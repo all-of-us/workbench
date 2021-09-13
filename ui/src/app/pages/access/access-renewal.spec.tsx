@@ -109,11 +109,13 @@ describe('Access Renewal Page', () => {
     setCompletionTimes(() => Date.now() - 1000 * 60 * 60 * 24 * EXPIRY_DAYS);
     await waitOneTickAndUpdate(wrapper);
 
-    expect(findNodesContainingText(wrapper, 'access has expired').length).toBe(1);
     expect(findNodesByExactText(wrapper, 'Review').length).toBe(1)
     expect(findNodesByExactText(wrapper, 'Confirm').length).toBe(1)
     expect(findNodesByExactText(wrapper, 'View & Sign').length).toBe(1)
     expect(findNodesByExactText(wrapper, 'Complete Training').length).toBe(1);
+
+    expect(findNodesContainingText(wrapper, 'access has expired').length).toBe(1);
+    expect(findNodesByExactText(wrapper, 'Thank you for completing all the necessary steps').length).toBe(0);
   });
 
   it('should show the correct state when profile is complete', async () => {
@@ -131,6 +133,9 @@ describe('Access Renewal Page', () => {
     expect(findNodesByExactText(wrapper, 'Confirm').length).toBe(1);
     expect(findNodesByExactText(wrapper, 'View & Sign').length).toBe(1)
     expect(findNodesByExactText(wrapper, 'Complete Training').length).toBe(1);
+
+    expect(findNodesContainingText(wrapper, 'access has expired').length).toBe(1);
+    expect(findNodesByExactText(wrapper, 'Thank you for completing all the necessary steps').length).toBe(0);
   });
 
   it('should show the correct state when profile and publication are complete', async () => {
@@ -148,6 +153,9 @@ describe('Access Renewal Page', () => {
     // Incomplete
     expect(findNodesByExactText(wrapper, 'View & Sign').length).toBe(1)
     expect(findNodesByExactText(wrapper, 'Complete Training').length).toBe(1);
+
+    expect(findNodesContainingText(wrapper, 'access has expired').length).toBe(1);
+    expect(findNodesByExactText(wrapper, 'Thank you for completing all the necessary steps').length).toBe(0);
   });
 
   it('should show the correct state when all items except DUCC are complete', async () => {
@@ -165,6 +173,9 @@ describe('Access Renewal Page', () => {
     expect(findNodesByExactText(wrapper, 'Completed').length).toBe(1);
     // Incomplete
     expect(findNodesByExactText(wrapper, 'View & Sign').length).toBe(1);
+
+    expect(findNodesContainingText(wrapper, 'access has expired').length).toBe(1);
+    expect(findNodesByExactText(wrapper, 'Thank you for completing all the necessary steps').length).toBe(0);
   });
 
   it('should show the correct state when all items are complete', async () => {
@@ -185,10 +196,12 @@ describe('Access Renewal Page', () => {
     expect(findNodesByExactText(wrapper, 'Confirmed').length).toBe(2);
     expect(findNodesByExactText(wrapper, 'Completed').length).toBe(2);
     expect(findNodesContainingText(wrapper, `${EXPIRY_DAYS - 1} days`).length).toBe(4);
+
     expect(findNodesByExactText(wrapper, 'Thank you for completing all the necessary steps').length).toBe(1);
+    expect(findNodesContainingText(wrapper, 'access has expired').length).toBe(0);
   });
 
-  it('should should ignore modules which are not expirable', async () => {
+  it('should ignore modules which are not expirable', async () => {
     expireAllModules();
 
     const newModules = [
@@ -223,7 +236,9 @@ describe('Access Renewal Page', () => {
     expect(findNodesByExactText(wrapper, 'Confirmed').length).toBe(2);
     expect(findNodesByExactText(wrapper, 'Completed').length).toBe(2);
     expect(findNodesContainingText(wrapper, `${EXPIRY_DAYS - 1} days`).length).toBe(4);
+
     expect(findNodesByExactText(wrapper, 'Thank you for completing all the necessary steps').length).toBe(1);
+    expect(findNodesContainingText(wrapper, 'access has expired').length).toBe(0);
   });
 
   it('should show the correct state when items are bypassed', async () => {
@@ -249,6 +264,9 @@ describe('Access Renewal Page', () => {
 
     // State check
     expect(findNodesContainingText(wrapper, 'click the refresh button').length).toBe(0);
+
+    expect(findNodesContainingText(wrapper, 'access has expired').length).toBe(1);
+    expect(findNodesByExactText(wrapper, 'Thank you for completing all the necessary steps').length).toBe(0);
   });
 
   it('should show the correct state when all items are complete or bypassed', async () => {
@@ -273,6 +291,7 @@ describe('Access Renewal Page', () => {
     expect(findNodesContainingText(wrapper, `${EXPIRY_DAYS - 1} days`).length).toBe(2);
 
     expect(findNodesByExactText(wrapper, 'Thank you for completing all the necessary steps').length).toBe(1);
+    expect(findNodesContainingText(wrapper, 'access has expired').length).toBe(0);
   });
 
   it('should show the correct state when modules are disabled', async () => {
@@ -304,6 +323,7 @@ describe('Access Renewal Page', () => {
 
     // all of the necessary steps = 3 rather than the usual 4
     expect(findNodesByExactText(wrapper, 'Thank you for completing all the necessary steps').length).toBe(1);
+    expect(findNodesContainingText(wrapper, 'access has expired').length).toBe(0);
   });
 
 });
