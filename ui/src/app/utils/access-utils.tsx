@@ -268,3 +268,11 @@ export const GetStartedButton = ({style = {marginLeft: '0.5rem'}}) => <Button
       location.replace('/');
     }}>Get Started</Button>;
 
+// TODO derive this from DbAccessModules ?
+export const expirableAccessModules = [
+  AccessModule.PROFILECONFIRMATION,
+  AccessModule.PUBLICATIONCONFIRMATION,
+  AccessModule.COMPLIANCETRAINING,    // note: not guaranteed to be present; check the Feature Flag enableComplianceTraining.
+  AccessModule.DATAUSERCODEOFCONDUCT,
+];
+
