@@ -339,6 +339,12 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
       // When editing existing workspace, show free tier if that is currently being used or 'User Provided Billing Account'
       // if it is user's billing account.
       if (!serverConfigStore.get().config.enableBillingUpgrade) {
+        if (this.isMode(WorkspaceEditMode.Create) || this.isMode(WorkspaceEditMode.Duplicate)) {
+          this.setState(prevState => fp.set(
+            ['workspace', 'billingAccountName'],
+            freeTierBillingAccount.name,
+            prevState));
+        }
         this.setState({billingAccounts: [freeTierBillingAccount]});
       } else if (serverConfigStore.get().config.enableBillingUpgrade && !hasBillingScope()) {
         if (this.isMode(WorkspaceEditMode.Create) || this.isMode(WorkspaceEditMode.Duplicate)) {
