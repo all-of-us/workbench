@@ -722,12 +722,13 @@ const StartStopRuntimeButton = ({workspaceNamespace, googleProject}) => {
   const [status, setRuntimeStatus] = useRuntimeStatus(workspaceNamespace, googleProject);
 
   const rotateStyle = {animation: 'rotation 2s infinite linear'};
-  const {altText, iconSrc = null, styleOverrides = {}, onClick = null } = switchCase(status,
+  const {altText, iconSrc, dataTestId, styleOverrides = {}, onClick = null } = switchCase(status,
     [
       RuntimeStatus.Creating,
       () => ({
         altText: 'Runtime creation in progress',
         iconSrc: computeStarting,
+        dataTestId: 'runtime-status-icon-starting',
         styleOverrides: rotateStyle
       })
     ],
@@ -736,6 +737,7 @@ const StartStopRuntimeButton = ({workspaceNamespace, googleProject}) => {
       () => ({
         altText: 'Runtime running, click to pause',
         iconSrc: computeRunning,
+        dataTestId: 'runtime-status-icon-running',
         onClick: () => { setRuntimeStatus(RuntimeStatusRequest.Stop); }
       })
     ],
@@ -744,6 +746,7 @@ const StartStopRuntimeButton = ({workspaceNamespace, googleProject}) => {
       () => ({
         altText: 'Runtime update in progress',
         iconSrc: computeStarting,
+        dataTestId: 'runtime-status-icon-starting',
         styleOverrides: rotateStyle
       })
     ],
@@ -751,7 +754,8 @@ const StartStopRuntimeButton = ({workspaceNamespace, googleProject}) => {
       RuntimeStatus.Error,
       () => ({
         altText: 'Runtime in error state',
-        iconSrc: computeError
+        iconSrc: computeError,
+        dataTestId: 'runtime-status-icon-error',
       })
     ],
     [
@@ -759,6 +763,7 @@ const StartStopRuntimeButton = ({workspaceNamespace, googleProject}) => {
       () => ({
         altText: 'Runtime pause in progress',
         iconSrc: computeStopping,
+        dataTestId: 'runtime-status-icon-stopping',
         styleOverrides: rotateStyle
       })
     ],
@@ -767,6 +772,7 @@ const StartStopRuntimeButton = ({workspaceNamespace, googleProject}) => {
       () => ({
         altText: 'Runtime paused, click to resume',
         iconSrc: computeStopped,
+        dataTestId: 'runtime-status-icon-stopped',
         onClick: () => { setRuntimeStatus(RuntimeStatusRequest.Start); }
       })
     ],
@@ -775,6 +781,7 @@ const StartStopRuntimeButton = ({workspaceNamespace, googleProject}) => {
       () => ({
         altText: 'Runtime resume in progress',
         iconSrc: computeStarting,
+        dataTestId: 'runtime-status-icon-starting',
         styleOverrides: rotateStyle
       })
     ],
@@ -783,6 +790,7 @@ const StartStopRuntimeButton = ({workspaceNamespace, googleProject}) => {
       () => ({
         altText: 'Runtime deletion in progress',
         iconSrc: computeStopping,
+        dataTestId: 'runtime-status-icon-stopping',
         styleOverrides: rotateStyle,
       })
     ],
@@ -790,21 +798,24 @@ const StartStopRuntimeButton = ({workspaceNamespace, googleProject}) => {
       RuntimeStatus.Deleted,
       () => ({
         altText: 'Runtime has been deleted',
-        iconSrc: computeNone
+        iconSrc: computeNone,
+        dataTestId: 'runtime-status-icon-none',
       })
     ],
     [
       RuntimeStatus.Unknown,
       () => ({
         altText: 'Runtime status unknown',
-        iconSrc: computeNone
+        iconSrc: computeNone,
+        dataTestId: 'runtime-status-icon-none',
       })
     ],
     [
       DEFAULT,
       () => ({
         altText: 'No runtime found',
-        iconSrc: computeNone
+        iconSrc: computeNone,
+        dataTestId: 'runtime-status-icon-none',
       })
     ]
   );
@@ -835,7 +846,7 @@ const StartStopRuntimeButton = ({workspaceNamespace, googleProject}) => {
                 alt={altText}
                 src={iconSrc}
                 style={styleOverrides}
-                data-test-id={`runtime-status-icon-${status}`}
+                data-test-id={dataTestId}
             />
           </Clickable>
         </FlexRow>
@@ -847,7 +858,7 @@ const StartStopRuntimeButton = ({workspaceNamespace, googleProject}) => {
               alt={altText}
               src={iconSrc}
               style={styleOverrides}
-              data-test-id={`runtime-status-icon-${status}`}
+              data-test-id={dataTestId}
           />
         </FlexRow>
       </TooltipTrigger>
