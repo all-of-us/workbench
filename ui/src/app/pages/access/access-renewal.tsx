@@ -16,6 +16,7 @@ import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors, {addOpacity, colorWithWhiteness} from 'app/styles/colors';
 import {cond, daysFromNow, displayDateWithoutHours, switchCase, useId, withStyle} from 'app/utils';
 import {
+  expirableAccessModules,
   maybeDaysRemaining,
   redirectToTraining
 } from 'app/utils/access-utils';
@@ -235,13 +236,15 @@ export const AccessRenewal = fp.flow(
     getProfile();
   }, []);
 
+  const expirableModules = modules.filter(moduleStatus => expirableAccessModules.includes(moduleStatus.moduleName));
+
   const completeOrBypassed = moduleName => {
     const status = modules.find(m => m.moduleName === moduleName);
     const wasBypassed = !!status.bypassEpochMillis;
     return wasBypassed || !isExpiring(status.expirationEpochMillis);
   }
 
-  const allModulesCompleteOrBypassed = fp.flow(fp.map('moduleName'), fp.all(completeOrBypassed))(modules);
+  const allModulesCompleteOrBypassed = fp.flow(fp.map('moduleName'), fp.all(completeOrBypassed))(expirableModules);
 
   // Render
   return <FadeBox style={{margin: '1rem auto 0', color: colors.primary}}>
