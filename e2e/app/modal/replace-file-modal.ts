@@ -1,6 +1,7 @@
 import { ElementHandle, Page } from 'puppeteer';
 import * as fp from 'lodash/fp';
 import { getPropValue } from 'utils/element-utils';
+import Modal from './modal';
 
 export enum Xpath {
   modal = '//*[@role="dialog"]',
@@ -8,9 +9,10 @@ export enum Xpath {
   cancelButton = '//button[text()="Cancel"]'
 }
 
-// Note: this does not extended the standard e2e Modal component.
-export default class ReplaceFileModal {
-  constructor(private readonly page: Page) {}
+export default class ReplaceFileModal extends Modal {
+  constructor(page: Page, xpath = Xpath.modal) {
+    super(page, xpath);
+  }
 
   async clickCancelButton(): Promise<void> {
     const button = await this.getCancelButton();

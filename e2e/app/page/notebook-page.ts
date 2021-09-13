@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import { ElementHandle, Frame, Page } from 'puppeteer';
 import { getPropValue } from 'utils/element-utils';
-import { waitForDocumentTitle, waitWhileLoading } from 'utils/waits-utils';
+import { waitForDocumentTitle, waitForNumericalString, waitWhileLoading } from 'utils/waits-utils';
 import { LinkText, ResourceCard } from 'app/text-labels';
 import RuntimePanel, { StartStopIconState } from 'app/component/runtime-panel';
 import NotebookCell, { CellType } from './notebook-cell';
@@ -14,6 +14,8 @@ import NotebookFrame from './notebook-frame';
 import { logger } from 'libs/logger';
 import RadioButton from 'app/element/radiobutton';
 import expect from 'expect';
+import ReplaceFileModal from 'app/modal/replace-file-modal';
+import { takeScreenshot } from 'utils/save-file-utils';
 
 // CSS selectors
 const CssSelector = {
@@ -376,6 +378,70 @@ export default class NotebookPage extends NotebookFrame {
     const codeOutput = await codeCell.waitForOutput(timeOut);
     logger.info(`Notebook code output:\n${codeOutput}`);
     return codeOutput;
+  }
+
+  async runCodeFile(cellIndex: number, fileName: string, timeout?: number) {
+    const codeCell = this.findCell(cellIndex);
+    const cellInput = await codeCell.focus();
+    // Open file in notebook cell.
+    await cellInput.type(`%load ${fileName}`);
+    await this.run(timeout);
+    await this.waitForKernelIdle(10000, 2000); // load file into cell should be very quick.
+    // run code.
+    await codeCell.focus();
+    await this.run();
+    const codeOutput = await codeCell.waitForOutput(timeout);
+    logger.info(`Notebook load "${fileName}". Code output:\n${codeOutput}`);
+    return codeOutput;
+  }
+
+  // Upload a file, open file in notebook cell, then run code.
+  async uploadFile(fileName: string, filePath: string): Promise<void> {
+    // Select File menu => Open to open Upload tab.
+    const newPage = await this.openUploadFilePage();
+
+    // The first dialog that open up is "Data Use Policy" dialog: verify message and close dialog.
+    await this.acceptDataUsePolicyDialog(newPage);
+
+    // Upload button that triggers file selection dialog.
+    await this.chooseFile(newPage, filePath);
+
+    // Upload button that uploads the file is visible.
+    const fileUploadButtonSelector =
+      '//*[@id="notebook_list"]//*[contains(@class, "new-file")]' +
+      `[.//input[@class="filename_input" and @value="${fileName}"]]//button[text()="Upload"]`;
+    const uploadButton = new Link(newPage, fileUploadButtonSelector);
+    await uploadButton.focus();
+    await uploadButton.click({ delay: 10 });
+
+    // Handle "Replace file" dialog if found: Do not overwrite existing file, click CANCEL button to dismiss dialog.
+    // Previously uploaded file persist because same workspace is used during the day.
+    const replaceFileMessage = `There is already a file named "${fileName}". Do you want to replace it?`;
+    const replaceFileModal = new ReplaceFileModal(newPage);
+    const exists = await replaceFileModal.isLoaded();
+    if (exists) {
+      const modalMessage = await replaceFileModal.getText();
+      expect(modalMessage).toContain(replaceFileMessage);
+      await replaceFileModal.clickCancelButton();
+      await newPage.waitForTimeout(500);
+      console.log(`Cancel to close "Replace file" "${fileName}" dialog`);
+    }
+
+    // Get file size.
+    const fileSizeXpath =
+      '//*[@id="notebook_list"]//*[contains(@class,"list_item")]' +
+      `[.//a[@class="item_link"]/*[normalize-space()="${fileName}"]]//*[contains(@class, "file_size")]`;
+    await waitForNumericalString(newPage, fileSizeXpath);
+    const fileSizeElement = await newPage.waitForXPath(fileSizeXpath, { visible: true });
+    const fileSize = await getPropValue(fileSizeElement, 'textContent');
+
+    // In case page has to be checked after finish.
+    await takeScreenshot(newPage, `notebook-upload-file-${fileName}.png`);
+
+    await newPage.close();
+    await this.page.bringToFront();
+    await this.waitForKernelIdle();
+    logger.info(`Notebook uploaded file "${fileName}". (file size: ${fileSize})`);
   }
 
   /**
