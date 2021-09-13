@@ -56,7 +56,9 @@ describe('WorkspaceEdit', () => {
   let workspaceEditMode: WorkspaceEditMode;
 
   const component = () => {
-    return mount(<MemoryRouter><WorkspaceEdit cancel={() => {}} hideSpinner={() => {}} showSpinner={() => {}} workspaceEditMode={workspaceEditMode}/></MemoryRouter>);
+    return mount(<MemoryRouter>
+      <WorkspaceEdit cancel={() => {}} hideSpinner={() => {}} showSpinner={() => {}} workspaceEditMode={workspaceEditMode}/>
+    </MemoryRouter>);
   };
 
   beforeEach(async () => {

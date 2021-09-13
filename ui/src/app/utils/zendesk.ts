@@ -95,7 +95,6 @@ export const supportUrls: ZendeskUrls = ((env) => {
 export function openZendeskWidget(
   givenName: string, familyName: string, aouEmailAddress: string,
   contactEmailAddress: string): void {
-  debugger;
   // Note: we're string-protecting our access of the 'zE' property, since
   // this property is dynamically loaded by the Zendesk web widget snippet,
   // and can't properly be typed. If for some reason the support widget is
