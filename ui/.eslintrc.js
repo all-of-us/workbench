@@ -43,13 +43,14 @@ module.exports = {
     '@typescript-eslint/no-empty-interface': 'error',
     '@typescript-eslint/no-inferrable-types': ['error', {ignoreParameters: true}],
     '@typescript-eslint/no-non-null-assertion': 'error',
-    'prefer-arrow/prefer-arrow-functions': ['warn'], // Lots of 'newable' functions in the code base
+    // 'prefer-arrow/prefer-arrow-functions': ['warn'], // Lots of 'newable' functions in the code base
     '@typescript-eslint/type-annotation-spacing': 'error',
     '@typescript-eslint/unified-signatures': 'error',
 
     /* Style */
     'brace-style': ['error', '1tbs', { 'allowSingleLine': true }],
-    'dot-notation': 'warn',
+    // Lots of non-dot-notation accesses & assignments where typing vars would be harder than not typing them
+    // 'dot-notation': 'warn',
     '@typescript-eslint/consistent-type-definitions': ['error', 'interface'],
     "indent": "off",
     '@typescript-eslint/indent': ['error', 2],
