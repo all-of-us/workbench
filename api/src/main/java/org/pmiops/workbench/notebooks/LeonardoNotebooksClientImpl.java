@@ -166,7 +166,7 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
 
     DbUser user = userProvider.get();
     DbWorkspace workspace = workspaceDao.getRequired(workspaceNamespace, workspaceFirecloudName);
-    String workspaceBucket =
+    String workspaceBucketName =
         fireCloudService
             .getWorkspace(workspace)
             .orElseThrow(() -> new NotFoundException("workspace not found"))
@@ -179,7 +179,7 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
 
     // This variable is already made available by Leonardo, but it's only exported in certain
     // notebooks contexts; this ensures it is always exported. See RW-7096.
-    customEnvironmentVariables.put(WORKSPACE_BUCKET_KEY, workspaceBucket);
+    customEnvironmentVariables.put(WORKSPACE_BUCKET_KEY, "gs://" + workspaceBucketName);
 
     // i.e. is NEW or MIGRATED
     if (!workspace.getBillingMigrationStatusEnum().equals(BillingMigrationStatus.OLD)) {
