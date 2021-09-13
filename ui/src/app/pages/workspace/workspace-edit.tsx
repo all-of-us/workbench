@@ -2,7 +2,7 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 import validate from 'validate.js';
 
-import {Button, Clickable, AoULink, StyledAnchorTag} from 'app/components/buttons';
+import {Button, Clickable, AoULink, StyledExternalLink} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {InfoIcon} from 'app/components/icons';
@@ -568,8 +568,8 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
     renderBillingDescription() {
       return <div>
         The <AouTitle/> provides $300 in free credits per user. Please refer to
-        <StyledAnchorTag href={supportUrls.billing} target='_blank'> &nbsp;this article
-        </StyledAnchorTag> to learn more about the free credit
+        <StyledExternalLink href={supportUrls.billing} target='_blank'> &nbsp;this article
+        </StyledExternalLink> to learn more about the free credit
         program and how it can be used. Once you have used up your free credits, you can request
         additional credits by <span style={styles.link} onClick={() => this.openContactWidget()}>
         contacting support</span>.
@@ -1256,10 +1256,10 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
         <hr style={{marginTop: '1rem'}}/>
         <WorkspaceEditSection header={<FlexRow style={{alignItems: 'center'}}>
           <div>Research Use Statement Questions</div>
-          <StyledAnchorTag href={supportUrls.researchPurpose}
-                           target='_blank' style={{marginLeft: '1rem', fontSize: 14, lineHeight: '18px', fontWeight: 400}}>
+          <StyledExternalLink href={supportUrls.researchPurpose}
+                              style={{marginLeft: '1rem', fontSize: 14, lineHeight: '18px', fontWeight: 400}}>
             Best practices for Research Use Statement questions
-          </StyledAnchorTag>
+          </StyledExternalLink>
         </FlexRow>} largeHeader={true}
               description={<div style={styles.researchPurposeDescription}>
                 <div style={{margin: '0.5rem', paddingTop: '0.5rem'}}>{ResearchPurposeDescription}

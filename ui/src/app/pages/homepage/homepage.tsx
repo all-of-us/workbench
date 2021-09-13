@@ -2,7 +2,8 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 
 import {
-  StyledAnchorTag,
+  StyledExternalLink,
+  StyledWorkbenchLink,
 } from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
@@ -127,18 +128,17 @@ const GettingStarted = () => {
       <h2 style={{fontWeight: 600, marginTop: 0}}>Here are some tips to get you started:</h2>
       <CustomBulletList>
         <CustomBulletListItem bullet='→'>
-          Create a <StyledAnchorTag href='https://support.google.com/chrome/answer/2364824'
-                                    target='_blank'>Chrome Profile</StyledAnchorTag> with your <AoU/> Researcher
+          Create a <StyledExternalLink href='https://support.google.com/chrome/answer/2364824'>
+          Chrome Profile</StyledExternalLink> with your <AoU/> Researcher
           Workbench Google account. This will keep your workbench browser sessions isolated from
           your other Google accounts.
         </CustomBulletListItem>
         <CustomBulletListItem bullet='→'>
-          Check out <StyledAnchorTag href='library'>Featured Workspaces</StyledAnchorTag> from
+          Check out <StyledWorkbenchLink href='library'>Featured Workspaces</StyledWorkbenchLink> from
           the left hand panel to browse through example workspaces.
         </CustomBulletListItem>
         <CustomBulletListItem bullet='→'>
-          Browse through our <StyledAnchorTag href={supportUrls.helpCenter}
-                                              target='_blank'>support materials</StyledAnchorTag> and forum topics.
+          Browse through our <StyledExternalLink href={supportUrls.helpCenter}>support materials</StyledExternalLink> and forum topics.
         </CustomBulletListItem>
       </CustomBulletList>
     </div>

@@ -1,4 +1,4 @@
-import { AoULink, StyledAnchorTag } from 'app/components/buttons';
+import { AoULink, StyledExternalLink, StyledWorkbenchLink } from 'app/components/buttons';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {SemiBoldHeader} from 'app/components/headers';
 import {AoU} from 'app/components/text-wrappers';
@@ -55,29 +55,31 @@ const styles = reactStyles({
 });
 
 const FooterAnchorTag = ({style = {}, href, ...props}) => {
-  return <StyledAnchorTag style={{...styles.footerAnchor, ...style}} href={href} {...props}>
+  return <StyledWorkbenchLink style={{...styles.footerAnchor, ...style}} href={href} {...props}>
     {props.children}
-  </StyledAnchorTag>;
+  </StyledWorkbenchLink>;
 };
 
-const NewTabFooterAnchorTag = ({style = {}, href, ...props}) => {
-  return <FooterAnchorTag style={style} href={href} target='_blank' {...props}>{props.children}</FooterAnchorTag>;
+const ExternalFooterAnchorTag = ({style = {}, href, ...props}) => {
+  return <StyledExternalLink style={{...styles.footerAnchor, ...style}} href={href} {...props}>
+    {props.children}
+  </StyledExternalLink>;
 };
 
 const DataBrowserLink = (props) => (
-  <NewTabFooterAnchorTag href={environment.publicUiUrl}
+  <ExternalFooterAnchorTag href={environment.publicUiUrl}
                          analyticsFn={AnalyticsTracker.Footer.DataBrowser}
                          {...props}>
     Data Browser
-  </NewTabFooterAnchorTag>
+  </ExternalFooterAnchorTag>
 );
 
 const ResearchHubLink = (props) => (
-  <NewTabFooterAnchorTag href='https://researchallofus.org'
+  <ExternalFooterAnchorTag href='https://researchallofus.org'
                          analyticsFn={AnalyticsTracker.Footer.ResearchHub}
                          {...props}>
     Research Hub
-  </NewTabFooterAnchorTag>
+  </ExternalFooterAnchorTag>
 );
 
 const FooterTemplate = ({style = {}, ...props}) => {
@@ -91,11 +93,11 @@ const FooterTemplate = ({style = {}, ...props}) => {
         {props.children}
         <div style={{...styles.footerAside, marginTop: '20px'}}>
           The <AoU/> logo is a service mark of the&nbsp;
-          <NewTabFooterAnchorTag
+          <ExternalFooterAnchorTag
               href='https://www.hhs.gov'
               analyticsFn={AnalyticsTracker.Footer.HHS}>
             U.S. Department of Health and Human Services
-          </NewTabFooterAnchorTag>.<br/>
+          </ExternalFooterAnchorTag>.<br/>
           The <AoU/> platform is for research only and does not provide medical advice, diagnosis or treatment. Copyright 2020.
         </div>
       </div>
@@ -151,23 +153,23 @@ const WorkbenchFooter = withUserProfile()(
           <FooterSection style={styles.workbenchFooterItem} header='User Support Hub'>
             <FlexRow>
               <FlexColumn style={{width: '50%'}}>
-                <NewTabFooterAnchorTag href={supportUrls.gettingStarted} analyticsFn={tracker.GettingStarted}>
+                <ExternalFooterAnchorTag href={supportUrls.gettingStarted} analyticsFn={tracker.GettingStarted}>
                   Getting Started
-                </NewTabFooterAnchorTag>
-                <NewTabFooterAnchorTag href={supportUrls.tableOfContents}
+                </ExternalFooterAnchorTag>
+                <ExternalFooterAnchorTag href={supportUrls.tableOfContents}
                                        analyticsFn={tracker.SupportDocs}>
                   Documentation
-                </NewTabFooterAnchorTag>
-                <NewTabFooterAnchorTag href={supportUrls.communityForum}
+                </ExternalFooterAnchorTag>
+                <ExternalFooterAnchorTag href={supportUrls.communityForum}
                                        analyticsFn={tracker.CommunityForum}>
                   Community Forum
-                </NewTabFooterAnchorTag>
+                </ExternalFooterAnchorTag>
               </FlexColumn>
               <FlexColumn style={{width: '50%'}}>
-                <NewTabFooterAnchorTag href={supportUrls.faq}
+                <ExternalFooterAnchorTag href={supportUrls.faq}
                                        analyticsFn={tracker.SupportFAQ}>
                   FAQs
-                </NewTabFooterAnchorTag>
+                </ExternalFooterAnchorTag>
                 <AoULink style={styles.footerAnchor} onClick={() => {
                   tracker.ContactUs('Zendesk');
                   openZendeskWidget(

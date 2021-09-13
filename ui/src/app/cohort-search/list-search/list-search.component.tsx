@@ -5,7 +5,7 @@ import {CSSProperties} from 'react';
 
 import {domainToTitle} from 'app/cohort-search/utils';
 import {AlertDanger} from 'app/components/alert';
-import {Clickable, StyledAnchorTag} from 'app/components/buttons';
+import {Clickable, StyledExternalLink} from 'app/components/buttons';
 import {FlexRow} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
 import {TextInput} from 'app/components/inputs';
@@ -540,9 +540,9 @@ export const ListSearch = fp.flow(withCdrVersions(), withCurrentWorkspace(), wit
           </TooltipTrigger>
         </td>
         <td style={{...columnBodyStyle, width: '10%', paddingRight: '0.5rem'}}>
-          <StyledAnchorTag href={this.getConceptLink(row.conceptId)} target='_blank'>
+          <StyledExternalLink href={this.getConceptLink(row.conceptId)}>
             {row.conceptId}
-          </StyledAnchorTag>
+          </StyledExternalLink>
         </td>
         <td style={{...columnBodyStyle, width: '10%', paddingRight: '0.5rem'}}>{row.isStandard ? 'Standard' : 'Source'}</td>
         <td style={{...columnBodyStyle}}>{!brand && row.type}</td>

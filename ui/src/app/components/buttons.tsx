@@ -342,15 +342,16 @@ export const AoULink = ({disabled = false, style = {}, children, ...props}) => {
   >{children}</Clickable>;
 };
 
-export const StyledAnchorTag = ({href, children, analyticsFn = null, style = {}, ...props}) => {
-  const inlineAnchor = {
-    display: 'inline-block',
-    color: colors.accent
-  };
+const inlineAnchorStyle = {
+  display: 'inline-block',
+  color: colors.accent
+};
 
-  return <Link
-      to={href}
-      style={{...inlineAnchor, ...style}}
+export const StyledExternalLink = ({href, children, analyticsFn = null, style = {}, ...props}) => {
+  return <a
+      href={href}
+      style={{...inlineAnchorStyle, ...style}}
+      target='_blank'
       onClick={e => {
         if (analyticsFn) {
           analyticsFn();
@@ -360,6 +361,22 @@ export const StyledAnchorTag = ({href, children, analyticsFn = null, style = {},
           preventDefaultIfNoKeysPressed(e)
         }
       }}
+      {...props}
+  >
+    {children}
+  </a>
+}
+
+export const StyledWorkbenchLink = ({href, children, analyticsFn = null, style = {}, ...props}) => {
+  return <Link
+      to={href}
+      style={{...inlineAnchorStyle, ...style}}
+      onClick={() => {
+        if (analyticsFn) {
+          analyticsFn();
+        }
+      }}
+      {...props}
   >
     {children}
   </Link>

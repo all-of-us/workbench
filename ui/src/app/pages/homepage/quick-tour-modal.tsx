@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import {
-  Button, StyledAnchorTag
+  Button, StyledExternalLink
 } from 'app/components/buttons';
 import {FlexColumn} from 'app/components/flex';
 import {AoU} from 'app/components/text-wrappers';
@@ -42,13 +42,13 @@ export const panels = [
     content: <div>A Workspace is your place to store and analyze data for a specific project.
       You can share this Workspace with other users, allowing them to view or edit
       your work. The dataset referenced by a workspace is in
-      {' '}<StyledAnchorTag href={OMOPDataSetLink} target='_blank'>
+      {' '}<StyledExternalLink href={OMOPDataSetLink}>
         OMOP common data model
-      </StyledAnchorTag>{' '}
+      </StyledExternalLink>{' '}
       format. Here are some
-      {' '}<StyledAnchorTag href={OMOPTutorialsLink} target='_blank'>
+      {' '}<StyledExternalLink href={OMOPTutorialsLink}>
         tutorials
-      </StyledAnchorTag>{' '}
+      </StyledExternalLink>{' '}
       to understand OMOP data model.
       <br/><br/>
       When you create your Workspace, you will be prompted

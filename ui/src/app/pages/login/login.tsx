@@ -1,5 +1,4 @@
-import {Button} from 'app/components/buttons';
-import {StyledAnchorTag} from 'app/components/buttons';
+import {Button, StyledExternalLink} from 'app/components/buttons';
 import {CookieBanner} from 'app/components/cookie-banner';
 import {GoogleSignInButton} from 'app/components/google-sign-in';
 import {Header, SmallHeader} from 'app/components/headers';
@@ -53,12 +52,11 @@ export const LoginReactComponent: React.FunctionComponent<{
           <div>
             <GoogleSignInButton />
           </div>
-          <StyledAnchorTag
-            target='_blank'
+          <StyledExternalLink
             href='https://www.researchallofus.org/faq/what-if-i-have-trouble-signing-in-to-the-workbench'
             style={{marginTop: '0.625rem', lineHeight: '0.75rem'}}>
               Trouble Signing In?
-          </StyledAnchorTag>
+          </StyledExternalLink>
         </div>
         <div style={{paddingTop: '1.25rem'}}>
           <SmallHeader>
