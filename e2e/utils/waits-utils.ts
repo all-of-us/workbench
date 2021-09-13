@@ -383,7 +383,7 @@ export async function waitWhileLoading(
   const { waitForRuntime = false } = opts;
   const notBlankPageSelector = '[data-test-id="sign-in-container"], title:not(empty), div.spinner, svg[viewBox]';
   const spinElementsSelector = `[style*="running spin"], .spinner:empty, [style*="running rotation"]${
-    waitForRuntime ? '' : ':not([aria-hidden="true"]):not([data-test-id="runtime-status-icon-container"])'
+    waitForRuntime ? '' : ':not([aria-hidden="true"]):not([data-test-id*="runtime-status"])'
   }`;
 
   // Prevent checking on Login page.
