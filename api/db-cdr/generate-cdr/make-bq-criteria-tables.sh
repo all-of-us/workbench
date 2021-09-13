@@ -182,21 +182,6 @@ bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
     domain_id       STRING
 )"
 
-# holds source snomed concept relationship data for conditions
-echo "CREATE TABLES - prep_snomed_rel_cm_src_in_data"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
-"CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_cm_src_in_data\`
-(
-    p_concept_id    INT64,
-    p_concept_code  STRING,
-    p_concept_name  STRING,
-    p_domain_id     STRING,
-    concept_id      INT64,
-    concept_code    STRING,
-    concept_name    STRING,
-    domain_id       STRING
-)"
-
 # holds standard snomed concept relationship data for measurements
 echo "CREATE TABLES - prep_snomed_rel_meas_in_data"
 bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
@@ -216,21 +201,6 @@ bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 echo "CREATE TABLES - prep_snomed_rel_pcs_in_data"
 bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_pcs_in_data\`
-(
-    p_concept_id    INT64,
-    p_concept_code  STRING,
-    p_concept_name  STRING,
-    p_domain_id     STRING,
-    concept_id      INT64,
-    concept_code    STRING,
-    concept_name    STRING,
-    domain_id       STRING
-)"
-
-# holds source snomed concept relationship data for procedures
-echo "CREATE TABLES - prep_snomed_rel_pcs_src_in_data"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
-"CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_pcs_src_in_data\`
 (
     p_concept_id    INT64,
     p_concept_code  STRING,
