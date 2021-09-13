@@ -12,6 +12,7 @@ import {environment} from 'environments/environment';
 import {AccessModule, AccessModuleStatus, ErrorCode, Profile} from 'generated/fetch';
 import {getLiveDUCCVersion} from './code-of-conduct';
 import {parseQueryParams} from "app/components/app-router";
+import {cond, daysFromNow, displayDateWithoutHours} from "./index";
 
 const {useState, useEffect} = React;
 
@@ -275,4 +276,45 @@ export const expirableAccessModules: Array<AccessModule> = [
   AccessModule.COMPLIANCETRAINING,    // note: not guaranteed to be present; check the Feature Flag enableComplianceTraining.
   AccessModule.DATAUSERCODEOFCONDUCT,
 ];
+
+export const isExpiring = (expiration: number): boolean => daysFromNow(expiration) <= serverConfigStore.get().config.accessRenewalLookback;
+
+const withInvalidDateHandling = date => {
+  if (!date) {
+    return 'Unavailable';
+  } else {
+    return displayDateWithoutHours(date);
+  }
+};
+
+export const computeDisplayDates = ({completionEpochMillis, expirationEpochMillis, bypassEpochMillis}: AccessModuleStatus) => {
+  const userCompletedModule = !!completionEpochMillis;
+  const userBypassedModule = !!bypassEpochMillis;
+  const lastConfirmedDate = withInvalidDateHandling(completionEpochMillis);
+  const nextReviewDate = withInvalidDateHandling(expirationEpochMillis);
+  const bypassDate = withInvalidDateHandling(bypassEpochMillis);
+
+  return cond(
+      // User has bypassed module
+      [userBypassedModule, () => ({lastConfirmedDate: `${bypassDate}`, nextReviewDate: 'Unavailable (bypassed)'})],
+      // User never completed training
+      [!userCompletedModule && !userBypassedModule, () =>
+          ({lastConfirmedDate: 'Unavailable (not completed)', nextReviewDate: 'Unavailable (not completed)'})],
+      // User completed training, but is in the lookback window
+      [userCompletedModule && isExpiring(expirationEpochMillis), () => {
+        const daysRemaining = daysFromNow(expirationEpochMillis);
+        const daysRemainingDisplay = daysRemaining >= 0 ? `(${daysRemaining} day${daysRemaining !== 1 ? 's' : ''})` : '(expired)';
+        return {
+          lastConfirmedDate,
+          nextReviewDate: `${nextReviewDate} ${daysRemainingDisplay}`
+        };
+      }],
+      // User completed training and is up to date
+      [userCompletedModule && !isExpiring(expirationEpochMillis), () => {
+        const daysRemaining = daysFromNow(expirationEpochMillis);
+        return {lastConfirmedDate, nextReviewDate: `${nextReviewDate} (${daysRemaining} day${daysRemaining !== 1 ? 's' : ''})`};
+      }]
+  );
+};
+
 

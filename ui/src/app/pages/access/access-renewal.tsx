@@ -14,9 +14,11 @@ import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {styles} from 'app/pages/profile/profile-styles';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors, {addOpacity, colorWithWhiteness} from 'app/styles/colors';
-import {cond, daysFromNow, displayDateWithoutHours, switchCase, useId, withStyle} from 'app/utils';
+import {cond, useId, withStyle} from 'app/utils';
 import {
   expirableAccessModules,
+  computeDisplayDates,
+  isExpiring,
   maybeDaysRemaining,
   redirectToTraining
 } from 'app/utils/access-utils';
@@ -100,51 +102,12 @@ const syncAndReload = fp.flow(
 
 // Helper Functions
 
-const isExpiring = (expiration: number): boolean => daysFromNow(expiration) <= serverConfigStore.get().config.accessRenewalLookback;
 const isModuleExpiring = (status: AccessModuleStatus): boolean => isExpiring(status.expirationEpochMillis);
 
 const isExpiringAndNotBypassed = (moduleName: AccessModule, modules: AccessModuleStatus[]) => {
   const status = modules.find(m => m.moduleName === moduleName);
   return isModuleExpiring(status) && !status.bypassEpochMillis;
 }
-
-const withInvalidDateHandling = date => {
-  if (!date) {
-    return 'Unavailable';
-  } else {
-    return displayDateWithoutHours(date);
-  }
-};
-
-const computeDisplayDates = ({completionEpochMillis, expirationEpochMillis, bypassEpochMillis}: AccessModuleStatus) => {
-  const userCompletedModule = !!completionEpochMillis;
-  const userBypassedModule = !!bypassEpochMillis;
-  const lastConfirmedDate = withInvalidDateHandling(completionEpochMillis);
-  const nextReviewDate = withInvalidDateHandling(expirationEpochMillis);
-  const bypassDate = withInvalidDateHandling(bypassEpochMillis);
-
-  return cond(
-    // User has bypassed module
-    [userBypassedModule, () => ({lastConfirmedDate: `${bypassDate}`, nextReviewDate: 'Unavailable (bypassed)'})],
-    // User never completed training
-    [!userCompletedModule && !userBypassedModule, () =>
-      ({lastConfirmedDate: 'Unavailable (not completed)', nextReviewDate: 'Unavailable (not completed)'})],
-    // User completed training, but is in the lookback window
-    [userCompletedModule && isExpiring(expirationEpochMillis), () => {
-      const daysRemaining = daysFromNow(expirationEpochMillis);
-      const daysRemainingDisplay = daysRemaining >= 0 ? `(${daysRemaining} day${daysRemaining !== 1 ? 's' : ''})` : '(expired)';
-      return {
-        lastConfirmedDate,
-        nextReviewDate: `${nextReviewDate} ${daysRemainingDisplay}`
-      };
-    }],
-    // User completed training and is up to date
-    [userCompletedModule && !isExpiring(expirationEpochMillis), () => {
-      const daysRemaining = daysFromNow(expirationEpochMillis);
-      return {lastConfirmedDate, nextReviewDate: `${nextReviewDate} (${daysRemaining} day${daysRemaining !== 1 ? 's' : ''})`};
-    }]
-  );
-};
 
 
 // Helper / Stateless Components

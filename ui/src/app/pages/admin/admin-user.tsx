@@ -40,6 +40,7 @@ import {
 } from 'generated/fetch';
 import {Dropdown} from 'primereact/dropdown';
 import validate from 'validate.js';
+import {computeDisplayDates} from 'app/utils/access-utils';
 
 const styles = reactStyles({
   semiBold: {
@@ -145,12 +146,14 @@ const FreeCreditsUsage = ({isAboveLimit, usage}: FreeCreditsProps) => {
 };
 
 interface AccessModuleProps {
-  module: AccessModuleStatus;
+  status: AccessModuleStatus;
 }
-const AccessModule = ({module}: AccessModuleProps) => {
+const AccessModule = ({status}: AccessModuleProps) => {
+  const {lastConfirmedDate, nextReviewDate} = computeDisplayDates(status);
   return <FlexColumn>
-    <div>Module name: {module.moduleName}</div>
-    <div>Subject to Access Renewal?</div>
+    <div>Module name: {status.moduleName}</div>
+    <div>Last Updated On: {lastConfirmedDate}</div>
+    <div>Next Review: {nextReviewDate}</div>
   </FlexColumn>;
 }
 
@@ -158,7 +161,7 @@ interface AccessModulesProps {
   modules: Array<AccessModuleStatus>;
 }
 const AccessModules = ({modules}: AccessModulesProps) => <div>
-  {modules.map(m => <AccessModule moduleX={m}/>)}
+  {modules.map(m => <AccessModule status={m}/>)}
 </div>;
 
 interface Props extends WithSpinnerOverlayProps, RouteComponentProps<MatchParams> {}
