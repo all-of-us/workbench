@@ -269,7 +269,7 @@ export const GetStartedButton = ({style = {marginLeft: '0.5rem'}}) => <Button
     }}>Get Started</Button>;
 
 // TODO derive this from DbAccessModules ?
-export const expirableAccessModules = [
+export const expirableAccessModules: Array<AccessModule> = [
   AccessModule.PROFILECONFIRMATION,
   AccessModule.PUBLICATIONCONFIRMATION,
   AccessModule.COMPLIANCETRAINING,    // note: not guaranteed to be present; check the Feature Flag enableComplianceTraining.

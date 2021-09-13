@@ -1,16 +1,17 @@
-import {AccessRenewal} from 'app/pages/access/access-renewal';
-
-import {registerApiClient} from 'app/services/swagger-fetch-clients';
-import {profileStore, serverConfigStore} from 'app/utils/stores';
-import {mount} from 'enzyme';
-import {AccessModule, InstitutionApi, ProfileApi} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
+import {mount} from 'enzyme';
+import SpyInstance = jest.SpyInstance;
+
+import {AccessRenewal} from 'app/pages/access/access-renewal';
+import {registerApiClient} from 'app/services/swagger-fetch-clients';
+import {profileStore, serverConfigStore} from 'app/utils/stores';
+import {AccessModule, InstitutionApi, Profile, ProfileApi} from 'generated/fetch';
 import defaultServerConfig from 'testing/default-server-config';
 import {findNodesByExactText, findNodesContainingText, waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {InstitutionApiStub} from 'testing/stubs/institution-api-stub';
 import {ProfileApiStub, ProfileStubVariables} from 'testing/stubs/profile-api-stub';
-import SpyInstance = jest.SpyInstance;
+import {expirableAccessModules} from 'app/utils/access-utils';
 
 const EXPIRY_DAYS = 365
 const oneYearFromNow = () => Date.now() + 1000 * 60 * 60 * 24 * EXPIRY_DAYS
@@ -25,12 +26,9 @@ describe('Access Renewal Page', () => {
     const expiredTime = oneHourAgo();
     const {profile} = profileStore.get();
 
-    const newProfile = fp.set('accessModules', {modules: [
-      {moduleName: AccessModule.DATAUSERCODEOFCONDUCT, expirationEpochMillis: expiredTime},
-      {moduleName: AccessModule.COMPLIANCETRAINING, expirationEpochMillis: expiredTime},
-      {moduleName: AccessModule.PROFILECONFIRMATION, expirationEpochMillis: expiredTime},
-      {moduleName: AccessModule.PUBLICATIONCONFIRMATION, expirationEpochMillis: expiredTime}
-    ]}, profile)
+    const newProfile = fp.set('accessModules',
+        {modules: expirableAccessModules.map(m => {return {moduleName: m, expirationEpochMillis: expiredTime}})},
+        profile)
     profileStore.set({profile: newProfile, load, reload, updateCache});
   }
 
@@ -76,7 +74,7 @@ describe('Access Renewal Page', () => {
     const newModules = fp.map(({moduleName, expirationEpochMillis, completionEpochMillis}) => ({
       moduleName,
       expirationEpochMillis: expirationEpochMillis,
-      // profile and publiction is not bypassable.
+      // profile and publication are not bypassable.
       bypassEpochMillis: (moduleName === AccessModule.PROFILECONFIRMATION || moduleName === AccessModule.PUBLICATIONCONFIRMATION)
           ? null
           : completionFn(),
@@ -180,6 +178,44 @@ describe('Access Renewal Page', () => {
 
   it('should show the correct state when all items are complete', async () => {
     expireAllModules()
+
+    const wrapper = component();
+
+    updateOneModuleExpirationTime(AccessModule.PROFILECONFIRMATION, oneYearFromNow());
+    updateOneModuleExpirationTime(AccessModule.PUBLICATIONCONFIRMATION, oneYearFromNow());
+    updateOneModuleExpirationTime(AccessModule.COMPLIANCETRAINING, oneYearFromNow());
+    updateOneModuleExpirationTime(AccessModule.DATAUSERCODEOFCONDUCT, oneYearFromNow());
+
+    setCompletionTimes(() => Date.now());
+
+    await waitOneTickAndUpdate(wrapper);
+
+    // All Complete
+    expect(findNodesByExactText(wrapper, 'Confirmed').length).toBe(2);
+    expect(findNodesByExactText(wrapper, 'Completed').length).toBe(2);
+    expect(findNodesContainingText(wrapper, `${EXPIRY_DAYS - 1} days`).length).toBe(4);
+    expect(findNodesByExactText(wrapper, 'Thank you for completing all the necessary steps').length).toBe(1);
+  });
+
+  it('should should ignore modules which are not expirable', async () => {
+    expireAllModules();
+
+    const newModules = [
+        ...profileStore.get().profile.accessModules.modules,
+        {
+          moduleName: AccessModule.TWOFACTORAUTH,   // not expirable
+          completionEpochMillis: null,
+          bypassEpochMillis: null,
+          expirationEpochMillis: null,
+        }
+    ];
+
+    const newProfile: Profile = {
+      ...profileStore.get().profile,
+      accessModules: {modules: newModules}
+    }
+
+    profileStore.set({profile: newProfile, load, reload, updateCache});
 
     const wrapper = component();
 
