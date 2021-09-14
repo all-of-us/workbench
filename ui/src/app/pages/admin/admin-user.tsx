@@ -31,6 +31,7 @@ import {
 } from 'app/utils/institutions';
 import {MatchParams, serverConfigStore} from 'app/utils/stores';
 import {
+  AccessModule,
   AccessModuleStatus,
   AccountPropertyUpdate,
   CheckEmailResponse,
@@ -144,23 +145,31 @@ const FreeCreditsUsage = ({isAboveLimit, usage}: FreeCreditsProps) => {
   </React.Fragment>;
 };
 
-interface StatusProps {
+interface ExpirationProps {
   modules: Array<AccessModuleStatus>;
 }
-const AccessModuleExpirations = ({modules}: StatusProps) => <FlexColumn style={{marginTop: '1rem'}}>
-  <label style={styles.semiBold}>Access Modules subject to annual renewal</label>
-  {Array.from(accessRenewalTitles.entries()).map(([moduleName, TitleComponent], zeroBasedStep) => {
-    // return the status if found; init an empty status with the moduleName if not
-    const status: AccessModuleStatus = modules.find(s => s.moduleName === moduleName) || {moduleName};
-    const {lastConfirmedDate, nextReviewDate} = computeDisplayDates(status);
-    return <FlexRow style={{marginTop: '0.5rem'}}>
-      <FlexColumn>
-        <label style={styles.semiBold}>Step {zeroBasedStep + 1}: <TitleComponent/></label>
-        <div>Last Updated On: {lastConfirmedDate}</div>
-        <div>Next Review: {nextReviewDate}</div>
-      </FlexColumn>
-    </FlexRow>})}
-</FlexColumn>;
+const AccessModuleExpirations = ({modules}: ExpirationProps) => {
+  const {enableComplianceTraining} = serverConfigStore.get().config;
+  const modulesAndTitles = enableComplianceTraining
+      ? Array.from(accessRenewalTitles.entries())
+      : Array.from(accessRenewalTitles.entries())
+          .filter(([moduleName,]) => moduleName !== AccessModule.COMPLIANCETRAINING);
+
+  return <FlexColumn style={{marginTop: '1rem'}}>
+    <label style={styles.semiBold}>Access Modules subject to annual renewal</label>
+    {modulesAndTitles.map(([moduleName, TitleComponent], zeroBasedStep) => {
+      // return the status if found; init an empty status with the moduleName if not
+      const status: AccessModuleStatus = modules.find(s => s.moduleName === moduleName) || {moduleName};
+      const {lastConfirmedDate, nextReviewDate} = computeDisplayDates(status);
+      return <FlexRow style={{marginTop: '0.5rem'}}>
+        <FlexColumn>
+          <label style={styles.semiBold}>Step {zeroBasedStep + 1}: <TitleComponent/></label>
+          <div>Last Updated On: {lastConfirmedDate}</div>
+          <div>Next Review: {nextReviewDate}</div>
+        </FlexColumn>
+      </FlexRow>})}
+  </FlexColumn>;
+}
 
 interface Props extends WithSpinnerOverlayProps, RouteComponentProps<MatchParams> {}
 
@@ -437,7 +446,6 @@ export const AdminUser = withRouter(class extends React.Component<Props, State> 
       updatedProfile,
       verifiedInstitutionOptions
     } = this.state;
-    const {enableRasLoginGovLinking} = serverConfigStore.get().config;
     const errors = validate({
       'verifiedInstitutionalAffiliation': this.validateVerifiedInstitutionalAffiliation(),
       'institutionShortName': this.validateInstitutionShortname(),
