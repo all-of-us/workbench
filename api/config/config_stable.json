@@ -101,7 +101,7 @@
     "enableEventDateModifier": false,
     "enableResearchPurposePrompt": false,
     "enableGenomicExtraction": false,
-    "enableFireCloudV2Billing" : false,
+    "enableFireCloudV2Billing" : true,
     "enableGpu": false,
     "enablePersistentDisk": false,
     "enableAccessModuleRewrite" : true,
@@ -119,6 +119,7 @@
     "exportObjectsPerTask": 10
   },
   "captcha": {
+    "enableCaptcha": true,
     "enableCaptcha": true,
     "useTestCaptcha": false
   },
