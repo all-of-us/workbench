@@ -566,7 +566,7 @@ export const AdminUser = withRouter(class extends React.Component<Props, State> 
               usage={this.getFreeCreditUsage()}
             />
           </FlexColumn>
-          <FlexColumn style={{width: '33%'}}>
+          <FlexColumn style={{width: '33%', marginRight: '1rem'}}>
             <DropdownWithLabel
                 label={'Free credit limit'}
                 options={this.getFreeCreditLimitOptions()}
@@ -620,8 +620,8 @@ export const AdminUser = withRouter(class extends React.Component<Props, State> 
                 containerStyle={styles.textInputContainer}
               />
             }
-          <AccessModuleExpirations modules={updatedProfile.accessModules.modules}/>
           </FlexColumn>
+          <AccessModuleExpirations modules={updatedProfile.accessModules.modules}/>
         </FlexRow>
       </FlexColumn>}
       {this.state.loading && <SpinnerOverlay/>}
