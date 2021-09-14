@@ -7,7 +7,6 @@ import static org.pmiops.workbench.db.model.DbStorageEnums.disabilityFromStorage
 import static org.pmiops.workbench.db.model.DbStorageEnums.educationFromStorage;
 import static org.pmiops.workbench.db.model.DbStorageEnums.ethnicityFromStorage;
 import static org.pmiops.workbench.db.model.DbStorageEnums.genderIdentityFromStorage;
-import static org.pmiops.workbench.db.model.DbStorageEnums.institutionDUATypeFromStorage;
 import static org.pmiops.workbench.db.model.DbStorageEnums.institutionalRoleFromStorage;
 import static org.pmiops.workbench.db.model.DbStorageEnums.organizationTypeFromStorage;
 import static org.pmiops.workbench.db.model.DbStorageEnums.raceFromStorage;
@@ -170,7 +169,6 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
         (rs, unused) ->
             new ReportingInstitution()
                 .displayName(rs.getString("display_name"))
-                .duaTypeEnum(institutionDUATypeFromStorage(rs.getShort("dua_type_enum")))
                 .institutionId(rs.getLong("institution_id"))
                 .organizationTypeEnum(
                     organizationTypeFromStorage(rs.getShort("organization_type_enum")))

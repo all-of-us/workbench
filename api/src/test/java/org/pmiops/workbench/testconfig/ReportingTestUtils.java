@@ -17,7 +17,6 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.BillingAccountType;
 import org.pmiops.workbench.model.BillingStatus;
-import org.pmiops.workbench.model.DuaType;
 import org.pmiops.workbench.model.InstitutionMembershipRequirement;
 import org.pmiops.workbench.model.OrganizationType;
 import org.pmiops.workbench.model.ReportingCohort;
@@ -114,7 +113,6 @@ public class ReportingTestUtils {
   // and does not run on every build and updates must be merged manually for now.
 
   public static final String INSTITUTION__DISPLAY_NAME = "foo_0";
-  public static final DuaType INSTITUTION__DUA_TYPE_ENUM = DuaType.MASTER;
   public static final Long INSTITUTION__INSTITUTION_ID = 2L;
   public static final OrganizationType INSTITUTION__ORGANIZATION_TYPE_ENUM =
       OrganizationType.ACADEMIC_RESEARCH_INSTITUTION;
@@ -347,7 +345,6 @@ public class ReportingTestUtils {
   public static ReportingInstitution createReportingInstitution() {
     return new ReportingInstitution()
         .displayName(INSTITUTION__DISPLAY_NAME)
-        .duaTypeEnum(INSTITUTION__DUA_TYPE_ENUM)
         .institutionId(INSTITUTION__INSTITUTION_ID)
         .organizationTypeEnum(INSTITUTION__ORGANIZATION_TYPE_ENUM)
         .organizationTypeOtherText(INSTITUTION__ORGANIZATION_TYPE_OTHER_TEXT)
@@ -357,7 +354,6 @@ public class ReportingTestUtils {
 
   public static void assertInstitutionFields(ReportingInstitution institution) {
     assertThat(institution.getDisplayName()).isEqualTo(INSTITUTION__DISPLAY_NAME);
-    assertThat(institution.getDuaTypeEnum()).isEqualTo(INSTITUTION__DUA_TYPE_ENUM);
     assertThat(institution.getInstitutionId()).isEqualTo(INSTITUTION__INSTITUTION_ID);
     assertThat(institution.getOrganizationTypeEnum())
         .isEqualTo(INSTITUTION__ORGANIZATION_TYPE_ENUM);
