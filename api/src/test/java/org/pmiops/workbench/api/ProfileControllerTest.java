@@ -81,7 +81,6 @@ import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.CreateAccountRequest;
 import org.pmiops.workbench.model.DemographicSurvey;
 import org.pmiops.workbench.model.Disability;
-import org.pmiops.workbench.model.DuaType;
 import org.pmiops.workbench.model.Education;
 import org.pmiops.workbench.model.Ethnicity;
 import org.pmiops.workbench.model.GenderIdentity;
@@ -1348,7 +1347,6 @@ public class ProfileControllerTest extends BaseControllerTest {
               new Institution()
                   .shortName("MGH123")
                   .displayName("Massachusetts General Hospital")
-                  .duaTypeEnum(DuaType.MASTER)
                   .addTierConfigsItem(
                       rtDomainsConfig.emailDomains(
                           ImmutableList.of("mgh.org", "massgeneral.hospital")))
