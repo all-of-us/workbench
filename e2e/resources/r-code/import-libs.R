@@ -1,20 +1,21 @@
 install_if_missing_then_load <- function(package, ...) {
-    if(!require(package, ...)) {
-        install.packages(package, verbose=F)
-    }
-    require(package, quietly=TRUE, ...)
+  if(!require(package, ...)) {
+    install.packages(package, verbose=F)
+  }
+  require(package, quietly=TRUE, ...)
 }
 
-pkgs <- c("data.table",
-            "dplyr",
-            "ggplot2",
-            "ggthemes",
-            "glue",
-            "grid",
-            "gridExtra",
-            "jsonlite",
-            "reticulate",
-            "scales")
+pkgs <- c(
+  "data.table",
+  "dplyr",
+  "ggplot2",
+  "ggthemes",
+  "glue",
+  "grid",
+  "gridExtra",
+  "jsonlite",
+  "reticulate",
+  "scales")
 
 sapply(pkgs, install_if_missing_then_load, character.only=T)
 

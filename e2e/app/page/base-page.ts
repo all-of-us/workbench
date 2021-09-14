@@ -16,8 +16,8 @@ export default abstract class BasePage {
   /**
    * Reload current page.
    */
-  async reloadPage(): Promise<void> {
-    const response = await this.page.reload({ waitUntil: ['networkidle0', 'load', 'domcontentloaded'] });
+  async reloadPage(timeout?: number): Promise<void> {
+    const response = await this.page.reload({ waitUntil: ['networkidle0', 'load', 'domcontentloaded'], timeout });
     if (response && !response.ok()) {
       // Log response if status is not OK
       logger.info(`Reload page: Response status: ${response.status()}\n${await response.text()}`);

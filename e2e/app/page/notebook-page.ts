@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import { ElementHandle, Frame, Page } from 'puppeteer';
 import { getPropValue } from 'utils/element-utils';
-import { waitForDocumentTitle, waitWhileLoading } from 'utils/waits-utils';
+import { waitForDocumentTitle, waitForNumericalString, waitWhileLoading } from 'utils/waits-utils';
 import { LinkText, ResourceCard } from 'app/text-labels';
 import RuntimePanel, { StartStopIconState } from 'app/component/runtime-panel';
 import NotebookCell, { CellType } from './notebook-cell';
@@ -13,6 +13,9 @@ import Link from 'app/element/link';
 import NotebookFrame from './notebook-frame';
 import { logger } from 'libs/logger';
 import RadioButton from 'app/element/radiobutton';
+import expect from 'expect';
+import ReplaceFileModal from 'app/modal/replace-file-modal';
+import { takeScreenshot } from 'utils/save-file-utils';
 
 // CSS selectors
 const CssSelector = {
@@ -29,7 +32,8 @@ const Xpath = {
   fileMenuDropdown: './/a[text()="File"]',
   downloadMenuDropdown: './/a[text()="Download as"]',
   downloadIpynbButton: './/*[@id="download_script"]/a',
-  downloadMarkdownButton: './/*[@id="download_markdown"]/a'
+  downloadMarkdownButton: './/*[@id="download_markdown"]/a',
+  open: './/*[@id="open_notebook"]/a'
 };
 
 export enum Mode {
@@ -94,18 +98,62 @@ export default class NotebookPage extends NotebookFrame {
     return new Link(this.page, selector);
   }
 
+  async openUploadFilePage(): Promise<Page> {
+    // Select File menu => Open.
+    await this.selectFileOpenMenu();
+
+    // New tab opens. "browser" is a Jest-Puppeteer global variable.
+    const newTarget = await browser.waitForTarget((target) => target.opener() === page.target());
+    const newPage = await newTarget.page();
+
+    // Upload button that triggers file selection dialog.
+    const uploadButtonSelector = 'input#upload_span_input';
+    await newPage.waitForSelector(uploadButtonSelector, { visible: true });
+    return newPage;
+  }
+
+  async acceptDataUsePolicyDialog(page: Page): Promise<void> {
+    const expectedMessage =
+      'It is All of Us data use policy to not upload data or files containing personally identifiable information';
+    page.on('dialog', async (dialog) => {
+      await page.waitForTimeout(500);
+      const modalMessage = dialog.message();
+      // If this is not the Data Use Policy dialog, error is thrown.
+      expect(modalMessage).toContain(expectedMessage);
+      await dialog.accept();
+      await page.waitForTimeout(500);
+      console.log('Accept "Data Use Policy" dialog');
+    });
+  }
+
+  async chooseFile(page: Page, pyFilePath: string): Promise<void> {
+    // Upload button that triggers file selection dialog.
+    const uploadButtonSelector = 'input#upload_span_input';
+    const [fileChooser] = await Promise.all([
+      page.waitForFileChooser({ timeout: 5000 }),
+      page
+        .waitForSelector(uploadButtonSelector)
+        .then((button) => button.click({ delay: 10 }))
+        .then(() => {
+          page.waitForTimeout(500);
+        })
+    ]);
+    await fileChooser.accept([pyFilePath]);
+  }
+
   /**
    * Run focused cell and insert a new cell below. Click Run button in toolbar.
    */
-  async run(): Promise<void> {
+  async run(timeout = 60000): Promise<void> {
     logger.info('Click notebook Run button.');
-    await this.waitForKernelIdle(60000, 1000);
+    await this.waitForKernelIdle(timeout, 1000);
     const runButton = await this.findRunButton();
     await runButton.click();
     // Click Run button turns notebook page into Command_mode from Edit mode.
     // Short sleep to avoid check output too soon.
     await this.page.waitForTimeout(500);
     await runButton.dispose();
+    await this.waitForKernelIdle(timeout, 1000);
   }
 
   /**
@@ -120,6 +168,42 @@ export default class NotebookPage extends NotebookFrame {
     // Need a short pause here after click SAVE button to allow click to finish. Otherwise, it can cause tests to fail.
     // See https://precisionmedicineinitiative.atlassian.net/browse/RW-7228 for more details.
     await this.page.waitForTimeout(2000);
+  }
+
+  async selectFileOpenMenu(): Promise<void> {
+    const clickFileMenuIcon = async (iframe: Frame): Promise<void> => {
+      await iframe.waitForXPath(Xpath.fileMenuDropdown, { visible: true, timeout: 2000 }).then((element) => {
+        element.hover();
+        element.click();
+      });
+    };
+
+    let maxRetries = 3;
+    const clickAndCheck = async (iframe: Frame) => {
+      await clickFileMenuIcon(iframe);
+      const succeeded = await iframe
+        .waitForXPath(Xpath.open, { visible: true, timeout: 2000 })
+        .then((menuitem) => {
+          menuitem.hover();
+          menuitem.click();
+          return true;
+        })
+        .catch(() => {
+          return false;
+        });
+      if (succeeded) {
+        return;
+      }
+      if (maxRetries <= 0) {
+        throw new Error('Failed to click File menu -> Download.');
+      }
+      maxRetries--;
+      await this.page.waitForTimeout(1000).then(() => clickAndCheck(iframe)); // 1 second pause and retry.
+    };
+
+    const frame = await this.getIFrame();
+    await clickAndCheck(frame);
+    await this.page.waitForTimeout(500);
   }
 
   private async downloadAs(formatXpath: string): Promise<NotebookDownloadModal> {
@@ -269,7 +353,8 @@ export default class NotebookPage extends NotebookFrame {
       notebookCode = fs.readFileSync(codeFile, 'ascii');
     }
 
-    await this.waitForKernelIdle(60000, 5000);
+    // Check kernel idle again before typing code.
+    await this.waitForKernelIdle(60000, 1000);
     const codeCell = cellIndex === -1 ? await this.findLastCell() : this.findCell(cellIndex);
     const cellInputTextbox = await codeCell.focus();
 
@@ -289,10 +374,74 @@ export default class NotebookPage extends NotebookFrame {
       logger.info(`Type notebook code:\n--------${notebookCode}\n--------`);
     }
 
-    await this.run();
-    const codeOutput = await this.waitForKernelIdle(300000, 3000).then(() => codeCell.waitForOutput(timeOut));
+    await this.run(timeOut);
+    const codeOutput = await codeCell.waitForOutput(timeOut);
     logger.info(`Notebook code output:\n${codeOutput}`);
     return codeOutput;
+  }
+
+  async runCodeFile(cellIndex: number, fileName: string, timeout?: number) {
+    const codeCell = this.findCell(cellIndex);
+    const cellInput = await codeCell.focus();
+    // Open file in notebook cell.
+    await cellInput.type(`%load ${fileName}`);
+    await this.run(timeout);
+    await this.waitForKernelIdle(10000, 2000); // load file into cell should be very quick.
+    // run code.
+    await codeCell.focus();
+    await this.run();
+    const codeOutput = await codeCell.waitForOutput(timeout);
+    logger.info(`Notebook load "${fileName}". Code output:\n${codeOutput}`);
+    return codeOutput;
+  }
+
+  // Upload a file, open file in notebook cell, then run code.
+  async uploadFile(fileName: string, filePath: string): Promise<void> {
+    // Select File menu => Open to open Upload tab.
+    const newPage = await this.openUploadFilePage();
+
+    // The first dialog that open up is "Data Use Policy" dialog: verify message and close dialog.
+    await this.acceptDataUsePolicyDialog(newPage);
+
+    // Upload button that triggers file selection dialog.
+    await this.chooseFile(newPage, filePath);
+
+    // Upload button that uploads the file is visible.
+    const fileUploadButtonSelector =
+      '//*[@id="notebook_list"]//*[contains(@class, "new-file")]' +
+      `[.//input[@class="filename_input" and @value="${fileName}"]]//button[text()="Upload"]`;
+    const uploadButton = new Link(newPage, fileUploadButtonSelector);
+    await uploadButton.focus();
+    await uploadButton.click({ delay: 10 });
+
+    // Handle "Replace file" dialog if found: Do not overwrite existing file, click CANCEL button to dismiss dialog.
+    // Previously uploaded file persist because same workspace is used during the day.
+    const replaceFileMessage = `There is already a file named "${fileName}". Do you want to replace it?`;
+    const replaceFileModal = new ReplaceFileModal(newPage);
+    const exists = await replaceFileModal.isLoaded();
+    if (exists) {
+      const modalMessage = await replaceFileModal.getText();
+      expect(modalMessage).toContain(replaceFileMessage);
+      await replaceFileModal.clickCancelButton();
+      await newPage.waitForTimeout(500);
+      console.log(`Cancel to close "Replace file" "${fileName}" dialog`);
+    }
+
+    // Get file size.
+    const fileSizeXpath =
+      '//*[@id="notebook_list"]//*[contains(@class,"list_item")]' +
+      `[.//a[@class="item_link"]/*[normalize-space()="${fileName}"]]//*[contains(@class, "file_size")]`;
+    await waitForNumericalString(newPage, fileSizeXpath);
+    const fileSizeElement = await newPage.waitForXPath(fileSizeXpath, { visible: true });
+    const fileSize = await getPropValue(fileSizeElement, 'textContent');
+
+    // In case page has to be checked after finish.
+    await takeScreenshot(newPage, `notebook-upload-file-${fileName}.png`);
+
+    await newPage.close();
+    await this.page.bringToFront();
+    await this.waitForKernelIdle();
+    logger.info(`Notebook uploaded file "${fileName}". (file size: ${fileSize})`);
   }
 
   /**
