@@ -270,14 +270,6 @@ export const GetStartedButton = ({style = {marginLeft: '0.5rem'}}) => <Button
   }}>Get Started</Button>;
 
 // the modules subject to Annual Access Renewal (AAR), in the order shown on the AAR page.
-// TODO derive this from DbAccessModules ?
-export const expirableAccessModules: Array<AccessModule> = [
-  AccessModule.PROFILECONFIRMATION,
-  AccessModule.PUBLICATIONCONFIRMATION,
-  AccessModule.COMPLIANCETRAINING,    // note: not guaranteed to be present; check the Feature Flag enableComplianceTraining.
-  AccessModule.DATAUSERCODEOFCONDUCT,
-];
-
 export const accessRenewalTitles = new Map<AccessModule, any>([
     [AccessModule.PROFILECONFIRMATION, () => 'Update your profile'],
     [AccessModule.PUBLICATIONCONFIRMATION,
