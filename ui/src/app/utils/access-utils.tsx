@@ -261,14 +261,15 @@ export const bypassAll = async(accessModules: AccessModule[], isBypassed: boolea
 };
 
 export const GetStartedButton = ({style = {marginLeft: '0.5rem'}}) => <Button
-    style={style}
-    onClick={() => {
-      // After a registration status change, to be safe, we reload the application. This results in
-      // rerendering of the homepage, but also reruns some application bootstrapping / caching which may
-      // have been dependent on the user's registration status, e.g. CDR config information.
-      location.replace('/');
-    }}>Get Started</Button>;
+  style={style}
+  onClick={() => {
+    // After a registration status change, to be safe, we reload the application. This results in
+    // rerendering of the homepage, but also reruns some application bootstrapping / caching which may
+    // have been dependent on the user's registration status, e.g. CDR config information.
+    location.replace('/');
+  }}>Get Started</Button>;
 
+// the modules subject to Annual Access Renewal (AAR), in the order shown on the AAR page.
 // TODO derive this from DbAccessModules ?
 export const expirableAccessModules: Array<AccessModule> = [
   AccessModule.PROFILECONFIRMATION,

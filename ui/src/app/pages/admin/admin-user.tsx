@@ -40,7 +40,7 @@ import {
 } from 'generated/fetch';
 import {Dropdown} from 'primereact/dropdown';
 import validate from 'validate.js';
-import {computeDisplayDates} from 'app/utils/access-utils';
+import {computeDisplayDates, expirableAccessModules} from 'app/utils/access-utils';
 
 const styles = reactStyles({
   semiBold: {
@@ -160,9 +160,17 @@ const AccessModule = ({status}: AccessModuleProps) => {
 interface AccessModulesProps {
   modules: Array<AccessModuleStatus>;
 }
-const AccessModules = ({modules}: AccessModulesProps) => <div>
-  {modules.map(m => <AccessModule status={m}/>)}
-</div>;
+const AccessModules = ({modules}: AccessModulesProps) => {
+  const statuses: Array<AccessModuleStatus> = fp.flatMap(moduleName => {
+    const status = modules.find(s => s.moduleName === moduleName);
+    // return the status if found; init an empty status with the moduleName if not
+    return status || {moduleName};
+  }, expirableAccessModules);
+
+  return <div>
+    {statuses.map(s => <AccessModule status={s}/>)}
+  </div>;
+}
 
 interface Props extends WithSpinnerOverlayProps, RouteComponentProps<MatchParams> {}
 
