@@ -156,7 +156,7 @@ while [[ "${is_running}" == "true" ]]; do
     created_job_names=$(echo "${created_jobs}" | jq -r ".job_name")
 
     # Find failed jobs only.
-    jq_job_filter="(.status | test(\"failed\")) and (.job_name | test(\"ui-deploy-to-test|api-deploy-to-test\")))"
+    jq_job_filter="(.status | test(\"failed\")) and (.job_name | test([\"ui-deploy-to-test\"]|[\"api-deploy-to-test\"])))"
     failed_jobs=$(echo "${created_jobs}" | jq ". | select(${jq_job_filter})")
 
     # Find running/queued jobs only.
