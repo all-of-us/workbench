@@ -152,7 +152,6 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
     return jdbcTemplate.query(
         "SELECT \n"
             + "  i.display_name,\n"
-            + "  i.dua_type_enum,\n"
             + "  i.institution_id,\n"
             + "  i.organization_type_enum,\n"
             + "  i.organization_type_other_text,\n"
