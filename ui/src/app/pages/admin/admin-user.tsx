@@ -30,6 +30,7 @@ import {
 } from 'app/utils/institutions';
 import {MatchParams, serverConfigStore} from 'app/utils/stores';
 import {
+  AccessModule,
   AccessModuleStatus,
   AccountPropertyUpdate,
   CheckEmailResponse,
@@ -145,32 +146,20 @@ const FreeCreditsUsage = ({isAboveLimit, usage}: FreeCreditsProps) => {
   </React.Fragment>;
 };
 
-interface AccessModuleProps {
-  status: AccessModuleStatus;
-}
-const AccessModule = ({status}: AccessModuleProps) => {
-  const {lastConfirmedDate, nextReviewDate} = computeDisplayDates(status);
-  return <FlexColumn>
-    <div>Module name: {status.moduleName}</div>
-    <div>Last Updated On: {lastConfirmedDate}</div>
-    <div>Next Review: {nextReviewDate}</div>
-  </FlexColumn>;
-}
-
-interface AccessModulesProps {
+interface StatusProps {
   modules: Array<AccessModuleStatus>;
 }
-const AccessModules = ({modules}: AccessModulesProps) => {
-  const statuses: Array<AccessModuleStatus> = fp.flatMap(moduleName => {
-    const status = modules.find(s => s.moduleName === moduleName);
+const AccessModuleExpirations = ({modules}: StatusProps) => <div>
+  {expirableAccessModules.map(moduleName => {
     // return the status if found; init an empty status with the moduleName if not
-    return status || {moduleName};
-  }, expirableAccessModules);
-
-  return <div>
-    {statuses.map(s => <AccessModule status={s}/>)}
-  </div>;
-}
+    const status: AccessModuleStatus = modules.find(s => s.moduleName === moduleName) || {moduleName};
+    const {lastConfirmedDate, nextReviewDate} = computeDisplayDates(status);
+    return <FlexColumn>
+      <div>Module name: {status.moduleName}</div>
+      <div>Last Updated On: {lastConfirmedDate}</div>
+      <div>Next Review: {nextReviewDate}</div>
+    </FlexColumn>})}
+</div>;
 
 interface Props extends WithSpinnerOverlayProps, RouteComponentProps<MatchParams> {}
 
@@ -636,7 +625,7 @@ export const AdminUser = withRouter(class extends React.Component<Props, State> 
                 containerStyle={styles.textInputContainer}
               />
             }
-          <AccessModules modules={updatedProfile.accessModules.modules}/>
+          <AccessModuleExpirations modules={updatedProfile.accessModules.modules}/>
           </FlexColumn>
         </FlexRow>
       </FlexColumn>}
