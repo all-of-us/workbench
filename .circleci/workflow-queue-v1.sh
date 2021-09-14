@@ -169,10 +169,10 @@ for id in ${workflow_ids}; do
     # V1 "/project/" api response does not show jobs that have not been created.
     # Get list of elements that appear in $JOB_LIST but are not in $created_job_names.
     not_created_jobs=$( \
-      echo ${JOB_LIST[@]} ${created_job_names[@]} \
+      echo ${created_job_names[@]} ${JOB_LIST[@]} \
       | sed 's/ /\n/g' \
       | sort | uniq -d \
-      | xargs echo ${created_job_names[@]} \
+      | xargs echo ${JOB_LIST[@]} \
       | sed 's/ /\n/g' \
       | sort \
       | uniq -u )
