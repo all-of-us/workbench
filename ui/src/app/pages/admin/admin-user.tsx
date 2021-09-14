@@ -79,20 +79,6 @@ const DropdownWithLabel = ({label, options, initialValue, onChange, disabled= fa
   </FlexColumn>;
 };
 
-const ToggleWithLabelAndToggledText = ({label, initialValue, disabled, onToggle, dataTestId}) => {
-  return <FlexColumn data-test-id={dataTestId} style={{width: '8rem', flex: '0 0 auto'}}>
-    <label>{label}</label>
-    <Toggle
-        name={initialValue ? 'BYPASSED' : ''}
-        checked={initialValue}
-        disabled={disabled}
-        onToggle={(checked) => onToggle(checked)}
-        height={18}
-        width={33}
-    />
-  </FlexColumn>;
-};
-
 const EmailValidationErrorMessage = ({emailValidationResponse, updatedProfile, verifiedInstitutionOptions}) => {
   if (updatedProfile && updatedProfile.verifiedInstitutionalAffiliation) {
     if (emailValidationResponse.isValidMember) {
