@@ -144,7 +144,7 @@ for id in ${workflow_ids}; do
   is_running=true
 
   while [[ "${is_running}" == "true" ]]; do
-    printf "%s\n" "*** Polling workflow id ${id} ***"
+    printf "\n\n%s\n" "*** Polling workflow id ${id} ***"
     is_running=false
 
     # Find jobs that have been created (listed jobs in api response):
@@ -186,7 +186,7 @@ for id in ${workflow_ids}; do
       is_running=true
     fi
 
-    printf "%s\n" "Has been waiting for ${waited_time} seconds."
+    printf "\n%s\n" ">>> Has been waiting for ${waited_time} seconds."
     if [ $waited_time -gt $max_time ]; then
       # End wait but do not fail script.
       printf "\n\n%s\n\n" "****** Max wait time (${max_time} seconds) exceeded. Stop waiting for running builds to complete."
