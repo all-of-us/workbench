@@ -16,11 +16,11 @@ import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors, {addOpacity, colorWithWhiteness} from 'app/styles/colors';
 import {cond, useId, withStyle} from 'app/utils';
 import {
-  expirableAccessModules,
   computeDisplayDates,
   isExpiring,
   maybeDaysRemaining,
-  redirectToTraining
+  redirectToTraining,
+  accessRenewalTitles
 } from 'app/utils/access-utils';
 import {useNavigation} from 'app/utils/navigation';
 import {profileStore, serverConfigStore, useStore} from 'app/utils/stores';
@@ -199,7 +199,7 @@ export const AccessRenewal = fp.flow(
     getProfile();
   }, []);
 
-  const expirableModules = modules.filter(moduleStatus => expirableAccessModules.includes(moduleStatus.moduleName));
+  const expirableModules = modules.filter(moduleStatus => Array.from(accessRenewalTitles.keys()).includes(moduleStatus.moduleName));
 
   const completeOrBypassed = moduleName => {
     const status = modules.find(m => m.moduleName === moduleName);
@@ -244,7 +244,7 @@ export const AccessRenewal = fp.flow(
       {/* Profile */}
       <RenewalCard
           step={1}
-          TitleComponent={() => 'Update your profile'}
+          TitleComponent={accessRenewalTitles.get(AccessModule.PROFILECONFIRMATION)}
           moduleStatus={modules.find(m => m.moduleName === AccessModule.PROFILECONFIRMATION)}>
         <div style={{marginBottom: '0.5rem'}}>Please update your profile information if any of it has changed recently.</div>
         <div>Note that you are obliged by the Terms of Use of the Workbench to provide keep your profile
@@ -259,7 +259,7 @@ export const AccessRenewal = fp.flow(
       {/* Publications */}
       <RenewalCard
           step={2}
-          TitleComponent={() => 'Report any publications or presentations based on your research using the Researcher Workbench'}
+          TitleComponent={accessRenewalTitles.get(AccessModule.PUBLICATIONCONFIRMATION)}
           moduleStatus={modules.find(m => m.moduleName === AccessModule.PUBLICATIONCONFIRMATION)}>
         <div>The <AoU/> Publication and Presentation Policy requires that you report any upcoming publication or
              presentation resulting from the use of <AoU/> Research Program Data at least two weeks before the date of publication.
@@ -299,7 +299,7 @@ export const AccessRenewal = fp.flow(
       {/* Compliance Training */}
       {enableComplianceTraining && <RenewalCard
           step={3}
-          TitleComponent={() => <div><AoU/> Responsible Conduct of Research Training</div>}
+          TitleComponent={accessRenewalTitles.get(AccessModule.COMPLIANCETRAINING)}
           moduleStatus={modules.find(m => m.moduleName === AccessModule.COMPLIANCETRAINING)}>
       <div> You are required to complete the refreshed ethics training courses to understand the privacy safeguards and
           the compliance requirements for using the <AoU/> Dataset.
@@ -330,7 +330,7 @@ export const AccessRenewal = fp.flow(
       {/* DUCC */}
       <RenewalCard
           step={enableComplianceTraining ? 4 : 3}
-          TitleComponent={() => 'Sign Data User Code of Conduct'}
+          TitleComponent={accessRenewalTitles.get(AccessModule.DATAUSERCODEOFCONDUCT)}
           moduleStatus={modules.find(m => m.moduleName === AccessModule.DATAUSERCODEOFCONDUCT)}>
         <div>Please review and sign the data user code of conduct consenting to the <AoU/> data use policy.</div>
         <ActionButton

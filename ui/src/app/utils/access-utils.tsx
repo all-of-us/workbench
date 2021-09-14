@@ -278,6 +278,14 @@ export const expirableAccessModules: Array<AccessModule> = [
   AccessModule.DATAUSERCODEOFCONDUCT,
 ];
 
+export const accessRenewalTitles = new Map<AccessModule, any>([
+    [AccessModule.PROFILECONFIRMATION, () => 'Update your profile'],
+    [AccessModule.PUBLICATIONCONFIRMATION,
+      () => 'Report any publications or presentations based on your research using the Researcher Workbench'],
+    [AccessModule.COMPLIANCETRAINING, () => <div><AoU/> Responsible Conduct of Research Training</div>],
+    [AccessModule.DATAUSERCODEOFCONDUCT, () => 'Sign Data User Code of Conduct'],
+]);
+
 export const isExpiring = (expiration: number): boolean => daysFromNow(expiration) <= serverConfigStore.get().config.accessRenewalLookback;
 
 const withInvalidDateHandling = date => {
