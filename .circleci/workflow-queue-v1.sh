@@ -72,7 +72,6 @@ fetch_older_pipelines() {
     exit 1
   fi
 
-  # Explanation:
   # .why=="github": Exclude jobs manually triggered via ssh by users.
   # .dont_build!="prs-only": Commits to github branch but a Pull Request has not been created.
   jq_filter=".branch==\"${BRANCH}\" and .why==\"github\" and .dont_build!=\"prs-only\" "
@@ -133,20 +132,19 @@ workflow_ids=$(echo "${pipeline_workflow_ids}" | tr ' ' '\n' | sort --u)
 printf "%s\n%s\n\n" "Currently running workflow_ids:" "${workflow_ids}"
 
 
-# Max wait time until workflows have finished is 60 minutes.
-# Because there could be several master jobs running/waiting in queue. Also because e2e tests take a while to finish.
-# DISCLAIMER This max time may not be enough.
-max_time=$((60 * 60))
-is_running=true
+# Max wait time until a workflow has finished is 30 minutes.
+# DISCLAIMER: This max time per workflow may not be enough.
+max_time=$((30 * 60))
 waited_time=0
 # sleep 30 seconds. The sleep_time and time_counter must be same.
 sleep_time="30s"
 sleep_time_counter=30
 
-while [[ "${is_running}" == "true" ]]; do
-  printf "\n***\n"
+for id in ${workflow_ids}; do
+  is_running=true
 
-  for id in ${workflow_ids}; do
+  while [[ "${is_running}" == "true" ]]; do
+    printf "%s\n" "*** Polling workflow id ${id} ***"
     is_running=false
 
     # Find jobs that have been created (listed jobs in api response):
@@ -156,35 +154,46 @@ while [[ "${is_running}" == "true" ]]; do
     created_job_names=$(echo "${created_jobs}" | jq -r ".job_name")
 
     # Find failed jobs only.
-    # (jq: If the key contains special characters or starts with a digit, need to surround it with double quotes)
     jq_job_filter="(.status | test(\"failed\")) and (.job_name | test(\"ui-deploy-to-test\"|\"api-deploy-to-test\"))"
     failed_jobs=$(echo "${created_jobs}" | jq ". | select(${jq_job_filter})")
+    if [[ $failed_jobs ]]; then
+      printf "\n%s\n%s\n" ">>> Deploy has failed:" "${failed_jobs}"
+      break
+    fi
 
     # Find running/queued jobs only.
     running_jobs=$(echo "${created_jobs}" | jq ". | select((.status | test(\"running|queued\")))")
-    printf "\n%s\n%s\n\n" "Find jobs that are running or queued:" "${running_jobs}"
+    printf "\n%s\n%s\n%s\n" "--------" "Running/queued jobs:" "${running_jobs}"
 
-    # Find out if any job has not been created.
+    # Find if any job has not been created.
     # V1 "/project/" api response does not show jobs that have not been created.
-    # We need to compare created jobs list against expected jobs list.
-    not_created_jobs=$(echo "${JOB_LIST[@]}" "${created_job_names[@]}" | tr ' ' '\n' | sort | uniq -u)
+    # Get list of elements that appear in $JOB_LIST but are not in $created_job_names.
+    not_created_jobs=$( \
+      echo ${JOB_LIST[@]} ${created_job_names[@]} \
+      | sed 's/ /\n/g' \
+      | sort | uniq -d \
+      | xargs echo ${created_job_names[@]} \
+      | sed 's/ /\n/g' \
+      | sort \
+      | uniq -u )
+    printf "\n%s\n%s\n%s\n" "--------" "Not created jobs:" "${not_created_jobs}"
 
-    # Wait while there are jobs in running/queued OR there are jobs that have not been created and no failed jobs.
-    if [[ $running_jobs ]] || ( [[ $failed_jobs ]] && [[ $not_created_jobs ]] ); then
+    # Wait while some jobs in running/queued OR some jobs that have not been created.
+    if [[ $running_jobs ]] || [[ $not_created_jobs ]]; then
       printf "\n%s\n" "Waiting for previously submitted pipelines to finish. sleep ${sleep_time}. Please wait..."
       sleep $sleep_time
       waited_time=$((sleep_time_counter + waited_time))
       is_running=true
+    fi
+
+    printf "%s\n" "Has been waiting for ${waited_time} seconds."
+    if [ $waited_time -gt $max_time ]; then
+      # End wait but do not fail script.
+      printf "\n\n%s\n\n" "****** Max wait time (${max_time} seconds) exceeded. Stop waiting for running builds to complete."
       break
     fi
   done
 
-  printf "%s\n" "Has been waiting for ${waited_time} seconds."
-  if [ $waited_time -gt $max_time ]; then
-    # Do not fail script.
-    printf "\n\n%s\n\n" "***** WARNING: Max wait time (${max_time} seconds) exceeded. Stop waiting for running builds to complete."
-    is_running=false
-  fi
 done
 
 printf "\n%s\n%s\n" "Finished waiting." "is_running=${is_running}";
