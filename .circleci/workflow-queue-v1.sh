@@ -163,7 +163,6 @@ for id in ${workflow_ids}; do
 
     # Find running/queued jobs only.
     running_jobs=$(echo "${created_jobs}" | jq ". | select((.status | test(\"running|queued\")))")
-    printf "\n%s\n%s\n%s\n" "--------" "Running/queued jobs:" "${running_jobs}"
 
     # Find if any job has not been created.
     # V1 "/project/" api response does not show jobs that have not been created.
@@ -176,11 +175,12 @@ for id in ${workflow_ids}; do
       | sed 's/ /\n/g' \
       | sort \
       | uniq -u )
-    printf "\n%s\n%s\n%s\n" "--------" "Not created jobs:" "${not_created_jobs}"
 
     # Wait while some jobs in running/queued OR some jobs that have not been created.
     if [[ $running_jobs ]] || [[ $not_created_jobs ]]; then
       printf "\n%s\n" "Waiting for previously submitted pipelines to finish. sleep ${sleep_time}. Please wait..."
+      printf "%s\n%s\n%s\n" "--------" "Running/queued jobs:" "${running_jobs}"
+      printf "%s\n%s\n%s\n" "--------" "Not created jobs:" "${not_created_jobs}"
       sleep $sleep_time
       waited_time=$((sleep_time_counter + waited_time))
       is_running=true
