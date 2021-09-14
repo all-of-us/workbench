@@ -116,7 +116,6 @@ interface CompletedButtonInterface {
   wasBypassed: boolean;
   style?: React.CSSProperties;
 }
-
 const CompletedButton = ({buttonText, wasBypassed, style}: CompletedButtonInterface) => <Button disabled={true}
     data-test-id='completed-button'
     style={{

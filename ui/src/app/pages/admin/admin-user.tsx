@@ -142,7 +142,7 @@ const AccessModuleExpirations = ({modules}: ExpirationProps) => {
           .filter(([moduleName,]) => moduleName !== AccessModule.COMPLIANCETRAINING);
 
   return <FlexColumn style={{marginTop: '1rem'}}>
-    <label style={styles.semiBold}>Access Modules subject to annual renewal</label>
+    <label style={styles.semiBold}>Data Access Status</label>
     {modulesAndTitles.map(([moduleName, TitleComponent], zeroBasedStep) => {
       // return the status if found; init an empty status with the moduleName if not
       const status: AccessModuleStatus = modules.find(s => s.moduleName === moduleName) || {moduleName};
@@ -620,8 +620,8 @@ export const AdminUser = withRouter(class extends React.Component<Props, State> 
                 containerStyle={styles.textInputContainer}
               />
             }
+            <AccessModuleExpirations modules={updatedProfile.accessModules.modules}/>
           </FlexColumn>
-          <AccessModuleExpirations modules={updatedProfile.accessModules.modules}/>
         </FlexRow>
       </FlexColumn>}
       {this.state.loading && <SpinnerOverlay/>}
