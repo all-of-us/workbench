@@ -1,6 +1,8 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
-
+import {Link as RouterLink, RouteComponentProps, withRouter} from 'react-router-dom';
+import {Dropdown} from 'primereact/dropdown';
+import validate from 'validate.js';
 
 import {Button} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
@@ -12,12 +14,11 @@ import {SpinnerOverlay} from 'app/components/spinners';
 import {institutionApi, profileApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {
-  formatFreeCreditsUSD, hasNewValidProps,
+  formatFreeCreditsUSD,
+  hasNewValidProps,
   isBlank,
   reactStyles
 } from 'app/utils';
-import {Link as RouterLink, RouteComponentProps, withRouter} from 'react-router-dom';
-
 import {BulletAlignedUnorderedList} from 'app/components/lists';
 import {TooltipTrigger} from 'app/components/popups';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
@@ -30,6 +31,8 @@ import {
 } from 'app/utils/institutions';
 import {MatchParams, serverConfigStore} from 'app/utils/stores';
 import {
+  AccessModule,
+  AccessModuleStatus,
   AccountPropertyUpdate,
   CheckEmailResponse,
   InstitutionalRole,
@@ -37,8 +40,8 @@ import {
   Profile,
   PublicInstitutionDetails,
 } from 'generated/fetch';
-import {Dropdown} from 'primereact/dropdown';
-import validate from 'validate.js';
+import {accessRenewalTitles, computeDisplayDates} from 'app/utils/access-utils';
+import {hasRegisteredAccess} from 'app/utils/access-tiers';
 
 const styles = reactStyles({
   semiBold: {
@@ -60,6 +63,12 @@ const CREDIT_LIMIT_DEFAULT_MIN = 300;
 const CREDIT_LIMIT_DEFAULT_MAX = 800;
 const CREDIT_LIMIT_DEFAULT_STEP = 50;
 
+const getUserStatus = ({accessTierShortNames}: Profile) => {
+  return (hasRegisteredAccess(accessTierShortNames))
+      ? () => <div style={{color: colors.success}}>Enabled</div>
+      : () => <div style={{color: colors.danger}}>Disabled</div>;
+}
+
 const DropdownWithLabel = ({label, options, initialValue, onChange, disabled= false, dataTestId, dropdownStyle = {}}) => {
   return <FlexColumn data-test-id={dataTestId} style={{marginTop: '1rem'}}>
     <label style={styles.semiBold}>{label}</label>
@@ -73,20 +82,6 @@ const DropdownWithLabel = ({label, options, initialValue, onChange, disabled= fa
         onChange={(e) => onChange(e)}
         value={initialValue}
         disabled={disabled}
-    />
-  </FlexColumn>;
-};
-
-const ToggleWithLabelAndToggledText = ({label, initialValue, disabled, onToggle, dataTestId}) => {
-  return <FlexColumn data-test-id={dataTestId} style={{width: '8rem', flex: '0 0 auto'}}>
-    <label>{label}</label>
-    <Toggle
-        name={initialValue ? 'BYPASSED' : ''}
-        checked={initialValue}
-        disabled={disabled}
-        onToggle={(checked) => onToggle(checked)}
-        height={18}
-        width={33}
     />
   </FlexColumn>;
 };
@@ -143,6 +138,34 @@ const FreeCreditsUsage = ({isAboveLimit, usage}: FreeCreditsProps) => {
   </React.Fragment>;
 };
 
+interface ExpirationProps {
+  modules: Array<AccessModuleStatus>;
+  UserStatusComponent: () => JSX.Element;
+}
+const AccessModuleExpirations = ({modules, UserStatusComponent}: ExpirationProps) => {
+  // compliance training is feature-flagged in some environments
+  const {enableComplianceTraining} = serverConfigStore.get().config;
+  const modulesAndTitles = enableComplianceTraining
+      ? Array.from(accessRenewalTitles.entries())
+      : Array.from(accessRenewalTitles.entries())
+          .filter(([moduleName,]) => moduleName !== AccessModule.COMPLIANCETRAINING);
+
+  return <FlexColumn style={{marginTop: '1rem'}}>
+    <label style={styles.semiBold}>Data Access Status: <UserStatusComponent/></label>
+    {modulesAndTitles.map(([moduleName, TitleComponent], zeroBasedStep) => {
+      // return the status if found; init an empty status with the moduleName if not
+      const status: AccessModuleStatus = modules.find(s => s.moduleName === moduleName) || {moduleName};
+      const {lastConfirmedDate, nextReviewDate} = computeDisplayDates(status);
+      return <FlexRow style={{marginTop: '0.5rem'}}>
+        <FlexColumn>
+          <label style={styles.semiBold}>Step {zeroBasedStep + 1}: <TitleComponent/></label>
+          <div>Last Updated On: {lastConfirmedDate}</div>
+          <div>Next Review: {nextReviewDate}</div>
+        </FlexColumn>
+      </FlexRow>})}
+  </FlexColumn>;
+}
+
 interface Props extends WithSpinnerOverlayProps, RouteComponentProps<MatchParams> {}
 
 interface State {
@@ -155,7 +178,6 @@ interface State {
   updatedProfile: Profile;
   verifiedInstitutionOptions: Array<PublicInstitutionDetails>;
 }
-
 
 export const AdminUser = withRouter(class extends React.Component<Props, State> {
 
@@ -418,7 +440,6 @@ export const AdminUser = withRouter(class extends React.Component<Props, State> 
       updatedProfile,
       verifiedInstitutionOptions
     } = this.state;
-    const {enableRasLoginGovLinking} = serverConfigStore.get().config;
     const errors = validate({
       'verifiedInstitutionalAffiliation': this.validateVerifiedInstitutionalAffiliation(),
       'institutionShortName': this.validateInstitutionShortname(),
@@ -607,48 +628,7 @@ export const AdminUser = withRouter(class extends React.Component<Props, State> 
                 containerStyle={styles.textInputContainer}
               />
             }
-            <div style={{marginTop: '1rem', width: '15rem'}}>
-              <label style={{fontWeight: 600}}>Bypass access to:</label>
-              <FlexRow style={{marginTop: '.5rem'}}>
-                <ToggleWithLabelAndToggledText
-                    label={'2-factor auth'}
-                    initialValue={!!updatedProfile.twoFactorAuthBypassTime}
-                    disabled={true}
-                    onToggle={() => {}}
-                    dataTestId={'twoFactorAuthBypassToggle'}
-                />
-                <ToggleWithLabelAndToggledText
-                    label={'Compliance training'}
-                    initialValue={!!updatedProfile.complianceTrainingBypassTime}
-                    disabled={true}
-                    onToggle={() => {}}
-                    dataTestId={'complianceTrainingBypassToggle'}
-                />
-              </FlexRow>
-              <FlexRow style={{marginTop: '1rem'}}>
-                <ToggleWithLabelAndToggledText
-                    label={'eRA Commons'}
-                    initialValue={!!updatedProfile.eraCommonsBypassTime}
-                    disabled={true}
-                    onToggle={(checked) => checked}
-                    dataTestId={'eraCommonsBypassToggle'}
-                />
-                <ToggleWithLabelAndToggledText
-                    label={'Data User Code of Conduct'}
-                    initialValue={!!updatedProfile.dataUseAgreementBypassTime}
-                    disabled={true}
-                    onToggle={() => {}}
-                    dataTestId={'dataUseAgreementBypassToggle'}
-                />
-                {enableRasLoginGovLinking && <ToggleWithLabelAndToggledText
-                    label={'RAS Login.gov Link'}
-                    initialValue={!!updatedProfile.rasLinkLoginGovBypassTime}
-                    disabled={true}
-                    onToggle={() => {}}
-                    dataTestId={'rasLinkLoginGovBypassToggle'}
-                />}
-              </FlexRow>
-            </div>
+            <AccessModuleExpirations modules={updatedProfile.accessModules.modules} UserStatusComponent={getUserStatus(updatedProfile)}/>
           </FlexColumn>
         </FlexRow>
       </FlexColumn>}
