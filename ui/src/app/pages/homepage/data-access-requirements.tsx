@@ -303,6 +303,12 @@ const syncExternalModules = async() => {
       profileApi().syncTwoFactorAuthStatus({signal: aborter.signal}),
       profileApi().syncComplianceTrainingStatus({signal: aborter.signal}),
       profileApi().syncEraCommonsStatus({signal: aborter.signal}),
+      if(refresh button is RAS) {
+        // If RAS, reinitliaze this workflow.
+      redirectToRas()''
+        const code = query.get('code');
+        handleRasCallback(code, spinnerProps, reload);
+    }
     ]);
   } catch (e) {
     if (!isAbortError(e)) { throw e; }
