@@ -14,7 +14,6 @@ import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {workspaceAdminApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {hasNewValidProps, reactStyles} from 'app/utils';
-import {useNavigation} from 'app/utils/navigation';
 import {
   getSelectedPopulations,
   getSelectedPrimaryPurposeItems
@@ -111,9 +110,9 @@ interface NameCellProps {
 }
 
 const NameCell = (props: NameCellProps) => {
-  const [navigate, ] = useNavigation();
   const {file, bucket, workspaceNamespace, accessReason} = props;
   const filename = file.name.trim();
+  const previewPath = `/admin/workspaces/${workspaceNamespace}/${encodeURIComponent(filename)}?accessReason=${accessReason}`
 
   const filenameSpan = () => <span>{filename}</span>;
 
@@ -125,16 +124,13 @@ const NameCell = (props: NameCellProps) => {
     </TooltipTrigger>
   </FlexRow>;
 
-  const navigateToPreview = () => navigate(
-      ['admin', 'workspaces', workspaceNamespace, encodeURIComponent(filename)],
-      { queryParams: { accessReason: accessReason } });
-
   const fileWithPreviewButton = () => <FlexRow>
     {filenameSpan()}
     <TooltipTrigger content='Please enter an access reason below' disabled={accessReason && accessReason.trim()}>
-      <Button style={styles.previewButton}
-              disabled={!accessReason || !accessReason.trim()}
-              onClick={navigateToPreview}>Preview</Button>
+      <Button
+          path={previewPath}
+          style={styles.previewButton}
+          disabled={!accessReason || !accessReason.trim()}>Preview</Button>
     </TooltipTrigger>
   </FlexRow>;
 

@@ -11,7 +11,6 @@ import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {withCurrentWorkspace} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
-import {useNavigation} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {ResourceType, WorkspaceAccessLevel, WorkspaceResource} from 'generated/fetch';
 import {useEffect, useState} from 'react';
@@ -85,7 +84,6 @@ interface Props extends WithSpinnerOverlayProps {
 export const DataComponent = withCurrentWorkspace()((props: Props) => {
   useEffect(() => props.hideSpinner(), []);
 
-  const [navigate, ] = useNavigation();
   const [activeTab, setActiveTab] = useState(Tabs.SHOWALL);
   const [resourceList, setResourceList] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -162,10 +160,11 @@ export const DataComponent = withCurrentWorkspace()((props: Props) => {
       <div style={styles.cardButtonArea}>
         <TooltipTrigger content={!writePermission &&
         `Write permission required to create cohorts`} side='top'>
-          <CardButton style={styles.resourceTypeButton} disabled={!writePermission}
-                      onClick={() => {
-                        navigate(['workspaces', workspace.namespace, workspace.id, 'data', 'cohorts', 'build']);
-                      }}>
+          <CardButton
+              path={`/workspaces/${workspace.namespace}/${workspace.id}/data/cohorts/build`}
+              style={styles.resourceTypeButton}
+              disabled={!writePermission}
+          >
             <div style={styles.cardHeader}>
               <h2 style={styles.cardHeaderText(!writePermission)}>Cohorts</h2>
               <ClrIcon shape='plus-circle' class='is-solid' size={18} style={{marginTop: 5}}/>
@@ -185,9 +184,9 @@ export const DataComponent = withCurrentWorkspace()((props: Props) => {
           <CardButton
               style={{...styles.resourceTypeButton, ...styles.resourceTypeButtonLast}}
               disabled={!writePermission}
+              path={`/workspaces/${workspace.namespace}/${workspace.id}/data/data-sets`}
               onClick={() => {
                 AnalyticsTracker.DatasetBuilder.OpenCreatePage();
-                navigate(['workspaces', workspace.namespace, workspace.id, 'data', 'data-sets']);
               }}>
             <div style={styles.cardHeader}>
               <h2 style={styles.cardHeaderText(!writePermission)}>Datasets</h2>

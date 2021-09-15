@@ -4,7 +4,7 @@ import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
 import {maybeDaysRemaining} from 'app/utils/access-utils';
 import {profileStore, useStore} from 'app/utils/stores';
-import {LinkButton} from './buttons';
+import {Button} from './buttons';
 import {FlexRow} from './flex';
 import {AlarmExclamation} from './icons';
 
@@ -71,9 +71,9 @@ const AccessRenewalNotification = ({daysRemaining}: {daysRemaining: number}) => 
     }
     </div>
     {/* TODO RW-6618 navigate to Access Renewal pages */}
-    <LinkButton path='access-renewal' type='primary' style={styles.button}>
+    <Button path='access-renewal' type='primary' style={styles.button}>
       <div style={styles.buttonText}>Get Started</div>
-    </LinkButton>
+    </Button>
   </FlexRow>;
 };
 

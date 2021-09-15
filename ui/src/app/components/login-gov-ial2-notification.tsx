@@ -6,7 +6,7 @@ import {getAccessModuleStatusByName} from 'app/utils/access-utils';
 import {profileStore, serverConfigStore, useStore} from 'app/utils/stores';
 import {environment} from 'environments/environment';
 import {AccessModule} from 'generated/fetch';
-import {Button, LinkButton} from './buttons';
+import {Button} from './buttons';
 import {FlexRow} from './flex';
 import {AlarmExclamation} from './icons';
 
@@ -70,7 +70,7 @@ const LoginGovIAL2Notification = () => {
     <AlarmExclamation style={styles.icon}/>
     <div style={styles.text}>Please verify your identity by 10/27/2021.
     </div>
-    <LinkButton
+    <Button
         path={
           environment.enableDataAccessRequirements
               ? 'data-access-requirements'
@@ -79,7 +79,7 @@ const LoginGovIAL2Notification = () => {
         type='primary'
         style={styles.button}>
       <div style={styles.buttonText}>LEARN MORE</div>
-    </LinkButton>
+    </Button>
   </FlexRow>;
 };
 

@@ -234,7 +234,7 @@ export const Clickable = ({as = 'div', disabled = false, onClick = null, propaga
   />;
 };
 
-export const Button = ({type = 'primary', style = {}, disabled = false, ...props}) => {
+const ButtonContentWrapper = ({type = 'primary', style = {}, disabled = false, ...props}) => {
   return <Clickable
     // `fp.omit` used to prevent propagation of test IDs to the rendered child component.
     disabled={disabled} {...fp.omit(['data-test-id'], props)}
@@ -242,16 +242,16 @@ export const Button = ({type = 'primary', style = {}, disabled = false, ...props
   />;
 };
 
-export const LinkButton = ({children, path, type = 'primary', style = {}, linkStyle={}, disabled = false, ...props}) => {
-  return disabled
-    ? <Button type={type} style={style} disabled={disabled} {...props}>
-        {children}
-      </Button>
-    : <Button type={type} style={style} disabled={disabled} {...props}>
+export const Button = ({children, path='', type = 'primary', style = {}, linkStyle={}, disabled = false, ...props}) => {
+  return path && !disabled
+    ? <ButtonContentWrapper type={type} style={style} disabled={disabled} {...props}>
       <RouteLink path={path} style={buttonVariants[type].linkStyle}>
         {children}
       </RouteLink>
-    </Button>
+    </ButtonContentWrapper>
+    : <ButtonContentWrapper type={type} style={style} disabled={disabled} {...props}>
+      {children}
+    </ButtonContentWrapper>
 }
 
 export const MenuItem = ({icon = null, faIcon = null, tooltip = '', disabled = false, children, style = {}, ...props}) => {
@@ -333,11 +333,16 @@ const cardButtonStyle = {
   }
 };
 
-export const CardButton = ({type = 'large', disabled = false, style = {}, children, ...props}) => {
+export const CardButton = ({path='', type = 'large', disabled = false, style = {}, children, ...props}) => {
   return <Clickable
     disabled={disabled} {...props}
     {...fp.merge(computeStyle(cardButtonStyle[type], {disabled}), {style})}
-  >{children}</Clickable>;
+  >
+    {path
+      ? <RouteLink path={path}>{children}</RouteLink>
+      : {children}
+    }
+  </Clickable>;
 };
 
 const tabButtonStyle = {

@@ -10,7 +10,6 @@ import {TooltipTrigger} from 'app/components/popups';
 import {nameValidationFormat} from 'app/components/rename-modal';
 import {userMetricsApi} from 'app/services/swagger-fetch-clients';
 import {summarizeErrors} from 'app/utils';
-import {useNavigation} from 'app/utils/navigation';
 import {Kernels} from 'app/utils/notebook-kernels';
 
 import {AnalyticsTracker} from 'app/utils/analytics';
@@ -26,23 +25,16 @@ export const NewNotebookModal = (props: Props) => {
   const [name, setName] = useState('');
   const [kernel, setKernel] = useState(Kernels.Python3);
   const [nameTouched, setNameTouched] = useState(false);
-  const [navigate, ] = useNavigation();
 
   const {workspace, onClose, existingNameList} = props;
+
+  const workspacePath = `/workspaces/${workspace.namespace}/${workspace.id}/notebooks/${encodeURIComponent(name)}`
+      + `?kernelType=${kernel}?creating=true`
+
   const errors = validate({name, kernel}, {
     kernel: {presence: {allowEmpty: false}},
     name: nameValidationFormat(existingNameList, ResourceType.NOTEBOOK)
   });
-
-  const save = () => {
-    userMetricsApi().updateRecentResource(workspace.namespace, workspace.id, {
-      notebookName: `${name}.ipynb`
-    });
-    navigate(
-      ['workspaces', workspace.namespace, workspace.id, 'notebooks', encodeURIComponent(name)],
-      {queryParams: {kernelType: kernel, creating: true}}
-    );
-  };
 
   return <Modal onRequestClose={onClose}>
     <ModalTitle>New Notebook</ModalTitle>
@@ -81,11 +73,14 @@ export const NewNotebookModal = (props: Props) => {
       <Button type='secondary' onClick={onClose}>Cancel</Button>
       <TooltipTrigger content={summarizeErrors(errors)}>
         <Button
+          path={workspacePath}
           style={{marginLeft: '0.5rem'}}
           disabled={!!errors}
           onClick={() => {
             AnalyticsTracker.Notebooks.Create(Kernels[kernel]);
-            save();
+            userMetricsApi().updateRecentResource(workspace.namespace, workspace.id, {
+              notebookName: `${name}.ipynb`
+            });
           }}
         >
           Create Notebook

@@ -1,7 +1,7 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
-import {Button, Clickable, LinkButton} from 'app/components/buttons';
+import {Button, Clickable} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {Arrow, ClrIcon, ExclamationTriangle, withCircleBackground} from 'app/components/icons';
@@ -14,12 +14,11 @@ import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {styles} from 'app/pages/profile/profile-styles';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors, {addOpacity, colorWithWhiteness} from 'app/styles/colors';
-import {cond, daysFromNow, displayDateWithoutHours, switchCase, useId, withStyle} from 'app/utils';
+import {cond, daysFromNow, displayDateWithoutHours, useId, withStyle} from 'app/utils';
 import {
   maybeDaysRemaining,
   redirectToTraining
 } from 'app/utils/access-utils';
-import {useNavigation} from 'app/utils/navigation';
 import {profileStore, serverConfigStore, useStore} from 'app/utils/stores';
 import {AccessModule, AccessModuleStatus} from 'generated/fetch';
 
@@ -182,7 +181,7 @@ const ActionButton = (
   return wasBypassed || !isModuleExpiring(moduleStatus)
     ? <CompletedButton buttonText={completedButtonText} wasBypassed={wasBypassed} style={style}/>
     : path
-        ? <LinkButton path={path} style={{...baseStyle, ...style}} disabled={disabled}>{actionButtonText}</LinkButton>
+        ? <Button path={path} style={{...baseStyle, ...style}} disabled={disabled}>{actionButtonText}</Button>
         : <Button
             onClick={onClick}
             disabled={disabled}
