@@ -11,25 +11,11 @@ import {encodeURIComponentStrict} from 'app/utils/navigation';
 import {authStore, profileStore, serverConfigStore, useStore} from 'app/utils/stores';
 import {environment} from 'environments/environment';
 import {AccessModule, AccessModuleStatus, ErrorCode, Profile, UserTierEligibility} from 'generated/fetch';
-import {getLiveDUCCVersion} from './code-of-conduct';
 import {parseQueryParams} from "app/components/app-router";
 import {cond, daysFromNow, displayDateWithoutHours} from "./index";
 import {AccessTierShortNames} from 'app/utils/access-tiers';
 
 const {useState, useEffect} = React;
-
-interface RegistrationTask {
-  key: string;    // legacy accessor text
-  module: AccessModule;
-  completionPropsKey: string;
-  loadingPropsKey?: string;
-  title: React.ReactNode;
-  description: React.ReactNode;
-  buttonText: string;
-  completedText: string;
-  onClick: Function;
-  featureFlag?: boolean;
-}
 
 export async function redirectToTraining() {
   AnalyticsTracker.Registration.EthicsTraining();
@@ -80,84 +66,6 @@ export const redirectToRas = (openInNewTab: boolean = true): void => {
       + '&response_type=code&scope=openid+profile+email+ga4gh_passport_v1+federated_identities';
 
   openInNewTab ? window.open(url, '_blank') : <Redirect to={url}/>;
-};
-
-// This needs to be a function, because we want it to evaluate at call time,
-// not at compile time, to ensure that we make use of the server config store.
-// This is important so that we can feature flag off registration tasks.
-//
-// Important: The completion criteria here needs to be kept synchronized with
-// the server-side logic, else users can get stuck on the registration dashboard
-// without a next step:
-// https://github.com/all-of-us/workbench/blob/master/api/src/main/java/org/pmiops/workbench/db/dao/UserServiceImpl.java#L240-L272
-//
-// Needing to pass navigate in here is a bit odd but necessary to access the navigate function which
-// can only be accessed through a hook/HOC from a component.
-export const getRegistrationTasks = (navigate): RegistrationTask[] => serverConfigStore.get().config ? ([
-  {
-    key: 'twoFactorAuth',
-    module: AccessModule.TWOFACTORAUTH,
-    completionPropsKey: 'twoFactorAuthCompleted',
-    title: 'Turn on Google 2-Step Verification',
-    description: 'Add an extra layer of security to your account by providing your phone number' +
-        'in addition to your password to verify your identity upon login.',
-    buttonText: 'Get Started',
-    completedText: 'Completed',
-    onClick: redirectToTwoFactorSetup
-  }, {
-    key: 'rasLoginGov',
-    module: AccessModule.RASLINKLOGINGOV,
-    completionPropsKey: 'rasLoginGovLinked',
-    loadingPropsKey: 'rasLoginGovLoading',
-    title: 'Connect Your Login.Gov Account',
-    featureFlag: serverConfigStore.get().config.enableRasLoginGovLinking,
-    description: 'Connect your Researcher Workbench account to your login.gov account. ',
-    buttonText: 'Connect',
-    completedText: 'Linked',
-    onClick: redirectToRas
-  }, {
-    key: 'eraCommons',
-    module: AccessModule.ERACOMMONS,
-    completionPropsKey: 'eraCommonsLinked',
-    loadingPropsKey: 'eraCommonsLoading',
-    title: 'Connect Your eRA Commons Account',
-    description: 'Connect your Researcher Workbench account to your eRA Commons account. ' +
-        'There is no exchange of personal data in this step.',
-    featureFlag: serverConfigStore.get().config.enableEraCommons,
-    buttonText: 'Connect',
-    completedText: 'Linked',
-    onClick: redirectToNiH
-  }, {
-    key: 'complianceTraining',
-    module: AccessModule.COMPLIANCETRAINING,
-    completionPropsKey: 'trainingCompleted',
-    title: <span><AoU/> Responsible Conduct of Research Training</span>,
-    description: <div>Complete ethics training courses to understand the privacy safeguards and the
-      compliance requirements for using the <AoU/> dataset.</div>,
-    buttonText: 'Complete training',
-    featureFlag: serverConfigStore.get().config.enableComplianceTraining,
-    completedText: 'Completed',
-    onClick: redirectToTraining
-  }, {
-    key: 'dataUserCodeOfConduct',
-    module: AccessModule.DATAUSERCODEOFCONDUCT,
-    completionPropsKey: 'dataUserCodeOfConductCompleted',
-    title: 'Data User Code of Conduct',
-    description: <span>Sign the Data User Code of Conduct consenting to the <AoU/> data use policy.</span>,
-    buttonText: 'View & Sign',
-    completedText: 'Signed',
-    onClick: () => {
-      AnalyticsTracker.Registration.EnterDUCC();
-      navigate(['data-code-of-conduct']);
-    }
-  }
-]).filter(registrationTask => registrationTask.featureFlag === undefined
-    || registrationTask.featureFlag) : (() => {
-      throw new Error('Cannot load registration tasks before config loaded');
-    })();
-
-export const getRegistrationTask = (navigate, module: AccessModule): RegistrationTask => {
-  return getRegistrationTasks(navigate).find(task => task.module === module);
 };
 
 export const wasReferredFromRenewal = (queryParams): boolean => {
@@ -244,11 +152,11 @@ export const GetStartedButton = ({style = {marginLeft: '0.5rem'}}) => <Button
 
 // the modules subject to Annual Access Renewal (AAR), in the order shown on the AAR page.
 export const accessRenewalTitles = new Map<AccessModule, () => JSX.Element | string>([
-    [AccessModule.PROFILECONFIRMATION, () => 'Update your profile'],
-    [AccessModule.PUBLICATIONCONFIRMATION,
-      () => 'Report any publications or presentations based on your research using the Researcher Workbench'],
-    [AccessModule.COMPLIANCETRAINING, () => <div><AoU/> Responsible Conduct of Research Training</div>],
-    [AccessModule.DATAUSERCODEOFCONDUCT, () => 'Sign Data User Code of Conduct'],
+  [AccessModule.PROFILECONFIRMATION, () => 'Update your profile'],
+  [AccessModule.PUBLICATIONCONFIRMATION,
+    () => 'Report any publications or presentations based on your research using the Researcher Workbench'],
+  [AccessModule.COMPLIANCETRAINING, () => <div><AoU/> Responsible Conduct of Research Training</div>],
+  [AccessModule.DATAUSERCODEOFCONDUCT, () => 'Sign Data User Code of Conduct'],
 ]) as Map<AccessModule, () => JSX.Element>;
 
 export const isExpiring = (expiration: number): boolean => daysFromNow(expiration) <= serverConfigStore.get().config.accessRenewalLookback;

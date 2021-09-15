@@ -2,7 +2,7 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {useEffect, useState} from 'react';
 
-import { useQuery } from 'app/components/app-router';
+import {useQuery} from 'app/components/app-router';
 import {Button, Clickable} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
@@ -16,7 +16,6 @@ import {
   Repeat
 } from 'app/components/icons';
 import {withErrorModal} from 'app/components/modals';
-import {TooltipTrigger} from 'app/components/popups';
 import {AoU} from 'app/components/text-wrappers';
 import {withProfileErrorModal} from 'app/components/with-error-modal';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
@@ -27,14 +26,17 @@ import {
   buildRasRedirectUrl,
   bypassAll,
   getAccessModuleStatusByName,
-  getRegistrationTask,
   GetStartedButton,
   redirectToRas,
+  redirectToNiH,
+  redirectToTraining,
 } from 'app/utils/access-utils';
 import {useNavigation} from 'app/utils/navigation';
 import {profileStore, serverConfigStore, useStore} from 'app/utils/stores';
 import {AccessModule, AccessModuleStatus, Profile} from 'generated/fetch';
 import {TwoFactorAuthModal} from './two-factor-auth-modal';
+import {AnalyticsTracker} from 'app/utils/analytics';
+import {TooltipTrigger} from 'app/components/popups';
 
 const styles = reactStyles({
   headerFlexColumn: {
@@ -225,18 +227,71 @@ export const allModules: AccessModule[] = [
   duccModule,
 ];
 
-const LoginGovTooltip = () => <TooltipTrigger
-    content={'For additional security, we require you to verify your identity by uploading a photo of your ID.'}>
-  <InfoIcon style={{margin: '0 0.3rem'}}/>
-</TooltipTrigger>;
+interface AccessModuleConfig {
+  moduleName: AccessModule;
+  isEnabledInEnvironment: boolean;  // either true or dependent on a feature flag
+  darLabel: JSX.Element;
+  externalSyncAction?: Function;
+}
 
-// TODO merge with RegistrationTasks after we remove RegistrationDashboard
-const moduleLabels: Map<AccessModule, JSX.Element> = new Map([
-  [AccessModule.TWOFACTORAUTH, <div>Turn on Google 2-Step Verification</div>],
-  [AccessModule.RASLINKLOGINGOV, <div>Verify your identity with Login.gov <LoginGovTooltip/></div>],
-  [AccessModule.ERACOMMONS, <div>Connect your eRA Commons account</div>],
-  [AccessModule.COMPLIANCETRAINING, <div>Complete <AoU/> research Registered Tier training</div>],
-  [AccessModule.DATAUSERCODEOFCONDUCT, <div>Sign Data User Code of Conduct</div>],
+// This needs to be a function, because we want it to evaluate at call time,
+// not at compile time, to ensure that we make use of the server config store.
+// This is important so that we can use feature flags.
+//
+// Important: The completion criteria here needs to be kept synchronized with
+// the server-side logic, else users can get stuck on the DAR
+// without a next step:
+// https://github.com/all-of-us/workbench/blob/master/api/src/main/java/org/pmiops/workbench/db/dao/UserServiceImpl.java#L240-L272
+const getAccessModuleConfig = (moduleName: AccessModule): AccessModuleConfig => {
+  const {enableRasLoginGovLinking, enableEraCommons, enableComplianceTraining} = serverConfigStore.get().config;
+  return switchCase(moduleName,
+
+      [AccessModule.TWOFACTORAUTH, () => ({
+        moduleName,
+        isEnabledInEnvironment: true,
+        darLabel: <div>Turn on Google 2-Step Verification</div>,
+        externalSyncAction: async () => await profileApi().syncTwoFactorAuthStatus(),
+      })],
+
+      [AccessModule.RASLINKLOGINGOV, () => ({
+        moduleName,
+        isEnabledInEnvironment: enableRasLoginGovLinking,
+        darLabel: <div>Verify your identity with Login.gov <TooltipTrigger
+            content={'For additional security, we require you to verify your identity by uploading a photo of your ID.'}>
+          <InfoIcon style={{margin: '0 0.3rem'}}/>
+        </TooltipTrigger></div>,
+        externalSyncAction: () => redirectToRas(false),
+      })],
+
+      [AccessModule.ERACOMMONS, () => ({
+        moduleName,
+        isEnabledInEnvironment: enableEraCommons,
+        darLabel: <div>Connect your eRA Commons account</div>,
+        externalSyncAction: async () => await profileApi().syncEraCommonsStatus(),
+      })],
+
+      [AccessModule.COMPLIANCETRAINING, () => ({
+        moduleName,
+        isEnabledInEnvironment: enableComplianceTraining,
+        darLabel: <div>Complete <AoU/> research Registered Tier training</div>,
+        externalSyncAction: async () => await profileApi().syncComplianceTrainingStatus(),
+      })],
+
+      [AccessModule.DATAUSERCODEOFCONDUCT, () => ({
+        moduleName,
+        isEnabledInEnvironment: true,
+        darLabel: <div>Sign Data User Code of Conduct</div>,
+      })]
+  );
+};
+
+const externalSyncActions: Map<AccessModule, Function> = new Map([
+  [AccessModule.TWOFACTORAUTH, async() => await profileApi().syncTwoFactorAuthStatus()],
+  [AccessModule.RASLINKLOGINGOV, () => redirectToRas(false)],
+  [AccessModule.ERACOMMONS, async() => await profileApi().syncEraCommonsStatus()],
+  [AccessModule.COMPLIANCETRAINING, async() => await profileApi().syncComplianceTrainingStatus()],
+  // DUCC state is strictly internal to the RW
+  [AccessModule.DATAUSERCODEOFCONDUCT, () => {}],
 ]);
 
 // RAS cannot be externally synced because it relies on a short lived token
@@ -250,6 +305,7 @@ const externalSyncActions: Map<AccessModule, Function> = new Map([
 // most refresh actions are the same as the external sync actions
 const refreshActions: Map<AccessModule, Function> = new Map(externalSyncActions);
 refreshActions.set(AccessModule.RASLINKLOGINGOV, () => redirectToRas(false));
+
 
 // this function does double duty:
 // - returns appropriate text for completed and bypassed modules and null for incomplete modules
@@ -312,10 +368,11 @@ const selfBypass = async(spinnerProps: WithSpinnerOverlayProps, reloadProfile: F
 };
 
 // exported for test
-export const getEnabledModules = (modules: AccessModule[], navigate): AccessModule[] => fp.flatMap(moduleName => {
-  const enabledTaskMaybe = getRegistrationTask(navigate, moduleName);
-  return enabledTaskMaybe ? [enabledTaskMaybe.module] : [];
-}, modules);
+export const getEnabledModules = (modules: AccessModule[]): AccessModule[] => fp.flow(
+    fp.map(getAccessModuleConfig),
+    fp.filter(moduleConfig => moduleConfig.isEnabledInEnvironment),
+    fp.map(moduleConfig => moduleConfig.moduleName)
+)(modules);
 
 const incompleteModules = (modules: AccessModule[], profile: Profile): AccessModule[] => modules.filter(moduleName => {
   const status = getAccessModuleStatusByName(profile, moduleName);
@@ -370,13 +427,14 @@ const ModuleIcon = (props: {moduleName: AccessModule, completedOrBypassed: boole
 // Sep 16 hack while we work out some RAS bugs
 const TemporaryRASModule = () => {
   const moduleName = AccessModule.RASLINKLOGINGOV;
+  const {darLabel} = getAccessModuleConfig(moduleName) || {};
   return <FlexRow data-test-id={`module-${moduleName}`}>
     <FlexRow style={styles.moduleCTA}/>
     <FlexRow style={styles.inactiveModuleBox}>
       <ModuleIcon moduleName={moduleName} completedOrBypassed={false} eligible={false}/>
       <FlexColumn style={styles.inactiveModuleText}>
         <div>
-          {moduleLabels.get(moduleName)}
+          {darLabel}
         </div>
         <div style={{fontSize: '14px', marginTop: '0.5em'}}>
           <b>Temporarily disabled.</b> Due to technical difficulties, this step is disabled.
@@ -396,6 +454,7 @@ interface ModuleProps {
   // eligible: boolean;  // is the user eligible to complete this module (does the inst. allow it)
   spinnerProps: WithSpinnerOverlayProps;
 }
+
 // Renders a module when it's enabled via feature flags.  Returns null if not.
 const MaybeModule = ({profile, moduleName, active, spinnerProps}: ModuleProps): JSX.Element => {
   // whether to show the refresh button: this module has been clicked
@@ -403,26 +462,27 @@ const MaybeModule = ({profile, moduleName, active, spinnerProps}: ModuleProps): 
 
   // whether to show the Two Factor Auth Modal
   const [showTwoFactorAuthModal, setShowTwoFactorAuthModal] = useState(false);
-
   const [navigate, ] = useNavigation();
-  const registrationTask = getRegistrationTask(navigate, moduleName);
+
+  // outside of the main getAccessModuleConfig() so that function doesn't have to deal with navigate
+  const moduleAction: Function = switchCase(moduleName,
+    [AccessModule.TWOFACTORAUTH, () => () => setShowTwoFactorAuthModal(true)],
+    [AccessModule.RASLINKLOGINGOV, () => redirectToRas],
+    [AccessModule.ERACOMMONS, () => redirectToNiH],
+    [AccessModule.COMPLIANCETRAINING, () => redirectToTraining],
+    [AccessModule.DATAUSERCODEOFCONDUCT, () => () => {
+      AnalyticsTracker.Registration.EnterDUCC();
+      navigate(['data-code-of-conduct']);
+    }]);
+
+  const {externalSyncAction, darLabel, isEnabledInEnvironment} = getAccessModuleConfig(moduleName) || {};
 
   const ModuleBox = ({children}) => {
-    // kluge until we have fully migrated from the Registration Dashboard:
-    // getRegistrationTask() has onClick() functions for every module, which is generally what we want
-    // but we pop up a modal for Two Factor Auth instead of using the standard task
-    const moduleAction = registrationTask && (moduleName === AccessModule.TWOFACTORAUTH ?
-        () => setShowTwoFactorAuthModal(true) :
-        registrationTask.onClick);
-
-    return active ?
-        <Clickable onClick={() => {
-          setShowRefresh(true);
-          moduleAction();
-        }}>
-          <FlexRow style={styles.activeModuleBox}>{children}</FlexRow>
-        </Clickable> :
-        <FlexRow style={styles.inactiveModuleBox}>{children}</FlexRow>;
+    return active
+        ? <Clickable onClick={() => { setShowRefresh(true); moduleAction(); }}>
+            <FlexRow style={styles.activeModuleBox}>{children}</FlexRow>
+          </Clickable>
+        : <FlexRow style={styles.inactiveModuleBox}>{children}</FlexRow>;
   };
 
   const Module = ({profile}) => {
@@ -440,7 +500,7 @@ const MaybeModule = ({profile, moduleName, active, spinnerProps}: ModuleProps): 
         <ModuleIcon moduleName={moduleName} completedOrBypassed={!!statusTextMaybe}/>
         <FlexColumn>
           <div style={active ? styles.activeModuleText : styles.inactiveModuleText}>
-            {moduleLabels.get(moduleName)}
+            {darLabel}
           </div>
           {statusTextMaybe && <div style={styles.moduleDate}>{statusTextMaybe}</div>}
         </FlexColumn>
@@ -458,8 +518,7 @@ const MaybeModule = ({profile, moduleName, active, spinnerProps}: ModuleProps): 
       return <TemporaryRASModule/>;
     }
   }
-  const moduleEnabled = !!registrationTask;
-  return moduleEnabled ? <Module profile={profile}/> : null;
+  return isEnabledInEnvironment ? <Module profile={profile}/> : null;
 };
 
 const DARHeader = () => <FlexColumn style={styles.headerFlexColumn}>
@@ -595,7 +654,7 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
 
   // whenever the profile changes, setActiveModule(the first incomplete enabled module)
   useEffect(() => {
-    setActiveModule(getActiveModule(enabledModules, profile));
+    setActiveModule(getActiveModule(getEnabledModules(allModules), profile));
   }, [profile]);
 
 
