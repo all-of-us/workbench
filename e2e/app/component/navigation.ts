@@ -11,7 +11,8 @@ export enum NavLink {
   CONTACT_US = 'Contact Us',
   USER_SUPPORT = 'User Support',
   YOUR_WORKSPACES = 'Your Workspaces',
-  FEATURED_WORKSPACES = 'Featured Workspaces'
+  FEATURED_WORKSPACES = 'Featured Workspaces',
+  INSTITUTION_ADMIN = 'Institution Admin'
 }
 
 export enum NavLinkIcon {
@@ -46,7 +47,7 @@ export default class Navigation {
             await username.click();
             return page.waitForXPath(appLinkXpath, { timeout: 2000, visible: true });
           }
-        } else if (destinationApp === NavLink.USER_ADMIN) {
+        } else if (destinationApp === NavLink.USER_ADMIN || destinationApp === NavLink.INSTITUTION_ADMIN) {
           // If it's a link under Admin submenu, open Admin submenu if needed
           if (!applink) {
             await admin.click();
