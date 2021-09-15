@@ -1,7 +1,7 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
-import {Button, Clickable} from 'app/components/buttons';
+import {Button, Clickable, LinkButton} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {Arrow, ClrIcon, ExclamationTriangle, withCircleBackground} from 'app/components/icons';
@@ -170,19 +170,23 @@ interface ActionButtonInterface {
   moduleStatus: AccessModuleStatus;
   actionButtonText: string;
   completedButtonText: string;
-  onClick: Function;
+  onClick?: Function;
   disabled?: boolean;
   style?: React.CSSProperties;
+  path?: string;
 }
 const ActionButton = (
-  {moduleStatus, actionButtonText, completedButtonText, onClick, disabled, style}: ActionButtonInterface) => {
+  {moduleStatus, actionButtonText, completedButtonText, onClick, disabled, style, path}: ActionButtonInterface) => {
   const wasBypassed = !!moduleStatus.bypassEpochMillis;
+  const baseStyle = {marginTop: 'auto', height: '1.6rem', width: 'max-content'};
   return wasBypassed || !isModuleExpiring(moduleStatus)
     ? <CompletedButton buttonText={completedButtonText} wasBypassed={wasBypassed} style={style}/>
-    : <Button
-        onClick={onClick}
-        disabled={disabled}
-        style={{marginTop: 'auto', height: '1.6rem', width: 'max-content', ...style}}>{actionButtonText}</Button>;
+    : path
+        ? <LinkButton path={path} style={{...baseStyle, ...style}} disabled={disabled}>{actionButtonText}</LinkButton>
+        : <Button
+            onClick={onClick}
+            disabled={disabled}
+            style={{...baseStyle, ...style}}>{actionButtonText}</Button>;
 };
 
 const BackArrow = withCircleBackground(() => <Arrow style={{height: 21, width: 18}}/>);
@@ -221,8 +225,6 @@ export const AccessRenewal = fp.flow(
   const reportId = useId();
   const [refreshButtonDisabled, setRefreshButtonDisabled] = useState(true);
   const [loading, setLoading] = useState(false);
-  const [, navigateByUrl] = useNavigation();
-
 
   // onMount - as we move between pages, let's make sure we have the latest profile
   useEffect(() => {
@@ -288,7 +290,7 @@ export const AccessRenewal = fp.flow(
             actionButtonText='Review'
             completedButtonText='Confirmed'
             moduleStatus={modules.find(m => m.moduleName === AccessModule.PROFILECONFIRMATION)}
-            onClick={() => navigateByUrl('profile', {queryParams: {renewal: 1}})}/>
+            path='profile?renewal=1'/>
       </RenewalCard>
       {/* Publications */}
       <RenewalCard
@@ -371,7 +373,7 @@ export const AccessRenewal = fp.flow(
             actionButtonText='View & Sign'
             completedButtonText='Completed'
             moduleStatus={modules.find(m => m.moduleName === AccessModule.DATAUSERCODEOFCONDUCT)}
-            onClick={() => navigateByUrl('data-code-of-conduct', {queryParams: {renewal: 1}})}/>
+            path='data-code-of-conduct?renewal=1'/>
       </RenewalCard>
     </div>
     {loading && <SpinnerOverlay dark={true} opacity={0.6}/>}

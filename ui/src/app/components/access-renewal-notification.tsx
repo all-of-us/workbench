@@ -3,9 +3,8 @@ import * as React from 'react';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
 import {maybeDaysRemaining} from 'app/utils/access-utils';
-import {useNavigation} from 'app/utils/navigation';
 import {profileStore, useStore} from 'app/utils/stores';
-import {Button} from './buttons';
+import {LinkButton} from './buttons';
 import {FlexRow} from './flex';
 import {AlarmExclamation} from './icons';
 
@@ -65,8 +64,6 @@ const styles = reactStyles({
 
 
 const AccessRenewalNotification = ({daysRemaining}: {daysRemaining: number}) => {
-  const [navigate, ] = useNavigation();
-
   return <FlexRow style={styles.box}>
     <AlarmExclamation style={styles.icon}/>
     <div style={styles.text}>Time for access renewal. {
@@ -74,9 +71,9 @@ const AccessRenewalNotification = ({daysRemaining}: {daysRemaining: number}) => 
     }
     </div>
     {/* TODO RW-6618 navigate to Access Renewal pages */}
-    <Button type='primary' style={styles.button} onClick={() => navigate(['access-renewal'])}>
+    <LinkButton path='access-renewal' type='primary' style={styles.button}>
       <div style={styles.buttonText}>Get Started</div>
-    </Button>
+    </LinkButton>
   </FlexRow>;
 };
 

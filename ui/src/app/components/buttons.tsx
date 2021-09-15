@@ -10,6 +10,7 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 import Interactive from 'react-interactive';
 import { Link } from 'react-router-dom';
+import { RouteLink } from './app-router';
 
 
 export const styles = reactStyles({
@@ -90,6 +91,9 @@ const buttonVariants = {
       borderRadius: '0.3rem',
       backgroundColor: colors.primary, color: colors.white,
     },
+    linkStyle: {
+      color: colors.white
+    },
     disabledStyle: {backgroundColor: colorWithWhiteness(colors.dark, disabledAlpha)},
     hover: {backgroundColor: colorWithWhiteness(colors.primary, hoverAlpha)}
   },
@@ -98,6 +102,9 @@ const buttonVariants = {
       ...styles.baseNew,
       backgroundColor: 'transparent',
       color: colors.primary,
+    },
+    linkStyle: {
+      color: colors.primary
     },
     disabledStyle: {
       borderColor: colorWithWhiteness(colors.dark, disabledAlpha),
@@ -109,6 +116,9 @@ const buttonVariants = {
     style: {
       ...styles.baseNew,
       backgroundColor: 'transparent',
+      color: colors.accent
+    },
+    linkStyle: {
       color: colors.accent
     },
     disabledStyle: {
@@ -130,6 +140,9 @@ const buttonVariants = {
       height: '30px',
       padding: '0 0.5rem'
     },
+    linkStyle: {
+      color: colors.accent
+    },
     disabledStyle: {
       borderColor: colorWithWhiteness(colors.dark, disabledAlpha),
       color: colorWithWhiteness(colors.dark, disabledAlpha)
@@ -145,6 +158,9 @@ const buttonVariants = {
       borderRadius: '0.2rem',
       backgroundColor: colors.primary, color: colors.white
     },
+    linkStyle: {
+      color: colors.white
+    },
     disabledStyle: {backgroundColor: colorWithWhiteness(colors.dark, disabledAlpha)},
     hover: {backgroundColor: 'rgba(255,255,255,0.3)'}
   },
@@ -154,6 +170,9 @@ const buttonVariants = {
       borderRadius: '0.2rem',
       backgroundColor: colors.secondary, color: colors.white
     },
+    linkStyle: {
+      color: colors.white
+    },
     disabledStyle: {backgroundColor: colorWithWhiteness(colors.dark, disabledAlpha)},
     hover: {backgroundColor: colorWithWhiteness(colors.secondary, hoverAlpha)}
   },
@@ -161,6 +180,9 @@ const buttonVariants = {
     style: {
       ...styles.baseNew,
       backgroundColor: colors.primary, color: colors.white,
+    },
+    linkStyle: {
+      color: colors.white
     },
     disabledStyle: {backgroundColor: colorWithWhiteness(colors.dark, disabledAlpha)},
     hover: {backgroundColor: colorWithWhiteness(colors.primary, hoverAlpha)}
@@ -170,6 +192,9 @@ const buttonVariants = {
       ...styles.baseNew,
       backgroundColor: 'transparent',
       color: colors.primary,
+    },
+    linkStyle: {
+      color: colors.primary
     },
     disabledStyle: {
       borderColor: colorWithWhiteness(colors.dark, disabledAlpha),
@@ -181,6 +206,9 @@ const buttonVariants = {
   link: {
     style: {
       ...styles.baseNew,
+      color: colors.accent
+    },
+    linkStyle: {
       color: colors.accent
     },
     disabledStyle: {
@@ -213,6 +241,18 @@ export const Button = ({type = 'primary', style = {}, disabled = false, ...props
     {...fp.merge(computeStyle(buttonVariants[type], {disabled}), {style})}
   />;
 };
+
+export const LinkButton = ({children, path, type = 'primary', style = {}, linkStyle={}, disabled = false, ...props}) => {
+  return disabled
+    ? <Button type={type} style={style} disabled={disabled} {...props}>
+        {children}
+      </Button>
+    : <Button type={type} style={style} disabled={disabled} {...props}>
+      <RouteLink path={path} style={buttonVariants[type].linkStyle}>
+        {children}
+      </RouteLink>
+    </Button>
+}
 
 export const MenuItem = ({icon = null, faIcon = null, tooltip = '', disabled = false, children, style = {}, ...props}) => {
   return <TooltipTrigger side='left' content={tooltip}>

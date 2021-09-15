@@ -1,3 +1,4 @@
+import colors from 'app/styles/colors';
 import {routeDataStore} from 'app/utils/stores';
 import {buildPageTitleForEnvironment} from 'app/utils/title';
 import * as fp from 'lodash/fp';
@@ -92,7 +93,7 @@ export const AppRouter = ({children}): React.ReactElement => {
   return <BrowserRouter getUserConfirmation={getUserConfirmation}>{children}</BrowserRouter>;
 };
 
-export const RouteLink = ({path, style = {}, children}): React.ReactElement => <Link style={{...style}} to={path}>{children}</Link>;
+export const RouteLink = ({path, style = {}, children}): React.ReactElement => <Link style={{textDecoration: 'none', color: colors.primary, ...style}} to={path}>{children}</Link>;
 
 export const AppRoute = ({path, guards = [], exact, intermediaryRoute = false, children}): React.ReactElement => {
   const { redirectPath = null } = fp.find(({allowed}) => !allowed(), guards) || {};
