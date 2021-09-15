@@ -42,11 +42,6 @@ export const styles = reactStyles({
   longInputHeightStyle: {
     height: 175,
   },
-  box: {
-    backgroundColor: colors.white,
-    borderRadius: 8,
-    padding: 21
-  },
   title: {
     color: colors.primary,
     fontSize: 16,
@@ -55,20 +50,15 @@ export const styles = reactStyles({
     display: 'inline',
     alignItems: 'flexEnd'
   },
-  uneditableProfileElement: {
-    paddingLeft: '0.5rem',
-    marginRight: 20,
-    marginBottom: 20,
-    height: '1.5rem',
-    color: colors.primary
-  },
   fadebox: {
     margin: '1rem 0 0 3%',
     width: '95%',
     padding: '0 0.1rem'
   },
   verticalLine: {
-    marginTop: '0.3rem', marginInlineStart: '0rem', width: '100%'
+    marginTop: '0.3rem',
+    marginInlineStart: '0rem',
+    width: '100%',
   },
   researchPurposeInfo: {
     fontWeight: 100,
