@@ -63,11 +63,10 @@ const CREDIT_LIMIT_DEFAULT_MIN = 300;
 const CREDIT_LIMIT_DEFAULT_MAX = 800;
 const CREDIT_LIMIT_DEFAULT_STEP = 50;
 
-const getUserStatus = (profile: Profile) => {
-  const {accessTierShortNames} = profile;
+const getUserStatus = ({accessTierShortNames}: Profile) => {
   return (hasRegisteredAccess(accessTierShortNames))
       ? () => <div style={{color: colors.success}}>Enabled</div>
-      : () => <div style={{color: colors.danger}}>Disabled</div>
+      : () => <div style={{color: colors.danger}}>Disabled</div>;
 }
 
 const DropdownWithLabel = ({label, options, initialValue, onChange, disabled= false, dataTestId, dropdownStyle = {}}) => {
@@ -144,6 +143,7 @@ interface ExpirationProps {
   UserStatusComponent: () => JSX.Element;
 }
 const AccessModuleExpirations = ({modules, UserStatusComponent}: ExpirationProps) => {
+  // compliance training is feature-flagged in some environments
   const {enableComplianceTraining} = serverConfigStore.get().config;
   const modulesAndTitles = enableComplianceTraining
       ? Array.from(accessRenewalTitles.entries())
