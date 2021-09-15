@@ -27,7 +27,7 @@ describe('Access Renewal Page', () => {
     const {profile} = profileStore.get();
 
     const newProfile = fp.set('accessModules',
-        {modules: Array.from(accessRenewalTitles.keys()).map(m => {return {moduleName: m, expirationEpochMillis: expiredTime}})},
+        {modules: Array.from(accessRenewalTitles.keys()).map(m => ({moduleName: m, expirationEpochMillis: expiredTime}))},
         profile)
     profileStore.set({profile: newProfile, load, reload, updateCache});
   }

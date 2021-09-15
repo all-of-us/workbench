@@ -198,7 +198,7 @@ export const AccessRenewal = fp.flow(
     getProfile();
   }, []);
 
-  const expirableModules = modules.filter(moduleStatus => Array.from(accessRenewalTitles.keys()).includes(moduleStatus.moduleName));
+  const expirableModules = modules.filter(moduleStatus => accessRenewalTitles.has(moduleStatus.moduleName));
 
   const completeOrBypassed = moduleName => {
     const status = modules.find(m => m.moduleName === moduleName);
