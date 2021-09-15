@@ -7,7 +7,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import org.pmiops.workbench.model.DuaType;
 import org.pmiops.workbench.model.OrganizationType;
 
 @Entity
@@ -19,7 +18,6 @@ public class DbInstitution {
   private String displayName;
   private Short organizationTypeEnum;
   private String organizationTypeOtherText;
-  private Short duaTypeEnum;
 
   public DbInstitution() {}
 
@@ -65,16 +63,6 @@ public class DbInstitution {
     return this;
   }
 
-  @Column(name = "dua_type_enum")
-  public DuaType getDuaTypeEnum() {
-    return DbStorageEnums.institutionDUATypeFromStorage(duaTypeEnum);
-  }
-
-  public DbInstitution setDuaTypeEnum(DuaType institutionDuaType) {
-    this.duaTypeEnum = DbStorageEnums.institutionDUATypeToStorage(institutionDuaType);
-    return this;
-  }
-
   @Column(name = "organization_type_other_text")
   public String getOrganizationTypeOtherText() {
     return organizationTypeOtherText;
@@ -101,13 +89,12 @@ public class DbInstitution {
     return Objects.equal(shortName, that.shortName)
         && Objects.equal(displayName, that.displayName)
         && Objects.equal(organizationTypeEnum, that.organizationTypeEnum)
-        && Objects.equal(organizationTypeOtherText, that.organizationTypeOtherText)
-        && Objects.equal(duaTypeEnum, that.duaTypeEnum);
+        && Objects.equal(organizationTypeOtherText, that.organizationTypeOtherText);
   }
 
   @Override
   public int hashCode() {
     return Objects.hashCode(
-        shortName, displayName, organizationTypeEnum, organizationTypeOtherText, duaTypeEnum);
+        shortName, displayName, organizationTypeEnum, organizationTypeOtherText);
   }
 }

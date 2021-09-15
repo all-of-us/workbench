@@ -7,7 +7,6 @@ import org.pmiops.workbench.model.ReportingInstitution;
 
 public enum InstitutionColumnValueExtractor implements ColumnValueExtractor<ReportingInstitution> {
   DISPLAY_NAME("display_name", ReportingInstitution::getDisplayName),
-  DUA_TYPE_ENUM("dua_type_enum", i -> enumToString(i.getDuaTypeEnum())),
   INSTITUTION_ID("institution_id", ReportingInstitution::getInstitutionId),
   ORGANIZATION_TYPE_ENUM("organization_type_enum", i -> enumToString(i.getOrganizationTypeEnum())),
   ORGANIZATION_TYPE_OTHER_TEXT(
