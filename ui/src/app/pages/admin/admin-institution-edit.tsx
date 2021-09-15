@@ -185,7 +185,7 @@ const TierConfig = (props: TierConfigProps) => {
           : <ControlledTierBadge style={{marginTop: '0.6rem', marginLeft: '0.6rem'}}/>}
     </FlexColumn>
     <FlexColumn style={{marginLeft: '0.4rem'}}>
-      <label style={styles.tierLabel}>`${displayNameForTier(accessTierShortName)}` access</label>
+      <label style={styles.tierLabel}>{displayNameForTier(accessTierShortName)} access</label>
       <FlexRow style={{gap: '0.3rem'}}>
         <EraRequiredSwitch tierConfig={tierConfig} onChange={setEraRequired}/>
         eRA account required
@@ -197,7 +197,7 @@ const TierConfig = (props: TierConfigProps) => {
       {tierConfig.membershipRequirement !== InstitutionMembershipRequirement.NOACCESS &&
         <div style={{marginTop: '1rem'}} data-test-id={`${accessTierShortName}-card-details`}>
           <label style={styles.label}>A user is considered part of this institution and eligible <br/>
-            to access `${displayNameForTier(accessTierShortName)}` tier data if:</label>
+            to access {displayNameForTier(accessTierShortName)} data if:</label>
           <RequirementDropdown tierConfig={tierConfig} onChange={setTierRequirement}/>
           {tierConfig.membershipRequirement === InstitutionMembershipRequirement.ADDRESSES &&
           <FlexColumn data-test-id={`${accessTierShortName}-email-address`} style={{width: '16rem'}}>
