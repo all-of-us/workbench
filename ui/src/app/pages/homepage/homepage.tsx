@@ -1,5 +1,6 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
+import {RouteComponentProps, withRouter} from 'react-router-dom';
 
 import {
   StyledAnchorTag,
@@ -14,22 +15,17 @@ import {AoU} from 'app/components/text-wrappers';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {RecentResources} from 'app/pages/homepage/recent-resources';
 import {RecentWorkspaces} from 'app/pages/homepage/recent-workspaces';
-import {RegistrationDashboard} from 'app/pages/homepage/registration-dashboard';
 import {profileApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {addOpacity} from 'app/styles/colors';
 import {reactStyles, withUserProfile} from 'app/utils';
 import {hasRegisteredAccess} from 'app/utils/access-tiers';
-import {buildRasRedirectUrl, getRegistrationTasksMap} from 'app/utils/access-utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {NavigationProps, useNavigation} from 'app/utils/navigation';
 import {fetchWithGlobalErrorHandler} from 'app/utils/retry';
-import {serverConfigStore} from 'app/utils/stores';
 import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {supportUrls} from 'app/utils/zendesk';
 import {Profile, WorkspaceResponseListResponse} from 'generated/fetch';
-import { RouteComponentProps, withRouter } from 'react-router-dom';
 import {QuickTourAndVideos} from './quick-tour-and-videos';
-import {parseQueryParams} from "app/components/app-router";
 
 import workspaceIcon from 'assets/images/workspace-icon.svg';
 import cohortIcon from 'assets/images/cohort-icon.svg';
@@ -154,18 +150,8 @@ interface Props extends WithSpinnerOverlayProps, NavigationProps, RouteComponent
 
 interface State {
   accessTasksLoaded: boolean;
-  accessTasksRemaining: boolean;
-  dataUserCodeOfConductCompleted: boolean;
-  eraCommonsError: string;
-  eraCommonsLinked: boolean;
-  eraCommonsLoading: boolean;
-  rasLoginGovLinkError: string;
-  rasLoginGovLinked: boolean;
-  rasLoginGovLoading: boolean;
   firstVisit: boolean;
   firstVisitTraining: boolean;
-  trainingCompleted: boolean;
-  twoFactorAuthCompleted: boolean;
   userWorkspacesResponse: WorkspaceResponseListResponse;
 }
 
@@ -177,18 +163,8 @@ export const Homepage = fp.flow(withUserProfile(), withNavigation, withRouter)(c
     super(props);
     this.state = {
       accessTasksLoaded: false,
-      accessTasksRemaining: undefined,
-      dataUserCodeOfConductCompleted: undefined,
-      eraCommonsError: '',
-      eraCommonsLinked: undefined,
-      eraCommonsLoading: false,
-      rasLoginGovLinkError: '',
-      rasLoginGovLinked: undefined,
-      rasLoginGovLoading: false,
       firstVisit: undefined,
       firstVisitTraining: true,
-      trainingCompleted: undefined,
-      twoFactorAuthCompleted: undefined,
       userWorkspacesResponse: undefined,
     };
   }
@@ -196,8 +172,6 @@ export const Homepage = fp.flow(withUserProfile(), withNavigation, withRouter)(c
   componentDidMount() {
     this.props.hideSpinner();
     this.checkWorkspaces();
-    this.validateNihToken();
-    this.validateRasLoginGovLink();
     this.callProfile();
   }
 
@@ -212,74 +186,15 @@ export const Homepage = fp.flow(withUserProfile(), withNavigation, withRouter)(c
     clearTimeout(this.timer);
   }
 
-  // This method is part of the eRA Commons linkage flow. The "return-url" sent to the Shibboleth
-  // server is set to "nih-callback", which is configured in our router to point to the homepage
-  // component. If we reach this component with a 'token' query parameter, we will attempt to
-  // store that token in Terra.
-  async validateNihToken() {
-    const token = (new URL(window.location.href)).searchParams.get('token');
-    if (token) {
-      this.setState({eraCommonsLoading: true});
-      try {
-        const profileResponse = await profileApi().updateNihToken({ jwt: token });
-        if (profileResponse.eraCommonsLinkedNihUsername !== undefined) {
-          this.setState({eraCommonsLinked: true});
-        }
-      } catch (e) {
-        this.setState({eraCommonsError: 'Error saving NIH Authentication status.'});
-      }
-    }
-  }
-
-  async validateRasLoginGovLink() {
-    const authCode = (new URL(window.location.href)).searchParams.get('code');
-    const redirectUrl = buildRasRedirectUrl();
-    if (authCode) {
-      this.setState({rasLoginGovLoading: true});
-      try {
-        const profileResponse = await profileApi().linkRasAccount({ authCode, redirectUrl });
-        if (profileResponse.rasLinkLoginGovUsername !== undefined) {
-          this.setState({rasLoginGovLinked: true});
-        }
-        if (profileResponse.eraCommonsLinkedNihUsername !== undefined) {
-          this.setState({eraCommonsLinked: true});
-        }
-      } catch (e) {
-        this.setState({rasLoginGovLinkError: 'Error saving RAS Login.Gov linkage status.'});
-        this.setState({rasLoginGovLoading: false});
-      }
-    }
-    // Cleanup parameter from URL after linking.
-    window.history.replaceState({}, '', '/');
-  }
-
   setFirstVisit() {
     this.setState({firstVisit: true});
     profileApi().updatePageVisits({ page: this.pageId});
   }
 
-  getRegistrationTasksMap() {
-    return getRegistrationTasksMap(this.props.navigate);
-  }
-
+  // TODO reload profile?
   async syncCompliance() {
-    const complianceStatus = profileApi().syncComplianceTrainingStatus().then(result => {
-      this.setState({
-        trainingCompleted: !!(this.getRegistrationTasksMap()['complianceTraining']
-          .completionTimestamp(result))
-      });
-    }).catch(err => {
-      this.setState({trainingCompleted: false});
-      console.error('error fetching moodle training status:', err);
-    });
-    const twoFactorAuthStatus = profileApi().syncTwoFactorAuthStatus().then(result => {
-      this.setState({
-        twoFactorAuthCompleted: !!(this.getRegistrationTasksMap()['twoFactorAuth'].completionTimestamp(result))
-      });
-    }).catch(err => {
-      this.setState({twoFactorAuthCompleted: false});
-      console.error('error fetching two factor auth status:', err);
-    });
+    const complianceStatus = profileApi().syncComplianceTrainingStatus();
+    const twoFactorAuthStatus = profileApi().syncTwoFactorAuthStatus();
     return Promise.all([complianceStatus, twoFactorAuthStatus]);
   }
 
@@ -302,34 +217,16 @@ export const Homepage = fp.flow(withUserProfile(), withNavigation, withRouter)(c
         // page visits is null; is first visit
         this.setFirstVisit();
       }
-      this.setState({
-        eraCommonsLinked: (serverConfigStore.get().config.enableEraCommons ?
-            (() => !!(this.getRegistrationTasksMap()['eraCommons']
-              .completionTimestamp(profile)))() : true),
-        rasLoginGovLinked: (serverConfigStore.get().config.enableRasLoginGovLinking ?
-            (() => !!(this.getRegistrationTasksMap()['rasLoginGov']
-              .completionTimestamp(profile)))() : true),
-        dataUserCodeOfConductCompleted:
-          (() => !!(this.getRegistrationTasksMap()['dataUserCodeOfConduct']
-            .completionTimestamp(profile)))()
-      });
-      // TODO(RW-6493): Update rasCommonsLinked similar to what we are doing for eraCommons
 
-      const workbenchAccessTasks = parseQueryParams(this.props.location.search).get('workbenchAccessTasks');
+      // TODO keep this check?
       const hasAccess = hasRegisteredAccess(profile.accessTierShortNames);
-      if (!hasAccess || workbenchAccessTasks) {
+      if (!hasAccess) {
         await this.syncCompliance();
       }
-      if (workbenchAccessTasks) {
-        this.setState({accessTasksRemaining: true, accessTasksLoaded: true});
-      } else {
-        this.setState({
-          accessTasksRemaining: !hasAccess,
-          accessTasksLoaded: true
-        });
-      }
+      this.setState({
+        accessTasksLoaded: true
+      });
     }
-    // TODO(RW-6494): Update accessTasksRemaining from user tier status and RAS link status.
   }
 
   async checkWorkspaces() {
@@ -343,13 +240,7 @@ export const Homepage = fp.flow(withUserProfile(), withNavigation, withRouter)(c
   }
 
   render() {
-    const {
-      accessTasksLoaded, accessTasksRemaining,
-      eraCommonsError, eraCommonsLinked, eraCommonsLoading, firstVisit, firstVisitTraining,
-      trainingCompleted, twoFactorAuthCompleted,
-      dataUserCodeOfConductCompleted, userWorkspacesResponse,
-      rasLoginGovLinkError, rasLoginGovLinked, rasLoginGovLoading,
-    } = this.state;
+    const {accessTasksLoaded, firstVisit, userWorkspacesResponse} = this.state;
 
     return <React.Fragment>
       <FlexColumn style={styles.pageWrapper}>
@@ -359,34 +250,20 @@ export const Homepage = fp.flow(withUserProfile(), withNavigation, withRouter)(c
           homepage redesign work*/}
           <FlexColumn style={{justifyContent: 'flex-start'}}>
               {accessTasksLoaded ?
-                (accessTasksRemaining ?
-                    (<RegistrationDashboard eraCommonsError={eraCommonsError}
-                                            eraCommonsLinked={eraCommonsLinked}
-                                            eraCommonsLoading={eraCommonsLoading}
-                                            rasLoginGovLinkError={rasLoginGovLinkError}
-                                            rasLoginGovLinked={rasLoginGovLinked}
-                                            rasLoginGovLoading={rasLoginGovLoading}
-                                            trainingCompleted={trainingCompleted}
-                                            firstVisitTraining={firstVisitTraining}
-                                            twoFactorAuthCompleted={twoFactorAuthCompleted}
-                                            dataUserCodeOfConductCompleted={dataUserCodeOfConductCompleted}/>
-                    ) : (
-                        <React.Fragment>
-                          <Workspaces/>
-                            {userWorkspacesResponse &&
-                              (this.userHasWorkspaces() ?
-                                    <RecentResources workspaces={userWorkspacesResponse.items}/> :
-                                    <GettingStarted/>
-                              )
-                            }
-                        </React.Fragment>
+                <React.Fragment>
+                  <Workspaces/>
+                    {userWorkspacesResponse &&
+                      (this.userHasWorkspaces() ?
+                            <RecentResources workspaces={userWorkspacesResponse.items}/> :
+                            <GettingStarted/>
                       )
-                ) :
+                    }
+                </React.Fragment> :
                 <Spinner dark={true} style={{width: '100%', marginTop: '5rem'}}/>}
           </FlexColumn>
         </FadeBox>
       </FlexColumn>
-      <QuickTourAndVideos showQuickTourInitially={firstVisit && accessTasksRemaining === false}/>
+      <QuickTourAndVideos showQuickTourInitially={firstVisit}/>
     </React.Fragment>;
   }
 });
