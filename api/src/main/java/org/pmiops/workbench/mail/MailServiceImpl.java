@@ -88,7 +88,8 @@ public class MailServiceImpl implements MailService {
         buildHtml(WELCOME_RESOURCE, welcomeMessageSubstitutionMap(password, username));
 
     sendWithRetries(
-        Collections.singletonList(contactEmail), Collections.emptyList(),
+        Collections.singletonList(contactEmail),
+        Collections.emptyList(),
         "Your new All of Us Researcher Workbench Account",
         String.format("Welcome for %s", username),
         htmlMessage);
@@ -108,7 +109,8 @@ public class MailServiceImpl implements MailService {
             INSTRUCTIONS_RESOURCE, instructionsSubstitutionMap(escapedUserInstructions, username));
 
     sendWithRetries(
-        Collections.singletonList(contactEmail), Collections.emptyList(),
+        Collections.singletonList(contactEmail),
+        Collections.emptyList(),
         "Instructions from your institution on using the Researcher Workbench",
         String.format("Institution user instructions for %s", contactEmail),
         htmlMessage);
@@ -131,7 +133,8 @@ public class MailServiceImpl implements MailService {
             freeTierDollarThresholdSubstitutionMap(user, currentUsage, remainingBalance));
 
     sendWithRetries(
-        Collections.singletonList(user.getContactEmail()), Collections.emptyList(),
+        Collections.singletonList(user.getContactEmail()),
+        Collections.emptyList(),
         String.format(
             "Reminder - %s Free credit usage in All of Us Researcher Workbench",
             formatPercentage(threshold)),
@@ -150,7 +153,8 @@ public class MailServiceImpl implements MailService {
         buildHtml(FREE_TIER_EXPIRATION_RESOURCE, freeTierExpirationSubstitutionMap(user));
 
     sendWithRetries(
-        Collections.singletonList(user.getContactEmail()), Collections.emptyList(),
+        Collections.singletonList(user.getContactEmail()),
+        Collections.emptyList(),
         "Alert - Free credit expiration in All of Us Researcher Workbench",
         expirationMsg,
         htmlMessage);
@@ -175,7 +179,8 @@ public class MailServiceImpl implements MailService {
             registeredTierAccessSubstitutionMap(expirationTime, user.getUsername()));
 
     sendWithRetries(
-        Collections.singletonList(user.getContactEmail()), Collections.emptyList(),
+        Collections.singletonList(user.getContactEmail()),
+        Collections.emptyList(),
         "Your access to All of Us Registered Tier Data will expire "
             + (daysRemaining == 1 ? "tomorrow" : String.format("in %d days", daysRemaining)),
         String.format(
@@ -201,7 +206,8 @@ public class MailServiceImpl implements MailService {
             registeredTierAccessSubstitutionMap(expirationTime, user.getUsername()));
 
     sendWithRetries(
-        Collections.singletonList(user.getContactEmail()), Collections.emptyList(),
+        Collections.singletonList(user.getContactEmail()),
+        Collections.emptyList(),
         "Your access to All of Us Registered Tier Data has expired",
         String.format(
             "Registered Tier access expired for user %s (%s)",
@@ -227,6 +233,7 @@ public class MailServiceImpl implements MailService {
     }
     sendWithRetries(
         receiptEmails,
+        Collections.singletonList(workbenchConfigProvider.get().mandrill.fromEmail),
         "Request to set up Google Cloud Billing Account for All of Us Workbench",
         String.format(
             " User %s (%s) requests billing setup from Carasoft.",
@@ -360,7 +367,8 @@ public class MailServiceImpl implements MailService {
     return new StringSubstitutor(stringMap).replace(emailContent);
   }
 
-  private RecipientAddress validatedRecipient(final String contactEmail, final RecipientType recipientType) {
+  private RecipientAddress validatedRecipient(
+      final String contactEmail, final RecipientType recipientType) {
     try {
       final InternetAddress contactInternetAddress = new InternetAddress(contactEmail);
       contactInternetAddress.validate();
@@ -374,10 +382,20 @@ public class MailServiceImpl implements MailService {
   }
 
   private void sendWithRetries(
-      List<String> toRecipientEmails, List<String> ccRecipientEmails, String subject, String description, String htmlMessage)
+      List<String> toRecipientEmails,
+      List<String> ccRecipientEmails,
+      String subject,
+      String description,
+      String htmlMessage)
       throws MessagingException {
-    List<RecipientAddress> toAddresses = toRecipientEmails.stream().map(a -> (validatedRecipient(a, RecipientType.TO))).collect(Collectors.toList());
-    toAddresses.addAll(ccRecipientEmails.stream().map(a -> (validatedRecipient(a, RecipientType.CC))).collect(Collectors.toList()));
+    List<RecipientAddress> toAddresses =
+        toRecipientEmails.stream()
+            .map(a -> (validatedRecipient(a, RecipientType.TO)))
+            .collect(Collectors.toList());
+    toAddresses.addAll(
+        ccRecipientEmails.stream()
+            .map(a -> (validatedRecipient(a, RecipientType.CC)))
+            .collect(Collectors.toList()));
     final MandrillMessage msg =
         new MandrillMessage()
             .to(toAddresses)

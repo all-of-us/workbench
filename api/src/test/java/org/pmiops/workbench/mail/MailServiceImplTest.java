@@ -11,7 +11,6 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
-import java.util.stream.Collectors;
 import javax.mail.MessagingException;
 import org.junit.Rule;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,6 +30,7 @@ import org.pmiops.workbench.mandrill.model.MandrillMessage;
 import org.pmiops.workbench.mandrill.model.MandrillMessageStatus;
 import org.pmiops.workbench.mandrill.model.MandrillMessageStatuses;
 import org.pmiops.workbench.mandrill.model.RecipientAddress;
+import org.pmiops.workbench.mandrill.model.RecipientType;
 import org.pmiops.workbench.model.BillingPaymentMethod;
 import org.pmiops.workbench.model.SendBillingSetupEmailRequest;
 import org.pmiops.workbench.test.Providers;
@@ -42,6 +42,7 @@ public class MailServiceImplTest extends SpringTest {
   private static final String PASSWORD = "secretpassword";
   private static final String FULL_USER_NAME = "bob@researchallofus.org";
   private static final String API_KEY = "this-is-an-api-key";
+  private static final String FROM_EMAIL = "test-donotreply@fake-research-aou.org";
 
   private WorkbenchConfig workbenchConfig = createWorkbenchConfig();
 
@@ -107,6 +108,10 @@ public class MailServiceImplTest extends SpringTest {
         .send(
             argThat(
                 got -> {
+                  assertThat((((MandrillMessage) got.getMessage()).getTo()))
+                      .containsExactly(
+                          new RecipientAddress().email("asdf@gmail.com").type(RecipientType.TO));
+
                   String gotHtml = ((MandrillMessage) got.getMessage()).getHtml();
                   // tags should be escaped, email addresses shouldn't.
                   return gotHtml.contains("help@myinstitute.org")
@@ -127,12 +132,14 @@ public class MailServiceImplTest extends SpringTest {
         .send(
             argThat(
                 got -> {
-                  List<String> receipts =
-                      (((MandrillMessage) got.getMessage())
-                          .getTo().stream()
-                              .map(RecipientAddress::getEmail)
-                              .collect(Collectors.toList()));
-                  assertThat(receipts).containsExactly(user.getContactEmail());
+                  List<RecipientAddress> receipts = (((MandrillMessage) got.getMessage()).getTo());
+                  assertThat(receipts)
+                      .containsExactly(
+                          new RecipientAddress()
+                              .email(user.getContactEmail())
+                              .type(RecipientType.TO),
+                          new RecipientAddress().email(FROM_EMAIL).type(RecipientType.CC));
+
                   String gotHtml = ((MandrillMessage) got.getMessage()).getHtml();
                   // tags should be escaped, email addresses shouldn't.
                   return gotHtml.contains("username@research.org")
@@ -158,12 +165,13 @@ public class MailServiceImplTest extends SpringTest {
         .send(
             argThat(
                 got -> {
-                  List<String> receipts =
-                      (((MandrillMessage) got.getMessage())
-                          .getTo().stream()
-                              .map(RecipientAddress::getEmail)
-                              .collect(Collectors.toList()));
-                  assertThat(receipts).containsExactly(user.getContactEmail());
+                  List<RecipientAddress> receipts = (((MandrillMessage) got.getMessage()).getTo());
+                  assertThat(receipts)
+                      .containsExactly(
+                          new RecipientAddress()
+                              .email(user.getContactEmail())
+                              .type(RecipientType.TO),
+                          new RecipientAddress().email(FROM_EMAIL).type(RecipientType.CC));
                   String gotHtml = ((MandrillMessage) got.getMessage()).getHtml();
                   // tags should be escaped, email addresses shouldn't.
                   return gotHtml.contains("username@research.org")
@@ -190,12 +198,15 @@ public class MailServiceImplTest extends SpringTest {
         .send(
             argThat(
                 got -> {
-                  List<String> receipts =
-                      (((MandrillMessage) got.getMessage())
-                          .getTo().stream()
-                              .map(RecipientAddress::getEmail)
-                              .collect(Collectors.toList()));
-                  assertThat(receipts).containsExactly(user.getContactEmail(), "test@carasoft.com");
+                  List<RecipientAddress> receipts = (((MandrillMessage) got.getMessage()).getTo());
+                  assertThat(receipts)
+                      .containsExactly(
+                          new RecipientAddress()
+                              .email(user.getContactEmail())
+                              .type(RecipientType.TO),
+                          new RecipientAddress().email("test@carasoft.com").type(RecipientType.TO),
+                          new RecipientAddress().email(FROM_EMAIL).type(RecipientType.CC));
+
                   String gotHtml = ((MandrillMessage) got.getMessage()).getHtml();
                   // tags should be escaped, email addresses shouldn't.
                   return gotHtml.contains("username@research.org")
@@ -232,7 +243,7 @@ public class MailServiceImplTest extends SpringTest {
 
   private WorkbenchConfig createWorkbenchConfig() {
     WorkbenchConfig workbenchConfig = WorkbenchConfig.createEmptyConfig();
-    workbenchConfig.mandrill.fromEmail = "test-donotreply@fake-research-aou.org";
+    workbenchConfig.mandrill.fromEmail = FROM_EMAIL;
     workbenchConfig.mandrill.sendRetries = 3;
     workbenchConfig.googleCloudStorageService.credentialsBucketName = "test-bucket";
     workbenchConfig.googleDirectoryService.gSuiteDomain = "research.org";
