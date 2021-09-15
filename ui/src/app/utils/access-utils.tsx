@@ -270,13 +270,13 @@ export const GetStartedButton = ({style = {marginLeft: '0.5rem'}}) => <Button
   }}>Get Started</Button>;
 
 // the modules subject to Annual Access Renewal (AAR), in the order shown on the AAR page.
-export const accessRenewalTitles = new Map<AccessModule, any>([
+export const accessRenewalTitles = new Map<AccessModule, () => JSX.Element | string>([
     [AccessModule.PROFILECONFIRMATION, () => 'Update your profile'],
     [AccessModule.PUBLICATIONCONFIRMATION,
       () => 'Report any publications or presentations based on your research using the Researcher Workbench'],
     [AccessModule.COMPLIANCETRAINING, () => <div><AoU/> Responsible Conduct of Research Training</div>],
     [AccessModule.DATAUSERCODEOFCONDUCT, () => 'Sign Data User Code of Conduct'],
-]);
+]) as Map<AccessModule, () => JSX.Element>;
 
 export const isExpiring = (expiration: number): boolean => daysFromNow(expiration) <= serverConfigStore.get().config.accessRenewalLookback;
 

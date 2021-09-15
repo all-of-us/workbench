@@ -41,6 +41,7 @@ import {
   PublicInstitutionDetails,
 } from 'generated/fetch';
 import {accessRenewalTitles, computeDisplayDates} from 'app/utils/access-utils';
+import {AccessTierShortNames} from 'app/utils/access-tiers';
 
 const styles = reactStyles({
   semiBold: {
@@ -61,6 +62,13 @@ const styles = reactStyles({
 const CREDIT_LIMIT_DEFAULT_MIN = 300;
 const CREDIT_LIMIT_DEFAULT_MAX = 800;
 const CREDIT_LIMIT_DEFAULT_STEP = 50;
+
+const getUserStatus = (profile: Profile) => {
+  const {accessTierShortNames} = profile;
+  return (accessTierShortNames && accessTierShortNames.includes(AccessTierShortNames.Registered))
+      ? () => <div style={{color: colors.success}}>Enabled</div>
+      : () => <div style={{color: colors.danger}}>Disabled</div>
+}
 
 const DropdownWithLabel = ({label, options, initialValue, onChange, disabled= false, dataTestId, dropdownStyle = {}}) => {
   return <FlexColumn data-test-id={dataTestId} style={{marginTop: '1rem'}}>
@@ -133,8 +141,9 @@ const FreeCreditsUsage = ({isAboveLimit, usage}: FreeCreditsProps) => {
 
 interface ExpirationProps {
   modules: Array<AccessModuleStatus>;
+  UserStatusComponent: () => JSX.Element;
 }
-const AccessModuleExpirations = ({modules}: ExpirationProps) => {
+const AccessModuleExpirations = ({modules, UserStatusComponent}: ExpirationProps) => {
   const {enableComplianceTraining} = serverConfigStore.get().config;
   const modulesAndTitles = enableComplianceTraining
       ? Array.from(accessRenewalTitles.entries())
@@ -142,7 +151,7 @@ const AccessModuleExpirations = ({modules}: ExpirationProps) => {
           .filter(([moduleName,]) => moduleName !== AccessModule.COMPLIANCETRAINING);
 
   return <FlexColumn style={{marginTop: '1rem'}}>
-    <label style={styles.semiBold}>Data Access Status</label>
+    <label style={styles.semiBold}>Data Access Status: <UserStatusComponent/></label>
     {modulesAndTitles.map(([moduleName, TitleComponent], zeroBasedStep) => {
       // return the status if found; init an empty status with the moduleName if not
       const status: AccessModuleStatus = modules.find(s => s.moduleName === moduleName) || {moduleName};
@@ -169,7 +178,6 @@ interface State {
   updatedProfile: Profile;
   verifiedInstitutionOptions: Array<PublicInstitutionDetails>;
 }
-
 
 export const AdminUser = withRouter(class extends React.Component<Props, State> {
 
@@ -620,7 +628,7 @@ export const AdminUser = withRouter(class extends React.Component<Props, State> 
                 containerStyle={styles.textInputContainer}
               />
             }
-            <AccessModuleExpirations modules={updatedProfile.accessModules.modules}/>
+            <AccessModuleExpirations modules={updatedProfile.accessModules.modules} UserStatusComponent={getUserStatus(updatedProfile)}/>
           </FlexColumn>
         </FlexRow>
       </FlexColumn>}
