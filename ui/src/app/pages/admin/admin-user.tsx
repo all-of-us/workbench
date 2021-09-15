@@ -574,7 +574,7 @@ export const AdminUser = withRouter(class extends React.Component<Props, State> 
               usage={this.getFreeCreditUsage()}
             />
           </FlexColumn>
-          <FlexColumn style={{width: '33%', marginRight: '1rem'}}>
+          <FlexColumn style={{width: '33%'}}>
             <DropdownWithLabel
                 label={'Free credit limit'}
                 options={this.getFreeCreditLimitOptions()}
