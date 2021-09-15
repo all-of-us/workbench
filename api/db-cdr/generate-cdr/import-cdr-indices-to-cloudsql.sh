@@ -6,7 +6,7 @@ export BQ_PROJECT=$1  # project
 export BQ_DATASET=$2  # dataset
 export WORKBENCH_PROJECT=$3 # workbench project
 export CDR_VERSION=$4 # cdr version
-export DATA_BROWSER=$3 # data browser flag
+export DATA_BROWSER=$5 # data browser flag
 
 if [ "$DATA_BROWSER" == false ]
 then
