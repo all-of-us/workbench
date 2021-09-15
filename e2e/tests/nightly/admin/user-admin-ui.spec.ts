@@ -5,7 +5,7 @@ import navigation, { NavLink } from 'app/component/navigation';
 import AdminTable from 'app/component/admin-table';
 import UserProfileInfo from 'app/page/admin-user-profile-info';
 
-describe('Admin', () => {
+describe('User Admin', () => {
   const userEmail = 'admin_test';
 
   beforeEach(async () => {
