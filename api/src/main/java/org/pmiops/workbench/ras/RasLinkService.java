@@ -165,7 +165,9 @@ public class RasLinkService {
     if (eRaUserId.isPresent() && !eRaUserId.get().isEmpty()) {
       return userService.updateRasLinkEraStatus(eRaUserId.get());
     } else {
-      log.info(String.format("User does not have valid eRA %s", userInfoResponse));
+      log.info(
+          String.format(
+              "User does not have valid eRA %s", userInfoResponse.get(FEDERATED_IDENTITIES)));
     }
     return user;
   }
