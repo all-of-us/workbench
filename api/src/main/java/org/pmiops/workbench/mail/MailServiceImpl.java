@@ -36,6 +36,7 @@ import org.pmiops.workbench.mandrill.model.MandrillMessage;
 import org.pmiops.workbench.mandrill.model.MandrillMessageStatus;
 import org.pmiops.workbench.mandrill.model.MandrillMessageStatuses;
 import org.pmiops.workbench.mandrill.model.RecipientAddress;
+import org.pmiops.workbench.mandrill.model.RecipientType;
 import org.pmiops.workbench.model.BillingPaymentMethod;
 import org.pmiops.workbench.model.SendBillingSetupEmailRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -87,7 +88,7 @@ public class MailServiceImpl implements MailService {
         buildHtml(WELCOME_RESOURCE, welcomeMessageSubstitutionMap(password, username));
 
     sendWithRetries(
-        Collections.singletonList(contactEmail),
+        Collections.singletonList(contactEmail), Collections.emptyList(),
         "Your new All of Us Researcher Workbench Account",
         String.format("Welcome for %s", username),
         htmlMessage);
@@ -107,7 +108,7 @@ public class MailServiceImpl implements MailService {
             INSTRUCTIONS_RESOURCE, instructionsSubstitutionMap(escapedUserInstructions, username));
 
     sendWithRetries(
-        Collections.singletonList(contactEmail),
+        Collections.singletonList(contactEmail), Collections.emptyList(),
         "Instructions from your institution on using the Researcher Workbench",
         String.format("Institution user instructions for %s", contactEmail),
         htmlMessage);
@@ -130,7 +131,7 @@ public class MailServiceImpl implements MailService {
             freeTierDollarThresholdSubstitutionMap(user, currentUsage, remainingBalance));
 
     sendWithRetries(
-        Collections.singletonList(user.getContactEmail()),
+        Collections.singletonList(user.getContactEmail()), Collections.emptyList(),
         String.format(
             "Reminder - %s Free credit usage in All of Us Researcher Workbench",
             formatPercentage(threshold)),
@@ -149,7 +150,7 @@ public class MailServiceImpl implements MailService {
         buildHtml(FREE_TIER_EXPIRATION_RESOURCE, freeTierExpirationSubstitutionMap(user));
 
     sendWithRetries(
-        Collections.singletonList(user.getContactEmail()),
+        Collections.singletonList(user.getContactEmail()), Collections.emptyList(),
         "Alert - Free credit expiration in All of Us Researcher Workbench",
         expirationMsg,
         htmlMessage);
@@ -174,7 +175,7 @@ public class MailServiceImpl implements MailService {
             registeredTierAccessSubstitutionMap(expirationTime, user.getUsername()));
 
     sendWithRetries(
-        Collections.singletonList(user.getContactEmail()),
+        Collections.singletonList(user.getContactEmail()), Collections.emptyList(),
         "Your access to All of Us Registered Tier Data will expire "
             + (daysRemaining == 1 ? "tomorrow" : String.format("in %d days", daysRemaining)),
         String.format(
@@ -200,7 +201,7 @@ public class MailServiceImpl implements MailService {
             registeredTierAccessSubstitutionMap(expirationTime, user.getUsername()));
 
     sendWithRetries(
-        Collections.singletonList(user.getContactEmail()),
+        Collections.singletonList(user.getContactEmail()), Collections.emptyList(),
         "Your access to All of Us Registered Tier Data has expired",
         String.format(
             "Registered Tier access expired for user %s (%s)",
@@ -359,7 +360,7 @@ public class MailServiceImpl implements MailService {
     return new StringSubstitutor(stringMap).replace(emailContent);
   }
 
-  private RecipientAddress validatedRecipient(final String contactEmail) {
+  private RecipientAddress validatedRecipient(final String contactEmail, final RecipientType recipientType) {
     try {
       final InternetAddress contactInternetAddress = new InternetAddress(contactEmail);
       contactInternetAddress.validate();
@@ -368,16 +369,18 @@ public class MailServiceImpl implements MailService {
     }
 
     final RecipientAddress toAddress = new RecipientAddress();
-    toAddress.setEmail(contactEmail);
+    toAddress.email(contactEmail).type(recipientType);
     return toAddress;
   }
 
   private void sendWithRetries(
-      List<String> contactEmails, String subject, String description, String htmlMessage)
+      List<String> toRecipientEmails, List<String> ccRecipientEmails, String subject, String description, String htmlMessage)
       throws MessagingException {
+    List<RecipientAddress> toAddresses = toRecipientEmails.stream().map(a -> (validatedRecipient(a, RecipientType.TO))).collect(Collectors.toList());
+    toAddresses.addAll(ccRecipientEmails.stream().map(a -> (validatedRecipient(a, RecipientType.CC))).collect(Collectors.toList()));
     final MandrillMessage msg =
         new MandrillMessage()
-            .to(contactEmails.stream().map(this::validatedRecipient).collect(Collectors.toList()))
+            .to(toAddresses)
             .html(htmlMessage)
             .subject(subject)
             .fromEmail(workbenchConfigProvider.get().mandrill.fromEmail);
