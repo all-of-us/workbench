@@ -123,10 +123,7 @@ public class MailServiceImplTest extends SpringTest {
   public void testSendBillingSetupEmail() throws Exception {
     DbUser user = createDbUser();
     SendBillingSetupEmailRequest request =
-        new SendBillingSetupEmailRequest()
-            .institution("inst")
-            .paymentMethod(BillingPaymentMethod.CREDIT_CARD)
-            .phone("123456");
+        new SendBillingSetupEmailRequest().institution("inst").phone("123456");
     service.sendBillingSetupEmail(user, request);
     verify(mandrillApi, times(1))
         .send(
@@ -143,7 +140,6 @@ public class MailServiceImplTest extends SpringTest {
                   String gotHtml = ((MandrillMessage) got.getMessage()).getHtml();
                   // tags should be escaped, email addresses shouldn't.
                   return gotHtml.contains("username@research.org")
-                      && gotHtml.contains("Credit Card")
                       && gotHtml.contains("given name family name")
                       && gotHtml.contains("user@contact.com")
                       && gotHtml.contains(

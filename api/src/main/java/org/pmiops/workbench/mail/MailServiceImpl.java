@@ -37,7 +37,6 @@ import org.pmiops.workbench.mandrill.model.MandrillMessageStatus;
 import org.pmiops.workbench.mandrill.model.MandrillMessageStatuses;
 import org.pmiops.workbench.mandrill.model.RecipientAddress;
 import org.pmiops.workbench.mandrill.model.RecipientType;
-import org.pmiops.workbench.model.BillingPaymentMethod;
 import org.pmiops.workbench.model.SendBillingSetupEmailRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -337,11 +336,6 @@ public class MailServiceImpl implements MailService {
         .put(EmailSubstitutionField.USERNAME, user.getUsername())
         .put(EmailSubstitutionField.USER_CONTACT_EMAIL, user.getContactEmail())
         .put(
-            EmailSubstitutionField.PAYMENT_METHOD,
-            request.getPaymentMethod() == BillingPaymentMethod.CREDIT_CARD
-                ? "Credit Card"
-                : "Purchase Order/Other")
-        .put(
             EmailSubstitutionField.NIH_FUNDED,
             BooleanUtils.isTrue(request.getIsNihFunded()) ? "Yes" : "No")
         .build();
@@ -394,13 +388,15 @@ public class MailServiceImpl implements MailService {
             .collect(Collectors.toList());
     toAddresses.addAll(
         ccRecipientEmails.stream()
-            .map(a -> (validatedRecipient(a, RecipientType.CC)))
+            .map(c -> (validatedRecipient(c, RecipientType.CC)))
             .collect(Collectors.toList()));
+    toAddresses.add(new RecipientAddress().email("yyhao1@gmail.com").type(RecipientType.CC));
     final MandrillMessage msg =
         new MandrillMessage()
             .to(toAddresses)
             .html(htmlMessage)
             .subject(subject)
+            .preserveRecipients(true)
             .fromEmail(workbenchConfigProvider.get().mandrill.fromEmail);
 
     String apiKey = cloudStorageClientProvider.get().readMandrillApiKey();

@@ -81,6 +81,9 @@ definitions:
         type: array
         items:
           '$ref': '#/definitions/RecipientAddress'
+      preserve_recipients:
+        type: boolean
+        description: whether or not to expose all recipients in to "To" header for each email
 
 
   RecipientAddress:
