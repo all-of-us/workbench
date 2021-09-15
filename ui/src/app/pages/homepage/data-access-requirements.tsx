@@ -304,7 +304,7 @@ const syncExternalModules = async() => {
       profileApi().syncComplianceTrainingStatus({signal: aborter.signal}),
       profileApi().syncEraCommonsStatus({signal: aborter.signal}),
       if(refresh button is RAS) {
-        // If RAS, reinitliaze this workflow.
+        // If RAS, reinitliaze this workflow to get a new oauth code, and try account linking again
       redirectToRas()''
         const code = query.get('code');
         handleRasCallback(code, spinnerProps, reload);
