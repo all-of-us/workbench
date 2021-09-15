@@ -69,6 +69,7 @@ VALUES
 (8,0,'Domains','DRUG','','Drugs',0,8),
 (9,0,'Domains','MEASUREMENT','','Labs and Measurements',0,9),
 (10,0,'Domains','VISIT','VISIT','Visits',0,10),
+(11,0,'Domains','OBSERVATION','','Observations',0,11),
 (12,1,'Program Data','PERSON','AGE','Age',0,1),
 (13,1,'Program Data','PERSON','DECEASED','Deceased',0,2),
 (14,1,'Program Data','PERSON','ETHNICITY','Ethnicity',0,3),
