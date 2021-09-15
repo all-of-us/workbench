@@ -93,7 +93,7 @@ describe('DataUserCodeOfConduct', () => {
     duccComponent(wrapper).setState({proceedDisabled: false});
     await waitOneTickAndUpdate(wrapper);
 
-    const spy = jest.spyOn(profileApi(), 'submitDataUseAgreement');
+    const spy = jest.spyOn(profileApi(), 'submitDUCC');
     wrapper.find('[data-test-id="ducc-next-button"]').simulate('click');
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find('[data-test-id="submit-ducc-button"]').prop('disabled')).toBeTruthy();
