@@ -29,6 +29,7 @@ import {
   getAccessModuleStatusByName,
   getRegistrationTask,
   GetStartedButton,
+  redirectToRas,
 } from 'app/utils/access-utils';
 import {isAbortError} from 'app/utils/errors';
 import {useNavigation} from 'app/utils/navigation';
@@ -239,6 +240,15 @@ const moduleLabels: Map<AccessModule, JSX.Element> = new Map([
   [AccessModule.DATAUSERCODEOFCONDUCT, <div>Sign Data User Code of Conduct</div>],
 ]);
 
+const externalSyncActions: Map<AccessModule, Function> = new Map([
+  [AccessModule.TWOFACTORAUTH, async() => await profileApi().syncTwoFactorAuthStatus()],
+  [AccessModule.RASLINKLOGINGOV, () => redirectToRas(false)],
+  [AccessModule.ERACOMMONS, async() => await profileApi().syncEraCommonsStatus()],
+  [AccessModule.COMPLIANCETRAINING, async() => await profileApi().syncComplianceTrainingStatus()],
+  // DUCC state is strictly internal to the RW
+  [AccessModule.DATAUSERCODEOFCONDUCT, () => {}],
+]);
+
 // this function does double duty:
 // - returns appropriate text for completed and bypassed modules and null for incomplete modules
 // - because of this, truthy return values indicate that a module is either complete or bypassed
@@ -284,6 +294,9 @@ const handleRasCallback = (code: string, spinnerProps: WithSpinnerOverlayProps, 
     await profileApi().linkRasAccount({ authCode: code, redirectUrl: buildRasRedirectUrl() });
     spinnerProps.hideSpinner();
     reloadProfile();
+
+    // Cleanup parameter from URL after linking.
+    window.history.replaceState({}, '', '/');
   });
 
   return handler();
@@ -294,21 +307,6 @@ const selfBypass = async(spinnerProps: WithSpinnerOverlayProps, reloadProfile: F
   await bypassAll(allModules, true);
   spinnerProps.hideSpinner();
   reloadProfile();
-};
-
-const syncExternalModules = async() => {
-  const aborter = new AbortController();
-  try {
-    await Promise.all([
-      profileApi().syncTwoFactorAuthStatus({signal: aborter.signal}),
-      profileApi().syncComplianceTrainingStatus({signal: aborter.signal}),
-      profileApi().syncEraCommonsStatus({signal: aborter.signal}),
-    ]);
-  } catch (e) {
-    if (!isAbortError(e)) { throw e; }
-  } finally {
-    aborter.abort();
-  }
 };
 
 // exported for test
@@ -323,16 +321,19 @@ export const getActiveModule = (modules: AccessModule[], profile: Profile): Acce
   return !bypassedOrCompletedText(status);
 });
 
-const Refresh = (props: {showSpinner: Function}) => <Button
-    type='primary'
-    style={styles.refreshButton}
-    onClick={async() => {
-      props.showSpinner();
-      await syncExternalModules();
-      location.reload();  // will also hide spinner
-    }} >
-  <Repeat style={styles.refreshIcon}/> Refresh
-</Button>;
+const Refresh = (props: { showSpinner: Function; externalSyncAction: Function }) => {
+  const {showSpinner, externalSyncAction} = props;
+  return <Button
+      type='primary'
+      style={styles.refreshButton}
+      onClick={async() => {
+        showSpinner();
+        await externalSyncAction();
+        location.reload(); // also hides spinner
+      }} >
+    <Repeat style={styles.refreshIcon}/> Refresh
+  </Button>;
+}
 
 const Next = () => <FlexRow style={styles.nextElement}>
   <span style={styles.nextText}>NEXT</span> <ArrowRight style={styles.nextIcon}/>
@@ -415,7 +416,11 @@ const MaybeModule = ({moduleName, active, spinnerProps}: ModuleProps): JSX.Eleme
 
     return <FlexRow data-test-id={`module-${moduleName}`}>
       <FlexRow style={styles.moduleCTA}>
-        {active && (showRefresh ? <Refresh showSpinner={spinnerProps.showSpinner}/> : <Next/>)}
+        {active && (showRefresh
+            ? <Refresh
+                externalSyncAction={externalSyncActions.get(moduleName)}
+                showSpinner={spinnerProps.showSpinner}/>
+            : <Next/>)}
       </FlexRow>
       <ModuleBox>
         <ModuleIcon moduleName={moduleName} completedOrBypassed={!!statusTextMaybe}/>
