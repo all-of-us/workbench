@@ -240,28 +240,12 @@ const moduleLabels: Map<AccessModule, JSX.Element> = new Map([
   [AccessModule.DATAUSERCODEOFCONDUCT, <div>Sign Data User Code of Conduct</div>],
 ]);
 
-const withAborter = async(abortableFn: (AbortController) => void) => {
-  const aborter = new AbortController();
-  try {
-    await abortableFn(aborter);
-  } catch (e) {
-    if (!isAbortError(e)) { throw e; }
-  } finally {
-    aborter.abort();
-  }
-};
-
-const moduleRefreshActions: Map<AccessModule, Function> = new Map([
-  [AccessModule.TWOFACTORAUTH, async() => {
-    await withAborter(aborter => profileApi().syncTwoFactorAuthStatus({signal: aborter.signal}));
-  }],
+const externalSyncActions: Map<AccessModule, Function> = new Map([
+  [AccessModule.TWOFACTORAUTH, async() => await profileApi().syncTwoFactorAuthStatus()],
   [AccessModule.RASLINKLOGINGOV, () => redirectToRas(false)],
-  [AccessModule.ERACOMMONS, async() => {
-    await withAborter(aborter => profileApi().syncEraCommonsStatus({signal: aborter.signal}));
-  }],
-  [AccessModule.COMPLIANCETRAINING, async() => {
-    await withAborter(aborter => profileApi().syncComplianceTrainingStatus({signal: aborter.signal}))
-  }],
+  [AccessModule.ERACOMMONS, async() => await profileApi().syncEraCommonsStatus()],
+  [AccessModule.COMPLIANCETRAINING, async() => await profileApi().syncComplianceTrainingStatus()],
+  // DUCC state is strictly internal to the RW
   [AccessModule.DATAUSERCODEOFCONDUCT, () => {}],
 ]);
 
@@ -337,14 +321,14 @@ export const getActiveModule = (modules: AccessModule[], profile: Profile): Acce
   return !bypassedOrCompletedText(status);
 });
 
-const Refresh = (props: { showSpinner: Function; refreshAction: Function }) => {
-  const {showSpinner, refreshAction} = props;
+const Refresh = (props: { showSpinner: Function; externalSyncAction: Function }) => {
+  const {showSpinner, externalSyncAction} = props;
   return <Button
       type='primary'
       style={styles.refreshButton}
       onClick={async() => {
         showSpinner();
-        await refreshAction();
+        await externalSyncAction();
         location.reload(); // also hides spinner
       }} >
     <Repeat style={styles.refreshIcon}/> Refresh
@@ -434,7 +418,7 @@ const MaybeModule = ({moduleName, active, spinnerProps}: ModuleProps): JSX.Eleme
       <FlexRow style={styles.moduleCTA}>
         {active && (showRefresh
             ? <Refresh
-                refreshAction={moduleRefreshActions.get(moduleName)}
+                externalSyncAction={externalSyncActions.get(moduleName)}
                 showSpinner={spinnerProps.showSpinner}/>
             : <Next/>)}
       </FlexRow>
