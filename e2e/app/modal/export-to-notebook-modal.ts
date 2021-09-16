@@ -1,7 +1,7 @@
 import RadioButton from 'app/element/radiobutton';
 import Textbox from 'app/element/textbox';
 import { Page } from 'puppeteer';
-import { Language, LinkText } from 'app/text-labels';
+import { AnalysisTool, Language, LinkText } from 'app/text-labels';
 import Modal from './modal';
 import { waitForText } from 'utils/waits-utils';
 
@@ -24,12 +24,12 @@ export default class ExportToNotebookModal extends Modal {
   }
 
   getPythonRadioButton(): RadioButton {
-    const selector = `${this.getXpath()}//label[contains(normalize-space(),"Python")]//input[@type="radio"]`;
+    const selector = this.getRadioButtonXpath('Python');
     return new RadioButton(this.page, selector);
   }
 
   getRRadioButton(): RadioButton {
-    const selector = `${this.getXpath()}//label[contains(normalize-space(),"R")]//input[@type="radio"]`;
+    const selector = this.getRadioButtonXpath('R');
     return new RadioButton(this.page, selector);
   }
 
@@ -41,6 +41,11 @@ export default class ExportToNotebookModal extends Modal {
   async pickLanguage(language: Language = Language.Python): Promise<void> {
     const radio = language === Language.Python ? this.getPythonRadioButton() : this.getRRadioButton();
     return radio.select();
+  }
+
+  async pickAnalysisTool(analysisTool: AnalysisTool = AnalysisTool.Hail): Promise<RadioButton> {
+    const radioButtonXpath = this.getRadioButtonXpath(analysisTool);
+    return new RadioButton(this.page, radioButtonXpath);
   }
 
   async clickExportButton(): Promise<void> {
@@ -59,5 +64,9 @@ export default class ExportToNotebookModal extends Modal {
     await this.enterNotebookName(notebookName);
     await this.pickLanguage(language);
     return await this.clickExportButton();
+  }
+
+  private getRadioButtonXpath(name: string): string {
+    return `${this.getXpath()}//label[contains(normalize-space(),"${name}")]//input[@type="radio"]`;
   }
 }

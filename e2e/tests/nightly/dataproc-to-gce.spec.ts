@@ -4,6 +4,7 @@ import { LinkText, ResourceCard } from 'app/text-labels';
 import { config } from 'resources/workbench-config';
 import { makeRandomName } from 'utils/str-utils';
 import { createWorkspace, signInWithAccessToken } from 'utils/test-utils';
+import { takeScreenshot } from '../../utils/save-file-utils';
 
 // This test could take a long time to run
 jest.setTimeout(40 * 60 * 1000);
@@ -24,6 +25,9 @@ describe('Updating runtime compute type', () => {
 
     // Use the preset selector to pick “Hail genomics analysis“
     await runtimePanel.pickRuntimePreset(RuntimePreset.HailGenomicsAnalysis);
+
+    // Take a screenshot for manual checking.
+    await takeScreenshot(page, 'runtime-sidebar-hail-genomic-analysis.png');
 
     // Create runtime
     await runtimePanel.createRuntime();

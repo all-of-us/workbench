@@ -273,7 +273,11 @@ export default class CohortParticipantsGroup {
    * @param {number} minAge
    * @param {number} maxAge
    */
-  async includeAge(minAge: number, maxAge: number): Promise<number> {
+  async includeAge(
+    minAge: number,
+    maxAge: number,
+    radioButtonText: MenuOption = MenuOption.AgeAtConsent
+  ): Promise<number> {
     await this.addCriteria([MenuOption.Demographics, MenuOption.Age]);
     const selector = `${this.cohortSearchContainerXpath}//input[@type="number"]`;
     await this.page.waitForXPath(selector, { visible: true });
@@ -287,7 +291,7 @@ export default class CohortParticipantsGroup {
       .then((input) => input.pressTab());
 
     // Select "Age at Consent" radiobutton.
-    await RadioButton.findByName(this.page, { name: 'Age at Consent' }).select();
+    await RadioButton.findByName(this.page, { name: radioButtonText }).select();
     // Get count from slider badge
     const count = await waitForNumericalString(this.page, `${this.cohortSearchContainerXpath}//*[@id="age-count"]`);
     // Click "ADD SELECTION" button to add selected age range

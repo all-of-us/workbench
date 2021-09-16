@@ -18,8 +18,8 @@ export enum WorkspaceAccessLevel {
 // Options in dropdown select.
 export enum MenuOption {
   Age = 'Age',
-  AgeAtCDR = 'Age at CDR',
-  AgeAtConsent = 'Age  at Consent',
+  AgeAtCDR = 'Age at CDR Date',
+  AgeAtConsent = 'Age at Consent',
   Conditions = 'Conditions',
   CopyToAnotherWorkspace = 'Copy to another Workspace',
   CurrentAge = 'Current Age',
@@ -61,7 +61,6 @@ export enum MenuOption {
 export enum LinkText {
   AddSelection = 'Add Selection',
   AddThis = 'ADD THIS',
-  AllSurveys = 'All Surveys',
   ApplyModifiers = 'APPLY MODIFIERS',
   ApplyRecreate = 'APPLY & RECREATE',
   Audit = 'AUDIT',
@@ -94,18 +93,14 @@ export enum LinkText {
   DeletePd = 'Delete Persistent Disk',
   DeleteNotebook = 'Delete Notebook',
   DeleteWorkspace = 'Delete Workspace',
-  Demographics = 'Demographics',
   DiscardChanges = 'Discard Changes',
   DownloadSql = 'DOWNLOAD SQL',
   DuplicateWorkspace = 'Duplicate Workspace',
   Edit = 'Edit',
   Export = 'Export',
+  ExtractAndContinue = 'Extract & Continue',
   Finish = 'Finish',
   FinishAndReview = 'Finish & Review',
-  FitbitActivitySummary = 'Fitbit Activity Summary',
-  FitbitHeartRateLevel = 'Fitbit Heart Rate Level',
-  FitbitHeartRateSummary = 'Fitbit Heart Rate Summary',
-  FitbitIntraDaySteps = 'Fitbit Intra Day Steps',
   GoToCopiedConceptSet = 'Go to Copied Concept Set',
   GoToCopiedNotebook = 'Go to Copied Notebook',
   KeepEditing = 'Keep Editing',
@@ -140,6 +135,12 @@ export enum Language {
   R = 'R'
 }
 
+export enum AnalysisTool {
+  Hail = 'Hail',
+  Plink = 'PLINK',
+  VCFCompatible = 'Other VCF-compatible tool'
+}
+
 // Data resource card.
 export enum ResourceCard {
   Cohort = 'Cohort',
@@ -154,7 +155,8 @@ export enum SideBarLink {
   DataDictionary,
   HelpTips,
   WorkspaceMenu,
-  EditAnnotations
+  EditAnnotations,
+  GenomicExtractionsHistory
 }
 
 export const InstitutionSelectValue = {
@@ -165,4 +167,18 @@ export const InstitutionSelectValue = {
   Wondros: 'Wondros',
   AdminTesting: 'Admin Testing',
   DummyMaster: 'Dummy Master'
+};
+
+export const SelectConceptSetCheckBox = {
+  AllSurveys: 'All Surveys',
+  Demographics: 'Demographics',
+  FitbitActivitySummary: 'Fitbit Activity Summary',
+  FitbitHeartRateLevel: 'Fitbit Heart Rate Level',
+  FitbitHeartRateSummary: 'Fitbit Heart Rate Summary',
+  FitbitIntraDaySteps: 'Fitbit Intra Day Steps',
+  WholeGenomeSequenceVariantData: 'All whole genome sequence variant data'
+};
+
+export const SelectValueCheckBox = {
+  VCFFile: 'VCF Files(s)'
 };

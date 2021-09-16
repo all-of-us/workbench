@@ -4,6 +4,7 @@ import { createWorkspace, signInWithAccessToken } from 'utils/test-utils';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { makeRandomName } from 'utils/str-utils';
 import { ResourceCard } from 'app/text-labels';
+import { takeScreenshot } from '../../utils/save-file-utils';
 
 // This test could take a long time to run
 jest.setTimeout(40 * 60 * 1000);
@@ -19,6 +20,9 @@ describe('Updating runtime compute type', () => {
     // Open the runtime panel
     const runtimePanel = new RuntimePanel(page);
     await runtimePanel.open();
+
+    // Take a screenshot for manual checking.
+    await takeScreenshot(page, 'runtime-sidebar-default-settings.png');
 
     // Create runtime
     await runtimePanel.createRuntime();

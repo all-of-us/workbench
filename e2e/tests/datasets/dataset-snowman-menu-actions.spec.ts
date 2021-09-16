@@ -2,7 +2,7 @@ import DataResourceCard from 'app/component/data-resource-card';
 import ExportToNotebookModal from 'app/modal/export-to-notebook-modal';
 import NotebookPreviewPage from 'app/page/notebook-preview-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
-import { Language, LinkText, MenuOption, ResourceCard } from 'app/text-labels';
+import { Language, LinkText, SelectConceptSetCheckBox, MenuOption, ResourceCard } from 'app/text-labels';
 import { makeRandomName, makeWorkspaceName } from 'utils/str-utils';
 import { findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
 import DatasetRenameModal from 'app/modal/dataset-rename-modal';
@@ -51,7 +51,7 @@ describe('Datasets card snowman menu actions', () => {
     expect(await cohortCheckBox.isChecked()).toBe(true);
 
     // Verify Cohort checkbox is checked.
-    const conceptSetCheckBox = datasetEditPage.getConceptSetCheckBox(LinkText.Demographics);
+    const conceptSetCheckBox = datasetEditPage.getConceptSetCheckBox(SelectConceptSetCheckBox.Demographics);
     expect(await conceptSetCheckBox.isChecked()).toBe(true);
 
     // Export button is enabled.
@@ -162,7 +162,7 @@ describe('Datasets card snowman menu actions', () => {
     const datasetBuildPage = await dataPage.clickAddDatasetButton();
 
     await datasetBuildPage.selectCohorts(['All Participants']);
-    await datasetBuildPage.selectConceptSets([LinkText.Demographics]);
+    await datasetBuildPage.selectConceptSets([SelectConceptSetCheckBox.Demographics]);
 
     // Preview table exists and has one or more table rows.
     const previewTable = await datasetBuildPage.getPreviewTable();

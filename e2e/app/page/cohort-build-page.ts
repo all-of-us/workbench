@@ -76,7 +76,7 @@ export default class CohortBuildPage extends AuthenticatedPage {
     await createCohortButton.click();
 
     if (cohortName === undefined) {
-      cohortName = makeRandomName();
+      cohortName = makeRandomName('testcohort', { includeHyphen: false });
     }
     if (description === undefined) {
       description = faker.lorem.words(10);

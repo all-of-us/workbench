@@ -5,7 +5,7 @@ import { makeRandomName, makeWorkspaceName } from 'utils/str-utils';
 import { findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
 import CohortActionsPage from 'app/page/cohort-actions-page';
 import { Ethnicity, Sex } from 'app/page/cohort-participants-group';
-import { Language, LinkText, MenuOption, ResourceCard } from 'app/text-labels';
+import { Language, LinkText, SelectConceptSetCheckBox, MenuOption, ResourceCard } from 'app/text-labels';
 import DataResourceCard from 'app/component/data-resource-card';
 import { getPropValue } from 'utils/element-utils';
 import CohortBuildPage from 'app/page/cohort-build-page';
@@ -46,7 +46,7 @@ describe('Export dataset to notebook tests', () => {
     // Step 1: select user created cohort.
     await datasetPage.selectCohorts([cohortName]);
     // Step 2: select demographics concept sets.
-    await datasetPage.selectConceptSets([LinkText.Demographics]);
+    await datasetPage.selectConceptSets([SelectConceptSetCheckBox.Demographics]);
 
     // Export to Python language notebook.
     const notebookName = makeRandomName();
@@ -99,7 +99,7 @@ describe('Export dataset to notebook tests', () => {
     await cohortActionsPage.clickCreateDatasetButton();
 
     await datasetBuildPage.selectCohorts([cohortName]);
-    await datasetBuildPage.selectConceptSets([LinkText.Demographics]);
+    await datasetBuildPage.selectConceptSets([SelectConceptSetCheckBox.Demographics]);
 
     // Preview table exists and has one or more table rows.
     const previewTable = await datasetBuildPage.getPreviewTable();

@@ -60,13 +60,21 @@ export default class RuntimePanel extends BaseHelpSidebar {
     return await diskInput.setValue(diskGbs);
   }
 
+  getDiskInput(): PrimereactInputNumber {
+    return new PrimereactInputNumber(this.page, '//*[@id="runtime-disk"]');
+  }
+
   async getDiskGbs(): Promise<number> {
-    const diskInput = new PrimereactInputNumber(this.page, '//*[@id="runtime-disk"]');
+    const diskInput = this.getDiskInput();
     return await diskInput.getInputValue();
   }
 
+  getComputeTypeSelect(): SelectMenu {
+    return SelectMenu.findByName(this.page, { id: 'runtime-compute' }, this);
+  }
+
   async pickComputeType(computeType: ComputeType): Promise<void> {
-    const computeTypeDropdown = SelectMenu.findByName(this.page, { id: 'runtime-compute' }, this);
+    const computeTypeDropdown = this.getComputeTypeSelect();
     return await computeTypeDropdown.select(computeType);
   }
 
@@ -268,5 +276,9 @@ export default class RuntimePanel extends BaseHelpSidebar {
     await this.waitForStartStopIconState(StartStopIconState.Running);
 
     return notebookPreviewPage;
+  }
+
+  getCustomizeButton(): Button {
+    return Button.findByName(this.page, { normalizeSpace: LinkText.Customize }, this);
   }
 }

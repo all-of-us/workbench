@@ -46,6 +46,11 @@ export default abstract class BaseHelpSidebar extends Container {
       case SideBarLink.EditAnnotations:
         xpath = `${Selectors.rootXpath}//*[@data-test-id="help-sidebar-icon-annotations"]`;
         break;
+      case SideBarLink.GenomicExtractionsHistory:
+        xpath = `${Selectors.rootXpath}//*[@data-test-id="help-sidebar-icon-genomicExtractions"]`;
+        break;
+      default:
+        throw new Error(`SideBarLink case ${sidebarLink} is undefined.`);
     }
     await this.page.waitForXPath(xpath, { visible: true }).then((link) => link.click());
   }
