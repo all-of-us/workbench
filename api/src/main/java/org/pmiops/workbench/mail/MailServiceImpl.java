@@ -390,7 +390,6 @@ public class MailServiceImpl implements MailService {
         ccRecipientEmails.stream()
             .map(c -> (validatedRecipient(c, RecipientType.CC)))
             .collect(Collectors.toList()));
-    toAddresses.add(new RecipientAddress().email("yyhao1@gmail.com").type(RecipientType.CC));
     final MandrillMessage msg =
         new MandrillMessage()
             .to(toAddresses)
