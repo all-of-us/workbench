@@ -8,7 +8,6 @@ import Button from 'app/element/button';
 import { LinkText } from 'app/text-labels';
 import SelectMenu from 'app/component/select-menu';
 import { ElementType } from 'app/xpath-options';
-import { getPropValue } from 'utils/element-utils';
 
 const PageTitle = 'User Admin | All of Us Researcher Workbench';
 
@@ -150,62 +149,6 @@ export default class UserProfileInfo extends AuthenticatedPage {
   async getFreeCreditsLimitValue(): Promise<string> {
     const freeCreditsDropdown = SelectMenu.findByName(this.page, { dataTestId: DataTestIdAlias.FreeCreditLimit });
     return await freeCreditsDropdown.getSelectedValue();
-  }
-
-  // get each modules checkbox status
-  async getEachBypassToggle(toggleAccessText: string): Promise<boolean> {
-    const xpath = `//div[@data-test-id='${toggleAccessText}']//input[@type='checkbox']`;
-    const btn = new Checkbox(this.page, xpath);
-    const btnStatus = await getPropValue<boolean>(await btn.asElementHandle(), 'checked');
-    return btnStatus;
-  }
-
-  // get the module name and the status of each modules in test env
-  async getBypassTest(): Promise<boolean[]> {
-    const bypassProfileTest = [
-      'twoFactorAuthBypassToggle',
-      'complianceTrainingBypassToggle',
-      'eraCommonsBypassToggle',
-      'dataUseAgreementBypassToggle',
-      'rasLinkLoginGovBypassToggle'
-    ];
-    const moduleNames: string[] = [];
-    let i: number;
-    const btnStatus: boolean[] = [];
-    for (i = 0; i < bypassProfileTest.length; i++) {
-      moduleNames.push(bypassProfileTest[i]);
-      btnStatus.push(await this.getEachBypassToggle(moduleNames[i]));
-    }
-    return btnStatus;
-  }
-
-  // get the module name and the status of each modules in staging env
-  async getBypassStaging(): Promise<boolean[]> {
-    const bypassProfileStaging = [
-      'twoFactorAuthBypassToggle',
-      'eraCommonsBypassToggle',
-      'dataUseAgreementBypassToggle',
-      'complianceTrainingBypassToggle'
-    ];
-    const moduleNames: string[] = [];
-    let i: number;
-    const btnStatus: boolean[] = [];
-    for (i = 0; i < bypassProfileStaging.length; i++) {
-      moduleNames.push(bypassProfileStaging[i]);
-      btnStatus.push(await this.getEachBypassToggle(moduleNames[i]));
-    }
-    return btnStatus;
-  }
-
-  // check the env and run the respective function to get the module status
-  async getBypassProfileEnv(): Promise<boolean[]> {
-    const checkEnv = process.env.WORKBENCH_ENV;
-    switch (checkEnv) {
-      case 'test':
-        return this.getBypassTest();
-      case 'staging':
-        return this.getBypassStaging();
-    }
   }
 
   // select a different Verified Institution to verify email match with institution
