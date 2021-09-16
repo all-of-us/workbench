@@ -148,38 +148,6 @@ public class MailServiceImplTest extends SpringTest {
   }
 
   @Test
-  public void testSendBillingSetupEmail_nihFunded_purchaseOrder() throws Exception {
-    DbUser user = createDbUser();
-    SendBillingSetupEmailRequest request =
-        new SendBillingSetupEmailRequest()
-            .institution("inst")
-            .paymentMethod(BillingPaymentMethod.PURCHASE_ORDER)
-            .isNihFunded(true)
-            .phone("123456");
-    service.sendBillingSetupEmail(user, request);
-    verify(mandrillApi, times(1))
-        .send(
-            argThat(
-                got -> {
-                  List<RecipientAddress> receipts = (((MandrillMessage) got.getMessage()).getTo());
-                  assertThat(receipts)
-                      .containsExactly(
-                          new RecipientAddress()
-                              .email(user.getContactEmail())
-                              .type(RecipientType.TO),
-                          new RecipientAddress().email(FROM_EMAIL).type(RecipientType.CC));
-                  String gotHtml = ((MandrillMessage) got.getMessage()).getHtml();
-                  // tags should be escaped, email addresses shouldn't.
-                  return gotHtml.contains("username@research.org")
-                      && gotHtml.contains("Purchase Order/Other")
-                      && gotHtml.contains("given name family name")
-                      && gotHtml.contains("user@contact.com")
-                      && gotHtml.contains(
-                          "Is this work NIH-funded and eligible for the STRIDES Program?: Yes");
-                }));
-  }
-
-  @Test
   public void testSendBillingSetupEmail_withCarasoft() throws Exception {
     workbenchConfig.billing.carahsoftEmail = "test@carasoft.com";
     DbUser user = createDbUser();
