@@ -1565,38 +1565,6 @@ paths:
       responses:
         204:
           description: Runtimes were checked and handled successfully.
-  "/v1/cron/bulkSyncComplianceTrainingStatus":
-    get:
-      security: []
-      tags:
-      - offlineUser
-      - cron
-      description: sync moodle badge/training status for all users.
-      operationId: bulkSyncComplianceTrainingStatus
-      responses:
-        204:
-          description: The user table is updated with training status.
-        404:
-          description: User not found while retrieving  badge.
-        500:
-          description: Internal Error
-          schema:
-            "$ref": "#/definitions/ErrorResponse"
-  "/v1/cron/bulkSyncTwoFactorAuthStatus":
-    get:
-      security: []
-      tags:
-      - offlineUser
-      - cron
-      description: sync 2FA status for all users
-      operationId: bulkSyncTwoFactorAuthStatus
-      responses:
-        204:
-          description: All users' 2FA statuses were updated.
-        500:
-          description: Internal Error
-          schema:
-            "$ref": "#/definitions/ErrorResponse"
   "/v1/cron/bulkAuditProjectAccess":
     get:
       security: []
