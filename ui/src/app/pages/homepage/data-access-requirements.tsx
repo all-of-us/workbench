@@ -29,6 +29,7 @@ import {
   getAccessModuleStatusByName,
   getRegistrationTask,
   GetStartedButton,
+  redirectToRas,
 } from 'app/utils/access-utils';
 import {isAbortError} from 'app/utils/errors';
 import {useNavigation} from 'app/utils/navigation';
@@ -239,6 +240,31 @@ const moduleLabels: Map<AccessModule, JSX.Element> = new Map([
   [AccessModule.DATAUSERCODEOFCONDUCT, <div>Sign Data User Code of Conduct</div>],
 ]);
 
+const withAborter = async(abortableFn: (AbortController) => void) => {
+  const aborter = new AbortController();
+  try {
+    await abortableFn(aborter);
+  } catch (e) {
+    if (!isAbortError(e)) { throw e; }
+  } finally {
+    aborter.abort();
+  }
+};
+
+const moduleRefreshActions: Map<AccessModule, Function> = new Map([
+  [AccessModule.TWOFACTORAUTH, async() => {
+    await withAborter(aborter => profileApi().syncTwoFactorAuthStatus({signal: aborter.signal}));
+  }],
+  [AccessModule.RASLINKLOGINGOV, redirectToRas],
+  [AccessModule.ERACOMMONS, async() => {
+    await withAborter(aborter => profileApi().syncEraCommonsStatus({signal: aborter.signal}));
+  }],
+  [AccessModule.COMPLIANCETRAINING, async() => {
+    await withAborter(aborter => profileApi().syncComplianceTrainingStatus({signal: aborter.signal}))
+  }],
+  [AccessModule.DATAUSERCODEOFCONDUCT, () => {}],
+]);
+
 // this function does double duty:
 // - returns appropriate text for completed and bypassed modules and null for incomplete modules
 // - because of this, truthy return values indicate that a module is either complete or bypassed
@@ -296,21 +322,6 @@ const selfBypass = async(spinnerProps: WithSpinnerOverlayProps, reloadProfile: F
   reloadProfile();
 };
 
-const syncExternalModules = async() => {
-  const aborter = new AbortController();
-  try {
-    await Promise.all([
-      profileApi().syncTwoFactorAuthStatus({signal: aborter.signal}),
-      profileApi().syncComplianceTrainingStatus({signal: aborter.signal}),
-      profileApi().syncEraCommonsStatus({signal: aborter.signal}),
-    ]);
-  } catch (e) {
-    if (!isAbortError(e)) { throw e; }
-  } finally {
-    aborter.abort();
-  }
-};
-
 // exported for test
 export const getEnabledModules = (modules: AccessModule[], navigate): AccessModule[] => fp.flatMap(moduleName => {
   const enabledTaskMaybe = getRegistrationTask(navigate, moduleName);
@@ -323,16 +334,19 @@ export const getActiveModule = (modules: AccessModule[], profile: Profile): Acce
   return !bypassedOrCompletedText(status);
 });
 
-const Refresh = (props: {showSpinner: Function}) => <Button
-    type='primary'
-    style={styles.refreshButton}
-    onClick={async() => {
-      props.showSpinner();
-      await syncExternalModules();
-      location.reload();  // will also hide spinner
-    }} >
-  <Repeat style={styles.refreshIcon}/> Refresh
-</Button>;
+const Refresh = (props: { showSpinner: Function; refreshAction: Function }) => {
+  const {showSpinner, refreshAction} = props;
+  return <Button
+      type='primary'
+      style={styles.refreshButton}
+      onClick={async() => {
+        showSpinner();
+        await refreshAction();
+        location.reload(); // also hides spinner
+      }} >
+    <Repeat style={styles.refreshIcon}/> Refresh
+  </Button>;
+}
 
 const Next = () => <FlexRow style={styles.nextElement}>
   <span style={styles.nextText}>NEXT</span> <ArrowRight style={styles.nextIcon}/>
@@ -415,7 +429,11 @@ const MaybeModule = ({moduleName, active, spinnerProps}: ModuleProps): JSX.Eleme
 
     return <FlexRow data-test-id={`module-${moduleName}`}>
       <FlexRow style={styles.moduleCTA}>
-        {active && (showRefresh ? <Refresh showSpinner={spinnerProps.showSpinner}/> : <Next/>)}
+        {active && (showRefresh
+            ? <Refresh
+                refreshAction={moduleRefreshActions.get(moduleName)}
+                showSpinner={spinnerProps.showSpinner}/>
+            : <Next/>)}
       </FlexRow>
       <ModuleBox>
         <ModuleIcon moduleName={moduleName} completedOrBypassed={!!statusTextMaybe}/>
