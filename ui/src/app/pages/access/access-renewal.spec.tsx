@@ -11,7 +11,7 @@ import defaultServerConfig from 'testing/default-server-config';
 import {findNodesByExactText, findNodesContainingText, waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {InstitutionApiStub} from 'testing/stubs/institution-api-stub';
 import {ProfileApiStub, ProfileStubVariables} from 'testing/stubs/profile-api-stub';
-import {expirableAccessModules} from 'app/utils/access-utils';
+import {accessRenewalTitles} from 'app/utils/access-utils';
 
 const EXPIRY_DAYS = 365
 const oneYearFromNow = () => Date.now() + 1000 * 60 * 60 * 24 * EXPIRY_DAYS
@@ -27,7 +27,7 @@ describe('Access Renewal Page', () => {
     const {profile} = profileStore.get();
 
     const newProfile = fp.set('accessModules',
-        {modules: expirableAccessModules.map(m => {return {moduleName: m, expirationEpochMillis: expiredTime}})},
+        {modules: Array.from(accessRenewalTitles.keys()).map(m => ({moduleName: m, expirationEpochMillis: expiredTime}))},
         profile)
     profileStore.set({profile: newProfile, load, reload, updateCache});
   }
