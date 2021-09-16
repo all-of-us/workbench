@@ -433,7 +433,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   public DbUser submitDUCC(DbUser dbUser, Integer duccSignedVersion, String initials) {
     // FIXME: this should not be hardcoded
     if (duccSignedVersion != getCurrentDuccVersion()) {
-      throw new BadRequestException("Data User Coode of Conduct Version is not up to date");
+      throw new BadRequestException("Data User Code of Conduct Version is not up to date");
     }
     final Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
     DbUserDataUseAgreement dataUseAgreement = new DbUserDataUseAgreement();
