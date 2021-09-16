@@ -438,7 +438,7 @@ paths:
     post:
       tags:
       - profile
-      description: Submits consent to the data use agreement for researchers.
+      description: (DEPRECATED.  Renamed to submitDUCC.)  Submits consent to the data use agreement for researchers.
       operationId: submitDataUseAgreement
       parameters:
       - in: query
@@ -451,6 +451,28 @@ paths:
         description: Initials of the user on the form.
         type: string
         required: true
+      responses:
+        200:
+          description: The user's profile.
+          schema:
+            "$ref": "#/definitions/Profile"
+  "/v1/account/submit-data-user-code-of-conduct":
+    post:
+      tags:
+        - profile
+      description: Submits consent to the Data User Code of Conduct for researchers.
+      operationId: submitDUCC
+      parameters:
+        - in: query
+          name: duccSignedVersion
+          description: Version \# of the Data User Code of Conduct that was signed.
+          type: integer
+          required: true
+        - in: query
+          name: initials
+          description: Initials of the user on the form.
+          type: string
+          required: true
       responses:
         200:
           description: The user's profile.

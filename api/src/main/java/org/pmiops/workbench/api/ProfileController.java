@@ -325,11 +325,17 @@ public class ProfileController implements ProfileApiDelegate {
   }
 
   @Override
+  @Deprecated // renamed to submitDUCC()
   public ResponseEntity<Profile> submitDataUseAgreement(
       Integer dataUseAgreementSignedVersion, String initials) {
     DbUser user =
-        userService.submitDataUseAgreement(
-            userProvider.get(), dataUseAgreementSignedVersion, initials);
+        userService.submitDUCC(userProvider.get(), dataUseAgreementSignedVersion, initials);
+    return getProfileResponse(saveUserWithConflictHandling(user));
+  }
+
+  @Override
+  public ResponseEntity<Profile> submitDUCC(Integer duccSignedVersion, String initials) {
+    DbUser user = userService.submitDUCC(userProvider.get(), duccSignedVersion, initials);
     return getProfileResponse(saveUserWithConflictHandling(user));
   }
 

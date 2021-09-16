@@ -430,15 +430,14 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   }
 
   @Override
-  public DbUser submitDataUseAgreement(
-      DbUser dbUser, Integer dataUseAgreementSignedVersion, String initials) {
+  public DbUser submitDUCC(DbUser dbUser, Integer duccSignedVersion, String initials) {
     // FIXME: this should not be hardcoded
-    if (dataUseAgreementSignedVersion != getCurrentDuccVersion()) {
-      throw new BadRequestException("Data Use Agreement Version is not up to date");
+    if (duccSignedVersion != getCurrentDuccVersion()) {
+      throw new BadRequestException("Data User Code of Conduct Version is not up to date");
     }
     final Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
     DbUserDataUseAgreement dataUseAgreement = new DbUserDataUseAgreement();
-    dataUseAgreement.setDataUseAgreementSignedVersion(dataUseAgreementSignedVersion);
+    dataUseAgreement.setDataUseAgreementSignedVersion(duccSignedVersion);
     dataUseAgreement.setUserId(dbUser.getUserId());
     dataUseAgreement.setUserFamilyName(dbUser.getFamilyName());
     dataUseAgreement.setUserGivenName(dbUser.getGivenName());
@@ -451,7 +450,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
           // user.setDataUseAgreementCompletionTime will be replaced by
           // accessModuleService.updateCompletionTime().
           user.setDataUseAgreementCompletionTime(timestamp);
-          user.setDataUseAgreementSignedVersion(dataUseAgreementSignedVersion);
+          user.setDataUseAgreementSignedVersion(duccSignedVersion);
           accessModuleService.updateCompletionTime(
               user, AccessModuleName.DATA_USER_CODE_OF_CONDUCT, timestamp);
           return user;
