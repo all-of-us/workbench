@@ -310,6 +310,9 @@ const handleRasCallback = (code: string, spinnerProps: WithSpinnerOverlayProps, 
     await profileApi().linkRasAccount({ authCode: code, redirectUrl: buildRasRedirectUrl() });
     spinnerProps.hideSpinner();
     reloadProfile();
+
+    // Cleanup parameter from URL after linking.
+    window.history.replaceState({}, '', '/');
   });
 
   return handler();
