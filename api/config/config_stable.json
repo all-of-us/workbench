@@ -104,7 +104,6 @@
     "enableGpu": false,
     "enablePersistentDisk": false,
     "enableAccessModuleRewrite" : true,
-    "enableUnifiedUserAccessCron": true,
     "enableStandardSourceDomains": true
   },
   "actionAudit": {
