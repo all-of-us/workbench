@@ -13,6 +13,7 @@ import {AccessModule, AccessModuleStatus, ErrorCode, Profile} from 'generated/fe
 import {getLiveDUCCVersion} from './code-of-conduct';
 import {parseQueryParams} from "app/components/app-router";
 import {cond, daysFromNow, displayDateWithoutHours} from "./index";
+import {Redirect} from "react-router-dom";
 
 const {useState, useEffect} = React;
 
@@ -70,13 +71,14 @@ export const buildRasRedirectUrl = (): string => {
   return encodeURIComponentStrict(window.location.origin.toString() + RAS_CALLBACK_PATH);
 };
 
-export const redirectToRas = (): void => {
+export const redirectToRas = (openInNewTab: boolean = true): void => {
   AnalyticsTracker.Registration.RasLoginGov();
   // The scopes are also used in backend for fetching user info.
   const url = serverConfigStore.get().config.rasHost + '/auth/oauth/v2/authorize?client_id=' + serverConfigStore.get().config.rasClientId
       + '&prompt=login+consent&redirect_uri=' + buildRasRedirectUrl()
       + '&response_type=code&scope=openid+profile+email+ga4gh_passport_v1+federated_identities';
-  window.open(url, '_blank');
+
+  openInNewTab ? window.open(url, '_blank') : <Redirect to={url}/>;
 };
 
 // This needs to be a function, because we want it to evaluate at call time,

@@ -255,7 +255,7 @@ const moduleRefreshActions: Map<AccessModule, Function> = new Map([
   [AccessModule.TWOFACTORAUTH, async() => {
     await withAborter(aborter => profileApi().syncTwoFactorAuthStatus({signal: aborter.signal}));
   }],
-  [AccessModule.RASLINKLOGINGOV, redirectToRas],
+  [AccessModule.RASLINKLOGINGOV, () => redirectToRas(false)],
   [AccessModule.ERACOMMONS, async() => {
     await withAborter(aborter => profileApi().syncEraCommonsStatus({signal: aborter.signal}));
   }],
