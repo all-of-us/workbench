@@ -97,7 +97,8 @@ describe('DataAccessRequirements', () => {
     });
 
     // update this if the order changes
-    it('should return the second enabled module (ERA, not RAS) from getActiveModule when the first module (2FA) has been completed and RAS is disabled', () => {
+    it('should return the second enabled module (ERA, not RAS) from getActiveModule' +
+        ' when the first module (2FA) has been completed and RAS is disabled', () => {
         serverConfigStore.set({config: {...defaultServerConfig, enableRasLoginGovLinking: false}});
 
         const testProfile = {

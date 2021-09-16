@@ -354,16 +354,20 @@ const ModuleIcon = (props: {moduleName: AccessModule, completedOrBypassed: boole
 
 // Sep 16 hack while we work out some RAS bugs
 const TemporaryRASModule = () => {
-  return <FlexRow data-test-id={`module-${AccessModule.RASLINKLOGINGOV}`}>
+  const moduleName = AccessModule.RASLINKLOGINGOV;
+  return <FlexRow data-test-id={`module-${moduleName}`}>
     <FlexRow style={styles.moduleCTA}/>
     <FlexRow style={styles.inactiveModuleBox}>
-      <ModuleIcon moduleName={AccessModule.RASLINKLOGINGOV} completedOrBypassed={false} eligible={false}/>
-      <FlexColumn>
-        <div style={styles.inactiveModuleText}>
-          Here are some words
+      <ModuleIcon moduleName={moduleName} completedOrBypassed={false} eligible={false}/>
+      <FlexColumn style={styles.inactiveModuleText}>
+        <div>
+          {moduleLabels.get(moduleName)}
         </div>
-        <div>here's a second div</div>
-      </FlexColumn>
+        <div style={{fontSize: '14px', marginTop: '0.5em'}}>
+          <b>Temporarily disabled.</b> Due to technical difficulties, this step is disabled.
+          In the future, you'll be prompted to complete identity verification to continue using the workbench.
+        </div>
+     </FlexColumn>
     </FlexRow>
   </FlexRow>;
 };
