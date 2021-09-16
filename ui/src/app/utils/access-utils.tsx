@@ -1,5 +1,6 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
+import {Redirect} from "react-router-dom";
 
 import {Button} from 'app/components/buttons';
 import {AoU} from 'app/components/text-wrappers';
@@ -13,7 +14,6 @@ import {AccessModule, AccessModuleStatus, ErrorCode, Profile} from 'generated/fe
 import {getLiveDUCCVersion} from './code-of-conduct';
 import {parseQueryParams} from "app/components/app-router";
 import {cond, daysFromNow, displayDateWithoutHours} from "./index";
-import {Redirect} from "react-router-dom";
 
 const {useState, useEffect} = React;
 
