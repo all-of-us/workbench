@@ -150,10 +150,14 @@ describe('DataAccessRequirements', () => {
     // Temporary hack Sep 16: when enableRasLoginGovLinking is false, we DO show the module
     // along with an Ineligible icon and some "technical difficulties" text
     // and it never becomes an activeModule
-    it('should not render the RAS module when its feature flag is disabled', () => {
+    it('should render the RAS module as ineligible when its feature flag is disabled', () => {
         serverConfigStore.set({config: {...defaultServerConfig, enableRasLoginGovLinking: false}});
         const wrapper = component();
-        expect(findModule(wrapper, AccessModule.RASLINKLOGINGOV).exists()).toBeFalsy();
+        expect(findModule(wrapper, AccessModule.RASLINKLOGINGOV).exists()).toBeTruthy();
+        expect(findIneligibleModule(wrapper, AccessModule.RASLINKLOGINGOV).exists()).toBeTruthy();
+
+        expect(findCompleteModule(wrapper, AccessModule.RASLINKLOGINGOV).exists()).toBeFalsy();
+        expect(findIncompleteModule(wrapper, AccessModule.RASLINKLOGINGOV).exists()).toBeFalsy();
     });
 
     it('should render all modules as incomplete when the profile accessModules are empty', () => {

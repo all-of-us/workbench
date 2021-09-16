@@ -338,9 +338,8 @@ const Next = () => <FlexRow style={styles.nextElement}>
   <span style={styles.nextText}>NEXT</span> <ArrowRight style={styles.nextIcon}/>
 </FlexRow>;
 
-const ModuleIcon = (props: {moduleName: AccessModule, completedOrBypassed: boolean}) => {
-  const eligible = true; // TODO RW-7059
-  const {moduleName, completedOrBypassed} = props;
+const ModuleIcon = (props: {moduleName: AccessModule, completedOrBypassed: boolean, eligible?: boolean}) => {
+  const {moduleName, completedOrBypassed, eligible = true} = props;
 
   return <div style={styles.moduleIcon}>
     {cond(
@@ -351,6 +350,22 @@ const ModuleIcon = (props: {moduleName: AccessModule, completedOrBypassed: boole
       [eligible && !completedOrBypassed,
         () => <CheckCircle data-test-id={`module-${moduleName}-incomplete`} style={{color: colors.disabled}}/>])}
   </div>;
+};
+
+// Sep 16 hack while we work out some RAS bugs
+const TemporaryRASModule = () => {
+  return <FlexRow data-test-id={`module-${AccessModule.RASLINKLOGINGOV}`}>
+    <FlexRow style={styles.moduleCTA}/>
+    <FlexRow style={styles.inactiveModuleBox}>
+      <ModuleIcon moduleName={AccessModule.RASLINKLOGINGOV} completedOrBypassed={false} eligible={false}/>
+      <FlexColumn>
+        <div style={styles.inactiveModuleText}>
+          Here are some words
+        </div>
+        <div>here's a second div</div>
+      </FlexColumn>
+    </FlexRow>
+  </FlexRow>;
 };
 
 interface ModuleProps {
@@ -413,6 +428,13 @@ const MaybeModule = ({moduleName, active, spinnerProps}: ModuleProps): JSX.Eleme
     </FlexRow>;
   };
 
+  // temp hack Sep 16: render a special temporary RAS module if disabled
+  if (moduleName === AccessModule.RASLINKLOGINGOV) {
+    const {enableRasLoginGovLinking} = serverConfigStore.get().config;
+    if (!enableRasLoginGovLinking) {
+      return <TemporaryRASModule/>;
+    }
+  }
   const moduleEnabled = !!registrationTask;
   return moduleEnabled ? <Module/> : null;
 };
