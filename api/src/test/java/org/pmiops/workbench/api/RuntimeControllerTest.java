@@ -89,6 +89,7 @@ import org.pmiops.workbench.model.ListRuntimeDeleteRequest;
 import org.pmiops.workbench.model.PersistentDiskRequest;
 import org.pmiops.workbench.model.Runtime;
 import org.pmiops.workbench.model.RuntimeConfigurationType;
+import org.pmiops.workbench.model.RuntimeError;
 import org.pmiops.workbench.model.RuntimeLocalizeRequest;
 import org.pmiops.workbench.model.RuntimeLocalizeResponse;
 import org.pmiops.workbench.model.RuntimeStatus;
@@ -420,7 +421,13 @@ public class RuntimeControllerTest extends SpringTest {
                         new LeonardoClusterError().errorCode(2).errorMessage(null))));
 
     assertThat(runtimeController.getRuntime(WORKSPACE_NS).getBody())
-        .isEqualTo(testRuntime.status(RuntimeStatus.ERROR));
+        .isEqualTo(
+            testRuntime
+                .status(RuntimeStatus.ERROR)
+                .errors(
+                    ImmutableList.of(
+                        new RuntimeError().errorCode(1).errorMessage("foo"),
+                        new RuntimeError().errorCode(2).errorMessage(null))));
   }
 
   @Test
