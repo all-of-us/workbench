@@ -33,7 +33,7 @@ import {
 import {isAbortError} from 'app/utils/errors';
 import {useNavigation} from 'app/utils/navigation';
 import {profileStore, serverConfigStore, useStore} from 'app/utils/stores';
-import {AccessModule, AccessModuleStatus} from 'generated/fetch';
+import {AccessModule, AccessModuleStatus, Profile} from 'generated/fetch';
 import {TwoFactorAuthModal} from './two-factor-auth-modal';
 
 const styles = reactStyles({
@@ -311,6 +311,18 @@ const syncExternalModules = async() => {
   }
 };
 
+// exported for test
+export const getEnabledModules = (modules: AccessModule[], navigate): AccessModule[] => fp.flatMap(moduleName => {
+  const enabledTaskMaybe = getRegistrationTask(navigate, moduleName);
+  return enabledTaskMaybe ? [enabledTaskMaybe.module] : [];
+}, modules);
+
+// exported for test
+export const getActiveModule = (modules: AccessModule[], profile: Profile): AccessModule => modules.find(moduleName => {
+  const status = getAccessModuleStatusByName(profile, moduleName);
+  return !bypassedOrCompletedText(status);
+});
+
 const Refresh = (props: {showSpinner: Function}) => <Button
     type='primary'
     style={styles.refreshButton}
@@ -326,9 +338,8 @@ const Next = () => <FlexRow style={styles.nextElement}>
   <span style={styles.nextText}>NEXT</span> <ArrowRight style={styles.nextIcon}/>
 </FlexRow>;
 
-const ModuleIcon = (props: {moduleName: AccessModule, completedOrBypassed: boolean}) => {
-  const eligible = true; // TODO RW-7059
-  const {moduleName, completedOrBypassed} = props;
+const ModuleIcon = (props: {moduleName: AccessModule, completedOrBypassed: boolean, eligible?: boolean}) => {
+  const {moduleName, completedOrBypassed, eligible = true} = props;
 
   return <div style={styles.moduleIcon}>
     {cond(
@@ -339,6 +350,26 @@ const ModuleIcon = (props: {moduleName: AccessModule, completedOrBypassed: boole
       [eligible && !completedOrBypassed,
         () => <CheckCircle data-test-id={`module-${moduleName}-incomplete`} style={{color: colors.disabled}}/>])}
   </div>;
+};
+
+// Sep 16 hack while we work out some RAS bugs
+const TemporaryRASModule = () => {
+  const moduleName = AccessModule.RASLINKLOGINGOV;
+  return <FlexRow data-test-id={`module-${moduleName}`}>
+    <FlexRow style={styles.moduleCTA}/>
+    <FlexRow style={styles.inactiveModuleBox}>
+      <ModuleIcon moduleName={moduleName} completedOrBypassed={false} eligible={false}/>
+      <FlexColumn style={styles.inactiveModuleText}>
+        <div>
+          {moduleLabels.get(moduleName)}
+        </div>
+        <div style={{fontSize: '14px', marginTop: '0.5em'}}>
+          <b>Temporarily disabled.</b> Due to technical difficulties, this step is disabled.
+          In the future, you'll be prompted to complete identity verification to continue using the workbench.
+        </div>
+     </FlexColumn>
+    </FlexRow>
+  </FlexRow>;
 };
 
 interface ModuleProps {
@@ -401,6 +432,13 @@ const MaybeModule = ({moduleName, active, spinnerProps}: ModuleProps): JSX.Eleme
     </FlexRow>;
   };
 
+  // temp hack Sep 16: render a special temporary RAS module if disabled
+  if (moduleName === AccessModule.RASLINKLOGINGOV) {
+    const {enableRasLoginGovLinking} = serverConfigStore.get().config;
+    if (!enableRasLoginGovLinking) {
+      return <TemporaryRASModule/>;
+    }
+  }
   const moduleEnabled = !!registrationTask;
   return moduleEnabled ? <Module/> : null;
 };
@@ -521,21 +559,14 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
   const [activeModule, setActiveModule] = useState(null);
 
   const [navigate, ] = useNavigation();
-  const enabledModules = fp.flatMap(moduleName => {
-    const enabledTaskMaybe = getRegistrationTask(navigate, moduleName);
-    return enabledTaskMaybe ? [enabledTaskMaybe.module] : [];
-  }, allModules);
+  const enabledModules = getEnabledModules(allModules, navigate);
 
   // whenever the profile changes, setActiveModule(the first incomplete enabled module)
   useEffect(() => {
-    fp.flow(
-      fp.find<AccessModule>(moduleName => {
-        const status = getAccessModuleStatusByName(profile, moduleName);
-        return !bypassedOrCompletedText(status);
-      }),
-      setActiveModule
-    )
-    (enabledModules);
+    const activeModule = getActiveModule(enabledModules, profile);
+    if (activeModule) {
+      setActiveModule(activeModule);
+    }
   }, [profile]);
 
   const {config: {unsafeAllowSelfBypass}} = useStore(serverConfigStore);

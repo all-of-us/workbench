@@ -3,12 +3,13 @@ import {mount} from "enzyme";
 
 import defaultServerConfig from 'testing/default-server-config';
 import {AccessModule, InstitutionApi, Profile, ProfileApi} from 'generated/fetch';
-import {allModules, DataAccessRequirements} from './data-access-requirements';
+import {allModules, DataAccessRequirements, getActiveModule, getEnabledModules} from './data-access-requirements';
 import {InstitutionApiStub} from 'testing/stubs/institution-api-stub';
 import {ProfileApiStub, ProfileStubVariables} from 'testing/stubs/profile-api-stub';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {profileStore, serverConfigStore} from 'app/utils/stores';
-import { MemoryRouter } from 'react-router-dom';
+import {MemoryRouter} from 'react-router-dom';
+import {useNavigation} from 'app/utils/navigation';
 
 const profile = ProfileStubVariables.PROFILE_STUB as Profile;
 const load = jest.fn();
@@ -37,16 +38,128 @@ describe('DataAccessRequirements', () => {
         profileStore.set({profile, load, reload, updateCache});
     });
 
-    it('should render all modules by default', () => {
+    it('should return all modules from getEnabledModules by default (all FFs enabled)', () => {
+        const [navigate, ] = useNavigation();
+        const enabledModules = getEnabledModules(allModules, navigate);
+        allModules.forEach(module => expect(enabledModules.includes(module)).toBeTruthy());
+    });
+
+    it('should not return the RAS module from getEnabledModules when its feature flag is disabled', () => {
+        serverConfigStore.set({config: {...defaultServerConfig, enableRasLoginGovLinking: false}});
+        const [navigate, ] = useNavigation();
+        const enabledModules = getEnabledModules(allModules, navigate);
+        expect(enabledModules.includes(AccessModule.RASLINKLOGINGOV)).toBeFalsy();
+    });
+
+    it('should not return the ERA module from getEnabledModules when its feature flag is disabled', () => {
+        serverConfigStore.set({config: {...defaultServerConfig, enableEraCommons: false}});
+        const [navigate, ] = useNavigation();
+        const enabledModules = getEnabledModules(allModules, navigate);
+        expect(enabledModules.includes(AccessModule.ERACOMMONS)).toBeFalsy();
+     });
+
+    it('should not return the Compliance module from getEnabledModules when its feature flag is disabled', () => {
+        serverConfigStore.set({config: {...defaultServerConfig, enableComplianceTraining: false}});
+        const [navigate, ] = useNavigation();
+        const enabledModules = getEnabledModules(allModules, navigate);
+        expect(enabledModules.includes(AccessModule.COMPLIANCETRAINING)).toBeFalsy();
+    });
+
+    it('should return the first module (2FA) from getActiveModule when no modules have been completed', () => {
+        const [navigate, ] = useNavigation();
+        const enabledModules = getEnabledModules(allModules, navigate);
+        const activeModule = getActiveModule(enabledModules, profile);
+
+        expect(activeModule).toEqual(allModules[0]);
+        expect(activeModule).toEqual(enabledModules[0]);
+
+        // update this if the order changes
+        expect(activeModule).toEqual(AccessModule.TWOFACTORAUTH)
+    });
+
+    it('should return the second module (RAS) from getActiveModule when the first module (2FA) has been completed', () => {
+        const testProfile = {
+            ...profile,
+            accessModules: {
+                modules: [{moduleName: AccessModule.TWOFACTORAUTH, completionEpochMillis: 1}]
+            }
+        };
+
+        const [navigate, ] = useNavigation();
+        const enabledModules = getEnabledModules(allModules, navigate);
+        const activeModule = getActiveModule(enabledModules, testProfile);
+
+        expect(activeModule).toEqual(allModules[1]);
+        expect(activeModule).toEqual(enabledModules[1]);
+
+        // update this if the order changes
+        expect(activeModule).toEqual(AccessModule.RASLINKLOGINGOV)
+    });
+
+    // update this if the order changes
+    it('should return the second enabled module (ERA, not RAS) from getActiveModule' +
+        ' when the first module (2FA) has been completed and RAS is disabled', () => {
+        serverConfigStore.set({config: {...defaultServerConfig, enableRasLoginGovLinking: false}});
+
+        const testProfile = {
+            ...profile,
+            accessModules: {
+                modules: [{moduleName: AccessModule.TWOFACTORAUTH, completionEpochMillis: 1}]
+            }
+        };
+
+        const [navigate, ] = useNavigation();
+        const enabledModules = getEnabledModules(allModules, navigate);
+        const activeModule = getActiveModule(enabledModules, testProfile);
+
+        // update this if the order changes
+        expect(activeModule).toEqual(AccessModule.ERACOMMONS)
+
+        // 2FA (module 0) is complete, so enabled #1 is active
+        expect(activeModule).toEqual(enabledModules[1]);
+
+        // but we skip allModules[1] because it's RAS and is not enabled
+        expect(activeModule).toEqual(allModules[2]);
+    });
+
+    it('should return the second module (RAS) from getActiveModule when the first module (2FA) has been bypassed', () => {
+        const testProfile = {
+            ...profile,
+            accessModules: {
+                modules: [{moduleName: AccessModule.TWOFACTORAUTH, bypassEpochMillis: 1}]
+            }
+        };
+
+        const [navigate, ] = useNavigation();
+        const enabledModules = getEnabledModules(allModules, navigate);
+        const activeModule = getActiveModule(enabledModules, testProfile);
+
+        expect(activeModule).toEqual(allModules[1]);
+        expect(activeModule).toEqual(enabledModules[1]);
+
+        // update this if the order changes
+        expect(activeModule).toEqual(AccessModule.RASLINKLOGINGOV)
+    });
+
+    it('should return undefined from getActiveModule when all modules have been completed', () => {
+        const testProfile = {
+            ...profile,
+            accessModules: {
+                modules: allModules.map(module => ({moduleName: module, completionEpochMillis: 1}))
+            }
+        };
+
+        const [navigate, ] = useNavigation();
+        const enabledModules = getEnabledModules(allModules, navigate);
+        const activeModule = getActiveModule(enabledModules, testProfile);
+
+        expect(activeModule).toBeUndefined();
+    });
+
+    it('should render all modules by default (all FFs enabled)', () => {
         const wrapper = component();
         allModules.forEach(module => expect(findModule(wrapper, module).exists()).toBeTruthy());
     });
-
-    it('should not render the RAS module when its feature flag is disabled', () => {
-        serverConfigStore.set({config: {...defaultServerConfig, enableRasLoginGovLinking: false}});
-        const wrapper = component();
-        expect(findModule(wrapper, AccessModule.RASLINKLOGINGOV).exists()).toBeFalsy();
-     });
 
     it('should not render the ERA module when its feature flag is disabled', () => {
         serverConfigStore.set({config: {...defaultServerConfig, enableEraCommons: false}});
@@ -58,6 +171,19 @@ describe('DataAccessRequirements', () => {
         serverConfigStore.set({config: {...defaultServerConfig, enableComplianceTraining: false}});
         const wrapper = component();
         expect(findModule(wrapper, AccessModule.COMPLIANCETRAINING).exists()).toBeFalsy();
+    });
+
+    // Temporary hack Sep 16: when enableRasLoginGovLinking is false, we DO show the module
+    // along with an Ineligible icon and some "technical difficulties" text
+    // and it never becomes an activeModule
+    it('should render the RAS module as ineligible when its feature flag is disabled', () => {
+        serverConfigStore.set({config: {...defaultServerConfig, enableRasLoginGovLinking: false}});
+        const wrapper = component();
+        expect(findModule(wrapper, AccessModule.RASLINKLOGINGOV).exists()).toBeTruthy();
+        expect(findIneligibleModule(wrapper, AccessModule.RASLINKLOGINGOV).exists()).toBeTruthy();
+
+        expect(findCompleteModule(wrapper, AccessModule.RASLINKLOGINGOV).exists()).toBeFalsy();
+        expect(findIncompleteModule(wrapper, AccessModule.RASLINKLOGINGOV).exists()).toBeFalsy();
     });
 
     it('should render all modules as incomplete when the profile accessModules are empty', () => {
@@ -76,7 +202,7 @@ describe('DataAccessRequirements', () => {
             profile: {
                 ...ProfileStubVariables.PROFILE_STUB,
                 accessModules: {
-                    modules: allModules.map(module => {return {moduleName: module, completionEpochMillis: 1}})
+                    modules: allModules.map(module => ({moduleName: module, completionEpochMillis: 1}))
                 }
             },
             load,
