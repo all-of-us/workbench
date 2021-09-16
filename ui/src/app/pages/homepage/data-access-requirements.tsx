@@ -33,7 +33,7 @@ import {
 import {isAbortError} from 'app/utils/errors';
 import {useNavigation} from 'app/utils/navigation';
 import {profileStore, serverConfigStore, useStore} from 'app/utils/stores';
-import {AccessModule, AccessModuleStatus} from 'generated/fetch';
+import {AccessModule, AccessModuleStatus, Profile} from 'generated/fetch';
 import {TwoFactorAuthModal} from './two-factor-auth-modal';
 
 const styles = reactStyles({
@@ -311,6 +311,18 @@ const syncExternalModules = async() => {
   }
 };
 
+// exported for test
+export const getEnabledModules = (modules: AccessModule[], navigate): AccessModule[] => fp.flatMap(moduleName => {
+  const enabledTaskMaybe = getRegistrationTask(navigate, moduleName);
+  return enabledTaskMaybe ? [enabledTaskMaybe.module] : [];
+}, modules);
+
+// exported for test
+export const getActiveModule = (modules: AccessModule[], profile: Profile): AccessModule => modules.find(moduleName => {
+  const status = getAccessModuleStatusByName(profile, moduleName);
+  return !bypassedOrCompletedText(status);
+});
+
 const Refresh = (props: {showSpinner: Function}) => <Button
     type='primary'
     style={styles.refreshButton}
@@ -521,21 +533,14 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
   const [activeModule, setActiveModule] = useState(null);
 
   const [navigate, ] = useNavigation();
-  const enabledModules = fp.flatMap(moduleName => {
-    const enabledTaskMaybe = getRegistrationTask(navigate, moduleName);
-    return enabledTaskMaybe ? [enabledTaskMaybe.module] : [];
-  }, allModules);
+  const enabledModules = getEnabledModules(allModules, navigate);
 
   // whenever the profile changes, setActiveModule(the first incomplete enabled module)
   useEffect(() => {
-    fp.flow(
-      fp.find<AccessModule>(moduleName => {
-        const status = getAccessModuleStatusByName(profile, moduleName);
-        return !bypassedOrCompletedText(status);
-      }),
-      setActiveModule
-    )
-    (enabledModules);
+    const activeModule = getActiveModule(enabledModules, profile);
+    if (activeModule) {
+      setActiveModule(activeModule);
+    }
   }, [profile]);
 
   const {config: {unsafeAllowSelfBypass}} = useStore(serverConfigStore);
