@@ -1,3 +1,4 @@
+import { RouteRedirect } from 'app/components/app-router';
 import {Button} from 'app/components/buttons';
 import {FlexRow} from 'app/components/flex';
 import {TextInput} from 'app/components/inputs';
@@ -5,7 +6,6 @@ import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import colors from 'app/styles/colors';
 import * as React from 'react';
 import {useEffect, useState} from 'react';
-import { Redirect } from 'react-router-dom';
 
 export const AdminWorkspaceSearch = (spinnerProps: WithSpinnerOverlayProps) => {
   const [workspaceNamespace, setWorkspaceNamespace] = useState();
@@ -16,7 +16,7 @@ export const AdminWorkspaceSearch = (spinnerProps: WithSpinnerOverlayProps) => {
   useEffect(() => spinnerProps.hideSpinner(), []);
 
   return redirect
-      ? <Redirect to={pathToWorkspace}/>
+      ? <RouteRedirect path={pathToWorkspace}/>
       : <FlexRow style={{justifyContent: 'flex-start', alignItems: 'center', marginTop: '1rem'}}>
         <label style={{color: colors.primary, marginRight: '1rem'}}>Workspace namespace</label>
         <TextInput

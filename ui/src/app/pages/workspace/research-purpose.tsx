@@ -23,7 +23,7 @@ import {serverConfigStore} from 'app/utils/stores';
 import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
-import { RouteLink } from 'app/components/app-router';
+import { RouteLink, RouteRedirect } from 'app/components/app-router';
 import { useState } from 'react';
 import { Redirect } from 'react-router-dom';
 
@@ -95,7 +95,7 @@ export const ResearchPurpose = fp.flow(withCurrentWorkspace(), withNavigation)(
     };
 
     return redirectPath
-        ? <Redirect to={redirectPath}/>
+        ? <RouteRedirect path={redirectPath}/>
         : <FadeBox>
           <div style={styles.mainHeader}>Primary purpose of project
             <Clickable disabled={!isOwner}

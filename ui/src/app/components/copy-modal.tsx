@@ -18,9 +18,7 @@ import { workspacesApi } from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {cond, reactStyles, withCdrVersions} from 'app/utils';
 import {findCdrVersion} from 'app/utils/cdr-versions';
-import {NavigationProps} from 'app/utils/navigation';
 import {toDisplay} from 'app/utils/resources';
-import {withNavigation} from 'app/utils/with-navigation-hoc';
 import { WorkspacePermissions } from 'app/utils/workspace-permissions';
 import {FlexRow} from './flex';
 import {ClrIcon} from './icons';
@@ -45,7 +43,7 @@ export interface CopyModalProps {
   saveFunction: (CopyRequest) => Promise<FileDetail | ConceptSet>;
 }
 
-interface HocProps extends CopyModalProps, NavigationProps {
+interface HocProps extends CopyModalProps {
   cdrVersionTiersResponse: CdrVersionTiersResponse;
 }
 
@@ -129,8 +127,7 @@ const NotebookRestrictionText = () => <div style={styles.restriction}>
   Notebooks can only be copied to workspaces in the same access tier.
 </div>;
 
-const CopyModal = fp.flow(withNavigation, withCdrVersions())
-(class extends React.Component<HocProps, CopyModalState> {
+const CopyModal = withCdrVersions()(class extends React.Component<HocProps, CopyModalState> {
   constructor(props: HocProps) {
     super(props);
     this.state = {
@@ -236,17 +233,6 @@ const CopyModal = fp.flow(withNavigation, withCdrVersions())
     });
   }
 
-  goToDestinationWorkspace() {
-    this.props.navigate(
-      [
-        'workspaces',
-        this.state.destination.namespace,
-        this.state.destination.id,
-        ResourceTypeHomeTabs.get(this.props.resourceType)
-      ]
-    );
-  }
-
   render() {
     const {resourceType} = this.props;
     const {loading, requestState} = this.state;
@@ -284,20 +270,22 @@ const CopyModal = fp.flow(withNavigation, withCdrVersions())
 
   renderActionButton() {
     const resourceType = toDisplay(this.props.resourceType);
-    if (this.state.requestState === RequestState.UNSENT ||
-      this.state.requestState === RequestState.COPY_ERROR) {
+    const {destination, loading, requestState} = this.state;
+    if (requestState === RequestState.UNSENT || requestState === RequestState.COPY_ERROR) {
       return (
         <Button style={{ marginLeft: '0.5rem' }}
-                disabled={this.state.destination === null || this.state.loading}
+                disabled={destination === null || loading}
                 onClick={() => this.save()}
                 data-test-id='copy-button'>
           Copy {resourceType}
         </Button>
       );
-    } else if (this.state.requestState === RequestState.SUCCESS) {
+    } else if (requestState === RequestState.SUCCESS) {
       return (
-        <Button style={{ marginLeft: '0.5rem' }}
-                onClick={() => this.goToDestinationWorkspace()}>
+        <Button
+            style={{ marginLeft: '0.5rem' }}
+            path={`/workspaces/${destination.namespace}/${destination.id}/${ResourceTypeHomeTabs.get(this.props.resourceType)}`}
+        >
           Go to Copied {resourceType}
         </Button>
       );

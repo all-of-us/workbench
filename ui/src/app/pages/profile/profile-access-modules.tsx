@@ -11,6 +11,7 @@ import {ProfileRegistrationStepStatus} from './profile-registration-step-status'
 import {styles} from './profile-styles';
 import { Redirect } from 'react-router-dom';
 import { useState } from 'react';
+import { RouteRedirect } from 'app/components/app-router';
 
 enum RegistrationStepStatus {
     COMPLETED,
@@ -133,7 +134,7 @@ export const ProfileAccessModules = (props: {profile: Profile}) => {
   const controlledTierEnabled = false, controlledTierBypassTime = null, controlledTierCompletionTime = null;
 
   return redirectToDUCC
-      ? <Redirect to={'/data-code-of-conduct'}/>
+      ? <RouteRedirect path={'/data-code-of-conduct'}/>
       : <React.Fragment>
             <div style={styles.title}>
                 Requirements for <AoU/> Workbench access

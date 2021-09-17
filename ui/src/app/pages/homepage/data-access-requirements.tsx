@@ -2,7 +2,7 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {useEffect, useState} from 'react';
 
-import { useQuery } from 'app/components/app-router';
+import {RouteRedirect, useQuery } from 'app/components/app-router';
 import {Button, Clickable} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
@@ -373,7 +373,7 @@ const MaybeModule = ({moduleName, active, spinnerProps}: ModuleProps): JSX.Eleme
             : registrationTask.onClick);
 
     return redirectToDUCC
-        ? <Redirect to={'/data-code-of-conduct'}/>
+        ? <RouteRedirect path={'/data-code-of-conduct'}/>
         : active
             ? <Clickable onClick={() => {
                 setShowRefresh(true);

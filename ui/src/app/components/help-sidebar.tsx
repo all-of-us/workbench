@@ -37,7 +37,6 @@ import {AnalyticsTracker} from 'app/utils/analytics';
 import {
   currentCohortSearchContextStore,
   currentConceptStore,
-  NavigationProps,
   setSidebarActiveIconStore
 } from 'app/utils/navigation';
 import {withRuntimeStore} from 'app/utils/runtime-utils';
@@ -63,7 +62,6 @@ import {WorkspaceShare} from 'app/pages/workspace/workspace-share';
 import {dataSetApi} from 'app/services/swagger-fetch-clients';
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import {getCdrVersion} from 'app/utils/cdr-versions';
-import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {
   CdrVersionTiersResponse,
   Criteria, GenomicExtractionJob,
@@ -76,6 +74,8 @@ import {
 import arrowLeft from 'assets/icons/arrow-left-regular.svg';
 import runtime from 'assets/icons/thunderstorm-solid.svg';
 import times from 'assets/icons/times-light.svg';
+import { Redirect } from 'react-router-dom';
+import { RouteRedirect } from './app-router';
 
 export const LOCAL_STORAGE_KEY_SIDEBAR_STATE = 'WORKSPACE_SIDEBAR_STATE';
 
@@ -228,7 +228,7 @@ const pageKeyToAnalyticsLabels = {
   reviewParticipantDetail: 'Review Individual',
 };
 
-interface Props extends NavigationProps {
+interface Props {
   pageKey: string;
   profileState: any;
   shareFunction: Function;
@@ -255,6 +255,7 @@ interface State {
   showCriteria: boolean;
   tooltipId: number;
   currentModal: CurrentModal;
+  redirectPath: string;
 }
 
 export const HelpSidebar = fp.flow(
@@ -265,8 +266,7 @@ export const HelpSidebar = fp.flow(
   withStore(compoundRuntimeOpStore, 'compoundRuntimeOps'),
   withStore(genomicExtractionStore, 'genomicExtraction'),
   withUserProfile(),
-  withCdrVersions(),
-  withNavigation
+  withCdrVersions()
 )(
   class extends React.Component<Props, State> {
     constructor(props: Props) {
@@ -278,7 +278,8 @@ export const HelpSidebar = fp.flow(
         searchTerm: '',
         showCriteria: false,
         tooltipId: undefined,
-        currentModal: CurrentModal.None
+        currentModal: CurrentModal.None,
+        redirectPath: null
       };
     }
 
@@ -294,7 +295,7 @@ export const HelpSidebar = fp.flow(
     }, async() => {
       AnalyticsTracker.Workspaces.Delete();
       await workspacesApi().deleteWorkspace(this.props.workspace.namespace, this.props.workspace.id);
-      this.props.navigate(['workspaces']);
+      this.setState({redirectPath: '/workspaces'});
     });
 
     iconConfig(iconKey): IconConfig {
@@ -488,7 +489,7 @@ export const HelpSidebar = fp.flow(
               icon='copy'
               onClick={() => {
                 AnalyticsTracker.Workspaces.OpenDuplicatePage();
-                this.props.navigate(['workspaces', namespace, id, 'duplicate']);
+                this.setState({redirectPath: `/workspaces/${namespace}/${id}/duplicate`});
               }}>
               Duplicate
             </MenuItem>
@@ -498,7 +499,7 @@ export const HelpSidebar = fp.flow(
               disabled={isNotOwner}
               onClick={() => {
                 AnalyticsTracker.Workspaces.OpenEditPage();
-                this.props.navigate(['workspaces', namespace, id, 'edit']);
+                this.setState({redirectPath: `/workspaces/${namespace}/${id}/edit`});
               }}>
               Edit
             </MenuItem>
@@ -797,102 +798,104 @@ export const HelpSidebar = fp.flow(
     }
 
     render() {
-      const {activeIcon} = this.state;
+      const {activeIcon, redirectPath} = this.state;
       const sidebarContent = this.sidebarContent(activeIcon);
       const shouldRenderWorkspaceMenu = !this.iconConfig('concept').showIcon() && !this.iconConfig('criteria').showIcon();
 
-      return <div id='help-sidebar'>
-        <div style={{...styles.iconContainer, ...(this.props.pageKey === NOTEBOOK_PAGE_KEY ? styles.notebookOverrides : {})}}>
-          {shouldRenderWorkspaceMenu && this.renderWorkspaceMenu()}
-          {this.icons().map((icon, i) =>
-              <div key={i} style={{display: 'table'}}>
-                <TooltipTrigger content={<div>{icon.tooltip}</div>} side='left'>
-                  <div style={activeIcon === icon.id ? iconStyles.active : icon.disabled ? iconStyles.disabled : styles.icon}
-                       onClick={() => {
-                         if (icon.id !== 'dataDictionary' && !icon.disabled) {
-                           this.onIconClick(icon);
-                         }
-                       }}>
-                    {
-                      switchCase(icon.id,
-                        ['dataDictionary',
-                          () => <a href={supportUrls.dataDictionary} target='_blank'>
-                              <FontAwesomeIcon data-test-id={'help-sidebar-icon-' + icon.id} icon={icon.faIcon} style={icon.style} />
-                            </a>
-                        ],
-                        ['runtime', () => this.displayRuntimeIcon(icon)],
-                        ['genomicExtractions', () => this.displayExtractionIcon(icon)],
-                        [DEFAULT, () => icon.faIcon === null
-                              ? <img data-test-id={'help-sidebar-icon-' + icon.id} src={proIcons[icon.id]} style={icon.style} />
-                              : this.displayFontAwesomeIcon(icon)
-                        ]
-                      )
-                    }
+      return redirectPath
+          ? <RouteRedirect path={redirectPath}/>
+          : <div id='help-sidebar'>
+            <div style={{...styles.iconContainer, ...(this.props.pageKey === NOTEBOOK_PAGE_KEY ? styles.notebookOverrides : {})}}>
+              {shouldRenderWorkspaceMenu && this.renderWorkspaceMenu()}
+              {this.icons().map((icon, i) =>
+                  <div key={i} style={{display: 'table'}}>
+                    <TooltipTrigger content={<div>{icon.tooltip}</div>} side='left'>
+                      <div style={activeIcon === icon.id ? iconStyles.active : icon.disabled ? iconStyles.disabled : styles.icon}
+                           onClick={() => {
+                             if (icon.id !== 'dataDictionary' && !icon.disabled) {
+                               this.onIconClick(icon);
+                             }
+                           }}>
+                        {
+                          switchCase(icon.id,
+                            ['dataDictionary',
+                              () => <a href={supportUrls.dataDictionary} target='_blank'>
+                                  <FontAwesomeIcon data-test-id={'help-sidebar-icon-' + icon.id} icon={icon.faIcon} style={icon.style} />
+                                </a>
+                            ],
+                            ['runtime', () => this.displayRuntimeIcon(icon)],
+                            ['genomicExtractions', () => this.displayExtractionIcon(icon)],
+                            [DEFAULT, () => icon.faIcon === null
+                                  ? <img data-test-id={'help-sidebar-icon-' + icon.id} src={proIcons[icon.id]} style={icon.style} />
+                                  : this.displayFontAwesomeIcon(icon)
+                            ]
+                          )
+                        }
+                      </div>
+                    </TooltipTrigger>
                   </div>
-                </TooltipTrigger>
-              </div>
-            )
-          }
-        </div>
-
-        <TransitionGroup>
-          <CSSTransition
-            key={activeIcon}
-            classNames='sidebar'
-            addEndListener={(node, done) => {
-              node.addEventListener('transitionend', (e) => {
-                if (node.isEqualNode(e.target)) {
-                  done(e);
-                }
-              }, false);
-            }}>
-            <div style={this.sidebarContainerStyles(activeIcon)}>
-              <div style={this.sidebarStyle} data-test-id='sidebar-content'>
-                {activeIcon && sidebarContent &&
-                <div style={{height: '100%', overflow: sidebarContent.overflow || 'auto'}}>
-                  <FlexColumn style={{height: '100%'}}>
-                    {sidebarContent.renderHeader &&
-                    <FlexRow style={{justifyContent: 'space-between', padding: sidebarContent.headerPadding}}>
-                      {sidebarContent.renderHeader()}
-
-                      <Clickable style={{marginLeft: 'auto'}} onClick={() => this.setActiveIcon(null)}>
-                        <img src={proIcons.times}
-                             style={{height: '27px', width: '17px'}}
-                             alt='Close'/>
-                      </Clickable>
-                    </FlexRow>}
-
-                    <div className='slim-scroll-bar' style={{flex: 1, padding: sidebarContent.bodyPadding || '0 0.5rem 5.5rem'}}>
-                      {sidebarContent.renderBody()}
-                    </div>
-                  </FlexColumn>
-
-                  {sidebarContent.showFooter &&
-                  <div style={{...styles.footer}}>
-                      <h3 style={{...styles.sectionTitle, marginTop: 0}}>Not finding what you're looking for?</h3>
-                      <p style={styles.contentItem}>
-                          Visit our <a href={supportUrls.helpCenter}
-                                                     target='_blank' onClick={() => this.analyticsEvent('UserSupport')}> User Support Hub
-                      </a> page or <span style={styles.link} onClick={() => this.openContactWidget()}> contact us</span>.
-                      </p>
-                  </div>}
-                </div>}
-              </div>
+                )
+              }
             </div>
-          </CSSTransition>
-        </TransitionGroup>
 
-        {
-          switchCase(this.state.currentModal,
-            [CurrentModal.Share, () => <WorkspaceShare workspace={this.props.workspace}
-                                                             onClose={() => this.setState({currentModal: CurrentModal.None})}/>],
-            [CurrentModal.Delete, () => <ConfirmDeleteModal closeFunction={() => this.setState({currentModal: CurrentModal.None})}
-                                                            resourceType={ResourceType.WORKSPACE}
-                                                            receiveDelete={() => this.deleteWorkspace()}
-                                                            resourceName={this.props.workspace.name}/>]
-          )
-        }
-      </div>;
+            <TransitionGroup>
+              <CSSTransition
+                key={activeIcon}
+                classNames='sidebar'
+                addEndListener={(node, done) => {
+                  node.addEventListener('transitionend', (e) => {
+                    if (node.isEqualNode(e.target)) {
+                      done(e);
+                    }
+                  }, false);
+                }}>
+                <div style={this.sidebarContainerStyles(activeIcon)}>
+                  <div style={this.sidebarStyle} data-test-id='sidebar-content'>
+                    {activeIcon && sidebarContent &&
+                    <div style={{height: '100%', overflow: sidebarContent.overflow || 'auto'}}>
+                      <FlexColumn style={{height: '100%'}}>
+                        {sidebarContent.renderHeader &&
+                        <FlexRow style={{justifyContent: 'space-between', padding: sidebarContent.headerPadding}}>
+                          {sidebarContent.renderHeader()}
+
+                          <Clickable style={{marginLeft: 'auto'}} onClick={() => this.setActiveIcon(null)}>
+                            <img src={proIcons.times}
+                                 style={{height: '27px', width: '17px'}}
+                                 alt='Close'/>
+                          </Clickable>
+                        </FlexRow>}
+
+                        <div className='slim-scroll-bar' style={{flex: 1, padding: sidebarContent.bodyPadding || '0 0.5rem 5.5rem'}}>
+                          {sidebarContent.renderBody()}
+                        </div>
+                      </FlexColumn>
+
+                      {sidebarContent.showFooter &&
+                      <div style={{...styles.footer}}>
+                          <h3 style={{...styles.sectionTitle, marginTop: 0}}>Not finding what you're looking for?</h3>
+                          <p style={styles.contentItem}>
+                              Visit our <a href={supportUrls.helpCenter}
+                                                         target='_blank' onClick={() => this.analyticsEvent('UserSupport')}> User Support Hub
+                          </a> page or <span style={styles.link} onClick={() => this.openContactWidget()}> contact us</span>.
+                          </p>
+                      </div>}
+                    </div>}
+                  </div>
+                </div>
+              </CSSTransition>
+            </TransitionGroup>
+
+            {
+              switchCase(this.state.currentModal,
+                [CurrentModal.Share, () => <WorkspaceShare workspace={this.props.workspace}
+                                                                 onClose={() => this.setState({currentModal: CurrentModal.None})}/>],
+                [CurrentModal.Delete, () => <ConfirmDeleteModal closeFunction={() => this.setState({currentModal: CurrentModal.None})}
+                                                                resourceType={ResourceType.WORKSPACE}
+                                                                receiveDelete={() => this.deleteWorkspace()}
+                                                                resourceName={this.props.workspace.name}/>]
+              )
+            }
+          </div>;
     }
   }
 );

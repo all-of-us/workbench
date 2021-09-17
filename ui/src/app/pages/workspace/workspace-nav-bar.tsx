@@ -20,7 +20,7 @@ import {MatchParams, serverConfigStore} from 'app/utils/stores';
 import {CdrVersionTiersResponse, Workspace} from 'generated/fetch';
 import {Redirect, useParams} from 'react-router-dom';
 import {CdrVersionUpgradeModal} from './cdr-version-upgrade-modal';
-import { RouteLink } from 'app/components/app-router';
+import { RouteLink, RouteRedirect } from 'app/components/app-router';
 
 const styles = reactStyles({
   container: {
@@ -115,7 +115,7 @@ const CdrVersion = (props: {workspace: Workspace, cdrVersionTiersResponse: CdrVe
   </Clickable>;
 
   return redirect
-      ? <Redirect to={redirectPath}/>
+      ? <RouteRedirect path={redirectPath}/>
       : <FlexRow data-test-id='cdr-version' style={{textTransform: 'none'}}>
         {getCdrVersion(workspace, cdrVersionTiersResponse).name}
         {!hasDefaultCdrVersion(workspace, cdrVersionTiersResponse) && <NewVersionFlag/>}
