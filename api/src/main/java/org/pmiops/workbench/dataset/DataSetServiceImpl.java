@@ -913,7 +913,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
         + "manifest_file = os.environ['"
         + generateVcfDirEnvName(qualifier)
         + "'] + '/manifest.txt'\n\n"
-        + "assert subprocess.run(['gsutil', '-q', 'stat', manifest_file]) == 0, (\n"
+        + "assert subprocess.run(['gsutil', '-q', 'stat', manifest_file]).returncode == 0, (\n"
         + "  \"!\" * 100 + \"\\n\\n\" +\n"
         + "  \"VCF extraction has not completed.\\n\" +\n"
         + "  \"Please monitor the extraction sidepanel for completion before continuing.\\n\\n\" +\n"
