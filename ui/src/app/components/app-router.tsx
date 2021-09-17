@@ -93,7 +93,8 @@ export const AppRouter = ({children}): React.ReactElement => {
   return <BrowserRouter getUserConfirmation={getUserConfirmation}>{children}</BrowserRouter>;
 };
 
-export const RouteLink = ({path, style = {}, children}): React.ReactElement => <Link style={{textDecoration: 'none', color: 'unset', ...style}} to={path}>{children}</Link>;
+export const RouteLink = ({path, style = {}, children}): React.ReactElement =>
+    <Link style={{textDecoration: 'none', color: 'unset', ...style}} to={path}>{children}</Link>;
 
 export const RouteRedirect = ({path}) => <Redirect to={path} push={true} />;
 

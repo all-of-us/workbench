@@ -65,7 +65,7 @@ export interface RegistrationDashboardProps {
   dataUserCodeOfConductCompleted: boolean;
 }
 
-interface HocProps extends RegistrationDashboardProps {}
+type HocProps = RegistrationDashboardProps
 
 interface State {
   showRefreshButton: boolean;

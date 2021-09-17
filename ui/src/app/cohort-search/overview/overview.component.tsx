@@ -504,7 +504,8 @@ export const ListOverview = fp.flow(withCurrentWorkspace(), withCdrVersions(), w
                           {!!chartData.length && <GenderChart data={chartData} />}
                         </div>
                         <div style={styles.cardHeader}>
-                          {genderOrSexTypeToText(currentGraphOptions.genderOrSexType)}, {ageTypeToText(currentGraphOptions.ageType)}, and Race
+                          {genderOrSexTypeToText(currentGraphOptions.genderOrSexType)},
+                          {ageTypeToText(currentGraphOptions.ageType)}, and Race
                           <ClrIcon shape='sort-by'
                             className={stackChart ? 'is-info' : ''}
                             onClick={() => this.toggleChartMode()} />

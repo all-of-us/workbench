@@ -122,7 +122,9 @@ export const ResearchPurpose = fp.flow(withCurrentWorkspace())(
             Good</a>
             |
               <Clickable onClick={() => AnalyticsTracker.WorkspaceUpdatePrompt.UpdateWorkspace()}>
-                <RouteLink path={`/workspaces/${workspace.namespace}/${workspace.id}/edit`} style={{marginLeft: '0.5rem'}}>Update</RouteLink>
+                <RouteLink path={`/workspaces/${workspace.namespace}/${workspace.id}/edit`} style={{marginLeft: '0.5rem'}}>
+                  Update
+                </RouteLink>
               </Clickable>
             </div>
             </FlexRow>}

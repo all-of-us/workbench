@@ -242,7 +242,16 @@ const ButtonContentWrapper = ({computedStyle, disabled = false, ...props}) => {
   />;
 };
 
-export const Button = ({children, path='', type = 'primary', style = {}, linkStyle={}, disabled = false, propagateDataTestId = false, ...props}) => {
+export const Button = ({
+                         children,
+                         path='',
+                         type = 'primary',
+                         style = {},
+                         linkStyle={},
+                         disabled = false,
+                         propagateDataTestId = false,
+                         ...props
+}) => {
   // `fp.omit` used to prevent propagation of test IDs to the rendered child component.
   const childProps = propagateDataTestId ? props : fp.omit(['data-test-id'], props);
   const childStyle = fp.merge(computeStyle(buttonVariants[type], {disabled}), {style})
