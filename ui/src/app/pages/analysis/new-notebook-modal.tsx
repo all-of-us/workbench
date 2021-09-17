@@ -29,7 +29,7 @@ export const NewNotebookModal = (props: Props) => {
   const {workspace, onClose, existingNameList} = props;
 
   const workspacePath = `/workspaces/${workspace.namespace}/${workspace.id}/notebooks/${encodeURIComponent(name)}`
-      + `?kernelType=${kernel}?creating=true`
+      + `?kernelType=${kernel}&creating=true`
 
   const errors = validate({name, kernel}, {
     kernel: {presence: {allowEmpty: false}},

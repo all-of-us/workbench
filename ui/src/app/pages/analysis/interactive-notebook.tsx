@@ -15,16 +15,15 @@ import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {hasNewValidProps, reactStyles, withCurrentWorkspace} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
-import {NavigationProps} from 'app/utils/navigation';
 import {withRuntimeStore} from 'app/utils/runtime-utils';
 import {maybeInitializeRuntime} from 'app/utils/runtime-utils';
 import {MatchParams, profileStore, RuntimeStore} from 'app/utils/stores';
 import {ACTION_DISABLED_INVALID_BILLING} from 'app/utils/strings';
-import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {BillingStatus, RuntimeStatus} from 'generated/fetch';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
+import { RouteRedirect } from 'app/components/app-router';
 
 
 const styles = reactStyles({
@@ -102,7 +101,7 @@ const styles = reactStyles({
   }
 });
 
-interface Props extends WithSpinnerOverlayProps, NavigationProps, RouteComponentProps<MatchParams> {
+interface Props extends WithSpinnerOverlayProps, RouteComponentProps<MatchParams> {
   workspace: WorkspaceData;
   runtimeStore: RuntimeStore;
 }
@@ -111,11 +110,12 @@ interface State {
   html: string;
   lastLockedBy: string;
   lockExpirationTime: number;
+  previewErrorMode: PreviewErrorMode;
+  previewErrorMessage: string;
+  redirectPath: string;
   showInUseModal: boolean;
   showPlaygroundModeModal: boolean;
   userRequestedExecutableNotebook: boolean;
-  previewErrorMode: PreviewErrorMode;
-  previewErrorMessage: string;
 }
 
 enum PreviewErrorMode {
@@ -127,7 +127,6 @@ enum PreviewErrorMode {
 export const InteractiveNotebook = fp.flow(
   withRuntimeStore(),
   withCurrentWorkspace(),
-  withNavigation,
   withRouter
 )(
   class extends React.Component<Props, State> {
@@ -139,11 +138,12 @@ export const InteractiveNotebook = fp.flow(
         html: '',
         lastLockedBy: '',
         lockExpirationTime: 0,
+        previewErrorMode: PreviewErrorMode.NONE,
+        previewErrorMessage: '',
+        redirectPath: null,
         showInUseModal: false,
         showPlaygroundModeModal: false,
-        userRequestedExecutableNotebook: false,
-        previewErrorMode: PreviewErrorMode.NONE,
-        previewErrorMessage: ''
+        userRequestedExecutableNotebook: false
       };
     }
 
@@ -228,12 +228,10 @@ export const InteractiveNotebook = fp.flow(
     }
 
     private navigateOldNotebooksPage(playgroundMode: boolean) {
-      const queryParams = {
-        playgroundMode: playgroundMode
-      };
-
-      this.props.navigate(['workspaces', this.props.match.params.ns, this.props.match.params.wsid,
-        'notebooks', this.props.match.params.nbName], {'queryParams': queryParams});
+      const {ns, wsid, nbName} = this.props.match.params;
+      this.setState({
+        redirectPath: `/workspaces/${ns}/${wsid}/notebooks/${nbName}?playgroundMode=${playgroundMode}`
+      });
     }
 
     private navigatePlaygroundMode() {
@@ -264,7 +262,7 @@ export const InteractiveNotebook = fp.flow(
     private cloneNotebook() {
       const {ns, wsid, nbName} = this.props.match.params;
       workspacesApi().cloneNotebook(ns, wsid, nbName).then((notebook) => {
-        this.props.navigate(['workspaces', ns, wsid, 'notebooks', encodeURIComponent(notebook.name)]);
+        this.setState({redirectPath: `/workspaces/${ns}/${wsid}/notebooks/${encodeURIComponent(notebook.name)}`});
       });
     }
 
@@ -316,74 +314,75 @@ export const InteractiveNotebook = fp.flow(
     render() {
       const {
         lastLockedBy,
+        redirectPath,
         showInUseModal,
         showPlaygroundModeModal,
         userRequestedExecutableNotebook,
       } = this.state;
-      return (
-        <div>
-          <div style={styles.navBar}>
-            <div style={{...styles.navBarItem, ...styles.active}}>
-              Preview (Read-Only)
+      return redirectPath
+          ? <RouteRedirect path={redirectPath} />
+          : <div>
+            <div style={styles.navBar}>
+              <div style={{...styles.navBarItem, ...styles.active}}>
+                Preview (Read-Only)
+              </div>
+              {userRequestedExecutableNotebook ? (
+                <div style={{...styles.navBarItem, textTransform: 'none'}}>
+                  <ClrIcon shape='sync' style={{...styles.navBarIcon, ...styles.rotate}}/>
+                  {this.renderNotebookText()}
+                </div>) : (
+                    <div style={{display: 'flex'}}>
+                      <TooltipTrigger content={this.billingLocked && ACTION_DISABLED_INVALID_BILLING}>
+                        <div style={this.buttonStyleObj}
+                             onClick={() => {
+                               AnalyticsTracker.Notebooks.Edit();
+                               this.startEditMode();
+                             }}>
+                          <EditComponentReact enableHoverEffect={false}
+                                              disabled={!this.canStartRuntimes}
+                                              style={styles.navBarIcon}/>
+                          Edit {this.notebookInUse && '(In Use)'}
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipTrigger content={this.billingLocked && ACTION_DISABLED_INVALID_BILLING}>
+                        <div style={this.buttonStyleObj}
+                             onClick={() => {
+                               AnalyticsTracker.Notebooks.Run();
+                               this.onPlaygroundModeClick();
+                             }}>
+                          <IconButton icon={PlaygroundIcon}
+                                      disabled={!this.canStartRuntimes}
+                                      style={styles.navBarIcon}/>
+                          Run (Playground Mode)
+                        </div>
+                      </TooltipTrigger>
+                    </div>
+                )
+              }
             </div>
-            {userRequestedExecutableNotebook ? (
-              <div style={{...styles.navBarItem, textTransform: 'none'}}>
-                <ClrIcon shape='sync' style={{...styles.navBarIcon, ...styles.rotate}}/>
-                {this.renderNotebookText()}
-              </div>) : (
-                  <div style={{display: 'flex'}}>
-                    <TooltipTrigger content={this.billingLocked && ACTION_DISABLED_INVALID_BILLING}>
-                      <div style={this.buttonStyleObj}
-                           onClick={() => {
-                             AnalyticsTracker.Notebooks.Edit();
-                             this.startEditMode();
-                           }}>
-                        <EditComponentReact enableHoverEffect={false}
-                                            disabled={!this.canStartRuntimes}
-                                            style={styles.navBarIcon}/>
-                        Edit {this.notebookInUse && '(In Use)'}
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipTrigger content={this.billingLocked && ACTION_DISABLED_INVALID_BILLING}>
-                      <div style={this.buttonStyleObj}
-                           onClick={() => {
-                             AnalyticsTracker.Notebooks.Run();
-                             this.onPlaygroundModeClick();
-                           }}>
-                        <IconButton icon={PlaygroundIcon}
-                                    disabled={!this.canStartRuntimes}
-                                    style={styles.navBarIcon}/>
-                        Run (Playground Mode)
-                      </div>
-                    </TooltipTrigger>
-                  </div>
-              )
-            }
-          </div>
-          <div style={styles.previewDiv}>
-            {this.renderPreviewContents()}
-          </div>
-          {showPlaygroundModeModal &&
-            <ConfirmPlaygroundModeModal
+            <div style={styles.previewDiv}>
+              {this.renderPreviewContents()}
+            </div>
+            {showPlaygroundModeModal &&
+              <ConfirmPlaygroundModeModal
+                onCancel={() => {
+                  this.setState({showPlaygroundModeModal: false}); }}
+                onContinue={() => {
+                  this.setState({showPlaygroundModeModal: false});
+                  this.startPlaygroundMode();
+                }}/>}
+            {showInUseModal &&
+            <NotebookInUseModal
+              email={lastLockedBy}
               onCancel={() => {
-                this.setState({showPlaygroundModeModal: false}); }}
-              onContinue={() => {
-                this.setState({showPlaygroundModeModal: false});
+                this.setState({showInUseModal: false}); }}
+              onCopy={() => {this.cloneNotebook(); }}
+              onPlaygroundMode={() => {
+                this.setState({showInUseModal: false});
                 this.startPlaygroundMode();
-              }}/>}
-          {showInUseModal &&
-          <NotebookInUseModal
-            email={lastLockedBy}
-            onCancel={() => {
-              this.setState({showInUseModal: false}); }}
-            onCopy={() => {this.cloneNotebook(); }}
-            onPlaygroundMode={() => {
-              this.setState({showInUseModal: false});
-              this.startPlaygroundMode();
-            }}>
-          </NotebookInUseModal>}
-        </div>
-      );
+              }}>
+            </NotebookInUseModal>}
+          </div>;
     }
   });
 
