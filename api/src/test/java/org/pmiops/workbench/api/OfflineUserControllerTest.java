@@ -43,7 +43,6 @@ public class OfflineUserControllerTest extends SpringTest {
   @Autowired private OfflineUserController offlineUserController;
   @Autowired private CloudTasksClient mockCloudTasksClient;
 
-  private List<DbUser> users;
   private Long incrementedUserId = 1L;
 
   private static WorkbenchConfig workbenchConfig;
@@ -66,7 +65,7 @@ public class OfflineUserControllerTest extends SpringTest {
   @BeforeEach
   public void setUp() {
     incrementedUserId = 1L;
-    users = createUsers();
+    List<DbUser> users = createUsers();
     List<Long> userIds = users.stream().map(DbUser::getUserId).collect(Collectors.toList());
     when(mockUserService.getAllUsersExcludingDisabled()).thenReturn(users);
     when(mockUserService.getAllUsers()).thenReturn(users);
