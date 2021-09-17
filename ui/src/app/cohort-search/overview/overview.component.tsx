@@ -17,9 +17,8 @@ import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, withCdrVersions, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {isAbortError} from 'app/utils/errors';
-import {currentWorkspaceStore, NavigationProps} from 'app/utils/navigation';
+import {currentWorkspaceStore} from 'app/utils/navigation';
 import { MatchParams } from 'app/utils/stores';
-import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {
   AgeType,
@@ -31,6 +30,7 @@ import {
   WorkspaceAccessLevel
 } from 'generated/fetch';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
+import { RouteRedirect } from 'app/components/app-router';
 
 const COHORT_TYPE = 'AoU_Discover';
 
@@ -121,7 +121,7 @@ const styles = reactStyles({
   }
 });
 
-interface Props extends NavigationProps, RouteComponentProps<MatchParams> {
+interface Props extends RouteComponentProps<MatchParams> {
   cohort: Cohort;
   cohortChanged: boolean;
   searchRequest: any;
@@ -149,9 +149,10 @@ interface State {
   saving: boolean;
   stackChart: boolean;
   total: number;
+  redirectPath: string;
 }
 
-export const ListOverview = fp.flow(withCurrentWorkspace(), withCdrVersions(), withNavigation, withRouter) (
+export const ListOverview = fp.flow(withCurrentWorkspace(), withCdrVersions(), withRouter) (
   class extends React.Component<Props, State> {
     private aborter = new AbortController();
     private ageMenu: any;
@@ -174,6 +175,7 @@ export const ListOverview = fp.flow(withCurrentWorkspace(), withCdrVersions(), w
         saving: false,
         stackChart: true,
         total: undefined,
+        redirectPath: null,
       };
     }
 
@@ -289,7 +291,7 @@ export const ListOverview = fp.flow(withCurrentWorkspace(), withCdrVersions(), w
         .then(() => {
           this.setState({saving: false});
           updating(true);
-          this.props.navigate(['workspaces', ns, wsid, 'data', 'cohorts', cid, 'actions']);
+          this.setState({redirectPath: `/workspaces/${ns}/${wsid}/data/cohorts/${cid}/actions`});
         })
         .catch(error => {
           console.error(error);
@@ -305,7 +307,7 @@ export const ListOverview = fp.flow(withCurrentWorkspace(), withCdrVersions(), w
       return cohortsApi().createCohort(ns, wsid, cohort)
         .then((c) => {
           updating(true);
-          this.props.navigate(['workspaces', ns, wsid, 'data', 'cohorts', c.id, 'actions']);
+          this.setState({redirectPath: `/workspaces/${ns}/${wsid}/data/cohorts/${c.id}/actions`});
         })
         .finally(() => this.setState({saving: false}));
     }
@@ -316,7 +318,7 @@ export const ListOverview = fp.flow(withCurrentWorkspace(), withCdrVersions(), w
       cohortsApi().deleteCohort(ns, wsid, cohort.id)
         .then(() => {
           updating();
-          this.props.navigate(['workspaces', ns, wsid, 'data']);
+          this.setState({redirectPath: `/workspaces/${ns}/${wsid}/data`});
         })
         .catch(error => console.error(error));
     }
@@ -338,7 +340,7 @@ export const ListOverview = fp.flow(withCurrentWorkspace(), withCdrVersions(), w
           url += `data/cohorts/${cohort.id}/review`;
           break;
       }
-      this.props.navigateByUrl(url);
+      this.setState({redirectPath: url});
     }
 
     toggleChartMode() {
@@ -407,129 +409,131 @@ export const ListOverview = fp.flow(withCurrentWorkspace(), withCdrVersions(), w
     render() {
       const {cohort} = this.props;
       const {ageType, apiError, chartData, currentGraphOptions, deleting, genderOrSexType, loading, refreshing,
-        saveModalOpen, stackChart, total} = this.state;
-      return <React.Fragment>
-        <div>
-          <div style={styles.overviewHeader}>
-            <div style={{width: '100%'}}>
-              {!!cohort.id ? <React.Fragment>
-                <Menu style={{width: 'fit-content', minWidth: '7.25rem'}}
-                  appendTo={document.body}
-                  model={this.saveItems}
-                  popup={true}
-                  ref={el => this.saveMenu = el}/>
-                <Button type='primary'
-                  style={styles.saveButton}
-                  onClick={(event) => this.saveMenu.toggle(event)}
-                  disabled={this.disableSaveButton}>
-                  Save Cohort <ClrIcon shape='caret down'/>
-                </Button>
-              </React.Fragment>
-              : <Button type='primary'
-                onClick={() => this.openSaveModal()}
-                style={styles.saveButton}
-                disabled={this.disableSaveButton}>Create Cohort</Button>}
-              <TooltipTrigger content={<div>Export to notebook</div>}>
-                <Clickable style={{...styles.actionIcon, ...styles.disabled}}
-                  onClick={() => this.navigateTo('notebook')} disabled>
-                  <ClrIcon shape='export' className='is-solid' size={30} />
-                </Clickable>
-              </TooltipTrigger>
-              <TooltipTrigger content={<div>Delete cohort</div>}>
-                <Clickable style={this.disableDeleteIcon ? {...styles.actionIcon, ...styles.disabled} : styles.actionIcon}
-                  onClick={() => this.setState({deleting: true})}>
-                  <ClrIcon shape='trash' className='is-solid' size={30} />
-                </Clickable>
-              </TooltipTrigger>
-              <TooltipTrigger content={<div>Review participant level data</div>}>
-                <Clickable style={this.disableActionIcons ? {...styles.actionIcon, ...styles.disabled} : styles.actionIcon}
-                  onClick={() => this.navigateTo('review')}>
-                  <ClrIcon shape='copy' className='is-solid' size={30} />
-                </Clickable>
-              </TooltipTrigger>
-            </div>
-            <h2 style={styles.totalCount}>
-              Total Count: &nbsp;
-              {this.definitionErrors ? <span>
-                -- <TooltipTrigger content={this.hasTemporalError ?
-                'Please complete criteria selections before saving temporal relationship.' :
-                `All criteria are suppressed. Un-suppress criteria to update the total count
-                     based on the visible criteria.`}>
-                  <ClrIcon style={{color: '#F57600'}} shape='warning-standard' size={18} />
-                </TooltipTrigger>
-              </span>
-              : loading ? <Spinner size={18} /> : <span>{this.showTotalCount && total.toLocaleString()}</span>}
-            </h2>
-          </div>
-          {apiError && !this.definitionErrors && <div style={styles.totalError}>
-            <ClrIcon className='is-solid' shape='exclamation-triangle' size={22} />
-            Sorry, the request cannot be completed. Please try again or contact Support in the left hand navigation.
-          </div>}
-          {!!total && !this.definitionErrors && !loading && !!chartData &&
-            <div style={styles.cardContainer}>
-              <div style={styles.card}>
-                <div style={styles.cardHeader}>Results by</div>
-                <div style={refreshing ? styles.disabled : {}}>
-                  <Menu appendTo={document.body}
-                    model={this.genderOrSexItems}
-                    popup={true} ref={el => this.genderOrSexMenu = el}/>
-                  <button style={styles.menuButton} onClick={(event) => this.genderOrSexMenu.toggle(event)}>
-                    {genderOrSexTypeToText(genderOrSexType)} <ClrIcon style={{float: 'right'}} shape='caret down' size={12}/>
-                  </button>
-                  <Menu appendTo={document.body}
-                    model={this.ageItems} popup={true}
-                    ref={el => this.ageMenu = el}/>
-                  <button style={styles.menuButton} onClick={(event) => this.ageMenu.toggle(event)}>
-                    {ageTypeToText(ageType)} <ClrIcon style={{float: 'right'}} shape='caret down' size={12}/>
-                  </button>
-                  <button style={this.disableRefreshButton ? {...styles.refreshButton, ...styles.disabled} : styles.refreshButton}
-                    onClick={() => this.refreshGraphs()}>
-                    REFRESH
-                  </button>
-                </div>
-                {refreshing ?
-                  <div style={{height: '15rem'}}>
-                    <Spinner style={styles.chartSpinner} size={75}/>
-                  </div> :
-                  <React.Fragment>
-                    <div style={styles.cardHeader}>
-                      {genderOrSexTypeToText(currentGraphOptions.genderOrSexType)}
-                    </div>
-                    <div style={{padding: '0.5rem 0.75rem'}}
-                      onMouseEnter={() => triggerEvent('Graphs', 'Hover', 'Graphs - Gender - Cohort Builder')}>
-                      {!!chartData.length && <GenderChart data={chartData} />}
-                    </div>
-                    <div style={styles.cardHeader}>
-                      {genderOrSexTypeToText(currentGraphOptions.genderOrSexType)}, {ageTypeToText(currentGraphOptions.ageType)}, and Race
-                      <ClrIcon shape='sort-by'
-                        className={stackChart ? 'is-info' : ''}
-                        onClick={() => this.toggleChartMode()} />
-                    </div>
-                    <div style={{padding: '0.5rem 0.75rem'}} onMouseEnter={() => triggerEvent(
-                      'Graphs',
-                      'Hover',
-                      'Graphs - Gender Age Race - Cohort Builder'
-                    )}>
-                      {!!chartData.length && <ComboChart mode={stackChart ? 'stacked' : 'normalized'} data={chartData} />}
-                    </div>
+        saveModalOpen, stackChart, total, redirectPath} = this.state;
+      return redirectPath
+          ? <RouteRedirect path={redirectPath}/>
+          : <React.Fragment>
+            <div>
+              <div style={styles.overviewHeader}>
+                <div style={{width: '100%'}}>
+                  {!!cohort.id ? <React.Fragment>
+                    <Menu style={{width: 'fit-content', minWidth: '7.25rem'}}
+                      appendTo={document.body}
+                      model={this.saveItems}
+                      popup={true}
+                      ref={el => this.saveMenu = el}/>
+                    <Button type='primary'
+                      style={styles.saveButton}
+                      onClick={(event) => this.saveMenu.toggle(event)}
+                      disabled={this.disableSaveButton}>
+                      Save Cohort <ClrIcon shape='caret down'/>
+                    </Button>
                   </React.Fragment>
-                }
+                  : <Button type='primary'
+                    onClick={() => this.openSaveModal()}
+                    style={styles.saveButton}
+                    disabled={this.disableSaveButton}>Create Cohort</Button>}
+                  <TooltipTrigger content={<div>Export to notebook</div>}>
+                    <Clickable style={{...styles.actionIcon, ...styles.disabled}}
+                      onClick={() => this.navigateTo('notebook')} disabled>
+                      <ClrIcon shape='export' className='is-solid' size={30} />
+                    </Clickable>
+                  </TooltipTrigger>
+                  <TooltipTrigger content={<div>Delete cohort</div>}>
+                    <Clickable style={this.disableDeleteIcon ? {...styles.actionIcon, ...styles.disabled} : styles.actionIcon}
+                      onClick={() => this.setState({deleting: true})}>
+                      <ClrIcon shape='trash' className='is-solid' size={30} />
+                    </Clickable>
+                  </TooltipTrigger>
+                  <TooltipTrigger content={<div>Review participant level data</div>}>
+                    <Clickable style={this.disableActionIcons ? {...styles.actionIcon, ...styles.disabled} : styles.actionIcon}
+                      onClick={() => this.navigateTo('review')}>
+                      <ClrIcon shape='copy' className='is-solid' size={30} />
+                    </Clickable>
+                  </TooltipTrigger>
+                </div>
+                <h2 style={styles.totalCount}>
+                  Total Count: &nbsp;
+                  {this.definitionErrors ? <span>
+                    -- <TooltipTrigger content={this.hasTemporalError ?
+                    'Please complete criteria selections before saving temporal relationship.' :
+                    `All criteria are suppressed. Un-suppress criteria to update the total count
+                         based on the visible criteria.`}>
+                      <ClrIcon style={{color: '#F57600'}} shape='warning-standard' size={18} />
+                    </TooltipTrigger>
+                  </span>
+                  : loading ? <Spinner size={18} /> : <span>{this.showTotalCount && total.toLocaleString()}</span>}
+                </h2>
               </div>
+              {apiError && !this.definitionErrors && <div style={styles.totalError}>
+                <ClrIcon className='is-solid' shape='exclamation-triangle' size={22} />
+                Sorry, the request cannot be completed. Please try again or contact Support in the left hand navigation.
+              </div>}
+              {!!total && !this.definitionErrors && !loading && !!chartData &&
+                <div style={styles.cardContainer}>
+                  <div style={styles.card}>
+                    <div style={styles.cardHeader}>Results by</div>
+                    <div style={refreshing ? styles.disabled : {}}>
+                      <Menu appendTo={document.body}
+                        model={this.genderOrSexItems}
+                        popup={true} ref={el => this.genderOrSexMenu = el}/>
+                      <button style={styles.menuButton} onClick={(event) => this.genderOrSexMenu.toggle(event)}>
+                        {genderOrSexTypeToText(genderOrSexType)} <ClrIcon style={{float: 'right'}} shape='caret down' size={12}/>
+                      </button>
+                      <Menu appendTo={document.body}
+                        model={this.ageItems} popup={true}
+                        ref={el => this.ageMenu = el}/>
+                      <button style={styles.menuButton} onClick={(event) => this.ageMenu.toggle(event)}>
+                        {ageTypeToText(ageType)} <ClrIcon style={{float: 'right'}} shape='caret down' size={12}/>
+                      </button>
+                      <button style={this.disableRefreshButton ? {...styles.refreshButton, ...styles.disabled} : styles.refreshButton}
+                        onClick={() => this.refreshGraphs()}>
+                        REFRESH
+                      </button>
+                    </div>
+                    {refreshing ?
+                      <div style={{height: '15rem'}}>
+                        <Spinner style={styles.chartSpinner} size={75}/>
+                      </div> :
+                      <React.Fragment>
+                        <div style={styles.cardHeader}>
+                          {genderOrSexTypeToText(currentGraphOptions.genderOrSexType)}
+                        </div>
+                        <div style={{padding: '0.5rem 0.75rem'}}
+                          onMouseEnter={() => triggerEvent('Graphs', 'Hover', 'Graphs - Gender - Cohort Builder')}>
+                          {!!chartData.length && <GenderChart data={chartData} />}
+                        </div>
+                        <div style={styles.cardHeader}>
+                          {genderOrSexTypeToText(currentGraphOptions.genderOrSexType)}, {ageTypeToText(currentGraphOptions.ageType)}, and Race
+                          <ClrIcon shape='sort-by'
+                            className={stackChart ? 'is-info' : ''}
+                            onClick={() => this.toggleChartMode()} />
+                        </div>
+                        <div style={{padding: '0.5rem 0.75rem'}} onMouseEnter={() => triggerEvent(
+                          'Graphs',
+                          'Hover',
+                          'Graphs - Gender Age Race - Cohort Builder'
+                        )}>
+                          {!!chartData.length && <ComboChart mode={stackChart ? 'stacked' : 'normalized'} data={chartData} />}
+                        </div>
+                      </React.Fragment>
+                    }
+                  </div>
+                </div>
+              }
             </div>
-          }
-        </div>
 
-        {saveModalOpen && <CreateModal entityName='Cohort'
-                                       title='Save Cohort as'
-                                       getExistingNames={() => this.getCohortNames()}
-                                       save={(name, desc) => this.createCohort(name, desc)}
-                                       close={() => this.setState({saveModalOpen: false})}/>}
+            {saveModalOpen && <CreateModal entityName='Cohort'
+                                           title='Save Cohort as'
+                                           getExistingNames={() => this.getCohortNames()}
+                                           save={(name, desc) => this.createCohort(name, desc)}
+                                           close={() => this.setState({saveModalOpen: false})}/>}
 
-        {deleting && <ConfirmDeleteModal closeFunction={this.cancelDelete}
-          resourceType={ResourceType.COHORT}
-          receiveDelete={this.delete}
-          resourceName={cohort.name} />}
-      </React.Fragment>;
+            {deleting && <ConfirmDeleteModal closeFunction={this.cancelDelete}
+              resourceType={ResourceType.COHORT}
+              receiveDelete={this.delete}
+              resourceName={cohort.name} />}
+          </React.Fragment>;
     }
   }
 );

@@ -11,8 +11,6 @@ import {
   getControlledTierConfig,
   getRegisteredTierConfig,
 } from 'app/utils/institutions';
-import {NavigationProps} from 'app/utils/navigation';
-import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {Institution, InstitutionMembershipRequirement} from 'generated/fetch';
 import {OrganizationType} from 'generated/fetch';
 import * as fp from 'lodash/fp';
@@ -51,16 +49,13 @@ const styles = reactStyles({
   }
 });
 
-interface Props extends WithSpinnerOverlayProps, NavigationProps {}
-
 interface State {
   loadingInstitutions: boolean;
   institutions: Array<Institution>;
   institutionLoadError: boolean;
 }
 
-export const AdminInstitution = fp.flow(withNavigation)(
-  class extends React.Component<Props, State> {
+export class AdminInstitution extends React.Component<WithSpinnerOverlayProps, State> {
     constructor(props) {
       super(props);
       this.state = {
@@ -122,8 +117,9 @@ export const AdminInstitution = fp.flow(withNavigation)(
             <label>Institution admin table</label>
                 <Button type='secondaryLight'
                         style={{padding: '0rem', marginTop: '0.3rem', verticalAlign: 'sub'}}
-                        onClick={() => this.props.navigateByUrl('admin/institution/add')}
-                        data-test-id='add-institution'>
+                        data-test-id='add-institution'
+                        path='/admin/institution/add'
+                >
                   <ClrIcon shape='plus-circle' class='is-solid' size={20}/>
                 </Button>
           </SemiBoldHeader>
@@ -152,4 +148,4 @@ export const AdminInstitution = fp.flow(withNavigation)(
         </FadeBox>
       </div>;
     }
-  });
+  };

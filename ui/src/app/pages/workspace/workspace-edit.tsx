@@ -56,9 +56,8 @@ import {
   hasDefaultCdrVersion
 } from 'app/utils/cdr-versions';
 import {reportError} from 'app/utils/errors';
-import {currentWorkspaceStore, NavigationProps, nextWorkspaceWarmupStore} from 'app/utils/navigation';
+import {currentWorkspaceStore, nextWorkspaceWarmupStore} from 'app/utils/navigation';
 import {serverConfigStore} from 'app/utils/stores';
-import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {
   getBillingAccountInfo
 } from 'app/utils/workbench-gapi-client';
@@ -263,7 +262,7 @@ const CdrVersionUpgrade = (props: UpgradeProps) => {
   </div>;
 };
 
-export interface WorkspaceEditProps extends WithSpinnerOverlayProps, NavigationProps {
+export interface WorkspaceEditProps extends WithSpinnerOverlayProps {
   cdrVersionTiersResponse: CdrVersionTiersResponse;
   workspace: WorkspaceData;
   cancel: Function;
@@ -277,10 +276,11 @@ export interface WorkspaceEditState {
   billingAccounts: Array<BillingAccount>;
   cdrVersions: Array<CdrVersion>;
   cloneUserRole: boolean;
+  fetchBillingAccountLoading: boolean;
   loading: boolean;
   populationChecked: boolean;
+  redirectPath: string;
   selectResearchPurpose: boolean;
-  fetchBillingAccountLoading: boolean;
   showCdrVersionModal: boolean;
   showConfirmationModal: boolean;
   showCreateBillingAccountModal: boolean;
@@ -295,7 +295,7 @@ export interface WorkspaceEditState {
   workspaceNewAclDelayedContinueFn: Function;
 }
 
-export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), withUserProfile(), withNavigation)(
+export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), withUserProfile())(
   class WorkspaceEditCmp extends React.Component<WorkspaceEditProps, WorkspaceEditState> {
     constructor(props: WorkspaceEditProps) {
       super(props);
@@ -303,10 +303,11 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
         billingAccounts: [],
         cdrVersions: props.workspace ? this.getCdrVersions(props.workspace.accessTierShortName) : this.getCdrVersions(DEFAULT_ACCESS_TIER),
         cloneUserRole: false,
+        fetchBillingAccountLoading: false,
         loading: false,
         populationChecked: props.workspace ? props.workspace.researchPurpose.populationDetails.length > 0 : undefined,
+        redirectPath: null,
         selectResearchPurpose: this.updateSelectedResearch(),
-        fetchBillingAccountLoading: false,
         showCdrVersionModal: false,
         showConfirmationModal: false,
         showCreateBillingAccountModal: false,
@@ -783,6 +784,10 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
       return fp.includes(researchOutcomeEnum, this.state.workspace.researchPurpose.researchOutcomeList);
     }
 
+    navigateToWorkspace(workspaceNamespace: string, workspaceId: string) {
+      this.setState({redirectPath: `/workspaces/${workspaceNamespace}/${workspaceId}/data`});
+    }
+
     onSaveClick() {
       if (this.isMode(WorkspaceEditMode.Create)) {
         AnalyticsTracker.Workspaces.Create();
@@ -826,7 +831,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
               ...ws.workspace,
               accessLevel: ws.accessLevel
             }));
-          this.props.navigate(['workspaces', workspace.namespace, workspace.id, 'data']);
+          this.navigateToWorkspace(workspace.namespace, workspace.id);
           return;
         }
 
@@ -843,9 +848,6 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
           await new Promise((accept) => setTimeout(accept, NEW_ACL_DELAY_POLL_INTERVAL_MS));
         }
 
-        const navigateToWorkspace = () => {
-          this.props.navigate(['workspaces', workspace.namespace, workspace.id, 'data']);
-        }
         if (accessLevel !== WorkspaceAccessLevel.OWNER) {
           reportError(new Error(
             `ACLs failed to propagate for workspace ${workspace.namespace}/${workspace.id}` +
@@ -856,7 +858,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
           this.setState({
             loading: false,
             workspaceNewAclDelayed: true,
-            workspaceNewAclDelayedContinueFn: navigateToWorkspace
+            workspaceNewAclDelayedContinueFn: () => this.navigateToWorkspace(workspace.namespace, workspace.id)
           });
           return;
         }
@@ -865,7 +867,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
         // This is also important for guarding against the ACL delay issue, as we have observed
         // that even after confirming OWNER access, subsequent calls to GET may still yield NOACCESS.
         nextWorkspaceWarmupStore.next({...workspace, accessLevel});
-        navigateToWorkspace();
+        this.navigateToWorkspace(workspace.namespace, workspace.id);
 
       } catch (error) {
         console.log(error);
