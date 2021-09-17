@@ -243,13 +243,15 @@ const ButtonContentWrapper = ({type = 'primary', style = {}, disabled = false, .
 };
 
 export const Button = ({children, path='', type = 'primary', style = {}, linkStyle={}, disabled = false, ...props}) => {
+  // `fp.omit` used to prevent propagation of test IDs to the rendered child component.
+  const childProps = propagateDataTestId ? props : fp.omit(['data-test-id'], props);
   return path && !disabled
-    ? <ButtonContentWrapper type={type} style={style} disabled={disabled} {...props}>
+    ? <ButtonContentWrapper type={type} style={style} disabled={disabled} {...childProps}>
       <RouteLink path={path} style={buttonVariants[type].linkStyle}>
         {children}
       </RouteLink>
     </ButtonContentWrapper>
-    : <ButtonContentWrapper type={type} style={style} disabled={disabled} {...props}>
+    : <ButtonContentWrapper type={type} style={style} disabled={disabled} {...childProps}>
       {children}
     </ButtonContentWrapper>
 }
