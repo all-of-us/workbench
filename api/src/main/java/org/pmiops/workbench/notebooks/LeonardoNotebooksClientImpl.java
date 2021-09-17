@@ -16,7 +16,9 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace.BillingMigrationStatus;
 import org.pmiops.workbench.exceptions.ExceptionUtils;
+import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.WorkbenchException;
+import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.leonardo.ApiException;
 import org.pmiops.workbench.leonardo.LeonardoRetryHandler;
 import org.pmiops.workbench.leonardo.api.DisksApi;
@@ -46,6 +48,7 @@ import org.springframework.stereotype.Service;
 public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
 
   private static final String WORKSPACE_NAMESPACE_KEY = "WORKSPACE_NAMESPACE";
+  private static final String WORKSPACE_BUCKET_KEY = "WORKSPACE_BUCKET";
   private static final String WORKSPACE_CDR_ENV_KEY = "WORKSPACE_CDR";
   private static final String JUPYTER_DEBUG_LOGGING_ENV_KEY = "JUPYTER_DEBUG_LOGGING";
   private static final String ALL_SAMPLES_WGS_KEY = "ALL_SAMPLES_WGS_BUCKET";
@@ -60,6 +63,7 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final Provider<DbUser> userProvider;
   private final Provider<DisksApi> diskApiProvider;
+  private final FireCloudService fireCloudService;
   private final NotebooksRetryHandler notebooksRetryHandler;
   private final LeonardoMapper leonardoMapper;
   private final LeonardoRetryHandler leonardoRetryHandler;
@@ -75,6 +79,7 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
       Provider<WorkbenchConfig> workbenchConfigProvider,
       Provider<DbUser> userProvider,
       @Qualifier(NotebooksConfig.USER_DISKS_API) Provider<DisksApi> diskApiProvider,
+      FireCloudService fireCloudService,
       NotebooksRetryHandler notebooksRetryHandler,
       LeonardoMapper leonardoMapper,
       LeonardoRetryHandler leonardoRetryHandler,
@@ -86,6 +91,7 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.userProvider = userProvider;
     this.diskApiProvider = diskApiProvider;
+    this.fireCloudService = fireCloudService;
     this.notebooksRetryHandler = notebooksRetryHandler;
     this.leonardoMapper = leonardoMapper;
     this.leonardoRetryHandler = leonardoRetryHandler;
@@ -160,9 +166,20 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
 
     DbUser user = userProvider.get();
     DbWorkspace workspace = workspaceDao.getRequired(workspaceNamespace, workspaceFirecloudName);
+    String workspaceBucketName =
+        fireCloudService
+            .getWorkspace(workspace)
+            .orElseThrow(() -> new NotFoundException("workspace not found"))
+            .getWorkspace()
+            .getBucketName();
+
     DbCdrVersion cdrVersion = workspace.getCdrVersion();
     Map<String, String> customEnvironmentVariables = new HashMap<>();
     customEnvironmentVariables.put(WORKSPACE_NAMESPACE_KEY, workspaceNamespace);
+
+    // This variable is already made available by Leonardo, but it's only exported in certain
+    // notebooks contexts; this ensures it is always exported. See RW-7096.
+    customEnvironmentVariables.put(WORKSPACE_BUCKET_KEY, "gs://" + workspaceBucketName);
 
     // i.e. is NEW or MIGRATED
     if (!workspace.getBillingMigrationStatusEnum().equals(BillingMigrationStatus.OLD)) {

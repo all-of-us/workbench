@@ -43,7 +43,7 @@ export default class NotebookDownloadModal extends NotebookFrame {
 
   async isLoaded(): Promise<boolean> {
     return (await this.getIFrame())
-      .waitForXPath(Xpath.modal, { visible: true })
+      .waitForXPath(Xpath.modal, { visible: true, timeout: 5000 })
       .then(() => {
         return true;
       })

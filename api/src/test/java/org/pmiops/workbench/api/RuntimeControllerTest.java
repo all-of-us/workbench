@@ -2,6 +2,7 @@ package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -88,6 +89,7 @@ import org.pmiops.workbench.model.ListRuntimeDeleteRequest;
 import org.pmiops.workbench.model.PersistentDiskRequest;
 import org.pmiops.workbench.model.Runtime;
 import org.pmiops.workbench.model.RuntimeConfigurationType;
+import org.pmiops.workbench.model.RuntimeError;
 import org.pmiops.workbench.model.RuntimeLocalizeRequest;
 import org.pmiops.workbench.model.RuntimeLocalizeResponse;
 import org.pmiops.workbench.model.RuntimeStatus;
@@ -380,6 +382,7 @@ public class RuntimeControllerTest extends SpringTest {
     FirecloudWorkspaceResponse fcResponse = new FirecloudWorkspaceResponse();
     fcResponse.setWorkspace(fcWorkspace);
     fcResponse.setAccessLevel(WorkspaceAccessLevel.OWNER.toString());
+    when(mockFireCloudService.getWorkspace(any())).thenReturn(Optional.of(fcResponse));
     when(mockFireCloudService.getWorkspace(fcWorkspace.getNamespace(), fcWorkspace.getName()))
         .thenReturn(fcResponse);
   }
@@ -418,7 +421,13 @@ public class RuntimeControllerTest extends SpringTest {
                         new LeonardoClusterError().errorCode(2).errorMessage(null))));
 
     assertThat(runtimeController.getRuntime(WORKSPACE_NS).getBody())
-        .isEqualTo(testRuntime.status(RuntimeStatus.ERROR));
+        .isEqualTo(
+            testRuntime
+                .status(RuntimeStatus.ERROR)
+                .errors(
+                    ImmutableList.of(
+                        new RuntimeError().errorCode(1).errorMessage("foo"),
+                        new RuntimeError().errorCode(2).errorMessage(null))));
   }
 
   @Test

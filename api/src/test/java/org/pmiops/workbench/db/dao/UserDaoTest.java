@@ -24,7 +24,6 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserAccessModule;
 import org.pmiops.workbench.db.model.DbUserAccessTier;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
-import org.pmiops.workbench.model.DuaType;
 import org.pmiops.workbench.model.InstitutionalRole;
 import org.pmiops.workbench.model.OrganizationType;
 import org.pmiops.workbench.model.TierAccessStatus;
@@ -439,7 +438,6 @@ public class UserDaoTest extends SpringTest {
     institution.setShortName("aa");
     institution.setDisplayName("MIT");
     institution.setOrganizationTypeEnum(OrganizationType.EDUCATIONAL_INSTITUTION);
-    institution.setDuaTypeEnum(DuaType.MASTER);
     return institutionDao.save(institution);
   }
 

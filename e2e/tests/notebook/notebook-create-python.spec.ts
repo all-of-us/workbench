@@ -12,7 +12,7 @@ import expect from 'expect';
 // 30 minutes.
 jest.setTimeout(30 * 60 * 1000);
 
-describe('Create python kernel notebook', () => {
+describe('Python Kernel Notebook Test', () => {
   beforeEach(async () => {
     await signInWithAccessToken(page);
   });
@@ -42,13 +42,13 @@ describe('Create python kernel notebook', () => {
     await modal.waitUntilClose();
   };
 
-  const workspace = 'e2eCreatePythonKernelNotebookTest';
+  const workspaceName = 'e2eCreatePythonKernelNotebookTest';
+  const pyNotebookName = makeRandomName('Py3');
 
   test('Run Python code and download notebook', async () => {
-    await findOrCreateWorkspace(page, { workspaceName: workspace });
+    await findOrCreateWorkspace(page, { workspaceName });
 
     const dataPage = new WorkspaceDataPage(page);
-    const pyNotebookName = makeRandomName('Python3');
     const notebook = await dataPage.createNotebook(pyNotebookName);
 
     // Verify kernel name.
@@ -76,22 +76,15 @@ describe('Create python kernel notebook', () => {
 
     expect(
       await notebook.runCodeCell(4, {
-        codeFile: 'resources/python-code/nbstripoutput-filter.py',
-        markdownWorkaround: true
-      })
-    ).toMatch(/success$/);
-
-    expect(
-      await notebook.runCodeCell(5, {
         codeFile: 'resources/python-code/gsutil.py',
         markdownWorkaround: true
       })
     ).toMatch(/success$/);
 
-    await notebook.runCodeCell(6, { codeFile: 'resources/python-code/simple-pyplot.py' });
+    await notebook.runCodeCell(5, { codeFile: 'resources/python-code/simple-pyplot.py' });
 
     // Verify plot is the output.
-    const cell = notebook.findCell(6);
+    const cell = notebook.findCell(5);
     const cellOutputElement = await cell.findOutputElementHandle();
     const [imgElement] = await cellOutputElement.$x('./img[@src]');
     expect(imgElement).toBeTruthy(); // plot format is a img.
@@ -125,7 +118,5 @@ describe('Create python kernel notebook', () => {
 
     // Ideally we would validate the download URLs or download content here.
     // As of 9/25/20 I was unable to find a clear mechanism for accessing this.
-
-    await notebook.deleteNotebook(pyNotebookName);
   });
 });

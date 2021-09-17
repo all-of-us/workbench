@@ -56,7 +56,7 @@ then
   "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_menu\`
       (id,parent_id,category,domain_id,type,name,is_group,sort_order)
   VALUES
-  (5,0,'Program Data','WHOLE_GENOME_VARIANT','','Whole Genome Variant',0,5)"
+  (5,0,'Program Data','WHOLE_GENOME_VARIANT','','Whole Genome Sequence Variant',0,5)"
 fi
 
 echo "Insert cb_criteria_menu"
@@ -69,6 +69,7 @@ VALUES
 (8,0,'Domains','DRUG','','Drugs',0,8),
 (9,0,'Domains','MEASUREMENT','','Labs and Measurements',0,9),
 (10,0,'Domains','VISIT','VISIT','Visits',0,10),
+(11,0,'Domains','OBSERVATION','','Observations',0,11),
 (12,1,'Program Data','PERSON','AGE','Age',0,1),
 (13,1,'Program Data','PERSON','DECEASED','Deceased',0,2),
 (14,1,'Program Data','PERSON','ETHNICITY','Ethnicity',0,3),

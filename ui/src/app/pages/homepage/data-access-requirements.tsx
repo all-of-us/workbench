@@ -29,10 +29,11 @@ import {
   getAccessModuleStatusByName,
   getRegistrationTask,
   GetStartedButton,
+  redirectToRas,
 } from 'app/utils/access-utils';
 import {isAbortError} from 'app/utils/errors';
 import {profileStore, serverConfigStore, useStore} from 'app/utils/stores';
-import {AccessModule, AccessModuleStatus} from 'generated/fetch';
+import {AccessModule, AccessModuleStatus, Profile} from 'generated/fetch';
 import {TwoFactorAuthModal} from './two-factor-auth-modal';
 
 const styles = reactStyles({
@@ -238,6 +239,15 @@ const moduleLabels: Map<AccessModule, JSX.Element> = new Map([
   [AccessModule.DATAUSERCODEOFCONDUCT, <div>Sign Data User Code of Conduct</div>],
 ]);
 
+const externalSyncActions: Map<AccessModule, Function> = new Map([
+  [AccessModule.TWOFACTORAUTH, async() => await profileApi().syncTwoFactorAuthStatus()],
+  [AccessModule.RASLINKLOGINGOV, () => redirectToRas(false)],
+  [AccessModule.ERACOMMONS, async() => await profileApi().syncEraCommonsStatus()],
+  [AccessModule.COMPLIANCETRAINING, async() => await profileApi().syncComplianceTrainingStatus()],
+  // DUCC state is strictly internal to the RW
+  [AccessModule.DATAUSERCODEOFCONDUCT, () => {}],
+]);
+
 // this function does double duty:
 // - returns appropriate text for completed and bypassed modules and null for incomplete modules
 // - because of this, truthy return values indicate that a module is either complete or bypassed
@@ -283,6 +293,9 @@ const handleRasCallback = (code: string, spinnerProps: WithSpinnerOverlayProps, 
     await profileApi().linkRasAccount({ authCode: code, redirectUrl: buildRasRedirectUrl() });
     spinnerProps.hideSpinner();
     reloadProfile();
+
+    // Cleanup parameter from URL after linking.
+    window.history.replaceState({}, '', '/');
   });
 
   return handler();
@@ -295,39 +308,38 @@ const selfBypass = async(spinnerProps: WithSpinnerOverlayProps, reloadProfile: F
   reloadProfile();
 };
 
-const syncExternalModules = async() => {
-  const aborter = new AbortController();
-  try {
-    await Promise.all([
-      profileApi().syncTwoFactorAuthStatus({signal: aborter.signal}),
-      profileApi().syncComplianceTrainingStatus({signal: aborter.signal}),
-      profileApi().syncEraCommonsStatus({signal: aborter.signal}),
-    ]);
-  } catch (e) {
-    if (!isAbortError(e)) { throw e; }
-  } finally {
-    aborter.abort();
-  }
-};
+// exported for test
+export const getEnabledModules = (modules: AccessModule[], navigate): AccessModule[] => fp.flatMap(moduleName => {
+  const enabledTaskMaybe = getRegistrationTask(navigate, moduleName);
+  return enabledTaskMaybe ? [enabledTaskMaybe.module] : [];
+}, modules);
 
-const Refresh = (props: {showSpinner: Function}) => <Button
-    type='primary'
-    style={styles.refreshButton}
-    onClick={async() => {
-      props.showSpinner();
-      await syncExternalModules();
-      location.reload();  // will also hide spinner
-    }} >
-  <Repeat style={styles.refreshIcon}/> Refresh
-</Button>;
+// exported for test
+export const getActiveModule = (modules: AccessModule[], profile: Profile): AccessModule => modules.find(moduleName => {
+  const status = getAccessModuleStatusByName(profile, moduleName);
+  return !bypassedOrCompletedText(status);
+});
+
+const Refresh = (props: { showSpinner: Function; externalSyncAction: Function }) => {
+  const {showSpinner, externalSyncAction} = props;
+  return <Button
+      type='primary'
+      style={styles.refreshButton}
+      onClick={async() => {
+        showSpinner();
+        await externalSyncAction();
+        location.reload(); // also hides spinner
+      }} >
+    <Repeat style={styles.refreshIcon}/> Refresh
+  </Button>;
+}
 
 const Next = () => <FlexRow style={styles.nextElement}>
   <span style={styles.nextText}>NEXT</span> <ArrowRight style={styles.nextIcon}/>
 </FlexRow>;
 
-const ModuleIcon = (props: {moduleName: AccessModule, completedOrBypassed: boolean}) => {
-  const eligible = true; // TODO RW-7059
-  const {moduleName, completedOrBypassed} = props;
+const ModuleIcon = (props: {moduleName: AccessModule, completedOrBypassed: boolean, eligible?: boolean}) => {
+  const {moduleName, completedOrBypassed, eligible = true} = props;
 
   return <div style={styles.moduleIcon}>
     {cond(
@@ -338,6 +350,26 @@ const ModuleIcon = (props: {moduleName: AccessModule, completedOrBypassed: boole
       [eligible && !completedOrBypassed,
         () => <CheckCircle data-test-id={`module-${moduleName}-incomplete`} style={{color: colors.disabled}}/>])}
   </div>;
+};
+
+// Sep 16 hack while we work out some RAS bugs
+const TemporaryRASModule = () => {
+  const moduleName = AccessModule.RASLINKLOGINGOV;
+  return <FlexRow data-test-id={`module-${moduleName}`}>
+    <FlexRow style={styles.moduleCTA}/>
+    <FlexRow style={styles.inactiveModuleBox}>
+      <ModuleIcon moduleName={moduleName} completedOrBypassed={false} eligible={false}/>
+      <FlexColumn style={styles.inactiveModuleText}>
+        <div>
+          {moduleLabels.get(moduleName)}
+        </div>
+        <div style={{fontSize: '14px', marginTop: '0.5em'}}>
+          <b>Temporarily disabled.</b> Due to technical difficulties, this step is disabled.
+          In the future, you'll be prompted to complete identity verification to continue using the workbench.
+        </div>
+     </FlexColumn>
+    </FlexRow>
+  </FlexRow>;
 };
 
 interface ModuleProps {
@@ -390,7 +422,11 @@ const MaybeModule = ({moduleName, active, spinnerProps}: ModuleProps): JSX.Eleme
 
     return <FlexRow data-test-id={`module-${moduleName}`}>
       <FlexRow style={styles.moduleCTA}>
-        {active && (showRefresh ? <Refresh showSpinner={spinnerProps.showSpinner}/> : <Next/>)}
+        {active && (showRefresh
+            ? <Refresh
+                externalSyncAction={externalSyncActions.get(moduleName)}
+                showSpinner={spinnerProps.showSpinner}/>
+            : <Next/>)}
       </FlexRow>
       <ModuleBox>
         <ModuleIcon moduleName={moduleName} completedOrBypassed={!!statusTextMaybe}/>
@@ -407,6 +443,13 @@ const MaybeModule = ({moduleName, active, spinnerProps}: ModuleProps): JSX.Eleme
     </FlexRow>;
   };
 
+  // temp hack Sep 16: render a special temporary RAS module if disabled
+  if (moduleName === AccessModule.RASLINKLOGINGOV) {
+    const {enableRasLoginGovLinking} = serverConfigStore.get().config;
+    if (!enableRasLoginGovLinking) {
+      return <TemporaryRASModule/>;
+    }
+  }
   const moduleEnabled = !!registrationTask;
   return moduleEnabled ? <Module/> : null;
 };
@@ -527,21 +570,14 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
   // which module are we currently guiding the user to complete?
   const [activeModule, setActiveModule] = useState(null);
 
-  const enabledModules = fp.flatMap(moduleName => {
-    const enabledTaskMaybe = getRegistrationTask(moduleName);
-    return enabledTaskMaybe ? [enabledTaskMaybe.module] : [];
-  }, allModules);
+  const enabledModules = getEnabledModules(allModules);
 
   // whenever the profile changes, setActiveModule(the first incomplete enabled module)
   useEffect(() => {
-    fp.flow(
-      fp.find<AccessModule>(moduleName => {
-        const status = getAccessModuleStatusByName(profile, moduleName);
-        return !bypassedOrCompletedText(status);
-      }),
-      setActiveModule
-    )
-    (enabledModules);
+    const activeModule = getActiveModule(enabledModules, profile);
+    if (activeModule) {
+      setActiveModule(activeModule);
+    }
   }, [profile]);
 
   const {config: {unsafeAllowSelfBypass}} = useStore(serverConfigStore);

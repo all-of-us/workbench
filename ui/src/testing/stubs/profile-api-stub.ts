@@ -138,8 +138,8 @@ export class ProfileApiStub extends ProfileApi {
     });
   }
 
-  public submitDataUseAgreement(dataUseAgreementVersion: number) {
-    this.profile.dataUseAgreementSignedVersion = dataUseAgreementVersion;
+  public submitDUCC(duccVersion: number) {
+    this.profile.dataUseAgreementSignedVersion = duccVersion;
     return Promise.resolve(this.profile);
   }
 

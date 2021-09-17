@@ -637,7 +637,9 @@ export const ListSearch = fp.flow(withCdrVersions(), withCurrentWorkspace(), wit
               </span>}
               {serverConfigStore.get().config.enableStandardSourceDomains && this.checkSource &&
                 <span style={{float: 'right'}}>
-                  <span style={{display: 'table-cell', paddingRight: '0.35rem'}}>Show as concept sources</span>
+                  <span style={{display: 'table-cell', paddingRight: '0.35rem'}}>
+                    Show results as source concepts (ICD9, ICD10{domain === Domain.PROCEDURE && <span>, CPT</span>})
+                  </span>
                   <InputSwitch checked={searchSource}
                                disabled={loading}
                                onChange={() => this.toggleSearchSource()}

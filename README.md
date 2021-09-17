@@ -184,27 +184,6 @@ yarn
 yarn lint --fix
 ```
 
-
-#### Legacy startup
-You can also run the UI through project.rb. NOTE: this is slower and not recommended.  
-From the `ui/` directory,
-```Shell
-./project.rb dev-up
-```
-
-[legacy] UI tests in Angular can be run and viewed at http://localhost:9876/index.html.
-
-Other available operations may be discovered by running:
-```Shell
-./project.rb
-```
-
-#### You can regenerate classes from swagger with
-
-```Shell
-./project.rb swagger-regen
-```
-
 ## Deploying
 
 To deploy your local workbench API code to a given AppEngine project, in the api

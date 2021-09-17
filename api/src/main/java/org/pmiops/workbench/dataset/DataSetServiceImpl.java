@@ -906,12 +906,29 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
         + extractionDir;
   }
 
+  private String generateExtractionManifestPollingCode(String qualifier) {
+    return "import os\n"
+        + "import subprocess\n\n"
+        + "# The extraction workflow outputs a manifest file upon completion.\n"
+        + "manifest_file = os.environ['"
+        + generateVcfDirEnvName(qualifier)
+        + "'] + '/manifest.txt'\n\n"
+        + "assert subprocess.run(['gsutil', '-q', 'stat', manifest_file]).returncode == 0, (\n"
+        + "  \"!\" * 100 + \"\\n\\n\" +\n"
+        + "  \"VCF extraction has not completed.\\n\" +\n"
+        + "  \"Please monitor the extraction sidepanel for completion before continuing.\\n\\n\" +\n"
+        + "  \"!\" * 100\n"
+        + ")\n\n"
+        + "print(\"VCF extraction has completed, continuing\")\n";
+  }
+
   private List<String> generateHailCode(
       String qualifier, DataSetExportRequest dataSetExportRequest) {
     final String matrixName = "mt_" + qualifier;
 
     return ImmutableList.of(
         generateExtractionDirCode(qualifier, dataSetExportRequest),
+        generateExtractionManifestPollingCode(qualifier),
         "# Confirm Spark is installed.\n"
             + "try:\n"
             + "    import pyspark\n"
@@ -984,6 +1001,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     // TODO: Add a check to see if sufficient disk space is available in the Runtime
     return ImmutableList.of(
         generateExtractionDirCode(qualifier, dataSetExportRequest),
+        generateExtractionManifestPollingCode(qualifier),
         "%%bash\n"
             + "\n"
             + "# Download VCFs\n"

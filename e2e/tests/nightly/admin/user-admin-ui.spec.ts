@@ -13,7 +13,7 @@ describe('Admin', () => {
     await navigation.navMenu(page, NavLink.USER_ADMIN);
   });
 
-  test('verify admin-user-profile page reflect the same modules and active status as on admin-table', async () => {
+  test('verify admin-user-profile page reflects the same modules and active statuses as on admin-table', async () => {
     const userAdminPage = new UserAdminPage(page);
     await userAdminPage.waitForLoad();
 
@@ -42,7 +42,6 @@ describe('Admin', () => {
     const userProfileInfo = await userAdminPage.clickNameLink(1, nameColIndex);
     //navigate to admin-user-profile page
     await userProfileInfo.waitForLoad();
-    await userProfileInfo.getBypassProfileEnv();
   });
 
   test('Verify admin-user-profile page ui, update freeCredits and update institution', async () => {

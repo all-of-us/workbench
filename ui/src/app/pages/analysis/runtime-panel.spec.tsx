@@ -48,8 +48,6 @@ describe('RuntimePanel', () => {
   let enablePd: boolean;
   let enableGpu: boolean;
 
-  const iconsDir = '/assets/icons';
-
   const component = async(propOverrides?: object) => {
     const allProps = {...props, ...propOverrides}
     const c = mount(<RuntimePanelWrapper {...allProps}/>);
@@ -836,7 +834,7 @@ describe('RuntimePanel', () => {
     const wrapper = await component();
 
     const costEstimator = () => wrapper.find('[data-test-id="cost-estimator"]');
-    expect(costEstimator()).toBeTruthy();
+    expect(costEstimator().exists()).toBeTruthy();
 
     // Default GCE machine, n1-standard-4, makes the running cost 20 cents an hour and the storage cost less than 1 cent an hour.
     const runningCost = () => costEstimator().find('[data-test-id="running-cost"]');
@@ -891,7 +889,7 @@ describe('RuntimePanel', () => {
     const wrapper = await component();
 
     const costEstimator = () => wrapper.find('[data-test-id="cost-estimator"]');
-    expect(costEstimator()).toBeTruthy();
+    expect(costEstimator().exists()).toBeTruthy();
 
     const runningCost = () => costEstimator().find('[data-test-id="running-cost"]');
     const storageCost = () => costEstimator().find('[data-test-id="storage-cost"]');
@@ -936,14 +934,14 @@ describe('RuntimePanel', () => {
   it('should display the Running runtime status icon in state Running', async() => {
     const wrapper = await component();
 
-    expect(wrapper.find('[data-test-id="runtime-status-icon-Running"]')).toBeTruthy();
+    expect(wrapper.find('[data-test-id="runtime-status-icon-running"]').exists()).toBeTruthy();
   });
 
   it('should display a compute-none when there is no runtime', async() => {
     runtimeApiStub.runtime = null;
     runtimeStoreStub.runtime = null;
     const wrapper = await component();
-    expect(wrapper.find('[data-test-id="runtime-status-icon-None"]')).toBeTruthy();
+    expect(wrapper.find('[data-test-id="runtime-status-icon-none"]').exists()).toBeTruthy();
   });
 
   it('should prevent runtime creation when disk size is invalid', async() => {

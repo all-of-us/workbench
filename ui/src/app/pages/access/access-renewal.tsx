@@ -14,10 +14,13 @@ import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {styles} from 'app/pages/profile/profile-styles';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors, {addOpacity, colorWithWhiteness} from 'app/styles/colors';
-import {cond, daysFromNow, displayDateWithoutHours, useId, withStyle} from 'app/utils';
+import {cond, useId, withStyle} from 'app/utils';
 import {
+  computeDisplayDates,
+  isExpiring,
   maybeDaysRemaining,
-  redirectToTraining
+  redirectToTraining,
+  accessRenewalTitles
 } from 'app/utils/access-utils';
 import {profileStore, serverConfigStore, useStore} from 'app/utils/stores';
 import {AccessModule, AccessModuleStatus} from 'generated/fetch';
@@ -98,51 +101,12 @@ const syncAndReload = fp.flow(
 
 // Helper Functions
 
-const isExpiring = (expiration: number): boolean => daysFromNow(expiration) <= serverConfigStore.get().config.accessRenewalLookback;
 const isModuleExpiring = (status: AccessModuleStatus): boolean => isExpiring(status.expirationEpochMillis);
 
 const isExpiringAndNotBypassed = (moduleName: AccessModule, modules: AccessModuleStatus[]) => {
   const status = modules.find(m => m.moduleName === moduleName);
   return isModuleExpiring(status) && !status.bypassEpochMillis;
 }
-
-const withInvalidDateHandling = date => {
-  if (!date) {
-    return 'Unavailable';
-  } else {
-    return displayDateWithoutHours(date);
-  }
-};
-
-const computeDisplayDates = ({completionEpochMillis, expirationEpochMillis, bypassEpochMillis}: AccessModuleStatus) => {
-  const userCompletedModule = !!completionEpochMillis;
-  const userBypassedModule = !!bypassEpochMillis;
-  const lastConfirmedDate = withInvalidDateHandling(completionEpochMillis);
-  const nextReviewDate = withInvalidDateHandling(expirationEpochMillis);
-  const bypassDate = withInvalidDateHandling(bypassEpochMillis);
-
-  return cond(
-    // User has bypassed module
-    [userBypassedModule, () => ({lastConfirmedDate: `${bypassDate}`, nextReviewDate: 'Unavailable (bypassed)'})],
-    // User never completed training
-    [!userCompletedModule && !userBypassedModule, () =>
-      ({lastConfirmedDate: 'Unavailable (not completed)', nextReviewDate: 'Unavailable (not completed)'})],
-    // User completed training, but is in the lookback window
-    [userCompletedModule && isExpiring(expirationEpochMillis), () => {
-      const daysRemaining = daysFromNow(expirationEpochMillis);
-      const daysRemainingDisplay = daysRemaining >= 0 ? `(${daysRemaining} day${daysRemaining !== 1 ? 's' : ''})` : '(expired)';
-      return {
-        lastConfirmedDate,
-        nextReviewDate: `${nextReviewDate} ${daysRemainingDisplay}`
-      };
-    }],
-    // User completed training and is up to date
-    [userCompletedModule && !isExpiring(expirationEpochMillis), () => {
-      const daysRemaining = daysFromNow(expirationEpochMillis);
-      return {lastConfirmedDate, nextReviewDate: `${nextReviewDate} (${daysRemaining} day${daysRemaining !== 1 ? 's' : ''})`};
-    }]
-  );
-};
 
 
 // Helper / Stateless Components
@@ -151,7 +115,6 @@ interface CompletedButtonInterface {
   wasBypassed: boolean;
   style?: React.CSSProperties;
 }
-
 const CompletedButton = ({buttonText, wasBypassed, style}: CompletedButtonInterface) => <Button disabled={true}
     data-test-id='completed-button'
     style={{
@@ -236,13 +199,15 @@ export const AccessRenewal = fp.flow(
     getProfile();
   }, []);
 
+  const expirableModules = modules.filter(moduleStatus => accessRenewalTitles.has(moduleStatus.moduleName));
+
   const completeOrBypassed = moduleName => {
     const status = modules.find(m => m.moduleName === moduleName);
     const wasBypassed = !!status.bypassEpochMillis;
     return wasBypassed || !isExpiring(status.expirationEpochMillis);
   }
 
-  const allModulesCompleteOrBypassed = fp.flow(fp.map('moduleName'), fp.all(completeOrBypassed))(modules);
+  const allModulesCompleteOrBypassed = fp.flow(fp.map('moduleName'), fp.all(completeOrBypassed))(expirableModules);
 
   // Render
   return <FadeBox style={{margin: '1rem auto 0', color: colors.primary}}>
@@ -279,7 +244,7 @@ export const AccessRenewal = fp.flow(
       {/* Profile */}
       <RenewalCard
           step={1}
-          TitleComponent={() => 'Update your profile'}
+          TitleComponent={accessRenewalTitles.get(AccessModule.PROFILECONFIRMATION)}
           moduleStatus={modules.find(m => m.moduleName === AccessModule.PROFILECONFIRMATION)}>
         <div style={{marginBottom: '0.5rem'}}>Please update your profile information if any of it has changed recently.</div>
         <div>Note that you are obliged by the Terms of Use of the Workbench to provide keep your profile
@@ -294,7 +259,7 @@ export const AccessRenewal = fp.flow(
       {/* Publications */}
       <RenewalCard
           step={2}
-          TitleComponent={() => 'Report any publications or presentations based on your research using the Researcher Workbench'}
+          TitleComponent={accessRenewalTitles.get(AccessModule.PUBLICATIONCONFIRMATION)}
           moduleStatus={modules.find(m => m.moduleName === AccessModule.PUBLICATIONCONFIRMATION)}>
         <div>The <AoU/> Publication and Presentation Policy requires that you report any upcoming publication or
              presentation resulting from the use of <AoU/> Research Program Data at least two weeks before the date of publication.
@@ -334,7 +299,7 @@ export const AccessRenewal = fp.flow(
       {/* Compliance Training */}
       {enableComplianceTraining && <RenewalCard
           step={3}
-          TitleComponent={() => <div><AoU/> Responsible Conduct of Research Training</div>}
+          TitleComponent={accessRenewalTitles.get(AccessModule.COMPLIANCETRAINING)}
           moduleStatus={modules.find(m => m.moduleName === AccessModule.COMPLIANCETRAINING)}>
       <div> You are required to complete the refreshed ethics training courses to understand the privacy safeguards and
           the compliance requirements for using the <AoU/> Dataset.
@@ -365,7 +330,7 @@ export const AccessRenewal = fp.flow(
       {/* DUCC */}
       <RenewalCard
           step={enableComplianceTraining ? 4 : 3}
-          TitleComponent={() => 'Sign Data User Code of Conduct'}
+          TitleComponent={accessRenewalTitles.get(AccessModule.DATAUSERCODEOFCONDUCT)}
           moduleStatus={modules.find(m => m.moduleName === AccessModule.DATAUSERCODEOFCONDUCT)}>
         <div>Please review and sign the data user code of conduct consenting to the <AoU/> data use policy.</div>
         <ActionButton

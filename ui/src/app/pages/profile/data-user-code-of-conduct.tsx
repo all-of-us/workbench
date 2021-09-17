@@ -124,13 +124,13 @@ export const DataUserCodeOfConduct = fp.flow(withUserProfile(), withRouter)(
       withErrorModal({ title: 'Your agreement failed to update', message: 'Please try submitting the agreement again.' })
     )(async(initials) => {
       const duccVersion = getLiveDUCCVersion();
-      const profile = await profileApi().submitDataUseAgreement(duccVersion, initials);
+      const profile = await profileApi().submitDUCC(duccVersion, initials);
       this.props.profileState.updateCache(profile);
     });
 
     submitDataUserCodeOfConduct(initials) {
       const duccVersion = getLiveDUCCVersion();
-      profileApi().submitDataUseAgreement(duccVersion, initials).then((profile) => {
+      profileApi().submitDUCC(duccVersion, initials).then((profile) => {
         this.props.profileState.updateCache(profile);
         history.back();
       });

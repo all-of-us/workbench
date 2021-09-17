@@ -15,6 +15,7 @@ import { makeWorkspaceName } from './str-utils';
 import { config } from 'resources/workbench-config';
 import { logger } from 'libs/logger';
 import { authenticator } from 'otplib';
+import AuthenticatedPage from 'app/page/authenticated-page';
 
 export async function signOut(page: Page): Promise<void> {
   await page.evaluate(() => {
@@ -31,7 +32,11 @@ declare const window: Window &
     setTestAccessTokenOverride: any;
   };
 
-export async function signInWithAccessToken(page: Page, tokenFilename = config.USER_ACCESS_TOKEN_FILE): Promise<void> {
+export async function signInWithAccessToken(
+  page: Page,
+  tokenFilename = config.USER_ACCESS_TOKEN_FILE,
+  postSignInPage: AuthenticatedPage = new HomePage(page)
+): Promise<void> {
   const token = fs.readFileSync(tokenFilename, 'ascii');
   logger.info('Sign in with access token to Workbench application');
   const homePage = new HomePage(page);
@@ -51,9 +56,17 @@ export async function signInWithAccessToken(page: Page, tokenFilename = config.U
   // logs; there is some delay between a console.log() execution and capture by
   // Puppeteer. Any console.log() within the above global function, for example,
   // is unlikely to be captured.
-  await homePage.reloadPage();
-  await homePage.gotoUrl(PageUrl.Home);
-  await homePage.waitForLoad();
+  try {
+    await homePage.reloadPage();
+    await homePage.gotoUrl(PageUrl.Home);
+    // normally the user is routed to the homepage after sign-in, so that's the default here.
+    // tests can override this.
+    await postSignInPage.waitForLoad();
+  } catch (err) {
+    // reloadPage and gotoUrl functions could fail on rare occasions.
+    await homePage.gotoUrl(PageUrl.Home);
+    await postSignInPage.waitForLoad();
+  }
 }
 
 /**
@@ -132,7 +145,6 @@ export async function createWorkspace(
   const workspacesPage = new WorkspacesPage(page);
   await workspacesPage.load();
   await workspacesPage.createWorkspace(workspaceName, cdrVersionName);
-  logger.info(`Created workspace "${workspaceName}" with CDR version "${cdrVersionName}"`);
   return workspaceName;
 }
 
