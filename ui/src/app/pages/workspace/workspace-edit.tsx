@@ -1241,6 +1241,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
                         value={billingAccountName}
                         options={this.buildBillingAccountOptions()}
                         disabled={(freeTierCreditsBalance < 0.0) && !enableBillingUpgrade}
+                            onclick={() => this.requestBillingScopeThenFetchBillingAccount()}
                         onChange={e => {
                           if (e.value === SELECT_OR_CREATE_BILLING_ACCOUNT_OPTION_VALUE) {
                             this.requestBillingScopeThenFetchBillingAccount();
@@ -1253,9 +1254,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
                           }
                         }}
               />
-              <div style={styles.freeCreditsBalanceClickable}>
-                <Clickable onClick={(e) => freeTierBalancePanel.toggle(e)}>View free credits balance</Clickable>
-              </div>
+              {showCreateBillingAccountModal &&<Button type='primary' onClick={() => this.setState({showCreateBillingAccountModal: true})}>CREATE BILLING ACCOUNT</Button>}
             </FlexRow>
             </div>}
           </WorkspaceEditSection>}
