@@ -8,17 +8,20 @@ import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {workspaceStubs} from 'testing/stubs/workspaces';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 import {WorkspaceCard} from './workspace-card';
+import { MemoryRouter } from 'react-router-dom';
 
 describe('WorkspaceCard', () => {
   const reload = jest.fn();
 
   const component = (accessLevel: WorkspaceAccessLevel) => {
     return mount(
-      <WorkspaceCard
-       accessLevel={accessLevel}
-       reload={reload}
-       workspace={workspaceStubs[0]}
-      />,
+      <MemoryRouter>
+        <WorkspaceCard
+         accessLevel={accessLevel}
+         reload={reload}
+         workspace={workspaceStubs[0]}
+        />
+      </MemoryRouter>,
       {attachTo: document.getElementById('root')}
     );
   };

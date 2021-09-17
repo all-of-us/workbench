@@ -234,24 +234,25 @@ export const Clickable = ({as = 'div', disabled = false, onClick = null, propaga
   />;
 };
 
-const ButtonContentWrapper = ({type = 'primary', style = {}, disabled = false, ...props}) => {
+const ButtonContentWrapper = ({computedStyle, disabled = false, ...props}) => {
   return <Clickable
     // `fp.omit` used to prevent propagation of test IDs to the rendered child component.
     disabled={disabled} {...fp.omit(['data-test-id'], props)}
-    {...fp.merge(computeStyle(buttonVariants[type], {disabled}), {style})}
+    {...computedStyle}
   />;
 };
 
 export const Button = ({children, path='', type = 'primary', style = {}, linkStyle={}, disabled = false, propagateDataTestId = false, ...props}) => {
   // `fp.omit` used to prevent propagation of test IDs to the rendered child component.
   const childProps = propagateDataTestId ? props : fp.omit(['data-test-id'], props);
+  const childStyle = fp.merge(computeStyle(buttonVariants[type], {disabled}), {style})
   return path && !disabled
-    ? <ButtonContentWrapper type={type} style={style} disabled={disabled} {...childProps}>
+    ? <ButtonContentWrapper computedStyle={childStyle} disabled={disabled} {...childProps}>
       <RouteLink path={path} style={buttonVariants[type].linkStyle}>
         {children}
       </RouteLink>
     </ButtonContentWrapper>
-    : <ButtonContentWrapper type={type} style={style} disabled={disabled} {...childProps}>
+    : <ButtonContentWrapper computedStyle={childStyle} disabled={disabled} {...childProps}>
       {children}
     </ButtonContentWrapper>
 }

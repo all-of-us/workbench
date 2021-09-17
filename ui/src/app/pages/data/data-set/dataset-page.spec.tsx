@@ -273,26 +273,6 @@ describe('DataSetPage', () => {
     expect(spy).toHaveBeenCalledTimes(1);
   });
 
-  it('should check that the Cohorts and Concept Sets "+" links go to their pages.', async() => {
-    const wrapper = component();
-    const pathPrefix = 'workspaces/' + workspaceDataStub.namespace + '/' + workspaceDataStub.id + '/data';
-
-    // Check Cohorts "+" link
-    wrapper.find({'data-test-id': 'cohorts-link'}).first().simulate('click');
-
-    expect(mockNavigateByUrl).toHaveBeenCalledWith(pathPrefix + '/cohorts/build', {
-      preventDefaultIfNoKeysPressed: true,
-      event: expect.anything()
-    });
-
-    // Check Concept Sets "+" link
-    wrapper.find({'data-test-id': 'concept-sets-link'}).first().simulate('click');
-    expect(mockNavigateByUrl).toHaveBeenCalledWith(pathPrefix + '/concepts', {
-      preventDefaultIfNoKeysPressed: true,
-      event: expect.anything()
-    });
-  });
-
   it('dataSet should show tooltip and disable SAVE button if user has READER access', async() => {
     const readWorkspace = {...workspaceStubs[0], accessLevel: WorkspaceAccessLevel.READER};
     currentWorkspaceStore.next(readWorkspace);
