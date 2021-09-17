@@ -1,3 +1,4 @@
+import { RouteRedirect } from 'app/components/app-router';
 import {Button} from 'app/components/buttons';
 import {ActionCardBase} from 'app/components/card';
 import {FadeBox} from 'app/components/containers';
@@ -7,12 +8,8 @@ import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {conceptSetsApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, withCurrentWorkspace} from 'app/utils';
-import {
-  conceptSetUpdating,
-  NavigationProps
-} from 'app/utils/navigation';
+import {conceptSetUpdating} from 'app/utils/navigation';
 import { MatchParams } from 'app/utils/stores';
-import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {ConceptSet} from 'generated/fetch';
 import * as fp from 'lodash/fp';
@@ -69,19 +66,21 @@ const actionCards = [
 interface State {
   conceptSet: ConceptSet;
   conceptSetLoading: boolean;
+  redirectPath: string;
 }
 
-interface Props extends WithSpinnerOverlayProps, NavigationProps, RouteComponentProps<MatchParams> {
+interface Props extends WithSpinnerOverlayProps, RouteComponentProps<MatchParams> {
   workspace: WorkspaceData;
 }
 
-export const ConceptSetActions = fp.flow(withCurrentWorkspace(), withNavigation, withRouter)(
+export const ConceptSetActions = fp.flow(withCurrentWorkspace(), withRouter)(
   class extends React.Component<Props, State> {
     constructor(props: any) {
       super(props);
       this.state = {
         conceptSet: undefined,
         conceptSetLoading: false,
+        redirectPath: null,
       };
     }
 
@@ -99,7 +98,7 @@ export const ConceptSetActions = fp.flow(withCurrentWorkspace(), withNavigation,
           if (cs) {
             this.setState({conceptSet: cs, conceptSetLoading: false});
           } else {
-            this.props.navigate(['workspaces', namespace, id, 'data', 'concepts']);
+            this.setState({redirectPath: `/workspaces/${namespace}/${id}/data/concepts`});
           }
         });
       }
@@ -123,46 +122,48 @@ export const ConceptSetActions = fp.flow(withCurrentWorkspace(), withNavigation,
           url += `data/data-sets`;
           break;
       }
-      this.props.navigateByUrl(url);
+      this.setState({redirectPath: url});
     }
 
     render() {
-      const {conceptSet, conceptSetLoading} = this.state;
-      return <FadeBox style={{margin: 'auto', marginTop: '1rem', width: '95.7%'}}>
-        {conceptSetLoading && <SpinnerOverlay />}
-        {conceptSet && <React.Fragment>
-          <h3 style={styles.conceptSetsHeader}>Concept Set Saved Successfully</h3>
-          <div style={{marginTop: '0.25rem'}}>
-            The concept set
-            <a style={{color: colors.accent, margin: '0 4px'}}
-               onClick={() => this.navigateTo('conceptSet')}>
-              {conceptSet.name}
-            </a>
-            has been saved.
-          </div>
-          <h3 style={{...styles.conceptSetsHeader, marginTop: '1.5rem'}}>What Next?</h3>
-          <div style={styles.cardArea}>
-            {actionCards.map((card, i) => {
-              return <ActionCardBase key={i} style={styles.card}>
-                <FlexColumn style={{alignItems: 'flex-start'}}>
-                  <FlexRow style={{alignItems: 'flex-start'}}>
-                    <div style={styles.cardName}>{card.title}</div>
-                  </FlexRow>
-                  <div style={styles.cardDescription}>{card.description}</div>
-                </FlexColumn>
-                <div>
-                  <Button
-                    type='primary'
-                    style={styles.cardButton}
-                    onClick={() => this.navigateTo(card.action)}>
-                    {card.title}
-                  </Button>
-                </div>
-              </ActionCardBase>;
-            })}
-          </div>
-        </React.Fragment>}
-      </FadeBox>;
+      const {conceptSet, conceptSetLoading, redirectPath} = this.state;
+      return redirectPath
+          ? <RouteRedirect path={redirectPath} />
+          : <FadeBox style={{margin: 'auto', marginTop: '1rem', width: '95.7%'}}>
+            {conceptSetLoading && <SpinnerOverlay />}
+            {conceptSet && <React.Fragment>
+              <h3 style={styles.conceptSetsHeader}>Concept Set Saved Successfully</h3>
+              <div style={{marginTop: '0.25rem'}}>
+                The concept set
+                <a style={{color: colors.accent, margin: '0 4px'}}
+                   onClick={() => this.navigateTo('conceptSet')}>
+                  {conceptSet.name}
+                </a>
+                has been saved.
+              </div>
+              <h3 style={{...styles.conceptSetsHeader, marginTop: '1.5rem'}}>What Next?</h3>
+              <div style={styles.cardArea}>
+                {actionCards.map((card, i) => {
+                  return <ActionCardBase key={i} style={styles.card}>
+                    <FlexColumn style={{alignItems: 'flex-start'}}>
+                      <FlexRow style={{alignItems: 'flex-start'}}>
+                        <div style={styles.cardName}>{card.title}</div>
+                      </FlexRow>
+                      <div style={styles.cardDescription}>{card.description}</div>
+                    </FlexColumn>
+                    <div>
+                      <Button
+                        type='primary'
+                        style={styles.cardButton}
+                        onClick={() => this.navigateTo(card.action)}>
+                        {card.title}
+                      </Button>
+                    </div>
+                  </ActionCardBase>;
+                })}
+              </div>
+            </React.Fragment>}
+          </FadeBox>;
     }
   }
 );

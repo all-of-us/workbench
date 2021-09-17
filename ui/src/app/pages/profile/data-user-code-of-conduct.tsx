@@ -17,10 +17,9 @@ import {reactStyles, withUserProfile} from 'app/utils';
 import {wasReferredFromRenewal} from 'app/utils/access-utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {getLiveDUCCVersion} from 'app/utils/code-of-conduct';
-import {NavigationProps} from 'app/utils/navigation';
-import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {Profile} from 'generated/fetch';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
+import {RouteRedirect} from "app/components/app-router";
 
 const styles = reactStyles({
   dataUserCodeOfConductPage: {
@@ -83,7 +82,7 @@ const InitialsAgreement = (props) => {
   </div>;
 };
 
-interface Props extends WithSpinnerOverlayProps, NavigationProps, RouteComponentProps {
+interface Props extends WithSpinnerOverlayProps, RouteComponentProps {
   profileState: {
     profile: Profile,
     reload: Function,
@@ -98,9 +97,10 @@ interface State {
   page: DataUserCodeOfConductPage;
   submitting: boolean;
   proceedDisabled: boolean;
+  redirectPath: string;
 }
 
-export const DataUserCodeOfConduct = fp.flow(withUserProfile(), withNavigation, withRouter)(
+export const DataUserCodeOfConduct = fp.flow(withUserProfile(), withRouter)(
   class extends React.Component<Props, State> {
     constructor(props) {
       super(props);
@@ -110,7 +110,8 @@ export const DataUserCodeOfConduct = fp.flow(withUserProfile(), withNavigation, 
         initialPublic: '',
         page: DataUserCodeOfConductPage.CONTENT,
         submitting: false,
-        proceedDisabled: true
+        proceedDisabled: true,
+        redirectPath: null
       };
     }
 
@@ -118,7 +119,7 @@ export const DataUserCodeOfConduct = fp.flow(withUserProfile(), withNavigation, 
       withSuccessModal({
         title: 'Your agreement has been updated',
         message: 'You will be redirected to the access renewal page upon closing this dialog.',
-        onDismiss: () => this.props.navigate(['access-renewal'])
+        onDismiss: () => this.setState({redirectPath: '/access-renewal'})
       }),
       withErrorModal({ title: 'Your agreement failed to update', message: 'Please try submitting the agreement again.' })
     )(async(initials) => {
@@ -141,7 +142,7 @@ export const DataUserCodeOfConduct = fp.flow(withUserProfile(), withNavigation, 
 
     render() {
       const {profileState: {profile}} = this.props;
-      const {proceedDisabled, initialMonitoring, initialPublic, page, submitting} = this.state;
+      const {proceedDisabled, initialMonitoring, initialPublic, page, submitting, redirectPath} = this.state;
       const errors = validate({initialMonitoring, initialPublic}, {
         initialMonitoring: {
           presence: {allowEmpty: false},
@@ -152,7 +153,9 @@ export const DataUserCodeOfConduct = fp.flow(withUserProfile(), withNavigation, 
           equality: {attribute: 'initialMonitoring'}
         }
       });
-      return <FlexColumn style={styles.dataUserCodeOfConductPage}>
+      return redirectPath
+          ? <RouteRedirect path={redirectPath} />
+          : <FlexColumn style={styles.dataUserCodeOfConductPage}>
           {
             page === DataUserCodeOfConductPage.CONTENT && <React.Fragment>
               <HtmlViewer

@@ -14,9 +14,7 @@ import {
   getRegistrationTasks,
   GetStartedButton,
 } from 'app/utils/access-utils';
-import {NavigationProps} from 'app/utils/navigation';
 import {serverConfigStore} from 'app/utils/stores';
-import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {AccessModule} from 'generated/fetch';
 import {TwoFactorAuthModal} from './two-factor-auth-modal';
 
@@ -67,7 +65,7 @@ export interface RegistrationDashboardProps {
   dataUserCodeOfConductCompleted: boolean;
 }
 
-interface HocProps extends RegistrationDashboardProps, NavigationProps {}
+interface HocProps extends RegistrationDashboardProps {}
 
 interface State {
   showRefreshButton: boolean;
@@ -79,7 +77,7 @@ interface State {
 }
 
 
-export const RegistrationDashboard = fp.flow(withNavigation)(class extends React.Component<HocProps, State> {
+export class RegistrationDashboard extends React.Component<HocProps, State> {
   constructor(props: HocProps) {
     super(props);
     this.state = {
@@ -266,4 +264,4 @@ export const RegistrationDashboard = fp.flow(withNavigation)(class extends React
         onCancel={() => this.setState({twoFactorAuthModalOpen: false})}/>}
     </FlexColumn>;
   }
-});
+};

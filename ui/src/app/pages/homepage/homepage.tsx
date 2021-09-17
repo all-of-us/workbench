@@ -22,10 +22,8 @@ import {reactStyles, withUserProfile} from 'app/utils';
 import {hasRegisteredAccess} from 'app/utils/access-tiers';
 import {buildRasRedirectUrl, getRegistrationTasksMap} from 'app/utils/access-utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
-import {NavigationProps} from 'app/utils/navigation';
 import {fetchWithGlobalErrorHandler} from 'app/utils/retry';
 import {serverConfigStore} from 'app/utils/stores';
-import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {supportUrls} from 'app/utils/zendesk';
 import {Profile, WorkspaceResponseListResponse} from 'generated/fetch';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
@@ -142,7 +140,7 @@ const GettingStarted = () => {
   </div>;
 };
 
-interface Props extends WithSpinnerOverlayProps, NavigationProps, RouteComponentProps {
+interface Props extends WithSpinnerOverlayProps, RouteComponentProps {
   profileState: {
     profile: Profile,
     reload: Function
@@ -166,7 +164,7 @@ interface State {
   userWorkspacesResponse: WorkspaceResponseListResponse;
 }
 
-export const Homepage = fp.flow(withUserProfile(), withNavigation, withRouter)(class extends React.Component<Props, State> {
+export const Homepage = fp.flow(withUserProfile(), withRouter)(class extends React.Component<Props, State> {
   private pageId = 'homepage';
   private timer: NodeJS.Timer;
 

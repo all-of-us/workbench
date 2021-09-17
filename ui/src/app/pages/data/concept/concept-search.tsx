@@ -28,7 +28,7 @@ import {
   conceptSetUpdating,
   currentConceptSetStore,
   currentConceptStore,
-  NavigationProps,
+  z
   setSidebarActiveIconStore
 } from 'app/utils/navigation';
 import { MatchParams } from 'app/utils/stores';

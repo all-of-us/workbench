@@ -11,15 +11,14 @@ import {withSpinnerOverlay, WithSpinnerOverlayProps} from 'app/components/with-s
 import {GenomicExtractionModal} from 'app/pages/data/data-set/genomic-extraction-modal';
 import {dataSetApi} from 'app/services/swagger-fetch-clients';
 import {AnalyticsTracker} from 'app/utils/analytics';
-import {NavigationProps} from 'app/utils/navigation';
 import {getDescription, getDisplayName, getType} from 'app/utils/resources';
 import {serverConfigStore} from 'app/utils/stores';
 import {ACTION_DISABLED_INVALID_BILLING} from 'app/utils/strings';
-import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {PrePackagedConceptSetEnum, WorkspaceResource} from 'generated/fetch';
 import {ExportDatasetModal} from './export-dataset-modal';
+import {RouteRedirect} from "app/components/app-router";
 
-interface Props extends WithConfirmDeleteModalProps, WithErrorModalProps, WithSpinnerOverlayProps, NavigationProps {
+interface Props extends WithConfirmDeleteModalProps, WithErrorModalProps, WithSpinnerOverlayProps {
   resource: WorkspaceResource;
   existingNameList: string[];
   onUpdate: () => Promise<void>;
@@ -28,6 +27,7 @@ interface Props extends WithConfirmDeleteModalProps, WithErrorModalProps, WithSp
 }
 
 interface State {
+  redirectPath: string;
   showRenameModal: boolean;
   showExportToNotebookModal: boolean;
   showGenomicExtractionModal: boolean;
@@ -36,13 +36,13 @@ interface State {
 export const DatasetResourceCard = fp.flow(
   withErrorModal(),
   withConfirmDeleteModal(),
-  withSpinnerOverlay(),
-  withNavigation
+  withSpinnerOverlay()
 )(class extends React.Component<Props, State> {
 
   constructor(props: Props) {
     super(props);
     this.state = {
+      redirectPath: null,
       showRenameModal: false,
       showExportToNotebookModal: false,
       showGenomicExtractionModal: false
@@ -68,10 +68,10 @@ export const DatasetResourceCard = fp.flow(
         displayName: 'Edit',
         onClick: () => {
           AnalyticsTracker.DatasetBuilder.OpenEditPage('From Card Snowman');
-          this.props.navigate(['workspaces',
-            resource.workspaceNamespace,
-            resource.workspaceFirecloudName,
-            'data', 'data-sets', resource.dataSet.id]);
+          this.setState({
+            redirectPath: `/workspaces/${resource.workspaceNamespace}/${resource.workspaceFirecloudName}`
+                + `/data/data-sets/${resource.dataSet.id}`
+          });
         },
         disabled: !canWrite(resource)
       },
@@ -144,28 +144,30 @@ export const DatasetResourceCard = fp.flow(
 
   render() {
     const {resource, menuOnly} = this.props;
-    return <React.Fragment>
-      {this.state.showExportToNotebookModal &&
-          <ExportDatasetModal dataset={resource.dataSet}
-                              closeFunction={() => this.setState({showExportToNotebookModal: false})}/>
-      }
-      {this.state.showGenomicExtractionModal &&
-      <GenomicExtractionModal dataSet={resource.dataSet}
-                              workspaceNamespace={resource.workspaceNamespace}
-                              workspaceFirecloudName={resource.workspaceFirecloudName}
-                              closeFunction={() => this.setState({showGenomicExtractionModal: false})}/>
-      }
-      {this.state.showRenameModal &&
-      <RenameModal onRename={(name, description) => this.rename(name, description)}
-                   resourceType={getType(resource)}
-                   onCancel={() => this.setState({showRenameModal: false})}
-                   oldDescription={getDescription(resource)}
-                   oldName={getDisplayName(resource)}
-                   existingNames={this.props.existingNameList}/>
-      }
-      {menuOnly ?
-          <ResourceActionsMenu actions={this.actions}/> :
-          <ResourceCard resource={resource} actions={this.actions}/>}
+    return this.state.redirectPath
+        ? <RouteRedirect path={this.state.redirectPath}/>
+        : <React.Fragment>
+          {this.state.showExportToNotebookModal &&
+              <ExportDatasetModal dataset={resource.dataSet}
+                                  closeFunction={() => this.setState({showExportToNotebookModal: false})}/>
+          }
+          {this.state.showGenomicExtractionModal &&
+          <GenomicExtractionModal dataSet={resource.dataSet}
+                                  workspaceNamespace={resource.workspaceNamespace}
+                                  workspaceFirecloudName={resource.workspaceFirecloudName}
+                                  closeFunction={() => this.setState({showGenomicExtractionModal: false})}/>
+          }
+          {this.state.showRenameModal &&
+          <RenameModal onRename={(name, description) => this.rename(name, description)}
+                       resourceType={getType(resource)}
+                       onCancel={() => this.setState({showRenameModal: false})}
+                       oldDescription={getDescription(resource)}
+                       oldName={getDisplayName(resource)}
+                       existingNames={this.props.existingNameList}/>
+          }
+          {menuOnly ?
+              <ResourceActionsMenu actions={this.actions}/> :
+              <ResourceCard resource={resource} actions={this.actions}/>}
     </React.Fragment>;
   }
 });

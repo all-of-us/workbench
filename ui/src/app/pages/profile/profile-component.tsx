@@ -28,13 +28,12 @@ import {
 } from 'app/utils';
 import {wasReferredFromRenewal} from 'app/utils/access-utils';
 import {convertAPIError, reportError} from 'app/utils/errors';
-import {NavigationProps} from 'app/utils/navigation';
-import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {environment} from 'environments/environment';
 import {AccessModule, InstitutionalRole, Profile, PublicInstitutionDetails} from 'generated/fetch';
 import {DataAccessPanel} from './data-access-panel';
 import {ProfileAccessModules} from './profile-access-modules';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
+import { RouteRedirect } from 'app/components/app-router';
 
 
 // validators for validate.js
@@ -58,7 +57,7 @@ const validators = {
   country: {...required, ...notTooLong(95)}
 };
 
-interface ProfilePageProps extends WithProfileErrorModalProps, WithSpinnerOverlayProps, NavigationProps, RouteComponentProps {
+interface ProfilePageProps extends WithProfileErrorModalProps, WithSpinnerOverlayProps, RouteComponentProps {
   profileState: {
     profile: Profile;
     reload: () => {};
@@ -67,13 +66,13 @@ interface ProfilePageProps extends WithProfileErrorModalProps, WithSpinnerOverla
 interface ProfilePageState {
   currentProfile: Profile;
   institutions: Array<PublicInstitutionDetails>;
+  redirectPath: string;
   showDemographicSurveyModal: boolean;
   updating: boolean;
 }
 export const ProfileComponent = fp.flow(
   withUserProfile(),
   withProfileErrorModal,
-  withNavigation,
   withRouter
   )(class extends React.Component<
     ProfilePageProps,
@@ -86,6 +85,7 @@ export const ProfileComponent = fp.flow(
       this.state = {
         currentProfile: this.initializeProfile(),
         institutions: [],
+        redirectPath: null,
         showDemographicSurveyModal: false,
         updating: false,
       };
@@ -95,14 +95,14 @@ export const ProfileComponent = fp.flow(
     saveProfileWithRenewal = withSuccessModal({
       title: 'Your profile has been updated',
       message: 'You will be redirected to the access renewal page upon closing this dialog.',
-      onDismiss: () => this.props.navigate(['access-renewal'])
+      onDismiss: () => this.setState({redirectPath: '/access-renewal'})
     }, this.saveProfile.bind(this));
 
     confirmProfile = fp.flow(
       withSuccessModal({
         title: 'You have confirmed your profile is accurate',
         message: 'You will be redirected to the access renewal page upon closing this dialog.',
-        onDismiss: () => this.props.navigate(['access-renewal'])
+        onDismiss: () => this.setState({redirectPath: '/access-renewal'})
       }),
       withErrorModal({ title: 'Failed To Confirm Profile', message: 'An error occurred trying to confirm your profile. Please try again.'})
     )(async() => {
@@ -207,7 +207,7 @@ export const ProfileComponent = fp.flow(
           profile
         },
       } = this.props;
-      const {currentProfile, updating, showDemographicSurveyModal} = this.state;
+      const {currentProfile, updating, showDemographicSurveyModal, redirectPath} = this.state;
       const {
       givenName, familyName, areaOfResearch, professionalUrl,
         address: {
@@ -291,225 +291,227 @@ export const ProfileComponent = fp.flow(
       </div>;
       };
 
-      return <FadeBox style={styles.fadebox}>
-      <div style={{width: '95%'}}>
-        {(!profile || updating) && <SpinnerOverlay/>}
-        <div style={{...styles.h1, marginBottom: '0.7rem'}}>Profile</div>
-        <FlexRow style={{justifyContent: 'spaceBetween'}}>
-          <div>
-            {(hasExpired || wasReferredFromRenewal(this.props.location.search)) &&
-              <div style={styles.renewalBox}>
-                <ExclamationTriangle size={25} color={colors.warning} style={{margin: '0.5rem'}}/>
-                <div style={{color: colors.primary, fontWeight: 600}}>Please update or verify your profile.</div>
-                <a onClick={() => this.confirmProfile()} style={{margin: '0 0.5rem 0 auto', textDecoration: 'underline'}}>Looks Good</a>
-              </div>
-            }
-            <div style={styles.title}>Public displayed Information</div>
-            <hr style={{...styles.verticalLine, width: '64%'}}/>
-            <FlexRow style={{marginTop: '1rem'}}>
-              {makeProfileInput({
-                title: 'First Name',
-                valueKey: 'givenName'
-              })}
-              {makeProfileInput({
-                title: 'Last Name',
-                valueKey: 'familyName'
-              })}
-            </FlexRow>
-            <FlexRow>
-              <FlexColumn>
-                {makeProfileInput({
-                  title: 'Your Institution',
-                  valueKey: ['verifiedInstitutionalAffiliation', 'institutionDisplayName'],
-                  disabled: true
-                })}
-                {!profile.verifiedInstitutionalAffiliation &&
-                  <div style={{color: colors.danger}}>
-                    Institution cannot be empty. Please contact admin.
-                  </div>}
-              </FlexColumn>
-              <FlexColumn>
-                <div style={styles.inputLabel}>Your Role</div>
-                {profile.verifiedInstitutionalAffiliation &&
-                  <Dropdown style={{width: '12.5rem'}}
-                            data-test-id='role-dropdown'
-                            placeholder='Your Role'
-                            options={this.getRoleOptions()}
-                            disabled={true}
-                            value={currentProfile.verifiedInstitutionalAffiliation.institutionalRoleEnum}/>}
-
-                {currentProfile.verifiedInstitutionalAffiliation &&
-                currentProfile.verifiedInstitutionalAffiliation.institutionalRoleEnum &&
-                currentProfile.verifiedInstitutionalAffiliation.institutionalRoleEnum ===
-                InstitutionalRole.OTHER && <div>{makeProfileInput({
-                  title: '',
-                  valueKey: ['verifiedInstitutionalAffiliation', 'institutionalRoleOtherText'],
-                  style: {marginTop: '1rem'},
-                  disabled: true
-                })}
-                </div>}
-              </FlexColumn>
-            </FlexRow>
-
-            <FlexRow style={{width: '100%'}}>
-              {makeProfileInput({
-                title: 'Professional URL',
-                valueKey: 'professionalUrl',
-                style: {width: '26rem'}
-              })}
-            </FlexRow>
-            <FlexRow>
-
-              {makeProfileInput({
-                title: <FlexColumn>
-                  <div>Your research background, experience and research interests</div>
-                  <div style={styles.researchPurposeInfo}>
-                    This information will be posted publicly on the <i>AoU</i> Research Hub Website
-                    to
-                    inform the <i>AoU</i> Research Participants.
+      return redirectPath
+          ? <RouteRedirect path={redirectPath} />
+          : <FadeBox style={styles.fadebox}>
+          <div style={{width: '95%'}}>
+            {(!profile || updating) && <SpinnerOverlay/>}
+            <div style={{...styles.h1, marginBottom: '0.7rem'}}>Profile</div>
+            <FlexRow style={{justifyContent: 'spaceBetween'}}>
+              <div>
+                {(hasExpired || wasReferredFromRenewal(this.props.location.search)) &&
+                  <div style={styles.renewalBox}>
+                    <ExclamationTriangle size={25} color={colors.warning} style={{margin: '0.5rem'}}/>
+                    <div style={{color: colors.primary, fontWeight: 600}}>Please update or verify your profile.</div>
+                    <a onClick={() => this.confirmProfile()} style={{margin: '0 0.5rem 0 auto', textDecoration: 'underline'}}>Looks Good</a>
                   </div>
-                </FlexColumn>,
-                maxCharacters: 2000,
-                tooLongWarningCharacters: 1900,
-                valueKey: 'areaOfResearch',
-                isLong: true,
-                style: {width: '26rem'}
-              })}
+                }
+                <div style={styles.title}>Public displayed Information</div>
+                <hr style={{...styles.verticalLine, width: '64%'}}/>
+                <FlexRow style={{marginTop: '1rem'}}>
+                  {makeProfileInput({
+                    title: 'First Name',
+                    valueKey: 'givenName'
+                  })}
+                  {makeProfileInput({
+                    title: 'Last Name',
+                    valueKey: 'familyName'
+                  })}
+                </FlexRow>
+                <FlexRow>
+                  <FlexColumn>
+                    {makeProfileInput({
+                      title: 'Your Institution',
+                      valueKey: ['verifiedInstitutionalAffiliation', 'institutionDisplayName'],
+                      disabled: true
+                    })}
+                    {!profile.verifiedInstitutionalAffiliation &&
+                      <div style={{color: colors.danger}}>
+                        Institution cannot be empty. Please contact admin.
+                      </div>}
+                  </FlexColumn>
+                  <FlexColumn>
+                    <div style={styles.inputLabel}>Your Role</div>
+                    {profile.verifiedInstitutionalAffiliation &&
+                      <Dropdown style={{width: '12.5rem'}}
+                                data-test-id='role-dropdown'
+                                placeholder='Your Role'
+                                options={this.getRoleOptions()}
+                                disabled={true}
+                                value={currentProfile.verifiedInstitutionalAffiliation.institutionalRoleEnum}/>}
+
+                    {currentProfile.verifiedInstitutionalAffiliation &&
+                    currentProfile.verifiedInstitutionalAffiliation.institutionalRoleEnum &&
+                    currentProfile.verifiedInstitutionalAffiliation.institutionalRoleEnum ===
+                    InstitutionalRole.OTHER && <div>{makeProfileInput({
+                      title: '',
+                      valueKey: ['verifiedInstitutionalAffiliation', 'institutionalRoleOtherText'],
+                      style: {marginTop: '1rem'},
+                      disabled: true
+                    })}
+                    </div>}
+                  </FlexColumn>
+                </FlexRow>
+
+                <FlexRow style={{width: '100%'}}>
+                  {makeProfileInput({
+                    title: 'Professional URL',
+                    valueKey: 'professionalUrl',
+                    style: {width: '26rem'}
+                  })}
+                </FlexRow>
+                <FlexRow>
+
+                  {makeProfileInput({
+                    title: <FlexColumn>
+                      <div>Your research background, experience and research interests</div>
+                      <div style={styles.researchPurposeInfo}>
+                        This information will be posted publicly on the <i>AoU</i> Research Hub Website
+                        to
+                        inform the <i>AoU</i> Research Participants.
+                      </div>
+                    </FlexColumn>,
+                    maxCharacters: 2000,
+                    tooLongWarningCharacters: 1900,
+                    valueKey: 'areaOfResearch',
+                    isLong: true,
+                    style: {width: '26rem'}
+                  })}
+                </FlexRow>
+                <div style={{width: '65%', marginTop: '0.5rem'}}>
+                  <div style={styles.title}>Private Information</div>
+                  <hr style={{...styles.verticalLine, width: '26rem'}}/>
+                  <FlexRow style={{marginTop: '1rem'}}>
+                    {makeProfileInput({
+                      title: 'User name',
+                      valueKey: 'username',
+                      disabled: true
+                    })}
+                    {makeProfileInput({
+                      title: 'Institutional email address',
+                      valueKey: 'contactEmail',
+                      disabled: true
+                    })}
+                  </FlexRow>
+                  <FlexRow>
+                    {makeProfileInput({
+                      title: 'Street address 1',
+                      valueKey: ['address', 'streetAddress1'],
+                      id: 'streetAddress1'
+                    })}
+                    {makeProfileInput({
+                      title: 'Street address 2',
+                      valueKey: ['address', 'streetAddress2'],
+                      id: 'streetAddress2'
+                    })}
+                  </FlexRow>
+                  <FlexRow>
+                    {makeProfileInput({
+                      title: 'City',
+                      valueKey: ['address', 'city'],
+                      id: 'city'
+                    })}
+                    {makeProfileInput({
+                      title: 'State',
+                      valueKey: ['address', 'state'],
+                      id: 'state'
+                    })}
+                  </FlexRow>
+                  <FlexRow>
+                    {makeProfileInput({
+                      title: 'Zip Code',
+                      valueKey: ['address', 'zipCode'],
+                      id: 'zipCode'
+                    })}
+                    {makeProfileInput({
+                      title: 'Country',
+                      valueKey: ['address', 'country'],
+                      id: 'country'
+                    })}
+                  </FlexRow>
+                </div>
+              </div>
+              <div style={{width: '20rem', marginRight: '4rem'}}>
+                <div style={{marginLeft: '1rem'}}>
+                  <div style={styles.title}>Free credits balance</div>
+                  <hr style={{...styles.verticalLine}}/>
+                  {profile && <FlexRow style={styles.freeCreditsBox}>
+                      <FlexColumn style={{marginLeft: '0.8rem'}}>
+                          <div style={{marginTop: '0.4rem'}}><AoU/> free credits used:</div>
+                          <div>Remaining <AoU/> free credits:</div>
+                      </FlexColumn>
+                      <FlexColumn style={{alignItems: 'flex-end', marginLeft: '1.0rem'}}>
+                        <div style={{marginTop: '0.4rem', fontWeight: 600}}>{formatFreeCreditsUSD(profile.freeTierUsage)}</div>
+                        <div style={{fontWeight: 600}}>{formatFreeCreditsUSD(profile.freeTierDollarQuota - profile.freeTierUsage)}</div>
+                      </FlexColumn>
+                  </FlexRow>}
+                </div>
+                {environment.enableDataAccessRequirements ?
+                    <DataAccessPanel userAccessTiers={profile.accessTierShortNames}/> :
+                    <ProfileAccessModules profile={profile}/>}
+                <div style={{marginTop: '1rem', marginLeft: '1rem'}}>
+                  <div style={styles.title}>Optional Demographics Survey</div>
+                  <hr style={{...styles.verticalLine}}/>
+                  <div style={{color: colors.primary, fontSize: '14px'}}>
+                    <div>Survey Completed</div>
+                    {/*If a user has created an account, they have, by definition, completed the demographic survey*/}
+                    <div>{displayDateWithoutHours(profile.demographicSurveyCompletionTime !== null ?
+                      profile.demographicSurveyCompletionTime : profile.firstSignInTime)}</div>
+                    <Button
+                      type={'link'}
+                      style={styles.updateSurveyButton}
+                      onClick={() => {
+                        this.setState({showDemographicSurveyModal: true});
+                      }}
+                      data-test-id={'demographics-survey-button'}
+                    >Update Survey</Button>
+                  </div>
+                </div>
+              </div>
             </FlexRow>
-            <div style={{width: '65%', marginTop: '0.5rem'}}>
-              <div style={styles.title}>Private Information</div>
-              <hr style={{...styles.verticalLine, width: '26rem'}}/>
-              <FlexRow style={{marginTop: '1rem'}}>
-                {makeProfileInput({
-                  title: 'User name',
-                  valueKey: 'username',
-                  disabled: true
-                })}
-                {makeProfileInput({
-                  title: 'Institutional email address',
-                  valueKey: 'contactEmail',
-                  disabled: true
-                })}
-              </FlexRow>
-              <FlexRow>
-                {makeProfileInput({
-                  title: 'Street address 1',
-                  valueKey: ['address', 'streetAddress1'],
-                  id: 'streetAddress1'
-                })}
-                {makeProfileInput({
-                  title: 'Street address 2',
-                  valueKey: ['address', 'streetAddress2'],
-                  id: 'streetAddress2'
-                })}
-              </FlexRow>
-              <FlexRow>
-                {makeProfileInput({
-                  title: 'City',
-                  valueKey: ['address', 'city'],
-                  id: 'city'
-                })}
-                {makeProfileInput({
-                  title: 'State',
-                  valueKey: ['address', 'state'],
-                  id: 'state'
-                })}
-              </FlexRow>
-              <FlexRow>
-                {makeProfileInput({
-                  title: 'Zip Code',
-                  valueKey: ['address', 'zipCode'],
-                  id: 'zipCode'
-                })}
-                {makeProfileInput({
-                  title: 'Country',
-                  valueKey: ['address', 'country'],
-                  id: 'country'
-                })}
-              </FlexRow>
-            </div>
-          </div>
-          <div style={{width: '20rem', marginRight: '4rem'}}>
-            <div style={{marginLeft: '1rem'}}>
-              <div style={styles.title}>Free credits balance</div>
-              <hr style={{...styles.verticalLine}}/>
-              {profile && <FlexRow style={styles.freeCreditsBox}>
-                  <FlexColumn style={{marginLeft: '0.8rem'}}>
-                      <div style={{marginTop: '0.4rem'}}><AoU/> free credits used:</div>
-                      <div>Remaining <AoU/> free credits:</div>
-                  </FlexColumn>
-                  <FlexColumn style={{alignItems: 'flex-end', marginLeft: '1.0rem'}}>
-                    <div style={{marginTop: '0.4rem', fontWeight: 600}}>{formatFreeCreditsUSD(profile.freeTierUsage)}</div>
-                    <div style={{fontWeight: 600}}>{formatFreeCreditsUSD(profile.freeTierDollarQuota - profile.freeTierUsage)}</div>
-                  </FlexColumn>
-              </FlexRow>}
-            </div>
-            {environment.enableDataAccessRequirements ?
-                <DataAccessPanel userAccessTiers={profile.accessTierShortNames}/> :
-                <ProfileAccessModules profile={profile}/>}
-            <div style={{marginTop: '1rem', marginLeft: '1rem'}}>
-              <div style={styles.title}>Optional Demographics Survey</div>
-              <hr style={{...styles.verticalLine}}/>
-              <div style={{color: colors.primary, fontSize: '14px'}}>
-                <div>Survey Completed</div>
-                {/*If a user has created an account, they have, by definition, completed the demographic survey*/}
-                <div>{displayDateWithoutHours(profile.demographicSurveyCompletionTime !== null ?
-                  profile.demographicSurveyCompletionTime : profile.firstSignInTime)}</div>
-                <Button
-                  type={'link'}
-                  style={styles.updateSurveyButton}
-                  onClick={() => {
-                    this.setState({showDemographicSurveyModal: true});
-                  }}
-                  data-test-id={'demographics-survey-button'}
-                >Update Survey</Button>
+            <div style={{display: 'flex'}}>
+
+
+              <div style={{display: 'flex', marginBottom: '2rem'}}>
+                <Button type='link'
+                        onClick={() => this.setState({currentProfile: profile})}
+                >
+                  Cancel
+                </Button>
+                <TooltipTrigger
+                  side='top'
+                  content={!!errors && this.saveProfileErrorMessage(errorMessages)}>
+                  <Button
+                    data-test-id='save_profile'
+                    type='purplePrimary'
+                    style={{marginLeft: 40}}
+                    onClick={() => wasReferredFromRenewal(this.props.location.search)
+                      ? this.saveProfileWithRenewal(currentProfile)
+                      : this.saveProfile(currentProfile)
+                    }
+                    disabled={!!errors || fp.isEqual(profile, currentProfile)}
+                  >
+                    Save Profile
+                  </Button>
+                </TooltipTrigger>
               </div>
             </div>
+            {showDemographicSurveyModal && <Modal width={850}>
+                <DemographicSurvey
+                    profile={currentProfile}
+                    onCancelClick={() => {
+                      this.setState({showDemographicSurveyModal: false});
+                    }}
+                    saveProfile={(profileWithDemoSurvey) => {
+                      this.saveProfile(profileWithDemoSurvey);
+                      this.setState({showDemographicSurveyModal: false});
+                    }}
+                    enableCaptcha={false}
+                    enablePrevious={false}
+                    showStepCount={false}
+                />
+            </Modal>}
           </div>
-        </FlexRow>
-        <div style={{display: 'flex'}}>
-
-
-          <div style={{display: 'flex', marginBottom: '2rem'}}>
-            <Button type='link'
-                    onClick={() => this.setState({currentProfile: profile})}
-            >
-              Cancel
-            </Button>
-            <TooltipTrigger
-              side='top'
-              content={!!errors && this.saveProfileErrorMessage(errorMessages)}>
-              <Button
-                data-test-id='save_profile'
-                type='purplePrimary'
-                style={{marginLeft: 40}}
-                onClick={() => wasReferredFromRenewal(this.props.location.search)
-                  ? this.saveProfileWithRenewal(currentProfile)
-                  : this.saveProfile(currentProfile)
-                }
-                disabled={!!errors || fp.isEqual(profile, currentProfile)}
-              >
-                Save Profile
-              </Button>
-            </TooltipTrigger>
-          </div>
-        </div>
-        {showDemographicSurveyModal && <Modal width={850}>
-            <DemographicSurvey
-                profile={currentProfile}
-                onCancelClick={() => {
-                  this.setState({showDemographicSurveyModal: false});
-                }}
-                saveProfile={(profileWithDemoSurvey) => {
-                  this.saveProfile(profileWithDemoSurvey);
-                  this.setState({showDemographicSurveyModal: false});
-                }}
-                enableCaptcha={false}
-                enablePrevious={false}
-                showStepCount={false}
-            />
-        </Modal>}
-      </div>
-    </FadeBox>;
+        </FadeBox>;
     }
   });
