@@ -46,6 +46,4 @@ export default class InstitutionAdminPage extends AuthenticatedPage {
   private institutionNameLinkSelector(instituteName: string): string {
     return `//tr/td/a[text()="${instituteName}"]`;
   }
-
-  
 }
