@@ -1,3 +1,4 @@
+import { RouteRedirect } from 'app/components/app-router';
 import {Button} from 'app/components/buttons';
 import {ActionCardBase} from 'app/components/card';
 import {FadeBox} from 'app/components/containers';
@@ -7,14 +8,13 @@ import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {cohortsApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, withCurrentWorkspace} from 'app/utils';
-import {NavigationProps} from 'app/utils/navigation';
 import { MatchParams } from 'app/utils/stores';
-import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {Cohort} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {RouteComponentProps, withRouter} from 'react-router-dom';
+import querystring from "querystring";
 
 const styles = reactStyles({
   cohortsHeader: {
@@ -68,24 +68,24 @@ const actionCards = [
   },
 ];
 
-interface Props extends WithSpinnerOverlayProps, NavigationProps, RouteComponentProps<MatchParams> {
+interface Props extends WithSpinnerOverlayProps, RouteComponentProps<MatchParams> {
   workspace: WorkspaceData;
 }
 
 interface State {
   cohort: Cohort;
   cohortLoading: boolean;
+  redirectPath: string;
 }
 
 export const CohortActions = fp.flow(
   withCurrentWorkspace(),
-  withNavigation,
   withRouter
 )(
   class extends React.Component<Props, State> {
     constructor(props: any) {
       super(props);
-      this.state = {cohort: undefined, cohortLoading: false};
+      this.state = {cohort: undefined, cohortLoading: false, redirectPath: null};
     }
 
     componentDidMount(): void {
@@ -96,7 +96,7 @@ export const CohortActions = fp.flow(
         if (c) {
           this.setState({cohort: c, cohortLoading: false});
         } else {
-          this.props.navigate(['workspaces', namespace, id, 'data', 'cohorts']);
+          this.setState({redirectPath: `/workspaces/${namespace}/${id}/data/cohorts`});
         }
       });
     }
@@ -105,11 +105,12 @@ export const CohortActions = fp.flow(
       const {cohort} = this.state;
       const {namespace, id} = this.props.workspace;
       let url = `/workspaces/${namespace}/${id}/`;
-      const queryParams: any = {};
+      let queryParams: any = null;
 
       switch (action) {
         case 'cohort':
           url += `data/cohorts/build`;
+          queryParams = {};
           queryParams.cohortId = cohort.id;
           break;
         case 'review':
@@ -124,12 +125,17 @@ export const CohortActions = fp.flow(
         case 'newCohort':
           url += `data/cohorts/build`;
       }
-      this.props.navigateByUrl(url, {queryParams});
+      if (queryParams) {
+        url += '?' + querystring.stringify(queryParams)
+      }
+      this.setState({redirectPath: url})
     }
 
     render() {
-      const {cohort, cohortLoading} = this.state;
-      return <FadeBox style={{margin: 'auto', marginTop: '1rem', width: '95.7%'}}>
+      const {cohort, cohortLoading, redirectPath} = this.state;
+      return redirectPath
+          ? <RouteRedirect path={redirectPath} />
+          : <FadeBox style={{margin: 'auto', marginTop: '1rem', width: '95.7%'}}>
         {cohortLoading && <SpinnerOverlay />}
         {cohort && <React.Fragment>
           <h3 style={styles.cohortsHeader}>Cohort Saved Successfully</h3>

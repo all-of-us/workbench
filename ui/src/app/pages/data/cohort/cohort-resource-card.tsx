@@ -9,12 +9,12 @@ import {withConfirmDeleteModal, WithConfirmDeleteModalProps} from 'app/component
 import {withErrorModal, WithErrorModalProps} from 'app/components/with-error-modal';
 import {withSpinnerOverlay, WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {cohortsApi, dataSetApi} from 'app/services/swagger-fetch-clients';
-import {NavigationProps} from 'app/utils/navigation';
 import {getDescription, getDisplayName, getId, getResourceUrl, getType} from 'app/utils/resources';
-import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {DataSet, WorkspaceResource} from 'generated/fetch';
+import { RouteRedirect } from 'app/components/app-router';
+import querystring from "querystring";
 
-interface Props extends WithConfirmDeleteModalProps, WithErrorModalProps, WithSpinnerOverlayProps, NavigationProps {
+interface Props extends WithConfirmDeleteModalProps, WithErrorModalProps, WithSpinnerOverlayProps {
   resource: WorkspaceResource;
   existingNameList: string[];
   onUpdate: () => Promise<void>;
@@ -22,22 +22,23 @@ interface Props extends WithConfirmDeleteModalProps, WithErrorModalProps, WithSp
 }
 
 interface State {
-  showRenameModal: boolean;
   referencingDataSets: Array<DataSet>;
+  redirectPath: string;
+  showRenameModal: boolean;
 }
 
 export const CohortResourceCard = fp.flow(
   withErrorModal(),
   withConfirmDeleteModal(),
-  withSpinnerOverlay(),
-  withNavigation
+  withSpinnerOverlay()
 )(class extends React.Component<Props, State> {
 
   constructor(props: Props) {
     super(props);
     this.state = {
-      showRenameModal: false,
       referencingDataSets: [],
+      redirectPath: null,
+      showRenameModal: false,
     };
   }
 
@@ -70,16 +71,17 @@ export const CohortResourceCard = fp.flow(
         displayName: 'Edit',
         onClick: () => {
           const urlObj = getResourceUrl(resource);
-          this.props.navigateByUrl(urlObj.url, urlObj);
+          const url = urlObj.queryParams
+              ? urlObj.url + '?' + querystring.stringify(urlObj.queryParams)
+              : urlObj.url
+          this.setState({redirectPath: url});
         },
         disabled: !canWrite(resource)
       },
       {
         icon: 'grid-view',
         displayName: 'Review',
-        onClick: () => {
-          this.props.navigateByUrl(this.reviewUrlForCohort);
-        },
+        onClick: () => this.setState({redirectPath: this.reviewUrlForCohort}),
         disabled: !canWrite(resource)
       },
       {
@@ -164,7 +166,9 @@ export const CohortResourceCard = fp.flow(
 
   render() {
     const {resource, menuOnly} = this.props;
-    return <React.Fragment>
+    return this.state.redirectPath
+        ? <RouteRedirect path={this.state.redirectPath} />
+    : <React.Fragment>
       {this.state.showRenameModal &&
       <RenameModal onRename={(name, description) => this.rename(name, description)}
                    resourceType={getType(resource)}

@@ -15,12 +15,11 @@ import {
   conceptSetUpdating,
   currentConceptSetStore,
   currentConceptStore,
-  NavigationProps,
   setSidebarActiveIconStore
 } from 'app/utils/navigation';
-import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {ConceptSet, Criteria, Domain, DomainCount, UpdateConceptSetRequest} from 'generated/fetch';
+import { RouteRedirect } from 'app/components/app-router';
 
 const styles = reactStyles({
   sectionTitle: {
@@ -74,7 +73,7 @@ const getConceptIdsToAddOrRemove = (conceptsToFilter: Array<Criteria>, conceptsT
   }, []);
 };
 
-interface Props extends NavigationProps {
+interface Props {
   workspace: WorkspaceData;
   concept: Array<any>;
   conceptSet: ConceptSet;
@@ -82,14 +81,16 @@ interface Props extends NavigationProps {
 
 interface State {
   conceptAddModalOpen: boolean;
+  redirectPath: string;
   updating: boolean;
 }
-export const ConceptListPage = fp.flow(withCurrentWorkspace(), withCurrentConcept(), withCurrentConceptSet(), withNavigation)(
+export const ConceptListPage = fp.flow(withCurrentWorkspace(), withCurrentConcept(), withCurrentConceptSet())(
   class extends React.Component<Props, State> {
     constructor(props) {
       super(props);
       this.state = {
         conceptAddModalOpen: false,
+        redirectPath: null,
         updating: false
       };
     }
@@ -110,7 +111,7 @@ export const ConceptListPage = fp.flow(withCurrentWorkspace(), withCurrentConcep
       try {
         const updatedConceptSet = await conceptSetsApi().updateConceptSetConcepts(namespace, id, conceptSet.id, updateConceptSetReq);
         currentConceptSetStore.next(updatedConceptSet);
-        this.props.navigate(['workspaces', namespace, id, 'data', 'concepts', 'sets', conceptSet.id, 'actions']);
+        this.afterConceptsSaved(updatedConceptSet);
       } catch (error) {
         console.error(error);
       }
@@ -124,7 +125,7 @@ export const ConceptListPage = fp.flow(withCurrentWorkspace(), withCurrentConcep
 
     afterConceptsSaved(conceptSet: ConceptSet) {
       const {namespace, id} = this.props.workspace;
-      this.props.navigate(['workspaces', namespace, id, 'data', 'concepts', 'sets', conceptSet.id, 'actions']);
+      this.setState({redirectPath: `/workspaces/${namespace}/${id}/data/concepts/sets/${conceptSet.id}/actions`});
     }
 
     get disableSaveConceptButton() {
@@ -191,29 +192,31 @@ export const ConceptListPage = fp.flow(withCurrentWorkspace(), withCurrentConcep
 
     render() {
       const {concept} = this.props;
-      const {conceptAddModalOpen, updating} = this.state;
-      return <div>
-        <div style={styles.selectionContainer}>
-          {updating && <SpinnerOverlay/>}
-          {!!concept && concept.length > 0 && this.renderSelections()}
-        </div>
-        <FlexRowWrap style={{flexDirection: 'row-reverse', marginTop: '1rem'}}>
-          <Button type='primary'
-                  style={styles.saveButton}
-                  disabled={this.disableSaveConceptButton}
-                  onClick={() => this.onSaveConceptSetClick()}>
-            Save Concept Set
-          </Button>
-          <Button type='link'
-                  style={{color: colors.primary, left: 0}}
-                  onClick={() => setSidebarActiveIconStore.next(null)}>
-            Close
-          </Button>
-        </FlexRowWrap>
-        {conceptAddModalOpen && <ConceptAddModal activeDomainTab={this.getDomainCount()}
-                         selectedConcepts={this.props.concept}
-                         onSave={(conceptSet) => this.afterConceptsSaved(conceptSet)}
-                         onClose={() => this.closeConceptAddModal()}/>}
-        </div>;
+      const {conceptAddModalOpen, redirectPath, updating} = this.state;
+      return redirectPath
+          ? <RouteRedirect path={redirectPath}/>
+          : <div>
+              <div style={styles.selectionContainer}>
+                {updating && <SpinnerOverlay/>}
+                {!!concept && concept.length > 0 && this.renderSelections()}
+              </div>
+              <FlexRowWrap style={{flexDirection: 'row-reverse', marginTop: '1rem'}}>
+                <Button type='primary'
+                        style={styles.saveButton}
+                        disabled={this.disableSaveConceptButton}
+                        onClick={() => this.onSaveConceptSetClick()}>
+                  Save Concept Set
+                </Button>
+                <Button type='link'
+                        style={{color: colors.primary, left: 0}}
+                        onClick={() => setSidebarActiveIconStore.next(null)}>
+                  Close
+                </Button>
+              </FlexRowWrap>
+              {conceptAddModalOpen && <ConceptAddModal activeDomainTab={this.getDomainCount()}
+                               selectedConcepts={this.props.concept}
+                               onSave={(conceptSet) => this.afterConceptsSaved(conceptSet)}
+                               onClose={() => this.closeConceptAddModal()}/>}
+              </div>;
     }
   });

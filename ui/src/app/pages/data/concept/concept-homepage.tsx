@@ -21,12 +21,11 @@ import {
 import {
   currentCohortSearchContextStore,
   currentConceptStore,
-  NavigationProps
 } from 'app/utils/navigation';
 import {serverConfigStore} from 'app/utils/stores';
-import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {Concept, Domain, DomainCard as ConceptDomainCard, DomainInfo, SurveyModule} from 'generated/fetch';
+import { RouteRedirect } from 'app/components/app-router';
 const styles = reactStyles({
   searchBar: {
     boxShadow: '0 4px 12px 0 rgba(0,0,0,0.15)', height: '3rem', width: '64.3%', lineHeight: '19px', paddingLeft: '2rem',
@@ -139,7 +138,7 @@ const PhysicalMeasurementsCard: React.FunctionComponent<{physicalMeasurementCard
       </DomainCardBase>;
     };
 
-interface Props extends WithSpinnerOverlayProps, NavigationProps {
+interface Props extends WithSpinnerOverlayProps {
   workspace: WorkspaceData;
   cohortContext: any;
   concept?: Array<Concept>;
@@ -170,9 +169,10 @@ interface State {
   surveyInfoError: boolean;
   // List of surveys loading updated counts for survey cards
   surveysLoading: Array<string>;
+  redirectPath: string;
 }
 
-export const ConceptHomepage = fp.flow(withCurrentCohortSearchContext(), withCurrentConcept(), withCurrentWorkspace(), withNavigation)(
+export const ConceptHomepage = fp.flow(withCurrentCohortSearchContext(), withCurrentConcept(), withCurrentWorkspace())(
   class extends React.Component<Props, State> {
     constructor(props) {
       super(props);
@@ -189,6 +189,7 @@ export const ConceptHomepage = fp.flow(withCurrentCohortSearchContext(), withCur
         showSearchError: false,
         surveyInfoError: false,
         surveysLoading: [],
+        redirectPath: null,
       };
     }
 
@@ -334,9 +335,9 @@ export const ConceptHomepage = fp.flow(withCurrentCohortSearchContext(), withCur
     browseDomain(domain: Domain, surveyName?: string) {
       const {namespace, id} = this.props.workspace;
       currentCohortSearchContextStore.next({domain: domain, searchTerms: this.state.currentSearchString, surveyName});
-      const url = `workspaces/${namespace}/${id}/data/concepts/${domain}`;
-
-      this.props.navigateByUrl(url, surveyName ? {queryParams: {survey: surveyName}} : {});
+      const url = `/workspaces/${namespace}/${id}/data/concepts/${domain}`;
+      const queryParams = surveyName ? `?survey=${surveyName}` : '';
+      this.setState({redirectPath: `${url}${queryParams}`});
     }
 
     errorMessage() {
@@ -348,7 +349,7 @@ export const ConceptHomepage = fp.flow(withCurrentCohortSearchContext(), withCur
 
     render() {
       const {conceptDomainCards, conceptDomainList, conceptSurveysList, currentInputString, currentSearchString, domainInfoError,
-        domainsLoading, inputErrors, loadingDomains, surveyInfoError, showSearchError, surveysLoading} = this.state;
+        domainsLoading, inputErrors, loadingDomains, surveyInfoError, showSearchError, surveysLoading, redirectPath} = this.state;
       // TODO cleanup with https://precisionmedicineinitiative.atlassian.net/browse/RW-7137
       const {enableStandardSourceDomains} = serverConfigStore.get().config;
       const domainCards = enableStandardSourceDomains &&
@@ -359,7 +360,8 @@ export const ConceptHomepage = fp.flow(withCurrentCohortSearchContext(), withCur
         conceptDomainCards.find(domain => domain.domain === Domain.PHYSICALMEASUREMENTCSS);
       const physicalMeasurementsInfo = !enableStandardSourceDomains &&
         conceptDomainList.find(domain => domain.domain === Domain.PHYSICALMEASUREMENTCSS);
-      return <React.Fragment>
+      return redirectPath ? <RouteRedirect path={redirectPath}/>
+      : <React.Fragment>
         <FadeBox style={{margin: 'auto', paddingTop: '1rem', width: '95.7%'}}>
           <div style={{display: 'flex', alignItems: 'center'}}>
             <ClrIcon shape='search' style={{position: 'absolute', height: '1rem', width: '1rem',
