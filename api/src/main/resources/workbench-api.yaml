@@ -6069,6 +6069,23 @@ definitions:
       diskConfig:
         description: The configuration of a persistent disk
         "$ref": "#/definitions/DiskConfig"
+      errors:
+        type: array
+        description: The list of errors that were encountered on runtime create, if any.
+        items:
+          $ref: "#/definitions/RuntimeError"
+  RuntimeError:
+    description: Errors encountered on runtime create
+    properties:
+      errorMessage:
+        type: string
+        description: Error message
+      errorCode:
+        type: integer
+        description: Error code
+      timestamp:
+        type: string
+        description: timestamp for error in ISO 8601 format
   DiskConfig:
     description: The configuration of a persistent disk, returned in runtime responses
     type: object
