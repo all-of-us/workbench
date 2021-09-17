@@ -31,7 +31,6 @@ import org.pmiops.workbench.mandrill.model.MandrillMessageStatus;
 import org.pmiops.workbench.mandrill.model.MandrillMessageStatuses;
 import org.pmiops.workbench.mandrill.model.RecipientAddress;
 import org.pmiops.workbench.mandrill.model.RecipientType;
-import org.pmiops.workbench.model.BillingPaymentMethod;
 import org.pmiops.workbench.model.SendBillingSetupEmailRequest;
 import org.pmiops.workbench.test.Providers;
 
@@ -152,11 +151,7 @@ public class MailServiceImplTest extends SpringTest {
     workbenchConfig.billing.carahsoftEmail = "test@carasoft.com";
     DbUser user = createDbUser();
     SendBillingSetupEmailRequest request =
-        new SendBillingSetupEmailRequest()
-            .institution("inst")
-            .paymentMethod(BillingPaymentMethod.PURCHASE_ORDER)
-            .isNihFunded(true)
-            .phone("123456");
+        new SendBillingSetupEmailRequest().institution("inst").isNihFunded(true).phone("123456");
     service.sendBillingSetupEmail(user, request);
     verify(mandrillApi, times(1))
         .send(
@@ -174,7 +169,6 @@ public class MailServiceImplTest extends SpringTest {
                   String gotHtml = ((MandrillMessage) got.getMessage()).getHtml();
                   // tags should be escaped, email addresses shouldn't.
                   return gotHtml.contains("username@research.org")
-                      && gotHtml.contains("Purchase Order/Other")
                       && gotHtml.contains("given name family name")
                       && gotHtml.contains("user@contact.com")
                       && gotHtml.contains(
@@ -187,11 +181,7 @@ public class MailServiceImplTest extends SpringTest {
     workbenchConfig.featureFlags.enableBillingUpgrade = false;
     DbUser user = createDbUser();
     SendBillingSetupEmailRequest request =
-        new SendBillingSetupEmailRequest()
-            .institution("inst")
-            .paymentMethod(BillingPaymentMethod.PURCHASE_ORDER)
-            .isNihFunded(true)
-            .phone("123456");
+        new SendBillingSetupEmailRequest().institution("inst").isNihFunded(true).phone("123456");
     service.sendBillingSetupEmail(user, request);
     verifyZeroInteractions(mandrillApi);
   }
