@@ -189,7 +189,7 @@ export const SideNav = (props: SideNavProps) => {
       hasAuthorityForAction(profile, AuthorityGuardedAction.WORKSPACE_ADMIN) && showAdminOptions && <SideNavItem
           content={'Workspaces'}
           onToggleSideNav={() => onToggleSideNav()}
-          href={'admin/workspaces'}
+          href={'/admin/workspaces'}
           active={workspaceAdminActive()}
       />
     }
@@ -205,7 +205,7 @@ export const SideNav = (props: SideNavProps) => {
       hasAuthorityForAction(profile, AuthorityGuardedAction.INSTITUTION_ADMIN) && showAdminOptions && <SideNavItem
           content={'Institution Admin'}
           onToggleSideNav={() => onToggleSideNav()}
-          href={'admin/institution'}
+          href={'/admin/institution'}
           active={workspaceAdminActive()}
       />
     }
