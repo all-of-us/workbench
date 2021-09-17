@@ -13,7 +13,7 @@ import {dataSetApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, summarizeErrors, withCurrentWorkspace} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
-import {encodeURIComponentStrict, useNavigation} from 'app/utils/navigation';
+import {encodeURIComponentStrict} from 'app/utils/navigation';
 import {ACTION_DISABLED_INVALID_BILLING} from 'app/utils/strings';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
@@ -61,7 +61,9 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(withCur
     const [codePreview, setCodePreview] = useState(null);
     const [loadingNotebook, setIsLoadingNotebook] = useState(false);
     const [errorMsg, setErrorMsg] = useState(null);
-    const [, navigateByUrl] = useNavigation();
+
+    const notebookUrl = `/workspaces/${workspace.namespace}/${workspace.id}/notebooks/preview/`
+        + appendNotebookFileSuffix(encodeURIComponentStrict(notebookName));
 
     async function exportDataset() {
       AnalyticsTracker.DatasetBuilder.Export(kernelType);
@@ -71,9 +73,6 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(withCur
       try {
         await dataSetApi().exportToNotebook(workspace.namespace, workspace.id, createExportDatasetRequest());
         // Open notebook in a new tab and return back to the Data tab
-        const notebookUrl = `/workspaces/${workspace.namespace}/${workspace.id}/notebooks/preview/`
-          + appendNotebookFileSuffix(encodeURIComponentStrict(notebookName));
-        navigateByUrl(notebookUrl);
       } catch (e) {
         console.error(e);
         setIsExporting(false);
@@ -279,7 +278,9 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(withCur
               <Button type='primary'
                       data-test-id='export-data-set'
                       disabled={!fp.isEmpty(errors)}
-                      onClick={() => exportDataset()}>
+                      onClick={() => exportDataset()}
+                      path={notebookUrl}
+              >
                 Export
               </Button>
             </TooltipTrigger>

@@ -16,11 +16,11 @@ import {
   getDefaultCdrVersionForTier,
   hasDefaultCdrVersion
 } from 'app/utils/cdr-versions';
-import {useNavigation} from 'app/utils/navigation';
 import {MatchParams, serverConfigStore} from 'app/utils/stores';
 import {CdrVersionTiersResponse, Workspace} from 'generated/fetch';
-import {useParams} from 'react-router-dom';
+import {Redirect, useParams} from 'react-router-dom';
 import {CdrVersionUpgradeModal} from './cdr-version-upgrade-modal';
+import { RouteLink } from 'app/components/app-router';
 
 const styles = reactStyles({
   container: {
@@ -92,7 +92,9 @@ const CdrVersion = (props: {workspace: Workspace, cdrVersionTiersResponse: CdrVe
 
   const [userHasDismissedAlert, setUserHasDismissedAlert] = useState(dismissedInLocalStorage());
   const [showModal, setShowModal] = useState(false);
-  const [navigate, ] = useNavigation();
+
+  const [redirect, setRedirect] = useState(false);
+  const redirectPath = `/workspaces/${workspace.namespace}/${workspace.id}/duplicate`
 
   // check whether the user has previously dismissed the alert in localStorage, to determine icon color
   useEffect(() =>
@@ -112,15 +114,17 @@ const CdrVersion = (props: {workspace: Workspace, cdrVersionTiersResponse: CdrVe
     </span>
   </Clickable>;
 
-  return <FlexRow data-test-id='cdr-version' style={{textTransform: 'none'}}>
-    {getCdrVersion(workspace, cdrVersionTiersResponse).name}
-    {!hasDefaultCdrVersion(workspace, cdrVersionTiersResponse) && <NewVersionFlag/>}
-    {showModal && <CdrVersionUpgradeModal
-        defaultCdrVersionName={getDefaultCdrVersionForTier(workspace.accessTierShortName, cdrVersionTiersResponse).name}
-        onClose={() => setShowModal(false)}
-        upgrade={() => navigate(['workspaces', namespace, id, 'duplicate'])}
-    />}
-  </FlexRow>;
+  return redirect
+      ? <Redirect to={redirectPath}/>
+      : <FlexRow data-test-id='cdr-version' style={{textTransform: 'none'}}>
+        {getCdrVersion(workspace, cdrVersionTiersResponse).name}
+        {!hasDefaultCdrVersion(workspace, cdrVersionTiersResponse) && <NewVersionFlag/>}
+        {showModal && <CdrVersionUpgradeModal
+            defaultCdrVersionName={getDefaultCdrVersionForTier(workspace.accessTierShortName, cdrVersionTiersResponse).name}
+            onClose={() => setShowModal(false)}
+            upgrade={() => setRedirect(true)}
+        />}
+      </FlexRow>;
 };
 
 const tabs = [
@@ -142,7 +146,6 @@ export const WorkspaceNavBar = fp.flow(
 )(props => {
   const {tabPath, workspace, cdrVersionTiersResponse} = props;
   const activeTabIndex = fp.findIndex(['link', tabPath], tabs);
-  const [navigate, ] = useNavigation();
   const {ns, wsid} = useParams<MatchParams>();
 
   const navTab = (currentTab, disabled) => {
@@ -156,9 +159,10 @@ export const WorkspaceNavBar = fp.flow(
         disabled={disabled}
         style={{...styles.tab, ...(selected ? styles.active : {}), ...(disabled ? styles.disabled : {})}}
         hover={{color: styles.active.color}}
-        onClick={() => navigate(['workspaces', ns, wsid, link])}
       >
-        {name}
+        <RouteLink path={`/workspaces/${ns}/${wsid}/${link}`}>
+          {name}
+        </RouteLink>
       </Clickable>
       {!hideSeparator && navSeparator}
     </React.Fragment>;

@@ -340,7 +340,7 @@ export const CardButton = ({path='', type = 'large', disabled = false, style = {
   >
     {path
       ? <RouteLink path={path}>{children}</RouteLink>
-      : {children}
+      : (children)
     }
   </Clickable>;
 };

@@ -22,7 +22,7 @@ import {reactStyles, withUserProfile} from 'app/utils';
 import {hasRegisteredAccess} from 'app/utils/access-tiers';
 import {buildRasRedirectUrl, getRegistrationTasksMap} from 'app/utils/access-utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
-import {NavigationProps, useNavigation} from 'app/utils/navigation';
+import {NavigationProps} from 'app/utils/navigation';
 import {fetchWithGlobalErrorHandler} from 'app/utils/retry';
 import {serverConfigStore} from 'app/utils/stores';
 import {withNavigation} from 'app/utils/with-navigation-hoc';
@@ -30,7 +30,7 @@ import {supportUrls} from 'app/utils/zendesk';
 import {Profile, WorkspaceResponseListResponse} from 'generated/fetch';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import {QuickTourAndVideos} from './quick-tour-and-videos';
-import {parseQueryParams} from "app/components/app-router";
+import {parseQueryParams, RouteLink} from "app/components/app-router";
 
 import workspaceIcon from 'assets/images/workspace-icon.svg';
 import cohortIcon from 'assets/images/cohort-icon.svg';
@@ -89,29 +89,26 @@ const WelcomeHeader = () => {
 };
 
 const Workspaces = () => {
-  const [navigate, ] = useNavigation();
-
   return <FlexColumn>
     <FlexRow style={{justifyContent: 'space-between', alignItems: 'center'}}>
       <FlexRow style={{alignItems: 'center'}}>
         <SemiBoldHeader style={{marginTop: '0px'}}>Workspaces</SemiBoldHeader>
-        <ClrIcon
-            shape='plus-circle'
-            size={30}
-            className={'is-solid'}
-            style={{color: colors.accent, marginLeft: '1rem', cursor: 'pointer'}}
-            onClick={() => {
-              AnalyticsTracker.Workspaces.OpenCreatePage();
-              navigate(['workspaces', 'build']);
-            }}
-        />
+        <RouteLink path={'/workspaces/build'}>
+          <ClrIcon
+              shape='plus-circle'
+              size={30}
+              className={'is-solid'}
+              style={{color: colors.accent, marginLeft: '1rem', cursor: 'pointer'}}
+              onClick={() => AnalyticsTracker.Workspaces.OpenCreatePage()}
+          />
+        </RouteLink>
       </FlexRow>
-      <span
+      <RouteLink
           style={{alignSelf: 'flex-end', color: colors.accent, cursor: 'pointer'}}
-          onClick={() => navigate(['workspaces'])}
+          path={'/workspaces'}
       >
         See all workspaces
-      </span>
+      </RouteLink>
     </FlexRow>
     <RecentWorkspaces />
   </FlexColumn>;
@@ -259,7 +256,7 @@ export const Homepage = fp.flow(withUserProfile(), withNavigation, withRouter)(c
   }
 
   getRegistrationTasksMap() {
-    return getRegistrationTasksMap(this.props.navigate);
+    return getRegistrationTasksMap();
   }
 
   async syncCompliance() {

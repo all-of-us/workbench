@@ -86,10 +86,7 @@ export const redirectToRas = (): void => {
 // the server-side logic, else users can get stuck on the registration dashboard
 // without a next step:
 // https://github.com/all-of-us/workbench/blob/master/api/src/main/java/org/pmiops/workbench/db/dao/UserServiceImpl.java#L240-L272
-//
-// Needing to pass navigate in here is a bit odd but necessary to access the navigate function which
-// can only be accessed through a hook/HOC from a component.
-export const getRegistrationTasks = (navigate): RegistrationTask[] => serverConfigStore.get().config ? ([
+export const getRegistrationTasks = (): RegistrationTask[] => serverConfigStore.get().config ? ([
   {
     key: 'twoFactorAuth',
     module: AccessModule.TWOFACTORAUTH,
@@ -167,23 +164,20 @@ export const getRegistrationTasks = (navigate): RegistrationTask[] => serverConf
       }
       return null;
     },
-    onClick: () => {
-      AnalyticsTracker.Registration.EnterDUCC();
-      navigate(['data-code-of-conduct']);
-    }
+    onClick: () => AnalyticsTracker.Registration.EnterDUCC
   }
 ]).filter(registrationTask => registrationTask.featureFlag === undefined
     || registrationTask.featureFlag) : (() => {
       throw new Error('Cannot load registration tasks before config loaded');
     })();
 
-export const getRegistrationTasksMap = (navigate) => getRegistrationTasks(navigate).reduce((acc, curr) => {
+export const getRegistrationTasksMap = () => getRegistrationTasks().reduce((acc, curr) => {
   acc[curr.key] = curr;
   return acc;
 }, {});
 
-export const getRegistrationTask = (navigate, module: AccessModule): RegistrationTask => {
-  return getRegistrationTasks(navigate).find(task => task.module === module);
+export const getRegistrationTask = (module: AccessModule): RegistrationTask => {
+  return getRegistrationTasks().find(task => task.module === module);
 };
 
 export const wasReferredFromRenewal = (queryParams): boolean => {

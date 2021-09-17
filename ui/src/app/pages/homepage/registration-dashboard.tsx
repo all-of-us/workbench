@@ -97,7 +97,7 @@ export const RegistrationDashboard = fp.flow(withNavigation)(class extends React
   }
 
   getRegistrationTasks() {
-    return getRegistrationTasks(this.props.navigate);
+    return getRegistrationTasks();
   }
 
   get taskCompletionList(): Array<boolean> {

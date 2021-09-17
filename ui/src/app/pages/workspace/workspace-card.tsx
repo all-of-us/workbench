@@ -17,10 +17,11 @@ import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {displayDate, reactStyles} from 'app/utils';
 import {AccessTierShortNames} from 'app/utils/access-tiers';
 import {AnalyticsTracker, triggerEvent} from 'app/utils/analytics';
-import {currentWorkspaceStore, NavigationProps, useNavigation} from 'app/utils/navigation';
+import {currentWorkspaceStore, NavigationProps} from 'app/utils/navigation';
 import {serverConfigStore} from 'app/utils/stores';
 import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
+import { RouteLink } from 'app/components/app-router';
 
 const EVENT_CATEGORY = 'Workspace list';
 
@@ -71,36 +72,36 @@ const WorkspaceCardMenu: React.FunctionComponent<WorkspaceCardMenuProps> = ({
   onShare,
   onDelete
 }) => {
-  const [navigate, ] = useNavigation();
-
-  const wsPathPrefix = 'workspaces/' + workspace.namespace + '/' + workspace.id;
+  const wsPathPrefix = '/workspaces/' + workspace.namespace + '/' + workspace.id;
 
   return <PopupTrigger
     side='bottom'
     closeOnClick
     content={
       <React.Fragment>
-        <MenuItem icon='copy'
-                  onClick={() => {
-                    // Using workspace.published here to identify Featured Workspaces. At some point, we will need a separate property for
-                    // this on the workspace object once users are able to publish their own workspaces
-                    workspace.published ?
-                      AnalyticsTracker.Workspaces.DuplicateFeatured(workspace.name) :
-                      AnalyticsTracker.Workspaces.OpenDuplicatePage('Card');
-                    navigate([wsPathPrefix, 'duplicate']);
-                  }}>
-          Duplicate
-        </MenuItem>
+        <RouteLink path={`${wsPathPrefix}/duplicate`}>
+          <MenuItem icon='copy'
+                    onClick={() => {
+                      // Using workspace.published here to identify Featured Workspaces. At some point, we will need a separate property for
+                      // this on the workspace object once users are able to publish their own workspaces
+                      workspace.published ?
+                        AnalyticsTracker.Workspaces.DuplicateFeatured(workspace.name) :
+                        AnalyticsTracker.Workspaces.OpenDuplicatePage('Card');
+                    }}>
+            Duplicate
+          </MenuItem>
+        </RouteLink>
         <TooltipTrigger content={<div>Requires Owner Permission</div>}
                         disabled={WorkspacePermissionsUtil.isOwner(accessLevel)}>
-          <MenuItem icon='pencil'
-                    onClick={() => {
-                      AnalyticsTracker.Workspaces.OpenEditPage('Card');
-                      navigate([wsPathPrefix, 'edit']); }
-                    }
-                    disabled={!WorkspacePermissionsUtil.isOwner(accessLevel)}>
-            Edit
-          </MenuItem>
+          <RouteLink path={`${wsPathPrefix}/edit`}>
+            <MenuItem icon='pencil'
+                      onClick={() => {
+                        AnalyticsTracker.Workspaces.OpenEditPage('Card');
+                      }}
+                      disabled={!WorkspacePermissionsUtil.isOwner(accessLevel)}>
+              Edit
+            </MenuItem>
+          </RouteLink>
         </TooltipTrigger>
         <TooltipTrigger content={<div data-test-id='workspace-share-disabled-tooltip'>Requires Owner Permission</div>}
                         disabled={WorkspacePermissionsUtil.isOwner(accessLevel)}>

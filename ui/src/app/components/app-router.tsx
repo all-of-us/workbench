@@ -93,7 +93,7 @@ export const AppRouter = ({children}): React.ReactElement => {
   return <BrowserRouter getUserConfirmation={getUserConfirmation}>{children}</BrowserRouter>;
 };
 
-export const RouteLink = ({path, style = {}, children}): React.ReactElement => <Link style={{textDecoration: 'none', color: colors.primary, ...style}} to={path}>{children}</Link>;
+export const RouteLink = ({path, style = {}, children}): React.ReactElement => <Link style={{textDecoration: 'none', color: 'unset', ...style}} to={path}>{children}</Link>;
 
 export const AppRoute = ({path, guards = [], exact, intermediaryRoute = false, children}): React.ReactElement => {
   const { redirectPath = null } = fp.find(({allowed}) => !allowed(), guards) || {};

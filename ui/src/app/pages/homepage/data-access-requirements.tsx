@@ -31,7 +31,6 @@ import {
   GetStartedButton,
 } from 'app/utils/access-utils';
 import {isAbortError} from 'app/utils/errors';
-import {useNavigation} from 'app/utils/navigation';
 import {profileStore, serverConfigStore, useStore} from 'app/utils/stores';
 import {AccessModule, AccessModuleStatus} from 'generated/fetch';
 import {TwoFactorAuthModal} from './two-factor-auth-modal';
@@ -357,25 +356,32 @@ const MaybeModule = ({moduleName, active, spinnerProps}: ModuleProps): JSX.Eleme
   // whether to show the Two Factor Auth Modal
   const [showTwoFactorAuthModal, setShowTwoFactorAuthModal] = useState(false);
 
-  const [navigate, ] = useNavigation();
-  const registrationTask = getRegistrationTask(navigate, moduleName);
+  // whether to redirect to DUCC
+  const [redirectToDUCC, setRedirectToDUCC] = useState(false);
+
+  const registrationTask = getRegistrationTask(moduleName);
 
   const ModuleBox = ({children}) => {
     // kluge until we have fully migrated from the Registration Dashboard:
     // getRegistrationTask() has onClick() functions for every module, which is generally what we want
     // but we pop up a modal for Two Factor Auth instead of using the standard task
-    const moduleAction = registrationTask && (moduleName === AccessModule.TWOFACTORAUTH ?
-        () => setShowTwoFactorAuthModal(true) :
-        registrationTask.onClick);
+    // and we redirect to DUCC page after doing the onClick
+    const moduleAction = registrationTask && (moduleName === AccessModule.TWOFACTORAUTH
+        ? () => setShowTwoFactorAuthModal(true)
+        : moduleName === AccessModule.DATAUSERCODEOFCONDUCT
+            ? () => setRedirectToDUCC(true)
+            : registrationTask.onClick);
 
-    return active ?
-        <Clickable onClick={() => {
-          setShowRefresh(true);
-          moduleAction();
-        }}>
-          <FlexRow style={styles.activeModuleBox}>{children}</FlexRow>
-        </Clickable> :
-        <FlexRow style={styles.inactiveModuleBox}>{children}</FlexRow>;
+    return redirectToDUCC
+        ? <Redirect to={'/data-code-of-conduct'}/>
+        : active
+            ? <Clickable onClick={() => {
+                setShowRefresh(true);
+                moduleAction();
+              }}>
+                <FlexRow style={styles.activeModuleBox}>{children}</FlexRow>
+              </Clickable>
+            : <FlexRow style={styles.inactiveModuleBox}>{children}</FlexRow>;
   };
 
   const Module = () => {
@@ -435,6 +441,7 @@ import {ReactComponent as electronic} from 'assets/icons/DAR/electronic.svg';
 import {ReactComponent as survey} from 'assets/icons/DAR/survey.svg';
 import {ReactComponent as physical} from 'assets/icons/DAR/physical.svg';
 import {ReactComponent as wearable} from 'assets/icons/DAR/wearable.svg';
+import {Redirect} from "react-router-dom";
 
 const Individual = individual;
 const Identifying = identifying;
@@ -520,9 +527,8 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
   // which module are we currently guiding the user to complete?
   const [activeModule, setActiveModule] = useState(null);
 
-  const [navigate, ] = useNavigation();
   const enabledModules = fp.flatMap(moduleName => {
-    const enabledTaskMaybe = getRegistrationTask(navigate, moduleName);
+    const enabledTaskMaybe = getRegistrationTask(moduleName);
     return enabledTaskMaybe ? [enabledTaskMaybe.module] : [];
   }, allModules);
 
