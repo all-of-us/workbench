@@ -1,9 +1,11 @@
 import {mount} from 'enzyme';
 import * as React from 'react';
 
-import {SideNav, SideNavItem, SideNavProps} from './side-nav';
+import {SideNav, SideNavProps} from './side-nav';
 import * as ProfilePicture from 'app/utils/profile-picture';
 import {ProfileStubVariables} from 'testing/stubs/profile-api-stub';
+import { MemoryRouter } from 'react-router-dom';
+import { SideNavItem } from './side-nav-item';
 
 describe('SideNav', () => {
   const props: SideNavProps = {
@@ -14,7 +16,7 @@ describe('SideNav', () => {
   const spy = jest.spyOn(ProfilePicture, "getProfilePictureSrc");
   spy.mockReturnValue("lol.png");
 
-  const component = () => mount(<SideNav {...props}/>);
+  const component = (propsOverrides?) => mount(<MemoryRouter><SideNav {...props} {...propsOverrides}/></MemoryRouter>);
 
   it('should render', () => {
     const wrapper = component();
@@ -22,12 +24,12 @@ describe('SideNav', () => {
   });
 
   it('disables options when user not registered', () => {
-    const wrapper = mount(<SideNav {...props} profile={{
-      ...ProfileStubVariables.PROFILE_STUB,
-      accessTierShortNames: [],
-      givenName: 'Tester',
-      familyName: 'MacTesterson'
-    }}/>);
+    const wrapper = component({profile: {
+    ...ProfileStubVariables.PROFILE_STUB,
+          accessTierShortNames: [],
+          givenName: 'Tester',
+          familyName: 'MacTesterson'
+    }});
     wrapper.find(`[data-test-id="TesterMacTesterson-menu-item"]`).first().simulate('click');
     // These are our expected items to be disabled when you are not registered
     let disabledItemText = ['Your Workspaces', 'Featured Workspaces', 'User Support Hub'];

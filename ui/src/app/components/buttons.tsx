@@ -336,9 +336,10 @@ const cardButtonStyle = {
   }
 };
 
-export const CardButton = ({path='', type = 'large', disabled = false, style = {}, children, ...props}) => {
+export const CardButton = ({path='', type = 'large', disabled = false, style = {}, propagateDataTestId = false, children, ...props}) => {
+  const childProps = propagateDataTestId ? props : fp.omit(['data-test-id'], props);
   return <Clickable
-    disabled={disabled} {...props}
+    disabled={disabled} {...childProps}
     {...fp.merge(computeStyle(cardButtonStyle[type], {disabled}), {style})}
   >
     {path

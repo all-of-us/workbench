@@ -16,7 +16,6 @@ import {ProxyApiStub} from 'testing/stubs/proxy-api-stub';
 import {LeoRuntimesApiStub} from 'testing/stubs/leo-runtimes-api-stub';
 import {ProfileStubVariables} from 'testing/stubs/profile-api-stub';
 import {workspaceStubs} from 'testing/stubs/workspaces';
-import {mockNavigate} from 'setupTests';
 import {NotebookRedirect, Progress, ProgressCardState, progressStrings} from './notebook-redirect';
 import { Route, Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
@@ -203,70 +202,5 @@ describe('NotebookRedirect', () => {
       .toBeTruthy();
     expect(currentCardText(wrapper))
       .toContain(progressStrings.get(Progress.Redirecting));
-  });
-
-  it('should navigate away after runtime transitions to deleting', async() => {
-    history.push(initialUrl + '?kernelType=R?creating=false');
-    runtimeStub.runtime.status = RuntimeStatus.Running;
-
-    const wrapper = await component();
-    await waitForFakeTimersAndUpdate(wrapper);
-
-    // Wait for the "redirecting" timer to elapse, rendering the iframe.
-    act(() => {
-      jest.advanceTimersByTime(2000);
-    });
-
-    await waitForFakeTimersAndUpdate(wrapper);
-
-    expect(wrapper.find(Iframe).exists()).toBeTruthy();
-    expect(mockNavigate).not.toHaveBeenCalled();
-
-    // Simulate transition to deleting - should navigate away.
-    act(() => {
-      runtimeStub.runtime = {...runtimeStub.runtime, status: RuntimeStatus.Deleting};
-      runtimeStore.set({
-        workspaceNamespace: workspace.namespace,
-        runtime: runtimeStub.runtime,
-        runtimeLoaded: true
-      });
-    });
-    await waitForFakeTimersAndUpdate(wrapper);
-
-    expect(mockNavigate).toHaveBeenCalled();
-  });
-
-
-  it('should not navigate after runtime transitions to updating', async() => {
-    const navSpy = jest.fn();
-
-    history.push(initialUrl + '?kernelType=R?creating=false');
-    runtimeStub.runtime.status = RuntimeStatus.Running;
-
-    const wrapper = await component();
-    await waitForFakeTimersAndUpdate(wrapper);
-
-    // Wait for the "redirecting" timer to elapse, rendering the iframe.
-    act(() => {
-      jest.advanceTimersByTime(2000);
-    });
-
-    await waitForFakeTimersAndUpdate(wrapper);
-
-    expect(wrapper.find(Iframe).exists()).toBeTruthy();
-    expect(mockNavigate).not.toHaveBeenCalled();
-
-    // Simulate transition to updating.
-    act(() => {
-      runtimeStub.runtime = {...runtimeStub.runtime, status: RuntimeStatus.Updating};
-      runtimeStore.set({
-        workspaceNamespace: workspace.namespace,
-        runtime: runtimeStub.runtime,
-        runtimeLoaded: true
-      });
-    });
-    await waitForFakeTimersAndUpdate(wrapper);
-
-    expect(mockNavigate).not.toHaveBeenCalled();
   });
 });

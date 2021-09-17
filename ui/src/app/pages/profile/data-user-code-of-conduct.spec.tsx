@@ -20,7 +20,7 @@ describe('DataUserCodeOfConduct', () => {
                            showSpinner={() => {}}/>
   </MemoryRouter>);
 
-  const duccComponent = (wrapper) => wrapper.childAt(0).childAt(0).childAt(0).childAt(0).childAt(0);
+  const duccComponent = (wrapper) => wrapper.childAt(0).childAt(0).childAt(0).childAt(0);
 
   beforeEach(() => {
     registerApiClient(ProfileApi, new ProfileApiStub());

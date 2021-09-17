@@ -12,7 +12,6 @@ import {workspaceStubs, WorkspaceStubVariables} from 'testing/stubs/workspaces';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 import {WorkspaceList} from './workspace-list';
 import {profileStore, serverConfigStore} from "app/utils/stores";
-import { mockNavigate } from 'setupTests';
 
 describe('WorkspaceList', () => {
   const profile = ProfileStubVariables.PROFILE_STUB as unknown as Profile;
@@ -50,15 +49,6 @@ describe('WorkspaceList', () => {
     const cardNameList = wrapper.find('[data-test-id="workspace-card-name"]')
         .map(c => c.text());
     expect(cardNameList).toEqual(workspaceStubs.map(w => w.name));
-  });
-
-  it('navigates when clicking on the workspace name', async() => {
-    const workspace = workspaceStubs[0];
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    wrapper.find('[data-test-id="workspace-card-name"]').first().simulate('click');
-    expect(mockNavigate).toHaveBeenCalledWith(
-      ['workspaces', workspace.namespace, workspace.id, 'data']);
   });
 
   it('has the correct permissions classes', async() => {

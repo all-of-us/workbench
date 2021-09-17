@@ -16,15 +16,6 @@ setupCustomValidators();
 stubPopupDimensions();
 enzyme.configure({ adapter: new Adapter() });
 
-const mockNavigate = jest.fn();
-const mockNavigateByUrl = jest.fn();
-
-jest.mock('app/utils/navigation', () => ({
-  ...jest.requireActual('app/utils/navigation'),
-  __esModule: true,
-  useNavigation: () => [mockNavigate, mockNavigateByUrl],
-}));
-
 global.beforeEach(() => {
   const appRoot = document.createElement('div');
   appRoot.setAttribute('id', 'root');
@@ -39,8 +30,3 @@ global.afterEach(() => {
   document.body.removeChild(document.getElementById('root'));
   document.body.removeChild(document.getElementById('popup-root'));
 });
-
-module.exports = {
-  mockNavigate: mockNavigate,
-  mockNavigateByUrl: mockNavigateByUrl
-}

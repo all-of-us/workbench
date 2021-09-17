@@ -17,6 +17,7 @@ import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {DataSetApiStub} from 'testing/stubs/data-set-api-stub';
 import {workspaceDataStub} from 'testing/stubs/workspaces';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
+import { MemoryRouter } from 'react-router-dom';
 
 describe('ExportDatasetModal', () => {
   let dataset;
@@ -26,7 +27,7 @@ describe('ExportDatasetModal', () => {
   let datasetApiStub;
 
   const component = (props) => {
-    return <ExportDatasetModal {...props}/>;
+    return <MemoryRouter><ExportDatasetModal {...props}/></MemoryRouter>;
   };
 
   function findExportButton(wrapper) {

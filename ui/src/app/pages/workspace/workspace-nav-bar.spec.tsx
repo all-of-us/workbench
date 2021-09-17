@@ -7,7 +7,6 @@ import {workspaceDataStub} from 'testing/stubs/workspaces';
 import {CdrVersionsStubVariables, cdrVersionTiersResponse} from 'testing/stubs/cdr-versions-api-stub';
 import {cdrVersionStore, serverConfigStore} from "app/utils/stores";
 import { MemoryRouter, Route } from 'react-router-dom';
-import { mockNavigate } from 'setupTests';
 
 describe('WorkspaceNavBar', () => {
 
@@ -42,14 +41,6 @@ describe('WorkspaceNavBar', () => {
     props = {tabPath: 'about'};
     const wrapper = component();
     expect(wrapper.find({'data-test-id': 'About', 'aria-selected': true}).exists()).toBeTruthy();
-  });
-
-  it('should navigate on tab click', () => {
-    const wrapper = component();
-
-    wrapper.find({'data-test-id': 'Data'}).first().simulate('click');
-    expect(mockNavigate).toHaveBeenCalledWith(
-      ['workspaces', workspaceDataStub.namespace, workspaceDataStub.id, 'data']);
   });
 
   it('should disable Data and Analysis tab if workspace require review research purpose', () => {

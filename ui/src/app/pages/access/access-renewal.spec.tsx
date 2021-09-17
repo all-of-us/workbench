@@ -6,6 +6,7 @@ import {mount} from 'enzyme';
 import {AccessModule, InstitutionApi, ProfileApi} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
+import { MemoryRouter } from 'react-router-dom';
 import defaultServerConfig from 'testing/default-server-config';
 import {findNodesByExactText, findNodesContainingText, waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {InstitutionApiStub} from 'testing/stubs/institution-api-stub';
@@ -91,7 +92,7 @@ describe('Access Renewal Page', () => {
   let mockUpdateProfile: SpyInstance;
 
   const component = () => {
-    return mount(<AccessRenewal hideSpinner={() => {}}/>);
+    return mount(<MemoryRouter><AccessRenewal hideSpinner={() => {}}/></MemoryRouter>);
   };
 
   beforeEach(() => {

@@ -15,6 +15,7 @@ import {RuntimeApiStub} from 'testing/stubs/runtime-api-stub';
 import {CdrVersionsStubVariables, cdrVersionTiersResponse} from 'testing/stubs/cdr-versions-api-stub';
 import {SpecificPopulationItems} from './workspace-edit-text';
 import {cdrVersionStore, profileStore, serverConfigStore} from "app/utils/stores";
+import { MemoryRouter } from 'react-router-dom';
 
 describe('WorkspaceAbout', () => {
   const profile = ProfileStubVariables.PROFILE_STUB as unknown as Profile;
@@ -29,7 +30,7 @@ describe('WorkspaceAbout', () => {
   };
 
   const component = () => {
-    return mount(<WorkspaceAbout hideSpinner={() => {}} showSpinner={() => {}} />);
+    return mount(<MemoryRouter><WorkspaceAbout hideSpinner={() => {}} showSpinner={() => {}} /></MemoryRouter>);
   };
 
   beforeEach(() => {

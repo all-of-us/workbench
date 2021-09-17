@@ -33,7 +33,6 @@ import {Dropdown} from "primereact/dropdown";
 
 import * as Authentication from "app/utils/authentication";
 import SpyInstance = jest.SpyInstance;
-import { mockNavigate } from 'setupTests';
 import { MemoryRouter } from 'react-router-dom';
 
 type AnyWrapper = (ShallowWrapper|ReactWrapper);
@@ -253,7 +252,6 @@ describe('WorkspaceEdit', () => {
     wrapper.find('[data-test-id="workspace-confirm-save-btn"]').first().simulate('click');
     await waitOneTickAndUpdate(wrapper);
     expect(workspacesApi.workspaces.length).toEqual(numBefore + 1);
-    expect(mockNavigate).toHaveBeenCalledTimes(1);
   });
 
   it('defaults to upgrading the CDR Version when duplicating a workspace with an older CDR Version', async() => {
@@ -395,76 +393,6 @@ describe('WorkspaceEdit', () => {
     await waitOneTickAndUpdate(wrapper);
 
     expect(workspacesApi.workspaces.length).toEqual(numBefore + 1);
-    expect(mockNavigate).toHaveBeenCalledTimes(1);
-  });
-
-  it('supports waiting on access delays', async () => {
-    workspaceEditMode = WorkspaceEditMode.Duplicate;
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-
-    workspacesApi.getWorkspace = (..._) => {
-      return Promise.resolve({workspace, accessLevel: WorkspaceAccessLevel.NOACCESS});
-    };
-
-    jest.useFakeTimers();
-    wrapper.find('[data-test-id="review-request-btn-false"]').first().simulate('click');
-    await waitOneTickAndUpdate(wrapper);
-    wrapper.find('[data-test-id="workspace-save-btn"]').first().simulate('click');
-    await waitOneTickAndUpdate(wrapper);
-    wrapper.find('[data-test-id="workspace-confirm-save-btn"]').first().simulate('click');
-    await waitOneTickAndUpdate(wrapper);
-    expect(mockNavigate).not.toHaveBeenCalled();
-
-    jest.advanceTimersByTime(15e3);
-    await waitOneTickAndUpdate(wrapper);
-    expect(mockNavigate).not.toHaveBeenCalled();
-
-    workspacesApi.getWorkspace = (..._) => {
-      return Promise.resolve({workspace, accessLevel: WorkspaceAccessLevel.OWNER});
-    };
-    jest.advanceTimersByTime(10e3);
-    await waitOneTickAndUpdate(wrapper);
-    expect(mockNavigate).toHaveBeenCalled();
-
-    jest.useRealTimers();
-  });
-
-  it('shows confirmation on extended access delays', async() => {
-    workspaceEditMode = WorkspaceEditMode.Duplicate;
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-
-    workspacesApi.getWorkspace = (..._) => {
-      return Promise.resolve({workspace, accessLevel: WorkspaceAccessLevel.NOACCESS});
-    };
-
-    jest.useFakeTimers();
-    wrapper.find('[data-test-id="review-request-btn-false"]').first().simulate('click');
-    await waitOneTickAndUpdate(wrapper);
-    wrapper.find('[data-test-id="workspace-save-btn"]').first().simulate('click');
-    await waitOneTickAndUpdate(wrapper);
-    wrapper.find('[data-test-id="workspace-confirm-save-btn"]').first().simulate('click');
-    let aclDelayBtn;
-    for (let i = 0; i < 10; i++) {
-      jest.advanceTimersByTime(20e3);
-      await waitOneTickAndUpdate(wrapper);
-      aclDelayBtn = wrapper.find('[data-test-id="workspace-acl-delay-btn"]').first();
-      if (aclDelayBtn.exists()) {
-        break;
-      }
-    }
-
-    if (!aclDelayBtn.exists()) {
-      fail('failed to find a rendered acl delay modal button after many timer increments');
-    }
-    expect(mockNavigate).not.toHaveBeenCalled();
-
-    aclDelayBtn.simulate('click');
-    await waitOneTickAndUpdate(wrapper);
-    expect(mockNavigate).toHaveBeenCalled();
-
-    jest.useRealTimers();
   });
 
   it ('should show warning message if research purpose summary Intended study have answer less than 50 characters', async() => {

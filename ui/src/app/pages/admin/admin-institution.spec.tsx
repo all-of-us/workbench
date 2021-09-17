@@ -8,12 +8,13 @@ import defaultServerConfig from 'testing/default-server-config';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {InstitutionApiStub} from 'testing/stubs/institution-api-stub';
 import {AdminInstitution} from './admin-institution';
+import { MemoryRouter } from 'react-router-dom';
 
 
 describe('AdminInstitutionSpec', () => {
 
   const component = () => {
-    return mount(<AdminInstitution hideSpinner={() => {}} showSpinner={() => {}} />);
+    return mount(<MemoryRouter><AdminInstitution hideSpinner={() => {}} showSpinner={() => {}} /></MemoryRouter>);
   };
 
   beforeEach(() => {
