@@ -18,7 +18,7 @@ import {
 } from 'app/utils/cdr-versions';
 import {MatchParams, serverConfigStore} from 'app/utils/stores';
 import {CdrVersionTiersResponse, Workspace} from 'generated/fetch';
-import {Redirect, useParams} from 'react-router-dom';
+import {useParams} from 'react-router-dom';
 import {CdrVersionUpgradeModal} from './cdr-version-upgrade-modal';
 import { RouteLink, RouteRedirect } from 'app/components/app-router';
 

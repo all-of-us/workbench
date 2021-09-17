@@ -10,15 +10,13 @@ import {queryResultSizeStore, visitsFilterOptions} from 'app/services/review-sta
 import {cohortBuilderApi, cohortReviewApi, cohortsApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, withCurrentWorkspace} from 'app/utils';
-import {
-  currentCohortReviewStore,
-  NavigationProps
-} from 'app/utils/navigation';
+import {currentCohortReviewStore} from 'app/utils/navigation';
 import { MatchParams } from 'app/utils/stores';
 import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {Cohort, CriteriaType, Domain, ReviewStatus, SortOrder, WorkspaceAccessLevel} from 'generated/fetch';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
+import { RouteRedirect } from 'app/components/app-router';
 
 const styles = reactStyles({
   title: {
@@ -28,11 +26,12 @@ const styles = reactStyles({
   },
 });
 
-interface Props extends WithSpinnerOverlayProps, NavigationProps, RouteComponentProps<MatchParams> {
+interface Props extends WithSpinnerOverlayProps, RouteComponentProps<MatchParams> {
   workspace: WorkspaceData;
 }
 
 interface State {
+  redirectPath: string;
   reviewPresent: boolean;
   cohort: Cohort;
 }
@@ -46,6 +45,7 @@ export const CohortReview = fp.flow(
     constructor(props: any) {
       super(props);
       this.state = {
+        redirectPath: null,
         reviewPresent: undefined,
         cohort: undefined,
       };
@@ -80,7 +80,7 @@ export const CohortReview = fp.flow(
         const reviewPresent = cohortReview.reviewStatus !== ReviewStatus.NONE;
         this.setState({reviewPresent});
         if (reviewPresent) {
-          this.props.navigate(['workspaces', ns, wsid, 'data', 'cohorts', cid, 'review', 'participants']);
+          this.setState({redirectPath: `/workspaces/${ns}/${wsid}/data/cohorts/${cid}/review/participants`});
         }
       });
       cohortsApi().getCohort(ns, wsid, +cid).then(cohort => this.setState({cohort}));
@@ -107,22 +107,24 @@ export const CohortReview = fp.flow(
     }
 
     render() {
-      const {cohort, reviewPresent} = this.state;
+      const {cohort, redirectPath, reviewPresent} = this.state;
       const loading = !cohort || reviewPresent === undefined;
       const ableToReview = !!cohort && reviewPresent === false && !this.readonly;
       const unableToReview = !!cohort && reviewPresent === false && this.readonly;
-      return <React.Fragment>
-        {loading ? <SpinnerOverlay/>
+      return redirectPath
+          ? <RouteRedirect path={redirectPath} />
           : <React.Fragment>
-            {ableToReview && <CreateReviewModal canceled={() => this.goBack()} cohort={cohort} created={() => this.reviewCreated()}/>}
-            {unableToReview && <Modal onRequestClose={() => this.goBack()}>
-                <ModalTitle style={styles.title}>Users with read-only access cannot create cohort reviews</ModalTitle>
-                <ModalFooter>
-                    <Button style={{}} type='primary' onClick={() => this.goBack()}>Return to cohorts</Button>
-                </ModalFooter>
-            </Modal>}
-          </React.Fragment>}
-      </React.Fragment>;
+            {loading ? <SpinnerOverlay/>
+              : <React.Fragment>
+                {ableToReview && <CreateReviewModal canceled={() => this.goBack()} cohort={cohort} created={() => this.reviewCreated()}/>}
+                {unableToReview && <Modal onRequestClose={() => this.goBack()}>
+                    <ModalTitle style={styles.title}>Users with read-only access cannot create cohort reviews</ModalTitle>
+                    <ModalFooter>
+                        <Button style={{}} type='primary' onClick={() => this.goBack()}>Return to cohorts</Button>
+                    </ModalFooter>
+                </Modal>}
+              </React.Fragment>}
+          </React.Fragment>;
     }
   }
 );

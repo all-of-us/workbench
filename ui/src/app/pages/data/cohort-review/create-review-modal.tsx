@@ -10,11 +10,11 @@ import {queryResultSizeStore} from 'app/services/review-state.service';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import {reactStyles, summarizeErrors, withCurrentCohortReview, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
-import {currentCohortReviewStore, NavigationProps} from 'app/utils/navigation';
-import {withNavigation} from 'app/utils/with-navigation-hoc';
+import {currentCohortReviewStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {Cohort} from 'generated/fetch';
 import {CohortReview} from 'generated/fetch';
+import { RouteRedirect } from 'app/components/app-router';
 
 const styles = reactStyles({
   title: {
@@ -48,7 +48,7 @@ const styles = reactStyles({
   }
 });
 
-interface Props extends NavigationProps {
+interface Props {
   canceled: Function;
   cohort: Cohort;
   cohortReview: CohortReview;
@@ -60,9 +60,10 @@ interface State {
   create: boolean;
   creating: boolean;
   numberOfParticipants: string;
+  redirectPath: string;
 }
 
-export const CreateReviewModal = fp.flow(withCurrentCohortReview(), withCurrentWorkspace(), withNavigation)(
+export const CreateReviewModal = fp.flow(withCurrentCohortReview(), withCurrentWorkspace())(
   class extends React.Component<Props, State> {
 
     constructor(props: any) {
@@ -71,6 +72,7 @@ export const CreateReviewModal = fp.flow(withCurrentCohortReview(), withCurrentW
         create: true,
         creating: false,
         numberOfParticipants: '',
+        redirectPath: null
       };
     }
 
@@ -90,13 +92,13 @@ export const CreateReviewModal = fp.flow(withCurrentCohortReview(), withCurrentW
           queryResultSizeStore.next(parseInt(numberOfParticipants, 10));
           this.setState({creating: false});
           this.props.created(true);
-          this.props.navigate(['workspaces', namespace, id, 'data', 'cohorts', cohort.id, 'review', 'participants']);
+          this.setState({redirectPath: `workspaces/${namespace}/${id}/data/cohorts/${cohort.id}/review/participants`});
         });
     }
 
     render() {
       const {cohort, cohortReview: {matchedParticipantCount}} = this.props;
-      const {creating, numberOfParticipants} = this.state;
+      const {creating, numberOfParticipants, redirectPath} = this.state;
       const max = Math.min(matchedParticipantCount, 10000);
       const errors = validate({numberOfParticipants}, {
         numberOfParticipants: {
@@ -109,41 +111,43 @@ export const CreateReviewModal = fp.flow(withCurrentCohortReview(), withCurrentW
         }
       });
       const disabled = !numberOfParticipants || errors;
-      return <Modal onRequestClose={() => this.props.canceled()}>
-        <ModalTitle style={styles.title}>Create Review Set</ModalTitle>
-        <ModalBody style={styles.body}>
-          <div style={{marginBottom: '0.5rem'}}>
-            Cohort {cohort.name} has {matchedParticipantCount.toLocaleString() + ' '}
-            participants for possible review.  How many would you like to review?
-            {matchedParticipantCount > 10000 && <span> (max 10,000)</span>}
-          </div>
-          <ValidationError>
-            {summarizeErrors(numberOfParticipants && errors && errors.numberOfParticipants)}
-          </ValidationError>
-          <NumberInput
-            value={numberOfParticipants}
-            style={styles.input}
-            placeholder='NUMBER OF PARTICIPANTS'
-            onChange={v => this.setState({numberOfParticipants: v})}/>
-        </ModalBody>
-        <ModalFooter>
-          <Button style={styles.cancel}
-            type='link'
-            disabled={creating}
-            onClick={() => this.props.canceled()}>
-            CANCEL
-          </Button>
-          <Button style={disabled ? styles.disabled : styles.create}
-            type='primary'
-            disabled={disabled || creating}
-            onClick={() => this.createReview()}>
-            {creating &&
-              <Spinner size={16} style={{marginRight: '0.25rem', marginLeft: '-0.25rem'}}/>
-            }
-            CREATE SET
-          </Button>
-        </ModalFooter>
-      </Modal>;
+      return redirectPath
+          ? <RouteRedirect path={redirectPath} />
+          : <Modal onRequestClose={() => this.props.canceled()}>
+            <ModalTitle style={styles.title}>Create Review Set</ModalTitle>
+            <ModalBody style={styles.body}>
+              <div style={{marginBottom: '0.5rem'}}>
+                Cohort {cohort.name} has {matchedParticipantCount.toLocaleString() + ' '}
+                participants for possible review.  How many would you like to review?
+                {matchedParticipantCount > 10000 && <span> (max 10,000)</span>}
+              </div>
+              <ValidationError>
+                {summarizeErrors(numberOfParticipants && errors && errors.numberOfParticipants)}
+              </ValidationError>
+              <NumberInput
+                value={numberOfParticipants}
+                style={styles.input}
+                placeholder='NUMBER OF PARTICIPANTS'
+                onChange={v => this.setState({numberOfParticipants: v})}/>
+            </ModalBody>
+            <ModalFooter>
+              <Button style={styles.cancel}
+                type='link'
+                disabled={creating}
+                onClick={() => this.props.canceled()}>
+                CANCEL
+              </Button>
+              <Button style={disabled ? styles.disabled : styles.create}
+                type='primary'
+                disabled={disabled || creating}
+                onClick={() => this.createReview()}>
+                {creating &&
+                  <Spinner size={16} style={{marginRight: '0.25rem', marginLeft: '-0.25rem'}}/>
+                }
+                CREATE SET
+              </Button>
+            </ModalFooter>
+          </Modal>;
     }
   }
 );

@@ -9,7 +9,6 @@ import {serverConfigStore, useStore} from 'app/utils/stores';
 import {Profile} from 'generated/fetch';
 import {ProfileRegistrationStepStatus} from './profile-registration-step-status';
 import {styles} from './profile-styles';
-import { Redirect } from 'react-router-dom';
 import { useState } from 'react';
 import { RouteRedirect } from 'app/components/app-router';
 

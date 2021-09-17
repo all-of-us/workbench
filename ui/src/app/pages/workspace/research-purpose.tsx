@@ -20,12 +20,10 @@ import {
   getSelectedResearchPurposeItems
 } from 'app/utils/research-purpose';
 import {serverConfigStore} from 'app/utils/stores';
-import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import { RouteLink, RouteRedirect } from 'app/components/app-router';
 import { useState } from 'react';
-import { Redirect } from 'react-router-dom';
 
 const styles = reactStyles({
   editIcon: {
@@ -74,7 +72,7 @@ const styles = reactStyles({
   }
 });
 
-export const ResearchPurpose = fp.flow(withCurrentWorkspace(), withNavigation)(
+export const ResearchPurpose = fp.flow(withCurrentWorkspace())(
   ({workspace}: {workspace: WorkspaceData}) => {
     const isOwner = WorkspacePermissionsUtil.isOwner(workspace.accessLevel);
     const selectedResearchPurposeItems = getSelectedResearchPurposeItems(workspace.researchPurpose, true);

@@ -2,7 +2,6 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 import Iframe from 'react-iframe';
 
-import {NavigationProps} from 'app/utils/navigation';
 import {fetchAbortableRetry} from 'app/utils/retry';
 import {MatchParams, RuntimeStore} from 'app/utils/stores';
 
@@ -24,7 +23,6 @@ import {
 } from 'app/utils';
 import {Kernels} from 'app/utils/notebook-kernels';
 import {maybeInitializeRuntime, withRuntimeStore} from 'app/utils/runtime-utils';
-import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {environment} from 'environments/environment';
 import {Profile, Runtime, RuntimeStatus} from 'generated/fetch';
@@ -217,12 +215,13 @@ const ProgressCard: React.FunctionComponent<{progressState: Progress, cardState:
 
 interface State {
   leoUrl: string;
+  redirectPath: string;
   showErrorModal: boolean;
   progress: Progress;
   progressComplete: Map<Progress, boolean>;
 }
 
-interface Props extends WithSpinnerOverlayProps, NavigationProps, RouteComponentProps<MatchParams> {
+interface Props extends WithSpinnerOverlayProps, RouteComponentProps<MatchParams> {
   workspace: WorkspaceData;
   profileState: {profile: Profile, reload: Function, updateCache: Function};
   runtimeStore: RuntimeStore;
@@ -236,7 +235,6 @@ export const NotebookRedirect = fp.flow(
   withUserProfile(),
   withCurrentWorkspace(),
   withRuntimeStore(),
-  withNavigation,
   withRouter
 )(
   class extends React.Component<Props, State> {
@@ -248,6 +246,7 @@ export const NotebookRedirect = fp.flow(
       super(props);
       this.state = {
         leoUrl: undefined,
+        redirectPath: null,
         showErrorModal: false,
         progress: Progress.Unknown,
         progressComplete: new Map<Progress, boolean>(),
@@ -314,11 +313,11 @@ export const NotebookRedirect = fp.flow(
     }
 
     componentDidUpdate(prevProps: Props) {
-      const {runtimeStore: {runtime}, workspace} = this.props;
+      const {runtimeStore: {runtime}, workspace: {namespace, id}} = this.props;
 
       // Only kick off the initialization process once the runtime is loaded.
       if (this.state.progress === Progress.Unknown && runtime !== undefined) {
-        this.initializeRuntimeStatusChecking(workspace.namespace);
+        this.initializeRuntimeStatusChecking(namespace);
       }
 
       // If we're already loaded (viewing the notebooks iframe), and the
@@ -328,11 +327,7 @@ export const NotebookRedirect = fp.flow(
       const {status: prevStatus = null} = prevProps.runtimeStore.runtime || {};
       const {status: curStatus = null} = runtime || {};
       if (isLoaded && interactiveRuntimeStatuses.has(prevStatus) && !interactiveRuntimeStatuses.has(curStatus)) {
-        this.props.navigate([
-          'workspaces', workspace.namespace, workspace.id,
-          // navigate will encode the notebook name automatically
-          'notebooks', 'preview', this.getFullNotebookName()
-        ]);
+        this.setState({redirectPath: `/workspaces/${namespace}/${id}/notebooks/preview/${encodeURIComponent(this.getFullNotebookName())}`})
       }
     }
 
