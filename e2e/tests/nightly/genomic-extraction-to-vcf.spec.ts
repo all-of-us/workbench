@@ -23,6 +23,9 @@ import { getPropValue } from 'utils/element-utils';
 import { Page } from 'puppeteer';
 import { takeScreenshot } from 'utils/save-file-utils';
 
+// 60 minutes. Test could take a long time.
+jest.setTimeout(60 * 60 * 1000);
+
 describe('Genomics Extraction Test', () => {
   beforeEach(async () => {
     await signInWithAccessToken(page);
