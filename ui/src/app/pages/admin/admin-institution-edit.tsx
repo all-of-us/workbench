@@ -42,7 +42,6 @@ import {
   updateRtEmailDomains,
 } from 'app/utils/institutions';
 import {MatchParams, serverConfigStore, useStore} from 'app/utils/stores';
-import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {
   Institution,
   InstitutionMembershipRequirement,

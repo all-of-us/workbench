@@ -12,11 +12,9 @@ import {reactStyles, summarizeErrors, withCurrentCohortReview, withCurrentWorksp
 import {triggerEvent} from 'app/utils/analytics';
 import {
   currentCohortReviewStore,
-  currentWorkspaceStore,
-  NavigationProps
+  currentWorkspaceStore
 } from 'app/utils/navigation';
 import { MatchParams } from 'app/utils/stores';
-import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {
   CohortReview,
@@ -192,7 +190,7 @@ const FILTER_KEYS = {
   DATE: 'Date',
   VISITS: 'Visits'
 };
-export interface DetailHeaderProps extends NavigationProps, RouteComponentProps<MatchParams> {
+export interface DetailHeaderProps extends RouteComponentProps<MatchParams> {
   cohortReview: CohortReview;
   participant: ParticipantCohortStatus;
   workspace: WorkspaceData;
@@ -208,7 +206,7 @@ export interface DetailHeaderState {
   redirectPath: string;
 }
 
-export const DetailHeader = fp.flow(withCurrentCohortReview(), withCurrentWorkspace(), withNavigation, withRouter)(
+export const DetailHeader = fp.flow(withCurrentCohortReview(), withCurrentWorkspace(), withRouter)(
   class extends React.Component<DetailHeaderProps, DetailHeaderState> {
     constructor(props: DetailHeaderProps) {
       super(props);

@@ -8,10 +8,7 @@ import {cohortBuilderApi, cohortReviewApi, cohortsApi} from 'app/services/swagge
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, withCdrVersions, withCurrentCohortReview, withCurrentWorkspace} from 'app/utils';
 import {findCdrVersion} from 'app/utils/cdr-versions';
-import {
-  currentCohortReviewStore,
-  NavigationProps
-} from 'app/utils/navigation';
+import {currentCohortReviewStore} from 'app/utils/navigation';
 import {MatchParams} from 'app/utils/stores';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {

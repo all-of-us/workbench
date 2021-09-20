@@ -25,48 +25,10 @@ export const currentCohortSearchContextStore = new BehaviorSubject<any>(undefine
 export const setSidebarActiveIconStore = new BehaviorSubject<string>(null);
 export const conceptSetUpdating = new BehaviorSubject<boolean>(false);
 
-export const useNavigation = () => {
-  const history = useHistory();
-
-  const navigateByUrl = (url, extras?: NavigateExtras) => {
-    url = '/' + url.replace(/^\//, '');
-
-    const preventDefaultIfNoKeysPressed = extras && extras.preventDefaultIfNoKeysPressed && !!extras.event;
-
-    // if modifier keys are pressed (like shift or cmd) use the href
-    // if no keys are pressed, prevent default behavior and route using navigateByUrl
-    if (preventDefaultIfNoKeysPressed && !(extras.event.shiftKey || extras.event.altKey || extras.event.ctrlKey || extras.event.metaKey)) {
-      extras.event.preventDefault();
-    }
-
-    history.push({
-      pathname: url,
-      search: extras && extras.queryParams ? querystring.stringify(extras.queryParams) : ''
-    });
-  };
-
-  const navigate = (commands, extras?: NavigateExtras) => {
-    navigateByUrl(commands.join('/'), extras);
-  };
-
-  return [navigate, navigateByUrl];
-};
-
 export const preventDefaultIfNoKeysPressed = (e: React.MouseEvent) => {
   if (!(e.shiftKey || e.altKey || e.ctrlKey || e.metaKey)) {
     e.preventDefault();
   }
-}
-
-interface NavigateExtras {
-  queryParams?: object;
-  preventDefaultIfNoKeysPressed?: boolean;
-  event?: React.MouseEvent;
-}
-
-export interface NavigationProps {
-  navigate: (commands, extras?: NavigateExtras) => void;
-  navigateByUrl: (commands, extras?: NavigateExtras) => void;
 }
 
 /**
