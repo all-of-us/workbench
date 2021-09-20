@@ -5,14 +5,17 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.SpecificPopulationEnum;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.rdr.model.RdrWorkspace;
+import org.pmiops.workbench.rdr.model.RdrWorkspace.AccessTierEnum;
 import org.pmiops.workbench.rdr.model.RdrWorkspaceDemographic;
 import org.pmiops.workbench.utils.mappers.MapStructConfig;
 
@@ -35,12 +38,21 @@ public interface RdrMapper {
   // Workspace User will be populated by a call to FireCloud
   // This will be handle in ServiceImpl Class
   @Mapping(target = "workspaceUsers", ignore = true)
-  RdrWorkspace toRdrModel(DbWorkspace employeeDbEntity);
+  RdrWorkspace toRdrModel(DbWorkspace dbWorkspace);
 
   ZoneOffset offset = OffsetDateTime.now().getOffset();
 
-  default OffsetDateTime toModelOffsetTime(Timestamp dbTime) {
+  default OffsetDateTime toModelOffsetTime(@Nullable Timestamp dbTime) {
+    if (dbTime == null) {
+      return null;
+    }
     return dbTime.toLocalDateTime().atOffset(offset);
+  }
+
+  default RdrWorkspace.AccessTierEnum toModelAccessTier(@Nullable String accessTier) {
+    return Optional.ofNullable(accessTier)
+        .map(t -> AccessTierEnum.fromValue(t.toUpperCase()))
+        .orElse(AccessTierEnum.UNSET);
   }
 
   default RdrWorkspace.StatusEnum toModelStatus(WorkspaceActiveStatus workspaceActiveStatus) {
