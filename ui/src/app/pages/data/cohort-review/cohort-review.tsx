@@ -12,7 +12,6 @@ import colors from 'app/styles/colors';
 import {reactStyles, withCurrentWorkspace} from 'app/utils';
 import {currentCohortReviewStore} from 'app/utils/navigation';
 import { MatchParams } from 'app/utils/stores';
-import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {Cohort, CriteriaType, Domain, ReviewStatus, SortOrder, WorkspaceAccessLevel} from 'generated/fetch';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
@@ -38,7 +37,6 @@ interface State {
 
 export const CohortReview = fp.flow(
   withCurrentWorkspace(),
-  withNavigation,
   withRouter
 )(
   class extends React.Component<Props, State> {
