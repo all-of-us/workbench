@@ -208,8 +208,8 @@ const styles = reactStyles({
 // in display order
 const rtModules = [
   AccessModule.TWOFACTORAUTH,
-  AccessModule.RASLINKLOGINGOV,
   AccessModule.ERACOMMONS,
+  AccessModule.RASLINKLOGINGOV,
   AccessModule.COMPLIANCETRAINING,
 ];
 
