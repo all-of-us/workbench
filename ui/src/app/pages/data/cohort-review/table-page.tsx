@@ -21,12 +21,8 @@ import colors from 'app/styles/colors';
 import {datatableStyles} from 'app/styles/datatable';
 import {reactStyles, withCurrentCohortReview, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
-import {
-  currentCohortReviewStore,
-  NavigationProps
-} from 'app/utils/navigation';
+import {currentCohortReviewStore} from 'app/utils/navigation';
 import {MatchParams} from 'app/utils/stores';
-import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {
   CohortReview,
@@ -229,7 +225,7 @@ const reverseColumnEnum = {
 };
 const EVENT_CATEGORY = 'Review Participant List';
 
-interface Props extends WithSpinnerOverlayProps, NavigationProps, RouteComponentProps<MatchParams> {
+interface Props extends WithSpinnerOverlayProps, RouteComponentProps<MatchParams> {
   cohortReview: CohortReview;
   workspace: WorkspaceData;
 }
@@ -247,7 +243,7 @@ interface State {
   redirectPath: string;
 }
 
-export const ParticipantsTable = fp.flow(withCurrentCohortReview(), withCurrentWorkspace(), withNavigation, withRouter)(
+export const ParticipantsTable = fp.flow(withCurrentCohortReview(), withCurrentWorkspace(), withRouter)(
   class extends React.Component<Props, State> {
     filterInput: Function;
     constructor(props: any) {
