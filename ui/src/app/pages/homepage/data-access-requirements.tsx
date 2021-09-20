@@ -206,10 +206,11 @@ const styles = reactStyles({
 });
 
 // in display order
+// TODO(RW-7301): Swap RAS and eRA order back.
 const rtModules = [
   AccessModule.TWOFACTORAUTH,
-  AccessModule.RASLINKLOGINGOV,
   AccessModule.ERACOMMONS,
+  AccessModule.RASLINKLOGINGOV,
   AccessModule.COMPLIANCETRAINING,
 ];
 
