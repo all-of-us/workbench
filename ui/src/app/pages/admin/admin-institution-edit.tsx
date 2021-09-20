@@ -184,7 +184,9 @@ const TierConfig = (props: TierConfigProps) => {
   const {emailAddresses, emailDomains} = tierConfig;
 
   return <FlexRow style={styles.tierConfigContainer}>
-    <div><TierBadge/></div>
+    <div>
+      <TierBadge/>
+    </div>
     <FlexColumn style={{marginLeft: '0.4rem'}}>
       <label style={styles.tierLabel}>{displayNameForTier(accessTierShortName)} access</label>
       <FlexRow style={{gap: '0.3rem'}}>
@@ -215,8 +217,8 @@ const TierConfig = (props: TierConfigProps) => {
               Enter one email address per line.  <br/>
             </p>
           </FlexColumn>}
-          {tierConfig.membershipRequirement === InstitutionMembershipRequirement.DOMAINS
-          && <FlexColumn data-test-id={`${accessTierShortName}-email-domain`} style={{width: '16rem'}}>
+          {tierConfig.membershipRequirement === InstitutionMembershipRequirement.DOMAINS &&
+          <FlexColumn data-test-id={`${accessTierShortName}-email-domain`} style={{width: '16rem'}}>
             <label style={styles.label}>Accepted Email Domains</label>
             <DomainTextArea
                 accessTierShortName={accessTierShortName}
