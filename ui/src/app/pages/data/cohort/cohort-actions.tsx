@@ -1,4 +1,4 @@
-import { RouteRedirect } from 'app/components/app-router';
+import {RouteLink} from 'app/components/app-router';
 import {Button} from 'app/components/buttons';
 import {ActionCardBase} from 'app/components/card';
 import {FadeBox} from 'app/components/containers';
@@ -75,7 +75,6 @@ interface Props extends WithSpinnerOverlayProps, RouteComponentProps<MatchParams
 interface State {
   cohort: Cohort;
   cohortLoading: boolean;
-  redirectPath: string;
 }
 
 export const CohortActions = fp.flow(
@@ -85,7 +84,7 @@ export const CohortActions = fp.flow(
   class extends React.Component<Props, State> {
     constructor(props: any) {
       super(props);
-      this.state = {cohort: undefined, cohortLoading: false, redirectPath: null};
+      this.state = {cohort: undefined, cohortLoading: false};
     }
 
     componentDidMount(): void {
@@ -93,15 +92,11 @@ export const CohortActions = fp.flow(
       this.setState({cohortLoading: true});
       const {namespace, id} = this.props.workspace;
       cohortsApi().getCohort(namespace, id, +this.props.match.params.cid).then(c => {
-        if (c) {
-          this.setState({cohort: c, cohortLoading: false});
-        } else {
-          this.setState({redirectPath: `/workspaces/${namespace}/${id}/data/cohorts`});
-        }
+        this.setState({cohort: c, cohortLoading: false});
       });
     }
 
-    navigateTo(action: string): void {
+    getNavigationPath(action: string): string {
       const {cohort} = this.state;
       const {namespace, id} = this.props.workspace;
       let url = `/workspaces/${namespace}/${id}/`;
@@ -128,24 +123,22 @@ export const CohortActions = fp.flow(
       if (queryParams) {
         url += '?' + querystring.stringify(queryParams)
       }
-      this.setState({redirectPath: url})
+      return url;
     }
 
     render() {
-      const {cohort, cohortLoading, redirectPath} = this.state;
-      return redirectPath
-          ? <RouteRedirect path={redirectPath} />
-          : <FadeBox style={{margin: 'auto', marginTop: '1rem', width: '95.7%'}}>
+      const {cohort, cohortLoading} = this.state;
+      return <FadeBox style={{margin: 'auto', marginTop: '1rem', width: '95.7%'}}>
         {cohortLoading && <SpinnerOverlay />}
         {cohort && <React.Fragment>
           <h3 style={styles.cohortsHeader}>Cohort Saved Successfully</h3>
           <div style={{marginTop: '0.25rem'}}>
             The cohort
-             <a
+             <RouteLink
                style={{color: colors.accent, margin: '0 4px'}}
-               onClick={() => this.navigateTo('cohort')}>
+               path={this.getNavigationPath('cohort')}>
                 {cohort.name}
-             </a>
+             </RouteLink>
              has been saved.
           </div>
           <h3 style={{...styles.cohortsHeader, marginTop: '1.5rem'}}>What Next?</h3>
@@ -162,7 +155,7 @@ export const CohortActions = fp.flow(
                   <Button
                     type='primary'
                     style={styles.cardButton}
-                    onClick={() => this.navigateTo(card.action)}>
+                    path={this.getNavigationPath(card.action)}>
                     {card.title}
                   </Button>
                 </div>
