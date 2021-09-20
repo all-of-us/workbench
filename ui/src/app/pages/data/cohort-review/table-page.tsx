@@ -39,6 +39,7 @@ import {
   SortOrder,
 } from 'generated/fetch';
 import {RouteComponentProps, withRouter} from 'react-router-dom';
+import { RouteRedirect } from 'app/components/app-router';
 
 const fields = [
   {field: 'participantId', name: 'Participant ID'},
@@ -65,6 +66,7 @@ const styles = reactStyles({
     color: colors.accent,
     background: 'transparent',
     cursor: 'pointer',
+    textTransform: 'none',
   },
   title: {
     marginTop: 0,
@@ -242,6 +244,7 @@ interface State {
   filters: any;
   error: boolean;
   demoFilters: any;
+  redirectPath: string;
 }
 
 export const ParticipantsTable = fp.flow(withCurrentCohortReview(), withCurrentWorkspace(), withNavigation, withRouter)(
@@ -258,7 +261,8 @@ export const ParticipantsTable = fp.flow(withCurrentCohortReview(), withCurrentW
         total: null,
         filters: filterStateStore.getValue().participants,
         error: false,
-        demoFilters: defaultDemoFilters
+        demoFilters: defaultDemoFilters,
+        redirectPath: null
       };
       this.filterInput = fp.debounce(300, () => {
         this.setState({loading: true, error: false});
@@ -419,40 +423,10 @@ export const ParticipantsTable = fp.flow(withCurrentCohortReview(), withCurrentW
       }[status];
     }
 
-    goBack() {
-      triggerEvent(EVENT_CATEGORY, 'Click', 'Back to cohort - Review Participant List');
-      const {match: {params: {ns, wsid, cid}}} = this.props;
-      this.props.navigateByUrl(`workspaces/${ns}/${wsid}/data/cohorts/build`, {queryParams: {cohortId: cid}});
-    }
-
     onRowClick = (event: any) => {
       const {ns, wsid, cid} = this.props.match.params;
-      this.props.navigate([
-        'workspaces',
-        ns,
-        wsid,
-        'data',
-        'cohorts',
-        cid,
-        'review',
-        'participants',
-        event.data.participantId
-      ]);
-    }
-
-    showCohortDescription() {
-      triggerEvent('Cohort Description', 'Click', 'Cohort Description button - Review Participant List');
-      const {ns, wsid, cid} = this.props.match.params;
-      this.props.navigate([
-        'workspaces',
-        ns,
-        wsid,
-        'data',
-        'cohorts',
-        cid,
-        'review',
-        'cohort-description'
-      ]);
+      this.setState({redirectPath: `/workspaces/${ns}/${wsid}/data/cohorts/`
+            + `${cid}/review/participants/${event.data.participantId}`});
     }
 
     onPage = (event: any) => {
@@ -582,8 +556,8 @@ export const ParticipantsTable = fp.flow(withCurrentCohortReview(), withCurrentW
     }
 
     render() {
-      const {cohortReview} = this.props;
-      const {loading, page, sortField, sortOrder, total} = this.state;
+      const {cohortReview, match: {params: {ns, wsid, cid}}} = this.props;
+      const {loading, page, redirectPath, sortField, sortOrder, total} = this.state;
       const data = loading ? null : this.state.data;
       const start = page * rows;
       let pageReportTemplate;
@@ -619,51 +593,58 @@ export const ParticipantsTable = fp.flow(withCurrentCohortReview(), withCurrentW
           header={header}
           sortable/>;
       });
-      return <div style={styles.review}>
-        <style>{datatableStyles}</style>
-        {!!cohortReview && <React.Fragment>
-          <button
-            style={styles.backBtn}
-            type='button'
-            onClick={() => this.goBack()}>
-            Back to cohort
-          </button>
-          <h4 style={styles.title}>
-            Review Sets for {cohortReview.cohortName}
-            <Button
-              style={{float: 'right', height: '1.3rem'}}
-              disabled={!data}
-              onClick={() => this.showCohortDescription()}>
-              Cohort Description
-            </Button>
-          </h4>
-          <div style={styles.description}>
-            {cohortReview.description}
-          </div>
-          <DataTable
-            style={styles.table}
-            value={data}
-            first={start}
-            sortField={sortField}
-            sortOrder={sortOrder}
-            onSort={this.onSort}
-            lazy
-            paginator={data && data.length > 0}
-            onPage={this.onPage}
-            alwaysShowPaginator={false}
-            paginatorTemplate={paginatorTemplate}
-            currentPageReportTemplate={pageReportTemplate}
-            rows={rows}
-            totalRecords={total}
-            onRowClick={this.onRowClick}
-            scrollable
-            scrollHeight='calc(100vh - 350px)'
-            footer={this.errorMessage()}>
-            {columns}
-          </DataTable>
-        </React.Fragment>}
-        {loading && <SpinnerOverlay />}
-      </div>;
+      return redirectPath
+          ? <RouteRedirect path={redirectPath}/>
+          : <div style={styles.review}>
+              <style>{datatableStyles}</style>
+              {!!cohortReview && <React.Fragment>
+                <Button
+                  style={styles.backBtn}
+                  type='link'
+                  onClick={() => {
+                    triggerEvent(EVENT_CATEGORY, 'Click', 'Back to cohort - Review Participant List');
+                  }}
+                  path={`/workspaces/${ns}/${wsid}/data/cohorts/build?cohortId=${cid}`}>
+                  Back to cohort
+                </Button>
+                <h4 style={styles.title}>
+                  Review Sets for {cohortReview.cohortName}
+                  <Button
+                    style={{float: 'right', height: '1.3rem'}}
+                    disabled={!data}
+                    onClick={() => triggerEvent('Cohort Description', 'Click', 'Cohort Description button - Review Participant List')}
+                    path={`/workspaces/${ns}/${wsid}/data/cohorts/${cid}/review/cohort-description`}
+                  >
+                    Cohort Description
+                  </Button>
+                </h4>
+                <div style={styles.description}>
+                  {cohortReview.description}
+                </div>
+                <DataTable
+                  style={styles.table}
+                  value={data}
+                  first={start}
+                  sortField={sortField}
+                  sortOrder={sortOrder}
+                  onSort={this.onSort}
+                  lazy
+                  paginator={data && data.length > 0}
+                  onPage={this.onPage}
+                  alwaysShowPaginator={false}
+                  paginatorTemplate={paginatorTemplate}
+                  currentPageReportTemplate={pageReportTemplate}
+                  rows={rows}
+                  totalRecords={total}
+                  onRowClick={this.onRowClick}
+                  scrollable
+                  scrollHeight='calc(100vh - 350px)'
+                  footer={this.errorMessage()}>
+                  {columns}
+                </DataTable>
+              </React.Fragment>}
+              {loading && <SpinnerOverlay />}
+            </div>;
     }
   }
 );
