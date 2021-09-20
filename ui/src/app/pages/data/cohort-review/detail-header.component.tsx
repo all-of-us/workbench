@@ -29,6 +29,7 @@ import {
 } from 'generated/fetch';
 import {RouteComponentProps, withRouter} from 'react-router-dom';
 import { Button } from 'app/components/buttons';
+import { RouteRedirect } from 'app/components/app-router';
 
 validators.dateFormat = (value: string) => {
   return moment(value, 'YYYY-MM-DD', true).isValid() ? null : 'must be in format \'YYYY-MM-DD\'';
@@ -204,6 +205,7 @@ export interface DetailHeaderState {
   afterId: number;
   filterState: any;
   filterTab: string;
+  redirectPath: string;
 }
 
 export const DetailHeader = fp.flow(withCurrentCohortReview(), withCurrentWorkspace(), withNavigation, withRouter)(
@@ -216,7 +218,8 @@ export const DetailHeader = fp.flow(withCurrentCohortReview(), withCurrentWorksp
         priorId: undefined,
         afterId: undefined,
         filterState: filterStateStore.getValue(),
-        filterTab: FILTER_KEYS.DATE
+        filterTab: FILTER_KEYS.DATE,
+        redirectPath: null
       };
     }
 
@@ -254,7 +257,8 @@ export const DetailHeader = fp.flow(withCurrentCohortReview(), withCurrentWorksp
         afterId: participantCohortStatuses[index + 1] && participantCohortStatuses[index + 1]['participantId'],
         isFirstParticipant: pagination.page === 0 && index === 0,
         isLastParticipant: (pagination.page + 1) === totalPages && (index + 1) === participantCohortStatuses.length,
-        priorId: participantCohortStatuses[index - 1] && participantCohortStatuses[index - 1]['participantId']
+        priorId: participantCohortStatuses[index - 1] && participantCohortStatuses[index - 1]['participantId'],
+        redirectPath: null
       });
     }
 
@@ -297,7 +301,8 @@ export const DetailHeader = fp.flow(withCurrentCohortReview(), withCurrentWorksp
 
     navigateById = (id: number): void => {
       const {ns, wsid, cid} = this.props.match.params;
-      this.props.navigate(['workspaces', ns, wsid, 'data', 'cohorts', cid, 'review', 'participants', id]);
+      // this.props.navigate(['workspaces', ns, wsid, 'data', 'cohorts', cid, 'review', 'participants', id]);
+      this.setState({redirectPath: `/workspaces/${ns}/${wsid}/data/cohorts/${cid}/review/participants/${id}`});
     }
 
     getRequestFilters = () => {
@@ -366,7 +371,8 @@ export const DetailHeader = fp.flow(withCurrentCohortReview(), withCurrentWorksp
         filterState,
         filterTab,
         isFirstParticipant,
-        isLastParticipant
+        isLastParticipant,
+        redirectPath
       } = this.state;
       const errors = validate({ageMin, ageMax, dateMin, dateMax}, {
         ageMin: {
@@ -392,7 +398,7 @@ export const DetailHeader = fp.flow(withCurrentCohortReview(), withCurrentWorksp
           dateFormat: {}
         }
       });
-      return <div className='detail-header'>
+      return redirectPath ? <RouteRedirect path={redirectPath}/> : <div className='detail-header'>
         <style>{css}</style>
         <Button
           style={styles.backBtn}
