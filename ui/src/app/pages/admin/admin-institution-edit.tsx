@@ -184,7 +184,7 @@ const TierConfig = (props: TierConfigProps) => {
   const {emailAddresses, emailDomains} = tierConfig;
 
   return <FlexRow style={styles.tierConfigContainer}>
-    <TierBadge/>
+    <div><TierBadge/></div>
     <FlexColumn style={{marginLeft: '0.4rem'}}>
       <label style={styles.tierLabel}>{displayNameForTier(accessTierShortName)} access</label>
       <FlexRow style={{gap: '0.3rem'}}>
