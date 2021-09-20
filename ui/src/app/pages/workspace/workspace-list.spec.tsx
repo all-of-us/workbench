@@ -12,6 +12,7 @@ import {workspaceStubs, WorkspaceStubVariables} from 'testing/stubs/workspaces';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 import {WorkspaceList} from './workspace-list';
 import {profileStore, serverConfigStore} from "app/utils/stores";
+import { MemoryRouter } from 'react-router';
 
 describe('WorkspaceList', () => {
   const profile = ProfileStubVariables.PROFILE_STUB as unknown as Profile;
@@ -26,7 +27,7 @@ describe('WorkspaceList', () => {
   };
 
   const component = () => {
-    return mount(<WorkspaceList {...props}/>, {attachTo: document.getElementById('root')});
+    return mount(<MemoryRouter><WorkspaceList {...props}/></MemoryRouter>, {attachTo: document.getElementById('root')});
   };
 
   beforeEach(() => {

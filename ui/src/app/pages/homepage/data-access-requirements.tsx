@@ -309,8 +309,8 @@ const selfBypass = async(spinnerProps: WithSpinnerOverlayProps, reloadProfile: F
 };
 
 // exported for test
-export const getEnabledModules = (modules: AccessModule[], navigate): AccessModule[] => fp.flatMap(moduleName => {
-  const enabledTaskMaybe = getRegistrationTask(navigate, moduleName);
+export const getEnabledModules = (modules: AccessModule[]): AccessModule[] => fp.flatMap(moduleName => {
+  const enabledTaskMaybe = getRegistrationTask(moduleName);
   return enabledTaskMaybe ? [enabledTaskMaybe.module] : [];
 }, modules);
 
