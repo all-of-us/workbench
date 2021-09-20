@@ -1,3 +1,4 @@
+import { Button } from 'app/components/buttons';
 import {ComboChart} from 'app/components/combo-chart.component';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
@@ -12,7 +13,6 @@ import {
   NavigationProps
 } from 'app/utils/navigation';
 import {MatchParams} from 'app/utils/stores';
-import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {
   AgeType,
@@ -55,6 +55,7 @@ const styles = reactStyles({
     color: colors.accent,
     background: 'transparent',
     cursor: 'pointer',
+    textTransform: 'none',
   },
   container: {
     width: '100%',
@@ -190,7 +191,7 @@ const domains = [Domain[Domain.CONDITION],
   Domain[Domain.DRUG],
   Domain[Domain.LAB]];
 
-export interface QueryReportProps extends WithSpinnerOverlayProps, NavigationProps, RouteComponentProps<MatchParams> {
+export interface QueryReportProps extends WithSpinnerOverlayProps, RouteComponentProps<MatchParams> {
   cdrVersionTiersResponse: CdrVersionTiersResponse;
   cohortReview: CohortReview;
   workspace: WorkspaceData;
@@ -204,7 +205,7 @@ export interface QueryReportState {
   reviewLoading: boolean;
 }
 
-export const QueryReport = fp.flow(withCdrVersions(), withCurrentCohortReview(), withCurrentWorkspace(), withNavigation, withRouter)(
+export const QueryReport = fp.flow(withCdrVersions(), withCurrentCohortReview(), withCurrentWorkspace(), withRouter)(
   class extends React.Component<QueryReportProps, QueryReportState> {
     constructor(props: any) {
       super(props);
@@ -286,24 +287,20 @@ export const QueryReport = fp.flow(withCdrVersions(), withCurrentCohortReview(),
       }
     }
 
-    goBack() {
-      const {ns, wsid, cid} = this.props.match.params;
-      this.props.navigate(['workspaces', ns, wsid, 'data', 'cohorts', cid, 'review', 'participants']);
-    }
-
     render() {
       const {cohortReview} = this.props;
+      const {ns, wsid, cid} = this.props.match.params;
       const {cdrName, cohort, data, groupedData, chartsLoading, reviewLoading} = this.state;
       // TODO can we use the creation time from the review instead of the cohort here?
       const created = !!cohort ? moment(cohort.creationTime).format('YYYY-MM-DD') : null;
       return <React.Fragment>
         <style>{css}</style>
-        {cohortReview && cohortReview.cohortReviewId && <button
+        {cohortReview && cohortReview.cohortReviewId && <Button
           style={styles.backBtn}
-          type='button'
-          onClick={() => this.goBack()}>
+          type='link'
+          path={`/workspaces/${ns}/${wsid}/data/cohorts/${cid}/review/participants`}>
           Back to review set
-        </button>}
+        </Button>}
         {reviewLoading && <SpinnerOverlay/>}
         {cohortReview && <div style={styles.reportBackground}>
           <div style={styles.container}>
