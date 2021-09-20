@@ -96,7 +96,7 @@ export const AppRouter = ({children}): React.ReactElement => {
 export const RouteLink = ({path, style = {}, children}): React.ReactElement =>
     <Link style={{textDecoration: 'none', color: 'unset', ...style}} to={path}>{children}</Link>;
 
-export const RouteRedirect = ({path}) => <Redirect to={path} push={true} />;
+export const RouteRedirect = ({path}) => <Redirect to={path} push/>;
 
 export const AppRoute = ({path, guards = [], exact, intermediaryRoute = false, children}): React.ReactElement => {
   const { redirectPath = null } = fp.find(({allowed}) => !allowed(), guards) || {};
