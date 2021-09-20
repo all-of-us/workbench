@@ -77,7 +77,7 @@ describe('DataAccessRequirements', () => {
         expect(activeModule).toEqual(AccessModule.TWOFACTORAUTH)
     });
 
-    it('should return the second module (RAS) from getActiveModule when the first module (2FA) has been completed', () => {
+    it('should return the second module (ERA) from getActiveModule when the first module (2FA) has been completed', () => {
         const testProfile = {
             ...profile,
             accessModules: {
