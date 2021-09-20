@@ -9,7 +9,6 @@ import {ProfileApiStub, ProfileStubVariables} from 'testing/stubs/profile-api-st
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {profileStore, serverConfigStore} from 'app/utils/stores';
 import {MemoryRouter} from 'react-router-dom';
-import {useNavigation} from 'app/utils/navigation';
 
 const profile = ProfileStubVariables.PROFILE_STUB as Profile;
 const load = jest.fn();
@@ -39,35 +38,30 @@ describe('DataAccessRequirements', () => {
     });
 
     it('should return all modules from getEnabledModules by default (all FFs enabled)', () => {
-        const [navigate, ] = useNavigation();
-        const enabledModules = getEnabledModules(allModules, navigate);
+        const enabledModules = getEnabledModules(allModules);
         allModules.forEach(module => expect(enabledModules.includes(module)).toBeTruthy());
     });
 
     it('should not return the RAS module from getEnabledModules when its feature flag is disabled', () => {
         serverConfigStore.set({config: {...defaultServerConfig, enableRasLoginGovLinking: false}});
-        const [navigate, ] = useNavigation();
-        const enabledModules = getEnabledModules(allModules, navigate);
+        const enabledModules = getEnabledModules(allModules);
         expect(enabledModules.includes(AccessModule.RASLINKLOGINGOV)).toBeFalsy();
     });
 
     it('should not return the ERA module from getEnabledModules when its feature flag is disabled', () => {
         serverConfigStore.set({config: {...defaultServerConfig, enableEraCommons: false}});
-        const [navigate, ] = useNavigation();
-        const enabledModules = getEnabledModules(allModules, navigate);
+        const enabledModules = getEnabledModules(allModules);
         expect(enabledModules.includes(AccessModule.ERACOMMONS)).toBeFalsy();
      });
 
     it('should not return the Compliance module from getEnabledModules when its feature flag is disabled', () => {
         serverConfigStore.set({config: {...defaultServerConfig, enableComplianceTraining: false}});
-        const [navigate, ] = useNavigation();
-        const enabledModules = getEnabledModules(allModules, navigate);
+        const enabledModules = getEnabledModules(allModules);
         expect(enabledModules.includes(AccessModule.COMPLIANCETRAINING)).toBeFalsy();
     });
 
     it('should return the first module (2FA) from getActiveModule when no modules have been completed', () => {
-        const [navigate, ] = useNavigation();
-        const enabledModules = getEnabledModules(allModules, navigate);
+        const enabledModules = getEnabledModules(allModules);
         const activeModule = getActiveModule(enabledModules, profile);
 
         expect(activeModule).toEqual(allModules[0]);
@@ -85,8 +79,7 @@ describe('DataAccessRequirements', () => {
             }
         };
 
-        const [navigate, ] = useNavigation();
-        const enabledModules = getEnabledModules(allModules, navigate);
+        const enabledModules = getEnabledModules(allModules);
         const activeModule = getActiveModule(enabledModules, testProfile);
 
         expect(activeModule).toEqual(allModules[1]);
@@ -108,8 +101,7 @@ describe('DataAccessRequirements', () => {
             }
         };
 
-        const [navigate, ] = useNavigation();
-        const enabledModules = getEnabledModules(allModules, navigate);
+        const enabledModules = getEnabledModules(allModules);
         const activeModule = getActiveModule(enabledModules, testProfile);
 
         // update this if the order changes
@@ -130,8 +122,7 @@ describe('DataAccessRequirements', () => {
             }
         };
 
-        const [navigate, ] = useNavigation();
-        const enabledModules = getEnabledModules(allModules, navigate);
+        const enabledModules = getEnabledModules(allModules);
         const activeModule = getActiveModule(enabledModules, testProfile);
 
         expect(activeModule).toEqual(allModules[1]);
@@ -149,8 +140,7 @@ describe('DataAccessRequirements', () => {
             }
         };
 
-        const [navigate, ] = useNavigation();
-        const enabledModules = getEnabledModules(allModules, navigate);
+        const enabledModules = getEnabledModules(allModules);
         const activeModule = getActiveModule(enabledModules, testProfile);
 
         expect(activeModule).toBeUndefined();
