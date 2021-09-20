@@ -6,7 +6,7 @@ import * as fp from 'lodash/fp';
 import {Button, Link} from 'app/components/buttons';
 import {Spinner} from 'app/components/spinners';
 import {WarningMessage} from 'app/components/messages';
-import {ConfirmDelete, Props, RuntimePanelWrapper} from 'app/pages/analysis/runtime-panel';
+import {ConfirmDelete, MIN_DISK_SIZE_GB, Props, RuntimePanelWrapper} from 'app/pages/analysis/runtime-panel';
 import {profileApi, registerApiClient, runtimeApi} from 'app/services/swagger-fetch-clients';
 import {findMachineByName, ComputeType} from 'app/utils/machines';
 import {runtimePresets} from 'app/utils/runtime-presets';
@@ -341,7 +341,7 @@ describe('RuntimePanel', () => {
 
     await pickMainCpu(wrapper, 8);
     await pickMainRam(wrapper, 52);
-    await pickMainDiskSize(wrapper, 75);
+    await pickMainDiskSize(wrapper, 85);
 
     await mustClickButton(wrapper, 'Create');
 
@@ -350,7 +350,7 @@ describe('RuntimePanel', () => {
       .toEqual(RuntimeConfigurationType.UserOverride);
     expect(runtimeApiStub.runtime.gceConfig).toEqual({
       machineType: 'n1-highmem-8',
-      diskSize: 75,
+      diskSize: 85,
       gpuConfig: null
     });
     expect(runtimeApiStub.runtime.dataprocConfig).toBeFalsy();
@@ -414,7 +414,7 @@ describe('RuntimePanel', () => {
 
     // Ensure set the form to something non-standard to start
     await pickMainCpu(wrapper, 8);
-    await pickMainDiskSize(wrapper, 75);
+    await pickMainDiskSize(wrapper, 85);
     await pickComputeType(wrapper, ComputeType.Dataproc);
 
     await pickPreset(wrapper, runtimePresets.generalAnalysis);
@@ -751,7 +751,7 @@ describe('RuntimePanel', () => {
 
     const wrapper = await component();
 
-    await pickMainDiskSize(wrapper, 75);
+    await pickMainDiskSize(wrapper, 85);
     await pickMainCpu(wrapper, 8);
     await pickMainRam(wrapper, 30);
     await pickWorkerCpu(wrapper, 16);
@@ -763,7 +763,7 @@ describe('RuntimePanel', () => {
     await mustClickButton(wrapper, 'Next');
     await mustClickButton(wrapper, 'Cancel');
 
-    expect(getMainDiskSize(wrapper)).toBe(75);
+    expect(getMainDiskSize(wrapper)).toBe(85);
     expect(getMainCpu(wrapper)).toBe(8);
     expect(getMainRam(wrapper)).toBe(30);
     expect(getWorkerCpu(wrapper)).toBe(16);
@@ -854,9 +854,9 @@ describe('RuntimePanel', () => {
     expect(runningCost().text()).toEqual('$0.20/hr');
     expect(storageCost().text()).toEqual('< $0.01/hr');
 
-    // After selecting Dataproc, the Dataproc defaults should make the running cost 71 cents an hour. The storage cost increases due to worker disk.
+    // After selecting Dataproc, the Dataproc defaults should make the running cost 72 cents an hour. The storage cost increases due to worker disk.
     await pickComputeType(wrapper, ComputeType.Dataproc);
-    expect(runningCost().text()).toEqual('$0.71/hr');
+    expect(runningCost().text()).toEqual('$0.72/hr');
     expect(storageCost().text()).toEqual('$0.01/hr');
 
     // Bump up all the worker values to increase the price on everything.
@@ -880,7 +880,7 @@ describe('RuntimePanel', () => {
         numberOfWorkers: 2,
         numberOfPreemptibleWorkers: 0,
         workerMachineType: 'n1-standard-4',
-        workerDiskSize: 60
+        workerDiskSize: MIN_DISK_SIZE_GB,
       }
     };
     runtimeApiStub.runtime = runtime;
@@ -893,13 +893,13 @@ describe('RuntimePanel', () => {
 
     const runningCost = () => costEstimator().find('[data-test-id="running-cost"]');
     const storageCost = () => costEstimator().find('[data-test-id="storage-cost"]');
-    expect(runningCost().text()).toEqual('$0.76/hr');
+    expect(runningCost().text()).toEqual('$0.77/hr');
     expect(storageCost().text()).toEqual('$0.06/hr');
 
     // Switch to n1-highmem-4, double disk size.
     await pickMainRam(wrapper, 26);
     await pickMainDiskSize(wrapper, 2000);
-    expect(runningCost().text()).toEqual('$0.86/hr');
+    expect(runningCost().text()).toEqual('$0.87/hr');
     expect(storageCost().text()).toEqual('$0.12/hr');
   });
 
@@ -958,7 +958,7 @@ describe('RuntimePanel', () => {
       await pickPdSize(wrapper, 4900);
       expect(getCreateButton().prop('disabled')).toBeTruthy();
 
-      await pickPdSize(wrapper, 60);
+      await pickPdSize(wrapper, MIN_DISK_SIZE_GB);
     } else {
       await pickMainDiskSize(wrapper, 49);
       expect(getCreateButton().prop('disabled')).toBeTruthy();
@@ -966,7 +966,7 @@ describe('RuntimePanel', () => {
       await pickMainDiskSize(wrapper, 4900);
       expect(getCreateButton().prop('disabled')).toBeTruthy();
 
-      await pickMainDiskSize(wrapper, 60);
+      await pickMainDiskSize(wrapper, MIN_DISK_SIZE_GB);
     }
     await pickComputeType(wrapper, ComputeType.Dataproc);
     await pickWorkerDiskSize(wrapper, 49);
@@ -975,8 +975,8 @@ describe('RuntimePanel', () => {
     await pickWorkerDiskSize(wrapper, 4900);
     expect(getCreateButton().prop('disabled')).toBeTruthy();
 
-    await pickMainDiskSize(wrapper, 60);
-    await pickWorkerDiskSize(wrapper, 60);
+    await pickMainDiskSize(wrapper, MIN_DISK_SIZE_GB);
+    await pickWorkerDiskSize(wrapper, MIN_DISK_SIZE_GB);
     expect(getCreateButton().prop('disabled')).toBeFalsy();
   });
 
@@ -990,7 +990,7 @@ describe('RuntimePanel', () => {
     await pickMainDiskSize(wrapper, 4900);
     expect(getNextButton().prop('disabled')).toBeTruthy();
 
-    await pickMainDiskSize(wrapper, 60);
+    await pickMainDiskSize(wrapper, MIN_DISK_SIZE_GB);
     await pickComputeType(wrapper, ComputeType.Dataproc);
     await pickWorkerDiskSize(wrapper, 49);
     expect(getNextButton().prop('disabled')).toBeTruthy();
@@ -998,8 +998,8 @@ describe('RuntimePanel', () => {
     await pickWorkerDiskSize(wrapper, 4900);
     expect(getNextButton().prop('disabled')).toBeTruthy();
 
-    await pickMainDiskSize(wrapper, 60);
-    await pickWorkerDiskSize(wrapper, 60);
+    await pickMainDiskSize(wrapper, MIN_DISK_SIZE_GB);
+    await pickWorkerDiskSize(wrapper, MIN_DISK_SIZE_GB);
     expect(getNextButton().prop('disabled')).toBeFalsy();
   });
 
