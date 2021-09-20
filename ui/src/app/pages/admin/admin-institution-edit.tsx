@@ -60,6 +60,10 @@ const styles = reactStyles({
     marginTop: '1.5rem',
     marginBottom: '0.3rem'
   },
+  tierBadge: {
+    marginTop: '0.6rem',
+    marginLeft: '0.6rem',
+  },
   tierLabel: {
     fontSize: '16px',
     fontWeight: 600,
@@ -158,6 +162,7 @@ const DomainTextArea = (props: {accessTierShortName: string, emailDomains: strin
 interface TierConfigProps {
   institution: Institution;
   accessTierShortName: string;
+  TierBadge: () => JSX.Element;
   setEnableControlledTier?: (boolean) => void;
   setEraRequired: (boolean) => void;
   setTierRequirement: (InstitutionMembershipRequirement) => void;
@@ -171,7 +176,7 @@ interface TierConfigProps {
   invalidDomainMsg: string;
 }
 const TierConfig = (props: TierConfigProps) => {
-  const {institution, accessTierShortName, setEnableControlledTier, setEraRequired, setTierRequirement,
+  const {institution, accessTierShortName, TierBadge, setEnableControlledTier, setEraRequired, setTierRequirement,
     validateTierAddresses, setTierAddresses, validateTierDomains, setTierDomains,
     invalidAddress, invalidAddressMsg, invalidDomain, invalidDomainMsg} = props;
 
@@ -179,11 +184,7 @@ const TierConfig = (props: TierConfigProps) => {
   const {emailAddresses, emailDomains} = tierConfig;
 
   return <FlexRow style={styles.tierConfigContainer}>
-    <FlexColumn>
-      {accessTierShortName === AccessTierShortNames.Registered
-          ? <RegisteredTierBadge style={{marginTop: '0.6rem', marginLeft: '0.6rem'}}/>
-          : <ControlledTierBadge style={{marginTop: '0.6rem', marginLeft: '0.6rem'}}/>}
-    </FlexColumn>
+    <TierBadge/>
     <FlexColumn style={{marginLeft: '0.4rem'}}>
       <label style={styles.tierLabel}>{displayNameForTier(accessTierShortName)} access</label>
       <FlexRow style={{gap: '0.3rem'}}>
@@ -697,6 +698,7 @@ export const AdminInstitutionEdit = fp.flow(withNavigation, withRouter)(class ex
           <TierConfig
               institution={institution}
               accessTierShortName={AccessTierShortNames.Registered}
+              TierBadge={() => <RegisteredTierBadge style={styles.tierBadge}/>}
               setEraRequired={(value) => this.setRtRequireEra(value)}
               setTierRequirement={(requirement) => this.setRegisteredTierRequirement(requirement)}
               validateTierAddresses={() => this.validateRtEmailAddresses()}
@@ -710,6 +712,7 @@ export const AdminInstitutionEdit = fp.flow(withNavigation, withRouter)(class ex
           <TierConfig
               institution={institution}
               accessTierShortName={AccessTierShortNames.Controlled}
+              TierBadge={() => <ControlledTierBadge style={styles.tierBadge}/>}
               setEnableControlledTier={(value) => this.setEnableControlledTier(value)}
               setEraRequired={(value) => this.setCtRequireEra(value)}
               setTierRequirement={(requirement) => this.setControlledTierRequirement(requirement)}
