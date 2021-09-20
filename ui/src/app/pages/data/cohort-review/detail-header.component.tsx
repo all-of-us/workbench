@@ -28,6 +28,7 @@ import {
   SortOrder
 } from 'generated/fetch';
 import {RouteComponentProps, withRouter} from 'react-router-dom';
+import { Button } from 'app/components/buttons';
 
 validators.dateFormat = (value: string) => {
   return moment(value, 'YYYY-MM-DD', true).isValid() ? null : 'must be in format \'YYYY-MM-DD\'';
@@ -55,6 +56,9 @@ const styles = reactStyles({
     color: colors.accent,
     background: 'transparent',
     cursor: 'pointer',
+    textTransform: 'none',
+    height: '1rem',
+    fontWeight: 400,
   },
   title: {
     marginTop: 0,
@@ -254,11 +258,6 @@ export const DetailHeader = fp.flow(withCurrentCohortReview(), withCurrentWorksp
       });
     }
 
-    backToTable() {
-      const {ns, wsid, cid} = this.props.match.params;
-      this.props.navigate(['workspaces', ns, wsid, 'data', 'cohorts', cid, 'review', 'participants']);
-    }
-
     previous = () => {
       this.navigate(true);
     }
@@ -361,7 +360,7 @@ export const DetailHeader = fp.flow(withCurrentCohortReview(), withCurrentWorksp
     }
 
     render() {
-      const {cohortReview: {cohortName, description}, participant} = this.props;
+      const {cohortReview: {cohortName, description}, match: {params: {ns, wsid, cid}}, participant} = this.props;
       const {
         filterState: {global: {ageMin, ageMax, dateMin, dateMax, visits}},
         filterState,
@@ -395,13 +394,13 @@ export const DetailHeader = fp.flow(withCurrentCohortReview(), withCurrentWorksp
       });
       return <div className='detail-header'>
         <style>{css}</style>
-        <button
+        <Button
           style={styles.backBtn}
-          type='button'
+          type='link'
           title='Go Back to the review set table'
-          onClick={() => this.backToTable()}>
+          path={`/workspaces/${ns}/${wsid}/data/cohorts/${cid}/review/participants`}>
           Back to review set
-        </button>
+        </Button>
         <h4 style={styles.title}>{cohortName}</h4>
         <div style={styles.description}>{description}</div>
         {errors && <div className='error-messages'>

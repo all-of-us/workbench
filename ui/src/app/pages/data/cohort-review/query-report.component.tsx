@@ -56,6 +56,8 @@ const styles = reactStyles({
     background: 'transparent',
     cursor: 'pointer',
     textTransform: 'none',
+    height: '1rem',
+    fontWeight: 400,
   },
   container: {
     width: '100%',
