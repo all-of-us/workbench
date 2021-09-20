@@ -153,17 +153,17 @@ export const WorkspaceNavBar = fp.flow(
     const selected = tabPath === link;
     const hideSeparator = selected || (activeTabIndex === tabs.indexOf(currentTab) + 1);
     return <React.Fragment key={name}>
-      <Clickable
-        data-test-id={name}
-        aria-selected={selected}
-        disabled={disabled}
-        style={{...styles.tab, ...(selected ? styles.active : {}), ...(disabled ? styles.disabled : {})}}
-        hover={{color: styles.active.color}}
-      >
-        <RouteLink path={`/workspaces/${ns}/${wsid}/${link}`}>
-          {name}
-        </RouteLink>
-      </Clickable>
+      <RouteLink path={`/workspaces/${ns}/${wsid}/${link}`}>
+        <Clickable
+          data-test-id={name}
+          aria-selected={selected}
+          disabled={disabled}
+          style={{...styles.tab, ...(selected ? styles.active : {}), ...(disabled ? styles.disabled : {})}}
+          hover={{color: styles.active.color}}
+        >
+            {name}
+        </Clickable>
+      </RouteLink>
       {!hideSeparator && navSeparator}
     </React.Fragment>;
   };
