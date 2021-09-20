@@ -386,13 +386,8 @@ describe('WorkspaceEdit', () => {
     wrapper.find('[data-test-id="workspace-confirm-save-btn"]').first().simulate('click');
     await waitOneTickAndUpdate(wrapper);
 
-    wrapper.find('[data-test-id="workspace-confirm-save-btn"]').first().simulate('click');
-    await waitOneTickAndUpdate(wrapper);
-
-    wrapper.find('[data-test-id="workspace-confirm-save-btn"]').first().simulate('click');
-    await waitOneTickAndUpdate(wrapper);
-
-    expect(workspacesApi.workspaces.length).toEqual(numBefore + 1);
+    // The mocked workspace create function resolves immediately, so we expect this to render a Redirect
+    expect(wrapper.find('[data-test-id="workspace-confirm-save-btn"]').length).toEqual(0);
   });
 
   it ('should show warning message if research purpose summary Intended study have answer less than 50 characters', async() => {
