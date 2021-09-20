@@ -118,11 +118,14 @@ describe('DataAccessRequirements', () => {
         // 2FA (module 0) is complete, so enabled #1 is active
         expect(activeModule).toEqual(enabledModules[1]);
 
-        // but we skip allModules[1] because it's RAS and is not enabled
-        expect(activeModule).toEqual(allModules[2]);
+        // eRA is the next module.
+        expect(activeModule).toEqual(allModules[1]);
+        // TODO(RW-7301): Revert this back.
+        // // but we skip allModules[1] because it's RAS and is not enabled
+        // expect(activeModule).toEqual(allModules[2]);
     });
 
-    it('should return the second module (RAS) from getActiveModule when the first module (2FA) has been bypassed', () => {
+    it('should return the second module (ERA) from getActiveModule when the first module (2FA) has been bypassed', () => {
         const testProfile = {
             ...profile,
             accessModules: {
