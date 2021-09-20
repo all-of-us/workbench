@@ -93,7 +93,7 @@ describe('DataAccessRequirements', () => {
         expect(activeModule).toEqual(enabledModules[1]);
 
         // update this if the order changes
-        expect(activeModule).toEqual(AccessModule.RASLINKLOGINGOV)
+        expect(activeModule).toEqual(AccessModule.ERACOMMONS)
     });
 
     // update this if the order changes
