@@ -6,7 +6,7 @@ import * as fp from 'lodash/fp';
 import {Button, Link} from 'app/components/buttons';
 import {Spinner} from 'app/components/spinners';
 import {WarningMessage} from 'app/components/messages';
-import {ConfirmDelete, Props, RuntimePanelWrapper} from 'app/pages/analysis/runtime-panel';
+import {ConfirmDelete, MIN_DISK_SIZE_GB, Props, RuntimePanelWrapper} from 'app/pages/analysis/runtime-panel';
 import {profileApi, registerApiClient, runtimeApi} from 'app/services/swagger-fetch-clients';
 import {findMachineByName, ComputeType} from 'app/utils/machines';
 import {runtimePresets} from 'app/utils/runtime-presets';
@@ -880,7 +880,7 @@ describe('RuntimePanel', () => {
         numberOfWorkers: 2,
         numberOfPreemptibleWorkers: 0,
         workerMachineType: 'n1-standard-4',
-        workerDiskSize: 60
+        workerDiskSize: MIN_DISK_SIZE_GB,
       }
     };
     runtimeApiStub.runtime = runtime;
@@ -958,7 +958,7 @@ describe('RuntimePanel', () => {
       await pickPdSize(wrapper, 4900);
       expect(getCreateButton().prop('disabled')).toBeTruthy();
 
-      await pickPdSize(wrapper, 60);
+      await pickPdSize(wrapper, MIN_DISK_SIZE_GB);
     } else {
       await pickMainDiskSize(wrapper, 49);
       expect(getCreateButton().prop('disabled')).toBeTruthy();
@@ -966,7 +966,7 @@ describe('RuntimePanel', () => {
       await pickMainDiskSize(wrapper, 4900);
       expect(getCreateButton().prop('disabled')).toBeTruthy();
 
-      await pickMainDiskSize(wrapper, 60);
+      await pickMainDiskSize(wrapper, MIN_DISK_SIZE_GB);
     }
     await pickComputeType(wrapper, ComputeType.Dataproc);
     await pickWorkerDiskSize(wrapper, 49);
@@ -975,8 +975,8 @@ describe('RuntimePanel', () => {
     await pickWorkerDiskSize(wrapper, 4900);
     expect(getCreateButton().prop('disabled')).toBeTruthy();
 
-    await pickMainDiskSize(wrapper, 60);
-    await pickWorkerDiskSize(wrapper, 60);
+    await pickMainDiskSize(wrapper, MIN_DISK_SIZE_GB);
+    await pickWorkerDiskSize(wrapper, MIN_DISK_SIZE_GB);
     expect(getCreateButton().prop('disabled')).toBeFalsy();
   });
 
@@ -990,7 +990,7 @@ describe('RuntimePanel', () => {
     await pickMainDiskSize(wrapper, 4900);
     expect(getNextButton().prop('disabled')).toBeTruthy();
 
-    await pickMainDiskSize(wrapper, 60);
+    await pickMainDiskSize(wrapper, MIN_DISK_SIZE_GB);
     await pickComputeType(wrapper, ComputeType.Dataproc);
     await pickWorkerDiskSize(wrapper, 49);
     expect(getNextButton().prop('disabled')).toBeTruthy();
@@ -998,8 +998,8 @@ describe('RuntimePanel', () => {
     await pickWorkerDiskSize(wrapper, 4900);
     expect(getNextButton().prop('disabled')).toBeTruthy();
 
-    await pickMainDiskSize(wrapper, 60);
-    await pickWorkerDiskSize(wrapper, 60);
+    await pickMainDiskSize(wrapper, MIN_DISK_SIZE_GB);
+    await pickWorkerDiskSize(wrapper, MIN_DISK_SIZE_GB);
     expect(getNextButton().prop('disabled')).toBeFalsy();
   });
 
