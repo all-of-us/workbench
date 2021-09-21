@@ -338,11 +338,11 @@ export class LeoRuntimeInitializer {
       } else if (this.isRuntimeStopped()) {
         await this.resumeRuntime();
       } else if (this.isRuntimeErrored()) {
-        // If runtime is in error state, delete it so it can be re-created at the next poll loop.
+        // If runtime is in error state, stop polling so we can display the error.
         reportError(
           `Runtime ${this.currentRuntime.googleProject}/${this.currentRuntime.runtimeName}` +
           ` has reached an ERROR status`);
-        await this.deleteRuntime();
+        return this.resolve(this.currentRuntime);
       }
     } catch (e) {
       if (isAbortError(e)) {

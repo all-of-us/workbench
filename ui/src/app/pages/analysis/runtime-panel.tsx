@@ -1302,8 +1302,8 @@ const RuntimePanel = fp.flow(
 
   const runningCostValidatorWithMessage = () => {
     const maxRunningCost = workspace.billingAccountType === BillingAccountType.FREETIER
-      ? 25
-      : 150;
+      ? 2500
+      : 15000;
     const message = costErrorsAsWarnings
       ? '^Your runtime is expensive. Are you sure you wish to proceed?'
       : `^Your runtime is too expensive. To proceed using free credits, reduce your running costs below $${maxRunningCost}/hr.`;
@@ -1407,6 +1407,18 @@ const RuntimePanel = fp.flow(
     </Button>;
   };
 
+  const renderTryAgainButton = () => {
+    return <Button
+        aria-label='Try Again'
+        disabled={!runtimeCanBeCreated}
+        onClick={() => {
+          setRequestedRuntime(createRuntimeRequest(newRuntimeConfig));
+          onClose();
+        }}>
+      Try Again
+    </Button>;
+  };
+
   const renderNextButton = () => {
     return <Button
       aria-label='Next'
@@ -1474,6 +1486,17 @@ const RuntimePanel = fp.flow(
                           runtimeCtx = {runtimeCtx}
                   />
               </FlexRow>
+              {currentRuntime && currentRuntime.errors && <ErrorMessage iconPosition={'top'} iconSize={16}>
+                  <div>An error was encountered with your cloud environment. Please re-attempt creation of the
+                    environment and contact support if the error persists.</div>
+                  <div>Error details:</div>
+                  {currentRuntime.errors.map((err, idx) => {
+                    return <div style={{fontFamily: 'monospace'}} key={idx}>
+                      {err.errorMessage}
+                    </div>
+                  })}
+                </ErrorMessage>
+              }
               <PresetSelector
                 allowDataproc={allowDataproc}
                 disabled={disableControls}
@@ -1594,7 +1617,11 @@ const RuntimePanel = fp.flow(
                   aria-label='Delete Environment'
                   disabled={disableControls || !runtimeExists}
                   onClick={() => setPanelContent(PanelContent.DeleteRuntime)}>Delete Environment</Link>
-              {runtimeExists || (pdExists && pdSizeReduced) ? renderNextButton() : renderCreateButton()}
+              {runtimeExists || (pdExists && pdSizeReduced)
+                  ? renderNextButton()
+                  : currentRuntime && currentRuntime.errors
+                      ? renderTryAgainButton()
+                      : renderCreateButton()}
             </FlexRow>
         }
     </Fragment>],
