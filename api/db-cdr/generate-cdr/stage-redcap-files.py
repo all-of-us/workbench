@@ -52,11 +52,14 @@ def main():
     os.mkdir(home_dir)
 
     # open your file writers for this survey and write headers
-    csv_writer, csv_file = open_writers_with_headers("prep_survey_staged")
+    #csv_writer, csv_file = open_writers_with_headers("prep_survey_staged")
     master_cope_dictionary = OrderedDict()
 
     for name in surveys:
         rows = read_csv(get_filename(name, date))
+        file_name = name.replace("ENGLISH", "").replace("_DataDictionary", "").lower()
+        if "covid" not in name.lower():
+            csv_writer, csv_file = open_writers_with_headers(file_name + "_staged")
         print("Reading & Parsing... " + name)
         previous_concept_code = None
 
@@ -108,10 +111,12 @@ def main():
                             else:
                                 master_cope_dictionary[concept_code] = new_entry
                 previous_concept_code = concept_code
+        if "covid" not in name.lower():
+            flush_and_close_files(csv_file)
 
+    csv_writer, csv_file = open_writers_with_headers("cope_staged")
     for key in master_cope_dictionary:
         csv_writer.writerow(master_cope_dictionary.get(key))
-
     flush_and_close_files(csv_file)
 
     # copy local output files and upload it to the bucket
