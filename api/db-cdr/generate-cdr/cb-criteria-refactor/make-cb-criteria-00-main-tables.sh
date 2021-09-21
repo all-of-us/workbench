@@ -21,6 +21,7 @@ elif [[ $run_in_parallel == "mult" ]]; then
   BQ_DATASET=$DATASET_MULT
 elif [[ $run_in_parallel == "ori" ]]; then
   echo "for 'ori' run make-bq-criteria-tables.sh script directly! Comment out prep tables..."
+  exit 1
 fi
 
 ################################################
