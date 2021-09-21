@@ -2,8 +2,8 @@
 # set -ex
 # do not output cmd-line for now
 set -e
-SQL_FOR='PHYSICAL MEASUREMENTS - CONCEPT SET'
-SQL_SCRIPT_ORDER=4
+SQL_FOR='FITBIT DATA'
+SQL_SCRIPT_ORDER=5
 TBL_CBC='cb_criteria'
 ####### common block for all make-cb-criteria-dd-*.sh scripts ###########
 function createTmpTable(){
@@ -41,68 +41,40 @@ elif [[ "$RUN_PARALLEL" == "mult" ]]; then
     TBL_CBC=$(createTmpTable $TBL_CBC)
 fi
 ####### end common block ###########
-# make-cb-criteria-04-pm-concept-set.sh
-#892 - #890 : make-bq-criteria-tables.sh
-# ---------ORDER - 4 - PHYSICAL MEASUREMENTS - CONCEPT SET---------
-# ORDER 4: #891 - #947: PHYSICAL MEASUREMENTS - CONCEPT SET
-# cb_criteria: Uses : cb_criteria, concept, measurement
+# make-cb-criteria-05-fitbit.sh
+#949 - #978 : make-bq-criteria-tables.sh
+# ---------ORDER - 5 - FITBIT DATA---------
+# ORDER 5: #949 - #978: FITBIT DATA
+# cb_criteria: Uses : cb_criteria
 ################################################
-# PHYSICAL MEASUREMENTS - CONCEPT SET
+# FITBIT DATA
 ################################################
-echo "PHYSICAL MEASUREMENTS - CONCEPT SET"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+echo "FITBIT DATA"
+bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
     (
           id
         , parent_id
         , domain_id
         , is_standard
         , type
-        , concept_id
-        , code
         , name
-        , rollup_count
-        , item_count
-        , est_count
         , is_group
         , is_selectable
         , has_attribute
         , has_hierarchy
-        , path
     )
 SELECT
-      ROW_NUMBER() OVER (ORDER BY concept_name)
-       + (SELECT COALESCE(MAX(id),$CB_CRITERIA_START_ID) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID ) AS id
+    (SELECT COALESCE(MAX(id),$CB_CRITERIA_START_ID) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` WHERE id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID ) + 1  AS id
     , -1
-    , 'PHYSICAL_MEASUREMENT_CSS'
-    , 0
-    , vocabulary_id as type
-    , concept_id
-    , concept_code as code
-    , concept_name as name
-    , 0 as rollup_count
-    , b.cnt as item_count
-    , b.cnt as est_count
-    , 0
+    , 'FITBIT'
+    , 1
+    , 'FITBIT'
+    , 'Fitbit'
     , 1
     , 0
     , 0
-    , CAST(ROW_NUMBER() OVER (ORDER BY concept_name) +
-      (SELECT COALESCE(MAX(id),$CB_CRITERIA_START_ID) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` where id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID) as STRING)
-FROM
-    (
-        SELECT *
-        FROM \`$BQ_PROJECT.$BQ_DATASET.concept\`
-        WHERE vocabulary_id = 'PPI'
-        and concept_class_id = 'Clinical Observation'
-        and domain_id = 'Measurement'
-    ) a
-JOIN
-    (   --- get the count of distinct patients coded with each concept
-        SELECT measurement_source_concept_id , COUNT(DISTINCT person_id) cnt
-        FROM \`$BQ_PROJECT.$BQ_DATASET.measurement\`
-        GROUP BY 1
-    ) b on a.concept_id = b.measurement_source_concept_id"
+    , 0"
 
 wait $!
 ## copy temp tables back to main tables, and delete temp?
