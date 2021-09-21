@@ -728,7 +728,7 @@ export const AdminInstitutionEdit = fp.flow(withNavigation, withRouter)(class ex
          </FlexRow>
         <FlexRow style={{justifyContent: 'flex-start', marginRight: '1rem'}}>
           <div>
-            <Button type='secondary' onClick={goBack} style={{marginRight: '1.5rem'}}>Cancel</Button>
+            <Button type='secondary' onClick={() => goBack()} style={{marginRight: '1.5rem'}}>Cancel</Button>
             <TooltipTrigger data-test-id='tooltip' content={
               errors && this.disableSave(errors) && <div>Answer required fields
                 <BulletAlignedUnorderedList>
@@ -750,7 +750,7 @@ export const AdminInstitutionEdit = fp.flow(withNavigation, withRouter)(class ex
         </FlexRow>
         {this.state.showBackButtonWarning && <SaveErrorModal
             onFinish={() => this.setState({showBackButtonWarning: false})}
-            onContinue={goBack}
+            onContinue={() => goBack()}
         />}
         {this.state.showApiError && <ApiErrorModal
             errorMsg={this.state.apiErrorMsg}
