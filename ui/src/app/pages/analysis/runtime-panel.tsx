@@ -162,7 +162,8 @@ const styles = reactStyles({
   }
 });
 
-const MIN_DISK_SIZE_GB = 60;
+// exported for testing
+export const MIN_DISK_SIZE_GB = 80;
 
 const defaultMachineName = 'n1-standard-4';
 const defaultMachineType: Machine = findMachineByName(defaultMachineName);
