@@ -45,6 +45,7 @@ import {
   CompoundRuntimeOpStore,
   compoundRuntimeOpStore, GenomicExtractionStore, genomicExtractionStore,
   routeDataStore,
+  runtimeStore,
   RuntimeStore,
   serverConfigStore, updateGenomicExtractionStore,
   withStore
@@ -69,6 +70,7 @@ import {
   Criteria, GenomicExtractionJob,
   ParticipantCohortStatus,
   ResourceType,
+  RuntimeError,
   RuntimeStatus, TerraJobStatus,
   WorkspaceAccessLevel
 } from 'generated/fetch';
@@ -76,6 +78,7 @@ import {
 import arrowLeft from 'assets/icons/arrow-left-regular.svg';
 import runtime from 'assets/icons/thunderstorm-solid.svg';
 import times from 'assets/icons/times-light.svg';
+import { RuntimeErrorModal } from './runtime-error-modal';
 
 export const LOCAL_STORAGE_KEY_SIDEBAR_STATE = 'WORKSPACE_SIDEBAR_STATE';
 
@@ -244,7 +247,8 @@ interface Props extends NavigationProps {
 enum CurrentModal {
   None,
   Share,
-  Delete
+  Delete,
+  RuntimeError
 }
 
 interface State {
@@ -255,6 +259,7 @@ interface State {
   showCriteria: boolean;
   tooltipId: number;
   currentModal: CurrentModal;
+  runtimeErrors: Array<RuntimeError>;
 }
 
 export const HelpSidebar = fp.flow(
@@ -278,7 +283,8 @@ export const HelpSidebar = fp.flow(
         searchTerm: '',
         showCriteria: false,
         tooltipId: undefined,
-        currentModal: CurrentModal.None
+        currentModal: CurrentModal.None,
+        runtimeErrors: null
       };
     }
 
@@ -417,6 +423,22 @@ export const HelpSidebar = fp.flow(
       this.subscriptions.push(routeDataStore.subscribe((newRoute, oldRoute) => {
         if (!fp.isEmpty(oldRoute) && !fp.isEqual(newRoute, oldRoute)) {
           this.setActiveIcon(null);
+        }
+      }));
+      this.subscriptions.push(runtimeStore.subscribe((newRuntime, oldRuntime) => {
+        // If the runtime status has changed from something that is not Error to Error,
+        // and we have error messages, show the error modal.
+        if (
+            newRuntime.runtimeLoaded
+            && newRuntime.workspaceNamespace === this.props.workspace.namespace
+            && newRuntime.runtime.status === RuntimeStatus.Error
+            && (!oldRuntime.runtime || oldRuntime.runtime.status !== RuntimeStatus.Error)
+            && newRuntime.runtime.errors
+        ) {
+          this.setState({
+            currentModal: CurrentModal.RuntimeError,
+            runtimeErrors: newRuntime.runtime.errors
+          });
         }
       }));
 
@@ -797,7 +819,7 @@ export const HelpSidebar = fp.flow(
     }
 
     render() {
-      const {activeIcon} = this.state;
+      const {activeIcon, runtimeErrors} = this.state;
       const sidebarContent = this.sidebarContent(activeIcon);
       const shouldRenderWorkspaceMenu = !this.iconConfig('concept').showIcon() && !this.iconConfig('criteria').showIcon();
 
@@ -889,7 +911,12 @@ export const HelpSidebar = fp.flow(
             [CurrentModal.Delete, () => <ConfirmDeleteModal closeFunction={() => this.setState({currentModal: CurrentModal.None})}
                                                             resourceType={ResourceType.WORKSPACE}
                                                             receiveDelete={() => this.deleteWorkspace()}
-                                                            resourceName={this.props.workspace.name}/>]
+                                                            resourceName={this.props.workspace.name}/>],
+            [CurrentModal.RuntimeError, () => <RuntimeErrorModal
+                closeFunction={() => this.setState({currentModal: CurrentModal.None})}
+                openRuntimePanel={() => this.setActiveIcon('runtime')}
+                errors={runtimeErrors}
+              />]
           )
         }
       </div>;
