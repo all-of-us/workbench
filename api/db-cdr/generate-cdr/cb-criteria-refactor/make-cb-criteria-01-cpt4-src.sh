@@ -182,7 +182,7 @@ FROM
                             and parent_id != 0
                             and is_group = 1
                     ) a
-                LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.prep_cpt_ancestor\` b on a.id = b.ancestor_id
+                LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.$TBL_ANC\` b on a.id = b.ancestor_id
             ) e
         LEFT JOIN
             (
@@ -213,7 +213,8 @@ WHERE type = 'CPT4'
                     WHERE type = 'CPT4'
                 )
         )"
-wait
+#wait for process to end before copying
+wait $!
 ## copy temp tables back to main tables, and delete temp?
 if [[ "$RUN_PARALLEL" == "mult" ]]; then
   cpToMain "$TBL_CBC" &
