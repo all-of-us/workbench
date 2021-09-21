@@ -594,7 +594,7 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
         <div style={styles.pleaseComplete}>
           Please complete the necessary steps to gain access to the <AoU/> datasets.
         </div>
-        <Iframe frameBorder={10} url={rasLogoutUrl}/>}
+        <Iframe frameBorder={10} url={rasLogoutUrl}/>
         <RegisteredTierCard activeModule={activeModule} spinnerProps={spinnerProps}/>
         {/* TODO RW-7059 - Step 2 ControlledTierCard */}
         <DuccCard activeModule={activeModule} spinnerProps={spinnerProps}/>
