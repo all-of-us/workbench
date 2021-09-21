@@ -36,6 +36,7 @@ import {useNavigation} from 'app/utils/navigation';
 import {profileStore, serverConfigStore, useStore} from 'app/utils/stores';
 import {AccessModule, AccessModuleStatus, Profile} from 'generated/fetch';
 import {TwoFactorAuthModal} from './two-factor-auth-modal';
+import Iframe from 'react-iframe';
 
 const styles = reactStyles({
   headerFlexColumn: {
@@ -206,11 +207,10 @@ const styles = reactStyles({
 });
 
 // in display order
-// TODO(RW-7301): Swap RAS and eRA order back.
 const rtModules = [
   AccessModule.TWOFACTORAUTH,
-  AccessModule.ERACOMMONS,
   AccessModule.RASLINKLOGINGOV,
+  AccessModule.ERACOMMONS,
   AccessModule.COMPLIANCETRAINING,
 ];
 
@@ -541,6 +541,9 @@ const DuccCard = (props: {activeModule: AccessModule, spinnerProps: WithSpinnerO
 export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerProps: WithSpinnerOverlayProps) => {
   const {profile, reload} = useStore(profileStore);
 
+  // whether user finishes RAS login.
+  const [rasLoggedIn, setRasLoggedIn] = useState(false);
+
   useEffect(() => {
     spinnerProps.hideSpinner();
   }, []);
@@ -558,6 +561,7 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
   useEffect(() => {
     if (code) {
       handleRasCallback(code, spinnerProps, reload);
+      setRasLoggedIn(true);
     }
   }, [code]);
 
@@ -575,7 +579,7 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
     }
   }, [profile]);
 
-  const {config: {unsafeAllowSelfBypass}} = useStore(serverConfigStore);
+  const {config: {unsafeAllowSelfBypass, rasLogoutUrl}} = useStore(serverConfigStore);
 
   return <FlexColumn style={styles.pageWrapper}>
       <DARHeader/>
@@ -590,6 +594,7 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
         <div style={styles.pleaseComplete}>
           Please complete the necessary steps to gain access to the <AoU/> datasets.
         </div>
+        {rasLoggedIn && <Iframe frameBorder={10} url={rasLogoutUrl}/>}
         <RegisteredTierCard activeModule={activeModule} spinnerProps={spinnerProps}/>
         {/* TODO RW-7059 - Step 2 ControlledTierCard */}
         <DuccCard activeModule={activeModule} spinnerProps={spinnerProps}/>

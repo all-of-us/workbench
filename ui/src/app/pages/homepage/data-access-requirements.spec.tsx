@@ -77,7 +77,7 @@ describe('DataAccessRequirements', () => {
         expect(activeModule).toEqual(AccessModule.TWOFACTORAUTH)
     });
 
-    it('should return the second module (ERA) from getActiveModule when the first module (2FA) has been completed', () => {
+    it('should return the second module (RAS) from getActiveModule when the first module (2FA) has been completed', () => {
         const testProfile = {
             ...profile,
             accessModules: {
@@ -93,7 +93,7 @@ describe('DataAccessRequirements', () => {
         expect(activeModule).toEqual(enabledModules[1]);
 
         // update this if the order changes
-        expect(activeModule).toEqual(AccessModule.ERACOMMONS)
+        expect(activeModule).toEqual(AccessModule.RASLINKLOGINGOV)
     });
 
     // update this if the order changes
@@ -118,14 +118,11 @@ describe('DataAccessRequirements', () => {
         // 2FA (module 0) is complete, so enabled #1 is active
         expect(activeModule).toEqual(enabledModules[1]);
 
-        // eRA is the next module.
-        expect(activeModule).toEqual(allModules[1]);
-        // TODO(RW-7301): Revert this back.
-        // // but we skip allModules[1] because it's RAS and is not enabled
-        // expect(activeModule).toEqual(allModules[2]);
+        // but we skip allModules[1] because it's RAS and is not enabled
+        expect(activeModule).toEqual(allModules[2]);
     });
 
-    it('should return the second module (ERA) from getActiveModule when the first module (2FA) has been bypassed', () => {
+    it('should return the second module (RAS) from getActiveModule when the first module (2FA) has been bypassed', () => {
         const testProfile = {
             ...profile,
             accessModules: {
@@ -141,7 +138,7 @@ describe('DataAccessRequirements', () => {
         expect(activeModule).toEqual(enabledModules[1]);
 
         // update this if the order changes
-        expect(activeModule).toEqual(AccessModule.ERACOMMONS)
+        expect(activeModule).toEqual(AccessModule.RASLINKLOGINGOV)
     });
 
     it('should return undefined from getActiveModule when all modules have been completed', () => {
