@@ -453,7 +453,6 @@ export const useRuntimeStatus = (currentWorkspaceNamespace, currentGoogleProject
           await LeoRuntimeInitializer.initialize({
             workspaceNamespace: currentWorkspaceNamespace,
             maxCreateCount: 0,
-            maxDeleteCount: 0,
             resolutionCondition: (r) => resolutionCondition(r)
           });
         } catch (e) {
