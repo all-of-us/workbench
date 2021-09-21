@@ -181,6 +181,7 @@ FROM
                         WHERE type = 'CPT4'
                             and parent_id != 0
                             and is_group = 1
+                            and id > $CB_CRITERIA_START_ID and id < $CB_CRITERIA_END_ID
                     ) a
                 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.$TBL_ANC\` b on a.id = b.ancestor_id
             ) e
@@ -192,6 +193,7 @@ FROM
                 WHERE c.type = 'CPT4'
                     and c.is_selectable = 1
                     and d.is_standard = 0
+                    and c.id > $CB_CRITERIA_START_ID and c.id < $CB_CRITERIA_END_ID
             ) f on e.descendant_id = f.id
         GROUP BY 1
     ) y
@@ -211,6 +213,7 @@ WHERE type = 'CPT4'
                     SELECT parent_id + $CB_CRITERIA_START_ID
                     FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
                     WHERE type = 'CPT4'
+                      and id > $CB_CRITERIA_START_ID and id < $CB_CRITERIA_END_ID
                 )
         )"
 #wait for process to end before copying
