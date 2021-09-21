@@ -573,6 +573,10 @@ export const useCustomRuntime = (currentWorkspaceNamespace, detachablePd):
               await disksApi().updateDisk(currentWorkspaceNamespace, diskStore.get().persistentDisk.name,
                 requestedRuntime.gceWithPdConfig.persistentDisk.size);
             }
+          } else if (runtime.status === RuntimeStatus.Error) {
+            await runtimeApi().deleteRuntime(currentWorkspaceNamespace, false, {
+              signal: aborter.signal
+            });
           } else {
             // There are no differences, no extra requests needed
           }

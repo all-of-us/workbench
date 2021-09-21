@@ -1302,8 +1302,8 @@ const RuntimePanel = fp.flow(
 
   const runningCostValidatorWithMessage = () => {
     const maxRunningCost = workspace.billingAccountType === BillingAccountType.FREETIER
-      ? 2500
-      : 15000;
+      ? 25
+      : 150;
     const message = costErrorsAsWarnings
       ? '^Your runtime is expensive. Are you sure you wish to proceed?'
       : `^Your runtime is too expensive. To proceed using free credits, reduce your running costs below $${maxRunningCost}/hr.`;
