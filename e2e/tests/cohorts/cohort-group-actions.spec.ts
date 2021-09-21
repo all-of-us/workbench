@@ -186,9 +186,9 @@ describe('Build cohort page actions', () => {
     expect((await group1.findGroupCriteriaList()).length).toBe(2);
     totalCount = await cohortBuildPage.getTotalCount(); // New Total Count by 2 criteria.
 
-    // Rename Criteria: rename "Whole Genome Variant" to "NDA Sets".
+    // Rename Criteria: rename "Whole Genome Sequence" to "NDA Sets".
     const newCriteriaName = 'DNA Sets';
-    await group1.editCriteriaName('Whole Genome Variant', newCriteriaName);
+    await group1.editCriteriaName('Whole Genome Sequence', newCriteriaName);
     // New criteria name is visible in page.
     await page.waitForXPath(group1.getCriteriaXpath(newCriteriaName), { visible: true });
 
