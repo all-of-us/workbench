@@ -2,7 +2,7 @@ import * as fp from 'lodash/fp';
 import {Dropdown} from 'primereact/dropdown';
 import {InputSwitch} from 'primereact/inputswitch';
 import * as React from 'react';
-import { RouteComponentProps, withRouter } from 'react-router-dom';
+import {RouteComponentProps, withRouter} from 'react-router-dom';
 import validate from 'validate.js';
 
 import {Button} from 'app/components/buttons';
@@ -40,7 +40,7 @@ import {
   updateRtEmailAddresses,
   updateRtEmailDomains,
 } from 'app/utils/institutions';
-import {NavigationProps, useNavigation} from 'app/utils/navigation';
+import {NavigationProps} from 'app/utils/navigation';
 import {MatchParams, serverConfigStore, useStore} from 'app/utils/stores';
 import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {
@@ -105,11 +105,6 @@ enum InstitutionMode {
   ADD,
   EDIT
 }
-
-const backNavigate = () => {
-  const [navigate, ] = useNavigation();
-  navigate(['admin', 'institution']);
-};
 
 const EraRequiredSwitch = (props: {tierConfig: InstitutionTierConfig, onChange: (boolean) => void}) => {
   const {tierConfig, onChange} = props;
@@ -534,6 +529,10 @@ export const AdminInstitutionEdit = fp.flow(withNavigation, withRouter)(class ex
         || this.state.invalidCtEmailAddress || this.state.invalidCtEmailDomain;
   }
 
+  backNavigate() {
+    this.props.navigate(['admin', 'institution']);
+  }
+  
   async saveInstitution() {
     const {institution, institutionMode} = this.state;
     const rtConfig: InstitutionTierConfig = getRegisteredTierConfig(institution);
@@ -564,11 +563,11 @@ export const AdminInstitutionEdit = fp.flow(withNavigation, withRouter)(class ex
 
     if (institutionMode === InstitutionMode.EDIT) {
       await institutionApi().updateInstitution(this.props.match.params.institutionId, institution)
-        .then(value => backNavigate())
+        .then(() => this.backNavigate())
         .catch(reason => this.handleError(reason));
     } else {
       await institutionApi().createInstitution(institution)
-        .then(value => backNavigate())
+        .then(() => this.backNavigate())
         .catch(reason => this.handleError(reason));
     }
   }
@@ -590,7 +589,7 @@ export const AdminInstitutionEdit = fp.flow(withNavigation, withRouter)(class ex
     if (!this.fieldsNotEdited()) {
       this.setState({showBackButtonWarning: true});
     } else {
-      backNavigate();
+      this.backNavigate();
     }
   }
 
@@ -729,7 +728,7 @@ export const AdminInstitutionEdit = fp.flow(withNavigation, withRouter)(class ex
          </FlexRow>
         <FlexRow style={{justifyContent: 'flex-start', marginRight: '1rem'}}>
           <div>
-            <Button type='secondary' onClick={backNavigate} style={{marginRight: '1.5rem'}}>Cancel</Button>
+            <Button type='secondary' onClick={() => this.backNavigate()} style={{marginRight: '1.5rem'}}>Cancel</Button>
             <TooltipTrigger data-test-id='tooltip' content={
               errors && this.disableSave(errors) && <div>Answer required fields
                 <BulletAlignedUnorderedList>
@@ -751,7 +750,7 @@ export const AdminInstitutionEdit = fp.flow(withNavigation, withRouter)(class ex
         </FlexRow>
         {this.state.showBackButtonWarning && <SaveErrorModal
             onFinish={() => this.setState({showBackButtonWarning: false})}
-            onContinue={backNavigate}
+            onContinue={() => this.backNavigate()}
         />}
         {this.state.showApiError && <ApiErrorModal
             errorMsg={this.state.apiErrorMsg}
