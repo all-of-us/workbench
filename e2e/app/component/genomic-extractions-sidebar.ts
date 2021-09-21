@@ -29,4 +29,37 @@ export default class GenomicExtractionsSidebar extends BaseHelpSidebar {
   getHistoryTable(): DataTable {
     return new DataTable(this.page, { container: this });
   }
+
+  // Extraction status icon.
+  async existStatusIcon(timeout?: number): Promise<boolean> {
+    const extractionStatusSpinner = '//*[@data-test-id="extraction-status-icon-container"]/*[@data-icon="sync-alt"]';
+    return this.page
+      .waitForXPath(extractionStatusSpinner, { visible: true, timeout })
+      .then(() => {
+        return true;
+      })
+      .catch(() => {
+        return false;
+      });
+  }
+
+  /**
+   * Open sidebar, check for status finished.
+   */
+  async waitForGenomicDataExtractionDone(timeout?: number): Promise<boolean> {
+    const sidebar = new GenomicExtractionsSidebar(this.page);
+    await sidebar.open();
+    try {
+      const table = sidebar.getHistoryTable();
+      await table.waitUntilVisible();
+      await this.page.waitForXPath(`${table.getXpath()}//*[@data-icon="check-circle" and @role="img"]`, {
+        visible: true,
+        timeout
+      });
+    } catch (err) {
+      return false;
+    } finally {
+      await sidebar.close();
+    }
+  }
 }

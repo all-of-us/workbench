@@ -134,7 +134,7 @@ export default class RuntimePanel extends BaseHelpSidebar {
   }
 
   buildStatusIconDataTestId = (startStopIconState: StartStopIconState): string => {
-    return `runtime-status-icon-${startStopIconState}`;
+    return `//*[@data-test-id="runtime-status-icon-${startStopIconState}"]`;
   };
 
   /**
@@ -147,18 +147,18 @@ export default class RuntimePanel extends BaseHelpSidebar {
     startStopIconState: StartStopIconState,
     timeout: number = 20 * 60 * 1000
   ): Promise<void> {
-    const xpath = `//*[@data-test-id="${this.buildStatusIconDataTestId(startStopIconState)}"]`;
+    const xpath = this.buildStatusIconDataTestId(startStopIconState);
     await this.page.waitForXPath(xpath, { visible: true, timeout });
   }
 
   async clickPauseRuntimeIcon(): Promise<void> {
-    const xpath = `//*[@data-test-id="${this.buildStatusIconDataTestId(StartStopIconState.Running)}"]`;
+    const xpath = this.buildStatusIconDataTestId(StartStopIconState.Running);
     const icon = new Button(this.page, xpath);
     await icon.click();
   }
 
   async clickResumeRuntimeIcon(): Promise<void> {
-    const xpath = `//*[@data-test-id="${this.buildStatusIconDataTestId(StartStopIconState.Stopped)}"]`;
+    const xpath = this.buildStatusIconDataTestId(StartStopIconState.Stopped);
     const icon = new Button(this.page, xpath);
     await icon.click();
   }
@@ -280,5 +280,46 @@ export default class RuntimePanel extends BaseHelpSidebar {
 
   getCustomizeButton(): Button {
     return Button.findByName(this.page, { normalizeSpace: LinkText.Customize }, this);
+  }
+
+  // runtime status spinner.
+  async existStatusIcon(timeout?: number): Promise<boolean> {
+    const runtimeStatusSpinner = '//*[@data-test-id="runtime-status-icon-container"]/*[@data-icon="sync-alt"]';
+    return this.page
+      .waitForXPath(runtimeStatusSpinner, { visible: true, timeout })
+      .then(() => {
+        return true;
+      })
+      .catch(() => {
+        return false;
+      });
+  }
+
+  /**
+   * Open Runtime sidebar, check status for running.
+   */
+  async waitForRunning(timeout?: number): Promise<boolean> {
+    const runtimeSidebar = new RuntimePanel(this.page);
+    await runtimeSidebar.open();
+    try {
+      await runtimeSidebar.waitForStartStopIconState(StartStopIconState.Running, timeout);
+      return true;
+    } catch (err) {
+      return false;
+    } finally {
+      await runtimeSidebar.close();
+    }
+  }
+
+  async isRunning(): Promise<boolean> {
+    const xpath = this.buildStatusIconDataTestId(StartStopIconState.Running);
+    return this.page
+      .waitForXPath(xpath, { visible: true, timeout: 1000 })
+      .then(() => {
+        return true;
+      })
+      .catch(() => {
+        return false;
+      });
   }
 }

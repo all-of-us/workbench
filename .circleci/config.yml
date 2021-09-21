@@ -542,6 +542,9 @@ jobs:
       optional_steps:
         type: steps
         default: []
+      no_output_timeout:
+        type: integer
+        default: 30m
     environment:
       WORKBENCH_ENV: << parameters.env_name >>
       TEST_MODE: << parameters.test_mode >>
@@ -584,7 +587,7 @@ jobs:
           command: |
             TESTS_FILE=$(circleci tests split --split-by=timings e2e_tests.txt)
             yarn test:ci $TESTS_FILE
-          no_output_timeout: 30m
+          no_output_timeout: << parameters.no_output_timeout >>
       - when:
           condition:
             equal: [ "test", << parameters.env_name >> ]
@@ -735,6 +738,8 @@ workflows:
           test_mode: "nightly-integration"
           optional_steps:
             - puppeteer-access-test-user-setup
+          # genomic-extraction-to-vcf.spec takes long time to run.
+          no_output_timeout: 60m
           requires:
             - puppeteer-env-setup
 

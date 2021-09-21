@@ -19,7 +19,6 @@ import NotebookPage from 'app/page/notebook-page';
 import { logger } from 'libs/logger';
 import { waitWhileLoading } from 'utils/waits-utils';
 import GenomicExtractionsSidebar from 'app/component/genomic-extractions-sidebar';
-import { getPropValue } from 'utils/element-utils';
 import { Page } from 'puppeteer';
 import { takeScreenshot } from 'utils/save-file-utils';
 
@@ -31,7 +30,9 @@ describe('Genomics Extraction Test', () => {
     await signInWithAccessToken(page);
   });
 
+  const maxWaitTime = 50 * 60 * 1000;
   const workspaceName = makeWorkspaceName();
+  const notebookName = makeRandomName('testPyNotebook');
 
   test('Create genomics dataset and export to notebook', async () => {
     await findOrCreateWorkspace(page, { cdrVersion: config.ALTERNATIVE_CDR_VERSION_NAME, workspaceName });
@@ -48,9 +49,9 @@ describe('Genomics Extraction Test', () => {
     let totalCount = await cohortBuildPage.getTotalCount();
     expect(group1Count).toEqual(totalCount);
 
-    // Group 2: Include Demographics Age. range: 18 - 20.
-    const minAge = 18;
-    const maxAge = 20;
+    // Group 2: Include Demographics Age. range: 20 - 21 to have smallest number of participants.
+    const minAge = 20;
+    const maxAge = 21;
     const group2 = cohortBuildPage.findIncludeParticipantsGroup('Group 2');
     await group2.includeAge(minAge, maxAge, MenuOption.CurrentAge);
 
@@ -58,7 +59,7 @@ describe('Genomics Extraction Test', () => {
     totalCount = await cohortBuildPage.getTotalCount();
 
     // Total Count should be 1.
-    expect(totalCount).toEqual(1);
+    expect(totalCount).toBeGreaterThanOrEqual(1);
 
     // Save cohort.
     const cohortName = await cohortBuildPage.createCohort();
@@ -82,16 +83,18 @@ describe('Genomics Extraction Test', () => {
     const createModal = await datasetPage.clickCreateButton();
     const datasetName = await createModal.createDataset();
 
-    // >>> CREATE RUNTIME.
+    // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    // CREATING NOTEBOOK RUNTIME.
 
     // Change runtime Compute Type to Dataproc Cluster.
     const runtimePanel = new RuntimePanel(page);
     await runtimePanel.open();
 
-    // Disk (GB) is not visible unless Compute Type is Dataproc Cluster.
-    expect(await runtimePanel.getDiskInput().exists()).toEqual(false);
-
-    await runtimePanel.clickButton(LinkText.Customize);
+    // If Customize button has been clicked and environment already exists, button won't be visible again.
+    const customizeButton = runtimePanel.getCustomizeButton();
+    if (await customizeButton.exists()) {
+      await runtimePanel.clickButton(LinkText.Customize);
+    }
 
     expect(await runtimePanel.getCpus()).toBe('4');
     expect(await runtimePanel.getRamGbs()).toBe('15');
@@ -108,13 +111,10 @@ describe('Genomics Extraction Test', () => {
     // Start creating runtime but NOT wait until finish.
     await createRuntime(page);
 
-    // spinner indicates runtime creation has started.
-    const runtimeStatusSpinner = '//*[@data-test-id="runtime-status-icon-container"]/*[@data-icon="sync-alt"]';
-    await page.waitForXPath(runtimeStatusSpinner, { visible: true });
+    // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    // EXTRACTING GENOMIC TO CREATE VCF FILES.
 
-    // >>> EXTRACT GENOMIC TO CREATE VCF FILES.
-
-    // Export to new notebook.
+    // Export genomic data to new notebook.
     const analyzeButton = datasetPage.getAnalyzeButton();
     await analyzeButton.waitUntilEnabled();
     await analyzeButton.click();
@@ -129,7 +129,6 @@ describe('Genomics Extraction Test', () => {
     const exportToNotebookModal = new ExportToNotebookModal(page);
     await exportToNotebookModal.waitForLoad();
 
-    const notebookName = makeRandomName();
     await exportToNotebookModal.enterNotebookName(notebookName);
     await exportToNotebookModal.pickLanguage(Language.Python);
     await exportToNotebookModal.pickAnalysisTool(AnalysisTool.Hail);
@@ -142,7 +141,7 @@ describe('Genomics Extraction Test', () => {
     const genomicExtractionsHistorySidebar = new GenomicExtractionsSidebar(page);
     await genomicExtractionsHistorySidebar.open();
 
-    let historyTable = genomicExtractionsHistorySidebar.getHistoryTable();
+    const historyTable = genomicExtractionsHistorySidebar.getHistoryTable();
     await historyTable.waitUntilVisible();
 
     // Verify table column names.
@@ -155,32 +154,18 @@ describe('Genomics Extraction Test', () => {
     const rowCount = await historyTable.getRowCount();
     expect(rowCount).toEqual(1);
 
-    // Verify dataset name in row 1 : column 1.
-    const td1 = await historyTable.getCell(1, 1);
-    const cellValue = await getPropValue(td1, 'textContent');
-    expect(cellValue).toEqual(datasetName);
+    // Verify dataset name.
+    const tableCellValue = await historyTable.getColumnValue('Dataset Name');
+    expect(tableCellValue).toEqual(datasetName);
+
     await genomicExtractionsHistorySidebar.close();
 
-    // spinner indicates extraction has started.
-    const extractionStatusSpinner = '//*[@data-test-id="extraction-status-icon-container"]/*[@data-icon="sync-alt"]';
-    await page.waitForXPath(extractionStatusSpinner, { visible: true });
+    // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    // LONG WAIT: Wait for VCF files extraction and runtime creation to finish.
+    await waitForDone(page, maxWaitTime);
 
-    // LONG WAIT: Wait for VCF files and runtime to finish. 50 minutes is the max time.
-    await waitWhileLoading(page, 50 * 60 * 1000, { waitForRuntime: true });
-
-    // Verify both runtime and vcf files are created successfully.
-    await checkRuntimeRunning(page);
-
-    historyTable = genomicExtractionsHistorySidebar.getHistoryTable();
-    await historyTable.waitUntilVisible();
-    const td2 = await historyTable.getCell(1, 2);
-    const checkImg = await td2.$x('.//*[@data-icon="check-circle" and @role="img"]');
-    expect(checkImg).toBeTruthy();
-
-    // Take a screenshot for manual checking in case test has failed.
-    await takeScreenshot(page, 'genomic-extraction-history-sidebar.png');
-
-    // Run all notebook code.
+    // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    // RUN NOTEBOOK CODE.
     const notebookPage = await notebookPreviewPage.openEditMode(notebookName);
 
     // We run code cell one by one in order to verify code output.
@@ -206,16 +191,39 @@ describe('Genomics Extraction Test', () => {
     logger.info('Creating runtime');
     const runtimeSidebar = new RuntimePanel(page);
     await runtimeSidebar.open();
+    const isRunning = await runtimeSidebar.isRunning();
+    if (isRunning) {
+      return;
+    }
     await runtimeSidebar.waitForStartStopIconState(StartStopIconState.None);
     await runtimeSidebar.clickButton(LinkText.Create);
     await runtimeSidebar.waitUntilClose();
   }
 
-  async function checkRuntimeRunning(page: Page): Promise<void> {
+  // Check creation status.
+  async function waitForDone(page: Page, maxTime: number): Promise<boolean> {
     const runtimeSidebar = new RuntimePanel(page);
+    const genomicSidebar = new GenomicExtractionsSidebar(page);
+    const startTime = Date.now();
+    while (Date.now() - startTime <= maxTime) {
+      await waitWhileLoading(page, 60 * 1000, { waitForRuntime: true }).catch(() => {
+        // Leave blank.
+      });
+      const isRuntimeReady = await runtimeSidebar.waitForRunning(30 * 1000);
+      const isExtractionReady = await genomicSidebar.waitForGenomicDataExtractionDone(30 * 1000);
+      if (isRuntimeReady && isExtractionReady) {
+        return true;
+      }
+    }
+    // Take screenshot for manual checking.
     await runtimeSidebar.open();
-    await runtimeSidebar.waitForStartStopIconState(StartStopIconState.Running);
+    await takeScreenshot(page, 'genomic-extraction-test-runtime-sidebar.png');
     await runtimeSidebar.close();
-    logger.info('Runtime is running');
+
+    await genomicSidebar.open();
+    await takeScreenshot(page, 'genomic-extraction-test-history-sidebar.png');
+    await genomicSidebar.close();
+
+    throw new Error('runtime is not running or/and genomic extraction is not done.');
   }
 });

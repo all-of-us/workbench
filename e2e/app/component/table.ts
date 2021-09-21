@@ -4,7 +4,7 @@ import { getPropValue } from 'utils/element-utils';
 
 export default class Table extends Container {
   private trXpath: string = this.xpath + '//tbody/tr';
-  private theadXpath: string = this.xpath + '/thead/tr/th';
+  private theadXpath: string = this.xpath + '//thead/tr/th';
 
   constructor(page: Page, xpath: string, container?: Container) {
     super(page, container === undefined ? xpath : `${container.getXpath()}${xpath}`);
@@ -77,17 +77,44 @@ export default class Table extends Container {
     return columnNames;
   }
 
-  async getColumnIndex(columName: string): Promise<number> {
+  async getColumnIndex(columnName: string): Promise<number> {
+    // Make sure column is visible.
+    const columnXpath =
+      `${this.theadXpath}[.//*[contains(normalize-space(text()), "${columnName}")]]` + '/span[@class="p-column-title"]';
+    console.log(`columnIndexXpath: ${columnXpath}`);
+    await this.page.waitForXPath(columnXpath, { visible: true });
+    // Get column index.
     const indexXpath =
-      `count(${this.theadXpath}[contains(normalize-space(text()), "${columName}")]` + '/preceding-sibling::*)';
-    const handle = await this.page.waitForXPath(indexXpath, { visible: true });
+      `count(${this.theadXpath}[normalize-space(.)="${columnName}"]/preceding-sibling::th) + 1`;
+    console.log(`indexXpath: ${indexXpath}`);
+/*
+    const value = await this.page.evaluate((xpath) => {
+      const element = document.evaluate(xpath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null)
+        .singleNodeValue;
+      return element.textContent;
+    }, indexXpath);
+*/
+    const handle = await this.page.waitForXPath(indexXpath);
+    console.log(`handle: ${handle}`);
     const value = await handle.jsonValue();
+    console.log(`value: ${value}`);
     return Number(value.toString());
   }
 
   async getHeaderCell(columnIndex: number): Promise<ElementHandle> {
     const cellXpath = this.getHeaderXpath(columnIndex);
     return this.page.waitForXPath(cellXpath, { visible: true });
+  }
+
+  async getColumnValue(columnName: string, rowIndex = 1): Promise<string> {
+    const rows = await this.getRowCount();
+    if (rows === 0) {
+      throw new Error('Genomic Extraction History table is empty in Genomic Extraction sidebar.');
+    }
+    const columnIndex = await this.getColumnIndex(columnName);
+    console.log(`columnIndex: ${columnIndex}`);
+    // Verify dataset name in row:column.
+    return this.getCellValue(rowIndex, columnIndex + 1);
   }
 
   getCellXpath(rowIndex: number, columnIndex: number): string {

@@ -176,7 +176,7 @@ export const SelectConceptSetCheckBox = {
   FitbitHeartRateLevel: 'Fitbit Heart Rate Level',
   FitbitHeartRateSummary: 'Fitbit Heart Rate Summary',
   FitbitIntraDaySteps: 'Fitbit Intra Day Steps',
-  WholeGenomeSequenceVariantData: 'All whole genome sequence variant data'
+  WholeGenomeSequenceVariantData: 'Whole Genome Sequencing Data'
 };
 
 export const SelectValueCheckBox = {
