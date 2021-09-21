@@ -532,7 +532,7 @@ export const AdminInstitutionEdit = fp.flow(withNavigation, withRouter)(class ex
   backNavigate() {
     this.props.navigate(['admin', 'institution']);
   }
-  
+
   async saveInstitution() {
     const {institution, institutionMode} = this.state;
     const rtConfig: InstitutionTierConfig = getRegisteredTierConfig(institution);
