@@ -27,7 +27,6 @@ class CloudSqlProxyContext < ServiceAccountContext
           common.warning "found and killed existing cloud sql proxy docker service"
         end
         docker_container_id = common.capture_stdout(%W{docker run -d
-             -u #{ENV["UID"]}
              -v #{@keyfile_path}:/config
              -p 0.0.0.0:3307:3307
              --rm
