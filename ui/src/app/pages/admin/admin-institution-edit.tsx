@@ -295,7 +295,7 @@ export const AdminInstitutionEdit = fp.flow(withNavigation, withRouter)(class ex
         organizationTypeEnum: null,
         tierConfigs: [{
           ...defaultTierConfig(AccessTierShortNames.Registered),
-          membershipRequirement: InstitutionMembershipRequirement.DOMAINS,
+          membershipRequirement: null,  // the default is NOACCESS which also means "don't render the card"
         }]
       },
       institutionToEdit: null,

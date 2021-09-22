@@ -550,9 +550,7 @@ describe('AdminInstitutionEditSpec - add mode', () => {
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper).toBeTruthy();
 
-    expect(wrapper.find('[data-test-id="registered-email-domain-input"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-id="registered-email-domain-input"]').first().prop('value')).toBe('');
-
+    expect(wrapper.find('[data-test-id="registered-email-domain-input"]').exists()).toBeFalsy();
     expect(wrapper.find('[data-test-id="registered-email-address-input"]').exists()).toBeFalsy();
     expect(wrapper.find('[data-test-id="controlled-email-address-input"]').exists()).toBeFalsy();
     expect(wrapper.find('[data-test-id="controlled-email-domain-input"]').exists()).toBeFalsy();
