@@ -550,21 +550,30 @@ describe('AdminInstitutionEditSpec - add mode', () => {
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper).toBeTruthy();
 
-    expect(wrapper.find('[data-test-id="registered-email-address-input"]').length).toBe(0);
-    expect(wrapper.find('[data-test-id="registered-email-domain-input"]').length).toBe(0);
-    expect(wrapper.find('[data-test-id="controlled-email-address-input"]').length).toBe(0);
-    expect(wrapper.find('[data-test-id="controlled-email-domain-input"]').length).toBe(0);
+    expect(wrapper.find('[data-test-id="registered-email-domain-input"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-id="registered-email-domain-input"]').first().prop('value')).toBe('');
+
+    expect(wrapper.find('[data-test-id="registered-email-address-input"]').exists()).toBeFalsy();
+    expect(wrapper.find('[data-test-id="controlled-email-address-input"]').exists()).toBeFalsy();
+    expect(wrapper.find('[data-test-id="controlled-email-domain-input"]').exists()).toBeFalsy();
 
     const agreementTypeDropDown = wrapper.find('[data-test-id="registered-agreement-dropdown"]').instance() as Dropdown;
-    await simulateComponentChange(wrapper, agreementTypeDropDown, InstitutionMembershipRequirement.DOMAINS);
+    await simulateComponentChange(wrapper, agreementTypeDropDown, InstitutionMembershipRequirement.ADDRESSES);
 
-    wrapper.find('[data-test-id="registered-email-domain-input"]').first()
-        .simulate('change', {target: {value: 'domain.com'}});
-    wrapper.find('[data-test-id="registered-email-domain-input"]').first()
+    expect(wrapper.find('[data-test-id="registered-email-address-input"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-id="registered-email-address-input"]').first().prop('value')).toBe('');
+
+    expect(wrapper.find('[data-test-id="registered-email-domain-input"]').exists()).toBeFalsy();
+    expect(wrapper.find('[data-test-id="controlled-email-address-input"]').exists()).toBeFalsy();
+    expect(wrapper.find('[data-test-id="controlled-email-domain-input"]').exists()).toBeFalsy();
+
+    wrapper.find('[data-test-id="registered-email-address-input"]').first()
+        .simulate('change', {target: {value: 'user@domain.com'}});
+    wrapper.find('[data-test-id="registered-email-address-input"]').first()
         .simulate('blur');
 
     // RT no change
-    expect(wrapper.find('[data-test-id="registered-email-domain-input"]').first().prop('value'))
-        .toBe('domain.com');
+    expect(wrapper.find('[data-test-id="registered-email-address-input"]').first().prop('value'))
+        .toBe('user@domain.com');
   });
 });
