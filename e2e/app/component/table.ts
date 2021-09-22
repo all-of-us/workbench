@@ -78,26 +78,10 @@ export default class Table extends Container {
   }
 
   async getColumnIndex(columnName: string): Promise<number> {
-    // Make sure column is visible.
-    const columnXpath =
-      `${this.theadXpath}[.//*[contains(normalize-space(text()), "${columnName}")]]` + '/span[@class="p-column-title"]';
-    console.log(`columnIndexXpath: ${columnXpath}`);
-    await this.page.waitForXPath(columnXpath, { visible: true });
-    // Get column index.
     const indexXpath =
-      `count(${this.theadXpath}[normalize-space(.)="${columnName}"]/preceding-sibling::th) + 1`;
-    console.log(`indexXpath: ${indexXpath}`);
-/*
-    const value = await this.page.evaluate((xpath) => {
-      const element = document.evaluate(xpath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null)
-        .singleNodeValue;
-      return element.textContent;
-    }, indexXpath);
-*/
-    const handle = await this.page.waitForXPath(indexXpath);
-    console.log(`handle: ${handle}`);
+      `count(${this.theadXpath}[contains(normalize-space(text()), "${columnName}")]` + '/preceding-sibling::*)';
+    const handle = await this.page.waitForXPath(indexXpath, { visible: true });
     const value = await handle.jsonValue();
-    console.log(`value: ${value}`);
     return Number(value.toString());
   }
 

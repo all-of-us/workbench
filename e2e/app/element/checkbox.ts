@@ -20,12 +20,7 @@ export default class Checkbox extends BaseElement {
    * Checked means element does not have "checked" property.
    */
   async isChecked(): Promise<boolean> {
-    try {
-      return this.getProperty<boolean>('checked');
-    } catch (err) {
-      // TEMPORARY WORKAROUND: attr "checked" is not found.
-      return true;
-    }
+    return this.getProperty<boolean>('checked');
   }
 
   /**

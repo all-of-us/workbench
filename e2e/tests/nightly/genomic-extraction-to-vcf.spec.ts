@@ -15,12 +15,11 @@ import GenomicsVariantExtractConfirmationModal from 'app/modal/genomic-variant-e
 import ExportToNotebookModal from 'app/modal/export-to-notebook-modal';
 import RuntimePanel, { ComputeType, StartStopIconState } from 'app/component/runtime-panel';
 import NotebookPreviewPage from 'app/page/notebook-preview-page';
-import NotebookPage from 'app/page/notebook-page';
 import { logger } from 'libs/logger';
-import { waitWhileLoading } from 'utils/waits-utils';
 import GenomicExtractionsSidebar from 'app/component/genomic-extractions-sidebar';
 import { Page } from 'puppeteer';
 import { takeScreenshot } from 'utils/save-file-utils';
+import expect from 'expect';
 
 // 60 minutes. Test could take a long time.
 jest.setTimeout(60 * 60 * 1000);
@@ -122,7 +121,7 @@ describe('Genomics Extraction Test', () => {
     // Confirm Extract Genomics Variant Data to VCF files.
     const confirmationModal = new GenomicsVariantExtractConfirmationModal(page);
     await confirmationModal.waitForLoad();
-    const continueButton = await confirmationModal.getContinueButton();
+    const continueButton = confirmationModal.getContinueButton();
     await continueButton.click();
 
     // Fill out Export to Notebook modal.
@@ -154,41 +153,34 @@ describe('Genomics Extraction Test', () => {
     const rowCount = await historyTable.getRowCount();
     expect(rowCount).toEqual(1);
 
-    // Verify dataset name.
-    const tableCellValue = await historyTable.getColumnValue('Dataset Name');
+    // Verify dataset name (Column #1 is 'Dataset Name').
+    const tableCellValue = await historyTable.getCellValue(1, 1);
     expect(tableCellValue).toEqual(datasetName);
 
     await genomicExtractionsHistorySidebar.close();
 
     // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     // LONG WAIT: Wait for VCF files extraction and runtime creation to finish.
-    await waitForDone(page, maxWaitTime);
+    await waitForComplete(page, maxWaitTime);
 
     // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     // RUN NOTEBOOK CODE.
     const notebookPage = await notebookPreviewPage.openEditMode(notebookName);
+    // Run all cells. Run one cell at a time is slower.
+    await notebookPage.selectRunAllCellsMenu();
+    await notebookPage.waitForKernelIdle(5 * 60 * 1000, 2000);
 
-    // We run code cell one by one in order to verify code output.
-    await runCell(notebookPage, 1);
+    // Find any output_error.
+    const frame = await notebookPage.getIFrame();
+    const existError = (await frame.$$('.cell.code_cell .output_subarea.output_error')).length > 0 ? true : false;
+    expect(existError).toBe(false);
 
-    await runCell(notebookPage, 2);
-
-    await runCell(notebookPage, 3);
-
-    await runCell(notebookPage, 4);
-
-    await runCell(notebookPage, 5);
+    // Clean up.
+    await notebookPage.deleteNotebook(notebookName);
+    await runtimePanel.deleteRuntime();
   });
 
-  async function runCell(notebookPage: NotebookPage, cellIndex = 1, timeout?: number): Promise<string> {
-    const cell = await notebookPage.findCell(cellIndex);
-    await cell.focus();
-    await notebookPage.run(timeout);
-    return cell.waitForOutput(timeout);
-  }
-
   async function createRuntime(page: Page): Promise<void> {
-    logger.info('Creating runtime');
     const runtimeSidebar = new RuntimePanel(page);
     await runtimeSidebar.open();
     const isRunning = await runtimeSidebar.isRunning();
@@ -201,17 +193,21 @@ describe('Genomics Extraction Test', () => {
   }
 
   // Check creation status.
-  async function waitForDone(page: Page, maxTime: number): Promise<boolean> {
+  async function waitForComplete(page: Page, maxTime: number): Promise<boolean> {
+    const pollInterval = 30 * 1000;
+    let isRuntimeReady = false;
+    let isExtractionReady = false;
     const runtimeSidebar = new RuntimePanel(page);
     const genomicSidebar = new GenomicExtractionsSidebar(page);
     const startTime = Date.now();
     while (Date.now() - startTime <= maxTime) {
-      await waitWhileLoading(page, 60 * 1000, { waitForRuntime: true }).catch(() => {
-        // Leave blank.
-      });
-      const isRuntimeReady = await runtimeSidebar.waitForRunning(30 * 1000);
-      const isExtractionReady = await genomicSidebar.waitForGenomicDataExtractionDone(30 * 1000);
+      isRuntimeReady = !isRuntimeReady ? await runtimeSidebar.waitForRunning(pollInterval) : true;
+      // At the time of writing this test, it takes 30 - 40 minutes to create VCF files.
+      isExtractionReady = !isExtractionReady
+        ? await genomicSidebar.waitForGenomicDataExtractionDone(pollInterval)
+        : true;
       if (isRuntimeReady && isExtractionReady) {
+        logger.info('Runtime is running and Genomic data extraction is done.');
         return true;
       }
     }
@@ -224,6 +220,6 @@ describe('Genomics Extraction Test', () => {
     await takeScreenshot(page, 'genomic-extraction-test-history-sidebar.png');
     await genomicSidebar.close();
 
-    throw new Error('runtime is not running or/and genomic extraction is not done.');
+    throw new Error('Runtime is not running or/and genomic extraction is not done.');
   }
 });

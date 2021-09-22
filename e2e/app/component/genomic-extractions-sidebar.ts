@@ -56,6 +56,7 @@ export default class GenomicExtractionsSidebar extends BaseHelpSidebar {
         visible: true,
         timeout
       });
+      return true;
     } catch (err) {
       return false;
     } finally {
