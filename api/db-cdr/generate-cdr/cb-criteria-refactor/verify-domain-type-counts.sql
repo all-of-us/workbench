@@ -1,3 +1,4 @@
+-- ====== A COPY OF `all-of-us-ehr-dev.test_R2019q4r3` in `all-of-us-ehr-dev.ChenchalDummySrc` is used to VERIFY ======
 -- ========== Below are SQL snippets for verifying counts for different domains/vocabularies/ SQL-BLOCKS ==============
 -- CPT4 Counts - SQL-ORDER = 1
 select * from (
@@ -193,6 +194,7 @@ order by domain_id, type, is_group, name, run_type;
 
 
 --============= COUNTS FOR ALL PROCESSED (DOMAIN_ID and TYPE) by IS_GROUP =============
+--------------- all-of-us-ehr-dev.ChenchalDummySrc is a copy of all-of-us-ehr-dev.test_R2019q4r3 --------------
 select * from (
                   select '01-sequential' run_type, domain_id, type, is_group, count(is_group) sum_grp_count
                        , sum(item_count) sum_item_count, sum(rollup_count) sum_rollup_count, sum(est_count) sum_est_count
