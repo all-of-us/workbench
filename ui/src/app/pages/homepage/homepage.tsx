@@ -149,6 +149,7 @@ interface Props extends WithSpinnerOverlayProps, NavigationProps, RouteComponent
 }
 
 interface State {
+  // TODO is this still needed? RW-7309
   accessTasksLoaded: boolean;
   firstVisit: boolean;
   firstVisitTraining: boolean;
@@ -191,13 +192,6 @@ export const Homepage = fp.flow(withUserProfile(), withNavigation, withRouter)(c
     profileApi().updatePageVisits({ page: this.pageId});
   }
 
-  // TODO reload profile?
-  async syncCompliance() {
-    const complianceStatus = profileApi().syncComplianceTrainingStatus();
-    const twoFactorAuthStatus = profileApi().syncTwoFactorAuthStatus();
-    return Promise.all([complianceStatus, twoFactorAuthStatus]);
-  }
-
   async callProfile() {
     const {profileState: {profile, reload}} = this.props;
 
@@ -218,10 +212,12 @@ export const Homepage = fp.flow(withUserProfile(), withNavigation, withRouter)(c
         this.setFirstVisit();
       }
 
-      // TODO keep this check?
+      // TODO is this still needed? RW-7309
       const hasAccess = hasRegisteredAccess(profile.accessTierShortNames);
       if (!hasAccess) {
-        await this.syncCompliance();
+        const complianceStatus = profileApi().syncComplianceTrainingStatus();
+        const twoFactorAuthStatus = profileApi().syncTwoFactorAuthStatus();
+        await Promise.all([complianceStatus, twoFactorAuthStatus]);
       }
       this.setState({
         accessTasksLoaded: true
