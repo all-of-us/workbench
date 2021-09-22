@@ -4,21 +4,6 @@ cron:
   schedule: every 3 hours
   timezone: UTC
   target: api
-- description: |
-    Daily sync of compliance training status (via Moodle API). This is just a backup to the primary
-    flow. It should catch expired compliance training, fixup compliance status independent of user
-    navigation, and update on removal of Moodle course completion for some reason.
-  url: /v1/cron/bulkSyncComplianceTrainingStatus
-  schedule: every 24 hours
-  timezone: UTC
-  target: api
-- description: >
-    Update our database cache of users' two-factor authentication settings on their GSuite accounts
-    via Google Directory Service.
-  url: /v1/cron/bulkSyncTwoFactorAuthStatus
-  schedule: every 24 hours
-  timezone: UTC
-  target: api
 - description: 'Daily audit of gcp resources that users have access to'
   url: /v1/cron/bulkAuditProjectAccess
   schedule: every 24 hours
