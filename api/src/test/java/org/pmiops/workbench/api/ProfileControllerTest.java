@@ -459,7 +459,7 @@ public class ProfileControllerTest extends BaseControllerTest {
   }
 
   @Test
-  public void testsubmitDUCC_success() {
+  public void testSubmitDUCC_success() {
     createAccountAndDbUserWithAffiliation();
     String initials = "NIH";
     assertThat(profileController.submitDUCC(DUCC_VERSION, initials).getStatusCode())
@@ -475,7 +475,7 @@ public class ProfileControllerTest extends BaseControllerTest {
   }
 
   @Test
-  public void testsubmitDUCC_wrongVersion_older() {
+  public void testSubmitDUCC_wrongVersion_older() {
     assertThrows(
         BadRequestException.class,
         () -> {
@@ -488,7 +488,7 @@ public class ProfileControllerTest extends BaseControllerTest {
   // not really a use case for this, but shows we need an exact match
 
   @Test
-  public void testsubmitDUCC_wrongVersion_newer() {
+  public void testSubmitDUCC_wrongVersion_newer() {
     assertThrows(
         BadRequestException.class,
         () -> {
