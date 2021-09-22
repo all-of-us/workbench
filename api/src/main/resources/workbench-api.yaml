@@ -434,28 +434,6 @@ paths:
           description: Bad request
           schema:
             "$ref": "#/definitions/ErrorResponse"
-  "/v1/account/submit-data-use-agreement":
-    post:
-      tags:
-      - profile
-      description: (DEPRECATED.  Renamed to submitDUCC.)  Submits consent to the data use agreement for researchers.
-      operationId: submitDataUseAgreement
-      parameters:
-      - in: query
-        name: dataUseAgreementSignedVersion
-        description: Version \# of the Data Use Agreement that was signed.
-        type: integer
-        required: true
-      - in: query
-        name: initials
-        description: Initials of the user on the form.
-        type: string
-        required: true
-      responses:
-        200:
-          description: The user's profile.
-          schema:
-            "$ref": "#/definitions/Profile"
   "/v1/account/submit-data-user-code-of-conduct":
     post:
       tags:
