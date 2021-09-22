@@ -246,18 +246,17 @@ export const Homepage = fp.flow(withUserProfile(), withNavigation, withRouter)(c
       <FlexColumn style={styles.pageWrapper}>
         <WelcomeHeader/>
         <FadeBox style={styles.fadeBox}>
-          {/* The elements inside this fadeBox will be changed as part of ongoing
-          homepage redesign work*/}
+          {/* The elements inside this fadeBox will be changed as part of ongoing homepage redesign work */}
           <FlexColumn style={{justifyContent: 'flex-start'}}>
-              {accessTasksLoaded ?
-                <React.Fragment>
-                  <Workspaces/>
-                    {userWorkspacesResponse &&
-                      (this.userHasWorkspaces()
-                              ? <RecentResources workspaces={userWorkspacesResponse.items}/>
-                              : <GettingStarted/>)}
-                </React.Fragment> :
-                <Spinner dark={true} style={{width: '100%', marginTop: '5rem'}}/>}
+              {accessTasksLoaded
+                  ? <React.Fragment>
+                      <Workspaces/>
+                        {userWorkspacesResponse &&
+                          (this.userHasWorkspaces()
+                                  ? <RecentResources workspaces={userWorkspacesResponse.items}/>
+                                  : <GettingStarted/>)}
+                    </React.Fragment>
+                  : <Spinner dark={true} style={{width: '100%', marginTop: '5rem'}}/>}
           </FlexColumn>
         </FadeBox>
       </FlexColumn>
