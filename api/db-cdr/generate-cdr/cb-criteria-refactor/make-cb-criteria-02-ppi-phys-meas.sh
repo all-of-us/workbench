@@ -259,8 +259,10 @@ WHERE domain_id = 'PHYSICAL_MEASUREMENT'
     and name = 'Blood Pressure'
     and is_selectable = 1"
 
+#wait for process to end before copying
 wait $!
 ## copy temp tables back to main tables, and delete temp?
 if [[ "$RUN_PARALLEL" == "mult" ]]; then
   cpToMain "$TBL_CBC" &
 fi
+

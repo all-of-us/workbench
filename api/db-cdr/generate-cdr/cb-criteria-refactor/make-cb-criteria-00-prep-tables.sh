@@ -130,3 +130,4 @@ wait pid
 echo "Running all scripts done total time $(timeIt script_start)"
 echo "Done!"
 exit 0
+

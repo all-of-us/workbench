@@ -314,6 +314,7 @@ FROM
 WHERE x.domain_id = 'SURVEY'
     and x.concept_id = y.ancestor_concept_id"
 
+#wait for process to end before copying
 wait $!
 ## copy temp tables back to main tables, and delete temp?
 if [[ "$RUN_PARALLEL" == "mult" ]]; then

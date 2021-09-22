@@ -41,13 +41,13 @@ function runScript(){
 ## TODO check EXIST required tables?
 main_tables=(
 make-cb-criteria-01-cpt4-src.sh
-#make-cb-criteria-02-ppi-phys-meas.sh
-#make-cb-criteria-03-ppi-surveys.sh
-#make-cb-criteria-04-pm-concept-set.sh
-#make-cb-criteria-05-fitbit.sh
-#make-cb-criteria-06-whole-genome-variant.sh
-#make-cb-criteria-07-demographics.sh
-#make-cb-criteria-08-visit.sh
+make-cb-criteria-02-ppi-phys-meas.sh
+make-cb-criteria-03-ppi-surveys.sh
+make-cb-criteria-04-pm-concept-set.sh
+make-cb-criteria-05-fitbit.sh
+make-cb-criteria-06-whole-genome-variant.sh
+make-cb-criteria-07-demographics.sh
+make-cb-criteria-08-visit.sh
 #make-cb-criteria-09-icd9-src.sh
 #make-cb-criteria-10-icd10-cm-src.sh
 # make-cb-criteria-11-icd10-pcs-src.sh <== need to fix
@@ -77,3 +77,4 @@ wait
 echo "Running scripts *all from make-cb-criteria-00-main-tables.sh* done on $(timeIt main_start) secs"
 echo ""
 exit 0
+

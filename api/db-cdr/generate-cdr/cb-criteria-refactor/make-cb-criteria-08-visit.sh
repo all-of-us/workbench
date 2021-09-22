@@ -94,6 +94,7 @@ FROM
         GROUP BY 1, 2
     ) a"
 
+#wait for process to end before copying
 wait $!
 ## copy temp tables back to main tables, and delete temp?
 if [[ "$RUN_PARALLEL" == "mult" ]]; then

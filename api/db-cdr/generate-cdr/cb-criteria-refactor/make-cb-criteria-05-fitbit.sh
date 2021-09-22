@@ -76,6 +76,7 @@ SELECT
     , 0
     , 0"
 
+#wait for process to end before copying
 wait $!
 ## copy temp tables back to main tables, and delete temp?
 if [[ "$RUN_PARALLEL" == "mult" ]]; then

@@ -216,6 +216,7 @@ WHERE type = 'CPT4'
                       and id > $CB_CRITERIA_START_ID and id < $CB_CRITERIA_END_ID
                 )
         )"
+
 #wait for process to end before copying
 wait $!
 ## copy temp tables back to main tables, and delete temp?

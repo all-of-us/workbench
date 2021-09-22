@@ -1,0 +1,123 @@
+[
+  {
+    "mode": "NULLABLE",
+    "name": "ancestor_concept_id",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "domain_id",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "type",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "is_standard",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "concept_id_1",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "concept_id_2",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "concept_id_3",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "concept_id_4",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "concept_id_5",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "concept_id_6",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "concept_id_7",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "concept_id_8",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "concept_id_9",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "concept_id_10",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "concept_id_11",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "concept_id_12",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "concept_id_13",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "concept_id_14",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "concept_id_15",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "concept_id_16",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "concept_id_17",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "concept_id_18",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "concept_id_19",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "concept_id_20",
+    "type": "INTEGER"
+  }
+]
+

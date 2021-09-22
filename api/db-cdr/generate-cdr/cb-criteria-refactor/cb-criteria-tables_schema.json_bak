@@ -1,0 +1,705 @@
+{
+  "cb_criteria_tables": [
+    {
+      "table_desc": "cb_criteria - table that holds cohort builder criteria",
+      "table_name": "cb_criteria",
+      "table_def": [
+        {
+          "mode": "NULLABLE",
+          "name": "id",
+          "type": "INTEGER"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "parent_id",
+          "type": "INTEGER"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "domain_id",
+          "type": "STRING"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "is_standard",
+          "type": "INTEGER"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "type",
+          "type": "STRING"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "subtype",
+          "type": "STRING"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "concept_id",
+          "type": "INTEGER"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "code",
+          "type": "STRING"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "name",
+          "type": "STRING"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "value",
+          "type": "STRING"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "rollup_count",
+          "type": "INTEGER"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "item_count",
+          "type": "INTEGER"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "est_count",
+          "type": "INTEGER"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "is_group",
+          "type": "INTEGER"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "is_selectable",
+          "type": "INTEGER"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "has_attribute",
+          "type": "INTEGER"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "has_hierarchy",
+          "type": "INTEGER"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "has_ancestor_data",
+          "type": "INTEGER"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "path",
+          "type": "STRING"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "synonyms",
+          "type": "STRING"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "full_text",
+          "type": "STRING"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "display_synonyms",
+          "type": "STRING"
+        }
+      ]
+    },
+    {
+      "table_desc": "cb_criteria_ancestor - table that holds the ingredient --> coded drugs mapping",
+      "table_name": "cb_criteria_ancestor",
+      "table_def": [
+        {
+          "mode": "NULLABLE",
+          "name": "ancestor_id",
+          "type": "INTEGER"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "descendant_id",
+          "type": "INTEGER"
+        }
+      ]
+    },
+    {
+      "table_desc": "cb_criteria_attribute - table that holds categorical results and min/max information about individual labs",
+      "table_name": "cb_criteria_attribute",
+      "table_def": [
+        {
+          "mode": "NULLABLE",
+          "name": "id",
+          "type": "INTEGER"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "concept_id",
+          "type": "INTEGER"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "value_as_concept_id",
+          "type": "INTEGER"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "concept_name",
+          "type": "STRING"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "type",
+          "type": "STRING"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "est_count",
+          "type": "STRING"
+        }
+      ]
+    },
+    {
+      "table_desc": "cb_survey_attribute - table that holds which survey versions each question and answer are apart of",
+      "table_name": "cb_survey_attribute",
+      "table_def": [
+        {
+          "mode": "NULLABLE",
+          "name": "id",
+          "type": "INTEGER"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "question_concept_id",
+          "type": "INTEGER"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "answer_concept_id",
+          "type": "INTEGER"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "survey_version_concept_id",
+          "type": "INTEGER"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "item_count",
+          "type": "INTEGER"
+        }
+      ]
+    },
+    {
+      "table_desc": "cb_criteria_relationship - table that holds the drug brands to ingredients relationship mapping also holds source concept --> standard concept mapping information",
+      "table_name": "cb_criteria_relationship",
+      "table_def": [
+        {
+          "mode": "NULLABLE",
+          "name": "concept_id_1",
+          "type": "INTEGER"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "concept_id_2",
+          "type": "INTEGER"
+        }
+      ]
+    },
+    {
+      "table_desc": "prep_ancestor_staging - staging table to make it easier to add data into prep_concept_ancestor",
+      "table_name": "prep_ancestor_staging",
+      "table_def": [
+        {
+          "mode": "NULLABLE",
+          "name": "ancestor_concept_id",
+          "type": "INTEGER"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "domain_id",
+          "type": "STRING"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "type",
+          "type": "STRING"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "is_standard",
+          "type": "INTEGER"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "concept_id_1",
+          "type": "INTEGER"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "concept_id_2",
+          "type": "INTEGER"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "concept_id_3",
+          "type": "INTEGER"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "concept_id_4",
+          "type": "INTEGER"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "concept_id_5",
+          "type": "INTEGER"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "concept_id_6",
+          "type": "INTEGER"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "concept_id_7",
+          "type": "INTEGER"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "concept_id_8",
+          "type": "INTEGER"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "concept_id_9",
+          "type": "INTEGER"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "concept_id_10",
+          "type": "INTEGER"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "concept_id_11",
+          "type": "INTEGER"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "concept_id_12",
+          "type": "INTEGER"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "concept_id_13",
+          "type": "INTEGER"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "concept_id_14",
+          "type": "INTEGER"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "concept_id_15",
+          "type": "INTEGER"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "concept_id_16",
+          "type": "INTEGER"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "concept_id_17",
+          "type": "INTEGER"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "concept_id_18",
+          "type": "INTEGER"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "concept_id_19",
+          "type": "INTEGER"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "concept_id_20",
+          "type": "INTEGER"
+        }
+      ]
+    },
+    {
+      "table_desc": "prep_concept_ancestor - table that holds ancestor information for parent counts",
+      "table_name": "prep_concept_ancestor",
+      "table_def": [
+        {
+          "mode": "NULLABLE",
+          "name": "ancestor_concept_id",
+          "type": "INTEGER"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "descendant_concept_id",
+          "type": "INTEGER"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "is_standard",
+          "type": "INTEGER"
+        }
+      ]
+    },
+    {
+      "table_desc": "prep_cpt_ancestor - table that holds CPT4 ancestor information for parent counts",
+      "table_name": "prep_cpt_ancestor",
+      "table_def": [
+        {
+          "mode": "NULLABLE",
+          "name": "ancestor_id",
+          "type": "INTEGER"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "descendant_id",
+          "type": "INTEGER"
+        }
+      ]
+    },
+    {
+      "table_desc": "prep_atc_rel_in_data - holds atc and rxnorm concept relationships for drugs",
+      "table_name": "prep_atc_rel_in_data",
+      "table_def": [
+        {
+          "mode": "NULLABLE",
+          "name": "p_concept_id",
+          "type": "INTEGER"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "p_concept_code",
+          "type": "STRING"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "p_concept_name",
+          "type": "STRING"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "p_domain_id",
+          "type": "STRING"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "concept_id",
+          "type": "INTEGER"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "concept_code",
+          "type": "STRING"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "concept_name",
+          "type": "STRING"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "domain_id",
+          "type": "STRING"
+        }
+      ]
+    },
+    {
+      "table_desc": "prep_loinc_rel_in_data - holds LOINC concept relationship data for measurements",
+      "table_name": "prep_loinc_rel_in_data",
+      "table_def": [
+        {
+          "mode": "NULLABLE",
+          "name": "p_concept_id",
+          "type": "INTEGER"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "p_concept_code",
+          "type": "STRING"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "p_concept_name",
+          "type": "STRING"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "p_domain_id",
+          "type": "STRING"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "concept_id",
+          "type": "INTEGER"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "concept_code",
+          "type": "STRING"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "concept_name",
+          "type": "STRING"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "domain_id",
+          "type": "STRING"
+        }
+      ]
+    },
+    {
+      "table_desc": "prep_snomed_rel_cm_in_data - holds standard snomed concept relationship data for conditions",
+      "table_name": "prep_snomed_rel_cm_in_data",
+      "table_def": [
+        {
+          "mode": "NULLABLE",
+          "name": "p_concept_id",
+          "type": "INTEGER"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "p_concept_code",
+          "type": "STRING"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "p_concept_name",
+          "type": "STRING"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "p_domain_id",
+          "type": "STRING"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "concept_id",
+          "type": "INTEGER"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "concept_code",
+          "type": "STRING"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "concept_name",
+          "type": "STRING"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "domain_id",
+          "type": "STRING"
+        }
+      ]
+    },
+    {
+      "table_desc": "prep_snomed_rel_cm_src_in_data - holds source snomed concept relationship data for conditions",
+      "table_name": "prep_snomed_rel_cm_src_in_data",
+      "table_def": [
+        {
+          "mode": "NULLABLE",
+          "name": "p_concept_id",
+          "type": "INTEGER"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "p_concept_code",
+          "type": "STRING"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "p_concept_name",
+          "type": "STRING"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "p_domain_id",
+          "type": "STRING"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "concept_id",
+          "type": "INTEGER"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "concept_code",
+          "type": "STRING"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "concept_name",
+          "type": "STRING"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "domain_id",
+          "type": "STRING"
+        }
+      ]
+    },
+    {
+      "table_desc": "prep_snomed_rel_meas_in_data - holds standard snomed concept relationship data for measurements",
+      "table_name": "prep_snomed_rel_meas_in_data",
+      "table_def": [
+        {
+          "mode": "NULLABLE",
+          "name": "p_concept_id",
+          "type": "INTEGER"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "p_concept_code",
+          "type": "STRING"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "p_concept_name",
+          "type": "STRING"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "p_domain_id",
+          "type": "STRING"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "concept_id",
+          "type": "INTEGER"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "concept_code",
+          "type": "STRING"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "concept_name",
+          "type": "STRING"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "domain_id",
+          "type": "STRING"
+        }
+      ]
+    },
+    {
+      "table_desc": "prep_snomed_rel_pcs_in_data - holds standard snomed concept relationship data for procedures",
+      "table_name": "prep_snomed_rel_pcs_in_data",
+      "table_def": [
+        {
+          "mode": "NULLABLE",
+          "name": "p_concept_id",
+          "type": "INTEGER"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "p_concept_code",
+          "type": "STRING"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "p_concept_name",
+          "type": "STRING"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "p_domain_id",
+          "type": "STRING"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "concept_id",
+          "type": "INTEGER"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "concept_code",
+          "type": "STRING"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "concept_name",
+          "type": "STRING"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "domain_id",
+          "type": "STRING"
+        }
+      ]
+    },
+    {
+      "table_desc": "prep_snomed_rel_pcs_src_in_data - holds source snomed concept relationship data for procedures",
+      "table_name": "prep_snomed_rel_pcs_src_in_data",
+      "table_def": [
+        {
+          "mode": "NULLABLE",
+          "name": "p_concept_id",
+          "type": "INTEGER"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "p_concept_code",
+          "type": "STRING"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "p_concept_name",
+          "type": "STRING"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "p_domain_id",
+          "type": "STRING"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "concept_id",
+          "type": "INTEGER"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "concept_code",
+          "type": "STRING"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "concept_name",
+          "type": "STRING"
+        },
+        {
+          "mode": "NULLABLE",
+          "name": "domain_id",
+          "type": "STRING"
+        }
+      ]
+    }
+  ]
+}
+
