@@ -306,11 +306,12 @@ describe('RuntimePanel', () => {
 
   it('should allow creation when runtime has error status', async() => {
     runtimeApiStub.runtime.status = RuntimeStatus.Error;
+    runtimeApiStub.runtime.errors = [{errorMessage: "I'm sorry Dave, I'm afraid I can't do that"}]
     runtimeStoreStub.runtime = runtimeApiStub.runtime;
 
     const wrapper = await component();
 
-    await mustClickButton(wrapper, 'Create');
+    await mustClickButton(wrapper, 'Try Again');
 
     // Kicks off a deletion to first clear the error status runtime.
     expect(runtimeApiStub.runtime.status).toEqual('Deleting');
