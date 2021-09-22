@@ -105,7 +105,7 @@ export default class NotebookPage extends NotebookFrame {
     await this.selectFileOpenMenu();
 
     // New tab opens. "browser" is a Jest-Puppeteer global variable.
-    const newTarget = await browser.waitForTarget((target) => target.opener() === page.target());
+    const newTarget = await browser.waitForTarget((target) => target.opener() === this.page.target());
     const newPage = await newTarget.page();
 
     // Upload button that triggers file selection dialog.
@@ -198,42 +198,6 @@ export default class NotebookPage extends NotebookFrame {
       }
       if (maxRetries <= 0) {
         throw new Error('Failed to click File menu -> Download.');
-      }
-      maxRetries--;
-      await this.page.waitForTimeout(1000).then(() => clickAndCheck(iframe)); // 1 second pause and retry.
-    };
-
-    const frame = await this.getIFrame();
-    await clickAndCheck(frame);
-    await this.page.waitForTimeout(500);
-  }
-
-  async selectRunAllCellsMenu(): Promise<void> {
-    const clickCellMenuIcon = async (iframe: Frame): Promise<void> => {
-      await iframe.waitForXPath(Xpath.cellMenuDropdown, { visible: true, timeout: 2000 }).then((element) => {
-        element.hover();
-        element.click();
-      });
-    };
-
-    let maxRetries = 3;
-    const clickAndCheck = async (iframe: Frame) => {
-      await clickCellMenuIcon(iframe);
-      const succeeded = await iframe
-        .waitForXPath(Xpath.runAllCode, { visible: true, timeout: 2000 })
-        .then((menuitem) => {
-          menuitem.hover();
-          menuitem.click();
-          return true;
-        })
-        .catch(() => {
-          return false;
-        });
-      if (succeeded) {
-        return;
-      }
-      if (maxRetries <= 0) {
-        throw new Error('Failed to click Cell menu -> Run All.');
       }
       maxRetries--;
       await this.page.waitForTimeout(1000).then(() => clickAndCheck(iframe)); // 1 second pause and retry.
@@ -433,6 +397,42 @@ export default class NotebookPage extends NotebookFrame {
     return codeOutput;
   }
 
+  async runAllCells(): Promise<void> {
+    const clickCellMenuIcon = async (iframe: Frame): Promise<void> => {
+      await iframe.waitForXPath(Xpath.cellMenuDropdown, { visible: true, timeout: 2000 }).then((element) => {
+        element.hover();
+        element.click();
+      });
+    };
+
+    let maxRetries = 3;
+    const clickAndCheck = async (iframe: Frame) => {
+      await clickCellMenuIcon(iframe);
+      const succeeded = await iframe
+        .waitForXPath(Xpath.runAllCode, { visible: true, timeout: 2000 })
+        .then((menuitem) => {
+          menuitem.hover();
+          menuitem.click();
+          return true;
+        })
+        .catch(() => {
+          return false;
+        });
+      if (succeeded) {
+        return;
+      }
+      if (maxRetries <= 0) {
+        throw new Error('Failed to click Cell menu -> Run All.');
+      }
+      maxRetries--;
+      await this.page.waitForTimeout(1000).then(() => clickAndCheck(iframe)); // 1 second pause and retry.
+    };
+
+    const frame = await this.getIFrame();
+    await clickAndCheck(frame);
+    await this.page.waitForTimeout(500);
+  }
+
   // Upload a file, open file in notebook cell, then run code.
   async uploadFile(fileName: string, filePath: string): Promise<void> {
     // Select File menu => Open to open Upload tab.
@@ -490,7 +490,7 @@ export default class NotebookPage extends NotebookFrame {
   async getCellInputOutput(cellIndex: number, cellType: CellType = CellType.Code): Promise<[string, string]> {
     const cell = this.findCell(cellIndex, cellType);
     const code = await cell.getInputText();
-    const output = await cell.waitForOutput(3 * 60 * 1000);
+    const output = await cell.waitForOutput(1000);
     return [code, output];
   }
 

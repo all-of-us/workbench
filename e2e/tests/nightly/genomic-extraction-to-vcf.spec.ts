@@ -6,15 +6,14 @@ import {
   Language,
   LinkText,
   MenuOption,
-  SelectConceptSetCheckBox,
-  SelectValueCheckBox
+  ConceptSetSelectValue,
+  DatasetValueSelect
 } from 'app/text-labels';
 import CohortActionsPage from 'app/page/cohort-actions-page';
 import { makeRandomName, makeWorkspaceName } from 'utils/str-utils';
-import GenomicsVariantExtractConfirmationModal from 'app/modal/genomic-variant-extract-confirmation-modal';
+import GenomicsVariantExtractConfirmationModal from 'app/modal/genomic-extract-confirmation-modal';
 import ExportToNotebookModal from 'app/modal/export-to-notebook-modal';
-import RuntimePanel, { ComputeType, StartStopIconState } from 'app/component/runtime-panel';
-import NotebookPreviewPage from 'app/page/notebook-preview-page';
+import RuntimePanel, { ComputeType } from 'app/component/runtime-panel';
 import { logger } from 'libs/logger';
 import GenomicExtractionsSidebar from 'app/component/genomic-extractions-sidebar';
 import { Page } from 'puppeteer';
@@ -57,7 +56,7 @@ describe('Genomics Extraction Test', () => {
     await group2.getGroupCount();
     totalCount = await cohortBuildPage.getTotalCount();
 
-    // Total Count should be 1.
+    // Total Count should be greater than 1.
     expect(totalCount).toBeGreaterThanOrEqual(1);
 
     // Save cohort.
@@ -71,12 +70,10 @@ describe('Genomics Extraction Test', () => {
 
     // Step 1: select user created cohort.
     await datasetPage.selectCohorts([cohortName]);
-
     // Step 2: select "All whole genome sequence variant data".
-    await datasetPage.selectConceptSets([SelectConceptSetCheckBox.WholeGenomeSequenceVariantData]);
-
+    await datasetPage.selectConceptSets([ConceptSetSelectValue.WholeGenomeSequenceVariantData]);
     // Step 3: make sure "VCF Files(s)" is selected.
-    await datasetPage.selectValues([SelectValueCheckBox.VCFFile]);
+    await datasetPage.selectValues([DatasetValueSelect.VCFFile]);
 
     // Save dataset.
     const createModal = await datasetPage.clickCreateButton();
@@ -108,7 +105,7 @@ describe('Genomics Extraction Test', () => {
     expect(await runtimePanel.getRamGbs()).toBe('15');
 
     // Start creating runtime but NOT wait until finish.
-    await createRuntime(page);
+    await runtimePanel.createRuntime({ waitForComplete: false });
 
     // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     // EXTRACTING GENOMIC TO CREATE VCF FILES.
@@ -131,10 +128,7 @@ describe('Genomics Extraction Test', () => {
     await exportToNotebookModal.enterNotebookName(notebookName);
     await exportToNotebookModal.pickLanguage(Language.Python);
     await exportToNotebookModal.pickAnalysisTool(AnalysisTool.Hail);
-    await exportToNotebookModal.clickExportButton();
-
-    const notebookPreviewPage = new NotebookPreviewPage(page);
-    await notebookPreviewPage.waitForLoad();
+    const notebookPreviewPage = await exportToNotebookModal.clickExportButton();
 
     // Check Genomic Extraction History.
     const genomicExtractionsHistorySidebar = new GenomicExtractionsSidebar(page);
@@ -167,7 +161,7 @@ describe('Genomics Extraction Test', () => {
     // RUN NOTEBOOK CODE.
     const notebookPage = await notebookPreviewPage.openEditMode(notebookName);
     // Run all cells. Run one cell at a time is slower.
-    await notebookPage.selectRunAllCellsMenu();
+    await notebookPage.runAllCells();
     await notebookPage.waitForKernelIdle(5 * 60 * 1000, 2000);
 
     // Find any output_error.
@@ -180,18 +174,6 @@ describe('Genomics Extraction Test', () => {
     await runtimePanel.deleteRuntime();
   });
 
-  async function createRuntime(page: Page): Promise<void> {
-    const runtimeSidebar = new RuntimePanel(page);
-    await runtimeSidebar.open();
-    const isRunning = await runtimeSidebar.isRunning();
-    if (isRunning) {
-      return;
-    }
-    await runtimeSidebar.waitForStartStopIconState(StartStopIconState.None);
-    await runtimeSidebar.clickButton(LinkText.Create);
-    await runtimeSidebar.waitUntilClose();
-  }
-
   // Check creation status.
   async function waitForComplete(page: Page, maxTime: number): Promise<boolean> {
     const pollInterval = 30 * 1000;
@@ -203,9 +185,7 @@ describe('Genomics Extraction Test', () => {
     while (Date.now() - startTime <= maxTime) {
       isRuntimeReady = !isRuntimeReady ? await runtimeSidebar.waitForRunning(pollInterval) : true;
       // At the time of writing this test, it takes 30 - 40 minutes to create VCF files.
-      isExtractionReady = !isExtractionReady
-        ? await genomicSidebar.waitForGenomicDataExtractionDone(pollInterval)
-        : true;
+      isExtractionReady = !isExtractionReady ? await genomicSidebar.waitForComplete(pollInterval) : true;
       if (isRuntimeReady && isExtractionReady) {
         logger.info('Runtime is running and Genomic data extraction is done.');
         return true;

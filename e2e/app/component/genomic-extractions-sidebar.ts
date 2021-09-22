@@ -16,7 +16,7 @@ export default class GenomicExtractionsSidebar extends BaseHelpSidebar {
     }
     await this.clickIcon(SideBarLink.GenomicExtractionsHistory);
     await this.waitUntilVisible();
-    await this.page.waitForTimeout(1000);
+    await this.page.waitForTimeout(100);
     // Wait for visible text
     await this.page.waitForXPath(`${this.getXpath()}//h3[normalize-space(text())="Genomic Extractions"]`, {
       visible: true
@@ -30,8 +30,8 @@ export default class GenomicExtractionsSidebar extends BaseHelpSidebar {
     return new DataTable(this.page, { container: this });
   }
 
-  // Extraction status icon.
-  async existStatusIcon(timeout?: number): Promise<boolean> {
+  // Extraction spinner status.
+  async isInProgress(timeout?: number): Promise<boolean> {
     const extractionStatusSpinner = '//*[@data-test-id="extraction-status-icon-container"]/*[@data-icon="sync-alt"]';
     return this.page
       .waitForXPath(extractionStatusSpinner, { visible: true, timeout })
@@ -44,13 +44,12 @@ export default class GenomicExtractionsSidebar extends BaseHelpSidebar {
   }
 
   /**
-   * Open sidebar, check for status finished.
+   * Open sidebar, wait for finished status, close sidebar.
    */
-  async waitForGenomicDataExtractionDone(timeout?: number): Promise<boolean> {
-    const sidebar = new GenomicExtractionsSidebar(this.page);
-    await sidebar.open();
+  async waitForComplete(timeout?: number): Promise<boolean> {
+    await this.open();
     try {
-      const table = sidebar.getHistoryTable();
+      const table = this.getHistoryTable();
       await table.waitUntilVisible();
       await this.page.waitForXPath(`${table.getXpath()}//*[@data-icon="check-circle" and @role="img"]`, {
         visible: true,
@@ -60,7 +59,7 @@ export default class GenomicExtractionsSidebar extends BaseHelpSidebar {
     } catch (err) {
       return false;
     } finally {
-      await sidebar.close();
+      await this.close();
     }
   }
 }

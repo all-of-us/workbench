@@ -169,7 +169,7 @@ export const InstitutionSelectValue = {
   DummyMaster: 'Dummy Master'
 };
 
-export const SelectConceptSetCheckBox = {
+export const ConceptSetSelectValue = {
   AllSurveys: 'All Surveys',
   Demographics: 'Demographics',
   FitbitActivitySummary: 'Fitbit Activity Summary',
@@ -179,6 +179,6 @@ export const SelectConceptSetCheckBox = {
   WholeGenomeSequenceVariantData: 'Whole Genome Sequencing Data'
 };
 
-export const SelectValueCheckBox = {
+export const DatasetValueSelect = {
   VCFFile: 'VCF Files(s)'
 };

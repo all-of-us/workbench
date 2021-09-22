@@ -1,6 +1,6 @@
 import DataResourceCard from 'app/component/data-resource-card';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
-import { SelectConceptSetCheckBox, MenuOption, ResourceCard, WorkspaceAccessLevel } from 'app/text-labels';
+import { ConceptSetSelectValue, MenuOption, ResourceCard, WorkspaceAccessLevel } from 'app/text-labels';
 import { findOrCreateWorkspace, findWorkspaceCard, signInWithAccessToken } from 'utils/test-utils';
 import { waitWhileLoading } from 'utils/waits-utils';
 import DatasetEditPage from 'app/page/dataset-edit-page';
@@ -28,12 +28,12 @@ describe('Create Dataset', () => {
     await datasetBuildPage.selectCohorts(['All Participants']);
 
     // Step 2 Select Concept Sets (Rows): select all checkboxes.
-    await datasetBuildPage.selectConceptSets([SelectConceptSetCheckBox.Demographics]);
-    await datasetBuildPage.selectConceptSets([SelectConceptSetCheckBox.AllSurveys]);
-    await datasetBuildPage.selectConceptSets([SelectConceptSetCheckBox.FitbitHeartRateSummary]);
-    await datasetBuildPage.selectConceptSets([SelectConceptSetCheckBox.FitbitActivitySummary]);
-    await datasetBuildPage.selectConceptSets([SelectConceptSetCheckBox.FitbitHeartRateLevel]);
-    await datasetBuildPage.selectConceptSets([SelectConceptSetCheckBox.FitbitIntraDaySteps]);
+    await datasetBuildPage.selectConceptSets([ConceptSetSelectValue.Demographics]);
+    await datasetBuildPage.selectConceptSets([ConceptSetSelectValue.AllSurveys]);
+    await datasetBuildPage.selectConceptSets([ConceptSetSelectValue.FitbitHeartRateSummary]);
+    await datasetBuildPage.selectConceptSets([ConceptSetSelectValue.FitbitActivitySummary]);
+    await datasetBuildPage.selectConceptSets([ConceptSetSelectValue.FitbitHeartRateLevel]);
+    await datasetBuildPage.selectConceptSets([ConceptSetSelectValue.FitbitIntraDaySteps]);
 
     // Preview table exists and has one or more table rows.
     const previewTable = await datasetBuildPage.getPreviewTable();
@@ -102,7 +102,7 @@ describe('Create Dataset', () => {
     expect(await analyzeButton.isCursorNotAllowed()).toBe(true);
 
     // No matter of what has changed, the Analyze button remains disabled.
-    await dataSetEditPage.selectConceptSets([SelectConceptSetCheckBox.FitbitIntraDaySteps]);
+    await dataSetEditPage.selectConceptSets([ConceptSetSelectValue.FitbitIntraDaySteps]);
     await dataSetEditPage.getPreviewTableButton().click();
     await waitWhileLoading(page);
     expect(await analyzeButton.isCursorNotAllowed()).toBe(true);

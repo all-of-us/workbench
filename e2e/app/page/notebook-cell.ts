@@ -170,7 +170,7 @@ export default class NotebookCell extends NotebookFrame {
     return this.cellIndex;
   }
 
-  outputSelector(index?: number): string {
+  private outputSelector(index?: number): string {
     return `${this.cellSelector(index)} .output_subarea`;
   }
 

@@ -4,6 +4,7 @@ import { Page } from 'puppeteer';
 import { AnalysisTool, Language, LinkText } from 'app/text-labels';
 import Modal from './modal';
 import { waitForText } from 'utils/waits-utils';
+import NotebookPreviewPage from 'app/page/notebook-preview-page';
 
 const title = 'Export Dataset';
 
@@ -48,8 +49,11 @@ export default class ExportToNotebookModal extends Modal {
     return new RadioButton(this.page, radioButtonXpath);
   }
 
-  async clickExportButton(): Promise<void> {
-    return this.clickButton(LinkText.Export, { waitForClose: true });
+  async clickExportButton(): Promise<NotebookPreviewPage> {
+    await this.clickButton(LinkText.Export, { waitForClose: true });
+    const notebookPreviewPage = new NotebookPreviewPage(this.page);
+    await notebookPreviewPage.waitForLoad();
+    return notebookPreviewPage;
   }
 
   /**
@@ -60,10 +64,10 @@ export default class ExportToNotebookModal extends Modal {
    * @param {string} notebookName Notebook name.
    * @param {Language} language Notebook programming language. Default value is Python.
    */
-  async fillInModal(notebookName: string, language: Language = Language.Python): Promise<void> {
+  async fillInModal(notebookName: string, language: Language = Language.Python): Promise<NotebookPreviewPage> {
     await this.enterNotebookName(notebookName);
     await this.pickLanguage(language);
-    return await this.clickExportButton();
+    return this.clickExportButton();
   }
 
   private getRadioButtonXpath(name: string): string {

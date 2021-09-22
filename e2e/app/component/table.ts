@@ -90,17 +90,6 @@ export default class Table extends Container {
     return this.page.waitForXPath(cellXpath, { visible: true });
   }
 
-  async getColumnValue(columnName: string, rowIndex = 1): Promise<string> {
-    const rows = await this.getRowCount();
-    if (rows === 0) {
-      throw new Error('Genomic Extraction History table is empty in Genomic Extraction sidebar.');
-    }
-    const columnIndex = await this.getColumnIndex(columnName);
-    console.log(`columnIndex: ${columnIndex}`);
-    // Verify dataset name in row:column.
-    return this.getCellValue(rowIndex, columnIndex + 1);
-  }
-
   getCellXpath(rowIndex: number, columnIndex: number): string {
     return `${this.trXpath}[${rowIndex}]/td[${columnIndex}]`;
   }

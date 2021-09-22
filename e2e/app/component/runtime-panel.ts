@@ -180,20 +180,30 @@ export default class RuntimePanel extends BaseHelpSidebar {
   /**
    * Create runtime and wait until running.
    */
-  async createRuntime(): Promise<void> {
-    logger.info('Creating runtime');
+  async createRuntime(opt: { waitForComplete?: boolean; timeout?: number } = {}): Promise<void> {
+    const { waitForComplete = true, timeout = 10 * 60 * 1000 } = opt;
     await this.open();
+
+    const isRunning = await this.isRunning();
+    if (isRunning) {
+      logger.info('Runtime is already running. Create new runtime is not needed.');
+      return;
+    }
+
     await this.waitForStartStopIconState(StartStopIconState.None);
     await this.clickButton(LinkText.Create);
-    await this.waitUntilClose();
-    // Runtime panel automatically close after click Create button.
-    // Reopen panel in order to check icon status.
-    await this.open();
-    // Runtime state transition: Starting -> Running
-    await this.waitForStartStopIconState(StartStopIconState.Starting, 10 * 60 * 1000);
-    await this.waitForStartStopIconState(StartStopIconState.Running);
-    await this.close();
-    logger.info('Runtime is running');
+    await this.waitUntilClose(); // Runtime panel automatically close after click Create button.
+    logger.info('Creating new runtime');
+
+    if (waitForComplete) {
+      // Reopen panel in order to check icon status.
+      await this.open();
+      // Runtime state transition: Starting -> Running
+      await this.waitForStartStopIconState(StartStopIconState.Starting, timeout);
+      await this.waitForStartStopIconState(StartStopIconState.Running);
+      await this.close();
+      logger.info('Runtime is running');
+    }
   }
 
   /**
