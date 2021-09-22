@@ -253,11 +253,9 @@ export const Homepage = fp.flow(withUserProfile(), withNavigation, withRouter)(c
                 <React.Fragment>
                   <Workspaces/>
                     {userWorkspacesResponse &&
-                      (this.userHasWorkspaces() ?
-                            <RecentResources workspaces={userWorkspacesResponse.items}/> :
-                            <GettingStarted/>
-                      )
-                    }
+                      (this.userHasWorkspaces()
+                              ? <RecentResources workspaces={userWorkspacesResponse.items}/>
+                              : <GettingStarted/>)}
                 </React.Fragment> :
                 <Spinner dark={true} style={{width: '100%', marginTop: '5rem'}}/>}
           </FlexColumn>
