@@ -1,12 +1,11 @@
 import {mount} from 'enzyme';
 import * as React from 'react';
-
-import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {ProfileApi} from 'generated/fetch';
 import {MemoryRouter} from 'react-router';
+
+import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {ProfileApiStub, ProfileStubVariables} from 'testing/stubs/profile-api-stub';
 import {stubResource} from 'testing/stubs/resources-stub';
-
 import {Homepage} from './homepage';
 import {CohortsApi, ConceptSetsApi, UserMetricsApi, WorkspacesApi} from 'generated/fetch/api';
 import {CohortsApiStub} from 'testing/stubs/cohorts-api-stub';
@@ -90,64 +89,6 @@ describe('HomepageComponent', () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find('[data-test-id="quick-tour-react"]').exists()).toBeTruthy();
-  });
-
-  it('should show access tasks dashboard if the user is not registered', async () => {
-    const newProfile = {
-      ...profile,
-      accessTierShortNames: [],   // unregistered
-    };
-    serverConfigStore.set({config: {...serverConfigStore.get().config}});
-    profileStore.set({profile: newProfile, load, reload, updateCache});
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.find('[data-test-id="registration-dashboard"]').length).toBeGreaterThanOrEqual(1);
-  });
-
-  it('should show DUCC task as incomplete for user who has signed old version', async () => {
-    const newProfile = {
-      ...profile,
-      dataUseAgreementBypassTime: null,
-      dataUseAgreementCompletionTime: 1000,
-      dataUseAgreementSignedVersion: 2, // Old version
-      accessTierShortNames: [],   // unregistered
-    };
-    serverConfigStore.set({config: {...serverConfigStore.get().config}});
-    profileStore.set({profile: newProfile, load, reload, updateCache});
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    const duccTask = wrapper.find('[data-test-id="registration-task-dataUserCodeOfConduct"]');
-    expect(duccTask.find('[data-test-id="registration-task-link"]').exists()).toBeTruthy();
-    expect(duccTask.find('[data-test-id="completed-button"]').exists()).toBeFalsy();
-  });
-
-  it('should show DUCC task as completed for user who has signed current version', async () => {
-    const newProfile = {
-      ...profile,
-      dataUseAgreementBypassTime: null,
-      dataUseAgreementCompletionTime: 1000,
-      dataUseAgreementSignedVersion: 3, // Live version
-      accessTierShortNames: [],   // unregistered
-    };
-    serverConfigStore.set({config: {...serverConfigStore.get().config}});
-    profileStore.set({profile: newProfile, load, reload, updateCache});
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    const duccTask = wrapper.find('[data-test-id="registration-task-dataUserCodeOfConduct"]');
-    expect(duccTask.find('[data-test-id="registration-task-link"]').exists()).toBeFalsy();
-    expect(duccTask.find('[data-test-id="completed-button"]').exists()).toBeTruthy();
-  });
-
-  it('should not display the quick tour if registration dashboard is open', async () => {
-    const newProfile = {
-      ...profile,
-      accessTierShortNames: [],   // unregistered
-    };
-    serverConfigStore.set({config: {...serverConfigStore.get().config}});
-    profileStore.set({profile: newProfile, load, reload, updateCache});
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.find('[data-test-id="quick-tour-react"]').exists()).toBeFalsy();
   });
 
   it('should not display the zero workspace UI while workspaces are being fetched', async () => {

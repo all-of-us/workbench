@@ -17,7 +17,7 @@ export const disabledGuard = (userDisabled: boolean): Guard => ({
 
 export const registrationGuard: Guard = {
   allowed: (): boolean => hasRegisteredAccess(profileStore.get().profile.accessTierShortNames),
-  redirectPath: environment.enableDataAccessRequirements ? '/data-access-requirements' : '/'
+  redirectPath: '/data-access-requirements'
 };
 
 export const expiredGuard: Guard = {
