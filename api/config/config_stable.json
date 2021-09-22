@@ -106,7 +106,7 @@
     "enablePersistentDisk": false,
     "enableAccessModuleRewrite" : true,
     "enableUnifiedUserAccessCron": true,
-    "enableStandardSourceDomains": false
+    "enableStandardSourceDomains": true
   },
   "actionAudit": {
     "logName": "workbench-action-audit-stable",
