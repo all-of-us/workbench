@@ -1123,7 +1123,7 @@ const RuntimePanel = fp.flow(
     // in progress, even if the runtime store doesn't actively reflect this yet.
     // Show the customize panel in this event.
     [() => !!pendingRuntime, () => PanelContent.Customize],
-    [([, r, s]) => r === null || s === RuntimeStatus.Unknown, () => PanelContent.Create],
+    [([, r, s]) => r === null || r === undefined || s === RuntimeStatus.Unknown, () => PanelContent.Create],
     [([, r, ]) => r.status === RuntimeStatus.Deleted &&
       ([RuntimeConfigurationType.GeneralAnalysis, RuntimeConfigurationType.HailGenomicAnalysis].includes(r.configurationType)),
       () => PanelContent.Create],
