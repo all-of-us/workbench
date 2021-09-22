@@ -543,7 +543,7 @@ jobs:
         type: steps
         default: []
       no_output_timeout:
-        type: integer
+        type: string
         default: 30m
     environment:
       WORKBENCH_ENV: << parameters.env_name >>
