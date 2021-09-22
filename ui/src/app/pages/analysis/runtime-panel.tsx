@@ -9,6 +9,7 @@ import {TextColumn} from 'app/components/text-column';
 import {disksApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {addOpacity, colorWithWhiteness} from 'app/styles/colors';
 import {
+  cond,
   DEFAULT,
   reactStyles,
   summarizeErrors,
@@ -1617,11 +1618,13 @@ const RuntimePanel = fp.flow(
                   aria-label='Delete Environment'
                   disabled={disableControls || !runtimeExists}
                   onClick={() => setPanelContent(PanelContent.DeleteRuntime)}>Delete Environment</Link>
-              {runtimeExists || (pdExists && pdSizeReduced)
-                  ? renderNextButton()
-                  : currentRuntime && currentRuntime.errors
-                      ? renderTryAgainButton()
-                      : renderCreateButton()}
+              {
+                cond(
+                    [runtimeExists || (pdExists && pdSizeReduced), () => renderNextButton()],
+                    [currentRuntime && currentRuntime.errors && currentRuntime.errors.length > 0, () => renderTryAgainButton()],
+                    () => renderCreateButton()
+                )
+              }
             </FlexRow>
         }
     </Fragment>],

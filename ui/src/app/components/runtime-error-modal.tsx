@@ -26,7 +26,7 @@ export const RuntimeErrorModal = ({errors, closeFunction, openRuntimePanel}) => 
         openRuntimePanel();
         closeFunction();
       }}>
-        Open runtime panel
+        Customize Analysis Environment
       </Button>
     </ModalFooter>
   </Modal>

@@ -15,7 +15,6 @@ const DEFAULT_MAX_POLLING_DELAY = 15000;
 // for some resilience to errored-out runtimes, while avoiding situations where we end up in an
 // endless create-error-delete loop.
 const DEFAULT_MAX_CREATE_COUNT = 2;
-const DEFAULT_MAX_DELETE_COUNT = 2;
 const DEFAULT_MAX_RESUME_COUNT = 2;
 // We allow a certain # of server errors to occur before we error-out of the initialization flow.
 const DEFAULT_MAX_SERVER_ERROR_COUNT = 10;
