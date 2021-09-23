@@ -3,7 +3,10 @@ import { config } from 'resources/workbench-config';
 import navigation, { NavLink } from 'app/component/navigation';
 import AdminTable from 'app/component/admin-table';
 import InstitutionAdminPage from 'app/page/admin-institution-list-page';
-import InstitutionEditPage, {AcceptedAddressSelectValue, InstitutionTypeSelectValue} from 'app/page/admin-institution-edit-page';
+import InstitutionEditPage, {
+  AcceptedAddressSelectValue,
+  InstitutionTypeSelectValue
+} from 'app/page/admin-institution-edit-page';
 
 describe('Institution Admin', () => {
   const testInstituteName = 'Admin testing';
@@ -30,7 +33,7 @@ describe('Institution Admin', () => {
     // navigate to institute edit page
     const institutionEditPage = new InstitutionEditPage(page);
     await institutionEditPage.waitForLoad();
-   
+
     // verify the input fields
     const instituteName = await institutionEditPage.getInstituteNameValue();
     expect(instituteName).toBe(testInstituteName);
