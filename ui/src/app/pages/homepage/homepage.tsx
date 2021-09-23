@@ -3,7 +3,7 @@ import * as React from 'react';
 import {RouteComponentProps, withRouter} from 'react-router-dom';
 
 import {
-  StyledAnchorTag,
+  StyledAnchorTag, StyledRouterLink,
 } from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
@@ -129,7 +129,7 @@ const GettingStarted = () => {
           your other Google accounts.
         </CustomBulletListItem>
         <CustomBulletListItem bullet='→'>
-          Check out <StyledAnchorTag href='library'>Featured Workspaces</StyledAnchorTag> from
+          Check out <StyledRouterLink path='/library'>Featured Workspaces</StyledRouterLink> from
           the left hand panel to browse through example workspaces.
         </CustomBulletListItem>
         <CustomBulletListItem bullet='→'>
