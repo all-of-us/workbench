@@ -1,4 +1,4 @@
-import { LinkButton, StyledAnchorTag, StyledRouterLink } from 'app/components/buttons';
+import { LinkButton, StyledExternalLink, StyledRouterLink } from 'app/components/buttons';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {SemiBoldHeader} from 'app/components/headers';
 import {AoU} from 'app/components/text-wrappers';
@@ -65,14 +65,14 @@ const FooterAnchorTag = ({style = {}, href, ...props}) => {
 };
 
 const NewTabFooterAnchorTag = ({style = {}, href, ...props}) => {
-  return <StyledAnchorTag
+  return <StyledExternalLink
       style={{...styles.footerAnchor, ...styles}}
       href={href}
       target='_blank'
       {...props}
   >
     {props.children}
-  </StyledAnchorTag>;
+  </StyledExternalLink>;
 };
 
 const DataBrowserLink = (props) => (

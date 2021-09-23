@@ -1,6 +1,6 @@
 import {AuditActionCardListView} from 'app/components/admin/audit-card-list-view';
 import {Navigate} from 'app/components/app-router';
-import {Button, StyledAnchorTag, StyledRouterLink} from 'app/components/buttons';
+import {Button, StyledExternalLink, StyledRouterLink} from 'app/components/buttons';
 import {NumberInput, TextInputWithLabel} from 'app/components/inputs';
 import {TooltipTrigger} from 'app/components/popups';
 import colors from 'app/styles/colors';
@@ -108,10 +108,10 @@ const UserInput = ({initialAuditSubject, auditSubjectType, getNextAuditPath, but
       fontWeight: 600
     }}>
     <TooltipTrigger content={'BigQuery Console page (use pmi-ops.org account)'}>
-      <StyledAnchorTag href={getBigQueryConsoleUrl()}
-                       target='_blank'>
+      <StyledExternalLink href={getBigQueryConsoleUrl()}
+                          target='_blank'>
         BigQuery Console
-      </StyledAnchorTag>
+      </StyledExternalLink>
     </TooltipTrigger>
     &nbsp;|&nbsp;
     <TooltipTrigger content={`Admin Page for ${auditSubjectType} ${auditSubject || 'n/a'}`}>

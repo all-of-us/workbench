@@ -364,23 +364,14 @@ export const StyledRouterLink = ({path, children, disabled = false, analyticsFn 
     </Link>;
 }
 
-export const StyledAnchorTag = ({href, children, analyticsFn = null, style = {}, ...props}) => {
-  const [, navigateByUrl] = useNavigation();
-
+export const StyledExternalLink = ({href, children, analyticsFn = null, style = {}, ...props}) => {
+  if (!href.startsWith('https://') && !href.startsWith('http://')) {
+    throw new Error('StyledExternalLink is for linking to URLs outside the Researcher Workbench; use StyledRouterLink for internal URLs');
+  }
   return <a href={href}
-            onClick={e => {
-              if (analyticsFn) {
-                analyticsFn();
-              }
-              // This does same page navigation iff there is no key pressed and target is not set.
-              if (props.target === undefined && !href.startsWith('https://') && !href.startsWith('http://')) {
-                navigateByUrl(href, {
-                  preventDefaultIfNoKeysPressed: true,
-                  event: e
-                });
-              }
-            }}
-            style={{...styles.inlineAnchor, ...style}} {...props}>{children}</a>;
+            onClick={() => analyticsFn && analyticsFn()}
+            style={{...styles.inlineAnchor, ...style}}
+            {...props}>{children}</a>;
 };
 
 interface SlidingFabState {

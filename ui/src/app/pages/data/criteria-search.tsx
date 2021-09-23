@@ -7,7 +7,7 @@ import {ListSearch} from 'app/cohort-search/list-search/list-search.component';
 import {Selection} from 'app/cohort-search/selection-list/selection-list.component';
 import {CriteriaTree} from 'app/cohort-search/tree/tree.component';
 import {domainToTitle, typeToTitle} from 'app/cohort-search/utils';
-import {Clickable, StyledAnchorTag} from 'app/components/buttons';
+import {Clickable, StyledExternalLink} from 'app/components/buttons';
 import {FlexRowWrap} from 'app/components/flex';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {AoU} from 'app/components/text-wrappers';
@@ -342,31 +342,31 @@ export const CriteriaSearch = fp.flow(withCurrentWorkspace(), withRouter)(class 
         </React.Fragment>}
         <div style={source === 'conceptSetDetails' ? styles.detailExternalLinks : styles.externalLinks}>
           {domain === Domain.DRUG && <div>
-            <StyledAnchorTag
+            <StyledExternalLink
                 href='https://mor.nlm.nih.gov/RxNav/'
                 target='_blank'
                 rel='noopener noreferrer'>
               Explore
-            </StyledAnchorTag>
+            </StyledExternalLink>
             &nbsp;drugs by brand names outside of <AoU/>
           </div>}
           {domain === Domain.SURVEY && <div>
             Find more information about each survey in the&nbsp;
-            <StyledAnchorTag
+            <StyledExternalLink
                 href='https://www.researchallofus.org/survey-explorer/'
                 target='_blank'
                 rel='noopener noreferrer'>
               Survey Explorer
-            </StyledAnchorTag>
+            </StyledExternalLink>
           </div>}
           {this.showDataBrowserLink && <div>
             Explore Source information on the&nbsp;
-            <StyledAnchorTag
+            <StyledExternalLink
                 href={environment.publicUiUrl}
                 target='_blank'
                 rel='noopener noreferrer'>
               Data Browser
-            </StyledAnchorTag>
+            </StyledExternalLink>
           </div>}
         </div>
       </FlexRowWrap>
