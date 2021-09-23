@@ -134,23 +134,18 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
     expect(wrapper).toBeTruthy();
 
     // Value before test.
-    expect(findRTDomainInput(wrapper).first().prop('value'))
-    .toBe('verily.com,\ngoogle.com');
-    expect(findCTAddressInput(wrapper).first().prop('value'))
-    .toBe('foo@verily.com');
+    expect(findRTDomainInput(wrapper).first().prop('value')).toBe('verily.com,\ngoogle.com');
+    expect(findCTAddressInput(wrapper).first().prop('value')).toBe('foo@verily.com');
 
     await simulateComponentChange(wrapper, findCTDropdown(wrapper), InstitutionMembershipRequirement.DOMAINS);
 
-    findCTDomainInput(wrapper).first()
-    .simulate('change', {target: {value: 'domain.com'}});
+    findCTDomainInput(wrapper).first().simulate('change', {target: {value: 'domain.com'}});
 
     wrapper.find('[data-test-id="save-institution-button"]').first().simulate('click');
     // RT no change
-    expect(findRTDomainInput(wrapper).first().prop('value'))
-    .toBe('verily.com,\n' + 'google.com');
+    expect(findRTDomainInput(wrapper).first().prop('value')).toBe('verily.com,\n' + 'google.com');
     // CT changed to email domains
-    expect(findCTDomainInput(wrapper).first().prop('value'))
-    .toBe('domain.com');
+    expect(findCTDomainInput(wrapper).first().prop('value')).toBe('domain.com');
     // CT email addresses become empty
     expect(findCTAddressInput(wrapper).length).toBe(0);
   });
@@ -189,16 +184,13 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
 
     // Single Entry with incorrect Email Domain format
     findRTDomainInput(wrapper).first()
-    .simulate('change', {target: {value: 'someDomain.com,\njustSomeRandom.domain,\n,'}});
+        .simulate('change', {target: {value: 'someDomain.com,\njustSomeRandom.domain,\n,'}});
     findRTDomainInput(wrapper).first().simulate('blur');
-    findCTAddressInput(wrapper).first()
-    .simulate('change', {target: {value: 'correctEmail@domain.com'}});
+    findCTAddressInput(wrapper).first().simulate('change', {target: {value: 'correctEmail@domain.com'}});
     findCTAddressInput(wrapper).first().simulate('blur');
 
-    expect(findRTDomainInput(wrapper).first().prop('value'))
-    .toBe('someDomain.com,\njustSomeRandom.domain');
-    expect(findCTAddressInput(wrapper).first().prop('value'))
-    .toBe('correctEmail@domain.com');
+    expect(findRTDomainInput(wrapper).first().prop('value')).toBe('someDomain.com,\njustSomeRandom.domain');
+    expect(findCTAddressInput(wrapper).first().prop('value')).toBe('correctEmail@domain.com');
   });
 
   it('should show appropriate section after changing agreement type in Controlled Tier requirement', async() => {
@@ -237,7 +229,7 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
     findRTAddressInput(wrapper).first().simulate('change', {target: {value: 'rtInvalidEmail@domain'}});
     findRTAddressInput(wrapper).first().simulate('blur');
     expect(findRTAddressError(wrapper).first().props().children)
-      .toBe('Following Email Addresses are not valid : rtInvalidEmail@domain');
+        .toBe('Following Email Addresses are not valid : rtInvalidEmail@domain');
 
     // Multiple Email Address entries with a mix of correct (someEmail@broadinstitute.org') and incorrect format
     findRTAddressInput(wrapper).first()
@@ -255,11 +247,10 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
       });
     findRTAddressInput(wrapper).first().simulate('blur');
     expect(findRTAddressError(wrapper).first().props().children)
-      .toBe('Following Email Addresses are not valid : invalidEmail@domain@org , invalidEmail , justDomain.org , nope@just#plain#wrong');
+        .toBe('Following Email Addresses are not valid : invalidEmail@domain@org , invalidEmail , justDomain.org , nope@just#plain#wrong');
 
     // Single correct format Email Address entries
-    findRTAddressInput(wrapper).first()
-      .simulate('change', {target: {value: 'correctEmail@domain.com'}});
+    findRTAddressInput(wrapper).first().simulate('change', {target: {value: 'correctEmail@domain.com'}});
     findRTAddressInput(wrapper).first().simulate('blur');
     expect(findRTAddressError(wrapper).length).toBe(0);
   });
@@ -296,11 +287,10 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
     });
     findCTAddressInput(wrapper).first().simulate('blur');
     expect(findCTAddressError(wrapper).first().props().children)
-    .toBe('Following Email Addresses are not valid : invalidEmail@domain@org , invalidEmail , justDomain.org , nope@just#plain#wrong');
+        .toBe('Following Email Addresses are not valid : invalidEmail@domain@org , invalidEmail , justDomain.org , nope@just#plain#wrong');
 
     // Single correct format Email Address entries
-    findCTAddressInput(wrapper).first()
-    .simulate('change', {target: {value: 'correctEmail@domain.com'}});
+    findCTAddressInput(wrapper).first().simulate('change', {target: {value: 'correctEmail@domain.com'}});
     findCTAddressInput(wrapper).first().simulate('blur');
     expect(findCTAddressError(wrapper).length).toBe(0);
   });
@@ -316,7 +306,7 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
 
     // Single Entry with incorrect Email Domain format
     findRTDomainInput(wrapper).first()
-      .simulate('change', {target: {value: 'invalidEmail@domain'}});
+        .simulate('change', {target: {value: 'invalidEmail@domain'}});
     findRTDomainInput(wrapper).first().simulate('blur');
     expect(findRTDomainError(wrapper).first().props().children)
       .toBe('Following Email Domains are not valid : invalidEmail@domain');
@@ -356,11 +346,10 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
     expect(findCTDomainError(wrapper).length).toBe(0);
 
     // Single Entry with incorrect Email Domain format
-    findCTDomainInput(wrapper).first()
-    .simulate('change', {target: {value: 'invalidEmail@domain'}});
+    findCTDomainInput(wrapper).first().simulate('change', {target: {value: 'invalidEmail@domain'}});
     findCTDomainInput(wrapper).first().simulate('blur');
     expect(findCTDomainError(wrapper).first().props().children)
-    .toBe('Following Email Domains are not valid : invalidEmail@domain');
+        .toBe('Following Email Domains are not valid : invalidEmail@domain');
 
     // Multiple Entries with correct and incorrect Email Domain format
     findCTDomainInput(wrapper).first()
@@ -376,11 +365,10 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
     });
     findCTDomainInput(wrapper).first().simulate('blur');
     expect(findCTDomainError(wrapper).first().props().children)
-    .toBe('Following Email Domains are not valid : someEmailAddress@domain@org , ' +
-        'justSomeText , broadinstitute.org#wrongTest');
+        .toBe('Following Email Domains are not valid : someEmailAddress@domain@org , ' +
+            'justSomeText , broadinstitute.org#wrongTest');
 
-    findCTDomainInput(wrapper).first()
-    .simulate('change', {target: {value: 'domain.com'}});
+    findCTDomainInput(wrapper).first().simulate('change', {target: {value: 'domain.com'}});
     findCTDomainInput(wrapper).first().simulate('blur');
     expect(findCTDomainError(wrapper).length).toBe(0);
   });
@@ -414,10 +402,9 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
 
     // Single Entry with incorrect Email Domain format
     findCTDomainInput(wrapper).first()
-    .simulate('change', {target: {value: 'validEmail.com,\n     ,\njustSomeRandom.domain,\n,'}});
+        .simulate('change', {target: {value: 'validEmail.com,\n     ,\njustSomeRandom.domain,\n,'}});
     findCTDomainInput(wrapper).first().simulate('blur');
-    expect(findCTDomainInput(wrapper).first().prop('value'))
-    .toBe('validEmail.com,\njustSomeRandom.domain');
+    expect(findCTDomainInput(wrapper).first().prop('value')).toBe('validEmail.com,\njustSomeRandom.domain');
 
     expect(findCTDomainError(wrapper).length).toBe(0);
   });
@@ -449,10 +436,9 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
 
     // Single Entry with incorrect Email Domain format
     findCTDomainInput(wrapper).first()
-    .simulate('change', {target: {value: '  someDomain.com,\njustSomeRandom.domain   ,\n,'}});
+        .simulate('change', {target: {value: '  someDomain.com,\njustSomeRandom.domain   ,\n,'}});
     findCTDomainInput(wrapper).first().simulate('blur');
-    expect(findCTDomainInput(wrapper).first().prop('value'))
-    .toBe('someDomain.com,\njustSomeRandom.domain');
+    expect(findCTDomainInput(wrapper).first().prop('value')).toBe('someDomain.com,\njustSomeRandom.domain');
 
     expect(findCTDomainError(wrapper).length).toBe(0);
   });
@@ -518,7 +504,7 @@ describe('AdminInstitutionEditSpec - add mode', () => {
     expect(findRTAddressInput(wrapper).exists()).toBeFalsy();
     expect(findCTAddressInput(wrapper).exists()).toBeFalsy();
     expect(findCTDomainInput(wrapper).exists()).toBeFalsy();
-    
+
     await simulateComponentChange(wrapper, findRTDropdown(wrapper), InstitutionMembershipRequirement.ADDRESSES);
 
     expect(findRTAddressInput(wrapper).exists()).toBeTruthy();
@@ -528,13 +514,10 @@ describe('AdminInstitutionEditSpec - add mode', () => {
     expect(findCTAddressInput(wrapper).exists()).toBeFalsy();
     expect(findCTDomainInput(wrapper).exists()).toBeFalsy();
 
-    findRTAddressInput(wrapper).first()
-        .simulate('change', {target: {value: 'user@domain.com'}});
-    findRTAddressInput(wrapper).first()
-        .simulate('blur');
+    findRTAddressInput(wrapper).first().simulate('change', {target: {value: 'user@domain.com'}});
+    findRTAddressInput(wrapper).first().simulate('blur');
 
     // RT no change
-    expect(findRTAddressInput(wrapper).first().prop('value'))
-        .toBe('user@domain.com');
+    expect(findRTAddressInput(wrapper).first().prop('value')).toBe('user@domain.com');
   });
 });
