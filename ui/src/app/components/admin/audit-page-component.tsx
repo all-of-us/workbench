@@ -1,6 +1,6 @@
 import {AuditActionCardListView} from 'app/components/admin/audit-card-list-view';
 import {Navigate} from 'app/components/app-router';
-import {Button, StyledAnchorTag} from 'app/components/buttons';
+import {Button, StyledAnchorTag, StyledRouterLink} from 'app/components/buttons';
 import {NumberInput, TextInputWithLabel} from 'app/components/inputs';
 import {TooltipTrigger} from 'app/components/popups';
 import colors from 'app/styles/colors';
@@ -45,7 +45,7 @@ export interface AuditPageProps {
   queryAuditLog: (subject: string) => Promise<GenericAuditQueryResult>;
   getNextAuditPath: (subject: string) => string;
   buttonLabel?: string;
-  getAdminPageUrl: (subject: string) => string[];
+  getAdminPageUrl: (subject: string) => string;
 }
 
 const UserInput = ({initialAuditSubject, auditSubjectType, getNextAuditPath, buttonLabel, queryText, getAdminPageUrl}) => {
@@ -115,10 +115,13 @@ const UserInput = ({initialAuditSubject, auditSubjectType, getNextAuditPath, but
     </TooltipTrigger>
     &nbsp;|&nbsp;
     <TooltipTrigger content={`Admin Page for ${auditSubjectType} ${auditSubject || 'n/a'}`}>
-      <StyledAnchorTag href={auditSubject ? getAdminPageUrl(auditSubject) : undefined}
-                       style={auditSubject ? {} : {cursor: 'not-allowed', color: colors.disabled}}>
+      <StyledRouterLink
+          path={auditSubject ? getAdminPageUrl(auditSubject) : undefined}
+          style={auditSubject ? {} : {cursor: 'not-allowed', color: colors.disabled}}
+          disabled={!auditSubject}
+      >
         {auditSubjectType} Admin
-      </StyledAnchorTag>
+      </StyledRouterLink>
     </TooltipTrigger>
     </div>
     <TooltipTrigger content={'Download actual SQL query for BigQuery Action Audit table. Useful' +

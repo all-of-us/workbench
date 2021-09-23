@@ -9,6 +9,7 @@ import {useNavigation} from 'app/utils/navigation';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import Interactive from 'react-interactive';
+import { Link } from 'react-router-dom';
 
 
 export const styles = reactStyles({
@@ -23,7 +24,10 @@ export const styles = reactStyles({
     borderRadius: 5,
     boxSizing: 'border-box'
   },
-
+  inlineAnchor: {
+    display: 'inline-block',
+    color: colors.accent
+  },
   slidingButtonContainer: {
     // Use position sticky so the FAB does not continue past the page footer. We
     // use a padding-bottom since when the FAB ignores margins in "fixed"
@@ -341,14 +345,33 @@ export const LinkButton = ({disabled = false, style = {}, children, ...props}) =
   >{children}</Clickable>;
 };
 
+export const StyledRouterLink = ({path, children, disabled = false, analyticsFn = null, style = {}, ...props}) => {
+  const linkStyle = {
+    style: {...styles.inlineAnchor}
+  }
+  const computedStyles = fp.merge(computeStyle(linkStyle, {disabled}), {style})
+  return <Clickable
+      as='span'
+      disabled={disabled}
+  >
+    {
+      disabled
+        ? <span {...computedStyles} {...props}>{children}</span>
+        : <Link
+            to={path}
+            onClick={() => analyticsFn && analyticsFn()}
+            {...computedStyles}
+            {...props}
+        >
+          {children}
+        </Link>
+    }
+  </Clickable>;
+}
+
 export const StyledAnchorTag = ({href, children, analyticsFn = null, style = {}, ...props}) => {
   const [, navigateByUrl] = useNavigation();
-  const inlineAnchor = {
-    display: 'inline-block',
-    color: colors.accent
-  };
 
-  // TODO RW-7154: change to react-router Link
   return <a href={href}
             onClick={e => {
               if (analyticsFn) {
@@ -362,7 +385,7 @@ export const StyledAnchorTag = ({href, children, analyticsFn = null, style = {},
                 });
               }
             }}
-            style={{...inlineAnchor, ...style}} {...props}>{children}</a>;
+            style={{...styles.inlineAnchor, ...style}} {...props}>{children}</a>;
 };
 
 interface SlidingFabState {
