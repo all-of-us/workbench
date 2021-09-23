@@ -107,6 +107,19 @@ enum InstitutionMode {
   EDIT
 }
 
+const isAddressInvalid = (emailAddress: string): boolean => {
+  const errors = validate({emailAddress}, {emailAddress: {email: true}});
+  return errors && errors.emailAddress && errors.emailAddress.length > 0;
+}
+
+const isDomainInvalid = (emailDomain: string): boolean => isAddressInvalid(`test@${emailDomain}`);
+
+const getInvalidEmailAddresses = (emailAddresses: Array<string>): Array<string> =>
+    emailAddresses.filter(isAddressInvalid);
+
+const getInvalidEmailDomains = (emailDomains: Array<string>): Array<string> =>
+    emailDomains.filter(isDomainInvalid);
+
 const EraRequiredSwitch = (props: {tierConfig: InstitutionTierConfig, onChange: (boolean) => void}) => {
   const {tierConfig, onChange} = props;
   const {config: {enableRasLoginGovLinking}} = useStore(serverConfigStore);
@@ -348,30 +361,17 @@ export const AdminInstitutionEdit = fp.flow(withNavigation, withRouter)(class ex
     }
   }
 
-  getInvalidEmailAddresses(emailAddresses) {
-    const invalidEmailAddress = [];
-    emailAddresses.map(emailAddress => {
-      const errors = validate({
-        emailAddress
-      }, {
-        emailAddress: {email: true}
-      });
-      if (errors && errors.emailAddress && errors.emailAddress.length > 0) {
-        invalidEmailAddress.push(emailAddress);
-      }
-    });
-    return invalidEmailAddress;
+  // Filter out empty line or empty email addresses like <email1>,,<email2> for registered tier
+  filterEmptyRtEmailAddresses() {
+    const updatedEmailAddresses = getRegisteredTierEmailAddresses(this.state.institution)
+        .filter(emailAddress => emailAddress !== '' || !!emailAddress);
+    this.setState(fp.set(['institution', 'tierConfigs'], updateRtEmailAddresses(this.state.institution, updatedEmailAddresses)));
+    return updatedEmailAddresses;
   }
 
-  // Filter out empty line or empty email addresses like <email1>,,<email2> for registered tier
   // Confirm each email is a valid email using validate.js
   validateRtEmailAddresses() {
-    const emailAddresses = getRegisteredTierEmailAddresses(this.state.institution);
-    const updatedEmailAddress = emailAddresses.filter(
-      emailAddress => emailAddress !== '' || !!emailAddress);
-    const invalidRtEmailAddress = this.getInvalidEmailAddresses(updatedEmailAddress);
-
-    this.setState(fp.set(['institution', 'tierConfigs'], updateRtEmailAddresses(this.state.institution, updatedEmailAddress)));
+    const invalidRtEmailAddress = getInvalidEmailAddresses(this.filterEmptyRtEmailAddresses());
     this.setState({invalidRtEmailAddress: invalidRtEmailAddress.length > 0});
     if (invalidRtEmailAddress.length > 0) {
       const errMessage = 'Following Email Addresses are not valid : ' + invalidRtEmailAddress.join(' , ');
@@ -386,7 +386,7 @@ export const AdminInstitutionEdit = fp.flow(withNavigation, withRouter)(class ex
     const emailAddresses = getControlledTierEmailAddresses(this.state.institution);
     const updatedEmailAddress = emailAddresses.filter(
       emailAddress => emailAddress !== '' || !!emailAddress);
-    const invalidCtEmailAddress = this.getInvalidEmailAddresses(updatedEmailAddress);
+    const invalidCtEmailAddress = getInvalidEmailAddresses(updatedEmailAddress);
 
     this.setState(fp.set(['institution', 'tierConfigs'], updateCtEmailAddresses(this.state.institution, updatedEmailAddress)));
     this.setState({invalidCtEmailAddress: invalidCtEmailAddress.length > 0});
@@ -397,22 +397,6 @@ export const AdminInstitutionEdit = fp.flow(withNavigation, withRouter)(class ex
     return;
   }
 
-  getInvalidEmailDomains(emailDomains) {
-    const invalidEmailDomains = [];
-    emailDomains.map(emailDomain => {
-      const testAddress = 'test@' + emailDomain;
-      const errors = validate({
-        testAddress
-      }, {
-        testAddress: {email: true}
-      });
-      if (errors && errors.testAddress && errors.testAddress.length > 0) {
-        invalidEmailDomains.push(emailDomain);
-      }
-    });
-    return invalidEmailDomains;
-  }
-
   // Filter out empty line or empty email addresses like <email1>,,<email2> for registered tier
   // Confirm each email domain matches with regex
   validateRtEmailDomains() {
@@ -420,7 +404,7 @@ export const AdminInstitutionEdit = fp.flow(withNavigation, withRouter)(class ex
     const emailDomainsWithNoEmptyString =
       emailDomains.filter(emailDomain => emailDomain.trim() !== '');
     this.setState(fp.set(['institution', 'tierConfigs'], updateRtEmailDomains(this.state.institution, emailDomainsWithNoEmptyString)));
-    const invalidRtEmailDomain = this.getInvalidEmailDomains(emailDomainsWithNoEmptyString);
+    const invalidRtEmailDomain = getInvalidEmailDomains(emailDomainsWithNoEmptyString);
     this.setState({invalidRtEmailDomain: invalidRtEmailDomain.length > 0});
     if (invalidRtEmailDomain.length > 0) {
       const errMessage = 'Following Email Domains are not valid : ' + invalidRtEmailDomain.join(' , ');
@@ -436,7 +420,7 @@ export const AdminInstitutionEdit = fp.flow(withNavigation, withRouter)(class ex
     const emailDomainsWithNoEmptyString =
         emailDomains.filter(emailDomain => emailDomain.trim() !== '');
     this.setState(fp.set(['institution', 'tierConfigs'], updateCtEmailDomains(this.state.institution, emailDomainsWithNoEmptyString)));
-    const invalidCtEmailDomain = this.getInvalidEmailDomains(emailDomainsWithNoEmptyString);
+    const invalidCtEmailDomain = getInvalidEmailDomains(emailDomainsWithNoEmptyString);
     this.setState({invalidCtEmailDomain: invalidCtEmailDomain.length > 0});
     if (invalidCtEmailDomain.length > 0) {
       const errMessage = 'Following Email Domains are not valid : ' + invalidCtEmailDomain.join(' , ');
@@ -510,7 +494,7 @@ export const AdminInstitutionEdit = fp.flow(withNavigation, withRouter)(class ex
   // Check if the fields have not been edited
   fieldsNotEdited() {
     return (this.isAddInstitutionMode && !this.fieldsEditedAddInstitution)
-        || (this.state.institutionBeforeEdits && !this.fieldsEditedEditInstitution);
+        || (this.isEditInstitutionMode && !this.fieldsEditedEditInstitution);
   }
 
   get fieldsEditedAddInstitution() {
@@ -526,29 +510,18 @@ export const AdminInstitutionEdit = fp.flow(withNavigation, withRouter)(class ex
 
   hasInvalidFields() {
     const {institution} = this.state;
-    let emailValid = true;
     if (!institution.tierConfigs) {
       // It is not expected for a tier requirement to be empty
       return true;
     }
-    const rtConfig: InstitutionTierConfig = getRegisteredTierConfig(institution);
-    if (rtConfig.membershipRequirement !== InstitutionMembershipRequirement.NOACCESS) {
-      emailValid = rtConfig.membershipRequirement === InstitutionMembershipRequirement.DOMAINS ?
-          rtConfig.emailDomains !== undefined : rtConfig.emailAddresses !== undefined;
-    }
-    return !emailValid || !institution.displayName || !institution.organizationTypeEnum ||
-        (institution.organizationTypeEnum === OrganizationType.OTHER &&
-            !institution.organizationTypeOtherText);
   }
 
   // Disable save button if
-  // a) No fields were edited or if there are any errors
-  // b) email address/Domain are not valid
-  // c) Required fields are not empty
+  // a) there are any errors
+  // b) any fields are invalid
+  // c) No fields were edited
   disableSave(errors) {
-    return this.hasInvalidFields() || errors || this.fieldsNotEdited()
-      || this.state.invalidRtEmailAddress || this.state.invalidRtEmailDomain
-        || this.state.invalidCtEmailAddress || this.state.invalidCtEmailDomain;
+    return errors || this.hasInvalidFields() || this.fieldsNotEdited();
   }
 
   backNavigate() {
@@ -615,26 +588,6 @@ export const AdminInstitutionEdit = fp.flow(withNavigation, withRouter)(class ex
     }
   }
 
-  validateEmailAddressPresence(tier: AccessTierShortNames) {
-    const {institution} = this.state;
-    if (getTierConfig(institution, tier).membershipRequirement === InstitutionMembershipRequirement.ADDRESSES) {
-      const emailAddresses = getTierEmailAddresses(institution, tier);
-      return emailAddresses && emailAddresses.length > 0;
-    } else {
-      return true;
-    }
-  }
-
-  validateEmailDomainPresence(tier: AccessTierShortNames) {
-    const {institution} = this.state;
-    if (getTierConfig(institution, tier).membershipRequirement === InstitutionMembershipRequirement.DOMAINS) {
-      const emailDomains = getTierEmailDomains(institution, tier);
-      return emailDomains && emailDomains.length > 0;
-    } else {
-      return true;
-    }
-  }
-
   get buttonText() {
     return !this.isAddInstitutionMode ? 'SAVE' : 'ADD';
   }
@@ -643,25 +596,60 @@ export const AdminInstitutionEdit = fp.flow(withNavigation, withRouter)(class ex
     return this.state.institutionMode === InstitutionMode.ADD;
   }
 
+  get isEditInstitutionMode() {
+    return this.state.institutionMode === InstitutionMode.EDIT;
+  }
+
   render() {
     const {institution, showOtherInstitutionTextBox, title} = this.state;
     const {
-      displayName, organizationTypeEnum
+      displayName, organizationTypeEnum, organizationTypeOtherText
     } = institution;
-    const errors = validate({
+
+    validate.validators.customEmailAddresses = (accessTierShortName: string) => {
+      const tierConfig = getTierConfig(this.state.institution, accessTierShortName);
+      if (tierConfig.membershipRequirement === InstitutionMembershipRequirement.ADDRESSES) {
+        const {emailAddresses} = tierConfig;
+        if (!emailAddresses || emailAddresses.length === 0) {
+          return 'should not be empty';
+        }
+        const invalid = getInvalidEmailAddresses(emailAddresses);
+        if (invalid.length > 0) {
+          return 'are not valid: ' + invalid.join(',');
+        }
+      }
+    };
+
+    validate.validators.customEmailDomains = (accessTierShortName: string) => {
+      const tierConfig = getTierConfig(this.state.institution, accessTierShortName);
+      if (tierConfig.membershipRequirement === InstitutionMembershipRequirement.DOMAINS) {
+        const {emailDomains} = tierConfig;
+        if (!emailDomains || emailDomains.length === 0) {
+          return 'should not be empty';
+        }
+        const invalid = getInvalidEmailDomains(emailDomains);
+        if (invalid.length > 0) {
+          return 'are not valid: ' + invalid.join(',');
+        }
+      }
+    };
+
+      const errors = validate({
       displayName,
-      'rtTierEmailAddresses': this.validateEmailAddressPresence(AccessTierShortNames.Registered),
-      'ctTierEmailAddresses': this.validateEmailAddressPresence(AccessTierShortNames.Controlled),
-      'rtTierEmailDomains': this.validateEmailDomainPresence(AccessTierShortNames.Registered),
-      'ctTierEmailDomains': this.validateEmailDomainPresence(AccessTierShortNames.Controlled),
-      organizationTypeEnum
+      organizationTypeEnum,
+      'organizationTypeOtherText': (organizationTypeEnum !== OrganizationType.OTHER) || organizationTypeOtherText,
+      'registeredTierEmailAddresses': AccessTierShortNames.Registered,
+      'controlledTierEmailAddresses': AccessTierShortNames.Controlled,
+      'registeredTierEmailDomains': AccessTierShortNames.Registered,
+      'controlledTierEmailDomains': AccessTierShortNames.Controlled,
     }, {
       displayName: {presence: {allowEmpty: false}, length: {maximum: 80, tooLong: 'must be %{count} characters or less'}},
       organizationTypeEnum: {presence: {allowEmpty: false}},
-      rtTierEmailAddresses: {truthiness: true} ,
-      ctTierEmailAddresses: {truthiness: true},
-      rtTierEmailDomains: {truthiness: true},
-      ctTierEmailDomains: {truthiness: true},
+      organizationTypeOtherText: {truthiness: true},
+      registeredTierEmailAddresses: {customEmailAddresses: {}},
+      controlledTierEmailAddresses: {customEmailAddresses: {}},
+      registeredTierEmailDomains: {customEmailDomains: {}},
+      controlledTierEmailDomains: {customEmailDomains: {}},
     });
     return <div>
       <style>{css}</style>
@@ -689,7 +677,7 @@ export const AdminInstitutionEdit = fp.flow(withNavigation, withRouter)(class ex
                 onBlur={v => this.setState(fp.set(['institution', 'displayName'], v.trim()))}
             />
             <div style={{color: colors.danger}} data-test-id='displayNameError'>
-              {errors && errors.displayName}
+              {institution.displayName && errors && errors.displayName}
               </div>
             <label style={styles.label}>Institution Type</label>
             <Dropdown style={{width: '16rem'}} data-test-id='organization-dropdown'
@@ -697,7 +685,7 @@ export const AdminInstitutionEdit = fp.flow(withNavigation, withRouter)(class ex
                       options={OrganizationTypeOptions}
                       value={institution.organizationTypeEnum}
                       onChange={v => this.updateInstitutionRole(v.value)}/>
-            <div style={{color: colors.danger}}>{!this.isAddInstitutionMode && errors && errors.organizationTypeEnum}</div>
+            <div style={{color: colors.danger}}>{institution.organizationTypeEnum && errors && errors.organizationTypeEnum}</div>
             {showOtherInstitutionTextBox && <TextInputWithLabel
               value={institution.organizationTypeOtherText}
               onChange={v => this.setState(fp.set(['institution', 'organizationTypeOtherText'], v))}
@@ -752,18 +740,21 @@ export const AdminInstitutionEdit = fp.flow(withNavigation, withRouter)(class ex
           <div>
             <Button type='secondary' onClick={() => this.backNavigate()} style={{marginRight: '1.5rem'}}>Cancel</Button>
             <TooltipTrigger data-test-id='tooltip' content={
-              errors && this.disableSave(errors) && <div>Answer required fields
+              errors && this.disableSave(errors) && <div>Please correct the following errors
                 <BulletAlignedUnorderedList>
-                  {errors.displayName && <li>Display Name should be of at most 80 Characters</li>}
+                  {errors.displayName && <li>{errors.displayName}</li>}
                   {errors.organizationTypeEnum && <li>Organization Type should not be empty</li>}
-                  {(errors.rtTierEmailDomains || errors.ctTierEmailDomains) &&
-                  <li>Email Domains should not be empty</li>}
-                  {(errors.rtTierEmailAddresses || errors.ctTierEmailAddresses)
-                  && <li>Email Addresses should not be empty</li>}
+                  {errors.organizationTypeOtherText && <li>Organization Type 'Other' text should not be empty</li>}
+                  {errors.registeredTierEmailAddresses && <li>{errors.registeredTierEmailAddresses}</li>}
+                  {errors.registeredTierEmailDomains && <li>{errors.registeredTierEmailDomains}</li>}
+                  {errors.controlledTierEmailAddresses && <li>{errors.controlledTierEmailAddresses}</li>}
+                  {errors.controlledTierEmailDomains && <li>{errors.controlledTierEmailDomains}</li>}
                 </BulletAlignedUnorderedList>
               </div>
             } disable={this.isAddInstitutionMode}>
-              <Button type='primary' data-test-id='save-institution-button' disabled={this.disableSave(errors)}
+              <Button type='primary'
+                      data-test-id='save-institution-button'
+                      disabled={this.disableSave(errors)}
                       onClick={() => this.saveInstitution()}>
                 {this.buttonText}
               </Button>
