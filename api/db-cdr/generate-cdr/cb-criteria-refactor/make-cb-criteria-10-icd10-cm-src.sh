@@ -4,23 +4,45 @@
 set -e
 SQL_FOR='ICD10CM - SOURCE'
 SQL_SCRIPT_ORDER=10
+TBL_CBC='cb_criteria'
+TBL_PAS='prep_ancestor_staging'
+TBL_PCA='prep_concept_ancestor'
 ####### common block for all make-cb-criteria-dd-*.sh scripts ###########
+function createTmpTable(){
+  local tmpTbl="temp_"$1"_"$SQL_SCRIPT_ORDER
+  res=$(bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+    "CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.$tmpTbl\` AS
+      SELECT * FROM \`$BQ_PROJECT.$BQ_DATASET.$1\` LIMIT 0")
+  echo $res >&2
+  echo "$tmpTbl"
+}
+function cpToMain(){
+  local tbl_to=`echo "$1" | perl -pe 's/(temp_)|(_\d+)//g'`
+  bq cp --append_table=true --quiet --project_id=$BQ_PROJECT \
+     $BQ_DATASET.$1 $BQ_DATASET.$tbl_to
+}
 export BQ_PROJECT=$1        # project
 export BQ_DATASET=$2        # dataset
 # export DATA_BROWSER=$3      # data browser flag
-IS_PARALLEL=$3
-if [[ "$IS_PARALLEL" -eq 1 ]]; then
-  echo "Running in parallel - " "$SQL_SCRIPT_ORDER - $SQL_FOR"
+RUN_PARALLEL=$3
+if [[ "$RUN_PARALLEL" == "par" ]]; then
+  echo "Running in parallel mode - " "$SQL_SCRIPT_ORDER - $SQL_FOR"
   STEP=$SQL_SCRIPT_ORDER
   CB_CRITERIA_START_ID=$[$STEP*10**9] # 3  billion
   CB_CRITERIA_END_ID=$[$[STEP+1]*10**9] # 4  billion
-else
-    echo "Running in Order - "  "$SQL_SCRIPT_ORDER - $SQL_FOR"
-    # set start_to to 0 (if running in ORDER from main script)
+elif [[ "$RUN_PARALLEL" == "seq" ]]; then
+    echo "Running in sequential mode - "  "$SQL_SCRIPT_ORDER - $SQL_FOR"
     CB_CRITERIA_START_ID=0
-    # max limit 50 billion (max limit for cb_criteria)
-    # not used in this script
-    CB_CRITERIA_END_ID=$[50*10**9]
+    CB_CRITERIA_END_ID=$[50*10**9] # max(id) from cb_criteria
+elif [[ "$RUN_PARALLEL" == "mult" ]]; then
+    echo "Running in parallel and Multitable mode - " "$SQL_SCRIPT_ORDER - $SQL_FOR"
+    STEP=$SQL_SCRIPT_ORDER
+    CB_CRITERIA_START_ID=$[$STEP*10**9] # 3  billion
+    CB_CRITERIA_END_ID=$[$[STEP+1]*10**9] # 4  billion
+    echo "Creating temp table for $TBL_CBC"
+    TBL_CBC=$(createTmpTable $TBL_CBC)
+    TBL_PAS=$(createTmpTable $TBL_PAS)
+    TBL_PCA=$(createTmpTable $TBL_PCA)
 fi
 ####### end common block ###########
 # make-cb-criteria-10-icd10-cm-src.sh
@@ -43,7 +65,7 @@ fi
 # cb_criteria update rollup counts: #2100: Uses : cb_criteria, prep_concept_ancestor, cb_search_all_events
 echo "ICD10CM - SOURCE - inserting root"
 bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
     (
           id
         , parent_id
@@ -60,7 +82,7 @@ bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
         , path
     )
 SELECT
-    ROW_NUMBER() OVER (ORDER BY concept_id) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` where id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID) AS id
+    ROW_NUMBER() OVER (ORDER BY concept_id) + (SELECT COALESCE(MAX(id),$CB_CRITERIA_START_ID) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` where id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID) AS id
     , 0
     , domain_id
     , 0
@@ -73,14 +95,14 @@ SELECT
     , 0
     , 1
     , CAST(ROW_NUMBER() OVER (ORDER BY concept_id) +
-        (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` where id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID) as STRING)
+        (SELECT COALESCE(MAX(id),$CB_CRITERIA_START_ID) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` where id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID) as STRING)
 FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_merged\`
 --- this is the root for ICD10CM
 WHERE concept_id = 2500000000"
 
 echo "ICD10CM - SOURCE - inserting second level"
 bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
     (
           id
         , parent_id
@@ -97,8 +119,8 @@ bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
         , path
     )
 SELECT
-      ROW_NUMBER() OVER (ORDER BY p.parent_id, c.concept_code) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` where id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID) AS id
-    , p.id AS parent_id
+      ROW_NUMBER() OVER (ORDER BY p.parent_id, c.concept_code) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` where id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID) AS id
+    , p.id - $CB_CRITERIA_START_ID AS parent_id
     , p.domain_id
     , p.is_standard
     , p.type
@@ -111,14 +133,15 @@ SELECT
     , 1
     ,CONCAT(p.path, '.',
         CAST(ROW_NUMBER() OVER (ORDER BY p.parent_id, c.concept_code) +
-        (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` where id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID) as STRING))
+        (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` where id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID) as STRING))
 FROM
     (
         SELECT *
-        FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+        FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
         WHERE parent_id = 0
             and type = 'ICD10CM'
-    ) p
+            and id > $CB_CRITERIA_START_ID and id < $CB_CRITERIA_END_ID
+      ) p
 JOIN
     (
         SELECT concept_id_1, concept_id_2
@@ -133,7 +156,7 @@ for i in {1..6};
 do
     echo "ICD10CM - SOURCE - inserting level $i"
     bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
-    "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+    "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
         (
               id
             , parent_id
@@ -152,8 +175,8 @@ do
             , path
         )
     SELECT
-          ROW_NUMBER() OVER (ORDER BY p.id, c.concept_code) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` where id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID)
-        , p.id
+          ROW_NUMBER() OVER (ORDER BY p.id, c.concept_code) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` where id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID)
+        , p.id - $CB_CRITERIA_START_ID
         , p.domain_id
         , p.is_standard
         , p.type
@@ -167,8 +190,8 @@ do
         , 0
         , 1
         , CONCAT(p.path, '.', CAST(ROW_NUMBER() OVER (ORDER BY p.id, c.concept_code) +
-            (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` where id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID) as STRING))
-    FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` p
+            (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` where id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID) as STRING))
+    FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` p
     JOIN \`$BQ_PROJECT.$BQ_DATASET.prep_icd10_rel_src_in_data\` c on p.code = c.p_concept_code
     LEFT JOIN
         (
@@ -179,16 +202,17 @@ do
         ) l on c.concept_code = l.concept_code
     WHERE p.type = 'ICD10CM'
         and p.is_standard = 0
+        and id > $CB_CRITERIA_START_ID and id < $CB_CRITERIA_END_ID
         and p.id not in
             (
-                SELECT parent_id
-                FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+                SELECT parent_id + $CB_CRITERIA_START_ID
+                FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
             )"
 done
 
 echo "ICD10CM - SOURCE - add items into ancestor staging to use in next query"
 bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_ancestor_staging\`
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.$TBL_PAS\`
     (
           ancestor_concept_id
         , domain_id
@@ -209,53 +233,55 @@ SELECT DISTINCT a.concept_id as ancestor_concept_id
     , e.concept_id c4
 
 FROM
-    (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE type = 'ICD10CM' and is_group = 1 and is_selectable = 1 and is_standard = 0) a
-    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE type = 'ICD10CM') b on a.id = b.parent_id
-    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE type = 'ICD10CM') c on b.id = c.parent_id
-    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE type = 'ICD10CM') d on c.id = d.parent_id
-    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE type = 'ICD10CM') e on d.id = e.parent_id"
+    (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
+         WHERE type = 'ICD10CM' and is_group = 1 and is_selectable = 1 and is_standard = 0
+         and id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID ) a
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` WHERE type = 'ICD10CM') b on a.id = b.parent_id + $CB_CRITERIA_START_ID
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` WHERE type = 'ICD10CM') c on b.id = c.parent_id + $CB_CRITERIA_START_ID
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` WHERE type = 'ICD10CM') d on c.id = d.parent_id + $CB_CRITERIA_START_ID
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` WHERE type = 'ICD10CM') e on d.id = e.parent_id + $CB_CRITERIA_START_ID"
 
 echo "ICD10CM - SOURCE - insert into prep_concept_ancestor"
 bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor\`
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.$TBL_PCA\`
     (
           ancestor_concept_id
         , descendant_concept_id
         , is_standard
     )
 SELECT DISTINCT ancestor_concept_id, concept_id_4 as descendant_concept_id, is_standard
-FROM \`$BQ_PROJECT.$BQ_DATASET.prep_ancestor_staging\`
+FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_PAS\`
 WHERE concept_id_4 is not null
     and type = 'ICD10CM'
     and is_standard = 0
 UNION DISTINCT
 SELECT DISTINCT ancestor_concept_id, concept_id_3 as descendant_concept_id, is_standard
-FROM \`$BQ_PROJECT.$BQ_DATASET.prep_ancestor_staging\`
+FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_PAS\`
 WHERE concept_id_3 is not null
     and type = 'ICD10CM'
     and is_standard = 0
 UNION DISTINCT
 SELECT DISTINCT ancestor_concept_id, concept_id_2 as descendant_concept_id, is_standard
-FROM \`$BQ_PROJECT.$BQ_DATASET.prep_ancestor_staging\`
+FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_PAS\`
 WHERE concept_id_2 is not null
     and type = 'ICD10CM'
     and is_standard = 0
 UNION DISTINCT
 SELECT DISTINCT ancestor_concept_id, concept_id_1 as descendant_concept_id, is_standard
-FROM \`$BQ_PROJECT.$BQ_DATASET.prep_ancestor_staging\`
+FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_PAS\`
 WHERE concept_id_1 is not null
     and type = 'ICD10CM'
     and is_standard = 0
 UNION DISTINCT
 -- this statement is to add the ancestor item to itself
 SELECT DISTINCT ancestor_concept_id, ancestor_concept_id as descendant_concept_id, is_standard
-FROM \`$BQ_PROJECT.$BQ_DATASET.prep_ancestor_staging\`
+FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_PAS\`
 WHERE type = 'ICD10CM'
 and is_standard = 0"
 
 echo "ICD10CM - SOURCE - update item counts"
 bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
-"UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
+"UPDATE \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` x
 SET x.item_count = y.cnt
     , x.est_count = y.cnt
 FROM
@@ -274,7 +300,7 @@ WHERE x.concept_id = y.concept_id
 
 echo "ICD10CM - SOURCE - generate rollup counts"
 bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
-"UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
+"UPDATE \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` x
 SET x.rollup_count = y.cnt
     , x.est_count = y.cnt
 FROM
@@ -285,11 +311,11 @@ FROM
             (
                 SELECT ancestor_concept_id
                         , descendant_concept_id
-                FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor\`
+                FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_PCA\`
                 WHERE ancestor_concept_id in
                     (
                         SELECT DISTINCT concept_id
-                        FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+                        FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
                         WHERE type = 'ICD10CM'
                             and is_standard = 0
                             and is_selectable = 1
@@ -307,3 +333,11 @@ WHERE x.concept_id = y.concept_id
     and x.is_group = 1"
 
 
+#wait for process to end before copying
+wait
+## copy temp tables back to main tables, and delete temp?
+if [[ "$RUN_PARALLEL" == "mult" ]]; then
+  cpToMain "$TBL_CBC" &
+  cpToMain "$TBL_PAS" &
+  cpToMain "$TBL_PCA" &
+fi

@@ -41,6 +41,8 @@ elif [[ "$RUN_PARALLEL" == "mult" ]]; then
     CB_CRITERIA_END_ID=$[$[STEP+1]*10**9] # 4  billion
     echo "Creating temp table for $TBL_CBC"
     TBL_CBC=$(createTmpTable $TBL_CBC)
+    TBL_PAS=$(createTmpTable $TBL_PAS)
+    TBL_PCA=$(createTmpTable $TBL_PCA)
 fi
 ####### end common block ###########
 # make-cb-criteria-09-icd9-src.sh
@@ -97,7 +99,7 @@ SELECT
     , 0
     , 1
     , CAST(ROW_NUMBER() OVER (ORDER BY concept_id) +
-        (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` where id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID) as STRING)
+        (SELECT COALESCE(MAX(id),$CB_CRITERIA_START_ID) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` where id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID) as STRING)
 FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_merged\`
 -- these are the four root nodes
 WHERE concept_id in (2500000024, 2500000023,2500000025,2500000080)"

@@ -1,4 +1,5 @@
-*run*.txt
+*.txt
+~*
 *.pyc
 *.swp
 *~
@@ -58,4 +59,4 @@ client/py/.pydevproject
 **/.gradle
 **/*.orig
 **/.vscode
-/api/db-cdr/generate-cdr/cb-criteria-refactor/0run_mult.txt
+
