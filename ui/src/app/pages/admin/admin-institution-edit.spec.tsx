@@ -382,7 +382,7 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
 
     await simulateComponentChange(wrapper, findRTDropdown(wrapper), InstitutionMembershipRequirement.DOMAINS);
 
-    // one entry has an incorrect Email Domain format
+    // one entry has an incorrect Email Domain format (whitespace)
     findRTDomainInput(wrapper).first()
       .simulate('change', {target: {value: 'validEmail.com,\n     ,\njustSomeRandom.domain,\n,'}});
     findRTDomainInput(wrapper).first().simulate('blur');
@@ -402,7 +402,7 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
 
     await simulateComponentChange(wrapper, findCTDropdown(wrapper), InstitutionMembershipRequirement.DOMAINS);
 
-    // one entry has an incorrect Email Domain format
+    // one entry has an incorrect Email Domain format (whitespace)
     findCTDomainInput(wrapper).first()
         .simulate('change', {target: {value: 'validEmail.com,\n     ,\njustSomeRandom.domain,\n,'}});
     findCTDomainInput(wrapper).first().simulate('blur');
@@ -418,7 +418,7 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
 
     await simulateComponentChange(wrapper, findRTDropdown(wrapper), InstitutionMembershipRequirement.DOMAINS);
 
-    // one entry has an incorrect Email Domain format
+    // one entry has an incorrect Email Domain format (whitespace)
     findRTDomainInput(wrapper).first()
       .simulate('change', {target: {value: '  someDomain.com,\njustSomeRandom.domain   ,\n,'}});
     findRTDomainInput(wrapper).first().simulate('blur');
@@ -436,7 +436,7 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
     await simulateComponentChange(wrapper, findCTEnabled(wrapper), true);
     await simulateComponentChange(wrapper, findCTDropdown(wrapper), InstitutionMembershipRequirement.DOMAINS);
 
-    // one entry has an incorrect Email Domain format
+    // one entry has an incorrect Email Domain format (whitespace)
     findCTDomainInput(wrapper).first()
         .simulate('change', {target: {value: '  someDomain.com,\njustSomeRandom.domain   ,\n,'}});
     findCTDomainInput(wrapper).first().simulate('blur');
@@ -606,7 +606,7 @@ describe('AdminInstitutionEditSpec - add mode', () => {
 
     await simulateComponentChange(wrapper, findCTDropdown(wrapper), InstitutionMembershipRequirement.DOMAINS);
 
-    // one entry has an incorrect Email Domain format
+    // one entry has an incorrect Email Domain format (whitespace)
     findCTDomainInput(wrapper).first()
         .simulate('change', {target: {value: 'validEmail.com,\n     ,\njustSomeRandom.domain,\n,'}});
     findCTDomainInput(wrapper).first().simulate('blur');
