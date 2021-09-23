@@ -25,8 +25,6 @@ const DataTestIdAlias = {
 
 export const LabelAlias = {
   InstitutionType: 'Institution Type',
-  SelectRTEmailType: 'A user is considered part of this institution and eligible <br> to access Registered Tier ',
-  SelectCTEmailType: 'A user is considered part of this institution and eligible <br> to access Controlled Tier ',
 };
 
 export const InstitutionTypeSelectValue = {
@@ -138,6 +136,7 @@ export default class InstitutionEditPage extends AuthenticatedPage {
     return await dropdown.getSelectedValue();
   }
 
+  // the institution name, type and intructions input field
   async getAddNewInstituteFields(): Promise<void> {
     this.getInstituteNameInput();
     this.getInstructionsTextarea();
@@ -161,12 +160,12 @@ export default class InstitutionEditPage extends AuthenticatedPage {
     await options.select(option);
   }  
 
-  // edit the whitelist emails Registered tier access
+  // get the emailAddress textarea in Registered tier access
   getRTEmailAddressInput(): Textarea {
     return Textarea.findByName(this.page, { dataTestId: DataTestIdAlias.rtAcceptedEmailAddresses });
   }
 
-  // edit the whitelist domains Registered tier access
+  // get the emailDomains textarea Registered tier access
   getRTEmailDomainsInput(): Textarea {
     return Textarea.findByName(this.page, { dataTestId: DataTestIdAlias.rtAcceptedEmailDomains });
   }
@@ -194,36 +193,29 @@ export default class InstitutionEditPage extends AuthenticatedPage {
     return SelectMenu.findByName(this.page, Field.AcceptedCTAddressSelect.textOption);
   }
 
+  // select the dropdown option in CT
   async selectCTEmailOption(value: string): Promise<void> {
     const options = this.getCTEmailDropdown();
     await options.select(value);
   }
 
-  // edit the whitelist emails Controlled tier access
+  // get the CT emailAddress Input 
   getCTEmailAddressInput(): Textarea {
     return Textarea.findByName(this.page, { dataTestId: DataTestIdAlias.ctAcceptedEmailAddresses });
   }
 
-  // edit the whitelist domains Controlled tier access
+  // get the CT emailDomains Input 
   getCTEmailDomainsInput(): Textarea {
     return Textarea.findByName(this.page, { dataTestId: DataTestIdAlias.ctAcceptedEmailDomains });
   }
 
+  // get the value of the selected dropdown option in RT
   async getRTEmailAcceptedValue(): Promise<string> {
     const dropdown = this.getRTEmailDropdown();
     return await dropdown.getSelectedValue();
   }
 
-  async isCTEmailAddressPresent(): Promise<void> {
-    const selector = '//div[@data-test-id="controlled-email-address"]';
-    await page.$x(selector);
-  }
-
-  async isCTEmailDomainPresent(): Promise<void> {
-    const selector = '//div[@data-test-id="controlled-email-domain"]';
-    await page.$x(selector);
-  }
-
+  // get the value of the selected dropdown option in CT
   async getCTEmailAcceptedValue(): Promise<string> {
     const dropdown = this.getCTEmailDropdown();
     return await dropdown.getSelectedValue();
