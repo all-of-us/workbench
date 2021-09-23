@@ -14,15 +14,19 @@ const PageTitle = 'Institution Admin | All of Us Researcher Workbench';
 const DataTestIdAlias = {
   displayName: 'displayName',
   userEmailInstructions: 'userEmailInstructions',
-  rtAcceptedEmailAddresses: 'rtEmailAddressInput',
-  ctAcceptedEmailAddresses: 'ctEmailAddressInput',
-  ControlledTierAccess: 'ct-card-container'
+  rtAcceptedEmailAddresses: 'registered-email-address-input',
+  rtAcceptedEmailDomains: 'registered-email-domain-input',
+  ctAcceptedEmailAddresses: 'controlled-email-address-input',
+  ctAcceptedEmailDomains: 'controlled-email-domain-input',
+  ControlledTierAccess: 'ct-card-container',
+  registeredCardDetails:'registered-card-details',
+  controlledCardDetails: 'controlled-card-details'
 };
 
 export const LabelAlias = {
   InstitutionType: 'Institution Type',
-  SelectRTEmailType: 'Select type',
-  SelectCTEmailType: 'Email address is at one of the following domains:'
+  SelectRTEmailType: 'A user is considered part of this institution and eligible <br> to access Registered Tier ',
+  SelectCTEmailType: 'A user is considered part of this institution and eligible <br> to access Controlled Tier ',
 };
 
 export const InstitutionTypeSelectValue = {
@@ -46,17 +50,19 @@ export const Field = {
       ancestorLevel: 2
     }
   },
-  AcceptedCTAddressSelect: {
-    textOption: {
-      type: ElementType.Dropdown,
-      name: LabelAlias.SelectCTEmailType,
-      ancestorLevel: 2
-    }
-  },
   AcceptedRTAddressSelect: {
     textOption: {
       type: ElementType.Dropdown,
-      name: LabelAlias.SelectRTEmailType,
+      //name: LabelAlias.SelectRTEmailType,
+      dataTestId: DataTestIdAlias.registeredCardDetails,
+      ancestorLevel: 2
+    }
+  },
+  AcceptedCTAddressSelect: {
+    textOption: {
+      type: ElementType.Dropdown,
+      //name: LabelAlias.SelectCTEmailType,
+      dataTestId: DataTestIdAlias.controlledCardDetails,
       ancestorLevel: 2
     }
   }
@@ -135,34 +141,45 @@ export default class InstitutionEditPage extends AuthenticatedPage {
   async getAddNewInstituteFields(): Promise<void> {
     this.getInstituteNameInput();
     this.getInstructionsTextarea();
-    this.getInstituteTypeDropdown();
+    this.selectInstitutionType(InstitutionTypeSelectValue.Industry);
   }
 
-  // edit the whitelist emails Controlled tier access
-  getCTAcceptedEmailInput(): Textarea {
-    return Textarea.findByName(this.page, { dataTestId: DataTestIdAlias.ctAcceptedEmailAddresses });
+  // get the Institution's RT-eRA-account-required-switch and verify if enabled
+  getRTeRAtoggle(): Checkbox {
+    const xpath = '//div[@data-test-id="registered-era-required-switch"]/div/input[@type="checkbox"]';
+    return new Checkbox(this.page, xpath);
   }
+  
+  // get the dropdown in registered-card-details
+  getRTEmailDropdown(): SelectMenu {
+    return SelectMenu.findByName(this.page, Field.AcceptedRTAddressSelect.textOption);
+  }
+
+  // select type from dropdown in registered-card-details
+  async selectRTEmailOption(option: string): Promise<void> {
+    const options = this.getRTEmailDropdown();
+    await options.select(option);
+  }  
 
   // edit the whitelist emails Registered tier access
-  getRTAcceptedEmailInput(): Textarea {
+  getRTEmailAddressInput(): Textarea {
     return Textarea.findByName(this.page, { dataTestId: DataTestIdAlias.rtAcceptedEmailAddresses });
   }
 
-  // get the Institution's CT-eRA-account-required-switch and verify if enabled
-  getRTeRAtoggle(): Checkbox {
-    const xpath = '//div[@data-test-id="rt-era-required-switch"]/div/input[@type="checkbox"]';
-    return new Checkbox(this.page, xpath);
+  // edit the whitelist domains Registered tier access
+  getRTEmailDomainsInput(): Textarea {
+    return Textarea.findByName(this.page, { dataTestId: DataTestIdAlias.rtAcceptedEmailDomains });
   }
 
-  // get the Institution's CT-eRA-account-required-switch and verify if disabled
+  // get the Institution's controlled-era-required-switch and verify if disabled
   getCTeRAtoggle(): Checkbox {
-    const xpath = '//div[@data-test-id="ct-era-required-switch"]/div/input[@type="checkbox"]';
+    const xpath = '//div[@data-test-id="controlled-era-required-switch"]/div/input[@type="checkbox"]';
     return new Checkbox(this.page, xpath);
   }
 
-  // get the Institution's CT-enabled-switch to verify if it is enabled or disabled
+  // get the Institution's controlled-enabled-switch to verify if it is enabled or disabled
   getCTEnabledtoggle(): Checkbox {
-    const xpath = '//div[@data-test-id="ct-enabled-switch"]/div/input[@type="checkbox"]';
+    const xpath = '//div[@data-test-id="controlled-enabled-switch"]/div/input[@type="checkbox"]';
     return new Checkbox(this.page, xpath);
   }
 
@@ -182,27 +199,33 @@ export default class InstitutionEditPage extends AuthenticatedPage {
     await options.select(value);
   }
 
-  async isCTEmailAddressPresent(): Promise<void> {
-    const selector = '//div[@data-test-id="ctEmailAddress"]';
-    await page.$x(selector);
+  // edit the whitelist emails Controlled tier access
+  getCTEmailAddressInput(): Textarea {
+    return Textarea.findByName(this.page, { dataTestId: DataTestIdAlias.ctAcceptedEmailAddresses });
   }
 
-  async isCTEmailDomainPresent(): Promise<void> {
-    const selector = '//div[@data-test-id="ctEmailDomain"]';
-    await page.$x(selector);
-  }
-
-  getRTEmailDropdown(): SelectMenu {
-    return SelectMenu.findByName(this.page, Field.AcceptedRTAddressSelect.textOption);
-  }
-
-  async getCTEmailAcceptedValue(): Promise<string> {
-    const dropdown = this.getCTEmailDropdown();
-    return await dropdown.getSelectedValue();
+  // edit the whitelist domains Controlled tier access
+  getCTEmailDomainsInput(): Textarea {
+    return Textarea.findByName(this.page, { dataTestId: DataTestIdAlias.ctAcceptedEmailDomains });
   }
 
   async getRTEmailAcceptedValue(): Promise<string> {
     const dropdown = this.getRTEmailDropdown();
+    return await dropdown.getSelectedValue();
+  }
+
+  async isCTEmailAddressPresent(): Promise<void> {
+    const selector = '//div[@data-test-id="controlled-email-address"]';
+    await page.$x(selector);
+  }
+
+  async isCTEmailDomainPresent(): Promise<void> {
+    const selector = '//div[@data-test-id="controlled-email-domain"]';
+    await page.$x(selector);
+  }
+
+  async getCTEmailAcceptedValue(): Promise<string> {
+    const dropdown = this.getCTEmailDropdown();
     return await dropdown.getSelectedValue();
   }
 
