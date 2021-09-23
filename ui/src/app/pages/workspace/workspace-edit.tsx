@@ -275,6 +275,7 @@ export interface WorkspaceEditProps extends WithSpinnerOverlayProps, NavigationP
 }
 
 export interface WorkspaceEditState {
+  billingAccountFetched: boolean;
   billingAccounts: Array<BillingAccount>;
   cdrVersions: Array<CdrVersion>;
   cloneUserRole: boolean;
@@ -301,6 +302,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
     constructor(props: WorkspaceEditProps) {
       super(props);
       this.state = {
+        billingAccountFetched: false,
         billingAccounts: [],
         cdrVersions: props.workspace ? this.getCdrVersions(props.workspace.accessTierShortName) : this.getCdrVersions(DEFAULT_ACCESS_TIER),
         cloneUserRole: false,
@@ -424,13 +426,16 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
         }
       }
       this.setState({billingAccounts});
+      this.setState({billingAccountFetched: true});
     }
 
     async requestBillingScopeThenFetchBillingAccount() {
-      // this.setState({fetchBillingAccountLoading: true});
-      // await ensureBillingScope();
-      // await this.fetchBillingAccounts();
-      // this.setState({fetchBillingAccountLoading: false});
+      if(!this.state.billingAccountFetched) {
+        this.setState({fetchBillingAccountLoading: true});
+        await ensureBillingScope();
+        await this.fetchBillingAccounts();
+        this.setState({fetchBillingAccountLoading: false});
+      }
       console.log("~~~~~~")
     }
 
