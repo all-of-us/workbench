@@ -149,7 +149,7 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
     // CT changed to email domains
     expect(findCTDomainInput(wrapper).first().prop('value')).toBe('domain.com');
     // CT email addresses become empty
-    expect(findCTAddressInput(wrapper).length).toBe(0);
+    expect(findCTAddressInput(wrapper).exists()).toBeFalsy();
   });
 
   it('should show appropriate section after changing agreement type in Registered Tier requirement', async() => {
@@ -159,16 +159,16 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
 
     await simulateComponentChange(wrapper, findRTDropdown(wrapper), InstitutionMembershipRequirement.DOMAINS);
 
-    expect(findRTAddress(wrapper).length).toBe(0);
-    expect(findRTDomain(wrapper).length).toBe(2);
+    expect(findRTAddress(wrapper).exists()).toBeFalsy();
+    expect(findRTDomain(wrapper).exists()).toBeTruthy();
 
     const rtEmailDomainLabel = findRTDomain(wrapper).first().props().children[0];
     expect(rtEmailDomainLabel.props.children).toBe('Accepted Email Domains');
 
     await simulateComponentChange(wrapper, findRTDropdown(wrapper), InstitutionMembershipRequirement.ADDRESSES);
 
-    expect(findRTAddress(wrapper).length).toBe(2);
-    expect(findRTDomain(wrapper).length).toBe(0);
+    expect(findRTAddress(wrapper).exists()).toBeTruthy();
+    expect(findRTDomain(wrapper).exists()).toBeFalsy();
 
     const rtEmailAddressLabel = findRTAddress(wrapper).first().props().children[0];
     expect(rtEmailAddressLabel.props.children).toBe('Accepted Email Addresses');
@@ -203,16 +203,16 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
     await simulateComponentChange(wrapper, findCTEnabled(wrapper), true);
     await simulateComponentChange(wrapper, findCTDropdown(wrapper), InstitutionMembershipRequirement.DOMAINS);
 
-    expect(findCTAddress(wrapper).length).toBe(0);
-    expect(findCTDomain(wrapper).length).toBe(2);
+    expect(findCTAddress(wrapper).exists()).toBeFalsy();
+    expect(findCTDomain(wrapper).exists()).toBeTruthy();
 
     const ctEmailDomainLabel = findCTDomain(wrapper).first().props().children[0];
     expect(ctEmailDomainLabel.props.children).toBe('Accepted Email Domains');
 
     await simulateComponentChange(wrapper, findCTDropdown(wrapper), InstitutionMembershipRequirement.ADDRESSES);
 
-    expect(findCTAddress(wrapper).length).toBe(2);
-    expect(findCTDomain(wrapper).length).toBe(0);
+    expect(findCTAddress(wrapper).exists()).toBeTruthy();
+    expect(findCTDomain(wrapper).exists()).toBeFalsy();
 
     const ctEmailAddressLabel = findCTAddress(wrapper).first().props().children[0];
     expect(ctEmailAddressLabel.props.children).toBe('Accepted Email Addresses');
@@ -225,7 +225,7 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
 
     await simulateComponentChange(wrapper, findRTDropdown(wrapper), InstitutionMembershipRequirement.ADDRESSES);
 
-    expect(findRTAddressError(wrapper).length).toBe(0);
+    expect(findRTAddressError(wrapper).exists()).toBeFalsy();
 
     // In case of a single entry which is not in the correct format
     findRTAddressInput(wrapper).first().simulate('change', {target: {value: 'rtInvalidEmail@domain'}});
@@ -254,7 +254,7 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
     // Single correct format Email Address entries
     findRTAddressInput(wrapper).first().simulate('change', {target: {value: 'correctEmail@domain.com'}});
     findRTAddressInput(wrapper).first().simulate('blur');
-    expect(findRTAddressError(wrapper).length).toBe(0);
+    expect(findRTAddressError(wrapper).exists()).toBeFalsy();
   });
 
   it('Should display error in case of invalid email Address Format in Controlled Tier requirement', async() => {
@@ -265,7 +265,7 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
     await simulateComponentChange(wrapper, findCTEnabled(wrapper), true);
     await simulateComponentChange(wrapper, findCTDropdown(wrapper), InstitutionMembershipRequirement.ADDRESSES);
 
-    expect(findCTAddressError(wrapper).length).toBe(0);
+    expect(findCTAddressError(wrapper).exists()).toBeFalsy();
 
     // In case of a single entry which is not in the correct format
     findCTAddressInput(wrapper).first().simulate('change', {target: {value: 'ctInvalidEmail@domain'}});
@@ -294,7 +294,7 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
     // Single correct format Email Address entries
     findCTAddressInput(wrapper).first().simulate('change', {target: {value: 'correctEmail@domain.com'}});
     findCTAddressInput(wrapper).first().simulate('blur');
-    expect(findCTAddressError(wrapper).length).toBe(0);
+    expect(findCTAddressError(wrapper).exists()).toBeFalsy();
   });
 
   it('Should display error in case of invalid email Domain Format in Registered Tier requirement', async() => {
@@ -304,7 +304,7 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
 
     await simulateComponentChange(wrapper, findRTDropdown(wrapper), InstitutionMembershipRequirement.DOMAINS);
 
-    expect(findRTDomainError(wrapper).length).toBe(0);
+    expect(findRTDomainError(wrapper).exists()).toBeFalsy();
 
     // Single Entry with incorrect Email Domain format
     findRTDomainInput(wrapper).first()
@@ -334,7 +334,7 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
     findRTDomainInput(wrapper).first()
       .simulate('change', {target: {value: 'domain.com'}});
     findRTDomainInput(wrapper).first().simulate('blur');
-    expect(findRTDomainError(wrapper).length).toBe(0);
+    expect(findRTDomainError(wrapper).exists()).toBeFalsy();
   });
 
   it('Should display error in case of invalid email Domain Format in Controlled Tier requirement', async() => {
@@ -345,7 +345,7 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
     await simulateComponentChange(wrapper, findCTEnabled(wrapper), true);
     await simulateComponentChange(wrapper, findCTDropdown(wrapper), InstitutionMembershipRequirement.DOMAINS);
 
-    expect(findCTDomainError(wrapper).length).toBe(0);
+    expect(findCTDomainError(wrapper).exists()).toBeFalsy();
 
     // Single Entry with incorrect Email Domain format
     findCTDomainInput(wrapper).first().simulate('change', {target: {value: 'invalidEmail@domain'}});
@@ -372,7 +372,7 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
 
     findCTDomainInput(wrapper).first().simulate('change', {target: {value: 'domain.com'}});
     findCTDomainInput(wrapper).first().simulate('blur');
-    expect(findCTDomainError(wrapper).length).toBe(0);
+    expect(findCTDomainError(wrapper).exists()).toBeFalsy();
   });
 
   it('Should ignore empty string in email Domain in Registered Tier requirement', async() => {
@@ -389,7 +389,7 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
     expect(findRTDomainInput(wrapper).first().prop('value'))
       .toBe('validEmail.com,\njustSomeRandom.domain');
 
-    expect(findRTDomainError(wrapper).length).toBe(0);
+    expect(findRTDomainError(wrapper).exists()).toBeFalsy();
   });
 
   it('Should ignore empty string in email Domain in Controlled Tier requirement', async() => {
@@ -408,7 +408,7 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
     findCTDomainInput(wrapper).first().simulate('blur');
     expect(findCTDomainInput(wrapper).first().prop('value')).toBe('validEmail.com,\njustSomeRandom.domain');
 
-    expect(findCTDomainError(wrapper).length).toBe(0);
+    expect(findCTDomainError(wrapper).exists()).toBeFalsy();
   });
 
   it('Should ignore whitespaces in email domains in Registered Tier requirement', async() => {
@@ -425,7 +425,7 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
     expect(findRTDomainInput(wrapper).first().prop('value'))
       .toBe('someDomain.com,\njustSomeRandom.domain');
 
-    expect(findRTDomainError(wrapper).length).toBe(0);
+    expect(findRTDomainError(wrapper).exists()).toBeFalsy();
   });
 
   it('Should ignore whitespaces in email domains in Controlled Tier requirement', async() => {
@@ -442,7 +442,7 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
     findCTDomainInput(wrapper).first().simulate('blur');
     expect(findCTDomainInput(wrapper).first().prop('value')).toBe('someDomain.com,\njustSomeRandom.domain');
 
-    expect(findCTDomainError(wrapper).length).toBe(0);
+    expect(findCTDomainError(wrapper).exists()).toBeFalsy();
   });
 });
 
