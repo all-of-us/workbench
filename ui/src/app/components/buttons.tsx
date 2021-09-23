@@ -350,6 +350,8 @@ export const StyledRouterLink = ({path, children, disabled = false, analyticsFn 
     style: {...styles.inlineAnchor}
   }
   const computedStyles = fp.merge(computeStyle(linkStyle, {disabled}), {style})
+  // A react-router Link will attempt to navigate whenever you click on it; it has no concept
+  // of 'disabled'. So if it is disabled, we render a span instead.
   return disabled
     ? <span {...computedStyles} {...props}>{children}</span>
     : <Link
