@@ -672,7 +672,7 @@ export const AdminInstitutionEdit = fp.flow(withNavigation, withRouter)(class ex
                 onBlur={v => this.setState(fp.set(['institution', 'displayName'], v.trim()))}
             />
             <div style={{color: colors.danger}} data-test-id='displayNameError'>
-              {!this.isAddInstitutionMode && errors && errors.displayName}
+              {errors && errors.displayName}
               </div>
             <label style={styles.label}>Institution Type</label>
             <Dropdown style={{width: '16rem'}} data-test-id='organization-dropdown'

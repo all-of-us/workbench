@@ -58,7 +58,7 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
     expect(wrapper).toBeTruthy();
   });
 
-  it('should throw an error for existing Institution if display name is more than 80 characters', async() => {
+  it('should throw an error for existing Institution if the display name is more than 80 characters', async() => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper).toBeTruthy();
