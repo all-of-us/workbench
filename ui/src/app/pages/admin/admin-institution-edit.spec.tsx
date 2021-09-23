@@ -15,9 +15,11 @@ import {AdminInstitutionEdit} from './admin-institution-edit';
 
 const findRTDetails = (wrapper) => wrapper.find('[data-test-id="registered-card-details"]');
 const findRTDropdown = (wrapper) => wrapper.find('[data-test-id="registered-agreement-dropdown"]').instance() as Dropdown;
+const findRTERARequired = (wrapper) => wrapper.find('[data-test-id="registered-era-required-switch"]').first().instance() as InputSwitch;
 
 const findCTDetails = (wrapper) => wrapper.find('[data-test-id="controlled-card-details"]');
 const findCTDropdown = (wrapper) => wrapper.find('[data-test-id="controlled-agreement-dropdown"]').instance() as Dropdown;
+const findCTERARequired = (wrapper) => wrapper.find('[data-test-id="controlled-era-required-switch"]').first().instance() as InputSwitch;
 const findCTEnabled = (wrapper) => wrapper.find('[data-test-id="controlled-enabled-switch"]').first().instance() as InputSwitch;
 
 const findRTAddress = (wrapper) => wrapper.find('[data-test-id="registered-email-address"]');
@@ -109,8 +111,8 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper).toBeTruthy();
 
-    expect((wrapper.find('[data-test-id="registered-era-required-switch"]').first().instance() as InputSwitch).props.checked).toBeTruthy();
-    expect((wrapper.find('[data-test-id="controlled-era-required-switch"]').first().instance() as InputSwitch).props.checked).toBeTruthy();
+    expect(findRTERARequired(wrapper).props.checked).toBeTruthy();
+    expect(findCTERARequired(wrapper).props.checked).toBeTruthy();
     expect(findCTEnabled(wrapper).props.checked).toBeTruthy();
 
     // change Registered from DOMAIN to ADDRESS
@@ -123,8 +125,8 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
     expect(findRTAddress(wrapper).exists()).toBeTruthy();
     expect(findRTDomain(wrapper).exists()).toBeFalsy();
 
-    expect((wrapper.find('[data-test-id="registered-era-required-switch"]').first().instance() as InputSwitch).props.checked).toBeTruthy();
-    expect((wrapper.find('[data-test-id="controlled-era-required-switch"]').first().instance() as InputSwitch).props.checked).toBeTruthy();
+    expect(findRTERARequired(wrapper).props.checked).toBeTruthy();
+    expect(findCTERARequired(wrapper).props.checked).toBeTruthy();
     expect(findCTEnabled(wrapper).props.checked).toBeTruthy();
   });
 
