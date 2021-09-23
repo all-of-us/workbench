@@ -31,7 +31,6 @@ import {
   GetStartedButton,
   redirectToRas,
 } from 'app/utils/access-utils';
-import {isAbortError} from 'app/utils/errors';
 import {useNavigation} from 'app/utils/navigation';
 import {profileStore, serverConfigStore, useStore} from 'app/utils/stores';
 import {AccessModule, AccessModuleStatus, Profile} from 'generated/fetch';
@@ -569,10 +568,7 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
 
   // whenever the profile changes, setActiveModule(the first incomplete enabled module)
   useEffect(() => {
-    const activeModule = getActiveModule(enabledModules, profile);
-    if (activeModule) {
-      setActiveModule(activeModule);
-    }
+    setActiveModule(getActiveModule(enabledModules, profile));
   }, [profile]);
 
   const {config: {unsafeAllowSelfBypass}} = useStore(serverConfigStore);
