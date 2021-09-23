@@ -194,23 +194,23 @@ order by domain_id, type, is_group, name, run_type;
 
 -- ICD9 SOURCE - SQL-ORDER = 9
 select * from (
-                  select '01-sequential' run_type, domain_id, type, is_group, name, count(is_group) sum_grp_count
+                  select '01-sequential' run_type, domain_id, type, is_group, 'icd9-name' name, count(is_group) sum_grp_count
                        , sum(item_count) sum_item_count, sum(rollup_count) sum_rollup_count, sum(est_count) sum_est_count
                   from `all-of-us-ehr-dev.ChenchalDummySeq.cb_criteria` where domain_id in ('CONDITION','PROCEDURE') and type in ('ICD9CM','ICD9Proc') group by 4,5,3,2
                   union all
-                  select '02-parallel' run_type, domain_id, type, is_group, name, count(is_group) sum_grp_count
+                  select '02-parallel' run_type, domain_id, type, is_group, 'icd9-name' name, count(is_group) sum_grp_count
                           , sum(item_count) sum_item_count, sum(rollup_count) sum_rollup_count, sum(est_count) sum_est_count
                   from `all-of-us-ehr-dev.ChenchalDummyPar.cb_criteria` where domain_id in ('CONDITION','PROCEDURE') and type in ('ICD9CM','ICD9Proc') group by 4,5,3,2
                   union all
-                  select '03-parallel-multi' run_type, domain_id, type, is_group, name, count(is_group) sum_grp_count
+                  select '03-parallel-multi' run_type, domain_id, type, is_group, 'icd9-name' name, count(is_group) sum_grp_count
                           , sum(item_count) sum_item_count, sum(rollup_count) sum_rollup_count, sum(est_count) sum_est_count
                   from `all-of-us-ehr-dev.ChenchalDummyMult.cb_criteria` where domain_id in ('CONDITION','PROCEDURE') and type in ('ICD9CM','ICD9Proc') group by 4,5,3,2
                   union all
-                  select '10-original' run_type, domain_id, type, is_group, name, count(is_group) sum_grp_count
+                  select '10-original' run_type, domain_id, type, is_group, 'icd9-name' name, count(is_group) sum_grp_count
                           , sum(item_count) sum_item_count, sum(rollup_count) sum_rollup_count, sum(est_count) sum_est_count
                   from `all-of-us-ehr-dev.ChenchalDummyOri.cb_criteria` where domain_id in ('CONDITION','PROCEDURE') and type in ('ICD9CM','ICD9Proc') group by 4,5,3,2
                   union all
-                  select '20-std-src' run_type, domain_id, type, is_group, name, count(is_group) sum_grp_count
+                  select '20-std-src' run_type, domain_id, type, is_group, 'icd9-name' name, count(is_group) sum_grp_count
                           , sum(item_count) sum_item_count, sum(rollup_count) sum_rollup_count, sum(est_count) sum_est_count
                   from `all-of-us-ehr-dev.ChenchalDummySrc.cb_criteria` where domain_id in ('CONDITION','PROCEDURE') and type in ('ICD9CM','ICD9Proc') group by 4,5,3,2
               )
