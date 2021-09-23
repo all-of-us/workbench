@@ -350,23 +350,16 @@ export const StyledRouterLink = ({path, children, disabled = false, analyticsFn 
     style: {...styles.inlineAnchor}
   }
   const computedStyles = fp.merge(computeStyle(linkStyle, {disabled}), {style})
-  return <Clickable
-      as='span'
-      disabled={disabled}
-  >
-    {
-      disabled
-        ? <span {...computedStyles} {...props}>{children}</span>
-        : <Link
-            to={path}
-            onClick={() => analyticsFn && analyticsFn()}
-            {...computedStyles}
-            {...props}
-        >
-          {children}
-        </Link>
-    }
-  </Clickable>;
+  return disabled
+    ? <span {...computedStyles} {...props}>{children}</span>
+    : <Link
+        to={path}
+        onClick={() => analyticsFn && analyticsFn()}
+        {...computedStyles}
+        {...props}
+    >
+      {children}
+    </Link>;
 }
 
 export const StyledAnchorTag = ({href, children, analyticsFn = null, style = {}, ...props}) => {

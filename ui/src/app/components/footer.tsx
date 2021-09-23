@@ -1,4 +1,4 @@
-import { LinkButton, StyledAnchorTag } from 'app/components/buttons';
+import { LinkButton, StyledAnchorTag, StyledRouterLink } from 'app/components/buttons';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {SemiBoldHeader} from 'app/components/headers';
 import {AoU} from 'app/components/text-wrappers';
@@ -55,13 +55,24 @@ const styles = reactStyles({
 });
 
 const FooterAnchorTag = ({style = {}, href, ...props}) => {
-  return <StyledAnchorTag style={{...styles.footerAnchor, ...style}} href={href} {...props}>
+  return <StyledRouterLink
+      style={{...styles.footerAnchor, ...style}}
+      path={href}
+      {...props}
+  >
     {props.children}
-  </StyledAnchorTag>;
+  </StyledRouterLink>;
 };
 
 const NewTabFooterAnchorTag = ({style = {}, href, ...props}) => {
-  return <FooterAnchorTag style={style} href={href} target='_blank' {...props}>{props.children}</FooterAnchorTag>;
+  return <StyledAnchorTag
+      style={{...styles.footerAnchor, ...styles}}
+      href={href}
+      target='_blank'
+      {...props}
+  >
+    {props.children}
+  </StyledAnchorTag>;
 };
 
 const DataBrowserLink = (props) => (
