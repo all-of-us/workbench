@@ -97,7 +97,6 @@ describe('DataAccessRequirements', () => {
         expect(activeModule).toEqual(AccessModule.RASLINKLOGINGOV)
     });
 
-<<<<<<< HEAD
     // update this if the order changes
     it('should return the second enabled module (ERA, not RAS) from getActiveModule' +
         ' when the first module (2FA) has been completed and RAS is disabled', () => {
