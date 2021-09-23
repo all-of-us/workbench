@@ -311,6 +311,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
               .name(bigQueryService.getString(row, rm.get("name")))
               .race(bigQueryService.getString(row, rm.get("race")))
               .ageRange(bigQueryService.getString(row, rm.get("ageRange")))
+              .ethnicity(bigQueryService.getString(row, rm.get("ethnicity")))
               .count(bigQueryService.getLong(row, rm.get("count"))));
     }
     return demoChartInfos;

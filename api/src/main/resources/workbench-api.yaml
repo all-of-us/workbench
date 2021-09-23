@@ -8364,6 +8364,7 @@ definitions:
     - name
     - race
     - ageRange
+    - ethnicity
     - count
     properties:
       name:
@@ -8374,6 +8375,9 @@ definitions:
         type: string
       ageRange:
         description: age range of subject
+        type: string
+      ethnicity:
+        description: ethnicity of subject
         type: string
       count:
         description: number of subjects

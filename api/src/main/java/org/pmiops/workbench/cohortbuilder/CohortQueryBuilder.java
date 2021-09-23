@@ -34,6 +34,7 @@ public class CohortQueryBuilder {
   private static final String DEMO_CHART_INFO_SQL_TEMPLATE =
       "SELECT ${genderOrSex} as name,\n"
           + "race,\n"
+          + "ethnicity,\n"
           + "CASE ${ageRange1}\n"
           + "${ageRange2}\n"
           + "ELSE '> 65'\n"
@@ -43,7 +44,7 @@ public class CohortQueryBuilder {
           + "WHERE ";
 
   private static final String DEMO_CHART_INFO_SQL_GROUP_BY =
-      "GROUP BY name, race, ageRange\n" + "ORDER BY name, race, ageRange\n";
+      "GROUP BY name, race, ageRange, ethnicity\n" + "ORDER BY name, race, ageRange, ethnicity\n";
 
   private static final String DOMAIN_CHART_INFO_SQL_TEMPLATE =
       "SELECT standard_name as name, standard_concept_id as conceptId, COUNT(DISTINCT person_id) as count\n"
