@@ -13,6 +13,28 @@ import {simulateComponentChange, waitOneTickAndUpdate} from 'testing/react-test-
 import {InstitutionApiStub, VERILY, VERILY_WITHOUT_CT} from 'testing/stubs/institution-api-stub';
 import {AdminInstitutionEdit} from './admin-institution-edit';
 
+const findRTDetails = (wrapper) => wrapper.find('[data-test-id="registered-card-details"]');
+const findRTDropdown = (wrapper) => wrapper.find('[data-test-id="registered-agreement-dropdown"]');
+
+const findCTDetails = (wrapper) => wrapper.find('[data-test-id="controlled-card-details"]');
+const findCTDropdown = (wrapper) => wrapper.find('[data-test-id="controlled-agreement-dropdown"]');
+const findCTEnabled = (wrapper) => wrapper.find('[data-test-id="controlled-enabled-switch"]').first().instance() as InputSwitch;
+
+const findRTAddress = (wrapper) => wrapper.find('[data-test-id="registered-email-address"]');
+const findRTDomain = (wrapper) => wrapper.find('[data-test-id="registered-email-domain"]');
+const findCTAddress = (wrapper) => wrapper.find('[data-test-id="controlled-email-address"]');
+const findCTDomain = (wrapper) => wrapper.find('[data-test-id="controlled-email-domain"]');
+
+const findRTAddressInput = (wrapper) => wrapper.find('[data-test-id="registered-email-address-input"]');
+const findRTDomainInput = (wrapper) => wrapper.find('[data-test-id="registered-email-domain-input"]');
+const findCTAddressInput = (wrapper) => wrapper.find('[data-test-id="controlled-email-address-input"]');
+const findCTDomainInput = (wrapper) => wrapper.find('[data-test-id="controlled-email-domain-input"]');
+
+const findRTAddressError = (wrapper) => wrapper.find('[data-test-id="registered-email-address-error"]');
+const findRTDomainError= (wrapper) => wrapper.find('[data-test-id="registered-email-domain-error"]');
+const findCTAddressError = (wrapper) => wrapper.find('[data-test-id="controlled-email-address-error"]');
+const findCTDomainError= (wrapper) => wrapper.find('[data-test-id="controlled-email-domain-error"]');
+
 describe('AdminInstitutionEditSpec - edit mode', () => {
 
   const component = (institution = VERILY.shortName) => {
@@ -50,21 +72,21 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper).toBeTruthy();
-    expect(wrapper.find('[data-test-id="registered-card-details"]').exists()).toBeTruthy();
+    expect(findRTDetails(wrapper).exists()).toBeTruthy();
   });
 
   it('should show CT card details when institution has controlled tier access enabled', async() => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper).toBeTruthy();
-    expect(wrapper.find('[data-test-id="controlled-card-details"]').exists()).toBeTruthy();
+    expect(findCTDetails(wrapper).exists()).toBeTruthy();
   });
 
   it('should hide CT card details when institution has controlled tier access disabled', async() => {
     const wrapper = component(VERILY_WITHOUT_CT.shortName);
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper).toBeTruthy();
-    expect(wrapper.find('[data-test-id="controlled-card-details"]').exists()).toBeFalsy();
+    expect(findCTDetails(wrapper).exists()).toBeFalsy();
   });
 
   it('should hide/show CT card details when controlled tier disabled/enabled', async() => {
@@ -72,15 +94,15 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper).toBeTruthy();
 
-    expect(wrapper.find('[data-test-id="controlled-card-details"]').exists()).toBeTruthy();
+    expect(findCTDetails(wrapper).exists()).toBeTruthy();
 
-    const ctEnabledToggle = wrapper.find('[data-test-id="controlled-enabled-switch"]').first().instance() as InputSwitch;
+    const ctEnabledToggle = findCTEnabled(wrapper);
     await simulateComponentChange(wrapper, ctEnabledToggle, false);
-    expect(wrapper.find('[data-test-id="controlled-card-details"]').exists()).toBeFalsy();
+    expect(findCTDetails(wrapper).exists()).toBeFalsy();
 
     await simulateComponentChange(wrapper, ctEnabledToggle, true);
     expect(ctEnabledToggle.props.checked).toBeTruthy();
-    expect(wrapper.find('[data-test-id="controlled-card-details"]').exists()).toBeTruthy();
+    expect(findCTDetails(wrapper).exists()).toBeTruthy();
   });
 
   it('should not change eRA Required and tier enabled switches when changing tier requirement', async() => {
@@ -90,22 +112,22 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
 
     expect((wrapper.find('[data-test-id="registered-era-required-switch"]').first().instance() as InputSwitch).props.checked).toBeTruthy();
     expect((wrapper.find('[data-test-id="controlled-era-required-switch"]').first().instance() as InputSwitch).props.checked).toBeTruthy();
-    expect((wrapper.find('[data-test-id="controlled-enabled-switch"]').first().instance() as InputSwitch).props.checked).toBeTruthy();
+    expect(findCTEnabled(wrapper).props.checked).toBeTruthy();
 
     // change Registered from DOMAIN to ADDRESS
 
-    expect(wrapper.find('[data-test-id="registered-email-domain"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-id="registered-email-address"]').exists()).toBeFalsy();
+    expect(findRTDomain(wrapper).exists()).toBeTruthy();
+    expect(findRTAddress(wrapper).exists()).toBeFalsy();
 
-    const agreementTypeDropDown = wrapper.find('[data-test-id="registered-agreement-dropdown"]').instance() as Dropdown;
+    const agreementTypeDropDown = findRTDropdown(wrapper).instance() as Dropdown;
     await simulateComponentChange(wrapper, agreementTypeDropDown, InstitutionMembershipRequirement.ADDRESSES);
 
-    expect(wrapper.find('[data-test-id="registered-email-address"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-id="registered-email-domain"]').exists()).toBeFalsy();
+    expect(findRTAddress(wrapper).exists()).toBeTruthy();
+    expect(findRTDomain(wrapper).exists()).toBeFalsy();
 
     expect((wrapper.find('[data-test-id="registered-era-required-switch"]').first().instance() as InputSwitch).props.checked).toBeTruthy();
     expect((wrapper.find('[data-test-id="controlled-era-required-switch"]').first().instance() as InputSwitch).props.checked).toBeTruthy();
-    expect((wrapper.find('[data-test-id="controlled-enabled-switch"]').first().instance() as InputSwitch).props.checked).toBeTruthy();
+    expect(findCTEnabled(wrapper).props.checked).toBeTruthy();
   });
 
   it('should update institution tier requirement', async() => {
@@ -114,26 +136,26 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
     expect(wrapper).toBeTruthy();
 
     // Value before test.
-    expect(wrapper.find('[data-test-id="registered-email-domain-input"]').first().prop('value'))
+    expect(findRTDomainInput(wrapper).first().prop('value'))
     .toBe('verily.com,\ngoogle.com');
-    expect(wrapper.find('[data-test-id="controlled-email-address-input"]').first().prop('value'))
+    expect(findCTAddressInput(wrapper).first().prop('value'))
     .toBe('foo@verily.com');
 
-    const ctAgreementTypeDropDown = wrapper.find('[data-test-id="controlled-agreement-dropdown"]').instance() as Dropdown;
+    const ctAgreementTypeDropDown = findCTDropdown(wrapper).instance() as Dropdown;
     await simulateComponentChange(wrapper, ctAgreementTypeDropDown, InstitutionMembershipRequirement.DOMAINS);
 
-    wrapper.find('[data-test-id="controlled-email-domain-input"]').first()
+    findCTDomainInput(wrapper).first()
     .simulate('change', {target: {value: 'domain.com'}});
 
     wrapper.find('[data-test-id="save-institution-button"]').first().simulate('click');
     // RT no change
-    expect(wrapper.find('[data-test-id="registered-email-domain-input"]').first().prop('value'))
+    expect(findRTDomainInput(wrapper).first().prop('value'))
     .toBe('verily.com,\n' + 'google.com');
     // CT changed to email domains
-    expect(wrapper.find('[data-test-id="controlled-email-domain-input"]').first().prop('value'))
+    expect(findCTDomainInput(wrapper).first().prop('value'))
     .toBe('domain.com');
     // CT email addresses become empty
-    expect(wrapper.find('[data-test-id="controlled-email-address-input"]').length).toBe(0);
+    expect(findCTAddressInput(wrapper).length).toBe(0);
   });
 
   it('should show appropriate section after changing agreement type in Registered Tier requirement', async() => {
@@ -141,11 +163,11 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper).toBeTruthy();
 
-    const agreementTypeDropDown = wrapper.find('[data-test-id="registered-agreement-dropdown"]').instance() as Dropdown;
+    const agreementTypeDropDown = findRTDropdown(wrapper).instance() as Dropdown;
     await simulateComponentChange(wrapper, agreementTypeDropDown, InstitutionMembershipRequirement.DOMAINS);
 
-    let rtEmailAddressDiv = wrapper.find('[data-test-id="registered-email-address"]');
-    let rtEmailDomainDiv = wrapper.find('[data-test-id="registered-email-domain"]');
+    let rtEmailAddressDiv = findRTAddress(wrapper);
+    let rtEmailDomainDiv = findRTDomain(wrapper);
     expect(rtEmailAddressDiv.length).toBe(0);
     expect(rtEmailDomainDiv.length).toBe(2);
 
@@ -154,8 +176,8 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
 
     await simulateComponentChange(wrapper, agreementTypeDropDown, InstitutionMembershipRequirement.ADDRESSES);
 
-    rtEmailAddressDiv = wrapper.find('[data-test-id="registered-email-address"]');
-    rtEmailDomainDiv = wrapper.find('[data-test-id="registered-email-domain"]');
+    rtEmailAddressDiv = findRTAddress(wrapper);
+    rtEmailDomainDiv = findRTDomain(wrapper);
     expect(rtEmailAddressDiv.length).toBe(2);
     expect(rtEmailDomainDiv.length).toBe(0);
 
@@ -168,25 +190,25 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper).toBeTruthy();
 
-    const ctEnabledToggle = wrapper.find('[data-test-id="controlled-enabled-switch"]').first().instance() as InputSwitch;
+    const ctEnabledToggle = findCTEnabled(wrapper);
     await simulateComponentChange(wrapper, ctEnabledToggle, true);
 
-    const rtAgreementTypeDropDown = wrapper.find('[data-test-id="registered-agreement-dropdown"]').instance() as Dropdown;
-    const ctAgreementTypeDropDown = wrapper.find('[data-test-id="controlled-agreement-dropdown"]').instance() as Dropdown;
+    const rtAgreementTypeDropDown = findRTDropdown(wrapper).instance() as Dropdown;
+    const ctAgreementTypeDropDown = findCTDropdown(wrapper).instance() as Dropdown;
     await simulateComponentChange(wrapper, rtAgreementTypeDropDown, InstitutionMembershipRequirement.DOMAINS);
     await simulateComponentChange(wrapper, ctAgreementTypeDropDown, InstitutionMembershipRequirement.ADDRESSES);
 
     // Single Entry with incorrect Email Domain format
-    wrapper.find('[data-test-id="registered-email-domain-input"]').first()
+    findRTDomainInput(wrapper).first()
     .simulate('change', {target: {value: 'someDomain.com,\njustSomeRandom.domain,\n,'}});
-    wrapper.find('[data-test-id="registered-email-domain-input"]').first().simulate('blur');
-    wrapper.find('[data-test-id="controlled-email-address-input"]').first()
+    findRTDomainInput(wrapper).first().simulate('blur');
+    findCTAddressInput(wrapper).first()
     .simulate('change', {target: {value: 'correctEmail@domain.com'}});
-    wrapper.find('[data-test-id="controlled-email-address-input"]').first().simulate('blur');
+    findCTAddressInput(wrapper).first().simulate('blur');
 
-    expect(wrapper.find('[data-test-id="registered-email-domain-input"]').first().prop('value'))
+    expect(findRTDomainInput(wrapper).first().prop('value'))
     .toBe('someDomain.com,\njustSomeRandom.domain');
-    expect(wrapper.find('[data-test-id="controlled-email-address-input"]').first().prop('value'))
+    expect(findCTAddressInput(wrapper).first().prop('value'))
     .toBe('correctEmail@domain.com');
   });
 
@@ -195,14 +217,14 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper).toBeTruthy();
 
-    const ctEnabledToggle = wrapper.find('[data-test-id="controlled-enabled-switch"]').first().instance() as InputSwitch;
+    const ctEnabledToggle = findCTEnabled(wrapper);
     await simulateComponentChange(wrapper, ctEnabledToggle, true);
 
-    const agreementTypeDropDown = wrapper.find('[data-test-id="controlled-agreement-dropdown"]').instance() as Dropdown;
+    const agreementTypeDropDown = findCTDropdown(wrapper).instance() as Dropdown;
     await simulateComponentChange(wrapper, agreementTypeDropDown, InstitutionMembershipRequirement.DOMAINS);
 
-    let ctEmailAddressDiv = wrapper.find('[data-test-id="controlled-email-address"]');
-    let ctEmailDomainDiv = wrapper.find('[data-test-id="controlled-email-domain"]');
+    let ctEmailAddressDiv = findCTAddress(wrapper);
+    let ctEmailDomainDiv = findCTDomain(wrapper);
     expect(ctEmailAddressDiv.length).toBe(0);
     expect(ctEmailDomainDiv.length).toBe(2);
 
@@ -211,8 +233,8 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
 
     await simulateComponentChange(wrapper, agreementTypeDropDown, InstitutionMembershipRequirement.ADDRESSES);
 
-    ctEmailAddressDiv = wrapper.find('[data-test-id="controlled-email-address"]');
-    ctEmailDomainDiv = wrapper.find('[data-test-id="controlled-email-domain"]');
+    ctEmailAddressDiv = findCTAddress(wrapper);
+    ctEmailDomainDiv = findCTDomain(wrapper);
     expect(ctEmailAddressDiv.length).toBe(2);
     expect(ctEmailDomainDiv.length).toBe(0);
 
@@ -225,23 +247,23 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper).toBeTruthy();
 
-    let rtEmailAddressError = wrapper.find('[data-test-id="registered-email-address-error"]');
+    let rtEmailAddressError = findRTAddressError(wrapper);
     expect(rtEmailAddressError.length).toBe(0);
-    const agreementTypeDropDown = wrapper.find('[data-test-id="registered-agreement-dropdown"]').instance() as Dropdown;
+    const agreementTypeDropDown = findRTDropdown(wrapper).instance() as Dropdown;
     await simulateComponentChange(wrapper, agreementTypeDropDown, InstitutionMembershipRequirement.ADDRESSES);
 
-    rtEmailAddressError = wrapper.find('[data-test-id="registered-email-address-error"]');
+    rtEmailAddressError = findRTAddressError(wrapper);
     expect(rtEmailAddressError.length).toBe(0);
 
     // In case of a single entry which is not in the correct format
-    wrapper.find('[data-test-id="registered-email-address-input"]').first().simulate('change', {target: {value: 'rtInvalidEmail@domain'}});
-    wrapper.find('[data-test-id="registered-email-address-input"]').first().simulate('blur');
-    rtEmailAddressError = wrapper.find('[data-test-id="registered-email-address-error"]');
+    findRTAddressInput(wrapper).first().simulate('change', {target: {value: 'rtInvalidEmail@domain'}});
+    findRTAddressInput(wrapper).first().simulate('blur');
+    rtEmailAddressError = findRTAddressError(wrapper);
     expect(rtEmailAddressError.first().props().children)
       .toBe('Following Email Addresses are not valid : rtInvalidEmail@domain');
 
     // Multiple Email Address entries with a mix of correct (someEmail@broadinstitute.org') and incorrect format
-    wrapper.find('[data-test-id="registered-email-address-input"]').first()
+    findRTAddressInput(wrapper).first()
       .simulate('change', {
         target: {
           value:
@@ -254,16 +276,16 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
             'nope@just#plain#wrong'
         }
       });
-    wrapper.find('[data-test-id="registered-email-address-input"]').first().simulate('blur');
-    rtEmailAddressError = wrapper.find('[data-test-id="registered-email-address-error"]');
+    findRTAddressInput(wrapper).first().simulate('blur');
+    rtEmailAddressError = findRTAddressError(wrapper);
     expect(rtEmailAddressError.first().props().children)
       .toBe('Following Email Addresses are not valid : invalidEmail@domain@org , invalidEmail , justDomain.org , nope@just#plain#wrong');
 
     // Single correct format Email Address entries
-    wrapper.find('[data-test-id="registered-email-address-input"]').first()
+    findRTAddressInput(wrapper).first()
       .simulate('change', {target: {value: 'correctEmail@domain.com'}});
-    wrapper.find('[data-test-id="registered-email-address-input"]').first().simulate('blur');
-    rtEmailAddressError = wrapper.find('[data-test-id="registered-email-address-error"]');
+    findRTAddressInput(wrapper).first().simulate('blur');
+    rtEmailAddressError = findRTAddressError(wrapper);
     expect(rtEmailAddressError.length).toBe(0);
   });
 
@@ -272,26 +294,26 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper).toBeTruthy();
 
-    const ctEnabledToggle = wrapper.find('[data-test-id="controlled-enabled-switch"]').first().instance() as InputSwitch;
+    const ctEnabledToggle = findCTEnabled(wrapper);
     await simulateComponentChange(wrapper, ctEnabledToggle, true);
 
-    let ctEmailAddressError = wrapper.find('[data-test-id="controlled-email-address-error"]');
+    let ctEmailAddressError = findCTAddressError(wrapper);
     expect(ctEmailAddressError.length).toBe(0);
-    const agreementTypeDropDown = wrapper.find('[data-test-id="controlled-agreement-dropdown"]').instance() as Dropdown;
+    const agreementTypeDropDown = findCTDropdown(wrapper).instance() as Dropdown;
     await simulateComponentChange(wrapper, agreementTypeDropDown, InstitutionMembershipRequirement.ADDRESSES);
 
-    ctEmailAddressError = wrapper.find('[data-test-id="controlled-email-address-error"]');
+    ctEmailAddressError = findCTAddressError(wrapper);
     expect(ctEmailAddressError.length).toBe(0);
 
     // In case of a single entry which is not in the correct format
-    wrapper.find('[data-test-id="controlled-email-address-input"]').first().simulate('change', {target: {value: 'ctInvalidEmail@domain'}});
-    wrapper.find('[data-test-id="controlled-email-address-input"]').first().simulate('blur');
-    ctEmailAddressError = wrapper.find('[data-test-id="controlled-email-address-error"]');
+    findCTAddressInput(wrapper).first().simulate('change', {target: {value: 'ctInvalidEmail@domain'}});
+    findCTAddressInput(wrapper).first().simulate('blur');
+    ctEmailAddressError = findCTAddressError(wrapper);
     expect(ctEmailAddressError.first().props().children)
     .toBe('Following Email Addresses are not valid : ctInvalidEmail@domain');
 
     // Multiple Email Address entries with a mix of correct (someEmail@broadinstitute.org') and incorrect format
-    wrapper.find('[data-test-id="controlled-email-address-input"]').first()
+    findCTAddressInput(wrapper).first()
     .simulate('change', {
       target: {
         value:
@@ -304,16 +326,16 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
             'nope@just#plain#wrong'
       }
     });
-    wrapper.find('[data-test-id="controlled-email-address-input"]').first().simulate('blur');
-    ctEmailAddressError = wrapper.find('[data-test-id="controlled-email-address-error"]');
+    findCTAddressInput(wrapper).first().simulate('blur');
+    ctEmailAddressError = findCTAddressError(wrapper);
     expect(ctEmailAddressError.first().props().children)
     .toBe('Following Email Addresses are not valid : invalidEmail@domain@org , invalidEmail , justDomain.org , nope@just#plain#wrong');
 
     // Single correct format Email Address entries
-    wrapper.find('[data-test-id="controlled-email-address-input"]').first()
+    findCTAddressInput(wrapper).first()
     .simulate('change', {target: {value: 'correctEmail@domain.com'}});
-    wrapper.find('[data-test-id="controlled-email-address-input"]').first().simulate('blur');
-    ctEmailAddressError = wrapper.find('[data-test-id="controlled-email-address-error"]');
+    findCTAddressInput(wrapper).first().simulate('blur');
+    ctEmailAddressError = findCTAddressError(wrapper);
     expect(ctEmailAddressError.length).toBe(0);
   });
 
@@ -322,24 +344,24 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper).toBeTruthy();
 
-    let rtEmailAddressError = wrapper.find('[data-test-id="registered-email-domain-error"]');
+    let rtEmailAddressError = findRTDomainError(wrapper);
     expect(rtEmailAddressError.length).toBe(0);
-    const agreementTypeDropDown = wrapper.find('[data-test-id="registered-agreement-dropdown"]').instance() as Dropdown;
+    const agreementTypeDropDown = findRTDropdown(wrapper).instance() as Dropdown;
     await simulateComponentChange(wrapper, agreementTypeDropDown, InstitutionMembershipRequirement.DOMAINS);
 
-    rtEmailAddressError = wrapper.find('[data-test-id="registered-email-domain-error"]');
+    rtEmailAddressError = findRTDomainError(wrapper);
     expect(rtEmailAddressError.length).toBe(0);
 
     // Single Entry with incorrect Email Domain format
-    wrapper.find('[data-test-id="registered-email-domain-input"]').first()
+    findRTDomainInput(wrapper).first()
       .simulate('change', {target: {value: 'invalidEmail@domain'}});
-    wrapper.find('[data-test-id="registered-email-domain-input"]').first().simulate('blur');
-    rtEmailAddressError = wrapper.find('[data-test-id="registered-email-domain-error"]');
+    findRTDomainInput(wrapper).first().simulate('blur');
+    rtEmailAddressError = findRTDomainError(wrapper);
     expect(rtEmailAddressError.first().props().children)
       .toBe('Following Email Domains are not valid : invalidEmail@domain');
 
     // Multiple Entries with correct and incorrect Email Domain format
-    wrapper.find('[data-test-id="registered-email-domain-input"]').first()
+    findRTDomainInput(wrapper).first()
       .simulate('change', {
         target: {
           value:
@@ -350,17 +372,17 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
             'broadinstitute.org#wrongTest'
         }
       });
-    wrapper.find('[data-test-id="registered-email-domain-input"]').first().simulate('blur');
-    rtEmailAddressError = wrapper.find('[data-test-id="registered-email-domain-error"]');
+    findRTDomainInput(wrapper).first().simulate('blur');
+    rtEmailAddressError = findRTDomainError(wrapper);
     expect(rtEmailAddressError.first().props().children)
       .toBe('Following Email Domains are not valid : someEmailAddress@domain@org , ' +
         'justSomeText , broadinstitute.org#wrongTest');
 
 
-    wrapper.find('[data-test-id="registered-email-domain-input"]').first()
+    findRTDomainInput(wrapper).first()
       .simulate('change', {target: {value: 'domain.com'}});
-    wrapper.find('[data-test-id="registered-email-domain-input"]').first().simulate('blur');
-    rtEmailAddressError = wrapper.find('[data-test-id="registered-email-domain-error"]');
+    findRTDomainInput(wrapper).first().simulate('blur');
+    rtEmailAddressError = findRTDomainError(wrapper);
     expect(rtEmailAddressError.length).toBe(0);
   });
 
@@ -369,27 +391,27 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper).toBeTruthy();
 
-    const ctEnabledToggle = wrapper.find('[data-test-id="controlled-enabled-switch"]').first().instance() as InputSwitch;
+    const ctEnabledToggle = findCTEnabled(wrapper);
     await simulateComponentChange(wrapper, ctEnabledToggle, true);
 
-    let ctEmailAddressError = wrapper.find('[data-test-id="controlled-email-domain-error"]');
+    let ctEmailAddressError = findCTDomainError(wrapper);
     expect(ctEmailAddressError.length).toBe(0);
-    const agreementTypeDropDown = wrapper.find('[data-test-id="controlled-agreement-dropdown"]').instance() as Dropdown;
+    const agreementTypeDropDown = findCTDropdown(wrapper).instance() as Dropdown;
     await simulateComponentChange(wrapper, agreementTypeDropDown, InstitutionMembershipRequirement.DOMAINS);
 
-    ctEmailAddressError = wrapper.find('[data-test-id="controlled-email-domain-error"]');
+    ctEmailAddressError = findCTDomainError(wrapper);
     expect(ctEmailAddressError.length).toBe(0);
 
     // Single Entry with incorrect Email Domain format
-    wrapper.find('[data-test-id="controlled-email-domain-input"]').first()
+    findCTDomainInput(wrapper).first()
     .simulate('change', {target: {value: 'invalidEmail@domain'}});
-    wrapper.find('[data-test-id="controlled-email-domain-input"]').first().simulate('blur');
-    ctEmailAddressError = wrapper.find('[data-test-id="controlled-email-domain-error"]');
+    findCTDomainInput(wrapper).first().simulate('blur');
+    ctEmailAddressError = findCTDomainError(wrapper);
     expect(ctEmailAddressError.first().props().children)
     .toBe('Following Email Domains are not valid : invalidEmail@domain');
 
     // Multiple Entries with correct and incorrect Email Domain format
-    wrapper.find('[data-test-id="controlled-email-domain-input"]').first()
+    findCTDomainInput(wrapper).first()
     .simulate('change', {
       target: {
         value:
@@ -400,16 +422,16 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
             'broadinstitute.org#wrongTest'
       }
     });
-    wrapper.find('[data-test-id="controlled-email-domain-input"]').first().simulate('blur');
-    ctEmailAddressError = wrapper.find('[data-test-id="controlled-email-domain-error"]');
+    findCTDomainInput(wrapper).first().simulate('blur');
+    ctEmailAddressError = findCTDomainError(wrapper);
     expect(ctEmailAddressError.first().props().children)
     .toBe('Following Email Domains are not valid : someEmailAddress@domain@org , ' +
         'justSomeText , broadinstitute.org#wrongTest');
 
-    wrapper.find('[data-test-id="controlled-email-domain-input"]').first()
+    findCTDomainInput(wrapper).first()
     .simulate('change', {target: {value: 'domain.com'}});
-    wrapper.find('[data-test-id="controlled-email-domain-input"]').first().simulate('blur');
-    ctEmailAddressError = wrapper.find('[data-test-id="controlled-email-domain-error"]');
+    findCTDomainInput(wrapper).first().simulate('blur');
+    ctEmailAddressError = findCTDomainError(wrapper);
     expect(ctEmailAddressError.length).toBe(0);
   });
 
@@ -418,17 +440,17 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper).toBeTruthy();
 
-    const agreementTypeDropDown = wrapper.find('[data-test-id="registered-agreement-dropdown"]').instance() as Dropdown;
+    const agreementTypeDropDown = findRTDropdown(wrapper).instance() as Dropdown;
     await simulateComponentChange(wrapper, agreementTypeDropDown, InstitutionMembershipRequirement.DOMAINS);
 
     // Single Entry with incorrect Email Domain format
-    wrapper.find('[data-test-id="registered-email-domain-input"]').first()
+    findRTDomainInput(wrapper).first()
       .simulate('change', {target: {value: 'validEmail.com,\n     ,\njustSomeRandom.domain,\n,'}});
-    wrapper.find('[data-test-id="registered-email-domain-input"]').first().simulate('blur');
-    expect(wrapper.find('[data-test-id="registered-email-domain-input"]').first().prop('value'))
+    findRTDomainInput(wrapper).first().simulate('blur');
+    expect(findRTDomainInput(wrapper).first().prop('value'))
       .toBe('validEmail.com,\njustSomeRandom.domain');
 
-    expect(wrapper.find('[data-test-id="registered-email-domain-domain-error"]').length).toBe(0);
+    expect(findRTDomainError(wrapper).length).toBe(0);
   });
 
   it('Should ignore empty string in email Domain in Controlled Tier requirement', async() => {
@@ -436,21 +458,21 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper).toBeTruthy();
 
-    const ctEnabledToggle = wrapper.find('[data-test-id="controlled-enabled-switch"]').first().instance() as InputSwitch;
+    const ctEnabledToggle = findCTEnabled(wrapper);
     await simulateComponentChange(wrapper, ctEnabledToggle, true);
     await waitOneTickAndUpdate(wrapper);
 
-    const agreementTypeDropDown = wrapper.find('[data-test-id="controlled-agreement-dropdown"]').instance() as Dropdown;
+    const agreementTypeDropDown = findCTDropdown(wrapper).instance() as Dropdown;
     await simulateComponentChange(wrapper, agreementTypeDropDown, InstitutionMembershipRequirement.DOMAINS);
 
     // Single Entry with incorrect Email Domain format
-    wrapper.find('[data-test-id="controlled-email-domain-input"]').first()
+    findCTDomainInput(wrapper).first()
     .simulate('change', {target: {value: 'validEmail.com,\n     ,\njustSomeRandom.domain,\n,'}});
-    wrapper.find('[data-test-id="controlled-email-domain-input"]').first().simulate('blur');
-    expect(wrapper.find('[data-test-id="controlled-email-domain-input"]').first().prop('value'))
+    findCTDomainInput(wrapper).first().simulate('blur');
+    expect(findCTDomainInput(wrapper).first().prop('value'))
     .toBe('validEmail.com,\njustSomeRandom.domain');
 
-    expect(wrapper.find('[data-test-id="controlled-email-domain-domain-error"]').length).toBe(0);
+    expect(findCTDomainError(wrapper).length).toBe(0);
   });
 
   it('Should ignore whitespaces in email domains in Registered Tier requirement', async() => {
@@ -458,17 +480,17 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper).toBeTruthy();
 
-    const agreementTypeDropDown = wrapper.find('[data-test-id="registered-agreement-dropdown"]').instance() as Dropdown;
+    const agreementTypeDropDown = findRTDropdown(wrapper).instance() as Dropdown;
     await simulateComponentChange(wrapper, agreementTypeDropDown, InstitutionMembershipRequirement.DOMAINS);
 
     // Single Entry with incorrect Email Domain format
-    wrapper.find('[data-test-id="registered-email-domain-input"]').first()
+    findRTDomainInput(wrapper).first()
       .simulate('change', {target: {value: '  someDomain.com,\njustSomeRandom.domain   ,\n,'}});
-    wrapper.find('[data-test-id="registered-email-domain-input"]').first().simulate('blur');
-    expect(wrapper.find('[data-test-id="registered-email-domain-input"]').first().prop('value'))
+    findRTDomainInput(wrapper).first().simulate('blur');
+    expect(findRTDomainInput(wrapper).first().prop('value'))
       .toBe('someDomain.com,\njustSomeRandom.domain');
 
-    expect(wrapper.find('[data-test-id="registered-email-domain-domain-error"]').length).toBe(0);
+    expect(findRTDomainError(wrapper).length).toBe(0);
   });
 
   it('Should ignore whitespaces in email domains in Controlled Tier requirement', async() => {
@@ -476,20 +498,20 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper).toBeTruthy();
 
-    const ctEnabledToggle = wrapper.find('[data-test-id="controlled-enabled-switch"]').first().instance() as InputSwitch;
+    const ctEnabledToggle = findCTEnabled(wrapper);
     await simulateComponentChange(wrapper, ctEnabledToggle, true);
 
-    const agreementTypeDropDown = wrapper.find('[data-test-id="controlled-agreement-dropdown"]').instance() as Dropdown;
+    const agreementTypeDropDown = findCTDropdown(wrapper).instance() as Dropdown;
     await simulateComponentChange(wrapper, agreementTypeDropDown, InstitutionMembershipRequirement.DOMAINS);
 
     // Single Entry with incorrect Email Domain format
-    wrapper.find('[data-test-id="controlled-email-domain-input"]').first()
+    findCTDomainInput(wrapper).first()
     .simulate('change', {target: {value: '  someDomain.com,\njustSomeRandom.domain   ,\n,'}});
-    wrapper.find('[data-test-id="controlled-email-domain-input"]').first().simulate('blur');
-    expect(wrapper.find('[data-test-id="controlled-email-domain-input"]').first().prop('value'))
+    findCTDomainInput(wrapper).first().simulate('blur');
+    expect(findCTDomainInput(wrapper).first().prop('value'))
     .toBe('someDomain.com,\njustSomeRandom.domain');
 
-    expect(wrapper.find('[data-test-id="controlled-email-domain-domain-error"]').length).toBe(0);
+    expect(findCTDomainError(wrapper).length).toBe(0);
   });
 });
 
@@ -518,14 +540,14 @@ describe('AdminInstitutionEditSpec - add mode', () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper).toBeTruthy();
-    expect(wrapper.find('[data-test-id="registered-card-details"]').exists()).toBeTruthy();
+    expect(findRTDetails(wrapper).exists()).toBeTruthy();
   });
 
   it('should not initially show CT card details', async () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper).toBeTruthy();
-    expect(wrapper.find('[data-test-id="controlled-card-details"]').exists()).toBeFalsy();
+    expect(findCTDetails(wrapper).exists()).toBeFalsy();
   });
 
   it('should hide/show CT card details when controlled tier enabled/disabled', async () => {
@@ -533,16 +555,16 @@ describe('AdminInstitutionEditSpec - add mode', () => {
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper).toBeTruthy();
 
-    expect(wrapper.find('[data-test-id="controlled-card-details"]').exists()).toBeFalsy();
+    expect(findCTDetails(wrapper).exists()).toBeFalsy();
 
-    const ctEnabledToggle = wrapper.find('[data-test-id="controlled-enabled-switch"]').first().instance() as InputSwitch;
+    const ctEnabledToggle = findCTEnabled(wrapper);
     await simulateComponentChange(wrapper, ctEnabledToggle, true);
     expect(ctEnabledToggle.props.checked).toBeTruthy();
-    expect(wrapper.find('[data-test-id="controlled-card-details"]').exists()).toBeTruthy();
+    expect(findCTDetails(wrapper).exists()).toBeTruthy();
 
     await simulateComponentChange(wrapper, ctEnabledToggle, false);
     expect(ctEnabledToggle.props.checked).toBeFalsy();
-    expect(wrapper.find('[data-test-id="controlled-card-details"]').exists()).toBeFalsy();
+    expect(findCTDetails(wrapper).exists()).toBeFalsy();
   });
 
   it('should update institution tier requirement', async() => {
@@ -550,28 +572,28 @@ describe('AdminInstitutionEditSpec - add mode', () => {
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper).toBeTruthy();
 
-    expect(wrapper.find('[data-test-id="registered-email-domain-input"]').exists()).toBeFalsy();
-    expect(wrapper.find('[data-test-id="registered-email-address-input"]').exists()).toBeFalsy();
-    expect(wrapper.find('[data-test-id="controlled-email-address-input"]').exists()).toBeFalsy();
-    expect(wrapper.find('[data-test-id="controlled-email-domain-input"]').exists()).toBeFalsy();
+    expect(findRTDomainInput(wrapper).exists()).toBeFalsy();
+    expect(findRTAddressInput(wrapper).exists()).toBeFalsy();
+    expect(findCTAddressInput(wrapper).exists()).toBeFalsy();
+    expect(findCTDomainInput(wrapper).exists()).toBeFalsy();
 
-    const agreementTypeDropDown = wrapper.find('[data-test-id="registered-agreement-dropdown"]').instance() as Dropdown;
+    const agreementTypeDropDown = findRTDropdown(wrapper).instance() as Dropdown;
     await simulateComponentChange(wrapper, agreementTypeDropDown, InstitutionMembershipRequirement.ADDRESSES);
 
-    expect(wrapper.find('[data-test-id="registered-email-address-input"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-id="registered-email-address-input"]').first().prop('value')).toBe('');
+    expect(findRTAddressInput(wrapper).exists()).toBeTruthy();
+    expect(findRTAddressInput(wrapper).first().prop('value')).toBe('');
 
-    expect(wrapper.find('[data-test-id="registered-email-domain-input"]').exists()).toBeFalsy();
-    expect(wrapper.find('[data-test-id="controlled-email-address-input"]').exists()).toBeFalsy();
-    expect(wrapper.find('[data-test-id="controlled-email-domain-input"]').exists()).toBeFalsy();
+    expect(findRTDomainInput(wrapper).exists()).toBeFalsy();
+    expect(findCTAddressInput(wrapper).exists()).toBeFalsy();
+    expect(findCTDomainInput(wrapper).exists()).toBeFalsy();
 
-    wrapper.find('[data-test-id="registered-email-address-input"]').first()
+    findRTAddressInput(wrapper).first()
         .simulate('change', {target: {value: 'user@domain.com'}});
-    wrapper.find('[data-test-id="registered-email-address-input"]').first()
+    findRTAddressInput(wrapper).first()
         .simulate('blur');
 
     // RT no change
-    expect(wrapper.find('[data-test-id="registered-email-address-input"]').first().prop('value'))
+    expect(findRTAddressInput(wrapper).first().prop('value'))
         .toBe('user@domain.com');
   });
 });
