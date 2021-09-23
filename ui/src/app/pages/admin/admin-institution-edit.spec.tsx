@@ -58,7 +58,7 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
     expect(wrapper).toBeTruthy();
   });
 
-  it('should throw error for existing Institution if display name is more than 80 characters', async() => {
+  it('should throw an error for existing Institution if display name is more than 80 characters', async() => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper).toBeTruthy();
@@ -467,6 +467,19 @@ describe('AdminInstitutionEditSpec - add mode', () => {
     expect(wrapper).toBeTruthy();
   });
 
+  it('should throw error for a new Institution if the display name is more than 80 characters', async() => {
+    const wrapper = component();
+    await waitOneTickAndUpdate(wrapper);
+    expect(wrapper).toBeTruthy();
+
+    const testInput = fp.repeat(83, 'a');
+    const displayNameText = wrapper.find('[id="displayName"]').first();
+    displayNameText.simulate('change', {target: {value: testInput}});
+    displayNameText.simulate('blur');
+    expect(wrapper.find('[data-test-id="displayNameError"]').first().prop('children'))
+        .toContain('Display name must be 80 characters or less');
+  });
+
   it('should always show RT card details', async () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
@@ -521,5 +534,84 @@ describe('AdminInstitutionEditSpec - add mode', () => {
 
     // RT no change
     expect(findRTAddressInput(wrapper).first().prop('value')).toBe('user@domain.com');
+  });
+
+  it('should not change eRA Required and tier enabled switches when changing tier requirement', async() => {
+    const wrapper = component();
+    await waitOneTickAndUpdate(wrapper);
+    expect(wrapper).toBeTruthy();
+
+    expect(findRTERARequired(wrapper).props.checked).toBeTruthy();
+    expect(findCTERARequired(wrapper).props.checked).toBeTruthy();
+
+    // change Registered to ADDRESS
+
+    expect(findRTAddress(wrapper).exists()).toBeFalsy();
+
+    await simulateComponentChange(wrapper, findRTDropdown(wrapper), InstitutionMembershipRequirement.ADDRESSES);
+
+    expect(findRTAddress(wrapper).exists()).toBeTruthy();
+    expect(findRTDomain(wrapper).exists()).toBeFalsy();
+
+    expect(findRTERARequired(wrapper).props.checked).toBeTruthy();
+    expect(findCTERARequired(wrapper).props.checked).toBeTruthy();
+  });
+
+  it('Should display error in case of invalid email Address Format in Registered Tier requirement', async() => {
+    const wrapper = component();
+    await waitOneTickAndUpdate(wrapper);
+    expect(wrapper).toBeTruthy();
+
+    await simulateComponentChange(wrapper, findRTDropdown(wrapper), InstitutionMembershipRequirement.ADDRESSES);
+
+    expect(findRTAddressError(wrapper).exists()).toBeFalsy();
+
+    // In case of a single entry which is not in the correct format
+    findRTAddressInput(wrapper).first().simulate('change', {target: {value: 'rtInvalidEmail@domain'}});
+    findRTAddressInput(wrapper).first().simulate('blur');
+    expect(findRTAddressError(wrapper).first().props().children)
+        .toBe('Following Email Addresses are not valid : rtInvalidEmail@domain');
+
+    // Multiple Email Address entries with a mix of correct (someEmail@broadinstitute.org') and incorrect format
+    findRTAddressInput(wrapper).first()
+        .simulate('change', {
+          target: {
+            value:
+                'invalidEmail@domain@org,\n' +
+                'correctEmail@someDomain.org,\n' +
+                ' correctEmail.123.hello@someDomain567.org.com   \n' +
+                ' invalidEmail   ,\n' +
+                ' justDomain.org,\n' +
+                'someEmail@broadinstitute.org\n' +
+                'nope@just#plain#wrong'
+          }
+        });
+    findRTAddressInput(wrapper).first().simulate('blur');
+    expect(findRTAddressError(wrapper).first().props().children)
+        .toBe('Following Email Addresses are not valid : invalidEmail@domain@org , invalidEmail , justDomain.org , nope@just#plain#wrong');
+
+    // Single correct format Email Address entries
+    findRTAddressInput(wrapper).first().simulate('change', {target: {value: 'correctEmail@domain.com'}});
+    findRTAddressInput(wrapper).first().simulate('blur');
+    expect(findRTAddressError(wrapper).exists()).toBeFalsy();
+  });
+
+  it('Should ignore empty string in email Domain in Controlled Tier requirement', async() => {
+    const wrapper = component();
+    await waitOneTickAndUpdate(wrapper);
+    expect(wrapper).toBeTruthy();
+
+    await simulateComponentChange(wrapper, findCTEnabled(wrapper), true);
+    await waitOneTickAndUpdate(wrapper);
+
+    await simulateComponentChange(wrapper, findCTDropdown(wrapper), InstitutionMembershipRequirement.DOMAINS);
+
+    // Single Entry with incorrect Email Domain format
+    findCTDomainInput(wrapper).first()
+        .simulate('change', {target: {value: 'validEmail.com,\n     ,\njustSomeRandom.domain,\n,'}});
+    findCTDomainInput(wrapper).first().simulate('blur');
+    expect(findCTDomainInput(wrapper).first().prop('value')).toBe('validEmail.com,\njustSomeRandom.domain');
+
+    expect(findCTDomainError(wrapper).exists()).toBeFalsy();
   });
 });
