@@ -115,9 +115,7 @@ for (( i=0; i < n_procs; i++ )); do
   fi
 done
 # wait for all prep_pids to complete
-for pid in ${prep_pids[*]}; do
-  wait $pid
-done
+wait
 echo "Running scripts done creating and populating all prep tables for cb_criteria total time $(timeIt script_start) secs"
 echo "###########################################################################"
 echo "# Running script for cb_criteria main tables....run time reset to 0 secs  #"
@@ -125,8 +123,7 @@ echo "##########################################################################
 #source make-cb-criteria-00-main-tables.sh "$BQ_PROJECT" "$BQ_DATASET" "$run_in_parallel"
 # vars are purposely hard-coded
 source make-cb-criteria-00-main-tables.sh "$run_in_parallel"
-pid=$!
-wait pid
+wait
 echo "Running all scripts done total time $(timeIt script_start)"
 echo "Done!"
 exit 0

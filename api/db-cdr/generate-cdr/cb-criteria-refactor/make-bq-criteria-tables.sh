@@ -11,252 +11,252 @@ set -e
 export BQ_PROJECT='all-of-us-ehr-dev'        # project
 export BQ_DATASET='ChenchalDummyOri'        # dataset
 #export DATA_BROWSER=$3      # data browser flag
-#
-#################################################
-## CREATE TABLES
-#################################################
-#echo "CREATE TABLES - cb_criteria"
-#bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
-#"CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
-#(
-#    id                  INT64,
-#    parent_id           INT64,
-#    domain_id           STRING,
-#    is_standard         INT64,
-#    type                STRING,
-#    subtype             STRING,
-#    concept_id          INT64,
-#    code                STRING,
-#    name                STRING,
-#    value               STRING,
-#    rollup_count        INT64,
-#    item_count          INT64,
-#    est_count           INT64,
-#    is_group            INT64,
-#    is_selectable       INT64,
-#    has_attribute       INT64,
-#    has_hierarchy       INT64,
-#    has_ancestor_data   INT64,
-#    path                STRING,
-#    synonyms            STRING,
-#    full_text           STRING,
-#    display_synonyms    STRING
-#)"
-#
-## table that holds the ingredient --> coded drugs mapping
-#echo "CREATE TABLES - cb_criteria_ancestor"
-#bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
-#"CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_ancestor\`
-#(
-#    ancestor_id INT64,
-#    descendant_id INT64
-#)"
-#
-## table that holds categorical results and min/max information about individual labs
-#echo "CREATE TABLES - cb_criteria_attribute"
-#bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
-#"CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_attribute\`
-#(
-#    id                    INT64,
-#    concept_id            INT64,
-#    value_as_concept_id	  INT64,
-#    concept_name          STRING,
-#    type                  STRING,
-#    est_count             STRING
-#)"
-#
-## table that holds which survey versions each question and answer are apart of
-#echo "CREATE TABLES - cb_survey_attribute"
-#bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
-#"CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.cb_survey_attribute\`
-#(
-#      id                    INT64
-#    , question_concept_id   INT64
-#    , answer_concept_id     INT64
-#    , survey_version_concept_id INT64
-#    , item_count            INT64
-#)"
-#
-## table that holds the drug brands to ingredients relationship mapping
-## also holds source concept --> standard concept mapping information
-#echo "CREATE TABLES - cb_criteria_relationship"
-#bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
-#"CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_relationship\`
-#(
-#    concept_id_1 INT64,
-#    concept_id_2 INT64
-#)"
-#
-## staging table to make it easier to add data into prep_concept_ancestor
-#echo "CREATE TABLES - prep_ancestor_staging"
-#bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
-#"CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.prep_ancestor_staging\`
-#(
-#    ancestor_concept_id     INT64,
-#    domain_id               STRING,
-#    type                    STRING,
-#    is_standard             INT64,
-#    concept_id_1            INT64,
-#    concept_id_2            INT64,
-#    concept_id_3            INT64,
-#    concept_id_4            INT64,
-#    concept_id_5            INT64,
-#    concept_id_6            INT64,
-#    concept_id_7            INT64,
-#    concept_id_8            INT64,
-#    concept_id_9            INT64,
-#    concept_id_10           INT64,
-#    concept_id_11           INT64,
-#    concept_id_12           INT64,
-#    concept_id_13           INT64,
-#    concept_id_14           INT64,
-#    concept_id_15           INT64,
-#    concept_id_16           INT64,
-#    concept_id_17           INT64,
-#    concept_id_18           INT64,
-#    concept_id_19           INT64,
-#    concept_id_20           INT64
-#)"
-#
-## table that holds ancestor information for parent counts
-#echo "CREATE TABLES - prep_concept_ancestor"
-#bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
-#"CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor\`
-#(
-#    ancestor_concept_id     INT64,
-#    descendant_concept_id   INT64,
-#    is_standard             INT64
-#)"
-#
-## table that holds CPT4 ancestor information for parent counts
-#echo "CREATE TABLES - prep_cpt_ancestor"
-#bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
-#"CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.prep_cpt_ancestor\`
-#(
-#    ancestor_id     INT64,
-#    descendant_id   INT64
-#)"
-#
-## holds atc and rxnorm concept relationships for drugs
-#echo "CREATE TABLES - prep_atc_rel_in_data"
-#bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
-#"CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.prep_atc_rel_in_data\`
-#(
-#    p_concept_id    INT64,
-#    p_concept_code  STRING,
-#    p_concept_name  STRING,
-#    p_domain_id     STRING,
-#    concept_id      INT64,
-#    concept_code    STRING,
-#    concept_name    STRING,
-#    domain_id       STRING
-#)"
-#
-## holds LOINC concept relationship data for measurements
-#echo "CREATE TABLES - prep_loinc_rel_in_data"
-#bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
-#"CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.prep_loinc_rel_in_data\`
-#(
-#    p_concept_id    INT64,
-#    p_concept_code  STRING,
-#    p_concept_name  STRING,
-#    p_domain_id     STRING,
-#    concept_id      INT64,
-#    concept_code    STRING,
-#    concept_name    STRING,
-#    domain_id       STRING
-#)"
-#
-## holds standard snomed concept relationship data for conditions
-#echo "CREATE TABLES - prep_snomed_rel_cm_in_data"
-#bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
-#"CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_cm_in_data\`
-#(
-#    p_concept_id    INT64,
-#    p_concept_code  STRING,
-#    p_concept_name  STRING,
-#    p_domain_id     STRING,
-#    concept_id      INT64,
-#    concept_code    STRING,
-#    concept_name    STRING,
-#    domain_id       STRING
-#)"
-#
-## holds source snomed concept relationship data for conditions
-#echo "CREATE TABLES - prep_snomed_rel_cm_src_in_data"
-#bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
-#"CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_cm_src_in_data\`
-#(
-#    p_concept_id    INT64,
-#    p_concept_code  STRING,
-#    p_concept_name  STRING,
-#    p_domain_id     STRING,
-#    concept_id      INT64,
-#    concept_code    STRING,
-#    concept_name    STRING,
-#    domain_id       STRING
-#)"
-#
-## holds standard snomed concept relationship data for measurements
-#echo "CREATE TABLES - prep_snomed_rel_meas_in_data"
-#bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
-#"CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_meas_in_data\`
-#(
-#    p_concept_id    INT64,
-#    p_concept_code  STRING,
-#    p_concept_name  STRING,
-#    p_domain_id     STRING,
-#    concept_id      INT64,
-#    concept_code    STRING,
-#    concept_name    STRING,
-#    domain_id       STRING
-#)"
-#
-## holds standard snomed concept relationship data for procedures
-#echo "CREATE TABLES - prep_snomed_rel_pcs_in_data"
-#bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
-#"CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_pcs_in_data\`
-#(
-#    p_concept_id    INT64,
-#    p_concept_code  STRING,
-#    p_concept_name  STRING,
-#    p_domain_id     STRING,
-#    concept_id      INT64,
-#    concept_code    STRING,
-#    concept_name    STRING,
-#    domain_id       STRING
-#)"
-#
-## holds source snomed concept relationship data for procedures
-#echo "CREATE TABLES - prep_snomed_rel_pcs_src_in_data"
-#bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
-#"CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_pcs_src_in_data\`
-#(
-#    p_concept_id    INT64,
-#    p_concept_code  STRING,
-#    p_concept_name  STRING,
-#    p_domain_id     STRING,
-#    concept_id      INT64,
-#    concept_code    STRING,
-#    concept_name    STRING,
-#    domain_id       STRING
-#)"
-#
-## create merged table of concept and prep_concept
-#echo "CREATE TABLES - prep_concept_merged"
-#bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
-#"CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.prep_concept_merged\` AS
-#SELECT * FROM \`$BQ_PROJECT.$BQ_DATASET.concept\`
-#UNION ALL
-#SELECT * FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept\`"
-#
-## create merged table of concept_relationship and prep_concept_relationship
-#echo "CREATE TABLES - prep_concept_relationship_merged"
-#bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
-#"CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.prep_concept_relationship_merged\` AS
-#SELECT * FROM \`$BQ_PROJECT.$BQ_DATASET.concept_relationship\`
-#UNION ALL
-#SELECT * FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_relationship\`"
+
+################################################
+# CREATE TABLES
+################################################
+echo "CREATE TABLES - cb_criteria"
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+"CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+(
+    id                  INT64,
+    parent_id           INT64,
+    domain_id           STRING,
+    is_standard         INT64,
+    type                STRING,
+    subtype             STRING,
+    concept_id          INT64,
+    code                STRING,
+    name                STRING,
+    value               STRING,
+    rollup_count        INT64,
+    item_count          INT64,
+    est_count           INT64,
+    is_group            INT64,
+    is_selectable       INT64,
+    has_attribute       INT64,
+    has_hierarchy       INT64,
+    has_ancestor_data   INT64,
+    path                STRING,
+    synonyms            STRING,
+    full_text           STRING,
+    display_synonyms    STRING
+)"
+
+# table that holds the ingredient --> coded drugs mapping
+echo "CREATE TABLES - cb_criteria_ancestor"
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+"CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_ancestor\`
+(
+    ancestor_id INT64,
+    descendant_id INT64
+)"
+
+# table that holds categorical results and min/max information about individual labs
+echo "CREATE TABLES - cb_criteria_attribute"
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+"CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_attribute\`
+(
+    id                    INT64,
+    concept_id            INT64,
+    value_as_concept_id	  INT64,
+    concept_name          STRING,
+    type                  STRING,
+    est_count             STRING
+)"
+
+# table that holds which survey versions each question and answer are apart of
+echo "CREATE TABLES - cb_survey_attribute"
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+"CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.cb_survey_attribute\`
+(
+      id                    INT64
+    , question_concept_id   INT64
+    , answer_concept_id     INT64
+    , survey_version_concept_id INT64
+    , item_count            INT64
+)"
+
+# table that holds the drug brands to ingredients relationship mapping
+# also holds source concept --> standard concept mapping information
+echo "CREATE TABLES - cb_criteria_relationship"
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+"CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_relationship\`
+(
+    concept_id_1 INT64,
+    concept_id_2 INT64
+)"
+
+# staging table to make it easier to add data into prep_concept_ancestor
+echo "CREATE TABLES - prep_ancestor_staging"
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+"CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.prep_ancestor_staging\`
+(
+    ancestor_concept_id     INT64,
+    domain_id               STRING,
+    type                    STRING,
+    is_standard             INT64,
+    concept_id_1            INT64,
+    concept_id_2            INT64,
+    concept_id_3            INT64,
+    concept_id_4            INT64,
+    concept_id_5            INT64,
+    concept_id_6            INT64,
+    concept_id_7            INT64,
+    concept_id_8            INT64,
+    concept_id_9            INT64,
+    concept_id_10           INT64,
+    concept_id_11           INT64,
+    concept_id_12           INT64,
+    concept_id_13           INT64,
+    concept_id_14           INT64,
+    concept_id_15           INT64,
+    concept_id_16           INT64,
+    concept_id_17           INT64,
+    concept_id_18           INT64,
+    concept_id_19           INT64,
+    concept_id_20           INT64
+)"
+
+# table that holds ancestor information for parent counts
+echo "CREATE TABLES - prep_concept_ancestor"
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+"CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor\`
+(
+    ancestor_concept_id     INT64,
+    descendant_concept_id   INT64,
+    is_standard             INT64
+)"
+
+# table that holds CPT4 ancestor information for parent counts
+echo "CREATE TABLES - prep_cpt_ancestor"
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+"CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.prep_cpt_ancestor\`
+(
+    ancestor_id     INT64,
+    descendant_id   INT64
+)"
+
+# holds atc and rxnorm concept relationships for drugs
+echo "CREATE TABLES - prep_atc_rel_in_data"
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+"CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.prep_atc_rel_in_data\`
+(
+    p_concept_id    INT64,
+    p_concept_code  STRING,
+    p_concept_name  STRING,
+    p_domain_id     STRING,
+    concept_id      INT64,
+    concept_code    STRING,
+    concept_name    STRING,
+    domain_id       STRING
+)"
+
+# holds LOINC concept relationship data for measurements
+echo "CREATE TABLES - prep_loinc_rel_in_data"
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+"CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.prep_loinc_rel_in_data\`
+(
+    p_concept_id    INT64,
+    p_concept_code  STRING,
+    p_concept_name  STRING,
+    p_domain_id     STRING,
+    concept_id      INT64,
+    concept_code    STRING,
+    concept_name    STRING,
+    domain_id       STRING
+)"
+
+# holds standard snomed concept relationship data for conditions
+echo "CREATE TABLES - prep_snomed_rel_cm_in_data"
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+"CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_cm_in_data\`
+(
+    p_concept_id    INT64,
+    p_concept_code  STRING,
+    p_concept_name  STRING,
+    p_domain_id     STRING,
+    concept_id      INT64,
+    concept_code    STRING,
+    concept_name    STRING,
+    domain_id       STRING
+)"
+
+# holds source snomed concept relationship data for conditions
+echo "CREATE TABLES - prep_snomed_rel_cm_src_in_data"
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+"CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_cm_src_in_data\`
+(
+    p_concept_id    INT64,
+    p_concept_code  STRING,
+    p_concept_name  STRING,
+    p_domain_id     STRING,
+    concept_id      INT64,
+    concept_code    STRING,
+    concept_name    STRING,
+    domain_id       STRING
+)"
+
+# holds standard snomed concept relationship data for measurements
+echo "CREATE TABLES - prep_snomed_rel_meas_in_data"
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+"CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_meas_in_data\`
+(
+    p_concept_id    INT64,
+    p_concept_code  STRING,
+    p_concept_name  STRING,
+    p_domain_id     STRING,
+    concept_id      INT64,
+    concept_code    STRING,
+    concept_name    STRING,
+    domain_id       STRING
+)"
+
+# holds standard snomed concept relationship data for procedures
+echo "CREATE TABLES - prep_snomed_rel_pcs_in_data"
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+"CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_pcs_in_data\`
+(
+    p_concept_id    INT64,
+    p_concept_code  STRING,
+    p_concept_name  STRING,
+    p_domain_id     STRING,
+    concept_id      INT64,
+    concept_code    STRING,
+    concept_name    STRING,
+    domain_id       STRING
+)"
+
+# holds source snomed concept relationship data for procedures
+echo "CREATE TABLES - prep_snomed_rel_pcs_src_in_data"
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+"CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_pcs_src_in_data\`
+(
+    p_concept_id    INT64,
+    p_concept_code  STRING,
+    p_concept_name  STRING,
+    p_domain_id     STRING,
+    concept_id      INT64,
+    concept_code    STRING,
+    concept_name    STRING,
+    domain_id       STRING
+)"
+
+# create merged table of concept and prep_concept
+echo "CREATE TABLES - prep_concept_merged"
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+"CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.prep_concept_merged\` AS
+SELECT * FROM \`$BQ_PROJECT.$BQ_DATASET.concept\`
+UNION ALL
+SELECT * FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept\`"
+
+# create merged table of concept_relationship and prep_concept_relationship
+echo "CREATE TABLES - prep_concept_relationship_merged"
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+"CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.prep_concept_relationship_merged\` AS
+SELECT * FROM \`$BQ_PROJECT.$BQ_DATASET.concept_relationship\`
+UNION ALL
+SELECT * FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_relationship\`"
 
 
 ################################################
@@ -1301,7 +1301,7 @@ FROM
         GROUP BY 1, 2
     ) a"
 
-exit 1
+
 ################################################
 # ICD9 - SOURCE
 ################################################
@@ -1711,7 +1711,7 @@ WHERE type in ('ICD9CM', 'ICD9Proc')
     and rollup_count is null"
 
 # TODO there are still some parents that don't actually have any children and never will. WHAT TO DO?
-
+exit 1
 
 ################################################
 # ICD10CM - SOURCE

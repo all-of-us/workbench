@@ -296,7 +296,7 @@ LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.ethnicity_concept_id = b.co
 WHERE b.concept_id is not null"
 
 #wait for process to end before copying
-wait $!
+wait
 ## copy temp tables back to main tables, and delete temp?
 if [[ "$RUN_PARALLEL" == "mult" ]]; then
   cpToMain "$TBL_CBC" &

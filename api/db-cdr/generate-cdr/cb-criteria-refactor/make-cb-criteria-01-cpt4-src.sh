@@ -218,7 +218,7 @@ WHERE type = 'CPT4'
         )"
 
 #wait for process to end before copying
-wait $!
+wait
 ## copy temp tables back to main tables, and delete temp?
 if [[ "$RUN_PARALLEL" == "mult" ]]; then
   cpToMain "$TBL_CBC" &
