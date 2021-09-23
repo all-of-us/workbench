@@ -16,6 +16,7 @@ import {AoU, AouTitle} from 'app/components/text-wrappers';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {CreateBillingAccountModal} from 'app/pages/workspace/create-billing-account-modal';
 import {WorkspaceEditSection} from 'app/pages/workspace/workspace-edit-section';
+import {Select} from 'app/components/inputs';
 import {
   disseminateFindings,
   PrimaryPurposeItems,
@@ -426,10 +427,11 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
     }
 
     async requestBillingScopeThenFetchBillingAccount() {
-      this.setState({fetchBillingAccountLoading: true});
-      await ensureBillingScope();
-      await this.fetchBillingAccounts();
-      this.setState({fetchBillingAccountLoading: false});
+      // this.setState({fetchBillingAccountLoading: true});
+      // await ensureBillingScope();
+      // await this.fetchBillingAccounts();
+      // this.setState({fetchBillingAccountLoading: false});
+      console.log("~~~~~~")
     }
 
     async componentDidMount() {
@@ -1236,12 +1238,12 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
               </div>
             </OverlayPanel>
             <FlexRow>
+              <div onClick={() =>  this.requestBillingScopeThenFetchBillingAccount()}>
                   <Dropdown data-test-id = 'billing-dropdown'
                       style={{width: '20rem'}}
                         value={billingAccountName}
                         options={this.buildBillingAccountOptions()}
                         disabled={(freeTierCreditsBalance < 0.0) && !enableBillingUpgrade}
-                            onclick={() => this.requestBillingScopeThenFetchBillingAccount()}
                         onChange={e => {
                           if (e.value === SELECT_OR_CREATE_BILLING_ACCOUNT_OPTION_VALUE) {
                             this.requestBillingScopeThenFetchBillingAccount();
@@ -1254,6 +1256,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
                           }
                         }}
               />
+              </div>
               {showCreateBillingAccountModal &&<Button type='primary' onClick={() => this.setState({showCreateBillingAccountModal: true})}>CREATE BILLING ACCOUNT</Button>}
             </FlexRow>
             </div>}
