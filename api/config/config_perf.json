@@ -85,7 +85,6 @@
   },
   "moodle": {
     "host": "aoudev.nnlm.gov",
-    "enableMoodleBackend": true,
     "credentialsKeyV2": "moodle-key-v2.txt"
   },
   "access": {
