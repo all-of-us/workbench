@@ -335,25 +335,29 @@ export const AdminInstitutionEdit = fp.flow(withNavigation, withRouter)(class ex
   // Filter out empty line or empty email addresses like <email1>,,<email2> for registered tier
   filterEmptyRtEmailAddresses() {
     const updatedEmailAddresses = getRegisteredTierEmailAddresses(this.state.institution).filter(nonEmpty);
-    this.setState(fp.set(['institution', 'tierConfigs'], updateRtEmailAddresses(this.state.institution, updatedEmailAddresses)));
+    this.setState(fp.set(['institution', 'tierConfigs'],
+        updateRtEmailAddresses(this.state.institution, updatedEmailAddresses)));
   }
 
   // Filter out empty line or empty email addresses like <email1>,,<email2> for controlled tier
   filterEmptyCtEmailAddresses() {
     const updatedEmailAddresses = getControlledTierEmailAddresses(this.state.institution).filter(nonEmpty);
-    this.setState(fp.set(['institution', 'tierConfigs'], updateCtEmailAddresses(this.state.institution, updatedEmailAddresses)));
+    this.setState(fp.set(['institution', 'tierConfigs'],
+        updateCtEmailAddresses(this.state.institution, updatedEmailAddresses)));
   }
 
   // Filter out empty line or empty email addresses like <email1>,,<email2> for registered tier
   filterEmptyRtEmailDomains() {
     const updatedEmailDomains = getRegisteredTierEmailDomains(this.state.institution).filter(nonEmpty);
-    this.setState(fp.set(['institution', 'tierConfigs'], updateRtEmailDomains(this.state.institution, updatedEmailDomains)));
+    this.setState(fp.set(['institution', 'tierConfigs'],
+        updateRtEmailDomains(this.state.institution, updatedEmailDomains)));
   }
 
   // Filter out empty line or empty email addresses like <email1>,,<email2> for controlled tier
   filterEmptyCtEmailDomains() {
     const updatedEmailDomains = getControlledTierEmailDomains(this.state.institution).filter(nonEmpty);
-    this.setState(fp.set(['institution', 'tierConfigs'], updateCtEmailDomains(this.state.institution, updatedEmailDomains)));
+    this.setState(fp.set(['institution', 'tierConfigs'],
+        updateCtEmailDomains(this.state.institution, updatedEmailDomains)));
   }
 
   setRegisteredTierRequirement(membershipRequirement: InstitutionMembershipRequirement) {
@@ -361,7 +365,8 @@ export const AdminInstitutionEdit = fp.flow(withNavigation, withRouter)(class ex
       ...getRegisteredTierConfig(this.state.institution),
       membershipRequirement: membershipRequirement,
     };
-    this.setState(fp.set(['institution', 'tierConfigs'], [rtTierConfig, getControlledTierConfig(this.state.institution)]));
+    this.setState(fp.set(['institution', 'tierConfigs'],
+        [rtTierConfig, getControlledTierConfig(this.state.institution)]));
   }
 
   setControlledTierRequirement(membershipRequirement: InstitutionMembershipRequirement) {
@@ -369,7 +374,8 @@ export const AdminInstitutionEdit = fp.flow(withNavigation, withRouter)(class ex
       ...getControlledTierConfig(this.state.institution),
       membershipRequirement: membershipRequirement,
     };
-    this.setState(fp.set(['institution', 'tierConfigs'], [getRegisteredTierConfig(this.state.institution), ctTierConfig]));
+    this.setState(fp.set(['institution', 'tierConfigs'],
+        [getRegisteredTierConfig(this.state.institution), ctTierConfig]));
   }
 
   setRtRequireEra(eRAEnabled: boolean) {
@@ -377,7 +383,8 @@ export const AdminInstitutionEdit = fp.flow(withNavigation, withRouter)(class ex
       ...getRegisteredTierConfig(this.state.institution),
       eraRequired: eRAEnabled
     };
-    this.setState(fp.set(['institution', 'tierConfigs'], [rtTierConfig, getControlledTierConfig(this.state.institution)]));
+    this.setState(fp.set(['institution', 'tierConfigs'],
+        [rtTierConfig, getControlledTierConfig(this.state.institution)]));
   }
 
   setCtRequireEra(eRAEnabled: boolean) {
@@ -385,7 +392,8 @@ export const AdminInstitutionEdit = fp.flow(withNavigation, withRouter)(class ex
       ...getControlledTierConfig(this.state.institution),
       eraRequired: eRAEnabled
     };
-    this.setState(fp.set(['institution', 'tierConfigs'], [getRegisteredTierConfig(this.state.institution), ctTierConfig]));
+    this.setState(fp.set(['institution', 'tierConfigs'],
+        [getRegisteredTierConfig(this.state.institution), ctTierConfig]));
   }
 
   setEnableControlledTier(enableCtAccess: boolean) {
@@ -395,7 +403,8 @@ export const AdminInstitutionEdit = fp.flow(withNavigation, withRouter)(class ex
       membershipRequirement: enableCtAccess === true ?
           InstitutionMembershipRequirement.DOMAINS : InstitutionMembershipRequirement.NOACCESS,
     };
-    this.setState(fp.set(['institution', 'tierConfigs'], [getRegisteredTierConfig(this.state.institution), ctTierConfig]));
+    this.setState(fp.set(['institution', 'tierConfigs'],
+        [getRegisteredTierConfig(this.state.institution), ctTierConfig]));
   }
 
   trimEmails(emails: string): Array<string> {
@@ -506,6 +515,7 @@ export const AdminInstitutionEdit = fp.flow(withNavigation, withRouter)(class ex
     }
     this.setState({apiErrorMsg: errorMsg, showApiError: true});
   }
+
   updateInstitutionRole(institutionRole) {
     this.setState({showOtherInstitutionTextBox: institutionRole === OrganizationType.OTHER});
     this.setState(fp.set(['institution', 'organizationTypeEnum'], institutionRole));
@@ -546,7 +556,7 @@ export const AdminInstitutionEdit = fp.flow(withNavigation, withRouter)(class ex
         }
         const invalid = getInvalidEmailAddresses(addresses);
         if (invalid.length > 0) {
-          return 'are not valid: ' + invalid.join(',');
+          return 'are not valid: ' + invalid.join(', ');
         }
       }
     };
@@ -560,7 +570,7 @@ export const AdminInstitutionEdit = fp.flow(withNavigation, withRouter)(class ex
         }
         const invalid = getInvalidEmailDomains(domains);
         if (invalid.length > 0) {
-          return 'are not valid: ' + invalid.join(',');
+          return 'are not valid: ' + invalid.join(', ');
         }
       }
     };
