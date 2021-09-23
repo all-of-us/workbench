@@ -138,7 +138,7 @@ describe('DataAccessRequirements', () => {
         expect(activeModule).toEqual(enabledModules[1]);
 
         // but we skip allModules[1] because it's ERA and is not enabled
-        expect(activeModule).toEqual(allModules[2]);
+        expect(activeModule).toEqual(allModules[1]);
     });
 
     it('should return the fourth module (Compliance) from getActiveModule when the first 3 modules have been completed', () => {
