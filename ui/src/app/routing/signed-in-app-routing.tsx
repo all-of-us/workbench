@@ -59,7 +59,7 @@ const WorkspaceSearchAdminPage = fp.flow(withRouteData, withRoutingSpinner)(Admi
 
 export const SignedInRoutes = () => {
   return <Switch>
-    <AppRoute exact path='/' guards={environment.enableDataAccessRequirements ? [expiredGuard, registrationGuard] : [expiredGuard]}>
+    <AppRoute exact path='/' guards={[expiredGuard, registrationGuard]}>
       <HomepagePage routeData={{title: 'Homepage'}}/>
     </AppRoute>
     <AppRoute exact path='/access-renewal'>
@@ -110,9 +110,9 @@ export const SignedInRoutes = () => {
     <AppRoute exact path='/admin/workspaces/:ns/:nbName'>
       <AdminNotebookViewPage routeData={{pathElementForTitle: 'nbName', minimizeChrome: true}}/>
     </AppRoute>
-    {environment.enableDataAccessRequirements && <AppRoute exact path='/data-access-requirements'>
+    <AppRoute exact path='/data-access-requirements'>
       <DataAccessRequirementsPage routeData={{title: 'Data Access Requirements'}}/>
-    </AppRoute>}
+    </AppRoute>
     <AppRoute exact path='/data-code-of-conduct'>
       <DataUserCodeOfConductPage routeData={{title: 'Data User Code of Conduct', minimizeChrome: true}}/>
     </AppRoute>
@@ -120,14 +120,10 @@ export const SignedInRoutes = () => {
       <ProfilePage routeData={{title: 'Profile'}}/>
     </AppRoute>
     <AppRoute exact path={NIH_CALLBACK_PATH}>
-      {environment.enableDataAccessRequirements ?
-          <DataAccessRequirementsPage routeData={{title: 'Data Access Requirements'}}/> :
-          <HomepagePage routeData={{title: 'Homepage'}}/>}
+      <DataAccessRequirementsPage routeData={{title: 'Data Access Requirements'}}/>
     </AppRoute>
     <AppRoute exact path={RAS_CALLBACK_PATH}>
-      {environment.enableDataAccessRequirements ?
-          <DataAccessRequirementsPage routeData={{title: 'Data Access Requirements'}}/> :
-          <HomepagePage routeData={{title: 'Homepage'}}/>}
+      <DataAccessRequirementsPage routeData={{title: 'Data Access Requirements'}}/>
     </AppRoute>
     <AppRoute exact path='/library' guards={[expiredGuard, registrationGuard]}>
       <WorkspaceLibraryPage routeData={{title: 'Workspace Library', minimizeChrome: false}}/>

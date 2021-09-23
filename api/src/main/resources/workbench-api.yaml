@@ -434,28 +434,6 @@ paths:
           description: Bad request
           schema:
             "$ref": "#/definitions/ErrorResponse"
-  "/v1/account/submit-data-use-agreement":
-    post:
-      tags:
-      - profile
-      description: (DEPRECATED.  Renamed to submitDUCC.)  Submits consent to the data use agreement for researchers.
-      operationId: submitDataUseAgreement
-      parameters:
-      - in: query
-        name: dataUseAgreementSignedVersion
-        description: Version \# of the Data Use Agreement that was signed.
-        type: integer
-        required: true
-      - in: query
-        name: initials
-        description: Initials of the user on the form.
-        type: string
-        required: true
-      responses:
-        200:
-          description: The user's profile.
-          schema:
-            "$ref": "#/definitions/Profile"
   "/v1/account/submit-data-user-code-of-conduct":
     post:
       tags:
@@ -1587,38 +1565,6 @@ paths:
       responses:
         204:
           description: Runtimes were checked and handled successfully.
-  "/v1/cron/bulkSyncComplianceTrainingStatus":
-    get:
-      security: []
-      tags:
-      - offlineUser
-      - cron
-      description: sync moodle badge/training status for all users.
-      operationId: bulkSyncComplianceTrainingStatus
-      responses:
-        204:
-          description: The user table is updated with training status.
-        404:
-          description: User not found while retrieving  badge.
-        500:
-          description: Internal Error
-          schema:
-            "$ref": "#/definitions/ErrorResponse"
-  "/v1/cron/bulkSyncTwoFactorAuthStatus":
-    get:
-      security: []
-      tags:
-      - offlineUser
-      - cron
-      description: sync 2FA status for all users
-      operationId: bulkSyncTwoFactorAuthStatus
-      responses:
-        204:
-          description: All users' 2FA statuses were updated.
-        500:
-          description: Internal Error
-          schema:
-            "$ref": "#/definitions/ErrorResponse"
   "/v1/cron/bulkAuditProjectAccess":
     get:
       security: []

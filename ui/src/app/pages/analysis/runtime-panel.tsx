@@ -9,6 +9,7 @@ import {TextColumn} from 'app/components/text-column';
 import {disksApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {addOpacity, colorWithWhiteness} from 'app/styles/colors';
 import {
+  cond,
   DEFAULT,
   reactStyles,
   summarizeErrors,
@@ -1122,7 +1123,7 @@ const RuntimePanel = fp.flow(
     // in progress, even if the runtime store doesn't actively reflect this yet.
     // Show the customize panel in this event.
     [() => !!pendingRuntime, () => PanelContent.Customize],
-    [([, r, s]) => r === null || s === RuntimeStatus.Unknown, () => PanelContent.Create],
+    [([, r, s]) => r === null || r === undefined || s === RuntimeStatus.Unknown, () => PanelContent.Create],
     [([, r, ]) => r.status === RuntimeStatus.Deleted &&
       ([RuntimeConfigurationType.GeneralAnalysis, RuntimeConfigurationType.HailGenomicAnalysis].includes(r.configurationType)),
       () => PanelContent.Create],
@@ -1407,6 +1408,18 @@ const RuntimePanel = fp.flow(
     </Button>;
   };
 
+  const renderTryAgainButton = () => {
+    return <Button
+        aria-label='Try Again'
+        disabled={!runtimeCanBeCreated}
+        onClick={() => {
+          setRequestedRuntime(createRuntimeRequest(newRuntimeConfig));
+          onClose();
+        }}>
+      Try Again
+    </Button>;
+  };
+
   const renderNextButton = () => {
     return <Button
       aria-label='Next'
@@ -1474,6 +1487,17 @@ const RuntimePanel = fp.flow(
                           runtimeCtx = {runtimeCtx}
                   />
               </FlexRow>
+              {currentRuntime && currentRuntime.errors && <ErrorMessage iconPosition={'top'} iconSize={16}>
+                  <div>An error was encountered with your cloud environment. Please re-attempt creation of the
+                    environment and contact support if the error persists.</div>
+                  <div>Error details:</div>
+                  {currentRuntime.errors.map((err, idx) => {
+                    return <div style={{fontFamily: 'monospace'}} key={idx}>
+                      {err.errorMessage}
+                    </div>
+                  })}
+                </ErrorMessage>
+              }
               <PresetSelector
                 allowDataproc={allowDataproc}
                 disabled={disableControls}
@@ -1594,7 +1618,13 @@ const RuntimePanel = fp.flow(
                   aria-label='Delete Environment'
                   disabled={disableControls || !runtimeExists}
                   onClick={() => setPanelContent(PanelContent.DeleteRuntime)}>Delete Environment</Link>
-              {runtimeExists || (pdExists && pdSizeReduced) ? renderNextButton() : renderCreateButton()}
+              {
+                cond(
+                    [runtimeExists || (pdExists && pdSizeReduced), () => renderNextButton()],
+                    [currentRuntime && currentRuntime.errors && currentRuntime.errors.length > 0, () => renderTryAgainButton()],
+                    () => renderCreateButton()
+                )
+              }
             </FlexRow>
         }
     </Fragment>],

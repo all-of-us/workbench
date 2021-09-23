@@ -15,7 +15,7 @@ import {
   getRegisteredTierEmailDomains,
 } from "app/utils/institutions";
 
-export const defaultInstitutions: Array<Institution> = [{
+export const VUMC: Institution = {
   shortName: 'VUMC',
   displayName: 'Vanderbilt University Medical Center',
   organizationTypeEnum: OrganizationType.HEALTHCENTERNONPROFIT,
@@ -28,7 +28,9 @@ export const defaultInstitutions: Array<Institution> = [{
     }
   ],
   userInstructions: 'Vanderbilt User Instruction'
-}, {
+}
+
+export const BROAD: Institution = {
   shortName: 'Broad',
   displayName: 'Broad Institute',
   organizationTypeEnum: OrganizationType.ACADEMICRESEARCHINSTITUTION,
@@ -40,7 +42,9 @@ export const defaultInstitutions: Array<Institution> = [{
       emailAddresses: ['contactEmail@broadinstitute.org', 'broad_institution@broadinstitute.org']
     }
   ]
-}, {
+};
+
+export const VERILY: Institution = {
   shortName: 'Verily',
   displayName: 'Verily LLC',
   organizationTypeEnum: OrganizationType.INDUSTRY,
@@ -59,7 +63,9 @@ export const defaultInstitutions: Array<Institution> = [{
     }
   ],
   userInstructions: 'Verily User Instruction'
-},{
+};
+
+export const VERILY_WITHOUT_CT: Institution = {
   shortName: 'Non CT Access',
   displayName: 'Non CT Access',
   organizationTypeEnum: OrganizationType.INDUSTRY,
@@ -76,7 +82,10 @@ export const defaultInstitutions: Array<Institution> = [{
     }
   ],
   userInstructions: 'Verily User Instruction'
-}
+};
+
+export const defaultInstitutions: Array<Institution> = [
+    VUMC, BROAD, VERILY, VERILY_WITHOUT_CT
 ];
 
 export class InstitutionApiStub extends InstitutionApi {

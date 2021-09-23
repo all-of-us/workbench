@@ -10,6 +10,7 @@ import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {profileStore, serverConfigStore} from 'app/utils/stores';
 import {MemoryRouter} from 'react-router-dom';
 import {useNavigation} from 'app/utils/navigation';
+import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 
 const profile = ProfileStubVariables.PROFILE_STUB as Profile;
 const load = jest.fn();
@@ -96,6 +97,7 @@ describe('DataAccessRequirements', () => {
         expect(activeModule).toEqual(AccessModule.RASLINKLOGINGOV)
     });
 
+<<<<<<< HEAD
     // update this if the order changes
     it('should return the second enabled module (ERA, not RAS) from getActiveModule' +
         ' when the first module (2FA) has been completed and RAS is disabled', () => {
@@ -141,6 +143,57 @@ describe('DataAccessRequirements', () => {
         expect(activeModule).toEqual(AccessModule.RASLINKLOGINGOV)
     });
 
+    // TODO(RW-7301)
+    // restore the intended module order [2FA, RAS, ERA] from the temporary version [2FA, ERA, RAS]
+
+    it('should return the second enabled module (RAS, not ERA) from getActiveModule' +
+        ' when the first module (2FA) has been completed and ERA is disabled', () => {
+        serverConfigStore.set({config: {...defaultServerConfig, enableEraCommons: false}});
+
+        const testProfile = {
+            ...profile,
+            accessModules: {
+                modules: [{moduleName: AccessModule.TWOFACTORAUTH, completionEpochMillis: 1}]
+            }
+        };
+
+        const [navigate, ] = useNavigation();
+        const enabledModules = getEnabledModules(allModules, navigate);
+        const activeModule = getActiveModule(enabledModules, testProfile);
+
+        // update this if the order changes
+        expect(activeModule).toEqual(AccessModule.RASLINKLOGINGOV)
+
+        // 2FA (module 0) is complete, so enabled #1 is active
+        expect(activeModule).toEqual(enabledModules[1]);
+
+        // but we skip allModules[1] because it's ERA and is not enabled
+        expect(activeModule).toEqual(allModules[2]);
+    });
+
+    it('should return the fourth module (Compliance) from getActiveModule when the first 3 modules have been completed', () => {
+        const testProfile = {
+            ...profile,
+            accessModules: {
+                modules: [
+                    {moduleName: AccessModule.TWOFACTORAUTH, completionEpochMillis: 1},
+                    {moduleName: AccessModule.ERACOMMONS, completionEpochMillis: 1},
+                    {moduleName: AccessModule.RASLINKLOGINGOV, completionEpochMillis: 1},
+                ]
+             }
+        };
+
+        const [navigate, ] = useNavigation();
+        const enabledModules = getEnabledModules(allModules, navigate);
+        const activeModule = getActiveModule(enabledModules, testProfile);
+
+        expect(activeModule).toEqual(allModules[3]);
+        expect(activeModule).toEqual(enabledModules[3]);
+
+        // update this if the order changes
+        expect(activeModule).toEqual(AccessModule.COMPLIANCETRAINING)
+    });
+
     it('should return undefined from getActiveModule when all modules have been completed', () => {
         const testProfile = {
             ...profile,
@@ -153,6 +206,42 @@ describe('DataAccessRequirements', () => {
         const enabledModules = getEnabledModules(allModules, navigate);
         const activeModule = getActiveModule(enabledModules, testProfile);
 
+        expect(activeModule).toBeUndefined();
+    });
+
+    it('should not indicate the RAS module as active when a user has completed it', () => {
+        // initially, the user has completed all modules except RAS (the standard case at RAS launch time)
+        const testProfile = {
+            ...profile,
+            accessModules: {
+                modules: [
+                    {moduleName: AccessModule.TWOFACTORAUTH, completionEpochMillis: 1},
+                    {moduleName: AccessModule.ERACOMMONS, completionEpochMillis: 1},
+                    {moduleName: AccessModule.COMPLIANCETRAINING, completionEpochMillis: 1},
+                    {moduleName: AccessModule.DATAUSERCODEOFCONDUCT, completionEpochMillis: 1},
+                ]
+            }
+        };
+
+        const [navigate, ] = useNavigation();
+        const enabledModules = getEnabledModules(allModules, navigate);
+
+        let activeModule = getActiveModule(enabledModules, testProfile);
+        expect(activeModule).toEqual(AccessModule.RASLINKLOGINGOV)
+
+        // simulate handleRasCallback() by updating the profile
+
+        const updatedProfile = {
+            ...testProfile,
+            accessModules: {
+                modules: [
+                    ...testProfile.accessModules.modules,
+                    {moduleName: AccessModule.RASLINKLOGINGOV, completionEpochMillis: 1},
+                ]
+            }
+        };
+
+        activeModule = getActiveModule(enabledModules, updatedProfile);
         expect(activeModule).toBeUndefined();
     });
 
@@ -218,6 +307,65 @@ describe('DataAccessRequirements', () => {
         });
         expect(findCompletionBanner(wrapper).exists()).toBeTruthy();
     });
+
+    // RAS launch bug
+    it('should render all modules as complete by transitioning to all complete', async() => {
+
+        // initially, the user has completed all modules except RAS (the standard case at RAS launch time)
+
+        const allExceptRas = allModules.filter(m => m !== AccessModule.RASLINKLOGINGOV);
+        profileStore.set({
+            profile: {
+                ...ProfileStubVariables.PROFILE_STUB,
+                accessModules: {
+                    modules: allExceptRas.map(module => ({moduleName: module, completionEpochMillis: 1}))
+                }
+            },
+            load,
+            reload,
+            updateCache});
+
+        const wrapper = component();
+        allExceptRas.forEach(module => {
+            expect(findCompleteModule(wrapper, module).exists()).toBeTruthy();
+
+            expect(findIncompleteModule(wrapper, module).exists()).toBeFalsy();
+            expect(findIneligibleModule(wrapper, module).exists()).toBeFalsy();
+        });
+
+        // RAS is not complete
+        expect(findIncompleteModule(wrapper, AccessModule.RASLINKLOGINGOV).exists()).toBeTruthy();
+
+        expect(findCompleteModule(wrapper, AccessModule.RASLINKLOGINGOV).exists()).toBeFalsy();
+        expect(findIneligibleModule(wrapper, AccessModule.RASLINKLOGINGOV).exists()).toBeFalsy();
+
+        expect(findCompletionBanner(wrapper).exists()).toBeFalsy();
+
+        // now all modules are complete
+
+        profileStore.set({
+            profile: {
+                ...ProfileStubVariables.PROFILE_STUB,
+                accessModules: {
+                    modules: allModules.map(module => ({moduleName: module, completionEpochMillis: 1}))
+                }
+            },
+            load,
+            reload,
+            updateCache});
+
+        await waitOneTickAndUpdate(wrapper);
+
+        allModules.forEach(module => {
+            expect(findCompleteModule(wrapper, module).exists()).toBeTruthy();
+
+            expect(findIncompleteModule(wrapper, module).exists()).toBeFalsy();
+            expect(findIneligibleModule(wrapper, module).exists()).toBeFalsy();
+        });
+
+        expect(findCompletionBanner(wrapper).exists()).toBeTruthy();
+    });
+
 
     it('should render all modules as complete when the profile accessModules are all bypassed', () => {
         profileStore.set({

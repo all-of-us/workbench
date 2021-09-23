@@ -179,11 +179,6 @@ export const getRegistrationTasks = (navigate): RegistrationTask[] => serverConf
       throw new Error('Cannot load registration tasks before config loaded');
     })();
 
-export const getRegistrationTasksMap = (navigate) => getRegistrationTasks(navigate).reduce((acc, curr) => {
-  acc[curr.key] = curr;
-  return acc;
-}, {});
-
 export const getRegistrationTask = (navigate, module: AccessModule): RegistrationTask => {
   return getRegistrationTasks(navigate).find(task => task.module === module);
 };
