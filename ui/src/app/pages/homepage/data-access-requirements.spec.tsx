@@ -57,7 +57,7 @@ describe('DataAccessRequirements', () => {
         const [navigate, ] = useNavigation();
         const enabledModules = getEnabledModules(allModules, navigate);
         expect(enabledModules.includes(AccessModule.ERACOMMONS)).toBeFalsy();
-     });
+    });
 
     it('should not return the Compliance module from getEnabledModules when its feature flag is disabled', () => {
         serverConfigStore.set({config: {...defaultServerConfig, enableComplianceTraining: false}});
@@ -78,7 +78,7 @@ describe('DataAccessRequirements', () => {
         expect(activeModule).toEqual(AccessModule.TWOFACTORAUTH)
     });
 
-    it('should return the second module (RAS) from getActiveModule when the first module (2FA) has been completed', () => {
+    it('should return the second module (ERA) from getActiveModule when the first module (2FA) has been completed', () => {
         const testProfile = {
             ...profile,
             accessModules: {
@@ -95,32 +95,6 @@ describe('DataAccessRequirements', () => {
 
         // update this if the order changes
         expect(activeModule).toEqual(AccessModule.RASLINKLOGINGOV)
-    });
-
-    // update this if the order changes
-    it('should return the second enabled module (ERA, not RAS) from getActiveModule' +
-        ' when the first module (2FA) has been completed and RAS is disabled', () => {
-        serverConfigStore.set({config: {...defaultServerConfig, enableRasLoginGovLinking: false}});
-
-        const testProfile = {
-            ...profile,
-            accessModules: {
-                modules: [{moduleName: AccessModule.TWOFACTORAUTH, completionEpochMillis: 1}]
-            }
-        };
-
-        const [navigate, ] = useNavigation();
-        const enabledModules = getEnabledModules(allModules, navigate);
-        const activeModule = getActiveModule(enabledModules, testProfile);
-
-        // update this if the order changes
-        expect(activeModule).toEqual(AccessModule.ERACOMMONS)
-
-        // 2FA (module 0) is complete, so enabled #1 is active
-        expect(activeModule).toEqual(enabledModules[1]);
-
-        // but we skip allModules[1] because it's RAS and is not enabled
-        expect(activeModule).toEqual(allModules[2]);
     });
 
     it('should return the second module (RAS) from getActiveModule when the first module (2FA) has been bypassed', () => {
@@ -142,11 +116,8 @@ describe('DataAccessRequirements', () => {
         expect(activeModule).toEqual(AccessModule.RASLINKLOGINGOV)
     });
 
-    // TODO(RW-7301)
-    // restore the intended module order [2FA, RAS, ERA] from the temporary version [2FA, ERA, RAS]
-
     it('should return the second enabled module (RAS, not ERA) from getActiveModule' +
-        ' when the first module (2FA) has been completed and ERA is disabled', () => {
+      ' when the first module (2FA) has been completed and ERA is disabled', () => {
         serverConfigStore.set({config: {...defaultServerConfig, enableEraCommons: false}});
 
         const testProfile = {
@@ -179,7 +150,7 @@ describe('DataAccessRequirements', () => {
                     {moduleName: AccessModule.ERACOMMONS, completionEpochMillis: 1},
                     {moduleName: AccessModule.RASLINKLOGINGOV, completionEpochMillis: 1},
                 ]
-             }
+            }
         };
 
         const [navigate, ] = useNavigation();
