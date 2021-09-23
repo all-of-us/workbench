@@ -365,9 +365,6 @@ export const StyledRouterLink = ({path, children, disabled = false, analyticsFn 
 }
 
 export const StyledExternalLink = ({href, children, analyticsFn = null, style = {}, ...props}) => {
-  if (!href.startsWith('https://') && !href.startsWith('http://')) {
-    throw new Error('StyledExternalLink is for linking to URLs outside the Researcher Workbench; use StyledRouterLink for internal URLs');
-  }
   return <a href={href}
             onClick={() => analyticsFn && analyticsFn()}
             style={{...styles.inlineAnchor, ...style}}
