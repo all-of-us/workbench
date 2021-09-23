@@ -177,15 +177,10 @@ interface TierConfigProps {
   setTierAddresses: (string) => void;
   filterEmptyDomains: Function;
   setTierDomains: (string) => void;
-  invalidAddress: boolean;
-  invalidAddressMsg: string;
-  invalidDomain: boolean;
-  invalidDomainMsg: string;
 }
 const TierConfig = (props: TierConfigProps) => {
   const {institution, accessTierShortName, TierBadge, setEnableControlledTier, setEraRequired, setTierRequirement,
-    filterEmptyAddresses, setTierAddresses, filterEmptyDomains, setTierDomains,
-    invalidAddress, invalidAddressMsg, invalidDomain, invalidDomainMsg} = props;
+    filterEmptyAddresses, setTierAddresses, filterEmptyDomains, setTierDomains} = props;
 
   const tierConfig = getTierConfig(institution, accessTierShortName);
   const {emailAddresses, emailDomains} = tierConfig;
@@ -217,9 +212,6 @@ const TierConfig = (props: TierConfigProps) => {
               emailAddresses={emailAddresses}
               onBlur={filterEmptyAddresses}
               onChange={setTierAddresses}/>
-            {invalidAddress && <div data-test-id={`${accessTierShortName}-email-address-error`} style={{color: colors.danger}}>
-              {invalidAddressMsg}
-            </div>}
             <p style={{color: colors.primary, fontSize: '12px', lineHeight: '18px'}}>
               Enter one email address per line.  <br/>
             </p>
@@ -232,9 +224,6 @@ const TierConfig = (props: TierConfigProps) => {
                 emailDomains={emailDomains}
                 onBlur={filterEmptyDomains}
                 onChange={setTierDomains}/>
-            {invalidDomain && <div data-test-id={`${accessTierShortName}-email-domain-error`} style={{color: colors.danger}}>
-              {invalidDomainMsg}
-            </div>}
             <p style={{color: colors.primary, fontSize: '12px', lineHeight: '18px'}}>
               Enter one domain per line. <br/>
               Note that subdomains are not included, so “university.edu” <br/>
@@ -280,14 +269,6 @@ interface InstitutionEditState {
   institutionMode: InstitutionMode;
   institution: Institution;
   institutionBeforeEdits: Institution;
-  invalidRtEmailAddress: boolean;
-  invalidRtEmailAddressMsg: string;
-  invalidCtEmailAddress: boolean;
-  invalidCtEmailAddressMsg: string;
-  invalidRtEmailDomain: boolean;
-  invalidRtEmailDomainsMsg: string;
-  invalidCtEmailDomain: boolean;
-  invalidCtEmailDomainsMsg: string;
   showOtherInstitutionTextBox: boolean;
   showBackButtonWarning: boolean;
   showApiError: boolean;
@@ -307,14 +288,6 @@ export const AdminInstitutionEdit = fp.flow(withNavigation, withRouter)(class ex
          organizationTypeEnum: null,
       },
       institutionBeforeEdits: null,
-      invalidRtEmailAddress: false,
-      invalidRtEmailAddressMsg: '',
-      invalidCtEmailAddress: false,
-      invalidCtEmailAddressMsg: '',
-      invalidRtEmailDomain: false,
-      invalidRtEmailDomainsMsg: '',
-      invalidCtEmailDomain: false,
-      invalidCtEmailDomainsMsg: '',
       showOtherInstitutionTextBox: false,
       showBackButtonWarning: false,
       showApiError: false,
@@ -673,11 +646,7 @@ export const AdminInstitutionEdit = fp.flow(withNavigation, withRouter)(class ex
               filterEmptyAddresses={() => this.filterEmptyRtEmailAddresses()}
               setTierAddresses={(addrs) => this.setRegisteredTierEmails(addrs)}
               filterEmptyDomains={() => this.filterEmptyRtEmailDomains()}
-              setTierDomains={(domains) => this.setRegisteredTierDomains(domains)}
-              invalidAddress={this.state.invalidRtEmailAddress}
-              invalidAddressMsg={this.state.invalidRtEmailAddressMsg}
-              invalidDomain={this.state.invalidRtEmailDomain}
-              invalidDomainMsg={this.state.invalidRtEmailDomainsMsg}/>
+              setTierDomains={(domains) => this.setRegisteredTierDomains(domains)}/>
           <TierConfig
               institution={institution}
               accessTierShortName={AccessTierShortNames.Controlled}
@@ -688,11 +657,7 @@ export const AdminInstitutionEdit = fp.flow(withNavigation, withRouter)(class ex
               filterEmptyAddresses={() => this.filterEmptyCtEmailAddresses()}
               setTierAddresses={(addrs) => this.setControlledTierEmails(addrs)}
               filterEmptyDomains={() => this.filterEmptyCtEmailDomains()}
-              setTierDomains={(domains) => this.setControlledTierDomains(domains)}
-              invalidAddress={this.state.invalidCtEmailAddress}
-              invalidAddressMsg={this.state.invalidCtEmailAddressMsg}
-              invalidDomain={this.state.invalidCtEmailDomain}
-              invalidDomainMsg={this.state.invalidCtEmailDomainsMsg}/>
+              setTierDomains={(domains) => this.setControlledTierDomains(domains)}/>
          </FlexRow>
         <FlexRow style={{justifyContent: 'flex-start', marginRight: '1rem'}}>
           <div>

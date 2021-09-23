@@ -32,10 +32,16 @@ const findRTDomainInput = (wrapper) => wrapper.find('[data-test-id="registered-e
 const findCTAddressInput = (wrapper) => wrapper.find('[data-test-id="controlled-email-address-input"]');
 const findCTDomainInput = (wrapper) => wrapper.find('[data-test-id="controlled-email-domain-input"]');
 
-const findRTAddressError = (wrapper) => wrapper.find('[data-test-id="registered-email-address-error"]');
-const findRTDomainError = (wrapper) => wrapper.find('[data-test-id="registered-email-domain-error"]');
-const findCTAddressError = (wrapper) => wrapper.find('[data-test-id="controlled-email-address-error"]');
-const findCTDomainError = (wrapper) => wrapper.find('[data-test-id="controlled-email-domain-error"]');
+// const findSaveDisabledTooltip = (wrapper) => wrapper.find('[data-test-id="tooltip"]');
+// const findSaveDisabledTooltipErrorText = (wrapper) =>
+//     findSaveDisabledTooltip(wrapper).first().props().children;
+
+const findSaveButtonDisabledX = (wrapper) => wrapper.find('[data-test-id="save-institution-button"]').first().props().disabled;
+
+const findRTAddressError = (wrapper) => findSaveButtonDisabledX(wrapper).registeredTierEmailAddresses[0];
+const findRTDomainError = (wrapper) => findSaveButtonDisabledX(wrapper).registeredTierEmailDomains[0];
+const findCTAddressError = (wrapper) => findSaveButtonDisabledX(wrapper).controlledTierEmailAddresses[0];
+const findCTDomainError = (wrapper) => findSaveButtonDisabledX(wrapper).controlledTierEmailDomains[0];
 
 describe('AdminInstitutionEditSpec - edit mode', () => {
 
@@ -225,13 +231,17 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
 
     await simulateComponentChange(wrapper, findRTDropdown(wrapper), InstitutionMembershipRequirement.ADDRESSES);
 
-    expect(findRTAddressError(wrapper).exists()).toBeFalsy();
+    expect(findRTAddressError(wrapper)).toBeTruthy();
+    expect(findRTAddressError(wrapper))
+        .toBe('Registered tier email addresses should not be empty');
 
     // In case of a single entry which is not in the correct format
     findRTAddressInput(wrapper).first().simulate('change', {target: {value: 'rtInvalidEmail@domain'}});
     findRTAddressInput(wrapper).first().simulate('blur');
-    expect(findRTAddressError(wrapper).first().props().children)
-        .toBe('Following Email Addresses are not valid : rtInvalidEmail@domain');
+
+    expect(findRTAddressError(wrapper)).toBeTruthy();
+    expect(findRTAddressError(wrapper))
+        .toBe('Registered tier email addresses are not valid: rtInvalidEmail@domain');
 
     // Multiple Email Address entries with a mix of correct (someEmail@broadinstitute.org') and incorrect format
     findRTAddressInput(wrapper).first()
