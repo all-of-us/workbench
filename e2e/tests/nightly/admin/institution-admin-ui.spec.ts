@@ -7,7 +7,6 @@ import InstitutionEditPage, {AcceptedAddressSelectValue, InstitutionTypeSelectVa
 
 describe('Institution Admin', () => {
   const testInstituteName = 'Admin testing';
-  //const emailAddress = 'testing@vumc.org';
 
   beforeEach(async () => {
     await signInWithAccessToken(page, config.ADMIN_TEST_ACCESS_TOKEN_FILE);
@@ -28,11 +27,11 @@ describe('Institution Admin', () => {
 
     //click on the Institution Name link
     await institutionAdminPage.clickInstitutionNameLink(testInstituteName);
-    //navigate to institute edit page
+    // navigate to institute edit page
     const institutionEditPage = new InstitutionEditPage(page);
     await institutionEditPage.waitForLoad();
-    // verify the fields
-    // await institutionEditPage.waitForSaveButton(false);
+   
+    // verify the input fields
     const instituteName = await institutionEditPage.getInstituteNameValue();
     expect(instituteName).toBe(testInstituteName);
     expect(await institutionEditPage.getInstitutionTypeValue()).toBe(InstitutionTypeSelectValue.Other);
@@ -42,13 +41,13 @@ describe('Institution Admin', () => {
     institutionEditPage.getRTEmailAddressInput();
     expect(await institutionEditPage.getCTEnabledtoggle().isChecked()).toBe(true);
     expect(await institutionEditPage.getCTEmailAcceptedValue()).toBe(AcceptedAddressSelectValue.Individual);
-    //verify that the Accepted Email Addresses text area is present in controlled-card-details
+    // verify that the Accepted Email Addresses text area is present in controlled-card-details
     institutionEditPage.getCTEmailAddressInput();
     await institutionEditPage.clickCancelButton();
     await institutionAdminPage.waitForLoad();
   });
 
-  test.only('add new institute page UI check', async () => {
+  test('add new institute page UI check', async () => {
     const institutionAdminPage = new InstitutionAdminPage(page);
     await institutionAdminPage.waitForLoad();
     await institutionAdminPage.getCreateNewInstituteBtn().click();
@@ -62,16 +61,16 @@ describe('Institution Admin', () => {
     expect(await institutionEditPage.getCTEnabledtoggle().isChecked()).toBe(false);
     await institutionEditPage.clickCTEnabledtoggle();
     expect(await institutionEditPage.getCTEnabledtoggle().isChecked()).toBe(true);
-    institutionEditPage.getCTEmailDropdown();
+    expect(await institutionEditPage.getCTEmailAcceptedValue()).toBe(AcceptedAddressSelectValue.Domains);
     //verify if the Accepted Email Domains textarea now displays in registered-card-details div
-    institutionEditPage.isCTEmailDomainPresent();
+    institutionEditPage.getCTEmailDomainsInput();
     // select from dropdown option- Individual email address is listed below:
     await institutionEditPage.selectCTEmailOption(AcceptedAddressSelectValue.Individual);
     //verify if the Accepted Email Addresses textarea now displays in controlled-card-details div
-    institutionEditPage.isCTEmailAddressPresent();
+    institutionEditPage.getCTEmailAddressInput();
 
     // verify that the ADD button is disabled
-    // expect(await institutionEditPage.getAddButton().isCursorNotAllowed()).toBe(true);
+    expect(await institutionEditPage.getAddButton().isCursorNotAllowed()).toBe(true);
     await institutionEditPage.clickCancelButton();
     await institutionAdminPage.waitForLoad();
   });
