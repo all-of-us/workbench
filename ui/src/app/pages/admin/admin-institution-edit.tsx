@@ -268,7 +268,7 @@ interface InstitutionEditState {
   apiErrorMsg: string;
   institutionMode: InstitutionMode;
   institution: Institution;
-  institutionToEdit: Institution;
+  institutionBeforeEdits: Institution;
   invalidRtEmailAddress: boolean;
   invalidRtEmailAddressMsg: string;
   invalidCtEmailAddress: boolean;
@@ -289,16 +289,13 @@ export const AdminInstitutionEdit = fp.flow(withNavigation, withRouter)(class ex
     this.state = {
       apiErrorMsg: '',
       institutionMode: InstitutionMode.ADD,
+      // properly initialized by initEditMode() / initAddMode()
       institution: {
-        shortName: '',
-        displayName: '',
-        organizationTypeEnum: null,
-        tierConfigs: [{
-          ...defaultTierConfig(AccessTierShortNames.Registered),
-          membershipRequirement: null,  // the default is NOACCESS which also means "don't render the card"
-        }]
+         shortName: '',
+         displayName: '',
+         organizationTypeEnum: null,
       },
-      institutionToEdit: null,
+      institutionBeforeEdits: null,
       invalidRtEmailAddress: false,
       invalidRtEmailAddressMsg: '',
       invalidCtEmailAddress: false,
@@ -314,20 +311,40 @@ export const AdminInstitutionEdit = fp.flow(withNavigation, withRouter)(class ex
     };
   }
 
+  initEditMode(loadedInstitution: Institution) {
+    this.setState({
+      institutionMode: InstitutionMode.EDIT,
+      institution: loadedInstitution,
+      institutionBeforeEdits: loadedInstitution,
+      showOtherInstitutionTextBox: loadedInstitution.organizationTypeEnum === OrganizationType.OTHER,
+      title: loadedInstitution.displayName
+    });
+  }
+
+  initAddMode() {
+    this.setState({
+      institutionMode: InstitutionMode.ADD,
+      title: 'Add new Institution',
+      institution: {
+        shortName: '',
+        displayName: '',
+        organizationTypeEnum: null,
+        tierConfigs: [{
+          ...defaultTierConfig(AccessTierShortNames.Registered),
+          membershipRequirement: null,  // the default is NOACCESS which also means "don't render the card"
+        }]
+      },
+    });
+  }
+
   async componentDidMount() {
     this.props.hideSpinner();
     // If institution short Name is passed in the URL get the institution details
     if (this.props.match.params.institutionId) {
       const loadedInstitution = await institutionApi().getInstitution(this.props.match.params.institutionId);
-      this.setState({
-        institutionMode: InstitutionMode.EDIT,
-        institution: loadedInstitution,
-        institutionToEdit: loadedInstitution,
-        showOtherInstitutionTextBox: loadedInstitution.organizationTypeEnum === OrganizationType.OTHER,
-        title: loadedInstitution.displayName
-      });
+      this.initEditMode(loadedInstitution);
     } else {
-      this.setState({institutionMode: InstitutionMode.ADD, title: 'Add new Institution'});
+      this.initAddMode();
     }
   }
 
@@ -493,7 +510,7 @@ export const AdminInstitutionEdit = fp.flow(withNavigation, withRouter)(class ex
   // Check if the fields have not been edited
   fieldsNotEdited() {
     return (this.isAddInstitutionMode && !this.fieldsEditedAddInstitution)
-        || (this.state.institutionToEdit && !this.fieldsEditedEditInstitution);
+        || (this.state.institutionBeforeEdits && !this.fieldsEditedEditInstitution);
   }
 
   get fieldsEditedAddInstitution() {
@@ -503,8 +520,8 @@ export const AdminInstitutionEdit = fp.flow(withNavigation, withRouter)(class ex
   }
 
   get fieldsEditedEditInstitution() {
-    const {institution, institutionToEdit} = this.state;
-    return institution !== institutionToEdit;
+    const {institution, institutionBeforeEdits} = this.state;
+    return institution !== institutionBeforeEdits;
   }
 
   hasInvalidFields() {
