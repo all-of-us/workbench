@@ -26,6 +26,7 @@ import {reactStyles} from 'app/utils';
 import {AccessTierShortNames, displayNameForTier} from 'app/utils/access-tiers';
 import {convertAPIError} from 'app/utils/errors';
 import {
+  defaultTierConfig,
   getControlledTierConfig,
   getControlledTierEmailAddresses,
   getControlledTierEmailDomains,
@@ -291,7 +292,11 @@ export const AdminInstitutionEdit = fp.flow(withNavigation, withRouter)(class ex
       institution: {
         shortName: '',
         displayName: '',
-        organizationTypeEnum: null
+        organizationTypeEnum: null,
+        tierConfigs: [{
+          ...defaultTierConfig(AccessTierShortNames.Registered),
+          membershipRequirement: null,  // the default is NOACCESS which also means "don't render the card"
+        }]
       },
       institutionToEdit: null,
       invalidRtEmailAddress: false,

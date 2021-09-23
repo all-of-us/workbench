@@ -13,7 +13,7 @@ import {simulateComponentChange, waitOneTickAndUpdate} from 'testing/react-test-
 import {InstitutionApiStub, VERILY, VERILY_WITHOUT_CT} from 'testing/stubs/institution-api-stub';
 import {AdminInstitutionEdit} from './admin-institution-edit';
 
-describe('AdminInstitutionEditSpec', () => {
+describe('AdminInstitutionEditSpec - edit mode', () => {
 
   const component = (institution = VERILY.shortName) => {
     return mount(<MemoryRouter initialEntries={[`/admin/institution/edit/${institution}`]}>
@@ -46,18 +46,11 @@ describe('AdminInstitutionEditSpec', () => {
       .toContain('Display name must be 80 characters or less');
   });
 
-  it('should hide/show CT card details when controlled tier disabled/enabled', async() => {
+  it('should always show RT card details', async () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper).toBeTruthy();
-
-    const ctEnabledToggle = wrapper.find('[data-test-id="controlled-enabled-switch"]').first().instance() as InputSwitch;
-    await simulateComponentChange(wrapper, ctEnabledToggle, false);
-    expect(wrapper.find('[data-test-id="controlled-card-details"]').exists()).toBeFalsy();
-
-    await simulateComponentChange(wrapper, ctEnabledToggle, true);
-    expect(ctEnabledToggle.props.checked).toBeTruthy();
-    expect(wrapper.find('[data-test-id="controlled-card-details"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-id="registered-card-details"]').exists()).toBeTruthy();
   });
 
   it('should show CT card details when institution has controlled tier access enabled', async() => {
@@ -72,6 +65,22 @@ describe('AdminInstitutionEditSpec', () => {
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper).toBeTruthy();
     expect(wrapper.find('[data-test-id="controlled-card-details"]').exists()).toBeFalsy();
+  });
+
+  it('should hide/show CT card details when controlled tier disabled/enabled', async() => {
+    const wrapper = component();
+    await waitOneTickAndUpdate(wrapper);
+    expect(wrapper).toBeTruthy();
+
+    expect(wrapper.find('[data-test-id="controlled-card-details"]').exists()).toBeTruthy();
+
+    const ctEnabledToggle = wrapper.find('[data-test-id="controlled-enabled-switch"]').first().instance() as InputSwitch;
+    await simulateComponentChange(wrapper, ctEnabledToggle, false);
+    expect(wrapper.find('[data-test-id="controlled-card-details"]').exists()).toBeFalsy();
+
+    await simulateComponentChange(wrapper, ctEnabledToggle, true);
+    expect(ctEnabledToggle.props.checked).toBeTruthy();
+    expect(wrapper.find('[data-test-id="controlled-card-details"]').exists()).toBeTruthy();
   });
 
   it('should not change eRA Required and tier enabled switches when changing tier requirement', async() => {
@@ -98,7 +107,6 @@ describe('AdminInstitutionEditSpec', () => {
     expect((wrapper.find('[data-test-id="controlled-era-required-switch"]').first().instance() as InputSwitch).props.checked).toBeTruthy();
     expect((wrapper.find('[data-test-id="controlled-enabled-switch"]').first().instance() as InputSwitch).props.checked).toBeTruthy();
   });
-
 
   it('should update institution tier requirement', async() => {
     const wrapper = component();
@@ -482,5 +490,88 @@ describe('AdminInstitutionEditSpec', () => {
     .toBe('someDomain.com,\njustSomeRandom.domain');
 
     expect(wrapper.find('[data-test-id="controlled-email-domain-domain-error"]').length).toBe(0);
+  });
+});
+
+describe('AdminInstitutionEditSpec - add mode', () => {
+
+  const component = () => {
+    return mount(<MemoryRouter initialEntries={[`/admin/institution/add`]}>
+      <Route path='/admin/institution/add'>
+        <AdminInstitutionEdit hideSpinner={() => {}} showSpinner={() => {}}/>
+      </Route>
+    </MemoryRouter>);
+  }
+
+  beforeEach(() => {
+    serverConfigStore.set({config: defaultServerConfig});
+    registerApiClient(InstitutionApi, new InstitutionApiStub());
+  });
+
+  it('should render', async () => {
+    const wrapper = component();
+    await waitOneTickAndUpdate(wrapper);
+    expect(wrapper).toBeTruthy();
+  });
+
+  it('should always show RT card details', async () => {
+    const wrapper = component();
+    await waitOneTickAndUpdate(wrapper);
+    expect(wrapper).toBeTruthy();
+    expect(wrapper.find('[data-test-id="registered-card-details"]').exists()).toBeTruthy();
+  });
+
+  it('should not initially show CT card details', async () => {
+    const wrapper = component();
+    await waitOneTickAndUpdate(wrapper);
+    expect(wrapper).toBeTruthy();
+    expect(wrapper.find('[data-test-id="controlled-card-details"]').exists()).toBeFalsy();
+  });
+
+  it('should hide/show CT card details when controlled tier enabled/disabled', async () => {
+    const wrapper = component();
+    await waitOneTickAndUpdate(wrapper);
+    expect(wrapper).toBeTruthy();
+
+    expect(wrapper.find('[data-test-id="controlled-card-details"]').exists()).toBeFalsy();
+
+    const ctEnabledToggle = wrapper.find('[data-test-id="controlled-enabled-switch"]').first().instance() as InputSwitch;
+    await simulateComponentChange(wrapper, ctEnabledToggle, true);
+    expect(ctEnabledToggle.props.checked).toBeTruthy();
+    expect(wrapper.find('[data-test-id="controlled-card-details"]').exists()).toBeTruthy();
+
+    await simulateComponentChange(wrapper, ctEnabledToggle, false);
+    expect(ctEnabledToggle.props.checked).toBeFalsy();
+    expect(wrapper.find('[data-test-id="controlled-card-details"]').exists()).toBeFalsy();
+  });
+
+  it('should update institution tier requirement', async() => {
+    const wrapper = component();
+    await waitOneTickAndUpdate(wrapper);
+    expect(wrapper).toBeTruthy();
+
+    expect(wrapper.find('[data-test-id="registered-email-domain-input"]').exists()).toBeFalsy();
+    expect(wrapper.find('[data-test-id="registered-email-address-input"]').exists()).toBeFalsy();
+    expect(wrapper.find('[data-test-id="controlled-email-address-input"]').exists()).toBeFalsy();
+    expect(wrapper.find('[data-test-id="controlled-email-domain-input"]').exists()).toBeFalsy();
+
+    const agreementTypeDropDown = wrapper.find('[data-test-id="registered-agreement-dropdown"]').instance() as Dropdown;
+    await simulateComponentChange(wrapper, agreementTypeDropDown, InstitutionMembershipRequirement.ADDRESSES);
+
+    expect(wrapper.find('[data-test-id="registered-email-address-input"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-id="registered-email-address-input"]').first().prop('value')).toBe('');
+
+    expect(wrapper.find('[data-test-id="registered-email-domain-input"]').exists()).toBeFalsy();
+    expect(wrapper.find('[data-test-id="controlled-email-address-input"]').exists()).toBeFalsy();
+    expect(wrapper.find('[data-test-id="controlled-email-domain-input"]').exists()).toBeFalsy();
+
+    wrapper.find('[data-test-id="registered-email-address-input"]').first()
+        .simulate('change', {target: {value: 'user@domain.com'}});
+    wrapper.find('[data-test-id="registered-email-address-input"]').first()
+        .simulate('blur');
+
+    // RT no change
+    expect(wrapper.find('[data-test-id="registered-email-address-input"]').first().prop('value'))
+        .toBe('user@domain.com');
   });
 });
