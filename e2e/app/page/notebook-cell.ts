@@ -88,7 +88,7 @@ export default class NotebookCell extends NotebookFrame {
    * @param {number} timeOut The timeout time in milliseconds.
    */
   async waitForOutput(timeOut: number = 30 * 1000): Promise<string> {
-    return Promise.race([this.getOutputText(timeOut), this.getOutputError(timeOut), this.getOutputStdError(timeOut)]);
+    return Promise.race([this.getOutputText(timeOut), this.getOutputError(timeOut)]);
   }
 
   /**

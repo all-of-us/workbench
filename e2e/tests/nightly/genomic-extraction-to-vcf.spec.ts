@@ -5,9 +5,9 @@ import {
   AnalysisTool,
   Language,
   LinkText,
-  MenuOption,
   ConceptSetSelectValue,
-  DatasetValueSelect
+  DatasetValueSelect,
+  AgeSelectionRadioButton
 } from 'app/text-labels';
 import CohortActionsPage from 'app/page/cohort-actions-page';
 import { makeRandomName, makeWorkspaceName } from 'utils/str-utils';
@@ -51,7 +51,7 @@ describe('Genomics Extraction Test', () => {
     const minAge = 20;
     const maxAge = 21;
     const group2 = cohortBuildPage.findIncludeParticipantsGroup('Group 2');
-    await group2.includeAge(minAge, maxAge, MenuOption.CurrentAge);
+    await group2.includeAge(minAge, maxAge, AgeSelectionRadioButton.CurrentAge);
 
     await group2.getGroupCount();
     totalCount = await cohortBuildPage.getTotalCount();
@@ -162,16 +162,38 @@ describe('Genomics Extraction Test', () => {
     const notebookPage = await notebookPreviewPage.openEditMode(notebookName);
     // Run all cells. Run one cell at a time is slower.
     await notebookPage.runAllCells();
-    await notebookPage.waitForKernelIdle(5 * 60 * 1000, 2000);
+    await notebookPage.waitForKernelIdle(5 * 60 * 1000, 5000);
+    await notebookPage.save();
 
     // Find any output_error.
     const frame = await notebookPage.getIFrame();
-    const existError = (await frame.$$('.cell.code_cell .output_subarea.output_error')).length > 0 ? true : false;
-    expect(existError).toBe(false);
+    const hasOutputError = (await frame.$$('.cell.code_cell .output_subarea.output_error')).length > 0 ? true : false;
+    expect(hasOutputError).toBe(false);
 
+    // Check all seven code cells have ran.
+    const prompts = await page.$$('.input .prompt_container .input_prompt');
+    expect(prompts.length).toBe(7);
+
+    // Spot-check on some cell outputs.
+    const [, cell2Output] = await notebookPage.getCellInputOutput(2);
+    expect(cell2Output).toMatch(/^VCF extraction has completed, continuing$/);
+
+    // cell #7 output is html table.
+    const cell7 = await notebookPage.findLastCell();
+    const cell7OutputElement = await cell7.findOutputElementHandle();
+    const [imgElement] = await cell7OutputElement.$x('./table');
+    expect(imgElement).toBeTruthy();
+
+    // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     // Clean up.
     await notebookPage.deleteNotebook(notebookName);
-    await runtimePanel.deleteRuntime();
+
+    logger.info('Deleting runtime');
+    await runtimePanel.open();
+    await runtimePanel.clickButton(LinkText.DeleteEnvironment);
+    await runtimePanel.clickButton(LinkText.Delete);
+    await runtimePanel.waitUntilClose();
+    // Not waiting for delete to finish.
   });
 
   // Check creation status.
@@ -190,6 +212,7 @@ describe('Genomics Extraction Test', () => {
         logger.info('Runtime is running and Genomic data extraction is done.');
         return true;
       }
+      await page.waitForTimeout(5000);
     }
     // Take screenshot for manual checking.
     await runtimeSidebar.open();

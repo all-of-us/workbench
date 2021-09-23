@@ -2,7 +2,7 @@ import { ElementHandle, Page } from 'puppeteer';
 import { FieldSelector } from 'app/page/cohort-build-page';
 import { waitForNumericalString, waitForText, waitWhileLoading } from 'utils/waits-utils';
 import TieredMenu from 'app/component/tiered-menu';
-import { LinkText, MenuOption } from 'app/text-labels';
+import { AgeSelectionRadioButton, LinkText, MenuOption } from 'app/text-labels';
 import { snowmanIconXpath } from 'app/component/snowman-menu';
 import Modal from 'app/modal/modal';
 import InputSwitch from 'app/element/input-switch';
@@ -276,7 +276,7 @@ export default class CohortParticipantsGroup {
   async includeAge(
     minAge: number,
     maxAge: number,
-    radioButtonText: MenuOption = MenuOption.AgeAtConsent
+    radioButtonText: AgeSelectionRadioButton = AgeSelectionRadioButton.CurrentAge
   ): Promise<number> {
     await this.addCriteria([MenuOption.Demographics, MenuOption.Age]);
     const selector = `${this.cohortSearchContainerXpath}//input[@type="number"]`;

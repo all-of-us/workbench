@@ -18,8 +18,8 @@ export enum WorkspaceAccessLevel {
 // Options in dropdown select.
 export enum MenuOption {
   Age = 'Age',
-  AgeAtCDR = 'Age at CDR Date',
-  AgeAtConsent = 'Age at Consent',
+  AgeAtCDR = 'Age at CDR',
+  AgeAtConsent = 'Age  at Consent',
   Conditions = 'Conditions',
   CopyToAnotherWorkspace = 'Copy to another Workspace',
   CurrentAge = 'Current Age',
@@ -182,3 +182,9 @@ export const ConceptSetSelectValue = {
 export const DatasetValueSelect = {
   VCFFile: 'VCF Files(s)'
 };
+
+export enum AgeSelectionRadioButton {
+  AgeAtCdrDate = 'Age at CDR Date',
+  CurrentAge = 'Current Age',
+  AgeAtConsent = 'Age at Consent'
+}

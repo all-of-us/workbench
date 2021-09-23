@@ -151,11 +151,11 @@ export default class NotebookPage extends NotebookFrame {
     await this.waitForKernelIdle(timeout, 1000);
     const runButton = await this.findRunButton();
     await runButton.click();
+    await runButton.dispose();
     // Click Run button turns notebook page into Command_mode from Edit mode.
     // Short sleep to avoid check output too soon.
-    await this.page.waitForTimeout(500);
-    await runButton.dispose();
-    await this.waitForKernelIdle(timeout, 1000);
+    await this.page.waitForTimeout(200);
+    await this.waitForKernelIdle(timeout, 2000);
   }
 
   /**
