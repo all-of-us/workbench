@@ -19,12 +19,12 @@ const DataTestIdAlias = {
   ctAcceptedEmailAddresses: 'controlled-email-address-input',
   ctAcceptedEmailDomains: 'controlled-email-domain-input',
   ControlledTierAccess: 'ct-card-container',
-  registeredCardDetails:'registered-card-details',
+  registeredCardDetails: 'registered-card-details',
   controlledCardDetails: 'controlled-card-details'
 };
 
 export const LabelAlias = {
-  InstitutionType: 'Institution Type',
+  InstitutionType: 'Institution Type'
 };
 
 export const InstitutionTypeSelectValue = {
@@ -51,7 +51,6 @@ export const Field = {
   AcceptedRTAddressSelect: {
     textOption: {
       type: ElementType.Dropdown,
-      //name: LabelAlias.SelectRTEmailType,
       dataTestId: DataTestIdAlias.registeredCardDetails,
       ancestorLevel: 2
     }
@@ -59,7 +58,6 @@ export const Field = {
   AcceptedCTAddressSelect: {
     textOption: {
       type: ElementType.Dropdown,
-      //name: LabelAlias.SelectCTEmailType,
       dataTestId: DataTestIdAlias.controlledCardDetails,
       ancestorLevel: 2
     }
@@ -148,7 +146,7 @@ export default class InstitutionEditPage extends AuthenticatedPage {
     const xpath = '//div[@data-test-id="registered-era-required-switch"]/div/input[@type="checkbox"]';
     return new Checkbox(this.page, xpath);
   }
-  
+
   // get the dropdown in registered-card-details
   getRTEmailDropdown(): SelectMenu {
     return SelectMenu.findByName(this.page, Field.AcceptedRTAddressSelect.textOption);
@@ -158,7 +156,7 @@ export default class InstitutionEditPage extends AuthenticatedPage {
   async selectRTEmailOption(option: string): Promise<void> {
     const options = this.getRTEmailDropdown();
     await options.select(option);
-  }  
+  }
 
   // get the emailAddress textarea in Registered tier access
   getRTEmailAddressInput(): Textarea {
@@ -199,12 +197,12 @@ export default class InstitutionEditPage extends AuthenticatedPage {
     await options.select(value);
   }
 
-  // get the CT emailAddress Input 
+  // get the CT emailAddress Input
   getCTEmailAddressInput(): Textarea {
     return Textarea.findByName(this.page, { dataTestId: DataTestIdAlias.ctAcceptedEmailAddresses });
   }
 
-  // get the CT emailDomains Input 
+  // get the CT emailDomains Input
   getCTEmailDomainsInput(): Textarea {
     return Textarea.findByName(this.page, { dataTestId: DataTestIdAlias.ctAcceptedEmailDomains });
   }
