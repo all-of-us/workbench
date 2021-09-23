@@ -248,8 +248,8 @@ export const QueryReport = fp.flow(withCdrVersions(), withCurrentCohortReview(),
     }
 
     groupChartData(data: any) {
-      const groups = ['name', 'ageRange', 'race'];
-      const init = {name: {}, ageRange: {}, race: {}};
+      const groups = ['name', 'ageRange', 'race', 'ethnicity'];
+      const init = {name: {}, ageRange: {}, race: {}, ethnicity: {}};
       const groupedData = data.reduce((acc, i) => {
         groups.forEach(group => {
           const key = i[group];
@@ -283,6 +283,8 @@ export const QueryReport = fp.flow(withCdrVersions(), withCurrentCohortReview(),
           return 'Gender';
         case 'race':
           return 'Race';
+        case 'ethnicity':
+          return 'Ethnicity';
       }
     }
 
