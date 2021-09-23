@@ -330,7 +330,7 @@ export const TabButton = ({disabled = false, style = {}, active = false, childre
   >{children}</Clickable>;
 };
 
-export const Link = ({disabled = false, style = {}, children, ...props}) => {
+export const LinkButton = ({disabled = false, style = {}, children, ...props}) => {
   const linkStyle = {
     style: {color: colors.accent},
     hover: {textDecoration: 'underline'}
