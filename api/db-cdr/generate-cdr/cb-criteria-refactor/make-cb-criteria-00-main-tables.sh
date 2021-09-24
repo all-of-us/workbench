@@ -3,6 +3,9 @@
 # This script does the following
 #   populate all cb_criteria table *in order*
 #   populate cb_criteria_* abd cb_survey_* tables
+echo "-----------------------------------------------------------"
+echo "Started at "`date`
+echo "PID "$$
 
 set -e
 # vars are purposely hard-coded for iterative testing
@@ -49,26 +52,26 @@ make-cb-criteria-06-whole-genome-variant.sh
 make-cb-criteria-07-demographics.sh
 make-cb-criteria-08-visit.sh
 make-cb-criteria-09-icd9-src.sh
-#make-cb-criteria-10-icd10-cm-src.sh
-# make-cb-criteria-11-icd10-pcs-src.sh <== need to fix
+make-cb-criteria-10-icd10-cm-src.sh
+make-cb-criteria-11-icd10-pcs-src.sh
 )
-n_procs=${#main_tables[@]}
-main_start=$SECONDS
-parProc=(par\ mult)
-for (( i=0; i < $n_procs; i++ )) ; do
-  f="${main_tables[$i]}"
+for f in "${main_tables[@]}" ; do
   st_time=$SECONDS
-  if [[ ${parProc[*]} =~ $run_in_parallel ]]; then
-    runScript "$f" "$BQ_PROJECT" "$BQ_DATASET" "$run_in_parallel" &
-    main_pids[${i}]=$!
-    sleep 1
-  else
+  if [[ "$run_in_parallel" == "seq" ]]; then
+    echo " $run_in_parallel - sequential run"
     runScript "$f" "$BQ_PROJECT" "$BQ_DATASET" "$run_in_parallel"
+  elif [[ "$run_in_parallel" == "par" ]]; then
+     runScript "$f" "$BQ_PROJECT" "$BQ_DATASET" "$run_in_parallel"  &
+    sleep 1
+  elif [[ "$run_in_parallel" == "mult" ]]; then
+      runScript "$f" "$BQ_PROJECT" "$BQ_DATASET" "$run_in_parallel" &
+      sleep 1
   fi
 done
 # wait for all processes to finish
 wait
-echo "Running scripts *all from make-cb-criteria-00-main-tables.sh* done on $(timeIt main_start) secs"
+echo "Running scripts *all from make-cb-criteria-00-main-tables.sh* done in $(timeIt main_start) secs"
 echo ""
-
+echo "Ended main tables at "`date`
+echo "-----------------------------------------------------------"
 

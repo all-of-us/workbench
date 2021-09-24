@@ -3,6 +3,9 @@
 # This script does the following
 #   create and populate all prep_* tables.
 #   create empty cb_* tables (criteria_* and survey_*)
+echo "-----------------------------------------------------------"
+echo "Started prep-tables at "`date`
+echo "PID "$$
 
 set -e
 # vars are purposely hard-coded for iterative testing
@@ -102,16 +105,13 @@ make-bq-prep-atc-rel-in-data.sh
 make-bq-prep-snomed-rel-pcs-src-tables.sh
 make-bq-prep-snomed-rel-pcs-tables.sh
 )
-n_procs=${#prep_tables[@]}
-for (( i=0; i < n_procs; i++ )); do
-  f="${prep_tables[$i]}"
+for f in "${prep_tables[@]}"; do
   st_time=$SECONDS
   if [[ "$run_in_parallel" == "seq" ]]; then
     runScript "$f" "$BQ_PROJECT" "$BQ_DATASET" "$run_in_parallel"
   else
     runScript "$f" "$BQ_PROJECT" "$BQ_DATASET" "$run_in_parallel" &
     sleep 1
-    prep_pids[${i}]=$!
   fi
 done
 # wait for all prep_pids to complete
@@ -125,6 +125,8 @@ echo "##########################################################################
 source make-cb-criteria-00-main-tables.sh "$run_in_parallel"
 wait
 echo "Running all scripts done total time $(timeIt script_start)"
-echo "Done!"
+echo ""
+echo "Ended prep and main tables at "`date`
+echo "-----------------------------------------------------------"
 exit 0
 
