@@ -334,6 +334,7 @@ export const TabButton = ({disabled = false, style = {}, active = false, childre
   >{children}</Clickable>;
 };
 
+// The intended use of this component is as a button that is styled as a link, but does not actually navigate anywhere.
 export const LinkButton = ({disabled = false, style = {}, children, ...props}) => {
   const linkStyle = {
     style: {color: colors.accent},
