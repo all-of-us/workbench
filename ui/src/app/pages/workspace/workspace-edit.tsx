@@ -389,13 +389,8 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
       this.setState({fetchBillingAccountLoading: true});
       const billingAccounts = (await userApi().listBillingAccounts()).billingAccounts;
 
-      console.log("~~~billing")
-      console.log("~~~billing")
-      console.log(this.state.billingAccounts)
-      console.log(this.state.workspace.billingAccountName)
-
       // Replace the free billing account with a new display name that has spend usage.
-      const displayFreeTierAccount : BillingAccount = {
+      const displayFreeTierAccount: BillingAccount = {
         ...billingAccounts.find(billingAccount => billingAccount.isFreeTier),
         displayName: this.formatFreeTierBillingAccountName()
       }
@@ -411,10 +406,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
         }
       } else if (this.isMode(WorkspaceEditMode.Edit)) {
         const fetchedBillingInfo = await getBillingAccountInfo(this.props.workspace.googleProject);
-        console.log("~~~billing55555555")
-        console.log(fetchedBillingInfo)
         if (!billingAccounts.find(billingAccount => billingAccount.name === fetchedBillingInfo.billingAccountName)) {
-          console.log("~~~billing3333333")
           // If the user has owner access on the workspace but does not have access to the billing account
           // that it is attached to, keep the server's current value for billingAccountName and add a shim
           // entry into billingAccounts so the dropdown entry is not empty.
@@ -444,7 +436,6 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
             });
           }
         } else {
-          console.log("~~~billing4444444")
           // Otherwise, use this as an opportunity to sync the fetched billing account name from
           // the source of truth, Google
           this.setState(prevState => fp.set(
@@ -454,10 +445,6 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
       this.setState({billingAccounts: displayBillingAccounts});
       this.setState({fetchBillingAccountLoading: false});
       this.setState({billingAccountFetched: true});
-      console.log("~~~billing222")
-      console.log("~~~billing22222")
-      console.log(billingAccounts)
-      console.log(this.state.workspace.billingAccountName)
     }
 
     async requestBillingScopeThenFetchBillingAccount() {
@@ -1268,7 +1255,8 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
               </FlexColumn>
               <FlexColumn>
                 {enableBillingUpgrade &&
-                <Button type='primary' style={{marginLeft: '20px', fontWeight: 400, height: '38px', width: '220px'}} onClick={() => this.setState({showCreateBillingAccountModal: true})}>
+                <Button type='primary' style={{marginLeft: '20px', fontWeight: 400, height: '38px', width: '220px'}}
+                        onClick={() => this.setState({showCreateBillingAccountModal: true})}>
                   CREATE BILLING ACCOUNT
                 </Button>}
               </FlexColumn>

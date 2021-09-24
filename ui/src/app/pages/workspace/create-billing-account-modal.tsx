@@ -2,7 +2,7 @@ import {faTimes} from '@fortawesome/free-solid-svg-icons';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {Button} from 'app/components/buttons';
 import {FlexColumn, FlexRow} from 'app/components/flex';
-import {GoogleCloudLogoSvg} from 'app/components/icons';
+import {GoogleCloudLogoSvg, InfoIcon} from 'app/components/icons';
 import {CheckBox, RadioButton, TextInput} from 'app/components/inputs';
 import {
   Modal,
@@ -21,6 +21,7 @@ import {BillingPaymentMethod} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {useState} from 'react';
+import {TooltipTrigger} from 'app/components/popups';
 
 export const styles = reactStyles({
   line: {
@@ -64,6 +65,11 @@ export const styles = reactStyles({
     width: '17px',
     height: '17px',
   },
+  infoIcon: {
+    height: '15px',
+    marginLeft: '0.2rem',
+    width: '15px'
+  },
 });
 
 const stylesFunction = {
@@ -105,6 +111,12 @@ const BillingConfirmItem = ({title, value, dataTestId}) => {
     <div data-test-id={dataTestId}>{value}</div>
   </FlexRow>;
 };
+
+const BilingPartnerTooltip = () => <TooltipTrigger
+  content={'Carahsoft, a third party associated with Google Cloud and the NIH, will have a representative help you set up your billing ' +
+  'account. Carahsoft can also guide you to any additional third party with which your institution may already have an agreement.'}>
+  <InfoIcon style={styles.infoIcon}/>
+</TooltipTrigger>;
 
 export const CreateBillingAccountModal = ({onClose}: Props) => {
   const {profile: {
@@ -189,7 +201,7 @@ export const CreateBillingAccountModal = ({onClose}: Props) => {
       <FlexColumn>
         <TextColumn>
           <p style={styles.textHeader}>Let a Google billing partner create the account for you.</p>
-          <p style={styles.textNormal}>A representative will help you set up <br/>your billing account.</p>
+          <p style={styles.textNormal}>A representative will help you set up <br/>your billing account.<BilingPartnerTooltip/></p>
         </TextColumn>
         <Button data-test-id='use-billing-partner-button'
                 type='primary'
@@ -324,7 +336,7 @@ export const CreateBillingAccountModal = ({onClose}: Props) => {
         3, () => (
         <FlexColumn>
           <div style={styles.textHeader}>Your request has been sent to a Google billing partner.
-            One of their representatives will contact you shortly.</div>
+            One of their representatives will contact within 1 business day.</div>
           <br/>
           <div style={styles.textHeader}>Once your account is set up, you can use it to create
             a new workspace or change a current workspace billing account.</div>
