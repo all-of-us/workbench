@@ -1241,7 +1241,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
           <WorkspaceEditSection header={<div><AoU/> billing account</div>}
                                 description={this.renderBillingDescription()} descriptionStyle={{marginLeft: '0rem'}}>
             {this.state.fetchBillingAccountLoading ? <SpinnerOverlay overrideStylesOverlay={styles.spinner}/> : <div>
-            <div style={styles.fieldHeader}>Select a curent billing account</div>
+            <div style={styles.fieldHeader}>Select a current billing account</div>
               {!enableBillingUpgrade && <OverlayPanel ref={(me) => freeTierBalancePanel = me} dismissable={true} appendTo={document.body}>
                 <div style={styles.freeCreditsBalanceOverlay}>
                   FREE CREDIT BALANCE {formatFreeCreditsUSD(freeTierCreditsBalance)}
