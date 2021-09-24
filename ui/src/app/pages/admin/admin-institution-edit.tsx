@@ -626,7 +626,6 @@ export const AdminInstitutionEdit = fp.flow(withNavigation, withRouter)(class ex
                       options={OrganizationTypeOptions}
                       value={institution.organizationTypeEnum}
                       onChange={v => this.updateInstitutionRole(v.value)}/>
-            <div style={{color: colors.danger}}>{institution.organizationTypeEnum && errors && errors.organizationTypeEnum}</div>
             {showOtherInstitutionTextBox && <TextInputWithLabel
               value={institution.organizationTypeOtherText}
               onChange={v => this.setState(fp.set(['institution', 'organizationTypeOtherText'], v))}
@@ -675,13 +674,12 @@ export const AdminInstitutionEdit = fp.flow(withNavigation, withRouter)(class ex
             <TooltipTrigger data-test-id='tooltip' content={
               errors && this.disableSave(errors) && <div>Please correct the following errors
                 <BulletAlignedUnorderedList>
-                  {errors.displayName && <li>{errors.displayName}</li>}
-                  {errors.organizationTypeEnum && <li>Organization Type should not be empty</li>}
-                  {errors.organizationTypeOtherText && <li>Organization Type 'Other' text should not be empty</li>}
-                  {errors.registeredTierEmailAddresses && <li>{errors.registeredTierEmailAddresses}</li>}
-                  {errors.registeredTierEmailDomains && <li>{errors.registeredTierEmailDomains}</li>}
-                  {errors.controlledTierEmailAddresses && <li>{errors.controlledTierEmailAddresses}</li>}
-                  {errors.controlledTierEmailDomains && <li>{errors.controlledTierEmailDomains}</li>}
+                  { // map each error with text we want to display to an error <li> if it is present
+                    [errors.displayName, errors.organizationTypeEnum,
+                    errors.registeredTierEmailAddresses, errors.registeredTierEmailDomains,
+                    errors.controlledTierEmailAddresses, errors.controlledTierEmailDomains]
+                        .map(e => e && <li key={e}>{e}</li>)}
+                {errors.organizationTypeOtherText && <li>Organization Type 'Other' requires additional information</li>}
                 </BulletAlignedUnorderedList>
               </div>
             } disable={this.isAddInstitutionMode}>
