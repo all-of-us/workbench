@@ -1,4 +1,4 @@
-import {Button, Clickable, Link, StyledAnchorTag} from 'app/components/buttons';
+import {Button, Clickable, LinkButton, StyledExternalLink} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {CreateModal} from 'app/components/create-modal';
 import {FlexColumn, FlexRow} from 'app/components/flex';
@@ -1072,8 +1072,8 @@ export const DatasetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), wi
             />
             <div style={{paddingLeft: '0.25rem'}}>
               The preview table could not be loaded. Please try again by clicking the ‘View Preview Table’ as
-              some queries take longer to load. If the error keeps happening, please <Link style={{
-                display: 'inline-block'}} onClick={() => this.openZendeskWidget()}>contact us</Link>. You can also
+              some queries take longer to load. If the error keeps happening, please <LinkButton style={{
+                display: 'inline-block'}} onClick={() => this.openZendeskWidget()}>contact us</LinkButton>. You can also
               export your dataset directly for analysis by clicking the ‘Analyze’ button, without viewing the preview
               table.
             </div>
@@ -1295,9 +1295,9 @@ export const DatasetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), wi
                     width: '100%', height: '1.375rem', backgroundColor: colorWithWhiteness(colors.dark, 0.9),
                     color: colors.primary, paddingLeft: '0.4rem', fontSize: '13px', lineHeight: '16px',
                     alignItems: 'center'}}>
-                    <StyledAnchorTag href={supportUrls.dataDictionary} target='_blank'>
+                    <StyledExternalLink href={supportUrls.dataDictionary} target='_blank'>
                       Learn more
-                    </StyledAnchorTag>&nbsp;in the data dictionary
+                    </StyledExternalLink>&nbsp;in the data dictionary
                   </FlexRow>}
                 </div>
               </div>

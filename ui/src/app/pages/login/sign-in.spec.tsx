@@ -10,13 +10,14 @@ import {AccountCreationSurvey} from 'app/pages/login/account-creation/account-cr
 import {AccountCreationTos} from 'app/pages/login/account-creation/account-creation-tos';
 import LoginReactComponent from 'app/pages/login/login';
 import {createEmptyProfile, SignInProps, SignIn} from './sign-in';
+import { MemoryRouter } from 'react-router-dom';
 
 describe('SignInReact', () => {
   let props: SignInProps;
 
   const signIn = jest.fn();
 
-  const component = () => mount(<SignIn {...props}/>);
+  const component = () => mount(<MemoryRouter><SignIn {...props}/></MemoryRouter>);
 
   // To correctly shallow-render this component wrapped by a HOC, we need to add an extra
   // .shallow() call at the end.

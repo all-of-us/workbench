@@ -9,6 +9,7 @@ import {useNavigation} from 'app/utils/navigation';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import Interactive from 'react-interactive';
+import { Link } from 'react-router-dom';
 
 
 export const styles = reactStyles({
@@ -23,7 +24,10 @@ export const styles = reactStyles({
     borderRadius: 5,
     boxSizing: 'border-box'
   },
-
+  inlineAnchor: {
+    display: 'inline-block',
+    color: colors.accent
+  },
   slidingButtonContainer: {
     // Use position sticky so the FAB does not continue past the page footer. We
     // use a padding-bottom since when the FAB ignores margins in "fixed"
@@ -330,7 +334,7 @@ export const TabButton = ({disabled = false, style = {}, active = false, childre
   >{children}</Clickable>;
 };
 
-export const Link = ({disabled = false, style = {}, children, ...props}) => {
+export const LinkButton = ({disabled = false, style = {}, children, ...props}) => {
   const linkStyle = {
     style: {color: colors.accent},
     hover: {textDecoration: 'underline'}
@@ -341,28 +345,30 @@ export const Link = ({disabled = false, style = {}, children, ...props}) => {
   >{children}</Clickable>;
 };
 
-export const StyledAnchorTag = ({href, children, analyticsFn = null, style = {}, ...props}) => {
-  const [, navigateByUrl] = useNavigation();
-  const inlineAnchor = {
-    display: 'inline-block',
-    color: colors.accent
-  };
+export const StyledRouterLink = ({path, children, disabled = false, analyticsFn = null, style = {}, ...props}) => {
+  const linkStyle = {
+    style: {...styles.inlineAnchor}
+  }
+  const computedStyles = fp.merge(computeStyle(linkStyle, {disabled}), {style})
+  // A react-router Link will attempt to navigate whenever you click on it; it has no concept
+  // of 'disabled'. So if it is disabled, we render a span instead.
+  return disabled
+    ? <span {...computedStyles} {...props}>{children}</span>
+    : <Link
+        to={path}
+        onClick={() => analyticsFn && analyticsFn()}
+        {...computedStyles}
+        {...props}
+    >
+      {children}
+    </Link>;
+}
 
-  // TODO RW-7154: change to react-router Link
+export const StyledExternalLink = ({href, children, analyticsFn = null, style = {}, ...props}) => {
   return <a href={href}
-            onClick={e => {
-              if (analyticsFn) {
-                analyticsFn();
-              }
-              // This does same page navigation iff there is no key pressed and target is not set.
-              if (props.target === undefined && !href.startsWith('https://') && !href.startsWith('http://')) {
-                navigateByUrl(href, {
-                  preventDefaultIfNoKeysPressed: true,
-                  event: e
-                });
-              }
-            }}
-            style={{...inlineAnchor, ...style}} {...props}>{children}</a>;
+            onClick={() => analyticsFn && analyticsFn()}
+            style={{...styles.inlineAnchor, ...style}}
+            {...props}>{children}</a>;
 };
 
 interface SlidingFabState {
