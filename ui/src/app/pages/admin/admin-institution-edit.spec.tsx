@@ -191,10 +191,10 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
     findRTDomainInput(wrapper).first()
         .simulate('change', {target: {value: 'someDomain.com,\njustSomeRandom.domain,\n,'}});
     findRTDomainInput(wrapper).first().simulate('blur');
+    expect(findRTDomainInput(wrapper).first().prop('value')).toBe('someDomain.com,\njustSomeRandom.domain');
+
     findCTAddressInput(wrapper).first().simulate('change', {target: {value: 'correctEmail@domain.com'}});
     findCTAddressInput(wrapper).first().simulate('blur');
-
-    expect(findRTDomainInput(wrapper).first().prop('value')).toBe('someDomain.com,\njustSomeRandom.domain');
     expect(findCTAddressInput(wrapper).first().prop('value')).toBe('correctEmail@domain.com');
   });
 
