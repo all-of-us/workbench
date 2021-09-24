@@ -4985,6 +4985,7 @@ FROM
             and b.domain_id = 'Observation'
             and a.observation_concept_id != 0
             and b.vocabulary_id != 'PPI'
+            and b.concept_class_id != 'Survey'
         GROUP BY 1,2,3,4
     ) x"
 
