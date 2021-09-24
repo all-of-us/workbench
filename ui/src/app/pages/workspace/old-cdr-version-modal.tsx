@@ -2,7 +2,7 @@
 import * as React from 'react';
 import {useState} from 'react';
 
-import {Button, StyledAnchorTag} from 'app/components/buttons';
+import {Button, StyledExternalLink} from 'app/components/buttons';
 import {FlexColumn} from 'app/components/flex';
 import {CheckBox} from 'app/components/inputs';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
@@ -43,9 +43,9 @@ const OldCdrVersionModal = (props: Props) => {
         <ModalBody>
             <FlexColumn>
                 <div style={styles.text}>
-                    Use of older dataset versions is <StyledAnchorTag
+                    Use of older dataset versions is <StyledExternalLink
                     href='https://www.researchallofus.org/data-tools/data-access/'>
-                    permitted</StyledAnchorTag> only to complete a study that was started using that older
+                    permitted</StyledExternalLink> only to complete a study that was started using that older
                     version, or to replicate a previous study. You must confirm the following to continue.
                 </div>
                 <div style={{margin: '24px 0'}} data-test-id='consent-will-use'><CheckBox

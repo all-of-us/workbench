@@ -36,7 +36,8 @@ JOIN \`$BQ_PROJECT.$BQ_DATASET.person\` p on p.person_id = co.person_id
 JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c on (c.concept_id = co.condition_source_concept_id)
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` vo on (vo.visit_occurrence_id = co.visit_occurrence_id)
 where co.condition_source_concept_id is not null
-    and co.condition_source_concept_id != 0"
+    and co.condition_source_concept_id != 0
+    and c.vocabulary_id != 'SNOMED'"
 
 ##############################################################
 # insert standard condition data into cb_search_all_events
@@ -82,7 +83,8 @@ JOIN \`$BQ_PROJECT.$BQ_DATASET.person\` p on p.person_id = po.person_id
 JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c on (c.concept_id = po.procedure_source_concept_id)
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` vo on (vo.visit_occurrence_id = po.visit_occurrence_id)
 WHERE po.procedure_source_concept_id is not null
-    and po.procedure_source_concept_id != 0"
+    and po.procedure_source_concept_id != 0
+    and c.vocabulary_id != 'SNOMED'"
 
 ##############################################################
 #   insert standard procedure data into cb_search_all_events

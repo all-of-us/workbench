@@ -1,4 +1,4 @@
-import {StyledAnchorTag} from 'app/components/buttons';
+import {StyledExternalLink} from 'app/components/buttons';
 import {GoogleSignInButton} from 'app/components/google-sign-in';
 import {BoldHeader} from 'app/components/headers';
 import {PublicLayout} from 'app/components/public-layout';
@@ -40,7 +40,7 @@ export const SignInAgain = (spinnerProps: WithSpinnerOverlayProps) => {
       <strong>Note</strong>: You may have been redirected to this page immediately after attempting to sign in,
       if you did not explicitly sign out of your most recent session. If, after signing in
       again, you continue to be redirected to this page, please contact&nbsp;
-      <StyledAnchorTag href={'mailto:' + supportUrl}>{supportUrl}</StyledAnchorTag> for
+      <StyledExternalLink href={'mailto:' + supportUrl}>{supportUrl}</StyledExternalLink> for
       assistance.
     </section>
   </PublicLayout>;

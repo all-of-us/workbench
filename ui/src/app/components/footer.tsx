@@ -1,4 +1,4 @@
-import { Link, StyledAnchorTag } from 'app/components/buttons';
+import { LinkButton, StyledExternalLink, StyledRouterLink } from 'app/components/buttons';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {SemiBoldHeader} from 'app/components/headers';
 import {AoU} from 'app/components/text-wrappers';
@@ -55,13 +55,24 @@ const styles = reactStyles({
 });
 
 const FooterAnchorTag = ({style = {}, href, ...props}) => {
-  return <StyledAnchorTag style={{...styles.footerAnchor, ...style}} href={href} {...props}>
+  return <StyledRouterLink
+      style={{...styles.footerAnchor, ...style}}
+      path={href}
+      {...props}
+  >
     {props.children}
-  </StyledAnchorTag>;
+  </StyledRouterLink>;
 };
 
 const NewTabFooterAnchorTag = ({style = {}, href, ...props}) => {
-  return <FooterAnchorTag style={style} href={href} target='_blank' {...props}>{props.children}</FooterAnchorTag>;
+  return <StyledExternalLink
+      style={{...styles.footerAnchor, ...styles}}
+      href={href}
+      target='_blank'
+      {...props}
+  >
+    {props.children}
+  </StyledExternalLink>;
 };
 
 const DataBrowserLink = (props) => (
@@ -168,7 +179,7 @@ const WorkbenchFooter = withUserProfile()(
                                        analyticsFn={tracker.SupportFAQ}>
                   FAQs
                 </NewTabFooterAnchorTag>
-                <Link style={styles.footerAnchor} onClick={() => {
+                <LinkButton style={styles.footerAnchor} onClick={() => {
                   tracker.ContactUs('Zendesk');
                   openZendeskWidget(
                     this.props.profileState.profile.givenName,
@@ -178,7 +189,7 @@ const WorkbenchFooter = withUserProfile()(
                   ); }
                 } href='#'>
                   Contact Us
-                </Link>
+                </LinkButton>
               </FlexColumn>
             </FlexRow>
           </FooterSection>

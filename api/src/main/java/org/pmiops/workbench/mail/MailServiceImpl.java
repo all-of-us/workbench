@@ -36,7 +36,7 @@ import org.pmiops.workbench.mandrill.model.MandrillMessage;
 import org.pmiops.workbench.mandrill.model.MandrillMessageStatus;
 import org.pmiops.workbench.mandrill.model.MandrillMessageStatuses;
 import org.pmiops.workbench.mandrill.model.RecipientAddress;
-import org.pmiops.workbench.model.BillingPaymentMethod;
+import org.pmiops.workbench.mandrill.model.RecipientType;
 import org.pmiops.workbench.model.SendBillingSetupEmailRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -88,6 +88,7 @@ public class MailServiceImpl implements MailService {
 
     sendWithRetries(
         Collections.singletonList(contactEmail),
+        Collections.emptyList(),
         "Your new All of Us Researcher Workbench Account",
         String.format("Welcome for %s", username),
         htmlMessage);
@@ -108,6 +109,7 @@ public class MailServiceImpl implements MailService {
 
     sendWithRetries(
         Collections.singletonList(contactEmail),
+        Collections.emptyList(),
         "Instructions from your institution on using the Researcher Workbench",
         String.format("Institution user instructions for %s", contactEmail),
         htmlMessage);
@@ -131,6 +133,7 @@ public class MailServiceImpl implements MailService {
 
     sendWithRetries(
         Collections.singletonList(user.getContactEmail()),
+        Collections.emptyList(),
         String.format(
             "Reminder - %s Free credit usage in All of Us Researcher Workbench",
             formatPercentage(threshold)),
@@ -150,6 +153,7 @@ public class MailServiceImpl implements MailService {
 
     sendWithRetries(
         Collections.singletonList(user.getContactEmail()),
+        Collections.emptyList(),
         "Alert - Free credit expiration in All of Us Researcher Workbench",
         expirationMsg,
         htmlMessage);
@@ -175,6 +179,7 @@ public class MailServiceImpl implements MailService {
 
     sendWithRetries(
         Collections.singletonList(user.getContactEmail()),
+        Collections.emptyList(),
         "Your access to All of Us Registered Tier Data will expire "
             + (daysRemaining == 1 ? "tomorrow" : String.format("in %d days", daysRemaining)),
         String.format(
@@ -201,6 +206,7 @@ public class MailServiceImpl implements MailService {
 
     sendWithRetries(
         Collections.singletonList(user.getContactEmail()),
+        Collections.emptyList(),
         "Your access to All of Us Registered Tier Data has expired",
         String.format(
             "Registered Tier access expired for user %s (%s)",
@@ -226,6 +232,7 @@ public class MailServiceImpl implements MailService {
     }
     sendWithRetries(
         receiptEmails,
+        Collections.singletonList(workbenchConfigProvider.get().mandrill.fromEmail),
         "Request to set up Google Cloud Billing Account for All of Us Workbench",
         String.format(
             " User %s (%s) requests billing setup from Carasoft.",
@@ -329,11 +336,6 @@ public class MailServiceImpl implements MailService {
         .put(EmailSubstitutionField.USERNAME, user.getUsername())
         .put(EmailSubstitutionField.USER_CONTACT_EMAIL, user.getContactEmail())
         .put(
-            EmailSubstitutionField.PAYMENT_METHOD,
-            request.getPaymentMethod() == BillingPaymentMethod.CREDIT_CARD
-                ? "Credit Card"
-                : "Purchase Order/Other")
-        .put(
             EmailSubstitutionField.NIH_FUNDED,
             BooleanUtils.isTrue(request.getIsNihFunded()) ? "Yes" : "No")
         .build();
@@ -359,7 +361,8 @@ public class MailServiceImpl implements MailService {
     return new StringSubstitutor(stringMap).replace(emailContent);
   }
 
-  private RecipientAddress validatedRecipient(final String contactEmail) {
+  private RecipientAddress validatedRecipient(
+      final String contactEmail, final RecipientType recipientType) {
     try {
       final InternetAddress contactInternetAddress = new InternetAddress(contactEmail);
       contactInternetAddress.validate();
@@ -368,18 +371,31 @@ public class MailServiceImpl implements MailService {
     }
 
     final RecipientAddress toAddress = new RecipientAddress();
-    toAddress.setEmail(contactEmail);
+    toAddress.email(contactEmail).type(recipientType);
     return toAddress;
   }
 
   private void sendWithRetries(
-      List<String> contactEmails, String subject, String description, String htmlMessage)
+      List<String> toRecipientEmails,
+      List<String> ccRecipientEmails,
+      String subject,
+      String description,
+      String htmlMessage)
       throws MessagingException {
+    List<RecipientAddress> toAddresses =
+        toRecipientEmails.stream()
+            .map(a -> (validatedRecipient(a, RecipientType.TO)))
+            .collect(Collectors.toList());
+    toAddresses.addAll(
+        ccRecipientEmails.stream()
+            .map(c -> (validatedRecipient(c, RecipientType.CC)))
+            .collect(Collectors.toList()));
     final MandrillMessage msg =
         new MandrillMessage()
-            .to(contactEmails.stream().map(this::validatedRecipient).collect(Collectors.toList()))
+            .to(toAddresses)
             .html(htmlMessage)
             .subject(subject)
+            .preserveRecipients(true)
             .fromEmail(workbenchConfigProvider.get().mandrill.fromEmail);
 
     String apiKey = cloudStorageClientProvider.get().readMandrillApiKey();
