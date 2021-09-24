@@ -223,7 +223,7 @@ const useOverriddenApiUrl = () => {
 
 export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => {
   const config = useServerConfig();
-  const {authLoaded} = useAuthentication();
+  const {authLoaded, authError} = useAuthentication();
   const isUserDisabled = useIsUserDisabled();
   const overriddenUrl = useOverriddenApiUrl();
 
@@ -313,7 +313,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
      </div>
     }
     {
-      !isCookiesEnabled &&
+      !isCookiesEnabled || (authError && authError.includes('Cookies')) &&
       <div>
         <div style={{maxWidth: '500px', margin: '1rem', fontFamily: 'Montserrat'}}>
           <div>
