@@ -26,7 +26,6 @@ describe('CreateBillingAccountModal', () => {
     expect(wrapper.find('[data-test-id="step-1-modal"]').exists()).toBeFalsy();
     expect(wrapper.find('[data-test-id="step-2-modal"]').exists()).toBeFalsy();
     expect(wrapper.find('[data-test-id="step-3-modal"]').exists()).toBeFalsy();
-    expect(wrapper.find('[data-test-id="step-4-modal"]').exists()).toBeFalsy();
 
     // Show step 1 when click use-billing-partner-button button, verify value populated.
     wrapper.find('[data-test-id="use-billing-partner-button"]').first().simulate('click');
@@ -34,15 +33,17 @@ describe('CreateBillingAccountModal', () => {
     expect(wrapper.find('[data-test-id="step-1-modal"]').exists()).toBeTruthy();
 
     // The only enabled input is user phone number. Others are populated from profile API.
-    expect(wrapper.find('[data-test-id="user-full-name"]').first().prop('disabled')).toBeTruthy();
+    expect(wrapper.find('[data-test-id="user-first-name"]').first().prop('disabled')).toBeTruthy();
+    expect(wrapper.find('[data-test-id="user-last-name"]').first().prop('disabled')).toBeTruthy();
     expect(wrapper.find('[data-test-id="user-contact-email"]').first().prop('disabled')).toBeTruthy();
     expect(wrapper.find('[data-test-id="user-workbench-id"]').first().prop('disabled')).toBeTruthy();
     expect(wrapper.find('[data-test-id="user-institution"]').first().prop('disabled')).toBeTruthy();
     expect(wrapper.find('[data-test-id="user-phone-number"]').first().prop('disabled')).toBeFalsy();
 
-    expect(wrapper.find('[data-test-id="user-full-name"]').first().prop('value'))
-    .toEqual('Tester!@#$%^&*()><script>alert("hello");</script>'
-        + ' ' + 'MacTesterson!@#$%^&*()><script>alert("hello");</script>');
+    expect(wrapper.find('[data-test-id="user-first-name"]').first().prop('value'))
+    .toEqual('Tester!@#$%^&*()><script>alert("hello");</script>');
+    expect(wrapper.find('[data-test-id="user-last-name"]').first().prop('value'))
+    .toEqual('MacTesterson!@#$%^&*()><script>alert("hello");</script>');
     expect(wrapper.find('[data-test-id="user-phone-number"]').first().prop('value')).toBeUndefined();
     expect(wrapper.find('[data-test-id="user-contact-email"]').first().prop('value'))
     .toEqual('tester@mactesterson.edu><script>alert("hello");</script>');
@@ -60,19 +61,14 @@ describe('CreateBillingAccountModal', () => {
     expect(wrapper.find('[data-test-id="step-1-modal"]').exists()).toBeFalsy();
     expect(wrapper.find('[data-test-id="step-2-modal"]').exists()).toBeTruthy();
 
-    // Next button is not clickable if user not select Credit Card/Purchase order.
-    expect(wrapper.find('[data-test-id="next-button"]').first().prop('disabled')).toBeTruthy();
-    wrapper.find('[data-test-id="credit-card-radio"]').first().simulate('click');
-    expect(wrapper.find('[data-test-id="next-button"]').first().prop('disabled')).toBeFalsy();
-
     // Go to step 3 and review user input
     wrapper.find('[data-test-id="next-button"]').first().simulate('click');
     expect(wrapper.find('[data-test-id="step-2-modal"]').exists()).toBeFalsy();
-    expect(wrapper.find('[data-test-id="step-3-modal"]').exists()).toBeTruthy();
 
-    expect(wrapper.find('[data-test-id="user-full-name-text"]').first().props().children)
-    .toEqual('Tester!@#$%^&*()><script>alert("hello");</script>'
-        + ' ' + 'MacTesterson!@#$%^&*()><script>alert("hello");</script>');
+    expect(wrapper.find('[data-test-id="user-first-name-text"]').first().props().children)
+    .toEqual('Tester!@#$%^&*()><script>alert("hello");</script>');
+    expect(wrapper.find('[data-test-id="user-last-name-text"]').first().props().children)
+    .toEqual('MacTesterson!@#$%^&*()><script>alert("hello");</script>');
     expect(wrapper.find('[data-test-id="user-phone-number-text"]').first().props().children)
     .toEqual('1234567890');
     expect(wrapper.find('[data-test-id="user-contact-email-text"]').first().props().children)
@@ -81,8 +77,6 @@ describe('CreateBillingAccountModal', () => {
     .toEqual('tester@fake-research-aou.org');
     expect(wrapper.find('[data-test-id="user-institution-text"]').first().props().children)
     .toEqual('The Broad Institute');
-    expect(wrapper.find('[data-test-id="use-credit-card-text"]').first().props().children)
-    .toEqual('Credit credit');
     expect(wrapper.find('[data-test-id="nih-funded-text"]').first().props().children).toEqual('N/A');
   });
 });

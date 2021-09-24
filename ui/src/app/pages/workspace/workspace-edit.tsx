@@ -329,12 +329,20 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
       history.back();
     }
 
+    formatFreeTierBillingAccountName(): string {
+      const {profileState: {profile: {freeTierDollarQuota, freeTierUsage}}} = this.props;
+      const freeTierCreditsBalance = freeTierDollarQuota - freeTierUsage;
+      return 'Use All of Us initial credits - ' + formatFreeCreditsUSD(freeTierCreditsBalance) + ' left'
+    }
+
     async initialBillingAccountLoad() {
+      const {profileState: {profile: {freeTierDollarQuota, freeTierUsage}}} = this.props;
+      const freeTierCreditsBalance = freeTierDollarQuota - freeTierUsage;
       const freeTierBillingAccount: BillingAccount = {
         name: 'billingAccounts/' + serverConfigStore.get().config.freeTierBillingAccountId,
         isFreeTier: true,
         isOpen: true,
-        displayName: 'Use All of Us initial credits',
+        displayName: this.formatFreeTierBillingAccountName(),
       };
       // If user hasn't granted GCP billing scope to workbench, we can not fetch billing account from Google
       // or fetch user's available billing accounts.
@@ -378,7 +386,21 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
     }
 
     async fetchBillingAccounts() {
+      this.setState({fetchBillingAccountLoading: true});
       const billingAccounts = (await userApi().listBillingAccounts()).billingAccounts;
+
+      console.log("~~~billing")
+      console.log("~~~billing")
+      console.log(this.state.billingAccounts)
+      console.log(this.state.workspace.billingAccountName)
+
+      // Replace the free billing account with a new display name that has spend usage.
+      const displayFreeTierAccount : BillingAccount = {
+        ...billingAccounts.find(billingAccount => billingAccount.isFreeTier),
+        displayName: this.formatFreeTierBillingAccountName()
+      }
+      const displayBillingAccounts = billingAccounts.map(b => b.isFreeTier ? displayFreeTierAccount : b)
+
       if (this.isMode(WorkspaceEditMode.Create) || this.isMode(WorkspaceEditMode.Duplicate)) {
         const maybeFreeTierAccount = billingAccounts.find(billingAccount => billingAccount.isFreeTier);
         if (maybeFreeTierAccount) {
@@ -389,7 +411,10 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
         }
       } else if (this.isMode(WorkspaceEditMode.Edit)) {
         const fetchedBillingInfo = await getBillingAccountInfo(this.props.workspace.googleProject);
+        console.log("~~~billing55555555")
+        console.log(fetchedBillingInfo)
         if (!billingAccounts.find(billingAccount => billingAccount.name === fetchedBillingInfo.billingAccountName)) {
+          console.log("~~~billing3333333")
           // If the user has owner access on the workspace but does not have access to the billing account
           // that it is attached to, keep the server's current value for billingAccountName and add a shim
           // entry into billingAccounts so the dropdown entry is not empty.
@@ -419,24 +444,27 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
             });
           }
         } else {
+          console.log("~~~billing4444444")
           // Otherwise, use this as an opportunity to sync the fetched billing account name from
           // the source of truth, Google
           this.setState(prevState => fp.set(
             ['workspace', 'billingAccountName'], fetchedBillingInfo.billingAccountName, prevState));
         }
       }
-      this.setState({billingAccounts});
+      this.setState({billingAccounts: displayBillingAccounts});
+      this.setState({fetchBillingAccountLoading: false});
       this.setState({billingAccountFetched: true});
+      console.log("~~~billing222")
+      console.log("~~~billing22222")
+      console.log(billingAccounts)
+      console.log(this.state.workspace.billingAccountName)
     }
 
     async requestBillingScopeThenFetchBillingAccount() {
       if(!this.state.billingAccountFetched) {
-        this.setState({fetchBillingAccountLoading: true});
         await ensureBillingScope();
         await this.fetchBillingAccounts();
-        this.setState({fetchBillingAccountLoading: false});
       }
-      console.log("~~~~~~")
     }
 
     async componentDidMount() {
@@ -579,13 +607,20 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
     }
 
     renderBillingDescription() {
+      const {enableBillingUpgrade} = serverConfigStore.get().config;
       return <div>
         The <AouTitle/> provides $300 in free credits per user. Please refer to
         <StyledAnchorTag href={supportUrls.billing} target='_blank'> &nbsp;this article
         </StyledAnchorTag> to learn more about the free credit
-        program and how it can be used. Once you have used up your free credits, you can request
-        additional credits by <span style={styles.link} onClick={() => this.openContactWidget()}>
-        contacting support</span>.
+        program and how it can be used .
+        {!enableBillingUpgrade &&
+        <div style={{display: 'inline'}}>Once you have used up your free credits, you can request
+          additional credits by <span style={styles.link} onClick={() => this.openContactWidget()}>
+        contacting support</span>.</div>}
+        {enableBillingUpgrade &&
+        <div style={{display: 'inline'}}>Once you have used up your free credits, you can either select a shared billing account or create
+          a new one using either Google Cloud Platform or a Google billing partner.
+          Please note once a new billing account is created it may take a few days to show up in the <b>Select account</b> dropdown.</div>}
       </div>;
     }
 
@@ -923,21 +958,6 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
         value: a.name,
         disabled: !a.isOpen
       }));
-      if (enableBillingUpgrade) {
-        if (hasBillingScope()) {
-          options.push({
-            label: 'Create a Google Cloud billing account',
-            value: CREATE_BILLING_ACCOUNT_OPTION_VALUE,
-            disabled: false
-          });
-        } else {
-          options.push({
-            label: 'Select or create a Google Cloud billing account',
-            value: SELECT_OR_CREATE_BILLING_ACCOUNT_OPTION_VALUE,
-            disabled: false
-          });
-        }
-      }
       return options;
     }
 
@@ -1234,35 +1254,24 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
           <WorkspaceEditSection header={<div><AoU/> billing account</div>}
                                 description={this.renderBillingDescription()} descriptionStyle={{marginLeft: '0rem'}}>
             {this.state.fetchBillingAccountLoading ? <SpinnerOverlay overrideStylesOverlay={styles.spinner}/> : <div>
-            <div style={styles.fieldHeader}>
-              Select account
-            </div>
-            <OverlayPanel ref={(me) => freeTierBalancePanel = me} dismissable={true} appendTo={document.body}>
-              <div style={styles.freeCreditsBalanceOverlay}>
-                FREE CREDIT BALANCE {formatFreeCreditsUSD(freeTierCreditsBalance)}
-              </div>
-            </OverlayPanel>
+            <div style={styles.fieldHeader}>Select a curent billing account</div>
             <FlexRow>
+              <FlexColumn>
               <div onClick={() =>  this.requestBillingScopeThenFetchBillingAccount()}>
                   <Dropdown data-test-id = 'billing-dropdown'
                       style={{width: '20rem'}}
                         value={billingAccountName}
                         options={this.buildBillingAccountOptions()}
                         disabled={(freeTierCreditsBalance < 0.0) && !enableBillingUpgrade}
-                        onChange={e => {
-                          if (e.value === SELECT_OR_CREATE_BILLING_ACCOUNT_OPTION_VALUE) {
-                            this.requestBillingScopeThenFetchBillingAccount();
-                          } else if (e.value === CREATE_BILLING_ACCOUNT_OPTION_VALUE) {
-                            this.setState({
-                              showCreateBillingAccountModal: true
-                            });
-                          } else {
-                            this.setState(fp.set(['workspace', 'billingAccountName'], e.value));
-                          }
-                        }}
-              />
+                        onChange={e => {this.setState(fp.set(['workspace', 'billingAccountName'], e.value));}}/>
               </div>
-              {showCreateBillingAccountModal &&<Button type='primary' onClick={() => this.setState({showCreateBillingAccountModal: true})}>CREATE BILLING ACCOUNT</Button>}
+              </FlexColumn>
+              <FlexColumn>
+                {enableBillingUpgrade &&
+                <Button type='primary' style={{marginLeft: '20px', fontWeight: 400, height: '38px', width: '220px'}} onClick={() => this.setState({showCreateBillingAccountModal: true})}>
+                  CREATE BILLING ACCOUNT
+                </Button>}
+              </FlexColumn>
             </FlexRow>
             </div>}
           </WorkspaceEditSection>}
