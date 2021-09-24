@@ -198,7 +198,7 @@ describe('Genomics Extraction Test', () => {
 
   // Check creation status.
   async function waitForComplete(page: Page, maxTime: number): Promise<boolean> {
-    const pollInterval = 30 * 1000;
+    const pollInterval = 10 * 1000;
     let isRuntimeReady = false;
     let isExtractionReady = false;
     const runtimeSidebar = new RuntimePanel(page);
@@ -212,7 +212,7 @@ describe('Genomics Extraction Test', () => {
         logger.info('Runtime is running and Genomic data extraction is done.');
         return true;
       }
-      await page.waitForTimeout(5000);
+      await page.waitForTimeout(pollInterval);
     }
     // Take screenshot for manual checking.
     await runtimeSidebar.open();
