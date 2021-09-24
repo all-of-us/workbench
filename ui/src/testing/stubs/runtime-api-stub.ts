@@ -31,7 +31,8 @@ export const defaultRuntime = () => ({
   createdDate: '08/08/2018',
   toolDockerImage: 'broadinstitute/terra-jupyter-aou:1.0.999',
   configurationType: RuntimeConfigurationType.GeneralAnalysis,
-  gceConfig: defaultGceConfig()
+  gceConfig: defaultGceConfig(),
+  errors: []
 });
 
 export class RuntimeApiStub extends RuntimeApi {
