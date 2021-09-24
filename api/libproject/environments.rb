@@ -130,7 +130,13 @@ ENVIRONMENTS = {
         :ingest_cdr_project => "fc-aou-vpc-ingest-prod",
         :dest_cdr_project => "fc-aou-cdr-prod",
         :auth_domain_group_email => "all-of-us-registered-prod@firecloud.org",
+      },
+      "controlled" => {
+        :ingest_cdr_project => "fc-aou-vpc-ingest-prod-ct",
+        :dest_cdr_project => "fc-aou-cdr-prod-ct",
+        :auth_domain_group_email => "all-of-us-controlled-prod@firecloud.org",
       }
+
     }
   })
 }
