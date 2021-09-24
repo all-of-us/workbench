@@ -17,7 +17,6 @@ import {switchCase} from 'app/utils';
 import {reactStyles} from 'app/utils';
 import {profileStore, useStore} from 'app/utils/stores';
 import {supportUrls} from 'app/utils/zendesk';
-import {BillingPaymentMethod} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {useState} from 'react';
@@ -129,7 +128,6 @@ export const CreateBillingAccountModal = ({onClose}: Props) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [phoneNumber, setPhoneNumber] = useState<string>();
   const [invalidPhoneNumberInput, setInvalidPhoneNumberInput] = useState<boolean>(null);
-  const [useCreditCard, setUseCreditCard] = useState<boolean>(null);
   const [nihFunded, setNihFunded] = useState<boolean>(null);
 
   const validatePhoneNumber = (phoneInput: string) => {
@@ -151,12 +149,11 @@ export const CreateBillingAccountModal = ({onClose}: Props) => {
   )(async() => {await profileApi().sendBillingSetupEmail(
     {
       phone: phoneNumber,
-      paymentMethod: useCreditCard ? BillingPaymentMethod.CREDITCARD : BillingPaymentMethod.PURCHASEORDER,
       isNihFunded: nihFunded,
       institution: verifiedInstitutionalAffiliation.institutionDisplayName
     }
   );
-    setCurrentStep(4);
+    setCurrentStep(3);
   });
 
   return <Modal width={650} onRequestClose={() => onClose()}>
