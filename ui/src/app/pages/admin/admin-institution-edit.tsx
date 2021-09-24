@@ -674,11 +674,13 @@ export const AdminInstitutionEdit = fp.flow(withNavigation, withRouter)(class ex
             <TooltipTrigger data-test-id='tooltip' content={
               errors && this.disableSave(errors) && <div>Please correct the following errors
                 <BulletAlignedUnorderedList>
-                  { // map each error with text we want to display to an error <li> if it is present
-                    [errors.displayName, errors.organizationTypeEnum,
-                    errors.registeredTierEmailAddresses, errors.registeredTierEmailDomains,
-                    errors.controlledTierEmailAddresses, errors.controlledTierEmailDomains]
-                        .map(e => e && <li key={e}>{e}</li>)}
+                  {[errors.displayName,
+                    errors.organizationTypeEnum,
+                    errors.registeredTierEmailAddresses,
+                    errors.registeredTierEmailDomains,
+                    errors.controlledTierEmailAddresses,
+                    errors.controlledTierEmailDomains
+                  ].map(e => e && <li key={e}>{e}</li>)}
                 {errors.organizationTypeOtherText && <li>Organization Type 'Other' requires additional information</li>}
                 </BulletAlignedUnorderedList>
               </div>
