@@ -61,10 +61,6 @@ describe('CreateBillingAccountModal', () => {
     expect(wrapper.find('[data-test-id="step-1-modal"]').exists()).toBeFalsy();
     expect(wrapper.find('[data-test-id="step-2-modal"]').exists()).toBeTruthy();
 
-    // Go to step 3 and review user input
-    wrapper.find('[data-test-id="next-button"]').first().simulate('click');
-    expect(wrapper.find('[data-test-id="step-2-modal"]').exists()).toBeFalsy();
-
     expect(wrapper.find('[data-test-id="user-first-name-text"]').first().props().children)
     .toEqual('Tester!@#$%^&*()><script>alert("hello");</script>');
     expect(wrapper.find('[data-test-id="user-last-name-text"]').first().props().children)
@@ -77,6 +73,6 @@ describe('CreateBillingAccountModal', () => {
     .toEqual('tester@fake-research-aou.org');
     expect(wrapper.find('[data-test-id="user-institution-text"]').first().props().children)
     .toEqual('The Broad Institute');
-    expect(wrapper.find('[data-test-id="nih-funded-text"]').first().props().children).toEqual('N/A');
+    expect(wrapper.find('[data-test-id="nih-funded-text"]').first().props().children).toEqual('No');
   });
 });

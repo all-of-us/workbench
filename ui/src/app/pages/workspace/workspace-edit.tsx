@@ -336,8 +336,6 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
     }
 
     async initialBillingAccountLoad() {
-      const {profileState: {profile: {freeTierDollarQuota, freeTierUsage}}} = this.props;
-      const freeTierCreditsBalance = freeTierDollarQuota - freeTierUsage;
       const freeTierBillingAccount: BillingAccount = {
         name: 'billingAccounts/' + serverConfigStore.get().config.freeTierBillingAccountId,
         isFreeTier: true,
@@ -397,7 +395,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
       const displayBillingAccounts = billingAccounts.map(b => b.isFreeTier ? displayFreeTierAccount : b)
 
       if (this.isMode(WorkspaceEditMode.Create) || this.isMode(WorkspaceEditMode.Duplicate)) {
-        const maybeFreeTierAccount = billingAccounts.find(billingAccount => billingAccount.isFreeTier);
+        const maybeFreeTierAccount = displayBillingAccounts.find(billingAccount => billingAccount.isFreeTier);
         if (maybeFreeTierAccount) {
           this.setState(prevState => fp.set(
             ['workspace', 'billingAccountName'],
@@ -406,7 +404,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
         }
       } else if (this.isMode(WorkspaceEditMode.Edit)) {
         const fetchedBillingInfo = await getBillingAccountInfo(this.props.workspace.googleProject);
-        if (!billingAccounts.find(billingAccount => billingAccount.name === fetchedBillingInfo.billingAccountName)) {
+        if (!displayBillingAccounts.find(billingAccount => billingAccount.name === fetchedBillingInfo.billingAccountName)) {
           // If the user has owner access on the workspace but does not have access to the billing account
           // that it is attached to, keep the server's current value for billingAccountName and add a shim
           // entry into billingAccounts so the dropdown entry is not empty.
@@ -415,7 +413,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
           // is the same as what is currently stored.
           //
           // This can happen if a workspace is shared to another researcher as an owner.
-          billingAccounts.push({
+          displayBillingAccounts.push({
             name: this.props.workspace.billingAccountName,
             displayName: 'User Provided Billing Account',
             isFreeTier: false,
@@ -1244,7 +1242,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
             <div style={styles.fieldHeader}>Select a curent billing account</div>
             <FlexRow>
               <FlexColumn>
-              <div onClick={() =>  this.requestBillingScopeThenFetchBillingAccount()}>
+              <div data-test-id = 'billing-dropdown-div' onClick={() =>  this.requestBillingScopeThenFetchBillingAccount()}>
                   <Dropdown data-test-id = 'billing-dropdown'
                       style={{width: '20rem'}}
                         value={billingAccountName}
