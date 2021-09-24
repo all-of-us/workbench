@@ -142,7 +142,7 @@ public class MailServiceImplTest extends SpringTest {
                       && gotHtml.contains("given name family name")
                       && gotHtml.contains("user@contact.com")
                       && gotHtml.contains(
-                      "Is this work NIH-funded and eligible for the STRIDES Program?: No");
+                          "Is this work NIH-funded and eligible for the STRIDES Program?: No");
                 }));
   }
 
@@ -172,7 +172,7 @@ public class MailServiceImplTest extends SpringTest {
                       && gotHtml.contains("given name family name")
                       && gotHtml.contains("user@contact.com")
                       && gotHtml.contains(
-                      "Is this work NIH-funded and eligible for the STRIDES Program?: Yes");
+                          "Is this work NIH-funded and eligible for the STRIDES Program?: Yes");
                 }));
   }
 
