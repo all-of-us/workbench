@@ -6,15 +6,17 @@ set -e
 
 export BQ_PROJECT=$1        # CDR project
 export BQ_DATASET=$2        # CDR dataset
+export FILE_NAME=$3         # Filename to process
+export ID=$4                # Starting id position
 
 BUCKET="all-of-us-workbench-private-cloudsql"
 SCHEMA_PATH="generate-cdr/bq-schemas"
 TEMP_FILE_DIR="csv"
 DATASET_DIR="$BQ_DATASET/cdr_csv_files"
-ID=1
 TOPIC_PARENT_ID=0
 QUESTION_PARENT_ID=0
 ANSWER_PARENT_ID=0
+OUTPUT_FILE_NAME=$(echo "$FILE_NAME" | cut -d'_' -f 1 | xargs -I {} bash -c 'echo {}.csv')
 
 function find_info() {
   local concept_code=$1
@@ -88,7 +90,7 @@ function find_info() {
   'ANSWER' as subtype,
   concept_id,
   concept_code as code,
-  SUBSTR(concept_name, (STRPOS(concept_name, ':') + 2), (LENGTH(concept_name) - STRPOS(concept_name, ':'))) as name,
+  CASE WHEN STRPOS(concept_name, ':') > 1 THEN SUBSTR(concept_name, (STRPOS(concept_name, ':') + 2), (LENGTH(concept_name) - STRPOS(concept_name, ':'))) ELSE concept_name END as name,
   value_source_concept_id as value,
   0 as is_group,
   1 as is_selectable,
@@ -138,13 +140,11 @@ function increment_answer_parent_id() {
 rm -rf $TEMP_FILE_DIR
 mkdir $TEMP_FILE_DIR
 
-gsutil -m cp gs://"$BUCKET/$DATASET_DIR/prep_survey_staged.csv" "$TEMP_FILE_DIR"
-
+gsutil -m cp gs://"$BUCKET/$DATASET_DIR/$FILE_NAME" "$TEMP_FILE_DIR"
 start=`date +%s`
 
 while IFS=$'|' read -r concept_code survey_name topic answers;
 do
-  echo $topic
   # Build custom order by clause
   if [[ -z "$answers" ]]
   then
@@ -166,7 +166,7 @@ do
   then
     formatted_topic=$(echo $topic | sed "s/'/\'/")
     echo "writing topic: $formatted_topic"
-    echo "$ID,$TOPIC_PARENT_ID,SURVEY,0,PPI,TOPIC,,,\"${formatted_topic}\",,1,0,0,1,$survey_name" >> "$TEMP_FILE_DIR/prep_survey.csv"
+    echo "$ID,$TOPIC_PARENT_ID,SURVEY,0,PPI,TOPIC,,,\"${formatted_topic}\",,1,0,0,1,$survey_name" >> "$TEMP_FILE_DIR/$OUTPUT_FILE_NAME"
     increment_question_parent_id "$ID"
     increment_id
   fi
@@ -176,30 +176,30 @@ do
     if [[ "$type" == "SURVEY" ]]
     then
       echo "writing survey: $survey_name"
-      echo "$ID,0,${res}" >> "$TEMP_FILE_DIR/prep_survey.csv"
+      echo "$ID,0,${res}" >> "$TEMP_FILE_DIR/$OUTPUT_FILE_NAME"
       increment_ids
     elif [[ "$type" == "QUESTION" ]]
     then
       echo "writing question for concept_code: $concept_code"
-      echo "$ID,$QUESTION_PARENT_ID,${res}" >> "$TEMP_FILE_DIR/prep_survey.csv"
+      echo "$ID,$QUESTION_PARENT_ID,${res}" >> "$TEMP_FILE_DIR/$OUTPUT_FILE_NAME"
       increment_answer_parent_id "$ID"
       increment_id
     elif [[ "$type" == "ANSWER" ]]
     then
       echo "writing answers for concept_code: $concept_code"
-      echo "$ID,$ANSWER_PARENT_ID,${res}" >> "$TEMP_FILE_DIR/prep_survey.csv"
+      echo "$ID,$ANSWER_PARENT_ID,${res}" >> "$TEMP_FILE_DIR/$OUTPUT_FILE_NAME"
       increment_id
     fi
   done
 
-done < csv/prep_survey_staged.csv
+done < csv/$FILE_NAME
 
-gsutil cp "$TEMP_FILE_DIR/prep_survey.csv" "gs://$BUCKET/$BQ_DATASET/cdr_csv_files/prep_survey.csv"
+gsutil cp "$TEMP_FILE_DIR/$OUTPUT_FILE_NAME" "gs://$BUCKET/$BQ_DATASET/cdr_csv_files/$OUTPUT_FILE_NAME"
 
 echo "Creating table - prep_survey"
 bq --project_id="$BQ_PROJECT" rm -f "$BQ_DATASET.prep_survey"
 bq load --project_id="$BQ_PROJECT" --source_format=CSV "$BQ_DATASET.prep_survey" \
-"gs://$BUCKET/$BQ_DATASET/cdr_csv_files/prep_survey.csv" "$SCHEMA_PATH/prep_survey.json"
+"gs://$BUCKET/$BQ_DATASET/cdr_csv_files/$OUTPUT_FILE_NAME" "$SCHEMA_PATH/prep_survey.json"
 
 end=`date +%s`
 

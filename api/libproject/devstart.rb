@@ -561,13 +561,24 @@ def make_bq_prep_survey(cmd_name, *args)
       ->(opts, v) { opts.dataset = v},
       "Dataset name"
   )
-  op.add_validator ->(opts) { raise ArgumentError unless opts.project and opts.dataset }
+  op.add_option(
+      "--filename [filename]",
+      ->(opts, v) { opts.filename = v},
+      "Filename"
+  )
+  op.add_option(
+      "--id-start-block [id_start_block]",
+      ->(opts, v) { opts.id_start_block = v},
+      "ID Start Block"
+  )
+
+  op.add_validator ->(opts) { raise ArgumentError unless opts.project and opts.dataset and opts.filename and opts.id_start_block}
   op.parse.validate
 
   ServiceAccountContext.new(op.opts.project).run do
     common = Common.new
     Dir.chdir('db-cdr') do
-      common.run_inline %W{./generate-cdr/make-bq-prep-survey.sh #{ENVIRONMENTS[op.opts.project][:source_cdr_project]} #{op.opts.dataset}}
+      common.run_inline %W{./generate-cdr/make-bq-prep-survey.sh #{ENVIRONMENTS[op.opts.project][:source_cdr_project]} #{op.opts.dataset} #{op.opts.filename} #{op.opts.id_start_block}}
     end
   end
 end
