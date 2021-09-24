@@ -332,7 +332,9 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
     formatFreeTierBillingAccountName(): string {
       const {profileState: {profile: {freeTierDollarQuota, freeTierUsage}}} = this.props;
       const freeTierCreditsBalance = freeTierDollarQuota - freeTierUsage;
-      return 'Use All of Us initial credits - ' + formatFreeCreditsUSD(freeTierCreditsBalance) + ' left'
+      return serverConfigStore.get().config.enableBillingUpgrade ?
+        'Use All of Us initial credits - ' + formatFreeCreditsUSD(freeTierCreditsBalance) + ' left'
+        : 'Use All of Us initial credits'
     }
 
     async initialBillingAccountLoad() {
@@ -1240,6 +1242,11 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
                                 description={this.renderBillingDescription()} descriptionStyle={{marginLeft: '0rem'}}>
             {this.state.fetchBillingAccountLoading ? <SpinnerOverlay overrideStylesOverlay={styles.spinner}/> : <div>
             <div style={styles.fieldHeader}>Select a curent billing account</div>
+              {!enableBillingUpgrade && <OverlayPanel ref={(me) => freeTierBalancePanel = me} dismissable={true} appendTo={document.body}>
+                <div style={styles.freeCreditsBalanceOverlay}>
+                  FREE CREDIT BALANCE {formatFreeCreditsUSD(freeTierCreditsBalance)}
+                </div>
+              </OverlayPanel>}
             <FlexRow>
               <FlexColumn>
               <div data-test-id = 'billing-dropdown-div' onClick={() =>  this.requestBillingScopeThenFetchBillingAccount()}>
