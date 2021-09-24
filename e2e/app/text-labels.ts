@@ -54,7 +54,7 @@ export enum MenuOption {
   SuppressCriteriaFromTotalCount = 'Suppress criteria from total count',
   Surveys = 'Surveys',
   Visits = 'Visits',
-  WholeGenomeVariant = 'Whole Genome Variant'
+  WholeGenomeVariant = 'Whole Genome Sequence'
 }
 
 // Button or link text labels.

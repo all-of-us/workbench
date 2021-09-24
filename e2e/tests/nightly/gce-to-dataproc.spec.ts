@@ -49,7 +49,7 @@ describe('Updating runtime compute type', () => {
     const numPreemptibleWorkers = 1;
     const numCpus = 2;
     const ramGbs = 13;
-    const workerDisk = 60;
+    const workerDisk = 80;
 
     await runtimePanel.pickComputeType(ComputeType.Dataproc);
     await runtimePanel.pickDataprocNumWorkers(numWorkers);

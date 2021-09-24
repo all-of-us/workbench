@@ -4,6 +4,7 @@ import {act} from 'react-dom/test-utils';
 import * as fp from 'lodash/fp';
 import {InputSwitch} from "primereact/inputswitch";
 import {MemoryRouter} from 'react-router';
+import {Dropdown} from "primereact/dropdown";
 
 // This file is necessary because angular imports complain if there
 // is no zone, regardless of whether the imports are used.
@@ -52,11 +53,13 @@ export const findNodesContainingText = fp.curry((wrapper: ReactWrapper, text) =>
 }));
 
 
-export async function simulateSwitchToggle(wrapper: ReactWrapper, inputSwitch: InputSwitch, expectedValue: boolean) {
-  inputSwitch.props.onChange({
+interface PrimeReactChangeEvent {originalEvent: Event, value: any, target: {name: string, id: string, value: any}};
+export const simulateComponentChange = async(wrapper: ReactWrapper, component: any, value: any) => {
+  const primeReactComponent = component as React.Component<{onChange: (PrimeReactChangeEvent) => void}, any>;
+  primeReactComponent.props.onChange({
     originalEvent: undefined,
-    value: expectedValue,
-    target: {name: 'name', id: '', value: expectedValue}
+    value,
+    target: {name: 'name', id: '', value}
   });
-  await waitOneTickAndUpdate(wrapper);
+  return await waitOneTickAndUpdate(wrapper);
 };

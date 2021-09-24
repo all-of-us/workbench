@@ -297,7 +297,7 @@ export const CohortSearch = fp.flow(withCurrentCohortSearchContext(), withRouter
       parentId: null,
       parameterId: '',
       type: CriteriaType.PPI.toString(),
-      name: 'Whole Genome Variant',
+      name: 'Whole Genome Sequence',
       group: false,
       domainId: Domain.WHOLEGENOMEVARIANT.toString(),
       hasAttributes: false,

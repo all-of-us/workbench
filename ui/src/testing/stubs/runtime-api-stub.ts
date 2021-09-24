@@ -10,14 +10,14 @@ import {
 import {stubNotImplementedError} from 'testing/stubs/stub-utils';
 
 export const defaultGceConfig = (): GceConfig => ({
-  diskSize: 80,
+  diskSize: 100,
   machineType: 'n1-standard-4'
 });
 
 export const defaultDataprocConfig = (): DataprocConfig => ({
   masterMachineType: 'n1-standard-4',
-  masterDiskSize: 80,
-  workerDiskSize: 100,
+  masterDiskSize: 100,
+  workerDiskSize: 120,
   workerMachineType: 'n1-standard-4',
   numberOfWorkers: 1,
   numberOfPreemptibleWorkers: 2,

@@ -142,11 +142,13 @@ public class RdrExportServiceImpl implements RdrExportService {
       rdrApiProvider.get().exportResearchers(rdrResearchersList);
 
       updateDbRdrExport(RdrEntity.USER, userIds);
+      log.info(String.format("successfully exported researcher data for user IDs: %s", userIds));
     } catch (ApiException ex) {
       log.severe(
-          String.format("Error while sending researcher data to RDR for user IDs: %s", userIds));
+          String.format(
+              "Error while sending researcher data to RDR for user IDs [%s]: %s",
+              userIds, ex.getResponseBody()));
     }
-    log.info(String.format("successfully exported researcher data for user IDs: %s", userIds));
   }
 
   /**

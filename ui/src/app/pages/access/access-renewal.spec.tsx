@@ -313,7 +313,7 @@ describe('Access Renewal Page', () => {
 
     await waitOneTickAndUpdate(wrapper);
 
-    // profileConfirmation, publicationConfirmation, and dataUseAgreement are complete
+    // profileConfirmation, publicationConfirmation, and DUCC are complete
     expect(findNodesByExactText(wrapper, 'Confirmed').length).toBe(2);
     expect(findNodesByExactText(wrapper, 'Completed').length).toBe(1);
     expect(findNodesContainingText(wrapper, `${EXPIRY_DAYS - 1} days`).length).toBe(3);

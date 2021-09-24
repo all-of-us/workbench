@@ -422,7 +422,7 @@ enum PrepackagedConceptSet {
   FITBITACTIVITY = 'Fitbit Activity Summary',
   FITBITHEARTRATELEVEL = 'Fitbit Heart Rate Level',
   FITBITINTRADAYSTEPS = 'Fitbit Intra Day Steps',
-  WHOLEGENOME = 'All whole genome sequence variant data'
+  WHOLEGENOME = 'Whole Genome Sequencing Data'
 }
 
 const PREPACKAGED_SURVEY_PERSON_DOMAIN = {

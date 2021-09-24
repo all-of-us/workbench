@@ -43,8 +43,7 @@ public interface UserService {
   DbUser updateUserWithConflictHandling(DbUser user);
 
   // TODO(jaycarlton): Move compliance-related methods to a new UserComplianceService or similar
-  DbUser submitDataUseAgreement(
-      DbUser user, Integer dataUseAgreementSignedVersion, String initials);
+  DbUser submitDUCC(DbUser user, Integer duccSignedVersion, String initials);
 
   // Registers that a user has agreed to a given version of the Terms of Service.
   void submitTermsOfService(DbUser dbUser, Integer tosVersion);
