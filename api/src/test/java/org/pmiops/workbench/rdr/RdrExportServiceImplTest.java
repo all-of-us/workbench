@@ -1,5 +1,6 @@
 package org.pmiops.workbench.rdr;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -36,6 +37,7 @@ import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.model.Degree;
 import org.pmiops.workbench.model.InstitutionalRole;
@@ -183,7 +185,7 @@ public class RdrExportServiceImplTest extends SpringTest {
     List<Long> userIds = new ArrayList<>();
     userIds.add(dbUserWithEmail.getUserId());
     userIds.add(dbUserWithoutEmail.getUserId());
-    rdrExportService.exportUsers(userIds);
+    assertThrows(ServerErrorException.class, () -> rdrExportService.exportUsers(userIds));
 
     verify(rdrExportService, times(0)).updateDbRdrExport(any(), anyList());
   }
