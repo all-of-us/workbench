@@ -580,7 +580,7 @@ def make_bq_prep_survey(cmd_name, *args)
     content_type = "Content-Type: application/json"
     accept = "Accept: application/json"
     circle_token = "Circle-Token: "
-    payload = "{ \"branch\": \"#{op.opts.branch}\", \"parameters\": { \"wb_prep_survey\": true, \"cdr_source_project\": \"#{cdr_source}\", \"cdr_source_dataset\": \"#{op.opts.bq_dataset}\", \"project\": \"#{op.opts.project}\" }}"
+    payload = "{ \"branch\": \"#{op.opts.branch}\", \"parameters\": { \"wb_prep_survey\": true, \"cdr_source_project\": \"#{cdr_source}\", \"cdr_source_dataset\": \"#{op.opts.dataset}\", \"project\": \"#{op.opts.project}\" }}"
     common.run_inline "curl -X POST https://circleci.com/api/v2/project/github/all-of-us/cdr-indices/pipeline -H '#{content_type}' -H '#{accept}' -H \"#{circle_token}\ $(cat ~/.circle-creds/key.txt)\" -d '#{payload}'"
 end
 
