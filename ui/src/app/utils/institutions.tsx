@@ -1,3 +1,7 @@
+import * as fp from 'lodash/fp';
+import * as React from 'react';
+import {CSSProperties} from "react";
+
 import {AccountCreationOptions} from 'app/pages/login/account-creation/account-creation-options';
 import {institutionApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
@@ -9,10 +13,9 @@ import {
   InstitutionTierConfig,
   PublicInstitutionDetails
 } from 'generated/fetch';
-import * as fp from 'lodash/fp';
-import * as React from 'react';
 import {isAbortError} from './errors';
-import {isBlank} from './index';
+import {isBlank, switchCase} from './index';
+import {ControlledTierBadge, RegisteredTierBadge} from 'app/components/icons';
 
 /**
  * Checks that the entered email address is a valid member of the chosen institution.
@@ -74,12 +77,12 @@ export const defaultTierConfig = (accessTier: string): InstitutionTierConfig => 
   emailDomains: []
 });
 
-export function getTierConfig(institution: Institution, accessTier: string): InstitutionTierConfig {
+export function getTierConfig(institution: Institution, accessTierShortName: string): InstitutionTierConfig {
   if (!institution.tierConfigs) {
-    return defaultTierConfig(accessTier);
+    return defaultTierConfig(accessTierShortName);
   }
 
-  return institution.tierConfigs.find(t => t.accessTierShortName === accessTier) || defaultTierConfig(accessTier);
+  return institution.tierConfigs.find(t => t.accessTierShortName === accessTierShortName) || defaultTierConfig(accessTierShortName);
 }
 
 export function getRegisteredTierConfig(institution: Institution): InstitutionTierConfig {
@@ -90,70 +93,92 @@ export function getControlledTierConfig(institution: Institution): InstitutionTi
   return getTierConfig(institution, AccessTierShortNames.Controlled);
 }
 
-export function getRegisteredTierEmailAddresses(institution: Institution): Array<string> {
-  return getTierEmailAddresses(institution, AccessTierShortNames.Registered);
-}
-
-export function getControlledTierEmailAddresses(institution: Institution): Array<string> {
-  return getTierEmailAddresses(institution, AccessTierShortNames.Controlled);
-}
-
-export function getTierEmailAddresses(institution: Institution, accessTier: string): Array<string> {
-  const tierConfig = getTierConfig(institution, accessTier);
+export function getTierEmailAddresses(institution: Institution, accessTierShortName: string): Array<string> {
+  const tierConfig = getTierConfig(institution, accessTierShortName);
   if (tierConfig.emailAddresses) {
     return tierConfig.emailAddresses;
   }
   return [];
 }
 
-export function getRegisteredTierEmailDomains(institution: Institution): Array<string> {
-  return getTierEmailDomains(institution, AccessTierShortNames.Registered);
-}
-
-export function getControlledTierEmailDomains(institution: Institution): Array<string> {
-  return getTierEmailDomains(institution, AccessTierShortNames.Controlled);
-}
-
-export function getTierEmailDomains(institution: Institution, accessTier: string): Array<string> {
-  const tierConfig = getTierConfig(institution, accessTier);
+export function getTierEmailDomains(institution: Institution, accessTierShortName: string): Array<string> {
+  const tierConfig = getTierConfig(institution, accessTierShortName);
   if (tierConfig.emailDomains) {
     return tierConfig.emailDomains;
   }
   return [];
 }
 
-// Update User register tier email addresses and return the new tier configs.
-export function updateRtEmailAddresses(institution: Institution, emailAddresses: Array<string>): Array<InstitutionTierConfig> {
-  const rtTierConfig = {
-    ...getRegisteredTierConfig(institution),
-    emailAddresses: emailAddresses
-  };
-  return [rtTierConfig, getControlledTierConfig(institution)];
+export function updateTierConfig(institution: Institution, tierConfig: InstitutionTierConfig): Array<InstitutionTierConfig> {
+  const otherTierConfigs = institution.tierConfigs.filter(t => t.accessTierShortName !== tierConfig.accessTierShortName);
+  return [tierConfig, ...otherTierConfigs];
 }
 
-// Update User controlled tier email addresses and return the new tier configs.
-export function updateCtEmailAddresses(institution: Institution, emailAddresses: Array<string>): Array<InstitutionTierConfig> {
-  const ctConfig = {
-    ...getControlledTierConfig(institution),
-    emailAddresses: emailAddresses
-  };
-  return [getRegisteredTierConfig(institution), ctConfig];
+// Update the email addresses of a single tier and return the new tier configs.
+export function updateTierEmailAddresses(
+    institution: Institution,
+    accessTierShortName: string,
+    emailAddresses: Array<string>): Array<InstitutionTierConfig> {
+
+  return updateTierConfig(institution, {
+    ...getTierConfig(institution, accessTierShortName),
+    emailAddresses
+  });
 }
 
-// Update User register tier email domains and return the new tier configs.
-export function updateRtEmailDomains(institution: Institution, emailDomains: Array<string>): Array<InstitutionTierConfig> {
-  const rtTierConfig = {
-    ...getRegisteredTierConfig(institution),
-    emailDomains: emailDomains
-  };
-  return [rtTierConfig, getControlledTierConfig(institution)];
+// Update the email domains of a single tier and return the new tier configs.
+export function updateTierEmailDomains(
+    institution: Institution,
+    accessTierShortName: string,
+    emailDomains: Array<string>): Array<InstitutionTierConfig> {
+
+  return updateTierConfig(institution, {
+    ...getTierConfig(institution, accessTierShortName),
+    emailDomains
+  });
 }
 
-// Update User controlled tier email domains and return the new tier configs.
-export function updateCtEmailDomains(institution: Institution, emailDomains: Array<string>): Array<InstitutionTierConfig> {
-  const ctConfig = {
-    ...getControlledTierConfig(institution),
-    emailDomains: emailDomains
+export function updateMembershipRequirement(
+    institution: Institution,
+    accessTierShortName: string,
+    membershipRequirement: InstitutionMembershipRequirement): Array<InstitutionTierConfig> {
+
+  return updateTierConfig(institution, {
+    ...getTierConfig(institution, accessTierShortName),
+    membershipRequirement
+  })
+}
+
+export function updateRequireEra(
+    institution: Institution,
+    accessTierShortName: string,
+    eraRequired: boolean): Array<InstitutionTierConfig> {
+
+  return updateTierConfig(institution, {
+    ...getTierConfig(institution, accessTierShortName),
+    eraRequired
+  })
+}
+
+export function updateEnableControlledTier(
+    institution: Institution,
+    accessTierShortName: string,
+    enableCtAccess: boolean): Array<InstitutionTierConfig> {
+
+  return updateTierConfig(institution, {
+    ...getTierConfig(institution, accessTierShortName),
+    membershipRequirement: enableCtAccess === true ?
+        InstitutionMembershipRequirement.DOMAINS : InstitutionMembershipRequirement.NOACCESS,
+  })
+}
+
+export function getTierBadge(accessTierShortName: string): () => JSX.Element {
+  const tierBadgeStyle: CSSProperties = {
+    marginTop: '0.6rem',
+    marginLeft: '0.6rem',
   };
-  return [getRegisteredTierConfig(institution), ctConfig];
+
+  return () => switchCase(accessTierShortName,
+      [AccessTierShortNames.Registered, () => <RegisteredTierBadge style={tierBadgeStyle}/>],
+      [AccessTierShortNames.Controlled, () => <ControlledTierBadge style={tierBadgeStyle}/>]);
 }
