@@ -110,3 +110,4 @@ wait
 if [[ "$RUN_PARALLEL" == "mult" ]]; then
   cpToMain "$TBL_CBC" &
 fi
+wait

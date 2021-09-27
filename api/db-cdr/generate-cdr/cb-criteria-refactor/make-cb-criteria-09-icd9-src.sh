@@ -402,7 +402,7 @@ SELECT DISTINCT
     , c.concept_id c2
 FROM
     (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
-         WHERE type in ('ICD9CM','ICD9Proc') and is_group = 1 and is_selectable = 1 and is_standard = 0
+         WHERE domain_id in ('CONDITION','PROCEDURE') and type in ('ICD9CM','ICD9Proc') and is_group = 1 and is_selectable = 1 and is_standard = 0
          and id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID ) a
     LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` WHERE type in ('ICD9CM','ICD9Proc')) b on a.id = b.parent_id + $CB_CRITERIA_START_ID
     LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` WHERE type in ('ICD9CM','ICD9Proc')) c on b.id = c.parent_id + $CB_CRITERIA_START_ID"

@@ -202,7 +202,7 @@ do
         ) l on c.concept_code = l.concept_code
     WHERE p.type = 'ICD10CM'
         and p.is_standard = 0
-        and id > $CB_CRITERIA_START_ID and id < $CB_CRITERIA_END_ID
+        and p.id > $CB_CRITERIA_START_ID and p.id < $CB_CRITERIA_END_ID
         and p.id not in
             (
                 SELECT parent_id + $CB_CRITERIA_START_ID
@@ -234,7 +234,7 @@ SELECT DISTINCT a.concept_id as ancestor_concept_id
 
 FROM
     (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
-         WHERE type = 'ICD10CM' and is_group = 1 and is_selectable = 1 and is_standard = 0
+         WHERE domain_id = 'CONDITION' and type = 'ICD10CM' and is_group = 1 and is_selectable = 1 and is_standard = 0
          and id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID ) a
     LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` WHERE type = 'ICD10CM') b on a.id = b.parent_id + $CB_CRITERIA_START_ID
     LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` WHERE type = 'ICD10CM') c on b.id = c.parent_id + $CB_CRITERIA_START_ID
@@ -320,6 +320,7 @@ FROM
                             and is_standard = 0
                             and is_selectable = 1
                             and is_group = 1
+                            and id > $CB_CRITERIA_START_ID and id < $CB_CRITERIA_END_ID
                     )
                     and is_standard = 0
                 ) a

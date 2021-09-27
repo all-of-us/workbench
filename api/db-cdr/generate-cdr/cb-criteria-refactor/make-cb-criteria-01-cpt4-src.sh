@@ -151,8 +151,10 @@ bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 SELECT
       DISTINCT a.id ancestor_id
     , coalesce(h.id, g.id, f.id, e.id, d.id, c.id, b.id) descendant_id
-FROM (SELECT id, parent_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` WHERE is_standard = 0 and is_group = 1 and parent_id !=0) a
-JOIN (SELECT id, parent_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` WHERE id > $CB_CRITERIA_START_ID and id < $CB_CRITERIA_END_ID) b on a.id  = b.parent_id + $CB_CRITERIA_START_ID
+FROM (SELECT id, parent_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
+           WHERE domain_id = 'PROCEDURE' and type = 'CPT4' and is_standard = 0 and is_group = 1 and parent_id !=0
+                 and id > $CB_CRITERIA_START_ID and id < $CB_CRITERIA_END_ID) a
+JOIN (SELECT id, parent_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`) b on a.id  = b.parent_id + $CB_CRITERIA_START_ID
 LEFT JOIN (SELECT id, parent_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`) c on b.id  = c.parent_id + $CB_CRITERIA_START_ID
 LEFT JOIN (SELECT id, parent_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`) d on c.id  = d.parent_id + $CB_CRITERIA_START_ID
 LEFT JOIN (SELECT id, parent_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`) e on d.id  = e.parent_id + $CB_CRITERIA_START_ID
@@ -224,3 +226,4 @@ if [[ "$RUN_PARALLEL" == "mult" ]]; then
   cpToMain "$TBL_CBC" &
   cpToMain "$TBL_ANC" &
 fi
+wait
