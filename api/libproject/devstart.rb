@@ -551,6 +551,12 @@ Common.register_command({
 
 def make_bq_prep_survey(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
+  op.opts.branch = "main"
+  op.add_option(
+    "--branch [--branch]",
+    ->(opts, v) { opts.branch = v},
+    "Branch. Optional - Default is main."
+  )
   op.add_option(
       "--project [project]",
       ->(opts, v) { opts.project = v},
