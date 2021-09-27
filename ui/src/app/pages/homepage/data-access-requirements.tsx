@@ -570,7 +570,7 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
     setActiveModule(getActiveModule(enabledModules, profile));
   }, [profile]);
 
-  const {config: {unsafeAllowSelfBypass, rasLogoutUrl}} = useStore(serverConfigStore);
+  const {config: {unsafeAllowSelfBypass}} = useStore(serverConfigStore);
 
   return <FlexColumn style={styles.pageWrapper}>
       <DARHeader/>
