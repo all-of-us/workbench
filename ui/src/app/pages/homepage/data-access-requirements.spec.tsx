@@ -78,7 +78,7 @@ describe('DataAccessRequirements', () => {
         expect(activeModule).toEqual(AccessModule.TWOFACTORAUTH)
     });
 
-    it('should return the second module (ERA) from getActiveModule when the first module (2FA) has been completed', () => {
+    it('should return the second module (RAS) from getActiveModule when the first module (2FA) has been completed', () => {
         const testProfile = {
             ...profile,
             accessModules: {
@@ -116,9 +116,9 @@ describe('DataAccessRequirements', () => {
         expect(activeModule).toEqual(AccessModule.RASLINKLOGINGOV)
     });
 
-    it('should return the second enabled module (RAS, not ERA) from getActiveModule' +
-      ' when the first module (2FA) has been completed and ERA is disabled', () => {
-        serverConfigStore.set({config: {...defaultServerConfig, enableEraCommons: false}});
+    it('should return the second enabled module (ERA, not RAS) from getActiveModule' +
+      ' when the first module (2FA) has been completed and RAS is disabled', () => {
+        serverConfigStore.set({config: {...defaultServerConfig, enableRasLoginGovLinking: false}});
 
         const testProfile = {
             ...profile,
@@ -132,13 +132,13 @@ describe('DataAccessRequirements', () => {
         const activeModule = getActiveModule(enabledModules, testProfile);
 
         // update this if the order changes
-        expect(activeModule).toEqual(AccessModule.RASLINKLOGINGOV)
+        expect(activeModule).toEqual(AccessModule.ERACOMMONS)
 
         // 2FA (module 0) is complete, so enabled #1 is active
         expect(activeModule).toEqual(enabledModules[1]);
 
-        // but we skip allModules[1] because it's ERA and is not enabled
-        expect(activeModule).toEqual(allModules[1]);
+        // but we skip allModules[1] because it's RAS and is not enabled
+        expect(activeModule).toEqual(allModules[2]);
     });
 
     it('should return the fourth module (Compliance) from getActiveModule when the first 3 modules have been completed', () => {

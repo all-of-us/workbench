@@ -35,7 +35,6 @@ import {useNavigation} from 'app/utils/navigation';
 import {profileStore, serverConfigStore, useStore} from 'app/utils/stores';
 import {AccessModule, AccessModuleStatus, Profile} from 'generated/fetch';
 import {TwoFactorAuthModal} from './two-factor-auth-modal';
-import Iframe from 'react-iframe';
 
 const styles = reactStyles({
   headerFlexColumn: {
