@@ -196,8 +196,7 @@ done < csv/$FILE_NAME
 
 gsutil cp "$TEMP_FILE_DIR/$OUTPUT_FILE_NAME" "gs://$BUCKET/$BQ_DATASET/cdr_csv_files/$OUTPUT_FILE_NAME"
 
-echo "Creating table - prep_survey"
-bq --project_id="$BQ_PROJECT" rm -f "$BQ_DATASET.prep_survey"
+echo "Loading data into prep_survey"
 bq load --project_id="$BQ_PROJECT" --source_format=CSV "$BQ_DATASET.prep_survey" \
 "gs://$BUCKET/$BQ_DATASET/cdr_csv_files/$OUTPUT_FILE_NAME" "$SCHEMA_PATH/prep_survey.json"
 

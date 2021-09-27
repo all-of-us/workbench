@@ -561,26 +561,21 @@ def make_bq_prep_survey(cmd_name, *args)
       ->(opts, v) { opts.dataset = v},
       "Dataset name"
   )
-  op.add_option(
-      "--filename [filename]",
-      ->(opts, v) { opts.filename = v},
-      "Filename"
-  )
-  op.add_option(
-      "--id-start-block [id_start_block]",
-      ->(opts, v) { opts.id_start_block = v},
-      "ID Start Block"
-  )
 
-  op.add_validator ->(opts) { raise ArgumentError unless opts.project and opts.dataset and opts.filename and opts.id_start_block}
+  op.add_validator ->(opts) { raise ArgumentError unless opts.project and opts.dataset}
   op.parse.validate
 
-  ServiceAccountContext.new(op.opts.project).run do
-    common = Common.new
-    Dir.chdir('db-cdr') do
-      common.run_inline %W{./generate-cdr/make-bq-prep-survey.sh #{ENVIRONMENTS[op.opts.project][:source_cdr_project]} #{op.opts.dataset} #{op.opts.filename} #{op.opts.id_start_block}}
+  env = ENVIRONMENTS[op.opts.project]
+    cdr_source = env.fetch(:source_cdr_project)
+    if op.opts.data_browser
+      cdr_source = "aou-res-curation-prod"
     end
-  end
+    common = Common.new
+    content_type = "Content-Type: application/json"
+    accept = "Accept: application/json"
+    circle_token = "Circle-Token: "
+    payload = "{ \"branch\": \"#{op.opts.branch}\", \"parameters\": { \"wb_prep_survey\": true, \"cdr_source_project\": \"#{cdr_source}\", \"cdr_source_dataset\": \"#{op.opts.bq_dataset}\", \"project\": \"#{op.opts.project}\" }}"
+    common.run_inline "curl -X POST https://circleci.com/api/v2/project/github/all-of-us/cdr-indices/pipeline -H '#{content_type}' -H '#{accept}' -H \"#{circle_token}\ $(cat ~/.circle-creds/key.txt)\" -d '#{payload}'"
 end
 
 Common.register_command({
