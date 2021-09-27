@@ -19,7 +19,7 @@ const faker = require('faker/locale/en_US');
 export const PageTitle = 'Create|Duplicate Workspace';
 
 export const LabelAlias = {
-  SELECT_BILLING: 'Select a current billing account', // select billing account
+  SELECT_BILLING: 'Select a current billing account', // Select a current billing account
   RESEARCH_PURPOSE: 'Research purpose',
   EDUCATION_PURPOSE: 'Educational Purpose',
   FOR_PROFIT_PURPOSE: 'For-Profit Purpose',
@@ -407,7 +407,7 @@ export default class WorkspaceEditPage extends WorkspaceBase {
    */
   async selectBillingAccount(billingAccount: string = UseFreeCredits): Promise<void> {
     const billingAccountSelect = this.getBillingAccountSelect();
-    await billingAccountSelect.selectOption(billingAccount);
+    await billingAccountSelect.selectOptionByValuePrefix(billingAccount);
   }
 
   /**

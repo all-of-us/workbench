@@ -35,6 +35,19 @@ export default class Select extends BaseElement {
     return this.selectedOption;
   }
 
+  async selectOptionByValuePrefix(valuePrefix: string): Promise<string> {
+    const disabled = await this.isDisabled();
+    if (disabled) {
+      throw new Error(`Select is disabled. Cannot select option value prefix: "${valuePrefix}".`);
+    }
+    const selector = `${this.xpath}/option[contains(normalize-space(text()), "${valuePrefix}")]`;
+    await this.page.waitForXPath(selector);
+    const option = (await this.page.$x(selector))[0];
+    const optionValue = await getPropValue<string>(option, 'value');
+    [this.selectedOption] = await (await this.asElementHandle()).select(optionValue);
+    return this.selectedOption;
+  }
+
   /**
    * Returns value that matches the Select option.
    */
