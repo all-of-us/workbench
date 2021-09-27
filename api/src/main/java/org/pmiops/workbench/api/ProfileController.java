@@ -325,11 +325,8 @@ public class ProfileController implements ProfileApiDelegate {
   }
 
   @Override
-  public ResponseEntity<Profile> submitDataUseAgreement(
-      Integer dataUseAgreementSignedVersion, String initials) {
-    DbUser user =
-        userService.submitDataUseAgreement(
-            userProvider.get(), dataUseAgreementSignedVersion, initials);
+  public ResponseEntity<Profile> submitDUCC(Integer duccSignedVersion, String initials) {
+    DbUser user = userService.submitDUCC(userProvider.get(), duccSignedVersion, initials);
     return getProfileResponse(saveUserWithConflictHandling(user));
   }
 

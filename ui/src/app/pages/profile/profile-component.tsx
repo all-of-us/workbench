@@ -2,6 +2,7 @@ import * as fp from 'lodash/fp';
 import {Dropdown} from 'primereact/dropdown';
 import * as React from 'react';
 import validate from 'validate.js';
+import {withRouter, RouteComponentProps} from 'react-router-dom';
 
 import {Button} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
@@ -30,12 +31,9 @@ import {wasReferredFromRenewal} from 'app/utils/access-utils';
 import {convertAPIError, reportError} from 'app/utils/errors';
 import {NavigationProps} from 'app/utils/navigation';
 import {withNavigation} from 'app/utils/with-navigation-hoc';
-import {environment} from 'environments/environment';
 import {AccessModule, InstitutionalRole, Profile} from 'generated/fetch';
 import {PublicInstitutionDetails} from 'generated/fetch';
 import {DataAccessPanel} from './data-access-panel';
-import {ProfileAccessModules} from './profile-access-modules';
-import { withRouter, RouteComponentProps } from 'react-router-dom';
 
 
 // validators for validate.js
@@ -445,9 +443,7 @@ export const ProfileComponent = fp.flow(
                   </FlexColumn>
               </FlexRow>}
             </div>
-            {environment.enableDataAccessRequirements ?
-                <DataAccessPanel userAccessTiers={profile.accessTierShortNames}/> :
-                <ProfileAccessModules profile={profile}/>}
+            <DataAccessPanel userAccessTiers={profile.accessTierShortNames}/>
             <div style={{marginTop: '1rem', marginLeft: '1rem'}}>
               <div style={styles.title}>Optional Demographics Survey</div>
               <hr style={{...styles.verticalLine}}/>

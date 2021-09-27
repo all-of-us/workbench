@@ -1,5 +1,6 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
+import {Redirect} from "react-router-dom";
 
 import {Button} from 'app/components/buttons';
 import {AoU} from 'app/components/text-wrappers';
@@ -12,6 +13,7 @@ import {environment} from 'environments/environment';
 import {AccessModule, AccessModuleStatus, ErrorCode, Profile} from 'generated/fetch';
 import {getLiveDUCCVersion} from './code-of-conduct';
 import {parseQueryParams} from "app/components/app-router";
+import {cond, daysFromNow, displayDateWithoutHours} from "./index";
 
 const {useState, useEffect} = React;
 
@@ -69,13 +71,14 @@ export const buildRasRedirectUrl = (): string => {
   return encodeURIComponentStrict(window.location.origin.toString() + RAS_CALLBACK_PATH);
 };
 
-export const redirectToRas = (): void => {
+export const redirectToRas = (openInNewTab: boolean = true): void => {
   AnalyticsTracker.Registration.RasLoginGov();
   // The scopes are also used in backend for fetching user info.
   const url = serverConfigStore.get().config.rasHost + '/auth/oauth/v2/authorize?client_id=' + serverConfigStore.get().config.rasClientId
       + '&prompt=login+consent&redirect_uri=' + buildRasRedirectUrl()
       + '&response_type=code&scope=openid+profile+email+ga4gh_passport_v1+federated_identities';
-  window.open(url, '_blank');
+
+  openInNewTab ? window.open(url, '_blank') : <Redirect to={url}/>;
 };
 
 // This needs to be a function, because we want it to evaluate at call time,
@@ -104,6 +107,21 @@ export const getRegistrationTasks = (navigate): RegistrationTask[] => serverConf
     },
     onClick: redirectToTwoFactorSetup
   }, {
+    key: 'eraCommons',
+    module: AccessModule.ERACOMMONS,
+    completionPropsKey: 'eraCommonsLinked',
+    loadingPropsKey: 'eraCommonsLoading',
+    title: 'Connect Your eRA Commons Account',
+    description: 'Connect your Researcher Workbench account to your eRA Commons account. ' +
+      'There is no exchange of personal data in this step.',
+    featureFlag: serverConfigStore.get().config.enableEraCommons,
+    buttonText: 'Connect',
+    completedText: 'Linked',
+    completionTimestamp: (profile: Profile) => {
+      return profile.eraCommonsCompletionTime || profile.eraCommonsBypassTime;
+    },
+    onClick: redirectToNiH
+  }, {
     key: 'rasLoginGov',
     module: AccessModule.RASLINKLOGINGOV,
     completionPropsKey: 'rasLoginGovLinked',
@@ -117,22 +135,6 @@ export const getRegistrationTasks = (navigate): RegistrationTask[] => serverConf
       return profile.rasLinkLoginGovCompletionTime || profile.rasLinkLoginGovBypassTime;
     },
     onClick: redirectToRas
-  },
-  {
-    key: 'eraCommons',
-    module: AccessModule.ERACOMMONS,
-    completionPropsKey: 'eraCommonsLinked',
-    loadingPropsKey: 'eraCommonsLoading',
-    title: 'Connect Your eRA Commons Account',
-    description: 'Connect your Researcher Workbench account to your eRA Commons account. ' +
-        'There is no exchange of personal data in this step.',
-    featureFlag: serverConfigStore.get().config.enableEraCommons,
-    buttonText: 'Connect',
-    completedText: 'Linked',
-    completionTimestamp: (profile: Profile) => {
-      return profile.eraCommonsCompletionTime || profile.eraCommonsBypassTime;
-    },
-    onClick: redirectToNiH
   }, {
     key: 'complianceTraining',
     module: AccessModule.COMPLIANCETRAINING,
@@ -176,11 +178,6 @@ export const getRegistrationTasks = (navigate): RegistrationTask[] => serverConf
     || registrationTask.featureFlag) : (() => {
       throw new Error('Cannot load registration tasks before config loaded');
     })();
-
-export const getRegistrationTasksMap = (navigate) => getRegistrationTasks(navigate).reduce((acc, curr) => {
-  acc[curr.key] = curr;
-  return acc;
-}, {});
 
 export const getRegistrationTask = (navigate, module: AccessModule): RegistrationTask => {
   return getRegistrationTasks(navigate).find(task => task.module === module);
@@ -260,19 +257,61 @@ export const bypassAll = async(accessModules: AccessModule[], isBypassed: boolea
 };
 
 export const GetStartedButton = ({style = {marginLeft: '0.5rem'}}) => <Button
-    style={style}
-    onClick={() => {
-      // After a registration status change, to be safe, we reload the application. This results in
-      // rerendering of the homepage, but also reruns some application bootstrapping / caching which may
-      // have been dependent on the user's registration status, e.g. CDR config information.
-      location.replace('/');
-    }}>Get Started</Button>;
+  style={style}
+  onClick={() => {
+    // After a registration status change, to be safe, we reload the application. This results in
+    // rerendering of the homepage, but also reruns some application bootstrapping / caching which may
+    // have been dependent on the user's registration status, e.g. CDR config information.
+    location.replace('/');
+  }}>Get Started</Button>;
 
-// TODO derive this from DbAccessModules ?
-export const expirableAccessModules: Array<AccessModule> = [
-  AccessModule.PROFILECONFIRMATION,
-  AccessModule.PUBLICATIONCONFIRMATION,
-  AccessModule.COMPLIANCETRAINING,    // note: not guaranteed to be present; check the Feature Flag enableComplianceTraining.
-  AccessModule.DATAUSERCODEOFCONDUCT,
-];
+// the modules subject to Annual Access Renewal (AAR), in the order shown on the AAR page.
+export const accessRenewalTitles = new Map<AccessModule, () => JSX.Element | string>([
+    [AccessModule.PROFILECONFIRMATION, () => 'Update your profile'],
+    [AccessModule.PUBLICATIONCONFIRMATION,
+      () => 'Report any publications or presentations based on your research using the Researcher Workbench'],
+    [AccessModule.COMPLIANCETRAINING, () => <div><AoU/> Responsible Conduct of Research Training</div>],
+    [AccessModule.DATAUSERCODEOFCONDUCT, () => 'Sign Data User Code of Conduct'],
+]) as Map<AccessModule, () => JSX.Element>;
+
+export const isExpiring = (expiration: number): boolean => daysFromNow(expiration) <= serverConfigStore.get().config.accessRenewalLookback;
+
+const withInvalidDateHandling = date => {
+  if (!date) {
+    return 'Unavailable';
+  } else {
+    return displayDateWithoutHours(date);
+  }
+};
+
+export const computeDisplayDates = ({completionEpochMillis, expirationEpochMillis, bypassEpochMillis}: AccessModuleStatus) => {
+  const userCompletedModule = !!completionEpochMillis;
+  const userBypassedModule = !!bypassEpochMillis;
+  const lastConfirmedDate = withInvalidDateHandling(completionEpochMillis);
+  const nextReviewDate = withInvalidDateHandling(expirationEpochMillis);
+  const bypassDate = withInvalidDateHandling(bypassEpochMillis);
+
+  return cond(
+      // User has bypassed module
+      [userBypassedModule, () => ({lastConfirmedDate: `${bypassDate}`, nextReviewDate: 'Unavailable (bypassed)'})],
+      // User never completed training
+      [!userCompletedModule && !userBypassedModule, () =>
+          ({lastConfirmedDate: 'Unavailable (not completed)', nextReviewDate: 'Unavailable (not completed)'})],
+      // User completed training, but is in the lookback window
+      [userCompletedModule && isExpiring(expirationEpochMillis), () => {
+        const daysRemaining = daysFromNow(expirationEpochMillis);
+        const daysRemainingDisplay = daysRemaining >= 0 ? `(${daysRemaining} day${daysRemaining !== 1 ? 's' : ''})` : '(expired)';
+        return {
+          lastConfirmedDate,
+          nextReviewDate: `${nextReviewDate} ${daysRemainingDisplay}`
+        };
+      }],
+      // User completed training and is up to date
+      [userCompletedModule && !isExpiring(expirationEpochMillis), () => {
+        const daysRemaining = daysFromNow(expirationEpochMillis);
+        return {lastConfirmedDate, nextReviewDate: `${nextReviewDate} (${daysRemaining} day${daysRemaining !== 1 ? 's' : ''})`};
+      }]
+  );
+};
+
 

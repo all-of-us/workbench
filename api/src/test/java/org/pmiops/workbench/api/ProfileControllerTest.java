@@ -81,7 +81,6 @@ import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.CreateAccountRequest;
 import org.pmiops.workbench.model.DemographicSurvey;
 import org.pmiops.workbench.model.Disability;
-import org.pmiops.workbench.model.DuaType;
 import org.pmiops.workbench.model.Education;
 import org.pmiops.workbench.model.Ethnicity;
 import org.pmiops.workbench.model.GenderIdentity;
@@ -460,10 +459,10 @@ public class ProfileControllerTest extends BaseControllerTest {
   }
 
   @Test
-  public void testSubmitDataUseAgreement_success() {
+  public void testSubmitDUCC_success() {
     createAccountAndDbUserWithAffiliation();
-    String duaInitials = "NIH";
-    assertThat(profileController.submitDataUseAgreement(DUCC_VERSION, duaInitials).getStatusCode())
+    String initials = "NIH";
+    assertThat(profileController.submitDUCC(DUCC_VERSION, initials).getStatusCode())
         .isEqualTo(HttpStatus.OK);
     List<DbUserDataUseAgreement> dbUserDataUseAgreementList =
         userDataUseAgreementDao.findByUserIdOrderByCompletionTimeDesc(dbUser.getUserId());
@@ -471,31 +470,31 @@ public class ProfileControllerTest extends BaseControllerTest {
     DbUserDataUseAgreement dbUserDataUseAgreement = dbUserDataUseAgreementList.get(0);
     assertThat(dbUserDataUseAgreement.getUserFamilyName()).isEqualTo(dbUser.getFamilyName());
     assertThat(dbUserDataUseAgreement.getUserGivenName()).isEqualTo(dbUser.getGivenName());
-    assertThat(dbUserDataUseAgreement.getUserInitials()).isEqualTo(duaInitials);
+    assertThat(dbUserDataUseAgreement.getUserInitials()).isEqualTo(initials);
     assertThat(dbUserDataUseAgreement.getDataUseAgreementSignedVersion()).isEqualTo(DUCC_VERSION);
   }
 
   @Test
-  public void testSubmitDataUseAgreement_wrongVersion_older() {
+  public void testSubmitDUCC_wrongVersion_older() {
     assertThrows(
         BadRequestException.class,
         () -> {
           createAccountAndDbUserWithAffiliation();
-          String duaInitials = "NIH";
-          profileController.submitDataUseAgreement(DUCC_VERSION - 1, duaInitials);
+          String initials = "NIH";
+          profileController.submitDUCC(DUCC_VERSION - 1, initials);
         });
   }
 
   // not really a use case for this, but shows we need an exact match
 
   @Test
-  public void testSubmitDataUseAgreement_wrongVersion_newer() {
+  public void testSubmitDUCC_wrongVersion_newer() {
     assertThrows(
         BadRequestException.class,
         () -> {
           createAccountAndDbUserWithAffiliation();
-          String duaInitials = "NIH";
-          profileController.submitDataUseAgreement(DUCC_VERSION + 1, duaInitials);
+          String initials = "NIH";
+          profileController.submitDUCC(DUCC_VERSION + 1, initials);
         });
   }
 
@@ -526,8 +525,8 @@ public class ProfileControllerTest extends BaseControllerTest {
 
     // sign the current version (A)
 
-    final String duaInitials = "NIH";
-    assertThat(profileController.submitDataUseAgreement(versionA, duaInitials).getStatusCode())
+    final String initials = "NIH";
+    assertThat(profileController.submitDUCC(versionA, initials).getStatusCode())
         .isEqualTo(HttpStatus.OK);
     assertThat(accessTierService.getAccessTiersForUser(dbUser)).contains(registeredTier);
 
@@ -767,7 +766,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     profile.setGivenName("OldGivenName");
     profile.setFamilyName("OldFamilyName");
     profileController.updateProfile(profile);
-    profileController.submitDataUseAgreement(DUCC_VERSION, "O.O.");
+    profileController.submitDUCC(DUCC_VERSION, "O.O.");
     profile.setGivenName("NewGivenName");
     profile.setFamilyName("NewFamilyName");
     profileController.updateProfile(profile);
@@ -1348,7 +1347,6 @@ public class ProfileControllerTest extends BaseControllerTest {
               new Institution()
                   .shortName("MGH123")
                   .displayName("Massachusetts General Hospital")
-                  .duaTypeEnum(DuaType.MASTER)
                   .addTierConfigsItem(
                       rtDomainsConfig.emailDomains(
                           ImmutableList.of("mgh.org", "massgeneral.hospital")))
@@ -1440,7 +1438,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     verify(mockProfileAuditor).fireUpdateAction(original, retrieved1);
     verify(mockProfileAuditor).fireUpdateAction(retrieved1, retrieved2);
 
-    // DUA and COMPLIANCE x2, one for each request
+    // DUCC and COMPLIANCE x2, one for each request
     verify(mockUserServiceAuditor, times(2))
         .fireAdministrativeBypassTime(
             eq(dbUser.getUserId()),

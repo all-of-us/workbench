@@ -21,6 +21,5 @@ export const environment: Environment = {
   enableCaptcha: true,
   enablePublishedWorkspaces: false,
   enableFooter: true,
-  enableDataAccessRequirements: false,
   accessTiersVisibleToUsers: [EnvAccessTierShortNames.Registered, EnvAccessTierShortNames.Controlled],
 };

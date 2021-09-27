@@ -8,7 +8,7 @@
     "leoBaseUrl": "https:\/\/leonardo.dsde-dev.broadinstitute.org",
     "xAppIdValue": "local-AoU-RW",
     "timeoutInSeconds": 60,
-    "jupyterDockerImage": "broadinstitute/terra-jupyter-aou:2.0.1",
+    "jupyterDockerImage": "broadinstitute/terra-jupyter-aou:2.0.2",
     "shibbolethApiBaseUrl": "https:\/\/profile-dot-broad-shibboleth-prod.appspot.com/dev",
     "shibbolethUiBaseUrl": "https:\/\/broad-shibboleth-prod.appspot.com/dev",
     "runtimeImages": {
@@ -85,7 +85,6 @@
   },
   "moodle": {
     "host": "aoudev.nnlm.gov",
-    "enableMoodleBackend": true,
     "credentialsKeyV2": "moodle-key-v2.txt"
   },
   "access": {
@@ -102,7 +101,7 @@
     "enableEventDateModifier": false,
     "enableResearchPurposePrompt": false,
     "enableGenomicExtraction": true,
-    "enableFireCloudV2Billing" : false,
+    "enableFireCloudV2Billing" : true,
     "enableGpu": true,
     "enablePersistentDisk": true,
     "enableAccessModuleRewrite" : true,

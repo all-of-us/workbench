@@ -9,6 +9,7 @@ import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+import org.pmiops.workbench.leonardo.model.LeonardoClusterError;
 import org.pmiops.workbench.leonardo.model.LeonardoDiskConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoDiskStatus;
 import org.pmiops.workbench.leonardo.model.LeonardoGceConfig;
@@ -30,6 +31,7 @@ import org.pmiops.workbench.model.GceWithPdConfig;
 import org.pmiops.workbench.model.ListRuntimeResponse;
 import org.pmiops.workbench.model.Runtime;
 import org.pmiops.workbench.model.RuntimeConfigurationType;
+import org.pmiops.workbench.model.RuntimeError;
 import org.pmiops.workbench.model.RuntimeStatus;
 
 @Mapper(config = MapStructConfig.class)
@@ -108,7 +110,10 @@ public interface LeonardoMapper {
   @Mapping(target = "gceWithPdConfig", ignore = true)
   @Mapping(target = "dataprocConfig", ignore = true)
   @Mapping(target = "diskConfig", ignore = true)
+  @Mapping(target = "errors", ignore = true)
   Runtime toApiRuntime(LeonardoListRuntimeResponse runtime);
+
+  RuntimeError toApiRuntimeError(LeonardoClusterError err);
 
   @AfterMapping
   default void getRuntimeAfterMapper(

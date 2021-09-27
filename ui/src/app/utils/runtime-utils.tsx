@@ -453,7 +453,6 @@ export const useRuntimeStatus = (currentWorkspaceNamespace, currentGoogleProject
           await LeoRuntimeInitializer.initialize({
             workspaceNamespace: currentWorkspaceNamespace,
             maxCreateCount: 0,
-            maxDeleteCount: 0,
             resolutionCondition: (r) => resolutionCondition(r)
           });
         } catch (e) {
@@ -573,6 +572,10 @@ export const useCustomRuntime = (currentWorkspaceNamespace, detachablePd):
               await disksApi().updateDisk(currentWorkspaceNamespace, diskStore.get().persistentDisk.name,
                 requestedRuntime.gceWithPdConfig.persistentDisk.size);
             }
+          } else if (runtime.status === RuntimeStatus.Error) {
+            await runtimeApi().deleteRuntime(currentWorkspaceNamespace, false, {
+              signal: aborter.signal
+            });
           } else {
             // There are no differences, no extra requests needed
           }

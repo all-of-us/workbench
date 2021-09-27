@@ -2,7 +2,7 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 import validate from 'validate.js';
 
-import {Button, Clickable, Link, StyledAnchorTag} from 'app/components/buttons';
+import {Button, Clickable, LinkButton, StyledExternalLink} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {InfoIcon} from 'app/components/icons';
@@ -574,8 +574,8 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
     renderBillingDescription() {
       return <div>
         The <AouTitle/> provides $300 in free credits per user. Please refer to
-        <StyledAnchorTag href={supportUrls.billing} target='_blank'> &nbsp;this article
-        </StyledAnchorTag> to learn more about the free credit
+        <StyledExternalLink href={supportUrls.billing} target='_blank'> &nbsp;this article
+        </StyledExternalLink> to learn more about the free credit
         program and how it can be used. Once you have used up your free credits, you can request
         additional credits by <span style={styles.link} onClick={() => this.openContactWidget()}>
         contacting support</span>.
@@ -882,7 +882,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
           let errorMsg;
           if (error.statusCode === 429) {
             errorMsg = 'Server is overloaded. Please try again in a few minutes.';
-          } else if (error.message.includes('billing account is closed')) {
+          } else if (error.message && error.message.includes('billing account is closed')) {
             errorMsg = error.message;
           } else {
             errorMsg = `Could not
@@ -1262,10 +1262,10 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
         <hr style={{marginTop: '1rem'}}/>
         <WorkspaceEditSection header={<FlexRow style={{alignItems: 'center'}}>
           <div>Research Use Statement Questions</div>
-          <StyledAnchorTag href={supportUrls.researchPurpose}
-                           target='_blank' style={{marginLeft: '1rem', fontSize: 14, lineHeight: '18px', fontWeight: 400}}>
+          <StyledExternalLink href={supportUrls.researchPurpose}
+                              target='_blank' style={{marginLeft: '1rem', fontSize: 14, lineHeight: '18px', fontWeight: 400}}>
             Best practices for Research Use Statement questions
-          </StyledAnchorTag>
+          </StyledExternalLink>
         </FlexRow>} largeHeader={true}
               description={<div style={styles.researchPurposeDescription}>
                 <div style={{margin: '0.5rem', paddingTop: '0.5rem'}}>{ResearchPurposeDescription}
@@ -1439,8 +1439,8 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
           <FlexRow style={styles.text}><div>
             Any research that focuses on certain population characteristics or&nbsp;
             <TooltipTrigger content={toolTipTextDemographic} style={{display: 'inline-block'}}>
-              <Link style={{display: 'inline-block'}}>uses
-              demographic variables</Link>
+              <LinkButton style={{display: 'inline-block'}}>uses
+              demographic variables</LinkButton>
             </TooltipTrigger>
             &nbsp;in analyses can result, often unintentionally,
             in findings that may be misinterpreted or misused by others to foster stigma. While it
@@ -1448,7 +1448,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
             data users can take important steps to minimize the risk of this happening–taking this
             step is a condition of your
             <TooltipTrigger content={toolTipTextDucc}>
-              <Link style={{display: 'inline-block'}}>Data User Code of Conduct agreement.</Link>
+              <LinkButton style={{display: 'inline-block'}}>Data User Code of Conduct agreement.</LinkButton>
             </TooltipTrigger>
             &nbsp;If you are concerned that your research could inadvertently stigmatize
             participants or communities, or if you are unsure, let us know. We encourage you to
@@ -1456,7 +1456,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
             Board (RAB) as a precaution. The RAB will provide feedback and, if needed, guidance for
             modifying your research purpose or scope. To learn more, please refer to the&nbsp;
             <TooltipTrigger content={toolTipTextStigmatization} style={{display: 'inline-block'}}>
-            <Link style={{display: 'inline-block'}}><AoU/> Stigmatizing Research Policy</Link>
+            <LinkButton style={{display: 'inline-block'}}><AoU/> Stigmatizing Research Policy</LinkButton>
             </TooltipTrigger>. If you
             request a review, you can expect to receive an initial response within five business days.
             During the RAB’s review, you may begin working in your workspace.</div>

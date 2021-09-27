@@ -1,3 +1,10 @@
+import * as fp from 'lodash/fp';
+import {Dropdown} from 'primereact/dropdown';
+import {InputSwitch} from 'primereact/inputswitch';
+import * as React from 'react';
+import {RouteComponentProps, withRouter} from 'react-router-dom';
+import validate from 'validate.js';
+
 import {Button} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
@@ -16,15 +23,17 @@ import {
 import {institutionApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
-import {AccessTierShortNames} from 'app/utils/access-tiers';
+import {AccessTierShortNames, displayNameForTier} from 'app/utils/access-tiers';
 import {convertAPIError} from 'app/utils/errors';
 import {
+  defaultTierConfig,
   getControlledTierConfig,
   getControlledTierEmailAddresses,
   getControlledTierEmailDomains,
   getRegisteredTierConfig,
   getRegisteredTierEmailAddresses,
-  getRegisteredTierEmailDomains, getTierConfig,
+  getRegisteredTierEmailDomains,
+  getTierConfig,
   getTierEmailAddresses,
   getTierEmailDomains,
   updateCtEmailAddresses,
@@ -33,7 +42,7 @@ import {
   updateRtEmailDomains,
 } from 'app/utils/institutions';
 import {NavigationProps} from 'app/utils/navigation';
-import {MatchParams, serverConfigStore} from 'app/utils/stores';
+import {MatchParams, serverConfigStore, useStore} from 'app/utils/stores';
 import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {
   Institution,
@@ -41,12 +50,6 @@ import {
   InstitutionTierConfig,
   OrganizationType
 } from 'generated/fetch';
-import * as fp from 'lodash/fp';
-import {Dropdown} from 'primereact/dropdown';
-import {InputSwitch} from 'primereact/inputswitch';
-import * as React from 'react';
-import { RouteComponentProps, withRouter } from 'react-router-dom';
-import validate from 'validate.js';
 
 const styles = reactStyles({
   label: {
@@ -57,6 +60,10 @@ const styles = reactStyles({
     color: colors.primary,
     marginTop: '1.5rem',
     marginBottom: '0.3rem'
+  },
+  tierBadge: {
+    marginTop: '0.6rem',
+    marginLeft: '0.6rem',
   },
   tierLabel: {
     fontSize: '16px',
@@ -100,6 +107,163 @@ enum InstitutionMode {
   EDIT
 }
 
+const EraRequiredSwitch = (props: {tierConfig: InstitutionTierConfig, onChange: (boolean) => void}) => {
+  const {tierConfig, onChange} = props;
+  const {config: {enableRasLoginGovLinking}} = useStore(serverConfigStore);
+  return <InputSwitch
+      data-test-id={`${tierConfig.accessTierShortName}-era-required-switch`}
+      onChange={(v) => onChange(v.value)}
+      checked={tierConfig.eraRequired}
+      disabled={!enableRasLoginGovLinking || tierConfig.membershipRequirement === InstitutionMembershipRequirement.NOACCESS}
+  />;
+};
+
+const EnableCtSwitch = (props: {institution: Institution, onChange: (boolean) => void}) => {
+  const {institution, onChange} = props;
+  return <InputSwitch
+      data-test-id='controlled-enabled-switch'
+      onChange={(v) => onChange(v.value)}
+      checked={getControlledTierConfig(institution).membershipRequirement !== InstitutionMembershipRequirement.NOACCESS}
+      disabled={false} // TODO
+  />;
+};
+
+const RequirementDropdown = (props: {tierConfig: InstitutionTierConfig, onChange: (InstitutionMembershipRequirement) => void}) => {
+  const {tierConfig, onChange} = props;
+  return <Dropdown style={{width: '16rem'}}
+                   data-test-id={`${tierConfig.accessTierShortName}-agreement-dropdown`}
+                   placeholder='Select type'
+                   options={MembershipRequirements}
+                   value={tierConfig.membershipRequirement}
+                   onChange={(v) => onChange(v.value)}/>;
+};
+
+const AddressTextArea = (props: {accessTierShortName: string, emailAddresses: string[], onBlur: Function, onChange: (string) => void}) => {
+  const {accessTierShortName, emailAddresses, onBlur, onChange} = props;
+  return <TextArea
+      value={emailAddresses && emailAddresses.join(',\n')}
+      data-test-id={`${accessTierShortName}-email-address-input`}
+      onBlur={onBlur}
+      onChange={onChange}/>;
+};
+
+const DomainTextArea = (props: {accessTierShortName: string, emailDomains: string[], onBlur: Function, onChange: (string) => void}) => {
+  const {accessTierShortName, emailDomains, onBlur, onChange} = props;
+  return <TextArea value={emailDomains && emailDomains.join(',\n')}
+                   data-test-id={`${accessTierShortName}-email-domain-input`}
+                   onBlur={onBlur}
+                   onChange={onChange}/>;
+};
+
+interface TierConfigProps {
+  institution: Institution;
+  accessTierShortName: string;
+  TierBadge: () => JSX.Element;
+  setEnableControlledTier?: (boolean) => void;
+  setEraRequired: (boolean) => void;
+  setTierRequirement: (InstitutionMembershipRequirement) => void;
+  validateTierAddresses: Function;
+  setTierAddresses: (string) => void;
+  validateTierDomains: Function;
+  setTierDomains: (string) => void;
+  invalidAddress: boolean;
+  invalidAddressMsg: string;
+  invalidDomain: boolean;
+  invalidDomainMsg: string;
+}
+const TierConfig = (props: TierConfigProps) => {
+  const {institution, accessTierShortName, TierBadge, setEnableControlledTier, setEraRequired, setTierRequirement,
+    validateTierAddresses, setTierAddresses, validateTierDomains, setTierDomains,
+    invalidAddress, invalidAddressMsg, invalidDomain, invalidDomainMsg} = props;
+
+  const tierConfig = getTierConfig(institution, accessTierShortName);
+  const {emailAddresses, emailDomains} = tierConfig;
+
+  return <FlexRow style={styles.tierConfigContainer}>
+    <div>
+      <TierBadge/>
+    </div>
+    <FlexColumn style={{marginLeft: '0.4rem'}}>
+      <label style={styles.tierLabel}>{displayNameForTier(accessTierShortName)} access</label>
+      <FlexRow style={{gap: '0.3rem'}}>
+        <EraRequiredSwitch tierConfig={tierConfig} onChange={setEraRequired}/>
+        eRA account required
+        {accessTierShortName === AccessTierShortNames.Controlled && <React.Fragment>
+          <EnableCtSwitch institution={institution} onChange={setEnableControlledTier}/>
+          Controlled tier enabled
+        </React.Fragment>}
+      </FlexRow>
+      {tierConfig.membershipRequirement !== InstitutionMembershipRequirement.NOACCESS &&
+        <div style={{marginTop: '1rem'}} data-test-id={`${accessTierShortName}-card-details`}>
+          <label style={styles.label}>A user is considered part of this institution and eligible <br/>
+            to access {displayNameForTier(accessTierShortName)} data if:</label>
+          <RequirementDropdown tierConfig={tierConfig} onChange={setTierRequirement}/>
+          {tierConfig.membershipRequirement === InstitutionMembershipRequirement.ADDRESSES &&
+          <FlexColumn data-test-id={`${accessTierShortName}-email-address`} style={{width: '16rem'}}>
+            <label style={styles.label}>Accepted Email Addresses</label>
+            <AddressTextArea
+              accessTierShortName={accessTierShortName}
+              emailAddresses={emailAddresses}
+              onBlur={validateTierAddresses}
+              onChange={setTierAddresses}/>
+            {invalidAddress && <div data-test-id={`${accessTierShortName}-email-address-error`} style={{color: colors.danger}}>
+              {invalidAddressMsg}
+            </div>}
+            <p style={{color: colors.primary, fontSize: '12px', lineHeight: '18px'}}>
+              Enter one email address per line.  <br/>
+            </p>
+          </FlexColumn>}
+          {tierConfig.membershipRequirement === InstitutionMembershipRequirement.DOMAINS &&
+          <FlexColumn data-test-id={`${accessTierShortName}-email-domain`} style={{width: '16rem'}}>
+            <label style={styles.label}>Accepted Email Domains</label>
+            <DomainTextArea
+                accessTierShortName={accessTierShortName}
+                emailDomains={emailDomains}
+                onBlur={validateTierDomains}
+                onChange={setTierDomains}/>
+            {invalidDomain && <div data-test-id={`${accessTierShortName}-email-domain-error`} style={{color: colors.danger}}>
+              {invalidDomainMsg}
+            </div>}
+            <p style={{color: colors.primary, fontSize: '12px', lineHeight: '18px'}}>
+              Enter one domain per line. <br/>
+              Note that subdomains are not included, so “university.edu” <br/>
+              matches alice@university.edu but not bob@med.university.edu.
+            </p>
+          </FlexColumn>}
+        </div>}
+    </FlexColumn>
+  </FlexRow>;
+};
+
+const SaveErrorModal = (props: {onFinish: Function, onContinue: Function}) => {
+  const {onFinish, onContinue} = props;
+  return <Modal>
+    <ModalTitle>Institution not saved</ModalTitle>
+    <ModalFooter>
+      <Button onClick={onFinish}
+              type='secondary' style={{marginRight: '2rem'}}>Finish Saving</Button>
+      <Button onClick={onContinue}
+              type='primary'>Yes Continue</Button>
+    </ModalFooter>
+  </Modal>;
+};
+
+const ApiErrorModal = (props: {errorMsg: string, onClose: Function}) => {
+  const {errorMsg, onClose} = props;
+  return <Modal>
+    <ModalTitle>Error While Saving Data</ModalTitle>
+    <ModalBody>
+      <label style={{...styles.label, fontWeight: 100}}>{errorMsg}</label>
+    </ModalBody>
+    <ModalFooter>
+      <Button onClick={onClose}
+              type='secondary'>Close</Button>
+    </ModalFooter>
+  </Modal>;
+};
+
+interface Props extends WithSpinnerOverlayProps, NavigationProps, RouteComponentProps<MatchParams> {}
+
 interface InstitutionEditState {
   apiErrorMsg: string;
   institutionMode: InstitutionMode;
@@ -119,8 +283,6 @@ interface InstitutionEditState {
   title: string;
 }
 
-interface Props extends WithSpinnerOverlayProps, NavigationProps, RouteComponentProps<MatchParams> {}
-
 export const AdminInstitutionEdit = fp.flow(withNavigation, withRouter)(class extends React.Component<Props, InstitutionEditState> {
   constructor(props) {
     super(props);
@@ -130,7 +292,11 @@ export const AdminInstitutionEdit = fp.flow(withNavigation, withRouter)(class ex
       institution: {
         shortName: '',
         displayName: '',
-        organizationTypeEnum: null
+        organizationTypeEnum: null,
+        tierConfigs: [{
+          ...defaultTierConfig(AccessTierShortNames.Registered),
+          membershipRequirement: null,  // the default is NOACCESS which also means "don't render the card"
+        }]
       },
       institutionToEdit: null,
       invalidRtEmailAddress: false,
@@ -368,6 +534,10 @@ export const AdminInstitutionEdit = fp.flow(withNavigation, withRouter)(class ex
         || this.state.invalidCtEmailAddress || this.state.invalidCtEmailDomain;
   }
 
+  backNavigate() {
+    this.props.navigate(['admin', 'institution']);
+  }
+
   async saveInstitution() {
     const {institution, institutionMode} = this.state;
     const rtConfig: InstitutionTierConfig = getRegisteredTierConfig(institution);
@@ -398,11 +568,11 @@ export const AdminInstitutionEdit = fp.flow(withNavigation, withRouter)(class ex
 
     if (institutionMode === InstitutionMode.EDIT) {
       await institutionApi().updateInstitution(this.props.match.params.institutionId, institution)
-        .then(value => this.backNavigate())
+        .then(() => this.backNavigate())
         .catch(reason => this.handleError(reason));
     } else {
       await institutionApi().createInstitution(institution)
-        .then(value => this.backNavigate())
+        .then(() => this.backNavigate())
         .catch(reason => this.handleError(reason));
     }
   }
@@ -426,10 +596,6 @@ export const AdminInstitutionEdit = fp.flow(withNavigation, withRouter)(class ex
     } else {
       this.backNavigate();
     }
-  }
-
-  backNavigate() {
-    this.props.navigate(['admin', 'institution']);
   }
 
   validateEmailAddressPresence(tier: AccessTierShortNames) {
@@ -461,7 +627,6 @@ export const AdminInstitutionEdit = fp.flow(withNavigation, withRouter)(class ex
   }
 
   render() {
-    const {enableRasLoginGovLinking} = serverConfigStore.get().config;
     const {institution, showOtherInstitutionTextBox, title} = this.state;
     const {
       displayName, organizationTypeEnum
@@ -507,7 +672,7 @@ export const AdminInstitutionEdit = fp.flow(withNavigation, withRouter)(class ex
                 onBlur={v => this.setState(fp.set(['institution', 'displayName'], v.trim()))}
             />
             <div style={{color: colors.danger}} data-test-id='displayNameError'>
-              {!this.isAddInstitutionMode && errors && errors.displayName}
+              {errors && errors.displayName}
               </div>
             <label style={styles.label}>Institution Type</label>
             <Dropdown style={{width: '16rem'}} data-test-id='organization-dropdown'
@@ -536,130 +701,36 @@ export const AdminInstitutionEdit = fp.flow(withNavigation, withRouter)(class ex
         </SemiBoldHeader>
         <hr style={{border: '1px solid #A9B6CB'}}/>
         <FlexRow style={{gap: '2rem'}}>
-          <FlexRow style={styles.tierConfigContainer}>
-            <FlexColumn>
-              <RegisteredTierBadge style={{marginTop: '0.6rem', marginLeft: '0.6rem'}}/>
-            </FlexColumn>
-            <FlexColumn style={{marginLeft: '0.4rem'}}>
-              <label style={styles.tierLabel}>Registered tier access</label>
-              <FlexRow style={{gap: '0.3rem'}}>
-                <InputSwitch
-                    data-test-id='rt-era-required-switch'
-                    onChange={(v) => this.setRtRequireEra(v.value)}
-                    checked={getRegisteredTierConfig(institution).eraRequired}
-                    disabled={!enableRasLoginGovLinking}
-                />
-                eRA account required
-              </FlexRow>
-              <div style={{marginTop: '1rem'}}>
-                <label style={styles.label}>A user is considered part of this institution and eligible <br/>
-                  to access registered tier data if:</label>
-                <Dropdown style={{width: '16rem'}} data-test-id='rt-agreement-dropdown'
-                          placeholder='Select type'
-                          options={MembershipRequirements}
-                          value={getRegisteredTierConfig(institution).membershipRequirement}
-                          onChange={(v) => this.setRegisteredTierRequirement(v.value)}/>
-                {getRegisteredTierConfig(institution).membershipRequirement === InstitutionMembershipRequirement.ADDRESSES &&
-                <FlexColumn data-test-id='rtEmailAddress' style={{width: '16rem'}}>
-                  <label style={styles.label}>Accepted Email Addresses</label>
-                  <TextArea value={getRegisteredTierEmailAddresses(institution)
-                  && getRegisteredTierEmailAddresses(institution).join(',\n')}
-                            data-test-id='rtEmailAddressInput'
-                            onBlur={(v) => this.validateRtEmailAddresses()}
-                            onChange={(v) => this.setRegisteredTierEmails(v)}/>
-                  {this.state.invalidRtEmailAddress && <div data-test-id='rtEmailAddressError' style={{color: colors.danger}}>
-                    {this.state.invalidRtEmailAddressMsg}
-                  </div>}
-                  <p style={{color: colors.primary, fontSize: '12px', lineHeight: '18px'}}>
-                    Enter one email address per line.  <br/>
-                  </p>
-                </FlexColumn>}
-                {getRegisteredTierConfig(institution).membershipRequirement === InstitutionMembershipRequirement.DOMAINS
-                && <FlexColumn data-test-id='rtEmailDomain' style={{width: '16rem'}}>
-                  <label style={styles.label}>Accepted Email Domains</label>
-                  <TextArea value={getRegisteredTierEmailDomains(institution) &&
-                  getRegisteredTierEmailDomains(institution).join(',\n')} onBlur={(v) => this.validateRtEmailDomains()}
-                            data-test-id='rtEmailDomainInput'
-                            onChange={(v) => this.setRegisteredTierDomains(v)}/>
-                  {this.state.invalidRtEmailDomain && <div data-test-id='rtEmailDomainError' style={{color: colors.danger}}>
-                    {this.state.invalidRtEmailDomainsMsg}
-                  </div>}
-                  <p style={{color: colors.primary, fontSize: '12px', lineHeight: '18px'}}>
-                    Enter one domain per line. <br/>
-                    Note that subdomains are not included, so “university.edu” <br/>
-                    matches alice@university.edu but not bob@med.university.edu.
-                  </p>
-                </FlexColumn>}
-              </div>
-            </FlexColumn>
-          </FlexRow>
-          <FlexRow style={styles.tierConfigContainer}>
-            <FlexColumn>
-              <ControlledTierBadge style={{marginTop: '0.6rem', marginLeft: '0.6rem'}}/>
-            </FlexColumn>
-            <FlexColumn style={{marginLeft: '0.4rem'}}>
-              <label style={styles.tierLabel}>Controlled tier access</label>
-              <FlexRow style={{gap: '0.3rem'}}>
-                <InputSwitch
-                    data-test-id='ct-era-required-switch'
-                    onChange={(v) => this.setCtRequireEra(v.value)}
-                    checked={getControlledTierConfig(institution).eraRequired}
-                    disabled={!enableRasLoginGovLinking ||
-                    getControlledTierConfig(institution).membershipRequirement === InstitutionMembershipRequirement.NOACCESS}
-                />
-                eRA account required
-                <InputSwitch
-                    data-test-id='ct-enabled-switch'
-                    onChange={(v) => this.setEnableControlledTier(v.value)}
-                    checked={getControlledTierConfig(institution).membershipRequirement !== InstitutionMembershipRequirement.NOACCESS}
-                    disabled={false}
-                />
-                Controlled tier enabled
-              </FlexRow>
-              {getControlledTierConfig(institution).membershipRequirement !== InstitutionMembershipRequirement.NOACCESS &&
-              <div style={{marginTop: '1rem'}} data-test-id='ct-card-container'>
-                <label style={styles.label}>A user is considered part of this institution and eligible <br/>
-                  to access registered tier data if:</label>
-                <Dropdown style={{width: '16rem'}} data-test-id='ct-agreement-dropdown'
-                          placeholder='Select type'
-                          options={MembershipRequirements}
-                          value={getControlledTierConfig(institution).membershipRequirement}
-                          onChange={(v) => this.setControlledTierRequirement(v.value)}/>
-                {getControlledTierConfig(institution).membershipRequirement === InstitutionMembershipRequirement.ADDRESSES &&
-                <FlexColumn data-test-id='ctEmailAddress' style={{width: '16rem'}}>
-                  <label style={styles.label}>Accepted Email Addresses</label>
-                  <TextArea value={getControlledTierEmailAddresses(institution)
-                  && getControlledTierEmailAddresses(institution).join(',\n')}
-                            data-test-id='ctEmailAddressInput'
-                            onBlur={(v) => this.validateCtEmailAddresses()}
-                            onChange={(v) => this.setControlledTierEmails(v)}/>
-                  {this.state.invalidCtEmailAddress && <div data-test-id='ctEmailAddressError' style={{color: colors.danger}}>
-                    {this.state.invalidCtEmailAddressMsg}
-                  </div>}
-                  <p style={{color: colors.primary, fontSize: '12px', lineHeight: '18px'}}>
-                    Enter one email address per line. <br/>
-                  </p>
-                </FlexColumn>}
-                {getControlledTierConfig(institution).membershipRequirement === InstitutionMembershipRequirement.DOMAINS
-                && <FlexColumn data-test-id='ctEmailDomain' style={{width: '16rem'}}>
-                  <label style={styles.label}>Accepted Email Domains</label>
-                  <TextArea value={getControlledTierEmailDomains(institution) &&
-                  getControlledTierEmailDomains(institution).join(',\n')} onBlur={(v) => this.validateCtEmailDomains()}
-                            data-test-id='ctEmailDomainInput'
-                            onChange={(v) => this.setControlledTierDomains(v)}/>
-                  {this.state.invalidCtEmailDomain && <div data-test-id='ctEmailDomainError' style={{color: colors.danger}}>
-                    {this.state.invalidCtEmailDomainsMsg}
-                  </div>}
-                  <p style={{color: colors.primary, fontSize: '12px', lineHeight: '18px'}}>
-                    Enter one domain per line. <br/>
-                    Note that subdomains are not included, so “university.edu” <br/>
-                    matches alice@university.edu but not bob@med.university.edu.
-                  </p>
-                </FlexColumn>}
-              </div>}
-            </FlexColumn>
-          </FlexRow>
-        </FlexRow>
+          <TierConfig
+              institution={institution}
+              accessTierShortName={AccessTierShortNames.Registered}
+              TierBadge={() => <RegisteredTierBadge style={styles.tierBadge}/>}
+              setEraRequired={(value) => this.setRtRequireEra(value)}
+              setTierRequirement={(requirement) => this.setRegisteredTierRequirement(requirement)}
+              validateTierAddresses={() => this.validateRtEmailAddresses()}
+              setTierAddresses={(addrs) => this.setRegisteredTierEmails(addrs)}
+              validateTierDomains={() => this.validateRtEmailDomains()}
+              setTierDomains={(domains) => this.setRegisteredTierDomains(domains)}
+              invalidAddress={this.state.invalidRtEmailAddress}
+              invalidAddressMsg={this.state.invalidRtEmailAddressMsg}
+              invalidDomain={this.state.invalidRtEmailDomain}
+              invalidDomainMsg={this.state.invalidRtEmailDomainsMsg}/>
+          <TierConfig
+              institution={institution}
+              accessTierShortName={AccessTierShortNames.Controlled}
+              TierBadge={() => <ControlledTierBadge style={styles.tierBadge}/>}
+              setEnableControlledTier={(value) => this.setEnableControlledTier(value)}
+              setEraRequired={(value) => this.setCtRequireEra(value)}
+              setTierRequirement={(requirement) => this.setControlledTierRequirement(requirement)}
+              validateTierAddresses={() => this.validateCtEmailAddresses()}
+              setTierAddresses={(addrs) => this.setControlledTierEmails(addrs)}
+              validateTierDomains={() => this.validateCtEmailDomains()}
+              setTierDomains={(domains) => this.setControlledTierDomains(domains)}
+              invalidAddress={this.state.invalidCtEmailAddress}
+              invalidAddressMsg={this.state.invalidCtEmailAddressMsg}
+              invalidDomain={this.state.invalidCtEmailDomain}
+              invalidDomainMsg={this.state.invalidCtEmailDomainsMsg}/>
+         </FlexRow>
         <FlexRow style={{justifyContent: 'flex-start', marginRight: '1rem'}}>
           <div>
             <Button type='secondary' onClick={() => this.backNavigate()} style={{marginRight: '1.5rem'}}>Cancel</Button>
@@ -682,25 +753,13 @@ export const AdminInstitutionEdit = fp.flow(withNavigation, withRouter)(class ex
             </TooltipTrigger>
           </div>
         </FlexRow>
-        {this.state.showBackButtonWarning && <Modal>
-          <ModalTitle>Institution not saved</ModalTitle>
-          <ModalFooter>
-            <Button onClick={() => this.setState({showBackButtonWarning: false})}
-                    type='secondary' style={{marginRight: '2rem'}}>Finish Saving</Button>
-            <Button onClick={() => this.backNavigate()}
-                    type='primary'>Yes Continue</Button>
-          </ModalFooter>
-        </Modal>}
-        {this.state.showApiError && <Modal>
-          <ModalTitle>Error While Saving Data</ModalTitle>
-          <ModalBody>
-            <label style={{...styles.label, fontWeight: 100}}>{this.state.apiErrorMsg}</label>
-          </ModalBody>
-          <ModalFooter>
-            <Button onClick={() => this.setState({showApiError: false})}
-                    type='secondary'>Close</Button>
-          </ModalFooter>
-        </Modal>}
+        {this.state.showBackButtonWarning && <SaveErrorModal
+            onFinish={() => this.setState({showBackButtonWarning: false})}
+            onContinue={() => this.backNavigate()}
+        />}
+        {this.state.showApiError && <ApiErrorModal
+            errorMsg={this.state.apiErrorMsg}
+            onClose={() => this.setState({showApiError: false})}/>}
       </FadeBox>
       </div>;
   }

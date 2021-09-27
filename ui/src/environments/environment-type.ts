@@ -76,9 +76,6 @@ export interface EnvironmentBase {
   // The UI environment config should be restricted to truly UI-specific environment variables, such
   // as server API endpoints and client IDs.
 
-  // use the new Data Access Requirements page in place of the Registration Dashboard
-  enableDataAccessRequirements: boolean;
-
   // which access tiers do we expose to the users via the UI?  likely temporary - until CT is fully rolled out
   accessTiersVisibleToUsers: string[];
 }

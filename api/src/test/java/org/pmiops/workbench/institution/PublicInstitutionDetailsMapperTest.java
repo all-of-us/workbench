@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbInstitutionTierRequirement.MembershipRequirement;
-import org.pmiops.workbench.model.DuaType;
 import org.pmiops.workbench.model.InstitutionMembershipRequirement;
 import org.pmiops.workbench.model.OrganizationType;
 import org.pmiops.workbench.model.PublicInstitutionDetails;
@@ -23,7 +22,6 @@ public class PublicInstitutionDetailsMapperTest extends SpringTest {
   public void testDbToModelSuccess() {
     final DbInstitution dbInst =
         new DbInstitution()
-            .setDuaTypeEnum(DuaType.MASTER)
             .setShortName("name")
             .setOrganizationTypeEnum(OrganizationType.INDUSTRY)
             .setDisplayName("displayName");
@@ -34,7 +32,6 @@ public class PublicInstitutionDetailsMapperTest extends SpringTest {
             new PublicInstitutionDetails()
                 .displayName(dbInst.getDisplayName())
                 .shortName(dbInst.getShortName())
-                .duaTypeEnum(dbInst.getDuaTypeEnum())
                 .organizationTypeEnum(dbInst.getOrganizationTypeEnum())
                 .registeredTierMembershipRequirement(InstitutionMembershipRequirement.DOMAINS));
   }

@@ -1,4 +1,4 @@
-import {Button, Clickable, Link} from 'app/components/buttons';
+import {Button, Clickable, LinkButton} from 'app/components/buttons';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
 import {ErrorMessage, WarningMessage} from 'app/components/messages';
@@ -9,6 +9,7 @@ import {TextColumn} from 'app/components/text-column';
 import {disksApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {addOpacity, colorWithWhiteness} from 'app/styles/colors';
 import {
+  cond,
   DEFAULT,
   reactStyles,
   summarizeErrors,
@@ -162,7 +163,8 @@ const styles = reactStyles({
   }
 });
 
-const MIN_DISK_SIZE_GB = 60;
+// exported for testing
+export const MIN_DISK_SIZE_GB = 80;
 
 const defaultMachineName = 'n1-standard-4';
 const defaultMachineType: Machine = findMachineByName(defaultMachineName);
@@ -1121,7 +1123,7 @@ const RuntimePanel = fp.flow(
     // in progress, even if the runtime store doesn't actively reflect this yet.
     // Show the customize panel in this event.
     [() => !!pendingRuntime, () => PanelContent.Customize],
-    [([, r, s]) => r === null || s === RuntimeStatus.Unknown, () => PanelContent.Create],
+    [([, r, s]) => r === null || r === undefined || s === RuntimeStatus.Unknown, () => PanelContent.Create],
     [([, r, ]) => r.status === RuntimeStatus.Deleted &&
       ([RuntimeConfigurationType.GeneralAnalysis, RuntimeConfigurationType.HailGenomicAnalysis].includes(r.configurationType)),
       () => PanelContent.Create],
@@ -1406,6 +1408,18 @@ const RuntimePanel = fp.flow(
     </Button>;
   };
 
+  const renderTryAgainButton = () => {
+    return <Button
+        aria-label='Try Again'
+        disabled={!runtimeCanBeCreated}
+        onClick={() => {
+          setRequestedRuntime(createRuntimeRequest(newRuntimeConfig));
+          onClose();
+        }}>
+      Try Again
+    </Button>;
+  };
+
   const renderNextButton = () => {
     return <Button
       aria-label='Next'
@@ -1473,6 +1487,18 @@ const RuntimePanel = fp.flow(
                           runtimeCtx = {runtimeCtx}
                   />
               </FlexRow>
+              {currentRuntime && currentRuntime.errors && currentRuntime.errors.length > 0
+                && <ErrorMessage iconPosition={'top'} iconSize={16}>
+                  <div>An error was encountered with your cloud environment. Please re-attempt creation of the
+                    environment and contact support if the error persists.</div>
+                  <div>Error details:</div>
+                  {currentRuntime.errors.map((err, idx) => {
+                    return <div style={{fontFamily: 'monospace'}} key={idx}>
+                      {err.errorMessage}
+                    </div>
+                  })}
+                </ErrorMessage>
+              }
               <PresetSelector
                 allowDataproc={allowDataproc}
                 disabled={disableControls}
@@ -1574,26 +1600,32 @@ const RuntimePanel = fp.flow(
            }
         {runtimeCtx.unattachedPdExists && !runtimeExists ?
             <FlexRow style={{justifyContent: 'space-between', marginTop: '.75rem'}}>
-                <Link
+                <LinkButton
                     style={{...styles.deleteLink, ...(
                           (disableControls) ?
                               {color: colorWithWhiteness(colors.dark, .4)} : {}
                       )}}
                     aria-label='Delete Persistent Disk'
                     disabled={disableControls}
-                    onClick={() => setPanelContent(PanelContent.DeleteUnattachedPd)}>Delete Persistent Disk</Link>
+                    onClick={() => setPanelContent(PanelContent.DeleteUnattachedPd)}>Delete Persistent Disk</LinkButton>
                 {!pdSizeReduced ? renderCreateButton() : renderNextButton()}
             </FlexRow> :
             <FlexRow style={{justifyContent: 'space-between', marginTop: '.75rem'}}>
-              <Link
+              <LinkButton
                   style={{...styles.deleteLink, ...(
                         (disableControls || !runtimeExists) ?
                             {color: colorWithWhiteness(colors.dark, .4)} : {}
                     )}}
                   aria-label='Delete Environment'
                   disabled={disableControls || !runtimeExists}
-                  onClick={() => setPanelContent(PanelContent.DeleteRuntime)}>Delete Environment</Link>
-              {runtimeExists || (pdExists && pdSizeReduced) ? renderNextButton() : renderCreateButton()}
+                  onClick={() => setPanelContent(PanelContent.DeleteRuntime)}>Delete Environment</LinkButton>
+              {
+                cond(
+                    [runtimeExists || (pdExists && pdSizeReduced), () => renderNextButton()],
+                    [currentRuntime && currentRuntime.errors && currentRuntime.errors.length > 0, () => renderTryAgainButton()],
+                    () => renderCreateButton()
+                )
+              }
             </FlexRow>
         }
     </Fragment>],

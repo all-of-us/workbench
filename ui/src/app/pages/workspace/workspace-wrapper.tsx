@@ -39,7 +39,6 @@ export const WorkspaceWrapper = fp.flow(
           workspaceNamespace: namespace,
           pollAbortSignal: newPollAborter.signal,
           maxCreateCount: 0,
-          maxDeleteCount: 0,
           maxResumeCount: 0
         });
       } catch (e) {

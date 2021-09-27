@@ -8,7 +8,7 @@
     "leoBaseUrl": "https:\/\/notebooks.firecloud.org",
     "xAppIdValue": "staging-AoU-RW",
     "timeoutInSeconds": 60,
-    "jupyterDockerImage": "broadinstitute/terra-jupyter-aou:2.0.1",
+    "jupyterDockerImage": "broadinstitute/terra-jupyter-aou:2.0.2",
     "shibbolethApiBaseUrl": "https:\/\/profile-dot-broad-shibboleth-prod.appspot.com",
     "shibbolethUiBaseUrl": "https:\/\/broad-shibboleth-prod.appspot.com",
     "runtimeImages": {
@@ -85,7 +85,6 @@
   },
   "moodle": {
     "host": "aoudev.nnlm.gov",
-    "enableMoodleBackend": true,
     "credentialsKeyV2": "moodle-key-v2.txt"
   },
   "access": {
@@ -107,7 +106,7 @@
     "enablePersistentDisk": false,
     "enableAccessModuleRewrite" : true,
     "enableUnifiedUserAccessCron": true,
-    "enableStandardSourceDomains": false
+    "enableStandardSourceDomains": true
   },
   "actionAudit": {
     "logName": "workbench-action-audit-staging",

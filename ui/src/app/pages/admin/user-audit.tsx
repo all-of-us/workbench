@@ -26,7 +26,7 @@ const getNextAuditPath = (subject: string) => {
 };
 
 const getAdminPageUrl = (subject: string) => {
-  return [`/admin/users/${subject}`];
+  return `/admin/users/${subject}`;
 };
 
 export const UserAudit = (spinnerProps: WithSpinnerOverlayProps) => {
