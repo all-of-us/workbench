@@ -23,8 +23,7 @@ elif [[ $run_in_parallel == "seq" ]]; then
 elif [[ $run_in_parallel == "mult" ]]; then
   BQ_DATASET=$DATASET_MULT
 elif [[ $run_in_parallel == "ori" ]]; then
-  echo "for 'ori' run make-bq-criteria-tables.sh script directly! Comment out prep tables..."
-  exit 1
+  BQ_DATASET=$DATASET_ORI # not used
 fi
 
 ################################################
@@ -54,20 +53,28 @@ make-cb-criteria-08-visit.sh
 make-cb-criteria-09-icd9-src.sh
 make-cb-criteria-10-icd10-cm-src.sh
 make-cb-criteria-11-icd10-pcs-src.sh
+make-cb-criteria-12-cond-occur-snomed-src.sh
+make-cb-criteria-13-cond-occur-snomed-std.sh
 )
-for f in "${main_tables[@]}" ; do
-  st_time=$SECONDS
-  if [[ "$run_in_parallel" == "seq" ]]; then
-    echo " $run_in_parallel - sequential run"
-    runScript "$f" "$BQ_PROJECT" "$BQ_DATASET" "$run_in_parallel"
-  elif [[ "$run_in_parallel" == "par" ]]; then
-     runScript "$f" "$BQ_PROJECT" "$BQ_DATASET" "$run_in_parallel"  &
-    sleep 1
-  elif [[ "$run_in_parallel" == "mult" ]]; then
-      runScript "$f" "$BQ_PROJECT" "$BQ_DATASET" "$run_in_parallel" &
-      sleep 1
-  fi
-done
+if [[ "$run_in_parallel" == "ori" ]]; then
+  echo "for 'ori' running make-bq-criteria-tables.sh script directly!"
+  source make-bq-criteria-tables.sh
+elif [[ "$run_in_parallel" == "seq" ]]; then
+  echo " $run_in_parallel - sequential run"
+  for f in "${main_tables[@]}" ; do
+    runScript "$f" "$BQ_PROJECT" "$BQ_DATASET" seq
+  done
+elif [[ "$run_in_parallel" == "par" ]]; then
+  echo " $run_in_parallel - parallel run"
+  for f in "${main_tables[@]}" ; do
+    runScript "$f" "$BQ_PROJECT" "$BQ_DATASET" par &
+  done
+elif [[ "$run_in_parallel" == "mult" ]]; then
+  echo " $run_in_parallel - parallel multi run"
+  for f in "${main_tables[@]}" ; do
+    runScript "$f" "$BQ_PROJECT" "$BQ_DATASET" mult &
+  done
+fi
 # wait for all processes to finish
 wait
 echo "Running scripts *all from make-cb-criteria-00-main-tables.sh* done in $(timeIt main_start) secs"

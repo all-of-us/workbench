@@ -120,7 +120,7 @@ bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
     )
 SELECT
       ROW_NUMBER() OVER (ORDER BY p.parent_id, c.concept_code) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` where id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID) AS id
-    , p.id - $CB_CRITERIA_START_ID AS parent_id
+    , p.id AS parent_id
     , p.domain_id
     , p.is_standard
     , p.type
@@ -176,7 +176,7 @@ do
         )
     SELECT
           ROW_NUMBER() OVER (ORDER BY p.id, c.concept_code) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` where id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID)
-        , p.id - $CB_CRITERIA_START_ID
+        , p.id
         , p.domain_id
         , p.is_standard
         , p.type
@@ -236,10 +236,10 @@ FROM
     (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
          WHERE domain_id = 'CONDITION' and type = 'ICD10CM' and is_group = 1 and is_selectable = 1 and is_standard = 0
          and id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID ) a
-    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` WHERE type = 'ICD10CM') b on a.id = b.parent_id + $CB_CRITERIA_START_ID
-    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` WHERE type = 'ICD10CM') c on b.id = c.parent_id + $CB_CRITERIA_START_ID
-    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` WHERE type = 'ICD10CM') d on c.id = d.parent_id + $CB_CRITERIA_START_ID
-    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` WHERE type = 'ICD10CM') e on d.id = e.parent_id + $CB_CRITERIA_START_ID"
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` WHERE type = 'ICD10CM') b on a.id = b.parent_id
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` WHERE type = 'ICD10CM') c on b.id = c.parent_id
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` WHERE type = 'ICD10CM') d on c.id = d.parent_id
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` WHERE type = 'ICD10CM') e on d.id = e.parent_id"
 
 echo "ICD10CM - SOURCE - insert into prep_concept_ancestor"
 bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
@@ -296,6 +296,7 @@ FROM
 WHERE x.concept_id = y.concept_id
     and x.type = 'ICD10CM'
     and x.is_standard = 0
+    and x.id > $CB_CRITERIA_START_ID and x.id < $CB_CRITERIA_END_ID
     and x.is_selectable = 1"
 
 echo "ICD10CM - SOURCE - generate rollup counts"
@@ -331,6 +332,7 @@ FROM
 WHERE x.concept_id = y.concept_id
     and x.type = 'ICD10CM'
     and x.is_standard = 0
+    and x.id > $CB_CRITERIA_START_ID and x.id < $CB_CRITERIA_END_ID
     and x.is_group = 1"
 
 #wait for process to end before copying
@@ -341,3 +343,4 @@ if [[ "$RUN_PARALLEL" == "mult" ]]; then
   cpToMain "$TBL_PAS" &
   cpToMain "$TBL_PCA" &
 fi
+

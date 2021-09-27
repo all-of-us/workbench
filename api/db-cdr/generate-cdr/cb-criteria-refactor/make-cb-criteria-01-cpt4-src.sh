@@ -77,7 +77,7 @@ bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
     )
 SELECT
      (a.id + $CB_CRITERIA_START_ID) id
-    , a.parent_id
+    , a.parent_id + $CB_CRITERIA_START_ID
     , a.domain_id
     , a.is_standard
     , a.type
@@ -154,13 +154,13 @@ SELECT
 FROM (SELECT id, parent_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
            WHERE domain_id = 'PROCEDURE' and type = 'CPT4' and is_standard = 0 and is_group = 1 and parent_id !=0
                  and id > $CB_CRITERIA_START_ID and id < $CB_CRITERIA_END_ID) a
-JOIN (SELECT id, parent_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`) b on a.id  = b.parent_id + $CB_CRITERIA_START_ID
-LEFT JOIN (SELECT id, parent_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`) c on b.id  = c.parent_id + $CB_CRITERIA_START_ID
-LEFT JOIN (SELECT id, parent_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`) d on c.id  = d.parent_id + $CB_CRITERIA_START_ID
-LEFT JOIN (SELECT id, parent_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`) e on d.id  = e.parent_id + $CB_CRITERIA_START_ID
-LEFT JOIN (SELECT id, parent_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`) f on e.id  = f.parent_id + $CB_CRITERIA_START_ID
-LEFT JOIN (SELECT id, parent_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`) g on f.id  = g.parent_id + $CB_CRITERIA_START_ID
-LEFT JOIN (SELECT id, parent_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`) h on g.id  = h.parent_id + $CB_CRITERIA_START_ID"
+JOIN (SELECT id, parent_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`) b on a.id  = b.parent_id
+LEFT JOIN (SELECT id, parent_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`) c on b.id  = c.parent_id
+LEFT JOIN (SELECT id, parent_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`) d on c.id  = d.parent_id
+LEFT JOIN (SELECT id, parent_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`) e on d.id  = e.parent_id
+LEFT JOIN (SELECT id, parent_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`) f on e.id  = f.parent_id
+LEFT JOIN (SELECT id, parent_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`) g on f.id  = g.parent_id
+LEFT JOIN (SELECT id, parent_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`) h on g.id  = h.parent_id"
 
 ############ cb_criteria - update counts ############
 echo "CPT4 - SOURCE - generate parent counts"
@@ -199,7 +199,8 @@ FROM
             ) f on e.descendant_id = f.id
         GROUP BY 1
     ) y
-WHERE x.id = y.id"
+WHERE x.id = y.id
+      and x.id > $CB_CRITERIA_START_ID and x.id < $CB_CRITERIA_END_ID"
 
 echo "CPT4 - SOURCE - delete zero count parents"
 bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
@@ -212,7 +213,7 @@ WHERE type = 'CPT4'
             (parent_id !=0 and rollup_count = 0)
             or id not in
                 (
-                    SELECT parent_id + $CB_CRITERIA_START_ID
+                    SELECT parent_id
                     FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
                     WHERE type = 'CPT4'
                       and id > $CB_CRITERIA_START_ID and id < $CB_CRITERIA_END_ID
@@ -226,4 +227,4 @@ if [[ "$RUN_PARALLEL" == "mult" ]]; then
   cpToMain "$TBL_CBC" &
   cpToMain "$TBL_ANC" &
 fi
-wait
+

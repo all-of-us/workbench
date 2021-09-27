@@ -1,5 +1,14 @@
 #!/bin/bash
+echo "-----------------------------------------------------------"
+echo "Running make-bq-criteria-tables.sh started at "`date`
+echo "PID "$$
+st_sec=$SECONDS;
 
+function timeIt(){
+  local e=$((SECONDS - $1))
+  echo "$e"
+}
+block_start=$SECONDS
 # This generates the criteria tables for the CDR
 
 # PREP: upload all prep tables
@@ -258,7 +267,8 @@ SELECT * FROM \`$BQ_PROJECT.$BQ_DATASET.concept_relationship\`
 UNION ALL
 SELECT * FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_relationship\`"
 
-
+echo "Running  prep steps done in $(timeIt block_start) secs total time $(timeIt st_sec) secs"
+block_start=$SECONDS
 ################################################
 # CPT4 - SOURCE
 ################################################
@@ -422,7 +432,8 @@ WHERE type = 'CPT4'
                 )
         )"
 
-
+echo "Running  CPT4 done in $(timeIt block_start) secs total time $(timeIt st_sec) secs"
+block_start=$SECONDS
 ################################################
 # PPI PHYSICAL MEASUREMENTS (PM)
 ################################################
@@ -630,7 +641,8 @@ WHERE domain_id = 'PHYSICAL_MEASUREMENT'
     and name = 'Blood Pressure'
     and is_selectable = 1"
 
-
+echo "Running  PPI - PHYSICAL_MEASUREMENT done in $(timeIt block_start) secs total time $(timeIt st_sec) secs"
+block_start=$SECONDS
 ################################################
 # PPI SURVEYS
 ################################################
@@ -888,7 +900,8 @@ FROM
 WHERE x.domain_id = 'SURVEY'
     and x.concept_id = y.ancestor_concept_id"
 
-
+echo "Running  PPI - SURVEYS done in $(timeIt block_start) secs total time $(timeIt st_sec) secs"
+block_start=$SECONDS
 ################################################
 # PHYSICAL MEASUREMENTS - CONCEPT SET
 ################################################
@@ -946,7 +959,8 @@ JOIN
         GROUP BY 1
     ) b on a.concept_id = b.measurement_source_concept_id"
 
-
+echo "Running  PPI PHYSICAL_MEASUREMENT - CONCEPT SETS done in $(timeIt block_start) secs total time $(timeIt st_sec) secs"
+block_start=$SECONDS
 ################################################
 # FITBIT DATA
 ################################################
@@ -977,6 +991,9 @@ SELECT
     , 0
     , 0"
 
+
+echo "Running  FITBIT done in $(timeIt block_start) secs total time $(timeIt st_sec) secs"
+block_start=$SECONDS
 ################################################
 # WHOLE GENOME VARIANT DATA
 ################################################
@@ -1007,6 +1024,8 @@ SELECT
     , 0
     , 0"
 
+echo "Running  WHOLE GENOME VARIANT done in $(timeIt block_start) secs total time $(timeIt st_sec) secs"
+block_start=$SECONDS
 ################################################
 # DEMOGRAPHICS
 ################################################
@@ -1253,7 +1272,8 @@ FROM
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.ethnicity_concept_id = b.concept_id
 WHERE b.concept_id is not null"
 
-
+echo "Running  DEMOGRAPHICS done in $(timeIt block_start) secs total time $(timeIt st_sec) secs"
+block_start=$SECONDS
 ################################################
 # VISIT_OCCURRENCE (VISITS/ENCOUNTERS)
 ################################################
@@ -1302,6 +1322,8 @@ FROM
     ) a"
 
 
+echo "Running  VISIT OCCURRENCE done in $(timeIt block_start) secs total time $(timeIt st_sec) secs"
+block_start=$SECONDS
 ################################################
 # ICD9 - SOURCE
 ################################################
@@ -1711,8 +1733,9 @@ WHERE type in ('ICD9CM', 'ICD9Proc')
     and rollup_count is null"
 
 # TODO there are still some parents that don't actually have any children and never will. WHAT TO DO?
-exit 1
 
+echo "Running  ICD9 - SOURCE done in $(timeIt block_start) secs total time $(timeIt st_sec) secs"
+block_start=$SECONDS
 ################################################
 # ICD10CM - SOURCE
 ################################################
@@ -2131,7 +2154,8 @@ WHERE x.concept_id = y.concept_id
     and x.is_standard = 0
     and x.is_group = 1"
 
-
+echo "Running  ICD10CM - SOURCE done in $(timeIt block_start) secs total time $(timeIt st_sec) secs"
+block_start=$SECONDS
 ################################################
 # ICD10PCS - SOURCE
 ################################################
@@ -2479,7 +2503,8 @@ WHERE x.concept_id = y.concept_id
     and x.is_standard = 0
     and x.is_group = 1"
 
-
+echo "Running  ICD10PCS - SOURCE done in $(timeIt block_start) secs total time $(timeIt st_sec) secs"
+block_start=$SECONDS
 ################################################
 # CONDITION_OCCURRENCE - SNOMED - SOURCE
 ################################################
@@ -2970,7 +2995,8 @@ WHERE x.concept_id = y.concept_id
     and x.is_standard = 0
     and x.is_group = 1"
 
-
+echo "Running  CONDITION_OCCURRENCE SNOMED - SOURCE done in $(timeIt block_start) secs total time $(timeIt st_sec) secs"
+block_start=$SECONDS
 ###############################################
 # CONDITION_OCCURRENCE - SNOMED - STANDARD
 ###############################################
@@ -3463,7 +3489,10 @@ WHERE x.concept_id = y.concept_id
     and x.is_standard = 1
     and x.is_group = 1"
 
-
+echo "Running  CONDITION_OCCURRENCE SNOMED - STANDARD done in $(timeIt block_start) secs total time $(timeIt st_sec) secs"
+block_start=$SECONDS
+echo "Exiting after CONDITION_OCCURRENCE SNOMED - STANDARD...."
+exit 2
 ################################################
 # MEASUREMENT - Clinical - STANDARD LOINC
 ################################################
@@ -3541,6 +3570,8 @@ bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
     GROUP BY 1,2,3
     ) a) b"
 
+echo "Running  MEASUREMENT - Clinical - STANDARD - LOINC done in $(timeIt block_start) secs total time $(timeIt st_sec) secs"
+block_start=$SECONDS
 ################################################
 # MEASUREMENT - Labs - STANDARD LOINC
 ################################################
@@ -4095,7 +4126,8 @@ WHERE x.type = 'LOINC'
     and x.subtype = 'LAB'
     and x.name = 'Uncategorized'"
 
-
+echo "Running  MEASUREMENT - Labs - STANDARD - LOINC done in $(timeIt block_start) secs total time $(timeIt st_sec) secs"
+block_start=$SECONDS
 ################################################
 # MEASUREMENT - SNOMED - STANDARD
 ################################################
@@ -4517,6 +4549,9 @@ WHERE x.concept_id = y.concept_id
     and x.type = 'SNOMED'
     and x.is_standard = 1
     and x.is_group = 1"
+
+echo "Running  MEASUREMENT - SNOMED - STANDARD done in $(timeIt block_start) secs total time $(timeIt st_sec) secs"
+block_start=$SECONDS
 
 ################################################
 # DRUG_EXPOSURE - ATC/RXNORM
@@ -4977,7 +5012,8 @@ WHERE x.concept_id = y.concept_id
     and type = 'ATC'
     and is_group = 1"
 
-
+echo "Running  DRUG_EXPOSURE - ATC/RXNORM done in $(timeIt block_start) secs total time $(timeIt st_sec) secs"
+block_start=$SECONDS
 ################################################
 # PROCEDURE_OCCURRENCE - SNOMED - SOURCE
 ################################################
@@ -5417,7 +5453,8 @@ WHERE x.concept_id = y.concept_id
     and x.is_standard = 0
     and x.is_group = 1"
 
-
+echo "Running  PROCEDURE_OCCURRENCE - SNOMED - SOURCE done in $(timeIt block_start) secs total time $(timeIt st_sec) secs"
+block_start=$SECONDS
 ###############################################
 # PROCEDURE_OCCURRENCE - SNOMED - STANDARD
 ###############################################
@@ -5891,7 +5928,8 @@ WHERE x.concept_id = y.concept_id
     and x.is_standard = 1
     and x.is_group = 1"
 
-
+echo "Running  PROCEDURE_OCCURRENCE - SNOMED - STANDARD done in $(timeIt block_start) secs total time $(timeIt st_sec) secs"
+block_start=$SECONDS
 ################################################
 # OBSERVATION
 ################################################
@@ -5950,7 +5988,8 @@ FROM
         GROUP BY 1,2,3,4
     ) x"
 
-
+echo "Running  OBSERVATION done in $(timeIt block_start) secs total time $(timeIt st_sec) secs"
+block_start=$SECONDS
 ################################################
 # CB_CRITERIA_ANCESTOR
 ################################################
@@ -5980,6 +6019,8 @@ and descendant_concept_id in
         FROM \`$BQ_PROJECT.$BQ_DATASET.drug_exposure\`
     )"
 
+echo "Running  CB_CRITERIA_ANCESTOR - Drugs done in $(timeIt block_start) secs total time $(timeIt st_sec) secs"
+block_start=$SECONDS
 ###############################################
 # ADD IN OTHER CODES NOT ALREADY CAPTURED
 ################################################
@@ -6144,6 +6185,8 @@ FROM
         GROUP BY 1,2,3,4
     ) x"
 
+echo "Running  ADD IN OTHER CODES NOT ALREADY CAPTURED done in $(timeIt block_start) secs total time $(timeIt st_sec) secs"
+block_start=$SECONDS
 ################################################
 # CB_CRITERIA_ATTRIBUTE
 ################################################
@@ -6338,7 +6381,8 @@ WHERE domain_id = 'MEASUREMENT'
         FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_attribute\`
     )"
 
-
+echo "Running CB_CRITERIA_ATTRIBUTE done in $(timeIt block_start) secs total time $(timeIt st_sec) secs"
+block_start=$SECONDS
 ################################################
 # CB_SURVEY_ATTRIBUTE
 ################################################
@@ -6421,7 +6465,8 @@ WHERE domain_id = 'SURVEY'
         FROM \`$BQ_PROJECT.$BQ_DATASET.cb_survey_attribute\`
     )"
 
-
+echo "Running CB_SURVEY_ATTRIBUTE done in $(timeIt block_start) secs total time $(timeIt st_sec) secs"
+block_start=$SECONDS
 ################################################
 # CB_CRITERIA_RELATIONSHIP
 ################################################
@@ -6469,6 +6514,8 @@ WHERE b.standard_concept = 'S'
                 and domain_id in ('CONDITION', 'PROCEDURE')
         )"
 
+echo "Running CB_CRITERIA_RELATIONSHIP done in $(timeIt block_start) secs total time $(timeIt st_sec) secs"
+block_start=$SECONDS
 ################################################
 # DATA CLEAN UP
 ################################################
@@ -6502,7 +6549,8 @@ bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 SET name = REGEXP_REPLACE(name, r'[\"]', '')
 WHERE REGEXP_CONTAINS(name, r'[\"]')"
 
-
+echo "Running DATA CLEAN UP done in $(timeIt block_start) secs total time $(timeIt st_sec) secs"
+block_start=$SECONDS
 ###############################################
 # FULL_TEXT and SYNONYMS
 ###############################################
@@ -6606,3 +6654,9 @@ FROM
         GROUP BY domain_id, is_standard, type, subtype, concept_id, name
     ) y
 WHERE x.id = y.id"
+
+echo "Running FULL_TEXT and SYNONYMS done in $(timeIt block_start) secs total time $(timeIt st_sec) secs"
+echo ""
+echo "Running make-bq-criteria-tables.sh done at "`date`
+echo "Running make-bq-criteria-tables.sh done in total time $(timeIt st_sec) secs"
+echo "--------------------------------------------------"

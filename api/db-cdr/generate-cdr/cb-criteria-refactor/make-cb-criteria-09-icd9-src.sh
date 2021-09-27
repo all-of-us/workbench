@@ -124,7 +124,7 @@ bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
     )
 SELECT
       ROW_NUMBER() OVER (ORDER BY p.parent_id, c.concept_code) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` where id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID) AS id
-    , p.id - $CB_CRITERIA_START_ID AS parent_id
+    , p.id AS parent_id
     , p.domain_id
     , p.is_standard
     , p.type
@@ -176,7 +176,7 @@ bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
     )
 SELECT
       ROW_NUMBER() OVER (ORDER BY p.id, c.concept_code) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` where id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID) AS id
-    , p.id - $CB_CRITERIA_START_ID AS parent_id
+    , p.id AS parent_id
     , p.domain_id
     , p.is_standard
     , p.type
@@ -248,7 +248,7 @@ bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
     )
 SELECT
       ROW_NUMBER() OVER (ORDER BY b.id, a.concept_code) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` where id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID) AS id
-    , b.id -$CB_CRITERIA_START_ID AS parent_id
+    , b.id AS parent_id
     , b.domain_id
     , b.is_standard
     , a.vocabulary_id AS type
@@ -334,7 +334,7 @@ bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
     )
 SELECT
       ROW_NUMBER() OVER (ORDER BY b.id,a.concept_code) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` where id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID) AS id
-    , CASE WHEN b.id is not null THEN b.id - $CB_CRITERIA_START_ID ELSE c.id - $CB_CRITERIA_START_ID END AS parent_id
+    , CASE WHEN b.id is not null THEN b.id ELSE c.id END AS parent_id
     , CASE WHEN b.domain_id is not null THEN b.domain_id ELSE c.domain_id END as domain_id
     , 0
     , a.vocabulary_id AS type
@@ -404,8 +404,8 @@ FROM
     (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
          WHERE domain_id in ('CONDITION','PROCEDURE') and type in ('ICD9CM','ICD9Proc') and is_group = 1 and is_selectable = 1 and is_standard = 0
          and id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID ) a
-    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` WHERE type in ('ICD9CM','ICD9Proc')) b on a.id = b.parent_id + $CB_CRITERIA_START_ID
-    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` WHERE type in ('ICD9CM','ICD9Proc')) c on b.id = c.parent_id + $CB_CRITERIA_START_ID"
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` WHERE type in ('ICD9CM','ICD9Proc')) b on a.id = b.parent_id
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` WHERE type in ('ICD9CM','ICD9Proc')) c on b.id = c.parent_id"
 
 echo "ICD9 - SOURCE - inserting into prep_concept_ancestor"
 bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
@@ -455,6 +455,7 @@ FROM
                             and is_standard = 0
                             and is_selectable = 1
                             and is_group = 1
+                            and id > $CB_CRITERIA_START_ID and id < $CB_CRITERIA_END_ID
                     )
                     and is_standard = 0
                 ) a
@@ -465,6 +466,7 @@ FROM
 WHERE x.concept_id = y.concept_id
     and x.type in ('ICD9CM', 'ICD9Proc')
     and x.is_standard = 0
+    and x.id > $CB_CRITERIA_START_ID and x.id < $CB_CRITERIA_END_ID
     and x.is_group = 1"
 
 echo "ICD9 - SOURCE - delete parents that have no count"
@@ -474,7 +476,9 @@ FROM\`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
 WHERE type in ('ICD9CM', 'ICD9Proc')
     and is_group = 1
     and is_selectable = 1
+    and id > $CB_CRITERIA_START_ID and id < $CB_CRITERIA_END_ID
     and rollup_count is null"
+
 
 # TODO there are still some parents that don't actually have any children and never will. WHAT TO DO?
 
@@ -486,3 +490,4 @@ if [[ "$RUN_PARALLEL" == "mult" ]]; then
   cpToMain "$TBL_PAS" &
   cpToMain "$TBL_PCA" &
 fi
+
