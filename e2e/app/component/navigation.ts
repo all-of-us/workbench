@@ -4,14 +4,16 @@ import { ElementType } from 'app/xpath-options';
 
 export enum NavLink {
   HOME = 'Home',
-  ADMIN = 'Admin',
-  USER_ADMIN = 'User Admin',
   PROFILE = 'Profile',
   SIGN_OUT = 'Sign Out',
-  CONTACT_US = 'Contact Us',
-  USER_SUPPORT = 'User Support',
   YOUR_WORKSPACES = 'Your Workspaces',
   FEATURED_WORKSPACES = 'Featured Workspaces',
+  USER_SUPPORT = 'User Support Hub',
+  CONTACT_US = 'Contact Us',
+  ADMIN = 'Admin',
+  USER_ADMIN = 'User Admin',
+  USER_AUDIT = 'User Audit',
+  WORKSPACES = 'Workspaces',
   INSTITUTION_ADMIN = 'Institution Admin'
 }
 
@@ -41,13 +43,14 @@ export default class Navigation {
       if (!applink) {
         // If it's a link under User submenu.
         const [username, admin] = await page.$x(angleIconXpath);
+        const AdminSubmenuItems = [destinationApp];
         if (destinationApp === NavLink.PROFILE || destinationApp === NavLink.SIGN_OUT) {
           // Open User submenu if needed
           if (!applink) {
             await username.click();
             return page.waitForXPath(appLinkXpath, { timeout: 2000, visible: true });
           }
-        } else if (destinationApp === NavLink.USER_ADMIN || destinationApp === NavLink.INSTITUTION_ADMIN) {
+        } else if (AdminSubmenuItems.includes(destinationApp)) {
           // If it's a link under Admin submenu, open Admin submenu if needed
           if (!applink) {
             await admin.click();

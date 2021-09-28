@@ -169,8 +169,8 @@ export const InstitutionSelectValue = {
 };
 
 export enum HeaderName {
-  InstitutionName ='Institution Name', 
-  InstitutionType ='Institution Type', 
-  DataAccessTiers = 'Data access tiers', 
+  InstitutionName = 'Institution Name',
+  InstitutionType = 'Institution Type',
+  DataAccessTiers = 'Data access tiers',
   UserEmailInstruction = 'User Email Instruction'
 }
