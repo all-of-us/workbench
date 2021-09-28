@@ -1,5 +1,6 @@
 import ProfilePage, { MissingErrorAlias } from 'app/page/profile-page';
 import { signInWithAccessToken } from 'utils/test-utils';
+import { logger } from 'libs/logger';
 import navigation, { NavLink } from 'app/component/navigation';
 import { makeString, makeUrl } from 'utils/str-utils';
 import Button from 'app/element/button';
@@ -145,7 +146,7 @@ describe('Profile', () => {
     ]) {
       const originalValue = await element.getValue();
 
-      console.log(`missingness test '${originalValue}' -> '${testText}' -> (empty), for element: `, element.getXpath());
+      logger.info(`missingness test '${originalValue}' -> '${testText}' -> (empty), for element: `, element.getXpath());
 
       // make a change, causing the Save button to activate
       await element.type(testText);
