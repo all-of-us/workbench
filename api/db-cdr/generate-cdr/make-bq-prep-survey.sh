@@ -155,7 +155,7 @@ do
     do
       order_by+="WHEN lower(value_source_value)=lower('${array[i]}') THEN $(("$i" + 1)) "
     done
-    last_index=$((expr $i + 2))
+    last_index=$(("$i" + 2))
     order_by+="ELSE $last_index END"
   fi
 
