@@ -42,8 +42,9 @@ const makeAuth2 = (config: ConfigResponse): Promise<any> => {
         },
         // onError
         ({error, details}) => {
-          authStore.set({...authStore.get(), authError: `${error}: ${details}`});
-          reject();
+          const authError = `${error}: ${details}`;
+          authStore.set({...authStore.get(), authError: authError});
+          reject(authError);
         }
       );
       resolve(gapi.auth2);
