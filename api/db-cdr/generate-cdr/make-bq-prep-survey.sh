@@ -122,19 +122,19 @@ function increment_ids() {
 }
 
 function increment_id() {
-  ID=$(("$ID" + 1))
+  ID=$((ID + 1))
 }
 
 function increment_topic_parent_id() {
-  TOPIC_PARENT_ID=$(("$1"))
+  TOPIC_PARENT_ID=$(($1))
 }
 
 function increment_question_parent_id() {
-  QUESTION_PARENT_ID=$(("$1"))
+  QUESTION_PARENT_ID=$(($1))
 }
 
 function increment_answer_parent_id() {
-  ANSWER_PARENT_ID=$(("$1"))
+  ANSWER_PARENT_ID=$(($1))
 }
 
 rm -rf "$TEMP_FILE_DIR"
@@ -153,9 +153,9 @@ do
     IFS=' ' read -r -a array <<< "$answers"
     for i in "${!array[@]}"
     do
-      order_by+="WHEN lower(value_source_value)=lower('${array[i]}') THEN $(("$i" + 1)) "
+      order_by+="WHEN lower(value_source_value)=lower('${array[i]}') THEN $((i + 1)) "
     done
-    last_index=$(("$i" + 2))
+    last_index=$((i + 2))
     order_by+="ELSE $last_index END"
   fi
 
