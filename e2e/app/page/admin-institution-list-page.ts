@@ -7,7 +7,7 @@ import ClrIconLink from 'app/element/clr-icon-link';
 const PageTitle = 'Institution Admin | All of Us Researcher Workbench';
 
 export const LabelAlias = {
-  CreateNewInstitute: 'Institution admin table'
+  CreateNewInstitution: 'Institution admin table'
 };
 
 export default class InstitutionAdminPage extends AuthenticatedPage {
@@ -25,25 +25,24 @@ export default class InstitutionAdminPage extends AuthenticatedPage {
     return new AdminTable(this.page);
   }
 
-  getCreateNewInstituteBtn(): ClrIconLink {
-    return ClrIconLink.findByName(this.page, { name: LabelAlias.CreateNewInstitute, iconShape: 'plus-circle' });
+  getCreateNewInstitutionBtn(): ClrIconLink {
+    return ClrIconLink.findByName(this.page, { name: LabelAlias.CreateNewInstitution, iconShape: 'plus-circle' });
   }
 
   // click institution name on the institution-list-page
-  async clickInstitutionNameLink(instituteName: string): Promise<Page> {
+  async clickInstitutionNameLink(institutionName: string): Promise<Page> {
     const dataTable = this.getInstitutionTable();
     dataTable.getFrozenBody();
-    const nameLink = await this.getinstitutionNameLink(instituteName);
-    // const nameLink = this.institutionNameLinkSelector(instituteName);
+    const nameLink = await this.getInstitutionNameLink(institutionName);
     await nameLink.click();
     return page;
   }
 
-  async getinstitutionNameLink(instituteName: string): Promise<ElementHandle> {
-    return this.page.waitForXPath(this.institutionNameLinkSelector(instituteName));
+  async getInstitutionNameLink(institutionName: string): Promise<ElementHandle> {
+    return this.page.waitForXPath(this.institutionNameLinkSelector(institutionName));
   }
 
-  private institutionNameLinkSelector(instituteName: string): string {
-    return `//tr/td/a[text()="${instituteName}"]`;
+  private institutionNameLinkSelector(institutionName: string): string {
+    return `//tr/td/a[text()="${institutionName}"]`;
   }
 }
