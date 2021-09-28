@@ -572,16 +572,16 @@ def make_bq_prep_survey(cmd_name, *args)
   op.parse.validate
 
   env = ENVIRONMENTS[op.opts.project]
-    cdr_source = env.fetch(:source_cdr_project)
-    if op.opts.data_browser
-      cdr_source = "aou-res-curation-prod"
-    end
-    common = Common.new
-    content_type = "Content-Type: application/json"
-    accept = "Accept: application/json"
-    circle_token = "Circle-Token: "
-    payload = "{ \"branch\": \"#{op.opts.branch}\", \"parameters\": { \"wb_prep_survey\": true, \"cdr_source_project\": \"#{cdr_source}\", \"cdr_source_dataset\": \"#{op.opts.dataset}\", \"project\": \"#{op.opts.project}\" }}"
-    common.run_inline "curl -X POST https://circleci.com/api/v2/project/github/all-of-us/cdr-indices/pipeline -H '#{content_type}' -H '#{accept}' -H \"#{circle_token}\ $(cat ~/.circle-creds/key.txt)\" -d '#{payload}'"
+  cdr_source = env.fetch(:source_cdr_project)
+  if op.opts.data_browser
+    cdr_source = "aou-res-curation-prod"
+  end
+  common = Common.new
+  content_type = "Content-Type: application/json"
+  accept = "Accept: application/json"
+  circle_token = "Circle-Token: "
+  payload = "{ \"branch\": \"#{op.opts.branch}\", \"parameters\": { \"wb_prep_survey\": true, \"cdr_source_project\": \"#{cdr_source}\", \"cdr_source_dataset\": \"#{op.opts.dataset}\", \"project\": \"#{op.opts.project}\" }}"
+  common.run_inline "curl -X POST https://circleci.com/api/v2/project/github/all-of-us/cdr-indices/pipeline -H '#{content_type}' -H '#{accept}' -H \"#{circle_token}\ $(cat ~/.circle-creds/key.txt)\" -d '#{payload}'"
 end
 
 Common.register_command({
