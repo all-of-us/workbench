@@ -403,7 +403,7 @@ dependencies {
   compile "com.google.cloud:google-cloud-iamcredentials:0.44.1"
   compile "com.google.cloud:google-cloud-logging:1.102.0"
   compile "com.google.cloud:google-cloud-monitoring:1.100.1"
-  compile "com.google.cloud:google-cloud-storage:1.113.1"
+  compile "com.google.cloud:google-cloud-storage:1.118.1"
   compile "com.google.cloud:google-cloud-tasks:1.30.4"
   compile "com.google.code.gson:gson:$project.ext.GSON_VERSION"
   compile "com.google.guava:guava:30.0-jre"
