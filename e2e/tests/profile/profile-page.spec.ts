@@ -146,7 +146,7 @@ describe('Profile', () => {
     ]) {
       const originalValue = await element.getValue();
 
-      logger.info(`missingness test '${originalValue}' -> '${testText}' -> (empty), for element: `, element.getXpath());
+      logger.info(`missingness test '${originalValue}' -> '${testText}' -> (empty), for element xpath: ${element.getXpath()}`);
 
       // make a change, causing the Save button to activate
       await element.type(testText);
