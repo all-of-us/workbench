@@ -549,6 +549,77 @@ Common.register_command({
   :fn => ->() { run_local_rw_migrations() }
 })
 
+def make_bq_prep_survey(cmd_name, *args)
+  op = WbOptionsParser.new(cmd_name, args)
+  op.opts.branch = "main"
+  op.add_option(
+    "--branch [--branch]",
+    ->(opts, v) { opts.branch = v},
+    "Branch. Optional - Default is main."
+  )
+  op.add_option(
+      "--project [project]",
+      ->(opts, v) { opts.project = v},
+      "Project name"
+  )
+  op.add_option(
+      "--dataset [dataset]",
+      ->(opts, v) { opts.dataset = v},
+      "Dataset name"
+  )
+
+  op.add_validator ->(opts) { raise ArgumentError unless opts.project and opts.dataset}
+  op.parse.validate
+
+  env = ENVIRONMENTS[op.opts.project]
+    cdr_source = env.fetch(:source_cdr_project)
+    if op.opts.data_browser
+      cdr_source = "aou-res-curation-prod"
+    end
+    common = Common.new
+    content_type = "Content-Type: application/json"
+    accept = "Accept: application/json"
+    circle_token = "Circle-Token: "
+    payload = "{ \"branch\": \"#{op.opts.branch}\", \"parameters\": { \"wb_prep_survey\": true, \"cdr_source_project\": \"#{cdr_source}\", \"cdr_source_dataset\": \"#{op.opts.dataset}\", \"project\": \"#{op.opts.project}\" }}"
+    common.run_inline "curl -X POST https://circleci.com/api/v2/project/github/all-of-us/cdr-indices/pipeline -H '#{content_type}' -H '#{accept}' -H \"#{circle_token}\ $(cat ~/.circle-creds/key.txt)\" -d '#{payload}'"
+end
+
+Common.register_command({
+  :invocation => "make-bq-prep-survey",
+  :description => "Make the prep_survey table.",
+  :fn => ->(*args) { make_bq_prep_survey("make-bq-prep-survey", *args) }
+})
+
+def make_bq_rm_prep_survey(cmd_name, *args)
+  op = WbOptionsParser.new(cmd_name, args)
+  op.add_option(
+      "--project [project]",
+      ->(opts, v) { opts.project = v},
+      "Project name"
+  )
+  op.add_option(
+      "--dataset [dataset]",
+      ->(opts, v) { opts.dataset = v},
+      "Dataset name"
+  )
+
+  op.add_validator ->(opts) { raise ArgumentError unless opts.project and opts.dataset}
+  op.parse.validate
+
+  ServiceAccountContext.new(op.opts.project).run do
+    common = Common.new
+    Dir.chdir('db-cdr') do
+      common.run_inline %W{./generate-cdr/make-bq-rm-prep-survey.sh #{ENVIRONMENTS[op.opts.project][:source_cdr_project]} #{op.opts.dataset}}
+    end
+  end
+end
+
+Common.register_command({
+  :invocation => "make-bq-rm-prep-survey",
+  :description => "Remove the prep_survey table.",
+  :fn => ->(*args) { make_bq_rm_prep_survey("make-bq-rm-prep-survey", *args) }
+})
+
 def circle_build_cdr_indices(cmd_name, args)
   op = WbOptionsParser.new(cmd_name, args)
   op.opts.data_browser = false
@@ -615,7 +686,7 @@ Common.register_command({
   :fn => ->(*args) { circle_build_cdr_indices("circle-build-cdr-indices", args) }
 })
 
-def make_bq_prep_survey(cmd_name, *args)
+def make_bq_prep_survey_old(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
   op.add_option(
       "--project [project]",
@@ -643,15 +714,15 @@ def make_bq_prep_survey(cmd_name, *args)
   ServiceAccountContext.new(op.opts.project).run do
     common = Common.new
     Dir.chdir('db-cdr') do
-      common.run_inline %W{./generate-cdr/make-bq-prep-survey.sh #{ENVIRONMENTS[op.opts.project][:source_cdr_project]} #{op.opts.dataset} #{op.opts.date} #{op.opts.tier}}
+      common.run_inline %W{./generate-cdr/make-bq-prep-survey-old.sh #{ENVIRONMENTS[op.opts.project][:source_cdr_project]} #{op.opts.dataset} #{op.opts.date} #{op.opts.tier}}
     end
   end
 end
 
 Common.register_command({
-  :invocation => "make-bq-prep-survey",
+  :invocation => "make-bq-prep-survey-old",
   :description => "Make the prep_survey table.",
-  :fn => ->(*args) { make_bq_prep_survey("make-bq-prep-survey", *args) }
+  :fn => ->(*args) { make_bq_prep_survey_old("make-bq-prep-survey-old", *args) }
 })
 
 def make_prep_ppi_csv_files(cmd_name, *args)
@@ -686,6 +757,33 @@ Common.register_command({
   :invocation => "make-prep-ppi-csv-files",
   :description => "Make prep ppi csv files for each survey type.",
   :fn => ->(*args) { make_prep_ppi_csv_files("make-prep-ppi-csv-files", *args) }
+})
+
+def stage_redcap_files(cmd_name, *args)
+  op = WbOptionsParser.new(cmd_name, args)
+  op.add_option(
+      "--date [date]",
+      ->(opts, v) { opts.date = v},
+      "Redcap file date"
+  )
+  op.add_option(
+        "--dataset [dataset]",
+        ->(opts, v) { opts.dataset = v},
+        "Dataset name"
+    )
+  op.add_validator ->(opts) { raise ArgumentError unless opts.date and opts.dataset }
+  op.parse.validate
+
+  common = Common.new
+  Dir.chdir('db-cdr/generate-cdr') do
+    common.run_inline %W{python stage-redcap-files.py --date #{op.opts.date} --dataset #{op.opts.dataset}}
+  end
+end
+
+Common.register_command({
+  :invocation => "stage-redcap-files",
+  :description => "Cleanup redcap files for CDR indices ingestion.",
+  :fn => ->(*args) { stage_redcap_files("stage-redcap-files", *args) }
 })
 
 def build_cdr_indices(cmd_name, *args)
