@@ -181,7 +181,7 @@ LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` d on (lower(a.code) = lower(d.conc
 order by a.id"
 
 echo "Loading Personal Medical History - Inserting prep_ppi_personal_medical_history into prep_survey"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_survey\`
     (
         id
@@ -223,7 +223,7 @@ LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` d on lower(a.code) = lower(d.conce
 order by a.id"
 
 echo "Loading Family Health - Inserting prep_ppi_family_health into prep_survey"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_survey\`
     (
         id
@@ -271,7 +271,7 @@ SELECT a.new_id as id
 order by a.id"
 
 echo "Loading Health Care Access - Inserting prep_ppi_health_care_access into prep_survey"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_survey\`
     (
         id
@@ -313,7 +313,7 @@ LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` d on lower(a.code) = lower(d.conce
 order by a.id"
 
 echo "Loading COPE - Inserting prep_ppi_cope into prep_survey"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_survey\`
     (
         id
@@ -368,7 +368,7 @@ bq extract --project_id="$BQ_PROJECT" --destination_format CSV --print_header=fa
 echo "Completed extract into bucket(gs://$BUCKET/$BQ_DATASET/$CDR_CSV_DIR/prep_survey.csv)"
 
 echo "Cleaning up prep tables"
-for tableName in $TABLES
+for tableName in "$TABLES"
 do
   echo "Deleting $tableName table"
   bq --project_id="$BQ_PROJECT" rm -f "$BQ_DATASET.$tableName"
