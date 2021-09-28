@@ -6,7 +6,6 @@ const defaultXpath = '//*[contains(concat(normalize-space(@class), " "), "p-data
 
 export default class adminTable extends Table {
   protected userLinkElement: ElementHandle;
-  columns1: any;
 
   constructor(page: Page, xpath: string = defaultXpath, container?: Container) {
     super(page, xpath, container);
@@ -33,6 +32,7 @@ export default class adminTable extends Table {
       //table[@class="p-datatable-scrollable-body-table"]`
     );
   }
+
 
   getHeaderTable(): Table {
     return new Table(
@@ -73,18 +73,10 @@ export default class adminTable extends Table {
    * Finds table column names. Returns in array of string.
    * @returns {Array<string>}
    */
-  //  async getAllColumnNames(): Promise<string[]> {
-  //   const colnames = await this.getUnfrozenColNames();
-  //   return colnames;
-  // }
-
-  async getAllColumnNames(): Promise<string[]> {
-    const columns1: Array<string> = await this.getFrozenColNames();
-    console.log(`columns1: ${columns1}`);
-    const columns2: Array<string> = await this.getUnfrozenColNames();
-    console.log(`columns2: ${columns2}`);
+  async getAllColumnNames(): Promise<string[]>  {
+    const columns1 : Array<string> =  await this.getFrozenColNames(); 
+    const columns2 : Array<string> =  await this.getUnfrozenColNames(); 
     const allColumnNames = columns1.concat(columns2);
-    console.log(`allColumnNames: ${allColumnNames}`);
     return allColumnNames;
   }
 
@@ -99,8 +91,6 @@ export default class adminTable extends Table {
   }
 
   async getNameColindex(): Promise<number> {
-    // const dataTable = this.getFrozenHeader();
-    // const columnName = await dataTable.getColumnNames();
     const columnName = await this.getFrozenColNames();
     const colIndexNum = columnName.indexOf('Name');
     return colIndexNum + 1;
