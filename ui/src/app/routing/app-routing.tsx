@@ -260,14 +260,15 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
   }, [config]);
 
   const firstPartyCookiesEnabled = cookiesEnabled();
-  const thirdPartyCookiesEnabled = authError && authError.includes('Cookies');
+  const thirdPartyCookiesEnabled = !(authError && authError.length > 0 && authError.includes('Cookies'));
 
+  debugger;
   return <React.Fragment>
     {authLoaded && isUserDisabled !== undefined && <React.Fragment>
       {/* Once Angular is removed the app structure will change and we can put this in a more appropriate place */}
       <NotificationModal/>
       {
-        firstPartyCookiesEnabled && <AppRouter>
+        firstPartyCookiesEnabled && thirdPartyCookiesEnabled && <AppRouter>
           <ScrollToTop/>
           {/* Previously, using a top-level Switch with AppRoute and ProtectedRoute has caused bugs: */}
           {/* see https://github.com/all-of-us/workbench/pull/3917 for details. */}
