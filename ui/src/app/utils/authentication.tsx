@@ -4,7 +4,7 @@ import {authStore, serverConfigStore, useStore} from 'app/utils/stores';
 import {delay} from 'app/utils/subscribable';
 import {environment} from 'environments/environment';
 import {ConfigResponse} from 'generated/fetch';
-import {useEffect} from 'react';
+import {useEffect, useState} from 'react';
 
 declare const gapi: any;
 
@@ -21,23 +21,32 @@ const isTestAccessTokenActive = () => {
 };
 
 const makeAuth2 = (config: ConfigResponse): Promise<any> => {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     gapi.load('auth2', () => {
       gapi.auth2.init({
         client_id: environment.clientId,
         hosted_domain: config.gsuiteDomain,
         scope: 'https://www.googleapis.com/auth/plus.login openid profile'
-      }).then(() => {
-        authStore.set({
-          ...authStore.get(),
-          authLoaded: true,
-          isSignedIn: gapi.auth2.getAuthInstance().isSignedIn.get()
-        });
+      }).then(
+        // onInit
+        () => {
+          authStore.set({
+            ...authStore.get(),
+            authLoaded: true,
+            isSignedIn: gapi.auth2.getAuthInstance().isSignedIn.get()
+          });
 
-        gapi.auth2.getAuthInstance().isSignedIn.listen((nextIsSignedIn: boolean) => {
-          authStore.set({...authStore.get(), isSignedIn: nextIsSignedIn});
-        });
-      });
+          gapi.auth2.getAuthInstance().isSignedIn.listen((nextIsSignedIn: boolean) => {
+            authStore.set({...authStore.get(), isSignedIn: nextIsSignedIn});
+          });
+        },
+        // onError
+        ({error, details}) => {
+          const authError = `${error}: ${details}`;
+          authStore.set({...authStore.get(), authError: authError});
+          reject(authError);
+        }
+      );
       resolve(gapi.auth2);
     });
   });
@@ -71,7 +80,7 @@ function clearIdToken(): void {
  *              handles redirect, etc. as appropriate when that state changes
  */
 export function useAuthentication() {
-  const {authLoaded, isSignedIn} = useStore(authStore);
+  const {authLoaded, isSignedIn, authError} = useStore(authStore);
   const {config} = useStore(serverConfigStore);
 
   useEffect(() => {
@@ -95,7 +104,7 @@ export function useAuthentication() {
     setLoggedInState(isSignedIn);
   }, [isSignedIn, authLoaded]);
 
-  return {authLoaded, isSignedIn};
+  return {authLoaded, isSignedIn, authError};
 }
 
 // The delay before continuing to avoid errors due to delays in applying the new scope grant

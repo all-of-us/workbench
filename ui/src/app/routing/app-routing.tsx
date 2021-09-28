@@ -223,7 +223,7 @@ const useOverriddenApiUrl = () => {
 
 export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => {
   const config = useServerConfig();
-  const {authLoaded} = useAuthentication();
+  const {authLoaded, authError} = useAuthentication();
   const isUserDisabled = useIsUserDisabled();
   const overriddenUrl = useOverriddenApiUrl();
 
@@ -259,79 +259,81 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
     }
   }, [config]);
 
-  const isCookiesEnabled = cookiesEnabled();
+  const firstPartyCookiesEnabled = cookiesEnabled();
+  const thirdPartyCookiesEnabled = !(authError && authError.length > 0 && authError.includes('Cookies'));
 
-  return authLoaded && isUserDisabled !== undefined && <React.Fragment>
-    {/* Once Angular is removed the app structure will change and we can put this in a more appropriate place */}
-    <NotificationModal/>
-    {
-      isCookiesEnabled && <AppRouter>
-        <ScrollToTop/>
-        {/* Previously, using a top-level Switch with AppRoute and ProtectedRoute has caused bugs: */}
-        {/* see https://github.com/all-of-us/workbench/pull/3917 for details. */}
-        {/* It should be noted that the reason this is currently working is because Switch only */}
-        {/* duck-types its children; it cares about them having a 'path' prop but doesn't validate */}
-        {/* that they are a Route or a subclass of Route. */}
-        <Switch>
-          <AppRoute exact path='/cookie-policy'>
-            <CookiePolicyPage routeData={{title: 'Cookie Policy'}}/>
-          </AppRoute>
-          <AppRoute exact path='/login'>
-            <SignInPage routeData={{title: 'Sign In'}}/>
-          </AppRoute>
-          <AppRoute exact path='/session-expired'>
-            <SessionExpiredPage routeData={{title: 'You have been signed out'}}/>
-          </AppRoute>
-          <AppRoute exact path='/sign-in-again'>
-            <SignInAgainPage routeData={{title: 'You have been signed out'}}/>
-          </AppRoute>
-          <AppRoute exact path='/user-disabled'>
-            <UserDisabledPage routeData={{title: 'Disabled'}}/>
-          </AppRoute>
-          <AppRoute exact path='/not-found'>
-            <NotFoundPage routeData={{title: 'Not Found'}}/>
-          </AppRoute>
-          <AppRoute
-              path=''
-              exact={false}
-              intermediaryRoute={true}
-              guards={[signInGuard, disabledGuard(isUserDisabled)]}
-          >
-            <SignedInPage
+  return <React.Fragment>
+    {authLoaded && isUserDisabled !== undefined && <React.Fragment>
+      {/* Once Angular is removed the app structure will change and we can put this in a more appropriate place */}
+      <NotificationModal/>
+      {
+        firstPartyCookiesEnabled && thirdPartyCookiesEnabled && <AppRouter>
+          <ScrollToTop/>
+          {/* Previously, using a top-level Switch with AppRoute and ProtectedRoute has caused bugs: */}
+          {/* see https://github.com/all-of-us/workbench/pull/3917 for details. */}
+          {/* It should be noted that the reason this is currently working is because Switch only */}
+          {/* duck-types its children; it cares about them having a 'path' prop but doesn't validate */}
+          {/* that they are a Route or a subclass of Route. */}
+          <Switch>
+            <AppRoute exact path='/cookie-policy'>
+              <CookiePolicyPage routeData={{title: 'Cookie Policy'}}/>
+            </AppRoute>
+            <AppRoute exact path='/login'>
+              <SignInPage routeData={{title: 'Sign In'}}/>
+            </AppRoute>
+            <AppRoute exact path='/session-expired'>
+              <SessionExpiredPage routeData={{title: 'You have been signed out'}}/>
+            </AppRoute>
+            <AppRoute exact path='/sign-in-again'>
+              <SignInAgainPage routeData={{title: 'You have been signed out'}}/>
+            </AppRoute>
+            <AppRoute exact path='/user-disabled'>
+              <UserDisabledPage routeData={{title: 'Disabled'}}/>
+            </AppRoute>
+            <AppRoute exact path='/not-found'>
+              <NotFoundPage routeData={{title: 'Not Found'}}/>
+            </AppRoute>
+            <AppRoute
+                path=''
+                exact={false}
                 intermediaryRoute={true}
-                routeData={{}}
-            />
-          </AppRoute>
-        </Switch>
-      </AppRouter>
-    }
+                guards={[signInGuard, disabledGuard(isUserDisabled)]}
+            >
+              <SignedInPage
+                  intermediaryRoute={true}
+                  routeData={{}}
+              />
+            </AppRoute>
+          </Switch>
+        </AppRouter>
+      }
+      {
+       overriddenUrl && <div style={{position: 'absolute', top: 0, left: '1rem'}}>
+        <span style={{fontSize: '80%', color: 'darkred'}}>
+          API URL: {overriddenUrl}
+        </span>
+       </div>
+      }
+      <div id='outdated'/> {/* for outdated-browser-rework */}
+    </React.Fragment>}
     {
-     overriddenUrl && <div style={{position: 'absolute', top: 0, left: '1rem'}}>
-      <span style={{fontSize: '80%', color: 'darkred'}}>
-        API URL: {overriddenUrl}
-      </span>
-     </div>
-    }
-    {
-      !isCookiesEnabled &&
+      !firstPartyCookiesEnabled || !thirdPartyCookiesEnabled &&
       <div>
         <div style={{maxWidth: '500px', margin: '1rem', fontFamily: 'Montserrat'}}>
           <div>
-              <img alt='logo' src={logo} width='155px'/>
+            <img alt='logo' src={logo} width='155px'/>
           </div>
           <div style={{fontSize: '20pt', color: '#2F2E7E', padding: '1rem 0 1rem 0'}}>Cookies are Disabled</div>
           <div style={{fontSize: '14pt', color: '#000000'}}>
-          For full functionality of this site it is necessary to enable cookies.
-          Here are the <a href='https://support.google.com/accounts/answer/61416'
-                          style={{color: '#2691D0'}}
-                          target='_blank'
-                          rel='noopener noreferrer'>
-          instructions how to enable cookies in your web browser</a>.
+            For full functionality of this site it is necessary to enable cookies.
+            Here are the <a href='https://support.google.com/accounts/answer/61416'
+                            style={{color: '#2691D0'}}
+                            target='_blank'
+                            rel='noopener noreferrer'>
+            instructions how to enable cookies in your web browser</a>.
           </div>
         </div>
       </div>
     }
-
-    <div id='outdated'/> {/* for outdated-browser-rework */}
   </React.Fragment>;
 };
