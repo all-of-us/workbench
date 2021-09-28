@@ -549,7 +549,7 @@ Common.register_command({
   :fn => ->() { run_local_rw_migrations() }
 })
 
-def make_bq_prep_survey(cmd_name, *args)
+def circle_prep_survey(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
   op.opts.branch = "main"
   op.add_option(
@@ -585,9 +585,9 @@ def make_bq_prep_survey(cmd_name, *args)
 end
 
 Common.register_command({
-  :invocation => "make-bq-prep-survey",
-  :description => "Make the prep_survey table.",
-  :fn => ->(*args) { make_bq_prep_survey("make-bq-prep-survey", *args) }
+  :invocation => "circle-prep-survey",
+  :description => "Build the prep_survey table in circle.",
+  :fn => ->(*args) { circle_prep_survey("circle-prep-survey", *args) }
 })
 
 def make_bq_rm_prep_survey(cmd_name, *args)
@@ -618,6 +618,46 @@ Common.register_command({
   :invocation => "make-bq-rm-prep-survey",
   :description => "Remove the prep_survey table.",
   :fn => ->(*args) { make_bq_rm_prep_survey("make-bq-rm-prep-survey", *args) }
+})
+
+def make_bq_prep_survey(cmd_name, *args)
+  op = WbOptionsParser.new(cmd_name, args)
+  op.add_option(
+      "--project [project]",
+      ->(opts, v) { opts.project = v},
+      "Project name"
+  )
+  op.add_option(
+      "--dataset [dataset]",
+      ->(opts, v) { opts.dataset = v},
+      "Dataset name"
+  )
+  op.add_option(
+      "--filename [filename]",
+      ->(opts, v) { opts.filename = v},
+      "Filename"
+  )
+  op.add_option(
+      "--id-start-block [id-start-block]",
+      ->(opts, v) { opts.id_start_block = v},
+      "ID start block"
+  )
+
+  op.add_validator ->(opts) { raise ArgumentError unless opts.project and opts.dataset and opts.filename and opts.id_start_block}
+  op.parse.validate
+
+  ServiceAccountContext.new(op.opts.project).run do
+    common = Common.new
+    Dir.chdir('db-cdr') do
+      common.run_inline %W{./generate-cdr/make-bq-prep-survey.sh #{ENVIRONMENTS[op.opts.project][:source_cdr_project]} #{op.opts.dataset} #{op.opts.filename} #{op.opts.id_start_block}}
+    end
+  end
+end
+
+Common.register_command({
+  :invocation => "make-bq-prep-survey",
+  :description => "Build the prep_survey table.",
+  :fn => ->(*args) { make_bq_prep_survey("make-bq-prep-survey", *args) }
 })
 
 def circle_build_cdr_indices(cmd_name, args)
