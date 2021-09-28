@@ -167,3 +167,10 @@ export const InstitutionSelectValue = {
   AdminTesting: 'Admin Testing',
   DummyMaster: 'Dummy Master'
 };
+
+export enum HeaderName {
+  InstitutionName ='Institution Name', 
+  InstitutionType ='Institution Type', 
+  DataAccessTiers = 'Data access tiers', 
+  UserEmailInstruction = 'User Email Instruction'
+}
