@@ -10,7 +10,7 @@ import {StatusAlertBanner} from 'app/components/status-alert-banner';
 import {statusAlertApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
-import {cookiesEnabled} from 'app/utils/cookies';
+import {firstPartyCookiesEnabled} from 'app/utils/cookies';
 import {profileStore, ProfileStore, useStore} from 'app/utils/stores';
 import {environment} from 'environments/environment';
 import {useEffect, useRef, useState} from 'react';
@@ -92,7 +92,7 @@ const barsTransformRotated = 'rotate(90deg)';
 const cookieKey = 'status-alert-banner-dismissed';
 
 const shouldShowStatusAlert = (statusAlertId, statusAlertMessage) => {
-  if (cookiesEnabled()) {
+  if (firstPartyCookiesEnabled()) {
     const cookie = localStorage.getItem(cookieKey);
     return (!cookie || (cookie && cookie !== `${statusAlertId}`)) && !!statusAlertMessage;
   } else {
@@ -158,7 +158,7 @@ export const NavBar = () => {
   });
 
   const onStatusAlertBannerUnmount = () => {
-    if (cookiesEnabled()) {
+    if (firstPartyCookiesEnabled()) {
       localStorage.setItem(cookieKey, `${statusAlertDetails.statusAlertId}`);
     }
     setShowStatusAlert(false);
