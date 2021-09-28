@@ -119,7 +119,8 @@ bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
         , path
     )
 SELECT
-    ROW_NUMBER() OVER (ORDER BY p.id, c.concept_name) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` WHERE id > $CB_CRITERIA_START_ID and id < $CB_CRITERIA_END_ID)
+    ROW_NUMBER() OVER (ORDER BY p.id, c.concept_name)
+       + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` WHERE id > $CB_CRITERIA_START_ID and id < $CB_CRITERIA_END_ID)
     , p.id
     , 'CONDITION'
     , 0
@@ -133,24 +134,24 @@ SELECT
     , 1
     , 0
     , 1
-    , CONCAT(p.path, '.', CAST(ROW_NUMBER() OVER (ORDER BY p.id, c.concept_name) +
-        (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` WHERE id > $CB_CRITERIA_START_ID and id < $CB_CRITERIA_END_ID) as STRING))
-FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` p
-JOIN \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_cm_src_in_data\` c on p.code = c.p_concept_code
-WHERE p.domain_id = 'CONDITION'
-    and p.type = 'SNOMED'
-    and p.is_standard = 0
-    and p.id > $CB_CRITERIA_START_ID and p.id < $CB_CRITERIA_END_ID
-    and p.id not in
-        (
-            SELECT parent_id
-            FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
-        )
-    and c.concept_id in
-        (
-            SELECT p_concept_id
-            FROM \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_cm_src_in_data\`
-        )"
+    , CONCAT(p.path, '.', CAST(ROW_NUMBER() OVER (ORDER BY p.id, c.concept_name)
+         + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` WHERE id > $CB_CRITERIA_START_ID and id < $CB_CRITERIA_END_ID) as STRING))
+    FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` p
+    JOIN \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_cm_src_in_data\` c on p.code = c.p_concept_code
+    WHERE p.domain_id = 'CONDITION'
+      and p.type = 'SNOMED'
+      and p.is_standard = 0
+      and p.id not in
+          (
+              SELECT parent_id
+              FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
+              WHERE id > $CB_CRITERIA_START_ID and id < $CB_CRITERIA_END_ID
+          )
+      and c.concept_id in
+          (
+              SELECT p_concept_id
+              FROM \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_cm_src_in_data\`
+          )"
 
 # for each loop, add all items (children/parents) directly under the items that were previously added
 # currently, there are only 17 levels, but we run it 18 times to be safe
@@ -178,7 +179,8 @@ do
             , path
         )
     SELECT
-        ROW_NUMBER() OVER (ORDER BY p.id, c.concept_name) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`)
+        ROW_NUMBER() OVER (ORDER BY p.id, c.concept_name)
+          + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` where id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID)
         , p.id
         , 'CONDITION'
         , 0
@@ -192,8 +194,8 @@ do
         , 1
         , 0
         , 1
-        , CONCAT(p.path, '.', CAST(ROW_NUMBER() OVER (ORDER BY p.id, c.concept_name) +
-            (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`) as STRING))
+        , CONCAT(p.path, '.', CAST(ROW_NUMBER() OVER (ORDER BY p.id, c.concept_name)
+             + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` where id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID) as STRING))
     FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` p
     JOIN \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_cm_src_in_data\` c on p.code = c.p_concept_code
     LEFT JOIN
@@ -206,11 +208,11 @@ do
     WHERE p.domain_id = 'CONDITION'
         and p.type = 'SNOMED'
         and p.is_standard = 0
-        and p.id > $CB_CRITERIA_START_ID and p.id < $CB_CRITERIA_END_ID
         and p.id not in
             (
                 SELECT parent_id
                 FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
+                WHERE id > $CB_CRITERIA_START_ID and id < $CB_CRITERIA_END_ID
             )"
 done
 
@@ -434,7 +436,6 @@ WHERE x.concept_id = y.concept_id
     and x.domain_id = 'CONDITION'
     and x.type = 'SNOMED'
     and x.is_standard = 0
-    and x.id > $CB_CRITERIA_START_ID and x.id < $CB_CRITERIA_END_ID
     and x.is_selectable = 1"
 
 echo "CONDITION_OCCURRENCE - SNOMED - SOURCE - parent counts"
@@ -460,7 +461,6 @@ FROM
                             and is_standard = 0
                             and parent_id != 0
                             and is_group = 1
-                            and id > $CB_CRITERIA_START_ID and id < $CB_CRITERIA_END_ID
                     )
                     and is_standard = 0
             ) a
@@ -471,7 +471,6 @@ WHERE x.concept_id = y.concept_id
     and x.domain_id = 'CONDITION'
     and x.type = 'SNOMED'
     and x.is_standard = 0
-    and x.id > $CB_CRITERIA_START_ID and x.id < $CB_CRITERIA_END_ID
     and x.is_group = 1"
 
 #wait for process to end before copying
@@ -481,5 +480,6 @@ if [[ "$RUN_PARALLEL" == "mult" ]]; then
   cpToMain "$TBL_CBC" &
   cpToMain "$TBL_PAS" &
   cpToMain "$TBL_PCA" &
+  wait
 fi
 

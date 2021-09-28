@@ -119,7 +119,8 @@ bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
         , path
     )
 SELECT
-      ROW_NUMBER() OVER (ORDER BY p.parent_id, c.concept_code) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` where id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID) AS id
+      ROW_NUMBER() OVER (ORDER BY p.parent_id, c.concept_code)
+         + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` where id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID) AS id
     , p.id AS parent_id
     , p.domain_id
     , p.is_standard
@@ -131,9 +132,8 @@ SELECT
     , 0
     , 0
     , 1
-    ,CONCAT(p.path, '.',
-        CAST(ROW_NUMBER() OVER (ORDER BY p.parent_id, c.concept_code) +
-        (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` where id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID) as STRING))
+    ,CONCAT(p.path, '.', CAST(ROW_NUMBER() OVER (ORDER BY p.parent_id, c.concept_code)
+        + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` where id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID) as STRING))
 FROM
     (
         SELECT *
@@ -175,7 +175,8 @@ do
             , path
         )
     SELECT
-          ROW_NUMBER() OVER (ORDER BY p.id, c.concept_code) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` where id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID)
+        ROW_NUMBER() OVER (ORDER BY p.id, c.concept_code)
+          + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` where id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID)
         , p.id
         , p.domain_id
         , p.is_standard
@@ -189,8 +190,8 @@ do
         , 1
         , 0
         , 1
-        , CONCAT(p.path, '.', CAST(ROW_NUMBER() OVER (ORDER BY p.id, c.concept_code) +
-            (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` where id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID) as STRING))
+        , CONCAT(p.path, '.', CAST(ROW_NUMBER() OVER (ORDER BY p.id, c.concept_code)
+             + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` where id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID) as STRING))
     FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` p
     JOIN \`$BQ_PROJECT.$BQ_DATASET.prep_icd10_rel_src_in_data\` c on p.code = c.p_concept_code
     LEFT JOIN
@@ -202,11 +203,11 @@ do
         ) l on c.concept_code = l.concept_code
     WHERE p.type = 'ICD10CM'
         and p.is_standard = 0
-        and p.id > $CB_CRITERIA_START_ID and p.id < $CB_CRITERIA_END_ID
         and p.id not in
             (
-                SELECT parent_id + $CB_CRITERIA_START_ID
+                SELECT parent_id
                 FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
+                WHERE id > $CB_CRITERIA_START_ID and id < $CB_CRITERIA_END_ID
             )"
 done
 
@@ -296,7 +297,6 @@ FROM
 WHERE x.concept_id = y.concept_id
     and x.type = 'ICD10CM'
     and x.is_standard = 0
-    and x.id > $CB_CRITERIA_START_ID and x.id < $CB_CRITERIA_END_ID
     and x.is_selectable = 1"
 
 echo "ICD10CM - SOURCE - generate rollup counts"
@@ -321,7 +321,6 @@ FROM
                             and is_standard = 0
                             and is_selectable = 1
                             and is_group = 1
-                            and id > $CB_CRITERIA_START_ID and id < $CB_CRITERIA_END_ID
                     )
                     and is_standard = 0
                 ) a
@@ -332,7 +331,6 @@ FROM
 WHERE x.concept_id = y.concept_id
     and x.type = 'ICD10CM'
     and x.is_standard = 0
-    and x.id > $CB_CRITERIA_START_ID and x.id < $CB_CRITERIA_END_ID
     and x.is_group = 1"
 
 #wait for process to end before copying
@@ -342,5 +340,6 @@ if [[ "$RUN_PARALLEL" == "mult" ]]; then
   cpToMain "$TBL_CBC" &
   cpToMain "$TBL_PAS" &
   cpToMain "$TBL_PCA" &
+  wait
 fi
 

@@ -98,8 +98,8 @@ SELECT
     , 0
     , 0
     , 1
-    , CAST(ROW_NUMBER() OVER (ORDER BY concept_id) +
-        (SELECT COALESCE(MAX(id),$CB_CRITERIA_START_ID) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` where id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID) as STRING)
+    , CAST(ROW_NUMBER() OVER (ORDER BY concept_id)
+        + (SELECT COALESCE(MAX(id),$CB_CRITERIA_START_ID) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` where id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID) as STRING)
 FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_merged\`
 -- these are the four root nodes
 WHERE concept_id in (2500000024, 2500000023,2500000025,2500000080)"
@@ -123,7 +123,8 @@ bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
         , path
     )
 SELECT
-      ROW_NUMBER() OVER (ORDER BY p.parent_id, c.concept_code) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` where id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID) AS id
+      ROW_NUMBER() OVER (ORDER BY p.parent_id, c.concept_code)
+         + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` where id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID) AS id
     , p.id AS parent_id
     , p.domain_id
     , p.is_standard
@@ -135,9 +136,8 @@ SELECT
     , 0
     , 0
     , 1
-    ,CONCAT(p.path, '.',
-        CAST(ROW_NUMBER() OVER (ORDER BY p.parent_id, c.concept_code) +
-        (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` where id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID) as STRING))
+    ,CONCAT(p.path, '.', CAST(ROW_NUMBER() OVER (ORDER BY p.parent_id, c.concept_code)
+        + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` where id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID) as STRING))
 -- in order to get level 2, we will link it from its level 1 parent
 FROM
     (
@@ -175,7 +175,8 @@ bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
         , path
     )
 SELECT
-      ROW_NUMBER() OVER (ORDER BY p.id, c.concept_code) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` where id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID) AS id
+      ROW_NUMBER() OVER (ORDER BY p.id, c.concept_code)
+        + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` where id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID) AS id
     , p.id AS parent_id
     , p.domain_id
     , p.is_standard
@@ -188,9 +189,8 @@ SELECT
     , 1
     , 0
     , 1
-    , CONCAT(p.path, '.',
-        CAST(ROW_NUMBER() OVER (ORDER BY p.id, c.concept_code) +
-        (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` where id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID) as STRING))
+    , CONCAT(p.path, '.', CAST(ROW_NUMBER() OVER (ORDER BY p.id, c.concept_code)
+          + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` where id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID) as STRING))
 -- in order to get level 3, we will link it from its level 2 parent
 FROM
     (
@@ -247,7 +247,8 @@ bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
       , path
     )
 SELECT
-      ROW_NUMBER() OVER (ORDER BY b.id, a.concept_code) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` where id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID) AS id
+      ROW_NUMBER() OVER (ORDER BY b.id, a.concept_code)
+         + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` where id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID) AS id
     , b.id AS parent_id
     , b.domain_id
     , b.is_standard
@@ -262,9 +263,8 @@ SELECT
     , 1
     , 0
     , 1
-    ,CONCAT(b.path, '.',
-        CAST(ROW_NUMBER() OVER (ORDER BY b.id, a.concept_code) +
-        (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` where id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID) as STRING))
+    ,CONCAT(b.path, '.', CAST(ROW_NUMBER() OVER (ORDER BY b.id, a.concept_code)
+         + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` where id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID) as STRING))
 -- in order to get level 4, we will link it to its level 3 parent
 FROM
     (
@@ -333,7 +333,8 @@ bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
         , path
     )
 SELECT
-      ROW_NUMBER() OVER (ORDER BY b.id,a.concept_code) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` where id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID) AS id
+      ROW_NUMBER() OVER (ORDER BY b.id,a.concept_code)
+         + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` where id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID) AS id
     , CASE WHEN b.id is not null THEN b.id ELSE c.id END AS parent_id
     , CASE WHEN b.domain_id is not null THEN b.domain_id ELSE c.domain_id END as domain_id
     , 0
@@ -349,9 +350,11 @@ SELECT
     , 1
     , CASE
         WHEN b.id is not null THEN
-            b.path || '.' || CAST(ROW_NUMBER() OVER (ORDER BY b.id,a.concept_code) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` where id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID) as STRING)
+            CONCAT(b.path, '.', CAST(ROW_NUMBER() OVER (ORDER BY b.id,a.concept_code)
+               + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` where id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID) as STRING))
         ELSE
-            c.path || '.' || CAST(ROW_NUMBER() OVER (ORDER BY b.id,a.concept_code) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` where id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID) as STRING)
+            CONCAT(c.path, '.', CAST(ROW_NUMBER() OVER (ORDER BY b.id,a.concept_code)
+               + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` where id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID) as STRING))
         END as path
 -- in order to get level 5, we will link it to its level 4 parent
 FROM
@@ -455,7 +458,6 @@ FROM
                             and is_standard = 0
                             and is_selectable = 1
                             and is_group = 1
-                            and id > $CB_CRITERIA_START_ID and id < $CB_CRITERIA_END_ID
                     )
                     and is_standard = 0
                 ) a
@@ -466,7 +468,6 @@ FROM
 WHERE x.concept_id = y.concept_id
     and x.type in ('ICD9CM', 'ICD9Proc')
     and x.is_standard = 0
-    and x.id > $CB_CRITERIA_START_ID and x.id < $CB_CRITERIA_END_ID
     and x.is_group = 1"
 
 echo "ICD9 - SOURCE - delete parents that have no count"
@@ -476,7 +477,6 @@ FROM\`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
 WHERE type in ('ICD9CM', 'ICD9Proc')
     and is_group = 1
     and is_selectable = 1
-    and id > $CB_CRITERIA_START_ID and id < $CB_CRITERIA_END_ID
     and rollup_count is null"
 
 
@@ -489,5 +489,6 @@ if [[ "$RUN_PARALLEL" == "mult" ]]; then
   cpToMain "$TBL_CBC" &
   cpToMain "$TBL_PAS" &
   cpToMain "$TBL_PCA" &
+  wait
 fi
 
