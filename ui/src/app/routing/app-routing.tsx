@@ -262,7 +262,6 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
   const firstPartyCookiesEnabled = cookiesEnabled();
   const thirdPartyCookiesEnabled = !(authError && authError.length > 0 && authError.includes('Cookies'));
 
-  debugger;
   return <React.Fragment>
     {authLoaded && isUserDisabled !== undefined && <React.Fragment>
       {/* Once Angular is removed the app structure will change and we can put this in a more appropriate place */}
