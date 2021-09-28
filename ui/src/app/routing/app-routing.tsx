@@ -60,38 +60,6 @@ interface RoutingProps {
   signOut: () => void;
 }
 
-const checkBrowserSupport = () => {
-  const minChromeVersion = 67;
-
-  outdatedBrowserRework({
-    browserSupport: {
-      Chrome: minChromeVersion, // Includes Chrome for mobile devices
-      Edge: false,
-      Safari: false,
-      'Mobile Safari': false,
-      Opera: false,
-      Firefox: false,
-      Vivaldi: false,
-      IE: false
-    },
-    isUnknownBrowserOK: false,
-    messages: {
-      en: {
-        outOfDate: 'Researcher Workbench may not function correctly in this browser.',
-        update: {
-          web: `If you experience issues, please install Google Chrome \
-            version ${minChromeVersion} or greater.`,
-          googlePlay: 'Please install Chrome from Google Play',
-          appStore: 'Please install Chrome from the App Store'
-        },
-        url: 'https://www.google.com/chrome/',
-        callToAction: 'Download Chrome now',
-        close: 'Close'
-      }
-    }
-  });
-};
-
 const currentAccessToken = () => {
   const tokenOverride = window.localStorage.getItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN);
 
@@ -140,26 +108,6 @@ const loadErrorReporter = () => {
   });
 
   stackdriverErrorReporterStore.set(reporter);
-};
-
-const exposeAccessTokenSetter = () => {
-  // Set this as early as possible in the application boot-strapping process,
-  // so it's available for Puppeteer to call. If we need this even earlier in
-  // the page, it could go into something like index.ts, but ideally we'd keep
-  // this logic in one place, and keep index.ts minimal.
-  if (environment.allowTestAccessTokenOverride) {
-    window.setTestAccessTokenOverride = (token: string) => {
-      // Disclaimer: console.log statements here are unlikely to captured by
-      // Puppeteer, since it typically reloads the page immediately after
-      // invoking this function.
-      if (token) {
-        window.localStorage.setItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN, token);
-        location.replace('/');
-      } else {
-        window.localStorage.removeItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN);
-      }
-    };
-  }
 };
 
 const ScrollToTop = () => {
@@ -242,12 +190,6 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
       }
     }
   };
-
-  // TODO(RW-7198): Move most of this bootstrapping out of the app router.
-  useEffect(() => {
-    exposeAccessTokenSetter();
-    checkBrowserSupport();
-  }, []);
 
   useEffect(() => {
     if (config) {
