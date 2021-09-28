@@ -90,7 +90,7 @@ LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` d on lower(a.code) = lower(d.conce
 order by a.id"
 
 echo "Loading Lifestyle - Inserting prep_ppi_lifestyle into prep_survey"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_survey\`
     (
         id

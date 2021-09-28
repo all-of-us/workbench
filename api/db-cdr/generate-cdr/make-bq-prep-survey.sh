@@ -112,7 +112,7 @@ function find_info() {
   group by concept_code, observation_source_concept_id, concept_name, value_source_concept_id, value_source_value
   order by ($order_by))
   order by id) order by id"
-  echo $(bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql --format=csv "$query" | sed "1 d" | tr '\n' '|')
+  echo $(bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql --format=csv "$query" | sed "1 d" | tr '\n' '|')
 }
 
 function increment_ids() {
@@ -122,26 +122,25 @@ function increment_ids() {
 }
 
 function increment_id() {
-  ID=$(expr $ID + 1)
+  ID=$(expr "$ID" + 1)
 }
 
 function increment_topic_parent_id() {
-  TOPIC_PARENT_ID=$(expr $1)
+  TOPIC_PARENT_ID=$(expr "$1")
 }
 
 function increment_question_parent_id() {
-  QUESTION_PARENT_ID=$(expr $1)
+  QUESTION_PARENT_ID=$(expr "$1")
 }
 
 function increment_answer_parent_id() {
-  ANSWER_PARENT_ID=$(expr $1)
+  ANSWER_PARENT_ID=$(expr "$1")
 }
 
-rm -rf $TEMP_FILE_DIR
-mkdir $TEMP_FILE_DIR
+rm -rf "$TEMP_FILE_DIR"
+mkdir "$TEMP_FILE_DIR"
 
 gsutil -m cp gs://"$BUCKET/$DATASET_DIR/$FILE_NAME" "$TEMP_FILE_DIR"
-start=`date +%s`
 
 while IFS=$'|' read -r concept_code survey_name topic answers;
 do
@@ -199,10 +198,5 @@ gsutil cp "$TEMP_FILE_DIR/$OUTPUT_FILE_NAME" "gs://$BUCKET/$BQ_DATASET/cdr_csv_f
 echo "Loading data into prep_survey"
 bq load --project_id="$BQ_PROJECT" --source_format=CSV "$BQ_DATASET.prep_survey" \
 "gs://$BUCKET/$BQ_DATASET/cdr_csv_files/$OUTPUT_FILE_NAME" "$SCHEMA_PATH/prep_survey.json"
-
-end=`date +%s`
-
-runtime=$((end-start))
-echo "total time: $runtime"
 
 rm -rf $TEMP_FILE_DIR
