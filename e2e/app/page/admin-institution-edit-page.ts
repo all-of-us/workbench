@@ -18,7 +18,6 @@ const DataTestIdAlias = {
   rtAcceptedEmailDomains: 'registered-email-domain-input',
   ctAcceptedEmailAddresses: 'controlled-email-address-input',
   ctAcceptedEmailDomains: 'controlled-email-domain-input',
-  ControlledTierAccess: 'ct-card-container',
   registeredCardDetails: 'registered-card-details',
   controlledCardDetails: 'controlled-card-details'
 };
@@ -100,15 +99,15 @@ export default class InstitutionEditPage extends AuthenticatedPage {
     return button;
   }
 
-  // get the institute name from the Institution Name input field
-  async getInstituteNameValue(): Promise<string> {
-    const instituteNameValue = this.getInstituteNameInput();
-    const instituteName = await instituteNameValue.getProperty<string>('value');
-    return instituteName;
+  // get the Institution name from the Institution Name input field
+  async getInstitutionNameValue(): Promise<string> {
+    const InstitutionNameValue = this.getInstitutionNameInput();
+    const InstitutionName = await InstitutionNameValue.getProperty<string>('value');
+    return InstitutionName;
   }
 
   // get the Institution Name input field
-  getInstituteNameInput(): Textbox {
+  getInstitutionNameInput(): Textbox {
     return Textbox.findByName(this.page, { dataTestId: DataTestIdAlias.displayName });
   }
 
@@ -118,25 +117,25 @@ export default class InstitutionEditPage extends AuthenticatedPage {
   }
 
   // get the Institution Type dropdown
-  getInstituteTypeDropdown(): SelectMenu {
+  getInstitutionTypeDropdown(): SelectMenu {
     return SelectMenu.findByName(this.page, Field.InstitutionTypeSelect.textOption);
   }
 
   // select Institution Type from the dropdown
   async selectInstitutionType(selectTextValue: string): Promise<void> {
-    const dropdown = this.getInstituteTypeDropdown();
+    const dropdown = this.getInstitutionTypeDropdown();
     return await dropdown.select(selectTextValue);
   }
 
-  // get the institute type value
+  // get the Institution type value
   async getInstitutionTypeValue(): Promise<string> {
-    const dropdown = this.getInstituteTypeDropdown();
+    const dropdown = this.getInstitutionTypeDropdown();
     return await dropdown.getSelectedValue();
   }
 
   // the institution name, type and intructions input field
-  async getAddNewInstituteFields(): Promise<void> {
-    this.getInstituteNameInput();
+  async getAddNewInstitutionFields(): Promise<void> {
+    this.getInstitutionNameInput();
     this.getInstructionsTextarea();
     this.selectInstitutionType(InstitutionTypeSelectValue.Industry);
   }
