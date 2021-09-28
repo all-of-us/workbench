@@ -99,5 +99,6 @@ wait
 ## copy temp tables back to main tables, and delete temp?
 if [[ "$RUN_PARALLEL" == "mult" ]]; then
   cpToMain "$TBL_CBC" &
+  wait
 fi
 

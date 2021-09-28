@@ -87,8 +87,8 @@ SELECT
     , 1
     , 0
     , 0
-    , CAST(ROW_NUMBER() OVER (ORDER BY concept_name) +
-      (SELECT COALESCE(MAX(id),$CB_CRITERIA_START_ID) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` where id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID) as STRING)
+    , CAST(ROW_NUMBER() OVER (ORDER BY concept_name)
+        + (SELECT COALESCE(MAX(id),$CB_CRITERIA_START_ID) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` where id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID) as STRING)
 FROM
     (
         SELECT *
@@ -109,5 +109,6 @@ wait
 ## copy temp tables back to main tables, and delete temp?
 if [[ "$RUN_PARALLEL" == "mult" ]]; then
   cpToMain "$TBL_CBC" &
+  wait
 fi
 

@@ -226,5 +226,6 @@ wait
 if [[ "$RUN_PARALLEL" == "mult" ]]; then
   cpToMain "$TBL_CBC" &
   cpToMain "$TBL_ANC" &
+  wait
 fi
 

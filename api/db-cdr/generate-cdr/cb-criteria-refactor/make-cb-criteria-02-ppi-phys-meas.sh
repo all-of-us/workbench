@@ -90,10 +90,10 @@ SELECT
     , has_attribute
     , has_hierarchy
 FROM (SELECT ROW_NUMBER() OVER(ORDER BY id)
-      + (SELECT GREATEST(COALESCE(MAX(id),0), $CB_CRITERIA_START_ID) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` WHERE id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID ) as new_id
+      + (SELECT COALESCE(MAX(id),$CB_CRITERIA_START_ID) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` WHERE id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID ) as new_id
        , * FROM \`$BQ_PROJECT.$BQ_DATASET.prep_physical_measurement\`) a
     LEFT JOIN (SELECT ROW_NUMBER() OVER(ORDER BY id)
-      + (SELECT GREATEST(COALESCE(MAX(id),0), $CB_CRITERIA_START_ID) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` WHERE id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID ) as new_id
+      + (SELECT COALESCE(MAX(id),$CB_CRITERIA_START_ID) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` WHERE id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID ) as new_id
        , id, parent_id FROM \`$BQ_PROJECT.$BQ_DATASET.prep_physical_measurement\`) b on a.parent_id = b.id
 ORDER BY 1"
 
@@ -264,5 +264,6 @@ wait
 ## copy temp tables back to main tables, and delete temp?
 if [[ "$RUN_PARALLEL" == "mult" ]]; then
   cpToMain "$TBL_CBC" &
+  wait
 fi
 
