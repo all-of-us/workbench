@@ -122,7 +122,7 @@ function increment_ids() {
 }
 
 function increment_id() {
-  ID=$(($ID + 1))
+  ID=$((ID + 1))
 }
 
 function increment_topic_parent_id() {
@@ -153,9 +153,9 @@ do
     IFS=' ' read -r -a array <<< "$answers"
     for i in "${!array[@]}"
     do
-      order_by+="WHEN lower(value_source_value)=lower('${array[i]}') THEN $(($i + 1)) "
+      order_by+="WHEN lower(value_source_value)=lower('${array[i]}') THEN $((i + 1)) "
     done
-    last_index=$(($i + 2))
+    last_index=$((i + 2))
     order_by+="ELSE $last_index END"
   fi
 
