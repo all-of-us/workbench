@@ -591,7 +591,7 @@ Common.register_command({
 })
 
 def make_bq_rm_prep_survey(cmd_name, *args)
-  op = WbOptionsParser.new(cmd_name, args
+  op = WbOptionsParser.new(cmd_name, args)
   op.add_option(
       "--project [project]",
       ->(opts, v) { opts.project = v},
