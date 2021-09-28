@@ -122,19 +122,19 @@ function increment_ids() {
 }
 
 function increment_id() {
-  ID=$(expr "$ID" + 1)
+  ID=$((expr "$ID" + 1))
 }
 
 function increment_topic_parent_id() {
-  TOPIC_PARENT_ID=$(expr "$1")
+  TOPIC_PARENT_ID=$((expr "$1"))
 }
 
 function increment_question_parent_id() {
-  QUESTION_PARENT_ID=$(expr "$1")
+  QUESTION_PARENT_ID=$((expr "$1"))
 }
 
 function increment_answer_parent_id() {
-  ANSWER_PARENT_ID=$(expr "$1")
+  ANSWER_PARENT_ID=$((expr "$1"))
 }
 
 rm -rf "$TEMP_FILE_DIR"
@@ -153,9 +153,9 @@ do
     IFS=' ' read -r -a array <<< "$answers"
     for i in "${!array[@]}"
     do
-      order_by+="WHEN lower(value_source_value)=lower('${array[i]}') THEN $(expr $i + 1) "
+      order_by+="WHEN lower(value_source_value)=lower('${array[i]}') THEN $((expr $i + 1)) "
     done
-    last_index=$(expr $i + 2)
+    last_index=$((expr $i + 2))
     order_by+="ELSE $last_index END"
   fi
 
@@ -163,7 +163,7 @@ do
   IFS=$'|' read -a result_array <<< "$result"
   if [[ ! -z "$topic" && "$topic" != "topic" && "${#result_array[@]}" -ge 2 ]]
   then
-    formatted_topic=$(echo $topic | sed "s/'/\'/")
+    formatted_topic=$(echo "$topic" | sed "s/'/\'/")
     echo "writing topic: $formatted_topic"
     echo "$ID,$TOPIC_PARENT_ID,SURVEY,0,PPI,TOPIC,,,\"${formatted_topic}\",,1,0,0,1,$survey_name" >> "$TEMP_FILE_DIR/$OUTPUT_FILE_NAME"
     increment_question_parent_id "$ID"
@@ -191,7 +191,7 @@ do
     fi
   done
 
-done < csv/$FILE_NAME
+done < csv/"$FILE_NAME"
 
 gsutil cp "$TEMP_FILE_DIR/$OUTPUT_FILE_NAME" "gs://$BUCKET/$BQ_DATASET/cdr_csv_files/$OUTPUT_FILE_NAME"
 

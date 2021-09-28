@@ -133,7 +133,7 @@ LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` d on (lower(a.code) = lower(d.conc
 order by a.id"
 
 echo "Loading Overall Health - Inserting prep_ppi_overall_health into prep_survey"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_survey\`
     (
         id
