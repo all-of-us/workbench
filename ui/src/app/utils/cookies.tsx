@@ -17,7 +17,7 @@ export const LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN = 'test-access-token-override';
  * SecurityError if you try to access it; e.g. documents created from data URIs
  * or in sandboxed iframes (depending on flags/context)
  */
-export function firstPartyCookiesEnabled(): boolean {
+export function cookiesEnabled(): boolean {
   try {
     // Create cookie
     document.cookie = 'cookietest=1';

@@ -20,7 +20,7 @@
  * });
  */
 
-import {firstPartyCookiesEnabled, LOCAL_STORAGE_API_OVERRIDE_KEY} from 'app/utils/cookies';
+import {cookiesEnabled, LOCAL_STORAGE_API_OVERRIDE_KEY} from 'app/utils/cookies';
 import {environment} from 'environments/environment';
 import {
   AuthDomainApi,
@@ -108,7 +108,7 @@ export const workspacesApi = bindCtor(WorkspacesApi);
 export const disksApi = bindCtor(DiskApi);
 
 export const getApiBaseUrl = () => {
-  if (firstPartyCookiesEnabled()) {
+  if (cookiesEnabled()) {
     return localStorage.getItem(LOCAL_STORAGE_API_OVERRIDE_KEY) || environment.allOfUsApiUrl;
   } else {
     return environment.allOfUsApiUrl;

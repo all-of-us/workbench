@@ -26,7 +26,7 @@ import {useIsUserDisabled} from 'app/utils/access-utils';
 import {initializeAnalytics} from 'app/utils/analytics';
 import {useAuthentication} from 'app/utils/authentication';
 import {
-  firstPartyCookiesEnabled,
+  cookiesEnabled,
   LOCAL_STORAGE_API_OVERRIDE_KEY,
   LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN
 } from 'app/utils/cookies';
@@ -191,7 +191,7 @@ const useOverriddenApiUrl = () => {
   const [overriddenUrl, setOverriddenUrl] = useState('');
 
   useEffect(() => {
-    if (firstPartyCookiesEnabled()) {
+    if (cookiesEnabled()) {
       try {
         setOverriddenUrl(localStorage.getItem(LOCAL_STORAGE_API_OVERRIDE_KEY));
 
@@ -259,7 +259,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
     }
   }, [config]);
 
-  const firstPartyCookiesEnabled = firstPartyCookiesEnabled();
+  const firstPartyCookiesEnabled = cookiesEnabled();
   const thirdPartyCookiesEnabled = !(authError && authError.length > 0 && authError.includes('Cookies'));
 
   return <React.Fragment>
