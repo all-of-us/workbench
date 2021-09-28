@@ -33,7 +33,6 @@ export default class adminTable extends Table {
     );
   }
 
-
   getHeaderTable(): Table {
     return new Table(
       this.page,
@@ -73,9 +72,9 @@ export default class adminTable extends Table {
    * Finds table column names. Returns in array of string.
    * @returns {Array<string>}
    */
-  async getAllColumnNames(): Promise<string[]>  {
-    const columns1 : Array<string> =  await this.getFrozenColNames(); 
-    const columns2 : Array<string> =  await this.getUnfrozenColNames(); 
+  async getAllColumnNames(): Promise<string[]> {
+    const columns1: Array<string> = await this.getFrozenColNames();
+    const columns2: Array<string> = await this.getUnfrozenColNames();
     const allColumnNames = columns1.concat(columns2);
     return allColumnNames;
   }

@@ -22,7 +22,14 @@ describe('Institution Admin', () => {
     await institutionAdminPage.waitForLoad();
     const adminTable = new AdminTable(page);
     const columns = await adminTable.getAllColumnNames();
-    expect(columns).toEqual(expect.arrayContaining([HeaderName.InstitutionName, HeaderName.InstitutionType, HeaderName.DataAccessTiers, HeaderName.UserEmailInstruction]));
+    expect(columns).toEqual(
+      expect.arrayContaining([
+        HeaderName.InstitutionName,
+        HeaderName.InstitutionType,
+        HeaderName.DataAccessTiers,
+        HeaderName.UserEmailInstruction
+      ])
+    );
 
     //click on the Institution Name link
     await institutionAdminPage.clickInstitutionNameLink(testInstitutionName);
