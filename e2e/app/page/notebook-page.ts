@@ -398,39 +398,33 @@ export default class NotebookPage extends NotebookFrame {
   }
 
   async runAllCells(): Promise<void> {
-    const clickCellMenuIcon = async (iframe: Frame): Promise<void> => {
-      await iframe.waitForXPath(Xpath.cellMenuDropdown, { visible: true, timeout: 2000 }).then((element) => {
-        element.hover();
-        element.click();
-      });
-    };
-
-    let maxRetries = 3;
-    const clickAndCheck = async (iframe: Frame) => {
-      await clickCellMenuIcon(iframe);
-      const succeeded = await iframe
-        .waitForXPath(Xpath.runAllCode, { visible: true, timeout: 2000 })
-        .then((menuitem) => {
-          menuitem.hover();
-          menuitem.click();
+    // Initial value is the max num of retries.
+    for (let retries = 3; retries > 0; retries--) {
+      const iframe = await this.getIFrame();
+      const succeeded = async (): Promise<boolean> => {
+        try {
+          // Open Cell menu dropdown.
+          const cellMenu = await iframe.waitForXPath(Xpath.cellMenuDropdown, { visible: true, timeout: 2000 });
+          await cellMenu.hover();
+          await cellMenu.click();
+          // Click Run All menuitem.
+          const runAllMenuItem = await iframe.waitForXPath(Xpath.runAllCode, { visible: true, timeout: 2000 });
+          await runAllMenuItem.hover();
+          await runAllMenuItem.click();
           return true;
-        })
-        .catch(() => {
+        } catch (err) {
+          logger.error(err);
           return false;
-        });
+        }
+      };
+      // If it's another retry, pause half second before retry.
+      // If succeeded, pause to avoid check code output too soon.
+      await this.page.waitForTimeout(500);
       if (succeeded) {
         return;
       }
-      if (maxRetries <= 0) {
-        throw new Error('Failed to click Cell menu -> Run All.');
-      }
-      maxRetries--;
-      await this.page.waitForTimeout(1000).then(() => clickAndCheck(iframe)); // 1 second pause and retry.
-    };
-
-    const frame = await this.getIFrame();
-    await clickAndCheck(frame);
-    await this.page.waitForTimeout(500);
+    }
+    throw new Error('Failed to click Cell menu -> Run All.');
   }
 
   // Upload a file, open file in notebook cell, then run code.

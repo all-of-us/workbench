@@ -46,7 +46,7 @@ export default class GenomicExtractionsSidebar extends BaseHelpSidebar {
   /**
    * Open sidebar, wait for finished status, close sidebar.
    */
-  async waitForComplete(timeout?: number): Promise<boolean> {
+  async waitForCompletionAndClose(timeout?: number): Promise<boolean> {
     await this.open();
     try {
       const table = this.getHistoryTable();

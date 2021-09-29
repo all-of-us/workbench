@@ -20,8 +20,8 @@ import { Page } from 'puppeteer';
 import { takeScreenshot } from 'utils/save-file-utils';
 import expect from 'expect';
 
-// 60 minutes. Test could take a long time.
-jest.setTimeout(60 * 60 * 1000);
+// 80 minutes. Test could take a long time.
+jest.setTimeout(80 * 60 * 1000);
 
 describe('Genomics Extraction Test', () => {
   beforeEach(async () => {
@@ -171,7 +171,7 @@ describe('Genomics Extraction Test', () => {
     expect(hasOutputError).toBe(false);
 
     // Check all seven code cells have ran.
-    const prompts = await page.$$('.input .prompt_container .input_prompt');
+    const prompts = await frame.$$('.input .prompt_container .input_prompt');
     expect(prompts.length).toBe(7);
 
     // Spot-check on some cell outputs.
@@ -205,9 +205,9 @@ describe('Genomics Extraction Test', () => {
     const genomicSidebar = new GenomicExtractionsSidebar(page);
     const startTime = Date.now();
     while (Date.now() - startTime <= maxTime) {
-      isRuntimeReady = !isRuntimeReady ? await runtimeSidebar.waitForRunning(pollInterval) : true;
+      isRuntimeReady = !isRuntimeReady ? await runtimeSidebar.waitForRunningAndClose(pollInterval) : true;
       // At the time of writing this test, it takes 30 - 40 minutes to create VCF files.
-      isExtractionReady = !isExtractionReady ? await genomicSidebar.waitForComplete(pollInterval) : true;
+      isExtractionReady = !isExtractionReady ? await genomicSidebar.waitForCompletionAndClose(pollInterval) : true;
       if (isRuntimeReady && isExtractionReady) {
         logger.info('Runtime is running and Genomic data extraction is done.');
         return true;

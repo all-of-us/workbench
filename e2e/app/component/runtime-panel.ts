@@ -169,6 +169,7 @@ export default class RuntimePanel extends BaseHelpSidebar {
       return;
     }
     await this.clickIcon(SideBarLink.ComputeConfiguration);
+    await this.getDeleteIcon();
     await this.waitUntilVisible();
     // Wait for visible texts
     await this.page.waitForXPath(`${this.getXpath()}//h3`, { visible: true });
@@ -308,7 +309,7 @@ export default class RuntimePanel extends BaseHelpSidebar {
   /**
    * Open Runtime sidebar, check status for running.
    */
-  async waitForRunning(timeout?: number): Promise<boolean> {
+  async waitForRunningAndClose(timeout?: number): Promise<boolean> {
     const runtimeSidebar = new RuntimePanel(this.page);
     await runtimeSidebar.open();
     try {

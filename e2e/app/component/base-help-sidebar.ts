@@ -60,9 +60,7 @@ export default abstract class BaseHelpSidebar extends Container {
    */
   async close(): Promise<void> {
     const sidePanelTitle = await this.getTitle();
-    const closeButton = new Button(this.page, this.deleteIconXpath);
-    await closeButton.waitUntilEnabled();
-    await closeButton.focus();
+    const closeButton = await this.getDeleteIcon();
     await closeButton.click();
     await this.waitUntilClose();
     logger.info(`Closed "${sidePanelTitle}" sidebar panel`);
@@ -99,5 +97,12 @@ export default abstract class BaseHelpSidebar extends Container {
       logger.error(err);
       throw new Error(err);
     });
+  }
+
+  async getDeleteIcon(): Promise<Button> {
+    const closeButton = new Button(this.page, this.deleteIconXpath);
+    await closeButton.waitUntilEnabled();
+    await closeButton.focus();
+    return closeButton;
   }
 }
