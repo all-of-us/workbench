@@ -17,7 +17,7 @@ DATASET_DIR="$BQ_DATASET/cdr_csv_files"
 TOPIC_PARENT_ID=0
 QUESTION_PARENT_ID=0
 ANSWER_PARENT_ID=0
-OUTPUT_FILE_NAME=$(echo "$FILE_NAME" | cut -d'_' -f 1 | xargs -I {} bash -c 'echo {}.csv')
+OUTPUT_FILE_NAME="survey_output.csv"
 
 function simple_select() {
   # run this query to initializing our .bigqueryrc configuration file
