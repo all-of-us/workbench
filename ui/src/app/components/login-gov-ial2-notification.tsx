@@ -75,7 +75,7 @@ const LoginGovIAL2Notification = () => {
     <Button
         type='primary'
         style={styles.button}
-        onClick={() => navigate(['data-access-requirements'])}>
+        path='/data-access-requirements'>
       <div style={styles.buttonText}>LEARN MORE</div>
     </Button>
   </FlexRow>;

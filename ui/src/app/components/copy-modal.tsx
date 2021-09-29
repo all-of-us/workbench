@@ -271,7 +271,6 @@ const CopyModal = withCdrVersions()(class extends React.Component<HocProps, Copy
 
   renderActionButton() {
     const resourceType = toDisplay(this.props.resourceType);
-    const {namespace, id} = this.state.destination;
     if (this.state.requestState === RequestState.UNSENT ||
       this.state.requestState === RequestState.COPY_ERROR) {
       return (
@@ -283,6 +282,7 @@ const CopyModal = withCdrVersions()(class extends React.Component<HocProps, Copy
         </Button>
       );
     } else if (this.state.requestState === RequestState.SUCCESS) {
+      const {namespace, id} = this.state.destination;
       return (
         <Button
             path={`/workspaces/${namespace}/${id}/${ResourceTypeHomeTabs.get(this.props.resourceType)}`}
