@@ -20,7 +20,6 @@ import {cond, reactStyles, withCdrVersions} from 'app/utils';
 import {findCdrVersion} from 'app/utils/cdr-versions';
 import {NavigationProps} from 'app/utils/navigation';
 import {toDisplay} from 'app/utils/resources';
-import {withNavigation} from 'app/utils/with-navigation-hoc';
 import { WorkspacePermissions } from 'app/utils/workspace-permissions';
 import {FlexRow} from './flex';
 import {ClrIcon} from './icons';
@@ -129,8 +128,7 @@ const NotebookRestrictionText = () => <div style={styles.restriction}>
   Notebooks can only be copied to workspaces in the same access tier.
 </div>;
 
-const CopyModal = fp.flow(withNavigation, withCdrVersions())
-(class extends React.Component<HocProps, CopyModalState> {
+const CopyModal = withCdrVersions()(class extends React.Component<HocProps, CopyModalState> {
   constructor(props: HocProps) {
     super(props);
     this.state = {
@@ -236,17 +234,6 @@ const CopyModal = fp.flow(withNavigation, withCdrVersions())
     });
   }
 
-  goToDestinationWorkspace() {
-    this.props.navigate(
-      [
-        'workspaces',
-        this.state.destination.namespace,
-        this.state.destination.id,
-        ResourceTypeHomeTabs.get(this.props.resourceType)
-      ]
-    );
-  }
-
   render() {
     const {resourceType} = this.props;
     const {loading, requestState} = this.state;
@@ -284,6 +271,7 @@ const CopyModal = fp.flow(withNavigation, withCdrVersions())
 
   renderActionButton() {
     const resourceType = toDisplay(this.props.resourceType);
+    const {namespace, id} = this.state.destination;
     if (this.state.requestState === RequestState.UNSENT ||
       this.state.requestState === RequestState.COPY_ERROR) {
       return (
@@ -296,8 +284,10 @@ const CopyModal = fp.flow(withNavigation, withCdrVersions())
       );
     } else if (this.state.requestState === RequestState.SUCCESS) {
       return (
-        <Button style={{ marginLeft: '0.5rem' }}
-                onClick={() => this.goToDestinationWorkspace()}>
+        <Button
+            path={`/workspaces/${namespace}/${id}/${ResourceTypeHomeTabs.get(this.props.resourceType)}`}
+            style={{ marginLeft: '0.5rem' }}
+        >
           Go to Copied {resourceType}
         </Button>
       );

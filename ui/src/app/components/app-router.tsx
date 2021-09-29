@@ -92,7 +92,10 @@ export const AppRouter = ({children}): React.ReactElement => {
   return <BrowserRouter getUserConfirmation={getUserConfirmation}>{children}</BrowserRouter>;
 };
 
-export const RouteLink = ({path, style = {}, children}): React.ReactElement => <Link style={{...style}} to={path}>{children}</Link>;
+// Most internal routing is done via custom styled Button, not via text, so we only want to use anchor styling
+// if we explicitly set it on the RouteLink
+export const RouteLink = ({path, style = {}, children}): React.ReactElement =>
+    <Link style={{textDecoration: 'none', color: 'unset', ...style}} to={path}>{children}</Link>;
 
 export const AppRoute = ({path, guards = [], exact, intermediaryRoute = false, children}): React.ReactElement => {
   const { redirectPath = null } = fp.find(({allowed}) => !allowed(), guards) || {};
