@@ -106,7 +106,7 @@ export const ConceptSetActions = fp.flow(withCurrentWorkspace(), withNavigation,
       }
     }
 
-    getNavigateUrl(action: string): string {
+    getNavigationPath(action: string): string {
       const {namespace, id} = this.props.workspace;
       const {conceptSet} = this.state;
       let url = `/workspaces/${namespace}/${id}/`;
@@ -136,7 +136,7 @@ export const ConceptSetActions = fp.flow(withCurrentWorkspace(), withNavigation,
           <div style={{marginTop: '0.25rem'}}>
             The concept set
             <RouteLink style={{color: colors.accent, margin: '0 4px'}}
-               path={this.getNavigateUrl('conceptSet')}>
+               path={this.getNavigationPath('conceptSet')}>
               {conceptSet.name}
             </RouteLink>
             has been saved.
@@ -155,7 +155,7 @@ export const ConceptSetActions = fp.flow(withCurrentWorkspace(), withNavigation,
                   <Button
                     type='primary'
                     style={styles.cardButton}
-                    path={this.getNavigateUrl(card.action)}>
+                    path={this.getNavigationPath(card.action)}>
                     {card.title}
                   </Button>
                 </div>

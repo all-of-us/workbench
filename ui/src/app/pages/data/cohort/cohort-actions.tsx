@@ -16,6 +16,7 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {RouteComponentProps, withRouter} from 'react-router-dom';
 import {RouteLink} from "app/components/app-router";
+import * as querystring from "querystring";
 
 const styles = reactStyles({
   cohortsHeader: {
@@ -102,14 +103,17 @@ export const CohortActions = fp.flow(
       });
     }
 
-    getNavigateUrl(action: string): string {
+    getNavigationPath(action: string): string {
       const {cohort} = this.state;
       const {namespace, id} = this.props.workspace;
       let url = `/workspaces/${namespace}/${id}/`;
+      let queryParams: any = null;
 
       switch (action) {
         case 'cohort':
-          url += `data/cohorts/build?cohortId=${cohort.id}`;
+          url += `data/cohorts/build`;
+          queryParams = {};
+          queryParams.cohortId = cohort.id;
           break;
         case 'review':
           url += `data/cohorts/${cohort.id}/review`;
@@ -122,6 +126,9 @@ export const CohortActions = fp.flow(
           break;
         case 'newCohort':
           url += `data/cohorts/build`;
+      }
+      if (queryParams) {
+        url += '?' + querystring.stringify(queryParams)
       }
       return url;
     }
@@ -136,7 +143,7 @@ export const CohortActions = fp.flow(
             The cohort
              <RouteLink
                style={{color: colors.accent, margin: '0 4px'}}
-               path={this.getNavigateUrl('cohort')}>
+               path={this.getNavigationPath('cohort')}>
                 {cohort.name}
              </RouteLink>
              has been saved.
@@ -155,7 +162,7 @@ export const CohortActions = fp.flow(
                   <Button
                     type='primary'
                     style={styles.cardButton}
-                    path={this.getNavigateUrl(card.action)}>
+                    path={this.getNavigationPath(card.action)}>
                     {card.title}
                   </Button>
                 </div>
