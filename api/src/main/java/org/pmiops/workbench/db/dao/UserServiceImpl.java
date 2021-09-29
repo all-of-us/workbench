@@ -23,6 +23,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.inject.Provider;
 import javax.mail.MessagingException;
 import org.hibernate.exception.GenericJDBCException;
@@ -86,6 +87,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
 
   private static final int MAX_RETRIES = 3;
   private static final int CURRENT_TERMS_OF_SERVICE_VERSION = 1;
+  private static final int CURRENT_DATA_USER_CODE_OF_CONDUCT_VERSION = 3;
 
   private final Provider<WorkbenchConfig> configProvider;
   private final Provider<DbUser> userProvider;
@@ -150,7 +152,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   @VisibleForTesting
   @Override
   public int getCurrentDuccVersion() {
-    return 3;
+    return CURRENT_DATA_USER_CODE_OF_CONDUCT_VERSION;
   }
 
   /**
@@ -876,6 +878,35 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
           } else {
             user.setTwoFactorAuthCompletionTime(null);
             accessModuleService.updateCompletionTime(user, AccessModuleName.TWO_FACTOR_AUTH, null);
+          }
+          return user;
+        },
+        targetUser,
+        agent);
+  }
+
+  @Override
+  public DbUser syncDuccVersionStatus(
+      DbUser targetUser, Agent agent, @Nullable Integer signedDuccVersion) {
+    if (isServiceAccount(targetUser)) {
+      // Skip sync for service account user rows.
+      return targetUser;
+    }
+
+    return updateUserWithRetries(
+        user -> {
+          // convert Integer to int to prevent a NPE from comparison-unboxing
+          final int signedVersionForComparison =
+              Optional.ofNullable(signedDuccVersion)
+                  // null is invalid, so convert to a known-invalid int
+                  .orElse(CURRENT_DATA_USER_CODE_OF_CONDUCT_VERSION - 1);
+
+          if (signedVersionForComparison != getCurrentDuccVersion()) {
+            // user.setDataUseAgreementCompletionTime() will be replaced by
+            // accessModuleService.updateCompletionTime()
+            user.setDataUseAgreementCompletionTime(null);
+            accessModuleService.updateCompletionTime(
+                user, AccessModuleName.DATA_USER_CODE_OF_CONDUCT, null);
           }
           return user;
         },
