@@ -899,7 +899,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
           final int signedVersionForComparison =
               Optional.ofNullable(signedDuccVersion)
                   // null is invalid, so convert to a known-invalid int
-                  .orElse(CURRENT_DATA_USER_CODE_OF_CONDUCT_VERSION - 1);
+                  .orElse(getCurrentDuccVersion() - 1);
 
           if (signedVersionForComparison != getCurrentDuccVersion()) {
             // user.setDataUseAgreementCompletionTime() will be replaced by
