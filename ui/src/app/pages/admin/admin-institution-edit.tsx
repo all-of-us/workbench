@@ -670,7 +670,7 @@ export const AdminInstitutionEdit = fp.flow(withNavigation, withRouter)(class ex
          </FlexRow>
         <FlexRow style={{justifyContent: 'flex-start', marginRight: '1rem'}}>
           <div>
-            <Button type='secondary' onClick={() => this.backNavigate()} style={{marginRight: '1.5rem'}}>Cancel</Button>
+            <Button type='secondary' path='/admin/institution' style={{marginRight: '1.5rem'}}>Cancel</Button>
             <TooltipTrigger data-test-id='tooltip' content={
               errors && this.disableSave(errors) && <div>Please correct the following errors
                 <BulletAlignedUnorderedList>

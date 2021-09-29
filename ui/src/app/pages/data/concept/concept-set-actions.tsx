@@ -105,7 +105,7 @@ export const ConceptSetActions = fp.flow(withCurrentWorkspace(), withNavigation,
       }
     }
 
-    navigateTo(action: string): void {
+    getNavigateUrl(action: string): string {
       const {namespace, id} = this.props.workspace;
       const {conceptSet} = this.state;
       let url = `/workspaces/${namespace}/${id}/`;
@@ -123,7 +123,7 @@ export const ConceptSetActions = fp.flow(withCurrentWorkspace(), withNavigation,
           url += `data/data-sets`;
           break;
       }
-      this.props.navigateByUrl(url);
+      return url;
     }
 
     render() {
@@ -135,7 +135,7 @@ export const ConceptSetActions = fp.flow(withCurrentWorkspace(), withNavigation,
           <div style={{marginTop: '0.25rem'}}>
             The concept set
             <a style={{color: colors.accent, margin: '0 4px'}}
-               onClick={() => this.navigateTo('conceptSet')}>
+               onClick={() => this.getNavigateUrl('conceptSet')}>
               {conceptSet.name}
             </a>
             has been saved.
@@ -154,7 +154,7 @@ export const ConceptSetActions = fp.flow(withCurrentWorkspace(), withNavigation,
                   <Button
                     type='primary'
                     style={styles.cardButton}
-                    onClick={() => this.navigateTo(card.action)}>
+                    path={this.getNavigateUrl(card.action)}>
                     {card.title}
                   </Button>
                 </div>
