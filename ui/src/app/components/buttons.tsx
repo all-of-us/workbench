@@ -223,15 +223,15 @@ export const Button = ({
   // `fp.omit` used to prevent propagation of test IDs to the rendered child component.
   const childProps = propagateDataTestId ? props : fp.omit(['data-test-id'], props);
   const computedStyle = fp.merge(computeStyle(buttonVariants[type], {disabled}), {style})
-  return path && !disabled
-      ? <RouteLink path={path} style={buttonVariants[type].linkStyle}>
-        <Clickable disabled={disabled} {...computedStyle} {...childProps}>
+  return path
+    ? <RouteLink path={path} {...computedStyle}>
+        <Clickable disabled={disabled} {...childProps}>
           {children}
         </Clickable>
       </RouteLink>
-      : <Clickable disabled={disabled} {...computedStyle} {...childProps}>
-        {children}
-      </Clickable>;
+    : <Clickable disabled={disabled} {...computedStyle} {...childProps}>
+      {children}
+    </Clickable>
 };
 
 export const MenuItem = ({icon = null, faIcon = null, tooltip = '', disabled = false, children, style = {}, ...props}) => {

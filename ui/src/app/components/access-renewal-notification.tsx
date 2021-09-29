@@ -81,5 +81,5 @@ export const AccessRenewalNotificationMaybe = () => {
   const {profile} = useStore(profileStore);
   const daysRemaining = maybeDaysRemaining(profile);
   // returning null is a way to tell React not to render this component.  `undefined` won't work here.
-  return daysRemaining !== undefined ? <AccessRenewalNotification daysRemaining={daysRemaining}/> : null;
+  return daysRemaining === undefined ? <AccessRenewalNotification daysRemaining={daysRemaining}/> : null;
 };
