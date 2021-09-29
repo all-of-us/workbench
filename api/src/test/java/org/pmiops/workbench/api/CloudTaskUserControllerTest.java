@@ -83,11 +83,16 @@ public class CloudTaskUserControllerTest extends SpringTest {
   }
 
   @Test
-  public void testSynchronizeAccess() throws Exception {
+  public void testSynchronizeAccess() {
     when(mockAccessModuleService.getAccessModuleStatus(userA, AccessModuleName.TWO_FACTOR_AUTH))
         .thenReturn(Optional.of(new AccessModuleStatus().completionEpochMillis(123L)));
     when(mockAccessModuleService.getAccessModuleStatus(userB, AccessModuleName.TWO_FACTOR_AUTH))
         .thenReturn(Optional.of(new AccessModuleStatus()));
+
+    // kluge to prevent test NPEs on the return value of syncDuccVersionStatus()
+    when(mockUserService.syncDuccVersionStatus(userA, Agent.asSystem(), null)).thenReturn(userA);
+    when(mockUserService.syncDuccVersionStatus(userB, Agent.asSystem(), null)).thenReturn(userB);
+
     controller.synchronizeUserAccess(
         new SynchronizeUserAccessRequest()
             .addUserIdsItem(userA.getUserId())
@@ -95,7 +100,16 @@ public class CloudTaskUserControllerTest extends SpringTest {
 
     // Ideally we would use a real implementation of UserService and mock its external deps, but
     // unfortunately UserService is too sprawling to replicate in a unit test.
+
+    // we sync DUCC for all users
+    verify(mockUserService).syncDuccVersionStatus(userA, Agent.asSystem(), null);
+    verify(mockUserService).syncDuccVersionStatus(userB, Agent.asSystem(), null);
+
+    // we only sync 2FA users with completed 2FA
     verify(mockUserService).syncTwoFactorAuthStatus(userA, Agent.asSystem());
+
+    // normally we would expect the userService sync methods to add to this count, but userService
+    // is mocked so we only see the direct calls from synchronizeUserAccess(), one per user
     verify(mockUserService, times(2)).updateUserWithRetries(any(), any(), any());
     verifyNoMoreInteractions(mockUserService);
   }
