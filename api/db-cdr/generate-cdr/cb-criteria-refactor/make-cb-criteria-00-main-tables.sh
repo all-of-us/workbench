@@ -55,6 +55,9 @@ make-cb-criteria-10-icd10-cm-src.sh
 make-cb-criteria-11-icd10-pcs-src.sh
 make-cb-criteria-12-cond-occur-snomed-src.sh
 make-cb-criteria-13-cond-occur-snomed-std.sh
+make-cb-criteria-14-meas-clin-loinc-std.sh
+make-cb-criteria-15-meas-labs-loinc-std.sh
+make-cb-criteria-16-meas-snomed-std.sh
 )
 if [[ "$run_in_parallel" == "ori" ]]; then
   echo "for 'ori' running make-bq-criteria-tables.sh script directly!"
