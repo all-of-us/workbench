@@ -2,12 +2,13 @@
 
 # This generates big query denormalized tables for search, review and datasets.
 
-set -ex
+set -e
 
-export BQ_PROJECT=$1        # CDR project
-export BQ_DATASET=$2        # CDR dataset
-export FILE_NAME=$3         # Filename to process
-export ID=$4                # Starting id position
+export BQ_PROJECT=$1         # CDR project
+export BQ_DATASET=$2         # CDR dataset
+export FILE_NAME=$3          # Filename to process
+export ID=$4                 # Starting id position
+export REMOVE_PREP_SURVEY=$5 # Should remove prep_survey
 
 BUCKET="all-of-us-workbench-private-cloudsql"
 SCHEMA_PATH="generate-cdr/bq-schemas"
@@ -17,6 +18,13 @@ TOPIC_PARENT_ID=0
 QUESTION_PARENT_ID=0
 ANSWER_PARENT_ID=0
 OUTPUT_FILE_NAME=$(echo "$FILE_NAME" | cut -d'_' -f 1 | xargs -I {} bash -c 'echo {}.csv')
+
+function simple_select() {
+  # run this query to initializing our .bigqueryrc configuration file
+  # otherwise this will corrupt the output of the first call to find_info()
+  query="select count(*) from \`$BQ_PROJECT.$BQ_DATASET.concept\`"
+  bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql --format=csv "$query"
+}
 
 function find_info() {
   local concept_code=$1
@@ -142,6 +150,10 @@ mkdir "$TEMP_FILE_DIR"
 
 gsutil -m cp gs://"$BUCKET/$DATASET_DIR/$FILE_NAME" "$TEMP_FILE_DIR"
 
+# run this query to initializing our .bigqueryrc configuration file
+# otherwise this will corrupt the output of the first call to find_info()
+simple_select
+
 while IFS=$'|' read -r concept_code survey_name topic answers;
 do
   # Build custom order by clause
@@ -196,6 +208,10 @@ done < csv/"$FILE_NAME"
 gsutil cp "$TEMP_FILE_DIR/$OUTPUT_FILE_NAME" "gs://$BUCKET/$BQ_DATASET/cdr_csv_files/$OUTPUT_FILE_NAME"
 
 echo "Loading data into prep_survey"
+if [[ "$REMOVE_PREP_SURVEY" = true ]]
+then
+  bq --project_id="$BQ_PROJECT" rm -f "$BQ_DATASET.prep_survey"
+fi
 bq load --project_id="$BQ_PROJECT" --source_format=CSV "$BQ_DATASET.prep_survey" \
 "gs://$BUCKET/$BQ_DATASET/cdr_csv_files/$OUTPUT_FILE_NAME" "$SCHEMA_PATH/prep_survey.json"
 
