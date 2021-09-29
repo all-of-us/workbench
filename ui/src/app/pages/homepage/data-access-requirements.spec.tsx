@@ -281,59 +281,71 @@ describe('DataAccessRequirements', () => {
     // RAS launch bug
     it('should render all modules as complete by transitioning to all complete', async() => {
 
-        // initially, the user has completed all modules except RAS (the standard case at RAS launch time)
 
-        const allExceptRas = allModules.filter(m => m !== AccessModule.RASLINKLOGINGOV);
-        profileStore.set({
-            profile: {
-                ...ProfileStubVariables.PROFILE_STUB,
-                accessModules: {
-                    modules: allExceptRas.map(module => ({moduleName: module, completionEpochMillis: 1}))
-                }
-            },
-            load,
-            reload,
-            updateCache});
+        await Promise.all(Array(10).fill(0).map(async() => {
+            console.log(Math.random());
 
-        const wrapper = component();
-        allExceptRas.forEach(module => {
-            expect(findCompleteModule(wrapper, module).exists()).toBeTruthy();
 
-            expect(findIncompleteModule(wrapper, module).exists()).toBeFalsy();
-            expect(findIneligibleModule(wrapper, module).exists()).toBeFalsy();
-        });
+            // initially, the user has completed all modules except RAS (the standard case at RAS launch time)
 
-        // RAS is not complete
-        expect(findIncompleteModule(wrapper, AccessModule.RASLINKLOGINGOV).exists()).toBeTruthy();
+            const allExceptRas = allModules.filter(m => m !== AccessModule.RASLINKLOGINGOV);
+            profileStore.set({
+                profile: {
+                    ...ProfileStubVariables.PROFILE_STUB,
+                    accessModules: {
+                        modules: allExceptRas.map(module => ({moduleName: module, completionEpochMillis: 1}))
+                    }
+                },
+                load,
+                reload,
+                updateCache
+            });
 
-        expect(findCompleteModule(wrapper, AccessModule.RASLINKLOGINGOV).exists()).toBeFalsy();
-        expect(findIneligibleModule(wrapper, AccessModule.RASLINKLOGINGOV).exists()).toBeFalsy();
+            const wrapper = component();
+            allExceptRas.forEach(module => {
+                expect(findCompleteModule(wrapper, module).exists()).toBeTruthy();
 
-        expect(findCompletionBanner(wrapper).exists()).toBeFalsy();
+                expect(findIncompleteModule(wrapper, module).exists()).toBeFalsy();
+                expect(findIneligibleModule(wrapper, module).exists()).toBeFalsy();
+            });
 
-        // now all modules are complete
+            // RAS is not complete
+            expect(findIncompleteModule(wrapper, AccessModule.RASLINKLOGINGOV).exists()).toBeTruthy();
 
-        profileStore.set({
-            profile: {
-                ...ProfileStubVariables.PROFILE_STUB,
-                accessModules: {
-                    modules: allModules.map(module => ({moduleName: module, completionEpochMillis: 1}))
-                }
-            },
-            load,
-            reload,
-            updateCache});
+            expect(findCompleteModule(wrapper, AccessModule.RASLINKLOGINGOV).exists()).toBeFalsy();
+            expect(findIneligibleModule(wrapper, AccessModule.RASLINKLOGINGOV).exists()).toBeFalsy();
 
-        await waitOneTickAndUpdate(wrapper);
+            expect(findCompletionBanner(wrapper).exists()).toBeFalsy();
 
-        allModules.forEach(module => {
-            expect(findCompleteModule(wrapper, module).exists()).toBeTruthy();
+            // now all modules are complete
 
-            expect(findIncompleteModule(wrapper, module).exists()).toBeFalsy();
-            expect(findIneligibleModule(wrapper, module).exists()).toBeFalsy();
-        });
+            profileStore.set({
+                profile: {
+                    ...ProfileStubVariables.PROFILE_STUB,
+                    accessModules: {
+                        modules: allModules.map(module => ({moduleName: module, completionEpochMillis: 1}))
+                    }
+                },
+                load,
+                reload,
+                updateCache
+            });
 
-        expect(findCompletionBanner(wrapper).exists()).toBeTruthy();
+            await waitOneTickAndUpdate(wrapper);
+
+            allModules.forEach(module => {
+                expect(findCompleteModule(wrapper, module).exists()).toBeTruthy();
+
+                expect(findIncompleteModule(wrapper, module).exists()).toBeFalsy();
+                expect(findIneligibleModule(wrapper, module).exists()).toBeFalsy();
+            });
+
+            expect(findCompletionBanner(wrapper).exists()).toBeTruthy();
+
+
+        }));
+
+
     });
 
 
