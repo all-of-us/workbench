@@ -210,14 +210,6 @@ export const Clickable = ({as = 'div', disabled = false, onClick = null, propaga
   />;
 };
 
-const ButtonContentWrapper = ({computedStyle, disabled = false, ...props}) => {
-  return <Clickable
-      // `fp.omit` used to prevent propagation of test IDs to the rendered child component.
-      disabled={disabled} {...fp.omit(['data-test-id'], props)}
-      {...computedStyle}
-  />;
-};
-
 export const Button = ({
                          children,
                          path='',
@@ -230,16 +222,16 @@ export const Button = ({
                        }) => {
   // `fp.omit` used to prevent propagation of test IDs to the rendered child component.
   const childProps = propagateDataTestId ? props : fp.omit(['data-test-id'], props);
-  const childStyle = fp.merge(computeStyle(buttonVariants[type], {disabled}), {style})
+  const computedStyle = fp.merge(computeStyle(buttonVariants[type], {disabled}), {style})
   return path && !disabled
-      ? <ButtonContentWrapper computedStyle={childStyle} disabled={disabled} {...childProps}>
-        <RouteLink path={path} style={buttonVariants[type].linkStyle}>
+      ? <RouteLink path={path} style={buttonVariants[type].linkStyle}>
+        <Clickable disabled={disabled} {...computedStyle} {...childProps}>
           {children}
-        </RouteLink>
-      </ButtonContentWrapper>
-      : <ButtonContentWrapper computedStyle={childStyle} disabled={disabled} {...childProps}>
+        </Clickable>
+      </RouteLink>
+      : <Clickable disabled={disabled} {...computedStyle} {...childProps}>
         {children}
-      </ButtonContentWrapper>;
+      </Clickable>;
 };
 
 export const MenuItem = ({icon = null, faIcon = null, tooltip = '', disabled = false, children, style = {}, ...props}) => {
