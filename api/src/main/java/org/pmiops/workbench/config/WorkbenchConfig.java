@@ -205,7 +205,6 @@ public class WorkbenchConfig {
 
   public static class MoodleConfig {
     public String host;
-    public boolean enableMoodleBackend;
     public String credentialsKeyV2;
   }
 

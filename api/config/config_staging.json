@@ -85,7 +85,6 @@
   },
   "moodle": {
     "host": "aoudev.nnlm.gov",
-    "enableMoodleBackend": true,
     "credentialsKeyV2": "moodle-key-v2.txt"
   },
   "access": {
@@ -102,12 +101,12 @@
     "enableEventDateModifier": false,
     "enableResearchPurposePrompt": false,
     "enableGenomicExtraction": false,
-    "enableFireCloudV2Billing" : false,
+    "enableFireCloudV2Billing" : true,
     "enableGpu": false,
     "enablePersistentDisk": false,
     "enableAccessModuleRewrite" : true,
     "enableUnifiedUserAccessCron": true,
-    "enableStandardSourceDomains": false
+    "enableStandardSourceDomains": true
   },
   "actionAudit": {
     "logName": "workbench-action-audit-staging",

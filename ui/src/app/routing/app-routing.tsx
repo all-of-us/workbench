@@ -60,38 +60,6 @@ interface RoutingProps {
   signOut: () => void;
 }
 
-const checkBrowserSupport = () => {
-  const minChromeVersion = 67;
-
-  outdatedBrowserRework({
-    browserSupport: {
-      Chrome: minChromeVersion, // Includes Chrome for mobile devices
-      Edge: false,
-      Safari: false,
-      'Mobile Safari': false,
-      Opera: false,
-      Firefox: false,
-      Vivaldi: false,
-      IE: false
-    },
-    isUnknownBrowserOK: false,
-    messages: {
-      en: {
-        outOfDate: 'Researcher Workbench may not function correctly in this browser.',
-        update: {
-          web: `If you experience issues, please install Google Chrome \
-            version ${minChromeVersion} or greater.`,
-          googlePlay: 'Please install Chrome from Google Play',
-          appStore: 'Please install Chrome from the App Store'
-        },
-        url: 'https://www.google.com/chrome/',
-        callToAction: 'Download Chrome now',
-        close: 'Close'
-      }
-    }
-  });
-};
-
 const currentAccessToken = () => {
   const tokenOverride = window.localStorage.getItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN);
 
@@ -140,26 +108,6 @@ const loadErrorReporter = () => {
   });
 
   stackdriverErrorReporterStore.set(reporter);
-};
-
-const exposeAccessTokenSetter = () => {
-  // Set this as early as possible in the application boot-strapping process,
-  // so it's available for Puppeteer to call. If we need this even earlier in
-  // the page, it could go into something like index.ts, but ideally we'd keep
-  // this logic in one place, and keep index.ts minimal.
-  if (environment.allowTestAccessTokenOverride) {
-    window.setTestAccessTokenOverride = (token: string) => {
-      // Disclaimer: console.log statements here are unlikely to captured by
-      // Puppeteer, since it typically reloads the page immediately after
-      // invoking this function.
-      if (token) {
-        window.localStorage.setItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN, token);
-        location.replace('/');
-      } else {
-        window.localStorage.removeItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN);
-      }
-    };
-  }
 };
 
 const ScrollToTop = () => {
@@ -223,7 +171,7 @@ const useOverriddenApiUrl = () => {
 
 export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => {
   const config = useServerConfig();
-  const {authLoaded} = useAuthentication();
+  const {authLoaded, authError} = useAuthentication();
   const isUserDisabled = useIsUserDisabled();
   const overriddenUrl = useOverriddenApiUrl();
 
@@ -243,12 +191,6 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
     }
   };
 
-  // TODO(RW-7198): Move most of this bootstrapping out of the app router.
-  useEffect(() => {
-    exposeAccessTokenSetter();
-    checkBrowserSupport();
-  }, []);
-
   useEffect(() => {
     if (config) {
       // Bootstrapping that requires server config
@@ -259,79 +201,81 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
     }
   }, [config]);
 
-  const isCookiesEnabled = cookiesEnabled();
+  const firstPartyCookiesEnabled = cookiesEnabled();
+  const thirdPartyCookiesEnabled = !(authError && authError.length > 0 && authError.includes('Cookies'));
 
-  return authLoaded && isUserDisabled !== undefined && <React.Fragment>
-    {/* Once Angular is removed the app structure will change and we can put this in a more appropriate place */}
-    <NotificationModal/>
-    {
-      isCookiesEnabled && <AppRouter>
-        <ScrollToTop/>
-        {/* Previously, using a top-level Switch with AppRoute and ProtectedRoute has caused bugs: */}
-        {/* see https://github.com/all-of-us/workbench/pull/3917 for details. */}
-        {/* It should be noted that the reason this is currently working is because Switch only */}
-        {/* duck-types its children; it cares about them having a 'path' prop but doesn't validate */}
-        {/* that they are a Route or a subclass of Route. */}
-        <Switch>
-          <AppRoute exact path='/cookie-policy'>
-            <CookiePolicyPage routeData={{title: 'Cookie Policy'}}/>
-          </AppRoute>
-          <AppRoute exact path='/login'>
-            <SignInPage routeData={{title: 'Sign In'}}/>
-          </AppRoute>
-          <AppRoute exact path='/session-expired'>
-            <SessionExpiredPage routeData={{title: 'You have been signed out'}}/>
-          </AppRoute>
-          <AppRoute exact path='/sign-in-again'>
-            <SignInAgainPage routeData={{title: 'You have been signed out'}}/>
-          </AppRoute>
-          <AppRoute exact path='/user-disabled'>
-            <UserDisabledPage routeData={{title: 'Disabled'}}/>
-          </AppRoute>
-          <AppRoute exact path='/not-found'>
-            <NotFoundPage routeData={{title: 'Not Found'}}/>
-          </AppRoute>
-          <AppRoute
-              path=''
-              exact={false}
-              intermediaryRoute={true}
-              guards={[signInGuard, disabledGuard(isUserDisabled)]}
-          >
-            <SignedInPage
+  return <React.Fragment>
+    {authLoaded && isUserDisabled !== undefined && <React.Fragment>
+      {/* Once Angular is removed the app structure will change and we can put this in a more appropriate place */}
+      <NotificationModal/>
+      {
+        firstPartyCookiesEnabled && thirdPartyCookiesEnabled && <AppRouter>
+          <ScrollToTop/>
+          {/* Previously, using a top-level Switch with AppRoute and ProtectedRoute has caused bugs: */}
+          {/* see https://github.com/all-of-us/workbench/pull/3917 for details. */}
+          {/* It should be noted that the reason this is currently working is because Switch only */}
+          {/* duck-types its children; it cares about them having a 'path' prop but doesn't validate */}
+          {/* that they are a Route or a subclass of Route. */}
+          <Switch>
+            <AppRoute exact path='/cookie-policy'>
+              <CookiePolicyPage routeData={{title: 'Cookie Policy'}}/>
+            </AppRoute>
+            <AppRoute exact path='/login'>
+              <SignInPage routeData={{title: 'Sign In'}}/>
+            </AppRoute>
+            <AppRoute exact path='/session-expired'>
+              <SessionExpiredPage routeData={{title: 'You have been signed out'}}/>
+            </AppRoute>
+            <AppRoute exact path='/sign-in-again'>
+              <SignInAgainPage routeData={{title: 'You have been signed out'}}/>
+            </AppRoute>
+            <AppRoute exact path='/user-disabled'>
+              <UserDisabledPage routeData={{title: 'Disabled'}}/>
+            </AppRoute>
+            <AppRoute exact path='/not-found'>
+              <NotFoundPage routeData={{title: 'Not Found'}}/>
+            </AppRoute>
+            <AppRoute
+                path=''
+                exact={false}
                 intermediaryRoute={true}
-                routeData={{}}
-            />
-          </AppRoute>
-        </Switch>
-      </AppRouter>
-    }
+                guards={[signInGuard, disabledGuard(isUserDisabled)]}
+            >
+              <SignedInPage
+                  intermediaryRoute={true}
+                  routeData={{}}
+              />
+            </AppRoute>
+          </Switch>
+        </AppRouter>
+      }
+      {
+       overriddenUrl && <div style={{position: 'absolute', top: 0, left: '1rem'}}>
+        <span style={{fontSize: '80%', color: 'darkred'}}>
+          API URL: {overriddenUrl}
+        </span>
+       </div>
+      }
+      <div id='outdated'/> {/* for outdated-browser-rework */}
+    </React.Fragment>}
     {
-     overriddenUrl && <div style={{position: 'absolute', top: 0, left: '1rem'}}>
-      <span style={{fontSize: '80%', color: 'darkred'}}>
-        API URL: {overriddenUrl}
-      </span>
-     </div>
-    }
-    {
-      !isCookiesEnabled &&
+      !firstPartyCookiesEnabled || !thirdPartyCookiesEnabled &&
       <div>
         <div style={{maxWidth: '500px', margin: '1rem', fontFamily: 'Montserrat'}}>
           <div>
-              <img alt='logo' src={logo} width='155px'/>
+            <img alt='logo' src={logo} width='155px'/>
           </div>
           <div style={{fontSize: '20pt', color: '#2F2E7E', padding: '1rem 0 1rem 0'}}>Cookies are Disabled</div>
           <div style={{fontSize: '14pt', color: '#000000'}}>
-          For full functionality of this site it is necessary to enable cookies.
-          Here are the <a href='https://support.google.com/accounts/answer/61416'
-                          style={{color: '#2691D0'}}
-                          target='_blank'
-                          rel='noopener noreferrer'>
-          instructions how to enable cookies in your web browser</a>.
+            For full functionality of this site it is necessary to enable cookies.
+            Here are the <a href='https://support.google.com/accounts/answer/61416'
+                            style={{color: '#2691D0'}}
+                            target='_blank'
+                            rel='noopener noreferrer'>
+            instructions how to enable cookies in your web browser</a>.
           </div>
         </div>
       </div>
     }
-
-    <div id='outdated'/> {/* for outdated-browser-rework */}
   </React.Fragment>;
 };

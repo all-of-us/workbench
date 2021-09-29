@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import {StyledAnchorTag} from 'app/components/buttons';
+import {StyledExternalLink} from 'app/components/buttons';
 import {BoldHeader} from 'app/components/headers';
 import {PublicLayout} from 'app/components/public-layout';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
@@ -15,7 +15,7 @@ export const UserDisabled = (spinnerProps: WithSpinnerOverlayProps) => {
   return <PublicLayout>
     <BoldHeader>Your account has been disabled</BoldHeader>
     <section style={{color: colors.primary, fontSize: '18px', marginTop: '.5rem'}}>
-      Contact <StyledAnchorTag href={'mailto:' + supportUrl}>{supportUrl}</StyledAnchorTag> for
+      Contact <StyledExternalLink href={'mailto:' + supportUrl}>{supportUrl}</StyledExternalLink> for
       more information.
     </section>
   </PublicLayout>;
