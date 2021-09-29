@@ -8,7 +8,7 @@ const userCredential: ICredentialConfig = {
   PASSWORD: process.env.PASSWORD,
   INSTITUTION_CONTACT_EMAIL: 'aou-dev-registration@broadinstitute.org',
   LOGIN_GOV_PASSWORD: process.env.LOGIN_GOV_PASSWORD,
-  LOGIN_GOV_2FA_SECRET: process.env.LOGIN_GOV_2FA_SECRET,
+  LOGIN_GOV_2FA_SECRET: process.env.LOGIN_GOV_2FA_SECRET
 };
 
 const urlPath: IPathConfig = {
