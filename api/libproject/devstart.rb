@@ -592,6 +592,7 @@ Common.register_command({
 
 def make_bq_prep_survey(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
+  op.opts.remove_prep_survey = false
   op.add_option(
       "--project [project]",
       ->(opts, v) { opts.project = v},
@@ -612,6 +613,11 @@ def make_bq_prep_survey(cmd_name, *args)
       ->(opts, v) { opts.id_start_block = v},
       "ID start block"
   )
+  op.add_option(
+      "--remove-prep-survey [remove-prep-survey]",
+      ->(opts, v) { opts.remove_prep_survey = v},
+      "Should we remove prep survey or not"
+  )
 
   op.add_validator ->(opts) { raise ArgumentError unless opts.project and opts.dataset and opts.filename and opts.id_start_block}
   op.parse.validate
@@ -619,7 +625,7 @@ def make_bq_prep_survey(cmd_name, *args)
   ServiceAccountContext.new(op.opts.project).run do
     common = Common.new
     Dir.chdir('db-cdr') do
-      common.run_inline %W{./generate-cdr/make-bq-prep-survey.sh #{ENVIRONMENTS[op.opts.project][:source_cdr_project]} #{op.opts.dataset} #{op.opts.filename} #{op.opts.id_start_block}}
+      common.run_inline %W{./generate-cdr/make-bq-prep-survey.sh #{ENVIRONMENTS[op.opts.project][:source_cdr_project]} #{op.opts.dataset} #{op.opts.filename} #{op.opts.id_start_block} #{op.opts.remove_prep_survey}}
     end
   end
 end
