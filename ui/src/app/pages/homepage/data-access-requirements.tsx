@@ -561,21 +561,26 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
 
   // which module are we currently guiding the user to complete?
   const [activeModule, setActiveModule] = useState(null);
+  const [complete, setComplete] = useState(false);
 
   const [navigate, ] = useNavigation();
   const enabledModules = getEnabledModules(allModules, navigate);
 
   // whenever the profile changes, setActiveModule(the first incomplete enabled module)
   useEffect(() => {
-    setActiveModule(getActiveModule(enabledModules, profile));
+    const activeModule = getActiveModule(enabledModules, profile);
+    setActiveModule(activeModule);
+    if (!activeModule) {
+      setComplete(true);
+    }
   }, [profile]);
 
   const {config: {unsafeAllowSelfBypass}} = useStore(serverConfigStore);
 
   return <FlexColumn style={styles.pageWrapper}>
       <DARHeader/>
-      {profile && !activeModule && <Completed/>}
-      {unsafeAllowSelfBypass && activeModule && <FlexRow data-test-id='self-bypass' style={styles.selfBypass}>
+      {complete && <Completed/>}
+      {unsafeAllowSelfBypass && !complete && <FlexRow data-test-id='self-bypass' style={styles.selfBypass}>
         <div style={styles.selfBypassText}>[Test environment] Self-service bypass is enabled</div>
         <Button
             style={{marginLeft: '0.5rem'}}
