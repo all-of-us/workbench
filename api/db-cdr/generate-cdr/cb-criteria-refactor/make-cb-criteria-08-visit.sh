@@ -70,7 +70,7 @@ bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
     )
 SELECT
     ROW_NUMBER() OVER(ORDER BY concept_name)
-      + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` where id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID) as id
+      + (SELECT COALESCE(MAX(id),$CB_CRITERIA_START_ID) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` where id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID) AS id
     , -1
     , 'VISIT'
     , 1

@@ -82,7 +82,8 @@ bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
         , path
     )
 SELECT
-    ROW_NUMBER() OVER (ORDER BY concept_id) + (SELECT COALESCE(MAX(id),$CB_CRITERIA_START_ID) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` where id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID) AS id
+    ROW_NUMBER() OVER (ORDER BY concept_id)
+      + (SELECT COALESCE(MAX(id),$CB_CRITERIA_START_ID) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` where id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID) AS id
     , 0
     , domain_id
     , 0
@@ -94,8 +95,8 @@ SELECT
     , 0
     , 0
     , 1
-    , CAST(ROW_NUMBER() OVER (ORDER BY concept_id) +
-        (SELECT COALESCE(MAX(id),$CB_CRITERIA_START_ID) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` where id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID) as STRING)
+    , CAST(ROW_NUMBER() OVER (ORDER BY concept_id)
+         + (SELECT COALESCE(MAX(id),$CB_CRITERIA_START_ID) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` where id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID) as STRING)
 FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_merged\`
 --- this is the root for ICD10CM
 WHERE concept_id = 2500000000"

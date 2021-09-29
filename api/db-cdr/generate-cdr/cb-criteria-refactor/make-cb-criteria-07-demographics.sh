@@ -130,8 +130,8 @@ bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
         , has_hierarchy
     )
 SELECT
-      ROW_NUMBER() OVER(ORDER BY a.cnt DESC)
-         + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` where id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID) AS id
+    ROW_NUMBER() OVER(ORDER BY a.cnt DESC)
+      + (SELECT COALESCE(MAX(id),$CB_CRITERIA_START_ID) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` where id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID) AS id
     , -1
     , 'PERSON'
     , 1
