@@ -57,7 +57,7 @@ describe('Workspace READER Jupyter notebook action tests', () => {
 
   test('Workspace READER copy notebook to another workspace', async () => {
     // READER log in.
-    await signInWithAccessToken(page, config.READER_ACCESS_TOKEN_FILE);
+    await signInWithAccessToken(page, config.READER_USER);
 
     await findOrCreateWorkspace(page, { workspaceName: readerWorkspaceName });
 
@@ -151,7 +151,7 @@ describe('Workspace READER Jupyter notebook action tests', () => {
   // TODO(RW-7287): Re-enable once Terra clone is fixed.
   test.skip('Workspace READER edit copy of notebook in workspace clone', async () => {
     // READER log in.
-    await signInWithAccessToken(page, config.READER_ACCESS_TOKEN_FILE);
+    await signInWithAccessToken(page, config.READER_USER);
 
     // Verify shared Workspace Access Level is READER.
     await new WorkspacesPage(page).load();

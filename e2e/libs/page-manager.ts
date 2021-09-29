@@ -97,11 +97,11 @@ export const withPageTest = (launchOpts?: LaunchOptions) => async (
   });
 };
 
-export const withSignIn = (tokenFileName?: string) => async (
+export const withSignIn = (userEmail?: string) => async (
   testFn: (page: Page, browser: Browser) => Promise<void>
 ): Promise<void> => {
   await withPageTest()(async (page, browser) => {
-    await signInWithAccessToken(page, tokenFileName);
+    await signInWithAccessToken(page, userEmail);
     await testFn(page, browser);
   });
 };

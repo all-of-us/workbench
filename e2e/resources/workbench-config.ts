@@ -8,15 +8,7 @@ const userCredential: ICredentialConfig = {
   PASSWORD: process.env.PASSWORD,
   INSTITUTION_CONTACT_EMAIL: 'aou-dev-registration@broadinstitute.org',
   LOGIN_GOV_PASSWORD: process.env.LOGIN_GOV_PASSWORD,
-  LOGIN_GOV_2FA_SECRET: process.env.LOGIN_GOV_2FA_SECRET,
-  // This is passed via a file to leave open the future option to allow token
-  // refresh during a Puppeteer test run, and also limits logging exposure of the token.
-  USER_ACCESS_TOKEN_FILE: 'signin-tokens/puppeteer-access-token.txt',
-  COLLABORATOR_ACCESS_TOKEN_FILE: 'signin-tokens/collaborator-puppeteer-access-token.txt',
-  READER_ACCESS_TOKEN_FILE: 'signin-tokens/reader-puppeteer-access-token.txt',
-  WRITER_ACCESS_TOKEN_FILE: 'signin-tokens/writer-puppeteer-access-token.txt',
-  ACCESS_TEST_ACCESS_TOKEN_FILE: 'signin-tokens/access-test-puppeteer-access-token.txt',
-  ADMIN_TEST_ACCESS_TOKEN_FILE: 'signin-tokens/admin-test-puppeteer-access-token.txt'
+  LOGIN_GOV_2FA_SECRET: process.env.LOGIN_GOV_2FA_SECRET
 };
 
 const urlPath: IPathConfig = {
