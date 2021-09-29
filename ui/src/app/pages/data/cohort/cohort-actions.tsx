@@ -1,3 +1,4 @@
+import {RouteLink} from 'app/components/app-router';
 import {Button} from 'app/components/buttons';
 import {ActionCardBase} from 'app/components/card';
 import {FadeBox} from 'app/components/containers';
@@ -13,10 +14,9 @@ import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {Cohort} from 'generated/fetch';
 import * as fp from 'lodash/fp';
+import * as querystring from 'querystring';
 import * as React from 'react';
 import {RouteComponentProps, withRouter} from 'react-router-dom';
-import {RouteLink} from "app/components/app-router";
-import * as querystring from "querystring";
 
 const styles = reactStyles({
   cohortsHeader: {
