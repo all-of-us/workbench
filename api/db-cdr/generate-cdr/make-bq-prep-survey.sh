@@ -150,6 +150,11 @@ mkdir "$TEMP_FILE_DIR"
 
 gsutil -m cp gs://"$BUCKET/$DATASET_DIR/$FILE_NAME" "$TEMP_FILE_DIR"
 
+if [[ "$REMOVE_PREP_SURVEY" = true ]]
+then
+  bq --project_id="$BQ_PROJECT" rm -f "$BQ_DATASET.prep_survey"
+fi
+
 # run this query to initializing our .bigqueryrc configuration file
 # otherwise this will corrupt the output of the first call to find_info()
 simple_select
@@ -208,10 +213,6 @@ done < csv/"$FILE_NAME"
 gsutil cp "$TEMP_FILE_DIR/$OUTPUT_FILE_NAME" "gs://$BUCKET/$BQ_DATASET/cdr_csv_files/$OUTPUT_FILE_NAME"
 
 echo "Loading data into prep_survey"
-if [[ "$REMOVE_PREP_SURVEY" = true ]]
-then
-  bq --project_id="$BQ_PROJECT" rm -f "$BQ_DATASET.prep_survey"
-fi
 bq load --project_id="$BQ_PROJECT" --source_format=CSV "$BQ_DATASET.prep_survey" \
 "gs://$BUCKET/$BQ_DATASET/cdr_csv_files/$OUTPUT_FILE_NAME" "$SCHEMA_PATH/prep_survey.json"
 
