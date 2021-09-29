@@ -17,7 +17,7 @@ describe('Institution Admin', () => {
     await navigation.navMenu(page, NavLink.INSTITUTION_ADMIN);
   });
 
-  test('check the Institution Admin page UI and test-Institution edit page', async () => {
+  test.only('check the Institution Admin page UI and test-Institution edit page', async () => {
     const institutionAdminPage = new InstitutionAdminPage(page);
     await institutionAdminPage.waitForLoad();
     const adminTable = new AdminTable(page);
@@ -50,6 +50,8 @@ describe('Institution Admin', () => {
     expect(await institutionEditPage.getCTEmailAcceptedValue()).toBe(AcceptedAddressSelectValue.Domains);
     // verify that the Accepted Email Domains text area is present in controlled-card-details
     institutionEditPage.getCTEmailDomainsInput();
+    //verify that the save button is disabled
+    expect(await institutionEditPage.getSaveButton().isCursorNotAllowed()).toBe(true);
     await institutionEditPage.clickCancelButton();
     await institutionAdminPage.waitForLoad();
   });
