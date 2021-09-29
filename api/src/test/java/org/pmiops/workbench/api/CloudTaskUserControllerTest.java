@@ -88,6 +88,11 @@ public class CloudTaskUserControllerTest extends SpringTest {
         .thenReturn(Optional.of(new AccessModuleStatus().completionEpochMillis(123L)));
     when(mockAccessModuleService.getAccessModuleStatus(userB, AccessModuleName.TWO_FACTOR_AUTH))
         .thenReturn(Optional.of(new AccessModuleStatus()));
+
+    // kluge to prevent test NPEs on the return value of syncDuccVersionStatus()
+    when(mockUserService.syncDuccVersionStatus(userA, Agent.asSystem(), null)).thenReturn(userA);
+    when(mockUserService.syncDuccVersionStatus(userB, Agent.asSystem(), null)).thenReturn(userB);
+
     controller.synchronizeUserAccess(
         new SynchronizeUserAccessRequest()
             .addUserIdsItem(userA.getUserId())

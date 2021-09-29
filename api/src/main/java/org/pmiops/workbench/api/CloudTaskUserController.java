@@ -118,6 +118,10 @@ public class CloudTaskUserController implements CloudTaskUserApiDelegate {
       DbUser user = userDao.findUserByUserId(userId);
 
       try {
+        user =
+            userService.syncDuccVersionStatus(
+                user, Agent.asSystem(), user.getDataUseAgreementSignedVersion());
+
         // 2FA synchronization requires an outgoing call to gsuite. For this reason, we
         // optimize to only verify that users who have 2FA enabled, still have it enabled.
         // Users who don't have 2FA will go through an active flow to enable it, and are not

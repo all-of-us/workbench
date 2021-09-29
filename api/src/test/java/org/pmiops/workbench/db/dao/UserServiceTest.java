@@ -24,9 +24,11 @@ import javax.annotation.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.SpringTest;
+import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.access.AccessModuleServiceImpl;
 import org.pmiops.workbench.access.AccessTierServiceImpl;
 import org.pmiops.workbench.access.UserAccessModuleMapperImpl;
+import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.actionaudit.targetproperties.BypassTimeTargetProperty;
 import org.pmiops.workbench.compliance.ComplianceService;
@@ -56,6 +58,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
@@ -84,6 +87,8 @@ public class UserServiceTest extends SpringTest {
   @MockBean private UserServiceAuditor mockUserServiceAuditAdapter;
   @MockBean private UserTermsOfServiceDao mockUserTermsOfServiceDao;
   @MockBean private InstitutionService mockInstitutionService;
+
+  @SpyBean private AccessModuleService accessModuleService;
 
   @Autowired private UserService userService;
   @Autowired private UserDao userDao;
@@ -518,6 +523,27 @@ public class UserServiceTest extends SpringTest {
     userService.submitTermsOfService(userDao.findUserByUsername(USERNAME), /* tosVersion */ 1);
     verify(mockUserTermsOfServiceDao).save(any(DbUserTermsOfService.class));
     verify(mockUserServiceAuditAdapter).fireAcknowledgeTermsOfService(any(DbUser.class), eq(1));
+  }
+
+  @Test
+  public void testSyncDuccVersionStatus_missing() {
+    final DbUser user = userDao.findUserByUsername(USERNAME);
+
+    userService.syncDuccVersionStatus(user, Agent.asSystem(), null);
+
+    verify(accessModuleService)
+        .updateCompletionTime(user, AccessModuleName.DATA_USER_CODE_OF_CONDUCT, null);
+  }
+
+  @Test
+  public void testSyncDuccVersionStatus_incorrectVersion() {
+    final DbUser user = userDao.findUserByUsername(USERNAME);
+
+    userService.syncDuccVersionStatus(
+        user, Agent.asSystem(), userService.getCurrentDuccVersion() - 1);
+
+    verify(accessModuleService)
+        .updateCompletionTime(user, AccessModuleName.DATA_USER_CODE_OF_CONDUCT, null);
   }
 
   @Test
