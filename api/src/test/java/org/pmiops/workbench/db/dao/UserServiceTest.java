@@ -5,6 +5,7 @@ import static com.google.common.truth.Truth.assertWithMessage;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.access.AccessTierService.REGISTERED_TIER_SHORT_NAME;
@@ -88,13 +89,14 @@ public class UserServiceTest extends SpringTest {
   @MockBean private UserTermsOfServiceDao mockUserTermsOfServiceDao;
   @MockBean private InstitutionService mockInstitutionService;
 
-  @SpyBean private AccessModuleService accessModuleService;
-
   @Autowired private UserService userService;
   @Autowired private UserDao userDao;
   @Autowired private AccessTierDao accessTierDao;
   @Autowired private AccessModuleDao accessModuleDao;
   @Autowired private UserAccessModuleDao userAccessModuleDao;
+
+  // we need the full service for some tests and mocks for others
+  @SpyBean private AccessModuleService accessModuleService;
 
   @Import({
     UserServiceTestConfiguration.class,
@@ -526,13 +528,12 @@ public class UserServiceTest extends SpringTest {
   }
 
   @Test
-  public void testSyncDuccVersionStatus_missing() {
+  public void testSyncDuccVersionStatus_correctVersion() {
     final DbUser user = userDao.findUserByUsername(USERNAME);
 
-    userService.syncDuccVersionStatus(user, Agent.asSystem(), null);
+    userService.syncDuccVersionStatus(user, Agent.asSystem(), userService.getCurrentDuccVersion());
 
-    verify(accessModuleService)
-        .updateCompletionTime(user, AccessModuleName.DATA_USER_CODE_OF_CONDUCT, null);
+    verify(accessModuleService, never()).updateCompletionTime(any(), any(), any());
   }
 
   @Test
@@ -541,6 +542,16 @@ public class UserServiceTest extends SpringTest {
 
     userService.syncDuccVersionStatus(
         user, Agent.asSystem(), userService.getCurrentDuccVersion() - 1);
+
+    verify(accessModuleService)
+        .updateCompletionTime(user, AccessModuleName.DATA_USER_CODE_OF_CONDUCT, null);
+  }
+
+  @Test
+  public void testSyncDuccVersionStatus_missing() {
+    final DbUser user = userDao.findUserByUsername(USERNAME);
+
+    userService.syncDuccVersionStatus(user, Agent.asSystem(), null);
 
     verify(accessModuleService)
         .updateCompletionTime(user, AccessModuleName.DATA_USER_CODE_OF_CONDUCT, null);
