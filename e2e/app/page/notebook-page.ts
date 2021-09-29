@@ -30,12 +30,12 @@ const CssSelector = {
 
 const Xpath = {
   fileMenuDropdown: './/a[text()="File"]',
-  cellMenuDropdown: './/a[text()="Cell"]',
+  cellMenuDropdown: './/*[@id="menubar"]//a[@id="celllink" and @aria-controls="cell_menu"]',
   downloadMenuDropdown: './/a[text()="Download as"]',
   downloadIpynbButton: './/*[@id="download_script"]/a',
   downloadMarkdownButton: './/*[@id="download_markdown"]/a',
   open: './/*[@id="open_notebook"]/a',
-  runAllCode: './/*[@id="run_all_cells"]/a'
+  runAllCode: './/*[@id="menubar"]//li[@class="dropdown open"]//*[@id="run_all_cells"]/a[@role="menuitem"]'
 };
 
 export enum Mode {
@@ -407,6 +407,7 @@ export default class NotebookPage extends NotebookFrame {
           const cellMenu = await iframe.waitForXPath(Xpath.cellMenuDropdown, { visible: true, timeout: 2000 });
           await cellMenu.hover();
           await cellMenu.click();
+          await this.page.waitForTimeout(1000);
           // Click Run All menuitem.
           const runAllMenuItem = await iframe.waitForXPath(Xpath.runAllCode, { visible: true, timeout: 2000 });
           await runAllMenuItem.hover();
@@ -420,7 +421,8 @@ export default class NotebookPage extends NotebookFrame {
       // If it's another retry, pause half second before retry.
       // If succeeded, pause to avoid check code output too soon.
       await this.page.waitForTimeout(500);
-      if (succeeded) {
+      if (await succeeded()) {
+        logger.info('Notebook: Run All Cell.');
         return;
       }
     }

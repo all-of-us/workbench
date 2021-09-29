@@ -213,6 +213,8 @@ describe('Genomics Extraction Test', () => {
         return true;
       }
       await page.waitForTimeout(pollInterval);
+      const timeInSecs = Math.round((Date.now() - startTime) / 1000);
+      logger.info(`Waiting for runtime and genomic extraction to finish took ${timeInSecs} seconds.`);
     }
     // Take screenshot for manual checking.
     await runtimeSidebar.open();
