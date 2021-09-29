@@ -11,7 +11,6 @@ import {profileStore, serverConfigStore} from 'app/utils/stores';
 import {MemoryRouter} from 'react-router-dom';
 import {useNavigation} from 'app/utils/navigation';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
-import {act} from "react-dom/test-utils";
 
 const profile = ProfileStubVariables.PROFILE_STUB as Profile;
 const load = jest.fn();
@@ -280,71 +279,62 @@ describe('DataAccessRequirements', () => {
     });
 
     // RAS launch bug
-    it('should render all modules as complete by transitioning to all complete',
+    it('should render all modules as complete by transitioning to all complete', async() => {
 
-        async() => {
-        let counter = 0;
-            await Promise.all(Array(2).fill(0).map(async () => {
-                    console.log(++counter);
+        // initially, the user has completed all modules except RAS (the standard case at RAS launch time)
 
-                    // initially, the user has completed all modules except RAS (the standard case at RAS launch time)
+        const allExceptRas = allModules.filter(m => m !== AccessModule.RASLINKLOGINGOV);
+        profileStore.set({
+            profile: {
+                ...ProfileStubVariables.PROFILE_STUB,
+                accessModules: {
+                    modules: allExceptRas.map(module => ({moduleName: module, completionEpochMillis: 1}))
+                }
+            },
+            load,
+            reload,
+            updateCache});
 
-                    const allExceptRas = allModules.filter(m => m !== AccessModule.RASLINKLOGINGOV);
-                    profileStore.set({
-                        profile: {
-                            ...ProfileStubVariables.PROFILE_STUB,
-                            accessModules: {
-                                modules: allExceptRas.map(module => ({moduleName: module, completionEpochMillis: 1}))
-                            }
-                        },
-                        load,
-                        reload,
-                        updateCache
-                    });
+        const wrapper = component();
+        allExceptRas.forEach(module => {
+            expect(findCompleteModule(wrapper, module).exists()).toBeTruthy();
 
-                    const wrapper = component();
-                    allExceptRas.forEach(module => {
-                        expect(findCompleteModule(wrapper, module).exists()).toBeTruthy();
-
-                        expect(findIncompleteModule(wrapper, module).exists()).toBeFalsy();
-                        expect(findIneligibleModule(wrapper, module).exists()).toBeFalsy();
-                    });
-
-                    // RAS is not complete
-                    expect(findIncompleteModule(wrapper, AccessModule.RASLINKLOGINGOV).exists()).toBeTruthy();
-
-                    expect(findCompleteModule(wrapper, AccessModule.RASLINKLOGINGOV).exists()).toBeFalsy();
-                    expect(findIneligibleModule(wrapper, AccessModule.RASLINKLOGINGOV).exists()).toBeFalsy();
-
-                    expect(findCompletionBanner(wrapper).exists()).toBeFalsy();
-
-                    // now all modules are complete
-
-                act(() => {
-                    profileStore.set({
-                        profile: {
-                            ...ProfileStubVariables.PROFILE_STUB,
-                            accessModules: {
-                                modules: allModules.map(module => ({moduleName: module, completionEpochMillis: 1}))
-                            }
-                        },
-                        load,
-                        reload,
-                        updateCache
-                    });
-                });
-                    await waitOneTickAndUpdate(wrapper);
-
-                    allModules.forEach(module => {
-                        expect(findCompleteModule(wrapper, module).exists()).toBeTruthy();
-
-                        expect(findIncompleteModule(wrapper, module).exists()).toBeFalsy();
-                        expect(findIneligibleModule(wrapper, module).exists()).toBeFalsy();
-                    });
-
-                    expect(findCompletionBanner(wrapper).exists()).toBeTruthy();
-                }))
+            expect(findIncompleteModule(wrapper, module).exists()).toBeFalsy();
+            expect(findIneligibleModule(wrapper, module).exists()).toBeFalsy();
         });
+
+        // RAS is not complete
+        expect(findIncompleteModule(wrapper, AccessModule.RASLINKLOGINGOV).exists()).toBeTruthy();
+
+        expect(findCompleteModule(wrapper, AccessModule.RASLINKLOGINGOV).exists()).toBeFalsy();
+        expect(findIneligibleModule(wrapper, AccessModule.RASLINKLOGINGOV).exists()).toBeFalsy();
+
+        expect(findCompletionBanner(wrapper).exists()).toBeFalsy();
+
+        // now all modules are complete
+
+        profileStore.set({
+            profile: {
+                ...ProfileStubVariables.PROFILE_STUB,
+                accessModules: {
+                    modules: allModules.map(module => ({moduleName: module, completionEpochMillis: 1}))
+                }
+            },
+            load,
+            reload,
+            updateCache});
+
+        await waitOneTickAndUpdate(wrapper);
+
+        allModules.forEach(module => {
+            expect(findCompleteModule(wrapper, module).exists()).toBeTruthy();
+
+            expect(findIncompleteModule(wrapper, module).exists()).toBeFalsy();
+            expect(findIneligibleModule(wrapper, module).exists()).toBeFalsy();
+        });
+
+        expect(findCompletionBanner(wrapper).exists()).toBeTruthy();
+    });
 
 
     it('should render all modules as complete when the profile accessModules are all bypassed', () => {
