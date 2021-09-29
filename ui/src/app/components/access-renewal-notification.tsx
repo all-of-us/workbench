@@ -63,7 +63,7 @@ const styles = reactStyles({
 });
 
 
-const AccessRenewalNotification = ({daysRemaining}: {daysRemaining: number}) => {\
+const AccessRenewalNotification = ({daysRemaining}: {daysRemaining: number}) => {
   return <FlexRow style={styles.box}>
     <AlarmExclamation style={styles.icon}/>
     <div style={styles.text}>Time for access renewal. {
