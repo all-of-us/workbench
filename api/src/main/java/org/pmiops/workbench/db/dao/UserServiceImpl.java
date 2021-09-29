@@ -29,6 +29,7 @@ import org.hibernate.exception.GenericJDBCException;
 import org.javers.common.collections.Lists;
 import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.access.AccessTierService;
+import org.pmiops.workbench.access.AccessUtils;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.actionaudit.targetproperties.BypassTimeTargetProperty;
@@ -52,6 +53,7 @@ import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.AccessBypassRequest;
+import org.pmiops.workbench.model.AccessModuleStatus;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.Degree;
 import org.pmiops.workbench.model.Institution;
@@ -693,11 +695,20 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       final Timestamp newComplianceTrainingExpirationTime;
       Map<String, BadgeDetailsV2> userBadgesByName =
           complianceService.getUserBadgesByBadgeName(dbUser.getUsername());
+
       if (userBadgesByName.containsKey(complianceService.getResearchEthicsTrainingField())) {
         BadgeDetailsV2 complianceBadge =
             userBadgesByName.get(complianceService.getResearchEthicsTrainingField());
+
         if (complianceBadge.getValid()) {
-          if (dbUser.getComplianceTrainingCompletionTime() == null) {
+          final Timestamp dbCompletionTime =
+              accessModuleService
+                  .getAccessModuleStatus(dbUser, AccessModuleName.RT_COMPLIANCE_TRAINING)
+                  .map(AccessModuleStatus::getCompletionEpochMillis)
+                  .map(Timestamp::new)
+                  .orElse(null);
+
+          if (dbCompletionTime == null) {
             // The badge was previously invalid and is now valid.
             newComplianceTrainingCompletionTime = now;
           } else if (!dbUser
@@ -708,8 +719,9 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
             newComplianceTrainingCompletionTime = now;
           } else {
             // The badge status has not changed since the last time the status was synced.
-            newComplianceTrainingCompletionTime = dbUser.getComplianceTrainingCompletionTime();
+            newComplianceTrainingCompletionTime = dbCompletionTime;
           }
+
           // Always update the expiration time if the training badge is valid
           newComplianceTrainingExpirationTime =
               Timestamp.from(Instant.ofEpochSecond(complianceBadge.getDateexpire()));
@@ -764,7 +776,13 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     return updateUserWithRetries(
         user -> {
           if (nihStatus != null) {
-            Timestamp eraCommonsCompletionTime = user.getEraCommonsCompletionTime();
+            Timestamp eraCommonsCompletionTime =
+                accessModuleService
+                    .getAccessModuleStatus(user, AccessModuleName.ERA_COMMONS)
+                    .map(AccessModuleStatus::getCompletionEpochMillis)
+                    .map(Timestamp::new)
+                    .orElse(null);
+
             Timestamp nihLinkExpireTime =
                 Timestamp.from(Instant.ofEpochSecond(nihStatus.getLinkExpireTime()));
 
@@ -841,7 +859,13 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     return updateUserWithRetries(
         user -> {
           if (isEnrolledIn2FA) {
-            if (user.getTwoFactorAuthCompletionTime() == null) {
+            final boolean needsDbCompletionUpdate =
+                accessModuleService
+                    .getAccessModuleStatus(user, AccessModuleName.TWO_FACTOR_AUTH)
+                    .map(status -> status.getCompletionEpochMillis() == null)
+                    .orElse(true);
+
+            if (needsDbCompletionUpdate) {
               // user.setTwoFactorAuthCompletionTime() will be replaced by
               // accessModuleService.updateCompletionTime()
               Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
@@ -897,7 +921,14 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
                     new NotFoundException(
                         String.format("User with database ID %d not found", userDatabaseId)));
 
-    final Timestamp previousBypassTime;
+    final Timestamp previousBypassTime =
+        accessModuleService
+            .getAccessModuleStatus(
+                user, AccessUtils.clientAccessModuleToStorage(accessBypassRequest.getModuleName()))
+            .map(AccessModuleStatus::getBypassEpochMillis)
+            .map(Timestamp::new)
+            .orElse(null);
+
     final Timestamp newBypassTime;
 
     final Boolean isBypassed = accessBypassRequest.getIsBypassed();
@@ -908,23 +939,18 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     }
     switch (accessBypassRequest.getModuleName()) {
       case DATA_USER_CODE_OF_CONDUCT:
-        previousBypassTime = user.getDataUseAgreementBypassTime();
         setDataUseAgreementBypassTime(userDatabaseId, previousBypassTime, newBypassTime);
         break;
       case COMPLIANCE_TRAINING:
-        previousBypassTime = user.getComplianceTrainingBypassTime();
         setComplianceTrainingBypassTime(userDatabaseId, previousBypassTime, newBypassTime);
         break;
       case ERA_COMMONS:
-        previousBypassTime = user.getEraCommonsBypassTime();
         setEraCommonsBypassTime(userDatabaseId, previousBypassTime, newBypassTime);
         break;
       case TWO_FACTOR_AUTH:
-        previousBypassTime = user.getTwoFactorAuthBypassTime();
         setTwoFactorAuthBypassTime(userDatabaseId, previousBypassTime, newBypassTime);
         break;
       case RAS_LINK_LOGIN_GOV:
-        previousBypassTime = user.getRasLinkLoginGovBypassTime();
         setRasLinkLoginGovBypassTime(userDatabaseId, previousBypassTime, newBypassTime);
         break;
       default:

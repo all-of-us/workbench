@@ -141,6 +141,8 @@ public class UserServiceTest extends SpringTest {
 
     providedWorkbenchConfig = WorkbenchConfig.createEmptyConfig();
     providedWorkbenchConfig.accessRenewal.expiryDays = (long) 365;
+    providedWorkbenchConfig.access.enableComplianceTraining = true;
+    providedWorkbenchConfig.access.enableEraCommons = true;
 
     // key UserService logic depends on the existence of the Registered Tier
     registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
@@ -179,18 +181,24 @@ public class UserServiceTest extends SpringTest {
     DbUser user = userDao.findUserByUsername(USERNAME);
     assertThat(user.getComplianceTrainingCompletionTime())
         .isEqualTo(Timestamp.from(Instant.ofEpochSecond(TIMESTAMP_SECS)));
-    assertThat(user.getComplianceTrainingExpirationTime())
-        .isEqualTo(Timestamp.from(Instant.ofEpochSecond(expiry)));
     assertModuleCompletionEqual(
         AccessModuleName.RT_COMPLIANCE_TRAINING,
         user,
         Timestamp.from(Instant.ofEpochSecond(TIMESTAMP_SECS)));
 
+    assertThat(user.getComplianceTrainingExpirationTime())
+        .isEqualTo(Timestamp.from(Instant.ofEpochSecond(expiry)));
+
     // Completion timestamp should not change when the method is called again.
     tick();
-    Timestamp completionTime = user.getComplianceTrainingCompletionTime();
     userService.syncComplianceTrainingStatusV2();
-    assertThat(user.getComplianceTrainingCompletionTime()).isEqualTo(completionTime);
+
+    assertThat(user.getComplianceTrainingCompletionTime())
+        .isEqualTo(Timestamp.from(Instant.ofEpochSecond(TIMESTAMP_SECS)));
+    assertModuleCompletionEqual(
+        AccessModuleName.RT_COMPLIANCE_TRAINING,
+        user,
+        Timestamp.from(Instant.ofEpochSecond(TIMESTAMP_SECS)));
   }
 
   @Test
@@ -306,16 +314,19 @@ public class UserServiceTest extends SpringTest {
 
     DbUser user = userDao.findUserByUsername(USERNAME);
     assertThat(user.getEraCommonsCompletionTime()).isEqualTo(Timestamp.from(START_INSTANT));
-    assertThat(user.getEraCommonsLinkExpireTime()).isEqualTo(Timestamp.from(START_INSTANT));
-    assertThat(user.getEraCommonsLinkedNihUsername()).isEqualTo("nih-user");
     assertModuleCompletionEqual(
         AccessModuleName.ERA_COMMONS, user, Timestamp.from(Instant.ofEpochSecond(TIMESTAMP_SECS)));
 
+    assertThat(user.getEraCommonsLinkExpireTime()).isEqualTo(Timestamp.from(START_INSTANT));
+    assertThat(user.getEraCommonsLinkedNihUsername()).isEqualTo("nih-user");
+
     // Completion timestamp should not change when the method is called again.
     tick();
-    Timestamp completionTime = user.getEraCommonsCompletionTime();
     userService.syncEraCommonsStatus();
-    assertThat(user.getEraCommonsCompletionTime()).isEqualTo(completionTime);
+
+    assertThat(user.getEraCommonsCompletionTime()).isEqualTo(Timestamp.from(START_INSTANT));
+    assertModuleCompletionEqual(
+        AccessModuleName.ERA_COMMONS, user, Timestamp.from(Instant.ofEpochSecond(TIMESTAMP_SECS)));
   }
 
   @Test
