@@ -636,6 +636,36 @@ Common.register_command({
   :fn => ->(*args) { make_bq_prep_survey("make-bq-prep-survey", *args) }
 })
 
+def make_bq_survey(cmd_name, *args)
+  op = WbOptionsParser.new(cmd_name, args)
+  op.add_option(
+      "--project [project]",
+      ->(opts, v) { opts.project = v},
+      "Project name"
+  )
+  op.add_option(
+      "--dataset [dataset]",
+      ->(opts, v) { opts.dataset = v},
+      "Dataset name"
+  )
+
+  op.add_validator ->(opts) { raise ArgumentError unless opts.project and opts.dataset}
+  op.parse.validate
+
+  ServiceAccountContext.new(op.opts.project).run do
+    common = Common.new
+    Dir.chdir('db-cdr') do
+      common.run_inline %W{./generate-cdr/make-bq-survey.sh #{ENVIRONMENTS[op.opts.project][:source_cdr_project]} #{op.opts.dataset}}
+    end
+  end
+end
+
+Common.register_command({
+  :invocation => "make-bq-survey",
+  :description => "Build the survey tree in cb_criteria.",
+  :fn => ->(*args) { make_bq_survey("make-bq-survey", *args) }
+})
+
 def circle_build_cdr_indices(cmd_name, args)
   op = WbOptionsParser.new(cmd_name, args)
   op.opts.data_browser = false
