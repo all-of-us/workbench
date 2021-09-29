@@ -58,16 +58,10 @@ export const NIH_CALLBACK_PATH = '/nih-callback';
 
 export const redirectToNiH = (): void => {
   AnalyticsTracker.Registration.ERACommons();
-  const url = 'https:\/\/auth.nih.gov\/siteminderagent\/smlogoutredirector.asp?TARGET=' +
-    encodeURIComponent(serverConfigStore.get().config.shibbolethUiBaseUrl + '/login?return-url=' +
-      encodeURIComponent(
-        window.location.origin.toString() + NIH_CALLBACK_PATH + '?token=<token>'));
-  console.log("~~~~")
-  console.log(url)
-  const url2 = 'https:\/\/auth.nih.gov\/siteminderagent\/smlogoutredirector.asp?TARGET=' +
-    encodeURIComponent(serverConfigStore.get().config.shibbolethUiBaseUrl + '/login?return-url=' +
-      encodeURIComponent(
-        window.location.origin.toString() + NIH_CALLBACK_PATH + '?token={token}'));
+
+  const url = serverConfigStore.get().config.rasLogoutUrl + serverConfigStore.get().config.shibbolethUiBaseUrl + '/login?return-url=' +
+    encodeURIComponent(
+      window.location.origin.toString() + NIH_CALLBACK_PATH + '?token={token}');
   window.open(url, '_blank');
 };
 
