@@ -128,7 +128,8 @@
   },
   "ras": {
     "host": "https:\/\/sts.nih.gov",
-    "clientId": "d139ec98-5c24-4076-a103-e020a558bea0"
+    "clientId": "d139ec98-5c24-4076-a103-e020a558bea0",
+    "logoutUrl": "https:\/\/auth.nih.gov\/siteminderagent\/smlogoutredirector.asp?TARGET="
   },
   "accessRenewal": {
     "expiryDays": 365,

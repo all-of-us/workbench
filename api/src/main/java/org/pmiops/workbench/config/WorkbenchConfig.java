@@ -313,6 +313,8 @@ public class WorkbenchConfig {
     public String host;
     // RAS client id to finish the OAuth flow.
     public String clientId;
+    // The URL that can sign out RAS login session.
+    public String logoutUrl;
   }
 
   public static class AccessRenewalConfig {

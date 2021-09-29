@@ -58,9 +58,10 @@ export const NIH_CALLBACK_PATH = '/nih-callback';
 
 export const redirectToNiH = (): void => {
   AnalyticsTracker.Registration.ERACommons();
-  const url = serverConfigStore.get().config.shibbolethUiBaseUrl + '/login?return-url=' +
-      encodeURIComponent(
-        window.location.origin.toString() + NIH_CALLBACK_PATH + '?token=<token>');
+
+  const url = serverConfigStore.get().config.rasLogoutUrl + serverConfigStore.get().config.shibbolethUiBaseUrl + '/login?return-url=' +
+    encodeURIComponent(
+      window.location.origin.toString() + NIH_CALLBACK_PATH + '?token={token}');
   window.open(url, '_blank');
 };
 
@@ -107,21 +108,6 @@ export const getRegistrationTasks = (navigate): RegistrationTask[] => serverConf
     },
     onClick: redirectToTwoFactorSetup
   }, {
-    key: 'eraCommons',
-    module: AccessModule.ERACOMMONS,
-    completionPropsKey: 'eraCommonsLinked',
-    loadingPropsKey: 'eraCommonsLoading',
-    title: 'Connect Your eRA Commons Account',
-    description: 'Connect your Researcher Workbench account to your eRA Commons account. ' +
-      'There is no exchange of personal data in this step.',
-    featureFlag: serverConfigStore.get().config.enableEraCommons,
-    buttonText: 'Connect',
-    completedText: 'Linked',
-    completionTimestamp: (profile: Profile) => {
-      return profile.eraCommonsCompletionTime || profile.eraCommonsBypassTime;
-    },
-    onClick: redirectToNiH
-  }, {
     key: 'rasLoginGov',
     module: AccessModule.RASLINKLOGINGOV,
     completionPropsKey: 'rasLoginGovLinked',
@@ -135,6 +121,21 @@ export const getRegistrationTasks = (navigate): RegistrationTask[] => serverConf
       return profile.rasLinkLoginGovCompletionTime || profile.rasLinkLoginGovBypassTime;
     },
     onClick: redirectToRas
+  }, {
+    key: 'eraCommons',
+    module: AccessModule.ERACOMMONS,
+    completionPropsKey: 'eraCommonsLinked',
+    loadingPropsKey: 'eraCommonsLoading',
+    title: 'Connect Your eRA Commons Account',
+    description: 'Connect your Researcher Workbench account to your eRA Commons account. ' +
+        'There is no exchange of personal data in this step.',
+    featureFlag: serverConfigStore.get().config.enableEraCommons,
+    buttonText: 'Connect',
+    completedText: 'Linked',
+    completionTimestamp: (profile: Profile) => {
+      return profile.eraCommonsCompletionTime || profile.eraCommonsBypassTime;
+    },
+    onClick: redirectToNiH
   }, {
     key: 'complianceTraining',
     module: AccessModule.COMPLIANCETRAINING,

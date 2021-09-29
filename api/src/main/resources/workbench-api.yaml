@@ -4350,6 +4350,9 @@ definitions:
       rasClientId:
         type: string
         description: The RAS OAuth client id.
+      rasLogoutUrl:
+        type: string
+        description: The URL that can sign out RAS login session.
       runtimeImages:
         type: array
         items:
