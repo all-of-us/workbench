@@ -66,7 +66,7 @@ describe('Create Dataset', () => {
 
   test('Workspace READER cannot edit dataset', async () => {
     // READER log in in new Incognito page.
-    await signInWithAccessToken(page, config.READER_ACCESS_TOKEN_FILE);
+    await signInWithAccessToken(page, config.READER_USER);
 
     // Find workspace created by previous test. If not found, test will fail.
     const workspaceCard = await findWorkspaceCard(page, workspace);

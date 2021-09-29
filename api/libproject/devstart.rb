@@ -1539,27 +1539,45 @@ Common.register_command({
     :fn => ->(*args) {fetch_workspace_details("fetch-workspace-details", *args)}
 })
 
+def can_skip_token_generation(token_filenames)
+  staleness_limit_minutes = 15
+
+  for f in token_filenames do
+    return false unless File.file?(f)
+
+    age_minutes = (Time.now - File.ctime(f)) / 60
+    return false unless age_minutes < staleness_limit_minutes
+  end
+
+  return true
+end
+
 def generate_impersonated_user_tokens(cmd_name, *args)
   common = Common.new
 
   op = WbOptionsParser.new(cmd_name, args)
   op.add_typed_option(
-      "--output-token-filenames [output-token-filename1, ...]",
+      "--output-token-dir [output-token-dir]",
       String,
-      ->(opts, v) { opts.output_token_filenames = v},
-      "Comma-separated paths to output file(s) for the generated token(s)\n" +
-      "These filenames must correspond to the usernames, in order.")
+      ->(opts, v) { opts.output_token_dir = v},
+      "Directory within which to generate the impersonated token(s).")
   op.add_typed_option(
       "--impersonated-usernames [impersonated-username1, ...]",
       String,
       ->(opts, v) { opts.impersonated_usernames = v},
-      "Comma-separated AoU researcher username(s) to impersonate, e.g. calbach@fake-research-aou.org\n" +
-      "These usernames must correspond to the output token filenames, in order.")
-  op.add_validator ->(opts) { raise ArgumentError unless (opts.output_token_filenames and opts.impersonated_usernames)}
+      "Comma-separated AoU researcher username(s) to impersonate, e.g. calbach@fake-research-aou.org\n")
+  op.add_validator ->(opts) { raise ArgumentError unless (opts.output_token_dir and opts.impersonated_usernames)}
   op.parse.validate
 
+  usernames = op.opts.impersonated_usernames.split(',').uniq
+  token_filenames = usernames.map{ |u| "#{op.opts.output_token_dir}/#{u}.txt" }
+  if can_skip_token_generation(token_filenames)
+    common.status("Recent access tokens already exist, skipping generation")
+    return
+  end
+
   user_email_domain = nil
-  op.opts.impersonated_usernames.split(',').each do |username|
+  usernames.each do |username|
    split_email = username.split('@')
    if split_email.nil? || split_email[1].nil?
      raise ArgumentError.new("Username is not a valid email address: " + username)
@@ -1603,8 +1621,8 @@ def generate_impersonated_user_tokens(cmd_name, *args)
   flags = ([
       ["--project-id", project_id]
     ] +
-    op.opts.output_token_filenames.split(',').map{ |filename| ["--output-token-filename", filename] } +
-    op.opts.impersonated_usernames.split(',').map{ |username| ["--impersonated-username", username] }
+    token_filenames.map{ |filename| ["--output-token-filename", filename] } +
+    usernames.map{ |username| ["--impersonated-username", username] }
   ).map { |kv| "#{kv[0]}=#{kv[1]}" }
   flags.map! { |f| "'#{f}'" }
 
