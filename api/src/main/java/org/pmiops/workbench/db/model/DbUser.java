@@ -321,10 +321,6 @@ public class DbUser {
   }
 
   @Column(name = "era_commons_completion_time")
-  public Timestamp getEraCommonsCompletionTime() {
-    return eraCommonsCompletionTime;
-  }
-
   public void setEraCommonsCompletionTime(Timestamp eraCommonsCompletionTime) {
     this.eraCommonsCompletionTime = eraCommonsCompletionTime;
   }
@@ -339,37 +335,21 @@ public class DbUser {
   }
 
   @Column(name = "ras_link_login_gov_completion_time")
-  public Timestamp getRasLinkLoginGovCompletionTime() {
-    return rasLinkLoginGovCompletionTime;
-  }
-
   public void setRasLinkLoginGovCompletionTime(Timestamp rasLinkLoginGovCompletionTime) {
     this.rasLinkLoginGovCompletionTime = rasLinkLoginGovCompletionTime;
   }
 
   @Column(name = "ras_link_login_gov_bypass_time")
-  public Timestamp getRasLinkLoginGovBypassTime() {
-    return rasLinkLoginGovBypassTime;
-  }
-
   public void setRasLinkLoginGovBypassTime(Timestamp rasLinkLoginGovBypassTime) {
     this.rasLinkLoginGovBypassTime = rasLinkLoginGovBypassTime;
   }
 
   @Column(name = "data_use_agreement_completion_time")
-  public Timestamp getDataUseAgreementCompletionTime() {
-    return dataUseAgreementCompletionTime;
-  }
-
   public void setDataUseAgreementCompletionTime(Timestamp dataUseAgreementCompletionTime) {
     this.dataUseAgreementCompletionTime = dataUseAgreementCompletionTime;
   }
 
   @Column(name = "data_use_agreement_bypass_time")
-  public Timestamp getDataUseAgreementBypassTime() {
-    return dataUseAgreementBypassTime;
-  }
-
   public void setDataUseAgreementBypassTime(Timestamp dataUseAgreementBypassTime) {
     this.dataUseAgreementBypassTime = dataUseAgreementBypassTime;
   }
@@ -384,10 +364,6 @@ public class DbUser {
   }
 
   @Column(name = "compliance_training_completion_time")
-  public Timestamp getComplianceTrainingCompletionTime() {
-    return complianceTrainingCompletionTime;
-  }
-
   public void setComplianceTrainingCompletionTime(Timestamp complianceTrainingCompletionTime) {
     this.complianceTrainingCompletionTime = complianceTrainingCompletionTime;
   }
@@ -397,10 +373,6 @@ public class DbUser {
   }
 
   @Column(name = "compliance_training_bypass_time")
-  public Timestamp getComplianceTrainingBypassTime() {
-    return complianceTrainingBypassTime;
-  }
-
   public void setComplianceTrainingBypassTime(Timestamp complianceTrainingBypassTime) {
     this.complianceTrainingBypassTime = complianceTrainingBypassTime;
   }
@@ -419,28 +391,16 @@ public class DbUser {
   }
 
   @Column(name = "era_commons_bypass_time")
-  public Timestamp getEraCommonsBypassTime() {
-    return eraCommonsBypassTime;
-  }
-
   public void setEraCommonsBypassTime(Timestamp eraCommonsBypassTime) {
     this.eraCommonsBypassTime = eraCommonsBypassTime;
   }
 
   @Column(name = "two_factor_auth_completion_time")
-  public Timestamp getTwoFactorAuthCompletionTime() {
-    return twoFactorAuthCompletionTime;
-  }
-
   public void setTwoFactorAuthCompletionTime(Timestamp twoFactorAuthCompletionTime) {
     this.twoFactorAuthCompletionTime = twoFactorAuthCompletionTime;
   }
 
   @Column(name = "two_factor_auth_bypass_time")
-  public Timestamp getTwoFactorAuthBypassTime() {
-    return twoFactorAuthBypassTime;
-  }
-
   public void setTwoFactorAuthBypassTime(Timestamp twoFactorAuthBypassTime) {
     this.twoFactorAuthBypassTime = twoFactorAuthBypassTime;
   }
