@@ -18,6 +18,7 @@ import {ConceptSet} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {RouteComponentProps, withRouter} from 'react-router-dom';
+import {RouteLink} from "../../../components/app-router";
 
 const styles = reactStyles({
   conceptSetsHeader: {
@@ -134,10 +135,10 @@ export const ConceptSetActions = fp.flow(withCurrentWorkspace(), withNavigation,
           <h3 style={styles.conceptSetsHeader}>Concept Set Saved Successfully</h3>
           <div style={{marginTop: '0.25rem'}}>
             The concept set
-            <a style={{color: colors.accent, margin: '0 4px'}}
-               onClick={() => this.getNavigateUrl('conceptSet')}>
+            <RouteLink style={{color: colors.accent, margin: '0 4px'}}
+               path={this.getNavigateUrl('conceptSet')}>
               {conceptSet.name}
-            </a>
+            </RouteLink>
             has been saved.
           </div>
           <h3 style={{...styles.conceptSetsHeader, marginTop: '1.5rem'}}>What Next?</h3>
