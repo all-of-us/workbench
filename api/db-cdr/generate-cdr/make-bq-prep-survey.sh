@@ -1,380 +1,202 @@
 #!/bin/bash
 
-# Create a new prep ppi tables from redcap file process in bucket: all-of-us-workbench-private-cloudsql/redcap/$DATE.
-set -e
+# This generates big query denormalized tables for search, review and datasets.
+
+set -ex
 
 export BQ_PROJECT=$1        # CDR project
 export BQ_DATASET=$2        # CDR dataset
-export DATE=$3              # Redcap survey file date
-export TIER=$4              # Ex: registered or controlled
+export FILE_NAME=$3         # Filename to process
+export ID=$4                # Starting id position
 
 BUCKET="all-of-us-workbench-private-cloudsql"
-CSV_HOME_DIR="redcap/$DATE"
-CDR_CSV_DIR="cdr_csv_files"
-EXPECTED_TABLES=("prep_ppi_basics"
-"prep_ppi_cope"
-"prep_ppi_family_health"
-"prep_ppi_health_care_access"
-"prep_ppi_lifestyle"
-"prep_ppi_overall_health"
-"prep_ppi_personal_medical_history")
+SCHEMA_PATH="generate-cdr/bq-schemas"
+TEMP_FILE_DIR="csv"
+DATASET_DIR="$BQ_DATASET/cdr_csv_files"
+TOPIC_PARENT_ID=0
+QUESTION_PARENT_ID=0
+ANSWER_PARENT_ID=0
+OUTPUT_FILE_NAME=$(echo "$FILE_NAME" | cut -d'_' -f 1 | xargs -I {} bash -c 'echo {}.csv')
 
-echo "Starting load of prep ppi tables into $BQ_PROJECT:$BQ_DATASET"
+function find_info() {
+  local concept_code=$1
+  local survey_name=$2
+  local order_by=$3
+  query="select domain_id, is_standard, type, subtype, concept_id, code, name, value, is_group, is_selectable, has_attribute, has_hierarchy, survey
+  from (
+  select 1 as id,
+  'SURVEY' as domain_id,
+  0 as is_standard,
+  'PPI' as type,
+  'SURVEY' as subtype,
+  concept_id,
+  concept_code as code,
+  concept_name as name,
+  null as value,
+  1 as is_group,
+  1 as is_selectable,
+  0 as has_attribute,
+  1 as has_hierarchy,
+  '$survey_name' as survey
+  from \`$BQ_PROJECT.$BQ_DATASET.concept\`
+  where lower(concept_code) = lower('$concept_code')
+  and concept_class_id in ('Module')
+  union distinct
+  select 1 as id,
+  'SURVEY' as domain_id,
+  0 as is_standard,
+  'PPI' as type,
+  'QUESTION' as subtype,
+  c.concept_id,
+  concept_code as code,
+  CASE WHEN cs.concept_synonym_name is null THEN c.concept_name ELSE REPLACE(cs.concept_synonym_name, '|', ',') END AS name,
+  null as value,
+  1 as is_group,
+  1 as is_selectable,
+  0 as has_attribute,
+  1 as has_hierarchy,
+  '$survey_name' as survey
+  from \`$BQ_PROJECT.$BQ_DATASET.concept\` c
+  join \`$BQ_PROJECT.$BQ_DATASET.observation\` o on o.observation_source_concept_id = c.concept_id
+  left join \`$BQ_PROJECT.$BQ_DATASET.concept_synonym\` cs on (c.concept_id = cs.concept_id and lower(cs.concept_synonym_name) not like '%this condition?' and NOT STARTS_WITH(cs.concept_synonym_name, c.concept_code))
+  where lower(concept_code) = lower('$concept_code')
+  and concept_class_id in ('Question')
+  group by id, domain_id, is_standard, type, subtype, concept_id, concept_code, concept_synonym_name, concept_name, value, is_group, is_selectable, has_attribute, has_hierarchy, survey
+  union distinct
+  select 2 as id,
+  'SURVEY' as domain_id,
+  0 as is_standard,
+  'PPI' as type,
+  'ANSWER' as subtype,
+  c.concept_id,
+  '' as code,
+  'Select a value' as name,
+  null as value,
+  0 as is_group,
+  1 as is_selectable,
+  1 as has_attribute,
+  1 as has_hierarchy,
+  '$survey_name' as survey
+  from \`$BQ_PROJECT.$BQ_DATASET.concept\` c
+  join \`$BQ_PROJECT.$BQ_DATASET.observation\` o on o.observation_source_concept_id = c.concept_id
+  where lower(observation_source_value) = lower('$concept_code')
+  and value_source_concept_id is null
+  group by id, domain_id, is_standard, type, subtype, concept_id, code, name, value, is_group, is_selectable, has_attribute, has_hierarchy, survey
+  union distinct
+  select id,
+  'SURVEY' as domain_id,
+  0 as is_standard,
+  'PPI' as type,
+  'ANSWER' as subtype,
+  concept_id,
+  concept_code as code,
+  CASE WHEN STRPOS(concept_name, ':') > 1 THEN SUBSTR(concept_name, (STRPOS(concept_name, ':') + 2), (LENGTH(concept_name) - STRPOS(concept_name, ':'))) ELSE concept_name END as name,
+  value_source_concept_id as value,
+  0 as is_group,
+  1 as is_selectable,
+  0 as has_attribute,
+  1 as has_hierarchy,
+  '$survey_name' as survey
+  from (
+  select ROW_NUMBER() OVER (ORDER BY ($order_by)) + (SELECT 2) AS id,
+  concept_code,
+  observation_source_concept_id as concept_id,
+  concept_name,
+  value_source_concept_id,
+  value_source_value
+  from \`$BQ_PROJECT.$BQ_DATASET.observation\` o
+  join \`$BQ_PROJECT.$BQ_DATASET.concept\` c on c.concept_id = o.value_source_concept_id
+  where lower(observation_source_value) = lower('$concept_code')
+  and value_source_concept_id != 0
+  and value_source_concept_id is not null
+  group by concept_code, observation_source_concept_id, concept_name, value_source_concept_id, value_source_value
+  order by ($order_by))
+  order by id) order by id"
+  echo $(bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql --format=csv "$query" | sed "1 d" | tr '\n' '|')
+}
 
-TABLES=$(gsutil ls gs://"$BUCKET"/"$CSV_HOME_DIR"/*_"$TIER".csv | cut -d'/' -f6 | cut -d'.' -f1 | awk -F"_$TIER" '{print $1}')
+function increment_ids() {
+  increment_topic_parent_id "$ID"
+  increment_question_parent_id "$ID"
+  increment_id
+}
 
-# Validate that all expected files are in bucket
-DIFF_OUTPUT=( $(echo ${EXPECTED_TABLES[@]} ${TABLES[@]} | tr ' ' '\n' | sort | uniq -u) )
-if [[ ${#DIFF_OUTPUT[@]} > 0 ]];
+function increment_id() {
+  ID=$((ID + 1))
+}
+
+function increment_topic_parent_id() {
+  TOPIC_PARENT_ID=$(($1))
+}
+
+function increment_question_parent_id() {
+  QUESTION_PARENT_ID=$(($1))
+}
+
+function increment_answer_parent_id() {
+  ANSWER_PARENT_ID=$(($1))
+}
+
+rm -rf "$TEMP_FILE_DIR"
+mkdir "$TEMP_FILE_DIR"
+
+gsutil -m cp gs://"$BUCKET/$DATASET_DIR/$FILE_NAME" "$TEMP_FILE_DIR"
+
+while IFS=$'|' read -r concept_code survey_name topic answers;
+do
+  # Build custom order by clause
+  if [[ -z "$answers" ]]
   then
-  echo "Missing following files: ${DIFF_OUTPUT[@]}"
-  exit 1
-fi
+    order_by="CASE WHEN lower(value_source_value)=lower('PMI_Skip') THEN 1 ELSE 2 END"
+  else
+    order_by="CASE "
+    IFS=' ' read -r -a array <<< "$answers"
+    for i in "${!array[@]}"
+    do
+      order_by+="WHEN lower(value_source_value)=lower('${array[i]}') THEN $((i + 1)) "
+    done
+    last_index=$((i + 2))
+    order_by+="ELSE $last_index END"
+  fi
 
-schema_path=generate-cdr/bq-schemas
+  result=$(find_info "$concept_code" "$survey_name" "$order_by")
+  IFS=$'|' read -a result_array <<< "$result"
+  if [[ ! -z "$topic" && "$topic" != "topic" && "${#result_array[@]}" -ge 2 ]]
+  then
+    formatted_topic=$(echo "$topic" | sed "s/'/\'/")
+    echo "writing topic: $formatted_topic"
+    echo "$ID,$TOPIC_PARENT_ID,SURVEY,0,PPI,TOPIC,,,\"${formatted_topic}\",,1,0,0,1,$survey_name" >> "$TEMP_FILE_DIR/$OUTPUT_FILE_NAME"
+    increment_question_parent_id "$ID"
+    increment_id
+  fi
+  for res in "${result_array[@]}"
+  do
+    type=$(echo "${res}" | cut -d "," -f 4)
+    if [[ "$type" == "SURVEY" ]]
+    then
+      echo "writing survey: $survey_name"
+      echo "$ID,0,${res}" >> "$TEMP_FILE_DIR/$OUTPUT_FILE_NAME"
+      increment_ids
+    elif [[ "$type" == "QUESTION" ]]
+    then
+      echo "writing question for concept_code: $concept_code"
+      echo "$ID,$QUESTION_PARENT_ID,${res}" >> "$TEMP_FILE_DIR/$OUTPUT_FILE_NAME"
+      increment_answer_parent_id "$ID"
+      increment_id
+    elif [[ "$type" == "ANSWER" ]]
+    then
+      echo "writing answers for concept_code: $concept_code"
+      echo "$ID,$ANSWER_PARENT_ID,${res}" >> "$TEMP_FILE_DIR/$OUTPUT_FILE_NAME"
+      increment_id
+    fi
+  done
 
-echo "Starting creation of prep ppi tables"
-for tableName in $TABLES
-do
-  echo "Processing $tableName table"
-  bq --project_id="$BQ_PROJECT" rm -f "$BQ_DATASET.$tableName"
-  bq load --skip_leading_rows=1 --project_id="$BQ_PROJECT" --source_format=CSV "$BQ_DATASET.$tableName" \
-  gs://"$BUCKET"/"$CSV_HOME_DIR"/"${tableName}_$TIER.csv" "$schema_path/$tableName.json"
-done
-echo "Completed creation of prep ppi tables"
+done < csv/"$FILE_NAME"
 
-echo "Starting creation of the prep_survey table"
-bq --project_id="$BQ_PROJECT" rm -f "$BQ_DATASET.prep_survey"
-bq --quiet --project_id="$BQ_PROJECT" mk --schema="$schema_path/prep_survey.json" "$BQ_DATASET.prep_survey"
+gsutil cp "$TEMP_FILE_DIR/$OUTPUT_FILE_NAME" "gs://$BUCKET/$BQ_DATASET/cdr_csv_files/$OUTPUT_FILE_NAME"
 
-echo "Loading The Basics - Inserting prep_ppi_basics into prep_survey"
-bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
-"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_survey\`
-    (
-        id
-        ,parent_id
-        ,domain_id
-        ,is_standard
-        ,type
-        ,subtype
-        ,concept_id
-        ,code
-        ,name
-        ,value
-        ,is_group
-        ,is_selectable
-        ,has_attribute
-        ,has_hierarchy
-        ,survey
-    )
-SELECT
-     a.id
-     , a.parent_id
-     ,'SURVEY' as domain_id
-     , 0 AS is_standard
-     ,'PPI' AS type
-     , a.type as subtype
-     , CASE WHEN a.type='ANSWER' THEN c.concept_id ELSE d.concept_id END AS concept_id
-     , a.code
-     , a.name
-     , CAST (if(a.type='ANSWER',d.concept_id,null) AS STRING) AS value
-     , if(a.type='ANSWER',0,1) AS is_group
-     , if (a.type = 'TOPIC', 0, 1) AS is_selectable
-     , CASE WHEN a.name = 'Select a value' THEN 1 ELSE 0 END AS has_attribute
-     , 1 AS has_hierarchy
-     , 'basics' AS survey
-FROM \`$BQ_PROJECT.$BQ_DATASET.prep_ppi_basics\` a
-LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.prep_ppi_basics\` b on a.parent_id = b.id
-LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c on lower(b.code) = lower(c.concept_code)
-LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` d on lower(a.code) = lower(d.concept_code)
-order by a.id"
+echo "Loading data into prep_survey"
+bq load --project_id="$BQ_PROJECT" --source_format=CSV "$BQ_DATASET.prep_survey" \
+"gs://$BUCKET/$BQ_DATASET/cdr_csv_files/$OUTPUT_FILE_NAME" "$SCHEMA_PATH/prep_survey.json"
 
-echo "Loading Lifestyle - Inserting prep_ppi_lifestyle into prep_survey"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_survey\`
-    (
-        id
-        ,parent_id
-        ,domain_id
-        ,is_standard
-        ,type
-        ,subtype
-        ,concept_id
-        ,code
-        ,name
-        ,value
-        ,is_group
-        ,is_selectable
-        ,has_attribute
-        ,has_hierarchy
-        ,survey
-    )
-SELECT
-     ROW_NUMBER() OVER (ORDER BY a.id) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.prep_survey\`) AS id
-     , CASE WHEN a.type = 'SURVEY' THEN 0 ELSE a.parent_id +  (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.prep_survey\`) END AS parent_id
-     ,'SURVEY' AS domain_id
-     , 0 AS is_standard
-     ,'PPI' AS type
-     , a.type as subtype
-     , CASE WHEN a.type='ANSWER' THEN c.concept_id ELSE d.concept_id END AS concept_id
-     , a.code
-     , a.name
-     , CAST (if(a.type='ANSWER',d.concept_id,null) AS STRING) AS value
-     , if(a.type='ANSWER',0,1) AS is_group
-     , if (a.type = 'TOPIC', 0, 1) AS is_selectable
-     , CASE WHEN a.name = 'Select a value' THEN 1 ELSE 0 END AS has_attribute
-     , 1 AS has_hierarchy
-     , 'lifestyle' AS survey
-FROM \`$BQ_PROJECT.$BQ_DATASET.prep_ppi_lifestyle\` a
-LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.prep_ppi_lifestyle\` b on a.parent_id = b.id
--- two concept codes associated with the code Lifestyle thus filtered out the incorrect one
-LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c on (lower(b.code) = lower(c.concept_code) and c.concept_id != 1333266)
-LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` d on (lower(a.code) = lower(d.concept_code) and d.concept_id != 1333266)
-order by a.id"
-
-echo "Loading Overall Health - Inserting prep_ppi_overall_health into prep_survey"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_survey\`
-    (
-        id
-        ,parent_id
-        ,domain_id
-        ,is_standard
-        ,type
-        ,subtype
-        ,concept_id
-        ,code
-        ,name
-        ,value
-        ,is_group
-        ,is_selectable
-        ,has_attribute
-        ,has_hierarchy
-        ,survey
-    )
-SELECT
-     a.new_id AS id
-     , CASE WHEN b.id is null THEN 0 else b.new_id end as parent_id
-     ,'SURVEY' as domain_id
-     , 0 as is_standard
-     ,'PPI' as type
-     , a.type as subtype
-     , CASE WHEN a.type='ANSWER' THEN c.concept_id ELSE d.concept_id END AS concept_id
-     , a.code
-     , a.name
-     , CASE WHEN a.type ='ANSWER' and c.concept_id = 1585747 then a.name
-            WHEN a.type = 'ANSWER' then CAST(d.concept_id as STRING)
-            else null end as value
-     , if(a.type='ANSWER',0,1) as is_group
-     , if (a.type = 'TOPIC', 0, 1) as is_selectable
-     , CASE WHEN a.name = 'Select a value' THEN 1 ELSE 0 end as has_attribute
-     , 1 as has_hierarchy
-     , 'overall health' as survey
-FROM
-(select ROW_NUMBER() OVER (ORDER BY id) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.prep_survey\`) AS new_id, *
--- Filter out “Date of” items and additional item associated with Overall Health similar to Lifestyle
-FROM \`$BQ_PROJECT.$BQ_DATASET.prep_ppi_overall_health\` where name not like '%Date of%') a
-LEFT JOIN(select ROW_NUMBER() OVER (ORDER BY id) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.prep_survey\`) AS new_id, * FROM \`$BQ_PROJECT.$BQ_DATASET.prep_ppi_overall_health\` where name not like '%Date of%') b on a.parent_id = b.id
--- used aou-res-curation-output-prod project
-LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c on (lower(b.code) = lower(c.concept_code) and c.concept_id != 1333057)
-LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` d on (lower(a.code) = lower(d.concept_code) and d.concept_id != 1333057)
-order by a.id"
-
-echo "Loading Personal Medical History - Inserting prep_ppi_personal_medical_history into prep_survey"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_survey\`
-    (
-        id
-        ,parent_id
-        ,domain_id
-        ,is_standard
-        ,type
-        ,subtype
-        ,concept_id
-        ,code
-        ,name
-        ,value
-        ,is_group
-        ,is_selectable
-        ,has_attribute
-        ,has_hierarchy
-        ,survey
-    )
-SELECT
-     ROW_NUMBER() OVER (ORDER BY a.id) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.prep_survey\`) AS id
-     , CASE WHEN a.type = 'SURVEY' THEN 0 ELSE a.parent_id +  (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.prep_survey\`) END AS parent_id
-     ,'SURVEY' as domain_id
-     , 0 as is_standard
-     ,'PPI' as type
-     , a.type as subtype
-     , CASE WHEN a.type='ANSWER' THEN c.concept_id ELSE d.concept_id END AS concept_id
-     , a.code
-     , a.name
-     , CAST (if(a.type='ANSWER',d.concept_id,null) AS STRING) AS value
-     , if(a.type='ANSWER',0,1) as is_group
-     , if (a.type = 'TOPIC', 0, 1) as is_selectable
-     , CASE WHEN a.name = 'Select a value' THEN 1 ELSE 0 end as has_attribute
-     , 1 as has_hierarchy
-     , 'personal medical history' as survey
-FROM \`$BQ_PROJECT.$BQ_DATASET.prep_ppi_personal_medical_history\` a
-LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.prep_ppi_personal_medical_history\` b on a.parent_id = b.id
-LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c on lower(b.code) = lower(c.concept_code)
-LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` d on lower(a.code) = lower(d.concept_code)
-order by a.id"
-
-echo "Loading Family Health - Inserting prep_ppi_family_health into prep_survey"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_survey\`
-    (
-        id
-        ,parent_id
-        ,domain_id
-        ,is_standard
-        ,type
-        ,subtype
-        ,concept_id
-        ,code
-        ,name
-        ,value
-        ,is_group
-        ,is_selectable
-        ,has_attribute
-        ,has_hierarchy
-        ,survey
-    )
-SELECT a.new_id as id
-    , CASE WHEN a.parent_id = 0 THEN 0 ELSE b.new_id END as parent_id
-    , a.domain_id
-    , a.is_standard
-    , a.type
-    , a.subtype
-    , a.concept_id
-    , CASE WHEN a.subtype != 'ANSWER' then c.concept_code ELSE d.concept_code end as concept_id
-    , a.name
-    , cast(a.value as string)
-    , a.is_group
-    , a.is_selectable
-    , a.has_attribute
-    , a.has_hierarchy
-    , 'family health history' as survey
-    FROM
-    (
-        SELECT ROW_NUMBER() OVER(ORDER BY id) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.prep_survey\`) as new_id, *
-        FROM \`$BQ_PROJECT.$BQ_DATASET.prep_ppi_family_health\`
-    ) a
-    LEFT JOIN
-    (   SELECT ROW_NUMBER() OVER(ORDER BY id) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.prep_survey\`) as new_id,*
-        FROM \`$BQ_PROJECT.$BQ_DATASET.prep_ppi_family_health\`
-    ) b on a.parent_id = b.id
-    LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c on a.concept_id = c.concept_id
-    LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` d on a.value = d.concept_id
-order by a.id"
-
-echo "Loading Health Care Access - Inserting prep_ppi_health_care_access into prep_survey"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_survey\`
-    (
-        id
-        ,parent_id
-        ,domain_id
-        ,is_standard
-        ,type
-        ,subtype
-        ,concept_id
-        ,code
-        ,name
-        ,value
-        ,is_group
-        ,is_selectable
-        ,has_attribute
-        ,has_hierarchy
-        ,survey
-    )
-SELECT
-    ROW_NUMBER() OVER (ORDER BY a.id) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.prep_survey\`) AS id
-    , CASE WHEN a.type = 'SURVEY' THEN 0 ELSE a.parent_id +  (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.prep_survey\`) END AS parent_id
-    ,'SURVEY' as domain_id
-    , 0 as is_standard
-    ,'PPI' as type
-    , a.type as subtype
-    , CASE WHEN a.type='ANSWER' THEN c.concept_id ELSE d.concept_id END AS concept_id
-    , a.code
-    , a.name
-    , CAST (if(a.type='ANSWER',d.concept_id,null) AS STRING) AS value
-    , if(a.type='ANSWER',0,1) as is_group
-    , if (a.type = 'TOPIC', 0, 1) as is_selectable
-    , CASE WHEN a.name = 'Select a value' THEN 1 ELSE 0 end as has_attribute
-    , 1 as has_hierarchy
-    , 'health care access' as survey
-FROM \`$BQ_PROJECT.$BQ_DATASET.prep_ppi_health_care_access\` a
-LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.prep_ppi_health_care_access\` b on a.parent_id = b.id
-LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c on lower(b.code) = lower(c.concept_code)
-LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` d on lower(a.code) = lower(d.concept_code)
-order by a.id"
-
-echo "Loading COPE - Inserting prep_ppi_cope into prep_survey"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_survey\`
-    (
-        id
-        ,parent_id
-        ,domain_id
-        ,is_standard
-        ,type
-        ,subtype
-        ,concept_id
-        ,code
-        ,name
-        ,value
-        ,is_group
-        ,is_selectable
-        ,has_attribute
-        ,has_hierarchy
-        ,survey
-    )
-SELECT
-     a.new_id as id
-     , CASE WHEN b.survey_seq is null THEN 0 else b.new_id end as parent_id
-     ,'SURVEY' as domain_id
-     , 0 as is_standard
-     ,'PPI' as type
-     , UPPER(a.type) as subtype
-     , CASE WHEN a.type='Answer' THEN c.concept_id ELSE d.concept_id END AS concept_id
-     , a.concept_code
-     , a.display
-     , CAST (if(a.type='Answer',d.concept_id,null) AS STRING) AS value
-     , if(a.type='Answer',0,1) as is_group
-     , if (a.type = 'Topic', 0, 1) as is_selectable
-     , CASE WHEN a.display = 'Select a value' THEN 1 ELSE 0 end as has_attribute
-     , 1 as has_hierarchy
-     , 'COVID-19 Participant Experience (COPE) Survey' as survey
-FROM
-(select ROW_NUMBER() OVER (ORDER BY survey_seq) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.prep_survey\`) AS new_id, *
-from \`$BQ_PROJECT.$BQ_DATASET.prep_ppi_cope\`
--- Filter out ‘Please specify’ items from survey
-where lower(display) not like '%please specify%') a
-LEFT JOIN
-(select ROW_NUMBER() OVER (ORDER BY survey_seq) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.prep_survey\`) AS new_id, *
-from \`$BQ_PROJECT.$BQ_DATASET.prep_ppi_cope\`
-where lower(display) not like '%please specify%') b on (a.parent_pmi_code = b.concept_code)
--- used aou-res-curation-output-prod project
-LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c on lower(b.concept_code) = lower(c.concept_code)
-LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` d on lower(a.concept_code) = lower(d.concept_code)
-order by 1"
-
-echo "Extracting prep_survey to the proper bucket"
-bq extract --project_id="$BQ_PROJECT" --destination_format CSV --print_header=false \
-"$BQ_DATASET.prep_survey" gs://"$BUCKET"/"$BQ_DATASET"/"$CDR_CSV_DIR"/prep_survey.csv
-echo "Completed extract into bucket(gs://$BUCKET/$BQ_DATASET/$CDR_CSV_DIR/prep_survey.csv)"
-
-echo "Cleaning up prep tables"
-for tableName in $TABLES
-do
-  echo "Deleting $tableName table"
-  bq --project_id="$BQ_PROJECT" rm -f "$BQ_DATASET.$tableName"
-done
-echo "Deleting prep_survey table"
-bq --project_id="$BQ_PROJECT" rm -f "$BQ_DATASET.prep_survey"
-echo "Completed clean up of prep tables"
-
-echo "Completed creation of the prep_survey table"
+rm -rf $TEMP_FILE_DIR

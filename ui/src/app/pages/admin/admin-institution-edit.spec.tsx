@@ -32,10 +32,13 @@ const findRTDomainInput = (wrapper) => wrapper.find('[data-test-id="registered-e
 const findCTAddressInput = (wrapper) => wrapper.find('[data-test-id="controlled-email-address-input"]');
 const findCTDomainInput = (wrapper) => wrapper.find('[data-test-id="controlled-email-domain-input"]');
 
-const findRTAddressError = (wrapper) => wrapper.find('[data-test-id="registered-email-address-error"]');
-const findRTDomainError = (wrapper) => wrapper.find('[data-test-id="registered-email-domain-error"]');
-const findCTAddressError = (wrapper) => wrapper.find('[data-test-id="controlled-email-address-error"]');
-const findCTDomainError = (wrapper) => wrapper.find('[data-test-id="controlled-email-domain-error"]');
+const findSaveButton = (wrapper) => wrapper.find('[data-test-id="save-institution-button"]');
+const findSaveButtonDisabled = (wrapper) => findSaveButton(wrapper).first().props().disabled;
+
+const findRTAddressError = (wrapper) => findSaveButtonDisabled(wrapper).registeredTierEmailAddresses;
+const findRTDomainError = (wrapper) => findSaveButtonDisabled(wrapper).registeredTierEmailDomains;
+const findCTAddressError = (wrapper) => findSaveButtonDisabled(wrapper).controlledTierEmailAddresses;
+const findCTDomainError = (wrapper) => findSaveButtonDisabled(wrapper).controlledTierEmailDomains;
 
 describe('AdminInstitutionEditSpec - edit mode', () => {
 
@@ -188,10 +191,10 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
     findRTDomainInput(wrapper).first()
         .simulate('change', {target: {value: 'someDomain.com,\njustSomeRandom.domain,\n,'}});
     findRTDomainInput(wrapper).first().simulate('blur');
+    expect(findRTDomainInput(wrapper).first().prop('value')).toBe('someDomain.com,\njustSomeRandom.domain');
+
     findCTAddressInput(wrapper).first().simulate('change', {target: {value: 'correctEmail@domain.com'}});
     findCTAddressInput(wrapper).first().simulate('blur');
-
-    expect(findRTDomainInput(wrapper).first().prop('value')).toBe('someDomain.com,\njustSomeRandom.domain');
     expect(findCTAddressInput(wrapper).first().prop('value')).toBe('correctEmail@domain.com');
   });
 
@@ -225,13 +228,17 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
 
     await simulateComponentChange(wrapper, findRTDropdown(wrapper), InstitutionMembershipRequirement.ADDRESSES);
 
-    expect(findRTAddressError(wrapper).exists()).toBeFalsy();
+    expect(findRTAddressError(wrapper)).toBeTruthy();
+    expect(findRTAddressError(wrapper)[0])
+        .toBe('Registered tier email addresses should not be empty');
 
     // In case of a single entry which is not in the correct format
     findRTAddressInput(wrapper).first().simulate('change', {target: {value: 'rtInvalidEmail@domain'}});
     findRTAddressInput(wrapper).first().simulate('blur');
-    expect(findRTAddressError(wrapper).first().props().children)
-        .toBe('Following Email Addresses are not valid : rtInvalidEmail@domain');
+
+    expect(findRTAddressError(wrapper)).toBeTruthy();
+    expect(findRTAddressError(wrapper)[0])
+        .toBe('Registered tier email addresses are not valid: rtInvalidEmail@domain');
 
     // Multiple Email Address entries with a mix of correct (someEmail@broadinstitute.org') and incorrect format
     findRTAddressInput(wrapper).first()
@@ -248,13 +255,14 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
         }
       });
     findRTAddressInput(wrapper).first().simulate('blur');
-    expect(findRTAddressError(wrapper).first().props().children)
-        .toBe('Following Email Addresses are not valid : invalidEmail@domain@org , invalidEmail , justDomain.org , nope@just#plain#wrong');
+    expect(findRTAddressError(wrapper)[0])
+        .toBe('Registered tier email addresses are not valid: invalidEmail@domain@org, invalidEmail, ' +
+            'justDomain.org, nope@just#plain#wrong');
 
     // Single correct format Email Address entries
     findRTAddressInput(wrapper).first().simulate('change', {target: {value: 'correctEmail@domain.com'}});
     findRTAddressInput(wrapper).first().simulate('blur');
-    expect(findRTAddressError(wrapper).exists()).toBeFalsy();
+    expect(findRTAddressError(wrapper)).toBeFalsy();
   });
 
   it('Should display error in case of invalid email Address Format in Controlled Tier requirement', async() => {
@@ -265,13 +273,13 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
     await simulateComponentChange(wrapper, findCTEnabled(wrapper), true);
     await simulateComponentChange(wrapper, findCTDropdown(wrapper), InstitutionMembershipRequirement.ADDRESSES);
 
-    expect(findCTAddressError(wrapper).exists()).toBeFalsy();
+    expect(findCTAddressError(wrapper)).toBeFalsy();
 
     // In case of a single entry which is not in the correct format
     findCTAddressInput(wrapper).first().simulate('change', {target: {value: 'ctInvalidEmail@domain'}});
     findCTAddressInput(wrapper).first().simulate('blur');
-    expect(findCTAddressError(wrapper).first().props().children)
-        .toBe('Following Email Addresses are not valid : ctInvalidEmail@domain');
+    expect(findCTAddressError(wrapper)[0])
+        .toBe('Controlled tier email addresses are not valid: ctInvalidEmail@domain');
 
     // Multiple Email Address entries with a mix of correct (someEmail@broadinstitute.org') and incorrect format
     findCTAddressInput(wrapper).first()
@@ -288,13 +296,14 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
       }
     });
     findCTAddressInput(wrapper).first().simulate('blur');
-    expect(findCTAddressError(wrapper).first().props().children)
-        .toBe('Following Email Addresses are not valid : invalidEmail@domain@org , invalidEmail , justDomain.org , nope@just#plain#wrong');
+    expect(findCTAddressError(wrapper)[0])
+        .toBe('Controlled tier email addresses are not valid: invalidEmail@domain@org, invalidEmail, ' +
+            'justDomain.org, nope@just#plain#wrong');
 
     // Single correct format Email Address entries
     findCTAddressInput(wrapper).first().simulate('change', {target: {value: 'correctEmail@domain.com'}});
     findCTAddressInput(wrapper).first().simulate('blur');
-    expect(findCTAddressError(wrapper).exists()).toBeFalsy();
+    expect(findCTAddressError(wrapper)).toBeFalsy();
   });
 
   it('Should display error in case of invalid email Domain Format in Registered Tier requirement', async() => {
@@ -304,14 +313,14 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
 
     await simulateComponentChange(wrapper, findRTDropdown(wrapper), InstitutionMembershipRequirement.DOMAINS);
 
-    expect(findRTDomainError(wrapper).exists()).toBeFalsy();
+    expect(findRTDomainError(wrapper)).toBeFalsy();
 
     // Single Entry with incorrect Email Domain format
     findRTDomainInput(wrapper).first()
         .simulate('change', {target: {value: 'invalidEmail@domain'}});
     findRTDomainInput(wrapper).first().simulate('blur');
-    expect(findRTDomainError(wrapper).first().props().children)
-      .toBe('Following Email Domains are not valid : invalidEmail@domain');
+    expect(findRTDomainError(wrapper)[0])
+      .toBe('Registered tier email domains are not valid: invalidEmail@domain');
 
     // Multiple Entries with correct and incorrect Email Domain format
     findRTDomainInput(wrapper).first()
@@ -326,15 +335,15 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
         }
       });
     findRTDomainInput(wrapper).first().simulate('blur');
-    expect(findRTDomainError(wrapper).first().props().children)
-      .toBe('Following Email Domains are not valid : someEmailAddress@domain@org , ' +
-        'justSomeText , broadinstitute.org#wrongTest');
+    expect(findRTDomainError(wrapper)[0])
+      .toBe('Registered tier email domains are not valid: someEmailAddress@domain@org, ' +
+        'justSomeText, broadinstitute.org#wrongTest');
 
 
     findRTDomainInput(wrapper).first()
       .simulate('change', {target: {value: 'domain.com'}});
     findRTDomainInput(wrapper).first().simulate('blur');
-    expect(findRTDomainError(wrapper).exists()).toBeFalsy();
+    expect(findRTDomainError(wrapper)).toBeFalsy();
   });
 
   it('Should display error in case of invalid email Domain Format in Controlled Tier requirement', async() => {
@@ -345,13 +354,15 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
     await simulateComponentChange(wrapper, findCTEnabled(wrapper), true);
     await simulateComponentChange(wrapper, findCTDropdown(wrapper), InstitutionMembershipRequirement.DOMAINS);
 
-    expect(findCTDomainError(wrapper).exists()).toBeFalsy();
+    expect(findCTDomainError(wrapper)).toBeTruthy();
+    expect(findCTDomainError(wrapper)[0])
+        .toBe('Controlled tier email domains should not be empty');
 
     // Single Entry with incorrect Email Domain format
     findCTDomainInput(wrapper).first().simulate('change', {target: {value: 'invalidEmail@domain'}});
     findCTDomainInput(wrapper).first().simulate('blur');
-    expect(findCTDomainError(wrapper).first().props().children)
-        .toBe('Following Email Domains are not valid : invalidEmail@domain');
+    expect(findCTDomainError(wrapper)[0])
+        .toBe('Controlled tier email domains are not valid: invalidEmail@domain');
 
     // Multiple Entries with correct and incorrect Email Domain format
     findCTDomainInput(wrapper).first()
@@ -366,13 +377,13 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
       }
     });
     findCTDomainInput(wrapper).first().simulate('blur');
-    expect(findCTDomainError(wrapper).first().props().children)
-        .toBe('Following Email Domains are not valid : someEmailAddress@domain@org , ' +
-            'justSomeText , broadinstitute.org#wrongTest');
+    expect(findCTDomainError(wrapper)[0])
+        .toBe('Controlled tier email domains are not valid: someEmailAddress@domain@org, ' +
+            'justSomeText, broadinstitute.org#wrongTest');
 
     findCTDomainInput(wrapper).first().simulate('change', {target: {value: 'domain.com'}});
     findCTDomainInput(wrapper).first().simulate('blur');
-    expect(findCTDomainError(wrapper).exists()).toBeFalsy();
+    expect(findCTDomainError(wrapper)).toBeFalsy();
   });
 
   it('Should ignore empty string in email Domain in Registered Tier requirement', async() => {
@@ -389,7 +400,7 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
     expect(findRTDomainInput(wrapper).first().prop('value'))
       .toBe('validEmail.com,\njustSomeRandom.domain');
 
-    expect(findRTDomainError(wrapper).exists()).toBeFalsy();
+    expect(findRTDomainError(wrapper)).toBeFalsy();
   });
 
   it('Should ignore empty string in email Domain in Controlled Tier requirement', async() => {
@@ -408,7 +419,7 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
     findCTDomainInput(wrapper).first().simulate('blur');
     expect(findCTDomainInput(wrapper).first().prop('value')).toBe('validEmail.com,\njustSomeRandom.domain');
 
-    expect(findCTDomainError(wrapper).exists()).toBeFalsy();
+    expect(findCTDomainError(wrapper)).toBeFalsy();
   });
 
   it('Should ignore whitespaces in email domains in Registered Tier requirement', async() => {
@@ -425,7 +436,7 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
     expect(findRTDomainInput(wrapper).first().prop('value'))
       .toBe('someDomain.com,\njustSomeRandom.domain');
 
-    expect(findRTDomainError(wrapper).exists()).toBeFalsy();
+    expect(findRTDomainError(wrapper)).toBeFalsy();
   });
 
   it('Should ignore whitespaces in email domains in Controlled Tier requirement', async() => {
@@ -442,7 +453,7 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
     findCTDomainInput(wrapper).first().simulate('blur');
     expect(findCTDomainInput(wrapper).first().prop('value')).toBe('someDomain.com,\njustSomeRandom.domain');
 
-    expect(findCTDomainError(wrapper).exists()).toBeFalsy();
+    expect(findCTDomainError(wrapper)).toBeFalsy();
   });
 });
 
@@ -564,13 +575,15 @@ describe('AdminInstitutionEditSpec - add mode', () => {
 
     await simulateComponentChange(wrapper, findRTDropdown(wrapper), InstitutionMembershipRequirement.ADDRESSES);
 
-    expect(findRTAddressError(wrapper).exists()).toBeFalsy();
+    expect(findRTAddressError(wrapper)).toBeTruthy();
+    expect(findRTAddressError(wrapper)[0])
+        .toBe('Registered tier email addresses should not be empty');
 
     // In case of a single entry which is not in the correct format
     findRTAddressInput(wrapper).first().simulate('change', {target: {value: 'rtInvalidEmail@domain'}});
     findRTAddressInput(wrapper).first().simulate('blur');
-    expect(findRTAddressError(wrapper).first().props().children)
-        .toBe('Following Email Addresses are not valid : rtInvalidEmail@domain');
+    expect(findRTAddressError(wrapper)[0])
+        .toBe('Registered tier email addresses are not valid: rtInvalidEmail@domain');
 
     // Multiple Email Address entries with a mix of correct (someEmail@broadinstitute.org') and incorrect format
     findRTAddressInput(wrapper).first()
@@ -587,13 +600,14 @@ describe('AdminInstitutionEditSpec - add mode', () => {
           }
         });
     findRTAddressInput(wrapper).first().simulate('blur');
-    expect(findRTAddressError(wrapper).first().props().children)
-        .toBe('Following Email Addresses are not valid : invalidEmail@domain@org , invalidEmail , justDomain.org , nope@just#plain#wrong');
+    expect(findRTAddressError(wrapper)[0])
+        .toBe('Registered tier email addresses are not valid: invalidEmail@domain@org, invalidEmail, ' +
+            'justDomain.org, nope@just#plain#wrong');
 
     // Single correct format Email Address entries
     findRTAddressInput(wrapper).first().simulate('change', {target: {value: 'correctEmail@domain.com'}});
     findRTAddressInput(wrapper).first().simulate('blur');
-    expect(findRTAddressError(wrapper).exists()).toBeFalsy();
+    expect(findRTAddressError(wrapper)).toBeFalsy();
   });
 
   it('Should ignore empty string in email Domain in Controlled Tier requirement', async() => {
@@ -612,6 +626,6 @@ describe('AdminInstitutionEditSpec - add mode', () => {
     findCTDomainInput(wrapper).first().simulate('blur');
     expect(findCTDomainInput(wrapper).first().prop('value')).toBe('validEmail.com,\njustSomeRandom.domain');
 
-    expect(findCTDomainError(wrapper).exists()).toBeFalsy();
+    expect(findCTDomainError(wrapper)).toBeFalsy();
   });
 });
