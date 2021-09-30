@@ -1,7 +1,7 @@
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { MenuOption, WorkspaceAccessLevel } from 'app/text-labels';
 import * as testData from 'resources/data/workspace-data';
-import {findOrCreateWorkspaceCard, performActions, refreshAccessToken, signInWithAccessToken} from 'utils/test-utils';
+import {findOrCreateWorkspaceCard, performActions, signInWithAccessToken} from 'utils/test-utils';
 import WorkspaceAboutPage from 'app/page/workspace-about-page';
 import WorkspaceEditPage from 'app/page/workspace-edit-page';
 import { makeWorkspaceName } from 'utils/str-utils';
@@ -22,7 +22,7 @@ describe('Editing workspace via workspace card snowman menu', () => {
    */
   test('User as OWNER can edit workspace', async () => {
     const workspaceCard = await findOrCreateWorkspaceCard(page, { workspaceName });
-    await refreshAccessToken(page);
+
     await workspaceCard.selectSnowmanMenu(MenuOption.Edit, { waitForNav: true });
 
     const workspaceEditPage = new WorkspaceEditPage(page);

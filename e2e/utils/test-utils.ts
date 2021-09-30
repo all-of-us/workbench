@@ -70,22 +70,6 @@ export async function signInWithAccessToken(
   }
 }
 
-export async function refreshAccessToken(
-  page: Page,
-  userEmail = config.USER_NAME,
-): Promise<void> {
-  // Keep file naming convention synchronized with generate-impersonated-user-tokens
-  const token = fs.readFileSync(`signin-tokens/${userEmail}.txt`, 'ascii');
-  logger.info('Refreshing access token...');
-
-  // Once ready, initialize the token on the page (this is stored in local storage).
-  // See sign-in.service.ts for details.
-  await page.waitForFunction('!!window["setTestAccessTokenOverride"]');
-  await page.evaluate((token) => {
-    window.setTestAccessTokenOverride(token);
-  }, token);
-}
-
 /**
  * Is there a element located by CSS selector?
  * @param page Puppeteer.Page

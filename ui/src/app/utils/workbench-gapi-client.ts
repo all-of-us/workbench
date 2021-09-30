@@ -1,3 +1,6 @@
+import { isTestAccessTokenActive } from "app/utils/authentication";
+import {LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN} from './cookies';
+
 declare const gapi: any;
 
 interface GoogleBillingAccountInfo {
@@ -8,6 +11,9 @@ interface GoogleBillingAccountInfo {
 export async function getBillingAccountInfo(googleProject: string) {
   return new Promise<GoogleBillingAccountInfo>((resolve) => {
     gapi.load('client', () => {
+      if(isTestAccessTokenActive()) {
+        gapi.client.setToken(window.localStorage.getItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN))
+      }
       gapi.client.load('cloudbilling', 'v1', () => {
         gapi.client.cloudbilling.projects.getBillingInfo({
           name: 'projects/' + googleProject
