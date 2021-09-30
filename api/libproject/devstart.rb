@@ -549,7 +549,7 @@ Common.register_command({
   :fn => ->() { run_local_rw_migrations() }
 })
 
-def circle_prep_survey(cmd_name, *args)
+def create_cdr_indices(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
   op.opts.branch = "main"
   op.add_option(
@@ -580,19 +580,18 @@ def circle_prep_survey(cmd_name, *args)
   content_type = "Content-Type: application/json"
   accept = "Accept: application/json"
   circle_token = "Circle-Token: "
-  payload = "{ \"branch\": \"#{op.opts.branch}\", \"parameters\": { \"wb_prep_survey\": true, \"cdr_source_project\": \"#{cdr_source}\", \"cdr_source_dataset\": \"#{op.opts.dataset}\", \"project\": \"#{op.opts.project}\" }}"
+  payload = "{ \"branch\": \"#{op.opts.branch}\", \"parameters\": { \"wb_create_cdr_indices\": true, \"cdr_source_project\": \"#{cdr_source}\", \"cdr_source_dataset\": \"#{op.opts.dataset}\", \"project\": \"#{op.opts.project}\" }}"
   common.run_inline "curl -X POST https://circleci.com/api/v2/project/github/all-of-us/cdr-indices/pipeline -H '#{content_type}' -H '#{accept}' -H \"#{circle_token}\ $(cat ~/.circle-creds/key.txt)\" -d '#{payload}'"
 end
 
 Common.register_command({
-  :invocation => "circle-prep-survey",
-  :description => "Build the prep_survey table in circle.",
-  :fn => ->(*args) { circle_prep_survey("circle-prep-survey", *args) }
+  :invocation => "create-cdr-indices",
+  :description => "Create the CDR indices in circle.",
+  :fn => ->(*args) { create_cdr_indices("create-cdr-indices", *args) }
 })
 
-def make_bq_prep_survey(cmd_name, *args)
+def create_prep_survey(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
-  op.opts.remove_prep_survey = false
   op.add_option(
       "--project [project]",
       ->(opts, v) { opts.project = v},
@@ -613,11 +612,6 @@ def make_bq_prep_survey(cmd_name, *args)
       ->(opts, v) { opts.id_start_block = v},
       "ID start block"
   )
-  op.add_option(
-      "--remove-prep-survey [remove-prep-survey]",
-      ->(opts, v) { opts.remove_prep_survey = v},
-      "Should we remove prep survey or not"
-  )
 
   op.add_validator ->(opts) { raise ArgumentError unless opts.project and opts.dataset and opts.filename and opts.id_start_block}
   op.parse.validate
@@ -625,18 +619,18 @@ def make_bq_prep_survey(cmd_name, *args)
   ServiceAccountContext.new(op.opts.project).run do
     common = Common.new
     Dir.chdir('db-cdr') do
-      common.run_inline %W{./generate-cdr/make-bq-prep-survey.sh #{ENVIRONMENTS[op.opts.project][:source_cdr_project]} #{op.opts.dataset} #{op.opts.filename} #{op.opts.id_start_block} #{op.opts.remove_prep_survey}}
+      common.run_inline %W{./generate-cdr/create-prep-survey.sh #{ENVIRONMENTS[op.opts.project][:source_cdr_project]} #{op.opts.dataset} #{op.opts.filename} #{op.opts.id_start_block}}
     end
   end
 end
 
 Common.register_command({
-  :invocation => "make-bq-prep-survey",
-  :description => "Build the prep_survey table.",
-  :fn => ->(*args) { make_bq_prep_survey("make-bq-prep-survey", *args) }
+  :invocation => "create-prep-survey",
+  :description => "Create the prep_survey table.",
+  :fn => ->(*args) { create_prep_survey("create-prep-survey", *args) }
 })
 
-def make_bq_survey(cmd_name, *args)
+def create_survey_criteria(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
   op.add_option(
       "--project [project]",
@@ -655,15 +649,15 @@ def make_bq_survey(cmd_name, *args)
   ServiceAccountContext.new(op.opts.project).run do
     common = Common.new
     Dir.chdir('db-cdr') do
-      common.run_inline %W{./generate-cdr/make-bq-survey.sh #{ENVIRONMENTS[op.opts.project][:source_cdr_project]} #{op.opts.dataset}}
+      common.run_inline %W{./generate-cdr/create-survey-criteria.sh #{ENVIRONMENTS[op.opts.project][:source_cdr_project]} #{op.opts.dataset}}
     end
   end
 end
 
 Common.register_command({
-  :invocation => "make-bq-survey",
-  :description => "Build the survey tree in cb_criteria.",
-  :fn => ->(*args) { make_bq_survey("make-bq-survey", *args) }
+  :invocation => "create-survey-criteria",
+  :description => "Create the survey tree in cb_criteria.",
+  :fn => ->(*args) { create_survey_criteria("create-survey-criteria", *args) }
 })
 
 def circle_build_cdr_indices(cmd_name, args)
