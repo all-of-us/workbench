@@ -112,8 +112,7 @@ export const CohortActions = fp.flow(
       switch (action) {
         case 'cohort':
           url += `data/cohorts/build`;
-          queryParams = {};
-          queryParams.cohortId = cohort.id;
+          queryParams = {cohortId: cohort.id};
           break;
         case 'review':
           url += `data/cohorts/${cohort.id}/review`;
