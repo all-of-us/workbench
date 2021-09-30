@@ -119,7 +119,6 @@ export const hasBillingScope = () => {
   // scope.
   return isTestAccessTokenActive() || getAuthInstance().currentUser.get().hasGrantedScopes('https://www.googleapis.com/auth/cloud-billing');
 };
-
 /*
  * Request Google Cloud Billing scope if necessary.
  *
