@@ -7,16 +7,7 @@ set -e
 export BQ_PROJECT=$1         # CDR project
 export BQ_DATASET=$2         # CDR dataset
 
-schema_path=generate-cdr/bq-schemas
-
-################################################
-# PPI SURVEYS
-################################################
-echo "PPI SURVEYS - drop/create cb_criteria"
-bq --project_id="$BQ_PROJECT" rm -f "$BQ_DATASET.cb_criteria"
-bq --quiet --project_id=$BQ_PROJECT mk --schema=$schema_path/cb_criteria.json $BQ_DATASET.cb_criteria
-
-echo "PPI SURVEYS - insert data"
+echo "PPI SURVEYS - insert into cb_criteria"
 bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
     (
@@ -68,9 +59,9 @@ SELECT
     , a.has_hierarchy
     , REGEXP_REPLACE( IFNULL(e.new_id,-1) ||'.'|| IFNULL(d.new_id,-1) ||'.'|| IFNULL(c.new_id,-1) ||'.'|| IFNULL(b.new_id,-1) ||'.'|| IFNULL(a.new_id,-1), '(-1.)*' ,'' ) as path
 FROM
-    (SELECT ROW_NUMBER() OVER(ORDER BY id) + (SELECT MAX(15000 + id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) as new_id, * FROM \`$BQ_PROJECT.$BQ_DATASET.prep_survey\`) a
-    LEFT JOIN (SELECT ROW_NUMBER() OVER(ORDER BY id) + (SELECT MAX(15000 + id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) as new_id, id, parent_id FROM \`$BQ_PROJECT.$BQ_DATASET.prep_survey\`) b on a.parent_id = b.id
-    LEFT JOIN (SELECT ROW_NUMBER() OVER(ORDER BY id) + (SELECT MAX(15000 + id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) as new_id, id, parent_id FROM \`$BQ_PROJECT.$BQ_DATASET.prep_survey\`) c on b.parent_id = c.id
-    LEFT JOIN (SELECT ROW_NUMBER() OVER(ORDER BY id) + (SELECT MAX(15000 + id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) as new_id, id, parent_id FROM \`$BQ_PROJECT.$BQ_DATASET.prep_survey\`) d on c.parent_id = d.id
-    LEFT JOIN (SELECT ROW_NUMBER() OVER(ORDER BY id) + (SELECT MAX(15000 + id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) as new_id, id, parent_id FROM \`$BQ_PROJECT.$BQ_DATASET.prep_survey\`) e on d.parent_id = e.id
+    (SELECT ROW_NUMBER() OVER(ORDER BY id) + (SELECT COALESCE(MAX(id),15000) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) as new_id, * FROM \`$BQ_PROJECT.$BQ_DATASET.prep_survey\`) a
+    LEFT JOIN (SELECT ROW_NUMBER() OVER(ORDER BY id) + (SELECT COALESCE(MAX(id),15000) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) as new_id, id, parent_id FROM \`$BQ_PROJECT.$BQ_DATASET.prep_survey\`) b on a.parent_id = b.id
+    LEFT JOIN (SELECT ROW_NUMBER() OVER(ORDER BY id) + (SELECT COALESCE(MAX(id),15000) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) as new_id, id, parent_id FROM \`$BQ_PROJECT.$BQ_DATASET.prep_survey\`) c on b.parent_id = c.id
+    LEFT JOIN (SELECT ROW_NUMBER() OVER(ORDER BY id) + (SELECT COALESCE(MAX(id),15000) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) as new_id, id, parent_id FROM \`$BQ_PROJECT.$BQ_DATASET.prep_survey\`) d on c.parent_id = d.id
+    LEFT JOIN (SELECT ROW_NUMBER() OVER(ORDER BY id) + (SELECT COALESCE(MAX(id),15000) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) as new_id, id, parent_id FROM \`$BQ_PROJECT.$BQ_DATASET.prep_survey\`) e on d.parent_id = e.id
 ORDER BY 1"
