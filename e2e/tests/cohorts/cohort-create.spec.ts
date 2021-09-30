@@ -101,8 +101,11 @@ describe('Create Cohorts Test', () => {
     const dataPage = new WorkspaceDataPage(page);
     const cohortBuildPage = await dataPage.clickAddCohortsButton();
 
-    // Include Group 1: Demographics Deceased.
+    // Include Group 1: Demographics Deceased AND Demographics Age range: 21 - 90.
     const group1 = cohortBuildPage.findIncludeParticipantsGroup('Group 1');
+    const minAge = 21;
+    const maxAge = 90;
+    await group1.includeAge(minAge, maxAge);
     await group1.includeDemographicsDeceased();
     const group1Count = await group1.getGroupCount();
     let totalCount = await cohortBuildPage.getTotalCount();
