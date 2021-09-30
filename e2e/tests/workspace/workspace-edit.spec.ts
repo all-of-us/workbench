@@ -22,7 +22,7 @@ describe('Editing workspace via workspace card snowman menu', () => {
    */
   test('User as OWNER can edit workspace', async () => {
     const workspaceCard = await findOrCreateWorkspaceCard(page, { workspaceName });
-    await refreshAccessToken(page, config.USER_NAME);
+    await refreshAccessToken(page);
     await workspaceCard.selectSnowmanMenu(MenuOption.Edit, { waitForNav: true });
 
     const workspaceEditPage = new WorkspaceEditPage(page);
