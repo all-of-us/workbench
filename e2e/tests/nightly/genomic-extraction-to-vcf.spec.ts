@@ -20,8 +20,9 @@ import { Page } from 'puppeteer';
 import { takeScreenshot } from 'utils/save-file-utils';
 import expect from 'expect';
 
-// 80 minutes. Test could take a long time.
-jest.setTimeout(80 * 60 * 1000);
+// 60 minutes. Test could take a long time.
+// Since refresh token expires in 60 min. test can fail if running takes longer than 60 min.
+jest.setTimeout(60 * 60 * 1000);
 
 describe('Genomics Extraction Test', () => {
   beforeEach(async () => {
