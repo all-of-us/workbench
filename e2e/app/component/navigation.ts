@@ -13,7 +13,7 @@ export enum NavLink {
   ADMIN = 'Admin',
   USER_ADMIN = 'User Admin',
   USER_AUDIT = 'User Audit',
-  WORKSPACES = 'Workspaces',
+  WORKSPACE_ADMIN = 'Workspaces',
   INSTITUTION_ADMIN = 'Institution Admin'
 }
 
@@ -43,8 +43,14 @@ export default class Navigation {
       if (!applink) {
         // If it's a link under User submenu.
         const [username, admin] = await page.$x(angleIconXpath);
-        const AdminSubmenuItems = [destinationApp];
-        if (destinationApp === NavLink.PROFILE || destinationApp === NavLink.SIGN_OUT) {
+        const UserSubmenuItems = [NavLink.PROFILE, NavLink.SIGN_OUT];
+        const AdminSubmenuItems = [
+          NavLink.USER_ADMIN,
+          NavLink.USER_AUDIT,
+          NavLink.WORKSPACE_ADMIN,
+          NavLink.INSTITUTION_ADMIN
+        ];
+        if (UserSubmenuItems.includes(destinationApp)) {
           // Open User submenu if needed
           if (!applink) {
             await username.click();
