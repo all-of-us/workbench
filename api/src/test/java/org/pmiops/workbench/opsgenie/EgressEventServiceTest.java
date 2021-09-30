@@ -295,11 +295,59 @@ public class EgressEventServiceTest extends SpringTest {
             .setStatus(EgressEventStatus.PENDING));
 
     egressEventService.handleEvent(oldEgressEvent);
+
+    Iterable<DbEgressEvent> dbEvents = egressEventDao.findAll();
+    assertThat(dbEvents).hasSize(1);
+  }
+
+  @Test
+  public void testCreateEgressEventAlert_staleEventsMultiwindow() throws ApiException {
+    when(mockAlertApi.createAlert(any())).thenReturn(new SuccessResponse().requestId("12345"));
+
+    EgressEvent oldEgressEvent =
+        recentEgressEventForUser(dbUser1)
+            .timeWindowDuration(60 * 60L)
+            .timeWindowStart(NOW.minus(Duration.ofMinutes(125)).toEpochMilli());
+
+    egressEventDao.save(
+        new DbEgressEvent()
+            .setCreationTime(Timestamp.from(NOW.minus(Duration.ofMinutes(60))))
+            // Different window; otherwise metadata matches.
+            .setEgressWindowSeconds(10 * 60L)
+            .setUser(dbUser1)
+            .setWorkspace(dbWorkspace)
+            .setStatus(EgressEventStatus.PENDING));
+
+    egressEventService.handleEvent(oldEgressEvent);
+
+    Iterable<DbEgressEvent> dbEvents = egressEventDao.findAll();
+    assertThat(dbEvents).hasSize(2);
+  }
+
+  @Test
+  public void testCreateEgressEventAlert_staleEventsDifferentUsers() throws ApiException {
+    when(mockAlertApi.createAlert(any())).thenReturn(new SuccessResponse().requestId("12345"));
+
+    EgressEvent oldEgressEvent =
+        recentEgressEventForUser(dbUser1)
+            .timeWindowDuration(60 * 60L)
+            .timeWindowStart(NOW.minus(Duration.ofMinutes(125)).toEpochMilli());
+
+    egressEventDao.save(
+        new DbEgressEvent()
+            .setCreationTime(Timestamp.from(NOW.minus(Duration.ofMinutes(60))))
+            .setEgressWindowSeconds(oldEgressEvent.getTimeWindowDuration())
+            // Different user, otherwise metadata matches
+            .setUser(dbUser2)
+            .setWorkspace(dbWorkspace)
+            .setStatus(EgressEventStatus.PENDING));
+
+    egressEventService.handleEvent(oldEgressEvent);
     verify(mockAlertApi).createAlert(any());
     verify(egressEventAuditor).fireEgressEvent(oldEgressEvent);
 
     Iterable<DbEgressEvent> dbEvents = egressEventDao.findAll();
-    assertThat(dbEvents).hasSize(1);
+    assertThat(dbEvents).hasSize(2);
   }
 
   @Test
