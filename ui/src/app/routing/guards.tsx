@@ -12,7 +12,7 @@ export const signInGuard: Guard = {
 };
 
 export const disabledGuard = (userDisabled: boolean): Guard => ({
-  // Show disable screen when user account is disabled or remoevd from registered tier by institution admin.
+  // Show disable screen when user account is disabled or remoevd from institution registered tier requirement.
   allowed: (): boolean => (!userDisabled && eligibaleForRegisteredForTier(profileStore.get().profile.tierEligibilities)),
   redirectPath: '/user-disabled'
 });
