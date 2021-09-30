@@ -8,7 +8,7 @@ export BQ_PROJECT=$1         # CDR project
 export BQ_DATASET=$2         # CDR dataset
 
 echo "PPI SURVEYS - insert into cb_criteria"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
     (
           id
