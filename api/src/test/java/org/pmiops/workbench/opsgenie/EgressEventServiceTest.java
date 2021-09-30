@@ -4,6 +4,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.opsgenie.EgressEventServiceImpl.NOT_FOUND_WORKSPACE_NAMESPACE;
@@ -28,8 +29,10 @@ import org.mockito.Captor;
 import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.actionaudit.auditors.EgressEventAuditor;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.db.dao.EgressEventDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.db.model.DbEgressEvent;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.institution.InstitutionService;
@@ -72,6 +75,7 @@ public class EgressEventServiceTest extends SpringTest {
   @MockBean private UserService mockUserService;
   @MockBean private WorkspaceAdminService mockWorkspaceAdminService;
   @MockBean private WorkspaceDao workspaceDao;
+  @MockBean private EgressEventDao mockEgressEventDao;
 
   @Captor private ArgumentCaptor<CreateAlertRequest> alertRequestCaptor;
 
@@ -229,8 +233,10 @@ public class EgressEventServiceTest extends SpringTest {
 
   @Test
   public void testCreateEgressEventAlert_staleEvent() throws ApiException {
-    doReturn(Optional.empty()).when(workspaceDao).getByGoogleProject(DEFAULT_GOOGLE_PROJECT);
     when(mockAlertApi.createAlert(any())).thenReturn(new SuccessResponse().requestId("12345"));
+    when(mockEgressEventDao.findAllByUserAndWorkspaceAndCreationTimeGreaterThan(
+            any(), any(), any()))
+        .thenReturn(ImmutableList.of(new DbEgressEvent()));
 
     EgressEvent oldEgressEvent =
         new EgressEvent()
@@ -245,6 +251,7 @@ public class EgressEventServiceTest extends SpringTest {
     egressEventService.handleEvent(oldEgressEvent);
     verify(mockAlertApi).createAlert(alertRequestCaptor.capture());
     verify(egressEventAuditor).fireEgressEvent(oldEgressEvent);
+    verify(mockEgressEventDao, never()).save(any());
 
     final CreateAlertRequest request = alertRequestCaptor.getValue();
     assertThat(request.getMessage()).contains("[>60 mins old] High-egress event");
@@ -253,7 +260,6 @@ public class EgressEventServiceTest extends SpringTest {
 
   @Test
   public void testCreateEgressEventAlert_staleEventShortWindow() throws ApiException {
-    doReturn(Optional.empty()).when(workspaceDao).getByGoogleProject(DEFAULT_GOOGLE_PROJECT);
     when(mockAlertApi.createAlert(any())).thenReturn(new SuccessResponse().requestId("12345"));
 
     EgressEvent oldEgressEvent =
@@ -269,6 +275,7 @@ public class EgressEventServiceTest extends SpringTest {
     egressEventService.handleEvent(oldEgressEvent);
     verify(mockAlertApi).createAlert(alertRequestCaptor.capture());
     verify(egressEventAuditor).fireEgressEvent(oldEgressEvent);
+    verify(mockEgressEventDao).save(any());
 
     final CreateAlertRequest request = alertRequestCaptor.getValue();
     assertThat(request.getMessage()).startsWith("High-egress event");

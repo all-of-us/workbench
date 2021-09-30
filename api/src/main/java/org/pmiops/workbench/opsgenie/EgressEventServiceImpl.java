@@ -2,13 +2,16 @@ package org.pmiops.workbench.opsgenie;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
+import com.google.gson.Gson;
 import com.ifountain.opsgenie.client.swagger.ApiException;
 import com.ifountain.opsgenie.client.swagger.api.AlertApi;
 import com.ifountain.opsgenie.client.swagger.model.CreateAlertRequest;
 import com.ifountain.opsgenie.client.swagger.model.SuccessResponse;
+import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
@@ -18,8 +21,11 @@ import javax.persistence.Transient;
 import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.actionaudit.auditors.EgressEventAuditor;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.db.dao.EgressEventDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.db.model.DbEgressEvent;
+import org.pmiops.workbench.db.model.DbEgressEvent.EgressEventStatus;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.institution.InstitutionService;
@@ -48,6 +54,7 @@ public class EgressEventServiceImpl implements EgressEventService {
   private final UserService userService;
   private final WorkspaceAdminService workspaceAdminService;
   private final WorkspaceDao workspaceDao;
+  private final EgressEventDao egressEventDao;
 
   // Workspace namespace placeholder in Egress alert when workspace namespace is missing.
   // It may happens when workspace is deleted from db, or we are not able to retrieve workspace
@@ -63,7 +70,8 @@ public class EgressEventServiceImpl implements EgressEventService {
       Provider<WorkbenchConfig> workbenchConfigProvider,
       UserService userService,
       WorkspaceAdminService workspaceAdminService,
-      WorkspaceDao workspaceDao) {
+      WorkspaceDao workspaceDao,
+      EgressEventDao egressEventDao) {
     this.clock = clock;
     this.egressEventAuditor = egressEventAuditor;
     this.institutionService = institutionService;
@@ -72,6 +80,7 @@ public class EgressEventServiceImpl implements EgressEventService {
     this.userService = userService;
     this.workspaceAdminService = workspaceAdminService;
     this.workspaceDao = workspaceDao;
+    this.egressEventDao = egressEventDao;
   }
 
   @Override
@@ -89,12 +98,20 @@ public class EgressEventServiceImpl implements EgressEventService {
       workspaceNamespace = dbWorkspaceMaybe.get().getWorkspaceNamespace();
     }
 
+    Optional<DbUser> dbUserMaybe =
+        vmNameToUserDatabaseId(event.getVmPrefix()).flatMap(userService::getByDatabaseId);
+    if (!dbUserMaybe.isPresent()) {
+      logger.warning(String.format("user not found by given VM prefix: %s", event.getVmPrefix()));
+    }
+
     logger.warning(
         String.format(
             "Received an egress event from workspace namespace %s, googleProject %s (%.2fMiB, VM prefix %s)",
             workspaceNamespace, event.getProjectName(), event.getEgressMib(), event.getVmPrefix()));
     this.egressEventAuditor.fireEgressEvent(event);
     this.createEgressEventAlert(event, workspaceNamespace);
+
+    this.maybePersistEgressEvent(event, dbUserMaybe, dbWorkspaceMaybe);
   }
 
   // Create (or potentially update) an OpsGenie alert for an egress event.
@@ -225,6 +242,48 @@ public class EgressEventServiceImpl implements EgressEventService {
                 String.format(
                     "Collaborator with user_id %d not Found", userAdminView.getUserDatabaseId()));
     return String.format("%s: %s", userAdminView.getRole(), userDetails);
+  }
+
+  private void maybePersistEgressEvent(
+      EgressEvent event, Optional<DbUser> userMaybe, Optional<DbWorkspace> workspaceMaybe) {
+    if (isEventStaleAndAlreadyPersisted(event, userMaybe, workspaceMaybe)) {
+      return;
+    }
+
+    egressEventDao.save(
+        new DbEgressEvent()
+            .setUser(userMaybe.orElse(null))
+            .setWorkspace(workspaceMaybe.orElse(null))
+            .setEgressMegabytes(
+                Optional.ofNullable(event.getEgressMib())
+                    // Mibibytes (2^20 bytes) -> Megabytes (10^6 bytes)
+                    .map(mib -> (float) (mib * ((1 << 20) / 1e6)))
+                    .orElse(null))
+            .setEgressWindowSeconds(Optional.ofNullable(event.getTimeWindowDuration()).orElse(null))
+            .setStatus(EgressEventStatus.PENDING)
+            .setEventJson(new Gson().toJson(event)));
+  }
+
+  private boolean isEventStaleAndAlreadyPersisted(
+      EgressEvent event, Optional<DbUser> userMaybe, Optional<DbWorkspace> workspaceMaybe) {
+    if (event.getTimeWindowDuration() == null
+        || !userMaybe.isPresent()
+        || !workspaceMaybe.isPresent()) {
+      return false;
+    }
+    if (!isEventStale(event)) {
+      return false;
+    }
+
+    // We'll consider this a duplicate a persisted event if it was captured within 2 alert windows
+    // of now.
+    Duration window = Duration.ofSeconds(event.getTimeWindowDuration());
+    Timestamp lookbackLimit = Timestamp.from(clock.instant().minus(window.multipliedBy(2L)));
+    List<DbEgressEvent> matchingEvents =
+        egressEventDao.findAllByUserAndWorkspaceAndCreationTimeGreaterThan(
+            userMaybe.get(), workspaceMaybe.get(), lookbackLimit);
+
+    return !matchingEvents.isEmpty();
   }
 
   /**
