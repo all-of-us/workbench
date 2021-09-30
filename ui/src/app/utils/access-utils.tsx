@@ -26,7 +26,6 @@ interface RegistrationTask {
   description: React.ReactNode;
   buttonText: string;
   completedText: string;
-  completionTimestamp: (profile: Profile) => number;
   onClick: Function;
   featureFlag?: boolean;
 }
@@ -58,9 +57,10 @@ export const NIH_CALLBACK_PATH = '/nih-callback';
 
 export const redirectToNiH = (): void => {
   AnalyticsTracker.Registration.ERACommons();
-  const url = serverConfigStore.get().config.shibbolethUiBaseUrl + '/login?return-url=' +
-      encodeURIComponent(
-        window.location.origin.toString() + NIH_CALLBACK_PATH + '?token=<token>');
+
+  const url = serverConfigStore.get().config.rasLogoutUrl + serverConfigStore.get().config.shibbolethUiBaseUrl + '/login?return-url=' +
+    encodeURIComponent(
+      window.location.origin.toString() + NIH_CALLBACK_PATH + '?token={token}');
   window.open(url, '_blank');
 };
 
@@ -102,25 +102,7 @@ export const getRegistrationTasks = (navigate): RegistrationTask[] => serverConf
         'in addition to your password to verify your identity upon login.',
     buttonText: 'Get Started',
     completedText: 'Completed',
-    completionTimestamp: (profile: Profile) => {
-      return profile.twoFactorAuthCompletionTime || profile.twoFactorAuthBypassTime;
-    },
     onClick: redirectToTwoFactorSetup
-  }, {
-    key: 'eraCommons',
-    module: AccessModule.ERACOMMONS,
-    completionPropsKey: 'eraCommonsLinked',
-    loadingPropsKey: 'eraCommonsLoading',
-    title: 'Connect Your eRA Commons Account',
-    description: 'Connect your Researcher Workbench account to your eRA Commons account. ' +
-      'There is no exchange of personal data in this step.',
-    featureFlag: serverConfigStore.get().config.enableEraCommons,
-    buttonText: 'Connect',
-    completedText: 'Linked',
-    completionTimestamp: (profile: Profile) => {
-      return profile.eraCommonsCompletionTime || profile.eraCommonsBypassTime;
-    },
-    onClick: redirectToNiH
   }, {
     key: 'rasLoginGov',
     module: AccessModule.RASLINKLOGINGOV,
@@ -131,10 +113,19 @@ export const getRegistrationTasks = (navigate): RegistrationTask[] => serverConf
     description: 'Connect your Researcher Workbench account to your login.gov account. ',
     buttonText: 'Connect',
     completedText: 'Linked',
-    completionTimestamp: (profile: Profile) => {
-      return profile.rasLinkLoginGovCompletionTime || profile.rasLinkLoginGovBypassTime;
-    },
     onClick: redirectToRas
+  }, {
+    key: 'eraCommons',
+    module: AccessModule.ERACOMMONS,
+    completionPropsKey: 'eraCommonsLinked',
+    loadingPropsKey: 'eraCommonsLoading',
+    title: 'Connect Your eRA Commons Account',
+    description: 'Connect your Researcher Workbench account to your eRA Commons account. ' +
+        'There is no exchange of personal data in this step.',
+    featureFlag: serverConfigStore.get().config.enableEraCommons,
+    buttonText: 'Connect',
+    completedText: 'Linked',
+    onClick: redirectToNiH
   }, {
     key: 'complianceTraining',
     module: AccessModule.COMPLIANCETRAINING,
@@ -145,9 +136,6 @@ export const getRegistrationTasks = (navigate): RegistrationTask[] => serverConf
     buttonText: 'Complete training',
     featureFlag: serverConfigStore.get().config.enableComplianceTraining,
     completedText: 'Completed',
-    completionTimestamp: (profile: Profile) => {
-      return profile.complianceTrainingCompletionTime || profile.complianceTrainingBypassTime;
-    },
     onClick: redirectToTraining
   }, {
     key: 'dataUserCodeOfConduct',
@@ -157,18 +145,6 @@ export const getRegistrationTasks = (navigate): RegistrationTask[] => serverConf
     description: <span>Sign the Data User Code of Conduct consenting to the <AoU/> data use policy.</span>,
     buttonText: 'View & Sign',
     completedText: 'Signed',
-    completionTimestamp: (profile: Profile) => {
-      if (profile.dataUseAgreementBypassTime) {
-        return profile.dataUseAgreementBypassTime;
-      }
-      // The DUCC completion time field tracks the most recent DUCC completion
-      // timestamp, but doesn't specify whether that DUCC is currently active.
-      const requiredDuccVersion = getLiveDUCCVersion();
-      if (profile.dataUseAgreementSignedVersion === requiredDuccVersion) {
-        return profile.dataUseAgreementCompletionTime;
-      }
-      return null;
-    },
     onClick: () => {
       AnalyticsTracker.Registration.EnterDUCC();
       navigate(['data-code-of-conduct']);

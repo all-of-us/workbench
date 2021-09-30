@@ -4,14 +4,6 @@ export interface ICredentialConfig {
   INSTITUTION_CONTACT_EMAIL: string;
   LOGIN_GOV_PASSWORD: string;
   LOGIN_GOV_2FA_SECRET: string;
-  // This is passed via a file to leave open the future option to allow token
-  // refresh during a Puppeteer test run, and also limits logging exposure of the token.
-  USER_ACCESS_TOKEN_FILE: string;
-  COLLABORATOR_ACCESS_TOKEN_FILE: string;
-  READER_ACCESS_TOKEN_FILE: string;
-  WRITER_ACCESS_TOKEN_FILE: string;
-  ACCESS_TEST_ACCESS_TOKEN_FILE: string;
-  ADMIN_TEST_ACCESS_TOKEN_FILE: string;
 }
 
 export interface IPathConfig {

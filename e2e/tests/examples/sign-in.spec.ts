@@ -25,7 +25,7 @@ describe('login tests', () => {
 
   test('withPage example: Sign in as READER', async () => {
     await withPageTest()(async (page) => {
-      await signInWithAccessToken(page, config.READER_ACCESS_TOKEN_FILE);
+      await signInWithAccessToken(page, config.READER_USER);
       const homePage = new HomePage(page);
       const plusIcon = homePage.getCreateNewWorkspaceLink();
       expect(await plusIcon.asElementHandle()).toBeTruthy();
@@ -58,7 +58,7 @@ describe('login tests', () => {
   });
 
   test('withSignIn example: Entering user email and password', async () => {
-    await withSignIn(config.READER_ACCESS_TOKEN_FILE)(async (page, _browser) => {
+    await withSignIn(config.READER_USER)(async (page, _browser) => {
       const workspacesPage = new WorkspacesPage(page);
       await workspacesPage.load();
       expect(await workspacesPage.isLoaded()).toBe(true);

@@ -9,7 +9,7 @@ describe('User Admin', () => {
   const userEmail = 'admin_test';
 
   beforeEach(async () => {
-    await signInWithAccessToken(page, config.ADMIN_TEST_ACCESS_TOKEN_FILE);
+    await signInWithAccessToken(page, config.ADMIN_TEST_USER);
     await navigation.navMenu(page, NavLink.USER_ADMIN);
   });
 

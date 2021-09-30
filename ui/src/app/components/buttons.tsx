@@ -10,6 +10,7 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 import Interactive from 'react-interactive';
 import { Link } from 'react-router-dom';
+import { RouteLink } from './app-router';
 
 
 export const styles = reactStyles({
@@ -209,12 +210,28 @@ export const Clickable = ({as = 'div', disabled = false, onClick = null, propaga
   />;
 };
 
-export const Button = ({type = 'primary', style = {}, disabled = false, ...props}) => {
-  return <Clickable
-    // `fp.omit` used to prevent propagation of test IDs to the rendered child component.
-    disabled={disabled} {...fp.omit(['data-test-id'], props)}
-    {...fp.merge(computeStyle(buttonVariants[type], {disabled}), {style})}
-  />;
+export const Button = ({
+                         children,
+                         path='',
+                         type = 'primary',
+                         style = {},
+                         linkStyle={},
+                         disabled = false,
+                         propagateDataTestId = false,
+                         ...props
+                       }) => {
+  // `fp.omit` used to prevent propagation of test IDs to the rendered child component.
+  const childProps = propagateDataTestId ? props : fp.omit(['data-test-id'], props);
+  const computedStyle = fp.merge(computeStyle(buttonVariants[type], {disabled}), {style})
+  return path
+    ? <RouteLink path={path} {...computedStyle}>
+        <Clickable disabled={disabled} {...childProps}>
+          {children}
+        </Clickable>
+      </RouteLink>
+    : <Clickable disabled={disabled} {...computedStyle} {...childProps}>
+      {children}
+    </Clickable>
 };
 
 export const MenuItem = ({icon = null, faIcon = null, tooltip = '', disabled = false, children, style = {}, ...props}) => {

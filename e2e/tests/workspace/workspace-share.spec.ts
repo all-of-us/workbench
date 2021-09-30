@@ -10,13 +10,11 @@ describe('Workspace Reader and Writer Permission Test', () => {
   const assignAccess = [
     {
       accessRole: WorkspaceAccessLevel.Writer,
-      userEmail: config.WRITER_USER,
-      userAccessTokenFilename: config.WRITER_ACCESS_TOKEN_FILE
+      userEmail: config.WRITER_USER
     },
     {
       accessRole: WorkspaceAccessLevel.Reader,
-      userEmail: config.READER_USER,
-      userAccessTokenFilename: config.READER_ACCESS_TOKEN_FILE
+      userEmail: config.READER_USER
     }
   ];
 
@@ -53,8 +51,7 @@ describe('Workspace Reader and Writer Permission Test', () => {
 
   // Test depends on previous test: Will fail when workspace is not found and share didn't work.
   test.each(assignAccess)('Verify WRITER and READER cannot share, edit or delete workspace', async (assign) => {
-    // Log in could fail if encounters Google Captcha
-    await signInWithAccessToken(page, assign.userAccessTokenFilename);
+    await signInWithAccessToken(page, assign.userEmail);
 
     // Find workspace created by previous test. If not found, test will fail.
     const workspaceCard = await findWorkspaceCard(page, workspace);
