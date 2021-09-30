@@ -7,6 +7,7 @@ import {profileStore, serverConfigStore} from 'app/utils/stores';
 import defaultServerConfig from 'testing/default-server-config';
 import {AccessModule} from 'generated/fetch';
 import {ProfileStubVariables} from 'testing/stubs/profile-api-stub';
+import { MemoryRouter } from 'react-router-dom';
 
 describe('LoginGovIAL2Notification', () => {
   const load = jest.fn();
@@ -20,7 +21,7 @@ describe('LoginGovIAL2Notification', () => {
   });
 
   const component = () => {
-    return mount(<LoginGovIAL2NotificationMaybe/>);
+    return mount(<MemoryRouter><LoginGovIAL2NotificationMaybe/></MemoryRouter>);
   };
 
   it('should show notification when login.gov feature flag enabled', () => {

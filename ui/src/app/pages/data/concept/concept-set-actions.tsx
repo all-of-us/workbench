@@ -1,3 +1,4 @@
+import {RouteLink} from 'app/components/app-router';
 import {Button} from 'app/components/buttons';
 import {ActionCardBase} from 'app/components/card';
 import {FadeBox} from 'app/components/containers';
@@ -105,7 +106,7 @@ export const ConceptSetActions = fp.flow(withCurrentWorkspace(), withNavigation,
       }
     }
 
-    navigateTo(action: string): void {
+    getNavigationPath(action: string): string {
       const {namespace, id} = this.props.workspace;
       const {conceptSet} = this.state;
       let url = `/workspaces/${namespace}/${id}/`;
@@ -123,7 +124,7 @@ export const ConceptSetActions = fp.flow(withCurrentWorkspace(), withNavigation,
           url += `data/data-sets`;
           break;
       }
-      this.props.navigateByUrl(url);
+      return url;
     }
 
     render() {
@@ -134,10 +135,10 @@ export const ConceptSetActions = fp.flow(withCurrentWorkspace(), withNavigation,
           <h3 style={styles.conceptSetsHeader}>Concept Set Saved Successfully</h3>
           <div style={{marginTop: '0.25rem'}}>
             The concept set
-            <a style={{color: colors.accent, margin: '0 4px'}}
-               onClick={() => this.navigateTo('conceptSet')}>
+            <RouteLink style={{color: colors.accent, margin: '0 4px'}}
+               path={this.getNavigationPath('conceptSet')}>
               {conceptSet.name}
-            </a>
+            </RouteLink>
             has been saved.
           </div>
           <h3 style={{...styles.conceptSetsHeader, marginTop: '1.5rem'}}>What Next?</h3>
@@ -154,7 +155,7 @@ export const ConceptSetActions = fp.flow(withCurrentWorkspace(), withNavigation,
                   <Button
                     type='primary'
                     style={styles.cardButton}
-                    onClick={() => this.navigateTo(card.action)}>
+                    path={this.getNavigationPath(card.action)}>
                     {card.title}
                   </Button>
                 </div>
