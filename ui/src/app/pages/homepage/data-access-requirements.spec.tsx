@@ -278,8 +278,9 @@ describe('DataAccessRequirements', () => {
         expect(findCompletionBanner(wrapper).exists()).toBeTruthy();
     });
 
-    // RAS launch bug
-    it('should render all modules as complete by transitioning to all complete', async() => {
+    // RAS launch bug (no JIRA ticket)
+    // temporarily disabled for flakiness - https://precisionmedicineinitiative.atlassian.net/browse/RW-7364
+    xit('should render all modules as complete by transitioning to all complete', async() => {
 
         // initially, the user has completed all modules except RAS (the standard case at RAS launch time)
 
