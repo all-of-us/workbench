@@ -5,7 +5,6 @@ import {findOrCreateWorkspaceCard, performActions, refreshAccessToken, signInWit
 import WorkspaceAboutPage from 'app/page/workspace-about-page';
 import WorkspaceEditPage from 'app/page/workspace-edit-page';
 import { makeWorkspaceName } from 'utils/str-utils';
-import {config} from "../../resources/workbench-config";
 
 describe('Editing workspace via workspace card snowman menu', () => {
   beforeEach(async () => {
