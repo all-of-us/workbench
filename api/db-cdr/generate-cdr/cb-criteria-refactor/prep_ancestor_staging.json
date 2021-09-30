@@ -16,6 +16,11 @@
   },
   {
     "mode": "NULLABLE",
+    "name": "subtype",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
     "name": "is_standard",
     "type": "INTEGER"
   },

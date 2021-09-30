@@ -2,7 +2,7 @@
 # set -ex
 # do not output cmd-line for now
 set -e
-SQL_FOR='CONDITION_OCCURRENCE - SNOMED - STANDARD'
+SQL_FOR='MEASUREMENT - Labs - STANDARD LOINC'
 SQL_SCRIPT_ORDER=15
 TBL_CBC='cb_criteria'
 TBL_PAS='prep_ancestor_staging'
@@ -86,7 +86,8 @@ bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
         , has_hierarchy
         , path
     )
-SELECT (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`)+1 as id
+SELECT
+    (SELECT COALESCE(MAX(id),$CB_CRITERIA_START_ID) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` WHERE id > $CB_CRITERIA_START_ID and id < $CB_CRITERIA_END_ID) + 1 as id
     , 0
     , 'MEASUREMENT'
     , 1
@@ -99,7 +100,7 @@ SELECT (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`)+1 as id
     , 0
     , 0
     , 1
-    , CAST((SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`)+1 AS STRING)"
+    , CAST((SELECT COALESCE(MAX(id),$CB_CRITERIA_START_ID) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` WHERE id > $CB_CRITERIA_START_ID and id < $CB_CRITERIA_END_ID) + 1 AS STRING)"
 
 # add items directly under the root item in the above query
 echo "MEASUREMENT - Labs - STANDARD LOINC - add level 0"
@@ -124,7 +125,8 @@ bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
         , path
     )
 SELECT
-      ROW_NUMBER() OVER (ORDER BY p.id, c.concept_name) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`)
+    ROW_NUMBER() OVER (ORDER BY p.id, c.concept_name)
+        + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` WHERE id > $CB_CRITERIA_START_ID and id < $CB_CRITERIA_END_ID)
     , p.id
     , 'MEASUREMENT'
     , 1
@@ -139,9 +141,8 @@ SELECT
     , 0
     , 0
     , 1
-    , CONCAT( p.path, '.',
-        CAST(ROW_NUMBER() OVER (ORDER BY p.id, c.concept_name) +
-        (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`) AS STRING) )
+    , CONCAT( p.path, '.', CAST(ROW_NUMBER() OVER (ORDER BY p.id, c.concept_name)
+          + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` WHERE id > $CB_CRITERIA_START_ID and id < $CB_CRITERIA_END_ID) as STRING))
 FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` p
 JOIN \`$BQ_PROJECT.$BQ_DATASET.prep_loinc_rel_in_data\` c on p.code = c.p_concept_code
 WHERE p.type = 'LOINC'
@@ -242,7 +243,7 @@ bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
         , path
     )
 SELECT
-      (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`)+1 as id
+     (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` WHERE id > $CB_CRITERIA_START_ID and id < $CB_CRITERIA_END_ID) + 1 as id
     , a.id as parent_id
     , 'MEASUREMENT'
     , 1
@@ -255,7 +256,7 @@ SELECT
     , 0
     , 0
     , 1
-    , CONCAT(a.path, '.', CAST((SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`)+1 AS STRING))
+    , CONCAT(a.path, '.', CAST((SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` WHERE id > $CB_CRITERIA_START_ID and id < $CB_CRITERIA_END_ID) + 1 AS STRING))
 FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` a
 WHERE type = 'LOINC'
     and subtype = 'LAB'
@@ -283,8 +284,9 @@ bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
         , has_hierarchy
         , path
     )
-SELECT ROW_NUMBER() OVER (ORDER BY concept_name) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`) as id
-    , (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`) as parent_id
+SELECT ROW_NUMBER() OVER (ORDER BY concept_name)
+    + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` WHERE id > $CB_CRITERIA_START_ID and id < $CB_CRITERIA_END_ID) as id
+    , (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` WHERE id > $CB_CRITERIA_START_ID and id < $CB_CRITERIA_END_ID) as parent_id
     , 'MEASUREMENT'
     , 1
     , 'LOINC'
@@ -301,9 +303,9 @@ SELECT ROW_NUMBER() OVER (ORDER BY concept_name) + (SELECT MAX(id) FROM \`$BQ_PR
     , 1
     , CONCAT(
         (SELECT path FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
-        WHERE type = 'LOINC' and subtype = 'LAB' and name = 'Uncategorized'), '.',
-        CAST(ROW_NUMBER() OVER (ORDER BY concept_name) +
-        (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`) AS STRING) )
+        WHERE type = 'LOINC' and subtype = 'LAB' and name = 'Uncategorized' and id > $CB_CRITERIA_START_ID and id < $CB_CRITERIA_END_ID), '.',
+        CAST(ROW_NUMBER() OVER (ORDER BY concept_name)
+          + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` WHERE id > $CB_CRITERIA_START_ID and id < $CB_CRITERIA_END_ID) AS STRING) )
 FROM
     (
         SELECT concept_id, concept_code, concept_name, COUNT(DISTINCT person_id) cnt
@@ -312,11 +314,13 @@ FROM
         WHERE standard_concept = 'S'
             and domain_id = 'Measurement'
             and vocabulary_id = 'LOINC'
+            and concept_class_id = 'Lab Test'
             and measurement_concept_id not in
                 (
                     SELECT concept_id
                     FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
                     WHERE type = 'LOINC'
+                        and id > $CB_CRITERIA_START_ID and id < $CB_CRITERIA_END_ID
                         and concept_id is not null
                 )
         GROUP BY 1,2,3
@@ -330,6 +334,7 @@ bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
           ancestor_concept_id
         , domain_id
         , type
+        , subtype
         , is_standard
         , concept_id_1
         , concept_id_2
@@ -347,6 +352,7 @@ bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 SELECT DISTINCT a.concept_id as ancestor_concept_id
     , a.domain_id
     , a.type
+    , a.subtype
     , a.is_standard
     , b.concept_id c1
     , c.concept_id c2
@@ -361,21 +367,21 @@ SELECT DISTINCT a.concept_id as ancestor_concept_id
     , m.concept_id c11
     , n.concept_id c12
 FROM
-    (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
+    (SELECT id, parent_id, domain_id, type, subtype, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
         WHERE type = 'LOINC' and subtype = 'LAB' and is_group = 1 and parent_id != 0 and concept_id is not null
               and id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID ) a
-    JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id from \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` WHERE type = 'LOINC' and subtype = 'LAB') b on a.id = b.parent_id
-    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` WHERE type = 'LOINC' and subtype = 'LAB') c on b.id = c.parent_id
-    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` WHERE type = 'LOINC' and subtype = 'LAB') d on c.id = d.parent_id
-    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` WHERE type = 'LOINC' and subtype = 'LAB') e on d.id = e.parent_id
-    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` WHERE type = 'LOINC' and subtype = 'LAB') f on e.id = f.parent_id
-    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` WHERE type = 'LOINC' and subtype = 'LAB') g on f.id = g.parent_id
-    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` WHERE type = 'LOINC' and subtype = 'LAB') h on g.id = h.parent_id
-    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` WHERE type = 'LOINC' and subtype = 'LAB') i on h.id = i.parent_id
-    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` WHERE type = 'LOINC' and subtype = 'LAB') j on i.id = j.parent_id
-    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` WHERE type = 'LOINC' and subtype = 'LAB') k on j.id = k.parent_id
-    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` WHERE type = 'LOINC' and subtype = 'LAB') m on k.id = m.parent_id
-    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` WHERE type = 'LOINC' and subtype = 'LAB') n on m.id = n.parent_id"
+    JOIN (SELECT id, parent_id, domain_id, type, subtype, is_standard, concept_id from \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` WHERE type = 'LOINC' and subtype = 'LAB') b on a.id = b.parent_id
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, subtype, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` WHERE type = 'LOINC' and subtype = 'LAB') c on b.id = c.parent_id
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, subtype, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` WHERE type = 'LOINC' and subtype = 'LAB') d on c.id = d.parent_id
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, subtype, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` WHERE type = 'LOINC' and subtype = 'LAB') e on d.id = e.parent_id
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, subtype, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` WHERE type = 'LOINC' and subtype = 'LAB') f on e.id = f.parent_id
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, subtype, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` WHERE type = 'LOINC' and subtype = 'LAB') g on f.id = g.parent_id
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, subtype, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` WHERE type = 'LOINC' and subtype = 'LAB') h on g.id = h.parent_id
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, subtype, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` WHERE type = 'LOINC' and subtype = 'LAB') i on h.id = i.parent_id
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, subtype, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` WHERE type = 'LOINC' and subtype = 'LAB') j on i.id = j.parent_id
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, subtype, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` WHERE type = 'LOINC' and subtype = 'LAB') k on j.id = k.parent_id
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, subtype, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` WHERE type = 'LOINC' and subtype = 'LAB') m on k.id = m.parent_id
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, subtype, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` WHERE type = 'LOINC' and subtype = 'LAB') n on m.id = n.parent_id"
 
 # Count: 13 - If loop count above is changed, the number of JOINS below must be updated
 echo "MEASUREMENT - Labs - STANDARD LOINC - add items into ancestor table"
@@ -390,78 +396,91 @@ SELECT DISTINCT ancestor_concept_id, concept_id_12 as descendant_concept_id, is_
 FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_PAS\`
 WHERE concept_id_12 is not null
     and type = 'LOINC'
+    and subtype = 'LAB'
     and is_standard = 1
 UNION DISTINCT
 SELECT DISTINCT ancestor_concept_id, concept_id_11 as descendant_concept_id, is_standard
 FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_PAS\`
 WHERE concept_id_11 is not null
     and type = 'LOINC'
+    and subtype = 'LAB'
     and is_standard = 1
 UNION DISTINCT
 SELECT DISTINCT ancestor_concept_id, concept_id_10 as descendant_concept_id, is_standard
 FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_PAS\`
 WHERE concept_id_10 is not null
     and type = 'LOINC'
+    and subtype = 'LAB'
     and is_standard = 1
 UNION DISTINCT
 SELECT DISTINCT ancestor_concept_id, concept_id_9 as descendant_concept_id, is_standard
 FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_PAS\`
 WHERE concept_id_9 is not null
     and type = 'LOINC'
+    and subtype = 'LAB'
     and is_standard = 1
 UNION DISTINCT
 SELECT DISTINCT ancestor_concept_id, concept_id_8 as descendant_concept_id, is_standard
 FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_PAS\`
 WHERE concept_id_8 is not null
     and type = 'LOINC'
+    and subtype = 'LAB'
     and is_standard = 1
 UNION DISTINCT
 SELECT DISTINCT ancestor_concept_id, concept_id_7 as descendant_concept_id, is_standard
 FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_PAS\`
 WHERE concept_id_7 is not null
     and type = 'LOINC'
+    and subtype = 'LAB'
     and is_standard = 1
 UNION DISTINCT
 SELECT DISTINCT ancestor_concept_id, concept_id_6 as descendant_concept_id, is_standard
 FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_PAS\`
 WHERE concept_id_6 is not null
     and type = 'LOINC'
+    and subtype = 'LAB'
     and is_standard = 1
 UNION DISTINCT
 SELECT DISTINCT ancestor_concept_id, concept_id_5 as descendant_concept_id, is_standard
 FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_PAS\`
 WHERE concept_id_5 is not null
     and type = 'LOINC'
+    and subtype = 'LAB'
     and is_standard = 1
 UNION DISTINCT
 SELECT DISTINCT ancestor_concept_id, concept_id_4 as descendant_concept_id, is_standard
 FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_PAS\`
 WHERE concept_id_4 is not null
     and type = 'LOINC'
+    and subtype = 'LAB'
     and is_standard = 1
 UNION DISTINCT
 SELECT DISTINCT ancestor_concept_id, concept_id_3 as descendant_concept_id, is_standard
 FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_PAS\`
 WHERE concept_id_3 is not null
     and type = 'LOINC'
+    and subtype = 'LAB'
     and is_standard = 1
 UNION DISTINCT
 SELECT DISTINCT ancestor_concept_id, concept_id_2 as descendant_concept_id, is_standard
 FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_PAS\`
 WHERE concept_id_2 is not null
     and type = 'LOINC'
+    and subtype = 'LAB'
     and is_standard = 1
 UNION DISTINCT
 SELECT DISTINCT ancestor_concept_id, concept_id_1 as descendant_concept_id, is_standard
 FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_PAS\`
 WHERE concept_id_1 is not null
     and type = 'LOINC'
+    and subtype = 'LAB'
     and is_standard = 1
 UNION DISTINCT
 -- this statement is to add the ancestor item to itself
 SELECT DISTINCT ancestor_concept_id, ancestor_concept_id as descendant_concept_id, is_standard
 FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_PAS\`
 WHERE type = 'LOINC'
+    and subtype = 'LAB'
     and is_standard = 1"
 
 echo "MEASUREMENT - Labs - STANDARD LOINC - item counts"
@@ -479,6 +498,7 @@ FROM
 WHERE x.concept_id = y.concept_id
     and x.type = 'LOINC'
     and x.subtype = 'LAB'
+    and x.id > $CB_CRITERIA_START_ID and x.id < $CB_CRITERIA_END_ID
     and x.is_standard = 1
     and x.is_selectable = 1"
 

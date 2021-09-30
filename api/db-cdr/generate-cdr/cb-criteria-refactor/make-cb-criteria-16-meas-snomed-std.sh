@@ -2,7 +2,7 @@
 # set -ex
 # do not output cmd-line for now
 set -e
-SQL_FOR='CONDITION_OCCURRENCE - SNOMED - STANDARD'
+SQL_FOR='MEASUREMENT - SNOMED - STANDARD'
 SQL_SCRIPT_ORDER=16
 TBL_CBC='cb_criteria'
 TBL_PAS='prep_ancestor_staging'
@@ -81,7 +81,8 @@ bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
         , path
     )
 SELECT
-      ROW_NUMBER() OVER(ORDER BY concept_name) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`) as id
+    ROW_NUMBER() OVER(ORDER BY concept_name)
+      + (SELECT COALESCE(MAX(id),$CB_CRITERIA_START_ID) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` WHERE id > $CB_CRITERIA_START_ID and id < $CB_CRITERIA_END_ID) as id
     , 0
     , 'MEASUREMENT'
     , 1
@@ -93,8 +94,8 @@ SELECT
     , 0
     , 0
     , 1
-    , CAST(ROW_NUMBER() OVER(ORDER BY concept_name) +
-        (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`) as STRING) as path
+    , CAST(ROW_NUMBER() OVER(ORDER BY concept_name)
+         + (SELECT COALESCE(MAX(id),$CB_CRITERIA_START_ID) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` WHERE id > $CB_CRITERIA_START_ID and id < $CB_CRITERIA_END_ID) as STRING) as path
 FROM
     (
         SELECT DISTINCT concept_id, concept_name, concept_code
@@ -139,7 +140,8 @@ bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
         , path
     )
 SELECT
-    ROW_NUMBER() OVER (ORDER BY p.id, c.concept_name) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`)
+    ROW_NUMBER() OVER (ORDER BY p.id, c.concept_name)
+      + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` WHERE id > $CB_CRITERIA_START_ID and id < $CB_CRITERIA_END_ID)
     , p.id
     , 'MEASUREMENT'
     , 1
@@ -153,13 +155,14 @@ SELECT
     , 0
     , 0
     , 1
-    , CONCAT(p.path, '.', CAST(ROW_NUMBER() OVER (ORDER BY p.id, c.concept_name) +
-        (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`) as STRING))
+    , CONCAT(p.path, '.', CAST(ROW_NUMBER() OVER (ORDER BY p.id, c.concept_name)
+         + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` WHERE id > $CB_CRITERIA_START_ID and id < $CB_CRITERIA_END_ID) as STRING))
 FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` p
 JOIN \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_meas_in_data\` c on p.code = c.p_concept_code
 WHERE p.domain_id = 'MEASUREMENT'
     and p.type = 'SNOMED'
     and p.is_standard = 1
+    and p.id > $CB_CRITERIA_START_ID and p.id < $CB_CRITERIA_END_ID
     and p.id not in
         (
             SELECT parent_id
