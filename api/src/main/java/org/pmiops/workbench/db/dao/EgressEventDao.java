@@ -9,6 +9,6 @@ import org.springframework.data.repository.CrudRepository;
 
 public interface EgressEventDao extends CrudRepository<DbEgressEvent, Long> {
 
-  List<DbEgressEvent> findAllByUserAndWorkspaceAndCreationTimeGreaterThan(
-      DbUser user, DbWorkspace workspace, Timestamp creationTimeLimit);
+  List<DbEgressEvent> findAllByUserAndWorkspaceAndEgressWindowSecondsAndCreationTimeGreaterThan(
+      DbUser user, DbWorkspace workspace, long egressWindowSeconds, Timestamp creationTimeLimit);
 }

@@ -1,6 +1,7 @@
 package org.pmiops.workbench.db.model;
 
 import java.sql.Timestamp;
+import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -33,7 +34,7 @@ public class DbEgressEvent {
   private Timestamp creationTime;
   private Timestamp lastModifiedTime;
   private EgressEventStatus status;
-  private String eventJson;
+  private String sumologicEvent;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -111,13 +112,13 @@ public class DbEgressEvent {
     return this;
   }
 
-  @Column(name = "event_json")
-  public String getEventJson() {
-    return eventJson;
+  @Column(name = "sumologic_event")
+  public String getSumologicEvent() {
+    return sumologicEvent;
   }
 
-  public DbEgressEvent setEventJson(String eventJson) {
-    this.eventJson = eventJson;
+  public DbEgressEvent setSumologicEvent(String sumologicEvent) {
+    this.sumologicEvent = sumologicEvent;
     return this;
   }
 
@@ -130,5 +131,38 @@ public class DbEgressEvent {
   public DbEgressEvent setStatus(EgressEventStatus s) {
     this.status = s;
     return this;
+  }
+
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    DbEgressEvent that = (DbEgressEvent) o;
+    return egressEventId == that.egressEventId
+        && Objects.equals(user, that.user)
+        && Objects.equals(workspace, that.workspace)
+        && Objects.equals(egressMegabytes, that.egressMegabytes)
+        && Objects.equals(egressWindowSeconds, that.egressWindowSeconds)
+        && Objects.equals(creationTime, that.creationTime)
+        && Objects.equals(lastModifiedTime, that.lastModifiedTime)
+        && status == that.status
+        && Objects.equals(sumologicEvent, that.sumologicEvent);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(
+        egressEventId,
+        user,
+        workspace,
+        egressMegabytes,
+        egressWindowSeconds,
+        creationTime,
+        lastModifiedTime,
+        status,
+        sumologicEvent);
   }
 }

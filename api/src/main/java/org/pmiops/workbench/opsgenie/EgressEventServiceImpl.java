@@ -138,6 +138,11 @@ public class EgressEventServiceImpl implements EgressEventService {
   }
 
   private boolean isEventStale(EgressEvent egressEvent) {
+    if (egressEvent.getTimeWindowDuration() == null || egressEvent.getTimeWindowStart() == null) {
+      logger.warning("egress event is missing window details, cannot determine staleness");
+      return false;
+    }
+
     // For shorter alerting windows, we don't make any claims about staleness. This ensures that we
     // don't misinterpret a delay in when Sumologic runs the query, and when our system receives the
     // event as a stale event.
@@ -256,12 +261,12 @@ public class EgressEventServiceImpl implements EgressEventService {
             .setWorkspace(workspaceMaybe.orElse(null))
             .setEgressMegabytes(
                 Optional.ofNullable(event.getEgressMib())
-                    // Mibibytes (2^20 bytes) -> Megabytes (10^6 bytes)
+                    // Mebibytes (2^20 bytes) -> Megabytes (10^6 bytes)
                     .map(mib -> (float) (mib * ((1 << 20) / 1e6)))
                     .orElse(null))
             .setEgressWindowSeconds(Optional.ofNullable(event.getTimeWindowDuration()).orElse(null))
             .setStatus(EgressEventStatus.PENDING)
-            .setEventJson(new Gson().toJson(event)));
+            .setSumologicEvent(new Gson().toJson(event)));
   }
 
   private boolean isEventStaleAndAlreadyPersisted(
@@ -280,8 +285,8 @@ public class EgressEventServiceImpl implements EgressEventService {
     Duration window = Duration.ofSeconds(event.getTimeWindowDuration());
     Timestamp lookbackLimit = Timestamp.from(clock.instant().minus(window.multipliedBy(2L)));
     List<DbEgressEvent> matchingEvents =
-        egressEventDao.findAllByUserAndWorkspaceAndCreationTimeGreaterThan(
-            userMaybe.get(), workspaceMaybe.get(), lookbackLimit);
+        egressEventDao.findAllByUserAndWorkspaceAndEgressWindowSecondsAndCreationTimeGreaterThan(
+            userMaybe.get(), workspaceMaybe.get(), event.getTimeWindowDuration(), lookbackLimit);
 
     return !matchingEvents.isEmpty();
   }

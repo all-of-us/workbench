@@ -24,13 +24,13 @@
       <column name="creation_time" type="datetime">
         <constraints nullable="false"/>
       </column>
-      <column name="last_modified" type="datetime">
+      <column name="last_modified_time" type="datetime">
         <constraints nullable="false"/>
       </column>
       <column name="status" type="ENUM('PENDING', 'REMEDIATED', 'VERIFIED_FALSE_POSITIVE')">
         <constraints nullable="false"/>
       </column>
-      <column name="event_json" type="blob">
+      <column name="sumologic_event" type="json">
         <constraints nullable="false"/>
       </column>
     </createTable>
