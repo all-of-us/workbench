@@ -54,7 +54,7 @@ import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
 
-import {Clickable, MenuItem, StyledAnchorTag} from 'app/components/buttons';
+import {Clickable, MenuItem, StyledExternalLink} from 'app/components/buttons';
 import {ConfirmDeleteModal} from 'app/components/confirm-delete-modal';
 import {GenomicsExtractionTable} from 'app/components/genomics-extraction-table';
 import {HelpTips} from 'app/components/help-tips';
@@ -893,9 +893,9 @@ export const HelpSidebar = fp.flow(
                   <div style={{...styles.footer}}>
                       <h3 style={{...styles.sectionTitle, marginTop: 0}}>Not finding what you're looking for?</h3>
                       <p style={styles.contentItem}>
-                          Visit our <StyledAnchorTag href={supportUrls.helpCenter}
-                                                     target='_blank' onClick={() => this.analyticsEvent('UserSupport')}> User Support Hub
-                      </StyledAnchorTag> page or <span style={styles.link} onClick={() => this.openContactWidget()}> contact us</span>.
+                          Visit our <StyledExternalLink href={supportUrls.helpCenter}
+                                                        target='_blank' onClick={() => this.analyticsEvent('UserSupport')}> User Support Hub
+                      </StyledExternalLink> page or <span style={styles.link} onClick={() => this.openContactWidget()}> contact us</span>.
                       </p>
                   </div>}
                 </div>}

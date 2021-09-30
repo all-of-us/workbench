@@ -14,7 +14,7 @@ import HomePage from 'app/page/home-page';
 
 describe('User Access', () => {
   beforeEach(async () => {
-    await signInWithAccessToken(page, config.ACCESS_TEST_ACCESS_TOKEN_FILE, new AccessRenewalPage(page));
+    await signInWithAccessToken(page, config.ACCESS_TEST_USER, new AccessRenewalPage(page));
   });
 
   // note that this test is "destructive" in that it brings the user to a state

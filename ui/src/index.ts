@@ -6,7 +6,11 @@ import * as ReactModal from 'react-modal';
 import * as StackTrace from 'stacktrace-js';
 
 import {ErrorHandler} from 'app/components/error-handler';
-import {setupCustomValidators} from 'app/services/setup';
+import {
+  checkBrowserSupport,
+  exposeAccessTokenSetter,
+  setupCustomValidators
+} from 'app/services/setup';
 import {AppRoutingComponent} from './app/routing/app-routing';
 
 
@@ -31,6 +35,8 @@ import "styles.css";
 (<any>window).StackTrace = StackTrace;
 
 setupCustomValidators();
+exposeAccessTokenSetter();
+checkBrowserSupport();
 ReactModal.defaultStyles.overlay = {};
 ReactModal.defaultStyles.content = {};
 

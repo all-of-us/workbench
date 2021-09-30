@@ -106,7 +106,7 @@
     "enablePersistentDisk": false,
     "enableAccessModuleRewrite" : true,
     "enableUnifiedUserAccessCron": true,
-    "enableStandardSourceDomains": false
+    "enableStandardSourceDomains": true
   },
   "actionAudit": {
     "logName": "workbench-action-audit-perf",
@@ -128,7 +128,8 @@
   },
   "ras": {
     "host": "https:\/\/stsstg.nih.gov",
-    "clientId": "e5c5d714-d597-48c8-b564-a249d729d0c9"
+    "clientId": "e5c5d714-d597-48c8-b564-a249d729d0c9",
+    "logoutUrl": "https:\/\/authtest.nih.gov\/siteminderagent\/smlogoutredirector.asp?TARGET="
   },
   "accessRenewal": {
     "expiryDays": 3650,

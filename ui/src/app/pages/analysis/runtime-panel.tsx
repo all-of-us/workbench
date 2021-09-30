@@ -1,4 +1,4 @@
-import {Button, Clickable, Link} from 'app/components/buttons';
+import {Button, Clickable, LinkButton} from 'app/components/buttons';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
 import {ErrorMessage, WarningMessage} from 'app/components/messages';
@@ -1487,7 +1487,8 @@ const RuntimePanel = fp.flow(
                           runtimeCtx = {runtimeCtx}
                   />
               </FlexRow>
-              {currentRuntime && currentRuntime.errors && <ErrorMessage iconPosition={'top'} iconSize={16}>
+              {currentRuntime && currentRuntime.errors && currentRuntime.errors.length > 0
+                && <ErrorMessage iconPosition={'top'} iconSize={16}>
                   <div>An error was encountered with your cloud environment. Please re-attempt creation of the
                     environment and contact support if the error persists.</div>
                   <div>Error details:</div>
@@ -1599,25 +1600,25 @@ const RuntimePanel = fp.flow(
            }
         {runtimeCtx.unattachedPdExists && !runtimeExists ?
             <FlexRow style={{justifyContent: 'space-between', marginTop: '.75rem'}}>
-                <Link
+                <LinkButton
                     style={{...styles.deleteLink, ...(
                           (disableControls) ?
                               {color: colorWithWhiteness(colors.dark, .4)} : {}
                       )}}
                     aria-label='Delete Persistent Disk'
                     disabled={disableControls}
-                    onClick={() => setPanelContent(PanelContent.DeleteUnattachedPd)}>Delete Persistent Disk</Link>
+                    onClick={() => setPanelContent(PanelContent.DeleteUnattachedPd)}>Delete Persistent Disk</LinkButton>
                 {!pdSizeReduced ? renderCreateButton() : renderNextButton()}
             </FlexRow> :
             <FlexRow style={{justifyContent: 'space-between', marginTop: '.75rem'}}>
-              <Link
+              <LinkButton
                   style={{...styles.deleteLink, ...(
                         (disableControls || !runtimeExists) ?
                             {color: colorWithWhiteness(colors.dark, .4)} : {}
                     )}}
                   aria-label='Delete Environment'
                   disabled={disableControls || !runtimeExists}
-                  onClick={() => setPanelContent(PanelContent.DeleteRuntime)}>Delete Environment</Link>
+                  onClick={() => setPanelContent(PanelContent.DeleteRuntime)}>Delete Environment</LinkButton>
               {
                 cond(
                     [runtimeExists || (pdExists && pdSizeReduced), () => renderNextButton()],

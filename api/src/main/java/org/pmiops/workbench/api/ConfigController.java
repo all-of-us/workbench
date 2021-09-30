@@ -48,6 +48,7 @@ public class ConfigController implements ConfigApiDelegate {
             .enablePersistentDisk(config.featureFlags.enablePersistentDisk)
             .rasHost(config.ras.host)
             .rasClientId(config.ras.clientId)
+            .rasLogoutUrl(config.ras.logoutUrl)
             .freeTierBillingAccountId(config.billing.accountId)
             .runtimeImages(
                 Stream.concat(

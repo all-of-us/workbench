@@ -34,10 +34,11 @@ declare const window: Window &
 
 export async function signInWithAccessToken(
   page: Page,
-  tokenFilename = config.USER_ACCESS_TOKEN_FILE,
+  userEmail = config.USER_NAME,
   postSignInPage: AuthenticatedPage = new HomePage(page)
 ): Promise<void> {
-  const token = fs.readFileSync(tokenFilename, 'ascii');
+  // Keep file naming convention synchronized with generate-impersonated-user-tokens
+  const token = fs.readFileSync(`signin-tokens/${userEmail}.txt`, 'ascii');
   logger.info('Sign in with access token to Workbench application');
   const homePage = new HomePage(page);
   await homePage.gotoUrl(PageUrl.Home);

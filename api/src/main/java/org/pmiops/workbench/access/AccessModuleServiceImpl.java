@@ -161,9 +161,8 @@ public class AccessModuleServiceImpl implements AccessModuleService {
    */
   private DbUserAccessModule retrieveUserAccessModuleOrCreate(
       DbUser user, DbAccessModule dbAccessModule) {
-    return userAccessModuleDao.getAllByUser(user).stream()
-        .filter(m -> m.getAccessModule().getName().equals(dbAccessModule.getName()))
-        .findFirst()
+    return userAccessModuleDao
+        .getByUserAndAccessModule(user, dbAccessModule)
         .orElse(new DbUserAccessModule().setUser(user).setAccessModule(dbAccessModule));
   }
 
