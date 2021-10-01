@@ -51,9 +51,8 @@ describe('Create R kernel notebook', () => {
       markdownWorkaround: true,
       timeOut: 5 * 60 * 1000
     });
-    expect(cell3Output).toMatch(/success$/);
-
     await notebook.save();
+    expect(cell3Output).toMatch(/success$/);
   });
 
   test('Duplicate rename delete notebook', async () => {

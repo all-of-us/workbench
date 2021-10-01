@@ -10,10 +10,11 @@ import {convertAPIError} from 'app/utils/errors';
 import {encodeURIComponentStrict} from 'app/utils/navigation';
 import {authStore, profileStore, serverConfigStore, useStore} from 'app/utils/stores';
 import {environment} from 'environments/environment';
-import {AccessModule, AccessModuleStatus, ErrorCode, Profile} from 'generated/fetch';
+import {AccessModule, AccessModuleStatus, ErrorCode, Profile, UserTierEligibility} from 'generated/fetch';
 import {getLiveDUCCVersion} from './code-of-conduct';
 import {parseQueryParams} from "app/components/app-router";
 import {cond, daysFromNow, displayDateWithoutHours} from "./index";
+import {AccessTierShortNames} from 'app/utils/access-tiers';
 
 const {useState, useEffect} = React;
 
@@ -290,4 +291,9 @@ export const computeDisplayDates = ({completionEpochMillis, expirationEpochMilli
   );
 };
 
-
+// return true if user is egligible for registered tier.
+// A user loses tier eligiblity when they are removed from institution tier requirement
+export const eligibleForRegisteredForTier = (tierEligiblities: Array<UserTierEligibility>): boolean => {
+  const rtEligiblity = tierEligiblities.find(t => t.accessTierShortName === AccessTierShortNames.Registered)
+  return !!rtEligiblity && rtEligiblity.eligible
+};

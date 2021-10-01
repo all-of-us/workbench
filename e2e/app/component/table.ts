@@ -4,7 +4,7 @@ import { getPropValue } from 'utils/element-utils';
 
 export default class Table extends Container {
   private trXpath: string = this.xpath + '//tbody/tr';
-  private theadXpath: string = this.xpath + '/thead/tr/th';
+  private theadXpath: string = this.xpath + '//thead/tr/th';
 
   constructor(page: Page, xpath: string, container?: Container) {
     super(page, container === undefined ? xpath : `${container.getXpath()}${xpath}`);
@@ -77,9 +77,9 @@ export default class Table extends Container {
     return columnNames;
   }
 
-  async getColumnIndex(columName: string): Promise<number> {
+  async getColumnIndex(columnName: string): Promise<number> {
     const indexXpath =
-      `count(${this.theadXpath}[contains(normalize-space(text()), "${columName}")]` + '/preceding-sibling::*)';
+      `count(${this.theadXpath}[contains(normalize-space(text()), "${columnName}")]` + '/preceding-sibling::*)';
     const handle = await this.page.waitForXPath(indexXpath, { visible: true });
     const value = await handle.jsonValue();
     return Number(value.toString());

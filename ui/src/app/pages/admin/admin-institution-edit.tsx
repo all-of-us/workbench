@@ -85,6 +85,9 @@ const styles = reactStyles({
     borderRadius: '0.31rem',
     onColor: '#080',
   },
+  saveButton: {
+    textTransform: 'uppercase',
+  },
 });
 
 // The easiest way to override primereact style.
@@ -530,7 +533,7 @@ export const AdminInstitutionEdit = fp.flow(withNavigation, withRouter)(class ex
   }
 
   get buttonText() {
-    return !this.isAddInstitutionMode ? 'SAVE' : 'ADD';
+    return !this.isAddInstitutionMode ? 'Save' : 'Add';
   }
 
   get isAddInstitutionMode() {
@@ -687,6 +690,7 @@ export const AdminInstitutionEdit = fp.flow(withNavigation, withRouter)(class ex
             } disable={this.isAddInstitutionMode}>
               <Button type='primary'
                       data-test-id='save-institution-button'
+                      style={styles.saveButton}
                       disabled={this.disableSave(errors)}
                       onClick={() => this.saveInstitution()}>
                 {this.buttonText}

@@ -62,7 +62,6 @@ export enum LinkText {
   Add = 'ADD',
   AddSelection = 'Add Selection',
   AddThis = 'ADD THIS',
-  AllSurveys = 'All Surveys',
   ApplyModifiers = 'APPLY MODIFIERS',
   ApplyRecreate = 'APPLY & RECREATE',
   Audit = 'AUDIT',
@@ -95,18 +94,14 @@ export enum LinkText {
   DeletePd = 'Delete Persistent Disk',
   DeleteNotebook = 'Delete Notebook',
   DeleteWorkspace = 'Delete Workspace',
-  Demographics = 'Demographics',
   DiscardChanges = 'Discard Changes',
   DownloadSql = 'DOWNLOAD SQL',
   DuplicateWorkspace = 'Duplicate Workspace',
   Edit = 'Edit',
   Export = 'Export',
+  ExtractAndContinue = 'Extract & Continue',
   Finish = 'Finish',
   FinishAndReview = 'Finish & Review',
-  FitbitActivitySummary = 'Fitbit Activity Summary',
-  FitbitHeartRateLevel = 'Fitbit Heart Rate Level',
-  FitbitHeartRateSummary = 'Fitbit Heart Rate Summary',
-  FitbitIntraDaySteps = 'Fitbit Intra Day Steps',
   GoToCopiedConceptSet = 'Go to Copied Concept Set',
   GoToCopiedNotebook = 'Go to Copied Notebook',
   KeepEditing = 'Keep Editing',
@@ -141,6 +136,12 @@ export enum Language {
   R = 'R'
 }
 
+export enum AnalysisTool {
+  Hail = 'Hail',
+  Plink = 'PLINK',
+  VCFCompatible = 'Other VCF-compatible tool'
+}
+
 // Data resource card.
 export enum ResourceCard {
   Cohort = 'Cohort',
@@ -155,7 +156,8 @@ export enum SideBarLink {
   DataDictionary,
   HelpTips,
   WorkspaceMenu,
-  EditAnnotations
+  EditAnnotations,
+  GenomicExtractionsHistory
 }
 
 export const InstitutionSelectValue = {
@@ -168,9 +170,30 @@ export const InstitutionSelectValue = {
   DummyMaster: 'Dummy Master'
 };
 
+
 export enum HeaderName {
   InstitutionName = 'Institution Name',
   InstitutionType = 'Institution Type',
   DataAccessTiers = 'Data access tiers',
   UserEmailInstruction = 'User Email Instruction'
+};
+
+export const ConceptSetSelectValue = {
+  AllSurveys: 'All Surveys',
+  Demographics: 'Demographics',
+  FitbitActivitySummary: 'Fitbit Activity Summary',
+  FitbitHeartRateLevel: 'Fitbit Heart Rate Level',
+  FitbitHeartRateSummary: 'Fitbit Heart Rate Summary',
+  FitbitIntraDaySteps: 'Fitbit Intra Day Steps',
+  WholeGenomeSequenceVariantData: 'Whole Genome Sequencing Data'
+};
+
+export const DatasetValueSelect = {
+  VCFFile: 'VCF Files(s)'
+};
+
+export enum AgeSelectionRadioButton {
+  AgeAtCdrDate = 'Age at CDR Date',
+  CurrentAge = 'Current Age',
+  AgeAtConsent = 'Age at Consent'
 }
