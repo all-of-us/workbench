@@ -4,60 +4,6 @@ import {getAccessModuleStatusByName} from 'app/utils/access-utils';
 import {profileStore, serverConfigStore, useStore} from 'app/utils/stores';
 import {AccessModule} from 'generated/fetch';
 import {NotificationBanner} from 'app/components/notification-banner';
-//
-// const styles = reactStyles({
-//   box: {
-//     boxSizing: 'border-box',
-//     height: '56.5px',
-//     width: '380.5px',
-//     border: '0.5px solid rgba(38,34,98,0.5)',
-//     borderRadius: '5px',
-//     backgroundColor: 'rgba(38,34,98,0.08)',
-//     alignItems: 'center',
-//     justifyContent: 'center',
-//     marginLeft: 'auto',
-//   },
-//   icon: {
-//     height: '25px',
-//     width: '25px',
-//     color:  colors.warning,
-//     fontFamily: 'Font Awesome 5 Pro',
-//     fontSize: '25px',
-//     letterSpacing: 0,
-//     lineHeight: '25px',
-//     marginLeft: 'auto',
-//   },
-//   text: {
-//     height: '40px',
-//     width: '199px',
-//     color: colors.primary,
-//     fontFamily: 'Montserrat',
-//     fontSize: '14px',
-//     fontWeight: 600,
-//     letterSpacing: 0,
-//     lineHeight: '20px',
-//     marginLeft: 'auto',
-//   },
-//   button: {
-//     boxSizing: 'border-box',
-//     height: '38px',
-//     width: '120px',
-//     border: '0.8px solid #216FB4',
-//     borderRadius: '1.6px',
-//     marginLeft: 'auto',
-//     marginRight: 'auto',
-//   },
-//   buttonText: {
-//     height: '21px',
-//     width: '98px',
-//     fontFamily: 'Montserrat',
-//     fontSize: '14px',
-//     fontWeight: 500,
-//     letterSpacing: '0',
-//     lineHeight: '21px',
-//     textAlign: 'center',
-//   },
-// });
 
 export const LoginGovIAL2NotificationMaybe = () => {
   const {profile} = useStore(profileStore);
@@ -73,7 +19,7 @@ export const LoginGovIAL2NotificationMaybe = () => {
       ? <NotificationBanner
           dataTestId='ial2-notification'
           text='Please verify your identity by 10/27/2021.'
-          buttonText='LEARN MORE'
+          buttonText='Get Started'
           buttonPath='/data-access-requirements'/>
       : null;
 };
