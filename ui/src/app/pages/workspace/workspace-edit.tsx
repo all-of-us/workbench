@@ -390,11 +390,13 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
       const billingAccounts = (await userApi().listBillingAccounts()).billingAccounts;
 
       // Replace the free billing account with a new display name that has spend usage.
-      const displayFreeTierAccount: BillingAccount = {
-        ...billingAccounts.find(billingAccount => billingAccount.isFreeTier),
-        displayName: this.formatFreeTierBillingAccountName()
-      }
-      const displayBillingAccounts = billingAccounts.map(b => b.isFreeTier ? displayFreeTierAccount : b)
+      const displayBillingAccounts: Array<BillingAccount> = billingAccounts.map((b) => {
+        if (b.isFreeTier) {
+          return { ...b, displayName: this.formatFreeTierBillingAccountName()
+          };
+        }
+        return b;
+      });
 
       if (this.isMode(WorkspaceEditMode.Create) || this.isMode(WorkspaceEditMode.Duplicate)) {
         const maybeFreeTierAccount = displayBillingAccounts.find(billingAccount => billingAccount.isFreeTier);

@@ -11,7 +11,7 @@ interface GoogleBillingAccountInfo {
 export async function getBillingAccountInfo(googleProject: string) {
   return new Promise<GoogleBillingAccountInfo>((resolve) => {
     gapi.load('client', () => {
-      if(isTestAccessTokenActive()) {
+      if (isTestAccessTokenActive()) {
         gapi.client.load('cloudbilling', 'v1', () => {
           gapi.client.setToken({
             access_token: window.localStorage.getItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN)

@@ -117,6 +117,8 @@ const BilingPartnerTooltip = () => <TooltipTrigger
   <InfoIcon style={styles.infoIcon}/>
 </TooltipTrigger>;
 
+const numSteps = 3;
+
 export const CreateBillingAccountModal = ({onClose}: Props) => {
   const {profile: {
     contactEmail,
@@ -153,7 +155,7 @@ export const CreateBillingAccountModal = ({onClose}: Props) => {
       institution: verifiedInstitutionalAffiliation.institutionDisplayName
     }
   );
-    setCurrentStep(3);
+    setCurrentStep(numSteps);
   });
 
   return <Modal width={650} onRequestClose={() => onClose()}>
@@ -165,12 +167,12 @@ export const CreateBillingAccountModal = ({onClose}: Props) => {
               <div style={{paddingTop: 5, marginLeft: '1rem', marginRight: '2rem'}}>
                 <div style={styles.textHeader}>Create billing account</div>
               </div>
-              {fp.range(1, 3).map((i) => <div style={stylesFunction.stepButtonCircle(currentStep, i)}>{i}</div>)}
+              {fp.range(1, numSteps).map((i) => <div style={stylesFunction.stepButtonCircle(currentStep, i)}>{i}</div>)}
             </FlexRow>
             {currentStep === 0 && <TextColumn>
               <div style={styles.textNormal}>Billing accounts are managed via Google Cloud Platform™ service.</div>
             </TextColumn>}
-            {currentStep !== 0 && currentStep !== 3 && <TextColumn>
+            {currentStep !== 0 && currentStep !== numSteps && <TextColumn>
               <div style={styles.textNormal}>Submit your information below to receive billing and additional information from
                 a Google billing partner representative.</div>
             </TextColumn>}
