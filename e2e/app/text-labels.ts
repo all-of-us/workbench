@@ -59,7 +59,7 @@ export enum MenuOption {
 
 // Button or link text labels.
 export enum LinkText {
-  Add = 'ADD',
+  Add = 'Add',
   AddSelection = 'Add Selection',
   AddThis = 'ADD THIS',
   ApplyModifiers = 'APPLY MODIFIERS',
