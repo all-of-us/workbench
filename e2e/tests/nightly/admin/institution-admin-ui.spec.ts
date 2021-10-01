@@ -17,7 +17,7 @@ describe('Institution Admin', () => {
     await navigation.navMenu(page, NavLink.INSTITUTION_ADMIN);
   });
 
-  test.only('check the Institution Admin page UI and test-Institution edit page', async () => {
+  test('check the Institution Admin page UI and test-Institution edit page', async () => {
     const institutionAdminPage = new InstitutionAdminPage(page);
     await institutionAdminPage.waitForLoad();
     const adminTable = new AdminTable(page);
