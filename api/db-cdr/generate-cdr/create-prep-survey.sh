@@ -8,7 +8,6 @@ export BQ_PROJECT=$1         # CDR project
 export BQ_DATASET=$2         # CDR dataset
 export FILE_NAME=$3          # Filename to process
 export ID=$4                 # Starting id position
-export REMOVE_PREP_SURVEY=$5 # Should remove prep_survey
 
 BUCKET="all-of-us-workbench-private-cloudsql"
 SCHEMA_PATH="generate-cdr/bq-schemas"
@@ -149,11 +148,6 @@ rm -rf "$TEMP_FILE_DIR"
 mkdir "$TEMP_FILE_DIR"
 
 gsutil -m cp gs://"$BUCKET/$DATASET_DIR/$FILE_NAME" "$TEMP_FILE_DIR"
-
-if [[ "$REMOVE_PREP_SURVEY" = true ]]
-then
-  bq --project_id="$BQ_PROJECT" rm -f "$BQ_DATASET.prep_survey"
-fi
 
 # run this query to initializing our .bigqueryrc configuration file
 # otherwise this will corrupt the output of the first call to find_info()

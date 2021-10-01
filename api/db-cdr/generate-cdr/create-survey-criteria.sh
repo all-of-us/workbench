@@ -7,6 +7,14 @@ set -e
 export BQ_PROJECT=$1         # CDR project
 export BQ_DATASET=$2         # CDR dataset
 
+BUCKET="all-of-us-workbench-private-cloudsql"
+CDR_CSV_DIR="cdr_csv_files"
+
+echo "Extracting prep_survey to the proper bucket"
+bq extract --project_id="$BQ_PROJECT" --destination_format CSV --print_header=false \
+"$BQ_DATASET.prep_survey" gs://"$BUCKET"/"$BQ_DATASET"/"$CDR_CSV_DIR"/prep_survey.csv
+echo "Completed extract into bucket(gs://$BUCKET/$BQ_DATASET/$CDR_CSV_DIR/prep_survey.csv)"
+
 echo "PPI SURVEYS - insert into cb_criteria"
 bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
