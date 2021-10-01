@@ -278,9 +278,15 @@ describe('DataAccessRequirements', () => {
         expect(findCompletionBanner(wrapper).exists()).toBeTruthy();
     });
 
+    const repeat = async(n, callback) => await Promise.all(Array(n).fill(0).map(callback));
+    const TEST_ITERATIONS = 1;  // 1 passes, 2 fails
+    let currentIteration = 0;
+
     // RAS launch bug (no JIRA ticket)
     // temporarily disabled for flakiness - https://precisionmedicineinitiative.atlassian.net/browse/RW-7364
-    xit('should render all modules as complete by transitioning to all complete', async() => {
+    it('should render all modules as complete by transitioning to all complete', async() => repeat(TEST_ITERATIONS, async() => {
+
+        console.log(`iteration ${++currentIteration}`);
 
         // initially, the user has completed all modules except RAS (the standard case at RAS launch time)
 
@@ -335,7 +341,7 @@ describe('DataAccessRequirements', () => {
         });
 
         expect(findCompletionBanner(wrapper).exists()).toBeTruthy();
-    });
+    }));
 
 
     it('should render all modules as complete when the profile accessModules are all bypassed', () => {
