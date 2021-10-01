@@ -1,0 +1,79 @@
+import * as React from 'react';
+
+import {getAccessModuleStatusByName} from 'app/utils/access-utils';
+import {profileStore, serverConfigStore, useStore} from 'app/utils/stores';
+import {AccessModule} from 'generated/fetch';
+import {NotificationBanner} from 'app/components/notification-banner';
+//
+// const styles = reactStyles({
+//   box: {
+//     boxSizing: 'border-box',
+//     height: '56.5px',
+//     width: '380.5px',
+//     border: '0.5px solid rgba(38,34,98,0.5)',
+//     borderRadius: '5px',
+//     backgroundColor: 'rgba(38,34,98,0.08)',
+//     alignItems: 'center',
+//     justifyContent: 'center',
+//     marginLeft: 'auto',
+//   },
+//   icon: {
+//     height: '25px',
+//     width: '25px',
+//     color:  colors.warning,
+//     fontFamily: 'Font Awesome 5 Pro',
+//     fontSize: '25px',
+//     letterSpacing: 0,
+//     lineHeight: '25px',
+//     marginLeft: 'auto',
+//   },
+//   text: {
+//     height: '40px',
+//     width: '199px',
+//     color: colors.primary,
+//     fontFamily: 'Montserrat',
+//     fontSize: '14px',
+//     fontWeight: 600,
+//     letterSpacing: 0,
+//     lineHeight: '20px',
+//     marginLeft: 'auto',
+//   },
+//   button: {
+//     boxSizing: 'border-box',
+//     height: '38px',
+//     width: '120px',
+//     border: '0.8px solid #216FB4',
+//     borderRadius: '1.6px',
+//     marginLeft: 'auto',
+//     marginRight: 'auto',
+//   },
+//   buttonText: {
+//     height: '21px',
+//     width: '98px',
+//     fontFamily: 'Montserrat',
+//     fontSize: '14px',
+//     fontWeight: 500,
+//     letterSpacing: '0',
+//     lineHeight: '21px',
+//     textAlign: 'center',
+//   },
+// });
+
+export const LoginGovIAL2NotificationMaybe = () => {
+  const {profile} = useStore(profileStore);
+  const {config: {enableRasLoginGovLinking}} = useStore(serverConfigStore);
+  const loginGovModule = getAccessModuleStatusByName(profile, AccessModule.RASLINKLOGINGOV);
+  // Show the Login.gov IAL2 notification when
+  // 1: enableRasLoginGovLinking enabled AND
+  // 2: user is not bypassed AND hasn't completed.
+  // 3: loginGovModule undefined means the same thing as 2.
+  const shouldShowIal2Notification = enableRasLoginGovLinking &&
+      (!loginGovModule || (!loginGovModule.bypassEpochMillis && !loginGovModule.completionEpochMillis));
+  return shouldShowIal2Notification
+      ? <NotificationBanner
+          dataTestId='ial2-notification'
+          text='Please verify your identity by 10/27/2021.'
+          buttonText='LEARN MORE'
+          buttonPath='/data-access-requirements'/>
+      : null;
+};
