@@ -238,15 +238,17 @@ const TierConfig = (props: TierConfigProps) => {
   </FlexRow>;
 };
 
-const SaveErrorModal = (props: {onFinish: Function, onContinue: Function}) => {
+const PendingChangesModal = (props: {onFinish: Function, onContinue: Function}) => {
   const {onFinish, onContinue} = props;
   return <Modal>
     <ModalTitle>Institution not saved</ModalTitle>
+    <ModalBody>Are you sure you want to leave this page?</ModalBody>
     <ModalFooter>
       <Button onClick={onFinish}
-              type='secondary' style={{marginRight: '2rem'}}>Finish Saving</Button>
+              type='secondary'
+              style={{marginRight: '2rem'}}>Keep Editing</Button>
       <Button onClick={onContinue}
-              type='primary'>Yes Continue</Button>
+              type='primary'>Yes, Leave</Button>
     </ModalFooter>
   </Modal>;
 };
@@ -698,7 +700,7 @@ export const AdminInstitutionEdit = fp.flow(withNavigation, withRouter)(class ex
             </TooltipTrigger>
           </div>
         </FlexRow>
-        {this.state.showBackButtonWarning && <SaveErrorModal
+        {this.state.showBackButtonWarning && <PendingChangesModal
             onFinish={() => this.setState({showBackButtonWarning: false})}
             onContinue={() => this.backNavigate()}
         />}
