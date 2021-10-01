@@ -4,7 +4,7 @@ import {AccessRenewalNotificationMaybe} from 'app/pages/signed-in/access-renewal
 import {Breadcrumb} from 'app/components/breadcrumb';
 import {Button} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
-import {LoginGovIAL2NotificationMaybe} from 'app/page/signed-in/login-gov-ial2-notification';
+import {LoginGovIAL2NotificationMaybe} from 'app/pages/signed-in/login-gov-ial2-notification';
 import {SideNav} from 'app/components/side-nav';
 import {StatusAlertBanner} from 'app/components/status-alert-banner';
 import {statusAlertApi} from 'app/services/swagger-fetch-clients';
