@@ -521,28 +521,16 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     return ResponseEntity.ok(new CloneWorkspaceResponse().workspace(savedWorkspace));
   }
 
-  /**
-   * Gets a FireCloud Billing project.
-   *
-   * <p>If {@code enableFireCloudV2Billing} is enabled, create one directly using FireCloud
-   * v2Billing endpoints. Otherwise, claim one from billing buffer.
-   */
+  /** Gets a FireCloud Billing project. */
   private FirecloudWorkspaceId getFcBillingProject(DbAccessTier accessTier, Workspace workspace) {
     DbUser user = userProvider.get();
-    String billingProject;
-    if (workbenchConfigProvider.get().featureFlags.enableFireCloudV2Billing) {
-      // If v2 Billing is enabled, we will call FireCloud directly to create one.
-      billingProject = billingProjectBufferService.createBillingProjectName();
-      fireCloudService.createAllOfUsBillingProject(
-          billingProject, accessTier.getServicePerimeter());
+    String billingProject = billingProjectBufferService.createBillingProjectName();
+    fireCloudService.createAllOfUsBillingProject(billingProject, accessTier.getServicePerimeter());
 
-      // We use AoU Service Account to create the billing account then assign owner role to user.
-      // In this way, we can make sure AoU Service Account is still the owner of this billing
-      // account.
-      fireCloudService.addOwnerToBillingProject(user.getUsername(), billingProject);
-    } else {
-      billingProject = claimBillingProject(user, accessTier);
-    }
+    // We use AoU Service Account to create the billing account then assign owner role to user.
+    // In this way, we can make sure AoU Service Account is still the owner of this billing
+    // account.
+    fireCloudService.addOwnerToBillingProject(user.getUsername(), billingProject);
     return generateFirecloudWorkspaceId(billingProject, workspace.getName());
   }
 

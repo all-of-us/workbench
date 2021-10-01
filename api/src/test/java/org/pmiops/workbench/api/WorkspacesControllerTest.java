@@ -606,19 +606,10 @@ public class WorkspacesControllerTest extends SpringTest {
     verify(fireCloudService)
         .updateBillingAccount(
             workspace.getNamespace(), TestMockFactory.WORKSPACE_BILLING_ACCOUNT_NAME);
-    verify(fireCloudService, never())
+    verify(fireCloudService)
         .createAllOfUsBillingProject(workspace.getNamespace(), accessTier.getServicePerimeter());
     assertThat(retrievedWorkspace.getBillingAccountName())
         .isEqualTo(TestMockFactory.WORKSPACE_BILLING_ACCOUNT_NAME);
-
-    // Now switch to v2 Billing and fire the same request. It is generally not recommaned to use
-    // one test method testing multiple-funtions, but consider we will migrate to v2 soon, this
-    // might be a fast easy way to write test.
-    workbenchConfig.featureFlags.enableFireCloudV2Billing = true;
-    Workspace v2Workspace = workspacesController.createWorkspace(workspace).getBody();
-    verify(fireCloudService)
-        .createAllOfUsBillingProject(v2Workspace.getNamespace(), accessTier.getServicePerimeter());
-    assertThat(v2Workspace).isEqualTo(workspace);
   }
 
   @Test
@@ -1119,20 +1110,9 @@ public class WorkspacesControllerTest extends SpringTest {
     assertThat(clonedWorkspace.getResearchPurpose()).isEqualTo(modPurpose);
     assertThat(clonedWorkspace.getBillingAccountName()).isEqualTo(newBillingAccountName);
 
-    // When V2 Billing enabled
-    workbenchConfig.featureFlags.enableFireCloudV2Billing = true;
-    Workspace v2ClonedWorkspace =
-        workspacesController
-            .cloneWorkspace(originalWorkspace.getNamespace(), originalWorkspace.getId(), req)
-            .getBody()
-            .getWorkspace();
     verify(fireCloudService)
         .createAllOfUsBillingProject(
-            v2ClonedWorkspace.getNamespace(), accessTier.getServicePerimeter());
-
-    // Hack so lists can be compared in isEqualTo regardless of order.  See comment above.
-    sortPopulationDetails(v2ClonedWorkspace.getResearchPurpose());
-    assertThat(v2ClonedWorkspace).isEqualTo(clonedWorkspace);
+            clonedWorkspace.getNamespace(), accessTier.getServicePerimeter());
   }
 
   @Test

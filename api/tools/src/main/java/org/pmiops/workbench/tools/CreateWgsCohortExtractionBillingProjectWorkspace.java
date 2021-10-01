@@ -21,10 +21,7 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.firecloud.api.BillingApi;
 import org.pmiops.workbench.firecloud.api.BillingV2Api;
-import org.pmiops.workbench.firecloud.model.FirecloudBillingProjectStatus;
-import org.pmiops.workbench.firecloud.model.FirecloudCreateRawlsBillingProjectFullRequest;
 import org.pmiops.workbench.firecloud.model.FirecloudCreateRawlsV2BillingProjectFullRequest;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdate;
@@ -128,29 +125,12 @@ public class CreateWgsCohortExtractionBillingProjectWorkspace {
           wgsCohortExtractionServiceAccountApiClientFactory(workbenchConfig);
 
       log.info("Creating billing project");
-      if (workbenchConfig.featureFlags.enableFireCloudV2Billing) {
-        FirecloudCreateRawlsV2BillingProjectFullRequest billingProjectRequest =
-            new FirecloudCreateRawlsV2BillingProjectFullRequest()
-                .billingAccount("billingAccounts/" + workbenchConfig.billing.accountId)
-                .projectName(opts.getOptionValue(billingProjectNameOpt.getLongOpt()));
-        BillingV2Api billingV2Api = apiClientFactory.billingV2Api();
-        billingV2Api.createBillingProjectFullV2(billingProjectRequest);
-      } else {
-        FirecloudCreateRawlsBillingProjectFullRequest billingProjectRequest =
-            new FirecloudCreateRawlsBillingProjectFullRequest()
-                .billingAccount("billingAccounts/" + workbenchConfig.billing.accountId)
-                .projectName(opts.getOptionValue(billingProjectNameOpt.getLongOpt()));
-        BillingApi billingApi = apiClientFactory.billingApi();
-        billingApi.createBillingProjectFull(billingProjectRequest);
-
-        while (billingApi
-                .billingProjectStatus(billingProjectRequest.getProjectName())
-                .getCreationStatus()
-            != FirecloudBillingProjectStatus.CreationStatusEnum.READY) {
-          log.info("Billing project is not ready yet");
-          Thread.sleep(5000);
-        }
-      }
+      FirecloudCreateRawlsV2BillingProjectFullRequest billingProjectRequest =
+          new FirecloudCreateRawlsV2BillingProjectFullRequest()
+              .billingAccount("billingAccounts/" + workbenchConfig.billing.accountId)
+              .projectName(opts.getOptionValue(billingProjectNameOpt.getLongOpt()));
+      BillingV2Api billingV2Api = apiClientFactory.billingV2Api();
+      billingV2Api.createBillingProjectFullV2(billingProjectRequest);
       String strippedName = workspaceName.toLowerCase().replaceAll("[^0-9a-z]", "");
       DbWorkspace.FirecloudWorkspaceId workspaceId =
           new DbWorkspace.FirecloudWorkspaceId(billingProjectName, strippedName);

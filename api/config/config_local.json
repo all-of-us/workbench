@@ -101,7 +101,6 @@
     "enableEventDateModifier": false,
     "enableResearchPurposePrompt": false,
     "enableGenomicExtraction": true,
-    "enableFireCloudV2Billing" : true,
     "enableGpu": true,
     "enablePersistentDisk": true,
     "enableAccessModuleRewrite" : true,

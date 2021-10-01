@@ -32,7 +32,6 @@ import org.pmiops.workbench.firecloud.api.StatusApi;
 import org.pmiops.workbench.firecloud.api.WorkspacesApi;
 import org.pmiops.workbench.firecloud.model.FirecloudBillingProjectMembership;
 import org.pmiops.workbench.firecloud.model.FirecloudBillingProjectStatus;
-import org.pmiops.workbench.firecloud.model.FirecloudCreateRawlsBillingProjectFullRequest;
 import org.pmiops.workbench.firecloud.model.FirecloudCreateRawlsV2BillingProjectFullRequest;
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupRef;
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
@@ -261,53 +260,27 @@ public class FireCloudServiceImpl implements FireCloudService {
               projectName, WORKSPACE_DELIMITER));
     }
 
-    if (isFireCloudBillingV2ApiEnabled()) {
-      FirecloudCreateRawlsV2BillingProjectFullRequest request =
-          new FirecloudCreateRawlsV2BillingProjectFullRequest()
-              .billingAccount(configProvider.get().billing.freeTierBillingAccountName())
-              .projectName(projectName)
-              .servicePerimeter(servicePerimeter);
-      BillingV2Api billingV2Api = serviceAccountBillingV2ApiProvider.get();
-      retryHandler.run(
-          (context) -> {
-            billingV2Api.createBillingProjectFullV2(request);
-            return null;
-          });
-    } else {
-      FirecloudCreateRawlsBillingProjectFullRequest request =
-          new FirecloudCreateRawlsBillingProjectFullRequest()
-              .billingAccount(configProvider.get().billing.freeTierBillingAccountName())
-              .projectName(projectName)
-              .highSecurityNetwork(true)
-              .enableFlowLogs(true)
-              .privateIpGoogleAccess(true)
-              .servicePerimeter(servicePerimeter);
-      BillingApi billingApi = billingApiProvider.get();
-      retryHandler.run(
-          (context) -> {
-            billingApi.createBillingProjectFull(request);
-            return null;
-          });
-    }
+    FirecloudCreateRawlsV2BillingProjectFullRequest request =
+        new FirecloudCreateRawlsV2BillingProjectFullRequest()
+            .billingAccount(configProvider.get().billing.freeTierBillingAccountName())
+            .projectName(projectName)
+            .servicePerimeter(servicePerimeter);
+    BillingV2Api billingV2Api = serviceAccountBillingV2ApiProvider.get();
+    retryHandler.run(
+        (context) -> {
+          billingV2Api.createBillingProjectFullV2(request);
+          return null;
+        });
   }
 
   @Override
   public void deleteBillingProject(String billingProject) {
-    if (isFireCloudBillingV2ApiEnabled()) {
-      BillingV2Api billingV2Api = serviceAccountBillingV2ApiProvider.get();
-      retryHandler.run(
-          (context) -> {
-            billingV2Api.deleteBillingProject(billingProject);
-            return null;
-          });
-    } else {
-      BillingApi billingApi = billingApiProvider.get();
-      retryHandler.run(
-          (context) -> {
-            billingApi.deleteBillingProject(billingProject);
-            return null;
-          });
-    }
+    BillingV2Api billingV2Api = serviceAccountBillingV2ApiProvider.get();
+    retryHandler.run(
+        (context) -> {
+          billingV2Api.deleteBillingProject(billingProject);
+          return null;
+        });
   }
 
   @Override
@@ -411,10 +384,8 @@ public class FireCloudServiceImpl implements FireCloudService {
             // propagating copies of large data files elswhere in the bucket.
             .copyFilesWithPrefix("notebooks/")
             .authorizationDomain(
-                ImmutableList.of(new FirecloudManagedGroupRef().membersGroupName(authDomainName)));
-    if (isFireCloudBillingV2ApiEnabled()) {
-      cloneRequest.bucketLocation(GOOGLE_BUCKETS_LOCATION);
-    }
+                ImmutableList.of(new FirecloudManagedGroupRef().membersGroupName(authDomainName)))
+            .bucketLocation(GOOGLE_BUCKETS_LOCATION);
     return retryHandler.run(
         (context) -> workspacesApi.cloneWorkspace(cloneRequest, fromProject, fromName));
   }
@@ -572,9 +543,5 @@ public class FireCloudServiceImpl implements FireCloudService {
             }
           }
         });
-  }
-
-  private boolean isFireCloudBillingV2ApiEnabled() {
-    return configProvider.get().featureFlags.enableFireCloudV2Billing;
   }
 }
