@@ -77,7 +77,7 @@ ORDER BY 1"
 # the concept_id of the answer is the concept_id for the question
 # we do this because there are a few answers that are attached to a topic and we want to get those as well
 echo "PPI SURVEYS - add items to ancestor table"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_survey_concept_ancestor\`
     (
           ancestor_concept_id
@@ -93,7 +93,7 @@ WHERE a.domain_id = 'SURVEY'
     and a.subtype = 'ANSWER'"
 
 echo "PPI SURVEYS - generate answer counts for all questions EXCEPT where question concept_id = 1585747"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
 SET x.item_count = y.cnt
     , x.est_count = y.cnt
@@ -121,7 +121,7 @@ WHERE x.domain_id = 'SURVEY'
     and x.value = y.value"
 
 echo "PPI SURVEYS - generate answer counts for question concept_id = 1585747"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
 SET x.item_count = y.cnt
     , x.est_count = y.cnt
@@ -150,7 +150,7 @@ WHERE x.domain_id = 'SURVEY'
     and x.value = y.value"
 
 echo "PPI SURVEYS - generate question counts"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
 SET x.rollup_count = y.cnt
     , x.item_count = y.cnt
@@ -178,7 +178,7 @@ WHERE x.domain_id = 'SURVEY'
     and x.concept_id = y.concept_id"
 
 echo "PPI SURVEYS - generate survey counts"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
 SET x.rollup_count = y.cnt
     , x.est_count = y.cnt
