@@ -1,5 +1,5 @@
 import WorkspaceDataPage from 'app/page/workspace-data-page';
-import { LinkText } from 'app/text-labels';
+import { ConceptSetSelectValue } from 'app/text-labels';
 import { findAllCards, signInWithAccessToken } from 'utils/test-utils';
 import WorkspacesPage from 'app/page/workspaces-page';
 import { logger } from 'libs/logger';
@@ -45,7 +45,7 @@ describe('Dataset UI Test', () => {
     expect(await datasetPage.getSelectAllCheckbox().isDisabled()).toBe(true);
 
     // Step 2 Select Concept Sets (Rows): select Demographics.
-    await datasetPage.selectConceptSets([LinkText.Demographics]);
+    await datasetPage.selectConceptSets([ConceptSetSelectValue.Demographics]);
 
     // Export button is disabled.
     expect(await analyzeButton.isCursorNotAllowed()).toBe(true);
@@ -60,11 +60,11 @@ describe('Dataset UI Test', () => {
     expect(await datasetPage.getSelectAllCheckbox().isChecked()).toBe(true);
 
     // Step 2 Select Concept Sets (Rows): select all checkboxes.
-    await datasetPage.selectConceptSets([LinkText.AllSurveys]);
-    await datasetPage.selectConceptSets([LinkText.FitbitHeartRateSummary]);
-    await datasetPage.selectConceptSets([LinkText.FitbitActivitySummary]);
-    await datasetPage.selectConceptSets([LinkText.FitbitHeartRateLevel]);
-    await datasetPage.selectConceptSets([LinkText.FitbitIntraDaySteps]);
+    await datasetPage.selectConceptSets([ConceptSetSelectValue.AllSurveys]);
+    await datasetPage.selectConceptSets([ConceptSetSelectValue.FitbitHeartRateSummary]);
+    await datasetPage.selectConceptSets([ConceptSetSelectValue.FitbitActivitySummary]);
+    await datasetPage.selectConceptSets([ConceptSetSelectValue.FitbitHeartRateLevel]);
+    await datasetPage.selectConceptSets([ConceptSetSelectValue.FitbitIntraDaySteps]);
 
     // Export button is disabled.
     expect(await analyzeButton.isCursorNotAllowed()).toBe(true);

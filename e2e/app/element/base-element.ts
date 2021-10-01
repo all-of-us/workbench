@@ -357,6 +357,7 @@ export default class BaseElement {
   // try this method when click() is not working
   async clickWithEval(): Promise<void> {
     const element = await this.asElementHandle();
+    await element.focus();
     await this.page.evaluate((elem) => elem.click(), element);
   }
 

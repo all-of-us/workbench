@@ -124,6 +124,14 @@ export default class NotebookCell extends NotebookFrame {
     return value.trim();
   }
 
+  async getOutputStdError(timeOut?: number): Promise<string> {
+    const element = await this.findOutputStdErrorElementHandle(timeOut);
+    const value = await getPropValue<string>(element, 'innerText');
+    await element.dispose();
+    console.error(`Run cell output error: \n${value}`);
+    return value.trim();
+  }
+
   /**
    * Find cell output_area element.
    * @param {number} timeOut The timeout in milliseconds.
@@ -142,6 +150,12 @@ export default class NotebookCell extends NotebookFrame {
    */
   async findOutputErrorElementHandle(timeOut?: number): Promise<ElementHandle> {
     const selector = `${this.outputSelector(this.getCellIndex())}.output_error`;
+    const iframe = await this.getIFrame();
+    return iframe.waitForSelector(selector, { visible: true, timeout: timeOut });
+  }
+
+  async findOutputStdErrorElementHandle(timeOut?: number): Promise<ElementHandle> {
+    const selector = `${this.outputSelector(this.getCellIndex())}.output_stderr`;
     const iframe = await this.getIFrame();
     return iframe.waitForSelector(selector, { visible: true, timeout: timeOut });
   }
