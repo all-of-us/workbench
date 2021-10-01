@@ -4326,6 +4326,10 @@ definitions:
         type: boolean
         default: false
         description: Whether to use the new rewrite access module.
+      enableEgressAlertingV2:
+        type: boolean
+        default: false
+        description: Whether egress alerting V2 is enabled.
       enableStandardSourceDomains:
         type: boolean
         default: false
