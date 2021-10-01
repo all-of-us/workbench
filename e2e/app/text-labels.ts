@@ -170,13 +170,12 @@ export const InstitutionSelectValue = {
   DummyMaster: 'Dummy Master'
 };
 
-
 export enum HeaderName {
   InstitutionName = 'Institution Name',
   InstitutionType = 'Institution Type',
   DataAccessTiers = 'Data access tiers',
   UserEmailInstruction = 'User Email Instruction'
-};
+}
 
 export const ConceptSetSelectValue = {
   AllSurveys: 'All Surveys',
