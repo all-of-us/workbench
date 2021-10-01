@@ -16,6 +16,9 @@
   "browserslist": [
     "chrome >= 67"
   ],
+  "jest": {
+    "testSequencer": "./src/testing/testSequencer.js"
+  },
   "private": true,
   "dependencies": {
     "@testing-library/jest-dom": "^5.11.4",
