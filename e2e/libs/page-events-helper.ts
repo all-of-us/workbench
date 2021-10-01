@@ -96,8 +96,10 @@ const notRedirectRequest = (request: Request): boolean => {
 };
 
 const getResponseText = async (request: Request): Promise<string> => {
-  const REDIRECT_CODE_START = 300;
-  const REDIRECT_CODE_END = 308;
+  // 3XX: redirects.
+  const REDIRECT_CODE_START = 299;
+  const REDIRECT_CODE_END = 400;
+  // No content response.
   const NO_CONTENT_RESPONSE_CODE = 204;
   const response = request.response();
   // Log response if response it's not a redirect or no-content
@@ -110,7 +112,7 @@ const getResponseText = async (request: Request): Promise<string> => {
     try {
       return (await request.response().buffer()).toString();
     } catch (err) {
-      console.error(`Puppeteer error during get response text.\n${err}`);
+      console.error(`ERROR when getResponseText.\n${err}`);
       return undefined;
     }
   }
@@ -123,7 +125,7 @@ export const logRequestError = async (request: Request): Promise<void> => {
   const responseText = stringifyData(await getResponseText(request));
   logger.log(
     'error',
-    'Request failed: %s %s %s\n%s %s',
+    'FAILED request: %s %s %s\n%s %s',
     status,
     request.method(),
     request.url(),

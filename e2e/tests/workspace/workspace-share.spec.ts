@@ -32,8 +32,7 @@ describe('Workspace Reader and Writer Permission Test', () => {
     await aboutPage.waitForLoad();
 
     for (const assign of assignAccess) {
-      const shareWorkspaceModal = await aboutPage.shareWorkspace();
-      await shareWorkspaceModal.shareWithUser(assign.userEmail, assign.accessRole);
+      await aboutPage.shareWorkspaceWithUser(assign.userEmail, assign.accessRole);
       await aboutPage.waitForLoad();
     }
 
