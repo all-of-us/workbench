@@ -8,7 +8,10 @@ export BQ_PROJECT=$1         # CDR project
 export BQ_DATASET=$2         # CDR dataset
 
 schema_path=generate-cdr/bq-schemas
-create_tables=(prep_survey cb_criteria)
+create_tables=(prep_survey
+cb_criteria
+prep_survey_concept_ancestor
+cb_search_all_events)
 
 for t in "${create_tables[@]}"
 do
