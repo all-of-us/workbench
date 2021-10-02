@@ -116,6 +116,13 @@ function find_info() {
   where lower(observation_source_value) = lower('$concept_code')
   and value_source_concept_id != 0
   and value_source_concept_id is not null
+  and o.observation_source_concept_id in (
+  select distinct concept_id
+  from \`$BQ_PROJECT.$BQ_DATASET.concept\` c
+  join \`$BQ_PROJECT.$BQ_DATASET.observation\` o on o.observation_source_concept_id = c.concept_id
+  where lower(concept_code) = lower('$concept_code')
+  and concept_class_id in ('Question')
+  )
   group by concept_code, observation_source_concept_id, concept_name, value_source_concept_id, value_source_value
   order by ($order_by))
   order by id) order by id"
@@ -180,6 +187,7 @@ do
     increment_question_parent_id "$ID"
     increment_id
   fi
+
   for res in "${result_array[@]}"
   do
     type=$(echo "${res}" | cut -d "," -f 4)
@@ -188,7 +196,7 @@ do
       echo "writing survey: $survey_name"
       echo "$ID,0,${res}" >> "$TEMP_FILE_DIR/$OUTPUT_FILE_NAME"
       increment_ids
-    elif [[ "$type" == "QUESTION" ]]
+    elif [[ "$type" == "QUESTION" && "${#result_array[@]}" -ge 2 ]]
     then
       echo "writing question for concept_code: $concept_code"
       echo "$ID,$QUESTION_PARENT_ID,${res}" >> "$TEMP_FILE_DIR/$OUTPUT_FILE_NAME"
