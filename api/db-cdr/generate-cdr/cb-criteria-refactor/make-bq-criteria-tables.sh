@@ -4551,8 +4551,7 @@ WHERE x.concept_id = y.concept_id
 
 echo "Running  MEASUREMENT - SNOMED - STANDARD done in $(timeIt block_start) secs total time $(timeIt st_sec) secs"
 block_start=$SECONDS
-echo "Exiting after MEASUREMENT - SNOMED - STANDARD ...."
-exit 2
+
 ################################################
 # DRUG_EXPOSURE - ATC/RXNORM
 ################################################
@@ -5455,6 +5454,8 @@ WHERE x.concept_id = y.concept_id
 
 echo "Running  PROCEDURE_OCCURRENCE - SNOMED - SOURCE done in $(timeIt block_start) secs total time $(timeIt st_sec) secs"
 block_start=$SECONDS
+echo "Exiting after PROCEDURE_OCCURRENCE - SNOMED - SOURCE ...."
+exit 2
 ###############################################
 # PROCEDURE_OCCURRENCE - SNOMED - STANDARD
 ###############################################
