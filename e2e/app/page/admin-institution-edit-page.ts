@@ -47,14 +47,14 @@ export const Field = {
       ancestorLevel: 2
     }
   },
-  AcceptedRTAddressSelect: {
+  AcceptedRtAddressSelect: {
     textOption: {
       type: ElementType.Dropdown,
       dataTestId: DataTestIdAlias.registeredCardDetails,
       ancestorLevel: 2
     }
   },
-  AcceptedCTAddressSelect: {
+  AcceptedCtAddressSelect: {
     textOption: {
       type: ElementType.Dropdown,
       dataTestId: DataTestIdAlias.controlledCardDetails,
@@ -81,22 +81,8 @@ export default class InstitutionEditPage extends AuthenticatedPage {
     return Button.findByName(this.page, { name: LinkText.Cancel });
   }
 
-  async waitForSaveButton(isActive: boolean): Promise<Button> {
-    const button = this.getSaveButton();
-    const isCursorEnabled = !(await button.isCursorNotAllowed());
-    expect(isCursorEnabled).toBe<boolean>(isActive);
-    return button;
-  }
-
   getAddButton(): Button {
     return Button.findByName(this.page, { name: LinkText.Add });
-  }
-
-  async waitForAddButton(isActive: boolean): Promise<Button> {
-    const button = this.getAddButton();
-    const isCursorEnabled = !(await button.isCursorNotAllowed());
-    expect(isCursorEnabled).toBe<boolean>(isActive);
-    return button;
   }
 
   // get the Institution name from the Institution Name input field
@@ -141,80 +127,80 @@ export default class InstitutionEditPage extends AuthenticatedPage {
   }
 
   // get the Institution's RT-eRA-account-required-switch and verify if enabled
-  getRTeRAtoggle(): Checkbox {
+  getRtEratoggle(): Checkbox {
     const xpath = '//div[@data-test-id="registered-era-required-switch"]/div/input[@type="checkbox"]';
     return new Checkbox(this.page, xpath);
   }
 
   // get the dropdown in registered-card-details
-  getRTEmailDropdown(): SelectMenu {
-    return SelectMenu.findByName(this.page, Field.AcceptedRTAddressSelect.textOption);
+  getRtEmailDropdown(): SelectMenu {
+    return SelectMenu.findByName(this.page, Field.AcceptedRtAddressSelect.textOption);
   }
 
   // select type from dropdown in registered-card-details
-  async selectRTEmailOption(option: string): Promise<void> {
-    const options = this.getRTEmailDropdown();
+  async selectRtEmailOption(option: string): Promise<void> {
+    const options = this.getRtEmailDropdown();
     await options.select(option);
   }
 
   // get the emailAddress textarea in Registered tier access
-  getRTEmailAddressInput(): Textarea {
+  getRtEmailAddressInput(): Textarea {
     return Textarea.findByName(this.page, { dataTestId: DataTestIdAlias.rtAcceptedEmailAddresses });
   }
 
   // get the emailDomains textarea Registered tier access
-  getRTEmailDomainsInput(): Textarea {
+  getRtEmailDomainsInput(): Textarea {
     return Textarea.findByName(this.page, { dataTestId: DataTestIdAlias.rtAcceptedEmailDomains });
   }
 
   // get the Institution's controlled-era-required-switch and verify if disabled
-  getCTeRAtoggle(): Checkbox {
+  getCtEratoggle(): Checkbox {
     const xpath = '//div[@data-test-id="controlled-era-required-switch"]/div/input[@type="checkbox"]';
     return new Checkbox(this.page, xpath);
   }
 
   // get the Institution's controlled-enabled-switch to verify if it is enabled or disabled
-  getCTEnabledtoggle(): Checkbox {
+  getCtEnabledtoggle(): Checkbox {
     const xpath = '//div[@data-test-id="controlled-enabled-switch"]/div/input[@type="checkbox"]';
     return new Checkbox(this.page, xpath);
   }
 
   // enable the CT toggle
-  async clickCTEnabledtoggle(): Promise<boolean> {
-    const ctEnabled = this.getCTEnabledtoggle();
+  async clickCtEnabledtoggle(): Promise<boolean> {
+    const ctEnabled = this.getCtEnabledtoggle();
     await ctEnabled.toggle(true);
     return true;
   }
 
-  getCTEmailDropdown(): SelectMenu {
-    return SelectMenu.findByName(this.page, Field.AcceptedCTAddressSelect.textOption);
+  getCtEmailDropdown(): SelectMenu {
+    return SelectMenu.findByName(this.page, Field.AcceptedCtAddressSelect.textOption);
   }
 
   // select the dropdown option in CT
-  async selectCTEmailOption(value: string): Promise<void> {
-    const options = this.getCTEmailDropdown();
+  async selectCtEmailOption(value: string): Promise<void> {
+    const options = this.getCtEmailDropdown();
     await options.select(value);
   }
 
   // get the CT emailAddress Input
-  getCTEmailAddressInput(): Textarea {
+  getCtEmailAddressInput(): Textarea {
     return Textarea.findByName(this.page, { dataTestId: DataTestIdAlias.ctAcceptedEmailAddresses });
   }
 
   // get the CT emailDomains Input
-  getCTEmailDomainsInput(): Textarea {
+  getCtEmailDomainsInput(): Textarea {
     return Textarea.findByName(this.page, { dataTestId: DataTestIdAlias.ctAcceptedEmailDomains });
   }
 
   // get the value of the selected dropdown option in RT
-  async getRTEmailAcceptedValue(): Promise<string> {
-    const dropdown = this.getRTEmailDropdown();
+  async getRtEmailAcceptedValue(): Promise<string> {
+    const dropdown = this.getRtEmailDropdown();
     return await dropdown.getSelectedValue();
   }
 
   // get the value of the selected dropdown option in CT
-  async getCTEmailAcceptedValue(): Promise<string> {
-    const dropdown = this.getCTEmailDropdown();
+  async getCtEmailAcceptedValue(): Promise<string> {
+    const dropdown = this.getCtEmailDropdown();
     return await dropdown.getSelectedValue();
   }
 
