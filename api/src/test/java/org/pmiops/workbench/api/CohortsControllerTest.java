@@ -281,7 +281,7 @@ public class CohortsControllerTest extends SpringTest {
   @BeforeEach
   public void setUp() {
     testMockFactory = new TestMockFactory();
-    testMockFactory.stubCreateBillingProject(billingProjectBufferService);
+    testMockFactory.stubCreateBillingProject(fireCloudService);
     testMockFactory.stubCreateFcWorkspace(fireCloudService);
     DbUser user = new DbUser();
     user.setUsername(CREATOR_EMAIL);

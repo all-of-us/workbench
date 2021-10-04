@@ -58,6 +58,7 @@ import org.springframework.stereotype.Service;
 public class FireCloudServiceImpl implements FireCloudService {
 
   @VisibleForTesting public static final int PROJECT_BILLING_ID_SIZE = 8;
+
   private static final Logger log = Logger.getLogger(FireCloudServiceImpl.class.getName());
 
   private final Provider<WorkbenchConfig> configProvider;
