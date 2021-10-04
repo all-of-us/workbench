@@ -287,7 +287,7 @@ describe('DataAccessRequirements', () => {
         }
     }
 
-    const TEST_ITERATIONS = 2;  // 1 passes, 2 fails
+    const TEST_ITERATIONS = 10;  // now 10 is not enough to repro
     let currentIteration = 0;
 
     // RAS launch bug (no JIRA ticket)
