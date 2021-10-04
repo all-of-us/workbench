@@ -49,7 +49,8 @@ describe('Workspace WRITER Jupyter notebook action tests', () => {
     await signOut(page);
   });
 
-  test('WRITER can clone workspace and edit notebook in workspace clone', async () => {
+  // TODO (RW-7312): Re-enable once Terra clone is fixed.
+  xtest('WRITER can clone workspace and edit notebook in workspace clone', async () => {
     // WRITER log in.
     await signInWithAccessToken(page, config.WRITER_USER);
 
