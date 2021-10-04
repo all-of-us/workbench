@@ -56,7 +56,7 @@ public class BillingProjectBufferService implements GaugeDataCollector {
   private final AccessTierService accessTierService;
   private final BillingProjectBufferEntryDao billingProjectBufferEntryDao;
   private final Clock clock;
-  public final FireCloudService fireCloudService;
+  private final FireCloudService fireCloudService;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @Autowired
