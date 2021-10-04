@@ -105,7 +105,7 @@
     "enableGpu": true,
     "enablePersistentDisk": true,
     "enableAccessModuleRewrite" : true,
-    "enableUnifiedUserAccessCron": true,
+    "enableEgressAlertingV2": true,
     "enableStandardSourceDomains": true
   },
   "actionAudit": {

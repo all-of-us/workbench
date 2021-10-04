@@ -3,15 +3,19 @@ import Container from 'app/container';
 import { getPropValue } from 'utils/element-utils';
 import Table from './table';
 
-const defaultXpath = '//*[contains(concat(normalize-space(@class), " "), "p-datatable ")]';
+const defaultXpath = '//*[contains(concat(" ", normalize-space(@class), " "), " p-datatable ")]';
 
 export default class DataTable extends Table {
-  constructor(page: Page, xpath: string = defaultXpath, container?: Container) {
+  constructor(page: Page, opts: { xpath?: string; container?: Container } = {}) {
+    const { xpath = defaultXpath, container } = opts;
     super(page, xpath, container);
   }
 
   getHeaderTable(): Table {
-    return new Table(this.page, `${this.getXpath()}//table[@class="p-datatable-scrollable-header-table"]`);
+    return new Table(
+      this.page,
+      `${this.getXpath()}//table[@class="p-datatable-scrollable-header-table" or @role="grid"]`
+    );
   }
 
   getBodyTable(): Table {

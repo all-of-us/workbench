@@ -254,8 +254,9 @@ public class WorkbenchConfig {
     public boolean enableGenomicExtraction;
     // If true, use the new rewrite version of access module.
     public boolean enableAccessModuleRewrite;
-    // TODO(RW-6877): remove
-    @Deprecated public boolean enableUnifiedUserAccessCron;
+    // If true, egress alerts are automatically remediated via cloud tasks. Otherwise, egress
+    // alerts will still be stored, but are assumed to be remediated by the oncall.
+    public boolean enableEgressAlertingV2;
     // If true, cohort and concept set will show source domains and standard domains options
     public boolean enableStandardSourceDomains;
     // If true, the backend and UI will support gpu for standard vm

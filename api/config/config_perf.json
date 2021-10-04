@@ -8,7 +8,7 @@
     "leoBaseUrl": "https:\/\/leonardo.dsde-perf.broadinstitute.org",
     "xAppIdValue": "perf-AoU-RW",
     "timeoutInSeconds": 60,
-    "jupyterDockerImage": "broadinstitute/terra-jupyter-aou:2.0.2",
+    "jupyterDockerImage": "broadinstitute/terra-jupyter-aou:2.0.1",
     "shibbolethApiBaseUrl": "",
     "shibbolethUiBaseUrl": "",
     "runtimeImages": {
@@ -105,7 +105,7 @@
     "enableGpu": false,
     "enablePersistentDisk": false,
     "enableAccessModuleRewrite" : true,
-    "enableUnifiedUserAccessCron": true,
+    "enableEgressAlertingV2": false,
     "enableStandardSourceDomains": true
   },
   "actionAudit": {

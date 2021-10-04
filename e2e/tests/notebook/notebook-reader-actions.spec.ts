@@ -55,7 +55,8 @@ describe('Workspace READER Jupyter notebook action tests', () => {
     expect(notebookCard).toBeTruthy();
   });
 
-  test('Workspace READER copy notebook to another workspace', async () => {
+  // TODO(RW-7312): update and re-enable
+  test.skip('Workspace READER copy notebook to another workspace', async () => {
     // READER log in.
     await signInWithAccessToken(page, config.READER_USER);
 
@@ -148,7 +149,7 @@ describe('Workspace READER Jupyter notebook action tests', () => {
     await newAnalysisPage.deleteResource(copyNotebookName, ResourceCard.Notebook);
   });
 
-  // TODO(RW-7287): Re-enable once Terra clone is fixed.
+  // TODO(RW-7312): update and re-enable
   test.skip('Workspace READER edit copy of notebook in workspace clone', async () => {
     // READER log in.
     await signInWithAccessToken(page, config.READER_USER);

@@ -160,26 +160,6 @@ describe('Create Cohorts Test', () => {
     expect(await dataPage.findCohortCard(cohortName)).toBeFalsy();
   });
 
-  test('Create cohort from whole genome variant', async () => {
-    await loadWorkspaceUrl(page, workspaceName);
-
-    const dataPage = new WorkspaceDataPage(page);
-    const cohortBuildPage = await dataPage.clickAddCohortsButton();
-
-    const group1 = cohortBuildPage.findIncludeParticipantsGroup('Group 1');
-    await group1.includeWholeGenomeVariant();
-    const group1Count = await group1.getGroupCount();
-    const totalCount = await cohortBuildPage.getTotalCount();
-    expect(group1Count).toEqual(totalCount);
-    expect(Number.isNaN(group1Count)).toBe(false);
-
-    // Save new cohort.
-    await cohortBuildPage.createCohort();
-
-    // Delete cohort in Cohort Build page.
-    await new CohortActionsPage(page).deleteCohort();
-  });
-
   test('Create cohort from EKG conditions with modifiers', async () => {
     await loadWorkspaceUrl(page, workspaceName);
 

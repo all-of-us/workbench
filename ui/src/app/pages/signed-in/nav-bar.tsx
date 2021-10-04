@@ -1,10 +1,10 @@
 import * as React from 'react';
 
-import {AccessRenewalNotificationMaybe} from 'app/components/access-renewal-notification';
+import {AccessRenewalNotificationMaybe} from 'app/pages/signed-in/access-renewal-notification';
 import {Breadcrumb} from 'app/components/breadcrumb';
 import {Button} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
-import {LoginGovIAL2NotificationMaybe} from 'app/components/login-gov-ial2-notification';
+import {LoginGovIAL2NotificationMaybe} from 'app/pages/signed-in/login-gov-ial2-notification';
 import {SideNav} from 'app/components/side-nav';
 import {StatusAlertBanner} from 'app/components/status-alert-banner';
 import {statusAlertApi} from 'app/services/swagger-fetch-clients';

@@ -1,8 +1,7 @@
 import DataResourceCard from 'app/component/data-resource-card';
 import ExportToNotebookModal from 'app/modal/export-to-notebook-modal';
-import NotebookPreviewPage from 'app/page/notebook-preview-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
-import { Language, LinkText, MenuOption, ResourceCard } from 'app/text-labels';
+import { Language, LinkText, ConceptSetSelectValue, MenuOption, ResourceCard } from 'app/text-labels';
 import { makeRandomName, makeWorkspaceName } from 'utils/str-utils';
 import { findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
 import DatasetRenameModal from 'app/modal/dataset-rename-modal';
@@ -51,7 +50,7 @@ describe('Datasets card snowman menu actions', () => {
     expect(await cohortCheckBox.isChecked()).toBe(true);
 
     // Verify Cohort checkbox is checked.
-    const conceptSetCheckBox = datasetEditPage.getConceptSetCheckBox(LinkText.Demographics);
+    const conceptSetCheckBox = datasetEditPage.getConceptSetCheckBox(ConceptSetSelectValue.Demographics);
     expect(await conceptSetCheckBox.isChecked()).toBe(true);
 
     // Export button is enabled.
@@ -137,11 +136,9 @@ describe('Datasets card snowman menu actions', () => {
     expect(await exportModal.waitForButton(LinkText.Export).isCursorNotAllowed()).toBe(true);
 
     const notebookName = makeRandomName('pyNotebook');
-    await exportModal.fillInModal(notebookName, kernelLanguage.LANGUAGE);
+    const notebookPreviewPage = await exportModal.fillInModal(notebookName, kernelLanguage.LANGUAGE);
 
     // Verify notebook created successfully. Not going to start the Jupyter notebook.
-    const notebookPreviewPage = new NotebookPreviewPage(page);
-    await notebookPreviewPage.waitForLoad();
     const currentPageUrl = page.url();
     expect(currentPageUrl).toContain(`notebooks/preview/${notebookName}.ipynb`);
 
@@ -162,7 +159,7 @@ describe('Datasets card snowman menu actions', () => {
     const datasetBuildPage = await dataPage.clickAddDatasetButton();
 
     await datasetBuildPage.selectCohorts(['All Participants']);
-    await datasetBuildPage.selectConceptSets([LinkText.Demographics]);
+    await datasetBuildPage.selectConceptSets([ConceptSetSelectValue.Demographics]);
 
     // Preview table exists and has one or more table rows.
     const previewTable = await datasetBuildPage.getPreviewTable();

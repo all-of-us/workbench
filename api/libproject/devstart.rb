@@ -146,31 +146,6 @@ Common.register_command({
   :fn => ->(*args) { dev_up("dev-up", args) }
 })
 
-def start_api_reqs()
-  common = Common.new
-  common.status "Starting database..."
-  common.run_inline %W{docker-compose up -d db}
-end
-
-Common.register_command({
-  :invocation => "start-api-reqs",
-  :description => "Starts up the services required for the API server" \
-     "(assumes database and config are already up-to-date.)",
-  :fn => Proc.new { start_api_reqs() }
-})
-
-def stop_api_reqs()
-  common = Common.new
-  common.status "Stopping database..."
-  common.run_inline %W{docker-compose stop db}
-end
-
-Common.register_command({
-  :invocation => "stop-api-reqs",
-  :description => "Stops the services required for the API server",
-  :fn => Proc.new { stop_api_reqs() }
-})
-
 def setup_local_environment()
   ENV.update(Workbench.read_vars_file("db/vars.env"))
   ENV.update(must_get_env_value("local", :gae_vars))

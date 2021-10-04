@@ -104,7 +104,7 @@ export default class WorkspaceCard extends CardBase {
   async findCard(workspaceName: string): Promise<WorkspaceCard | null> {
     const selector = `.//*[${WorkspaceCardSelector.cardNameXpath} and normalize-space(text())="${workspaceName}"]`;
     try {
-      await this.page.waitForXPath(WorkspaceCardSelector.cardRootXpath, { visible: true });
+      await this.page.waitForXPath(WorkspaceCardSelector.cardRootXpath, { visible: true, timeout: 5000 });
     } catch (err) {
       // no Workspace card.
       return null;

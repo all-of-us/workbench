@@ -255,6 +255,13 @@ public class EgressEventServiceImpl implements EgressEventService {
       return;
     }
 
+    // Ahead of the feature launch, events are still handled manually by the oncall, so store
+    // them immediately as REMEDIATED. In all cases, we want to store the event in our database.
+    EgressEventStatus status = EgressEventStatus.REMEDIATED;
+    if (workbenchConfigProvider.get().featureFlags.enableEgressAlertingV2) {
+      status = EgressEventStatus.PENDING;
+    }
+
     egressEventDao.save(
         new DbEgressEvent()
             .setUser(userMaybe.orElse(null))
@@ -265,7 +272,7 @@ public class EgressEventServiceImpl implements EgressEventService {
                     .map(mib -> (float) (mib * ((1 << 20) / 1e6)))
                     .orElse(null))
             .setEgressWindowSeconds(Optional.ofNullable(event.getTimeWindowDuration()).orElse(null))
-            .setStatus(EgressEventStatus.PENDING)
+            .setStatus(status)
             .setSumologicEvent(new Gson().toJson(event)));
   }
 
