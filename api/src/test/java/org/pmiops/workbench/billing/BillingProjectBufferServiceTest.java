@@ -14,7 +14,6 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import java.sql.Timestamp;
 import java.time.Clock;
@@ -25,11 +24,9 @@ import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -41,7 +38,6 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import javax.inject.Provider;
 import javax.persistence.EntityManager;
-import org.javers.common.collections.Sets;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -142,6 +138,8 @@ public class BillingProjectBufferServiceTest {
   public void setUp() {
     workbenchConfig = WorkbenchConfig.createEmptyConfig();
     workbenchConfig.billing.projectNamePrefix = "test-prefix";
+    TestMockFactory.stubCreateBillingProject(mockFireCloudService, "test-prefix");
+
     workbenchConfig.billing.bufferRefillProjectsPerTask = 1;
     workbenchConfig.billing.bufferStatusChecksPerTask = 10;
 
@@ -175,7 +173,6 @@ public class BillingProjectBufferServiceTest {
     workbenchConfig.billing.bufferRefillProjectsPerTask = 2;
     billingProjectBufferService.bufferBillingProjects();
     verify(mockFireCloudService, times(2)).createAllOfUsBillingProject(anyString(), anyString());
-
   }
 
   @Test
@@ -196,40 +193,6 @@ public class BillingProjectBufferServiceTest {
                 .findByFireCloudProjectName(billingProjectName)
                 .getStatusEnum())
         .isEqualTo(BufferEntryStatus.CREATING);
-  }
-
-  @Test
-  public void fillBufferMultiTier() {
-    DbAccessTier controlledTier = TestMockFactory.createControlledTierForTests(accessTierDao);
-
-    workbenchConfig.billing.bufferCapacityPerTier =
-        ImmutableMap.of(registeredTier.getShortName(), 1, controlledTier.getShortName(), 1);
-
-    billingProjectBufferService.bufferBillingProjects();
-
-    Set<String> expectedPerimeters =
-        Sets.asSet(registeredTier.getServicePerimeter(), controlledTier.getServicePerimeter());
-
-    // one project per tier, per bufferRefillProjectsPerTask
-    final int expectedCreationCount =
-        workbenchConfig.billing.bufferRefillProjectsPerTask
-            * workbenchConfig.billing.bufferCapacityPerTier.size();
-
-    ArgumentCaptor<String> projectCaptor = ArgumentCaptor.forClass(String.class);
-    ArgumentCaptor<String> perimeterCaptor = ArgumentCaptor.forClass(String.class);
-    verify(mockFireCloudService, times(expectedCreationCount))
-        .createAllOfUsBillingProject(projectCaptor.capture(), perimeterCaptor.capture());
-
-    for (String billingProjectName : projectCaptor.getAllValues()) {
-      assertThat(billingProjectName).startsWith(workbenchConfig.billing.projectNamePrefix);
-      assertThat(
-              billingProjectBufferEntryDao
-                  .findByFireCloudProjectName(billingProjectName)
-                  .getStatusEnum())
-          .isEqualTo(BufferEntryStatus.CREATING);
-    }
-
-    assertThat(perimeterCaptor.getAllValues()).containsExactlyElementsIn(expectedPerimeters);
   }
 
   @Test
@@ -440,8 +403,11 @@ public class BillingProjectBufferServiceTest {
 
   @Test
   public void syncBillingProjectStatus_multiple() {
+    TestMockFactory.stubCreateBillingProject(mockFireCloudService);
     billingProjectBufferService.bufferBillingProjects();
+    TestMockFactory.stubCreateBillingProject(mockFireCloudService);
     billingProjectBufferService.bufferBillingProjects();
+    TestMockFactory.stubCreateBillingProject(mockFireCloudService);
     billingProjectBufferService.bufferBillingProjects();
 
     ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
@@ -473,8 +439,11 @@ public class BillingProjectBufferServiceTest {
 
   @Test
   public void syncBillingProjectStatus_iteratePastStallingRequests() {
+    TestMockFactory.stubCreateBillingProject(mockFireCloudService);
     billingProjectBufferService.bufferBillingProjects();
+    TestMockFactory.stubCreateBillingProject(mockFireCloudService);
     billingProjectBufferService.bufferBillingProjects();
+    TestMockFactory.stubCreateBillingProject(mockFireCloudService);
     billingProjectBufferService.bufferBillingProjects();
 
     ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
@@ -500,130 +469,6 @@ public class BillingProjectBufferServiceTest {
                 .findByFireCloudProjectName(capturedProjectNames.get(2))
                 .getStatusEnum())
         .isEqualTo(BufferEntryStatus.AVAILABLE);
-  }
-
-  @Test
-  public void testOutageRecoveryTime() {
-    // This test runs through a simulated outage-and-recovery scenario, checking the time
-    // it takes Workbench to recover with a project in the READY state after an extended
-    // Terra outage.
-    //
-    // See RW-6192 for more context on the issue that motivated this test. When that issue
-    // was filed, it took a 300-project buffer ~1-2 hours to reach a recovery state. This
-    // test demonstrates that with an appropriate set of configuration values, a 300-project
-    // buffer can recover almost immediately after the first non-error project is ready.
-
-    workbenchConfig.billing.bufferCapacityPerTier =
-        Collections.singletonMap(registeredTier.getShortName(), 300);
-    workbenchConfig.billing.bufferRefillProjectsPerTask = 5;
-    workbenchConfig.billing.bufferStatusChecksPerTask = 10;
-
-    // Set up the core Terra mock. All projects will return CREATING status for 15 minutes after
-    // their creation time. After 15 minutes, they will return ERROR by default, or SUCCESS if
-    // the project name has been added to the HashSet.
-    Set<String> successProjectNames = new HashSet<>();
-    doAnswer(
-            invocation -> {
-              String projectName = invocation.getArgument(0);
-              DbBillingProjectBufferEntry entry =
-                  billingProjectBufferEntryDao.findByFireCloudProjectName(projectName);
-              Duration timeSinceCreation =
-                  Duration.between(entry.getCreationTime().toInstant(), CLOCK.instant());
-              log.fine(
-                  String.format(
-                      "%s is %s mins old (%s project)",
-                      projectName,
-                      timeSinceCreation.toMinutes(),
-                      successProjectNames.contains(projectName) ? "SUCCESS" : "ERROR"));
-              CreationStatusEnum status = null;
-              if (timeSinceCreation.toMinutes() < 15) {
-                status = CreationStatusEnum.CREATING;
-              } else if (successProjectNames.contains(projectName)) {
-                status = CreationStatusEnum.READY;
-              } else {
-                status = CreationStatusEnum.ERROR;
-              }
-              return new FirecloudBillingProjectStatus()
-                  .creationStatus(status)
-                  .projectName(projectName);
-            })
-        .when(mockFireCloudService)
-        .getBillingProjectStatus(anyString());
-
-    // This lambda simulates the passage of time, with the clock incrementing and each of the
-    // buffer and sync cron jobs executing every minute.
-    Runnable tick =
-        () -> {
-          CLOCK.setInstant(CLOCK.instant().plus(Duration.ofMinutes(1)));
-          billingProjectBufferService.bufferBillingProjects();
-          billingProjectBufferService.syncBillingProjectStatus();
-        };
-
-    Instant startingTime = CLOCK.instant();
-
-    // Simulate a Terra outage: create a bunch of projects which will error-out after 15 minutes.
-    while (billingProjectBufferEntryDao.count() < 300) {
-      tick.run();
-      if (Duration.between(startingTime, CLOCK.instant()).toHours() > 3) {
-        // Bail out if it takes too long
-        break;
-      }
-    }
-
-    List<ProjectCountByStatusAndTier> projectCounts =
-        billingProjectBufferEntryDao.getBillingBufferGaugeData();
-
-    // Sanity check: there shouldn't be any AVAILABLE projects.
-    assertThat(filterByStatus(projectCounts, BufferEntryStatus.AVAILABLE)).isEmpty();
-
-    // Sanity check: there should be non-zero CREATING projects.
-    assertThat(filterByStatus(projectCounts, BufferEntryStatus.CREATING)).isNotEmpty();
-
-    // Simulate a Terra system recovery.
-    //
-    // Add a new mock to the buffer entry DAO, which will take any newly-created buffer entries
-    // and add them to the successProjectNames list, so they will become SUCCESS status after 15
-    // minutes.
-    doAnswer(
-            invocation -> {
-              DbBillingProjectBufferEntry entry = invocation.getArgument(0);
-              // Use a nonexistent ID as a signal that the current entry is being newly-created.
-              if (entry.getId() == 0) {
-                successProjectNames.add(entry.getFireCloudProjectName());
-              }
-              return invocation.callRealMethod();
-            })
-        .when(billingProjectBufferEntryDao)
-        .save((DbBillingProjectBufferEntry) any());
-
-    Instant terraRecoveryTime = CLOCK.instant();
-    Instant workbenchRecoveryTime = null;
-    while (true) {
-      tick.run();
-
-      int availableCount =
-          filterByStatus(
-                  billingProjectBufferEntryDao.getBillingBufferGaugeData(),
-                  BufferEntryStatus.AVAILABLE)
-              .size();
-
-      // Recovery is defined as "time to first project available"
-      if (availableCount >= 1) {
-        workbenchRecoveryTime = CLOCK.instant();
-        break;
-      }
-      if (Duration.between(startingTime, CLOCK.instant()).toHours() > 4) {
-        // To avoid looping forever, bail out after 4 "hours" if this keeps running.
-        log.severe("Took too long recovering, bailing out");
-        break;
-      }
-    }
-
-    assertThat(workbenchRecoveryTime).isNotNull();
-    long workbenchRecoveryMinutes =
-        Duration.between(terraRecoveryTime, workbenchRecoveryTime).toMinutes();
-    log.info(String.format("Workbench recovered in %s minutes", workbenchRecoveryMinutes));
-    assertThat(workbenchRecoveryMinutes).isLessThan(30l);
   }
 
   private List<ProjectCountByStatusAndTier> filterByStatus(
@@ -864,10 +709,13 @@ public class BillingProjectBufferServiceTest {
 
   @Test
   public void cleanBillingBuffer_multipleCreates() {
+    TestMockFactory.stubCreateBillingProject(mockFireCloudService);
     billingProjectBufferService.bufferBillingProjects();
 
     CLOCK.setInstant(NOW.plus(30, ChronoUnit.MINUTES));
+    TestMockFactory.stubCreateBillingProject(mockFireCloudService);
     billingProjectBufferService.bufferBillingProjects();
+    TestMockFactory.stubCreateBillingProject(mockFireCloudService);
     billingProjectBufferService.bufferBillingProjects();
 
     final ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);

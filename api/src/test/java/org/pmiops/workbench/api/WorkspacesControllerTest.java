@@ -2202,6 +2202,8 @@ public class WorkspacesControllerTest extends SpringTest {
 
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
+    verify(fireCloudService, times(1)).addOwnerToBillingProject(any(), any());
+
     ShareWorkspaceRequest shareWorkspaceRequest =
         new ShareWorkspaceRequest()
             .workspaceEtag(workspace.getEtag())
@@ -2219,7 +2221,8 @@ public class WorkspacesControllerTest extends SpringTest {
             ownerUser.getUsername(), workspace.getNamespace(), Optional.empty());
     verify(fireCloudService, never())
         .removeOwnerFromBillingProject(eq(writerUser.getUsername()), any(), eq(Optional.empty()));
-    verify(fireCloudService, never()).addOwnerToBillingProject(any(), any());
+    // Times still 1 happended during workspace creation
+    verify(fireCloudService, times(1)).addOwnerToBillingProject(any(), any());
   }
 
   @Test

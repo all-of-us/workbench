@@ -190,11 +190,17 @@ public class TestMockFactory {
         .createWorkspace(anyString(), anyString(), anyString());
   }
 
+  public static void stubCreateBillingProjectByPrefix(
+      FireCloudService fireCloudService, String projectIdPrefix) {
+    stubCreateBillingProject(fireCloudService, projectIdPrefix + UUID.randomUUID().toString());
+  }
+
   public static void stubCreateBillingProject(FireCloudService fireCloudService) {
     stubCreateBillingProject(fireCloudService, UUID.randomUUID().toString());
   }
 
-  public static void stubCreateBillingProject(FireCloudService fireCloudService, String billingProjectId) {
+  public static void stubCreateBillingProject(
+      FireCloudService fireCloudService, String billingProjectId) {
     doReturn(billingProjectId).when(fireCloudService).createBillingProjectName();
   }
 
