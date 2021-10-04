@@ -10,7 +10,7 @@ import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {profileStore, serverConfigStore} from 'app/utils/stores';
 import {MemoryRouter} from 'react-router-dom';
 import {useNavigation} from 'app/utils/navigation';
-import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
+import {waitForFakeTimersAndUpdate, waitOneTickAndUpdate} from 'testing/react-test-helpers';
 
 const profile = ProfileStubVariables.PROFILE_STUB as Profile;
 const load = jest.fn();
@@ -284,6 +284,8 @@ describe('DataAccessRequirements', () => {
 
         // initially, the user has completed all modules except RAS (the standard case at RAS launch time)
 
+        jest.useFakeTimers();
+
         const allExceptRas = allModules.filter(m => m !== AccessModule.RASLINKLOGINGOV);
         profileStore.set({
             profile: {
@@ -325,7 +327,7 @@ describe('DataAccessRequirements', () => {
             reload,
             updateCache});
 
-        await waitOneTickAndUpdate(wrapper);
+        await waitForFakeTimersAndUpdate(wrapper);
 
         allModules.forEach(module => {
             expect(findCompleteModule(wrapper, module).exists()).toBeTruthy();
@@ -335,6 +337,7 @@ describe('DataAccessRequirements', () => {
         });
 
         expect(findCompletionBanner(wrapper).exists()).toBeTruthy();
+        jest.useRealTimers();
     });
 
 
