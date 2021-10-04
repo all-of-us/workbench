@@ -8,9 +8,11 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
+import com.google.common.hash.Hashing;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -55,6 +57,7 @@ import org.springframework.stereotype.Service;
 // TODO: consider retrying internally when FireCloud returns a 503
 public class FireCloudServiceImpl implements FireCloudService {
 
+  @VisibleForTesting public static final int PROJECT_BILLING_ID_SIZE = 8;
   private static final Logger log = Logger.getLogger(FireCloudServiceImpl.class.getName());
 
   private final Provider<WorkbenchConfig> configProvider;
@@ -252,7 +255,7 @@ public class FireCloudServiceImpl implements FireCloudService {
   }
 
   @Override
-  public void createAllOfUsBillingProject(String projectName, String servicePerimeter) {
+  public String createAllOfUsBillingProject(String projectName, String servicePerimeter) {
     if (projectName.contains(WORKSPACE_DELIMITER)) {
       throw new IllegalArgumentException(
           String.format(
@@ -271,6 +274,7 @@ public class FireCloudServiceImpl implements FireCloudService {
           billingV2Api.createBillingProjectFullV2(request);
           return null;
         });
+    return projectName;
   }
 
   @Override
@@ -543,5 +547,20 @@ public class FireCloudServiceImpl implements FireCloudService {
             }
           }
         });
+  }
+
+  @Override
+  public String createBillingProjectName() {
+    String randomString =
+        Hashing.sha256()
+            .hashUnencodedChars(UUID.randomUUID().toString())
+            .toString()
+            .substring(0, PROJECT_BILLING_ID_SIZE);
+
+    String projectNamePrefix = configProvider.get().billing.projectNamePrefix;
+    if (!projectNamePrefix.endsWith("-")) {
+      projectNamePrefix = projectNamePrefix + "-";
+    }
+    return projectNamePrefix + randomString;
   }
 }

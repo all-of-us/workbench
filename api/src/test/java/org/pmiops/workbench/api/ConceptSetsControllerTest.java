@@ -265,7 +265,7 @@ public class ConceptSetsControllerTest extends SpringTest {
   public void setUp() {
     TestMockFactory testMockFactory = new TestMockFactory();
 
-    testMockFactory.stubBufferBillingProject(billingProjectBufferService);
+    testMockFactory.stubCreateBillingProject(billingProjectBufferService);
     TestMockFactory.stubCreateFcWorkspace(fireCloudService);
 
     DbUser user = new DbUser();

@@ -4,6 +4,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.pmiops.workbench.firecloud.FireCloudServiceImpl.PROJECT_BILLING_ID_SIZE;
 
 import com.google.api.client.http.HttpTransport;
 import com.google.cloud.iam.credentials.v1.IamCredentialsClient;
@@ -234,5 +235,25 @@ public class FireCloudServiceImplTest extends SpringTest {
     // from config.
     assertThat(request.getBillingAccount()).isEqualTo("billingAccounts/test-billing-account");
     assertThat(request.getServicePerimeter()).isEqualTo(servicePerimeter);
+  }
+
+  @Test
+  public void createBillingProjectName_withUnderScore() {
+    String prefix = "prefix-";
+    workbenchConfig.billing.projectNamePrefix = prefix;
+    String projectName = service.createBillingProjectName();
+
+    assertThat(projectName.startsWith(prefix)).isTrue();
+    assertThat(projectName.length()).isEqualTo(prefix.length() + PROJECT_BILLING_ID_SIZE);
+  }
+
+  @Test
+  public void createBillingProjectName_withoutUnderScore() {
+    String prefix = "prefix";
+    workbenchConfig.billing.projectNamePrefix = prefix;
+    String projectName = service.createBillingProjectName();
+
+    assertThat(projectName.startsWith(prefix + "-")).isTrue();
+    assertThat(projectName.length()).isEqualTo(prefix.length() + 1 + PROJECT_BILLING_ID_SIZE);
   }
 }

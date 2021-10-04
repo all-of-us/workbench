@@ -43,8 +43,12 @@ public interface FireCloudService {
    */
   void registerUser(String contactEmail, String firstName, String lastName);
 
-  /** Creates a billing project owned by AllOfUs. */
-  void createAllOfUsBillingProject(String projectName, String servicePerimeter);
+  /**
+   * Creates a billing project owned by AllOfUs.
+   *
+   * @return
+   */
+  String createAllOfUsBillingProject(String projectName, String servicePerimeter);
 
   void deleteBillingProject(String billingProject);
 
@@ -121,4 +125,7 @@ public interface FireCloudService {
   FirecloudNihStatus getNihStatus();
 
   ApiClient getApiClientWithImpersonation(String email) throws IOException;
+
+  /** Creates a random Billing Project name. */
+  String createBillingProjectName();
 }

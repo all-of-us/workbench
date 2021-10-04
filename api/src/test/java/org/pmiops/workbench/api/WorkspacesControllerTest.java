@@ -385,7 +385,7 @@ public class WorkspacesControllerTest extends SpringTest {
     archivedCdrVersionId = Long.toString(archivedCdrVersion.getCdrVersionId());
 
     fcWorkspaceAcl = createWorkspaceACL();
-    testMockFactory.stubBufferBillingProject(billingProjectBufferService);
+    testMockFactory.stubCreateBillingProject(billingProjectBufferService);
     testMockFactory.stubCreateFcWorkspace(fireCloudService);
 
     // required to enable the use of default method blobToFileDetail()
@@ -423,7 +423,7 @@ public class WorkspacesControllerTest extends SpringTest {
     DbBillingProjectBufferEntry entry = mock(DbBillingProjectBufferEntry.class);
     doReturn(projectName).when(entry).getFireCloudProjectName();
     doReturn(entry).when(billingProjectBufferService).assignBillingProject(any(), any());
-    doReturn(projectName).when(billingProjectBufferService).createBillingProjectName();
+    doReturn(projectName).when(fireCloudService).createBillingProjectName();
   }
 
   private void stubFcUpdateWorkspaceACL() {
@@ -616,7 +616,7 @@ public class WorkspacesControllerTest extends SpringTest {
   public void testCreateWorkspace_resetBillingAccountOnFailedSave() throws Exception {
     doThrow(RuntimeException.class).when(workspaceDao).save(any(DbWorkspace.class));
     Workspace workspace = createWorkspace();
-    testMockFactory.stubBufferBillingProject(billingProjectBufferService, workspace.getNamespace());
+    testMockFactory.stubCreateBillingProject(billingProjectBufferService, workspace.getNamespace());
 
     try {
       workspacesController.createWorkspace(workspace).getBody();
