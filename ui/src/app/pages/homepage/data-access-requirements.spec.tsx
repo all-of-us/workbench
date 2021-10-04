@@ -10,7 +10,7 @@ import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {profileStore, serverConfigStore} from 'app/utils/stores';
 import {MemoryRouter} from 'react-router-dom';
 import {useNavigation} from 'app/utils/navigation';
-import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
+import {waitForFakeTimersAndUpdate} from 'testing/react-test-helpers';
 
 const profile = ProfileStubVariables.PROFILE_STUB as Profile;
 const load = jest.fn();
@@ -38,6 +38,11 @@ describe('DataAccessRequirements', () => {
         serverConfigStore.set({config: defaultServerConfig});
         profileStore.set({profile, load, reload, updateCache});
     });
+
+    afterEach(() => {
+        // reset to standard behavior after tests which use fake timers
+        jest.useRealTimers();
+    })
 
     it('should return all modules from getEnabledModules by default (all FFs enabled)', () => {
         const [navigate, ] = useNavigation();
@@ -279,8 +284,9 @@ describe('DataAccessRequirements', () => {
     });
 
     // RAS launch bug (no JIRA ticket)
-    // temporarily disabled for flakiness - https://precisionmedicineinitiative.atlassian.net/browse/RW-7364
-    xit('should render all modules as complete by transitioning to all complete', async() => {
+    it('should render all modules as complete by transitioning to all complete', async() => {
+        // this test is subject to flakiness using real timers
+        jest.useFakeTimers();
 
         // initially, the user has completed all modules except RAS (the standard case at RAS launch time)
 
@@ -325,7 +331,7 @@ describe('DataAccessRequirements', () => {
             reload,
             updateCache});
 
-        await waitOneTickAndUpdate(wrapper);
+        await waitForFakeTimersAndUpdate(wrapper);
 
         allModules.forEach(module => {
             expect(findCompleteModule(wrapper, module).exists()).toBeTruthy();
