@@ -60,6 +60,7 @@ make-cb-criteria-15-meas-labs-loinc-std.sh
 make-cb-criteria-16-meas-snomed-std.sh
 make-cb-criteria-17-drug-rxnorm.sh
 make-cb-criteria-18-proc-occur-snomed-src.sh
+make-cb-criteria-19-proc-occur-snomed-std.sh
 )
 if [[ "$run_in_parallel" == "ori" ]]; then
   echo "for 'ori' running make-bq-criteria-tables.sh script directly!"
