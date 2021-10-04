@@ -23,7 +23,7 @@ describe('Workspace WRITER Jupyter notebook action tests', () => {
   const notebookName = makeRandomName('py3');
   const writerWorkspaceName = 'e2eNotebookWriterActionsTestWorkspace'; // WRITER workspace for copy-to.
 
-  test('Run Python code and share notebook to workspace WRITER', async () => {
+  test('Create Python notebook and share workspace to a WRITER', async () => {
     await signInWithAccessToken(page);
     await findOrCreateWorkspace(page, { workspaceName });
 
@@ -49,8 +49,7 @@ describe('Workspace WRITER Jupyter notebook action tests', () => {
     await signOut(page);
   });
 
-  // TODO (RW-7287): Re-enable once Terra clone is fixed.
-  xtest('WRITER can clone workspace and edit notebook in workspace clone', async () => {
+  test('WRITER can clone workspace and edit notebook in workspace clone', async () => {
     // WRITER log in.
     await signInWithAccessToken(page, config.WRITER_USER);
 
