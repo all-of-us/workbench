@@ -218,6 +218,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
             workspaceId.getWorkspaceNamespace(),
             workspaceId.getWorkspaceName(),
             accessTier.getAuthDomainName());
+
     DbWorkspace dbWorkspace = createDbWorkspace(workspace, cdrVersion, user, fcWorkspace);
     try {
       dbWorkspace = workspaceDao.save(dbWorkspace);

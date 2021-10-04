@@ -174,8 +174,8 @@ public class BillingProjectBufferServiceTest {
   public void canBufferMultipleProjectsPerTask() {
     workbenchConfig.billing.bufferRefillProjectsPerTask = 2;
     billingProjectBufferService.bufferBillingProjects();
-
     verify(mockFireCloudService, times(2)).createAllOfUsBillingProject(anyString(), anyString());
+
   }
 
   @Test
