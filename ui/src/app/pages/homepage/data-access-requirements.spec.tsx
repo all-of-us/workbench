@@ -39,6 +39,11 @@ describe('DataAccessRequirements', () => {
         profileStore.set({profile, load, reload, updateCache});
     });
 
+    afterEach(() => {
+        // reset to standard behavior after tests which use fake timers
+        jest.useRealTimers();
+    })
+
     it('should return all modules from getEnabledModules by default (all FFs enabled)', () => {
         const [navigate, ] = useNavigation();
         const enabledModules = getEnabledModules(allModules, navigate);
@@ -336,9 +341,6 @@ describe('DataAccessRequirements', () => {
         });
 
         expect(findCompletionBanner(wrapper).exists()).toBeTruthy();
-
-        // reset to standard behavior for other tests
-        jest.useRealTimers();
     });
 
 
