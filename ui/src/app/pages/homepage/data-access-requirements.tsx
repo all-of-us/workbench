@@ -239,14 +239,17 @@ const moduleLabels: Map<AccessModule, JSX.Element> = new Map([
   [AccessModule.DATAUSERCODEOFCONDUCT, <div>Sign Data User Code of Conduct</div>],
 ]);
 
+// RAS cannot be externally synced because it relies on a short lived token
+// DUCC state is strictly internal to the RW
 const externalSyncActions: Map<AccessModule, Function> = new Map([
   [AccessModule.TWOFACTORAUTH, async() => await profileApi().syncTwoFactorAuthStatus()],
-  [AccessModule.RASLINKLOGINGOV, () => redirectToRas(false)],
   [AccessModule.ERACOMMONS, async() => await profileApi().syncEraCommonsStatus()],
   [AccessModule.COMPLIANCETRAINING, async() => await profileApi().syncComplianceTrainingStatus()],
-  // DUCC state is strictly internal to the RW
-  [AccessModule.DATAUSERCODEOFCONDUCT, () => {}],
 ]);
+
+// most refresh actions are the same as the external sync actions
+const refreshActions: Map<AccessModule, Function> = new Map(externalSyncActions);
+refreshActions.set(AccessModule.RASLINKLOGINGOV, () => redirectToRas(false));
 
 // this function does double duty:
 // - returns appropriate text for completed and bypassed modules and null for incomplete modules
@@ -314,20 +317,32 @@ export const getEnabledModules = (modules: AccessModule[], navigate): AccessModu
   return enabledTaskMaybe ? [enabledTaskMaybe.module] : [];
 }, modules);
 
-// exported for test
-export const getActiveModule = (modules: AccessModule[], profile: Profile): AccessModule => modules.find(moduleName => {
+const incompleteModules = (modules: AccessModule[], profile: Profile): AccessModule[] => modules.filter(moduleName => {
   const status = getAccessModuleStatusByName(profile, moduleName);
   return !bypassedOrCompletedText(status);
 });
 
-const Refresh = (props: { showSpinner: Function; externalSyncAction: Function }) => {
-  const {showSpinner, externalSyncAction} = props;
+const syncIncompleteModules = (modules: AccessModule[], profile: Profile, reloadProfile: Function) => {
+  incompleteModules(modules, profile).map(async module => {
+    const syncAction = externalSyncActions.get(module);
+    if (syncAction) {
+      await syncAction();
+    }
+  });
+  reloadProfile();
+}
+
+// exported for test
+export const getActiveModule = (modules: AccessModule[], profile: Profile): AccessModule => incompleteModules(modules, profile)[0];
+
+const Refresh = (props: { showSpinner: Function; refreshAction: Function }) => {
+  const {showSpinner, refreshAction} = props;
   return <Button
       type='primary'
       style={styles.refreshButton}
       onClick={async() => {
         showSpinner();
-        await externalSyncAction();
+        await refreshAction();
         location.reload(); // also hides spinner
       }} >
     <Repeat style={styles.refreshIcon}/> Refresh
@@ -417,7 +432,7 @@ const MaybeModule = ({moduleName, active, spinnerProps}: ModuleProps): JSX.Eleme
       <FlexRow style={styles.moduleCTA}>
         {active && (showRefresh
             ? <Refresh
-                externalSyncAction={externalSyncActions.get(moduleName)}
+                refreshAction={refreshActions.get(moduleName)}
                 showSpinner={spinnerProps.showSpinner}/>
             : <Next/>)}
       </FlexRow>
@@ -538,8 +553,12 @@ const DuccCard = (props: {activeModule: AccessModule, spinnerProps: WithSpinnerO
 
 export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerProps: WithSpinnerOverlayProps) => {
   const {profile, reload} = useStore(profileStore);
+  const {config: {unsafeAllowSelfBypass}} = useStore(serverConfigStore);
+  const [navigate, ] = useNavigation();
+  const enabledModules = getEnabledModules(allModules, navigate);
 
   useEffect(() => {
+    syncIncompleteModules(enabledModules, profile, reload);
     spinnerProps.hideSpinner();
   }, []);
 
@@ -559,18 +578,15 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
     }
   }, [code]);
 
+
   // which module are we currently guiding the user to complete?
   const [activeModule, setActiveModule] = useState(null);
-
-  const [navigate, ] = useNavigation();
-  const enabledModules = getEnabledModules(allModules, navigate);
 
   // whenever the profile changes, setActiveModule(the first incomplete enabled module)
   useEffect(() => {
     setActiveModule(getActiveModule(enabledModules, profile));
   }, [profile]);
 
-  const {config: {unsafeAllowSelfBypass}} = useStore(serverConfigStore);
 
   return <FlexColumn style={styles.pageWrapper}>
       <DARHeader/>
