@@ -4,7 +4,6 @@ import com.google.cloud.tasks.v2.CloudTasksClient;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Optional;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.apache.commons.cli.CommandLine;
@@ -36,8 +35,6 @@ import org.springframework.context.annotation.Import;
   WorkbenchLocationConfigService.class,
 })
 public class BackfillWorkspacesToRdr {
-  private static final Logger log = Logger.getLogger(BackfillWorkspacesToRdr.class.getName());
-
   // I haven't read the entire commons cli code, but it looks like it is limited to the Number type,
   // we really want an Integer
   // https://github.com/apache/commons-cli/blob/98d06d37bc7058bbfb2704c9620669c66e279f4a/src/main/java/org/apache/commons/cli/PatternOptionBuilder.java#L98
