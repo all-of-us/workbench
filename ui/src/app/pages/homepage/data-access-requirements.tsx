@@ -633,7 +633,7 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
 
   // whenever the profile changes, setActiveModule(the first incomplete enabled module)
   useEffect(() => {
-    setActiveModule(getActiveModule(getEnabledModules(allModules), profile));
+    setActiveModule(getActiveModule(enabledModules, profile));
   }, [profile]);
 
 
