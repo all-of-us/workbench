@@ -2,7 +2,6 @@ package org.pmiops.workbench.monitoring.labels;
 
 import java.util.Collections;
 import java.util.Set;
-import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.BufferEntryStatus;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.utils.Booleans;
 import org.pmiops.workbench.utils.Enums;
@@ -14,7 +13,6 @@ import org.pmiops.workbench.utils.Enums;
 public enum MetricLabel implements MetricLabelBase {
   ACCESS_TIER_SHORT_NAME("access_tier_short_name"),
   ACCESS_TIER_SHORT_NAMES("access_tier_short_names"),
-  BUFFER_ENTRY_STATUS("BufferEntryStatus", Enums.getValueStrings(BufferEntryStatus.class)),
   CRON_JOB_NAME("cron_job_name"),
   CRON_JOB_SUCCEEDED("cron_job_completion_status", Booleans.VALUE_STRINGS),
   DATASET_INVALID("Invalid", Booleans.VALUE_STRINGS),

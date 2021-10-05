@@ -4,7 +4,6 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
@@ -40,7 +39,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
-import java.util.UUID;
 import java.util.stream.Collectors;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -55,7 +53,6 @@ import org.pmiops.workbench.access.AccessTierServiceImpl;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.actionaudit.auditors.WorkspaceAuditor;
-import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
@@ -89,7 +86,6 @@ import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
-import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
@@ -203,7 +199,6 @@ public class DataSetControllerTest extends SpringTest {
   @Autowired private WorkspacesController workspacesController;
 
   @MockBean private BigQueryService mockBigQueryService;
-  @MockBean private BillingProjectBufferService mockBillingProjectBufferService;
   @MockBean private CdrBigQuerySchemaConfigService mockCdrBigQuerySchemaConfigService;
   @MockBean private CdrVersionService mockCdrVersionService;
   @MockBean private CohortQueryBuilder mockCohortQueryBuilder;
@@ -306,14 +301,6 @@ public class DataSetControllerTest extends SpringTest {
 
   @BeforeEach
   public void setUp() throws Exception {
-    doAnswer(
-            (invocation) -> {
-              DbBillingProjectBufferEntry entry = new DbBillingProjectBufferEntry();
-              entry.setFireCloudProjectName(UUID.randomUUID().toString());
-              return entry;
-            })
-        .when(mockBillingProjectBufferService)
-        .assignBillingProject(any(), any());
     TestMockFactory.stubCreateFcWorkspace(fireCloudService);
     TestMockFactory.stubCreateBillingProject(fireCloudService);
 

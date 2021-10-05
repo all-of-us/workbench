@@ -89,11 +89,11 @@ public class MonitoringServiceTest extends SpringTest {
   @Test
   public void testRecordValue() {
     long value = 16L;
-    monitoringService.recordValue(GaugeMetric.BILLING_BUFFER_PROJECT_COUNT, value);
+    monitoringService.recordValue(GaugeMetric.WORKSPACE_COUNT, value);
 
     verify(mockInitService).createAndRegister();
     verify(mockStatsRecorder).newMeasureMap();
-    verify(mockMeasureMap).put(GaugeMetric.BILLING_BUFFER_PROJECT_COUNT.getMeasureLong(), value);
+    verify(mockMeasureMap).put(GaugeMetric.WORKSPACE_COUNT.getMeasureLong(), value);
     verify(mockMeasureMap).record(any(TagContext.class));
   }
 
@@ -101,7 +101,7 @@ public class MonitoringServiceTest extends SpringTest {
   public void testRecordMap() {
     monitoringService.recordValues(
         ImmutableMap.of(
-            GaugeMetric.BILLING_BUFFER_PROJECT_COUNT, 2L,
+            GaugeMetric.WORKSPACE_COUNT, 2L,
             GaugeMetric.USER_COUNT, 33L));
     verify(mockStatsRecorder).newMeasureMap();
     verify(mockMeasureMap, times(2)).put(any(MeasureLong.class), anyLong());

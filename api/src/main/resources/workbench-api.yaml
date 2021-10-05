@@ -1595,54 +1595,6 @@ paths:
           description: Internal Error
           schema:
             "$ref": "#/definitions/ErrorResponse"
-  "/v1/cron/bufferBillingProjects":
-    get:
-      security: []
-      tags:
-      - offlineBilling
-      - cron
-      description: If the AoU Billing Project buffer is not full, refill with one
-        or more billing projects.
-      operationId: bufferBillingProjects
-      responses:
-        204:
-          description: No Error
-        500:
-          description: Internal Error
-          schema:
-            "$ref": "#/definitions/ErrorResponse"
-  "/v1/cron/syncBillingProjectStatus":
-    get:
-      security: []
-      tags:
-      - offlineBilling
-      - cron
-      description: Fetch a BillingProjectBufferEntry that is in the CREATING state
-        and check its status on Firecloud
-      operationId: syncBillingProjectStatus
-      responses:
-        204:
-          description: No Error
-        500:
-          description: Internal Error
-          schema:
-            "$ref": "#/definitions/ErrorResponse"
-  "/v1/cron/cleanBillingBuffer":
-    get:
-      security: []
-      tags:
-      - offlineBilling
-      - cron
-      description: Find BillingProjectBufferEntries that have failed during the creation
-        or assignment step and set their statuses to ERROR
-      operationId: cleanBillingBuffer
-      responses:
-        204:
-          description: No Error
-        500:
-          description: Internal Error
-          schema:
-            "$ref": "#/definitions/ErrorResponse"
   "/v1/cron/checkFreeTierBillingUsage":
     get:
       security: []
@@ -1686,21 +1638,6 @@ paths:
       responses:
         204:
           description: No Error
-        500:
-          description: Internal Error
-          schema:
-            "$ref": "#/definitions/ErrorResponse"
-  "/v1/monitoring/billingProjectBufferStatus":
-    get:
-      tags:
-      - monitoring
-      description: Return statistics about the billing buffer.
-      operationId: getBillingProjectBufferStatus
-      responses:
-        200:
-          description: No Error
-          schema:
-            "$ref": "#/definitions/BillingProjectBufferStatus"
         500:
           description: Internal Error
           schema:
