@@ -464,7 +464,7 @@ public class WorkspacesControllerTest extends SpringTest {
 
     when(fireCloudService.cloneWorkspace(anyString(), anyString(), eq(ns), eq(name), anyString()))
         .thenReturn(fcResponse);
-
+    doReturn(ns).when(fireCloudService).createBillingProjectName();
     return fcResponse;
   }
 
@@ -1064,7 +1064,6 @@ public class WorkspacesControllerTest extends SpringTest {
     // Assign the same bucket name as the mock-factory's bucket name, so the clone vs. get equality
     // assertion below will pass.
     clonedFirecloudWorkspace.setBucketName(TestMockFactory.WORKSPACE_BUCKET_NAME);
-
     final Workspace clonedWorkspace =
         workspacesController
             .cloneWorkspace(originalWorkspace.getNamespace(), originalWorkspace.getId(), req)
