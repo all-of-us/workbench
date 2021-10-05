@@ -75,5 +75,4 @@ describe('Notebook and Runtime UI Test', () => {
     await analysisPage.waitForLoad();
     return analysisPage.findNotebookCard();
   }
-
 });
