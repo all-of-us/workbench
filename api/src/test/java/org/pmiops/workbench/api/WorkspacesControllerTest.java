@@ -55,7 +55,6 @@ import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.actionaudit.auditors.WorkspaceAuditor;
-import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.CdrVersionService;
@@ -96,7 +95,6 @@ import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceFreeTierUsageDao;
 import org.pmiops.workbench.db.model.DbAccessTier;
-import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbCohortReview;
@@ -244,7 +242,6 @@ public class WorkspacesControllerTest extends SpringTest {
   private static final String BUCKET_URI =
       String.format("gs://%s/", TestMockFactory.WORKSPACE_BUCKET_NAME);
 
-  @Autowired private BillingProjectBufferService billingProjectBufferService;
   @Autowired private WorkspaceAuditor mockWorkspaceAuditor;
   @Autowired private CohortAnnotationDefinitionController cohortAnnotationDefinitionController;
   @Autowired private WorkspacesController workspacesController;
@@ -289,7 +286,6 @@ public class WorkspacesControllerTest extends SpringTest {
   @MockBean({
     BigQueryService.class,
     BillingProjectAuditor.class,
-    BillingProjectBufferService.class,
     CdrBigQuerySchemaConfigService.class,
     CloudStorageClient.class,
     CohortBuilderMapper.class,
@@ -417,13 +413,6 @@ public class WorkspacesControllerTest extends SpringTest {
   private FirecloudWorkspaceACL createWorkspaceACL(JSONObject acl) {
     return new Gson()
         .fromJson(new JSONObject().put("acl", acl).toString(), FirecloudWorkspaceACL.class);
-  }
-
-  private void mockBillingProjectBuffer(String projectName) {
-    DbBillingProjectBufferEntry entry = mock(DbBillingProjectBufferEntry.class);
-    doReturn(projectName).when(entry).getFireCloudProjectName();
-    doReturn(entry).when(billingProjectBufferService).assignBillingProject(any(), any());
-    doReturn(projectName).when(fireCloudService).createBillingProjectName();
   }
 
   private void stubFcUpdateWorkspaceACL() {
@@ -558,7 +547,6 @@ public class WorkspacesControllerTest extends SpringTest {
   @Test
   public void testCreateWorkspace() throws Exception {
     Workspace workspace = createWorkspace();
-    mockBillingProjectBuffer(workspace.getNamespace());
     workspace = workspacesController.createWorkspace(workspace).getBody();
     verify(fireCloudService)
         .createWorkspace(
@@ -1077,7 +1065,6 @@ public class WorkspacesControllerTest extends SpringTest {
     // assertion below will pass.
     clonedFirecloudWorkspace.setBucketName(TestMockFactory.WORKSPACE_BUCKET_NAME);
 
-    mockBillingProjectBuffer("cloned-ns");
     final Workspace clonedWorkspace =
         workspacesController
             .cloneWorkspace(originalWorkspace.getNamespace(), originalWorkspace.getId(), req)
@@ -1130,8 +1117,6 @@ public class WorkspacesControllerTest extends SpringTest {
     req.setWorkspace(modWorkspace);
     stubCloneWorkspace(modWorkspace.getNamespace(), modWorkspace.getName(), LOGGED_IN_USER_EMAIL);
 
-    mockBillingProjectBuffer("cloned-ns");
-
     doThrow(RuntimeException.class).when(workspaceDao).save(any(DbWorkspace.class));
 
     try {
@@ -1164,8 +1149,6 @@ public class WorkspacesControllerTest extends SpringTest {
     final CloneWorkspaceRequest req = new CloneWorkspaceRequest();
     req.setWorkspace(modWorkspace);
     stubCloneWorkspace(modWorkspace.getNamespace(), modWorkspace.getName(), LOGGED_IN_USER_EMAIL);
-
-    mockBillingProjectBuffer("cloned-ns");
 
     workspacesController.cloneWorkspace(
         originalWorkspace.getNamespace(), originalWorkspace.getId(), req);
@@ -1454,7 +1437,6 @@ public class WorkspacesControllerTest extends SpringTest {
         stubCloneWorkspace(
             modWorkspace.getNamespace(), modWorkspace.getName(), LOGGED_IN_USER_EMAIL);
 
-    mockBillingProjectBuffer("cloned-ns");
     stubGetWorkspace(clonedWorkspace, WorkspaceAccessLevel.WRITER);
     Workspace cloned =
         workspacesController
@@ -1629,7 +1611,6 @@ public class WorkspacesControllerTest extends SpringTest {
             Domain.CONDITION, ImmutableSet.of(dbConceptSetConceptId1, dbConceptSetConceptId2)))
         .thenReturn(456);
 
-    mockBillingProjectBuffer("cloned-ns");
     stubGetWorkspace(clonedWorkspace, WorkspaceAccessLevel.WRITER);
     Workspace cloned =
         workspacesController
@@ -1731,7 +1712,6 @@ public class WorkspacesControllerTest extends SpringTest {
         stubCloneWorkspace(
             modWorkspace.getNamespace(), modWorkspace.getName(), LOGGED_IN_USER_EMAIL);
 
-    mockBillingProjectBuffer("cloned-ns");
     stubGetWorkspace(clonedWorkspace, WorkspaceAccessLevel.READER);
     Workspace cloned =
         workspacesController
@@ -1857,8 +1837,6 @@ public class WorkspacesControllerTest extends SpringTest {
     req.setWorkspace(modWorkspace);
     stubCloneWorkspace(modWorkspace.getNamespace(), modWorkspace.getName(), "cloner@gmail.com");
 
-    mockBillingProjectBuffer("cloned-ns");
-
     Workspace workspace2 =
         workspacesController
             .cloneWorkspace(workspace.getNamespace(), workspace.getId(), req)
@@ -1888,8 +1866,6 @@ public class WorkspacesControllerTest extends SpringTest {
             .cdrVersionId(cdrVersionId2);
     stubCloneWorkspace(modWorkspace.getNamespace(), modWorkspace.getName(), "cloner@gmail.com");
 
-    mockBillingProjectBuffer("cloned-ns");
-
     CloneWorkspaceRequest req = new CloneWorkspaceRequest().workspace(modWorkspace);
     Workspace workspace2 =
         workspacesController
@@ -1914,7 +1890,7 @@ public class WorkspacesControllerTest extends SpringTest {
                   .cdrVersionId("bad-cdr-version-id");
           stubCloneWorkspace(
               modWorkspace.getNamespace(), modWorkspace.getName(), "cloner@gmail.com");
-          mockBillingProjectBuffer("cloned-ns");
+
           workspacesController.cloneWorkspace(
               workspace.getNamespace(),
               workspace.getId(),
@@ -1936,7 +1912,7 @@ public class WorkspacesControllerTest extends SpringTest {
                   .cdrVersionId("100");
           stubCloneWorkspace(
               modWorkspace.getNamespace(), modWorkspace.getName(), "cloner@gmail.com");
-          mockBillingProjectBuffer("cloned-ns");
+
           workspacesController.cloneWorkspace(
               workspace.getNamespace(),
               workspace.getId(),
@@ -1958,7 +1934,6 @@ public class WorkspacesControllerTest extends SpringTest {
                   .cdrVersionId(archivedCdrVersionId);
           stubCloneWorkspace(
               modWorkspace.getNamespace(), modWorkspace.getName(), "cloner@gmail.com");
-          mockBillingProjectBuffer("cloned-ns");
           workspacesController.cloneWorkspace(
               workspace.getNamespace(),
               workspace.getId(),
@@ -2035,7 +2010,6 @@ public class WorkspacesControllerTest extends SpringTest {
             .billingAccountName("billing-account");
 
     stubCloneWorkspace("cloned-ns", "cloned", cloner.getUsername());
-    mockBillingProjectBuffer("cloned-ns");
 
     Workspace workspace2 =
         workspacesController
