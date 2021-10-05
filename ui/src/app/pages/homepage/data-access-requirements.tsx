@@ -388,6 +388,7 @@ const TemporaryRASModule = () => {
 };
 
 interface ModuleProps {
+  profile: Profile,
   moduleName: AccessModule;
   active: boolean;    // is this the currently-active module that the user should complete
 
@@ -396,7 +397,7 @@ interface ModuleProps {
   spinnerProps: WithSpinnerOverlayProps;
 }
 // Renders a module when it's enabled via feature flags.  Returns null if not.
-const MaybeModule = ({moduleName, active, spinnerProps}: ModuleProps): JSX.Element => {
+const MaybeModule = ({profile, moduleName, active, spinnerProps}: ModuleProps): JSX.Element => {
   // whether to show the refresh button: this module has been clicked
   const [showRefresh, setShowRefresh] = useState(false);
 
@@ -424,8 +425,7 @@ const MaybeModule = ({moduleName, active, spinnerProps}: ModuleProps): JSX.Eleme
         <FlexRow style={styles.inactiveModuleBox}>{children}</FlexRow>;
   };
 
-  const Module = () => {
-    const {profile} = useStore(profileStore);
+  const Module = ({profile}) => {
     const statusTextMaybe = bypassedOrCompletedText(getAccessModuleStatusByName(profile, moduleName));
 
     return <FlexRow data-test-id={`module-${moduleName}`}>
@@ -459,7 +459,7 @@ const MaybeModule = ({moduleName, active, spinnerProps}: ModuleProps): JSX.Eleme
     }
   }
   const moduleEnabled = !!registrationTask;
-  return moduleEnabled ? <Module/> : null;
+  return moduleEnabled ? <Module profile={profile}/> : null;
 };
 
 const DARHeader = () => <FlexColumn style={styles.headerFlexColumn}>
@@ -475,11 +475,22 @@ const Completed = () => <FlexRow data-test-id='dar-completed' style={styles.comp
   <GetStartedButton style={{marginLeft: 'auto'}}/>
 </FlexRow>;
 
-const ModulesForCard = (props: {modules: AccessModule[], activeModule: AccessModule, spinnerProps: WithSpinnerOverlayProps}) => {
-  const {modules, activeModule, spinnerProps} = props;
+interface CardProps {
+  profile: Profile,
+  modules: Array<AccessModule>,
+  activeModule: AccessModule,
+  spinnerProps: WithSpinnerOverlayProps
+}
+const ModulesForCard = (props: CardProps) => {
+  const {profile, modules, activeModule, spinnerProps} = props;
   return <FlexColumn style={styles.modulesContainer}>
     {modules.map(moduleName =>
-        <MaybeModule key={moduleName} moduleName={moduleName} active={moduleName === activeModule} spinnerProps={spinnerProps}/>
+        <MaybeModule
+            key={moduleName}
+            moduleName={moduleName}
+            profile={profile}
+            active={moduleName === activeModule}
+            spinnerProps={spinnerProps}/>
     )}
   </FlexColumn>;
 };
@@ -517,8 +528,8 @@ const DataDetail = (props: {icon: string, text: string}) => {
   </FlexRow>;
 };
 
-const RegisteredTierCard = (props: {activeModule: AccessModule, spinnerProps: WithSpinnerOverlayProps}) => {
-  const {activeModule, spinnerProps} = props;
+const RegisteredTierCard = (props: {profile: Profile, activeModule: AccessModule, spinnerProps: WithSpinnerOverlayProps}) => {
+  const {profile, activeModule, spinnerProps} = props;
   return <FlexRow style={styles.card}>
     <FlexColumn>
       <div style={styles.cardStep}>Step 1</div>
@@ -535,19 +546,19 @@ const RegisteredTierCard = (props: {activeModule: AccessModule, spinnerProps: Wi
       <DataDetail icon='physical' text='Physical measurements'/>
       <DataDetail icon='wearable' text='Wearable devices'/>
     </FlexColumn>
-    <ModulesForCard modules={rtModules} activeModule={activeModule} spinnerProps={spinnerProps}/>
+    <ModulesForCard profile={profile}  modules={rtModules} activeModule={activeModule} spinnerProps={spinnerProps}/>
   </FlexRow>;
 };
 
-const DuccCard = (props: {activeModule: AccessModule, spinnerProps: WithSpinnerOverlayProps}) => {
-  const {activeModule, spinnerProps} = props;
+const DuccCard = (props: {profile: Profile, activeModule: AccessModule, spinnerProps: WithSpinnerOverlayProps}) => {
+  const {profile, activeModule, spinnerProps} = props;
   return <FlexRow style={{...styles.card, height: '125px'}}>
     <FlexColumn>
       {/* This will be Step 3 when CT becomes the new Step 2 */}
       <div style={styles.cardStep}>Step 2</div>
       <div style={styles.cardHeader}>Sign the code of conduct</div>
     </FlexColumn>
-    <ModulesForCard modules={[duccModule]} activeModule={activeModule} spinnerProps={spinnerProps}/>
+    <ModulesForCard profile={profile} modules={[duccModule]} activeModule={activeModule} spinnerProps={spinnerProps}/>
   </FlexRow>;
 };
 
@@ -601,9 +612,9 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
         <div style={styles.pleaseComplete}>
           Please complete the necessary steps to gain access to the <AoU/> datasets.
         </div>
-        <RegisteredTierCard activeModule={activeModule} spinnerProps={spinnerProps}/>
+        <RegisteredTierCard profile={profile} activeModule={activeModule} spinnerProps={spinnerProps}/>
         {/* TODO RW-7059 - Step 2 ControlledTierCard */}
-        <DuccCard activeModule={activeModule} spinnerProps={spinnerProps}/>
+        <DuccCard profile={profile} activeModule={activeModule} spinnerProps={spinnerProps}/>
       </FadeBox>
     </FlexColumn>;
 });
