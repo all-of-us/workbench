@@ -174,15 +174,15 @@ public class RuntimeController implements RuntimeApiDelegate {
 
   @Override
   public ResponseEntity<Runtime> getRuntime(String workspaceNamespace) {
+    DbUser user = userProvider.get();
+    enforceComputeSecuritySuspension(user);
+
     DbWorkspace dbWorkspace = lookupWorkspace(workspaceNamespace);
     String firecloudWorkspaceName = dbWorkspace.getFirecloudName();
     String googleProject = dbWorkspace.getGoogleProject();
     workspaceAuthService.enforceWorkspaceAccessLevel(
         workspaceNamespace, firecloudWorkspaceName, WorkspaceAccessLevel.WRITER);
     workspaceAuthService.validateActiveBilling(workspaceNamespace, firecloudWorkspaceName);
-
-    DbUser user = userProvider.get();
-    enforceComputeSecuritySuspension(user);
 
     try {
       LeonardoGetRuntimeResponse leoRuntimeResponse =
@@ -283,14 +283,14 @@ public class RuntimeController implements RuntimeApiDelegate {
           "Exactly one of GceConfig or DataprocConfig or GceWithPdConfig must be provided");
     }
 
+    DbUser user = userProvider.get();
+    enforceComputeSecuritySuspension(user);
+
     DbWorkspace dbWorkspace = lookupWorkspace(workspaceNamespace);
     String firecloudWorkspaceName = dbWorkspace.getFirecloudName();
     workspaceAuthService.enforceWorkspaceAccessLevel(
         workspaceNamespace, firecloudWorkspaceName, WorkspaceAccessLevel.WRITER);
     workspaceAuthService.validateActiveBilling(workspaceNamespace, firecloudWorkspaceName);
-
-    DbUser user = userProvider.get();
-    enforceComputeSecuritySuspension(user);
 
     leonardoNotebooksClient.createRuntime(
         runtime.googleProject(dbWorkspace.getGoogleProject()).runtimeName(user.getRuntimeName()),
@@ -316,14 +316,14 @@ public class RuntimeController implements RuntimeApiDelegate {
       throw new BadRequestException("Only one of GceConfig or DataprocConfig must be provided");
     }
 
+    DbUser user = userProvider.get();
+    enforceComputeSecuritySuspension(user);
+
     DbWorkspace dbWorkspace = lookupWorkspace(workspaceNamespace);
     String firecloudWorkspaceName = dbWorkspace.getFirecloudName();
     workspaceAuthService.enforceWorkspaceAccessLevel(
         workspaceNamespace, firecloudWorkspaceName, WorkspaceAccessLevel.WRITER);
     workspaceAuthService.validateActiveBilling(workspaceNamespace, firecloudWorkspaceName);
-
-    DbUser user = userProvider.get();
-    enforceComputeSecuritySuspension(user);
 
     leonardoNotebooksClient.updateRuntime(
         runtimeRequest
@@ -337,13 +337,13 @@ public class RuntimeController implements RuntimeApiDelegate {
   @Override
   public ResponseEntity<EmptyResponse> deleteRuntime(
       String workspaceNamespace, Boolean deleteDisk) {
+    DbUser user = userProvider.get();
+    enforceComputeSecuritySuspension(user);
+
     DbWorkspace dbWorkspace = lookupWorkspace(workspaceNamespace);
     String firecloudWorkspaceName = dbWorkspace.getFirecloudName();
     workspaceAuthService.enforceWorkspaceAccessLevel(
         workspaceNamespace, firecloudWorkspaceName, WorkspaceAccessLevel.WRITER);
-
-    DbUser user = userProvider.get();
-    enforceComputeSecuritySuspension(user);
 
     leonardoNotebooksClient.deleteRuntime(
         dbWorkspace.getGoogleProject(),
@@ -355,6 +355,9 @@ public class RuntimeController implements RuntimeApiDelegate {
   @Override
   public ResponseEntity<RuntimeLocalizeResponse> localize(
       String workspaceNamespace, RuntimeLocalizeRequest body) {
+    DbUser user = userProvider.get();
+    enforceComputeSecuritySuspension(user);
+
     DbWorkspace dbWorkspace = lookupWorkspace(workspaceNamespace);
     workspaceAuthService.enforceWorkspaceAccessLevel(
         dbWorkspace.getWorkspaceNamespace(),
@@ -362,9 +365,6 @@ public class RuntimeController implements RuntimeApiDelegate {
         WorkspaceAccessLevel.WRITER);
     workspaceAuthService.validateActiveBilling(
         dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
-
-    DbUser user = userProvider.get();
-    enforceComputeSecuritySuspension(user);
 
     final FirecloudWorkspace firecloudWorkspace;
     try {
