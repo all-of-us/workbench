@@ -2,18 +2,18 @@ import { findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
 import { config } from 'resources/workbench-config';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import {
+  AgeSelectionRadioButton,
   AnalysisTool,
-  Language,
-  LinkText,
   ConceptSetSelectValue,
   DatasetValueSelect,
-  AgeSelectionRadioButton
+  Language,
+  LinkText
 } from 'app/text-labels';
 import CohortActionsPage from 'app/page/cohort-actions-page';
 import { makeRandomName, makeWorkspaceName } from 'utils/str-utils';
 import GenomicsVariantExtractConfirmationModal from 'app/modal/genomic-extract-confirmation-modal';
 import ExportToNotebookModal from 'app/modal/export-to-notebook-modal';
-import RuntimePanel, { ComputeType } from 'app/component/runtime-panel';
+import RuntimePanel, { AutoPauseIdleTime, ComputeType } from 'app/component/runtime-panel';
 import { logger } from 'libs/logger';
 import GenomicExtractionsSidebar from 'app/component/genomic-extractions-sidebar';
 import { Page } from 'puppeteer';
@@ -98,6 +98,10 @@ describe('Genomics Extraction Test', () => {
 
     // Change Compute Type to Dataproc Cluster.
     await runtimePanel.pickComputeType(ComputeType.Dataproc);
+
+    // Increase runtime auto-pause time because runtime will auto. pause after 30 min (default value) of idle
+    // while export to vcf file still in progress.
+    await runtimePanel.pickAutoPauseTime(AutoPauseIdleTime.EightHours);
 
     // Disk (GB) is visible after select Dataproc Cluster.
     expect(await runtimePanel.getDiskGbs()).toBe(100);
