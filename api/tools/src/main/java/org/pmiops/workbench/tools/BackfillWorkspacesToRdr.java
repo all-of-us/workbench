@@ -11,6 +11,7 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
+import org.pmiops.workbench.cloudtasks.CloudTasksConfig;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchLocationConfigService;
@@ -31,10 +32,11 @@ import org.springframework.context.annotation.Import;
  * not set.
  */
 @Import({
+  CloudTasksConfig.class,
   WorkbenchLocationConfigService.class,
 })
 public class BackfillWorkspacesToRdr {
-  private static final Logger log = Logger.getLogger(DeleteWorkspaces.class.getName());
+  private static final Logger log = Logger.getLogger(BackfillWorkspacesToRdr.class.getName());
 
   // I haven't read the entire commons cli code, but it looks like it is limited to the Number type,
   // we really want an Integer
