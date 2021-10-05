@@ -16,7 +16,6 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -30,10 +29,8 @@ import org.hibernate.exception.GenericJDBCException;
 import org.javers.common.collections.Lists;
 import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.access.AccessTierService;
-import org.pmiops.workbench.access.AccessUtils;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
-import org.pmiops.workbench.actionaudit.targetproperties.BypassTimeTargetProperty;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbAccessModule.AccessModuleName;
@@ -382,8 +379,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     dbUser.setProfessionalUrl(professionalUrl);
     dbUser.setDisabled(false);
     dbUser.setAddress(dbAddress);
-    dbUser.setProfileLastConfirmedTime(now);
-    dbUser.setPublicationsLastConfirmedTime(now);
     if (degrees != null) {
       dbUser.setDegreesEnum(degrees);
     }
@@ -451,9 +446,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     return updateUserWithRetries(
         (user) -> {
           // TODO: Teardown/reconcile duplicated state between the user profile and DUA.
-          // user.setDataUseAgreementCompletionTime will be replaced by
-          // accessModuleService.updateCompletionTime().
-          user.setDataUseAgreementCompletionTime(timestamp);
           user.setDataUseAgreementSignedVersion(duccSignedVersion);
           accessModuleService.updateCompletionTime(
               user, AccessModuleName.DATA_USER_CODE_OF_CONDUCT, timestamp);
@@ -494,110 +486,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     userTermsOfService.setUserId(dbUser.getUserId());
     userTermsOfServiceDao.save(userTermsOfService);
     userServiceAuditor.fireAcknowledgeTermsOfService(dbUser, tosVersion);
-  }
-
-  @Override
-  public void setDataUseAgreementBypassTime(
-      Long userId, Timestamp previousBypassTime, Timestamp newBypassTime) {
-    setBypassTimeWithRetries(
-        userId,
-        previousBypassTime,
-        newBypassTime,
-        DbUser::setDataUseAgreementBypassTime,
-        BypassTimeTargetProperty.DATA_USE_AGREEMENT_BYPASS_TIME);
-  }
-
-  @Override
-  public void setComplianceTrainingBypassTime(
-      Long userId, Timestamp previousBypassTime, Timestamp newBypassTime) {
-    setBypassTimeWithRetries(
-        userId,
-        previousBypassTime,
-        newBypassTime,
-        DbUser::setComplianceTrainingBypassTime,
-        BypassTimeTargetProperty.COMPLIANCE_TRAINING_BYPASS_TIME);
-  }
-
-  @Override
-  public void setEraCommonsBypassTime(
-      Long userId, Timestamp previousBypassTime, Timestamp newBypassTime) {
-    setBypassTimeWithRetries(
-        userId,
-        previousBypassTime,
-        newBypassTime,
-        DbUser::setEraCommonsBypassTime,
-        BypassTimeTargetProperty.ERA_COMMONS_BYPASS_TIME);
-  }
-
-  @Override
-  public void setTwoFactorAuthBypassTime(
-      Long userId, Timestamp previousBypassTime, Timestamp newBypassTime) {
-    setBypassTimeWithRetries(
-        userId,
-        previousBypassTime,
-        newBypassTime,
-        DbUser::setTwoFactorAuthBypassTime,
-        BypassTimeTargetProperty.TWO_FACTOR_AUTH_BYPASS_TIME);
-  }
-
-  @Override
-  public void setRasLinkLoginGovBypassTime(
-      Long userId, Timestamp previousBypassTime, Timestamp newBypassTime) {
-    setBypassTimeWithRetries(
-        userId,
-        previousBypassTime,
-        newBypassTime,
-        DbUser::setRasLinkLoginGovBypassTime,
-        BypassTimeTargetProperty.RAS_LINK_LOGIN_GOV);
-  }
-
-  /**
-   * Functional bypass time column setter, using retry logic.
-   *
-   * @param userId id of user getting bypassed
-   * @param previousBypassTime time of bypass, before update
-   * @param newBypassTime time of bypass
-   * @param setter void-returning method to call to set the particular bypass field. Should
-   *     typically be a method reference on DbUser, e.g.
-   * @param targetProperty BypassTimeTargetProperty enum value, for auditing
-   */
-  private void setBypassTimeWithRetries(
-      long userId,
-      Timestamp previousBypassTime,
-      Timestamp newBypassTime,
-      BiConsumer<DbUser, Timestamp> setter,
-      BypassTimeTargetProperty targetProperty) {
-    setBypassTimeWithRetries(
-        userDao.findUserByUserId(userId),
-        previousBypassTime,
-        newBypassTime,
-        targetProperty,
-        setter);
-  }
-
-  private void setBypassTimeWithRetries(
-      DbUser dbUser,
-      Timestamp previousBypassTime,
-      Timestamp newBypassTime,
-      BypassTimeTargetProperty targetProperty,
-      BiConsumer<DbUser, Timestamp> setter) {
-    updateUserWithRetries(
-        (u) -> {
-          setter.accept(u, newBypassTime);
-          return u;
-        },
-        dbUser,
-        Agent.asAdmin(userProvider.get()));
-
-    if (!configProvider.get().featureFlags.enableAccessModuleRewrite) {
-      // After launch access module rewrite, we will start firing this audit event from
-      // AccessModuleService.
-      userServiceAuditor.fireAdministrativeBypassTime(
-          dbUser.getUserId(),
-          targetProperty,
-          Optional.ofNullable(previousBypassTime).map(Timestamp::toInstant),
-          Optional.ofNullable(newBypassTime).map(Timestamp::toInstant));
-    }
   }
 
   @Override
@@ -740,10 +628,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
 
       return updateUserWithRetries(
           u -> {
-            // user.setComplianceTrainingCompletionTime() will be replaced by
-            // accessModuleService.updateCompletionTime()
-            u.setComplianceTrainingCompletionTime(newComplianceTrainingCompletionTime);
-            accessModuleService.updateCompletionTime(
+             accessModuleService.updateCompletionTime(
                 u, AccessModuleName.RT_COMPLIANCE_TRAINING, newComplianceTrainingCompletionTime);
             u.setComplianceTrainingExpirationTime(newComplianceTrainingExpirationTime);
             return u;
@@ -812,15 +697,11 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
 
             user.setEraCommonsLinkedNihUsername(nihStatus.getLinkedNihUsername());
             user.setEraCommonsLinkExpireTime(nihLinkExpireTime);
-            // user.setEraCommonsCompletionTime() will be replaced by
-            // accessModuleService.updateCompletionTime()
-            user.setEraCommonsCompletionTime(eraCommonsCompletionTime);
             accessModuleService.updateCompletionTime(
                 user, AccessModuleName.ERA_COMMONS, eraCommonsCompletionTime);
           } else {
             user.setEraCommonsLinkedNihUsername(null);
             user.setEraCommonsLinkExpireTime(null);
-            user.setEraCommonsCompletionTime(null);
             accessModuleService.updateCompletionTime(user, AccessModuleName.ERA_COMMONS, null);
           }
           return user;
@@ -868,15 +749,11 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
                     .orElse(true);
 
             if (needsDbCompletionUpdate) {
-              // user.setTwoFactorAuthCompletionTime() will be replaced by
-              // accessModuleService.updateCompletionTime()
-              Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
-              user.setTwoFactorAuthCompletionTime(timestamp);
+             Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
               accessModuleService.updateCompletionTime(
                   user, AccessModuleName.TWO_FACTOR_AUTH, timestamp);
             }
           } else {
-            user.setTwoFactorAuthCompletionTime(null);
             accessModuleService.updateCompletionTime(user, AccessModuleName.TWO_FACTOR_AUTH, null);
           }
           return user;
@@ -902,9 +779,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
                   .orElse(getCurrentDuccVersion() - 1);
 
           if (signedVersionForComparison != getCurrentDuccVersion()) {
-            // user.setDataUseAgreementCompletionTime() will be replaced by
-            // accessModuleService.updateCompletionTime()
-            user.setDataUseAgreementCompletionTime(null);
             accessModuleService.updateCompletionTime(
                 user, AccessModuleName.DATA_USER_CODE_OF_CONDUCT, null);
           }
@@ -951,44 +825,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
                 () ->
                     new NotFoundException(
                         String.format("User with database ID %d not found", userDatabaseId)));
-
-    final Timestamp previousBypassTime =
-        accessModuleService
-            .getAccessModuleStatus(
-                user, AccessUtils.clientAccessModuleToStorage(accessBypassRequest.getModuleName()))
-            .map(AccessModuleStatus::getBypassEpochMillis)
-            .map(Timestamp::new)
-            .orElse(null);
-
-    final Timestamp newBypassTime;
-
-    final Boolean isBypassed = accessBypassRequest.getIsBypassed();
-    if (isBypassed) {
-      newBypassTime = new Timestamp(clock.instant().toEpochMilli());
-    } else {
-      newBypassTime = null;
-    }
-    switch (accessBypassRequest.getModuleName()) {
-      case DATA_USER_CODE_OF_CONDUCT:
-        setDataUseAgreementBypassTime(userDatabaseId, previousBypassTime, newBypassTime);
-        break;
-      case COMPLIANCE_TRAINING:
-        setComplianceTrainingBypassTime(userDatabaseId, previousBypassTime, newBypassTime);
-        break;
-      case ERA_COMMONS:
-        setEraCommonsBypassTime(userDatabaseId, previousBypassTime, newBypassTime);
-        break;
-      case TWO_FACTOR_AUTH:
-        setTwoFactorAuthBypassTime(userDatabaseId, previousBypassTime, newBypassTime);
-        break;
-      case RAS_LINK_LOGIN_GOV:
-        setRasLinkLoginGovBypassTime(userDatabaseId, previousBypassTime, newBypassTime);
-        break;
-      default:
-        throw new BadRequestException(
-            "There is no access module named: " + accessBypassRequest.getModuleName().toString());
-    }
-    // Dual write then deprecate the one in userService
     accessModuleService.updateBypassTime(
         user.getUserId(), accessBypassRequest.getModuleName(), accessBypassRequest.getIsBypassed());
     updateUserAccessTiers(user, Agent.asUser(user));
@@ -1014,11 +850,8 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
 
     return updateUserWithRetries(
         user -> {
-          // user.setRasLinkLoginGovUsername() will be replaced by
-          // accessModuleService.updateCompletionTime()
-          Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
+         Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
           user.setRasLinkLoginGovUsername(loginGovUserName);
-          user.setRasLinkLoginGovCompletionTime(timestamp);
           accessModuleService.updateCompletionTime(user, AccessModuleName.RAS_LOGIN_GOV, timestamp);
           // TODO(RW-6480): Determine if need to set link expiration time.
           return user;
@@ -1033,11 +866,8 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
 
     return updateUserWithRetries(
         user -> {
-          // user.setEraCommonsCompletionTime() will be replaced by
-          // accessModuleService.updateCompletionTime()
           Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
           user.setEraCommonsLinkedNihUsername(eRACommonsUsername);
-          user.setEraCommonsCompletionTime(timestamp);
           accessModuleService.updateCompletionTime(user, AccessModuleName.ERA_COMMONS, timestamp);
           return user;
         },
@@ -1051,9 +881,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     return updateUserWithRetries(
         user -> {
           Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
-          // user.setProfileLastConfirmedTime() will be replaced by
-          // accessModuleService.updateCompletionTime()
-          user.setProfileLastConfirmedTime(timestamp);
           accessModuleService.updateCompletionTime(
               user, AccessModuleName.PROFILE_CONFIRMATION, timestamp);
           return user;
@@ -1069,9 +896,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     return updateUserWithRetries(
         user -> {
           Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
-          // user.setPublicationsLastConfirmedTime() will be replaced by
-          // accessModuleService.updateCompletionTime()
-          user.setPublicationsLastConfirmedTime(timestamp);
           accessModuleService.updateCompletionTime(
               user, AccessModuleName.PUBLICATION_CONFIRMATION, timestamp);
           return user;
