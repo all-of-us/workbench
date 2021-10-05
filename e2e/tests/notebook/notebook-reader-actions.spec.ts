@@ -19,9 +19,9 @@ import expect from 'expect';
 jest.setTimeout(30 * 60 * 1000);
 
 describe('Workspace READER Jupyter notebook action tests', () => {
-  // All tests use same workspace and notebook.
+  // Test reuse same workspace and notebook if exists.
   const workspaceName = makeWorkspaceName();
-  const notebookName = makeRandomName('py3');
+  const notebookName = makeRandomName('py', { includeHyphen: false });
   const readerWorkspaceName = 'e2eNotebookReaderActionsTestWorkspace'; // READER workspace for copy-to.
 
   const pyCode = '!jupyter kernelspec list';
@@ -114,8 +114,8 @@ describe('Workspace READER Jupyter notebook action tests', () => {
 
     // Copy notebook to another Workspace and give notebook a new name.
     const newAnalysisPage = await notebookPreviewPage.goAnalysisPage();
-    const copyNotebookName = `copy-of-${notebookName}`;
-    await newAnalysisPage.copyNotebookToWorkspace(notebookName, readerWorkspaceName, copyNotebookName);
+    const copyOfNotebookName = `copy-of-${notebookName}`;
+    await newAnalysisPage.copyNotebookToWorkspace(notebookName, readerWorkspaceName, copyOfNotebookName);
 
     // Verify Copy Success modal.
     const modal = new Modal(page);
@@ -135,7 +135,7 @@ describe('Workspace READER Jupyter notebook action tests', () => {
     expect(linkDisplayed).toBe(true);
 
     // Verify copied notebook exists in collaborator Workspace.
-    notebookCard = await dataResourceCard.findCard(copyNotebookName, ResourceCard.Notebook);
+    notebookCard = await dataResourceCard.findCard(copyOfNotebookName, ResourceCard.Notebook);
     expect(notebookCard).toBeTruthy();
 
     // Notebook actions Rename, Duplicate, Delete and Copy to another Workspace actions are avaliable to click.
@@ -146,7 +146,7 @@ describe('Workspace READER Jupyter notebook action tests', () => {
     expect(await copyNotebookCardMenu.isOptionDisabled(MenuOption.CopyToAnotherWorkspace)).toBe(false);
     await notebookCard.clickSnowmanIcon(); // close menu
 
-    await newAnalysisPage.deleteResource(copyNotebookName, ResourceCard.Notebook);
+    await newAnalysisPage.deleteResource(copyOfNotebookName, ResourceCard.Notebook);
   });
 
   // TODO(RW-7312): update and re-enable
