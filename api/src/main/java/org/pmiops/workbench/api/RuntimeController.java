@@ -3,6 +3,9 @@ package org.pmiops.workbench.api;
 import com.google.common.collect.ImmutableList;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.sql.Timestamp;
+import java.time.Clock;
+import java.time.Instant;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
@@ -24,6 +27,7 @@ import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
@@ -34,6 +38,8 @@ import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.EmptyResponse;
+import org.pmiops.workbench.model.ErrorCode;
+import org.pmiops.workbench.model.ErrorResponse;
 import org.pmiops.workbench.model.GceWithPdConfig;
 import org.pmiops.workbench.model.ListRuntimeDeleteRequest;
 import org.pmiops.workbench.model.ListRuntimeResponse;
@@ -42,6 +48,7 @@ import org.pmiops.workbench.model.Runtime;
 import org.pmiops.workbench.model.RuntimeLocalizeRequest;
 import org.pmiops.workbench.model.RuntimeLocalizeResponse;
 import org.pmiops.workbench.model.RuntimeStatus;
+import org.pmiops.workbench.model.SecuritySuspendedErrorParameters;
 import org.pmiops.workbench.model.UpdateRuntimeRequest;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
@@ -70,6 +77,7 @@ public class RuntimeController implements RuntimeApiDelegate {
 
   private static final Logger log = Logger.getLogger(RuntimeController.class.getName());
 
+  private final Clock clock;
   private final LeonardoRuntimeAuditor leonardoRuntimeAuditor;
   private final LeonardoNotebooksClient leonardoNotebooksClient;
   private final Provider<DbUser> userProvider;
@@ -82,6 +90,7 @@ public class RuntimeController implements RuntimeApiDelegate {
 
   @Autowired
   RuntimeController(
+      Clock clock,
       LeonardoRuntimeAuditor leonardoRuntimeAuditor,
       LeonardoNotebooksClient leonardoNotebooksClient,
       Provider<DbUser> userProvider,
@@ -91,6 +100,7 @@ public class RuntimeController implements RuntimeApiDelegate {
       Provider<WorkbenchConfig> workbenchConfigProvider,
       UserRecentResourceService userRecentResourceService,
       LeonardoMapper leonardoMapper) {
+    this.clock = clock;
     this.leonardoRuntimeAuditor = leonardoRuntimeAuditor;
     this.leonardoNotebooksClient = leonardoNotebooksClient;
     this.userProvider = userProvider;
@@ -171,9 +181,12 @@ public class RuntimeController implements RuntimeApiDelegate {
         workspaceNamespace, firecloudWorkspaceName, WorkspaceAccessLevel.WRITER);
     workspaceAuthService.validateActiveBilling(workspaceNamespace, firecloudWorkspaceName);
 
+    DbUser user = userProvider.get();
+    enforceComputeSecuritySuspension(user);
+
     try {
       LeonardoGetRuntimeResponse leoRuntimeResponse =
-          leonardoNotebooksClient.getRuntime(googleProject, userProvider.get().getRuntimeName());
+          leonardoNotebooksClient.getRuntime(googleProject, user.getRuntimeName());
       if (LeonardoRuntimeStatus.ERROR.equals(leoRuntimeResponse.getStatus())) {
         log.warning(
             String.format(
@@ -276,10 +289,13 @@ public class RuntimeController implements RuntimeApiDelegate {
         workspaceNamespace, firecloudWorkspaceName, WorkspaceAccessLevel.WRITER);
     workspaceAuthService.validateActiveBilling(workspaceNamespace, firecloudWorkspaceName);
 
-    runtime.setGoogleProject(dbWorkspace.getGoogleProject());
-    runtime.setRuntimeName(userProvider.get().getRuntimeName());
+    DbUser user = userProvider.get();
+    enforceComputeSecuritySuspension(user);
 
-    leonardoNotebooksClient.createRuntime(runtime, workspaceNamespace, firecloudWorkspaceName);
+    leonardoNotebooksClient.createRuntime(
+        runtime.googleProject(dbWorkspace.getGoogleProject()).runtimeName(user.getRuntimeName()),
+        workspaceNamespace,
+        firecloudWorkspaceName);
     return ResponseEntity.ok(new EmptyResponse());
   }
 
@@ -306,10 +322,14 @@ public class RuntimeController implements RuntimeApiDelegate {
         workspaceNamespace, firecloudWorkspaceName, WorkspaceAccessLevel.WRITER);
     workspaceAuthService.validateActiveBilling(workspaceNamespace, firecloudWorkspaceName);
 
-    runtimeRequest.getRuntime().setGoogleProject(dbWorkspace.getGoogleProject());
-    runtimeRequest.getRuntime().setRuntimeName(userProvider.get().getRuntimeName());
+    DbUser user = userProvider.get();
+    enforceComputeSecuritySuspension(user);
 
-    leonardoNotebooksClient.updateRuntime(runtimeRequest.getRuntime());
+    leonardoNotebooksClient.updateRuntime(
+        runtimeRequest
+            .getRuntime()
+            .googleProject(dbWorkspace.getGoogleProject())
+            .runtimeName(user.getRuntimeName()));
 
     return ResponseEntity.ok(new EmptyResponse());
   }
@@ -322,9 +342,12 @@ public class RuntimeController implements RuntimeApiDelegate {
     workspaceAuthService.enforceWorkspaceAccessLevel(
         workspaceNamespace, firecloudWorkspaceName, WorkspaceAccessLevel.WRITER);
 
+    DbUser user = userProvider.get();
+    enforceComputeSecuritySuspension(user);
+
     leonardoNotebooksClient.deleteRuntime(
         dbWorkspace.getGoogleProject(),
-        userProvider.get().getRuntimeName(),
+        user.getRuntimeName(),
         Optional.ofNullable(deleteDisk).orElse(false));
     return ResponseEntity.ok(new EmptyResponse());
   }
@@ -339,6 +362,9 @@ public class RuntimeController implements RuntimeApiDelegate {
         WorkspaceAccessLevel.WRITER);
     workspaceAuthService.validateActiveBilling(
         dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
+
+    DbUser user = userProvider.get();
+    enforceComputeSecuritySuspension(user);
 
     final FirecloudWorkspace firecloudWorkspace;
     try {
@@ -377,7 +403,7 @@ public class RuntimeController implements RuntimeApiDelegate {
 
     leonardoNotebooksClient.createStorageLink(
         googleProjectId,
-        userProvider.get().getRuntimeName(),
+        user.getRuntimeName(),
         new StorageLink()
             .cloudStorageDirectory(gcsNotebooksDir)
             .localBaseDirectory(editDir)
@@ -407,6 +433,21 @@ public class RuntimeController implements RuntimeApiDelegate {
 
     // This is the Jupyer-server-root-relative path, the style used by the Jupyter REST API.
     return ResponseEntity.ok(new RuntimeLocalizeResponse().runtimeLocalDirectory(targetDir));
+  }
+
+  private void enforceComputeSecuritySuspension(DbUser user) throws FailedPreconditionException {
+    Optional<Instant> suspendedUntil =
+        Optional.ofNullable(user.getComputeSecuritySuspendedUntil()).map(Timestamp::toInstant);
+    if (suspendedUntil.isPresent() && clock.instant().isBefore(suspendedUntil.get())) {
+      throw new FailedPreconditionException(
+          new ErrorResponse()
+              .errorCode(ErrorCode.COMPUTE_SECURITY_SUSPENDED)
+              .message("user is suspended from compute for security reasons")
+              .parameters(
+                  new SecuritySuspendedErrorParameters()
+                      // Instant.toString() yields ISO-8601
+                      .suspendedUntil(suspendedUntil.get().toString())));
+    }
   }
 
   private String jsonToDataUri(JSONObject json) {
