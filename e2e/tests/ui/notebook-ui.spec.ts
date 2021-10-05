@@ -26,7 +26,7 @@ describe('Notebook and Runtime UI Test', () => {
 
     const pyNotebookCard = await openNotebook(page);
     if (!pyNotebookCard) {
-      logger.info(`Cannot find a notebook "${workspaceName}". Test end early.`);
+      logger.info(`Cannot find a notebook. Test end early.`);
       return;
     }
 
