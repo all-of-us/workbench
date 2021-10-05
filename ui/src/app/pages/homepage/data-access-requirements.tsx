@@ -232,6 +232,7 @@ interface AccessModuleConfig {
   isEnabledInEnvironment: boolean;  // either true or dependent on a feature flag
   darLabel: JSX.Element;
   externalSyncAction?: Function;
+  refreshAction?: Function;
 }
 
 // This needs to be a function, because we want it to evaluate at call time,
@@ -251,6 +252,7 @@ const getAccessModuleConfig = (moduleName: AccessModule): AccessModuleConfig => 
         isEnabledInEnvironment: true,
         darLabel: <div>Turn on Google 2-Step Verification</div>,
         externalSyncAction: async () => await profileApi().syncTwoFactorAuthStatus(),
+        refreshAction: async () => await profileApi().syncTwoFactorAuthStatus(),
       })],
 
       [AccessModule.RASLINKLOGINGOV, () => ({
@@ -260,7 +262,7 @@ const getAccessModuleConfig = (moduleName: AccessModule): AccessModuleConfig => 
             content={'For additional security, we require you to verify your identity by uploading a photo of your ID.'}>
           <InfoIcon style={{margin: '0 0.3rem'}}/>
         </TooltipTrigger></div>,
-        externalSyncAction: () => redirectToRas(false),
+        refreshAction: () => redirectToRas(false),
       })],
 
       [AccessModule.ERACOMMONS, () => ({
@@ -268,6 +270,7 @@ const getAccessModuleConfig = (moduleName: AccessModule): AccessModuleConfig => 
         isEnabledInEnvironment: enableEraCommons,
         darLabel: <div>Connect your eRA Commons account</div>,
         externalSyncAction: async () => await profileApi().syncEraCommonsStatus(),
+        refreshAction: async () => await profileApi().syncEraCommonsStatus(),
       })],
 
       [AccessModule.COMPLIANCETRAINING, () => ({
@@ -275,6 +278,7 @@ const getAccessModuleConfig = (moduleName: AccessModule): AccessModuleConfig => 
         isEnabledInEnvironment: enableComplianceTraining,
         darLabel: <div>Complete <AoU/> research Registered Tier training</div>,
         externalSyncAction: async () => await profileApi().syncComplianceTrainingStatus(),
+        refreshAction: async () => await profileApi().syncComplianceTrainingStatus(),
       })],
 
       [AccessModule.DATAUSERCODEOFCONDUCT, () => ({
@@ -284,28 +288,6 @@ const getAccessModuleConfig = (moduleName: AccessModule): AccessModuleConfig => 
       })]
   );
 };
-
-const externalSyncActions: Map<AccessModule, Function> = new Map([
-  [AccessModule.TWOFACTORAUTH, async() => await profileApi().syncTwoFactorAuthStatus()],
-  [AccessModule.RASLINKLOGINGOV, () => redirectToRas(false)],
-  [AccessModule.ERACOMMONS, async() => await profileApi().syncEraCommonsStatus()],
-  [AccessModule.COMPLIANCETRAINING, async() => await profileApi().syncComplianceTrainingStatus()],
-  // DUCC state is strictly internal to the RW
-  [AccessModule.DATAUSERCODEOFCONDUCT, () => {}],
-]);
-
-// RAS cannot be externally synced because it relies on a short lived token
-// DUCC state is strictly internal to the RW
-const externalSyncActions: Map<AccessModule, Function> = new Map([
-  [AccessModule.TWOFACTORAUTH, async() => await profileApi().syncTwoFactorAuthStatus()],
-  [AccessModule.ERACOMMONS, async() => await profileApi().syncEraCommonsStatus()],
-  [AccessModule.COMPLIANCETRAINING, async() => await profileApi().syncComplianceTrainingStatus()],
-]);
-
-// most refresh actions are the same as the external sync actions
-const refreshActions: Map<AccessModule, Function> = new Map(externalSyncActions);
-refreshActions.set(AccessModule.RASLINKLOGINGOV, () => redirectToRas(false));
-
 
 // this function does double duty:
 // - returns appropriate text for completed and bypassed modules and null for incomplete modules
@@ -380,10 +362,10 @@ const incompleteModules = (modules: AccessModule[], profile: Profile): AccessMod
 });
 
 const syncIncompleteModules = (modules: AccessModule[], profile: Profile, reloadProfile: Function) => {
-  incompleteModules(modules, profile).map(async module => {
-    const syncAction = externalSyncActions.get(module);
-    if (syncAction) {
-      await syncAction();
+  incompleteModules(modules, profile).map(async moduleName => {
+    const {externalSyncAction} = getAccessModuleConfig(moduleName);
+    if (externalSyncAction) {
+      await externalSyncAction();
     }
   });
   reloadProfile();
@@ -475,7 +457,7 @@ const MaybeModule = ({profile, moduleName, active, spinnerProps}: ModuleProps): 
       navigate(['data-code-of-conduct']);
     }]);
 
-  const {externalSyncAction, darLabel, isEnabledInEnvironment} = getAccessModuleConfig(moduleName) || {};
+  const {refreshAction, darLabel, isEnabledInEnvironment} = getAccessModuleConfig(moduleName) || {};
 
   const ModuleBox = ({children}) => {
     return active
@@ -490,9 +472,9 @@ const MaybeModule = ({profile, moduleName, active, spinnerProps}: ModuleProps): 
 
     return <FlexRow data-test-id={`module-${moduleName}`}>
       <FlexRow style={styles.moduleCTA}>
-        {active && (showRefresh
+        {active && ((showRefresh && refreshAction)
             ? <Refresh
-                refreshAction={refreshActions.get(moduleName)}
+                refreshAction={refreshAction}
                 showSpinner={spinnerProps.showSpinner}/>
             : <Next/>)}
       </FlexRow>
@@ -624,8 +606,7 @@ const DuccCard = (props: {profile: Profile, activeModule: AccessModule, spinnerP
 export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerProps: WithSpinnerOverlayProps) => {
   const {profile, reload} = useStore(profileStore);
   const {config: {unsafeAllowSelfBypass}} = useStore(serverConfigStore);
-  const [navigate, ] = useNavigation();
-  const enabledModules = getEnabledModules(allModules, navigate);
+  const enabledModules = getEnabledModules(allModules);
 
   useEffect(() => {
     syncIncompleteModules(enabledModules, profile, reload);
