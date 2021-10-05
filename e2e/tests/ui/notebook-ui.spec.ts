@@ -24,9 +24,9 @@ describe('Notebook and Runtime UI Test', () => {
       return;
     }
 
-    const pyNotebookCard = await openNotebook(page);
+    const pyNotebookCard = await openAnyNotebook(page);
     if (!pyNotebookCard) {
-      logger.info(`Cannot find a notebook. Test end early.`);
+      logger.info('Cannot find a notebook. Test end early.');
       return;
     }
 
@@ -57,19 +57,17 @@ describe('Notebook and Runtime UI Test', () => {
   });
 
   async function openWorkspace(page: Page, workspaceName: string): Promise<boolean> {
-    // Find all workspaces that are older than 30 min.
     const workspaceCard = await WorkspaceCard.findCard(page, workspaceName);
     // Don't create new workspace if none found.
     if (!workspaceCard) {
       return false;
     }
 
-    // Open workspace.
     await workspaceCard.clickWorkspaceName();
     return true;
   }
 
-  async function openNotebook(page: Page): Promise<DataResourceCard | null> {
+  async function openAnyNotebook(page: Page): Promise<DataResourceCard | null> {
     const analysisPage = new WorkspaceAnalysisPage(page);
     await analysisPage.openAnalysisPage();
     await analysisPage.waitForLoad();
