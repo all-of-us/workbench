@@ -42,7 +42,7 @@ function runScript(){
 
 ## TODO check EXIST required tables?
 main_tables=(
-make-cb-criteria-01-cpt4-src.sh
+make-cb-criteria-01-proc-meas-cpt4.sh
 make-cb-criteria-02-ppi-phys-meas.sh
 make-cb-criteria-03-ppi-surveys.sh
 make-cb-criteria-04-pm-concept-set.sh
@@ -53,14 +53,14 @@ make-cb-criteria-08-visit.sh
 make-cb-criteria-09-icd9-src.sh
 make-cb-criteria-10-icd10-cm-src.sh
 make-cb-criteria-11-icd10-pcs-src.sh
-make-cb-criteria-12-cond-occur-snomed-src.sh
-make-cb-criteria-13-cond-occur-snomed-std.sh
+make-cb-criteria-12-cond-occur-snomed-other-src.sh
+make-cb-criteria-13-cond-occur-snomed-other-std.sh
 make-cb-criteria-14-meas-clin-loinc-std.sh
 make-cb-criteria-15-meas-labs-loinc-std.sh
-make-cb-criteria-16-meas-snomed-std.sh
-make-cb-criteria-17-drug-rxnorm.sh
-make-cb-criteria-18-proc-occur-snomed-src.sh
-make-cb-criteria-19-proc-occur-snomed-std.sh
+make-cb-criteria-16-meas-snomed-other-std.sh
+make-cb-criteria-17-drug-rxnorm-other.sh
+make-cb-criteria-18-proc-occur-snomed-other-src.sh
+make-cb-criteria-19-proc-occur-snomed-other-std.sh
 make-cb-criteria-20-observation.sh
 )
 if [[ "$run_in_parallel" == "ori" ]]; then

@@ -45,7 +45,7 @@ elif [[ "$RUN_PARALLEL" == "mult" ]]; then
     TBL_PCA=$(createTmpTable $TBL_PCA)
 fi
 ####### end common block ###########
-# make-cb-criteria-12-cond-occur-snomed-src.sh
+# make-cb-criteria-12-cond-occur-snomed-other-src.sh
 #2569 - #2972 : make-bq-criteria-tables.sh
 # ---------ORDER - 12 - CONDITION_OCCURRENCE - SNOMED - SOURCE---------
 # ORDER - 12: #2569 - #2972: CONDITION_OCCURRENCE - SNOMED - SOURCE
@@ -59,7 +59,9 @@ fi
 # prep_concept_ancestor: #2785: Uses : prep_ancestor_staging
 # cb_criteria update counts: #2920: Uses : cb_criteria, condition_occurrence
 # cb_criteria update parent counts: #2938: Uses : cb_criteria, prep_concept_ancestor, condition_occurrence
-
+# ADD IN OTHER CODES NOT ALREADY CAPTURED
+#5986 : CONDITION_OCCURRENCE - add other source concepts
+#cb_criteria: Uses : cb_criteria, condition_occurrence, concept
 ################################################
 # CONDITION_OCCURRENCE - SNOMED - SOURCE
 ################################################
@@ -472,6 +474,73 @@ WHERE x.concept_id = y.concept_id
     and x.type = 'SNOMED'
     and x.is_standard = 0
     and x.is_group = 1"
+
+###############################################
+# ADD IN OTHER CODES NOT ALREADY CAPTURED
+################################################
+echo "CONDITION_OCCURRENCE - add other source concepts"
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
+    (
+      id
+      ,parent_id
+      ,domain_id
+      ,is_standard
+      ,type
+      ,concept_id
+      ,code
+      ,name
+      ,rollup_count
+      ,item_count
+      ,est_count
+      ,is_group
+      ,is_selectable
+      ,has_attribute
+      ,has_hierarchy
+      ,path
+    )
+SELECT
+    ROW_NUMBER() OVER (order by vocabulary_id,concept_name)
+       + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` where id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID)
+    , -1
+    , 'CONDITION'
+    , 0
+    , vocabulary_id
+    , concept_id
+    , concept_code
+    , concept_name
+    , 0
+    , cnt
+    , cnt
+    , 0
+    , 1
+    , 0
+    , 0
+    , CAST(ROW_NUMBER() OVER(order by vocabulary_id,concept_name)
+        + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` where id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID) as STRING) as path
+FROM
+    (
+        SELECT b.concept_name, b.vocabulary_id, b.concept_id, b.concept_code, count(DISTINCT a.person_id) cnt
+        FROM \`$BQ_PROJECT.$BQ_DATASET.condition_occurrence\` a
+        LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.condition_source_concept_id = b.concept_id
+        LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c on a.condition_concept_id = c.concept_id
+        WHERE a.condition_source_concept_id NOT IN
+            (
+                SELECT concept_id
+                FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
+                WHERE domain_id = 'CONDITION'
+                    and is_standard = 0
+                    and concept_id is not null
+                    and id > $CB_CRITERIA_START_ID and id < $CB_CRITERIA_END_ID
+            )
+            and a.condition_source_concept_id != 0
+            and a.condition_source_concept_id is not null
+            and b.concept_id is not null
+            and b.vocabulary_id != 'PPI'
+            and (b.domain_id LIKE 'Condition%' OR c.domain_id = 'Condition')
+        GROUP BY 1,2,3,4
+    )"
+
 
 #wait for process to end before copying
 wait

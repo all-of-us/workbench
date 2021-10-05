@@ -6,6 +6,7 @@ SQL_FOR='DRUG_EXPOSURE - ATC/RXNORM'
 SQL_SCRIPT_ORDER=17
 TBL_CBC='cb_criteria'
 TBL_PCA='prep_concept_ancestor'
+TBL_CBA='cb_criteria_ancestor'
 ####### common block for all make-cb-criteria-dd-*.sh scripts ###########
 function createTmpTable(){
   local tmpTbl="temp_"$1"_"$SQL_SCRIPT_ORDER
@@ -41,6 +42,7 @@ elif [[ "$RUN_PARALLEL" == "mult" ]]; then
     echo "Creating temp table for $TBL_CBC"
     TBL_CBC=$(createTmpTable $TBL_CBC)
     TBL_PCA=$(createTmpTable $TBL_PCA)
+    TBL_CBA=$(createTmpTable $TBL_CBA)
 fi
 ####### end common block ###########
 # make-cb-criteria-17-drug-rxnorm.sh
@@ -69,6 +71,14 @@ fi
     #cb_criteria:  #4867: Uses : cb_criteria, concept, concept_relationship
 # prep_concept_ancestor: #4917: Uses : cb_criteria
 # cb_criteria parent counts: #4934: Uses : cb_criteria, prep_concept_ancestor, drug_exposure, concept_ancestor, concept
+# add to make-cb-criteria-17-drug-rxnorm-other.sh
+# ---------CB_CRITERIA_ANCESTOR ---------
+#5954 - #5982 cb_criteria_ancestor: Uses tables: concept_ancestor, cb_criteria, drug_exposure
+# Then
+# ADD IN OTHER CODES NOT ALREADY CAPTURED
+#6118 : DRUG_EXPOSURE - add other standard concepts
+#cb_criteria: Uses : cb_criteria, drug_exposure, concept, cb_criteria_ancestor
+
 ################################################
 # DRUG_EXPOSURE - ATC/RXNORM
 ################################################
@@ -614,12 +624,106 @@ WHERE x.concept_id = y.concept_id
     and is_group = 1
     and id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID"
 
+################################################
+# CB_CRITERIA_ANCESTOR
+################################################
+echo "CB_CRITERIA_ANCESTOR - Drugs - add ingredients to drugs mapping"
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBA\`
+    (
+          ancestor_id
+        , descendant_id
+    )
+SELECT
+      ancestor_concept_id
+    , descendant_concept_id
+FROM \`$BQ_PROJECT.$BQ_DATASET.concept_ancestor\`
+WHERE ancestor_concept_id in
+    (
+        SELECT DISTINCT concept_id
+        FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
+        WHERE domain_id = 'DRUG'
+            and type = 'RXNORM'
+            and is_group = 0
+            and is_selectable = 1
+    )
+and descendant_concept_id in
+    (
+        SELECT DISTINCT drug_concept_id
+        FROM \`$BQ_PROJECT.$BQ_DATASET.drug_exposure\`
+    )"
+
+echo "DRUG_EXPOSURE - add other standard concepts"
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
+    (
+      id
+      ,parent_id
+      ,domain_id
+      ,is_standard
+      ,type
+      ,concept_id
+      ,code
+      ,name
+      ,rollup_count
+      ,item_count
+      ,est_count
+      ,is_group
+      ,is_selectable
+      ,has_attribute
+      ,has_hierarchy
+      ,path
+    )
+SELECT
+    ROW_NUMBER() OVER(order by vocabulary_id,concept_name)
+       + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`) as ID
+    , -1
+    , 'DRUG'
+    , 1
+    , vocabulary_id
+    , concept_id
+    , concept_code
+    , concept_name
+    , 0
+    , cnt
+    , cnt
+    , 0
+    , 1
+    , 0
+    , 0
+    , CAST(ROW_NUMBER() OVER(order by vocabulary_id,concept_name)
+        + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`) as STRING) as path
+FROM
+    (
+        SELECT concept_name, vocabulary_id, concept_id, concept_code, count(DISTINCT person_id) cnt
+        FROM \`$BQ_PROJECT.$BQ_DATASET.drug_exposure\` a
+        LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.drug_concept_id = b.concept_id
+        WHERE standard_concept = 'S'
+            and domain_id = 'Drug'
+            and drug_concept_id NOT IN
+                (
+                    SELECT descendant_id
+                    FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBA\`
+                    WHERE ancestor_id in
+                        (
+                            SELECT concept_id
+                            FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
+                            WHERE domain_id = 'DRUG'
+                                and is_standard = 1
+                                and concept_id is not null
+                                and id > $CB_CRITERIA_START_ID and id < $CB_CRITERIA_END_ID
+                        )
+                )
+        GROUP BY 1,2,3,4
+    )"
+
 #wait for process to end before copying
 wait
 ## copy temp tables back to main tables, and delete temp?
 if [[ "$RUN_PARALLEL" == "mult" ]]; then
   cpToMain "$TBL_CBC" &
   cpToMain "$TBL_PCA" &
+  cpToMain "$TBL_CBA" &
   wait
 fi
 

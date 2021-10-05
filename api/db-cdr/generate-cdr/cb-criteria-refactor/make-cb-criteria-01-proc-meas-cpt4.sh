@@ -43,13 +43,16 @@ elif [[ "$RUN_PARALLEL" == "mult" ]]; then
     TBL_ANC=$(createTmpTable $TBL_ANC)
 fi
 ####### end common block ###########
-# make-cb-criteria-01-cpt4-src.sh
+# make-cb-criteria-01-proc-meas-cpt4-src.sh
 #262 - #424 : make-bq-criteria-tables.sh
 # cb_criteria: Uses : prep_cpt, concept, cb_search_all_events
 # prep_cpt_ancestor: Uses : cb_criteria
 # cb_criteria update counts: Uses : prep_cpt_ancestor, cb_search_all_events, cb_criteria
 # cb_criteria delete zero count parents: Uses :  cb_criteria after update counts
-# NOTE: From here on the cb_criteria.id depends on max(id) column from cb_criteria
+# add to make-cb-criteria-01-proc-meas-cpt4.sh
+# ADD IN OTHER CODES NOT ALREADY CAPTURED (for CPT4)
+#6092 : MEASUREMENT - add other standard concepts (modified for CPT4)
+#cb_criteria: Uses : cb_criteria, measurement, concept
 ################################################
 # CPT4 - SOURCE  -- STEP-01
 ################################################
@@ -219,6 +222,69 @@ WHERE type = 'CPT4'
                       and id > $CB_CRITERIA_START_ID and id < $CB_CRITERIA_END_ID
                 )
         )"
+
+###############################################
+# ADD IN OTHER CODES NOT ALREADY CAPTURED (for CPT4)
+################################################
+echo "MEASUREMENT - CPT4 - add other standard concepts"
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
+    (
+      id
+      ,parent_id
+      ,domain_id
+      ,is_standard
+      ,type
+      ,concept_id
+      ,code,name
+      ,rollup_count
+      ,item_count
+      ,est_count
+      ,is_group
+      ,is_selectable
+      ,has_attribute
+      ,has_hierarchy
+      ,path
+    )
+SELECT
+    ROW_NUMBER() OVER(order by vocabulary_id,concept_name)
+       + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` where id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID)
+    , -1
+    , 'MEASUREMENT'
+    , 1
+    , vocabulary_id
+    , concept_id
+    , concept_code
+    , concept_name
+    , 0
+    , cnt
+    , cnt
+    , 0
+    , 1
+    , 0
+    , 0
+    , CAST(ROW_NUMBER() OVER(order by vocabulary_id,concept_name)
+        + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` where id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID) as STRING) as path
+FROM
+    (
+        SELECT concept_name, vocabulary_id, concept_id, concept_code, count(DISTINCT person_id) cnt
+        FROM \`$BQ_PROJECT.$BQ_DATASET.measurement\` a
+        LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.measurement_concept_id = b.concept_id
+        WHERE standard_concept = 'S'
+            and domain_id = 'Measurement'
+            and vocabulary_id not in ('PPI')
+            and measurement_concept_id NOT IN
+                (
+                    SELECT concept_id
+                    FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
+                    WHERE domain_id = 'MEASUREMENT'
+                        and is_standard = 1
+                        and concept_id is not null
+                        and id > $CB_CRITERIA_START_ID and id < $CB_CRITERIA_END_ID
+                )
+            and vocabulary_id = 'CPT4'
+        GROUP BY 1,2,3,4
+    )"
 
 #wait for process to end before copying
 wait
