@@ -1642,21 +1642,6 @@ paths:
           description: Internal Error
           schema:
             "$ref": "#/definitions/ErrorResponse"
-  "/v1/monitoring/billingProjectBufferStatus":
-    get:
-      tags:
-      - monitoring
-      description: Return statistics about the billing buffer.
-      operationId: getBillingProjectBufferStatus
-      responses:
-        200:
-          description: No Error
-          schema:
-            "$ref": "#/definitions/BillingProjectBufferStatus"
-        500:
-          description: Internal Error
-          schema:
-            "$ref": "#/definitions/ErrorResponse"
   "/v1/cron/monitoring/updateGaugeMetrics":
     get:
       tags:
