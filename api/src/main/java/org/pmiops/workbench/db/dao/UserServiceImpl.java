@@ -628,7 +628,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
 
       return updateUserWithRetries(
           u -> {
-             accessModuleService.updateCompletionTime(
+            accessModuleService.updateCompletionTime(
                 u, AccessModuleName.RT_COMPLIANCE_TRAINING, newComplianceTrainingCompletionTime);
             u.setComplianceTrainingExpirationTime(newComplianceTrainingExpirationTime);
             return u;
@@ -749,7 +749,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
                     .orElse(true);
 
             if (needsDbCompletionUpdate) {
-             Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
+              Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
               accessModuleService.updateCompletionTime(
                   user, AccessModuleName.TWO_FACTOR_AUTH, timestamp);
             }
@@ -850,7 +850,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
 
     return updateUserWithRetries(
         user -> {
-         Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
+          Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
           user.setRasLinkLoginGovUsername(loginGovUserName);
           accessModuleService.updateCompletionTime(user, AccessModuleName.RAS_LOGIN_GOV, timestamp);
           // TODO(RW-6480): Determine if need to set link expiration time.
