@@ -31,7 +31,7 @@ describe('Genomics Extraction Test', () => {
 
   const maxWaitTime = 50 * 60 * 1000;
   const workspaceName = makeWorkspaceName();
-  const notebookName = makeRandomName('testPyNotebook');
+  const notebookName = makeRandomName('genomicDataToVcf');
 
   test('Export genomics dataset to new notebook', async () => {
     await findOrCreateWorkspace(page, { cdrVersion: config.ALTERNATIVE_CDR_VERSION_NAME, workspaceName });
