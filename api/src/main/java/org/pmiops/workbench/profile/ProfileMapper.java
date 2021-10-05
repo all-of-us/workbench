@@ -46,8 +46,8 @@ public interface ProfileMapper {
   @Mapping(target = "dataUseAgreementBypassTime", ignore = true)
   @Mapping(target = "rasLinkLoginGovCompletionTime", ignore = true)
   @Mapping(target = "rasLinkLoginGovBypassTime", ignore = true)
-
-  
+  @Mapping(target = "publicationsLastConfirmedTime", ignore = true)
+  @Mapping(target = "profileLastConfirmedTime", ignore = true)
   Profile toModel(
       DbUser dbUser,
       VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation,
