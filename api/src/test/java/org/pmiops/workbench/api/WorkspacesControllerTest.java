@@ -464,7 +464,7 @@ public class WorkspacesControllerTest extends SpringTest {
 
     when(fireCloudService.cloneWorkspace(anyString(), anyString(), eq(ns), eq(name), anyString()))
         .thenReturn(fcResponse);
-    doReturn(ns).when(fireCloudService).createBillingProjectName();
+    when(fireCloudService.createBillingProjectName()).thenReturn(ns);
     return fcResponse;
   }
 
