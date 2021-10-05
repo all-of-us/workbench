@@ -3,7 +3,7 @@ import DataResourceCard from 'app/component/data-resource-card';
 import Link from 'app/element/link';
 import Textarea from 'app/element/textarea';
 import Textbox from 'app/element/textbox';
-import { LinkText, MenuOption, ResourceCard } from 'app/text-labels';
+import { LinkText, MenuOption, ResourceCard, WorkspaceAccessLevel } from 'app/text-labels';
 import { buildXPath } from 'app/xpath-builders';
 import { ElementType } from 'app/xpath-options';
 import { waitWhileLoading } from 'utils/waits-utils';
@@ -292,11 +292,14 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
   /**
    * Share workspace via Workspace Actions snowman menu "Share" option.
    */
-  async shareWorkspace(): Promise<ShareModal> {
+  async shareWorkspaceWithUser(email: string, role: WorkspaceAccessLevel): Promise<void> {
     await this.selectWorkspaceAction(MenuOption.Share, { waitForNav: false });
-    const modal = new ShareModal(this.page);
-    await modal.waitForLoad();
-    return modal;
+    const shareModal = new ShareModal(this.page);
+    await shareModal.waitForLoad();
+
+    await shareModal.shareWithUser(email, role);
+    await waitWhileLoading(this.page);
+    await this.waitForLoad();
   }
 
   async getWorkspaceActionMenu(): Promise<SnowmanMenu> {

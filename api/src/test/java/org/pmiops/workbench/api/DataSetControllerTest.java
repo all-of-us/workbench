@@ -315,6 +315,7 @@ public class DataSetControllerTest extends SpringTest {
         .when(mockBillingProjectBufferService)
         .assignBillingProject(any(), any());
     TestMockFactory.stubCreateFcWorkspace(fireCloudService);
+    TestMockFactory.stubCreateBillingProject(fireCloudService);
 
     Gson gson = new Gson();
     CdrBigQuerySchemaConfig cdrBigQuerySchemaConfig =

@@ -57,8 +57,7 @@ describe('Create Dataset', () => {
     const aboutPage = new WorkspaceAboutPage(page);
     await aboutPage.waitForLoad();
 
-    const shareWorkspaceModal = await aboutPage.shareWorkspace();
-    await shareWorkspaceModal.shareWithUser(config.READER_USER, WorkspaceAccessLevel.Reader);
+    await aboutPage.shareWorkspaceWithUser(config.READER_USER, WorkspaceAccessLevel.Reader);
     await waitWhileLoading(page);
 
     // Don't delete dataset because it's needed in next test.

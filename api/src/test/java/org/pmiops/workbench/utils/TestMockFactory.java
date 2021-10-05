@@ -19,14 +19,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 import org.pmiops.workbench.access.AccessTierService;
-import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.db.dao.AccessModuleDao;
 import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.model.DbAccessModule;
 import org.pmiops.workbench.db.model.DbAccessModule.AccessModuleName;
 import org.pmiops.workbench.db.model.DbAccessTier;
-import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
@@ -192,20 +190,18 @@ public class TestMockFactory {
         .createWorkspace(anyString(), anyString(), anyString());
   }
 
-  public void stubBufferBillingProject(BillingProjectBufferService billingProjectBufferService) {
-    stubBufferBillingProject(billingProjectBufferService, UUID.randomUUID().toString());
+  public static void stubCreateBillingProjectByPrefix(
+      FireCloudService fireCloudService, String projectIdPrefix) {
+    stubCreateBillingProject(fireCloudService, projectIdPrefix + UUID.randomUUID().toString());
   }
 
-  public void stubBufferBillingProject(
-      BillingProjectBufferService billingProjectBufferService, String billingProjectId) {
-    doAnswer(
-            invocation -> {
-              DbBillingProjectBufferEntry entry = mock(DbBillingProjectBufferEntry.class);
-              doReturn(billingProjectId).when(entry).getFireCloudProjectName();
-              return entry;
-            })
-        .when(billingProjectBufferService)
-        .assignBillingProject(any(), any());
+  public static void stubCreateBillingProject(FireCloudService fireCloudService) {
+    stubCreateBillingProject(fireCloudService, UUID.randomUUID().toString());
+  }
+
+  public static void stubCreateBillingProject(
+      FireCloudService fireCloudService, String billingProjectId) {
+    doReturn(billingProjectId).when(fireCloudService).createBillingProjectName();
   }
 
   public static Cloudbilling createMockedCloudbilling() {
