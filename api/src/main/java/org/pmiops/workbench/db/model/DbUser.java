@@ -92,8 +92,9 @@ public class DbUser {
   private Timestamp twoFactorAuthBypassTime;
 
   private Timestamp profileLastConfirmedTime;
-
   private Timestamp publicationsLastConfirmedTime;
+
+  private Timestamp computeSecuritySuspendedUntil;
 
   // potentially obsolete access module fields.  These are likely to be deleted in the near future.
   // Moodle badges are indexed by username, not this value.  See ComplianceService.
@@ -517,6 +518,15 @@ public class DbUser {
 
   public void setPublicationsLastConfirmedTime(Timestamp publicationsLastConfirmedTime) {
     this.publicationsLastConfirmedTime = publicationsLastConfirmedTime;
+  }
+
+  @Column(name = "compute_security_suspended_until")
+  public Timestamp getComputeSecuritySuspendedUntil() {
+    return computeSecuritySuspendedUntil;
+  }
+
+  public void setComputeSecuritySuspendedUntil(Timestamp computeSecuritySuspendedUntil) {
+    this.computeSecuritySuspendedUntil = computeSecuritySuspendedUntil;
   }
 
   // null-friendly versions of equals() and hashCode() for DbVerifiedInstitutionalAffiliation
