@@ -10,7 +10,6 @@ import {FlexColumn, FlexRow} from 'app/components/flex';
 import {Header, SemiBoldHeader, SmallHeader} from 'app/components/headers';
 import {ClrIcon} from 'app/components/icons';
 import {CustomBulletList, CustomBulletListItem} from 'app/components/lists';
-import {Spinner} from 'app/components/spinners';
 import {AoU} from 'app/components/text-wrappers';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {RecentResources} from 'app/pages/homepage/recent-resources';
@@ -18,7 +17,6 @@ import {RecentWorkspaces} from 'app/pages/homepage/recent-workspaces';
 import {profileApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {addOpacity} from 'app/styles/colors';
 import {reactStyles, withUserProfile} from 'app/utils';
-import {hasRegisteredAccess} from 'app/utils/access-tiers';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {NavigationProps, useNavigation} from 'app/utils/navigation';
 import {fetchWithGlobalErrorHandler} from 'app/utils/retry';
@@ -26,7 +24,6 @@ import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {supportUrls} from 'app/utils/zendesk';
 import {Profile, WorkspaceResponseListResponse} from 'generated/fetch';
 import {QuickTourAndVideos} from './quick-tour-and-videos';
-
 import workspaceIcon from 'assets/images/workspace-icon.svg';
 import cohortIcon from 'assets/images/cohort-icon.svg';
 import analysisIcon from 'assets/images/analysis-icon.svg';
@@ -149,8 +146,6 @@ interface Props extends WithSpinnerOverlayProps, NavigationProps, RouteComponent
 }
 
 interface State {
-  // TODO is this still needed? RW-7309
-  accessTasksLoaded: boolean;
   firstVisit: boolean;
   firstVisitTraining: boolean;
   userWorkspacesResponse: WorkspaceResponseListResponse;
@@ -163,7 +158,6 @@ export const Homepage = fp.flow(withUserProfile(), withNavigation, withRouter)(c
   constructor(props: Props) {
     super(props);
     this.state = {
-      accessTasksLoaded: false,
       firstVisit: undefined,
       firstVisitTraining: true,
       userWorkspacesResponse: undefined,
@@ -211,17 +205,6 @@ export const Homepage = fp.flow(withUserProfile(), withNavigation, withRouter)(c
         // page visits is null; is first visit
         this.setFirstVisit();
       }
-
-      // TODO is this still needed? RW-7309
-      const hasAccess = hasRegisteredAccess(profile.accessTierShortNames);
-      if (!hasAccess) {
-        const complianceStatus = profileApi().syncComplianceTrainingStatus();
-        const twoFactorAuthStatus = profileApi().syncTwoFactorAuthStatus();
-        await Promise.all([complianceStatus, twoFactorAuthStatus]);
-      }
-      this.setState({
-        accessTasksLoaded: true
-      });
     }
   }
 
@@ -236,7 +219,7 @@ export const Homepage = fp.flow(withUserProfile(), withNavigation, withRouter)(c
   }
 
   render() {
-    const {accessTasksLoaded, firstVisit, userWorkspacesResponse} = this.state;
+    const {firstVisit, userWorkspacesResponse} = this.state;
 
     return <React.Fragment>
       <FlexColumn style={styles.pageWrapper}>
@@ -244,15 +227,11 @@ export const Homepage = fp.flow(withUserProfile(), withNavigation, withRouter)(c
         <FadeBox style={styles.fadeBox}>
           {/* The elements inside this fadeBox will be changed as part of ongoing homepage redesign work */}
           <FlexColumn style={{justifyContent: 'flex-start'}}>
-              {accessTasksLoaded
-                  ? <React.Fragment>
-                      <Workspaces/>
-                        {userWorkspacesResponse &&
-                          (this.userHasWorkspaces()
-                                  ? <RecentResources workspaces={userWorkspacesResponse.items}/>
-                                  : <GettingStarted/>)}
-                    </React.Fragment>
-                  : <Spinner dark={true} style={{width: '100%', marginTop: '5rem'}}/>}
+            <Workspaces/>
+            {userWorkspacesResponse &&
+              (this.userHasWorkspaces()
+                      ? <RecentResources workspaces={userWorkspacesResponse.items}/>
+                      : <GettingStarted/>)}
           </FlexColumn>
         </FadeBox>
       </FlexColumn>
