@@ -392,7 +392,9 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
       // Replace the free billing account with a new display name that has spend usage.
       const displayBillingAccounts: Array<BillingAccount> = billingAccounts.map((b) => {
         if (b.isFreeTier) {
-          return { ...b, displayName: this.formatFreeTierBillingAccountName()
+          return {
+            ...b,
+            displayName: this.formatFreeTierBillingAccountName()
           };
         }
         return b;
@@ -609,7 +611,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
         {enableBillingUpgrade &&
         <div style={{display: 'inline'}}>Once you have used up your free credits, you can either select a shared billing account or create
           a new one using either Google Cloud Platform or a Google billing partner.
-          Please note once a new billing account is created it may take a few days to show up in the <b>Select account</b> dropdown.</div>}
+          Please note: If creating a billing account via a Google billing partner, it may take a few days to show up in the <b>Select account</b> dropdown.</div>}
       </div>;
     }
 
