@@ -56,7 +56,7 @@ public class MeasurementBundleTest extends SpringTest {
           MeasurementBundle.builder()
               .addMeasurement(GaugeMetric.COHORT_COUNT, 101L)
               .addMeasurement(GaugeMetric.WORKSPACE_COUNT, 2L)
-              .addTag(MetricLabel.ACCESS_TIER_SHORT_NAME, Boolean.valueOf(true).toString())
+              .addTag(MetricLabel.ACCESS_TIER_SHORT_NAME, "Registered")
               .build();
         });
   }
