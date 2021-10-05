@@ -385,7 +385,7 @@ public class WorkspacesControllerTest extends SpringTest {
     archivedCdrVersionId = Long.toString(archivedCdrVersion.getCdrVersionId());
 
     fcWorkspaceAcl = createWorkspaceACL();
-    testMockFactory.stubBufferBillingProject(billingProjectBufferService);
+    testMockFactory.stubCreateBillingProject(fireCloudService);
     testMockFactory.stubCreateFcWorkspace(fireCloudService);
 
     // required to enable the use of default method blobToFileDetail()
@@ -423,7 +423,7 @@ public class WorkspacesControllerTest extends SpringTest {
     DbBillingProjectBufferEntry entry = mock(DbBillingProjectBufferEntry.class);
     doReturn(projectName).when(entry).getFireCloudProjectName();
     doReturn(entry).when(billingProjectBufferService).assignBillingProject(any(), any());
-    doReturn(projectName).when(billingProjectBufferService).createBillingProjectName();
+    doReturn(projectName).when(fireCloudService).createBillingProjectName();
   }
 
   private void stubFcUpdateWorkspaceACL() {
@@ -606,26 +606,17 @@ public class WorkspacesControllerTest extends SpringTest {
     verify(fireCloudService)
         .updateBillingAccount(
             workspace.getNamespace(), TestMockFactory.WORKSPACE_BILLING_ACCOUNT_NAME);
-    verify(fireCloudService, never())
+    verify(fireCloudService)
         .createAllOfUsBillingProject(workspace.getNamespace(), accessTier.getServicePerimeter());
     assertThat(retrievedWorkspace.getBillingAccountName())
         .isEqualTo(TestMockFactory.WORKSPACE_BILLING_ACCOUNT_NAME);
-
-    // Now switch to v2 Billing and fire the same request. It is generally not recommaned to use
-    // one test method testing multiple-funtions, but consider we will migrate to v2 soon, this
-    // might be a fast easy way to write test.
-    workbenchConfig.featureFlags.enableFireCloudV2Billing = true;
-    Workspace v2Workspace = workspacesController.createWorkspace(workspace).getBody();
-    verify(fireCloudService)
-        .createAllOfUsBillingProject(v2Workspace.getNamespace(), accessTier.getServicePerimeter());
-    assertThat(v2Workspace).isEqualTo(workspace);
   }
 
   @Test
   public void testCreateWorkspace_resetBillingAccountOnFailedSave() throws Exception {
     doThrow(RuntimeException.class).when(workspaceDao).save(any(DbWorkspace.class));
     Workspace workspace = createWorkspace();
-    testMockFactory.stubBufferBillingProject(billingProjectBufferService, workspace.getNamespace());
+    testMockFactory.stubCreateBillingProject(fireCloudService, workspace.getNamespace());
 
     try {
       workspacesController.createWorkspace(workspace).getBody();
@@ -1119,20 +1110,9 @@ public class WorkspacesControllerTest extends SpringTest {
     assertThat(clonedWorkspace.getResearchPurpose()).isEqualTo(modPurpose);
     assertThat(clonedWorkspace.getBillingAccountName()).isEqualTo(newBillingAccountName);
 
-    // When V2 Billing enabled
-    workbenchConfig.featureFlags.enableFireCloudV2Billing = true;
-    Workspace v2ClonedWorkspace =
-        workspacesController
-            .cloneWorkspace(originalWorkspace.getNamespace(), originalWorkspace.getId(), req)
-            .getBody()
-            .getWorkspace();
     verify(fireCloudService)
         .createAllOfUsBillingProject(
-            v2ClonedWorkspace.getNamespace(), accessTier.getServicePerimeter());
-
-    // Hack so lists can be compared in isEqualTo regardless of order.  See comment above.
-    sortPopulationDetails(v2ClonedWorkspace.getResearchPurpose());
-    assertThat(v2ClonedWorkspace).isEqualTo(clonedWorkspace);
+            clonedWorkspace.getNamespace(), accessTier.getServicePerimeter());
   }
 
   @Test
@@ -2222,6 +2202,8 @@ public class WorkspacesControllerTest extends SpringTest {
 
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
+    verify(fireCloudService, times(1)).addOwnerToBillingProject(any(), any());
+
     ShareWorkspaceRequest shareWorkspaceRequest =
         new ShareWorkspaceRequest()
             .workspaceEtag(workspace.getEtag())
@@ -2239,7 +2221,8 @@ public class WorkspacesControllerTest extends SpringTest {
             ownerUser.getUsername(), workspace.getNamespace(), Optional.empty());
     verify(fireCloudService, never())
         .removeOwnerFromBillingProject(eq(writerUser.getUsername()), any(), eq(Optional.empty()));
-    verify(fireCloudService, never()).addOwnerToBillingProject(any(), any());
+    // Times still 1 happended during workspace creation
+    verify(fireCloudService, times(1)).addOwnerToBillingProject(any(), any());
   }
 
   @Test
