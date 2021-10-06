@@ -124,7 +124,7 @@ export default class InstitutionEditPage extends AuthenticatedPage {
   async getAddNewInstitutionFields(): Promise<void> {
     this.getInstitutionNameInput();
     this.getInstructionsTextarea();
-    this.selectInstitutionType(InstitutionTypeSelectValue.Industry);
+    await this.selectInstitutionType(InstitutionTypeSelectValue.Industry);
   }
 
   // get the Institution's RT-eRA-account-required-switch and verify if enabled
