@@ -149,8 +149,15 @@ const ActionButton = (
 
 const BackArrow = withCircleBackground(() => <Arrow style={{height: 21, width: 18}}/>);
 
+interface CardProps {
+  step: number,
+  moduleStatus: AccessModuleStatus,
+  style: React.CSSProperties,
+  children,
+}
 const RenewalCard = withStyle(renewalStyle.card)(
-  ({step, TitleComponent, moduleStatus, children, style}) => {
+  ({step, moduleStatus, style, children}: CardProps) => {
+    const TitleComponent = accessRenewalTitles.get(moduleStatus.moduleName);
     const {lastConfirmedDate, nextReviewDate} = computeDisplayDates(moduleStatus);
     return <FlexColumn style={style}>
       <div style={renewalStyle.h3}>STEP {step}</div>
@@ -242,7 +249,6 @@ export const AccessRenewal = fp.flow(
       {/* Profile */}
       <RenewalCard
           step={1}
-          TitleComponent={accessRenewalTitles.get(AccessModule.PROFILECONFIRMATION)}
           moduleStatus={modules.find(m => m.moduleName === AccessModule.PROFILECONFIRMATION)}>
         <div style={{marginBottom: '0.5rem'}}>Please update your profile information if any of it has changed recently.</div>
         <div>Note that you are obliged by the Terms of Use of the Workbench to provide keep your profile
@@ -257,7 +263,6 @@ export const AccessRenewal = fp.flow(
       {/* Publications */}
       <RenewalCard
           step={2}
-          TitleComponent={accessRenewalTitles.get(AccessModule.PUBLICATIONCONFIRMATION)}
           moduleStatus={modules.find(m => m.moduleName === AccessModule.PUBLICATIONCONFIRMATION)}>
         <div>The <AoU/> Publication and Presentation Policy requires that you report any upcoming publication or
              presentation resulting from the use of <AoU/> Research Program Data at least two weeks before the date of publication.
@@ -297,7 +302,6 @@ export const AccessRenewal = fp.flow(
       {/* Compliance Training */}
       {enableComplianceTraining && <RenewalCard
           step={3}
-          TitleComponent={accessRenewalTitles.get(AccessModule.COMPLIANCETRAINING)}
           moduleStatus={modules.find(m => m.moduleName === AccessModule.COMPLIANCETRAINING)}>
       <div> You are required to complete the refreshed ethics training courses to understand the privacy safeguards and
           the compliance requirements for using the <AoU/> Dataset.
@@ -328,7 +332,6 @@ export const AccessRenewal = fp.flow(
       {/* DUCC */}
       <RenewalCard
           step={enableComplianceTraining ? 4 : 3}
-          TitleComponent={accessRenewalTitles.get(AccessModule.DATAUSERCODEOFCONDUCT)}
           moduleStatus={modules.find(m => m.moduleName === AccessModule.DATAUSERCODEOFCONDUCT)}>
         <div>Please review and sign the data user code of conduct consenting to the <AoU/> data use policy.</div>
         <ActionButton
