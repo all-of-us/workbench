@@ -8,6 +8,7 @@ import Button from 'app/element/button';
 import { LinkText } from 'app/text-labels';
 import SelectMenu from 'app/component/select-menu';
 import { ElementType } from 'app/xpath-options';
+import InstitutionNotSavedModal from 'app/modal/institution-not-saved-modal';
 
 const PageTitle = 'Institution Admin | All of Us Researcher Workbench';
 
@@ -207,5 +208,14 @@ export default class InstitutionEditPage extends AuthenticatedPage {
   async clickCancelButton(): Promise<void> {
     const button = this.getCancelButton();
     await button.click();
+  }
+ 
+
+  async clickBackButton(): Promise<InstitutionNotSavedModal> {
+    const iconXpath = '//h3[text()="Add new Institution"]/preceding-sibling::div[@tabindex="0"  and @role = "button"]';
+    await this.page.waitForXPath(iconXpath, { visible: true }).then((icon) => icon.click());
+    const modal = new InstitutionNotSavedModal(this.page);
+    await modal.waitForLoad();
+    return modal;
   }
 }
