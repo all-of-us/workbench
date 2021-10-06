@@ -17,7 +17,8 @@ import expect from 'expect';
 // 30 minutes.
 jest.setTimeout(30 * 60 * 1000);
 
-describe('Workspace WRITER Jupyter notebook action tests', () => {
+// TODO (RW-7312): Re-enable once issue is fixed.
+xdescribe('Workspace WRITER Jupyter notebook action tests', () => {
   // All tests use same workspace and notebook.
   const workspaceName = makeWorkspaceName();
   const notebookName = makeRandomName('py3');
@@ -49,8 +50,7 @@ describe('Workspace WRITER Jupyter notebook action tests', () => {
     await signOut(page);
   });
 
-  // TODO (RW-7312): Re-enable once Terra clone is fixed.
-  xtest('WRITER can clone workspace and edit notebook in workspace clone', async () => {
+  test('WRITER can clone workspace and edit notebook in workspace clone', async () => {
     // WRITER log in.
     await signInWithAccessToken(page, config.WRITER_USER);
 
