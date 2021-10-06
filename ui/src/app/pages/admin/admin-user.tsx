@@ -40,7 +40,7 @@ import {
   Profile,
   PublicInstitutionDetails,
 } from 'generated/fetch';
-import {accessRenewalTitles, computeDisplayDates} from 'app/utils/access-utils';
+import {accessRenewalModules, computeDisplayDates, getAccessModuleConfig} from 'app/utils/access-utils';
 import {hasRegisteredAccess} from 'app/utils/access-tiers';
 
 const styles = reactStyles({
@@ -145,17 +145,17 @@ interface ExpirationProps {
 const AccessModuleExpirations = ({modules, UserStatusComponent}: ExpirationProps) => {
   // compliance training is feature-flagged in some environments
   const {enableComplianceTraining} = serverConfigStore.get().config;
-  const modulesAndTitles = enableComplianceTraining
-      ? Array.from(accessRenewalTitles.entries())
-      : Array.from(accessRenewalTitles.entries())
-          .filter(([moduleName,]) => moduleName !== AccessModule.COMPLIANCETRAINING);
+  const moduleNames = enableComplianceTraining
+      ? accessRenewalModules
+      : accessRenewalModules.filter(moduleName => moduleName !== AccessModule.COMPLIANCETRAINING);
 
   return <FlexColumn style={{marginTop: '1rem'}}>
     <label style={styles.semiBold}>Data Access Status: <UserStatusComponent/></label>
-    {modulesAndTitles.map(([moduleName, TitleComponent], zeroBasedStep) => {
+    {moduleNames.map((moduleName, zeroBasedStep) => {
       // return the status if found; init an empty status with the moduleName if not
       const status: AccessModuleStatus = modules.find(s => s.moduleName === moduleName) || {moduleName};
       const {lastConfirmedDate, nextReviewDate} = computeDisplayDates(status);
+      const TitleComponent = getAccessModuleConfig(moduleName).aarLabel;
       return <FlexRow style={{marginTop: '0.5rem'}}>
         <FlexColumn>
           <label style={styles.semiBold}>Step {zeroBasedStep + 1}: <TitleComponent/></label>

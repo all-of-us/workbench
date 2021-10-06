@@ -16,7 +16,9 @@ import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors, {addOpacity, colorWithWhiteness} from 'app/styles/colors';
 import {cond, useId, withStyle} from 'app/utils';
 import {
+  accessRenewalModules,
   computeDisplayDates,
+  getAccessModuleConfig,
   isExpiring,
   maybeDaysRemaining,
   redirectToTraining,
@@ -157,7 +159,7 @@ interface CardProps {
 }
 const RenewalCard = withStyle(renewalStyle.card)(
   ({step, moduleStatus, style, children}: CardProps) => {
-    const TitleComponent = accessRenewalTitles.get(moduleStatus.moduleName);
+    const TitleComponent = getAccessModuleConfig(moduleStatus.moduleName).aarLabel;
     const {lastConfirmedDate, nextReviewDate} = computeDisplayDates(moduleStatus);
     return <FlexColumn style={style}>
       <div style={renewalStyle.h3}>STEP {step}</div>
@@ -172,7 +174,6 @@ const RenewalCard = withStyle(renewalStyle.card)(
     </FlexColumn>;
   }
 );
-
 
 // Page to render
 export const AccessRenewal = fp.flow(
@@ -204,7 +205,7 @@ export const AccessRenewal = fp.flow(
     getProfile();
   }, []);
 
-  const expirableModules = modules.filter(moduleStatus => accessRenewalTitles.has(moduleStatus.moduleName));
+  const expirableModules = modules.filter(moduleStatus => accessRenewalModules.includes(moduleStatus.moduleName));
 
   const completeOrBypassed = moduleName => {
     const status = modules.find(m => m.moduleName === moduleName);

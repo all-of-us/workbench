@@ -14,8 +14,8 @@ import {AccessModule, AccessModuleStatus, ErrorCode, Profile, UserTierEligibilit
 import {parseQueryParams} from "app/components/app-router";
 import {cond, daysFromNow, displayDateWithoutHours, switchCase} from "./index";
 import {AccessTierShortNames} from 'app/utils/access-tiers';
-import {TooltipTrigger} from "../components/popups";
-import {InfoIcon} from "../components/icons";
+import {TooltipTrigger} from 'app/components/popups';
+import {InfoIcon} from 'app/components/icons';
 
 const {useState, useEffect} = React;
 
@@ -156,6 +156,12 @@ export const getAccessModuleConfig = (moduleName: AccessModule): AccessModuleCon
 //   [AccessModule.COMPLIANCETRAINING, () => <div><AoU/> Responsible Conduct of Research Training</div>],
 //   [AccessModule.DATAUSERCODEOFCONDUCT, () => 'Sign Data User Code of Conduct'],
 // ]) as Map<AccessModule, () => JSX.Element>;
+export const accessRenewalModules = [
+  AccessModule.PROFILECONFIRMATION,
+  AccessModule.PUBLICATIONCONFIRMATION,
+  AccessModule.COMPLIANCETRAINING,
+  AccessModule.DATAUSERCODEOFCONDUCT
+];
 
 export const wasReferredFromRenewal = (queryParams): boolean => {
   const renewal = parseQueryParams(queryParams).get('renewal');
