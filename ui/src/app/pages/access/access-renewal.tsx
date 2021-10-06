@@ -20,7 +20,6 @@ import {
   isExpiring,
   maybeDaysRemaining,
   redirectToTraining,
-  accessRenewalTitles
 } from 'app/utils/access-utils';
 import {useNavigation} from 'app/utils/navigation';
 import {profileStore, serverConfigStore, useStore} from 'app/utils/stores';

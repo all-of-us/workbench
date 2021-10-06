@@ -12,8 +12,10 @@ import {authStore, profileStore, serverConfigStore, useStore} from 'app/utils/st
 import {environment} from 'environments/environment';
 import {AccessModule, AccessModuleStatus, ErrorCode, Profile, UserTierEligibility} from 'generated/fetch';
 import {parseQueryParams} from "app/components/app-router";
-import {cond, daysFromNow, displayDateWithoutHours} from "./index";
+import {cond, daysFromNow, displayDateWithoutHours, switchCase} from "./index";
 import {AccessTierShortNames} from 'app/utils/access-tiers';
+import {TooltipTrigger} from "../components/popups";
+import {InfoIcon} from "../components/icons";
 
 const {useState, useEffect} = React;
 
@@ -67,6 +69,93 @@ export const redirectToRas = (openInNewTab: boolean = true): void => {
 
   openInNewTab ? window.open(url, '_blank') : <Redirect to={url}/>;
 };
+
+
+interface AccessModuleConfig {
+  moduleName: AccessModule;
+  isEnabledInEnvironment: boolean;  // either true or dependent on a feature flag
+  aarLabel: () => JSX.Element;
+  darLabel: JSX.Element;
+  externalSyncAction?: Function;
+  refreshAction?: Function;
+}
+
+// This needs to be a function, because we want it to evaluate at call time,
+// not at compile time, to ensure that we make use of the server config store.
+// This is important so that we can use feature flags.
+//
+// Important: The completion criteria here needs to be kept synchronized with
+// the server-side logic, else users can get stuck on the DAR
+// without a next step:
+// https://github.com/all-of-us/workbench/blob/master/api/src/main/java/org/pmiops/workbench/db/dao/UserServiceImpl.java#L240-L272
+export const getAccessModuleConfig = (moduleName: AccessModule): AccessModuleConfig => {
+  const {enableRasLoginGovLinking, enableEraCommons, enableComplianceTraining} = serverConfigStore.get().config;
+  return switchCase(moduleName,
+
+      [AccessModule.TWOFACTORAUTH, () => ({
+        moduleName,
+        isEnabledInEnvironment: true,
+        darLabel: <div>Turn on Google 2-Step Verification</div>,
+        externalSyncAction: async () => await profileApi().syncTwoFactorAuthStatus(),
+        refreshAction: async () => await profileApi().syncTwoFactorAuthStatus(),
+      })],
+
+      [AccessModule.RASLINKLOGINGOV, () => ({
+        moduleName,
+        isEnabledInEnvironment: enableRasLoginGovLinking,
+        darLabel: <div>Verify your identity with Login.gov <TooltipTrigger
+            content={'For additional security, we require you to verify your identity by uploading a photo of your ID.'}>
+          <InfoIcon style={{margin: '0 0.3rem'}}/>
+        </TooltipTrigger></div>,
+        refreshAction: () => redirectToRas(false),
+      })],
+
+      [AccessModule.ERACOMMONS, () => ({
+        moduleName,
+        isEnabledInEnvironment: enableEraCommons,
+        darLabel: <div>Connect your eRA Commons account</div>,
+        externalSyncAction: async () => await profileApi().syncEraCommonsStatus(),
+        refreshAction: async () => await profileApi().syncEraCommonsStatus(),
+      })],
+
+      [AccessModule.COMPLIANCETRAINING, () => ({
+        moduleName,
+        isEnabledInEnvironment: enableComplianceTraining,
+        aarLabel: () => <div><AoU/> Responsible Conduct of Research Training</div>,
+        darLabel: <div>Complete <AoU/> research Registered Tier training</div>,
+        externalSyncAction: async () => await profileApi().syncComplianceTrainingStatus(),
+        refreshAction: async () => await profileApi().syncComplianceTrainingStatus(),
+      })],
+
+      [AccessModule.DATAUSERCODEOFCONDUCT, () => ({
+        moduleName,
+        isEnabledInEnvironment: true,
+        aarLabel: () => 'Sign Data User Code of Conduct',
+        darLabel: <div>Sign Data User Code of Conduct</div>,
+      })],
+
+      [AccessModule.PROFILECONFIRMATION, () => ({
+        moduleName,
+        isEnabledInEnvironment: true,
+        aarLabel: () => 'Update your profile',
+      })],
+
+      [AccessModule.PUBLICATIONCONFIRMATION, () => ({
+        moduleName,
+        isEnabledInEnvironment: true,
+        aarLabel: () => 'Report any publications or presentations based on your research using the Researcher Workbench',
+      })],
+  );
+};
+//
+// // the modules subject to Annual Access Renewal (AAR), in the order shown on the AAR page.
+// export const accessRenewalTitles = new Map<AccessModule, () => JSX.Element | string>([
+//   [AccessModule.PROFILECONFIRMATION, () => 'Update your profile'],
+//   [AccessModule.PUBLICATIONCONFIRMATION,
+//     () => 'Report any publications or presentations based on your research using the Researcher Workbench'],
+//   [AccessModule.COMPLIANCETRAINING, () => <div><AoU/> Responsible Conduct of Research Training</div>],
+//   [AccessModule.DATAUSERCODEOFCONDUCT, () => 'Sign Data User Code of Conduct'],
+// ]) as Map<AccessModule, () => JSX.Element>;
 
 export const wasReferredFromRenewal = (queryParams): boolean => {
   const renewal = parseQueryParams(queryParams).get('renewal');
@@ -149,15 +238,6 @@ export const GetStartedButton = ({style = {marginLeft: '0.5rem'}}) => <Button
     // have been dependent on the user's registration status, e.g. CDR config information.
     location.replace('/');
   }}>Get Started</Button>;
-
-// the modules subject to Annual Access Renewal (AAR), in the order shown on the AAR page.
-export const accessRenewalTitles = new Map<AccessModule, () => JSX.Element | string>([
-  [AccessModule.PROFILECONFIRMATION, () => 'Update your profile'],
-  [AccessModule.PUBLICATIONCONFIRMATION,
-    () => 'Report any publications or presentations based on your research using the Researcher Workbench'],
-  [AccessModule.COMPLIANCETRAINING, () => <div><AoU/> Responsible Conduct of Research Training</div>],
-  [AccessModule.DATAUSERCODEOFCONDUCT, () => 'Sign Data User Code of Conduct'],
-]) as Map<AccessModule, () => JSX.Element>;
 
 export const isExpiring = (expiration: number): boolean => daysFromNow(expiration) <= serverConfigStore.get().config.accessRenewalLookback;
 

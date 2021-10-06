@@ -10,7 +10,6 @@ import {Header} from 'app/components/headers';
 import {
   ArrowRight,
   CheckCircle,
-  InfoIcon,
   MinusCircle,
   RegisteredTierBadge,
   Repeat
@@ -30,13 +29,13 @@ import {
   redirectToRas,
   redirectToNiH,
   redirectToTraining,
+  getAccessModuleConfig,
 } from 'app/utils/access-utils';
 import {useNavigation} from 'app/utils/navigation';
 import {profileStore, serverConfigStore, useStore} from 'app/utils/stores';
 import {AccessModule, AccessModuleStatus, Profile} from 'generated/fetch';
 import {TwoFactorAuthModal} from './two-factor-auth-modal';
 import {AnalyticsTracker} from 'app/utils/analytics';
-import {TooltipTrigger} from 'app/components/popups';
 
 const styles = reactStyles({
   headerFlexColumn: {
@@ -226,68 +225,6 @@ export const allModules: AccessModule[] = [
   ...ctModules,
   duccModule,
 ];
-
-interface AccessModuleConfig {
-  moduleName: AccessModule;
-  isEnabledInEnvironment: boolean;  // either true or dependent on a feature flag
-  darLabel: JSX.Element;
-  externalSyncAction?: Function;
-  refreshAction?: Function;
-}
-
-// This needs to be a function, because we want it to evaluate at call time,
-// not at compile time, to ensure that we make use of the server config store.
-// This is important so that we can use feature flags.
-//
-// Important: The completion criteria here needs to be kept synchronized with
-// the server-side logic, else users can get stuck on the DAR
-// without a next step:
-// https://github.com/all-of-us/workbench/blob/master/api/src/main/java/org/pmiops/workbench/db/dao/UserServiceImpl.java#L240-L272
-const getAccessModuleConfig = (moduleName: AccessModule): AccessModuleConfig => {
-  const {enableRasLoginGovLinking, enableEraCommons, enableComplianceTraining} = serverConfigStore.get().config;
-  return switchCase(moduleName,
-
-      [AccessModule.TWOFACTORAUTH, () => ({
-        moduleName,
-        isEnabledInEnvironment: true,
-        darLabel: <div>Turn on Google 2-Step Verification</div>,
-        externalSyncAction: async () => await profileApi().syncTwoFactorAuthStatus(),
-        refreshAction: async () => await profileApi().syncTwoFactorAuthStatus(),
-      })],
-
-      [AccessModule.RASLINKLOGINGOV, () => ({
-        moduleName,
-        isEnabledInEnvironment: enableRasLoginGovLinking,
-        darLabel: <div>Verify your identity with Login.gov <TooltipTrigger
-            content={'For additional security, we require you to verify your identity by uploading a photo of your ID.'}>
-          <InfoIcon style={{margin: '0 0.3rem'}}/>
-        </TooltipTrigger></div>,
-        refreshAction: () => redirectToRas(false),
-      })],
-
-      [AccessModule.ERACOMMONS, () => ({
-        moduleName,
-        isEnabledInEnvironment: enableEraCommons,
-        darLabel: <div>Connect your eRA Commons account</div>,
-        externalSyncAction: async () => await profileApi().syncEraCommonsStatus(),
-        refreshAction: async () => await profileApi().syncEraCommonsStatus(),
-      })],
-
-      [AccessModule.COMPLIANCETRAINING, () => ({
-        moduleName,
-        isEnabledInEnvironment: enableComplianceTraining,
-        darLabel: <div>Complete <AoU/> research Registered Tier training</div>,
-        externalSyncAction: async () => await profileApi().syncComplianceTrainingStatus(),
-        refreshAction: async () => await profileApi().syncComplianceTrainingStatus(),
-      })],
-
-      [AccessModule.DATAUSERCODEOFCONDUCT, () => ({
-        moduleName,
-        isEnabledInEnvironment: true,
-        darLabel: <div>Sign Data User Code of Conduct</div>,
-      })]
-  );
-};
 
 // this function does double duty:
 // - returns appropriate text for completed and bypassed modules and null for incomplete modules
