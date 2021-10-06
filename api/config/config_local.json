@@ -140,5 +140,13 @@
     "unsafeCloudTasksForwardingHost": "http:\/\/localhost:8081",
     "usersPerAuditTask": 20,
     "usersPerSynchronizeAccessTask": 50
+  },
+  "egressAlertRemediationPolicy": {
+    "escalations": [{
+      "afterIncidentCount": 1,
+      "suspendCompute": {
+        "durationMinutes": 5
+      }
+    }]
   }
 }
