@@ -100,7 +100,7 @@
     "enableBillingUpgrade": false,
     "enableEventDateModifier": false,
     "enableResearchPurposePrompt": false,
-    "enableGenomicExtraction": false,
+    "enableGenomicExtraction": true,
     "enableFireCloudV2Billing" : true,
     "enableGpu": false,
     "enablePersistentDisk": false,

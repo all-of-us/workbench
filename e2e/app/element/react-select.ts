@@ -3,6 +3,7 @@ import { ElementHandle, Page } from 'puppeteer';
 import { getPropValue } from 'utils/element-utils';
 import BaseElement from './base-element';
 import Textbox from './textbox';
+import Link from './link';
 
 export default class ReactSelect extends BaseElement {
   private readonly name: string;
@@ -24,9 +25,10 @@ export default class ReactSelect extends BaseElement {
     await option.click({ delay: 20 });
   }
 
-  async waitForOption(optionText: string): Promise<ElementHandle> {
+  async waitForOption(optionText: string): Promise<Link> {
     const selector = this.getOptionXpath(optionText);
-    return this.page.waitForXPath(selector, { visible: true });
+    await this.page.waitForXPath(selector, { visible: true });
+    return new Link(this.page, selector);
   }
 
   async getAllOptionTexts(): Promise<string[]> {
@@ -47,9 +49,13 @@ export default class ReactSelect extends BaseElement {
 
   private getOptionXpath(optionText?: string): string {
     if (optionText) {
-      return `${this.getRootXpath()}//*[starts-with(@id,"react-select") and text()="${optionText}"]`;
+      return (
+        this.getRootXpath() +
+        `//*[contains(@class, "-menu")]//*[starts-with(@id,"react-select-") and text()="${optionText}"]`
+      );
     }
-    return `${this.getRootXpath()}//*[starts-with(@id,"react-select") and text()]`;
+    // First option
+    return `${this.getRootXpath()}//*[contains(@class, "-menu")]//*[starts-with(@id,"react-select-") and text()]`;
   }
 
   private getRootXpath(): string {

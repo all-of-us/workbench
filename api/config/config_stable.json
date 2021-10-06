@@ -83,8 +83,8 @@
     "host": "https:\/\/aousupporthelp1580753096.zendesk.com"
   },
   "moodle": {
-    "host": "aoudev.nnlm.gov",
-    "credentialsKeyV2": "moodle-key-v2.txt"
+    "host": "aou.nnlm.gov",
+    "credentialsKeyV2": "moodle-prod-key-v2.txt"
   },
   "access": {
     "enableComplianceTraining": true,

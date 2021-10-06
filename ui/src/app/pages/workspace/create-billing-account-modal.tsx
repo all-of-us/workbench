@@ -2,7 +2,7 @@ import {faTimes} from '@fortawesome/free-solid-svg-icons';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {Button} from 'app/components/buttons';
 import {FlexColumn, FlexRow} from 'app/components/flex';
-import {GoogleCloudLogoSvg} from 'app/components/icons';
+import {GoogleCloudLogoSvg, InfoIcon} from 'app/components/icons';
 import {CheckBox, RadioButton, TextInput} from 'app/components/inputs';
 import {
   Modal,
@@ -17,10 +17,11 @@ import {switchCase} from 'app/utils';
 import {reactStyles} from 'app/utils';
 import {profileStore, useStore} from 'app/utils/stores';
 import {supportUrls} from 'app/utils/zendesk';
-import {BillingPaymentMethod} from 'generated/fetch';
+import {SpinnerOverlay} from 'app/components/spinners';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {useState} from 'react';
+import {TooltipTrigger} from 'app/components/popups';
 
 export const styles = reactStyles({
   line: {
@@ -44,7 +45,7 @@ export const styles = reactStyles({
     fontFamily: 'Montserrat',
     fontSize: '16px',
     fontWeight: 600,
-    lineHeight: '20px',
+    lineHeight: '21px',
     letterSpacing: '0',
     marginTop: '5px',
   },
@@ -52,25 +53,29 @@ export const styles = reactStyles({
     color: colors.primary,
     fontFamily: 'Montserrat',
     fontSize: '14px',
-    lineHeight: '22px',
+    lineHeight: '21px',
     letterSpacing: '0',
     marginTop: '5px',
   },
   radioButton: {
-    margin: '15px',
-    lineHeight: '22px',
+    lineHeight: '21px',
     letterSpacing: '0',
     marginTop: '15px',
     flexShrink: 0,
     width: '17px',
     height: '17px',
   },
+  infoIcon: {
+    height: '15px',
+    marginLeft: '0.2rem',
+    width: '15px'
+  },
 });
 
 const stylesFunction = {
   stepButtonCircle: (currentStep: number, buttonStep: number): React.CSSProperties => {
     return {
-      visibility: currentStep === 0 || currentStep === 4 ? 'hidden' : 'visible',
+      visibility: currentStep === 0 || currentStep === 3 ? 'hidden' : 'visible',
       borderRadius: '50%',
       height: '37px',
       width: '37px',
@@ -102,10 +107,18 @@ export interface Props {
 
 const BillingConfirmItem = ({title, value, dataTestId}) => {
   return <FlexRow id = {`${dataTestId}-wrapper`} style={{marginTop: '5px'}}>
-    <div style={{width: '170px'}}>{title}:</div>
+    <div style={{width: '220px'}}>{title}:</div>
     <div data-test-id={dataTestId}>{value}</div>
   </FlexRow>;
 };
+
+const BilingPartnerTooltip = () => <TooltipTrigger
+  content={'Carahsoft, a third party associated with Google Cloud and the NIH, will have a representative help you set up your billing ' +
+  'account. Carahsoft can also guide you to any additional third party with which your institution may already have an agreement.'}>
+  <InfoIcon style={styles.infoIcon}/>
+</TooltipTrigger>;
+
+const numSteps = 3;
 
 export const CreateBillingAccountModal = ({onClose}: Props) => {
   const {profile: {
@@ -118,8 +131,8 @@ export const CreateBillingAccountModal = ({onClose}: Props) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [phoneNumber, setPhoneNumber] = useState<string>();
   const [invalidPhoneNumberInput, setInvalidPhoneNumberInput] = useState<boolean>(null);
-  const [useCreditCard, setUseCreditCard] = useState<boolean>(null);
   const [nihFunded, setNihFunded] = useState<boolean>(null);
+  const [emailSending, setEmailSending] = useState(false);
 
   const validatePhoneNumber = (phoneInput: string) => {
     const sanitizedPhone = phoneInput.replace(/\D/g, '');
@@ -137,15 +150,17 @@ export const CreateBillingAccountModal = ({onClose}: Props) => {
       title: 'Failed To Send Email',
       message: 'An error occurred trying to send email. Please try again.',
     })
-  )(async() => {await profileApi().sendBillingSetupEmail(
+  )(async() => {
+    setEmailSending(true)
+    await profileApi().sendBillingSetupEmail(
     {
       phone: phoneNumber,
-      paymentMethod: useCreditCard ? BillingPaymentMethod.CREDITCARD : BillingPaymentMethod.PURCHASEORDER,
       isNihFunded: nihFunded,
       institution: verifiedInstitutionalAffiliation.institutionDisplayName
     }
   );
-    setCurrentStep(4);
+    setCurrentStep(numSteps);
+    setEmailSending(false)
   });
 
   return <Modal width={650} onRequestClose={() => onClose()}>
@@ -157,15 +172,12 @@ export const CreateBillingAccountModal = ({onClose}: Props) => {
               <div style={{paddingTop: 5, marginLeft: '1rem', marginRight: '2rem'}}>
                 <div style={styles.textHeader}>Create billing account</div>
               </div>
-              {fp.range(1, 4).map((i) => <div style={stylesFunction.stepButtonCircle(currentStep, i)}>{i}</div>)}
+              {fp.range(1, numSteps).map((i) => <div style={stylesFunction.stepButtonCircle(currentStep, i)} key={i}>{i}</div>)}
             </FlexRow>
             {currentStep === 0 && <TextColumn>
               <div style={styles.textNormal}>Billing accounts are managed via Google Cloud Platform™ service.</div>
-              <div style={styles.textNormal}><a href={supportUrls.createBillingAccount}>Learn more</a>
-                &nbsp;on how to set up a billing account.
-              </div>
             </TextColumn>}
-            {currentStep !== 0 && currentStep !== 4 && <TextColumn>
+            {currentStep !== 0 && currentStep !== numSteps && <TextColumn>
               <div style={styles.textNormal}>Submit your information below to receive billing and additional information from
                 a Google billing partner representative.</div>
             </TextColumn>}
@@ -193,7 +205,7 @@ export const CreateBillingAccountModal = ({onClose}: Props) => {
       <FlexColumn>
         <TextColumn>
           <p style={styles.textHeader}>Let a Google billing partner create the account for you.</p>
-          <p style={styles.textNormal}>A representative will help you set up <br/>your billing account.</p>
+          <p style={styles.textNormal}>A representative will help you set up <br/>your billing account.<BilingPartnerTooltip/></p>
         </TextColumn>
         <Button data-test-id='use-billing-partner-button'
                 type='primary'
@@ -208,50 +220,70 @@ export const CreateBillingAccountModal = ({onClose}: Props) => {
           <div style={styles.textHeader}>Your Information</div>
           <FlexRow style={{marginTop: '20px'}}>
             <FlexColumn style={styles.textNormal}>
-              Your name
+              <b>First name</b>
               <TextInput
-                  data-test-id='user-full-name'
+                  data-test-id='user-first-name'
                   style={styles.textInput}
                   disabled={true}
-                  value={givenName + ' ' + familyName}/>
+                  value={givenName}/>
             </FlexColumn>
             <FlexColumn style={styles.textNormal}>
-              Your phone number
+              <b>Last name</b>
               <TextInput
-                  data-test-id='user-phone-number'
-                  style={styles.textInput}
-                  onChange={(v) => validatePhoneNumber(v)}/>
-              {invalidPhoneNumberInput && <div data-test-id='invalidPhoneNumber' style={{color: colors.danger}}>
-                Invalid phone number input
-              </div>}
+                data-test-id='user-last-name'
+                style={styles.textInput}
+                disabled={true}
+                value={familyName}/>
             </FlexColumn>
           </FlexRow>
           <FlexRow style={{marginTop: '20px'}}>
             <FlexColumn style={styles.textNormal}>
-              Your contact email address
+              <b>Your phone number</b>
+              <TextInput
+                data-test-id='user-phone-number'
+                style={styles.textInput}
+                onChange={(v) => validatePhoneNumber(v)}/>
+              {invalidPhoneNumberInput && <div data-test-id='invalidPhoneNumber' style={{color: colors.danger}}>
+                Invalid phone number input
+              </div>}
+            </FlexColumn>
+            <FlexColumn style={styles.textNormal}>
+              <b>Your contact email address</b>
               <TextInput
                   data-test-id='user-contact-email'
                   disabled={true}
                   style={styles.textInput}
                   value={contactEmail}/>
             </FlexColumn>
-            <FlexColumn style={styles.textNormal}>
-              Your researchallofus.org ID
-              <TextInput
-                  data-test-id='user-workbench-id'
-                  style={styles.textInput}
-                  disabled={true}
-                  value={username}/>
-            </FlexColumn>
           </FlexRow>
           <FlexRow style={{marginTop: '20px'}}>
             <FlexColumn style={styles.textNormal}>
-              Your institution
+              <b>Your Researcher Workbench login ID</b>
+              <TextInput
+                data-test-id='user-workbench-id'
+                style={styles.textInput}
+                disabled={true}
+                value={username}/>
+            </FlexColumn>
+            <FlexColumn style={styles.textNormal}>
+              <b>Your institution</b>
               <TextInput
                   data-test-id='user-institution'
                   style={styles.textInput}
                   disabled={true}
                   value={verifiedInstitutionalAffiliation.institutionDisplayName}/>
+            </FlexColumn>
+          </FlexRow>
+          <FlexRow style={{marginTop: '10px'}}>
+            <CheckBox style={styles.radioButton}
+                      checked={nihFunded === true}
+                      onChange={(v) => setNihFunded(v)}/>
+            <FlexColumn style={{marginTop: '9px', marginLeft: '15px', marginBottom: '15px'}}>
+              <div style={styles.textNormal}><b>NIH-funded Research.</b></div>
+              <div style={styles.textNormal}>My research is funded by the National Institute of Health, (NIH).
+                NIH funded research is eligible for discounted cloud rates through
+                the NIH STRIDES initiative.
+              </div>
             </FlexColumn>
           </FlexRow>
           <FlexRow style={{marginTop: '100px', justifyContent: 'flex-end'}}>
@@ -271,92 +303,22 @@ export const CreateBillingAccountModal = ({onClose}: Props) => {
         </FlexColumn>)],
       [
         2, () => (
-        <FlexColumn style={{justifyContent: 'space-evenly', width: '100%'}}>
-          <div style={styles.textHeader}>What payment method would you like to use?</div>
-          <FlexColumn style={{marginTop: '20px', width: '100%'}}>
-            <FlexRow style={{boxSizing: 'border-box', borderRadius: '8px', border: '1px solid #CCCFD4', marginBottom: '7px'}}>
-              <RadioButton data-test-id='credit-card-radio'
-                           style={styles.radioButton}
-                           checked={useCreditCard === true}
-                           onChange={() => setUseCreditCard(true)}/>
-              <FlexColumn style={{marginTop: '9px', marginLeft: '15px', marginBottom: '15px'}}>
-                <FlexRow>
-                  <div style={styles.textHeader}>Credit Card&nbsp;&nbsp;</div>
-                  <i style={styles.textNormal}>24 hours to process</i>
-                </FlexRow>
-                <div style={styles.textNormal}>A Google billing partner representative will contact you to process
-                  your request.</div>
-              </FlexColumn>
-            </FlexRow>
-            <FlexRow style={{boxSizing: 'border-box', borderRadius: '8px', border: '1px solid #CCCFD4', marginBottom: '7px'}}>
-              <RadioButton
-                  style={styles.radioButton}
-                  checked={useCreditCard === false}
-                  onChange={() => setUseCreditCard(false)}/>
-              <FlexColumn style={{marginTop: '9px', marginLeft: '15px', marginBottom: '15px'}}>
-                <FlexRow>
-                  <div style={styles.textHeader}>Purchase Order/Other&nbsp;&nbsp;</div>
-                  <i style={styles.textNormal}>5-7 days to process</i>
-                </FlexRow>
-                <div style={styles.textNormal}>You will need to provide more info for the quote, a
-                  Google billing partner representative will contact you to process your request.
-                </div>
-              </FlexColumn>
-            </FlexRow>
-            <FlexRow style={{marginTop: '10px'}}>
-              <CheckBox style={styles.radioButton}
-                        checked={nihFunded === true}
-                        onChange={(v) => setNihFunded(v)}/>
-              <FlexColumn style={{marginTop: '9px', marginLeft: '15px', marginBottom: '15px'}}>
-                <div style={styles.textHeader}>NIH-funded Research.</div>
-                <div style={styles.textNormal}>My research is funded by the National Institute of Health, (NIH).
-                  NIH funded research is eligible for discounted cloud rates through
-                  the NIH STRIDES initiative.
-                </div>
-              </FlexColumn>
-            </FlexRow>
-          </FlexColumn>
-          <FlexRow style={{marginTop: '100px', justifyContent: 'space-between'}}>
-            <Button type='secondary'
-                    style={{fontWeight: 400, padding: '0 18px', height: '40px'}}
-                    onClick={() => {setCurrentStep(1); }}>
-              Back
-            </Button>
-            <FlexRow style={{justifyContent: 'flex-end'}}>
-              <Button type='secondary'
-                      style={{fontWeight: 400, padding: '0 18px', height: '40px', marginRight: '10px'}}
-                      onClick={() => onClose()}>
-                Cancel
-              </Button>
-              <Button data-test-id='next-button'
-                      type='primary'
-                      style={{fontWeight: 400, padding: '0 18px', height: '40px', width: '93px'}}
-                      disabled={useCreditCard === null}
-                      onClick={() => {setCurrentStep(3); }}>
-                Next
-              </Button>
-            </FlexRow>
-          </FlexRow>
-        </FlexColumn>)
-      ], [
-        3, () => (
         <FlexColumn style={{width: '100%'}}>
           <div style={styles.textHeader}>Please review your information</div>
           <TextColumn>
-            <BillingConfirmItem title='Name' value={givenName + ' ' + familyName} dataTestId='user-full-name-text'/>
+            <BillingConfirmItem title='First Name' value={givenName} dataTestId='user-first-name-text'/>
+            <BillingConfirmItem title='Last Name' value={familyName} dataTestId='user-last-name-text'/>
             <BillingConfirmItem title='Phone number' value={phoneNumber} dataTestId='user-phone-number-text'/>
             <BillingConfirmItem title='Contact email' value={contactEmail} dataTestId='user-contact-email-text'/>
-            <BillingConfirmItem title='Researchallofus.org ID' value={username} dataTestId='user-workbench-id-text'/>
+            <BillingConfirmItem title='Researcher Workbench ID' value={username} dataTestId='user-workbench-id-text'/>
             <BillingConfirmItem title='Institution' value={verifiedInstitutionalAffiliation.institutionDisplayName}
                                 dataTestId='user-institution-text'/>
-            <BillingConfirmItem title='Payment type' value={useCreditCard ? 'Credit credit' : 'Purchase order/Other'}
-                                dataTestId='use-credit-card-text'/>
-            <BillingConfirmItem title='NiH-funded' value={nihFunded ? 'NIH’s STRIDES initiative' : 'N/A'} dataTestId='nih-funded-text'/>
+            <BillingConfirmItem title='NiH-funded' value={nihFunded ? 'Yes' : 'No'} dataTestId='nih-funded-text'/>
           </TextColumn>
           <FlexRow style={{marginTop: '100px', justifyContent: 'space-between'}}>
             <Button type='secondary'
                     style={{fontWeight: 400, padding: '0 18px', height: '40px'}}
-                    onClick={() => {setCurrentStep(2); }}>
+                    onClick={() => {setCurrentStep(1); }}>
               Back
             </Button>
             <FlexRow style={{justifyContent: 'flex-end'}}>
@@ -375,10 +337,10 @@ export const CreateBillingAccountModal = ({onClose}: Props) => {
           </FlexRow>
         </FlexColumn>)
       ], [
-        4, () => (
+        3, () => (
         <FlexColumn>
           <div style={styles.textHeader}>Your request has been sent to a Google billing partner.
-            One of their representatives will contact you shortly.</div>
+            One of their representatives will contact within 1 business day.</div>
           <br/>
           <div style={styles.textHeader}>Once your account is set up, you can use it to create
             a new workspace or change a current workspace billing account.</div>
@@ -404,5 +366,6 @@ export const CreateBillingAccountModal = ({onClose}: Props) => {
         }}
         onClick={() => onClose()}
     />}
+    {emailSending && <SpinnerOverlay/>}
   </Modal>;
 };

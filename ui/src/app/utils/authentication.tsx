@@ -16,7 +16,7 @@ declare global {
 }
 
 /** Returns true if use access token, this is used by Puppeteer test. */
-const isTestAccessTokenActive = () => {
+export const isTestAccessTokenActive = () => {
   return environment.allowTestAccessTokenOverride && window.localStorage.getItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN);
 };
 

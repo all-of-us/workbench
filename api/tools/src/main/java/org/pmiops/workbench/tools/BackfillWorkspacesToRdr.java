@@ -4,13 +4,13 @@ import com.google.cloud.tasks.v2.CloudTasksClient;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Optional;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
+import org.pmiops.workbench.cloudtasks.CloudTasksConfig;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchLocationConfigService;
@@ -31,11 +31,10 @@ import org.springframework.context.annotation.Import;
  * not set.
  */
 @Import({
+  CloudTasksConfig.class,
   WorkbenchLocationConfigService.class,
 })
 public class BackfillWorkspacesToRdr {
-  private static final Logger log = Logger.getLogger(DeleteWorkspaces.class.getName());
-
   // I haven't read the entire commons cli code, but it looks like it is limited to the Number type,
   // we really want an Integer
   // https://github.com/apache/commons-cli/blob/98d06d37bc7058bbfb2704c9620669c66e279f4a/src/main/java/org/apache/commons/cli/PatternOptionBuilder.java#L98

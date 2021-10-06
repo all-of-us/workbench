@@ -10,6 +10,11 @@ import RadioButton from 'app/element/radiobutton';
 
 const defaultXpath = '//*[@id="runtime-panel"]';
 
+export enum AutoPauseIdleTime {
+  ThirtyMinutes = '30 minutes (default)',
+  EightHours = '8 hours'
+}
+
 export enum StartStopIconState {
   Error = 'error',
   None = 'none',
@@ -76,6 +81,15 @@ export default class RuntimePanel extends BaseHelpSidebar {
   async pickComputeType(computeType: ComputeType): Promise<void> {
     const computeTypeDropdown = this.getComputeTypeSelect();
     return await computeTypeDropdown.select(computeType);
+  }
+
+  getAutoPauseSelect(): SelectMenu {
+    return SelectMenu.findByName(this.page, { id: 'runtime-autopause' }, this);
+  }
+
+  async pickAutoPauseTime(pauseTime: AutoPauseIdleTime): Promise<void> {
+    const autoPauseDropdown = this.getAutoPauseSelect();
+    return await autoPauseDropdown.select(pauseTime);
   }
 
   async pickDataprocNumWorkers(numWorkers: number): Promise<void> {
