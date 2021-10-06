@@ -1558,22 +1558,6 @@ public class ProfileControllerTest extends BaseControllerTest {
         .isEqualTo(TIMESTAMP.toInstant().toEpochMilli());
   }
 
-  private Long getCompletionEpochMillis(Profile profile, AccessModule accessModuleName) {
-    return profile.getAccessModules().getModules().stream()
-        .filter(m -> m.getModuleName() == accessModuleName)
-        .findFirst()
-        .map(AccessModuleStatus::getCompletionEpochMillis)
-        .orElse(null);
-  }
-
-  private Long getBypassEpochMillis(Profile profile, AccessModule accessModuleName) {
-    return profile.getAccessModules().getModules().stream()
-        .filter(m -> m.getModuleName() == accessModuleName)
-        .findFirst()
-        .map(AccessModuleStatus::getBypassEpochMillis)
-        .orElse(null);
-  }
-
   private Profile createAccountAndDbUserWithAffiliation(
       VerifiedInstitutionalAffiliation verifiedAffiliation, boolean grantAdminAuthority) {
 
