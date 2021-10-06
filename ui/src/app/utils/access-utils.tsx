@@ -147,15 +147,8 @@ export const getAccessModuleConfig = (moduleName: AccessModule): AccessModuleCon
       })],
   );
 };
-//
-// // the modules subject to Annual Access Renewal (AAR), in the order shown on the AAR page.
-// export const accessRenewalTitles = new Map<AccessModule, () => JSX.Element | string>([
-//   [AccessModule.PROFILECONFIRMATION, () => 'Update your profile'],
-//   [AccessModule.PUBLICATIONCONFIRMATION,
-//     () => 'Report any publications or presentations based on your research using the Researcher Workbench'],
-//   [AccessModule.COMPLIANCETRAINING, () => <div><AoU/> Responsible Conduct of Research Training</div>],
-//   [AccessModule.DATAUSERCODEOFCONDUCT, () => 'Sign Data User Code of Conduct'],
-// ]) as Map<AccessModule, () => JSX.Element>;
+
+// the modules subject to Annual Access Renewal (AAR), in the order shown on the AAR page.
 export const accessRenewalModules = [
   AccessModule.PROFILECONFIRMATION,
   AccessModule.PUBLICATIONCONFIRMATION,
