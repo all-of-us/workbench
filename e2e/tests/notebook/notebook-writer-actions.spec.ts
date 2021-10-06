@@ -129,12 +129,11 @@ xdescribe('Workspace WRITER Jupyter notebook action tests', () => {
     // Notebook snowman actions Rename, Duplicate and Delete are disabled.
     const dataResourceCard = new DataResourceCard(page);
     let notebookCard = await dataResourceCard.findCard(notebookName, ResourceCard.Notebook);
-    // open Snowman menu.
+    // open Snowman menu.  All Workspace actions are available for click.
     const snowmanMenu = await notebookCard.getSnowmanMenu();
     expect(await snowmanMenu.isOptionDisabled(MenuOption.Rename)).toBe(false);
     expect(await snowmanMenu.isOptionDisabled(MenuOption.Duplicate)).toBe(false);
     expect(await snowmanMenu.isOptionDisabled(MenuOption.Delete)).toBe(false);
-    // But the Copy to another Workspace action is available for click.
     expect(await snowmanMenu.isOptionDisabled(MenuOption.CopyToAnotherWorkspace)).toBe(false);
     // close Snowman menu.
     await notebookCard.clickSnowmanIcon();
@@ -143,9 +142,9 @@ xdescribe('Workspace WRITER Jupyter notebook action tests', () => {
     const notebookPreviewPage = new NotebookPreviewPage(page);
     await notebookPreviewPage.waitForLoad();
 
-    // Edit link is disabled.
+    // Edit link is enabled.
     expect(await notebookPreviewPage.getEditLink().isCursorNotAllowed()).toBe(false);
-    // Run (Playground mode) link is disabled.
+    // Run (Playground mode) link is enabled.
     expect(await notebookPreviewPage.getRunPlaygroundModeLink().isCursorNotAllowed()).toBe(false);
     // Verify notebook code and answer are displayed.
     const previewCode = await notebookPreviewPage.getFormattedCode();
@@ -180,7 +179,7 @@ xdescribe('Workspace WRITER Jupyter notebook action tests', () => {
     notebookCard = await dataResourceCard.findCard(copyNotebookName, ResourceCard.Notebook);
     expect(notebookCard).toBeTruthy();
 
-    // Notebook actions Rename, Duplicate, Delete and Copy to another Workspace actions are avaliable to click.
+    // Notebook actions Rename, Duplicate, Delete and Copy to another Workspace actions are available for click.
     const copyNotebookCardMenu = await notebookCard.getSnowmanMenu();
     expect(await copyNotebookCardMenu.isOptionDisabled(MenuOption.Rename)).toBe(false);
     expect(await copyNotebookCardMenu.isOptionDisabled(MenuOption.Duplicate)).toBe(false);
