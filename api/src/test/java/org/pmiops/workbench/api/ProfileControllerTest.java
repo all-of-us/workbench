@@ -75,6 +75,7 @@ import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapperIm
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.AccessBypassRequest;
 import org.pmiops.workbench.model.AccessModule;
+import org.pmiops.workbench.model.AccessModuleStatus;
 import org.pmiops.workbench.model.AccountPropertyUpdate;
 import org.pmiops.workbench.model.Address;
 import org.pmiops.workbench.model.Authority;
@@ -1021,11 +1022,11 @@ public class ProfileControllerTest extends BaseControllerTest {
     createAccountAndDbUserWithAffiliation();
 
     profileController.syncEraCommonsStatus();
-    assertThat(userDao.findUserByUsername(FULL_USER_NAME).getEraCommonsLinkedNihUsername())
-        .isEqualTo(linkedUsername);
-    assertThat(userDao.findUserByUsername(FULL_USER_NAME).getEraCommonsLinkExpireTime())
-        .isNotNull();
-    assertThat(userDao.findUserByUsername(FULL_USER_NAME).getEraCommonsCompletionTime())
+    final DbUser user = userDao.findUserByUsername(FULL_USER_NAME);
+    assertThat(user.getEraCommonsLinkedNihUsername()).isEqualTo(linkedUsername);
+    assertThat(user.getEraCommonsLinkExpireTime()).isNotNull();
+    assertThat(
+            getCompletionEpochMillis(profileController.getMe().getBody(), AccessModule.ERA_COMMONS))
         .isNotNull();
   }
 
@@ -1067,7 +1068,8 @@ public class ProfileControllerTest extends BaseControllerTest {
 
     createAccountAndDbUserWithAffiliation();
     Profile profile = profileController.getMe().getBody();
-    assertThat(profile.getProfileLastConfirmedTime()).isEqualTo(initialTestTime);
+    assertThat(getCompletionEpochMillis(profile, AccessModule.PROFILE_CONFIRMATION))
+        .isEqualTo(initialTestTime);
 
     // time passes
 
@@ -1081,7 +1083,8 @@ public class ProfileControllerTest extends BaseControllerTest {
     profileController.updateProfile(profile);
 
     Profile updatedProfile = profileController.getMe().getBody();
-    assertThat(updatedProfile.getProfileLastConfirmedTime()).isEqualTo(laterTime);
+    assertThat(getCompletionEpochMillis(updatedProfile, AccessModule.PROFILE_CONFIRMATION))
+        .isEqualTo(laterTime);
   }
 
   @Test
@@ -1386,10 +1389,10 @@ public class ProfileControllerTest extends BaseControllerTest {
     final Profile original = createAccountAndDbUserWithAffiliation();
 
     // user has no bypasses at test start
-    assertThat(original.getDataUseAgreementBypassTime()).isNull();
-    assertThat(original.getComplianceTrainingBypassTime()).isNull();
-    assertThat(original.getEraCommonsBypassTime()).isNull();
-    assertThat(original.getTwoFactorAuthBypassTime()).isNull();
+    assertThat(getBypassEpochMillis(original, AccessModule.DATA_USER_CODE_OF_CONDUCT)).isNull();
+    assertThat(getBypassEpochMillis(original, AccessModule.COMPLIANCE_TRAINING)).isNull();
+    assertThat(getBypassEpochMillis(original, AccessModule.ERA_COMMONS)).isNull();
+    assertThat(getBypassEpochMillis(original, AccessModule.TWO_FACTOR_AUTH)).isNull();
 
     final List<AccessBypassRequest> bypasses1 =
         ImmutableList.of(
@@ -1406,12 +1409,13 @@ public class ProfileControllerTest extends BaseControllerTest {
     final Profile retrieved1 = profileService.updateAccountProperties(request1);
 
     // this is now bypassed
-    assertThat(retrieved1.getDataUseAgreementBypassTime()).isNotNull();
+    assertThat(getBypassEpochMillis(retrieved1, AccessModule.DATA_USER_CODE_OF_CONDUCT))
+        .isNotNull();
     // remains unbypassed because the flag was set to false
-    assertThat(retrieved1.getComplianceTrainingBypassTime()).isNull();
+    assertThat(getBypassEpochMillis(retrieved1, AccessModule.COMPLIANCE_TRAINING)).isNull();
     // unchanged: unbypassed
-    assertThat(retrieved1.getEraCommonsBypassTime()).isNull();
-    assertThat(retrieved1.getTwoFactorAuthBypassTime()).isNull();
+    assertThat(getBypassEpochMillis(retrieved1, AccessModule.ERA_COMMONS)).isNull();
+    assertThat(getBypassEpochMillis(retrieved1, AccessModule.TWO_FACTOR_AUTH)).isNull();
 
     final List<AccessBypassRequest> bypasses2 =
         ImmutableList.of(
@@ -1428,11 +1432,11 @@ public class ProfileControllerTest extends BaseControllerTest {
     final Profile retrieved2 = profileService.updateAccountProperties(request2);
 
     // this is now unbypassed
-    assertThat(retrieved2.getDataUseAgreementBypassTime()).isNull();
+    assertThat(getBypassEpochMillis(retrieved2, AccessModule.DATA_USER_CODE_OF_CONDUCT)).isNull();
     // these 3 are now bypassed
-    assertThat(retrieved2.getComplianceTrainingBypassTime()).isNotNull();
-    assertThat(retrieved2.getEraCommonsBypassTime()).isNotNull();
-    assertThat(retrieved2.getTwoFactorAuthBypassTime()).isNotNull();
+    assertThat(getBypassEpochMillis(retrieved2, AccessModule.COMPLIANCE_TRAINING)).isNotNull();
+    assertThat(getBypassEpochMillis(retrieved2, AccessModule.ERA_COMMONS)).isNotNull();
+    assertThat(getBypassEpochMillis(retrieved2, AccessModule.TWO_FACTOR_AUTH)).isNotNull();
 
     // TODO(RW-6930): Make Profile contain the new AccessModule block, then read from there.
     verify(mockProfileAuditor).fireUpdateAction(original, retrieved1);
@@ -1542,13 +1546,15 @@ public class ProfileControllerTest extends BaseControllerTest {
     body.setRedirectUrl("url");
 
     dbUser.setRasLinkLoginGovUsername(loginGovUsername);
-    dbUser.setRasLinkLoginGovCompletionTime(TIMESTAMP);
+    dbUser = userDao.save(dbUser);
+    accessModuleService.updateCompletionTime(dbUser, AccessModuleName.RAS_LOGIN_GOV, TIMESTAMP);
+
     when(mockRasLinkService.linkRasLoginGovAccount(body.getAuthCode(), body.getRedirectUrl()))
         .thenReturn(dbUser);
 
-    assertThat(profileController.linkRasAccount(body).getBody().getRasLinkLoginGovUsername())
-        .isEqualTo(loginGovUsername);
-    assertThat(profileController.linkRasAccount(body).getBody().getRasLinkLoginGovCompletionTime())
+    final Profile profile = profileController.linkRasAccount(body).getBody();
+    assertThat(profile.getRasLinkLoginGovUsername()).isEqualTo(loginGovUsername);
+    assertThat(getCompletionEpochMillis(profile, AccessModule.RAS_LINK_LOGIN_GOV))
         .isEqualTo(TIMESTAMP.toInstant().toEpochMilli());
   }
 
@@ -1597,6 +1603,10 @@ public class ProfileControllerTest extends BaseControllerTest {
     assertThat(profile.getFamilyName()).isEqualTo(FAMILY_NAME);
     assertThat(profile.getGivenName()).isEqualTo(GIVEN_NAME);
     assertThat(profile.getAccessTierShortNames()).isEmpty();
+    assertThat(getCompletionEpochMillis(profile, AccessModule.PROFILE_CONFIRMATION))
+        .isEqualTo(TIMESTAMP.getTime());
+    assertThat(getCompletionEpochMillis(profile, AccessModule.PUBLICATION_CONFIRMATION))
+        .isEqualTo(TIMESTAMP.getTime());
 
     DbUser user = userDao.findUserByUsername(FULL_USER_NAME);
     assertThat(user).isNotNull();
@@ -1607,12 +1617,22 @@ public class ProfileControllerTest extends BaseControllerTest {
         .isWithin(TIME_TOLERANCE_MILLIS)
         .of(ProfileControllerTest.TIMESTAMP.getTime());
     assertThat(accessTierService.getAccessTierShortNamesForUser(user)).isEmpty();
-    assertThat((double) user.getProfileLastConfirmedTime().getTime())
-        .isWithin(TIME_TOLERANCE_MILLIS)
-        .of(ProfileControllerTest.TIMESTAMP.getTime());
-    assertThat((double) user.getPublicationsLastConfirmedTime().getTime())
-        .isWithin(TIME_TOLERANCE_MILLIS)
-        .of(ProfileControllerTest.TIMESTAMP.getTime());
+  }
+
+  private Long getCompletionEpochMillis(Profile profile, AccessModule accessModuleName) {
+    return profile.getAccessModules().getModules().stream()
+        .filter(m -> m.getModuleName() == accessModuleName)
+        .findFirst()
+        .map(AccessModuleStatus::getCompletionEpochMillis)
+        .orElse(null);
+  }
+
+  private Long getBypassEpochMillis(Profile profile, AccessModule accessModuleName) {
+    return profile.getAccessModules().getModules().stream()
+        .filter(m -> m.getModuleName() == accessModuleName)
+        .findFirst()
+        .map(AccessModuleStatus::getBypassEpochMillis)
+        .orElse(null);
   }
 
   private VerifiedInstitutionalAffiliation createVerifiedInstitutionalAffiliation() {
