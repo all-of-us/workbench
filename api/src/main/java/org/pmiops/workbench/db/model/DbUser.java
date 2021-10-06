@@ -77,9 +77,13 @@ public class DbUser {
   private Integer dataUseAgreementSignedVersion;
   private Timestamp complianceTrainingExpirationTime;
 
-  // potentially obsolete access module fields.  These are likely to be deleted in the near future.
-  // Moodle badges are indexed by username, not this value.  See ComplianceService.
-  @Deprecated private Integer moodleId;
+  private Timestamp twoFactorAuthCompletionTime;
+  private Timestamp twoFactorAuthBypassTime;
+
+  private Timestamp profileLastConfirmedTime;
+  private Timestamp publicationsLastConfirmedTime;
+
+  private Timestamp computeSecuritySuspendedUntil;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -270,17 +274,6 @@ public class DbUser {
 
   public void setAreaOfResearch(String areaOfResearch) {
     this.areaOfResearch = areaOfResearch;
-  }
-
-  @Deprecated
-  @Column(name = "moodle_id")
-  public Integer getMoodleId() {
-    return moodleId;
-  }
-
-  @Deprecated
-  public void setMoodleId(Integer moodleId) {
-    this.moodleId = moodleId;
   }
 
   @Column(name = "era_commons_linked_nih_username")
