@@ -16,11 +16,12 @@ import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors, {addOpacity, colorWithWhiteness} from 'app/styles/colors';
 import {cond, useId, withStyle} from 'app/utils';
 import {
+  accessRenewalModules,
   computeDisplayDates,
+  getAccessModuleConfig,
   isExpiring,
   maybeDaysRemaining,
   redirectToTraining,
-  accessRenewalTitles
 } from 'app/utils/access-utils';
 import {useNavigation} from 'app/utils/navigation';
 import {profileStore, serverConfigStore, useStore} from 'app/utils/stores';
@@ -150,12 +151,19 @@ const ActionButton = (
 
 const BackArrow = withCircleBackground(() => <Arrow style={{height: 21, width: 18}}/>);
 
+interface CardProps {
+  step: number,
+  moduleStatus: AccessModuleStatus,
+  style: React.CSSProperties,
+  children: string | React.ReactNode,
+}
 const RenewalCard = withStyle(renewalStyle.card)(
-  ({step, TitleComponent, moduleStatus, children, style}) => {
+  ({step, moduleStatus, style, children}: CardProps) => {
+    const {AARTitleComponent} = getAccessModuleConfig(moduleStatus.moduleName);
     const {lastConfirmedDate, nextReviewDate} = computeDisplayDates(moduleStatus);
     return <FlexColumn style={style}>
       <div style={renewalStyle.h3}>STEP {step}</div>
-      <div style={renewalStyle.h3}><TitleComponent/></div>
+      <div style={renewalStyle.h3}><AARTitleComponent/></div>
       <div style={{ color: colors.primary, margin: '0.5rem 0', display: 'grid', columnGap: '1rem', gridTemplateColumns: 'auto 1fr'}}>
         <div>Last Updated On:</div>
         <div>Next Review:</div>
@@ -166,7 +174,6 @@ const RenewalCard = withStyle(renewalStyle.card)(
     </FlexColumn>;
   }
 );
-
 
 // Page to render
 export const AccessRenewal = fp.flow(
@@ -198,7 +205,7 @@ export const AccessRenewal = fp.flow(
     getProfile();
   }, []);
 
-  const expirableModules = modules.filter(moduleStatus => accessRenewalTitles.has(moduleStatus.moduleName));
+  const expirableModules = modules.filter(moduleStatus => accessRenewalModules.includes(moduleStatus.moduleName));
 
   const completeOrBypassed = moduleName => {
     const status = modules.find(m => m.moduleName === moduleName);
@@ -243,7 +250,6 @@ export const AccessRenewal = fp.flow(
       {/* Profile */}
       <RenewalCard
           step={1}
-          TitleComponent={accessRenewalTitles.get(AccessModule.PROFILECONFIRMATION)}
           moduleStatus={modules.find(m => m.moduleName === AccessModule.PROFILECONFIRMATION)}>
         <div style={{marginBottom: '0.5rem'}}>Please update your profile information if any of it has changed recently.</div>
         <div>Note that you are obliged by the Terms of Use of the Workbench to provide keep your profile
@@ -258,7 +264,6 @@ export const AccessRenewal = fp.flow(
       {/* Publications */}
       <RenewalCard
           step={2}
-          TitleComponent={accessRenewalTitles.get(AccessModule.PUBLICATIONCONFIRMATION)}
           moduleStatus={modules.find(m => m.moduleName === AccessModule.PUBLICATIONCONFIRMATION)}>
         <div>The <AoU/> Publication and Presentation Policy requires that you report any upcoming publication or
              presentation resulting from the use of <AoU/> Research Program Data at least two weeks before the date of publication.
@@ -298,7 +303,6 @@ export const AccessRenewal = fp.flow(
       {/* Compliance Training */}
       {enableComplianceTraining && <RenewalCard
           step={3}
-          TitleComponent={accessRenewalTitles.get(AccessModule.COMPLIANCETRAINING)}
           moduleStatus={modules.find(m => m.moduleName === AccessModule.COMPLIANCETRAINING)}>
       <div> You are required to complete the refreshed ethics training courses to understand the privacy safeguards and
           the compliance requirements for using the <AoU/> Dataset.
@@ -329,7 +333,6 @@ export const AccessRenewal = fp.flow(
       {/* DUCC */}
       <RenewalCard
           step={enableComplianceTraining ? 4 : 3}
-          TitleComponent={accessRenewalTitles.get(AccessModule.DATAUSERCODEOFCONDUCT)}
           moduleStatus={modules.find(m => m.moduleName === AccessModule.DATAUSERCODEOFCONDUCT)}>
         <div>Please review and sign the data user code of conduct consenting to the <AoU/> data use policy.</div>
         <ActionButton
