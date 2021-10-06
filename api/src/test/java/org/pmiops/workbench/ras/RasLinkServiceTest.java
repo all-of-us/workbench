@@ -213,7 +213,6 @@ public class RasLinkServiceTest extends SpringTest {
 
     assertThat(userDao.findUserByUserId(userId).getRasLinkLoginGovUsername())
         .isEqualTo(LOGIN_GOV_USERNAME);
-    assertThat(userDao.findUserByUserId(userId).getRasLinkLoginGovCompletionTime()).isEqualTo(NOW);
     assertModuleCompletionTime(AccessModuleName.RAS_LOGIN_GOV, NOW);
     assertModuleCompletionTime(AccessModuleName.ERA_COMMONS, null);
   }
@@ -228,7 +227,6 @@ public class RasLinkServiceTest extends SpringTest {
 
     assertThat(userDao.findUserByUserId(userId).getRasLinkLoginGovUsername())
         .isEqualTo(LOGIN_GOV_USERNAME);
-    assertThat(userDao.findUserByUserId(userId).getRasLinkLoginGovCompletionTime()).isEqualTo(NOW);
     assertThat(userDao.findUserByUserId(userId).getEraCommonsLinkedNihUsername())
         .isEqualTo("eraUserId");
     assertModuleCompletionTime(AccessModuleName.RAS_LOGIN_GOV, NOW);
@@ -248,7 +246,6 @@ public class RasLinkServiceTest extends SpringTest {
 
     assertThat(userDao.findUserByUserId(userId).getRasLinkLoginGovUsername())
         .isEqualTo(LOGIN_GOV_USERNAME);
-    assertThat(userDao.findUserByUserId(userId).getRasLinkLoginGovCompletionTime()).isEqualTo(NOW);
     assertModuleCompletionTime(AccessModuleName.RAS_LOGIN_GOV, NOW);
     assertModuleCompletionTime(AccessModuleName.ERA_COMMONS, eRATime);
   }
@@ -273,10 +270,10 @@ public class RasLinkServiceTest extends SpringTest {
         () -> rasLinkService.linkRasLoginGovAccount(AUTH_CODE, REDIRECT_URL));
   }
 
-  private void assertModuleCompletionTime(AccessModuleName module, Timestamp timestamp) {
+  private void assertModuleCompletionTime(AccessModuleName moduleName, Timestamp timestamp) {
     Optional<DbUserAccessModule> dbAccessModule =
         userAccessModuleDao.getByUserAndAccessModule(
-            currentUser, accessModuleDao.findOneByName(module).get());
+            currentUser, accessModuleDao.findOneByName(moduleName).get());
     if (!dbAccessModule.isPresent()) {
       assertThat(timestamp).isNull();
     } else {

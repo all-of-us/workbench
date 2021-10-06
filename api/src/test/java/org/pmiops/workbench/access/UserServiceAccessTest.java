@@ -393,7 +393,6 @@ public class UserServiceAccessTest {
   public void test_updateUserWithRetries_dua_unbypassed_aar_expired_noncompliant() {
     testUnregistration(
         user -> {
-          user.setDataUseAgreementBypassTime(null);
           final Timestamp willExpire = Timestamp.from(START_INSTANT);
           accessModuleService.updateBypassTime(
               dbUser.getUserId(), AccessModule.DATA_USER_CODE_OF_CONDUCT, false);
