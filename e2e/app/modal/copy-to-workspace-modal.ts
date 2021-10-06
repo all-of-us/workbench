@@ -19,9 +19,6 @@ export default class CopyToWorkspaceModal extends Modal {
       await this.getDestinationTextbox().exists(timeout),
       await this.getNotebookNameTextbox().exists(timeout)
     ]);
-    await this.page.waitForXPath(`${this.getXpath()}//*[text()="${modalTitle}"]`, { visible: true });
-    await this.getDestinationTextbox().exists(30 * 1000);
-    await this.getNotebookNameTextbox().exists(30 * 1000);
     return true;
   }
 

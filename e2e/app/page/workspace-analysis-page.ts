@@ -8,7 +8,6 @@ import { getPropValue } from 'utils/element-utils';
 import { waitForDocumentTitle, waitWhileLoading } from 'utils/waits-utils';
 import NotebookPage from './notebook-page';
 import WorkspaceBase from './workspace-base';
-import {takeScreenshot} from "../../utils/save-file-utils";
 
 const PageTitle = 'View Notebooks';
 
@@ -112,7 +111,6 @@ export default class WorkspaceAnalysisPage extends WorkspaceBase {
     // Fill out modal fields.
     const copyModal = new CopyToWorkspaceModal(this.page);
     await copyModal.waitForLoad();
-    await takeScreenshot(this.page, 'CopyToWorkspaceModal.jpg');
     await copyModal.copyToAnotherWorkspace(destinationWorkspace, destinationNotebookName);
   }
 
