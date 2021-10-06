@@ -4289,6 +4289,9 @@ definitions:
         type: boolean
         default: false
         description: Whether the Compliance Training access module is enabled.
+      complianceTrainingHost:
+        type: string
+        description: The hostname for constructing the compliance training URL.
       enableEraCommons:
         type: boolean
         default: false
