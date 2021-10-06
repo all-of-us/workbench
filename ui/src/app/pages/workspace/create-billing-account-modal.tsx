@@ -17,6 +17,7 @@ import {switchCase} from 'app/utils';
 import {reactStyles} from 'app/utils';
 import {profileStore, useStore} from 'app/utils/stores';
 import {supportUrls} from 'app/utils/zendesk';
+import {SpinnerOverlay} from 'app/components/spinners';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {useState} from 'react';
@@ -131,6 +132,7 @@ export const CreateBillingAccountModal = ({onClose}: Props) => {
   const [phoneNumber, setPhoneNumber] = useState<string>();
   const [invalidPhoneNumberInput, setInvalidPhoneNumberInput] = useState<boolean>(null);
   const [nihFunded, setNihFunded] = useState<boolean>(null);
+  const [emailSending, setEmailSending] = useState(false);
 
   const validatePhoneNumber = (phoneInput: string) => {
     const sanitizedPhone = phoneInput.replace(/\D/g, '');
@@ -148,7 +150,9 @@ export const CreateBillingAccountModal = ({onClose}: Props) => {
       title: 'Failed To Send Email',
       message: 'An error occurred trying to send email. Please try again.',
     })
-  )(async() => {await profileApi().sendBillingSetupEmail(
+  )(async() => {
+    setEmailSending(true)
+    await profileApi().sendBillingSetupEmail(
     {
       phone: phoneNumber,
       isNihFunded: nihFunded,
@@ -156,6 +160,7 @@ export const CreateBillingAccountModal = ({onClose}: Props) => {
     }
   );
     setCurrentStep(numSteps);
+    setEmailSending(false)
   });
 
   return <Modal width={650} onRequestClose={() => onClose()}>
@@ -361,5 +366,6 @@ export const CreateBillingAccountModal = ({onClose}: Props) => {
         }}
         onClick={() => onClose()}
     />}
+    {emailSending && <SpinnerOverlay/>}
   </Modal>;
 };
