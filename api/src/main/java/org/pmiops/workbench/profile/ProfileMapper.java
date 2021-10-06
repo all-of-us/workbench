@@ -35,19 +35,6 @@ public interface ProfileMapper {
   @Mapping(source = "latestTermsOfService.tosVersion", target = "latestTermsOfServiceVersion")
   @Mapping(source = "latestTermsOfService.agreementTime", target = "latestTermsOfServiceTime")
   @Mapping(source = "dbUser.userId", target = "userId")
-
-  @Mapping(target = "twoFactorAuthCompletionTime", ignore = true)
-  @Mapping(target = "twoFactorAuthBypassTime", ignore = true)
-  @Mapping(target = "eraCommonsCompletionTime", ignore = true)
-  @Mapping(target = "eraCommonsBypassTime", ignore = true)
-  @Mapping(target = "complianceTrainingCompletionTime", ignore = true)
-  @Mapping(target = "complianceTrainingBypassTime", ignore = true)
-  @Mapping(target = "dataUseAgreementCompletionTime", ignore = true)
-  @Mapping(target = "dataUseAgreementBypassTime", ignore = true)
-  @Mapping(target = "rasLinkLoginGovCompletionTime", ignore = true)
-  @Mapping(target = "rasLinkLoginGovBypassTime", ignore = true)
-  @Mapping(target = "publicationsLastConfirmedTime", ignore = true)
-  @Mapping(target = "profileLastConfirmedTime", ignore = true)
   Profile toModel(
       DbUser dbUser,
       VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation,
