@@ -155,7 +155,7 @@ interface CardProps {
   step: number,
   moduleStatus: AccessModuleStatus,
   style: React.CSSProperties,
-  children,
+  children: string | React.ReactNode,
 }
 const RenewalCard = withStyle(renewalStyle.card)(
   ({step, moduleStatus, style, children}: CardProps) => {
