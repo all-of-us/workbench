@@ -386,15 +386,15 @@ export async function waitWhileLoading(
     waitForRuntime ? '' : ':not([aria-hidden="true"]):not([data-test-id*="runtime-status"])'
   }`;
 
-  // Prevent checking on Login page.
+  // Prevent checking in Login page.
   await page.waitForSelector('[data-test-id="sign-in-page"]', { timeout: 1000 }).catch(() => {
     return;
   });
 
-  // To prevent checking on blank page, wait for elements exist in DOM.
+  // Prevent checking in blank page: wait for loading spinner or some elements exists in DOM.
   await Promise.race([page.waitForSelector(notBlankPageSelector), page.waitForSelector(spinElementsSelector)]);
 
-  // Wait for spinners stop and gone.
+  // Wait for loading spinner to stop or no longer exists.
   try {
     await Promise.all([
       page.waitForFunction(

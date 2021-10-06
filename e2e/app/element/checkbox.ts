@@ -38,7 +38,7 @@ export default class Checkbox extends BaseElement {
         return;
       }
       maxAttempts--;
-      await this.page.waitForTimeout(2000).then(click); // Two seconds pause before try again
+      await this.page.waitForTimeout(1000).then(click); // 1 second pause before try again
     };
     const checked = await this.isChecked();
     if (!checked) {

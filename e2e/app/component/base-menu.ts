@@ -8,11 +8,6 @@ import Link from 'app/element/link';
 export default abstract class BaseMenu extends Container {
   protected abstract getMenuItemXpath(menuItemText: string): string;
 
-  async waitUntilVisible(): Promise<void> {
-    await this.page.waitForXPath(this.getXpath(), { visible: true });
-    await waitWhileLoading(this.page);
-  }
-
   protected constructor(page: Page, xpath: string) {
     super(page, xpath);
   }
