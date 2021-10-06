@@ -155,10 +155,10 @@ const AccessModuleExpirations = ({modules, UserStatusComponent}: ExpirationProps
       // return the status if found; init an empty status with the moduleName if not
       const status: AccessModuleStatus = modules.find(s => s.moduleName === moduleName) || {moduleName};
       const {lastConfirmedDate, nextReviewDate} = computeDisplayDates(status);
-      const TitleComponent = getAccessModuleConfig(moduleName).aarLabel;
+      const {AARTitleComponent} = getAccessModuleConfig(moduleName);
       return <FlexRow style={{marginTop: '0.5rem'}}>
         <FlexColumn>
-          <label style={styles.semiBold}>Step {zeroBasedStep + 1}: <TitleComponent/></label>
+          <label style={styles.semiBold}>Step {zeroBasedStep + 1}: <AARTitleComponent/></label>
           <div>Last Updated On: {lastConfirmedDate}</div>
           <div>Next Review: {nextReviewDate}</div>
         </FlexColumn>

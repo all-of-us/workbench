@@ -74,8 +74,8 @@ export const redirectToRas = (openInNewTab: boolean = true): void => {
 interface AccessModuleConfig {
   moduleName: AccessModule;
   isEnabledInEnvironment: boolean;  // either true or dependent on a feature flag
-  aarLabel: () => JSX.Element;
-  darLabel: JSX.Element;
+  AARTitleComponent: () => JSX.Element;
+  DARTitleComponent: () => JSX.Element;
   externalSyncAction?: Function;
   refreshAction?: Function;
 }
@@ -95,7 +95,7 @@ export const getAccessModuleConfig = (moduleName: AccessModule): AccessModuleCon
       [AccessModule.TWOFACTORAUTH, () => ({
         moduleName,
         isEnabledInEnvironment: true,
-        darLabel: <div>Turn on Google 2-Step Verification</div>,
+        DARTitleComponent: () => <div>Turn on Google 2-Step Verification</div>,
         externalSyncAction: async () => await profileApi().syncTwoFactorAuthStatus(),
         refreshAction: async () => await profileApi().syncTwoFactorAuthStatus(),
       })],
@@ -103,7 +103,7 @@ export const getAccessModuleConfig = (moduleName: AccessModule): AccessModuleCon
       [AccessModule.RASLINKLOGINGOV, () => ({
         moduleName,
         isEnabledInEnvironment: enableRasLoginGovLinking,
-        darLabel: <div>Verify your identity with Login.gov <TooltipTrigger
+        DARTitleComponent: () => <div>Verify your identity with Login.gov <TooltipTrigger
             content={'For additional security, we require you to verify your identity by uploading a photo of your ID.'}>
           <InfoIcon style={{margin: '0 0.3rem'}}/>
         </TooltipTrigger></div>,
@@ -113,7 +113,7 @@ export const getAccessModuleConfig = (moduleName: AccessModule): AccessModuleCon
       [AccessModule.ERACOMMONS, () => ({
         moduleName,
         isEnabledInEnvironment: enableEraCommons,
-        darLabel: <div>Connect your eRA Commons account</div>,
+        DARTitleComponent: () => <div>Connect your eRA Commons account</div>,
         externalSyncAction: async () => await profileApi().syncEraCommonsStatus(),
         refreshAction: async () => await profileApi().syncEraCommonsStatus(),
       })],
@@ -121,8 +121,8 @@ export const getAccessModuleConfig = (moduleName: AccessModule): AccessModuleCon
       [AccessModule.COMPLIANCETRAINING, () => ({
         moduleName,
         isEnabledInEnvironment: enableComplianceTraining,
-        aarLabel: () => <div><AoU/> Responsible Conduct of Research Training</div>,
-        darLabel: <div>Complete <AoU/> research Registered Tier training</div>,
+        AARTitleComponent: () => <div><AoU/> Responsible Conduct of Research Training</div>,
+        DARTitleComponent: () => <div>Complete <AoU/> research Registered Tier training</div>,
         externalSyncAction: async () => await profileApi().syncComplianceTrainingStatus(),
         refreshAction: async () => await profileApi().syncComplianceTrainingStatus(),
       })],
@@ -130,20 +130,20 @@ export const getAccessModuleConfig = (moduleName: AccessModule): AccessModuleCon
       [AccessModule.DATAUSERCODEOFCONDUCT, () => ({
         moduleName,
         isEnabledInEnvironment: true,
-        aarLabel: () => 'Sign Data User Code of Conduct',
-        darLabel: <div>Sign Data User Code of Conduct</div>,
+        AARTitleComponent: () => 'Sign Data User Code of Conduct',
+        DARTitleComponent: () => <div>Sign Data User Code of Conduct</div>,
       })],
 
       [AccessModule.PROFILECONFIRMATION, () => ({
         moduleName,
         isEnabledInEnvironment: true,
-        aarLabel: () => 'Update your profile',
+        AARTitleComponent: () => 'Update your profile',
       })],
 
       [AccessModule.PUBLICATIONCONFIRMATION, () => ({
         moduleName,
         isEnabledInEnvironment: true,
-        aarLabel: () => 'Report any publications or presentations based on your research using the Researcher Workbench',
+        AARTitleComponent: () => 'Report any publications or presentations based on your research using the Researcher Workbench',
       })],
   );
 };

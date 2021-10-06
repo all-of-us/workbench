@@ -159,11 +159,11 @@ interface CardProps {
 }
 const RenewalCard = withStyle(renewalStyle.card)(
   ({step, moduleStatus, style, children}: CardProps) => {
-    const TitleComponent = getAccessModuleConfig(moduleStatus.moduleName).aarLabel;
+    const {AARTitleComponent} = getAccessModuleConfig(moduleStatus.moduleName);
     const {lastConfirmedDate, nextReviewDate} = computeDisplayDates(moduleStatus);
     return <FlexColumn style={style}>
       <div style={renewalStyle.h3}>STEP {step}</div>
-      <div style={renewalStyle.h3}><TitleComponent/></div>
+      <div style={renewalStyle.h3}><AARTitleComponent/></div>
       <div style={{ color: colors.primary, margin: '0.5rem 0', display: 'grid', columnGap: '1rem', gridTemplateColumns: 'auto 1fr'}}>
         <div>Last Updated On:</div>
         <div>Next Review:</div>
