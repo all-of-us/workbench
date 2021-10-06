@@ -1,6 +1,6 @@
 import { Page } from 'puppeteer';
 import AuthenticatedPage from 'app/page/authenticated-page';
-import { waitForDocumentTitle } from 'utils/waits-utils';
+import { waitForDocumentTitle, waitWhileLoading } from 'utils/waits-utils';
 import Checkbox from 'app/element/checkbox';
 import Textbox from 'app/element/textbox';
 import Textarea from 'app/element/textarea';
@@ -207,7 +207,10 @@ export default class InstitutionEditPage extends AuthenticatedPage {
 
   async clickCancelButton(): Promise<void> {
     const button = this.getCancelButton();
+    const navPromise = this.page.waitForNavigation({ waitUntil: ['load', 'networkidle0'] });
     await button.click();
+    await navPromise;
+    await waitWhileLoading(this.page);
   }
 
   async clickBackButton(): Promise<InstitutionNotSavedModal> {
