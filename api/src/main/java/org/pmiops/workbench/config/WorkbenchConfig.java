@@ -358,6 +358,8 @@ public class WorkbenchConfig {
    *   <li>On incident 3, the user's compute is suspended for 1 hour
    *   <li>On incident 4+, the user is disabled
    * </ul>
+   *
+   * Only has an effect if enableEgressAlertingV2 is enabled.
    */
   public static class EgressAlertRemediationPolicy {
     public static class Escalation {
