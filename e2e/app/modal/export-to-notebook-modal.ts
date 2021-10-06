@@ -44,7 +44,7 @@ export default class ExportToNotebookModal extends Modal {
     return radio.select();
   }
 
-  async pickAnalysisTool(analysisTool: AnalysisTool = AnalysisTool.Hail): Promise<RadioButton> {
+  pickAnalysisTool(analysisTool: AnalysisTool = AnalysisTool.Hail): RadioButton {
     const radioButtonXpath = this.getRadioButtonXpath(analysisTool);
     return new RadioButton(this.page, radioButtonXpath);
   }

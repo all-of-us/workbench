@@ -124,11 +124,11 @@ export default class BaseElement {
         .catch(() => {
           return null;
         });
-      return elementHandle.jsonValue();
+      return await elementHandle.jsonValue();
     };
 
     const boxModel = async (element) => {
-      return element.boxModel();
+      return await element.boxModel();
     };
 
     return this.asElementHandle()

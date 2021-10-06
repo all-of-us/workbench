@@ -1,6 +1,7 @@
 import { Page } from 'puppeteer';
 import { logger } from 'libs/logger';
 import { takeScreenshot } from './save-file-utils';
+import { makeDateTimeStr } from './str-utils';
 
 export const waitForFn = async (fn: () => any, interval = 2000, timeout = 10000): Promise<boolean> => {
   const start = Date.now();
@@ -406,9 +407,9 @@ export async function waitWhileLoading(
       ),
       page.waitForSelector(spinElementsSelector, { hidden: true, timeout })
     ]);
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(400);
   } catch (err) {
-    logger.error(`FAILED to wait for spinner stop: xpath="${spinElementsSelector}"`);
+    logger.error(`ERROR: Loading spinner has not stopped. spinner xpath is "${spinElementsSelector}"`);
     if (err.message.includes('Target closed')) {
       // Leave blank. Ignore error and continue test.
       // Puppeteer can throw following exception when polling for mutation status if this object disappeared in DOM
@@ -416,7 +417,7 @@ export async function waitWhileLoading(
       // Error: Protocol error (Runtime.callFunctionOn): Target closed.
     } else {
       logger.error(err.stack);
-      await takeScreenshot(page, 'Spinner_TimeoutError.jpg');
+      await takeScreenshot(page, `${makeDateTimeStr('ERROR_Spinner_Timeout')}.jpg`);
       throw new Error(err.message);
     }
   }

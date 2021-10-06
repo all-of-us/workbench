@@ -169,15 +169,14 @@ export default class NotebookPage extends NotebookFrame {
     // Puppeteer slowmo is not set and playback is very fast.
     // Need a short pause here after click SAVE button to allow click to finish. Otherwise, it can cause tests to fail.
     // See https://precisionmedicineinitiative.atlassian.net/browse/RW-7228 for more details.
-    await this.page.waitForTimeout(2000);
+    await this.page.waitForTimeout(500);
   }
 
   async selectFileOpenMenu(): Promise<void> {
     const clickFileMenuIcon = async (iframe: Frame): Promise<void> => {
-      await iframe.waitForXPath(Xpath.fileMenuDropdown, { visible: true, timeout: 2000 }).then((element) => {
-        element.hover();
-        element.click();
-      });
+      const dropdown = await iframe.waitForXPath(Xpath.fileMenuDropdown, { visible: true, timeout: 2000 });
+      await dropdown.hover();
+      await dropdown.click();
     };
 
     let maxRetries = 3;

@@ -292,12 +292,12 @@ export function isValidDate(date: string) {
   return d.toISOString().slice(0, 10) === date;
 }
 
-const asyncFilter = async (arr, predicate) =>
+const asyncFilter = (arr, predicate) =>
   arr.reduce(async (items, item) => ((await predicate(item)) ? [...(await items), item] : items), []);
 
 /**
  * Generates a two factor auth code by given secret.
  */
-export async function generate2FACode(secret: string) {
+export function generate2FACode(secret: string) {
   return authenticator.generate(secret);
 }
