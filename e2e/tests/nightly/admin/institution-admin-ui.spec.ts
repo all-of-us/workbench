@@ -89,7 +89,14 @@ describe('Institution Admin', () => {
     expect(await ctEmailAddressTextArea.asElementHandle()).toBeTruthy();
     // verify that the ADD button is disabled
     expect(await institutionEditPage.getAddButton().isCursorNotAllowed()).toBe(true);
-    await institutionEditPage.clickCancelButton();
+    // click the back icon on the top right
+    const institutionNotSavedModal = await institutionEditPage.clickBackButton();
+    // click Keep Editing button to stay on the add new institution page
+    await institutionNotSavedModal.clickKeepEditingButton();
+    await institutionEditPage.waitForLoad();
+    const institutionNotSavedModal2 = await institutionEditPage.clickBackButton();
+    // click yes, leave button to navigate to the institution admin page
+    await institutionNotSavedModal2.clickYesLeaveButton();
     await institutionAdminPage.waitForLoad();
   });
 });
