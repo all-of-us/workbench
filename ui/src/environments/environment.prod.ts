@@ -14,7 +14,6 @@ export const environment: Environment = {
   gaLoggedInDimension: 'dimension2',
   gaUserInstitutionCategoryDimension: 'dimension3',
   zendeskEnv: ZendeskEnv.Prod,
-  trainingUrl: 'https://aou.nnlm.gov',
   inactivityTimeoutSeconds: 30 * 60,
   inactivityWarningBeforeSeconds: 5 * 60,
   allowTestAccessTokenOverride: false,

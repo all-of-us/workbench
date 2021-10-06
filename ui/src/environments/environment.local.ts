@@ -8,7 +8,6 @@ export const environment: Environment = {
   allOfUsApiUrl: 'http://localhost:8081',
   captchaSiteKey: '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI',
   clientId: testEnvironmentBase.clientId,
-  trainingUrl: 'https://aoudev.nnlm.gov',
   leoApiUrl: 'https://leonardo.dsde-dev.broadinstitute.org',
   publicUiUrl: 'http://localhost:4201',
   debug: true,

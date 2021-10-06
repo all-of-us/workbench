@@ -35,6 +35,7 @@ public class ConfigController implements ConfigApiDelegate {
             .shibbolethUiBaseUrl(config.firecloud.shibbolethUiBaseUrl)
             .defaultFreeCreditsDollarLimit(config.billing.defaultFreeCreditsDollarLimit)
             .enableComplianceTraining(config.access.enableComplianceTraining)
+            .complianceTrainingHost(config.moodle.host)
             .enableEraCommons(config.access.enableEraCommons)
             .unsafeAllowSelfBypass(config.access.unsafeAllowSelfBypass)
             .enableBillingUpgrade(config.featureFlags.enableBillingUpgrade)
