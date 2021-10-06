@@ -209,7 +209,6 @@ export default class InstitutionEditPage extends AuthenticatedPage {
     const button = this.getCancelButton();
     await button.click();
   }
- 
 
   async clickBackButton(): Promise<InstitutionNotSavedModal> {
     const iconXpath = '//h3[text()="Add new Institution"]/preceding-sibling::div[@tabindex="0"  and @role = "button"]';

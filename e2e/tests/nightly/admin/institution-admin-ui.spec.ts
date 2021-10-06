@@ -59,7 +59,7 @@ describe('Institution Admin', () => {
     await institutionAdminPage.waitForLoad();
   });
 
-  test('add new Institution page UI check', async () => {
+  test.only('add new Institution page UI check', async () => {
     const institutionAdminPage = new InstitutionAdminPage(page);
     await institutionAdminPage.waitForLoad();
     const adminTable = new AdminTable(page);
@@ -97,6 +97,6 @@ describe('Institution Admin', () => {
     const institutionNotSavedModal2 = await institutionEditPage.clickBackButton();
     // click yes, leave button to navigate to the institution admin page
     await institutionNotSavedModal2.clickYesLeaveButton();
-    await institutionAdminPage.waitForLoad();
+    //await institutionAdminPage.waitForLoad();
   });
 });

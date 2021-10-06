@@ -3,7 +3,6 @@ import { LinkText } from 'app/text-labels';
 import Modal from './modal';
 import { waitForText } from 'utils/waits-utils';
 
-
 const modalTitle = 'Institution not saved';
 
 export default class InstitutionNotSavedModal extends Modal {
@@ -15,14 +14,13 @@ export default class InstitutionNotSavedModal extends Modal {
     await waitForText(this.page, modalTitle, { xpath: this.getXpath() });
     return true;
   }
- 
+
   // click KeepEditing  button of the Institution Not Saved Modal
   async clickKeepEditingButton(): Promise<void> {
     await this.clickButton(LinkText.KeepEditing);
   }
   // click yes, Leave button of the Institution Not Saved Modal
-  async clickYesLeaveButton(): Promise<Page> {
+  async clickYesLeaveButton(): Promise<void> {
     await this.clickButton(LinkText.YesLeave);
-    return page;
   }
 }
