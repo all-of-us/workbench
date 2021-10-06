@@ -32,6 +32,7 @@ public class WorkbenchConfig {
   public RasConfig ras;
   public AccessRenewalConfig accessRenewal;
   public OfflineBatchConfig offlineBatch;
+  public EgressAlertRemediationPolicy egressAlertRemediationPolicy;
 
   /** Creates a config with non-null-but-empty member variables, for use in testing. */
   public static WorkbenchConfig createEmptyConfig() {
@@ -58,6 +59,7 @@ public class WorkbenchConfig {
     config.ras = new RasConfig();
     config.accessRenewal = new AccessRenewalConfig();
     config.offlineBatch = new OfflineBatchConfig();
+    config.egressAlertRemediationPolicy = new EgressAlertRemediationPolicy();
     return config;
   }
 
@@ -337,5 +339,23 @@ public class WorkbenchConfig {
     public Integer usersPerAuditTask;
     // Number of users to process within a single access synchronization task.
     public Integer usersPerSynchronizeAccessTask;
+  }
+
+  public static class EgressAlertRemediationPolicy {
+    public static class Escalation {
+      public static class SuspendCompute {
+        public Long durationMinutes;
+      }
+
+      public static class DisableUser {}
+
+      public Integer afterIncidentCount;
+
+      // Exactly one of the following should be specified.
+      public SuspendCompute suspendCompute;
+      public DisableUser disableUser;
+    }
+
+    List<Escalation> escalations;
   }
 }
