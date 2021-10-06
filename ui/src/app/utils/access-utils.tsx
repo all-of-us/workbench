@@ -9,9 +9,7 @@ import {AnalyticsTracker} from 'app/utils/analytics';
 import {convertAPIError} from 'app/utils/errors';
 import {encodeURIComponentStrict} from 'app/utils/navigation';
 import {authStore, profileStore, serverConfigStore, useStore} from 'app/utils/stores';
-import {environment} from 'environments/environment';
 import {AccessModule, AccessModuleStatus, ErrorCode, Profile, UserTierEligibility} from 'generated/fetch';
-import {getLiveDUCCVersion} from './code-of-conduct';
 import {parseQueryParams} from "app/components/app-router";
 import {cond, daysFromNow, displayDateWithoutHours} from "./index";
 import {AccessTierShortNames} from 'app/utils/access-tiers';
@@ -34,7 +32,9 @@ interface RegistrationTask {
 export async function redirectToTraining() {
   AnalyticsTracker.Registration.EthicsTraining();
   await profileApi().updatePageVisits({page: 'moodle'});
-  window.open(environment.trainingUrl + '/static/data-researcher.html?saml=on', '_blank');
+  const {config: {complianceTrainingHost}} = serverConfigStore.get();
+  const url = `https://${complianceTrainingHost}/static/data-researcher.html?saml=on'`;
+  window.open(url, '_blank');
 }
 
 export const getTwoFactorSetupUrl = (): string => {

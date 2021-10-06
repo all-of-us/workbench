@@ -17,7 +17,6 @@ export const testEnvironmentBase: EnvironmentBase = {
   gaUserAgentDimension: 'dimension2',
   gaLoggedInDimension: 'dimension3',
   gaUserInstitutionCategoryDimension: 'dimension4',
-  trainingUrl: 'https://aoudev.nnlm.gov',
   zendeskEnv: ZendeskEnv.Sandbox,
   shouldShowDisplayTag: true,
   inactivityTimeoutSeconds: 99999999999,
