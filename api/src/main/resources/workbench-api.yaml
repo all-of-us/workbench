@@ -5518,8 +5518,6 @@ definitions:
         description: The nonce returned from the account creation API.
   SendBillingSetupEmailRequest:
     type: object
-    required:
-      - paymentMethod
     properties:
       phone:
         type: string
@@ -5527,18 +5525,9 @@ definitions:
       institution:
         type: string
         description: The insitution of the user.
-      paymentMethod:
-        description: The payment to use, credit card or purchase order
-        "$ref": "#/definitions/BillingPaymentMethod"
       isNihFunded:
         type: boolean
         description: Whether its NIH Funded research
-  BillingPaymentMethod:
-    type: string
-    description: 'The payment to use when setting up billing with billing parners, credit card or purchase order'
-    enum:
-      - CREDIT_CARD
-      - PURCHASE_ORDER
   UpdateContactEmailRequest:
     type: object
     required:
