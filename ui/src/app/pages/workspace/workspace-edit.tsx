@@ -452,7 +452,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
     }
 
     async requestBillingScopeThenFetchBillingAccount() {
-      if(!this.state.billingAccountFetched) {
+      if(serverConfigStore.get().config.enableBillingUpgrade && !this.state.billingAccountFetched) {
         await ensureBillingScope();
         await this.fetchBillingAccounts();
       }

@@ -167,7 +167,7 @@ export const CreateBillingAccountModal = ({onClose}: Props) => {
               <div style={{paddingTop: 5, marginLeft: '1rem', marginRight: '2rem'}}>
                 <div style={styles.textHeader}>Create billing account</div>
               </div>
-              {fp.range(1, numSteps).map((i) => <div style={stylesFunction.stepButtonCircle(currentStep, i)}>{i}</div>)}
+              {fp.range(1, numSteps).map((i) => <div style={stylesFunction.stepButtonCircle(currentStep, i)} key={i}>{i}</div>)}
             </FlexRow>
             {currentStep === 0 && <TextColumn>
               <div style={styles.textNormal}>Billing accounts are managed via Google Cloud Platform™ service.</div>
