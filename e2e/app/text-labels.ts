@@ -127,7 +127,8 @@ export enum LinkText {
   Submit = 'Submit',
   Update = 'Update',
   Yes = 'Yes',
-  YesDelete = 'YES, DELETE'
+  YesDelete = 'YES, DELETE',
+  YesLeave = 'Yes, Leave'
 }
 
 // Notebook programming language.
