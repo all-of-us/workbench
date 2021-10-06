@@ -341,6 +341,24 @@ public class WorkbenchConfig {
     public Integer usersPerSynchronizeAccessTask;
   }
 
+  /**
+   * One or more escalating remediation actions to take, depending on the number of observed egress
+   * incidents. The highest matching escalation takes precedence. For example, with the given
+   * policy: <code>
+   * escalations: [
+   *   {afterIncidentCount: 1, suspendCompute: {durationMinutes: 10}},
+   *   {afterIncidentCount: 2, suspendCompute: {durationMinutes: 60}},
+   *   {afterIncidentCount: 4, disableUser: {}}
+   * ]
+   * </code>
+   *
+   * <ul>
+   *   <li>On incident 1, the user's compute is suspended for 10 minutes
+   *   <li>On incident 2, the user's compute is suspended for 1 hour
+   *   <li>On incident 3, the user's compute is suspended for 1 hour
+   *   <li>On incident 4+, the user is disabled
+   * </ul>
+   */
   public static class EgressAlertRemediationPolicy {
     public static class Escalation {
       public static class SuspendCompute {
@@ -349,6 +367,8 @@ public class WorkbenchConfig {
 
       public static class DisableUser {}
 
+      // This policy will take effect after this many egress incidents have occurred. The highest
+      // matching incident count escalation takes precedence. Should be a positive integer.
       public Integer afterIncidentCount;
 
       // Exactly one of the following should be specified.
@@ -356,6 +376,6 @@ public class WorkbenchConfig {
       public DisableUser disableUser;
     }
 
-    List<Escalation> escalations;
+    public List<Escalation> escalations;
   }
 }
