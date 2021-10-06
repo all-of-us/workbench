@@ -611,7 +611,8 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
         {enableBillingUpgrade &&
         <div style={{display: 'inline'}}>Once you have used up your free credits, you can either select a shared billing account or create
           a new one using either Google Cloud Platform or a Google billing partner.
-          Please note: If creating a billing account via a Google billing partner, it may take a few days to show up in the <b>Select account</b> dropdown.</div>}
+          Please note: If creating a billing account via a Google billing partner,
+          it may take a few days to show up in the <b>Select account</b> dropdown.</div>}
       </div>;
     }
 
