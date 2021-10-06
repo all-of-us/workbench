@@ -17,10 +17,10 @@ import colors, {addOpacity, colorWithWhiteness} from 'app/styles/colors';
 import {cond, useId, withStyle} from 'app/utils';
 import {
   computeDisplayDates,
-  accessRenewalTitles,
   isExpiring,
   maybeDaysRemaining,
   redirectToTraining,
+  accessRenewalTitles
 } from 'app/utils/access-utils';
 import {useNavigation} from 'app/utils/navigation';
 import {profileStore, serverConfigStore, useStore} from 'app/utils/stores';
@@ -167,14 +167,6 @@ const RenewalCard = withStyle(renewalStyle.card)(
   }
 );
 
-// the modules subject to Annual Access Renewal, in the order shown on the page.
-// exported for testing
-export const accessRenewalModules = [
-  AccessModule.PROFILECONFIRMATION,
-  AccessModule.PUBLICATIONCONFIRMATION,
-  AccessModule.COMPLIANCETRAINING,
-  AccessModule.DATAUSERCODEOFCONDUCT
-];
 
 // Page to render
 export const AccessRenewal = fp.flow(
@@ -194,6 +186,7 @@ export const AccessRenewal = fp.flow(
   const [loading, setLoading] = useState(false);
   const [, navigateByUrl] = useNavigation();
 
+
   // onMount - as we move between pages, let's make sure we have the latest profile
   useEffect(() => {
     const getProfile = async() => {
@@ -205,7 +198,7 @@ export const AccessRenewal = fp.flow(
     getProfile();
   }, []);
 
-  const expirableModules = modules.filter(moduleStatus => accessRenewalModules.includes(moduleStatus.moduleName));
+  const expirableModules = modules.filter(moduleStatus => accessRenewalTitles.has(moduleStatus.moduleName));
 
   const completeOrBypassed = moduleName => {
     const status = modules.find(m => m.moduleName === moduleName);
