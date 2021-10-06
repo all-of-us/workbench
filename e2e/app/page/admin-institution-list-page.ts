@@ -31,8 +31,6 @@ export default class InstitutionAdminPage extends AuthenticatedPage {
 
   // click institution name on the institution-list-page
   async clickInstitutionNameLink(institutionName: string): Promise<Page> {
-    const dataTable = this.getInstitutionTable();
-    dataTable.getFrozenBody();
     const nameLink = await this.getInstitutionNameLink(institutionName);
     await nameLink.click();
     return page;
