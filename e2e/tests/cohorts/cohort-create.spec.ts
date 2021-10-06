@@ -101,52 +101,48 @@ describe('Create Cohorts Test', () => {
     const dataPage = new WorkspaceDataPage(page);
     const cohortBuildPage = await dataPage.clickAddCohortsButton();
 
-    // Include Group 1: Demographics Age range: 21 - 90.
+    // Include Group 1: Demographics Deceased AND Demographics Age range: 21 - 90.
+    const group1 = cohortBuildPage.findIncludeParticipantsGroup('Group 1');
     const minAge = 21;
     const maxAge = 90;
-    const group1 = cohortBuildPage.findIncludeParticipantsGroup('Group 1');
     await group1.includeAge(minAge, maxAge);
-
+    await group1.includeDemographicsDeceased();
     const group1Count = await group1.getGroupCount();
-    const totalCount = await cohortBuildPage.getTotalCount();
+    let totalCount = await cohortBuildPage.getTotalCount();
 
+    expect(Number.isNaN(group1Count)).toBe(false);
     expect(group1Count).toEqual(totalCount);
 
-    // Include Group 2: Demographics Deceased.
+    // Include Group 2: Demographics Ethnicity.
     const group2 = cohortBuildPage.findIncludeParticipantsGroup('Group 2');
-    await group2.includeDemographicsDeceased();
-    const group2Count = await group2.getGroupCount();
-    expect(Number.isNaN(group2Count)).toBe(false);
-
-    // Include Group 3: Demographics Ethnicity.
-    const group3 = cohortBuildPage.findIncludeParticipantsGroup('Group 3');
     // Choose all ethnicities.
-    await group3.includeEthnicity([
+    await group2.includeEthnicity([
       Ethnicity.HispanicOrLatino,
       Ethnicity.NotHispanicOrLatino,
       Ethnicity.RaceEthnicityNoneOfThese,
       Ethnicity.PreferNotToAnswer,
       Ethnicity.Skip
     ]);
-    const group3Count = await group3.getGroupCount();
-    expect(Number.isNaN(group3Count)).toBe(false);
+    const group2Count = await group2.getGroupCount();
+    expect(Number.isNaN(group2Count)).toBe(false);
 
-    // Include Group 4: Demographics Gender Identity.
+    // Include Group 3: Demographics Gender Identity.
+    const group3 = cohortBuildPage.findIncludeParticipantsGroup('Group 3');
+    await group3.includeGenderIdentity([Sex.FEMALE]);
+    await group3.getGroupCount();
+    expect(Number.isNaN(await group3.getGroupCount())).toBe(false);
+
+    // Include Group 4: Demographics Race.
     const group4 = cohortBuildPage.findIncludeParticipantsGroup('Group 4');
-    await group4.includeGenderIdentity([Sex.FEMALE]);
+    await group4.includeRace([Race.WHITE, Race.BLACK, Race.UNKNOWN]);
     await group4.getGroupCount();
-    expect(Number.isNaN(await group4.getGroupCount())).toBe(false);
 
-    // Include Group 5: Demographics Race.
+    totalCount = await cohortBuildPage.getTotalCount();
+    expect(Number.isNaN(totalCount)).toBe(false);
+
+    // Include Group 5: Demographics Sex Assigned at Birth. Include all choices.
     const group5 = cohortBuildPage.findIncludeParticipantsGroup('Group 5');
-    await group5.includeRace([Race.WHITE, Race.BLACK, Race.UNKNOWN]);
-    await group5.getGroupCount();
-
-    expect(Number.isNaN(await cohortBuildPage.getTotalCount())).toBe(false);
-
-    // Include Group 6: Demographics Sex Assigned at Birth. Include all choices.
-    const group6 = cohortBuildPage.findIncludeParticipantsGroup('Group 6');
-    await group6.includeSexAssignedAtBirth([Sex.UNKNOWN, Sex.FEMALE, Sex.SKIPPED, Sex.MALE]);
+    await group5.includeSexAssignedAtBirth([Sex.UNKNOWN, Sex.FEMALE, Sex.SKIPPED, Sex.MALE]);
 
     // Save new cohort.
     const cohortName = await cohortBuildPage.createCohort();
@@ -162,26 +158,6 @@ describe('Create Cohorts Test', () => {
     // Delete cohort in Workspace Data page.
     await dataPage.deleteResource(cohortName, ResourceCard.Cohort);
     expect(await dataPage.findCohortCard(cohortName)).toBeFalsy();
-  });
-
-  test('Create cohort from whole genome variant', async () => {
-    await loadWorkspaceUrl(page, workspaceName);
-
-    const dataPage = new WorkspaceDataPage(page);
-    const cohortBuildPage = await dataPage.clickAddCohortsButton();
-
-    const group1 = cohortBuildPage.findIncludeParticipantsGroup('Group 1');
-    await group1.includeWholeGenomeVariant();
-    const group1Count = await group1.getGroupCount();
-    const totalCount = await cohortBuildPage.getTotalCount();
-    expect(group1Count).toEqual(totalCount);
-    expect(Number.isNaN(group1Count)).toBe(false);
-
-    // Save new cohort.
-    await cohortBuildPage.createCohort();
-
-    // Delete cohort in Cohort Build page.
-    await new CohortActionsPage(page).deleteCohort();
   });
 
   test('Create cohort from EKG conditions with modifiers', async () => {

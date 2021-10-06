@@ -239,14 +239,17 @@ const moduleLabels: Map<AccessModule, JSX.Element> = new Map([
   [AccessModule.DATAUSERCODEOFCONDUCT, <div>Sign Data User Code of Conduct</div>],
 ]);
 
+// RAS cannot be externally synced because it relies on a short lived token
+// DUCC state is strictly internal to the RW
 const externalSyncActions: Map<AccessModule, Function> = new Map([
   [AccessModule.TWOFACTORAUTH, async() => await profileApi().syncTwoFactorAuthStatus()],
-  [AccessModule.RASLINKLOGINGOV, () => redirectToRas(false)],
   [AccessModule.ERACOMMONS, async() => await profileApi().syncEraCommonsStatus()],
   [AccessModule.COMPLIANCETRAINING, async() => await profileApi().syncComplianceTrainingStatus()],
-  // DUCC state is strictly internal to the RW
-  [AccessModule.DATAUSERCODEOFCONDUCT, () => {}],
 ]);
+
+// most refresh actions are the same as the external sync actions
+const refreshActions: Map<AccessModule, Function> = new Map(externalSyncActions);
+refreshActions.set(AccessModule.RASLINKLOGINGOV, () => redirectToRas(false));
 
 // this function does double duty:
 // - returns appropriate text for completed and bypassed modules and null for incomplete modules
@@ -314,20 +317,32 @@ export const getEnabledModules = (modules: AccessModule[], navigate): AccessModu
   return enabledTaskMaybe ? [enabledTaskMaybe.module] : [];
 }, modules);
 
-// exported for test
-export const getActiveModule = (modules: AccessModule[], profile: Profile): AccessModule => modules.find(moduleName => {
+const incompleteModules = (modules: AccessModule[], profile: Profile): AccessModule[] => modules.filter(moduleName => {
   const status = getAccessModuleStatusByName(profile, moduleName);
   return !bypassedOrCompletedText(status);
 });
 
-const Refresh = (props: { showSpinner: Function; externalSyncAction: Function }) => {
-  const {showSpinner, externalSyncAction} = props;
+const syncIncompleteModules = (modules: AccessModule[], profile: Profile, reloadProfile: Function) => {
+  incompleteModules(modules, profile).map(async module => {
+    const syncAction = externalSyncActions.get(module);
+    if (syncAction) {
+      await syncAction();
+    }
+  });
+  reloadProfile();
+}
+
+// exported for test
+export const getActiveModule = (modules: AccessModule[], profile: Profile): AccessModule => incompleteModules(modules, profile)[0];
+
+const Refresh = (props: { showSpinner: Function; refreshAction: Function }) => {
+  const {showSpinner, refreshAction} = props;
   return <Button
       type='primary'
       style={styles.refreshButton}
       onClick={async() => {
         showSpinner();
-        await externalSyncAction();
+        await refreshAction();
         location.reload(); // also hides spinner
       }} >
     <Repeat style={styles.refreshIcon}/> Refresh
@@ -373,6 +388,7 @@ const TemporaryRASModule = () => {
 };
 
 interface ModuleProps {
+  profile: Profile,
   moduleName: AccessModule;
   active: boolean;    // is this the currently-active module that the user should complete
 
@@ -381,7 +397,7 @@ interface ModuleProps {
   spinnerProps: WithSpinnerOverlayProps;
 }
 // Renders a module when it's enabled via feature flags.  Returns null if not.
-const MaybeModule = ({moduleName, active, spinnerProps}: ModuleProps): JSX.Element => {
+const MaybeModule = ({profile, moduleName, active, spinnerProps}: ModuleProps): JSX.Element => {
   // whether to show the refresh button: this module has been clicked
   const [showRefresh, setShowRefresh] = useState(false);
 
@@ -409,15 +425,14 @@ const MaybeModule = ({moduleName, active, spinnerProps}: ModuleProps): JSX.Eleme
         <FlexRow style={styles.inactiveModuleBox}>{children}</FlexRow>;
   };
 
-  const Module = () => {
-    const {profile} = useStore(profileStore);
+  const Module = ({profile}) => {
     const statusTextMaybe = bypassedOrCompletedText(getAccessModuleStatusByName(profile, moduleName));
 
     return <FlexRow data-test-id={`module-${moduleName}`}>
       <FlexRow style={styles.moduleCTA}>
         {active && (showRefresh
             ? <Refresh
-                externalSyncAction={externalSyncActions.get(moduleName)}
+                refreshAction={refreshActions.get(moduleName)}
                 showSpinner={spinnerProps.showSpinner}/>
             : <Next/>)}
       </FlexRow>
@@ -444,7 +459,7 @@ const MaybeModule = ({moduleName, active, spinnerProps}: ModuleProps): JSX.Eleme
     }
   }
   const moduleEnabled = !!registrationTask;
-  return moduleEnabled ? <Module/> : null;
+  return moduleEnabled ? <Module profile={profile}/> : null;
 };
 
 const DARHeader = () => <FlexColumn style={styles.headerFlexColumn}>
@@ -460,11 +475,22 @@ const Completed = () => <FlexRow data-test-id='dar-completed' style={styles.comp
   <GetStartedButton style={{marginLeft: 'auto'}}/>
 </FlexRow>;
 
-const ModulesForCard = (props: {modules: AccessModule[], activeModule: AccessModule, spinnerProps: WithSpinnerOverlayProps}) => {
-  const {modules, activeModule, spinnerProps} = props;
+interface CardProps {
+  profile: Profile,
+  modules: Array<AccessModule>,
+  activeModule: AccessModule,
+  spinnerProps: WithSpinnerOverlayProps
+}
+const ModulesForCard = (props: CardProps) => {
+  const {profile, modules, activeModule, spinnerProps} = props;
   return <FlexColumn style={styles.modulesContainer}>
     {modules.map(moduleName =>
-        <MaybeModule key={moduleName} moduleName={moduleName} active={moduleName === activeModule} spinnerProps={spinnerProps}/>
+        <MaybeModule
+            key={moduleName}
+            moduleName={moduleName}
+            profile={profile}
+            active={moduleName === activeModule}
+            spinnerProps={spinnerProps}/>
     )}
   </FlexColumn>;
 };
@@ -502,8 +528,8 @@ const DataDetail = (props: {icon: string, text: string}) => {
   </FlexRow>;
 };
 
-const RegisteredTierCard = (props: {activeModule: AccessModule, spinnerProps: WithSpinnerOverlayProps}) => {
-  const {activeModule, spinnerProps} = props;
+const RegisteredTierCard = (props: {profile: Profile, activeModule: AccessModule, spinnerProps: WithSpinnerOverlayProps}) => {
+  const {profile, activeModule, spinnerProps} = props;
   return <FlexRow style={styles.card}>
     <FlexColumn>
       <div style={styles.cardStep}>Step 1</div>
@@ -520,26 +546,30 @@ const RegisteredTierCard = (props: {activeModule: AccessModule, spinnerProps: Wi
       <DataDetail icon='physical' text='Physical measurements'/>
       <DataDetail icon='wearable' text='Wearable devices'/>
     </FlexColumn>
-    <ModulesForCard modules={rtModules} activeModule={activeModule} spinnerProps={spinnerProps}/>
+    <ModulesForCard profile={profile}  modules={rtModules} activeModule={activeModule} spinnerProps={spinnerProps}/>
   </FlexRow>;
 };
 
-const DuccCard = (props: {activeModule: AccessModule, spinnerProps: WithSpinnerOverlayProps}) => {
-  const {activeModule, spinnerProps} = props;
+const DuccCard = (props: {profile: Profile, activeModule: AccessModule, spinnerProps: WithSpinnerOverlayProps}) => {
+  const {profile, activeModule, spinnerProps} = props;
   return <FlexRow style={{...styles.card, height: '125px'}}>
     <FlexColumn>
       {/* This will be Step 3 when CT becomes the new Step 2 */}
       <div style={styles.cardStep}>Step 2</div>
       <div style={styles.cardHeader}>Sign the code of conduct</div>
     </FlexColumn>
-    <ModulesForCard modules={[duccModule]} activeModule={activeModule} spinnerProps={spinnerProps}/>
+    <ModulesForCard profile={profile} modules={[duccModule]} activeModule={activeModule} spinnerProps={spinnerProps}/>
   </FlexRow>;
 };
 
 export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerProps: WithSpinnerOverlayProps) => {
   const {profile, reload} = useStore(profileStore);
+  const {config: {unsafeAllowSelfBypass}} = useStore(serverConfigStore);
+  const [navigate, ] = useNavigation();
+  const enabledModules = getEnabledModules(allModules, navigate);
 
   useEffect(() => {
+    syncIncompleteModules(enabledModules, profile, reload);
     spinnerProps.hideSpinner();
   }, []);
 
@@ -559,18 +589,15 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
     }
   }, [code]);
 
+
   // which module are we currently guiding the user to complete?
   const [activeModule, setActiveModule] = useState(null);
-
-  const [navigate, ] = useNavigation();
-  const enabledModules = getEnabledModules(allModules, navigate);
 
   // whenever the profile changes, setActiveModule(the first incomplete enabled module)
   useEffect(() => {
     setActiveModule(getActiveModule(enabledModules, profile));
   }, [profile]);
 
-  const {config: {unsafeAllowSelfBypass}} = useStore(serverConfigStore);
 
   return <FlexColumn style={styles.pageWrapper}>
       <DARHeader/>
@@ -585,9 +612,9 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
         <div style={styles.pleaseComplete}>
           Please complete the necessary steps to gain access to the <AoU/> datasets.
         </div>
-        <RegisteredTierCard activeModule={activeModule} spinnerProps={spinnerProps}/>
+        <RegisteredTierCard profile={profile} activeModule={activeModule} spinnerProps={spinnerProps}/>
         {/* TODO RW-7059 - Step 2 ControlledTierCard */}
-        <DuccCard activeModule={activeModule} spinnerProps={spinnerProps}/>
+        <DuccCard profile={profile} activeModule={activeModule} spinnerProps={spinnerProps}/>
       </FadeBox>
     </FlexColumn>;
 });

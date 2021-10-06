@@ -74,17 +74,10 @@ describe('Python Kernel Notebook Test', () => {
       })
     ).toMatch(/success$/);
 
-    expect(
-      await notebook.runCodeCell(4, {
-        codeFile: 'resources/python-code/gsutil.py',
-        markdownWorkaround: true
-      })
-    ).toMatch(/success$/);
-
-    await notebook.runCodeCell(5, { codeFile: 'resources/python-code/simple-pyplot.py' });
+    await notebook.runCodeCell(4, { codeFile: 'resources/python-code/simple-pyplot.py' });
 
     // Verify plot is the output.
-    const cell = notebook.findCell(5);
+    const cell = notebook.findCell(4);
     const cellOutputElement = await cell.findOutputElementHandle();
     const [imgElement] = await cellOutputElement.$x('./img[@src]');
     expect(imgElement).toBeTruthy(); // plot format is a img.

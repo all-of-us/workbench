@@ -27,7 +27,6 @@ import org.pmiops.workbench.access.AccessTierServiceImpl;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.actionaudit.auditors.WorkspaceAuditor;
-import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
@@ -165,7 +164,6 @@ public class CohortsControllerTest extends SpringTest {
   @Autowired WorkspacesController workspacesController;
   @Autowired CohortsController cohortsController;
   @Autowired ConceptSetsController conceptSetsController;
-  @Autowired BillingProjectBufferService billingProjectBufferService;
 
   Workspace workspace;
   Workspace workspace2;
@@ -222,7 +220,6 @@ public class CohortsControllerTest extends SpringTest {
     AccessModuleService.class,
     BigQueryService.class,
     BillingProjectAuditor.class,
-    BillingProjectBufferService.class,
     CdrVersionService.class,
     CloudBillingClient.class,
     CloudStorageClient.class,
@@ -281,7 +278,7 @@ public class CohortsControllerTest extends SpringTest {
   @BeforeEach
   public void setUp() {
     testMockFactory = new TestMockFactory();
-    testMockFactory.stubBufferBillingProject(billingProjectBufferService);
+    testMockFactory.stubCreateBillingProject(fireCloudService);
     testMockFactory.stubCreateFcWorkspace(fireCloudService);
     DbUser user = new DbUser();
     user.setUsername(CREATOR_EMAIL);

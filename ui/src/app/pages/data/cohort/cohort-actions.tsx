@@ -1,3 +1,4 @@
+import {RouteLink} from 'app/components/app-router';
 import {Button} from 'app/components/buttons';
 import {ActionCardBase} from 'app/components/card';
 import {FadeBox} from 'app/components/containers';
@@ -13,6 +14,7 @@ import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {Cohort} from 'generated/fetch';
 import * as fp from 'lodash/fp';
+import * as querystring from 'querystring';
 import * as React from 'react';
 import {RouteComponentProps, withRouter} from 'react-router-dom';
 
@@ -101,16 +103,16 @@ export const CohortActions = fp.flow(
       });
     }
 
-    navigateTo(action: string): void {
+    getNavigationPath(action: string): string {
       const {cohort} = this.state;
       const {namespace, id} = this.props.workspace;
       let url = `/workspaces/${namespace}/${id}/`;
-      const queryParams: any = {};
+      let queryParams: any = null;
 
       switch (action) {
         case 'cohort':
           url += `data/cohorts/build`;
-          queryParams.cohortId = cohort.id;
+          queryParams = {cohortId: cohort.id};
           break;
         case 'review':
           url += `data/cohorts/${cohort.id}/review`;
@@ -124,7 +126,10 @@ export const CohortActions = fp.flow(
         case 'newCohort':
           url += `data/cohorts/build`;
       }
-      this.props.navigateByUrl(url, {queryParams});
+      if (queryParams) {
+        url += '?' + querystring.stringify(queryParams)
+      }
+      return url;
     }
 
     render() {
@@ -135,11 +140,11 @@ export const CohortActions = fp.flow(
           <h3 style={styles.cohortsHeader}>Cohort Saved Successfully</h3>
           <div style={{marginTop: '0.25rem'}}>
             The cohort
-             <a
+             <RouteLink
                style={{color: colors.accent, margin: '0 4px'}}
-               onClick={() => this.navigateTo('cohort')}>
+               path={this.getNavigationPath('cohort')}>
                 {cohort.name}
-             </a>
+             </RouteLink>
              has been saved.
           </div>
           <h3 style={{...styles.cohortsHeader, marginTop: '1.5rem'}}>What Next?</h3>
@@ -156,7 +161,7 @@ export const CohortActions = fp.flow(
                   <Button
                     type='primary'
                     style={styles.cardButton}
-                    onClick={() => this.navigateTo(card.action)}>
+                    path={this.getNavigationPath(card.action)}>
                     {card.title}
                   </Button>
                 </div>

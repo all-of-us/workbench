@@ -146,31 +146,6 @@ Common.register_command({
   :fn => ->(*args) { dev_up("dev-up", args) }
 })
 
-def start_api_reqs()
-  common = Common.new
-  common.status "Starting database..."
-  common.run_inline %W{docker-compose up -d db}
-end
-
-Common.register_command({
-  :invocation => "start-api-reqs",
-  :description => "Starts up the services required for the API server" \
-     "(assumes database and config are already up-to-date.)",
-  :fn => Proc.new { start_api_reqs() }
-})
-
-def stop_api_reqs()
-  common = Common.new
-  common.status "Stopping database..."
-  common.run_inline %W{docker-compose stop db}
-end
-
-Common.register_command({
-  :invocation => "stop-api-reqs",
-  :description => "Stops the services required for the API server",
-  :fn => Proc.new { stop_api_reqs() }
-})
-
 def setup_local_environment()
   ENV.update(Workbench.read_vars_file("db/vars.env"))
   ENV.update(must_get_env_value("local", :gae_vars))
@@ -549,8 +524,9 @@ Common.register_command({
   :fn => ->() { run_local_rw_migrations() }
 })
 
-def circle_prep_survey(cmd_name, *args)
+def create_cdr_indices(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
+  op.opts.data_browser = false
   op.opts.branch = "main"
   op.add_option(
     "--branch [--branch]",
@@ -558,17 +534,42 @@ def circle_prep_survey(cmd_name, *args)
     "Branch. Optional - Default is main."
   )
   op.add_option(
-      "--project [project]",
-      ->(opts, v) { opts.project = v},
-      "Project name"
+    "--project [project]",
+    ->(opts, v) { opts.project = v},
+    "Project name"
   )
   op.add_option(
-      "--dataset [dataset]",
-      ->(opts, v) { opts.dataset = v},
-      "Dataset name"
+    "--bq-dataset [bq-dataset]",
+    ->(opts, v) { opts.bq_dataset = v},
+    "BQ dataset. Required."
+  )
+  op.add_option(
+    "--wgv-project [wgv-project]",
+    ->(opts, v) { opts.wgv_project = v},
+    "Whole genome variant project."
+  )
+  op.add_option(
+    "--wgv-dataset [wgv-dataset]",
+    ->(opts, v) { opts.wgv_dataset = v},
+    "Whole genome variant dataset."
+  )
+  op.add_option(
+    "--wgv-table [wgv-table]",
+    ->(opts, v) { opts.wgv_table = v},
+    "Whole genome variant table."
+  )
+  op.add_option(
+    "--cdr-version [cdr-version]",
+    ->(opts, v) { opts.cdr_version = v},
+    "CDR version. Required."
+  )
+  op.add_option(
+    "--data-browser [data-browser]",
+    ->(opts, v) { opts.data_browser = v},
+    "Is this run for data browser. Default is false"
   )
 
-  op.add_validator ->(opts) { raise ArgumentError unless opts.project and opts.dataset}
+  op.add_validator ->(opts) { raise ArgumentError unless opts.project and opts.bq_dataset and opts.cdr_version}
   op.parse.validate
 
   env = ENVIRONMENTS[op.opts.project]
@@ -580,19 +581,18 @@ def circle_prep_survey(cmd_name, *args)
   content_type = "Content-Type: application/json"
   accept = "Accept: application/json"
   circle_token = "Circle-Token: "
-  payload = "{ \"branch\": \"#{op.opts.branch}\", \"parameters\": { \"wb_prep_survey\": true, \"cdr_source_project\": \"#{cdr_source}\", \"cdr_source_dataset\": \"#{op.opts.dataset}\", \"project\": \"#{op.opts.project}\" }}"
+  payload = "{ \"branch\": \"#{op.opts.branch}\", \"parameters\": { \"wb_create_cdr_indices\": true, \"cdr_source_project\": \"#{cdr_source}\", \"cdr_source_dataset\": \"#{op.opts.bq_dataset}\", \"wgv_source_project\": \"#{op.opts.wgv_project}\", \"wgv_source_dataset\": \"#{op.opts.wgv_dataset}\", \"wgv_source_table\": \"#{op.opts.wgv_table}\", \"project\": \"#{op.opts.project}\", \"cdr_version_db_name\": \"#{op.opts.cdr_version}\", \"data_browser\": #{op.opts.data_browser} }}"
   common.run_inline "curl -X POST https://circleci.com/api/v2/project/github/all-of-us/cdr-indices/pipeline -H '#{content_type}' -H '#{accept}' -H \"#{circle_token}\ $(cat ~/.circle-creds/key.txt)\" -d '#{payload}'"
 end
 
 Common.register_command({
-  :invocation => "circle-prep-survey",
-  :description => "Build the prep_survey table in circle.",
-  :fn => ->(*args) { circle_prep_survey("circle-prep-survey", *args) }
+  :invocation => "create-cdr-indices",
+  :description => "Create the CDR indices in circle.",
+  :fn => ->(*args) { create_cdr_indices("create-cdr-indices", *args) }
 })
 
-def make_bq_prep_survey(cmd_name, *args)
+def create_prep_survey(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
-  op.opts.remove_prep_survey = false
   op.add_option(
       "--project [project]",
       ->(opts, v) { opts.project = v},
@@ -613,11 +613,6 @@ def make_bq_prep_survey(cmd_name, *args)
       ->(opts, v) { opts.id_start_block = v},
       "ID start block"
   )
-  op.add_option(
-      "--remove-prep-survey [remove-prep-survey]",
-      ->(opts, v) { opts.remove_prep_survey = v},
-      "Should we remove prep survey or not"
-  )
 
   op.add_validator ->(opts) { raise ArgumentError unless opts.project and opts.dataset and opts.filename and opts.id_start_block}
   op.parse.validate
@@ -625,15 +620,75 @@ def make_bq_prep_survey(cmd_name, *args)
   ServiceAccountContext.new(op.opts.project).run do
     common = Common.new
     Dir.chdir('db-cdr') do
-      common.run_inline %W{./generate-cdr/make-bq-prep-survey.sh #{ENVIRONMENTS[op.opts.project][:source_cdr_project]} #{op.opts.dataset} #{op.opts.filename} #{op.opts.id_start_block} #{op.opts.remove_prep_survey}}
+      common.run_inline %W{./generate-cdr/create-prep-survey.sh #{ENVIRONMENTS[op.opts.project][:source_cdr_project]} #{op.opts.dataset} #{op.opts.filename} #{op.opts.id_start_block}}
     end
   end
 end
 
 Common.register_command({
-  :invocation => "make-bq-prep-survey",
-  :description => "Build the prep_survey table.",
-  :fn => ->(*args) { make_bq_prep_survey("make-bq-prep-survey", *args) }
+  :invocation => "create-prep-survey",
+  :description => "Create the prep_survey table.",
+  :fn => ->(*args) { create_prep_survey("create-prep-survey", *args) }
+})
+
+def create_tables(cmd_name, *args)
+  op = WbOptionsParser.new(cmd_name, args)
+  op.add_option(
+      "--project [project]",
+      ->(opts, v) { opts.project = v},
+      "Project name"
+  )
+  op.add_option(
+      "--dataset [dataset]",
+      ->(opts, v) { opts.dataset = v},
+      "Dataset name"
+  )
+
+  op.add_validator ->(opts) { raise ArgumentError unless opts.project and opts.dataset}
+  op.parse.validate
+
+  ServiceAccountContext.new(op.opts.project).run do
+    common = Common.new
+    Dir.chdir('db-cdr') do
+      common.run_inline %W{./generate-cdr/create-tables.sh #{ENVIRONMENTS[op.opts.project][:source_cdr_project]} #{op.opts.dataset}}
+    end
+  end
+end
+
+Common.register_command({
+  :invocation => "create-tables",
+  :description => "Create the CDR indices tables.",
+  :fn => ->(*args) { create_tables("create-tables", *args) }
+})
+
+def create_survey_criteria(cmd_name, *args)
+  op = WbOptionsParser.new(cmd_name, args)
+  op.add_option(
+      "--project [project]",
+      ->(opts, v) { opts.project = v},
+      "Project name"
+  )
+  op.add_option(
+      "--dataset [dataset]",
+      ->(opts, v) { opts.dataset = v},
+      "Dataset name"
+  )
+
+  op.add_validator ->(opts) { raise ArgumentError unless opts.project and opts.dataset}
+  op.parse.validate
+
+  ServiceAccountContext.new(op.opts.project).run do
+    common = Common.new
+    Dir.chdir('db-cdr') do
+      common.run_inline %W{./generate-cdr/create-survey-criteria.sh #{ENVIRONMENTS[op.opts.project][:source_cdr_project]} #{op.opts.dataset}}
+    end
+  end
+end
+
+Common.register_command({
+  :invocation => "create-survey-criteria",
+  :description => "Create the survey tree in cb_criteria.",
+  :fn => ->(*args) { create_survey_criteria("create-survey-criteria", *args) }
 })
 
 def circle_build_cdr_indices(cmd_name, args)

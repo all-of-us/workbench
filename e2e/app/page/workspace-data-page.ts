@@ -17,6 +17,7 @@ import { SaveOption } from 'app/modal/conceptset-save-modal';
 import ConceptSetActionsPage from './conceptset-actions-page';
 import { Visits } from './cohort-participants-group';
 import CriteriaSearchPage from './criteria-search-page';
+import WorkspaceEditPage from './workspace-edit-page';
 
 const PageTitle = 'Data Page';
 
@@ -199,5 +200,24 @@ export default class WorkspaceDataPage extends WorkspaceBase {
 
     const conceptSetsCard = await this.createConceptSets();
     return conceptSetsCard;
+  }
+
+  async clone(cloneName?: string): Promise<string> {
+    await this.selectWorkspaceAction(MenuOption.Duplicate);
+
+    // Fill out Workspace Name.
+    const workspaceEditPage = new WorkspaceEditPage(this.page);
+    await workspaceEditPage.waitForLoad();
+
+    await workspaceEditPage.getWorkspaceNameTextbox().clear();
+    await workspaceEditPage.fillOutWorkspaceName(cloneName);
+
+    const finishButton = workspaceEditPage.getDuplicateWorkspaceButton();
+    await workspaceEditPage.requestForReviewRadiobutton(false);
+    await finishButton.waitUntilEnabled();
+    await workspaceEditPage.clickCreateFinishButton(finishButton);
+
+    await this.waitForLoad();
+    return cloneName;
   }
 }

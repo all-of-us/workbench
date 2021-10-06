@@ -85,6 +85,9 @@ const styles = reactStyles({
     borderRadius: '0.31rem',
     onColor: '#080',
   },
+  saveButton: {
+    textTransform: 'uppercase',
+  },
 });
 
 // The easiest way to override primereact style.
@@ -235,15 +238,17 @@ const TierConfig = (props: TierConfigProps) => {
   </FlexRow>;
 };
 
-const SaveErrorModal = (props: {onFinish: Function, onContinue: Function}) => {
+const PendingChangesModal = (props: {onFinish: Function, onContinue: Function}) => {
   const {onFinish, onContinue} = props;
   return <Modal>
     <ModalTitle>Institution not saved</ModalTitle>
+    <ModalBody>Are you sure you want to leave this page?</ModalBody>
     <ModalFooter>
       <Button onClick={onFinish}
-              type='secondary' style={{marginRight: '2rem'}}>Finish Saving</Button>
+              type='secondary'
+              style={{marginRight: '2rem'}}>Keep Editing</Button>
       <Button onClick={onContinue}
-              type='primary'>Yes Continue</Button>
+              type='primary'>Yes, Leave</Button>
     </ModalFooter>
   </Modal>;
 };
@@ -530,7 +535,7 @@ export const AdminInstitutionEdit = fp.flow(withNavigation, withRouter)(class ex
   }
 
   get buttonText() {
-    return !this.isAddInstitutionMode ? 'SAVE' : 'ADD';
+    return !this.isAddInstitutionMode ? 'Save' : 'Add';
   }
 
   get isAddInstitutionMode() {
@@ -670,7 +675,7 @@ export const AdminInstitutionEdit = fp.flow(withNavigation, withRouter)(class ex
          </FlexRow>
         <FlexRow style={{justifyContent: 'flex-start', marginRight: '1rem'}}>
           <div>
-            <Button type='secondary' onClick={() => this.backNavigate()} style={{marginRight: '1.5rem'}}>Cancel</Button>
+            <Button type='secondary' path='/admin/institution' style={{marginRight: '1.5rem'}}>Cancel</Button>
             <TooltipTrigger data-test-id='tooltip' content={
               errors && this.disableSave(errors) && <div>Please correct the following errors
                 <BulletAlignedUnorderedList>
@@ -687,6 +692,7 @@ export const AdminInstitutionEdit = fp.flow(withNavigation, withRouter)(class ex
             } disable={this.isAddInstitutionMode}>
               <Button type='primary'
                       data-test-id='save-institution-button'
+                      style={styles.saveButton}
                       disabled={this.disableSave(errors)}
                       onClick={() => this.saveInstitution()}>
                 {this.buttonText}
@@ -694,7 +700,7 @@ export const AdminInstitutionEdit = fp.flow(withNavigation, withRouter)(class ex
             </TooltipTrigger>
           </div>
         </FlexRow>
-        {this.state.showBackButtonWarning && <SaveErrorModal
+        {this.state.showBackButtonWarning && <PendingChangesModal
             onFinish={() => this.setState({showBackButtonWarning: false})}
             onContinue={() => this.backNavigate()}
         />}

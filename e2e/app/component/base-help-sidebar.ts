@@ -46,6 +46,11 @@ export default abstract class BaseHelpSidebar extends Container {
       case SideBarLink.EditAnnotations:
         xpath = `${Selectors.rootXpath}//*[@data-test-id="help-sidebar-icon-annotations"]`;
         break;
+      case SideBarLink.GenomicExtractionsHistory:
+        xpath = `${Selectors.rootXpath}//*[@data-test-id="help-sidebar-icon-genomicExtractions"]`;
+        break;
+      default:
+        throw new Error(`SideBarLink case ${sidebarLink} is undefined.`);
     }
     await this.page.waitForXPath(xpath, { visible: true }).then((link) => link.click());
   }
@@ -55,9 +60,7 @@ export default abstract class BaseHelpSidebar extends Container {
    */
   async close(): Promise<void> {
     const sidePanelTitle = await this.getTitle();
-    const closeButton = new Button(this.page, this.deleteIconXpath);
-    await closeButton.waitUntilEnabled();
-    await closeButton.focus();
+    const closeButton = await this.getDeleteIcon();
     await closeButton.click();
     await this.waitUntilClose();
     logger.info(`Closed "${sidePanelTitle}" sidebar panel`);
@@ -94,5 +97,12 @@ export default abstract class BaseHelpSidebar extends Container {
       logger.error(err);
       throw new Error(err);
     });
+  }
+
+  async getDeleteIcon(): Promise<Button> {
+    const closeButton = new Button(this.page, this.deleteIconXpath);
+    await closeButton.waitUntilEnabled();
+    await closeButton.focus();
+    return closeButton;
   }
 }

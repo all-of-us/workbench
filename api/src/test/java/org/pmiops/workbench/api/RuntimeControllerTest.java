@@ -18,7 +18,9 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import com.google.gson.internal.LinkedTreeMap;
+import java.sql.Timestamp;
 import java.time.Clock;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.Base64;
@@ -33,6 +35,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.access.AccessTierServiceImpl;
@@ -55,6 +58,7 @@ import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
@@ -437,6 +441,27 @@ public class RuntimeControllerTest extends SpringTest {
 
     assertThat(runtimeController.getRuntime(WORKSPACE_NS).getBody())
         .isEqualTo(testRuntime.status(RuntimeStatus.ERROR));
+  }
+
+  @Test
+  public void testGetRuntime_securitySuspended() throws ApiException {
+    user.setComputeSecuritySuspendedUntil(
+        Timestamp.from(FakeClockConfiguration.NOW.toInstant().plus(Duration.ofMinutes(5))));
+    when(userRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
+        .thenReturn(testLeoRuntime);
+
+    assertThrows(
+        FailedPreconditionException.class, () -> runtimeController.getRuntime(WORKSPACE_NS));
+  }
+
+  @Test
+  public void testGetRuntime_securitySuspendedElapsed() throws ApiException {
+    user.setComputeSecuritySuspendedUntil(
+        Timestamp.from(FakeClockConfiguration.NOW.toInstant().minus(Duration.ofMinutes(20))));
+    when(userRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
+        .thenReturn(testLeoRuntime);
+
+    runtimeController.getRuntime(WORKSPACE_NS);
   }
 
   @Test
@@ -1195,6 +1220,19 @@ public class RuntimeControllerTest extends SpringTest {
   }
 
   @Test
+  public void testCreateRuntime_securitySuspended() {
+    user.setComputeSecuritySuspendedUntil(
+        Timestamp.from(FakeClockConfiguration.NOW.toInstant().plus(Duration.ofMinutes(5))));
+
+    assertThrows(
+        FailedPreconditionException.class,
+        () ->
+            runtimeController.createRuntime(
+                WORKSPACE_NS,
+                new Runtime().gceConfig(new GceConfig().diskSize(50).machineType("standard"))));
+  }
+
+  @Test
   public void testUpdateRuntime() throws ApiException {
     stubGetWorkspace(WORKSPACE_NS, GOOGLE_PROJECT_ID, WORKSPACE_ID, "test");
 
@@ -1385,6 +1423,16 @@ public class RuntimeControllerTest extends SpringTest {
             "workspaces/myfirstworkspace/.all_of_us_config.json");
 
     assertThat(resp.getRuntimeLocalDirectory()).isEqualTo("workspaces/myfirstworkspace");
+  }
+
+  @Test
+  public void testLocalize_securitySuspended() {
+    user.setComputeSecuritySuspendedUntil(
+        Timestamp.from(FakeClockConfiguration.NOW.toInstant().plus(Duration.ofMinutes(5))));
+
+    assertThrows(
+        FailedPreconditionException.class,
+        () -> runtimeController.localize(WORKSPACE_NS, new RuntimeLocalizeRequest()));
   }
 
   @Test

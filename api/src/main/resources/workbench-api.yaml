@@ -704,6 +704,10 @@ paths:
           description: No runtime exists for this user and workspace.
           schema:
             "$ref": "#/definitions/ErrorResponse"
+        412:
+          description: Compute is temporarily suspended for security reasons.
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
     post:
       summary: Create a workspace runtime.
       description: |
@@ -729,6 +733,10 @@ paths:
           description: A runtime for this user and workspace already exists.
           schema:
             "$ref": "#/definitions/EmptyResponse"
+        412:
+          description: Compute is temporarily suspended for security reasons.
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
     patch:
       summary: Updates the configuration of a runtime
       description: In order to update the configuration of a runtime, it must first be running or paused
@@ -748,6 +756,10 @@ paths:
             "$ref": "#/definitions/EmptyResponse"
         400:
           description: Bad Request
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
+        412:
+          description: Compute is temporarily suspended for security reasons.
           schema:
             "$ref": "#/definitions/ErrorResponse"
         500:
@@ -778,6 +790,10 @@ paths:
           description: No runtime exists for this user and workspace.
           schema:
             "$ref": "#/definitions/ErrorResponse"
+        412:
+          description: Compute is temporarily suspended for security reasons.
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
   "/v1/runtimes/{workspaceNamespace}/localize":
     post:
       summary: Localize files to the user's runtime.
@@ -803,6 +819,10 @@ paths:
             "$ref": "#/definitions/RuntimeLocalizeResponse"
         404:
           description: Runtime or Workspace not found
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
+        412:
+          description: Compute is temporarily suspended for security reasons.
           schema:
             "$ref": "#/definitions/ErrorResponse"
         500:
@@ -1595,54 +1615,6 @@ paths:
           description: Internal Error
           schema:
             "$ref": "#/definitions/ErrorResponse"
-  "/v1/cron/bufferBillingProjects":
-    get:
-      security: []
-      tags:
-      - offlineBilling
-      - cron
-      description: If the AoU Billing Project buffer is not full, refill with one
-        or more billing projects.
-      operationId: bufferBillingProjects
-      responses:
-        204:
-          description: No Error
-        500:
-          description: Internal Error
-          schema:
-            "$ref": "#/definitions/ErrorResponse"
-  "/v1/cron/syncBillingProjectStatus":
-    get:
-      security: []
-      tags:
-      - offlineBilling
-      - cron
-      description: Fetch a BillingProjectBufferEntry that is in the CREATING state
-        and check its status on Firecloud
-      operationId: syncBillingProjectStatus
-      responses:
-        204:
-          description: No Error
-        500:
-          description: Internal Error
-          schema:
-            "$ref": "#/definitions/ErrorResponse"
-  "/v1/cron/cleanBillingBuffer":
-    get:
-      security: []
-      tags:
-      - offlineBilling
-      - cron
-      description: Find BillingProjectBufferEntries that have failed during the creation
-        or assignment step and set their statuses to ERROR
-      operationId: cleanBillingBuffer
-      responses:
-        204:
-          description: No Error
-        500:
-          description: Internal Error
-          schema:
-            "$ref": "#/definitions/ErrorResponse"
   "/v1/cron/checkFreeTierBillingUsage":
     get:
       security: []
@@ -1686,21 +1658,6 @@ paths:
       responses:
         204:
           description: No Error
-        500:
-          description: Internal Error
-          schema:
-            "$ref": "#/definitions/ErrorResponse"
-  "/v1/monitoring/billingProjectBufferStatus":
-    get:
-      tags:
-      - monitoring
-      description: Return statistics about the billing buffer.
-      operationId: getBillingProjectBufferStatus
-      responses:
-        200:
-          description: No Error
-          schema:
-            "$ref": "#/definitions/BillingProjectBufferStatus"
         500:
           description: Internal Error
           schema:
@@ -4224,6 +4181,12 @@ definitions:
       category:
         "$ref": "#/definitions/FeaturedWorkspaceCategory"
         description: The category that this workspace belongs to
+  SecuritySuspendedErrorParameters:
+    type: object
+    properties:
+      suspendedUntil:
+        type: string
+        description: The time at which the security suspension will end, if any, in ISO 8601 format.
   ErrorResponse:
     type: object
     properties:
@@ -4242,12 +4205,17 @@ definitions:
         type: string
         description: Unique ID for this error response, for correlation with backend
           logs
+      parameters:
+        type: object
+        description: Additional structured error parameters, specific to the error code.
+        additionalProperties: true
   ErrorCode:
     type: string
     description: Short parsable error descriptions
     enum:
     - PARSE_ERROR
     - USER_DISABLED
+    - COMPUTE_SECURITY_SUSPENDED
   StatusResponse:
     type: object
     required:
@@ -4326,6 +4294,10 @@ definitions:
         type: boolean
         default: false
         description: Whether to use the new rewrite access module.
+      enableEgressAlertingV2:
+        type: boolean
+        default: false
+        description: Whether egress alerting V2 is enabled.
       enableStandardSourceDomains:
         type: boolean
         default: false

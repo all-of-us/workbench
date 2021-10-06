@@ -6,11 +6,12 @@ import {AccessModule, InstitutionApi, Profile, ProfileApi} from 'generated/fetch
 import {allModules, DataAccessRequirements, getActiveModule, getEnabledModules} from './data-access-requirements';
 import {InstitutionApiStub} from 'testing/stubs/institution-api-stub';
 import {ProfileApiStub, ProfileStubVariables} from 'testing/stubs/profile-api-stub';
-import {registerApiClient} from 'app/services/swagger-fetch-clients';
+import {profileApi, registerApiClient} from 'app/services/swagger-fetch-clients';
 import {profileStore, serverConfigStore} from 'app/utils/stores';
 import {MemoryRouter} from 'react-router-dom';
 import {useNavigation} from 'app/utils/navigation';
-import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
+import {waitForFakeTimersAndUpdate, waitOneTickAndUpdate} from 'testing/react-test-helpers';
+
 
 const profile = ProfileStubVariables.PROFILE_STUB as Profile;
 const load = jest.fn();
@@ -38,6 +39,11 @@ describe('DataAccessRequirements', () => {
         serverConfigStore.set({config: defaultServerConfig});
         profileStore.set({profile, load, reload, updateCache});
     });
+
+    afterEach(() => {
+        // reset to standard behavior after tests which use fake timers
+        jest.useRealTimers();
+    })
 
     it('should return all modules from getEnabledModules by default (all FFs enabled)', () => {
         const [navigate, ] = useNavigation();
@@ -278,8 +284,10 @@ describe('DataAccessRequirements', () => {
         expect(findCompletionBanner(wrapper).exists()).toBeTruthy();
     });
 
-    // RAS launch bug
+    // RAS launch bug (no JIRA ticket)
     it('should render all modules as complete by transitioning to all complete', async() => {
+        // this test is subject to flakiness using real timers
+        jest.useFakeTimers();
 
         // initially, the user has completed all modules except RAS (the standard case at RAS launch time)
 
@@ -324,7 +332,7 @@ describe('DataAccessRequirements', () => {
             reload,
             updateCache});
 
-        await waitOneTickAndUpdate(wrapper);
+        await waitForFakeTimersAndUpdate(wrapper);
 
         allModules.forEach(module => {
             expect(findCompleteModule(wrapper, module).exists()).toBeTruthy();
@@ -421,6 +429,46 @@ describe('DataAccessRequirements', () => {
 
         const wrapper = component();
         expect(wrapper.find('[data-test-id="self-bypass"]').exists()).toBeFalsy();
+    });
+
+    // regression tests for RW-7384: sync external modules to gain access
+
+    it('should sync incomplete external modules', async() => {
+        // profile contains no completed modules, so we sync all (2FA, ERA, Compliance)
+        const spy2FA = jest.spyOn(profileApi(), 'syncTwoFactorAuthStatus');
+        const spyERA = jest.spyOn(profileApi(), 'syncEraCommonsStatus');
+        const spyCompliance = jest.spyOn(profileApi(), 'syncComplianceTrainingStatus');
+
+        const wrapper = component();
+        await waitOneTickAndUpdate(wrapper);
+
+        expect(spy2FA).toHaveBeenCalledTimes(1);
+        expect(spyERA).toHaveBeenCalledTimes(1);
+        expect(spyCompliance).toHaveBeenCalledTimes(1);
+     });
+
+    it('should not sync complete external modules', async() => {
+        profileStore.set({
+            profile: {
+                ...ProfileStubVariables.PROFILE_STUB,
+                accessModules: {
+                    modules: allModules.map(module => ({moduleName: module, completionEpochMillis: 1}))
+                }
+            },
+            load,
+            reload,
+            updateCache});
+
+        const spy2FA = jest.spyOn(profileApi(), 'syncTwoFactorAuthStatus');
+        const spyERA = jest.spyOn(profileApi(), 'syncEraCommonsStatus');
+        const spyCompliance = jest.spyOn(profileApi(), 'syncComplianceTrainingStatus');
+
+        const wrapper = component();
+        await waitOneTickAndUpdate(wrapper);
+
+        expect(spy2FA).toHaveBeenCalledTimes(0);
+        expect(spyERA).toHaveBeenCalledTimes(0);
+        expect(spyCompliance).toHaveBeenCalledTimes(0);
     });
 
 });

@@ -40,12 +40,6 @@ public class MetricLabelTest extends SpringTest {
       };
 
   @Test
-  public void testBufferEntryStatus() {
-    assertThat(DISCRETE_VALUE_LABEL.supportsDiscreteValue("a")).isTrue();
-    assertThat(DISCRETE_VALUE_LABEL.supportsDiscreteValue("coolio")).isFalse();
-  }
-
-  @Test
   public void testUnrestricted() {
     assertThat(CONTINUOUS_VALUE_LABEL.supportsDiscreteValue("101")).isTrue();
     assertThat(CONTINUOUS_VALUE_LABEL.supportsDiscreteValue("102"));

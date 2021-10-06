@@ -1,8 +1,9 @@
 import Textbox from 'app/element/textbox';
 import { LinkText } from 'app/text-labels';
-import { ElementHandle, Page } from 'puppeteer';
+import { Page } from 'puppeteer';
 import { waitForText, waitWhileLoading } from 'utils/waits-utils';
 import Modal from './modal';
+import ReactSelect from 'app/element/react-select';
 
 const modalTitle = 'Copy to Workspace';
 
@@ -20,7 +21,7 @@ export default class CopyToWorkspaceModal extends Modal {
     return Textbox.findByName(this.page, { containsText: 'Destination' }, this);
   }
 
-  getNameTextbox(): Textbox {
+  getNotebookNameTextbox(): Textbox {
     return new Textbox(
       this.page,
       `${this.getXpath()}//*[contains(text(), "Name")]/ancestor::node()[1]/input[@type="text"]`
@@ -30,21 +31,14 @@ export default class CopyToWorkspaceModal extends Modal {
   /**
    *
    * @param {string} workspaceName Destination Workspace name.
-   * @param {string} newName New name.
+   * @param {string} newNotebookName New name.
    */
-  async beginCopyToAnotherWorkspace(workspaceName: string, newName?: string): Promise<void> {
-    // Click dropdown trigger.
-    const destinationInput = this.getDestinationTextbox();
-    await destinationInput.click();
-
-    // Select Workspace in dropdown
-    const selectOption = await this.waitForSelectOption(workspaceName);
-    await selectOption.click();
-
-    // Type new name.
-    if (newName !== undefined) {
-      const nameInput = this.getNameTextbox();
-      await nameInput.type(newName);
+  async beginCopyToAnotherWorkspace(workspaceName: string, newNotebookName?: string): Promise<void> {
+    await this.selectDestinationWorkspace(workspaceName);
+    // Type notebook name.
+    if (newNotebookName !== undefined) {
+      const nameInput = this.getNotebookNameTextbox();
+      await nameInput.type(newNotebookName);
     }
   }
 
@@ -55,19 +49,12 @@ export default class CopyToWorkspaceModal extends Modal {
    */
   async copyToAnotherWorkspace(workspaceName: string, newName?: string): Promise<void> {
     await this.beginCopyToAnotherWorkspace(workspaceName, newName);
-
     await this.clickButton(LinkText.Copy);
     await waitWhileLoading(this.page);
   }
 
-  async waitForSelectOption(workspaceName?: string): Promise<ElementHandle> {
-    const xpathSubstr = 'starts-with(@id, "react-select-") and contains(@id, "-option-")';
-    if (workspaceName === undefined) {
-      // Without a workspace name, select the second (or any) option in dropdown.
-      return this.page.waitForXPath(`${this.getXpath()}//*[${xpathSubstr} and text()]`, { visible: true });
-    }
-    return this.page.waitForXPath(`${this.getXpath()}//*[${xpathSubstr} and text()="${workspaceName}"]`, {
-      visible: true
-    });
+  async selectDestinationWorkspace(workspaceName: string): Promise<void> {
+    const selectMenu = new ReactSelect(this.page, { name: 'Destination *' });
+    await selectMenu.selectOption(workspaceName);
   }
 }

@@ -429,11 +429,10 @@ export default class WorkspaceEditPage extends WorkspaceBase {
    * Type in new workspace name.
    * @return {string} new workspace name
    */
-  async fillOutWorkspaceName(): Promise<string> {
-    const newWorkspaceName = makeWorkspaceName({ includeHyphen: false });
-    await this.getWorkspaceNameTextbox().type(newWorkspaceName);
+  async fillOutWorkspaceName(workspaceName: string = makeWorkspaceName({ includeHyphen: false })): Promise<string> {
+    await this.getWorkspaceNameTextbox().type(workspaceName);
     await this.getWorkspaceNameTextbox().pressTab();
-    return newWorkspaceName;
+    return workspaceName;
   }
 
   /**
@@ -497,9 +496,11 @@ export default class WorkspaceEditPage extends WorkspaceBase {
   }
 
   // Fill out only the fields needed for a successful duplication
-  async fillOutRequiredDuplicationFields(): Promise<string> {
+  async fillOutRequiredDuplicationFields(
+    workspaceName: string = makeWorkspaceName({ includeHyphen: false })
+  ): Promise<string> {
     await this.getWorkspaceNameTextbox().clear();
-    const workspaceName = await this.fillOutWorkspaceName();
+    await this.fillOutWorkspaceName(workspaceName);
     await this.requestForReviewRadiobutton(false);
     return workspaceName;
   }

@@ -1,6 +1,7 @@
 import {mount} from 'enzyme';
 import * as React from 'react';
 import * as fp from 'lodash/fp';
+import {MemoryRouter} from 'react-router-dom';
 
 import {LoginGovIAL2NotificationMaybe} from "./login-gov-ial2-notification";
 import {profileStore, serverConfigStore} from 'app/utils/stores';
@@ -20,7 +21,7 @@ describe('LoginGovIAL2Notification', () => {
   });
 
   const component = () => {
-    return mount(<LoginGovIAL2NotificationMaybe/>);
+    return mount(<MemoryRouter><LoginGovIAL2NotificationMaybe/></MemoryRouter>);
   };
 
   it('should show notification when login.gov feature flag enabled', () => {
@@ -29,19 +30,19 @@ describe('LoginGovIAL2Notification', () => {
         enableRasLoginGovLinking: true
       }});
     const wrapper = component();
-    expect(wrapper.find('[data-test-id="ial2-notification"]').length).toBe(2);
+    expect(wrapper.find('[data-test-id="ial2-notification"]').exists()).toBeTruthy();
   });
 
-  it('should not notification when login.gov feature flag disabled', () => {
+  it('should not show notification when login.gov feature flag disabled', () => {
     serverConfigStore.set({config: {
         ...defaultServerConfig,
         enableRasLoginGovLinking: false
       }});
     const wrapper = component();
-    expect(wrapper.find('[data-test-id="ial2-notification"]').length).toBe(0);
+    expect(wrapper.find('[data-test-id="ial2-notification"]').exists()).toBeFalsy();
   });
 
-  it('should not notification when login.gov complete', () => {
+  it('should not show notification when login.gov complete', () => {
     serverConfigStore.set({config: {
         ...defaultServerConfig,
         enableRasLoginGovLinking: true
@@ -52,10 +53,10 @@ describe('LoginGovIAL2Notification', () => {
     profileStore.set({profile: newProfile, load, reload, updateCache});
 
     const wrapper = component();
-    expect(wrapper.find('[data-test-id="ial2-notification"]').length).toBe(0);
+    expect(wrapper.find('[data-test-id="ial2-notification"]').exists()).toBeFalsy();
   });
 
-  it('should not notification when login.gov bypassed', () => {
+  it('should not show notification when login.gov bypassed', () => {
     serverConfigStore.set({config: {
         ...defaultServerConfig,
         enableRasLoginGovLinking: true
@@ -66,7 +67,7 @@ describe('LoginGovIAL2Notification', () => {
     profileStore.set({profile: newProfile, load, reload, updateCache});
 
     const wrapper = component();
-    expect(wrapper.find('[data-test-id="ial2-notification"]').length).toBe(0);
+    expect(wrapper.find('[data-test-id="ial2-notification"]').exists()).toBeFalsy();
   });
 
 });

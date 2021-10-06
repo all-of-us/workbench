@@ -8,9 +8,11 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
+import com.google.common.hash.Hashing;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -32,7 +34,6 @@ import org.pmiops.workbench.firecloud.api.StatusApi;
 import org.pmiops.workbench.firecloud.api.WorkspacesApi;
 import org.pmiops.workbench.firecloud.model.FirecloudBillingProjectMembership;
 import org.pmiops.workbench.firecloud.model.FirecloudBillingProjectStatus;
-import org.pmiops.workbench.firecloud.model.FirecloudCreateRawlsBillingProjectFullRequest;
 import org.pmiops.workbench.firecloud.model.FirecloudCreateRawlsV2BillingProjectFullRequest;
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupRef;
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
@@ -55,6 +56,8 @@ import org.springframework.stereotype.Service;
 @Service
 // TODO: consider retrying internally when FireCloud returns a 503
 public class FireCloudServiceImpl implements FireCloudService {
+
+  @VisibleForTesting public static final int PROJECT_BILLING_ID_SIZE = 8;
 
   private static final Logger log = Logger.getLogger(FireCloudServiceImpl.class.getName());
 
@@ -253,7 +256,7 @@ public class FireCloudServiceImpl implements FireCloudService {
   }
 
   @Override
-  public void createAllOfUsBillingProject(String projectName, String servicePerimeter) {
+  public String createAllOfUsBillingProject(String projectName, String servicePerimeter) {
     if (projectName.contains(WORKSPACE_DELIMITER)) {
       throw new IllegalArgumentException(
           String.format(
@@ -261,53 +264,28 @@ public class FireCloudServiceImpl implements FireCloudService {
               projectName, WORKSPACE_DELIMITER));
     }
 
-    if (isFireCloudBillingV2ApiEnabled()) {
-      FirecloudCreateRawlsV2BillingProjectFullRequest request =
-          new FirecloudCreateRawlsV2BillingProjectFullRequest()
-              .billingAccount(configProvider.get().billing.freeTierBillingAccountName())
-              .projectName(projectName)
-              .servicePerimeter(servicePerimeter);
-      BillingV2Api billingV2Api = serviceAccountBillingV2ApiProvider.get();
-      retryHandler.run(
-          (context) -> {
-            billingV2Api.createBillingProjectFullV2(request);
-            return null;
-          });
-    } else {
-      FirecloudCreateRawlsBillingProjectFullRequest request =
-          new FirecloudCreateRawlsBillingProjectFullRequest()
-              .billingAccount(configProvider.get().billing.freeTierBillingAccountName())
-              .projectName(projectName)
-              .highSecurityNetwork(true)
-              .enableFlowLogs(true)
-              .privateIpGoogleAccess(true)
-              .servicePerimeter(servicePerimeter);
-      BillingApi billingApi = billingApiProvider.get();
-      retryHandler.run(
-          (context) -> {
-            billingApi.createBillingProjectFull(request);
-            return null;
-          });
-    }
+    FirecloudCreateRawlsV2BillingProjectFullRequest request =
+        new FirecloudCreateRawlsV2BillingProjectFullRequest()
+            .billingAccount(configProvider.get().billing.freeTierBillingAccountName())
+            .projectName(projectName)
+            .servicePerimeter(servicePerimeter);
+    BillingV2Api billingV2Api = serviceAccountBillingV2ApiProvider.get();
+    retryHandler.run(
+        (context) -> {
+          billingV2Api.createBillingProjectFullV2(request);
+          return null;
+        });
+    return projectName;
   }
 
   @Override
   public void deleteBillingProject(String billingProject) {
-    if (isFireCloudBillingV2ApiEnabled()) {
-      BillingV2Api billingV2Api = serviceAccountBillingV2ApiProvider.get();
-      retryHandler.run(
-          (context) -> {
-            billingV2Api.deleteBillingProject(billingProject);
-            return null;
-          });
-    } else {
-      BillingApi billingApi = billingApiProvider.get();
-      retryHandler.run(
-          (context) -> {
-            billingApi.deleteBillingProject(billingProject);
-            return null;
-          });
-    }
+    BillingV2Api billingV2Api = serviceAccountBillingV2ApiProvider.get();
+    retryHandler.run(
+        (context) -> {
+          billingV2Api.deleteBillingProject(billingProject);
+          return null;
+        });
   }
 
   @Override
@@ -411,10 +389,8 @@ public class FireCloudServiceImpl implements FireCloudService {
             // propagating copies of large data files elswhere in the bucket.
             .copyFilesWithPrefix("notebooks/")
             .authorizationDomain(
-                ImmutableList.of(new FirecloudManagedGroupRef().membersGroupName(authDomainName)));
-    if (isFireCloudBillingV2ApiEnabled()) {
-      cloneRequest.bucketLocation(GOOGLE_BUCKETS_LOCATION);
-    }
+                ImmutableList.of(new FirecloudManagedGroupRef().membersGroupName(authDomainName)))
+            .bucketLocation(GOOGLE_BUCKETS_LOCATION);
     return retryHandler.run(
         (context) -> workspacesApi.cloneWorkspace(cloneRequest, fromProject, fromName));
   }
@@ -574,7 +550,18 @@ public class FireCloudServiceImpl implements FireCloudService {
         });
   }
 
-  private boolean isFireCloudBillingV2ApiEnabled() {
-    return configProvider.get().featureFlags.enableFireCloudV2Billing;
+  @Override
+  public String createBillingProjectName() {
+    String randomString =
+        Hashing.sha256()
+            .hashUnencodedChars(UUID.randomUUID().toString())
+            .toString()
+            .substring(0, PROJECT_BILLING_ID_SIZE);
+
+    String projectNamePrefix = configProvider.get().billing.projectNamePrefix;
+    if (!projectNamePrefix.endsWith("-")) {
+      projectNamePrefix = projectNamePrefix + "-";
+    }
+    return projectNamePrefix + randomString;
   }
 }

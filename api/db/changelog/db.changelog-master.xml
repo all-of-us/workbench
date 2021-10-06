@@ -186,6 +186,8 @@
   <include file="changelog/db.changelog-174-backfill-institution-tier-requirements.xml"/>
   <include file="changelog/db.changelog-175-add-ct-training-access-module.xml"/>
   <include file="changelog/db.changelog-176-drop-dua-type-column.xml"/>
+  <include file="changelog/db.changelog-177-add-egress-event-table.xml"/>
+  <include file="changelog/db.changelog-178-add-compute-security-suspended-column.xml"/>
   <!--
    Note: to update the DB locally, do the following:
    - Migrate schema changes: `./project.rb run-local-all-migrations`

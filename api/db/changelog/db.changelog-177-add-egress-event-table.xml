@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+  <changeSet author="calbach" id="changelog-177-add-egress-event-table">
+    <createTable tableName="egress_event">
+      <column name="egress_event_id" type="bigint" autoIncrement="true">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="user_id" type="bigint">
+        <constraints nullable="true" foreignKeyName="fk_egress_event_user_id" references="user(user_id)"/>
+      </column>
+      <column name="workspace_id" type="bigint">
+        <constraints nullable="true" foreignKeyName="fk_egress_event_workspace_id" references="workspace(workspace_id)"/>
+      </column>
+      <column name="egress_megabytes" type="float">
+        <constraints nullable="true"/>
+      </column>
+      <column name="egress_window_seconds" type="bigint">
+        <constraints nullable="true"/>
+      </column>
+      <column name="creation_time" type="datetime">
+        <constraints nullable="false"/>
+      </column>
+      <column name="last_modified_time" type="datetime">
+        <constraints nullable="false"/>
+      </column>
+      <column name="status" type="ENUM('PENDING', 'REMEDIATED', 'VERIFIED_FALSE_POSITIVE')">
+        <constraints nullable="false"/>
+      </column>
+      <column name="sumologic_event" type="json">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+  </changeSet>
+</databaseChangeLog>

@@ -42,7 +42,8 @@ public class ExceptionAdvice {
       if (thrownErrorResponse != null) {
         errorResponse
             .message(thrownErrorResponse.getMessage())
-            .errorCode(thrownErrorResponse.getErrorCode());
+            .errorCode(thrownErrorResponse.getErrorCode())
+            .parameters(thrownErrorResponse.getParameters());
       }
     }
 

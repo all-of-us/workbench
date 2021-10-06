@@ -7,7 +7,7 @@ import com.google.common.collect.ImmutableMap;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.SpringTest;
-import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.BufferEntryStatus;
+import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.monitoring.labels.MetricLabel;
 import org.pmiops.workbench.monitoring.views.GaugeMetric;
 import org.pmiops.workbench.monitoring.views.Metric;
@@ -29,10 +29,7 @@ public class MeasurementBundleTest extends SpringTest {
   @Test
   public void testBuild_multipleMeasurementsNoAttachments() {
     final ImmutableMap<Metric, Number> measurementMap =
-        ImmutableMap.of(
-            GaugeMetric.BILLING_BUFFER_PROJECT_COUNT, 202L,
-            GaugeMetric.COHORT_COUNT, 300L,
-            GaugeMetric.USER_COUNT, USER_COUNT);
+        ImmutableMap.of(GaugeMetric.COHORT_COUNT, 300L, GaugeMetric.USER_COUNT, USER_COUNT);
     final MeasurementBundle bundle =
         MeasurementBundle.builder().addAllMeasurements(measurementMap).build();
     assertThat(bundle.getMeasurements()).hasSize(measurementMap.size());
@@ -58,8 +55,8 @@ public class MeasurementBundleTest extends SpringTest {
         () -> {
           MeasurementBundle.builder()
               .addMeasurement(GaugeMetric.COHORT_COUNT, 101L)
-              .addMeasurement(GaugeMetric.BILLING_BUFFER_PROJECT_COUNT, 202L)
-              .addTag(MetricLabel.BUFFER_ENTRY_STATUS, BufferEntryStatus.AVAILABLE.toString())
+              .addMeasurement(GaugeMetric.WORKSPACE_COUNT, 2L)
+              .addTag(MetricLabel.ACCESS_TIER_SHORT_NAME, "Registered")
               .build();
         });
   }
@@ -70,7 +67,7 @@ public class MeasurementBundleTest extends SpringTest {
         IllegalStateException.class,
         () -> {
           MeasurementBundle.builder()
-              .addTag(MetricLabel.BUFFER_ENTRY_STATUS, "lost and gone forever")
+              .addTag(MetricLabel.USER_DISABLED, "lost and gone forever")
               .build();
         });
   }
@@ -79,14 +76,14 @@ public class MeasurementBundleTest extends SpringTest {
   public void testGetTagValue() {
     final MeasurementBundle measurementBundle =
         MeasurementBundle.builder()
-            .addMeasurement(GaugeMetric.BILLING_BUFFER_PROJECT_COUNT, 101L)
-            .addTag(MetricLabel.BUFFER_ENTRY_STATUS, BufferEntryStatus.AVAILABLE.toString())
+            .addMeasurement(GaugeMetric.WORKSPACE_COUNT, 101L)
+            .addTag(MetricLabel.WORKSPACE_ACTIVE_STATUS, WorkspaceActiveStatus.ACTIVE.toString())
             .build();
 
     final Optional<String> labelValue =
-        measurementBundle.getTagValue(MetricLabel.BUFFER_ENTRY_STATUS);
+        measurementBundle.getTagValue(MetricLabel.WORKSPACE_ACTIVE_STATUS);
     assertThat(labelValue.isPresent()).isTrue();
-    assertThat(labelValue.orElse("wrong")).isEqualTo(BufferEntryStatus.AVAILABLE.toString());
+    assertThat(labelValue.orElse("wrong")).isEqualTo(WorkspaceActiveStatus.ACTIVE.toString());
 
     final Optional<String> missingValue = measurementBundle.getTagValue(MetricLabel.METHOD_NAME);
     assertThat(missingValue.isPresent()).isFalse();

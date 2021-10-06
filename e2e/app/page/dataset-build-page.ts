@@ -117,7 +117,7 @@ export default class DatasetBuildPage extends AuthenticatedPage {
     const createButton = this.getCreateDatasetButton();
     await createButton.waitUntilEnabled();
     await createButton.click();
-    await waitWhileLoading(this.page);
+
     const createModal = new DatasetCreateModal(this.page);
     await createModal.waitForLoad();
     return createModal;
