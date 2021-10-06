@@ -30,10 +30,9 @@ export default class InstitutionAdminPage extends AuthenticatedPage {
   }
 
   // click institution name on the institution-list-page
-  async clickInstitutionNameLink(institutionName: string): Promise<Page> {
+  async clickInstitutionNameLink(institutionName: string): Promise<void> {
     const nameLink = await this.getInstitutionNameLink(institutionName);
     await nameLink.click();
-    return page;
   }
 
   async getInstitutionNameLink(institutionName: string): Promise<ElementHandle> {
