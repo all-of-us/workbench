@@ -1,6 +1,7 @@
 import { Page } from 'puppeteer';
 import { logger } from 'libs/logger';
 import { takeScreenshot } from './save-file-utils';
+import Container from 'app/container';
 
 export const waitForFn = async (fn: () => any, interval = 2000, timeout = 10000): Promise<boolean> => {
   const start = Date.now();
@@ -315,58 +316,42 @@ export async function waitForNumberElements(page: Page, cssSelector: string, exp
 /**
  * Wait for visible texts to match.
  * @param page
- * @param textSubstr
- * @param selector: {css, xpath}
+ * @param textStr
+ * @param opts
  */
 export async function waitForText(
   page: Page,
-  textSubstr: string,
-  selector: { xpath?: string; css?: string } = { css: 'body' },
-  timeout?: number
+  textStr: string,
+  opts: { timeout?: number; container?: Container; rootXpath?: string } = {}
 ): Promise<boolean> {
-  if (selector.css !== undefined) {
-    try {
-      // wait for visible then compare texts
-      await page.waitForSelector(selector.css, { visible: true, timeout });
-      const jsHandle = await page.waitForFunction(
-        (css, expText) => {
-          const regExp = new RegExp(expText);
-          const element = document.querySelector(css);
-          return element && regExp.test(element.textContent);
-        },
-        { timeout },
-        selector.css,
-        textSubstr
-      );
-      return (await jsHandle.jsonValue()) as boolean;
-    } catch (err) {
-      logger.error(`waitForText() failed: css=${selector.css} contains "${textSubstr}"`);
-      logger.error(err);
-      throw new Error(err);
-    }
+  const { timeout = 30 * 1000, container, rootXpath } = opts;
+  let root = '.';
+  if (container) {
+    root = container.getXpath();
+  } else if (rootXpath) {
+    root = rootXpath;
   }
-  if (selector.xpath !== undefined) {
-    try {
-      await page.waitForXPath(selector.xpath, { visible: true, timeout });
-      const jsHandle = await page.waitForFunction(
-        (xpath, expText) => {
-          const regExp = new RegExp(expText);
-          const element = document.evaluate(xpath, document.body, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null)
-            .singleNodeValue;
-          return element && regExp.test(element.textContent);
-        },
-        { timeout },
-        selector.xpath,
-        textSubstr
-      );
-      return (await jsHandle.jsonValue()) as boolean;
-    } catch (err) {
-      logger.error(`waitForText() failed: xpath=${selector.xpath} contains "${textSubstr}"`);
-      logger.error(err);
-      throw new Error(err);
-    }
+  const selector = `${root}//*[contains(normalize-space(text()), "${textStr}")]`;
+
+  try {
+    await page.waitForXPath(selector, { visible: true, timeout });
+    const jsHandle = await page.waitForFunction(
+      (xpath, expText) => {
+        const regExp = new RegExp(expText);
+        const element = document.evaluate(xpath, document.body, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null)
+          .singleNodeValue;
+        return element && regExp.test(element.textContent);
+      },
+      { timeout: timeout },
+      selector,
+      textStr
+    );
+    return (await jsHandle.jsonValue()) as boolean;
+  } catch (err) {
+    logger.error(`ERROR: waitForText() failed. xpath is ${selector}. Contains string "${textStr}"`);
+    logger.error(err);
+    throw new Error(err);
   }
-  throw new Error('waitForText(): xpath or css is required');
 }
 
 /**
