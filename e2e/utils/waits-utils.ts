@@ -2,6 +2,7 @@ import { Page } from 'puppeteer';
 import { logger } from 'libs/logger';
 import { takeScreenshot } from './save-file-utils';
 import Container from 'app/container';
+import { makeDateTimeStr } from './str-utils';
 
 export const waitForFn = async (fn: () => any, interval = 2000, timeout = 10000): Promise<boolean> => {
   const start = Date.now();
@@ -370,15 +371,15 @@ export async function waitWhileLoading(
     waitForRuntime ? '' : ':not([aria-hidden="true"]):not([data-test-id*="runtime-status"])'
   }`;
 
-  // Prevent checking on Login page.
+  // Prevent checking in Login page.
   await page.waitForSelector('[data-test-id="sign-in-page"]', { timeout: 1000 }).catch(() => {
     return;
   });
 
-  // To prevent checking on blank page, wait for elements exist in DOM.
+  // Prevent checking in blank page: wait for loading spinner or some elements exists in DOM.
   await Promise.race([page.waitForSelector(notBlankPageSelector), page.waitForSelector(spinElementsSelector)]);
 
-  // Wait for spinners stop and gone.
+  // Wait for loading spinner to stop and no longer exists.
   try {
     await Promise.all([
       page.waitForFunction(
@@ -392,7 +393,7 @@ export async function waitWhileLoading(
     ]);
     await page.waitForTimeout(500);
   } catch (err) {
-    logger.error(`FAILED to wait for spinner stop: xpath="${spinElementsSelector}"`);
+    logger.error(`ERROR: Loading spinner has not stopped. spinner xpath is "${spinElementsSelector}"`);
     if (err.message.includes('Target closed')) {
       // Leave blank. Ignore error and continue test.
       // Puppeteer can throw following exception when polling for mutation status if this object disappeared in DOM
@@ -400,7 +401,7 @@ export async function waitWhileLoading(
       // Error: Protocol error (Runtime.callFunctionOn): Target closed.
     } else {
       logger.error(err.stack);
-      await takeScreenshot(page, 'Spinner_TimeoutError.jpg');
+      await takeScreenshot(page, `${makeDateTimeStr('ERROR_Spinner_Timeout')}.jpg`);
       throw new Error(err.message);
     }
   }

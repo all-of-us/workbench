@@ -60,8 +60,7 @@ describe('Create Concept Sets from Domains', () => {
     const successMessage = 'Concept Set Saved Successfully';
     await waitForText(page, successMessage);
 
-    const linkExists = await waitForText(page, conceptSetName);
-    expect(linkExists).toBe(true);
+    await waitForText(page, conceptSetName);
     console.log(`Created Concept Set "${conceptSetName}"`);
 
     // Delete Concept Set
