@@ -153,15 +153,15 @@ public class EgressRemediationService {
     if (policy == null) {
       return Optional.empty();
     }
-    List<Escalation> sortedEscalations =
+    List<Escalation> descendingEscalations =
         policy.escalations.stream()
-            .sorted(Comparator.comparingInt(e -> e.afterIncidentCount))
+            .sorted(Comparator.comparingInt((Escalation e) -> e.afterIncidentCount).reversed())
             .collect(Collectors.toList());
-    for (Escalation e : sortedEscalations) {
+    for (Escalation e : descendingEscalations) {
       // We validate against duplicate afterIncidentCount's upstream. If somehow we still have
-      // duplicates at this point, we pick the first matching escalation, as the above sort is
+      // duplicates at this point, we pick the last matching escalation, as the above sort is
       // stable.
-      if (e.afterIncidentCount >= incidentCount) {
+      if (e.afterIncidentCount <= incidentCount) {
         return Optional.of(e);
       }
     }
