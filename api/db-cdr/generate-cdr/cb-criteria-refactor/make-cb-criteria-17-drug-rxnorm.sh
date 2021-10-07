@@ -74,11 +74,6 @@ fi
 # add to make-cb-criteria-17-drug-rxnorm-other.sh
 # ---------CB_CRITERIA_ANCESTOR ---------
 #5954 - #5982 cb_criteria_ancestor: Uses tables: concept_ancestor, cb_criteria, drug_exposure
-# Then
-# ADD IN OTHER CODES NOT ALREADY CAPTURED
-#6118 : DRUG_EXPOSURE - add other standard concepts
-#cb_criteria: Uses : cb_criteria, drug_exposure, concept, cb_criteria_ancestor
-
 ################################################
 # DRUG_EXPOSURE - ATC/RXNORM
 ################################################
@@ -651,70 +646,6 @@ and descendant_concept_id in
     (
         SELECT DISTINCT drug_concept_id
         FROM \`$BQ_PROJECT.$BQ_DATASET.drug_exposure\`
-    )"
-
-echo "DRUG_EXPOSURE - add other standard concepts"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
-    (
-      id
-      ,parent_id
-      ,domain_id
-      ,is_standard
-      ,type
-      ,concept_id
-      ,code
-      ,name
-      ,rollup_count
-      ,item_count
-      ,est_count
-      ,is_group
-      ,is_selectable
-      ,has_attribute
-      ,has_hierarchy
-      ,path
-    )
-SELECT
-    ROW_NUMBER() OVER(order by vocabulary_id,concept_name)
-       + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`) as ID
-    , -1
-    , 'DRUG'
-    , 1
-    , vocabulary_id
-    , concept_id
-    , concept_code
-    , concept_name
-    , 0
-    , cnt
-    , cnt
-    , 0
-    , 1
-    , 0
-    , 0
-    , CAST(ROW_NUMBER() OVER(order by vocabulary_id,concept_name)
-        + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`) as STRING) as path
-FROM
-    (
-        SELECT concept_name, vocabulary_id, concept_id, concept_code, count(DISTINCT person_id) cnt
-        FROM \`$BQ_PROJECT.$BQ_DATASET.drug_exposure\` a
-        LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.drug_concept_id = b.concept_id
-        WHERE standard_concept = 'S'
-            and domain_id = 'Drug'
-            and drug_concept_id NOT IN
-                (
-                    SELECT descendant_id
-                    FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBA\`
-                    WHERE ancestor_id in
-                        (
-                            SELECT concept_id
-                            FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
-                            WHERE domain_id = 'DRUG'
-                                and is_standard = 1
-                                and concept_id is not null
-                                and id > $CB_CRITERIA_START_ID and id < $CB_CRITERIA_END_ID
-                        )
-                )
-        GROUP BY 1,2,3,4
     )"
 
 #wait for process to end before copying

@@ -459,68 +459,6 @@ WHERE x.concept_id = y.concept_id
     and x.is_standard = 1
     and x.is_group = 1"
 
-###############################################
-# ADD IN OTHER CODES NOT ALREADY CAPTURED
-################################################
-echo "PROCEDURE_OCCURRENCE - add other standard concepts"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
-    (
-      id
-      ,parent_id
-      ,domain_id
-      ,is_standard
-      ,type
-      ,concept_id
-      ,code
-      ,name
-      ,rollup_count
-      ,item_count
-      ,est_count
-      ,is_group
-      ,is_selectable
-      ,has_attribute
-      ,has_hierarchy
-      ,path
-    )
-SELECT
-    ROW_NUMBER() OVER(order by vocabulary_id,concept_name)
-       + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`) as ID
-    , -1
-    , 'PROCEDURE'
-    , 1
-    , vocabulary_id
-    , concept_id
-    , concept_code
-    , concept_name
-    , 0
-    , cnt
-    , cnt
-    , 0
-    , 1
-    , 0
-    , 0
-    , CAST(ROW_NUMBER() OVER(order by vocabulary_id,concept_name)
-        + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`) as STRING) as path
-FROM
-    (
-        SELECT concept_name, vocabulary_id, concept_id, concept_code, count(DISTINCT person_id) cnt
-        FROM \`$BQ_PROJECT.$BQ_DATASET.procedure_occurrence\` a
-        LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.procedure_concept_id = b.concept_id
-        WHERE standard_concept = 'S'
-            and domain_id = 'Procedure'
-            and procedure_concept_id NOT IN
-                (
-                    SELECT concept_id
-                    FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
-                    WHERE domain_id = 'PROCEDURE'
-                        and is_standard = 1
-                        and concept_id is not null
-                        and id > $CB_CRITERIA_START_ID and id < $CB_CRITERIA_END_ID
-                )
-        GROUP BY 1,2,3,4
-    )"
-
 #wait for process to end before copying
 wait
 ## copy temp tables back to main tables, and delete temp?

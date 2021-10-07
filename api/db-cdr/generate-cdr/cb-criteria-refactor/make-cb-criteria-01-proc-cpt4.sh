@@ -88,9 +88,9 @@ SELECT
     , a.concept_id
     , a.code
     , CASE WHEN b.concept_id is not null THEN b.concept_name ELSE a.name END AS name
-    , CASE WHEN a.parent_id != 0 THEN 0 ELSE null END AS rollup_count
+    , CASE WHEN a.parent_id != $CB_CRITERIA_START_ID THEN 0 ELSE null END AS rollup_count
     , CASE
-        WHEN a.parent_id != 0 THEN
+        WHEN a.parent_id != $CB_CRITERIA_START_ID THEN
             CASE
                 WHEN c.cnt is null THEN 0
                 ELSE c.cnt
@@ -223,68 +223,6 @@ WHERE type = 'CPT4'
                       and id > $CB_CRITERIA_START_ID and id < $CB_CRITERIA_END_ID
                 )
         )"
-
-###############################################
-# ADD IN OTHER CODES NOT ALREADY CAPTURED (for CPT4)
-################################################
-echo "MEASUREMENT - CPT4 - add other standard concepts"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
-    (
-      id
-      ,parent_id
-      ,domain_id
-      ,is_standard
-      ,type
-      ,concept_id
-      ,code,name
-      ,rollup_count
-      ,item_count
-      ,est_count
-      ,is_group
-      ,is_selectable
-      ,has_attribute
-      ,has_hierarchy
-      ,path
-    )
-SELECT
-    ROW_NUMBER() OVER(order by vocabulary_id,concept_name)
-       + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` where id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID)
-    , -1
-    , 'MEASUREMENT'
-    , 1
-    , vocabulary_id
-    , concept_id
-    , concept_code
-    , concept_name
-    , 0
-    , cnt
-    , cnt
-    , 0
-    , 1
-    , 0
-    , 0
-    , CAST(ROW_NUMBER() OVER(order by vocabulary_id,concept_name)
-        + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` where id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID) as STRING) as path
-FROM
-    (
-        SELECT concept_name, vocabulary_id, concept_id, concept_code, count(DISTINCT person_id) cnt
-        FROM \`$BQ_PROJECT.$BQ_DATASET.measurement\` a
-        LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.measurement_concept_id = b.concept_id
-        WHERE standard_concept = 'S'
-            and domain_id = 'Measurement'
-            and vocabulary_id != 'PPI'
-            and measurement_concept_id NOT IN
-                (
-                    SELECT concept_id
-                    FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
-                    WHERE is_standard = 1
-                        and concept_id is not null
-                        and id > $CB_CRITERIA_START_ID and id < $CB_CRITERIA_END_ID
-                )
-            and vocabulary_id in ('CPT4')
-        GROUP BY 1,2,3,4
-    )"
 
 #wait for process to end before copying
 wait
