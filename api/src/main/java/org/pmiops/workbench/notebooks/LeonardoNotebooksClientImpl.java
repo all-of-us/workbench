@@ -1,10 +1,12 @@
 package org.pmiops.workbench.notebooks;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -17,6 +19,7 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace.BillingMigrationStatus;
 import org.pmiops.workbench.exceptions.ExceptionUtils;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.leonardo.ApiException;
@@ -30,6 +33,7 @@ import org.pmiops.workbench.leonardo.model.LeonardoGetPersistentDiskResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
+import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.leonardo.model.LeonardoUpdateDiskRequest;
 import org.pmiops.workbench.leonardo.model.LeonardoUpdateRuntimeRequest;
 import org.pmiops.workbench.leonardo.model.LeonardoUserJupyterExtensionConfig;
@@ -53,6 +57,13 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
   private static final String JUPYTER_DEBUG_LOGGING_ENV_KEY = "JUPYTER_DEBUG_LOGGING";
   private static final String ALL_SAMPLES_WGS_KEY = "ALL_SAMPLES_WGS_BUCKET";
   private static final String SINGLE_SAMPLE_ARRAY_BUCKET_KEY = "SINGLE_SAMPLE_ARRAY_BUCKET";
+
+  private static Set<LeonardoRuntimeStatus> STOPPABLE_RUNTIME_STATUSES =
+      ImmutableSet.of(
+          LeonardoRuntimeStatus.CREATING,
+          LeonardoRuntimeStatus.RUNNING,
+          LeonardoRuntimeStatus.STARTING,
+          LeonardoRuntimeStatus.UPDATING);
 
   private static final Logger log = Logger.getLogger(LeonardoNotebooksClientImpl.class.getName());
 
@@ -298,6 +309,57 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
           runtimesApi.deleteRuntime(googleProject, runtimeName, /* deleteDisk */ false);
           return null;
         });
+  }
+
+  @Override
+  public int stopAllUserRuntimesAsService(String userEmail) throws WorkbenchException {
+    RuntimesApi runtimesApi = serviceRuntimesApiProvider.get();
+    List<LeonardoListRuntimeResponse> runtimes =
+        leonardoRetryHandler.run(
+            (context) ->
+                runtimesApi.listRuntimes(
+                    LeonardoMapper.RUNTIME_LABEL_CREATED_BY + "=" + userEmail, false));
+    List<Boolean> results =
+        runtimes.stream()
+            .filter(STOPPABLE_RUNTIME_STATUSES::contains)
+            .filter(
+                r -> {
+                  if (!userEmail.equals(r.getAuditInfo().getCreator())) {
+                    log.severe(
+                        String.format(
+                            "listRuntime query by label returned a runtime not created by the expected user: '%s/%s' has creator '%s', expected '%s'",
+                            r.getGoogleProject(),
+                            r.getRuntimeName(),
+                            r.getAuditInfo().getCreator(),
+                            userEmail));
+                    return false;
+                  }
+                  return true;
+                })
+            .parallel()
+            .map(
+                r -> {
+                  try {
+                    leonardoRetryHandler.runAndThrowChecked(
+                        (context) -> {
+                          runtimesApi.stopRuntime(r.getGoogleProject(), r.getRuntimeName());
+                          return null;
+                        });
+                  } catch (ApiException e) {
+                    log.log(
+                        Level.WARNING,
+                        String.format(
+                            "failed to stop runtime '%s/%s'",
+                            r.getGoogleProject(), r.getRuntimeName()));
+                    return false;
+                  }
+                  return true;
+                })
+            .collect(Collectors.toList());
+    if (results.contains(false)) {
+      throw new ServerErrorException("failed to stop all user runtimes, see logs for details");
+    }
+    return results.size();
   }
 
   @Override
