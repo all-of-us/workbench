@@ -1,7 +1,6 @@
 package org.pmiops.workbench.db.dao;
 
 import com.google.api.services.oauth2.model.Userinfoplus;
-import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
@@ -50,20 +49,6 @@ public interface UserService {
   void submitTermsOfService(DbUser dbUser, Integer tosVersion);
 
   void setDataUseAgreementNameOutOfDate(String newGivenName, String newFamilyName);
-
-  void setDataUseAgreementBypassTime(
-      Long userId, Timestamp previousBypassTime, Timestamp newBypassTime);
-
-  void setComplianceTrainingBypassTime(
-      Long userId, Timestamp previousBypassTime, Timestamp newBypassTime);
-
-  void setEraCommonsBypassTime(Long userId, Timestamp previousBypassTime, Timestamp newBypassTime);
-
-  void setTwoFactorAuthBypassTime(
-      Long userId, Timestamp previousBypassTime, Timestamp newBypassTime);
-
-  void setRasLinkLoginGovBypassTime(
-      Long userId, Timestamp previousBypassTime, Timestamp newBypassTime);
 
   DbUser setDisabledStatus(Long userId, boolean disabled);
 
