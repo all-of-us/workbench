@@ -72,14 +72,25 @@ export default class adminTable extends Table {
    * Finds table column names. Returns in array of string.
    * @returns {Array<string>}
    */
-  async getColumnNames(): Promise<string[]> {
+  async getAllColumnNames(): Promise<string[]> {
+    const columns1: Array<string> = await this.getFrozenColNames();
+    const columns2: Array<string> = await this.getUnfrozenColNames();
+    const allColumnNames = columns1.concat(columns2);
+    return allColumnNames;
+  }
+
+  getUnfrozenColNames(): Promise<string[]> {
     const headerTable = this.getHeaderTable();
     return headerTable.getColumnNames();
   }
 
+  getFrozenColNames(): Promise<string[]> {
+    const headerTable = this.getFrozenHeader();
+    return headerTable.getColumnNames();
+  }
+
   async getNameColindex(): Promise<number> {
-    const dataTable = this.getFrozenHeader();
-    const columnName = await dataTable.getColumnNames();
+    const columnName = await this.getFrozenColNames();
     const colIndexNum = columnName.indexOf('Name');
     return colIndexNum + 1;
   }
