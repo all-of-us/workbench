@@ -5706,16 +5706,6 @@ definitions:
         "$ref": "#/definitions/VerifiedInstitutionalAffiliation"
       demographicSurvey:
         "$ref": "#/definitions/DemographicSurvey"
-      twoFactorAuthCompletionTime:
-        type: integer
-        format: int64
-        description: Timestamp when the user completed two factor authentication in
-          milliseconds since the UNIX epoch.
-      twoFactorAuthBypassTime:
-        type: integer
-        format: int64
-        description: Timestamp when the user was bypassed for completing two factor
-          authentication in milliseconds since the UNIX epoch.
       eraCommonsLinkedNihUsername:
         type: string
         description: The user's NIH username
@@ -5724,33 +5714,6 @@ definitions:
         description: The FireCloud-calculated expiration time
         format: int64
         default: 0
-      eraCommonsCompletionTime:
-        type: integer
-        format: int64
-        description: Timestamp when the user completed era commons linking.
-      eraCommonsBypassTime:
-        type: integer
-        format: int64
-        description: Timestamp when the user was bypassed for completing era commons
-          linking.
-      complianceTrainingCompletionTime:
-        type: integer
-        format: int64
-        description: Timestamp when a user completed compliance training.
-      complianceTrainingBypassTime:
-        type: integer
-        format: int64
-        description: Timestamp when a user was bypassed for completing compliance
-          training
-      dataUseAgreementCompletionTime:
-        type: integer
-        format: int64
-        description: Timestamp when a user completed the data use agreement.
-      dataUseAgreementBypassTime:
-        type: integer
-        format: int64
-        description: Timestamp when a user was bypassed for completing the data use
-          agreement.
       dataUseAgreementSignedVersion:
         type: integer
         format: int32
@@ -5776,23 +5739,6 @@ definitions:
       rasLinkLoginGovUsername:
         type: string
         description: The user's identity name in login.gov.
-      rasLinkLoginGovCompletionTime:
-        type: integer
-        format: int64
-        description: 'Timestamp when the user completed RAS linking(login.gov). Note: All AoU users
-        are required to have IAL2 setup in login.gov.'
-      rasLinkLoginGovBypassTime:
-        type: integer
-        format: int64
-        description: Timestamp when the user was bypassed for completing login.gov linking.
-      publicationsLastConfirmedTime:
-        type: integer
-        format: int64
-        description: Timestamp when the user last confirmed their publications.
-      profileLastConfirmedTime:
-        type: integer
-        format: int64
-        description: Timestamp when the user last confirmed their profile.
       accessModules:
         type: object
         properties:
