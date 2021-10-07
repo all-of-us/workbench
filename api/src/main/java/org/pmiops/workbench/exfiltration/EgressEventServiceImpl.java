@@ -1,4 +1,4 @@
-package org.pmiops.workbench.opsgenie;
+package org.pmiops.workbench.exfiltration;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;

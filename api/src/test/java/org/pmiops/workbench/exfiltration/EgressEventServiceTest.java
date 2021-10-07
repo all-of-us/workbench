@@ -1,4 +1,4 @@
-package org.pmiops.workbench.opsgenie;
+package org.pmiops.workbench.exfiltration;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -6,7 +6,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.pmiops.workbench.opsgenie.EgressEventServiceImpl.NOT_FOUND_WORKSPACE_NAMESPACE;
+import static org.pmiops.workbench.exfiltration.EgressEventServiceImpl.NOT_FOUND_WORKSPACE_NAMESPACE;
 import static org.pmiops.workbench.utils.TestMockFactory.DEFAULT_GOOGLE_PROJECT;
 
 import com.google.common.collect.ImmutableList;

@@ -1,4 +1,4 @@
-package org.pmiops.workbench.opsgenie;
+package org.pmiops.workbench.exfiltration;
 
 import java.sql.Timestamp;
 import java.time.Clock;
@@ -23,6 +23,7 @@ import org.pmiops.workbench.db.model.DbEgressEvent.EgressEventStatus;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
 import org.springframework.stereotype.Service;
 
@@ -55,6 +56,8 @@ public class EgressRemediationService {
   }
 
   public void remediateEgressEvent(long egressEventId) {
+    // TODO(RW-7389): Add audit logging of remediation.
+
     DbEgressEvent event =
         egressEventDao
             .findById(egressEventId)
@@ -91,7 +94,7 @@ public class EgressRemediationService {
           } else if (e.suspendCompute != null) {
             suspendUserCompute(user, Duration.ofMinutes(e.suspendCompute.durationMinutes));
           } else {
-            throw new FailedPreconditionException("egress alert policy is invalid: " + e);
+            throw new ServerErrorException("egress alert policy is invalid: " + e);
           }
         });
 
@@ -179,15 +182,18 @@ public class EgressRemediationService {
         user,
         Agent.asSystem());
 
-    int stopCount = leonardoNotebooksClient.stopAllUserRuntimesAsService(user.getUsername());
-    log.info(String.format("stopped %d runtimes for user", stopCount));
+    stopUserRuntimes(user.getUsername());
   }
 
   private void disableUser(DbUser user) {
     userService.setDisabledStatus(user.getUserId(), true);
 
     // also stop any running compute, killing any active egress processes the user may have
-    int stopCount = leonardoNotebooksClient.stopAllUserRuntimesAsService(user.getUsername());
+    stopUserRuntimes(user.getUsername());
+  }
+
+  private void stopUserRuntimes(String userEmail) {
+    int stopCount = leonardoNotebooksClient.stopAllUserRuntimesAsService(userEmail);
     log.info(String.format("stopped %d runtimes for user", stopCount));
   }
 }

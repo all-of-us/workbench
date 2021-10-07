@@ -58,9 +58,10 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
   private static final String ALL_SAMPLES_WGS_KEY = "ALL_SAMPLES_WGS_BUCKET";
   private static final String SINGLE_SAMPLE_ARRAY_BUCKET_KEY = "SINGLE_SAMPLE_ARRAY_BUCKET";
 
+  // Keep in sync with
+  // https://github.com/DataBiosphere/leonardo/blob/develop/core/src/main/scala/org/broadinstitute/dsde/workbench/leonardo/runtimeModels.scala#L162
   private static Set<LeonardoRuntimeStatus> STOPPABLE_RUNTIME_STATUSES =
       ImmutableSet.of(
-          LeonardoRuntimeStatus.CREATING,
           LeonardoRuntimeStatus.RUNNING,
           LeonardoRuntimeStatus.STARTING,
           LeonardoRuntimeStatus.UPDATING);
@@ -350,7 +351,8 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
                         Level.WARNING,
                         String.format(
                             "failed to stop runtime '%s/%s'",
-                            r.getGoogleProject(), r.getRuntimeName()));
+                            r.getGoogleProject(), r.getRuntimeName()),
+                        e);
                     return false;
                   }
                   return true;
