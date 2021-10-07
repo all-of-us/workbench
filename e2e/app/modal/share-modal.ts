@@ -16,7 +16,7 @@ export default class ShareModal extends Modal {
   }
 
   async isLoaded(): Promise<boolean> {
-    await waitForText(this.page, modalText, { xpath: this.getXpath() });
+    await waitForText(this.page, modalText, { container: this });
     return true;
   }
 

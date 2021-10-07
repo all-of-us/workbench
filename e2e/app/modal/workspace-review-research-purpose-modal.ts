@@ -11,9 +11,13 @@ export default class WorkspaceReviewResearchPurposeModal extends Modal {
   }
 
   async isLoaded(): Promise<boolean> {
-    return await waitForText(this.page, modalTitle, { xpath: this.getXpath() }).catch(() => {
-      return false;
-    });
+    return await waitForText(this.page, modalTitle, { container: this })
+      .then(() => {
+        return true;
+      })
+      .catch(() => {
+        return false;
+      });
   }
 
   async clickReviewNowButton(): Promise<void> {

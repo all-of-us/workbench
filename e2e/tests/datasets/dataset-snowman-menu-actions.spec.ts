@@ -92,7 +92,7 @@ describe('Datasets card snowman menu actions', () => {
 
     // Type in same dataset name will not work.
     await renameModal.typeNewName(datasetName);
-    await waitForText(page, 'New name already exists', { xpath: renameModal.getXpath() });
+    await waitForText(page, 'New name already exists', { container: renameModal });
     expect(await renameModal.waitForButton(LinkText.RenameDataset).isCursorNotAllowed()).toBe(true);
 
     const newDatasetName = makeRandomName();
