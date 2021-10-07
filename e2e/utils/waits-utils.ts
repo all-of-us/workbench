@@ -323,32 +323,31 @@ export async function waitForText(
   page: Page,
   textStr: string,
   opts: { timeout?: number; container?: Container; rootXpath?: string } = {}
-): Promise<boolean> {
+): Promise<void> {
   const { timeout = 30 * 1000, container, rootXpath } = opts;
-  let root = '.';
+  let xpath: string;
   if (container) {
-    root = container.getXpath();
+    xpath = container.getXpath();
   } else if (rootXpath) {
-    root = rootXpath;
+    xpath = rootXpath;
+  } else {
+    xpath = '//*[@data-test-id="signed-in" or @data-test-id="sign-in-page"]';
   }
-  const selector = `${root}//*[contains(normalize-space(text()), "${textStr}")]`;
 
   try {
-    await page.waitForXPath(selector, { visible: true, timeout });
-    const jsHandle = await page.waitForFunction(
-      (xpath, expText) => {
-        const regExp = new RegExp(expText);
+    await page.waitForFunction(
+      (xpath, text) => {
+        const regExp = new RegExp(text);
         const element = document.evaluate(xpath, document.body, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null)
           .singleNodeValue;
         return element && regExp.test(element.textContent);
       },
       { timeout: timeout },
-      selector,
+      xpath,
       textStr
     );
-    return (await jsHandle.jsonValue()) as boolean;
   } catch (err) {
-    logger.error(`ERROR: waitForText() failed. xpath is ${selector}. Contains string "${textStr}"`);
+    logger.error(`ERROR: Failed to find text "${textStr}" (in xpath: '${xpath}').`);
     logger.error(err);
     throw new Error(err);
   }
