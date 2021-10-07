@@ -79,7 +79,7 @@ bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
         , path
     )
 SELECT
-     (a.id + $CB_CRITERIA_START_ID) id
+     (a.id + $CB_CRITERIA_START_ID ) id
     , a.parent_id + $CB_CRITERIA_START_ID
     , a.domain_id
     , a.is_standard
@@ -155,7 +155,8 @@ SELECT
       DISTINCT a.id ancestor_id
     , coalesce(h.id, g.id, f.id, e.id, d.id, c.id, b.id) descendant_id
 FROM (SELECT id, parent_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
-           WHERE domain_id = 'PROCEDURE' and type = 'CPT4' and is_standard = 0 and is_group = 1 and parent_id !=0
+           WHERE domain_id = 'PROCEDURE' and type = 'CPT4' and is_standard = 0 and is_group = 1
+                 and parent_id !=$CB_CRITERIA_START_ID
                  and id > $CB_CRITERIA_START_ID and id < $CB_CRITERIA_END_ID) a
 JOIN (SELECT id, parent_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`) b on a.id  = b.parent_id
 LEFT JOIN (SELECT id, parent_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`) c on b.id  = c.parent_id
@@ -184,7 +185,7 @@ FROM
                         SELECT id
                         FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
                         WHERE type = 'CPT4'
-                            and parent_id != 0
+                            and parent_id != $CB_CRITERIA_START_ID
                             and is_group = 1
                             and id > $CB_CRITERIA_START_ID and id < $CB_CRITERIA_END_ID
                     ) a
@@ -213,7 +214,7 @@ WHERE type = 'CPT4'
     and is_group = 1
     and
         (
-            (parent_id !=0 and rollup_count = 0)
+            (parent_id !=$CB_CRITERIA_START_ID and rollup_count = 0)
             or id not in
                 (
                     SELECT parent_id
@@ -272,17 +273,16 @@ FROM
         LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.measurement_concept_id = b.concept_id
         WHERE standard_concept = 'S'
             and domain_id = 'Measurement'
-            and vocabulary_id not in ('PPI')
+            and vocabulary_id != 'PPI'
             and measurement_concept_id NOT IN
                 (
                     SELECT concept_id
                     FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
-                    WHERE domain_id = 'MEASUREMENT'
-                        and is_standard = 1
+                    WHERE is_standard = 1
                         and concept_id is not null
                         and id > $CB_CRITERIA_START_ID and id < $CB_CRITERIA_END_ID
                 )
-            and vocabulary_id = 'CPT4'
+            and vocabulary_id in ('CPT4')
         GROUP BY 1,2,3,4
     )"
 

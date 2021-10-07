@@ -491,6 +491,7 @@ FROM
             and a.procedure_source_concept_id is not null
             and b.concept_id is not null
             and b.vocabulary_id != 'PPI'
+            and b.vocabulary_id in ('SNOMED')
             and (b.domain_id = 'Procedure' OR c.domain_id = 'Procedure')
         GROUP BY 1,2,3,4
     )"
