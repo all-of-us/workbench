@@ -20,7 +20,7 @@ export function makeString(charLimit?: number): string {
 // Makes a different string of the same length.
 export function makeDifferentStringSameLength(original: string): string {
   if (!original) {
-    throw Error('cannot make a different empty string')
+    throw Error('cannot make a different empty string');
   }
 
   let out = '';
