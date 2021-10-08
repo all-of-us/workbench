@@ -1,6 +1,6 @@
 import { findOrCreateWorkspace, isValidDate, signInWithAccessToken } from 'utils/test-utils';
 import { MenuOption, LinkText, ResourceCard } from 'app/text-labels';
-import { makeRandomName, makeWorkspaceName } from 'utils/str-utils';
+import { makeRandomName } from 'utils/str-utils';
 import CohortParticipantDetailPage from 'app/page/cohort-participant-detail-page';
 import CohortReviewModal from 'app/modal/cohort-review-modal';
 import CohortReviewPage from 'app/page/cohort-review-page';
@@ -20,11 +20,14 @@ describe('Cohort review tests', () => {
     await signInWithAccessToken(page);
   });
 
-  const workspace = makeWorkspaceName();
-  const reviewSetNumberOfParticipants = 100;
+  const workspaceName = 'e2eCohortReviewTest';
+  let cohortName: string;
+  
+  const reviewSetNumberOfParticipants_1 = 50;
+  const reviewSetNumberOfParticipants_2 = 100;
 
-  test('Create cohort review set in cohort build page', async () => {
-    await findOrCreateWorkspace(page, { workspaceName: workspace });
+  test('Create review set in cohort build page', async () => {
+    await findOrCreateWorkspace(page, { workspaceName: workspaceName });
 
     const dataPage = new WorkspaceDataPage(page);
     let cohortBuildPage = await dataPage.clickAddCohortsButton();
@@ -36,7 +39,7 @@ describe('Cohort review tests', () => {
     await cohortBuildPage.createCohort();
 
     const cohortActionsPage = new CohortActionsPage(page);
-    const cohortName = await cohortActionsPage.getCohortName();
+    cohortName = await cohortActionsPage.getCohortName();
     cohortBuildPage = await cohortActionsPage.clickCohortName();
     await cohortBuildPage.getTotalCount();
 
@@ -46,8 +49,7 @@ describe('Cohort review tests', () => {
     const modal = new CohortReviewModal(page);
     await modal.waitForLoad();
 
-    const reviewSetNumberOfParticipants = 100;
-    await modal.fillInNumberOfParticipants(reviewSetNumberOfParticipants);
+    await modal.fillInNumberOfParticipants(reviewSetNumberOfParticipants_1);
     await modal.clickButton(LinkText.CreateSet);
 
     const cohortReviewPage = new CohortReviewPage(page);
@@ -59,9 +61,9 @@ describe('Cohort review tests', () => {
     const participantsTable = cohortReviewPage.getDataTable();
     const records = await participantsTable.getNumRecords();
     // Table records page numbering is in "1 - 25 of 100 records" format.
-    expect(Number(records[2])).toEqual(reviewSetNumberOfParticipants);
+    expect(Number(records[2])).toEqual(reviewSetNumberOfParticipants_1);
 
-    console.log(`Created Review Set with ${reviewSetNumberOfParticipants} participants.`);
+    console.log(`Created Review Set with ${reviewSetNumberOfParticipants_1} participants.`);
 
     // Click Back to Cohort link
     const backToCohortButton = cohortReviewPage.getBackToCohortButton();
@@ -80,7 +82,6 @@ describe('Cohort review tests', () => {
     expect(reviewCohortCard).toBeTruthy();
 
     await dataPage.deleteResource(cohortName, ResourceCard.CohortReview);
-    await dataPage.deleteResource(cohortName, ResourceCard.Cohort);
   });
 
   /**
@@ -93,8 +94,8 @@ describe('Cohort review tests', () => {
    * Rename Cohort review.
    * Delete cohort review via card's ellipsis menu.
    */
-  test('Create cohort review set from cohort card', async () => {
-    await findOrCreateWorkspace(page, { workspaceName: workspace });
+  test('Create review set from cohort card', async () => {
+    await findOrCreateWorkspace(page, { workspaceName: workspaceName });
 
     const dataPage = new WorkspaceDataPage(page);
     const cohortBuildPage = await dataPage.clickAddCohortsButton();
@@ -114,7 +115,7 @@ describe('Cohort review tests', () => {
     await group3.includeLabsAndMeasurements('Red cell indices', 1);
 
     // Save new cohort
-    const cohortName = await cohortBuildPage.createCohort();
+    cohortName = await cohortBuildPage.createCohort();
 
     // Find new cohort card.
     const cohortActionsPage = new CohortActionsPage(page);
@@ -125,9 +126,9 @@ describe('Cohort review tests', () => {
     await cohortCard.selectSnowmanMenu(MenuOption.Review, { waitForNav: true });
     const modal = new CohortReviewModal(page);
     await modal.waitForLoad();
-    await modal.fillInNumberOfParticipants(reviewSetNumberOfParticipants);
+    await modal.fillInNumberOfParticipants(reviewSetNumberOfParticipants_2);
     await modal.clickButton(LinkText.CreateSet);
-    console.log(`Created Review Set with ${reviewSetNumberOfParticipants} participants.`);
+    console.log(`Created Review Set with ${reviewSetNumberOfParticipants_2} participants.`);
 
     let cohortReviewPage = new CohortReviewPage(page);
     await cohortReviewPage.waitForLoad();
@@ -139,7 +140,7 @@ describe('Cohort review tests', () => {
     // Table records page numbering is in "1 - 25 of 100 records" format.
     expect(Number(records[0])).toEqual(1);
     expect(Number(records[1])).toEqual(25);
-    expect(Number(records[2])).toEqual(reviewSetNumberOfParticipants);
+    expect(Number(records[2])).toEqual(reviewSetNumberOfParticipants_2);
 
     // Verify table column names match.
     const columns = [
@@ -173,8 +174,8 @@ describe('Cohort review tests', () => {
     const annotationsSidebar = new AnnotationsSidebar(page);
     await annotationsSidebar.open();
 
-    const reviewParticipantid1 = await annotationsSidebar.getParticipantID();
-    expect(participantId).toEqual(reviewParticipantid1);
+    const reviewParticipantId1 = await annotationsSidebar.getParticipantID();
+    expect(participantId).toEqual(reviewParticipantId1);
 
     // select review status from dropdown option
     const participantStatus1 = await annotationsSidebar.selectReviewStatus(ReviewStatus.Excluded);
@@ -202,10 +203,10 @@ describe('Cohort review tests', () => {
     await annotationsSidebar.open();
 
     // get the participant ID on the sidebar content
-    const reviewParticipantid2 = await annotationsSidebar.getParticipantID();
-    console.log(`reviewParticipantid2: ${reviewParticipantid2}`);
+    const reviewParticipantId2 = await annotationsSidebar.getParticipantID();
+
     // validate that the participant ID on detail page and the sidebar content match
-    expect(detailPageParticipantid).toEqual(reviewParticipantid2);
+    expect(detailPageParticipantid).toEqual(reviewParticipantId2);
 
     // select a review status
     const participantStatus2 = await annotationsSidebar.selectReviewStatus(ReviewStatus.Included);
@@ -269,13 +270,11 @@ describe('Cohort review tests', () => {
     const statusCell1 = await participantsTable.getCell(2, 8);
     const statusValue1 = await getPropValue<string>(statusCell1, 'textContent');
     expect(statusValue1).toEqual(participantStatus1);
-    console.log(`${reviewParticipantid1}: ${statusValue1}`);
 
     // Get the status of participant2
     const statusCell2 = await participantsTable.getCell(3, 8);
     const statusValue2 = await getPropValue<string>(statusCell2, 'textContent');
     expect(statusValue2).toEqual(participantStatus2);
-    console.log(`${reviewParticipantid2}: ${statusValue2}`);
 
     // return to cohort review page
     await cohortReviewPage.getBackToCohortButton().clickAndWait();
