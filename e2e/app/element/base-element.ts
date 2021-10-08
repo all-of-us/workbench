@@ -207,7 +207,7 @@ export default class BaseElement {
         throw new Error(`Failed to type "${newValue}". Actual text: "${actualValue}"`);
       }
       maxRetries--;
-      await this.page.waitForTimeout(2000).then(typeAndCheck); // 2 seconds pause and retry type
+      await this.page.waitForTimeout(1000).then(typeAndCheck); // 1 second pause and retry type
     };
     await waitForFn(() => this.isVisible());
     await typeAndCheck();
@@ -259,7 +259,7 @@ export default class BaseElement {
         throw new Error('Failed to clear text."');
       }
       maxRetries--;
-      await this.page.waitForTimeout(2000).then(() => clearAndCheck(element)); // 2 seconds pause and retry clear
+      await this.page.waitForTimeout(1000).then(() => clearAndCheck(element)); // 1 second pause and retry clear
     };
 
     const text = await getTextLength();
@@ -359,6 +359,7 @@ export default class BaseElement {
     const element = await this.asElementHandle();
     await element.focus();
     await this.page.evaluate((elem) => elem.click(), element);
+    await this.page.waitForTimeout(500);
   }
 
   /**
