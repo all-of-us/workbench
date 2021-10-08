@@ -37,7 +37,7 @@ export default class OldCdrVersionModal extends Modal {
     const xpath = '//*[@data-test-id="old-cdr-version-modal"]';
     await this.page.waitForXPath(xpath, { visible: true });
     const modalTitle = 'You have selected an older version of the dataset';
-    await waitForText(this.page, modalTitle, { xpath: this.getXpath() });
+    await waitForText(this.page, modalTitle, { container: this });
     return true;
   }
 

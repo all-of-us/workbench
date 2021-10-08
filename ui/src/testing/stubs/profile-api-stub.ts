@@ -116,26 +116,7 @@ export class ProfileApiStub extends ProfileApi {
 
   public bypassAccessRequirement(
     userId: number, bypassed?: AccessBypassRequest, options?: any): Promise<EmptyResponse> {
-    return new Promise<EmptyResponse>(resolve => {
-      let valueToSet;
-      if (bypassed.isBypassed) {
-        valueToSet = 1;
-      } else {
-        valueToSet = null;
-      }
-      switch (bypassed.moduleName) {
-        case AccessModule.COMPLIANCETRAINING:
-          this.profile.complianceTrainingBypassTime = valueToSet;
-          break;
-        case AccessModule.ERACOMMONS:
-          this.profile.eraCommonsBypassTime = valueToSet;
-          break;
-        case AccessModule.RASLINKLOGINGOV:
-          this.profile.rasLinkLoginGovBypassTime = valueToSet;
-          break;
-      }
-      resolve({});
-    });
+    return new Promise<EmptyResponse>(() => {});
   }
 
   public submitDUCC(duccVersion: number) {

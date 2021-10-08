@@ -12,7 +12,7 @@ export default class GenomicsVariantExtractConfirmationModal extends Modal {
   }
 
   async isLoaded(): Promise<boolean> {
-    await waitForText(this.page, modalTitle, { xpath: this.getXpath() });
+    await waitForText(this.page, modalTitle, { container: this });
     await waitWhileLoading(this.page);
     return true;
   }

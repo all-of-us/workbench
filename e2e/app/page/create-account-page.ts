@@ -186,7 +186,7 @@ export default class CreateAccountPage extends BasePage {
 
   // Step 2: Fill out institution affiliation details
   async fillOutInstitution(): Promise<void> {
-    await Promise.all([waitForText(this.page, 'complete Step 1 of 3', { css: 'body' }), waitWhileLoading(this.page)]);
+    await Promise.all([waitForText(this.page, 'complete Step 1 of 3'), waitWhileLoading(this.page)]);
 
     await this.selectInstitution(InstitutionSelectValue.Broad);
     await this.getInstitutionValue();

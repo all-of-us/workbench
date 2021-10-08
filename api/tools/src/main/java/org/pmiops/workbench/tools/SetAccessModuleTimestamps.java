@@ -59,7 +59,6 @@ public class SetAccessModuleTimestamps {
   private static DbUser dbUser;
 
   void applyTimestampUpdateToUser(
-      UserDao userDao,
       AccessModuleService accessModuleService,
       String username,
       AccessModuleName moduleName,
@@ -67,14 +66,7 @@ public class SetAccessModuleTimestamps {
       boolean isBypass) {
     accessModuleService.updateCompletionTime(dbUser, moduleName, timestamp);
 
-    if (moduleName == AccessModuleName.PROFILE_CONFIRMATION) {
-      // dual-write to DbUser and AccessModuleService
-      // we will remove the module fields in DbUser soon
-      // see the Access Module Update epic
-      // https://precisionmedicineinitiative.atlassian.net/browse/RW-6237
-      dbUser.setProfileLastConfirmedTime(timestamp);
-      dbUser = userDao.save(dbUser);
-    } else {
+    if (moduleName != AccessModuleName.PROFILE_CONFIRMATION) {
       accessModuleService.updateBypassTime(
           dbUser.getUserId(), AccessUtils.storageAccessModuleToClient(moduleName), isBypass);
     }
@@ -97,14 +89,13 @@ public class SetAccessModuleTimestamps {
       }
 
       applyTimestampUpdateToUser(
-          userDao,
           accessModuleService,
           username,
           AccessModuleName.PROFILE_CONFIRMATION,
           PROFILE_CONFIRMATION_TIMESTAMP,
           false);
       applyTimestampUpdateToUser(
-          userDao, accessModuleService, username, AccessModuleName.RAS_LOGIN_GOV, null, false);
+          accessModuleService, username, AccessModuleName.RAS_LOGIN_GOV, null, false);
     };
   }
 

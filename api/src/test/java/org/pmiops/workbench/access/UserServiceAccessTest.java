@@ -156,6 +156,7 @@ public class UserServiceAccessTest {
     providedWorkbenchConfig = WorkbenchConfig.createEmptyConfig();
     providedWorkbenchConfig.access.enableComplianceTraining = true;
     providedWorkbenchConfig.access.enableEraCommons = true;
+    providedWorkbenchConfig.access.enforceRasLoginGovLinking = true;
     providedWorkbenchConfig.accessRenewal.expiryDays = EXPIRATION_DAYS;
     providedWorkbenchConfig.accessRenewal.expiryDaysWarningThresholds =
         ImmutableList.of(1L, 3L, 7L, 15L, 30L);
@@ -393,7 +394,6 @@ public class UserServiceAccessTest {
   public void test_updateUserWithRetries_dua_unbypassed_aar_expired_noncompliant() {
     testUnregistration(
         user -> {
-          user.setDataUseAgreementBypassTime(null);
           final Timestamp willExpire = Timestamp.from(START_INSTANT);
           accessModuleService.updateBypassTime(
               dbUser.getUserId(), AccessModule.DATA_USER_CODE_OF_CONDUCT, false);
@@ -1097,6 +1097,7 @@ public class UserServiceAccessTest {
     accessModuleService.updateBypassTime(user.getUserId(), AccessModule.TWO_FACTOR_AUTH, true);
     accessModuleService.updateBypassTime(
         user.getUserId(), AccessModule.DATA_USER_CODE_OF_CONDUCT, true);
+    accessModuleService.updateBypassTime(user.getUserId(), AccessModule.RAS_LINK_LOGIN_GOV, true);
 
     accessModuleService.updateCompletionTime(
         user, AccessModuleName.PUBLICATION_CONFIRMATION, timestamp);

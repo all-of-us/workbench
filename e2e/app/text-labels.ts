@@ -59,6 +59,7 @@ export enum MenuOption {
 
 // Button or link text labels.
 export enum LinkText {
+  Add = 'Add',
   AddSelection = 'Add Selection',
   AddThis = 'ADD THIS',
   ApplyModifiers = 'APPLY MODIFIERS',
@@ -126,7 +127,8 @@ export enum LinkText {
   Submit = 'Submit',
   Update = 'Update',
   Yes = 'Yes',
-  YesDelete = 'YES, DELETE'
+  YesDelete = 'YES, DELETE',
+  YesLeave = 'Yes, Leave'
 }
 
 // Notebook programming language.
@@ -168,6 +170,13 @@ export const InstitutionSelectValue = {
   AdminTesting: 'Admin Testing',
   DummyMaster: 'Dummy Master'
 };
+
+export enum HeaderName {
+  InstitutionName = 'Institution Name',
+  InstitutionType = 'Institution Type',
+  DataAccessTiers = 'Data access tiers',
+  UserEmailInstruction = 'User Email Instruction'
+}
 
 export const ConceptSetSelectValue = {
   AllSurveys: 'All Surveys',

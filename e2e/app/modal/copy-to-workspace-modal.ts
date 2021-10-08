@@ -1,7 +1,7 @@
 import Textbox from 'app/element/textbox';
 import { LinkText } from 'app/text-labels';
 import { Page } from 'puppeteer';
-import { waitForText, waitWhileLoading } from 'utils/waits-utils';
+import { waitWhileLoading } from 'utils/waits-utils';
 import Modal from './modal';
 import ReactSelect from 'app/element/react-select';
 
@@ -13,8 +13,18 @@ export default class CopyToWorkspaceModal extends Modal {
   }
 
   async isLoaded(): Promise<boolean> {
-    await waitForText(this.page, modalTitle, { xpath: this.getXpath() });
-    return true;
+    const timeout = 30 * 1000;
+    return Promise.all([
+      this.page.waitForXPath(`${this.getXpath()}//*[text()="${modalTitle}"]`, { visible: true, timeout }),
+      await this.getDestinationTextbox().exists(timeout),
+      await this.getNotebookNameTextbox().exists(timeout)
+    ])
+      .then(() => {
+        return true;
+      })
+      .catch(() => {
+        return false;
+      });
   }
 
   getDestinationTextbox(): Textbox {

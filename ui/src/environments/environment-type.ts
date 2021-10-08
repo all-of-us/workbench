@@ -50,9 +50,6 @@ export interface EnvironmentBase {
   // The URL to forward users to for the public UI (aka Data Browser).
   // Example value: 'https://aou-db-stable.appspot.com'
   publicUiUrl: string;
-  // The url for Moodle integration
-  // Example value: https://aoudev.nnlm.gov
-  trainingUrl: string;
   // The Zendesk environment corresponding to this deployment.
   zendeskEnv: ZendeskEnv;
   inactivityTimeoutSeconds: number;

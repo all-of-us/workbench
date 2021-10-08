@@ -113,7 +113,8 @@ export class AdminUserBypass extends React.Component<Props, State> {
     const {
       enableComplianceTraining,
       enableEraCommons,
-      enableRasLoginGovLinking} = serverConfigStore.get().config;
+      enableRasLoginGovLinking,
+      enforceRasLoginGovLinking} = serverConfigStore.get().config;
     return <PopupTrigger
         ref={this.popupRef}
         side='bottom'
@@ -144,7 +145,7 @@ export class AdminUserBypass extends React.Component<Props, State> {
                   onToggle={() => {this.setState({selectedModules:
                     fp.xor(selectedModules, [AccessModule.DATAUSERCODEOFCONDUCT])}); }}
           />
-          {enableRasLoginGovLinking && <Toggle name='RAS Login.gov Link'
+          {(enableRasLoginGovLinking || enforceRasLoginGovLinking) && <Toggle name='RAS Login.gov Link'
                                        checked={selectedModules.includes(AccessModule.RASLINKLOGINGOV)}
                                        data-test-id='ras-link-login-gov-toggle'
                                        onToggle={() => {this.setState({selectedModules:

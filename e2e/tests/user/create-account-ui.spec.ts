@@ -66,7 +66,7 @@ describe('Account creation UI tests:', () => {
     await nextButton.clickWithEval();
 
     // Step 3 of 3: Enter user information.
-    expect(await waitForText(page, 'Create your account')).toBeTruthy();
+    await waitForText(page, 'Create your account');
 
     // verify username domain
     expect(await createAccountPage.getUsernameDomain()).toBe(config.EMAIL_DOMAIN_NAME);
