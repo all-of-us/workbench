@@ -11,11 +11,7 @@ export default class InstitutionNotSavedModal extends Modal {
   }
 
   async isLoaded(): Promise<boolean> {
-<<<<<<< HEAD
-    await waitForText(this.page, modalTitle, { xpath: this.getXpath() });
-=======
     await waitForText(this.page, modalTitle, { container: this });
->>>>>>> master
     return true;
   }
 
