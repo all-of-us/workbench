@@ -92,7 +92,8 @@
     "enableEraCommons": true,
     "unsafeAllowSelfBypass": true,
     "unsafeAllowUserCreationFromGSuiteData": true,
-    "enableRasLoginGovLinking": true
+    "enableRasLoginGovLinking": true,
+    "enforceRasLoginGovLinking": false
   },
   "featureFlags": {
     "unsafeAllowDeleteUser": true,

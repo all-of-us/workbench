@@ -266,6 +266,8 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
         accessModuleService.isModuleCompliant(user, AccessModuleName.PUBLICATION_CONFIRMATION);
     boolean profileConfirmationComplete =
         accessModuleService.isModuleCompliant(user, AccessModuleName.PROFILE_CONFIRMATION);
+    boolean rasLoginGovComplete =
+        accessModuleService.isModuleCompliant(user, AccessModuleName.RAS_LOGIN_GOV);
 
     boolean eRARequiredForRegisteredTier = true;
     boolean institutionalEmailValid = false;
@@ -291,6 +293,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
         && dataUseAgreementTrainingComplete
         && publicationConfirmationComplete
         && profileConfirmationComplete
+        && rasLoginGovComplete
         && institutionalEmailValid;
   }
 
