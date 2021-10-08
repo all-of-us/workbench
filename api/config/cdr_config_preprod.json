@@ -76,7 +76,6 @@
     {
       "cdrVersionId": 5,
       "name": "All of Us Controlled Tier Dataset v5 alpha",
-      "isDefault": true,
       "bigqueryProject": "fc-aou-cdr-preprod-ct",
       "bigqueryDataset": "C2021Q2R1",
       "wgsBigqueryDataset": "alpha2_prelim2",
@@ -103,6 +102,20 @@
       "hasFitbitData": true,
       "hasCopeSurveyData": true,
       "accessTier": "registered"
+    },
+    {
+      "cdrVersionId": 7,
+      "name": "All of Us Controlled Tier Dataset v5",
+      "isDefault": true,
+      "bigqueryProject": "fc-aou-cdr-preprod-ct",
+      "bigqueryDataset": "C2021Q3R2",
+      "creationTime": "2021-10-06 00:00:00Z",
+      "releaseNumber": 8,
+      "numParticipants": 331382,
+      "cdrDbName": "c_2021q3_2",
+      "hasFitbitData": true,
+      "hasCopeSurveyData": true,
+      "accessTier": "controlled"
     }
   ]
 }
