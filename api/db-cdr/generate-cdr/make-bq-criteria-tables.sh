@@ -4989,6 +4989,122 @@ FROM
         GROUP BY 1,2,3,4
     ) x"
 
+# this will add the min/max values for all numeric observation concepts
+# this code will filter out any observations WHERE all results = 0
+echo "CB_CRITERIA_ATTRIBUTE - Observations - add numeric results"
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_attribute\`
+    (
+          id
+        , concept_id
+        , value_as_concept_id
+        , concept_name
+        , type
+        , est_count
+    )
+SELECT
+      ROW_NUMBER() OVER (ORDER BY concept_id) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_attribute\`) as id
+    , concept_id
+    , value_as_concept_id
+    , concept_name
+    , type
+    , cnt
+FROM
+    (
+        SELECT
+              observation_concept_id as concept_id
+            , 0 as value_as_concept_id
+            , 'MIN' as concept_name
+            , 'NUM' as type
+            , CAST(MIN(value_as_number) as STRING) as cnt
+        FROM \`$BQ_PROJECT.$BQ_DATASET.observation\`
+        WHERE observation_concept_id in
+            (
+                SELECT concept_id
+                FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+                WHERE domain_id = 'OBSERVATION'
+                    and is_group = 0
+            )
+            and value_as_number is not null
+        GROUP BY 1
+        HAVING NOT (min(value_as_number) = 0 and max(value_as_number) = 0)
+
+        UNION ALL
+
+        SELECT
+              observation_concept_id as concept_id
+            , 0 as value_as_concept_id
+            , 'MAX' as concept_name
+            , 'NUM' as type
+            , CAST(max(value_as_number) as STRING) as cnt
+        FROM \`$BQ_PROJECT.$BQ_DATASET.observation\`
+        WHERE observation_concept_id in
+            (
+                SELECT concept_id
+                FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+                WHERE domain_id = 'OBSERVATION'
+                    and is_group = 0
+            )
+            and value_as_number is not null
+        GROUP BY 1
+        HAVING NOT (min(value_as_number) = 0 and max(value_as_number) = 0)
+    ) a"
+
+# this will add all categorical values for all observation concepts where value_as_concept_id is valid
+echo "CB_CRITERIA_ATTRIBUTE - Observation - add categorical results"
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_attribute\`
+    (
+          id
+        , concept_id
+        , value_as_concept_id
+        , concept_name
+        , type
+        , est_count
+    )
+SELECT
+      ROW_NUMBER() OVER (ORDER BY concept_id) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_attribute\`) as id
+    , concept_id
+    , value_as_concept_id
+    , concept_name
+    , type
+    , cnt
+FROM
+    (
+        SELECT
+              observation_concept_id as concept_id
+            , value_as_concept_id
+            , b.concept_name
+            , 'CAT' as type
+            , CAST(COUNT(DISTINCT person_id) as STRING) as cnt
+        FROM \`$BQ_PROJECT.$BQ_DATASET.observation\` a
+        JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.value_as_concept_id = b.concept_id
+        WHERE observation_concept_id in
+            (
+                SELECT concept_id
+                FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+                WHERE domain_id = 'OBSERVATION'
+                    and is_group = 0
+            )
+            and value_as_concept_id != 0
+            and value_as_concept_id is not null
+        GROUP BY 1,2,3
+    ) a"
+
+
+# set has_attribute=1 for any observation criteria that has data in cb_criteria_attribute
+echo "CB_CRITERIA - update has_attribute"
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+"UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+SET has_attribute = 1
+WHERE domain_id = 'OBSERVATION'
+    and is_selectable = 1
+    and concept_id in
+    (
+        SELECT DISTINCT concept_id
+        FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_attribute\`
+    )"
+
 
 ################################################
 # CB_CRITERIA_ANCESTOR
