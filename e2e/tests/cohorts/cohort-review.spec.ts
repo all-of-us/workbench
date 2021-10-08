@@ -15,14 +15,14 @@ import { Surveys } from 'app/page/cohort-participants-group';
 
 jest.setTimeout(20 * 60 * 1000);
 
-describe('Cohort review tests', () => {
+describe('Cohort review set tests', () => {
   beforeEach(async () => {
     await signInWithAccessToken(page);
   });
 
   const workspaceName = 'e2eCohortReviewTest';
   let cohortName: string;
-  
+
   const reviewSetNumberOfParticipants_1 = 50;
   const reviewSetNumberOfParticipants_2 = 100;
 
@@ -197,7 +197,7 @@ describe('Cohort review tests', () => {
     await participantDetailPage.waitForLoad();
 
     // get the participant ID on the detail page
-    const detailPageParticipantid = await participantDetailPage.getParticipantIDnum();
+    const detailPageParticipantId = await participantDetailPage.getParticipantIDnum();
 
     // click on the pen icon to open the sidebar
     await annotationsSidebar.open();
@@ -206,7 +206,7 @@ describe('Cohort review tests', () => {
     const reviewParticipantId2 = await annotationsSidebar.getParticipantID();
 
     // validate that the participant ID on detail page and the sidebar content match
-    expect(detailPageParticipantid).toEqual(reviewParticipantId2);
+    expect(detailPageParticipantId).toEqual(reviewParticipantId2);
 
     // select a review status
     const participantStatus2 = await annotationsSidebar.selectReviewStatus(ReviewStatus.Included);
@@ -299,6 +299,6 @@ describe('Cohort review tests', () => {
     expect(modalTextContent).toContain(`Are you sure you want to delete Cohort Review: ${newCohortReviewName}?`);
 
     // Verify Delete Cohort Review successful.
-    expect(await DataResourceCard.findCard(page, newCohortReviewName, 5000)).toBeFalsy();
+    expect(await DataResourceCard.findCard(page, newCohortReviewName)).toBeFalsy();
   });
 });
