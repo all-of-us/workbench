@@ -29,7 +29,6 @@ export default class AnnotationsSidebar extends BaseHelpSidebar {
     }
     await this.clickIcon(SideBarLink.EditAnnotations);
     await this.waitUntilVisible();
-    await this.page.waitForTimeout(1000);
     // Wait for visible text
     await this.page.waitForXPath(`${this.getXpath()}//h3`, { visible: true });
     // Wait for visible button
