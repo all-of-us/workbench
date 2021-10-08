@@ -30,6 +30,11 @@
       "id": "howtoworkwithallofussurveydatatier5",
       "category": "TUTORIAL_WORKSPACES"
     }, {
+      "name": "How to Work With Wearable Device Data (tier 5)",
+      "namespace": "aou-rw-7b4a3b1d",
+      "id": "howtoworkwithwearabledevicedatatier5",
+      "category": "TUTORIAL_WORKSPACES"
+    }, {
       "name": "Phenotype - Breast Cancer (tier 5)",
       "namespace": "aou-rw-c6574691",
       "id": "phenotypebreastcancertier5",
