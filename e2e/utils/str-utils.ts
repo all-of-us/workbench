@@ -3,6 +3,9 @@ import { Page } from 'puppeteer';
 
 import faker from 'faker';
 
+// Warning: this function produces values in a fixed range. This has a ~.11%
+// chance of creating two identical values; tests should not depend on this
+// being random.
 export function makeString(charLimit?: number): string {
   let loremStr: string = faker.lorem.paragraphs();
   if (charLimit === undefined) {
@@ -12,6 +15,19 @@ export function makeString(charLimit?: number): string {
     loremStr = loremStr.slice(0, charLimit);
   }
   return loremStr;
+}
+
+// Makes a different string of the same length.
+export function makeDifferentStringSameLength(original: string): string {
+  if (!original) {
+    throw Error('cannot make a different empty string');
+  }
+
+  let out = '';
+  do {
+    out = makeString(original.length);
+  } while (original === out);
+  return out;
 }
 
 export function makeUrl(charLimit?: number): string {
