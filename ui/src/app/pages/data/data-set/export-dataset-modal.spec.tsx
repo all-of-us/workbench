@@ -201,6 +201,15 @@ describe('ExportDatasetModal', () => {
     });
   });
 
+  it('Remove genomics analysis tools if no WGS', async() => {
+    testProps.dataset.prePackagedConceptSet = [];
+    const wrapper = mount(component(testProps));
+
+    Object.keys(DataSetExportRequest.GenomicsAnalysisToolEnum).forEach(tool => {
+      expect(wrapper.find(`[data-test-id="genomics-tool-${tool}"]`).exists()).toBeFalsy();
+    });
+  });
+
   it('Should export code with genomics analysis tool', async() => {
     testProps.dataset.prePackagedConceptSet = [PrePackagedConceptSetEnum.WHOLEGENOME];
     const wrapper = mount(component(testProps));
