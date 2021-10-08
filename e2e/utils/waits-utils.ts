@@ -1,6 +1,8 @@
 import { Page } from 'puppeteer';
 import { logger } from 'libs/logger';
 import { takeScreenshot } from './save-file-utils';
+import Container from 'app/container';
+import { makeDateTimeStr } from './str-utils';
 
 export const waitForFn = async (fn: () => any, interval = 2000, timeout = 10000): Promise<boolean> => {
   const start = Date.now();
@@ -315,58 +317,41 @@ export async function waitForNumberElements(page: Page, cssSelector: string, exp
 /**
  * Wait for visible texts to match.
  * @param page
- * @param textSubstr
- * @param selector: {css, xpath}
+ * @param textStr
+ * @param opts
  */
 export async function waitForText(
   page: Page,
-  textSubstr: string,
-  selector: { xpath?: string; css?: string } = { css: 'body' },
-  timeout?: number
-): Promise<boolean> {
-  if (selector.css !== undefined) {
-    try {
-      // wait for visible then compare texts
-      await page.waitForSelector(selector.css, { visible: true, timeout });
-      const jsHandle = await page.waitForFunction(
-        (css, expText) => {
-          const regExp = new RegExp(expText);
-          const element = document.querySelector(css);
-          return element && regExp.test(element.textContent);
-        },
-        { timeout },
-        selector.css,
-        textSubstr
-      );
-      return (await jsHandle.jsonValue()) as boolean;
-    } catch (err) {
-      logger.error(`waitForText() failed: css=${selector.css} contains "${textSubstr}"`);
-      logger.error(err);
-      throw new Error(err);
-    }
+  textStr: string,
+  opts: { timeout?: number; container?: Container; rootXpath?: string } = {}
+): Promise<void> {
+  const { timeout = 30 * 1000, container, rootXpath } = opts;
+  let xpath: string;
+  if (container) {
+    xpath = container.getXpath();
+  } else if (rootXpath) {
+    xpath = rootXpath;
+  } else {
+    xpath = '//*[@data-test-id="signed-in" or @data-test-id="sign-in-page"]';
   }
-  if (selector.xpath !== undefined) {
-    try {
-      await page.waitForXPath(selector.xpath, { visible: true, timeout });
-      const jsHandle = await page.waitForFunction(
-        (xpath, expText) => {
-          const regExp = new RegExp(expText);
-          const element = document.evaluate(xpath, document.body, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null)
-            .singleNodeValue;
-          return element && regExp.test(element.textContent);
-        },
-        { timeout },
-        selector.xpath,
-        textSubstr
-      );
-      return (await jsHandle.jsonValue()) as boolean;
-    } catch (err) {
-      logger.error(`waitForText() failed: xpath=${selector.xpath} contains "${textSubstr}"`);
-      logger.error(err);
-      throw new Error(err);
-    }
+
+  try {
+    await page.waitForFunction(
+      (xpath, text) => {
+        const regExp = new RegExp(text);
+        const element = document.evaluate(xpath, document.body, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null)
+          .singleNodeValue;
+        return element && regExp.test(element.textContent);
+      },
+      { timeout: timeout },
+      xpath,
+      textStr
+    );
+  } catch (err) {
+    logger.error(`ERROR: Failed to find text "${textStr}" (in xpath: '${xpath}').`);
+    logger.error(err);
+    throw new Error(err);
   }
-  throw new Error('waitForText(): xpath or css is required');
 }
 
 /**
@@ -386,15 +371,15 @@ export async function waitWhileLoading(
     waitForRuntime ? '' : ':not([aria-hidden="true"]):not([data-test-id*="runtime-status"])'
   }`;
 
-  // Prevent checking on Login page.
+  // Prevent checking in Login page.
   await page.waitForSelector('[data-test-id="sign-in-page"]', { timeout: 1000 }).catch(() => {
     return;
   });
 
-  // To prevent checking on blank page, wait for elements exist in DOM.
+  // Prevent checking in blank page: wait for loading spinner or some elements exists in DOM.
   await Promise.race([page.waitForSelector(notBlankPageSelector), page.waitForSelector(spinElementsSelector)]);
 
-  // Wait for spinners stop and gone.
+  // Wait for loading spinner to stop and no longer exists.
   try {
     await Promise.all([
       page.waitForFunction(
@@ -408,7 +393,7 @@ export async function waitWhileLoading(
     ]);
     await page.waitForTimeout(500);
   } catch (err) {
-    logger.error(`FAILED to wait for spinner stop: xpath="${spinElementsSelector}"`);
+    logger.error(`ERROR: Loading spinner has not stopped. spinner xpath is "${spinElementsSelector}"`);
     if (err.message.includes('Target closed')) {
       // Leave blank. Ignore error and continue test.
       // Puppeteer can throw following exception when polling for mutation status if this object disappeared in DOM
@@ -416,7 +401,7 @@ export async function waitWhileLoading(
       // Error: Protocol error (Runtime.callFunctionOn): Target closed.
     } else {
       logger.error(err.stack);
-      await takeScreenshot(page, 'Spinner_TimeoutError.jpg');
+      await takeScreenshot(page, `${makeDateTimeStr('ERROR_Spinner_Timeout')}.jpg`);
       throw new Error(err.message);
     }
   }

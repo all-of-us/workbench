@@ -28,7 +28,7 @@ describe('User Access', () => {
 
     // the profile confirmation is expired, so the Review action is active for the profile
 
-    const reviewButton = await aarPage.getReviewProfileButton();
+    const reviewButton = aarPage.getReviewProfileButton();
     expect(reviewButton).toBeTruthy();
 
     // clicking Review redirects the user to the Profile page
@@ -39,7 +39,7 @@ describe('User Access', () => {
     // the Profile page indicates that confirmation is needed, and provides a link to confirm
 
     expect(await profilePage.needsConfirmation()).toBeTruthy();
-    const looksGoodLink = await profilePage.getLooksGoodLink();
+    const looksGoodLink = profilePage.getLooksGoodLink();
 
     // clicking Looks Good shows the Profile Confirmation modal
 

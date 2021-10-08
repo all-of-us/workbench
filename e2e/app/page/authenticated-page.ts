@@ -4,7 +4,7 @@ import { getPropValue } from 'utils/element-utils';
 import HelpTipsSidebar from 'app/component/help-tips-sidebar';
 import { logger } from 'libs/logger';
 
-export const signedInIndicator = '[data-test-id="signed-in"]';
+export const signedInXpath = '[data-test-id="signed-in"]';
 
 /**
  * AuthenticatedPage represents the base page for any AoU page after user has successfully logged in (aka authenticated).
@@ -17,7 +17,7 @@ export default abstract class AuthenticatedPage extends BasePage {
 
   protected async isSignedIn(timeout = 60 * 1000): Promise<boolean> {
     return this.page
-      .waitForSelector(signedInIndicator, { timeout })
+      .waitForSelector(signedInXpath, { timeout })
       .then(() => {
         return true;
       })
@@ -38,7 +38,7 @@ export default abstract class AuthenticatedPage extends BasePage {
   async waitForLoad(): Promise<this> {
     const signedIn = await this.isSignedIn();
     if (!signedIn) {
-      throw new Error(`Failed to find signed-in web-element. xpath="${signedInIndicator}"`);
+      throw new Error(`Failed to find signed-in web-element. xpath="${signedInXpath}"`);
     }
     await this.isLoaded();
     await this.closeHelpSidebarIfOpen();
