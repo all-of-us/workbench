@@ -5003,7 +5003,7 @@ bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
         , est_count
     )
 SELECT
-      ROW_NUMBER() OVER (ORDER BY concept_id) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_attribute\`) as id
+      ROW_NUMBER() OVER (ORDER BY concept_id) + (SELECT COALESCE(MAX(id),1) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_attribute\`) as id
     , concept_id
     , value_as_concept_id
     , concept_name
