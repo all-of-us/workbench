@@ -16,9 +16,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class ServiceAccounts {
 
-  private static final String SIGN_JWT_URL_FORMAT =
-      "https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/%s:signJwt";
-
   /**
    * Returns an appropriate set of backend service credentials with the given set of scopes.
    *

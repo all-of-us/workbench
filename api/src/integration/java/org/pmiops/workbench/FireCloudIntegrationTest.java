@@ -8,22 +8,23 @@ import org.pmiops.workbench.firecloud.ApiClient;
 import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.FireCloudServiceImpl;
+import org.pmiops.workbench.firecloud.FirecloudApiClientFactory;
 import org.pmiops.workbench.firecloud.api.NihApi;
 import org.pmiops.workbench.firecloud.api.ProfileApi;
 import org.pmiops.workbench.firecloud.model.FirecloudMe;
 import org.pmiops.workbench.google.StorageConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 
 public class FireCloudIntegrationTest extends BaseIntegrationTest {
 
   @Autowired private FireCloudService service;
+  @Autowired private FirecloudApiClientFactory firecloudApiClientFactory;
 
   @TestConfiguration
-  @ComponentScan(basePackageClasses = FireCloudServiceImpl.class)
   @Import({
+    FirecloudApiClientFactory.class,
     FireCloudServiceImpl.class,
     StorageConfig.class,
     BaseIntegrationTest.Configuration.class
@@ -54,7 +55,8 @@ public class FireCloudIntegrationTest extends BaseIntegrationTest {
   @Test
   public void testImpersonatedProfileCall() throws Exception {
     ApiClient apiClient =
-        service.getApiClientWithImpersonation("integration-test-user@fake-research-aou.org");
+        firecloudApiClientFactory.newImpersonatedApiClient(
+            "integration-test-user@fake-research-aou.org");
 
     // Run the most basic API call against the /me/ endpoint.
     ProfileApi profileApi = new ProfileApi(apiClient);
