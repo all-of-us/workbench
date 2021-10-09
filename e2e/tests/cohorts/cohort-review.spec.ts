@@ -11,7 +11,8 @@ import { getPropValue } from 'utils/element-utils';
 import AnnotationsSidebar, { ReviewStatus } from 'app/component/annotations-sidebar';
 import { AnnotationType } from 'app/modal/annotation-field-modal';
 import CohortActionsPage from 'app/page/cohort-actions-page';
-import { Surveys } from 'app/page/cohort-participants-group';
+import { Page } from 'puppeteer';
+import CohortBuildPage from 'app/page/cohort-build-page';
 
 jest.setTimeout(20 * 60 * 1000);
 
@@ -21,7 +22,7 @@ describe('Cohort review set tests', () => {
   });
 
   const workspaceName = 'e2eCohortReviewTest';
-  let cohortName: string;
+  const cohortName = makeRandomName('auotest', { includeHyphen: false });
 
   const reviewSetNumberOfParticipants_1 = 50;
   const reviewSetNumberOfParticipants_2 = 100;
@@ -29,19 +30,12 @@ describe('Cohort review set tests', () => {
   test('Create review set in cohort build page', async () => {
     await findOrCreateWorkspace(page, { workspaceName: workspaceName });
 
-    const dataPage = new WorkspaceDataPage(page);
-    let cohortBuildPage = await dataPage.clickAddCohortsButton();
+    const cohortCard = await findOrCreateCohortCard(page, cohortName);
+    await cohortCard.clickResourceName();
 
-    // Include Participants Group 1: add a survey.
-    const group1 = cohortBuildPage.findIncludeParticipantsGroup('Group 1');
-    await group1.includeSurveys([Surveys.BASICS]);
-    await cohortBuildPage.getTotalCount();
-    await cohortBuildPage.createCohort();
-
-    const cohortActionsPage = new CohortActionsPage(page);
-    cohortName = await cohortActionsPage.getCohortName();
-    cohortBuildPage = await cohortActionsPage.clickCohortName();
-    await cohortBuildPage.getTotalCount();
+    const cohortBuildPage = new CohortBuildPage(page);
+    await cohortBuildPage.waitForLoad();
+    await cohortBuildPage.getTotalCount(); // For wait for page ready.
 
     const reviewSetsButton = cohortBuildPage.getCopyButton();
     await reviewSetsButton.click();
@@ -73,6 +67,7 @@ describe('Cohort review set tests', () => {
     await cohortBuildPage.getTotalCount();
 
     // Back out to Data page
+    const dataPage = new WorkspaceDataPage(page);
     await dataPage.openDataPage();
     await dataPage.waitForLoad();
 
@@ -97,32 +92,7 @@ describe('Cohort review set tests', () => {
   test('Create review set from cohort card', async () => {
     await findOrCreateWorkspace(page, { workspaceName: workspaceName });
 
-    const dataPage = new WorkspaceDataPage(page);
-    const cohortBuildPage = await dataPage.clickAddCohortsButton();
-
-    // Include Participants Group 1: Add hydroxychloroquine drug.
-    const group1 = cohortBuildPage.findIncludeParticipantsGroup('Group 1');
-    await group1.includeDrugs('hydroxychloroquine', 1);
-    // Include Participants Group 1: Add Hydrocodone drug.
-    await group1.includeDrugs('Hydrocodone', 1);
-
-    // Include Participants Group 2: Add colonoscopy procedures.
-    const group2 = cohortBuildPage.findIncludeParticipantsGroup('Group 2');
-    await group2.includeProcedures('Colonoscopy', 1);
-
-    // Include Participants Group 3: Add Red cell indices labs and measurements.
-    const group3 = cohortBuildPage.findIncludeParticipantsGroup('Group 3');
-    await group3.includeLabsAndMeasurements('Red cell indices', 1);
-
-    // Save new cohort
-    cohortName = await cohortBuildPage.createCohort();
-
-    // Find new cohort card.
-    const cohortActionsPage = new CohortActionsPage(page);
-    await cohortActionsPage.waitForLoad();
-    await dataPage.openDataPage({ waitPageChange: true });
-    const cohortCard = await dataPage.findCohortCard(cohortName);
-
+    const cohortCard = await findOrCreateCohortCard(page, cohortName);
     await cohortCard.selectSnowmanMenu(MenuOption.Review, { waitForNav: true });
     const modal = new CohortReviewModal(page);
     await modal.waitForLoad();
@@ -161,7 +131,7 @@ describe('Cohort review set tests', () => {
     const dobCell = await participantsTable.getCell(2, 2);
     const cellValue = await getPropValue<string>(dobCell, 'textContent');
     // Check birth date is valid format.
-    isValidDate(cellValue);
+    expect(isValidDate(cellValue)).toBeTruthy();
 
     // Check table row link navigation works. Click ParticipantId link in the second row.
     const participantId = await cohortReviewPage.clickParticipantLink(2);
@@ -276,13 +246,15 @@ describe('Cohort review set tests', () => {
     const statusValue2 = await getPropValue<string>(statusCell2, 'textContent');
     expect(statusValue2).toEqual(participantStatus2);
 
-    // return to cohort review page
+    // Return to cohort review page
     await cohortReviewPage.getBackToCohortButton().clickAndWait();
 
     // Land on Cohort Build page
+    const cohortBuildPage = new CohortBuildPage(page);
     await cohortBuildPage.waitForLoad();
 
     // Land on the Data Page & click the Cohort Reviews SubTab
+    const dataPage = new WorkspaceDataPage(page);
     await dataPage.openCohortReviewsSubtab();
 
     // Rename Cohort Review
@@ -301,4 +273,41 @@ describe('Cohort review set tests', () => {
     // Verify Delete Cohort Review successful.
     expect(await DataResourceCard.findCard(page, newCohortReviewName)).toBeFalsy();
   });
+
+  async function findOrCreateCohortCard(page: Page, cohortName: string): Promise<DataResourceCard> {
+    const dataPage = new WorkspaceDataPage(page);
+
+    // Search for Cohort first. If found, return Cohort card.
+    const existingCohortsCard = await dataPage.findCohortCard(cohortName);
+    if (existingCohortsCard) {
+      return existingCohortsCard;
+    }
+
+    // Create new.
+    const cohortBuildPage = await dataPage.clickAddCohortsButton();
+
+    // Include Participants Group 1: Add hydroxychloroquine drug.
+    const group1 = cohortBuildPage.findIncludeParticipantsGroup('Group 1');
+    await group1.includeDrugs('hydroxychloroquine', 1);
+    // Include Participants Group 1: Add Hydrocodone drug.
+    await group1.includeDrugs('Hydrocodone', 1);
+
+    // Include Participants Group 2: Add colonoscopy procedures.
+    const group2 = cohortBuildPage.findIncludeParticipantsGroup('Group 2');
+    await group2.includeProcedures('Colonoscopy', 1);
+
+    // Include Participants Group 3: Add Red cell indices labs and measurements.
+    const group3 = cohortBuildPage.findIncludeParticipantsGroup('Group 3');
+    await group3.includeLabsAndMeasurements('Red cell indices', 1);
+
+    // Save new cohort
+    await cohortBuildPage.createCohort(cohortName);
+
+    const cohortActionsPage = new CohortActionsPage(page);
+    await cohortActionsPage.waitForLoad();
+
+    await dataPage.openDataPage({ waitPageChange: true });
+    const cohortCard: DataResourceCard = await dataPage.findCohortCard(cohortName);
+    return cohortCard;
+  }
 });
