@@ -19,10 +19,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import com.google.gson.internal.LinkedTreeMap;
 import java.sql.Timestamp;
-import java.time.Clock;
 import java.time.Duration;
-import java.time.Instant;
-import java.time.ZoneId;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
@@ -105,7 +102,6 @@ import org.pmiops.workbench.notebooks.NotebooksRetryHandler;
 import org.pmiops.workbench.notebooks.api.ProxyApi;
 import org.pmiops.workbench.notebooks.model.LocalizationEntry;
 import org.pmiops.workbench.notebooks.model.Localize;
-import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
 import org.pmiops.workbench.testconfig.UserServiceTestConfiguration;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
@@ -146,8 +142,6 @@ public class RuntimeControllerTest extends SpringTest {
   private static final String LOGGED_IN_USER_EMAIL = "bob@gmail.com";
   private static final String OTHER_USER_EMAIL = "alice@gmail.com";
   private static final String BUCKET_NAME = "workspace-bucket";
-  private static final Instant NOW = Instant.now();
-  private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
   private static final String API_HOST = "api.stable.fake-research-aou.org";
   private static final String API_BASE_URL = "https://" + API_HOST;
   private static final String BIGQUERY_DATASET = "dataset-name";
@@ -192,11 +186,6 @@ public class RuntimeControllerTest extends SpringTest {
     @Scope("prototype")
     public WorkbenchConfig workbenchConfig() {
       return config;
-    }
-
-    @Bean
-    Clock clock() {
-      return CLOCK;
     }
 
     @Bean
