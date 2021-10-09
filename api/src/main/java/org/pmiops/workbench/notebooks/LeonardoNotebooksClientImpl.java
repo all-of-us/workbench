@@ -2,6 +2,7 @@ package org.pmiops.workbench.notebooks;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -68,6 +69,7 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
 
   private static final Logger log = Logger.getLogger(LeonardoNotebooksClientImpl.class.getName());
 
+  private final LeonardoApiClientFactory leonardoApiClientFactory;
   private final Provider<RuntimesApi> runtimesApiProvider;
   private final Provider<RuntimesApi> serviceRuntimesApiProvider;
   private final Provider<ProxyApi> proxyApiProvider;
@@ -83,6 +85,7 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
 
   @Autowired
   public LeonardoNotebooksClientImpl(
+      LeonardoApiClientFactory leonardoApiClientFactory,
       @Qualifier(NotebooksConfig.USER_RUNTIMES_API) Provider<RuntimesApi> runtimesApiProvider,
       @Qualifier(NotebooksConfig.SERVICE_RUNTIMES_API)
           Provider<RuntimesApi> serviceRuntimesApiProvider,
@@ -96,6 +99,7 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
       LeonardoMapper leonardoMapper,
       LeonardoRetryHandler leonardoRetryHandler,
       WorkspaceDao workspaceDao) {
+    this.leonardoApiClientFactory = leonardoApiClientFactory;
     this.runtimesApiProvider = runtimesApiProvider;
     this.serviceRuntimesApiProvider = serviceRuntimesApiProvider;
     this.proxyApiProvider = proxyApiProvider;
@@ -314,15 +318,25 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
 
   @Override
   public int stopAllUserRuntimesAsService(String userEmail) throws WorkbenchException {
-    RuntimesApi runtimesApi = serviceRuntimesApiProvider.get();
+    RuntimesApi runtimesApiAsService = serviceRuntimesApiProvider.get();
     List<LeonardoListRuntimeResponse> runtimes =
         leonardoRetryHandler.run(
             (context) ->
-                runtimesApi.listRuntimes(
+                runtimesApiAsService.listRuntimes(
                     LeonardoMapper.RUNTIME_LABEL_CREATED_BY + "=" + userEmail, false));
+
+    // Only the runtime creator has start/stop permissions, therefore we impersonate here.
+    // If/when IA-2996 is resolved, switch this back to the service.
+    RuntimesApi runtimesApiAsImpersonatedUser = new RuntimesApi();
+    try {
+      runtimesApiAsImpersonatedUser.setApiClient(
+          leonardoApiClientFactory.newImpersonatedApiClient(userEmail));
+    } catch (IOException e) {
+      throw new ServerErrorException(e);
+    }
     List<Boolean> results =
         runtimes.stream()
-            .filter(STOPPABLE_RUNTIME_STATUSES::contains)
+            .filter(r -> STOPPABLE_RUNTIME_STATUSES.contains(r.getStatus()))
             .filter(
                 r -> {
                   if (!userEmail.equals(r.getAuditInfo().getCreator())) {
@@ -343,7 +357,8 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
                   try {
                     leonardoRetryHandler.runAndThrowChecked(
                         (context) -> {
-                          runtimesApi.stopRuntime(r.getGoogleProject(), r.getRuntimeName());
+                          runtimesApiAsImpersonatedUser.stopRuntime(
+                              r.getGoogleProject(), r.getRuntimeName());
                           return null;
                         });
                   } catch (ApiException e) {
