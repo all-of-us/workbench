@@ -15,6 +15,7 @@ import org.pmiops.workbench.firecloud.model.FirecloudMe;
 import org.pmiops.workbench.google.StorageConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 
 public class FireCloudIntegrationTest extends BaseIntegrationTest {
@@ -23,6 +24,7 @@ public class FireCloudIntegrationTest extends BaseIntegrationTest {
   @Autowired private FirecloudApiClientFactory firecloudApiClientFactory;
 
   @TestConfiguration
+  @ComponentScan(basePackageClasses = FireCloudServiceImpl.class)
   @Import({
     FirecloudApiClientFactory.class,
     FireCloudServiceImpl.class,

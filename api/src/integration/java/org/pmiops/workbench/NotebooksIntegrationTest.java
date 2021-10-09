@@ -6,9 +6,11 @@ import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.firecloud.FirecloudApiClientFactory;
 import org.pmiops.workbench.google.StorageConfig;
 import org.pmiops.workbench.monitoring.LogsBasedMetricService;
 import org.pmiops.workbench.monitoring.MonitoringService;
+import org.pmiops.workbench.notebooks.LeonardoApiClientFactory;
 import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
 import org.pmiops.workbench.notebooks.LeonardoNotebooksClientImpl;
 import org.pmiops.workbench.utils.mappers.LeonardoMapper;
@@ -37,7 +39,9 @@ public class NotebooksIntegrationTest extends BaseIntegrationTest {
   // where the class under test is defined. Adding that annotation
   @ComponentScan(basePackageClasses = LeonardoNotebooksClientImpl.class)
   @Import({
+    FirecloudApiClientFactory.class,
     LeonardoNotebooksClientImpl.class,
+    LeonardoApiClientFactory.class,
     StorageConfig.class,
     BaseIntegrationTest.Configuration.class
   })
