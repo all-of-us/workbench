@@ -42,6 +42,12 @@ public interface LeonardoNotebooksClient {
   /** Deletes a notebook runtime as the appengine SA, to be used only for admin operations */
   void deleteRuntimeAsService(String googleProject, String runtimeName) throws WorkbenchException;
 
+  /**
+   * Stops all runtimes created by the user, if any can be stopped. Returns the count of stopped
+   * runtimes.
+   */
+  int stopAllUserRuntimesAsService(String userEmail) throws WorkbenchException;
+
   /** Gets information about a notebook runtime */
   LeonardoGetRuntimeResponse getRuntime(String googleProject, String runtimeName)
       throws WorkbenchException;
