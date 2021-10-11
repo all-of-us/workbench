@@ -61,6 +61,16 @@ public class FirecloudApiClientFactory {
     return delegatedCreds;
   }
 
+  /**
+   * Creates a Firecloud API client authenticated as the given user via impersonation. This should
+   * be used as a last resort, and only when the following conditions hold:
+   *
+   * <ol>
+   *   <li>The API client is used outside the context of an end user request (exception: admin
+   *       requests)
+   *   <li>RW service account credentials lack sufficient permission to make the desired call
+   * </ol>
+   */
   public ApiClient newImpersonatedApiClient(String userEmail) throws IOException {
     OAuth2Credentials delegatedCreds = getDelegatedUserCredentials(userEmail);
     ApiClient client = newApiClient();
@@ -68,6 +78,10 @@ public class FirecloudApiClientFactory {
     return client;
   }
 
+  /**
+   * Creates a Firecloud API client, unauthenticated. Most clients should use an authenticated,
+   * request scoped bean instead of calling this directly.
+   */
   public ApiClient newApiClient() {
     WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
     ApiClient apiClient = new ApiClient();

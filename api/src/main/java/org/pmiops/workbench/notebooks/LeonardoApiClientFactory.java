@@ -23,6 +23,16 @@ public class LeonardoApiClientFactory {
     this.workbenchConfigProvider = workbenchConfigProvider;
   }
 
+  /**
+   * Creates a Leonardo API client authenticated as the given user via impersonation. This should be
+   * used as a last resort, and only when the following conditions hold:
+   *
+   * <ol>
+   *   <li>The API client is used outside the context of an end user request (exception: admin
+   *       requests)
+   *   <li>RW service account credentials lack sufficient permission to make the desired call
+   * </ol>
+   */
   public ApiClient newImpersonatedApiClient(String userEmail) throws IOException {
     OAuth2Credentials delegatedCreds =
         firecloudApiClientFactory.getDelegatedUserCredentials(userEmail);
@@ -31,6 +41,10 @@ public class LeonardoApiClientFactory {
     return client;
   }
 
+  /**
+   * Creates a Leonardo API client, unauthenticated. Most clients should use an authenticated,
+   * request scoped bean instead of calling this directly.
+   */
   public ApiClient newApiClient() {
     WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
     final ApiClient apiClient =
@@ -45,6 +59,10 @@ public class LeonardoApiClientFactory {
     return apiClient;
   }
 
+  /**
+   * Creates a Leonardo notebooks API client, unauthenticated. Most clients should use an
+   * authenticated, request scoped bean instead of calling this directly.
+   */
   public org.pmiops.workbench.notebooks.ApiClient newNotebooksClient() {
     WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
     final org.pmiops.workbench.notebooks.ApiClient apiClient =
