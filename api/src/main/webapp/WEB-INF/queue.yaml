@@ -34,3 +34,15 @@ queue:
   retry_parameters:
     task_retry_limit: 1
     task_age_limit: 5m
+
+- name: egressEventQueue
+  target: api
+
+  # rate parameters
+  bucket_size: 500
+  rate: 1/s
+  max_concurrent_requests: 10
+
+  retry_parameters:
+    task_retry_limit: 1
+    task_age_limit: 5m

@@ -2,9 +2,11 @@ package org.pmiops.workbench.exfiltration;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.exfiltration.EgressEventServiceImpl.NOT_FOUND_WORKSPACE_NAMESPACE;
 import static org.pmiops.workbench.utils.TestMockFactory.DEFAULT_GOOGLE_PROJECT;
@@ -30,6 +32,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.actionaudit.auditors.EgressEventAuditor;
+import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.EgressEventDao;
 import org.pmiops.workbench.db.dao.UserDao;
@@ -72,7 +75,7 @@ public class EgressEventServiceTest extends SpringTest {
   @MockBean private InstitutionService mockInstitutionService;
   @MockBean private UserService mockUserService;
   @MockBean private WorkspaceAdminService mockWorkspaceAdminService;
-
+  @MockBean private TaskQueueService mockTaskQueueService;
   @Autowired private WorkspaceDao workspaceDao;
   @Autowired private EgressEventDao egressEventDao;
   @Autowired private UserDao userDao;
@@ -133,6 +136,7 @@ public class EgressEventServiceTest extends SpringTest {
   public void setUp() {
     workbenchConfig = WorkbenchConfig.createEmptyConfig();
     workbenchConfig.server.uiBaseUrl = "https://workbench.researchallofus.org";
+    workbenchConfig.featureFlags.enableEgressAlertingV2 = true;
 
     dbWorkspace = new DbWorkspace();
     dbWorkspace.setWorkspaceNamespace(WORKSPACE_NAMEPACE);
@@ -182,6 +186,7 @@ public class EgressEventServiceTest extends SpringTest {
     egressEventService.handleEvent(event);
     verify(mockAlertApi).createAlert(alertRequestCaptor.capture());
     verify(egressEventAuditor).fireEgressEvent(event);
+    verify(mockTaskQueueService).pushEgressEventTask(anyLong());
 
     String vmPrefix = "all-of-us-" + dbUser1.getUserId();
 
@@ -209,12 +214,24 @@ public class EgressEventServiceTest extends SpringTest {
   }
 
   @Test
+  public void testCreateEgressEventAlert_alertingV2Disabled() throws ApiException {
+    workbenchConfig.featureFlags.enableEgressAlertingV2 = false;
+    when(mockAlertApi.createAlert(any())).thenReturn(new SuccessResponse().requestId("12345"));
+
+    EgressEvent event = recentEgressEventForUser(dbUser1);
+    egressEventService.handleEvent(event);
+
+    verifyZeroInteractions(mockTaskQueueService);
+  }
+
+  @Test
   public void testCreateEgressEventAlert_institutionNotFound() throws ApiException {
     when(mockAlertApi.createAlert(any())).thenReturn(new SuccessResponse().requestId("12345"));
     doReturn(Optional.empty()).when(mockInstitutionService).getByUser(any(DbUser.class));
 
     egressEventService.handleEvent(recentEgressEventForUser(dbUser1));
     verify(mockAlertApi).createAlert(alertRequestCaptor.capture());
+    verify(mockTaskQueueService).pushEgressEventTask(anyLong());
 
     final CreateAlertRequest request = alertRequestCaptor.getValue();
     assertThat(request.getDescription())
@@ -238,6 +255,7 @@ public class EgressEventServiceTest extends SpringTest {
     egressEventService.handleEvent(event);
     verify(mockAlertApi).createAlert(alertRequestCaptor.capture());
     verify(egressEventAuditor).fireEgressEvent(event);
+    verify(mockTaskQueueService).pushEgressEventTask(anyLong());
 
     final CreateAlertRequest request = alertRequestCaptor.getValue();
     assertThat(request.getDescription())
@@ -267,6 +285,7 @@ public class EgressEventServiceTest extends SpringTest {
     egressEventService.handleEvent(oldEgressEvent);
     verify(mockAlertApi).createAlert(alertRequestCaptor.capture());
     verify(egressEventAuditor).fireEgressEvent(oldEgressEvent);
+    verify(mockTaskQueueService).pushEgressEventTask(anyLong());
 
     final CreateAlertRequest request = alertRequestCaptor.getValue();
     assertThat(request.getMessage()).contains("[>60 mins old] High-egress event");
@@ -295,6 +314,7 @@ public class EgressEventServiceTest extends SpringTest {
             .setStatus(EgressEventStatus.PENDING));
 
     egressEventService.handleEvent(oldEgressEvent);
+    verifyZeroInteractions(mockTaskQueueService);
 
     Iterable<DbEgressEvent> dbEvents = egressEventDao.findAll();
     assertThat(dbEvents).hasSize(1);
@@ -319,6 +339,7 @@ public class EgressEventServiceTest extends SpringTest {
             .setStatus(EgressEventStatus.PENDING));
 
     egressEventService.handleEvent(oldEgressEvent);
+    verify(mockTaskQueueService).pushEgressEventTask(anyLong());
 
     Iterable<DbEgressEvent> dbEvents = egressEventDao.findAll();
     assertThat(dbEvents).hasSize(2);
@@ -345,6 +366,7 @@ public class EgressEventServiceTest extends SpringTest {
     egressEventService.handleEvent(oldEgressEvent);
     verify(mockAlertApi).createAlert(any());
     verify(egressEventAuditor).fireEgressEvent(oldEgressEvent);
+    verify(mockTaskQueueService).pushEgressEventTask(anyLong());
 
     Iterable<DbEgressEvent> dbEvents = egressEventDao.findAll();
     assertThat(dbEvents).hasSize(2);
@@ -372,6 +394,7 @@ public class EgressEventServiceTest extends SpringTest {
     egressEventService.handleEvent(oldEgressEvent);
     verify(mockAlertApi).createAlert(alertRequestCaptor.capture());
     verify(egressEventAuditor).fireEgressEvent(oldEgressEvent);
+    verify(mockTaskQueueService).pushEgressEventTask(anyLong());
 
     final CreateAlertRequest request = alertRequestCaptor.getValue();
     assertThat(request.getMessage()).startsWith("High-egress event");

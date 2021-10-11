@@ -2700,6 +2700,26 @@ paths:
       responses:
         200:
           description: 'User synchronization ran successfully'
+  "/v1/cloudTask/processEgressEvent":
+    post:
+      tags:
+      - cloudTaskEgress
+      - cloudTask
+      security: []
+      description: "Processes and remediates the given PENDING egress event"
+      operationId: processEgressEvent
+      consumes:
+      - application/json
+      parameters:
+      - in: body
+        name: request
+        required: true
+        description: Event to be processed.
+        schema:
+          "$ref": "#/definitions/ProcessEgressEventRequest"
+      responses:
+        200:
+          description: 'Egress event processed successfully'
   "/v1/institutions":
     x-aou-note: Institution endpoints, for Verified Institutional Affiliation
     get:
@@ -8373,6 +8393,16 @@ definitions:
         items:
           type: integer
           format: int64
+
+  ProcessEgressEventRequest:
+    type: object
+    required:
+      - eventId
+    properties:
+      eventId:
+        description: 'Egress event ID to be processed'
+        type: integer
+        format: int64
 
   WorkspaceAuditLogQueryResponse:
     type: object
