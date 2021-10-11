@@ -1,15 +1,11 @@
 package org.pmiops.workbench.firecloud;
 
 import com.google.api.client.http.HttpStatusCodes;
-import com.google.api.client.http.HttpTransport;
-import com.google.auth.oauth2.OAuth2Credentials;
-import com.google.cloud.iam.credentials.v1.IamCredentialsClient;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
 import com.google.common.hash.Hashing;
-import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -19,8 +15,6 @@ import java.util.logging.Logger;
 import javax.inject.Provider;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.pmiops.workbench.auth.DelegatedUserCredentials;
-import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.WorkbenchException;
@@ -81,12 +75,9 @@ public class FireCloudServiceImpl implements FireCloudService {
 
   private final Provider<WorkspacesApi> endUserWorkspacesApiProvider;
   private final Provider<WorkspacesApi> serviceAccountWorkspaceApiProvider;
+  private final FirecloudApiClientFactory firecloudApiClientFactory;
 
   private final FirecloudRetryHandler retryHandler;
-  private final IamCredentialsClient iamCredentialsClient;
-  private final HttpTransport httpTransport;
-
-  private static final String ADMIN_SERVICE_ACCOUNT_NAME = "firecloud-admin";
 
   private static final String MEMBER_ROLE = "member";
   private static final String STATUS_SUBSYSTEMS_KEY = "systems";
@@ -99,15 +90,6 @@ public class FireCloudServiceImpl implements FireCloudService {
   // The default location for AoU buckets. Setting this location when cloning workspaces to make it
   // work in service perimter environment. See shorturl.at/mAHQY for more details.
   private static final String GOOGLE_BUCKETS_LOCATION = "US";
-
-  // The set of Google OAuth scopes required for access to FireCloud APIs. If FireCloud ever changes
-  // its API scopes (see https://api.firecloud.org/api-docs.yaml), we'll need to update this list.
-  public static final List<String> FIRECLOUD_API_OAUTH_SCOPES =
-      ImmutableList.of(
-          "openid",
-          "https://www.googleapis.com/auth/userinfo.profile",
-          "https://www.googleapis.com/auth/userinfo.email",
-          "https://www.googleapis.com/auth/cloud-billing");
 
   // All options are defined in this document:
   // https://docs.google.com/document/d/1YS95Q7ViRztaCSfPK-NS6tzFPrVpp5KUo0FaWGx7VHw/edit#
@@ -144,9 +126,8 @@ public class FireCloudServiceImpl implements FireCloudService {
       @Qualifier(FireCloudCacheConfig.SERVICE_ACCOUNT_REQUEST_SCOPED_GROUP_CACHE)
           Provider<LoadingCache<String, FirecloudManagedGroupWithMembers>>
               requestScopedGroupCacheProvider,
-      FirecloudRetryHandler retryHandler,
-      IamCredentialsClient iamCredentialsClient,
-      HttpTransport httpTransport) {
+      FirecloudApiClientFactory firecloudApiClientFactory,
+      FirecloudRetryHandler retryHandler) {
     this.configProvider = configProvider;
     this.profileApiProvider = profileApiProvider;
     this.billingApiProvider = billingApiProvider;
@@ -157,38 +138,11 @@ public class FireCloudServiceImpl implements FireCloudService {
     this.endUserWorkspacesApiProvider = endUserWorkspacesApiProvider;
     this.serviceAccountWorkspaceApiProvider = serviceAccountWorkspaceApiProvider;
     this.statusApiProvider = statusApiProvider;
-    this.retryHandler = retryHandler;
     this.endUserStaticNotebooksApiProvider = endUserStaticNotebooksApiProvider;
     this.serviceAccountStaticNotebooksApiProvider = serviceAccountStaticNotebooksApiProvider;
     this.requestScopedGroupCacheProvider = requestScopedGroupCacheProvider;
-    this.iamCredentialsClient = iamCredentialsClient;
-    this.httpTransport = httpTransport;
-  }
-
-  /**
-   * Given an email address of an AoU user, generates a FireCloud ApiClient instance with an access
-   * token suitable for accessing data on behalf of that user.
-   *
-   * <p>This relies on domain-wide delegation of authority in Google's OAuth flow; see
-   * /api/docs/domain-wide-delegation.md for more details.
-   *
-   * @param userEmail
-   * @return
-   */
-  public ApiClient getApiClientWithImpersonation(String userEmail) throws IOException {
-    final OAuth2Credentials delegatedCreds =
-        new DelegatedUserCredentials(
-            ServiceAccounts.getServiceAccountEmail(
-                ADMIN_SERVICE_ACCOUNT_NAME, configProvider.get().server.projectId),
-            userEmail,
-            FIRECLOUD_API_OAUTH_SCOPES,
-            iamCredentialsClient,
-            httpTransport);
-    delegatedCreds.refreshIfExpired();
-
-    ApiClient apiClient = FireCloudConfig.buildApiClient(configProvider.get());
-    apiClient.setAccessToken(delegatedCreds.getAccessToken().getTokenValue());
-    return apiClient;
+    this.firecloudApiClientFactory = firecloudApiClientFactory;
+    this.retryHandler = retryHandler;
   }
 
   @Override
@@ -346,8 +300,7 @@ public class FireCloudServiceImpl implements FireCloudService {
     if (callerAccessToken.isPresent()) {
       // use a private instance of BillingApi instead of the provider
       // b/c we don't want to modify its ApiClient globally
-
-      final ApiClient apiClient = FireCloudConfig.buildApiClient(configProvider.get());
+      final ApiClient apiClient = firecloudApiClientFactory.newApiClient();
       apiClient.setAccessToken(callerAccessToken.get());
       scopedBillingApi = new BillingApi();
       scopedBillingApi.setApiClient(apiClient);
@@ -525,12 +478,6 @@ public class FireCloudServiceImpl implements FireCloudService {
   public String staticNotebooksConvert(byte[] notebook) {
     return retryHandler.run(
         (context) -> endUserStaticNotebooksApiProvider.get().convertNotebook(notebook));
-  }
-
-  @Override
-  public String staticNotebooksConvertAsService(byte[] notebook) {
-    return retryHandler.run(
-        (context) -> serviceAccountStaticNotebooksApiProvider.get().convertNotebook(notebook));
   }
 
   @Override

@@ -3,10 +3,8 @@ package org.pmiops.workbench.tools;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.apache.ApacheHttpTransport;
 import com.google.cloud.iam.credentials.v1.IamCredentialsClient;
-import com.google.common.collect.ImmutableList;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.List;
 import java.util.logging.Logger;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
@@ -14,6 +12,7 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.pmiops.workbench.auth.DelegatedUserCredentials;
 import org.pmiops.workbench.auth.ServiceAccounts;
+import org.pmiops.workbench.firecloud.FireCloudConfig;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -56,11 +55,6 @@ public class GenerateImpersonatedUserTokens {
 
   private static final Logger log =
       Logger.getLogger(GenerateImpersonatedUserTokens.class.getName());
-  private static final List<String> AOU_SCOPES =
-      ImmutableList.of(
-          "https://www.googleapis.com/auth/userinfo.profile",
-          "https://www.googleapis.com/auth/userinfo.email",
-          "https://www.googleapis.com/auth/cloud-billing");
 
   private void writeTokens(String projectId, String[] usernames, String[] filenames)
       throws IOException {
@@ -77,7 +71,8 @@ public class GenerateImpersonatedUserTokens {
           String.format("Writing impersonated user credential for %s to %s", username, filename));
 
       final DelegatedUserCredentials creds =
-          new DelegatedUserCredentials(saEmail, username, AOU_SCOPES, credsClient, transport);
+          new DelegatedUserCredentials(
+              saEmail, username, FireCloudConfig.BILLING_SCOPES, credsClient, transport);
       creds.refresh();
       final String token = creds.getAccessToken().getTokenValue();
 

@@ -6,8 +6,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.firecloud.FireCloudServiceImpl.PROJECT_BILLING_ID_SIZE;
 
-import com.google.api.client.http.HttpTransport;
-import com.google.cloud.iam.credentials.v1.IamCredentialsClient;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableMap;
 import java.util.Arrays;
@@ -65,8 +63,7 @@ public class FireCloudServiceImplTest extends SpringTest {
   @Qualifier(FireCloudConfig.SERVICE_ACCOUNT_BILLING_V2_API)
   private BillingV2Api billingV2Api;
 
-  @MockBean private HttpTransport httpTransport;
-  @MockBean private IamCredentialsClient iamCredentialsClient;
+  @MockBean private FirecloudApiClientFactory firecloudApiClientFactory;
   @MockBean private NihApi nihApi;
   @MockBean private ProfileApi profileApi;
   @MockBean private StatusApi statusApi;
