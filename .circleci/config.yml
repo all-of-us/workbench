@@ -270,9 +270,9 @@ commands:
             - ~/.gradle/caches
           key: v6-gradle-cache-{{ .Branch }}-{{ checksum "~/workbench/api/build.gradle" }}
       - store_test_results:
-          path: ~/workbench/api/build/test-results/test
+          path: ~/workbench/api/build/reports
       - store_artifacts:
-          path: ~/workbench/api/build/test-results/test
+          path: ~/workbench/api/build/reports
           destination: JunitTestResult
           when: always
 
