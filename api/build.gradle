@@ -746,17 +746,6 @@ task manageLeonardoRuntimes(type: JavaExec) {
 }
 
 // Called by devs from the command-line:
-// - devstart.rb > reset_default_runtime_autopause
-task resetDefaultRuntimeAutopause(type: JavaExec) {
-  classpath sourceSets.__tools__.runtimeClasspath
-  main = "org.pmiops.workbench.tools.ResetDefaultRuntimeAutopause"
-  systemProperties = commandLineSpringProperties
-  if (project.hasProperty("appArgs")) {
-    args Eval.me(appArgs)
-  }
-}
-
-// Called by devs from the command-line:
 // - devstart.rb > set_authority
 task setAuthority(type: JavaExec) {
   classpath sourceSets.__tools__.runtimeClasspath
