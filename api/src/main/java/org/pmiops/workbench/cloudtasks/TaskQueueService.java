@@ -12,7 +12,7 @@ import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchLocationConfigService;
 import org.pmiops.workbench.model.AuditProjectAccessRequest;
-import org.pmiops.workbench.model.ProcessEgressAlertRequest;
+import org.pmiops.workbench.model.ProcessEgressEventRequest;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -96,7 +96,7 @@ public class TaskQueueService {
     createAndPushTask(
         EGRESS_EVENT_QUEUE_NAME,
         EGRESS_EVENT_PATH,
-        new ProcessEgressAlertRequest().eventId(eventId));
+        new ProcessEgressEventRequest().eventId(eventId));
   }
 
   private void createAndPushTask(String queueName, String taskUri, Object jsonBody) {
