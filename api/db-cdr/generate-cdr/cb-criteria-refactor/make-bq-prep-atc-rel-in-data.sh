@@ -12,7 +12,7 @@ export BQ_DATASET=$2        # dataset
 # ATC4 - ATC5 --> RXNORM/RXNORM Extension ingredient
 # ATC4 - ATC5 --> RXNORM/RXNORM Extension precise ingedient --> RXNORM ingredient
 echo "DRUG_EXPOSURE - RXNORM - temp table - ATC4 to ATC5 to RXNORM"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_atc_rel_in_data\`
     (p_concept_id, p_concept_code, p_concept_name, p_domain_id, concept_id, concept_code, concept_name, domain_id)
 SELECT distinct e.p_concept_id, e.p_concept_code, e.p_concept_name, e.p_DOMAIN_ID,
@@ -75,7 +75,7 @@ left join
     ) e on d.atc_5 = e.atc_5"
 
 echo "DRUGS - temp table - ATC3 to ATC4"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
 "insert into \`$BQ_PROJECT.$BQ_DATASET.prep_atc_rel_in_data\`
     (p_concept_id, p_concept_code, p_concept_name, p_domain_id, concept_id, concept_code, concept_name, domain_id)
 select c1.CONCEPT_ID as p_concept_id, c1.CONCEPT_CODE as p_concept_code, c1.CONCEPT_NAME as p_concept_name,
@@ -98,7 +98,7 @@ where RELATIONSHIP_ID = 'Subsumes'
         )"
 
 echo "DRUGS - temp table - ATC2 TO ATC3"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
 "insert into \`$BQ_PROJECT.$BQ_DATASET.prep_atc_rel_in_data\`
     (p_concept_id, p_concept_code, p_concept_name, p_domain_id, concept_id, concept_code, concept_name, domain_id)
 select c1.CONCEPT_ID as p_concept_id, c1.CONCEPT_CODE as p_concept_code, c1.CONCEPT_NAME as p_concept_name,
@@ -121,7 +121,7 @@ where RELATIONSHIP_ID = 'Subsumes'
         )"
 
 echo "DRUGS - temp table - ATC1 TO ATC2"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
 "insert into \`$BQ_PROJECT.$BQ_DATASET.prep_atc_rel_in_data\`
     (p_concept_id, p_concept_code, p_concept_name, p_domain_id, concept_id, concept_code, concept_name, domain_id)
 select c1.CONCEPT_ID as p_concept_id, c1.CONCEPT_CODE as p_concept_code, c1.CONCEPT_NAME as p_concept_name,

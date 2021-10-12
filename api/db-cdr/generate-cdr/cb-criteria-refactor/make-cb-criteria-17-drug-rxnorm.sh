@@ -10,7 +10,7 @@ TBL_CBA='cb_criteria_ancestor'
 ####### common block for all make-cb-criteria-dd-*.sh scripts ###########
 function createTmpTable(){
   local tmpTbl="prep_temp_"$1"_"$SQL_SCRIPT_ORDER
-  res=$(bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+  res=$(bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
     "CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.$tmpTbl\` AS
       SELECT * FROM \`$BQ_PROJECT.$BQ_DATASET.$1\` LIMIT 0")
   echo $res >&2
@@ -78,7 +78,7 @@ fi
 # DRUG_EXPOSURE - ATC/RXNORM
 ################################################
 echo "DRUGS - add roots"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
     (
         id
@@ -118,7 +118,7 @@ WHERE VOCABULARY_ID = 'ATC'
     and STANDARD_CONCEPT = 'C'"
 
 echo "DRUGS - add root for unmapped ingredients"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
     (
         id
@@ -149,7 +149,7 @@ SELECT
     , CAST((SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` WHERE id > $CB_CRITERIA_START_ID and id < $CB_CRITERIA_END_ID) + 1 as STRING)"
 
 echo "DRUGS - level 2"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
     (
         id
@@ -198,7 +198,7 @@ WHERE p.domain_id = 'DRUG'
         )"
 
 echo "DRUGS - level 3"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
     (
         id
@@ -246,7 +246,7 @@ WHERE p.domain_id = 'DRUG'
         )"
 
 echo "DRUGS - level 4"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
     (
         id
@@ -294,7 +294,7 @@ WHERE p.domain_id = 'DRUG'
         )"
 
 echo "DRUGS - level 5 - ingredients"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
     (
         id
@@ -342,7 +342,7 @@ WHERE p.domain_id = 'DRUG'
         )"
 
 echo "DRUGS - add parents for unmapped ingredients"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
     (
         id
@@ -405,7 +405,7 @@ FROM
     )"
 
 echo "DRUGS - add unmapped ingredients"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
     (
         id
@@ -476,7 +476,7 @@ JOIN
     ) z on UPPER(SUBSTR(x.concept_name, 1, 1)) = z.name"
 
 echo "DRUGS - generate child counts"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
 "update \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` x
 set x.rollup_count = 0
     , x.item_count = y.cnt
@@ -501,7 +501,7 @@ WHERE x.concept_id = y.concept_id
     and x.id > $CB_CRITERIA_START_ID and x.id < $CB_CRITERIA_END_ID"
 
 echo "DRUG_EXPOSURE - ATC/RXNORM - add brand names"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
     (
           id
@@ -553,7 +553,7 @@ FROM
     ) x"
 
 echo "DRUG_EXPOSURE - ATC/RXNORM - add data into prep_concept_ancestor table"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.$TBL_PCA\`
     (
           ancestor_concept_id
@@ -572,7 +572,7 @@ LEFT JOIN (SELECT id, parent_id, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_
 LEFT JOIN (SELECT id, parent_id, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` WHERE domain_id = 'DRUG' and type in ('ATC','RXNORM')) e on d.id = e.parent_id"
 
 echo "DRUG_EXPOSURE - ATC/RXNORM - generate parent counts"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` x
 SET x.rollup_count = y.cnt
     , x.item_count = 0
@@ -623,7 +623,7 @@ WHERE x.concept_id = y.concept_id
 # CB_CRITERIA_ANCESTOR
 ################################################
 echo "CB_CRITERIA_ANCESTOR - Drugs - add ingredients to drugs mapping"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBA\`
     (
           ancestor_id

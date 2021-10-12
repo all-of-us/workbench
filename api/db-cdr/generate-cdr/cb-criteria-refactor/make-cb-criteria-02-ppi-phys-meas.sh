@@ -8,7 +8,7 @@ TBL_CBC='cb_criteria'
 ####### common block for all make-cb-criteria-dd-*.sh scripts ###########
 function createTmpTable(){
   local tmpTbl="prep_temp_"$1"_"$SQL_SCRIPT_ORDER
-  res=$(bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+  res=$(bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
     "CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.$tmpTbl\` AS
       SELECT * FROM \`$BQ_PROJECT.$BQ_DATASET.$1\` LIMIT 0")
   echo $res >&2
@@ -52,7 +52,7 @@ fi
 # PPI PHYSICAL MEASUREMENTS (PM)
 ################################################
 echo "PM - insert data"
-bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
     (
           id
@@ -99,7 +99,7 @@ ORDER BY 1"
 
 
 echo "PM - counts for Heart Rate, Height, Weight, BMI, Waist Circumference, Hip Circumference"
-bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` x
 SET x.item_count = y.cnt
     , x.est_count = y.cnt
@@ -117,7 +117,7 @@ WHERE x.domain_id = 'PHYSICAL_MEASUREMENT'
     and x.concept_id = y.concept_id"
 
 echo "PM - counts for heart rhythm, pregnancy, wheelchair use"
-bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` x
 SET x.item_count = y.cnt
     , x.est_count = y.cnt
@@ -138,7 +138,7 @@ WHERE x.domain_id = 'PHYSICAL_MEASUREMENT'
 
 #----- BLOOD PRESSURE -----
 echo "PM - blood pressure - hypotensive"
-bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
 SET item_count =
         (
@@ -163,7 +163,7 @@ WHERE domain_id = 'PHYSICAL_MEASUREMENT'
     and name LIKE 'Hypotensive%'"
 
 echo "PM - blood pressure - normal"
-bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
 SET item_count =
         (
@@ -188,7 +188,7 @@ WHERE domain_id = 'PHYSICAL_MEASUREMENT'
     and name LIKE 'Normal%'"
 
 echo "PM - blood pressure - pre-hypertensive"
-bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
 SET item_count =
         (
@@ -213,7 +213,7 @@ WHERE domain_id = 'PHYSICAL_MEASUREMENT'
     and name LIKE 'Pre-Hypertensive%'"
 
 echo "PM - blood pressure  - hypertensive"
-bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
 SET item_count =
         (
@@ -238,7 +238,7 @@ WHERE domain_id = 'PHYSICAL_MEASUREMENT'
     and name LIKE 'Hypertensive%'"
 
 echo "PM - blood pressure  - detail"
-bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
 SET item_count =
         (

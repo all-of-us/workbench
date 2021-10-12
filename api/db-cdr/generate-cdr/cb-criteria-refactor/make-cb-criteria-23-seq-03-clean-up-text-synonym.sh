@@ -22,31 +22,31 @@ export BQ_DATASET=$2        # dataset
 # DATA CLEAN UP
 ################################################
 echo "CLEAN UP - set rollup_count = -1 WHERE the count is NULL"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
 SET rollup_count = -1
 WHERE rollup_count is null"
 
 echo "CLEAN UP - set item_count = -1 WHERE the count is NULL"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
 SET item_count = -1
 WHERE item_count is null"
 
 echo "CLEAN UP - set est_count = -1 WHERE the count is NULL"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
 SET est_count = -1
 WHERE est_count is null"
 
 echo "CLEAN UP - set has_ancestor_data = 0 for all items WHERE it is currently NULL"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
 SET has_ancestor_data = 0
 WHERE has_ancestor_data is null"
 
 echo "CLEAN UP - remove all double quotes FROM criteria names"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
 SET name = REGEXP_REPLACE(name, r'[\"]', '')
 WHERE REGEXP_CONTAINS(name, r'[\"]')"
@@ -55,7 +55,7 @@ WHERE REGEXP_CONTAINS(name, r'[\"]')"
 # FULL_TEXT and SYNONYMS
 ###############################################
 echo "FULL_TEXT and SYNONYMS - adding data"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
 SET   x.full_text = y.full_text
     , x.synonyms = y.full_text
@@ -83,7 +83,7 @@ FROM
 WHERE x.id = y.id"
 
 echo "DISPLAY_SYNONYMS - adding data"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
 SET   x.display_synonyms = y.display_synonyms
 FROM
@@ -110,7 +110,7 @@ FROM
 WHERE x.id = y.id"
 
 echo "FULL_TEXT and SYNONYMS - adding update for survey answers"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
 SET   x.full_text = y.full_text
     , x.synonyms = y.full_text
@@ -141,7 +141,7 @@ WHERE x.id = y.id"
 
 # add [rank1] for all items. this is to deal with the poly-hierarchical issue in many trees
 echo "FULL_TEXT - add [rank1]"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
 SET x.full_text = CONCAT(x.full_text, '|', y.rnk)
    ,x.synonyms = CONCAT(x.full_text, '|', y.rnk)

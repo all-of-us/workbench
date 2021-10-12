@@ -10,7 +10,7 @@ export BQ_DATASET=$2        # dataset
 #4984 - #5009 : prep_snomed_rel_pcs_src : make-bq-criteria-tables.sh
 #       Uses tables: concept_relationship, concept, relationship
 echo "PROCEDURE_OCCURRENCE - SNOMED - SOURCE - create prep_snomed_rel_pcs_src"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
 "CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_pcs_src\` AS
 SELECT DISTINCT c1.concept_id AS p_concept_id
     , c1.concept_code AS p_concept_code
@@ -38,7 +38,7 @@ WHERE cr.concept_id_1 = c1.concept_id
 #5010 - #5065 : prep_snomed_rel_pcs_src_in_data : make-bq-criteria-tables.sh
 #       Uses tables: procedure_occurrence, concept, prep_snomed_rel_pcs_src
 echo "PROCEDURE_OCCURRENCE - SNOMED - SOURCE - temp table adding level 0"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_pcs_src_in_data\`
     (
           p_concept_id
@@ -67,7 +67,7 @@ WHERE concept_id in
 for i in {1..9};
 do
     echo "PROCEDURE_OCCURRENCE - SNOMED - SOURCE - temp table adding level $i"
-    bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+    bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
     "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_pcs_src_in_data\`
         (
               p_concept_id

@@ -10,7 +10,7 @@ export BQ_DATASET=$2        # dataset
 #3547 - #3570 : prep_loinc_rel : make-bq-criteria-tables.sh
 #       Uses tables: concept_relationship, concept, relationship
 echo "MEASUREMENT - Labs - STANDARD LOINC - create prep_loinc_rel"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
 "CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.prep_loinc_rel\` AS
 SELECT DISTINCT c1.concept_id AS p_concept_id
     , c1.concept_code AS p_concept_code
@@ -36,7 +36,7 @@ WHERE cr.concept_id_1 = c1.concept_id
 #3571 - #3622 : prep_loinc_rel_in_data : make-bq-criteria-tables.sh
 #       Uses tables: measurement, concept, prep_loinc_rel
 echo "MEASUREMENT - Labs - STANDARD LOINC - temp table adding level 0"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_loinc_rel_in_data\`
     (
           p_concept_id
@@ -64,7 +64,7 @@ WHERE concept_id in
 for i in {1..5};
 do
     echo "MEASUREMENT - Labs - STANDARD LOINC - load temp table adding level $i"
-    bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+    bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
     "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_loinc_rel_in_data\`
         (
               p_concept_id

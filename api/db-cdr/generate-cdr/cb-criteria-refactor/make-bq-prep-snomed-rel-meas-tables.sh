@@ -10,7 +10,7 @@ export BQ_DATASET=$2        # dataset
 #4102 - #4129 : prep_snomed_rel_meas : make-bq-criteria-tables.sh
 #       Uses tables: concept_relationship, concept, relationship
 echo "MEASUREMENT - SNOMED - STANDARD - create table prep_snomed_rel_meas"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
 "CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_meas\` AS
 SELECT DISTINCT c1.concept_id AS p_concept_id
     , c1.concept_code AS p_concept_code
@@ -40,7 +40,7 @@ WHERE cr.concept_id_1 = c1.concept_id
 #4130 - #4184 : prep_snomed_rel_meas_in_data : make-bq-criteria-tables.sh
 #       Uses tables: measurement, concept, prep_snomed_rel_meas
 echo "MEASUREMENT - SNOMED - STANDARD - temp table level 0"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_meas_in_data\`
     (
           p_concept_id
@@ -69,7 +69,7 @@ WHERE concept_id in
 for i in {1..4};
 do
     echo "MEASUREMENT - SNOMED - STANDARD - temp table level $i"
-    bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+    bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
     "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_meas_in_data\`
         (
               p_concept_id

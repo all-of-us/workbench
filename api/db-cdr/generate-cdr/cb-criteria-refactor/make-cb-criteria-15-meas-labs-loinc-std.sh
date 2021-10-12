@@ -10,7 +10,7 @@ TBL_PCA='prep_concept_ancestor'
 ####### common block for all make-cb-criteria-dd-*.sh scripts ###########
 function createTmpTable(){
   local tmpTbl="prep_temp_"$1"_"$SQL_SCRIPT_ORDER
-  res=$(bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+  res=$(bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
     "CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.$tmpTbl\` AS
       SELECT * FROM \`$BQ_PROJECT.$BQ_DATASET.$1\` LIMIT 0")
   echo $res >&2
@@ -68,7 +68,7 @@ fi
 # MEASUREMENT - Labs - STANDARD LOINC
 ################################################
 echo "MEASUREMENT - Labs - STANDARD LOINC - add root"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
     (
           id
@@ -104,7 +104,7 @@ SELECT
 
 # add items directly under the root item in the above query
 echo "MEASUREMENT - Labs - STANDARD LOINC - add level 0"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
     (
           id
@@ -165,7 +165,7 @@ WHERE p.type = 'LOINC'
 for i in {1..13};
 do
     echo "MEASUREMENT - Labs - STANDARD LOINC - add level $i"
-    bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+    bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
     "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
         (
               id
@@ -224,7 +224,7 @@ do
 done
 
 echo "MEASUREMENT - Labs - STANDARD LOINC - add parent for un-categorized labs"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
     (
           id
@@ -263,7 +263,7 @@ WHERE type = 'LOINC'
     and parent_id = 0"
 
 echo "MEASUREMENT - Labs - STANDARD LOINC - add uncategorized labs"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
     (
           id
@@ -328,7 +328,7 @@ FROM
 
 # Join Count: 13 - If loop count above is changed, the number of JOINS below must be updated
 echo "MEASUREMENT - Labs - STANDARD LOINC - add items into staging table for use in next query"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.$TBL_PAS\`
     (
           ancestor_concept_id
@@ -385,7 +385,7 @@ FROM
 
 # Count: 13 - If loop count above is changed, the number of JOINS below must be updated
 echo "MEASUREMENT - Labs - STANDARD LOINC - add items into ancestor table"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.$TBL_PCA\`
     (
           ancestor_concept_id
@@ -484,7 +484,7 @@ WHERE type = 'LOINC'
     and is_standard = 1"
 
 echo "MEASUREMENT - Labs - STANDARD LOINC - item counts"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` x
 SET x.item_count = y.cnt
     , x.est_count = y.cnt
@@ -503,7 +503,7 @@ WHERE x.concept_id = y.concept_id
     and x.is_selectable = 1"
 
 echo "MEASUREMENT - Labs - STANDARD LOINC - generate parent counts"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` x
 SET x.rollup_count = y.cnt
     , x.est_count = y.cnt
@@ -539,7 +539,7 @@ WHERE x.concept_id = y.concept_id
     and x.is_group = 1"
 
 echo "MEASUREMENT - Labs - STANDARD LOINC - generate count for Uncategorized parent"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` x
 SET x.rollup_count = y.cnt
     , x.est_count = y.cnt

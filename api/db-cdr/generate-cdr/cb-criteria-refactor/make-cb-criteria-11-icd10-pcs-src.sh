@@ -10,7 +10,7 @@ TBL_PCA='prep_concept_ancestor'
 ####### common block for all make-cb-criteria-dd-*.sh scripts ###########
 function createTmpTable(){
   local tmpTbl="prep_temp_"$1"_"$SQL_SCRIPT_ORDER
-  res=$(bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+  res=$(bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
     "CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.$tmpTbl\` AS
       SELECT * FROM \`$BQ_PROJECT.$BQ_DATASET.$1\` LIMIT 0")
   echo $res >&2
@@ -64,7 +64,7 @@ fi
 ################################################
 # prep tables already created before
 echo "ICD10PCS - SOURCE - adding root"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
     (
           id
@@ -102,7 +102,7 @@ FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_merged\`
 WHERE concept_id = 2500000022"
 
 echo "ICD10PCS - SOURCE - adding second level"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
     (
           id
@@ -156,7 +156,7 @@ JOIN \`$BQ_PROJECT.$BQ_DATASET.prep_concept_merged\` c on  b.concept_id_2 = c.co
 for i in {1..7};
 do
     echo "ICD10PCS - SOURCE - adding level $i"
-    bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+    bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
     "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
         (
               id
@@ -213,7 +213,7 @@ do
 done
 
 echo "ICD10PCS - SOURCE - add items into ancestor staging to use in next query"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.$TBL_PAS\`
     (
           ancestor_concept_id
@@ -247,7 +247,7 @@ FROM
     LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` WHERE type = 'ICD10PCS') f on e.id = f.parent_id"
 
 echo "ICD10PCS - SOURCE - insert into prep_concept_ancestor"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.$TBL_PCA\`
     (
           ancestor_concept_id
@@ -291,7 +291,7 @@ WHERE type = 'ICD10PCS'
 and is_standard = 0"
 
 echo "ICD10PCS - SOURCE - generate item counts"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` x
 SET x.item_count = y.cnt
     , x.est_count = y.cnt
@@ -308,7 +308,7 @@ WHERE x.concept_id = y.concept_id
     and x.is_selectable = 1"
 
 echo "ICD10PCS - SOURCE - generate rollup counts"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` x
 SET x.rollup_count = y.cnt
     , x.est_count = y.cnt

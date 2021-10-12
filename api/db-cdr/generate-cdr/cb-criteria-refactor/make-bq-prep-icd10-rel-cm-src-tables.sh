@@ -11,7 +11,7 @@ export BQ_DATASET=$2        # dataset
 #     	Uses tables: prep_concept_merged, prep_concept_relationship_merged,
 #	                   concept, cb_search_all_events
 echo "ICD10CM - SOURCE - create prep_icd10_rel_cm_src"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
 "CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.prep_icd10_rel_cm_src\` AS
 SELECT * EXCEPT(rnk)
 FROM
@@ -36,7 +36,7 @@ WHERE rnk =1"
 # adding in child items that fell out due to not having a relationship to a parent in concept_relationship
 # from the joins below we are going through parents, grandparents, great grandparents to find the first parent that exists
 echo "ICD10CM - SOURCE - adding extra child items to prep_icd10_rel_cm_src"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_icd10_rel_cm_src\`
     (
           p_concept_id
@@ -78,7 +78,7 @@ LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` f on ( TRIM(LEFT(c.concept_code, L
 for i in {1..2};
 do
   echo "ICD10CM - SOURCE - adding extra parent items to prep_icd10_rel_cm_src"
-  bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+  bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
   "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_icd10_rel_cm_src\`
       (
             p_concept_id
@@ -108,7 +108,7 @@ done
 #1817 - #1868 : prep_icd10_rel_src_in_data : make-bq-criteria-tables.sh
 #        Uses tables: cb_search_all_events, prep_concept_merged, prep_icd10_rel_cm_src
 echo "ICD10CM - SOURCE - temp table inserting level 0"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
 "CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.prep_icd10_rel_src_in_data\`
     (
         p_concept_id    INT64,
@@ -134,7 +134,7 @@ WHERE concept_id in
 for i in {1..5};
 do
     echo "ICD10CM - SOURCE - temp table inserting level $i"
-    bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+    bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
     "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_icd10_rel_src_in_data\`
         (
               p_concept_id

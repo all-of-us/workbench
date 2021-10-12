@@ -10,7 +10,7 @@ TBL_PCA='prep_concept_ancestor'
 ####### common block for all make-cb-criteria-dd-*.sh scripts ###########
 function createTmpTable(){
   local tmpTbl="prep_temp_"$1"_"$SQL_SCRIPT_ORDER
-  res=$(bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+  res=$(bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
     "CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.$tmpTbl\` AS
       SELECT * FROM \`$BQ_PROJECT.$BQ_DATASET.$1\` LIMIT 0")
   echo $res >&2
@@ -68,7 +68,7 @@ fi
 # ICD9 - SOURCE
 ################################################
 echo "ICD9 - SOURCE - inserting roots"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
     (
           id
@@ -106,7 +106,7 @@ FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_merged\`
 WHERE concept_id in (2500000024, 2500000023,2500000025,2500000080)"
 
 echo "ICD9 - SOURCE - inserting level 2 (only groups at this level)"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
     (
           id
@@ -157,7 +157,7 @@ JOIN
 JOIN \`$BQ_PROJECT.$BQ_DATASET.prep_concept_merged\` c on x.concept_id_2 = c.concept_id"
 
 echo "ICD9 - SOURCE - inserting level 3 (only groups at this level)"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
     (
           id
@@ -227,7 +227,7 @@ LEFT JOIN
     ) d on c.concept_id = d.concept_id"
 
 echo "ICD9 - SOURCE - inserting level 4 (parents and children)"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
     (
         id
@@ -313,7 +313,7 @@ WHERE
     )"
 
 echo "ICD9 - SOURCE - inserting level 5 (children)"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
     (
           id
@@ -387,7 +387,7 @@ LEFT JOIN
 WHERE d.cnt is not null"
 
 echo "ICD9 - SOURCE - add items into staging table for use in next query"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.$TBL_PAS\`
     (
           ancestor_concept_id
@@ -412,7 +412,7 @@ FROM
     LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` WHERE type in ('ICD9CM','ICD9Proc')) c on b.id = c.parent_id"
 
 echo "ICD9 - SOURCE - inserting into prep_concept_ancestor"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.$TBL_PCA\`
     (
           ancestor_concept_id
@@ -438,7 +438,7 @@ WHERE type in ('ICD9CM','ICD9Proc')
 and is_standard = 0"
 
 echo "ICD9 - SOURCE - generate rollup counts"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` x
 SET x.rollup_count = y.cnt
     , x.est_count = y.cnt
@@ -472,7 +472,7 @@ WHERE x.concept_id = y.concept_id
     and x.is_group = 1"
 
 echo "ICD9 - SOURCE - delete parents that have no count"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
 "DELETE
 FROM\`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
 WHERE type in ('ICD9CM', 'ICD9Proc')

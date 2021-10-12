@@ -10,7 +10,7 @@ export BQ_DATASET=$2        # dataset
 #2138 - #2154 : prep_icd10pcs_rel_src : make-bq-criteria-tables.sh
 #       Uses tables: prep_concept_merged, prep_concept_relationship_merged
 echo "ICD10PCS - SOURCE - create prep_icd10pcs_rel_src"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
 "CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.prep_icd10pcs_rel_src\` AS
 SELECT DISTINCT
       c1.concept_id AS p_concept_id
@@ -30,7 +30,7 @@ WHERE c1.vocabulary_id = 'ICD10PCS'
 #2155 - #2207 : prep_icd10pcs_rel_src_in_data : make-bq-criteria-tables.sh
 #      	Uses tables: cb_search_all_events, prep_concept_merged
 echo "ICD10PCS - SOURCE - temp table insert level 0"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
 "CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.prep_icd10pcs_rel_src_in_data\`
         (
             p_concept_id    INT64,
@@ -57,7 +57,7 @@ WHERE concept_id in
 for i in {1..7};
 do
     echo "ICD10PCS - SOURCE - temp table insert level $i"
-    bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+    bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
     "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_icd10pcs_rel_src_in_data\`
         (
              p_concept_id

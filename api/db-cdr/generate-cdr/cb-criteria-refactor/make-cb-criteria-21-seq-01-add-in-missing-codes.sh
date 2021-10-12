@@ -33,7 +33,7 @@ export BQ_DATASET=$2        # dataset
 ## ADD IN OTHER CODES NOT ALREADY CAPTURED
 #################################################
 echo "CONDITION_OCCURRENCE - add other source concepts"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
     (
       id
@@ -92,7 +92,7 @@ FROM
     ) x"
 
 echo "CONDITION_OCCURRENCE - add other standard concepts"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
     (
       id
@@ -148,7 +148,7 @@ FROM
     ) x"
 
 echo "PROCEDURE_OCCURRENCE - add other source concepts"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
     (
       id
@@ -207,7 +207,7 @@ FROM
     ) x"
 
 echo "PROCEDURE_OCCURRENCE - add other standard concepts"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
     (
       id
@@ -262,7 +262,7 @@ FROM
     ) x"
 
 echo "MEASUREMENT - add other standard concepts"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
     (
       id
@@ -319,7 +319,7 @@ FROM
     ) x"
 
 echo "DRUG_EXPOSURE - add other standard concepts"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
     (
       id

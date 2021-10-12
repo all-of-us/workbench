@@ -9,7 +9,7 @@ TBL_ANC='prep_cpt_ancestor'
 ####### common block for all make-cb-criteria-dd-*.sh scripts ###########
 function createTmpTable(){
   local tmpTbl="prep_temp_"$1"_"$SQL_SCRIPT_ORDER
-  res=$(bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+  res=$(bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
     "CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.$tmpTbl\` AS
       SELECT * FROM \`$BQ_PROJECT.$BQ_DATASET.$1\` LIMIT 0")
   echo $res >&2
@@ -57,7 +57,7 @@ fi
 # CPT4 - SOURCE  -- STEP-01
 ################################################
 echo "CPT4 - SOURCE - insert data (do not insert zero count children)"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
     (
           id
@@ -145,7 +145,7 @@ WHERE a.type = 'CPT4'
 ORDER BY 1"
 ############ prep_cpt_ancestor ############
 echo "CPT4 - SOURCE - add ancestor data"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.$TBL_ANC\`
     (
           ancestor_id
@@ -168,7 +168,7 @@ LEFT JOIN (SELECT id, parent_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`) h on 
 
 ############ cb_criteria - update counts ############
 echo "CPT4 - SOURCE - generate parent counts"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` x
 SET x.rollup_count = y.cnt
     , x.est_count = y.cnt
@@ -207,7 +207,7 @@ WHERE x.id = y.id
       and x.id > $CB_CRITERIA_START_ID and x.id < $CB_CRITERIA_END_ID"
 
 echo "CPT4 - SOURCE - delete zero count parents"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
 "DELETE
 FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
 WHERE type = 'CPT4'

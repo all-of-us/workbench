@@ -30,7 +30,7 @@ export BQ_DATASET=$2        # dataset
 #cb_criteria: Uses : cb_criteria, cb_criteria_attribute
 # we hard code the min/max for these PPI questions because we can't get the information programmatically
 echo "CB_CRITERIA_ATTRIBUTE - PPI SURVEY - add values for certain questions"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_attribute\`
     (
           id
@@ -106,7 +106,7 @@ VALUES
 # this will add the min/max values for all numeric measurement concepts
 # this code will filter out any labs WHERE all results = 0
 echo "CB_CRITERIA_ATTRIBUTE - Measurements - add numeric results"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_attribute\`
     (
           id
@@ -166,7 +166,7 @@ FROM
 
 # this will add all categorical values for all measurement concepts where value_as_concept_id is valid
 echo "CB_CRITERIA_ATTRIBUTE - Measurements - add categorical results"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_attribute\`
     (
           id
@@ -208,7 +208,7 @@ FROM
 
 # set has_attribute=1 for any measurement criteria that has data in cb_criteria_attribute
 echo "CB_CRITERIA - update has_attribute"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
 SET has_attribute = 1
 WHERE domain_id = 'MEASUREMENT'
@@ -230,7 +230,7 @@ WHERE domain_id = 'MEASUREMENT'
 # 22.23: #6411: CB_CRITERIA - update has_attribute
   #cb_criteria: Uses : cb_criteria, cb_survey_attribute
 echo "CB_SURVEY_ATTRIBUTE - adding data for questions"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_survey_attribute\`
     (
           id
@@ -265,7 +265,7 @@ FROM
     )"
 
 echo "CB_SURVEY_ATTRIBUTE - adding data for answers"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_survey_attribute\`
 SELECT
         ROW_NUMBER() OVER (ORDER BY question_concept_id, answer_concept_id) +
@@ -297,7 +297,7 @@ FROM
 
 # set has_attribute=1 for any criteria that has data in cb_survey_attribute
 echo "CB_SURVEY - update has_attribute"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
 SET has_attribute = 1
 WHERE domain_id = 'SURVEY'
@@ -317,7 +317,7 @@ WHERE domain_id = 'SURVEY'
 # 22.31: #6449: CB_CRITERIA_RELATIONSHIP - Source Concept -> Standard Concept Mapping
   #cb_criteria_relationship: Uses : cb_criteria_relationship, concept_relationship, cb_criteria
 echo "CB_CRITERIA_RELATIONSHIP - Drugs - add drug/ingredient relationships"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_relationship\`
     (
           concept_id_1
@@ -338,7 +338,7 @@ WHERE b.concept_class_id = 'Ingredient'
         )"
 
 echo "CB_CRITERIA_RELATIONSHIP - Source Concept -> Standard Concept Mapping"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_relationship\`
     (
           concept_id_1
