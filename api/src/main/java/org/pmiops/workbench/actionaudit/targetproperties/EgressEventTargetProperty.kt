@@ -28,7 +28,7 @@ constructor(
 }
 
 /**
- * Action properties relating to high-egress event remediation within the workbench.
+ * Action properties relating to a stored high-egress event within the workbench.
  */
 enum class DbEgressEventTargetProperty
 constructor(
@@ -41,6 +41,10 @@ constructor(
     CREATION_TIME("creation_time", { it.creationTime?.toString() })
 }
 
+/**
+ * Action properties describing the specific policy escalation automatically applied in response to
+ * a high-egress event within the workbench.
+ */
 enum class EgressEscalationTargetProperty
 constructor(
     override val propertyName: String,
