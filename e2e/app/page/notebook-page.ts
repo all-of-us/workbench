@@ -257,7 +257,7 @@ export default class NotebookPage extends NotebookFrame {
     return this.downloadAs(Xpath.downloadMarkdownButton);
   }
 
-  async isIdle(timeout?: number): Promise<boolean> {
+  async isIdle(timeout = 1000): Promise<boolean> {
     const frame = await this.getIFrame();
     const idleIconSelector = `${CssSelector.kernelIcon}.kernel_idle_icon`;
     const notificationSelector = '#notification_kernel';
@@ -286,7 +286,9 @@ export default class NotebookPage extends NotebookFrame {
     }
     // Throws exception if not ready.
     const status = await this.getKernelStatus();
-    throw new Error(`Notebook kernel is not idle. Actual kernel status is ${status}.`);
+    throw new Error(
+      `Notebook kernel is not idle after waiting ${timeOut} seconds. Actual kernel status was ${status}.`
+    );
   }
 
   async getKernelStatus(): Promise<KernelStatus | string> {

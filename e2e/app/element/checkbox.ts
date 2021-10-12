@@ -29,7 +29,6 @@ export default class Checkbox extends BaseElement {
   async check(maxAttempts = 2): Promise<void> {
     const click = async () => {
       await this.clickWithEval();
-      await this.page.waitForTimeout(500);
       const isChecked = await this.isChecked();
       if (isChecked) {
         return;
@@ -38,7 +37,7 @@ export default class Checkbox extends BaseElement {
         return;
       }
       maxAttempts--;
-      await this.page.waitForTimeout(2000).then(click); // Two seconds pause before try again
+      await this.page.waitForTimeout(1000).then(click); // 1 second pause then try again
     };
     const checked = await this.isChecked();
     if (!checked) {
@@ -54,7 +53,6 @@ export default class Checkbox extends BaseElement {
     if (is) {
       await this.focus();
       await this.clickWithEval();
-      await this.page.waitForTimeout(500);
     }
   }
 

@@ -5,9 +5,7 @@ import java.util.logging.Logger;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.firecloud.ApiClient;
-import org.pmiops.workbench.firecloud.FireCloudConfig;
-import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.FireCloudServiceImpl;
+import org.pmiops.workbench.firecloud.FirecloudApiClientFactory;
 import org.pmiops.workbench.firecloud.api.NihApi;
 import org.pmiops.workbench.firecloud.api.ProfileApi;
 import org.pmiops.workbench.firecloud.model.FirecloudMe;
@@ -25,13 +23,13 @@ import org.springframework.context.annotation.Import;
  * domain-wide delegation to make FireCloud API calls impersonating other users.
  */
 @Configuration
-@Import({FireCloudServiceImpl.class, FireCloudConfig.class})
+@Import({FirecloudApiClientFactory.class})
 public class FetchFireCloudUserProfile {
-  private static final Logger log =
-      Logger.getLogger(org.pmiops.workbench.tools.FetchFireCloudUserProfile.class.getName());
+  private static final Logger log = Logger.getLogger(FetchFireCloudUserProfile.class.getName());
 
   @Bean
-  public CommandLineRunner run(UserDao userDao, FireCloudService fireCloudService) {
+  public CommandLineRunner run(
+      UserDao userDao, FirecloudApiClientFactory firecloudApiClientFactory) {
     return (args) -> {
       if (args.length != 1) {
         throw new IllegalArgumentException("Expected 1 arg (username). Got " + Arrays.asList(args));
@@ -45,7 +43,7 @@ public class FetchFireCloudUserProfile {
       }
       log.info("Fetching data for " + userEmail);
 
-      ApiClient apiClient = fireCloudService.getApiClientWithImpersonation(userEmail);
+      ApiClient apiClient = firecloudApiClientFactory.newImpersonatedApiClient(userEmail);
 
       ProfileApi profileApi = new ProfileApi(apiClient);
       FirecloudMe me = profileApi.me();

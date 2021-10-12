@@ -59,8 +59,8 @@ const staging: IEnvConfig = {
   READER_USER: process.env.READER_USER || 'puppetcistagingreader1@staging.fake-research-aou.org',
   ACCESS_TEST_USER: process.env.ACCESS_TEST_USER || 'puppet-access-tester-1@staging.fake-research-aou.org',
   ADMIN_TEST_USER: process.env.ADMIN_TEST_USER || 'puppeteer-admin-1@staging.fake-research-aou.org',
-  DEFAULT_CDR_VERSION_NAME: 'Synthetic Dataset v3',
-  ALTERNATIVE_CDR_VERSION_NAME: 'Synthetic Dataset v3 with WGS',
+  DEFAULT_CDR_VERSION_NAME: 'Synthetic Dataset v4',
+  ALTERNATIVE_CDR_VERSION_NAME: 'Synthetic Dataset v3',
   LOGIN_GOV_USER: 'aou-dev-registration@broadinstitute.org'
 };
 

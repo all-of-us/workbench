@@ -99,6 +99,7 @@ import org.pmiops.workbench.model.RuntimeLocalizeResponse;
 import org.pmiops.workbench.model.RuntimeStatus;
 import org.pmiops.workbench.model.UpdateRuntimeRequest;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.notebooks.LeonardoApiClientFactory;
 import org.pmiops.workbench.notebooks.LeonardoNotebooksClientImpl;
 import org.pmiops.workbench.notebooks.NotebooksConfig;
 import org.pmiops.workbench.notebooks.NotebooksRetryHandler;
@@ -224,6 +225,7 @@ public class RuntimeControllerTest extends SpringTest {
   @MockBean UserServiceAuditor mockUserServiceAuditor;
   @MockBean WorkspaceService mockWorkspaceService;
   @MockBean WorkspaceAuthService mockWorkspaceAuthService;
+  @MockBean LeonardoApiClientFactory mockLeonardoApiClientFactory;
 
   @Qualifier(NotebooksConfig.USER_RUNTIMES_API)
   @MockBean

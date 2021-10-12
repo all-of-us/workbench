@@ -55,7 +55,6 @@ export default abstract class BaseMenu extends Container {
 
     // Wait for top-level menu dropdown open.
     await this.waitUntilVisible();
-    await this.page.waitForTimeout(200);
 
     // Iterate orderly.
     let rootXpath = this.getXpath();

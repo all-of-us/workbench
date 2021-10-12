@@ -39,6 +39,7 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.firecloud.FirecloudApiClientFactory;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.institution.PublicInstitutionDetailsMapperImpl;
 import org.pmiops.workbench.leonardo.ApiException;
@@ -53,6 +54,7 @@ import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.Disk;
 import org.pmiops.workbench.model.DiskStatus;
 import org.pmiops.workbench.model.DiskType;
+import org.pmiops.workbench.notebooks.LeonardoApiClientFactory;
 import org.pmiops.workbench.notebooks.LeonardoNotebooksClientImpl;
 import org.pmiops.workbench.notebooks.NotebooksConfig;
 import org.pmiops.workbench.notebooks.NotebooksRetryHandler;
@@ -105,27 +107,29 @@ public class DiskControllerTest extends SpringTest {
 
   @TestConfiguration
   @Import({
-    DiskController.class,
+    AccessTierServiceImpl.class,
     CohortMapperImpl.class,
     CohortReviewMapperImpl.class,
+    CommonMappers.class,
     ConceptSetMapperImpl.class,
     DataSetMapperImpl.class,
+    DiskController.class,
     FirecloudMapperImpl.class,
-    WorkspaceMapperImpl.class,
-    CommonMappers.class,
-    PublicInstitutionDetailsMapperImpl.class,
-    UserServiceTestConfiguration.class,
     LeonardoMapperImpl.class,
     LeonardoNotebooksClientImpl.class,
-    NotebooksRetryHandler.class,
     LeonardoRetryHandler.class,
     NoBackOffPolicy.class,
-    AccessTierServiceImpl.class,
+    NotebooksRetryHandler.class,
+    PublicInstitutionDetailsMapperImpl.class,
+    UserServiceTestConfiguration.class,
+    WorkspaceMapperImpl.class,
   })
   @MockBean({
     AccessModuleService.class,
     ConceptSetService.class,
     CohortService.class,
+    FirecloudApiClientFactory.class,
+    LeonardoApiClientFactory.class,
     MailService.class,
   })
   static class Configuration {

@@ -1,4 +1,4 @@
-package org.pmiops.workbench.opsgenie;
+package org.pmiops.workbench.exfiltration;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
@@ -20,6 +20,7 @@ import javax.inject.Provider;
 import javax.persistence.Transient;
 import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.actionaudit.auditors.EgressEventAuditor;
+import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.EgressEventDao;
 import org.pmiops.workbench.db.dao.UserService;
@@ -53,6 +54,7 @@ public class EgressEventServiceImpl implements EgressEventService {
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final UserService userService;
   private final WorkspaceAdminService workspaceAdminService;
+  private final TaskQueueService taskQueueService;
   private final WorkspaceDao workspaceDao;
   private final EgressEventDao egressEventDao;
 
@@ -70,6 +72,7 @@ public class EgressEventServiceImpl implements EgressEventService {
       Provider<WorkbenchConfig> workbenchConfigProvider,
       UserService userService,
       WorkspaceAdminService workspaceAdminService,
+      TaskQueueService taskQueueService,
       WorkspaceDao workspaceDao,
       EgressEventDao egressEventDao) {
     this.clock = clock;
@@ -79,6 +82,7 @@ public class EgressEventServiceImpl implements EgressEventService {
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.userService = userService;
     this.workspaceAdminService = workspaceAdminService;
+    this.taskQueueService = taskQueueService;
     this.workspaceDao = workspaceDao;
     this.egressEventDao = egressEventDao;
   }
@@ -111,7 +115,11 @@ public class EgressEventServiceImpl implements EgressEventService {
     this.egressEventAuditor.fireEgressEvent(event);
     this.createEgressEventAlert(event, workspaceNamespace);
 
-    this.maybePersistEgressEvent(event, dbUserMaybe, dbWorkspaceMaybe);
+    Optional<DbEgressEvent> maybeEvent =
+        this.maybePersistEgressEvent(event, dbUserMaybe, dbWorkspaceMaybe);
+    if (workbenchConfigProvider.get().featureFlags.enableEgressAlertingV2) {
+      maybeEvent.ifPresent(e -> taskQueueService.pushEgressEventTask(e.getEgressEventId()));
+    }
   }
 
   // Create (or potentially update) an OpsGenie alert for an egress event.
@@ -249,10 +257,10 @@ public class EgressEventServiceImpl implements EgressEventService {
     return String.format("%s: %s", userAdminView.getRole(), userDetails);
   }
 
-  private void maybePersistEgressEvent(
+  private Optional<DbEgressEvent> maybePersistEgressEvent(
       EgressEvent event, Optional<DbUser> userMaybe, Optional<DbWorkspace> workspaceMaybe) {
     if (isEventStaleAndAlreadyPersisted(event, userMaybe, workspaceMaybe)) {
-      return;
+      return Optional.empty();
     }
 
     // Ahead of the feature launch, events are still handled manually by the oncall, so store
@@ -262,18 +270,20 @@ public class EgressEventServiceImpl implements EgressEventService {
       status = EgressEventStatus.PENDING;
     }
 
-    egressEventDao.save(
-        new DbEgressEvent()
-            .setUser(userMaybe.orElse(null))
-            .setWorkspace(workspaceMaybe.orElse(null))
-            .setEgressMegabytes(
-                Optional.ofNullable(event.getEgressMib())
-                    // Mebibytes (2^20 bytes) -> Megabytes (10^6 bytes)
-                    .map(mib -> (float) (mib * ((1 << 20) / 1e6)))
-                    .orElse(null))
-            .setEgressWindowSeconds(Optional.ofNullable(event.getTimeWindowDuration()).orElse(null))
-            .setStatus(status)
-            .setSumologicEvent(new Gson().toJson(event)));
+    return Optional.of(
+        egressEventDao.save(
+            new DbEgressEvent()
+                .setUser(userMaybe.orElse(null))
+                .setWorkspace(workspaceMaybe.orElse(null))
+                .setEgressMegabytes(
+                    Optional.ofNullable(event.getEgressMib())
+                        // Mebibytes (2^20 bytes) -> Megabytes (10^6 bytes)
+                        .map(mib -> (float) (mib * ((1 << 20) / 1e6)))
+                        .orElse(null))
+                .setEgressWindowSeconds(
+                    Optional.ofNullable(event.getTimeWindowDuration()).orElse(null))
+                .setStatus(status)
+                .setSumologicEvent(new Gson().toJson(event))));
   }
 
   private boolean isEventStaleAndAlreadyPersisted(

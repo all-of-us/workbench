@@ -247,7 +247,7 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(withCur
                   {kernelTypeEnum}
                 </label>)}
 
-            {kernelType === KernelTypeEnum.Python && <React.Fragment>
+            {hasWgs() && kernelType === KernelTypeEnum.Python && <React.Fragment>
                 <div style={headerStyles.formLabel}>
                     Select analysis tool for genetic variant data
                 </div>

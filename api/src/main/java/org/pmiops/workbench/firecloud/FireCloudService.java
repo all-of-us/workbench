@@ -1,7 +1,6 @@
 package org.pmiops.workbench.firecloud;
 
 import com.google.common.annotations.VisibleForTesting;
-import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -106,8 +105,6 @@ public interface FireCloudService {
 
   String staticNotebooksConvert(byte[] notebook);
 
-  String staticNotebooksConvertAsService(byte[] notebook);
-
   /** Update billing account using end user credential. */
   void updateBillingAccount(String billingProject, String billingAccount);
   /** Update billing account using APP's service account. */
@@ -119,8 +116,6 @@ public interface FireCloudService {
    * <p>Returns null if the FireCloud user is not found or if the user has no NIH linkage.
    */
   FirecloudNihStatus getNihStatus();
-
-  ApiClient getApiClientWithImpersonation(String email) throws IOException;
 
   /** Creates a random Billing Project name. */
   String createBillingProjectName();

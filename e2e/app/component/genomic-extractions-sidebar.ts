@@ -16,7 +16,6 @@ export default class GenomicExtractionsSidebar extends BaseHelpSidebar {
     }
     await this.clickIcon(SideBarLink.GenomicExtractionsHistory);
     await this.waitUntilVisible();
-    await this.page.waitForTimeout(100);
     // Wait for visible text
     await this.page.waitForXPath(`${this.getXpath()}//h3[normalize-space(text())="Genomic Extractions"]`, {
       visible: true

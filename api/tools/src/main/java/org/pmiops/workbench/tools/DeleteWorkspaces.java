@@ -14,7 +14,6 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.auth.ServiceAccounts;
-import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentWorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
@@ -26,6 +25,7 @@ import org.pmiops.workbench.firecloud.ApiClient;
 import org.pmiops.workbench.firecloud.FireCloudConfig;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.FireCloudServiceImpl;
+import org.pmiops.workbench.firecloud.FirecloudApiClientFactory;
 import org.pmiops.workbench.firecloud.api.ProfileApi;
 import org.pmiops.workbench.firecloud.api.WorkspacesApi;
 import org.pmiops.workbench.google.CloudBillingClient;
@@ -42,8 +42,15 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Scope;
 
+// TODO(calbach): This Spring configuration in this tool is very brittle. Either delete this tool or
+// refactor it to instead hit the Workbench API directly.
 @Configuration
-@Import({FireCloudServiceImpl.class, FireCloudConfig.class, CloudBillingClientImpl.class})
+@Import({
+  FirecloudApiClientFactory.class,
+  FireCloudServiceImpl.class,
+  FireCloudConfig.class,
+  CloudBillingClientImpl.class
+})
 public class DeleteWorkspaces {
 
   private static final Logger log = Logger.getLogger(DeleteWorkspaces.class.getName());
@@ -106,25 +113,26 @@ public class DeleteWorkspaces {
   @Primary
   @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
   @Qualifier(FireCloudConfig.END_USER_WORKSPACE_API)
-  WorkspacesApi workspaceApi(WorkbenchConfig config) {
+  WorkspacesApi workspaceApi(FirecloudApiClientFactory factory) {
     if (currentImpersonatedUser == null) {
       return null;
     }
-    return new WorkspacesApi(buildFirecloudServiceAccountApiClient(config));
+    return new WorkspacesApi(buildFirecloudServiceAccountApiClient(factory));
   }
 
   @Bean
   @Primary
   @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-  ProfileApi profileApi(WorkbenchConfig config) {
+  ProfileApi profileApi(FirecloudApiClientFactory factory) {
     if (currentImpersonatedUser == null) {
       return null;
     }
-    return new ProfileApi(buildFirecloudServiceAccountApiClient(config));
+    return new ProfileApi(buildFirecloudServiceAccountApiClient(factory));
   }
 
-  private static ApiClient buildFirecloudServiceAccountApiClient(WorkbenchConfig workbenchConfig) {
-    ApiClient apiClient = FireCloudConfig.buildApiClient(workbenchConfig);
+  private static ApiClient buildFirecloudServiceAccountApiClient(
+      FirecloudApiClientFactory factory) {
+    ApiClient apiClient = factory.newApiClient();
     try {
       apiClient.setAccessToken(
           ServiceAccounts.getScopedServiceAccessToken(FireCloudConfig.BILLING_SCOPES));
