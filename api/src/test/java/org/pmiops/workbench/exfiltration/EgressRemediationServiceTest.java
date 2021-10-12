@@ -4,6 +4,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
@@ -20,6 +21,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.SpringTest;
+import org.pmiops.workbench.actionaudit.auditors.EgressEventAuditor;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.EgressAlertRemediationPolicy;
 import org.pmiops.workbench.config.WorkbenchConfig.EgressAlertRemediationPolicy.Escalation;
@@ -52,6 +54,7 @@ public class EgressRemediationServiceTest extends SpringTest {
 
   @MockBean private UserService mockUserService;
   @MockBean private LeonardoNotebooksClient mockLeonardoNotebooksClient;
+  @MockBean private EgressEventAuditor mockEgressEventAuditor;
 
   @Autowired private WorkspaceDao workspaceDao;
   @Autowired private EgressEventDao egressEventDao;
@@ -318,6 +321,15 @@ public class EgressRemediationServiceTest extends SpringTest {
 
     DbEgressEvent event = egressEventDao.findById(eventId).get();
     assertThat(event.getStatus()).isEqualTo(EgressEventStatus.REMEDIATED);
+  }
+
+  @Test
+  public void testRemediateEgressEvent_auditOnRemediation() {
+    workbenchConfig.egressAlertRemediationPolicy.escalations =
+        ImmutableList.of(suspendComputeAfter(1, Duration.ofMinutes(1)));
+
+    egressRemediationService.remediateEgressEvent(saveNewEvent());
+    verify(mockEgressEventAuditor).fireRemediateEgressEvent(any(), notNull());
   }
 
   private void saveOldEvents(Duration... ages) {

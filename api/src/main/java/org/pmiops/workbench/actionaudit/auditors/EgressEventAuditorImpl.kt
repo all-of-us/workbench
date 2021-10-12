@@ -1,18 +1,19 @@
 package org.pmiops.workbench.actionaudit.auditors
 
-import java.time.Clock
-import java.util.logging.Logger
-import javax.inject.Provider
 import org.pmiops.workbench.actionaudit.ActionAuditEvent
 import org.pmiops.workbench.actionaudit.ActionAuditService
 import org.pmiops.workbench.actionaudit.ActionType
 import org.pmiops.workbench.actionaudit.AgentType
 import org.pmiops.workbench.actionaudit.TargetType
+import org.pmiops.workbench.actionaudit.targetproperties.DbEgressEventTargetProperty
+import org.pmiops.workbench.actionaudit.targetproperties.EgressEscalationTargetProperty
 import org.pmiops.workbench.actionaudit.targetproperties.EgressEventCommentTargetProperty
 import org.pmiops.workbench.actionaudit.targetproperties.EgressEventTargetProperty
 import org.pmiops.workbench.actionaudit.targetproperties.TargetPropertyExtractor
+import org.pmiops.workbench.config.WorkbenchConfig
 import org.pmiops.workbench.db.dao.UserDao
 import org.pmiops.workbench.db.dao.WorkspaceDao
+import org.pmiops.workbench.db.model.DbEgressEvent
 import org.pmiops.workbench.exceptions.BadRequestException
 import org.pmiops.workbench.model.EgressEvent
 import org.pmiops.workbench.model.EgressEventRequest
@@ -20,16 +21,20 @@ import org.pmiops.workbench.workspaces.WorkspaceService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
+import java.time.Clock
+import java.util.Optional
+import java.util.logging.Logger
+import javax.inject.Provider
 
 @Service
 class EgressEventAuditorImpl @Autowired
 constructor(
-    private val actionAuditService: ActionAuditService,
-    private val workspaceService: WorkspaceService,
-    private val workspaceDao: WorkspaceDao,
-    private val userDao: UserDao,
-    private val clock: Clock,
-    @Qualifier("ACTION_ID") private val actionIdProvider: Provider<String>
+        private val actionAuditService: ActionAuditService,
+        private val workspaceService: WorkspaceService,
+        private val workspaceDao: WorkspaceDao,
+        private val userDao: UserDao,
+        private val clock: Clock,
+        @Qualifier("ACTION_ID") private val actionIdProvider: Provider<String>
 ) : EgressEventAuditor {
 
     override fun fireEgressEvent(event: EgressEvent) {
@@ -83,6 +88,23 @@ constructor(
         ), egressEvent = event)
     }
 
+    override fun fireRemediateEgressEvent(
+            dbEvent: DbEgressEvent,
+            escalation: WorkbenchConfig.EgressAlertRemediationPolicy.Escalation?) {
+        val dbWorkspaceMaybe = Optional.ofNullable(dbEvent.workspace)
+        val actionId = actionIdProvider.get()
+        fireRemediationEventSet(baseEvent = ActionAuditEvent(
+                timestamp = clock.millis(),
+                actionId = actionId,
+                actionType = ActionType.REMEDIATE_HIGH_EGRESS_EVENT,
+                agentType = AgentType.SYSTEM,
+                agentIdMaybe = null,
+                agentEmailMaybe = null,
+                targetType = TargetType.WORKSPACE,
+                targetIdMaybe = dbWorkspaceMaybe.map { it.workspaceId }.orElse(null)
+        ), egressEvent = dbEvent, escalation = escalation)
+    }
+
     override fun fireFailedToParseEgressEventRequest(request: EgressEventRequest) {
         fireEventSet(baseEvent = getGenericBaseEvent(), comment = String.format(
                 "Failed to parse egress event JSON from SumoLogic. Field contents: %s",
@@ -122,6 +144,32 @@ constructor(
                     targetPropertyMaybe = EgressEventCommentTargetProperty.COMMENT.propertyName,
                     newValueMaybe = comment
             ))
+        }
+        actionAuditService.send(events)
+    }
+
+    private fun fireRemediationEventSet(
+            baseEvent: ActionAuditEvent,
+            egressEvent: DbEgressEvent? = null,
+            escalation: WorkbenchConfig.EgressAlertRemediationPolicy.Escalation? = null) {
+        var events = ArrayList<ActionAuditEvent>()
+        if (egressEvent != null) {
+            val propertyValues = TargetPropertyExtractor.getPropertyValuesByName(
+                    DbEgressEventTargetProperty.values(), egressEvent)
+            events.addAll(propertyValues.map {
+                baseEvent.copy(
+                        targetPropertyMaybe = it.key,
+                        newValueMaybe = it.value)
+            })
+        }
+        if (escalation != null) {
+            val propertyValues = TargetPropertyExtractor.getPropertyValuesByName(
+                    EgressEscalationTargetProperty.values(), escalation)
+            events.addAll(propertyValues.map {
+                baseEvent.copy(
+                        targetPropertyMaybe = it.key,
+                        newValueMaybe = it.value)
+            })
         }
         actionAuditService.send(events)
     }
