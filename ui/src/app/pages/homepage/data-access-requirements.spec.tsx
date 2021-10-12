@@ -3,13 +3,19 @@ import {mount} from "enzyme";
 
 import defaultServerConfig from 'testing/default-server-config';
 import {AccessModule, InstitutionApi, Profile, ProfileApi} from 'generated/fetch';
-import {allModules, DataAccessRequirements, getActiveModule, getEnabledModules} from './data-access-requirements';
+import {
+    allModules,
+    DataAccessRequirements,
+    getActiveModule,
+    getEnabledModules
+} from './data-access-requirements';
 import {InstitutionApiStub} from 'testing/stubs/institution-api-stub';
 import {ProfileApiStub, ProfileStubVariables} from 'testing/stubs/profile-api-stub';
 import {profileApi, registerApiClient} from 'app/services/swagger-fetch-clients';
 import {profileStore, serverConfigStore} from 'app/utils/stores';
 import {MemoryRouter} from 'react-router-dom';
 import {waitForFakeTimersAndUpdate, waitOneTickAndUpdate} from 'testing/react-test-helpers';
+import {AccessTierShortNames} from 'app/utils/access-tiers';
 
 
 const profile = ProfileStubVariables.PROFILE_STUB as Profile;
@@ -457,6 +463,43 @@ describe('DataAccessRequirements', () => {
         expect(spy2FA).toHaveBeenCalledTimes(0);
         expect(spyERA).toHaveBeenCalledTimes(0);
         expect(spyCompliance).toHaveBeenCalledTimes(0);
+    });
+
+    it ('Should not show Era Commons Module for Registered Tier if the institution does not require eRa', async() => {
+        let wrapper = component();
+        await waitOneTickAndUpdate(wrapper);
+        expect(findModule(wrapper, AccessModule.ERACOMMONS).exists()).toBeTruthy();
+
+        profileStore.set({
+            profile: {
+                ...ProfileStubVariables.PROFILE_STUB,
+                tierEligibilities: [{
+                    accessTierShortName: AccessTierShortNames.Registered,
+                    eraRequired: false
+                }]
+            },
+            load,
+            reload,
+            updateCache});
+        wrapper = component();
+        await waitOneTickAndUpdate(wrapper);
+        expect(findModule(wrapper, AccessModule.ERACOMMONS).exists()).toBeFalsy();
+
+        // Ignore eraRequired if the accessTier is Controlled
+        profileStore.set({
+            profile: {
+                ...ProfileStubVariables.PROFILE_STUB,
+                tierEligibilities: [{
+                    accessTierShortName: AccessTierShortNames.Controlled,
+                    eraRequired: false
+                }]
+            },
+            load,
+            reload,
+            updateCache});
+        wrapper = component();
+        await waitOneTickAndUpdate(wrapper);
+        expect(findModule(wrapper, AccessModule.ERACOMMONS).exists()).toBeTruthy();
     });
 
 });

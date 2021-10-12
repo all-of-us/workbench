@@ -24,12 +24,12 @@ import {cond, displayDateWithoutHours, reactStyles, switchCase} from 'app/utils'
 import {
   buildRasRedirectUrl,
   bypassAll,
+  getAccessModuleConfig,
   getAccessModuleStatusByName,
   GetStartedButton,
-  redirectToRas,
   redirectToNiH,
+  redirectToRas,
   redirectToTraining,
-  getAccessModuleConfig,
 } from 'app/utils/access-utils';
 import {useNavigation} from 'app/utils/navigation';
 import {profileStore, serverConfigStore, useStore} from 'app/utils/stores';
@@ -394,6 +394,15 @@ const MaybeModule = ({profile, moduleName, active, spinnerProps}: ModuleProps): 
 
   const {DARTitleComponent, refreshAction, isEnabledInEnvironment} = getAccessModuleConfig(moduleName);
 
+  const showEraRegisteredModule = (moduleName, profile) => {
+    if (moduleName === AccessModule.ERACOMMONS) {
+      const registeredTier = profile.tierEligibilities
+          .find(value => value.accessTierShortName === AccessTierShortNames.Registered);
+      return !!registeredTier ? registeredTier.eraRequired: true;
+    }
+    return true;
+  };
+
   const ModuleBox = ({children}) => {
     return active
         ? <Clickable onClick={() => { setShowRefresh(true); moduleAction(); }}>
@@ -435,7 +444,8 @@ const MaybeModule = ({profile, moduleName, active, spinnerProps}: ModuleProps): 
       return <TemporaryRASModule/>;
     }
   }
-  return isEnabledInEnvironment ? <Module profile={profile}/> : null;
+
+  return isEnabledInEnvironment && showEraRegisteredModule(moduleName, profile) ? <Module profile={profile}/> : null;
 };
 
 const DARHeader = () => <FlexColumn style={styles.headerFlexColumn}>
@@ -479,6 +489,7 @@ import {ReactComponent as electronic} from 'assets/icons/DAR/electronic.svg';
 import {ReactComponent as survey} from 'assets/icons/DAR/survey.svg';
 import {ReactComponent as physical} from 'assets/icons/DAR/physical.svg';
 import {ReactComponent as wearable} from 'assets/icons/DAR/wearable.svg';
+import {AccessTierShortNames} from 'app/utils/access-tiers';
 
 const Individual = individual;
 const Identifying = identifying;
