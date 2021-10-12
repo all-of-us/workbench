@@ -99,18 +99,12 @@ export function getControlledTierConfig(institution: Institution): InstitutionTi
 
 export function getTierEmailAddresses(tierConfigs: Array<InstitutionTierConfig>, accessTierShortName: string): Array<string> {
   const tierConfig = getTierConfigOrDefault(tierConfigs, accessTierShortName);
-  if (tierConfig.emailAddresses) {
-    return tierConfig.emailAddresses;
-  }
-  return [];
+  return tierConfig.emailAddresses || [];
 }
 
 export function getTierEmailDomains(tierConfigs: Array<InstitutionTierConfig>, accessTierShortName: string): Array<string> {
   const tierConfig = getTierConfigOrDefault(tierConfigs, accessTierShortName);
-  if (tierConfig.emailDomains) {
-    return tierConfig.emailDomains;
-  }
-  return [];
+  return tierConfig.emailDomains || [];
 }
 
 function mergeTierConfigs(configs: InstitutionTierConfig[], tierConfig: InstitutionTierConfig): Array<InstitutionTierConfig> {
