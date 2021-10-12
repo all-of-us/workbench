@@ -54,6 +54,7 @@ import * as fp from 'lodash/fp';
 import {Column} from 'primereact/column';
 import {DataTable} from 'primereact/datatable';
 import * as React from 'react';
+import {useState} from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 
 export const styles = reactStyles({
@@ -255,20 +256,28 @@ const ImmutableListItem: React.FunctionComponent <{
 const ImmutableWorkspaceCohortListItem: React.FunctionComponent<{
   name: string, onChange: Function, checked: boolean, cohortId: number, namespace: string, wid: string}>
     = ({name, onChange, checked, cohortId, namespace, wid}) => {
+      const [showNameTooltip, setShowNameTooltip] = useState(false);
       return <div style={styles.listItem}>
         <input type='checkbox' value={name} onChange={() => onChange()}
                style={styles.listItemCheckbox} checked={checked}/>
         <FlexRow style={{lineHeight: '1.5rem', color: colors.primary, width: '100%', minWidth: 0}}>
-          <div style={{overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>{name}</div>
+          <TooltipTrigger disabled={!showNameTooltip} content={<div>{name}</div>}>
+            <div style={{overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}
+                 onMouseOver={(e) => setShowNameTooltip(checkNameWidth(e.target as HTMLDivElement))}>
+              {name}
+            </div>
+          </TooltipTrigger>
           <div style={{marginLeft: 'auto', paddingRight: '1rem'}}>
             <a href={'/workspaces/' + namespace + '/' + wid + '/data/cohorts/' + cohortId + '/review/cohort-description'}
             target='_blank'>
               <ClrIcon size='20' shape='bar-chart'/>
             </a>
           </div>
-    </FlexRow>
-  </div>;
+        </FlexRow>
+      </div>;
     };
+
+const checkNameWidth = (element: HTMLDivElement) => element.offsetWidth < element.scrollWidth;
 
 const Subheader = (props) => {
   return <div style={{...styles.subheader, ...props.style}}>{props.children}</div>;
