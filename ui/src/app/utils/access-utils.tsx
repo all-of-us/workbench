@@ -9,7 +9,13 @@ import {AnalyticsTracker} from 'app/utils/analytics';
 import {convertAPIError} from 'app/utils/errors';
 import {encodeURIComponentStrict} from 'app/utils/navigation';
 import {authStore, profileStore, serverConfigStore, useStore} from 'app/utils/stores';
-import {AccessModule, AccessModuleStatus, ErrorCode, Profile, UserTierEligibility} from 'generated/fetch';
+import {
+  AccessModule,
+  AccessModuleStatus,
+  ErrorCode,
+  Profile,
+  UserTierEligibility
+} from 'generated/fetch';
 import {parseQueryParams} from "app/components/app-router";
 import {cond, daysFromNow, displayDateWithoutHours, switchCase} from "./index";
 import {AccessTierShortNames} from 'app/utils/access-tiers';
@@ -218,7 +224,16 @@ export const useIsUserDisabled = () => {
 };
 
 export const getAccessModuleStatusByName = (profile: Profile, moduleName: AccessModule): AccessModuleStatus => {
-  return profile.accessModules.modules.find(a => a.moduleName === moduleName);
+  let moduleStatus = profile.accessModules.modules.find(a => a.moduleName === moduleName);
+  // Set today's date to byPass for eraCommon in case Registered tier, and era is not Required
+  if (moduleName === AccessModule.ERACOMMONS && moduleStatus.bypassEpochMillis === null && moduleStatus.completionEpochMillis === null) {
+    const registeredTier = profile.tierEligibilities
+        .find(value => value.accessTierShortName === AccessTierShortNames.Registered);
+    if (!!registeredTier && !registeredTier.eraRequired) {
+      moduleStatus.bypassEpochMillis = new Date().getMilliseconds();
+    }
+  }
+  return moduleStatus;
 };
 
 export const bypassAll = async(accessModules: AccessModule[], isBypassed: boolean) => {
