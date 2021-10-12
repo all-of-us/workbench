@@ -263,8 +263,12 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
         accessModuleService.isModuleCompliant(user, AccessModuleName.PUBLICATION_CONFIRMATION);
     boolean profileConfirmationComplete =
         accessModuleService.isModuleCompliant(user, AccessModuleName.PROFILE_CONFIRMATION);
+    // A temporary work around to check RAS completion status. Currently RAS is marked as complete
+    // when enforce featuer flag is off OR the module is complete. But after cleaning up enableRas
+    // feature flag, this should be moved to accessModuleService.
     boolean rasLoginGovComplete =
-        accessModuleService.isModuleCompliant(user, AccessModuleName.RAS_LOGIN_GOV);
+        !configProvider.get().access.enforceRasLoginGovLinking
+            || accessModuleService.isModuleCompliant(user, AccessModuleName.RAS_LOGIN_GOV);
 
     boolean eRARequiredForRegisteredTier = true;
     boolean institutionalEmailValid = false;

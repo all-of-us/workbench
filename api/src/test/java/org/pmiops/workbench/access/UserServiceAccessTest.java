@@ -839,6 +839,8 @@ public class UserServiceAccessTest {
               accessModuleService.updateBypassTime(
                   user.getUserId(), AccessModule.TWO_FACTOR_AUTH, true);
               accessModuleService.updateBypassTime(
+                  user.getUserId(), AccessModule.RAS_LINK_LOGIN_GOV, true);
+              accessModuleService.updateBypassTime(
                   user.getUserId(), AccessModule.ERA_COMMONS, true);
               accessModuleService.updateBypassTime(
                   user.getUserId(), AccessModule.DATA_USER_CODE_OF_CONDUCT, true);
@@ -1015,6 +1017,26 @@ public class UserServiceAccessTest {
         institution.tierConfigs(ImmutableList.of(rtTierConfig.eraRequired(true))));
     accessModuleService.updateBypassTime(dbUser.getUserId(), AccessModule.ERA_COMMONS, false);
     accessModuleService.updateCompletionTime(dbUser, AccessModuleName.ERA_COMMONS, null);
+    updateUserWithRetries(Function.identity());
+    assertRegisteredTierEnabled(dbUser);
+  }
+
+  @Test
+  public void testRasLinkNotComplete() {
+    assertThat(userAccessTierDao.findAll()).isEmpty();
+    providedWorkbenchConfig.access.enforceRasLoginGovLinking = true;
+    dbUser = updateUserWithRetries(registerUserNow);
+    assertRegisteredTierEnabled(dbUser);
+
+    // Incomplete RAS module, expect user removed from Registered tier;
+    accessModuleService.updateBypassTime(
+        dbUser.getUserId(), AccessModule.RAS_LINK_LOGIN_GOV, false);
+    updateUserWithRetries(Function.identity());
+    assertRegisteredTierDisabled(dbUser);
+
+    // Complete RAS Linking, verify user become registered
+    accessModuleService.updateCompletionTime(
+        dbUser, AccessModuleName.RAS_LOGIN_GOV, new Timestamp(PROVIDED_CLOCK.millis()));
     updateUserWithRetries(Function.identity());
     assertRegisteredTierEnabled(dbUser);
   }
