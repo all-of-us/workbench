@@ -38,7 +38,7 @@ constructor(
     EGRESS_EVENT_ID("egress_event_id",
             { it.egressEventId.toString() }),
     USER_ID("user_id", { it.user?.userId.toString() }),
-    CREATION_TIME("creation_time", { it.creationTime.toString() })
+    CREATION_TIME("creation_time", { it.creationTime?.toString() })
 }
 
 enum class EgressEscalationTargetProperty
@@ -54,7 +54,7 @@ constructor(
                     "suspend_compute"
                 }
             }),
-    SUSPEND_COMPUTE_DURATION_MIN("suspend_duration", { it.suspendCompute?.durationMinutes.toString() }),
+    SUSPEND_COMPUTE_DURATION_MIN("suspend_duration", { it.suspendCompute?.durationMinutes?.toString() }),
 }
 
 /**
