@@ -294,7 +294,7 @@ public class InstitutionServiceImpl implements InstitutionService {
           break;
       }
     }
-    if(!validated) {
+    if (!validated) {
       log.info(logMsg);
     } 
     return validated;
