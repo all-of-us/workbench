@@ -329,25 +329,30 @@ export const AdminInstitutionEdit = fp.flow(withNavigation, withRouter)(class ex
   }
 
   private filterEmptyAddresses(accessTierShortName: string) {
-    const nonEmptyAddrs = getTierEmailAddresses(this.state.institution, accessTierShortName).filter(nonEmpty);
-    this.setTierConfigs(updateTierEmailAddresses(this.state.institution, accessTierShortName, nonEmptyAddrs));
+    const {tierConfigs} = this.state.institution;
+    const nonEmptyAddrs = getTierEmailAddresses(tierConfigs, accessTierShortName).filter(nonEmpty);
+    this.setTierConfigs(updateTierEmailAddresses(tierConfigs, accessTierShortName, nonEmptyAddrs));
   }
 
   private filterEmptyDomains(accessTierShortName: string) {
-    const nonEmptyDomains = getTierEmailDomains(this.state.institution, accessTierShortName).filter(nonEmpty);
-    this.setTierConfigs(updateTierEmailDomains(this.state.institution, accessTierShortName, nonEmptyDomains));
+    const {tierConfigs} = this.state.institution;
+    const nonEmptyDomains = getTierEmailDomains(tierConfigs, accessTierShortName).filter(nonEmpty);
+    this.setTierConfigs(updateTierEmailDomains(tierConfigs, accessTierShortName, nonEmptyDomains));
   }
 
   private setMembershipRequirement(accessTierShortName: string, membershipRequirement: InstitutionMembershipRequirement) {
-    this.setTierConfigs(updateMembershipRequirement(this.state.institution, accessTierShortName, membershipRequirement));
+    const {tierConfigs} = this.state.institution;
+    this.setTierConfigs(updateMembershipRequirement(tierConfigs, accessTierShortName, membershipRequirement));
   }
 
   private setRequireEra(accessTierShortName: string, requireEra: boolean) {
-    this.setTierConfigs(updateRequireEra(this.state.institution, accessTierShortName, requireEra));
+    const {tierConfigs} = this.state.institution;
+    this.setTierConfigs(updateRequireEra(tierConfigs, accessTierShortName, requireEra));
   }
 
   private setEnableControlledTier(accessTierShortName: string, enableControlled: boolean) {
-    this.setTierConfigs(updateEnableControlledTier(this.state.institution.tierConfigs, accessTierShortName, enableControlled));
+    const {tierConfigs} = this.state.institution;
+    this.setTierConfigs(updateEnableControlledTier(tierConfigs, accessTierShortName, enableControlled));
   }
 
   trimEmails(emails: string): Array<string> {
@@ -355,11 +360,13 @@ export const AdminInstitutionEdit = fp.flow(withNavigation, withRouter)(class ex
   }
 
   private setTierAddresses(accessTierShortName: string, emailAddresses: string) {
-    this.setTierConfigs(updateTierEmailAddresses(this.state.institution, accessTierShortName, this.trimEmails(emailAddresses)));
+    const {tierConfigs} = this.state.institution;
+    this.setTierConfigs(updateTierEmailAddresses(tierConfigs, accessTierShortName, this.trimEmails(emailAddresses)));
   }
 
   private setTierDomains(accessTierShortName: string, emailDomains: string) {
-    this.setTierConfigs(updateTierEmailDomains(this.state.institution, accessTierShortName, this.trimEmails(emailDomains)));
+    const {tierConfigs} = this.state.institution;
+    this.setTierConfigs(updateTierEmailDomains(tierConfigs, accessTierShortName, this.trimEmails(emailDomains)));
   }
 
   // Check if the fields have not been edited

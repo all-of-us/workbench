@@ -97,74 +97,69 @@ export function getControlledTierConfig(institution: Institution): InstitutionTi
   return getTierConfig(institution, AccessTierShortNames.Controlled);
 }
 
-export function getTierEmailAddresses(institution: Institution, accessTierShortName: string): Array<string> {
-  const tierConfig = getTierConfig(institution, accessTierShortName);
+export function getTierEmailAddresses(tierConfigs: Array<InstitutionTierConfig>, accessTierShortName: string): Array<string> {
+  const tierConfig = getTierConfigOrDefault(tierConfigs, accessTierShortName);
   if (tierConfig.emailAddresses) {
     return tierConfig.emailAddresses;
   }
   return [];
 }
 
-export function getTierEmailDomains(institution: Institution, accessTierShortName: string): Array<string> {
-  const tierConfig = getTierConfig(institution, accessTierShortName);
+export function getTierEmailDomains(tierConfigs: Array<InstitutionTierConfig>, accessTierShortName: string): Array<string> {
+  const tierConfig = getTierConfigOrDefault(tierConfigs, accessTierShortName);
   if (tierConfig.emailDomains) {
     return tierConfig.emailDomains;
   }
   return [];
 }
 
-
 function mergeTierConfigs(configs: InstitutionTierConfig[], tierConfig: InstitutionTierConfig): Array<InstitutionTierConfig> {
   const otherTierConfigs = configs.filter(t => t.accessTierShortName !== tierConfig.accessTierShortName);
   return [tierConfig, ...otherTierConfigs];
 }
 
-function mergeTierConfig(institution: Institution, tierConfig: InstitutionTierConfig): Array<InstitutionTierConfig> {
-  return mergeTierConfigs(institution.tierConfigs, tierConfig);
-}
-
 // Update the email addresses of a single tier and return the new tier configs.
 export function updateTierEmailAddresses(
-    institution: Institution,
+    tierConfigs: Array<InstitutionTierConfig>,
     accessTierShortName: string,
     emailAddresses: Array<string>): Array<InstitutionTierConfig> {
 
-  return mergeTierConfig(institution, {
-    ...getTierConfig(institution, accessTierShortName),
+  return mergeTierConfigs(tierConfigs, {
+    ...getTierConfigOrDefault(tierConfigs, accessTierShortName),
     emailAddresses
   });
 }
 
 // Update the email domains of a single tier and return the new tier configs.
 export function updateTierEmailDomains(
-    institution: Institution,
+    tierConfigs: Array<InstitutionTierConfig>,
     accessTierShortName: string,
     emailDomains: Array<string>): Array<InstitutionTierConfig> {
 
-  return mergeTierConfig(institution, {
-    ...getTierConfig(institution, accessTierShortName),
+  return mergeTierConfigs(tierConfigs, {
+    ...getTierConfigOrDefault(tierConfigs, accessTierShortName),
     emailDomains
   });
 }
 
 export function updateMembershipRequirement(
-    institution: Institution,
+    tierConfigs: Array<InstitutionTierConfig>,
     accessTierShortName: string,
     membershipRequirement: InstitutionMembershipRequirement): Array<InstitutionTierConfig> {
 
-  return mergeTierConfig(institution, {
-    ...getTierConfig(institution, accessTierShortName),
+  return mergeTierConfigs(tierConfigs, {
+    ...getTierConfigOrDefault(tierConfigs, accessTierShortName),
     membershipRequirement
   })
 }
 
 export function updateRequireEra(
-    institution: Institution,
+    tierConfigs: Array<InstitutionTierConfig>,
     accessTierShortName: string,
     eraRequired: boolean): Array<InstitutionTierConfig> {
 
-  return mergeTierConfig(institution, {
-    ...getTierConfig(institution, accessTierShortName),
+  return mergeTierConfigs(tierConfigs, {
+    ...getTierConfigOrDefault(tierConfigs, accessTierShortName),
     eraRequired
   })
 }
