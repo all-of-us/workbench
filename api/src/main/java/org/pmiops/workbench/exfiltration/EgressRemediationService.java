@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import javax.inject.Provider;
 import org.pmiops.workbench.actionaudit.Agent;
+import org.pmiops.workbench.actionaudit.auditors.EgressEventAuditor;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.EgressAlertRemediationPolicy;
 import org.pmiops.workbench.config.WorkbenchConfig.EgressAlertRemediationPolicy.Escalation;
@@ -40,6 +41,7 @@ public class EgressRemediationService {
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final UserService userService;
   private final LeonardoNotebooksClient leonardoNotebooksClient;
+  private final EgressEventAuditor egressEventAuditor;
   private final EgressEventDao egressEventDao;
 
   public EgressRemediationService(
@@ -47,17 +49,17 @@ public class EgressRemediationService {
       Provider<WorkbenchConfig> workbenchConfigProvider,
       UserService userService,
       LeonardoNotebooksClient leonardoNotebooksClient,
+      EgressEventAuditor egressEventAuditor,
       EgressEventDao egressEventDao) {
     this.clock = clock;
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.userService = userService;
     this.leonardoNotebooksClient = leonardoNotebooksClient;
+    this.egressEventAuditor = egressEventAuditor;
     this.egressEventDao = egressEventDao;
   }
 
   public void remediateEgressEvent(long egressEventId) {
-    // TODO(RW-7389): Add audit logging of remediation.
-
     DbEgressEvent event =
         egressEventDao
             .findById(egressEventId)
@@ -99,6 +101,8 @@ public class EgressRemediationService {
         });
 
     egressEventDao.save(event.setStatus(EgressEventStatus.REMEDIATED));
+
+    egressEventAuditor.fireRemediateEgressEvent(event, escalation.orElse(null));
   }
 
   /**
@@ -186,7 +190,13 @@ public class EgressRemediationService {
   }
 
   private void disableUser(DbUser user) {
-    userService.setDisabledStatus(user.getUserId(), true);
+    userService.updateUserWithRetries(
+        u -> {
+          u.setDisabled(true);
+          return u;
+        },
+        user,
+        Agent.asSystem());
 
     // also stop any running compute, killing any active egress processes the user may have
     stopUserRuntimes(user.getUsername());

@@ -1,5 +1,7 @@
 package org.pmiops.workbench.actionaudit.auditors
 
+import org.pmiops.workbench.config.WorkbenchConfig
+import org.pmiops.workbench.db.model.DbEgressEvent
 import org.pmiops.workbench.model.EgressEvent
 import org.pmiops.workbench.model.EgressEventRequest
 
@@ -14,6 +16,15 @@ interface EgressEventAuditor {
      * fires an audit event log in the target workspace.
      */
     fun fireEgressEvent(event: EgressEvent)
+
+    /**
+     * Decorates a high-egress event with remediation metadata and fires an audit event log in the
+     * target workspace.
+     */
+    fun fireRemediateEgressEvent(
+        dbEvent: DbEgressEvent,
+        escalation: WorkbenchConfig.EgressAlertRemediationPolicy.Escalation?
+    )
 
     /**
      * Fires an audit event log tracking when a Sumologic-reported high-egress event
