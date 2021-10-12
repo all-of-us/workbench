@@ -109,7 +109,7 @@ export function getTierEmailDomains(institution: Institution, accessTierShortNam
   return [];
 }
 
-export function updateTierConfig(institution: Institution, tierConfig: InstitutionTierConfig): Array<InstitutionTierConfig> {
+function mergeTierConfig(institution: Institution, tierConfig: InstitutionTierConfig): Array<InstitutionTierConfig> {
   const otherTierConfigs = institution.tierConfigs.filter(t => t.accessTierShortName !== tierConfig.accessTierShortName);
   return [tierConfig, ...otherTierConfigs];
 }
@@ -120,7 +120,7 @@ export function updateTierEmailAddresses(
     accessTierShortName: string,
     emailAddresses: Array<string>): Array<InstitutionTierConfig> {
 
-  return updateTierConfig(institution, {
+  return mergeTierConfig(institution, {
     ...getTierConfig(institution, accessTierShortName),
     emailAddresses
   });
@@ -132,7 +132,7 @@ export function updateTierEmailDomains(
     accessTierShortName: string,
     emailDomains: Array<string>): Array<InstitutionTierConfig> {
 
-  return updateTierConfig(institution, {
+  return mergeTierConfig(institution, {
     ...getTierConfig(institution, accessTierShortName),
     emailDomains
   });
@@ -143,7 +143,7 @@ export function updateMembershipRequirement(
     accessTierShortName: string,
     membershipRequirement: InstitutionMembershipRequirement): Array<InstitutionTierConfig> {
 
-  return updateTierConfig(institution, {
+  return mergeTierConfig(institution, {
     ...getTierConfig(institution, accessTierShortName),
     membershipRequirement
   })
@@ -154,7 +154,7 @@ export function updateRequireEra(
     accessTierShortName: string,
     eraRequired: boolean): Array<InstitutionTierConfig> {
 
-  return updateTierConfig(institution, {
+  return mergeTierConfig(institution, {
     ...getTierConfig(institution, accessTierShortName),
     eraRequired
   })
@@ -165,7 +165,7 @@ export function updateEnableControlledTier(
     accessTierShortName: string,
     enableCtAccess: boolean): Array<InstitutionTierConfig> {
 
-  return updateTierConfig(institution, {
+  return mergeTierConfig(institution, {
     ...getTierConfig(institution, accessTierShortName),
     membershipRequirement: enableCtAccess === true ?
         InstitutionMembershipRequirement.DOMAINS : InstitutionMembershipRequirement.NOACCESS,
