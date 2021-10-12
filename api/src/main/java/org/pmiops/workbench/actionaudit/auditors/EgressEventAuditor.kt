@@ -22,8 +22,9 @@ interface EgressEventAuditor {
      * target workspace.
      */
     fun fireRemediateEgressEvent(
-            dbEvent: DbEgressEvent,
-            escalation: WorkbenchConfig.EgressAlertRemediationPolicy.Escalation?)
+        dbEvent: DbEgressEvent,
+        escalation: WorkbenchConfig.EgressAlertRemediationPolicy.Escalation?
+    )
 
     /**
      * Fires an audit event log tracking when a Sumologic-reported high-egress event

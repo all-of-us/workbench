@@ -1,5 +1,9 @@
 package org.pmiops.workbench.actionaudit.auditors
 
+import java.time.Clock
+import java.util.Optional
+import java.util.logging.Logger
+import javax.inject.Provider
 import org.pmiops.workbench.actionaudit.ActionAuditEvent
 import org.pmiops.workbench.actionaudit.ActionAuditService
 import org.pmiops.workbench.actionaudit.ActionType
@@ -21,20 +25,16 @@ import org.pmiops.workbench.workspaces.WorkspaceService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
-import java.time.Clock
-import java.util.Optional
-import java.util.logging.Logger
-import javax.inject.Provider
 
 @Service
 class EgressEventAuditorImpl @Autowired
 constructor(
-        private val actionAuditService: ActionAuditService,
-        private val workspaceService: WorkspaceService,
-        private val workspaceDao: WorkspaceDao,
-        private val userDao: UserDao,
-        private val clock: Clock,
-        @Qualifier("ACTION_ID") private val actionIdProvider: Provider<String>
+    private val actionAuditService: ActionAuditService,
+    private val workspaceService: WorkspaceService,
+    private val workspaceDao: WorkspaceDao,
+    private val userDao: UserDao,
+    private val clock: Clock,
+    @Qualifier("ACTION_ID") private val actionIdProvider: Provider<String>
 ) : EgressEventAuditor {
 
     override fun fireEgressEvent(event: EgressEvent) {
@@ -89,8 +89,9 @@ constructor(
     }
 
     override fun fireRemediateEgressEvent(
-            dbEvent: DbEgressEvent,
-            escalation: WorkbenchConfig.EgressAlertRemediationPolicy.Escalation?) {
+        dbEvent: DbEgressEvent,
+        escalation: WorkbenchConfig.EgressAlertRemediationPolicy.Escalation?
+    ) {
         val dbWorkspaceMaybe = Optional.ofNullable(dbEvent.workspace)
         val actionId = actionIdProvider.get()
         fireRemediationEventSet(baseEvent = ActionAuditEvent(
@@ -149,9 +150,10 @@ constructor(
     }
 
     private fun fireRemediationEventSet(
-            baseEvent: ActionAuditEvent,
-            egressEvent: DbEgressEvent? = null,
-            escalation: WorkbenchConfig.EgressAlertRemediationPolicy.Escalation? = null) {
+        baseEvent: ActionAuditEvent,
+        egressEvent: DbEgressEvent? = null,
+        escalation: WorkbenchConfig.EgressAlertRemediationPolicy.Escalation? = null
+    ) {
         var events = ArrayList<ActionAuditEvent>()
         if (egressEvent != null) {
             val propertyValues = TargetPropertyExtractor.getPropertyValuesByName(
