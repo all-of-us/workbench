@@ -1,5 +1,22 @@
 -- ====== A COPY OF `all-of-us-ehr-dev.test_R2019q4r3` in `all-of-us-ehr-dev.ChenchalDummySrc` is used to VERIFY ======
 -- ====== Verify after a complete run ===============
+-- row counts for all tables
+
+select * from (
+                  select '01-sequential' run_type, table_id, row_count from `all-of-us-ehr-dev.ChenchalDummySeq.__TABLES__`
+                  union all
+                  select '02-parallel' run_type, table_id, row_count from `all-of-us-ehr-dev.ChenchalDummyPar.__TABLES__`
+                  union all
+                  select '03-parallel-multi' run_type, table_id, row_count from `all-of-us-ehr-dev.ChenchalDummyMult.__TABLES__`
+                  where table_id in (select table_id from `all-of-us-ehr-dev.ChenchalDummySeq.__TABLES__`)   -- exclude prep_temp_* tables
+                  union all
+                  select '10-original' run_type, table_id, row_count from `all-of-us-ehr-dev.ChenchalDummyOri.__TABLES__`
+                  union all
+                  select '20-std-src' run_type, table_id, row_count from `all-of-us-ehr-dev.ChenchalDummySrc.__TABLES__`
+                  where table_id in (select table_id from `all-of-us-ehr-dev.ChenchalDummySeq.__TABLES__`)  -- exclude tablesnot used/created by make-cb-criterta
+              )
+order by 2,1;
+
 -- by domain_id
 select * from (
               select '01-sequential' run_type, domain_id, count(*) row_count

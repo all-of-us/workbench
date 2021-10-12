@@ -66,32 +66,34 @@ make-cb-criteria-20-observation.sh
 if [[ "$run_in_parallel" == "ori" ]]; then
   echo "for 'ori' running make-bq-criteria-tables.sh script directly!"
   source make-bq-criteria-tables.sh
-elif [[ "$run_in_parallel" == "seq" ]]; then
-  echo " $run_in_parallel - sequential run"
-  for f in "${main_tables[@]}" ; do
+else
+  if [[ "$run_in_parallel" == "seq" ]]; then
+    echo " $run_in_parallel - sequential run"
+    for f in "${main_tables[@]}" ; do
+      runScript "$f" "$BQ_PROJECT" "$BQ_DATASET" seq
+    done
+  elif [[ "$run_in_parallel" == "par" ]]; then
+    echo " $run_in_parallel - parallel run"
+    for f in "${main_tables[@]}" ; do
+      runScript "$f" "$BQ_PROJECT" "$BQ_DATASET" par &
+    done
+  elif [[ "$run_in_parallel" == "mult" ]]; then
+    echo " $run_in_parallel - parallel multi run"
+    for f in "${main_tables[@]}" ; do
+      runScript "$f" "$BQ_PROJECT" "$BQ_DATASET" mult &
+    done
+  fi
+  # wait for all processes to finish
+  wait
+  run_in_order=(
+  make-cb-criteria-21-seq-01-add-in-missing-codes.sh
+  make-cb-criteria-22-seq-02-attrib-other-tables.sh
+  make-cb-criteria-23-seq-03-clean-up-text-synonym.sh
+  )
+  for f in "${run_in_order[@]}" ; do
     runScript "$f" "$BQ_PROJECT" "$BQ_DATASET" seq
   done
-elif [[ "$run_in_parallel" == "par" ]]; then
-  echo " $run_in_parallel - parallel run"
-  for f in "${main_tables[@]}" ; do
-    runScript "$f" "$BQ_PROJECT" "$BQ_DATASET" par &
-  done
-elif [[ "$run_in_parallel" == "mult" ]]; then
-  echo " $run_in_parallel - parallel multi run"
-  for f in "${main_tables[@]}" ; do
-    runScript "$f" "$BQ_PROJECT" "$BQ_DATASET" mult &
-  done
 fi
-# wait for all processes to finish
-wait
-run_in_order=(
-make-cb-criteria-21-seq-01-add-in-missing-codes.sh
-make-cb-criteria-22-seq-02-attrib-other-tables.sh
-make-cb-criteria-23-seq-03-clean-up-text-synonym.sh
-)
-for f in "${run_in_order[@]}" ; do
-  runScript "$f" "$BQ_PROJECT" "$BQ_DATASET" seq
-done
 # wait to finish
 wait
 echo "Running scripts *all from make-cb-criteria-00-main-tables.sh* done in $(timeIt main_start) secs"
