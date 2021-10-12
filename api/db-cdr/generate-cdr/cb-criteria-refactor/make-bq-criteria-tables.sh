@@ -5454,8 +5454,7 @@ WHERE x.concept_id = y.concept_id
 
 echo "Running  PROCEDURE_OCCURRENCE - SNOMED - SOURCE done in $(timeIt block_start) secs total time $(timeIt st_sec) secs"
 block_start=$SECONDS
-echo "Exiting after PROCEDURE_OCCURRENCE - SNOMED - SOURCE ...."
-exit 2
+
 ###############################################
 # PROCEDURE_OCCURRENCE - SNOMED - STANDARD
 ###############################################
@@ -5931,6 +5930,7 @@ WHERE x.concept_id = y.concept_id
 
 echo "Running  PROCEDURE_OCCURRENCE - SNOMED - STANDARD done in $(timeIt block_start) secs total time $(timeIt st_sec) secs"
 block_start=$SECONDS
+
 ################################################
 # OBSERVATION
 ################################################
