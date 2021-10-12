@@ -77,14 +77,6 @@ public class DbUser {
   private Integer dataUseAgreementSignedVersion;
   private Timestamp complianceTrainingExpirationTime;
 
-  private Timestamp twoFactorAuthCompletionTime;
-  private Timestamp twoFactorAuthBypassTime;
-
-  private Timestamp profileLastConfirmedTime;
-  private Timestamp publicationsLastConfirmedTime;
-
-  private Timestamp computeSecuritySuspendedUntil;
-
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "user_id")
