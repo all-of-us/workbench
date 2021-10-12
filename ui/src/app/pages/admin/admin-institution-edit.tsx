@@ -347,7 +347,7 @@ export const AdminInstitutionEdit = fp.flow(withNavigation, withRouter)(class ex
   }
 
   private setEnableControlledTier(accessTierShortName: string, enableControlled: boolean) {
-    this.setTierConfigs(updateEnableControlledTier(this.state.institution, accessTierShortName, enableControlled));
+    this.setTierConfigs(updateEnableControlledTier(this.state.institution.tierConfigs, accessTierShortName, enableControlled));
   }
 
   trimEmails(emails: string): Array<string> {

@@ -77,12 +77,16 @@ export const defaultTierConfig = (accessTier: string): InstitutionTierConfig => 
   emailDomains: []
 });
 
+export function getTierConfigOrDefault(configs: Array<InstitutionTierConfig>, accessTierShortName: string): InstitutionTierConfig {
+   return configs.find(t => t.accessTierShortName === accessTierShortName) || defaultTierConfig(accessTierShortName);
+}
+
 export function getTierConfig(institution: Institution, accessTierShortName: string): InstitutionTierConfig {
   if (!institution.tierConfigs) {
     return defaultTierConfig(accessTierShortName);
   }
 
-  return institution.tierConfigs.find(t => t.accessTierShortName === accessTierShortName) || defaultTierConfig(accessTierShortName);
+  return getTierConfigOrDefault(institution.tierConfigs, accessTierShortName);
 }
 
 export function getRegisteredTierConfig(institution: Institution): InstitutionTierConfig {
@@ -109,9 +113,14 @@ export function getTierEmailDomains(institution: Institution, accessTierShortNam
   return [];
 }
 
-function mergeTierConfig(institution: Institution, tierConfig: InstitutionTierConfig): Array<InstitutionTierConfig> {
-  const otherTierConfigs = institution.tierConfigs.filter(t => t.accessTierShortName !== tierConfig.accessTierShortName);
+
+function mergeTierConfigs(configs: InstitutionTierConfig[], tierConfig: InstitutionTierConfig): Array<InstitutionTierConfig> {
+  const otherTierConfigs = configs.filter(t => t.accessTierShortName !== tierConfig.accessTierShortName);
   return [tierConfig, ...otherTierConfigs];
+}
+
+function mergeTierConfig(institution: Institution, tierConfig: InstitutionTierConfig): Array<InstitutionTierConfig> {
+  return mergeTierConfigs(institution.tierConfigs, tierConfig);
 }
 
 // Update the email addresses of a single tier and return the new tier configs.
@@ -161,12 +170,12 @@ export function updateRequireEra(
 }
 
 export function updateEnableControlledTier(
-    institution: Institution,
+    tierConfigs: Array<InstitutionTierConfig>,
     accessTierShortName: string,
     enableCtAccess: boolean): Array<InstitutionTierConfig> {
 
-  return mergeTierConfig(institution, {
-    ...getTierConfig(institution, accessTierShortName),
+  return mergeTierConfigs(tierConfigs, {
+    ...getTierConfigOrDefault(tierConfigs, accessTierShortName),
     membershipRequirement: enableCtAccess === true ?
         InstitutionMembershipRequirement.DOMAINS : InstitutionMembershipRequirement.NOACCESS,
   })
