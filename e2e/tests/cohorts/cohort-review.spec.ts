@@ -35,7 +35,6 @@ describe('Cohort review set tests', () => {
 
     const cohortBuildPage = new CohortBuildPage(page);
     await cohortBuildPage.waitForLoad();
-    await cohortBuildPage.getTotalCount(); // For wait for page ready.
 
     const reviewSetsButton = cohortBuildPage.getCopyButton();
     await reviewSetsButton.click();
