@@ -9,7 +9,7 @@ TBL_PAS='prep_ancestor_staging'
 TBL_PCA='prep_concept_ancestor'
 ####### common block for all make-cb-criteria-dd-*.sh scripts ###########
 function createTmpTable(){
-  local tmpTbl="temp_"$1"_"$SQL_SCRIPT_ORDER
+  local tmpTbl="prep_temp_"$1"_"$SQL_SCRIPT_ORDER
   res=$(bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
     "CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.$tmpTbl\` AS
       SELECT * FROM \`$BQ_PROJECT.$BQ_DATASET.$1\` LIMIT 0")
@@ -17,7 +17,7 @@ function createTmpTable(){
   echo "$tmpTbl"
 }
 function cpToMain(){
-  local tbl_to=`echo "$1" | perl -pe 's/(temp_)|(_\d+)//g'`
+  local tbl_to=`echo "$1" | perl -pe 's/(prep_temp_)|(_\d+)//g'`
   bq cp --append_table=true --quiet --project_id=$BQ_PROJECT \
      $BQ_DATASET.$1 $BQ_DATASET.$tbl_to
 }
