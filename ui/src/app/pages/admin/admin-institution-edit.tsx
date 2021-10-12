@@ -9,45 +9,35 @@ import {Button} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {SemiBoldHeader} from 'app/components/headers';
-import {ControlledTierBadge, RegisteredTierBadge} from 'app/components/icons';
 import {TextArea, TextInputWithLabel} from 'app/components/inputs';
 import {BulletAlignedUnorderedList} from 'app/components/lists';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {Scroll} from 'app/icons/scroll';
-import {
-  MembershipRequirements,
-  OrganizationTypeOptions
-} from 'app/pages/admin/admin-institution-options';
+import {MembershipRequirements, OrganizationTypeOptions} from 'app/pages/admin/admin-institution-options';
 import {institutionApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {reactStyles} from 'app/utils';
+import {reactStyles, switchCase} from 'app/utils';
 import {AccessTierShortNames, displayNameForTier} from 'app/utils/access-tiers';
 import {convertAPIError} from 'app/utils/errors';
 import {
   defaultTierConfig,
   getControlledTierConfig,
-  getControlledTierEmailAddresses,
-  getControlledTierEmailDomains,
-  getRegisteredTierConfig,
-  getRegisteredTierEmailAddresses,
-  getRegisteredTierEmailDomains,
+  getTierBadge,
   getTierConfig,
-  updateCtEmailAddresses,
-  updateCtEmailDomains,
-  updateRtEmailAddresses,
-  updateRtEmailDomains,
+  getTierEmailAddresses,
+  getTierEmailDomains,
+  updateEnableControlledTier,
+  updateMembershipRequirement,
+  updateRequireEra,
+  updateTierEmailAddresses,
+  updateTierEmailDomains,
 } from 'app/utils/institutions';
 import {NavigationProps} from 'app/utils/navigation';
 import {MatchParams, serverConfigStore, useStore} from 'app/utils/stores';
 import {withNavigation} from 'app/utils/with-navigation-hoc';
-import {
-  Institution,
-  InstitutionMembershipRequirement,
-  InstitutionTierConfig,
-  OrganizationType
-} from 'generated/fetch';
+import {Institution, InstitutionMembershipRequirement, InstitutionTierConfig, OrganizationType} from 'generated/fetch';
 
 const styles = reactStyles({
   label: {
@@ -58,10 +48,6 @@ const styles = reactStyles({
     color: colors.primary,
     marginTop: '1.5rem',
     marginBottom: '0.3rem'
-  },
-  tierBadge: {
-    marginTop: '0.6rem',
-    marginLeft: '0.6rem',
   },
   tierLabel: {
     fontSize: '16px',
@@ -172,7 +158,6 @@ const DomainTextArea = (props: {accessTierShortName: string, emailDomains: strin
 interface TierConfigProps {
   institution: Institution;
   accessTierShortName: string;
-  TierBadge: () => JSX.Element;
   setEnableControlledTier?: (boolean) => void;
   setEraRequired: (boolean) => void;
   setTierRequirement: (InstitutionMembershipRequirement) => void;
@@ -182,8 +167,10 @@ interface TierConfigProps {
   setTierDomains: (string) => void;
 }
 const TierConfig = (props: TierConfigProps) => {
-  const {institution, accessTierShortName, TierBadge, setEnableControlledTier, setEraRequired, setTierRequirement,
+  const {institution, accessTierShortName, setEnableControlledTier, setEraRequired, setTierRequirement,
     filterEmptyAddresses, setTierAddresses, filterEmptyDomains, setTierDomains} = props;
+
+  const TierBadge: () => JSX.Element = getTierBadge(accessTierShortName);
 
   const tierConfig = getTierConfig(institution, accessTierShortName);
   const {emailAddresses, emailDomains} = tierConfig;
@@ -337,103 +324,42 @@ export const AdminInstitutionEdit = fp.flow(withNavigation, withRouter)(class ex
     }
   }
 
-  // Filter out empty line or empty email addresses like <email1>,,<email2> for registered tier
-  filterEmptyRtEmailAddresses() {
-    const updatedEmailAddresses = getRegisteredTierEmailAddresses(this.state.institution).filter(nonEmpty);
-    this.setState(fp.set(['institution', 'tierConfigs'],
-        updateRtEmailAddresses(this.state.institution, updatedEmailAddresses)));
+  private setTierConfigs(tierConfigs: Array<InstitutionTierConfig>) {
+    this.setState(fp.set(['institution', 'tierConfigs'], tierConfigs));
   }
 
-  // Filter out empty line or empty email addresses like <email1>,,<email2> for controlled tier
-  filterEmptyCtEmailAddresses() {
-    const updatedEmailAddresses = getControlledTierEmailAddresses(this.state.institution).filter(nonEmpty);
-    this.setState(fp.set(['institution', 'tierConfigs'],
-        updateCtEmailAddresses(this.state.institution, updatedEmailAddresses)));
+  private filterEmptyAddresses(accessTierShortName: string) {
+    const nonEmptyAddrs = getTierEmailAddresses(this.state.institution, accessTierShortName).filter(nonEmpty);
+    this.setTierConfigs(updateTierEmailAddresses(this.state.institution, accessTierShortName, nonEmptyAddrs));
   }
 
-  // Filter out empty line or empty email addresses like <email1>,,<email2> for registered tier
-  filterEmptyRtEmailDomains() {
-    const updatedEmailDomains = getRegisteredTierEmailDomains(this.state.institution).filter(nonEmpty);
-    this.setState(fp.set(['institution', 'tierConfigs'],
-        updateRtEmailDomains(this.state.institution, updatedEmailDomains)));
+  private filterEmptyDomains(accessTierShortName: string) {
+    const nonEmptyDomains = getTierEmailDomains(this.state.institution, accessTierShortName).filter(nonEmpty);
+    this.setTierConfigs(updateTierEmailDomains(this.state.institution, accessTierShortName, nonEmptyDomains));
   }
 
-  // Filter out empty line or empty email addresses like <email1>,,<email2> for controlled tier
-  filterEmptyCtEmailDomains() {
-    const updatedEmailDomains = getControlledTierEmailDomains(this.state.institution).filter(nonEmpty);
-    this.setState(fp.set(['institution', 'tierConfigs'],
-        updateCtEmailDomains(this.state.institution, updatedEmailDomains)));
+  private setMembershipRequirement(accessTierShortName: string, membershipRequirement: InstitutionMembershipRequirement) {
+    this.setTierConfigs(updateMembershipRequirement(this.state.institution, accessTierShortName, membershipRequirement));
   }
 
-  setRegisteredTierRequirement(membershipRequirement: InstitutionMembershipRequirement) {
-    const rtTierConfig: InstitutionTierConfig = {
-      ...getRegisteredTierConfig(this.state.institution),
-      membershipRequirement: membershipRequirement,
-    };
-    this.setState(fp.set(['institution', 'tierConfigs'],
-        [rtTierConfig, getControlledTierConfig(this.state.institution)]));
+  private setRequireEra(accessTierShortName: string, requireEra: boolean) {
+    this.setTierConfigs(updateRequireEra(this.state.institution, accessTierShortName, requireEra));
   }
 
-  setControlledTierRequirement(membershipRequirement: InstitutionMembershipRequirement) {
-    const ctTierConfig: InstitutionTierConfig = {
-      ...getControlledTierConfig(this.state.institution),
-      membershipRequirement: membershipRequirement,
-    };
-    this.setState(fp.set(['institution', 'tierConfigs'],
-        [getRegisteredTierConfig(this.state.institution), ctTierConfig]));
-  }
-
-  setRtRequireEra(eRAEnabled: boolean) {
-    const rtTierConfig: InstitutionTierConfig = {
-      ...getRegisteredTierConfig(this.state.institution),
-      eraRequired: eRAEnabled
-    };
-    this.setState(fp.set(['institution', 'tierConfigs'],
-        [rtTierConfig, getControlledTierConfig(this.state.institution)]));
-  }
-
-  setCtRequireEra(eRAEnabled: boolean) {
-    const ctTierConfig: InstitutionTierConfig = {
-      ...getControlledTierConfig(this.state.institution),
-      eraRequired: eRAEnabled
-    };
-    this.setState(fp.set(['institution', 'tierConfigs'],
-        [getRegisteredTierConfig(this.state.institution), ctTierConfig]));
-  }
-
-  setEnableControlledTier(enableCtAccess: boolean) {
-    // When switch from disable to enabled, set tier requirement from NOACCESS to DOMAINS with empty domain list.
-    const ctTierConfig: InstitutionTierConfig = {
-      ...getControlledTierConfig(this.state.institution),
-      membershipRequirement: enableCtAccess === true ?
-          InstitutionMembershipRequirement.DOMAINS : InstitutionMembershipRequirement.NOACCESS,
-    };
-    this.setState(fp.set(['institution', 'tierConfigs'],
-        [getRegisteredTierConfig(this.state.institution), ctTierConfig]));
+  private setEnableControlledTier(accessTierShortName: string, enableControlled: boolean) {
+    this.setTierConfigs(updateEnableControlledTier(this.state.institution, accessTierShortName, enableControlled));
   }
 
   trimEmails(emails: string): Array<string> {
     return emails.split(/[,\n]+/).map(email => email.trim());
   }
 
-  setRegisteredTierEmails(emailAddresses: string) {
-    this.setState(fp.set(['institution', 'tierConfigs'],
-        updateRtEmailAddresses(this.state.institution, this.trimEmails(emailAddresses))));
+  private setTierAddresses(accessTierShortName: string, emailAddresses: string) {
+    this.setTierConfigs(updateTierEmailAddresses(this.state.institution, accessTierShortName, this.trimEmails(emailAddresses)));
   }
 
-  setControlledTierEmails(emailAddresses: string) {
-    this.setState(fp.set(['institution', 'tierConfigs'],
-        updateCtEmailAddresses(this.state.institution, this.trimEmails(emailAddresses))));
-  }
-
-  setRegisteredTierDomains(emailDomains: string) {
-    this.setState(fp.set(['institution', 'tierConfigs'],
-        updateRtEmailDomains(this.state.institution, this.trimEmails(emailDomains))));
-  }
-
-  setControlledTierDomains(emailDomains: string) {
-    this.setState(fp.set(['institution', 'tierConfigs'],
-        updateCtEmailDomains(this.state.institution, this.trimEmails(emailDomains))));
+  private setTierDomains(accessTierShortName: string, emailDomains: string) {
+    this.setTierConfigs(updateTierEmailDomains(this.state.institution, accessTierShortName, this.trimEmails(emailDomains)));
   }
 
   // Check if the fields have not been edited
@@ -473,40 +399,42 @@ export const AdminInstitutionEdit = fp.flow(withNavigation, withRouter)(class ex
     this.props.navigate(['admin', 'institution']);
   }
 
+  cleanConfigForSaving(tierConfig: InstitutionTierConfig): InstitutionTierConfig[] {
+    return switchCase(tierConfig.membershipRequirement,
+        // DOMAINS -> clear emailAddresses
+        [InstitutionMembershipRequirement.DOMAINS,
+          () => [{
+            ...tierConfig,
+            emailAddresses: [],
+          }]],
+        // ADDRESSES -> clear emailDomains
+        [InstitutionMembershipRequirement.ADDRESSES,
+          () => [{
+            ...tierConfig,
+            emailDomains: [],
+          }]],
+        // NOACCESS -> remove completely
+        [InstitutionMembershipRequirement.NOACCESS, () => []]);
+  }
+
   async saveInstitution() {
     const {institution, institutionMode} = this.state;
-    const rtConfig: InstitutionTierConfig = getRegisteredTierConfig(institution);
-    const ctConfig: InstitutionTierConfig = getControlledTierConfig(institution);
-    if (institution && rtConfig) {
-      if (rtConfig.membershipRequirement === InstitutionMembershipRequirement.DOMAINS) {
-        rtConfig.emailAddresses = [];
-      } else if (rtConfig.membershipRequirement === InstitutionMembershipRequirement.ADDRESSES) {
-        rtConfig.emailDomains = [];
-      }
+
+    const institutionToSave: Institution = {
+      ...institution,
+      tierConfigs: fp.flatMap(tierConfig => this.cleanConfigForSaving(tierConfig), institution.tierConfigs),
     }
-    if (institution && ctConfig) {
-      if (ctConfig.membershipRequirement === InstitutionMembershipRequirement.DOMAINS) {
-        ctConfig.emailAddresses = [];
-      } else if (ctConfig.membershipRequirement === InstitutionMembershipRequirement.ADDRESSES) {
-        ctConfig.emailDomains = [];
-      }
-    }
-    if (ctConfig.membershipRequirement === InstitutionMembershipRequirement.NOACCESS) {
-      // Don't set CT if CT is NOACCESS
-      institution.tierConfigs = [rtConfig];
-    } else {
-      institution.tierConfigs = [rtConfig, ctConfig];
-    }
-    if (institution && institution.organizationTypeEnum !== OrganizationType.OTHER) {
-      institution.organizationTypeOtherText = null;
+
+    if (institution.organizationTypeEnum !== OrganizationType.OTHER) {
+      institutionToSave.organizationTypeOtherText = null;
     }
 
     if (institutionMode === InstitutionMode.EDIT) {
-      await institutionApi().updateInstitution(this.props.match.params.institutionId, institution)
+      await institutionApi().updateInstitution(this.props.match.params.institutionId, institutionToSave)
         .then(() => this.backNavigate())
         .catch(reason => this.handleError(reason));
     } else {
-      await institutionApi().createInstitution(institution)
+      await institutionApi().createInstitution(institutionToSave)
         .then(() => this.backNavigate())
         .catch(reason => this.handleError(reason));
     }
@@ -597,6 +525,10 @@ export const AdminInstitutionEdit = fp.flow(withNavigation, withRouter)(class ex
       registeredTierEmailDomains: {customEmailDomains: {}},
       controlledTierEmailDomains: {customEmailDomains: {}},
     });
+
+    // in display order
+    const tiers = [AccessTierShortNames.Registered, AccessTierShortNames.Controlled];
+
     return <div>
       <style>{css}</style>
       <FadeBox style={{marginTop: '1rem', marginLeft: '1rem', width: '1239px'}}>
@@ -651,27 +583,18 @@ export const AdminInstitutionEdit = fp.flow(withNavigation, withRouter)(class ex
         </SemiBoldHeader>
         <hr style={{border: '1px solid #A9B6CB'}}/>
         <FlexRow style={{gap: '2rem'}}>
+          {tiers.map(accessTierShortName =>
           <TierConfig
+              key={accessTierShortName}
+              accessTierShortName={accessTierShortName}
               institution={institution}
-              accessTierShortName={AccessTierShortNames.Registered}
-              TierBadge={() => <RegisteredTierBadge style={styles.tierBadge}/>}
-              setEraRequired={(value) => this.setRtRequireEra(value)}
-              setTierRequirement={(requirement) => this.setRegisteredTierRequirement(requirement)}
-              filterEmptyAddresses={() => this.filterEmptyRtEmailAddresses()}
-              setTierAddresses={(addrs) => this.setRegisteredTierEmails(addrs)}
-              filterEmptyDomains={() => this.filterEmptyRtEmailDomains()}
-              setTierDomains={(domains) => this.setRegisteredTierDomains(domains)}/>
-          <TierConfig
-              institution={institution}
-              accessTierShortName={AccessTierShortNames.Controlled}
-              TierBadge={() => <ControlledTierBadge style={styles.tierBadge}/>}
-              setEnableControlledTier={(value) => this.setEnableControlledTier(value)}
-              setEraRequired={(value) => this.setCtRequireEra(value)}
-              setTierRequirement={(requirement) => this.setControlledTierRequirement(requirement)}
-              filterEmptyAddresses={() => this.filterEmptyCtEmailAddresses()}
-              setTierAddresses={(addrs) => this.setControlledTierEmails(addrs)}
-              filterEmptyDomains={() => this.filterEmptyCtEmailDomains()}
-              setTierDomains={(domains) => this.setControlledTierDomains(domains)}/>
+              setEnableControlledTier={(value) => this.setEnableControlledTier(accessTierShortName, value)}
+              setEraRequired={(value) => this.setRequireEra(accessTierShortName, value)}
+              setTierRequirement={(requirement) => this.setMembershipRequirement(accessTierShortName, requirement)}
+              filterEmptyAddresses={() => this.filterEmptyAddresses(accessTierShortName)}
+              setTierAddresses={(addrs) => this.setTierAddresses(accessTierShortName, addrs)}
+              filterEmptyDomains={() => this.filterEmptyDomains(accessTierShortName)}
+              setTierDomains={(domains) => this.setTierDomains(accessTierShortName, domains)}/>)}
          </FlexRow>
         <FlexRow style={{justifyContent: 'flex-start', marginRight: '1rem'}}>
           <div>
