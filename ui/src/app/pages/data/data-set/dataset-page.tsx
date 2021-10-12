@@ -258,8 +258,8 @@ const ImmutableWorkspaceCohortListItem: React.FunctionComponent<{
       return <div style={styles.listItem}>
         <input type='checkbox' value={name} onChange={() => onChange()}
                style={styles.listItemCheckbox} checked={checked}/>
-        <FlexRow style={{lineHeight: '1.5rem', color: colors.primary, width: '100%'}}>
-          <div>{name}</div>
+        <FlexRow style={{lineHeight: '1.5rem', color: colors.primary, width: '100%', minWidth: 0}}>
+          <div style={{overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>{name}</div>
           <div style={{marginLeft: 'auto', paddingRight: '1rem'}}>
             <a href={'/workspaces/' + namespace + '/' + wid + '/data/cohorts/' + cohortId + '/review/cohort-description'}
             target='_blank'>
