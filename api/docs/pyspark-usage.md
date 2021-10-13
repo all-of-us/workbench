@@ -68,7 +68,7 @@ import subprocess
 # Take the first 5 VCF files in the bucket for testing.
 vcf_path = 'gs://fc-aou-test-datasets-registered/6/wgs/vcf/merged/*.vcf.gz'
 input_files = !gsutil ls {vcf_path}
-input_files[:5]
+input_files = input_files[:5]
 
 def unzip_and_wc(input_file):
     name = os.path.basename(input_file)
