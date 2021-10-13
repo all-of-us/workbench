@@ -13,4 +13,7 @@ public interface EgressEventDao extends CrudRepository<DbEgressEvent, Long> {
 
   List<DbEgressEvent> findAllByUserAndWorkspaceAndEgressWindowSecondsAndCreationTimeGreaterThan(
       DbUser user, DbWorkspace workspace, long egressWindowSeconds, Timestamp creationTimeLimit);
+
+  List<DbEgressEvent> findAllByStatusAndLastModifiedTimeLessThan(
+      EgressEventStatus status, Timestamp creationTimeLimit);
 }
