@@ -299,17 +299,3 @@ export const eligibleForRegisteredForTier = (tierEligiblities: Array<UserTierEli
   const rtEligiblity = tierEligiblities.find(t => t.accessTierShortName === AccessTierShortNames.Registered)
   return !!rtEligiblity && rtEligiblity.eligible
 };
-
-// Show eraCommons module only if institution has registered tiered and eraCommon is not required
-export const showEraRegisteredModule = (moduleName: AccessModule, profile: Profile): Boolean => {
-  if (moduleName === AccessModule.ERACOMMONS) {
-    return isEraCommonRequired(profile);
-  }
-  return true;
-};
-
-const isEraCommonRequired = (profile: Profile): Boolean => {
-  const registeredTier = profile.tierEligibilities
-      .find(value => value.accessTierShortName === AccessTierShortNames.Registered);
-  return !!registeredTier ? registeredTier.eraRequired: true;
-}

@@ -30,7 +30,6 @@ import {
   redirectToNiH,
   redirectToRas,
   redirectToTraining,
-  showEraRegisteredModule,
 } from 'app/utils/access-utils';
 import {useNavigation} from 'app/utils/navigation';
 import {profileStore, serverConfigStore, useStore} from 'app/utils/stores';
@@ -437,6 +436,22 @@ const MaybeModule = ({profile, moduleName, active, spinnerProps}: ModuleProps): 
       return <TemporaryRASModule/>;
     }
   }
+
+  // Hide the eRA Commons module when the flag to enable RAS is set and the user's
+  // institution does not require eRA Commons for RT.
+
+  const isEraCommonsRequired = (profile: Profile): Boolean => {
+    const registeredTier = profile.tierEligibilities
+        .find(value => value.accessTierShortName === AccessTierShortNames.Registered);
+    return !!registeredTier ? registeredTier.eraRequired: true;
+  }
+
+  const showEraRegisteredModule = (moduleName: AccessModule, profile: Profile): Boolean => {
+    if (moduleName === AccessModule.ERACOMMONS) {
+      return isEraCommonsRequired(profile);
+    }
+    return true;
+  };
 
   return isEnabledInEnvironment && showEraRegisteredModule(moduleName, profile) ? <Module profile={profile}/> : null;
 };
