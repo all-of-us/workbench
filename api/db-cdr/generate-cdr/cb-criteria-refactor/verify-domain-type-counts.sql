@@ -112,6 +112,17 @@ select * from (
                   from `all-of-us-ehr-dev.ChenchalDummySrc.cb_criteria`group by 2,3,4,5
               )
 order by domain_id, type, is_standard, is_group, run_type;
+-- Test with R2021Q3R2
+select * from (
+                  select 'r2021q3r2-parallel-multi' run_type, domain_id, type, is_standard, is_group, count(*) row_count
+                       , sum(item_count) sum_item_count, sum(rollup_count) sum_rollup_count, sum(est_count) sum_est_count
+                  from `all-of-us-ehr-dev.Chenchal_Multi_R2021Q3R2.cb_criteria`  group by 2,3,4,5
+                  union all
+                  select 'r2021q3r2-std' run_type, domain_id, type, is_standard, is_group, count(*) row_count
+                          , sum(item_count) sum_item_count, sum(rollup_count) sum_rollup_count, sum(est_count) sum_est_count
+                  from `all-of-us-ehr-dev.Chenchal_R2021Q3R2.cb_criteria_original`group by 2,3,4,5
+              )
+order by domain_id, type, is_standard, is_group, run_type;
 
 -- CB_CRITERIA_ANCESTOR TABLE
 select * from (

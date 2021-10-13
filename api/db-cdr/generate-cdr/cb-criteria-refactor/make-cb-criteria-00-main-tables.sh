@@ -12,7 +12,7 @@ set -e
 export BQ_PROJECT='all-of-us-ehr-dev'      # project
 export DATASET_PAR='ChenchalDummyPar'        # dataset
 export DATASET_SEQ='ChenchalDummySeq'        # dataset
-export DATASET_MULT='ChenchalDummyMult'        # dataset
+export DATASET_MULT='Chenchal_Multi_R2021Q3R2'        # dataset
 export DATASET_ORI='ChenchalDummyOri'        # dataset
 
 run_in_parallel=$1
