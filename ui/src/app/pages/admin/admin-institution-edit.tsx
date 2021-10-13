@@ -123,7 +123,7 @@ const nonEmpty = (item: string): boolean => item && !!item.trim();
 
 const EraRequiredSwitch = (props: {tierConfig: InstitutionTierConfig, onChange: (boolean) => void}) => {
   const {tierConfig, onChange} = props;
-  const {config: {enableRasLoginGovLinking, enforceRasLoginGovLinking}} = useStore(serverConfigStore);
+  const {config: {enableRasLoginGovLinking}} = useStore(serverConfigStore);
   return <InputSwitch
       data-test-id={`${tierConfig.accessTierShortName}-era-required-switch`}
       onChange={(v) => onChange(v.value)}

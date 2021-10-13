@@ -1041,6 +1041,28 @@ public class UserServiceAccessTest {
     assertRegisteredTierEnabled(dbUser);
   }
 
+  @Test
+  public void testRasLinkNotComplete_enableRasFFOff() {
+    // TODO: Delete this test when delete enable RAS feature flag.
+    assertThat(userAccessTierDao.findAll()).isEmpty();
+    providedWorkbenchConfig.access.enforceRasLoginGovLinking = true;
+    providedWorkbenchConfig.access.enforceRasLoginGovLinking = false;
+    dbUser = updateUserWithRetries(registerUserNow);
+    assertRegisteredTierEnabled(dbUser);
+
+    // Incomplete RAS module, expect user removed from Registered tier;
+    accessModuleService.updateBypassTime(
+        dbUser.getUserId(), AccessModule.RAS_LINK_LOGIN_GOV, false);
+    updateUserWithRetries(Function.identity());
+    assertRegisteredTierDisabled(dbUser);
+
+    // Complete RAS Linking, verify user become registered
+    accessModuleService.updateCompletionTime(
+        dbUser, AccessModuleName.RAS_LOGIN_GOV, new Timestamp(PROVIDED_CLOCK.millis()));
+    updateUserWithRetries(Function.identity());
+    assertRegisteredTierEnabled(dbUser);
+  }
+
   // adds `days` days plus most of another day (to demonstrate we are truncating, not rounding)
   private Duration daysPlusSome(long days) {
     return Duration.ofDays(days).plus(Duration.ofHours(18));
