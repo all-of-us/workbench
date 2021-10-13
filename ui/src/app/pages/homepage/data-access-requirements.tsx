@@ -36,6 +36,13 @@ import {profileStore, serverConfigStore, useStore} from 'app/utils/stores';
 import {AccessModule, AccessModuleStatus, Profile} from 'generated/fetch';
 import {TwoFactorAuthModal} from './two-factor-auth-modal';
 import {AnalyticsTracker} from 'app/utils/analytics';
+import {ReactComponent as individual} from 'assets/icons/DAR/individual.svg';
+import {ReactComponent as identifying} from 'assets/icons/DAR/identifying.svg';
+import {ReactComponent as electronic} from 'assets/icons/DAR/electronic.svg';
+import {ReactComponent as survey} from 'assets/icons/DAR/survey.svg';
+import {ReactComponent as physical} from 'assets/icons/DAR/physical.svg';
+import {ReactComponent as wearable} from 'assets/icons/DAR/wearable.svg';
+import {AccessTierShortNames} from 'app/utils/access-tiers';
 
 const styles = reactStyles({
   headerFlexColumn: {
@@ -220,7 +227,7 @@ const duccModule = AccessModule.DATAUSERCODEOFCONDUCT;
 
 // in display order
 // exported for test
-export const allModules: AccessModule[] = [
+export let allModules: AccessModule[] = [
   ...rtModules,
   ...ctModules,
   duccModule,
@@ -286,6 +293,15 @@ const selfBypass = async(spinnerProps: WithSpinnerOverlayProps, reloadProfile: F
   reloadProfile();
 };
 
+export const updateVisibleModules = (profile: Profile) => {
+  const eraCommonIndex = allModules.findIndex(module => module === AccessModule.ERACOMMONS);
+  if(eraCommonIndex > -1) {
+    if (!profile.tierEligibilities.find(
+        eligible => eligible.accessTierShortName === AccessTierShortNames.Registered).eraRequired) {
+      allModules.splice(eraCommonIndex, 1);
+    }
+  }
+}
 // exported for test
 export const getEnabledModules = (modules: AccessModule[]): AccessModule[] => fp.flow(
     fp.map(getAccessModuleConfig),
@@ -492,14 +508,6 @@ const ModulesForCard = (props: CardProps) => {
 
 // TODO is there a better way?
 
-import {ReactComponent as individual} from 'assets/icons/DAR/individual.svg';
-import {ReactComponent as identifying} from 'assets/icons/DAR/identifying.svg';
-import {ReactComponent as electronic} from 'assets/icons/DAR/electronic.svg';
-import {ReactComponent as survey} from 'assets/icons/DAR/survey.svg';
-import {ReactComponent as physical} from 'assets/icons/DAR/physical.svg';
-import {ReactComponent as wearable} from 'assets/icons/DAR/wearable.svg';
-import {AccessTierShortNames} from 'app/utils/access-tiers';
-
 const Individual = individual;
 const Identifying = identifying;
 const Electronic = electronic;
@@ -561,6 +569,7 @@ const DuccCard = (props: {profile: Profile, activeModule: AccessModule, spinnerP
 export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerProps: WithSpinnerOverlayProps) => {
   const {profile, reload} = useStore(profileStore);
   const {config: {unsafeAllowSelfBypass}} = useStore(serverConfigStore);
+  updateVisibleModules(profile);
   const enabledModules = getEnabledModules(allModules);
 
   useEffect(() => {
