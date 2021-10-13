@@ -19,6 +19,8 @@ import java.util.function.Function;
 import javax.mail.MessagingException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.compliance.ComplianceService;
@@ -1041,12 +1043,13 @@ public class UserServiceAccessTest {
     assertRegisteredTierEnabled(dbUser);
   }
 
-  @Test
-  public void testRasLinkNotComplete_enableRasFFOff() {
+  @ParameterizedTest
+  @ValueSource(booleans = {true, false})
+  public void testRasLinkNotComplete_enableRasFFNotAffect(boolean enableRasFFStatus) {
     // TODO: Delete this test when delete enable RAS feature flag.
     assertThat(userAccessTierDao.findAll()).isEmpty();
     providedWorkbenchConfig.access.enforceRasLoginGovLinking = true;
-    providedWorkbenchConfig.access.enforceRasLoginGovLinking = false;
+    providedWorkbenchConfig.access.enableRasLoginGovLinking = enableRasFFStatus;
     dbUser = updateUserWithRetries(registerUserNow);
     assertRegisteredTierEnabled(dbUser);
 
