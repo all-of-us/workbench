@@ -429,9 +429,10 @@ const MaybeModule = ({profile, moduleName, active, spinnerProps}: ModuleProps): 
     </FlexRow>;
   };
 
+  const {enableRasLoginGovLinking} = serverConfigStore.get().config;
+
   // temp hack Sep 16: render a special temporary RAS module if disabled
   if (moduleName === AccessModule.RASLINKLOGINGOV) {
-    const {enableRasLoginGovLinking} = serverConfigStore.get().config;
     if (!enableRasLoginGovLinking) {
       return <TemporaryRASModule/>;
     }
@@ -440,20 +441,20 @@ const MaybeModule = ({profile, moduleName, active, spinnerProps}: ModuleProps): 
   // Hide the eRA Commons module when the flag to enable RAS is set and the user's
   // institution does not require eRA Commons for RT.
 
-  const isEraCommonsRequired = (profile: Profile): Boolean => {
+  const isEraCommonsRequiredByInstitution = (profile: Profile): Boolean => {
     const registeredTier = profile.tierEligibilities
         .find(value => value.accessTierShortName === AccessTierShortNames.Registered);
-    return !!registeredTier ? registeredTier.eraRequired: true;
+    return !!registeredTier ? registeredTier.eraRequired : true;
   }
 
-  const showEraRegisteredModule = (moduleName: AccessModule, profile: Profile): Boolean => {
+  const showEraCommonsModule = (moduleName: AccessModule, profile: Profile): Boolean => {
     if (moduleName === AccessModule.ERACOMMONS) {
-      return isEraCommonsRequired(profile);
+      return !(enableRasLoginGovLinking && !isEraCommonsRequiredByInstitution(profile))
     }
     return true;
   };
 
-  return isEnabledInEnvironment && showEraRegisteredModule(moduleName, profile) ? <Module profile={profile}/> : null;
+  return isEnabledInEnvironment && showEraCommonsModule(moduleName, profile) ? <Module profile={profile}/> : null;
 };
 
 const DARHeader = () => <FlexColumn style={styles.headerFlexColumn}>

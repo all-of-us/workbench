@@ -224,15 +224,7 @@ export const useIsUserDisabled = () => {
 };
 
 export const getAccessModuleStatusByName = (profile: Profile, moduleName: AccessModule): AccessModuleStatus => {
-  let moduleStatus = profile.accessModules.modules.find(a => a.moduleName === moduleName);
-  // Set today's date to byPass for eraCommon in case Registered tier, and era is not Required
-  if (moduleName === AccessModule.ERACOMMONS && !!moduleStatus
-      && moduleStatus.bypassEpochMillis === null && moduleStatus.completionEpochMillis === null) {
-    if (!isEraCommonRequired(profile)) {
-      moduleStatus.bypassEpochMillis = new Date().getMilliseconds();
-    }
-  }
-  return moduleStatus;
+  return profile.accessModules.modules.find(a => a.moduleName === moduleName);
 };
 
 export const bypassAll = async(accessModules: AccessModule[], isBypassed: boolean) => {
