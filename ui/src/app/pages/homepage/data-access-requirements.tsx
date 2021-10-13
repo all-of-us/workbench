@@ -426,7 +426,6 @@ const MaybeModule = ({profile, moduleName, active, spinnerProps}: ModuleProps): 
 
   const {DARTitleComponent, refreshAction, isEnabledInEnvironment} = getAccessModuleConfig(moduleName);
 
-
   const ModuleBox = ({children}) => {
     return active
         ? <Clickable onClick={() => { setShowRefresh(true); moduleAction(); }}>
@@ -468,7 +467,6 @@ const MaybeModule = ({profile, moduleName, active, spinnerProps}: ModuleProps): 
       return <TemporaryRASModule/>;
     }
   }
-
   return isEnabledInEnvironment ? <Module profile={profile}/> : null;
 };
 
