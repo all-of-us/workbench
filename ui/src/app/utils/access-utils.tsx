@@ -228,9 +228,7 @@ export const getAccessModuleStatusByName = (profile: Profile, moduleName: Access
   // Set today's date to byPass for eraCommon in case Registered tier, and era is not Required
   if (moduleName === AccessModule.ERACOMMONS && !!moduleStatus
       && moduleStatus.bypassEpochMillis === null && moduleStatus.completionEpochMillis === null) {
-    const registeredTier = profile.tierEligibilities
-        .find(value => value.accessTierShortName === AccessTierShortNames.Registered);
-    if (!!registeredTier && !registeredTier.eraRequired) {
+    if (!isEraCommonRequired(profile)) {
       moduleStatus.bypassEpochMillis = new Date().getMilliseconds();
     }
   }
@@ -295,9 +293,23 @@ export const computeDisplayDates = ({completionEpochMillis, expirationEpochMilli
   );
 };
 
-// return true if user is egligible for registered tier.
-// A user loses tier eligiblity when they are removed from institution tier requirement
+// return true if user is eligible for registered tier.
+// A user loses tier eligibility when they are removed from institution tier requirement
 export const eligibleForRegisteredForTier = (tierEligiblities: Array<UserTierEligibility>): boolean => {
   const rtEligiblity = tierEligiblities.find(t => t.accessTierShortName === AccessTierShortNames.Registered)
   return !!rtEligiblity && rtEligiblity.eligible
 };
+
+// Show eraCommons module only if institution has registered tiered and eraCommon is not required
+export const showEraRegisteredModule = (moduleName: AccessModule, profile: Profile): Boolean => {
+  if (moduleName === AccessModule.ERACOMMONS) {
+    return isEraCommonRequired(profile);
+  }
+  return true;
+};
+
+const isEraCommonRequired = (profile: Profile): Boolean => {
+  const registeredTier = profile.tierEligibilities
+      .find(value => value.accessTierShortName === AccessTierShortNames.Registered);
+  return !!registeredTier ? registeredTier.eraRequired: true;
+}

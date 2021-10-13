@@ -30,6 +30,7 @@ import {
   redirectToNiH,
   redirectToRas,
   redirectToTraining,
+  showEraRegisteredModule,
 } from 'app/utils/access-utils';
 import {useNavigation} from 'app/utils/navigation';
 import {profileStore, serverConfigStore, useStore} from 'app/utils/stores';
@@ -394,14 +395,6 @@ const MaybeModule = ({profile, moduleName, active, spinnerProps}: ModuleProps): 
 
   const {DARTitleComponent, refreshAction, isEnabledInEnvironment} = getAccessModuleConfig(moduleName);
 
-  const showEraRegisteredModule = (moduleName, profile) => {
-    if (moduleName === AccessModule.ERACOMMONS) {
-      const registeredTier = profile.tierEligibilities
-          .find(value => value.accessTierShortName === AccessTierShortNames.Registered);
-      return !!registeredTier ? registeredTier.eraRequired: true;
-    }
-    return true;
-  };
 
   const ModuleBox = ({children}) => {
     return active
