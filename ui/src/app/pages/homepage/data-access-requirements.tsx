@@ -294,18 +294,14 @@ const selfBypass = async(spinnerProps: WithSpinnerOverlayProps, reloadProfile: F
 };
 
 const maybeRemoveEraCommonsModule = (profile: Profile) => {
-
-  const eraCommonsIndexAllModules = allModules.findIndex(module => module === AccessModule.ERACOMMONS);
-  if (eraCommonsIndexAllModules === -1) { return; }
-
-  const eraCommonsIndexRtModules = rtModules.findIndex(module => module === AccessModule.ERACOMMONS);
-  if (eraCommonsIndexRtModules === -1) { return; }
-
   // Remove the eRA Commons module when the flag to enable RAS is set and the user's
   // institution does not require eRA Commons for RT.
 
   const {enableRasLoginGovLinking} = serverConfigStore.get().config;
   if (!enableRasLoginGovLinking) { return; }
+
+  const eraCommonsIndexAllModules = allModules.findIndex(module => module === AccessModule.ERACOMMONS);
+  const eraCommonsIndexRtModules = rtModules.findIndex(module => module === AccessModule.ERACOMMONS);
 
   const isEraCommonsRequiredByInstitution = (profile: Profile): Boolean => {
     const registeredTier = profile.tierEligibilities
@@ -313,7 +309,12 @@ const maybeRemoveEraCommonsModule = (profile: Profile) => {
     return !!registeredTier ? registeredTier.eraRequired : true;
   }
 
-  if(!isEraCommonsRequiredByInstitution(profile)) {
+  if (eraCommonsIndexAllModules === -1 && eraCommonsIndexRtModules === -1 && isEraCommonsRequiredByInstitution(profile)) {
+    // Add eraCommons back if is Institution does required eRa Commons for RT and it was already removed from all Modules
+    allModules.splice(2, 0, AccessModule.ERACOMMONS);
+    rtModules.splice(2, 0, AccessModule.ERACOMMONS);
+    return;
+  } else if (!isEraCommonsRequiredByInstitution(profile)) {
     allModules.splice(eraCommonsIndexAllModules, 1);
     rtModules.splice(eraCommonsIndexRtModules, 1);
   }
