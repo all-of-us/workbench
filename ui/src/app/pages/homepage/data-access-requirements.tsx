@@ -293,13 +293,25 @@ const selfBypass = async(spinnerProps: WithSpinnerOverlayProps, reloadProfile: F
   reloadProfile();
 };
 
-export const updateVisibleModules = (profile: Profile) => {
-  const eraCommonIndex = allModules.findIndex(module => module === AccessModule.ERACOMMONS);
-  if(eraCommonIndex > -1) {
-    if (!profile.tierEligibilities.find(
-        eligible => eligible.accessTierShortName === AccessTierShortNames.Registered).eraRequired) {
-      allModules.splice(eraCommonIndex, 1);
-    }
+const maybeRemoveEraCommonsModule = (profile: Profile) => {
+
+  const eraCommonsIndex = allModules.findIndex(module => module === AccessModule.ERACOMMONS);
+  if (eraCommonsIndex === -1) { return; }
+
+  // Remove the eRA Commons module when the flag to enable RAS is set and the user's
+  // institution does not require eRA Commons for RT.
+
+  const {enableRasLoginGovLinking} = serverConfigStore.get().config;
+  if (!enableRasLoginGovLinking) { return; }
+
+  const isEraCommonsRequiredByInstitution = (profile: Profile): Boolean => {
+    const registeredTier = profile.tierEligibilities
+        .find(value => value.accessTierShortName === AccessTierShortNames.Registered);
+    return !!registeredTier ? registeredTier.eraRequired : true;
+  }
+
+  if(!isEraCommonsRequiredByInstitution(profile)) {
+    allModules.splice(eraCommonsIndex, 1);
   }
 }
 // exported for test
@@ -445,32 +457,15 @@ const MaybeModule = ({profile, moduleName, active, spinnerProps}: ModuleProps): 
     </FlexRow>;
   };
 
-  const {enableRasLoginGovLinking} = serverConfigStore.get().config;
-
   // temp hack Sep 16: render a special temporary RAS module if disabled
   if (moduleName === AccessModule.RASLINKLOGINGOV) {
+    const {enableRasLoginGovLinking} = serverConfigStore.get().config;
     if (!enableRasLoginGovLinking) {
       return <TemporaryRASModule/>;
     }
   }
 
-  // Hide the eRA Commons module when the flag to enable RAS is set and the user's
-  // institution does not require eRA Commons for RT.
-
-  const isEraCommonsRequiredByInstitution = (profile: Profile): Boolean => {
-    const registeredTier = profile.tierEligibilities
-        .find(value => value.accessTierShortName === AccessTierShortNames.Registered);
-    return !!registeredTier ? registeredTier.eraRequired : true;
-  }
-
-  const showEraCommonsModule = (moduleName: AccessModule, profile: Profile): Boolean => {
-    if (moduleName === AccessModule.ERACOMMONS) {
-      return !(enableRasLoginGovLinking && !isEraCommonsRequiredByInstitution(profile))
-    }
-    return true;
-  };
-
-  return isEnabledInEnvironment && showEraCommonsModule(moduleName, profile) ? <Module profile={profile}/> : null;
+  return isEnabledInEnvironment ? <Module profile={profile}/> : null;
 };
 
 const DARHeader = () => <FlexColumn style={styles.headerFlexColumn}>
@@ -569,7 +564,7 @@ const DuccCard = (props: {profile: Profile, activeModule: AccessModule, spinnerP
 export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerProps: WithSpinnerOverlayProps) => {
   const {profile, reload} = useStore(profileStore);
   const {config: {unsafeAllowSelfBypass}} = useStore(serverConfigStore);
-  updateVisibleModules(profile);
+  maybeRemoveEraCommonsModule(profile);
   const enabledModules = getEnabledModules(allModules);
 
   useEffect(() => {
