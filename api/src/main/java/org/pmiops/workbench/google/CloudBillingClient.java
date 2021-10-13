@@ -1,12 +1,18 @@
 package org.pmiops.workbench.google;
 
 import com.google.api.services.cloudbilling.model.BillingAccount;
+import com.google.api.services.cloudbilling.model.ProjectBillingInfo;
 import java.io.IOException;
 
 /** Encapsulate Google APIs for interfacing with Google Cloud Billing APIs. */
 public interface CloudBillingClient {
+  /** Fetch billing account info by given billing account name. */
   BillingAccount getBillingAccount(String billingAccount) throws IOException;
 
+  /** Poll GCP project's billing info until matches the expected billing account name. */
   boolean pollUntilBillingAccountLinked(String billingAccountName, String projectId)
       throws IOException, InterruptedException;
+
+  /** Get a project's billing accont info. */
+  ProjectBillingInfo getProjectBillingInfo(String projectId) throws IOException;
 }

@@ -8,7 +8,6 @@ import com.google.api.services.cloudbilling.model.ProjectBillingInfo;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.List;
 import javax.inject.Provider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -44,8 +43,7 @@ public class CloudBillingClientImpl implements CloudBillingClient {
       throws IOException, InterruptedException {
     Instant deadline = Instant.now().plusSeconds(30);
     Duration pollingInterval = Duration.ofSeconds(2);
-    while (!getProjectBillingInfo(billingAccountName).stream()
-        .anyMatch(b -> b.getProjectId() == projectId)) {
+    while (getProjectBillingInfo(projectId).getBillingAccountName() != billingAccountName) {
       if (Instant.now().plus(pollingInterval).isAfter(deadline)) {
         throw new InterruptedException(
             String.format(
@@ -57,17 +55,11 @@ public class CloudBillingClientImpl implements CloudBillingClient {
     return true;
   }
 
-  private List<ProjectBillingInfo> getProjectBillingInfo(String billingAccountName)
-      throws IOException {
+  @Override
+  public ProjectBillingInfo getProjectBillingInfo(String projectId) throws IOException {
     return retryHandler.runAndThrowChecked(
         (context) -> {
-          return endUserCloudBillingProvider
-              .get()
-              .billingAccounts()
-              .projects()
-              .list(billingAccountName)
-              .execute()
-              .getProjectBillingInfo();
+          return endUserCloudBillingProvider.get().projects().getBillingInfo(projectId).execute();
         });
   }
 }
