@@ -169,6 +169,7 @@ public class RasLinkServiceTest extends SpringTest {
       config.accessRenewal.expiryDays = (long) 365;
       config.access.enableEraCommons = true;
       config.access.enableRasLoginGovLinking = true;
+      config.access.enforceRasLoginGovLinking = true;
       return config;
     }
 
