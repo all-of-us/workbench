@@ -20,7 +20,8 @@ const PageTitle = 'Build Cohort Criteria';
 
 export enum FieldSelector {
   TotalCount = '//*[contains(normalize-space(text()), "Total Count")]/parent::*//span',
-  GroupCount = '//*[contains(normalize-space(text()), "Group Count")]/parent::*//span'
+  GroupCount = '//*[contains(normalize-space(text()), "Group Count")]/parent::*//span',
+  ItemList = '//*[@id="list-include-groups"]/*[@data-test-id="includes-search-group"]//*[@data-test-id="item-list"]'
 }
 
 export default class CohortBuildPage extends AuthenticatedPage {
@@ -29,11 +30,17 @@ export default class CohortBuildPage extends AuthenticatedPage {
   }
 
   async isLoaded(): Promise<boolean> {
-    await Promise.all([
-      waitForDocumentTitle(this.page, PageTitle),
-      waitWhileLoading(this.page),
-      this.findIncludeParticipantsGroup('Group 1').getAddCriteriaButton().asElementHandle()
-    ]);
+    await waitForDocumentTitle(this.page, PageTitle);
+    await this.findIncludeParticipantsGroup('Group 1').getAddCriteriaButton().asElementHandle();
+    await waitWhileLoading(this.page);
+    await this.page
+      .waitForXPath(FieldSelector.ItemList, { visible: true, timeout: 1000 })
+      .then(() => {
+        this.getTotalCount();
+      })
+      .catch(() => {
+        // Ignore
+      });
     return true;
   }
 

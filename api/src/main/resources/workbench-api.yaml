@@ -4309,6 +4309,10 @@ definitions:
         type: boolean
         default: false
         description: Whether to use enable RAS-AoU linking for login.gov when user setup account.
+      enforceRasLoginGovLinking:
+        type: boolean
+        default: false
+        description: Whether to enforce all users finish RAS-AoU linking for login.gov.
       enableGenomicExtraction:
         type: boolean
         default: false

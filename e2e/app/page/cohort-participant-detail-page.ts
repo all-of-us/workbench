@@ -18,7 +18,7 @@ export default class CohortParticipantDetailPage extends AuthenticatedPage {
     return true;
   }
 
-  // get the particpant ID displayed between the two pi-angle button on participant detail page
+  // get the participant ID displayed between the two pi-angle button on participant detail page
   async getParticipantIDnum(): Promise<string> {
     const selector = '//*[@class="detail-header"]//span[contains(., "Participant ")]';
     const pID = await this.extractParticipantID(selector);
@@ -44,7 +44,6 @@ export default class CohortParticipantDetailPage extends AuthenticatedPage {
   }
 
   // click on pi-angle-right button to go to next participant
-
   async goToTheNextParticipant(): Promise<void> {
     const iconXpath = '//button[@title ="Go To the Next Participant"]';
     await this.page.waitForXPath(iconXpath, { visible: true }).then((icon) => icon.click());

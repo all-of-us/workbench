@@ -9,11 +9,7 @@ import {
   OrganizationType,
 } from 'generated/fetch';
 import {stubNotImplementedError} from 'testing/stubs/stub-utils';
-import {
-  getRegisteredTierConfig,
-  getRegisteredTierEmailAddresses,
-  getRegisteredTierEmailDomains,
-} from "app/utils/institutions";
+import {getRegisteredTierConfig} from "app/utils/institutions";
 
 export const VUMC: Institution = {
   shortName: 'VUMC',
@@ -166,11 +162,12 @@ export class InstitutionApiStub extends InstitutionApi {
     const response: CheckEmailResponse = {
       isValidMember: false
     };
-    if (getRegisteredTierConfig(institution).membershipRequirement === InstitutionMembershipRequirement.ADDRESSES
-        && getRegisteredTierEmailAddresses(institution).includes(contactEmail)) {
+    const tierConfig = getRegisteredTierConfig(institution);
+    if (tierConfig.membershipRequirement === InstitutionMembershipRequirement.ADDRESSES
+        && tierConfig.emailAddresses.includes(contactEmail)) {
       response.isValidMember = true;
-    } else if (getRegisteredTierConfig(institution).membershipRequirement === InstitutionMembershipRequirement.DOMAINS
-        && getRegisteredTierEmailDomains(institution).includes(domain)) {
+    } else if (tierConfig.membershipRequirement === InstitutionMembershipRequirement.DOMAINS
+        && tierConfig.emailDomains.includes(domain)) {
       response.isValidMember = true;
     }
     return response;

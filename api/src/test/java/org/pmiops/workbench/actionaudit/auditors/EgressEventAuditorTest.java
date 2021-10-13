@@ -5,6 +5,8 @@ import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -20,10 +22,15 @@ import org.pmiops.workbench.actionaudit.ActionAuditEvent;
 import org.pmiops.workbench.actionaudit.ActionAuditService;
 import org.pmiops.workbench.actionaudit.ActionType;
 import org.pmiops.workbench.actionaudit.AgentType;
+import org.pmiops.workbench.actionaudit.targetproperties.EgressEscalationTargetProperty;
 import org.pmiops.workbench.actionaudit.targetproperties.EgressEventCommentTargetProperty;
 import org.pmiops.workbench.actionaudit.targetproperties.EgressEventTargetProperty;
+import org.pmiops.workbench.config.WorkbenchConfig.EgressAlertRemediationPolicy.Escalation;
+import org.pmiops.workbench.config.WorkbenchConfig.EgressAlertRemediationPolicy.Escalation.DisableUser;
+import org.pmiops.workbench.config.WorkbenchConfig.EgressAlertRemediationPolicy.Escalation.SuspendCompute;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.db.model.DbEgressEvent;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -44,6 +51,7 @@ public class EgressEventAuditorTest extends SpringTest {
   private static final String WORKSPACE_NAMESPACE = "aou-rw-test-c7dec260";
   private static final String GOOGLE_PROJECT = "gcp-project-id";
   private static final String WORKSPACE_FIRECLOUD_NAME = "mytestworkspacename";
+  private static final Timestamp NOW = Timestamp.from(Instant.parse("2000-01-01T00:00:00.00Z"));
 
   private static final String EGRESS_EVENT_PROJECT_NAME = GOOGLE_PROJECT;
   private static final String EGRESS_EVENT_VM_PREFIX = "all-of-us-" + USER_ID;
@@ -178,6 +186,138 @@ public class EgressEventAuditorTest extends SpringTest {
                 .findFirst()
                 .get())
         .contains("Failed to find workspace");
+  }
+
+  @Test
+  public void testFireRemediateEgressEvent_noEscalation() {
+    egressEventAuditor.fireRemediateEgressEvent(
+        new DbEgressEvent()
+            .setWorkspace(dbWorkspace)
+            .setUser(dbUser)
+            .setEgressEventId(1337)
+            .setCreationTime(NOW),
+        null);
+    verify(mockActionAuditService).send(eventsCaptor.capture());
+    Collection<ActionAuditEvent> events = eventsCaptor.getValue();
+
+    // Ensure all events have the expected set of constant fields.
+    assertThat(events.stream().map(event -> event.getAgentType()).collect(Collectors.toSet()))
+        .containsExactly(AgentType.SYSTEM);
+    assertThat(events.stream().map(event -> event.getActionType()).collect(Collectors.toSet()))
+        .containsExactly(ActionType.REMEDIATE_HIGH_EGRESS_EVENT);
+    assertThat(events.stream().map(event -> event.getTargetIdMaybe()).collect(Collectors.toSet()))
+        .containsExactly(WORKSPACE_ID);
+
+    // We should have distinct event rows with values from the egress event.
+    assertThat(
+            events.stream()
+                .filter(
+                    event ->
+                        event.getTargetPropertyMaybe()
+                            == EgressEscalationTargetProperty.REMEDIATION.getPropertyName())
+                .map(event -> event.getNewValueMaybe())
+                .collect(Collectors.toSet()))
+        .isEmpty();
+    assertThat(
+            events.stream()
+                .filter(
+                    event ->
+                        event.getTargetPropertyMaybe()
+                            == EgressEscalationTargetProperty.SUSPEND_COMPUTE_DURATION_MIN
+                                .getPropertyName())
+                .map(event -> event.getNewValueMaybe())
+                .collect(Collectors.toSet()))
+        .isEmpty();
+  }
+
+  @Test
+  public void testFireRemediateEgressEvent_suspendCompute() {
+    Escalation escalation = new Escalation();
+    escalation.suspendCompute = new SuspendCompute();
+    escalation.suspendCompute.durationMinutes = 15L;
+    egressEventAuditor.fireRemediateEgressEvent(
+        new DbEgressEvent()
+            .setWorkspace(dbWorkspace)
+            .setUser(dbUser)
+            .setEgressEventId(1337)
+            .setCreationTime(NOW),
+        escalation);
+    verify(mockActionAuditService).send(eventsCaptor.capture());
+    Collection<ActionAuditEvent> events = eventsCaptor.getValue();
+
+    // Ensure all events have the expected set of constant fields.
+    assertThat(events.stream().map(event -> event.getAgentType()).collect(Collectors.toSet()))
+        .containsExactly(AgentType.SYSTEM);
+    assertThat(events.stream().map(event -> event.getActionType()).collect(Collectors.toSet()))
+        .containsExactly(ActionType.REMEDIATE_HIGH_EGRESS_EVENT);
+    assertThat(events.stream().map(event -> event.getTargetIdMaybe()).collect(Collectors.toSet()))
+        .containsExactly(WORKSPACE_ID);
+
+    // We should have distinct event rows with values from the egress event.
+    assertThat(
+            events.stream()
+                .filter(
+                    event ->
+                        event.getTargetPropertyMaybe()
+                            == EgressEscalationTargetProperty.REMEDIATION.getPropertyName())
+                .map(event -> event.getNewValueMaybe())
+                .collect(Collectors.toSet()))
+        .containsExactly("suspend_compute");
+    assertThat(
+            events.stream()
+                .filter(
+                    event ->
+                        event.getTargetPropertyMaybe()
+                            == EgressEscalationTargetProperty.SUSPEND_COMPUTE_DURATION_MIN
+                                .getPropertyName())
+                .map(event -> event.getNewValueMaybe())
+                .collect(Collectors.toSet()))
+        .containsExactly("15");
+  }
+
+  @Test
+  public void testFireRemediateEgressEvent_disableUser() {
+    Escalation escalation = new Escalation();
+    escalation.disableUser = new DisableUser();
+    egressEventAuditor.fireRemediateEgressEvent(
+        new DbEgressEvent()
+            .setWorkspace(dbWorkspace)
+            .setUser(dbUser)
+            .setEgressEventId(1337)
+            .setCreationTime(NOW),
+        escalation);
+    verify(mockActionAuditService).send(eventsCaptor.capture());
+    Collection<ActionAuditEvent> events = eventsCaptor.getValue();
+
+    // Ensure all events have the expected set of constant fields.
+    assertThat(events.stream().map(event -> event.getAgentType()).collect(Collectors.toSet()))
+        .containsExactly(AgentType.SYSTEM);
+    assertThat(events.stream().map(event -> event.getActionType()).collect(Collectors.toSet()))
+        .containsExactly(ActionType.REMEDIATE_HIGH_EGRESS_EVENT);
+    assertThat(events.stream().map(event -> event.getTargetIdMaybe()).collect(Collectors.toSet()))
+        .containsExactly(WORKSPACE_ID);
+
+    // We should have distinct event rows with values from the egress event.
+    assertThat(
+            events.stream()
+                .filter(
+                    event ->
+                        event.getTargetPropertyMaybe()
+                            == EgressEscalationTargetProperty.REMEDIATION.getPropertyName())
+                .map(event -> event.getNewValueMaybe())
+                .collect(Collectors.toSet()))
+        .containsExactly("disable_user");
+    assertThat(
+            events.stream()
+                .filter(
+                    event ->
+                        event.getTargetPropertyMaybe()
+                            == EgressEscalationTargetProperty.SUSPEND_COMPUTE_DURATION_MIN
+                                .getPropertyName())
+                .map(event -> event.getNewValueMaybe())
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList()))
+        .isEmpty();
   }
 
   @Test
