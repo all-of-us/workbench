@@ -136,7 +136,7 @@ public class EgressEventServiceTest extends SpringTest {
   public void setUp() {
     workbenchConfig = WorkbenchConfig.createEmptyConfig();
     workbenchConfig.server.uiBaseUrl = "https://workbench.researchallofus.org";
-    workbenchConfig.featureFlags.enableEgressAlertingV2 = true;
+    workbenchConfig.featureFlags.enableEgressAlertingV2 = false;
 
     dbWorkspace = new DbWorkspace();
     dbWorkspace.setWorkspaceNamespace(WORKSPACE_NAMEPACE);
@@ -186,7 +186,6 @@ public class EgressEventServiceTest extends SpringTest {
     egressEventService.handleEvent(event);
     verify(mockAlertApi).createAlert(alertRequestCaptor.capture());
     verify(egressEventAuditor).fireEgressEvent(event);
-    verify(mockTaskQueueService).pushEgressEventTask(anyLong());
 
     String vmPrefix = "all-of-us-" + dbUser1.getUserId();
 
@@ -202,6 +201,16 @@ public class EgressEventServiceTest extends SpringTest {
             Pattern.compile("Institution:\\s+Verily\\s+Life\\s+Sciences,\\s+Account\\s+Age:"));
     assertThat(request.getAlias()).isEqualTo(WORKSPACE_NAMEPACE + " | " + vmPrefix);
 
+    verifyZeroInteractions(mockTaskQueueService);
+  }
+
+  @Test
+  public void testCreateEgressEventAlert_v2() throws ApiException {
+    workbenchConfig.featureFlags.enableEgressAlertingV2 = true;
+    EgressEvent event = recentEgressEventForUser(dbUser1);
+    egressEventService.handleEvent(event);
+    verify(egressEventAuditor).fireEgressEvent(event);
+
     List<DbEgressEvent> dbEvents = ImmutableList.copyOf(egressEventDao.findAll());
     assertThat(dbEvents).hasSize(1);
     DbEgressEvent dbEvent = Iterables.getOnlyElement(dbEvents);
@@ -211,17 +220,8 @@ public class EgressEventServiceTest extends SpringTest {
     assertThat(dbEvent.getLastModifiedTime()).isNotNull();
     assertThat(dbEvent.getSumologicEvent()).isNotNull();
     assertThat(dbEvent.getEgressWindowSeconds()).isEqualTo(event.getTimeWindowDuration());
-  }
 
-  @Test
-  public void testCreateEgressEventAlert_alertingV2Disabled() throws ApiException {
-    workbenchConfig.featureFlags.enableEgressAlertingV2 = false;
-    when(mockAlertApi.createAlert(any())).thenReturn(new SuccessResponse().requestId("12345"));
-
-    EgressEvent event = recentEgressEventForUser(dbUser1);
-    egressEventService.handleEvent(event);
-
-    verifyZeroInteractions(mockTaskQueueService);
+    verifyZeroInteractions(mockAlertApi);
   }
 
   @Test
@@ -231,7 +231,6 @@ public class EgressEventServiceTest extends SpringTest {
 
     egressEventService.handleEvent(recentEgressEventForUser(dbUser1));
     verify(mockAlertApi).createAlert(alertRequestCaptor.capture());
-    verify(mockTaskQueueService).pushEgressEventTask(anyLong());
 
     final CreateAlertRequest request = alertRequestCaptor.getValue();
     assertThat(request.getDescription())
@@ -244,6 +243,8 @@ public class EgressEventServiceTest extends SpringTest {
         .containsMatch(Pattern.compile("Institution:\\s+not\\s+found,\\s+Account\\s+Age:"));
     assertThat(request.getAlias())
         .isEqualTo(WORKSPACE_NAMEPACE + " | all-of-us-" + dbUser1.getUserId());
+
+    verifyZeroInteractions(mockTaskQueueService);
   }
 
   @Test
@@ -255,7 +256,6 @@ public class EgressEventServiceTest extends SpringTest {
     egressEventService.handleEvent(event);
     verify(mockAlertApi).createAlert(alertRequestCaptor.capture());
     verify(egressEventAuditor).fireEgressEvent(event);
-    verify(mockTaskQueueService).pushEgressEventTask(anyLong());
 
     final CreateAlertRequest request = alertRequestCaptor.getValue();
     assertThat(request.getDescription())
@@ -285,7 +285,6 @@ public class EgressEventServiceTest extends SpringTest {
     egressEventService.handleEvent(oldEgressEvent);
     verify(mockAlertApi).createAlert(alertRequestCaptor.capture());
     verify(egressEventAuditor).fireEgressEvent(oldEgressEvent);
-    verify(mockTaskQueueService).pushEgressEventTask(anyLong());
 
     final CreateAlertRequest request = alertRequestCaptor.getValue();
     assertThat(request.getMessage()).contains("[>60 mins old] High-egress event");
@@ -296,8 +295,8 @@ public class EgressEventServiceTest extends SpringTest {
   }
 
   @Test
-  public void testCreateEgressEventAlert_stalePersistedEvent() throws ApiException {
-    when(mockAlertApi.createAlert(any())).thenReturn(new SuccessResponse().requestId("12345"));
+  public void testCreateEgressEventAlert_stalePersistedEvent_v2() {
+    workbenchConfig.featureFlags.enableEgressAlertingV2 = true;
 
     EgressEvent oldEgressEvent =
         recentEgressEventForUser(dbUser1)
@@ -321,8 +320,8 @@ public class EgressEventServiceTest extends SpringTest {
   }
 
   @Test
-  public void testCreateEgressEventAlert_staleEventsMultiwindow() throws ApiException {
-    when(mockAlertApi.createAlert(any())).thenReturn(new SuccessResponse().requestId("12345"));
+  public void testCreateEgressEventAlert_staleEventsMultiwindow_v2() {
+    workbenchConfig.featureFlags.enableEgressAlertingV2 = true;
 
     EgressEvent oldEgressEvent =
         recentEgressEventForUser(dbUser1)
@@ -346,8 +345,8 @@ public class EgressEventServiceTest extends SpringTest {
   }
 
   @Test
-  public void testCreateEgressEventAlert_staleEventsDifferentUsers() throws ApiException {
-    when(mockAlertApi.createAlert(any())).thenReturn(new SuccessResponse().requestId("12345"));
+  public void testCreateEgressEventAlert_staleEventsDifferentUsers_v2() {
+    workbenchConfig.featureFlags.enableEgressAlertingV2 = true;
 
     EgressEvent oldEgressEvent =
         recentEgressEventForUser(dbUser1)
@@ -364,7 +363,6 @@ public class EgressEventServiceTest extends SpringTest {
             .setStatus(EgressEventStatus.PENDING));
 
     egressEventService.handleEvent(oldEgressEvent);
-    verify(mockAlertApi).createAlert(any());
     verify(egressEventAuditor).fireEgressEvent(oldEgressEvent);
     verify(mockTaskQueueService).pushEgressEventTask(anyLong());
 
@@ -373,8 +371,8 @@ public class EgressEventServiceTest extends SpringTest {
   }
 
   @Test
-  public void testCreateEgressEventAlert_staleEventShortWindowPersisted() throws ApiException {
-    when(mockAlertApi.createAlert(any())).thenReturn(new SuccessResponse().requestId("12345"));
+  public void testCreateEgressEventAlert_staleEventShortWindowPersisted_v2() {
+    workbenchConfig.featureFlags.enableEgressAlertingV2 = true;
 
     EgressEvent oldEgressEvent =
         recentEgressEventForUser(dbUser1)
@@ -392,13 +390,8 @@ public class EgressEventServiceTest extends SpringTest {
             .setStatus(EgressEventStatus.PENDING));
 
     egressEventService.handleEvent(oldEgressEvent);
-    verify(mockAlertApi).createAlert(alertRequestCaptor.capture());
     verify(egressEventAuditor).fireEgressEvent(oldEgressEvent);
     verify(mockTaskQueueService).pushEgressEventTask(anyLong());
-
-    final CreateAlertRequest request = alertRequestCaptor.getValue();
-    assertThat(request.getMessage()).startsWith("High-egress event");
-    assertThat(request.getNote()).startsWith("Time window");
 
     Iterable<DbEgressEvent> dbEvents = egressEventDao.findAll();
     assertThat(dbEvents).hasSize(2);

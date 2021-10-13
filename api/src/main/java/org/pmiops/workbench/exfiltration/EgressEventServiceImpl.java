@@ -113,11 +113,16 @@ public class EgressEventServiceImpl implements EgressEventService {
             "Received an egress event from workspace namespace %s, googleProject %s (%.2fMiB, VM prefix %s)",
             workspaceNamespace, event.getProjectName(), event.getEgressMib(), event.getVmPrefix()));
     this.egressEventAuditor.fireEgressEvent(event);
-    this.createEgressEventAlert(event, workspaceNamespace);
+
+    boolean enableEgressAlertingV2 =
+        workbenchConfigProvider.get().featureFlags.enableEgressAlertingV2;
+    if (!enableEgressAlertingV2) {
+      this.createEgressEventAlert(event, workspaceNamespace);
+    }
 
     Optional<DbEgressEvent> maybeEvent =
         this.maybePersistEgressEvent(event, dbUserMaybe, dbWorkspaceMaybe);
-    if (workbenchConfigProvider.get().featureFlags.enableEgressAlertingV2) {
+    if (enableEgressAlertingV2) {
       maybeEvent.ifPresent(e -> taskQueueService.pushEgressEventTask(e.getEgressEventId()));
     }
   }
