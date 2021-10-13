@@ -227,7 +227,7 @@ const duccModule = AccessModule.DATAUSERCODEOFCONDUCT;
 
 // in display order
 // exported for test
-export let allModules: AccessModule[] = [
+export const allModules: AccessModule[] = [
   ...rtModules,
   ...ctModules,
   duccModule,
@@ -295,8 +295,11 @@ const selfBypass = async(spinnerProps: WithSpinnerOverlayProps, reloadProfile: F
 
 const maybeRemoveEraCommonsModule = (profile: Profile) => {
 
-  const eraCommonsIndex = allModules.findIndex(module => module === AccessModule.ERACOMMONS);
-  if (eraCommonsIndex === -1) { return; }
+  const eraCommonsIndexAllModules = allModules.findIndex(module => module === AccessModule.ERACOMMONS);
+  if (eraCommonsIndexAllModules === -1) { return; }
+
+  const eraCommonsIndexRtModules = rtModules.findIndex(module => module === AccessModule.ERACOMMONS);
+  if (eraCommonsIndexRtModules === -1) { return; }
 
   // Remove the eRA Commons module when the flag to enable RAS is set and the user's
   // institution does not require eRA Commons for RT.
@@ -311,7 +314,8 @@ const maybeRemoveEraCommonsModule = (profile: Profile) => {
   }
 
   if(!isEraCommonsRequiredByInstitution(profile)) {
-    allModules.splice(eraCommonsIndex, 1);
+    allModules.splice(eraCommonsIndexAllModules, 1);
+    rtModules.splice(eraCommonsIndexRtModules, 1);
   }
 }
 // exported for test
