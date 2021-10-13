@@ -43,7 +43,8 @@ public interface FireCloudService {
   void registerUser(String contactEmail, String firstName, String lastName);
 
   /** Creates a billing project owned by AllOfUs. */
-  String createAllOfUsBillingProject(String projectName, String servicePerimeter);
+  String createAllOfUsBillingProject(
+      String projectName, String servicePerimeter, String billingAccountName);
 
   void deleteBillingProject(String billingProject);
 

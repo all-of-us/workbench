@@ -6,4 +6,7 @@ import java.io.IOException;
 /** Encapsulate Google APIs for interfacing with Google Cloud Billing APIs. */
 public interface CloudBillingClient {
   BillingAccount getBillingAccount(String billingAccount) throws IOException;
+
+  boolean pollUntilBillingAccountLinked(String billingAccountName, String projectId)
+      throws IOException, InterruptedException;
 }

@@ -595,7 +595,10 @@ public class WorkspacesControllerTest extends SpringTest {
         .updateBillingAccount(
             workspace.getNamespace(), TestMockFactory.WORKSPACE_BILLING_ACCOUNT_NAME);
     verify(fireCloudService)
-        .createAllOfUsBillingProject(workspace.getNamespace(), accessTier.getServicePerimeter());
+        .createAllOfUsBillingProject(
+            workspace.getNamespace(),
+            accessTier.getServicePerimeter(),
+            workspace.getBillingAccountName());
     assertThat(retrievedWorkspace.getBillingAccountName())
         .isEqualTo(TestMockFactory.WORKSPACE_BILLING_ACCOUNT_NAME);
   }
@@ -1098,7 +1101,9 @@ public class WorkspacesControllerTest extends SpringTest {
 
     verify(fireCloudService)
         .createAllOfUsBillingProject(
-            clonedWorkspace.getNamespace(), accessTier.getServicePerimeter());
+            clonedWorkspace.getNamespace(),
+            accessTier.getServicePerimeter(),
+            newBillingAccountName);
   }
 
   @Test

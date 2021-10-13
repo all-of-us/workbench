@@ -509,7 +509,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private FirecloudWorkspaceId getFcBillingProject(DbAccessTier accessTier, Workspace workspace) {
     DbUser user = userProvider.get();
     String billingProject = fireCloudService.createBillingProjectName();
-    fireCloudService.createAllOfUsBillingProject(billingProject, accessTier.getServicePerimeter());
+    fireCloudService.createAllOfUsBillingProject(
+        billingProject, accessTier.getServicePerimeter(), workspace.getBillingAccountName());
 
     // We use AoU Service Account to create the billing account then assign owner role to user.
     // In this way, we can make sure AoU Service Account is still the owner of this billing

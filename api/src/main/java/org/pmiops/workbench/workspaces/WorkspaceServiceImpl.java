@@ -411,24 +411,21 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
       fireCloudService.updateBillingAccountAsService(
           workspace.getWorkspaceNamespace(), newBillingAccountName);
     } else {
-      try {
-        Optional<Boolean> isOpenMaybe =
-            Optional.ofNullable(
-                cloudBillingClient.getBillingAccount(newBillingAccountName).getOpen());
-        boolean isOpen = isOpenMaybe.orElse(false);
-        if (!isOpen) {
-          throw new BadRequestException(
-              "Provided billing account is closed. Please provide an open account.");
-        }
-        fireCloudService.updateBillingAccount(
-            workspace.getWorkspaceNamespace(), newBillingAccountName);
-      } catch (IOException e) {
-        throw new ServerErrorException("Could not fetch user provided billing account.", e);
-      }
+      fireCloudService.updateBillingAccount(
+          workspace.getWorkspaceNamespace(), newBillingAccountName);
     }
 
-    // TODO(RW-6955): After Terra PPW, updateBillingAccount will be async API. Poll account info
-    // to verify billing account is update in GCP.
+    try {
+      cloudBillingClient.pollUntilBillingAccountLinked(
+          newBillingAccountName, workspace.getGoogleProject());
+    } catch (IOException | InterruptedException e) {
+      throw new ServerErrorException(
+          String.format(
+              "Error when poll billing account %s for project %s",
+              newBillingAccountName, workspace.getGoogleProject()),
+          e);
+    }
+
     workspace.setBillingAccountName(newBillingAccountName);
 
     if (newBillingAccountName.equals(

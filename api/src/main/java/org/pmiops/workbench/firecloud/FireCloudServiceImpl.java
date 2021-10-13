@@ -210,7 +210,8 @@ public class FireCloudServiceImpl implements FireCloudService {
   }
 
   @Override
-  public String createAllOfUsBillingProject(String projectName, String servicePerimeter) {
+  public String createAllOfUsBillingProject(
+      String projectName, String servicePerimeter, String billingAccountName) {
     if (projectName.contains(WORKSPACE_DELIMITER)) {
       throw new IllegalArgumentException(
           String.format(
@@ -220,7 +221,7 @@ public class FireCloudServiceImpl implements FireCloudService {
 
     FirecloudCreateRawlsV2BillingProjectFullRequest request =
         new FirecloudCreateRawlsV2BillingProjectFullRequest()
-            .billingAccount(configProvider.get().billing.freeTierBillingAccountName())
+            .billingAccount(billingAccountName)
             .projectName(projectName)
             .servicePerimeter(servicePerimeter);
     BillingV2Api billingV2Api = serviceAccountBillingV2ApiProvider.get();
