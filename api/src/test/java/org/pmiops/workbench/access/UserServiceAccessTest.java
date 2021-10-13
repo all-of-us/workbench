@@ -1043,6 +1043,21 @@ public class UserServiceAccessTest {
     assertRegisteredTierEnabled(dbUser);
   }
 
+  @Test
+  public void testRasLinkNotComplete_enforceRasOff_enableRasOn() {
+    assertThat(userAccessTierDao.findAll()).isEmpty();
+    providedWorkbenchConfig.access.enforceRasLoginGovLinking = false;
+    providedWorkbenchConfig.access.enableRasLoginGovLinking = true;
+    dbUser = updateUserWithRetries(registerUserNow);
+    assertRegisteredTierEnabled(dbUser);
+
+    // Incomplete RAS module, expect user is still Registered;
+    accessModuleService.updateBypassTime(
+        dbUser.getUserId(), AccessModule.RAS_LINK_LOGIN_GOV, false);
+    updateUserWithRetries(Function.identity());
+    assertRegisteredTierEnabled(dbUser);
+  }
+
   @ParameterizedTest
   @ValueSource(booleans = {true, false})
   public void testRasLinkNotComplete_enableRasFFNotAffect(boolean enableRasFFStatus) {
