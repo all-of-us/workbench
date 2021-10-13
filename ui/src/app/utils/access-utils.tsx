@@ -226,7 +226,8 @@ export const useIsUserDisabled = () => {
 export const getAccessModuleStatusByName = (profile: Profile, moduleName: AccessModule): AccessModuleStatus => {
   let moduleStatus = profile.accessModules.modules.find(a => a.moduleName === moduleName);
   // Set today's date to byPass for eraCommon in case Registered tier, and era is not Required
-  if (moduleName === AccessModule.ERACOMMONS && moduleStatus.bypassEpochMillis === null && moduleStatus.completionEpochMillis === null) {
+  if (moduleName === AccessModule.ERACOMMONS && !!moduleStatus
+      && moduleStatus.bypassEpochMillis === null && moduleStatus.completionEpochMillis === null) {
     const registeredTier = profile.tierEligibilities
         .find(value => value.accessTierShortName === AccessTierShortNames.Registered);
     if (!!registeredTier && !registeredTier.eraRequired) {
