@@ -100,6 +100,7 @@ public class FireCloudServiceImplTest extends SpringTest {
     workbenchConfig.firecloud.baseUrl = "https://api.firecloud.org";
     workbenchConfig.firecloud.debugEndpoints = true;
     workbenchConfig.firecloud.timeoutInSeconds = 20;
+    workbenchConfig.billing.accountId = "test-billing-account";
   }
 
   @AfterEach
@@ -215,7 +216,6 @@ public class FireCloudServiceImplTest extends SpringTest {
   @Test
   public void testCreateAllOfUsBillingProject_v2BillingApi() throws Exception {
     final String servicePerimeter = "a-cloud-with-a-fence-around-it";
-    final String billingAccount = "billingAccounts/test-billing-account";
     // confirm that this value is no longer how we choose perimeters
 
     service.createAllOfUsBillingProject("project-name", servicePerimeter);
