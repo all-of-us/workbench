@@ -63,7 +63,7 @@ describe('Workspace Admin', () => {
     await workspaceAdminPage.clickNotebookPreviewButton();
     const adminNotebookPreviewPage = new AdminNotebookPreviewPage(page);
     await adminNotebookPreviewPage.waitForLoad();
-    // verify that the notebook preview page loaded 
+    // verify that the notebook preview page loaded
     const previewCode = await adminNotebookPreviewPage.getFormattedCode();
     expect(previewCode.some((item) => item.includes('import pandas'))).toBe(true);
     expect(previewCode.some((item) => item.includes('import os'))).toBe(true);
