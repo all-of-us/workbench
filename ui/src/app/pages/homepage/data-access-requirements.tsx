@@ -1,6 +1,7 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {useEffect, useState} from 'react';
+import assert from "assert";
 
 import {useQuery} from 'app/components/app-router';
 import {Button, Clickable} from 'app/components/buttons';
@@ -320,7 +321,7 @@ const maybeRemoveEraCommonsModule = (profile: Profile) => {
   }
 }
 // exported for test
-export const getEnabledModules = (modules: AccessModule[]): AccessModule[] => fp.flow(
+export const getVisibleModules = (modules: AccessModule[]): AccessModule[] => fp.flow(
     fp.map(getAccessModuleConfig),
     fp.filter(moduleConfig => moduleConfig.isEnabledInEnvironment),
     fp.map(moduleConfig => moduleConfig.moduleName)
@@ -492,8 +493,10 @@ interface CardProps {
 }
 const ModulesForCard = (props: CardProps) => {
   const {profile, modules, activeModule, spinnerProps} = props;
+  const visibleModules = getVisibleModules(modules)
+  assert(visibleModules.includes(activeModule));
   return <FlexColumn style={styles.modulesContainer}>
-    {modules.map(moduleName =>
+    {visibleModules.map(moduleName =>
         <MaybeModule
             key={moduleName}
             moduleName={moduleName}
@@ -548,7 +551,7 @@ const RegisteredTierCard = (props: {profile: Profile, activeModule: AccessModule
       <DataDetail icon='physical' text='Physical measurements'/>
       <DataDetail icon='wearable' text='Wearable devices'/>
     </FlexColumn>
-    <ModulesForCard profile={profile}  modules={rtModules} activeModule={activeModule} spinnerProps={spinnerProps}/>
+    <ModulesForCard profile={profile} modules={rtModules} activeModule={activeModule} spinnerProps={spinnerProps}/>
   </FlexRow>;
 };
 
@@ -568,10 +571,10 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
   const {profile, reload} = useStore(profileStore);
   const {config: {unsafeAllowSelfBypass}} = useStore(serverConfigStore);
   maybeRemoveEraCommonsModule(profile);
-  const enabledModules = getEnabledModules(allModules);
+  const visibleModules = getVisibleModules(allModules);
 
   useEffect(() => {
-    syncIncompleteModules(enabledModules, profile, reload);
+    syncIncompleteModules(visibleModules, profile, reload);
     spinnerProps.hideSpinner();
   }, []);
 
@@ -597,7 +600,7 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
 
   // whenever the profile changes, setActiveModule(the first incomplete enabled module)
   useEffect(() => {
-    setActiveModule(getActiveModule(enabledModules, profile));
+    setActiveModule(getActiveModule(visibleModules, profile));
   }, [profile]);
 
 
