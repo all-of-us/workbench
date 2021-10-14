@@ -19,7 +19,7 @@ export default class DeleteRuntimeModal extends Modal {
   async clickDeleteButton(): Promise<void> {
     await this.clickButton(LinkText.Delete);
   }
-  
+
   // click Cancel button of the Delete Runtime Modal
   async clickCancelButton(): Promise<void> {
     await this.clickButton(LinkText.Cancel);
