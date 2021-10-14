@@ -3,9 +3,15 @@ import { config } from 'resources/workbench-config';
 import navigation, { NavLink } from 'app/component/navigation';
 import WorkspaceAdminPage from 'app/page/admin-workspace-page';
 import { WorkspaceHeadings } from 'app/text-labels';
+import RuntimePanel from 'app/component/runtime-panel';
+import WorkspacesPage from 'app/page/workspaces-page';
+import WorkspaceCard from 'app/component/workspace-card';
+import WorkspaceDataPage from 'app/page/workspace-data-page';
+import AdminNotebookPreviewPage from 'app/page/admin-notebook-preview-page';
 
 describe('Workspace Admin', () => {
   const workspaceNamespace = 'aou-rw-test-8c5cdbaf';
+  const workspaceName = 'e2eWorkspaceAdmin';
 
   beforeEach(async () => {
     await signInWithAccessToken(page, config.ADMIN_TEST_USER);
@@ -36,8 +42,9 @@ describe('Workspace Admin', () => {
         WorkspaceHeadings.Runtimes,
       ])
     );
+    expect(await workspaceAdminPage.getRuntimeDeleteButton().exists()).toBeFalsy();
     const noActiveRuntimeText = 'No active runtimes exist for this workspace';
-    expect(await workspaceAdminPage.getWorkspaceHeader()).toEqual(noActiveRuntimeText);
+    expect(await workspaceAdminPage.getNoActiveRuntimeText()).toEqual(noActiveRuntimeText);
   });
 
   test('Verify that admin is able to preview the Notebook', async () => {
@@ -53,16 +60,44 @@ describe('Workspace Admin', () => {
     //verify that the Notebook Preview button is now enabled
     expect(await workspaceAdminPage.getNotebookPreviewButton().isCursorNotAllowed()).toBe(false);
     await workspaceAdminPage.clickNotebookPreviewButton();
-
+    const adminNotebookPreviewPage = new AdminNotebookPreviewPage(page);
+    await adminNotebookPreviewPage.waitForLoad();
+    const previewCode = await adminNotebookPreviewPage.getFormattedCode(); 
+    expect(previewCode.some((item) => item.includes('import pandas'))).toBe(true);
+    expect(previewCode.some((item) => item.includes('import os'))).toBe(true);
+    await adminNotebookPreviewPage.clickNamespaceLink();
+    await workspaceAdminPage.waitForLoad();
   });
 
   test('Verify that admin is able to delete runtime', async () => {
-    
     const workspaceAdminPage = new WorkspaceAdminPage(page);
     await workspaceAdminPage.waitForLoad();
     await workspaceAdminPage.getWorkspaceNamespaceInput().type(workspaceNamespace);
     workspaceAdminPage.clickLoadWorkspaceButton();
     await workspaceAdminPage.waitForLoad();
-
+    const noActiveRuntimeText = 'No active runtimes exist for this workspace';
+    expect(await workspaceAdminPage.getWorkspaceHeader()).toEqual(noActiveRuntimeText);
+    await new WorkspacesPage(page).load();
+    const workspaceCard = await WorkspaceCard.findCard(page, workspaceName);
+    await workspaceCard.clickWorkspaceName();
+    await new WorkspaceDataPage(page).waitForLoad();
+    const runtimePanel = new RuntimePanel(page);
+    await runtimePanel.open();
+    // Create runtime
+    await runtimePanel.createRuntime();
+    await page.waitForTimeout(2000);
+    await navigation.navMenu(page, NavLink.WORKSPACE_ADMIN);
+    await workspaceAdminPage.waitForLoad();
+    await workspaceAdminPage.getWorkspaceNamespaceInput().type(workspaceNamespace);
+    workspaceAdminPage.clickLoadWorkspaceButton();
+    await workspaceAdminPage.waitForLoad();
+    expect(await workspaceAdminPage.getRuntimeDeleteButton().exists()).toBeTruthy();
+    let deleteRuntimeModal1 = await workspaceAdminPage.clickRuntimeDeleteButton();
+    await deleteRuntimeModal1.clickCancelButton();
+    await workspaceAdminPage.waitForLoad();
+    let deleteRuntimeModal2 = await workspaceAdminPage.clickRuntimeDeleteButton();
+    await deleteRuntimeModal2.clickDeleteButton();
+    await workspaceAdminPage.waitForLoad();
+    expect(await workspaceAdminPage.getRuntimeStatus()).toEqual('Deleting');
   });
 });
