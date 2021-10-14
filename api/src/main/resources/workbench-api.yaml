@@ -1709,6 +1709,18 @@ paths:
           description: Internal Error
           schema:
             "$ref": "#/definitions/ErrorResponse"
+  "/v1/cron/checkPendingEgressEvents":
+    get:
+      security: []
+      tags:
+      - offlineEgress
+      - cron
+      description: 'Endpoint meant to be called offline to trigger re-enqueueing of any pending
+        egress events. Only executable via App Engine cronjob.'
+      operationId: checkPendingEgressEvents
+      responses:
+        204:
+          description: No content.
 
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}/notebooks/rename":
     parameters:
