@@ -5,10 +5,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 
-import com.google.common.collect.ImmutableList;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
@@ -55,8 +53,6 @@ public class OfflineEgressControllerTest extends SpringTest {
     egressEventDao.save(newEvent());
 
     fakeClock.setInstant(FakeClockConfiguration.NOW.toInstant());
-    List<DbEgressEvent> events = ImmutableList.copyOf(egressEventDao.findAll());
-
     offlineEgressController.checkPendingEgressEvents();
 
     verify(mockTaskQueueService, times(2)).pushEgressEventTask(anyLong());
