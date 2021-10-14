@@ -107,7 +107,7 @@ public class CohortMaterializationServiceTest extends SpringTest {
   static class Configuration {
     @Bean(name = BigQueryConfig.DEFAULT_QUERY_TIMEOUT)
     public Duration defaultBigQueryTimeout() {
-      return Duration.ofSeconds(1L);
+      return Duration.ofMinutes(1L);
     }
 
     @Bean
