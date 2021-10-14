@@ -36,9 +36,9 @@ export default class Navigation {
     const findMenuItem = async (): Promise<ElementHandle | null> => {
       await Navigation.openNavMenu(page);
       const angleIconXpath = buildXPath({ type: ElementType.Icon, iconShape: 'angle' });
-      await page.waitForXPath(angleIconXpath, { timeout: 2000, visible: true });
-      const appLinkXpath = `//*[@role="button" and @tabindex="0"]//span[contains(., "${destinationApp}")]`;
-      // Find link. If not found, determine if link should be found in a submenu: User or Admin
+      await page.waitForXPath(angleIconXpath, { timeout: 2000, visible: true }); 
+      const appLinkXpath = `//*[@role="button" and @tabindex="0"]//span[(text()="${destinationApp}")]`;
+      // Find link. If not found, determine if link should be found in a) submenu: User or Admin
       const [applink] = await page.$x(appLinkXpath);
       if (!applink) {
         // If it's a link under User submenu.
