@@ -220,7 +220,7 @@ export const ConceptHomepage = fp.flow(withCurrentCohortSearchContext(), withCur
       });
       const promises = [];
       conceptDomainCards.forEach(conceptDomain => {
-        promises.push(this.getDomainCounts(conceptDomain.domain.toString())
+        promises.push(this.getDomainCounts(conceptDomain.domain.toString(), conceptDomain.standard)
           .then(domainCount => {
             conceptDomain.conceptCount = domainCount.conceptCount;
             this.setState({domainsLoading: this.state.domainsLoading.filter(domain => domain !== conceptDomain.domain)});
@@ -239,11 +239,11 @@ export const ConceptHomepage = fp.flow(withCurrentCohortSearchContext(), withCur
     }
 
     // Temp function to use the correct endpoint based on the enableStandardSourceDomains config flag
-    getDomainCounts(domain: string) {
+    getDomainCounts(domain: string, standard: boolean) {
       const {id, namespace} = this.props.workspace;
       const {currentInputString} = this.state;
       return serverConfigStore.get().config.enableStandardSourceDomains
-        ? cohortBuilderApi().findDomainCountByStandardSource(namespace, id, domain, true, currentInputString)
+        ? cohortBuilderApi().findDomainCountByStandardSource(namespace, id, domain, standard, currentInputString)
         : cohortBuilderApi().findDomainCount(namespace, id, domain, currentInputString);
     }
 
