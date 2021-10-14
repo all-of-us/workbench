@@ -27,18 +27,6 @@ public class CloudBillingClientImpl implements CloudBillingClient {
   }
 
   @Override
-  public BillingAccount getBillingAccount(String billingAccountName) throws IOException {
-    return retryHandler.runAndThrowChecked(
-        (context) -> {
-          return endUserCloudBillingProvider
-              .get()
-              .billingAccounts()
-              .get(billingAccountName)
-              .execute();
-        });
-  }
-
-  @Override
   public ProjectBillingInfo pollUntilBillingAccountLinked(String billingAccountName, String projectId)
       throws IOException, InterruptedException {
     Duration pollInterval = Duration.ofSeconds(2);

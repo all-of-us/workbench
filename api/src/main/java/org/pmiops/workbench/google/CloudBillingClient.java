@@ -6,9 +6,6 @@ import java.io.IOException;
 
 /** Encapsulate Google APIs for interfacing with Google Cloud Billing APIs. */
 public interface CloudBillingClient {
-  /** Fetch billing account info by given billing account name. */
-  BillingAccount getBillingAccount(String billingAccount) throws IOException;
-
   /** Poll GCP project's billing info until matches the expected billing account name.
    * @return*/
   ProjectBillingInfo pollUntilBillingAccountLinked(String billingAccountName, String projectId)

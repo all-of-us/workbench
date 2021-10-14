@@ -1,5 +1,6 @@
 package org.pmiops.workbench.workspaces;
 
+import com.google.api.services.cloudbilling.model.ProjectBillingInfo;
 import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.sql.Timestamp;
@@ -416,8 +417,12 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
     }
 
     try {
-      cloudBillingClient.pollUntilBillingAccountLinked(
+      ProjectBillingInfo projectBillingInfo = cloudBillingClient.pollUntilBillingAccountLinked(
           newBillingAccountName, workspace.getGoogleProject());
+      if (!projectBillingInfo.getBillingEnabled()) {
+        throw new BadRequestException(
+            "Provided billing account is closed. Please provide an open account.");
+      }
     } catch (IOException | InterruptedException e) {
       throw new ServerErrorException(
           String.format(
