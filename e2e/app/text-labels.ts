@@ -105,7 +105,7 @@ export enum LinkText {
   GoToCopiedConceptSet = 'Go to Copied Concept Set',
   GoToCopiedNotebook = 'Go to Copied Notebook',
   KeepEditing = 'Keep Editing',
-  LoadWorkspace = 'LoadWorkspace',
+  LoadWorkspace = 'Load Workspace',
   Next = 'Next',
   No = 'No',
   OK = 'OK',
@@ -207,4 +207,10 @@ export enum WorkspaceHeadings {
   ResearchPurpose = 'Research Purpose',
   CloudStorageTraffic = 'Cloud Storage Traffic',
   Runtimes = 'Runtimes'
+}
+
+export enum CloudStorageHeader {
+  Location = 'Location',
+  Filename = 'Filename',
+  FileSize = 'File size (MB)'
 }
