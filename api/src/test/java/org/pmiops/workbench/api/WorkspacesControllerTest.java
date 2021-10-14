@@ -49,6 +49,7 @@ import java.util.stream.Collectors;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
@@ -588,10 +589,10 @@ public class WorkspacesControllerTest extends SpringTest {
     assertThat(retrievedWorkspace.getGoogleProject()).isEqualTo(DEFAULT_GOOGLE_PROJECT);
 
     verify(fireCloudService)
-        .createAllOfUsBillingProject(
-            workspace.getNamespace(),
-            accessTier.getServicePerimeter(),
-            workspace.getBillingAccountName());
+        .updateBillingAccount(
+            workspace.getNamespace(), TestMockFactory.WORKSPACE_BILLING_ACCOUNT_NAME);
+    verify(fireCloudService)
+        .createAllOfUsBillingProject(workspace.getNamespace(), accessTier.getServicePerimeter());
     assertThat(retrievedWorkspace.getBillingAccountName())
         .isEqualTo(TestMockFactory.WORKSPACE_BILLING_ACCOUNT_NAME);
   }
@@ -605,6 +606,8 @@ public class WorkspacesControllerTest extends SpringTest {
     try {
       workspacesController.createWorkspace(workspace).getBody();
     } catch (Exception e) {
+      verify(fireCloudService)
+          .updateBillingAccount(workspace.getNamespace(), workspace.getBillingAccountName());
       verify(fireCloudService)
           .updateBillingAccountAsService(
               workspace.getNamespace(), workbenchConfig.billing.freeTierBillingAccountName());
@@ -749,6 +752,8 @@ public class WorkspacesControllerTest extends SpringTest {
   public void testUpdateWorkspace() throws Exception {
     Workspace ws = createWorkspace();
     ws = workspacesController.createWorkspace(ws).getBody();
+    verify(fireCloudService, times(1))
+        .updateBillingAccount(ws.getNamespace(), ws.getBillingAccountName());
 
     ws.setName("updated-name");
     UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
@@ -759,6 +764,9 @@ public class WorkspacesControllerTest extends SpringTest {
     ws.setEtag(updated.getEtag());
     assertThat(updated).isEqualTo(ws);
 
+    ArgumentCaptor<String> projectCaptor = ArgumentCaptor.forClass(String.class);
+    ArgumentCaptor<ProjectBillingInfo> billingCaptor =
+        ArgumentCaptor.forClass(ProjectBillingInfo.class);
     verify(fireCloudService, times(1))
         .updateBillingAccount(ws.getNamespace(), "update-billing-account");
 
@@ -1059,6 +1067,8 @@ public class WorkspacesControllerTest extends SpringTest {
             .getBody()
             .getWorkspace();
     verify(mockWorkspaceAuditor).fireDuplicateAction(anyLong(), anyLong(), any(Workspace.class));
+    verify(fireCloudService)
+        .updateBillingAccount(clonedWorkspace.getNamespace(), newBillingAccountName);
 
     // Stub out the FC service getWorkspace, since that's called by workspacesController.
     stubGetWorkspace(clonedFirecloudWorkspace, WorkspaceAccessLevel.WRITER);
@@ -1081,12 +1091,11 @@ public class WorkspacesControllerTest extends SpringTest {
     assertThat(clonedWorkspace.getName()).isEqualTo(modWorkspace.getName());
     assertThat(clonedWorkspace.getNamespace()).isEqualTo(modWorkspace.getNamespace());
     assertThat(clonedWorkspace.getResearchPurpose()).isEqualTo(modPurpose);
+    assertThat(clonedWorkspace.getBillingAccountName()).isEqualTo(newBillingAccountName);
 
     verify(fireCloudService)
         .createAllOfUsBillingProject(
-            clonedWorkspace.getNamespace(),
-            accessTier.getServicePerimeter(),
-            newBillingAccountName);
+            clonedWorkspace.getNamespace(), accessTier.getServicePerimeter());
   }
 
   @Test
@@ -1112,6 +1121,8 @@ public class WorkspacesControllerTest extends SpringTest {
           .getBody()
           .getWorkspace();
     } catch (Exception e) {
+      verify(fireCloudService)
+          .updateBillingAccount(modWorkspace.getNamespace(), modWorkspace.getBillingAccountName());
       verify(fireCloudService)
           .updateBillingAccountAsService(
               modWorkspace.getNamespace(), workbenchConfig.billing.freeTierBillingAccountName());

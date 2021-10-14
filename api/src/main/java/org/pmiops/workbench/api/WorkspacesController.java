@@ -260,7 +260,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     dbWorkspace.setBillingMigrationStatusEnum(BillingMigrationStatus.NEW);
     dbWorkspace.setCdrVersion(cdrVersion);
     dbWorkspace.setGoogleProject(fcWorkspace.getGoogleProject());
-    dbWorkspace.setBillingAccountName(workspace.getBillingAccountName());
 
     // Ignore incoming fields pertaining to review status; clients can only request a review.
     workspaceMapper.mergeResearchPurposeIntoWorkspace(dbWorkspace, workspace.getResearchPurpose());
@@ -269,6 +268,23 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       dbWorkspace.setTimeRequested(now);
     }
     dbWorkspace.setReviewRequested(workspace.getResearchPurpose().getReviewRequested());
+
+    // A little unintuitive but setting this here reflects the current state of the workspace
+    // while it was in the billing buffer. Setting this value will inform the update billing
+    // code to skip an unnecessary GCP API call if the billing account is being kept at the free
+    // tier
+    dbWorkspace.setBillingAccountName(
+        workbenchConfigProvider.get().billing.freeTierBillingAccountName());
+
+    try {
+      workspaceService.updateWorkspaceBillingAccount(
+          dbWorkspace, workspace.getBillingAccountName());
+    } catch (ServerErrorException e) {
+      // Will be addressed with RW-4440
+      throw new ServerErrorException(
+          "This message is going to be swallowed due to a bug in ExceptionAdvice. ",
+          new ServerErrorException("Could not update the workspace's billing account", e));
+    }
 
     return dbWorkspace;
   }
@@ -493,8 +509,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private FirecloudWorkspaceId getFcBillingProject(DbAccessTier accessTier, Workspace workspace) {
     DbUser user = userProvider.get();
     String billingProject = fireCloudService.createBillingProjectName();
-    fireCloudService.createAllOfUsBillingProject(
-        billingProject, accessTier.getServicePerimeter(), workspace.getBillingAccountName());
+    fireCloudService.createAllOfUsBillingProject(billingProject, accessTier.getServicePerimeter());
 
     // We use AoU Service Account to create the billing account then assign owner role to user.
     // In this way, we can make sure AoU Service Account is still the owner of this billing

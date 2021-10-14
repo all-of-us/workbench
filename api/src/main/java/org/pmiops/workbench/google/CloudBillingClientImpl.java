@@ -29,11 +29,17 @@ public class CloudBillingClientImpl implements CloudBillingClient {
   public ProjectBillingInfo pollUntilBillingAccountLinked(
       String billingAccountName, String projectId) throws IOException, InterruptedException {
     Duration pollInterval = Duration.ofSeconds(2);
-    for (Instant deadline = Instant.now().plusSeconds(30);
+    for (Instant deadline = Instant.now().plusSeconds(60);
         Instant.now().isBefore(deadline);
         Thread.sleep(pollInterval.toMillis())) {
+      System.out.println("~~~~~~~~!!!!!!!!");
+      System.out.println("~~~~~~~~!!!!!!!!");
+      System.out.println("~~~~~~~~!!!!!!!!");
+      System.out.println("~~~~~~~~!!!!!!!!");
       ProjectBillingInfo projectBillingInfo = getProjectBillingInfo(projectId);
-      if (projectBillingInfo.getBillingAccountName() == billingAccountName) {
+      System.out.println(projectBillingInfo.getBillingAccountName());
+      System.out.println(billingAccountName);
+      if (projectBillingInfo.getBillingAccountName().equals(billingAccountName)) {
         return projectBillingInfo;
       }
     }
@@ -47,7 +53,11 @@ public class CloudBillingClientImpl implements CloudBillingClient {
   public ProjectBillingInfo getProjectBillingInfo(String projectId) throws IOException {
     return retryHandler.runAndThrowChecked(
         (context) -> {
-          return endUserCloudBillingProvider.get().projects().getBillingInfo(projectId).execute();
+          return endUserCloudBillingProvider
+              .get()
+              .projects()
+              .getBillingInfo("projects/" + projectId)
+              .execute();
         });
   }
 }

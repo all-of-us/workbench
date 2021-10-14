@@ -218,7 +218,7 @@ public class FireCloudServiceImplTest extends SpringTest {
     final String billingAccount = "billingAccounts/test-billing-account";
     // confirm that this value is no longer how we choose perimeters
 
-    service.createAllOfUsBillingProject("project-name", servicePerimeter, billingAccount);
+    service.createAllOfUsBillingProject("project-name", servicePerimeter);
 
     ArgumentCaptor<FirecloudCreateRawlsV2BillingProjectFullRequest> captor =
         ArgumentCaptor.forClass(FirecloudCreateRawlsV2BillingProjectFullRequest.class);
