@@ -2,18 +2,41 @@ import { signInWithAccessToken } from 'utils/test-utils';
 import { config } from 'resources/workbench-config';
 import navigation, { NavLink } from 'app/component/navigation';
 import WorkspaceAdminPage from 'app/page/admin-workspace-page';
+import { WorkspaceHeadings } from 'app/text-labels';
 
 describe('Workspace Admin', () => {
-  const WorkspaceName = 'Admin testing';
+  const workspaceNamespace = 'aou-rw-test-8c5cdbaf';
 
   beforeEach(async () => {
-    await signInWithAccessToken(page, config.ADMIN_TEST_ACCESS_TOKEN_FILE);
+    await signInWithAccessToken(page, config.ADMIN_TEST_USER);
     await navigation.navMenu(page, NavLink.WORKSPACE_ADMIN);
   });
 
-  test.only('check the Workspace Admin page UI', async () => {
+  test('check the Workspace Admin page UI', async () => {
     const workspaceAdminPage = new WorkspaceAdminPage(page);
     await workspaceAdminPage.waitForLoad();
-    workspaceAdminPage.getLoadWorkspaceButton();
+    await workspaceAdminPage.getWorkspaceNamespaceInput().type(workspaceNamespace);
+    workspaceAdminPage.clickLoadWorkspaceButton();
+    await workspaceAdminPage.waitForLoad();
+    expect(await workspaceAdminPage.getWorkspaceHeader()).toEqual('Workspace');
+    const headings3 = await workspaceAdminPage.getAllHeadings3();
+    expect(headings3).toEqual(
+      expect.arrayContaining([
+        WorkspaceHeadings.BasicInformation,
+        WorkspaceHeadings.Collaborators,
+        WorkspaceHeadings.CohortBuilder,
+        WorkspaceHeadings.CloudStorageObjects,
+        WorkspaceHeadings.ResearchPurpose,
+      ])
+    );
+    const headings2 = await workspaceAdminPage.getAllHeadings2();
+    expect(headings2).toEqual(
+      expect.arrayContaining([
+        WorkspaceHeadings.CloudStorageTraffic,
+        WorkspaceHeadings.Runtimes,
+      ])
+    );
+    const noActiveRuntimeText = 'No active runtimes exist for this workspace';
+    expect(await workspaceAdminPage.getWorkspaceHeader()).toEqual(noActiveRuntimeText);
   });
 });
