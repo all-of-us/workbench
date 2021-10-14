@@ -39,4 +39,30 @@ describe('Workspace Admin', () => {
     const noActiveRuntimeText = 'No active runtimes exist for this workspace';
     expect(await workspaceAdminPage.getWorkspaceHeader()).toEqual(noActiveRuntimeText);
   });
+
+  test('Verify that admin is able to preview the Notebook', async () => {
+    const workspaceAdminPage = new WorkspaceAdminPage(page);
+    await workspaceAdminPage.waitForLoad();
+    await workspaceAdminPage.getWorkspaceNamespaceInput().type(workspaceNamespace);
+    workspaceAdminPage.clickLoadWorkspaceButton();
+    await workspaceAdminPage.waitForLoad();
+    //verify that the Notebook Preview button is disabled
+    expect(await workspaceAdminPage.getNotebookPreviewButton().isCursorNotAllowed()).toBe(true);
+    const accessReasonText = 'for auditing purposes';
+    await workspaceAdminPage.getAccessReasonInput().type(accessReasonText);
+    //verify that the Notebook Preview button is now enabled
+    expect(await workspaceAdminPage.getNotebookPreviewButton().isCursorNotAllowed()).toBe(false);
+    await workspaceAdminPage.clickNotebookPreviewButton();
+
+  });
+
+  test('Verify that admin is able to delete runtime', async () => {
+    
+    const workspaceAdminPage = new WorkspaceAdminPage(page);
+    await workspaceAdminPage.waitForLoad();
+    await workspaceAdminPage.getWorkspaceNamespaceInput().type(workspaceNamespace);
+    workspaceAdminPage.clickLoadWorkspaceButton();
+    await workspaceAdminPage.waitForLoad();
+
+  });
 });
