@@ -50,7 +50,7 @@ export default class WorkspaceAdminPage extends AuthenticatedPage {
     const headings = await page.$$eval('h3', (headers) => {
       return headers.map((header) => header.textContent);
     });
-    // get only the first-5 headings(h3) 
+    // get only the first-5 headings(h3)
     const namespaceHeadings = headings.slice(0, 5);
     return namespaceHeadings;
   }
@@ -72,7 +72,7 @@ export default class WorkspaceAdminPage extends AuthenticatedPage {
     const headings = await page.$$eval('h2', (headers) => {
       return headers.map((header) => header.textContent);
     });
-    // get only the 2nd and 3rd headings(h2) 
+    // get only the 2nd and 3rd headings(h2)
     const namespaceHeadings = headings.slice(1, 3);
     return namespaceHeadings;
   }
@@ -94,13 +94,14 @@ export default class WorkspaceAdminPage extends AuthenticatedPage {
   // get the text area to input the reason to access
   getAccessReasonInput(): Textbox {
     const selector =
-      '//label[contains(text(), "To preview notebooks, enter Access Reason (for auditing purposes")]/following-sibling::textarea';
+      '//label[contains(text(), "To preview notebooks, enter Access Reason (for auditing purposes")]' +
+      '/following-sibling::textarea';
     return new Textbox(this.page, selector);
   }
 
   // get the No Active Runtime Text to verify that no runtime is active
-  async getNoActiveRuntimeText(): Promise<string>{
-    const xpath = '//h2[contains(text(),"Runtimes")]/following-sibling::p'
+  async getNoActiveRuntimeText(): Promise<string> {
+    const xpath = '//h2[contains(text(),"Runtimes")]/following-sibling::p';
     const element = BaseElement.asBaseElement(this.page, await this.page.waitForXPath(xpath, { visible: true }));
     const textContent = await element.getTextContent();
     return textContent;
@@ -109,8 +110,8 @@ export default class WorkspaceAdminPage extends AuthenticatedPage {
   // get the Runtime Delete button
   getRuntimeDeleteButton(): Button {
     return Button.findByName(this.page, { name: LinkText.Delete });
-  } 
-  
+  }
+
   async clickRuntimeDeleteButton(): Promise<DeleteRuntimeModal> {
     const button = this.getRuntimeDeleteButton();
     await button.click();
@@ -119,8 +120,16 @@ export default class WorkspaceAdminPage extends AuthenticatedPage {
     return modal;
   }
 
-  // get the runtime status (delete) in the Status col 
+  // get the runtime status in the Status col
   async getRuntimeStatus(): Promise<string> {
+    const xpath = '//div[text()="Delete" and @role="button"]/preceding-sibling::div[1]';
+    const element = BaseElement.asBaseElement(this.page, await this.page.waitForXPath(xpath, { visible: true }));
+    const textContent = await element.getTextContent();
+    return textContent;
+  }
+
+  // get the runtime status (delete) in the Status col
+  async getRuntimeDeleteStatus(): Promise<string> {
     const xpath = '//div[text()="Delete" and @role="button"]/preceding-sibling::div[1][contains(text(),"Deleting")]';
     const element = BaseElement.asBaseElement(this.page, await this.page.waitForXPath(xpath, { visible: true }));
     const textContent = await element.getTextContent();
