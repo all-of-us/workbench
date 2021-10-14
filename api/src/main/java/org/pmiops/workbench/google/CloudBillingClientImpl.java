@@ -3,7 +3,6 @@ package org.pmiops.workbench.google;
 import static org.pmiops.workbench.google.GoogleConfig.END_USER_CLOUD_BILLING;
 
 import com.google.api.services.cloudbilling.Cloudbilling;
-import com.google.api.services.cloudbilling.model.BillingAccount;
 import com.google.api.services.cloudbilling.model.ProjectBillingInfo;
 import java.io.IOException;
 import java.time.Duration;
@@ -27,14 +26,14 @@ public class CloudBillingClientImpl implements CloudBillingClient {
   }
 
   @Override
-  public ProjectBillingInfo pollUntilBillingAccountLinked(String billingAccountName, String projectId)
-      throws IOException, InterruptedException {
+  public ProjectBillingInfo pollUntilBillingAccountLinked(
+      String billingAccountName, String projectId) throws IOException, InterruptedException {
     Duration pollInterval = Duration.ofSeconds(2);
     for (Instant deadline = Instant.now().plusSeconds(30);
         Instant.now().isBefore(deadline);
         Thread.sleep(pollInterval.toMillis())) {
       ProjectBillingInfo projectBillingInfo = getProjectBillingInfo(projectId);
-      if(projectBillingInfo.getBillingAccountName() == billingAccountName) {
+      if (projectBillingInfo.getBillingAccountName() == billingAccountName) {
         return projectBillingInfo;
       }
     }

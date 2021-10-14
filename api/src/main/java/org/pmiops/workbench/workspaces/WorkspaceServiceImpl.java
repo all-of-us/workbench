@@ -417,8 +417,9 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
     }
 
     try {
-      ProjectBillingInfo projectBillingInfo = cloudBillingClient.pollUntilBillingAccountLinked(
-          newBillingAccountName, workspace.getGoogleProject());
+      ProjectBillingInfo projectBillingInfo =
+          cloudBillingClient.pollUntilBillingAccountLinked(
+              newBillingAccountName, workspace.getGoogleProject());
       if (!projectBillingInfo.getBillingEnabled()) {
         throw new BadRequestException(
             "Provided billing account is closed. Please provide an open account.");

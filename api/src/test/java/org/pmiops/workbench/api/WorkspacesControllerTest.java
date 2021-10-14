@@ -21,7 +21,6 @@ import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.FakeClockConfiguration.NOW_TIME;
 import static org.pmiops.workbench.utils.TestMockFactory.DEFAULT_GOOGLE_PROJECT;
 
-import com.google.api.services.cloudbilling.model.BillingAccount;
 import com.google.api.services.cloudbilling.model.ProjectBillingInfo;
 import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.TableResult;
@@ -50,7 +49,6 @@ import java.util.stream.Collectors;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
 import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
@@ -386,7 +384,8 @@ public class WorkspacesControllerTest extends SpringTest {
 
     // required to enable the use of default method blobToFileDetail()
     when(cloudStorageClient.blobToFileDetail(any(), anyString())).thenCallRealMethod();
-    when(mockCloudBillingClient.pollUntilBillingAccountLinked(any(), any())).thenReturn(new ProjectBillingInfo().setBillingEnabled(true));
+    when(mockCloudBillingClient.pollUntilBillingAccountLinked(any(), any()))
+        .thenReturn(new ProjectBillingInfo().setBillingEnabled(true));
   }
 
   private DbUser createUser(String email) {
@@ -1060,8 +1059,6 @@ public class WorkspacesControllerTest extends SpringTest {
             .getBody()
             .getWorkspace();
     verify(mockWorkspaceAuditor).fireDuplicateAction(anyLong(), anyLong(), any(Workspace.class));
-    verify(fireCloudService)
-        .updateBillingAccount(clonedWorkspace.getNamespace(), newBillingAccountName);
 
     // Stub out the FC service getWorkspace, since that's called by workspacesController.
     stubGetWorkspace(clonedFirecloudWorkspace, WorkspaceAccessLevel.WRITER);
