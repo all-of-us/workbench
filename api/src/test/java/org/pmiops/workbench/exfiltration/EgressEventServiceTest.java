@@ -210,6 +210,7 @@ public class EgressEventServiceTest extends SpringTest {
     EgressEvent event = recentEgressEventForUser(dbUser1);
     egressEventService.handleEvent(event);
     verify(egressEventAuditor).fireEgressEvent(event);
+    verify(mockTaskQueueService).pushEgressEventTask(anyLong());
 
     List<DbEgressEvent> dbEvents = ImmutableList.copyOf(egressEventDao.findAll());
     assertThat(dbEvents).hasSize(1);
