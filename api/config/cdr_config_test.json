@@ -83,6 +83,7 @@
       "name": "Synthetic Dataset in the Controlled Tier",
       "bigqueryProject": "fc-aou-cdr-synth-test-2",
       "bigqueryDataset": "test_R2019q4r3",
+      "wgsBigqueryDataset": "1kg_wgs",
       "creationTime": "2020-08-26 00:09:51Z",
       "releaseNumber": 3,
       "numParticipants": 234525,
@@ -94,17 +95,17 @@
     {
       "cdrVersionId": 6,
       "isDefault": false,
-      "name": "Synthetic Dataset v3 with WGS",
-      "bigqueryProject": "fc-aou-cdr-synth-test",
-      "bigqueryDataset": "test_R2019q4r3",
-      "wgsBigqueryDataset": "1kg_wgs",
-      "creationTime": "2021-03-03 00:09:00Z",
+      "archivalStatus": 1,
+      "accessTier": "registered",
+      "name": "[Removed] Synthetic Dataset v3 with WGS",
+      "bigqueryProject": "",
+      "bigqueryDataset": "",
+      "creationTime": "2020-08-26 00:09:51Z",
       "releaseNumber": 3,
-      "numParticipants": 234525,
-      "cdrDbName": "synth_r_2019q4_19",
-      "hasFitbitData": true,
-      "hasCopeSurveyData": true,
-      "accessTier": "registered"
+      "numParticipants": 0,
+      "cdrDbName": "cdr",
+      "hasFitbitData": false,
+      "hasCopeSurveyData": false
     }
   ]
 }
