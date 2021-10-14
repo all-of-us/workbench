@@ -63,10 +63,12 @@ describe('Workspace Admin', () => {
     await workspaceAdminPage.clickNotebookPreviewButton();
     const adminNotebookPreviewPage = new AdminNotebookPreviewPage(page);
     await adminNotebookPreviewPage.waitForLoad();
+    // verify that the notebook preview page loaded 
     const previewCode = await adminNotebookPreviewPage.getFormattedCode();
     expect(previewCode.some((item) => item.includes('import pandas'))).toBe(true);
     expect(previewCode.some((item) => item.includes('import os'))).toBe(true);
     expect(await adminNotebookPreviewPage.getNamespaceText()).toEqual(workspaceNamespace);
+    // click on the namespace link to navigate back to the workpsace admin page
     await adminNotebookPreviewPage.clickNamespaceLink();
     await workspaceAdminPage.waitForLoad();
   });
@@ -87,20 +89,22 @@ describe('Workspace Admin', () => {
     // Create runtime
     await runtimePanel.createRuntime();
     await page.waitForTimeout(2000);
+    // navigate back to workspace admin page to delete the workspace
     await navigation.navMenu(page, NavLink.WORKSPACE_ADMIN);
     await workspaceAdminPage.waitForLoad();
     await workspaceAdminPage.getWorkspaceNamespaceInput().type(workspaceNamespace);
     workspaceAdminPage.clickLoadWorkspaceButton();
     await workspaceAdminPage.waitForLoad();
-    //verify the runtime status
+    //verify the runtime status is running
     expect(await workspaceAdminPage.getRuntimeStatus()).toEqual('Running');
     const deleteRuntimeModal1 = await workspaceAdminPage.clickRuntimeDeleteButton();
     await deleteRuntimeModal1.clickCancelButton();
     await workspaceAdminPage.waitForLoad();
     const deleteRuntimeModal2 = await workspaceAdminPage.clickRuntimeDeleteButton();
+    // delete the runtime
     await deleteRuntimeModal2.clickDeleteButton();
     await workspaceAdminPage.waitForLoad();
-    //verify the runtime status
+    //verify the runtime status is deleting
     expect(await workspaceAdminPage.getRuntimeDeleteStatus()).toEqual('Deleting');
   });
 });
