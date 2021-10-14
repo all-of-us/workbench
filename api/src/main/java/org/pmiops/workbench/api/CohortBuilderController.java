@@ -20,7 +20,6 @@ import org.pmiops.workbench.model.DemoChartInfoListResponse;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainCardResponse;
 import org.pmiops.workbench.model.DomainCount;
-import org.pmiops.workbench.model.DomainInfoResponse;
 import org.pmiops.workbench.model.GenderOrSexType;
 import org.pmiops.workbench.model.ParticipantDemographics;
 import org.pmiops.workbench.model.SearchRequest;
@@ -234,15 +233,6 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     Long count = cohortBuilderService.findDomainCountByStandard(domain, term, standard);
     return ResponseEntity.ok(
         new DomainCount().conceptCount(count).domain(Domain.valueOf(domain)).name(domain));
-  }
-
-  @Override
-  public ResponseEntity<DomainInfoResponse> findDomainInfos(
-      String workspaceNamespace, String workspaceId) {
-    workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-        workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-    return ResponseEntity.ok(
-        new DomainInfoResponse().items(cohortBuilderService.findDomainInfos()));
   }
 
   @Override

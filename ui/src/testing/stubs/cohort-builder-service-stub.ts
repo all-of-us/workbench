@@ -9,8 +9,6 @@ import {
   DemoChartInfoListResponse,
   Domain,
   DomainCount,
-  DomainInfo,
-  DomainInfoResponse,
   ParticipantDemographics,
   SurveyCount,
   SurveyModule,
@@ -45,27 +43,6 @@ export class SurveyStubVariables {
       participantCount: 300,
       orderNumber: 3
     }
-  ];
-}
-
-export class DomainStubVariables {
-  static STUB_DOMAINS: DomainInfo[] = [
-    {
-      domain: Domain.CONDITION,
-      name: 'Condition',
-      description: 'The Conditions Stub',
-      standardConceptCount: 1,
-      allConceptCount: 2,
-      participantCount: 30
-    },
-    {
-      domain: Domain.MEASUREMENT,
-      name: 'Measurement',
-      description: 'The Measurements Stub',
-      standardConceptCount: 50,
-      allConceptCount: 65,
-      participantCount: 200
-    },
   ];
 }
 
@@ -400,10 +377,6 @@ export class CohortBuilderServiceStub extends CohortBuilderApi {
 
   findCriteriaMenu(): Promise<CriteriaMenuListResponse> {
     return new Promise<CriteriaMenuListResponse>(resolve => resolve({items: []}));
-  }
-
-  findDomainInfos(): Promise<DomainInfoResponse> {
-    return new Promise<DomainInfoResponse>(resolve => resolve({items: DomainStubVariables.STUB_DOMAINS}));
   }
 
   findSurveyModules(): Promise<SurveysResponse> {
