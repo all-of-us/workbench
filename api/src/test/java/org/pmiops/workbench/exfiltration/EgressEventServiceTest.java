@@ -30,6 +30,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.pmiops.workbench.JpaFakeDateTimeConfiguration;
 import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.actionaudit.auditors.EgressEventAuditor;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
@@ -63,6 +64,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 
 @DataJpaTest
+@Import({JpaFakeDateTimeConfiguration.class})
 public class EgressEventServiceTest extends SpringTest {
 
   private static final Instant NOW = Instant.parse("2020-06-11T01:30:00.02Z");
@@ -305,14 +307,15 @@ public class EgressEventServiceTest extends SpringTest {
             .timeWindowStart(NOW.minus(Duration.ofMinutes(125)).toEpochMilli());
 
     // Persist an existing copy of this event into the database.
+    fakeClock.setInstant(NOW.minus(Duration.ofHours(1L)));
     egressEventDao.save(
         new DbEgressEvent()
-            .setCreationTime(Timestamp.from(NOW.minus(Duration.ofMinutes(60))))
             .setEgressWindowSeconds(oldEgressEvent.getTimeWindowDuration())
             .setUser(dbUser1)
             .setWorkspace(dbWorkspace)
             .setStatus(EgressEventStatus.PENDING));
 
+    fakeClock.setInstant(NOW);
     egressEventService.handleEvent(oldEgressEvent);
     verifyZeroInteractions(mockTaskQueueService);
 
@@ -329,15 +332,16 @@ public class EgressEventServiceTest extends SpringTest {
             .timeWindowDuration(60 * 60L)
             .timeWindowStart(NOW.minus(Duration.ofMinutes(125)).toEpochMilli());
 
+    fakeClock.setInstant(NOW.minus(Duration.ofHours(1L)));
     egressEventDao.save(
         new DbEgressEvent()
-            .setCreationTime(Timestamp.from(NOW.minus(Duration.ofMinutes(60))))
             // Different window; otherwise metadata matches.
             .setEgressWindowSeconds(10 * 60L)
             .setUser(dbUser1)
             .setWorkspace(dbWorkspace)
             .setStatus(EgressEventStatus.PENDING));
 
+    fakeClock.setInstant(NOW);
     egressEventService.handleEvent(oldEgressEvent);
     verify(mockTaskQueueService).pushEgressEventTask(anyLong());
 
@@ -354,15 +358,16 @@ public class EgressEventServiceTest extends SpringTest {
             .timeWindowDuration(60 * 60L)
             .timeWindowStart(NOW.minus(Duration.ofMinutes(125)).toEpochMilli());
 
+    fakeClock.setInstant(NOW.minus(Duration.ofHours(1L)));
     egressEventDao.save(
         new DbEgressEvent()
-            .setCreationTime(Timestamp.from(NOW.minus(Duration.ofMinutes(60))))
             .setEgressWindowSeconds(oldEgressEvent.getTimeWindowDuration())
             // Different user, otherwise metadata matches
             .setUser(dbUser2)
             .setWorkspace(dbWorkspace)
             .setStatus(EgressEventStatus.PENDING));
 
+    fakeClock.setInstant(NOW);
     egressEventService.handleEvent(oldEgressEvent);
     verify(mockAlertApi).createAlert(any());
     verify(egressEventAuditor).fireEgressEvent(oldEgressEvent);
@@ -383,14 +388,15 @@ public class EgressEventServiceTest extends SpringTest {
             .timeWindowDuration(Duration.ofMinutes(1).getSeconds());
 
     // Persist an existing copy of this event into the database.
+    fakeClock.setInstant(NOW.minus(Duration.ofMinutes(2L)));
     egressEventDao.save(
         new DbEgressEvent()
-            .setCreationTime(Timestamp.from(NOW.minus(Duration.ofMinutes(2))))
             .setEgressWindowSeconds(oldEgressEvent.getTimeWindowDuration())
             .setUser(dbUser1)
             .setWorkspace(dbWorkspace)
             .setStatus(EgressEventStatus.PENDING));
 
+    fakeClock.setInstant(NOW);
     egressEventService.handleEvent(oldEgressEvent);
     verify(mockAlertApi).createAlert(alertRequestCaptor.capture());
     verify(egressEventAuditor).fireEgressEvent(oldEgressEvent);

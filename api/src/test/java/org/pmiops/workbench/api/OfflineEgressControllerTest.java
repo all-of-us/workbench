@@ -10,6 +10,7 @@ import java.time.Instant;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
+import org.pmiops.workbench.JpaFakeDateTimeConfiguration;
 import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.db.dao.EgressEventDao;
@@ -23,6 +24,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 
 @DataJpaTest
+@Import(JpaFakeDateTimeConfiguration.class)
 public class OfflineEgressControllerTest extends SpringTest {
   private static final Instant TEN_MINUTES_AGO =
       FakeClockConfiguration.NOW.toInstant().minus(Duration.ofMinutes(10));
@@ -34,7 +36,7 @@ public class OfflineEgressControllerTest extends SpringTest {
   @Autowired private EgressEventDao egressEventDao;
   @Autowired private OfflineEgressController offlineEgressController;
 
-  @Import(OfflineEgressController.class)
+  @Import({OfflineEgressController.class})
   @TestConfiguration
   static class Configuration {}
 
