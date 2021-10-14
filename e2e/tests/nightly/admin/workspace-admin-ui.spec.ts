@@ -2,7 +2,7 @@ import { signInWithAccessToken } from 'utils/test-utils';
 import { config } from 'resources/workbench-config';
 import navigation, { NavLink } from 'app/component/navigation';
 import WorkspaceAdminPage from 'app/page/admin-workspace-page';
-import { WorkspaceHeadings } from 'app/text-labels';
+import { WorkspaceHeadings, CloudStorageHeader } from 'app/text-labels';
 import RuntimePanel from 'app/component/runtime-panel';
 import WorkspacesPage from 'app/page/workspaces-page';
 import WorkspaceCard from 'app/component/workspace-card';
@@ -12,6 +12,7 @@ import AdminNotebookPreviewPage from 'app/page/admin-notebook-preview-page';
 describe('Workspace Admin', () => {
   const workspaceNamespace = 'aou-rw-test-8c5cdbaf';
   const workspaceName = 'e2eWorkspaceAdmin';
+  const noActiveRuntimeText = 'No active runtimes exist for this workspace.';
 
   beforeEach(async () => {
     await signInWithAccessToken(page, config.ADMIN_TEST_USER);
@@ -22,7 +23,7 @@ describe('Workspace Admin', () => {
     const workspaceAdminPage = new WorkspaceAdminPage(page);
     await workspaceAdminPage.waitForLoad();
     await workspaceAdminPage.getWorkspaceNamespaceInput().type(workspaceNamespace);
-    workspaceAdminPage.clickLoadWorkspaceButton();
+    await workspaceAdminPage.clickLoadWorkspaceButton();
     await workspaceAdminPage.waitForLoad();
     expect(await workspaceAdminPage.getWorkspaceHeader()).toEqual('Workspace');
     const headings3 = await workspaceAdminPage.getAllHeadings3();
@@ -32,18 +33,18 @@ describe('Workspace Admin', () => {
         WorkspaceHeadings.Collaborators,
         WorkspaceHeadings.CohortBuilder,
         WorkspaceHeadings.CloudStorageObjects,
-        WorkspaceHeadings.ResearchPurpose,
+        WorkspaceHeadings.ResearchPurpose
       ])
     );
     const headings2 = await workspaceAdminPage.getAllHeadings2();
     expect(headings2).toEqual(
-      expect.arrayContaining([
-        WorkspaceHeadings.CloudStorageTraffic,
-        WorkspaceHeadings.Runtimes,
-      ])
+      expect.arrayContaining([WorkspaceHeadings.CloudStorageTraffic, WorkspaceHeadings.Runtimes])
+    );
+    const cloudStorageCols = await workspaceAdminPage.getcloudStorageColNames();
+    expect(cloudStorageCols).toEqual(
+      expect.arrayContaining([CloudStorageHeader.Location, CloudStorageHeader.Filename, CloudStorageHeader.FileSize])
     );
     expect(await workspaceAdminPage.getRuntimeDeleteButton().exists()).toBeFalsy();
-    const noActiveRuntimeText = 'No active runtimes exist for this workspace';
     expect(await workspaceAdminPage.getNoActiveRuntimeText()).toEqual(noActiveRuntimeText);
   });
 
@@ -62,9 +63,10 @@ describe('Workspace Admin', () => {
     await workspaceAdminPage.clickNotebookPreviewButton();
     const adminNotebookPreviewPage = new AdminNotebookPreviewPage(page);
     await adminNotebookPreviewPage.waitForLoad();
-    const previewCode = await adminNotebookPreviewPage.getFormattedCode(); 
+    const previewCode = await adminNotebookPreviewPage.getFormattedCode();
     expect(previewCode.some((item) => item.includes('import pandas'))).toBe(true);
     expect(previewCode.some((item) => item.includes('import os'))).toBe(true);
+    expect(await adminNotebookPreviewPage.getNamespaceText()).toEqual(workspaceNamespace);
     await adminNotebookPreviewPage.clickNamespaceLink();
     await workspaceAdminPage.waitForLoad();
   });
@@ -75,8 +77,7 @@ describe('Workspace Admin', () => {
     await workspaceAdminPage.getWorkspaceNamespaceInput().type(workspaceNamespace);
     workspaceAdminPage.clickLoadWorkspaceButton();
     await workspaceAdminPage.waitForLoad();
-    const noActiveRuntimeText = 'No active runtimes exist for this workspace';
-    expect(await workspaceAdminPage.getWorkspaceHeader()).toEqual(noActiveRuntimeText);
+    expect(await workspaceAdminPage.getNoActiveRuntimeText()).toEqual(noActiveRuntimeText);
     await new WorkspacesPage(page).load();
     const workspaceCard = await WorkspaceCard.findCard(page, workspaceName);
     await workspaceCard.clickWorkspaceName();
@@ -91,13 +92,15 @@ describe('Workspace Admin', () => {
     await workspaceAdminPage.getWorkspaceNamespaceInput().type(workspaceNamespace);
     workspaceAdminPage.clickLoadWorkspaceButton();
     await workspaceAdminPage.waitForLoad();
-    expect(await workspaceAdminPage.getRuntimeDeleteButton().exists()).toBeTruthy();
-    let deleteRuntimeModal1 = await workspaceAdminPage.clickRuntimeDeleteButton();
+    //verify the runtime status
+    expect(await workspaceAdminPage.getRuntimeStatus()).toEqual('Running');
+    const deleteRuntimeModal1 = await workspaceAdminPage.clickRuntimeDeleteButton();
     await deleteRuntimeModal1.clickCancelButton();
     await workspaceAdminPage.waitForLoad();
-    let deleteRuntimeModal2 = await workspaceAdminPage.clickRuntimeDeleteButton();
+    const deleteRuntimeModal2 = await workspaceAdminPage.clickRuntimeDeleteButton();
     await deleteRuntimeModal2.clickDeleteButton();
     await workspaceAdminPage.waitForLoad();
-    expect(await workspaceAdminPage.getRuntimeStatus()).toEqual('Deleting');
+    //verify the runtime status
+    expect(await workspaceAdminPage.getRuntimeDeleteStatus()).toEqual('Deleting');
   });
 });
