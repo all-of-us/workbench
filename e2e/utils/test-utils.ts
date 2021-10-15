@@ -16,7 +16,7 @@ import { config } from 'resources/workbench-config';
 import { logger } from 'libs/logger';
 import { authenticator } from 'otplib';
 import AuthenticatedPage from 'app/page/authenticated-page';
-import { AccessTierDisplayNames } from '../app/page/workspace-edit-page';
+import { AccessTierDisplayNames } from 'app/page/workspace-edit-page';
 
 export async function signOut(page: Page): Promise<void> {
   await page.evaluate(() => {
