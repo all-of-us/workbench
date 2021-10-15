@@ -51,30 +51,30 @@ describe('DataAccessRequirements', () => {
     })
 
     it('should return all modules from getEnabledModules by default (all FFs enabled)', () => {
-        const enabledModules = getVisibleModules(allModules);
+        const enabledModules = getVisibleModules(allModules, profile);
         allModules.forEach(module => expect(enabledModules.includes(module)).toBeTruthy());
     });
 
     it('should not return the RAS module from getEnabledModules when its feature flag is disabled', () => {
         serverConfigStore.set({config: {...defaultServerConfig, enableRasLoginGovLinking: false}});
-        const enabledModules = getVisibleModules(allModules);
+        const enabledModules = getVisibleModules(allModules, profile);
         expect(enabledModules.includes(AccessModule.RASLINKLOGINGOV)).toBeFalsy();
     });
 
     it('should not return the ERA module from getEnabledModules when its feature flag is disabled', () => {
         serverConfigStore.set({config: {...defaultServerConfig, enableEraCommons: false}});
-        const enabledModules = getVisibleModules(allModules);
+        const enabledModules = getVisibleModules(allModules, profile);
         expect(enabledModules.includes(AccessModule.ERACOMMONS)).toBeFalsy();
     });
 
     it('should not return the Compliance module from getEnabledModules when its feature flag is disabled', () => {
         serverConfigStore.set({config: {...defaultServerConfig, enableComplianceTraining: false}});
-        const enabledModules = getVisibleModules(allModules);
+        const enabledModules = getVisibleModules(allModules, profile);
         expect(enabledModules.includes(AccessModule.COMPLIANCETRAINING)).toBeFalsy();
     });
 
     it('should return the first module (2FA) from getActiveModule when no modules have been completed', () => {
-        const enabledModules = getVisibleModules(allModules);
+        const enabledModules = getVisibleModules(allModules, profile);
         const activeModule = getActiveModule(enabledModules, profile);
 
         expect(activeModule).toEqual(allModules[0]);
@@ -92,7 +92,7 @@ describe('DataAccessRequirements', () => {
             }
         };
 
-        const enabledModules = getVisibleModules(allModules);
+        const enabledModules = getVisibleModules(allModules, profile);
         const activeModule = getActiveModule(enabledModules, testProfile);
 
         expect(activeModule).toEqual(allModules[1]);
@@ -110,7 +110,7 @@ describe('DataAccessRequirements', () => {
             }
         };
 
-        const enabledModules = getVisibleModules(allModules);
+        const enabledModules = getVisibleModules(allModules, profile);
         const activeModule = getActiveModule(enabledModules, testProfile);
 
         expect(activeModule).toEqual(allModules[1]);
@@ -131,7 +131,7 @@ describe('DataAccessRequirements', () => {
             }
         };
 
-        const enabledModules = getVisibleModules(allModules);
+        const enabledModules = getVisibleModules(allModules, profile);
         const activeModule = getActiveModule(enabledModules, testProfile);
 
         // update this if the order changes
@@ -156,7 +156,7 @@ describe('DataAccessRequirements', () => {
             }
         };
 
-        const enabledModules = getVisibleModules(allModules);
+        const enabledModules = getVisibleModules(allModules, profile);
         const activeModule = getActiveModule(enabledModules, testProfile);
 
         expect(activeModule).toEqual(allModules[3]);
@@ -174,7 +174,7 @@ describe('DataAccessRequirements', () => {
             }
         };
 
-        const enabledModules = getVisibleModules(allModules);
+        const enabledModules = getVisibleModules(allModules, profile);
         const activeModule = getActiveModule(enabledModules, testProfile);
 
         expect(activeModule).toBeUndefined();
@@ -194,7 +194,7 @@ describe('DataAccessRequirements', () => {
             }
         };
 
-        const enabledModules = getVisibleModules(allModules);
+        const enabledModules = getVisibleModules(allModules, profile);
 
         let activeModule = getActiveModule(enabledModules, testProfile);
         expect(activeModule).toEqual(AccessModule.RASLINKLOGINGOV)
@@ -490,6 +490,9 @@ describe('DataAccessRequirements', () => {
             profile: {
                 ...ProfileStubVariables.PROFILE_STUB,
                 tierEligibilities: [{
+                    accessTierShortName: AccessTierShortNames.Registered,
+                    eraRequired: true
+                },{
                     accessTierShortName: AccessTierShortNames.Controlled,
                     eraRequired: false
                 }]
