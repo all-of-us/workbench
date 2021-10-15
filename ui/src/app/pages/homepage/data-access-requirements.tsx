@@ -1,6 +1,7 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {useEffect, useState} from 'react';
+import assert from "assert";
 
 import {useQuery} from 'app/components/app-router';
 import {Button, Clickable} from 'app/components/buttons';
@@ -293,10 +294,10 @@ const selfBypass = async(spinnerProps: WithSpinnerOverlayProps, reloadProfile: F
   reloadProfile();
 };
 const getVisibleRTModules = (profile: Profile): AccessModule[] => {
-  return fp.filter(module=> maybeRemoveEraCommonsModules(profile, module),rtModules);
+  return fp.filter(module=> isEraCommonsModuleRequiredByInstitution(profile, module),rtModules);
 }
 
-const maybeRemoveEraCommonsModules = (profile: Profile, moduleNames: AccessModule): boolean => {
+const isEraCommonsModuleRequiredByInstitution = (profile: Profile, moduleNames: AccessModule): boolean => {
   // Remove the eRA Commons module when the flag to enable RAS is set and the user's
   // institution does not require eRA Commons for RT.
 
@@ -314,7 +315,7 @@ const maybeRemoveEraCommonsModules = (profile: Profile, moduleNames: AccessModul
 export const getVisibleModules = (modules: AccessModule[], profile: Profile): AccessModule[] => fp.flow(
     fp.map(getAccessModuleConfig),
     fp.filter(moduleConfig => moduleConfig.isEnabledInEnvironment),
-    fp.filter(moduleConfig => maybeRemoveEraCommonsModules(profile, moduleConfig.moduleName)),
+    fp.filter(moduleConfig => isEraCommonsModuleRequiredByInstitution(profile, moduleConfig.moduleName)),
     fp.map(moduleConfig => moduleConfig.moduleName)
 )(modules);
 
@@ -484,8 +485,6 @@ interface CardProps {
 }
 const ModulesForCard = (props: CardProps) => {
   const {profile, modules, activeModule, spinnerProps} = props;
-//  const visibleModules = getVisibleModules(modules, profile)
- // assert(visibleModules.includes(activeModule));
   return <FlexColumn style={styles.modulesContainer}>
     {modules.map(moduleName =>
         <MaybeModule
@@ -561,7 +560,6 @@ const DuccCard = (props: {profile: Profile, activeModule: AccessModule, spinnerP
 export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerProps: WithSpinnerOverlayProps) => {
   const {profile, reload} = useStore(profileStore);
   const {config: {unsafeAllowSelfBypass}} = useStore(serverConfigStore);
-  //maybeRemoveEraCommonsModule(profile);
   const visibleModules = getVisibleModules(allModules, profile);
 
   useEffect(() => {

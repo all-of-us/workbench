@@ -50,20 +50,21 @@ describe('DataAccessRequirements', () => {
         jest.useRealTimers();
     })
 
-    it('should return all modules from getVisibleModules by default (all FFs enabled)', () => {
+
+    it('should return all modules from getEnabledModules by default (all FFs enabled)', () => {
         const enabledModules = getVisibleModules(allModules, profile);
         allModules.forEach(module => expect(enabledModules.includes(module)).toBeTruthy());
     });
 
-    it('should not return the RAS module from getVisibleModules when its feature flag is disabled', () => {
-        serverConfigStore.set({config: {...defaultServerConfig, enableRasLoginGovLinking: false}});
+    it('should not return the RAS module from getEnabledModules when its feature flag is disabled', () => {
+        serverConfigStore.set({config: {...defaultServerConfig, enableRasLoginGovLinking: false, enforceRasLoginGovLinking: false}});
         const enabledModules = getVisibleModules(allModules, profile);
         expect(enabledModules.includes(AccessModule.RASLINKLOGINGOV)).toBeFalsy();
     });
 
-    it('should return the RAS module from getVisibleModules when ' +
+    it('should return the RAS module from getEnabledModules when ' +
         'enforceRasLoginGovLinking is enabled, enableRasLoginGovLinking is not', () => {
-        serverConfigStore.set({config: {...defaultServerConfig, enableRasLoginGovLinking: false}});
+        serverConfigStore.set({config: {...defaultServerConfig, enableRasLoginGovLinking: false, enforceRasLoginGovLinking: true}});
         const enabledModules = getVisibleModules(allModules, profile);
         expect(enabledModules.includes(AccessModule.RASLINKLOGINGOV)).toBeTruthy();
     });
