@@ -16,6 +16,7 @@ import {CSSTransition, TransitionGroup} from 'react-transition-group';
 
 import {faCircle} from '@fortawesome/free-solid-svg-icons/faCircle';
 import {faSyncAlt} from '@fortawesome/free-solid-svg-icons/faSyncAlt';
+import {faTerminal} from '@fortawesome/free-solid-svg-icons/faTerminal';
 import {SelectionList} from 'app/cohort-search/selection-list/selection-list.component';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {TooltipTrigger} from 'app/components/popups';
@@ -304,6 +305,9 @@ export const HelpSidebar = fp.flow(
     });
 
     iconConfig(iconKey): IconConfig {
+      const {runtimeStore} = this.props;
+      let status = runtimeStore && runtimeStore.runtime && runtimeStore.runtime.status;
+
       return {
         'criteria': {
           id: 'criteria',
@@ -368,6 +372,15 @@ export const HelpSidebar = fp.flow(
           style: {height: '22px', width: '22px'},
           tooltip: 'Cloud Analysis Environment'
         },
+        'terminal': {
+          id: 'terminal',
+          disabled: status !== RuntimeStatus.Running,
+          faIcon: faTerminal,
+          label: 'Terminal Icon',
+          showIcon: () => true,
+          style: {height: '22px', width: '22px'},
+          tooltip: status === RuntimeStatus.Running ? 'Cloud Analysis Terminal' : 'Terminal needs an active cloud environment to run'
+        },
         'genomicExtractions': {
           id: 'genomicExtractions',
           disabled: false,
@@ -392,7 +405,7 @@ export const HelpSidebar = fp.flow(
       ].filter(key => this.iconConfig(key).showIcon());
 
       if (WorkspacePermissionsUtil.canWrite(this.props.workspace.accessLevel)) {
-        keys.push('runtime');
+        keys.push('runtime', 'terminal');
       }
 
       if (serverConfigStore.get().config.enableGenomicExtraction &&
