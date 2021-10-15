@@ -195,19 +195,6 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
         response.items(cohortBuilderService.findDemoChartInfo(genderOrSexType, ageType, request)));
   }
 
-  //  TODO: Remove this method call once the enableStandardSource flag is enabled
-  @Override
-  public ResponseEntity<DomainCount> findDomainCount(
-      String workspaceNamespace, String workspaceId, String domain, String term) {
-    workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-        workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-    validateDomain(domain);
-    validateTerm(term);
-    Long count = cohortBuilderService.findDomainCount(domain, term);
-    return ResponseEntity.ok(
-        new DomainCount().conceptCount(count).domain(Domain.valueOf(domain)).name(domain));
-  }
-
   @Override
   public ResponseEntity<DomainCount> findDomainCountByStandardSource(
       String workspaceNamespace, String workspaceId, String domain, Boolean standard, String term) {
