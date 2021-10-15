@@ -323,22 +323,11 @@ public class CBCriteriaDaoTest extends SpringTest {
   }
 
   @Test
-  public void findDomainCount() {
-    assertThat(cbCriteriaDao.findDomainCount("term", Domain.CONDITION.toString())).isEqualTo(1);
-  }
-
-  @Test
   public void findDomainCountAndStandard() {
     assertThat(cbCriteriaDao.findDomainCountAndStandard("term", Domain.CONDITION.toString(), false))
         .isEqualTo(1);
     assertThat(cbCriteriaDao.findDomainCountAndStandard("term", Domain.CONDITION.toString(), true))
         .isEqualTo(0);
-  }
-
-  @Test
-  public void findDomainCountOnCode() {
-    assertThat(cbCriteriaDao.findDomainCountOnCode("120", Domain.CONDITION.toString()))
-        .isEqualTo(2);
   }
 
   @Test

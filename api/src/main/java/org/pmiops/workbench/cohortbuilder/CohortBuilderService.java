@@ -70,8 +70,6 @@ public interface CohortBuilderService {
   List<DemoChartInfo> findDemoChartInfo(
       GenderOrSexType genderOrSexType, AgeType ageType, SearchRequest request);
 
-  Long findDomainCount(String domain, String term);
-
   Long findDomainCountByStandard(String domain, String term, Boolean standard);
 
   List<DomainCard> findDomainCards();

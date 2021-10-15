@@ -180,21 +180,11 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
 
   @Query(
       value =
-          "select count(*) from DbCriteria where match(fullText, concat(:term, '+[', :domain, '_rank1]')) > 0")
-  Long findDomainCount(@Param("term") String term, @Param("domain") String domain);
-
-  @Query(
-      value =
           "select count(*) from DbCriteria where standard =:standard and match(fullText, concat(:term, '+[', :domain, '_rank1]')) > 0")
   Long findDomainCountAndStandard(
       @Param("term") String term,
       @Param("domain") String domain,
       @Param("standard") Boolean standard);
-
-  @Query(
-      value =
-          "select count(*) from DbCriteria where code like upper(concat(:term,'%')) and match(fullText, concat('+[', :domain, '_rank1]')) > 0")
-  Long findDomainCountOnCode(@Param("term") String term, @Param("domain") String domain);
 
   @Query(
       value =

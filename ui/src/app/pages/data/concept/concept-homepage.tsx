@@ -242,9 +242,7 @@ export const ConceptHomepage = fp.flow(withCurrentCohortSearchContext(), withCur
     getDomainCounts(domain: string, standard: boolean) {
       const {id, namespace} = this.props.workspace;
       const {currentInputString} = this.state;
-      return serverConfigStore.get().config.enableStandardSourceDomains
-        ? cohortBuilderApi().findDomainCountByStandardSource(namespace, id, domain, standard, currentInputString)
-        : cohortBuilderApi().findDomainCount(namespace, id, domain, currentInputString);
+      return cohortBuilderApi().findDomainCountByStandardSource(namespace, id, domain, standard, currentInputString);
     }
 
     handleSearchKeyPress(e) {
