@@ -1,7 +1,6 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {useEffect, useState} from 'react';
-import assert from "assert";
 
 import {useQuery} from 'app/components/app-router';
 import {Button, Clickable} from 'app/components/buttons';
@@ -293,37 +292,29 @@ const selfBypass = async(spinnerProps: WithSpinnerOverlayProps, reloadProfile: F
   spinnerProps.hideSpinner();
   reloadProfile();
 };
+const getVisibleRTModules = (profile: Profile): AccessModule[] => {
+  return fp.filter(module=> maybeRemoveEraCommonsModules(profile, module),rtModules);
+}
 
-const maybeRemoveEraCommonsModule = (profile: Profile) => {
+const maybeRemoveEraCommonsModules = (profile: Profile, moduleNames: AccessModule): boolean => {
   // Remove the eRA Commons module when the flag to enable RAS is set and the user's
   // institution does not require eRA Commons for RT.
 
+  if (moduleNames !== AccessModule.ERACOMMONS) { return true;}
   const {enableRasLoginGovLinking} = serverConfigStore.get().config;
-  if (!enableRasLoginGovLinking) { return; }
+  if (!enableRasLoginGovLinking) { return true; }
 
-  const eraCommonsIndexAllModules = allModules.findIndex(module => module === AccessModule.ERACOMMONS);
-  const eraCommonsIndexRtModules = rtModules.findIndex(module => module === AccessModule.ERACOMMONS);
-
-  const isEraCommonsRequiredByInstitution = (profile: Profile): Boolean => {
-    const registeredTier = profile.tierEligibilities
-        .find(value => value.accessTierShortName === AccessTierShortNames.Registered);
-    return !!registeredTier ? registeredTier.eraRequired : true;
-  }
-
-  if (eraCommonsIndexAllModules === -1 && eraCommonsIndexRtModules === -1 && isEraCommonsRequiredByInstitution(profile)) {
-    // Add eraCommons back if is Institution does required eRa Commons for RT and it was already removed from all Modules
-    allModules.splice(2, 0, AccessModule.ERACOMMONS);
-    rtModules.splice(2, 0, AccessModule.ERACOMMONS);
-    return;
-  } else if (!isEraCommonsRequiredByInstitution(profile)) {
-    allModules.splice(eraCommonsIndexAllModules, 1);
-    rtModules.splice(eraCommonsIndexRtModules, 1);
-  }
+  return fp.flow(
+      fp.filter({accessTierShortName: AccessTierShortNames.Registered}),
+      fp.some('eraRequired')
+  )(profile.tierEligibilities);
 }
+
 // exported for test
-export const getVisibleModules = (modules: AccessModule[]): AccessModule[] => fp.flow(
+export const getVisibleModules = (modules: AccessModule[], profile: Profile): AccessModule[] => fp.flow(
     fp.map(getAccessModuleConfig),
     fp.filter(moduleConfig => moduleConfig.isEnabledInEnvironment),
+    fp.filter(moduleConfig => maybeRemoveEraCommonsModules(profile, moduleConfig.moduleName)),
     fp.map(moduleConfig => moduleConfig.moduleName)
 )(modules);
 
@@ -493,10 +484,10 @@ interface CardProps {
 }
 const ModulesForCard = (props: CardProps) => {
   const {profile, modules, activeModule, spinnerProps} = props;
-  const visibleModules = getVisibleModules(modules)
-  assert(visibleModules.includes(activeModule));
+//  const visibleModules = getVisibleModules(modules, profile)
+ // assert(visibleModules.includes(activeModule));
   return <FlexColumn style={styles.modulesContainer}>
-    {visibleModules.map(moduleName =>
+    {modules.map(moduleName =>
         <MaybeModule
             key={moduleName}
             moduleName={moduleName}
@@ -551,7 +542,7 @@ const RegisteredTierCard = (props: {profile: Profile, activeModule: AccessModule
       <DataDetail icon='physical' text='Physical measurements'/>
       <DataDetail icon='wearable' text='Wearable devices'/>
     </FlexColumn>
-    <ModulesForCard profile={profile} modules={rtModules} activeModule={activeModule} spinnerProps={spinnerProps}/>
+    <ModulesForCard profile={profile} modules={getVisibleRTModules(profile)} activeModule={activeModule} spinnerProps={spinnerProps}/>
   </FlexRow>;
 };
 
@@ -570,8 +561,8 @@ const DuccCard = (props: {profile: Profile, activeModule: AccessModule, spinnerP
 export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerProps: WithSpinnerOverlayProps) => {
   const {profile, reload} = useStore(profileStore);
   const {config: {unsafeAllowSelfBypass}} = useStore(serverConfigStore);
-  maybeRemoveEraCommonsModule(profile);
-  const visibleModules = getVisibleModules(allModules);
+  //maybeRemoveEraCommonsModule(profile);
+  const visibleModules = getVisibleModules(allModules, profile);
 
   useEffect(() => {
     syncIncompleteModules(visibleModules, profile, reload);
