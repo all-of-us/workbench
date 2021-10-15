@@ -30,7 +30,7 @@ const local: IEnvConfig = {
   ACCESS_TEST_USER: process.env.ACCESS_TEST_USER || 'puppet-access-tester-1@fake-research-aou.org',
   ADMIN_TEST_USER: process.env.ADMIN_TEST_USER || 'puppeteer-admin-1@fake-research-aou.org',
   DEFAULT_CDR_VERSION_NAME: 'Synthetic Dataset v3',
-  ALTERNATIVE_CDR_VERSION_NAME: 'Synthetic Dataset v3 with WGS',
+  ALTERNATIVE_CDR_VERSION_NAME: 'Synthetic Dataset v2',
   LOGIN_GOV_USER: 'aou-dev-registration@broadinstitute.org'
 };
 
@@ -45,7 +45,7 @@ const test: IEnvConfig = {
   ACCESS_TEST_USER: process.env.ACCESS_TEST_USER || 'puppet-access-tester-1@fake-research-aou.org',
   ADMIN_TEST_USER: process.env.ADMIN_TEST_USER || 'puppeteer-admin-1@fake-research-aou.org',
   DEFAULT_CDR_VERSION_NAME: 'Synthetic Dataset v3',
-  ALTERNATIVE_CDR_VERSION_NAME: 'Synthetic Dataset v3 with WGS',
+  ALTERNATIVE_CDR_VERSION_NAME: 'Synthetic Dataset v2',
   LOGIN_GOV_USER: 'aou-dev-registration@broadinstitute.org'
 };
 
