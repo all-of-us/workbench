@@ -50,30 +50,31 @@ describe('DataAccessRequirements', () => {
         jest.useRealTimers();
     })
 
-    it('should return all modules from getEnabledModules by default (all FFs enabled)', () => {
+    it('should return all modules from getVisibleModules by default (all FFs enabled)', () => {
         const enabledModules = getVisibleModules(allModules, profile);
         allModules.forEach(module => expect(enabledModules.includes(module)).toBeTruthy());
     });
 
-    it('should not return the RAS module from getEnabledModules when its feature flag is disabled', () => {
-        serverConfigStore.set({config: {...defaultServerConfig, enableRasLoginGovLinking: false, enforceRasLoginGovLinking: false}});
+    it('should not return the RAS module from getVisibleModules when its feature flag is disabled', () => {
+        serverConfigStore.set({config: {...defaultServerConfig, enableRasLoginGovLinking: false}});
         const enabledModules = getVisibleModules(allModules, profile);
         expect(enabledModules.includes(AccessModule.RASLINKLOGINGOV)).toBeFalsy();
     });
 
-    it('should return the RAS module from getEnabledModules when enforceRasLoginGovLinking is enabled, enableRasLoginGovLinking is not', () => {
-        serverConfigStore.set({config: {...defaultServerConfig, enableRasLoginGovLinking: false, enforceRasLoginGovLinking: true}});
-        const enabledModules = getEnabledModules(allModules);
+    it('should return the RAS module from getVisibleModules when ' +
+        'enforceRasLoginGovLinking is enabled, enableRasLoginGovLinking is not', () => {
+        serverConfigStore.set({config: {...defaultServerConfig, enableRasLoginGovLinking: false}});
+        const enabledModules = getVisibleModules(allModules, profile);
         expect(enabledModules.includes(AccessModule.RASLINKLOGINGOV)).toBeTruthy();
     });
 
-    it('should not return the ERA module from getEnabledModules when its feature flag is disabled', () => {
+    it('should not return the ERA module from getVisibleModules when its feature flag is disabled', () => {
         serverConfigStore.set({config: {...defaultServerConfig, enableEraCommons: false}});
         const enabledModules = getVisibleModules(allModules, profile);
         expect(enabledModules.includes(AccessModule.ERACOMMONS)).toBeFalsy();
     });
 
-    it('should not return the Compliance module from getEnabledModules when its feature flag is disabled', () => {
+    it('should not return the Compliance module from getVisibleModules when its feature flag is disabled', () => {
         serverConfigStore.set({config: {...defaultServerConfig, enableComplianceTraining: false}});
         const enabledModules = getVisibleModules(allModules, profile);
         expect(enabledModules.includes(AccessModule.COMPLIANCETRAINING)).toBeFalsy();
