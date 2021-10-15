@@ -4,6 +4,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -38,6 +39,8 @@ import org.pmiops.workbench.db.model.DbEgressEvent.EgressEventStatus;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.mail.MailService;
+import org.pmiops.workbench.mail.MailService.EgressRemediationAction;
 import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
 import org.pmiops.workbench.test.FakeClock;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,6 +62,7 @@ public class EgressRemediationServiceTest extends SpringTest {
   @MockBean private UserService mockUserService;
   @MockBean private LeonardoNotebooksClient mockLeonardoNotebooksClient;
   @MockBean private EgressEventAuditor mockEgressEventAuditor;
+  @MockBean private MailService mockMailService;
 
   @Autowired private FakeClock fakeClock;
   @Autowired private WorkspaceDao workspaceDao;
@@ -69,6 +73,7 @@ public class EgressRemediationServiceTest extends SpringTest {
 
   private long userId;
   private DbWorkspace dbWorkspace;
+  private DbWorkspace dbWorkspace2;
 
   @TestConfiguration
   @Import({EgressRemediationService.class})
@@ -94,6 +99,11 @@ public class EgressRemediationServiceTest extends SpringTest {
     dbWorkspace.setWorkspaceNamespace("ns");
     dbWorkspace.setGoogleProject("proj");
     dbWorkspace = workspaceDao.save(dbWorkspace);
+
+    dbWorkspace2 = new DbWorkspace();
+    dbWorkspace2.setWorkspaceNamespace("ns2");
+    dbWorkspace2.setGoogleProject("proj2");
+    dbWorkspace2 = workspaceDao.save(dbWorkspace2);
 
     // Ideally we would use UserService's implementation directly, but the interface is too
     // complicated. Instead, just provide a minimal fake implementation of the relevant methods.
@@ -235,15 +245,10 @@ public class EgressRemediationServiceTest extends SpringTest {
   public void testRemediateEgressEvent_noIncidentMergeAcrossWorkspaces() {
     workbenchConfig.egressAlertRemediationPolicy = suspendXMinutesOnXIncidentsPolicy();
 
-    DbWorkspace workspace2 = new DbWorkspace();
-    workspace2.setWorkspaceNamespace("ns2");
-    workspace2.setGoogleProject("proj2");
-    workspace2 = workspaceDao.save(workspace2);
-
     saveOldEvents(
         oldEvent(Duration.ofHours(3)).setWorkspace(dbWorkspace),
-        oldEvent(Duration.ofHours(3)).setWorkspace(workspace2),
-        oldEvent(Duration.ofHours(4)).setWorkspace(workspace2));
+        oldEvent(Duration.ofHours(3)).setWorkspace(dbWorkspace2),
+        oldEvent(Duration.ofHours(4)).setWorkspace(dbWorkspace2));
 
     egressRemediationService.remediateEgressEvent(saveNewEvent());
 
@@ -254,11 +259,6 @@ public class EgressRemediationServiceTest extends SpringTest {
   @Test
   public void testRemediateEgressEvent_noIncidentMergeMissingWorkspace() {
     workbenchConfig.egressAlertRemediationPolicy = suspendXMinutesOnXIncidentsPolicy();
-
-    DbWorkspace workspace2 = new DbWorkspace();
-    workspace2.setWorkspaceNamespace("ns2");
-    workspace2.setGoogleProject("proj2");
-    workspace2 = workspaceDao.save(workspace2);
 
     saveOldEvents(
         oldEvent(Duration.ofHours(3)).setWorkspace(dbWorkspace),
@@ -297,7 +297,7 @@ public class EgressRemediationServiceTest extends SpringTest {
   }
 
   @Test
-  public void testRemediateEgressEvent_suspendCompute() {
+  public void testRemediateEgressEvent_suspendCompute() throws Exception {
     workbenchConfig.egressAlertRemediationPolicy.escalations =
         ImmutableList.of(suspendComputeAfter(1, Duration.ofMinutes(1)));
 
@@ -309,10 +309,13 @@ public class EgressRemediationServiceTest extends SpringTest {
 
     DbEgressEvent event = egressEventDao.findById(eventId).get();
     assertThat(event.getStatus()).isEqualTo(EgressEventStatus.REMEDIATED);
+
+    verify(mockMailService)
+        .sendEgressRemediationEmail(any(), eq(EgressRemediationAction.SUSPEND_COMPUTE));
   }
 
   @Test
-  public void testRemediateEgressEvent_disableUser() {
+  public void testRemediateEgressEvent_disableUser() throws Exception {
     workbenchConfig.egressAlertRemediationPolicy.escalations =
         ImmutableList.of(disableUserAfter(1));
 
@@ -326,6 +329,9 @@ public class EgressRemediationServiceTest extends SpringTest {
 
     DbEgressEvent event = egressEventDao.findById(eventId).get();
     assertThat(event.getStatus()).isEqualTo(EgressEventStatus.REMEDIATED);
+
+    verify(mockMailService)
+        .sendEgressRemediationEmail(any(), eq(EgressRemediationAction.DISABLE_USER));
   }
 
   @Test
@@ -335,6 +341,33 @@ public class EgressRemediationServiceTest extends SpringTest {
 
     egressRemediationService.remediateEgressEvent(saveNewEvent());
     verify(mockEgressEventAuditor).fireRemediateEgressEvent(any(), notNull());
+  }
+
+  @Test
+  public void testRemediateEgressEvent_notify_skipIfRecentEvent() {
+    workbenchConfig.egressAlertRemediationPolicy.escalations =
+        ImmutableList.of(suspendComputeAfter(1, Duration.ofMinutes(1)));
+
+    saveOldEvents(oldEvent(Duration.ofMinutes(30L)).setStatus(EgressEventStatus.REMEDIATED));
+    egressRemediationService.remediateEgressEvent(saveNewEvent());
+
+    verifyZeroInteractions(mockMailService);
+  }
+
+  @Test
+  public void testRemediateEgressEvent_notify_sendIfRecentUnrelatedEvents() throws Exception {
+    workbenchConfig.egressAlertRemediationPolicy.escalations =
+        ImmutableList.of(suspendComputeAfter(1, Duration.ofMinutes(1)));
+
+    saveOldEvents(
+        oldEvent(Duration.ofMinutes(10L))
+            .setStatus(EgressEventStatus.REMEDIATED)
+            .setWorkspace(dbWorkspace2),
+        oldEvent(Duration.ofHours(2L)).setStatus(EgressEventStatus.REMEDIATED));
+    egressRemediationService.remediateEgressEvent(saveNewEvent());
+
+    verify(mockMailService)
+        .sendEgressRemediationEmail(any(), eq(EgressRemediationAction.SUSPEND_COMPUTE));
   }
 
   private void saveOldEvents(Duration... ages) {

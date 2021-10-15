@@ -37,6 +37,10 @@ public class EgressRemediationService {
   // Heuristic window for merging egress alerts into an "incident", for characterizing prior user
   // behavior.
   private static final Duration EGRESS_INCIDENT_MERGE_WINDOW = Duration.ofMinutes(90L);
+  // We use similar logic to debounce email notifications to users. Often we'll receive multiple
+  // alerts on different windows for the same effective incident; avoid resending emails in this
+  // case (still suspend, to be safe).
+  private static final Duration EGRESS_NOTIFY_DEBOUNCE_TIME = Duration.ofHours(1L);
 
   private static final Logger log = Logger.getLogger(EgressRemediationService.class.getName());
 
@@ -107,10 +111,13 @@ public class EgressRemediationService {
           } else {
             throw new ServerErrorException("egress alert policy is invalid: " + e);
           }
-          try {
-            mailService.sendEgressRemediationEmail(user, action);
-          } catch (MessagingException ex) {
-            throw new ServerErrorException("failed to send egress remediation email", ex);
+
+          if (shouldNotifyForEvent(event)) {
+            try {
+              mailService.sendEgressRemediationEmail(user, action);
+            } catch (MessagingException ex) {
+              throw new ServerErrorException("failed to send egress remediation email", ex);
+            }
           }
         });
 
@@ -167,6 +174,23 @@ public class EgressRemediationService {
     }
 
     return incidentCount;
+  }
+
+  private boolean shouldNotifyForEvent(DbEgressEvent event) {
+    if (event.getWorkspace() == null) {
+      return true;
+    }
+
+    Timestamp debounceAfter =
+        Timestamp.from(event.getCreationTime().toInstant().minus(EGRESS_NOTIFY_DEBOUNCE_TIME));
+    List<DbEgressEvent> priorEvents =
+        egressEventDao.findAllByUserAndWorkspaceAndCreationTimeBetweenAndEgressEventIdNot(
+            event.getUser(),
+            event.getWorkspace(),
+            debounceAfter,
+            event.getCreationTime(),
+            event.getEgressEventId());
+    return priorEvents.isEmpty();
   }
 
   private static Optional<Escalation> matchEscalation(
