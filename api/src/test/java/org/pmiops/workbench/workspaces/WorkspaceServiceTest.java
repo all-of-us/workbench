@@ -437,7 +437,7 @@ public class WorkspaceServiceTest {
             .setBillingAccountName(newBillingAccount)
             .setBillingEnabled(true);
     when(mockCloudBillingClient.pollUntilBillingAccountLinked(
-            newBillingAccount, workspace.getGoogleProject()))
+            workspace.getGoogleProject(), newBillingAccount))
         .thenReturn(projectBillingInfo);
 
     assertThat(workspace.getBillingAccountName())
@@ -466,7 +466,7 @@ public class WorkspaceServiceTest {
             .setBillingAccountName(workbenchConfig.billing.freeTierBillingAccountName())
             .setBillingEnabled(true);
     when(mockCloudBillingClient.pollUntilBillingAccountLinked(
-            workbenchConfig.billing.freeTierBillingAccountName(), workspace.getGoogleProject()))
+            workspace.getGoogleProject(), workbenchConfig.billing.freeTierBillingAccountName()))
         .thenReturn(projectBillingInfo);
     workspaceService.updateWorkspaceBillingAccount(
         workspace, workbenchConfig.billing.freeTierBillingAccountName());
@@ -506,7 +506,7 @@ public class WorkspaceServiceTest {
             .setBillingAccountName(newBillingAccount)
             .setBillingEnabled(false);
     when(mockCloudBillingClient.pollUntilBillingAccountLinked(
-            newBillingAccount, workspace.getGoogleProject()))
+            workspace.getGoogleProject(), newBillingAccount))
         .thenReturn(projectBillingInfo);
 
     assertThrows(

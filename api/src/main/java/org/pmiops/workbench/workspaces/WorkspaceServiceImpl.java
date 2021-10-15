@@ -36,6 +36,7 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserRecentWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
@@ -419,17 +420,14 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
     try {
       ProjectBillingInfo projectBillingInfo =
           cloudBillingClient.pollUntilBillingAccountLinked(
-              newBillingAccountName, workspace.getGoogleProject());
+              workspace.getGoogleProject(), newBillingAccountName);
       if (!projectBillingInfo.getBillingEnabled()) {
-        throw new BadRequestException(
+        throw new FailedPreconditionException(
             "Provided billing account is closed. Please provide an open account.");
       }
     } catch (IOException | InterruptedException e) {
       throw new ServerErrorException(
-          String.format(
-              "Error when poll billing account %s for project %s",
-              newBillingAccountName, workspace.getGoogleProject()),
-          e);
+          String.format("Timed out while verifying billing account update."), e);
     }
 
     workspace.setBillingAccountName(newBillingAccountName);
