@@ -26,7 +26,7 @@ import {
 import {serverConfigStore} from 'app/utils/stores';
 import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {Concept, Domain, DomainCard as ConceptDomainCard, DomainInfo, SurveyModule} from 'generated/fetch';
+import {Concept, Domain, DomainCard as ConceptDomainCard, SurveyModule} from 'generated/fetch';
 const styles = reactStyles({
   searchBar: {
     boxShadow: '0 4px 12px 0 rgba(0,0,0,0.15)', height: '3rem', width: '64.3%', lineHeight: '19px', paddingLeft: '2rem',
@@ -75,12 +75,10 @@ const styles = reactStyles({
 });
 
 const DomainCard: React.FunctionComponent<{
-  conceptDomainCard: ConceptDomainCard, conceptDomainInfo: DomainInfo, browseInDomain: Function, updating: boolean
-}> = ({conceptDomainCard, conceptDomainInfo, browseInDomain, updating}) => {
-  const {enableStandardSourceDomains} = serverConfigStore.get().config;
-  // TODO cleanup with https://precisionmedicineinitiative.atlassian.net/browse/RW-7137
-  const conceptCount = enableStandardSourceDomains ? conceptDomainCard.conceptCount : conceptDomainInfo.allConceptCount;
-  const {name, participantCount} = enableStandardSourceDomains ? conceptDomainCard : conceptDomainInfo;
+  conceptDomainCard: ConceptDomainCard, browseInDomain: Function, updating: boolean
+}> = ({conceptDomainCard, browseInDomain, updating}) => {
+  const conceptCount = conceptDomainCard.conceptCount;
+  const {name, participantCount} = conceptDomainCard;
   return <DomainCardBase style={{width: 'calc(25% - 1rem)'}} data-test-id='domain-box'>
     <Clickable style={styles.domainBoxHeader}
          onClick={browseInDomain}
@@ -115,13 +113,11 @@ const SurveyCard: React.FunctionComponent<{survey: SurveyModule, browseSurvey: F
     </DomainCardBase>;
   };
 
-const PhysicalMeasurementsCard: React.FunctionComponent<{physicalMeasurementCard: ConceptDomainCard, physicalMeasurementInfo: DomainInfo,
+const PhysicalMeasurementsCard: React.FunctionComponent<{physicalMeasurementCard: ConceptDomainCard,
   browsePhysicalMeasurements: Function, updating: boolean}> =
-    ({physicalMeasurementCard, physicalMeasurementInfo, browsePhysicalMeasurements, updating}) => {
-      const {enableStandardSourceDomains} = serverConfigStore.get().config;
-      // TODO cleanup with https://precisionmedicineinitiative.atlassian.net/browse/RW-7137
-      const conceptCount = enableStandardSourceDomains ? physicalMeasurementCard.conceptCount : physicalMeasurementInfo.allConceptCount;
-      const {description, name, participantCount} = enableStandardSourceDomains ? physicalMeasurementCard : physicalMeasurementInfo;
+    ({physicalMeasurementCard, browsePhysicalMeasurements, updating}) => {
+      const conceptCount = physicalMeasurementCard.conceptCount;
+      const {description, name, participantCount} = physicalMeasurementCard;
       return <DomainCardBase style={{maxHeight: 'auto', width: '11.5rem'}}>
         <Clickable style={styles.domainBoxHeader}
           onClick={browsePhysicalMeasurements}
@@ -148,8 +144,6 @@ interface Props extends WithSpinnerOverlayProps, NavigationProps {
 interface State {
   // Array of domains and their metadata
   conceptDomainCards: Array<ConceptDomainCard>;
-  // Array of domains and their metadata
-  conceptDomainList: Array<DomainInfo>;
   // Array of surveys
   conceptSurveysList: Array<SurveyModule>;
   // Current string in search box
@@ -178,7 +172,6 @@ export const ConceptHomepage = fp.flow(withCurrentCohortSearchContext(), withCur
       super(props);
       this.state = {
         conceptDomainCards: [],
-        conceptDomainList: [],
         conceptSurveysList: [],
         currentInputString: props.cohortContext ? props.cohortContext.searchTerms : '',
         currentSearchString: props.cohortContext ? props.cohortContext.searchTerms : '',
@@ -199,21 +192,12 @@ export const ConceptHomepage = fp.flow(withCurrentCohortSearchContext(), withCur
 
     async loadDomainsAndSurveys() {
       const {cohortContext, workspace: {id, namespace}} = this.props;
-      const {enableStandardSourceDomains} = serverConfigStore.get().config;
-      // TODO cleanup with https://precisionmedicineinitiative.atlassian.net/browse/RW-7137
-      const getDomainCards = enableStandardSourceDomains
-        ? cohortBuilderApi().findDomainCards(namespace, id)
+      const getDomainCards = cohortBuilderApi().findDomainCards(namespace, id)
           .then(conceptDomainCards => this.setState({conceptDomainCards: conceptDomainCards.items}))
           .catch((e) => {
             this.setState({domainInfoError: true});
             console.error(e);
-          })
-        : cohortBuilderApi().findDomainInfos(namespace, id)
-        .then(conceptDomainInfo => this.setState({conceptDomainList: conceptDomainInfo.items}))
-        .catch((e) => {
-          this.setState({domainInfoError: true});
-          console.error(e);
-        });
+          });
       const getSurveyInfo = cohortBuilderApi().findSurveyModules(namespace, id)
         .then(surveysInfo => this.setState({conceptSurveysList: surveysInfo.items}))
         .catch((e) => {
@@ -222,12 +206,7 @@ export const ConceptHomepage = fp.flow(withCurrentCohortSearchContext(), withCur
         });
       await Promise.all([getDomainCards, getSurveyInfo]);
       if (cohortContext && cohortContext.searchTerms) {
-        // TODO cleanup with https://precisionmedicineinitiative.atlassian.net/browse/RW-7137
-        if (enableStandardSourceDomains) {
-          this.updateCardCounts();
-        } else {
-          this.updateCardCountsOld();
-        }
+        this.updateCardCounts();
       }
       this.setState({loadingDomains: false});
     }
@@ -241,7 +220,7 @@ export const ConceptHomepage = fp.flow(withCurrentCohortSearchContext(), withCur
       });
       const promises = [];
       conceptDomainCards.forEach(conceptDomain => {
-        promises.push(this.getDomainCounts(conceptDomain.domain.toString())
+        promises.push(this.getDomainCounts(conceptDomain.domain.toString(), conceptDomain.standard)
           .then(domainCount => {
             conceptDomain.conceptCount = domainCount.conceptCount;
             this.setState({domainsLoading: this.state.domainsLoading.filter(domain => domain !== conceptDomain.domain)});
@@ -259,40 +238,12 @@ export const ConceptHomepage = fp.flow(withCurrentCohortSearchContext(), withCur
       this.setState({conceptDomainCards, conceptSurveysList});
     }
 
-    // TODO remove with https://precisionmedicineinitiative.atlassian.net/browse/RW-7137
-    async updateCardCountsOld() {
-      const {id, namespace} = this.props.workspace;
-      const {conceptDomainList, conceptSurveysList, currentInputString} = this.state;
-      this.setState({
-        domainsLoading: conceptDomainList.map(domain => domain.domain),
-        surveysLoading: conceptSurveysList.map(survey => survey.name),
-      });
-      const promises = [];
-      conceptDomainList.forEach(conceptDomain => {
-        promises.push(this.getDomainCounts(conceptDomain.domain.toString())
-          .then(domainCount => {
-            conceptDomain.allConceptCount = domainCount.conceptCount;
-            this.setState({domainsLoading: this.state.domainsLoading.filter(domain => domain !== conceptDomain.domain)});
-          })
-        );
-      });
-      conceptSurveysList.forEach(conceptSurvey => {
-        promises.push(cohortBuilderApi().findSurveyCount(namespace, id, conceptSurvey.name, currentInputString)
-          .then(surveyCount => {
-            conceptSurvey.questionCount = surveyCount.conceptCount;
-            this.setState({surveysLoading: this.state.surveysLoading.filter(survey => survey !== conceptSurvey.name)});
-          }));
-      });
-      await Promise.all(promises);
-      this.setState({conceptDomainList, conceptSurveysList});
-    }
-
     // Temp function to use the correct endpoint based on the enableStandardSourceDomains config flag
-    getDomainCounts(domain: string) {
+    getDomainCounts(domain: string, standard: boolean) {
       const {id, namespace} = this.props.workspace;
       const {currentInputString} = this.state;
       return serverConfigStore.get().config.enableStandardSourceDomains
-        ? cohortBuilderApi().findDomainCountByStandardSource(namespace, id, domain, true, currentInputString)
+        ? cohortBuilderApi().findDomainCountByStandardSource(namespace, id, domain, standard, currentInputString)
         : cohortBuilderApi().findDomainCount(namespace, id, domain, currentInputString);
     }
 
@@ -307,12 +258,7 @@ export const ConceptHomepage = fp.flow(withCurrentCohortSearchContext(), withCur
           this.setState({inputErrors, showSearchError: false});
           if (inputErrors.length === 0) {
             this.setState({currentSearchString: currentInputString}, () => {
-              // TODO cleanup with https://precisionmedicineinitiative.atlassian.net/browse/RW-7137
-              if (serverConfigStore.get().config.enableStandardSourceDomains) {
-                this.updateCardCounts();
-              } else {
-                this.updateCardCountsOld();
-              }
+              this.updateCardCounts();
             });
           }
         }
@@ -347,18 +293,10 @@ export const ConceptHomepage = fp.flow(withCurrentCohortSearchContext(), withCur
     }
 
     render() {
-      const {conceptDomainCards, conceptDomainList, conceptSurveysList, currentInputString, currentSearchString, domainInfoError,
+      const {conceptDomainCards, conceptSurveysList, currentInputString, currentSearchString, domainInfoError,
         domainsLoading, inputErrors, loadingDomains, surveyInfoError, showSearchError, surveysLoading} = this.state;
-      // TODO cleanup with https://precisionmedicineinitiative.atlassian.net/browse/RW-7137
-      const {enableStandardSourceDomains} = serverConfigStore.get().config;
-      const domainCards = enableStandardSourceDomains &&
-        conceptDomainCards.filter(domain => domain.domain !== Domain.PHYSICALMEASUREMENTCSS);
-      const domainInfos = !enableStandardSourceDomains &&
-        conceptDomainList.filter(domain => domain.domain !== Domain.PHYSICALMEASUREMENTCSS);
-      const physicalMeasurementsCard = enableStandardSourceDomains &&
-        conceptDomainCards.find(domain => domain.domain === Domain.PHYSICALMEASUREMENTCSS);
-      const physicalMeasurementsInfo = !enableStandardSourceDomains &&
-        conceptDomainList.find(domain => domain.domain === Domain.PHYSICALMEASUREMENTCSS);
+      const domainCards = conceptDomainCards.filter(domain => domain.domain !== Domain.PHYSICALMEASUREMENTCSS);
+      const physicalMeasurementsCard = conceptDomainCards.find(domain => domain.domain === Domain.PHYSICALMEASUREMENTCSS);
       return <React.Fragment>
         <FadeBox style={{margin: 'auto', paddingTop: '1rem', width: '95.7%'}}>
           <div style={{display: 'flex', alignItems: 'center'}}>
@@ -389,9 +327,7 @@ export const ConceptHomepage = fp.flow(withCurrentCohortSearchContext(), withCur
               <div style={styles.cardList}>
                 {domainInfoError
                   ? this.errorMessage()
-                  : enableStandardSourceDomains ?
-                    // TODO cleanup with https://precisionmedicineinitiative.atlassian.net/browse/RW-7137
-                    <React.Fragment>
+                  : <React.Fragment>
                       {domainCards.some(domain => domainsLoading.includes(domain.domain))
                       ? <Spinner size={42}/>
                       : domainCards.every(domain => domain.conceptCount === 0)
@@ -399,21 +335,6 @@ export const ConceptHomepage = fp.flow(withCurrentCohortSearchContext(), withCur
                         : domainCards
                           .filter(domain => domain.conceptCount !== 0)
                           .map((domain, i) => <DomainCard conceptDomainCard={domain}
-                                                          conceptDomainInfo={null}
-                                                          browseInDomain={() => this.browseDomain(domain.domain)}
-                                                          key={i} data-test-id='domain-box'
-                                                          updating={domainsLoading.includes(domain.domain)}/>)
-                      }
-                    </React.Fragment> :
-                    <React.Fragment>
-                      {domainInfos.some(domain => domainsLoading.includes(domain.domain))
-                        ? <Spinner size={42}/>
-                        : domainInfos.every(domain => domain.allConceptCount === 0)
-                          ? 'No Domain Results. Please type in a new search term.'
-                          : domainInfos
-                          .filter(domain => domain.allConceptCount !== 0)
-                          .map((domain, i) => <DomainCard conceptDomainCard={null}
-                                                          conceptDomainInfo={domain}
                                                           browseInDomain={() => this.browseDomain(domain.domain)}
                                                           key={i} data-test-id='domain-box'
                                                           updating={domainsLoading.includes(domain.domain)}/>)
@@ -439,8 +360,7 @@ export const ConceptHomepage = fp.flow(withCurrentCohortSearchContext(), withCur
                                                      updating={surveysLoading.includes(survey.name)}/>)
                 }
               </div>
-              {/*TODO cleanup with https://precisionmedicineinitiative.atlassian.net/browse/RW-7137*/}
-              {enableStandardSourceDomains && !!physicalMeasurementsCard && <React.Fragment>
+              {!!physicalMeasurementsCard && <React.Fragment>
                 <div style={styles.sectionHeader}>
                   Program Physical Measurements
                 </div>
@@ -452,25 +372,6 @@ export const ConceptHomepage = fp.flow(withCurrentCohortSearchContext(), withCur
                       : physicalMeasurementsCard.conceptCount === 0
                         ? 'No Program Physical Measurement Results. Please type in a new search term.'
                         : <PhysicalMeasurementsCard physicalMeasurementCard={physicalMeasurementsCard}
-                                                    physicalMeasurementInfo={null}
-                                                    browsePhysicalMeasurements={() => this.browseDomain(Domain.PHYSICALMEASUREMENTCSS)}
-                                                    updating={domainsLoading.includes(Domain.PHYSICALMEASUREMENTCSS)}/>
-                  }
-                </div>
-              </React.Fragment>}
-              {!enableStandardSourceDomains && !!physicalMeasurementsInfo && <React.Fragment>
-                <div style={styles.sectionHeader}>
-                  Program Physical Measurements
-                </div>
-                <div style={{...styles.cardList, marginBottom: '1rem'}}>
-                  {domainInfoError
-                    ? this.errorMessage()
-                    : domainsLoading.includes(Domain.PHYSICALMEASUREMENTCSS)
-                      ? <Spinner size={42}/>
-                      : physicalMeasurementsInfo.allConceptCount === 0
-                        ? 'No Program Physical Measurement Results. Please type in a new search term.'
-                        : <PhysicalMeasurementsCard physicalMeasurementCard={null}
-                                                    physicalMeasurementInfo={physicalMeasurementsInfo}
                                                     browsePhysicalMeasurements={() => this.browseDomain(Domain.PHYSICALMEASUREMENTCSS)}
                                                     updating={domainsLoading.includes(Domain.PHYSICALMEASUREMENTCSS)}/>
                   }

@@ -8,9 +8,9 @@ import {
   CriteriaType,
   DemoChartInfoListResponse,
   Domain,
+  DomainCard,
+  DomainCardResponse,
   DomainCount,
-  DomainInfo,
-  DomainInfoResponse,
   ParticipantDemographics,
   SurveyCount,
   SurveyModule,
@@ -49,22 +49,26 @@ export class SurveyStubVariables {
 }
 
 export class DomainStubVariables {
-  static STUB_DOMAINS: DomainInfo[] = [
+  static STUB_DOMAINS: DomainCard[] = [
     {
+      category: 'Domains',
+      conceptCount: 1,
+      description: 'Conditions',
       domain: Domain.CONDITION,
-      name: 'Condition',
-      description: 'The Conditions Stub',
-      standardConceptCount: 1,
-      allConceptCount: 2,
-      participantCount: 30
+      name: 'Conditions',
+      participantCount: 30,
+      sortOrder: 1,
+      standard: true
     },
     {
+      category: 'Domains',
+      conceptCount: 50,
+      description: 'Labs and Measurements',
       domain: Domain.MEASUREMENT,
-      name: 'Measurement',
-      description: 'The Measurements Stub',
-      standardConceptCount: 50,
-      allConceptCount: 65,
-      participantCount: 200
+      name: 'Labs and Measurements',
+      participantCount: 200,
+      sortOrder: 3,
+      standard: true
     },
   ];
 }
@@ -402,15 +406,19 @@ export class CohortBuilderServiceStub extends CohortBuilderApi {
     return new Promise<CriteriaMenuListResponse>(resolve => resolve({items: []}));
   }
 
-  findDomainInfos(): Promise<DomainInfoResponse> {
-    return new Promise<DomainInfoResponse>(resolve => resolve({items: DomainStubVariables.STUB_DOMAINS}));
-  }
-
   findSurveyModules(): Promise<SurveysResponse> {
     return new Promise<SurveysResponse>(resolve => resolve({items: SurveyStubVariables.STUB_SURVEYS}));
   }
 
+  findDomainCards(): Promise<DomainCardResponse> {
+    return new Promise<DomainCardResponse>(resolve => resolve({items: DomainStubVariables.STUB_DOMAINS}));
+  }
+
   findDomainCount(): Promise<DomainCount> {
+    return new Promise<DomainCount>(resolve => resolve(domainCountStub));
+  }
+
+  findDomainCountByStandardSource(): Promise<DomainCount> {
     return new Promise<DomainCount>(resolve => resolve(domainCountStub));
   }
 

@@ -17,14 +17,12 @@ import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
 import org.pmiops.workbench.cdr.dao.CBDataFilterDao;
 import org.pmiops.workbench.cdr.dao.CriteriaMenuDao;
 import org.pmiops.workbench.cdr.dao.DomainCardDao;
-import org.pmiops.workbench.cdr.dao.DomainInfoDao;
 import org.pmiops.workbench.cdr.dao.PersonDao;
 import org.pmiops.workbench.cdr.dao.SurveyModuleDao;
 import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.cdr.model.DbCriteriaAttribute;
 import org.pmiops.workbench.cdr.model.DbCriteriaMenu;
 import org.pmiops.workbench.cdr.model.DbDomainCard;
-import org.pmiops.workbench.cdr.model.DbDomainInfo;
 import org.pmiops.workbench.cdr.model.DbSurveyModule;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderServiceImpl;
@@ -43,7 +41,6 @@ import org.pmiops.workbench.model.CriteriaSubType;
 import org.pmiops.workbench.model.CriteriaType;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainCard;
-import org.pmiops.workbench.model.DomainInfo;
 import org.pmiops.workbench.model.ParticipantDemographics;
 import org.pmiops.workbench.model.SurveyModule;
 import org.pmiops.workbench.model.SurveyVersionListResponse;
@@ -69,7 +66,6 @@ public class CohortBuilderControllerTest extends SpringTest {
   @Autowired private CBCriteriaAttributeDao cbCriteriaAttributeDao;
   @Autowired private CBDataFilterDao cbDataFilterDao;
   @Autowired private CriteriaMenuDao criteriaMenuDao;
-  @Autowired private DomainInfoDao domainInfoDao;
   @Autowired private DomainCardDao domainCardDao;
   @Autowired private PersonDao personDao;
   @Autowired private SurveyModuleDao surveyModuleDao;
@@ -98,7 +94,6 @@ public class CohortBuilderControllerTest extends SpringTest {
             cbCriteriaDao,
             criteriaMenuDao,
             cbDataFilterDao,
-            domainInfoDao,
             domainCardDao,
             personDao,
             surveyModuleDao,
@@ -137,40 +132,6 @@ public class CohortBuilderControllerTest extends SpringTest {
                 .getItems()
                 .get(0))
         .isEqualTo(cohortBuilderMapper.dbModelToClient(dbCriteriaMenu));
-  }
-
-  // Todo: Remove this test once the standardSource flag is true on all environment
-  @Test
-  public void findDomainInfos() {
-    cbCriteriaDao.save(
-        DbCriteria.builder()
-            .addDomainId(Domain.CONDITION.toString())
-            .addType(CriteriaType.ICD9CM.toString())
-            .addCount(0L)
-            .addHierarchy(true)
-            .addStandard(false)
-            .addParentId(0)
-            .addFullText("term*[CONDITION_rank1]")
-            .build());
-    DbDomainInfo dbDomainInfo =
-        domainInfoDao.save(
-            new DbDomainInfo()
-                .conceptId(1L)
-                .domain((short) 0)
-                .domainId("CONDITION")
-                .name("Conditions")
-                .description("descr")
-                .allConceptCount(10)
-                .standardConceptCount(0)
-                .participantCount(1000));
-
-    DomainInfo domainInfo =
-        controller.findDomainInfos(WORKSPACE_NAMESPACE, WORKSPACE_ID).getBody().getItems().get(0);
-    assertThat(domainInfo.getName()).isEqualTo(dbDomainInfo.getName());
-    assertThat(domainInfo.getDescription()).isEqualTo(dbDomainInfo.getDescription());
-    assertThat(domainInfo.getParticipantCount()).isEqualTo(dbDomainInfo.getParticipantCount());
-    assertThat(domainInfo.getAllConceptCount()).isEqualTo(10);
-    assertThat(domainInfo.getStandardConceptCount()).isEqualTo(0);
   }
 
   @Test
