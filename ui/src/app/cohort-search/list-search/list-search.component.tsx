@@ -280,7 +280,7 @@ export const ListSearch = fp.flow(withCdrVersions(), withCurrentWorkspace(), wit
         hoverId: undefined,
         loading: false,
         searching: false,
-        searchSource: false,
+        searchSource: props.searchContext.domain === Domain.PHYSICALMEASUREMENTCSS,
         searchTerms: props.searchTerms,
         standardOnly: false,
         sourceMatch: undefined,

@@ -12,6 +12,7 @@ import static org.mockito.Mockito.when;
 import com.google.common.collect.ImmutableList;
 import java.sql.Timestamp;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -20,6 +21,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
+import org.pmiops.workbench.JpaFakeDateTimeConfiguration;
 import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.actionaudit.auditors.EgressEventAuditor;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -37,6 +39,7 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
+import org.pmiops.workbench.test.FakeClock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -47,6 +50,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 
 @DataJpaTest
+@Import({JpaFakeDateTimeConfiguration.class})
 public class EgressRemediationServiceTest extends SpringTest {
 
   private static final String USER_EMAIL = "asdf@fake-research-aou.org";
@@ -56,6 +60,7 @@ public class EgressRemediationServiceTest extends SpringTest {
   @MockBean private LeonardoNotebooksClient mockLeonardoNotebooksClient;
   @MockBean private EgressEventAuditor mockEgressEventAuditor;
 
+  @Autowired private FakeClock fakeClock;
   @Autowired private WorkspaceDao workspaceDao;
   @Autowired private EgressEventDao egressEventDao;
   @Autowired private UserDao userDao;
@@ -342,7 +347,7 @@ public class EgressRemediationServiceTest extends SpringTest {
 
   private void saveOldEvents(DbEgressEvent... events) {
     for (DbEgressEvent target : events) {
-      saveEventWithCreationTimeWorkaround(target);
+      saveEventAtCreationTime(target);
     }
   }
 
@@ -351,17 +356,16 @@ public class EgressRemediationServiceTest extends SpringTest {
   }
 
   private long saveNewEvent(DbEgressEvent e) {
-    return saveEventWithCreationTimeWorkaround(e).getEgressEventId();
+    return saveEventAtCreationTime(e).getEgressEventId();
   }
 
-  private DbEgressEvent saveEventWithCreationTimeWorkaround(DbEgressEvent target) {
-    Timestamp targetCreation = target.getCreationTime();
+  private DbEgressEvent saveEventAtCreationTime(DbEgressEvent target) {
+    Instant originalTime = fakeClock.instant();
+    fakeClock.setInstant(target.getCreationTime().toInstant());
 
-    // Hack: insert the event, then update it. Apply the desired creation timestamp on the update.
-    // This is necessary because Spring data JPA will insert it's own creation timestamp on insert
-    // as the field is annotated with @CreationTimestamp; subsequent updates are not affected.
     DbEgressEvent e = egressEventDao.save(target);
-    return egressEventDao.save(e.setCreationTime(targetCreation));
+    fakeClock.setInstant(originalTime);
+    return e;
   }
 
   private EgressAlertRemediationPolicy suspendXMinutesOnXIncidentsPolicy() {

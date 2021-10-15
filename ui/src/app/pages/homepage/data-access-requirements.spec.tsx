@@ -56,9 +56,15 @@ describe('DataAccessRequirements', () => {
     });
 
     it('should not return the RAS module from getEnabledModules when its feature flag is disabled', () => {
-        serverConfigStore.set({config: {...defaultServerConfig, enableRasLoginGovLinking: false}});
+        serverConfigStore.set({config: {...defaultServerConfig, enableRasLoginGovLinking: false, enforceRasLoginGovLinking: false}});
         const enabledModules = getVisibleModules(allModules, profile);
         expect(enabledModules.includes(AccessModule.RASLINKLOGINGOV)).toBeFalsy();
+    });
+
+    it('should return the RAS module from getEnabledModules when enforceRasLoginGovLinking is enabled, enableRasLoginGovLinking is not', () => {
+        serverConfigStore.set({config: {...defaultServerConfig, enableRasLoginGovLinking: false, enforceRasLoginGovLinking: true}});
+        const enabledModules = getEnabledModules(allModules);
+        expect(enabledModules.includes(AccessModule.RASLINKLOGINGOV)).toBeTruthy();
     });
 
     it('should not return the ERA module from getEnabledModules when its feature flag is disabled', () => {
@@ -122,7 +128,7 @@ describe('DataAccessRequirements', () => {
 
     it('should return the second enabled module (ERA, not RAS) from getActiveModule' +
       ' when the first module (2FA) has been completed and RAS is disabled', () => {
-        serverConfigStore.set({config: {...defaultServerConfig, enableRasLoginGovLinking: false}});
+        serverConfigStore.set({config: {...defaultServerConfig, enableRasLoginGovLinking: false, enforceRasLoginGovLinking: false}});
 
         const testProfile = {
             ...profile,
@@ -236,7 +242,7 @@ describe('DataAccessRequirements', () => {
     // along with an Ineligible icon and some "technical difficulties" text
     // and it never becomes an activeModule
     it('should render the RAS module as ineligible when its feature flag is disabled', () => {
-        serverConfigStore.set({config: {...defaultServerConfig, enableRasLoginGovLinking: false}});
+        serverConfigStore.set({config: {...defaultServerConfig, enableRasLoginGovLinking: false, enforceRasLoginGovLinking: false}});
         const wrapper = component();
         expect(findModule(wrapper, AccessModule.RASLINKLOGINGOV).exists()).toBeTruthy();
         expect(findIneligibleModule(wrapper, AccessModule.RASLINKLOGINGOV).exists()).toBeTruthy();

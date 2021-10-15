@@ -73,13 +73,13 @@ export default class WorkspaceDataPage extends WorkspaceBase {
     console.log(`Exported Dataset "${datasetName}" to notebook "${notebookName}"`);
   }
 
-  async findCohortCard(cohortName?: string): Promise<DataResourceCard> {
+  async findCohortCard(cohortName?: string, timeout?: number): Promise<DataResourceCard> {
     await this.openCohortsSubtab();
     if (cohortName) {
       // find Concept Set that match specified name.
-      return new DataResourceCard(this.page).findCard(cohortName, ResourceCard.Cohort, 1000);
+      return new DataResourceCard(this.page).findCard(cohortName, ResourceCard.Cohort, timeout);
     }
-    // if Concept Sets name isn't specified, find an existing Concept Sets.
+    // if Cohort name isn't specified, find any existing Cohort.
     return new DataResourceCard(this.page).findAnyCard(ResourceCard.Cohort);
   }
 

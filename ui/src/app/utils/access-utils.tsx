@@ -71,8 +71,8 @@ export const redirectToRas = (openInNewTab: boolean = true): void => {
   AnalyticsTracker.Registration.RasLoginGov();
   // The scopes are also used in backend for fetching user info.
   const url = serverConfigStore.get().config.rasHost + '/auth/oauth/v2/authorize?client_id=' + serverConfigStore.get().config.rasClientId
-      + '&prompt=login+consent&redirect_uri=' + buildRasRedirectUrl()
-      + '&response_type=code&scope=openid+profile+email+ga4gh_passport_v1+federated_identities';
+    + '&prompt=login+consent&redirect_uri=' + buildRasRedirectUrl()
+    + '&response_type=code&scope=openid+profile+email+ga4gh_passport_v1+federated_identities';
 
   openInNewTab ? window.open(url, '_blank') : <Redirect to={url}/>;
 };
@@ -96,62 +96,62 @@ interface AccessModuleConfig {
 // without a next step:
 // https://github.com/all-of-us/workbench/blob/master/api/src/main/java/org/pmiops/workbench/db/dao/UserServiceImpl.java#L240-L272
 export const getAccessModuleConfig = (moduleName: AccessModule): AccessModuleConfig => {
-  const {enableRasLoginGovLinking, enableEraCommons, enableComplianceTraining} = serverConfigStore.get().config;
+  const {enableRasLoginGovLinking, enforceRasLoginGovLinking, enableEraCommons, enableComplianceTraining} = serverConfigStore.get().config;
   return switchCase(moduleName,
 
-      [AccessModule.TWOFACTORAUTH, () => ({
-        moduleName,
-        isEnabledInEnvironment: true,
-        DARTitleComponent: () => <div>Turn on Google 2-Step Verification</div>,
-        externalSyncAction: async () => await profileApi().syncTwoFactorAuthStatus(),
-        refreshAction: async () => await profileApi().syncTwoFactorAuthStatus(),
-      })],
+    [AccessModule.TWOFACTORAUTH, () => ({
+      moduleName,
+      isEnabledInEnvironment: true,
+      DARTitleComponent: () => <div>Turn on Google 2-Step Verification</div>,
+      externalSyncAction: async () => await profileApi().syncTwoFactorAuthStatus(),
+      refreshAction: async () => await profileApi().syncTwoFactorAuthStatus(),
+    })],
 
-      [AccessModule.RASLINKLOGINGOV, () => ({
-        moduleName,
-        isEnabledInEnvironment: enableRasLoginGovLinking,
-        DARTitleComponent: () => <div>Verify your identity with Login.gov <TooltipTrigger
-            content={'For additional security, we require you to verify your identity by uploading a photo of your ID.'}>
-          <InfoIcon style={{margin: '0 0.3rem'}}/>
-        </TooltipTrigger></div>,
-        refreshAction: () => redirectToRas(false),
-      })],
+    [AccessModule.RASLINKLOGINGOV, () => ({
+      moduleName,
+      isEnabledInEnvironment: enableRasLoginGovLinking || enforceRasLoginGovLinking,
+      DARTitleComponent: () => <div>Verify your identity with Login.gov <TooltipTrigger
+        content={'For additional security, we require you to verify your identity by uploading a photo of your ID.'}>
+        <InfoIcon style={{margin: '0 0.3rem'}}/>
+      </TooltipTrigger></div>,
+      refreshAction: () => redirectToRas(false),
+    })],
 
-      [AccessModule.ERACOMMONS, () => ({
-        moduleName,
-        isEnabledInEnvironment: enableEraCommons,
-        DARTitleComponent: () => <div>Connect your eRA Commons account</div>,
-        externalSyncAction: async () => await profileApi().syncEraCommonsStatus(),
-        refreshAction: async () => await profileApi().syncEraCommonsStatus(),
-      })],
+    [AccessModule.ERACOMMONS, () => ({
+      moduleName,
+      isEnabledInEnvironment: enableEraCommons,
+      DARTitleComponent: () => <div>Connect your eRA Commons account</div>,
+      externalSyncAction: async () => await profileApi().syncEraCommonsStatus(),
+      refreshAction: async () => await profileApi().syncEraCommonsStatus(),
+    })],
 
-      [AccessModule.COMPLIANCETRAINING, () => ({
-        moduleName,
-        isEnabledInEnvironment: enableComplianceTraining,
-        AARTitleComponent: () => <div><AoU/> Responsible Conduct of Research Training</div>,
-        DARTitleComponent: () => <div>Complete <AoU/> research Registered Tier training</div>,
-        externalSyncAction: async () => await profileApi().syncComplianceTrainingStatus(),
-        refreshAction: async () => await profileApi().syncComplianceTrainingStatus(),
-      })],
+    [AccessModule.COMPLIANCETRAINING, () => ({
+      moduleName,
+      isEnabledInEnvironment: enableComplianceTraining,
+      AARTitleComponent: () => <div><AoU/> Responsible Conduct of Research Training</div>,
+      DARTitleComponent: () => <div>Complete <AoU/> research Registered Tier training</div>,
+      externalSyncAction: async () => await profileApi().syncComplianceTrainingStatus(),
+      refreshAction: async () => await profileApi().syncComplianceTrainingStatus(),
+    })],
 
-      [AccessModule.DATAUSERCODEOFCONDUCT, () => ({
-        moduleName,
-        isEnabledInEnvironment: true,
-        AARTitleComponent: () => 'Sign Data User Code of Conduct',
-        DARTitleComponent: () => <div>Sign Data User Code of Conduct</div>,
-      })],
+    [AccessModule.DATAUSERCODEOFCONDUCT, () => ({
+      moduleName,
+      isEnabledInEnvironment: true,
+      AARTitleComponent: () => 'Sign Data User Code of Conduct',
+      DARTitleComponent: () => <div>Sign Data User Code of Conduct</div>,
+    })],
 
-      [AccessModule.PROFILECONFIRMATION, () => ({
-        moduleName,
-        isEnabledInEnvironment: true,
-        AARTitleComponent: () => 'Update your profile',
-      })],
+    [AccessModule.PROFILECONFIRMATION, () => ({
+      moduleName,
+      isEnabledInEnvironment: true,
+      AARTitleComponent: () => 'Update your profile',
+    })],
 
-      [AccessModule.PUBLICATIONCONFIRMATION, () => ({
-        moduleName,
-        isEnabledInEnvironment: true,
-        AARTitleComponent: () => 'Report any publications or presentations based on your research using the Researcher Workbench',
-      })],
+    [AccessModule.PUBLICATIONCONFIRMATION, () => ({
+      moduleName,
+      isEnabledInEnvironment: true,
+      AARTitleComponent: () => 'Report any publications or presentations based on your research using the Researcher Workbench',
+    })],
   );
 };
 
@@ -263,25 +263,25 @@ export const computeDisplayDates = ({completionEpochMillis, expirationEpochMilli
   const bypassDate = withInvalidDateHandling(bypassEpochMillis);
 
   return cond(
-      // User has bypassed module
-      [userBypassedModule, () => ({lastConfirmedDate: `${bypassDate}`, nextReviewDate: 'Unavailable (bypassed)'})],
-      // User never completed training
-      [!userCompletedModule && !userBypassedModule, () =>
-          ({lastConfirmedDate: 'Unavailable (not completed)', nextReviewDate: 'Unavailable (not completed)'})],
-      // User completed training, but is in the lookback window
-      [userCompletedModule && isExpiring(expirationEpochMillis), () => {
-        const daysRemaining = daysFromNow(expirationEpochMillis);
-        const daysRemainingDisplay = daysRemaining >= 0 ? `(${daysRemaining} day${daysRemaining !== 1 ? 's' : ''})` : '(expired)';
-        return {
-          lastConfirmedDate,
-          nextReviewDate: `${nextReviewDate} ${daysRemainingDisplay}`
-        };
-      }],
-      // User completed training and is up to date
-      [userCompletedModule && !isExpiring(expirationEpochMillis), () => {
-        const daysRemaining = daysFromNow(expirationEpochMillis);
-        return {lastConfirmedDate, nextReviewDate: `${nextReviewDate} (${daysRemaining} day${daysRemaining !== 1 ? 's' : ''})`};
-      }]
+    // User has bypassed module
+    [userBypassedModule, () => ({lastConfirmedDate: `${bypassDate}`, nextReviewDate: 'Unavailable (bypassed)'})],
+    // User never completed training
+    [!userCompletedModule && !userBypassedModule, () =>
+      ({lastConfirmedDate: 'Unavailable (not completed)', nextReviewDate: 'Unavailable (not completed)'})],
+    // User completed training, but is in the lookback window
+    [userCompletedModule && isExpiring(expirationEpochMillis), () => {
+      const daysRemaining = daysFromNow(expirationEpochMillis);
+      const daysRemainingDisplay = daysRemaining >= 0 ? `(${daysRemaining} day${daysRemaining !== 1 ? 's' : ''})` : '(expired)';
+      return {
+        lastConfirmedDate,
+        nextReviewDate: `${nextReviewDate} ${daysRemainingDisplay}`
+      };
+    }],
+    // User completed training and is up to date
+    [userCompletedModule && !isExpiring(expirationEpochMillis), () => {
+      const daysRemaining = daysFromNow(expirationEpochMillis);
+      return {lastConfirmedDate, nextReviewDate: `${nextReviewDate} (${daysRemaining} day${daysRemaining !== 1 ? 's' : ''})`};
+    }]
   );
 };
 

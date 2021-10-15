@@ -230,8 +230,11 @@ public class WorkbenchConfig {
     // These booleans control whether each of our core access modules are enabled per environment.
     public boolean enableComplianceTraining;
     public boolean enableEraCommons;
-    // If true, user account setup requires linking eRA commons via RAS instead of Shibboleth.
+    // If true, new users are required to finish identity verification using RAS/login.gov.
+    // This will be replaced with enforceRasLoginGovLinking.
     public boolean enableRasLoginGovLinking;
+    // If true, all users are required to finish identity verification using RAS/login.gov
+    public boolean enforceRasLoginGovLinking;
   }
 
   public static class FeatureFlagsConfig {

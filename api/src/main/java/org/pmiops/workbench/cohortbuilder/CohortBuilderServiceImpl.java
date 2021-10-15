@@ -30,7 +30,6 @@ import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
 import org.pmiops.workbench.cdr.dao.CBDataFilterDao;
 import org.pmiops.workbench.cdr.dao.CriteriaMenuDao;
 import org.pmiops.workbench.cdr.dao.DomainCardDao;
-import org.pmiops.workbench.cdr.dao.DomainInfoDao;
 import org.pmiops.workbench.cdr.dao.PersonDao;
 import org.pmiops.workbench.cdr.dao.SurveyModuleDao;
 import org.pmiops.workbench.cdr.model.DbCriteria;
@@ -48,7 +47,6 @@ import org.pmiops.workbench.model.DataFilter;
 import org.pmiops.workbench.model.DemoChartInfo;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainCard;
-import org.pmiops.workbench.model.DomainInfo;
 import org.pmiops.workbench.model.FilterColumns;
 import org.pmiops.workbench.model.GenderOrSexType;
 import org.pmiops.workbench.model.ParticipantDemographics;
@@ -75,7 +73,6 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   private final CBCriteriaDao cbCriteriaDao;
   private final CriteriaMenuDao criteriaMenuDao;
   private final CBDataFilterDao cbDataFilterDao;
-  private final DomainInfoDao domainInfoDao;
   private final DomainCardDao domainCardDao;
   private final PersonDao personDao;
   private final SurveyModuleDao surveyModuleDao;
@@ -90,7 +87,6 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
       CBCriteriaDao cbCriteriaDao,
       CriteriaMenuDao criteriaMenuDao,
       CBDataFilterDao cbDataFilterDao,
-      DomainInfoDao domainInfoDao,
       DomainCardDao domainCardDao,
       PersonDao personDao,
       SurveyModuleDao surveyModuleDao,
@@ -102,7 +98,6 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
     this.cbCriteriaDao = cbCriteriaDao;
     this.criteriaMenuDao = criteriaMenuDao;
     this.cbDataFilterDao = cbDataFilterDao;
-    this.domainInfoDao = domainInfoDao;
     this.domainCardDao = domainCardDao;
     this.personDao = personDao;
     this.surveyModuleDao = surveyModuleDao;
@@ -375,14 +370,6 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
     return count == 0
         ? cbCriteriaDao.findDomainCountAndStandard(modifyTermMatch(term), domain, standard)
         : count;
-  }
-
-  @Override
-  public List<DomainInfo> findDomainInfos() {
-    return domainInfoDao.findByOrderByDomainId().stream()
-        .filter(dbDomainInfo -> dbDomainInfo.getAllConceptCount() > 0)
-        .map(cohortBuilderMapper::dbModelToClient)
-        .collect(Collectors.toList());
   }
 
   @Override
