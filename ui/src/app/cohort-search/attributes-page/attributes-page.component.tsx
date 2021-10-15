@@ -282,7 +282,7 @@ export const AttributesPage = fp.flow(withCurrentWorkspace(), withCurrentCohortC
       const {form, options} = this.state;
       if (this.isSurvey) {
         this.getSurveyAttributes();
-      } else if (this.isMeasurement) {
+      } else if (this.isMeasurement || this.isObservation) {
         this.getAttributes();
       } else {
         if (!options.find(opt => opt.value === AttrName.ANY.toString())) {
@@ -672,6 +672,11 @@ export const AttributesPage = fp.flow(withCurrentWorkspace(), withCurrentCohortC
       return domainId === Domain.MEASUREMENT;
     }
 
+    get isObservation() {
+      const {node: {domainId}} = this.props;
+      return domainId === Domain.OBSERVATION;
+    }
+
     get isPhysicalMeasurement() {
       const {node: {domainId}} = this.props;
       return domainId === Domain.PHYSICALMEASUREMENT;
@@ -688,7 +693,7 @@ export const AttributesPage = fp.flow(withCurrentWorkspace(), withCurrentCohortC
     }
 
     get hasRange() {
-      return this.isMeasurement || this.isSurvey;
+      return this.isMeasurement || this.isObservation || this.isSurvey;
     }
 
     get disableAddButton() {
@@ -708,7 +713,7 @@ export const AttributesPage = fp.flow(withCurrentWorkspace(), withCurrentCohortC
       const {node: {count, subtype}} = this.props;
       const {form, isCOPESurvey, options} = this.state;
       return form.num.length > 0 && <React.Fragment>
-        {this.isMeasurement && <div style={styles.label}>Numeric Values</div>}
+        {(this.isMeasurement || this.isObservation) && <div style={styles.label}>Numeric Values</div>}
         {isCOPESurvey && <div>
           <CheckBox onChange={(v) => this.toggleAnyValueCheckbox(v)}/> Any value
           {count > -1 && <span style={styles.badge}> {count.toLocaleString()}</span>}
@@ -759,7 +764,7 @@ export const AttributesPage = fp.flow(withCurrentWorkspace(), withCurrentCohortC
           {count > -1 && <span style={styles.badge}>{count.toLocaleString()}</span>}
         </div>}
         {!(isCOPESurvey && form.anyVersion) && <React.Fragment>
-          <div style={styles.orCircle}>OR</div>
+          {form.num.length > 0 && <div style={styles.orCircle}>OR</div>}
           {!isCOPESurvey && <div style={styles.label}>Categorical Values</div>}
           {form.cat.map((attr, a) => <div key={a} style={styles.categorical}>
             <CheckBox checked={attr.checked} style={{marginRight: '3px'}}
@@ -796,7 +801,7 @@ export const AttributesPage = fp.flow(withCurrentWorkspace(), withCurrentCohortC
           </div> : <h3 style={{fontWeight: 600, margin: '0 0 0.5rem', textTransform: 'capitalize'}}>
             {this.isPhysicalMeasurement ? name : domainId.toString().toLowerCase()} Detail
           </h3>}
-          {this.isSurvey && <div style={{...styles.label, marginBottom: '0.5rem'}}>
+          {(this.isObservation || this.isSurvey) && <div style={{...styles.label, marginBottom: '0.5rem'}}>
             {subtype === CriteriaSubType.ANSWER
               ? `${ppiQuestions.getValue()[parentId].name} - ${name}`
               : name

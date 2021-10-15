@@ -9,7 +9,13 @@ import {AnalyticsTracker} from 'app/utils/analytics';
 import {convertAPIError} from 'app/utils/errors';
 import {encodeURIComponentStrict} from 'app/utils/navigation';
 import {authStore, profileStore, serverConfigStore, useStore} from 'app/utils/stores';
-import {AccessModule, AccessModuleStatus, ErrorCode, Profile, UserTierEligibility} from 'generated/fetch';
+import {
+  AccessModule,
+  AccessModuleStatus,
+  ErrorCode,
+  Profile,
+  UserTierEligibility
+} from 'generated/fetch';
 import {parseQueryParams} from "app/components/app-router";
 import {cond, daysFromNow, displayDateWithoutHours, switchCase} from "./index";
 import {AccessTierShortNames} from 'app/utils/access-tiers';
@@ -279,8 +285,8 @@ export const computeDisplayDates = ({completionEpochMillis, expirationEpochMilli
   );
 };
 
-// return true if user is egligible for registered tier.
-// A user loses tier eligiblity when they are removed from institution tier requirement
+// return true if user is eligible for registered tier.
+// A user loses tier eligibility when they are removed from institution tier requirement
 export const eligibleForRegisteredForTier = (tierEligiblities: Array<UserTierEligibility>): boolean => {
   const rtEligiblity = tierEligiblities.find(t => t.accessTierShortName === AccessTierShortNames.Registered)
   return !!rtEligiblity && rtEligiblity.eligible

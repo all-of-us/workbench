@@ -124,6 +124,8 @@
     "webpack": "4.44.2"
   },
   "resolutions": {
+    "ansi-html": "https://registry.yarnpkg.com/ansi-html-community/-/ansi-html-community-0.0.8.tgz#69fbc4d6ccbe383f9736934ae34c3f8290f1bf41",
+    "ansi-regex": "^5.0.1",
     "browserslist": "^4.16.5",
     "glob-parent":  "^5.1.2",
     "immer": "^9.0.6",

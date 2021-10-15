@@ -36,17 +36,16 @@
     },
     {
       "cdrVersionId": 2,
-      "name": "[Removed] Synthetic Dataset v2",
-      "archivalStatus": 1,
-      "bigqueryProject": "",
-      "bigqueryDataset": "",
-      "creationTime": "2018-06-06 00:00:00Z",
-      "releaseNumber": 2,
-      "numParticipants": 0,
-      "cdrDbName": "synth_r_2020q1_3",
-      "accessTier": "registered",
-      "hasFitbitData": false,
-      "hasCopeSurveyData": false
+      "name": "Synthetic Dataset v2",
+      "bigqueryProject": "fc-aou-cdr-synth-test",
+      "bigqueryDataset": "test_R2019q4r3",
+      "creationTime": "2019-09-30 00:00:00Z",
+      "releaseNumber": 3,
+      "numParticipants": 234525,
+      "cdrDbName": "synth_r_2019q4_19",
+      "hasFitbitData": true,
+      "hasCopeSurveyData": true,
+      "accessTier": "registered"
     },
     {
       "cdrVersionId": 3,
@@ -83,6 +82,7 @@
       "name": "Synthetic Dataset in the Controlled Tier",
       "bigqueryProject": "fc-aou-cdr-synth-test-2",
       "bigqueryDataset": "test_R2019q4r3",
+      "wgsBigqueryDataset": "1kg_wgs",
       "creationTime": "2020-08-26 00:09:51Z",
       "releaseNumber": 3,
       "numParticipants": 234525,
@@ -94,17 +94,17 @@
     {
       "cdrVersionId": 6,
       "isDefault": false,
-      "name": "Synthetic Dataset v3 with WGS",
-      "bigqueryProject": "fc-aou-cdr-synth-test",
-      "bigqueryDataset": "test_R2019q4r3",
-      "wgsBigqueryDataset": "1kg_wgs",
-      "creationTime": "2021-03-03 00:09:00Z",
+      "archivalStatus": 1,
+      "accessTier": "registered",
+      "name": "[Removed] Synthetic Dataset v3 with WGS",
+      "bigqueryProject": "",
+      "bigqueryDataset": "",
+      "creationTime": "2020-08-26 00:09:51Z",
       "releaseNumber": 3,
-      "numParticipants": 234525,
-      "cdrDbName": "synth_r_2019q4_19",
-      "hasFitbitData": true,
-      "hasCopeSurveyData": true,
-      "accessTier": "registered"
+      "numParticipants": 0,
+      "cdrDbName": "cdr",
+      "hasFitbitData": false,
+      "hasCopeSurveyData": false
     }
   ]
 }

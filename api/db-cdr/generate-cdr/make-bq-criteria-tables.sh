@@ -4986,6 +4986,14 @@ FROM
             and a.observation_concept_id != 0
             and b.vocabulary_id != 'PPI'
             and b.concept_class_id != 'Survey'
+            and b.concept_id not in (
+                select distinct observation_concept_id
+                from \`$BQ_PROJECT.$BQ_DATASET.observation\`
+                where observation_source_concept_id in (
+                SELECT distinct concept_id
+                FROM \`$BQ_PROJECT.$BQ_DATASET.prep_survey\`
+                )
+            )
         GROUP BY 1,2,3,4
     ) x"
 

@@ -58,7 +58,11 @@ export class ProfileStubVariables {
         expirationEpochMillis: undefined
       }],
       anyModuleHasExpired: false
-    }
+    },
+    tierEligibilities : [{
+      accessTierShortName: AccessTierShortNames.Registered,
+      eraRequired: true
+    }]
   };
   static ADMIN_TABLE_USER_STUB = <AdminTableUser>{...ProfileStubVariables.PROFILE_STUB};
 }
