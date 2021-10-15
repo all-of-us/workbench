@@ -3,13 +3,19 @@ import {mount} from "enzyme";
 
 import defaultServerConfig from 'testing/default-server-config';
 import {AccessModule, InstitutionApi, Profile, ProfileApi} from 'generated/fetch';
-import {allModules, DataAccessRequirements, getActiveModule, getEnabledModules} from './data-access-requirements';
+import {
+    allModules,
+    DataAccessRequirements,
+    getActiveModule,
+    getVisibleModules
+} from './data-access-requirements';
 import {InstitutionApiStub} from 'testing/stubs/institution-api-stub';
 import {ProfileApiStub, ProfileStubVariables} from 'testing/stubs/profile-api-stub';
 import {profileApi, registerApiClient} from 'app/services/swagger-fetch-clients';
 import {profileStore, serverConfigStore} from 'app/utils/stores';
 import {MemoryRouter} from 'react-router-dom';
 import {waitForFakeTimersAndUpdate, waitOneTickAndUpdate} from 'testing/react-test-helpers';
+import {AccessTierShortNames} from 'app/utils/access-tiers';
 
 
 const profile = ProfileStubVariables.PROFILE_STUB as Profile;
@@ -44,37 +50,39 @@ describe('DataAccessRequirements', () => {
         jest.useRealTimers();
     })
 
+
     it('should return all modules from getEnabledModules by default (all FFs enabled)', () => {
-        const enabledModules = getEnabledModules(allModules);
+        const enabledModules = getVisibleModules(allModules, profile);
         allModules.forEach(module => expect(enabledModules.includes(module)).toBeTruthy());
     });
 
     it('should not return the RAS module from getEnabledModules when its feature flag is disabled', () => {
         serverConfigStore.set({config: {...defaultServerConfig, enableRasLoginGovLinking: false, enforceRasLoginGovLinking: false}});
-        const enabledModules = getEnabledModules(allModules);
+        const enabledModules = getVisibleModules(allModules, profile);
         expect(enabledModules.includes(AccessModule.RASLINKLOGINGOV)).toBeFalsy();
     });
 
-    it('should return the RAS module from getEnabledModules when enforceRasLoginGovLinking is enabled, enableRasLoginGovLinking is not', () => {
+    it('should return the RAS module from getEnabledModules when ' +
+        'enforceRasLoginGovLinking is enabled, enableRasLoginGovLinking is not', () => {
         serverConfigStore.set({config: {...defaultServerConfig, enableRasLoginGovLinking: false, enforceRasLoginGovLinking: true}});
-        const enabledModules = getEnabledModules(allModules);
+        const enabledModules = getVisibleModules(allModules, profile);
         expect(enabledModules.includes(AccessModule.RASLINKLOGINGOV)).toBeTruthy();
     });
 
-    it('should not return the ERA module from getEnabledModules when its feature flag is disabled', () => {
+    it('should not return the ERA module from getVisibleModules when its feature flag is disabled', () => {
         serverConfigStore.set({config: {...defaultServerConfig, enableEraCommons: false}});
-        const enabledModules = getEnabledModules(allModules);
+        const enabledModules = getVisibleModules(allModules, profile);
         expect(enabledModules.includes(AccessModule.ERACOMMONS)).toBeFalsy();
     });
 
-    it('should not return the Compliance module from getEnabledModules when its feature flag is disabled', () => {
+    it('should not return the Compliance module from getVisibleModules when its feature flag is disabled', () => {
         serverConfigStore.set({config: {...defaultServerConfig, enableComplianceTraining: false}});
-        const enabledModules = getEnabledModules(allModules);
+        const enabledModules = getVisibleModules(allModules, profile);
         expect(enabledModules.includes(AccessModule.COMPLIANCETRAINING)).toBeFalsy();
     });
 
     it('should return the first module (2FA) from getActiveModule when no modules have been completed', () => {
-        const enabledModules = getEnabledModules(allModules);
+        const enabledModules = getVisibleModules(allModules, profile);
         const activeModule = getActiveModule(enabledModules, profile);
 
         expect(activeModule).toEqual(allModules[0]);
@@ -92,7 +100,7 @@ describe('DataAccessRequirements', () => {
             }
         };
 
-        const enabledModules = getEnabledModules(allModules);
+        const enabledModules = getVisibleModules(allModules, profile);
         const activeModule = getActiveModule(enabledModules, testProfile);
 
         expect(activeModule).toEqual(allModules[1]);
@@ -110,7 +118,7 @@ describe('DataAccessRequirements', () => {
             }
         };
 
-        const enabledModules = getEnabledModules(allModules);
+        const enabledModules = getVisibleModules(allModules, profile);
         const activeModule = getActiveModule(enabledModules, testProfile);
 
         expect(activeModule).toEqual(allModules[1]);
@@ -131,7 +139,7 @@ describe('DataAccessRequirements', () => {
             }
         };
 
-        const enabledModules = getEnabledModules(allModules);
+        const enabledModules = getVisibleModules(allModules, profile);
         const activeModule = getActiveModule(enabledModules, testProfile);
 
         // update this if the order changes
@@ -156,7 +164,7 @@ describe('DataAccessRequirements', () => {
             }
         };
 
-        const enabledModules = getEnabledModules(allModules);
+        const enabledModules = getVisibleModules(allModules, profile);
         const activeModule = getActiveModule(enabledModules, testProfile);
 
         expect(activeModule).toEqual(allModules[3]);
@@ -174,7 +182,7 @@ describe('DataAccessRequirements', () => {
             }
         };
 
-        const enabledModules = getEnabledModules(allModules);
+        const enabledModules = getVisibleModules(allModules, profile);
         const activeModule = getActiveModule(enabledModules, testProfile);
 
         expect(activeModule).toBeUndefined();
@@ -194,7 +202,7 @@ describe('DataAccessRequirements', () => {
             }
         };
 
-        const enabledModules = getEnabledModules(allModules);
+        const enabledModules = getVisibleModules(allModules, profile);
 
         let activeModule = getActiveModule(enabledModules, testProfile);
         expect(activeModule).toEqual(AccessModule.RASLINKLOGINGOV)
@@ -463,6 +471,46 @@ describe('DataAccessRequirements', () => {
         expect(spy2FA).toHaveBeenCalledTimes(0);
         expect(spyERA).toHaveBeenCalledTimes(0);
         expect(spyCompliance).toHaveBeenCalledTimes(0);
+    });
+
+    it ('Should not show Era Commons Module for Registered Tier if the institution does not require eRa', async() => {
+        let wrapper = component();
+        await waitOneTickAndUpdate(wrapper);
+        expect(findModule(wrapper, AccessModule.ERACOMMONS).exists()).toBeTruthy();
+
+        profileStore.set({
+            profile: {
+                ...ProfileStubVariables.PROFILE_STUB,
+                tierEligibilities: [{
+                    accessTierShortName: AccessTierShortNames.Registered,
+                    eraRequired: false
+                }]
+            },
+            load,
+            reload,
+            updateCache});
+        wrapper = component();
+        await waitOneTickAndUpdate(wrapper);
+        expect(findModule(wrapper, AccessModule.ERACOMMONS).exists()).toBeFalsy();
+
+        // Ignore eraRequired if the accessTier is Controlled
+        profileStore.set({
+            profile: {
+                ...ProfileStubVariables.PROFILE_STUB,
+                tierEligibilities: [{
+                    accessTierShortName: AccessTierShortNames.Registered,
+                    eraRequired: true
+                },{
+                    accessTierShortName: AccessTierShortNames.Controlled,
+                    eraRequired: false
+                }]
+            },
+            load,
+            reload,
+            updateCache});
+        wrapper = component();
+        await waitOneTickAndUpdate(wrapper);
+        expect(findModule(wrapper, AccessModule.ERACOMMONS).exists()).toBeTruthy();
     });
 
 });

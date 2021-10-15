@@ -1,6 +1,7 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {useEffect, useState} from 'react';
+import assert from "assert";
 
 import {useQuery} from 'app/components/app-router';
 import {Button, Clickable} from 'app/components/buttons';
@@ -24,18 +25,25 @@ import {cond, displayDateWithoutHours, reactStyles, switchCase} from 'app/utils'
 import {
   buildRasRedirectUrl,
   bypassAll,
+  getAccessModuleConfig,
   getAccessModuleStatusByName,
   GetStartedButton,
-  redirectToRas,
   redirectToNiH,
+  redirectToRas,
   redirectToTraining,
-  getAccessModuleConfig,
 } from 'app/utils/access-utils';
 import {useNavigation} from 'app/utils/navigation';
 import {profileStore, serverConfigStore, useStore} from 'app/utils/stores';
 import {AccessModule, AccessModuleStatus, Profile} from 'generated/fetch';
 import {TwoFactorAuthModal} from './two-factor-auth-modal';
 import {AnalyticsTracker} from 'app/utils/analytics';
+import {ReactComponent as individual} from 'assets/icons/DAR/individual.svg';
+import {ReactComponent as identifying} from 'assets/icons/DAR/identifying.svg';
+import {ReactComponent as electronic} from 'assets/icons/DAR/electronic.svg';
+import {ReactComponent as survey} from 'assets/icons/DAR/survey.svg';
+import {ReactComponent as physical} from 'assets/icons/DAR/physical.svg';
+import {ReactComponent as wearable} from 'assets/icons/DAR/wearable.svg';
+import {AccessTierShortNames} from 'app/utils/access-tiers';
 
 const styles = reactStyles({
   headerFlexColumn: {
@@ -285,11 +293,29 @@ const selfBypass = async(spinnerProps: WithSpinnerOverlayProps, reloadProfile: F
   spinnerProps.hideSpinner();
   reloadProfile();
 };
+const getVisibleRTModules = (profile: Profile): AccessModule[] => {
+  return fp.filter(module=> isEraCommonsModuleRequiredByInstitution(profile, module),rtModules);
+}
+
+const isEraCommonsModuleRequiredByInstitution = (profile: Profile, moduleNames: AccessModule): boolean => {
+  // Remove the eRA Commons module when the flag to enable RAS is set and the user's
+  // institution does not require eRA Commons for RT.
+
+  if (moduleNames !== AccessModule.ERACOMMONS) { return true;}
+  const {enableRasLoginGovLinking} = serverConfigStore.get().config;
+  if (!enableRasLoginGovLinking) { return true; }
+
+  return fp.flow(
+      fp.filter({accessTierShortName: AccessTierShortNames.Registered}),
+      fp.some('eraRequired')
+  )(profile.tierEligibilities);
+}
 
 // exported for test
-export const getEnabledModules = (modules: AccessModule[]): AccessModule[] => fp.flow(
+export const getVisibleModules = (modules: AccessModule[], profile: Profile): AccessModule[] => fp.flow(
     fp.map(getAccessModuleConfig),
     fp.filter(moduleConfig => moduleConfig.isEnabledInEnvironment),
+    fp.filter(moduleConfig => isEraCommonsModuleRequiredByInstitution(profile, moduleConfig.moduleName)),
     fp.map(moduleConfig => moduleConfig.moduleName)
 )(modules);
 
@@ -473,13 +499,6 @@ const ModulesForCard = (props: CardProps) => {
 
 // TODO is there a better way?
 
-import {ReactComponent as individual} from 'assets/icons/DAR/individual.svg';
-import {ReactComponent as identifying} from 'assets/icons/DAR/identifying.svg';
-import {ReactComponent as electronic} from 'assets/icons/DAR/electronic.svg';
-import {ReactComponent as survey} from 'assets/icons/DAR/survey.svg';
-import {ReactComponent as physical} from 'assets/icons/DAR/physical.svg';
-import {ReactComponent as wearable} from 'assets/icons/DAR/wearable.svg';
-
 const Individual = individual;
 const Identifying = identifying;
 const Electronic = electronic;
@@ -522,7 +541,7 @@ const RegisteredTierCard = (props: {profile: Profile, activeModule: AccessModule
       <DataDetail icon='physical' text='Physical measurements'/>
       <DataDetail icon='wearable' text='Wearable devices'/>
     </FlexColumn>
-    <ModulesForCard profile={profile}  modules={rtModules} activeModule={activeModule} spinnerProps={spinnerProps}/>
+    <ModulesForCard profile={profile} modules={getVisibleRTModules(profile)} activeModule={activeModule} spinnerProps={spinnerProps}/>
   </FlexRow>;
 };
 
@@ -541,10 +560,10 @@ const DuccCard = (props: {profile: Profile, activeModule: AccessModule, spinnerP
 export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerProps: WithSpinnerOverlayProps) => {
   const {profile, reload} = useStore(profileStore);
   const {config: {unsafeAllowSelfBypass}} = useStore(serverConfigStore);
-  const enabledModules = getEnabledModules(allModules);
+  const visibleModules = getVisibleModules(allModules, profile);
 
   useEffect(() => {
-    syncIncompleteModules(enabledModules, profile, reload);
+    syncIncompleteModules(visibleModules, profile, reload);
     spinnerProps.hideSpinner();
   }, []);
 
@@ -570,7 +589,7 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
 
   // whenever the profile changes, setActiveModule(the first incomplete enabled module)
   useEffect(() => {
-    setActiveModule(getActiveModule(enabledModules, profile));
+    setActiveModule(getActiveModule(visibleModules, profile));
   }, [profile]);
 
 
