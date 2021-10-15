@@ -4,8 +4,9 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doReturn;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import javax.inject.Provider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,7 +34,6 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
-import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.model.ConceptIdName;
 import org.pmiops.workbench.model.Criteria;
 import org.pmiops.workbench.model.CriteriaAttribute;
@@ -60,7 +60,6 @@ public class CohortBuilderControllerTest extends SpringTest {
   private CohortBuilderController controller;
 
   @Mock private BigQueryService bigQueryService;
-  @Mock private CloudStorageClient cloudStorageClient;
   @Mock private CohortQueryBuilder cohortQueryBuilder;
   @Autowired private CBCriteriaDao cbCriteriaDao;
   @Autowired private CBCriteriaAttributeDao cbCriteriaAttributeDao;
@@ -102,10 +101,10 @@ public class CohortBuilderControllerTest extends SpringTest {
     controller =
         new CohortBuilderController(configProvider, cohortBuilderService, workspaceAuthService);
 
-    MySQLStopWords mySQLStopWords = new MySQLStopWords(Arrays.asList("about"));
+    MySQLStopWords mySQLStopWords = new MySQLStopWords(Collections.singletonList("about"));
     doReturn(mySQLStopWords).when(mySQLStopWordsProvider).get();
     DbCdrVersion cdrVersion = new DbCdrVersion();
-    cdrVersion.setCdrVersionId(1l);
+    cdrVersion.setCdrVersionId(1L);
     DbWorkspace dbWorkspace = new DbWorkspace();
     dbWorkspace.setWorkspaceNamespace(WORKSPACE_NAMESPACE);
     dbWorkspace.setName("Saved workspace");
@@ -126,9 +125,8 @@ public class CohortBuilderControllerTest extends SpringTest {
                 .addSortOrder(2L)
                 .build());
     assertThat(
-            controller
-                .findCriteriaMenu(WORKSPACE_NAMESPACE, WORKSPACE_ID, 0L)
-                .getBody()
+            Objects.requireNonNull(
+                    controller.findCriteriaMenu(WORKSPACE_NAMESPACE, WORKSPACE_ID, 0L).getBody())
                 .getItems()
                 .get(0))
         .isEqualTo(cohortBuilderMapper.dbModelToClient(dbCriteriaMenu));
@@ -159,7 +157,10 @@ public class CohortBuilderControllerTest extends SpringTest {
                 .sortOrder(3));
 
     DomainCard domainCard =
-        controller.findDomainCards(WORKSPACE_NAMESPACE, WORKSPACE_ID).getBody().getItems().get(0);
+        Objects.requireNonNull(
+                controller.findDomainCards(WORKSPACE_NAMESPACE, WORKSPACE_ID).getBody())
+            .getItems()
+            .get(0);
     assertThat(domainCard.getName()).isEqualTo(dbDomainCard.getName());
     assertThat(domainCard.getDescription()).isEqualTo(dbDomainCard.getDescription());
     assertThat(domainCard.getParticipantCount()).isEqualTo(dbDomainCard.getParticipantCount());
@@ -206,7 +207,10 @@ public class CohortBuilderControllerTest extends SpringTest {
                 .participantCount(1000));
 
     SurveyModule surveyModule =
-        controller.findSurveyModules(WORKSPACE_NAMESPACE, WORKSPACE_ID).getBody().getItems().get(0);
+        Objects.requireNonNull(
+                controller.findSurveyModules(WORKSPACE_NAMESPACE, WORKSPACE_ID).getBody())
+            .getItems()
+            .get(0);
     assertThat(surveyModule.getName()).isEqualTo(dbSurveyModule.getName());
     assertThat(surveyModule.getDescription()).isEqualTo(dbSurveyModule.getDescription());
     assertThat(surveyModule.getParticipantCount()).isEqualTo(dbSurveyModule.getParticipantCount());
@@ -237,29 +241,31 @@ public class CohortBuilderControllerTest extends SpringTest {
     cbCriteriaDao.save(icd9Criteria);
 
     assertThat(
-            controller
-                .findCriteriaBy(
-                    WORKSPACE_NAMESPACE,
-                    WORKSPACE_ID,
-                    Domain.CONDITION.toString(),
-                    CriteriaType.ICD9CM.toString(),
-                    false,
-                    0L)
-                .getBody()
+            Objects.requireNonNull(
+                    controller
+                        .findCriteriaBy(
+                            WORKSPACE_NAMESPACE,
+                            WORKSPACE_ID,
+                            Domain.CONDITION.toString(),
+                            CriteriaType.ICD9CM.toString(),
+                            false,
+                            0L)
+                        .getBody())
                 .getItems()
                 .get(0))
         .isEqualTo(createResponseCriteria(icd9CriteriaParent));
 
     assertThat(
-            controller
-                .findCriteriaBy(
-                    "1",
-                    "1",
-                    Domain.CONDITION.toString(),
-                    CriteriaType.ICD9CM.toString(),
-                    false,
-                    icd9CriteriaParent.getId())
-                .getBody()
+            Objects.requireNonNull(
+                    controller
+                        .findCriteriaBy(
+                            "1",
+                            "1",
+                            Domain.CONDITION.toString(),
+                            CriteriaType.ICD9CM.toString(),
+                            false,
+                            icd9CriteriaParent.getId())
+                        .getBody())
                 .getItems()
                 .get(0))
         .isEqualTo(createResponseCriteria(icd9Criteria));
@@ -302,15 +308,16 @@ public class CohortBuilderControllerTest extends SpringTest {
     cbCriteriaDao.save(demoCriteria);
 
     assertThat(
-            controller
-                .findCriteriaBy(
-                    WORKSPACE_NAMESPACE,
-                    WORKSPACE_ID,
-                    Domain.PERSON.toString(),
-                    CriteriaType.AGE.toString(),
-                    false,
-                    null)
-                .getBody()
+            Objects.requireNonNull(
+                    controller
+                        .findCriteriaBy(
+                            WORKSPACE_NAMESPACE,
+                            WORKSPACE_ID,
+                            Domain.PERSON.toString(),
+                            CriteriaType.AGE.toString(),
+                            false,
+                            null)
+                        .getBody())
                 .getItems()
                 .get(0))
         .isEqualTo(createResponseCriteria(demoCriteria));
@@ -330,16 +337,17 @@ public class CohortBuilderControllerTest extends SpringTest {
     cbCriteriaDao.save(criteria);
 
     assertThat(
-            controller
-                .findCriteriaAutoComplete(
-                    WORKSPACE_NAMESPACE,
-                    WORKSPACE_ID,
-                    Domain.MEASUREMENT.toString(),
-                    "LP12",
-                    CriteriaType.LOINC.toString(),
-                    true,
-                    null)
-                .getBody()
+            Objects.requireNonNull(
+                    controller
+                        .findCriteriaAutoComplete(
+                            WORKSPACE_NAMESPACE,
+                            WORKSPACE_ID,
+                            Domain.MEASUREMENT.toString(),
+                            "LP12",
+                            CriteriaType.LOINC.toString(),
+                            true,
+                            null)
+                        .getBody())
                 .getItems()
                 .get(0))
         .isEqualTo(createResponseCriteria(criteria));
@@ -360,16 +368,17 @@ public class CohortBuilderControllerTest extends SpringTest {
     cbCriteriaDao.save(criteria);
 
     assertThat(
-            controller
-                .findCriteriaAutoComplete(
-                    WORKSPACE_NAMESPACE,
-                    WORKSPACE_ID,
-                    Domain.MEASUREMENT.toString(),
-                    "LP12",
-                    CriteriaType.LOINC.toString(),
-                    true,
-                    null)
-                .getBody()
+            Objects.requireNonNull(
+                    controller
+                        .findCriteriaAutoComplete(
+                            WORKSPACE_NAMESPACE,
+                            WORKSPACE_ID,
+                            Domain.MEASUREMENT.toString(),
+                            "LP12",
+                            CriteriaType.LOINC.toString(),
+                            true,
+                            null)
+                        .getBody())
                 .getItems()
                 .get(0))
         .isEqualTo(createResponseCriteria(criteria));
@@ -389,16 +398,17 @@ public class CohortBuilderControllerTest extends SpringTest {
     cbCriteriaDao.save(criteria);
 
     assertThat(
-            controller
-                .findCriteriaAutoComplete(
-                    WORKSPACE_NAMESPACE,
-                    WORKSPACE_ID,
-                    Domain.CONDITION.toString(),
-                    "LP12",
-                    CriteriaType.SNOMED.toString(),
-                    true,
-                    null)
-                .getBody()
+            Objects.requireNonNull(
+                    controller
+                        .findCriteriaAutoComplete(
+                            WORKSPACE_NAMESPACE,
+                            WORKSPACE_ID,
+                            Domain.CONDITION.toString(),
+                            "LP12",
+                            CriteriaType.SNOMED.toString(),
+                            true,
+                            null)
+                        .getBody())
                 .getItems()
                 .get(0))
         .isEqualTo(createResponseCriteria(criteria));
@@ -455,30 +465,32 @@ public class CohortBuilderControllerTest extends SpringTest {
 
     assertThat(cohortBuilderMapper.dbModelToClient(dbCriteria))
         .isEqualTo(
-            controller
-                .findCriteriaByDomain(
-                    WORKSPACE_NAMESPACE,
-                    WORKSPACE_ID,
-                    Domain.PHYSICAL_MEASUREMENT_CSS.toString(),
-                    false,
-                    "12345",
-                    null,
-                    null)
-                .getBody()
+            Objects.requireNonNull(
+                    controller
+                        .findCriteriaByDomain(
+                            WORKSPACE_NAMESPACE,
+                            WORKSPACE_ID,
+                            Domain.PHYSICAL_MEASUREMENT_CSS.toString(),
+                            false,
+                            "12345",
+                            null,
+                            null)
+                        .getBody())
                 .getItems()
                 .get(0));
 
     assertThat(
-            controller
-                .findCriteriaByDomain(
-                    WORKSPACE_NAMESPACE,
-                    WORKSPACE_ID,
-                    Domain.PHYSICAL_MEASUREMENT_CSS.toString(),
-                    true,
-                    "12345",
-                    null,
-                    null)
-                .getBody()
+            Objects.requireNonNull(
+                    controller
+                        .findCriteriaByDomain(
+                            WORKSPACE_NAMESPACE,
+                            WORKSPACE_ID,
+                            Domain.PHYSICAL_MEASUREMENT_CSS.toString(),
+                            true,
+                            "12345",
+                            null,
+                            null)
+                        .getBody())
                 .getItems())
         .isEmpty();
   }
@@ -503,30 +515,32 @@ public class CohortBuilderControllerTest extends SpringTest {
     cbCriteriaDao.save(criteria);
 
     assertThat(
-            controller
-                .findCriteriaByDomain(
-                    WORKSPACE_NAMESPACE,
-                    WORKSPACE_ID,
-                    Domain.CONDITION.name(),
-                    false,
-                    "001",
-                    null,
-                    null)
-                .getBody()
+            Objects.requireNonNull(
+                    controller
+                        .findCriteriaByDomain(
+                            WORKSPACE_NAMESPACE,
+                            WORKSPACE_ID,
+                            Domain.CONDITION.name(),
+                            false,
+                            "001",
+                            null,
+                            null)
+                        .getBody())
                 .getItems()
                 .get(0))
         .isEqualTo(createResponseCriteria(criteria));
     assertThat(
-            controller
-                .findCriteriaByDomain(
-                    WORKSPACE_NAMESPACE,
-                    WORKSPACE_ID,
-                    Domain.CONDITION.name(),
-                    true,
-                    "001",
-                    null,
-                    null)
-                .getBody()
+            Objects.requireNonNull(
+                    controller
+                        .findCriteriaByDomain(
+                            WORKSPACE_NAMESPACE,
+                            WORKSPACE_ID,
+                            Domain.CONDITION.name(),
+                            true,
+                            "001",
+                            null,
+                            null)
+                        .getBody())
                 .getItems())
         .isEmpty();
   }
@@ -551,20 +565,34 @@ public class CohortBuilderControllerTest extends SpringTest {
     cbCriteriaDao.save(criteria);
 
     List<Criteria> results =
-        controller
-            .findCriteriaByDomain(
-                WORKSPACE_NAMESPACE, WORKSPACE_ID, Domain.CONDITION.name(), false, "00", null, null)
-            .getBody()
+        Objects.requireNonNull(
+                controller
+                    .findCriteriaByDomain(
+                        WORKSPACE_NAMESPACE,
+                        WORKSPACE_ID,
+                        Domain.CONDITION.name(),
+                        false,
+                        "00",
+                        null,
+                        null)
+                    .getBody())
             .getItems();
 
     assertThat(1).isEqualTo(results.size());
     assertThat(results.get(0)).isEqualTo(createResponseCriteria(criteria));
 
     results =
-        controller
-            .findCriteriaByDomain(
-                WORKSPACE_NAMESPACE, WORKSPACE_ID, Domain.CONDITION.name(), true, "00", null, null)
-            .getBody()
+        Objects.requireNonNull(
+                controller
+                    .findCriteriaByDomain(
+                        WORKSPACE_NAMESPACE,
+                        WORKSPACE_ID,
+                        Domain.CONDITION.name(),
+                        true,
+                        "00",
+                        null,
+                        null)
+                    .getBody())
             .getItems();
 
     assertThat(0).isEqualTo(results.size());
@@ -590,19 +618,33 @@ public class CohortBuilderControllerTest extends SpringTest {
     cbCriteriaDao.save(criteria1);
 
     List<Criteria> results =
-        controller
-            .findCriteriaByDomain(
-                WORKSPACE_NAMESPACE, WORKSPACE_ID, Domain.DRUG.name(), true, "672535", null, null)
-            .getBody()
+        Objects.requireNonNull(
+                controller
+                    .findCriteriaByDomain(
+                        WORKSPACE_NAMESPACE,
+                        WORKSPACE_ID,
+                        Domain.DRUG.name(),
+                        true,
+                        "672535",
+                        null,
+                        null)
+                    .getBody())
             .getItems();
     assertThat(1).isEqualTo(results.size());
     assertThat(results.get(0)).isEqualTo(createResponseCriteria(criteria1));
 
     results =
-        controller
-            .findCriteriaByDomain(
-                WORKSPACE_NAMESPACE, WORKSPACE_ID, Domain.DRUG.name(), false, "672535", null, null)
-            .getBody()
+        Objects.requireNonNull(
+                controller
+                    .findCriteriaByDomain(
+                        WORKSPACE_NAMESPACE,
+                        WORKSPACE_ID,
+                        Domain.DRUG.name(),
+                        false,
+                        "672535",
+                        null,
+                        null)
+                    .getBody())
             .getItems();
     assertThat(0).isEqualTo(results.size());
   }
@@ -626,25 +668,18 @@ public class CohortBuilderControllerTest extends SpringTest {
             .build();
     cbCriteriaDao.save(criteria);
 
-    //    assertThat(
-    //            controller
-    //                .findCriteriaByDomain(
-    //                    WORKSPACE_NAMESPACE, WORKSPACE_ID, Domain.CONDITION.name(), true, "LP12",
-    // null, null)
-    //                .getBody()
-    //                .getItems()).isEmpty();
-
     assertThat(
-            controller
-                .findCriteriaByDomain(
-                    WORKSPACE_NAMESPACE,
-                    WORKSPACE_ID,
-                    Domain.CONDITION.name(),
-                    false,
-                    "LP12",
-                    null,
-                    null)
-                .getBody()
+            Objects.requireNonNull(
+                    controller
+                        .findCriteriaByDomain(
+                            WORKSPACE_NAMESPACE,
+                            WORKSPACE_ID,
+                            Domain.CONDITION.name(),
+                            false,
+                            "LP12",
+                            null,
+                            null)
+                        .getBody())
                 .getItems()
                 .get(0))
         .isEqualTo(createResponseCriteria(criteria));
@@ -670,30 +705,32 @@ public class CohortBuilderControllerTest extends SpringTest {
     cbCriteriaDao.save(criteria);
 
     assertThat(
-            controller
-                .findCriteriaByDomain(
-                    WORKSPACE_NAMESPACE,
-                    WORKSPACE_ID,
-                    Domain.CONDITION.name(),
-                    true,
-                    "LP12",
-                    null,
-                    null)
-                .getBody()
+            Objects.requireNonNull(
+                    controller
+                        .findCriteriaByDomain(
+                            WORKSPACE_NAMESPACE,
+                            WORKSPACE_ID,
+                            Domain.CONDITION.name(),
+                            true,
+                            "LP12",
+                            null,
+                            null)
+                        .getBody())
                 .getItems()
                 .get(0))
         .isEqualTo(createResponseCriteria(criteria));
     assertThat(
-            controller
-                .findCriteriaByDomain(
-                    WORKSPACE_NAMESPACE,
-                    WORKSPACE_ID,
-                    Domain.CONDITION.name(),
-                    false,
-                    "LP12",
-                    null,
-                    null)
-                .getBody()
+            Objects.requireNonNull(
+                    controller
+                        .findCriteriaByDomain(
+                            WORKSPACE_NAMESPACE,
+                            WORKSPACE_ID,
+                            Domain.CONDITION.name(),
+                            false,
+                            "LP12",
+                            null,
+                            null)
+                        .getBody())
                 .getItems())
         .isEmpty();
   }
@@ -718,31 +755,33 @@ public class CohortBuilderControllerTest extends SpringTest {
     cbCriteriaDao.save(criteria);
 
     assertThat(
-            controller
-                .findCriteriaByDomain(
-                    WORKSPACE_NAMESPACE,
-                    WORKSPACE_ID,
-                    Domain.CONDITION.name(),
-                    true,
-                    "",
-                    null,
-                    null)
-                .getBody()
+            Objects.requireNonNull(
+                    controller
+                        .findCriteriaByDomain(
+                            WORKSPACE_NAMESPACE,
+                            WORKSPACE_ID,
+                            Domain.CONDITION.name(),
+                            true,
+                            "",
+                            null,
+                            null)
+                        .getBody())
                 .getItems()
                 .get(0))
         .isEqualTo(createResponseCriteria(criteria));
 
     assertThat(
-            controller
-                .findCriteriaByDomain(
-                    WORKSPACE_NAMESPACE,
-                    WORKSPACE_ID,
-                    Domain.CONDITION.name(),
-                    false,
-                    "",
-                    null,
-                    null)
-                .getBody()
+            Objects.requireNonNull(
+                    controller
+                        .findCriteriaByDomain(
+                            WORKSPACE_NAMESPACE,
+                            WORKSPACE_ID,
+                            Domain.CONDITION.name(),
+                            false,
+                            "",
+                            null,
+                            null)
+                        .getBody())
                 .getItems())
         .isEmpty();
   }
@@ -769,267 +808,34 @@ public class CohortBuilderControllerTest extends SpringTest {
     cbCriteriaDao.save(criteria);
 
     assertThat(
-            controller
-                .findCriteriaByDomain(
-                    WORKSPACE_NAMESPACE, WORKSPACE_ID, Domain.DRUG.name(), true, "LP12", null, null)
-                .getBody()
+            Objects.requireNonNull(
+                    controller
+                        .findCriteriaByDomain(
+                            WORKSPACE_NAMESPACE,
+                            WORKSPACE_ID,
+                            Domain.DRUG.name(),
+                            true,
+                            "LP12",
+                            null,
+                            null)
+                        .getBody())
                 .getItems()
                 .get(0))
         .isEqualTo(createResponseCriteria(criteria));
     assertThat(
-            controller
-                .findCriteriaByDomain(
-                    WORKSPACE_NAMESPACE,
-                    WORKSPACE_ID,
-                    Domain.DRUG.name(),
-                    false,
-                    "LP12",
-                    null,
-                    null)
-                .getBody()
+            Objects.requireNonNull(
+                    controller
+                        .findCriteriaByDomain(
+                            WORKSPACE_NAMESPACE,
+                            WORKSPACE_ID,
+                            Domain.DRUG.name(),
+                            false,
+                            "LP12",
+                            null,
+                            null)
+                        .getBody())
                 .getItems())
         .isEmpty();
-    jdbcTemplate.execute("drop table cb_criteria_relationship");
-  }
-
-  @Test
-  public void findCriteriaByDomainAndSearchTermPhysicalMeasurement() {
-    DbCriteria dbCriteria =
-        DbCriteria.builder()
-            .addCode("12345")
-            .addCount(10L)
-            .addConceptId("123")
-            .addDomainId(Domain.PHYSICAL_MEASUREMENT_CSS.toString())
-            .addGroup(Boolean.FALSE)
-            .addSelectable(Boolean.TRUE)
-            .addName("chol blah")
-            .addParentId(0)
-            .addType(CriteriaType.PPI.toString())
-            .addAttribute(Boolean.FALSE)
-            .addStandard(false)
-            .addFullText("[PHYSICAL_MEASUREMENT_CSS_rank1]")
-            .build();
-    cbCriteriaDao.save(dbCriteria);
-
-    assertThat(cohortBuilderMapper.dbModelToClient(dbCriteria))
-        .isEqualTo(
-            controller
-                .findCriteriaByDomainAndSearchTerm(
-                    WORKSPACE_NAMESPACE,
-                    WORKSPACE_ID,
-                    Domain.PHYSICAL_MEASUREMENT_CSS.toString(),
-                    "12345",
-                    null,
-                    null)
-                .getBody()
-                .getItems()
-                .get(0));
-  }
-
-  @Test
-  public void findCriteriaByDomainAndSearchTermMatchesSourceCode() {
-    DbCriteria criteria =
-        DbCriteria.builder()
-            .addCode("001")
-            .addCount(10L)
-            .addConceptId("123")
-            .addDomainId(Domain.CONDITION.toString())
-            .addGroup(Boolean.TRUE)
-            .addSelectable(Boolean.TRUE)
-            .addName("chol blah")
-            .addParentId(0)
-            .addType(CriteriaType.ICD9CM.toString())
-            .addAttribute(Boolean.FALSE)
-            .addStandard(false)
-            .addFullText("[CONDITION_rank1]")
-            .build();
-    cbCriteriaDao.save(criteria);
-
-    assertThat(
-            controller
-                .findCriteriaByDomainAndSearchTerm(
-                    WORKSPACE_NAMESPACE, WORKSPACE_ID, Domain.CONDITION.name(), "001", null, null)
-                .getBody()
-                .getItems()
-                .get(0))
-        .isEqualTo(createResponseCriteria(criteria));
-  }
-
-  @Test
-  public void findCriteriaByDomainAndSearchTermLikeSourceCode() {
-    DbCriteria criteria =
-        DbCriteria.builder()
-            .addCode("00")
-            .addCount(10L)
-            .addConceptId("123")
-            .addDomainId(Domain.CONDITION.toString())
-            .addGroup(Boolean.TRUE)
-            .addSelectable(Boolean.TRUE)
-            .addName("chol blah")
-            .addParentId(0)
-            .addType(CriteriaType.ICD9CM.toString())
-            .addAttribute(Boolean.FALSE)
-            .addStandard(false)
-            .addFullText("+[CONDITION_rank1]")
-            .build();
-    cbCriteriaDao.save(criteria);
-
-    List<Criteria> results =
-        controller
-            .findCriteriaByDomainAndSearchTerm(
-                WORKSPACE_NAMESPACE, WORKSPACE_ID, Domain.CONDITION.name(), "00", null, null)
-            .getBody()
-            .getItems();
-
-    assertThat(1).isEqualTo(results.size());
-    assertThat(results.get(0)).isEqualTo(createResponseCriteria(criteria));
-  }
-
-  @Test
-  public void findCriteriaByDomainAndSearchTermDrugMatchesStandardCodeBrand() {
-    DbCriteria criteria1 =
-        DbCriteria.builder()
-            .addCode("672535")
-            .addCount(-1L)
-            .addConceptId("19001487")
-            .addDomainId(Domain.DRUG.toString())
-            .addGroup(Boolean.FALSE)
-            .addSelectable(Boolean.TRUE)
-            .addName("4-Way")
-            .addParentId(0)
-            .addType(CriteriaType.BRAND.toString())
-            .addAttribute(Boolean.FALSE)
-            .addStandard(true)
-            .addFullText("[DRUG_rank1]")
-            .build();
-    cbCriteriaDao.save(criteria1);
-
-    List<Criteria> results =
-        controller
-            .findCriteriaByDomainAndSearchTerm(
-                WORKSPACE_NAMESPACE, WORKSPACE_ID, Domain.DRUG.name(), "672535", null, null)
-            .getBody()
-            .getItems();
-    assertThat(1).isEqualTo(results.size());
-    assertThat(results.get(0)).isEqualTo(createResponseCriteria(criteria1));
-  }
-
-  @Test
-  public void findCriteriaByDomainAndSearchTermMatchesStandardCode() {
-    DbCriteria criteria =
-        DbCriteria.builder()
-            .addCode("LP12")
-            .addCount(10L)
-            .addConceptId("123")
-            .addDomainId(Domain.CONDITION.toString())
-            .addGroup(Boolean.TRUE)
-            .addSelectable(Boolean.TRUE)
-            .addName("chol blah")
-            .addParentId(0)
-            .addType(CriteriaType.LOINC.toString())
-            .addAttribute(Boolean.FALSE)
-            .addStandard(true)
-            .addFullText("[CONDITION_rank1]")
-            .build();
-    cbCriteriaDao.save(criteria);
-
-    assertThat(
-            controller
-                .findCriteriaByDomainAndSearchTerm(
-                    WORKSPACE_NAMESPACE, WORKSPACE_ID, Domain.CONDITION.name(), "LP12", null, null)
-                .getBody()
-                .getItems()
-                .get(0))
-        .isEqualTo(createResponseCriteria(criteria));
-  }
-
-  @Test
-  public void findCriteriaByDomainAndSearchTermMatchesSynonyms() {
-    DbCriteria criteria =
-        DbCriteria.builder()
-            .addCode("001")
-            .addCount(10L)
-            .addConceptId("123")
-            .addDomainId(Domain.CONDITION.toString())
-            .addGroup(Boolean.TRUE)
-            .addSelectable(Boolean.TRUE)
-            .addName("chol blah")
-            .addParentId(0)
-            .addType(CriteriaType.LOINC.toString())
-            .addAttribute(Boolean.FALSE)
-            .addStandard(true)
-            .addFullText("LP12*[CONDITION_rank1]")
-            .build();
-    cbCriteriaDao.save(criteria);
-
-    assertThat(
-            controller
-                .findCriteriaByDomainAndSearchTerm(
-                    WORKSPACE_NAMESPACE, WORKSPACE_ID, Domain.CONDITION.name(), "LP12", null, null)
-                .getBody()
-                .getItems()
-                .get(0))
-        .isEqualTo(createResponseCriteria(criteria));
-  }
-
-  @Test
-  public void findCriteriaByDomainAndSearchTermEmptyTerm() {
-    DbCriteria criteria =
-        DbCriteria.builder()
-            .addCode("001")
-            .addCount(10L)
-            .addConceptId("123")
-            .addDomainId(Domain.CONDITION.toString())
-            .addGroup(Boolean.TRUE)
-            .addSelectable(Boolean.TRUE)
-            .addName("chol blah")
-            .addParentId(0)
-            .addType(CriteriaType.LOINC.toString())
-            .addAttribute(Boolean.FALSE)
-            .addStandard(true)
-            .addFullText("LP12*[CONDITION_rank1]")
-            .build();
-    cbCriteriaDao.save(criteria);
-
-    assertThat(
-            controller
-                .findCriteriaByDomainAndSearchTerm(
-                    WORKSPACE_NAMESPACE, WORKSPACE_ID, Domain.CONDITION.name(), "", null, null)
-                .getBody()
-                .getItems()
-                .get(0))
-        .isEqualTo(createResponseCriteria(criteria));
-  }
-
-  @Test
-  public void findCriteriaByDomainAndSearchTermDrugMatchesSynonyms() {
-    jdbcTemplate.execute(
-        "create table cb_criteria_relationship(concept_id_1 integer, concept_id_2 integer)");
-    DbCriteria criteria =
-        DbCriteria.builder()
-            .addCode("001")
-            .addCount(10L)
-            .addConceptId("123")
-            .addDomainId(Domain.DRUG.toString())
-            .addGroup(Boolean.TRUE)
-            .addSelectable(Boolean.TRUE)
-            .addName("chol blah")
-            .addParentId(0)
-            .addType(CriteriaType.ATC.toString())
-            .addAttribute(Boolean.FALSE)
-            .addStandard(true)
-            .addFullText("LP12*[DRUG_rank1]")
-            .build();
-    cbCriteriaDao.save(criteria);
-
-    assertThat(
-            controller
-                .findCriteriaByDomainAndSearchTerm(
-                    WORKSPACE_NAMESPACE, WORKSPACE_ID, Domain.DRUG.name(), "LP12", null, null)
-                .getBody()
-                .getItems()
-                .get(0))
-        .isEqualTo(createResponseCriteria(criteria));
     jdbcTemplate.execute("drop table cb_criteria_relationship");
   }
 
@@ -1050,10 +856,11 @@ public class CohortBuilderControllerTest extends SpringTest {
             .build();
     cbCriteriaDao.save(criteria);
     assertThat(
-            controller
-                .findStandardCriteriaByDomainAndConceptId(
-                    WORKSPACE_NAMESPACE, WORKSPACE_ID, Domain.CONDITION.toString(), 12345L)
-                .getBody()
+            Objects.requireNonNull(
+                    controller
+                        .findStandardCriteriaByDomainAndConceptId(
+                            WORKSPACE_NAMESPACE, WORKSPACE_ID, Domain.CONDITION.toString(), 12345L)
+                        .getBody())
                 .getItems()
                 .get(0))
         .isEqualTo(createResponseCriteria(criteria));
@@ -1090,25 +897,31 @@ public class CohortBuilderControllerTest extends SpringTest {
     cbCriteriaDao.save(drugBrandCriteria);
 
     assertThat(
-            controller
-                .findDrugBrandOrIngredientByValue(WORKSPACE_NAMESPACE, WORKSPACE_ID, "drugN", null)
-                .getBody()
+            Objects.requireNonNull(
+                    controller
+                        .findDrugBrandOrIngredientByValue(
+                            WORKSPACE_NAMESPACE, WORKSPACE_ID, "drugN", null)
+                        .getBody())
                 .getItems()
                 .get(0))
         .isEqualTo(createResponseCriteria(drugATCCriteria));
 
     assertThat(
-            controller
-                .findDrugBrandOrIngredientByValue(WORKSPACE_NAMESPACE, WORKSPACE_ID, "brandN", null)
-                .getBody()
+            Objects.requireNonNull(
+                    controller
+                        .findDrugBrandOrIngredientByValue(
+                            WORKSPACE_NAMESPACE, WORKSPACE_ID, "brandN", null)
+                        .getBody())
                 .getItems()
                 .get(0))
         .isEqualTo(createResponseCriteria(drugBrandCriteria));
 
     assertThat(
-            controller
-                .findDrugBrandOrIngredientByValue(WORKSPACE_NAMESPACE, WORKSPACE_ID, "LP6789", null)
-                .getBody()
+            Objects.requireNonNull(
+                    controller
+                        .findDrugBrandOrIngredientByValue(
+                            WORKSPACE_NAMESPACE, WORKSPACE_ID, "LP6789", null)
+                        .getBody())
                 .getItems()
                 .get(0))
         .isEqualTo(createResponseCriteria(drugBrandCriteria));
@@ -1136,10 +949,11 @@ public class CohortBuilderControllerTest extends SpringTest {
                 .build());
 
     List<CriteriaAttribute> attrs =
-        controller
-            .findCriteriaAttributeByConceptId(
-                WORKSPACE_NAMESPACE, WORKSPACE_ID, criteriaAttributeMin.getConceptId())
-            .getBody()
+        Objects.requireNonNull(
+                controller
+                    .findCriteriaAttributeByConceptId(
+                        WORKSPACE_NAMESPACE, WORKSPACE_ID, criteriaAttributeMin.getConceptId())
+                    .getBody())
             .getItems();
     assertThat(attrs.contains(createResponseCriteriaAttribute(criteriaAttributeMin))).isTrue();
     assertThat(attrs.contains(createResponseCriteriaAttribute(criteriaAttributeMax))).isTrue();
@@ -1185,6 +999,7 @@ public class CohortBuilderControllerTest extends SpringTest {
             .build());
     ParticipantDemographics demos =
         controller.findParticipantDemographics(WORKSPACE_NAMESPACE, WORKSPACE_ID).getBody();
+    assert demos != null;
     assertThat(new ConceptIdName().conceptId(1L).conceptName("Male"))
         .isEqualTo(demos.getGenderList().get(0));
     assertThat(new ConceptIdName().conceptId(2L).conceptName("African American"))
@@ -1224,6 +1039,7 @@ public class CohortBuilderControllerTest extends SpringTest {
             .findSurveyVersionByQuestionConceptId(
                 WORKSPACE_NAMESPACE, WORKSPACE_ID, 1333342L, 715713L)
             .getBody();
+    assert response != null;
     assertThat(response.getItems().get(0).getSurveyVersionConceptId()).isEqualTo(new Long("100"));
     assertThat(response.getItems().get(0).getDisplayName()).isEqualTo("May 2020");
     assertThat(response.getItems().get(0).getItemCount()).isEqualTo(new Long("291"));

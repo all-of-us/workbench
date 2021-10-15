@@ -132,21 +132,6 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   }
 
   @Override
-  public ResponseEntity<CriteriaListWithCountResponse> findCriteriaByDomainAndSearchTerm(
-      String workspaceNamespace,
-      String workspaceId,
-      String domain,
-      String term,
-      String surveyName,
-      Integer limit) {
-    workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-        workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-    validateDomain(domain, surveyName);
-    return ResponseEntity.ok(
-        cohortBuilderService.findCriteriaByDomainAndSearchTerm(domain, term, surveyName, limit));
-  }
-
-  @Override
   public ResponseEntity<CriteriaListResponse> findCriteriaForCohortEdit(
       String workspaceNamespace, String workspaceId, String domain, CriteriaRequest request) {
     workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
