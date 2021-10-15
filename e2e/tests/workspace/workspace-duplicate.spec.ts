@@ -70,7 +70,7 @@ describe('Duplicate workspace', () => {
     await duplicateButton.waitUntilEnabled();
 
     // Change CDR version to an old CDR version.
-    await workspaceEditPage.selectCdrVersion(config.ALTERNATIVE_CDR_VERSION_NAME);
+    await workspaceEditPage.selectCdrVersion(config.OLD_CDR_VERSION_NAME);
     expect(await duplicateButton.isCursorNotAllowed()).toBe(true);
 
     const modal = new OldCdrVersionModal(page);
@@ -83,7 +83,7 @@ describe('Duplicate workspace', () => {
 
     // Try again. This time consent to restriction.
     // Duplicate workspace with an older CDR Version can proceed after consenting to restrictions.
-    await workspaceEditPage.selectCdrVersion(config.ALTERNATIVE_CDR_VERSION_NAME);
+    await workspaceEditPage.selectCdrVersion(config.OLD_CDR_VERSION_NAME);
     await modal.consentToOldCdrRestrictions();
 
     // Finish creation of workspace.

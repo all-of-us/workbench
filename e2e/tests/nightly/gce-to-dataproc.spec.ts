@@ -4,6 +4,7 @@ import { createWorkspace, signInWithAccessToken } from 'utils/test-utils';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { makeRandomName } from 'utils/str-utils';
 import { ResourceCard } from 'app/text-labels';
+import { AccessTierDisplayNames } from 'app/page/workspace-edit-page';
 
 // This test could take a long time to run
 jest.setTimeout(40 * 60 * 1000);
@@ -14,7 +15,10 @@ describe('Updating runtime compute type', () => {
   });
 
   test('Switch from GCE to dataproc', async () => {
-    await createWorkspace(page, { cdrVersionName: config.ALTERNATIVE_CDR_VERSION_NAME });
+    await createWorkspace(page, {
+      cdrVersionName: config.CONTROLLED_TIER_CDR_VERSION_NAME,
+      dataAccessTier: AccessTierDisplayNames.Controlled
+    });
 
     // Open the runtime panel
     const runtimePanel = new RuntimePanel(page);

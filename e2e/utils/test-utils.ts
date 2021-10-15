@@ -16,6 +16,7 @@ import { config } from 'resources/workbench-config';
 import { logger } from 'libs/logger';
 import { authenticator } from 'otplib';
 import AuthenticatedPage from 'app/page/authenticated-page';
+import { AccessTierDisplayNames } from '../app/page/workspace-edit-page';
 
 export async function signOut(page: Page): Promise<void> {
   await page.evaluate(() => {
@@ -141,11 +142,15 @@ export async function performAction(
  */
 export async function createWorkspace(
   page: Page,
-  { cdrVersionName = config.DEFAULT_CDR_VERSION_NAME, workspaceName = makeWorkspaceName() } = {}
+  {
+    workspaceName = makeWorkspaceName(),
+    cdrVersionName = config.DEFAULT_CDR_VERSION_NAME,
+    dataAccessTier = AccessTierDisplayNames.Registered
+  } = {}
 ): Promise<string> {
   const workspacesPage = new WorkspacesPage(page);
   await workspacesPage.load();
-  await workspacesPage.createWorkspace(workspaceName, cdrVersionName);
+  await workspacesPage.createWorkspace(workspaceName, { cdrVersionName, dataAccessTier });
   return workspaceName;
 }
 
@@ -166,19 +171,19 @@ export async function createWorkspace(
  */
 export async function findOrCreateWorkspace(
   page: Page,
-  opts: { cdrVersion?: string; workspaceName?: string } = {}
+  opts: { cdrVersion?: string; workspaceName?: string; dataAccessTier?: AccessTierDisplayNames } = {}
 ): Promise<string> {
-  const { cdrVersion = config.DEFAULT_CDR_VERSION_NAME, workspaceName } = opts;
+  const { workspaceName, cdrVersion, dataAccessTier } = opts;
   // Returns specified workspaceName Workspace card if exists.
   if (workspaceName !== undefined) {
     const cardFound = await findWorkspaceCard(page, workspaceName);
     if (cardFound != null) {
       logger.info(`Found workspace card name: ${workspaceName}`);
-      // TODO workspace CDR version is not verified
+      // TODO workspace CDR version and Data Access Tier are not verified
       await cardFound.clickWorkspaceName();
       return workspaceName; // Found Workspace card matching workspace name
     }
-    return createWorkspace(page, { workspaceName, cdrVersionName: cdrVersion });
+    return createWorkspace(page, { workspaceName, cdrVersionName: cdrVersion, dataAccessTier });
   }
 
   // Find a suitable workspace among existing workspaces with OWNER role and older than 30 minutes.
