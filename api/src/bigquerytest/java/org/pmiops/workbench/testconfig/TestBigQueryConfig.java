@@ -34,7 +34,9 @@ public class TestBigQueryConfig {
             RetrySettings.newBuilder()
                 .setMaxAttempts(3)
                 .setInitialRpcTimeout(org.threeten.bp.Duration.ofSeconds(20L))
+                .setMaxRpcTimeout(org.threeten.bp.Duration.ofSeconds(30L))
                 .setInitialRetryDelay(org.threeten.bp.Duration.ofSeconds(1L))
+                .setMaxRetryDelay(org.threeten.bp.Duration.ofSeconds(10L))
                 .build())
         .build()
         .getService();
