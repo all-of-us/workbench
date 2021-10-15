@@ -6,6 +6,11 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.model.SendBillingSetupEmailRequest;
 
 public interface MailService {
+  enum EgressRemediationAction {
+    SUSPEND_COMPUTE,
+    DISABLE_USER
+  }
+
   void sendWelcomeEmail(final String contactEmail, final String password, final String username)
       throws MessagingException;
 
@@ -27,4 +32,7 @@ public interface MailService {
 
   void sendBillingSetupEmail(final DbUser user, SendBillingSetupEmailRequest emailRequest)
       throws MessagingException;
+
+  void sendEgressRemediationEmail(
+      final DbUser user, EgressRemediationAction egressRemediationAction) throws MessagingException;
 }

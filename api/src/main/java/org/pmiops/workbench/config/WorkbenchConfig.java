@@ -381,6 +381,7 @@ public class WorkbenchConfig {
       public DisableUser disableUser;
     }
 
+    public String notifyFromEmail;
     public List<Escalation> escalations;
   }
 }

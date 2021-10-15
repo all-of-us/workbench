@@ -12,6 +12,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import javax.inject.Provider;
+import javax.mail.MessagingException;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.auditors.EgressEventAuditor;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -25,6 +26,8 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
+import org.pmiops.workbench.mail.MailService;
+import org.pmiops.workbench.mail.MailService.EgressRemediationAction;
 import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
 import org.springframework.stereotype.Service;
 
@@ -40,6 +43,7 @@ public class EgressRemediationService {
   private final Clock clock;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final UserService userService;
+  private final MailService mailService;
   private final LeonardoNotebooksClient leonardoNotebooksClient;
   private final EgressEventAuditor egressEventAuditor;
   private final EgressEventDao egressEventDao;
@@ -48,12 +52,14 @@ public class EgressRemediationService {
       Clock clock,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       UserService userService,
+      MailService mailService,
       LeonardoNotebooksClient leonardoNotebooksClient,
       EgressEventAuditor egressEventAuditor,
       EgressEventDao egressEventDao) {
     this.clock = clock;
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.userService = userService;
+    this.mailService = mailService;
     this.leonardoNotebooksClient = leonardoNotebooksClient;
     this.egressEventAuditor = egressEventAuditor;
     this.egressEventDao = egressEventDao;
@@ -91,12 +97,20 @@ public class EgressRemediationService {
     // Execute the action, if any
     escalation.ifPresent(
         e -> {
+          EgressRemediationAction action = null;
           if (e.disableUser != null) {
             disableUser(user);
+            action = EgressRemediationAction.DISABLE_USER;
           } else if (e.suspendCompute != null) {
             suspendUserCompute(user, Duration.ofMinutes(e.suspendCompute.durationMinutes));
+            action = EgressRemediationAction.SUSPEND_COMPUTE;
           } else {
             throw new ServerErrorException("egress alert policy is invalid: " + e);
+          }
+          try {
+            mailService.sendEgressRemediationEmail(user, action);
+          } catch (MessagingException ex) {
+            throw new ServerErrorException("failed to send egress remediation email", ex);
           }
         });
 
