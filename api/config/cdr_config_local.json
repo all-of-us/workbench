@@ -36,17 +36,16 @@
     },
     {
       "cdrVersionId": 2,
-      "name": "[Removed] Synthetic Dataset v2",
-      "archivalStatus": 1,
-      "accessTier": "registered",
-      "bigqueryProject": "",
-      "bigqueryDataset": "",
-      "creationTime": "2018-06-06 00:00:00Z",
-      "releaseNumber": 2,
-      "numParticipants": 0,
+      "name": "Synthetic Dataset v2",
+      "bigqueryProject": "fc-aou-cdr-synth-test",
+      "bigqueryDataset": "test_R2019q4r3",
+      "creationTime": "2019-09-30 00:00:00Z",
+      "releaseNumber": 3,
+      "numParticipants": 234525,
       "cdrDbName": "cdr",
-      "hasFitbitData": false,
-      "hasCopeSurveyData": false
+      "hasFitbitData": true,
+      "hasCopeSurveyData": true,
+      "accessTier": "registered"
     },
     {
       "cdrVersionId": 3,
