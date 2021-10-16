@@ -30,8 +30,10 @@ const local: IEnvConfig = {
   ACCESS_TEST_USER: process.env.ACCESS_TEST_USER || 'puppet-access-tester-1@fake-research-aou.org',
   ADMIN_TEST_USER: process.env.ADMIN_TEST_USER || 'puppeteer-admin-1@fake-research-aou.org',
   DEFAULT_CDR_VERSION_NAME: 'Synthetic Dataset v3',
-  ALTERNATIVE_CDR_VERSION_NAME: 'Synthetic Dataset v2',
-  LOGIN_GOV_USER: 'aou-dev-registration@broadinstitute.org'
+  OLD_CDR_VERSION_NAME: 'Synthetic Dataset v2',
+  CONTROLLED_TIER_CDR_VERSION_NAME: 'Synthetic Dataset in the Controlled Tier',
+  LOGIN_GOV_USER: 'aou-dev-registration@broadinstitute.org',
+  ENABLED_PERSISTENT_DISK: true
 };
 
 // workbench test environment
@@ -45,8 +47,10 @@ const test: IEnvConfig = {
   ACCESS_TEST_USER: process.env.ACCESS_TEST_USER || 'puppet-access-tester-1@fake-research-aou.org',
   ADMIN_TEST_USER: process.env.ADMIN_TEST_USER || 'puppeteer-admin-1@fake-research-aou.org',
   DEFAULT_CDR_VERSION_NAME: 'Synthetic Dataset v3',
-  ALTERNATIVE_CDR_VERSION_NAME: 'Synthetic Dataset v2',
-  LOGIN_GOV_USER: 'aou-dev-registration@broadinstitute.org'
+  OLD_CDR_VERSION_NAME: 'Synthetic Dataset v2',
+  CONTROLLED_TIER_CDR_VERSION_NAME: 'Synthetic Dataset in the Controlled Tier',
+  LOGIN_GOV_USER: 'aou-dev-registration@broadinstitute.org',
+  ENABLED_PERSISTENT_DISK: true
 };
 
 // workbench staging environment
@@ -60,8 +64,10 @@ const staging: IEnvConfig = {
   ACCESS_TEST_USER: process.env.ACCESS_TEST_USER || 'puppet-access-tester-1@staging.fake-research-aou.org',
   ADMIN_TEST_USER: process.env.ADMIN_TEST_USER || 'puppeteer-admin-1@staging.fake-research-aou.org',
   DEFAULT_CDR_VERSION_NAME: 'Synthetic Dataset v4',
-  ALTERNATIVE_CDR_VERSION_NAME: 'Synthetic Dataset v3',
-  LOGIN_GOV_USER: 'aou-dev-registration@broadinstitute.org'
+  OLD_CDR_VERSION_NAME: 'Synthetic Dataset v3',
+  CONTROLLED_TIER_CDR_VERSION_NAME: 'Synthetic Dataset in the Controlled Tier',
+  LOGIN_GOV_USER: 'aou-dev-registration@broadinstitute.org',
+  ENABLED_PERSISTENT_DISK: false
 };
 
 // NOT WORKING: workbench stable environment
@@ -70,13 +76,15 @@ const stable: IEnvConfig = {
   API_URL: process.env.STABLE_API_URL,
   EMAIL_DOMAIN_NAME: '@stable.fake-research-aou.org',
   DEFAULT_CDR_VERSION_NAME: 'Synthetic Dataset v4',
-  ALTERNATIVE_CDR_VERSION_NAME: 'Synthetic Dataset v3',
+  OLD_CDR_VERSION_NAME: 'Synthetic Dataset v3',
   COLLABORATOR_USER: 'TODO - NOT AVAILABLE',
   WRITER_USER: 'TODO - NOT AVAILABLE',
   READER_USER: 'TODO - NOT AVAILABLE',
   ACCESS_TEST_USER: 'TODO - NOT AVAILABLE',
   ADMIN_TEST_USER: 'TODO - NOT AVAILABLE',
-  LOGIN_GOV_USER: 'aou-dev-registration@broadinstitute.org'
+  CONTROLLED_TIER_CDR_VERSION_NAME: 'TODO - NOT AVAILABLE',
+  LOGIN_GOV_USER: 'aou-dev-registration@broadinstitute.org',
+  ENABLED_PERSISTENT_DISK: false
 };
 
 // workbench perf environment
@@ -90,8 +98,10 @@ const perf: IEnvConfig = {
   ACCESS_TEST_USER: 'TODO - NOT AVAILABLE',
   ADMIN_TEST_USER: 'TODO - NOT AVAILABLE',
   DEFAULT_CDR_VERSION_NAME: 'Synthetic Dataset v4',
-  ALTERNATIVE_CDR_VERSION_NAME: 'Synthetic Dataset v3',
-  LOGIN_GOV_USER: 'aou-dev-registration@broadinstitute.org'
+  OLD_CDR_VERSION_NAME: 'Synthetic Dataset v3',
+  CONTROLLED_TIER_CDR_VERSION_NAME: 'TODO - NOT AVAILABLE',
+  LOGIN_GOV_USER: 'aou-dev-registration@broadinstitute.org',
+  ENABLED_PERSISTENT_DISK: false
 };
 
 const environment = {

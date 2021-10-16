@@ -1,4 +1,4 @@
-import { findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
+import { createWorkspace, signInWithAccessToken } from 'utils/test-utils';
 import { config } from 'resources/workbench-config';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import {
@@ -19,6 +19,7 @@ import GenomicExtractionsSidebar from 'app/component/genomic-extractions-sidebar
 import { Page } from 'puppeteer';
 import { takeScreenshot } from 'utils/save-file-utils';
 import expect from 'expect';
+import { AccessTierDisplayNames } from 'app/page/workspace-edit-page';
 
 // 60 minutes. Test could take a long time.
 // Since refresh token expires in 60 min. test can fail if running takes longer than 60 min.
@@ -34,7 +35,11 @@ describe('Genomics Extraction Test', () => {
   const notebookName = makeRandomName('genomicDataToVcf');
 
   test('Export genomics dataset to new notebook', async () => {
-    await findOrCreateWorkspace(page, { cdrVersion: config.ALTERNATIVE_CDR_VERSION_NAME, workspaceName });
+    await createWorkspace(page, {
+      workspaceName,
+      cdrVersionName: config.CONTROLLED_TIER_CDR_VERSION_NAME,
+      dataAccessTier: AccessTierDisplayNames.Controlled
+    });
 
     // Create new cohort from Whole Genome Variant.
     const dataPage = new WorkspaceDataPage(page);

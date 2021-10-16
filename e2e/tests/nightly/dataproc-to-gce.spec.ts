@@ -4,6 +4,7 @@ import { LinkText, ResourceCard } from 'app/text-labels';
 import { config } from 'resources/workbench-config';
 import { makeRandomName } from 'utils/str-utils';
 import { createWorkspace, signInWithAccessToken } from 'utils/test-utils';
+import { AccessTierDisplayNames } from 'app/page/workspace-edit-page';
 
 // This test could take a long time to run
 jest.setTimeout(40 * 60 * 1000);
@@ -14,7 +15,10 @@ describe('Updating runtime compute type', () => {
   });
 
   test('Switch from dataproc to GCE', async () => {
-    await createWorkspace(page, { cdrVersionName: config.ALTERNATIVE_CDR_VERSION_NAME });
+    await createWorkspace(page, {
+      cdrVersionName: config.CONTROLLED_TIER_CDR_VERSION_NAME,
+      dataAccessTier: AccessTierDisplayNames.Controlled
+    });
 
     // Open the runtime panel
     // Click “customize“ , from the default “create panel”
@@ -72,7 +76,6 @@ describe('Updating runtime compute type', () => {
 
     // Delete environment
     await notebook.deleteRuntime();
-    await notebook.deleteUnattachedPd();
 
     // Verify GCE custom settings are still shown
     await runtimePanel.open();

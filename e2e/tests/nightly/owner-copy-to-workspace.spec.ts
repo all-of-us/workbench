@@ -49,7 +49,7 @@ describe('Workspace owner copy notebook tests', () => {
       if (defaultCdrWorkspace === undefined) {
         defaultCdrWorkspace = await createCustomCdrVersionWorkspace(config.DEFAULT_CDR_VERSION_NAME);
       }
-      await copyNotebookTest(defaultCdrWorkspace, config.ALTERNATIVE_CDR_VERSION_NAME);
+      await copyNotebookTest(defaultCdrWorkspace, config.OLD_CDR_VERSION_NAME);
     },
     30 * 60 * 1000
   );
