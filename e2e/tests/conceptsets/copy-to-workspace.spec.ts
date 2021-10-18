@@ -93,7 +93,7 @@ describe('Copy Concept Set to another workspace', () => {
     // Create a source and a destination workspace with differing CDR Versions.
     await findOrCreateWorkspace(page, { workspaceName: destWorkspace });
     await createWorkspace(page, {
-      cdrVersionName: config.ALTERNATIVE_CDR_VERSION_NAME
+      cdrVersionName: config.OLD_CDR_VERSION_NAME
     });
 
     const { conceptSetName } = await createConceptSet();

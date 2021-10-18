@@ -10,7 +10,9 @@ import com.google.gson.Gson;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.time.Duration;
 import java.util.UUID;
+import org.pmiops.workbench.config.BigQueryConfig;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -28,6 +30,13 @@ public class TestBigQueryConfig {
         .setCredentials(credentials)
         .build()
         .getService();
+  }
+
+  @Bean(name = BigQueryConfig.DEFAULT_QUERY_TIMEOUT)
+  public Duration defaultQueryTimeout() {
+    // We're not subject to GAE timeouts in unit tests. Allow queries to run a bit longer to avoid
+    // failing on the occasional slow job.
+    return Duration.ofMinutes(3L);
   }
 
   @Bean

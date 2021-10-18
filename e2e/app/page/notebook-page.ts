@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import { ElementHandle, Frame, Page } from 'puppeteer';
 import { getPropValue } from 'utils/element-utils';
 import { waitForDocumentTitle, waitForNumericalString, waitWhileLoading } from 'utils/waits-utils';
-import { LinkText, ResourceCard } from 'app/text-labels';
+import { ResourceCard } from 'app/text-labels';
 import RuntimePanel, { StartStopIconState } from 'app/component/runtime-panel';
 import NotebookCell, { CellType } from './notebook-cell';
 import NotebookDownloadModal from 'app/modal/notebook-download-modal';
@@ -12,10 +12,10 @@ import WorkspaceDataPage from './workspace-data-page';
 import Link from 'app/element/link';
 import NotebookFrame from './notebook-frame';
 import { logger } from 'libs/logger';
-import RadioButton from 'app/element/radiobutton';
 import expect from 'expect';
 import ReplaceFileModal from 'app/modal/replace-file-modal';
 import { takeScreenshot } from 'utils/save-file-utils';
+import { config } from 'resources/workbench-config';
 
 // CSS selectors
 const CssSelector = {
@@ -507,17 +507,12 @@ export default class NotebookPage extends NotebookFrame {
     // Open runtime panel
     const runtimePanel = new RuntimePanel(this.page);
     await runtimePanel.open();
-
-    // Click 'delete environment' then Delete buttons.
-    await runtimePanel.clickButton(LinkText.DeleteEnvironment);
-    // Select "Delete gce runtime and pd" radiobutton.
-    await RadioButton.findByName(this.page, { dataTestId: 'delete-runtime' }).select();
-    await runtimePanel.clickButton(LinkText.Delete);
+    await runtimePanel.clickDeleteEnvironmentButton();
 
     const notebookPreviewPage = new NotebookPreviewPage(this.page);
     await notebookPreviewPage.waitForLoad();
 
-    // Wait until runtime status indicats None.
+    // Wait until runtime status indicates None.
     await runtimePanel.open();
     await runtimePanel.waitForStartStopIconState(StartStopIconState.Stopping);
     await runtimePanel.waitForStartStopIconState(StartStopIconState.None);
@@ -528,12 +523,14 @@ export default class NotebookPage extends NotebookFrame {
    * Delete unattached persistent disk
    */
   async deleteUnattachedPd(): Promise<void> {
-    // Open runtime panel
-    const runtimePanel = new RuntimePanel(this.page);
-    await runtimePanel.open();
+    if (config.ENABLED_PERSISTENT_DISK) {
+      // Open runtime panel
+      const runtimePanel = new RuntimePanel(this.page);
+      await runtimePanel.open();
 
-    // Click 'delete persistent disk' then Delete buttons.
-    await runtimePanel.deleteUnattachedPd();
+      // Click 'delete persistent disk' then Delete buttons.
+      await runtimePanel.deleteUnattachedPd();
+    }
   }
 
   private async findRunButton(timeout?: number): Promise<ElementHandle> {

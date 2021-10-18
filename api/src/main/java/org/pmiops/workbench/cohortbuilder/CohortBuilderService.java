@@ -14,7 +14,6 @@ import org.pmiops.workbench.model.CriteriaMenu;
 import org.pmiops.workbench.model.DataFilter;
 import org.pmiops.workbench.model.DemoChartInfo;
 import org.pmiops.workbench.model.DomainCard;
-import org.pmiops.workbench.model.DomainInfo;
 import org.pmiops.workbench.model.GenderOrSexType;
 import org.pmiops.workbench.model.ParticipantDemographics;
 import org.pmiops.workbench.model.SearchRequest;
@@ -64,9 +63,6 @@ public interface CohortBuilderService {
   CriteriaListWithCountResponse findCriteriaByDomain(
       String domain, String term, String surveyName, Boolean standard, Integer limit);
 
-  CriteriaListWithCountResponse findCriteriaByDomainAndSearchTerm(
-      String domain, String term, String surveyName, Integer limit);
-
   List<CriteriaMenu> findCriteriaMenuByParentId(long parentId);
 
   List<DataFilter> findDataFilters();
@@ -74,11 +70,7 @@ public interface CohortBuilderService {
   List<DemoChartInfo> findDemoChartInfo(
       GenderOrSexType genderOrSexType, AgeType ageType, SearchRequest request);
 
-  Long findDomainCount(String domain, String term);
-
   Long findDomainCountByStandard(String domain, String term, Boolean standard);
-
-  List<DomainInfo> findDomainInfos();
 
   List<DomainCard> findDomainCards();
 
