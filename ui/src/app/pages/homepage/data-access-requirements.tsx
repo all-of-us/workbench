@@ -38,11 +38,13 @@ import {profileStore, serverConfigStore, useStore} from 'app/utils/stores';
 import {AccessModule, AccessModuleStatus, Profile} from 'generated/fetch';
 import {TwoFactorAuthModal} from './two-factor-auth-modal';
 import {AnalyticsTracker} from 'app/utils/analytics';
-import {ReactComponent as individual} from 'assets/icons/DAR/individual.svg';
-import {ReactComponent as identifying} from 'assets/icons/DAR/identifying.svg';
+import {ReactComponent as additional} from 'assets/icons/DAR/additional.svg';
 import {ReactComponent as electronic} from 'assets/icons/DAR/electronic.svg';
-import {ReactComponent as survey} from 'assets/icons/DAR/survey.svg';
+import {ReactComponent as genomic} from 'assets/icons/DAR/genomic.svg';
+import {ReactComponent as identifying} from 'assets/icons/DAR/identifying.svg';
+import {ReactComponent as individual} from 'assets/icons/DAR/individual.svg';
 import {ReactComponent as physical} from 'assets/icons/DAR/physical.svg';
+import {ReactComponent as survey} from 'assets/icons/DAR/survey.svg';
 import {ReactComponent as wearable} from 'assets/icons/DAR/wearable.svg';
 import {AccessTierShortNames} from 'app/utils/access-tiers';
 import {environment} from 'environments/environment';
@@ -501,20 +503,24 @@ const ModulesForCard = (props: CardProps) => {
 
 // TODO is there a better way?
 
-const Individual = individual;
-const Identifying = identifying;
+const Additional = additional;
 const Electronic = electronic;
-const Survey = survey;
+const Genomic = genomic;
+const Identifying = identifying;
+const Individual = individual;
 const Physical = physical;
+const Survey = survey;
 const Wearable = wearable;
 
 const renderIcon = (iconName: string) => switchCase(iconName,
-    ['individual', () => <Individual style={styles.rtDetailsIcon}/>],
-    ['identifying', () => <Identifying style={styles.rtDetailsIcon}/>],
+    ['additional', () => <Additional style={styles.rtDetailsIcon}/>],
     ['electronic', () => <Electronic style={styles.rtDetailsIcon}/>],
-    ['survey', () => <Survey style={styles.rtDetailsIcon}/>],
+    ['genomic', () => <Genomic style={styles.rtDetailsIcon}/>],
+    ['identifying', () => <Identifying style={styles.rtDetailsIcon}/>],
+    ['individual', () => <Individual style={styles.rtDetailsIcon}/>],
     ['physical', () => <Physical style={styles.rtDetailsIcon}/>],
-    ['wearable', () => <Wearable style={styles.rtDetailsIcon}/>]
+    ['survey', () => <Survey style={styles.rtDetailsIcon}/>],
+    ['wearable', () => <Wearable style={styles.rtDetailsIcon}/>],
 );
 
 const DataDetail = (props: {icon: string, text: string}) => {
@@ -548,6 +554,7 @@ const RegisteredTierCard = (props: {profile: Profile, activeModule: AccessModule
 };
 
 const ControlledTierCard = (props) => {
+  //const moduleName = AccessModule.
   return <FlexRow style={styles.card}>
     <FlexColumn>
       <div style={styles.cardStep}>Step 2</div>
@@ -558,12 +565,28 @@ const ControlledTierCard = (props) => {
       </FlexRow>
       <div style={styles.rtDataDetails}>You are eligible to access Controlled Tier Data</div>
       <div style={styles.rtDataDetails}>In addition to Registered Tier data, the Controlled Tier curated dataset contains: </div>
-      <DataDetail icon='individual' text='Individual (not aggregated) data'/>
-      <DataDetail icon='identifying' text='Identifying information removed'/>
-      <DataDetail icon='electronic' text='Electronic health records'/>
-      <DataDetail icon='survey' text='Survey responses'/>
-      <DataDetail icon='physical' text='Physical measurements'/>
-      <DataDetail icon='wearable' text='Wearable devices'/>
+      <DataDetail icon='genomic' text='Genomic data'/>
+      <DataDetail icon='additional' text='Additional demographic details'/>
+    </FlexColumn>
+    <FlexColumn style={styles.modulesContainer}>
+      <FlexRow>
+        <FlexRow style={styles.moduleCTA}/>
+        <FlexRow style={styles.inactiveModuleBox}>
+
+          <div style={styles.moduleIcon}>
+            <MinusCircle style={{color: colors.disabled}}/>
+          </div>
+
+
+          <FlexColumn style={styles.inactiveModuleText}>
+            <div>[inst] must sign an institutional agreement</div>
+            <div style={{fontSize: '14px', marginTop: '0.5em'}}>
+              <b>Temporarily disabled.</b> Due to technical difficulties, this step is disabled.
+              In the future, you'll be prompted to complete identity verification to continue using the workbench.
+            </div>
+          </FlexColumn>
+        </FlexRow>
+      </FlexRow>
     </FlexColumn>
     {/*<ModulesForCard profile={profile} modules={getVisibleRTModules(profile)} activeModule={activeModule} spinnerProps={spinnerProps}/>*/}
   </FlexRow>
