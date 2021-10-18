@@ -280,7 +280,7 @@ export const ListSearch = fp.flow(withCdrVersions(), withCurrentWorkspace(), wit
         hoverId: undefined,
         loading: false,
         searching: false,
-        searchSource: false,
+        searchSource: props.searchContext.domain === Domain.PHYSICALMEASUREMENTCSS,
         searchTerms: props.searchTerms,
         standardOnly: false,
         sourceMatch: undefined,
@@ -295,7 +295,7 @@ export const ListSearch = fp.flow(withCdrVersions(), withCurrentWorkspace(), wit
         this.setState({data: this.props.concept});
       } else {
         const searchString = searchTerms || '';
-        this.getResults(searchString);
+        this.getResultsBySourceOrStandard(searchString);
       }
     }
 
@@ -323,45 +323,9 @@ export const ListSearch = fp.flow(withCdrVersions(), withCurrentWorkspace(), wit
               // Update search terms so they will persist if user returns to concept homepage
               currentCohortSearchContextStore.next({...searchContext, searchTerms: value});
             }
-            this.getResults(value);
+            this.getResultsBySourceOrStandard(value);
           }
         }
-      }
-    }
-
-    // Temp function to get the correct results based on enableStandardSourceDomains config flag
-    getResults(value: string) {
-      if (serverConfigStore.get().config.enableStandardSourceDomains) {
-        this.getResultsBySourceOrStandard(value);
-      } else {
-        this.getAllResults(value);
-      }
-    }
-
-    // Old function that searches both source and standard
-    getAllResults = async(value: string) => {
-      let sourceMatch;
-      try {
-        this.setState({data: null, apiError: false, inputErrors: [], loading: true, searching: true, standardOnly: false});
-        const {searchContext: {domain, source, selectedSurvey}, workspace: {id, namespace}} = this.props;
-        const surveyName = selectedSurvey || 'All';
-        const resp = await cohortBuilderApi().findCriteriaByDomainAndSearchTerm(namespace, id, domain, value.trim(), surveyName);
-        const data = source !== 'cohort' && this.isSurvey
-          ? resp.items.filter(survey => survey.subtype === CriteriaSubType.QUESTION.toString())
-          : resp.items;
-        if (data.length && this.checkSource) {
-          sourceMatch = data.find(item => item.code.toLowerCase() === value.trim().toLowerCase() && !item.isStandard);
-          if (sourceMatch) {
-            const stdResp = await cohortBuilderApi().findStandardCriteriaByDomainAndConceptId(namespace, id, domain, sourceMatch.conceptId);
-            this.setState({standardData: stdResp.items});
-          }
-        }
-        this.setState({data, totalCount: resp.totalCount});
-      } catch (err) {
-        console.error(err);
-        this.setState({apiError: true});
-      } finally {
-        this.setState({loading: false, sourceMatch});
       }
     }
 
@@ -498,7 +462,7 @@ export const ListSearch = fp.flow(withCdrVersions(), withCurrentWorkspace(), wit
     toggleSearchSource() {
       this.setState(
         (state) => ({searchSource: !state.searchSource}),
-        () => this.getResults(this.state.searchTerms || '')
+        () => this.getResultsBySourceOrStandard(this.state.searchTerms || '')
       );
     }
 
@@ -698,7 +662,7 @@ export const ListSearch = fp.flow(withCdrVersions(), withCurrentWorkspace(), wit
         {apiError && <div style={{...styles.error, ...(domain === Domain.DRUG ? {marginTop: '3.75rem'} : {})}}>
           <ClrIcon style={{margin: '0 0.5rem 0 0.25rem'}} className='is-solid' shape='exclamation-triangle' size='22'/>
           Sorry, the request cannot be completed. Please try again or contact Support in the left hand navigation.
-          {standardOnly && <Clickable style={styles.vocabLink} onClick={() => this.getResults(sourceMatch.code)}>
+          {standardOnly && <Clickable style={styles.vocabLink} onClick={() => this.getResultsBySourceOrStandard(sourceMatch.code)}>
             &nbsp;Return to source code.
           </Clickable>}
         </div>}

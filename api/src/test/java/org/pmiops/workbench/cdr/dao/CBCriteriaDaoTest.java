@@ -196,16 +196,6 @@ public class CBCriteriaDaoTest extends SpringTest {
   }
 
   @Test
-  public void findCriteriaByDomainAndTypeAndCode() {
-    PageRequest page = PageRequest.of(0, 10);
-    List<DbCriteria> criteriaList =
-        cbCriteriaDao
-            .findCriteriaByDomainAndTypeAndCode(Domain.CONDITION.toString(), "00", page)
-            .getContent();
-    assertThat(criteriaList).containsExactly(icd9Criteria);
-  }
-
-  @Test
   public void findCriteriaByDomainAndTypeAndCodeAndStandard() {
     PageRequest page = PageRequest.of(0, 10);
     List<DbCriteria> criteriaList =
@@ -223,16 +213,6 @@ public class CBCriteriaDaoTest extends SpringTest {
   }
 
   @Test
-  public void findCriteriaByDomainAndFullText() {
-    PageRequest page = PageRequest.of(0, 10);
-    List<DbCriteria> measurements =
-        cbCriteriaDao
-            .findCriteriaByDomainAndFullText(Domain.MEASUREMENT.toString(), "001", page)
-            .getContent();
-    assertThat(measurements).containsExactly(measurementCriteria);
-  }
-
-  @Test
   public void findCriteriaByDomainAndFullTextAndStandard() {
     PageRequest page = PageRequest.of(0, 10);
     List<DbCriteria> measurements =
@@ -246,14 +226,6 @@ public class CBCriteriaDaoTest extends SpringTest {
             .findCriteriaByDomainAndFullTextAndStandard(
                 Domain.MEASUREMENT.toString(), "001", true, page)
             .getContent();
-    assertThat(measurements).containsExactly(measurementCriteria);
-  }
-
-  @Test
-  public void findCriteriaTopCounts() {
-    PageRequest page = PageRequest.of(0, 10);
-    List<DbCriteria> measurements =
-        cbCriteriaDao.findCriteriaTopCounts(Domain.MEASUREMENT.toString(), page).getContent();
     assertThat(measurements).containsExactly(measurementCriteria);
   }
 
@@ -351,22 +323,11 @@ public class CBCriteriaDaoTest extends SpringTest {
   }
 
   @Test
-  public void findDomainCount() {
-    assertThat(cbCriteriaDao.findDomainCount("term", Domain.CONDITION.toString())).isEqualTo(1);
-  }
-
-  @Test
   public void findDomainCountAndStandard() {
     assertThat(cbCriteriaDao.findDomainCountAndStandard("term", Domain.CONDITION.toString(), false))
         .isEqualTo(1);
     assertThat(cbCriteriaDao.findDomainCountAndStandard("term", Domain.CONDITION.toString(), true))
         .isEqualTo(0);
-  }
-
-  @Test
-  public void findDomainCountOnCode() {
-    assertThat(cbCriteriaDao.findDomainCountOnCode("120", Domain.CONDITION.toString()))
-        .isEqualTo(2);
   }
 
   @Test

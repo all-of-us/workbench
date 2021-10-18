@@ -13,6 +13,7 @@ import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.TableId;
 import com.google.cloud.bigquery.TableResult;
 import com.google.common.annotations.VisibleForTesting;
+import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -42,6 +43,7 @@ public class BigQueryService {
 
   @Autowired private Provider<WorkbenchConfig> workbenchConfigProvider;
   @Autowired private BigQuery defaultBigQuery;
+  @Autowired private Duration defaultBigQueryTimeout;
 
   @VisibleForTesting
   protected BigQuery getBigQueryService() {
@@ -60,7 +62,7 @@ public class BigQueryService {
 
   /** Execute the provided query using bigquery. */
   public TableResult executeQuery(QueryJobConfiguration query) {
-    return executeQuery(query, 60000L);
+    return executeQuery(query, defaultBigQueryTimeout.toMillis());
   }
 
   /** Execute the provided query using bigquery. */

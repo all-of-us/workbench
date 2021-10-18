@@ -1,7 +1,7 @@
 import { Page } from 'puppeteer';
 import Button from 'app/element/button';
 import { LinkText, PageUrl } from 'app/text-labels';
-import WorkspaceEditPage, { FIELD as EDIT_FIELD } from 'app/page/workspace-edit-page';
+import WorkspaceEditPage, { AccessTierDisplayNames, FIELD as EDIT_FIELD } from 'app/page/workspace-edit-page';
 import RadioButton from 'app/element/radiobutton';
 import { waitForDocumentTitle, waitWhileLoading } from 'utils/waits-utils';
 import ReactSelect from 'app/element/react-select';
@@ -14,6 +14,7 @@ import { logger } from 'libs/logger';
 import WorkspaceAboutPage from './workspace-about-page';
 import WorkspaceReviewResearchPurposeModal from 'app/modal/workspace-review-research-purpose-modal';
 import WorkspaceCard from 'app/component/workspace-card';
+
 const faker = require('faker/locale/en_US');
 
 export const PageTitle = 'View Workspace';
@@ -80,18 +81,31 @@ export default class WorkspacesPage extends AuthenticatedPage {
    */
   async createWorkspace(
     workspaceName: string,
-    cdrVersionName: string = config.DEFAULT_CDR_VERSION_NAME,
-    billingAccount: string = UseFreeCredits,
-    reviewRequest = false
+    opts: {
+      dataAccessTier?: string;
+      cdrVersionName?: string;
+      billingAccount?: string;
+      reviewRequest?: boolean;
+    } = {}
   ): Promise<string[]> {
+    const {
+      dataAccessTier = AccessTierDisplayNames.Registered,
+      cdrVersionName = config.DEFAULT_CDR_VERSION_NAME,
+      billingAccount = UseFreeCredits,
+      reviewRequest = false
+    } = opts;
+
     const editPage = await this.fillOutRequiredCreationFields(workspaceName, billingAccount, reviewRequest);
+
+    // select Data access tier
+    await editPage.selectAccessTier(dataAccessTier);
 
     // select the chosen CDR Version
     await editPage.selectCdrVersion(cdrVersionName);
 
     // if the CDR Version is not the default, consent to the necessary restrictions
     // cannot create a workspace with an old CDR Version without consenting to the restrictions.
-    if (cdrVersionName !== config.DEFAULT_CDR_VERSION_NAME) {
+    if (cdrVersionName === config.OLD_CDR_VERSION_NAME) {
       const modal = new OldCdrVersionModal(this.page);
       await modal.waitForLoad();
       await modal.consentToOldCdrRestrictions();
@@ -101,7 +115,10 @@ export default class WorkspacesPage extends AuthenticatedPage {
     const createButton = editPage.getCreateWorkspaceButton();
     await createButton.waitUntilEnabled();
     const modalContent = await editPage.clickCreateFinishButton(createButton);
-    logger.info(`Created workspace "${workspaceName}" with CDR Version "${cdrVersionName}"`);
+    logger.info(
+      `Created workspace "${workspaceName}" with CDR Version "${cdrVersionName}"` +
+        ` and Data Access Tier "${dataAccessTier}"`
+    );
     return modalContent;
   }
 

@@ -18,11 +18,11 @@ describe('Workspace CDR Version Upgrade modal', () => {
   const workspaceName = 'e2eWorkspaceUpgradeCDRVersionTest';
 
   test('CDR Upgrade model', async () => {
-    await findOrCreateWorkspace(page, { cdrVersion: config.ALTERNATIVE_CDR_VERSION_NAME, workspaceName });
+    await findOrCreateWorkspace(page, { cdrVersion: config.OLD_CDR_VERSION_NAME, workspaceName });
 
     const workspacePage: WorkspaceBase = new WorkspaceDataPage(page);
     const cdrVersion = await workspacePage.getCdrVersion();
-    expect(cdrVersion).toBe(config.ALTERNATIVE_CDR_VERSION_NAME);
+    expect(cdrVersion).toBe(config.OLD_CDR_VERSION_NAME);
 
     let modal = await launchCdrUpgradeModal(page);
 
@@ -41,7 +41,7 @@ describe('Workspace CDR Version Upgrade modal', () => {
     const duplicationPage = new WorkspaceEditPage(page);
     const upgradeMessage = await duplicationPage.getCdrVersionUpgradeMessage();
     expect(upgradeMessage).toContain(workspaceName);
-    expect(upgradeMessage).toContain(`${config.ALTERNATIVE_CDR_VERSION_NAME} to ${config.DEFAULT_CDR_VERSION_NAME}.`);
+    expect(upgradeMessage).toContain(`${config.OLD_CDR_VERSION_NAME} to ${config.DEFAULT_CDR_VERSION_NAME}.`);
 
     const editCancelButton = duplicationPage.getCancelButton();
     await editCancelButton.clickAndWait();
@@ -51,7 +51,7 @@ describe('Workspace CDR Version Upgrade modal', () => {
   test('Duplicate Workspace with llder CDR version to newer CDR version', async () => {
     const workspaceCard = await findOrCreateWorkspaceCard(page, {
       workspaceName,
-      cdrVersion: config.ALTERNATIVE_CDR_VERSION_NAME
+      cdrVersion: config.OLD_CDR_VERSION_NAME
     });
     await workspaceCard.asElementHandle().hover();
     await workspaceCard.selectSnowmanMenu(MenuOption.Duplicate, { waitForNav: true });
@@ -66,7 +66,7 @@ describe('Workspace CDR Version Upgrade modal', () => {
 
     const upgradeMessage = await workspaceEditPage.getCdrVersionUpgradeMessage();
     expect(upgradeMessage).toContain(workspaceName);
-    expect(upgradeMessage).toContain(`${config.ALTERNATIVE_CDR_VERSION_NAME} to ${config.DEFAULT_CDR_VERSION_NAME}.`);
+    expect(upgradeMessage).toContain(`${config.OLD_CDR_VERSION_NAME} to ${config.DEFAULT_CDR_VERSION_NAME}.`);
 
     const finishButton = workspaceEditPage.getDuplicateWorkspaceButton();
     await workspaceEditPage.requestForReviewRadiobutton(false);
