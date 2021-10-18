@@ -647,11 +647,9 @@ def create_tables(cmd_name, *args)
   op.add_validator ->(opts) { raise ArgumentError unless opts.project and opts.dataset}
   op.parse.validate
 
-  ServiceAccountContext.new(op.opts.project).run do
-    common = Common.new
-    Dir.chdir('db-cdr') do
-      common.run_inline %W{./generate-cdr/create-tables.sh #{ENVIRONMENTS[op.opts.project][:source_cdr_project]} #{op.opts.dataset}}
-    end
+  common = Common.new
+  Dir.chdir('db-cdr') do
+    common.run_inline %W{./generate-cdr/create-tables.sh #{ENVIRONMENTS[op.opts.project][:source_cdr_project]} #{op.opts.dataset}}
   end
 end
 
