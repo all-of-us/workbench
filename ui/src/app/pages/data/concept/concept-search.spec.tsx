@@ -29,7 +29,7 @@ describe('ConceptSearch', () => {
     currentConceptStore.next([]);
     currentConceptSetStore.next(undefined);
     conceptSet = ConceptSetsApiStub.stubConceptSets()[0];
-    serverConfigStore.set({config: {...defaultServerConfig, enableStandardSourceDomains: false}});
+    serverConfigStore.set({config: {...defaultServerConfig}});
   });
 
   const component = () => {
