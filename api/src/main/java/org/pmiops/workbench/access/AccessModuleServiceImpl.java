@@ -3,6 +3,7 @@ package org.pmiops.workbench.access;
 import static org.pmiops.workbench.access.AccessUtils.auditAccessModuleFromStorage;
 import static org.pmiops.workbench.access.AccessUtils.clientAccessModuleToStorage;
 import static org.pmiops.workbench.access.AccessUtils.storageAccessModuleToClient;
+import static org.pmiops.workbench.db.dao.UserService.CURRENT_DATA_USER_CODE_OF_CONDUCT_VERSION;
 
 import com.google.common.base.Preconditions;
 import java.sql.Timestamp;
@@ -131,13 +132,22 @@ public class AccessModuleServiceImpl implements AccessModuleService {
   public boolean isModuleCompliant(DbUser dbUser, AccessModuleName accessModuleName) {
     DbAccessModule dbAccessModule =
         getDbAccessModuleOrThrow(dbAccessModulesProvider.get(), accessModuleName);
-    // if the module is not enabled, the user is always compliant
-    if (!isModuleEnabledInEnvironment(storageAccessModuleToClient(dbAccessModule.getName()))) {
+    // if the module is not required, the user is always compliant
+    if (!isModuleRequiredInEnvironment(storageAccessModuleToClient(dbAccessModule.getName()))) {
       return true;
     }
     DbUserAccessModule userAccessModule = retrieveUserAccessModuleOrCreate(dbUser, dbAccessModule);
     boolean isBypassed = dbAccessModule.getBypassable() && userAccessModule.getBypassTime() != null;
     boolean isCompleted = userAccessModule.getCompletionTime() != null;
+
+    // we have an additional check before considering DUCC "complete"
+    if (isCompleted && accessModuleName == AccessModuleName.DATA_USER_CODE_OF_CONDUCT) {
+      // protect against NPE when unboxing for comparison
+      final int signedVersion =
+          Optional.ofNullable(dbUser.getDataUseAgreementSignedVersion()).orElse(-1);
+      isCompleted = (signedVersion == CURRENT_DATA_USER_CODE_OF_CONDUCT_VERSION);
+    }
+
     boolean isExpired =
         getExpirationTime(userAccessModule)
             .map(x -> x.before(new Timestamp(clock.millis())))
@@ -215,6 +225,10 @@ public class AccessModuleServiceImpl implements AccessModuleService {
     return new Timestamp(completionTime.getTime() + expiryDaysInMs);
   }
 
+  // Do we display this module in the user's Profile.accessModules ? This differs temporarily from
+  // whether the module is *required* in the environment because we have two Feature Flags for RAS.
+  // When the RAS roll-out is complete, we can collapse these two methods again.
+
   private boolean isModuleEnabledInEnvironment(AccessModule module) {
     final AccessConfig accessConfig = configProvider.get().access;
 
@@ -224,7 +238,27 @@ public class AccessModuleServiceImpl implements AccessModuleService {
       case COMPLIANCE_TRAINING:
         return accessConfig.enableComplianceTraining;
       case RAS_LINK_LOGIN_GOV:
-        return accessConfig.enforceRasLoginGovLinking || accessConfig.enableRasLoginGovLinking;
+        return accessConfig.enableRasLoginGovLinking;
+      default:
+        return true;
+    }
+  }
+
+  // Do we require this module's completion for users to be compliant with the appropriate tier(s)?
+  // This differs temporarily from whether we display this module in the user's
+  // Profile.accessModules because we have two Feature Flags for RAS.
+  // When the RAS roll-out is complete, we can collapse these two methods again.
+
+  private boolean isModuleRequiredInEnvironment(AccessModule module) {
+    final AccessConfig accessConfig = configProvider.get().access;
+
+    switch (module) {
+      case ERA_COMMONS:
+        return accessConfig.enableEraCommons;
+      case COMPLIANCE_TRAINING:
+        return accessConfig.enableComplianceTraining;
+      case RAS_LINK_LOGIN_GOV:
+        return accessConfig.enforceRasLoginGovLinking;
       default:
         return true;
     }

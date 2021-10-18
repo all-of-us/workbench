@@ -18,6 +18,8 @@ import org.pmiops.workbench.model.UserAccessExpiration;
 import org.springframework.data.domain.Sort;
 
 public interface UserService {
+  static final int CURRENT_DATA_USER_CODE_OF_CONDUCT_VERSION = 3;
+
   DbUser updateUserWithRetries(Function<DbUser, DbUser> userModifier, DbUser dbUser, Agent agent);
 
   DbUser createServiceAccountUser(String email);

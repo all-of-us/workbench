@@ -84,7 +84,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
 
   private static final int MAX_RETRIES = 3;
   private static final int CURRENT_TERMS_OF_SERVICE_VERSION = 1;
-  private static final int CURRENT_DATA_USER_CODE_OF_CONDUCT_VERSION = 3;
 
   private final Provider<WorkbenchConfig> configProvider;
   private final Provider<DbUser> userProvider;
@@ -240,36 +239,25 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     tiersForRemoval.forEach(tier -> accessTierService.removeUserFromTier(dbUser, tier));
   }
 
-  private boolean isDataUseAgreementCompliant(DbUser user) {
-    if (accessModuleService.isModuleBypassed(user, AccessModuleName.DATA_USER_CODE_OF_CONDUCT)) {
-      return true;
-    }
-    final Integer signedVersion = user.getDataUseAgreementSignedVersion();
-    if (signedVersion == null || signedVersion != getCurrentDuccVersion()) {
-      return false;
-    }
-    return accessModuleService.isModuleCompliant(user, AccessModuleName.DATA_USER_CODE_OF_CONDUCT);
-  }
+  // missing ERA_COMMONS (special-cased below)
+  // missing CT_COMPLIANCE_TRAINING, for controlled tier only
+  // see also: AccessModuleServiceImpl.isModuleRequiredInEnvironment()
+  private static final List<AccessModuleName> requiredModulesForRegisteredTier =
+      ImmutableList.of(
+          AccessModuleName.TWO_FACTOR_AUTH,
+          AccessModuleName.RT_COMPLIANCE_TRAINING,
+          AccessModuleName.DATA_USER_CODE_OF_CONDUCT,
+          AccessModuleName.RAS_LOGIN_GOV,
+          AccessModuleName.PROFILE_CONFIRMATION,
+          AccessModuleName.PUBLICATION_CONFIRMATION);
 
   private boolean shouldUserBeRegistered(DbUser user) {
-    boolean twoFactorAuthComplete =
-        accessModuleService.isModuleCompliant(user, AccessModuleName.TWO_FACTOR_AUTH);
-    boolean eRACommonsComplete =
-        accessModuleService.isModuleCompliant(user, AccessModuleName.ERA_COMMONS);
-    boolean complianceTrainingComplete =
-        accessModuleService.isModuleCompliant(user, AccessModuleName.RT_COMPLIANCE_TRAINING);
-    boolean dataUseAgreementTrainingComplete = isDataUseAgreementCompliant(user);
-    boolean publicationConfirmationComplete =
-        accessModuleService.isModuleCompliant(user, AccessModuleName.PUBLICATION_CONFIRMATION);
-    boolean profileConfirmationComplete =
-        accessModuleService.isModuleCompliant(user, AccessModuleName.PROFILE_CONFIRMATION);
+    boolean allStandardRequiredModulesCompliant =
+        requiredModulesForRegisteredTier.stream()
+            .allMatch(moduleName -> accessModuleService.isModuleCompliant(user, moduleName));
 
-    // A temporary work around to check RAS completion status. Currently RAS is marked as complete
-    // when enforce featuer flag is off OR the module is complete. But after cleaning up enable
-    // feature flag, this should be moved to accessModuleService's isModuleEnabled check.
-    boolean rasLoginGovComplete =
-        !configProvider.get().access.enforceRasLoginGovLinking
-            || accessModuleService.isModuleCompliant(user, AccessModuleName.RAS_LOGIN_GOV);
+    boolean eraCompliant =
+        accessModuleService.isModuleCompliant(user, AccessModuleName.ERA_COMMONS);
 
     boolean eRARequiredForRegisteredTier = true;
     boolean institutionalEmailValid = false;
@@ -289,14 +277,9 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     }
 
     return !user.getDisabled()
-        && twoFactorAuthComplete
-        && (!eRARequiredForRegisteredTier || eRACommonsComplete)
-        && complianceTrainingComplete
-        && dataUseAgreementTrainingComplete
-        && publicationConfirmationComplete
-        && profileConfirmationComplete
-        && rasLoginGovComplete
-        && institutionalEmailValid;
+        && (!eRARequiredForRegisteredTier || eraCompliant)
+        && institutionalEmailValid
+        && allStandardRequiredModulesCompliant;
   }
 
   private boolean isServiceAccount(DbUser user) {
