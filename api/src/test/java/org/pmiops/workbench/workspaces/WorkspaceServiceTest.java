@@ -39,6 +39,7 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserRecentWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
@@ -510,7 +511,7 @@ public class WorkspaceServiceTest {
         .thenReturn(projectBillingInfo);
 
     assertThrows(
-        BadRequestException.class,
+        FailedPreconditionException.class,
         () -> workspaceService.updateWorkspaceBillingAccount(workspace, newBillingAccount));
   }
 }
