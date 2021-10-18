@@ -617,11 +617,9 @@ def create_prep_survey(cmd_name, *args)
   op.add_validator ->(opts) { raise ArgumentError unless opts.project and opts.dataset and opts.filename and opts.id_start_block}
   op.parse.validate
 
-  ServiceAccountContext.new(op.opts.project).run do
-    common = Common.new
-    Dir.chdir('db-cdr') do
-      common.run_inline %W{./generate-cdr/create-prep-survey.sh #{ENVIRONMENTS[op.opts.project][:source_cdr_project]} #{op.opts.dataset} #{op.opts.filename} #{op.opts.id_start_block}}
-    end
+  common = Common.new
+  Dir.chdir('db-cdr') do
+    common.run_inline %W{./generate-cdr/create-prep-survey.sh #{ENVIRONMENTS[op.opts.project][:source_cdr_project]} #{op.opts.dataset} #{op.opts.filename} #{op.opts.id_start_block}}
   end
 end
 
@@ -675,11 +673,9 @@ def create_survey_criteria(cmd_name, *args)
   op.add_validator ->(opts) { raise ArgumentError unless opts.project and opts.dataset}
   op.parse.validate
 
-  ServiceAccountContext.new(op.opts.project).run do
-    common = Common.new
-    Dir.chdir('db-cdr') do
-      common.run_inline %W{./generate-cdr/create-survey-criteria.sh #{ENVIRONMENTS[op.opts.project][:source_cdr_project]} #{op.opts.dataset}}
-    end
+  common = Common.new
+  Dir.chdir('db-cdr') do
+    common.run_inline %W{./generate-cdr/create-survey-criteria.sh #{ENVIRONMENTS[op.opts.project][:source_cdr_project]} #{op.opts.dataset}}
   end
 end
 
