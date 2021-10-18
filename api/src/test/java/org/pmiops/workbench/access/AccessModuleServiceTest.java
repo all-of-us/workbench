@@ -4,6 +4,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.pmiops.workbench.access.AccessModuleServiceImpl.deriveExpirationTimestamp;
+import static org.pmiops.workbench.db.dao.UserService.CURRENT_DATA_USER_CODE_OF_CONDUCT_VERSION;
 
 import com.google.common.collect.ImmutableList;
 import java.sql.Timestamp;
@@ -398,6 +399,10 @@ public class AccessModuleServiceTest extends SpringTest {
     Instant now = Instant.ofEpochMilli(FakeClockConfiguration.NOW_TIME);
     long expiryDays = 365L;
     config.accessRenewal.expiryDays = expiryDays;
+
+    user.setDataUseAgreementSignedVersion(CURRENT_DATA_USER_CODE_OF_CONDUCT_VERSION);
+    user = userDao.save(user);
+
     DbAccessModule duccModule =
         accessModuleDao.findOneByName(AccessModuleName.DATA_USER_CODE_OF_CONDUCT).get();
     Timestamp completionTime = Timestamp.from(now.minus(expiryDays - 10, ChronoUnit.DAYS));
