@@ -21,7 +21,6 @@ import {
   currentCohortSearchContextStore,
   setSidebarActiveIconStore
 } from 'app/utils/navigation';
-import {serverConfigStore} from 'app/utils/stores';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {environment} from 'environments/environment';
 import {

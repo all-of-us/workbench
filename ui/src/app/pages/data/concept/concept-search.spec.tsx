@@ -9,9 +9,7 @@ import {
   currentConceptStore,
   currentWorkspaceStore
 } from 'app/utils/navigation';
-import {serverConfigStore} from 'app/utils/stores';
 import {ConceptSet, ConceptSetsApi, WorkspacesApi} from 'generated/fetch';
-import defaultServerConfig from 'testing/default-server-config';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
 import {workspaceDataStub} from 'testing/stubs/workspaces';
@@ -29,7 +27,6 @@ describe('ConceptSearch', () => {
     currentConceptStore.next([]);
     currentConceptSetStore.next(undefined);
     conceptSet = ConceptSetsApiStub.stubConceptSets()[0];
-    serverConfigStore.set({config: {...defaultServerConfig}});
   });
 
   const component = () => {
