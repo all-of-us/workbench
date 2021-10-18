@@ -405,7 +405,7 @@ const MaybeModule = ({profile, moduleName, active, spinnerProps}: ModuleProps): 
 
   // whether to show the Two Factor Auth Modal
   const [showTwoFactorAuthModal, setShowTwoFactorAuthModal] = useState(false);
-  const [navigate, ] = useNavigation();
+  const [navigate] = useNavigation();
 
   // outside of the main getAccessModuleConfig() so that function doesn't have to deal with navigate
   const moduleAction: Function = switchCase(moduleName,
