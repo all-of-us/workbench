@@ -78,7 +78,6 @@ public class AccessModuleServiceTest extends SpringTest {
     user.setUsername("user");
     user = userDao.save(user);
     config = WorkbenchConfig.createEmptyConfig();
-    config.featureFlags.enableAccessModuleRewrite = true;
     config.access.enableComplianceTraining = true;
     config.access.enableEraCommons = true;
     TestMockFactory.createAccessModules(accessModuleDao);

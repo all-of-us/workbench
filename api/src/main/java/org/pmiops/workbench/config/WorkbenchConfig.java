@@ -259,8 +259,6 @@ public class WorkbenchConfig {
     public boolean enableGenomicExtraction;
     // If true, use FireCloud V2 Billing instead of the Billing Buffer when creating projects.
     public boolean enableFireCloudV2Billing;
-    // If true, use the new rewrite version of access module.
-    public boolean enableAccessModuleRewrite;
     // If true, egress alerts are automatically remediated via cloud tasks. Otherwise, egress
     // alerts will still be stored, but are assumed to be remediated by the oncall.
     public boolean enableEgressAlertingV2;
