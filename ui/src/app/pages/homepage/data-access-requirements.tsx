@@ -11,6 +11,7 @@ import {Header} from 'app/components/headers';
 import {
   ArrowRight,
   CheckCircle,
+  ControlledTierBadge,
   MinusCircle,
   RegisteredTierBadge,
   Repeat
@@ -44,6 +45,7 @@ import {ReactComponent as survey} from 'assets/icons/DAR/survey.svg';
 import {ReactComponent as physical} from 'assets/icons/DAR/physical.svg';
 import {ReactComponent as wearable} from 'assets/icons/DAR/wearable.svg';
 import {AccessTierShortNames} from 'app/utils/access-tiers';
+import {environment} from 'environments/environment';
 
 const styles = reactStyles({
   headerFlexColumn: {
@@ -221,7 +223,7 @@ const rtModules = [
   AccessModule.COMPLIANCETRAINING,
 ];
 
-// TODO RW-7059
+// TODO RW-7059 *
 const ctModules = [];
 
 const duccModule = AccessModule.DATAUSERCODEOFCONDUCT;
@@ -545,12 +547,24 @@ const RegisteredTierCard = (props: {profile: Profile, activeModule: AccessModule
   </FlexRow>;
 };
 
-const DuccCard = (props: {profile: Profile, activeModule: AccessModule, spinnerProps: WithSpinnerOverlayProps}) => {
-  const {profile, activeModule, spinnerProps} = props;
+const ControlledTierCard = (props) => {
+  return <FlexRow style={styles.card}>
+    <FlexColumn>
+      <div style={styles.cardStep}>Step 2</div>
+      <div style={styles.cardHeader}>Additional Data Access</div>
+      <FlexRow>
+        <ControlledTierBadge/>
+        <div style={styles.rtData}>Controlled Tier data</div>
+      </FlexRow>
+    </FlexColumn>
+  </FlexRow>
+};
+
+const DuccCard = (props: {profile: Profile, activeModule: AccessModule, spinnerProps: WithSpinnerOverlayProps, stepNumber: Number}) => {
+  const {profile, activeModule, spinnerProps, stepNumber} = props;
   return <FlexRow style={{...styles.card, height: '125px'}}>
     <FlexColumn>
-      {/* This will be Step 3 when CT becomes the new Step 2 */}
-      <div style={styles.cardStep}>Step 2</div>
+      <div style={styles.cardStep}>Step {stepNumber}</div>
       <div style={styles.cardHeader}>Sign the code of conduct</div>
     </FlexColumn>
     <ModulesForCard profile={profile} modules={[duccModule]} activeModule={activeModule} spinnerProps={spinnerProps}/>
@@ -592,6 +606,13 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
     setActiveModule(getActiveModule(visibleModules, profile));
   }, [profile]);
 
+  const enableCt = environment.accessTiersVisibleToUsers.includes(AccessTierShortNames.Controlled)
+
+  const rtCard = <RegisteredTierCard key='rt' profile={profile} activeModule={activeModule} spinnerProps={spinnerProps}/>
+  const ctCard = enableCt ? <ControlledTierCard key='ct' stepNumber={2}/> : null
+  const dCard = <DuccCard key='dt' profile={profile} activeModule={activeModule} spinnerProps={spinnerProps} stepNumber={enableCt ? 3 : 2}/>
+
+  const cards = enableCt ? [rtCard, ctCard, dCard] : [rtCard, dCard];
 
   return <FlexColumn style={styles.pageWrapper}>
       <DARHeader/>
@@ -606,9 +627,7 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
         <div style={styles.pleaseComplete}>
           Please complete the necessary steps to gain access to the <AoU/> datasets.
         </div>
-        <RegisteredTierCard profile={profile} activeModule={activeModule} spinnerProps={spinnerProps}/>
-        {/* TODO RW-7059 - Step 2 ControlledTierCard */}
-        <DuccCard profile={profile} activeModule={activeModule} spinnerProps={spinnerProps}/>
+        <React.Fragment>{cards}</React.Fragment>
       </FadeBox>
     </FlexColumn>;
 });
