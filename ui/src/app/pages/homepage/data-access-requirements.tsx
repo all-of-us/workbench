@@ -224,7 +224,7 @@ const rtModules = [
 ];
 
 // TODO RW-7059 *
-const ctModules = [];
+const ctModules = [AccessModule.ERACOMMONS];
 
 const duccModule = AccessModule.DATAUSERCODEOFCONDUCT;
 
@@ -556,7 +556,16 @@ const ControlledTierCard = (props) => {
         <ControlledTierBadge/>
         <div style={styles.rtData}>Controlled Tier data</div>
       </FlexRow>
+      <div style={styles.rtDataDetails}>You are eligible to access Controlled Tier Data</div>
+      <div style={styles.rtDataDetails}>In addition to Registered Tier data, the Controlled Tier curated dataset contains: </div>
+      <DataDetail icon='individual' text='Individual (not aggregated) data'/>
+      <DataDetail icon='identifying' text='Identifying information removed'/>
+      <DataDetail icon='electronic' text='Electronic health records'/>
+      <DataDetail icon='survey' text='Survey responses'/>
+      <DataDetail icon='physical' text='Physical measurements'/>
+      <DataDetail icon='wearable' text='Wearable devices'/>
     </FlexColumn>
+    {/*<ModulesForCard profile={profile} modules={getVisibleRTModules(profile)} activeModule={activeModule} spinnerProps={spinnerProps}/>*/}
   </FlexRow>
 };
 
