@@ -52,7 +52,6 @@ import org.pmiops.workbench.db.dao.AccessModuleDao;
 import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserDataUseAgreementDao;
-import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.UserServiceImpl;
 import org.pmiops.workbench.db.dao.UserTermsOfServiceDao;
 import org.pmiops.workbench.db.model.DbAccessModule;
@@ -142,7 +141,6 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Autowired private AccessModuleDao accessModuleDao;
   @Autowired private AccessTierDao accessTierDao;
-  @Autowired private AccessModuleService accessModuleService;
   @Autowired private AccessTierService accessTierService;
   @Autowired private InstitutionService institutionService;
   @Autowired private ProfileController profileController;
@@ -153,7 +151,7 @@ public class ProfileControllerTest extends BaseControllerTest {
   @Autowired private FakeClock fakeClock;
 
   // allows us to mock out only specific methods
-  @SpyBean private UserService userService;
+  @SpyBean private AccessModuleService accessModuleService;
 
   private static final long NONCE_LONG = 12345;
   private static final String CAPTCHA_TOKEN = "captchaToken";
@@ -288,7 +286,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     googleUser.setPassword("testPassword");
     googleUser.setIsEnrolledIn2Sv(true);
 
-    DUCC_VERSION = userService.getCurrentDuccVersion();
+    DUCC_VERSION = accessModuleService.getCurrentDuccVersion();
 
     when(mockDirectoryService.getUserOrThrow(FULL_USER_NAME)).thenReturn(googleUser);
     when(mockDirectoryService.createUser(GIVEN_NAME, FAMILY_NAME, FULL_USER_NAME, CONTACT_EMAIL))
@@ -522,7 +520,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     final int versionB = 8;
 
     // set the current DUCC version to version A
-    when(userService.getCurrentDuccVersion()).thenReturn(versionA);
+    when(accessModuleService.getCurrentDuccVersion()).thenReturn(versionA);
 
     // sign the current version (A)
 
@@ -532,7 +530,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     assertThat(accessTierService.getAccessTiersForUser(dbUser)).contains(registeredTier);
 
     // time passes and the system now requires a newer version (B)
-    when(userService.getCurrentDuccVersion()).thenReturn(versionB);
+    when(accessModuleService.getCurrentDuccVersion()).thenReturn(versionB);
 
     // a bit of a hack here: use this to sync the registration status
     // see also https://precisionmedicineinitiative.atlassian.net/browse/RW-2352

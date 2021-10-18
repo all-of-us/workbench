@@ -108,8 +108,6 @@ public interface UserService {
    */
   DbUser syncTwoFactorAuthStatus(DbUser targetUser, Agent agent, boolean isEnrolledIn2FA);
 
-  int getCurrentDuccVersion();
-
   DbUser syncDuccVersionStatus(DbUser targetUser, Agent agent, @Nullable Integer signedDuccVersion);
 
   Optional<DbUser> getByUsername(String username);

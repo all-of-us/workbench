@@ -35,4 +35,6 @@ public interface AccessModuleService {
 
   /** Returns true is the access module is bypassable and bypassed */
   boolean isModuleBypassed(DbUser dbUser, AccessModuleName accessModuleName);
+
+  int getCurrentDuccVersion();
 }

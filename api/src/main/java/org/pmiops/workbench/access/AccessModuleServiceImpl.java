@@ -5,6 +5,7 @@ import static org.pmiops.workbench.access.AccessUtils.clientAccessModuleToStorag
 import static org.pmiops.workbench.access.AccessUtils.storageAccessModuleToClient;
 import static org.pmiops.workbench.db.dao.UserService.CURRENT_DATA_USER_CODE_OF_CONDUCT_VERSION;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import java.sql.Timestamp;
 import java.time.Clock;
@@ -43,6 +44,8 @@ public class AccessModuleServiceImpl implements AccessModuleService {
   private final UserServiceAuditor userServiceAuditor;
   private final Provider<WorkbenchConfig> configProvider;
   private final UserAccessModuleMapper userAccessModuleMapper;
+
+  private static final int CURRENT_DATA_USER_CODE_OF_CONDUCT_VERSION = 3;
 
   @Autowired
   public AccessModuleServiceImpl(
@@ -128,6 +131,12 @@ public class AccessModuleServiceImpl implements AccessModuleService {
         .filter(a -> isModuleEnabledInEnvironment(a.getModuleName()));
   }
 
+  @VisibleForTesting
+  @Override
+  public int getCurrentDuccVersion() {
+    return CURRENT_DATA_USER_CODE_OF_CONDUCT_VERSION;
+  }
+
   @Override
   public boolean isModuleCompliant(DbUser dbUser, AccessModuleName accessModuleName) {
     DbAccessModule dbAccessModule =
@@ -145,7 +154,7 @@ public class AccessModuleServiceImpl implements AccessModuleService {
       // protect against NPE when unboxing for comparison
       final int signedVersion =
           Optional.ofNullable(dbUser.getDataUseAgreementSignedVersion()).orElse(-1);
-      isCompleted = (signedVersion == CURRENT_DATA_USER_CODE_OF_CONDUCT_VERSION);
+      isCompleted = (getCurrentDuccVersion() == signedVersion);
     }
 
     boolean isExpired =

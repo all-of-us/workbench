@@ -77,13 +77,15 @@ public class AccessModuleServiceTest extends SpringTest {
   public void setup() {
     user = new DbUser();
     user.setUsername("user");
+    user.setDataUseAgreementSignedVersion(accessModuleService.getCurrentDuccVersion());
     user = userDao.save(user);
+
     config = WorkbenchConfig.createEmptyConfig();
     config.featureFlags.enableAccessModuleRewrite = true;
     config.access.enableComplianceTraining = true;
     config.access.enableEraCommons = true;
-    TestMockFactory.createAccessModules(accessModuleDao);
-    accessModules = accessModuleDao.findAll();
+
+    accessModules = TestMockFactory.createAccessModules(accessModuleDao);
   }
 
   @Test
