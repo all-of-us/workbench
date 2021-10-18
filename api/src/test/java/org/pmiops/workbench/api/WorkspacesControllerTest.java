@@ -21,7 +21,6 @@ import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.FakeClockConfiguration.NOW_TIME;
 import static org.pmiops.workbench.utils.TestMockFactory.DEFAULT_GOOGLE_PROJECT;
 
-import com.google.api.services.cloudbilling.model.BillingAccount;
 import com.google.api.services.cloudbilling.model.ProjectBillingInfo;
 import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.TableResult;
@@ -386,10 +385,8 @@ public class WorkspacesControllerTest extends SpringTest {
 
     // required to enable the use of default method blobToFileDetail()
     when(cloudStorageClient.blobToFileDetail(any(), anyString())).thenCallRealMethod();
-
-    doReturn(new BillingAccount().setOpen(true))
-        .when(mockCloudBillingClient)
-        .getBillingAccount(anyString());
+    when(mockCloudBillingClient.pollUntilBillingAccountLinked(any(), any()))
+        .thenReturn(new ProjectBillingInfo().setBillingEnabled(true));
   }
 
   private DbUser createUser(String email) {

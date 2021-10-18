@@ -49,9 +49,9 @@
     "extractionMethodConfigurationNamespace": "aouwgscohortextraction-test",
     "extractionMethodConfigurationName": "GvsExtractCohortFromSampleNames",
     "extractionMethodConfigurationVersion": 4,
-    "extractionCohortsDataset": "fc-aou-cdr-synth-test.wgs_extraction_cohorts",
-    "extractionDestinationDataset": "fc-aou-cdr-synth-test.wgs_extracted_cohorts",
-    "extractionTempTablesDataset": "fc-aou-cdr-synth-test.wgs_extraction_temp_tables"
+    "extractionCohortsDataset": "fc-aou-cdr-synth-test-2.wgs_extraction_cohorts",
+    "extractionDestinationDataset": "fc-aou-cdr-synth-test-2.wgs_extracted_cohorts",
+    "extractionTempTablesDataset": "fc-aou-cdr-synth-test-2.wgs_extraction_temp_tables"
   },
   "cdr": {
     "debugQueries": false
@@ -102,7 +102,6 @@
     "enableEventDateModifier": false,
     "enableResearchPurposePrompt": false,
     "enableGenomicExtraction": true,
-    "enableFireCloudV2Billing" : true,
     "enableGpu": true,
     "enablePersistentDisk": true,
     "enableAccessModuleRewrite" : true,

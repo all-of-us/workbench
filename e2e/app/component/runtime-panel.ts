@@ -7,6 +7,7 @@ import NotebookPreviewPage from 'app/page/notebook-preview-page';
 import BaseHelpSidebar from './base-help-sidebar';
 import { logger } from 'libs/logger';
 import RadioButton from 'app/element/radiobutton';
+import { config } from 'resources/workbench-config';
 
 const defaultXpath = '//*[@id="runtime-panel"]';
 
@@ -227,10 +228,7 @@ export default class RuntimePanel extends BaseHelpSidebar {
   async deleteRuntime(): Promise<void> {
     logger.info('Deleting runtime');
     await this.open();
-    await this.clickButton(LinkText.DeleteEnvironment);
-    // Select "Delete gce runtime and pd" radiobutton.
-    await RadioButton.findByName(this.page, { dataTestId: 'delete-runtime' }).select();
-    await this.clickButton(LinkText.Delete);
+    await this.clickDeleteEnvironmentButton();
     await this.waitUntilClose();
     // Runtime panel automatically close after click Create button.
     // Reopen panel in order to check icon status.
@@ -346,5 +344,14 @@ export default class RuntimePanel extends BaseHelpSidebar {
       .catch(() => {
         return false;
       });
+  }
+
+  async clickDeleteEnvironmentButton(): Promise<void> {
+    await this.clickButton(LinkText.DeleteEnvironment);
+    // Select "Delete gce runtime and pd" radiobutton when PD-disk is enabled.
+    if (config.ENABLED_PERSISTENT_DISK) {
+      await RadioButton.findByName(this.page, { dataTestId: 'delete-runtime' }).select();
+    }
+    await this.clickButton(LinkText.Delete);
   }
 }

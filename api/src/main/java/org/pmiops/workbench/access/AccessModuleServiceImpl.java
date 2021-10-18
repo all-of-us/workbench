@@ -82,14 +82,11 @@ public class AccessModuleServiceImpl implements AccessModuleService {
 
     userAccessModuleToUpdate.setBypassTime(newBypassTime);
     userAccessModuleDao.save(userAccessModuleToUpdate);
-    if (configProvider.get().featureFlags.enableAccessModuleRewrite) {
-      // If enabled, fire audit event from here instead of from UserService.
-      userServiceAuditor.fireAdministrativeBypassTime(
-          user.getUserId(),
-          auditAccessModuleFromStorage(accessModule.getName()),
-          Optional.ofNullable(previousBypassTime).map(Timestamp::toInstant),
-          Optional.ofNullable(newBypassTime).map(Timestamp::toInstant));
-    }
+    userServiceAuditor.fireAdministrativeBypassTime(
+        user.getUserId(),
+        auditAccessModuleFromStorage(accessModule.getName()),
+        Optional.ofNullable(previousBypassTime).map(Timestamp::toInstant),
+        Optional.ofNullable(newBypassTime).map(Timestamp::toInstant));
   }
 
   @Override
