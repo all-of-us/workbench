@@ -3,7 +3,6 @@ package org.pmiops.workbench.access;
 import static org.pmiops.workbench.access.AccessUtils.auditAccessModuleFromStorage;
 import static org.pmiops.workbench.access.AccessUtils.clientAccessModuleToStorage;
 import static org.pmiops.workbench.access.AccessUtils.storageAccessModuleToClient;
-import static org.pmiops.workbench.db.dao.UserService.CURRENT_DATA_USER_CODE_OF_CONDUCT_VERSION;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
