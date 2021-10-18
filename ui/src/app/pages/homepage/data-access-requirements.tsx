@@ -553,9 +553,9 @@ const RegisteredTierCard = (props: {profile: Profile, activeModule: AccessModule
   </FlexRow>;
 };
 
-const ControlledTierCard = (props) => {
-  //const moduleName = AccessModule.
-  return <FlexRow style={styles.card}>
+const ControlledTierCard = (props: {profile: Profile}) => {
+  const {profile} = props;
+  return <FlexRow style={{...styles.card, height: 300}}>
     <FlexColumn>
       <div style={styles.cardStep}>Step 2</div>
       <div style={styles.cardHeader}>Additional Data Access</div>
@@ -564,7 +564,7 @@ const ControlledTierCard = (props) => {
         <div style={styles.rtData}>Controlled Tier data</div>
       </FlexRow>
       <div style={styles.rtDataDetails}>You are eligible to access Controlled Tier Data</div>
-      <div style={styles.rtDataDetails}>In addition to Registered Tier data, the Controlled Tier curated dataset contains: </div>
+      <div style={styles.rtDataDetails}>In addition to Registered Tier data, the Controlled Tier curated dataset contains:</div>
       <DataDetail icon='genomic' text='Genomic data'/>
       <DataDetail icon='additional' text='Additional demographic details'/>
     </FlexColumn>
@@ -572,23 +572,16 @@ const ControlledTierCard = (props) => {
       <FlexRow>
         <FlexRow style={styles.moduleCTA}/>
         <FlexRow style={styles.inactiveModuleBox}>
-
           <div style={styles.moduleIcon}>
             <MinusCircle style={{color: colors.disabled}}/>
           </div>
-
-
           <FlexColumn style={styles.inactiveModuleText}>
-            <div>[inst] must sign an institutional agreement</div>
-            <div style={{fontSize: '14px', marginTop: '0.5em'}}>
-              <b>Temporarily disabled.</b> Due to technical difficulties, this step is disabled.
-              In the future, you'll be prompted to complete identity verification to continue using the workbench.
-            </div>
+            <div>{profile.verifiedInstitutionalAffiliation.institutionDisplayName} must
+            sign an institutional agreement</div>
           </FlexColumn>
         </FlexRow>
       </FlexRow>
     </FlexColumn>
-    {/*<ModulesForCard profile={profile} modules={getVisibleRTModules(profile)} activeModule={activeModule} spinnerProps={spinnerProps}/>*/}
   </FlexRow>
 };
 
@@ -641,7 +634,7 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
   const enableCt = environment.accessTiersVisibleToUsers.includes(AccessTierShortNames.Controlled)
 
   const rtCard = <RegisteredTierCard key='rt' profile={profile} activeModule={activeModule} spinnerProps={spinnerProps}/>
-  const ctCard = enableCt ? <ControlledTierCard key='ct' stepNumber={2}/> : null
+  const ctCard = enableCt ? <ControlledTierCard key='ct' profile={profile}/> : null
   const dCard = <DuccCard key='dt' profile={profile} activeModule={activeModule} spinnerProps={spinnerProps} stepNumber={enableCt ? 3 : 2}/>
 
   const cards = enableCt ? [rtCard, ctCard, dCard] : [rtCard, dCard];
