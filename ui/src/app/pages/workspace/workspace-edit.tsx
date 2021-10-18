@@ -307,7 +307,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
         cdrVersions: props.workspace ? this.getCdrVersions(props.workspace.accessTierShortName) : this.getCdrVersions(DEFAULT_ACCESS_TIER),
         cloneUserRole: false,
         loading: false,
-        populationChecked: props.workspace ? props.workspace.researchPurpose.populationDetails.length > 0 : false,
+        populationChecked: props.workspace ? props.workspace.researchPurpose.populationDetails.length > 0 : undefined,
         selectResearchPurpose: this.updateSelectedResearch(),
         fetchBillingAccountLoading: false,
         showCdrVersionModal: false,
@@ -1393,7 +1393,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
             <RadioButton name='population' style={{marginRight: '0.5rem'}}
                          data-test-id='specific-population-yes'
                          onChange={v => this.setState({populationChecked: true})}
-                         checked={populationChecked}/>
+                         checked={populationChecked === true}/>
             <label style={styles.text}>Yes, my study will focus on one or more specific
               underrepresented populations, either on their own or in comparison to other groups.</label>
           </div>
