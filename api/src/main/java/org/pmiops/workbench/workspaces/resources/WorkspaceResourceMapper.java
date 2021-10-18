@@ -60,7 +60,7 @@ public interface WorkspaceResourceMapper {
   @Mapping(target = "notebook", ignore = true)
   // This should be set when the resource is set
   @Mapping(target = "modifiedTime", source = "cohortReview.lastModifiedTime")
-  WorkspaceResource dbWorkspaceAndDbCohortReviewToWorkspaceResource(
+  WorkspaceResource dbWorkspaceAndCohortReviewToWorkspaceResource(
       DbWorkspace dbWorkspace, WorkspaceAccessLevel accessLevel, CohortReview cohortReview);
 
   @Mapping(target = "workspaceId", source = "dbWorkspace.workspaceId")

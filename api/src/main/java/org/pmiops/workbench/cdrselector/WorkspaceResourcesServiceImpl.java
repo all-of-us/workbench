@@ -76,7 +76,7 @@ public class WorkspaceResourcesServiceImpl implements WorkspaceResourcesService 
           reviews.stream()
               .map(
                   cohortReview ->
-                      workspaceResourceMapper.dbWorkspaceAndDbCohortReviewToWorkspaceResource(
+                      workspaceResourceMapper.dbWorkspaceAndCohortReviewToWorkspaceResource(
                           dbWorkspace, workspaceAccessLevel, cohortReview))
               .collect(Collectors.toList()));
     }
