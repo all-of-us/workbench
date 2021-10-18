@@ -555,6 +555,10 @@ const RegisteredTierCard = (props: {profile: Profile, activeModule: AccessModule
 
 const ControlledTierCard = (props: {profile: Profile}) => {
   const {profile} = props;
+  const isSigned = fp.flow(
+    fp.filter({accessTierShortName: AccessTierShortNames.Controlled}),
+    fp.some('eligible')
+  )(profile.tierEligibilities)
   return <FlexRow style={{...styles.card, height: 300}}>
     <FlexColumn>
       <div style={styles.cardStep}>Step 2</div>
@@ -571,11 +575,12 @@ const ControlledTierCard = (props: {profile: Profile}) => {
     <FlexColumn style={styles.modulesContainer}>
       <FlexRow>
         <FlexRow style={styles.moduleCTA}/>
-        <FlexRow style={styles.inactiveModuleBox}>
+        <FlexRow style={isSigned ? styles.activeModuleBox : styles.inactiveModuleBox}>
           <div style={styles.moduleIcon}>
-            <MinusCircle style={{color: colors.disabled}}/>
+            {isSigned ? <CheckCircle style={{color: colors.success}}/>
+              : <MinusCircle style={{color: colors.disabled}}/>}
           </div>
-          <FlexColumn style={styles.inactiveModuleText}>
+          <FlexColumn style={isSigned ? styles.activeModuleText : styles.inactiveModuleText}>
             <div>{profile.verifiedInstitutionalAffiliation.institutionDisplayName} must
             sign an institutional agreement</div>
           </FlexColumn>
