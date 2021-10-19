@@ -21,31 +21,31 @@ import org.pmiops.workbench.model.AccessModule;
 public class AccessUtilsTest {
   @Test
   public void test_clientAccessModuleToStorage() {
-    for (final AccessModule am : AccessModule.values()) {
-      final AccessModuleName amn = clientAccessModuleToStorage(am);
-      assertWithMessage(am.toString()).that(amn).isNotNull();
-      final AccessModule roundTrip = storageAccessModuleToClient(amn);
-      assertWithMessage(amn.toString()).that(roundTrip).isNotNull();
+    for (final AccessModule original : AccessModule.values()) {
+      final AccessModuleName converted = clientAccessModuleToStorage(original);
+      assertWithMessage(original.toString()).that(converted).isNotNull();
+      final AccessModule roundTrip = storageAccessModuleToClient(converted);
+      assertWithMessage(converted.toString()).that(roundTrip).isEqualTo(original);
     }
   }
 
   @Test
   public void test_storageAccessModuleToClient() {
-    for (final AccessModuleName amn : AccessModuleName.values()) {
-      final AccessModule am = storageAccessModuleToClient(amn);
-      assertWithMessage(amn.toString()).that(am).isNotNull();
-      final AccessModuleName roundTrip = clientAccessModuleToStorage(am);
-      assertWithMessage(am.toString()).that(roundTrip).isNotNull();
+    for (final AccessModuleName original : AccessModuleName.values()) {
+      final AccessModule converted = storageAccessModuleToClient(original);
+      assertWithMessage(original.toString()).that(converted).isNotNull();
+      final AccessModuleName roundTrip = clientAccessModuleToStorage(converted);
+      assertWithMessage(converted.toString()).that(roundTrip).isEqualTo(original);
     }
   }
 
   @Test
   public void test_auditAccessModuleToStorage() {
-    for (final BypassTimeTargetProperty bttp : BypassTimeTargetProperty.values()) {
-      final AccessModuleName amn = auditAccessModuleToStorage(bttp);
-      assertWithMessage(bttp.toString()).that(amn).isNotNull();
-      final BypassTimeTargetProperty roundTrip = auditAccessModuleFromStorage(amn);
-      assertWithMessage(amn.toString()).that(roundTrip).isNotNull();
+    for (final BypassTimeTargetProperty original : BypassTimeTargetProperty.values()) {
+      final AccessModuleName converted = auditAccessModuleToStorage(original);
+      assertWithMessage(original.toString()).that(converted).isNotNull();
+      final BypassTimeTargetProperty roundTrip = auditAccessModuleFromStorage(converted);
+      assertWithMessage(converted.toString()).that(roundTrip).isEqualTo(original);
     }
   }
 
@@ -56,11 +56,11 @@ public class AccessUtilsTest {
         .filter(DbAccessModule::getBypassable)
         .map(DbAccessModule::getName)
         .forEach(
-            dam -> {
-              final BypassTimeTargetProperty bttp = auditAccessModuleFromStorage(dam);
-              assertWithMessage(dam.toString()).that(bttp).isNotNull();
-              final AccessModuleName roundTrip = auditAccessModuleToStorage(bttp);
-              assertWithMessage(bttp.toString()).that(roundTrip).isNotNull();
+            original -> {
+              final BypassTimeTargetProperty converted = auditAccessModuleFromStorage(original);
+              assertWithMessage(original.toString()).that(converted).isNotNull();
+              final AccessModuleName roundTrip = auditAccessModuleToStorage(converted);
+              assertWithMessage(converted.toString()).that(roundTrip).isEqualTo(original);
             });
   }
 }
