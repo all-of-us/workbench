@@ -224,7 +224,7 @@ const rtModules = [
   AccessModule.COMPLIANCETRAINING,
 ];
 
-// TODO RW-7059 *
+// TODO RW-7059
 const ctModules = [];
 
 const duccModule = AccessModule.DATAUSERCODEOFCONDUCT;
