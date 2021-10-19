@@ -1,7 +1,6 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {useEffect, useState} from 'react';
-import assert from "assert";
 
 import {useQuery} from 'app/components/app-router';
 import {Button, Clickable} from 'app/components/buttons';
@@ -226,7 +225,7 @@ const rtModules = [
 ];
 
 // TODO RW-7059 *
-const ctModules = [AccessModule.ERACOMMONS];
+const ctModules = [];
 
 const duccModule = AccessModule.DATAUSERCODEOFCONDUCT;
 
@@ -558,7 +557,7 @@ const ControlledTierCard = (props: {profile: Profile}) => {
   const controlledTierEligibility = profile.tierEligibilities.find(tier=> tier.accessTierShortName === AccessTierShortNames.Controlled);
   const isSigned = !!controlledTierEligibility;
   const hasAccess = isSigned && controlledTierEligibility.eligible;
-  return <FlexRow style={{...styles.card, height: 300}}>
+  return <FlexRow data-test-id='controlled-card' style={{...styles.card, height: 300}}>
     <FlexColumn>
       <div style={styles.cardStep}>Step 2</div>
       <div style={styles.cardHeader}>Additional Data Access</div>
@@ -572,10 +571,12 @@ const ControlledTierCard = (props: {profile: Profile}) => {
       <DataDetail icon='additional' text='Additional demographic details'/>
     </FlexColumn>
     <FlexColumn style={styles.modulesContainer}>
-      <ControlledTierStep enable={isSigned}
+      <ControlledTierStep data-test-id='controlled-signed'
+                          enable={isSigned}
                            text={profile.verifiedInstitutionalAffiliation.institutionDisplayName
                            + 'must sign an institutional agreement'}/>
-      <ControlledTierStep enable={hasAccess}
+      <ControlledTierStep data-test-id='controlled-user-email'
+                          enable={hasAccess}
                            text={profile.verifiedInstitutionalAffiliation.institutionDisplayName
                            + 'must allow you to access controlled tier data'}/>
     </FlexColumn>
@@ -588,8 +589,9 @@ const ControlledTierStep = (props: {enable: boolean, text: String}) => {
     {/* Since Institution access steps does not require user interaction, will display them as inactive*/}
     <FlexRow style={styles.inactiveModuleBox}>
       <div style={styles.moduleIcon}>
-        {props.enable ? <CheckCircle style={{color: colors.success}}/>
-            : <MinusCircle style={{color: colors.disabled}}/>}
+        {props.enable
+          ? <CheckCircle data-test-id='eligible' style={{color: colors.success}}/>
+          : <MinusCircle data-test-id='ineligible' style={{color: colors.disabled}}/>}
       </div>
       <FlexColumn style={styles.inactiveModuleText}>
         <div>{props.text}
