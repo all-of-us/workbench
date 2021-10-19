@@ -572,38 +572,31 @@ const ControlledTierCard = (props: {profile: Profile}) => {
       <DataDetail icon='additional' text='Additional demographic details'/>
     </FlexColumn>
     <FlexColumn style={styles.modulesContainer}>
-      <FlexRow>
-        <FlexRow style={styles.moduleCTA}/>
-        <FlexRow style={styles.inactiveModuleBox}>
-          <div style={styles.moduleIcon}>
-            {isSigned ? <CheckCircle style={{color: colors.success}}/>
-                : <MinusCircle style={{color: colors.disabled}}/>}
-          </div>
-          <FlexColumn style={styles.inactiveModuleText}>
-            <div>{profile.verifiedInstitutionalAffiliation.institutionDisplayName} must
-              sign an institutional agreement
-            </div>
-          </FlexColumn>
-        </FlexRow>
-      </FlexRow>
-      {/*  Has access*/}
-      <FlexRow>
-        <FlexRow style={styles.moduleCTA}/>
-        <FlexRow style={styles.inactiveModuleBox}>
-          <div style={styles.moduleIcon}>
-            {hasAccess ? <CheckCircle style={{color: colors.success}}/>
-                : <MinusCircle style={{color: colors.disabled}}/>}
-          </div>
-          <FlexColumn style={styles.inactiveModuleText}>
-            <div>{profile.verifiedInstitutionalAffiliation.institutionDisplayName} must
-              allow you to access controlled tier data
-            </div>
-          </FlexColumn>
-        </FlexRow>
-      </FlexRow>
+      <ControlledTierSteps disable={isSigned}
+                           text={profile.verifiedInstitutionalAffiliation.institutionDisplayName
+                           + 'must sign an institutional agreement'}/>
+      <ControlledTierSteps disable={hasAccess}
+                           text={profile.verifiedInstitutionalAffiliation.institutionDisplayName
+                           + 'must allow you to access controlled tier data'}/>
     </FlexColumn>
   </FlexRow>
 };
+
+const ControlledTierSteps = (props: {disable: boolean, text: String}) => {
+  return <FlexRow>
+    <FlexRow style={styles.moduleCTA}/>
+    <FlexRow style={styles.inactiveModuleBox}>
+      <div style={styles.moduleIcon}>
+        {props.disable ? <CheckCircle style={{color: colors.success}}/>
+            : <MinusCircle style={{color: colors.disabled}}/>}
+      </div>
+      <FlexColumn style={styles.inactiveModuleText}>
+        <div>{props.text}
+        </div>
+       </FlexColumn>
+      </FlexRow>
+     </FlexRow>;
+}
 
 const DuccCard = (props: {profile: Profile, activeModule: AccessModule, spinnerProps: WithSpinnerOverlayProps, stepNumber: Number}) => {
   const {profile, activeModule, spinnerProps, stepNumber} = props;
