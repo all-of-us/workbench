@@ -189,6 +189,9 @@ public class EgressRemediationService {
     //  2. In the extremely unlikely event that we receive two egress events at the exact same time,
     //     this logic will result in 2 notifications, rather than 0. Both event processors will miss
     //     the other event in their respective queries.
+    //
+    // Filtering for REMEDIATED events could also work here, but could result in duplicate
+    // notifications when events are processed in close proximity.
     List<DbEgressEvent> priorEvents =
         egressEventDao.findAllByUserAndWorkspaceAndCreationTimeBetweenAndCreationTimeNot(
             event.getUser(),
