@@ -183,13 +183,19 @@ public class EgressRemediationService {
 
     Timestamp debounceAfter =
         Timestamp.from(event.getCreationTime().toInstant().minus(EGRESS_NOTIFY_DEBOUNCE_TIME));
+
+    // We use a [closed, open) time interval check on the event which serves two purposes:
+    //  1. Excludes the event we are actively processing.
+    //  2. In the extremely unlikely event that we receive two egress events at the exact same time,
+    //     this logic will result in 2 notifications, rather than 0. Both event processors will miss
+    //     the other event in their respective queries.
     List<DbEgressEvent> priorEvents =
-        egressEventDao.findAllByUserAndWorkspaceAndCreationTimeBetweenAndEgressEventIdNot(
+        egressEventDao.findAllByUserAndWorkspaceAndCreationTimeBetweenAndCreationTimeNot(
             event.getUser(),
             event.getWorkspace(),
             debounceAfter,
             event.getCreationTime(),
-            event.getEgressEventId());
+            event.getCreationTime());
     return priorEvents.isEmpty();
   }
 
