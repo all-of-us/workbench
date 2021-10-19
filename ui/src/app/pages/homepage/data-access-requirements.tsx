@@ -651,7 +651,12 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
 
   const rtCard = <RegisteredTierCard key='rt' profile={profile} activeModule={activeModule} spinnerProps={spinnerProps}/>
   const ctCard = showCtCard ? <ControlledTierCard key='ct' profile={profile}/> : null
-  const dCard = <DuccCard key='dt' profile={profile} activeModule={activeModule} spinnerProps={spinnerProps} stepNumber={showCtCard ? 3 : 2}/>
+  const dCard = <DuccCard
+    key='dt'
+    profile={profile}
+    activeModule={activeModule}
+    spinnerProps={spinnerProps}
+    stepNumber={showCtCard ? 3 : 2}/>
 
   const cards = showCtCard ? [rtCard, ctCard, dCard] : [rtCard, dCard];
 
