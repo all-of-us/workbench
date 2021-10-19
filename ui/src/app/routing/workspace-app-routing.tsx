@@ -17,6 +17,7 @@ import {DataComponent} from 'app/pages/data/data-component';
 import {DatasetPage} from 'app/pages/data/data-set/dataset-page';
 import {WorkspaceAbout} from 'app/pages/workspace/workspace-about';
 import {WorkspaceEdit, WorkspaceEditMode} from 'app/pages/workspace/workspace-edit';
+import {LeoApplicationType} from 'app/pages/analysis/notebook-redirect';
 import {BreadcrumbType} from 'app/utils/navigation';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
@@ -34,6 +35,7 @@ const DetailPagePage = fp.flow(withRouteData, withRoutingSpinner)(DetailPage);
 const InteractiveNotebookPage = fp.flow(withRouteData, withRoutingSpinner)(InteractiveNotebook);
 const NotebookListPage = fp.flow(withRouteData, withRoutingSpinner)(NotebookList);
 const NotebookRedirectPage = fp.flow(withRouteData, withRoutingSpinner)(NotebookRedirect);
+const TerminalRedirectPage = fp.flow(withRouteData, withRoutingSpinner)(NotebookRedirect);
 const ParticipantsTablePage = fp.flow(withRouteData, withRoutingSpinner)(ParticipantsTable);
 const QueryReportPage = fp.flow(withRouteData, withRoutingSpinner)(QueryReport);
 const WorkspaceAboutPage = fp.flow(withRouteData, withRoutingSpinner)(WorkspaceAbout);
@@ -91,17 +93,35 @@ export const WorkspaceRoutes = () => {
       }}/>
     </AppRoute>
     <AppRoute exact path={`${path}/notebooks/:nbName`}>
-      <NotebookRedirectPage routeData={{
-        pathElementForTitle: 'nbName',
-        breadcrumb: BreadcrumbType.Notebook,
-        // The iframe we use to display the Jupyter notebook does something strange
-        // to the height calculation of the container, which is normally set to auto.
-        // Setting this flag sets the container to 100% so that no content is clipped.
-        contentFullHeightOverride: true,
-        pageKey: NOTEBOOK_PAGE_KEY,
-        workspaceNavBarTab: 'notebooks',
-        minimizeChrome: true
-      }}/>
+      <NotebookRedirectPage
+          routeData={{
+            pathElementForTitle: 'nbName',
+            breadcrumb: BreadcrumbType.Notebook,
+            // The iframe we use to display the Jupyter notebook does something strange
+            // to the height calculation of the container, which is normally set to auto.
+            // Setting this flag sets the container to 100% so that no content is clipped.
+            contentFullHeightOverride: true,
+            pageKey: NOTEBOOK_PAGE_KEY,
+            workspaceNavBarTab: 'notebooks',
+            minimizeChrome: true
+          }}
+          leoAppType={LeoApplicationType.Notebook}
+      />
+    </AppRoute>
+    <AppRoute exact path={`${path}/terminals/:nbName`}>
+      <TerminalRedirectPage
+          routeData={{
+            pathElementForTitle: 'nbName',
+            breadcrumb: BreadcrumbType.Terminal,
+            // The iframe we use to display the Jupyter notebook does something strange
+            // to the height calculation of the container, which is normally set to auto.
+            // Setting this flag sets the container to 100% so that no content is clipped.
+            contentFullHeightOverride: true,
+            workspaceNavBarTab: 'terminals',
+            minimizeChrome: true
+          }}
+          leoAppType={LeoApplicationType.Terminal}
+      />
     </AppRoute>
     <AppRoute exact path={`${path}/data`}>
       <DataComponentPage routeData={{

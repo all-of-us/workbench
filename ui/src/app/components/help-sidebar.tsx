@@ -374,12 +374,12 @@ export const HelpSidebar = fp.flow(
         },
         'terminal': {
           id: 'terminal',
-          disabled: status !== RuntimeStatus.Running,
+          disabled: false,
           faIcon: faTerminal,
           label: 'Terminal Icon',
           showIcon: () => true,
           style: {height: '22px', width: '22px'},
-          tooltip: status === RuntimeStatus.Running ? 'Cloud Analysis Terminal' : 'Terminal needs an active cloud environment to run'
+          tooltip:  'Cloud Analysis Terminal'
         },
         'genomicExtractions': {
           id: 'genomicExtractions',
@@ -856,6 +856,7 @@ export const HelpSidebar = fp.flow(
                             </a>
                         ],
                         ['runtime', () => this.displayRuntimeIcon(icon)],
+                        ['terminal', () => this.props.navigate(['workspaces'])],
                         ['genomicExtractions', () => this.displayExtractionIcon(icon)],
                         [DEFAULT, () => icon.faIcon === null
                               ? <img data-test-id={'help-sidebar-icon-' + icon.id} src={proIcons[icon.id]} style={icon.style} />
