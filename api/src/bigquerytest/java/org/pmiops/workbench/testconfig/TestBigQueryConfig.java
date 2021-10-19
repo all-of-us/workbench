@@ -32,7 +32,7 @@ public class TestBigQueryConfig {
         // Note: Later we may want to apply similar settings to the real server. See RW-7413.
         .setRetrySettings(
             RetrySettings.newBuilder()
-                .setMaxAttempts(3)
+                .setTotalTimeout(org.threeten.bp.Duration.ofMinutes(5))
                 .setInitialRpcTimeout(org.threeten.bp.Duration.ofSeconds(20L))
                 .setMaxRpcTimeout(org.threeten.bp.Duration.ofSeconds(30L))
                 .setInitialRetryDelay(org.threeten.bp.Duration.ofSeconds(1L))
