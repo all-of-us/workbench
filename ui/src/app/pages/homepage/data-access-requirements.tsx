@@ -557,6 +557,7 @@ const ControlledTierCard = (props: {profile: Profile}) => {
   const controlledTierEligibility = profile.tierEligibilities.find(tier=> tier.accessTierShortName === AccessTierShortNames.Controlled);
   const isSigned = !!controlledTierEligibility;
   const hasAccess = isSigned && controlledTierEligibility.eligible;
+  const {verifiedInstitutionalAffiliation: {institutionDisplayName}} = profile;
   return <FlexRow data-test-id='controlled-card' style={{...styles.card, height: 300}}>
     <FlexColumn>
       <div style={styles.cardStep}>Step 2</div>
@@ -573,12 +574,10 @@ const ControlledTierCard = (props: {profile: Profile}) => {
     <FlexColumn style={styles.modulesContainer}>
       <ControlledTierStep data-test-id='controlled-signed'
                           enable={isSigned}
-                           text={profile.verifiedInstitutionalAffiliation.institutionDisplayName
-                           + 'must sign an institutional agreement'}/>
+                          text={`${institutionDisplayName} must sign an institutional agreement`}/>
       <ControlledTierStep data-test-id='controlled-user-email'
                           enable={hasAccess}
-                           text={profile.verifiedInstitutionalAffiliation.institutionDisplayName
-                           + 'must allow you to access controlled tier data'}/>
+                          text={`${institutionDisplayName} must allow you to access controlled tier data`}/>
     </FlexColumn>
   </FlexRow>
 };
