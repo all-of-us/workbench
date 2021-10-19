@@ -141,6 +141,7 @@
     "usersPerSynchronizeAccessTask": 50
   },
   "egressAlertRemediationPolicy": {
+    "notifyFromEmail": "workbench-notificatio-aaaaekogch7vg3c6hi4sgyx4le@pmi-engteam.slack.com",
     "escalations": [{
       "afterIncidentCount": 1,
       "suspendCompute": {
