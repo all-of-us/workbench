@@ -572,22 +572,23 @@ const ControlledTierCard = (props: {profile: Profile}) => {
       <DataDetail icon='additional' text='Additional demographic details'/>
     </FlexColumn>
     <FlexColumn style={styles.modulesContainer}>
-      <ControlledTierSteps disable={isSigned}
+      <ControlledTierStep enable={isSigned}
                            text={profile.verifiedInstitutionalAffiliation.institutionDisplayName
                            + 'must sign an institutional agreement'}/>
-      <ControlledTierSteps disable={hasAccess}
+      <ControlledTierStep enable={hasAccess}
                            text={profile.verifiedInstitutionalAffiliation.institutionDisplayName
                            + 'must allow you to access controlled tier data'}/>
     </FlexColumn>
   </FlexRow>
 };
 
-const ControlledTierSteps = (props: {disable: boolean, text: String}) => {
+const ControlledTierStep = (props: {enable: boolean, text: String}) => {
   return <FlexRow>
     <FlexRow style={styles.moduleCTA}/>
+    {/* Since Institution access steps does not require user interaction, will display them as inactive*/}
     <FlexRow style={styles.inactiveModuleBox}>
       <div style={styles.moduleIcon}>
-        {props.disable ? <CheckCircle style={{color: colors.success}}/>
+        {props.enable ? <CheckCircle style={{color: colors.success}}/>
             : <MinusCircle style={{color: colors.disabled}}/>}
       </div>
       <FlexColumn style={styles.inactiveModuleText}>
