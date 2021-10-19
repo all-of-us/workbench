@@ -43,6 +43,7 @@ public interface WorkspaceResourceMapper {
   @Mapping(target = "notebook", ignore = true)
   // This should be set when the resource is set
   @Mapping(target = "modifiedTime", source = "dbCohort.lastModifiedTime")
+  @Mapping(target = "lastModifiedEpochMillis", source = "dbCohort.lastModifiedTime")
   WorkspaceResource dbWorkspaceAndDbCohortToWorkspaceResource(
       DbWorkspace dbWorkspace, WorkspaceAccessLevel accessLevel, DbCohort dbCohort);
 
@@ -60,6 +61,7 @@ public interface WorkspaceResourceMapper {
   @Mapping(target = "notebook", ignore = true)
   // This should be set when the resource is set
   @Mapping(target = "modifiedTime", source = "cohortReview.lastModifiedTime")
+  @Mapping(target = "lastModifiedEpochMillis", source = "cohortReview.lastModifiedTime")
   WorkspaceResource dbWorkspaceAndCohortReviewToWorkspaceResource(
       DbWorkspace dbWorkspace, WorkspaceAccessLevel accessLevel, CohortReview cohortReview);
 
@@ -77,6 +79,7 @@ public interface WorkspaceResourceMapper {
   @Mapping(target = "notebook", ignore = true)
   // This should be set when the resource is set
   @Mapping(target = "modifiedTime", source = "conceptSet.lastModifiedTime")
+  @Mapping(target = "lastModifiedEpochMillis", source = "conceptSet.lastModifiedTime")
   WorkspaceResource dbWorkspaceAndConceptSetToWorkspaceResource(
       DbWorkspace dbWorkspace, WorkspaceAccessLevel accessLevel, ConceptSet conceptSet);
 
@@ -94,6 +97,7 @@ public interface WorkspaceResourceMapper {
   @Mapping(target = "notebook", ignore = true)
   // This should be set when the resource is set
   @Mapping(target = "modifiedTime", source = "dbDataset.lastModifiedTime")
+  @Mapping(target = "lastModifiedEpochMillis", source = "dbDataset.lastModifiedTime")
   WorkspaceResource dbWorkspaceAndDbDatasetToWorkspaceResource(
       DbWorkspace dbWorkspace, WorkspaceAccessLevel accessLevel, DbDataset dbDataset);
 }
