@@ -3,7 +3,6 @@ package org.pmiops.workbench.db.dao;
 import static org.pmiops.workbench.access.AccessTierService.REGISTERED_TIER_SHORT_NAME;
 
 import com.google.api.services.oauth2.model.Userinfoplus;
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import java.sql.Timestamp;
 import java.time.Clock;
@@ -143,12 +142,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     this.accessTierService = accessTierService;
     this.mailService = mailService;
     this.institutionService = institutionService;
-  }
-
-  @VisibleForTesting
-  @Override
-  public int getCurrentDuccVersion() {
-    return CURRENT_DATA_USER_CODE_OF_CONDUCT_VERSION;
   }
 
   /**
@@ -422,7 +415,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   @Override
   public DbUser submitDUCC(DbUser dbUser, Integer duccSignedVersion, String initials) {
     // FIXME: this should not be hardcoded
-    if (duccSignedVersion != getCurrentDuccVersion()) {
+    if (duccSignedVersion != accessModuleService.getCurrentDuccVersion()) {
       throw new BadRequestException("Data User Code of Conduct Version is not up to date");
     }
     final Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
@@ -767,9 +760,9 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
           final int signedVersionForComparison =
               Optional.ofNullable(signedDuccVersion)
                   // null is invalid, so convert to a known-invalid int
-                  .orElse(getCurrentDuccVersion() - 1);
+                  .orElse(accessModuleService.getCurrentDuccVersion() - 1);
 
-          if (signedVersionForComparison != getCurrentDuccVersion()) {
+          if (signedVersionForComparison != accessModuleService.getCurrentDuccVersion()) {
             accessModuleService.updateCompletionTime(
                 user, AccessModuleName.DATA_USER_CODE_OF_CONDUCT, null);
           }

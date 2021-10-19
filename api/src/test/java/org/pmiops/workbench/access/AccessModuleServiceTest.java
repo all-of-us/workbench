@@ -4,7 +4,6 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.pmiops.workbench.access.AccessModuleServiceImpl.deriveExpirationTimestamp;
-import static org.pmiops.workbench.db.dao.UserService.CURRENT_DATA_USER_CODE_OF_CONDUCT_VERSION;
 
 import com.google.common.collect.ImmutableList;
 import java.sql.Timestamp;
@@ -77,13 +76,15 @@ public class AccessModuleServiceTest extends SpringTest {
   public void setup() {
     user = new DbUser();
     user.setUsername("user");
+    user.setDataUseAgreementSignedVersion(accessModuleService.getCurrentDuccVersion());
     user = userDao.save(user);
+
     config = WorkbenchConfig.createEmptyConfig();
     config.featureFlags.enableAccessModuleRewrite = true;
     config.access.enableComplianceTraining = true;
     config.access.enableEraCommons = true;
-    TestMockFactory.createAccessModules(accessModuleDao);
-    accessModules = accessModuleDao.findAll();
+
+    accessModules = TestMockFactory.createAccessModules(accessModuleDao);
   }
 
   @Test
@@ -400,7 +401,7 @@ public class AccessModuleServiceTest extends SpringTest {
     long expiryDays = 365L;
     config.accessRenewal.expiryDays = expiryDays;
 
-    user.setDataUseAgreementSignedVersion(CURRENT_DATA_USER_CODE_OF_CONDUCT_VERSION);
+    user.setDataUseAgreementSignedVersion(accessModuleService.getCurrentDuccVersion());
     user = userDao.save(user);
 
     DbAccessModule duccModule =

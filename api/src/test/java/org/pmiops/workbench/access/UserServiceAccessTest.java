@@ -254,7 +254,7 @@ public class UserServiceAccessTest {
 
     // add a proper DUA completion which will expire soon, but remove DUA bypass
 
-    dbUser.setDataUseAgreementSignedVersion(userService.getCurrentDuccVersion());
+    dbUser.setDataUseAgreementSignedVersion(accessModuleService.getCurrentDuccVersion());
     accessModuleService.updateCompletionTime(
         dbUser, AccessModuleName.DATA_USER_CODE_OF_CONDUCT, willExpireAfter(Duration.ofDays(1)));
     dbUser = updateUserWithRetries(this::removeDuaBypass);
@@ -387,7 +387,7 @@ public class UserServiceAccessTest {
               dbUser.getUserId(), AccessModule.DATA_USER_CODE_OF_CONDUCT, false);
           accessModuleService.updateCompletionTime(
               dbUser, AccessModuleName.DATA_USER_CODE_OF_CONDUCT, Timestamp.from(START_INSTANT));
-          user.setDataUseAgreementSignedVersion(userService.getCurrentDuccVersion() - 1);
+          user.setDataUseAgreementSignedVersion(accessModuleService.getCurrentDuccVersion() - 1);
           return userDao.save(user);
         });
   }
@@ -402,7 +402,7 @@ public class UserServiceAccessTest {
           accessModuleService.updateCompletionTime(
               dbUser, AccessModuleName.DATA_USER_CODE_OF_CONDUCT, willExpire);
 
-          user.setDataUseAgreementSignedVersion(userService.getCurrentDuccVersion());
+          user.setDataUseAgreementSignedVersion(accessModuleService.getCurrentDuccVersion());
 
           advanceClockDays(EXPIRATION_DAYS + 1);
 
@@ -471,7 +471,7 @@ public class UserServiceAccessTest {
     accessModuleService.updateCompletionTime(dbUser, AccessModuleName.RT_COMPLIANCE_TRAINING, now);
 
     // a completion requirement for DUCC (formerly "DUA" - TODO rename)
-    dbUser.setDataUseAgreementSignedVersion(userService.getCurrentDuccVersion());
+    dbUser.setDataUseAgreementSignedVersion(accessModuleService.getCurrentDuccVersion());
 
     userService.maybeSendAccessExpirationEmail(dbUser);
 
@@ -509,7 +509,7 @@ public class UserServiceAccessTest {
     accessModuleService.updateCompletionTime(
         dbUser, AccessModuleName.DATA_USER_CODE_OF_CONDUCT, now);
     // a completion requirement for DUCC (formerly "DUA" - TODO rename)
-    dbUser.setDataUseAgreementSignedVersion(userService.getCurrentDuccVersion());
+    dbUser.setDataUseAgreementSignedVersion(accessModuleService.getCurrentDuccVersion());
 
     // expiring in 1 day (plus some) will trigger the 1-day warning
 
@@ -620,7 +620,7 @@ public class UserServiceAccessTest {
         dbUser, AccessModuleName.DATA_USER_CODE_OF_CONDUCT, now);
 
     // a completion requirement for DUCC (formerly "DUA" - TODO rename)
-    dbUser.setDataUseAgreementSignedVersion(userService.getCurrentDuccVersion());
+    dbUser.setDataUseAgreementSignedVersion(accessModuleService.getCurrentDuccVersion());
 
     // expiring in .5 days will not trigger an email
 
@@ -644,7 +644,7 @@ public class UserServiceAccessTest {
         dbUser, AccessModuleName.DATA_USER_CODE_OF_CONDUCT, now);
 
     // a completion requirement for DUCC (formerly "DUA" - TODO rename)
-    dbUser.setDataUseAgreementSignedVersion(userService.getCurrentDuccVersion());
+    dbUser.setDataUseAgreementSignedVersion(accessModuleService.getCurrentDuccVersion());
 
     // expiring in 30 days (plus) will trigger the 30-day warning
 
@@ -669,7 +669,7 @@ public class UserServiceAccessTest {
         dbUser, AccessModuleName.DATA_USER_CODE_OF_CONDUCT, now);
 
     // a completion requirement for DUCC (formerly "DUA" - TODO rename)
-    dbUser.setDataUseAgreementSignedVersion(userService.getCurrentDuccVersion());
+    dbUser.setDataUseAgreementSignedVersion(accessModuleService.getCurrentDuccVersion());
 
     // expiring in 31 days (plus) will not trigger a warning
     accessModuleService.updateCompletionTime(
@@ -691,7 +691,7 @@ public class UserServiceAccessTest {
         dbUser, AccessModuleName.PUBLICATION_CONFIRMATION, now);
 
     // a completion requirement for DUCC (formerly "DUA" - TODO rename)
-    dbUser.setDataUseAgreementSignedVersion(userService.getCurrentDuccVersion());
+    dbUser.setDataUseAgreementSignedVersion(accessModuleService.getCurrentDuccVersion());
 
     // expiring in 30 days (plus) would trigger the 30-day warning...
     final Duration thirtyPlus = daysPlusSome(30);
@@ -724,7 +724,7 @@ public class UserServiceAccessTest {
         dbUser, AccessModuleName.PUBLICATION_CONFIRMATION, now);
 
     // a completion requirement for DUCC (formerly "DUA" - TODO rename)
-    dbUser.setDataUseAgreementSignedVersion(userService.getCurrentDuccVersion());
+    dbUser.setDataUseAgreementSignedVersion(accessModuleService.getCurrentDuccVersion());
 
     // expiring in 15 days (plus) would trigger the 15-day warning...
     accessModuleService.updateCompletionTime(
@@ -750,7 +750,7 @@ public class UserServiceAccessTest {
         dbUser, AccessModuleName.DATA_USER_CODE_OF_CONDUCT, now);
 
     // a completion requirement for DUCC (formerly "DUA" - TODO rename)
-    dbUser.setDataUseAgreementSignedVersion(userService.getCurrentDuccVersion());
+    dbUser.setDataUseAgreementSignedVersion(accessModuleService.getCurrentDuccVersion());
 
     // but this is expired
     final Duration oneHour = Duration.ofHours(1);
@@ -777,7 +777,7 @@ public class UserServiceAccessTest {
         dbUser, AccessModuleName.DATA_USER_CODE_OF_CONDUCT, now);
 
     // a completion requirement for DUCC (formerly "DUA" - TODO rename)
-    dbUser.setDataUseAgreementSignedVersion(userService.getCurrentDuccVersion());
+    dbUser.setDataUseAgreementSignedVersion(accessModuleService.getCurrentDuccVersion());
 
     // but this expired yesterday
 
