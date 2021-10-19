@@ -647,13 +647,13 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
     setActiveModule(getActiveModule(visibleModules, profile));
   }, [profile]);
 
-  const enableCt = environment.accessTiersVisibleToUsers.includes(AccessTierShortNames.Controlled)
+  const showCtCard = environment.accessTiersVisibleToUsers.includes(AccessTierShortNames.Controlled)
 
   const rtCard = <RegisteredTierCard key='rt' profile={profile} activeModule={activeModule} spinnerProps={spinnerProps}/>
-  const ctCard = enableCt ? <ControlledTierCard key='ct' profile={profile}/> : null
-  const dCard = <DuccCard key='dt' profile={profile} activeModule={activeModule} spinnerProps={spinnerProps} stepNumber={enableCt ? 3 : 2}/>
+  const ctCard = showCtCard ? <ControlledTierCard key='ct' profile={profile}/> : null
+  const dCard = <DuccCard key='dt' profile={profile} activeModule={activeModule} spinnerProps={spinnerProps} stepNumber={showCtCard ? 3 : 2}/>
 
-  const cards = enableCt ? [rtCard, ctCard, dCard] : [rtCard, dCard];
+  const cards = showCtCard ? [rtCard, ctCard, dCard] : [rtCard, dCard];
 
   return <FlexColumn style={styles.pageWrapper}>
       <DARHeader/>
