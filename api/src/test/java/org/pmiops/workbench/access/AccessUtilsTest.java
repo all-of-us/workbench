@@ -1,8 +1,10 @@
 package org.pmiops.workbench.access;
 
 import static com.google.common.truth.Truth.assertWithMessage;
-import static org.pmiops.workbench.access.AccessUtils.AUDIT_TO_STORAGE_ACCESS_MODULE;
-import static org.pmiops.workbench.access.AccessUtils.CLIENT_TO_STORAGE_ACCESS_MODULE;
+import static org.pmiops.workbench.access.AccessUtils.auditAccessModuleFromStorage;
+import static org.pmiops.workbench.access.AccessUtils.auditAccessModuleToStorage;
+import static org.pmiops.workbench.access.AccessUtils.clientAccessModuleToStorage;
+import static org.pmiops.workbench.access.AccessUtils.storageAccessModuleToClient;
 import static org.pmiops.workbench.utils.TestMockFactory.DEFAULT_ACCESS_MODULES;
 
 import org.junit.jupiter.api.Test;
@@ -17,33 +19,48 @@ import org.pmiops.workbench.model.AccessModule;
  * <p>Ensure that all mappings in AccessUtils cover all enum values.
  */
 public class AccessUtilsTest {
-
   @Test
-  public void test_CLIENT_TO_STORAGE_ACCESS_MODULE() {
-    for (AccessModule m : AccessModule.values()) {
-      assertWithMessage(m.toString()).that(CLIENT_TO_STORAGE_ACCESS_MODULE.get(m)).isNotNull();
-    }
-    for (AccessModuleName m : AccessModuleName.values()) {
-      assertWithMessage(m.toString())
-          .that(CLIENT_TO_STORAGE_ACCESS_MODULE.inverse().get(m))
-          .isNotNull();
+  public void test_clientAccessModuleToStorage() {
+    for (final AccessModule am : AccessModule.values()) {
+      final AccessModuleName amn = clientAccessModuleToStorage(am);
+      assertWithMessage(am.toString()).that(amn).isNotNull();
+      final AccessModule roundTrip = storageAccessModuleToClient(amn);
+      assertWithMessage(amn.toString()).that(roundTrip).isNotNull();
     }
   }
 
   @Test
-  public void test_AUDIT_TO_STORAGE_ACCESS_MODULE() {
-    for (BypassTimeTargetProperty b : BypassTimeTargetProperty.values()) {
-      assertWithMessage(b.toString()).that(AUDIT_TO_STORAGE_ACCESS_MODULE.get(b)).isNotNull();
+  public void test_storageAccessModuleToClient() {
+    for (final AccessModuleName amn : AccessModuleName.values()) {
+      final AccessModule am = storageAccessModuleToClient(amn);
+      assertWithMessage(amn.toString()).that(am).isNotNull();
+      final AccessModuleName roundTrip = clientAccessModuleToStorage(am);
+      assertWithMessage(am.toString()).that(roundTrip).isNotNull();
     }
+  }
 
+  @Test
+  public void test_auditAccessModuleToStorage() {
+    for (final BypassTimeTargetProperty bttp : BypassTimeTargetProperty.values()) {
+      final AccessModuleName amn = auditAccessModuleToStorage(bttp);
+      assertWithMessage(bttp.toString()).that(amn).isNotNull();
+      final BypassTimeTargetProperty roundTrip = auditAccessModuleFromStorage(amn);
+      assertWithMessage(amn.toString()).that(roundTrip).isNotNull();
+    }
+  }
+
+  @Test
+  public void test_auditAccessModuleFromStorage() {
     // not all modules can be bypassed; don't check those
     DEFAULT_ACCESS_MODULES.stream()
         .filter(DbAccessModule::getBypassable)
         .map(DbAccessModule::getName)
         .forEach(
-            m ->
-                assertWithMessage(m.toString())
-                    .that(AUDIT_TO_STORAGE_ACCESS_MODULE.inverse().get(m))
-                    .isNotNull());
+            dam -> {
+              final BypassTimeTargetProperty bttp = auditAccessModuleFromStorage(dam);
+              assertWithMessage(dam.toString()).that(bttp).isNotNull();
+              final AccessModuleName roundTrip = auditAccessModuleToStorage(bttp);
+              assertWithMessage(bttp.toString()).that(roundTrip).isNotNull();
+            });
   }
 }
