@@ -856,7 +856,7 @@ export const HelpSidebar = fp.flow(
                             </a>
                         ],
                         ['runtime', () => this.displayRuntimeIcon(icon)],
-                        ['terminal', () => this.props.navigate(['workspaces'])],
+                        ['terminal', () => this.props.navigate(['terminals'])],
                         ['genomicExtractions', () => this.displayExtractionIcon(icon)],
                         [DEFAULT, () => icon.faIcon === null
                               ? <img data-test-id={'help-sidebar-icon-' + icon.id} src={proIcons[icon.id]} style={icon.style} />

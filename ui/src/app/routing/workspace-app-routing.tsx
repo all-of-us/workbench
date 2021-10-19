@@ -34,8 +34,7 @@ const DataSetComponentPage = fp.flow(withRouteData, withRoutingSpinner)(DatasetP
 const DetailPagePage = fp.flow(withRouteData, withRoutingSpinner)(DetailPage);
 const InteractiveNotebookPage = fp.flow(withRouteData, withRoutingSpinner)(InteractiveNotebook);
 const NotebookListPage = fp.flow(withRouteData, withRoutingSpinner)(NotebookList);
-const NotebookRedirectPage = fp.flow(withRouteData, withRoutingSpinner)(NotebookRedirect);
-const TerminalRedirectPage = fp.flow(withRouteData, withRoutingSpinner)(NotebookRedirect);
+const LeonardoAppRedirectPage = fp.flow(withRouteData, withRoutingSpinner)(NotebookRedirect);
 const ParticipantsTablePage = fp.flow(withRouteData, withRoutingSpinner)(ParticipantsTable);
 const QueryReportPage = fp.flow(withRouteData, withRoutingSpinner)(QueryReport);
 const WorkspaceAboutPage = fp.flow(withRouteData, withRoutingSpinner)(WorkspaceAbout);
@@ -93,7 +92,7 @@ export const WorkspaceRoutes = () => {
       }}/>
     </AppRoute>
     <AppRoute exact path={`${path}/notebooks/:nbName`}>
-      <NotebookRedirectPage
+      <LeonardoAppRedirectPage
           routeData={{
             pathElementForTitle: 'nbName',
             breadcrumb: BreadcrumbType.Notebook,
@@ -108,8 +107,8 @@ export const WorkspaceRoutes = () => {
           leoAppType={LeoApplicationType.Notebook}
       />
     </AppRoute>
-    <AppRoute exact path={`${path}/terminals/:nbName`}>
-      <TerminalRedirectPage
+    <AppRoute exact path={`${path}/terminals`}>
+      <LeonardoAppRedirectPage
           routeData={{
             pathElementForTitle: 'nbName',
             breadcrumb: BreadcrumbType.Terminal,
