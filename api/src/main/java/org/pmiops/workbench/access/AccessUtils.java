@@ -20,6 +20,7 @@ public class AccessUtils {
           .put(AccessModule.TWO_FACTOR_AUTH, AccessModuleName.TWO_FACTOR_AUTH)
           .put(AccessModule.ERA_COMMONS, AccessModuleName.ERA_COMMONS)
           .put(AccessModule.COMPLIANCE_TRAINING, AccessModuleName.RT_COMPLIANCE_TRAINING)
+          .put(AccessModule.CT_COMPLIANCE_TRAINING, AccessModuleName.CT_COMPLIANCE_TRAINING)
           .put(AccessModule.RAS_LINK_LOGIN_GOV, AccessModuleName.RAS_LOGIN_GOV)
           .put(AccessModule.DATA_USER_CODE_OF_CONDUCT, AccessModuleName.DATA_USER_CODE_OF_CONDUCT)
           .put(AccessModule.PUBLICATION_CONFIRMATION, AccessModuleName.PUBLICATION_CONFIRMATION)
@@ -33,6 +34,9 @@ public class AccessUtils {
           .put(
               BypassTimeTargetProperty.COMPLIANCE_TRAINING_BYPASS_TIME,
               AccessModuleName.RT_COMPLIANCE_TRAINING)
+          .put(
+              BypassTimeTargetProperty.CT_COMPLIANCE_TRAINING_BYPASS_TIME,
+              AccessModuleName.CT_COMPLIANCE_TRAINING)
           .put(
               BypassTimeTargetProperty.TWO_FACTOR_AUTH_BYPASS_TIME,
               AccessModuleName.TWO_FACTOR_AUTH)
