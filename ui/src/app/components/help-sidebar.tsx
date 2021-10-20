@@ -218,6 +218,7 @@ interface IconConfig {
   showIcon: () => boolean;
   style: CSSProperties;
   tooltip: string;
+  hasContent: true
 }
 
 const pageKeyToAnalyticsLabels = {
@@ -315,6 +316,7 @@ export const HelpSidebar = fp.flow(
           showIcon: () => this.props.pageKey === 'cohortBuilder' && !!this.props.criteria,
           style: {fontSize: '21px'},
           tooltip: 'Selected Criteria',
+          hasContent: true,
         },
         'concept': {
           id: 'concept',
@@ -324,6 +326,7 @@ export const HelpSidebar = fp.flow(
           showIcon: () => this.props.pageKey === 'conceptSets',
           style: {fontSize: '21px'},
           tooltip: 'Selected Concepts',
+          hasContent: true,
         },
         'help': {
           id: 'help',
@@ -333,6 +336,7 @@ export const HelpSidebar = fp.flow(
           showIcon: () => true,
           style: {fontSize: '21px'},
           tooltip: 'Help Tips',
+          hasContent: true,
         },
         'notebooksHelp': {
           id: 'notebooksHelp',
@@ -342,6 +346,7 @@ export const HelpSidebar = fp.flow(
           showIcon: () => true,
           style: {fontSize: '21px'},
           tooltip: 'Workspace Storage',
+          hasContent: true,
         },
         'dataDictionary': {
           id: 'dataDictionary',
@@ -351,6 +356,7 @@ export const HelpSidebar = fp.flow(
           showIcon: () => true,
           style: {color: colors.white, fontSize: '20px', marginTop: '5px'},
           tooltip: 'Data Dictionary',
+          hasContent: false,
         },
         'annotations': {
           id: 'annotations',
@@ -360,6 +366,7 @@ export const HelpSidebar = fp.flow(
           showIcon: () => this.props.pageKey === 'reviewParticipantDetail',
           style: {fontSize: '20px', marginLeft: '3px'},
           tooltip: 'Annotations',
+          hasContent: true,
         },
         'runtime': {
           id: 'runtime',
@@ -368,7 +375,8 @@ export const HelpSidebar = fp.flow(
           label: 'Cloud Icon',
           showIcon: () => true,
           style: {height: '22px', width: '22px'},
-          tooltip: 'Cloud Analysis Environment'
+          tooltip: 'Cloud Analysis Environment',
+          hasContent: true,
         },
         'terminal': {
           id: 'terminal',
@@ -377,7 +385,8 @@ export const HelpSidebar = fp.flow(
           label: 'Terminal Icon',
           showIcon: () => true,
           style: {height: '22px', width: '22px'},
-          tooltip:  'Cloud Analysis Terminal'
+          tooltip:  'Cloud Analysis Terminal',
+          hasContent: false,
         },
         'genomicExtractions': {
           id: 'genomicExtractions',
@@ -388,6 +397,7 @@ export const HelpSidebar = fp.flow(
           // position: absolute is so the status icon won't push the DNA icon to the left.
           style: {height: '22px', width: '22px', marginTop: '0.25rem', position: 'absolute'},
           tooltip: 'Genomic Extraction History',
+          hasContent: true,
         }
       }[iconKey];
     }
@@ -844,7 +854,7 @@ export const HelpSidebar = fp.flow(
                 <TooltipTrigger content={<div>{icon.tooltip}</div>} side='left'>
                   <div style={activeIcon === icon.id ? iconStyles.active : icon.disabled ? iconStyles.disabled : styles.icon}
                        onClick={() => {
-                         if (icon.id !== 'dataDictionary' && icon.id !== 'terminal' && !icon.disabled) {
+                         if (icon.hasContent && !icon.disabled) {
                            this.onIconClick(icon);
                          }
                        }}>

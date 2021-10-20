@@ -49,7 +49,7 @@ export enum Progress {
 }
 
 const getProgressString = (appType: LeoApplicationType, progress: Progress) => {
-  if(appType === LeoApplicationType.Notebook) {
+  if (appType === LeoApplicationType.Notebook) {
     return notebookProgressStrings.get(progress)
   } else {
     return terminalProgressStrings.get(progress)
@@ -67,13 +67,13 @@ export const notebookProgressStrings: Map<Progress, string> = new Map([
 ]);
 
 export const terminalProgressStrings: Map<Progress, string> = new Map([
-  [Progress.Unknown, 'Connecting to the terminal server'],
-  [Progress.Initializing, 'Initializing terminal server, may take up to 5 minutes'],
-  [Progress.Resuming, 'Resuming terminal server, may take up to 1 minute'],
-  [Progress.Authenticating, 'Authenticating with the terminal server'],
+  [Progress.Unknown, 'Connecting to the terminal'],
+  [Progress.Initializing, 'Initializing terminal, may take up to 5 minutes'],
+  [Progress.Resuming, 'Resuming terminal, may take up to 1 minute'],
+  [Progress.Authenticating, 'Authenticating with the terminal'],
   [Progress.Copying, 'Copying notebooks onto the server'],
-  [Progress.Creating, 'Creating the new terminal'],
-  [Progress.Redirecting, 'Redirecting to the terminal server'],
+  [Progress.Creating, 'Opening the new terminal'],
+  [Progress.Redirecting, 'Redirecting to the terminal'],
 ]);
 
 // Statuses during which the user can interact with the Runtime UIs, e.g. via
@@ -291,7 +291,7 @@ export const LeonardoAppLauncher = fp.flow(
       return !!creating;
     }
 
-    private isCreatingTerminal() {
+    private isOpeningTerminal() {
       return this.props.leoAppType === LeoApplicationType.Terminal;
     }
 
@@ -305,7 +305,7 @@ export const LeonardoAppLauncher = fp.flow(
     }
 
     private getLeoAppUrl(runtime: Runtime, nbName: string): string {
-      if(this.isCreatingTerminal()) {
+      if (this.isOpeningTerminal()) {
         return encodeURI(
             environment.leoApiUrl + '/proxy/'
             + runtime.googleProject + '/'
@@ -327,7 +327,7 @@ export const LeonardoAppLauncher = fp.flow(
     }
 
     private getPageTitle() {
-      if(this.isCreatingTerminal()) {
+      if (this.isOpeningTerminal()) {
         return 'Loading Terminal'
       } else {
         return this.isCreatingNewNotebook() ? 'Creating New Notebook: ' : 'Loading Notebook: ' + this.getNotebookName()
@@ -413,7 +413,7 @@ export const LeonardoAppLauncher = fp.flow(
             + '/' + id + '/notebooks/' +
             encodeURIComponent(this.getFullNotebookName()));
       }
-      if(this.isCreatingTerminal()) {
+      if (this.isOpeningTerminal()) {
         proxyApi().connectToTerminal(runtime.googleProject, runtime.runtimeName, terminalName)
       }
       this.setState({leoUrl: this.getLeoAppUrl(runtime, leoAppLocation)});
@@ -424,7 +424,7 @@ export const LeonardoAppLauncher = fp.flow(
     }
 
     private async getLeoAppPathAndLocalize(runtime: Runtime) {
-      if(this.isCreatingTerminal()) {
+      if (this.isOpeningTerminal()) {
         const {workspace} = this.props;
         this.incrementProgress(Progress.Creating);
         const resp = await this.runtimeRetry(() => runtimeApi().localize(

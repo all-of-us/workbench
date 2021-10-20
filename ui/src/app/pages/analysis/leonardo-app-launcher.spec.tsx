@@ -336,7 +336,7 @@ describe('TerminalLauncher', () => {
     jest.clearAllMocks();
   });
 
-  it('should be "Initializing" until a Creating runtime for an existing notebook is running', async() => {
+  it('should display terminal state header correcrly when RuntimeStatus changes', async() => {
     runtimeStub.runtime.status = RuntimeStatus.Creating;
 
     const wrapper = await terminalComponent();
