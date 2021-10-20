@@ -197,8 +197,13 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
     customEnvironmentVariables.put(
         WORKSPACE_BUCKET_KEY, "gs://" + fcWorkspaceResponse.getWorkspace().getBucketName());
 
+    // In Terra V2 workspaces, all compute users have the bigquery.readSessionUser role per CA-1179.
+    // In all workspaces, OWNERs have storage read session permission via the project viewer role.
+    // If this variable is exported (with any value), codegen will use the BQ storage API, which is
+    // ~200x faster for loading large dataframes from Bigquery.
+    // After CA-952 is complete, this should always be exported.
     if (WorkspaceAccessLevel.OWNER.toString().equals(fcWorkspaceResponse.getAccessLevel())
-        || fcWorkspaceResponse.getWorkspace().getWorkspaceVersion() != null) {
+        || workspace.isTerraV2Workspace()) {
       customEnvironmentVariables.put(BIGQUERY_STORAGE_API_ENABLED_ENV_KEY, "true");
     }
 
