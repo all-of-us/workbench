@@ -432,6 +432,12 @@ const MaybeModule = ({profile, moduleName, active, spinnerProps}: ModuleProps): 
   };
 
   const Module = ({profile}) => {
+    // RW-7461
+    const loginGovHelpText = <div style={styles.moduleDate}>
+      Verifying your identity helps us keep participant data safe. You’ll need to provide your state ID, social
+      security number, and phone number.
+      Contact us if you’re having trouble completing this step.
+    </div>;
     const statusTextMaybe = bypassedOrCompletedText(getAccessModuleStatusByName(profile, moduleName));
 
     return <FlexRow data-test-id={`module-${moduleName}`}>
@@ -447,6 +453,7 @@ const MaybeModule = ({profile, moduleName, active, spinnerProps}: ModuleProps): 
         <FlexColumn>
           <div style={active ? styles.activeModuleText : styles.inactiveModuleText}>
             <DARTitleComponent/>
+            {(moduleName === AccessModule.RASLINKLOGINGOV) ? loginGovHelpText : null}
           </div>
           {statusTextMaybe && <div style={styles.moduleDate}>{statusTextMaybe}</div>}
         </FlexColumn>
