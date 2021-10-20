@@ -98,7 +98,6 @@ function convertToResource(
     workspaceNamespace: namespace,
     workspaceFirecloudName: id,
     permission: WorkspaceAccessLevel[accessLevel],
-    modifiedTime: inputResource.lastModifiedTime ? new Date(inputResource.lastModifiedTime).toString() : new Date().toDateString(),
     accessTierShortName,
     cdrVersionId,
     workspaceBillingStatus: billingStatus,
@@ -107,6 +106,8 @@ function convertToResource(
     conceptSet: resourceType === ResourceType.CONCEPTSET ? inputResource as ConceptSet : null,
     dataSet: resourceType === ResourceType.DATASET ? inputResource as DataSet : null,
     notebook: resourceType === ResourceType.NOTEBOOK ? inputResource as FileDetail : null,
+    modifiedTime: inputResource.lastModifiedTime ? new Date(inputResource.lastModifiedTime).toString() : new Date().toDateString(),
+    lastModifiedEpochMillis: inputResource.lastModifiedTime,
   };
 }
 

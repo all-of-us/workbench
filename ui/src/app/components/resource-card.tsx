@@ -146,7 +146,7 @@ class ResourceCard extends React.Component<Props, {}> {
           </FlexColumn>
           <div style={styles.cardFooter}>
             <div style={styles.lastModified} data-test-id='last-modified'>
-              Last Modified: {formatWorkspaceResourceDisplayDate(resource.modifiedTime)}</div>
+              Last Modified: {formatWorkspaceResourceDisplayDate(resource.lastModifiedEpochMillis)}</div>
             <StyledResourceType resource={resource}/>
           </div>
         </ResourceCardBase>;

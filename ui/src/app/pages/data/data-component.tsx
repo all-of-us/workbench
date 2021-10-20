@@ -102,11 +102,19 @@ export const DataComponent = withCurrentWorkspace()((props: Props) => {
       setResourceList(
         (await workspacesApi().getWorkspaceResources(workspace.namespace, workspace.id, {typesToFetch: resourceTypesToFetch}))
           .map(result => {
-            return {
-              ...result,
-              // TODO (RW-4682): Fix this nonsense
-              modifiedTime: result.modifiedTime ? new Date(Number(result.modifiedTime)).toDateString() : null
-            }; }));
+
+
+            const [type, name] = [
+              getTypeString(result),
+              getDisplayName(result)
+            ];
+
+            console.log(`DataComponent ${name} (${type}) modifiedTime = ${result.modifiedTime}`);
+            console.log(`DataComponent ${name} (${type}) lastModifiedEpochMillis = ${result.lastModifiedEpochMillis}`);
+
+
+
+            return result; }));
     } catch (error) {
       console.log(error);
     } finally {

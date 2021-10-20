@@ -319,7 +319,7 @@ export function displayDate(time: Number): string {
 }
 
 // Remove this when we complete RW-3065
-export function formatWorkspaceResourceDisplayDate(time: string): string {
+export function formatWorkspaceResourceDisplayDate(time: number): string {
   if (!time) {
     return '';
   }

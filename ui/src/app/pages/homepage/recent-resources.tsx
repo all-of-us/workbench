@@ -124,7 +124,7 @@ export const RecentResources = fp.flow(withCdrVersions())((props: Props) => {
             resourceType: <ResourceNavigation resource={r}><StyledResourceType resource={r}/></ResourceNavigation>,
             resourceName: <ResourceNavigation resource={r} style={styles.navigation}>{getDisplayName(r)}</ResourceNavigation>,
             workspaceName: <WorkspaceNavigation workspace={getWorkspace(r)} resource={r} style={styles.navigation}/>,
-            formattedLastModified: formatWorkspaceResourceDisplayDate(r.modifiedTime),
+            formattedLastModified: formatWorkspaceResourceDisplayDate(r.lastModifiedEpochMillis),
             cdrVersionName: getCdrVersionName(r),
           };
         }));
