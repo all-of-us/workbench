@@ -1,7 +1,6 @@
 import { ElementHandle, Page } from 'puppeteer';
 import { config } from 'resources/workbench-config';
 import Button from 'app/element/button';
-import { signedInXpath } from 'app/page/authenticated-page';
 
 export enum FieldSelector {
   LoginButton = '//*[@role="button"]/*[contains(normalize-space(text()),"Sign In")]',
@@ -93,15 +92,17 @@ export default class GoogleLoginPage {
       submitButton.click()
     ]);
     await submitButton.dispose();
-    await this.page.waitForSelector(signedInXpath, { timeout: 2 * 60 * 1000 }).catch(async (err) => {
-      // Two main reasons why error is throw are caused by "Enter Recovery Email" page or login captcha.
-      // At this time, we can only handle "Enter Recover Email" page if it exists.
-      const found = await this.fillOutRecoverEmail();
-      if (!found) {
-        console.error(err);
-        throw err;
-      }
-    });
+    await this.page
+      .waitForXPath(process.env.Authenticated_Page_Xpath, { timeout: 2 * 60 * 1000 })
+      .catch(async (err) => {
+        // Two main reasons why error is throw are caused by "Enter Recovery Email" page or login captcha.
+        // At this time, we can only handle "Enter Recover Email" page if it exists.
+        const found = await this.fillOutRecoverEmail();
+        if (!found) {
+          console.error(err);
+          throw err;
+        }
+      });
   }
 
   /**
