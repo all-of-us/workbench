@@ -468,7 +468,7 @@ const MaybeModule = ({profile, moduleName, active, spinnerProps}: ModuleProps): 
         <FlexColumn>
           <div style={active ? styles.activeModuleText : styles.inactiveModuleText}>
             <DARTitleComponent/>
-            {(moduleName === AccessModule.RASLINKLOGINGOV) ? loginGovHelpText : null}
+            {(moduleName === AccessModule.RASLINKLOGINGOV) && loginGovHelpText}
           </div>
           {statusTextMaybe && <div style={styles.moduleDate}>{statusTextMaybe}</div>}
         </FlexColumn>
