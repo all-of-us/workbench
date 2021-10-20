@@ -6,6 +6,7 @@ import {
   faInbox,
   faInfoCircle, IconDefinition
 } from '@fortawesome/free-solid-svg-icons';
+import {RouteLink} from 'app/components/app-router';
 import {faDna} from '@fortawesome/free-solid-svg-icons/faDna';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import * as fp from 'lodash/fp';
@@ -835,6 +836,8 @@ export const HelpSidebar = fp.flow(
       const {activeIcon, runtimeErrors} = this.state;
       const sidebarContent = this.sidebarContent(activeIcon);
       const shouldRenderWorkspaceMenu = !this.iconConfig('concept').showIcon() && !this.iconConfig('criteria').showIcon();
+      const {workspace, workspace: { id, namespace}} = this.props;
+      const terminalUrl = `/workspaces/${namespace}/${id}/terminals`;
 
       return <div id='help-sidebar'>
         <div style={{...styles.iconContainer, ...(this.props.pageKey === NOTEBOOK_PAGE_KEY ? styles.notebookOverrides : {})}}>
@@ -856,7 +859,12 @@ export const HelpSidebar = fp.flow(
                             </a>
                         ],
                         ['runtime', () => this.displayRuntimeIcon(icon)],
-                        ['terminal', () => this.props.navigate(['terminals'])],
+                        ['terminal',
+                          () => <RouteLink path={terminalUrl}>
+                             <FontAwesomeIcon data-test-id={'help-sidebar-icon-' + icon.id} icon={icon.faIcon} style={icon.style} />
+                            </RouteLink>
+
+                          ],
                         ['genomicExtractions', () => this.displayExtractionIcon(icon)],
                         [DEFAULT, () => icon.faIcon === null
                               ? <img data-test-id={'help-sidebar-icon-' + icon.id} src={proIcons[icon.id]} style={icon.style} />

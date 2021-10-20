@@ -289,6 +289,10 @@ export const NotebookRedirect = fp.flow(
       return !!creating;
     }
 
+    private isCreatingTerminal() {
+      return this.props.leoAppType === LeoApplicationType.Terminal;
+    }
+
     private isPlaygroundMode() {
       const playgroundMode = parseQueryParams(this.props.location.search).get('playgroundMode');
       return playgroundMode === 'true';
@@ -298,11 +302,18 @@ export const NotebookRedirect = fp.flow(
       return await fetchAbortableRetry(f, runtimeApiRetryTimeoutMillis, runtimeApiRetryAttempts);
     }
 
-    private notebookUrl(runtime: Runtime, nbName: string): string {
-      return encodeURI(
-        environment.leoApiUrl + '/proxy/'
-          + runtime.googleProject + '/'
-          + runtime.runtimeName + '/jupyter/notebooks/' + nbName);
+    private getLeoAppUrl(runtime: Runtime, nbName: string): string {
+      if(this.isCreatingTerminal()) {
+        return encodeURI(
+            environment.leoApiUrl + '/proxy/'
+            + runtime.googleProject + '/'
+            + runtime.runtimeName + '/jupyter/terminals/1');
+      } else {
+        return encodeURI(
+            environment.leoApiUrl + '/proxy/'
+            + runtime.googleProject + '/'
+            + runtime.runtimeName + '/jupyter/notebooks/' + nbName);
+      }
     }
 
     // get notebook name without file suffix
@@ -310,6 +321,14 @@ export const NotebookRedirect = fp.flow(
       const {nbName} = this.props.match.params;
       // safe whether nbName has the standard notebook suffix or not
       return dropNotebookFileSuffix(decodeURIComponent(nbName));
+    }
+
+    private getPageTitle() {
+      if(this.isCreatingTerminal()) {
+        return 'Loading Terminal'
+      } else {
+        return this.isCreatingNewNotebook() ? 'Creating New Notebook: ' : 'Loading Notebook: ' + this.getNotebookName()
+      }
     }
 
     // get notebook name with file suffix
@@ -385,29 +404,38 @@ export const NotebookRedirect = fp.flow(
       this.incrementProgress(Progress.Authenticating);
       await this.initializeNotebookCookies(runtime);
 
-      const notebookLocation = await this.getNotebookPathAndLocalize(runtime);
+      const leoAppLocation = await this.getLeoAppPathAndLocalize(runtime);
       if (this.isCreatingNewNotebook()) {
         window.history.replaceState({}, 'Notebook', 'workspaces/' + namespace
             + '/' + id + '/notebooks/' +
             encodeURIComponent(this.getFullNotebookName()));
       }
-      this.setState({leoUrl: this.notebookUrl(runtime, notebookLocation)});
+      this.setState({leoUrl: this.getLeoAppUrl(runtime, leoAppLocation)});
       this.incrementProgress(Progress.Redirecting);
 
       // give it a second to "redirect"
       this.redirectTimer = global.setTimeout(() => this.incrementProgress(Progress.Loaded), redirectMillis);
     }
 
-    private async getNotebookPathAndLocalize(runtime: Runtime) {
-      if (this.isCreatingNewNotebook()) {
+    private async getLeoAppPathAndLocalize(runtime: Runtime) {
+      if(this.isCreatingTerminal()) {
+        const {workspace} = this.props;
         this.incrementProgress(Progress.Creating);
-        return this.createNotebookAndLocalize(runtime);
+        const resp = await this.runtimeRetry(() => runtimeApi().localize(
+            workspace.namespace, null,
+            {signal: this.pollAborter.signal}));
+        return resp.runtimeLocalDirectory;
       } else {
-        this.incrementProgress(Progress.Copying);
-        const fullNotebookName = this.getFullNotebookName();
-        const localizedNotebookDir =
-            await this.localizeNotebooks([fullNotebookName]);
-        return `${localizedNotebookDir}/${fullNotebookName}`;
+        if (this.isCreatingNewNotebook()) {
+          this.incrementProgress(Progress.Creating);
+          return this.createNotebookAndLocalize(runtime);
+        } else {
+          this.incrementProgress(Progress.Copying);
+          const fullNotebookName = this.getFullNotebookName();
+          const localizedNotebookDir =
+              await this.localizeNotebooks([fullNotebookName]);
+          return `${localizedNotebookDir}/${fullNotebookName}`;
+        }
       }
     }
 
@@ -453,8 +481,7 @@ export const NotebookRedirect = fp.flow(
           <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}
                data-test-id='notebook-redirect'>
             <h2 style={{lineHeight: 0}}>
-              {creatingNewNotebook ? 'Creating New Notebook: ' : 'Loading Notebook: '}
-              {this.getNotebookName()}
+              {this.getPageTitle()}
             </h2>
             <Button type='secondary' onClick={() => window.history.back()}>Cancel</Button>
           </div>
