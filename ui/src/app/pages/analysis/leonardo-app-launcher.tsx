@@ -245,6 +245,8 @@ interface State {
   progressComplete: Map<Progress, boolean>;
 }
 
+const terminalName = '1'
+
 interface Props extends WithSpinnerOverlayProps, NavigationProps, RouteComponentProps<MatchParams> {
   workspace: WorkspaceData;
   profileState: {profile: Profile, reload: Function, updateCache: Function};
@@ -307,7 +309,8 @@ export const LeonardoAppLauncher = fp.flow(
         return encodeURI(
             environment.leoApiUrl + '/proxy/'
             + runtime.googleProject + '/'
-            + runtime.runtimeName + '/jupyter/terminals/1');
+            + runtime.runtimeName + '/jupyter/terminals/'
+            + terminalName);
       } else {
         return encodeURI(
             environment.leoApiUrl + '/proxy/'
@@ -409,6 +412,9 @@ export const LeonardoAppLauncher = fp.flow(
         window.history.replaceState({}, 'Notebook', 'workspaces/' + namespace
             + '/' + id + '/notebooks/' +
             encodeURIComponent(this.getFullNotebookName()));
+      }
+      if(this.isCreatingTerminal()) {
+        proxyApi().connectToTerminal(runtime.googleProject, runtime.runtimeName, terminalName)
       }
       this.setState({leoUrl: this.getLeoAppUrl(runtime, leoAppLocation)});
       this.incrementProgress(Progress.Redirecting);
