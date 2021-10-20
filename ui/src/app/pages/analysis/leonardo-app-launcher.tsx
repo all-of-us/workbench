@@ -50,13 +50,13 @@ export enum Progress {
 
 const getProgressString = (appType: LeoApplicationType, progress: Progress) => {
   if(appType === LeoApplicationType.Notebook) {
-    return noetbookProgressStrings.get(progress)
+    return notebookProgressStrings.get(progress)
   } else {
     return terminalProgressStrings.get(progress)
   }
 }
 
-export const noetbookProgressStrings: Map<Progress, string> = new Map([
+export const notebookProgressStrings: Map<Progress, string> = new Map([
   [Progress.Unknown, 'Connecting to the notebook server'],
   [Progress.Initializing, 'Initializing notebook server, may take up to 5 minutes'],
   [Progress.Resuming, 'Resuming notebook server, may take up to 1 minute'],
@@ -256,7 +256,7 @@ const runtimeApiRetryTimeoutMillis = 10000;
 const runtimeApiRetryAttempts = 5;
 const redirectMillis = 1000;
 
-export const NotebookRedirect = fp.flow(
+export const LeonardoAppLauncher = fp.flow(
   withUserProfile(),
   withCurrentWorkspace(),
   withRuntimeStore(),
@@ -479,7 +479,7 @@ export const NotebookRedirect = fp.flow(
       return <React.Fragment>
         {progress !== Progress.Loaded ? <div style={styles.main}>
           <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}
-               data-test-id='notebook-redirect'>
+               data-test-id='leo-app-launcher'>
             <h2 style={{lineHeight: 0}}>
               {this.getPageTitle()}
             </h2>
@@ -488,7 +488,9 @@ export const NotebookRedirect = fp.flow(
           <div style={{display: 'flex', flexDirection: 'row', marginTop: '1rem'}}>
             {Array.from(progressCardStates, ([key, _], index) => {
               return <ProgressCard key={index} progressState={progress} cardState={key}
-                                   creatingNewNotebook={creatingNewNotebook} progressComplete={progressComplete} leoAppType = {leoAppType}/>;
+                                   creatingNewNotebook={creatingNewNotebook}
+                                   progressComplete={progressComplete}
+                                   leoAppType = {leoAppType}/>;
             })}
           </div>
           <FlexRow style={styles.reminderText}>

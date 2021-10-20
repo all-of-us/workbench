@@ -306,9 +306,6 @@ export const HelpSidebar = fp.flow(
     });
 
     iconConfig(iconKey): IconConfig {
-      const {runtimeStore} = this.props;
-      let status = runtimeStore && runtimeStore.runtime && runtimeStore.runtime.status;
-
       return {
         'criteria': {
           id: 'criteria',
@@ -847,7 +844,7 @@ export const HelpSidebar = fp.flow(
                 <TooltipTrigger content={<div>{icon.tooltip}</div>} side='left'>
                   <div style={activeIcon === icon.id ? iconStyles.active : icon.disabled ? iconStyles.disabled : styles.icon}
                        onClick={() => {
-                         if (icon.id !== 'dataDictionary' && !icon.disabled) {
+                         if (icon.id !== 'dataDictionary' && icon.id !== 'terminal' && !icon.disabled) {
                            this.onIconClick(icon);
                          }
                        }}>
