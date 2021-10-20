@@ -4,12 +4,16 @@ import { waitForDocumentTitle, waitWhileLoading } from 'utils/waits-utils';
 import Button from 'app/element/button';
 import { LinkText } from 'app/text-labels';
 import Textbox from 'app/element/textbox';
+import Textarea from 'app/element/textarea';
 import { getPropValue } from 'utils/element-utils';
 import Table from 'app/component/table';
 import BaseElement from 'app/element/base-element';
 import DeleteRuntimeModal from 'app/modal/delete-runtime.modal';
 
 const PageTitle = 'Workspace Admin | All of Us Researcher Workbench';
+export const LabelAlias = {
+  WorkspaceNamespace: 'Workspace namespace'
+};
 
 export default class WorkspaceAdminPage extends AuthenticatedPage {
   constructor(page: Page) {
@@ -18,12 +22,12 @@ export default class WorkspaceAdminPage extends AuthenticatedPage {
 
   async isLoaded(): Promise<boolean> {
     await Promise.all([waitForDocumentTitle(this.page, PageTitle)]);
+    await waitWhileLoading(this.page);
     return true;
   }
 
   getWorkspaceNamespaceInput(): Textbox {
-    const selector = "//label[text()='Workspace namespace']/following-sibling::input[@type='text']";
-    return new Textbox(this.page, selector);
+    return Textbox.findByName(this.page, { name: LabelAlias.WorkspaceNamespace });
   }
 
   getLoadWorkspaceButton(): Button {
@@ -47,7 +51,7 @@ export default class WorkspaceAdminPage extends AuthenticatedPage {
   // get all the h3 headers
   async getAllHeadings3(): Promise<string[]> {
     await this.page.waitForXPath('//h3', { visible: true });
-    const headings = await page.$$eval('h3', (headers) => {
+    const headings = await this.page.$$eval('h3', (headers) => {
       return headers.map((header) => header.textContent);
     });
     // get only the first-5 headings(h3)
@@ -69,7 +73,7 @@ export default class WorkspaceAdminPage extends AuthenticatedPage {
 
   async getAllHeadings2(): Promise<string[]> {
     await this.page.waitForXPath('//h2', { visible: true });
-    const headings = await page.$$eval('h2', (headers) => {
+    const headings = await this.page.$$eval('h2', (headers) => {
       return headers.map((header) => header.textContent);
     });
     // get only the 2nd and 3rd headings(h2)
@@ -92,11 +96,11 @@ export default class WorkspaceAdminPage extends AuthenticatedPage {
   }
 
   // get the text area to input the reason to access
-  getAccessReasonInput(): Textbox {
+  getAccessReasonTextArea(): Textarea {
     const selector =
-      '//label[contains(text(), "To preview notebooks, enter Access Reason (for auditing purposes")]' +
+      '//label[contains(text(), "To preview notebooks, enter Access Reason (for auditing purposes)")]' +
       '/following-sibling::textarea';
-    return new Textbox(this.page, selector);
+    return new Textarea(this.page, selector);
   }
 
   // get the No Active Runtime Text to verify that no runtime is active
@@ -124,15 +128,13 @@ export default class WorkspaceAdminPage extends AuthenticatedPage {
   async getRuntimeStatus(): Promise<string> {
     const xpath = '//div[text()="Delete" and @role="button"]/preceding-sibling::div[1]';
     const element = BaseElement.asBaseElement(this.page, await this.page.waitForXPath(xpath, { visible: true }));
-    const textContent = await element.getTextContent();
-    return textContent;
+    return element.getTextContent();
   }
 
   // get the runtime status (delete) in the Status col
   async getRuntimeDeleteStatus(): Promise<string> {
     const xpath = '//div[text()="Delete" and @role="button"]/preceding-sibling::div[1][contains(text(),"Deleting")]';
     const element = BaseElement.asBaseElement(this.page, await this.page.waitForXPath(xpath, { visible: true }));
-    const textContent = await element.getTextContent();
-    return textContent;
+    return element.getTextContent();
   }
 }

@@ -9,6 +9,8 @@ import WorkspaceCard from 'app/component/workspace-card';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import AdminNotebookPreviewPage from 'app/page/admin-notebook-preview-page';
 
+
+
 describe('Workspace Admin', () => {
   const workspaceNamespace = 'aou-rw-test-8c5cdbaf';
   const workspaceName = 'e2eWorkspaceAdmin';
@@ -19,7 +21,7 @@ describe('Workspace Admin', () => {
     await navigation.navMenu(page, NavLink.WORKSPACE_ADMIN);
   });
 
-  test('check the Workspace Admin page UI', async () => {
+  test.skip('check the Workspace Admin page UI', async () => {
     const workspaceAdminPage = new WorkspaceAdminPage(page);
     await workspaceAdminPage.waitForLoad();
     await workspaceAdminPage.getWorkspaceNamespaceInput().type(workspaceNamespace);
@@ -48,7 +50,9 @@ describe('Workspace Admin', () => {
     expect(await workspaceAdminPage.getNoActiveRuntimeText()).toEqual(noActiveRuntimeText);
   });
 
-  test('Verify that admin is able to preview the Notebook', async () => {
+
+
+  test.only('Verify that admin is able to preview the Notebook', async () => {
     const workspaceAdminPage = new WorkspaceAdminPage(page);
     await workspaceAdminPage.waitForLoad();
     await workspaceAdminPage.getWorkspaceNamespaceInput().type(workspaceNamespace);
@@ -56,8 +60,8 @@ describe('Workspace Admin', () => {
     await workspaceAdminPage.waitForLoad();
     //verify that the Notebook Preview button is disabled
     expect(await workspaceAdminPage.getNotebookPreviewButton().isCursorNotAllowed()).toBe(true);
-    const accessReasonText = 'for auditing purposes';
-    await workspaceAdminPage.getAccessReasonInput().type(accessReasonText);
+    const accessReasonText = 'testing purposes';
+    await workspaceAdminPage.getAccessReasonTextArea().type(accessReasonText);
     //verify that the Notebook Preview button is now enabled
     expect(await workspaceAdminPage.getNotebookPreviewButton().isCursorNotAllowed()).toBe(false);
     await workspaceAdminPage.clickNotebookPreviewButton();
@@ -65,6 +69,7 @@ describe('Workspace Admin', () => {
     await adminNotebookPreviewPage.waitForLoad();
     // verify that the notebook preview page loaded
     const previewCode = await adminNotebookPreviewPage.getFormattedCode();
+    // verify that the notebook file is in Python programming language
     expect(previewCode.some((item) => item.includes('import pandas'))).toBe(true);
     expect(previewCode.some((item) => item.includes('import os'))).toBe(true);
     expect(await adminNotebookPreviewPage.getNamespaceText()).toEqual(workspaceNamespace);
@@ -73,11 +78,13 @@ describe('Workspace Admin', () => {
     await workspaceAdminPage.waitForLoad();
   });
 
-  test('Verify that admin is able to delete runtime', async () => {
+
+
+  test.skip('Verify that admin is able to delete runtime', async () => {
     const workspaceAdminPage = new WorkspaceAdminPage(page);
     await workspaceAdminPage.waitForLoad();
     await workspaceAdminPage.getWorkspaceNamespaceInput().type(workspaceNamespace);
-    workspaceAdminPage.clickLoadWorkspaceButton();
+    await workspaceAdminPage.clickLoadWorkspaceButton();
     await workspaceAdminPage.waitForLoad();
     expect(await workspaceAdminPage.getNoActiveRuntimeText()).toEqual(noActiveRuntimeText);
     await new WorkspacesPage(page).load();
@@ -93,16 +100,15 @@ describe('Workspace Admin', () => {
     await navigation.navMenu(page, NavLink.WORKSPACE_ADMIN);
     await workspaceAdminPage.waitForLoad();
     await workspaceAdminPage.getWorkspaceNamespaceInput().type(workspaceNamespace);
-    workspaceAdminPage.clickLoadWorkspaceButton();
+    await workspaceAdminPage.clickLoadWorkspaceButton();
     await workspaceAdminPage.waitForLoad();
     //verify the runtime status is running
     expect(await workspaceAdminPage.getRuntimeStatus()).toEqual('Running');
-    const deleteRuntimeModal1 = await workspaceAdminPage.clickRuntimeDeleteButton();
-    await deleteRuntimeModal1.clickCancelButton();
+    let deleteRuntimeModal = await workspaceAdminPage.clickRuntimeDeleteButton();
+    await deleteRuntimeModal.clickCancelButton();
     await workspaceAdminPage.waitForLoad();
-    const deleteRuntimeModal2 = await workspaceAdminPage.clickRuntimeDeleteButton();
     // delete the runtime
-    await deleteRuntimeModal2.clickDeleteButton();
+    await deleteRuntimeModal.clickDeleteButton();
     await workspaceAdminPage.waitForLoad();
     //verify the runtime status is deleting
     expect(await workspaceAdminPage.getRuntimeDeleteStatus()).toEqual('Deleting');
