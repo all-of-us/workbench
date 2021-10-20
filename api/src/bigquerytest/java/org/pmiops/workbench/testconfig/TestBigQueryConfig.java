@@ -32,7 +32,7 @@ public class TestBigQueryConfig {
         // Note: Later we may want to apply similar settings to the real server. See RW-7413.
         .setRetrySettings(
             RetrySettings.newBuilder()
-                .setTotalTimeout(org.threeten.bp.Duration.ofMinutes(5))
+                .setTotalTimeout(org.threeten.bp.Duration.ofMinutes(15))
                 .setInitialRpcTimeout(org.threeten.bp.Duration.ofSeconds(20L))
                 .setMaxRpcTimeout(org.threeten.bp.Duration.ofSeconds(30L))
                 .setInitialRetryDelay(org.threeten.bp.Duration.ofSeconds(1L))
@@ -46,7 +46,7 @@ public class TestBigQueryConfig {
   public Duration defaultQueryTimeout() {
     // We're not subject to GAE timeouts in unit tests. Allow queries to run a bit longer to avoid
     // failing on the occasional slow job.
-    return Duration.ofMinutes(3L);
+    return Duration.ofMinutes(5L);
   }
 
   @Bean
