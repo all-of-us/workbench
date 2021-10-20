@@ -84,6 +84,7 @@ import org.pmiops.workbench.monitoring.GaugeDataCollector;
 import org.pmiops.workbench.monitoring.MeasurementBundle;
 import org.pmiops.workbench.monitoring.labels.MetricLabel;
 import org.pmiops.workbench.monitoring.views.GaugeMetric;
+import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -1394,9 +1395,15 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
                 + "\"\"\"";
         dataFrameSection =
             namespace
-                + "df = pandas.read_gbq("
+                + "df = pandas.read_gbq(\n"
+                + "    "
                 + namespace
-                + "sql, dialect=\"standard\", progress_bar_type=\"tqdm_notebook\")";
+                + "sql,\n"
+                + "    dialect=\"standard\",\n"
+                + "    use_bqstorage_api=(\""
+                + LeonardoNotebooksClient.BIGQUERY_STORAGE_API_ENABLED_ENV_KEY
+                + "\" in os.environ),\n"
+                + "    progress_bar_type=\"tqdm_notebook\")";
         displayHeadSection = namespace + "df.head(5)";
         break;
       case R:

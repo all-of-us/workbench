@@ -97,6 +97,7 @@ import org.pmiops.workbench.model.RuntimeStatus;
 import org.pmiops.workbench.model.UpdateRuntimeRequest;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.notebooks.LeonardoApiClientFactory;
+import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
 import org.pmiops.workbench.notebooks.LeonardoNotebooksClientImpl;
 import org.pmiops.workbench.notebooks.NotebooksConfig;
 import org.pmiops.workbench.notebooks.NotebooksRetryHandler;
@@ -362,6 +363,16 @@ public class RuntimeControllerTest extends SpringTest {
 
   private void stubGetWorkspace(
       String workspaceNamespace, String googleProject, String firecloudName, String creator) {
+    stubGetWorkspace(
+        workspaceNamespace, googleProject, firecloudName, creator, WorkspaceAccessLevel.OWNER);
+  }
+
+  private void stubGetWorkspace(
+      String workspaceNamespace,
+      String googleProject,
+      String firecloudName,
+      String creator,
+      WorkspaceAccessLevel accessLevel) {
     DbWorkspace w = new DbWorkspace();
     w.setWorkspaceNamespace(workspaceNamespace);
     w.setFirecloudName(firecloudName);
@@ -370,13 +381,14 @@ public class RuntimeControllerTest extends SpringTest {
     when(workspaceDao.getRequired(workspaceNamespace, firecloudName)).thenReturn(w);
     when(workspaceDao.getByNamespace(workspaceNamespace)).thenReturn(Optional.of(w));
     stubGetFcWorkspace(
-        createFcWorkspace(workspaceNamespace, googleProject, firecloudName, creator));
+        createFcWorkspace(workspaceNamespace, googleProject, firecloudName, creator), accessLevel);
   }
 
-  private void stubGetFcWorkspace(FirecloudWorkspaceDetails fcWorkspace) {
+  private void stubGetFcWorkspace(
+      FirecloudWorkspaceDetails fcWorkspace, WorkspaceAccessLevel accessLevel) {
     FirecloudWorkspaceResponse fcResponse = new FirecloudWorkspaceResponse();
     fcResponse.setWorkspace(fcWorkspace);
-    fcResponse.setAccessLevel(WorkspaceAccessLevel.OWNER.toString());
+    fcResponse.setAccessLevel(accessLevel.toString());
     when(mockFireCloudService.getWorkspace(any())).thenReturn(Optional.of(fcResponse));
     when(mockFireCloudService.getWorkspace(fcWorkspace.getNamespace(), fcWorkspace.getName()))
         .thenReturn(fcResponse);
@@ -1221,6 +1233,80 @@ public class RuntimeControllerTest extends SpringTest {
             runtimeController.createRuntime(
                 WORKSPACE_NS,
                 new Runtime().gceConfig(new GceConfig().diskSize(50).machineType("standard"))));
+  }
+
+  @Test
+  public void testCreateRuntime_terraWorkspaceV1() throws ApiException {
+    // namespace == project, for v1 workspaces
+    when(userRuntimesApi.getRuntime(WORKSPACE_NS, getRuntimeName()))
+        .thenThrow(new NotFoundException());
+    stubGetWorkspace(WORKSPACE_NS, WORKSPACE_NS, WORKSPACE_ID, "test", WorkspaceAccessLevel.WRITER);
+
+    runtimeController.createRuntime(
+        WORKSPACE_NS,
+        new Runtime().gceConfig(new GceConfig().diskSize(50).machineType("standard")));
+
+    verify(userRuntimesApi)
+        .createRuntime(
+            eq(WORKSPACE_NS), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
+
+    LeonardoCreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
+    Gson gson = new Gson();
+    assertThat(
+            gson.toJsonTree(createRuntimeRequest.getCustomEnvironmentVariables())
+                .getAsJsonObject()
+                .has(LeonardoNotebooksClient.BIGQUERY_STORAGE_API_ENABLED_ENV_KEY))
+        .isFalse();
+  }
+
+  @Test
+  public void testCreateRuntime_terraWorkspaceV1Owner() throws ApiException {
+    // namespace == project, for v1 workspaces
+    when(userRuntimesApi.getRuntime(WORKSPACE_NS, getRuntimeName()))
+        .thenThrow(new NotFoundException());
+    stubGetWorkspace(WORKSPACE_NS, WORKSPACE_NS, WORKSPACE_ID, "test", WorkspaceAccessLevel.OWNER);
+
+    runtimeController.createRuntime(
+        WORKSPACE_NS,
+        new Runtime().gceConfig(new GceConfig().diskSize(50).machineType("standard")));
+
+    verify(userRuntimesApi)
+        .createRuntime(
+            eq(WORKSPACE_NS), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
+
+    LeonardoCreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
+    Gson gson = new Gson();
+    assertThat(
+            gson.toJsonTree(createRuntimeRequest.getCustomEnvironmentVariables())
+                .getAsJsonObject()
+                .getAsJsonPrimitive(LeonardoNotebooksClient.BIGQUERY_STORAGE_API_ENABLED_ENV_KEY)
+                .isString())
+        .isTrue();
+  }
+
+  @Test
+  public void testCreateRuntime_terraWorkspaceV2() throws ApiException {
+    when(userRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
+        .thenThrow(new NotFoundException());
+    stubGetWorkspace(
+        WORKSPACE_NS, GOOGLE_PROJECT_ID, WORKSPACE_ID, "test", WorkspaceAccessLevel.WRITER);
+
+    runtimeController.createRuntime(
+        WORKSPACE_NS,
+        new Runtime().gceConfig(new GceConfig().diskSize(50).machineType("standard")));
+
+    verify(userRuntimesApi)
+        .createRuntime(
+            eq(GOOGLE_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
+
+    LeonardoCreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
+    Gson gson = new Gson();
+    assertThat(
+            gson.toJsonTree(createRuntimeRequest.getCustomEnvironmentVariables())
+                .getAsJsonObject()
+                .getAsJsonPrimitive(LeonardoNotebooksClient.BIGQUERY_STORAGE_API_ENABLED_ENV_KEY)
+                .isString())
+        .isTrue();
   }
 
   @Test
