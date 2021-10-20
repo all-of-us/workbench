@@ -1395,11 +1395,15 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
                 + "\"\"\"";
         dataFrameSection =
             namespace
-                + "df = pandas.read_gbq("
+                + "df = pandas.read_gbq(\n"
+                + "    "
                 + namespace
-                + "sql, use_bqstorage_api=(\""
+                + "sql,\n"
+                + "    dialect=\"standard\",\n"
+                + "    use_bqstorage_api=(\""
                 + LeonardoNotebooksClient.BIGQUERY_STORAGE_API_ENABLED_ENV_KEY
-                + "\" in os.environ), dialect=\"standard\", progress_bar_type=\"tqdm_notebook\")";
+                + "\" in os.environ),\n"
+                + "    progress_bar_type=\"tqdm_notebook\")";
         displayHeadSection = namespace + "df.head(5)";
         break;
       case R:
