@@ -9,8 +9,6 @@ import WorkspaceCard from 'app/component/workspace-card';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import AdminNotebookPreviewPage from 'app/page/admin-notebook-preview-page';
 
-
-
 describe('Workspace Admin', () => {
   const workspaceNamespace = 'aou-rw-test-8c5cdbaf';
   const workspaceName = 'e2eWorkspaceAdmin';
@@ -21,7 +19,7 @@ describe('Workspace Admin', () => {
     await navigation.navMenu(page, NavLink.WORKSPACE_ADMIN);
   });
 
-  test.skip('check the Workspace Admin page UI', async () => {
+  test('check the Workspace Admin page UI', async () => {
     const workspaceAdminPage = new WorkspaceAdminPage(page);
     await workspaceAdminPage.waitForLoad();
     await workspaceAdminPage.getWorkspaceNamespaceInput().type(workspaceNamespace);
@@ -50,9 +48,7 @@ describe('Workspace Admin', () => {
     expect(await workspaceAdminPage.getNoActiveRuntimeText()).toEqual(noActiveRuntimeText);
   });
 
-
-
-  test.only('Verify that admin is able to preview the Notebook', async () => {
+  test('Verify that admin is able to preview the Notebook', async () => {
     const workspaceAdminPage = new WorkspaceAdminPage(page);
     await workspaceAdminPage.waitForLoad();
     await workspaceAdminPage.getWorkspaceNamespaceInput().type(workspaceNamespace);
@@ -78,9 +74,7 @@ describe('Workspace Admin', () => {
     await workspaceAdminPage.waitForLoad();
   });
 
-
-
-  test.skip('Verify that admin is able to delete runtime', async () => {
+  test('Verify that admin is able to delete runtime', async () => {
     const workspaceAdminPage = new WorkspaceAdminPage(page);
     await workspaceAdminPage.waitForLoad();
     await workspaceAdminPage.getWorkspaceNamespaceInput().type(workspaceNamespace);
@@ -104,7 +98,7 @@ describe('Workspace Admin', () => {
     await workspaceAdminPage.waitForLoad();
     //verify the runtime status is running
     expect(await workspaceAdminPage.getRuntimeStatus()).toEqual('Running');
-    let deleteRuntimeModal = await workspaceAdminPage.clickRuntimeDeleteButton();
+    const deleteRuntimeModal = await workspaceAdminPage.clickRuntimeDeleteButton();
     await deleteRuntimeModal.clickCancelButton();
     await workspaceAdminPage.waitForLoad();
     // delete the runtime

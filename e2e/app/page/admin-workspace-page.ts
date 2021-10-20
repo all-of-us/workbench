@@ -11,6 +11,7 @@ import BaseElement from 'app/element/base-element';
 import DeleteRuntimeModal from 'app/modal/delete-runtime.modal';
 
 const PageTitle = 'Workspace Admin | All of Us Researcher Workbench';
+
 export const LabelAlias = {
   WorkspaceNamespace: 'Workspace namespace'
 };
