@@ -149,7 +149,8 @@ public class FixDesynchronizedBillingProjectOwners {
       Map<String, String> workspaceRoles =
           FirecloudTransforms.extractAclResponse(
                   workspacesApi.getWorkspaceAcl(w.getNamespace(), w.getName()))
-              .entrySet().stream()
+              .entrySet()
+              .stream()
               .filter(e -> e.getKey().endsWith("@" + researcherDomain))
               .collect(Collectors.toMap(Entry::getKey, e -> e.getValue().getAccessLevel()));
       Set<String> workspaceOwners =
