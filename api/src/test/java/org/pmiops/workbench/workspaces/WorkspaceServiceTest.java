@@ -41,7 +41,7 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.CloudBillingClient;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
@@ -176,7 +176,7 @@ public class WorkspaceServiceTest {
       String workspaceName,
       String workspaceNamespace,
       WorkspaceAccessLevel accessLevel) {
-    FirecloudWorkspace mockWorkspace = mock(FirecloudWorkspace.class);
+    FirecloudWorkspaceDetails mockWorkspace = mock(FirecloudWorkspaceDetails.class);
     doReturn(workspaceNamespace).when(mockWorkspace).getNamespace();
     doReturn(workspaceName).when(mockWorkspace).getName();
     doReturn(workspaceId).when(mockWorkspace).getWorkspaceId();

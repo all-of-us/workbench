@@ -23,7 +23,7 @@ import org.pmiops.workbench.dataset.mapper.DataSetMapperImpl;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.CloudMonitoringService;
 import org.pmiops.workbench.google.CloudStorageClient;
@@ -155,7 +155,7 @@ public class WorkspaceAdminControllerTest extends SpringTest {
     when(mockLeonardoNotebooksClient.listRuntimesByProjectAsService(WORKSPACE_NAMESPACE))
         .thenReturn(runtimes);
 
-    FirecloudWorkspace fcWorkspace =
+    FirecloudWorkspaceDetails fcWorkspace =
         TestMockFactory.createFirecloudWorkspace(
             WORKSPACE_NAMESPACE, DB_WORKSPACE_FIRECLOUD_NAME, FIRECLOUD_WORKSPACE_CREATOR_USERNAME);
     FirecloudWorkspaceResponse fcWorkspaceResponse =

@@ -59,7 +59,7 @@ import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.institution.PublicInstitutionDetailsMapperImpl;
@@ -350,9 +350,9 @@ public class RuntimeControllerTest extends SpringTest {
     doReturn(Optional.of(testWorkspace)).when(workspaceDao).getByNamespace(WORKSPACE_NS);
   }
 
-  private static FirecloudWorkspace createFcWorkspace(
+  private static FirecloudWorkspaceDetails createFcWorkspace(
       String ns, String googleProject, String name, String creator) {
-    return new FirecloudWorkspace()
+    return new FirecloudWorkspaceDetails()
         .namespace(ns)
         .name(name)
         .createdBy(creator)
@@ -373,7 +373,7 @@ public class RuntimeControllerTest extends SpringTest {
         createFcWorkspace(workspaceNamespace, googleProject, firecloudName, creator));
   }
 
-  private void stubGetFcWorkspace(FirecloudWorkspace fcWorkspace) {
+  private void stubGetFcWorkspace(FirecloudWorkspaceDetails fcWorkspace) {
     FirecloudWorkspaceResponse fcResponse = new FirecloudWorkspaceResponse();
     fcResponse.setWorkspace(fcWorkspace);
     fcResponse.setAccessLevel(WorkspaceAccessLevel.OWNER.toString());

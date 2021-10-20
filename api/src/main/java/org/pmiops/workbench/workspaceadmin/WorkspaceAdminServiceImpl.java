@@ -31,7 +31,7 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
 import org.pmiops.workbench.google.CloudMonitoringService;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
@@ -195,7 +195,8 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
             dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
 
     final List<ListRuntimeResponse> workbenchListRuntimeResponses =
-        leonardoNotebooksClient.listRuntimesByProjectAsService(dbWorkspace.getGoogleProject())
+        leonardoNotebooksClient
+            .listRuntimesByProjectAsService(dbWorkspace.getGoogleProject())
             .stream()
             .map(leonardoMapper::toApiListRuntimeResponse)
             .collect(Collectors.toList());
@@ -206,7 +207,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
             .cloudStorage(adminWorkspaceCloudStorageCounts)
             .runtimes(workbenchListRuntimeResponses);
 
-    final FirecloudWorkspace firecloudWorkspace =
+    final FirecloudWorkspaceDetails firecloudWorkspace =
         fireCloudService
             .getWorkspaceAsService(workspaceNamespace, workspaceFirecloudName)
             .getWorkspace();

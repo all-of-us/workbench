@@ -21,7 +21,7 @@ import org.pmiops.workbench.firecloud.FirecloudTransforms;
 import org.pmiops.workbench.firecloud.api.BillingV2Api;
 import org.pmiops.workbench.firecloud.api.WorkspacesApi;
 import org.pmiops.workbench.firecloud.model.FirecloudBillingProjectMember;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.WebApplicationType;
@@ -114,7 +114,7 @@ public class FixDesynchronizedBillingProjectOwners {
             .collect(Collectors.toSet());
 
     for (FirecloudWorkspaceResponse resp : workspaces) {
-      FirecloudWorkspace w = resp.getWorkspace();
+      FirecloudWorkspaceDetails w = resp.getWorkspace();
       if (!billingProjectIds.isEmpty() && !billingProjectIds.contains(w.getNamespace())) {
         continue;
       }
@@ -149,7 +149,8 @@ public class FixDesynchronizedBillingProjectOwners {
       Map<String, String> workspaceRoles =
           FirecloudTransforms.extractAclResponse(
                   workspacesApi.getWorkspaceAcl(w.getNamespace(), w.getName()))
-              .entrySet().stream()
+              .entrySet()
+              .stream()
               .filter(e -> e.getKey().endsWith("@" + researcherDomain))
               .collect(Collectors.toMap(Entry::getKey, e -> e.getValue().getAccessLevel()));
       Set<String> workspaceOwners =
