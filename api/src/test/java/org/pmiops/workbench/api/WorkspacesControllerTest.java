@@ -110,10 +110,10 @@ import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdateResponseList;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.genomics.GenomicExtractionService;
 import org.pmiops.workbench.google.CloudBillingClient;
@@ -438,7 +438,8 @@ public class WorkspacesControllerTest extends SpringTest {
     stubGetWorkspace(testMockFactory.createFirecloudWorkspace(ns, name, creator), access);
   }
 
-  private void stubGetWorkspace(FirecloudWorkspace fcWorkspace, WorkspaceAccessLevel access) {
+  private void stubGetWorkspace(
+      FirecloudWorkspaceDetails fcWorkspace, WorkspaceAccessLevel access) {
     FirecloudWorkspaceResponse fcResponse = new FirecloudWorkspaceResponse();
     fcResponse.setWorkspace(fcWorkspace);
     fcResponse.setAccessLevel(access.toString());
@@ -455,8 +456,8 @@ public class WorkspacesControllerTest extends SpringTest {
    * details. The mocked workspace object is returned so the caller can make further modifications
    * if needed.
    */
-  private FirecloudWorkspace stubCloneWorkspace(String ns, String name, String creator) {
-    FirecloudWorkspace fcResponse = new FirecloudWorkspace();
+  private FirecloudWorkspaceDetails stubCloneWorkspace(String ns, String name, String creator) {
+    FirecloudWorkspaceDetails fcResponse = new FirecloudWorkspaceDetails();
     fcResponse.setNamespace(ns);
     fcResponse.setName(name);
     fcResponse.setCreatedBy(creator);
@@ -1057,7 +1058,7 @@ public class WorkspacesControllerTest extends SpringTest {
 
     final CloneWorkspaceRequest req = new CloneWorkspaceRequest();
     req.setWorkspace(modWorkspace);
-    final FirecloudWorkspace clonedFirecloudWorkspace =
+    final FirecloudWorkspaceDetails clonedFirecloudWorkspace =
         stubCloneWorkspace(
             modWorkspace.getNamespace(), modWorkspace.getName(), LOGGED_IN_USER_EMAIL);
     // Assign the same bucket name as the mock-factory's bucket name, so the clone vs. get equality
@@ -1431,7 +1432,7 @@ public class WorkspacesControllerTest extends SpringTest {
     modWorkspace.setResearchPurpose(modPurpose);
 
     req.setWorkspace(modWorkspace);
-    final FirecloudWorkspace clonedWorkspace =
+    final FirecloudWorkspaceDetails clonedWorkspace =
         stubCloneWorkspace(
             modWorkspace.getNamespace(), modWorkspace.getName(), LOGGED_IN_USER_EMAIL);
 
@@ -1601,7 +1602,7 @@ public class WorkspacesControllerTest extends SpringTest {
     modWorkspace.setResearchPurpose(modPurpose);
     req.setWorkspace(modWorkspace);
 
-    FirecloudWorkspace clonedWorkspace =
+    FirecloudWorkspaceDetails clonedWorkspace =
         stubCloneWorkspace(
             modWorkspace.getNamespace(), modWorkspace.getName(), LOGGED_IN_USER_EMAIL);
 
@@ -1706,7 +1707,7 @@ public class WorkspacesControllerTest extends SpringTest {
         LOGGED_IN_USER_EMAIL,
         WorkspaceAccessLevel.OWNER);
     stubFcGetWorkspaceACL();
-    FirecloudWorkspace clonedWorkspace =
+    FirecloudWorkspaceDetails clonedWorkspace =
         stubCloneWorkspace(
             modWorkspace.getNamespace(), modWorkspace.getName(), LOGGED_IN_USER_EMAIL);
 
@@ -2355,7 +2356,7 @@ public class WorkspacesControllerTest extends SpringTest {
     when(fireCloudService.getWorkspace("project", "workspace"))
         .thenReturn(
             new FirecloudWorkspaceResponse()
-                .workspace(new FirecloudWorkspace().bucketName("bucket")));
+                .workspace(new FirecloudWorkspaceDetails().bucketName("bucket")));
     Blob mockBlob1 = mock(Blob.class);
     Blob mockBlob2 = mock(Blob.class);
     Blob mockBlob3 = mock(Blob.class);
@@ -2384,7 +2385,7 @@ public class WorkspacesControllerTest extends SpringTest {
     when(fireCloudService.getWorkspace("project", "workspace"))
         .thenReturn(
             new FirecloudWorkspaceResponse()
-                .workspace(new FirecloudWorkspace().bucketName("bucket")));
+                .workspace(new FirecloudWorkspaceDetails().bucketName("bucket")));
     Blob mockBlob1 = mock(Blob.class);
     Blob mockBlob2 = mock(Blob.class);
     when(mockBlob1.getName())
@@ -2853,7 +2854,7 @@ public class WorkspacesControllerTest extends SpringTest {
     final String testWorkspaceName = "test-ws";
     final String testNotebook = NotebooksService.withNotebookExtension("test-notebook");
 
-    FirecloudWorkspace fcWorkspace =
+    FirecloudWorkspaceDetails fcWorkspace =
         testMockFactory.createFirecloudWorkspace(
             testWorkspaceNamespace, testWorkspaceName, LOGGED_IN_USER_EMAIL);
     fcWorkspace.setBucketName(TestMockFactory.WORKSPACE_BUCKET_NAME);

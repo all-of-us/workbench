@@ -24,7 +24,7 @@ import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace.BillingMigrationStatus;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.ResearchOutcomeEnum;
@@ -62,7 +62,7 @@ public class WorkspaceMapperTest extends SpringTest {
   private static final String ACCESS_TIER_SHORT_NAME = "registered";
 
   private DbWorkspace sourceDbWorkspace;
-  private FirecloudWorkspace sourceFirecloudWorkspace;
+  private FirecloudWorkspaceDetails sourceFirecloudWorkspace;
 
   @Autowired private WorkspaceMapper workspaceMapper;
 
@@ -82,7 +82,7 @@ public class WorkspaceMapperTest extends SpringTest {
   @BeforeEach
   public void setUp() {
     sourceFirecloudWorkspace =
-        new FirecloudWorkspace()
+        new FirecloudWorkspaceDetails()
             .workspaceId(Long.toString(CREATOR_USER_ID))
             .bucketName(FIRECLOUD_BUCKET_NAME)
             .createdBy(CREATOR_EMAIL)

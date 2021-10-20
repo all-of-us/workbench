@@ -28,7 +28,7 @@ import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
@@ -151,9 +151,9 @@ public class TestMockFactory {
                 .approved(false));
   }
 
-  public static FirecloudWorkspace createFirecloudWorkspace(
+  public static FirecloudWorkspaceDetails createFirecloudWorkspace(
       String ns, String name, String creator) {
-    return new FirecloudWorkspace()
+    return new FirecloudWorkspaceDetails()
         .namespace(ns)
         .workspaceId(ns)
         .name(name)
@@ -174,7 +174,7 @@ public class TestMockFactory {
             invocation -> {
               String capturedWorkspaceName = (String) invocation.getArguments()[1];
               String capturedWorkspaceNamespace = (String) invocation.getArguments()[0];
-              FirecloudWorkspace fcWorkspace =
+              FirecloudWorkspaceDetails fcWorkspace =
                   createFirecloudWorkspace(capturedWorkspaceNamespace, capturedWorkspaceName, null);
 
               FirecloudWorkspaceResponse fcResponse = new FirecloudWorkspaceResponse();
@@ -245,7 +245,7 @@ public class TestMockFactory {
     dbWorkspace.setWorkspaceId(workspaceDbId);
     dbWorkspace.setName(workspace.getName());
     dbWorkspace.setWorkspaceNamespace(workspace.getNamespace());
-    // a.k.a. FirecloudWorkspace.name
+    // a.k.a. FirecloudWorkspaceDetails.name
     dbWorkspace.setFirecloudName(workspace.getId()); // DB_WORKSPACE_FIRECLOUD_NAME
     ResearchPurpose researchPurpose = workspace.getResearchPurpose();
     dbWorkspace.setDiseaseFocusedResearch(researchPurpose.getDiseaseFocusedResearch());
