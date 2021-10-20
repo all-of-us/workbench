@@ -16,6 +16,9 @@ import org.pmiops.workbench.notebooks.model.StorageLink;
  */
 public interface LeonardoNotebooksClient {
 
+  String WORKSPACE_CDR_ENV_KEY = "WORKSPACE_CDR";
+  String BIGQUERY_STORAGE_API_ENABLED_ENV_KEY = "BIGQUERY_STORAGE_API_ENABLED";
+
   /** lists all notebook runtimes as the appengine SA, to be used only for admin operations */
   List<LeonardoListRuntimeResponse> listRuntimesByProjectAsService(String googleProject);
 
