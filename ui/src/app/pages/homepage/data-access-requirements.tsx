@@ -448,6 +448,7 @@ const MaybeModule = ({profile, moduleName, active, spinnerProps}: ModuleProps): 
       <div>
         <span style={styles.link} onClick={(e) => {
           openZendeskWidget(givenName, familyName, username, contactEmail);
+          // prevents the enclosing Clickable's onClick() from triggering instead
           e.stopPropagation();
         }}>Contact us</span> if you’re having trouble completing this step.
       </div>
