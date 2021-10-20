@@ -220,6 +220,11 @@ const styles = reactStyles({
     cursor: 'pointer',
     textDecoration: 'underline',
   },
+  loginGovHelp: {
+    opacity: '0.5',
+    fontSize: '12px',
+    lineHeight: '22px',
+  },
 });
 
 // in display order
@@ -440,7 +445,7 @@ const MaybeModule = ({profile, moduleName, active, spinnerProps}: ModuleProps): 
   const Module = ({profile}) => {
     const {givenName, familyName, username, contactEmail} = profile;
     // RW-7461
-    const loginGovHelpText = <div style={styles.moduleDate}>
+    const loginGovHelpText = <div style={styles.loginGovHelp}>
       <div>
         Verifying your identity helps us keep participant data safe.
         You’ll need to provide your state ID, social security number, and phone number.
