@@ -18,7 +18,7 @@ import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.ResourceType;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceResource;
-import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
+import org.pmiops.workbench.workspaces.resources.WorkspaceResourceMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -27,18 +27,18 @@ public class WorkspaceResourcesServiceImpl implements WorkspaceResourcesService 
   private final CohortReviewService cohortReviewService;
   private final ConceptSetService conceptSetService;
   private final DataSetDao dataSetDao;
-  private final WorkspaceMapper workspaceMapper;
+  private final WorkspaceResourceMapper workspaceResourceMapper;
 
   @Autowired
   public WorkspaceResourcesServiceImpl(
       CohortReviewService cohortReviewService,
       ConceptSetService conceptSetService,
       DataSetDao dataSetDao,
-      WorkspaceMapper workspaceMapper) {
+      WorkspaceResourceMapper workspaceResourceMapper) {
     this.cohortReviewService = cohortReviewService;
     this.conceptSetService = conceptSetService;
     this.dataSetDao = dataSetDao;
-    this.workspaceMapper = workspaceMapper;
+    this.workspaceResourceMapper = workspaceResourceMapper;
   }
 
   @Override
@@ -64,7 +64,7 @@ public class WorkspaceResourcesServiceImpl implements WorkspaceResourcesService 
           cohorts.stream()
               .map(
                   cohort ->
-                      workspaceMapper.dbWorkspaceAndDbCohortToWorkspaceResource(
+                      workspaceResourceMapper.dbWorkspaceAndDbCohortToWorkspaceResource(
                           dbWorkspace, workspaceAccessLevel, cohort))
               .collect(Collectors.toList()));
     }
@@ -76,7 +76,7 @@ public class WorkspaceResourcesServiceImpl implements WorkspaceResourcesService 
           reviews.stream()
               .map(
                   cohortReview ->
-                      workspaceMapper.dbWorkspaceAndDbCohortReviewToWorkspaceResource(
+                      workspaceResourceMapper.dbWorkspaceAndCohortReviewToWorkspaceResource(
                           dbWorkspace, workspaceAccessLevel, cohortReview))
               .collect(Collectors.toList()));
     }
@@ -87,7 +87,7 @@ public class WorkspaceResourcesServiceImpl implements WorkspaceResourcesService 
           conceptSets.stream()
               .map(
                   conceptSet ->
-                      workspaceMapper.dbWorkspaceSetToWorkspaceResource(
+                      workspaceResourceMapper.dbWorkspaceAndConceptSetToWorkspaceResource(
                           dbWorkspace, workspaceAccessLevel, conceptSet))
               .collect(Collectors.toList()));
     }
@@ -98,7 +98,7 @@ public class WorkspaceResourcesServiceImpl implements WorkspaceResourcesService 
           datasets.stream()
               .map(
                   dbDataset ->
-                      workspaceMapper.dbWorkspaceAndDbDatasetToWorkspaceResource(
+                      workspaceResourceMapper.dbWorkspaceAndDbDatasetToWorkspaceResource(
                           dbWorkspace, workspaceAccessLevel, dbDataset))
               .collect(Collectors.toList()));
     }

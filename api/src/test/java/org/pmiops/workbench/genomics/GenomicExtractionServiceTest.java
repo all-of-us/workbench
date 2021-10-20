@@ -60,7 +60,7 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkflow;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkflowOutputs;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkflowOutputsResponse;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkflowStatus;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.google.StorageConfig;
@@ -162,7 +162,8 @@ public class GenomicExtractionServiceTest {
     workbenchConfig.wgsCohortExtraction.operationalTerraWorkspaceName =
         "operationalTerraWorkspaceName";
 
-    FirecloudWorkspace fcWorkspace = new FirecloudWorkspace().bucketName("user-bucket");
+    FirecloudWorkspaceDetails fcWorkspace =
+        new FirecloudWorkspaceDetails().bucketName("user-bucket");
     FirecloudWorkspaceResponse fcWorkspaceResponse =
         new FirecloudWorkspaceResponse().workspace(fcWorkspace);
     doReturn(Optional.of(fcWorkspaceResponse)).when(fireCloudService).getWorkspace(any());

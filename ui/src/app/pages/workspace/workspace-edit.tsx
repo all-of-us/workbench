@@ -1393,7 +1393,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
             <RadioButton name='population' style={{marginRight: '0.5rem'}}
                          data-test-id='specific-population-yes'
                          onChange={v => this.setState({populationChecked: true})}
-                         checked={populationChecked}/>
+                         checked={populationChecked ?? false}/>
             <label style={styles.text}>Yes, my study will focus on one or more specific
               underrepresented populations, either on their own or in comparison to other groups.</label>
           </div>
@@ -1491,7 +1491,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
                              onChange={() => {
                                this.updateResearchPurpose('reviewRequested', true);
                              }}
-                             checked={reviewRequested}/>
+                             checked={reviewRequested ?? false}/>
                 <label style={{...styles.text, marginLeft: '0.5rem'}}>Yes, I would like to request
                   a review of my research purpose.</label>
                 </FlexRow>

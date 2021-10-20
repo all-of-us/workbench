@@ -1,7 +1,6 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {useEffect, useState} from 'react';
-import assert from "assert";
 
 import {useQuery} from 'app/components/app-router';
 import {Button, Clickable} from 'app/components/buttons';
@@ -11,6 +10,7 @@ import {Header} from 'app/components/headers';
 import {
   ArrowRight,
   CheckCircle,
+  ControlledTierBadge,
   MinusCircle,
   RegisteredTierBadge,
   Repeat
@@ -37,13 +37,16 @@ import {profileStore, serverConfigStore, useStore} from 'app/utils/stores';
 import {AccessModule, AccessModuleStatus, Profile} from 'generated/fetch';
 import {TwoFactorAuthModal} from './two-factor-auth-modal';
 import {AnalyticsTracker} from 'app/utils/analytics';
-import {ReactComponent as individual} from 'assets/icons/DAR/individual.svg';
-import {ReactComponent as identifying} from 'assets/icons/DAR/identifying.svg';
+import {ReactComponent as additional} from 'assets/icons/DAR/additional.svg';
 import {ReactComponent as electronic} from 'assets/icons/DAR/electronic.svg';
-import {ReactComponent as survey} from 'assets/icons/DAR/survey.svg';
+import {ReactComponent as genomic} from 'assets/icons/DAR/genomic.svg';
+import {ReactComponent as identifying} from 'assets/icons/DAR/identifying.svg';
+import {ReactComponent as individual} from 'assets/icons/DAR/individual.svg';
 import {ReactComponent as physical} from 'assets/icons/DAR/physical.svg';
+import {ReactComponent as survey} from 'assets/icons/DAR/survey.svg';
 import {ReactComponent as wearable} from 'assets/icons/DAR/wearable.svg';
 import {AccessTierShortNames} from 'app/utils/access-tiers';
+import {environment} from 'environments/environment';
 
 const styles = reactStyles({
   headerFlexColumn: {
@@ -499,20 +502,24 @@ const ModulesForCard = (props: CardProps) => {
 
 // TODO is there a better way?
 
-const Individual = individual;
-const Identifying = identifying;
+const Additional = additional;
 const Electronic = electronic;
-const Survey = survey;
+const Genomic = genomic;
+const Identifying = identifying;
+const Individual = individual;
 const Physical = physical;
+const Survey = survey;
 const Wearable = wearable;
 
 const renderIcon = (iconName: string) => switchCase(iconName,
-    ['individual', () => <Individual style={styles.rtDetailsIcon}/>],
-    ['identifying', () => <Identifying style={styles.rtDetailsIcon}/>],
+    ['additional', () => <Additional style={styles.rtDetailsIcon}/>],
     ['electronic', () => <Electronic style={styles.rtDetailsIcon}/>],
-    ['survey', () => <Survey style={styles.rtDetailsIcon}/>],
+    ['genomic', () => <Genomic style={styles.rtDetailsIcon}/>],
+    ['identifying', () => <Identifying style={styles.rtDetailsIcon}/>],
+    ['individual', () => <Individual style={styles.rtDetailsIcon}/>],
     ['physical', () => <Physical style={styles.rtDetailsIcon}/>],
-    ['wearable', () => <Wearable style={styles.rtDetailsIcon}/>]
+    ['survey', () => <Survey style={styles.rtDetailsIcon}/>],
+    ['wearable', () => <Wearable style={styles.rtDetailsIcon}/>],
 );
 
 const DataDetail = (props: {icon: string, text: string}) => {
@@ -545,12 +552,59 @@ const RegisteredTierCard = (props: {profile: Profile, activeModule: AccessModule
   </FlexRow>;
 };
 
-const DuccCard = (props: {profile: Profile, activeModule: AccessModule, spinnerProps: WithSpinnerOverlayProps}) => {
-  const {profile, activeModule, spinnerProps} = props;
+const ControlledTierCard = (props: {profile: Profile}) => {
+  const {profile} = props;
+  const controlledTierEligibility = profile.tierEligibilities.find(tier=> tier.accessTierShortName === AccessTierShortNames.Controlled);
+  const isSigned = !!controlledTierEligibility;
+  const hasAccess = isSigned && controlledTierEligibility.eligible;
+  const {verifiedInstitutionalAffiliation: {institutionDisplayName}} = profile;
+  return <FlexRow data-test-id='controlled-card' style={{...styles.card, height: 300}}>
+    <FlexColumn>
+      <div style={styles.cardStep}>Step 2</div>
+      <div style={styles.cardHeader}>Additional Data Access</div>
+      <FlexRow>
+        <ControlledTierBadge/>
+        <div style={styles.rtData}>Controlled Tier data</div>
+      </FlexRow>
+      <div style={styles.rtDataDetails}>You are eligible to access Controlled Tier Data</div>
+      <div style={styles.rtDataDetails}>In addition to Registered Tier data, the Controlled Tier curated dataset contains:</div>
+      <DataDetail icon='genomic' text='Genomic data'/>
+      <DataDetail icon='additional' text='Additional demographic details'/>
+    </FlexColumn>
+    <FlexColumn style={styles.modulesContainer}>
+      <ControlledTierStep data-test-id='controlled-signed'
+                          enable={isSigned}
+                          text={`${institutionDisplayName} must sign an institutional agreement`}/>
+      <ControlledTierStep data-test-id='controlled-user-email'
+                          enable={hasAccess}
+                          text={`${institutionDisplayName} must allow you to access controlled tier data`}/>
+    </FlexColumn>
+  </FlexRow>
+};
+
+const ControlledTierStep = (props: {enable: boolean, text: String}) => {
+  return <FlexRow>
+    <FlexRow style={styles.moduleCTA}/>
+    {/* Since Institution access steps does not require user interaction, will display them as inactive*/}
+    <FlexRow style={styles.inactiveModuleBox}>
+      <div style={styles.moduleIcon}>
+        {props.enable
+          ? <CheckCircle data-test-id='eligible' style={{color: colors.success}}/>
+          : <MinusCircle data-test-id='ineligible' style={{color: colors.disabled}}/>}
+      </div>
+      <FlexColumn style={styles.inactiveModuleText}>
+        <div>{props.text}
+        </div>
+       </FlexColumn>
+      </FlexRow>
+     </FlexRow>;
+}
+
+const DuccCard = (props: {profile: Profile, activeModule: AccessModule, spinnerProps: WithSpinnerOverlayProps, stepNumber: Number}) => {
+  const {profile, activeModule, spinnerProps, stepNumber} = props;
   return <FlexRow style={{...styles.card, height: '125px'}}>
     <FlexColumn>
-      {/* This will be Step 3 when CT becomes the new Step 2 */}
-      <div style={styles.cardStep}>Step 2</div>
+      <div style={styles.cardStep}>Step {stepNumber}</div>
       <div style={styles.cardHeader}>Sign the code of conduct</div>
     </FlexColumn>
     <ModulesForCard profile={profile} modules={[duccModule]} activeModule={activeModule} spinnerProps={spinnerProps}/>
@@ -592,6 +646,18 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
     setActiveModule(getActiveModule(visibleModules, profile));
   }, [profile]);
 
+  const showCtCard = environment.accessTiersVisibleToUsers.includes(AccessTierShortNames.Controlled)
+
+  const rtCard = <RegisteredTierCard key='rt' profile={profile} activeModule={activeModule} spinnerProps={spinnerProps}/>
+  const ctCard = showCtCard ? <ControlledTierCard key='ct' profile={profile}/> : null
+  const dCard = <DuccCard
+    key='dt'
+    profile={profile}
+    activeModule={activeModule}
+    spinnerProps={spinnerProps}
+    stepNumber={showCtCard ? 3 : 2}/>
+
+  const cards = showCtCard ? [rtCard, ctCard, dCard] : [rtCard, dCard];
 
   return <FlexColumn style={styles.pageWrapper}>
       <DARHeader/>
@@ -606,9 +672,7 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
         <div style={styles.pleaseComplete}>
           Please complete the necessary steps to gain access to the <AoU/> datasets.
         </div>
-        <RegisteredTierCard profile={profile} activeModule={activeModule} spinnerProps={spinnerProps}/>
-        {/* TODO RW-7059 - Step 2 ControlledTierCard */}
-        <DuccCard profile={profile} activeModule={activeModule} spinnerProps={spinnerProps}/>
+        <React.Fragment>{cards}</React.Fragment>
       </FadeBox>
     </FlexColumn>;
 });

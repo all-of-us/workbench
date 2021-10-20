@@ -44,8 +44,8 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exceptions.TooManyRequestsException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.model.ArchivalStatus;
 import org.pmiops.workbench.model.Authority;
@@ -207,7 +207,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     // Note: please keep any initialization logic here in sync with cloneWorkspaceImpl().
     FirecloudWorkspaceId workspaceId = getFcBillingProject(accessTier, workspace);
-    FirecloudWorkspace fcWorkspace =
+    FirecloudWorkspaceDetails fcWorkspace =
         fireCloudService.createWorkspace(
             workspaceId.getWorkspaceNamespace(),
             workspaceId.getWorkspaceName(),
@@ -238,7 +238,10 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   private DbWorkspace createDbWorkspace(
-      Workspace workspace, DbCdrVersion cdrVersion, DbUser user, FirecloudWorkspace fcWorkspace) {
+      Workspace workspace,
+      DbCdrVersion cdrVersion,
+      DbUser user,
+      FirecloudWorkspaceDetails fcWorkspace) {
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
 
     // The final step in the process is to clone the AoU representation of the
@@ -343,7 +346,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     workspaceAuthService.enforceWorkspaceAccessLevel(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.OWNER);
     Workspace workspace = request.getWorkspace();
-    FirecloudWorkspace fcWorkspace =
+    FirecloudWorkspaceDetails fcWorkspace =
         fireCloudService.getWorkspace(workspaceNamespace, workspaceId).getWorkspace();
     if (workspace == null) {
       throw new BadRequestException("No workspace provided in request");
@@ -459,7 +462,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     DbUser user = userProvider.get();
     // Note: please keep any initialization logic here in sync with createWorkspaceImpl().
     FirecloudWorkspaceId toFcWorkspaceId = getFcBillingProject(accessTier, toWorkspace);
-    FirecloudWorkspace toFcWorkspace =
+    FirecloudWorkspaceDetails toFcWorkspace =
         fireCloudService.cloneWorkspace(
             fromWorkspaceNamespace,
             fromWorkspaceId,

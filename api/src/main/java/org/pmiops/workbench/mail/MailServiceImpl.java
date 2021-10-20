@@ -1,6 +1,7 @@
 package org.pmiops.workbench.mail;
 
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.html.HtmlEscapers;
 import com.google.common.io.Resources;
@@ -61,6 +62,8 @@ public class MailServiceImpl implements MailService {
       "emails/rt_access_expired_email/content.html";
   private static final String SETUP_BILLING_ACCOUNT_EMAIL =
       "emails/setup_gcp_billing_account_email/content.html";
+  private static final String EGRESS_REMEDIATION_EMAIL =
+      "emails/egress_remediation_email/content.html";
 
   private enum Status {
     REJECTED,
@@ -237,6 +240,37 @@ public class MailServiceImpl implements MailService {
         String.format(
             " User %s (%s) requests billing setup from Carasoft.",
             dbUser.getUsername(), dbUser.getContactEmail()),
+        htmlMessage);
+  }
+
+  @Override
+  public void sendEgressRemediationEmail(DbUser dbUser, EgressRemediationAction action)
+      throws MessagingException {
+    String remediationDescription =
+        ImmutableMap.of(
+                EgressRemediationAction.DISABLE_USER,
+                "Your account has been disabled pending manual review by the <i>All of Us</i> "
+                    + "security team.",
+                EgressRemediationAction.SUSPEND_COMPUTE,
+                "Your Workbench compute access has been temporarily suspended, and will be "
+                    + "automatically restored after a brief duration.")
+            .get(action);
+    String htmlMessage =
+        buildHtml(
+            EGRESS_REMEDIATION_EMAIL,
+            ImmutableMap.<EmailSubstitutionField, String>builder()
+                .put(EmailSubstitutionField.HEADER_IMG, getAllOfUsLogo())
+                .put(EmailSubstitutionField.ALL_OF_US, getAllOfUsItalicsText())
+                .put(EmailSubstitutionField.USERNAME, dbUser.getUsername())
+                .put(EmailSubstitutionField.EGRESS_REMEDIATION_DESCRIPTION, remediationDescription)
+                .build());
+
+    sendWithRetries(
+        ImmutableList.of(dbUser.getContactEmail()),
+        ImmutableList.of(
+            workbenchConfigProvider.get().egressAlertRemediationPolicy.notifyFromEmail),
+        "[Response Required] AoU Researcher Workbench High Data Egress Alert",
+        String.format("Egress remediation email for %s", dbUser.getUsername()),
         htmlMessage);
   }
 

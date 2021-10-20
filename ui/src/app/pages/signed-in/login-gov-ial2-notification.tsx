@@ -18,7 +18,7 @@ export const LoginGovIAL2NotificationMaybe = () => {
   return shouldShowIal2Notification
       ? <NotificationBanner
           dataTestId='ial2-notification'
-          text='Please verify your identity by 10/27/2021.'
+          text='Please verify your identity by 12/1/2021.'
           buttonText='Get Started'
           buttonPath='/data-access-requirements'/>
       : null;
