@@ -409,7 +409,7 @@ dependencies {
   compile "com.google.guava:guava:30.0-jre"
   compile "com.google.http-client:google-http-client-apache:2.0.0"
   compile "com.google.oauth-client:google-oauth-client-jetty:1.31.5"
-  compile "com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20180219.1"
+  compile "com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20211018.2"
   compile "com.opsgenie.integration:sdk:2+"
   compile "com.squareup.okhttp:logging-interceptor:$project.ext.OKHTTP_VERSION"
   compile "com.squareup.okhttp:okhttp:$project.ext.OKHTTP_VERSION"
