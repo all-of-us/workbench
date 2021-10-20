@@ -3,7 +3,7 @@ import * as React from 'react';
 import {useEffect, useState} from 'react';
 
 import {useQuery} from 'app/components/app-router';
-import {Button, Clickable} from 'app/components/buttons';
+import {Button, Clickable, LinkButton} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {Header} from 'app/components/headers';
@@ -47,6 +47,7 @@ import {ReactComponent as survey} from 'assets/icons/DAR/survey.svg';
 import {ReactComponent as wearable} from 'assets/icons/DAR/wearable.svg';
 import {AccessTierShortNames} from 'app/utils/access-tiers';
 import {environment} from 'environments/environment';
+import {openZendeskWidget} from 'app/utils/zendesk';
 
 const styles = reactStyles({
   headerFlexColumn: {
@@ -213,6 +214,11 @@ const styles = reactStyles({
   refreshIcon: {
     fontSize: '18px',
     paddingRight: '4px',
+  },
+  link: {
+    color: colors.accent,
+    cursor: 'pointer',
+    textDecoration: 'underline',
   },
 });
 
@@ -432,11 +438,19 @@ const MaybeModule = ({profile, moduleName, active, spinnerProps}: ModuleProps): 
   };
 
   const Module = ({profile}) => {
+    const {givenName, familyName, username, contactEmail} = profile;
     // RW-7461
     const loginGovHelpText = <div style={styles.moduleDate}>
-      Verifying your identity helps us keep participant data safe. You’ll need to provide your state ID, social
-      security number, and phone number.
-      Contact us if you’re having trouble completing this step.
+      <div>
+        Verifying your identity helps us keep participant data safe.
+        You’ll need to provide your state ID, social security number, and phone number.
+      </div>
+      <div>
+        <span style={styles.link} onClick={(e) => {
+          openZendeskWidget(givenName, familyName, username, contactEmail);
+          e.stopPropagation();
+        }}>Contact us</span> if you’re having trouble completing this step.
+      </div>
     </div>;
     const statusTextMaybe = bypassedOrCompletedText(getAccessModuleStatusByName(profile, moduleName));
 
