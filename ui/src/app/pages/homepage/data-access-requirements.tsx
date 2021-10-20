@@ -1,8 +1,6 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {useEffect, useState} from 'react';
-
-import {useQuery} from 'app/components/app-router';
 import {Button, Clickable} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
@@ -47,6 +45,7 @@ import {ReactComponent as survey} from 'assets/icons/DAR/survey.svg';
 import {ReactComponent as wearable} from 'assets/icons/DAR/wearable.svg';
 import {AccessTierShortNames} from 'app/utils/access-tiers';
 import {environment} from 'environments/environment';
+import {useQuery} from 'app/components/app-router';
 
 const styles = reactStyles({
   headerFlexColumn: {
@@ -139,6 +138,12 @@ const styles = reactStyles({
     fontWeight: 600,
     marginBottom: '0.5em',
     marginLeft: '0.5em',
+  },
+  ctDataOptional: {
+    fontSize: '16px',
+    fontStyle: 'italic',
+    fontWeight: 'normal',
+    marginBottom: '0.5em'
   },
   rtDetailsIcon: {
     marginRight: '0.5em',
@@ -467,6 +472,50 @@ const MaybeModule = ({profile, moduleName, active, spinnerProps}: ModuleProps): 
   return isEnabledInEnvironment ? <Module profile={profile}/> : null;
 };
 
+
+
+const ControlledTierEraModule = ({profile, active, spinnerProps}): JSX.Element => {
+  // whether to show the refresh button: this module has been clicked
+  const [showRefresh, setShowRefresh] = useState(false);
+  const moduleName = AccessModule.ERACOMMONS;
+
+
+  const {DARTitleComponent, refreshAction, isEnabledInEnvironment} = getAccessModuleConfig(moduleName);
+  const statusTextMaybe = bypassedOrCompletedText(getAccessModuleStatusByName(profile, moduleName));
+
+  const ModuleBox = ({children}) => {
+    return !statusTextMaybe
+        ? <Clickable onClick={() => { setShowRefresh(true); redirectToNiH(); }}>
+          <FlexRow style={styles.activeModuleBox}>{children}</FlexRow>
+        </Clickable>
+        : <FlexRow style={styles.inactiveModuleBox}>{children}</FlexRow>;
+  };
+
+  const Module = ({profile}) => {
+    return <FlexRow data-test-id={`module-${moduleName}`}>
+      <FlexRow style={styles.moduleCTA}>
+        {((showRefresh && refreshAction)
+            ? <Refresh
+                refreshAction={refreshAction}
+                showSpinner={spinnerProps.showSpinner}/>
+            : null)}
+      </FlexRow>
+      <ModuleBox>
+        <ModuleIcon moduleName={moduleName} completedOrBypassed={!!statusTextMaybe}/>
+        <FlexColumn>
+          <div style={!statusTextMaybe ? styles.activeModuleText : styles.inactiveModuleText}>
+            <DARTitleComponent/>
+          </div>
+          {statusTextMaybe && <div style={styles.moduleDate}>{statusTextMaybe}</div>}
+        </FlexColumn>
+      </ModuleBox>
+    </FlexRow>;
+  };
+
+
+  return isEnabledInEnvironment ? <Module profile={profile}/> : null;
+};
+
 const DARHeader = () => <FlexColumn style={styles.headerFlexColumn}>
   <Header style={styles.headerRW}>Researcher Workbench</Header>
   <Header style={styles.headerDAR}>Data Access Requirements</Header>
@@ -552,19 +601,26 @@ const RegisteredTierCard = (props: {profile: Profile, activeModule: AccessModule
   </FlexRow>;
 };
 
-const ControlledTierCard = (props: {profile: Profile}) => {
-  const {profile} = props;
+const ControlledTierCard = (props: {profile: Profile, spinnerProps: WithSpinnerOverlayProps}) => {
+  const {profile,spinnerProps } = props;
   const controlledTierEligibility = profile.tierEligibilities.find(tier=> tier.accessTierShortName === AccessTierShortNames.Controlled);
+  const registeredTierEligibility = profile.tierEligibilities.find(tier=> tier.accessTierShortName === AccessTierShortNames.Registered);
   const isSigned = !!controlledTierEligibility;
   const hasAccess = isSigned && controlledTierEligibility.eligible;
   const {verifiedInstitutionalAffiliation: {institutionDisplayName}} = profile;
+  // Display era in CT if:
+  // 1) Institution has signed the CT institution agreement,
+  // 2) Registered Tier DOES NOT require era
+  // 3) CT Requirement DOES require era
+  const displayEraCommon = isSigned && !registeredTierEligibility.eraRequired && controlledTierEligibility.eraRequired;
   return <FlexRow data-test-id='controlled-card' style={{...styles.card, height: 300}}>
     <FlexColumn>
       <div style={styles.cardStep}>Step 2</div>
       <div style={styles.cardHeader}>Additional Data Access</div>
       <FlexRow>
         <ControlledTierBadge/>
-        <div style={styles.rtData}>Controlled Tier data</div>
+        <div style={styles.rtData}>Controlled Tier data - </div>
+        <div style={styles.ctDataOptional}>&nbsp;Optional</div>
       </FlexRow>
       <div style={styles.rtDataDetails}>You are eligible to access Controlled Tier Data</div>
       <div style={styles.rtDataDetails}>In addition to Registered Tier data, the Controlled Tier curated dataset contains:</div>
@@ -578,6 +634,8 @@ const ControlledTierCard = (props: {profile: Profile}) => {
       <ControlledTierStep data-test-id='controlled-user-email'
                           enable={hasAccess}
                           text={`${institutionDisplayName} must allow you to access controlled tier data`}/>
+      {displayEraCommon &&
+         <ControlledTierEraModule profile={profile} active={true} spinnerProps={spinnerProps}/>}
     </FlexColumn>
   </FlexRow>
 };
@@ -649,7 +707,7 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
   const showCtCard = environment.accessTiersVisibleToUsers.includes(AccessTierShortNames.Controlled)
 
   const rtCard = <RegisteredTierCard key='rt' profile={profile} activeModule={activeModule} spinnerProps={spinnerProps}/>
-  const ctCard = showCtCard ? <ControlledTierCard key='ct' profile={profile}/> : null
+  const ctCard = showCtCard ? <ControlledTierCard key='ct' profile={profile} spinnerProps={spinnerProps}/> : null
   const dCard = <DuccCard
     key='dt'
     profile={profile}
