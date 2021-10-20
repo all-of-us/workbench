@@ -635,7 +635,7 @@ const ControlledTierCard = (props: {profile: Profile, spinnerProps: WithSpinnerO
                           enable={hasAccess}
                           text={`${institutionDisplayName} must allow you to access controlled tier data`}/>
       {displayEraCommon &&
-         <ControlledTierEraModule profile={profile} active={true} spinnerProps={spinnerProps}/>}
+         <ControlledTierEraModule data-test-id='ct-era-module' profile={profile} active={true} spinnerProps={spinnerProps}/>}
     </FlexColumn>
   </FlexRow>
 };

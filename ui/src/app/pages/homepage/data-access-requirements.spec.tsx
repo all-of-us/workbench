@@ -45,6 +45,7 @@ describe('DataAccessRequirements', () => {
 
     const findControlledTierCard = (wrapper) => wrapper.find('[data-test-id="controlled-card"]')
 
+    const findControlledTierEraCommon = (wrapper) => wrapper.find('[data-test-id="ct-era-module"]');
 
     beforeEach(async() => {
         registerApiClient(InstitutionApi, new InstitutionApiStub());
@@ -652,4 +653,78 @@ describe('DataAccessRequirements', () => {
         expect(findControlledTierCard(wrapper).exists()).toBeFalsy();
     });
 
+    it ("Should display eraCommon card in CT when the user institution has signed agreement and ct requires eraCommon", async() => {
+        let wrapper = component();
+        await waitOneTickAndUpdate(wrapper);
+
+        profileStore.set({
+            profile: {
+                ...ProfileStubVariables.PROFILE_STUB,
+                tierEligibilities: [{
+                    accessTierShortName: AccessTierShortNames.Registered,
+                    eraRequired: false,
+                    eligible: false
+                },{
+                    accessTierShortName: AccessTierShortNames.Controlled,
+                    eraRequired: true,
+                    eligible: true
+                }]
+            },
+            load,
+            reload,
+            updateCache
+        });
+        wrapper = component();
+        await waitOneTickAndUpdate(wrapper);
+        expect(findControlledTierEraCommon(wrapper).exists()).toBeTruthy();
+    });
+
+    it ("Should not display eraCommon card in CT when rt requires eraCommon", async() => {
+        let wrapper = component();
+        await waitOneTickAndUpdate(wrapper);
+
+        profileStore.set({
+            profile: {
+                ...ProfileStubVariables.PROFILE_STUB,
+                tierEligibilities: [{
+                    accessTierShortName: AccessTierShortNames.Registered,
+                    eraRequired: true,
+                    eligible: false
+                },{
+                    accessTierShortName: AccessTierShortNames.Controlled,
+                    eraRequired: true,
+                    eligible: true
+                }]
+            },
+            load,
+            reload,
+            updateCache
+        });
+        wrapper = component();
+        await waitOneTickAndUpdate(wrapper);
+        expect(findControlledTierEraCommon(wrapper).exists()).toBeFalsy();
+    });
+
+    it ("Should not display eraCommon card in CT when user has not signed Institution agreement", async() => {
+        let wrapper = component();
+        await waitOneTickAndUpdate(wrapper);
+
+        profileStore.set({
+            profile: {
+                ...ProfileStubVariables.PROFILE_STUB,
+                // no CT eligibility object
+                tierEligibilities: [{
+                    accessTierShortName: AccessTierShortNames.Registered,
+                    eraRequired: false,
+                    eligible: false
+                }]
+            },
+            load,
+            reload,
+            updateCache
+        });
+        wrapper = component();
+        await waitOneTickAndUpdate(wrapper);
+        expect(findControlledTierEraCommon(wrapper).exists()).toBeFalsy();
+    });
 });
