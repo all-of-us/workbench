@@ -240,16 +240,12 @@ const rtModules = [
   AccessModule.COMPLIANCETRAINING,
 ];
 
-// TODO RW-7059
-const ctModules = [];
-
 const duccModule = AccessModule.DATAUSERCODEOFCONDUCT;
 
 // in display order
 // exported for test
 export const allModules: AccessModule[] = [
   ...rtModules,
-  ...ctModules,
   duccModule,
 ];
 
