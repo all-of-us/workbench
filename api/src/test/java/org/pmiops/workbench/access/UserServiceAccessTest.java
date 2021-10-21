@@ -219,15 +219,15 @@ public class UserServiceAccessTest {
     assertUserNotInControlledTier(dbUser);
   }
 
-  //  @Test
-  //  public void test_updateUserWithRetries_addToControlledTier() {
-  //    providedWorkbenchConfig.featureFlags.unsafeAllowAccessToAllTiersForRegisteredUsers = false;
-  //    assertThat(userAccessTierDao.findAll()).isEmpty();
-  //
-  //    dbUser = updateUserWithRetries(addUserToControlledNow);
-  //    assertRegisteredTierEnabled(dbUser);
-  //    assertControlledTierEnabled(dbUser);
-  //  }
+    @Test
+    public void test_updateUserWithRetries_addToControlledTier() {
+      providedWorkbenchConfig.featureFlags.unsafeAllowAccessToAllTiersForRegisteredUsers = false;
+      assertThat(userAccessTierDao.findAll()).isEmpty();
+
+      dbUser = updateUserWithRetries(addUserToControlledNow);
+      assertRegisteredTierEnabled(dbUser);
+      assertControlledTierEnabled(dbUser);
+    }
 
   @Test
   public void test_updateUserWithRetries_register_includes_others() {
@@ -1210,6 +1210,12 @@ public class UserServiceAccessTest {
         user, AccessModuleName.PROFILE_CONFIRMATION, timestamp);
 
     createAffiliation(user);
+    return user;
+  }
+
+  private DbUser controlledTierUser(Timestamp timestamp, DbUser user) {
+    user = registerUser(timestamp, user);
+    accessModuleService.updateBypassTime(user.getUserId(), AccessModule.CT_COMPLIANCE_TRAINING, true);
     return user;
   }
 
