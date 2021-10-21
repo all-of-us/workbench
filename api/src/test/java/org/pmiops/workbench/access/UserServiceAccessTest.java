@@ -1165,11 +1165,10 @@ public class UserServiceAccessTest {
     // if not present, we're done
     // if present: assert that the row is disabled
     Optional<DbUserAccessTier> userAccessMaybe =
-        userAccessTierDao.getByUserAndAccessTier(dbUser, dbAccessTier);
+        userAccessTierDao.getByUserAndAccessTier(dbUser, controlledTier);
     userAccessMaybe.ifPresent(
         userAccess ->
-            assertThat(userAccessMaybe.getTierAccessStatusEnum())
-                .isEqualTo(TierAccessStatus.DISABLED));
+            assertThat(userAccess.getTierAccessStatusEnum()).isEqualTo(TierAccessStatus.DISABLED));
   }
 
   private void assertTierMembershipWithStatus(
