@@ -372,13 +372,13 @@ export async function waitWhileLoading(
   }`;
 
   await Promise.race([
-    page.waitForXPath(process.env.Authenticated_Page_Xpath), // authenticated page
-    page.waitForXPath(process.env.Unauthenticated_Page_Xpath) // Login and Create Account pages
+    page.waitForXPath(process.env.AUTHENTICATED_TEST_ID_XPATH), // authenticated page
+    page.waitForXPath(process.env.UNAUTHENTICATED_TEST_ID_XPATH) // Login and Create Account pages
   ]);
 
   // Prevent checking in Login and Create Account pages.
   await page
-    .waitForXPath(process.env.Unauthenticated_Page_Xpath, { timeout: 10 })
+    .waitForXPath(process.env.UNAUTHENTICATED_TEST_ID_XPATH, { timeout: 10 })
     .then(() => {
       return;
     })

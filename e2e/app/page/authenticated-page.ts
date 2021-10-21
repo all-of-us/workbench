@@ -15,7 +15,7 @@ export default abstract class AuthenticatedPage extends BasePage {
 
   protected async isSignedIn(timeout = 60 * 1000): Promise<boolean> {
     return this.page
-      .waitForXPath(process.env.Authenticated_Page_Xpath, { timeout })
+      .waitForXPath(process.env.AUTHENTICATED_TEST_ID_XPATH, { timeout })
       .then(() => {
         return true;
       })
@@ -36,7 +36,7 @@ export default abstract class AuthenticatedPage extends BasePage {
   async waitForLoad(): Promise<this> {
     const signedIn = await this.isSignedIn();
     if (!signedIn) {
-      throw new Error(`Failed to find signed-in web-element. xpath="${process.env.Authenticated_Page_Xpath}"`);
+      throw new Error(`Failed to find signed-in web-element. xpath="${process.env.AUTHENTICATED_TEST_ID_XPATH}"`);
     }
     await this.isLoaded();
     await this.closeHelpSidebarIfOpen();
