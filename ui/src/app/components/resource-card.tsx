@@ -7,7 +7,7 @@ import {Clickable} from 'app/components/buttons';
 import {ResourceCardBase} from 'app/components/card';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import colors from 'app/styles/colors';
-import {formatWorkspaceResourceDisplayDate, reactStyles} from 'app/utils';
+import {reactStyles} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {stringifyUrl} from 'app/utils/navigation';
 import {
@@ -20,6 +20,7 @@ import {
   isConceptSet,
   isDataSet,
   isNotebook,
+  formatWorkspaceResourceDisplayDate,
 } from 'app/utils/resources';
 import {WorkspaceResource} from 'generated/fetch';
 import {Action, ResourceActionsMenu} from './resource-actions-menu';
