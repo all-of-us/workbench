@@ -40,6 +40,7 @@ import {ConfirmDeleteModal} from './confirm-delete-modal';
 import {HelpSidebar} from './help-sidebar';
 import {WorkspacesApiStub} from "testing/stubs/workspaces-api-stub";
 import {DataSetApiStub} from "testing/stubs/data-set-api-stub";
+import {MemoryRouter} from "react-router-dom";
 
 const sidebarContent = require('assets/json/help-sidebar.json');
 
@@ -74,7 +75,7 @@ describe('HelpSidebar', () => {
   let props: {};
 
   const component = async() => {
-    const c = mount(<HelpSidebar {...props} />, {attachTo: document.getElementById('root')});
+    const c = mount(<MemoryRouter><HelpSidebar {...props} /></MemoryRouter>, {attachTo: document.getElementById('root')});
     await waitOneTickAndUpdate(c);
     return c;
   };
