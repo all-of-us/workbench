@@ -26,9 +26,9 @@ export const stubResource: WorkspaceResource = {
   workspaceNamespace: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
   workspaceFirecloudName: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID,
   workspaceId: 1,
-  modifiedTime: '2019-01-28 20:13:58.0',
   permission: 'OWNER',
   cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
   accessTierShortName: AccessTierShortNames.Registered,
-  workspaceBillingStatus: BillingStatus.ACTIVE
+  workspaceBillingStatus: BillingStatus.ACTIVE,
+  lastModifiedEpochMillis: 1634763170,
 };

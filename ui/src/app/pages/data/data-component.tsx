@@ -99,14 +99,8 @@ export const DataComponent = withCurrentWorkspace()((props: Props) => {
   const loadResources = async() => {
     try {
       setIsLoading(true);
-      setResourceList(
-        (await workspacesApi().getWorkspaceResources(workspace.namespace, workspace.id, {typesToFetch: resourceTypesToFetch}))
-          .map(result => {
-            return {
-              ...result,
-              // TODO (RW-4682): Fix this nonsense
-              modifiedTime: result.modifiedTime ? new Date(Number(result.modifiedTime)).toDateString() : null
-            }; }));
+      setResourceList(await workspacesApi().getWorkspaceResources(workspace.namespace, workspace.id,
+        {typesToFetch: resourceTypesToFetch}));
     } catch (error) {
       console.log(error);
     } finally {

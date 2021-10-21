@@ -46,7 +46,7 @@ import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.CloudMonitoringService;
 import org.pmiops.workbench.google.CloudStorageClient;
@@ -145,7 +145,9 @@ public class WorkspaceAdminServiceTest extends SpringTest {
         .thenReturn(
             new FirecloudWorkspaceResponse()
                 .workspace(
-                    new FirecloudWorkspace().bucketName("bucket").namespace(WORKSPACE_NAMESPACE)));
+                    new FirecloudWorkspaceDetails()
+                        .bucketName("bucket")
+                        .namespace(WORKSPACE_NAMESPACE)));
 
     final Workspace workspace =
         testMockFactory.createWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME);

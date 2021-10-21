@@ -318,17 +318,6 @@ export function displayDate(time: Number): string {
       hour: '2-digit', minute: '2-digit', hour12: true});
 }
 
-// Remove this when we complete RW-3065
-export function formatWorkspaceResourceDisplayDate(time: string): string {
-  if (!time) {
-    return '';
-  }
-
-  const date = new Date(time);
-  // datetime formatting to slice off weekday from readable date string
-  return date.toDateString().split(' ').slice(1).join(' ');
-}
-
 export function formatDomainString(domainString: string): string {
   return domainString === Domain.PHYSICALMEASUREMENTCSS.toString()
       ? fp.capitalize(Domain.PHYSICALMEASUREMENT.toString())

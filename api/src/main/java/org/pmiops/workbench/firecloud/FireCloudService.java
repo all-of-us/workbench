@@ -9,10 +9,10 @@ import org.pmiops.workbench.firecloud.model.FirecloudBillingProjectStatus;
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
 import org.pmiops.workbench.firecloud.model.FirecloudMe;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdateResponseList;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 
 /**
@@ -65,10 +65,10 @@ public interface FireCloudService {
       String ownerEmailToRemove, String projectName, Optional<String> callerAccessToken);
 
   /** Creates a new FC workspace. */
-  FirecloudWorkspace createWorkspace(
+  FirecloudWorkspaceDetails createWorkspace(
       String projectName, String workspaceName, String authDomainName);
 
-  FirecloudWorkspace cloneWorkspace(
+  FirecloudWorkspaceDetails cloneWorkspace(
       String fromProject, String fromName, String toProject, String toName, String authDomainName);
 
   /** Retrieves all billing project memberships for the user from FireCloud. */

@@ -34,7 +34,7 @@ import org.pmiops.workbench.firecloud.model.FirecloudSubmissionRequest;
 import org.pmiops.workbench.firecloud.model.FirecloudSubmissionResponse;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkflowOutputs;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkflowOutputsResponse;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.google.StorageConfig;
 import org.pmiops.workbench.model.GenomicExtractionJob;
@@ -204,7 +204,7 @@ public class GenomicExtractionService {
     WgsCohortExtractionConfig cohortExtractionConfig =
         workbenchConfigProvider.get().wgsCohortExtraction;
 
-    FirecloudWorkspace fcUserWorkspace =
+    FirecloudWorkspaceDetails fcUserWorkspace =
         fireCloudService.getWorkspace(workspace).get().getWorkspace();
 
     String extractionUuid = UUID.randomUUID().toString();

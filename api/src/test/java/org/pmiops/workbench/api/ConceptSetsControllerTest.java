@@ -53,9 +53,9 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.CloudBillingClient;
 import org.pmiops.workbench.google.CloudStorageClient;
@@ -871,7 +871,7 @@ public class ConceptSetsControllerTest extends SpringTest {
   }
 
   private void stubGetWorkspace(String ns, String name) {
-    FirecloudWorkspace fcWorkspace = new FirecloudWorkspace();
+    FirecloudWorkspaceDetails fcWorkspace = new FirecloudWorkspaceDetails();
     fcWorkspace.setNamespace(ns);
     fcWorkspace.setName(name);
     fcWorkspace.setCreatedBy(USER_EMAIL);
