@@ -86,6 +86,7 @@ public class UserServiceAccessTest {
   private static WorkbenchConfig providedWorkbenchConfig;
 
   private static DbAccessTier registeredTier;
+  private static DbAccessTier controlledTier;
 
   private Function<Timestamp, Function<DbUser, DbUser>> registerUserWithTime =
       t -> dbu -> registerUser(t, dbu);
@@ -164,11 +165,14 @@ public class UserServiceAccessTest {
         ImmutableList.of(1L, 3L, 7L, 15L, 30L);
 
     registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
+    controlledTier = TestMockFactory.createControlledTierForTests(accessTierDao);
     accessModules = TestMockFactory.createAccessModules(accessModuleDao);
+
     dbUser = new DbUser();
     dbUser.setUsername(USERNAME);
     dbUser.setContactEmail("user@domain.com");
     dbUser = userDao.save(dbUser);
+
     rtTierConfig = new InstitutionTierConfig().accessTierShortName(registeredTier.getShortName());
     institution =
         new Institution()
@@ -207,11 +211,23 @@ public class UserServiceAccessTest {
 
   @Test
   public void test_updateUserWithRetries_register() {
+    providedWorkbenchConfig.featureFlags.unsafeAllowAccessToAllTiersForRegisteredUsers = false;
     assertThat(userAccessTierDao.findAll()).isEmpty();
 
     dbUser = updateUserWithRetries(registerUserNow);
     assertRegisteredTierEnabled(dbUser);
+    assertUserNotInControlledTier(dbUser);
   }
+
+  //  @Test
+  //  public void test_updateUserWithRetries_addToControlledTier() {
+  //    providedWorkbenchConfig.featureFlags.unsafeAllowAccessToAllTiersForRegisteredUsers = false;
+  //    assertThat(userAccessTierDao.findAll()).isEmpty();
+  //
+  //    dbUser = updateUserWithRetries(addUserToControlledNow);
+  //    assertRegisteredTierEnabled(dbUser);
+  //    assertControlledTierEnabled(dbUser);
+  //  }
 
   @Test
   public void test_updateUserWithRetries_register_includes_others() {
@@ -1136,12 +1152,40 @@ public class UserServiceAccessTest {
     assertRegisteredTierMembershipWithStatus(dbUser, TierAccessStatus.DISABLED);
   }
 
-  private void assertRegisteredTierMembershipWithStatus(DbUser dbUser, TierAccessStatus status) {
-    assertThat(userAccessTierDao.findAll()).hasSize(1);
+  private void assertControlledTierEnabled(DbUser dbUser) {
+    assertControlledTierMembershipWithStatus(dbUser, TierAccessStatus.ENABLED);
+  }
+
+  private void assertControlledTierDisabled(DbUser dbUser) {
+    assertControlledTierMembershipWithStatus(dbUser, TierAccessStatus.DISABLED);
+  }
+
+  // JOEL NOTE: I finished up this check that we were discussing
+  private void assertUserNotInControlledTier(DbUser dbUser) {
+    // if not present, we're done
+    // if present: assert that the row is disabled
     Optional<DbUserAccessTier> userAccessMaybe =
-        userAccessTierDao.getByUserAndAccessTier(dbUser, registeredTier);
+        userAccessTierDao.getByUserAndAccessTier(dbUser, dbAccessTier);
+    userAccessMaybe.ifPresent(
+        userAccess ->
+            assertThat(userAccessMaybe.getTierAccessStatusEnum())
+                .isEqualTo(TierAccessStatus.DISABLED));
+  }
+
+  private void assertTierMembershipWithStatus(
+      DbAccessTier dbAccessTier, DbUser dbUser, TierAccessStatus status) {
+    Optional<DbUserAccessTier> userAccessMaybe =
+        userAccessTierDao.getByUserAndAccessTier(dbUser, dbAccessTier);
     assertThat(userAccessMaybe).isPresent();
     assertThat(userAccessMaybe.get().getTierAccessStatusEnum()).isEqualTo(status);
+  }
+
+  private void assertRegisteredTierMembershipWithStatus(DbUser dbUser, TierAccessStatus status) {
+    assertTierMembershipWithStatus(registeredTier, dbUser, status);
+  }
+
+  private void assertControlledTierMembershipWithStatus(DbUser dbUser, TierAccessStatus status) {
+    assertTierMembershipWithStatus(controlledTier, dbUser, status);
   }
 
   private DbUser registerUser(Timestamp timestamp, DbUser user) {
