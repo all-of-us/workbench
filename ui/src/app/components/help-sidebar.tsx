@@ -6,7 +6,6 @@ import {
   faInbox,
   faInfoCircle, IconDefinition
 } from '@fortawesome/free-solid-svg-icons';
-import {RouteLink} from 'app/components/app-router';
 import {faDna} from '@fortawesome/free-solid-svg-icons/faDna';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import * as fp from 'lodash/fp';
@@ -500,6 +499,11 @@ export const HelpSidebar = fp.flow(
       openZendeskWidget(givenName, familyName, username, contactEmail);
     }
 
+    navigateToTerminal() {
+      const {workspace: {id, namespace}} = this.props;
+      this.props.navigate(['workspaces', namespace, id, 'terminals']);
+    }
+
     analyticsEvent(type: string, label?: string) {
       const {pageKey} = this.props;
       const analyticsLabel = pageKeyToAnalyticsLabels[pageKey];
@@ -843,8 +847,6 @@ export const HelpSidebar = fp.flow(
       const {activeIcon, runtimeErrors} = this.state;
       const sidebarContent = this.sidebarContent(activeIcon);
       const shouldRenderWorkspaceMenu = !this.iconConfig('concept').showIcon() && !this.iconConfig('criteria').showIcon();
-      const {workspace, workspace: { id, namespace}} = this.props;
-      const terminalUrl = `/workspaces/${namespace}/${id}/terminals`;
 
       return <div id='help-sidebar'>
         <div style={{...styles.iconContainer, ...(this.props.pageKey === NOTEBOOK_PAGE_KEY ? styles.notebookOverrides : {})}}>
@@ -867,9 +869,11 @@ export const HelpSidebar = fp.flow(
                         ],
                         ['runtime', () => this.displayRuntimeIcon(icon)],
                         ['terminal',
-                          () => <RouteLink path={terminalUrl}>
-                             <FontAwesomeIcon data-test-id={'help-sidebar-icon-' + icon.id} icon={icon.faIcon} style={icon.style} />
-                            </RouteLink>
+                          () =>
+                             <FontAwesomeIcon
+                                 data-test-id={'help-sidebar-icon-' + icon.id}
+                                 icon={icon.faIcon} style={icon.style}
+                                 onClick={() => this.navigateToTerminal()}/>
 
                           ],
                         ['genomicExtractions', () => this.displayExtractionIcon(icon)],
