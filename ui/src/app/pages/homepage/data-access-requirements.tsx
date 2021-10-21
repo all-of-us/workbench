@@ -443,8 +443,6 @@ const MaybeModule = ({profile, moduleName, active, spinnerProps}: ModuleProps): 
 
   const Module = ({profile}) => {
     const status = getAccessModuleStatusByName(profile, moduleName)
-    const statusTextMaybe = getStatusText(getAccessModuleStatusByName(profile, moduleName));
-
     const {givenName, familyName, username, contactEmail} = profile;
     // RW-7461
     const loginGovHelpText = <div style={styles.loginGovHelp}>
