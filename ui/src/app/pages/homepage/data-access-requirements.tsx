@@ -474,7 +474,7 @@ const MaybeModule = ({profile, moduleName, active, spinnerProps}: ModuleProps): 
 
 
 
-const ControlledTierEraModule = ({profile, active, spinnerProps}): JSX.Element => {
+const ControlledTierEraModule = ({profile, spinnerProps}): JSX.Element => {
   // whether to show the refresh button: this module has been clicked
   const [showRefresh, setShowRefresh] = useState(false);
   const moduleName = AccessModule.ERACOMMONS;
@@ -513,7 +513,7 @@ const ControlledTierEraModule = ({profile, active, spinnerProps}): JSX.Element =
   };
 
 
-  return isEnabledInEnvironment ? <Module profile={profile}/> : null;
+  return isEnabledInEnvironment ? <Module data-test-id={`module-${AccessModule.ERACOMMONS}`} profile={profile}/> : null;
 };
 
 const DARHeader = () => <FlexColumn style={styles.headerFlexColumn}>
@@ -612,7 +612,7 @@ const ControlledTierCard = (props: {profile: Profile, spinnerProps: WithSpinnerO
   // 1) Institution has signed the CT institution agreement,
   // 2) Registered Tier DOES NOT require era
   // 3) CT Requirement DOES require era
-  const displayEraCommon = isSigned && !registeredTierEligibility.eraRequired && controlledTierEligibility.eraRequired;
+  const displayEraCommon = isSigned && !registeredTierEligibility?.eraRequired && controlledTierEligibility.eraRequired;
   return <FlexRow data-test-id='controlled-card' style={{...styles.card, height: 300}}>
     <FlexColumn>
       <div style={styles.cardStep}>Step 2</div>
@@ -635,7 +635,7 @@ const ControlledTierCard = (props: {profile: Profile, spinnerProps: WithSpinnerO
                           enable={hasAccess}
                           text={`${institutionDisplayName} must allow you to access controlled tier data`}/>
       {displayEraCommon &&
-         <ControlledTierEraModule data-test-id='ct-era-module' profile={profile} active={true} spinnerProps={spinnerProps}/>}
+         <ControlledTierEraModule profile={profile} spinnerProps={spinnerProps}/>}
     </FlexColumn>
   </FlexRow>
 };
