@@ -257,7 +257,7 @@ const isCompleted = (status: AccessModuleStatus) => status && !!status.completio
 const isBypassed = (status: AccessModuleStatus) => status && !!status.bypassEpochMillis
 const isCompliant = (status: AccessModuleStatus) => isCompleted(status) || isBypassed(status)
 
-const bypassedOrCompletedText = (status: AccessModuleStatus) => {
+const getStatusText = (status: AccessModuleStatus) => {
   console.assert(isCompliant(status), 'Cannot provide status text for incomplete module')
   const {completionEpochMillis, bypassEpochMillis}: AccessModuleStatus = status || {};
   return isCompleted(status)
@@ -443,7 +443,7 @@ const MaybeModule = ({profile, moduleName, active, spinnerProps}: ModuleProps): 
 
   const Module = ({profile}) => {
     const status = getAccessModuleStatusByName(profile, moduleName)
-    const statusTextMaybe = bypassedOrCompletedText(getAccessModuleStatusByName(profile, moduleName));
+    const statusTextMaybe = getStatusText(getAccessModuleStatusByName(profile, moduleName));
 
     const {givenName, familyName, username, contactEmail} = profile;
     // RW-7461
@@ -476,7 +476,7 @@ const MaybeModule = ({profile, moduleName, active, spinnerProps}: ModuleProps): 
             <DARTitleComponent/>
             {(moduleName === AccessModule.RASLINKLOGINGOV) && loginGovHelpText}
           </div>
-          {isCompliant(status) && <div style={styles.moduleDate}>{bypassedOrCompletedText(status)}</div>}
+          {isCompliant(status) && <div style={styles.moduleDate}>{getStatusText(status)}</div>}
         </FlexColumn>
       </ModuleBox>
       {showTwoFactorAuthModal && <TwoFactorAuthModal
@@ -524,7 +524,7 @@ const ControlledTierEraModule = ({profile, spinnerProps}): JSX.Element => {
           <div style={isCompliant(status) ? styles.inactiveModuleText : styles.activeModuleText}>
             <DARTitleComponent/>
           </div>
-          {isCompliant(status) && <div style={styles.moduleDate}>{bypassedOrCompletedText(status)}</div>}
+          {isCompliant(status) && <div style={styles.moduleDate}>{getStatusText(status)}</div>}
         </FlexColumn>
       </ModuleBox>
     </FlexRow>;
