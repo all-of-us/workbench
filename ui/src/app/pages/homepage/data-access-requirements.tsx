@@ -261,8 +261,8 @@ const bypassedOrCompletedText = (status: AccessModuleStatus) => {
   console.assert(isDone(status), 'Cannot provide status text for incomplete module')
   const {completionEpochMillis, bypassEpochMillis}: AccessModuleStatus = status || {};
   return isCompleted(status)
-    ? `Completed on: ${displayDateWithoutHours(status.completionEpochMillis)}`
-    : `Bypassed on: ${displayDateWithoutHours(status.bypassEpochMillis)}`
+    ? `Completed on: ${displayDateWithoutHours(status?.completionEpochMillis)}`
+    : `Bypassed on: ${displayDateWithoutHours(status?.bypassEpochMillis)}`
 };
 
 const handleTerraShibbolethCallback = (token: string, spinnerProps: WithSpinnerOverlayProps, reloadProfile: Function) => {
