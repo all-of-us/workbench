@@ -430,7 +430,8 @@ public class UserServiceTest extends SpringTest {
   public void testSyncDuccVersionStatus_correctVersion() {
     final DbUser user = userDao.findUserByUsername(USERNAME);
 
-    userService.syncDuccVersionStatus(user, Agent.asSystem(), userService.getCurrentDuccVersion());
+    userService.syncDuccVersionStatus(
+        user, Agent.asSystem(), accessModuleService.getCurrentDuccVersion());
 
     verify(accessModuleService, never()).updateCompletionTime(any(), any(), any());
   }
@@ -440,7 +441,7 @@ public class UserServiceTest extends SpringTest {
     final DbUser user = userDao.findUserByUsername(USERNAME);
 
     userService.syncDuccVersionStatus(
-        user, Agent.asSystem(), userService.getCurrentDuccVersion() - 1);
+        user, Agent.asSystem(), accessModuleService.getCurrentDuccVersion() - 1);
 
     verify(accessModuleService)
         .updateCompletionTime(user, AccessModuleName.DATA_USER_CODE_OF_CONDUCT, null);

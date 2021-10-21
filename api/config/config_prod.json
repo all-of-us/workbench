@@ -101,10 +101,8 @@
     "enableEventDateModifier": false,
     "enableResearchPurposePrompt": false,
     "enableGenomicExtraction": false,
-    "enableFireCloudV2Billing" : true,
     "enableGpu": false,
     "enablePersistentDisk": false,
-    "enableAccessModuleRewrite" : true,
     "enableEgressAlertingV2": false,
     "enableStandardSourceDomains": true
   },

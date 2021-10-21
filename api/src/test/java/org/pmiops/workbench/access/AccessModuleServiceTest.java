@@ -76,13 +76,14 @@ public class AccessModuleServiceTest extends SpringTest {
   public void setup() {
     user = new DbUser();
     user.setUsername("user");
+    user.setDataUseAgreementSignedVersion(accessModuleService.getCurrentDuccVersion());
     user = userDao.save(user);
+
     config = WorkbenchConfig.createEmptyConfig();
-    config.featureFlags.enableAccessModuleRewrite = true;
     config.access.enableComplianceTraining = true;
     config.access.enableEraCommons = true;
-    TestMockFactory.createAccessModules(accessModuleDao);
-    accessModules = accessModuleDao.findAll();
+
+    accessModules = TestMockFactory.createAccessModules(accessModuleDao);
   }
 
   @Test
@@ -398,6 +399,10 @@ public class AccessModuleServiceTest extends SpringTest {
     Instant now = Instant.ofEpochMilli(FakeClockConfiguration.NOW_TIME);
     long expiryDays = 365L;
     config.accessRenewal.expiryDays = expiryDays;
+
+    user.setDataUseAgreementSignedVersion(accessModuleService.getCurrentDuccVersion());
+    user = userDao.save(user);
+
     DbAccessModule duccModule =
         accessModuleDao.findOneByName(AccessModuleName.DATA_USER_CODE_OF_CONDUCT).get();
     Timestamp completionTime = Timestamp.from(now.minus(expiryDays - 10, ChronoUnit.DAYS));

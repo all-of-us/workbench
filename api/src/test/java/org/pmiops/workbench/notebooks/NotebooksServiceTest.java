@@ -25,7 +25,7 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.monitoring.LogsBasedMetricService;
@@ -48,7 +48,8 @@ public class NotebooksServiceTest extends SpringTest {
       new JSONObject().put("who", "I'm a notebook!");
   private static final String BUCKET_NAME = "notebook.bucket";
   private static final FirecloudWorkspaceResponse WORKSPACE_RESPONSE =
-      new FirecloudWorkspaceResponse().workspace(new FirecloudWorkspace().bucketName(BUCKET_NAME));
+      new FirecloudWorkspaceResponse()
+          .workspace(new FirecloudWorkspaceDetails().bucketName(BUCKET_NAME));
   private static final String NOTEBOOK_NAME = "my first notebook";
   private static final String NAMESPACE_NAME = "namespace_name";
   private static final String WORKSPACE_NAME = "workspace_name";
@@ -203,7 +204,7 @@ public class NotebooksServiceTest extends SpringTest {
     when(mockFirecloudService.getWorkspace(anyString(), anyString()))
         .thenReturn(
             new FirecloudWorkspaceResponse()
-                .workspace(new FirecloudWorkspace().bucketName("bkt ")));
+                .workspace(new FirecloudWorkspaceDetails().bucketName("bkt ")));
     when(mockBlob.getContent()).thenReturn("{}".getBytes());
     when(mockCloudStorageClient.getBlob(anyString(), anyString())).thenReturn(mockBlob);
   }

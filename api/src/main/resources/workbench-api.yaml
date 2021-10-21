@@ -4222,10 +4222,6 @@ definitions:
         type: boolean
         default: false
         description: Whether to enable genomic data extraction for eligible datasets.
-      enableAccessModuleRewrite:
-        type: boolean
-        default: false
-        description: Whether to use the new rewrite access module.
       enableEgressAlertingV2:
         type: boolean
         default: false
@@ -4798,6 +4794,7 @@ definitions:
     enum:
     - DATA_USER_CODE_OF_CONDUCT
     - COMPLIANCE_TRAINING
+    - CT_COMPLIANCE_TRAINING
     - ERA_COMMONS
     - TWO_FACTOR_AUTH
     - RAS_LINK_LOGIN_GOV

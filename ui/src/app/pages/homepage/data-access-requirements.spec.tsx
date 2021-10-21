@@ -3,12 +3,7 @@ import {mount} from "enzyme";
 
 import defaultServerConfig from 'testing/default-server-config';
 import {AccessModule, InstitutionApi, Profile, ProfileApi} from 'generated/fetch';
-import {
-    allModules,
-    DataAccessRequirements,
-    getActiveModule,
-    getVisibleModules
-} from './data-access-requirements';
+import {allModules, DataAccessRequirements, getActiveModule, getVisibleModules} from './data-access-requirements';
 import {InstitutionApiStub} from 'testing/stubs/institution-api-stub';
 import {ProfileApiStub, ProfileStubVariables} from 'testing/stubs/profile-api-stub';
 import {profileApi, registerApiClient} from 'app/services/swagger-fetch-clients';
@@ -16,6 +11,7 @@ import {profileStore, serverConfigStore} from 'app/utils/stores';
 import {MemoryRouter} from 'react-router-dom';
 import {waitForFakeTimersAndUpdate, waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {AccessTierShortNames} from 'app/utils/access-tiers';
+import {environment} from 'environments/environment';
 
 
 const profile = ProfileStubVariables.PROFILE_STUB as Profile;
@@ -36,6 +32,19 @@ describe('DataAccessRequirements', () => {
     const findIncompleteModule = (wrapper, module: AccessModule) => wrapper.find(`[data-test-id="module-${module}-incomplete"]`);
 
     const findCompletionBanner = (wrapper) => wrapper.find('[data-test-id="dar-completed"]');
+
+    const findControlledSignedStepEligible = (wrapper) => wrapper.find('[data-test-id="controlled-signed"]')
+      .find('[data-test-id="eligible"]');
+    const findControlledSignedStepIneligible = (wrapper) => wrapper.find('[data-test-id="controlled-signed"]')
+      .find('[data-test-id="ineligible"]');
+
+    const findControlledUserEligible = (wrapper) => wrapper.find('[data-test-id="controlled-user-email"]')
+      .find('[data-test-id="eligible"]');
+    const findControlledUserIneligible = (wrapper) => wrapper.find('[data-test-id="controlled-user-email"]')
+      .find('[data-test-id="ineligible"]');
+
+    const findControlledTierCard = (wrapper) => wrapper.find('[data-test-id="controlled-card"]')
+
 
     beforeEach(async() => {
         registerApiClient(InstitutionApi, new InstitutionApiStub());
@@ -511,6 +520,136 @@ describe('DataAccessRequirements', () => {
         wrapper = component();
         await waitOneTickAndUpdate(wrapper);
         expect(findModule(wrapper, AccessModule.ERACOMMONS).exists()).toBeTruthy();
+    });
+
+    it ("Should display Institution has signed agreement when the user has a Tier Eligibility object for CT", async() => {
+        let wrapper = component();
+        await waitOneTickAndUpdate(wrapper);
+
+        profileStore.set({
+            profile: {
+                ...ProfileStubVariables.PROFILE_STUB,
+                tierEligibilities: [{
+                    accessTierShortName: AccessTierShortNames.Controlled,
+                    eraRequired: true
+                }]
+            },
+            load,
+            reload,
+            updateCache
+        });
+        wrapper = component();
+        await waitOneTickAndUpdate(wrapper);
+        expect(findControlledSignedStepEligible(wrapper).exists()).toBeTruthy();
+        expect(findControlledSignedStepIneligible(wrapper).exists()).toBeFalsy();
+    });
+
+    it ("Should not display Institution has signed agreement when the user doesn't have a Tier Eligibility object for CT", async() => {
+        let wrapper = component();
+        await waitOneTickAndUpdate(wrapper);
+
+        profileStore.set({
+            profile: {
+                ...ProfileStubVariables.PROFILE_STUB,
+                tierEligibilities: [{
+                    accessTierShortName: AccessTierShortNames.Registered,
+                    eraRequired: true
+                }]
+            },
+            load,
+            reload,
+            updateCache
+        });
+        wrapper = component();
+        await waitOneTickAndUpdate(wrapper);
+        expect(findControlledSignedStepEligible(wrapper).exists()).toBeFalsy();
+        expect(findControlledSignedStepIneligible(wrapper).exists()).toBeTruthy();
+    });
+
+    it ("Should display Institution allows you to access CT when the user's CT Tier Eligibility object has eligible=true", async() => {
+        let wrapper = component();
+        await waitOneTickAndUpdate(wrapper);
+
+        profileStore.set({
+            profile: {
+                ...ProfileStubVariables.PROFILE_STUB,
+                tierEligibilities: [{
+                    accessTierShortName: AccessTierShortNames.Controlled,
+                    eraRequired: true,
+                    eligible: true
+                }]
+            },
+            load,
+            reload,
+            updateCache
+        });
+        wrapper = component();
+        await waitOneTickAndUpdate(wrapper);
+        expect(findControlledUserEligible(wrapper).exists()).toBeTruthy();
+        expect(findControlledUserIneligible(wrapper).exists()).toBeFalsy();
+    });
+
+    it ("Should not display Institution allows you to access CT when the user's CT Tier Eligibility object has eligible=false", async() => {
+        let wrapper = component();
+        await waitOneTickAndUpdate(wrapper);
+
+        profileStore.set({
+            profile: {
+                ...ProfileStubVariables.PROFILE_STUB,
+                tierEligibilities: [{
+                    accessTierShortName: AccessTierShortNames.Controlled,
+                    eraRequired: true,
+                    eligible: false
+                }]
+            },
+            load,
+            reload,
+            updateCache
+        });
+        wrapper = component();
+        await waitOneTickAndUpdate(wrapper);
+        expect(findControlledUserEligible(wrapper).exists()).toBeFalsy();
+        expect(findControlledUserIneligible(wrapper).exists()).toBeTruthy();
+    });
+
+    it ("Should not display Institution allows you to access CT when the user does not have a CT Tier Eligibility object", async() => {
+        let wrapper = component();
+        await waitOneTickAndUpdate(wrapper);
+
+        profileStore.set({
+            profile: {
+                ...ProfileStubVariables.PROFILE_STUB,
+                // no CT eligibility object
+                tierEligibilities: [{
+                    accessTierShortName: AccessTierShortNames.Registered,
+                    eraRequired: true,
+                    eligible: false
+                }]
+            },
+            load,
+            reload,
+            updateCache
+        });
+        wrapper = component();
+        await waitOneTickAndUpdate(wrapper);
+        expect(findControlledUserEligible(wrapper).exists()).toBeFalsy();
+        expect(findControlledUserIneligible(wrapper).exists()).toBeTruthy();
+    });
+
+    it ("Should display the CT card when the environment has a Controlled Tier", async() => {
+        environment.accessTiersVisibleToUsers = [AccessTierShortNames.Registered, AccessTierShortNames.Controlled];
+
+        let wrapper = component();
+        await waitOneTickAndUpdate(wrapper);
+        expect(findControlledTierCard(wrapper).exists()).toBeTruthy();
+    });
+
+    it ("Should not display the CT card when the environment does not have a Controlled Tier", async() => {
+        environment.accessTiersVisibleToUsers = [AccessTierShortNames.Registered];
+
+        let wrapper = component();
+        await waitOneTickAndUpdate(wrapper);
+        expect(findControlledTierCard(wrapper).exists()).toBeFalsy();
     });
 
 });

@@ -2,6 +2,7 @@ package org.pmiops.workbench.testconfig;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.api.gax.retrying.RetrySettings;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.auth.oauth2.ServiceAccountCredentials;
 import com.google.cloud.bigquery.BigQuery;
@@ -28,6 +29,15 @@ public class TestBigQueryConfig {
     return BigQueryOptions.newBuilder()
         .setProjectId("all-of-us-workbench-test")
         .setCredentials(credentials)
+        // Note: Later we may want to apply similar settings to the real server. See RW-7413.
+        .setRetrySettings(
+            RetrySettings.newBuilder()
+                .setTotalTimeout(org.threeten.bp.Duration.ofMinutes(15))
+                .setInitialRpcTimeout(org.threeten.bp.Duration.ofSeconds(20L))
+                .setMaxRpcTimeout(org.threeten.bp.Duration.ofSeconds(30L))
+                .setInitialRetryDelay(org.threeten.bp.Duration.ofSeconds(1L))
+                .setMaxRetryDelay(org.threeten.bp.Duration.ofSeconds(10L))
+                .build())
         .build()
         .getService();
   }
@@ -36,7 +46,7 @@ public class TestBigQueryConfig {
   public Duration defaultQueryTimeout() {
     // We're not subject to GAE timeouts in unit tests. Allow queries to run a bit longer to avoid
     // failing on the occasional slow job.
-    return Duration.ofMinutes(3L);
+    return Duration.ofMinutes(5L);
   }
 
   @Bean
