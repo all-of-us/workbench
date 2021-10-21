@@ -242,20 +242,16 @@ export const allModules: AccessModule[] = [
   duccModule,
 ];
 
-// this function does double duty:
-// - returns appropriate text for completed and bypassed modules and null for incomplete modules
-// - because of this, truthy return values indicate that a module is either complete or bypassed
-const bypassedOrCompletedText = (status: AccessModuleStatus) => {
-  const {completionEpochMillis, bypassEpochMillis}: AccessModuleStatus = status || {};
-  const userCompletedModule = !!completionEpochMillis;
-  const userBypassedModule = !!bypassEpochMillis;
+const isCompleted = (status: AccessModuleStatus) => status && !!status.completionEpochMillis
+const isBypassed = (status: AccessModuleStatus) => status && !!status.bypassEpochMillis
+const isDone = (status: AccessModuleStatus) => isCompleted(status) || isBypassed(status)
 
-  return cond(
-      [userCompletedModule, () => `Completed on: ${displayDateWithoutHours(completionEpochMillis)}`],
-      [userBypassedModule, () => `Bypassed on: ${displayDateWithoutHours(bypassEpochMillis)}`],
-      // return nothing if there's no text
-    () => null
-  );
+const bypassedOrCompletedText = (status: AccessModuleStatus) => {
+  console.assert(isDone(status), 'Cannot provide status text for incomplete module')
+  const {completionEpochMillis, bypassEpochMillis}: AccessModuleStatus = status || {};
+  return isCompleted(status)
+    ? `Completed on: ${displayDateWithoutHours(status.completionEpochMillis)}`
+    : `Bypassed on: ${displayDateWithoutHours(status.bypassEpochMillis)}`
 };
 
 const handleTerraShibbolethCallback = (token: string, spinnerProps: WithSpinnerOverlayProps, reloadProfile: Function) => {
@@ -327,10 +323,8 @@ export const getVisibleModules = (modules: AccessModule[], profile: Profile): Ac
     fp.map(moduleConfig => moduleConfig.moduleName)
 )(modules);
 
-const incompleteModules = (modules: AccessModule[], profile: Profile): AccessModule[] => modules.filter(moduleName => {
-  const status = getAccessModuleStatusByName(profile, moduleName);
-  return !bypassedOrCompletedText(status);
-});
+const incompleteModules = (modules: AccessModule[], profile: Profile): AccessModule[] =>
+  modules.filter(moduleName => !isDone(getAccessModuleStatusByName(profile, moduleName)));
 
 const syncIncompleteModules = (modules: AccessModule[], profile: Profile, reloadProfile: Function) => {
   incompleteModules(modules, profile).map(async moduleName => {
@@ -437,7 +431,7 @@ const MaybeModule = ({profile, moduleName, active, spinnerProps}: ModuleProps): 
   };
 
   const Module = ({profile}) => {
-    const statusTextMaybe = bypassedOrCompletedText(getAccessModuleStatusByName(profile, moduleName));
+    const status = getAccessModuleStatusByName(profile, moduleName)
 
     return <FlexRow data-test-id={`module-${moduleName}`}>
       <FlexRow style={styles.moduleCTA}>
@@ -448,12 +442,12 @@ const MaybeModule = ({profile, moduleName, active, spinnerProps}: ModuleProps): 
             : <Next/>)}
       </FlexRow>
       <ModuleBox>
-        <ModuleIcon moduleName={moduleName} completedOrBypassed={!!statusTextMaybe}/>
+        <ModuleIcon moduleName={moduleName} completedOrBypassed={isDone(status)}/>
         <FlexColumn>
           <div style={active ? styles.activeModuleText : styles.inactiveModuleText}>
             <DARTitleComponent/>
           </div>
-          {statusTextMaybe && <div style={styles.moduleDate}>{statusTextMaybe}</div>}
+          {isDone(status) && <div style={styles.moduleDate}>{bypassedOrCompletedText(status)}</div>}
         </FlexColumn>
       </ModuleBox>
       {showTwoFactorAuthModal && <TwoFactorAuthModal
@@ -478,13 +472,11 @@ const ControlledTierEraModule = ({profile, active, spinnerProps}): JSX.Element =
   // whether to show the refresh button: this module has been clicked
   const [showRefresh, setShowRefresh] = useState(false);
   const moduleName = AccessModule.ERACOMMONS;
-
-
   const {DARTitleComponent, refreshAction, isEnabledInEnvironment} = getAccessModuleConfig(moduleName);
-  const statusTextMaybe = bypassedOrCompletedText(getAccessModuleStatusByName(profile, moduleName));
+  const status = getAccessModuleStatusByName(profile, moduleName)
 
   const ModuleBox = ({children}) => {
-    return !statusTextMaybe
+    return !isDone(status)
         ? <Clickable onClick={() => { setShowRefresh(true); redirectToNiH(); }}>
           <FlexRow style={styles.activeModuleBox}>{children}</FlexRow>
         </Clickable>
@@ -494,19 +486,16 @@ const ControlledTierEraModule = ({profile, active, spinnerProps}): JSX.Element =
   const Module = ({profile}) => {
     return <FlexRow data-test-id={`module-${moduleName}`}>
       <FlexRow style={styles.moduleCTA}>
-        {((showRefresh && refreshAction)
-            ? <Refresh
-                refreshAction={refreshAction}
-                showSpinner={spinnerProps.showSpinner}/>
-            : null)}
+        {showRefresh && refreshAction
+          && <Refresh refreshAction={refreshAction} showSpinner={spinnerProps.showSpinner}/>}
       </FlexRow>
       <ModuleBox>
-        <ModuleIcon moduleName={moduleName} completedOrBypassed={!!statusTextMaybe}/>
+        <ModuleIcon moduleName={moduleName} completedOrBypassed={isDone(status)}/>
         <FlexColumn>
-          <div style={!statusTextMaybe ? styles.activeModuleText : styles.inactiveModuleText}>
+          <div style={isDone(status) ? styles.inactiveModuleText : styles.activeModuleText}>
             <DARTitleComponent/>
           </div>
-          {statusTextMaybe && <div style={styles.moduleDate}>{statusTextMaybe}</div>}
+          {isDone(status) && <div style={styles.moduleDate}>{bypassedOrCompletedText(status)}</div>}
         </FlexColumn>
       </ModuleBox>
     </FlexRow>;
