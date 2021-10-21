@@ -95,6 +95,7 @@ public class UserServiceAccessTest {
   private static List<DbAccessModule> accessModules;
 
   private InstitutionTierConfig rtTierConfig;
+  private InstitutionTierConfig ctTierConfig;
   private Institution institution;
 
   @Autowired private AccessModuleDao accessModuleDao;
@@ -174,6 +175,7 @@ public class UserServiceAccessTest {
     dbUser = userDao.save(dbUser);
 
     rtTierConfig = new InstitutionTierConfig().accessTierShortName(registeredTier.getShortName());
+    ctTierConfig = new InstitutionTierConfig().accessTierShortName(controlledTier.getShortName());
     institution =
         new Institution()
             .displayName("institution")
@@ -219,15 +221,15 @@ public class UserServiceAccessTest {
     assertUserNotInControlledTier(dbUser);
   }
 
-    @Test
-    public void test_updateUserWithRetries_addToControlledTier() {
-      providedWorkbenchConfig.featureFlags.unsafeAllowAccessToAllTiersForRegisteredUsers = false;
-      assertThat(userAccessTierDao.findAll()).isEmpty();
+  @Test
+  public void test_updateUserWithRetries_addToControlledTier() {
+    providedWorkbenchConfig.featureFlags.unsafeAllowAccessToAllTiersForRegisteredUsers = false;
+    assertThat(userAccessTierDao.findAll()).isEmpty();
 
-      dbUser = updateUserWithRetries(addUserToControlledNow);
-      assertRegisteredTierEnabled(dbUser);
-      assertControlledTierEnabled(dbUser);
-    }
+    dbUser = updateUserWithRetries(this::completeCTRequirements);
+    assertRegisteredTierEnabled(dbUser);
+    assertControlledTierEnabled(dbUser);
+  }
 
   @Test
   public void test_updateUserWithRetries_register_includes_others() {
@@ -1213,9 +1215,20 @@ public class UserServiceAccessTest {
     return user;
   }
 
-  private DbUser controlledTierUser(Timestamp timestamp, DbUser user) {
-    user = registerUser(timestamp, user);
-    accessModuleService.updateBypassTime(user.getUserId(), AccessModule.CT_COMPLIANCE_TRAINING, true);
+  private void addCTConfigToInstitution(Institution institution) {
+    institution.addTierConfigsItem(
+        ctTierConfig
+            .eraRequired(false)
+            .membershipRequirement(InstitutionMembershipRequirement.DOMAINS)
+            .addEmailDomainsItem("domain.com"));
+    institutionService.updateInstitution(institution.getShortName(), institution);
+  }
+
+  private DbUser completeCTRequirements(DbUser user) {
+    addCTConfigToInstitution(institutionService.getByUser(user).get());
+    user = registerUser(new Timestamp(PROVIDED_CLOCK.millis()), user);
+    accessModuleService.updateBypassTime(
+        user.getUserId(), AccessModule.CT_COMPLIANCE_TRAINING, true);
     return user;
   }
 
