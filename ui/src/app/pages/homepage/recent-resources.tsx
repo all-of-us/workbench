@@ -1,7 +1,6 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {Link as RouterLink} from 'react-router-dom';
-
 import {Column} from 'primereact/column';
 import {DataTable} from 'primereact/datatable';
 import {CSSProperties, useEffect, useState} from 'react';
@@ -12,9 +11,9 @@ import {renderResourceCard} from 'app/components/render-resource-card';
 import {ResourceNavigation, StyledResourceType} from 'app/components/resource-card';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {userMetricsApi} from 'app/services/swagger-fetch-clients';
-import {formatWorkspaceResourceDisplayDate, reactStyles, withCdrVersions} from 'app/utils';
+import {reactStyles, withCdrVersions} from 'app/utils';
 import {getCdrVersion} from 'app/utils/cdr-versions';
-import {getDisplayName, isNotebook} from 'app/utils/resources';
+import {getDisplayName, isNotebook, formatWorkspaceResourceDisplayDate} from 'app/utils/resources';
 import {
   CdrVersionTiersResponse,
   Workspace,
@@ -124,7 +123,7 @@ export const RecentResources = fp.flow(withCdrVersions())((props: Props) => {
             resourceType: <ResourceNavigation resource={r}><StyledResourceType resource={r}/></ResourceNavigation>,
             resourceName: <ResourceNavigation resource={r} style={styles.navigation}>{getDisplayName(r)}</ResourceNavigation>,
             workspaceName: <WorkspaceNavigation workspace={getWorkspace(r)} resource={r} style={styles.navigation}/>,
-            formattedLastModified: formatWorkspaceResourceDisplayDate(r.modifiedTime),
+            formattedLastModified: formatWorkspaceResourceDisplayDate(r.lastModifiedEpochMillis),
             cdrVersionName: getCdrVersionName(r),
           };
         }));

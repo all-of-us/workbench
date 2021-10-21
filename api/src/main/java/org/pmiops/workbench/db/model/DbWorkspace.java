@@ -178,6 +178,12 @@ public class DbWorkspace {
     this.firecloudName = firecloudName;
   }
 
+  @Transient
+  public boolean isTerraV2Workspace() {
+    // Before Terra PPW, workspace namespace and project were identical.
+    return !workspaceNamespace.equals(googleProject);
+  }
+
   @ManyToOne
   @JoinColumn(name = "cdr_version_id")
   public DbCdrVersion getCdrVersion() {

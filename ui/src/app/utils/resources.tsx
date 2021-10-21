@@ -14,13 +14,13 @@ import {
 import {encodeURIComponentStrict, UrlObj} from './navigation';
 import {WorkspaceData} from './workspace-data';
 
-const isCohort = (resource: WorkspaceResource): boolean => !!resource.cohort;
-const isCohortReview = (resource: WorkspaceResource): boolean => !!resource.cohortReview;
-const isConceptSet = (resource: WorkspaceResource): boolean => !!resource.conceptSet;
-const isDataSet = (resource: WorkspaceResource): boolean => !!resource.dataSet;
-const isNotebook = (resource: WorkspaceResource): boolean => !!resource.notebook;
+export const isCohort = (resource: WorkspaceResource): boolean => !!resource.cohort;
+export const isCohortReview = (resource: WorkspaceResource): boolean => !!resource.cohortReview;
+export const isConceptSet = (resource: WorkspaceResource): boolean => !!resource.conceptSet;
+export const isDataSet = (resource: WorkspaceResource): boolean => !!resource.dataSet;
+export const isNotebook = (resource: WorkspaceResource): boolean => !!resource.notebook;
 
-function toDisplay(resourceType: ResourceType): string {
+export function toDisplay(resourceType: ResourceType): string {
   return fp.cond([
       [rt => rt === ResourceType.COHORT, () => 'Cohort'],
       [rt => rt === ResourceType.COHORTREVIEW, () => 'Cohort Review'],
@@ -34,9 +34,9 @@ function toDisplay(resourceType: ResourceType): string {
   ])(resourceType);
 }
 
-const getTypeString = (resource: WorkspaceResource): string => toDisplay(getType(resource));
+export const getTypeString = (resource: WorkspaceResource): string => toDisplay(getType(resource));
 
-function getDescription(resource: WorkspaceResource): string {
+export function getDescription(resource: WorkspaceResource): string {
   return fp.cond([
       [isCohort, r => r.cohort.description],
       [isCohortReview, r => r.cohortReview.description],
@@ -46,7 +46,7 @@ function getDescription(resource: WorkspaceResource): string {
   ])(resource);
 }
 
-function getDisplayName(resource: WorkspaceResource): string {
+export function getDisplayName(resource: WorkspaceResource): string {
   return fp.cond([
       [isCohort, r => r.cohort.name],
       [isCohortReview, r => r.cohortReview.cohortName],
@@ -56,7 +56,7 @@ function getDisplayName(resource: WorkspaceResource): string {
   ])(resource);
 }
 
-function getId(resource: WorkspaceResource): number {
+export function getId(resource: WorkspaceResource): number {
   // Notebooks do not have IDs
   return fp.cond([
       [isCohort, r => r.cohort.id],
@@ -66,7 +66,7 @@ function getId(resource: WorkspaceResource): number {
   ])(resource);
 }
 
-function getResourceUrl(resource: WorkspaceResource): UrlObj {
+export function getResourceUrl(resource: WorkspaceResource): UrlObj {
   const {workspaceNamespace, workspaceFirecloudName} = resource;
   const workspacePrefix = `/workspaces/${workspaceNamespace}/${workspaceFirecloudName}`;
 
@@ -79,7 +79,7 @@ function getResourceUrl(resource: WorkspaceResource): UrlObj {
   ])(resource);
 }
 
-function getType(resource: WorkspaceResource): ResourceType {
+export function getType(resource: WorkspaceResource): ResourceType {
   return fp.cond([
       [isCohort, () => ResourceType.COHORT],
       [isCohortReview, () => ResourceType.COHORTREVIEW],
@@ -89,7 +89,7 @@ function getType(resource: WorkspaceResource): ResourceType {
   ])(resource);
 }
 
-function convertToResource(
+export function convertToResource(
   inputResource: FileDetail | Cohort | CohortReview | ConceptSet | DataSet,
   resourceType: ResourceType,
   workspace: WorkspaceData): WorkspaceResource {
@@ -98,7 +98,6 @@ function convertToResource(
     workspaceNamespace: namespace,
     workspaceFirecloudName: id,
     permission: WorkspaceAccessLevel[accessLevel],
-    modifiedTime: inputResource.lastModifiedTime ? new Date(inputResource.lastModifiedTime).toString() : new Date().toDateString(),
     accessTierShortName,
     cdrVersionId,
     workspaceBillingStatus: billingStatus,
@@ -107,21 +106,16 @@ function convertToResource(
     conceptSet: resourceType === ResourceType.CONCEPTSET ? inputResource as ConceptSet : null,
     dataSet: resourceType === ResourceType.DATASET ? inputResource as DataSet : null,
     notebook: resourceType === ResourceType.NOTEBOOK ? inputResource as FileDetail : null,
+    lastModifiedEpochMillis: inputResource.lastModifiedTime,
   };
 }
 
-export {
-    isCohort,
-    isCohortReview,
-    isConceptSet,
-    isDataSet,
-    isNotebook,
-    getTypeString,
-    toDisplay,
-    getDescription,
-    getDisplayName,
-    getId,
-    getResourceUrl,
-    getType,
-    convertToResource,
-};
+export function formatWorkspaceResourceDisplayDate(time: number): string {
+  if (!time) {
+    return '';
+  }
+
+  const date = new Date(time);
+  // datetime formatting to slice off weekday from readable date string
+  return date.toDateString().split(' ').slice(1).join(' ');
+}

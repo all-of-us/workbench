@@ -46,6 +46,7 @@ import {ReactComponent as wearable} from 'assets/icons/DAR/wearable.svg';
 import {AccessTierShortNames} from 'app/utils/access-tiers';
 import {environment} from 'environments/environment';
 import {useQuery} from 'app/components/app-router';
+import {openZendeskWidget} from 'app/utils/zendesk';
 
 const styles = reactStyles({
   headerFlexColumn: {
@@ -218,6 +219,16 @@ const styles = reactStyles({
   refreshIcon: {
     fontSize: '18px',
     paddingRight: '4px',
+  },
+  link: {
+    color: colors.accent,
+    cursor: 'pointer',
+    textDecoration: 'underline',
+  },
+  loginGovHelp: {
+    opacity: '0.5',
+    fontSize: '12px',
+    lineHeight: '22px',
   },
 });
 
@@ -431,6 +442,22 @@ const MaybeModule = ({profile, moduleName, active, spinnerProps}: ModuleProps): 
   };
 
   const Module = ({profile}) => {
+    const {givenName, familyName, username, contactEmail} = profile;
+    // RW-7461
+    const loginGovHelpText = <div style={styles.loginGovHelp}>
+      <div>
+        Verifying your identity helps us keep participant data safe.
+        You’ll need to provide your state ID, social security number, and phone number.
+      </div>
+      <div>
+        <span style={styles.link} onClick={(e) => {
+          openZendeskWidget(givenName, familyName, username, contactEmail);
+          // prevents the enclosing Clickable's onClick() from triggering instead
+          e.stopPropagation();
+        }}>Contact us</span> if you’re having trouble completing this step.
+      </div>
+    </div>;
+
     const status = getAccessModuleStatusByName(profile, moduleName)
 
     return <FlexRow data-test-id={`module-${moduleName}`}>
@@ -446,6 +473,7 @@ const MaybeModule = ({profile, moduleName, active, spinnerProps}: ModuleProps): 
         <FlexColumn>
           <div style={active ? styles.activeModuleText : styles.inactiveModuleText}>
             <DARTitleComponent/>
+            {(moduleName === AccessModule.RASLINKLOGINGOV) && loginGovHelpText}
           </div>
           {isDone(status) && <div style={styles.moduleDate}>{bypassedOrCompletedText(status)}</div>}
         </FlexColumn>

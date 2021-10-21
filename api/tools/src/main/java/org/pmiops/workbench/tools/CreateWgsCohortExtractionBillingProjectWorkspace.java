@@ -23,8 +23,8 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.api.BillingV2Api;
 import org.pmiops.workbench.firecloud.model.FirecloudCreateRawlsV2BillingProjectFullRequest;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdate;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceIngest;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.springframework.boot.CommandLineRunner;
@@ -146,7 +146,7 @@ public class CreateWgsCohortExtractionBillingProjectWorkspace {
               + ", "
               + workspaceId.getWorkspaceName()
               + ")");
-      FirecloudWorkspace workspace =
+      FirecloudWorkspaceDetails workspace =
           apiClientFactory.workspacesApi().createWorkspace(workspaceIngest);
 
       log.info("Updating Workspace ACL");

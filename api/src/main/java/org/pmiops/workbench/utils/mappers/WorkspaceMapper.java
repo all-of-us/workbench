@@ -8,7 +8,7 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.model.CdrVersion;
 import org.pmiops.workbench.model.RecentWorkspace;
@@ -38,14 +38,15 @@ public interface WorkspaceMapper {
   @Mapping(target = "cdrVersionId", source = "dbWorkspace.cdrVersion")
   @Mapping(target = "accessTierShortName", source = "dbWorkspace.cdrVersion.accessTier.shortName")
   @Mapping(target = "googleProject", source = "dbWorkspace.googleProject")
-  Workspace toApiWorkspace(DbWorkspace dbWorkspace, FirecloudWorkspace fcWorkspace);
+  Workspace toApiWorkspace(DbWorkspace dbWorkspace, FirecloudWorkspaceDetails fcWorkspace);
 
   @Mapping(target = "cdrVersionId", source = "cdrVersion")
   @Mapping(target = "creator", source = "creator.username")
   @Mapping(target = "etag", source = "version", qualifiedByName = "cdrVersionToEtag")
   @Mapping(
       target = "googleBucketName",
-      ignore = true) // available via toApiWorkspace(DbWorkspace dbWorkspace, FirecloudWorkspace
+      ignore =
+          true) // available via toApiWorkspace(DbWorkspace dbWorkspace, FirecloudWorkspaceDetails
   // fcWorkspace)
   @Mapping(target = "id", source = "firecloudName")
   @Mapping(target = "namespace", source = "workspaceNamespace")

@@ -35,10 +35,10 @@ import org.pmiops.workbench.firecloud.model.FirecloudMe;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.firecloud.model.FirecloudProfile;
 import org.pmiops.workbench.firecloud.model.FirecloudUpdateRawlsBillingAccountRequest;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdateResponseList;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceIngest;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceRequestClone;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
@@ -317,7 +317,7 @@ public class FireCloudServiceImpl implements FireCloudService {
   }
 
   @Override
-  public FirecloudWorkspace createWorkspace(
+  public FirecloudWorkspaceDetails createWorkspace(
       String projectName, String workspaceName, String authDomainName) {
     WorkspacesApi workspacesApi = endUserWorkspacesApiProvider.get();
     FirecloudWorkspaceIngest workspaceIngest =
@@ -331,7 +331,7 @@ public class FireCloudServiceImpl implements FireCloudService {
   }
 
   @Override
-  public FirecloudWorkspace cloneWorkspace(
+  public FirecloudWorkspaceDetails cloneWorkspace(
       String fromProject, String fromName, String toProject, String toName, String authDomainName) {
     WorkspacesApi workspacesApi = endUserWorkspacesApiProvider.get();
     FirecloudWorkspaceRequestClone cloneRequest =

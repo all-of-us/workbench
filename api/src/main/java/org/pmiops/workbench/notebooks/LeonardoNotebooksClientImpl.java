@@ -23,6 +23,7 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.leonardo.ApiException;
 import org.pmiops.workbench.leonardo.LeonardoRetryHandler;
 import org.pmiops.workbench.leonardo.api.DisksApi;
@@ -40,6 +41,7 @@ import org.pmiops.workbench.leonardo.model.LeonardoUpdateRuntimeRequest;
 import org.pmiops.workbench.leonardo.model.LeonardoUserJupyterExtensionConfig;
 import org.pmiops.workbench.model.Runtime;
 import org.pmiops.workbench.model.RuntimeConfigurationType;
+import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.notebooks.api.ProxyApi;
 import org.pmiops.workbench.notebooks.model.LocalizationEntry;
 import org.pmiops.workbench.notebooks.model.Localize;
@@ -54,7 +56,6 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
 
   private static final String WORKSPACE_NAMESPACE_KEY = "WORKSPACE_NAMESPACE";
   private static final String WORKSPACE_BUCKET_KEY = "WORKSPACE_BUCKET";
-  private static final String WORKSPACE_CDR_ENV_KEY = "WORKSPACE_CDR";
   private static final String JUPYTER_DEBUG_LOGGING_ENV_KEY = "JUPYTER_DEBUG_LOGGING";
   private static final String ALL_SAMPLES_WGS_KEY = "ALL_SAMPLES_WGS_BUCKET";
   private static final String SINGLE_SAMPLE_ARRAY_BUCKET_KEY = "SINGLE_SAMPLE_ARRAY_BUCKET";
@@ -182,12 +183,10 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
 
     DbUser user = userProvider.get();
     DbWorkspace workspace = workspaceDao.getRequired(workspaceNamespace, workspaceFirecloudName);
-    String workspaceBucketName =
+    FirecloudWorkspaceResponse fcWorkspaceResponse =
         fireCloudService
             .getWorkspace(workspace)
-            .orElseThrow(() -> new NotFoundException("workspace not found"))
-            .getWorkspace()
-            .getBucketName();
+            .orElseThrow(() -> new NotFoundException("workspace not found"));
 
     DbCdrVersion cdrVersion = workspace.getCdrVersion();
     Map<String, String> customEnvironmentVariables = new HashMap<>();
@@ -195,7 +194,18 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
 
     // This variable is already made available by Leonardo, but it's only exported in certain
     // notebooks contexts; this ensures it is always exported. See RW-7096.
-    customEnvironmentVariables.put(WORKSPACE_BUCKET_KEY, "gs://" + workspaceBucketName);
+    customEnvironmentVariables.put(
+        WORKSPACE_BUCKET_KEY, "gs://" + fcWorkspaceResponse.getWorkspace().getBucketName());
+
+    // In Terra V2 workspaces, all compute users have the bigquery.readSessionUser role per CA-1179.
+    // In all workspaces, OWNERs have storage read session permission via the project viewer role.
+    // If this variable is exported (with any value), codegen will use the BQ storage API, which is
+    // ~200x faster for loading large dataframes from Bigquery.
+    // After CA-952 is complete, this should always be exported.
+    if (WorkspaceAccessLevel.OWNER.toString().equals(fcWorkspaceResponse.getAccessLevel())
+        || workspace.isTerraV2Workspace()) {
+      customEnvironmentVariables.put(BIGQUERY_STORAGE_API_ENABLED_ENV_KEY, "true");
+    }
 
     // i.e. is NEW or MIGRATED
     if (!workspace.getBillingMigrationStatusEnum().equals(BillingMigrationStatus.OLD)) {
