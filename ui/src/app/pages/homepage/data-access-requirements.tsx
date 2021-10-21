@@ -255,10 +255,10 @@ export const allModules: AccessModule[] = [
 
 const isCompleted = (status: AccessModuleStatus) => status && !!status.completionEpochMillis
 const isBypassed = (status: AccessModuleStatus) => status && !!status.bypassEpochMillis
-const isDone = (status: AccessModuleStatus) => isCompleted(status) || isBypassed(status)
+const isCompliant = (status: AccessModuleStatus) => isCompleted(status) || isBypassed(status)
 
 const bypassedOrCompletedText = (status: AccessModuleStatus) => {
-  console.assert(isDone(status), 'Cannot provide status text for incomplete module')
+  console.assert(isCompliant(status), 'Cannot provide status text for incomplete module')
   const {completionEpochMillis, bypassEpochMillis}: AccessModuleStatus = status || {};
   return isCompleted(status)
     ? `Completed on: ${displayDateWithoutHours(status?.completionEpochMillis)}`
@@ -335,7 +335,7 @@ export const getVisibleModules = (modules: AccessModule[], profile: Profile): Ac
 )(modules);
 
 const incompleteModules = (modules: AccessModule[], profile: Profile): AccessModule[] =>
-  modules.filter(moduleName => !isDone(getAccessModuleStatusByName(profile, moduleName)));
+  modules.filter(moduleName => !isCompliant(getAccessModuleStatusByName(profile, moduleName)));
 
 const syncIncompleteModules = (modules: AccessModule[], profile: Profile, reloadProfile: Function) => {
   incompleteModules(modules, profile).map(async moduleName => {
@@ -470,13 +470,13 @@ const MaybeModule = ({profile, moduleName, active, spinnerProps}: ModuleProps): 
             : <Next/>)}
       </FlexRow>
       <ModuleBox>
-        <ModuleIcon moduleName={moduleName} completedOrBypassed={isDone(status)}/>
+        <ModuleIcon moduleName={moduleName} completedOrBypassed={isCompliant(status)}/>
         <FlexColumn>
           <div style={active ? styles.activeModuleText : styles.inactiveModuleText}>
             <DARTitleComponent/>
             {(moduleName === AccessModule.RASLINKLOGINGOV) && loginGovHelpText}
           </div>
-          {isDone(status) && <div style={styles.moduleDate}>{bypassedOrCompletedText(status)}</div>}
+          {isCompliant(status) && <div style={styles.moduleDate}>{bypassedOrCompletedText(status)}</div>}
         </FlexColumn>
       </ModuleBox>
       {showTwoFactorAuthModal && <TwoFactorAuthModal
@@ -505,7 +505,7 @@ const ControlledTierEraModule = ({profile, spinnerProps}): JSX.Element => {
   const status = getAccessModuleStatusByName(profile, moduleName)
 
   const ModuleBox = ({children}) => {
-    return !isDone(status)
+    return !isCompliant(status)
         ? <Clickable onClick={() => { setShowRefresh(true); redirectToNiH(); }}>
           <FlexRow style={styles.activeModuleBox}>{children}</FlexRow>
         </Clickable>
@@ -519,12 +519,12 @@ const ControlledTierEraModule = ({profile, spinnerProps}): JSX.Element => {
           && <Refresh refreshAction={refreshAction} showSpinner={spinnerProps.showSpinner}/>}
       </FlexRow>
       <ModuleBox>
-        <ModuleIcon moduleName={moduleName} completedOrBypassed={isDone(status)}/>
+        <ModuleIcon moduleName={moduleName} completedOrBypassed={isCompliant(status)}/>
         <FlexColumn>
-          <div style={isDone(status) ? styles.inactiveModuleText : styles.activeModuleText}>
+          <div style={isCompliant(status) ? styles.inactiveModuleText : styles.activeModuleText}>
             <DARTitleComponent/>
           </div>
-          {isDone(status) && <div style={styles.moduleDate}>{bypassedOrCompletedText(status)}</div>}
+          {isCompliant(status) && <div style={styles.moduleDate}>{bypassedOrCompletedText(status)}</div>}
         </FlexColumn>
       </ModuleBox>
     </FlexRow>;
