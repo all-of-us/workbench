@@ -3,7 +3,7 @@ import DataResourceCard from 'app/component/data-resource-card';
 import Link from 'app/element/link';
 import Textarea from 'app/element/textarea';
 import Textbox from 'app/element/textbox';
-import { LinkText, MenuOption, ResourceCard } from 'app/text-labels';
+import { LinkText, MenuOption, ResourceCard, WorkspaceAccessLevel } from 'app/text-labels';
 import { buildXPath } from 'app/xpath-builders';
 import { ElementType } from 'app/xpath-options';
 import { waitWhileLoading } from 'utils/waits-utils';
@@ -14,7 +14,7 @@ import BaseElement from 'app/element/base-element';
 import ShareModal from 'app/modal/share-modal';
 import { logger } from 'libs/logger';
 
-export const UseFreeCredits = 'Use All of Us free credits';
+export const UseFreeCredits = 'Use All of Us initial credits';
 
 export enum TabLabels {
   Data = 'Data',
@@ -98,7 +98,7 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
     const selector = buildXPath({ name: pageTabName, type: ElementType.Tab });
     const tabLink = new Link(this.page, selector);
     if (!(await tabLink.exists())) {
-      throw new Error(`Failed to find and click \"${pageTabName}\" page tab.`);
+      throw new Error(`Failed to find and click "${pageTabName}" page tab.`);
     }
     waitPageChange ? await tabLink.clickAndWait() : await tabLink.click();
     await tabLink.dispose();
@@ -262,6 +262,7 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
    */
   async dismissDeleteWorkspaceModal(clickButtonText: LinkText = LinkText.DeleteWorkspace): Promise<string[]> {
     const modal = new Modal(this.page);
+    await modal.waitForLoad();
     const modalText = await modal.getTextContent();
     const textBox = modal.waitForTextbox('type DELETE to confirm');
     await textBox.type('delete');
@@ -291,11 +292,14 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
   /**
    * Share workspace via Workspace Actions snowman menu "Share" option.
    */
-  async shareWorkspace(): Promise<ShareModal> {
+  async shareWorkspaceWithUser(email: string, role: WorkspaceAccessLevel): Promise<void> {
     await this.selectWorkspaceAction(MenuOption.Share, { waitForNav: false });
-    const modal = new ShareModal(this.page);
-    await modal.waitForLoad();
-    return modal;
+    const shareModal = new ShareModal(this.page);
+    await shareModal.waitForLoad();
+
+    await shareModal.shareWithUser(email, role);
+    await waitWhileLoading(this.page);
+    await this.waitForLoad();
   }
 
   async getWorkspaceActionMenu(): Promise<SnowmanMenu> {

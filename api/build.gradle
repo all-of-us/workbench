@@ -1,13 +1,16 @@
 import org.pmiops.workbench.tooling.GenerateAPIListingTask
 import org.pmiops.workbench.tooling.IncrementalHotSwapTask
 
+if(JavaVersion.current() != JavaVersion.VERSION_1_8){
+  throw new GradleException("This build must be run with Java 8. See developer-system-initialization.md")
+}
+
 // Runs before all tasks. Sets up properties and dependencies for the build
 // process itself.
 buildscript {
   // External properties on the default project. Values declared in ext blocks
   // outside of the buildscsript block aren't usable here.
   ext {
-    ELASTICSEARCH_VERSION = '6.8.3'
     GAE_VERSION = '1.9.64'
     GSON_VERSION = '2.8.5'
     JACKSON_DATABIND_VERSION = '2.11.3'
@@ -395,7 +398,7 @@ dependencies {
   compile "com.google.appengine:appengine:$project.ext.GAE_VERSION"
   compile "com.google.auth:google-auth-library-appengine:0.19.0"
   compile "com.google.auth:google-auth-library-oauth2-http:0.19.0"
-  compile "com.google.cloud.sql:mysql-socket-factory:1.0.10"
+  compile "com.google.cloud.sql:mysql-socket-factory:1.3.4"
   compile "com.google.cloud:google-cloud-bigquery:1.122.2"
   compile "com.google.cloud:google-cloud-iamcredentials:0.44.1"
   compile "com.google.cloud:google-cloud-logging:1.102.0"
@@ -406,7 +409,7 @@ dependencies {
   compile "com.google.guava:guava:30.0-jre"
   compile "com.google.http-client:google-http-client-apache:2.0.0"
   compile "com.google.oauth-client:google-oauth-client-jetty:1.31.5"
-  compile "com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20180219.1"
+  compile "com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20211018.2"
   compile "com.opsgenie.integration:sdk:2+"
   compile "com.squareup.okhttp:logging-interceptor:$project.ext.OKHTTP_VERSION"
   compile "com.squareup.okhttp:okhttp:$project.ext.OKHTTP_VERSION"
@@ -426,10 +429,6 @@ dependencies {
   compile 'org.springframework.boot:spring-boot-starter-validation'
   compile "commons-codec:commons-codec:1.15"
   compile 'com.auth0:java-jwt:3.14.0'
-
-  // Elasticsearch client
-  compile "org.elasticsearch.client:elasticsearch-rest-high-level-client:$project.ext.ELASTICSEARCH_VERSION"
-  compile "org.elasticsearch:elasticsearch:$project.ext.ELASTICSEARCH_VERSION"
 
   compile "org.hibernate:hibernate-core:${project.ext['hibernate.version']}"
 
@@ -531,6 +530,8 @@ task integrationTest(type: Test) {
   // These tests should always run when requested since they consume and produce side-effects.
   outputs.upToDateWhen { false }
 
+  useJUnitPlatform()
+
   // Option to control size of stack trace:
   // jvmArgs '-XX:MaxJavaStackTraceDepth=10'
 }
@@ -542,6 +543,8 @@ task bigQueryTest(type: Test) {
   classpath = sourceSets.__bigQueryTest__.runtimeClasspath
 
   outputs.upToDateWhen { false }
+
+  useJUnitPlatform()
 }
 
 tasks.withType(Test) {
@@ -658,16 +661,6 @@ def commandLineSpringProperties = [
   'spring.datasource.password': System.getenv("WORKBENCH_DB_PASSWORD")
 ]
 
-// See project.rb command: load-es-index
-task elasticSearchIndexer(type: JavaExec) {
-  classpath = sourceSets.__tools__.runtimeClasspath
-  main = "org.pmiops.workbench.tools.elastic.ElasticSearchIndexer"
-  systemProperties = commandLineSpringProperties
-  if (project.hasProperty("appArgs")) {
-    args Eval.me(appArgs)
-  }
-}
-
 // See project.rb command: fetch-firecloud-user-profiles
 task fetchFireCloudUserProfile(type: JavaExec) {
   classpath = sourceSets.__tools__.runtimeClasspath
@@ -688,20 +681,10 @@ task fetchWorkspaceDetails(type: JavaExec) {
   }
 }
 
-// See project.rb command: export-workspace-data
-task exportWorkspaceData(type: JavaExec) {
+// See project.rb command: generate-impersonated-user-tokens
+task generateImpersonatedUserTokens(type: JavaExec) {
   classpath = sourceSets.__tools__.runtimeClasspath
-  main = "org.pmiops.workbench.tools.ExportWorkspaceData"
-  systemProperties = commandLineSpringProperties
-  if (project.hasProperty("appArgs")) {
-    args Eval.me(appArgs)
-  }
-}
-
-// See project.rb command: generate-impersonated-user-token
-task generateImpersonatedUserToken(type: JavaExec) {
-  classpath = sourceSets.__tools__.runtimeClasspath
-  main = "org.pmiops.workbench.tools.GenerateImpersonatedUserToken"
+  main = "org.pmiops.workbench.tools.GenerateImpersonatedUserTokens"
   systemProperties = commandLineSpringProperties
   if (project.hasProperty("appArgs")) {
     args Eval.me(appArgs)
@@ -784,16 +767,6 @@ task updateCdrConfig(type: JavaExec) {
   }
 }
 
-// This should be run directly
-task updateReviewDemographics(type: JavaExec) {
-    classpath sourceSets.__tools__.runtimeClasspath
-    main = "org.pmiops.workbench.tools.UpdateReviewDemographics"
-    systemProperties = commandLineSpringProperties
-    if (project.hasProperty("appArgs")) {
-      args Eval.me(appArgs)
-    }
-}
-
 // See project.rb command: create-wgs-cohort-extraction-bp-workspace
 task createWgsCohortExtractionBillingProjectWorkspace(type: JavaExec) {
   classpath sourceSets.__tools__.runtimeClasspath
@@ -824,20 +797,20 @@ task loadInstitutions(type: JavaExec) {
   }
 }
 
-// See project.rb command: populate-user-affiliations
-task populateUserAffiliations(type: JavaExec) {
+// See project.rb command: fix-desynchronized-billing-project-owners
+task fixDesynchronizedBillingProjectOwners(type: JavaExec) {
   classpath = sourceSets.__tools__.runtimeClasspath
-  main = "org.pmiops.workbench.tools.institutions.PopulateUserAffiliations"
+  main = "org.pmiops.workbench.tools.FixDesynchronizedBillingProjectOwners"
   systemProperties = commandLineSpringProperties
   if (project.hasProperty("appArgs")) {
     args Eval.me(appArgs)
   }
 }
 
-// See project.rb command: fix-desynchronized-billing-project-owners
-task fixDesynchronizedBillingProjectOwners(type: JavaExec) {
+// See project.rb command: set-access-module-timestamps
+task setAccessModuleTimestamps(type: JavaExec) {
   classpath = sourceSets.__tools__.runtimeClasspath
-  main = "org.pmiops.workbench.tools.FixDesynchronizedBillingProjectOwners"
+  main = "org.pmiops.workbench.tools.SetAccessModuleTimestamps"
   systemProperties = commandLineSpringProperties
   if (project.hasProperty("appArgs")) {
     args Eval.me(appArgs)

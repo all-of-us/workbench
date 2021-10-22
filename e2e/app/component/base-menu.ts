@@ -8,11 +8,6 @@ import Link from 'app/element/link';
 export default abstract class BaseMenu extends Container {
   protected abstract getMenuItemXpath(menuItemText: string): string;
 
-  async waitUntilVisible(): Promise<void> {
-    await this.page.waitForXPath(this.getXpath(), { visible: true });
-    await waitWhileLoading(this.page);
-  }
-
   protected constructor(page: Page, xpath: string) {
     super(page, xpath);
   }
@@ -60,7 +55,6 @@ export default abstract class BaseMenu extends Container {
 
     // Wait for top-level menu dropdown open.
     await this.waitUntilVisible();
-    await this.page.waitForTimeout(500);
 
     // Iterate orderly.
     let rootXpath = this.getXpath();
@@ -103,7 +97,7 @@ export default abstract class BaseMenu extends Container {
     const menuItemSelector = `${menuParentXpath}${this.getMenuItemXpath(menuItemText)}`;
     const link = new Link(this.page, menuItemSelector);
     await link.focus(10000);
-    await this.page.waitForTimeout(500);
+    await this.page.waitForTimeout(200);
     return link;
   }
 }

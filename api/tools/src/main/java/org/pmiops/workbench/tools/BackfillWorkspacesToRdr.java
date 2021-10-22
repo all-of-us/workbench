@@ -3,13 +3,14 @@ package org.pmiops.workbench.tools;
 import com.google.cloud.tasks.v2.CloudTasksClient;
 import java.math.BigInteger;
 import java.util.List;
-import java.util.logging.Logger;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
+import org.pmiops.workbench.cloudtasks.CloudTasksConfig;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchLocationConfigService;
@@ -30,11 +31,10 @@ import org.springframework.context.annotation.Import;
  * not set.
  */
 @Import({
+  CloudTasksConfig.class,
   WorkbenchLocationConfigService.class,
 })
 public class BackfillWorkspacesToRdr {
-  private static final Logger log = Logger.getLogger(DeleteWorkspaces.class.getName());
-
   // I haven't read the entire commons cli code, but it looks like it is limited to the Number type,
   // we really want an Integer
   // https://github.com/apache/commons-cli/blob/98d06d37bc7058bbfb2704c9620669c66e279f4a/src/main/java/org/apache/commons/cli/PatternOptionBuilder.java#L98
@@ -72,14 +72,17 @@ public class BackfillWorkspacesToRdr {
   public CommandLineRunner run(RdrExportDao rdrExportDao, TaskQueueService taskQueueService) {
     return (args) -> {
       CommandLine opts = new DefaultParser().parse(options, args);
-      Integer limit = ((Number) opts.getParsedOptionValue("limit")).intValue();
+
+      Optional<Integer> limit =
+          Optional.ofNullable(opts.getParsedOptionValue(limitOpt.getLongOpt()))
+              .map(opt -> ((Number) opt).intValue());
       boolean dryRun = opts.hasOption(dryRunOpt.getLongOpt());
 
       // Only backfill the workspaces that have not changed. The changed workspaces will be handled
       // by the nightly cron job. This way changed workspaces won't slip past the manual review
       List<BigInteger> nativeWorkspaceListToExport =
-          limit != null
-              ? rdrExportDao.findTopUnchangedDbWorkspaceIds(limit)
+          limit.isPresent()
+              ? rdrExportDao.findTopUnchangedDbWorkspaceIds(limit.get())
               : rdrExportDao.findAllUnchangedDbWorkspaceIds();
 
       List<Long> workspaceListToExport =

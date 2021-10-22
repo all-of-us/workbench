@@ -7,12 +7,12 @@ import {ListSearch} from 'app/cohort-search/list-search/list-search.component';
 import {Selection} from 'app/cohort-search/selection-list/selection-list.component';
 import {CriteriaTree} from 'app/cohort-search/tree/tree.component';
 import {domainToTitle, typeToTitle} from 'app/cohort-search/utils';
-import {Clickable, StyledAnchorTag} from 'app/components/buttons';
+import {Clickable, StyledExternalLink} from 'app/components/buttons';
 import {FlexRowWrap} from 'app/components/flex';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {AoU} from 'app/components/text-wrappers';
 import colors, {addOpacity, colorWithWhiteness} from 'app/styles/colors';
-import {reactStyles, withCurrentWorkspace, withUrlParams} from 'app/utils';
+import {reactStyles, withCurrentWorkspace} from 'app/utils';
 import {
   attributesSelectionStore,
   currentCohortCriteriaStore,
@@ -20,8 +20,12 @@ import {
   currentConceptStore,
   setSidebarActiveIconStore
 } from 'app/utils/navigation';
+import { MatchParams } from 'app/utils/stores';
 import {environment} from 'environments/environment';
 import {Criteria, Domain} from 'generated/fetch';
+import { RouteComponentProps, withRouter } from 'react-router-dom';
+
+import arrowIcon from 'assets/icons/arrow-left-regular.svg';
 
 export const LOCAL_STORAGE_KEY_COHORT_CONTEXT = 'CURRENT_COHORT_CONTEXT';
 export const LOCAL_STORAGE_KEY_CRITERIA_SELECTIONS = 'CURRENT_CRITERIA_SELECTIONS';
@@ -118,13 +122,10 @@ export const growlCSS = `
   }
  `;
 
-const arrowIcon = '/assets/icons/arrow-left-regular.svg';
-
-interface Props {
+interface Props extends RouteComponentProps<MatchParams> {
   backFn?: () => void;
   cohortContext: any;
   conceptSearchTerms?: string;
-  urlParams: any;
 }
 
 interface State {
@@ -141,7 +142,7 @@ interface State {
   loadingSubtree: boolean;
 }
 
-export const CriteriaSearch = fp.flow(withUrlParams(), withCurrentWorkspace())(class extends React.Component<Props, State>  {
+export const CriteriaSearch = fp.flow(withCurrentWorkspace(), withRouter)(class extends React.Component<Props, State>  {
   growl: any;
   growlTimer: NodeJS.Timer;
   subscription: Subscription;
@@ -240,7 +241,7 @@ export const CriteriaSearch = fp.flow(withUrlParams(), withCurrentWorkspace())(c
   }
 
   addSelection = (selectCriteria)  => {
-    const {cohortContext, cohortContext: {source}, urlParams} = this.props;
+    const {cohortContext, cohortContext: {source}, match: {params}} = this.props;
     // In case of Criteria/Cohort, close existing attribute sidebar before selecting a new value
     if (!this.isConcept && !!attributesSelectionStore.getValue()) {
       this.closeSidebar();
@@ -253,7 +254,7 @@ export const CriteriaSearch = fp.flow(withUrlParams(), withCurrentWorkspace())(c
     }
     // Save selections in local storage in case of error or page refresh
     if (source === 'cohort') {
-      const {wsid} = urlParams;
+      const {wsid} = params;
       const cohort = currentCohortStore.getValue();
       cohortContext.item.searchParameters = criteriaList;
       const localStorageContext = {
@@ -341,31 +342,31 @@ export const CriteriaSearch = fp.flow(withUrlParams(), withCurrentWorkspace())(c
         </React.Fragment>}
         <div style={source === 'conceptSetDetails' ? styles.detailExternalLinks : styles.externalLinks}>
           {domain === Domain.DRUG && <div>
-            <StyledAnchorTag
+            <StyledExternalLink
                 href='https://mor.nlm.nih.gov/RxNav/'
                 target='_blank'
                 rel='noopener noreferrer'>
               Explore
-            </StyledAnchorTag>
+            </StyledExternalLink>
             &nbsp;drugs by brand names outside of <AoU/>
           </div>}
           {domain === Domain.SURVEY && <div>
             Find more information about each survey in the&nbsp;
-            <StyledAnchorTag
+            <StyledExternalLink
                 href='https://www.researchallofus.org/survey-explorer/'
                 target='_blank'
                 rel='noopener noreferrer'>
               Survey Explorer
-            </StyledAnchorTag>
+            </StyledExternalLink>
           </div>}
           {this.showDataBrowserLink && <div>
             Explore Source information on the&nbsp;
-            <StyledAnchorTag
+            <StyledExternalLink
                 href={environment.publicUiUrl}
                 target='_blank'
                 rel='noopener noreferrer'>
               Data Browser
-            </StyledAnchorTag>
+            </StyledExternalLink>
           </div>}
         </div>
       </FlexRowWrap>
@@ -387,7 +388,7 @@ export const CriteriaSearch = fp.flow(withUrlParams(), withCurrentWorkspace())(c
             selectOption={this.setAutocompleteSelection}
             setSearchTerms={this.setTreeSearchTerms}/>}
          {/*List View (using duplicated version of ListSearch) */}
-        {!this.initTree && <div style={this.searchContentStyle('list')}>
+        {!this.initTree && cohortContext.domain && <div style={this.searchContentStyle('list')}>
           <ListSearch hierarchy={this.showHierarchy}
                       searchContext={cohortContext}
                       searchTerms={conceptSearchTerms}

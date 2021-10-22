@@ -1,4 +1,4 @@
-import { ElementHandle, Frame, Page } from 'puppeteer';
+import { ElementHandle, Page } from 'puppeteer';
 import { getPropValue } from 'utils/element-utils';
 import NotebookFrame from './notebook-frame';
 
@@ -27,6 +27,13 @@ export default class NotebookCell extends NotebookFrame {
     super(page);
   }
 
+  async findCell(cellIndx?: number): Promise<ElementHandle> {
+    const iframe = await this.getIFrame();
+    cellIndx = cellIndx || this.getCellIndex();
+    const selector = this.cellSelector(cellIndx);
+    return iframe.waitForSelector(`${selector} .CodeMirror-code`, { visible: true });
+  }
+
   async getLastCell(): Promise<NotebookCell | null> {
     const elements = await this.findAllCells();
     if (elements.length === 0) return null;
@@ -34,35 +41,46 @@ export default class NotebookCell extends NotebookFrame {
     return this;
   }
 
+  async isSelected(cellIndx?: number): Promise<boolean> {
+    const iframe = await this.getIFrame();
+    cellIndx = cellIndx || this.getCellIndex();
+    const selector = this.cellSelector(cellIndx);
+    return iframe
+      .waitForSelector(`${selector}.selected`, { visible: true })
+      .then(() => {
+        return true;
+      })
+      .catch(() => {
+        return false;
+      });
+  }
+
   /**
    * Set focus to (select) a notebook cell input. Retry up to 3 times if focus fails.
    * @returns ElementHandle to code input if exists.
    */
   async focus(maxAttempts = 3): Promise<ElementHandle> {
-    const clickInCell = async (iframe: Frame): Promise<ElementHandle> => {
-      const selector = this.cellSelector(this.getCellIndex());
-      const cell = await iframe.waitForSelector(`${selector} .CodeMirror-code`, { visible: true });
-      await cell.click({ delay: 10 }); // focus
-      return cell;
-    };
-
-    const clickAndCheck = async (iframe: Frame): Promise<ElementHandle> => {
+    const clickAndCheck = async (): Promise<ElementHandle> => {
       maxAttempts--;
-      const cell = await clickInCell(iframe);
+      const cell = await this.findCell();
+      await cell.click({ delay: 100 });
+      // Click in a notebook cell editor area enables cell Edit mode.
+      // When a cell is in Edit mode, user can enter code to run.
+      const iframe = await this.getIFrame();
       const [element] = await iframe.$$('body.notebook_app.edit_mode');
-      if (element) {
+      const selected = await this.isSelected();
+      if (element && selected) {
         return cell;
       }
       if (maxAttempts <= 0) {
-        console.warn('Notebook body is not in edit_mode.');
+        console.warn(`Notebook cell[${this.getCellIndex()}] is not in edit_mode or selected.`);
         return cell;
       }
-      await this.page.waitForTimeout(3000); // Pause 3 seconds then retry
-      return clickAndCheck(iframe);
+      await this.page.waitForTimeout(2000); // Pause 2 seconds then retry
+      return clickAndCheck();
     };
 
-    const frame = await this.getIFrame();
-    return clickAndCheck(frame);
+    return clickAndCheck();
   }
 
   /**
@@ -106,6 +124,14 @@ export default class NotebookCell extends NotebookFrame {
     return value.trim();
   }
 
+  async getOutputStdError(timeOut?: number): Promise<string> {
+    const element = await this.findOutputStdErrorElementHandle(timeOut);
+    const value = await getPropValue<string>(element, 'innerText');
+    await element.dispose();
+    console.error(`Run cell output error: \n${value}`);
+    return value.trim();
+  }
+
   /**
    * Find cell output_area element.
    * @param {number} timeOut The timeout in milliseconds.
@@ -124,6 +150,12 @@ export default class NotebookCell extends NotebookFrame {
    */
   async findOutputErrorElementHandle(timeOut?: number): Promise<ElementHandle> {
     const selector = `${this.outputSelector(this.getCellIndex())}.output_error`;
+    const iframe = await this.getIFrame();
+    return iframe.waitForSelector(selector, { visible: true, timeout: timeOut });
+  }
+
+  async findOutputStdErrorElementHandle(timeOut?: number): Promise<ElementHandle> {
+    const selector = `${this.outputSelector(this.getCellIndex())}.output_stderr`;
     const iframe = await this.getIFrame();
     return iframe.waitForSelector(selector, { visible: true, timeout: timeOut });
   }

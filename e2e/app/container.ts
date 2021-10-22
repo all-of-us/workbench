@@ -31,17 +31,13 @@ export default class Container {
   }
 
   async waitUntilVisible(timeout = 60000): Promise<void> {
-    await Promise.all([
-      waitWhileLoading(this.page, timeout),
-      this.page.waitForXPath(this.getXpath(), { visible: true, timeout })
-    ]);
+    await this.page.waitForXPath(this.getXpath(), { visible: true, timeout });
+    await waitWhileLoading(this.page, timeout);
   }
 
   async waitUntilClose(timeout = 2 * 60 * 1000): Promise<void> {
-    await Promise.all([
-      waitWhileLoading(this.page, timeout),
-      this.page.waitForXPath(this.getXpath(), { hidden: true, timeout })
-    ]);
+    await this.page.waitForXPath(this.getXpath(), { hidden: true, timeout });
+    await this.page.waitForTimeout(500); // For page rendering to finish.
   }
 
   /**

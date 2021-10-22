@@ -4,13 +4,12 @@ import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
 import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.auth.UserAuthentication;
-import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.ServerErrorException;
+import org.pmiops.workbench.leonardo.api.DisksApi;
 import org.pmiops.workbench.leonardo.api.RuntimesApi;
 import org.pmiops.workbench.leonardo.api.ServiceInfoApi;
 import org.pmiops.workbench.notebooks.api.JupyterApi;
@@ -24,6 +23,8 @@ import org.springframework.web.context.annotation.RequestScope;
 public class NotebooksConfig {
   public static final String USER_RUNTIMES_API = "userRuntimesApi";
   public static final String SERVICE_RUNTIMES_API = "svcRuntimesApi";
+
+  public static final String USER_DISKS_API = "userDisksApi";
 
   // Identifiers for the Swagger2 APIs for Jupyter and Welder, used for creating/localizing files.
   private static final String USER_NOTEBOOKS_CLIENT = "notebooksApiClient";
@@ -43,9 +44,9 @@ public class NotebooksConfig {
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public ApiClient notebooksApiClient(
       UserAuthentication userAuthentication,
-      WorkbenchConfig workbenchConfig,
+      LeonardoApiClientFactory factory,
       HttpServletRequest req) {
-    ApiClient apiClient = buildNotebooksApiClient(workbenchConfig);
+    ApiClient apiClient = factory.newNotebooksClient();
     apiClient.setAccessToken(userAuthentication.getCredentials());
 
     // We pass-through the "Referer" header to outgoing Proxy API requests. Leonardo verifies this
@@ -64,8 +65,8 @@ public class NotebooksConfig {
   @Bean(name = SERVICE_LEONARDO_CLIENT)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public org.pmiops.workbench.leonardo.ApiClient leoServiceApiClient(
-      WorkbenchConfig workbenchConfig) {
-    org.pmiops.workbench.leonardo.ApiClient apiClient = buildLeoApiClient(workbenchConfig);
+      LeonardoApiClientFactory factory) {
+    org.pmiops.workbench.leonardo.ApiClient apiClient = factory.newApiClient();
     try {
       apiClient.setAccessToken(ServiceAccounts.getScopedServiceAccessToken(NOTEBOOK_SCOPES));
     } catch (IOException e) {
@@ -77,16 +78,16 @@ public class NotebooksConfig {
   @Bean(name = USER_LEONARDO_CLIENT)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public org.pmiops.workbench.leonardo.ApiClient leoUserApiClient(
-      UserAuthentication userAuthentication, WorkbenchConfig workbenchConfig) {
-    org.pmiops.workbench.leonardo.ApiClient apiClient = buildLeoApiClient(workbenchConfig);
+      UserAuthentication userAuthentication, LeonardoApiClientFactory factory) {
+    org.pmiops.workbench.leonardo.ApiClient apiClient = factory.newApiClient();
     apiClient.setAccessToken(userAuthentication.getCredentials());
     return apiClient;
   }
 
   @Bean(name = SERVICE_NOTEBOOKS_CLIENT)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public ApiClient workbenchServiceAccountClient(WorkbenchConfig workbenchConfig) {
-    ApiClient apiClient = buildNotebooksApiClient(workbenchConfig);
+  public ApiClient workbenchServiceAccountClient(LeonardoApiClientFactory factory) {
+    ApiClient apiClient = factory.newNotebooksClient();
     try {
       apiClient.setAccessToken(ServiceAccounts.getScopedServiceAccessToken(NOTEBOOK_SCOPES));
     } catch (IOException e) {
@@ -100,6 +101,15 @@ public class NotebooksConfig {
   public RuntimesApi runtimesApi(
       @Qualifier(USER_LEONARDO_CLIENT) org.pmiops.workbench.leonardo.ApiClient apiClient) {
     RuntimesApi api = new RuntimesApi();
+    api.setApiClient(apiClient);
+    return api;
+  }
+
+  @Bean(name = USER_DISKS_API)
+  @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
+  public DisksApi disksApi(
+      @Qualifier(USER_LEONARDO_CLIENT) org.pmiops.workbench.leonardo.ApiClient apiClient) {
+    DisksApi api = new DisksApi();
     api.setApiClient(apiClient);
     return api;
   }
@@ -136,34 +146,5 @@ public class NotebooksConfig {
     ServiceInfoApi api = new ServiceInfoApi();
     api.setApiClient(apiClient);
     return api;
-  }
-
-  private ApiClient buildNotebooksApiClient(WorkbenchConfig workbenchConfig) {
-    final ApiClient apiClient =
-        new ApiClient()
-            .setBasePath(workbenchConfig.firecloud.leoBaseUrl)
-            .setDebugging(workbenchConfig.firecloud.debugEndpoints)
-            .addDefaultHeader(
-                org.pmiops.workbench.firecloud.FireCloudConfig.X_APP_ID_HEADER,
-                workbenchConfig.firecloud.xAppIdValue);
-    apiClient
-        .getHttpClient()
-        .setReadTimeout(workbenchConfig.firecloud.timeoutInSeconds, TimeUnit.SECONDS);
-    return apiClient;
-  }
-
-  private org.pmiops.workbench.leonardo.ApiClient buildLeoApiClient(
-      WorkbenchConfig workbenchConfig) {
-    final org.pmiops.workbench.leonardo.ApiClient apiClient =
-        new org.pmiops.workbench.leonardo.ApiClient()
-            .setBasePath(workbenchConfig.firecloud.leoBaseUrl)
-            .setDebugging(workbenchConfig.firecloud.debugEndpoints)
-            .addDefaultHeader(
-                org.pmiops.workbench.firecloud.FireCloudConfig.X_APP_ID_HEADER,
-                workbenchConfig.firecloud.xAppIdValue);
-    apiClient
-        .getHttpClient()
-        .setReadTimeout(workbenchConfig.firecloud.timeoutInSeconds, TimeUnit.SECONDS);
-    return apiClient;
   }
 }

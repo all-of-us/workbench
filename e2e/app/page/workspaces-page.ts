@@ -1,13 +1,11 @@
 import { Page } from 'puppeteer';
 import Button from 'app/element/button';
-import { Language, LinkText, PageUrl } from 'app/text-labels';
-import WorkspaceEditPage, { FIELD as EDIT_FIELD } from 'app/page/workspace-edit-page';
+import { LinkText, PageUrl } from 'app/text-labels';
+import WorkspaceEditPage, { AccessTierDisplayNames, FIELD as EDIT_FIELD } from 'app/page/workspace-edit-page';
 import RadioButton from 'app/element/radiobutton';
-import { findOrCreateWorkspace } from 'utils/test-utils';
 import { waitForDocumentTitle, waitWhileLoading } from 'utils/waits-utils';
 import ReactSelect from 'app/element/react-select';
 import WorkspaceDataPage from './workspace-data-page';
-import WorkspaceAnalysisPage from './workspace-analysis-page';
 import { config } from 'resources/workbench-config';
 import { UseFreeCredits } from './workspace-base';
 import OldCdrVersionModal from 'app/modal/old-cdr-version-modal';
@@ -16,6 +14,7 @@ import { logger } from 'libs/logger';
 import WorkspaceAboutPage from './workspace-about-page';
 import WorkspaceReviewResearchPurposeModal from 'app/modal/workspace-review-research-purpose-modal';
 import WorkspaceCard from 'app/component/workspace-card';
+
 const faker = require('faker/locale/en_US');
 
 export const PageTitle = 'View Workspace';
@@ -35,17 +34,15 @@ export default class WorkspacesPage extends AuthenticatedPage {
 
   async isLoaded(): Promise<boolean> {
     await waitForDocumentTitle(this.page, PageTitle);
-
     await waitWhileLoading(this.page, 120000).catch(async () => {
       logger.warn('Retry loading Workspaces page');
       await this.page.reload({ waitUntil: ['networkidle0', 'load'] });
       await waitWhileLoading(this.page);
     });
-
-    await Promise.all([
-      this.page.waitForXPath('//a[text()="Workspaces"]', { visible: true }),
-      this.page.waitForXPath('//h3[normalize-space(text())="Workspaces"]', { visible: true }) // Texts above Filter By Select
-    ]);
+    await this.page.waitForXPath('//a[text()="Workspaces"]', { visible: true });
+    await this.page.waitForSelector('[data-test-id="workspace-card"], [role="button"]', {
+      visible: true
+    });
     return true;
   }
 
@@ -53,7 +50,10 @@ export default class WorkspacesPage extends AuthenticatedPage {
    * Load 'Your Workspaces' page and ensure page load is completed.
    */
   async load(): Promise<this> {
-    await this.loadPageUrl(PageUrl.Workspaces);
+    const title = await this.page.title();
+    if (!title.includes(PageTitle)) {
+      await this.loadPageUrl(PageUrl.Workspaces);
+    }
     await waitWhileLoading(this.page);
     return this;
   }
@@ -81,17 +81,31 @@ export default class WorkspacesPage extends AuthenticatedPage {
    */
   async createWorkspace(
     workspaceName: string,
-    cdrVersionName: string = config.DEFAULT_CDR_VERSION_NAME,
-    billingAccount: string = UseFreeCredits,
-    reviewRequest = false
+    opts: {
+      dataAccessTier?: string;
+      cdrVersionName?: string;
+      billingAccount?: string;
+      reviewRequest?: boolean;
+    } = {}
   ): Promise<string[]> {
+    const {
+      dataAccessTier = AccessTierDisplayNames.Registered,
+      cdrVersionName = config.DEFAULT_CDR_VERSION_NAME,
+      billingAccount = UseFreeCredits,
+      reviewRequest = false
+    } = opts;
+
     const editPage = await this.fillOutRequiredCreationFields(workspaceName, billingAccount, reviewRequest);
+
+    // select Data access tier
+    await editPage.selectAccessTier(dataAccessTier);
 
     // select the chosen CDR Version
     await editPage.selectCdrVersion(cdrVersionName);
 
     // if the CDR Version is not the default, consent to the necessary restrictions
-    if (cdrVersionName !== config.DEFAULT_CDR_VERSION_NAME) {
+    // cannot create a workspace with an old CDR Version without consenting to the restrictions.
+    if (cdrVersionName === config.OLD_CDR_VERSION_NAME) {
       const modal = new OldCdrVersionModal(this.page);
       await modal.waitForLoad();
       await modal.consentToOldCdrRestrictions();
@@ -101,7 +115,10 @@ export default class WorkspacesPage extends AuthenticatedPage {
     const createButton = editPage.getCreateWorkspaceButton();
     await createButton.waitUntilEnabled();
     const modalContent = await editPage.clickCreateFinishButton(createButton);
-    logger.info(`Created workspace "${workspaceName}" with CDR Version "${cdrVersionName}"`);
+    logger.info(
+      `Created workspace "${workspaceName}" with CDR Version "${cdrVersionName}"` +
+        ` and Data Access Tier "${dataAccessTier}"`
+    );
     return modalContent;
   }
 
@@ -113,7 +130,7 @@ export default class WorkspacesPage extends AuthenticatedPage {
     const editPage = await this.clickCreateNewWorkspace();
     // wait for Billing Account default selected value to appear
     const selectBilling = editPage.getBillingAccountSelect();
-    await selectBilling.waitForSelectedValue(UseFreeCredits, 60000);
+    await selectBilling.selectOptionByValuePrefix(billingAccount);
 
     await editPage.getWorkspaceNameTextbox().type(workspaceName);
     await editPage.getWorkspaceNameTextbox().pressTab();
@@ -152,27 +169,6 @@ export default class WorkspacesPage extends AuthenticatedPage {
     await editPage.requestForReviewRadiobutton(reviewRequest);
 
     return editPage;
-  }
-
-  /**
-   * Create a new notebook in a selected Workspace.
-   * @param {string} workspaceName Workspace name.
-   * @param {string} notebookName Notebook name
-   * @param {Language} lang Notebook language.
-   */
-  async createNotebook(opts: {
-    workspaceName: string;
-    notebookName: string;
-    lang?: Language;
-  }): Promise<WorkspaceAnalysisPage> {
-    const { workspaceName, notebookName, lang } = opts;
-    await findOrCreateWorkspace(this.page, { workspaceName });
-
-    const dataPage = new WorkspaceDataPage(this.page);
-    const notebookPage = await dataPage.createNotebook(notebookName, lang); // Python 3 is the default
-
-    // Do not run any code. Simply returns to the Workspace Analysis tab.
-    return notebookPage.goAnalysisPage();
   }
 
   async filterByAccessLevel(level: string): Promise<string> {

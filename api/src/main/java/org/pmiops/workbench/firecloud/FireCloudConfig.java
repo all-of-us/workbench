@@ -8,7 +8,6 @@ import com.google.protobuf.Duration;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -30,8 +29,11 @@ import org.springframework.web.context.annotation.RequestScope;
 
 @org.springframework.context.annotation.Configuration
 public class FireCloudConfig {
-
-  public static final String X_APP_ID_HEADER = "X-App-ID";
+  public static final List<String> BILLING_SCOPES =
+      ImmutableList.<String>builder()
+          .addAll(FirecloudApiClientFactory.SCOPES)
+          .add("https://www.googleapis.com/auth/cloud-billing")
+          .build();
 
   // Bean names used to differentiate between an API client authenticated as the end user (via
   // UserAuthentication) and an API client authenticated as the service account user (via
@@ -51,30 +53,20 @@ public class FireCloudConfig {
   public static final String END_USER_STATIC_NOTEBOOKS_API = "endUserStaticNotebooksApi";
   public static final String SERVICE_ACCOUNT_BILLING_V2_API = "serviceAccountBillingV2Api";
   public static final String END_USER_STATIC_BILLING_V2_API = "endUserBillingV2Api";
-  public static final List<String> TERRA_SCOPES =
-      ImmutableList.of(
-          "https://www.googleapis.com/auth/userinfo.profile",
-          "https://www.googleapis.com/auth/userinfo.email");
-
-  public static final List<String> BILLING_SCOPES =
-      ImmutableList.<String>builder()
-          .addAll(TERRA_SCOPES)
-          .add("https://www.googleapis.com/auth/cloud-billing")
-          .build();
 
   @Bean(name = END_USER_API_CLIENT)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public ApiClient endUserApiClient(
-      UserAuthentication userAuthentication, WorkbenchConfig workbenchConfig) {
-    ApiClient apiClient = buildApiClient(workbenchConfig);
+      UserAuthentication userAuthentication, FirecloudApiClientFactory factory) {
+    ApiClient apiClient = factory.newApiClient();
     apiClient.setAccessToken(userAuthentication.getCredentials());
     return apiClient;
   }
 
   @Bean(name = SERVICE_ACCOUNT_API_CLIENT)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public ApiClient allOfUsApiClient(WorkbenchConfig workbenchConfig) {
-    ApiClient apiClient = buildApiClient(workbenchConfig);
+  public ApiClient allOfUsApiClient(FirecloudApiClientFactory factory) {
+    ApiClient apiClient = factory.newApiClient();
     try {
       apiClient.setAccessToken(ServiceAccounts.getScopedServiceAccessToken(BILLING_SCOPES));
     } catch (IOException e) {
@@ -97,7 +89,7 @@ public class FireCloudConfig {
                         + workbenchConfig.wgsCohortExtraction.serviceAccount,
                     Collections.emptyList(),
                     ImmutableList.<String>builder()
-                        .addAll(TERRA_SCOPES)
+                        .addAll(FirecloudApiClientFactory.SCOPES)
                         .add("https://www.googleapis.com/auth/devstorage.read_write")
                         .build(),
                     Duration.newBuilder().setSeconds(60 * 10).build())
@@ -108,11 +100,10 @@ public class FireCloudConfig {
   @Bean(name = WGS_COHORT_EXTRACTION_SERVICE_ACCOUNT_API_CLIENT)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public ApiClient wgsExtractionServiceAccountApiClient(
-      WorkbenchConfig workbenchConfig,
+      FirecloudApiClientFactory factory,
       @Qualifier(WGS_EXTRACTION_SA_CREDENTIALS) GoogleCredentials credentials) {
-    ApiClient apiClient = buildApiClient(workbenchConfig);
+    ApiClient apiClient = factory.newApiClient();
     apiClient.setAccessToken(credentials.getAccessToken().getTokenValue());
-
     return apiClient;
   }
 
@@ -225,20 +216,9 @@ public class FireCloudConfig {
 
   @Bean
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public StatusApi statusApi(WorkbenchConfig workbenchConfig) {
+  public StatusApi statusApi(FirecloudApiClientFactory factory) {
     StatusApi statusApi = new StatusApi();
-    statusApi.setApiClient(buildApiClient(workbenchConfig));
+    statusApi.setApiClient(factory.newApiClient());
     return statusApi;
-  }
-
-  public static ApiClient buildApiClient(WorkbenchConfig workbenchConfig) {
-    ApiClient apiClient = new ApiClient();
-    apiClient.setBasePath(workbenchConfig.firecloud.baseUrl);
-    apiClient.addDefaultHeader(X_APP_ID_HEADER, workbenchConfig.firecloud.xAppIdValue);
-    apiClient.setDebugging(workbenchConfig.firecloud.debugEndpoints);
-    apiClient
-        .getHttpClient()
-        .setReadTimeout(workbenchConfig.firecloud.timeoutInSeconds, TimeUnit.SECONDS);
-    return apiClient;
   }
 }

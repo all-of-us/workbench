@@ -1,11 +1,10 @@
 package org.pmiops.workbench.db.dao;
 
 import com.google.api.services.oauth2.model.Userinfoplus;
-import java.io.IOException;
-import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
+import javax.annotation.Nullable;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.db.model.DbAddress;
 import org.pmiops.workbench.db.model.DbDemographicSurvey;
@@ -15,14 +14,11 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.AccessBypassRequest;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.Degree;
-import org.pmiops.workbench.model.RenewableAccessModuleStatus;
 import org.pmiops.workbench.model.UserAccessExpiration;
 import org.springframework.data.domain.Sort;
 
 public interface UserService {
   DbUser updateUserWithRetries(Function<DbUser, DbUser> userModifier, DbUser dbUser, Agent agent);
-
-  List<RenewableAccessModuleStatus> getRenewableAccessModuleStatus(DbUser dbUser);
 
   DbUser createServiceAccountUser(String email);
 
@@ -47,27 +43,12 @@ public interface UserService {
   DbUser updateUserWithConflictHandling(DbUser user);
 
   // TODO(jaycarlton): Move compliance-related methods to a new UserComplianceService or similar
-  DbUser submitDataUseAgreement(
-      DbUser user, Integer dataUseAgreementSignedVersion, String initials);
+  DbUser submitDUCC(DbUser user, Integer duccSignedVersion, String initials);
 
   // Registers that a user has agreed to a given version of the Terms of Service.
   void submitTermsOfService(DbUser dbUser, Integer tosVersion);
 
   void setDataUseAgreementNameOutOfDate(String newGivenName, String newFamilyName);
-
-  void setDataUseAgreementBypassTime(
-      Long userId, Timestamp previousBypassTime, Timestamp newBypassTime);
-
-  void setComplianceTrainingBypassTime(
-      Long userId, Timestamp previousBypassTime, Timestamp newBypassTime);
-
-  void setEraCommonsBypassTime(Long userId, Timestamp previousBypassTime, Timestamp newBypassTime);
-
-  void setTwoFactorAuthBypassTime(
-      Long userId, Timestamp previousBypassTime, Timestamp newBypassTime);
-
-  void setRasLinkLoginGovBypassTime(
-      Long userId, Timestamp previousBypassTime, Timestamp newBypassTime);
 
   DbUser setDisabledStatus(Long userId, boolean disabled);
 
@@ -78,22 +59,8 @@ public interface UserService {
   List<DbUser> getAllUsersExcludingDisabled();
 
   @Deprecated // use or create an auditor in org.pmiops.workbench.actionaudit.auditors
-  void logAdminUserAction(long targetUserId, String targetAction, Object oldValue, Object newValue);
-
-  @Deprecated // use or create an auditor in org.pmiops.workbench.actionaudit.auditors
   void logAdminWorkspaceAction(
       long targetWorkspaceId, String targetAction, Object oldValue, Object newValue);
-
-  /**
-   * Find users with Registered Tier access whose name or username match the supplied search terms.
-   *
-   * @param term User-supplied search term
-   * @param sort Option(s) for ordering query results
-   * @return the List of DbUsers which meet the search and access requirements
-   * @deprecated use {@link #findUsersBySearchString(String, Sort, String)} instead.
-   */
-  @Deprecated
-  List<DbUser> findUsersBySearchString(String term, Sort sort);
 
   /**
    * Find users whose name or username match the supplied search terms and who have the appropriate
@@ -113,9 +80,6 @@ public interface UserService {
       throws org.pmiops.workbench.moodle.ApiException, NotFoundException;
 
   DbUser syncEraCommonsStatus();
-
-  DbUser syncEraCommonsStatusUsingImpersonation(DbUser user, Agent agent)
-      throws IOException, org.pmiops.workbench.firecloud.ApiException;
 
   /**
    * Synchronize the 2FA enablement status of the currently signed-in user between the Workbench
@@ -142,7 +106,7 @@ public interface UserService {
    */
   DbUser syncTwoFactorAuthStatus(DbUser targetUser, Agent agent, boolean isEnrolledIn2FA);
 
-  int getCurrentDuccVersion();
+  DbUser syncDuccVersionStatus(DbUser targetUser, Agent agent, @Nullable Integer signedDuccVersion);
 
   Optional<DbUser> getByUsername(String username);
 
@@ -163,6 +127,9 @@ public interface UserService {
   Optional<DbUser> findUserWithAuthoritiesAndPageVisits(long userId);
 
   DbUser updateRasLinkLoginGovStatus(String loginGovUserName);
+
+  /** Link eRA commons account in RW using RAS as source of truth. */
+  DbUser updateRasLinkEraStatus(String eRACommonsUsername);
 
   /** Confirm that a user's profile is up to date, for annual renewal compliance purposes. */
   DbUser confirmProfile(DbUser u);

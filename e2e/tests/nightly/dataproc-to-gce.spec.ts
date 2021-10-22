@@ -4,11 +4,10 @@ import { LinkText, ResourceCard } from 'app/text-labels';
 import { config } from 'resources/workbench-config';
 import { makeRandomName } from 'utils/str-utils';
 import { createWorkspace, signInWithAccessToken } from 'utils/test-utils';
+import { AccessTierDisplayNames } from 'app/page/workspace-edit-page';
 
 // This test could take a long time to run
-jest.setTimeout(60 * 30 * 1000);
-// Retry one more when fails
-jest.retryTimes(0);
+jest.setTimeout(40 * 60 * 1000);
 
 describe('Updating runtime compute type', () => {
   beforeEach(async () => {
@@ -16,7 +15,10 @@ describe('Updating runtime compute type', () => {
   });
 
   test('Switch from dataproc to GCE', async () => {
-    await createWorkspace(page, { cdrVersion: config.ALTERNATIVE_CDR_VERSION_NAME });
+    await createWorkspace(page, {
+      cdrVersionName: config.CONTROLLED_TIER_CDR_VERSION_NAME,
+      dataAccessTier: AccessTierDisplayNames.Controlled
+    });
 
     // Open the runtime panel
     // Click “customize“ , from the default “create panel”
@@ -40,6 +42,7 @@ describe('Updating runtime compute type', () => {
     const workersOutputText = await notebook.runCodeCell(1, { codeFile: 'resources/python-code/count-workers.py' });
     // Spark config always seems to start at this and then scale if you need additional threads.
     expect(workersOutputText).toBe("'2'");
+    await notebook.save();
 
     // Open runtime panel
     await runtimePanel.open();
@@ -48,7 +51,6 @@ describe('Updating runtime compute type', () => {
     await runtimePanel.pickComputeType(ComputeType.Standard);
     await runtimePanel.pickCpus(8);
     await runtimePanel.pickRamGbs(30);
-    await runtimePanel.pickDiskGbs(60);
 
     // Apply changes and wait for new runtime running
     const notebookPreviewPage = await runtimePanel.applyChanges();
@@ -79,7 +81,6 @@ describe('Updating runtime compute type', () => {
     await runtimePanel.open();
     expect(await runtimePanel.getCpus()).toBe('8');
     expect(await runtimePanel.getRamGbs()).toBe('30');
-    expect(await runtimePanel.getDiskGbs()).toBe(60);
 
     // Delete notebook
     const workspaceAnalysisPage = await notebookPreviewPage.goAnalysisPage();

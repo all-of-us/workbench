@@ -5,7 +5,7 @@ module.exports = {
   testRunner: 'jest-circus/runner',
   testEnvironment: '<rootDir>/puppeteer-custom-environment.ts',
   setupFilesAfterEnv: ['<rootDir>/jest-circus.setup.ts', '<rootDir>/jest.test-setup.ts'],
-  setupFiles: ['dotenv/config'],
+  setupFiles: ['<rootDir>/jest.setup.ts'],
   reporters: [
     'default',
     [
@@ -44,7 +44,7 @@ module.exports = {
       tsconfig: 'tsconfig.jest.json'
     }
   },
-  testPathIgnorePatterns: ['/node_modules/', '/tsc-out/'],
+  testPathIgnorePatterns: ['/node_modules/', '/tsc-out/', '/examples/'],
   testMatch:
     process.env.TEST_MODE === 'nightly-integration'
       ? ['<rootDir>/tests/nightly/**/*.spec.ts']

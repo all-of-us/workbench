@@ -2,7 +2,7 @@ import { ElementHandle, Page } from 'puppeteer';
 import { FieldSelector } from 'app/page/cohort-build-page';
 import { waitForNumericalString, waitForText, waitWhileLoading } from 'utils/waits-utils';
 import TieredMenu from 'app/component/tiered-menu';
-import { LinkText, MenuOption } from 'app/text-labels';
+import { AgeSelectionRadioButton, LinkText, MenuOption } from 'app/text-labels';
 import { snowmanIconXpath } from 'app/component/snowman-menu';
 import Modal from 'app/modal/modal';
 import InputSwitch from 'app/element/input-switch';
@@ -189,9 +189,7 @@ export default class CohortParticipantsGroup {
   async deleteCriteria(criteriaName: string): Promise<void> {
     await this.clickCriteriaSnowmanIcon(criteriaName);
     await this.selectSnowmanMenu(MenuOption.DeleteCriteria);
-    const xpath = `${this.rootXpath}//*[normalize-space()="UNDO" and @role="button"]`;
-    const undoButton = new Button(this.page, xpath);
-    await undoButton.waitForXPath(); // Find the UNDO button but do not click.
+    await waitWhileLoading(this.page);
   }
 
   /**
@@ -275,7 +273,11 @@ export default class CohortParticipantsGroup {
    * @param {number} minAge
    * @param {number} maxAge
    */
-  async includeAge(minAge: number, maxAge: number): Promise<number> {
+  async includeAge(
+    minAge: number,
+    maxAge: number,
+    radioButtonText: AgeSelectionRadioButton = AgeSelectionRadioButton.CurrentAge
+  ): Promise<number> {
     await this.addCriteria([MenuOption.Demographics, MenuOption.Age]);
     const selector = `${this.cohortSearchContainerXpath}//input[@type="number"]`;
     await this.page.waitForXPath(selector, { visible: true });
@@ -289,7 +291,7 @@ export default class CohortParticipantsGroup {
       .then((input) => input.pressTab());
 
     // Select "Age at Consent" radiobutton.
-    await RadioButton.findByName(this.page, { name: 'Age at Consent' }).select();
+    await RadioButton.findByName(this.page, { name: radioButtonText }).select();
     // Get count from slider badge
     const count = await waitForNumericalString(this.page, `${this.cohortSearchContainerXpath}//*[@id="age-count"]`);
     // Click "ADD SELECTION" button to add selected age range
@@ -505,8 +507,15 @@ export default class CohortParticipantsGroup {
 
   async searchCriteria(searchWord: string): Promise<Table> {
     const searchFilterTextbox = Textbox.findByName(this.page, { dataTestId: 'list-search-input' });
+    const waitForResponsePromise = this.page.waitForResponse(
+      (response) => {
+        return response.url().includes('/criteria/') && response.request().method() === 'GET';
+      },
+      { timeout: 60000 }
+    );
     await searchFilterTextbox.type(searchWord);
     await searchFilterTextbox.pressReturn();
+    await waitForResponsePromise;
     await waitWhileLoading(this.page);
     return new Table(this.page, `${this.criteriaSearchContainerXpath}//table[@class="p-datatable"]`);
   }

@@ -2,8 +2,8 @@ import {profileApi} from 'app/services/swagger-fetch-clients';
 import { BreadcrumbType } from 'app/utils/navigation';
 import {atom, Atom} from 'app/utils/subscribable';
 import {
-  CdrVersionTiersResponse,
-  ConfigResponse,
+  CdrVersionTier,
+  ConfigResponse, Disk,
   GenomicExtractionJob,
   Profile,
   Runtime,
@@ -20,6 +20,7 @@ export interface RouteDataStore {
   breadcrumb?: BreadcrumbType;
   pathElementForTitle?: string;
   contentFullHeightOverride?: boolean;
+  workspaceNavBarTab?: string;
 }
 
 export const routeDataStore = atom<RouteDataStore>({});
@@ -27,11 +28,16 @@ export const routeDataStore = atom<RouteDataStore>({});
 interface AuthStore {
   authLoaded: boolean;
   isSignedIn: boolean;
+  authError: string;
 }
 
-export const authStore = atom<AuthStore>({authLoaded: false, isSignedIn: false});
+export const authStore = atom<AuthStore>({authLoaded: false, isSignedIn: false, authError: ''});
 
-export const cdrVersionStore = atom<CdrVersionTiersResponse>({tiers: []});
+interface CdrVersionStore {
+  tiers?: Array<CdrVersionTier>;
+}
+
+export const cdrVersionStore = atom<CdrVersionStore>({});
 
 export interface GenomicExtractionStore {
   [workspaceNamespace: string]: GenomicExtractionJob[];
@@ -120,9 +126,22 @@ export const clearCompoundRuntimeOperations = () => {
 export interface RuntimeStore {
   workspaceNamespace: string | null | undefined;
   runtime: Runtime | null | undefined;
+  runtimeLoaded: boolean;
 }
 
-export const runtimeStore = atom<RuntimeStore>({workspaceNamespace: undefined, runtime: undefined});
+export const runtimeStore = atom<RuntimeStore>({
+  workspaceNamespace: undefined,
+  runtime: undefined,
+  runtimeLoaded: false
+});
+
+// runtime store states: undefined(initial state) -> Runtime (user selected) <--> null (delete only - no recreate)
+export interface DiskStore {
+  workspaceNamespace: string | null | undefined;
+  persistentDisk: Disk | null | undefined;
+}
+
+export const diskStore = atom<DiskStore>({workspaceNamespace: undefined, persistentDisk: undefined});
 
 export interface StackdriverErrorReporterStore {
   reporter?: StackdriverErrorReporter;
@@ -136,15 +155,22 @@ export interface ServerConfigStore {
 
 export const serverConfigStore = atom<ServerConfigStore>({});
 
-export interface CanComponentDeactivate {
-  canDeactivate: () => Promise<boolean> | boolean;
+// These fields come from the colon-prefixed params declared on router paths.
+// See app-routing, signed-in-app-routing, and workspace-app-routing for examples.
+// If you want to add a new route param, you will need to define it here as well.
+export interface MatchParams {
+  cid?: string;
+  csid?: string;
+  dataSetId?: string;
+  domain?: string;
+  institutionId?: string;
+  nbName?: string;
+  ns?: string;
+  pid?: string;
+  username?: string;
+  usernameWithoutGsuiteDomain?: string;
+  wsid?: string;
 }
-
-export interface NavigationGuardStore {
-  component?: CanComponentDeactivate;
-}
-
-export const navigationGuardStore = atom<NavigationGuardStore>({});
 
 /**
  * @name useStore

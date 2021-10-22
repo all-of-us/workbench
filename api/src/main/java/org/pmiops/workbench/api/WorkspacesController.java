@@ -22,8 +22,6 @@ import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.pmiops.workbench.actionaudit.auditors.WorkspaceAuditor;
 import org.pmiops.workbench.annotations.AuthorityRequired;
-import org.pmiops.workbench.billing.BillingProjectBufferService;
-import org.pmiops.workbench.billing.EmptyBufferException;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdrselector.WorkspaceResourcesService;
@@ -33,7 +31,6 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbAccessTier;
-import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserRecentWorkspace;
@@ -47,8 +44,8 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exceptions.TooManyRequestsException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.model.ArchivalStatus;
 import org.pmiops.workbench.model.Authority;
@@ -102,7 +99,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private static final Level OPERATION_TIME_LOG_LEVEL = Level.FINE;
   private static final String RANDOM_CHARS = "abcdefghijklmnopqrstuvwxyz";
 
-  private final BillingProjectBufferService billingProjectBufferService;
   private final CdrVersionDao cdrVersionDao;
   private final Clock clock;
   private final CloudStorageClient cloudStorageClient;
@@ -123,7 +119,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
   @Autowired
   public WorkspacesController(
-      BillingProjectBufferService billingProjectBufferService,
       CdrVersionDao cdrVersionDao,
       Clock clock,
       CloudStorageClient cloudStorageClient,
@@ -141,7 +136,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       WorkspaceDao workspaceDao,
       WorkspaceService workspaceService,
       WorkspaceAuthService workspaceAuthService) {
-    this.billingProjectBufferService = billingProjectBufferService;
     this.cdrVersionDao = cdrVersionDao;
     this.clock = clock;
     this.cloudStorageClient = cloudStorageClient;
@@ -213,7 +207,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     // Note: please keep any initialization logic here in sync with cloneWorkspaceImpl().
     FirecloudWorkspaceId workspaceId = getFcBillingProject(accessTier, workspace);
-    FirecloudWorkspace fcWorkspace =
+    FirecloudWorkspaceDetails fcWorkspace =
         fireCloudService.createWorkspace(
             workspaceId.getWorkspaceNamespace(),
             workspaceId.getWorkspaceName(),
@@ -244,7 +238,10 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   private DbWorkspace createDbWorkspace(
-      Workspace workspace, DbCdrVersion cdrVersion, DbUser user, FirecloudWorkspace fcWorkspace) {
+      Workspace workspace,
+      DbCdrVersion cdrVersion,
+      DbUser user,
+      FirecloudWorkspaceDetails fcWorkspace) {
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
 
     // The final step in the process is to clone the AoU representation of the
@@ -293,16 +290,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     }
 
     return dbWorkspace;
-  }
-
-  private String claimBillingProject(DbUser user, DbAccessTier accessTier) {
-    try {
-      final DbBillingProjectBufferEntry bufferedBillingProject =
-          billingProjectBufferService.assignBillingProject(user, accessTier);
-      return bufferedBillingProject.getFireCloudProjectName();
-    } catch (EmptyBufferException e) {
-      throw new TooManyRequestsException(e);
-    }
   }
 
   private void validateWorkspaceApiModel(Workspace workspace) {
@@ -359,7 +346,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     workspaceAuthService.enforceWorkspaceAccessLevel(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.OWNER);
     Workspace workspace = request.getWorkspace();
-    FirecloudWorkspace fcWorkspace =
+    FirecloudWorkspaceDetails fcWorkspace =
         fireCloudService.getWorkspace(workspaceNamespace, workspaceId).getWorkspace();
     if (workspace == null) {
       throw new BadRequestException("No workspace provided in request");
@@ -475,7 +462,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     DbUser user = userProvider.get();
     // Note: please keep any initialization logic here in sync with createWorkspaceImpl().
     FirecloudWorkspaceId toFcWorkspaceId = getFcBillingProject(accessTier, toWorkspace);
-    FirecloudWorkspace toFcWorkspace =
+    FirecloudWorkspaceDetails toFcWorkspace =
         fireCloudService.cloneWorkspace(
             fromWorkspaceNamespace,
             fromWorkspaceId,
@@ -521,28 +508,16 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     return ResponseEntity.ok(new CloneWorkspaceResponse().workspace(savedWorkspace));
   }
 
-  /**
-   * Gets a FireCloud Billing project.
-   *
-   * <p>If {@code enableFireCloudV2Billing} is enabled, create one directly using FireCloud
-   * v2Billing endpoints. Otherwise, claim one from billing buffer.
-   */
+  /** Gets a FireCloud Billing project. */
   private FirecloudWorkspaceId getFcBillingProject(DbAccessTier accessTier, Workspace workspace) {
     DbUser user = userProvider.get();
-    String billingProject;
-    if (workbenchConfigProvider.get().featureFlags.enableFireCloudV2Billing) {
-      // If v2 Billing is enabled, we will call FireCloud directly to create one.
-      billingProject = billingProjectBufferService.createBillingProjectName();
-      fireCloudService.createAllOfUsBillingProject(
-          billingProject, accessTier.getServicePerimeter());
+    String billingProject = fireCloudService.createBillingProjectName();
+    fireCloudService.createAllOfUsBillingProject(billingProject, accessTier.getServicePerimeter());
 
-      // We use AoU Service Account to create the billing account then assign owner role to user.
-      // In this way, we can make sure AoU Service Account is still the owner of this billing
-      // account.
-      fireCloudService.addOwnerToBillingProject(user.getUsername(), billingProject);
-    } else {
-      billingProject = claimBillingProject(user, accessTier);
-    }
+    // We use AoU Service Account to create the billing account then assign owner role to user.
+    // In this way, we can make sure AoU Service Account is still the owner of this billing
+    // account.
+    fireCloudService.addOwnerToBillingProject(user.getUsername(), billingProject);
     return generateFirecloudWorkspaceId(billingProject, workspace.getName());
   }
 
@@ -612,6 +587,9 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   public ResponseEntity<EmptyResponse> reviewWorkspace(
       String ns, String id, ResearchPurposeReviewRequest review) {
     DbWorkspace workspace = workspaceDao.getRequired(ns, id);
+
+    // RW-7087 replace with a new workspaceAuditor action (fireReviewAction?)
+    // because this uses the deprecated DbAdminActionHistory
     userService.logAdminWorkspaceAction(
         workspace.getWorkspaceId(),
         "research purpose approval",

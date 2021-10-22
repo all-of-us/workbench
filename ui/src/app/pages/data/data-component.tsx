@@ -11,10 +11,13 @@ import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {withCurrentWorkspace} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
-import {navigate} from 'app/utils/navigation';
+import {useNavigation} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {ResourceType, WorkspaceAccessLevel, WorkspaceResource} from 'generated/fetch';
 import {useEffect, useState} from 'react';
+
+import cohortImg from 'assets/images/cohort-diagram.svg';
+import dataSetImg from 'assets/images/dataset-diagram.svg';
 
 const styles = {
   cardButtonArea: {
@@ -73,10 +76,6 @@ const descriptions = {
   cohorts: `A cohort is a group of participants based on specific criteria.`,
 };
 
-const cohortImg = '/assets/images/cohort-diagram.svg';
-
-const dataSetImg = '/assets/images/dataset-diagram.svg';
-
 const resourceTypesToFetch = [ResourceType.COHORT, ResourceType.COHORTREVIEW, ResourceType.CONCEPTSET, ResourceType.DATASET];
 
 interface Props extends WithSpinnerOverlayProps {
@@ -86,6 +85,7 @@ interface Props extends WithSpinnerOverlayProps {
 export const DataComponent = withCurrentWorkspace()((props: Props) => {
   useEffect(() => props.hideSpinner(), []);
 
+  const [navigate, ] = useNavigation();
   const [activeTab, setActiveTab] = useState(Tabs.SHOWALL);
   const [resourceList, setResourceList] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -99,14 +99,8 @@ export const DataComponent = withCurrentWorkspace()((props: Props) => {
   const loadResources = async() => {
     try {
       setIsLoading(true);
-      setResourceList(
-        (await workspacesApi().getWorkspaceResources(workspace.namespace, workspace.id, {typesToFetch: resourceTypesToFetch}))
-          .map(result => {
-            return {
-              ...result,
-              // TODO (RW-4682): Fix this nonsense
-              modifiedTime: result.modifiedTime ? new Date(Number(result.modifiedTime)).toDateString() : null
-            }; }));
+      setResourceList(await workspacesApi().getWorkspaceResources(workspace.namespace, workspace.id,
+        {typesToFetch: resourceTypesToFetch}));
     } catch (error) {
       console.log(error);
     } finally {
@@ -176,7 +170,7 @@ export const DataComponent = withCurrentWorkspace()((props: Props) => {
             {/*Because the container can stretch based on window size, but the height
               can't we set a max width to cap the height based on aspect ratio*/}
             <div style={{width: '100%', maxWidth: '425px', paddingTop: '1rem'}}>
-              <img src={cohortImg}/>
+              <img data-test-id={"cohort-diagram"} src={cohortImg}/>
             </div>
           </CardButton>
         </TooltipTrigger>
@@ -199,7 +193,7 @@ export const DataComponent = withCurrentWorkspace()((props: Props) => {
             {/*Because the container can stretch based on window size, but the height
                can't we set a max width to cap the height based on aspect ratio*/}
             <div style={{width: '100%', maxWidth: '425px', paddingTop: '1.5rem'}}>
-              <img src={dataSetImg}/>
+              <img data-test-id={"dataset-diagram"} src={dataSetImg}/>
             </div>
           </CardButton>
         </TooltipTrigger>

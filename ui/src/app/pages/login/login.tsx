@@ -1,5 +1,5 @@
 import {Button} from 'app/components/buttons';
-import {StyledAnchorTag} from 'app/components/buttons';
+import {StyledExternalLink} from 'app/components/buttons';
 import {CookieBanner} from 'app/components/cookie-banner';
 import {GoogleSignInButton} from 'app/components/google-sign-in';
 import {Header, SmallHeader} from 'app/components/headers';
@@ -42,7 +42,7 @@ export const styles = reactStyles({
 
 
 export const LoginReactComponent: React.FunctionComponent<{
-  signIn: Function, onCreateAccount: Function }> = ({ signIn, onCreateAccount}) => {
+  onCreateAccount: Function }> = ({onCreateAccount}) => {
     return <React.Fragment>
       <div data-test-id='login' style={{marginBottom: '.5rem', marginTop: '5.5rem',  paddingLeft: '3rem'}}>
         <div>
@@ -51,14 +51,14 @@ export const LoginReactComponent: React.FunctionComponent<{
             Researcher Workbench account?
           </Header>
           <div>
-            <GoogleSignInButton signIn={signIn} />
+            <GoogleSignInButton />
           </div>
-          <StyledAnchorTag
+          <StyledExternalLink
             target='_blank'
             href='https://www.researchallofus.org/faq/what-if-i-have-trouble-signing-in-to-the-workbench'
             style={{marginTop: '0.625rem', lineHeight: '0.75rem'}}>
               Trouble Signing In?
-          </StyledAnchorTag>
+          </StyledExternalLink>
         </div>
         <div style={{paddingTop: '1.25rem'}}>
           <SmallHeader>

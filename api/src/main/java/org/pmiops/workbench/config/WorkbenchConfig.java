@@ -20,7 +20,6 @@ public class WorkbenchConfig {
   public ServerConfig server;
   public AdminConfig admin;
   public MandrillConfig mandrill;
-  public ElasticsearchConfig elasticsearch;
   public MoodleConfig moodle;
   public ZendeskConfig zendesk;
   public AccessConfig access;
@@ -33,6 +32,7 @@ public class WorkbenchConfig {
   public RasConfig ras;
   public AccessRenewalConfig accessRenewal;
   public OfflineBatchConfig offlineBatch;
+  public EgressAlertRemediationPolicy egressAlertRemediationPolicy;
 
   /** Creates a config with non-null-but-empty member variables, for use in testing. */
   public static WorkbenchConfig createEmptyConfig() {
@@ -43,7 +43,6 @@ public class WorkbenchConfig {
     config.auth.serviceAccountApiUsers = new ArrayList<>();
     config.wgsCohortExtraction = new WgsCohortExtractionConfig();
     config.cdr = new CdrConfig();
-    config.elasticsearch = new ElasticsearchConfig();
     config.featureFlags = new FeatureFlagsConfig();
     config.firecloud = new FireCloudConfig();
     config.googleCloudStorageService = new GoogleCloudStorageServiceConfig();
@@ -60,6 +59,7 @@ public class WorkbenchConfig {
     config.ras = new RasConfig();
     config.accessRenewal = new AccessRenewalConfig();
     config.offlineBatch = new OfflineBatchConfig();
+    config.egressAlertRemediationPolicy = new EgressAlertRemediationPolicy();
     return config;
   }
 
@@ -107,6 +107,8 @@ public class WorkbenchConfig {
     public Double defaultFreeCreditsDollarLimit;
     // Thresholds for email alerting based on free tier usage, by cost
     public ArrayList<Double> freeTierCostAlertThresholds;
+    // The contact email from Carahsoft for billing account setup
+    public String carahsoftEmail;
   }
 
   public static class FireCloudConfig {
@@ -115,8 +117,6 @@ public class WorkbenchConfig {
     public String samBaseUrl;
     public Integer notebookRuntimeMaxAgeDays;
     public Integer notebookRuntimeIdleMaxAgeDays;
-    public String notebookRuntimeDefaultMachineType;
-    public Integer notebookRuntimeDefaultDiskSizeGb;
     public String leoBaseUrl;
     // This value specifies the information we hand to Terra as our AppId header.
     // It is primarily used for metrics gathering information.
@@ -197,7 +197,6 @@ public class WorkbenchConfig {
   }
 
   public static class AdminConfig {
-    public String adminIdVerification;
     public String loginUrl;
   }
 
@@ -206,15 +205,8 @@ public class WorkbenchConfig {
     public int sendRetries;
   }
 
-  public static class ElasticsearchConfig {
-    public String baseUrl;
-    public boolean enableBasicAuth;
-    public boolean enableElasticsearchBackend;
-  }
-
   public static class MoodleConfig {
     public String host;
-    public boolean enableMoodleBackend;
     public String credentialsKeyV2;
   }
 
@@ -238,12 +230,11 @@ public class WorkbenchConfig {
     // These booleans control whether each of our core access modules are enabled per environment.
     public boolean enableComplianceTraining;
     public boolean enableEraCommons;
-    public boolean enableDataUseAgreement;
-    public boolean enableBetaAccess;
-    // If true, users can be expired on the system, losing access
-    public boolean enableAccessRenewal;
-    // If true, user account setup requires linking eRA commons via RAS instead of Shibboleth.
+    // If true, new users are required to finish identity verification using RAS/login.gov.
+    // This will be replaced with enforceRasLoginGovLinking.
     public boolean enableRasLoginGovLinking;
+    // If true, all users are required to finish identity verification using RAS/login.gov
+    public boolean enforceRasLoginGovLinking;
   }
 
   public static class FeatureFlagsConfig {
@@ -258,8 +249,6 @@ public class WorkbenchConfig {
     // Setting this to true will enable the use of Billing Accounts controlled by the user
     // See RW-4711.
     public boolean enableBillingUpgrade;
-    // Flag to indicate whether to use the V2 Data User Code of Conduct
-    public boolean enableV3DataUserCodeOfConduct;
     // Flag to indicate whether to show the Event Date modifier in cohort builder
     public boolean enableEventDateModifier;
     // Flag to indicate whether to show Update research purpose prompt after an year of workspace
@@ -268,12 +257,15 @@ public class WorkbenchConfig {
     // If true, enable genomic extraction functionality for datasets which have genomics data
     // associated with their CDRs.
     public boolean enableGenomicExtraction;
-    // If true, use FireCloud V2 Billing instead of the Billing Buffer when creating projects.
-    public boolean enableFireCloudV2Billing;
-    // If true, use the new rewrite version of access module.
-    public boolean enableAccessModuleRewrite;
+    // If true, egress alerts are automatically remediated via cloud tasks. Otherwise, egress
+    // alerts will still be stored, but are assumed to be remediated by the oncall.
+    public boolean enableEgressAlertingV2;
     // If true, cohort and concept set will show source domains and standard domains options
     public boolean enableStandardSourceDomains;
+    // If true, the backend and UI will support gpu for standard vm
+    public boolean enableGpu;
+    // If true, the backend and UI will support persistent disk as the default notebook storage
+    public boolean enablePersistentDisk;
   }
 
   public static class ActionAuditConfig {
@@ -323,15 +315,15 @@ public class WorkbenchConfig {
     public String host;
     // RAS client id to finish the OAuth flow.
     public String clientId;
+    // The URL that can sign out RAS login session.
+    public String logoutUrl;
   }
 
   public static class AccessRenewalConfig {
     // Days a user's module completion is good for until it expires
     public Long expiryDays;
-    // Do we send expiration emails when users have expired due to Access Renewal
-    // as well as warning emails when users will expire soon?
-    // true = send emails.  false = log only.
-    public boolean sendEmails;
+    // Lookback period - the point when we give users the option to update their compliance items
+    public Long lookbackPeriod;
     // Thresholds for sending warning emails based on approaching module expiration, in days
     public List<Long> expiryDaysWarningThresholds;
   }
@@ -344,5 +336,48 @@ public class WorkbenchConfig {
     // with the task queue configuration to affect the overall concurrency of the offline batch
     // process.
     public Integer usersPerAuditTask;
+    // Number of users to process within a single access synchronization task.
+    public Integer usersPerSynchronizeAccessTask;
+  }
+
+  /**
+   * One or more escalating remediation actions to take, depending on the number of observed egress
+   * incidents. The highest matching escalation takes precedence. For example, with the given
+   * policy: <code>
+   * escalations: [
+   *   {afterIncidentCount: 1, suspendCompute: {durationMinutes: 10}},
+   *   {afterIncidentCount: 2, suspendCompute: {durationMinutes: 60}},
+   *   {afterIncidentCount: 4, disableUser: {}}
+   * ]
+   * </code>
+   *
+   * <ul>
+   *   <li>On incident 1, the user's compute is suspended for 10 minutes
+   *   <li>On incident 2, the user's compute is suspended for 1 hour
+   *   <li>On incident 3, the user's compute is suspended for 1 hour
+   *   <li>On incident 4+, the user is disabled
+   * </ul>
+   *
+   * Only has an effect if enableEgressAlertingV2 is enabled.
+   */
+  public static class EgressAlertRemediationPolicy {
+    public static class Escalation {
+      public static class SuspendCompute {
+        public Long durationMinutes;
+      }
+
+      public static class DisableUser {}
+
+      // This policy will take effect after this many egress incidents have occurred. The highest
+      // matching incident count escalation takes precedence. Should be a positive integer.
+      public Integer afterIncidentCount;
+
+      // Exactly one of the following should be specified.
+      public SuspendCompute suspendCompute;
+      public DisableUser disableUser;
+    }
+
+    public String notifyFromEmail;
+    public List<Escalation> escalations;
   }
 }

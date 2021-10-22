@@ -6,9 +6,15 @@ import Button from 'app/element/button';
 import NotebookPreviewPage from 'app/page/notebook-preview-page';
 import BaseHelpSidebar from './base-help-sidebar';
 import { logger } from 'libs/logger';
+import RadioButton from 'app/element/radiobutton';
+import { config } from 'resources/workbench-config';
 
 const defaultXpath = '//*[@id="runtime-panel"]';
-const statusIconXpath = '//*[@data-test-id="runtime-status-icon"]';
+
+export enum AutoPauseIdleTime {
+  ThirtyMinutes = '30 minutes (default)',
+  EightHours = '8 hours'
+}
 
 export enum StartStopIconState {
   Error = 'error',
@@ -60,14 +66,31 @@ export default class RuntimePanel extends BaseHelpSidebar {
     return await diskInput.setValue(diskGbs);
   }
 
+  getDiskInput(): PrimereactInputNumber {
+    return new PrimereactInputNumber(this.page, '//*[@id="runtime-disk"]');
+  }
+
   async getDiskGbs(): Promise<number> {
-    const diskInput = new PrimereactInputNumber(this.page, '//*[@id="runtime-disk"]');
+    const diskInput = this.getDiskInput();
     return await diskInput.getInputValue();
   }
 
+  getComputeTypeSelect(): SelectMenu {
+    return SelectMenu.findByName(this.page, { id: 'runtime-compute' }, this);
+  }
+
   async pickComputeType(computeType: ComputeType): Promise<void> {
-    const computeTypeDropdown = SelectMenu.findByName(this.page, { id: 'runtime-compute' }, this);
+    const computeTypeDropdown = this.getComputeTypeSelect();
     return await computeTypeDropdown.select(computeType);
+  }
+
+  getAutoPauseSelect(): SelectMenu {
+    return SelectMenu.findByName(this.page, { id: 'runtime-autopause' }, this);
+  }
+
+  async pickAutoPauseTime(pauseTime: AutoPauseIdleTime): Promise<void> {
+    const autoPauseDropdown = this.getAutoPauseSelect();
+    return await autoPauseDropdown.select(pauseTime);
   }
 
   async pickDataprocNumWorkers(numWorkers: number): Promise<void> {
@@ -125,8 +148,8 @@ export default class RuntimePanel extends BaseHelpSidebar {
     return await runtimePresetMenu.select(runtimePreset);
   }
 
-  buildStatusIconSrc = (startStopIconState: StartStopIconState): string => {
-    return `/assets/icons/compute-${startStopIconState}.svg`;
+  buildStatusIconDataTestId = (startStopIconState: StartStopIconState): string => {
+    return `//*[@data-test-id="runtime-status-icon-${startStopIconState}"]`;
   };
 
   /**
@@ -139,18 +162,18 @@ export default class RuntimePanel extends BaseHelpSidebar {
     startStopIconState: StartStopIconState,
     timeout: number = 20 * 60 * 1000
   ): Promise<void> {
-    const xpath = `${this.getXpath()}${statusIconXpath}[@src="${this.buildStatusIconSrc(startStopIconState)}"]`;
+    const xpath = this.buildStatusIconDataTestId(startStopIconState);
     await this.page.waitForXPath(xpath, { visible: true, timeout });
   }
 
   async clickPauseRuntimeIcon(): Promise<void> {
-    const xpath = `${this.getXpath()}${statusIconXpath}[@src="${this.buildStatusIconSrc(StartStopIconState.Running)}"]`;
+    const xpath = this.buildStatusIconDataTestId(StartStopIconState.Running);
     const icon = new Button(this.page, xpath);
     await icon.click();
   }
 
   async clickResumeRuntimeIcon(): Promise<void> {
-    const xpath = `${this.getXpath()}${statusIconXpath}[@src="${this.buildStatusIconSrc(StartStopIconState.Stopped)}"]`;
+    const xpath = this.buildStatusIconDataTestId(StartStopIconState.Stopped);
     const icon = new Button(this.page, xpath);
     await icon.click();
   }
@@ -161,6 +184,7 @@ export default class RuntimePanel extends BaseHelpSidebar {
       return;
     }
     await this.clickIcon(SideBarLink.ComputeConfiguration);
+    await this.getDeleteIcon();
     await this.waitUntilVisible();
     // Wait for visible texts
     await this.page.waitForXPath(`${this.getXpath()}//h3`, { visible: true });
@@ -172,20 +196,30 @@ export default class RuntimePanel extends BaseHelpSidebar {
   /**
    * Create runtime and wait until running.
    */
-  async createRuntime(): Promise<void> {
-    logger.info('Creating runtime');
+  async createRuntime(opt: { waitForComplete?: boolean; timeout?: number } = {}): Promise<void> {
+    const { waitForComplete = true, timeout = 10 * 60 * 1000 } = opt;
     await this.open();
+
+    const isRunning = await this.isRunning();
+    if (isRunning) {
+      logger.info('Runtime is already running. Create new runtime is not needed.');
+      return;
+    }
+
     await this.waitForStartStopIconState(StartStopIconState.None);
     await this.clickButton(LinkText.Create);
-    await this.waitUntilClose();
-    // Runtime panel automatically close after click Create button.
-    // Reopen panel in order to check icon status.
-    await this.open();
-    // Runtime state transition: Starting -> Running
-    await this.waitForStartStopIconState(StartStopIconState.Starting, 10 * 60 * 1000);
-    await this.waitForStartStopIconState(StartStopIconState.Running);
-    await this.close();
-    logger.info('Runtime is running');
+    await this.waitUntilClose(); // Runtime panel automatically close after click Create button.
+    logger.info('Creating new runtime');
+
+    if (waitForComplete) {
+      // Reopen panel in order to check icon status.
+      await this.open();
+      // Runtime state transition: Starting -> Running
+      await this.waitForStartStopIconState(StartStopIconState.Starting, timeout);
+      await this.waitForStartStopIconState(StartStopIconState.Running);
+      await this.close();
+      logger.info('Runtime is running');
+    }
   }
 
   /**
@@ -194,8 +228,7 @@ export default class RuntimePanel extends BaseHelpSidebar {
   async deleteRuntime(): Promise<void> {
     logger.info('Deleting runtime');
     await this.open();
-    await this.clickButton(LinkText.DeleteEnvironment);
-    await this.clickButton(LinkText.Delete);
+    await this.clickDeleteEnvironmentButton();
     await this.waitUntilClose();
     // Runtime panel automatically close after click Create button.
     // Reopen panel in order to check icon status.
@@ -235,6 +268,20 @@ export default class RuntimePanel extends BaseHelpSidebar {
     logger.info('Runtime is resumed');
   }
 
+  /**
+   * Delete unattached persistent disk.
+   */
+  async deleteUnattachedPd(): Promise<void> {
+    logger.info('Deleting unattached persistent disk');
+    await this.open();
+    await this.clickButton(LinkText.DeletePd);
+    // Select "Delete gce runtime and pd" radiobutton.
+    await RadioButton.findByName(this.page, { dataTestId: 'delete-unattached-pd' }).select();
+    await this.clickButton(LinkText.Delete);
+    await this.waitUntilClose();
+    logger.info('Unattached persistent disk is deleted');
+  }
+
   async applyChanges(): Promise<NotebookPreviewPage> {
     await this.clickButton(LinkText.Next);
     await this.clickButton(LinkText.ApplyRecreate);
@@ -252,5 +299,59 @@ export default class RuntimePanel extends BaseHelpSidebar {
     await this.waitForStartStopIconState(StartStopIconState.Running);
 
     return notebookPreviewPage;
+  }
+
+  getCustomizeButton(): Button {
+    return Button.findByName(this.page, { normalizeSpace: LinkText.Customize }, this);
+  }
+
+  // runtime status spinner.
+  async existStatusIcon(timeout?: number): Promise<boolean> {
+    const runtimeStatusSpinner = '//*[@data-test-id="runtime-status-icon-container"]/*[@data-icon="sync-alt"]';
+    return this.page
+      .waitForXPath(runtimeStatusSpinner, { visible: true, timeout })
+      .then(() => {
+        return true;
+      })
+      .catch(() => {
+        return false;
+      });
+  }
+
+  /**
+   * Open Runtime sidebar, check status for running.
+   */
+  async waitForRunningAndClose(timeout?: number): Promise<boolean> {
+    const runtimeSidebar = new RuntimePanel(this.page);
+    await runtimeSidebar.open();
+    try {
+      await runtimeSidebar.waitForStartStopIconState(StartStopIconState.Running, timeout);
+      return true;
+    } catch (err) {
+      return false;
+    } finally {
+      await runtimeSidebar.close();
+    }
+  }
+
+  async isRunning(): Promise<boolean> {
+    const xpath = this.buildStatusIconDataTestId(StartStopIconState.Running);
+    return this.page
+      .waitForXPath(xpath, { visible: true, timeout: 1000 })
+      .then(() => {
+        return true;
+      })
+      .catch(() => {
+        return false;
+      });
+  }
+
+  async clickDeleteEnvironmentButton(): Promise<void> {
+    await this.clickButton(LinkText.DeleteEnvironment);
+    // Select "Delete gce runtime and pd" radiobutton when PD-disk is enabled.
+    if (config.ENABLED_PERSISTENT_DISK) {
+      await RadioButton.findByName(this.page, { dataTestId: 'delete-runtime' }).select();
+    }
+    await this.clickButton(LinkText.Delete);
   }
 }

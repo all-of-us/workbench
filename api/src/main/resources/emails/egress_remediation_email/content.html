@@ -1,0 +1,55 @@
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
+  <style>
+    body {
+      background-color: #F1F1F1;
+      padding-left: 1rem;
+      padding-top: 1rem;
+      width: 600px;
+    }
+    div {
+      color: #302C71;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 300;
+      font-size: 16px;
+      line-height: 24px;
+      margin-top: 2rem;
+      margin-bottom: 1rem;
+    }
+  </style>
+</head>
+<body>
+<img src="${HEADER_IMG}">
+<div>Dear researcher,</div>
+<div>This is an automated email from the ${ALL_OF_US} Security Team at Vanderbilt University Medical
+  Center. We received an alert related to activity on your account <b>${USERNAME}</b>. This
+  alert was triggered because our monitoring system detected potential data egress from
+  your workspace. Please be advised users are not permitted to pull any row level data out of the
+  Researcher Workbench, per the ${ALL_OF_US} Research Program Data User Code of Conduct.
+  ${EGRESS_REMEDIATION_DESCRIPTION}
+</div>
+<div>
+  To confirm your activity, please answer the following questions (if applicable):
+</div>
+<div>
+  <ul>
+    <li>Can you please confirm your account activity, and please share the details of that activity?
+    <li>Specifically, can you share the SQL query you used so we can validate it against our logs?
+    <li>Can you confirm no row level data was downloaded to your local device during this activity?
+  </ul>
+</div>
+<div>
+  Please respond by choosing "Reply to All". Please do not include any participant data in your
+  response.
+</div>
+<div>
+  Thank you for your help. We truly appreciate your continued cooperation in keeping our data and
+  system safe.
+</div>
+<div>
+  ${ALL_OF_US} DRC / RW Security Team<br/>
+  Vanderbilt University Medical Center
+</div>
+</body>

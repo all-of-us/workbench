@@ -1,5 +1,7 @@
 package org.pmiops.workbench.api;
 
+import static org.pmiops.workbench.access.AccessTierService.REGISTERED_TIER_SHORT_NAME;
+
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
@@ -76,7 +78,7 @@ public class InstitutionController implements InstitutionApiDelegate {
   /**
    * Note: this API is publicly-accessible since it is called during account creation.
    *
-   * @return Returns whether the email is a valid institutional member.
+   * @return Returns whether the email has valid institutional membership for the registered tier.
    */
   @Override
   public ResponseEntity<CheckEmailResponse> checkEmail(
@@ -85,23 +87,9 @@ public class InstitutionController implements InstitutionApiDelegate {
         new CheckEmailResponse()
             .isValidMember(
                 institutionService.validateInstitutionalEmail(
-                    getInstitutionImpl(shortName), request.getContactEmail())));
-  }
-
-  /**
-   * Note: this API is publicly-accessible since it is called during account creation.
-   *
-   * @return Returns whether the email is a valid institutional member.
-   * @deprecated in favor of the newer POST checkEmail() endpoint
-   */
-  @Override
-  public ResponseEntity<CheckEmailResponse> deprecatedCheckEmail(
-      final String shortName, final String email) {
-    return ResponseEntity.ok(
-        new CheckEmailResponse()
-            .isValidMember(
-                institutionService.validateInstitutionalEmail(
-                    getInstitutionImpl(shortName), email)));
+                    getInstitutionImpl(shortName),
+                    request.getContactEmail(),
+                    REGISTERED_TIER_SHORT_NAME)));
   }
 
   @Override

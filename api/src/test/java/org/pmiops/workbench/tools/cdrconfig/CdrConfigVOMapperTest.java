@@ -52,7 +52,6 @@ public class CdrConfigVOMapperTest {
     testVersionJson.creationTime = Timestamp.from(Instant.now());
     testVersionJson.numParticipants = 100;
     testVersionJson.cdrDbName = "data";
-    testVersionJson.elasticIndexBaseName = "elastic";
     testVersionJson.wgsBigqueryDataset = "wgs1";
     testVersionJson.hasFitbitData = false;
     testVersionJson.hasCopeSurveyData = true;
@@ -153,7 +152,6 @@ public class CdrConfigVOMapperTest {
     expected.setCreationTime(testVersionJson.creationTime);
     expected.setNumParticipants(testVersionJson.numParticipants);
     expected.setCdrDbName(testVersionJson.cdrDbName);
-    expected.setElasticIndexBaseName(testVersionJson.elasticIndexBaseName);
     expected.setWgsBigqueryDataset(testVersionJson.wgsBigqueryDataset);
     expected.setHasFitbitData(testVersionJson.hasFitbitData);
     expected.setHasCopeSurveyData(testVersionJson.hasCopeSurveyData);

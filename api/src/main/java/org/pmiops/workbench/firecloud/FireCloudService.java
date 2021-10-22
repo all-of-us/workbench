@@ -1,7 +1,6 @@
 package org.pmiops.workbench.firecloud;
 
 import com.google.common.annotations.VisibleForTesting;
-import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -10,10 +9,10 @@ import org.pmiops.workbench.firecloud.model.FirecloudBillingProjectStatus;
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
 import org.pmiops.workbench.firecloud.model.FirecloudMe;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdateResponseList;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 
 /**
@@ -44,7 +43,7 @@ public interface FireCloudService {
   void registerUser(String contactEmail, String firstName, String lastName);
 
   /** Creates a billing project owned by AllOfUs. */
-  void createAllOfUsBillingProject(String projectName, String servicePerimeter);
+  String createAllOfUsBillingProject(String projectName, String servicePerimeter);
 
   void deleteBillingProject(String billingProject);
 
@@ -66,10 +65,10 @@ public interface FireCloudService {
       String ownerEmailToRemove, String projectName, Optional<String> callerAccessToken);
 
   /** Creates a new FC workspace. */
-  FirecloudWorkspace createWorkspace(
+  FirecloudWorkspaceDetails createWorkspace(
       String projectName, String workspaceName, String authDomainName);
 
-  FirecloudWorkspace cloneWorkspace(
+  FirecloudWorkspaceDetails cloneWorkspace(
       String fromProject, String fromName, String toProject, String toName, String authDomainName);
 
   /** Retrieves all billing project memberships for the user from FireCloud. */
@@ -106,8 +105,6 @@ public interface FireCloudService {
 
   String staticNotebooksConvert(byte[] notebook);
 
-  String staticNotebooksConvertAsService(byte[] notebook);
-
   /** Update billing account using end user credential. */
   void updateBillingAccount(String billingProject, String billingAccount);
   /** Update billing account using APP's service account. */
@@ -120,5 +117,6 @@ public interface FireCloudService {
    */
   FirecloudNihStatus getNihStatus();
 
-  ApiClient getApiClientWithImpersonation(String email) throws IOException;
+  /** Creates a random Billing Project name. */
+  String createBillingProjectName();
 }

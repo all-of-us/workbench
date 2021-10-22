@@ -23,6 +23,7 @@ import org.pmiops.workbench.db.model.DbRdrExport;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.RdrEntityEnums;
+import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.model.InstitutionalRole;
 import org.pmiops.workbench.model.RdrEntity;
@@ -142,11 +143,14 @@ public class RdrExportServiceImpl implements RdrExportService {
       rdrApiProvider.get().exportResearchers(rdrResearchersList);
 
       updateDbRdrExport(RdrEntity.USER, userIds);
+      log.info(String.format("successfully exported researcher data for user IDs: %s", userIds));
     } catch (ApiException ex) {
       log.severe(
-          String.format("Error while sending researcher data to RDR for user IDs: %s", userIds));
+          String.format(
+              "Error while sending researcher data to RDR for user IDs [%s]: %s",
+              userIds, ex.getResponseBody()));
+      throw new ServerErrorException(ex);
     }
-    log.info(String.format("successfully exported researcher data for user IDs: %s", userIds));
   }
 
   /**
@@ -177,13 +181,15 @@ public class RdrExportServiceImpl implements RdrExportService {
           updateDbRdrExport(RdrEntity.WORKSPACE, workspaceIds);
         }
       }
+      log.info(
+          String.format(
+              "successfully exported workspace data for workspace IDs: %s", workspaceIds));
     } catch (ApiException ex) {
       log.severe(
           String.format(
               "Error while sending workspace data to RDR for workspace IDs: %s", workspaceIds));
+      throw new ServerErrorException(ex);
     }
-    log.info(
-        String.format("successfully exported workspace data for workspace IDs: %s", workspaceIds));
   }
 
   // Convert workbench DBUser to RDR Model

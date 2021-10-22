@@ -6,6 +6,13 @@ export enum ZendeskEnv {
   Sandbox = 'sandbox'
 }
 
+// A copy of utils/access-tiers.tsx AccessTierShortNames, so there's no circular dependency.
+// TODO: remove this after accessTiersVisibleToUsers is removed
+export enum EnvAccessTierShortNames {
+  Registered = 'registered',
+  Controlled = 'controlled',
+}
+
 export interface EnvironmentBase {
   // Permanent environment variables.
   //
@@ -43,9 +50,6 @@ export interface EnvironmentBase {
   // The URL to forward users to for the public UI (aka Data Browser).
   // Example value: 'https://aou-db-stable.appspot.com'
   publicUiUrl: string;
-  // The url for Moodle integration
-  // Example value: https://aoudev.nnlm.gov
-  trainingUrl: string;
   // The Zendesk environment corresponding to this deployment.
   zendeskEnv: ZendeskEnv;
   inactivityTimeoutSeconds: number;
@@ -61,12 +65,16 @@ export interface EnvironmentBase {
   captchaSiteKey: string;
   // Enable workbench footer on the signed in pages
   enableFooter: boolean;
+
   // WARNING: Please think *very* carefully before adding a new environment flag here! Instead
   // of this file, prefer storing feature flags in the server-side WorkbenchConfig and passing them
   // to the UI via ConfigController and serverConfigStore.
   //
   // The UI environment config should be restricted to truly UI-specific environment variables, such
   // as server API endpoints and client IDs.
+
+  // which access tiers do we expose to the users via the UI?  likely temporary - until CT is fully rolled out
+  accessTiersVisibleToUsers: string[];
 }
 
 export interface Environment extends EnvironmentBase {

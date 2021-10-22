@@ -27,6 +27,18 @@ public class RasLinkConstants {
   // The login.gov's PREFERRED_USERNAME field from RAS UserInfo endpoint
   static final String PREFERRED_USERNAME_FIELD_NAME = "preferred_username";
 
+  // The login.gov's FEDERATED_IDENTITIES field from RAS UserInfo endpoint
+  static final String FEDERATED_IDENTITIES = "federated_identities";
+
+  // The login.gov's identities field from RAS UserInfo endpoint
+  static final String IDENTITIES = "identities";
+
+  // The login.gov's era commons provider name field from RAS UserInfo endpoint
+  static final String ERA_COMMONS_PROVIDER_NAME = "era";
+
+  // The login.gov's ther user id field from RAS UserInfo's identity.
+  static final String IDENTITY_USERID = "userid";
+
   // The identifier that indicate users login using login.gov account.
   static final String LOGIN_GOV_IDENTIFIER_LOWER_CASE = "@login.gov";
 
@@ -35,5 +47,5 @@ public class RasLinkConstants {
 
   // The required scopes to finish RAS OAuth flow, and get enough information AoU needs.
   static final Set<String> RAS_AUTH_CODE_SCOPES =
-      ImmutableSet.of("ga4gh_passport_v1", "openid", "profile");
+      ImmutableSet.of("ga4gh_passport_v1", "openid", "profile", "federated_identities");
 }

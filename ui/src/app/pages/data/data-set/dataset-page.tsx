@@ -1,9 +1,4 @@
-import * as fp from 'lodash/fp';
-import {Column} from 'primereact/column';
-import {DataTable} from 'primereact/datatable';
-import * as React from 'react';
-
-import {Button, Clickable, Link, StyledAnchorTag} from 'app/components/buttons';
+import {Button, Clickable, LinkButton, StyledExternalLink} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {CreateModal} from 'app/components/create-modal';
 import {FlexColumn, FlexRow} from 'app/components/flex';
@@ -21,21 +16,19 @@ import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {
   formatDomain,
   formatDomainString,
-  reactStyles, switchCase,
+  hasNewValidProps,
+  reactStyles,
+  switchCase,
   toggleIncludes,
   withCdrVersions,
   withCurrentWorkspace,
-  withUrlParams,
   withUserProfile
 } from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {getCdrVersion} from 'app/utils/cdr-versions';
-import {
-  currentWorkspaceStore,
-  navigateAndPreventDefaultIfNoKeysPressed
-} from 'app/utils/navigation';
+import {currentWorkspaceStore, useNavigation} from 'app/utils/navigation';
 import {apiCallWithGatewayTimeoutRetries} from 'app/utils/retry';
-import {serverConfigStore} from 'app/utils/stores';
+import {MatchParams, serverConfigStore} from 'app/utils/stores';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
@@ -46,15 +39,22 @@ import {
   DataDictionaryEntry,
   DataSet,
   DataSetPreviewRequest,
-  DataSetPreviewValueList, DataSetRequest,
+  DataSetPreviewValueList,
+  DataSetRequest,
   Domain,
   DomainValue,
   DomainValuePair,
   ErrorResponse,
   PrePackagedConceptSetEnum,
-  Profile, ResourceType,
+  Profile,
+  ResourceType,
   ValueSet,
 } from 'generated/fetch';
+import * as fp from 'lodash/fp';
+import {Column} from 'primereact/column';
+import {DataTable} from 'primereact/datatable';
+import * as React from 'react';
+import { RouteComponentProps, withRouter } from 'react-router-dom';
 
 export const styles = reactStyles({
   dataDictionaryHeader: {
@@ -252,6 +252,24 @@ const ImmutableListItem: React.FunctionComponent <{
     </div>;
   };
 
+const ImmutableWorkspaceCohortListItem: React.FunctionComponent<{
+  name: string, onChange: Function, checked: boolean, cohortId: number, namespace: string, wid: string}>
+    = ({name, onChange, checked, cohortId, namespace, wid}) => {
+      return <div style={styles.listItem}>
+        <input type='checkbox' value={name} onChange={() => onChange()}
+               style={styles.listItemCheckbox} checked={checked}/>
+        <FlexRow style={{lineHeight: '1.5rem', color: colors.primary, width: '100%'}}>
+          <div>{name}</div>
+          <div style={{marginLeft: 'auto', paddingRight: '1rem'}}>
+            <a href={'/workspaces/' + namespace + '/' + wid + '/data/cohorts/' + cohortId + '/review/cohort-description'}
+            target='_blank'>
+              <ClrIcon size='20' shape='bar-chart'/>
+            </a>
+          </div>
+    </FlexRow>
+  </div>;
+    };
+
 const Subheader = (props) => {
   return <div style={{...styles.subheader, ...props.style}}>{props.children}</div>;
 };
@@ -356,14 +374,21 @@ export class ValueListItem extends React.Component<
   }
 }
 
-const plusLink = (dataTestId: string, path: string, disable?: boolean) => {
+const PlusLink = ({dataTestId, path, disable}: {dataTestId: string, path: string, disable?: boolean}) => {
+  const [, navigateByUrl] = useNavigation();
+
   return <TooltipTrigger data-test-id='plus-icon-tooltip' disabled={!disable}
                          content='Requires Owner or Writer permission'>
     <Clickable disabled={disable} data-test-id={dataTestId} href={path}
-            onClick={e => {navigateAndPreventDefaultIfNoKeysPressed(e, path); }}>
-    <ClrIcon shape='plus-circle' class='is-solid' size={16}
-             style={stylesFunction.plusIconColor(disable)}/>
-  </Clickable></TooltipTrigger>;
+               onClick={e => {
+                 navigateByUrl(path, {
+                   preventDefaultIfNoKeysPressed: true,
+                   event: e
+                 });
+               }}>
+      <ClrIcon shape='plus-circle' class='is-solid' size={16}
+               style={stylesFunction.plusIconColor(disable)}/>
+    </Clickable></TooltipTrigger>;
 };
 
 const StepNumber = ({step, style = {}}) => {
@@ -397,7 +422,7 @@ enum PrepackagedConceptSet {
   FITBITACTIVITY = 'Fitbit Activity Summary',
   FITBITHEARTRATELEVEL = 'Fitbit Heart Rate Level',
   FITBITINTRADAYSTEPS = 'Fitbit Intra Day Steps',
-  WHOLEGENOME = 'All whole genome variant data'
+  WHOLEGENOME = 'Whole Genome Sequencing Data'
 }
 
 const PREPACKAGED_SURVEY_PERSON_DOMAIN = {
@@ -423,10 +448,9 @@ interface DataSetPreviewInfo {
   values?: Array<DataSetPreviewValueList>;
 }
 
-interface Props extends WithErrorModalProps, WithSpinnerOverlayProps {
+interface Props extends WithErrorModalProps, WithSpinnerOverlayProps, RouteComponentProps<MatchParams> {
   workspace: WorkspaceData;
   cdrVersionTiersResponse: CdrVersionTiersResponse;
-  urlParams: any;
   profileState: {
     profile: Profile,
     reload: Function
@@ -465,7 +489,7 @@ interface State {
   savingDataset: boolean;
 }
 
-export const DatasetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlParams(), withCdrVersions(), withErrorModal())(
+export const DatasetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withCdrVersions(), withErrorModal(), withRouter)(
   class extends React.Component<Props, State> {
     dt: any;
     constructor(props) {
@@ -498,32 +522,11 @@ export const DatasetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), wi
 
     async componentDidMount() {
       this.props.hideSpinner();
-      const {namespace, id} = this.props.workspace;
-      const resourcesPromise = this.loadResources();
-      if (getCdrVersion(this.props.workspace, this.props.cdrVersionTiersResponse).hasFitbitData) {
-        PREPACKAGED_DOMAINS =   {
-          ...PREPACKAGED_SURVEY_PERSON_DOMAIN,
-          ...PREPACKAGED_WITH_FITBIT_DOMAINS
-        };
-      }
-      // Only allow selection of genomics prepackaged concept sets if genomics
-      // data extraction is possible, since extraction is the only action that
-      // can be taken on genomics variant data from the dataset builder.
-      if (serverConfigStore.get().config.enableGenomicExtraction &&
-          getCdrVersion(this.props.workspace, this.props.cdrVersionTiersResponse).hasWgsData) {
-        PREPACKAGED_DOMAINS = {
-          ...PREPACKAGED_DOMAINS,
-          ...PREPACKAGED_WITH_WHOLE_GENOME
-        };
-      }
+      await this.loadResources();
 
-      if (this.props.urlParams.dataSetId !== undefined) {
-        const [, dataset] = await Promise.all([
-          resourcesPromise,
-          dataSetApi().getDataSet(namespace, id, this.props.urlParams.dataSetId)
-        ]);
-
-        this.loadDataset(dataset);
+      this.updatePrepackagedDomains();
+      if (this.props.match.params.dataSetId) {
+        this.fetchDataset();
       }
     }
 
@@ -546,7 +549,50 @@ export const DatasetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), wi
       });
     }
 
-    async componentDidUpdate({}, prevState: State) {
+    updatePrepackagedDomains() {
+      if (getCdrVersion(this.props.workspace, this.props.cdrVersionTiersResponse).hasFitbitData) {
+        PREPACKAGED_DOMAINS =   {
+          ...PREPACKAGED_SURVEY_PERSON_DOMAIN,
+          ...PREPACKAGED_WITH_FITBIT_DOMAINS
+        };
+      }
+      // Only allow selection of genomics prepackaged concept sets if genomics
+      // data extraction is possible, since extraction is the only action that
+      // can be taken on genomics variant data from the dataset builder.
+      if (serverConfigStore.get().config.enableGenomicExtraction &&
+        getCdrVersion(this.props.workspace, this.props.cdrVersionTiersResponse).hasWgsData) {
+        PREPACKAGED_DOMAINS = {
+          ...PREPACKAGED_DOMAINS,
+          ...PREPACKAGED_WITH_WHOLE_GENOME
+        };
+      }
+    }
+
+    async fetchDataset() {
+      const dataset = await dataSetApi().getDataSet(
+        this.props.workspace.namespace, this.props.workspace.id, +this.props.match.params.dataSetId);
+      this.loadDataset(dataset);
+    }
+
+    async componentDidUpdate(prevProps, prevState: State) {
+      if (hasNewValidProps(this.props, prevProps, [
+        (props) => props.workspace.namespace,
+        (props) => props.workspace.id,
+        (props) => props.cdrVersionTiersResponse
+      ])) {
+        this.updatePrepackagedDomains();
+      }
+
+      if (hasNewValidProps(this.props, prevProps, [
+        (props) => props.workspace.namespace,
+        (props) => props.workspace.id,
+        (props) => props.match.params.dataSetId])) {
+
+        if (hasNewValidProps(this.props, prevProps, [(props) => props.match.params.dataSetId])) {
+          this.fetchDataset();
+        }
+      }
+
       // If any domains were dropped, we want to drop any domain/value pair selections.
       const droppedDomains = Array.from(prevState.selectedDomains)
           .filter(d => !this.state.selectedDomains.has(d));
@@ -588,7 +634,7 @@ export const DatasetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), wi
       // If any of these domains has not yet been loaded, request the schema
       // (value sets) for them.
       const domainsToLoad = newDomains.filter(
-        d => !this.state.domainValueSetIsLoading.has(d) && !this.state.domainValueSetLookup.has(d));
+        d => d && !this.state.domainValueSetIsLoading.has(d) && !this.state.domainValueSetLookup.has(d));
       if (domainsToLoad.length > 0) {
         this.setState(({domainValueSetIsLoading, domainValueSetLookup}) => {
           const newLoading = new Set(domainValueSetIsLoading);
@@ -1026,8 +1072,8 @@ export const DatasetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), wi
             />
             <div style={{paddingLeft: '0.25rem'}}>
               The preview table could not be loaded. Please try again by clicking the ‘View Preview Table’ as
-              some queries take longer to load. If the error keeps happening, please <Link style={{
-                display: 'inline-block'}} onClick={() => this.openZendeskWidget()}>contact us</Link>. You can also
+              some queries take longer to load. If the error keeps happening, please <LinkButton style={{
+                display: 'inline-block'}} onClick={() => this.openZendeskWidget()}>contact us</LinkButton>. You can also
               export your dataset directly for analysis by clicking the ‘Analyze’ button, without viewing the preview
               table.
             </div>
@@ -1153,7 +1199,7 @@ export const DatasetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), wi
             <div style={{width: '33%', height: '80%', minWidth: styles.selectBoxHeader.minWidth}}>
               <div style={{backgroundColor: 'white', border: `1px solid ${colors.light}`}}>
                 <BoxHeader step='1' header='Select Cohorts' subHeader='Participants'>
-                  {plusLink('cohorts-link', cohortsPath, !this.canWrite)}
+                  <PlusLink dataTestId='cohorts-link' path={cohortsPath} disable={!this.canWrite}/>
                 </BoxHeader>
                 <div style={{height: '9rem', overflowY: 'auto'}}>
                   <Subheader>Prepackaged Cohorts</Subheader>
@@ -1163,11 +1209,15 @@ export const DatasetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), wi
                                        () => this.selectPrePackagedCohort()}/>
                   <Subheader>Workspace Cohorts</Subheader>
                   {!loadingResources && this.state.cohortList.map(cohort =>
-                      <ImmutableListItem key={cohort.id} name={cohort.name}
-                                       data-test-id='cohort-list-item'
-                                       checked={selectedCohortIds.includes(cohort.id)}
-                                       onChange={
-                                         () => this.selectCohort(cohort)}/>)
+                    <ImmutableWorkspaceCohortListItem key={cohort.id} name={cohort.name}
+                                      data-test-id='cohort-list-item'
+                                      checked={selectedCohortIds.includes(cohort.id)}
+                                      cohortId={cohort.id}
+                                      namespace={namespace}
+                                      wid={id}
+                                      onChange={
+                                        () => this.selectCohort(cohort)}/>
+                    )
                   }
                   {loadingResources && <Spinner style={{position: 'relative', top: '0.5rem',
                     left: '7rem'}}/>}
@@ -1180,7 +1230,7 @@ export const DatasetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), wi
                 <div style={{width: '60%', borderRight: `1px solid ${colors.light}`}}>
                     <BoxHeader step='2' header='Select Concept Sets' subHeader='Rows'
                                style={{paddingRight: '1rem'}}>
-                      {plusLink('concept-sets-link', conceptSetsPath, !this.canWrite)}
+                      <PlusLink dataTestId='concept-sets-link' path={conceptSetsPath} disable={!this.canWrite}/>
                     </BoxHeader>
                   <div style={{height: '9rem', overflowY: 'auto'}} data-test-id='prePackage-concept-set'>
                     <Subheader>Prepackaged Concept Sets</Subheader>
@@ -1245,9 +1295,9 @@ export const DatasetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), wi
                     width: '100%', height: '1.375rem', backgroundColor: colorWithWhiteness(colors.dark, 0.9),
                     color: colors.primary, paddingLeft: '0.4rem', fontSize: '13px', lineHeight: '16px',
                     alignItems: 'center'}}>
-                    <StyledAnchorTag href={supportUrls.dataDictionary} target='_blank'>
+                    <StyledExternalLink href={supportUrls.dataDictionary} target='_blank'>
                       Learn more
-                    </StyledAnchorTag>&nbsp;in the data dictionary
+                    </StyledExternalLink>&nbsp;in the data dictionary
                   </FlexRow>}
                 </div>
               </div>
@@ -1387,3 +1437,4 @@ export const DatasetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), wi
       </React.Fragment>;
     }
   });
+

@@ -1,0 +1,100 @@
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
+  <style>
+    body {
+      background-color: #F1F1F1;
+      padding-left: 1rem;
+      padding-top: 1rem;
+      width: 600px;
+    }
+    * {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 300;
+    }
+    div {
+      margin-top: 2rem;
+      margin-bottom: 1rem;
+      color: #302C71;
+      font-size: 24px;
+      font-weight: 300;
+      line-height: 36px;
+    }
+    * {
+      margin-bottom: 6px;
+    }
+    .text {
+      color: rgba(0,0,0,0.87);
+      font-size: 16px;
+      font-weight: 300;
+      line-height: 22px;
+      margin-bottom: 1rem;
+    }
+  </style>
+</head>
+<body>
+<img src="${HEADER_IMG}">
+<div class="text">Hello, this is an automated email from the ${ALL_OF_US} Researcher Workbench. This email was
+  generated at the request of ${FIRST_NAME} ${LAST_NAME}, a user of the Workbench from ${INSTITUTION_NAME} who would
+  like to pay for cloud services to be used for their work in the Workbench.
+</div>
+<div class="text">
+  Background: Analysis work conducted in the All of Us Researcher Workbench makes use of cloud computing
+  resources provided by Google Cloud. After a researcher consumes any initial credits provided to them by
+  the All of Us program, they must provide their own means of payment for any Google Cloud resources they require.
+  This requires that a Google Cloud Billing Account is selected or created, and configured to allow that account to be used from the All of Us Workbench.
+</div>
+
+<div class="text">
+  This message is sent to ${FIRST_NAME} ${LAST_NAME} and Carahsoft, an NIH and Google Cloud partner who can
+  assist in creating or configuring a Google Cloud Billing Account. If your institution already has an existing
+  relationship with an NIH/Google Cloud partner, Carahsoft will refer you to that partner.
+</div>
+
+<div class="text">
+  Requester information:
+  <ul>
+    <li>Name: ${FIRST_NAME} ${LAST_NAME}
+    <li>Email: ${USER_CONTACT_EMAIL}
+    <li>Phone: ${USER_PHONE}
+    <li>Institution: ${INSTITUTION_NAME}
+  </ul>
+</div>
+<div class="text">Is this work NIH-funded and eligible for the STRIDES Program?: ${NIH_FUNDED}</div>
+
+<div class="text">
+  Instructions for Carahsoft Representative:
+  <ol>
+    <li>Set up a Google Cloud (GCP) billing account based on user preferences, through one of our resellers or direct with Carahsoft.
+      If they are eligible or already enrolled in the NIH  STRIDES program, please work on that account provision as well.
+    <li>Once their billing account is set up, link the following user IDs to that billing account:
+    <ul>
+      <li>${USERNAME}</li>
+      <li><a href="mailto:terra-billing@terra.bio">terra-billing@terra.bio</a></li>
+    </ul>
+  </ol>
+</div>
+<div class="text">
+  To do this, go to the "Billing Accounts" tab at <a href="https://console.cloud.google.com/billing">https://console.cloud.google.com/billing</a> and
+  check the box next to the billing account you’d like to edit Billing Account".
+  Then click on “Account Management” on the left hand panel. Go to “Permissions” on the right hand panel
+  and select "Add member". Add terra-billing@terra.bio and ${USERNAME}.  In the dropdown for that member,
+  select role "Billing" -> "Billing Account User". Don't forget the "Save" button!
+</div>
+<div class="text">
+  It is also through this Billing Portal that you can <a href="https://support.terra.bio/hc/en-us/articles/360057589931-How-to-set-up-and-use-GCP-budget-alerts"> set up billing alerts</a> to notify you when you reach a
+  certain spending threshold! Please work with your representative to set this up.
+</div>
+
+<div class="text">
+  You should expect to hear back from a Carahsoft representative within 1 business day to start this process.
+  If you have any questions for the All of Us Researcher Workbench Support team, please email us as the email below.
+</div>
+
+<div class="text">
+  Thank you,
+  The All of Us Researcher Workbench Support Team
+  ${FROM_EMAIL}
+</div>
+</body>

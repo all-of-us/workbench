@@ -46,7 +46,7 @@ export default class ConceptSetActionsPage extends AuthenticatedPage {
 
   async openConceptSet(conceptName: string): Promise<ConceptSetPage> {
     const link = new Link(this.page, `//a[text()="${conceptName}"]`);
-    await link.click();
+    await link.clickAndWait();
     const conceptSetPage = new ConceptSetPage(this.page);
     await conceptSetPage.waitForLoad();
     return conceptSetPage;

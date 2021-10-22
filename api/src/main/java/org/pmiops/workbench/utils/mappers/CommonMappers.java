@@ -1,12 +1,12 @@
 package org.pmiops.workbench.utils.mappers;
 
+import com.google.common.base.Strings;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.Optional;
-import joptsimple.internal.Strings;
 import org.mapstruct.Named;
 import org.pmiops.workbench.api.Etags;
 import org.pmiops.workbench.db.model.DbCdrVersion;

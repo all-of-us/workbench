@@ -19,21 +19,37 @@ import java.util.function.Function;
 import javax.mail.MessagingException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.db.dao.AccessModuleDao;
 import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.UserAccessTierDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.UserServiceImpl;
+import org.pmiops.workbench.db.dao.VerifiedInstitutionalAffiliationDao;
+import org.pmiops.workbench.db.model.DbAccessModule;
+import org.pmiops.workbench.db.model.DbAccessModule.AccessModuleName;
 import org.pmiops.workbench.db.model.DbAccessTier;
+import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserAccessTier;
+import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.DirectoryService;
+import org.pmiops.workbench.institution.InstitutionService;
+import org.pmiops.workbench.institution.InstitutionServiceImpl;
 import org.pmiops.workbench.mail.MailService;
+import org.pmiops.workbench.model.AccessModule;
+import org.pmiops.workbench.model.Institution;
+import org.pmiops.workbench.model.InstitutionMembershipRequirement;
+import org.pmiops.workbench.model.InstitutionTierConfig;
+import org.pmiops.workbench.model.InstitutionalRole;
+import org.pmiops.workbench.model.OrganizationType;
 import org.pmiops.workbench.model.TierAccessStatus;
 import org.pmiops.workbench.model.UserAccessExpiration;
 import org.pmiops.workbench.test.FakeClock;
@@ -75,10 +91,19 @@ public class UserServiceAccessTest {
       t -> dbu -> registerUser(t, dbu);
   private Function<DbUser, DbUser> registerUserNow;
 
+  private static List<DbAccessModule> accessModules;
+
+  private InstitutionTierConfig rtTierConfig;
+  private Institution institution;
+
+  @Autowired private AccessModuleDao accessModuleDao;
   @Autowired private AccessTierDao accessTierDao;
   @Autowired private UserAccessTierDao userAccessTierDao;
   @Autowired private UserDao userDao;
   @Autowired private UserService userService;
+  @Autowired private AccessModuleService accessModuleService;
+  @Autowired private InstitutionService institutionService;
+  @Autowired private VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
 
   @MockBean private MailService mailService;
 
@@ -88,6 +113,7 @@ public class UserServiceAccessTest {
     AccessModuleServiceImpl.class,
     UserAccessModuleMapperImpl.class,
     CommonMappers.class,
+    InstitutionServiceImpl.class,
   })
   @MockBean({
     ComplianceService.class,
@@ -119,23 +145,46 @@ public class UserServiceAccessTest {
     DbUser getDbUser() {
       return dbUser;
     }
+
+    @Bean
+    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+    public List<DbAccessModule> getDbAccessModules() {
+      return accessModules;
+    }
   }
 
   @BeforeEach
   public void setUp() {
     providedWorkbenchConfig = WorkbenchConfig.createEmptyConfig();
-    providedWorkbenchConfig.access.enableAccessRenewal = true;
     providedWorkbenchConfig.access.enableComplianceTraining = true;
     providedWorkbenchConfig.access.enableEraCommons = true;
+    providedWorkbenchConfig.access.enforceRasLoginGovLinking = true;
     providedWorkbenchConfig.accessRenewal.expiryDays = EXPIRATION_DAYS;
     providedWorkbenchConfig.accessRenewal.expiryDaysWarningThresholds =
         ImmutableList.of(1L, 3L, 7L, 15L, 30L);
 
     registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
-
+    accessModules = TestMockFactory.createAccessModules(accessModuleDao);
     dbUser = new DbUser();
     dbUser.setUsername(USERNAME);
+    dbUser.setContactEmail("user@domain.com");
     dbUser = userDao.save(dbUser);
+    rtTierConfig = new InstitutionTierConfig().accessTierShortName(registeredTier.getShortName());
+    institution =
+        new Institution()
+            .displayName("institution")
+            .shortName("shortname")
+            .tierConfigs(
+                ImmutableList.of(
+                    rtTierConfig
+                        .membershipRequirement(InstitutionMembershipRequirement.DOMAINS)
+                        .addEmailDomainsItem("domain.com")
+                        .eraRequired(true)
+                        .accessTierShortName(registeredTier.getShortName())))
+            .organizationTypeEnum(OrganizationType.INDUSTRY)
+            .userInstructions("Some user instructions");
+    institution = institutionService.createInstitution(institution);
+    createAffiliation(dbUser);
 
     // reset the clock so tests changing this don't affect each other
     PROVIDED_CLOCK.setInstant(START_INSTANT);
@@ -205,8 +254,9 @@ public class UserServiceAccessTest {
 
     // add a proper DUA completion which will expire soon, but remove DUA bypass
 
-    dbUser.setDataUseAgreementSignedVersion(userService.getCurrentDuccVersion());
-    dbUser.setDataUseAgreementCompletionTime(willExpireAfter(Duration.ofDays(1)));
+    dbUser.setDataUseAgreementSignedVersion(accessModuleService.getCurrentDuccVersion());
+    accessModuleService.updateCompletionTime(
+        dbUser, AccessModuleName.DATA_USER_CODE_OF_CONDUCT, willExpireAfter(Duration.ofDays(1)));
     dbUser = updateUserWithRetries(this::removeDuaBypass);
 
     // User is compliant
@@ -221,69 +271,19 @@ public class UserServiceAccessTest {
     dbUser =
         updateUserWithRetries(
             user -> {
-              user.setDataUseAgreementCompletionTime(new Timestamp(PROVIDED_CLOCK.millis()));
-              return user;
-            });
-    assertRegisteredTierEnabled(dbUser);
-  }
-
-  // Ensure that we don't enforce access renewal in environments where the flag is not set:
-  // make the user expire in all of the ways possible by access renewal, and test that none
-  // of these cause noncompliance.
-
-  @Test
-  public void testRenewalFlag() {
-    providedWorkbenchConfig.access.enableAccessRenewal = false;
-
-    final Timestamp willExpire = Timestamp.from(START_INSTANT);
-
-    // initialize user as registered, including:
-    // bypassed DUA
-    // bypassed Compliance training
-    // recent confirmedPublications
-    // recent confirmedProfile
-
-    dbUser = updateUserWithRetries(registerUserNow);
-    assertRegisteredTierEnabled(dbUser);
-
-    // add proper DUA completion and compliance training and remove bypasses
-
-    dbUser =
-        updateUserWithRetries(
-            user -> {
-              user.setDataUseAgreementSignedVersion(userService.getCurrentDuccVersion());
-              user.setDataUseAgreementCompletionTime(willExpire);
-              user.setDataUseAgreementBypassTime(null);
-
-              user.setComplianceTrainingCompletionTime(willExpire);
-              user.setComplianceTrainingBypassTime(null);
+              accessModuleService.updateCompletionTime(
+                  dbUser,
+                  AccessModuleName.DATA_USER_CODE_OF_CONDUCT,
+                  new Timestamp(PROVIDED_CLOCK.millis()));
               return user;
             });
 
-    // This is just a switch from bypassed -> user-performed action so we remain compliant
-    // (and still would be so, with enableAccessRenewal = true)
-    assertRegisteredTierEnabled(dbUser);
-
-    // Time passing beyond the expiration window would cause the user to become
-    // noncompliant when enableAccessRenewal = true
-    advanceClockDays(EXPIRATION_DAYS + 1);
-
-    dbUser =
-        updateUserWithRetries(
-            user -> {
-              // removing publicationsConfirmed and profileConfirmed would also cause
-              // noncompliance when enableAccessRenewal = true
-              user.setPublicationsLastConfirmedTime(null);
-              user.setProfileLastConfirmedTime(null);
-              return user;
-            });
-
-    // the user is still compliant because we are not checking for expiration
     assertRegisteredTierEnabled(dbUser);
   }
 
   private DbUser removeDuaBypass(DbUser user) {
-    user.setDataUseAgreementBypassTime(null);
+    accessModuleService.updateBypassTime(
+        user.getUserId(), AccessModule.DATA_USER_CODE_OF_CONDUCT, false);
     return userDao.save(user);
   }
 
@@ -309,7 +309,7 @@ public class UserServiceAccessTest {
   public void test_updateUserWithRetries_era_unbypassed_noncompliant() {
     testUnregistration(
         user -> {
-          user.setEraCommonsBypassTime(null);
+          accessModuleService.updateBypassTime(dbUser.getUserId(), AccessModule.ERA_COMMONS, false);
           return userDao.save(user);
         });
   }
@@ -320,7 +320,8 @@ public class UserServiceAccessTest {
   public void test_updateUserWithRetries_2fa_unbypassed_noncompliant() {
     testUnregistration(
         user -> {
-          user.setTwoFactorAuthBypassTime(null);
+          accessModuleService.updateBypassTime(
+              dbUser.getUserId(), AccessModule.TWO_FACTOR_AUTH, false);
           return userDao.save(user);
         });
   }
@@ -328,21 +329,11 @@ public class UserServiceAccessTest {
   // Compliance training can be bypassed, and is subject to annual renewal.
 
   @Test
-  public void test_updateUserWithRetries_training_unbypassed_no_aar_noncompliant() {
-    providedWorkbenchConfig.access.enableAccessRenewal = false;
-
-    testUnregistration(
-        user -> {
-          user.setComplianceTrainingBypassTime(null);
-          return userDao.save(user);
-        });
-  }
-
-  @Test
   public void test_updateUserWithRetries_training_unbypassed_aar_noncompliant() {
     testUnregistration(
         user -> {
-          user.setComplianceTrainingBypassTime(null);
+          accessModuleService.updateBypassTime(
+              dbUser.getUserId(), AccessModule.COMPLIANCE_TRAINING, false);
           return userDao.save(user);
         });
   }
@@ -351,9 +342,11 @@ public class UserServiceAccessTest {
   public void test_updateUserWithRetries_training_unbypassed_aar_expired_noncompliant() {
     testUnregistration(
         user -> {
-          user.setComplianceTrainingBypassTime(null);
           final Timestamp willExpire = Timestamp.from(START_INSTANT);
-          user.setComplianceTrainingCompletionTime(willExpire);
+          accessModuleService.updateBypassTime(
+              dbUser.getUserId(), AccessModule.COMPLIANCE_TRAINING, false);
+          accessModuleService.updateCompletionTime(
+              dbUser, AccessModuleName.RT_COMPLIANCE_TRAINING, willExpire);
 
           advanceClockDays(EXPIRATION_DAYS + 1);
 
@@ -365,46 +358,11 @@ public class UserServiceAccessTest {
   // A missing DUA version or a version other than the latest is also noncompliant.
 
   @Test
-  public void test_updateUserWithRetries_dua_unbypassed_no_aar_noncompliant() {
-    providedWorkbenchConfig.access.enableAccessRenewal = false;
-
-    testUnregistration(
-        user -> {
-          user.setDataUseAgreementBypassTime(null);
-          return userDao.save(user);
-        });
-  }
-
-  @Test
-  public void test_updateUserWithRetries_dua_unbypassed_no_aar_missing_version_noncompliant() {
-    providedWorkbenchConfig.access.enableAccessRenewal = false;
-
-    testUnregistration(
-        user -> {
-          user.setDataUseAgreementBypassTime(null);
-          user.setDataUseAgreementCompletionTime(Timestamp.from(START_INSTANT));
-          return userDao.save(user);
-        });
-  }
-
-  @Test
-  public void test_updateUserWithRetries_dua_unbypassed_no_aar_wrong_version_noncompliant() {
-    providedWorkbenchConfig.access.enableAccessRenewal = false;
-
-    testUnregistration(
-        user -> {
-          user.setDataUseAgreementBypassTime(null);
-          user.setDataUseAgreementCompletionTime(Timestamp.from(START_INSTANT));
-          user.setDataUseAgreementSignedVersion(userService.getCurrentDuccVersion() - 1);
-          return userDao.save(user);
-        });
-  }
-
-  @Test
   public void test_updateUserWithRetries_dua_unbypassed_aar_noncompliant() {
     testUnregistration(
         user -> {
-          user.setDataUseAgreementBypassTime(null);
+          accessModuleService.updateBypassTime(
+              dbUser.getUserId(), AccessModule.DATA_USER_CODE_OF_CONDUCT, false);
           return userDao.save(user);
         });
   }
@@ -413,8 +371,10 @@ public class UserServiceAccessTest {
   public void test_updateUserWithRetries_dua_unbypassed_aar_missing_version_noncompliant() {
     testUnregistration(
         user -> {
-          user.setDataUseAgreementBypassTime(null);
-          user.setDataUseAgreementCompletionTime(Timestamp.from(START_INSTANT));
+          accessModuleService.updateBypassTime(
+              dbUser.getUserId(), AccessModule.DATA_USER_CODE_OF_CONDUCT, false);
+          accessModuleService.updateCompletionTime(
+              dbUser, AccessModuleName.DATA_USER_CODE_OF_CONDUCT, Timestamp.from(START_INSTANT));
           return userDao.save(user);
         });
   }
@@ -423,9 +383,11 @@ public class UserServiceAccessTest {
   public void test_updateUserWithRetries_dua_unbypassed_aar_wrong_version_noncompliant() {
     testUnregistration(
         user -> {
-          user.setDataUseAgreementBypassTime(null);
-          user.setDataUseAgreementCompletionTime(Timestamp.from(START_INSTANT));
-          user.setDataUseAgreementSignedVersion(userService.getCurrentDuccVersion() - 1);
+          accessModuleService.updateBypassTime(
+              dbUser.getUserId(), AccessModule.DATA_USER_CODE_OF_CONDUCT, false);
+          accessModuleService.updateCompletionTime(
+              dbUser, AccessModuleName.DATA_USER_CODE_OF_CONDUCT, Timestamp.from(START_INSTANT));
+          user.setDataUseAgreementSignedVersion(accessModuleService.getCurrentDuccVersion() - 1);
           return userDao.save(user);
         });
   }
@@ -434,10 +396,13 @@ public class UserServiceAccessTest {
   public void test_updateUserWithRetries_dua_unbypassed_aar_expired_noncompliant() {
     testUnregistration(
         user -> {
-          user.setDataUseAgreementBypassTime(null);
           final Timestamp willExpire = Timestamp.from(START_INSTANT);
-          user.setDataUseAgreementCompletionTime(willExpire);
-          user.setDataUseAgreementSignedVersion(userService.getCurrentDuccVersion());
+          accessModuleService.updateBypassTime(
+              dbUser.getUserId(), AccessModule.DATA_USER_CODE_OF_CONDUCT, false);
+          accessModuleService.updateCompletionTime(
+              dbUser, AccessModuleName.DATA_USER_CODE_OF_CONDUCT, willExpire);
+
+          user.setDataUseAgreementSignedVersion(accessModuleService.getCurrentDuccVersion());
 
           advanceClockDays(EXPIRATION_DAYS + 1);
 
@@ -451,7 +416,8 @@ public class UserServiceAccessTest {
   public void test_updateUserWithRetries_publications_not_confirmed() {
     testUnregistration(
         user -> {
-          user.setPublicationsLastConfirmedTime(null);
+          accessModuleService.updateCompletionTime(
+              dbUser, AccessModuleName.PUBLICATION_CONFIRMATION, null);
           return userDao.save(user);
         });
   }
@@ -461,8 +427,8 @@ public class UserServiceAccessTest {
     testUnregistration(
         user -> {
           final Timestamp willExpire = Timestamp.from(START_INSTANT);
-          user.setPublicationsLastConfirmedTime(willExpire);
-
+          accessModuleService.updateCompletionTime(
+              dbUser, AccessModuleName.PUBLICATION_CONFIRMATION, willExpire);
           advanceClockDays(EXPIRATION_DAYS + 1);
 
           return userDao.save(user);
@@ -475,7 +441,8 @@ public class UserServiceAccessTest {
   public void test_updateUserWithRetries_profile_not_confirmed() {
     testUnregistration(
         user -> {
-          user.setProfileLastConfirmedTime(null);
+          accessModuleService.updateCompletionTime(
+              dbUser, AccessModuleName.PROFILE_CONFIRMATION, null);
           return userDao.save(user);
         });
   }
@@ -485,8 +452,8 @@ public class UserServiceAccessTest {
     testUnregistration(
         user -> {
           final Timestamp willExpire = Timestamp.from(START_INSTANT);
-          user.setProfileLastConfirmedTime(willExpire);
-
+          accessModuleService.updateCompletionTime(
+              dbUser, AccessModuleName.PROFILE_CONFIRMATION, willExpire);
           advanceClockDays(EXPIRATION_DAYS + 1);
 
           return userDao.save(user);
@@ -496,12 +463,15 @@ public class UserServiceAccessTest {
   @Test
   public void test_maybeSendAccessExpirationEmail_up_to_date() {
     final Timestamp now = new Timestamp(PROVIDED_CLOCK.millis());
-    dbUser.setProfileLastConfirmedTime(now);
-    dbUser.setPublicationsLastConfirmedTime(now);
-    dbUser.setDataUseAgreementCompletionTime(now);
-    dbUser.setComplianceTrainingCompletionTime(now);
+    accessModuleService.updateCompletionTime(dbUser, AccessModuleName.PROFILE_CONFIRMATION, now);
+    accessModuleService.updateCompletionTime(
+        dbUser, AccessModuleName.PUBLICATION_CONFIRMATION, now);
+    accessModuleService.updateCompletionTime(
+        dbUser, AccessModuleName.DATA_USER_CODE_OF_CONDUCT, now);
+    accessModuleService.updateCompletionTime(dbUser, AccessModuleName.RT_COMPLIANCE_TRAINING, now);
+
     // a completion requirement for DUCC (formerly "DUA" - TODO rename)
-    dbUser.setDataUseAgreementSignedVersion(userService.getCurrentDuccVersion());
+    dbUser.setDataUseAgreementSignedVersion(accessModuleService.getCurrentDuccVersion());
 
     userService.maybeSendAccessExpirationEmail(dbUser);
 
@@ -514,13 +484,15 @@ public class UserServiceAccessTest {
   public void test_maybeSendAccessExpirationEmail_bypassed_is_up_to_date() {
     final Timestamp now = new Timestamp(PROVIDED_CLOCK.millis());
 
-    dbUser.setDataUseAgreementBypassTime(now);
-    dbUser.setComplianceTrainingBypassTime(now);
+    accessModuleService.updateBypassTime(
+        dbUser.getUserId(), AccessModule.DATA_USER_CODE_OF_CONDUCT, true);
+    accessModuleService.updateBypassTime(
+        dbUser.getUserId(), AccessModule.COMPLIANCE_TRAINING, true);
 
     // these 2 are not bypassable
-
-    dbUser.setProfileLastConfirmedTime(now);
-    dbUser.setPublicationsLastConfirmedTime(now);
+    accessModuleService.updateCompletionTime(dbUser, AccessModuleName.PROFILE_CONFIRMATION, now);
+    accessModuleService.updateCompletionTime(
+        dbUser, AccessModuleName.PUBLICATION_CONFIRMATION, now);
 
     userService.maybeSendAccessExpirationEmail(dbUser);
 
@@ -531,45 +503,24 @@ public class UserServiceAccessTest {
   public void test_maybeSendAccessExpirationEmail_expiring_1() throws MessagingException {
     // these are up to date
     final Timestamp now = new Timestamp(PROVIDED_CLOCK.millis());
-    dbUser.setProfileLastConfirmedTime(now);
-    dbUser.setPublicationsLastConfirmedTime(now);
-    dbUser.setDataUseAgreementCompletionTime(now);
+    accessModuleService.updateCompletionTime(
+        dbUser, AccessModuleName.PUBLICATION_CONFIRMATION, now);
+    accessModuleService.updateCompletionTime(dbUser, AccessModuleName.PROFILE_CONFIRMATION, now);
+    accessModuleService.updateCompletionTime(
+        dbUser, AccessModuleName.DATA_USER_CODE_OF_CONDUCT, now);
     // a completion requirement for DUCC (formerly "DUA" - TODO rename)
-    dbUser.setDataUseAgreementSignedVersion(userService.getCurrentDuccVersion());
+    dbUser.setDataUseAgreementSignedVersion(accessModuleService.getCurrentDuccVersion());
 
     // expiring in 1 day (plus some) will trigger the 1-day warning
 
     final Duration oneDayPlusSome = daysPlusSome(1);
     final Instant expirationTime = PROVIDED_CLOCK.instant().plus(oneDayPlusSome);
-    dbUser.setComplianceTrainingCompletionTime(willExpireAfter(oneDayPlusSome));
+    accessModuleService.updateCompletionTime(
+        dbUser, AccessModuleName.RT_COMPLIANCE_TRAINING, willExpireAfter(oneDayPlusSome));
 
     userService.maybeSendAccessExpirationEmail(dbUser);
 
     verify(mailService).alertUserRegisteredTierWarningThreshold(dbUser, 1, expirationTime);
-  }
-
-  @Test
-  public void test_maybeSendAccessExpirationEmail_expiring_1_FF_false() {
-    providedWorkbenchConfig.access.enableAccessRenewal = false;
-    // these are up to date
-    final Timestamp now = new Timestamp(PROVIDED_CLOCK.millis());
-    dbUser.setProfileLastConfirmedTime(now);
-    dbUser.setPublicationsLastConfirmedTime(now);
-    dbUser.setDataUseAgreementCompletionTime(now);
-    // a completion requirement for DUCC (formerly "DUA" - TODO rename)
-    dbUser.setDataUseAgreementSignedVersion(userService.getCurrentDuccVersion());
-
-    // expiring in 1 day (plus some) would trigger the 1-day warning...
-
-    final Duration oneDayPlusSome = daysPlusSome(1);
-    dbUser.setComplianceTrainingCompletionTime(willExpireAfter(oneDayPlusSome));
-
-    // but the feature flag is off
-    providedWorkbenchConfig.access.enableAccessRenewal = false;
-
-    userService.maybeSendAccessExpirationEmail(dbUser);
-
-    verifyZeroInteractions(mailService);
   }
 
   // if any module is incomplete, we don't send an email
@@ -579,17 +530,21 @@ public class UserServiceAccessTest {
   public void test_maybeSendAccessExpirationEmail_expired_but_missing() {
     // these are up to date
     final Timestamp now = new Timestamp(PROVIDED_CLOCK.millis());
-    dbUser.setProfileLastConfirmedTime(now);
-    dbUser.setPublicationsLastConfirmedTime(now);
+    accessModuleService.updateCompletionTime(
+        dbUser, AccessModuleName.PUBLICATION_CONFIRMATION, now);
+    accessModuleService.updateCompletionTime(dbUser, AccessModuleName.PROFILE_CONFIRMATION, now);
 
     // expiring in 1 day (plus some) would trigger the 1-day warning...
 
     final Duration oneDayPlusSome = daysPlusSome(1);
-    dbUser.setComplianceTrainingCompletionTime(willExpireAfter(oneDayPlusSome));
+    accessModuleService.updateCompletionTime(
+        dbUser, AccessModuleName.RT_COMPLIANCE_TRAINING, willExpireAfter(oneDayPlusSome));
 
     // but this module is incomplete (and also not bypassed)
-    dbUser.setDataUseAgreementCompletionTime(null);
-    dbUser.setDataUseAgreementBypassTime(null);
+    accessModuleService.updateCompletionTime(
+        dbUser, AccessModuleName.DATA_USER_CODE_OF_CONDUCT, null);
+    accessModuleService.updateBypassTime(
+        dbUser.getUserId(), AccessModule.DATA_USER_CODE_OF_CONDUCT, false);
 
     userService.maybeSendAccessExpirationEmail(dbUser);
 
@@ -604,17 +559,20 @@ public class UserServiceAccessTest {
       throws MessagingException {
     // these are up to date
     final Timestamp now = new Timestamp(PROVIDED_CLOCK.millis());
-    dbUser.setProfileLastConfirmedTime(now);
-    dbUser.setPublicationsLastConfirmedTime(now);
+    accessModuleService.updateCompletionTime(dbUser, AccessModuleName.PROFILE_CONFIRMATION, now);
+    accessModuleService.updateCompletionTime(
+        dbUser, AccessModuleName.PUBLICATION_CONFIRMATION, now);
 
     // this is bypassed
-    dbUser.setDataUseAgreementBypassTime(now);
+    accessModuleService.updateBypassTime(
+        dbUser.getUserId(), AccessModule.DATA_USER_CODE_OF_CONDUCT, true);
 
     // expiring in 1 day (plus some) will trigger the 1-day warning
 
     final Duration oneDayPlusSome = daysPlusSome(1);
     final Instant expirationTime = PROVIDED_CLOCK.instant().plus(oneDayPlusSome);
-    dbUser.setComplianceTrainingCompletionTime(willExpireAfter(oneDayPlusSome));
+    accessModuleService.updateCompletionTime(
+        dbUser, AccessModuleName.RT_COMPLIANCE_TRAINING, willExpireAfter(oneDayPlusSome));
 
     userService.maybeSendAccessExpirationEmail(dbUser);
 
@@ -628,17 +586,20 @@ public class UserServiceAccessTest {
       throws MessagingException {
     // these are up to date
     final Timestamp now = new Timestamp(PROVIDED_CLOCK.millis());
-    dbUser.setProfileLastConfirmedTime(now);
-    dbUser.setPublicationsLastConfirmedTime(now);
+    accessModuleService.updateCompletionTime(dbUser, AccessModuleName.PROFILE_CONFIRMATION, now);
+    accessModuleService.updateCompletionTime(
+        dbUser, AccessModuleName.PUBLICATION_CONFIRMATION, now);
 
     // expiring in 1 day (plus some) will trigger the 1-day warning
 
     final Duration oneDayPlusSome = daysPlusSome(1);
     final Instant expirationTime = PROVIDED_CLOCK.instant().plus(oneDayPlusSome);
-    dbUser.setComplianceTrainingCompletionTime(willExpireAfter(oneDayPlusSome));
+    accessModuleService.updateCompletionTime(
+        dbUser, AccessModuleName.RT_COMPLIANCE_TRAINING, willExpireAfter(oneDayPlusSome));
 
     // a bypass which would "expire" in 30 days does NOT trigger a 30-day warning
-    dbUser.setDataUseAgreementBypassTime(willExpireAfter(daysPlusSome(30)));
+    accessModuleService.updateBypassTime(
+        dbUser.getUserId(), AccessModule.DATA_USER_CODE_OF_CONDUCT, true);
 
     userService.maybeSendAccessExpirationEmail(dbUser);
 
@@ -652,16 +613,20 @@ public class UserServiceAccessTest {
   public void test_maybeSendAccessExpirationEmail_expiring_today() {
     // these are up to date
     final Timestamp now = new Timestamp(PROVIDED_CLOCK.millis());
-    dbUser.setProfileLastConfirmedTime(now);
-    dbUser.setPublicationsLastConfirmedTime(now);
-    dbUser.setDataUseAgreementCompletionTime(now);
+    accessModuleService.updateCompletionTime(dbUser, AccessModuleName.PROFILE_CONFIRMATION, now);
+    accessModuleService.updateCompletionTime(
+        dbUser, AccessModuleName.PUBLICATION_CONFIRMATION, now);
+    accessModuleService.updateCompletionTime(
+        dbUser, AccessModuleName.DATA_USER_CODE_OF_CONDUCT, now);
+
     // a completion requirement for DUCC (formerly "DUA" - TODO rename)
-    dbUser.setDataUseAgreementSignedVersion(userService.getCurrentDuccVersion());
+    dbUser.setDataUseAgreementSignedVersion(accessModuleService.getCurrentDuccVersion());
 
     // expiring in .5 days will not trigger an email
 
     final Duration halfDay = Duration.ofHours(12);
-    dbUser.setComplianceTrainingCompletionTime(willExpireAfter(halfDay));
+    accessModuleService.updateCompletionTime(
+        dbUser, AccessModuleName.RT_COMPLIANCE_TRAINING, willExpireAfter(halfDay));
 
     userService.maybeSendAccessExpirationEmail(dbUser);
 
@@ -672,17 +637,21 @@ public class UserServiceAccessTest {
   public void test_maybeSendAccessExpirationEmail_expiring_30() throws MessagingException {
     // these are up to date
     final Timestamp now = new Timestamp(PROVIDED_CLOCK.millis());
-    dbUser.setProfileLastConfirmedTime(now);
-    dbUser.setPublicationsLastConfirmedTime(now);
-    dbUser.setDataUseAgreementCompletionTime(now);
+    accessModuleService.updateCompletionTime(dbUser, AccessModuleName.PROFILE_CONFIRMATION, now);
+    accessModuleService.updateCompletionTime(
+        dbUser, AccessModuleName.PUBLICATION_CONFIRMATION, now);
+    accessModuleService.updateCompletionTime(
+        dbUser, AccessModuleName.DATA_USER_CODE_OF_CONDUCT, now);
+
     // a completion requirement for DUCC (formerly "DUA" - TODO rename)
-    dbUser.setDataUseAgreementSignedVersion(userService.getCurrentDuccVersion());
+    dbUser.setDataUseAgreementSignedVersion(accessModuleService.getCurrentDuccVersion());
 
     // expiring in 30 days (plus) will trigger the 30-day warning
 
     final Duration thirtyPlus = daysPlusSome(30);
     final Instant expirationTime = PROVIDED_CLOCK.instant().plus(thirtyPlus);
-    dbUser.setComplianceTrainingCompletionTime(willExpireAfter(thirtyPlus));
+    accessModuleService.updateCompletionTime(
+        dbUser, AccessModuleName.RT_COMPLIANCE_TRAINING, willExpireAfter(thirtyPlus));
 
     userService.maybeSendAccessExpirationEmail(dbUser);
 
@@ -693,14 +662,18 @@ public class UserServiceAccessTest {
   public void test_maybeSendAccessExpirationEmail_expiring_31() {
     // these are up to date
     final Timestamp now = new Timestamp(PROVIDED_CLOCK.millis());
-    dbUser.setProfileLastConfirmedTime(now);
-    dbUser.setPublicationsLastConfirmedTime(now);
-    dbUser.setDataUseAgreementCompletionTime(now);
+    accessModuleService.updateCompletionTime(dbUser, AccessModuleName.PROFILE_CONFIRMATION, now);
+    accessModuleService.updateCompletionTime(
+        dbUser, AccessModuleName.PUBLICATION_CONFIRMATION, now);
+    accessModuleService.updateCompletionTime(
+        dbUser, AccessModuleName.DATA_USER_CODE_OF_CONDUCT, now);
+
     // a completion requirement for DUCC (formerly "DUA" - TODO rename)
-    dbUser.setDataUseAgreementSignedVersion(userService.getCurrentDuccVersion());
+    dbUser.setDataUseAgreementSignedVersion(accessModuleService.getCurrentDuccVersion());
 
     // expiring in 31 days (plus) will not trigger a warning
-    dbUser.setComplianceTrainingCompletionTime(willExpireAfter(daysPlusSome(31)));
+    accessModuleService.updateCompletionTime(
+        dbUser, AccessModuleName.RT_COMPLIANCE_TRAINING, willExpireAfter(daysPlusSome(31)));
 
     userService.maybeSendAccessExpirationEmail(dbUser);
 
@@ -713,21 +686,24 @@ public class UserServiceAccessTest {
   public void test_maybeSendAccessExpirationEmail_expiring_15_and_30() throws MessagingException {
     // these are up to date
     final Timestamp now = new Timestamp(PROVIDED_CLOCK.millis());
-    dbUser.setProfileLastConfirmedTime(now);
-    dbUser.setPublicationsLastConfirmedTime(now);
+    accessModuleService.updateCompletionTime(dbUser, AccessModuleName.PROFILE_CONFIRMATION, now);
+    accessModuleService.updateCompletionTime(
+        dbUser, AccessModuleName.PUBLICATION_CONFIRMATION, now);
 
     // a completion requirement for DUCC (formerly "DUA" - TODO rename)
-    dbUser.setDataUseAgreementSignedVersion(userService.getCurrentDuccVersion());
+    dbUser.setDataUseAgreementSignedVersion(accessModuleService.getCurrentDuccVersion());
 
     // expiring in 30 days (plus) would trigger the 30-day warning...
     final Duration thirtyPlus = daysPlusSome(30);
     final Instant expirationTime30 = PROVIDED_CLOCK.instant().plus(thirtyPlus);
-    dbUser.setComplianceTrainingCompletionTime(willExpireAfter(thirtyPlus));
+    accessModuleService.updateCompletionTime(
+        dbUser, AccessModuleName.RT_COMPLIANCE_TRAINING, willExpireAfter(thirtyPlus));
 
     // but 15 days (plus) is sooner, so trigger 15 instead
     final Duration fifteenPlus = daysPlusSome(15);
     final Instant expirationTime15 = PROVIDED_CLOCK.instant().plus(fifteenPlus);
-    dbUser.setDataUseAgreementCompletionTime(willExpireAfter(fifteenPlus));
+    accessModuleService.updateCompletionTime(
+        dbUser, AccessModuleName.DATA_USER_CODE_OF_CONDUCT, willExpireAfter(fifteenPlus));
 
     userService.maybeSendAccessExpirationEmail(dbUser);
 
@@ -743,17 +719,20 @@ public class UserServiceAccessTest {
   public void test_maybeSendAccessExpirationEmail_expiring_14_and_15() {
     // these are up to date
     final Timestamp now = new Timestamp(PROVIDED_CLOCK.millis());
-    dbUser.setProfileLastConfirmedTime(now);
-    dbUser.setPublicationsLastConfirmedTime(now);
+    accessModuleService.updateCompletionTime(dbUser, AccessModuleName.PROFILE_CONFIRMATION, now);
+    accessModuleService.updateCompletionTime(
+        dbUser, AccessModuleName.PUBLICATION_CONFIRMATION, now);
 
     // a completion requirement for DUCC (formerly "DUA" - TODO rename)
-    dbUser.setDataUseAgreementSignedVersion(userService.getCurrentDuccVersion());
+    dbUser.setDataUseAgreementSignedVersion(accessModuleService.getCurrentDuccVersion());
 
     // expiring in 15 days (plus) would trigger the 15-day warning...
-    dbUser.setComplianceTrainingCompletionTime(willExpireAfter(daysPlusSome(15)));
+    accessModuleService.updateCompletionTime(
+        dbUser, AccessModuleName.RT_COMPLIANCE_TRAINING, willExpireAfter(daysPlusSome(15)));
 
     // but 14 days (plus) is sooner, so no email is sent
-    dbUser.setDataUseAgreementCompletionTime(willExpireAfter(daysPlusSome(14)));
+    accessModuleService.updateCompletionTime(
+        dbUser, AccessModuleName.DATA_USER_CODE_OF_CONDUCT, willExpireAfter(daysPlusSome(14)));
 
     userService.maybeSendAccessExpirationEmail(dbUser);
 
@@ -764,41 +743,24 @@ public class UserServiceAccessTest {
   public void test_maybeSendAccessExpirationEmail_expired() throws MessagingException {
     // these are up to date
     final Timestamp now = new Timestamp(PROVIDED_CLOCK.millis());
-    dbUser.setProfileLastConfirmedTime(now);
-    dbUser.setPublicationsLastConfirmedTime(now);
-    dbUser.setDataUseAgreementCompletionTime(now);
+    accessModuleService.updateCompletionTime(dbUser, AccessModuleName.PROFILE_CONFIRMATION, now);
+    accessModuleService.updateCompletionTime(
+        dbUser, AccessModuleName.PUBLICATION_CONFIRMATION, now);
+    accessModuleService.updateCompletionTime(
+        dbUser, AccessModuleName.DATA_USER_CODE_OF_CONDUCT, now);
+
     // a completion requirement for DUCC (formerly "DUA" - TODO rename)
-    dbUser.setDataUseAgreementSignedVersion(userService.getCurrentDuccVersion());
+    dbUser.setDataUseAgreementSignedVersion(accessModuleService.getCurrentDuccVersion());
 
     // but this is expired
     final Duration oneHour = Duration.ofHours(1);
     final Instant expirationTime = PROVIDED_CLOCK.instant().minus(oneHour);
-    dbUser.setComplianceTrainingCompletionTime(expiredBy(oneHour));
+    accessModuleService.updateCompletionTime(
+        dbUser, AccessModuleName.RT_COMPLIANCE_TRAINING, expiredBy(oneHour));
 
     userService.maybeSendAccessExpirationEmail(dbUser);
 
     verify(mailService).alertUserRegisteredTierExpiration(dbUser, expirationTime);
-  }
-
-  @Test
-  public void test_maybeSendAccessExpirationEmail_expired_FF_false() {
-    // these are up to date
-    final Timestamp now = new Timestamp(PROVIDED_CLOCK.millis());
-    dbUser.setProfileLastConfirmedTime(now);
-    dbUser.setPublicationsLastConfirmedTime(now);
-    dbUser.setDataUseAgreementCompletionTime(now);
-    // a completion requirement for DUCC (formerly "DUA" - TODO rename)
-    dbUser.setDataUseAgreementSignedVersion(userService.getCurrentDuccVersion());
-
-    // this would be expired...
-    dbUser.setComplianceTrainingCompletionTime(expiredBy(Duration.ofHours(1)));
-
-    // but the feature flag is off
-    providedWorkbenchConfig.access.enableAccessRenewal = false;
-
-    userService.maybeSendAccessExpirationEmail(dbUser);
-
-    verifyZeroInteractions(mailService);
   }
 
   // don't send an email if we have been expired for more than a day
@@ -808,11 +770,14 @@ public class UserServiceAccessTest {
   public void test_maybeSendAccessExpirationEmail_extra_expired() {
     // these are up to date
     final Timestamp now = new Timestamp(PROVIDED_CLOCK.millis());
-    dbUser.setProfileLastConfirmedTime(now);
-    dbUser.setPublicationsLastConfirmedTime(now);
-    dbUser.setDataUseAgreementCompletionTime(now);
+    accessModuleService.updateCompletionTime(dbUser, AccessModuleName.PROFILE_CONFIRMATION, now);
+    accessModuleService.updateCompletionTime(
+        dbUser, AccessModuleName.PUBLICATION_CONFIRMATION, now);
+    accessModuleService.updateCompletionTime(
+        dbUser, AccessModuleName.DATA_USER_CODE_OF_CONDUCT, now);
+
     // a completion requirement for DUCC (formerly "DUA" - TODO rename)
-    dbUser.setDataUseAgreementSignedVersion(userService.getCurrentDuccVersion());
+    dbUser.setDataUseAgreementSignedVersion(accessModuleService.getCurrentDuccVersion());
 
     // but this expired yesterday
 
@@ -820,7 +785,8 @@ public class UserServiceAccessTest {
     final Timestamp extraExpired =
         Timestamp.from(aYearAgo.minus(Duration.ofDays(1)).minus(Duration.ofHours(1)));
 
-    dbUser.setComplianceTrainingCompletionTime(extraExpired);
+    accessModuleService.updateCompletionTime(
+        dbUser, AccessModuleName.RT_COMPLIANCE_TRAINING, extraExpired);
 
     userService.maybeSendAccessExpirationEmail(dbUser);
 
@@ -871,18 +837,25 @@ public class UserServiceAccessTest {
 
               // this is sufficient to fully register the user when the compliance module is
               // disabled
-
               user.setDisabled(false);
-              user.setEraCommonsBypassTime(now);
-              user.setTwoFactorAuthBypassTime(now);
-              user.setDataUseAgreementBypassTime(now);
-              user.setPublicationsLastConfirmedTime(now);
-              user.setProfileLastConfirmedTime(now);
+              accessModuleService.updateBypassTime(
+                  user.getUserId(), AccessModule.TWO_FACTOR_AUTH, true);
+              accessModuleService.updateBypassTime(
+                  user.getUserId(), AccessModule.RAS_LINK_LOGIN_GOV, true);
+              accessModuleService.updateBypassTime(
+                  user.getUserId(), AccessModule.ERA_COMMONS, true);
+              accessModuleService.updateBypassTime(
+                  user.getUserId(), AccessModule.DATA_USER_CODE_OF_CONDUCT, true);
+              accessModuleService.updateCompletionTime(
+                  user, AccessModuleName.PUBLICATION_CONFIRMATION, now);
+              accessModuleService.updateCompletionTime(
+                  user, AccessModuleName.PROFILE_CONFIRMATION, now);
 
               // ensure there is nothing set for compliance
-
-              user.setComplianceTrainingCompletionTime(null);
-              user.setComplianceTrainingBypassTime(null);
+              accessModuleService.updateCompletionTime(
+                  user, AccessModuleName.RT_COMPLIANCE_TRAINING, null);
+              accessModuleService.updateBypassTime(
+                  user.getUserId(), AccessModule.COMPLIANCE_TRAINING, false);
 
               return user;
             });
@@ -900,6 +873,212 @@ public class UserServiceAccessTest {
     assertThat(expirations.get(0).getFamilyName()).isEqualTo(dbUser.getFamilyName());
 
     assertThat(expirations.get(0).getExpirationDate()).isEqualTo(aYearFromNow);
+  }
+
+  @Test
+  public void testInstitutionAddressInvalid_emailDomainsNotMatch() {
+    testUnregistration(
+        user -> {
+          institutionService.updateInstitution(
+              institution.getShortName(),
+              institution.tierConfigs(
+                  ImmutableList.of(rtTierConfig.emailDomains(ImmutableList.of("test.com")))));
+          return userDao.save(user);
+        });
+  }
+
+  @Test
+  public void testInstitutionAddressInvalid_emailDomainsNull() {
+    testUnregistration(
+        user -> {
+          institutionService.updateInstitution(
+              institution.getShortName(),
+              institution.tierConfigs(ImmutableList.of(rtTierConfig.emailDomains(null))));
+          return userDao.save(user);
+        });
+  }
+
+  @Test
+  public void testInstitutionAddressInvalid_emailDomainsTierRequirementEmpty() {
+    testUnregistration(
+        user -> {
+          institutionService.updateInstitution(
+              institution.getShortName(), institution.tierConfigs(ImmutableList.of()));
+          return userDao.save(user);
+        });
+  }
+
+  @Test
+  public void testInstitutionAddressInvalid_emailAddressMatch() {
+    institutionService.updateInstitution(
+        institution.getShortName(),
+        institution.tierConfigs(
+            ImmutableList.of(
+                rtTierConfig
+                    .membershipRequirement(InstitutionMembershipRequirement.ADDRESSES)
+                    .addEmailAddressesItem(dbUser.getContactEmail())
+                    .emailDomains(null))));
+    dbUser = updateUserWithRetries(registerUserNow);
+    assertRegisteredTierEnabled(dbUser);
+  }
+
+  @Test
+  public void testInstitutionAddressInvalid_emailAddressNotMatch() {
+    testUnregistration(
+        user -> {
+          institutionService.updateInstitution(
+              institution.getShortName(),
+              institution.tierConfigs(
+                  ImmutableList.of(
+                      rtTierConfig
+                          .membershipRequirement(InstitutionMembershipRequirement.ADDRESSES)
+                          .addEmailAddressesItem("randmom@email.com")
+                          .emailDomains(null))));
+          return userDao.save(user);
+        });
+  }
+
+  @Test
+  public void testInstitutionAddressInvalid_emailAddressNull() {
+    testUnregistration(
+        user -> {
+          institutionService.updateInstitution(
+              institution.getShortName(),
+              institution.tierConfigs(
+                  ImmutableList.of(rtTierConfig.emailDomains(null).emailAddresses(null))));
+          return userDao.save(user);
+        });
+  }
+
+  @Test
+  public void testInstitutionAddressInvalid_emailAddressTierConfigNotExist() {
+    testUnregistration(
+        user -> {
+          institutionService.updateInstitution(
+              institution.getShortName(), institution.tierConfigs(ImmutableList.of()));
+          return userDao.save(user);
+        });
+  }
+
+  @Test
+  public void testInstitutionRequriement_optionalEra() {
+    assertThat(userAccessTierDao.findAll()).isEmpty();
+    providedWorkbenchConfig.access.enableEraCommons = true;
+    providedWorkbenchConfig.access.enableRasLoginGovLinking = true;
+
+    institutionService.updateInstitution(
+        institution.getShortName(),
+        institution.tierConfigs(ImmutableList.of(rtTierConfig.eraRequired(true))));
+    dbUser = updateUserWithRetries(registerUserNow);
+    assertRegisteredTierEnabled(dbUser);
+
+    // Now make user eRA not complete, expect user removed from Registered tier;
+    accessModuleService.updateBypassTime(dbUser.getUserId(), AccessModule.ERA_COMMONS, false);
+    accessModuleService.updateCompletionTime(dbUser, AccessModuleName.ERA_COMMONS, null);
+    updateUserWithRetries(Function.identity());
+    assertRegisteredTierDisabled(dbUser);
+
+    // Make eRA is optional for that institution, verify user become registered
+    institutionService.updateInstitution(
+        institution.getShortName(),
+        institution.tierConfigs(ImmutableList.of(rtTierConfig.eraRequired(false))));
+    updateUserWithRetries(Function.identity());
+    assertRegisteredTierEnabled(dbUser);
+  }
+
+  @Test
+  public void testInstitutionRequirement_optionalEra_loginGovFlagDisabled() {
+    // User not complete eRA, but it is optional for that institution
+    assertThat(userAccessTierDao.findAll()).isEmpty();
+    providedWorkbenchConfig.access.enableEraCommons = true;
+    providedWorkbenchConfig.access.enableRasLoginGovLinking = true;
+    updateUserWithRetries(registerUserNow);
+    institutionService.updateInstitution(
+        institution.getShortName(),
+        institution.tierConfigs(ImmutableList.of(rtTierConfig.eraRequired(false))));
+    accessModuleService.updateBypassTime(dbUser.getUserId(), AccessModule.ERA_COMMONS, false);
+    accessModuleService.updateCompletionTime(dbUser, AccessModuleName.ERA_COMMONS, null);
+    updateUserWithRetries(Function.identity());
+    assertRegisteredTierEnabled(dbUser);
+
+    // Now login.gov flag disabled, eRA is always required.
+    providedWorkbenchConfig.access.enableRasLoginGovLinking = false;
+    updateUserWithRetries(Function.identity());
+    assertRegisteredTierDisabled(dbUser);
+  }
+
+  @Test
+  public void testInstitutionRequirement_optionalEra_loginGovFlagEnabled_eRAFlagDisabled() {
+    // When eRA flag is disabled, that means user completed eRA Commons
+    assertThat(userAccessTierDao.findAll()).isEmpty();
+    updateUserWithRetries(registerUserNow);
+    providedWorkbenchConfig.access.enableEraCommons = false;
+    providedWorkbenchConfig.access.enableRasLoginGovLinking = false;
+    institutionService.updateInstitution(
+        institution.getShortName(),
+        institution.tierConfigs(ImmutableList.of(rtTierConfig.eraRequired(true))));
+    accessModuleService.updateBypassTime(dbUser.getUserId(), AccessModule.ERA_COMMONS, false);
+    accessModuleService.updateCompletionTime(dbUser, AccessModuleName.ERA_COMMONS, null);
+    updateUserWithRetries(Function.identity());
+    assertRegisteredTierEnabled(dbUser);
+  }
+
+  @Test
+  public void testRasLinkNotComplete() {
+    assertThat(userAccessTierDao.findAll()).isEmpty();
+    providedWorkbenchConfig.access.enforceRasLoginGovLinking = true;
+    dbUser = updateUserWithRetries(registerUserNow);
+    assertRegisteredTierEnabled(dbUser);
+
+    // Incomplete RAS module, expect user removed from Registered tier;
+    accessModuleService.updateBypassTime(
+        dbUser.getUserId(), AccessModule.RAS_LINK_LOGIN_GOV, false);
+    updateUserWithRetries(Function.identity());
+    assertRegisteredTierDisabled(dbUser);
+
+    // Complete RAS Linking, verify user become registered
+    accessModuleService.updateCompletionTime(
+        dbUser, AccessModuleName.RAS_LOGIN_GOV, new Timestamp(PROVIDED_CLOCK.millis()));
+    updateUserWithRetries(Function.identity());
+    assertRegisteredTierEnabled(dbUser);
+  }
+
+  @Test
+  public void testRasLinkNotComplete_enforceRasOff_enableRasOn() {
+    assertThat(userAccessTierDao.findAll()).isEmpty();
+    providedWorkbenchConfig.access.enforceRasLoginGovLinking = false;
+    providedWorkbenchConfig.access.enableRasLoginGovLinking = true;
+    dbUser = updateUserWithRetries(registerUserNow);
+    assertRegisteredTierEnabled(dbUser);
+
+    // Incomplete RAS module, expect user is still Registered;
+    accessModuleService.updateBypassTime(
+        dbUser.getUserId(), AccessModule.RAS_LINK_LOGIN_GOV, false);
+    updateUserWithRetries(Function.identity());
+    assertRegisteredTierEnabled(dbUser);
+  }
+
+  @ParameterizedTest
+  @ValueSource(booleans = {true, false})
+  public void testRasLinkNotComplete_enableRasFFNotAffect(boolean enableRasFFStatus) {
+    // TODO: Delete this test when delete enable RAS feature flag.
+    assertThat(userAccessTierDao.findAll()).isEmpty();
+    providedWorkbenchConfig.access.enforceRasLoginGovLinking = true;
+    providedWorkbenchConfig.access.enableRasLoginGovLinking = enableRasFFStatus;
+    dbUser = updateUserWithRetries(registerUserNow);
+    assertRegisteredTierEnabled(dbUser);
+
+    // Incomplete RAS module, expect user removed from Registered tier;
+    accessModuleService.updateBypassTime(
+        dbUser.getUserId(), AccessModule.RAS_LINK_LOGIN_GOV, false);
+    updateUserWithRetries(Function.identity());
+    assertRegisteredTierDisabled(dbUser);
+
+    // Complete RAS Linking, verify user become registered
+    accessModuleService.updateCompletionTime(
+        dbUser, AccessModuleName.RAS_LOGIN_GOV, new Timestamp(PROVIDED_CLOCK.millis()));
+    updateUserWithRetries(Function.identity());
+    assertRegisteredTierEnabled(dbUser);
   }
 
   // adds `days` days plus most of another day (to demonstrate we are truncating, not rounding)
@@ -974,15 +1153,34 @@ public class UserServiceAccessTest {
     //        && dataUseAgreementCompliant
     //        && isPublicationsCompliant
     //        && isProfileCompliant
+    //        && institutionEmailValid
+    accessModuleService.updateBypassTime(user.getUserId(), AccessModule.COMPLIANCE_TRAINING, true);
+    accessModuleService.updateBypassTime(user.getUserId(), AccessModule.ERA_COMMONS, true);
+    accessModuleService.updateBypassTime(user.getUserId(), AccessModule.TWO_FACTOR_AUTH, true);
+    accessModuleService.updateBypassTime(
+        user.getUserId(), AccessModule.DATA_USER_CODE_OF_CONDUCT, true);
+    accessModuleService.updateBypassTime(user.getUserId(), AccessModule.RAS_LINK_LOGIN_GOV, true);
 
-    user.setDisabled(false);
-    user.setComplianceTrainingBypassTime(timestamp);
-    user.setEraCommonsBypassTime(timestamp);
-    user.setTwoFactorAuthBypassTime(timestamp);
-    user.setDataUseAgreementBypassTime(timestamp);
-    user.setPublicationsLastConfirmedTime(timestamp);
-    user.setProfileLastConfirmedTime(timestamp);
+    accessModuleService.updateCompletionTime(
+        user, AccessModuleName.PUBLICATION_CONFIRMATION, timestamp);
+    accessModuleService.updateCompletionTime(
+        user, AccessModuleName.PROFILE_CONFIRMATION, timestamp);
 
-    return userDao.save(user);
+    createAffiliation(user);
+    return user;
+  }
+
+  private void createAffiliation(final DbUser user) {
+    final DbInstitution inst =
+        institutionService.getDbInstitutionOrThrow(institution.getShortName());
+    if (institutionService.getByUser(user).isPresent()) {
+      return;
+    }
+    final DbVerifiedInstitutionalAffiliation affiliation =
+        new DbVerifiedInstitutionalAffiliation()
+            .setUser(user)
+            .setInstitution(inst)
+            .setInstitutionalRoleEnum(InstitutionalRole.FELLOW);
+    verifiedInstitutionalAffiliationDao.save(affiliation);
   }
 }

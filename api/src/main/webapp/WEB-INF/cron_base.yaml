@@ -4,46 +4,9 @@ cron:
   schedule: every 3 hours
   timezone: UTC
   target: api
-- description: |
-    Daily sync of compliance training status (via Moodle API). This is just a backup to the primary
-    flow. It should catch expired compliance training, fixup compliance status independent of user
-    navigation, and update on removal of Moodle course completion for some reason.
-  url: /v1/cron/bulkSyncComplianceTrainingStatus
-  schedule: every 24 hours
-  timezone: UTC
-  target: api
-- description: >
-    Daily sync of eRA Commons linkage status (via FireCloud API). Records changes in the log,
-    but currently does not drive any downstream processes.
-  url: /v1/cron/bulkSyncEraCommonsStatus
-  schedule: every 24 hours
-  timezone: UTC
-  target: api
-- description: >
-    Update our database cache of users' two-factor authentication settings on their GSuite accounts
-    via Google Directory Service.
-  url: /v1/cron/bulkSyncTwoFactorAuthStatus
-  schedule: every 24 hours
-  timezone: UTC
-  target: api
 - description: 'Daily audit of gcp resources that users have access to'
   url: /v1/cron/bulkAuditProjectAccess
   schedule: every 24 hours
-  timezone: UTC
-  target: api
-- description: 'If the AoU Billing Project buffer is not full, refill with one or more projects.'
-  url: /v1/cron/bufferBillingProjects
-  schedule: every 1 minutes
-  timezone: UTC
-  target: api
-- description: 'Fetch a BillingProjectBufferEntry that is in the CREATING state and check its status on Firecloud'
-  url: /v1/cron/syncBillingProjectStatus
-  schedule: every 1 minutes
-  timezone: UTC
-  target: api
-- description: 'Find BillingProjectBufferEntries that have failed during the creation or assignment step and set their statuses to ERROR'
-  url: /v1/cron/cleanBillingBuffer
-  schedule: every 1 hours
   timezone: UTC
   target: api
 - description: 'Find and alert users that have exceeded their free tier billing usage'
@@ -85,6 +48,11 @@ cron:
   url: /v1/cron/synchronizeUserAccess
   schedule: every day 23:00
   timezone: America/Chicago
+  target: api
+- description: Re-enqueues any egress events which have been pending for too long.
+  url: /v1/cron/checkPendingEgressEvents
+  schedule: every 1 hours
+  timezone: UTC
   target: api
 - description: >
     Check each user to determine when they will no longer meet compliance guidelines.

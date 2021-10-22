@@ -1,7 +1,6 @@
 package org.pmiops.workbench.api;
 
 import org.pmiops.workbench.cdr.CdrVersionService;
-import org.pmiops.workbench.model.CdrVersionListResponse;
 import org.pmiops.workbench.model.CdrVersionTiersResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -14,12 +13,6 @@ public class CdrVersionsController implements CdrVersionsApiDelegate {
   @Autowired
   CdrVersionsController(CdrVersionService cdrVersionService) {
     this.cdrVersionService = cdrVersionService;
-  }
-
-  @Override
-  @Deprecated
-  public ResponseEntity<CdrVersionListResponse> getCdrVersions() {
-    return ResponseEntity.ok(cdrVersionService.getCdrVersions());
   }
 
   @Override

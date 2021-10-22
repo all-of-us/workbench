@@ -155,20 +155,6 @@ paths:
           description: List of featured workspaces
           schema:
             "$ref": "#/definitions/FeaturedWorkspacesConfigResponse"
-  "/v1/cdrVersions":
-    get:
-      tags:
-      - cdrVersions
-      description: >
-        DEPRECATED.
-        Returns all curated data repository (CDR) versions in the Registered Tier
-        that the user has access to
-      operationId: getCdrVersions
-      responses:
-        200:
-          description: A list of CDR versions.
-          schema:
-            "$ref": "#/definitions/CdrVersionListResponse"
   "/v1/cdrVersionsByTier":
     get:
       tags:
@@ -328,6 +314,26 @@ paths:
           description: Welcome Email sent.
         500:
           description: Internal Server Error
+  "/v1/send-billing-setup-email":
+    post:
+      tags:
+        - profile
+      consumes:
+        - application/json
+      description: Send billing setup email to GCP partner
+      operationId: sendBillingSetupEmail
+      parameters:
+        - in: body
+          name: sendBillingSetupEmail
+          schema:
+            "$ref": "#/definitions/SendBillingSetupEmailRequest"
+      responses:
+        200:
+          description: Billing setup email sent.
+        403:
+          description: Forbidden
+        500:
+          description: Internal Server Error
   "/v1/google-account":
     post:
       tags:
@@ -428,23 +434,23 @@ paths:
           description: Bad request
           schema:
             "$ref": "#/definitions/ErrorResponse"
-  "/v1/account/submit-data-use-agreement":
+  "/v1/account/submit-data-user-code-of-conduct":
     post:
       tags:
-      - profile
-      description: Submits consent to the data use agreement for researchers.
-      operationId: submitDataUseAgreement
+        - profile
+      description: Submits consent to the Data User Code of Conduct for researchers.
+      operationId: submitDUCC
       parameters:
-      - in: query
-        name: dataUseAgreementSignedVersion
-        description: Version \# of the Data Use Agreement that was signed.
-        type: integer
-        required: true
-      - in: query
-        name: initials
-        description: Initials of the user on the form.
-        type: string
-        required: true
+        - in: query
+          name: duccSignedVersion
+          description: Version \# of the Data User Code of Conduct that was signed.
+          type: integer
+          required: true
+        - in: query
+          name: initials
+          description: Initials of the user on the form.
+          type: string
+          required: true
       responses:
         200:
           description: The user's profile.
@@ -555,45 +561,6 @@ paths:
       summary: enable/disable a user to an auth domain if you have ID verification
         authority
       operationId: updateUserDisabledStatus
-  "/v1/user/{term}":
-    get:
-      tags:
-      - user
-      description: >
-        DEPRECATED.  Use /v1/userSearch/{accessTier}/{term} instead.
-        Return a page of users matching a search term.
-        Used by autocomplete for workspace sharing.
-      operationId: user
-      responses:
-        200:
-          description: The user information matching supplied search terms
-          schema:
-            "$ref": "#/definitions/UserResponse"
-      parameters:
-      - in: path
-        name: term
-        description: String to find in user's name or email address. Search is a case-insensitive
-          substring match.
-        required: true
-        type: string
-      - in: query
-        name: pageToken
-        description: 'Pagination token retrieved from a previous call to user; used
-          for retrieving additional pages of results.'
-        type: string
-        required: false
-      - in: query
-        name: pageSize
-        description: 'Maximum number of results to return in a response. Defaults
-          to 10.'
-        type: integer
-        required: false
-      - in: query
-        name: sortOrder
-        description: Sort order, either 'asc' or 'desc'. Defaults to 'asc' on the
-          user's email.
-        type: string
-        required: false
   "/v1/userSearch/{accessTierShortName}/{term}":
     get:
       tags:
@@ -737,6 +704,10 @@ paths:
           description: No runtime exists for this user and workspace.
           schema:
             "$ref": "#/definitions/ErrorResponse"
+        412:
+          description: Compute is temporarily suspended for security reasons.
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
     post:
       summary: Create a workspace runtime.
       description: |
@@ -762,6 +733,10 @@ paths:
           description: A runtime for this user and workspace already exists.
           schema:
             "$ref": "#/definitions/EmptyResponse"
+        412:
+          description: Compute is temporarily suspended for security reasons.
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
     patch:
       summary: Updates the configuration of a runtime
       description: In order to update the configuration of a runtime, it must first be running or paused
@@ -783,6 +758,10 @@ paths:
           description: Bad Request
           schema:
             "$ref": "#/definitions/ErrorResponse"
+        412:
+          description: Compute is temporarily suspended for security reasons.
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
         500:
           description: Internal Server Error
           schema:
@@ -796,6 +775,12 @@ paths:
       - runtime
       parameters:
       - "$ref": "#/parameters/workspaceNamespace"
+      - in: query
+        name: deleteDisk
+        description: Whether or not disk should be deleted if the runtime is using persistent disk. Default to false if not specified
+        required: false
+        type: boolean
+        default: false
       responses:
         200:
           description: Success
@@ -803,6 +788,10 @@ paths:
             "$ref": "#/definitions/EmptyResponse"
         404:
           description: No runtime exists for this user and workspace.
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
+        412:
+          description: Compute is temporarily suspended for security reasons.
           schema:
             "$ref": "#/definitions/ErrorResponse"
   "/v1/runtimes/{workspaceNamespace}/localize":
@@ -832,10 +821,82 @@ paths:
           description: Runtime or Workspace not found
           schema:
             "$ref": "#/definitions/ErrorResponse"
+        412:
+          description: Compute is temporarily suspended for security reasons.
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
         500:
           description: Internal Error
           schema:
             "$ref": "#/definitions/ErrorResponse"
+  "/v1/disks/{workspaceNamespace}":
+    get:
+      summary: Get the user's workspace persistent disk.
+      description: Returns the current user's latest created persistent disk, if any, which has been created
+        for the given workspace.
+      operationId: getDisk
+      tags:
+        - disk
+      parameters:
+        - "$ref": "#/parameters/workspaceNamespace"
+      responses:
+        200:
+          description: The persistent disk for this user and workspace.
+          schema:
+            "$ref": "#/definitions/Disk"
+        404:
+          description: No persistent disk exists for this user and workspace.
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
+    delete:
+      summary: Delete a persistent disk.
+      description: Delete the current user's latest created persistent disk
+      operationId: deleteDisk
+      tags:
+        - disk
+      parameters:
+        - "$ref": "#/parameters/workspaceNamespace"
+        - in: query
+          name: diskName
+          description: diskName
+          type: string
+          required: true
+      responses:
+        200:
+          description: Success
+          schema:
+            "$ref": "#/definitions/EmptyResponse"
+        404:
+          description: No persistent disk exists for this user and workspace.
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
+    patch:
+      summary: Updates the configuration of a persistent disk
+      description: In order to update the configuration of a persistent disk, it must first be ready
+      operationId: updateDisk
+      tags:
+        - disk
+      parameters:
+        - "$ref": "#/parameters/workspaceNamespace"
+        - in: query
+          name: diskName
+          description: diskName
+          type: string
+          required: true
+        - in: query
+          name: diskSize
+          type: integer
+          description: Update disk disk Size
+          required: true
+      responses:
+        "200":
+          description: Persistent disk update request accepted
+          schema:
+            "$ref": "#/definitions/EmptyResponse"
+        "404":
+          description: Bad Request
+          schema:
+            $ref: "#/definitions/ErrorResponse"
   "/v1/workspaces":
     get:
       tags:
@@ -1524,53 +1585,6 @@ paths:
       responses:
         204:
           description: Runtimes were checked and handled successfully.
-  "/v1/cron/bulkSyncComplianceTrainingStatus":
-    get:
-      security: []
-      tags:
-      - offlineUser
-      - cron
-      description: sync moodle badge/training status for all users.
-      operationId: bulkSyncComplianceTrainingStatus
-      responses:
-        204:
-          description: The user table is updated with training status.
-        404:
-          description: User not found while retrieving  badge.
-        500:
-          description: Internal Error
-          schema:
-            "$ref": "#/definitions/ErrorResponse"
-  "/v1/cron/bulkSyncEraCommonsStatus":
-    get:
-      security: []
-      tags:
-      - offlineUser
-      - cron
-      description: sync eRA Commons linkage status for all users.
-      operationId: bulkSyncEraCommonsStatus
-      responses:
-        204:
-          description: All users' eRA Commons statuses were updated.
-        500:
-          description: Internal Error
-          schema:
-            "$ref": "#/definitions/ErrorResponse"
-  "/v1/cron/bulkSyncTwoFactorAuthStatus":
-    get:
-      security: []
-      tags:
-      - offlineUser
-      - cron
-      description: sync 2FA status for all users
-      operationId: bulkSyncTwoFactorAuthStatus
-      responses:
-        204:
-          description: All users' 2FA statuses were updated.
-        500:
-          description: Internal Error
-          schema:
-            "$ref": "#/definitions/ErrorResponse"
   "/v1/cron/bulkAuditProjectAccess":
     get:
       security: []
@@ -1597,54 +1611,6 @@ paths:
       responses:
         204:
           description: All modified/created workspaces and users were exported
-        500:
-          description: Internal Error
-          schema:
-            "$ref": "#/definitions/ErrorResponse"
-  "/v1/cron/bufferBillingProjects":
-    get:
-      security: []
-      tags:
-      - offlineBilling
-      - cron
-      description: If the AoU Billing Project buffer is not full, refill with one
-        or more billing projects.
-      operationId: bufferBillingProjects
-      responses:
-        204:
-          description: No Error
-        500:
-          description: Internal Error
-          schema:
-            "$ref": "#/definitions/ErrorResponse"
-  "/v1/cron/syncBillingProjectStatus":
-    get:
-      security: []
-      tags:
-      - offlineBilling
-      - cron
-      description: Fetch a BillingProjectBufferEntry that is in the CREATING state
-        and check its status on Firecloud
-      operationId: syncBillingProjectStatus
-      responses:
-        204:
-          description: No Error
-        500:
-          description: Internal Error
-          schema:
-            "$ref": "#/definitions/ErrorResponse"
-  "/v1/cron/cleanBillingBuffer":
-    get:
-      security: []
-      tags:
-      - offlineBilling
-      - cron
-      description: Find BillingProjectBufferEntries that have failed during the creation
-        or assignment step and set their statuses to ERROR
-      operationId: cleanBillingBuffer
-      responses:
-        204:
-          description: No Error
         500:
           description: Internal Error
           schema:
@@ -1696,21 +1662,6 @@ paths:
           description: Internal Error
           schema:
             "$ref": "#/definitions/ErrorResponse"
-  "/v1/monitoring/billingProjectBufferStatus":
-    get:
-      tags:
-      - monitoring
-      description: Return statistics about the billing buffer.
-      operationId: getBillingProjectBufferStatus
-      responses:
-        200:
-          description: No Error
-          schema:
-            "$ref": "#/definitions/BillingProjectBufferStatus"
-        500:
-          description: Internal Error
-          schema:
-            "$ref": "#/definitions/ErrorResponse"
   "/v1/cron/monitoring/updateGaugeMetrics":
     get:
       tags:
@@ -1758,6 +1709,18 @@ paths:
           description: Internal Error
           schema:
             "$ref": "#/definitions/ErrorResponse"
+  "/v1/cron/checkPendingEgressEvents":
+    get:
+      security: []
+      tags:
+      - offlineEgress
+      - cron
+      description: 'Endpoint meant to be called offline to trigger re-enqueueing of any pending
+        egress events. Only executable via App Engine cronjob.'
+      operationId: checkPendingEgressEvents
+      responses:
+        204:
+          description: No content.
 
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}/notebooks/rename":
     parameters:
@@ -2729,6 +2692,46 @@ paths:
       responses:
         200:
           description: 'Audit ran successfully (possibly with audit findings)'
+  "/v1/cloudTask/synchronizeUserAccess":
+    post:
+      tags:
+      - cloudTaskUser
+      - cloudTask
+      security: []
+      description: "Audits the provided user's access to GCP resources"
+      operationId: synchronizeUserAccess
+      consumes:
+      - application/json
+      parameters:
+      - in: body
+        name: request
+        required: true
+        description: Users to synchronize.
+        schema:
+          "$ref": "#/definitions/SynchronizeUserAccessRequest"
+      responses:
+        200:
+          description: 'User synchronization ran successfully'
+  "/v1/cloudTask/processEgressEvent":
+    post:
+      tags:
+      - cloudTaskEgress
+      - cloudTask
+      security: []
+      description: "Processes and remediates the given PENDING egress event"
+      operationId: processEgressEvent
+      consumes:
+      - application/json
+      parameters:
+      - in: body
+        name: request
+        required: true
+        description: Event to be processed.
+        schema:
+          "$ref": "#/definitions/ProcessEgressEventRequest"
+      responses:
+        200:
+          description: 'Egress event processed successfully'
   "/v1/institutions":
     x-aou-note: Institution endpoints, for Verified Institutional Affiliation
     get:
@@ -2850,30 +2853,6 @@ paths:
         schema:
           "$ref": "#/definitions/CheckEmailRequest"
 
-      responses:
-        200:
-          description: Whether the email is a valid member of the institution.
-          schema:
-            "$ref": "#/definitions/CheckEmailResponse"
-  "/v1/institutions/{shortName}/checkEmail/{email}/":
-    parameters:
-      - in: path
-        name: shortName
-        type: string
-        description: 'The short name / key of the institution to check, e.g. "VUMC"'
-        required: true
-      - in: path
-        name: email
-        type: string
-        description: Institutional contact email address to check.
-        required: true
-    get:
-      tags:
-        - institution
-      operationId: deprecatedCheckEmail
-      description: Checks whether the given email address is a verified member of an institution. DEPRECATED in favor of the POST endpoint.
-      x-aou-note: This endpoint is publicly-accessible and called by clients during user registration.
-      security: []
       responses:
         200:
           description: Whether the email is a valid member of the institution.
@@ -3075,11 +3054,11 @@ paths:
           description: The Participant Chart data
           schema:
             "$ref": "#/definitions/ParticipantChartDataListResponse"
-  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortReviewId}/charts/{domain}":
+  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/charts/{domain}":
     parameters:
     - "$ref": "#/parameters/workspaceNamespace"
     - "$ref": "#/parameters/workspaceId"
-    - "$ref": "#/parameters/cohortReviewId"
+    - "$ref": "#/parameters/cohortId"
     get:
       tags:
       - cohortReview
@@ -3349,41 +3328,46 @@ paths:
           description: A collection of criteria menu options
           schema:
             "$ref": "#/definitions/CriteriaMenuListResponse"
-  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria/domaininfo":
+  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria/domainCard":
     parameters:
       - "$ref": "#/parameters/workspaceNamespace"
       - "$ref": "#/parameters/workspaceId"
     get:
       tags:
-      - cohortBuilder
+        - cohortBuilder
       description: 'Returns information on the domains of data in the workspace''s
-        CDR version along with participant and concept counts'
-      operationId: findDomainInfos
+          CDR version along with participant and concept counts'
+      operationId: findDomainCards
       responses:
         200:
           description: information on the domains
           schema:
-            "$ref": "#/definitions/DomainInfoResponse"
-  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria/domaininfo/{domain}":
+            "$ref": "#/definitions/DomainCardResponse"
+  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria/domaincard/{domain}/{standard}":
     parameters:
       - "$ref": "#/parameters/workspaceNamespace"
       - "$ref": "#/parameters/workspaceId"
     get:
       tags:
-      - cohortBuilder
-      description: 'Returns a count of term matches per domain'
-      operationId: findDomainCount
+        - cohortBuilder
+      description: 'Returns a count of term matches per domain per standard flag'
+      operationId: findDomainCountByStandardSource
       parameters:
-      - in: path
-        name: domain
-        type: string
-        required: true
-        description: the specific type of domain
-      - in: query
-        name: term
-        type: string
-        required: true
-        description: the term to search for
+        - in: path
+          name: domain
+          type: string
+          required: true
+          description: the specific type of domain
+        - in: path
+          name: standard
+          type: boolean
+          required: true
+          description: is domain standard or Source
+        - in: query
+          name: term
+          type: string
+          required: true
+          description: the term to search for
       responses:
         200:
           description: A count of matching concepts in this domain
@@ -3429,36 +3413,41 @@ paths:
           description: A count of matching concepts per survey
           schema:
             "$ref": "#/definitions/SurveyCount"
-  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria/{domain}/search/term":
+  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria/{domain}/{standard}/search/term":
     parameters:
       - "$ref": "#/parameters/workspaceNamespace"
       - "$ref": "#/parameters/workspaceId"
     get:
       tags:
-      - cohortBuilder
+        - cohortBuilder
       description: 'Returns a collection of criteria per search term'
-      operationId: findCriteriaByDomainAndSearchTerm
+      operationId: findCriteriaByDomain
       parameters:
-      - in: path
-        name: domain
-        type: string
-        required: true
-        description: the specific type of domain
-      - in: query
-        name: term
-        type: string
-        required: true
-        description: the term to search for
-      - in: query
-        name: surveyName
-        type: string
-        required: false
-        description: name for the survey to search
-      - in: query
-        name: limit
-        type: integer
-        required: false
-        description: number of criteria matches to return
+        - in: path
+          name: domain
+          type: string
+          required: true
+          description: the specific type of domain
+        - in: path
+          name: standard
+          type: boolean
+          required: true
+          description: True if standard else false
+        - in: query
+          name: term
+          type: string
+          required: true
+          description: the term to search for
+        - in: query
+          name: surveyName
+          type: string
+          required: false
+          description: name for the survey to search
+        - in: query
+          name: limit
+          type: integer
+          required: false
+          description: number of criteria matches to return
       responses:
         200:
           description: A collection of criteria
@@ -3948,19 +3937,6 @@ definitions:
     - DEMO_PROJECTS
     - PHENOTYPE_LIBRARY
     - TUTORIAL_WORKSPACES
-  CdrVersionListResponse:
-    type: object
-    required:
-    - items
-    - defaultCdrVersionId
-    properties:
-      items:
-        type: array
-        items:
-          "$ref": "#/definitions/CdrVersion"
-      defaultCdrVersionId:
-        type: string
-        description: ID of the CDR versions that should be used by the user by default
   CdrVersionTiersResponse:
     type: object
     required:
@@ -4017,16 +3993,19 @@ definitions:
         description:
           Milliseconds since the UNIX epoch. This timestamp is derived from the deid dataset name.
           Ex - deid_output_20191004 -> 2019-10-04 00:00:00Z
-  DomainInfo:
+  DomainCard:
     type: object
     required:
-    - domain
-    - name
-    - description
-    - standardConceptCount
-    - allConceptCount
-    - participantCount
+      - domain
+      - name
+      - description
+      - conceptCount
+      - participantCount
+      - category
     properties:
+      category:
+        description: Category of the domain
+        type: string
       domain:
         description: the domain ID
         "$ref": "#/definitions/Domain"
@@ -4036,17 +4015,21 @@ definitions:
       description:
         description: description of the domain
         type: string
-      standardConceptCount:
-        description: number of standard concepts in this domain
-        type: integer
-        format: int64
-      allConceptCount:
-        description: number of concepts in this domain (standard or non-standard)
+      conceptCount:
+        description: number of concept count in this domain
         type: integer
         format: int64
       participantCount:
         description: number of participants with data in the CDR for a concept in
           this domain
+        type: integer
+        format: int64
+      standard:
+        description: Identifies if the concept is standard or source
+        type: boolean
+        default: false
+      sortOrder:
+        description: Sort order for the domain
         type: integer
         format: int64
   DataFiltersResponse:
@@ -4123,6 +4106,12 @@ definitions:
       category:
         "$ref": "#/definitions/FeaturedWorkspaceCategory"
         description: The category that this workspace belongs to
+  SecuritySuspendedErrorParameters:
+    type: object
+    properties:
+      suspendedUntil:
+        type: string
+        description: The time at which the security suspension will end, if any, in ISO 8601 format.
   ErrorResponse:
     type: object
     properties:
@@ -4141,12 +4130,17 @@ definitions:
         type: string
         description: Unique ID for this error response, for correlation with backend
           logs
+      parameters:
+        type: object
+        description: Additional structured error parameters, specific to the error code.
+        additionalProperties: true
   ErrorCode:
     type: string
     description: Short parsable error descriptions
     enum:
     - PARSE_ERROR
     - USER_DISABLED
+    - COMPUTE_SECURITY_SUSPENDED
   StatusResponse:
     type: object
     required:
@@ -4188,6 +4182,9 @@ definitions:
         type: boolean
         default: false
         description: Whether the Compliance Training access module is enabled.
+      complianceTrainingHost:
+        type: string
+        description: The hostname for constructing the compliance training URL.
       enableEraCommons:
         type: boolean
         default: false
@@ -4217,35 +4214,52 @@ definitions:
         type: boolean
         default: false
         description: Whether to use enable RAS-AoU linking for login.gov when user setup account.
-      enableAccessRenewal:
+      enforceRasLoginGovLinking:
         type: boolean
         default: false
-        description: Whether to enable the access renewal, allowing users to expire.
+        description: Whether to enforce all users finish RAS-AoU linking for login.gov.
       enableGenomicExtraction:
         type: boolean
         default: false
         description: Whether to enable genomic data extraction for eligible datasets.
-      enableAccessModuleRewrite:
+      enableEgressAlertingV2:
         type: boolean
         default: false
-        description: Whether to use the new rewrite access module.
+        description: Whether egress alerting V2 is enabled.
       enableStandardSourceDomains:
         type: boolean
         default: false
         description: Whether to show separate source and standard domains
+      enableGpu:
+        type: boolean
+        default: false
+        description: Whether to enable GPU for standard vm
+      enablePersistentDisk:
+        type: boolean
+        default: false
+        description: Whether to persistent disk as the notebook storage
       rasHost:
         type: string
         description: The RAS base host name.
       accessRenewalExpiry:
         type: number
         description: Days a user's module completion is good for until it expires.
+      accessRenewalLookback:
+        type: number
+        description: the point when we give users the option to update their compliance items.
       rasClientId:
         type: string
         description: The RAS OAuth client id.
+      rasLogoutUrl:
+        type: string
+        description: The URL that can sign out RAS login session.
       runtimeImages:
         type: array
         items:
           "$ref": "#/definitions/RuntimeImage"
+      freeTierBillingAccountId:
+        type: string
+        description: The free tier billing account id
 
   RuntimeImage:
     type: object
@@ -4361,6 +4375,29 @@ definitions:
     enum:
       - pd-standard
       - pd-ssd
+  Disk:
+    description: The configuration of a persistent disk, returned in disk responses
+    type: object
+    required:
+      - name
+      - size
+      - diskType
+      - blockSize
+    properties:
+      name:
+        type: string
+        description: Name of the persistent disk
+      status:
+        "$ref": "#/definitions/DiskStatus"
+        description: Persistent disk status. Read only.
+      size:
+        type: integer
+        description: Size of persistent disk in GB
+      diskType:
+        $ref: "#/definitions/DiskType"
+      blockSize:
+        type: integer
+        description: Block size of persistent disk in bytes
   WorkspaceListResponse:
     type: object
     required:
@@ -4757,6 +4794,7 @@ definitions:
     enum:
     - DATA_USER_CODE_OF_CONDUCT
     - COMPLIANCE_TRAINING
+    - CT_COMPLIANCE_TRAINING
     - ERA_COMMONS
     - TWO_FACTOR_AUTH
     - RAS_LINK_LOGIN_GOV
@@ -5311,7 +5349,7 @@ definitions:
         type: array
         items:
           type: string
-  DomainInfoResponse:
+  DomainCardResponse:
     type: object
     required:
     - items
@@ -5319,7 +5357,7 @@ definitions:
       items:
         type: array
         items:
-          "$ref": "#/definitions/DomainInfo"
+          "$ref": "#/definitions/DomainCard"
   ValueSet:
     type: object
     properties:
@@ -5398,6 +5436,18 @@ definitions:
       creationNonce:
         type: string
         description: The nonce returned from the account creation API.
+  SendBillingSetupEmailRequest:
+    type: object
+    properties:
+      phone:
+        type: string
+        description: User contact phone
+      institution:
+        type: string
+        description: The insitution of the user.
+      isNihFunded:
+        type: boolean
+        description: Whether its NIH Funded research
   UpdateContactEmailRequest:
     type: object
     required:
@@ -5528,6 +5578,11 @@ definitions:
         type: array
         items:
           type: string
+      tierEligibilities:
+        type: array
+        description: User eligibility of each acces tier based on their institution's tier requirements.
+        items:
+          "$ref": "#/definitions/UserTierEligibility"
       degrees:
         type: array
         items:
@@ -5568,16 +5623,6 @@ definitions:
         "$ref": "#/definitions/VerifiedInstitutionalAffiliation"
       demographicSurvey:
         "$ref": "#/definitions/DemographicSurvey"
-      twoFactorAuthCompletionTime:
-        type: integer
-        format: int64
-        description: Timestamp when the user completed two factor authentication in
-          milliseconds since the UNIX epoch.
-      twoFactorAuthBypassTime:
-        type: integer
-        format: int64
-        description: Timestamp when the user was bypassed for completing two factor
-          authentication in milliseconds since the UNIX epoch.
       eraCommonsLinkedNihUsername:
         type: string
         description: The user's NIH username
@@ -5586,33 +5631,6 @@ definitions:
         description: The FireCloud-calculated expiration time
         format: int64
         default: 0
-      eraCommonsCompletionTime:
-        type: integer
-        format: int64
-        description: Timestamp when the user completed era commons linking.
-      eraCommonsBypassTime:
-        type: integer
-        format: int64
-        description: Timestamp when the user was bypassed for completing era commons
-          linking.
-      complianceTrainingCompletionTime:
-        type: integer
-        format: int64
-        description: Timestamp when a user completed compliance training.
-      complianceTrainingBypassTime:
-        type: integer
-        format: int64
-        description: Timestamp when a user was bypassed for completing compliance
-          training
-      dataUseAgreementCompletionTime:
-        type: integer
-        format: int64
-        description: Timestamp when a user completed the data use agreement.
-      dataUseAgreementBypassTime:
-        type: integer
-        format: int64
-        description: Timestamp when a user was bypassed for completing the data use
-          agreement.
       dataUseAgreementSignedVersion:
         type: integer
         format: int32
@@ -5638,35 +5656,6 @@ definitions:
       rasLinkLoginGovUsername:
         type: string
         description: The user's identity name in login.gov.
-      rasLinkLoginGovCompletionTime:
-        type: integer
-        format: int64
-        description: 'Timestamp when the user completed RAS linking(login.gov). Note: All AoU users
-        are required to have IAL2 setup in login.gov.'
-      rasLinkLoginGovBypassTime:
-        type: integer
-        format: int64
-        description: Timestamp when the user was bypassed for completing login.gov linking.
-      publicationsLastConfirmedTime:
-        type: integer
-        format: int64
-        description: Timestamp when the user last confirmed their publications.
-      profileLastConfirmedTime:
-        type: integer
-        format: int64
-        description: Timestamp when the user last confirmed their profile.
-      renewableAccessModules:
-        type: object
-        properties:
-          modules:
-            type: array
-            items:
-              "$ref": "#/definitions/RenewableAccessModuleStatus"
-          anyModuleHasExpired:
-            type: boolean
-            description: >
-              Whether any modules have expired. Each expired module will have
-              the corresponding hasExpired flag set in the modules array.
       accessModules:
         type: object
         properties:
@@ -5679,24 +5668,6 @@ definitions:
             description: >
               Whether any modules have expired. Expiration information is also included with each
               module in the array; this field is provided for convenience.
-
-  RenewableAccessModuleStatus:
-    type: object
-    properties:
-      moduleName:
-        type: string
-        enum:
-          - complianceTraining
-          - dataUseAgreement
-          - profileConfirmation
-          - publicationConfirmation
-      expirationEpochMillis:
-        type: integer
-        format: int64
-        description: When this module expired or will expire.
-      hasExpired:
-        type: boolean
-        description: Whether this module has expired according to the server's clock.
 
   AccessModuleStatus:
     type: object
@@ -5810,6 +5781,16 @@ definitions:
     - Deleting
     - Deleted
     - Unknown
+  DiskStatus:
+    type: string
+    enum:
+      - Creating
+      - Restoring
+      - Failed
+      - Ready
+      - Deleting
+      - Deleted
+      - Unknown
   RuntimeConfigurationType:
     description: >
       The configuration type for this runtime. Namely, whether there was a user
@@ -5864,6 +5845,23 @@ definitions:
       diskConfig:
         description: The configuration of a persistent disk
         "$ref": "#/definitions/DiskConfig"
+      errors:
+        type: array
+        description: The list of errors that were encountered on runtime create, if any.
+        items:
+          $ref: "#/definitions/RuntimeError"
+  RuntimeError:
+    description: Errors encountered on runtime create
+    properties:
+      errorMessage:
+        type: string
+        description: Error message
+      errorCode:
+        type: integer
+        description: Error code
+      timestamp:
+        type: string
+        description: timestamp for error in ISO 8601 format
   DiskConfig:
     description: The configuration of a persistent disk, returned in runtime responses
     type: object
@@ -5891,6 +5889,21 @@ definitions:
     properties:
       runtime:
         "$ref": "#/definitions/Runtime"
+  UpdateDiskRequest:
+    description: "Updates an existing persistent disk"
+    type: object
+    properties:
+      labels:
+        type: object
+        description: The labels to be added or updated on the persistent disk. Of type Map[String,String]
+      size:
+        type: integer
+        description: The size in GB that the persistent disk is to be updated to.
+      diskType:
+        $ref: "#/definitions/DiskType"
+      blockSize:
+        type: integer
+        description: The block size in bytes that the persistent disk is to be updated to.
   PersistentDiskRequest:
     description: configuration to create a disk
     type: object
@@ -5923,6 +5936,10 @@ definitions:
           for the master node. For example "n1-standard-16"
           or "n1-highmem-64". If unspecified, defaults to creating a "n1-standard-4" machine. To decide which is right for you,
           see https://cloud.google.com/compute/docs/machine-types
+      gpuConfig:
+        $ref: "#/definitions/GpuConfig"
+        description: >
+          Optional, a config that describes the gpus associated with a runtime
   GceWithPdConfig:
     description: Configuration for Google Compute Engine instances with Persistent Disk.
     properties:
@@ -5940,6 +5957,10 @@ definitions:
           or "n1-highmem-64". If unspecified, defaults to creating a "n1-standard-4" machine. To decide which is right for you,
 
           see https://cloud.google.com/compute/docs/machine-types
+      gpuConfig:
+        $ref: "#/definitions/GpuConfig"
+        description: >
+          Optional, a config that describes the gpus associated with a runtime
   DataprocConfig:
     description: Configuration for a single Dataproc cluster.
     properties:
@@ -5985,6 +6006,19 @@ definitions:
           Optional, the number of preemptible workers. If unspecified, the
           default number is 0. Ignored if numberOfWorkers is 0.
           For more information, see https://cloud.google.com/compute/docs/instances/preemptible
+  GpuConfig:
+    description: A config that describes the gpus associated with a runtime
+    type: object
+    required:
+      - gpuType
+      - numOfGpus
+    properties:
+      gpuType:
+        type: string
+        description: The google identifier for the gpu specs associated with this runtime, ex `nvidia-tesla-t4`. See https://cloud.google.com/compute/docs/gpus
+      numOfGpus:
+        type: integer
+        description: The number of gpus associated with this runtime
   FileDetail:
     type: object
     required:
@@ -6189,7 +6223,7 @@ definitions:
       - cdrVersionId
       - accessTierShortName
       - permission
-      - modifiedTime
+      - lastModifiedEpochMillis
     properties:
       workspaceId:
         type: integer
@@ -6217,7 +6251,12 @@ definitions:
       dataSet:
         "$ref": "#/definitions/DataSet"
       modifiedTime:
+        description: DEPRECATED because string formatting is ambiguous. Use lastModifiedEpochMillis.
         type: string
+      lastModifiedEpochMillis:
+        description: the resource's last modified time, in milliseconds since the epoch
+        type: integer
+        format: int64
   RecentResourceRequest:
     type: object
     properties:
@@ -6396,29 +6435,14 @@ definitions:
         type: string
         description: 'The detailed Organization Type of this institution, as text,
           if its enumerated type is OTHER'
-      duaTypeEnum:
-        "$ref": "#/definitions/DuaType"
-        description: 'Type of Data Use Agreement Institution has signed, Master or restricted to a defined set of specific researchers'
-      emailAddresses:
-        type: array
-        description: A list of email addresses which can be validated as members of
-          this Institution
-        items:
-          type: string
-      emailDomains:
-        type: array
-        description: A list of email domains which can be validated as members of
-          this Institution
-        items:
-          type: string
       userInstructions:
         description: Institution-specific instructions for users to be sent in email
         type: string
-      tierRequirements:
+      tierConfigs:
         type: array
         description: List of requirements on how members can get access for each tier.
         items:
-          "$ref": "#/definitions/InstitutionTierRequirement"
+          "$ref": "#/definitions/InstitutionTierConfig"
   PublicInstitutionDetails:
     type: object
     description: 'Represents an institution which has been approved to validate researchers
@@ -6437,13 +6461,14 @@ definitions:
         type: string
         description: A more descriptive name for the Institution, such as 'Vanderbilt
           University Medical Center'
-      duaTypeEnum:
-        "$ref": "#/definitions/DuaType"
-        description: 'Type of Data Use Agreement Institution has signed, Master or restricted to a defined set of specific researchers'
       organizationTypeEnum:
         "$ref": "#/definitions/OrganizationType"
         description: 'The Organization Type of this institution if it is one of the
           enumerated OrganizationTypes, or OrganizationType.OTHER if it is not'
+      registeredTierMembershipRequirement:
+        "$ref": "#/definitions/InstitutionMembershipRequirement"
+        description: 'Type of Registered tier requirement the institution has signed, email domains
+         or restricted to a defined set of specific researchers'
   InstitutionUserInstructions:
     type: object
     description: Institution-specific instructions for users to perform after registration.
@@ -6484,13 +6509,6 @@ definitions:
     - EDUCATIONAL_INSTITUTION
     - HEALTH_CENTER_NON_PROFIT
     - OTHER
-
-  DuaType:
-    type: string
-    description: 'Type of Data Use Agreement Institution has signed, Applicable to all researchers or restricted to  just few'
-    enum:
-      - MASTER
-      - RESTRICTED
 
   InstitutionMembershipRequirement:
     type: string
@@ -6544,9 +6562,9 @@ definitions:
         type: string
         description: 'The user''s detailed Institutional Role at this Institution,
           as text, if its enumerated type is OTHER'
-  InstitutionTierRequirement:
+  InstitutionTierConfig:
     type: object
-    description: Institution-specific access tier membership requirement.
+    description: Institution-specific access tier membership requirement and configs.
     required:
       - accessTierShortName
       - membershipRequirement
@@ -6560,6 +6578,14 @@ definitions:
       eraRequired:
         type: boolean
         description: Whether eRA commons is required for members in the institution for this tier.
+      emailDomains:
+        type: array
+        items:
+          type: string
+      emailAddresses:
+        type: array
+        items:
+          type: string
   WorkspaceAdminView:
     description: Admin-visible metadata about a workspace.
     type: object
@@ -8260,6 +8286,26 @@ definitions:
           type: integer
           format: int64
 
+  SynchronizeUserAccessRequest:
+    type: object
+    properties:
+      userIds:
+        description: 'List of users to synchronize'
+        type: array
+        items:
+          type: integer
+          format: int64
+
+  ProcessEgressEventRequest:
+    type: object
+    required:
+      - eventId
+    properties:
+      eventId:
+        description: 'Egress event ID to be processed'
+        type: integer
+        format: int64
+
   WorkspaceAuditLogQueryResponse:
     type: object
     description: >
@@ -9056,9 +9102,6 @@ definitions:
       displayName:
         type: string
         description: Human-readable name  for the institution, as shown in the UI.
-      duaTypeEnum:
-        description: Data Use Agreement type.
-        "$ref": "#/definitions/DuaType"
       institutionId:
         type: integer
         format: int64
@@ -9079,6 +9122,10 @@ definitions:
         description: |-
           A unique string identifier used in the API to map a user affiliation to an institution. (Database
           identifiers are not typically exposed in the workbench API).
+      registeredTierRequirement:
+        description: Institution tegisted tier requirement.
+        "$ref": "#/definitions/InstitutionMembershipRequirement"
+
   ReportingDataset:
     x-aou-note: |-
       This code was generated using reporting-wizard.rb at 2020-11-18T10:38:12-05:00.
@@ -9227,3 +9274,18 @@ definitions:
     enum:
       - DISABLED
       - ENABLED
+  UserTierEligibility:
+    type: object
+    properties:
+      accessTierShortName:
+        description: Short name of access tier.
+        type: string
+      eligible:
+         type: boolean
+         description: |-
+          User eligibility for tiers is based on their contact emails and their institution's tier
+          requirements. This does not mean the user has access to these tiers; to gain
+          access, the user must still complete all the necessary access requirement steps for each tier.
+      eraRequired:
+         type: boolean
+         description: If eRA Commons linking is required for this access tier.

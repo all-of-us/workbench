@@ -29,7 +29,7 @@ import org.pmiops.workbench.cdr.dao.CBCriteriaAttributeDao;
 import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
 import org.pmiops.workbench.cdr.dao.CBDataFilterDao;
 import org.pmiops.workbench.cdr.dao.CriteriaMenuDao;
-import org.pmiops.workbench.cdr.dao.DomainInfoDao;
+import org.pmiops.workbench.cdr.dao.DomainCardDao;
 import org.pmiops.workbench.cdr.dao.PersonDao;
 import org.pmiops.workbench.cdr.dao.SurveyModuleDao;
 import org.pmiops.workbench.cdr.model.DbCriteria;
@@ -46,7 +46,7 @@ import org.pmiops.workbench.model.CriteriaMenu;
 import org.pmiops.workbench.model.DataFilter;
 import org.pmiops.workbench.model.DemoChartInfo;
 import org.pmiops.workbench.model.Domain;
-import org.pmiops.workbench.model.DomainInfo;
+import org.pmiops.workbench.model.DomainCard;
 import org.pmiops.workbench.model.FilterColumns;
 import org.pmiops.workbench.model.GenderOrSexType;
 import org.pmiops.workbench.model.ParticipantDemographics;
@@ -73,7 +73,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   private final CBCriteriaDao cbCriteriaDao;
   private final CriteriaMenuDao criteriaMenuDao;
   private final CBDataFilterDao cbDataFilterDao;
-  private final DomainInfoDao domainInfoDao;
+  private final DomainCardDao domainCardDao;
   private final PersonDao personDao;
   private final SurveyModuleDao surveyModuleDao;
   private final CohortBuilderMapper cohortBuilderMapper;
@@ -87,7 +87,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
       CBCriteriaDao cbCriteriaDao,
       CriteriaMenuDao criteriaMenuDao,
       CBDataFilterDao cbDataFilterDao,
-      DomainInfoDao domainInfoDao,
+      DomainCardDao domainCardDao,
       PersonDao personDao,
       SurveyModuleDao surveyModuleDao,
       CohortBuilderMapper cohortBuilderMapper,
@@ -98,7 +98,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
     this.cbCriteriaDao = cbCriteriaDao;
     this.criteriaMenuDao = criteriaMenuDao;
     this.cbDataFilterDao = cbDataFilterDao;
-    this.domainInfoDao = domainInfoDao;
+    this.domainCardDao = domainCardDao;
     this.personDao = personDao;
     this.surveyModuleDao = surveyModuleDao;
     this.cohortBuilderMapper = cohortBuilderMapper;
@@ -240,62 +240,37 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   }
 
   @Override
-  public CriteriaListWithCountResponse findCriteriaByDomainAndSearchTerm(
-      String domain, String term, String surveyName, Integer limit) {
+  public CriteriaListWithCountResponse findCriteriaByDomain(
+      String domain, String term, String surveyName, Boolean standard, Integer limit) {
     PageRequest pageRequest =
         PageRequest.of(0, Optional.ofNullable(limit).orElse(DEFAULT_CRITERIA_SEARCH_LIMIT));
-    if (term == null || term.trim().isEmpty()) {
-      if (Domain.SURVEY.equals(Domain.fromValue(domain))) {
-        Long id = cbCriteriaDao.findIdByDomainAndName(domain, surveyName);
-        Page<DbCriteria> dbCriteriaPage =
-            cbCriteriaDao.findSurveyQuestionCriteriaByDomainAndIdAndFullText(
-                domain, id, pageRequest);
-        return new CriteriaListWithCountResponse()
-            .items(
-                dbCriteriaPage.getContent().stream()
-                    .map(cohortBuilderMapper::dbModelToClient)
-                    .collect(Collectors.toList()))
-            .totalCount(dbCriteriaPage.getTotalElements());
-      }
-      Page<DbCriteria> dbCriteriaPage = cbCriteriaDao.findCriteriaTopCounts(domain, pageRequest);
-      return new CriteriaListWithCountResponse()
-          .items(
-              dbCriteriaPage.getContent().stream()
-                  .map(cohortBuilderMapper::dbModelToClient)
-                  .collect(Collectors.toList()))
-          .totalCount(dbCriteriaPage.getTotalElements());
+
+    // if search term is empty find the top counts for the domain
+    if (isTopCountsSearch(term)) {
+      return getTopCountsSearchWithStandard(domain, surveyName, standard, pageRequest);
     }
 
     String modifiedSearchTerm = modifyTermMatch(term);
+    // if the modified search term is empty return an empty result
     if (modifiedSearchTerm.isEmpty()) {
       return new CriteriaListWithCountResponse().totalCount(0L);
     }
-    if (Domain.SURVEY.equals(Domain.fromValue(domain))) {
-      Page<DbCriteria> dbCriteriaPage;
-      if (surveyName.equals("All")) {
-        dbCriteriaPage =
-            cbCriteriaDao.findSurveyQuestionCriteriaByDomainAndFullText(
-                domain, modifiedSearchTerm, pageRequest);
-      } else {
-        Long id = cbCriteriaDao.findIdByDomainAndName(domain, surveyName);
-        dbCriteriaPage =
-            cbCriteriaDao.findSurveyQuestionCriteriaByDomainAndIdAndFullText(
-                domain, id, modifiedSearchTerm, pageRequest);
-      }
-      return new CriteriaListWithCountResponse()
-          .items(
-              dbCriteriaPage.getContent().stream()
-                  .map(cohortBuilderMapper::dbModelToClient)
-                  .collect(Collectors.toList()))
-          .totalCount(dbCriteriaPage.getTotalElements());
+
+    // if domain type is survey then search survey by term.
+    if (isSurveyDomain(domain)) {
+      return findSurveyCriteriaBySearchTerm(surveyName, pageRequest, modifiedSearchTerm);
     }
 
+    // find a match on concept code
     Page<DbCriteria> dbCriteriaPage =
-        cbCriteriaDao.findCriteriaByDomainAndTypeAndCode(
-            domain, term.replaceAll("[()+\"*-]", ""), pageRequest);
+        cbCriteriaDao.findCriteriaByDomainAndTypeAndCodeAndStandard(
+            domain, term.replaceAll("[()+\"*-]", ""), standard, pageRequest);
+
+    // if no match is found on concept code then find match on full text index by term
     if (dbCriteriaPage.getContent().isEmpty() && !term.contains(".")) {
       dbCriteriaPage =
-          cbCriteriaDao.findCriteriaByDomainAndFullText(domain, modifiedSearchTerm, pageRequest);
+          cbCriteriaDao.findCriteriaByDomainAndFullTextAndStandard(
+              domain, modifiedSearchTerm, standard, pageRequest);
     }
     return new CriteriaListWithCountResponse()
         .items(
@@ -342,16 +317,17 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   }
 
   @Override
-  public Long findDomainCount(String domain, String term) {
-    Domain domainToCount = Domain.valueOf(domain);
-    Long count = cbCriteriaDao.findDomainCountOnCode(term, domain);
-    return count == 0 ? cbCriteriaDao.findDomainCount(modifyTermMatch(term), domain) : count;
+  public Long findDomainCountByStandard(String domain, String term, Boolean standard) {
+    Long count = cbCriteriaDao.findDomainCountOnCodeAndStandard(term, domain, standard);
+    return count == 0
+        ? cbCriteriaDao.findDomainCountAndStandard(modifyTermMatch(term), domain, standard)
+        : count;
   }
 
   @Override
-  public List<DomainInfo> findDomainInfos() {
-    return domainInfoDao.findByOrderByDomainId().stream()
-        .filter(dbDomainInfo -> dbDomainInfo.getAllConceptCount() > 0)
+  public List<DomainCard> findDomainCards() {
+    return domainCardDao.findByOrderById().stream()
+        .filter(dbDomainCard -> dbDomainCard.getConceptCount() > 0)
         .map(cohortBuilderMapper::dbModelToClient)
         .collect(Collectors.toList());
   }
@@ -459,6 +435,49 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
         .stream()
         .map(cohortBuilderMapper::dbModelToClient)
         .collect(Collectors.toList());
+  }
+
+  private CriteriaListWithCountResponse getTopCountsSearchWithStandard(
+      String domain, String surveyName, Boolean standard, PageRequest pageRequest) {
+    Page<DbCriteria> dbCriteriaPage;
+    if (isSurveyDomain(domain)) {
+      Long id = cbCriteriaDao.findSurveyId(surveyName);
+      dbCriteriaPage = cbCriteriaDao.findSurveyQuestionByPath(id, pageRequest);
+    } else {
+      dbCriteriaPage = cbCriteriaDao.findCriteriaTopCountsByStandard(domain, standard, pageRequest);
+    }
+    return new CriteriaListWithCountResponse()
+        .items(
+            dbCriteriaPage.getContent().stream()
+                .map(cohortBuilderMapper::dbModelToClient)
+                .collect(Collectors.toList()))
+        .totalCount(dbCriteriaPage.getTotalElements());
+  }
+
+  private CriteriaListWithCountResponse findSurveyCriteriaBySearchTerm(
+      String surveyName, PageRequest pageRequest, String modifiedSearchTerm) {
+    Page<DbCriteria> dbCriteriaPage;
+    if (surveyName.equals("All")) {
+      dbCriteriaPage = cbCriteriaDao.findSurveyQuestionByTerm(modifiedSearchTerm, pageRequest);
+    } else {
+      Long id = cbCriteriaDao.findSurveyId(surveyName);
+      dbCriteriaPage =
+          cbCriteriaDao.findSurveyQuestionByPathAndTerm(id, modifiedSearchTerm, pageRequest);
+    }
+    return new CriteriaListWithCountResponse()
+        .items(
+            dbCriteriaPage.getContent().stream()
+                .map(cohortBuilderMapper::dbModelToClient)
+                .collect(Collectors.toList()))
+        .totalCount(dbCriteriaPage.getTotalElements());
+  }
+
+  private boolean isTopCountsSearch(String term) {
+    return term == null || term.trim().isEmpty();
+  }
+
+  private boolean isSurveyDomain(String domain) {
+    return Domain.SURVEY.equals(Domain.fromValue(domain));
   }
 
   private String modifyTermMatch(String term) {

@@ -15,7 +15,6 @@ const DEFAULT_MAX_POLLING_DELAY = 15000;
 // for some resilience to errored-out runtimes, while avoiding situations where we end up in an
 // endless create-error-delete loop.
 const DEFAULT_MAX_CREATE_COUNT = 2;
-const DEFAULT_MAX_DELETE_COUNT = 2;
 const DEFAULT_MAX_RESUME_COUNT = 2;
 // We allow a certain # of server errors to occur before we error-out of the initialization flow.
 const DEFAULT_MAX_SERVER_ERROR_COUNT = 10;
@@ -77,7 +76,6 @@ export interface LeoRuntimeInitializerOptions {
   maxPollingDelay?: number;
   overallTimeout?: number;
   maxCreateCount?: number;
-  maxDeleteCount?: number;
   maxResumeCount?: number;
   maxServerErrorCount?: number;
   targetRuntime?: Runtime;
@@ -90,7 +88,6 @@ const DEFAULT_OPTIONS: Partial<LeoRuntimeInitializerOptions> = {
   maxPollingDelay: DEFAULT_MAX_POLLING_DELAY,
   overallTimeout: DEFAULT_OVERALL_TIMEOUT,
   maxCreateCount: DEFAULT_MAX_CREATE_COUNT,
-  maxDeleteCount: DEFAULT_MAX_DELETE_COUNT,
   maxResumeCount: DEFAULT_MAX_RESUME_COUNT,
   maxServerErrorCount: DEFAULT_MAX_SERVER_ERROR_COUNT,
   resolutionCondition: (runtime) => runtime.status === RuntimeStatus.Running
@@ -125,7 +122,6 @@ export class LeoRuntimeInitializer {
   private readonly maxDelay: number;
   private readonly overallTimeout: number;
   private readonly maxCreateCount: number;
-  private readonly maxDeleteCount: number;
   private readonly maxResumeCount: number;
   private readonly maxServerErrorCount: number;
 
@@ -149,7 +145,7 @@ export class LeoRuntimeInitializer {
     this.currentRuntimeValue = nextRuntime;
     const storeWorkspaceNamespace = runtimeStore.get().workspaceNamespace;
     if (storeWorkspaceNamespace === this.workspaceNamespace || storeWorkspaceNamespace === undefined ) {
-      runtimeStore.set({workspaceNamespace: this.workspaceNamespace, runtime: this.currentRuntimeValue});
+      runtimeStore.set({workspaceNamespace: this.workspaceNamespace, runtime: this.currentRuntimeValue, runtimeLoaded: true});
     }
   }
 
@@ -181,7 +177,6 @@ export class LeoRuntimeInitializer {
     this.maxDelay = options.maxPollingDelay;
     this.overallTimeout = options.overallTimeout;
     this.maxCreateCount = options.maxCreateCount;
-    this.maxDeleteCount = options.maxDeleteCount;
     this.maxResumeCount = options.maxResumeCount;
     this.maxServerErrorCount = options.maxServerErrorCount;
     this.targetRuntime = options.targetRuntime;
@@ -217,15 +212,6 @@ export class LeoRuntimeInitializer {
     await leoRuntimesApi().startRuntime(
       this.currentRuntime.googleProject, this.currentRuntime.runtimeName, {signal: this.pollAbortSignal});
     this.resumeCount++;
-  }
-
-  private async deleteRuntime(): Promise<void> {
-    if (this.deleteCount >= this.maxDeleteCount) {
-      throw new ExceededActionCountError(
-        `Reached max runtime delete count (${this.maxDeleteCount})`, this.currentRuntime);
-    }
-    await runtimeApi().deleteRuntime(this.workspaceNamespace, {signal: this.pollAbortSignal});
-    this.deleteCount++;
   }
 
   private reachedResolution(): boolean {
@@ -338,11 +324,11 @@ export class LeoRuntimeInitializer {
       } else if (this.isRuntimeStopped()) {
         await this.resumeRuntime();
       } else if (this.isRuntimeErrored()) {
-        // If runtime is in error state, delete it so it can be re-created at the next poll loop.
+        // If runtime is in error state, stop polling so we can display the error.
         reportError(
           `Runtime ${this.currentRuntime.googleProject}/${this.currentRuntime.runtimeName}` +
           ` has reached an ERROR status`);
-        await this.deleteRuntime();
+        return this.resolve(this.currentRuntime);
       }
     } catch (e) {
       if (isAbortError(e)) {

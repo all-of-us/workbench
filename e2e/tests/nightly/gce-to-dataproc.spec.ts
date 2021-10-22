@@ -4,11 +4,10 @@ import { createWorkspace, signInWithAccessToken } from 'utils/test-utils';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { makeRandomName } from 'utils/str-utils';
 import { ResourceCard } from 'app/text-labels';
+import { AccessTierDisplayNames } from 'app/page/workspace-edit-page';
 
 // This test could take a long time to run
-jest.setTimeout(60 * 30 * 1000);
-// Retry one more when fails
-jest.retryTimes(0);
+jest.setTimeout(40 * 60 * 1000);
 
 describe('Updating runtime compute type', () => {
   beforeEach(async () => {
@@ -16,7 +15,10 @@ describe('Updating runtime compute type', () => {
   });
 
   test('Switch from GCE to dataproc', async () => {
-    await createWorkspace(page, { cdrVersion: config.ALTERNATIVE_CDR_VERSION_NAME });
+    await createWorkspace(page, {
+      cdrVersionName: config.CONTROLLED_TIER_CDR_VERSION_NAME,
+      dataAccessTier: AccessTierDisplayNames.Controlled
+    });
 
     // Open the runtime panel
     const runtimePanel = new RuntimePanel(page);
@@ -51,7 +53,7 @@ describe('Updating runtime compute type', () => {
     const numPreemptibleWorkers = 1;
     const numCpus = 2;
     const ramGbs = 13;
-    const workerDisk = 60;
+    const workerDisk = 80;
 
     await runtimePanel.pickComputeType(ComputeType.Dataproc);
     await runtimePanel.pickDataprocNumWorkers(numWorkers);
@@ -74,6 +76,7 @@ describe('Updating runtime compute type', () => {
 
     // Delete runtime
     await notebook.deleteRuntime();
+    await notebook.deleteUnattachedPd();
 
     // Verify that dataproc settings are still shown
     await runtimePanel.open();

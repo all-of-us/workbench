@@ -7,9 +7,10 @@ import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.model.Institution;
-import org.pmiops.workbench.model.InstitutionTierRequirement;
+import org.pmiops.workbench.model.InstitutionTierConfig;
 import org.pmiops.workbench.model.InstitutionUserInstructions;
 import org.pmiops.workbench.model.PublicInstitutionDetails;
+import org.pmiops.workbench.model.UserTierEligibility;
 
 public interface InstitutionService {
   List<Institution> getInstitutions();
@@ -50,28 +51,11 @@ public interface InstitutionService {
    *
    * @param institution the institution to validate against
    * @param contactEmail contact email to validate
+   * @param accessTierShortName the name of the access tier to verify.
    * @return boolean – is the contact email a valid member
    */
-  boolean validateInstitutionalEmail(Institution institution, String contactEmail);
-
-  /**
-   * Retrieve an ordered list of the email domains which this institution uses to match user contact
-   * email, or an empty list if none. Throws NotFoundException if the Institution does not exist.
-   *
-   * @param institutionShortName the short name (key) used to refer to this institution in the API
-   * @return the list of email domains associated with this institution, if any
-   */
-  List<String> getEmailDomains(String institutionShortName);
-
-  /**
-   * Retrieve an ordered list of the email addresses which this institution uses to match user
-   * contact email, or an empty list if none. Throws NotFoundException if the Institution does not
-   * exist.
-   *
-   * @param institutionShortName the short name (key) used to refer to this institution in the API
-   * @return the list of email addresses associated with this institution, if any
-   */
-  List<String> getEmailAddresses(String institutionShortName);
+  boolean validateInstitutionalEmail(
+      Institution institution, String contactEmail, String accessTierShortName);
 
   /**
    * Retrieve the optional text block of user instructions to fill the instructions email sent after
@@ -121,11 +105,21 @@ public interface InstitutionService {
   Optional<Institution> getByUser(DbUser user);
 
   /**
-   * Retrieve list of the {@link InstitutionTierRequirement} which specifies how members can access
-   * each tier.
+   * Retrieve list of the {@link InstitutionTierConfig} which specifies how members can access each
+   * tier and the requirement for each tier.
    *
    * @param institutionShortName the short name (key) used to refer to this institution in the API
-   * @return the list of {@link InstitutionTierRequirement} for each tier.
+   * @return the list of {@link InstitutionTierConfig} for each tier.
    */
-  List<InstitutionTierRequirement> getTierRequirements(String institutionShortName);
+  List<InstitutionTierConfig> getTierConfigs(String institutionShortName);
+
+  /** Returns {@code true} if eRA commons is required for given tier. */
+  boolean eRaRequiredForTier(Institution institution, String accessTierShortName);
+
+  /**
+   * Returns the access tiers that the user's institution allow the user to join.
+   *
+   * @return
+   */
+  List<UserTierEligibility> getUserTierEligibilities(DbUser user);
 }

@@ -2,6 +2,7 @@ package org.pmiops.workbench.utils.mappers;
 
 import com.google.cloud.bigquery.FieldValueList;
 import com.google.cloud.bigquery.TableResult;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
@@ -11,7 +12,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
-import org.elasticsearch.common.Strings;
 import org.mapstruct.Mapper;
 import org.pmiops.workbench.model.AuditAction;
 import org.pmiops.workbench.model.AuditAgent;

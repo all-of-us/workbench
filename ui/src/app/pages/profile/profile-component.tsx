@@ -1,11 +1,13 @@
 import * as fp from 'lodash/fp';
+import {Dropdown} from 'primereact/dropdown';
 import * as React from 'react';
-import * as validate from 'validate.js';
+import validate from 'validate.js';
+import {withRouter, RouteComponentProps} from 'react-router-dom';
 
 import {Button} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
-import {ControlledTierBadge, ExclamationTriangle} from 'app/components/icons';
+import {ExclamationTriangle} from 'app/components/icons';
 import {TextAreaWithLengthValidationMessage, TextInput, ValidationError} from 'app/components/inputs';
 import {BulletAlignedUnorderedList} from 'app/components/lists';
 import {Modal} from 'app/components/modals';
@@ -15,28 +17,23 @@ import {SpinnerOverlay} from 'app/components/spinners';
 import {AoU} from 'app/components/text-wrappers';
 import {withProfileErrorModal, WithProfileErrorModalProps} from 'app/components/with-error-modal';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
-import {getRegistrationTasksMap} from 'app/pages/homepage/registration-dashboard';
 import {AccountCreationOptions} from 'app/pages/login/account-creation/account-creation-options';
-import {DataAccessPanel} from 'app/pages/profile/data-access-panel';
 import {DemographicSurvey} from 'app/pages/profile/demographic-survey';
-import {ProfileRegistrationStepStatus} from 'app/pages/profile/profile-registration-step-status';
 import {styles} from 'app/pages/profile/profile-styles';
 import {institutionApi, profileApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {
   displayDateWithoutHours,
   formatFreeCreditsUSD,
-  lensOnProps,
   withUserProfile
 } from 'app/utils';
 import {wasReferredFromRenewal} from 'app/utils/access-utils';
 import {convertAPIError, reportError} from 'app/utils/errors';
-import {navigate} from 'app/utils/navigation';
-import {serverConfigStore} from 'app/utils/stores';
-import {environment} from 'environments/environment';
-import {InstitutionalRole, Profile} from 'generated/fetch';
+import {NavigationProps} from 'app/utils/navigation';
+import {withNavigation} from 'app/utils/with-navigation-hoc';
+import {AccessModule, InstitutionalRole, Profile} from 'generated/fetch';
 import {PublicInstitutionDetails} from 'generated/fetch';
-import {Dropdown} from 'primereact/dropdown';
+import {DataAccessPanel} from './data-access-panel';
 
 
 // validators for validate.js
@@ -60,77 +57,23 @@ const validators = {
   country: {...required, ...notTooLong(95)}
 };
 
-enum RegistrationStepStatus {
-  COMPLETED,
-  BYPASSED,
-  UNCOMPLETE
-}
-
-interface ProfilePageProps extends WithProfileErrorModalProps, WithSpinnerOverlayProps {
+interface ProfilePageProps extends WithProfileErrorModalProps, WithSpinnerOverlayProps, NavigationProps, RouteComponentProps {
   profileState: {
     profile: Profile;
     reload: () => {};
   };
-  controlledTierProfile: {
-    controlledTierCompletionTime?: number
-    controlledTierBypassTime?: number
-    controlledTierEnabled?: boolean
-  };
 }
-
 interface ProfilePageState {
   currentProfile: Profile;
   institutions: Array<PublicInstitutionDetails>;
   showDemographicSurveyModal: boolean;
   updating: boolean;
 }
-
-interface CompletionTime {
-  completionTime: number;
-  bypassTime: number;
-}
-
-const getRegistrationStatus = (completionTime: number, bypassTime: number) => {
-  return completionTime !== null && completionTime !== undefined ? RegistrationStepStatus.COMPLETED :
-  bypassTime !== null && completionTime !== undefined ? RegistrationStepStatus.BYPASSED : RegistrationStepStatus.UNCOMPLETE;
-};
-
-const bypassedText = (bypassTime: number): JSX.Element => {
-  return <React.Fragment>
-  <div>Bypassed on:</div>
-  <div>{displayDateWithoutHours(bypassTime)}</div>
-</React.Fragment>;
-};
-
-const getCompleteOrBypassContent = ({bypassTime, completionTime}: CompletionTime): JSX.Element => {
-  switch (getRegistrationStatus(completionTime, bypassTime)) {
-    case RegistrationStepStatus.COMPLETED:
-      return <React.Fragment>
-      <div>Completed on:</div>
-      <div>{displayDateWithoutHours(completionTime)}</div>
-    </React.Fragment>;
-    case RegistrationStepStatus.BYPASSED:
-      return bypassedText(bypassTime);
-    default:
-      return;
-  }
-};
-
-const focusCompletionProps = lensOnProps(['completionTime', 'bypassTime']);
-
-const getTwoFactorContent = fp.flow(
-  focusCompletionProps(['twoFactorAuthCompletionTime', 'twoFactorAuthBypassTime']),
-  getCompleteOrBypassContent
-);
-
-const getControlledTierContent = fp.flow(
-  focusCompletionProps(['controlledTierCompletionTime', 'controlledTierBypassTime']),
-  getCompleteOrBypassContent
-);
-
 export const ProfileComponent = fp.flow(
   withUserProfile(),
-  withProfileErrorModal
+  withProfileErrorModal,
+  withNavigation,
+  withRouter
   )(class extends React.Component<
     ProfilePageProps,
     ProfilePageState
@@ -143,7 +86,7 @@ export const ProfileComponent = fp.flow(
         currentProfile: this.initializeProfile(),
         institutions: [],
         showDemographicSurveyModal: false,
-        updating: false
+        updating: false,
       };
     }
     static displayName = 'ProfilePage';
@@ -151,14 +94,14 @@ export const ProfileComponent = fp.flow(
     saveProfileWithRenewal = withSuccessModal({
       title: 'Your profile has been updated',
       message: 'You will be redirected to the access renewal page upon closing this dialog.',
-      onDismiss: () => navigate(['access-renewal'])
+      onDismiss: () => this.props.navigate(['access-renewal'])
     }, this.saveProfile.bind(this));
 
     confirmProfile = fp.flow(
       withSuccessModal({
         title: 'You have confirmed your profile is accurate',
         message: 'You will be redirected to the access renewal page upon closing this dialog.',
-        onDismiss: () => navigate(['access-renewal'])
+        onDismiss: () => this.props.navigate(['access-renewal'])
       }),
       withErrorModal({ title: 'Failed To Confirm Profile', message: 'An error occurred trying to confirm your profile. Please try again.'})
     )(async() => {
@@ -170,18 +113,11 @@ export const ProfileComponent = fp.flow(
     async componentDidMount() {
       this.props.hideSpinner();
       try {
-        const details = await institutionApi().getPublicInstitutionDetails();
-        this.setState({
-          institutions: details.institutions
-        });
+        const {institutions} = await institutionApi().getPublicInstitutionDetails();
+        this.setState({institutions});
       } catch (e) {
         reportError(e);
       }
-    }
-
-    navigateToTraining(): void {
-      window.location.assign(
-        environment.trainingUrl + '/static/data-researcher.html?saml=on');
     }
 
     initializeProfile() {
@@ -264,81 +200,13 @@ export const ProfileComponent = fp.flow(
       }
     }
 
-    private getEraCommonsCardText(profile) {
-      switch (getRegistrationStatus(profile.eraCommonsCompletionTime, profile.eraCommonsBypassTime)) {
-        case RegistrationStepStatus.COMPLETED:
-          return <div>
-          {profile.eraCommonsLinkedNihUsername != null && <React.Fragment>
-              <div> Username:</div>
-              <div> {profile.eraCommonsLinkedNihUsername} </div>
-          </React.Fragment>}
-          {profile.eraCommonsLinkExpireTime != null &&
-          //  Firecloud returns eraCommons link expiration as 0 if there is no linked account.
-          profile.eraCommonsLinkExpireTime !== 0
-          && <React.Fragment>
-              <div> Completed on:</div>
-              <div>
-                {displayDateWithoutHours(profile.eraCommonsCompletionTime)}
-              </div>
-          </React.Fragment>}
-        </div>;
-        case RegistrationStepStatus.BYPASSED:
-          return bypassedText(profile.twoFactorAuthBypassTime);
-        default:
-          return;
-      }
-    }
-
-    private getComplianceTrainingText(profile) {
-      switch (getRegistrationStatus(profile.complianceTrainingCompletionTime, profile.complianceTrainingBypassTime)) {
-        case RegistrationStepStatus.COMPLETED:
-          return <React.Fragment>
-          <div>Training Completed</div>
-          <div>{displayDateWithoutHours(profile.complianceTrainingCompletionTime)}</div>
-        </React.Fragment>;
-        case RegistrationStepStatus.BYPASSED:
-          return bypassedText(profile.complianceTrainingBypassTime);
-        default:
-          return;
-      }
-    }
-
-    private getDUCCText(profile) {
-      const universalText = <a onClick={getRegistrationTasksMap()['dataUserCodeOfConduct'].onClick}>
-      View code of conduct
-    </a>;
-      switch (getRegistrationStatus(profile.dataUseAgreementCompletionTime, profile.dataUseAgreementBypassTime)) {
-        case RegistrationStepStatus.COMPLETED:
-          return <React.Fragment>
-          <div>Signed On:</div>
-          <div>
-            {displayDateWithoutHours(profile.dataUseAgreementCompletionTime)}
-          </div>
-          {universalText}
-        </React.Fragment>;
-        case RegistrationStepStatus.BYPASSED:
-          return <React.Fragment>
-          {bypassedText(profile.dataUseAgreementBypassTime)}
-          {universalText}
-        </React.Fragment>;
-        case RegistrationStepStatus.UNCOMPLETE:
-          return universalText;
-      }
-    }
-
     render() {
       const {
         profileState: {
           profile
         },
-        // TODO: when the controlled tier data is available fetch it from the profile
-        controlledTierProfile: {
-          controlledTierEnabled = false, controlledTierBypassTime = null, controlledTierCompletionTime = null
-        } = {}
       } = this.props;
       const {currentProfile, updating, showDemographicSurveyModal} = this.state;
-      const {enableComplianceTraining, enableEraCommons} =
-      serverConfigStore.get().config;
       const {
       givenName, familyName, areaOfResearch, professionalUrl,
         address: {
@@ -352,10 +220,12 @@ export const ProfileComponent = fp.flow(
     } = currentProfile;
 
 
-      const hasExpired = fp.flow(
-        fp.find({moduleName: 'profileConfirmation'}),
-        fp.get('hasExpired')
-      )(profile.renewableAccessModules.modules);
+      const profileExpiration = fp.flow(
+        fp.find({moduleName: AccessModule.PROFILECONFIRMATION}),
+        fp.get('expirationEpochMillis'),
+      )(profile.accessModules.modules);
+      const hasExpired = profileExpiration && profileExpiration < Date.now();
+
       const urlError = professionalUrl
       ? validate({website: professionalUrl}, {website: {url: {message: '^Professional URL %{value} is not a valid URL'}}})
       : undefined;
@@ -426,7 +296,7 @@ export const ProfileComponent = fp.flow(
         <div style={{...styles.h1, marginBottom: '0.7rem'}}>Profile</div>
         <FlexRow style={{justifyContent: 'spaceBetween'}}>
           <div>
-            {(hasExpired || wasReferredFromRenewal()) &&
+            {(hasExpired || wasReferredFromRenewal(this.props.location.search)) &&
               <div style={styles.renewalBox}>
                 <ExclamationTriangle size={25} color={colors.warning} style={{margin: '0.5rem'}}/>
                 <div style={{color: colors.primary, fontWeight: 600}}>Please update or verify your profile.</div>
@@ -559,84 +429,22 @@ export const ProfileComponent = fp.flow(
             </div>
           </div>
           <div style={{width: '20rem', marginRight: '4rem'}}>
-            <div style={styles.title}>Free credits balance
+            <div style={{marginLeft: '1rem'}}>
+              <div style={styles.title}>Free credits balance</div>
+              <hr style={{...styles.verticalLine}}/>
+              {profile && <FlexRow style={styles.freeCreditsBox}>
+                  <FlexColumn style={{marginLeft: '0.8rem'}}>
+                      <div style={{marginTop: '0.4rem'}}><AoU/> free credits used:</div>
+                      <div>Remaining <AoU/> free credits:</div>
+                  </FlexColumn>
+                  <FlexColumn style={{alignItems: 'flex-end', marginLeft: '1.0rem'}}>
+                    <div style={{marginTop: '0.4rem', fontWeight: 600}}>{formatFreeCreditsUSD(profile.freeTierUsage)}</div>
+                    <div style={{fontWeight: 600}}>{formatFreeCreditsUSD(profile.freeTierDollarQuota - profile.freeTierUsage)}</div>
+                  </FlexColumn>
+              </FlexRow>}
             </div>
-            <hr style={{...styles.verticalLine}}/>
-            {profile && <FlexRow style={styles.freeCreditsBox}>
-                <FlexColumn style={{marginLeft: '0.8rem'}}>
-                    <div style={{marginTop: '0.4rem'}}><i>All of Us</i> free credits used:</div>
-                    <div>Remaining <i>All of Us</i> free credits:</div>
-                </FlexColumn>
-                <FlexColumn style={{alignItems: 'flex-end', marginLeft: '1.0rem'}}>
-                  <div style={{marginTop: '0.4rem', fontWeight: 600}}>{formatFreeCreditsUSD(profile.freeTierUsage)}</div>
-                  <div style={{fontWeight: 600}}>{formatFreeCreditsUSD(profile.freeTierDollarQuota - profile.freeTierUsage)}</div>
-                </FlexColumn>
-            </FlexRow>}
-            {controlledTierEnabled && <DataAccessPanel tiers={profile.accessTierShortNames}/>}
-            <div style={styles.title}>
-              Requirements for <AoU/> Workbench access
-            </div>
-            <hr style={{...styles.verticalLine}}/>
-            <div style={{display: 'grid', gap: '10px', gridAutoRows: '225px', gridTemplateColumns: '220px 220px'}}>
-              {controlledTierEnabled && <ProfileRegistrationStepStatus
-                title={<span><i>All of Us</i> Controlled Tier Data Training</span>}
-                wasBypassed={!!controlledTierBypassTime}
-                incompleteButtonText={'Get Started'}
-                completedButtonText={'Completed'}
-                isComplete={!!(controlledTierCompletionTime || controlledTierBypassTime)}
-                // TODO: link to the training modules once they are available
-                completeStep={() => null}
-                content={getControlledTierContent({controlledTierCompletionTime, controlledTierBypassTime})}
-                >
-                <div>
-                  {!(controlledTierCompletionTime || controlledTierBypassTime) && <div>To be completed</div>}
-                  <ControlledTierBadge/>
-                </div>
-              </ProfileRegistrationStepStatus>}
-              <ProfileRegistrationStepStatus
-                title='Turn on Google 2-Step Verification'
-                wasBypassed={!!profile.twoFactorAuthBypassTime}
-                incompleteButtonText='Set Up'
-                completedButtonText={getRegistrationTasksMap()['twoFactorAuth'].completedText}
-                isComplete={!!(getRegistrationTasksMap()['twoFactorAuth'].completionTimestamp(profile))}
-                completeStep={getRegistrationTasksMap()['twoFactorAuth'].onClick}
-                content={getTwoFactorContent(profile)}
-                >
-              </ProfileRegistrationStepStatus>
-              {enableEraCommons && <ProfileRegistrationStepStatus
-                  title='Connect Your eRA Commons Account'
-                  wasBypassed={!!profile.eraCommonsBypassTime}
-                  incompleteButtonText='Link'
-                  completedButtonText={getRegistrationTasksMap()['eraCommons'].completedText}
-                  isComplete={!!(getRegistrationTasksMap()['eraCommons'].completionTimestamp(profile))}
-                  completeStep={getRegistrationTasksMap()['eraCommons'].onClick}
-                  content={this.getEraCommonsCardText(profile)}
-                >
-              </ProfileRegistrationStepStatus>}
-              {enableComplianceTraining && <ProfileRegistrationStepStatus
-                  title={<span><i>All of Us</i> Responsible Conduct of Research Training</span>}
-                  wasBypassed={!!profile.complianceTrainingBypassTime}
-                  incompleteButtonText='Access Training'
-                  completedButtonText={getRegistrationTasksMap()['complianceTraining'].completedText}
-                  isComplete={!!(getRegistrationTasksMap()['complianceTraining'].completionTimestamp(profile))}
-                  completeStep={getRegistrationTasksMap()['complianceTraining'].onClick}
-                  content={this.getComplianceTrainingText(profile)}
-                >
-              </ProfileRegistrationStepStatus>}
-              <ProfileRegistrationStepStatus
-                  title='Sign Data User Code Of Conduct'
-                  wasBypassed={!!profile.dataUseAgreementBypassTime}
-                  incompleteButtonText='Sign'
-                  completedButtonText={getRegistrationTasksMap()['dataUserCodeOfConduct'].completedText}
-                  isComplete={!!(getRegistrationTasksMap()['dataUserCodeOfConduct'].completionTimestamp(profile))}
-                  completeStep={getRegistrationTasksMap()['dataUserCodeOfConduct'].onClick}
-                  childrenStyle={{marginLeft: 0}}
-                  content={this.getDUCCText(profile)}
-                >
-              </ProfileRegistrationStepStatus>
-            </div>
+            <DataAccessPanel userAccessTiers={profile.accessTierShortNames}/>
             <div style={{marginTop: '1rem', marginLeft: '1rem'}}>
-
               <div style={styles.title}>Optional Demographics Survey</div>
               <hr style={{...styles.verticalLine}}/>
               <div style={{color: colors.primary, fontSize: '14px'}}>
@@ -672,7 +480,7 @@ export const ProfileComponent = fp.flow(
                 data-test-id='save_profile'
                 type='purplePrimary'
                 style={{marginLeft: 40}}
-                onClick={() => wasReferredFromRenewal()
+                onClick={() => wasReferredFromRenewal(this.props.location.search)
                   ? this.saveProfileWithRenewal(currentProfile)
                   : this.saveProfile(currentProfile)
                 }

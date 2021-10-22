@@ -13,7 +13,7 @@ import {dataSetApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, summarizeErrors, withCurrentWorkspace} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
-import {encodeURIComponentStrict, navigateByUrl} from 'app/utils/navigation';
+import {encodeURIComponentStrict, useNavigation} from 'app/utils/navigation';
 import {ACTION_DISABLED_INVALID_BILLING} from 'app/utils/strings';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
@@ -29,7 +29,6 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {useEffect, useState} from 'react';
 import {validate} from 'validate.js';
-import GenomicsAnalysisToolEnum = DataSetExportRequest.GenomicsAnalysisToolEnum;
 
 interface Props {
   closeFunction: Function;
@@ -55,13 +54,14 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(withCur
   ({workspace, dataset, closeFunction}: HocProps) => {
     const [existingNotebooks, setExistingNotebooks] = useState(undefined);
     const [kernelType, setKernelType] = useState(KernelTypeEnum.Python);
-    const [genomicsAnalysisTool, setGenomicsAnalysisTool] = useState(GenomicsAnalysisToolEnum.HAIL);
+    const [genomicsAnalysisTool, setGenomicsAnalysisTool] = useState(DataSetExportRequest.GenomicsAnalysisToolEnum.HAIL);
     const [isExporting, setIsExporting] = useState(false);
     const [creatingNewNotebook, setCreatingNewNotebook] = useState(true);
     const [notebookName, setNotebookName] = useState('');
     const [codePreview, setCodePreview] = useState(null);
     const [loadingNotebook, setIsLoadingNotebook] = useState(false);
     const [errorMsg, setErrorMsg] = useState(null);
+    const [, navigateByUrl] = useNavigation();
 
     async function exportDataset() {
       AnalyticsTracker.DatasetBuilder.Export(kernelType);
@@ -156,7 +156,7 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(withCur
       }
     }
 
-    function genomicsToolRadioButton(displayName: string, genomicsTool: GenomicsAnalysisToolEnum) {
+    function genomicsToolRadioButton(displayName: string, genomicsTool: DataSetExportRequest.GenomicsAnalysisToolEnum) {
       return <label key={'genomics-tool-' + genomicsTool} style={styles.radioButtonLabel}>
         <RadioButton
           style={{marginRight: '0.25rem'}}
@@ -247,13 +247,13 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(withCur
                   {kernelTypeEnum}
                 </label>)}
 
-            {kernelType === KernelTypeEnum.Python && <React.Fragment>
+            {hasWgs() && kernelType === KernelTypeEnum.Python && <React.Fragment>
                 <div style={headerStyles.formLabel}>
                     Select analysis tool for genetic variant data
                 </div>
-              {genomicsToolRadioButton('Hail', GenomicsAnalysisToolEnum.HAIL)}
-              {genomicsToolRadioButton('PLINK', GenomicsAnalysisToolEnum.PLINK)}
-              {genomicsToolRadioButton('Other VCF-compatible tool', GenomicsAnalysisToolEnum.NONE)}
+              {genomicsToolRadioButton('Hail', DataSetExportRequest.GenomicsAnalysisToolEnum.HAIL)}
+              {genomicsToolRadioButton('PLINK', DataSetExportRequest.GenomicsAnalysisToolEnum.PLINK)}
+              {genomicsToolRadioButton('Other VCF-compatible tool', DataSetExportRequest.GenomicsAnalysisToolEnum.NONE)}
             </React.Fragment>}
 
             <FlexRow style={{marginTop: '1rem', alignItems: 'center'}}>

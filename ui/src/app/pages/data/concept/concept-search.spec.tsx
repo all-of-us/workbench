@@ -1,13 +1,20 @@
 import {mount} from 'enzyme';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
+import {MemoryRouter, Route} from 'react-router';
 
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
-import {currentWorkspaceStore, urlParamsStore} from 'app/utils/navigation';
+import {
+  currentConceptSetStore,
+  currentConceptStore,
+  currentWorkspaceStore
+} from 'app/utils/navigation';
+import {serverConfigStore} from 'app/utils/stores';
 import {ConceptSet, ConceptSetsApi, WorkspacesApi} from 'generated/fetch';
+import defaultServerConfig from 'testing/default-server-config';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
-import {workspaceDataStub, WorkspaceStubVariables} from 'testing/stubs/workspaces';
+import {workspaceDataStub} from 'testing/stubs/workspaces';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 import {ConceptSearch} from './concept-search';
 
@@ -15,27 +22,33 @@ describe('ConceptSearch', () => {
   let conceptSet: ConceptSet;
 
   beforeEach(() => {
+    jest.clearAllMocks();
     registerApiClient(ConceptSetsApi, new ConceptSetsApiStub());
     registerApiClient(WorkspacesApi, new WorkspacesApiStub());
     currentWorkspaceStore.next(workspaceDataStub);
+    currentConceptStore.next([]);
+    currentConceptSetStore.next(undefined);
     conceptSet = ConceptSetsApiStub.stubConceptSets()[0];
-    urlParamsStore.next({
-      ns: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
-      wsid: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID,
-      csid: conceptSet.id
-    });
+    serverConfigStore.set({config: {...defaultServerConfig, enableStandardSourceDomains: false}});
   });
-  
+
   const component = () => {
-    return mount(<ConceptSearch setConceptSetUpdating={() => {}}
-                                setShowUnsavedModal={() => {}}
-                                setUnsavedConceptChanges={() => {}}
-                                hideSpinner={() => {}}
-                                showSpinner={() => {}}/>);
+    return mount(<MemoryRouter
+        initialEntries={[`/workspaces/${workspaceDataStub.namespace}/${workspaceDataStub.id}/data/concepts/sets/${conceptSet.id}`]}
+    >
+      <Route path='/workspaces/:ns/:wsid/data/concepts/sets/:csid'>
+        <ConceptSearch setConceptSetUpdating={() => {}}
+                       setShowUnsavedModal={() => {}}
+                       setUnsavedConceptChanges={() => {}}
+                       hideSpinner={() => {}}
+                       showSpinner={() => {}}
+        />
+      </Route>
+    </MemoryRouter>);
   }
 
   it('should render', () => {
-    const wrapper = component(); 
+    const wrapper = component();
     expect(wrapper).toBeTruthy();
   });
 

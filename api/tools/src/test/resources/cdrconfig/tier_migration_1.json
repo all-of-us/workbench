@@ -20,7 +20,6 @@
       "releaseNumber": 3,
       "numParticipants": 234525,
       "cdrDbName": "cdr",
-      "elasticIndexBaseName": "cdr",
       "hasFitbitData": true,
       "hasCopeSurveyData": true,
       "accessTier": "registered"
@@ -35,7 +34,6 @@
       "releaseNumber": 3,
       "numParticipants": 234525,
       "cdrDbName": "cdr",
-      "elasticIndexBaseName": "cdr",
       "hasFitbitData": true,
       "hasCopeSurveyData": true,
       "accessTier": "registered"
@@ -50,7 +48,6 @@
       "releaseNumber": 3,
       "numParticipants": 234525,
       "cdrDbName": "cdr",
-      "elasticIndexBaseName": "cdr",
       "hasFitbitData": true,
       "hasCopeSurveyData": true,
       "accessTier": "registered"
@@ -65,7 +62,6 @@
       "releaseNumber": 3,
       "numParticipants": 234525,
       "cdrDbName": "cdr",
-      "elasticIndexBaseName": "cdr",
       "hasFitbitData": true,
       "hasCopeSurveyData": true,
       "accessTier": "registered"

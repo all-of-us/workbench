@@ -1,24 +1,20 @@
 package org.pmiops.workbench.firecloud;
 
 import com.google.api.client.http.HttpStatusCodes;
-import com.google.api.client.http.HttpTransport;
-import com.google.auth.oauth2.OAuth2Credentials;
-import com.google.cloud.iam.credentials.v1.IamCredentialsClient;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
-import java.io.IOException;
+import com.google.common.hash.Hashing;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.inject.Provider;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.pmiops.workbench.auth.DelegatedUserCredentials;
-import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.WorkbenchException;
@@ -32,17 +28,17 @@ import org.pmiops.workbench.firecloud.api.StatusApi;
 import org.pmiops.workbench.firecloud.api.WorkspacesApi;
 import org.pmiops.workbench.firecloud.model.FirecloudBillingProjectMembership;
 import org.pmiops.workbench.firecloud.model.FirecloudBillingProjectStatus;
-import org.pmiops.workbench.firecloud.model.FirecloudCreateRawlsBillingProjectFullRequest;
+import org.pmiops.workbench.firecloud.model.FirecloudCreateRawlsV2BillingProjectFullRequest;
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupRef;
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
 import org.pmiops.workbench.firecloud.model.FirecloudMe;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.firecloud.model.FirecloudProfile;
 import org.pmiops.workbench.firecloud.model.FirecloudUpdateRawlsBillingAccountRequest;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdateResponseList;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceIngest;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceRequestClone;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
@@ -54,6 +50,8 @@ import org.springframework.stereotype.Service;
 @Service
 // TODO: consider retrying internally when FireCloud returns a 503
 public class FireCloudServiceImpl implements FireCloudService {
+
+  @VisibleForTesting public static final int PROJECT_BILLING_ID_SIZE = 8;
 
   private static final Logger log = Logger.getLogger(FireCloudServiceImpl.class.getName());
 
@@ -77,12 +75,9 @@ public class FireCloudServiceImpl implements FireCloudService {
 
   private final Provider<WorkspacesApi> endUserWorkspacesApiProvider;
   private final Provider<WorkspacesApi> serviceAccountWorkspaceApiProvider;
+  private final FirecloudApiClientFactory firecloudApiClientFactory;
 
   private final FirecloudRetryHandler retryHandler;
-  private final IamCredentialsClient iamCredentialsClient;
-  private final HttpTransport httpTransport;
-
-  private static final String ADMIN_SERVICE_ACCOUNT_NAME = "firecloud-admin";
 
   private static final String MEMBER_ROLE = "member";
   private static final String STATUS_SUBSYSTEMS_KEY = "systems";
@@ -92,15 +87,9 @@ public class FireCloudServiceImpl implements FireCloudService {
   private static final String SAM_STATUS_NAME = "Sam";
   private static final String RAWLS_STATUS_NAME = "Rawls";
   private static final String GOOGLE_BUCKETS_STATUS_NAME = "GoogleBuckets";
-
-  // The set of Google OAuth scopes required for access to FireCloud APIs. If FireCloud ever changes
-  // its API scopes (see https://api.firecloud.org/api-docs.yaml), we'll need to update this list.
-  public static final List<String> FIRECLOUD_API_OAUTH_SCOPES =
-      ImmutableList.of(
-          "openid",
-          "https://www.googleapis.com/auth/userinfo.profile",
-          "https://www.googleapis.com/auth/userinfo.email",
-          "https://www.googleapis.com/auth/cloud-billing");
+  // The default location for AoU buckets. Setting this location when cloning workspaces to make it
+  // work in service perimter environment. See shorturl.at/mAHQY for more details.
+  private static final String GOOGLE_BUCKETS_LOCATION = "US";
 
   // All options are defined in this document:
   // https://docs.google.com/document/d/1YS95Q7ViRztaCSfPK-NS6tzFPrVpp5KUo0FaWGx7VHw/edit#
@@ -137,9 +126,8 @@ public class FireCloudServiceImpl implements FireCloudService {
       @Qualifier(FireCloudCacheConfig.SERVICE_ACCOUNT_REQUEST_SCOPED_GROUP_CACHE)
           Provider<LoadingCache<String, FirecloudManagedGroupWithMembers>>
               requestScopedGroupCacheProvider,
-      FirecloudRetryHandler retryHandler,
-      IamCredentialsClient iamCredentialsClient,
-      HttpTransport httpTransport) {
+      FirecloudApiClientFactory firecloudApiClientFactory,
+      FirecloudRetryHandler retryHandler) {
     this.configProvider = configProvider;
     this.profileApiProvider = profileApiProvider;
     this.billingApiProvider = billingApiProvider;
@@ -150,38 +138,11 @@ public class FireCloudServiceImpl implements FireCloudService {
     this.endUserWorkspacesApiProvider = endUserWorkspacesApiProvider;
     this.serviceAccountWorkspaceApiProvider = serviceAccountWorkspaceApiProvider;
     this.statusApiProvider = statusApiProvider;
-    this.retryHandler = retryHandler;
     this.endUserStaticNotebooksApiProvider = endUserStaticNotebooksApiProvider;
     this.serviceAccountStaticNotebooksApiProvider = serviceAccountStaticNotebooksApiProvider;
     this.requestScopedGroupCacheProvider = requestScopedGroupCacheProvider;
-    this.iamCredentialsClient = iamCredentialsClient;
-    this.httpTransport = httpTransport;
-  }
-
-  /**
-   * Given an email address of an AoU user, generates a FireCloud ApiClient instance with an access
-   * token suitable for accessing data on behalf of that user.
-   *
-   * <p>This relies on domain-wide delegation of authority in Google's OAuth flow; see
-   * /api/docs/domain-wide-delegation.md for more details.
-   *
-   * @param userEmail
-   * @return
-   */
-  public ApiClient getApiClientWithImpersonation(String userEmail) throws IOException {
-    final OAuth2Credentials delegatedCreds =
-        new DelegatedUserCredentials(
-            ServiceAccounts.getServiceAccountEmail(
-                ADMIN_SERVICE_ACCOUNT_NAME, configProvider.get().server.projectId),
-            userEmail,
-            FIRECLOUD_API_OAUTH_SCOPES,
-            iamCredentialsClient,
-            httpTransport);
-    delegatedCreds.refreshIfExpired();
-
-    ApiClient apiClient = FireCloudConfig.buildApiClient(configProvider.get());
-    apiClient.setAccessToken(delegatedCreds.getAccessToken().getTokenValue());
-    return apiClient;
+    this.firecloudApiClientFactory = firecloudApiClientFactory;
+    this.retryHandler = retryHandler;
   }
 
   @Override
@@ -249,7 +210,7 @@ public class FireCloudServiceImpl implements FireCloudService {
   }
 
   @Override
-  public void createAllOfUsBillingProject(String projectName, String servicePerimeter) {
+  public String createAllOfUsBillingProject(String projectName, String servicePerimeter) {
     if (projectName.contains(WORKSPACE_DELIMITER)) {
       throw new IllegalArgumentException(
           String.format(
@@ -257,49 +218,28 @@ public class FireCloudServiceImpl implements FireCloudService {
               projectName, WORKSPACE_DELIMITER));
     }
 
-    FirecloudCreateRawlsBillingProjectFullRequest request =
-        new FirecloudCreateRawlsBillingProjectFullRequest()
+    FirecloudCreateRawlsV2BillingProjectFullRequest request =
+        new FirecloudCreateRawlsV2BillingProjectFullRequest()
             .billingAccount(configProvider.get().billing.freeTierBillingAccountName())
             .projectName(projectName)
-            .highSecurityNetwork(true)
-            .enableFlowLogs(true)
-            .privateIpGoogleAccess(true)
             .servicePerimeter(servicePerimeter);
-
-    if (isFireCloudBillingV2ApiEnabled()) {
-      BillingV2Api billingV2Api = serviceAccountBillingV2ApiProvider.get();
-      retryHandler.run(
-          (context) -> {
-            billingV2Api.createBillingProjectFullV2(request);
-            return null;
-          });
-    } else {
-      BillingApi billingApi = billingApiProvider.get();
-      retryHandler.run(
-          (context) -> {
-            billingApi.createBillingProjectFull(request);
-            return null;
-          });
-    }
+    BillingV2Api billingV2Api = serviceAccountBillingV2ApiProvider.get();
+    retryHandler.run(
+        (context) -> {
+          billingV2Api.createBillingProjectFullV2(request);
+          return null;
+        });
+    return projectName;
   }
 
   @Override
   public void deleteBillingProject(String billingProject) {
-    if (isFireCloudBillingV2ApiEnabled()) {
-      BillingV2Api billingV2Api = serviceAccountBillingV2ApiProvider.get();
-      retryHandler.run(
-          (context) -> {
-            billingV2Api.deleteBillingProject(billingProject);
-            return null;
-          });
-    } else {
-      BillingApi billingApi = billingApiProvider.get();
-      retryHandler.run(
-          (context) -> {
-            billingApi.deleteBillingProject(billingProject);
-            return null;
-          });
-    }
+    BillingV2Api billingV2Api = serviceAccountBillingV2ApiProvider.get();
+    retryHandler.run(
+        (context) -> {
+          billingV2Api.deleteBillingProject(billingProject);
+          return null;
+        });
   }
 
   @Override
@@ -360,8 +300,7 @@ public class FireCloudServiceImpl implements FireCloudService {
     if (callerAccessToken.isPresent()) {
       // use a private instance of BillingApi instead of the provider
       // b/c we don't want to modify its ApiClient globally
-
-      final ApiClient apiClient = FireCloudConfig.buildApiClient(configProvider.get());
+      final ApiClient apiClient = firecloudApiClientFactory.newApiClient();
       apiClient.setAccessToken(callerAccessToken.get());
       scopedBillingApi = new BillingApi();
       scopedBillingApi.setApiClient(apiClient);
@@ -378,7 +317,7 @@ public class FireCloudServiceImpl implements FireCloudService {
   }
 
   @Override
-  public FirecloudWorkspace createWorkspace(
+  public FirecloudWorkspaceDetails createWorkspace(
       String projectName, String workspaceName, String authDomainName) {
     WorkspacesApi workspacesApi = endUserWorkspacesApiProvider.get();
     FirecloudWorkspaceIngest workspaceIngest =
@@ -392,7 +331,7 @@ public class FireCloudServiceImpl implements FireCloudService {
   }
 
   @Override
-  public FirecloudWorkspace cloneWorkspace(
+  public FirecloudWorkspaceDetails cloneWorkspace(
       String fromProject, String fromName, String toProject, String toName, String authDomainName) {
     WorkspacesApi workspacesApi = endUserWorkspacesApiProvider.get();
     FirecloudWorkspaceRequestClone cloneRequest =
@@ -403,8 +342,8 @@ public class FireCloudServiceImpl implements FireCloudService {
             // propagating copies of large data files elswhere in the bucket.
             .copyFilesWithPrefix("notebooks/")
             .authorizationDomain(
-                ImmutableList.of(new FirecloudManagedGroupRef().membersGroupName(authDomainName)));
-
+                ImmutableList.of(new FirecloudManagedGroupRef().membersGroupName(authDomainName)))
+            .bucketLocation(GOOGLE_BUCKETS_LOCATION);
     return retryHandler.run(
         (context) -> workspacesApi.cloneWorkspace(cloneRequest, fromProject, fromName));
   }
@@ -542,12 +481,6 @@ public class FireCloudServiceImpl implements FireCloudService {
   }
 
   @Override
-  public String staticNotebooksConvertAsService(byte[] notebook) {
-    return retryHandler.run(
-        (context) -> serviceAccountStaticNotebooksApiProvider.get().convertNotebook(notebook));
-  }
-
-  @Override
   public FirecloudNihStatus getNihStatus() {
     NihApi nihApi = nihApiProvider.get();
     return retryHandler.run(
@@ -564,7 +497,18 @@ public class FireCloudServiceImpl implements FireCloudService {
         });
   }
 
-  private boolean isFireCloudBillingV2ApiEnabled() {
-    return configProvider.get().featureFlags.enableFireCloudV2Billing;
+  @Override
+  public String createBillingProjectName() {
+    String randomString =
+        Hashing.sha256()
+            .hashUnencodedChars(UUID.randomUUID().toString())
+            .toString()
+            .substring(0, PROJECT_BILLING_ID_SIZE);
+
+    String projectNamePrefix = configProvider.get().billing.projectNamePrefix;
+    if (!projectNamePrefix.endsWith("-")) {
+      projectNamePrefix = projectNamePrefix + "-";
+    }
+    return projectNamePrefix + randomString;
   }
 }

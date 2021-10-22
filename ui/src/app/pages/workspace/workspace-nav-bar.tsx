@@ -1,4 +1,3 @@
-import {Component, Input} from '@angular/core';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {useEffect, useState} from 'react';
@@ -9,19 +8,18 @@ import {ClrIcon} from 'app/components/icons';
 import colors from 'app/styles/colors';
 import {
   reactStyles,
-  ReactWrapperBase,
   withCdrVersions,
-  withCurrentWorkspace,
-  withUrlParams
+  withCurrentWorkspace
 } from 'app/utils';
 import {
   getCdrVersion,
   getDefaultCdrVersionForTier,
   hasDefaultCdrVersion
 } from 'app/utils/cdr-versions';
-import {NavStore} from 'app/utils/navigation';
-import {serverConfigStore} from 'app/utils/stores';
+import {useNavigation} from 'app/utils/navigation';
+import {MatchParams, serverConfigStore} from 'app/utils/stores';
 import {CdrVersionTiersResponse, Workspace} from 'generated/fetch';
+import {useParams} from 'react-router-dom';
 import {CdrVersionUpgradeModal} from './cdr-version-upgrade-modal';
 
 const styles = reactStyles({
@@ -94,6 +92,7 @@ const CdrVersion = (props: {workspace: Workspace, cdrVersionTiersResponse: CdrVe
 
   const [userHasDismissedAlert, setUserHasDismissedAlert] = useState(dismissedInLocalStorage());
   const [showModal, setShowModal] = useState(false);
+  const [navigate, ] = useNavigation();
 
   // check whether the user has previously dismissed the alert in localStorage, to determine icon color
   useEffect(() =>
@@ -119,7 +118,7 @@ const CdrVersion = (props: {workspace: Workspace, cdrVersionTiersResponse: CdrVe
     {showModal && <CdrVersionUpgradeModal
         defaultCdrVersionName={getDefaultCdrVersionForTier(workspace.accessTierShortName, cdrVersionTiersResponse).name}
         onClose={() => setShowModal(false)}
-        upgrade={() => NavStore.navigate(['/workspaces', namespace, id, 'duplicate'])}
+        upgrade={() => navigate(['workspaces', namespace, id, 'duplicate'])}
     />}
   </FlexRow>;
 };
@@ -137,13 +136,14 @@ function restrictTab(workspace, tab) {
       && workspace.researchPurpose.needsReviewPrompt && tab.name !== 'About';
 }
 
-export const WorkspaceNavBarReact = fp.flow(
+export const WorkspaceNavBar = fp.flow(
   withCurrentWorkspace(),
-  withUrlParams(),
   withCdrVersions()
 )(props => {
-  const {tabPath, workspace, urlParams: {ns: namespace, wsid: id}, cdrVersionTiersResponse} = props;
+  const {tabPath, workspace, cdrVersionTiersResponse} = props;
   const activeTabIndex = fp.findIndex(['link', tabPath], tabs);
+  const [navigate, ] = useNavigation();
+  const {ns, wsid} = useParams<MatchParams>();
 
   const navTab = (currentTab, disabled) => {
     const {name, link} = currentTab;
@@ -156,7 +156,7 @@ export const WorkspaceNavBarReact = fp.flow(
         disabled={disabled}
         style={{...styles.tab, ...(selected ? styles.active : {}), ...(disabled ? styles.disabled : {})}}
         hover={{color: styles.active.color}}
-        onClick={() => NavStore.navigate(fp.compact(['/workspaces', namespace, id, link]))}
+        onClick={() => navigate(['workspaces', ns, wsid, link])}
       >
         {name}
       </Clickable>
@@ -172,14 +172,3 @@ export const WorkspaceNavBarReact = fp.flow(
   </div>;
 });
 
-@Component({
-  selector: 'app-workspace-nav-bar',
-  template: '<div #root></div>',
-})
-export class WorkspaceNavBarComponent extends ReactWrapperBase {
-  @Input() tabPath;
-
-  constructor() {
-    super(WorkspaceNavBarReact, ['tabPath']);
-  }
-}

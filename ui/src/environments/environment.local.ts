@@ -1,4 +1,4 @@
-import {Environment, ZendeskEnv} from 'environments/environment-type';
+import {EnvAccessTierShortNames, Environment, ZendeskEnv} from 'environments/environment-type';
 import {testEnvironmentBase} from 'environments/test-env-base';
 
 // This file is used for a local UI server pointed at a local API server
@@ -8,7 +8,6 @@ export const environment: Environment = {
   allOfUsApiUrl: 'http://localhost:8081',
   captchaSiteKey: '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI',
   clientId: testEnvironmentBase.clientId,
-  trainingUrl: 'https://aoudev.nnlm.gov',
   leoApiUrl: 'https://leonardo.dsde-dev.broadinstitute.org',
   publicUiUrl: 'http://localhost:4201',
   debug: true,
@@ -22,5 +21,6 @@ export const environment: Environment = {
   allowTestAccessTokenOverride: true,
   enableCaptcha: true,
   enablePublishedWorkspaces: false,
-  enableFooter: true
+  enableFooter: true,
+  accessTiersVisibleToUsers: [EnvAccessTierShortNames.Registered, EnvAccessTierShortNames.Controlled],
 };

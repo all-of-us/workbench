@@ -66,7 +66,6 @@ export default class CohortActionsPage extends AuthenticatedPage {
     await this.getCohortLink().clickAndWait();
     const cohortBuildPage = new CohortBuildPage(this.page);
     await cohortBuildPage.waitForLoad();
-    await cohortBuildPage.getTotalCount();
     await waitWhileLoading(this.page);
     return cohortBuildPage;
   }
@@ -99,7 +98,6 @@ export default class CohortActionsPage extends AuthenticatedPage {
     // Delete cohort in Cohort Build page.
     const cohortBuildPage = new CohortBuildPage(this.page);
     await cohortBuildPage.waitForLoad();
-    await cohortBuildPage.getTotalCount();
 
     const modalText = await cohortBuildPage.deleteCohort();
     // Verify Delete dialog content text

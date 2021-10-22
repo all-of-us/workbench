@@ -1,6 +1,7 @@
-import { ClickOptions, ElementHandle, Page, WaitForSelectorOptions } from 'puppeteer';
+import { ClickOptions, ElementHandle, NavigationOptions, Page, WaitForSelectorOptions } from 'puppeteer';
 import { getAttrValue, getPropValue } from 'utils/element-utils';
 import { logger } from 'libs/logger';
+import { waitForFn } from 'utils/waits-utils';
 
 /**
  * BaseElement represents a web element in the DOM.
@@ -27,12 +28,14 @@ export default class BaseElement {
    * @param {WaitForSelectorOptions} waitOptions
    */
   async waitForXPath(waitOptions: WaitForSelectorOptions = { visible: true }): Promise<ElementHandle> {
-    if (this.xpath === undefined && this.element !== undefined) return this.element.asElement();
+    if (this.getXpath() === undefined && this.element !== undefined) return this.element.asElement();
     return this.page
       .waitForXPath(this.xpath, waitOptions)
-      .then((elemt) => (this.element = elemt.asElement()))
+      .then((element) => {
+        return (this.element = element.asElement());
+      })
       .catch((err) => {
-        logger.error(`waitForXpath('${this.xpath}') failed`);
+        logger.error(`waitForXpath('${this.getXpath()}') failed`);
         logger.error(err);
         logger.error(err.stack);
         // Debugging pause
@@ -57,8 +60,8 @@ export default class BaseElement {
    * @param {string} descendantXpath Be sure to begin xpath with a dot. e.g. ".//div".
    */
   async findDescendant(descendantXpath: string): Promise<ElementHandle[]> {
-    return this.asElementHandle().then((elemt) => {
-      return elemt.$x(descendantXpath);
+    return this.asElementHandle().then((element) => {
+      return element.$x(descendantXpath);
     });
   }
 
@@ -79,7 +82,7 @@ export default class BaseElement {
 
   /**
    * Finds the value of an attribute
-   * @param attribute name
+   * @param attributeName name
    */
   async getAttribute(attributeName: string): Promise<string> {
     return this.asElementHandle().then((element) => {
@@ -90,7 +93,7 @@ export default class BaseElement {
   /**
    * Does attribute exists for this element?
    *
-   * @param attribute name
+   * @param attributeName name
    */
   async hasAttribute(attributeName: string): Promise<boolean> {
     return this.getAttribute(attributeName).then((value) => {
@@ -108,33 +111,31 @@ export default class BaseElement {
 
   /**
    * <pre>
-   *  Check if the element is visible
+   *  Check both boxModel and style for visibility to determine whether element is visible.
    * </pre>
-   * @param {Page} page
-   * @param {ElementHandle} element
    */
   async isVisible(): Promise<boolean> {
-    return this.asElementHandle()
-      .then((elemt) => {
-        return elemt.boxModel();
-      })
-      .then((box) => {
-        return box !== null;
-      });
-  }
+    const computedStyle = async (element) => {
+      const elementHandle = await this.page
+        .evaluateHandle((elem) => {
+          const style = window.getComputedStyle(elem);
+          return style && style.display !== 'none' && style.visibility !== 'hidden' && style.opacity !== '0';
+        }, element)
+        .catch(() => {
+          return null;
+        });
+      return elementHandle.jsonValue();
+    };
 
-  /**
-   * Check both boxModel and style for visibility.
-   */
-  async isDisplayed(): Promise<boolean> {
-    const elemt = await this.asElementHandle();
-    const isVisibleHandle = await this.page.evaluateHandle((e) => {
-      const style = window.getComputedStyle(e);
-      return style && style.display !== 'none' && style.visibility !== 'hidden' && style.opacity !== '0';
-    }, elemt);
-    const jValue = await isVisibleHandle.jsonValue();
-    const boxModelValue = await elemt.boxModel();
-    return jValue && boxModelValue !== null;
+    const boxModel = async (element) => {
+      return element.boxModel();
+    };
+
+    return this.asElementHandle()
+      .then((element) => {
+        return !!(computedStyle(element) && boxModel(element));
+      })
+      .catch(() => false);
   }
 
   async click(options?: ClickOptions): Promise<void> {
@@ -146,23 +147,25 @@ export default class BaseElement {
       while (Date.now() - startTime < 30 * 1000) {
         const viewport = await element.isIntersectingViewport();
         if (viewport) {
-          const box = await element.boundingBox();
-          const x = box.x + box.width / 2;
-          const y = box.y + box.height / 2;
-          if (previousX !== undefined && previousY !== undefined) {
-            // tslint:disable:triple-equals
-            if (
-              parseFloat(previousX.toFixed(7)) === parseFloat(x.toFixed(7)) &&
-              parseFloat(previousY.toFixed(7)) === parseFloat(y.toFixed(7))
-            ) {
-              break;
+          const boundingBox = await element.boundingBox();
+          const boxModel = await element.boxModel();
+          if (boundingBox && boxModel) {
+            const x = boundingBox.x + boundingBox.width / 2;
+            const y = boundingBox.y + boundingBox.height / 2;
+            if (previousX !== undefined && previousY !== undefined) {
+              if (
+                parseFloat(previousX.toFixed(7)) === parseFloat(x.toFixed(7)) &&
+                parseFloat(previousY.toFixed(7)) === parseFloat(y.toFixed(7))
+              ) {
+                break;
+              }
             }
+            previousX = x;
+            previousY = y;
           }
-          previousX = x;
-          previousY = y;
         }
         await element.hover();
-        await this.page.waitForTimeout(200);
+        await this.page.waitForTimeout(500);
       }
       return element.click(options);
     });
@@ -170,39 +173,50 @@ export default class BaseElement {
 
   /**
    * Clear existing value in textbox then type new text value.
-   * @param textValue The text string.
+   * @param newValue The text string.
    * @param options The typing options.
    */
-  async type(textValue: string, options: { delay?: number } = {}): Promise<this> {
-    const { delay = 10 } = options;
+  async type(newValue: string, { delay = 10, confidence = 2 } = {}): Promise<this> {
+    if (newValue === undefined) {
+      throw new Error('type() function parameter "newValue" is undefined.');
+    }
 
     const clearAndType = async (txt: string): Promise<string> => {
       await this.clear();
       await this.asElementHandle().then((handle: ElementHandle) => handle.type(txt, { delay }));
+      await this.pressTab();
       return this.getProperty<string>('value');
     };
 
-    let maxRetries = 2;
+    let maxRetries = 4;
+    let confidenceCounter = 0;
     const typeAndCheck = async () => {
-      const actualValue = await clearAndType(textValue);
-      if (actualValue === textValue) {
-        await this.pressTab();
-        return; // success
+      let actualValue = await this.getProperty<string>('value');
+      if (actualValue !== newValue) {
+        actualValue = await clearAndType(newValue);
+      }
+      if (actualValue === newValue) {
+        confidenceCounter++;
+        if (confidenceCounter >= confidence) {
+          return; // success
+        }
+      } else {
+        confidenceCounter = confidenceCounter > 0 ? confidenceCounter-- : 0;
       }
       if (maxRetries <= 0) {
-        throw new Error(`BaseElement.type("${textValue}") failed. Actual text: "${actualValue}"`);
+        throw new Error(`Failed to type "${newValue}". Actual text: "${actualValue}"`);
       }
       maxRetries--;
-      await this.page.waitForTimeout(1000).then(typeAndCheck); // one second pause and retry type
+      await this.page.waitForTimeout(1000).then(typeAndCheck); // 1 second pause and retry type
     };
-
+    await waitForFn(() => this.isVisible());
     await typeAndCheck();
     return this;
   }
 
   async pressKeyboard(key: string, options?: { text?: string; delay?: number }): Promise<void> {
-    return this.asElementHandle().then((elemt) => {
-      return elemt.press(key, options);
+    return this.asElementHandle().then((element) => {
+      return element.press(key, options);
     });
   }
 
@@ -218,14 +232,42 @@ export default class BaseElement {
   }
 
   /**
-   * Clear value in textbox.
+   * Clear value in textbox. Retries up to 3 times.
    */
-  async clear(options: ClickOptions = { clickCount: 3 }): Promise<void> {
-    const elemt = await this.asElementHandle();
-    await elemt.focus();
-    await elemt.hover();
-    await elemt.click(options);
-    await this.page.keyboard.press('Backspace');
+  async clear(): Promise<void> {
+    const getTextLength = async (): Promise<number> => {
+      const text = await this.getProperty<string>('value');
+      return text.trim().length;
+    };
+
+    const deleteText = async (element: ElementHandle): Promise<void> => {
+      await element.focus();
+      await element.hover();
+      await element.click({ clickCount: 3 });
+      await this.page.keyboard.press('Backspace');
+      await this.page.waitForTimeout(100);
+    };
+
+    let maxRetries = 3;
+    const clearAndCheck = async (element: ElementHandle) => {
+      await deleteText(element);
+      const textLength = await getTextLength();
+      if (textLength === 0) {
+        return; // success
+      }
+      if (maxRetries <= 0) {
+        throw new Error('Failed to clear text."');
+      }
+      maxRetries--;
+      await this.page.waitForTimeout(1000).then(() => clearAndCheck(element)); // 1 second pause and retry clear
+    };
+
+    const text = await getTextLength();
+    if (text === 0) {
+      return; // No text to clear.
+    }
+    const element = await this.asElementHandle();
+    await clearAndCheck(element);
   }
 
   async clearTextInput(): Promise<void> {
@@ -297,8 +339,8 @@ export default class BaseElement {
    * Finds visible element's bounding box size.
    */
   async getSize(): Promise<{ width: number; height: number }> {
-    const box = await this.asElementHandle().then((elemt) => {
-      return elemt.boundingBox();
+    const box = await this.asElementHandle().then((element) => {
+      return element.boundingBox();
     });
     if (box === null) {
       // if element is not visible, returns size of (0, 0).
@@ -315,26 +357,23 @@ export default class BaseElement {
   // try this method when click() is not working
   async clickWithEval(): Promise<void> {
     const element = await this.asElementHandle();
+    await element.focus();
     await this.page.evaluate((elem) => elem.click(), element);
+    await this.page.waitForTimeout(500);
   }
 
   /**
    * Click on element then wait for page navigation to finish.
    */
-  async clickAndWait(timeout: number = 2 * 60 * 1000): Promise<void> {
-    try {
-      const navigationPromise = this.page.waitForNavigation({
-        waitUntil: ['load', 'domcontentloaded', 'networkidle0'],
-        timeout
-      });
-      await this.click({ delay: 10 });
-      await navigationPromise;
-    } catch (err) {
-      logger.error('clickAndWait() failed.');
-      logger.error(err);
-      logger.error(err.stack);
-      throw new Error(err);
-    }
+  async clickAndWait(
+    navOptions: NavigationOptions = { waitUntil: ['load', 'networkidle0'], timeout: 2 * 60 * 1000 }
+  ): Promise<void> {
+    const navigationPromise = this.page.waitForNavigation(navOptions);
+    await this.click({ delay: 10 });
+    await navigationPromise.catch((err) => {
+      // Log error but DON'T fail the test! Puppeteer waitForNavigation has issues.
+      logger.error(`Encountered error when click (${this.xpath}) and wait for navigation to complete.\n${err.stack}`);
+    });
   }
 
   /**
@@ -372,9 +411,9 @@ export default class BaseElement {
     return this.waitForXPath(waitOptions);
   }
 
-  async exists(): Promise<boolean> {
+  async exists(timeout = 2000): Promise<boolean> {
     return this.page
-      .waitForXPath(this.xpath, { visible: true, timeout: 2000 })
+      .waitForXPath(this.xpath, { visible: true, timeout })
       .then(() => {
         return true;
       })

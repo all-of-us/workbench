@@ -1,7 +1,8 @@
 import ProfilePage, { MissingErrorAlias } from 'app/page/profile-page';
 import { signInWithAccessToken } from 'utils/test-utils';
+import { logger } from 'libs/logger';
 import navigation, { NavLink } from 'app/component/navigation';
-import { makeString, makeUrl } from 'utils/str-utils';
+import { makeString, makeDifferentStringSameLength, makeUrl } from 'utils/str-utils';
 import Button from 'app/element/button';
 
 describe('Profile', () => {
@@ -105,7 +106,8 @@ describe('Profile', () => {
     const researchBackground = profilePage.getResearchBackgroundTextarea();
 
     // make a change, causing the Save button to activate
-    await researchBackground.paste(makeString(10));
+    // Note: this must be a different length than the original, as makeString is not guaranteed to be unique.
+    await researchBackground.paste(makeString(15));
 
     // save button is enabled and no error message is displayed
     await waitForSaveButton(true);
@@ -131,8 +133,6 @@ describe('Profile', () => {
 
     // note: Professional URL and Address2 are optional fields
 
-    const testText = makeString(10);
-
     for (const { element, missingError } of [
       { element: firstName, missingError: MissingErrorAlias.FirstName },
       { element: lastName, missingError: MissingErrorAlias.LastName },
@@ -144,6 +144,13 @@ describe('Profile', () => {
       { element: country, missingError: MissingErrorAlias.Country }
     ]) {
       const originalValue = await element.getValue();
+
+      // Ensure testText is distinct from the original value.
+      const testText = makeDifferentStringSameLength(originalValue);
+
+      logger.info(
+        `missingness test '${originalValue}' -> '${testText}' -> (empty), for element xpath: ${element.getXpath()}`
+      );
 
       // make a change, causing the Save button to activate
       await element.type(testText);

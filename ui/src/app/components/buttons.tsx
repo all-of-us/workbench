@@ -5,10 +5,12 @@ import {Interactive as LocalInteractive} from 'app/components/interactive';
 import {TooltipTrigger} from 'app/components/popups';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles} from 'app/utils/index';
-import {navigateAndPreventDefaultIfNoKeysPressed} from 'app/utils/navigation';
+import {useNavigation} from 'app/utils/navigation';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
-import * as Interactive from 'react-interactive';
+import Interactive from 'react-interactive';
+import { Link } from 'react-router-dom';
+import { RouteLink } from './app-router';
 
 
 export const styles = reactStyles({
@@ -23,7 +25,10 @@ export const styles = reactStyles({
     borderRadius: 5,
     boxSizing: 'border-box'
   },
-
+  inlineAnchor: {
+    display: 'inline-block',
+    color: colors.accent
+  },
   slidingButtonContainer: {
     // Use position sticky so the FAB does not continue past the page footer. We
     // use a padding-bottom since when the FAB ignores margins in "fixed"
@@ -205,12 +210,28 @@ export const Clickable = ({as = 'div', disabled = false, onClick = null, propaga
   />;
 };
 
-export const Button = ({type = 'primary', style = {}, disabled = false, ...props}) => {
-  return <Clickable
-    // `fp.omit` used to prevent propagation of test IDs to the rendered child component.
-    disabled={disabled} {...fp.omit(['data-test-id'], props)}
-    {...fp.merge(computeStyle(buttonVariants[type], {disabled}), {style})}
-  />;
+export const Button = ({
+                         children,
+                         path='',
+                         type = 'primary',
+                         style = {},
+                         linkStyle={},
+                         disabled = false,
+                         propagateDataTestId = false,
+                         ...props
+                       }) => {
+  // `fp.omit` used to prevent propagation of test IDs to the rendered child component.
+  const childProps = propagateDataTestId ? props : fp.omit(['data-test-id'], props);
+  const computedStyle = fp.merge(computeStyle(buttonVariants[type], {disabled}), {style})
+  return path
+    ? <RouteLink path={path} {...computedStyle}>
+        <Clickable disabled={disabled} {...childProps}>
+          {children}
+        </Clickable>
+      </RouteLink>
+    : <Clickable disabled={disabled} {...computedStyle} {...childProps}>
+      {children}
+    </Clickable>
 };
 
 export const MenuItem = ({icon = null, faIcon = null, tooltip = '', disabled = false, children, style = {}, ...props}) => {
@@ -330,7 +351,8 @@ export const TabButton = ({disabled = false, style = {}, active = false, childre
   >{children}</Clickable>;
 };
 
-export const Link = ({disabled = false, style = {}, children, ...props}) => {
+// The intended use of this component is as a button that is styled as a link, but does not actually navigate anywhere.
+export const LinkButton = ({disabled = false, style = {}, children, ...props}) => {
   const linkStyle = {
     style: {color: colors.accent},
     hover: {textDecoration: 'underline'}
@@ -341,22 +363,30 @@ export const Link = ({disabled = false, style = {}, children, ...props}) => {
   >{children}</Clickable>;
 };
 
-export const StyledAnchorTag = ({href, children, analyticsFn = null, style = {}, ...props}) => {
-  const inlineAnchor = {
-    display: 'inline-block',
-    color: colors.accent
-  };
+export const StyledRouterLink = ({path, children, disabled = false, analyticsFn = null, style = {}, ...props}) => {
+  const linkStyle = {
+    style: {...styles.inlineAnchor}
+  }
+  const computedStyles = fp.merge(computeStyle(linkStyle, {disabled}), {style})
+  // A react-router Link will attempt to navigate whenever you click on it; it has no concept
+  // of 'disabled'. So if it is disabled, we render a span instead.
+  return disabled
+    ? <span {...computedStyles} {...props}>{children}</span>
+    : <Link
+        to={path}
+        onClick={() => analyticsFn && analyticsFn()}
+        {...computedStyles}
+        {...props}
+    >
+      {children}
+    </Link>;
+}
+
+export const StyledExternalLink = ({href, children, analyticsFn = null, style = {}, ...props}) => {
   return <a href={href}
-            onClick={e => {
-              if (analyticsFn) {
-                analyticsFn();
-              }
-              // This does same page navigation iff there is no key pressed and target is not set.
-              if (props.target === undefined && !href.startsWith('https://') && !href.startsWith('http://')) {
-                navigateAndPreventDefaultIfNoKeysPressed(e, href);
-              }
-            }}
-            style={{...inlineAnchor, ...style}} {...props}>{children}</a>;
+            onClick={() => analyticsFn && analyticsFn()}
+            style={{...styles.inlineAnchor, ...style}}
+            {...props}>{children}</a>;
 };
 
 interface SlidingFabState {

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>All of Us Researcher Workbench</title>
+    <base href="/">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+
+    <!-- Google Platform JS for authentication
+      This puts `gapi` into the global namespace
+    -->
+    <script src="https://apis.google.com/js/platform.js"></script>
+    <!-- Google Analytics setup -->
+    <script async type="text/javascript" src="https://www.googletagmanager.com/gtag/js"></script>
+    <script type="text/javascript">
+      window.dataLayer=window.dataLayer||[];
+      function gtag() {window.dataLayer.push(arguments)}
+    </script>
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,500,600,700" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+  </head>
+  <base href="/">
+
+  <body id='body'>
+    <noscript>
+      <div style="max-width: 500px; margin: 1rem;">
+        <div><img alt="logo" src="/assets/images/all-of-us-logo.svg" width="155px"></div>
+        <div>
+          <div style="font-size: 20pt; color: #2F2E7E; padding: 1rem 0 1rem 0;">Javascript is Disabled</div>
+          <div style="font-size: 14pt; color: #000000">
+            For full functionality of this site it is necessary to enable JavaScript.
+            Here are the <a href="https://www.enable-javascript.com/" style="color: #2691D0" target="_blank" rel="noopener noreferrer">
+            instructions how to enable JavaScript in your web browser</a>.
+          </div>
+        </div>
+      </div>
+    </noscript>
+
+    <div id="root"></div>
+    <div id='error-handler-root'></div>
+    <div id='popup-root'></div>
+  </body>
+</html>

@@ -3,7 +3,7 @@ import Link from 'app/element/link';
 import DataResourceCard from 'app/component/data-resource-card';
 import ClrIconLink from 'app/element/clr-icon-link';
 import { Language, MenuOption, ResourceCard } from 'app/text-labels';
-import { ElementHandle, Page } from 'puppeteer';
+import { Page } from 'puppeteer';
 import { makeRandomName } from 'utils/str-utils';
 import { waitForDocumentTitle, waitWhileLoading } from 'utils/waits-utils';
 import CohortActionsPage from './cohort-actions-page';
@@ -17,6 +17,7 @@ import { SaveOption } from 'app/modal/conceptset-save-modal';
 import ConceptSetActionsPage from './conceptset-actions-page';
 import { Visits } from './cohort-participants-group';
 import CriteriaSearchPage from './criteria-search-page';
+import WorkspaceEditPage from './workspace-edit-page';
 
 const PageTitle = 'Data Page';
 
@@ -27,15 +28,7 @@ export default class WorkspaceDataPage extends WorkspaceBase {
 
   async isLoaded(): Promise<boolean> {
     await Promise.all([waitForDocumentTitle(this.page, PageTitle), waitWhileLoading(this.page)]);
-    await this.imgDiagramLoaded();
     return true;
-  }
-
-  async imgDiagramLoaded(): Promise<ElementHandle[]> {
-    return Promise.all<ElementHandle, ElementHandle>([
-      this.page.waitForXPath('//img[@src="/assets/images/dataset-diagram.svg"]', { visible: true }),
-      this.page.waitForXPath('//img[@src="/assets/images/cohort-diagram.svg"]', { visible: true })
-    ]);
   }
 
   getAddDatasetButton(): ClrIconLink {
@@ -80,13 +73,13 @@ export default class WorkspaceDataPage extends WorkspaceBase {
     console.log(`Exported Dataset "${datasetName}" to notebook "${notebookName}"`);
   }
 
-  async findCohortCard(cohortName?: string): Promise<DataResourceCard> {
+  async findCohortCard(cohortName?: string, timeout?: number): Promise<DataResourceCard> {
     await this.openCohortsSubtab();
     if (cohortName) {
       // find Concept Set that match specified name.
-      return new DataResourceCard(this.page).findCard(cohortName, ResourceCard.Cohort);
+      return new DataResourceCard(this.page).findCard(cohortName, ResourceCard.Cohort, timeout);
     }
-    // if Concept Sets name isn't specified, find an existing Concept Sets.
+    // if Cohort name isn't specified, find any existing Cohort.
     return new DataResourceCard(this.page).findAnyCard(ResourceCard.Cohort);
   }
 
@@ -207,5 +200,24 @@ export default class WorkspaceDataPage extends WorkspaceBase {
 
     const conceptSetsCard = await this.createConceptSets();
     return conceptSetsCard;
+  }
+
+  async clone(cloneName?: string): Promise<string> {
+    await this.selectWorkspaceAction(MenuOption.Duplicate);
+
+    // Fill out Workspace Name.
+    const workspaceEditPage = new WorkspaceEditPage(this.page);
+    await workspaceEditPage.waitForLoad();
+
+    await workspaceEditPage.getWorkspaceNameTextbox().clear();
+    await workspaceEditPage.fillOutWorkspaceName(cloneName);
+
+    const finishButton = workspaceEditPage.getDuplicateWorkspaceButton();
+    await workspaceEditPage.requestForReviewRadiobutton(false);
+    await finishButton.waitUntilEnabled();
+    await workspaceEditPage.clickCreateFinishButton(finishButton);
+
+    await this.waitForLoad();
+    return cloneName;
   }
 }

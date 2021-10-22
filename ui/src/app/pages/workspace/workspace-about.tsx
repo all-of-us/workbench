@@ -1,23 +1,22 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
-import {currentWorkspaceStore} from 'app/utils/navigation';
-import {WorkspaceData} from 'app/utils/workspace-data';
-
-import {profileApi, workspacesApi} from 'app/services/swagger-fetch-clients';
-
 import {Button} from 'app/components/buttons';
 import {FlexColumn} from 'app/components/flex';
 import {InfoIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
+import {AouTitle} from 'app/components/text-wrappers';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {ResearchPurpose} from 'app/pages/workspace/research-purpose';
 import {WorkspaceShare} from 'app/pages/workspace/workspace-share';
+import {profileApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {reactStyles, withCdrVersions, withUrlParams, withUserProfile} from 'app/utils';
+import {reactStyles, withCdrVersions, withUserProfile} from 'app/utils';
 import {AuthorityGuardedAction, hasAuthorityForAction} from 'app/utils/authorities';
 import {getCdrVersion} from 'app/utils/cdr-versions';
+import {currentWorkspaceStore} from 'app/utils/navigation';
+import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {
   BillingAccountType,
@@ -90,12 +89,12 @@ const WorkspaceInfoTooltipText = () => {
     <br/>The date this workspace was last updated<br/>
     <u>Data Access Tier</u>
     <br/>To make sure data is accessed only by authorized users, users can request
-      and be granted access to data access tiers within the <i>All of Us</i> Research Program.
+      and be granted access to data access tiers within the <AouTitle/>.
       Currently there are 3 tiers  - “Public”, “Registered” and “Controlled”.<br/>
   </div>;
 };
 
-export const WorkspaceAbout = fp.flow(withUserProfile(), withUrlParams(), withCdrVersions())
+export const WorkspaceAbout = fp.flow(withUserProfile(), withCdrVersions())
 (class extends React.Component<WorkspaceProps, WorkspaceState> {
 
   constructor(props) {
@@ -109,17 +108,17 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withUrlParams(), withCd
     };
   }
 
-  async componentDidMount() {
+  componentDidMount() {
     this.props.hideSpinner();
     this.setVisits();
-    await this.reloadWorkspace(currentWorkspaceStore.getValue());
-    this.loadFreeTierUsage();
-    this.loadUserRoles();
+    const workspace = this.reloadWorkspace(currentWorkspaceStore.getValue());
+    this.loadFreeTierUsage(workspace);
+    this.loadUserRoles(workspace);
   }
 
-  async loadFreeTierUsage() {
+  async loadFreeTierUsage(workspace: WorkspaceData) {
     const freeTierUsage = await workspacesApi().getBillingUsage(
-      this.state.workspace.namespace, this.state.workspace.id);
+      workspace.namespace, workspace.id);
     this.setState({workspaceFreeTierUsage: freeTierUsage.cost});
   }
 
@@ -130,12 +129,12 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withUrlParams(), withCd
     }
   }
 
-  async reloadWorkspace(workspace: WorkspaceData) {
-    this.setState({workspace: workspace});
+  reloadWorkspace(workspace: WorkspaceData): WorkspaceData {
+    this.setState({workspace});
+    return workspace;
   }
 
-  async loadUserRoles() {
-    const {workspace} = this.state;
+  loadUserRoles(workspace: WorkspaceData) {
     this.setState({workspaceUserRoles: []});
     workspacesApi().getFirecloudWorkspaceUserRoles(workspace.namespace, workspace.id).then(
       resp => {
@@ -193,10 +192,10 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withUrlParams(), withCd
     }
   }
 
-  async onShare() {
+  onShare() {
     this.setState({sharing: false});
-    await this.reloadWorkspace(currentWorkspaceStore.getValue());
-    this.loadUserRoles();
+    const workspace = this.reloadWorkspace(currentWorkspaceStore.getValue());
+    this.loadUserRoles(workspace);
   }
 
   render() {

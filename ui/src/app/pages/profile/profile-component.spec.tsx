@@ -1,5 +1,7 @@
 import {mount, ReactWrapper} from 'enzyme';
 import * as React from 'react';
+import {MemoryRouter} from "react-router-dom";
+import SpyInstance = jest.SpyInstance;
 
 import {TextInput} from 'app/components/inputs';
 import {ProfileComponent} from 'app/pages/profile/profile-component';
@@ -7,7 +9,6 @@ import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {profileStore, serverConfigStore} from 'app/utils/stores';
 import {InstitutionApi, ProfileApi} from 'generated/fetch';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
-import SpyInstance = jest.SpyInstance;
 import {InstitutionApiStub} from 'testing/stubs/institution-api-stub';
 import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
 import {ProfileStubVariables} from 'testing/stubs/profile-api-stub';
@@ -29,7 +30,7 @@ describe('ProfilePageComponent', () => {
   let mockUpdateProfile: SpyInstance;
 
   const component = (controlledTierProfile = {}) => {
-    return mount(<ProfileComponent controlledTierProfile={controlledTierProfile} hideSpinner={() => {}}/>);
+    return mount(<MemoryRouter><ProfileComponent controlledTierProfile={controlledTierProfile} hideSpinner={() => {}}/></MemoryRouter>);
   };
 
   const load = jest.fn();
@@ -113,23 +114,4 @@ describe('ProfilePageComponent', () => {
 
     expect(getSaveProfileButton(wrapper).first().prop('disabled')).toBe(true);
   });
-
-  it('should not display controlled tier card when there is no controlled tier', async() => {
-    const wrapper = component();
-    const profileCardCompleteButtons = wrapper.find('[data-test-id="incomplete-button"]');
-    expect(profileCardCompleteButtons.length).toBe(4);
-  });
-
-  it('should display a controlled tier card when there is a controlled tier', async() => {
-    const wrapper = component({controlledTierEnabled: true});
-    const profileCardCompleteButtons = wrapper.find('[data-test-id="incomplete-button"]');
-    expect(profileCardCompleteButtons.length).toBe(5);
-  });
-
-  it('should display a controlled tier card with a complete button when the user has completed training', async() => {
-    const wrapper = component({controlledTierEnabled: true, controlledTierCompletionTime: 1});
-    const profileCardCompleteButtons = wrapper.find('[data-test-id="completed-button"]');
-    expect(profileCardCompleteButtons.length).toBe(1);
-  });
-
 });

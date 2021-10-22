@@ -1,5 +1,6 @@
 package org.pmiops.workbench.api;
 
+import java.math.BigDecimal;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.inject.Provider;
@@ -26,6 +27,7 @@ public class ConfigController implements ConfigApiDelegate {
     WorkbenchConfig config = configProvider.get();
     return ResponseEntity.ok(
         new ConfigResponse()
+            .accessRenewalLookback(BigDecimal.valueOf(config.accessRenewal.lookbackPeriod))
             .gsuiteDomain(config.googleDirectoryService.gSuiteDomain)
             .projectId(config.server.projectId)
             .firecloudURL(config.firecloud.baseUrl)
@@ -33,18 +35,23 @@ public class ConfigController implements ConfigApiDelegate {
             .shibbolethUiBaseUrl(config.firecloud.shibbolethUiBaseUrl)
             .defaultFreeCreditsDollarLimit(config.billing.defaultFreeCreditsDollarLimit)
             .enableComplianceTraining(config.access.enableComplianceTraining)
+            .complianceTrainingHost(config.moodle.host)
             .enableEraCommons(config.access.enableEraCommons)
             .unsafeAllowSelfBypass(config.access.unsafeAllowSelfBypass)
             .enableBillingUpgrade(config.featureFlags.enableBillingUpgrade)
             .enableEventDateModifier(config.featureFlags.enableEventDateModifier)
             .enableResearchReviewPrompt(config.featureFlags.enableResearchPurposePrompt)
             .enableRasLoginGovLinking(config.access.enableRasLoginGovLinking)
-            .enableAccessRenewal(config.access.enableAccessRenewal)
+            .enforceRasLoginGovLinking(config.access.enforceRasLoginGovLinking)
             .enableGenomicExtraction(config.featureFlags.enableGenomicExtraction)
-            .enableAccessModuleRewrite(config.featureFlags.enableAccessModuleRewrite)
+            .enableEgressAlertingV2(config.featureFlags.enableEgressAlertingV2)
             .enableStandardSourceDomains(config.featureFlags.enableStandardSourceDomains)
+            .enableGpu(config.featureFlags.enableGpu)
+            .enablePersistentDisk(config.featureFlags.enablePersistentDisk)
             .rasHost(config.ras.host)
             .rasClientId(config.ras.clientId)
+            .rasLogoutUrl(config.ras.logoutUrl)
+            .freeTierBillingAccountId(config.billing.accountId)
             .runtimeImages(
                 Stream.concat(
                         config.firecloud.runtimeImages.dataproc.stream()

@@ -1,0 +1,47 @@
+[
+  {
+    "mode": "REQUIRED",
+    "name": "id",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "REQUIRED",
+    "name": "category",
+    "type": "STRING"
+  },
+  {
+    "mode": "REQUIRED",
+    "name": "domain",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "REQUIRED",
+    "name": "name",
+    "type": "STRING"
+  },
+  {
+    "mode": "REQUIRED",
+    "name": "description",
+    "type": "STRING"
+  },
+  {
+    "mode": "REQUIRED",
+    "name": "concept_count",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "REQUIRED",
+    "name": "participant_count",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "REQUIRED",
+    "name": "is_standard",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "REQUIRED",
+    "name": "sort_order",
+    "type": "INTEGER"
+  }
+]

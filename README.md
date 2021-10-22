@@ -85,47 +85,6 @@ Other available operations may be discovered by running:
 ./project.rb
 ```
 
-#### API: Faster API startup for MacOS
-The above steps for starting the API server can take upwards of 8-10 minutes on MacOS, most likely due to performance issues with Docker for Mac. Follow these steps to set up your developer environment to start the API server outside of docker. A full restart should take ~30 seconds with this method.
-
-All commands should be run from `workbench/api`
-
-##### Setup
-* Install Java 8
-* Add following to `~/.bash_profile`. Note:
-    * Your Java8 library directory may be different.  
-      YOUR_WORKBENCH_DIRECTORY_PATH is the pathname to your workbench git repo.
-      ```Shell
-      export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk1.8.0_201.jdk/Contents/Home
-      export WORKBENCH_DIR=[YOUR_WORKBENCH_DIRECTORY_PATH]
-      source $WORKBENCH_DIR/api/db/load_vars.sh
-      ```
-        * If you are using zsh, add the lines above to `~/.zshrc`.
-    * Source your bash profile or open a new terminal
-      ```Shell
-      source `~/.bash_profile`
-      ```
-* Install Java App Engine components
-    * ```Shell
-      gcloud components install app-engine-java
-      ```
-* Generate Google Cloud access token
-    * ```Shell
-      ./project.rb get-test-service-creds
-      ```
-
-##### Usage
-* If you have schema migrations or pending configuration updates, run through the [normal docker developer startup process](#api-dev-appengine-appserver) at least once successfully. This is typically only necessary when switching between branches.
-* Start services required for API server
-    * ```Shell
-      ./project.rb start-api-reqs
-      # the counterpart command is ./project.rb stop-api-reqs
-      ```
-* Start API server through gradle
-    * ```Shell
-      ./gradlew appengineRun
-      ```
-
 #### Hot Code Swapping
 
 While the API is running locally, saving a .java file should cause a recompile and reload of that class. Status is logged to the console. Not all changes reload correctly (e.g., model classes do not appear to reload more than once).
@@ -161,14 +120,18 @@ yarn dev-up
 
 You can view your local UI server at http://localhost:4200/.  
 
-By default, this connects to our test API server. Use `--configuration=$ENV` to
+By default, this connects to our test API server. Set the `REACT_APP_ENVIRONMENT` variable to
 use an alternate `src/environments/environment.$ENV.ts` file and connect to a
 different API server. To connect to your own API server running at
-`localhost:8081`, pass `--configuration=local`.
+`localhost:8081`, pass `REACT_APP_ENVIRONMENT=local`.
+
+```
+REACT_APP_ENVIRONMENT=local yarn dev-up
+```
 
 To run react UI tests:
 ```Shell
-yarn test-react
+yarn test
 ```
 
 Other useful yarn commands:
@@ -178,27 +141,6 @@ yarn
 
 # To lint the UI and automatically fix issues:
 yarn lint --fix
-```
-
-
-#### Legacy startup
-You can also run the UI through project.rb. NOTE: this is slower and not recommended.  
-From the `ui/` directory,
-```Shell
-./project.rb dev-up
-```
-
-[legacy] UI tests in Angular can be run and viewed at http://localhost:9876/index.html.
-
-Other available operations may be discovered by running:
-```Shell
-./project.rb
-```
-
-#### You can regenerate classes from swagger with
-
-```Shell
-./project.rb swagger-regen
 ```
 
 ## Deploying
@@ -323,59 +265,6 @@ Then import a dump to cloudsql instance by specifying dump file in the --file op
 ##### Result
 * mysql db is in your local mysql for development. You need to alter your env per above to use it.
 
-
-## Elasticsearch
-
-Elasticsearch is being integrated as an auxilliary backed on top of the BigQuery
-CDR for cohort building. Currently it can only be run via docker-compose on a
-local instance. See the full design:
-https://docs.google.com/document/d/1N_TDTOi-moTH6wrXn1Ix4dwUlw4j8GT9OsL9yXYXYmY/edit
-
-### Indexing
-
-```
-./project.rb load-es-index
-```
-
-### Development
-
-As of 3/4/19, you'll need to enable Elasticsearch locally to utilize it in the
-Cohort Builder.
-
-```
-sed -i 's/\("enableElasticsearchBackend": \)false/\1true/' config/config_local.json
-```
-
-#### Example criteria
-
-Currently the default setting for the indexer is to only index ~1000
-to keep the local data size small. Some example criteria that will match this
-default dataset:
-
-- Conditions ICD9: Group 250 Diabetes mellitus
-- Drugs: Acetaminophen
-- PPI: Anything (support for individual answers coming soon)
-- Procedures CPT: 99213
-
-#### Elasticsearch Direct Queries
-
-Requires that Elastic is running (via run-api or dev-up).
-
-Show the top 5 standard condition concept IDs:
-
-```
-curl -H "Content-Type: application/json" "localhost:9200/cdr_person/_doc/_search?pretty" -d '{"size": 0, "aggs": {"aggs": {"terms": {"field": "condition_concept_ids", "size": 5 }}}}'
-```
-
-The above IDs can be cross-referenced against the Criteria table in SQL or
-BigQuery to determine cohort builder search targets.
-
-Dump all participants matching a condition source concept ID (disclaimer: large):
-
-```
-curl -H "Content-Type: application/json" "localhost:9200/cdr_person/_doc/_search?pretty" -d '{"query": {"term": {"condition_source_concept_ids": "44833466"}}}' > dump.json
-```
-
 ###
 ## Cohort Builder
 
@@ -422,16 +311,10 @@ ctx.common.run_inline("#{ctx.gradlew_path} --info update -PrunList=schema")
 
 ## Running test cases
 
-To run both api and common api unit tests, in the api dir run:
+To run unit tests, in the api dir run:
 
 ```
 ./project.rb test
-```
-
-To run just api unit tests, run:
-
-```
-./project.rb test-api
 ```
 
 To run bigquery tests (which run slowly and actually

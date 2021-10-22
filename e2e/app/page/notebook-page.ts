@@ -1,8 +1,8 @@
 import * as fs from 'fs';
-import { ElementHandle, Page } from 'puppeteer';
+import { ElementHandle, Frame, Page } from 'puppeteer';
 import { getPropValue } from 'utils/element-utils';
-import { waitForDocumentTitle, waitWhileLoading } from 'utils/waits-utils';
-import { LinkText, ResourceCard } from 'app/text-labels';
+import { waitForDocumentTitle, waitForNumericalString, waitWhileLoading } from 'utils/waits-utils';
+import { ResourceCard } from 'app/text-labels';
 import RuntimePanel, { StartStopIconState } from 'app/component/runtime-panel';
 import NotebookCell, { CellType } from './notebook-cell';
 import NotebookDownloadModal from 'app/modal/notebook-download-modal';
@@ -11,24 +11,32 @@ import WorkspaceAnalysisPage from './workspace-analysis-page';
 import WorkspaceDataPage from './workspace-data-page';
 import Link from 'app/element/link';
 import NotebookFrame from './notebook-frame';
+import { logger } from 'libs/logger';
+import expect from 'expect';
+import ReplaceFileModal from 'app/modal/replace-file-modal';
+import { takeScreenshot } from 'utils/save-file-utils';
+import { config } from 'resources/workbench-config';
 
 // CSS selectors
-enum CssSelector {
-  body = 'body.notebook_app',
-  notebookContainer = '#notebook-container',
-  toolbarContainer = '#maintoolbar-container',
-  runCellButton = 'button[data-jupyter-action="jupyter-notebook:run-cell-and-select-next"]',
-  saveNotebookButton = 'button[data-jupyter-action="jupyter-notebook:save-notebook"]',
-  kernelIcon = '#kernel_indicator_icon',
-  kernelName = '.kernel_indicator_name'
-}
+const CssSelector = {
+  body: 'body.notebook_app',
+  notebookContainer: '#notebook-container',
+  toolbarContainer: '#maintoolbar-container',
+  runCellButton: 'button[data-jupyter-action="jupyter-notebook:run-cell-and-select-next"]',
+  saveNotebookButton: 'button[data-jupyter-action="jupyter-notebook:save-notebook"]',
+  kernelIcon: '#kernel_indicator_icon',
+  kernelName: '.kernel_indicator_name'
+};
 
-enum Xpath {
-  fileMenuDropdown = './/a[text()="File"]',
-  downloadMenuDropdown = './/a[text()="Download as"]',
-  downloadIpynbButton = './/*[@id="download_script"]/a',
-  downloadMarkdownButton = './/*[@id="download_markdown"]/a'
-}
+const Xpath = {
+  fileMenuDropdown: './/a[text()="File"]',
+  cellMenuDropdown: './/*[@id="menubar"]//a[@id="celllink" and @aria-controls="cell_menu"]',
+  downloadMenuDropdown: './/a[text()="Download as"]',
+  downloadIpynbButton: './/*[@id="download_script"]/a',
+  downloadMarkdownButton: './/*[@id="download_markdown"]/a',
+  open: './/*[@id="open_notebook"]/a',
+  runAllCode: './/*[@id="menubar"]//li[@class="dropdown open"]//*[@id="run_all_cells"]/a[@role="menuitem"]'
+};
 
 export enum Mode {
   Command = 'command_mode',
@@ -51,9 +59,11 @@ export default class NotebookPage extends NotebookFrame {
       await this.findRunButton(120000);
     } catch (err) {
       console.warn(`Reloading "${this.documentTitle}" because cannot find the Run button`);
-      await this.page.reload({ waitUntil: ['networkidle0', 'load'] });
+      await this.page.reload();
     }
-    await this.waitForKernelIdle(10 * 60 * 1000); // 10 minutes
+    // When open notebook for the first time, notebook websocket can close unexpectedly that causes kernel disconnect unexpectedly.
+    // Thus, a longer sleep interval is required.
+    await this.waitForKernelIdle(10 * 60 * 1000, 10000); // 10 minutes
     return true;
   }
 
@@ -90,14 +100,62 @@ export default class NotebookPage extends NotebookFrame {
     return new Link(this.page, selector);
   }
 
+  async openUploadFilePage(): Promise<Page> {
+    // Select File menu => Open.
+    await this.selectFileOpenMenu();
+
+    // New tab opens. "browser" is a Jest-Puppeteer global variable.
+    const newTarget = await browser.waitForTarget((target) => target.opener() === this.page.target());
+    const newPage = await newTarget.page();
+
+    // Upload button that triggers file selection dialog.
+    const uploadButtonSelector = 'input#upload_span_input';
+    await newPage.waitForSelector(uploadButtonSelector, { visible: true });
+    return newPage;
+  }
+
+  async acceptDataUsePolicyDialog(page: Page): Promise<void> {
+    const expectedMessage =
+      'It is All of Us data use policy to not upload data or files containing personally identifiable information';
+    page.on('dialog', async (dialog) => {
+      await page.waitForTimeout(500);
+      const modalMessage = dialog.message();
+      // If this is not the Data Use Policy dialog, error is thrown.
+      expect(modalMessage).toContain(expectedMessage);
+      await dialog.accept();
+      await page.waitForTimeout(500);
+      console.log('Accept "Data Use Policy" dialog');
+    });
+  }
+
+  async chooseFile(page: Page, pyFilePath: string): Promise<void> {
+    // Upload button that triggers file selection dialog.
+    const uploadButtonSelector = 'input#upload_span_input';
+    const [fileChooser] = await Promise.all([
+      page.waitForFileChooser({ timeout: 5000 }),
+      page
+        .waitForSelector(uploadButtonSelector)
+        .then((button) => button.click({ delay: 10 }))
+        .then(() => {
+          page.waitForTimeout(500);
+        })
+    ]);
+    await fileChooser.accept([pyFilePath]);
+  }
+
   /**
    * Run focused cell and insert a new cell below. Click Run button in toolbar.
    */
-  async run(): Promise<void> {
+  async run(timeout = 60000): Promise<void> {
+    logger.info('Click notebook Run button.');
+    await this.waitForKernelIdle(timeout, 1000);
     const runButton = await this.findRunButton();
     await runButton.click();
-    await this.page.waitForTimeout(1000);
     await runButton.dispose();
+    // Click Run button turns notebook page into Command_mode from Edit mode.
+    // Short sleep to avoid check output too soon.
+    await this.page.waitForTimeout(200);
+    await this.waitForKernelIdle(timeout, 2000);
   }
 
   /**
@@ -108,12 +166,81 @@ export default class NotebookPage extends NotebookFrame {
     const saveButton = await frame.waitForSelector(CssSelector.saveNotebookButton, { visible: true });
     await saveButton.click();
     await saveButton.dispose();
+    // Puppeteer slowmo is not set and playback is very fast.
+    // Need a short pause here after click SAVE button to allow click to finish. Otherwise, it can cause tests to fail.
+    // See https://precisionmedicineinitiative.atlassian.net/browse/RW-7228 for more details.
+    await this.page.waitForTimeout(500);
+  }
+
+  async selectFileOpenMenu(): Promise<void> {
+    const clickFileMenuIcon = async (iframe: Frame): Promise<void> => {
+      await iframe.waitForXPath(Xpath.fileMenuDropdown, { visible: true, timeout: 2000 }).then((element) => {
+        element.hover();
+        element.click();
+      });
+    };
+
+    let maxRetries = 3;
+    const clickAndCheck = async (iframe: Frame) => {
+      await clickFileMenuIcon(iframe);
+      const succeeded = await iframe
+        .waitForXPath(Xpath.open, { visible: true, timeout: 2000 })
+        .then((menuitem) => {
+          menuitem.hover();
+          menuitem.click();
+          return true;
+        })
+        .catch(() => {
+          return false;
+        });
+      if (succeeded) {
+        return;
+      }
+      if (maxRetries <= 0) {
+        throw new Error('Failed to click File menu -> Download.');
+      }
+      maxRetries--;
+      await this.page.waitForTimeout(1000).then(() => clickAndCheck(iframe)); // 1 second pause and retry.
+    };
+
+    const frame = await this.getIFrame();
+    await clickAndCheck(frame);
+    await this.page.waitForTimeout(500);
   }
 
   private async downloadAs(formatXpath: string): Promise<NotebookDownloadModal> {
+    const clickFileMenuIcon = async (iframe: Frame): Promise<void> => {
+      await iframe.waitForXPath(Xpath.fileMenuDropdown, { visible: true, timeout: 2000 }).then((element) => {
+        element.hover();
+        element.click();
+      });
+    };
+
+    let maxRetries = 3;
+    const clickAndCheck = async (iframe: Frame) => {
+      await clickFileMenuIcon(iframe);
+      const succeeded = await iframe
+        .waitForXPath(Xpath.downloadMenuDropdown, { visible: true, timeout: 2000 })
+        .then((menuitem) => {
+          menuitem.hover();
+          return true;
+        })
+        .catch(() => {
+          return false;
+        });
+      if (succeeded) {
+        return;
+      }
+      if (maxRetries <= 0) {
+        throw new Error('Failed to click File menu -> Download.');
+      }
+      maxRetries--;
+      await this.page.waitForTimeout(1000).then(() => clickAndCheck(iframe)); // 1 second pause and retry.
+    };
+
     const frame = await this.getIFrame();
-    await frame.waitForXPath(Xpath.fileMenuDropdown, { visible: true }).then((element) => element.click());
-    await frame.waitForXPath(Xpath.downloadMenuDropdown, { visible: true }).then((element) => element.hover());
+    await clickAndCheck(frame);
+    await this.page.waitForTimeout(500);
     const menuOption = await frame.waitForXPath(formatXpath, { visible: true });
     await menuOption.hover();
     await menuOption.click();
@@ -130,45 +257,38 @@ export default class NotebookPage extends NotebookFrame {
     return this.downloadAs(Xpath.downloadMarkdownButton);
   }
 
-  /**
-   * Wait for notebook kernel becomes ready (idle).
-   */
-  async waitForKernelIdle(timeOut?: number): Promise<void> {
+  async isIdle(timeout = 1000): Promise<boolean> {
     const frame = await this.getIFrame();
     const idleIconSelector = `${CssSelector.kernelIcon}.kernel_idle_icon`;
     const notificationSelector = '#notification_kernel';
-    const isIdle = async (timeout): Promise<boolean> => {
-      return Promise.all([
-        frame.waitForSelector(idleIconSelector, { visible: true, timeout }),
-        frame.waitForSelector(notificationSelector, { hidden: true, timeout })
-      ])
-        .then(() => {
-          return true;
-        })
-        .catch(() => {
-          return false;
-        });
-    };
+    return Promise.all([
+      frame.waitForSelector(idleIconSelector, { visible: true, timeout }),
+      frame.waitForSelector(notificationSelector, { hidden: true, timeout })
+    ])
+      .then(() => true)
+      .catch(() => false);
+  }
+
+  /**
+   * Wait for notebook kernel becomes ready (idle).
+   */
+  async waitForKernelIdle(timeOut = 300000, sleepInterval = 5000): Promise<boolean> {
     // Check kernel status twice with a pause between two checks because kernel status can suddenly become not ready.
     let ready = false;
     const startTime = Date.now();
-    while (Date.now() - startTime <= timeOut) {
-      const idle = await isIdle(30000);
+    while (Date.now() - startTime < timeOut) {
+      const idle = await this.isIdle(2000);
       if (ready && idle) {
-        break;
+        return true;
       }
       ready = idle;
-      await this.page.waitForTimeout(5000);
+      await this.page.waitForTimeout(sleepInterval);
     }
     // Throws exception if not ready.
-    try {
-      await Promise.all([
-        frame.waitForSelector(idleIconSelector, { visible: true, timeout: 1000 }),
-        frame.waitForSelector(notificationSelector, { hidden: true, timeout: 1000 })
-      ]);
-    } catch (e) {
-      throw new Error(`Notebook kernel is ${await this.getKernelStatus()}. waitForKernelIdle() encountered ${e}`);
-    }
+    const status = await this.getKernelStatus();
+    throw new Error(
+      `Notebook kernel is not idle after waiting ${timeOut} seconds. Actual kernel status was ${status}.`
+    );
   }
 
   async getKernelStatus(): Promise<KernelStatus | string> {
@@ -226,41 +346,138 @@ export default class NotebookPage extends NotebookFrame {
     cellIndex: number,
     opts: { code?: string; codeFile?: string; timeOut?: number; markdownWorkaround?: boolean } = {}
   ): Promise<string> {
-    const cell = cellIndex === -1 ? await this.findLastCell() : this.findCell(cellIndex);
-    const inputCell = await cell.focus();
-
     const { code, codeFile, timeOut = 2 * 60 * 1000, markdownWorkaround = false } = opts;
-
-    let codeToRun;
-    if (code !== undefined) {
-      codeToRun = code;
-    } else if (codeFile !== undefined) {
-      codeToRun = fs.readFileSync(codeFile, 'ascii');
+    if (code !== undefined && codeFile !== undefined) {
+      throw new Error('Code and codeFile parameters are both defined. Only one is required in runCodeCell method.');
     }
+    let notebookCode: string;
+    if (code !== undefined) {
+      notebookCode = code;
+    } else if (codeFile !== undefined) {
+      notebookCode = fs.readFileSync(codeFile, 'ascii');
+    }
+
+    // Check kernel idle again before typing code.
+    await this.waitForKernelIdle(60000, 1000);
+    const codeCell = cellIndex === -1 ? await this.findLastCell() : this.findCell(cellIndex);
+    const cellInputTextbox = await codeCell.focus();
 
     // autoCloseBrackets is true by default for R code cells.
     // Puppeteer types in every character of code, resulting in extra brackets.
     // Workaround: Type code in Markdown cell, then change to Code cell to run.
-    if (markdownWorkaround) {
-      await this.changeToMarkdownCell();
-      const markdownCell = this.findCell(cellIndex, CellType.Markdown);
-      const markdownCellInput = await markdownCell.focus();
-      await markdownCellInput.type(codeToRun);
-      await this.changeToCodeCell();
-    } else {
-      if (codeToRun) {
-        await inputCell.type(codeToRun);
+    if (notebookCode) {
+      if (markdownWorkaround) {
+        await this.changeToMarkdownCell();
+        const markdownCell = this.findCell(cellIndex, CellType.Markdown);
+        const markdownCellInput = await markdownCell.focus();
+        await markdownCellInput.type(notebookCode);
+        await this.changeToCodeCell();
+      } else {
+        await cellInputTextbox.type(notebookCode);
       }
+      logger.info(`Type notebook code:\n--------${notebookCode}\n--------`);
     }
 
-    await inputCell.dispose();
+    await this.run(timeOut);
+    const codeOutput = await codeCell.waitForOutput(timeOut);
+    logger.info(`Notebook code output:\n${codeOutput}`);
+    return codeOutput;
+  }
+
+  async runCodeFile(cellIndex: number, fileName: string, timeout?: number) {
+    const codeCell = this.findCell(cellIndex);
+    const cellInput = await codeCell.focus();
+    // Open file in notebook cell.
+    await cellInput.type(`%load ${fileName}`);
+    await this.run(timeout);
+    await this.waitForKernelIdle(10000, 2000); // load file into cell should be very quick.
+    // run code.
+    await codeCell.focus();
     await this.run();
-    await this.waitForKernelIdle(timeOut);
-    const [output] = await Promise.all([
-      cell.waitForOutput(timeOut),
-      this.waitForKernelIdle(timeOut) // Wait for kernel idle again because sometimes kernel turns unexpectedly.
-    ]);
-    return output;
+    const codeOutput = await codeCell.waitForOutput(timeout);
+    logger.info(`Notebook load "${fileName}". Code output:\n${codeOutput}`);
+    return codeOutput;
+  }
+
+  async runAllCells(): Promise<void> {
+    // Initial value is the max num of retries.
+    for (let retries = 3; retries > 0; retries--) {
+      const iframe = await this.getIFrame();
+      const succeeded = async (): Promise<boolean> => {
+        try {
+          // Open Cell menu dropdown.
+          const cellMenu = await iframe.waitForXPath(Xpath.cellMenuDropdown, { visible: true, timeout: 2000 });
+          await cellMenu.hover();
+          await cellMenu.click();
+          await this.page.waitForTimeout(1000);
+          // Click Run All menuitem.
+          const runAllMenuItem = await iframe.waitForXPath(Xpath.runAllCode, { visible: true, timeout: 2000 });
+          await runAllMenuItem.hover();
+          await runAllMenuItem.click();
+          return true;
+        } catch (err) {
+          logger.error(err);
+          return false;
+        }
+      };
+      // If it's another retry, pause half second before retry.
+      // If succeeded, pause to avoid check code output too soon.
+      await this.page.waitForTimeout(500);
+      if (await succeeded()) {
+        logger.info('Notebook: Run All Cell.');
+        return;
+      }
+    }
+    throw new Error('Failed to click Cell menu -> Run All.');
+  }
+
+  // Upload a file, open file in notebook cell, then run code.
+  async uploadFile(fileName: string, filePath: string): Promise<void> {
+    // Select File menu => Open to open Upload tab.
+    const newPage = await this.openUploadFilePage();
+
+    // The first dialog that open up is "Data Use Policy" dialog: verify message and close dialog.
+    await this.acceptDataUsePolicyDialog(newPage);
+
+    // Upload button that triggers file selection dialog.
+    await this.chooseFile(newPage, filePath);
+
+    // Upload button that uploads the file is visible.
+    const fileUploadButtonSelector =
+      '//*[@id="notebook_list"]//*[contains(@class, "new-file")]' +
+      `[.//input[@class="filename_input" and @value="${fileName}"]]//button[text()="Upload"]`;
+    const uploadButton = new Link(newPage, fileUploadButtonSelector);
+    await uploadButton.focus();
+    await uploadButton.click({ delay: 10 });
+
+    // Handle "Replace file" dialog if found: Do not overwrite existing file, click CANCEL button to dismiss dialog.
+    // Previously uploaded file persist because same workspace is used during the day.
+    const replaceFileMessage = `There is already a file named "${fileName}". Do you want to replace it?`;
+    const replaceFileModal = new ReplaceFileModal(newPage);
+    const exists = await replaceFileModal.isLoaded();
+    if (exists) {
+      const modalMessage = await replaceFileModal.getText();
+      expect(modalMessage).toContain(replaceFileMessage);
+      await replaceFileModal.clickCancelButton();
+      await newPage.waitForTimeout(500);
+      console.log(`Cancel to close "Replace file" "${fileName}" dialog`);
+    }
+
+    // Get file size.
+    const fileSizeXpath =
+      '//*[@id="notebook_list"]//*[contains(@class,"list_item")]' +
+      `[.//a[@class="item_link"]/*[normalize-space()="${fileName}"]]//*[contains(@class, "file_size")]`;
+    await waitForNumericalString(newPage, fileSizeXpath);
+    const fileSizeElement = await newPage.waitForXPath(fileSizeXpath, { visible: true });
+    const fileSize = await getPropValue(fileSizeElement, 'textContent');
+
+    // In case page has to be checked after finish.
+    await takeScreenshot(newPage, `notebook-upload-file-${fileName}.png`);
+
+    await newPage.close();
+    await this.page.bringToFront();
+    await this.waitForKernelIdle();
+    logger.info(`Notebook uploaded file "${fileName}". (file size: ${fileSize})`);
   }
 
   /**
@@ -290,19 +507,30 @@ export default class NotebookPage extends NotebookFrame {
     // Open runtime panel
     const runtimePanel = new RuntimePanel(this.page);
     await runtimePanel.open();
-
-    // Click 'delete environment' then Delete buttons.
-    await runtimePanel.clickButton(LinkText.DeleteEnvironment);
-    await runtimePanel.clickButton(LinkText.Delete);
+    await runtimePanel.clickDeleteEnvironmentButton();
 
     const notebookPreviewPage = new NotebookPreviewPage(this.page);
     await notebookPreviewPage.waitForLoad();
 
-    // Wait until runtime status indicats None.
+    // Wait until runtime status indicates None.
     await runtimePanel.open();
     await runtimePanel.waitForStartStopIconState(StartStopIconState.Stopping);
     await runtimePanel.waitForStartStopIconState(StartStopIconState.None);
     await runtimePanel.close();
+  }
+
+  /**
+   * Delete unattached persistent disk
+   */
+  async deleteUnattachedPd(): Promise<void> {
+    if (config.ENABLED_PERSISTENT_DISK) {
+      // Open runtime panel
+      const runtimePanel = new RuntimePanel(this.page);
+      await runtimePanel.open();
+
+      // Click 'delete persistent disk' then Delete buttons.
+      await runtimePanel.deleteUnattachedPd();
+    }
   }
 
   private async findRunButton(timeout?: number): Promise<ElementHandle> {
@@ -318,6 +546,7 @@ export default class NotebookPage extends NotebookFrame {
   async changeToMarkdownCell(): Promise<void> {
     await this.toggleMode(Mode.Command);
     await this.page.keyboard.press('M');
+    await this.page.waitForTimeout(500);
   }
 
   /**
@@ -326,6 +555,7 @@ export default class NotebookPage extends NotebookFrame {
   async changeToCodeCell(): Promise<void> {
     await this.toggleMode(Mode.Command);
     await this.page.keyboard.press('Y');
+    await this.page.waitForTimeout(500);
   }
 
   /**

@@ -36,7 +36,8 @@ JOIN \`$BQ_PROJECT.$BQ_DATASET.person\` p on p.person_id = co.person_id
 JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c on (c.concept_id = co.condition_source_concept_id)
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` vo on (vo.visit_occurrence_id = co.visit_occurrence_id)
 where co.condition_source_concept_id is not null
-    and co.condition_source_concept_id != 0"
+    and co.condition_source_concept_id != 0
+    and c.vocabulary_id != 'SNOMED'"
 
 ##############################################################
 # insert standard condition data into cb_search_all_events
@@ -82,7 +83,8 @@ JOIN \`$BQ_PROJECT.$BQ_DATASET.person\` p on p.person_id = po.person_id
 JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c on (c.concept_id = po.procedure_source_concept_id)
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` vo on (vo.visit_occurrence_id = po.visit_occurrence_id)
 WHERE po.procedure_source_concept_id is not null
-    and po.procedure_source_concept_id != 0"
+    and po.procedure_source_concept_id != 0
+    and c.vocabulary_id != 'SNOMED'"
 
 ##############################################################
 #   insert standard procedure data into cb_search_all_events
@@ -249,49 +251,93 @@ WHERE meas.person_id = sad.person_id
     -- this is intentional as we want to update systolic on the diastolic row
     and sad.concept_id = 903115"
 
-##############################################################
-# Observation - Source Data
-##############################################################
-echo "cb_search_all_events - inserting observation source data"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\`
-    (
-          person_id
-        , entry_date
-        , entry_datetime
-        , is_standard
-        , concept_id
-        , domain
-        , age_at_event
-        , visit_concept_id
-        , visit_occurrence_id
-        , value_as_number
-        , value_as_concept_id
-        , value_source_concept_id
-        , survey_version_concept_id
-    )
-SELECT
-      b.person_id
-    , a.observation_date as entry_date
-    , a.observation_datetime as entry_datetime
-    , 0 as is_standard
-    , a.observation_source_concept_id as concept_id
-    , 'Observation' as domain
-    , DATE_DIFF(a.observation_date, DATE(b.birth_datetime), YEAR) -
-        IF(EXTRACT(MONTH FROM DATE(b.birth_datetime))*100 + EXTRACT(DAY FROM DATE(b.birth_datetime))
-        > EXTRACT(MONTH FROM a.observation_date)*100 + EXTRACT(DAY FROM a.observation_date), 1, 0) as age_at_event
-    , d.visit_concept_id
-    , d.visit_occurrence_id
-    , a.value_as_number
-    , a.value_as_concept_id
-    , a.value_source_concept_id
-    , c.survey_version_concept_id
-FROM \`$BQ_PROJECT.$BQ_DATASET.observation\` a
-JOIN \`$BQ_PROJECT.$BQ_DATASET.person\` b on a.person_id = b.person_id
-LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.observation_ext\` c on a.observation_id = c.observation_id
-LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` d on a.visit_occurrence_id = d.visit_occurrence_id
-WHERE a.observation_source_concept_id is not null
-    and a.observation_source_concept_id != 0"
+if [ "$DATA_BROWSER" == false ]
+then
+  ##############################################################
+  # Observation - Source Data
+  ##############################################################
+  echo "cb_search_all_events - inserting observation source data"
+  bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+  "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\`
+      (
+            person_id
+          , entry_date
+          , entry_datetime
+          , is_standard
+          , concept_id
+          , domain
+          , age_at_event
+          , visit_concept_id
+          , visit_occurrence_id
+          , value_as_number
+          , value_as_concept_id
+          , value_source_concept_id
+          , survey_version_concept_id
+      )
+  SELECT
+        b.person_id
+      , a.observation_date as entry_date
+      , a.observation_datetime as entry_datetime
+      , 0 as is_standard
+      , a.observation_source_concept_id as concept_id
+      , 'Observation' as domain
+      , DATE_DIFF(a.observation_date, DATE(b.birth_datetime), YEAR) -
+          IF(EXTRACT(MONTH FROM DATE(b.birth_datetime))*100 + EXTRACT(DAY FROM DATE(b.birth_datetime))
+          > EXTRACT(MONTH FROM a.observation_date)*100 + EXTRACT(DAY FROM a.observation_date), 1, 0) as age_at_event
+      , d.visit_concept_id
+      , d.visit_occurrence_id
+      , a.value_as_number
+      , a.value_as_concept_id
+      , a.value_source_concept_id
+      , c.survey_version_concept_id
+  FROM \`$BQ_PROJECT.$BQ_DATASET.observation\` a
+  JOIN \`$BQ_PROJECT.$BQ_DATASET.person\` b on a.person_id = b.person_id
+  LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.observation_ext\` c on a.observation_id = c.observation_id
+  LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` d on a.visit_occurrence_id = d.visit_occurrence_id
+  WHERE a.observation_source_concept_id is not null
+      and a.observation_source_concept_id != 0"
+else
+  ##############################################################
+  # Observation - Source Data
+  ##############################################################
+  echo "cb_search_all_events - inserting observation source data"
+  bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+  "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\`
+      (
+            person_id
+          , entry_date
+          , entry_datetime
+          , is_standard
+          , concept_id
+          , domain
+          , age_at_event
+          , visit_concept_id
+          , visit_occurrence_id
+          , value_as_number
+          , value_as_concept_id
+          , value_source_concept_id
+      )
+  SELECT
+        b.person_id
+      , a.observation_date as entry_date
+      , a.observation_datetime as entry_datetime
+      , 0 as is_standard
+      , a.observation_source_concept_id as concept_id
+      , 'Observation' as domain
+      , DATE_DIFF(a.observation_date, DATE(b.birth_datetime), YEAR) -
+          IF(EXTRACT(MONTH FROM DATE(b.birth_datetime))*100 + EXTRACT(DAY FROM DATE(b.birth_datetime))
+          > EXTRACT(MONTH FROM a.observation_date)*100 + EXTRACT(DAY FROM a.observation_date), 1, 0) as age_at_event
+      , d.visit_concept_id
+      , d.visit_occurrence_id
+      , a.value_as_number
+      , a.value_as_concept_id
+      , a.value_source_concept_id
+  FROM \`$BQ_PROJECT.$BQ_DATASET.observation\` a
+  JOIN \`$BQ_PROJECT.$BQ_DATASET.person\` b on a.person_id = b.person_id
+  LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` d on a.visit_occurrence_id = d.visit_occurrence_id
+  WHERE a.observation_source_concept_id is not null
+      and a.observation_source_concept_id != 0"
+fi
 
 ################################################################
 #   insert standard observation data into cb_search_all_events

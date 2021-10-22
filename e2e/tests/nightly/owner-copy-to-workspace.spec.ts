@@ -49,14 +49,14 @@ describe('Workspace owner copy notebook tests', () => {
       if (defaultCdrWorkspace === undefined) {
         defaultCdrWorkspace = await createCustomCdrVersionWorkspace(config.DEFAULT_CDR_VERSION_NAME);
       }
-      await copyNotebookTest(defaultCdrWorkspace, config.ALTERNATIVE_CDR_VERSION_NAME);
+      await copyNotebookTest(defaultCdrWorkspace, config.OLD_CDR_VERSION_NAME);
     },
     30 * 60 * 1000
   );
 });
 
 async function copyNotebookTest(sourceWorkspaceName: string, destCdrVersionName: string) {
-  const destWorkspace = await createWorkspace(page, { cdrVersion: destCdrVersionName });
+  const destWorkspace = await createWorkspace(page, { cdrVersionName: destCdrVersionName });
 
   // Find and open source workspace Data page.
   const workspaceCard = await findWorkspaceCard(page, sourceWorkspaceName);
@@ -121,6 +121,6 @@ async function copyNotebookTest(sourceWorkspaceName: string, destCdrVersionName:
 }
 
 async function createCustomCdrVersionWorkspace(cdrVersion: string): Promise<string> {
-  const workspaceName = await createWorkspace(page, { cdrVersion });
+  const workspaceName = await createWorkspace(page, { cdrVersionName: cdrVersion });
   return workspaceName;
 }

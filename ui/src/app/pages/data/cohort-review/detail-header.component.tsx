@@ -1,5 +1,5 @@
 import * as fp from 'lodash/fp';
-import * as moment from 'moment';
+import moment from 'moment'
 import {RadioButton} from 'primereact/radiobutton';
 import * as React from 'react';
 import {validate, validators} from 'validate.js';
@@ -10,7 +10,13 @@ import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, summarizeErrors, withCurrentCohortReview, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
-import {currentCohortReviewStore, currentWorkspaceStore, navigate, urlParamsStore} from 'app/utils/navigation';
+import {
+  currentCohortReviewStore,
+  currentWorkspaceStore,
+  NavigationProps
+} from 'app/utils/navigation';
+import { MatchParams } from 'app/utils/stores';
+import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {
   CohortReview,
@@ -21,6 +27,7 @@ import {
   ParticipantCohortStatus,
   SortOrder
 } from 'generated/fetch';
+import {RouteComponentProps, withRouter} from 'react-router-dom';
 
 validators.dateFormat = (value: string) => {
   return moment(value, 'YYYY-MM-DD', true).isValid() ? null : 'must be in format \'YYYY-MM-DD\'';
@@ -180,7 +187,7 @@ const FILTER_KEYS = {
   DATE: 'Date',
   VISITS: 'Visits'
 };
-export interface DetailHeaderProps {
+export interface DetailHeaderProps extends NavigationProps, RouteComponentProps<MatchParams> {
   cohortReview: CohortReview;
   participant: ParticipantCohortStatus;
   workspace: WorkspaceData;
@@ -195,7 +202,7 @@ export interface DetailHeaderState {
   filterTab: string;
 }
 
-export const DetailHeader = fp.flow(withCurrentCohortReview(), withCurrentWorkspace())(
+export const DetailHeader = fp.flow(withCurrentCohortReview(), withCurrentWorkspace(), withNavigation, withRouter)(
   class extends React.Component<DetailHeaderProps, DetailHeaderState> {
     constructor(props: DetailHeaderProps) {
       super(props);
@@ -248,8 +255,8 @@ export const DetailHeader = fp.flow(withCurrentCohortReview(), withCurrentWorksp
     }
 
     backToTable() {
-      const {ns, wsid, cid} = urlParamsStore.getValue();
-      navigate(['/workspaces', ns, wsid, 'data', 'cohorts', cid, 'review', 'participants']);
+      const {ns, wsid, cid} = this.props.match.params;
+      this.props.navigate(['workspaces', ns, wsid, 'data', 'cohorts', cid, 'review', 'participants']);
     }
 
     previous = () => {
@@ -273,7 +280,7 @@ export const DetailHeader = fp.flow(withCurrentCohortReview(), withCurrentWorksp
           : statuses[0];
 
         const {page, pageSize} = reviewPaginationStore.getValue();
-        const {ns, wsid, cid} = urlParamsStore.getValue();
+        const {ns, wsid, cid} = this.props.match.params;
         const {cdrVersionId} = currentWorkspaceStore.getValue();
         const request = {
           page: left ? page - 1 : page + 1,
@@ -281,7 +288,7 @@ export const DetailHeader = fp.flow(withCurrentCohortReview(), withCurrentWorksp
           sortOrder: SortOrder.Asc,
           filters: {items: this.getRequestFilters()}
         } as PageFilterRequest;
-        cohortReviewApi().getParticipantCohortStatuses(ns, wsid, cid, +cdrVersionId, request).then(response => {
+        cohortReviewApi().getParticipantCohortStatuses(ns, wsid, +cid, +cdrVersionId, request).then(response => {
           currentCohortReviewStore.next(response.cohortReview);
           const status = statusGetter(response.cohortReview.participantCohortStatuses);
           this.navigateById(status.participantId);
@@ -290,8 +297,8 @@ export const DetailHeader = fp.flow(withCurrentCohortReview(), withCurrentWorksp
     }
 
     navigateById = (id: number): void => {
-      const {ns, wsid, cid} = urlParamsStore.getValue();
-      navigate(['/workspaces', ns, wsid, 'data', 'cohorts', cid, 'review', 'participants', id]);
+      const {ns, wsid, cid} = this.props.match.params;
+      this.props.navigate(['workspaces', ns, wsid, 'data', 'cohorts', cid, 'review', 'participants', id]);
     }
 
     getRequestFilters = () => {

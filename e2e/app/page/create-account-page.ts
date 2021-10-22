@@ -11,18 +11,10 @@ import { Frame, Page } from 'puppeteer';
 import { defaultFieldValues } from 'resources/data/user-registration-data';
 import { config } from 'resources/workbench-config';
 import { waitForText, waitWhileLoading } from 'utils/waits-utils';
-import { LinkText } from 'app/text-labels';
+import { LinkText, InstitutionSelectValue } from 'app/text-labels';
 import { getPropValue } from 'utils/element-utils';
 
 const faker = require('faker/locale/en_US');
-
-export const InstitutionSelectValue = {
-  Vanderbilt: 'Vanderbilt University Medical Center',
-  Broad: 'Broad Institute',
-  Verily: 'Verily LLC',
-  NationalInstituteHealth: 'National Institute of Health',
-  Wondros: 'Wondros'
-};
 
 export const InstitutionRoleSelectValue = {
   EarlyCareerTenureTrackResearcher: 'Early career tenure-track researcher',
@@ -194,7 +186,7 @@ export default class CreateAccountPage extends BasePage {
 
   // Step 2: Fill out institution affiliation details
   async fillOutInstitution(): Promise<void> {
-    await Promise.all([waitForText(this.page, 'complete Step 1 of 3', { css: 'body' }), waitWhileLoading(this.page)]);
+    await Promise.all([waitForText(this.page, 'complete Step 1 of 3'), waitWhileLoading(this.page)]);
 
     await this.selectInstitution(InstitutionSelectValue.Broad);
     await this.getInstitutionValue();

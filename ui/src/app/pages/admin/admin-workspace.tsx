@@ -1,7 +1,7 @@
 import * as HighCharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import * as fp from 'lodash/fp';
-import * as moment from 'moment';
+import moment from 'moment'
 import * as React from 'react';
 
 import {Button} from 'app/components/buttons';
@@ -13,12 +13,13 @@ import {SpinnerOverlay} from 'app/components/spinners';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {workspaceAdminApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {reactStyles, UrlParamsProps, withUrlParams} from 'app/utils';
-import {navigate} from 'app/utils/navigation';
+import {hasNewValidProps, reactStyles} from 'app/utils';
+import {useNavigation} from 'app/utils/navigation';
 import {
   getSelectedPopulations,
   getSelectedPrimaryPurposeItems
 } from 'app/utils/research-purpose';
+import { MatchParams } from 'app/utils/stores';
 import {
   CloudStorageTraffic,
   FileDetail,
@@ -28,6 +29,7 @@ import {
 import {Column} from 'primereact/column';
 import {DataTable} from 'primereact/datatable';
 import {ReactFragment, useState} from 'react';
+import { Link, RouteComponentProps, withRouter } from 'react-router-dom';
 
 const styles = reactStyles({
   infoRow: {
@@ -68,14 +70,14 @@ const styles = reactStyles({
 
 const PurpleLabel = ({style = {}, children}) => {
   return <label style={{color: colors.primary, ...style}}>
-    {...children}
+    {children}
   </label>;
 };
 
 const WorkspaceInfoField = ({labelText, children}) => {
   return <FlexRow style={styles.infoRow}>
     <PurpleLabel style={styles.infoLabel}>{labelText}</PurpleLabel>
-    <div style={styles.infoValue}>{...children}</div>
+    <div style={styles.infoValue}>{children}</div>
   </FlexRow>;
 };
 
@@ -109,6 +111,7 @@ interface NameCellProps {
 }
 
 const NameCell = (props: NameCellProps) => {
+  const [navigate, ] = useNavigation();
   const {file, bucket, workspaceNamespace, accessReason} = props;
   const filename = file.name.trim();
 
@@ -205,7 +208,7 @@ const FileDetailsTable = (props: FileDetailsProps) => {
   </FlexColumn>;
 };
 
-interface Props extends UrlParamsProps, WithSpinnerOverlayProps {}
+interface Props extends WithSpinnerOverlayProps, RouteComponentProps<MatchParams> {}
 
 interface State {
   workspaceDetails?: WorkspaceAdminView;
@@ -232,8 +235,14 @@ class AdminWorkspaceImpl extends React.Component<Props, State> {
     this.getFederatedWorkspaceInformation();
   }
 
+  componentDidUpdate(prevProps) {
+    if (hasNewValidProps(this.props, prevProps, [p => p.match.params])) {
+      this.getFederatedWorkspaceInformation();
+    }
+  }
+
   async getFederatedWorkspaceInformation() {
-    const {urlParams: { workspaceNamespace } } = this.props;
+    const {ns} = this.props.match.params;
 
     this.setState({
       loadingData: true,
@@ -241,9 +250,9 @@ class AdminWorkspaceImpl extends React.Component<Props, State> {
 
     try {
       // Fire off all requests in parallel
-      const workspaceDetailsPromise = workspaceAdminApi().getWorkspaceAdminView(workspaceNamespace);
-      const cloudStorageTrafficPromise = workspaceAdminApi().getCloudStorageTraffic(workspaceNamespace);
-      const filesPromise = workspaceAdminApi().listFiles(workspaceNamespace);
+      const workspaceDetailsPromise = workspaceAdminApi().getWorkspaceAdminView(ns);
+      const cloudStorageTrafficPromise = workspaceAdminApi().getCloudStorageTraffic(ns);
+      const filesPromise = workspaceAdminApi().listFiles(ns);
       // Wait for all promises to complete before updating state.
       const [workspaceDetails, cloudStorageTraffic, files] =
           await Promise.all([workspaceDetailsPromise, cloudStorageTrafficPromise, filesPromise]);
@@ -321,7 +330,7 @@ class AdminWorkspaceImpl extends React.Component<Props, State> {
 
   private async deleteRuntime() {
     await workspaceAdminApi().deleteRuntimesInWorkspace(
-      this.props.urlParams.workspaceNamespace,
+      this.props.match.params.ns,
       {runtimesToDelete: [this.state.runtimeToDelete.runtimeName]});
     this.setState({runtimeToDelete: null});
     await this.getFederatedWorkspaceInformation();
@@ -367,7 +376,7 @@ class AdminWorkspaceImpl extends React.Component<Props, State> {
             <WorkspaceInfoField labelText='Last Modified Time'>{new Date(workspace.lastModifiedTime).toDateString()}</WorkspaceInfoField>
             <WorkspaceInfoField labelText='Workspace Published'>{workspace.published ? 'Yes' : 'No'}</WorkspaceInfoField>
             <WorkspaceInfoField labelText='Audit'>
-              <a href={`/admin/workspace-audit/${workspace.namespace}`}>Audit History</a>
+              {<Link to={`/admin/workspace-audit/${workspace.namespace}`}>Audit History</Link>}
             </WorkspaceInfoField>
           </div>
           <h3>Collaborators</h3>
@@ -423,9 +432,9 @@ class AdminWorkspaceImpl extends React.Component<Props, State> {
               {workspace.researchPurpose.anticipatedFindings}
             </WorkspaceInfoField>
             {workspace.researchPurpose.populationDetails.length > 0 &&
-              <WorkspaceInfoField labelText='Population area(s) of focus'>
-                {getSelectedPopulations(workspace.researchPurpose)}
-              </WorkspaceInfoField>}
+            <WorkspaceInfoField labelText='Population area(s) of focus'>
+              {getSelectedPopulations(workspace.researchPurpose)}
+            </WorkspaceInfoField>}
           </div>
         </div>
 
@@ -493,4 +502,4 @@ class AdminWorkspaceImpl extends React.Component<Props, State> {
   }
 }
 
-export const AdminWorkspace = withUrlParams()(AdminWorkspaceImpl);
+export const AdminWorkspace = withRouter(AdminWorkspaceImpl);

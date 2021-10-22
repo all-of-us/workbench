@@ -19,7 +19,6 @@ public class CdrVersionVO {
   public Timestamp creationTime;
   public int numParticipants;
   public String cdrDbName;
-  public String elasticIndexBaseName;
   public String wgsBigqueryDataset;
   public Boolean hasFitbitData;
   public Boolean hasCopeSurveyData;

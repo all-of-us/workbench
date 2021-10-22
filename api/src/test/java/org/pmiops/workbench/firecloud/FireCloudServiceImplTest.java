@@ -4,9 +4,8 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.pmiops.workbench.firecloud.FireCloudServiceImpl.PROJECT_BILLING_ID_SIZE;
 
-import com.google.api.client.http.HttpTransport;
-import com.google.cloud.iam.credentials.v1.IamCredentialsClient;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableMap;
 import java.util.Arrays;
@@ -30,7 +29,7 @@ import org.pmiops.workbench.firecloud.api.GroupsApi;
 import org.pmiops.workbench.firecloud.api.NihApi;
 import org.pmiops.workbench.firecloud.api.ProfileApi;
 import org.pmiops.workbench.firecloud.api.StatusApi;
-import org.pmiops.workbench.firecloud.model.FirecloudCreateRawlsBillingProjectFullRequest;
+import org.pmiops.workbench.firecloud.model.FirecloudCreateRawlsV2BillingProjectFullRequest;
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.firecloud.model.FirecloudSystemStatus;
@@ -64,8 +63,7 @@ public class FireCloudServiceImplTest extends SpringTest {
   @Qualifier(FireCloudConfig.SERVICE_ACCOUNT_BILLING_V2_API)
   private BillingV2Api billingV2Api;
 
-  @MockBean private HttpTransport httpTransport;
-  @MockBean private IamCredentialsClient iamCredentialsClient;
+  @MockBean private FirecloudApiClientFactory firecloudApiClientFactory;
   @MockBean private NihApi nihApi;
   @MockBean private ProfileApi profileApi;
   @MockBean private StatusApi statusApi;
@@ -216,14 +214,16 @@ public class FireCloudServiceImplTest extends SpringTest {
   }
 
   @Test
-  public void testCreateAllOfUsBillingProject() throws Exception {
+  public void testCreateAllOfUsBillingProject_v2BillingApi() throws Exception {
     final String servicePerimeter = "a-cloud-with-a-fence-around-it";
+    // confirm that this value is no longer how we choose perimeters
+
     service.createAllOfUsBillingProject("project-name", servicePerimeter);
 
-    ArgumentCaptor<FirecloudCreateRawlsBillingProjectFullRequest> captor =
-        ArgumentCaptor.forClass(FirecloudCreateRawlsBillingProjectFullRequest.class);
-    verify(billingApi).createBillingProjectFull(captor.capture());
-    FirecloudCreateRawlsBillingProjectFullRequest request = captor.getValue();
+    ArgumentCaptor<FirecloudCreateRawlsV2BillingProjectFullRequest> captor =
+        ArgumentCaptor.forClass(FirecloudCreateRawlsV2BillingProjectFullRequest.class);
+    verify(billingV2Api).createBillingProjectFullV2(captor.capture());
+    FirecloudCreateRawlsV2BillingProjectFullRequest request = captor.getValue();
 
     // N.B. FireCloudServiceImpl doesn't add the project prefix; this is done by callers such
     // as BillingProjectBufferService.
@@ -231,32 +231,26 @@ public class FireCloudServiceImplTest extends SpringTest {
     // FireCloudServiceImpl always adds the "billingAccounts/" prefix to the billing account
     // from config.
     assertThat(request.getBillingAccount()).isEqualTo("billingAccounts/test-billing-account");
-    assertThat(request.isEnableFlowLogs()).isTrue();
-    assertThat(request.isHighSecurityNetwork()).isTrue();
     assertThat(request.getServicePerimeter()).isEqualTo(servicePerimeter);
   }
 
   @Test
-  public void testCreateAllOfUsBillingProject_v2BillingApi() throws Exception {
-    final String servicePerimeter = "a-cloud-with-a-fence-around-it";
-    // confirm that this value is no longer how we choose perimeters
-    workbenchConfig.featureFlags.enableFireCloudV2Billing = true;
+  public void createBillingProjectName_withUnderScore() {
+    String prefix = "prefix-";
+    workbenchConfig.billing.projectNamePrefix = prefix;
+    String projectName = service.createBillingProjectName();
 
-    service.createAllOfUsBillingProject("project-name", servicePerimeter);
+    assertThat(projectName.startsWith(prefix)).isTrue();
+    assertThat(projectName.length()).isEqualTo(prefix.length() + PROJECT_BILLING_ID_SIZE);
+  }
 
-    ArgumentCaptor<FirecloudCreateRawlsBillingProjectFullRequest> captor =
-        ArgumentCaptor.forClass(FirecloudCreateRawlsBillingProjectFullRequest.class);
-    verify(billingV2Api).createBillingProjectFullV2(captor.capture());
-    FirecloudCreateRawlsBillingProjectFullRequest request = captor.getValue();
+  @Test
+  public void createBillingProjectName_withoutUnderScore() {
+    String prefix = "prefix";
+    workbenchConfig.billing.projectNamePrefix = prefix;
+    String projectName = service.createBillingProjectName();
 
-    // N.B. FireCloudServiceImpl doesn't add the project prefix; this is done by callers such
-    // as BillingProjectBufferService.
-    assertThat(request.getProjectName()).isEqualTo("project-name");
-    // FireCloudServiceImpl always adds the "billingAccounts/" prefix to the billing account
-    // from config.
-    assertThat(request.getBillingAccount()).isEqualTo("billingAccounts/test-billing-account");
-    assertThat(request.isEnableFlowLogs()).isTrue();
-    assertThat(request.isHighSecurityNetwork()).isTrue();
-    assertThat(request.getServicePerimeter()).isEqualTo(servicePerimeter);
+    assertThat(projectName.startsWith(prefix + "-")).isTrue();
+    assertThat(projectName.length()).isEqualTo(prefix.length() + 1 + PROJECT_BILLING_ID_SIZE);
   }
 }

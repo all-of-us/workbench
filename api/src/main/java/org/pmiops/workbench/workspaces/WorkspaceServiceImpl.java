@@ -1,5 +1,6 @@
 package org.pmiops.workbench.workspaces;
 
+import com.google.api.services.cloudbilling.model.ProjectBillingInfo;
 import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.sql.Timestamp;
@@ -35,14 +36,15 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserRecentWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.CloudBillingClient;
 import org.pmiops.workbench.model.BillingStatus;
@@ -171,7 +173,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
   public WorkspaceResponse getWorkspace(String workspaceNamespace, String workspaceId) {
     DbWorkspace dbWorkspace = workspaceDao.getRequired(workspaceNamespace, workspaceId);
     FirecloudWorkspaceResponse fcResponse;
-    FirecloudWorkspace fcWorkspace;
+    FirecloudWorkspaceDetails fcWorkspace;
 
     WorkspaceResponse workspaceResponse = new WorkspaceResponse();
 
@@ -411,24 +413,23 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
       fireCloudService.updateBillingAccountAsService(
           workspace.getWorkspaceNamespace(), newBillingAccountName);
     } else {
-      try {
-        Optional<Boolean> isOpenMaybe =
-            Optional.ofNullable(
-                cloudBillingClient.getBillingAccount(newBillingAccountName).getOpen());
-        boolean isOpen = isOpenMaybe.orElse(false);
-        if (!isOpen) {
-          throw new BadRequestException(
-              "Provided billing account is closed. Please provide an open account.");
-        }
-        fireCloudService.updateBillingAccount(
-            workspace.getWorkspaceNamespace(), newBillingAccountName);
-      } catch (IOException e) {
-        throw new ServerErrorException("Could not fetch user provided billing account.", e);
-      }
+      fireCloudService.updateBillingAccount(
+          workspace.getWorkspaceNamespace(), newBillingAccountName);
     }
 
-    // TODO(RW-6955): After Terra PPW, updateBillingAccount will be async API. Poll account info
-    // to verify billing account is update in GCP.
+    try {
+      ProjectBillingInfo projectBillingInfo =
+          cloudBillingClient.pollUntilBillingAccountLinked(
+              workspace.getGoogleProject(), newBillingAccountName);
+      if (!projectBillingInfo.getBillingEnabled()) {
+        throw new FailedPreconditionException(
+            "Provided billing account is closed. Please provide an open account.");
+      }
+    } catch (IOException | InterruptedException e) {
+      throw new ServerErrorException(
+          String.format("Timed out while verifying billing account update."), e);
+    }
+
     workspace.setBillingAccountName(newBillingAccountName);
 
     if (newBillingAccountName.equals(

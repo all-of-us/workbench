@@ -81,55 +81,6 @@ public class UserController implements UserApiDelegate {
   }
 
   /**
-   * Return a page of users matching a search term. Used by autocomplete for workspace sharing.
-   *
-   * @param term
-   * @param pageToken
-   * @param pageSize
-   * @param sortOrder
-   * @return
-   * @deprecated use {@link #userSearch(String, String, String, Integer, String)} with an access
-   *     tier short name argument instead.
-   */
-  @Override
-  @Deprecated
-  public ResponseEntity<UserResponse> user(
-      String term, String pageToken, Integer pageSize, String sortOrder) {
-    UserResponse response = initializeUserResponse();
-
-    if (Strings.isNullOrEmpty(term)) {
-      return ResponseEntity.ok(response);
-    }
-
-    PaginationToken paginationToken;
-    try {
-      paginationToken = getPaginationTokenFromPageToken(pageToken);
-    } catch (IllegalArgumentException | BadRequestException e) {
-      return ResponseEntity.badRequest().body(response);
-    }
-
-    // See discussion on RW-2894. This may not be strictly necessary, especially if researchers
-    // details will be published publicly, but it prevents arbitrary unregistered users from seeing
-    // limited researcher profile details.
-
-    // also TODO RW-6190: add access tier parameter to this call and check that tier's
-    // membership specifically
-
-    if (!isUserInRegisteredTier()) {
-      throw new ForbiddenException("user search requires registered data access");
-    }
-
-    // What we are really looking for here are users who have a FC account.
-    // This should exist if they have signed in at least once
-    List<DbUser> users =
-        userService.findUsersBySearchString(term, getSort(sortOrder)).stream()
-            .filter(user -> user.getFirstSignInTime() != null)
-            .collect(Collectors.toList());
-
-    return processSearchResults(term, pageSize, response, paginationToken, users);
-  }
-
-  /**
    * Return a page of users matching a search term and an access tier. Used by autocomplete for
    * workspace sharing.
    *
@@ -243,16 +194,6 @@ public class UserController implements UserApiDelegate {
     return ResponseEntity.ok(response);
   }
 
-  // check that a user has registered tier membership according to both our DB and Terra/Firecloud
-  private boolean isUserInRegisteredTier() {
-    return accessTierService.getAccessTiersForUser(userProvider.get()).stream()
-        .anyMatch(
-            tier ->
-                tier.getShortName().equals(AccessTierService.REGISTERED_TIER_SHORT_NAME)
-                    && fireCloudService.isUserMemberOfGroupWithCache(
-                        userProvider.get().getUsername(), tier.getAuthDomainName()));
-  }
-
   @Override
   public ResponseEntity<WorkbenchListBillingAccountsResponse> listBillingAccounts() {
     List<BillingAccount> billingAccounts =
@@ -285,7 +226,7 @@ public class UserController implements UserApiDelegate {
     return Stream.of(
         new BillingAccount()
             .isFreeTier(true)
-            .displayName("Use All of Us free credits")
+            .displayName("Use All of Us initial credits")
             .name(configProvider.get().billing.freeTierBillingAccountName())
             .isOpen(true));
   }
@@ -299,7 +240,8 @@ public class UserController implements UserApiDelegate {
     try {
       response = cloudBillingProvider.get().billingAccounts().list().execute();
     } catch (IOException e) {
-      throw new ServerErrorException("Could not retrieve billing accounts list from Google Cloud");
+      throw new ServerErrorException(
+          "Could not retrieve billing accounts list from Google Cloud", e);
     }
 
     return Optional.ofNullable(response.getBillingAccounts()).orElse(Collections.emptyList())

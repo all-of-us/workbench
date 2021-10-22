@@ -34,8 +34,9 @@ import {
   ConfigApi,
   Configuration as FetchConfiguration,
   DataSetApi,
-  FeaturedWorkspacesConfigApi,
-  InstitutionApi, // internal
+  DiskApi,
+  FeaturedWorkspacesConfigApi, // internal
+  InstitutionApi,
   ProfileApi,
   RuntimeApi,
   StatusAlertApi,
@@ -104,6 +105,7 @@ export const userApi = bindCtor(UserApi);
 export const userMetricsApi = bindCtor(UserMetricsApi);
 export const workspaceAdminApi = bindCtor(WorkspaceAdminApi);
 export const workspacesApi = bindCtor(WorkspacesApi);
+export const disksApi = bindCtor(DiskApi);
 
 export const getApiBaseUrl = () => {
   if (cookiesEnabled()) {

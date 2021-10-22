@@ -21,9 +21,19 @@ export const styles = reactStyles({
     fontSize: 14,
     marginRight: 20
   },
+  dataAccessTier: {
+    marginBottom: '0.9rem',
+    display: 'grid',
+    columnGap: '0.25rem',
+    width: 459,
+    gridTemplateColumns: 'fit-content(2rem) fit-content(10rem) 1fr',
+    gridTemplateAreas: `"badge label available"
+                        ". primary primary"`
+  },
   dataAccessText: {
     fontWeight: 500,
-    color: colors.primary
+    color: colors.primary,
+    lineHeight: '22px',
   },
   longInputContainerStyle: {
     width: 420,
@@ -31,11 +41,6 @@ export const styles = reactStyles({
   },
   longInputHeightStyle: {
     height: 175,
-  },
-  box: {
-    backgroundColor: colors.white,
-    borderRadius: 8,
-    padding: 21
   },
   title: {
     color: colors.primary,
@@ -45,20 +50,15 @@ export const styles = reactStyles({
     display: 'inline',
     alignItems: 'flexEnd'
   },
-  uneditableProfileElement: {
-    paddingLeft: '0.5rem',
-    marginRight: 20,
-    marginBottom: 20,
-    height: '1.5rem',
-    color: colors.primary
-  },
   fadebox: {
     margin: '1rem 0 0 3%',
     width: '95%',
     padding: '0 0.1rem'
   },
   verticalLine: {
-    marginTop: '0.3rem', marginInlineStart: '0rem', width: '100%'
+    marginTop: '0.3rem',
+    marginInlineStart: '0rem',
+    width: '100%',
   },
   researchPurposeInfo: {
     fontWeight: 100,

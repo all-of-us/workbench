@@ -9,10 +9,13 @@ import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+import org.pmiops.workbench.leonardo.model.LeonardoClusterError;
 import org.pmiops.workbench.leonardo.model.LeonardoDiskConfig;
+import org.pmiops.workbench.leonardo.model.LeonardoDiskStatus;
 import org.pmiops.workbench.leonardo.model.LeonardoGceConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoGceWithPdConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
+import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoMachineConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeConfig;
@@ -20,12 +23,15 @@ import org.pmiops.workbench.leonardo.model.LeonardoRuntimeConfig.CloudServiceEnu
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeImage;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.model.DataprocConfig;
+import org.pmiops.workbench.model.Disk;
 import org.pmiops.workbench.model.DiskConfig;
+import org.pmiops.workbench.model.DiskStatus;
 import org.pmiops.workbench.model.GceConfig;
 import org.pmiops.workbench.model.GceWithPdConfig;
 import org.pmiops.workbench.model.ListRuntimeResponse;
 import org.pmiops.workbench.model.Runtime;
 import org.pmiops.workbench.model.RuntimeConfigurationType;
+import org.pmiops.workbench.model.RuntimeError;
 import org.pmiops.workbench.model.RuntimeStatus;
 
 @Mapper(config = MapStructConfig.class)
@@ -44,11 +50,15 @@ public interface LeonardoMapper {
 
   @Mapping(target = "cloudService", ignore = true)
   @Mapping(target = "properties", ignore = true)
+  @Mapping(target = "componentGatewayEnabled", ignore = true)
   LeonardoMachineConfig toLeonardoMachineConfig(DataprocConfig dataprocConfig);
 
   @AfterMapping
-  default void addCloudServiceEnum(@MappingTarget LeonardoMachineConfig leonardoMachineConfig) {
-    leonardoMachineConfig.setCloudService(LeonardoMachineConfig.CloudServiceEnum.DATAPROC);
+  default void addMachineConfigDefaults(
+      @MappingTarget LeonardoMachineConfig leonardoMachineConfig) {
+    leonardoMachineConfig
+        .cloudService(LeonardoMachineConfig.CloudServiceEnum.DATAPROC)
+        .componentGatewayEnabled(true);
   }
 
   GceConfig toGceConfig(LeonardoGceConfig leonardoGceConfig);
@@ -63,6 +73,8 @@ public interface LeonardoMapper {
   }
 
   DiskConfig toDiskConfig(LeonardoDiskConfig leonardoDiskConfig);
+
+  Disk toApiDisk(LeonardoListPersistentDiskResponse disk);
 
   @Mapping(target = "cloudService", ignore = true)
   LeonardoGceWithPdConfig toLeonardoGceWithPdConfig(GceWithPdConfig gceWithPdConfig);
@@ -98,7 +110,10 @@ public interface LeonardoMapper {
   @Mapping(target = "gceWithPdConfig", ignore = true)
   @Mapping(target = "dataprocConfig", ignore = true)
   @Mapping(target = "diskConfig", ignore = true)
+  @Mapping(target = "errors", ignore = true)
   Runtime toApiRuntime(LeonardoListRuntimeResponse runtime);
+
+  RuntimeError toApiRuntimeError(LeonardoClusterError err);
 
   @AfterMapping
   default void getRuntimeAfterMapper(
@@ -168,6 +183,13 @@ public interface LeonardoMapper {
       return RuntimeStatus.UNKNOWN;
     }
     return RuntimeStatus.fromValue(leonardoRuntimeStatus.toString());
+  }
+
+  default DiskStatus toApiDiskStatus(LeonardoDiskStatus leonardoDiskStatus) {
+    if (leonardoDiskStatus == null) {
+      return DiskStatus.UNKNOWN;
+    }
+    return DiskStatus.fromValue(leonardoDiskStatus.toString());
   }
 
   default String getJupyterImage(List<LeonardoRuntimeImage> images) {

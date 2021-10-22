@@ -1,12 +1,14 @@
 package org.pmiops.workbench.db.model;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.hash.Hashing;
 import java.sql.Timestamp;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.persistence.CascadeType;
 import javax.persistence.CollectionTable;
@@ -34,6 +36,7 @@ public class DbUser {
 
   private static final String RUNTIME_NAME_PREFIX = "all-of-us-";
   private static final String PD_NAME_PREFIX = "all-of-us-pd-";
+  @VisibleForTesting static final int PD_UUID_SUFFIX_SIZE = 4;
 
   // user "system account" fields besides those related to access modules
 
@@ -54,6 +57,7 @@ public class DbUser {
   private Timestamp demographicSurveyCompletionTime;
   private Timestamp creationTime;
   private Timestamp lastModifiedTime;
+  private Timestamp computeSecuritySuspendedUntil;
 
   // user-editable Profile fields
 
@@ -69,32 +73,9 @@ public class DbUser {
 
   private String eraCommonsLinkedNihUsername;
   private Timestamp eraCommonsLinkExpireTime;
-  private Timestamp eraCommonsCompletionTime;
-  private Timestamp eraCommonsBypassTime;
-
   private String rasLinkLoginGovUsername;
-  private Timestamp rasLinkLoginGovCompletionTime;
-  private Timestamp rasLinkLoginGovExpireTime;
-  private Timestamp rasLinkLoginGovBypassTime;
-
-  private Timestamp dataUseAgreementCompletionTime;
-  private Timestamp dataUseAgreementBypassTime;
   private Integer dataUseAgreementSignedVersion;
-
-  private Timestamp complianceTrainingCompletionTime;
-  private Timestamp complianceTrainingBypassTime;
   private Timestamp complianceTrainingExpirationTime;
-
-  private Timestamp twoFactorAuthCompletionTime;
-  private Timestamp twoFactorAuthBypassTime;
-
-  private Timestamp profileLastConfirmedTime;
-
-  private Timestamp publicationsLastConfirmedTime;
-
-  // potentially obsolete access module fields.  These are likely to be deleted in the near future.
-  // Moodle badges are indexed by username, not this value.  See ComplianceService.
-  @Deprecated private Integer moodleId;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -287,17 +268,6 @@ public class DbUser {
     this.areaOfResearch = areaOfResearch;
   }
 
-  @Deprecated
-  @Column(name = "moodle_id")
-  public Integer getMoodleId() {
-    return moodleId;
-  }
-
-  @Deprecated
-  public void setMoodleId(Integer moodleId) {
-    this.moodleId = moodleId;
-  }
-
   @Column(name = "era_commons_linked_nih_username")
   public String getEraCommonsLinkedNihUsername() {
     return eraCommonsLinkedNihUsername;
@@ -316,15 +286,6 @@ public class DbUser {
     this.eraCommonsLinkExpireTime = eraCommonsLinkExpireTime;
   }
 
-  @Column(name = "era_commons_completion_time")
-  public Timestamp getEraCommonsCompletionTime() {
-    return eraCommonsCompletionTime;
-  }
-
-  public void setEraCommonsCompletionTime(Timestamp eraCommonsCompletionTime) {
-    this.eraCommonsCompletionTime = eraCommonsCompletionTime;
-  }
-
   @Column(name = "ras_link_login_gov_username")
   public String getRasLinkLoginGovUsername() {
     return rasLinkLoginGovUsername;
@@ -332,42 +293,6 @@ public class DbUser {
 
   public void setRasLinkLoginGovUsername(String rasLinkLoginGovUsername) {
     this.rasLinkLoginGovUsername = rasLinkLoginGovUsername;
-  }
-
-  @Column(name = "ras_link_login_gov_completion_time")
-  public Timestamp getRasLinkLoginGovCompletionTime() {
-    return rasLinkLoginGovCompletionTime;
-  }
-
-  public void setRasLinkLoginGovCompletionTime(Timestamp rasLinkLoginGovCompletionTime) {
-    this.rasLinkLoginGovCompletionTime = rasLinkLoginGovCompletionTime;
-  }
-
-  @Column(name = "ras_link_login_gov_bypass_time")
-  public Timestamp getRasLinkLoginGovBypassTime() {
-    return rasLinkLoginGovBypassTime;
-  }
-
-  public void setRasLinkLoginGovBypassTime(Timestamp rasLinkLoginGovBypassTime) {
-    this.rasLinkLoginGovBypassTime = rasLinkLoginGovBypassTime;
-  }
-
-  @Column(name = "data_use_agreement_completion_time")
-  public Timestamp getDataUseAgreementCompletionTime() {
-    return dataUseAgreementCompletionTime;
-  }
-
-  public void setDataUseAgreementCompletionTime(Timestamp dataUseAgreementCompletionTime) {
-    this.dataUseAgreementCompletionTime = dataUseAgreementCompletionTime;
-  }
-
-  @Column(name = "data_use_agreement_bypass_time")
-  public Timestamp getDataUseAgreementBypassTime() {
-    return dataUseAgreementBypassTime;
-  }
-
-  public void setDataUseAgreementBypassTime(Timestamp dataUseAgreementBypassTime) {
-    this.dataUseAgreementBypassTime = dataUseAgreementBypassTime;
   }
 
   @Column(name = "data_use_agreement_signed_version")
@@ -379,28 +304,6 @@ public class DbUser {
     this.dataUseAgreementSignedVersion = dataUseAgreementSignedVersion;
   }
 
-  @Column(name = "compliance_training_completion_time")
-  public Timestamp getComplianceTrainingCompletionTime() {
-    return complianceTrainingCompletionTime;
-  }
-
-  public void setComplianceTrainingCompletionTime(Timestamp complianceTrainingCompletionTime) {
-    this.complianceTrainingCompletionTime = complianceTrainingCompletionTime;
-  }
-
-  public void clearComplianceTrainingCompletionTime() {
-    this.complianceTrainingCompletionTime = null;
-  }
-
-  @Column(name = "compliance_training_bypass_time")
-  public Timestamp getComplianceTrainingBypassTime() {
-    return complianceTrainingBypassTime;
-  }
-
-  public void setComplianceTrainingBypassTime(Timestamp complianceTrainingBypassTime) {
-    this.complianceTrainingBypassTime = complianceTrainingBypassTime;
-  }
-
   @Column(name = "compliance_training_expiration_time")
   public Timestamp getComplianceTrainingExpirationTime() {
     return complianceTrainingExpirationTime;
@@ -408,37 +311,6 @@ public class DbUser {
 
   public void setComplianceTrainingExpirationTime(Timestamp complianceTrainingExpirationTime) {
     this.complianceTrainingExpirationTime = complianceTrainingExpirationTime;
-  }
-
-  public void clearComplianceTrainingExpirationTime() {
-    this.complianceTrainingExpirationTime = null;
-  }
-
-  @Column(name = "era_commons_bypass_time")
-  public Timestamp getEraCommonsBypassTime() {
-    return eraCommonsBypassTime;
-  }
-
-  public void setEraCommonsBypassTime(Timestamp eraCommonsBypassTime) {
-    this.eraCommonsBypassTime = eraCommonsBypassTime;
-  }
-
-  @Column(name = "two_factor_auth_completion_time")
-  public Timestamp getTwoFactorAuthCompletionTime() {
-    return twoFactorAuthCompletionTime;
-  }
-
-  public void setTwoFactorAuthCompletionTime(Timestamp twoFactorAuthCompletionTime) {
-    this.twoFactorAuthCompletionTime = twoFactorAuthCompletionTime;
-  }
-
-  @Column(name = "two_factor_auth_bypass_time")
-  public Timestamp getTwoFactorAuthBypassTime() {
-    return twoFactorAuthBypassTime;
-  }
-
-  public void setTwoFactorAuthBypassTime(Timestamp twoFactorAuthBypassTime) {
-    this.twoFactorAuthBypassTime = twoFactorAuthBypassTime;
   }
 
   @OneToOne(
@@ -498,22 +370,13 @@ public class DbUser {
     this.address = address;
   }
 
-  @Column(name = "profile_last_confirmed_time")
-  public Timestamp getProfileLastConfirmedTime() {
-    return profileLastConfirmedTime;
+  @Column(name = "compute_security_suspended_until")
+  public Timestamp getComputeSecuritySuspendedUntil() {
+    return computeSecuritySuspendedUntil;
   }
 
-  public void setProfileLastConfirmedTime(Timestamp profileLastConfirmedTime) {
-    this.profileLastConfirmedTime = profileLastConfirmedTime;
-  }
-
-  @Column(name = "publications_last_confirmed_time")
-  public Timestamp getPublicationsLastConfirmedTime() {
-    return publicationsLastConfirmedTime;
-  }
-
-  public void setPublicationsLastConfirmedTime(Timestamp publicationsLastConfirmedTime) {
-    this.publicationsLastConfirmedTime = publicationsLastConfirmedTime;
+  public void setComputeSecuritySuspendedUntil(Timestamp computeSecuritySuspendedUntil) {
+    this.computeSecuritySuspendedUntil = computeSecuritySuspendedUntil;
   }
 
   // null-friendly versions of equals() and hashCode() for DbVerifiedInstitutionalAffiliation
@@ -535,9 +398,19 @@ public class DbUser {
     return RUNTIME_NAME_PREFIX + getUserId();
   }
 
+  @Transient
+  public String getUserPDNamePrefix() {
+    return PD_NAME_PREFIX + getUserId();
+  }
+
   /** Returns a name for the Persistent Disk to be created for this user. */
   @Transient
-  public String getPDName() {
-    return PD_NAME_PREFIX + getUserId();
+  public String generatePDName() {
+    String randomString =
+        Hashing.sha256()
+            .hashUnencodedChars(UUID.randomUUID().toString())
+            .toString()
+            .substring(0, PD_UUID_SUFFIX_SIZE);
+    return getUserPDNamePrefix() + "-" + randomString;
   }
 }

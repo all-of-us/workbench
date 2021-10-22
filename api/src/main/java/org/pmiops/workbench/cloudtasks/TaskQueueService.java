@@ -12,6 +12,7 @@ import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchLocationConfigService;
 import org.pmiops.workbench.model.AuditProjectAccessRequest;
+import org.pmiops.workbench.model.ProcessEgressEventRequest;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -20,8 +21,12 @@ public class TaskQueueService {
   private static final String EXPORT_RESEARCHER_PATH = BASE_PATH + "/exportResearcherData";
   private static final String EXPORT_WORKSPACE_PATH = BASE_PATH + "/exportWorkspaceData";
   private static final String AUDIT_PROJECTS_PATH = BASE_PATH + "/auditProjectAccess";
+  private static final String SYNCHRONIZE_ACCESS_PATH = BASE_PATH + "/synchronizeUserAccess";
+  private static final String EGRESS_EVENT_PATH = BASE_PATH + "/processEgressEvent";
 
   private static final String AUDIT_PROJECTS_QUEUE_NAME = "auditProjectQueue";
+  private static final String SYNCHRONIZE_ACCESS_QUEUE_NAME = "synchronizeAccessQueue";
+  private static final String EGRESS_EVENT_QUEUE_NAME = "egressEventQueue";
 
   private WorkbenchLocationConfigService locationConfigService;
   private Provider<CloudTasksClient> cloudTasksClientProvider;
@@ -72,6 +77,26 @@ public class TaskQueueService {
           AUDIT_PROJECTS_PATH,
           new AuditProjectAccessRequest().userIds(group));
     }
+  }
+
+  public void groupAndPushSynchronizeAccessTasks(List<Long> userIds) {
+    WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
+    List<List<Long>> groups =
+        CloudTasksUtils.partitionList(
+            userIds, workbenchConfig.offlineBatch.usersPerSynchronizeAccessTask);
+    for (List<Long> group : groups) {
+      createAndPushTask(
+          SYNCHRONIZE_ACCESS_QUEUE_NAME,
+          SYNCHRONIZE_ACCESS_PATH,
+          new AuditProjectAccessRequest().userIds(group));
+    }
+  }
+
+  public void pushEgressEventTask(Long eventId) {
+    createAndPushTask(
+        EGRESS_EVENT_QUEUE_NAME,
+        EGRESS_EVENT_PATH,
+        new ProcessEgressEventRequest().eventId(eventId));
   }
 
   private void createAndPushTask(String queueName, String taskUri, Object jsonBody) {

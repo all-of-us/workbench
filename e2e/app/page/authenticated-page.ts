@@ -2,8 +2,9 @@ import { Page } from 'puppeteer';
 import BasePage from 'app/page/base-page';
 import { getPropValue } from 'utils/element-utils';
 import HelpTipsSidebar from 'app/component/help-tips-sidebar';
+import { logger } from 'libs/logger';
 
-const signedInIndicator = 'app-signed-in';
+export const signedInXpath = '[data-test-id="signed-in"]';
 
 /**
  * AuthenticatedPage represents the base page for any AoU page after user has successfully logged in (aka authenticated).
@@ -14,10 +15,15 @@ export default abstract class AuthenticatedPage extends BasePage {
     super(page);
   }
 
-  protected async isSignedIn(): Promise<boolean> {
+  protected async isSignedIn(timeout = 60 * 1000): Promise<boolean> {
     return this.page
-      .waitForSelector(signedInIndicator, { timeout: 3 * 60 * 1000 })
-      .then((elemt) => elemt.asElement() !== null);
+      .waitForSelector(signedInXpath, { timeout })
+      .then(() => {
+        return true;
+      })
+      .catch(() => {
+        return false;
+      });
   }
 
   /**
@@ -30,9 +36,14 @@ export default abstract class AuthenticatedPage extends BasePage {
    * Wait until current page is loaded and without spinners spinning.
    */
   async waitForLoad(): Promise<this> {
-    await this.isSignedIn();
+    const signedIn = await this.isSignedIn();
+    if (!signedIn) {
+      throw new Error(`Failed to find signed-in web-element. xpath="${signedInXpath}"`);
+    }
     await this.isLoaded();
     await this.closeHelpSidebarIfOpen();
+    const pageTitle = await this.page.title();
+    logger.info(`"${pageTitle}" page loaded.`);
     return this;
   }
 
@@ -41,6 +52,10 @@ export default abstract class AuthenticatedPage extends BasePage {
    */
   async loadPageUrl(url: string): Promise<void> {
     await this.gotoUrl(url);
+    const signedIn = await this.isSignedIn(5000);
+    if (!signedIn) {
+      await this.page.reload();
+    }
     await this.waitForLoad();
   }
 

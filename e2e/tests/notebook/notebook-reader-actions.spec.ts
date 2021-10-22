@@ -6,59 +6,65 @@ import WorkspaceAnalysisPage from 'app/page/workspace-analysis-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { Language, LinkText, MenuOption, ResourceCard, WorkspaceAccessLevel } from 'app/text-labels';
 import { config } from 'resources/workbench-config';
-import { createWorkspace, findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
+import { findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
 import { waitWhileLoading } from 'utils/waits-utils';
 import WorkspacesPage from 'app/page/workspaces-page';
 import Modal from 'app/modal/modal';
 import NotebookPreviewPage from 'app/page/notebook-preview-page';
 import WorkspaceEditPage from 'app/page/workspace-edit-page';
 import { makeRandomName, makeWorkspaceName } from 'utils/str-utils';
+import expect from 'expect';
 
 // 30 minutes.
 jest.setTimeout(30 * 60 * 1000);
 
 describe('Workspace READER Jupyter notebook action tests', () => {
-  // All tests use same workspace and notebook.
-  const workspace = makeWorkspaceName();
-  const notebookName = makeRandomName('Py3');
+  // Test reuse same workspace and notebook if exists.
+  const workspaceName = makeWorkspaceName();
+  const notebookName = makeRandomName('py', { includeHyphen: false });
+  const readerWorkspaceName = 'e2eNotebookReaderActionsTestWorkspace'; // READER workspace for copy-to.
 
-  const pyCode = 'print(1+1)';
-  const pyAnswer = 2;
+  const pyCode = '!jupyter kernelspec list';
+  const pyAnswer = 'python3';
 
   test('Share notebook to workspace READER', async () => {
     await signInWithAccessToken(page);
-    await findOrCreateWorkspace(page, { workspaceName: workspace });
+    await findOrCreateWorkspace(page, { workspaceName });
 
     const dataPage = new WorkspaceDataPage(page);
 
-    const notebook = await dataPage.createNotebook(notebookName, Language.Python);
-
-    // Run code: 1 + 1.
-    const cellOutput = await notebook.runCodeCell(1, { code: pyCode });
-    expect(Number.parseInt(cellOutput, 10)).toEqual(pyAnswer);
-    await notebook.save();
-
-    await notebook.goAnalysisPage();
+    // Share workspace to a READER before creating new notebook.
     await dataPage.openAboutPage();
     const aboutPage = new WorkspaceAboutPage(page);
     await aboutPage.waitForLoad();
 
-    // Share Workspace to a READER.
     const shareModal = await aboutPage.openShareModal();
     await shareModal.shareWithUser(config.READER_USER, WorkspaceAccessLevel.Reader);
     await waitWhileLoading(page);
+
+    const notebook = await dataPage.createNotebook(notebookName, Language.Python);
+
+    // Run Python code.
+    const codeOutput = await notebook.runCodeCell(1, { code: pyCode });
+    expect(codeOutput).toEqual(expect.stringContaining(pyAnswer));
+
+    await notebook.save();
+
+    const analysisPage = await notebook.goAnalysisPage();
+    const notebookCard = await analysisPage.findNotebookCard(notebookName);
+    expect(notebookCard).toBeTruthy();
   });
 
-  test('Workspace READER copy notebook to another workspace', async () => {
+  // TODO(RW-7312): update and re-enable
+  test.skip('Workspace READER copy notebook to another workspace', async () => {
     // READER log in.
-    await signInWithAccessToken(page, config.READER_ACCESS_TOKEN_FILE);
+    await signInWithAccessToken(page, config.READER_USER);
 
-    // Create a new Workspace. This is the copy-to workspace.
-    const readerWorkspaceName = await createWorkspace(page);
+    await findOrCreateWorkspace(page, { workspaceName: readerWorkspaceName });
 
     // Verify shared Workspace Access Level is READER.
     await new WorkspacesPage(page).load();
-    const workspaceCard = await WorkspaceCard.findCard(page, workspace);
+    const workspaceCard = await WorkspaceCard.findCard(page, workspaceName);
     const accessLevel = await workspaceCard.getWorkspaceAccessLevel();
     expect(accessLevel).toBe(WorkspaceAccessLevel.Reader);
 
@@ -108,8 +114,8 @@ describe('Workspace READER Jupyter notebook action tests', () => {
 
     // Copy notebook to another Workspace and give notebook a new name.
     const newAnalysisPage = await notebookPreviewPage.goAnalysisPage();
-    const copyNotebookName = `copy-of-${notebookName}`;
-    await newAnalysisPage.copyNotebookToWorkspace(notebookName, readerWorkspaceName, copyNotebookName);
+    const copyOfNotebookName = `copy-of-${notebookName}`;
+    await newAnalysisPage.copyNotebookToWorkspace(notebookName, readerWorkspaceName, copyOfNotebookName);
 
     // Verify Copy Success modal.
     const modal = new Modal(page);
@@ -125,11 +131,11 @@ describe('Workspace READER Jupyter notebook action tests', () => {
     // Verify current workspace is collaborator Workspace.
     await newAnalysisPage.waitForLoad();
     const workspaceLink = Link.findByName(page, { name: readerWorkspaceName });
-    const linkDisplayed = await workspaceLink.isDisplayed();
+    const linkDisplayed = await workspaceLink.isVisible();
     expect(linkDisplayed).toBe(true);
 
     // Verify copied notebook exists in collaborator Workspace.
-    notebookCard = await dataResourceCard.findCard(copyNotebookName, ResourceCard.Notebook);
+    notebookCard = await dataResourceCard.findCard(copyOfNotebookName, ResourceCard.Notebook);
     expect(notebookCard).toBeTruthy();
 
     // Notebook actions Rename, Duplicate, Delete and Copy to another Workspace actions are avaliable to click.
@@ -140,16 +146,17 @@ describe('Workspace READER Jupyter notebook action tests', () => {
     expect(await copyNotebookCardMenu.isOptionDisabled(MenuOption.CopyToAnotherWorkspace)).toBe(false);
     await notebookCard.clickSnowmanIcon(); // close menu
 
-    await newAnalysisPage.deleteResource(copyNotebookName, ResourceCard.Notebook);
+    await newAnalysisPage.deleteResource(copyOfNotebookName, ResourceCard.Notebook);
   });
 
-  test('Workspace READER edit copy of notebook in workspace clone', async () => {
+  // TODO(RW-7312): update and re-enable
+  test.skip('Workspace READER edit copy of notebook in workspace clone', async () => {
     // READER log in.
-    await signInWithAccessToken(page, config.READER_ACCESS_TOKEN_FILE);
+    await signInWithAccessToken(page, config.READER_USER);
 
     // Verify shared Workspace Access Level is READER.
     await new WorkspacesPage(page).load();
-    const workspaceCard = await WorkspaceCard.findCard(page, workspace);
+    const workspaceCard = await WorkspaceCard.findCard(page, workspaceName);
     await workspaceCard.clickWorkspaceName();
 
     const dataPage = new WorkspaceDataPage(page);

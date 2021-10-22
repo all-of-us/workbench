@@ -2,7 +2,6 @@ package org.pmiops.workbench.db.model;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
-import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.BufferEntryStatus;
 import org.pmiops.workbench.db.model.DbWorkspace.BillingMigrationStatus;
 import org.pmiops.workbench.model.AnnotationType;
 import org.pmiops.workbench.model.ArchivalStatus;
@@ -14,7 +13,6 @@ import org.pmiops.workbench.model.Degree;
 import org.pmiops.workbench.model.Disability;
 import org.pmiops.workbench.model.DisseminateResearchEnum;
 import org.pmiops.workbench.model.Domain;
-import org.pmiops.workbench.model.DuaType;
 import org.pmiops.workbench.model.Education;
 import org.pmiops.workbench.model.Ethnicity;
 import org.pmiops.workbench.model.GenderIdentity;
@@ -152,26 +150,6 @@ public final class DbStorageEnums {
 
   public static Short billingStatusToStorage(BillingStatus s) {
     return CLIENT_TO_STORAGE_BILLING_STATUS.get(s);
-  }
-
-  // BufferEntryStatus
-  private static final BiMap<BufferEntryStatus, Short>
-      CLIENT_TO_STORAGE_BILLING_PROJECT_BUFFER_STATUS =
-          ImmutableBiMap.<BufferEntryStatus, Short>builder()
-              .put(BufferEntryStatus.CREATING, (short) 0)
-              .put(BufferEntryStatus.ERROR, (short) 1)
-              .put(BufferEntryStatus.AVAILABLE, (short) 2)
-              .put(BufferEntryStatus.ASSIGNING, (short) 3)
-              .put(BufferEntryStatus.ASSIGNED, (short) 4)
-              .put(BufferEntryStatus.GARBAGE_COLLECTED, (short) 5)
-              .build();
-
-  public static BufferEntryStatus billingProjectBufferEntryStatusFromStorage(Short s) {
-    return CLIENT_TO_STORAGE_BILLING_PROJECT_BUFFER_STATUS.inverse().get(s);
-  }
-
-  public static Short billingProjectBufferEntryStatusToStorage(BufferEntryStatus s) {
-    return CLIENT_TO_STORAGE_BILLING_PROJECT_BUFFER_STATUS.get(s);
   }
 
   // CohortStatus
@@ -354,20 +332,6 @@ public final class DbStorageEnums {
     return CLIENT_TO_STORAGE_ORGANIZATION_TYPE.get(organizationType);
   }
 
-  // Institution Data Use agreement Type
-  private static final BiMap<DuaType, Short> CLIENT_TO_STORAGE_INSTITUTION_DUA_TYPE =
-      ImmutableBiMap.<DuaType, Short>builder()
-          .put(DuaType.MASTER, (short) 0)
-          .put(DuaType.RESTRICTED, (short) 1)
-          .build();
-
-  public static DuaType institutionDUATypeFromStorage(Short institutionDuaType) {
-    return CLIENT_TO_STORAGE_INSTITUTION_DUA_TYPE.inverse().get(institutionDuaType);
-  }
-
-  public static Short institutionDUATypeToStorage(DuaType institutionDuaType) {
-    return CLIENT_TO_STORAGE_INSTITUTION_DUA_TYPE.get(institutionDuaType);
-  }
   // PrePackagedConceptSet
   private static final BiMap<PrePackagedConceptSetEnum, Short>
       CLIENT_TO_STORAGE_PRE_PACKAGED_CONCEPTSET =

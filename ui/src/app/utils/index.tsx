@@ -1,4 +1,3 @@
-import {ElementRef, OnChanges, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {colorWithWhiteness} from 'app/styles/colors';
 import {
   currentCohortCriteriaStore,
@@ -8,15 +7,11 @@ import {
   currentConceptSetStore,
   currentConceptStore,
   currentWorkspaceStore,
-  globalErrorStore,
-  queryParamsStore,
-  routeConfigDataStore,
-  urlParamsStore
+  globalErrorStore
 } from 'app/utils/navigation';
-import {Domain, } from 'generated/fetch';
+import {Domain} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
-import * as ReactDOM from 'react-dom';
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 import {ReplaySubject} from 'rxjs/ReplaySubject';
 import {cdrVersionStore, profileStore, withStore} from './stores';
@@ -160,41 +155,6 @@ export function reactStyles<T extends {[key: string]: React.CSSProperties }>(t: 
   return t;
 }
 
-/**
- * Helper base class for defining an Angular-wrapped React component. This is a
- * stop-gap for React migration.
- *
- * Requirements:
- *  - Component template must contain a div labeled "#root".
- *  - React propNames must exactly match instance property names on the subclass
- *    (usually these are also annotated as Angular @Inputs)
- */
-export class ReactWrapperBase implements OnChanges, OnInit, OnDestroy {
-  @ViewChild('root') rootElement: ElementRef;
-
-  constructor(private WrappedComponent: React.ComponentType, private propNames: string[]) {}
-
-  ngOnInit(): void {
-    this.renderComponent();
-  }
-
-  ngOnChanges(): void {
-    this.renderComponent();
-  }
-
-  ngOnDestroy(): void {
-    ReactDOM.unmountComponentAtNode(this.rootElement.nativeElement);
-  }
-
-  renderComponent(): void {
-    const {WrappedComponent, propNames} = this;
-    ReactDOM.render(
-      <WrappedComponent {...fp.fromPairs(propNames.map(name => [name, this[name]]))} />,
-      this.rootElement.nativeElement
-    );
-  }
-}
-
 export function decamelize(str: string, separator: string) {
   separator = typeof separator === 'undefined' ? '_' : separator;
 
@@ -335,27 +295,9 @@ export const withUserProfile = () => {
   return withStore(profileStore, 'profileState');
 };
 
-// HOC that provides a 'urlParams' prop with the current url params object
-export const withUrlParams = () => {
-  return connectBehaviorSubject(urlParamsStore, 'urlParams');
-};
-export interface UrlParamsProps {
-  urlParams: { [key: string]: any; };
-}
-
-// HOC that provides a 'routeConfigData' prop with current route's data object
-export const withRouteConfigData = () => {
-  return connectBehaviorSubject(routeConfigDataStore, 'routeConfigData');
-};
-
 // HOC that provides a 'cdrVersionTiersResponse' prop with the CDR version information.
 export const withCdrVersions = () => {
   return withStore(cdrVersionStore, 'cdrVersionTiersResponse');
-};
-
-// HOC that provides a 'queryParams' prop with current query params
-export const withQueryParams = () => {
-  return connectBehaviorSubject(queryParamsStore, 'queryParams');
 };
 
 export function displayDateWithoutHours(time: number): string {
@@ -374,17 +316,6 @@ export function displayDate(time: Number): string {
   return date.toLocaleString('en-US',
     {year: '2-digit', month: '2-digit', day: '2-digit',
       hour: '2-digit', minute: '2-digit', hour12: true});
-}
-
-// Remove this when we complete RW-3065
-export function formatWorkspaceResourceDisplayDate(time: string): string {
-  if (!time) {
-    return '';
-  }
-
-  const date = new Date(time);
-  // datetime formatting to slice off weekday from readable date string
-  return date.toDateString().split(' ').slice(1).join(' ');
 }
 
 export function formatDomainString(domainString: string): string {
@@ -411,13 +342,28 @@ export function sliceByHalfLength(obj) {
   return Math.ceil(obj.length / 2);
 }
 
+
+export function hasNewValidProps(currProps, prevProps, fieldsToCompare) {
+  for (const fieldGetter of fieldsToCompare) {
+    if (!fieldGetter(currProps)) {
+      return false;
+    }
+
+    if (fieldGetter(currProps) !== fieldGetter(prevProps)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 // Returns a function which will execute `action` at most once every `sensitivityMs` milliseconds
 // if the returned function has been invoked within the last `sensitivityMs` milliseconds
 // Example : debouncing user activity events to change rate of invocation from 1000/s to 1/s
 export function debouncer(action, sensitivityMs) {
   let t = Date.now();
 
-  const timer = setInterval(() => {
+  const timer = global.setInterval(() => {
     if (Date.now() - t < sensitivityMs) {
       action();
     }
@@ -609,3 +555,4 @@ export const cond = <T extends unknown>(...args: ([boolean, () => T] | (() => T)
     }
   }
 };
+

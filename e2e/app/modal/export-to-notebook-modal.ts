@@ -1,9 +1,10 @@
 import RadioButton from 'app/element/radiobutton';
 import Textbox from 'app/element/textbox';
 import { Page } from 'puppeteer';
-import { Language, LinkText } from 'app/text-labels';
+import { AnalysisTool, Language, LinkText } from 'app/text-labels';
 import Modal from './modal';
 import { waitForText } from 'utils/waits-utils';
+import NotebookPreviewPage from 'app/page/notebook-preview-page';
 
 const title = 'Export Dataset';
 
@@ -13,7 +14,7 @@ export default class ExportToNotebookModal extends Modal {
   }
 
   async isLoaded(): Promise<boolean> {
-    await waitForText(this.page, title, { xpath: this.getXpath() });
+    await waitForText(this.page, title, { container: this });
     await this.getNotebookNameInput().asElementHandle();
     return true;
   }
@@ -24,12 +25,12 @@ export default class ExportToNotebookModal extends Modal {
   }
 
   getPythonRadioButton(): RadioButton {
-    const selector = `${this.getXpath()}//label[contains(normalize-space(),"Python")]//input[@type="radio"]`;
+    const selector = this.getRadioButtonXpath('Python');
     return new RadioButton(this.page, selector);
   }
 
   getRRadioButton(): RadioButton {
-    const selector = `${this.getXpath()}//label[contains(normalize-space(),"R")]//input[@type="radio"]`;
+    const selector = this.getRadioButtonXpath('R');
     return new RadioButton(this.page, selector);
   }
 
@@ -43,8 +44,16 @@ export default class ExportToNotebookModal extends Modal {
     return radio.select();
   }
 
-  async clickExportButton(): Promise<void> {
-    return this.clickButton(LinkText.Export, { waitForClose: true });
+  pickAnalysisTool(analysisTool: AnalysisTool = AnalysisTool.Hail): RadioButton {
+    const radioButtonXpath = this.getRadioButtonXpath(analysisTool);
+    return new RadioButton(this.page, radioButtonXpath);
+  }
+
+  async clickExportButton(): Promise<NotebookPreviewPage> {
+    await this.clickButton(LinkText.Export, { waitForClose: true });
+    const notebookPreviewPage = new NotebookPreviewPage(this.page);
+    await notebookPreviewPage.waitForLoad();
+    return notebookPreviewPage;
   }
 
   /**
@@ -55,9 +64,13 @@ export default class ExportToNotebookModal extends Modal {
    * @param {string} notebookName Notebook name.
    * @param {Language} language Notebook programming language. Default value is Python.
    */
-  async fillInModal(notebookName: string, language: Language = Language.Python): Promise<void> {
+  async fillInModal(notebookName: string, language: Language = Language.Python): Promise<NotebookPreviewPage> {
     await this.enterNotebookName(notebookName);
     await this.pickLanguage(language);
-    return await this.clickExportButton();
+    return this.clickExportButton();
+  }
+
+  private getRadioButtonXpath(name: string): string {
+    return `${this.getXpath()}//label[contains(normalize-space(),"${name}")]//input[@type="radio"]`;
   }
 }

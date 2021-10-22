@@ -21,7 +21,6 @@
       "releaseNumber": 1,
       "numParticipants": 0,
       "cdrDbName": "cdr",
-      "elasticIndexBaseName": "cdr",
       "accessTier": "registered"
     }
   ]

@@ -5,8 +5,8 @@ import static com.google.common.truth.Truth.assertThat;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import java.util.List;
-import org.junit.Ignore;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.api.BigQueryBaseTest;
 import org.pmiops.workbench.api.BigQueryTestService;
@@ -42,7 +42,7 @@ public class ConceptBigQueryServiceTest extends BigQueryBaseTest {
   }
 
   @Test
-  @Ignore("RW-5707")
+  @Disabled("RW-5707")
   public void testGetConceptCountNoConceptsSaved() {
     DbConceptSetConceptId dbConceptSetConceptId1 =
         DbConceptSetConceptId.builder().addConceptId(6L).addStandard(true).build();

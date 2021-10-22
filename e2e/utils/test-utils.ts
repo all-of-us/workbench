@@ -14,9 +14,12 @@ import Navigation, { NavLink } from 'app/component/navigation';
 import { makeWorkspaceName } from './str-utils';
 import { config } from 'resources/workbench-config';
 import { logger } from 'libs/logger';
+import { authenticator } from 'otplib';
+import AuthenticatedPage from 'app/page/authenticated-page';
+import { AccessTierDisplayNames } from 'app/page/workspace-edit-page';
 
 export async function signOut(page: Page): Promise<void> {
-  await page.evaluate(async () => {
+  await page.evaluate(() => {
     return 'window.setTestAccessTokenOverride(null)';
   });
 
@@ -24,18 +27,30 @@ export async function signOut(page: Page): Promise<void> {
   await page.waitForTimeout(1000);
 }
 
-export async function signInWithAccessToken(page: Page, tokenFilename = config.USER_ACCESS_TOKEN_FILE): Promise<void> {
-  const token = fs.readFileSync(tokenFilename, 'ascii');
+// Resolve typescript error: TS2339: Property 'setTestAccessTokenOverride' does not exist on type 'Window & typeof globalThis'.
+declare const window: Window &
+  typeof globalThis & {
+    setTestAccessTokenOverride: any;
+  };
+
+export async function signInWithAccessToken(
+  page: Page,
+  userEmail = config.USER_NAME,
+  postSignInPage: AuthenticatedPage = new HomePage(page)
+): Promise<void> {
+  // Keep file naming convention synchronized with generate-impersonated-user-tokens
+  const token = fs.readFileSync(`signin-tokens/${userEmail}.txt`, 'ascii');
   logger.info('Sign in with access token to Workbench application');
   const homePage = new HomePage(page);
   await homePage.gotoUrl(PageUrl.Home);
 
   // Once ready, initialize the token on the page (this is stored in local storage).
   // See sign-in.service.ts for details.
-  const navigationPromise = page.waitForNavigation({ waitUntil: ['load', 'networkidle0'] });
+
   await page.waitForFunction('!!window["setTestAccessTokenOverride"]');
-  await page.evaluate(`window.setTestAccessTokenOverride('${token}')`);
-  await navigationPromise;
+  await page.evaluate((token) => {
+    window.setTestAccessTokenOverride(token);
+  }, token);
 
   // Force a page reload; auth will be re-initialized with the token now that
   // localstorage has been updated.
@@ -43,8 +58,17 @@ export async function signInWithAccessToken(page: Page, tokenFilename = config.U
   // logs; there is some delay between a console.log() execution and capture by
   // Puppeteer. Any console.log() within the above global function, for example,
   // is unlikely to be captured.
-  await homePage.gotoUrl(PageUrl.Home);
-  await homePage.waitForLoad();
+  try {
+    await homePage.reloadPage();
+    await homePage.gotoUrl(PageUrl.Home);
+    // normally the user is routed to the homepage after sign-in, so that's the default here.
+    // tests can override this.
+    await postSignInPage.waitForLoad();
+  } catch (err) {
+    // reloadPage and gotoUrl functions could fail on rare occasions.
+    await homePage.gotoUrl(PageUrl.Home);
+    await postSignInPage.waitForLoad();
+  }
 }
 
 /**
@@ -118,12 +142,15 @@ export async function performAction(
  */
 export async function createWorkspace(
   page: Page,
-  options: { cdrVersion?: string; workspaceName?: string } = {}
+  {
+    workspaceName = makeWorkspaceName(),
+    cdrVersionName = config.DEFAULT_CDR_VERSION_NAME,
+    dataAccessTier = AccessTierDisplayNames.Registered
+  } = {}
 ): Promise<string> {
-  const { cdrVersion = config.DEFAULT_CDR_VERSION_NAME, workspaceName = makeWorkspaceName() } = options;
   const workspacesPage = new WorkspacesPage(page);
   await workspacesPage.load();
-  await workspacesPage.createWorkspace(workspaceName, cdrVersion);
+  await workspacesPage.createWorkspace(workspaceName, { cdrVersionName, dataAccessTier });
   return workspaceName;
 }
 
@@ -144,19 +171,19 @@ export async function createWorkspace(
  */
 export async function findOrCreateWorkspace(
   page: Page,
-  opts: { cdrVersion?: string; workspaceName?: string } = {}
+  opts: { cdrVersion?: string; workspaceName?: string; dataAccessTier?: AccessTierDisplayNames } = {}
 ): Promise<string> {
-  const { cdrVersion = config.DEFAULT_CDR_VERSION_NAME, workspaceName } = opts;
+  const { workspaceName, cdrVersion, dataAccessTier } = opts;
   // Returns specified workspaceName Workspace card if exists.
   if (workspaceName !== undefined) {
     const cardFound = await findWorkspaceCard(page, workspaceName);
     if (cardFound != null) {
       logger.info(`Found workspace card name: ${workspaceName}`);
-      // TODO workspace CDR version is not verified
+      // TODO workspace CDR version and Data Access Tier are not verified
       await cardFound.clickWorkspaceName();
       return workspaceName; // Found Workspace card matching workspace name
     }
-    return createWorkspace(page, { workspaceName, cdrVersion });
+    return createWorkspace(page, { workspaceName, cdrVersionName: cdrVersion, dataAccessTier });
   }
 
   // Find a suitable workspace among existing workspaces with OWNER role and older than 30 minutes.
@@ -208,7 +235,7 @@ export async function findOrCreateWorkspaceCard(
     logger.info(`Not finding workspace card name: ${workspaceName}`);
   }
 
-  await createWorkspace(page, { workspaceName, cdrVersion });
+  await createWorkspace(page, { workspaceName, cdrVersionName: cdrVersion });
 
   cardFound = await findWorkspaceCard(page, workspaceName);
   if (cardFound === null) {
@@ -272,3 +299,10 @@ export function isValidDate(date: string) {
 
 const asyncFilter = async (arr, predicate) =>
   arr.reduce(async (items, item) => ((await predicate(item)) ? [...(await items), item] : items), []);
+
+/**
+ * Generates a two factor auth code by given secret.
+ */
+export async function generate2FACode(secret: string) {
+  return authenticator.generate(secret);
+}

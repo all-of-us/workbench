@@ -25,42 +25,35 @@ public class ExceptionAdvice {
 
   @ExceptionHandler({Exception.class})
   public ResponseEntity<?> serverError(Exception e) {
-    ErrorResponse errorResponse = WorkbenchException.errorResponse();
-    // if this error was thrown by another error, get the info from that exception
-    Throwable relevantError = e;
-    if (e.getCause() != null) {
-      relevantError = e.getCause();
-    }
-
     final int statusCode;
     // if exception class has an HTTP status associated with it, grab it
-    if (relevantError.getClass().getAnnotation(ResponseStatus.class) != null) {
-      statusCode = relevantError.getClass().getAnnotation(ResponseStatus.class).value().value();
+    if (e.getClass().getAnnotation(ResponseStatus.class) != null) {
+      statusCode = e.getClass().getAnnotation(ResponseStatus.class).value().value();
     } else {
       statusCode = HttpStatus.INTERNAL_SERVER_ERROR.value();
     }
 
-    if (relevantError instanceof WorkbenchException) {
-      // Only include Exception details on Workbench errors.
-      errorResponse.setMessage(relevantError.getMessage());
-      errorResponse.setErrorClassName(relevantError.getClass().getName());
-      WorkbenchException workbenchException = (WorkbenchException) relevantError;
-      if (workbenchException.getErrorResponse() != null
-          && workbenchException.getErrorResponse().getErrorCode() != null) {
-        errorResponse.setErrorCode(workbenchException.getErrorResponse().getErrorCode());
+    ErrorResponse errorResponse = WorkbenchException.errorResponse().statusCode(statusCode);
+
+    // Only include Exception details on Workbench errors.
+    if (e instanceof WorkbenchException) {
+      errorResponse.setErrorClassName(e.getClass().getName());
+      ErrorResponse thrownErrorResponse = ((WorkbenchException) e).getErrorResponse();
+      if (thrownErrorResponse != null) {
+        errorResponse
+            .message(thrownErrorResponse.getMessage())
+            .errorCode(thrownErrorResponse.getErrorCode())
+            .parameters(thrownErrorResponse.getParameters());
       }
     }
 
     // only log error if it's a server error
     if (statusCode >= HttpStatus.INTERNAL_SERVER_ERROR.value()) {
       final String logMessage =
-          String.format(
-              "ErrorId %s: %s",
-              errorResponse.getErrorUniqueId(), relevantError.getClass().getName());
+          String.format("ErrorId %s: %s", errorResponse.getErrorUniqueId(), e.getClass().getName());
       log.log(Level.SEVERE, logMessage, e);
     }
 
-    errorResponse.setStatusCode(statusCode);
     return ResponseEntity.status(statusCode).body(errorResponse);
   }
 }

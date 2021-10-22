@@ -1,14 +1,15 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
-import {CSSProperties, PropsWithChildren} from 'react';
+import {CSSProperties} from 'react';
+import {Link as RouterLink} from 'react-router-dom';
 
 import {Clickable} from 'app/components/buttons';
 import {ResourceCardBase} from 'app/components/card';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import colors from 'app/styles/colors';
-import {formatWorkspaceResourceDisplayDate, reactStyles} from 'app/utils';
+import {reactStyles} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
-import {navigateAndPreventDefaultIfNoKeysPressed} from 'app/utils/navigation';
+import {stringifyUrl} from 'app/utils/navigation';
 import {
   getDescription,
   getDisplayName,
@@ -19,6 +20,7 @@ import {
   isConceptSet,
   isDataSet,
   isNotebook,
+  formatWorkspaceResourceDisplayDate,
 } from 'app/utils/resources';
 import {WorkspaceResource} from 'generated/fetch';
 import {Action, ResourceActionsMenu} from './resource-actions-menu';
@@ -93,15 +95,16 @@ function canDelete(resource: WorkspaceResource): boolean {
   return resource.permission === 'OWNER' || resource.permission === 'WRITER';
 }
 
-interface NavProps extends PropsWithChildren<any> {
+interface NavProps {
   resource: WorkspaceResource;
   linkTestId?: string;
   style?: CSSProperties;
+  children: string | React.ReactNode;
 }
 
 const ResourceNavigation = (props: NavProps) => {
   const {resource, linkTestId, style = styles.resourceName, children} = props;
-  const url = getResourceUrl(resource);
+  const url = stringifyUrl(getResourceUrl(resource));
 
   function canNavigate(): boolean {
     // can always navigate to notebooks
@@ -115,15 +118,9 @@ const ResourceNavigation = (props: NavProps) => {
   }
 
   return <Clickable disabled={!canNavigate()}>
-    <a style={style}
-       data-test-id={linkTestId}
-       href={url}
-       onClick={e => {
-         onNavigate();
-         navigateAndPreventDefaultIfNoKeysPressed(e, url);
-       }}>
-      {...children}
-    </a>
+    <RouterLink to={url} style={style} data-test-id={linkTestId} onClick={() => onNavigate()}>
+      {children}
+    </RouterLink>
   </Clickable>;
 };
 
@@ -150,7 +147,7 @@ class ResourceCard extends React.Component<Props, {}> {
           </FlexColumn>
           <div style={styles.cardFooter}>
             <div style={styles.lastModified} data-test-id='last-modified'>
-              Last Modified: {formatWorkspaceResourceDisplayDate(resource.modifiedTime)}</div>
+              Last Modified: {formatWorkspaceResourceDisplayDate(resource.lastModifiedEpochMillis)}</div>
             <StyledResourceType resource={resource}/>
           </div>
         </ResourceCardBase>;

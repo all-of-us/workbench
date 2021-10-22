@@ -5,13 +5,15 @@ import Navigation, { NavLink } from 'app/component/navigation';
 import WorkspaceCard from 'app/component/workspace-card';
 import WorkspaceEditPage from 'app/page/workspace-edit-page';
 import WorkspacesPage from 'app/page/workspaces-page';
+import { config } from 'resources/workbench-config';
+import OldCdrVersionModal from 'app/modal/old-cdr-version-modal';
 
 describe('Duplicate workspace', () => {
   beforeEach(async () => {
     await signInWithAccessToken(page);
   });
 
-  const workspace = 'e2eCloneWorkspaceTest';
+  const workspaceName = 'e2eCloneWorkspaceTest';
 
   /**
    * Test:
@@ -20,10 +22,12 @@ describe('Duplicate workspace', () => {
    * - Enter a new workspace name and save the duplicate.
    * - Delete duplicate workspace.
    */
-  test('OWNER can duplicate workspace via Workspace card', async () => {
-    const workspaceCard = await findOrCreateWorkspaceCard(page, { workspaceName: workspace });
-    await workspaceCard.asElementHandle().hover();
-    await workspaceCard.selectSnowmanMenu(MenuOption.Duplicate, { waitForNav: true });
+  test('Duplicate workspace', async () => {
+    await findOrCreateWorkspace(page, { workspaceName });
+
+    // Access Workspace Duplicate page via Workspace action menu.
+    const dataPage = new WorkspaceDataPage(page);
+    await dataPage.selectWorkspaceAction(MenuOption.Duplicate);
 
     // Fill out Workspace Name should be just enough for successful duplication
     const workspaceEditPage = new WorkspaceEditPage(page);
@@ -40,7 +44,6 @@ describe('Duplicate workspace', () => {
     await workspaceEditPage.clickCreateFinishButton(finishButton);
 
     // Duplicate workspace Data page is loaded.
-    const dataPage = new WorkspaceDataPage(page);
     await dataPage.waitForLoad();
     expect(page.url()).toContain(duplicateWorkspaceName.replace(/-/g, '')); // Remove dash from workspace name
 
@@ -54,31 +57,53 @@ describe('Duplicate workspace', () => {
     expect(await WorkspaceCard.findCard(page, duplicateWorkspaceName)).toBeFalsy();
   });
 
-  test('OWNER can access workspace duplicate page via Workspace action menu', async () => {
-    await findOrCreateWorkspace(page, { workspaceName: workspace });
-
-    const dataPage = new WorkspaceDataPage(page);
-    await dataPage.selectWorkspaceAction(MenuOption.Duplicate);
+  test('Cannot duplicate workspace with older CDR version without consent to restrictions', async () => {
+    const workspaceCard = await findOrCreateWorkspaceCard(page, { workspaceName });
+    await workspaceCard.asElementHandle().hover();
+    await workspaceCard.selectSnowmanMenu(MenuOption.Duplicate, { waitForNav: true });
 
     const workspaceEditPage = new WorkspaceEditPage(page);
-    await workspaceEditPage.waitForLoad();
 
-    const finishButton = workspaceEditPage.getDuplicateWorkspaceButton();
-    expect(await finishButton.isCursorNotAllowed()).toBe(true);
+    // Fill out the fields required for duplication and observe that duplication is enabled
+    const duplicateWorkspaceName = await workspaceEditPage.fillOutRequiredDuplicationFields();
+    const duplicateButton = workspaceEditPage.getDuplicateWorkspaceButton();
+    await duplicateButton.waitUntilEnabled();
 
-    // Fill out Workspace Name
-    await workspaceEditPage.getWorkspaceNameTextbox().clear();
-    await workspaceEditPage.fillOutWorkspaceName();
-    // select "Share workspace with same set of collaborators radiobutton
-    await workspaceEditPage.clickShareWithCollaboratorsCheckbox();
+    // Change CDR version to an old CDR version.
+    await workspaceEditPage.selectCdrVersion(config.OLD_CDR_VERSION_NAME);
+    expect(await duplicateButton.isCursorNotAllowed()).toBe(true);
+
+    const modal = new OldCdrVersionModal(page);
+    const cancelButton = modal.getCancelButton();
+    await cancelButton.click();
+
+    // The CDR version is forcibly reverted back to the default
+    const cdrVersionSelect = workspaceEditPage.getCdrVersionSelect();
+    expect(await cdrVersionSelect.getSelectedValue()).toBe(config.DEFAULT_CDR_VERSION_NAME);
+
+    // Try again. This time consent to restriction.
+    // Duplicate workspace with an older CDR Version can proceed after consenting to restrictions.
+    await workspaceEditPage.selectCdrVersion(config.OLD_CDR_VERSION_NAME);
+    await modal.consentToOldCdrRestrictions();
+
+    // Finish creation of workspace.
     await workspaceEditPage.requestForReviewRadiobutton(false);
-    await finishButton.waitUntilEnabled();
-    expect(await finishButton.isCursorNotAllowed()).toBe(false);
+    await duplicateButton.waitUntilEnabled();
+    await workspaceEditPage.clickCreateFinishButton(duplicateButton);
 
-    // Click CANCEL button.
-    const cancelButton = workspaceEditPage.getCancelButton();
-    await cancelButton.clickAndWait();
-
+    // Duplicate workspace Data page is loaded.
+    const dataPage = new WorkspaceDataPage(page);
     await dataPage.waitForLoad();
+    expect(page.url()).toContain(`/${duplicateWorkspaceName.toLowerCase()}/data`);
+
+    // Delete duplicate workspace via Workspace card in Your Workspaces page.
+    await Navigation.navMenu(page, NavLink.YOUR_WORKSPACES);
+    const workspacesPage = new WorkspacesPage(page);
+    await workspacesPage.waitForLoad();
+
+    await WorkspaceCard.deleteWorkspace(page, duplicateWorkspaceName);
+
+    // Verify Delete action was successful.
+    expect(await WorkspaceCard.findCard(page, duplicateWorkspaceName)).toBeFalsy();
   });
 });

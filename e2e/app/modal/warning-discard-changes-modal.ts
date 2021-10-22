@@ -11,7 +11,7 @@ export default class WarningDiscardChangesModal extends Modal {
   }
 
   async isLoaded(): Promise<boolean> {
-    await waitForText(this.page, title, { xpath: this.getXpath() });
+    await waitForText(this.page, title, { container: this });
     return true;
   }
 

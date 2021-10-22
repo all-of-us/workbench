@@ -7,7 +7,6 @@ import static org.pmiops.workbench.db.model.DbStorageEnums.disabilityFromStorage
 import static org.pmiops.workbench.db.model.DbStorageEnums.educationFromStorage;
 import static org.pmiops.workbench.db.model.DbStorageEnums.ethnicityFromStorage;
 import static org.pmiops.workbench.db.model.DbStorageEnums.genderIdentityFromStorage;
-import static org.pmiops.workbench.db.model.DbStorageEnums.institutionDUATypeFromStorage;
 import static org.pmiops.workbench.db.model.DbStorageEnums.institutionalRoleFromStorage;
 import static org.pmiops.workbench.db.model.DbStorageEnums.organizationTypeFromStorage;
 import static org.pmiops.workbench.db.model.DbStorageEnums.raceFromStorage;
@@ -20,7 +19,9 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
+import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.model.InstitutionMembershipRequirement;
 import org.pmiops.workbench.model.ReportingCohort;
 import org.pmiops.workbench.model.ReportingDataset;
 import org.pmiops.workbench.model.ReportingDatasetCohort;
@@ -150,22 +151,30 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
   public List<ReportingInstitution> getInstitutions() {
     return jdbcTemplate.query(
         "SELECT \n"
-            + "  display_name,\n"
-            + "  dua_type_enum,\n"
-            + "  institution_id,\n"
-            + "  organization_type_enum,\n"
-            + "  organization_type_other_text,\n"
-            + "  short_name\n"
-            + "FROM institution",
+            + "  i.display_name,\n"
+            + "  i.institution_id,\n"
+            + "  i.organization_type_enum,\n"
+            + "  i.organization_type_other_text,\n"
+            + "  i.short_name,\n"
+            + "  itr.requirement_enum\n"
+            + "FROM institution i\n"
+            + "JOIN institution_tier_requirement itr\n"
+            + "   ON i.institution_id=itr.institution_id\n"
+            + "JOIN access_tier at\n"
+            + "   ON itr.access_tier_id=at.access_tier_id\n"
+            + "WHERE at.short_name='"
+            + AccessTierService.REGISTERED_TIER_SHORT_NAME
+            + "'",
         (rs, unused) ->
             new ReportingInstitution()
                 .displayName(rs.getString("display_name"))
-                .duaTypeEnum(institutionDUATypeFromStorage(rs.getShort("dua_type_enum")))
                 .institutionId(rs.getLong("institution_id"))
                 .organizationTypeEnum(
                     organizationTypeFromStorage(rs.getShort("organization_type_enum")))
                 .organizationTypeOtherText(rs.getString("organization_type_other_text"))
-                .shortName(rs.getString("short_name")));
+                .shortName(rs.getString("short_name"))
+                .registeredTierRequirement(
+                    InstitutionMembershipRequirement.valueOf(rs.getString("requirement_enum"))));
   }
 
   @Override
@@ -175,18 +184,18 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
             "SELECT \n"
                 + "  u.user_id,\n"
                 + "  u.area_of_research,\n"
-                + "  u.compliance_training_bypass_time,\n"
-                + "  u.compliance_training_completion_time,\n"
+                + "  uamrt.compliance_training_bypass_time,\n"
+                + "  uamrt.compliance_training_completion_time,\n"
                 + "  u.compliance_training_expiration_time,\n"
                 + "  u.contact_email,\n"
                 + "  u.creation_time,\n"
-                + "  u.data_use_agreement_bypass_time,\n"
-                + "  u.data_use_agreement_completion_time,\n"
+                + "  uamd.data_use_agreement_bypass_time,\n"
+                + "  uamd.data_use_agreement_completion_time,\n"
                 + "  u.data_use_agreement_signed_version,\n"
                 + "  u.demographic_survey_completion_time,\n"
                 + "  u.disabled,\n"
-                + "  u.era_commons_bypass_time,\n"
-                + "  u.era_commons_completion_time,\n"
+                + "  uame.era_commons_bypass_time,\n"
+                + "  uame.era_commons_completion_time,\n"
                 + "  u.family_name,\n"
                 // temporary solution to RW-6566
                 + "  uat.first_enabled AS first_registration_completion_time,\n"
@@ -195,8 +204,8 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 + "  u.given_name,\n"
                 + "  u.last_modified_time,\n"
                 + "  u.professional_url,\n"
-                + "  u.two_factor_auth_bypass_time,\n"
-                + "  u.two_factor_auth_completion_time,\n"
+                + "  uamt.two_factor_auth_bypass_time,\n"
+                + "  uamt.two_factor_auth_completion_time,\n"
                 + "  u.email AS username,\n"
                 + "  a.city,\n"
                 + "  a.country,\n"
@@ -261,6 +270,38 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 + "    WHERE uat.access_status = 1 AND at.short_name = 'registered' "
                 + "  ) uat ON u.user_id = uat.user_id "
                 // end temporary solution for RW-6566
+                + "  LEFT OUTER JOIN ( "
+                + "    SELECT uam.user_id, "
+                + "      uam.bypass_time AS era_commons_bypass_time, "
+                + "      uam.completion_time AS era_commons_completion_time "
+                + "    FROM user_access_module uam "
+                + "    JOIN access_module am ON am.access_module_id=uam.access_module_id "
+                + "    WHERE am.name = 'ERA_COMMONS' "
+                + "  ) uame ON u.user_id = uame.user_id "
+                + "  LEFT OUTER JOIN ( "
+                + "    SELECT uam.user_id, "
+                + "      uam.bypass_time AS two_factor_auth_bypass_time, "
+                + "      uam.completion_time AS two_factor_auth_completion_time "
+                + "    FROM user_access_module uam "
+                + "    JOIN access_module am ON am.access_module_id=uam.access_module_id "
+                + "    WHERE am.name = 'TWO_FACTOR_AUTH' "
+                + "  ) uamt ON u.user_id = uamt.user_id "
+                + "  LEFT OUTER JOIN ( "
+                + "    SELECT uam.user_id, "
+                + "      uam.bypass_time AS compliance_training_bypass_time, "
+                + "      uam.completion_time AS compliance_training_completion_time "
+                + "    FROM user_access_module uam "
+                + "    JOIN access_module am ON am.access_module_id=uam.access_module_id "
+                + "    WHERE am.name = 'RT_COMPLIANCE_TRAINING' "
+                + "  ) uamrt ON u.user_id = uamrt.user_id "
+                + "  LEFT OUTER JOIN ( "
+                + "    SELECT uam.user_id, "
+                + "      uam.bypass_time AS data_use_agreement_bypass_time, "
+                + "      uam.completion_time AS data_use_agreement_completion_time "
+                + "    FROM user_access_module uam "
+                + "    JOIN access_module am ON am.access_module_id=uam.access_module_id "
+                + "    WHERE am.name = 'DATA_USER_CODE_OF_CONDUCT' "
+                + "  ) uamd ON u.user_id = uamd.user_id "
                 + "  ORDER BY u.user_id"
                 + "  LIMIT %d\n"
                 + "  OFFSET %d",

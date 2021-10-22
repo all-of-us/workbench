@@ -2,9 +2,9 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 import Iframe from 'react-iframe';
 
-import {navigate, urlParamsStore} from 'app/utils/navigation';
+import {NavigationProps} from 'app/utils/navigation';
 import {fetchAbortableRetry} from 'app/utils/retry';
-import {RuntimeStore} from 'app/utils/stores';
+import {MatchParams, RuntimeStore} from 'app/utils/stores';
 
 import {Button} from 'app/components/buttons';
 import {FlexRow} from 'app/components/flex';
@@ -20,15 +20,17 @@ import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {
   reactStyles,
   withCurrentWorkspace,
-  withQueryParams,
   withUserProfile
 } from 'app/utils';
 import {Kernels} from 'app/utils/notebook-kernels';
 import {maybeInitializeRuntime, withRuntimeStore} from 'app/utils/runtime-utils';
+import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {environment} from 'environments/environment';
 import {Profile, Runtime, RuntimeStatus} from 'generated/fetch';
+import {RouteComponentProps, withRouter} from 'react-router-dom';
 import {appendNotebookFileSuffix, dropNotebookFileSuffix} from './util';
+import {parseQueryParams} from "app/components/app-router";
 
 export enum Progress {
   Unknown,
@@ -49,6 +51,14 @@ export const progressStrings: Map<Progress, string> = new Map([
   [Progress.Copying, 'Copying the notebook onto the server'],
   [Progress.Creating, 'Creating the new notebook'],
   [Progress.Redirecting, 'Redirecting to the notebook server'],
+]);
+
+// Statuses during which the user can interact with the Runtime UIs, e.g. via
+// an iframe. When the runtime is in other states, requests to the runtime host
+// are likely to fail.
+const interactiveRuntimeStatuses = new Set<RuntimeStatus>([
+  RuntimeStatus.Running,
+  RuntimeStatus.Updating
 ]);
 
 const styles = reactStyles({
@@ -212,9 +222,8 @@ interface State {
   progressComplete: Map<Progress, boolean>;
 }
 
-interface Props extends WithSpinnerOverlayProps {
+interface Props extends WithSpinnerOverlayProps, NavigationProps, RouteComponentProps<MatchParams> {
   workspace: WorkspaceData;
-  queryParams: any;
   profileState: {profile: Profile, reload: Function, updateCache: Function};
   runtimeStore: RuntimeStore;
 }
@@ -227,7 +236,8 @@ export const NotebookRedirect = fp.flow(
   withUserProfile(),
   withCurrentWorkspace(),
   withRuntimeStore(),
-  withQueryParams(),
+  withNavigation,
+  withRouter
 )(
   class extends React.Component<Props, State> {
 
@@ -251,11 +261,13 @@ export const NotebookRedirect = fp.flow(
     }
 
     private isCreatingNewNotebook() {
-      return !!this.props.queryParams.creating;
+      const creating = parseQueryParams(this.props.location.search).get('creating');
+      return !!creating;
     }
 
     private isPlaygroundMode() {
-      return this.props.queryParams.playgroundMode === 'true';
+      const playgroundMode = parseQueryParams(this.props.location.search).get('playgroundMode');
+      return playgroundMode === 'true';
     }
 
     private async runtimeRetry<T>(f: () => Promise<T>): Promise<T> {
@@ -271,7 +283,7 @@ export const NotebookRedirect = fp.flow(
 
     // get notebook name without file suffix
     private getNotebookName() {
-      const {nbName} = urlParamsStore.getValue();
+      const {nbName} = this.props.match.params;
       // safe whether nbName has the standard notebook suffix or not
       return dropNotebookFileSuffix(decodeURIComponent(nbName));
     }
@@ -310,13 +322,13 @@ export const NotebookRedirect = fp.flow(
       }
 
       // If we're already loaded (viewing the notebooks iframe), and the
-      // runtime transitions out of the "running" state, navigate back to
+      // runtime transitions out of an interactive state, navigate back to
       // the preview page as the iframe will start erroring.
+      const isLoaded = runtime !== undefined && this.state.progress === Progress.Loaded;
       const {status: prevStatus = null} = prevProps.runtimeStore.runtime || {};
-      const isLoaded = this.state.progress === Progress.Loaded;
-      if (isLoaded && prevStatus === RuntimeStatus.Running &&
-          runtime !== undefined && (runtime === null || runtime.status !== RuntimeStatus.Running)) {
-        navigate([
+      const {status: curStatus = null} = runtime || {};
+      if (isLoaded && interactiveRuntimeStatuses.has(prevStatus) && !interactiveRuntimeStatuses.has(curStatus)) {
+        this.props.navigate([
           'workspaces', workspace.namespace, workspace.id,
           // navigate will encode the notebook name automatically
           'notebooks', 'preview', this.getFullNotebookName()
@@ -377,7 +389,7 @@ export const NotebookRedirect = fp.flow(
 
     private async createNotebookAndLocalize(runtime: Runtime) {
       const fileContent = commonNotebookFormat;
-      const {kernelType} = this.props.queryParams;
+      const kernelType = parseQueryParams(this.props.location.search).get('kernelType');
       if (kernelType === Kernels.R.toString()) {
         fileContent.metadata = rNotebookMetadata;
       } else {

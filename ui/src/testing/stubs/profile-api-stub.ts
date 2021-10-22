@@ -7,13 +7,11 @@ import {
   NihToken,
   Profile,
   ProfileApi,
-  RenewableAccessModuleStatus,
 } from 'generated/fetch';
 
 import {AccessTierShortNames} from 'app/utils/access-tiers';
-import {EmptyResponse} from 'generated/fetch/api';
+import {AdminUserListResponse, EmptyResponse} from 'generated/fetch/api';
 import {stubNotImplementedError} from 'testing/stubs/stub-utils';
-import ModuleNameEnum = RenewableAccessModuleStatus.ModuleNameEnum;
 
 export class ProfileStubVariables {
   static PROFILE_STUB = <Profile>{
@@ -45,22 +43,26 @@ export class ProfileStubVariables {
       institutionDisplayName: 'The Broad Institute',
       institutionalRoleEnum: InstitutionalRole.FELLOW
     },
-    renewableAccessModules: {
+    accessModules : {
       modules: [{
-        moduleName: ModuleNameEnum.DataUseAgreement,
+        moduleName: AccessModule.COMPLIANCETRAINING,
         expirationEpochMillis: undefined
       }, {
-        moduleName: ModuleNameEnum.ComplianceTraining,
+        moduleName: AccessModule.DATAUSERCODEOFCONDUCT,
         expirationEpochMillis: undefined
       }, {
-        moduleName: ModuleNameEnum.ProfileConfirmation,
+        moduleName: AccessModule.PROFILECONFIRMATION,
         expirationEpochMillis: undefined
       }, {
-        moduleName: ModuleNameEnum.PublicationConfirmation,
+        moduleName: AccessModule.PUBLICATIONCONFIRMATION,
         expirationEpochMillis: undefined
       }],
       anyModuleHasExpired: false
-    }
+    },
+    tierEligibilities : [{
+      accessTierShortName: AccessTierShortNames.Registered,
+      eraRequired: true
+    }]
   };
   static ADMIN_TABLE_USER_STUB = <AdminTableUser>{...ProfileStubVariables.PROFILE_STUB};
 }
@@ -118,30 +120,11 @@ export class ProfileApiStub extends ProfileApi {
 
   public bypassAccessRequirement(
     userId: number, bypassed?: AccessBypassRequest, options?: any): Promise<EmptyResponse> {
-    return new Promise<EmptyResponse>(resolve => {
-      let valueToSet;
-      if (bypassed.isBypassed) {
-        valueToSet = 1;
-      } else {
-        valueToSet = null;
-      }
-      switch (bypassed.moduleName) {
-        case AccessModule.COMPLIANCETRAINING:
-          this.profile.complianceTrainingBypassTime = valueToSet;
-          break;
-        case AccessModule.ERACOMMONS:
-          this.profile.eraCommonsBypassTime = valueToSet;
-          break;
-        case AccessModule.RASLINKLOGINGOV:
-          this.profile.rasLinkLoginGovBypassTime = valueToSet;
-          break;
-      }
-      resolve({});
-    });
+    return new Promise<EmptyResponse>(() => {});
   }
 
-  public submitDataUseAgreement(dataUseAgreementVersion: number) {
-    this.profile.dataUseAgreementSignedVersion = dataUseAgreementVersion;
+  public submitDUCC(duccVersion: number) {
+    this.profile.dataUseAgreementSignedVersion = duccVersion;
     return Promise.resolve(this.profile);
   }
 
@@ -149,4 +132,10 @@ export class ProfileApiStub extends ProfileApi {
     return Promise.resolve(this.profile);
   }
 
+  public getAllUsers(): Promise<AdminUserListResponse> {
+    return Promise.resolve({users: [{
+      userId: 1,
+      username: ProfileStubVariables.PROFILE_STUB.username,
+    }]});
+  }
 }

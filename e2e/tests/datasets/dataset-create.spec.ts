@@ -1,10 +1,9 @@
 import DataResourceCard from 'app/component/data-resource-card';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
-import { LinkText, MenuOption, ResourceCard, WorkspaceAccessLevel } from 'app/text-labels';
+import { ConceptSetSelectValue, MenuOption, ResourceCard, WorkspaceAccessLevel } from 'app/text-labels';
 import { findOrCreateWorkspace, findWorkspaceCard, signInWithAccessToken } from 'utils/test-utils';
 import { waitWhileLoading } from 'utils/waits-utils';
 import DatasetEditPage from 'app/page/dataset-edit-page';
-import WorkspacesPage from 'app/page/workspaces-page';
 import WorkspaceAboutPage from 'app/page/workspace-about-page';
 import { config } from 'resources/workbench-config';
 import { makeWorkspaceName } from 'utils/str-utils';
@@ -15,77 +14,6 @@ jest.setTimeout(10 * 60 * 1000);
 describe('Create Dataset', () => {
   const workspace = makeWorkspaceName();
   let datasetName;
-
-  test('Cannot create dataset when required inputs are blank', async () => {
-    await signInWithAccessToken(page);
-    await findOrCreateWorkspace(page, { workspaceName: workspace });
-
-    // Click Add Dataset button.
-    const dataPage = new WorkspaceDataPage(page);
-    const datasetPage = await dataPage.clickAddDatasetButton();
-
-    // Select Values (Columns): Select All checkbox is disabled.
-    expect(await datasetPage.getSelectAllCheckbox().isDisabled()).toBe(true);
-
-    // Step 1 Select Cohort: Choose "All Participants"
-    await datasetPage.selectCohorts(['All Participants']);
-
-    // Export button is disabled.
-    const analyzeButton = datasetPage.getAnalyzeButton();
-    expect(await analyzeButton.isCursorNotAllowed()).toBe(true);
-
-    // Create Dataset button is disabled.
-    const createDatasetButton = datasetPage.getCreateDatasetButton();
-    expect(await createDatasetButton.isCursorNotAllowed()).toBe(true);
-
-    // Select Values (Columns): Select All checkbox is disabled.
-    expect(await datasetPage.getSelectAllCheckbox().isDisabled()).toBe(true);
-
-    // Step 2 Select Concept Sets (Rows): select Demographics.
-    await datasetPage.selectConceptSets([LinkText.Demographics]);
-
-    // Export button is disabled.
-    expect(await analyzeButton.isCursorNotAllowed()).toBe(true);
-
-    // Create Dataset button is enabled.
-    expect(await createDatasetButton.isCursorNotAllowed()).toBe(false);
-
-    // Select Values (Columns): Select All checkbox is enabled.
-    expect(await datasetPage.getSelectAllCheckbox().isDisabled()).toBe(false);
-
-    // Select Values (Columns): Select All checkbox is checked.
-    expect(await datasetPage.getSelectAllCheckbox().isChecked()).toBe(true);
-
-    // Step 2 Select Concept Sets (Rows): select all checkboxes.
-    await datasetPage.selectConceptSets([LinkText.AllSurveys]);
-    await datasetPage.selectConceptSets([LinkText.FitbitHeartRateSummary]);
-    await datasetPage.selectConceptSets([LinkText.FitbitActivitySummary]);
-    await datasetPage.selectConceptSets([LinkText.FitbitHeartRateLevel]);
-    await datasetPage.selectConceptSets([LinkText.FitbitIntraDaySteps]);
-
-    // Export button is disabled.
-    expect(await analyzeButton.isCursorNotAllowed()).toBe(true);
-
-    // Create Dataset button is enabled.
-    expect(await createDatasetButton.isCursorNotAllowed()).toBe(false);
-
-    // Step 1 uncheck "All Participants".
-    await datasetPage.unselectCohort('All Participants');
-
-    // Export button is disabled.
-    expect(await analyzeButton.isCursorNotAllowed()).toBe(true);
-
-    // Create Dataset button is disabled.
-    expect(await createDatasetButton.isCursorNotAllowed()).toBe(true);
-
-    // View Preview Table button is disabled.
-    expect(await datasetPage.getPreviewTableButton().isCursorNotAllowed()).toBe(true);
-
-    // Go to Workspaces page. There is no Discard Changes warning.
-    await datasetPage.getBackToWorkspacesLink().clickAndWait();
-
-    await new WorkspacesPage(page).waitForLoad();
-  });
 
   test('Create dataset with all available inputs', async () => {
     await signInWithAccessToken(page);
@@ -100,12 +28,12 @@ describe('Create Dataset', () => {
     await datasetBuildPage.selectCohorts(['All Participants']);
 
     // Step 2 Select Concept Sets (Rows): select all checkboxes.
-    await datasetBuildPage.selectConceptSets([LinkText.Demographics]);
-    await datasetBuildPage.selectConceptSets([LinkText.AllSurveys]);
-    await datasetBuildPage.selectConceptSets([LinkText.FitbitHeartRateSummary]);
-    await datasetBuildPage.selectConceptSets([LinkText.FitbitActivitySummary]);
-    await datasetBuildPage.selectConceptSets([LinkText.FitbitHeartRateLevel]);
-    await datasetBuildPage.selectConceptSets([LinkText.FitbitIntraDaySteps]);
+    await datasetBuildPage.selectConceptSets([ConceptSetSelectValue.Demographics]);
+    await datasetBuildPage.selectConceptSets([ConceptSetSelectValue.AllSurveys]);
+    await datasetBuildPage.selectConceptSets([ConceptSetSelectValue.FitbitHeartRateSummary]);
+    await datasetBuildPage.selectConceptSets([ConceptSetSelectValue.FitbitActivitySummary]);
+    await datasetBuildPage.selectConceptSets([ConceptSetSelectValue.FitbitHeartRateLevel]);
+    await datasetBuildPage.selectConceptSets([ConceptSetSelectValue.FitbitIntraDaySteps]);
 
     // Preview table exists and has one or more table rows.
     const previewTable = await datasetBuildPage.getPreviewTable();
@@ -129,8 +57,7 @@ describe('Create Dataset', () => {
     const aboutPage = new WorkspaceAboutPage(page);
     await aboutPage.waitForLoad();
 
-    const shareWorkspaceModal = await aboutPage.shareWorkspace();
-    await shareWorkspaceModal.shareWithUser(config.READER_USER, WorkspaceAccessLevel.Reader);
+    await aboutPage.shareWorkspaceWithUser(config.READER_USER, WorkspaceAccessLevel.Reader);
     await waitWhileLoading(page);
 
     // Don't delete dataset because it's needed in next test.
@@ -138,7 +65,7 @@ describe('Create Dataset', () => {
 
   test('Workspace READER cannot edit dataset', async () => {
     // READER log in in new Incognito page.
-    await signInWithAccessToken(page, config.READER_ACCESS_TOKEN_FILE);
+    await signInWithAccessToken(page, config.READER_USER);
 
     // Find workspace created by previous test. If not found, test will fail.
     const workspaceCard = await findWorkspaceCard(page, workspace);
@@ -174,7 +101,7 @@ describe('Create Dataset', () => {
     expect(await analyzeButton.isCursorNotAllowed()).toBe(true);
 
     // No matter of what has changed, the Analyze button remains disabled.
-    await dataSetEditPage.selectConceptSets([LinkText.FitbitIntraDaySteps]);
+    await dataSetEditPage.selectConceptSets([ConceptSetSelectValue.FitbitIntraDaySteps]);
     await dataSetEditPage.getPreviewTableButton().click();
     await waitWhileLoading(page);
     expect(await analyzeButton.isCursorNotAllowed()).toBe(true);

@@ -2,6 +2,10 @@
 ### Operating System
 We currently only support MacOS and Linux for development and testing.
 ### Prerequisite Software
+  * [Java 8](https://openjdk.java.net/projects/jdk8/)
+    * This must be installed, but needn't be the default.
+    * See [Developer System Initialization](developer-system-initialization.md) for configuration if your
+      system has a different default version of Java
   * [Docker CE](https://www.docker.com/community-edition)
     * Docker must be installed to build and run code (For Google workstations, see http://go/installdocker).
     * __IMPORTANT__: be sure to allocate ~70-80% of available memory and swap to the Docker Engine. This should be
@@ -14,12 +18,14 @@ We currently only support MacOS and Linux for development and testing.
     * Python is required by some project-specific scripts and by the Google Cloud Platform tools.
   * [gcloud](https://cloud.google.com/sdk/docs/#install_the_latest_cloud_tools_version_cloudsdk_current_version)
     * Command-line interface for Google Cloud Platform.
+    * Recent versions of gcloud are expected to work. However, a specific version is used in
+      CircleCI, which is guaranteed to work: https://github.com/all-of-us/workbench/blob/master/ci/Dockerfile.circle_build
     * For use with Stackdriver alert policies and certain other new features you may
     need to install `alpha` or `beta` channels via 
     ```text
     gcloud components install alpha
     ```
-    
+
 
 For local development, also install:
 
@@ -27,9 +33,6 @@ For local development, also install:
   * [Node.js](https://nodejs.org/en/) >= 8.  Currently known to work up to 12.16.
   * [Java 8](https://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)
   * [Docker Compose](https://docs.docker.com/compose/install/)
-  * [Docker sync](https://docker-sync.readthedocs.io)
-    * `sudo gem install docker-sync`
-    * If you'd prefer to install as non-root, you can [follow instructions for user-level install](https://docker-sync.readthedocs.io/en/latest/getting-started/installation.html).
 
 ### Initialization
 Next, follow the steps in [Developer System Initialization](developer-system-initialization.md).

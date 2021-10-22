@@ -1,4 +1,3 @@
-import {Component, Input} from '@angular/core';
 import {faEdit} from '@fortawesome/free-regular-svg-icons';
 import {
   faBook,
@@ -10,7 +9,7 @@ import {
 import {faDna} from '@fortawesome/free-solid-svg-icons/faDna';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import * as fp from 'lodash/fp';
-import * as moment from 'moment';
+import moment from 'moment'
 import {CSSProperties} from 'react';
 import * as React from 'react';
 import {CSSTransition, TransitionGroup} from 'react-transition-group';
@@ -21,15 +20,14 @@ import {SelectionList} from 'app/cohort-search/selection-list/selection-list.com
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {TooltipTrigger} from 'app/components/popups';
 import {PopupTrigger} from 'app/components/popups';
-import {RuntimePanel} from 'app/pages/analysis/runtime-panel';
+import {RuntimePanelWrapper} from 'app/pages/analysis/runtime-panel';
 import {SidebarContent} from 'app/pages/data/cohort-review/sidebar-content.component';
 import {ConceptListPage} from 'app/pages/data/concept/concept-list';
 import {participantStore} from 'app/services/review-state.service';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {
   DEFAULT,
-  reactStyles,
-  ReactWrapperBase, switchCase, withCdrVersions,
+  reactStyles, switchCase, withCdrVersions,
   withCurrentCohortCriteria,
   withCurrentConcept,
   withCurrentWorkspace,
@@ -39,7 +37,7 @@ import {AnalyticsTracker} from 'app/utils/analytics';
 import {
   currentCohortSearchContextStore,
   currentConceptStore,
-  NavStore,
+  NavigationProps,
   setSidebarActiveIconStore
 } from 'app/utils/navigation';
 import {withRuntimeStore} from 'app/utils/runtime-utils';
@@ -47,6 +45,7 @@ import {
   CompoundRuntimeOpStore,
   compoundRuntimeOpStore, GenomicExtractionStore, genomicExtractionStore,
   routeDataStore,
+  runtimeStore,
   RuntimeStore,
   serverConfigStore, updateGenomicExtractionStore,
   withStore
@@ -55,7 +54,7 @@ import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
 
-import {Clickable, MenuItem, StyledAnchorTag} from 'app/components/buttons';
+import {Clickable, MenuItem, StyledExternalLink} from 'app/components/buttons';
 import {ConfirmDeleteModal} from 'app/components/confirm-delete-modal';
 import {GenomicsExtractionTable} from 'app/components/genomics-extraction-table';
 import {HelpTips} from 'app/components/help-tips';
@@ -65,22 +64,28 @@ import {WorkspaceShare} from 'app/pages/workspace/workspace-share';
 import {dataSetApi} from 'app/services/swagger-fetch-clients';
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import {getCdrVersion} from 'app/utils/cdr-versions';
-import {navigate} from 'app/utils/navigation';
+import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {
   CdrVersionTiersResponse,
   Criteria, GenomicExtractionJob,
   ParticipantCohortStatus,
   ResourceType,
+  RuntimeError,
   RuntimeStatus, TerraJobStatus,
   WorkspaceAccessLevel
 } from 'generated/fetch';
 
+import arrowLeft from 'assets/icons/arrow-left-regular.svg';
+import runtime from 'assets/icons/thunderstorm-solid.svg';
+import times from 'assets/icons/times-light.svg';
+import { RuntimeErrorModal } from './runtime-error-modal';
+
 export const LOCAL_STORAGE_KEY_SIDEBAR_STATE = 'WORKSPACE_SIDEBAR_STATE';
 
 const proIcons = {
-  arrowLeft: '/assets/icons/arrow-left-regular.svg',
-  runtime: '/assets/icons/thunderstorm-solid.svg',
-  times: '/assets/icons/times-light.svg'
+  arrowLeft: arrowLeft,
+  runtime: runtime,
+  times: times
 };
 
 const styles = reactStyles({
@@ -226,7 +231,7 @@ const pageKeyToAnalyticsLabels = {
   reviewParticipantDetail: 'Review Individual',
 };
 
-interface Props {
+interface Props extends NavigationProps {
   pageKey: string;
   profileState: any;
   shareFunction: Function;
@@ -242,7 +247,8 @@ interface Props {
 enum CurrentModal {
   None,
   Share,
-  Delete
+  Delete,
+  RuntimeError
 }
 
 interface State {
@@ -253,6 +259,7 @@ interface State {
   showCriteria: boolean;
   tooltipId: number;
   currentModal: CurrentModal;
+  runtimeErrors: Array<RuntimeError>;
 }
 
 export const HelpSidebar = fp.flow(
@@ -263,7 +270,8 @@ export const HelpSidebar = fp.flow(
   withStore(compoundRuntimeOpStore, 'compoundRuntimeOps'),
   withStore(genomicExtractionStore, 'genomicExtraction'),
   withUserProfile(),
-  withCdrVersions()
+  withCdrVersions(),
+  withNavigation
 )(
   class extends React.Component<Props, State> {
     constructor(props: Props) {
@@ -275,7 +283,8 @@ export const HelpSidebar = fp.flow(
         searchTerm: '',
         showCriteria: false,
         tooltipId: undefined,
-        currentModal: CurrentModal.None
+        currentModal: CurrentModal.None,
+        runtimeErrors: null
       };
     }
 
@@ -291,7 +300,7 @@ export const HelpSidebar = fp.flow(
     }, async() => {
       AnalyticsTracker.Workspaces.Delete();
       await workspacesApi().deleteWorkspace(this.props.workspace.namespace, this.props.workspace.id);
-      navigate(['/workspaces']);
+      this.props.navigate(['workspaces']);
     });
 
     iconConfig(iconKey): IconConfig {
@@ -401,7 +410,7 @@ export const HelpSidebar = fp.flow(
     async componentDidMount() {
       // This is being set here instead of the constructor to show the opening animation of the side panel and
       // indicate to the user that it's something they can close.
-      this.setActiveIcon(setSidebarActiveIconStore.getValue());
+      this.setActiveIcon(localStorage.getItem(LOCAL_STORAGE_KEY_SIDEBAR_STATE));
       this.subscriptions.push(participantStore.subscribe(participant => this.setState({participant})));
       this.subscriptions.push(setSidebarActiveIconStore.subscribe(activeIcon => {
         this.setState({activeIcon});
@@ -414,6 +423,22 @@ export const HelpSidebar = fp.flow(
       this.subscriptions.push(routeDataStore.subscribe((newRoute, oldRoute) => {
         if (!fp.isEmpty(oldRoute) && !fp.isEqual(newRoute, oldRoute)) {
           this.setActiveIcon(null);
+        }
+      }));
+      this.subscriptions.push(runtimeStore.subscribe((newRuntime, oldRuntime) => {
+        // If the runtime status has changed from something that is not Error to Error,
+        // and we have error messages, show the error modal.
+        if (
+            newRuntime.runtimeLoaded
+            && newRuntime.workspaceNamespace === this.props.workspace.namespace
+            && newRuntime.runtime.status === RuntimeStatus.Error
+            && (!oldRuntime.runtime || oldRuntime.runtime.status !== RuntimeStatus.Error)
+            && newRuntime.runtime.errors
+        ) {
+          this.setState({
+            currentModal: CurrentModal.RuntimeError,
+            runtimeErrors: newRuntime.runtime.errors
+          });
         }
       }));
 
@@ -485,7 +510,7 @@ export const HelpSidebar = fp.flow(
               icon='copy'
               onClick={() => {
                 AnalyticsTracker.Workspaces.OpenDuplicatePage();
-                NavStore.navigate(['/workspaces', namespace, id, 'duplicate']);
+                this.props.navigate(['workspaces', namespace, id, 'duplicate']);
               }}>
               Duplicate
             </MenuItem>
@@ -495,7 +520,7 @@ export const HelpSidebar = fp.flow(
               disabled={isNotOwner}
               onClick={() => {
                 AnalyticsTracker.Workspaces.OpenEditPage();
-                NavStore.navigate(['/workspaces', namespace, id, 'edit']);
+                this.props.navigate(['workspaces', namespace, id, 'edit']);
               }}>
               Edit
             </MenuItem>
@@ -730,7 +755,7 @@ export const HelpSidebar = fp.flow(
             bodyWidthRem: '30',
             bodyPadding: '0 1.25rem',
             renderBody: () =>
-             <RuntimePanel onClose={() => this.setActiveIcon(null)}/>,
+             <RuntimePanelWrapper onClose={() => this.setActiveIcon(null)}/>,
             showFooter: false
           };
         case 'notebooksHelp':
@@ -754,7 +779,7 @@ export const HelpSidebar = fp.flow(
               </div>
             ,
             renderBody: () => this.state.participant ?
-               <SidebarContent/> : <Spinner style={{display: 'block', margin: '3rem auto'}}/>,
+               <SidebarContent participant={this.state.participant}/> : <Spinner style={{display: 'block', margin: '3rem auto'}}/>,
             showFooter: true
           };
         case 'concept':
@@ -794,7 +819,7 @@ export const HelpSidebar = fp.flow(
     }
 
     render() {
-      const {activeIcon} = this.state;
+      const {activeIcon, runtimeErrors} = this.state;
       const sidebarContent = this.sidebarContent(activeIcon);
       const shouldRenderWorkspaceMenu = !this.iconConfig('concept').showIcon() && !this.iconConfig('criteria').showIcon();
 
@@ -868,9 +893,9 @@ export const HelpSidebar = fp.flow(
                   <div style={{...styles.footer}}>
                       <h3 style={{...styles.sectionTitle, marginTop: 0}}>Not finding what you're looking for?</h3>
                       <p style={styles.contentItem}>
-                          Visit our <StyledAnchorTag href={supportUrls.helpCenter}
-                                                     target='_blank' onClick={() => this.analyticsEvent('UserSupport')}> User Support Hub
-                      </StyledAnchorTag> page or <span style={styles.link} onClick={() => this.openContactWidget()}> contact us</span>.
+                          Visit our <StyledExternalLink href={supportUrls.helpCenter}
+                                                        target='_blank' onClick={() => this.analyticsEvent('UserSupport')}> User Support Hub
+                      </StyledExternalLink> page or <span style={styles.link} onClick={() => this.openContactWidget()}> contact us</span>.
                       </p>
                   </div>}
                 </div>}
@@ -886,22 +911,15 @@ export const HelpSidebar = fp.flow(
             [CurrentModal.Delete, () => <ConfirmDeleteModal closeFunction={() => this.setState({currentModal: CurrentModal.None})}
                                                             resourceType={ResourceType.WORKSPACE}
                                                             receiveDelete={() => this.deleteWorkspace()}
-                                                            resourceName={this.props.workspace.name}/>]
+                                                            resourceName={this.props.workspace.name}/>],
+            [CurrentModal.RuntimeError, () => <RuntimeErrorModal
+                closeFunction={() => this.setState({currentModal: CurrentModal.None})}
+                openRuntimePanel={() => this.setActiveIcon('runtime')}
+                errors={runtimeErrors}
+              />]
           )
         }
       </div>;
     }
   }
 );
-
-@Component({
-  selector: 'app-help-sidebar',
-  template: '<div #root></div>',
-})
-export class HelpSidebarComponent extends ReactWrapperBase {
-  @Input('pageKey') pageKey: Props['pageKey'];
-
-  constructor() {
-    super(HelpSidebar, ['pageKey' ]);
-  }
-}

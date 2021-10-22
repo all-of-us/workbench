@@ -1,11 +1,13 @@
 import {faTimes} from '@fortawesome/free-solid-svg-icons';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
-import {StyledAnchorTag} from 'app/components/buttons';
+import {StyledRouterLink} from 'app/components/buttons';
 import {FlexRow} from 'app/components/flex';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
 import {cookiesEnabled} from 'app/utils/cookies';
 import * as React from 'react';
+
+import cookies from 'assets/images/cookies.png';
 
 const styles = reactStyles({
   cookiePolicyMessage: {
@@ -62,10 +64,10 @@ export class CookieBanner extends React.Component<{}, CookieBannerState> {
   render() {
     return this.cookieBannerVisible() && <div style={styles.cookiePolicyMessage}>
             <FlexRow style={{alignItems: 'center'}}>
-                <img src='assets/images/cookies.png'/>
+                <img src={cookies}/>
                 <div style={{paddingLeft: '1rem', color: colors.primary}}>
                     We use cookies to help provide you with the best experience we can. By continuing to use our site, you consent
-                    to our <StyledAnchorTag href='/cookie-policy' target='_blank'>Cookie Policy</StyledAnchorTag>.
+                    to our <StyledRouterLink path='/cookie-policy' target='_blank'>Cookie Policy</StyledRouterLink>.
                 </div>
             </FlexRow>
             <FontAwesomeIcon icon={faTimes} style={styles.iconStyles} onClick={() => this.handleCloseCookies()} />

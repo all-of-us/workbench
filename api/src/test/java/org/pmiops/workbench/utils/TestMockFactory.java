@@ -19,18 +19,16 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 import org.pmiops.workbench.access.AccessTierService;
-import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.db.dao.AccessModuleDao;
 import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.model.DbAccessModule;
 import org.pmiops.workbench.db.model.DbAccessModule.AccessModuleName;
 import org.pmiops.workbench.db.model.DbAccessTier;
-import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
@@ -49,6 +47,22 @@ public class TestMockFactory {
       "gonewiththewind"; // should match workspace name w/o spaces
   public static final String DEFAULT_GOOGLE_PROJECT = "aou-rw-test-123";
 
+  /**
+   * Populate the list of expected Access Modules with appropriate properties. See
+   * http://broad.io/aou-access-modules-2021.
+   *
+   * <p>TWO_FACTOR_AUTH and ERA_COMMONS: bypassable and not subject to AAR (expirable)
+   *
+   * <p>DATA_USER_CODE_OF_CONDUCT and RT_COMPLIANCE_TRAINING: bypassable and expirable
+   *
+   * <p>PROFILE_CONFIRMATION and PUBLICATION_CONFIRMATION: expirable and not bypassable
+   *
+   * <p>When considering new modules, the simplest option for implementation purposes is to make
+   * them bypassable and non-expirable. So we should default to this, unless required for product
+   * reasons.
+   *
+   * <p>RAS_LOGIN_GOV and CT_COMPLIANCE_TRAINING are bypassable and non-expirable for this reason.
+   */
   public static final List<DbAccessModule> DEFAULT_ACCESS_MODULES =
       ImmutableList.of(
           new DbAccessModule()
@@ -70,6 +84,10 @@ public class TestMockFactory {
           new DbAccessModule()
               .setName(AccessModuleName.RT_COMPLIANCE_TRAINING)
               .setExpirable(true)
+              .setBypassable(true),
+          new DbAccessModule()
+              .setName(AccessModuleName.CT_COMPLIANCE_TRAINING)
+              .setExpirable(false)
               .setBypassable(true),
           new DbAccessModule()
               .setName(AccessModuleName.PROFILE_CONFIRMATION)
@@ -133,9 +151,9 @@ public class TestMockFactory {
                 .approved(false));
   }
 
-  public static FirecloudWorkspace createFirecloudWorkspace(
+  public static FirecloudWorkspaceDetails createFirecloudWorkspace(
       String ns, String name, String creator) {
-    return new FirecloudWorkspace()
+    return new FirecloudWorkspaceDetails()
         .namespace(ns)
         .workspaceId(ns)
         .name(name)
@@ -156,7 +174,7 @@ public class TestMockFactory {
             invocation -> {
               String capturedWorkspaceName = (String) invocation.getArguments()[1];
               String capturedWorkspaceNamespace = (String) invocation.getArguments()[0];
-              FirecloudWorkspace fcWorkspace =
+              FirecloudWorkspaceDetails fcWorkspace =
                   createFirecloudWorkspace(capturedWorkspaceNamespace, capturedWorkspaceName, null);
 
               FirecloudWorkspaceResponse fcResponse = new FirecloudWorkspaceResponse();
@@ -172,20 +190,13 @@ public class TestMockFactory {
         .createWorkspace(anyString(), anyString(), anyString());
   }
 
-  public void stubBufferBillingProject(BillingProjectBufferService billingProjectBufferService) {
-    stubBufferBillingProject(billingProjectBufferService, UUID.randomUUID().toString());
+  public static void stubCreateBillingProject(FireCloudService fireCloudService) {
+    stubCreateBillingProject(fireCloudService, UUID.randomUUID().toString());
   }
 
-  public void stubBufferBillingProject(
-      BillingProjectBufferService billingProjectBufferService, String billingProjectId) {
-    doAnswer(
-            invocation -> {
-              DbBillingProjectBufferEntry entry = mock(DbBillingProjectBufferEntry.class);
-              doReturn(billingProjectId).when(entry).getFireCloudProjectName();
-              return entry;
-            })
-        .when(billingProjectBufferService)
-        .assignBillingProject(any(), any());
+  public static void stubCreateBillingProject(
+      FireCloudService fireCloudService, String billingProjectId) {
+    doReturn(billingProjectId).when(fireCloudService).createBillingProjectName();
   }
 
   public static Cloudbilling createMockedCloudbilling() {
@@ -234,7 +245,7 @@ public class TestMockFactory {
     dbWorkspace.setWorkspaceId(workspaceDbId);
     dbWorkspace.setName(workspace.getName());
     dbWorkspace.setWorkspaceNamespace(workspace.getNamespace());
-    // a.k.a. FirecloudWorkspace.name
+    // a.k.a. FirecloudWorkspaceDetails.name
     dbWorkspace.setFirecloudName(workspace.getId()); // DB_WORKSPACE_FIRECLOUD_NAME
     ResearchPurpose researchPurpose = workspace.getResearchPurpose();
     dbWorkspace.setDiseaseFocusedResearch(researchPurpose.getDiseaseFocusedResearch());

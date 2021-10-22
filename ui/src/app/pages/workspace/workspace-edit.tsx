@@ -1,8 +1,8 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
-import * as validate from 'validate.js';
+import validate from 'validate.js';
 
-import {Button, Clickable, Link, StyledAnchorTag} from 'app/components/buttons';
+import {Button, Clickable, LinkButton, StyledExternalLink} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {InfoIcon} from 'app/components/icons';
@@ -16,6 +16,7 @@ import {AoU, AouTitle} from 'app/components/text-wrappers';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {CreateBillingAccountModal} from 'app/pages/workspace/create-billing-account-modal';
 import {WorkspaceEditSection} from 'app/pages/workspace/workspace-edit-section';
+import {Select} from 'app/components/inputs';
 import {
   disseminateFindings,
   PrimaryPurposeItems,
@@ -46,15 +47,22 @@ import {
 import {AccessTierShortNames} from 'app/utils/access-tiers';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {
+  ensureBillingScope,
+  hasBillingScope
+} from 'app/utils/authentication';
+import {
   getCdrVersion,
   getCdrVersionTier,
   getDefaultCdrVersionForTier,
   hasDefaultCdrVersion
 } from 'app/utils/cdr-versions';
 import {reportError} from 'app/utils/errors';
-import {currentWorkspaceStore, navigate, nextWorkspaceWarmupStore} from 'app/utils/navigation';
+import {currentWorkspaceStore, NavigationProps, nextWorkspaceWarmupStore} from 'app/utils/navigation';
 import {serverConfigStore} from 'app/utils/stores';
-import {getBillingAccountInfo} from 'app/utils/workbench-gapi-client';
+import {withNavigation} from 'app/utils/with-navigation-hoc';
+import {
+  getBillingAccountInfo
+} from 'app/utils/workbench-gapi-client';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
 import {
@@ -215,6 +223,7 @@ export const styles = reactStyles({
 });
 
 const CREATE_BILLING_ACCOUNT_OPTION_VALUE = 'CREATE_BILLING_ACCOUNT_OPTION';
+const SELECT_OR_CREATE_BILLING_ACCOUNT_OPTION_VALUE = 'SELECT_OR_CREATE_BILLING_ACCOUNT_OPTION_VALUE';
 
 // default to creating workspaces in the Registered Tier
 const DEFAULT_ACCESS_TIER = AccessTierShortNames.Registered;
@@ -255,7 +264,7 @@ const CdrVersionUpgrade = (props: UpgradeProps) => {
   </div>;
 };
 
-export interface WorkspaceEditProps extends WithSpinnerOverlayProps {
+export interface WorkspaceEditProps extends WithSpinnerOverlayProps, NavigationProps {
   cdrVersionTiersResponse: CdrVersionTiersResponse;
   workspace: WorkspaceData;
   cancel: Function;
@@ -266,12 +275,14 @@ export interface WorkspaceEditProps extends WithSpinnerOverlayProps {
 }
 
 export interface WorkspaceEditState {
+  billingAccountFetched: boolean;
   billingAccounts: Array<BillingAccount>;
   cdrVersions: Array<CdrVersion>;
   cloneUserRole: boolean;
   loading: boolean;
   populationChecked: boolean;
   selectResearchPurpose: boolean;
+  fetchBillingAccountLoading: boolean;
   showCdrVersionModal: boolean;
   showConfirmationModal: boolean;
   showCreateBillingAccountModal: boolean;
@@ -286,17 +297,19 @@ export interface WorkspaceEditState {
   workspaceNewAclDelayedContinueFn: Function;
 }
 
-export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), withUserProfile())(
+export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), withUserProfile(), withNavigation)(
   class WorkspaceEditCmp extends React.Component<WorkspaceEditProps, WorkspaceEditState> {
     constructor(props: WorkspaceEditProps) {
       super(props);
       this.state = {
+        billingAccountFetched: false,
         billingAccounts: [],
         cdrVersions: props.workspace ? this.getCdrVersions(props.workspace.accessTierShortName) : this.getCdrVersions(DEFAULT_ACCESS_TIER),
         cloneUserRole: false,
         loading: false,
         populationChecked: props.workspace ? props.workspace.researchPurpose.populationDetails.length > 0 : undefined,
         selectResearchPurpose: this.updateSelectedResearch(),
+        fetchBillingAccountLoading: false,
         showCdrVersionModal: false,
         showConfirmationModal: false,
         showCreateBillingAccountModal: false,
@@ -316,11 +329,79 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
       history.back();
     }
 
+    formatFreeTierBillingAccountName(): string {
+      const {profileState: {profile: {freeTierDollarQuota, freeTierUsage}}} = this.props;
+      const freeTierCreditsBalance = freeTierDollarQuota - freeTierUsage;
+      return serverConfigStore.get().config.enableBillingUpgrade ?
+        'Use All of Us initial credits - ' + formatFreeCreditsUSD(freeTierCreditsBalance) + ' left'
+        : 'Use All of Us initial credits'
+    }
+
+    async initialBillingAccountLoad() {
+      const freeTierBillingAccount: BillingAccount = {
+        name: 'billingAccounts/' + serverConfigStore.get().config.freeTierBillingAccountId,
+        isFreeTier: true,
+        isOpen: true,
+        displayName: this.formatFreeTierBillingAccountName(),
+      };
+      // If user hasn't granted GCP billing scope to workbench, we can not fetch billing account from Google
+      // or fetch user's available billing accounts.
+      // When creating/duplicating workspace, show free tier billing account.
+      // When editing existing workspace, show free tier if that is currently being used or 'User Provided Billing Account'
+      // if it is user's billing account.
+      if (!serverConfigStore.get().config.enableBillingUpgrade) {
+        if (this.isMode(WorkspaceEditMode.Create) || this.isMode(WorkspaceEditMode.Duplicate)) {
+          this.setState(prevState => fp.set(
+            ['workspace', 'billingAccountName'],
+            freeTierBillingAccount.name,
+            prevState));
+        }
+        this.setState({billingAccounts: [freeTierBillingAccount]});
+      } else if (serverConfigStore.get().config.enableBillingUpgrade && !hasBillingScope()) {
+        if (this.isMode(WorkspaceEditMode.Create) || this.isMode(WorkspaceEditMode.Duplicate)) {
+          this.setState(prevState => fp.set(
+              ['workspace', 'billingAccountName'],
+            freeTierBillingAccount.name,
+            prevState));
+          this.setState({billingAccounts: [freeTierBillingAccount]});
+        } else if (this.isMode(WorkspaceEditMode.Edit)) {
+          // If the user hasn't grant billing scope to workbench yet, keep the server's current value for
+          // billingAccountName and add a shim entry into billingAccounts so the dropdown entry is not empty.
+          //
+          // The server will not perform an updateBillingInfo call if the received billingAccountName
+          // is the same as what is currently stored.
+          if (this.props.workspace.billingAccountName === freeTierBillingAccount.name) {
+            this.setState({billingAccounts: [freeTierBillingAccount]});
+          } else {
+            this.setState({billingAccounts: [{
+              name: this.props.workspace.billingAccountName,
+              displayName: 'User Provided Billing Account',
+              isFreeTier: false,
+              isOpen: true}]});
+          }
+        }
+      } else {
+        await this.fetchBillingAccounts();
+      }
+    }
+
     async fetchBillingAccounts() {
+      this.setState({fetchBillingAccountLoading: true});
       const billingAccounts = (await userApi().listBillingAccounts()).billingAccounts;
 
+      // Replace the free billing account with a new display name that has spend usage.
+      const displayBillingAccounts: Array<BillingAccount> = billingAccounts.map((b) => {
+        if (b.isFreeTier) {
+          return {
+            ...b,
+            displayName: this.formatFreeTierBillingAccountName()
+          };
+        }
+        return b;
+      });
+
       if (this.isMode(WorkspaceEditMode.Create) || this.isMode(WorkspaceEditMode.Duplicate)) {
-        const maybeFreeTierAccount = billingAccounts.find(billingAccount => billingAccount.isFreeTier);
+        const maybeFreeTierAccount = displayBillingAccounts.find(billingAccount => billingAccount.isFreeTier);
         if (maybeFreeTierAccount) {
           this.setState(prevState => fp.set(
             ['workspace', 'billingAccountName'],
@@ -328,9 +409,8 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
             prevState));
         }
       } else if (this.isMode(WorkspaceEditMode.Edit)) {
-        const fetchedBillingInfo = await getBillingAccountInfo(this.props.workspace.namespace);
-
-        if (!billingAccounts.find(billingAccount => billingAccount.name === fetchedBillingInfo.billingAccountName)) {
+        const fetchedBillingInfo = await getBillingAccountInfo(this.props.workspace.googleProject);
+        if (!displayBillingAccounts.find(billingAccount => billingAccount.name === fetchedBillingInfo.billingAccountName)) {
           // If the user has owner access on the workspace but does not have access to the billing account
           // that it is attached to, keep the server's current value for billingAccountName and add a shim
           // entry into billingAccounts so the dropdown entry is not empty.
@@ -339,7 +419,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
           // is the same as what is currently stored.
           //
           // This can happen if a workspace is shared to another researcher as an owner.
-          billingAccounts.push({
+          displayBillingAccounts.push({
             name: this.props.workspace.billingAccountName,
             displayName: 'User Provided Billing Account',
             isFreeTier: false,
@@ -366,12 +446,21 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
             ['workspace', 'billingAccountName'], fetchedBillingInfo.billingAccountName, prevState));
         }
       }
-      this.setState({billingAccounts});
+      this.setState({billingAccounts: displayBillingAccounts});
+      this.setState({fetchBillingAccountLoading: false});
+      this.setState({billingAccountFetched: true});
+    }
+
+    async requestBillingScopeThenFetchBillingAccount() {
+      if(serverConfigStore.get().config.enableBillingUpgrade && !this.state.billingAccountFetched) {
+        await ensureBillingScope();
+        await this.fetchBillingAccounts();
+      }
     }
 
     async componentDidMount() {
       this.props.hideSpinner();
-      await this.fetchBillingAccounts();
+      await this.initialBillingAccountLoad();
     }
 
     createWorkspace(): Workspace {
@@ -509,13 +598,21 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
     }
 
     renderBillingDescription() {
+      const {enableBillingUpgrade} = serverConfigStore.get().config;
       return <div>
         The <AouTitle/> provides $300 in free credits per user. Please refer to
-        <StyledAnchorTag href={supportUrls.billing} target='_blank'> &nbsp;this article
-        </StyledAnchorTag> to learn more about the free credit
-        program and how it can be used. Once you have used up your free credits, you can request
-        additional credits by <span style={styles.link} onClick={() => this.openContactWidget()}>
-        contacting support</span>.
+        <StyledExternalLink href={supportUrls.billing} target='_blank'> &nbsp;this article
+        </StyledExternalLink> to learn more about the free credit
+        program and how it can be used .
+        {!enableBillingUpgrade &&
+        <div style={{display: 'inline'}}>Once you have used up your free credits, you can request
+          additional credits by <span style={styles.link} onClick={() => this.openContactWidget()}>
+        contacting support</span>.</div>}
+        {enableBillingUpgrade &&
+        <div style={{display: 'inline'}}>Once you have used up your free credits, you can either select a shared billing account or create
+          a new one using either Google Cloud Platform or a Google billing partner.
+          Please note: If creating a billing account via a Google billing partner,
+          it may take a few days to show up in the <b>Select account</b> dropdown.</div>}
       </div>;
     }
 
@@ -769,7 +866,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
               ...ws.workspace,
               accessLevel: ws.accessLevel
             }));
-          navigate(['workspaces', workspace.namespace, workspace.id, 'data']);
+          this.props.navigate(['workspaces', workspace.namespace, workspace.id, 'data']);
           return;
         }
 
@@ -786,7 +883,9 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
           await new Promise((accept) => setTimeout(accept, NEW_ACL_DELAY_POLL_INTERVAL_MS));
         }
 
-        const navigateToWorkspace = () => navigate(['workspaces', workspace.namespace, workspace.id, 'data']);
+        const navigateToWorkspace = () => {
+          this.props.navigate(['workspaces', workspace.namespace, workspace.id, 'data']);
+        }
         if (accessLevel !== WorkspaceAccessLevel.OWNER) {
           reportError(new Error(
             `ACLs failed to propagate for workspace ${workspace.namespace}/${workspace.id}` +
@@ -810,9 +909,6 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
 
       } catch (error) {
         console.log(error);
-        error = await error.json();
-
-        console.log(error);
         this.setState({loading: false});
         if (error.statusCode === 409) {
           this.setState({workspaceCreationConflictError: true});
@@ -820,7 +916,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
           let errorMsg;
           if (error.statusCode === 429) {
             errorMsg = 'Server is overloaded. Please try again in a few minutes.';
-          } else if (error.message.includes('billing account is closed')) {
+          } else if (error.message && error.message.includes('billing account is closed')) {
             errorMsg = error.message;
           } else {
             errorMsg = `Could not
@@ -854,14 +950,6 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
         value: a.name,
         disabled: !a.isOpen
       }));
-      if (enableBillingUpgrade) {
-        options.push({
-          label: 'Create a new billing account',
-          value: CREATE_BILLING_ACCOUNT_OPTION_VALUE,
-          disabled: false
-        });
-      }
-
       return options;
     }
 
@@ -1157,41 +1245,41 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
         {(!this.isMode(WorkspaceEditMode.Edit) || this.props.workspace.accessLevel === WorkspaceAccessLevel.OWNER) &&
           <WorkspaceEditSection header={<div><AoU/> billing account</div>}
                                 description={this.renderBillingDescription()} descriptionStyle={{marginLeft: '0rem'}}>
-            <div style={styles.fieldHeader}>
-              Select account
-            </div>
-            <OverlayPanel ref={(me) => freeTierBalancePanel = me} dismissable={true} appendTo={document.body}>
-              <div style={styles.freeCreditsBalanceOverlay}>
-                FREE CREDIT BALANCE {formatFreeCreditsUSD(freeTierCreditsBalance)}
-              </div>
-            </OverlayPanel>
+            {this.state.fetchBillingAccountLoading ? <SpinnerOverlay overrideStylesOverlay={styles.spinner}/> : <div>
+            <div style={styles.fieldHeader}>Select a current billing account</div>
+              {!enableBillingUpgrade && <OverlayPanel ref={(me) => freeTierBalancePanel = me} dismissable={true} appendTo={document.body}>
+                <div style={styles.freeCreditsBalanceOverlay}>
+                  FREE CREDIT BALANCE {formatFreeCreditsUSD(freeTierCreditsBalance)}
+                </div>
+              </OverlayPanel>}
             <FlexRow>
-              <Dropdown style={{width: '14rem'}}
+              <FlexColumn>
+              <div data-test-id = 'billing-dropdown-div' onClick={() =>  this.requestBillingScopeThenFetchBillingAccount()}>
+                  <Dropdown data-test-id = 'billing-dropdown'
+                      style={{width: '20rem'}}
                         value={billingAccountName}
                         options={this.buildBillingAccountOptions()}
                         disabled={(freeTierCreditsBalance < 0.0) && !enableBillingUpgrade}
-                        onChange={e => {
-                          if (e.value === CREATE_BILLING_ACCOUNT_OPTION_VALUE) {
-                            this.setState({
-                              showCreateBillingAccountModal: true
-                            });
-                          } else {
-                            this.setState(fp.set(['workspace', 'billingAccountName'], e.value));
-                          }
-                        }}
-              />
-              <div style={styles.freeCreditsBalanceClickable}>
-                <Clickable onClick={(e) => freeTierBalancePanel.toggle(e)}>View free credits balance</Clickable>
+                        onChange={e => {this.setState(fp.set(['workspace', 'billingAccountName'], e.value));}}/>
               </div>
+              </FlexColumn>
+              <FlexColumn>
+                {enableBillingUpgrade &&
+                <Button type='primary' style={{marginLeft: '20px', fontWeight: 400, height: '38px', width: '220px'}}
+                        onClick={() => this.setState({showCreateBillingAccountModal: true})}>
+                  CREATE BILLING ACCOUNT
+                </Button>}
+              </FlexColumn>
             </FlexRow>
+            </div>}
           </WorkspaceEditSection>}
         <hr style={{marginTop: '1rem'}}/>
         <WorkspaceEditSection header={<FlexRow style={{alignItems: 'center'}}>
           <div>Research Use Statement Questions</div>
-          <StyledAnchorTag href={supportUrls.researchPurpose}
-                           target='_blank' style={{marginLeft: '1rem', fontSize: 14, lineHeight: '18px', fontWeight: 400}}>
+          <StyledExternalLink href={supportUrls.researchPurpose}
+                              target='_blank' style={{marginLeft: '1rem', fontSize: 14, lineHeight: '18px', fontWeight: 400}}>
             Best practices for Research Use Statement questions
-          </StyledAnchorTag>
+          </StyledExternalLink>
         </FlexRow>} largeHeader={true}
               description={<div style={styles.researchPurposeDescription}>
                 <div style={{margin: '0.5rem', paddingTop: '0.5rem'}}>{ResearchPurposeDescription}
@@ -1305,7 +1393,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
             <RadioButton name='population' style={{marginRight: '0.5rem'}}
                          data-test-id='specific-population-yes'
                          onChange={v => this.setState({populationChecked: true})}
-                         checked={populationChecked}/>
+                         checked={populationChecked ?? false}/>
             <label style={styles.text}>Yes, my study will focus on one or more specific
               underrepresented populations, either on their own or in comparison to other groups.</label>
           </div>
@@ -1365,8 +1453,8 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
           <FlexRow style={styles.text}><div>
             Any research that focuses on certain population characteristics or&nbsp;
             <TooltipTrigger content={toolTipTextDemographic} style={{display: 'inline-block'}}>
-              <Link style={{display: 'inline-block'}}>uses
-              demographic variables</Link>
+              <LinkButton style={{display: 'inline-block'}}>uses
+              demographic variables</LinkButton>
             </TooltipTrigger>
             &nbsp;in analyses can result, often unintentionally,
             in findings that may be misinterpreted or misused by others to foster stigma. While it
@@ -1374,7 +1462,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
             data users can take important steps to minimize the risk of this happening–taking this
             step is a condition of your
             <TooltipTrigger content={toolTipTextDucc}>
-              <Link style={{display: 'inline-block'}}>Data User Code of Conduct agreement.</Link>
+              <LinkButton style={{display: 'inline-block'}}>Data User Code of Conduct agreement.</LinkButton>
             </TooltipTrigger>
             &nbsp;If you are concerned that your research could inadvertently stigmatize
             participants or communities, or if you are unsure, let us know. We encourage you to
@@ -1382,7 +1470,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
             Board (RAB) as a precaution. The RAB will provide feedback and, if needed, guidance for
             modifying your research purpose or scope. To learn more, please refer to the&nbsp;
             <TooltipTrigger content={toolTipTextStigmatization} style={{display: 'inline-block'}}>
-            <Link style={{display: 'inline-block'}}><i>All of Us</i> Stigmatizing Research Policy</Link>
+            <LinkButton style={{display: 'inline-block'}}><AoU/> Stigmatizing Research Policy</LinkButton>
             </TooltipTrigger>. If you
             request a review, you can expect to receive an initial response within five business days.
             During the RAB’s review, you may begin working in your workspace.</div>
@@ -1403,7 +1491,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
                              onChange={() => {
                                this.updateResearchPurpose('reviewRequested', true);
                              }}
-                             checked={reviewRequested}/>
+                             checked={reviewRequested ?? false}/>
                 <label style={{...styles.text, marginLeft: '0.5rem'}}>Yes, I would like to request
                   a review of my research purpose.</label>
                 </FlexRow>

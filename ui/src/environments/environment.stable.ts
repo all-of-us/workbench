@@ -1,4 +1,4 @@
-import {Environment, ZendeskEnv} from 'environments/environment-type';
+import {EnvAccessTierShortNames, Environment, ZendeskEnv} from 'environments/environment-type';
 
 export const environment: Environment = {
   displayTag: 'Stable',
@@ -14,11 +14,11 @@ export const environment: Environment = {
   gaLoggedInDimension: 'dimension2',
   gaUserInstitutionCategoryDimension: 'dimension3',
   zendeskEnv: ZendeskEnv.Sandbox,
-  trainingUrl: 'https://aoudev.nnlm.gov',
   inactivityTimeoutSeconds: 30 * 60,
   inactivityWarningBeforeSeconds: 5 * 60,
   allowTestAccessTokenOverride: false,
   enableCaptcha: true,
   enablePublishedWorkspaces: false,
-  enableFooter: true
+  enableFooter: true,
+  accessTiersVisibleToUsers: [EnvAccessTierShortNames.Registered],
 };

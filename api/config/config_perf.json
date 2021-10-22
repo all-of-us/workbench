@@ -4,13 +4,11 @@
     "samBaseUrl": "https:\/\/sam.dsde-perf.broadinstitute.org",
     "notebookRuntimeMaxAgeDays": 7,
     "notebookRuntimeIdleMaxAgeDays": 3,
-    "notebookRuntimeDefaultMachineType": "n1-standard-2",
-    "notebookRuntimeDefaultDiskSizeGb": 50,
     "debugEndpoints": false,
     "leoBaseUrl": "https:\/\/leonardo.dsde-perf.broadinstitute.org",
     "xAppIdValue": "perf-AoU-RW",
     "timeoutInSeconds": 60,
-    "jupyterDockerImage": "broadinstitute/terra-jupyter-aou:1.1.5",
+    "jupyterDockerImage": "broadinstitute/terra-jupyter-aou:2.0.1",
     "shibbolethApiBaseUrl": "",
     "shibbolethUiBaseUrl": "",
     "runtimeImages": {
@@ -33,7 +31,8 @@
     "freeTierCostAlertThresholds": [
       0.5,
       0.75
-    ]
+    ],
+    "carahsoftEmail": "workbench-notificatio-aaaaekogch7vg3c6hi4sgyx4le@pmi-engteam.slack.com"
   },
   "auth": {
     "serviceAccountApiUsers": [
@@ -49,7 +48,7 @@
     "extractionPetServiceAccount": "pet-111879944971009838720@aouwgscohortextraction-perf.iam.gserviceaccount.com",
     "extractionMethodConfigurationNamespace": "aouwgscohortextraction-perf",
     "extractionMethodConfigurationName": "GvsExtractCohortFromSampleNames",
-    "extractionMethodConfigurationVersion": 2,
+    "extractionMethodConfigurationVersion": 3,
     "extractionCohortsDataset": "fc-aou-cdr-perf-ct.wgs_extraction_cohorts",
     "extractionDestinationDataset": "fc-aou-cdr-perf-ct.wgs_extraction_destination",
     "extractionTempTablesDataset": "fc-aou-cdr-perf-ct.wgs_extraction_temp_tables"
@@ -75,8 +74,7 @@
     "appEngineLocationId": "us-central"
   },
   "admin": {
-    "loginUrl": "https:\/\/all-of-us-rw-perf.appspot.com/login",
-    "adminIdVerification": "manual-id-verification-requests@fake-research-aou.org"
+    "loginUrl": "https:\/\/all-of-us-rw-perf.appspot.com/login"
   },
   "mandrill": {
     "fromEmail": "support@researchallofus.org",
@@ -85,37 +83,29 @@
   "zendesk": {
     "host": "https:\/\/aousupporthelp1580753096.zendesk.com"
   },
-  "elasticsearch": {
-    "baseUrl": "https:\/\/7c7c7bf81223406abe60fec3dcb34e71.us-east-1.aws.found.io:9243",
-    "enableBasicAuth": true,
-    "enableElasticsearchBackend": false
-  },
   "moodle": {
     "host": "aoudev.nnlm.gov",
-    "enableMoodleBackend": true,
     "credentialsKeyV2": "moodle-key-v2.txt"
   },
   "access": {
     "enableComplianceTraining": true,
     "enableEraCommons": true,
-    "enableDataUseAgreement": true,
-    "enableBetaAccess": false,
     "unsafeAllowSelfBypass": true,
     "unsafeAllowUserCreationFromGSuiteData": false,
-    "enableAccessRenewal": true,
-    "enableRasLoginGovLinking": false
+    "enableRasLoginGovLinking": true,
+    "enforceRasLoginGovLinking": false
   },
   "featureFlags": {
     "unsafeAllowDeleteUser": true,
     "unsafeAllowAccessToAllTiersForRegisteredUsers": true,
     "enableBillingUpgrade": false,
-    "enableV3DataUserCodeOfConduct": true,
     "enableEventDateModifier": false,
     "enableResearchPurposePrompt": false,
-    "enableGenomicExtraction": false,
-    "enableFireCloudV2Billing" : false,
-    "enableAccessModuleRewrite" : false,
-    "enableStandardSourceDomains": false
+    "enableGenomicExtraction": true,
+    "enableGpu": false,
+    "enablePersistentDisk": false,
+    "enableEgressAlertingV2": false,
+    "enableStandardSourceDomains": true
   },
   "actionAudit": {
     "logName": "workbench-action-audit-perf",
@@ -136,15 +126,17 @@
     "maxRowsPerInsert": 2500
   },
   "ras": {
-    "host": "",
-    "clientId": ""
+    "host": "https:\/\/stsstg.nih.gov",
+    "clientId": "e5c5d714-d597-48c8-b564-a249d729d0c9",
+    "logoutUrl": "https:\/\/authtest.nih.gov\/siteminderagent\/smlogoutredirector.asp?TARGET="
   },
   "accessRenewal": {
     "expiryDays": 3650,
-    "sendEmails": true,
-    "expiryDaysWarningThresholds": [ 1, 3, 7, 15, 30 ]
+    "expiryDaysWarningThresholds": [ 1, 3, 7, 15, 30 ],
+    "lookbackPeriod": 330
   },
   "offlineBatch": {
-    "usersPerAuditTask": 20
+    "usersPerAuditTask": 20,
+    "usersPerSynchronizeAccessTask": 50
   }
 }

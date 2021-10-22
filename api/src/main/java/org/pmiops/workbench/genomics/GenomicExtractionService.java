@@ -2,6 +2,7 @@ package org.pmiops.workbench.genomics;
 
 import com.google.cloud.storage.Blob;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.primitives.Ints;
 import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.time.Clock;
@@ -33,7 +34,7 @@ import org.pmiops.workbench.firecloud.model.FirecloudSubmissionRequest;
 import org.pmiops.workbench.firecloud.model.FirecloudSubmissionResponse;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkflowOutputs;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkflowOutputsResponse;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.google.StorageConfig;
 import org.pmiops.workbench.model.GenomicExtractionJob;
@@ -51,6 +52,9 @@ public class GenomicExtractionService {
   public static final String EXTRACT_WORKFLOW_NAME = "GvsExtractCohortFromSampleNames";
   // Theoretical maximum is 20K-30K, keep it lower during the initial alpha period.
   private static final int MAX_EXTRACTION_SAMPLE_COUNT = 5_000;
+  // Scatter count boundaries for extraction. Affects number of works and numbers of shards.
+  private static final int MIN_EXTRACTION_SCATTER = 20;
+  private static final int MAX_EXTRACTION_SCATTER = 2_000;
 
   private final DataSetService dataSetService;
   private final FireCloudService fireCloudService;
@@ -200,7 +204,7 @@ public class GenomicExtractionService {
     WgsCohortExtractionConfig cohortExtractionConfig =
         workbenchConfigProvider.get().wgsCohortExtraction;
 
-    FirecloudWorkspace fcUserWorkspace =
+    FirecloudWorkspaceDetails fcUserWorkspace =
         fireCloudService.getWorkspace(workspace).get().getWorkspace();
 
     String extractionUuid = UUID.randomUUID().toString();
@@ -233,6 +237,10 @@ public class GenomicExtractionService {
     final String outputDir =
         "gs://" + fcUserWorkspace.getBucketName() + "/" + extractionFolder + "/vcfs/";
 
+    // Initial heuristic for scatter count, optimizing to avoid large compute/output shards while
+    // keeping overhead low and limiting footprint on shared extraction quota.
+    int scatter =
+        Ints.constrainToRange(personIds.size() / 2, MIN_EXTRACTION_SCATTER, MAX_EXTRACTION_SCATTER);
     FirecloudMethodConfiguration methodConfig =
         methodConfigurationsApiProvider
             .get()
@@ -249,7 +257,7 @@ public class GenomicExtractionService {
                                     + "\"")
                             .put(
                                 EXTRACT_WORKFLOW_NAME + ".query_project",
-                                "\"" + workspace.getWorkspaceNamespace() + "\"")
+                                "\"" + workspace.getGoogleProject() + "\"")
                             .put(
                                 EXTRACT_WORKFLOW_NAME + ".extraction_uuid",
                                 "\"" + extractionUuid + "\"")
@@ -270,7 +278,8 @@ public class GenomicExtractionService {
                                 EXTRACT_WORKFLOW_NAME + ".wgs_intervals",
                                 "\"gs://gcp-public-data--broad-references/hg38/v0/wgs_calling_regions.hg38.interval_list\"")
                             // This value will need to be dynamically adjusted through testing
-                            .put(EXTRACT_WORKFLOW_NAME + ".scatter_count", "1000")
+                            .put(
+                                EXTRACT_WORKFLOW_NAME + ".scatter_count", Integer.toString(scatter))
                             .put(
                                 EXTRACT_WORKFLOW_NAME + ".reference",
                                 "\"gs://gcp-public-data--broad-references/hg38/v0/Homo_sapiens_assembly38.fasta\"")

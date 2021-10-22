@@ -7,11 +7,12 @@ import DataResourceCard from 'app/component/data-resource-card';
 import NotebookDownloadModal from 'app/modal/notebook-download-modal';
 import { getPropValue } from 'utils/element-utils';
 import NotebookPreviewPage from 'app/page/notebook-preview-page';
+import expect from 'expect';
 
 // 30 minutes.
 jest.setTimeout(30 * 60 * 1000);
 
-describe('Create python kernel notebook', () => {
+describe('Python Kernel Notebook Test', () => {
   beforeEach(async () => {
     await signInWithAccessToken(page);
   });
@@ -41,38 +42,45 @@ describe('Create python kernel notebook', () => {
     await modal.waitUntilClose();
   };
 
-  const workspace = 'e2eCreatePythonKernelNotebookTest';
+  const workspaceName = 'e2eCreatePythonKernelNotebookTest';
+  const pyNotebookName = makeRandomName('Py3');
 
   test('Run Python code and download notebook', async () => {
-    await findOrCreateWorkspace(page, { workspaceName: workspace });
+    await findOrCreateWorkspace(page, { workspaceName });
 
     const dataPage = new WorkspaceDataPage(page);
-    const pyNotebookName = makeRandomName('Python3');
     const notebook = await dataPage.createNotebook(pyNotebookName);
 
     // Verify kernel name.
     const kernelName = await notebook.getKernelName();
     expect(kernelName).toBe('Python 3');
 
-    const cell1OutputText = await notebook.runCodeCell(1, { codeFile: 'resources/python-code/import-os.py' });
+    const cell1OutputText = await notebook.runCodeCell(1, {
+      codeFile: 'resources/python-code/import-os.py'
+    });
     // toContain() is not a strong enough check: error text also includes "success" because it's in the code
-    expect(cell1OutputText.endsWith('success')).toBeTruthy();
+    expect(cell1OutputText).toMatch(/success$/);
 
-    const cell2OutputText = await notebook.runCodeCell(2, { codeFile: 'resources/python-code/import-libs.py' });
-    // toContain() is not a strong enough check: error text also includes "success" because it's in the code
-    expect(cell2OutputText.endsWith('success')).toBeTruthy();
+    expect(
+      await notebook.runCodeCell(2, {
+        codeFile: 'resources/python-code/import-libs.py'
+      })
+    ).toMatch(/success$/);
 
-    await notebook.runCodeCell(3, { codeFile: 'resources/python-code/simple-pyplot.py' });
+    expect(
+      await notebook.runCodeCell(3, {
+        codeFile: 'resources/python-code/git-ignore-check.py',
+        markdownWorkaround: true
+      })
+    ).toMatch(/success$/);
+
+    await notebook.runCodeCell(4, { codeFile: 'resources/python-code/simple-pyplot.py' });
 
     // Verify plot is the output.
-    const cell = notebook.findCell(3);
+    const cell = notebook.findCell(4);
     const cellOutputElement = await cell.findOutputElementHandle();
     const [imgElement] = await cellOutputElement.$x('./img[@src]');
     expect(imgElement).toBeTruthy(); // plot format is a img.
-
-    const codeSnippet = '!jupyter kernelspec list';
-    const codeSnippetOutput = await notebook.runCodeCell(4, { code: codeSnippet });
-    expect(codeSnippetOutput).toEqual(expect.stringContaining('/usr/local/share/jupyter/kernels/python3'));
 
     // Save, exit notebook then come back from Analysis page.
     await notebook.save();
@@ -103,7 +111,5 @@ describe('Create python kernel notebook', () => {
 
     // Ideally we would validate the download URLs or download content here.
     // As of 9/25/20 I was unable to find a clear mechanism for accessing this.
-
-    await notebook.deleteNotebook(pyNotebookName);
   });
 });

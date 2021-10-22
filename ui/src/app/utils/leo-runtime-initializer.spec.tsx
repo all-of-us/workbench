@@ -1,19 +1,23 @@
 import * as React from 'react';
 
-import {leoRuntimesApi, registerApiClient as registerApiClientNotebooks} from 'app/services/notebooks-swagger-fetch-clients';
-import {runtimeApi, registerApiClient} from 'app/services/swagger-fetch-clients';
-import {LeoRuntimeInitializer, LeoRuntimeInitializerOptions} from 'app/utils/leo-runtime-initializer';
-import {Runtime} from 'generated/fetch';
-import {RuntimeStatus} from 'generated/fetch';
+import {
+  leoRuntimesApi,
+  registerApiClient as registerApiClientNotebooks
+} from 'app/services/notebooks-swagger-fetch-clients';
+import {registerApiClient, runtimeApi} from 'app/services/swagger-fetch-clients';
+import {
+  LeoRuntimeInitializer,
+  LeoRuntimeInitializerOptions
+} from 'app/utils/leo-runtime-initializer';
+import {Runtime, RuntimeConfigurationType, RuntimeStatus} from 'generated/fetch';
 import {RuntimeApi} from 'generated/fetch/api';
-import SpyInstance = jest.SpyInstance;
 import {expect} from '@jest/globals';
 import {RuntimesApi as LeoRuntimesApi} from 'notebooks-generated/fetch';
 import {defaultRuntime, RuntimeApiStub} from 'testing/stubs/runtime-api-stub';
 import {LeoRuntimesApiStub} from 'testing/stubs/leo-runtimes-api-stub';
-import {RuntimeConfigurationType} from 'generated/fetch';
 import {serverConfigStore} from "app/utils/stores";
 import {runtimePresets} from './runtime-presets';
+import SpyInstance = jest.SpyInstance;
 
 let mockGetRuntime: SpyInstance;
 let mockCreateRuntime: SpyInstance;
@@ -182,12 +186,12 @@ describe('RuntimeInitializer', () => {
     });
     await new Promise(setImmediate);
 
-    expect(mockCreateRuntime).toHaveBeenCalledWith(workspaceNamespace, jasmine.objectContaining({
+    expect(mockCreateRuntime).toHaveBeenCalledWith(workspaceNamespace, expect.objectContaining({
       gceConfig: {
         diskSize: 777,
         machineType: 'n1-standard-16'
       }
-    }), jasmine.any(Object));
+    }), expect.any(Object));
   });
 
   it('should use preset values during lazy runtime creation if a preset was selected', async() => {
@@ -198,7 +202,8 @@ describe('RuntimeInitializer', () => {
         configurationType: RuntimeConfigurationType.GeneralAnalysis,
         gceConfig: {
           diskSize: 777,
-          machineType: 'n1-standard-16'
+          machineType: 'n1-standard-16',
+          gpuConfig: null,
         },
         status: RuntimeStatus.Deleted
       }; });
@@ -208,44 +213,23 @@ describe('RuntimeInitializer', () => {
     });
     await new Promise(setImmediate);
 
-    expect(mockCreateRuntime).toHaveBeenCalledWith(workspaceNamespace, jasmine.objectContaining({
+    expect(mockCreateRuntime).toHaveBeenCalledWith(workspaceNamespace, expect.objectContaining({
       gceConfig: {
         diskSize: runtimePresets.generalAnalysis.runtimeTemplate.gceConfig.diskSize,
-        machineType: runtimePresets.generalAnalysis.runtimeTemplate.gceConfig.machineType
+        machineType: runtimePresets.generalAnalysis.runtimeTemplate.gceConfig.machineType,
+        gpuConfig: null,
       }
-    }), jasmine.any(Object));
+    }), expect.any(Object));
   });
 
-  it('should delete runtime if in an error state', async() => {
-    // A runtime in an error state should trigger a deletion request.
+  it('should not automatically delete errored runtimes', async() => {
     mockGetRuntimeCalls([
-      {status: RuntimeStatus.Creating},
-      {status: RuntimeStatus.Error},
-    ]);
-    mockDeleteRuntime.mockImplementationOnce(async(workspaceNamespace) => {
-      return {};
-    });
-    mockGetRuntimeCalls([
-      {status: RuntimeStatus.Deleting},
-      {status: RuntimeStatus.Deleting},
-    ]);
-    // After some period of "deleting" status, we expect the runtime to become nonexistent...
-    mockGetRuntime.mockRejectedValueOnce(new Response(null, {status: 404}));
-    // which should trigger a creation request...
-    mockCreateRuntime.mockImplementationOnce(async(workspaceNamespace) => {
-      return {status: RuntimeStatus.Creating};
-    });
-    // and eventually give us a good runtime.
-    mockGetRuntimeCalls([
-      {status: RuntimeStatus.Starting},
-      {status: RuntimeStatus.Running}
+      {status: RuntimeStatus.Error}
     ]);
 
     const runtime = await runInitializerAndTimers();
 
-    expect(mockDeleteRuntime).toHaveBeenCalled();
-    expect(mockCreateRuntime).toHaveBeenCalled();
-    expect(runtime.status).toEqual(RuntimeStatus.Running);
+    expect(runtime.status).toEqual(RuntimeStatus.Error);
   });
 
   it('should recover from intermittent 500s', async() => {
@@ -316,32 +300,6 @@ describe('RuntimeInitializer', () => {
       await initializePromise;
     } catch (error) {
       expect(error.message).toMatch(/aborted/i);
-    }
-  });
-
-  it('should respect the maxDeleteCount option', async() => {
-    // Mock out getRuntime API responses which simulate a runtime in an error state, which is then
-    // reset, but ends up in an error state again. This scenario should warrant two deleteRuntime
-    // calls, but the initializer is configured to max out at 1 and should return an error.
-    mockGetRuntimeCalls([
-      {status: RuntimeStatus.Error},
-      {status: RuntimeStatus.Deleting},
-      {status: RuntimeStatus.Creating},
-      {status: RuntimeStatus.Error},
-    ]);
-    mockDeleteRuntime.mockImplementation(async(workspaceNamespace) => {
-      return {};
-    });
-    mockCreateRuntime.mockImplementation(async(workspaceNamespace) => {
-      return {status: RuntimeStatus.Creating};
-    });
-
-    expect.assertions(2);
-    try {
-     await runInitializerAndTimers({maxDeleteCount: 1});
-    } catch (error) {
-      expect(mockDeleteRuntime).toHaveBeenCalledTimes(1);
-      expect(error.message).toMatch(/max runtime delete count/i);
     }
   });
 

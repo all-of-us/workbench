@@ -1,5 +1,3 @@
-import {Component} from '@angular/core';
-import {ReactWrapperBase} from 'app/utils';
 import {zendeskWidgetKey} from 'app/utils/zendesk';
 import * as React from 'react';
 
@@ -55,13 +53,3 @@ export const ZendeskWidget = () => {
   }, []);
   return <React.Fragment />;
 };
-
-@Component({
-  selector: 'app-zendesk-widget',
-  template: '<div #root></div>',
-})
-export class ZendeskWidgetComponent extends ReactWrapperBase {
-  constructor() {
-    super(ZendeskWidget, []);
-  }
-}

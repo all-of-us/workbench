@@ -62,7 +62,7 @@ class PuppeteerCustomEnvironment extends PuppeteerEnvironment {
       await savePageToFile(activePage, htmlFile);
     }
     if (super.handleTestEvent) {
-      super.handleTestEvent(event, state);
+      await super.handleTestEvent(event, state);
     }
   }
 }

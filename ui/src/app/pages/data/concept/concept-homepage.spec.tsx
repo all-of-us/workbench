@@ -4,42 +4,46 @@ import * as React from 'react';
 import {ConceptHomepage} from 'app/pages/data/concept/concept-homepage';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore} from 'app/utils/navigation';
+import {serverConfigStore} from 'app/utils/stores';
 import {
   CohortBuilderApi,
   ConceptSetsApi,
   WorkspacesApi
 } from 'generated/fetch';
+import defaultServerConfig from 'testing/default-server-config';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {CohortBuilderServiceStub, DomainStubVariables, SurveyStubVariables} from 'testing/stubs/cohort-builder-service-stub';
 import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
 import {workspaceDataStub} from 'testing/stubs/workspaces';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
-import {Key} from 'ts-key-enum';
 
 function searchTable(searchTerm: string, wrapper) {
   wrapper.find('[data-test-id="concept-search-input"]')
     .find('input').simulate('change', {target: {value: searchTerm}});
   wrapper.find('[data-test-id="concept-search-input"]')
-    .find('input').simulate('keypress', {key: Key.Enter});
+    .find('input').simulate('keypress', {key: 'Enter'});
 }
 
 const defaultSearchTerm = 'test';
 
-const component = () => {
-  return mount(<ConceptHomepage setConceptSetUpdating={() => {}}
-                                setShowUnsavedModal={() => {}}
-                                setUnsavedConceptChanges={() => {}}
-                                hideSpinner={() => {}}
-                                showSpinner={() => {}}/>);
-}
+
 
 describe('ConceptHomepage', () => {
+
+  const component = () => {
+    return mount(<ConceptHomepage setConceptSetUpdating={() => {}}
+                                  setShowUnsavedModal={() => {}}
+                                  setUnsavedConceptChanges={() => {}}
+                                  hideSpinner={() => {}}
+                                  showSpinner={() => {}}/>);
+  };
 
   beforeEach(() => {
     registerApiClient(WorkspacesApi, new WorkspacesApiStub());
     registerApiClient(ConceptSetsApi, new ConceptSetsApiStub());
     registerApiClient(CohortBuilderApi, new CohortBuilderServiceStub());
     currentWorkspaceStore.next(workspaceDataStub);
+    serverConfigStore.set({config: {...defaultServerConfig, enableStandardSourceDomains: false}});
   });
 
   it('should render', () => {

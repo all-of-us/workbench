@@ -21,7 +21,6 @@ import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.FakeClockConfiguration.NOW_TIME;
 import static org.pmiops.workbench.utils.TestMockFactory.DEFAULT_GOOGLE_PROJECT;
 
-import com.google.api.services.cloudbilling.model.BillingAccount;
 import com.google.api.services.cloudbilling.model.ProjectBillingInfo;
 import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.TableResult;
@@ -55,7 +54,6 @@ import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.actionaudit.auditors.WorkspaceAuditor;
-import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.CdrVersionService;
@@ -96,7 +94,6 @@ import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceFreeTierUsageDao;
 import org.pmiops.workbench.db.model.DbAccessTier;
-import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbCohortReview;
@@ -113,10 +110,10 @@ import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdateResponseList;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.genomics.GenomicExtractionService;
 import org.pmiops.workbench.google.CloudBillingClient;
@@ -181,6 +178,7 @@ import org.pmiops.workbench.utils.mappers.WorkspaceMapperImpl;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
+import org.pmiops.workbench.workspaces.resources.WorkspaceResourceMapperImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -244,7 +242,6 @@ public class WorkspacesControllerTest extends SpringTest {
   private static final String BUCKET_URI =
       String.format("gs://%s/", TestMockFactory.WORKSPACE_BUCKET_NAME);
 
-  @Autowired private BillingProjectBufferService billingProjectBufferService;
   @Autowired private WorkspaceAuditor mockWorkspaceAuditor;
   @Autowired private CohortAnnotationDefinitionController cohortAnnotationDefinitionController;
   @Autowired private WorkspacesController workspacesController;
@@ -282,6 +279,7 @@ public class WorkspacesControllerTest extends SpringTest {
     UserMapperImpl.class,
     WorkspaceAuthService.class,
     WorkspaceMapperImpl.class,
+    WorkspaceResourceMapperImpl.class,
     WorkspaceResourcesServiceImpl.class,
     WorkspacesController.class,
     WorkspaceServiceImpl.class,
@@ -289,7 +287,6 @@ public class WorkspacesControllerTest extends SpringTest {
   @MockBean({
     BigQueryService.class,
     BillingProjectAuditor.class,
-    BillingProjectBufferService.class,
     CdrBigQuerySchemaConfigService.class,
     CloudStorageClient.class,
     CohortBuilderMapper.class,
@@ -385,15 +382,13 @@ public class WorkspacesControllerTest extends SpringTest {
     archivedCdrVersionId = Long.toString(archivedCdrVersion.getCdrVersionId());
 
     fcWorkspaceAcl = createWorkspaceACL();
-    testMockFactory.stubBufferBillingProject(billingProjectBufferService);
+    testMockFactory.stubCreateBillingProject(fireCloudService);
     testMockFactory.stubCreateFcWorkspace(fireCloudService);
 
     // required to enable the use of default method blobToFileDetail()
     when(cloudStorageClient.blobToFileDetail(any(), anyString())).thenCallRealMethod();
-
-    doReturn(new BillingAccount().setOpen(true))
-        .when(mockCloudBillingClient)
-        .getBillingAccount(anyString());
+    when(mockCloudBillingClient.pollUntilBillingAccountLinked(any(), any()))
+        .thenReturn(new ProjectBillingInfo().setBillingEnabled(true));
   }
 
   private DbUser createUser(String email) {
@@ -417,13 +412,6 @@ public class WorkspacesControllerTest extends SpringTest {
   private FirecloudWorkspaceACL createWorkspaceACL(JSONObject acl) {
     return new Gson()
         .fromJson(new JSONObject().put("acl", acl).toString(), FirecloudWorkspaceACL.class);
-  }
-
-  private void mockBillingProjectBuffer(String projectName) {
-    DbBillingProjectBufferEntry entry = mock(DbBillingProjectBufferEntry.class);
-    doReturn(projectName).when(entry).getFireCloudProjectName();
-    doReturn(entry).when(billingProjectBufferService).assignBillingProject(any(), any());
-    doReturn(projectName).when(billingProjectBufferService).createBillingProjectName();
   }
 
   private void stubFcUpdateWorkspaceACL() {
@@ -450,7 +438,8 @@ public class WorkspacesControllerTest extends SpringTest {
     stubGetWorkspace(testMockFactory.createFirecloudWorkspace(ns, name, creator), access);
   }
 
-  private void stubGetWorkspace(FirecloudWorkspace fcWorkspace, WorkspaceAccessLevel access) {
+  private void stubGetWorkspace(
+      FirecloudWorkspaceDetails fcWorkspace, WorkspaceAccessLevel access) {
     FirecloudWorkspaceResponse fcResponse = new FirecloudWorkspaceResponse();
     fcResponse.setWorkspace(fcWorkspace);
     fcResponse.setAccessLevel(access.toString());
@@ -467,15 +456,15 @@ public class WorkspacesControllerTest extends SpringTest {
    * details. The mocked workspace object is returned so the caller can make further modifications
    * if needed.
    */
-  private FirecloudWorkspace stubCloneWorkspace(String ns, String name, String creator) {
-    FirecloudWorkspace fcResponse = new FirecloudWorkspace();
+  private FirecloudWorkspaceDetails stubCloneWorkspace(String ns, String name, String creator) {
+    FirecloudWorkspaceDetails fcResponse = new FirecloudWorkspaceDetails();
     fcResponse.setNamespace(ns);
     fcResponse.setName(name);
     fcResponse.setCreatedBy(creator);
 
     when(fireCloudService.cloneWorkspace(anyString(), anyString(), eq(ns), eq(name), anyString()))
         .thenReturn(fcResponse);
-
+    when(fireCloudService.createBillingProjectName()).thenReturn(ns);
     return fcResponse;
   }
 
@@ -558,7 +547,6 @@ public class WorkspacesControllerTest extends SpringTest {
   @Test
   public void testCreateWorkspace() throws Exception {
     Workspace workspace = createWorkspace();
-    mockBillingProjectBuffer(workspace.getNamespace());
     workspace = workspacesController.createWorkspace(workspace).getBody();
     verify(fireCloudService)
         .createWorkspace(
@@ -606,26 +594,17 @@ public class WorkspacesControllerTest extends SpringTest {
     verify(fireCloudService)
         .updateBillingAccount(
             workspace.getNamespace(), TestMockFactory.WORKSPACE_BILLING_ACCOUNT_NAME);
-    verify(fireCloudService, never())
+    verify(fireCloudService)
         .createAllOfUsBillingProject(workspace.getNamespace(), accessTier.getServicePerimeter());
     assertThat(retrievedWorkspace.getBillingAccountName())
         .isEqualTo(TestMockFactory.WORKSPACE_BILLING_ACCOUNT_NAME);
-
-    // Now switch to v2 Billing and fire the same request. It is generally not recommaned to use
-    // one test method testing multiple-funtions, but consider we will migrate to v2 soon, this
-    // might be a fast easy way to write test.
-    workbenchConfig.featureFlags.enableFireCloudV2Billing = true;
-    Workspace v2Workspace = workspacesController.createWorkspace(workspace).getBody();
-    verify(fireCloudService)
-        .createAllOfUsBillingProject(v2Workspace.getNamespace(), accessTier.getServicePerimeter());
-    assertThat(v2Workspace).isEqualTo(workspace);
   }
 
   @Test
   public void testCreateWorkspace_resetBillingAccountOnFailedSave() throws Exception {
     doThrow(RuntimeException.class).when(workspaceDao).save(any(DbWorkspace.class));
     Workspace workspace = createWorkspace();
-    testMockFactory.stubBufferBillingProject(billingProjectBufferService, workspace.getNamespace());
+    testMockFactory.stubCreateBillingProject(fireCloudService, workspace.getNamespace());
 
     try {
       workspacesController.createWorkspace(workspace).getBody();
@@ -1079,14 +1058,12 @@ public class WorkspacesControllerTest extends SpringTest {
 
     final CloneWorkspaceRequest req = new CloneWorkspaceRequest();
     req.setWorkspace(modWorkspace);
-    final FirecloudWorkspace clonedFirecloudWorkspace =
+    final FirecloudWorkspaceDetails clonedFirecloudWorkspace =
         stubCloneWorkspace(
             modWorkspace.getNamespace(), modWorkspace.getName(), LOGGED_IN_USER_EMAIL);
     // Assign the same bucket name as the mock-factory's bucket name, so the clone vs. get equality
     // assertion below will pass.
     clonedFirecloudWorkspace.setBucketName(TestMockFactory.WORKSPACE_BUCKET_NAME);
-
-    mockBillingProjectBuffer("cloned-ns");
     final Workspace clonedWorkspace =
         workspacesController
             .cloneWorkspace(originalWorkspace.getNamespace(), originalWorkspace.getId(), req)
@@ -1119,20 +1096,9 @@ public class WorkspacesControllerTest extends SpringTest {
     assertThat(clonedWorkspace.getResearchPurpose()).isEqualTo(modPurpose);
     assertThat(clonedWorkspace.getBillingAccountName()).isEqualTo(newBillingAccountName);
 
-    // When V2 Billing enabled
-    workbenchConfig.featureFlags.enableFireCloudV2Billing = true;
-    Workspace v2ClonedWorkspace =
-        workspacesController
-            .cloneWorkspace(originalWorkspace.getNamespace(), originalWorkspace.getId(), req)
-            .getBody()
-            .getWorkspace();
     verify(fireCloudService)
         .createAllOfUsBillingProject(
-            v2ClonedWorkspace.getNamespace(), accessTier.getServicePerimeter());
-
-    // Hack so lists can be compared in isEqualTo regardless of order.  See comment above.
-    sortPopulationDetails(v2ClonedWorkspace.getResearchPurpose());
-    assertThat(v2ClonedWorkspace).isEqualTo(clonedWorkspace);
+            clonedWorkspace.getNamespace(), accessTier.getServicePerimeter());
   }
 
   @Test
@@ -1149,8 +1115,6 @@ public class WorkspacesControllerTest extends SpringTest {
     final CloneWorkspaceRequest req = new CloneWorkspaceRequest();
     req.setWorkspace(modWorkspace);
     stubCloneWorkspace(modWorkspace.getNamespace(), modWorkspace.getName(), LOGGED_IN_USER_EMAIL);
-
-    mockBillingProjectBuffer("cloned-ns");
 
     doThrow(RuntimeException.class).when(workspaceDao).save(any(DbWorkspace.class));
 
@@ -1184,8 +1148,6 @@ public class WorkspacesControllerTest extends SpringTest {
     final CloneWorkspaceRequest req = new CloneWorkspaceRequest();
     req.setWorkspace(modWorkspace);
     stubCloneWorkspace(modWorkspace.getNamespace(), modWorkspace.getName(), LOGGED_IN_USER_EMAIL);
-
-    mockBillingProjectBuffer("cloned-ns");
 
     workspacesController.cloneWorkspace(
         originalWorkspace.getNamespace(), originalWorkspace.getId(), req);
@@ -1470,11 +1432,10 @@ public class WorkspacesControllerTest extends SpringTest {
     modWorkspace.setResearchPurpose(modPurpose);
 
     req.setWorkspace(modWorkspace);
-    final FirecloudWorkspace clonedWorkspace =
+    final FirecloudWorkspaceDetails clonedWorkspace =
         stubCloneWorkspace(
             modWorkspace.getNamespace(), modWorkspace.getName(), LOGGED_IN_USER_EMAIL);
 
-    mockBillingProjectBuffer("cloned-ns");
     stubGetWorkspace(clonedWorkspace, WorkspaceAccessLevel.WRITER);
     Workspace cloned =
         workspacesController
@@ -1641,7 +1602,7 @@ public class WorkspacesControllerTest extends SpringTest {
     modWorkspace.setResearchPurpose(modPurpose);
     req.setWorkspace(modWorkspace);
 
-    FirecloudWorkspace clonedWorkspace =
+    FirecloudWorkspaceDetails clonedWorkspace =
         stubCloneWorkspace(
             modWorkspace.getNamespace(), modWorkspace.getName(), LOGGED_IN_USER_EMAIL);
 
@@ -1649,7 +1610,6 @@ public class WorkspacesControllerTest extends SpringTest {
             Domain.CONDITION, ImmutableSet.of(dbConceptSetConceptId1, dbConceptSetConceptId2)))
         .thenReturn(456);
 
-    mockBillingProjectBuffer("cloned-ns");
     stubGetWorkspace(clonedWorkspace, WorkspaceAccessLevel.WRITER);
     Workspace cloned =
         workspacesController
@@ -1747,11 +1707,10 @@ public class WorkspacesControllerTest extends SpringTest {
         LOGGED_IN_USER_EMAIL,
         WorkspaceAccessLevel.OWNER);
     stubFcGetWorkspaceACL();
-    FirecloudWorkspace clonedWorkspace =
+    FirecloudWorkspaceDetails clonedWorkspace =
         stubCloneWorkspace(
             modWorkspace.getNamespace(), modWorkspace.getName(), LOGGED_IN_USER_EMAIL);
 
-    mockBillingProjectBuffer("cloned-ns");
     stubGetWorkspace(clonedWorkspace, WorkspaceAccessLevel.READER);
     Workspace cloned =
         workspacesController
@@ -1877,8 +1836,6 @@ public class WorkspacesControllerTest extends SpringTest {
     req.setWorkspace(modWorkspace);
     stubCloneWorkspace(modWorkspace.getNamespace(), modWorkspace.getName(), "cloner@gmail.com");
 
-    mockBillingProjectBuffer("cloned-ns");
-
     Workspace workspace2 =
         workspacesController
             .cloneWorkspace(workspace.getNamespace(), workspace.getId(), req)
@@ -1908,8 +1865,6 @@ public class WorkspacesControllerTest extends SpringTest {
             .cdrVersionId(cdrVersionId2);
     stubCloneWorkspace(modWorkspace.getNamespace(), modWorkspace.getName(), "cloner@gmail.com");
 
-    mockBillingProjectBuffer("cloned-ns");
-
     CloneWorkspaceRequest req = new CloneWorkspaceRequest().workspace(modWorkspace);
     Workspace workspace2 =
         workspacesController
@@ -1934,7 +1889,7 @@ public class WorkspacesControllerTest extends SpringTest {
                   .cdrVersionId("bad-cdr-version-id");
           stubCloneWorkspace(
               modWorkspace.getNamespace(), modWorkspace.getName(), "cloner@gmail.com");
-          mockBillingProjectBuffer("cloned-ns");
+
           workspacesController.cloneWorkspace(
               workspace.getNamespace(),
               workspace.getId(),
@@ -1956,7 +1911,7 @@ public class WorkspacesControllerTest extends SpringTest {
                   .cdrVersionId("100");
           stubCloneWorkspace(
               modWorkspace.getNamespace(), modWorkspace.getName(), "cloner@gmail.com");
-          mockBillingProjectBuffer("cloned-ns");
+
           workspacesController.cloneWorkspace(
               workspace.getNamespace(),
               workspace.getId(),
@@ -1978,7 +1933,6 @@ public class WorkspacesControllerTest extends SpringTest {
                   .cdrVersionId(archivedCdrVersionId);
           stubCloneWorkspace(
               modWorkspace.getNamespace(), modWorkspace.getName(), "cloner@gmail.com");
-          mockBillingProjectBuffer("cloned-ns");
           workspacesController.cloneWorkspace(
               workspace.getNamespace(),
               workspace.getId(),
@@ -2055,7 +2009,6 @@ public class WorkspacesControllerTest extends SpringTest {
             .billingAccountName("billing-account");
 
     stubCloneWorkspace("cloned-ns", "cloned", cloner.getUsername());
-    mockBillingProjectBuffer("cloned-ns");
 
     Workspace workspace2 =
         workspacesController
@@ -2222,6 +2175,8 @@ public class WorkspacesControllerTest extends SpringTest {
 
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
+    verify(fireCloudService, times(1)).addOwnerToBillingProject(any(), any());
+
     ShareWorkspaceRequest shareWorkspaceRequest =
         new ShareWorkspaceRequest()
             .workspaceEtag(workspace.getEtag())
@@ -2239,7 +2194,8 @@ public class WorkspacesControllerTest extends SpringTest {
             ownerUser.getUsername(), workspace.getNamespace(), Optional.empty());
     verify(fireCloudService, never())
         .removeOwnerFromBillingProject(eq(writerUser.getUsername()), any(), eq(Optional.empty()));
-    verify(fireCloudService, never()).addOwnerToBillingProject(any(), any());
+    // Times still 1 happended during workspace creation
+    verify(fireCloudService, times(1)).addOwnerToBillingProject(any(), any());
   }
 
   @Test
@@ -2400,7 +2356,7 @@ public class WorkspacesControllerTest extends SpringTest {
     when(fireCloudService.getWorkspace("project", "workspace"))
         .thenReturn(
             new FirecloudWorkspaceResponse()
-                .workspace(new FirecloudWorkspace().bucketName("bucket")));
+                .workspace(new FirecloudWorkspaceDetails().bucketName("bucket")));
     Blob mockBlob1 = mock(Blob.class);
     Blob mockBlob2 = mock(Blob.class);
     Blob mockBlob3 = mock(Blob.class);
@@ -2429,7 +2385,7 @@ public class WorkspacesControllerTest extends SpringTest {
     when(fireCloudService.getWorkspace("project", "workspace"))
         .thenReturn(
             new FirecloudWorkspaceResponse()
-                .workspace(new FirecloudWorkspace().bucketName("bucket")));
+                .workspace(new FirecloudWorkspaceDetails().bucketName("bucket")));
     Blob mockBlob1 = mock(Blob.class);
     Blob mockBlob2 = mock(Blob.class);
     when(mockBlob1.getName())
@@ -2898,7 +2854,7 @@ public class WorkspacesControllerTest extends SpringTest {
     final String testWorkspaceName = "test-ws";
     final String testNotebook = NotebooksService.withNotebookExtension("test-notebook");
 
-    FirecloudWorkspace fcWorkspace =
+    FirecloudWorkspaceDetails fcWorkspace =
         testMockFactory.createFirecloudWorkspace(
             testWorkspaceNamespace, testWorkspaceName, LOGGED_IN_USER_EMAIL);
     fcWorkspace.setBucketName(TestMockFactory.WORKSPACE_BUCKET_NAME);

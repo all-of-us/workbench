@@ -1,36 +1,88 @@
 import {
   CheckEmailRequest,
   CheckEmailResponse,
-  DuaType,
   GetInstitutionsResponse,
   GetPublicInstitutionDetailsResponse,
   Institution,
   InstitutionApi,
+  InstitutionMembershipRequirement,
   OrganizationType,
 } from 'generated/fetch';
 import {stubNotImplementedError} from 'testing/stubs/stub-utils';
+import {getRegisteredTierConfig} from "app/utils/institutions";
 
-export const defaultInstitutions: Array<Institution> = [{
+export const VUMC: Institution = {
   shortName: 'VUMC',
   displayName: 'Vanderbilt University Medical Center',
   organizationTypeEnum: OrganizationType.HEALTHCENTERNONPROFIT,
-  emailDomains: ['vumc.org'],
-  duaTypeEnum: DuaType.MASTER,
+  tierConfigs: [
+    {
+      accessTierShortName: "registered",
+      membershipRequirement: InstitutionMembershipRequirement.DOMAINS,
+      eraRequired: true,
+      emailDomains: ["vumc.org"]
+    }
+  ],
   userInstructions: 'Vanderbilt User Instruction'
-}, {
+}
+
+export const BROAD: Institution = {
   shortName: 'Broad',
   displayName: 'Broad Institute',
   organizationTypeEnum: OrganizationType.ACADEMICRESEARCHINSTITUTION,
-  emailDomains: [],
-  emailAddresses: ['contactEmail@broadinstitute.org', 'broad_institution@broadinstitute.org'],
-  duaTypeEnum: DuaType.RESTRICTED
-}, {
+  tierConfigs: [
+    {
+      accessTierShortName: "registered",
+      membershipRequirement: InstitutionMembershipRequirement.ADDRESSES,
+      eraRequired: true,
+      emailAddresses: ['contactEmail@broadinstitute.org', 'broad_institution@broadinstitute.org']
+    }
+  ]
+};
+
+export const VERILY: Institution = {
   shortName: 'Verily',
   displayName: 'Verily LLC',
   organizationTypeEnum: OrganizationType.INDUSTRY,
-  emailDomains: ['verily.com', 'google.com'],
+  tierConfigs: [
+    {
+      accessTierShortName: "registered",
+      membershipRequirement: InstitutionMembershipRequirement.DOMAINS,
+      eraRequired: true,
+      emailDomains: ['verily.com', 'google.com']
+    },
+    {
+      accessTierShortName: "controlled",
+      membershipRequirement: InstitutionMembershipRequirement.ADDRESSES,
+      eraRequired: true,
+      emailAddresses: ['foo@verily.com']
+    }
+  ],
   userInstructions: 'Verily User Instruction'
-}];
+};
+
+export const VERILY_WITHOUT_CT: Institution = {
+  shortName: 'Non CT Access',
+  displayName: 'Non CT Access',
+  organizationTypeEnum: OrganizationType.INDUSTRY,
+  tierConfigs: [
+    {
+      accessTierShortName: "registered",
+      membershipRequirement: InstitutionMembershipRequirement.DOMAINS,
+      eraRequired: true,
+      emailDomains: ['verily.com', 'google.com']
+    },
+    {
+      accessTierShortName: "controlled",
+      membershipRequirement: InstitutionMembershipRequirement.NOACCESS,
+    }
+  ],
+  userInstructions: 'Verily User Instruction'
+};
+
+export const defaultInstitutions: Array<Institution> = [
+    VUMC, BROAD, VERILY, VERILY_WITHOUT_CT
+];
 
 export class InstitutionApiStub extends InstitutionApi {
   public institutions: Array<Institution>;
@@ -83,7 +135,7 @@ export class InstitutionApiStub extends InstitutionApi {
             shortName: x.shortName,
             displayName: x.displayName,
             organizationTypeEnum: x.organizationTypeEnum,
-            duaTypeEnum: x.duaTypeEnum
+            registeredTierMembershipRequirement: getRegisteredTierConfig(x).membershipRequirement
           };
         })
       });
@@ -110,9 +162,12 @@ export class InstitutionApiStub extends InstitutionApi {
     const response: CheckEmailResponse = {
       isValidMember: false
     };
-    if (institution.emailAddresses && institution.emailAddresses.includes(contactEmail)) {
+    const tierConfig = getRegisteredTierConfig(institution);
+    if (tierConfig.membershipRequirement === InstitutionMembershipRequirement.ADDRESSES
+        && tierConfig.emailAddresses.includes(contactEmail)) {
       response.isValidMember = true;
-    } else if (institution.emailDomains && institution.emailDomains.includes(domain)) {
+    } else if (tierConfig.membershipRequirement === InstitutionMembershipRequirement.DOMAINS
+        && tierConfig.emailDomains.includes(domain)) {
       response.isValidMember = true;
     }
     return response;

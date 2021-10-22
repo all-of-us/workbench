@@ -51,6 +51,7 @@ ENVIRONMENTS = {
     :cdr_sql_instance => "#{TEST_PROJECT}:us-central1:workbenchmaindb",
     :gae_vars => make_gae_vars(0, 10, 'F2'),
     :source_cdr_project => "all-of-us-ehr-dev",
+    :source_cdr_wgs_project => "all-of-us-workbench-test",
     :publisher_account => "circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com",
     :accessTiers => {
       "registered" => {
@@ -68,8 +69,9 @@ ENVIRONMENTS = {
   "all-of-us-rw-perf" => env_with_defaults("perf", {
     :api_endpoint_host => "api-dot-all-of-us-rw-perf.appspot.com",
     :cdr_sql_instance => "#{TEST_PROJECT}:us-central1:workbenchmaindb",
-    :gae_vars => make_gae_vars(20, 20),
+    :gae_vars => make_gae_vars(5, 20),
     :source_cdr_project => "all-of-us-ehr-dev",
+    :source_cdr_wgs_project => "all-of-us-workbench-test",
     :publisher_account => "circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com",
     :accessTiers => {
       "registered" => {
@@ -88,6 +90,7 @@ ENVIRONMENTS = {
     :api_endpoint_host => "api-dot-all-of-us-rw-stable.appspot.com",
     :cdr_sql_instance => "#{TEST_PROJECT}:us-central1:workbenchmaindb",
     :source_cdr_project => "all-of-us-ehr-dev",
+    :source_cdr_wgs_project => "all-of-us-workbench-test",
     :publisher_account => "deploy@all-of-us-rw-stable.iam.gserviceaccount.com",
     :accessTiers => {
       "registered" => {
@@ -127,7 +130,13 @@ ENVIRONMENTS = {
         :ingest_cdr_project => "fc-aou-vpc-ingest-prod",
         :dest_cdr_project => "fc-aou-cdr-prod",
         :auth_domain_group_email => "all-of-us-registered-prod@firecloud.org",
+      },
+      "controlled" => {
+        :ingest_cdr_project => "fc-aou-vpc-ingest-prod-ct",
+        :dest_cdr_project => "fc-aou-cdr-prod-ct",
+        :auth_domain_group_email => "all-of-us-controlled-prod@firecloud.org",
       }
+
     }
   })
 }

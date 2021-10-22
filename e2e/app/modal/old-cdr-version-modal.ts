@@ -5,6 +5,7 @@ import { LinkText } from 'app/text-labels';
 import Checkbox from 'app/element/checkbox';
 import { waitForText } from 'utils/waits-utils';
 import Modal from './modal';
+import expect from 'expect';
 
 const LabelAlias = {
   WILL_USE_OLD_CDR_VERSION: 'I will use this workspace to complete an existing study or replicate a previous study.',
@@ -36,7 +37,7 @@ export default class OldCdrVersionModal extends Modal {
     const xpath = '//*[@data-test-id="old-cdr-version-modal"]';
     await this.page.waitForXPath(xpath, { visible: true });
     const modalTitle = 'You have selected an older version of the dataset';
-    await waitForText(this.page, modalTitle, { xpath: this.getXpath() });
+    await waitForText(this.page, modalTitle, { container: this });
     return true;
   }
 
@@ -60,6 +61,9 @@ export default class OldCdrVersionModal extends Modal {
    * if the CDR Version is not the default, consent to the necessary restrictions in the modal which appears
    */
   async consentToOldCdrRestrictions(): Promise<void> {
+    const modalTitle = await this.getTitle();
+    expect(modalTitle).toMatch('You have selected an older version of the dataset.');
+
     // can't continue yet - user has not yet consented
     const continueButton: Button = this.getContinueButton();
     expect(await continueButton.isCursorNotAllowed()).toBe(true);

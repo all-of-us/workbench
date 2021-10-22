@@ -28,7 +28,9 @@
       "releaseNumber": 1,
       "numParticipants": 0,
       "cdrDbName": "synth_r_2020q1_3",
-      "accessTier": "registered"
+      "accessTier": "registered",
+      "hasFitbitData": false,
+      "hasCopeSurveyData": false
     },
     {
       "cdrVersionId": 2,
@@ -40,7 +42,9 @@
       "releaseNumber": 2,
       "numParticipants": 0,
       "cdrDbName": "synth_r_2020q1_3",
-      "accessTier": "registered"
+      "accessTier": "registered",
+      "hasFitbitData": false,
+      "hasCopeSurveyData": false
     },
     {
       "cdrVersionId": 3,
@@ -51,7 +55,7 @@
       "creationTime": "2021-04-20 00:00:00Z",
       "releaseNumber": 3,
       "numParticipants": 234525,
-      "cdrDbName": "synth_r_2019q4_16",
+      "cdrDbName": "synth_r_2019q4_18",
       "hasFitbitData": true,
       "hasCopeSurveyData": true
     },
@@ -62,10 +66,11 @@
       "name": "Synthetic Dataset in the Controlled Tier",
       "bigqueryProject": "fc-aou-cdr-perf-ct",
       "bigqueryDataset": "test_R2019q4r3",
+      "wgsBigqueryDataset": "1kg_wgs",
       "creationTime": "2021-04-20 00:00:00Z",
       "releaseNumber": 3,
       "numParticipants": 234525,
-      "cdrDbName": "synth_r_2019q4_16",
+      "cdrDbName": "synth_r_2019q4_18",
       "hasFitbitData": true,
       "hasCopeSurveyData": true
     },
@@ -78,7 +83,7 @@
       "creationTime": "2019-09-30 00:00:00Z",
       "releaseNumber": 4,
       "numParticipants": 234525,
-      "cdrDbName": "synth_r_2019q4_16",
+      "cdrDbName": "synth_r_2019q4_18",
       "hasFitbitData": true,
       "hasCopeSurveyData": true,
       "accessTier": "registered"

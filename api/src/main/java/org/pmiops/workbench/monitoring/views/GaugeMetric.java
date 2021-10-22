@@ -14,10 +14,6 @@ public enum GaugeMetric implements Metric {
   // 2. update workbench-terraform-modules with the new name
   // See https://github.com/all-of-us/workbench/wiki/Monitoring,-Alerts,-and-Dashboards for details.
 
-  BILLING_BUFFER_PROJECT_COUNT(
-      "billing_buffer_project_count_3",
-      "Number of projects in the billing buffer for each status/tier pair",
-      ImmutableList.of(MetricLabel.BUFFER_ENTRY_STATUS, MetricLabel.ACCESS_TIER_SHORT_NAME)),
   COHORT_COUNT("cohort_count_2", "Count of all cohorts in existence"),
   COHORT_REVIEW_COUNT("cohort_review_count_2", "Total number of cohort reviews in existence"),
   DATASET_COUNT(

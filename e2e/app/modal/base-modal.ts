@@ -25,16 +25,14 @@ export default abstract class BaseModal extends Container {
   async waitForLoad(): Promise<this> {
     const timeout = 30000;
     await this.waitUntilVisible(timeout);
-    await waitWhileLoading(this.page);
     await this.isLoaded();
-    await this.page.waitForTimeout(1000);
+    await waitWhileLoading(this.page);
     return this;
   }
 
   async getTextContent(): Promise<string[]> {
     // xpath that excludes button labels and spans
     const selector = `${this.getXpath()}//div[normalize-space(text()) and not(@role="button")]`;
-    await this.waitUntilVisible();
     await this.page.waitForXPath(selector, { visible: true });
     const elements: ElementHandle[] = await this.page.$x(selector);
     return fp.flow(

@@ -1,15 +1,16 @@
-import {Component, Input} from '@angular/core';
-import { Link, StyledAnchorTag } from 'app/components/buttons';
+import { LinkButton, StyledExternalLink, StyledRouterLink } from 'app/components/buttons';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {SemiBoldHeader} from 'app/components/headers';
 import {AoU} from 'app/components/text-wrappers';
 import colors from 'app/styles/colors';
-import {reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
+import {reactStyles, withUserProfile} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
 import { environment } from 'environments/environment';
 import * as React from 'react';
 
+import aouFooterLogo from 'assets/images/all-of-us-logo-footer.svg';
+import nihFooterLogo from 'assets/images/nih-logo-footer.png';
 
 const styles = reactStyles({
   footerAnchor: {
@@ -43,7 +44,7 @@ const styles = reactStyles({
     backgroundColor: colors.primary,
     padding: '1rem',
     // Must be higher than the side helpbar index for now. See help-bar.tsx.
-    // Eventually the footer should be reflowed benetah this, per RW-5110. The footer
+    // Eventually the footer should be reflowed beneath this, per RW-5110. The footer
     // should be beneath any other floating elements, such as modals.
     zIndex: 102
   },
@@ -54,13 +55,24 @@ const styles = reactStyles({
 });
 
 const FooterAnchorTag = ({style = {}, href, ...props}) => {
-  return <StyledAnchorTag style={{...styles.footerAnchor, ...style}} href={href} {...props}>
+  return <StyledRouterLink
+      style={{...styles.footerAnchor, ...style}}
+      path={href}
+      {...props}
+  >
     {props.children}
-  </StyledAnchorTag>;
+  </StyledRouterLink>;
 };
 
 const NewTabFooterAnchorTag = ({style = {}, href, ...props}) => {
-  return <FooterAnchorTag style={style} href={href} target='_blank' {...props}>{props.children}</FooterAnchorTag>;
+  return <StyledExternalLink
+      style={{...styles.footerAnchor, ...styles}}
+      href={href}
+      target='_blank'
+      {...props}
+  >
+    {props.children}
+  </StyledExternalLink>;
 };
 
 const DataBrowserLink = (props) => (
@@ -83,8 +95,8 @@ const FooterTemplate = ({style = {}, ...props}) => {
   return <div style={{...styles.footerTemplate, ...style}} {...props}>
     <FlexRow>
       <FlexColumn style={{height: '4rem', justifyContent: 'space-between'}}>
-        <img style={styles.footerImage} src='assets/images/all-of-us-logo-footer.svg'/>
-        <img style={{...styles.footerImage, height: '1rem'}} src='assets/images/nih-logo-footer.png'/>
+        <img style={styles.footerImage} src={aouFooterLogo}/>
+        <img style={{...styles.footerImage, height: '1rem'}} src={nihFooterLogo}/>
       </FlexColumn>
       <div style={{marginLeft: '1.5rem', width: '100%'}}>
         {props.children}
@@ -167,7 +179,7 @@ const WorkbenchFooter = withUserProfile()(
                                        analyticsFn={tracker.SupportFAQ}>
                   FAQs
                 </NewTabFooterAnchorTag>
-                <Link style={styles.footerAnchor} onClick={() => {
+                <LinkButton style={styles.footerAnchor} onClick={() => {
                   tracker.ContactUs('Zendesk');
                   openZendeskWidget(
                     this.props.profileState.profile.givenName,
@@ -177,7 +189,7 @@ const WorkbenchFooter = withUserProfile()(
                   ); }
                 } href='#'>
                   Contact Us
-                </Link>
+                </LinkButton>
               </FlexColumn>
             </FlexRow>
           </FooterSection>
@@ -223,18 +235,5 @@ export class Footer extends React.Component<FooterProps> {
       case FooterTypeEnum.Workbench:
         return <WorkbenchFooter />;
     }
-  }
-}
-
-@Component({
-  selector: 'app-footer',
-  template: '<div #root></div>'
-})
-export class FooterComponent extends ReactWrapperBase {
-  @Input('type') type: FooterProps['type'];
-  constructor() {
-    super(Footer, [
-      'type',
-    ]);
   }
 }

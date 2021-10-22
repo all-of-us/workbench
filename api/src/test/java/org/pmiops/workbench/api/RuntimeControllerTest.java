@@ -2,6 +2,7 @@ package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -17,9 +18,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import com.google.gson.internal.LinkedTreeMap;
-import java.time.Clock;
-import java.time.Instant;
-import java.time.ZoneId;
+import java.sql.Timestamp;
+import java.time.Duration;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
@@ -32,6 +32,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.access.AccessTierServiceImpl;
@@ -54,10 +55,11 @@ import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.institution.PublicInstitutionDetailsMapperImpl;
@@ -83,22 +85,25 @@ import org.pmiops.workbench.model.DataprocConfig;
 import org.pmiops.workbench.model.DiskType;
 import org.pmiops.workbench.model.GceConfig;
 import org.pmiops.workbench.model.GceWithPdConfig;
+import org.pmiops.workbench.model.GpuConfig;
 import org.pmiops.workbench.model.ListRuntimeDeleteRequest;
 import org.pmiops.workbench.model.PersistentDiskRequest;
 import org.pmiops.workbench.model.Runtime;
 import org.pmiops.workbench.model.RuntimeConfigurationType;
+import org.pmiops.workbench.model.RuntimeError;
 import org.pmiops.workbench.model.RuntimeLocalizeRequest;
 import org.pmiops.workbench.model.RuntimeLocalizeResponse;
 import org.pmiops.workbench.model.RuntimeStatus;
 import org.pmiops.workbench.model.UpdateRuntimeRequest;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.notebooks.LeonardoApiClientFactory;
+import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
 import org.pmiops.workbench.notebooks.LeonardoNotebooksClientImpl;
 import org.pmiops.workbench.notebooks.NotebooksConfig;
 import org.pmiops.workbench.notebooks.NotebooksRetryHandler;
 import org.pmiops.workbench.notebooks.api.ProxyApi;
 import org.pmiops.workbench.notebooks.model.LocalizationEntry;
 import org.pmiops.workbench.notebooks.model.Localize;
-import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
 import org.pmiops.workbench.testconfig.UserServiceTestConfiguration;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
@@ -139,8 +144,6 @@ public class RuntimeControllerTest extends SpringTest {
   private static final String LOGGED_IN_USER_EMAIL = "bob@gmail.com";
   private static final String OTHER_USER_EMAIL = "alice@gmail.com";
   private static final String BUCKET_NAME = "workspace-bucket";
-  private static final Instant NOW = Instant.now();
-  private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
   private static final String API_HOST = "api.stable.fake-research-aou.org";
   private static final String API_BASE_URL = "https://" + API_HOST;
   private static final String BIGQUERY_DATASET = "dataset-name";
@@ -188,11 +191,6 @@ public class RuntimeControllerTest extends SpringTest {
     }
 
     @Bean
-    Clock clock() {
-      return CLOCK;
-    }
-
-    @Bean
     @Scope("prototype")
     DbUser user() {
       return user;
@@ -217,6 +215,7 @@ public class RuntimeControllerTest extends SpringTest {
   @MockBean UserServiceAuditor mockUserServiceAuditor;
   @MockBean WorkspaceService mockWorkspaceService;
   @MockBean WorkspaceAuthService mockWorkspaceAuthService;
+  @MockBean LeonardoApiClientFactory mockLeonardoApiClientFactory;
 
   @Qualifier(NotebooksConfig.USER_RUNTIMES_API)
   @MockBean
@@ -255,8 +254,6 @@ public class RuntimeControllerTest extends SpringTest {
   public void setUp() {
     config = WorkbenchConfig.createEmptyConfig();
     config.server.apiBaseUrl = API_BASE_URL;
-    config.firecloud.notebookRuntimeDefaultMachineType = "n1-standard-4";
-    config.firecloud.notebookRuntimeDefaultDiskSizeGb = 50;
     config.access.enableComplianceTraining = true;
 
     user = new DbUser();
@@ -354,9 +351,9 @@ public class RuntimeControllerTest extends SpringTest {
     doReturn(Optional.of(testWorkspace)).when(workspaceDao).getByNamespace(WORKSPACE_NS);
   }
 
-  private static FirecloudWorkspace createFcWorkspace(
+  private static FirecloudWorkspaceDetails createFcWorkspace(
       String ns, String googleProject, String name, String creator) {
-    return new FirecloudWorkspace()
+    return new FirecloudWorkspaceDetails()
         .namespace(ns)
         .name(name)
         .createdBy(creator)
@@ -366,6 +363,16 @@ public class RuntimeControllerTest extends SpringTest {
 
   private void stubGetWorkspace(
       String workspaceNamespace, String googleProject, String firecloudName, String creator) {
+    stubGetWorkspace(
+        workspaceNamespace, googleProject, firecloudName, creator, WorkspaceAccessLevel.OWNER);
+  }
+
+  private void stubGetWorkspace(
+      String workspaceNamespace,
+      String googleProject,
+      String firecloudName,
+      String creator,
+      WorkspaceAccessLevel accessLevel) {
     DbWorkspace w = new DbWorkspace();
     w.setWorkspaceNamespace(workspaceNamespace);
     w.setFirecloudName(firecloudName);
@@ -374,13 +381,15 @@ public class RuntimeControllerTest extends SpringTest {
     when(workspaceDao.getRequired(workspaceNamespace, firecloudName)).thenReturn(w);
     when(workspaceDao.getByNamespace(workspaceNamespace)).thenReturn(Optional.of(w));
     stubGetFcWorkspace(
-        createFcWorkspace(workspaceNamespace, googleProject, firecloudName, creator));
+        createFcWorkspace(workspaceNamespace, googleProject, firecloudName, creator), accessLevel);
   }
 
-  private void stubGetFcWorkspace(FirecloudWorkspace fcWorkspace) {
+  private void stubGetFcWorkspace(
+      FirecloudWorkspaceDetails fcWorkspace, WorkspaceAccessLevel accessLevel) {
     FirecloudWorkspaceResponse fcResponse = new FirecloudWorkspaceResponse();
     fcResponse.setWorkspace(fcWorkspace);
-    fcResponse.setAccessLevel(WorkspaceAccessLevel.OWNER.toString());
+    fcResponse.setAccessLevel(accessLevel.toString());
+    when(mockFireCloudService.getWorkspace(any())).thenReturn(Optional.of(fcResponse));
     when(mockFireCloudService.getWorkspace(fcWorkspace.getNamespace(), fcWorkspace.getName()))
         .thenReturn(fcResponse);
   }
@@ -393,6 +402,10 @@ public class RuntimeControllerTest extends SpringTest {
 
   private String getRuntimeName() {
     return "all-of-us-".concat(Long.toString(user.getUserId()));
+  }
+
+  private String getPdName() {
+    return "all-of-us-pd-".concat(Long.toString(user.getUserId()));
   }
 
   @Test
@@ -415,7 +428,13 @@ public class RuntimeControllerTest extends SpringTest {
                         new LeonardoClusterError().errorCode(2).errorMessage(null))));
 
     assertThat(runtimeController.getRuntime(WORKSPACE_NS).getBody())
-        .isEqualTo(testRuntime.status(RuntimeStatus.ERROR));
+        .isEqualTo(
+            testRuntime
+                .status(RuntimeStatus.ERROR)
+                .errors(
+                    ImmutableList.of(
+                        new RuntimeError().errorCode(1).errorMessage("foo"),
+                        new RuntimeError().errorCode(2).errorMessage(null))));
   }
 
   @Test
@@ -425,6 +444,27 @@ public class RuntimeControllerTest extends SpringTest {
 
     assertThat(runtimeController.getRuntime(WORKSPACE_NS).getBody())
         .isEqualTo(testRuntime.status(RuntimeStatus.ERROR));
+  }
+
+  @Test
+  public void testGetRuntime_securitySuspended() throws ApiException {
+    user.setComputeSecuritySuspendedUntil(
+        Timestamp.from(FakeClockConfiguration.NOW.toInstant().plus(Duration.ofMinutes(5))));
+    when(userRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
+        .thenReturn(testLeoRuntime);
+
+    assertThrows(
+        FailedPreconditionException.class, () -> runtimeController.getRuntime(WORKSPACE_NS));
+  }
+
+  @Test
+  public void testGetRuntime_securitySuspendedElapsed() throws ApiException {
+    user.setComputeSecuritySuspendedUntil(
+        Timestamp.from(FakeClockConfiguration.NOW.toInstant().minus(Duration.ofMinutes(20))));
+    when(userRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
+        .thenReturn(testLeoRuntime);
+
+    runtimeController.getRuntime(WORKSPACE_NS);
   }
 
   @Test
@@ -982,7 +1022,7 @@ public class RuntimeControllerTest extends SpringTest {
                     .persistentDisk(
                         new PersistentDiskRequest()
                             .diskType(DiskType.SSD)
-                            .name(user.getPDName())
+                            .name(getPdName())
                             .size(500))));
 
     verify(userRuntimesApi)
@@ -1007,8 +1047,7 @@ public class RuntimeControllerTest extends SpringTest {
     assertThat(createLeonardoGceWithPdConfig.getMachineType()).isEqualTo("standard");
     assertThat(createLeonardoGceWithPdConfig.getPersistentDisk().getDiskType())
         .isEqualTo(LeonardoDiskType.SSD);
-    assertThat(createLeonardoGceWithPdConfig.getPersistentDisk().getName())
-        .isEqualTo(user.getPDName());
+    assertThat(createLeonardoGceWithPdConfig.getPersistentDisk().getName()).isEqualTo(getPdName());
     assertThat(createLeonardoGceWithPdConfig.getPersistentDisk().getSize()).isEqualTo(500);
   }
 
@@ -1104,6 +1143,173 @@ public class RuntimeControllerTest extends SpringTest {
   }
 
   @Test
+  public void testCreateRuntime_gceWithGpu() throws ApiException {
+    when(userRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
+        .thenThrow(new NotFoundException());
+    stubGetWorkspace(WORKSPACE_NS, GOOGLE_PROJECT_ID, WORKSPACE_ID, "test");
+
+    runtimeController.createRuntime(
+        WORKSPACE_NS,
+        new Runtime()
+            .gceConfig(
+                new GceConfig()
+                    .diskSize(50)
+                    .machineType("standard")
+                    .gpuConfig(new GpuConfig().gpuType("nvidia-tesla-t4").numOfGpus(2))));
+
+    verify(userRuntimesApi)
+        .createRuntime(
+            eq(GOOGLE_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
+
+    LeonardoCreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
+
+    Gson gson = new Gson();
+    LeonardoGceConfig createLeonardoGceConfig =
+        gson.fromJson(
+            gson.toJson(createRuntimeRequest.getRuntimeConfig()), LeonardoGceConfig.class);
+
+    assertThat(
+            gson.fromJson(
+                    gson.toJson(createRuntimeRequest.getRuntimeConfig()),
+                    LeonardoRuntimeConfig.class)
+                .getCloudService())
+        .isEqualTo(LeonardoRuntimeConfig.CloudServiceEnum.GCE);
+    assertThat(createLeonardoGceConfig.getDiskSize()).isEqualTo(50);
+    assertThat(createLeonardoGceConfig.getMachineType()).isEqualTo("standard");
+    assertThat(createLeonardoGceConfig.getGpuConfig().getGpuType()).isEqualTo("nvidia-tesla-t4");
+    assertThat(createLeonardoGceConfig.getGpuConfig().getNumOfGpus()).isEqualTo(2);
+  }
+
+  @Test
+  public void testCreateRuntime_gceWithPD_wihGpu() throws ApiException {
+    when(userRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
+        .thenThrow(new NotFoundException());
+    stubGetWorkspace(WORKSPACE_NS, GOOGLE_PROJECT_ID, WORKSPACE_ID, "test");
+
+    runtimeController.createRuntime(
+        WORKSPACE_NS,
+        new Runtime()
+            .gceWithPdConfig(
+                new GceWithPdConfig()
+                    .bootDiskSize(50)
+                    .machineType("standard")
+                    .persistentDisk(
+                        new PersistentDiskRequest()
+                            .diskType(DiskType.SSD)
+                            .name(getPdName())
+                            .size(500))
+                    .gpuConfig(new GpuConfig().gpuType("nvidia-tesla-t4").numOfGpus(2))));
+
+    verify(userRuntimesApi)
+        .createRuntime(
+            eq(GOOGLE_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
+
+    LeonardoCreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
+
+    Gson gson = new Gson();
+    LeonardoGceWithPdConfig createLeonardoGceWithPdConfig =
+        gson.fromJson(
+            gson.toJson(createRuntimeRequest.getRuntimeConfig()), LeonardoGceWithPdConfig.class);
+
+    assertThat(
+            gson.fromJson(
+                    gson.toJson(createRuntimeRequest.getRuntimeConfig()),
+                    LeonardoRuntimeConfig.class)
+                .getCloudService())
+        .isEqualTo(LeonardoRuntimeConfig.CloudServiceEnum.GCE);
+    assertThat(createLeonardoGceWithPdConfig.getGpuConfig().getGpuType())
+        .isEqualTo("nvidia-tesla-t4");
+    assertThat(createLeonardoGceWithPdConfig.getGpuConfig().getNumOfGpus()).isEqualTo(2);
+  }
+
+  @Test
+  public void testCreateRuntime_securitySuspended() {
+    user.setComputeSecuritySuspendedUntil(
+        Timestamp.from(FakeClockConfiguration.NOW.toInstant().plus(Duration.ofMinutes(5))));
+
+    assertThrows(
+        FailedPreconditionException.class,
+        () ->
+            runtimeController.createRuntime(
+                WORKSPACE_NS,
+                new Runtime().gceConfig(new GceConfig().diskSize(50).machineType("standard"))));
+  }
+
+  @Test
+  public void testCreateRuntime_terraWorkspaceV1() throws ApiException {
+    // namespace == project, for v1 workspaces
+    when(userRuntimesApi.getRuntime(WORKSPACE_NS, getRuntimeName()))
+        .thenThrow(new NotFoundException());
+    stubGetWorkspace(WORKSPACE_NS, WORKSPACE_NS, WORKSPACE_ID, "test", WorkspaceAccessLevel.WRITER);
+
+    runtimeController.createRuntime(
+        WORKSPACE_NS,
+        new Runtime().gceConfig(new GceConfig().diskSize(50).machineType("standard")));
+
+    verify(userRuntimesApi)
+        .createRuntime(
+            eq(WORKSPACE_NS), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
+
+    LeonardoCreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
+    Gson gson = new Gson();
+    assertThat(
+            gson.toJsonTree(createRuntimeRequest.getCustomEnvironmentVariables())
+                .getAsJsonObject()
+                .has(LeonardoNotebooksClient.BIGQUERY_STORAGE_API_ENABLED_ENV_KEY))
+        .isFalse();
+  }
+
+  @Test
+  public void testCreateRuntime_terraWorkspaceV1Owner() throws ApiException {
+    // namespace == project, for v1 workspaces
+    when(userRuntimesApi.getRuntime(WORKSPACE_NS, getRuntimeName()))
+        .thenThrow(new NotFoundException());
+    stubGetWorkspace(WORKSPACE_NS, WORKSPACE_NS, WORKSPACE_ID, "test", WorkspaceAccessLevel.OWNER);
+
+    runtimeController.createRuntime(
+        WORKSPACE_NS,
+        new Runtime().gceConfig(new GceConfig().diskSize(50).machineType("standard")));
+
+    verify(userRuntimesApi)
+        .createRuntime(
+            eq(WORKSPACE_NS), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
+
+    LeonardoCreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
+    Gson gson = new Gson();
+    assertThat(
+            gson.toJsonTree(createRuntimeRequest.getCustomEnvironmentVariables())
+                .getAsJsonObject()
+                .getAsJsonPrimitive(LeonardoNotebooksClient.BIGQUERY_STORAGE_API_ENABLED_ENV_KEY)
+                .isString())
+        .isTrue();
+  }
+
+  @Test
+  public void testCreateRuntime_terraWorkspaceV2() throws ApiException {
+    when(userRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
+        .thenThrow(new NotFoundException());
+    stubGetWorkspace(
+        WORKSPACE_NS, GOOGLE_PROJECT_ID, WORKSPACE_ID, "test", WorkspaceAccessLevel.WRITER);
+
+    runtimeController.createRuntime(
+        WORKSPACE_NS,
+        new Runtime().gceConfig(new GceConfig().diskSize(50).machineType("standard")));
+
+    verify(userRuntimesApi)
+        .createRuntime(
+            eq(GOOGLE_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
+
+    LeonardoCreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
+    Gson gson = new Gson();
+    assertThat(
+            gson.toJsonTree(createRuntimeRequest.getCustomEnvironmentVariables())
+                .getAsJsonObject()
+                .getAsJsonPrimitive(LeonardoNotebooksClient.BIGQUERY_STORAGE_API_ENABLED_ENV_KEY)
+                .isString())
+        .isTrue();
+  }
+
+  @Test
   public void testUpdateRuntime() throws ApiException {
     stubGetWorkspace(WORKSPACE_NS, GOOGLE_PROJECT_ID, WORKSPACE_ID, "test");
 
@@ -1138,7 +1344,7 @@ public class RuntimeControllerTest extends SpringTest {
 
   @Test
   public void testDeleteRuntime() throws ApiException {
-    runtimeController.deleteRuntime(WORKSPACE_NS);
+    runtimeController.deleteRuntime(WORKSPACE_NS, false);
     verify(userRuntimesApi).deleteRuntime(GOOGLE_PROJECT_ID, getRuntimeName(), false);
   }
 
@@ -1294,6 +1500,16 @@ public class RuntimeControllerTest extends SpringTest {
             "workspaces/myfirstworkspace/.all_of_us_config.json");
 
     assertThat(resp.getRuntimeLocalDirectory()).isEqualTo("workspaces/myfirstworkspace");
+  }
+
+  @Test
+  public void testLocalize_securitySuspended() {
+    user.setComputeSecuritySuspendedUntil(
+        Timestamp.from(FakeClockConfiguration.NOW.toInstant().plus(Duration.ofMinutes(5))));
+
+    assertThrows(
+        FailedPreconditionException.class,
+        () -> runtimeController.localize(WORKSPACE_NS, new RuntimeLocalizeRequest()));
   }
 
   @Test

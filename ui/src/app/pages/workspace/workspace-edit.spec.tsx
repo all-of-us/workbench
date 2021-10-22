@@ -3,7 +3,7 @@ import * as React from 'react';
 import {mount, ReactWrapper, ShallowWrapper} from 'enzyme';
 
 import {profileApi, registerApiClient} from 'app/services/swagger-fetch-clients';
-import {currentWorkspaceStore, navigate} from 'app/utils/navigation';
+import {currentWorkspaceStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {
   DisseminateResearchEnum, ProfileApi,
@@ -28,18 +28,21 @@ import {WorkspaceEditSection} from 'app/pages/workspace/workspace-edit-section';
 import {CdrVersionsStubVariables} from 'testing/stubs/cdr-versions-api-stub';
 import {cdrVersionStore, profileStore, serverConfigStore} from 'app/utils/stores';
 import {AccessTierShortNames} from 'app/utils/access-tiers';
-import {ProfileApiStub} from "../../../testing/stubs/profile-api-stub";
+import {ProfileApiStub} from "testing/stubs/profile-api-stub";
+import {Dropdown} from "primereact/dropdown";
 
-jest.mock('app/utils/navigation', () => ({
-  ...(jest.requireActual('app/utils/navigation')),
-  navigate: jest.fn()
-}));
+import * as Authentication from "app/utils/authentication";
+import SpyInstance = jest.SpyInstance;
+import { mockNavigate } from 'setupTests';
 
 type AnyWrapper = (ShallowWrapper|ReactWrapper);
 
 jest.mock('app/utils/workbench-gapi-client', () => ({
   getBillingAccountInfo: () => new Promise(resolve => resolve({billingAccountName: 'billing-account'}))
 }));
+
+let mockHasBillingScope: SpyInstance;
+let mockEnsureBillingScope: SpyInstance;
 
 function getSaveButtonDisableMsg(wrapper: AnyWrapper, attributeName: string) {
   return wrapper.find('[data-test-id="workspace-save-btn"]').first().prop('disabled')[attributeName];
@@ -92,7 +95,13 @@ describe('WorkspaceEdit', () => {
     });
     currentWorkspaceStore.next(workspace);
     cdrVersionStore.set(cdrVersionTiersResponse);
-    serverConfigStore.set({config: {enableBillingUpgrade: true, defaultFreeCreditsDollarLimit: 100.0, gsuiteDomain: ''}});
+    serverConfigStore.set({config: {enableBillingUpgrade: true, freeTierBillingAccountId: 'freetier',
+        defaultFreeCreditsDollarLimit: 100.0, gsuiteDomain: ''}});
+
+    mockHasBillingScope = jest.spyOn(Authentication, 'hasBillingScope');
+    mockEnsureBillingScope = jest.spyOn(Authentication, 'ensureBillingScope');
+    mockHasBillingScope.mockImplementation(() => false);
+    mockEnsureBillingScope.mockImplementation(() => {});
   });
 
   it('displays workspaces create page', async () => {
@@ -148,7 +157,8 @@ describe('WorkspaceEdit', () => {
       .first().prop('checked')).toEqual(true);
   });
 
-  it('should clear all selected specific populations if NO underrepresented populations study is selected', async () => {
+  it('should clear all selected specific populations if NO underrepresented populations study is selected',
+      async () => {
     // Set the workspace state to represent a workspace which is studying a
     // specific population group.
     workspace.researchPurpose.populationDetails = [SpecificPopulationEnum.AGECHILDREN,
@@ -240,7 +250,7 @@ describe('WorkspaceEdit', () => {
     wrapper.find('[data-test-id="workspace-confirm-save-btn"]').first().simulate('click');
     await waitOneTickAndUpdate(wrapper);
     expect(workspacesApi.workspaces.length).toEqual(numBefore + 1);
-    expect(navigate).toHaveBeenCalledTimes(1);
+    expect(mockNavigate).toHaveBeenCalledTimes(1);
   });
 
   it('defaults to upgrading the CDR Version when duplicating a workspace with an older CDR Version', async() => {
@@ -382,7 +392,7 @@ describe('WorkspaceEdit', () => {
     await waitOneTickAndUpdate(wrapper);
 
     expect(workspacesApi.workspaces.length).toEqual(numBefore + 1);
-    expect(navigate).toHaveBeenCalledTimes(1);
+    expect(mockNavigate).toHaveBeenCalledTimes(1);
   });
 
   it('supports waiting on access delays', async () => {
@@ -401,18 +411,18 @@ describe('WorkspaceEdit', () => {
     await waitOneTickAndUpdate(wrapper);
     wrapper.find('[data-test-id="workspace-confirm-save-btn"]').first().simulate('click');
     await waitOneTickAndUpdate(wrapper);
-    expect(navigate).not.toHaveBeenCalled();
+    expect(mockNavigate).not.toHaveBeenCalled();
 
     jest.advanceTimersByTime(15e3);
     await waitOneTickAndUpdate(wrapper);
-    expect(navigate).not.toHaveBeenCalled();
+    expect(mockNavigate).not.toHaveBeenCalled();
 
     workspacesApi.getWorkspace = (..._) => {
       return Promise.resolve({workspace, accessLevel: WorkspaceAccessLevel.OWNER});
     };
     jest.advanceTimersByTime(10e3);
     await waitOneTickAndUpdate(wrapper);
-    expect(navigate).toHaveBeenCalled();
+    expect(mockNavigate).toHaveBeenCalled();
 
     jest.useRealTimers();
   });
@@ -445,11 +455,11 @@ describe('WorkspaceEdit', () => {
     if (!aclDelayBtn.exists()) {
       fail('failed to find a rendered acl delay modal button after many timer increments');
     }
-    expect(navigate).not.toHaveBeenCalled();
+    expect(mockNavigate).not.toHaveBeenCalled();
 
     aclDelayBtn.simulate('click');
     await waitOneTickAndUpdate(wrapper);
-    expect(navigate).toHaveBeenCalled();
+    expect(mockNavigate).toHaveBeenCalled();
 
     jest.useRealTimers();
   });
@@ -572,5 +582,116 @@ describe('WorkspaceEdit', () => {
     const inValidInput = fp.repeat(8, ' ');
     wrapper.find('[data-test-id="otherDisseminateResearch-text"]').first().simulate('change', {target: {value: inValidInput}});
     expect(getSaveButtonDisableMsg(wrapper, 'otherDisseminateResearchFindings')).toBeDefined();
+  });
+
+  it ('should show free tier then user billing when user not granting then grant billing scope', async () => {
+    workspaceEditMode = WorkspaceEditMode.Create;
+    const wrapper = component();
+    await waitOneTickAndUpdate(wrapper);
+
+    let billingDropDown = wrapper.find('[data-test-id="billing-dropdown"]').instance() as Dropdown;
+
+    expect(mockEnsureBillingScope).toHaveBeenCalledTimes(0);
+    expect(billingDropDown.props.value).toEqual("billingAccounts/freetier");
+    expect(billingDropDown.props.options.map(o => o.value))
+      .toEqual(['billingAccounts/freetier']);
+    expect(billingDropDown.props.options.map(o => o.label))
+      .toEqual(['Use All of Us initial credits - $33.33 left']);
+
+    // Now select SELECT_OR_CREATE_BILLING_ACCOUNT_OPTION_VALUE, expect request billing scope then show the
+    // real billing accounts user has access to.
+    mockHasBillingScope.mockImplementation(() => true);
+
+    wrapper.find('[data-test-id="billing-dropdown-div"]').first().simulate('click');
+    await waitOneTickAndUpdate(wrapper);
+
+    billingDropDown = wrapper.find('[data-test-id="billing-dropdown"]').instance() as Dropdown;
+    expect(mockEnsureBillingScope).toHaveBeenCalledTimes(1);
+    expect(billingDropDown.props.value).toEqual("free-tier");
+    expect(billingDropDown.props.options.map(o => o.value))
+      .toEqual(['free-tier', 'user-billing']);
+    expect(billingDropDown.props.options.map(o => o.label))
+      .toEqual(['Use All of Us initial credits - $33.33 left', 'User Billing']);
+  });
+
+  it('should show free tier user account and user-billing when user granted billing scope', async () => {
+    mockHasBillingScope.mockImplementation(() => true);
+    workspaceEditMode = WorkspaceEditMode.Create;
+    const wrapper = component();
+    await waitOneTickAndUpdate(wrapper);
+
+    const billingDropDown = wrapper.find('[data-test-id="billing-dropdown"]').instance() as Dropdown;
+
+    expect(billingDropDown.props.value).toEqual("free-tier");
+    expect(billingDropDown.props.options.map(o => o.value))
+      .toEqual(['free-tier', 'user-billing']);
+    expect(billingDropDown.props.options.map(o => o.label))
+      .toEqual(['Use All of Us initial credits - $33.33 left', 'User Billing']);
+  });
+
+  it('should show free tier and user billing account when they grant billing scope when creating workspace', async () => {
+    mockHasBillingScope.mockImplementation(() => true);
+    workspaceEditMode = WorkspaceEditMode.Create;
+    const wrapper = component();
+    await waitOneTickAndUpdate(wrapper);
+
+    const billingDropDown = wrapper.find('[data-test-id="billing-dropdown"]').instance() as Dropdown;
+
+    expect(mockEnsureBillingScope).toHaveBeenCalledTimes(0);
+    expect(billingDropDown.props.value).toEqual("free-tier");
+    expect(billingDropDown.props.options.map(o => o.value))
+      .toEqual(['free-tier', 'user-billing']);
+    expect(billingDropDown.props.options.map(o => o.label))
+      .toEqual(['Use All of Us initial credits - $33.33 left', 'User Billing']);
+  });
+
+  it('should show User Provided Billing Account when user does not have permission on the billing account workspace is using', async () => {
+    mockHasBillingScope.mockImplementation(() => true);
+    workspaceEditMode = WorkspaceEditMode.Edit;
+    const wrapper = component();
+    await waitOneTickAndUpdate(wrapper);
+
+    const billingDropDown = wrapper.find('[data-test-id="billing-dropdown"]').instance() as Dropdown;
+
+    expect(mockEnsureBillingScope).toHaveBeenCalledTimes(0);
+    // 'billing-account' is workspace's current billing account.
+    // There would be 3 options: Free tier, user's billing account, workspace billing account
+    expect(billingDropDown.props.value).toEqual("billing-account");
+    expect(billingDropDown.props.options.map(o => o.value))
+      .toEqual(['free-tier', 'user-billing', 'billing-account']);
+    expect(billingDropDown.props.options.map(o => o.label))
+      .toEqual(['Use All of Us initial credits - $33.33 left', 'User Billing', 'User Provided Billing Account']);
+  });
+
+  it('should show user provided text when they not granting billing scope when editing workspace', async () => {
+    workspaceEditMode = WorkspaceEditMode.Edit;
+    const wrapper = component();
+    await waitOneTickAndUpdate(wrapper);
+
+    let billingDropDown = wrapper.find('[data-test-id="billing-dropdown"]').instance() as Dropdown;
+
+    expect(mockEnsureBillingScope).toHaveBeenCalledTimes(0);
+    // 'billing-account' is workspace's current billing account.
+    // There would be 4 options: Free tier, user's billing account, workspace billing account
+    expect(billingDropDown.props.value).toEqual("billing-account");
+    expect(billingDropDown.props.options.map(o => o.value))
+      .toEqual(['billing-account']);
+    expect(billingDropDown.props.options.map(o => o.label))
+      .toEqual(['User Provided Billing Account']);
+
+
+    // Now select SELECT_OR_CREATE_BILLING_ACCOUNT_OPTION_VALUE, expect request billing scope then show the
+    // real billing accounts user has access to.
+    mockHasBillingScope.mockImplementation(() => true);
+    wrapper.find('[data-test-id="billing-dropdown-div"]').first().simulate('click');
+    await waitOneTickAndUpdate(wrapper);
+
+    billingDropDown = wrapper.find('[data-test-id="billing-dropdown"]').instance() as Dropdown;
+    expect(mockEnsureBillingScope).toHaveBeenCalledTimes(1);
+    expect(billingDropDown.props.value).toEqual("billing-account");
+    expect(billingDropDown.props.options.map(o => o.value))
+      .toEqual(['free-tier', 'user-billing', 'billing-account']);
+    expect(billingDropDown.props.options.map(o => o.label))
+      .toEqual(['Use All of Us initial credits - $33.33 left', 'User Billing', 'User Provided Billing Account']);
   });
 });

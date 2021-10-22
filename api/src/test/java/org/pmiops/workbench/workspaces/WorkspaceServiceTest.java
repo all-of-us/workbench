@@ -11,7 +11,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.google.api.services.cloudbilling.model.BillingAccount;
+import com.google.api.services.cloudbilling.model.ProjectBillingInfo;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
@@ -39,8 +39,9 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserRecentWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.CloudBillingClient;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
@@ -175,7 +176,7 @@ public class WorkspaceServiceTest {
       String workspaceName,
       String workspaceNamespace,
       WorkspaceAccessLevel accessLevel) {
-    FirecloudWorkspace mockWorkspace = mock(FirecloudWorkspace.class);
+    FirecloudWorkspaceDetails mockWorkspace = mock(FirecloudWorkspaceDetails.class);
     doReturn(workspaceNamespace).when(mockWorkspace).getNamespace();
     doReturn(workspaceName).when(mockWorkspace).getName();
     doReturn(workspaceId).when(mockWorkspace).getWorkspaceId();
@@ -431,9 +432,15 @@ public class WorkspaceServiceTest {
     String newBillingAccount = "billing-123";
     DbWorkspace workspace = dbWorkspaces.get(1); // arbitrary choice of those defined for testing
     workspace.setBillingAccountName(workbenchConfig.billing.freeTierBillingAccountName());
-    BillingAccount billingAccount = new BillingAccount();
-    billingAccount.setOpen(true);
-    when(mockCloudBillingClient.getBillingAccount(newBillingAccount)).thenReturn(billingAccount);
+    ProjectBillingInfo projectBillingInfo =
+        new ProjectBillingInfo()
+            .setProjectId(workspace.getGoogleProject())
+            .setBillingAccountName(newBillingAccount)
+            .setBillingEnabled(true);
+    when(mockCloudBillingClient.pollUntilBillingAccountLinked(
+            workspace.getGoogleProject(), newBillingAccount))
+        .thenReturn(projectBillingInfo);
+
     assertThat(workspace.getBillingAccountName())
         .isEqualTo(workbenchConfig.billing.freeTierBillingAccountName());
 
@@ -451,8 +458,17 @@ public class WorkspaceServiceTest {
     String oldBillingAccount = "billing-123";
     DbWorkspace workspace = dbWorkspaces.get(1); // arbitrary choice of those defined for testing
     workspace.setBillingAccountName(oldBillingAccount);
+
     assertThat(workspace.getBillingAccountName()).isEqualTo(oldBillingAccount);
 
+    ProjectBillingInfo projectBillingInfo =
+        new ProjectBillingInfo()
+            .setProjectId(workspace.getGoogleProject())
+            .setBillingAccountName(workbenchConfig.billing.freeTierBillingAccountName())
+            .setBillingEnabled(true);
+    when(mockCloudBillingClient.pollUntilBillingAccountLinked(
+            workspace.getGoogleProject(), workbenchConfig.billing.freeTierBillingAccountName()))
+        .thenReturn(projectBillingInfo);
     workspaceService.updateWorkspaceBillingAccount(
         workspace, workbenchConfig.billing.freeTierBillingAccountName());
 
@@ -484,14 +500,18 @@ public class WorkspaceServiceTest {
     String newBillingAccount = "billing-123";
     DbWorkspace workspace = dbWorkspaces.get(1); // arbitrary choice of those defined for testing
     workspace.setBillingAccountName(workbenchConfig.billing.freeTierBillingAccountName());
-    BillingAccount billingAccount = new BillingAccount();
-    billingAccount.setOpen(false);
-    when(mockCloudBillingClient.getBillingAccount(newBillingAccount)).thenReturn(billingAccount);
+
+    ProjectBillingInfo projectBillingInfo =
+        new ProjectBillingInfo()
+            .setProjectId(workspace.getGoogleProject())
+            .setBillingAccountName(newBillingAccount)
+            .setBillingEnabled(false);
+    when(mockCloudBillingClient.pollUntilBillingAccountLinked(
+            workspace.getGoogleProject(), newBillingAccount))
+        .thenReturn(projectBillingInfo);
 
     assertThrows(
-        BadRequestException.class,
+        FailedPreconditionException.class,
         () -> workspaceService.updateWorkspaceBillingAccount(workspace, newBillingAccount));
-    verify(mockFireCloudService, never()).updateBillingAccountAsService(anyString(), anyString());
-    verify(mockFireCloudService, never()).updateBillingAccount(anyString(), anyString());
   }
 }

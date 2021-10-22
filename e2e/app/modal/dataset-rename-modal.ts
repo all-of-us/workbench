@@ -12,7 +12,7 @@ export default class DatasetRenameModal extends Modal {
   }
 
   async isLoaded(): Promise<boolean> {
-    await waitForText(this.page, title, { xpath: this.getXpath() });
+    await waitForText(this.page, title, { container: this });
     return true;
   }
 
@@ -23,6 +23,6 @@ export default class DatasetRenameModal extends Modal {
 
   async typeDescription(description: string): Promise<void> {
     const descriptionTextarea = Textarea.findByName(this.page, { dataTestId: 'descriptionLabel' });
-    await descriptionTextarea.type(description);
+    await descriptionTextarea.paste(description);
   }
 }

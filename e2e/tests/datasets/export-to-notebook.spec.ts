@@ -5,7 +5,7 @@ import { makeRandomName, makeWorkspaceName } from 'utils/str-utils';
 import { findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
 import CohortActionsPage from 'app/page/cohort-actions-page';
 import { Ethnicity, Sex } from 'app/page/cohort-participants-group';
-import { Language, LinkText, MenuOption, ResourceCard } from 'app/text-labels';
+import { Language, LinkText, ConceptSetSelectValue, MenuOption, ResourceCard } from 'app/text-labels';
 import DataResourceCard from 'app/component/data-resource-card';
 import { getPropValue } from 'utils/element-utils';
 import CohortBuildPage from 'app/page/cohort-build-page';
@@ -13,6 +13,7 @@ import DeleteConfirmationModal from 'app/modal/delete-confirmation-modal';
 import WarningDiscardChangesModal from 'app/modal/warning-discard-changes-modal';
 import ExportToNotebookModal from 'app/modal/export-to-notebook-modal';
 import { TabLabels } from 'app/page/workspace-base';
+import waitForExpect from 'wait-for-expect';
 
 // 30 minutes. Test involves starting of notebook that could take a long time to create.
 jest.setTimeout(30 * 60 * 1000);
@@ -45,7 +46,7 @@ describe('Export dataset to notebook tests', () => {
     // Step 1: select user created cohort.
     await datasetPage.selectCohorts([cohortName]);
     // Step 2: select demographics concept sets.
-    await datasetPage.selectConceptSets([LinkText.Demographics]);
+    await datasetPage.selectConceptSets([ConceptSetSelectValue.Demographics]);
 
     // Export to Python language notebook.
     const notebookName = makeRandomName();
@@ -73,15 +74,16 @@ describe('Export dataset to notebook tests', () => {
 
     // Associated dataset is gone after delete cohort.
     await dataPage.openTab(TabLabels.Datasets, { waitPageChange: false });
-    expect(await new DataResourceCard(page).cardExists(datasetName, ResourceCard.Dataset)).toBe(false);
+    await waitForExpect(async () => {
+      expect(await new DataResourceCard(page).cardExists(datasetName, ResourceCard.Dataset)).toBe(false);
+    });
   });
 
   /**
    * Test:
    * - Create dataset and export to notebook. Start the notebook and run the dataset code.
    */
-  // TODO Enable notebook test after bug fix. https://precisionmedicineinitiative.atlassian.net/browse/RW-6885
-  xtest.each(KernelLanguages)('Export to %s kernel Jupyter notebook when creating dataset', async (kernelLanguage) => {
+  test.each(KernelLanguages)('Export to %s kernel Jupyter notebook when creating dataset', async (kernelLanguage) => {
     await findOrCreateWorkspace(page, { workspaceName: workspace });
 
     // Click Add Dataset button
@@ -97,7 +99,7 @@ describe('Export dataset to notebook tests', () => {
     await cohortActionsPage.clickCreateDatasetButton();
 
     await datasetBuildPage.selectCohorts([cohortName]);
-    await datasetBuildPage.selectConceptSets([LinkText.Demographics]);
+    await datasetBuildPage.selectConceptSets([ConceptSetSelectValue.Demographics]);
 
     // Preview table exists and has one or more table rows.
     const previewTable = await datasetBuildPage.getPreviewTable();

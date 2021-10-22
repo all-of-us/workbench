@@ -101,7 +101,7 @@ paths:
         content:
           'application/json':
             schema:
-              $ref: '#/components/schemas/CreateRawlsBillingProjectFullRequest'
+              $ref: '#/components/schemas/CreateRawlsV2BillingProjectFullRequest'
         required: true
       responses:
         201:
@@ -713,7 +713,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Workspace'
+                $ref: '#/components/schemas/WorkspaceDetails'
         403:
           description: Unable to create bucket for workspace
           content: {}
@@ -916,7 +916,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Workspace'
+                $ref: '#/components/schemas/WorkspaceDetails'
         400:
           description: Unable to create resources for workspace
           content: {}
@@ -1854,6 +1854,25 @@ components:
         allUsersGroup:
           type: boolean
           description: User is a member of the "All Users" group?
+    CreateRawlsV2BillingProjectFullRequest:
+      required:
+        - billingAccount
+        - projectName
+      type: object
+      properties:
+        projectName:
+          type: string
+          description: the name of the project to create
+        billingAccount:
+          type: string
+          description: the id of the billing account to use, must start with 'billingAccounts/'
+        servicePerimeter:
+          type: string
+          description: The fully qualified name of the GCP service perimeter to put
+            this project into in the form accessPolicies/[POLICY NUMBER]/servicePerimeters/[NAME].
+            Caller must have the add_project action for this service perimeter in
+            Sam.
+      description: ""
     ErrorReport:
       required:
         - causes
@@ -1993,72 +2012,81 @@ components:
         userEmail:
           type: string
           description: User's email
-    Workspace:
+    WorkspaceDetails:
       required:
-        - accessLevels
-        - attributes
-        - authDomainACLs
-        - authorizationDomain
         - bucketName
         - createdBy
         - createdDate
-        - googleProject
         - isLocked
         - lastModified
         - name
         - namespace
         - workspaceId
+        - googleProject
+        - workspaceVersion
       type: object
       properties:
-        namespace:
-          type: string
-          description: The namespace the workspace belongs to
-        name:
-          type: string
-          description: The name of the workspace
+        attributes:
+          type: object
+          properties: { }
+          description: Map[String, Attribute]
         authorizationDomain:
           type: array
-          description: The list of groups to form the Authorization Domain (empty
-            if no Authorization Domain is set)
+          description: The list of groups in the Authorization Domain (empty if no
+            AD is set)
           items:
             $ref: '#/components/schemas/ManagedGroupRef'
-        workspaceId:
-          type: string
-          description: A UUID associated with the workspace
         bucketName:
           type: string
           description: The name of the bucket associated with the workspace
+        createdBy:
+          type: string
+          description: The user who created the workspace
         createdDate:
           type: string
           description: The date the workspace was created in yyyy-MM-ddTHH:mm:ss.SSSZZ
             format
           format: date-time
+        isLocked:
+          type: boolean
+          description: Can the Workspace currently be modified?
         lastModified:
           type: string
           description: The date the workspace was last modified in yyyy-MM-ddTHH:mm:ss.SSSZZ
             format
           format: date-time
-        createdBy:
+        name:
           type: string
-          description: The user who created the workspace
-        attributes:
-          type: object
-          properties: {}
-          description: Map[String, Attribute]
-        accessLevels:
-          type: object
-          properties: {}
-          description: Map[String, RawlsGroupRef]
-        authDomainACLs:
-          type: object
-          properties: {}
-          description: Map[String, RawlsGroupRef]
-        isLocked:
-          type: boolean
-          description: Can the Workspace currently be modified?
+          description: The name of the workspace
+        namespace:
+          type: string
+          description: The namespace the workspace belongs to
+        workflowCollectionName:
+          type: string
+          description: The name of the workflow collection associated with the workspace
+        workspaceId:
+          type: string
+          description: A UUID associated with the workspace
         googleProject:
           type: string
-          description: the google project used by the workspace for compute and storage
+          description: Identifies the google project used by the workspace for compute and storage
+        googleProjectNumber:
+          type: string
+          description: A different google project identifier for the same project identified by the googleProject; required by google for certain actions
+        workspaceVersion:
+          type: string
+          description: internal use
+        billingAccount:
+          type: string
+          description: The current billing account being charged for activity within this workspace. For desired billing account, look to the billing account specified on this workspace's billing project
+        billingAccountErrorMessage:
+          type: string
+          description: Error message received during most recent attempt to update the current billing account on workspace's Google project. Empty if update was successful.
+        completedCloneWorkspaceFileTransfer:
+          type: string
+          description: The date all files were successfully transferred to the workspace bucket if applicable
+            in yyyy-MM-ddTHH:mm:ss.SSSZZ format
+          format: date-time
       description: ""
     WorkspaceAccessLevel:
       type: object
@@ -2092,6 +2120,11 @@ components:
             if no Authorization Domain is set)
           items:
             $ref: '#/components/schemas/ManagedGroupRef'
+        bucketLocation:
+          type: string
+          required: false
+          description: Region (NOT multi-region) in which bucket attached to the workspace should be created. If not
+            provided, the bucket will be created in the 'US' multi-region.
     WorkspaceRequestClone:
       required:
         - attributes
@@ -2119,6 +2152,11 @@ components:
           type: string
           description: Used for clone operations only; the prefix for files to copy
             between source and destination workspace buckets
+        bucketLocation:
+          type: string
+          required: false
+          description: Region (NOT multi-region) in which bucket attached to the workspace should be created. If not
+            provided, the bucket will be created in the 'US' multi-region.
       description: ""
     WorkspaceResponse:
       type: object
@@ -2130,7 +2168,7 @@ components:
         catalog:
           type: boolean
         workspace:
-          $ref: '#/components/schemas/Workspace'
+          $ref: '#/components/schemas/WorkspaceDetails'
         workspaceSubmissionStats:
           $ref: '#/components/schemas/WorkspaceSubmissionStats'
         owners:
@@ -2748,6 +2786,21 @@ components:
           items:
             type: string
           description: the roles the caller has on the project
+        workspacesWithIncorrectBillingAccount:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkspaceBillingAccount'
+    WorkspaceBillingAccount:
+      required:
+        - workspaceName
+      type: object
+      properties:
+        workspaceName:
+          type: string
+          description: the name of the workspace
+        currentBillingAccountOnGoogleProject:
+          type: string
+          description: the billing project associated with the workspace
     UpdateRawlsBillingAccountRequest:
       required:
         - billingAccount

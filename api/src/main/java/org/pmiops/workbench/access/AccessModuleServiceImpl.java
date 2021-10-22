@@ -2,7 +2,9 @@ package org.pmiops.workbench.access;
 
 import static org.pmiops.workbench.access.AccessUtils.auditAccessModuleFromStorage;
 import static org.pmiops.workbench.access.AccessUtils.clientAccessModuleToStorage;
+import static org.pmiops.workbench.access.AccessUtils.storageAccessModuleToClient;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import java.sql.Timestamp;
 import java.time.Clock;
@@ -15,6 +17,7 @@ import javax.annotation.Nullable;
 import javax.inject.Provider;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.config.WorkbenchConfig.AccessConfig;
 import org.pmiops.workbench.db.dao.UserAccessModuleDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.DbAccessModule;
@@ -40,6 +43,8 @@ public class AccessModuleServiceImpl implements AccessModuleService {
   private final UserServiceAuditor userServiceAuditor;
   private final Provider<WorkbenchConfig> configProvider;
   private final UserAccessModuleMapper userAccessModuleMapper;
+
+  private static final int CURRENT_DATA_USER_CODE_OF_CONDUCT_VERSION = 3;
 
   @Autowired
   public AccessModuleServiceImpl(
@@ -80,14 +85,11 @@ public class AccessModuleServiceImpl implements AccessModuleService {
 
     userAccessModuleToUpdate.setBypassTime(newBypassTime);
     userAccessModuleDao.save(userAccessModuleToUpdate);
-    if (configProvider.get().featureFlags.enableAccessModuleRewrite) {
-      // If enabled, fire audit event from here instead of from UserService.
-      userServiceAuditor.fireAdministrativeBypassTime(
-          user.getUserId(),
-          auditAccessModuleFromStorage(accessModule.getName()),
-          Optional.ofNullable(previousBypassTime).map(Timestamp::toInstant),
-          Optional.ofNullable(newBypassTime).map(Timestamp::toInstant));
-    }
+    userServiceAuditor.fireAdministrativeBypassTime(
+        user.getUserId(),
+        auditAccessModuleFromStorage(accessModule.getName()),
+        Optional.ofNullable(previousBypassTime).map(Timestamp::toInstant),
+        Optional.ofNullable(newBypassTime).map(Timestamp::toInstant));
   }
 
   @Override
@@ -101,10 +103,71 @@ public class AccessModuleServiceImpl implements AccessModuleService {
   }
 
   @Override
-  public List<AccessModuleStatus> getClientAccessModuleStatus(DbUser user) {
+  public List<AccessModuleStatus> getAccessModuleStatus(DbUser user) {
     return userAccessModuleDao.getAllByUser(user).stream()
-        .map(a -> userAccessModuleMapper.dbToModule(a, getExpirationTime(a).orElse(null)))
+        .map(this::maybeReturnAccessModule)
+        .filter(Optional::isPresent)
+        .map(Optional::get)
         .collect(Collectors.toList());
+  }
+
+  @Override
+  public Optional<AccessModuleStatus> getAccessModuleStatus(
+      DbUser user, AccessModuleName accessModuleName) {
+    DbAccessModule dbAccessModule =
+        getDbAccessModuleOrThrow(dbAccessModulesProvider.get(), accessModuleName);
+    DbUserAccessModule userAccessModule = retrieveUserAccessModuleOrCreate(user, dbAccessModule);
+    return maybeReturnAccessModule(userAccessModule);
+  }
+
+  private Optional<AccessModuleStatus> maybeReturnAccessModule(
+      DbUserAccessModule dbUserAccessModule) {
+    return Optional.of(dbUserAccessModule)
+        .map(a -> userAccessModuleMapper.dbToModule(a, getExpirationTime(a).orElse(null)))
+        .filter(a -> isModuleStatusReturnedInProfile(a.getModuleName()));
+  }
+
+  @VisibleForTesting
+  @Override
+  public int getCurrentDuccVersion() {
+    return CURRENT_DATA_USER_CODE_OF_CONDUCT_VERSION;
+  }
+
+  @Override
+  public boolean isModuleCompliant(DbUser dbUser, AccessModuleName accessModuleName) {
+    DbAccessModule dbAccessModule =
+        getDbAccessModuleOrThrow(dbAccessModulesProvider.get(), accessModuleName);
+    // if the module is not required, the user is always compliant
+    if (!isModuleRequiredInEnvironment(storageAccessModuleToClient(dbAccessModule.getName()))) {
+      return true;
+    }
+    DbUserAccessModule userAccessModule = retrieveUserAccessModuleOrCreate(dbUser, dbAccessModule);
+    boolean isBypassed = dbAccessModule.getBypassable() && userAccessModule.getBypassTime() != null;
+    boolean isCompleted = userAccessModule.getCompletionTime() != null;
+
+    // we have an additional check before considering DUCC "complete"
+    if (isCompleted && accessModuleName == AccessModuleName.DATA_USER_CODE_OF_CONDUCT) {
+      // protect against NPE when unboxing for comparison
+      final int signedVersion =
+          Optional.ofNullable(dbUser.getDataUseAgreementSignedVersion()).orElse(-1);
+      isCompleted = (getCurrentDuccVersion() == signedVersion);
+    }
+
+    boolean isExpired =
+        getExpirationTime(userAccessModule)
+            .map(x -> x.before(new Timestamp(clock.millis())))
+            .orElse(false);
+
+    // A module is completed when it is bypassed OR (completed but not expired).
+    return isBypassed || (isCompleted && !isExpired);
+  }
+
+  @Override
+  public boolean isModuleBypassed(DbUser dbUser, AccessModuleName accessModuleName) {
+    DbAccessModule dbAccessModule =
+        getDbAccessModuleOrThrow(dbAccessModulesProvider.get(), accessModuleName);
+    return dbAccessModule.getBypassable()
+        && retrieveUserAccessModuleOrCreate(dbUser, dbAccessModule).getBypassTime() != null;
   }
 
   /**
@@ -113,9 +176,8 @@ public class AccessModuleServiceImpl implements AccessModuleService {
    */
   private DbUserAccessModule retrieveUserAccessModuleOrCreate(
       DbUser user, DbAccessModule dbAccessModule) {
-    return userAccessModuleDao.getAllByUser(user).stream()
-        .filter(m -> m.getAccessModule().getName().equals(dbAccessModule.getName()))
-        .findFirst()
+    return userAccessModuleDao
+        .getByUserAndAccessModule(user, dbAccessModule)
         .orElse(new DbUserAccessModule().setUser(user).setAccessModule(dbAccessModule));
   }
 
@@ -128,12 +190,10 @@ public class AccessModuleServiceImpl implements AccessModuleService {
    *   <li>The module is expirable.
    *   <li>The module was completed(CompletionTime is not null).
    *   <li>The module is not bypassed(BypassTime is null).
-   *   <li>Access annual renewal is enabled(enableAccessRenewal is true).
    * </ul>
    */
   private Optional<Timestamp> getExpirationTime(DbUserAccessModule dbUserAccessModule) {
-    if (!configProvider.get().access.enableAccessRenewal
-        || !dbUserAccessModule.getAccessModule().getExpirable()
+    if (!dbUserAccessModule.getAccessModule().getExpirable()
         || dbUserAccessModule.getCompletionTime() == null
         || dbUserAccessModule.getBypassTime() != null) {
       return Optional.empty();
@@ -168,5 +228,42 @@ public class AccessModuleServiceImpl implements AccessModuleService {
         expiryDays, "expected value for config key accessRenewal.expiryDays.expiryDays");
     long expiryDaysInMs = TimeUnit.MILLISECONDS.convert(expiryDays, TimeUnit.DAYS);
     return new Timestamp(completionTime.getTime() + expiryDaysInMs);
+  }
+
+  // Do we require this module's completion for users to be compliant with the appropriate tier(s)?
+  // This differs temporarily from whether we display this module in the user's
+  // Profile.accessModules because we have two Feature Flags for RAS.
+  // When the RAS roll-out is complete, we can collapse these two methods again.
+
+  private boolean isModuleRequiredInEnvironment(AccessModule module) {
+    final AccessConfig accessConfig = configProvider.get().access;
+
+    switch (module) {
+      case ERA_COMMONS:
+        return accessConfig.enableEraCommons;
+      case COMPLIANCE_TRAINING:
+        return accessConfig.enableComplianceTraining;
+      case RAS_LINK_LOGIN_GOV:
+        return accessConfig.enforceRasLoginGovLinking;
+      default:
+        return true;
+    }
+  }
+
+  // Do we display this module in the user's Profile.accessModules ? This differs temporarily from
+  // whether the module is *required* in the environment because we have two Feature Flags for RAS.
+  // When the RAS roll-out is complete, we can collapse these two methods again.
+
+  private boolean isModuleStatusReturnedInProfile(AccessModule module) {
+    final AccessConfig accessConfig = configProvider.get().access;
+
+    // temporary special case: always return RAS in Profile.accessModules when this FF = true
+    // even when we do not require it for tier membership
+    if (accessConfig.enableRasLoginGovLinking && module == AccessModule.RAS_LINK_LOGIN_GOV) {
+      return true;
+    }
+
+    // for every other case
+    return isModuleRequiredInEnvironment(module);
   }
 }

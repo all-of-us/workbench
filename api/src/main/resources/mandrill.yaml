@@ -81,6 +81,10 @@ definitions:
         type: array
         items:
           '$ref': '#/definitions/RecipientAddress'
+      preserve_recipients:
+        type: boolean
+        description: whether or not to expose all recipients in to "To" header for each email
+
 
   RecipientAddress:
     required:
@@ -90,6 +94,8 @@ definitions:
       email:
         type: string
         description: recipient address
+      type:
+        '$ref': '#/definitions/RecipientType'
 
   MandrillMessageStatuses:
     type: array
@@ -109,4 +115,11 @@ definitions:
         type: string
         description: why email was rejected if it was
 
+  RecipientType:
+    type: string
+    description: the header type to use for the recipient. Possible values "to", "cc", or "bcc".
+    enum:
+      - to
+      - cc
+      - bcc
 

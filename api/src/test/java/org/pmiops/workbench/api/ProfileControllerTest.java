@@ -15,6 +15,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import com.google.api.services.directory.model.User;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import java.io.IOException;
@@ -30,6 +31,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.pmiops.workbench.FakeClockConfiguration;
+import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.access.AccessModuleServiceImpl;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.access.AccessTierServiceImpl;
@@ -50,10 +52,10 @@ import org.pmiops.workbench.db.dao.AccessModuleDao;
 import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserDataUseAgreementDao;
-import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.UserServiceImpl;
 import org.pmiops.workbench.db.dao.UserTermsOfServiceDao;
 import org.pmiops.workbench.db.model.DbAccessModule;
+import org.pmiops.workbench.db.model.DbAccessModule.AccessModuleName;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserDataUseAgreement;
@@ -72,17 +74,19 @@ import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapperIm
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.AccessBypassRequest;
 import org.pmiops.workbench.model.AccessModule;
+import org.pmiops.workbench.model.AccessModuleStatus;
 import org.pmiops.workbench.model.AccountPropertyUpdate;
 import org.pmiops.workbench.model.Address;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.CreateAccountRequest;
 import org.pmiops.workbench.model.DemographicSurvey;
 import org.pmiops.workbench.model.Disability;
-import org.pmiops.workbench.model.DuaType;
 import org.pmiops.workbench.model.Education;
 import org.pmiops.workbench.model.Ethnicity;
 import org.pmiops.workbench.model.GenderIdentity;
 import org.pmiops.workbench.model.Institution;
+import org.pmiops.workbench.model.InstitutionMembershipRequirement;
+import org.pmiops.workbench.model.InstitutionTierConfig;
 import org.pmiops.workbench.model.InstitutionUserInstructions;
 import org.pmiops.workbench.model.InstitutionalRole;
 import org.pmiops.workbench.model.NihToken;
@@ -147,7 +151,7 @@ public class ProfileControllerTest extends BaseControllerTest {
   @Autowired private FakeClock fakeClock;
 
   // allows us to mock out only specific methods
-  @SpyBean private UserService userService;
+  @SpyBean private AccessModuleService accessModuleService;
 
   private static final long NONCE_LONG = 12345;
   private static final String CAPTCHA_TOKEN = "captchaToken";
@@ -158,23 +162,25 @@ public class ProfileControllerTest extends BaseControllerTest {
   private static final String GIVEN_NAME = "Bob";
   private static final String GSUITE_DOMAIN = "researchallofus.org";
   private static final String NONCE = Long.toString(NONCE_LONG);
-  private static final String PRIMARY_EMAIL = "bob@researchallofus.org";
   private static final String RESEARCH_PURPOSE = "To test things";
   private static final String STATE = "EX";
   private static final String STREET_ADDRESS = "1 Example Lane";
   private static final String USER_PREFIX = "bob";
   private static final String WRONG_CAPTCHA_TOKEN = "WrongCaptchaToken";
   private static final String ZIP_CODE = "12345";
+  private static final String FULL_USER_NAME = USER_PREFIX + "@" + GSUITE_DOMAIN;
   private static final Timestamp TIMESTAMP = FakeClockConfiguration.NOW;
   private static final double TIME_TOLERANCE_MILLIS = 100.0;
   private static final int CURRENT_TERMS_OF_SERVICE_VERSION = 1;
   private CreateAccountRequest createAccountRequest;
-  private com.google.api.services.directory.model.User googleUser;
+  private User googleUser;
   private static DbUser dbUser;
   private static List<DbAccessModule> accessModules;
 
   private int DUCC_VERSION;
   private DbAccessTier registeredTier;
+  private InstitutionTierConfig rtAddressesConfig;
+  private InstitutionTierConfig rtDomainsConfig;
 
   @TestConfiguration
   @Import({
@@ -244,6 +250,17 @@ public class ProfileControllerTest extends BaseControllerTest {
     // key UserService logic depends on the existence of the Registered Tier
     registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
 
+    rtAddressesConfig =
+        new InstitutionTierConfig()
+            .membershipRequirement(InstitutionMembershipRequirement.ADDRESSES)
+            .eraRequired(false)
+            .accessTierShortName(registeredTier.getShortName());
+    rtDomainsConfig =
+        new InstitutionTierConfig()
+            .membershipRequirement(InstitutionMembershipRequirement.DOMAINS)
+            .eraRequired(false)
+            .accessTierShortName(registeredTier.getShortName());
+
     Profile profile = new Profile();
     profile.setContactEmail(CONTACT_EMAIL);
     profile.setFamilyName(FAMILY_NAME);
@@ -263,17 +280,16 @@ public class ProfileControllerTest extends BaseControllerTest {
     createAccountRequest.setProfile(profile);
     createAccountRequest.setCaptchaVerificationToken(CAPTCHA_TOKEN);
 
-    googleUser = new com.google.api.services.directory.model.User();
-    googleUser.setPrimaryEmail(PRIMARY_EMAIL);
+    googleUser = new User();
+    googleUser.setPrimaryEmail(FULL_USER_NAME);
     googleUser.setChangePasswordAtNextLogin(true);
     googleUser.setPassword("testPassword");
     googleUser.setIsEnrolledIn2Sv(true);
 
-    DUCC_VERSION = userService.getCurrentDuccVersion();
+    DUCC_VERSION = accessModuleService.getCurrentDuccVersion();
 
-    when(mockDirectoryService.getUser(PRIMARY_EMAIL)).thenReturn(googleUser);
-    when(mockDirectoryService.createUser(
-            GIVEN_NAME, FAMILY_NAME, USER_PREFIX + "@" + GSUITE_DOMAIN, CONTACT_EMAIL))
+    when(mockDirectoryService.getUserOrThrow(FULL_USER_NAME)).thenReturn(googleUser);
+    when(mockDirectoryService.createUser(GIVEN_NAME, FAMILY_NAME, FULL_USER_NAME, CONTACT_EMAIL))
         .thenReturn(googleUser);
     when(mockCloudStorageClient.getCaptchaServerKey()).thenReturn("Server_Key");
 
@@ -308,9 +324,8 @@ public class ProfileControllerTest extends BaseControllerTest {
                   .shortName("Broad")
                   .displayName("The Broad Institute")
                   .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION)
-                  .emailAddresses(Collections.singletonList(CONTACT_EMAIL))
-                  .emailDomains(Collections.singletonList("example.com"))
-                  .duaTypeEnum(DuaType.RESTRICTED);
+                  .addTierConfigsItem(
+                      rtAddressesConfig.emailAddresses(ImmutableList.of("email@domain.org")));
           institutionService.createInstitution(broad);
           final VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation =
               new VerifiedInstitutionalAffiliation()
@@ -331,9 +346,10 @@ public class ProfileControllerTest extends BaseControllerTest {
                   .shortName("Broad")
                   .displayName("The Broad Institute")
                   .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION)
-                  .emailAddresses(Collections.singletonList(CONTACT_EMAIL))
-                  .emailDomains(Collections.singletonList("example.com"))
-                  .duaTypeEnum(DuaType.MASTER);
+                  .addTierConfigsItem(
+                      rtDomainsConfig
+                          .emailAddresses(ImmutableList.of(CONTACT_EMAIL))
+                          .emailDomains(ImmutableList.of("example.com")));
           institutionService.createInstitution(broad);
           final VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation =
               new VerifiedInstitutionalAffiliation()
@@ -345,36 +361,12 @@ public class ProfileControllerTest extends BaseControllerTest {
   }
 
   @Test
-  public void testCreateAccount_MismatchEmailDomainNullDUA() {
-    assertThrows(
-        BadRequestException.class,
-        () -> {
-          final Institution broad =
-              new Institution()
-                  .shortName("Broad")
-                  .displayName("The Broad Institute")
-                  .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION)
-                  .emailAddresses(Collections.singletonList(CONTACT_EMAIL))
-                  .emailDomains(Collections.singletonList("example.com"));
-          institutionService.createInstitution(broad);
-          final VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation =
-              new VerifiedInstitutionalAffiliation()
-                  .institutionShortName("Broad")
-                  .institutionalRoleEnum(InstitutionalRole.STUDENT);
-          createAccountRequest.getProfile().contactEmail("bob@broadInstitute.com");
-          createAccountAndDbUserWithAffiliation(verifiedInstitutionalAffiliation);
-        });
-  }
-
-  @Test
-  public void testCreateAccount_Success_RESTRICTEDDUA() {
+  public void testCreateAccount_success_addressesRtRequirement() {
     final Institution broad =
         new Institution()
             .shortName("Broad")
             .displayName("The Broad Institute")
-            .emailAddresses(Collections.singletonList(CONTACT_EMAIL))
-            .emailDomains(Collections.singletonList("example.com"))
-            .duaTypeEnum(DuaType.RESTRICTED)
+            .addTierConfigsItem(rtAddressesConfig.emailAddresses(ImmutableList.of(CONTACT_EMAIL)))
             .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION);
     institutionService.createInstitution(broad);
 
@@ -387,32 +379,12 @@ public class ProfileControllerTest extends BaseControllerTest {
   }
 
   @Test
-  public void testCreateAccount_Success_MasterDUA() {
+  public void testCreateAccount_success_domainsRtRequirement() {
     final Institution broad =
         new Institution()
             .shortName("Broad")
             .displayName("The Broad Institute")
-            .emailAddresses(Collections.singletonList("institution@example.com"))
-            .emailDomains(Collections.singletonList("example.com"))
-            .duaTypeEnum(DuaType.MASTER)
-            .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION);
-    institutionService.createInstitution(broad);
-
-    final VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation =
-        new VerifiedInstitutionalAffiliation()
-            .institutionShortName("Broad")
-            .institutionalRoleEnum(InstitutionalRole.STUDENT);
-    createAccountRequest.getProfile().contactEmail("bob@example.com");
-    createAccountAndDbUserWithAffiliation(verifiedInstitutionalAffiliation);
-  }
-
-  @Test
-  public void testCreateAccount_Success_NULLDUA() {
-    final Institution broad =
-        new Institution()
-            .shortName("Broad")
-            .displayName("The Broad Institute")
-            .emailDomains(Collections.singletonList("example.com"))
+            .addTierConfigsItem(rtDomainsConfig.emailDomains(ImmutableList.of("example.com")))
             .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION);
     institutionService.createInstitution(broad);
 
@@ -428,7 +400,7 @@ public class ProfileControllerTest extends BaseControllerTest {
   public void testCreateAccount_success() {
     createAccountAndDbUserWithAffiliation();
     verify(mockProfileAuditor).fireCreateAction(any(Profile.class));
-    final DbUser dbUser = userDao.findUserByUsername(PRIMARY_EMAIL);
+    final DbUser dbUser = userDao.findUserByUsername(FULL_USER_NAME);
     assertThat(dbUser).isNotNull();
     assertThat(accessTierService.getAccessTierShortNamesForUser(dbUser)).isEmpty();
   }
@@ -438,7 +410,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     createAccountRequest.setTermsOfServiceVersion(1);
     createAccountAndDbUserWithAffiliation();
 
-    final DbUser dbUser = userDao.findUserByUsername(PRIMARY_EMAIL);
+    final DbUser dbUser = userDao.findUserByUsername(FULL_USER_NAME);
     final List<DbUserTermsOfService> tosRows = Lists.newArrayList(userTermsOfServiceDao.findAll());
     assertThat(tosRows.size()).isEqualTo(1);
     assertThat(tosRows.get(0).getTosVersion()).isEqualTo(1);
@@ -486,10 +458,10 @@ public class ProfileControllerTest extends BaseControllerTest {
   }
 
   @Test
-  public void testSubmitDataUseAgreement_success() {
+  public void testSubmitDUCC_success() {
     createAccountAndDbUserWithAffiliation();
-    String duaInitials = "NIH";
-    assertThat(profileController.submitDataUseAgreement(DUCC_VERSION, duaInitials).getStatusCode())
+    String initials = "NIH";
+    assertThat(profileController.submitDUCC(DUCC_VERSION, initials).getStatusCode())
         .isEqualTo(HttpStatus.OK);
     List<DbUserDataUseAgreement> dbUserDataUseAgreementList =
         userDataUseAgreementDao.findByUserIdOrderByCompletionTimeDesc(dbUser.getUserId());
@@ -497,31 +469,31 @@ public class ProfileControllerTest extends BaseControllerTest {
     DbUserDataUseAgreement dbUserDataUseAgreement = dbUserDataUseAgreementList.get(0);
     assertThat(dbUserDataUseAgreement.getUserFamilyName()).isEqualTo(dbUser.getFamilyName());
     assertThat(dbUserDataUseAgreement.getUserGivenName()).isEqualTo(dbUser.getGivenName());
-    assertThat(dbUserDataUseAgreement.getUserInitials()).isEqualTo(duaInitials);
+    assertThat(dbUserDataUseAgreement.getUserInitials()).isEqualTo(initials);
     assertThat(dbUserDataUseAgreement.getDataUseAgreementSignedVersion()).isEqualTo(DUCC_VERSION);
   }
 
   @Test
-  public void testSubmitDataUseAgreement_wrongVersion_older() {
+  public void testSubmitDUCC_wrongVersion_older() {
     assertThrows(
         BadRequestException.class,
         () -> {
           createAccountAndDbUserWithAffiliation();
-          String duaInitials = "NIH";
-          profileController.submitDataUseAgreement(DUCC_VERSION - 1, duaInitials);
+          String initials = "NIH";
+          profileController.submitDUCC(DUCC_VERSION - 1, initials);
         });
   }
 
   // not really a use case for this, but shows we need an exact match
 
   @Test
-  public void testSubmitDataUseAgreement_wrongVersion_newer() {
+  public void testSubmitDUCC_wrongVersion_newer() {
     assertThrows(
         BadRequestException.class,
         () -> {
           createAccountAndDbUserWithAffiliation();
-          String duaInitials = "NIH";
-          profileController.submitDataUseAgreement(DUCC_VERSION + 1, duaInitials);
+          String initials = "NIH";
+          profileController.submitDUCC(DUCC_VERSION + 1, initials);
         });
   }
 
@@ -534,29 +506,31 @@ public class ProfileControllerTest extends BaseControllerTest {
 
     // bypass the other access requirements
     final DbUser dbUser = userDao.findUserByUserId(userId);
-    dbUser.setComplianceTrainingBypassTime(TIMESTAMP);
-    dbUser.setEraCommonsBypassTime(TIMESTAMP);
-    dbUser.setTwoFactorAuthBypassTime(TIMESTAMP);
-    dbUser.setPublicationsLastConfirmedTime(TIMESTAMP);
-    dbUser.setProfileLastConfirmedTime(TIMESTAMP);
-    userDao.save(dbUser);
+    accessModuleService.updateCompletionTime(dbUser, AccessModuleName.ERA_COMMONS, TIMESTAMP);
+    accessModuleService.updateCompletionTime(
+        dbUser, AccessModuleName.RT_COMPLIANCE_TRAINING, TIMESTAMP);
+    accessModuleService.updateCompletionTime(dbUser, AccessModuleName.TWO_FACTOR_AUTH, TIMESTAMP);
+    accessModuleService.updateCompletionTime(
+        dbUser, AccessModuleName.PUBLICATION_CONFIRMATION, TIMESTAMP);
+    accessModuleService.updateCompletionTime(
+        dbUser, AccessModuleName.PROFILE_CONFIRMATION, TIMESTAMP);
 
     // arbitrary; at coding time the current version is 3
     final int versionA = 5;
     final int versionB = 8;
 
     // set the current DUCC version to version A
-    when(userService.getCurrentDuccVersion()).thenReturn(versionA);
+    when(accessModuleService.getCurrentDuccVersion()).thenReturn(versionA);
 
     // sign the current version (A)
 
-    final String duaInitials = "NIH";
-    assertThat(profileController.submitDataUseAgreement(versionA, duaInitials).getStatusCode())
+    final String initials = "NIH";
+    assertThat(profileController.submitDUCC(versionA, initials).getStatusCode())
         .isEqualTo(HttpStatus.OK);
     assertThat(accessTierService.getAccessTiersForUser(dbUser)).contains(registeredTier);
 
     // time passes and the system now requires a newer version (B)
-    when(userService.getCurrentDuccVersion()).thenReturn(versionB);
+    when(accessModuleService.getCurrentDuccVersion()).thenReturn(versionB);
 
     // a bit of a hack here: use this to sync the registration status
     // see also https://precisionmedicineinitiative.atlassian.net/browse/RW-2352
@@ -606,8 +580,8 @@ public class ProfileControllerTest extends BaseControllerTest {
               new Institution()
                   .shortName("Broad")
                   .displayName("The Broad Institute")
-                  .emailAddresses(Collections.singletonList(CONTACT_EMAIL))
-                  .duaTypeEnum(DuaType.RESTRICTED)
+                  .addTierConfigsItem(
+                      rtAddressesConfig.emailAddresses(ImmutableList.of(CONTACT_EMAIL)))
                   .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION);
           institutionService.createInstitution(broad);
           // "Broad" is the only institution
@@ -629,9 +603,8 @@ public class ProfileControllerTest extends BaseControllerTest {
               new Institution()
                   .shortName("Broad")
                   .displayName("The Broad Institute")
-                  .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION)
-                  .emailAddresses(Collections.emptyList())
-                  .duaTypeEnum(DuaType.RESTRICTED);
+                  .addTierConfigsItem(rtAddressesConfig.emailAddresses(ImmutableList.of()))
+                  .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION);
           institutionService.createInstitution(broad);
           final VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation =
               new VerifiedInstitutionalAffiliation()
@@ -654,8 +627,7 @@ public class ProfileControllerTest extends BaseControllerTest {
                   .shortName("Broad")
                   .displayName("The Broad Institute")
                   .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION)
-                  .emailDomains(emailDomains)
-                  .duaTypeEnum(DuaType.MASTER);
+                  .addTierConfigsItem(rtAddressesConfig.emailDomains(emailDomains));
           institutionService.createInstitution(broad);
           final VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation =
               new VerifiedInstitutionalAffiliation()
@@ -793,7 +765,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     profile.setGivenName("OldGivenName");
     profile.setFamilyName("OldFamilyName");
     profileController.updateProfile(profile);
-    profileController.submitDataUseAgreement(DUCC_VERSION, "O.O.");
+    profileController.submitDUCC(DUCC_VERSION, "O.O.");
     profile.setGivenName("NewGivenName");
     profile.setFamilyName("NewFamilyName");
     profileController.updateProfile(profile);
@@ -974,7 +946,8 @@ public class ProfileControllerTest extends BaseControllerTest {
     createAccountAndDbUserWithAffiliation(verifiedInstitutionalAffiliation);
     verify(mockMailService).sendWelcomeEmail(any(), any(), any());
     verify(mockMailService)
-        .sendInstitutionUserInstructions(CONTACT_EMAIL, instructions.getInstructions());
+        .sendInstitutionUserInstructions(
+            CONTACT_EMAIL, instructions.getInstructions(), FULL_USER_NAME);
   }
 
   @Test
@@ -1047,10 +1020,12 @@ public class ProfileControllerTest extends BaseControllerTest {
     createAccountAndDbUserWithAffiliation();
 
     profileController.syncEraCommonsStatus();
-    assertThat(userDao.findUserByUsername(PRIMARY_EMAIL).getEraCommonsLinkedNihUsername())
-        .isEqualTo(linkedUsername);
-    assertThat(userDao.findUserByUsername(PRIMARY_EMAIL).getEraCommonsLinkExpireTime()).isNotNull();
-    assertThat(userDao.findUserByUsername(PRIMARY_EMAIL).getEraCommonsCompletionTime()).isNotNull();
+    final DbUser user = userDao.findUserByUsername(FULL_USER_NAME);
+    assertThat(user.getEraCommonsLinkedNihUsername()).isEqualTo(linkedUsername);
+    assertThat(user.getEraCommonsLinkExpireTime()).isNotNull();
+    assertThat(
+            getCompletionEpochMillis(profileController.getMe().getBody(), AccessModule.ERA_COMMONS))
+        .isNotNull();
   }
 
   @Test
@@ -1091,7 +1066,8 @@ public class ProfileControllerTest extends BaseControllerTest {
 
     createAccountAndDbUserWithAffiliation();
     Profile profile = profileController.getMe().getBody();
-    assertThat(profile.getProfileLastConfirmedTime()).isEqualTo(initialTestTime);
+    assertThat(getCompletionEpochMillis(profile, AccessModule.PROFILE_CONFIRMATION))
+        .isEqualTo(initialTestTime);
 
     // time passes
 
@@ -1105,7 +1081,8 @@ public class ProfileControllerTest extends BaseControllerTest {
     profileController.updateProfile(profile);
 
     Profile updatedProfile = profileController.getMe().getBody();
-    assertThat(updatedProfile.getProfileLastConfirmedTime()).isEqualTo(laterTime);
+    assertThat(getCompletionEpochMillis(updatedProfile, AccessModule.PROFILE_CONFIRMATION))
+        .isEqualTo(laterTime);
   }
 
   @Test
@@ -1132,7 +1109,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     final Profile original = createAccountAndDbUserWithAffiliation();
 
     // valid user but no fields updated
-    final AccountPropertyUpdate request = new AccountPropertyUpdate().username(PRIMARY_EMAIL);
+    final AccountPropertyUpdate request = new AccountPropertyUpdate().username(FULL_USER_NAME);
     final Profile retrieved = profileService.updateAccountProperties(request);
 
     // RW-5257 Demo Survey completion time is incorrectly updated
@@ -1154,8 +1131,8 @@ public class ProfileControllerTest extends BaseControllerTest {
         new Institution()
             .shortName("Broad")
             .displayName("The Broad Institute")
-            .emailAddresses(ImmutableList.of(CONTACT_EMAIL, newContactEmail))
-            .duaTypeEnum(DuaType.RESTRICTED)
+            .addTierConfigsItem(
+                rtAddressesConfig.emailAddresses(ImmutableList.of(CONTACT_EMAIL, newContactEmail)))
             .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION);
     institutionService.createInstitution(broadPlus);
 
@@ -1170,7 +1147,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     assertThat(original.getContactEmail()).isEqualTo(CONTACT_EMAIL);
 
     final AccountPropertyUpdate request =
-        new AccountPropertyUpdate().username(PRIMARY_EMAIL).contactEmail(newContactEmail);
+        new AccountPropertyUpdate().username(FULL_USER_NAME).contactEmail(newContactEmail);
 
     final Profile retrieved = profileService.updateAccountProperties(request);
     assertThat(retrieved.getContactEmail()).isEqualTo(newContactEmail);
@@ -1193,8 +1170,9 @@ public class ProfileControllerTest extends BaseControllerTest {
               new Institution()
                   .shortName("Broad")
                   .displayName("The Broad Institute")
-                  .emailAddresses(ImmutableList.of(CONTACT_EMAIL, newContactEmail))
-                  .duaTypeEnum(DuaType.RESTRICTED)
+                  .addTierConfigsItem(
+                      rtAddressesConfig.emailAddresses(
+                          ImmutableList.of(CONTACT_EMAIL, newContactEmail)))
                   .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION);
           institutionService.createInstitution(broadPlus);
           final VerifiedInstitutionalAffiliation affiliation =
@@ -1206,7 +1184,7 @@ public class ProfileControllerTest extends BaseControllerTest {
               createAccountAndDbUserWithAffiliation(affiliation, grantAdminAuthority);
           assertThat(original.getContactEmail()).isEqualTo(CONTACT_EMAIL);
           final AccountPropertyUpdate request =
-              new AccountPropertyUpdate().username(PRIMARY_EMAIL).contactEmail(newContactEmail);
+              new AccountPropertyUpdate().username(FULL_USER_NAME).contactEmail(newContactEmail);
           profileService.updateAccountProperties(request);
         });
   }
@@ -1223,7 +1201,7 @@ public class ProfileControllerTest extends BaseControllerTest {
           createAccountAndDbUserWithAffiliation(grantAdminAuthority);
           final String newContactEmail = "eric.lander@broadinstitute.org";
           final AccountPropertyUpdate request =
-              new AccountPropertyUpdate().username(PRIMARY_EMAIL).contactEmail(newContactEmail);
+              new AccountPropertyUpdate().username(FULL_USER_NAME).contactEmail(newContactEmail);
           profileService.updateAccountProperties(request);
         });
   }
@@ -1250,8 +1228,7 @@ public class ProfileControllerTest extends BaseControllerTest {
         new Institution()
             .shortName("MGH123")
             .displayName("Massachusetts General Hospital")
-            .emailAddresses(ImmutableList.of(CONTACT_EMAIL))
-            .duaTypeEnum(DuaType.RESTRICTED)
+            .addTierConfigsItem(rtAddressesConfig.emailAddresses(ImmutableList.of(CONTACT_EMAIL)))
             .organizationTypeEnum(OrganizationType.HEALTH_CENTER_NON_PROFIT);
     institutionService.createInstitution(massGeneral);
 
@@ -1262,7 +1239,7 @@ public class ProfileControllerTest extends BaseControllerTest {
             .institutionalRoleEnum(InstitutionalRole.POST_DOCTORAL);
 
     final AccountPropertyUpdate request =
-        new AccountPropertyUpdate().username(PRIMARY_EMAIL).affiliation(newAffiliation);
+        new AccountPropertyUpdate().username(FULL_USER_NAME).affiliation(newAffiliation);
     final Profile retrieved = profileService.updateAccountProperties(request);
     assertThat(retrieved.getVerifiedInstitutionalAffiliation()).isEqualTo(newAffiliation);
 
@@ -1284,8 +1261,9 @@ public class ProfileControllerTest extends BaseControllerTest {
               new Institution()
                   .shortName("MGH123")
                   .displayName("Massachusetts General Hospital")
-                  .duaTypeEnum(DuaType.MASTER)
-                  .emailDomains(ImmutableList.of("mgh.org", "massgeneral.hospital"))
+                  .addTierConfigsItem(
+                      rtDomainsConfig.emailDomains(
+                          ImmutableList.of("mgh.org", "massgeneral.hospital")))
                   .organizationTypeEnum(OrganizationType.HEALTH_CENTER_NON_PROFIT);
           institutionService.createInstitution(massGeneral);
           final VerifiedInstitutionalAffiliation newAffiliation =
@@ -1294,7 +1272,7 @@ public class ProfileControllerTest extends BaseControllerTest {
                   .institutionDisplayName(massGeneral.getDisplayName())
                   .institutionalRoleEnum(InstitutionalRole.POST_DOCTORAL);
           final AccountPropertyUpdate request =
-              new AccountPropertyUpdate().username(PRIMARY_EMAIL).affiliation(newAffiliation);
+              new AccountPropertyUpdate().username(FULL_USER_NAME).affiliation(newAffiliation);
           profileService.updateAccountProperties(request);
         });
   }
@@ -1324,8 +1302,8 @@ public class ProfileControllerTest extends BaseControllerTest {
         new Institution()
             .shortName("MGH123")
             .displayName("Massachusetts General Hospital")
-            .duaTypeEnum(DuaType.MASTER)
-            .emailDomains(ImmutableList.of("mgh.org", "massgeneral.hospital"))
+            .addTierConfigsItem(
+                rtDomainsConfig.emailDomains(ImmutableList.of("mgh.org", "massgeneral.hospital")))
             .organizationTypeEnum(OrganizationType.HEALTH_CENTER_NON_PROFIT);
     institutionService.createInstitution(massGeneral);
 
@@ -1337,7 +1315,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
     final AccountPropertyUpdate request =
         new AccountPropertyUpdate()
-            .username(PRIMARY_EMAIL)
+            .username(FULL_USER_NAME)
             .contactEmail(newContactEmail)
             .affiliation(newAffiliation);
     final Profile retrieved = profileService.updateAccountProperties(request);
@@ -1370,8 +1348,9 @@ public class ProfileControllerTest extends BaseControllerTest {
               new Institution()
                   .shortName("MGH123")
                   .displayName("Massachusetts General Hospital")
-                  .duaTypeEnum(DuaType.MASTER)
-                  .emailDomains(ImmutableList.of("mgh.org", "massgeneral.hospital"))
+                  .addTierConfigsItem(
+                      rtDomainsConfig.emailDomains(
+                          ImmutableList.of("mgh.org", "massgeneral.hospital")))
                   .organizationTypeEnum(OrganizationType.HEALTH_CENTER_NON_PROFIT);
           institutionService.createInstitution(massGeneral);
           final VerifiedInstitutionalAffiliation newAffiliation =
@@ -1381,7 +1360,7 @@ public class ProfileControllerTest extends BaseControllerTest {
                   .institutionalRoleEnum(InstitutionalRole.POST_DOCTORAL);
           final AccountPropertyUpdate request =
               new AccountPropertyUpdate()
-                  .username(PRIMARY_EMAIL)
+                  .username(FULL_USER_NAME)
                   .contactEmail(newContactEmail)
                   .affiliation(newAffiliation);
           profileService.updateAccountProperties(request);
@@ -1394,7 +1373,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
     final AccountPropertyUpdate request =
         new AccountPropertyUpdate()
-            .username(PRIMARY_EMAIL)
+            .username(FULL_USER_NAME)
             .accessBypassRequests(Collections.emptyList());
     final Profile retrieved = profileService.updateAccountProperties(request);
 
@@ -1408,10 +1387,10 @@ public class ProfileControllerTest extends BaseControllerTest {
     final Profile original = createAccountAndDbUserWithAffiliation();
 
     // user has no bypasses at test start
-    assertThat(original.getDataUseAgreementBypassTime()).isNull();
-    assertThat(original.getComplianceTrainingBypassTime()).isNull();
-    assertThat(original.getEraCommonsBypassTime()).isNull();
-    assertThat(original.getTwoFactorAuthBypassTime()).isNull();
+    assertThat(getBypassEpochMillis(original, AccessModule.DATA_USER_CODE_OF_CONDUCT)).isNull();
+    assertThat(getBypassEpochMillis(original, AccessModule.COMPLIANCE_TRAINING)).isNull();
+    assertThat(getBypassEpochMillis(original, AccessModule.ERA_COMMONS)).isNull();
+    assertThat(getBypassEpochMillis(original, AccessModule.TWO_FACTOR_AUTH)).isNull();
 
     final List<AccessBypassRequest> bypasses1 =
         ImmutableList.of(
@@ -1424,16 +1403,17 @@ public class ProfileControllerTest extends BaseControllerTest {
                 .isBypassed(false));
 
     final AccountPropertyUpdate request1 =
-        new AccountPropertyUpdate().username(PRIMARY_EMAIL).accessBypassRequests(bypasses1);
+        new AccountPropertyUpdate().username(FULL_USER_NAME).accessBypassRequests(bypasses1);
     final Profile retrieved1 = profileService.updateAccountProperties(request1);
 
     // this is now bypassed
-    assertThat(retrieved1.getDataUseAgreementBypassTime()).isNotNull();
+    assertThat(getBypassEpochMillis(retrieved1, AccessModule.DATA_USER_CODE_OF_CONDUCT))
+        .isNotNull();
     // remains unbypassed because the flag was set to false
-    assertThat(retrieved1.getComplianceTrainingBypassTime()).isNull();
+    assertThat(getBypassEpochMillis(retrieved1, AccessModule.COMPLIANCE_TRAINING)).isNull();
     // unchanged: unbypassed
-    assertThat(retrieved1.getEraCommonsBypassTime()).isNull();
-    assertThat(retrieved1.getTwoFactorAuthBypassTime()).isNull();
+    assertThat(getBypassEpochMillis(retrieved1, AccessModule.ERA_COMMONS)).isNull();
+    assertThat(getBypassEpochMillis(retrieved1, AccessModule.TWO_FACTOR_AUTH)).isNull();
 
     final List<AccessBypassRequest> bypasses2 =
         ImmutableList.of(
@@ -1450,17 +1430,17 @@ public class ProfileControllerTest extends BaseControllerTest {
     final Profile retrieved2 = profileService.updateAccountProperties(request2);
 
     // this is now unbypassed
-    assertThat(retrieved2.getDataUseAgreementBypassTime()).isNull();
+    assertThat(getBypassEpochMillis(retrieved2, AccessModule.DATA_USER_CODE_OF_CONDUCT)).isNull();
     // these 3 are now bypassed
-    assertThat(retrieved2.getComplianceTrainingBypassTime()).isNotNull();
-    assertThat(retrieved2.getEraCommonsBypassTime()).isNotNull();
-    assertThat(retrieved2.getTwoFactorAuthBypassTime()).isNotNull();
+    assertThat(getBypassEpochMillis(retrieved2, AccessModule.COMPLIANCE_TRAINING)).isNotNull();
+    assertThat(getBypassEpochMillis(retrieved2, AccessModule.ERA_COMMONS)).isNotNull();
+    assertThat(getBypassEpochMillis(retrieved2, AccessModule.TWO_FACTOR_AUTH)).isNotNull();
 
     // TODO(RW-6930): Make Profile contain the new AccessModule block, then read from there.
     verify(mockProfileAuditor).fireUpdateAction(original, retrieved1);
     verify(mockProfileAuditor).fireUpdateAction(retrieved1, retrieved2);
 
-    // DUA and COMPLIANCE x2, one for each request
+    // DUCC and COMPLIANCE x2, one for each request
     verify(mockUserServiceAuditor, times(2))
         .fireAdministrativeBypassTime(
             eq(dbUser.getUserId()),
@@ -1497,7 +1477,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     final Double newQuota = 123.4;
 
     final AccountPropertyUpdate request =
-        new AccountPropertyUpdate().username(PRIMARY_EMAIL).freeCreditsLimit(newQuota);
+        new AccountPropertyUpdate().username(FULL_USER_NAME).freeCreditsLimit(newQuota);
 
     final Profile retrieved = profileService.updateAccountProperties(request);
     assertThat(retrieved.getFreeTierDollarQuota()).isWithin(0.01).of(newQuota);
@@ -1512,7 +1492,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
     final AccountPropertyUpdate request =
         new AccountPropertyUpdate()
-            .username(PRIMARY_EMAIL)
+            .username(FULL_USER_NAME)
             .freeCreditsLimit(original.getFreeTierDollarQuota());
     profileService.updateAccountProperties(request);
 
@@ -1541,7 +1521,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
     final AccountPropertyUpdate request =
         new AccountPropertyUpdate()
-            .username(PRIMARY_EMAIL)
+            .username(FULL_USER_NAME)
             .freeCreditsLimit(config.billing.defaultFreeCreditsDollarLimit);
     profileService.updateAccountProperties(request);
     verify(mockUserServiceAuditor, never())
@@ -1564,13 +1544,15 @@ public class ProfileControllerTest extends BaseControllerTest {
     body.setRedirectUrl("url");
 
     dbUser.setRasLinkLoginGovUsername(loginGovUsername);
-    dbUser.setRasLinkLoginGovCompletionTime(TIMESTAMP);
+    dbUser = userDao.save(dbUser);
+    accessModuleService.updateCompletionTime(dbUser, AccessModuleName.RAS_LOGIN_GOV, TIMESTAMP);
+
     when(mockRasLinkService.linkRasLoginGovAccount(body.getAuthCode(), body.getRedirectUrl()))
         .thenReturn(dbUser);
 
-    assertThat(profileController.linkRasAccount(body).getBody().getRasLinkLoginGovUsername())
-        .isEqualTo(loginGovUsername);
-    assertThat(profileController.linkRasAccount(body).getBody().getRasLinkLoginGovCompletionTime())
+    final Profile profile = profileController.linkRasAccount(body).getBody();
+    assertThat(profile.getRasLinkLoginGovUsername()).isEqualTo(loginGovUsername);
+    assertThat(getCompletionEpochMillis(profile, AccessModule.RAS_LINK_LOGIN_GOV))
         .isEqualTo(TIMESTAMP.toInstant().toEpochMilli());
   }
 
@@ -1582,7 +1564,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     Profile result = profileController.createAccount(createAccountRequest).getBody();
 
     // initialize the global test dbUser
-    dbUser = userDao.findUserByUsername(PRIMARY_EMAIL);
+    dbUser = userDao.findUserByUsername(FULL_USER_NAME);
 
     if (grantAdminAuthority) {
       dbUser.setAuthoritiesEnum(Collections.singleton(Authority.ACCESS_CONTROL_ADMIN));
@@ -1614,13 +1596,17 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   private void assertProfile(Profile profile) {
     assertThat(profile).isNotNull();
-    assertThat(profile.getUsername()).isEqualTo(PRIMARY_EMAIL);
+    assertThat(profile.getUsername()).isEqualTo(FULL_USER_NAME);
     assertThat(profile.getContactEmail()).isEqualTo(CONTACT_EMAIL);
     assertThat(profile.getFamilyName()).isEqualTo(FAMILY_NAME);
     assertThat(profile.getGivenName()).isEqualTo(GIVEN_NAME);
     assertThat(profile.getAccessTierShortNames()).isEmpty();
+    assertThat(getCompletionEpochMillis(profile, AccessModule.PROFILE_CONFIRMATION))
+        .isEqualTo(TIMESTAMP.getTime());
+    assertThat(getCompletionEpochMillis(profile, AccessModule.PUBLICATION_CONFIRMATION))
+        .isEqualTo(TIMESTAMP.getTime());
 
-    DbUser user = userDao.findUserByUsername(PRIMARY_EMAIL);
+    DbUser user = userDao.findUserByUsername(FULL_USER_NAME);
     assertThat(user).isNotNull();
     assertThat(user.getContactEmail()).isEqualTo(CONTACT_EMAIL);
     assertThat(user.getFamilyName()).isEqualTo(FAMILY_NAME);
@@ -1629,12 +1615,22 @@ public class ProfileControllerTest extends BaseControllerTest {
         .isWithin(TIME_TOLERANCE_MILLIS)
         .of(ProfileControllerTest.TIMESTAMP.getTime());
     assertThat(accessTierService.getAccessTierShortNamesForUser(user)).isEmpty();
-    assertThat((double) user.getProfileLastConfirmedTime().getTime())
-        .isWithin(TIME_TOLERANCE_MILLIS)
-        .of(ProfileControllerTest.TIMESTAMP.getTime());
-    assertThat((double) user.getPublicationsLastConfirmedTime().getTime())
-        .isWithin(TIME_TOLERANCE_MILLIS)
-        .of(ProfileControllerTest.TIMESTAMP.getTime());
+  }
+
+  private Long getCompletionEpochMillis(Profile profile, AccessModule accessModuleName) {
+    return profile.getAccessModules().getModules().stream()
+        .filter(m -> m.getModuleName() == accessModuleName)
+        .findFirst()
+        .map(AccessModuleStatus::getCompletionEpochMillis)
+        .orElse(null);
+  }
+
+  private Long getBypassEpochMillis(Profile profile, AccessModule accessModuleName) {
+    return profile.getAccessModules().getModules().stream()
+        .filter(m -> m.getModuleName() == accessModuleName)
+        .findFirst()
+        .map(AccessModuleStatus::getBypassEpochMillis)
+        .orElse(null);
   }
 
   private VerifiedInstitutionalAffiliation createVerifiedInstitutionalAffiliation() {
@@ -1642,8 +1638,7 @@ public class ProfileControllerTest extends BaseControllerTest {
         new Institution()
             .shortName("Broad")
             .displayName("The Broad Institute")
-            .emailAddresses(Collections.singletonList(CONTACT_EMAIL))
-            .duaTypeEnum(DuaType.RESTRICTED)
+            .addTierConfigsItem(rtAddressesConfig.emailAddresses(ImmutableList.of(CONTACT_EMAIL)))
             .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION);
     institutionService.createInstitution(broad);
 

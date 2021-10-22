@@ -13,23 +13,25 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Scope;
+import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-@Configuration
-@EnableTransactionManagement
-@EnableJpaRepositories(
-    entityManagerFactoryRef = "entityManagerFactory",
-    transactionManagerRef = "transactionManager",
-    basePackages = {"org.pmiops.workbench.db"})
 /**
  * Spring configuration for our workbench database. Uses the spring.datasource.* properties from
  * application.properties to configure the connection. Applies to the model and DAO objects under
  * this package.
  */
+@Configuration
+@EnableTransactionManagement
+@EnableJpaAuditing
+@EnableJpaRepositories(
+    entityManagerFactoryRef = "entityManagerFactory",
+    transactionManagerRef = "transactionManager",
+    basePackages = {"org.pmiops.workbench.db"})
 public class WorkbenchDbConfig {
 
   @Primary

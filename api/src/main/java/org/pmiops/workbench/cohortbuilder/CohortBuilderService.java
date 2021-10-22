@@ -13,7 +13,7 @@ import org.pmiops.workbench.model.CriteriaListWithCountResponse;
 import org.pmiops.workbench.model.CriteriaMenu;
 import org.pmiops.workbench.model.DataFilter;
 import org.pmiops.workbench.model.DemoChartInfo;
-import org.pmiops.workbench.model.DomainInfo;
+import org.pmiops.workbench.model.DomainCard;
 import org.pmiops.workbench.model.GenderOrSexType;
 import org.pmiops.workbench.model.ParticipantDemographics;
 import org.pmiops.workbench.model.SearchRequest;
@@ -60,8 +60,8 @@ public interface CohortBuilderService {
 
   List<Criteria> findCriteriaBy(String domain, String type, Boolean standard, Long parentId);
 
-  CriteriaListWithCountResponse findCriteriaByDomainAndSearchTerm(
-      String domain, String term, String surveyName, Integer limit);
+  CriteriaListWithCountResponse findCriteriaByDomain(
+      String domain, String term, String surveyName, Boolean standard, Integer limit);
 
   List<CriteriaMenu> findCriteriaMenuByParentId(long parentId);
 
@@ -70,9 +70,9 @@ public interface CohortBuilderService {
   List<DemoChartInfo> findDemoChartInfo(
       GenderOrSexType genderOrSexType, AgeType ageType, SearchRequest request);
 
-  Long findDomainCount(String domain, String term);
+  Long findDomainCountByStandard(String domain, String term, Boolean standard);
 
-  List<DomainInfo> findDomainInfos();
+  List<DomainCard> findDomainCards();
 
   List<Criteria> findDrugBrandOrIngredientByValue(String value, Integer limit);
 

@@ -1,3 +1,4 @@
+import {RouteLink} from 'app/components/app-router';
 import {Button} from 'app/components/buttons';
 import {ActionCardBase} from 'app/components/card';
 import {FadeBox} from 'app/components/containers';
@@ -7,10 +8,17 @@ import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {conceptSetsApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, withCurrentWorkspace} from 'app/utils';
-import {conceptSetUpdating, navigate, navigateByUrl, urlParamsStore} from 'app/utils/navigation';
+import {
+  conceptSetUpdating,
+  NavigationProps
+} from 'app/utils/navigation';
+import { MatchParams } from 'app/utils/stores';
+import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {ConceptSet} from 'generated/fetch';
+import * as fp from 'lodash/fp';
 import * as React from 'react';
+import {RouteComponentProps, withRouter} from 'react-router-dom';
 
 const styles = reactStyles({
   conceptSetsHeader: {
@@ -64,11 +72,11 @@ interface State {
   conceptSetLoading: boolean;
 }
 
-interface Props extends WithSpinnerOverlayProps {
+interface Props extends WithSpinnerOverlayProps, NavigationProps, RouteComponentProps<MatchParams> {
   workspace: WorkspaceData;
 }
 
-export const ConceptSetActions = withCurrentWorkspace()(
+export const ConceptSetActions = fp.flow(withCurrentWorkspace(), withNavigation, withRouter)(
   class extends React.Component<Props, State> {
     constructor(props: any) {
       super(props);
@@ -81,21 +89,24 @@ export const ConceptSetActions = withCurrentWorkspace()(
     componentDidMount(): void {
       this.props.hideSpinner();
       conceptSetUpdating.next(false);
-      const csid = urlParamsStore.getValue().csid;
       this.setState({conceptSetLoading: true});
-      if (csid) {
+    }
+
+    componentDidUpdate() {
+      const {csid} = this.props.match.params;
+      if (csid && this.state.conceptSetLoading) {
         const {namespace, id} = this.props.workspace;
-        conceptSetsApi().getConceptSet(namespace, id, csid).then(cs => {
+        conceptSetsApi().getConceptSet(namespace, id, +csid).then(cs => {
           if (cs) {
             this.setState({conceptSet: cs, conceptSetLoading: false});
           } else {
-            navigate(['workspaces', namespace, id, 'data', 'concepts']);
+            this.props.navigate(['workspaces', namespace, id, 'data', 'concepts']);
           }
         });
       }
     }
 
-    navigateTo(action: string): void {
+    getNavigationPath(action: string): string {
       const {namespace, id} = this.props.workspace;
       const {conceptSet} = this.state;
       let url = `/workspaces/${namespace}/${id}/`;
@@ -113,7 +124,7 @@ export const ConceptSetActions = withCurrentWorkspace()(
           url += `data/data-sets`;
           break;
       }
-      navigateByUrl(url);
+      return url;
     }
 
     render() {
@@ -124,10 +135,10 @@ export const ConceptSetActions = withCurrentWorkspace()(
           <h3 style={styles.conceptSetsHeader}>Concept Set Saved Successfully</h3>
           <div style={{marginTop: '0.25rem'}}>
             The concept set
-            <a style={{color: colors.accent, margin: '0 4px'}}
-               onClick={() => this.navigateTo('conceptSet')}>
+            <RouteLink style={{color: colors.accent, margin: '0 4px'}}
+               path={this.getNavigationPath('conceptSet')}>
               {conceptSet.name}
-            </a>
+            </RouteLink>
             has been saved.
           </div>
           <h3 style={{...styles.conceptSetsHeader, marginTop: '1.5rem'}}>What Next?</h3>
@@ -144,7 +155,7 @@ export const ConceptSetActions = withCurrentWorkspace()(
                   <Button
                     type='primary'
                     style={styles.cardButton}
-                    onClick={() => this.navigateTo(card.action)}>
+                    path={this.getNavigationPath(card.action)}>
                     {card.title}
                   </Button>
                 </div>

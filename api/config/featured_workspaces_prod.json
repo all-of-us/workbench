@@ -1,30 +1,6 @@
 {
   "featuredWorkspaces": [
     {
-      "name": "How to Work with All of Us Survey Data",
-      "namespace": "aou-rw-cd85862c",
-      "id": "howtoworkwithallofussurveydata",
-      "category": "TUTORIAL_WORKSPACES"
-    },
-    {
-      "name": "How to Work with All of Us Physical Measurements Data",
-      "namespace": "aou-rw-6a434c52",
-      "id": "howtoworkwithallofusphysicalmeasurementsdata",
-      "category": "TUTORIAL_WORKSPACES"
-    },
-    {
-      "name": "How to Get Started with Registered Tier Data",
-      "namespace": "aou-rw-28ce3c37",
-      "id": "howtogetstartedwithregisteredtierdata",
-      "category": "TUTORIAL_WORKSPACES"
-    },
-    {
-      "name": "How to Work With Wearable Device Data",
-      "namespace": "aou-rw-263e8603",
-      "id": "howtoworkwithwearabledevicedata",
-      "category": "TUTORIAL_WORKSPACES"
-    },
-    {
       "name": "How to Backup Notebooks and Intermediate Results",
       "namespace": "aou-rw-c73447b2",
       "id": "featuredworkspaceversioningnotebooksandintermediateresults",
@@ -36,39 +12,58 @@
       "id": "howtoreproducetheallofussarscov2antibodystudy",
       "category": "TUTORIAL_WORKSPACES"
     },
-
-
     {
-      "name": "Phenotype - Breast Cancer",
-      "namespace": "aou-rw-88722095",
-      "id": "phenotypebreastcancer",
+      "name": "How  to Work with All of Us Physical Measurements Data",
+      "namespace": "aou-rw-0beec6ae",
+      "id": "howtoworkwithallofusphysicalmeasurementsdatatier5",
+      "category": "TUTORIAL_WORKSPACES"
+    },
+    {
+      "name": "How to Get Started with Registered Tier Data (tier 5)",
+      "namespace": "aou-rw-4a344d07",
+      "id": "howtogetstartedwithregisteredtierdatatier5",
+      "category": "TUTORIAL_WORKSPACES"
+    },
+    {
+      "name": "How to Work with All of Us Survey Data (tier 5)",
+      "namespace": "aou-rw-141ad4f5",
+      "id": "howtoworkwithallofussurveydatatier5",
+      "category": "TUTORIAL_WORKSPACES"
+    }, {
+      "name": "How to Work With Wearable Device Data (tier 5)",
+      "namespace": "aou-rw-7b4a3b1d",
+      "id": "howtoworkwithwearabledevicedatatier5",
+      "category": "TUTORIAL_WORKSPACES"
+    }, {
+      "name": "Phenotype - Breast Cancer (tier 5)",
+      "namespace": "aou-rw-c6574691",
+      "id": "phenotypebreastcancertier5",
       "category": "PHENOTYPE_LIBRARY"
     },
     {
-      "name": "Phenotype - Dementia",
-      "namespace": "aou-rw-1219e893",
-      "id": "phenotypedementia",
+      "name": "Phenotype - Dementia (tier 5)",
+      "namespace": "aou-rw-1b3759b6",
+      "id": "phenotypedementiatier5",
       "category": "PHENOTYPE_LIBRARY"
     },
     {
-      "name": "Phenotype - Depression",
-      "namespace": "aou-rw-536bb70b",
-      "id": "phenotypedepression",
+      "name": "Phenotype - Depression (tier 5)",
+      "namespace": "aou-rw-6ed35443",
+      "id": "phenotypedepressiontier5",
       "category": "PHENOTYPE_LIBRARY"
     },
     {
-      "name": "Phenotype - Ischemic Heart Disease",
-      "namespace": "aou-rw-eef0793a",
-      "id": "phenotypeischemicheartdisease",
+      "name": "Phenotype - Ischemic Heart Disease (tier 5)",
+      "namespace": "aou-rw-5d0f62b5",
+      "id": "phenotypeischemicheartdiseasetier5",
       "category": "PHENOTYPE_LIBRARY"
     },
     {
-      "name": "Phenotype - Type 2 Diabetes",
-      "namespace": "aou-rw-c697f47e",
-      "id": "phenotypetype2diabetes",
+      "name": "Phenotype - Type 2 Diabetes (tier 5)",
+      "namespace": "aou-rw-8ec0c8fe",
+      "id": "phenotypetype2diabetestier5",
       "category": "PHENOTYPE_LIBRARY"
     },
-
     {
       "name": "Demo - Medication Sequencing",
       "namespace": "aou-rw-e8aeecf1",
@@ -110,6 +105,12 @@
       "namespace": "aou-rw-7172272a",
       "id": "howtorunnotebooksinthebackground",
       "category": "TUTORIAL_WORKSPACES"
+    },
+    {
+      "name": "Demo - Hypertension Prevalence",
+      "namespace": "aou-rw-1f867de7",
+      "id": "duplicateofd16htnrevisionaftercodereview",
+      "category": "DEMO_PROJECTS"
     }
   ]
 }

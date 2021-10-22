@@ -5,7 +5,6 @@ import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 
-import com.google.common.collect.ImmutableList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -15,10 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.pmiops.workbench.SpringTest;
-import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.cohortreview.CohortReviewService;
-import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.BufferEntryStatus;
-import org.pmiops.workbench.monitoring.labels.MetricLabel;
 import org.pmiops.workbench.monitoring.views.GaugeMetric;
 import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,18 +25,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 
 public class GaugeRecorderServiceTest extends SpringTest {
-
-  private static final List<MeasurementBundle> BILLING_BUFFER_GAUGE_BUNDLES =
-      ImmutableList.of(
-          MeasurementBundle.builder()
-              .addMeasurement(GaugeMetric.BILLING_BUFFER_PROJECT_COUNT, 22L)
-              .addTag(MetricLabel.BUFFER_ENTRY_STATUS, BufferEntryStatus.AVAILABLE.toString())
-              .build(),
-          MeasurementBundle.builder()
-              .addMeasurement(GaugeMetric.BILLING_BUFFER_PROJECT_COUNT, 3L)
-              .addTag(MetricLabel.BUFFER_ENTRY_STATUS, BufferEntryStatus.CREATING.toString())
-              .build());
-
   private static final long WORKSPACES_COUNT = 101L;
   private static final MeasurementBundle WORKSPACE_MEASUREMENT_BUNDLE =
       MeasurementBundle.builder()
@@ -55,7 +39,6 @@ public class GaugeRecorderServiceTest extends SpringTest {
   // Implementation classes for the ones that implement it. We could get
   // around this using Qualifiers if we wanted, but we only really care in
   // this test class.
-  @Autowired private BillingProjectBufferService mockBillingProjectBufferService;
   @Autowired private WorkspaceServiceImpl mockWorkspaceServiceImpl;
   @Autowired private MonitoringService mockMonitoringService;
 
@@ -67,12 +50,7 @@ public class GaugeRecorderServiceTest extends SpringTest {
 
   @TestConfiguration
   @Import({GaugeRecorderService.class, LogsBasedMetricServiceFakeImpl.class})
-  @MockBean({
-    BillingProjectBufferService.class,
-    CohortReviewService.class,
-    MonitoringService.class,
-    WorkspaceServiceImpl.class
-  })
+  @MockBean({CohortReviewService.class, MonitoringService.class, WorkspaceServiceImpl.class})
   public static class Config {
     /**
      * This is "yet another" GaugeDataCollector implementation, meant to showcase how we just grab
@@ -94,7 +72,6 @@ public class GaugeRecorderServiceTest extends SpringTest {
     doReturn(Collections.singleton(WORKSPACE_MEASUREMENT_BUNDLE))
         .when(mockWorkspaceServiceImpl)
         .getGaugeData();
-    doReturn(BILLING_BUFFER_GAUGE_BUNDLES).when(mockBillingProjectBufferService).getGaugeData();
   }
 
   @Test
@@ -110,13 +87,10 @@ public class GaugeRecorderServiceTest extends SpringTest {
 
     verify(mockMonitoringService, atLeast(1)).recordBundles(measurementBundlesListCaptor.capture());
     verify(mockWorkspaceServiceImpl).getGaugeData();
-    verify(mockBillingProjectBufferService).getGaugeData();
-
     final List<Collection<MeasurementBundle>> allRecordedBundles =
         measurementBundlesListCaptor.getAllValues();
     final int expectedSize =
         mockWorkspaceServiceImpl.getGaugeData().size()
-            + mockBillingProjectBufferService.getGaugeData().size()
             + standAloneGaugeDataCollector.getGaugeData().size();
     final int flatSize =
         allRecordedBundles.stream().map(Collection::size).mapToInt(Integer::valueOf).sum();

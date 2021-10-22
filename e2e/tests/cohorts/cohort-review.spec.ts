@@ -1,6 +1,6 @@
 import { findOrCreateWorkspace, isValidDate, signInWithAccessToken } from 'utils/test-utils';
 import { MenuOption, LinkText, ResourceCard } from 'app/text-labels';
-import { makeRandomName, makeWorkspaceName } from 'utils/str-utils';
+import { makeRandomName } from 'utils/str-utils';
 import CohortParticipantDetailPage from 'app/page/cohort-participant-detail-page';
 import CohortReviewModal from 'app/modal/cohort-review-modal';
 import CohortReviewPage from 'app/page/cohort-review-page';
@@ -11,34 +11,30 @@ import { getPropValue } from 'utils/element-utils';
 import AnnotationsSidebar, { ReviewStatus } from 'app/component/annotations-sidebar';
 import { AnnotationType } from 'app/modal/annotation-field-modal';
 import CohortActionsPage from 'app/page/cohort-actions-page';
-import { Surveys } from 'app/page/cohort-participants-group';
+import { Page } from 'puppeteer';
+import CohortBuildPage from 'app/page/cohort-build-page';
 
 jest.setTimeout(20 * 60 * 1000);
 
-describe('Cohort review tests', () => {
+describe('Cohort review set tests', () => {
   beforeEach(async () => {
     await signInWithAccessToken(page);
   });
 
-  const workspace = makeWorkspaceName();
-  const reviewSetNumberOfParticipants = 100;
+  const workspaceName = 'e2eCohortReviewTest';
+  const cohortName = makeRandomName('auotest', { includeHyphen: false });
 
-  test('Create cohort review set in cohort build page', async () => {
-    await findOrCreateWorkspace(page, { workspaceName: workspace });
+  const reviewSetNumberOfParticipants_1 = 50;
+  const reviewSetNumberOfParticipants_2 = 100;
 
-    const dataPage = new WorkspaceDataPage(page);
-    let cohortBuildPage = await dataPage.clickAddCohortsButton();
+  test('Create review set in cohort build page', async () => {
+    await findOrCreateWorkspace(page, { workspaceName: workspaceName });
 
-    // Include Participants Group 1: add a survey.
-    const group1 = cohortBuildPage.findIncludeParticipantsGroup('Group 1');
-    await group1.includeSurveys([Surveys.BASICS]);
-    await cohortBuildPage.getTotalCount();
-    await cohortBuildPage.createCohort();
+    const cohortCard = await findOrCreateCohortCard(page, cohortName);
+    await cohortCard.clickResourceName();
 
-    const cohortActionsPage = new CohortActionsPage(page);
-    const cohortName = await cohortActionsPage.getCohortName();
-    cohortBuildPage = await cohortActionsPage.clickCohortName();
-    await cohortBuildPage.getTotalCount();
+    const cohortBuildPage = new CohortBuildPage(page);
+    await cohortBuildPage.waitForLoad();
 
     const reviewSetsButton = cohortBuildPage.getCopyButton();
     await reviewSetsButton.click();
@@ -46,8 +42,7 @@ describe('Cohort review tests', () => {
     const modal = new CohortReviewModal(page);
     await modal.waitForLoad();
 
-    const reviewSetNumberOfParticipants = 100;
-    await modal.fillInNumberOfParticipants(reviewSetNumberOfParticipants);
+    await modal.fillInNumberOfParticipants(reviewSetNumberOfParticipants_1);
     await modal.clickButton(LinkText.CreateSet);
 
     const cohortReviewPage = new CohortReviewPage(page);
@@ -59,9 +54,9 @@ describe('Cohort review tests', () => {
     const participantsTable = cohortReviewPage.getDataTable();
     const records = await participantsTable.getNumRecords();
     // Table records page numbering is in "1 - 25 of 100 records" format.
-    expect(Number(records[2])).toEqual(reviewSetNumberOfParticipants);
+    expect(Number(records[2])).toEqual(reviewSetNumberOfParticipants_1);
 
-    console.log(`Created Review Set with ${reviewSetNumberOfParticipants} participants.`);
+    console.log(`Created Review Set with ${reviewSetNumberOfParticipants_1} participants.`);
 
     // Click Back to Cohort link
     const backToCohortButton = cohortReviewPage.getBackToCohortButton();
@@ -71,6 +66,7 @@ describe('Cohort review tests', () => {
     await cohortBuildPage.getTotalCount();
 
     // Back out to Data page
+    const dataPage = new WorkspaceDataPage(page);
     await dataPage.openDataPage();
     await dataPage.waitForLoad();
 
@@ -80,7 +76,6 @@ describe('Cohort review tests', () => {
     expect(reviewCohortCard).toBeTruthy();
 
     await dataPage.deleteResource(cohortName, ResourceCard.CohortReview);
-    await dataPage.deleteResource(cohortName, ResourceCard.Cohort);
   });
 
   /**
@@ -93,41 +88,16 @@ describe('Cohort review tests', () => {
    * Rename Cohort review.
    * Delete cohort review via card's ellipsis menu.
    */
-  test('Create cohort review set from cohort card', async () => {
-    await findOrCreateWorkspace(page, { workspaceName: workspace });
+  test('Create review set from cohort card', async () => {
+    await findOrCreateWorkspace(page, { workspaceName: workspaceName });
 
-    const dataPage = new WorkspaceDataPage(page);
-    const cohortBuildPage = await dataPage.clickAddCohortsButton();
-
-    // Include Participants Group 1: Add hydroxychloroquine drug.
-    const group1 = cohortBuildPage.findIncludeParticipantsGroup('Group 1');
-    await group1.includeDrugs('hydroxychloroquine', 1);
-    // Include Participants Group 1: Add Hydrocodone drug.
-    await group1.includeDrugs('Hydrocodone', 1);
-
-    // Include Participants Group 2: Add colonoscopy procedures.
-    const group2 = cohortBuildPage.findIncludeParticipantsGroup('Group 2');
-    await group2.includeProcedures('Colonoscopy', 1);
-
-    // Include Participants Group 3: Add Red cell indices labs and measurements.
-    const group3 = cohortBuildPage.findIncludeParticipantsGroup('Group 3');
-    await group3.includeLabsAndMeasurements('Red cell indices', 1);
-
-    // Save new cohort
-    const cohortName = await cohortBuildPage.createCohort();
-
-    // Find new cohort card.
-    const cohortActionsPage = new CohortActionsPage(page);
-    await cohortActionsPage.waitForLoad();
-    await dataPage.openDataPage({ waitPageChange: true });
-    const cohortCard = await dataPage.findCohortCard(cohortName);
-
+    const cohortCard = await findOrCreateCohortCard(page, cohortName);
     await cohortCard.selectSnowmanMenu(MenuOption.Review, { waitForNav: true });
     const modal = new CohortReviewModal(page);
     await modal.waitForLoad();
-    await modal.fillInNumberOfParticipants(reviewSetNumberOfParticipants);
+    await modal.fillInNumberOfParticipants(reviewSetNumberOfParticipants_2);
     await modal.clickButton(LinkText.CreateSet);
-    console.log(`Created Review Set with ${reviewSetNumberOfParticipants} participants.`);
+    console.log(`Created Review Set with ${reviewSetNumberOfParticipants_2} participants.`);
 
     let cohortReviewPage = new CohortReviewPage(page);
     await cohortReviewPage.waitForLoad();
@@ -139,7 +109,7 @@ describe('Cohort review tests', () => {
     // Table records page numbering is in "1 - 25 of 100 records" format.
     expect(Number(records[0])).toEqual(1);
     expect(Number(records[1])).toEqual(25);
-    expect(Number(records[2])).toEqual(reviewSetNumberOfParticipants);
+    expect(Number(records[2])).toEqual(reviewSetNumberOfParticipants_2);
 
     // Verify table column names match.
     const columns = [
@@ -160,7 +130,7 @@ describe('Cohort review tests', () => {
     const dobCell = await participantsTable.getCell(2, 2);
     const cellValue = await getPropValue<string>(dobCell, 'textContent');
     // Check birth date is valid format.
-    isValidDate(cellValue);
+    expect(isValidDate(cellValue)).toBeTruthy();
 
     // Check table row link navigation works. Click ParticipantId link in the second row.
     const participantId = await cohortReviewPage.clickParticipantLink(2);
@@ -173,8 +143,8 @@ describe('Cohort review tests', () => {
     const annotationsSidebar = new AnnotationsSidebar(page);
     await annotationsSidebar.open();
 
-    const reviewParticipantid1 = await annotationsSidebar.getParticipantID();
-    expect(participantId).toEqual(reviewParticipantid1);
+    const reviewParticipantId1 = await annotationsSidebar.getParticipantID();
+    expect(participantId).toEqual(reviewParticipantId1);
 
     // select review status from dropdown option
     const participantStatus1 = await annotationsSidebar.selectReviewStatus(ReviewStatus.Excluded);
@@ -196,16 +166,16 @@ describe('Cohort review tests', () => {
     await participantDetailPage.waitForLoad();
 
     // get the participant ID on the detail page
-    const detailPageParticipantid = await participantDetailPage.getParticipantIDnum();
+    const detailPageParticipantId = await participantDetailPage.getParticipantIDnum();
 
     // click on the pen icon to open the sidebar
     await annotationsSidebar.open();
 
     // get the participant ID on the sidebar content
-    const reviewParticipantid2 = await annotationsSidebar.getParticipantID();
-    console.log(`reviewParticipantid2: ${reviewParticipantid2}`);
+    const reviewParticipantId2 = await annotationsSidebar.getParticipantID();
+
     // validate that the participant ID on detail page and the sidebar content match
-    expect(detailPageParticipantid).toEqual(reviewParticipantid2);
+    expect(detailPageParticipantId).toEqual(reviewParticipantId2);
 
     // select a review status
     const participantStatus2 = await annotationsSidebar.selectReviewStatus(ReviewStatus.Included);
@@ -269,21 +239,21 @@ describe('Cohort review tests', () => {
     const statusCell1 = await participantsTable.getCell(2, 8);
     const statusValue1 = await getPropValue<string>(statusCell1, 'textContent');
     expect(statusValue1).toEqual(participantStatus1);
-    console.log(`${reviewParticipantid1}: ${statusValue1}`);
 
     // Get the status of participant2
     const statusCell2 = await participantsTable.getCell(3, 8);
     const statusValue2 = await getPropValue<string>(statusCell2, 'textContent');
     expect(statusValue2).toEqual(participantStatus2);
-    console.log(`${reviewParticipantid2}: ${statusValue2}`);
 
-    // return to cohort review page
+    // Return to cohort review page
     await cohortReviewPage.getBackToCohortButton().clickAndWait();
 
     // Land on Cohort Build page
+    const cohortBuildPage = new CohortBuildPage(page);
     await cohortBuildPage.waitForLoad();
 
     // Land on the Data Page & click the Cohort Reviews SubTab
+    const dataPage = new WorkspaceDataPage(page);
     await dataPage.openCohortReviewsSubtab();
 
     // Rename Cohort Review
@@ -300,6 +270,43 @@ describe('Cohort review tests', () => {
     expect(modalTextContent).toContain(`Are you sure you want to delete Cohort Review: ${newCohortReviewName}?`);
 
     // Verify Delete Cohort Review successful.
-    expect(await DataResourceCard.findCard(page, newCohortReviewName, 5000)).toBeFalsy();
+    expect(await DataResourceCard.findCard(page, newCohortReviewName)).toBeFalsy();
   });
+
+  async function findOrCreateCohortCard(page: Page, cohortName: string): Promise<DataResourceCard> {
+    const dataPage = new WorkspaceDataPage(page);
+
+    // Search for Cohort first. If found, return Cohort card.
+    const existingCohortsCard = await dataPage.findCohortCard(cohortName);
+    if (existingCohortsCard) {
+      return existingCohortsCard;
+    }
+
+    // Create new.
+    const cohortBuildPage = await dataPage.clickAddCohortsButton();
+
+    // Include Participants Group 1: Add hydroxychloroquine drug.
+    const group1 = cohortBuildPage.findIncludeParticipantsGroup('Group 1');
+    await group1.includeDrugs('hydroxychloroquine', 1);
+    // Include Participants Group 1: Add Hydrocodone drug.
+    await group1.includeDrugs('Hydrocodone', 1);
+
+    // Include Participants Group 2: Add colonoscopy procedures.
+    const group2 = cohortBuildPage.findIncludeParticipantsGroup('Group 2');
+    await group2.includeProcedures('Colonoscopy', 1);
+
+    // Include Participants Group 3: Add Red cell indices labs and measurements.
+    const group3 = cohortBuildPage.findIncludeParticipantsGroup('Group 3');
+    await group3.includeLabsAndMeasurements('Red cell indices', 1);
+
+    // Save new cohort
+    await cohortBuildPage.createCohort(cohortName);
+
+    const cohortActionsPage = new CohortActionsPage(page);
+    await cohortActionsPage.waitForLoad();
+
+    await dataPage.openDataPage({ waitPageChange: true });
+    const cohortCard: DataResourceCard = await dataPage.findCohortCard(cohortName);
+    return cohortCard;
+  }
 });

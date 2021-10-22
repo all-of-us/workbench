@@ -4,13 +4,11 @@
     "samBaseUrl": "https:\/\/sam.dsde-dev.broadinstitute.org",
     "notebookRuntimeMaxAgeDays": 7,
     "notebookRuntimeIdleMaxAgeDays": 3,
-    "notebookRuntimeDefaultMachineType": "n1-standard-4",
-    "notebookRuntimeDefaultDiskSizeGb": 50,
     "debugEndpoints": false,
     "leoBaseUrl": "https:\/\/leonardo.dsde-dev.broadinstitute.org",
     "xAppIdValue": "local-AoU-RW",
     "timeoutInSeconds": 60,
-    "jupyterDockerImage": "broadinstitute/terra-jupyter-aou:1.1.5",
+    "jupyterDockerImage": "broadinstitute/terra-jupyter-aou:2.0.1",
     "shibbolethApiBaseUrl": "https:\/\/profile-dot-broad-shibboleth-prod.appspot.com/dev",
     "shibbolethUiBaseUrl": "https:\/\/broad-shibboleth-prod.appspot.com/dev",
     "runtimeImages": {
@@ -33,7 +31,8 @@
     "freeTierCostAlertThresholds": [
       0.5,
       0.75
-    ]
+    ],
+    "carahsoftEmail": "workbench-notificatio-aaaaekogch7vg3c6hi4sgyx4le@pmi-engteam.slack.com"
   },
   "auth": {
     "serviceAccountApiUsers": [
@@ -49,10 +48,10 @@
     "extractionPetServiceAccount": "pet-118217329794842274136@aou-wgs-cohort-extraction.iam.gserviceaccount.com",
     "extractionMethodConfigurationNamespace": "aouwgscohortextraction-test",
     "extractionMethodConfigurationName": "GvsExtractCohortFromSampleNames",
-    "extractionMethodConfigurationVersion": 3,
-    "extractionCohortsDataset": "fc-aou-cdr-synth-test.wgs_extraction_cohorts",
-    "extractionDestinationDataset": "fc-aou-cdr-synth-test.wgs_extracted_cohorts",
-    "extractionTempTablesDataset": "fc-aou-cdr-synth-test.wgs_extraction_temp_tables"
+    "extractionMethodConfigurationVersion": 4,
+    "extractionCohortsDataset": "fc-aou-cdr-synth-test-2.wgs_extraction_cohorts",
+    "extractionDestinationDataset": "fc-aou-cdr-synth-test-2.wgs_extracted_cohorts",
+    "extractionTempTablesDataset": "fc-aou-cdr-synth-test-2.wgs_extraction_temp_tables"
   },
   "cdr": {
     "debugQueries": false
@@ -75,8 +74,7 @@
     "appEngineLocationId": "us-central"
   },
   "admin": {
-    "loginUrl": "http:\/\/localhost:4200/login",
-    "adminIdVerification": "manual-id-verification-requests@fake-research-aou.org"
+    "loginUrl": "http:\/\/localhost:4200/login"
   },
   "mandrill": {
     "fromEmail": "support@researchallofus.org",
@@ -85,37 +83,29 @@
   "zendesk": {
     "host": "https:\/\/aousupporthelp1580753096.zendesk.com"
   },
-  "elasticsearch": {
-    "baseUrl": "http:\/\/elastic:9200",
-    "enableBasicAuth": false,
-    "enableElasticsearchBackend": false
-  },
   "moodle": {
     "host": "aoudev.nnlm.gov",
-    "enableMoodleBackend": true,
     "credentialsKeyV2": "moodle-key-v2.txt"
   },
   "access": {
     "enableComplianceTraining": true,
     "enableEraCommons": true,
-    "enableDataUseAgreement": true,
-    "enableBetaAccess": false,
     "unsafeAllowSelfBypass": true,
     "unsafeAllowUserCreationFromGSuiteData": true,
-    "enableAccessRenewal": true,
-    "enableRasLoginGovLinking": false
+    "enableRasLoginGovLinking": true,
+    "enforceRasLoginGovLinking": false
   },
   "featureFlags": {
     "unsafeAllowDeleteUser": true,
     "unsafeAllowAccessToAllTiersForRegisteredUsers": true,
     "enableBillingUpgrade": true,
-    "enableV3DataUserCodeOfConduct": true,
     "enableEventDateModifier": false,
     "enableResearchPurposePrompt": false,
     "enableGenomicExtraction": true,
-    "enableFireCloudV2Billing" : false,
-    "enableAccessModuleRewrite" : false,
-    "enableStandardSourceDomains": false
+    "enableGpu": true,
+    "enablePersistentDisk": true,
+    "enableEgressAlertingV2": true,
+    "enableStandardSourceDomains": true
   },
   "actionAudit": {
     "logName": "workbench-action-audit-local",
@@ -137,15 +127,26 @@
   },
   "ras": {
     "host": "https:\/\/stsstg.nih.gov",
-    "clientId": "e5c5d714-d597-48c8-b564-a249d729d0c9"
+    "clientId": "e5c5d714-d597-48c8-b564-a249d729d0c9",
+    "logoutUrl": "https:\/\/authtest.nih.gov\/siteminderagent\/smlogoutredirector.asp?TARGET="
   },
   "accessRenewal": {
     "expiryDays": 365,
-    "sendEmails": true,
-    "expiryDaysWarningThresholds": [ 1, 3, 7, 15, 30 ]
+    "expiryDaysWarningThresholds": [ 1, 3, 7, 15, 30 ],
+    "lookbackPeriod": 330
   },
   "offlineBatch": {
     "unsafeCloudTasksForwardingHost": "http:\/\/localhost:8081",
-    "usersPerAuditTask": 20
+    "usersPerAuditTask": 20,
+    "usersPerSynchronizeAccessTask": 50
+  },
+  "egressAlertRemediationPolicy": {
+    "notifyFromEmail": "workbench-notificatio-aaaaekogch7vg3c6hi4sgyx4le@pmi-engteam.slack.com",
+    "escalations": [{
+      "afterIncidentCount": 1,
+      "suspendCompute": {
+        "durationMinutes": 5
+      }
+    }]
   }
 }

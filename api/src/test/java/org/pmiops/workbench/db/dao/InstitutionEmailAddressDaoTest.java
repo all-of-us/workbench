@@ -6,8 +6,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.config.CommonConfig;
+import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbInstitutionEmailAddress;
+import org.pmiops.workbench.utils.TestMockFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
@@ -20,15 +22,18 @@ import org.springframework.test.annotation.DirtiesContext.ClassMode;
 public class InstitutionEmailAddressDaoTest extends SpringTest {
 
   @Autowired InstitutionDao institutionDao;
+  @Autowired AccessTierDao accessTierDao;
   @Autowired InstitutionEmailAddressDao institutionEmailAddressDao;
 
   private DbInstitution testInst;
+  private DbAccessTier registeredTier;
 
   @BeforeEach
   public void setUp() {
     testInst =
         institutionDao.save(
             new DbInstitution().setShortName("Broad").setDisplayName("The Broad Institute"));
+    registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
   }
 
   @Test
@@ -43,11 +48,13 @@ public class InstitutionEmailAddressDaoTest extends SpringTest {
         institutionEmailAddressDao.save(
             new DbInstitutionEmailAddress()
                 .setEmailAddress("researcher@vumc.org")
+                .setAccessTier(registeredTier)
                 .setInstitution(testInst));
     final DbInstitutionEmailAddress two =
         institutionEmailAddressDao.save(
             new DbInstitutionEmailAddress()
                 .setEmailAddress("researcher@nih.gov")
+                .setAccessTier(registeredTier)
                 .setInstitution(testInst));
 
     assertThat(institutionEmailAddressDao.getByInstitution(testInst)).containsExactly(one, two);
@@ -60,6 +67,7 @@ public class InstitutionEmailAddressDaoTest extends SpringTest {
         institutionEmailAddressDao.save(
             new DbInstitutionEmailAddress()
                 .setEmailAddress("researcher@vumc.org")
+                .setAccessTier(registeredTier)
                 .setInstitution(testInst));
 
     final DbInstitution otherInst =
@@ -69,6 +77,7 @@ public class InstitutionEmailAddressDaoTest extends SpringTest {
         institutionEmailAddressDao.save(
             new DbInstitutionEmailAddress()
                 .setEmailAddress("researcher@nih.gov")
+                .setAccessTier(registeredTier)
                 .setInstitution(otherInst));
 
     assertThat(institutionEmailAddressDao.getByInstitution(testInst)).containsExactly(one);
@@ -86,10 +95,12 @@ public class InstitutionEmailAddressDaoTest extends SpringTest {
     institutionEmailAddressDao.save(
         new DbInstitutionEmailAddress()
             .setEmailAddress("researcher@vumc.org")
+            .setAccessTier(registeredTier)
             .setInstitution(testInst));
     institutionEmailAddressDao.save(
         new DbInstitutionEmailAddress()
             .setEmailAddress("researcher@nih.gov")
+            .setAccessTier(registeredTier)
             .setInstitution(testInst));
 
     assertThat(institutionEmailAddressDao.deleteByInstitution(testInst)).isEqualTo(2L);
@@ -102,6 +113,7 @@ public class InstitutionEmailAddressDaoTest extends SpringTest {
     institutionEmailAddressDao.save(
         new DbInstitutionEmailAddress()
             .setEmailAddress("researcher@vumc.org")
+            .setAccessTier(registeredTier)
             .setInstitution(testInst));
 
     final DbInstitution otherInst =
@@ -110,6 +122,7 @@ public class InstitutionEmailAddressDaoTest extends SpringTest {
     institutionEmailAddressDao.save(
         new DbInstitutionEmailAddress()
             .setEmailAddress("researcher@nih.gov")
+            .setAccessTier(registeredTier)
             .setInstitution(otherInst));
 
     assertThat(institutionEmailAddressDao.deleteByInstitution(testInst)).isEqualTo(1L);

@@ -1,6 +1,6 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
-
+import {Link as RouterLink} from 'react-router-dom';
 import {Column} from 'primereact/column';
 import {DataTable} from 'primereact/datatable';
 import {CSSProperties, useEffect, useState} from 'react';
@@ -11,10 +11,9 @@ import {renderResourceCard} from 'app/components/render-resource-card';
 import {ResourceNavigation, StyledResourceType} from 'app/components/resource-card';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {userMetricsApi} from 'app/services/swagger-fetch-clients';
-import {formatWorkspaceResourceDisplayDate, reactStyles, withCdrVersions} from 'app/utils';
+import {reactStyles, withCdrVersions} from 'app/utils';
 import {getCdrVersion} from 'app/utils/cdr-versions';
-import {navigateAndPreventDefaultIfNoKeysPressed} from 'app/utils/navigation';
-import {getDisplayName, isNotebook} from 'app/utils/resources';
+import {getDisplayName, isNotebook, formatWorkspaceResourceDisplayDate} from 'app/utils/resources';
 import {
   CdrVersionTiersResponse,
   Workspace,
@@ -54,12 +53,9 @@ const WorkspaceNavigation = (props: NavProps) => {
   const url = `/workspaces/${namespace}/${id}/${tab}`;
 
   return <Clickable>
-    <a data-test-id='workspace-navigation'
-       style={style}
-       href={url}
-       onClick={e => navigateAndPreventDefaultIfNoKeysPressed(e, url)}>
+    <RouterLink to={url} style={style} data-test-id='workspace-navigation'>
       {name}
-    </a>
+    </RouterLink>
   </Clickable>;
 };
 
@@ -119,16 +115,18 @@ export const RecentResources = fp.flow(withCdrVersions())((props: Props) => {
     };
 
     if (resources && wsMap) {
-      setTableData(resources.map(r => {
-        return {
-          menu: renderResourceMenu(r),
-          resourceType: <ResourceNavigation resource={r}><StyledResourceType resource={r}/></ResourceNavigation>,
-          resourceName: <ResourceNavigation resource={r} style={styles.navigation}>{getDisplayName(r)}</ResourceNavigation>,
-          workspaceName: <WorkspaceNavigation workspace={getWorkspace(r)} resource={r} style={styles.navigation}/>,
-          formattedLastModified: formatWorkspaceResourceDisplayDate(r.modifiedTime),
-          cdrVersionName: getCdrVersionName(r),
-        };
-      }));
+      setTableData(resources
+        .filter(r => wsMap.has(r.workspaceFirecloudName))
+        .map(r => {
+          return {
+            menu: renderResourceMenu(r),
+            resourceType: <ResourceNavigation resource={r}><StyledResourceType resource={r}/></ResourceNavigation>,
+            resourceName: <ResourceNavigation resource={r} style={styles.navigation}>{getDisplayName(r)}</ResourceNavigation>,
+            workspaceName: <WorkspaceNavigation workspace={getWorkspace(r)} resource={r} style={styles.navigation}/>,
+            formattedLastModified: formatWorkspaceResourceDisplayDate(r.lastModifiedEpochMillis),
+            cdrVersionName: getCdrVersionName(r),
+          };
+        }));
     }
   }, [resources, wsMap]);
 

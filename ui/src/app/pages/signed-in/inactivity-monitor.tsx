@@ -1,8 +1,7 @@
-import {Component, Input} from '@angular/core';
-import Timeout = NodeJS.Timeout;
 import {TextModal} from 'app/components/text-modal';
 import {debouncer} from 'app/utils';
-import {ReactWrapperBase} from 'app/utils';
+import {signOut} from 'app/utils/authentication';
+import {navigateSignOut} from 'app/utils/navigation';
 import {environment} from 'environments/environment';
 
 import * as React from 'react';
@@ -39,26 +38,28 @@ const secondsToText = (seconds: number) => {
       `${seconds / 60} minutes` : `${seconds} seconds`;
 };
 
-export interface Props {
-  signOut: (continuePath?: string) => void;
-}
+const invalidateInactivityCookieAndSignOut = (continuePath?: string): void => {
+  window.localStorage.setItem(INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LAST_ACTIVE, null);
+  signOut();
+  navigateSignOut(continuePath);
+};
 
-export const InactivityMonitor = ({signOut}: Props) => {
+export const InactivityMonitor = () => {
   const [showModal, setShowModal] = useState(false);
 
   function signOutIfLocalStorageInactivityElapsed(continuePath?: string): void {
     const elapsedMs = getInactivityElapsedMs();
     if (elapsedMs && elapsedMs > environment.inactivityTimeoutSeconds * 1000) {
-      signOut(continuePath);
+      invalidateInactivityCookieAndSignOut(continuePath);
     }
   }
 
   // Signal user activity.
   useEffect(() => {
-    let getUserActivityTimer: () => Timeout;
-    let inactivityInterval: Timeout;
-    let logoutTimer: Timeout;
-    let inactivityModalTimer: Timeout;
+    let getUserActivityTimer: () => NodeJS.Timeout;
+    let inactivityInterval: NodeJS.Timeout;
+    let logoutTimer: NodeJS.Timeout;
+    let inactivityModalTimer: NodeJS.Timeout;
 
     const startUserActivityTracker = () => {
       const signalUserActivity = debouncer(() => {
@@ -73,12 +74,12 @@ export const InactivityMonitor = ({signOut}: Props) => {
 
     const startInactivityTimers = (elapsedMs: number = 0) => {
       clearTimeout(logoutTimer);
-      logoutTimer = setTimeout(
-        () => signOut('/session-expired'),
+      logoutTimer = global.setTimeout(
+        () => invalidateInactivityCookieAndSignOut('/session-expired'),
         Math.max(0, environment.inactivityTimeoutSeconds * 1000 - elapsedMs));
 
       clearTimeout(inactivityModalTimer);
-      inactivityModalTimer = setTimeout(
+      inactivityModalTimer = global.setTimeout(
         () => setShowModal(true),
         Math.max(0, 1000 * (environment.inactivityTimeoutSeconds - environment.inactivityWarningBeforeSeconds) - elapsedMs));
     };
@@ -97,7 +98,7 @@ export const InactivityMonitor = ({signOut}: Props) => {
       // setTimeout does not necessary track real wall-time. Periodically
       // clear/restart the timers so that they reflect the time which has elapsed
       // since we last saw activity, as tracked in local storage.
-      inactivityInterval = setInterval(() => {
+      inactivityInterval = global.setInterval(() => {
         startInactivityTimers(getInactivityElapsedMs());
       }, 60 * 1000);
 
@@ -152,15 +153,3 @@ export const InactivityMonitor = ({signOut}: Props) => {
      />}
   </React.Fragment>;
 };
-
-@Component({
-  selector: 'app-inactivity-monitor',
-  template: '<div #root></div>',
-})
-export class InactivityMonitorComponent extends ReactWrapperBase {
-  @Input() signOut: Props['signOut'];
-
-  constructor() {
-    super(InactivityMonitor as React.ComponentType<{}>, ['signOut']);
-  }
-}

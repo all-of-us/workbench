@@ -31,7 +31,7 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserRecentResource;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.model.Cohort;
@@ -146,10 +146,10 @@ public class UserMetricsControllerTest extends SpringTest {
     when(workspaceDao.findActiveByWorkspaceId(dbUserRecentResource3.getWorkspaceId()))
         .thenReturn(Optional.of(dbWorkspace2));
 
-    final FirecloudWorkspace fcWorkspace1 = new FirecloudWorkspace();
+    final FirecloudWorkspaceDetails fcWorkspace1 = new FirecloudWorkspaceDetails();
     fcWorkspace1.setNamespace(dbWorkspace1.getFirecloudName());
 
-    final FirecloudWorkspace fcWorkspace2 = new FirecloudWorkspace();
+    final FirecloudWorkspaceDetails fcWorkspace2 = new FirecloudWorkspaceDetails();
     fcWorkspace1.setNamespace(dbWorkspace2.getFirecloudName());
 
     final FirecloudWorkspaceResponse workspaceResponse = new FirecloudWorkspaceResponse();

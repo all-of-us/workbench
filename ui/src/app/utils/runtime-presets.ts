@@ -1,5 +1,6 @@
 import {Runtime, RuntimeConfigurationType} from 'generated/fetch';
 import * as fp from 'lodash/fp';
+import {DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES} from './machines';
 
 export const runtimePresets: {
   [runtimePresetName: string]: {displayName: string, runtimeTemplate: Runtime}
@@ -8,10 +9,12 @@ export const runtimePresets: {
     displayName: 'General Analysis',
     runtimeTemplate: {
       configurationType: RuntimeConfigurationType.GeneralAnalysis,
+      autopauseThreshold: DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES,
       // TODO: Support specifying toolDockerImage here.
       gceConfig: {
         machineType: 'n1-standard-4',
-        diskSize: 100
+        diskSize: 100,
+        gpuConfig: null,
       },
     }
   },
@@ -19,6 +22,7 @@ export const runtimePresets: {
     displayName: 'Hail Genomics Analysis',
     runtimeTemplate: {
       configurationType: RuntimeConfigurationType.HailGenomicAnalysis,
+      autopauseThreshold: DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES,
       dataprocConfig: {
         masterMachineType: 'n1-standard-4',
         masterDiskSize: 100,

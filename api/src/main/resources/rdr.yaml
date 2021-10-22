@@ -157,6 +157,12 @@ definitions:
         $ref: '#/definitions/RdrWorkspaceDemographic'
       cdrVersionName: 
         type: string
+      accessTier:
+        type: string
+        enum:
+          - UNSET
+          - REGISTERED
+          - CONTROLLED
 
   RdrWorkspaceDemographic:
     type: object

@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Bean;
 @TestConfiguration
 public class FakeClockConfiguration {
 
-  public static final Timestamp NOW = Timestamp.from(Instant.now());
+  public static final Timestamp NOW = Timestamp.from(Instant.parse("2000-01-01T00:00:00.00Z"));
   public static final long NOW_TIME = NOW.getTime();
   public static final FakeClock CLOCK = new FakeClock(NOW.toInstant(), ZoneId.systemDefault());
 

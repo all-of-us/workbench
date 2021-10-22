@@ -11,7 +11,7 @@ export default class CohortSaveAsModal extends Modal {
   }
 
   async isLoaded(): Promise<boolean> {
-    await waitForText(this.page, title, { xpath: this.getXpath() });
+    await waitForText(this.page, title, { container: this });
     return true;
   }
 
@@ -22,7 +22,7 @@ export default class CohortSaveAsModal extends Modal {
 
   async typeDescription(description: string): Promise<void> {
     const descriptionTextarea = this.waitForTextarea('DESCRIPTION');
-    await descriptionTextarea.type(description);
+    await descriptionTextarea.paste(description);
   }
 
   async clickSaveButton(): Promise<void> {

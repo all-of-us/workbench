@@ -9,6 +9,7 @@ import {TextInput} from 'app/components/inputs';
 import {withErrorModal, withSuccessModal} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
+import {AoU} from 'app/components/text-wrappers';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
@@ -16,9 +17,10 @@ import {reactStyles, withUserProfile} from 'app/utils';
 import {wasReferredFromRenewal} from 'app/utils/access-utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {getLiveDUCCVersion} from 'app/utils/code-of-conduct';
-import {navigate} from 'app/utils/navigation';
+import {NavigationProps} from 'app/utils/navigation';
+import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {Profile} from 'generated/fetch';
-
+import { withRouter, RouteComponentProps } from 'react-router-dom';
 
 const styles = reactStyles({
   dataUserCodeOfConductPage: {
@@ -81,7 +83,7 @@ const InitialsAgreement = (props) => {
   </div>;
 };
 
-interface Props extends WithSpinnerOverlayProps {
+interface Props extends WithSpinnerOverlayProps, NavigationProps, RouteComponentProps {
   profileState: {
     profile: Profile,
     reload: Function,
@@ -98,7 +100,7 @@ interface State {
   proceedDisabled: boolean;
 }
 
-export const DataUserCodeOfConduct = withUserProfile()(
+export const DataUserCodeOfConduct = fp.flow(withUserProfile(), withNavigation, withRouter)(
   class extends React.Component<Props, State> {
     constructor(props) {
       super(props);
@@ -116,20 +118,20 @@ export const DataUserCodeOfConduct = withUserProfile()(
       withSuccessModal({
         title: 'Your agreement has been updated',
         message: 'You will be redirected to the access renewal page upon closing this dialog.',
-        onDismiss: () => navigate(['access-renewal'])
+        onDismiss: () => this.props.navigate(['access-renewal'])
       }),
       withErrorModal({ title: 'Your agreement failed to update', message: 'Please try submitting the agreement again.' })
     )(async(initials) => {
       const duccVersion = getLiveDUCCVersion();
-      const profile = await profileApi().submitDataUseAgreement(duccVersion, initials);
+      const profile = await profileApi().submitDUCC(duccVersion, initials);
       this.props.profileState.updateCache(profile);
     });
 
     submitDataUserCodeOfConduct(initials) {
       const duccVersion = getLiveDUCCVersion();
-      profileApi().submitDataUseAgreement(duccVersion, initials).then((profile) => {
+      profileApi().submitDUCC(duccVersion, initials).then((profile) => {
         this.props.profileState.updateCache(profile);
-        navigate(['/']);
+        history.back();
       });
     }
 
@@ -156,7 +158,7 @@ export const DataUserCodeOfConduct = withUserProfile()(
               <HtmlViewer
                   ariaLabel='data user code of conduct agreement'
                   containerStyles={{margin: '2rem 0 1rem'}}
-                  filePath={'assets/documents/data-user-code-of-conduct.html'}
+                  filePath={'/data-user-code-of-conduct.html'}
                   onLastPage={() => this.setState({proceedDisabled: false})}
               />
               <FlexRow style={styles.dataUserCodeOfConductFooter}>
@@ -197,18 +199,18 @@ export const DataUserCodeOfConduct = withUserProfile()(
                 </div>
                 <InitialsAgreement onChange={(v) => this.setState({initialMonitoring: v})}>
                   My work, including any external data, files, or software I upload into the
-                   Researcher Workbench, will be logged and monitored by the <i>All of Us</i> Research
+                   Researcher Workbench, will be logged and monitored by the <AoU/> Research
                    Program to ensure compliance with policies and procedures.
                 </InitialsAgreement>
                 <InitialsAgreement onChange={(v) => this.setState({initialPublic: v})}>
                   My name, affiliation, profile information and research description will be made
-                   public. My research description will be used by the <i>All of Us</i> Research
+                   public. My research description will be used by the <AoU/> Research
                    Program to provide participants with meaningful information about the research
                    being conducted.
                 </InitialsAgreement>
                 <div style={{...styles.bold, ...styles.smallTopMargin}}>
                   I acknowledge that failure to comply with the requirements outlined in this Data
-                   User Code of Conduct may result in termination of my <i>All of Us</i> Research
+                   User Code of Conduct may result in termination of my <AoU/> Research
                    Program account and/or other sanctions, including, but not limited to:
                 </div>
                 <ul style={{...styles.bold, ...styles.smallTopMargin}}>
@@ -223,7 +225,7 @@ export const DataUserCodeOfConduct = withUserProfile()(
                 </ul>
                 <div style={{...styles.bold, ...styles.smallTopMargin}}>
                   I understand that failure to comply with these requirements may also carry
-                   financial or legal repercussions. Any misuse of the <i>All of Us</i> Research
+                   financial or legal repercussions. Any misuse of the <AoU/> Research
                    Hub, Researcher Workbench or data resources is taken very seriously, and other
                   sanctions may be sought.
                 </div>
@@ -263,7 +265,7 @@ export const DataUserCodeOfConduct = withUserProfile()(
                         // This may record extra GA events if the user views & accepts the DUCC from their profile. If the additional events
                         // are an issue, we may need further changes, possibly disable the Accept button after initial submit.
                         AnalyticsTracker.Registration.AcceptDUCC();
-                        wasReferredFromRenewal()
+                        wasReferredFromRenewal(this.props.location.search)
                           ? this.submitCodeOfConductWithRenewal(initialMonitoring)
                           : this.submitDataUserCodeOfConduct(initialMonitoring);
                         this.setState({submitting: false});

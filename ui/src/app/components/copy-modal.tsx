@@ -18,7 +18,7 @@ import { workspacesApi } from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {cond, reactStyles, withCdrVersions} from 'app/utils';
 import {findCdrVersion} from 'app/utils/cdr-versions';
-import {navigate} from 'app/utils/navigation';
+import {NavigationProps} from 'app/utils/navigation';
 import {toDisplay} from 'app/utils/resources';
 import { WorkspacePermissions } from 'app/utils/workspace-permissions';
 import {FlexRow} from './flex';
@@ -32,8 +32,7 @@ const ResourceTypeHomeTabs = new Map()
   .set(ResourceType.CONCEPTSET, 'data')
   .set(ResourceType.DATASET, 'data');
 
-export interface Props {
-  cdrVersionTiersResponse: CdrVersionTiersResponse;
+export interface CopyModalProps {
   fromWorkspaceNamespace: string;
   fromWorkspaceFirecloudName: string;
   fromResourceName: string;
@@ -45,12 +44,16 @@ export interface Props {
   saveFunction: (CopyRequest) => Promise<FileDetail | ConceptSet>;
 }
 
+interface HocProps extends CopyModalProps, NavigationProps {
+  cdrVersionTiersResponse: CdrVersionTiersResponse;
+}
+
 interface WorkspaceOptions {
   label: string;
   options: Array<{label: string, value: Workspace}>;
 }
 
-interface State {
+interface CopyModalState {
   workspaceOptions: Array<WorkspaceOptions>;
   destination: Workspace;
   newName: string;
@@ -125,8 +128,8 @@ const NotebookRestrictionText = () => <div style={styles.restriction}>
   Notebooks can only be copied to workspaces in the same access tier.
 </div>;
 
-class CopyModalComponent extends React.Component<Props, State> {
-  constructor(props: Props) {
+const CopyModal = withCdrVersions()(class extends React.Component<HocProps, CopyModalState> {
+  constructor(props: HocProps) {
     super(props);
     this.state = {
       workspaceOptions: [],
@@ -231,17 +234,6 @@ class CopyModalComponent extends React.Component<Props, State> {
     });
   }
 
-  goToDestinationWorkspace() {
-    navigate(
-      [
-        'workspaces',
-        this.state.destination.namespace,
-        this.state.destination.id,
-        ResourceTypeHomeTabs.get(this.props.resourceType)
-      ]
-    );
-  }
-
   render() {
     const {resourceType} = this.props;
     const {loading, requestState} = this.state;
@@ -290,9 +282,12 @@ class CopyModalComponent extends React.Component<Props, State> {
         </Button>
       );
     } else if (this.state.requestState === RequestState.SUCCESS) {
+      const {namespace, id} = this.state.destination;
       return (
-        <Button style={{ marginLeft: '0.5rem' }}
-                onClick={() => this.goToDestinationWorkspace()}>
+        <Button
+            path={`/workspaces/${namespace}/${id}/${ResourceTypeHomeTabs.get(this.props.resourceType)}`}
+            style={{ marginLeft: '0.5rem' }}
+        >
           Go to Copied {resourceType}
         </Button>
       );
@@ -382,13 +377,8 @@ class CopyModalComponent extends React.Component<Props, State> {
         Do you want to view the copied {toDisplay(resourceType)}?</div>
     );
   }
-}
-
-const CopyModal = fp.flow(withCdrVersions())(CopyModalComponent);
+});
 
 export {
-  CopyModal,
-  CopyModalComponent, // VisibleForTesting
-  Props as CopyModalProps,
-  State as CopyModalState,
+  CopyModal
 };

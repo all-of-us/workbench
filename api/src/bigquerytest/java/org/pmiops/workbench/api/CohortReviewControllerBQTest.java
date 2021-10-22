@@ -56,6 +56,7 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
+import org.pmiops.workbench.google.CloudBillingClientImpl;
 import org.pmiops.workbench.model.CohortChartData;
 import org.pmiops.workbench.model.CohortChartDataListResponse;
 import org.pmiops.workbench.model.CohortReview;
@@ -128,6 +129,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     FireCloudService.class,
     FreeTierBillingService.class,
     UserRecentResourceService.class,
+    CloudBillingClientImpl.class
   })
   static class Configuration {
 
@@ -658,7 +660,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     CohortChartDataListResponse response =
         controller
             .getCohortChartData(
-                NAMESPACE, NAME, reviewWithoutEHRData.getCohortReviewId(), Domain.LAB.name(), 10)
+                NAMESPACE, NAME, reviewWithoutEHRData.getCohortId(), Domain.LAB.name(), 10)
             .getBody();
     assertThat(response.getItems().size()).isEqualTo(3);
     assertThat(response.getItems().get(0))
@@ -676,7 +678,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     CohortChartDataListResponse response =
         controller
             .getCohortChartData(
-                NAMESPACE, NAME, reviewWithEHRData.getCohortReviewId(), Domain.LAB.name(), 10)
+                NAMESPACE, NAME, reviewWithEHRData.getCohortId(), Domain.LAB.name(), 10)
             .getBody();
     assertThat(response.getItems().size()).isEqualTo(3);
     assertThat(response.getItems().get(0))
@@ -692,7 +694,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     CohortChartDataListResponse response =
         controller
             .getCohortChartData(
-                NAMESPACE, NAME, reviewWithoutEHRData.getCohortReviewId(), Domain.DRUG.name(), 10)
+                NAMESPACE, NAME, reviewWithoutEHRData.getCohortId(), Domain.DRUG.name(), 10)
             .getBody();
     assertThat(response.getItems().size()).isEqualTo(1);
     assertThat(response.getItems().get(0))
@@ -704,11 +706,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     CohortChartDataListResponse response =
         controller
             .getCohortChartData(
-                NAMESPACE,
-                NAME,
-                reviewWithoutEHRData.getCohortReviewId(),
-                Domain.CONDITION.name(),
-                10)
+                NAMESPACE, NAME, reviewWithoutEHRData.getCohortId(), Domain.CONDITION.name(), 10)
             .getBody();
     assertThat(response.getItems().size()).isEqualTo(2);
     assertThat(response.getItems().get(0))
@@ -722,11 +720,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     CohortChartDataListResponse response =
         controller
             .getCohortChartData(
-                NAMESPACE,
-                NAME,
-                reviewWithoutEHRData.getCohortReviewId(),
-                Domain.PROCEDURE.name(),
-                10)
+                NAMESPACE, NAME, reviewWithoutEHRData.getCohortId(), Domain.PROCEDURE.name(), 10)
             .getBody();
 
     assertThat(response.getItems().size()).isEqualTo(3);

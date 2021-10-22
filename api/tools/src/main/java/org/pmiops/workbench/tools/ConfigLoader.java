@@ -4,13 +4,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.fge.jsonpatch.diff.JsonDiff;
 import com.google.common.collect.ImmutableMap;
-import com.google.gson.Gson;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.logging.Logger;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfig;
 import org.pmiops.workbench.config.FeaturedWorkspacesConfig;
+import org.pmiops.workbench.config.FileConfigs;
+import org.pmiops.workbench.config.FileConfigs.ConfigFormatException;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.ConfigDao;
 import org.pmiops.workbench.db.model.DbConfig;
@@ -53,27 +51,17 @@ public class ConfigLoader {
         throw new IllegalArgumentException("Unrecognized config key: " + configKey);
       }
 
-      ObjectMapper jackson = new ObjectMapper();
-      String rawJson =
-          new String(Files.readAllBytes(Paths.get(configFile)), Charset.defaultCharset());
-      // Strip all lines starting with '//'.
-      String strippedJson = rawJson.replaceAll("\\s*//.*", "");
-      JsonNode newJson = jackson.readTree(strippedJson);
-
-      // Make sure the config parses to the appropriate configuration format,
-      // and has the same representation after being marshalled back to JSON.
-      Gson gson = new Gson();
-      Object configObj = gson.fromJson(newJson.toString(), configClass);
-      String marshalledJson = gson.toJson(configObj, configClass);
-      JsonNode marshalledNode = jackson.readTree(marshalledJson);
-      JsonNode marshalledDiff = JsonDiff.asJson(newJson, marshalledNode);
-      if (marshalledDiff.size() > 0) {
-        log.info(
+      JsonNode newJson = null;
+      try {
+        newJson = FileConfigs.loadConfig(configFile, configClass);
+      } catch (ConfigFormatException e) {
+        log.severe(
             String.format(
                 "Configuration doesn't match {0} format; see diff.", configClass.getSimpleName()));
-        log.info(marshalledDiff.toString());
+        log.severe(e.getJsonDiff().toString());
         System.exit(1);
       }
+
       DbConfig existingConfig = configDao.findById(configKey).orElse(null);
       if (existingConfig == null) {
         log.info("No configuration exists, creating one.");
@@ -82,6 +70,7 @@ public class ConfigLoader {
         config.setConfiguration(newJson.toString());
         configDao.save(config);
       } else {
+        ObjectMapper jackson = new ObjectMapper();
         JsonNode existingJson = jackson.readTree(existingConfig.getConfiguration());
         JsonNode diff = JsonDiff.asJson(existingJson, newJson);
         if (diff.size() == 0) {

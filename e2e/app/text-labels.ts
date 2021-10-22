@@ -54,16 +54,17 @@ export enum MenuOption {
   SuppressCriteriaFromTotalCount = 'Suppress criteria from total count',
   Surveys = 'Surveys',
   Visits = 'Visits',
-  WholeGenomeVariant = 'Whole Genome Variant'
+  WholeGenomeVariant = 'Whole Genome Sequence'
 }
 
 // Button or link text labels.
 export enum LinkText {
+  Add = 'Add',
   AddSelection = 'Add Selection',
   AddThis = 'ADD THIS',
-  AllSurveys = 'All Surveys',
   ApplyModifiers = 'APPLY MODIFIERS',
   ApplyRecreate = 'APPLY & RECREATE',
+  Audit = 'AUDIT',
   Back = 'Back',
   BackToCohort = 'Back to cohort',
   BackToReviewSet = 'Back to review set',
@@ -90,30 +91,30 @@ export enum LinkText {
   DeleteConceptSet = 'Delete Concept Set',
   DeleteDataset = 'Delete Dataset',
   DeleteEnvironment = 'Delete Environment',
+  DeletePd = 'Delete Persistent Disk',
   DeleteNotebook = 'Delete Notebook',
   DeleteWorkspace = 'Delete Workspace',
-  Demographics = 'Demographics',
   DiscardChanges = 'Discard Changes',
+  DownloadSql = 'DOWNLOAD SQL',
   DuplicateWorkspace = 'Duplicate Workspace',
   Edit = 'Edit',
   Export = 'Export',
+  ExtractAndContinue = 'Extract & Continue',
   Finish = 'Finish',
   FinishAndReview = 'Finish & Review',
-  FitbitActivitySummary = 'Fitbit Activity Summary',
-  FitbitHeartRateLevel = 'Fitbit Heart Rate Level',
-  FitbitHeartRateSummary = 'Fitbit Heart Rate Summary',
-  FitbitIntraDaySteps = 'Fitbit Intra Day Steps',
   GoToCopiedConceptSet = 'Go to Copied Concept Set',
   GoToCopiedNotebook = 'Go to Copied Notebook',
   KeepEditing = 'Keep Editing',
   Next = 'Next',
   No = 'No',
+  OK = 'OK',
   Rename = 'Rename',
   RenameCohort = 'Rename Cohort',
   RenameCohortReview = 'Rename Cohort Review',
   RenameConceptSet = 'Rename Concept Set',
   RenameDataset = 'Rename Dataset',
   RenameNotebook = 'Rename Notebook',
+  Review = 'Review',
   ReviewLater = 'REVIEW LATER',
   ReviewNow = 'REVIEW NOW',
   Save = 'Save',
@@ -126,13 +127,20 @@ export enum LinkText {
   Submit = 'Submit',
   Update = 'Update',
   Yes = 'Yes',
-  YesDelete = 'YES, DELETE'
+  YesDelete = 'YES, DELETE',
+  YesLeave = 'Yes, Leave'
 }
 
 // Notebook programming language.
 export enum Language {
   Python = 'Python',
   R = 'R'
+}
+
+export enum AnalysisTool {
+  Hail = 'Hail',
+  Plink = 'PLINK',
+  VCFCompatible = 'Other VCF-compatible tool'
 }
 
 // Data resource card.
@@ -149,5 +157,43 @@ export enum SideBarLink {
   DataDictionary,
   HelpTips,
   WorkspaceMenu,
-  EditAnnotations
+  EditAnnotations,
+  GenomicExtractionsHistory
+}
+
+export const InstitutionSelectValue = {
+  Vanderbilt: 'Vanderbilt University Medical Center',
+  Broad: 'Broad Institute',
+  Verily: 'Verily LLC',
+  NationalInstituteHealth: 'National Institute of Health',
+  Wondros: 'Wondros',
+  AdminTesting: 'Admin Testing',
+  DummyMaster: 'Dummy Master'
+};
+
+export enum HeaderName {
+  InstitutionName = 'Institution Name',
+  InstitutionType = 'Institution Type',
+  DataAccessTiers = 'Data access tiers',
+  UserEmailInstruction = 'User Email Instruction'
+}
+
+export const ConceptSetSelectValue = {
+  AllSurveys: 'All Surveys',
+  Demographics: 'Demographics',
+  FitbitActivitySummary: 'Fitbit Activity Summary',
+  FitbitHeartRateLevel: 'Fitbit Heart Rate Level',
+  FitbitHeartRateSummary: 'Fitbit Heart Rate Summary',
+  FitbitIntraDaySteps: 'Fitbit Intra Day Steps',
+  WholeGenomeSequenceVariantData: 'Whole Genome Sequencing Data'
+};
+
+export const DatasetValueSelect = {
+  VCFFile: 'VCF Files(s)'
+};
+
+export enum AgeSelectionRadioButton {
+  AgeAtCdrDate = 'Age at CDR Date',
+  CurrentAge = 'Current Age',
+  AgeAtConsent = 'Age at Consent'
 }

@@ -1,11 +1,11 @@
 import * as fp from 'lodash/fp';
+import {InputSwitch} from 'primereact/inputswitch';
 import * as React from 'react';
 import {CSSProperties} from 'react';
-import {Key} from 'ts-key-enum';
 
 import {domainToTitle} from 'app/cohort-search/utils';
 import {AlertDanger} from 'app/components/alert';
-import {Clickable, StyledAnchorTag} from 'app/components/buttons';
+import {Clickable, StyledExternalLink} from 'app/components/buttons';
 import {FlexRow} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
 import {TextInput} from 'app/components/inputs';
@@ -21,6 +21,7 @@ import {
   currentCohortSearchContextStore,
   setSidebarActiveIconStore
 } from 'app/utils/navigation';
+import {serverConfigStore} from 'app/utils/stores';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {environment} from 'environments/environment';
 import {
@@ -252,6 +253,7 @@ interface State {
   inputErrors: Array<string>;
   loading: boolean;
   searching: boolean;
+  searchSource: boolean;
   searchTerms: string;
   standardOnly: boolean;
   sourceMatch: any;
@@ -278,6 +280,7 @@ export const ListSearch = fp.flow(withCdrVersions(), withCurrentWorkspace(), wit
         hoverId: undefined,
         loading: false,
         searching: false,
+        searchSource: props.searchContext.domain === Domain.PHYSICALMEASUREMENTCSS,
         searchTerms: props.searchTerms,
         standardOnly: false,
         sourceMatch: undefined,
@@ -292,7 +295,7 @@ export const ListSearch = fp.flow(withCdrVersions(), withCurrentWorkspace(), wit
         this.setState({data: this.props.concept});
       } else {
         const searchString = searchTerms || '';
-        this.getResults(searchString);
+        this.getResultsBySourceOrStandard(searchString);
       }
     }
 
@@ -306,7 +309,7 @@ export const ListSearch = fp.flow(withCdrVersions(), withCurrentWorkspace(), wit
 
     handleInput = (event: any) => {
       const {key, target: {value}} = event;
-      if (key === Key.Enter) {
+      if (key === 'Enter') {
         if (value.trim().length < searchTrigger) {
           this.setState({inputErrors: ['Minimum criteria search length is two characters']});
         } else {
@@ -320,34 +323,29 @@ export const ListSearch = fp.flow(withCdrVersions(), withCurrentWorkspace(), wit
               // Update search terms so they will persist if user returns to concept homepage
               currentCohortSearchContextStore.next({...searchContext, searchTerms: value});
             }
-            this.getResults(value);
+            this.getResultsBySourceOrStandard(value);
           }
         }
       }
     }
 
-    getResults = async(value: string) => {
-      let sourceMatch;
+    // Searches either source or standard based on value of searchSource in state
+    getResultsBySourceOrStandard = async(value: string) => {
       try {
-        this.setState({data: null, apiError: false, inputErrors: [], loading: true, searching: true, standardOnly: false});
+        this.setState({data: null, apiError: false, inputErrors: [], loading: true, searching: true});
         const {searchContext: {domain, source, selectedSurvey}, workspace: {id, namespace}} = this.props;
+        const {searchSource} = this.state;
         const surveyName = selectedSurvey || 'All';
-        const resp = await cohortBuilderApi().findCriteriaByDomainAndSearchTerm(namespace, id, domain, value.trim(), surveyName);
+        const resp = await cohortBuilderApi().findCriteriaByDomain(namespace, id, domain, !searchSource, value.trim(), surveyName);
         const data = source !== 'cohort' && this.isSurvey
           ? resp.items.filter(survey => survey.subtype === CriteriaSubType.QUESTION.toString())
           : resp.items;
-        if (data.length && this.checkSource) {
-          sourceMatch = data.find(item => item.code.toLowerCase() === value.trim().toLowerCase() && !item.isStandard);
-          if (sourceMatch) {
-            const stdResp = await cohortBuilderApi().findStandardCriteriaByDomainAndConceptId(namespace, id, domain, sourceMatch.conceptId);
-            this.setState({standardData: stdResp.items});
-          }
-        }
         this.setState({data, totalCount: resp.totalCount});
       } catch (err) {
+        console.error(err);
         this.setState({apiError: true});
       } finally {
-        this.setState({loading: false, sourceMatch});
+        this.setState({loading: false});
       }
     }
 
@@ -448,9 +446,24 @@ export const ListSearch = fp.flow(withCdrVersions(), withCurrentWorkspace(), wit
       return this.props.searchContext.domain === Domain.SURVEY;
     }
 
+    dataBrowserDomainTitle() {
+      const domain = this.props.searchContext.domain;
+      if (domain === Domain.DRUG) {
+        return 'drug-exposures';
+      } else if (domain === Domain.MEASUREMENT) {
+        return 'labs-and-measurements';
+      }
+      return domainToTitle(this.props.searchContext.domain).toLowerCase();
+    }
     getConceptLink(conceptId) {
-      return environment.publicUiUrl + '/ehr/' +
-        domainToTitle(this.props.searchContext.domain).toLowerCase() + '?search=' + conceptId;
+      return environment.publicUiUrl + '/ehr/' + this.dataBrowserDomainTitle() + '/' + conceptId;
+    }
+
+    toggleSearchSource() {
+      this.setState(
+        (state) => ({searchSource: !state.searchSource}),
+        () => this.getResultsBySourceOrStandard(this.state.searchTerms || '')
+      );
     }
 
     renderRow(row: any, child: boolean, elementId: string) {
@@ -491,9 +504,9 @@ export const ListSearch = fp.flow(withCdrVersions(), withCurrentWorkspace(), wit
           </TooltipTrigger>
         </td>
         <td style={{...columnBodyStyle, width: '10%', paddingRight: '0.5rem'}}>
-          <StyledAnchorTag href={this.getConceptLink(row.conceptId)} target='_blank'>
+          <StyledExternalLink href={this.getConceptLink(row.conceptId)} target='_blank'>
             {row.conceptId}
-          </StyledAnchorTag>
+          </StyledExternalLink>
         </td>
         <td style={{...columnBodyStyle, width: '10%', paddingRight: '0.5rem'}}>{row.isStandard ? 'Standard' : 'Source'}</td>
         <td style={{...columnBodyStyle}}>{!brand && row.type}</td>
@@ -525,11 +538,16 @@ export const ListSearch = fp.flow(withCdrVersions(), withCurrentWorkspace(), wit
 
     render() {
       const {concept, searchContext: {domain, source}} = this.props;
-      const {apiError, cdrVersion, data, ingredients, inputErrors, loading, searching, searchTerms, standardOnly, sourceMatch, standardData,
-        totalCount} = this.state;
+      const {apiError, cdrVersion, data, ingredients, inputErrors, loading, searching, searchSource, searchTerms, standardOnly, sourceMatch,
+        standardData, totalCount} = this.state;
       const showStandardOption = !standardOnly && !!standardData && standardData.length > 0;
       const displayData = standardOnly ? standardData : data;
       return <div style={{overflow: 'auto'}}>
+        <style>{`
+          body .p-inputswitch.p-inputswitch-focus .p-inputswitch-slider {
+            box-shadow: none
+          }
+        `}</style>
         {this.selectIconDisabled() && <div style={{color: colors.warning, fontWeight: 'bold', maxWidth: '1000px'}}>
           NOTE: Concept Set can have only 1000 concepts. Please delete some concepts before adding more.
         </div>}
@@ -576,10 +594,23 @@ export const ListSearch = fp.flow(withCdrVersions(), withCurrentWorkspace(), wit
                   Return to source code
                 </Clickable>.
               </div>}
-              {!!totalCount && <div>
-                There are {totalCount.toLocaleString()} results{!!cdrVersion && <span> in {cdrVersion.name}</span>}
-              </div>}
             </React.Fragment>}
+            <div>
+              {!loading && !!totalCount && <span>
+                There are {totalCount.toLocaleString()} results{!!cdrVersion && <span> in {cdrVersion.name}</span>}
+              </span>}
+              {serverConfigStore.get().config.enableStandardSourceDomains && this.checkSource &&
+                <span style={{float: 'right'}}>
+                  <span style={{display: 'table-cell', paddingRight: '0.35rem'}}>
+                    Show results as source concepts (ICD9, ICD10{domain === Domain.PROCEDURE && <span>, CPT</span>})
+                  </span>
+                  <InputSwitch checked={searchSource}
+                               disabled={loading}
+                               onChange={() => this.toggleSearchSource()}
+                               style={{display: 'table-cell', boxShadow: 0}}/>
+                </span>
+              }
+            </div>
           </div>
         </div>
         {!loading && !!displayData && <div style={styles.listContainer}>
@@ -631,7 +662,7 @@ export const ListSearch = fp.flow(withCdrVersions(), withCurrentWorkspace(), wit
         {apiError && <div style={{...styles.error, ...(domain === Domain.DRUG ? {marginTop: '3.75rem'} : {})}}>
           <ClrIcon style={{margin: '0 0.5rem 0 0.25rem'}} className='is-solid' shape='exclamation-triangle' size='22'/>
           Sorry, the request cannot be completed. Please try again or contact Support in the left hand navigation.
-          {standardOnly && <Clickable style={styles.vocabLink} onClick={() => this.getResults(sourceMatch.code)}>
+          {standardOnly && <Clickable style={styles.vocabLink} onClick={() => this.getResultsBySourceOrStandard(sourceMatch.code)}>
             &nbsp;Return to source code.
           </Clickable>}
         </div>}

@@ -1,18 +1,21 @@
-import {Component} from '@angular/core';
-import {AccessRenewalNotificationMaybe} from 'app/components/access-renewal-notification';
+import * as React from 'react';
+
+import {AccessRenewalNotificationMaybe} from 'app/pages/signed-in/access-renewal-notification';
 import {Breadcrumb} from 'app/components/breadcrumb';
 import {Button} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
+import {LoginGovIAL2NotificationMaybe} from 'app/pages/signed-in/login-gov-ial2-notification';
 import {SideNav} from 'app/components/side-nav';
 import {StatusAlertBanner} from 'app/components/status-alert-banner';
 import {statusAlertApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {reactStyles, ReactWrapperBase} from 'app/utils';
+import {reactStyles} from 'app/utils';
 import {cookiesEnabled} from 'app/utils/cookies';
 import {profileStore, ProfileStore, useStore} from 'app/utils/stores';
 import {environment} from 'environments/environment';
-import * as React from 'react';
 import {useEffect, useRef, useState} from 'react';
+
+import logo from 'assets/images/all-of-us-logo.svg'
 
 const styles = reactStyles({
   headerContainer: {
@@ -185,7 +188,7 @@ export const NavBar = () => {
     <div>
       <a href={'/'}>
         <img
-            src='/assets/images/all-of-us-logo.svg'
+            src={logo}
             style={styles.headerImage}
         />
       </a>
@@ -198,6 +201,7 @@ export const NavBar = () => {
     </div>
     <Breadcrumb/>
     {window.location.pathname !== '/access-renewal' && <AccessRenewalNotificationMaybe/>}
+    {window.location.pathname !== '/data-access-requirements' && <LoginGovIAL2NotificationMaybe/>}
     {
       showStatusAlert && <StatusAlertBanner
           title={statusAlertDetails.title}
@@ -223,13 +227,3 @@ export const NavBar = () => {
     }
   </div>;
 };
-
-@Component({
-  selector: 'app-nav-bar',
-  template: '<div #root></div>'
-})
-export class NavBarComponent extends ReactWrapperBase {
-  constructor() {
-    super(NavBar, []);
-  }
-}

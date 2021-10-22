@@ -1,5 +1,6 @@
 package org.pmiops.workbench.api;
 
+import com.google.api.services.directory.model.User;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import java.sql.Timestamp;
@@ -57,6 +58,7 @@ import org.pmiops.workbench.model.PageVisit;
 import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.model.RasLinkRequestBody;
 import org.pmiops.workbench.model.ResendWelcomeEmailRequest;
+import org.pmiops.workbench.model.SendBillingSetupEmailRequest;
 import org.pmiops.workbench.model.UpdateContactEmailRequest;
 import org.pmiops.workbench.model.UserAccessExpiration;
 import org.pmiops.workbench.model.UserAuditLogQueryResponse;
@@ -246,7 +248,7 @@ public class ProfileController implements ProfileApiDelegate {
             + "@"
             + workbenchConfigProvider.get().googleDirectoryService.gSuiteDomain;
 
-    com.google.api.services.directory.model.User googleUser =
+    User googleUser =
         directoryService.createUser(
             profile.getGivenName(),
             profile.getFamilyName(),
@@ -259,7 +261,7 @@ public class ProfileController implements ProfileApiDelegate {
           userService.createUser(
               profile.getGivenName(),
               profile.getFamilyName(),
-              googleUser.getPrimaryEmail(),
+              gSuiteUsername,
               profile.getContactEmail(),
               profile.getAreaOfResearch(),
               profile.getProfessionalUrl(),
@@ -298,7 +300,7 @@ public class ProfileController implements ProfileApiDelegate {
     final MailService mail = mailServiceProvider.get();
 
     try {
-      mail.sendWelcomeEmail(profile.getContactEmail(), googleUser.getPassword(), googleUser);
+      mail.sendWelcomeEmail(profile.getContactEmail(), googleUser.getPassword(), gSuiteUsername);
     } catch (MessagingException e) {
       throw new WorkbenchException(e);
     }
@@ -309,7 +311,8 @@ public class ProfileController implements ProfileApiDelegate {
         .ifPresent(
             instructions -> {
               try {
-                mail.sendInstitutionUserInstructions(profile.getContactEmail(), instructions);
+                mail.sendInstitutionUserInstructions(
+                    profile.getContactEmail(), instructions, gSuiteUsername);
               } catch (MessagingException e) {
                 throw new WorkbenchException(e);
               }
@@ -322,11 +325,8 @@ public class ProfileController implements ProfileApiDelegate {
   }
 
   @Override
-  public ResponseEntity<Profile> submitDataUseAgreement(
-      Integer dataUseAgreementSignedVersion, String initials) {
-    DbUser user =
-        userService.submitDataUseAgreement(
-            userProvider.get(), dataUseAgreementSignedVersion, initials);
+  public ResponseEntity<Profile> submitDUCC(Integer duccSignedVersion, String initials) {
+    DbUser user = userService.submitDUCC(userProvider.get(), duccSignedVersion, initials);
     return getProfileResponse(saveUserWithConflictHandling(user));
   }
 
@@ -389,7 +389,7 @@ public class ProfileController implements ProfileApiDelegate {
   public ResponseEntity<Void> updateContactEmail(
       UpdateContactEmailRequest updateContactEmailRequest) {
     String username = updateContactEmailRequest.getUsername().toLowerCase();
-    com.google.api.services.directory.model.User googleUser = directoryService.getUser(username);
+    User googleUser = directoryService.getUserOrThrow(username);
     DbUser user = userService.getByUsernameOrThrow(username);
     checkUserCreationNonce(user, updateContactEmailRequest.getCreationNonce());
     if (userHasEverLoggedIn(googleUser, user)) {
@@ -409,7 +409,7 @@ public class ProfileController implements ProfileApiDelegate {
   @Override
   public ResponseEntity<Void> resendWelcomeEmail(ResendWelcomeEmailRequest resendRequest) {
     String username = resendRequest.getUsername().toLowerCase();
-    com.google.api.services.directory.model.User googleUser = directoryService.getUser(username);
+    User googleUser = directoryService.getUserOrThrow(username);
     DbUser user = userService.getByUsernameOrThrow(username);
     checkUserCreationNonce(user, resendRequest.getCreationNonce());
     if (userHasEverLoggedIn(googleUser, user)) {
@@ -418,18 +418,26 @@ public class ProfileController implements ProfileApiDelegate {
     return resetPasswordAndSendWelcomeEmail(username, user);
   }
 
-  private boolean userHasEverLoggedIn(
-      com.google.api.services.directory.model.User googleUser, DbUser user) {
+  @Override
+  public ResponseEntity<Void> sendBillingSetupEmail(SendBillingSetupEmailRequest emailRequest) {
+    try {
+      mailServiceProvider.get().sendBillingSetupEmail(userProvider.get(), emailRequest);
+    } catch (MessagingException e) {
+      throw new ServerErrorException("Failed to send billing setup email", e);
+    }
+    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+  }
+
+  private boolean userHasEverLoggedIn(User googleUser, DbUser user) {
     return user.getFirstSignInTime() != null || !googleUser.getChangePasswordAtNextLogin();
   }
 
   private ResponseEntity<Void> resetPasswordAndSendWelcomeEmail(String username, DbUser user) {
-    com.google.api.services.directory.model.User googleUser =
-        directoryService.resetUserPassword(username);
+    User googleUser = directoryService.resetUserPassword(username);
     try {
       mailServiceProvider
           .get()
-          .sendWelcomeEmail(user.getContactEmail(), googleUser.getPassword(), googleUser);
+          .sendWelcomeEmail(user.getContactEmail(), googleUser.getPassword(), user.getUsername());
     } catch (MessagingException e) {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
@@ -527,9 +535,7 @@ public class ProfileController implements ProfileApiDelegate {
   @AuthorityRequired({Authority.ACCESS_CONTROL_ADMIN})
   public ResponseEntity<EmptyResponse> bypassAccessRequirement(
       Long userId, AccessBypassRequest request) {
-    // Dual write then deprecate the one in userService
     userService.updateBypassTime(userId, request);
-    accessModuleService.updateBypassTime(userId, request.getModuleName(), request.getIsBypassed());
     return ResponseEntity.ok(new EmptyResponse());
   }
 
@@ -540,9 +546,7 @@ public class ProfileController implements ProfileApiDelegate {
       throw new ForbiddenException("Self bypass is disallowed in this environment.");
     }
     long userId = userProvider.get().getUserId();
-    // Dual write then deprecate the one in userService
     userService.updateBypassTime(userId, request);
-    accessModuleService.updateBypassTime(userId, request.getModuleName(), request.getIsBypassed());
     return ResponseEntity.ok(new EmptyResponse());
   }
 
@@ -579,6 +583,7 @@ public class ProfileController implements ProfileApiDelegate {
   }
 
   @Override
+  @AuthorityRequired({Authority.RESEARCHER_DATA_VIEW})
   public ResponseEntity<UserAuditLogQueryResponse> getAuditLogEntries(
       String usernameWithoutGsuiteDomain,
       Integer limit,

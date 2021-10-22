@@ -2,10 +2,17 @@ package org.pmiops.workbench.db.jdbc;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
-import static org.pmiops.workbench.testconfig.ReportingTestUtils.WORKSPACE__ACCESS_TIER_SHORT_NAME;
+import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__COMPLIANCE_TRAINING_BYPASS_TIME;
+import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__COMPLIANCE_TRAINING_COMPLETION_TIME;
+import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__DATA_USE_AGREEMENT_BYPASS_TIME;
+import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__DATA_USE_AGREEMENT_COMPLETION_TIME;
+import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__ERA_COMMONS_BYPASS_TIME;
+import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__ERA_COMMONS_COMPLETION_TIME;
 import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__INSTITUTIONAL_ROLE_ENUM;
 import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__INSTITUTIONAL_ROLE_OTHER_TEXT;
 import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__INSTITUTION_ID;
+import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__TWO_FACTOR_AUTH_BYPASS_TIME;
+import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__TWO_FACTOR_AUTH_COMPLETION_TIME;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -21,25 +28,35 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.SpringTest;
+import org.pmiops.workbench.db.dao.AccessModuleDao;
 import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.DataSetDao;
 import org.pmiops.workbench.db.dao.InstitutionDao;
+import org.pmiops.workbench.db.dao.InstitutionTierRequirementDao;
+import org.pmiops.workbench.db.dao.UserAccessModuleDao;
 import org.pmiops.workbench.db.dao.UserAccessTierDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.VerifiedInstitutionalAffiliationDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.db.model.DbAccessModule;
+import org.pmiops.workbench.db.model.DbAccessModule.AccessModuleName;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.db.model.DbInstitution;
+import org.pmiops.workbench.db.model.DbInstitutionTierRequirement;
+import org.pmiops.workbench.db.model.DbInstitutionTierRequirement.MembershipRequirement;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbUserAccessModule;
 import org.pmiops.workbench.db.model.DbUserAccessTier;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.model.InstitutionMembershipRequirement;
 import org.pmiops.workbench.model.ReportingDatasetCohort;
+import org.pmiops.workbench.model.ReportingInstitution;
 import org.pmiops.workbench.model.ReportingUser;
 import org.pmiops.workbench.model.ReportingWorkspace;
 import org.pmiops.workbench.model.TierAccessStatus;
@@ -47,6 +64,7 @@ import org.pmiops.workbench.testconfig.ReportingTestConfig;
 import org.pmiops.workbench.testconfig.ReportingTestUtils;
 import org.pmiops.workbench.testconfig.fixtures.ReportingTestFixture;
 import org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture;
+import org.pmiops.workbench.utils.TestMockFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -70,11 +88,14 @@ public class ReportingQueryServiceTest extends SpringTest {
   // It's necessary to bring in several Dao classes, since we aim to populate join tables
   // that have neither entities of their own nor stand-alone DAOs.
   @Autowired private AccessTierDao accessTierDao;
+  @Autowired private AccessModuleDao accessModuleDao;
   @Autowired private CdrVersionDao cdrVersionDao;
   @Autowired private CohortDao cohortDao;
   @Autowired private DataSetDao dataSetDao;
   @Autowired private InstitutionDao institutionDao;
+  @Autowired InstitutionTierRequirementDao institutionTierRequirementDao;
   @Autowired private UserAccessTierDao userAccessTierDao;
+  @Autowired private UserAccessModuleDao userAccessModuleDao;
   @Autowired private VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
 
   @Autowired private EntityManager entityManager;
@@ -91,17 +112,30 @@ public class ReportingQueryServiceTest extends SpringTest {
   public static class config {}
 
   private DbInstitution dbInstitution;
+  private DbAccessTier registeredTier;
+  private DbAccessTier controlledTier;
+
+  private DbAccessModule twoFactorAuthModule;
+  private DbAccessModule rtTrainingModule;
+  private DbAccessModule eRACommonsModule;
+  private DbAccessModule duccModule;
 
   @BeforeEach
   public void setup() {
+    registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
+    controlledTier = TestMockFactory.createControlledTierForTests(accessTierDao);
+    TestMockFactory.createAccessModules(accessModuleDao);
     dbInstitution = createDbInstitution();
+    twoFactorAuthModule = accessModuleDao.findOneByName(AccessModuleName.TWO_FACTOR_AUTH).get();
+    rtTrainingModule = accessModuleDao.findOneByName(AccessModuleName.RT_COMPLIANCE_TRAINING).get();
+    eRACommonsModule = accessModuleDao.findOneByName(AccessModuleName.ERA_COMMONS).get();
+    duccModule = accessModuleDao.findOneByName(AccessModuleName.DATA_USER_CODE_OF_CONDUCT).get();
   }
 
   @Test
   public void testGetReportingDatasetCohorts() {
     final DbUser user1 = createDbUserWithInstitute();
-    final DbAccessTier accessTier1 = createAccessTier();
-    final DbCdrVersion cdrVersion1 = createCdrVersion(accessTier1);
+    final DbCdrVersion cdrVersion1 = createCdrVersion(registeredTier);
     final DbWorkspace workspace1 = createDbWorkspace(user1, cdrVersion1);
     final DbCohort cohort1 = createCohort(user1, workspace1);
     final DbDataset dataset1 = createDataset(workspace1, cohort1);
@@ -141,17 +175,6 @@ public class ReportingQueryServiceTest extends SpringTest {
             ReportingTestUtils.createDbWorkspace(user1, cdrVersion1)); // save cdr version too
     assertThat(workspaceDao.count()).isEqualTo(initialWorkspaceCount + 1);
     return workspace1;
-  }
-
-  @Transactional
-  public DbAccessTier createAccessTier() {
-    return accessTierDao.save(
-        new DbAccessTier()
-            .setShortName(WORKSPACE__ACCESS_TIER_SHORT_NAME)
-            .setDisplayName("A Longer Name")
-            .setAuthDomainName("auth-domain")
-            .setAuthDomainGroupEmail("auth-domain@email.com")
-            .setServicePerimeter("service/perimeter"));
   }
 
   @Transactional
@@ -200,8 +223,7 @@ public class ReportingQueryServiceTest extends SpringTest {
   @Test
   public void testWorkspaceIterator_oneEntry() {
     final DbUser user = createDbUserWithInstitute();
-    final DbAccessTier accessTier = createAccessTier();
-    final DbCdrVersion cdrVersion = createCdrVersion(accessTier);
+    final DbCdrVersion cdrVersion = createCdrVersion(registeredTier);
     final DbWorkspace workspace = createDbWorkspace(user, cdrVersion);
 
     final Iterator<List<ReportingWorkspace>> iterator =
@@ -223,6 +245,17 @@ public class ReportingQueryServiceTest extends SpringTest {
             .setTierAccessStatus(TierAccessStatus.ENABLED)
             .setFirstEnabled(Timestamp.from(Instant.now()))
             .setLastUpdated(Timestamp.from(Instant.now())));
+  }
+
+  @Transactional
+  public DbUserAccessModule addUserAccessModule(
+      DbUser user, DbAccessModule accessModule, Timestamp bypassTime, Timestamp completionTime) {
+    return userAccessModuleDao.save(
+        new DbUserAccessModule()
+            .setUser(user)
+            .setAccessModule(accessModule)
+            .setBypassTime(bypassTime)
+            .setCompletionTime(completionTime));
   }
 
   @Transactional
@@ -334,10 +367,9 @@ public class ReportingQueryServiceTest extends SpringTest {
 
   @Test
   public void testQueryUser_disabledTier() {
-    final DbAccessTier accessTier = createAccessTier();
     final DbUser user = createDbUserWithInstitute();
-    addUserToTier(user, accessTier);
-    removeUserFromExistingTier(user, accessTier);
+    addUserToTier(user, registeredTier);
+    removeUserFromExistingTier(user, registeredTier);
     entityManager.flush();
 
     final List<List<ReportingUser>> stream =
@@ -350,11 +382,10 @@ public class ReportingQueryServiceTest extends SpringTest {
 
   @Test
   public void testQueryUser_multiTier() {
-    final DbAccessTier accessTier = createAccessTier();
     final DbAccessTier tier2 =
         accessTierDao.save(
             new DbAccessTier()
-                .setAccessTierId(accessTier.getAccessTierId() + 1)
+                .setAccessTierId(controlledTier.getAccessTierId())
                 .setShortName("tier2")
                 .setDisplayName("Tier Two")
                 .setAuthDomainName("t2-auth-domain")
@@ -362,7 +393,7 @@ public class ReportingQueryServiceTest extends SpringTest {
                 .setServicePerimeter("t2/service/perimeter"));
 
     final DbUser user = createDbUserWithInstitute();
-    addUserToTier(user, accessTier);
+    addUserToTier(user, registeredTier);
     addUserToTier(user, tier2);
 
     entityManager.flush();
@@ -374,7 +405,7 @@ public class ReportingQueryServiceTest extends SpringTest {
     assertThat(stream.size()).isEqualTo(1);
 
     ReportingUser reportingUser = stream.stream().findFirst().get().get(0);
-    assertThat(reportingUser.getAccessTierShortNames()).contains(accessTier.getShortName());
+    assertThat(reportingUser.getAccessTierShortNames()).contains(registeredTier.getShortName());
     assertThat(reportingUser.getAccessTierShortNames()).contains(tier2.getShortName());
   }
 
@@ -388,6 +419,17 @@ public class ReportingQueryServiceTest extends SpringTest {
   }
 
   @Test
+  public void testQueryInstitution() {
+    // A simple test to make sure the query works.
+    createInstitutionTierRequirement(dbInstitution);
+    final List<ReportingInstitution> institutions = reportingQueryService.getInstitutions();
+    assertThat(institutions.size()).isEqualTo(1);
+    assertThat(institutions.get(0).getRegisteredTierRequirement())
+        .isEqualTo(InstitutionMembershipRequirement.ADDRESSES);
+    assertThat(institutions.get(0).getDisplayName()).isEqualTo(dbInstitution.getDisplayName());
+  }
+
+  @Test
   public void testUserCount() {
     createUsers(3);
     assertThat(reportingQueryService.getUserCount()).isEqualTo(3);
@@ -395,8 +437,7 @@ public class ReportingQueryServiceTest extends SpringTest {
 
   private void createWorkspaces(int count) {
     final DbUser user = createDbUserWithInstitute();
-    final DbAccessTier accessTier = createAccessTier();
-    final DbCdrVersion cdrVersion = createCdrVersion(accessTier);
+    final DbCdrVersion cdrVersion = createCdrVersion(registeredTier);
     for (int i = 0; i < count; ++i) {
       createDbWorkspace(user, cdrVersion);
     }
@@ -404,11 +445,42 @@ public class ReportingQueryServiceTest extends SpringTest {
   }
 
   private void createUsers(int count) {
-    final DbAccessTier accessTier = createAccessTier();
     for (int i = 0; i < count; ++i) {
       final DbUser user = createDbUserWithInstitute();
-      addUserToTier(user, accessTier);
+      addUserToTier(user, registeredTier);
+      addUserAccessModule(
+          user,
+          twoFactorAuthModule,
+          USER__TWO_FACTOR_AUTH_BYPASS_TIME,
+          USER__TWO_FACTOR_AUTH_COMPLETION_TIME);
+      addUserAccessModule(
+          user,
+          rtTrainingModule,
+          USER__COMPLIANCE_TRAINING_BYPASS_TIME,
+          USER__COMPLIANCE_TRAINING_COMPLETION_TIME);
+      addUserAccessModule(
+          user, eRACommonsModule, USER__ERA_COMMONS_BYPASS_TIME, USER__ERA_COMMONS_COMPLETION_TIME);
+      addUserAccessModule(
+          user,
+          duccModule,
+          USER__DATA_USE_AGREEMENT_BYPASS_TIME,
+          USER__DATA_USE_AGREEMENT_COMPLETION_TIME);
     }
     entityManager.flush();
+  }
+
+  public void createInstitutionTierRequirement(DbInstitution institution) {
+    institutionTierRequirementDao.save(
+        new DbInstitutionTierRequirement()
+            .setAccessTier(registeredTier)
+            .setInstitution(institution)
+            .setMembershipRequirement(MembershipRequirement.ADDRESSES)
+            .setEraRequired(true));
+    institutionTierRequirementDao.save(
+        new DbInstitutionTierRequirement()
+            .setAccessTier(controlledTier)
+            .setInstitution(institution)
+            .setMembershipRequirement(MembershipRequirement.DOMAINS)
+            .setEraRequired(false));
   }
 }
