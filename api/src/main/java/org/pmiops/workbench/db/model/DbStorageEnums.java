@@ -243,6 +243,7 @@ public final class DbStorageEnums {
           .put(Domain.FITBIT_INTRADAY_STEPS, (short) 18)
           .put(Domain.PHYSICAL_MEASUREMENT_CSS, (short) 19)
           .put(Domain.WHOLE_GENOME_VARIANT, (short) 20)
+          .put(Domain.ZIP_CODE_SOCIOECONOMIC, (short) 21)
           .build();
 
   // A mapping from our Domain enum to OMOP domain ID values.
@@ -346,6 +347,7 @@ public final class DbStorageEnums {
               .put(PrePackagedConceptSetEnum.FITBIT_INTRADAY_STEPS, (short) 7)
               .put(PrePackagedConceptSetEnum.FITBIT, (short) 8)
               .put(PrePackagedConceptSetEnum.WHOLE_GENOME, (short) 9)
+              .put(PrePackagedConceptSetEnum.ZIP_CODE_SOCIOECONOMIC, (short) 10)
               .build();
 
   public static PrePackagedConceptSetEnum prePackagedConceptSetsFromStorage(Short conceptSet) {

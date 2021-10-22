@@ -3866,6 +3866,7 @@ definitions:
     - FITBIT_INTRADAY_STEPS
     - PHYSICAL_MEASUREMENT_CSS
     - WHOLE_GENOME_VARIANT
+    - ZIP_CODE_SOCIOECONOMIC
   Surveys:
     type: string
     description: a survey for concepts
@@ -5123,6 +5124,7 @@ definitions:
     - FITBIT_INTRADAY_STEPS
     - WHOLE_GENOME
     - BOTH
+    - ZIP_CODE_SOCIOECONOMIC
   DataSetExportRequest:
     type: object
     required:

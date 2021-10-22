@@ -125,7 +125,8 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
           Domain.FITBIT_HEART_RATE_LEVEL,
           Domain.FITBIT_HEART_RATE_SUMMARY,
           Domain.FITBIT_INTRADAY_STEPS,
-          Domain.WHOLE_GENOME_VARIANT);
+          Domain.WHOLE_GENOME_VARIANT,
+          Domain.ZIP_CODE_SOCIOECONOMIC);
 
   // See https://cloud.google.com/appengine/articles/deadlineexceedederrors for details
   private static final long APP_ENGINE_HARD_TIMEOUT_MSEC_MINUS_FIVE_SEC = 55000L;
@@ -311,6 +312,11 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
           .put(Domain.SURVEY, "answer")
           .put(Domain.VISIT, "visit")
           .put(Domain.PHYSICAL_MEASUREMENT_CSS, "measurement")
+          .put(Domain.FITBIT_HEART_RATE_LEVEL, "heart_rate_minute_level")
+          .put(Domain.FITBIT_INTRADAY_STEPS, "steps_intraday")
+          .put(Domain.FITBIT_ACTIVITY, "activity_summary")
+          .put(Domain.FITBIT_HEART_RATE_SUMMARY, "heart_rate_summary")
+          .put(Domain.ZIP_CODE_SOCIOECONOMIC, "observation")
           .build();
 
   @Override
@@ -642,6 +648,12 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
           == 1) {
         queryBuilder.append(", DATE");
       }
+    }
+
+    if (domain == Domain.ZIP_CODE_SOCIOECONOMIC) {
+      queryBuilder.append(
+          "\nAND observation_source_concept_id = 1585250"
+              + "\nAND observation.value_as_string not like 'Res%'");
     }
 
     if (OUTER_QUERY_DOMAIN.contains(domain)) {
