@@ -1,6 +1,6 @@
 import {CohortPage} from 'app/cohort-search/cohort-page/cohort-page.component';
 import {AppRoute, withRouteData} from 'app/components/app-router';
-import {NOTEBOOK_PAGE_KEY} from 'app/components/help-sidebar';
+import {LEONARDO_APP_PAGE_KEY} from 'app/components/help-sidebar';
 import {withRoutingSpinner} from 'app/components/with-routing-spinner';
 import {InteractiveNotebook} from 'app/pages/analysis/interactive-notebook';
 import {NotebookList} from 'app/pages/analysis/notebook-list';
@@ -86,7 +86,7 @@ export const WorkspaceRoutes = () => {
       <InteractiveNotebookPage routeData={{
         pathElementForTitle: 'nbName',
         breadcrumb: BreadcrumbType.Notebook,
-        pageKey: NOTEBOOK_PAGE_KEY,
+        pageKey: LEONARDO_APP_PAGE_KEY,
         workspaceNavBarTab: 'notebooks',
         minimizeChrome: true
       }}/>
@@ -94,11 +94,13 @@ export const WorkspaceRoutes = () => {
     <AppRoute exact path={`${path}/notebooks/:nbName`}>
       <LeonardoAppRedirectPage
           routeData={{
-            breadcrumb: BreadcrumbType.Terminal,
+            pathElementForTitle: 'nbName',
+            breadcrumb: BreadcrumbType.Notebook,
             // The iframe we use to display the Jupyter notebook does something strange
             // to the height calculation of the container, which is normally set to auto.
             // Setting this flag sets the container to 100% so that no content is clipped.
             contentFullHeightOverride: true,
+            pageKey: LEONARDO_APP_PAGE_KEY,
             workspaceNavBarTab: 'notebooks',
             minimizeChrome: true
           }}
@@ -108,8 +110,8 @@ export const WorkspaceRoutes = () => {
     <AppRoute exact path={`${path}/terminals`}>
       <LeonardoAppRedirectPage
           routeData={{
-            pathElementForTitle: 'nbName',
             breadcrumb: BreadcrumbType.Terminal,
+            pageKey: LEONARDO_APP_PAGE_KEY,
             // The iframe we use to display the Jupyter notebook does something strange
             // to the height calculation of the container, which is normally set to auto.
             // Setting this flag sets the container to 100% so that no content is clipped.

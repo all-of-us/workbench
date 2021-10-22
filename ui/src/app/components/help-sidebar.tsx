@@ -207,7 +207,7 @@ const iconStyles = {
   }
 };
 
-export const NOTEBOOK_PAGE_KEY = 'notebook';
+export const LEONARDO_APP_PAGE_KEY = 'leonardo_app';
 
 interface IconConfig {
   id: string;
@@ -517,7 +517,7 @@ export const HelpSidebar = fp.flow(
       return {
         ...styles.sidebarContainer,
         width: activeIcon ? `calc(${this.sidebarWidth}rem + 70px)` : 0, // +70px accounts for the width of the icon sidebar + box shadow
-        ...(this.props.pageKey === NOTEBOOK_PAGE_KEY ? styles.notebookOverrides : {})
+        ...(this.props.pageKey === LEONARDO_APP_PAGE_KEY ? styles.notebookOverrides : {})
       };
     }
 
@@ -849,7 +849,7 @@ export const HelpSidebar = fp.flow(
       const shouldRenderWorkspaceMenu = !this.iconConfig('concept').showIcon() && !this.iconConfig('criteria').showIcon();
 
       return <div id='help-sidebar'>
-        <div style={{...styles.iconContainer, ...(this.props.pageKey === NOTEBOOK_PAGE_KEY ? styles.notebookOverrides : {})}}>
+        <div style={{...styles.iconContainer, ...(this.props.pageKey === LEONARDO_APP_PAGE_KEY ? styles.notebookOverrides : {})}}>
           {shouldRenderWorkspaceMenu && this.renderWorkspaceMenu()}
           {this.icons().map((icon, i) =>
               <div key={i} style={{display: 'table'}}>

@@ -72,7 +72,7 @@ export const terminalProgressStrings: Map<Progress, string> = new Map([
   [Progress.Resuming, 'Resuming terminal, may take up to 1 minute'],
   [Progress.Authenticating, 'Authenticating with the terminal'],
   [Progress.Copying, 'Copying notebooks onto the server'],
-  [Progress.Creating, 'Opening the new terminal'],
+  [Progress.Creating, 'Opening the terminal'],
   [Progress.Redirecting, 'Redirecting to the terminal'],
 ]);
 
@@ -245,6 +245,7 @@ interface State {
   progressComplete: Map<Progress, boolean>;
 }
 
+/** Terminal decides by Leo. Currently seems Leo support 1 and 2 as Terminal names. */
 const terminalName = '1'
 
 interface Props extends WithSpinnerOverlayProps, NavigationProps, RouteComponentProps<MatchParams> {
