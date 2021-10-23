@@ -137,8 +137,9 @@ public class DbWorkspace {
     return workspaceId;
   }
 
-  public void setWorkspaceId(long workspaceId) {
+  public DbWorkspace setWorkspaceId(long workspaceId) {
     this.workspaceId = workspaceId;
+    return this;
   }
 
   @Version
@@ -147,8 +148,9 @@ public class DbWorkspace {
     return version;
   }
 
-  public void setVersion(int version) {
+  public DbWorkspace setVersion(int version) {
     this.version = version;
+    return this;
   }
 
   @Column(name = "name")
@@ -156,8 +158,9 @@ public class DbWorkspace {
     return name;
   }
 
-  public void setName(String name) {
+  public DbWorkspace setName(String name) {
     this.name = name;
+    return this;
   }
 
   @Column(name = "workspace_namespace")
@@ -165,8 +168,9 @@ public class DbWorkspace {
     return workspaceNamespace;
   }
 
-  public void setWorkspaceNamespace(String workspaceNamespace) {
+  public DbWorkspace setWorkspaceNamespace(String workspaceNamespace) {
     this.workspaceNamespace = workspaceNamespace;
+    return this;
   }
 
   @Column(name = "firecloud_name")
@@ -174,8 +178,9 @@ public class DbWorkspace {
     return firecloudName;
   }
 
-  public void setFirecloudName(String firecloudName) {
+  public DbWorkspace setFirecloudName(String firecloudName) {
     this.firecloudName = firecloudName;
+    return this;
   }
 
   @Transient
@@ -190,8 +195,9 @@ public class DbWorkspace {
     return cdrVersion;
   }
 
-  public void setCdrVersion(DbCdrVersion cdrVersion) {
+  public DbWorkspace setCdrVersion(DbCdrVersion cdrVersion) {
     this.cdrVersion = cdrVersion;
+    return this;
   }
 
   @ManyToOne
@@ -200,8 +206,9 @@ public class DbWorkspace {
     return creator;
   }
 
-  public void setCreator(DbUser creator) {
+  public DbWorkspace setCreator(DbUser creator) {
     this.creator = creator;
+    return this;
   }
 
   @Column(name = "creation_time")
@@ -209,8 +216,9 @@ public class DbWorkspace {
     return creationTime;
   }
 
-  public void setCreationTime(Timestamp creationTime) {
+  public DbWorkspace setCreationTime(Timestamp creationTime) {
     this.creationTime = creationTime;
+    return this;
   }
 
   @Column(name = "last_modified_time")
@@ -218,8 +226,9 @@ public class DbWorkspace {
     return lastModifiedTime;
   }
 
-  public void setLastModifiedTime(Timestamp lastModifiedTime) {
+  public DbWorkspace setLastModifiedTime(Timestamp lastModifiedTime) {
     this.lastModifiedTime = lastModifiedTime;
+    return this;
   }
 
   @Column(name = "last_accessed_time")
@@ -227,8 +236,9 @@ public class DbWorkspace {
     return lastAccessedTime;
   }
 
-  public void setLastAccessedTime(Timestamp lastAccessedTime) {
+  public DbWorkspace setLastAccessedTime(Timestamp lastAccessedTime) {
     this.lastAccessedTime = lastAccessedTime;
+    return this;
   }
 
   @Column(name = "published")
@@ -236,8 +246,9 @@ public class DbWorkspace {
     return published;
   }
 
-  public void setPublished(boolean published) {
+  public DbWorkspace setPublished(boolean published) {
     this.published = published;
+    return this;
   }
 
   @Column(name = "rp_disease_focused_research")
@@ -245,8 +256,9 @@ public class DbWorkspace {
     return this.diseaseFocusedResearch;
   }
 
-  public void setDiseaseFocusedResearch(boolean diseaseFocusedResearch) {
+  public DbWorkspace setDiseaseFocusedResearch(boolean diseaseFocusedResearch) {
     this.diseaseFocusedResearch = diseaseFocusedResearch;
+    return this;
   }
 
   @Column(name = "rp_disease_of_focus")
@@ -254,8 +266,9 @@ public class DbWorkspace {
     return this.diseaseOfFocus;
   }
 
-  public void setDiseaseOfFocus(String diseaseOfFocus) {
+  public DbWorkspace setDiseaseOfFocus(String diseaseOfFocus) {
     this.diseaseOfFocus = diseaseOfFocus;
+    return this;
   }
 
   @Column(name = "rp_methods_development")
@@ -263,8 +276,9 @@ public class DbWorkspace {
     return this.methodsDevelopment;
   }
 
-  public void setMethodsDevelopment(boolean methodsDevelopment) {
+  public DbWorkspace setMethodsDevelopment(boolean methodsDevelopment) {
     this.methodsDevelopment = methodsDevelopment;
+    return this;
   }
 
   @Column(name = "rp_control_set")
@@ -272,8 +286,9 @@ public class DbWorkspace {
     return this.controlSet;
   }
 
-  public void setControlSet(boolean controlSet) {
+  public DbWorkspace setControlSet(boolean controlSet) {
     this.controlSet = controlSet;
+    return this;
   }
 
   @Column(name = "rp_ancestry")
@@ -281,8 +296,9 @@ public class DbWorkspace {
     return this.ancestry;
   }
 
-  public void setAncestry(boolean ancestry) {
+  public DbWorkspace setAncestry(boolean ancestry) {
     this.ancestry = ancestry;
+    return this;
   }
 
   @Column(name = "rp_commercial_purpose")
@@ -290,8 +306,9 @@ public class DbWorkspace {
     return this.commercialPurpose;
   }
 
-  public void setCommercialPurpose(boolean commercialPurpose) {
+  public DbWorkspace setCommercialPurpose(boolean commercialPurpose) {
     this.commercialPurpose = commercialPurpose;
+    return this;
   }
 
   @Column(name = "rp_social_behavioral")
@@ -299,8 +316,9 @@ public class DbWorkspace {
     return this.socialBehavioral;
   }
 
-  public void setSocialBehavioral(boolean socialBehavioral) {
+  public DbWorkspace setSocialBehavioral(boolean socialBehavioral) {
     this.socialBehavioral = socialBehavioral;
+    return this;
   }
 
   @Column(name = "rp_population_health")
@@ -308,8 +326,9 @@ public class DbWorkspace {
     return this.populationHealth;
   }
 
-  public void setPopulationHealth(boolean populationHealth) {
+  public DbWorkspace setPopulationHealth(boolean populationHealth) {
     this.populationHealth = populationHealth;
+    return this;
   }
 
   @Column(name = "rp_ethics")
@@ -317,8 +336,9 @@ public class DbWorkspace {
     return ethics;
   }
 
-  public void setEthics(boolean ethics) {
+  public DbWorkspace setEthics(boolean ethics) {
     this.ethics = ethics;
+    return this;
   }
 
   @Column(name = "rp_educational")
@@ -326,8 +346,9 @@ public class DbWorkspace {
     return this.educational;
   }
 
-  public void setEducational(boolean educational) {
+  public DbWorkspace setEducational(boolean educational) {
     this.educational = educational;
+    return this;
   }
 
   @Column(name = "rp_drug_development")
@@ -335,8 +356,9 @@ public class DbWorkspace {
     return this.drugDevelopment;
   }
 
-  public void setDrugDevelopment(boolean drugDevelopment) {
+  public DbWorkspace setDrugDevelopment(boolean drugDevelopment) {
     this.drugDevelopment = drugDevelopment;
+    return this;
   }
 
   @Column(name = "rp_other_purpose")
@@ -344,8 +366,9 @@ public class DbWorkspace {
     return this.otherPurpose;
   }
 
-  public void setOtherPurpose(boolean otherPurpose) {
+  public DbWorkspace setOtherPurpose(boolean otherPurpose) {
     this.otherPurpose = otherPurpose;
+    return this;
   }
 
   @Column(name = "rp_other_purpose_details")
@@ -353,8 +376,9 @@ public class DbWorkspace {
     return this.otherPurposeDetails;
   }
 
-  public void setOtherPurposeDetails(String otherPurposeDetails) {
+  public DbWorkspace setOtherPurposeDetails(String otherPurposeDetails) {
     this.otherPurposeDetails = otherPurposeDetails;
+    return this;
   }
 
   @Column(name = "google_project")
@@ -362,8 +386,9 @@ public class DbWorkspace {
     return googleProject;
   }
 
-  public void setGoogleProject(String googleProject) {
+  public DbWorkspace setGoogleProject(String googleProject) {
     this.googleProject = googleProject;
+    return this;
   }
 
   @ElementCollection(fetch = FetchType.EAGER)
@@ -373,8 +398,9 @@ public class DbWorkspace {
     return populationDetailsSet;
   }
 
-  private void setPopulationDetails(Set<Short> newPopulationDetailsSet) {
+  private DbWorkspace setPopulationDetails(Set<Short> newPopulationDetailsSet) {
     this.populationDetailsSet = newPopulationDetailsSet;
+    return this;
   }
 
   @Transient
@@ -388,8 +414,8 @@ public class DbWorkspace {
         .collect(Collectors.toSet());
   }
 
-  public void setSpecificPopulationsEnum(Set<SpecificPopulationEnum> newPopulationDetails) {
-    setPopulationDetails(
+  public DbWorkspace setSpecificPopulationsEnum(Set<SpecificPopulationEnum> newPopulationDetails) {
+    return setPopulationDetails(
         newPopulationDetails.stream()
             .map(DbStorageEnums::specificPopulationToStorage)
             .collect(Collectors.toSet()));
@@ -404,8 +430,9 @@ public class DbWorkspace {
     return disseminateResearchSet;
   }
 
-  public void setDisseminateResearchSet(Set<Short> disseminateResearchSet) {
+  public DbWorkspace setDisseminateResearchSet(Set<Short> disseminateResearchSet) {
     this.disseminateResearchSet = disseminateResearchSet;
+    return this;
   }
 
   @Transient
@@ -419,9 +446,9 @@ public class DbWorkspace {
         .collect(Collectors.toSet());
   }
 
-  public void setDisseminateResearchEnumSet(
+  public DbWorkspace setDisseminateResearchEnumSet(
       Set<DisseminateResearchEnum> disseminateResearchEnumEnum) {
-    setDisseminateResearchSet(
+    return setDisseminateResearchSet(
         disseminateResearchEnumEnum.stream()
             .map(DbStorageEnums::disseminateResearchToStorage)
             .collect(Collectors.toSet()));
@@ -432,8 +459,9 @@ public class DbWorkspace {
     return disseminateResearchOther;
   }
 
-  public void setDisseminateResearchOther(String disseminateResearchOther) {
+  public DbWorkspace setDisseminateResearchOther(String disseminateResearchOther) {
     this.disseminateResearchOther = disseminateResearchOther;
+    return this;
   }
 
   @ElementCollection(fetch = FetchType.EAGER)
@@ -445,8 +473,9 @@ public class DbWorkspace {
     return researchOutcomeSet;
   }
 
-  public void setResearchOutcomeSet(Set<Short> researchOutcomeSet) {
+  public DbWorkspace setResearchOutcomeSet(Set<Short> researchOutcomeSet) {
     this.researchOutcomeSet = researchOutcomeSet;
+    return this;
   }
 
   @Transient
@@ -460,8 +489,8 @@ public class DbWorkspace {
         .collect(Collectors.toSet());
   }
 
-  public void setResearchOutcomeEnumSet(Set<ResearchOutcomeEnum> researchOutcomeEnum) {
-    setResearchOutcomeSet(
+  public DbWorkspace setResearchOutcomeEnumSet(Set<ResearchOutcomeEnum> researchOutcomeEnum) {
+    return setResearchOutcomeSet(
         researchOutcomeEnum.stream()
             .map(DbStorageEnums::researchOutcomeToStorage)
             .collect(Collectors.toSet()));
@@ -472,8 +501,9 @@ public class DbWorkspace {
     return this.otherPopulationDetails;
   }
 
-  public void setOtherPopulationDetails(String otherPopulationDetails) {
+  public DbWorkspace setOtherPopulationDetails(String otherPopulationDetails) {
     this.otherPopulationDetails = otherPopulationDetails;
+    return this;
   }
 
   @Column(name = "rp_additional_notes")
@@ -481,8 +511,9 @@ public class DbWorkspace {
     return this.additionalNotes;
   }
 
-  public void setAdditionalNotes(String additionalNotes) {
+  public DbWorkspace setAdditionalNotes(String additionalNotes) {
     this.additionalNotes = additionalNotes;
+    return this;
   }
 
   @Column(name = "rp_reason_for_all_of_us")
@@ -490,8 +521,9 @@ public class DbWorkspace {
     return this.reasonForAllOfUs;
   }
 
-  public void setReasonForAllOfUs(String reasonForAllOfUs) {
+  public DbWorkspace setReasonForAllOfUs(String reasonForAllOfUs) {
     this.reasonForAllOfUs = reasonForAllOfUs;
+    return this;
   }
 
   @Column(name = "rp_intended_study")
@@ -499,8 +531,9 @@ public class DbWorkspace {
     return this.intendedStudy;
   }
 
-  public void setIntendedStudy(String intendedStudy) {
+  public DbWorkspace setIntendedStudy(String intendedStudy) {
     this.intendedStudy = intendedStudy;
+    return this;
   }
 
   @Column(name = "rp_anticipated_findings")
@@ -508,8 +541,9 @@ public class DbWorkspace {
     return this.anticipatedFindings;
   }
 
-  public void setAnticipatedFindings(String anticipatedFindings) {
+  public DbWorkspace setAnticipatedFindings(String anticipatedFindings) {
     this.anticipatedFindings = anticipatedFindings;
+    return this;
   }
 
   @Column(name = "rp_scientific_approach")
@@ -517,8 +551,9 @@ public class DbWorkspace {
     return scientificApproach;
   }
 
-  public void setScientificApproach(String scientificApproach) {
+  public DbWorkspace setScientificApproach(String scientificApproach) {
     this.scientificApproach = scientificApproach;
+    return this;
   }
 
   @Column(name = "rp_review_requested")
@@ -526,11 +561,12 @@ public class DbWorkspace {
     return this.reviewRequested;
   }
 
-  public void setReviewRequested(Boolean reviewRequested) {
+  public DbWorkspace setReviewRequested(Boolean reviewRequested) {
     if (reviewRequested != null && reviewRequested && this.timeRequested == null) {
       this.timeRequested = new Timestamp(System.currentTimeMillis());
     }
     this.reviewRequested = reviewRequested;
+    return this;
   }
 
   /**
@@ -543,8 +579,9 @@ public class DbWorkspace {
     return this.approved;
   }
 
-  public void setApproved(Boolean approved) {
+  public DbWorkspace setApproved(Boolean approved) {
     this.approved = approved;
+    return this;
   }
 
   @Column(name = "rp_time_requested")
@@ -552,8 +589,9 @@ public class DbWorkspace {
     return this.timeRequested;
   }
 
-  public void setTimeRequested(Timestamp timeRequested) {
+  public DbWorkspace setTimeRequested(Timestamp timeRequested) {
     this.timeRequested = timeRequested;
+    return this;
   }
 
   @OneToMany(mappedBy = "workspaceId", orphanRemoval = true, cascade = CascadeType.ALL)
@@ -561,8 +599,9 @@ public class DbWorkspace {
     return cohorts;
   }
 
-  public void setCohorts(Set<DbCohort> cohorts) {
+  public DbWorkspace setCohorts(Set<DbCohort> cohorts) {
     this.cohorts = cohorts;
+    return this;
   }
 
   public void addCohort(DbCohort cohort) {
@@ -574,8 +613,9 @@ public class DbWorkspace {
     return conceptSets;
   }
 
-  public void setConceptSets(Set<DbConceptSet> conceptSets) {
+  public DbWorkspace setConceptSets(Set<DbConceptSet> conceptSets) {
     this.conceptSets = conceptSets;
+    return this;
   }
 
   @OneToMany(mappedBy = "workspaceId", orphanRemoval = true, cascade = CascadeType.ALL)
@@ -583,8 +623,9 @@ public class DbWorkspace {
     return dataSets;
   }
 
-  public void setDataSets(Set<DbDataset> dataSets) {
+  public DbWorkspace setDataSets(Set<DbDataset> dataSets) {
     this.dataSets = dataSets;
+    return this;
   }
 
   public void addDataSet(DbDataset dataSet) {
@@ -601,8 +642,9 @@ public class DbWorkspace {
     return this.firecloudUuid;
   }
 
-  public void setFirecloudUuid(String firecloudUuid) {
+  public DbWorkspace setFirecloudUuid(String firecloudUuid) {
     this.firecloudUuid = firecloudUuid;
+    return this;
   }
 
   @Column(name = "active_status")
@@ -610,8 +652,9 @@ public class DbWorkspace {
     return activeStatus;
   }
 
-  private void setActiveStatus(Short activeStatus) {
+  private DbWorkspace setActiveStatus(Short activeStatus) {
     this.activeStatus = activeStatus;
+    return this;
   }
 
   @Transient
@@ -619,8 +662,9 @@ public class DbWorkspace {
     return DbStorageEnums.workspaceActiveStatusFromStorage(getActiveStatus());
   }
 
-  public void setWorkspaceActiveStatusEnum(WorkspaceActiveStatus activeStatus) {
+  public DbWorkspace setWorkspaceActiveStatusEnum(WorkspaceActiveStatus activeStatus) {
     setActiveStatus(DbStorageEnums.workspaceActiveStatusToStorage(activeStatus));
+    return this;
   }
 
   @Transient
@@ -633,8 +677,9 @@ public class DbWorkspace {
     return DbStorageEnums.billingMigrationStatusFromStorage(billingMigrationStatus);
   }
 
-  public void setBillingMigrationStatusEnum(BillingMigrationStatus status) {
+  public DbWorkspace setBillingMigrationStatusEnum(BillingMigrationStatus status) {
     this.billingMigrationStatus = DbStorageEnums.billingMigrationStatusToStorage(status);
+    return this;
   }
 
   @Column(name = "billing_migration_status")
@@ -642,8 +687,9 @@ public class DbWorkspace {
     return this.billingMigrationStatus;
   }
 
-  private void setBillingMigrationStatus(short s) {
+  private DbWorkspace setBillingMigrationStatus(short s) {
     this.billingMigrationStatus = s;
+    return this;
   }
 
   @Column(name = "billing_status")
@@ -651,8 +697,9 @@ public class DbWorkspace {
     return DbStorageEnums.billingStatusFromStorage(billingStatus);
   }
 
-  public void setBillingStatus(BillingStatus billingStatus) {
+  public DbWorkspace setBillingStatus(BillingStatus billingStatus) {
     this.billingStatus = DbStorageEnums.billingStatusToStorage(billingStatus);
+    return this;
   }
 
   @Column(name = "billing_account_name")
@@ -660,8 +707,9 @@ public class DbWorkspace {
     return billingAccountName;
   }
 
-  public void setBillingAccountName(String billingAccountName) {
+  public DbWorkspace setBillingAccountName(String billingAccountName) {
     this.billingAccountName = billingAccountName;
+    return this;
   }
 
   @Column(name = "billing_account_type")
@@ -669,8 +717,9 @@ public class DbWorkspace {
     return DbStorageEnums.billingAccountTypeFromStorage(billingAccountType);
   }
 
-  public void setBillingAccountType(BillingAccountType billingAccountType) {
+  public DbWorkspace setBillingAccountType(BillingAccountType billingAccountType) {
     this.billingAccountType = DbStorageEnums.billingAccountTypeToStorage(billingAccountType);
+    return this;
   }
 
   @Column(name = "needs_rp_review_prompt")
@@ -679,8 +728,9 @@ public class DbWorkspace {
     return needsRPReviewPrompt;
   }
 
-  public void setNeedsResearchPurposeReviewPrompt(Short needsReviewRPPrompt) {
+  public DbWorkspace setNeedsResearchPurposeReviewPrompt(Short needsReviewRPPrompt) {
     this.needsRPReviewPrompt = needsReviewRPPrompt;
+    return this;
   }
 
   @Transient
@@ -691,7 +741,8 @@ public class DbWorkspace {
     return needsRPReviewPrompt == 0;
   }
 
-  public void setNeedsReviewPrompt(Boolean needsReviewRPPrompt) {
+  public DbWorkspace setNeedsReviewPrompt(Boolean needsReviewRPPrompt) {
     this.needsRPReviewPrompt = (short) (needsReviewRPPrompt ? 0 : 1);
+    return this;
   }
 }
