@@ -7,7 +7,7 @@ import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 
 import {NewNotebookModal} from 'app/pages/analysis/new-notebook-modal';
-import {profileApi, workspacesApi} from 'app/services/swagger-fetch-clients';
+import {profileApi, notebooksApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {withCurrentWorkspace} from 'app/utils';
 import {WorkspaceData} from 'app/utils/workspace-data';
@@ -64,7 +64,7 @@ export const NotebookList = withCurrentWorkspace()(class extends React.Component
     try {
       const {workspace: {namespace, id}} = this.props;
       this.setState({loading: true});
-      const notebookList = await workspacesApi().getNoteBookList(namespace, id);
+      const notebookList = await notebooksApi().getNoteBookList(namespace, id);
       this.setState({notebookList});
       const notebookNameList = notebookList.map(fd => fd.name.slice(0, -('.ipynb'.length)));
       this.setState({notebookNameList});

@@ -37,6 +37,7 @@ import {
   DiskApi,
   FeaturedWorkspacesConfigApi, // internal
   InstitutionApi,
+  NotebooksApi,
   ProfileApi,
   RuntimeApi,
   StatusAlertApi,
@@ -97,6 +98,7 @@ export const configApi = bindCtor(ConfigApi);
 export const dataSetApi = bindCtor(DataSetApi);
 export const featuredWorkspacesConfigApi = bindCtor(FeaturedWorkspacesConfigApi);
 export const institutionApi = bindCtor(InstitutionApi);
+export const notebooksApi = bindCtor(NotebooksApi);
 export const profileApi = bindCtor(ProfileApi);
 export const runtimeApi = bindCtor(RuntimeApi);
 export const statusApi = bindCtor(StatusApi);

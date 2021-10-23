@@ -3,8 +3,8 @@ import * as React from 'react';
 import Select from 'react-select';
 
 import {TextInput} from 'app/components/inputs';
-import {conceptSetsApi, registerApiClient, workspacesApi} from 'app/services/swagger-fetch-clients';
-import {ConceptSetsApi, ResourceType, WorkspaceAccessLevel, WorkspacesApi} from 'generated/fetch';
+import {conceptSetsApi, registerApiClient, notebooksApi} from 'app/services/swagger-fetch-clients';
+import { ConceptSetsApi, NotebooksApi, ResourceType, WorkspaceAccessLevel, WorkspacesApi} from 'generated/fetch';
 import {dropNotebookFileSuffix} from 'app/pages/analysis/util';
 
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
@@ -15,6 +15,7 @@ import {cdrVersionStore} from 'app/utils/stores';
 
 import {CopyModal, CopyModalProps} from './copy-modal';
 import {AccessTierShortNames} from 'app/utils/access-tiers';
+import { NotebooksApiStub } from 'testing/stubs/notebooks-api-stub';
 
 function simulateSelect(wrapper: ReactWrapper, reactSelect: Select, selection: string) {
   // Open Select options. Simulating a click doesn't work for some reason
@@ -102,7 +103,7 @@ describe('CopyModal', () => {
   const fromAccessTierShortName = workspaces[0].accessTierShortName;
   const fromResourceName = 'notebook';
   const notebookSaveFunction = (copyRequest) => {
-    return workspacesApi().copyNotebook(
+    return notebooksApi().copyNotebook(
         fromWorkspaceNamespace,
         fromWorkspaceFirecloudName,
         dropNotebookFileSuffix(fromResourceName),
@@ -127,6 +128,7 @@ describe('CopyModal', () => {
   beforeEach(() => {
     const wsApiStub = new WorkspacesApiStub(workspaces);
     registerApiClient(WorkspacesApi, wsApiStub);
+    registerApiClient(NotebooksApi, new NotebooksApiStub());
 
     props = {
       fromWorkspaceNamespace: fromWorkspaceNamespace,
@@ -204,7 +206,7 @@ describe('CopyModal', () => {
     // Type out new name
     wrapper.find(TextInput).simulate('change', {target: {value: 'Freeblast'}});
 
-    const spy = jest.spyOn(workspacesApi(), 'copyNotebook');
+    const spy = jest.spyOn(notebooksApi(), 'copyNotebook');
     // Click copy button
     wrapper.find('[data-test-id="copy-button"]').first().simulate('click');
 
@@ -235,7 +237,7 @@ describe('CopyModal', () => {
     // Type out new name
     wrapper.find(TextInput).simulate('change', {target: {value: 'Freeblast'}});
 
-    const spy = jest.spyOn(workspacesApi(), 'copyNotebook');
+    const spy = jest.spyOn(notebooksApi(), 'copyNotebook');
     // Click copy button
     wrapper.find('[data-test-id="copy-button"]').first().simulate('click');
 
@@ -264,7 +266,7 @@ describe('CopyModal', () => {
     // Type out new name
     wrapper.find(TextInput).simulate('change', {target: {value: 'Freeblast'}});
 
-    const spy = jest.spyOn(workspacesApi(), 'copyNotebook');
+    const spy = jest.spyOn(notebooksApi(), 'copyNotebook');
     // Click copy button
     const copyButton = wrapper.find('[data-test-id="copy-button"]').first();
     copyButton.simulate('click');
@@ -277,7 +279,7 @@ describe('CopyModal', () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
 
-    const spy = jest.spyOn(workspacesApi(), 'copyNotebook');
+    const spy = jest.spyOn(notebooksApi(), 'copyNotebook');
 
     // Click copy button
     const copyButton = wrapper.find('[data-test-id="copy-button"]').first();

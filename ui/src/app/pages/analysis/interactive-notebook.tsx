@@ -11,7 +11,7 @@ import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {EditComponentReact} from 'app/icons/edit';
 import {ConfirmPlaygroundModeModal} from 'app/pages/analysis/confirm-playground-mode-modal';
 import {NotebookInUseModal} from 'app/pages/analysis/notebook-in-use-modal';
-import {workspacesApi} from 'app/services/swagger-fetch-clients';
+import {notebooksApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {hasNewValidProps, reactStyles, withCurrentWorkspace} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
@@ -169,7 +169,7 @@ export const InteractiveNotebook = fp.flow(
     async loadNotebook() {
       const {ns, wsid, nbName} = this.props.match.params;
       try {
-        const {html} = await workspacesApi().readOnlyNotebook(ns, wsid, nbName);
+        const {html} = await notebooksApi().readOnlyNotebook(ns, wsid, nbName);
         this.setState({html: html});
       } catch (e) {
         let previewErrorMode = PreviewErrorMode.ERROR;
@@ -183,7 +183,7 @@ export const InteractiveNotebook = fp.flow(
         this.setState({previewErrorMode, previewErrorMessage});
       }
 
-      workspacesApi().getNotebookLockingMetadata(ns, wsid, nbName).then((resp) => {
+      notebooksApi().getNotebookLockingMetadata(ns, wsid, nbName).then((resp) => {
         this.setState({
           lastLockedBy: resp.lastLockedBy,
           lockExpirationTime: resp.lockExpirationTime
@@ -263,7 +263,7 @@ export const InteractiveNotebook = fp.flow(
 
     private cloneNotebook() {
       const {ns, wsid, nbName} = this.props.match.params;
-      workspacesApi().cloneNotebook(ns, wsid, nbName).then((notebook) => {
+      notebooksApi().cloneNotebook(ns, wsid, nbName).then((notebook) => {
         this.props.navigate(['workspaces', ns, wsid, 'notebooks', encodeURIComponent(notebook.name)]);
       });
     }
