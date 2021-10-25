@@ -7,6 +7,8 @@ set -ex
 export BQ_PROJECT=$1  # project
 export BQ_DATASET=$2  # dataset
 
+TABLE_LIST=$(bq ls -n 1000 "$BQ_PROJECT:$BQ_DATASET")
+
 ################################################
 # CREATE TABLES
 ################################################
@@ -258,7 +260,7 @@ bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
     CALORIE_COUNT                   FLOAT64
 )"
 
-echo "CREATE TABLE - ds_steps_intradayy"
+echo "CREATE TABLE - ds_steps_intraday"
 bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.ds_steps_intraday\`
 (
@@ -266,6 +268,25 @@ bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
     STEPS                           NUMERIC,
     PERSON_ID                       INT64
 )"
+
+if [[ "$TABLE_LIST" == *"zip3_ses_map"* ]]; then
+  echo "CREATE TABLE - ds_zip_code_socioeconomic"
+  bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+  "CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.ds_zip_code_socioeconomic\`
+  (
+      PERSON_ID                       INT64,
+      OBSERVATION_DATETIME            TIMESTAMP,
+      ZIP_CODE                        STRING,
+      ASSISTED_INCOME                 FLOAT64,
+      HIGH_SCHOOL_EDUCATION           FLOAT64,
+      MEDIAN_INCOME                   FLOAT64,
+      NO_HEALTH_INSURANCE             FLOAT64,
+      POVERTY                         FLOAT64,
+      VACANT_HOUSING                  FLOAT64,
+      DEPRIVATION_INDEX               FLOAT64,
+      AMERICAN_COMMUNITY_SURVEY_YEAR  INT64
+  )"
+fi
 
 ################################################
 # INSERT DATA
@@ -496,3 +517,25 @@ SELECT datetime, steps, person_id
 FROM (SELECT *, ROW_NUMBER() OVER (PARTITION BY person_id ) AS rank
 FROM \`$BQ_PROJECT.$BQ_DATASET.steps_intraday\`)
 where rank = 1"
+
+if [[ "$TABLE_LIST" == *"zip3_ses_map"* ]]; then
+  echo "ds_zip_code_socioeconomic - inserting data"
+  bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+  "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_zip_code_socioeconomic\`
+  (PERSON_ID, OBSERVATION_DATETIME, ZIP_CODE, ASSISTED_INCOME, HIGH_SCHOOL_EDUCATION, MEDIAN_INCOME, NO_HEALTH_INSURANCE, POVERTY, VACANT_HOUSING, DEPRIVATION_INDEX, AMERICAN_COMMUNITY_SURVEY_YEAR)
+  select o.person_id,
+  o.observation_datetime,
+  zip.zip3_as_string,
+  zip.fraction_assisted_income,
+  zip.fraction_high_school_edu,
+  zip.median_income,
+  zip.fraction_no_health_ins,
+  zip.fraction_poverty,
+  zip.fraction_vacant_housing,
+  zip.deprivation_index,
+  zip.acs
+  from \`$BQ_PROJECT.$BQ_DATASET.observation\` o
+  join \`$BQ_PROJECT.$BQ_DATASET.zip3_ses_map\` zip on CAST(SUBSTR(o.value_as_string, 0, STRPOS(o.value_as_string, '*') - 1) as INT64) = zip.zip3
+  where observation_source_concept_id = 1585250
+  and o.value_as_string not like 'Res%'"
+fi

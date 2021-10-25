@@ -422,7 +422,8 @@ enum PrepackagedConceptSet {
   FITBITACTIVITY = 'Fitbit Activity Summary',
   FITBITHEARTRATELEVEL = 'Fitbit Heart Rate Level',
   FITBITINTRADAYSTEPS = 'Fitbit Intra Day Steps',
-  WHOLEGENOME = 'Whole Genome Sequencing Data'
+  WHOLEGENOME = 'Whole Genome Sequencing Data',
+  ZIPCODESOCIOECONOMIC = 'Zip Code Socioeconomic Status Data'
 }
 
 const PREPACKAGED_SURVEY_PERSON_DOMAIN = {
@@ -439,6 +440,10 @@ const PREPACKAGED_WITH_FITBIT_DOMAINS = {
 
 const PREPACKAGED_WITH_WHOLE_GENOME = {
   [PrepackagedConceptSet.WHOLEGENOME]: Domain.WHOLEGENOMEVARIANT
+};
+
+const PREPACKAGED_WITH_ZIP_CODE_SOCIOECONOMIC = {
+  [PrepackagedConceptSet.ZIPCODESOCIOECONOMIC]: Domain.ZIPCODESOCIOECONOMIC
 };
 let PREPACKAGED_DOMAINS = PREPACKAGED_SURVEY_PERSON_DOMAIN;
 
@@ -564,6 +569,13 @@ export const DatasetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), wi
         PREPACKAGED_DOMAINS = {
           ...PREPACKAGED_DOMAINS,
           ...PREPACKAGED_WITH_WHOLE_GENOME
+        };
+      }
+      // Add Zipcode Socioeconomic status data if were in controlled tier dataset
+      if (getCdrVersion(this.props.workspace, this.props.cdrVersionTiersResponse).accessTierShortName === "controlled") {
+        PREPACKAGED_DOMAINS = {
+          ...PREPACKAGED_DOMAINS,
+          ...PREPACKAGED_WITH_ZIP_CODE_SOCIOECONOMIC
         };
       }
     }
@@ -718,6 +730,9 @@ export const DatasetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), wi
       if (!serverConfigStore.get().config.enableGenomicExtraction ||
           !getCdrVersion(this.props.workspace, this.props.cdrVersionTiersResponse).hasWgsData) {
         prepackagedList = prepackagedList.filter(prepack => prepack !== 'WHOLEGENOME');
+      }
+      if (getCdrVersion(this.props.workspace, this.props.cdrVersionTiersResponse).accessTierShortName !== 'controlled') {
+        prepackagedList = prepackagedList.filter(prepack => prepack !== 'ZIPCODESOCIOECONOMIC');
       }
       return prepackagedList;
     }
@@ -900,6 +915,10 @@ export const DatasetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), wi
               re.add(PrepackagedConceptSet.WHOLEGENOME);
               break;
             }
+            case PrePackagedConceptSetEnum.ZIPCODESOCIOECONOMIC: {
+              re.add(PrepackagedConceptSet.ZIPCODESOCIOECONOMIC);
+              break;
+            }
             case PrePackagedConceptSetEnum.NONE:
             default:
               break;
@@ -935,6 +954,9 @@ export const DatasetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), wi
             break;
           case PrepackagedConceptSet.WHOLEGENOME:
             selectedPrePackagedConceptSDetEnum.push(PrePackagedConceptSetEnum.WHOLEGENOME);
+            break;
+          case PrepackagedConceptSet.ZIPCODESOCIOECONOMIC:
+            selectedPrePackagedConceptSDetEnum.push(PrePackagedConceptSetEnum.ZIPCODESOCIOECONOMIC);
             break;
 
         }
