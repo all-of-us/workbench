@@ -16,6 +16,7 @@ import {CSSTransition, TransitionGroup} from 'react-transition-group';
 
 import {faCircle} from '@fortawesome/free-solid-svg-icons/faCircle';
 import {faSyncAlt} from '@fortawesome/free-solid-svg-icons/faSyncAlt';
+import {faTerminal} from '@fortawesome/free-solid-svg-icons/faTerminal';
 import {SelectionList} from 'app/cohort-search/selection-list/selection-list.component';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {TooltipTrigger} from 'app/components/popups';
@@ -206,7 +207,7 @@ const iconStyles = {
   }
 };
 
-export const NOTEBOOK_PAGE_KEY = 'notebook';
+export const LEONARDO_APP_PAGE_KEY = 'leonardo_app';
 
 interface IconConfig {
   id: string;
@@ -216,6 +217,7 @@ interface IconConfig {
   showIcon: () => boolean;
   style: CSSProperties;
   tooltip: string;
+  hasContent: true
 }
 
 const pageKeyToAnalyticsLabels = {
@@ -313,6 +315,7 @@ export const HelpSidebar = fp.flow(
           showIcon: () => this.props.pageKey === 'cohortBuilder' && !!this.props.criteria,
           style: {fontSize: '21px'},
           tooltip: 'Selected Criteria',
+          hasContent: true,
         },
         'concept': {
           id: 'concept',
@@ -322,6 +325,7 @@ export const HelpSidebar = fp.flow(
           showIcon: () => this.props.pageKey === 'conceptSets',
           style: {fontSize: '21px'},
           tooltip: 'Selected Concepts',
+          hasContent: true,
         },
         'help': {
           id: 'help',
@@ -331,6 +335,7 @@ export const HelpSidebar = fp.flow(
           showIcon: () => true,
           style: {fontSize: '21px'},
           tooltip: 'Help Tips',
+          hasContent: true,
         },
         'notebooksHelp': {
           id: 'notebooksHelp',
@@ -340,6 +345,7 @@ export const HelpSidebar = fp.flow(
           showIcon: () => true,
           style: {fontSize: '21px'},
           tooltip: 'Workspace Storage',
+          hasContent: true,
         },
         'dataDictionary': {
           id: 'dataDictionary',
@@ -349,6 +355,7 @@ export const HelpSidebar = fp.flow(
           showIcon: () => true,
           style: {color: colors.white, fontSize: '20px', marginTop: '5px'},
           tooltip: 'Data Dictionary',
+          hasContent: false,
         },
         'annotations': {
           id: 'annotations',
@@ -358,6 +365,7 @@ export const HelpSidebar = fp.flow(
           showIcon: () => this.props.pageKey === 'reviewParticipantDetail',
           style: {fontSize: '20px', marginLeft: '3px'},
           tooltip: 'Annotations',
+          hasContent: true,
         },
         'runtime': {
           id: 'runtime',
@@ -366,7 +374,18 @@ export const HelpSidebar = fp.flow(
           label: 'Cloud Icon',
           showIcon: () => true,
           style: {height: '22px', width: '22px'},
-          tooltip: 'Cloud Analysis Environment'
+          tooltip: 'Cloud Analysis Environment',
+          hasContent: true,
+        },
+        'terminal': {
+          id: 'terminal',
+          disabled: false,
+          faIcon: faTerminal,
+          label: 'Terminal Icon',
+          showIcon: () => true,
+          style: {height: '22px', width: '22px'},
+          tooltip:  'Cloud Analysis Terminal',
+          hasContent: false,
         },
         'genomicExtractions': {
           id: 'genomicExtractions',
@@ -377,6 +396,7 @@ export const HelpSidebar = fp.flow(
           // position: absolute is so the status icon won't push the DNA icon to the left.
           style: {height: '22px', width: '22px', marginTop: '0.25rem', position: 'absolute'},
           tooltip: 'Genomic Extraction History',
+          hasContent: true,
         }
       }[iconKey];
     }
@@ -392,7 +412,7 @@ export const HelpSidebar = fp.flow(
       ].filter(key => this.iconConfig(key).showIcon());
 
       if (WorkspacePermissionsUtil.canWrite(this.props.workspace.accessLevel)) {
-        keys.push('runtime');
+        keys.push('runtime', 'terminal');
       }
 
       if (serverConfigStore.get().config.enableGenomicExtraction &&
@@ -479,6 +499,11 @@ export const HelpSidebar = fp.flow(
       openZendeskWidget(givenName, familyName, username, contactEmail);
     }
 
+    navigateToTerminal() {
+      const {workspace: {id, namespace}} = this.props;
+      this.props.navigate(['workspaces', namespace, id, 'terminals']);
+    }
+
     analyticsEvent(type: string, label?: string) {
       const {pageKey} = this.props;
       const analyticsLabel = pageKeyToAnalyticsLabels[pageKey];
@@ -492,7 +517,7 @@ export const HelpSidebar = fp.flow(
       return {
         ...styles.sidebarContainer,
         width: activeIcon ? `calc(${this.sidebarWidth}rem + 70px)` : 0, // +70px accounts for the width of the icon sidebar + box shadow
-        ...(this.props.pageKey === NOTEBOOK_PAGE_KEY ? styles.notebookOverrides : {})
+        ...(this.props.pageKey === LEONARDO_APP_PAGE_KEY ? styles.notebookOverrides : {})
       };
     }
 
@@ -824,14 +849,14 @@ export const HelpSidebar = fp.flow(
       const shouldRenderWorkspaceMenu = !this.iconConfig('concept').showIcon() && !this.iconConfig('criteria').showIcon();
 
       return <div id='help-sidebar'>
-        <div style={{...styles.iconContainer, ...(this.props.pageKey === NOTEBOOK_PAGE_KEY ? styles.notebookOverrides : {})}}>
+        <div style={{...styles.iconContainer, ...(this.props.pageKey === LEONARDO_APP_PAGE_KEY ? styles.notebookOverrides : {})}}>
           {shouldRenderWorkspaceMenu && this.renderWorkspaceMenu()}
           {this.icons().map((icon, i) =>
               <div key={i} style={{display: 'table'}}>
                 <TooltipTrigger content={<div>{icon.tooltip}</div>} side='left'>
                   <div style={activeIcon === icon.id ? iconStyles.active : icon.disabled ? iconStyles.disabled : styles.icon}
                        onClick={() => {
-                         if (icon.id !== 'dataDictionary' && !icon.disabled) {
+                         if (icon.hasContent && !icon.disabled) {
                            this.onIconClick(icon);
                          }
                        }}>
@@ -843,6 +868,14 @@ export const HelpSidebar = fp.flow(
                             </a>
                         ],
                         ['runtime', () => this.displayRuntimeIcon(icon)],
+                        ['terminal',
+                          () =>
+                             <FontAwesomeIcon
+                                 data-test-id={'help-sidebar-icon-' + icon.id}
+                                 icon={icon.faIcon} style={icon.style}
+                                 onClick={() => this.navigateToTerminal()}/>
+
+                          ],
                         ['genomicExtractions', () => this.displayExtractionIcon(icon)],
                         [DEFAULT, () => icon.faIcon === null
                               ? <img data-test-id={'help-sidebar-icon-' + icon.id} src={proIcons[icon.id]} style={icon.style} />

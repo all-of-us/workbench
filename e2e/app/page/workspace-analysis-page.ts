@@ -37,7 +37,7 @@ export default class WorkspaceAnalysisPage extends WorkspaceBase {
     await modal.fillInModal(notebookName, language);
 
     // Log notebook page heading.
-    const pageHeadingCss = '[data-test-id="notebook-redirect"] > h2';
+    const pageHeadingCss = '[data-test-id="leo-app-launcher"] > h2';
     const headingTextElement = await this.page.waitForSelector(pageHeadingCss, { visible: true });
     const headingText = await getPropValue<string>(headingTextElement, 'textContent');
 

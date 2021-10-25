@@ -14,4 +14,10 @@ export class ProxyApiStub extends ProxyApi {
       resolve(new Response());
     });
   }
+
+  public connectToTerminal(googleProject: string, runtimeName: string, terminalName: string): Promise<Response> {
+    return new Promise<Response>(resolve => {
+      resolve(new Response());
+    });
+  }
 }

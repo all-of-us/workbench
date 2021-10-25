@@ -32,6 +32,11 @@ import {RouteComponentProps, withRouter} from 'react-router-dom';
 import {appendNotebookFileSuffix, dropNotebookFileSuffix} from './util';
 import {parseQueryParams} from "app/components/app-router";
 
+export enum LeoApplicationType {
+  Notebook,
+  Terminal
+}
+
 export enum Progress {
   Unknown,
   Initializing,
@@ -43,7 +48,15 @@ export enum Progress {
   Loaded
 }
 
-export const progressStrings: Map<Progress, string> = new Map([
+const getProgressString = (appType: LeoApplicationType, progress: Progress) => {
+  if (appType === LeoApplicationType.Notebook) {
+    return notebookProgressStrings.get(progress)
+  } else {
+    return terminalProgressStrings.get(progress)
+  }
+}
+
+export const notebookProgressStrings: Map<Progress, string> = new Map([
   [Progress.Unknown, 'Connecting to the notebook server'],
   [Progress.Initializing, 'Initializing notebook server, may take up to 5 minutes'],
   [Progress.Resuming, 'Resuming notebook server, may take up to 1 minute'],
@@ -51,6 +64,16 @@ export const progressStrings: Map<Progress, string> = new Map([
   [Progress.Copying, 'Copying the notebook onto the server'],
   [Progress.Creating, 'Creating the new notebook'],
   [Progress.Redirecting, 'Redirecting to the notebook server'],
+]);
+
+export const terminalProgressStrings: Map<Progress, string> = new Map([
+  [Progress.Unknown, 'Connecting to the terminal'],
+  [Progress.Initializing, 'Initializing terminal, may take up to 5 minutes'],
+  [Progress.Resuming, 'Resuming terminal, may take up to 1 minute'],
+  [Progress.Authenticating, 'Authenticating with the terminal'],
+  [Progress.Copying, 'Copying notebooks onto the server'],
+  [Progress.Creating, 'Opening the terminal'],
+  [Progress.Redirecting, 'Redirecting to the terminal'],
 ]);
 
 // Statuses during which the user can interact with the Runtime UIs, e.g. via
@@ -165,8 +188,8 @@ const progressCardStates: Map<ProgressCardState, Array<Progress>> = new Map([
 ]);
 
 const ProgressCard: React.FunctionComponent<{progressState: Progress, cardState: ProgressCardState,
-  progressComplete: Map<Progress, boolean>, creatingNewNotebook: boolean}> =
-  ({progressState, cardState, progressComplete, creatingNewNotebook}) => {
+  progressComplete: Map<Progress, boolean>, creatingNewNotebook: boolean, leoAppType: LeoApplicationType}> =
+  ({progressState, cardState, progressComplete, creatingNewNotebook, leoAppType}) => {
     const includesStates = progressCardStates.get(cardState);
     const isCurrent = includesStates.includes(progressState);
     const isComplete = includesStates.every(s => s.valueOf() < progressState.valueOf());
@@ -176,23 +199,23 @@ const ProgressCard: React.FunctionComponent<{progressState: Progress, cardState:
       switch (cardState) {
         case ProgressCardState.UnknownInitializingResuming:
           if (progressState === Progress.Unknown || progressComplete[Progress.Unknown]) {
-            return progressStrings.get(Progress.Unknown);
+            return getProgressString(leoAppType, Progress.Unknown);
           } else if (progressState === Progress.Initializing ||
             progressComplete[Progress.Initializing]) {
-            return progressStrings.get(Progress.Initializing);
+            return getProgressString(leoAppType, Progress.Initializing);
           } else {
-            return progressStrings.get(Progress.Resuming);
+            return getProgressString(leoAppType, Progress.Resuming);
           }
         case ProgressCardState.Authenticating:
-          return progressStrings.get(Progress.Authenticating);
+          return getProgressString(leoAppType, Progress.Authenticating);
         case ProgressCardState.CopyingCreating:
           if (creatingNewNotebook) {
-            return progressStrings.get(Progress.Creating);
+            return getProgressString(leoAppType, Progress.Creating);
           } else {
-            return progressStrings.get(Progress.Copying);
+            return getProgressString(leoAppType, Progress.Copying);
           }
         case ProgressCardState.Redirecting:
-          return progressStrings.get(Progress.Redirecting);
+          return getProgressString(leoAppType, Progress.Redirecting);
       }
     };
 
@@ -222,17 +245,21 @@ interface State {
   progressComplete: Map<Progress, boolean>;
 }
 
+/** Terminal decides by Leo. Currently seems Leo support 1 and 2 as Terminal names. */
+const terminalName = '1'
+
 interface Props extends WithSpinnerOverlayProps, NavigationProps, RouteComponentProps<MatchParams> {
   workspace: WorkspaceData;
   profileState: {profile: Profile, reload: Function, updateCache: Function};
   runtimeStore: RuntimeStore;
+  leoAppType: LeoApplicationType;
 }
 
 const runtimeApiRetryTimeoutMillis = 10000;
 const runtimeApiRetryAttempts = 5;
 const redirectMillis = 1000;
 
-export const NotebookRedirect = fp.flow(
+export const LeonardoAppLauncher = fp.flow(
   withUserProfile(),
   withCurrentWorkspace(),
   withRuntimeStore(),
@@ -265,6 +292,10 @@ export const NotebookRedirect = fp.flow(
       return !!creating;
     }
 
+    private isOpeningTerminal() {
+      return this.props.leoAppType === LeoApplicationType.Terminal;
+    }
+
     private isPlaygroundMode() {
       const playgroundMode = parseQueryParams(this.props.location.search).get('playgroundMode');
       return playgroundMode === 'true';
@@ -274,11 +305,19 @@ export const NotebookRedirect = fp.flow(
       return await fetchAbortableRetry(f, runtimeApiRetryTimeoutMillis, runtimeApiRetryAttempts);
     }
 
-    private notebookUrl(runtime: Runtime, nbName: string): string {
-      return encodeURI(
-        environment.leoApiUrl + '/proxy/'
-          + runtime.googleProject + '/'
-          + runtime.runtimeName + '/jupyter/notebooks/' + nbName);
+    private getLeoAppUrl(runtime: Runtime, nbName: string): string {
+      if (this.isOpeningTerminal()) {
+        return encodeURI(
+            environment.leoApiUrl + '/proxy/'
+            + runtime.googleProject + '/'
+            + runtime.runtimeName + '/jupyter/terminals/'
+            + terminalName);
+      } else {
+        return encodeURI(
+            environment.leoApiUrl + '/proxy/'
+            + runtime.googleProject + '/'
+            + runtime.runtimeName + '/jupyter/notebooks/' + nbName);
+      }
     }
 
     // get notebook name without file suffix
@@ -286,6 +325,14 @@ export const NotebookRedirect = fp.flow(
       const {nbName} = this.props.match.params;
       // safe whether nbName has the standard notebook suffix or not
       return dropNotebookFileSuffix(decodeURIComponent(nbName));
+    }
+
+    private getPageTitle() {
+      if (this.isOpeningTerminal()) {
+        return 'Loading Terminal'
+      } else {
+        return this.isCreatingNewNotebook() ? 'Creating New Notebook: ' : 'Loading Notebook: ' + this.getNotebookName()
+      }
     }
 
     // get notebook name with file suffix
@@ -361,29 +408,41 @@ export const NotebookRedirect = fp.flow(
       this.incrementProgress(Progress.Authenticating);
       await this.initializeNotebookCookies(runtime);
 
-      const notebookLocation = await this.getNotebookPathAndLocalize(runtime);
+      const leoAppLocation = await this.getLeoAppPathAndLocalize(runtime);
       if (this.isCreatingNewNotebook()) {
         window.history.replaceState({}, 'Notebook', 'workspaces/' + namespace
             + '/' + id + '/notebooks/' +
             encodeURIComponent(this.getFullNotebookName()));
       }
-      this.setState({leoUrl: this.notebookUrl(runtime, notebookLocation)});
+      if (this.isOpeningTerminal()) {
+        proxyApi().connectToTerminal(runtime.googleProject, runtime.runtimeName, terminalName)
+      }
+      this.setState({leoUrl: this.getLeoAppUrl(runtime, leoAppLocation)});
       this.incrementProgress(Progress.Redirecting);
 
       // give it a second to "redirect"
       this.redirectTimer = global.setTimeout(() => this.incrementProgress(Progress.Loaded), redirectMillis);
     }
 
-    private async getNotebookPathAndLocalize(runtime: Runtime) {
-      if (this.isCreatingNewNotebook()) {
+    private async getLeoAppPathAndLocalize(runtime: Runtime) {
+      if (this.isOpeningTerminal()) {
+        const {workspace} = this.props;
         this.incrementProgress(Progress.Creating);
-        return this.createNotebookAndLocalize(runtime);
+        const resp = await this.runtimeRetry(() => runtimeApi().localize(
+            workspace.namespace, null,
+            {signal: this.pollAborter.signal}));
+        return resp.runtimeLocalDirectory;
       } else {
-        this.incrementProgress(Progress.Copying);
-        const fullNotebookName = this.getFullNotebookName();
-        const localizedNotebookDir =
-            await this.localizeNotebooks([fullNotebookName]);
-        return `${localizedNotebookDir}/${fullNotebookName}`;
+        if (this.isCreatingNewNotebook()) {
+          this.incrementProgress(Progress.Creating);
+          return this.createNotebookAndLocalize(runtime);
+        } else {
+          this.incrementProgress(Progress.Copying);
+          const fullNotebookName = this.getFullNotebookName();
+          const localizedNotebookDir =
+              await this.localizeNotebooks([fullNotebookName]);
+          return `${localizedNotebookDir}/${fullNotebookName}`;
+        }
       }
     }
 
@@ -422,21 +481,23 @@ export const NotebookRedirect = fp.flow(
 
     render() {
       const {showErrorModal, progress, progressComplete, leoUrl} = this.state;
+      const {leoAppType} = this.props;
       const creatingNewNotebook = this.isCreatingNewNotebook();
       return <React.Fragment>
         {progress !== Progress.Loaded ? <div style={styles.main}>
           <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}
-               data-test-id='notebook-redirect'>
+               data-test-id='leo-app-launcher'>
             <h2 style={{lineHeight: 0}}>
-              {creatingNewNotebook ? 'Creating New Notebook: ' : 'Loading Notebook: '}
-              {this.getNotebookName()}
+              {this.getPageTitle()}
             </h2>
             <Button type='secondary' onClick={() => window.history.back()}>Cancel</Button>
           </div>
           <div style={{display: 'flex', flexDirection: 'row', marginTop: '1rem'}}>
             {Array.from(progressCardStates, ([key, _], index) => {
               return <ProgressCard key={index} progressState={progress} cardState={key}
-                                   creatingNewNotebook={creatingNewNotebook} progressComplete={progressComplete}/>;
+                                   creatingNewNotebook={creatingNewNotebook}
+                                   progressComplete={progressComplete}
+                                   leoAppType = {leoAppType}/>;
             })}
           </div>
           <FlexRow style={styles.reminderText}>
