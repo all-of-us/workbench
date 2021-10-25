@@ -215,32 +215,32 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     // For Controlled Tier Alpha, we simply evaluate whether the user is qualified for
     // Registered Tier and set RT+CT or RT only based on the feature flag
 
-    boolean allowAccessToAllTiersForRegisteredUsers =
-        configProvider.get().featureFlags.unsafeAllowAccessToAllTiersForRegisteredUsers;
+//    boolean allowAccessToAllTiersForRegisteredUsers =
+//        configProvider.get().featureFlags.unsafeAllowAccessToAllTiersForRegisteredUsers;
 
     //    boolean joelTemp =  !allowAccessToAllTiersForRegisteredUsers &&
     // shouldGrantUserTierAccess(dbUser, requiredModulesForControlledTier,
     // CONTROLLED_TIER_SHORT_NAME);
 
-    if (allowAccessToAllTiersForRegisteredUsers) {
-      if (shouldGrantUserTierAccess(
-          dbUser, requiredModulesForRegisteredTier, REGISTERED_TIER_SHORT_NAME)) {
-        // get me all tiers
-      } else {
-        //        empty list;
-      }
-    } else {
-      //      List<CT> tierList;
-      if (shouldGrantUserTierAccess(
-          dbUser, requiredModulesForRegisteredTier, REGISTERED_TIER_SHORT_NAME)) {
-        // .add(RT)
-      }
-      if (shouldGrantUserTierAccess(
-          dbUser, requiredModulesForRegisteredTier, REGISTERED_TIER_SHORT_NAME)) {
-        // .add(ct);
-      }
-      //      return tierList;
-    }
+//    if (allowAccessToAllTiersForRegisteredUsers) {
+//      if (shouldGrantUserTierAccess(
+//          dbUser, requiredModulesForRegisteredTier, REGISTERED_TIER_SHORT_NAME)) {
+//        // get me all tiers
+//      } else {
+//        //        empty list;
+//      }
+//    } else {
+//      //      List<CT> tierList;
+//      if (shouldGrantUserTierAccess(
+//          dbUser, requiredModulesForRegisteredTier, REGISTERED_TIER_SHORT_NAME)) {
+//        // .add(RT)
+//      }
+//      if (shouldGrantUserTierAccess(
+//          dbUser, requiredModulesForRegisteredTier, REGISTERED_TIER_SHORT_NAME)) {
+//        // .add(ct);
+//      }
+//      //      return tierList;
+//    }
 
     //    if (shouldGrantUserTierAccess(dbUser, requiredModulesForRegisteredTier,
     // REGISTERED_TIER_SHORT_NAME)) {
@@ -276,13 +276,14 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
 
 
   private List<DbAccessTier> getUserAccessTiersList(DbUser dbUser) {
+    // This is a temporary measure until Controlled Tier Beta access controls is implemented.
     boolean allowAccessToAllTiersForRegisteredUsers =
         configProvider.get().featureFlags.unsafeAllowAccessToAllTiersForRegisteredUsers;
 
-    boolean shouldAddControlledAccessTier =
-        allowAccessToAllTiersForRegisteredUsers
-            || shouldGrantUserTierAccess(
-                dbUser, requiredModulesForControlledTier, CONTROLLED_TIER_SHORT_NAME);
+    if (allowAccessToAllTiersForRegisteredUsers) {
+      return accessTierService.getAllTiers();
+    }
+
 
     DbAccessTier registeredAccessTier =
         accessTierService.getAccessTierByName(REGISTERED_TIER_SHORT_NAME).get();
@@ -291,7 +292,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
 
    // If unsafeAllowAccessToAllTiersForRegisteredUsers is true OR if user has completed all The CT Steps
    // send both Registered Access Tier and Controlled Access Tier, else just send Registered Access Tier
-    return shouldAddControlledAccessTier
+    return shouldGrantUserTierAccess(dbUser, requiredModulesForControlledTier, CONTROLLED_TIER_SHORT_NAME)
         ? Arrays.asList(registeredAccessTier, controlledAccessTier)
         : Arrays.asList(registeredAccessTier);
   }

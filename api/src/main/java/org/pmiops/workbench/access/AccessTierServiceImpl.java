@@ -180,27 +180,6 @@ public class AccessTierServiceImpl implements AccessTierService {
         .collect(Collectors.toList());
   }
 
-  /**
-   * Return a list of access tiers which Registered users have access to. Depending on environment,
-   * this will either be the Registered Tier or all tiers. This is a temporary measure until we
-   * implement Controlled Tier Beta access controls.
-   *
-   * <p>See https://precisionmedicineinitiative.atlassian.net/browse/RW-6237
-   *
-   * @return the list of tiers which Registered users have access to.
-   */
-  @Override
-  public List<DbAccessTier> getTiersForRegisteredUsers() {
-    // sanity check this regardless of feature flag
-    final DbAccessTier registeredTier = getRegisteredTierOrThrow();
-
-    if (configProvider.get().featureFlags.unsafeAllowAccessToAllTiersForRegisteredUsers) {
-      return getAllTiers();
-    } else {
-      return Collections.singletonList(registeredTier);
-    }
-  }
-
   @Override
   public List<DbUser> getAllRegisteredTierUsers() {
     return userAccessTierDao.getAllByAccessTier(getRegisteredTierOrThrow()).stream()

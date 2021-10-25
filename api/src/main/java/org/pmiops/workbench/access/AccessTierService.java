@@ -63,17 +63,6 @@ public interface AccessTierService {
    */
   List<String> getAccessTierShortNamesForUser(DbUser user);
 
-  /**
-   * Return a list of access tiers which Registered users have access to. Depending on environment,
-   * this will either be the Registered Tier or all tiers. This is a temporary measure until we
-   * implement Controlled Tier Beta access controls.
-   *
-   * <p>See https://precisionmedicineinitiative.atlassian.net/browse/RW-6237
-   *
-   * @return the list of tiers which Registered users have access to.
-   */
-  List<DbAccessTier> getTiersForRegisteredUsers();
-
   List<DbUser> getAllRegisteredTierUsers();
 
   Optional<DbAccessTier> getAccessTierByName(String accessTierShortName);
