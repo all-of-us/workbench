@@ -1,13 +1,10 @@
 import * as fp from 'lodash/fp';
 
-import {appendNotebookFileSuffix, dropNotebookFileSuffix} from 'app/pages/analysis/util';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {
   CloneWorkspaceRequest,
   CloneWorkspaceResponse,
-  CopyRequest,
   EmptyResponse,
-  FileDetail, KernelTypeEnum, KernelTypeResponse,
   RecentWorkspaceResponse,
   ResearchPurposeReviewRequest,
   ResourceType,
@@ -38,8 +35,6 @@ import {recentWorkspaceStubs, userRolesStub, workspaceStubs, WorkspaceStubVariab
 export class WorkspacesApiStub extends WorkspacesApi {
   public workspaces: Workspace[];
   workspaceAccess: Map<string, WorkspaceAccessLevel>;
-  notebookList: FileDetail[];
-  public notebookKernel: KernelTypeEnum;
   workspaceUserRoles: Map< string, UserRole[]>;
   recentWorkspaces: RecentWorkspaceResponse;
   newWorkspaceCount = 0;
@@ -48,64 +43,10 @@ export class WorkspacesApiStub extends WorkspacesApi {
     super(undefined, undefined, (..._: any[]) => { throw stubNotImplementedError; });
     this.workspaces = fp.defaultTo(workspaceStubs, workspaces);
     this.workspaceAccess = new Map<string, WorkspaceAccessLevel>();
-    this.notebookList = WorkspacesApiStub.stubNotebookList();
     this.workspaceUserRoles = new Map<string, UserRole[]>();
     this.workspaceUserRoles
       .set(this.workspaces[0].id, fp.defaultTo(userRolesStub, workspaceUserRoles));
     this.recentWorkspaces = recentWorkspaceStubs;
-  }
-
-  static stubNotebookList(): FileDetail[] {
-    return [
-      {
-        'name': 'mockFile.ipynb',
-        'path': 'gs://bucket/notebooks/mockFile.ipynb',
-        'lastModifiedTime': 100
-      }
-    ];
-  }
-
-  getNoteBookList(workspaceNamespace: string,
-    workspaceId: string, extraHttpRequestParams?: any): Promise<Array<FileDetail>> {
-    return new Promise<Array<FileDetail>>(resolve => {
-      resolve(this.notebookList);
-    });
-  }
-
-  getNotebookKernel(workspaceNamespace: string, workspaceId: string, notebookName: string, options?: any): Promise<KernelTypeResponse> {
-    return new Promise<KernelTypeResponse>(resolve => {
-      resolve({
-        kernelType: this.notebookKernel
-      });
-    });
-  }
-
-  cloneNotebook(workspaceNamespace: string, workspaceId: string,
-    notebookName: string): Promise<any> {
-    return new Promise<any>(resolve => {
-      const cloneName = appendNotebookFileSuffix(dropNotebookFileSuffix(notebookName) + ' Clone');
-      this.notebookList.push({
-        'name': cloneName,
-        'path': 'gs://bucket/notebooks/' + cloneName,
-        'lastModifiedTime': 100
-      });
-      resolve({});
-    });
-  }
-
-  copyNotebook(fromWorkspaceNamespace: string, fromWorkspaceId: string, fromNotebookName: String,
-    copyRequest: CopyRequest): Promise<any> {
-    return new Promise<any>(resolve => {
-      resolve({});
-    });
-  }
-
-  deleteNotebook(workspaceNamespace: string, workspaceId: string,
-    notebookName: String): Promise<any> {
-    return new Promise<any>(resolve => {
-      this.notebookList.pop();
-      resolve({});
-    });
   }
 
   getWorkspaces(options?: any): Promise<WorkspaceResponseListResponse> {

@@ -9,20 +9,21 @@ import {currentWorkspaceStore} from 'app/utils/navigation';
 import {
   DataSetApi, DataSetExportRequest,
   DataSetRequest,
-  KernelTypeEnum, PrePackagedConceptSetEnum,
-  WorkspacesApi
+  KernelTypeEnum,
+  NotebooksApi,
+  PrePackagedConceptSetEnum
 } from 'generated/fetch';
 import {act} from 'react-dom/test-utils';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {DataSetApiStub} from 'testing/stubs/data-set-api-stub';
 import {workspaceDataStub} from 'testing/stubs/workspaces';
-import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
+import { NotebooksApiStub } from 'testing/stubs/notebooks-api-stub';
 
 describe('ExportDatasetModal', () => {
   let dataset;
   let workspace;
   let testProps;
-  let workspacesApiStub;
+  let notebooksApiStub;
   let datasetApiStub;
 
   const component = (props) => {
@@ -40,8 +41,8 @@ describe('ExportDatasetModal', () => {
       name: 'Test Dataset Name'
     };
 
-    workspacesApiStub = new WorkspacesApiStub();
-    registerApiClient(WorkspacesApi, workspacesApiStub);
+    notebooksApiStub = new NotebooksApiStub
+    registerApiClient(NotebooksApi, notebooksApiStub);
     datasetApiStub = new DataSetApiStub();
     registerApiClient(DataSetApi, datasetApiStub);
 
@@ -99,7 +100,7 @@ describe('ExportDatasetModal', () => {
   });
 
   it('should disable export if a conflicting name is provided', async() => {
-    workspacesApiStub.notebookList = [
+    notebooksApiStub.notebookList = [
       {
         'name': 'existing notebook.ipynb'
       }];
@@ -120,11 +121,11 @@ describe('ExportDatasetModal', () => {
   it('should export to an existing notebook with the correct kernel type', async() => {
     const expectedNotebookName = 'existing notebook';
     dataset.name = expectedNotebookName;
-    workspacesApiStub.notebookList = [
+    notebooksApiStub.notebookList = [
       {
         'name': `${expectedNotebookName}.ipynb`
       }];
-    workspacesApiStub.notebookKernel = KernelTypeEnum.R;
+    notebooksApiStub.notebookKernel = KernelTypeEnum.R;
 
     const expectedDatasetRequest = {
       dataSetId: dataset.id,

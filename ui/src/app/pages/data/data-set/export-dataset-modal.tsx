@@ -9,7 +9,7 @@ import {TooltipTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
 import {appendNotebookFileSuffix} from 'app/pages/analysis/util';
 
-import {dataSetApi, workspacesApi} from 'app/services/swagger-fetch-clients';
+import {dataSetApi, notebooksApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, summarizeErrors, withCurrentWorkspace} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
@@ -149,7 +149,7 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(withCur
       } else {
         setCreatingNewNotebook(false);
         setIsLoadingNotebook(true);
-        workspacesApi().getNotebookKernel(workspace.namespace, workspace.id, value)
+        notebooksApi().getNotebookKernel(workspace.namespace, workspace.id, value)
           .then(resp => setKernelType(resp.kernelType))
           .catch(() => setErrorMsg('Could not fetch notebook metadata. Please try again or create a new notebook.'))
           .finally(() => setIsLoadingNotebook(false));
@@ -173,7 +173,7 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(withCur
     }
 
     useEffect(() => {
-      workspacesApi().getNoteBookList(workspace.namespace, workspace.id)
+      notebooksApi().getNoteBookList(workspace.namespace, workspace.id)
         .then(notebooks => setExistingNotebooks(notebooks.map(fileDetail => fileDetail.name.slice(0, -6))))
         .catch(() => setExistingNotebooks([])); // If the request fails, at least let the user create new notebooks
     }, [workspace]);
