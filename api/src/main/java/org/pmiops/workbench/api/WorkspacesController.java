@@ -618,13 +618,14 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   @Override
   public ResponseEntity<WorkspaceUserRolesResponse> getFirecloudWorkspaceUserRoles(
       String workspaceNamespace, String workspaceId) {
+    workspaceAuthService.enforceWorkspaceAccessLevel(
+        workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+
     DbWorkspace dbWorkspace = workspaceDao.getRequired(workspaceNamespace, workspaceId);
 
     List<UserRole> userRoles =
         workspaceService.getFirecloudUserRoles(workspaceNamespace, dbWorkspace.getFirecloudName());
-    WorkspaceUserRolesResponse resp = new WorkspaceUserRolesResponse();
-    resp.setItems(userRoles);
-    return ResponseEntity.ok(resp);
+    return ResponseEntity.ok(new WorkspaceUserRolesResponse().items(userRoles));
   }
 
   @Override

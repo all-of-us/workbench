@@ -307,7 +307,6 @@ public class WorkspacesControllerTest extends SpringTest {
   }
 
   private static DbUser currentUser;
-  private static FirecloudWorkspaceACL fcWorkspaceAcl;
   private static WorkbenchConfig workbenchConfig;
   @Autowired FireCloudService fireCloudService;
   @Autowired private WorkspaceService workspaceService;
@@ -368,7 +367,6 @@ public class WorkspacesControllerTest extends SpringTest {
     archivedCdrVersion = cdrVersionDao.save(archivedCdrVersion);
     archivedCdrVersionId = Long.toString(archivedCdrVersion.getCdrVersionId());
 
-    fcWorkspaceAcl = createWorkspaceACL();
     testMockFactory.stubCreateBillingProject(fireCloudService);
     testMockFactory.stubCreateFcWorkspace(fireCloudService);
 
@@ -394,6 +392,17 @@ public class WorkspacesControllerTest extends SpringTest {
                     .put("canShare", true)));
   }
 
+  private FirecloudWorkspaceACL createWorkspaceACLNoAccess() {
+    return createWorkspaceACL(
+        new JSONObject()
+            .put(
+                "other-user@gmail.com",
+                new JSONObject()
+                    .put("accessLevel", "OWNER")
+                    .put("canCompute", true)
+                    .put("canShare", true)));
+  }
+
   private FirecloudWorkspaceACL createWorkspaceACL(JSONObject acl) {
     return new Gson()
         .fromJson(new JSONObject().put("acl", acl).toString(), FirecloudWorkspaceACL.class);
@@ -405,7 +414,7 @@ public class WorkspacesControllerTest extends SpringTest {
   }
 
   private void stubFcGetWorkspaceACL() {
-    stubFcGetWorkspaceACL(fcWorkspaceAcl);
+    stubFcGetWorkspaceACL(createWorkspaceACL());
   }
 
   private void stubFcGetWorkspaceACL(FirecloudWorkspaceACL acl) {
@@ -2370,6 +2379,37 @@ public class WorkspacesControllerTest extends SpringTest {
             .getBody()
             .getWorkspace();
     assertThat(workspace.getPublished()).isFalse();
+  }
+
+  @Test
+  public void testGetFirecloudWorkspaceUserRoles() {
+    stubFcGetGroup();
+    stubFcGetWorkspaceACL();
+
+    Workspace workspace = createWorkspace();
+    workspace = workspacesController.createWorkspace(workspace).getBody();
+    WorkspaceUserRolesResponse resp =
+        workspacesController
+            .getFirecloudWorkspaceUserRoles(workspace.getNamespace(), workspace.getId())
+            .getBody();
+
+    assertThat(resp.getItems())
+        .containsExactly(
+            new UserRole().email(currentUser.getUsername()).role(WorkspaceAccessLevel.OWNER));
+  }
+
+  @Test
+  public void testGetFirecloudWorkspaceUserRoles_noAccess() {
+    Workspace workspace = createWorkspace();
+    when(fireCloudService.getWorkspace(workspace.getNamespace(), workspace.getId()))
+        .thenThrow(new ForbiddenException());
+
+    assertThrows(
+        ForbiddenException.class,
+        () ->
+            workspacesController
+                .getFirecloudWorkspaceUserRoles(workspace.getNamespace(), workspace.getId())
+                .getBody());
   }
 
   @Test
