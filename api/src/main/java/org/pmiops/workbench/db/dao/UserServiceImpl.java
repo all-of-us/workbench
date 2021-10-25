@@ -1,5 +1,6 @@
 package org.pmiops.workbench.db.dao;
 
+import static org.pmiops.workbench.access.AccessTierService.CONTROLLED_TIER_SHORT_NAME;
 import static org.pmiops.workbench.access.AccessTierService.REGISTERED_TIER_SHORT_NAME;
 
 import com.google.api.services.oauth2.model.Userinfoplus;
@@ -7,6 +8,7 @@ import com.google.common.collect.ImmutableList;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -213,9 +215,49 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     // For Controlled Tier Alpha, we simply evaluate whether the user is qualified for
     // Registered Tier and set RT+CT or RT only based on the feature flag
 
+    boolean allowAccessToAllTiersForRegisteredUsers =
+        configProvider.get().featureFlags.unsafeAllowAccessToAllTiersForRegisteredUsers;
+
+    //    boolean joelTemp =  !allowAccessToAllTiersForRegisteredUsers &&
+    // shouldGrantUserTierAccess(dbUser, requiredModulesForControlledTier,
+    // CONTROLLED_TIER_SHORT_NAME);
+
+    if (allowAccessToAllTiersForRegisteredUsers) {
+      if (shouldGrantUserTierAccess(
+          dbUser, requiredModulesForRegisteredTier, REGISTERED_TIER_SHORT_NAME)) {
+        // get me all tiers
+      } else {
+        //        empty list;
+      }
+    } else {
+      //      List<CT> tierList;
+      if (shouldGrantUserTierAccess(
+          dbUser, requiredModulesForRegisteredTier, REGISTERED_TIER_SHORT_NAME)) {
+        // .add(RT)
+      }
+      if (shouldGrantUserTierAccess(
+          dbUser, requiredModulesForRegisteredTier, REGISTERED_TIER_SHORT_NAME)) {
+        // .add(ct);
+      }
+      //      return tierList;
+    }
+
+    //    if (shouldGrantUserTierAccess(dbUser, requiredModulesForRegisteredTier,
+    // REGISTERED_TIER_SHORT_NAME)) {
+    //      //add getAccessTierByName(RT) to list TIER
+    //      if (allowAccessToAllTiersForRegisteredUsers || shouldGrantUserTierAccess(dbUser,
+    // requiredModulesForControlledTier, CONTROLLED_TIER_SHORT_NAME)) {
+    //        add getAccessTierByName(CT) to  TIER;
+    //      }
+    //    return list
+    //    } else {
+    //    return empty list;
+    //    }
+
     final List<DbAccessTier> newAccessTiers =
-        shouldUserBeRegistered(dbUser)
-            ? accessTierService.getTiersForRegisteredUsers()
+        shouldGrantUserTierAccess(
+                dbUser, requiredModulesForRegisteredTier, REGISTERED_TIER_SHORT_NAME)
+            ? getUserAccessTiersList(dbUser)
             : Collections.emptyList();
 
     if (!newAccessTiers.equals(previousAccessTiers)) {
@@ -232,6 +274,28 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     tiersForRemoval.forEach(tier -> accessTierService.removeUserFromTier(dbUser, tier));
   }
 
+
+  private List<DbAccessTier> getUserAccessTiersList(DbUser dbUser) {
+    boolean allowAccessToAllTiersForRegisteredUsers =
+        configProvider.get().featureFlags.unsafeAllowAccessToAllTiersForRegisteredUsers;
+
+    boolean shouldAddControlledAccessTier =
+        allowAccessToAllTiersForRegisteredUsers
+            || shouldGrantUserTierAccess(
+                dbUser, requiredModulesForControlledTier, CONTROLLED_TIER_SHORT_NAME);
+
+    DbAccessTier registeredAccessTier =
+        accessTierService.getAccessTierByName(REGISTERED_TIER_SHORT_NAME).get();
+    DbAccessTier controlledAccessTier =
+        accessTierService.getAccessTierByName(CONTROLLED_TIER_SHORT_NAME).get();
+
+   // If unsafeAllowAccessToAllTiersForRegisteredUsers is true OR if user has completed all The CT Steps
+   // send both Registered Access Tier and Controlled Access Tier, else just send Registered Access Tier
+    return shouldAddControlledAccessTier
+        ? Arrays.asList(registeredAccessTier, controlledAccessTier)
+        : Arrays.asList(registeredAccessTier);
+  }
+
   // missing ERA_COMMONS (special-cased below)
   // missing CT_COMPLIANCE_TRAINING, for controlled tier only
   // see also: AccessModuleServiceImpl.isModuleRequiredInEnvironment()
@@ -244,35 +308,73 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
           AccessModuleName.PROFILE_CONFIRMATION,
           AccessModuleName.PUBLICATION_CONFIRMATION);
 
-  private boolean shouldUserBeRegistered(DbUser user) {
-    boolean allStandardRequiredModulesCompliant =
-        requiredModulesForRegisteredTier.stream()
-            .allMatch(moduleName -> accessModuleService.isModuleCompliant(user, moduleName));
+  private static final List<AccessModuleName> requiredModulesForControlledTier =
+      ImmutableList.of(AccessModuleName.CT_COMPLIANCE_TRAINING);
 
+  private boolean shouldGrantUserRTAccess(DbUser user) {
+    return shouldGrantUserTierAccess(
+        user, requiredModulesForRegisteredTier, REGISTERED_TIER_SHORT_NAME);
+  }
+
+  private boolean shouldGrantUserTierAccess(
+      DbUser user, List<AccessModuleName> requiredModules, String tierShortName) {
+    boolean allStandardRequiredModulesCompliant =
+        requiredModules.stream()
+            .allMatch(moduleName -> accessModuleService.isModuleCompliant(user, moduleName));
     boolean eraCompliant =
         accessModuleService.isModuleCompliant(user, AccessModuleName.ERA_COMMONS);
 
-    boolean eRARequiredForRegisteredTier = true;
-    boolean institutionalEmailValid = false;
+    boolean eRARequiredForTier = true;
+    boolean institutionalEmailValidForTier = false;
     Optional<Institution> institution = institutionService.getByUser(user);
     if (institution.isPresent()) {
       // eRA is required when login.gov linking is not enabled or user institution requires that in
       // tier requirement.
-      eRARequiredForRegisteredTier =
+      eRARequiredForTier =
           !configProvider.get().access.enableRasLoginGovLinking
-              || institutionService.eRaRequiredForTier(
-                  institution.get(), REGISTERED_TIER_SHORT_NAME);
-      institutionalEmailValid =
+              || institutionService.eRaRequiredForTier(institution.get(), tierShortName);
+      institutionalEmailValidForTier =
           institutionService.validateInstitutionalEmail(
-              institution.get(), user.getContactEmail(), REGISTERED_TIER_SHORT_NAME);
+              institution.get(), user.getContactEmail(), tierShortName);
     } else {
       log.warning(String.format("Institution not found for user %s", user.getUsername()));
     }
-
     return !user.getDisabled()
-        && (!eRARequiredForRegisteredTier || eraCompliant)
-        && institutionalEmailValid
+        && (!eRARequiredForTier || eraCompliant)
+        && institutionalEmailValidForTier
         && allStandardRequiredModulesCompliant;
+  }
+
+  private boolean shouldGrantUserCTAccess(DbUser user) {
+    //    boolean allStandardRequiredModulesCompliant =
+    //        requiredModulesForControlledTier.stream()
+    //            .allMatch(moduleName -> accessModuleService.isModuleCompliant(user, moduleName));
+    //    boolean eraCompliant =
+    //        accessModuleService.isModuleCompliant(user, AccessModuleName.ERA_COMMONS);
+    //
+    //    boolean eRARequiredForControlledTier = true;
+    //    boolean institutionalEmailValid = false;
+    //    Optional<Institution> institution = institutionService.getByUser(user);
+    //    if (institution.isPresent()) {
+    //      // eRA is required when login.gov linking is not enabled or user institution requires
+    // that in
+    //      // tier requirement.
+    //      eRARequiredForControlledTier =
+    //          !configProvider.get().access.enableRasLoginGovLinking
+    //              || institutionService.eRaRequiredForTier(
+    //              institution.get(), CONTROLLED_TIER_SHORT_NAME);
+    //      institutionalEmailValid =
+    //          institutionService.validateInstitutionalEmail(
+    //              institution.get(), user.getContactEmail(), CONTROLLED_TIER_SHORT_NAME);
+    //    } else {
+    //      log.warning(String.format("Institution not found for user %s", user.getUsername()));
+    //    }
+    //    return !user.getDisabled()
+    //        && (!eRARequiredForControlledTier || eraCompliant)
+    //        && institutionalEmailValid
+    //        && allStandardRequiredModulesCompliant;
+    return shouldGrantUserTierAccess(
+        user, requiredModulesForControlledTier, CONTROLLED_TIER_SHORT_NAME);
   }
 
   private boolean isServiceAccount(DbUser user) {

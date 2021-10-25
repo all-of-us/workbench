@@ -209,6 +209,11 @@ public class AccessTierServiceImpl implements AccessTierService {
         .collect(Collectors.toList());
   }
 
+  @Override
+  public Optional<DbAccessTier> getAccessTierByName(String accessTierShortName) {
+    return accessTierDao.findOneByShortName(accessTierShortName);
+  }
+
   private DbAccessTier getRegisteredTierOrThrow() {
     return accessTierDao
         .findOneByShortName(REGISTERED_TIER_SHORT_NAME)

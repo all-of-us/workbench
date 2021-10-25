@@ -1,12 +1,15 @@
 package org.pmiops.workbench.access;
 
 import java.util.List;
+import java.util.Optional;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbUser;
 
 public interface AccessTierService {
   // TODO remove once we are no longer special-casing the Registered Tier
   String REGISTERED_TIER_SHORT_NAME = "registered";
+
+  String CONTROLLED_TIER_SHORT_NAME = "controlled";
 
   /**
    * Return all access tiers in the database, in alphabetical order by shortName
@@ -72,4 +75,6 @@ public interface AccessTierService {
   List<DbAccessTier> getTiersForRegisteredUsers();
 
   List<DbUser> getAllRegisteredTierUsers();
+
+  Optional<DbAccessTier> getAccessTierByName(String accessTierShortName);
 }
