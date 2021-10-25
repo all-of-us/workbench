@@ -731,7 +731,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     return ResponseEntity.ok(workspaceResourceResponse);
   }
 
-  // TODO(calbach): remove this; superceded by tracing interceptor
+  // TODO(RW-4826): remove this; superceded by tracing interceptor
   private <T> T recordOperationTime(Supplier<T> operation, String operationName) {
     log.log(OPERATION_TIME_LOG_LEVEL, String.format("recordOperationTime: %s", operationName));
     return logsBasedMetricService.recordElapsedTime(

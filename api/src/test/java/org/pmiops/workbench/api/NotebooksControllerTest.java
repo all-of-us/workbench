@@ -1,6 +1,7 @@
 package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth.assertWithMessage;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -23,10 +24,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.json.JSONObject;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
@@ -176,7 +181,7 @@ public class NotebooksControllerTest extends SpringTest {
 
     List<FileDetail> body =
         notebooksController
-            .getNoteBookList(workspace.getWorkspaceNamespace(), workspace.getName())
+            .getNoteBookList(workspace.getWorkspaceNamespace(), workspace.getFirecloudName())
             .getBody();
 
     List<String> gotNames = body.stream().map(FileDetail::getName).collect(Collectors.toList());
@@ -206,7 +211,7 @@ public class NotebooksControllerTest extends SpringTest {
     rename.setName(NotebooksService.withNotebookExtension("nb1"));
     rename.setNewName(newName);
     notebooksController.renameNotebook(
-        workspace.getWorkspaceNamespace(), workspace.getName(), rename);
+        workspace.getWorkspaceNamespace(), workspace.getFirecloudName(), rename);
     verify(mockCloudStorageClient)
         .copyBlob(
             BlobId.of(TestMockFactory.WORKSPACE_BUCKET_NAME, nb1),
@@ -233,7 +238,7 @@ public class NotebooksControllerTest extends SpringTest {
     rename.setName(NotebooksService.withNotebookExtension("nb1"));
     rename.setNewName(newName);
     notebooksController.renameNotebook(
-        workspace.getWorkspaceNamespace(), workspace.getName(), rename);
+        workspace.getWorkspaceNamespace(), workspace.getFirecloudName(), rename);
     verify(mockCloudStorageClient)
         .copyBlob(
             BlobId.of(TestMockFactory.WORKSPACE_BUCKET_NAME, nb1),
@@ -260,10 +265,10 @@ public class NotebooksControllerTest extends SpringTest {
 
     notebooksController.copyNotebook(
         fromWorkspace.getWorkspaceNamespace(),
-        fromWorkspace.getName(),
+        fromWorkspace.getFirecloudName(),
         fromNotebookName,
         new CopyRequest()
-            .toWorkspaceName(toWorkspace.getName())
+            .toWorkspaceName(toWorkspace.getFirecloudName())
             .toWorkspaceNamespace(toWorkspace.getWorkspaceNamespace())
             .newName(newNotebookName));
 
@@ -294,10 +299,10 @@ public class NotebooksControllerTest extends SpringTest {
 
     notebooksController.copyNotebook(
         fromWorkspace.getWorkspaceNamespace(),
-        fromWorkspace.getName(),
+        fromWorkspace.getFirecloudName(),
         fromNotebookName,
         new CopyRequest()
-            .toWorkspaceName(toWorkspace.getName())
+            .toWorkspaceName(toWorkspace.getFirecloudName())
             .toWorkspaceNamespace(toWorkspace.getWorkspaceNamespace())
             .newName(newNotebookName));
 
@@ -324,10 +329,10 @@ public class NotebooksControllerTest extends SpringTest {
         () ->
             notebooksController.copyNotebook(
                 fromWorkspace.getWorkspaceNamespace(),
-                fromWorkspace.getName(),
+                fromWorkspace.getFirecloudName(),
                 fromNotebookName,
                 new CopyRequest()
-                    .toWorkspaceName(toWorkspace.getName())
+                    .toWorkspaceName(toWorkspace.getFirecloudName())
                     .toWorkspaceNamespace(toWorkspace.getWorkspaceNamespace())
                     .newName(newNotebookName)));
   }
@@ -347,10 +352,10 @@ public class NotebooksControllerTest extends SpringTest {
         () ->
             notebooksController.copyNotebook(
                 fromWorkspace.getWorkspaceNamespace(),
-                fromWorkspace.getName(),
+                fromWorkspace.getFirecloudName(),
                 fromNotebookName,
                 new CopyRequest()
-                    .toWorkspaceName(toWorkspace.getName())
+                    .toWorkspaceName(toWorkspace.getFirecloudName())
                     .toWorkspaceNamespace(toWorkspace.getWorkspaceNamespace())
                     .newName(newNotebookName)));
   }
@@ -367,7 +372,7 @@ public class NotebooksControllerTest extends SpringTest {
     CopyRequest copyNotebookRequest =
         new CopyRequest()
             .toWorkspaceNamespace(toWorkspace.getWorkspaceNamespace())
-            .toWorkspaceName(toWorkspace.getName())
+            .toWorkspaceName(toWorkspace.getFirecloudName())
             .newName(newNotebookName);
     BlobId newBlobId =
         BlobId.of(TestMockFactory.WORKSPACE_BUCKET_NAME, "notebooks/" + newNotebookName);
@@ -380,7 +385,7 @@ public class NotebooksControllerTest extends SpringTest {
         () ->
             notebooksController.copyNotebook(
                 fromWorkspace.getWorkspaceNamespace(),
-                fromWorkspace.getName(),
+                fromWorkspace.getFirecloudName(),
                 fromNotebookName,
                 copyNotebookRequest));
   }
@@ -403,7 +408,7 @@ public class NotebooksControllerTest extends SpringTest {
             newWorkspace()
                 .setWorkspaceNamespace("to-ns")
                 .setName("to-name")
-                .setFirecloudName("to-name")
+                .setFirecloudName("fc-to-name")
                 .setCdrVersion(cdrVersion));
     String newNotebookName = NotebooksService.withNotebookExtension("new");
 
@@ -415,10 +420,10 @@ public class NotebooksControllerTest extends SpringTest {
         () ->
             notebooksController.copyNotebook(
                 fromWorkspace.getWorkspaceNamespace(),
-                fromWorkspace.getName(),
+                fromWorkspace.getFirecloudName(),
                 fromNotebookName,
                 new CopyRequest()
-                    .toWorkspaceName(toWorkspace.getName())
+                    .toWorkspaceName(toWorkspace.getFirecloudName())
                     .toWorkspaceNamespace(toWorkspace.getWorkspaceNamespace())
                     .newName(newNotebookName)));
   }
@@ -433,7 +438,7 @@ public class NotebooksControllerTest extends SpringTest {
     String fullPath = BUCKET_URI + newPath;
     notebooksController.cloneNotebook(
         workspace.getWorkspaceNamespace(),
-        workspace.getName(),
+        workspace.getFirecloudName(),
         NotebooksService.withNotebookExtension("nb1"));
     verify(mockCloudStorageClient)
         .copyBlob(
@@ -452,7 +457,7 @@ public class NotebooksControllerTest extends SpringTest {
     String fullPath = BUCKET_URI + nb1;
     notebooksController.deleteNotebook(
         workspace.getWorkspaceNamespace(),
-        workspace.getName(),
+        workspace.getFirecloudName(),
         NotebooksService.withNotebookExtension("nb1"));
     verify(mockCloudStorageClient)
         .deleteBlob(BlobId.of(TestMockFactory.WORKSPACE_BUCKET_NAME, nb1));
@@ -460,39 +465,31 @@ public class NotebooksControllerTest extends SpringTest {
         .deleteNotebookEntry(eq(workspace.getWorkspaceId()), anyLong(), eq(fullPath));
   }
 
-  @Test
-  public void notebookLockingEmailHashTest() {
-    final String[][] knownTestData = {
-      {
-        "fc-bucket-id-1",
-        "user@aou",
-        "dc5acd54f734a2e2350f2adcb0a25a4d1978b45013b76d6bc0a2d37d035292fe"
-      },
-      {
-        "fc-bucket-id-1",
-        "another-user@aou",
-        "bc90f9f740702e5e0408f2ea13fed9457a7ee9c01117820f5c541067064468c3"
-      },
-      {
-        "fc-bucket-id-2",
-        "user@aou",
-        "a759e5aef091fd22bbf40bf8ee7cfde4988c668541c18633bd79ab84b274d622"
-      },
-      // catches an edge case where the hash has a leading 0
-      {
-        "fc-5ac6bde3-f225-44ca-ad4d-92eed68df7db",
-        "brubenst2@fake-research-aou.org",
-        "060c0b2ef2385804b7b69a4b4477dd9661be35db270c940525c2282d081aef56"
-      }
-    };
+  private static Stream<Arguments> notebookLockingCases() {
+    return Stream.of(
+        Arguments.of(
+            "fc-bucket-id-1",
+            "user@aou",
+            "dc5acd54f734a2e2350f2adcb0a25a4d1978b45013b76d6bc0a2d37d035292fe"),
+        Arguments.of(
+            "fc-bucket-id-1",
+            "another-user@aou",
+            "bc90f9f740702e5e0408f2ea13fed9457a7ee9c01117820f5c541067064468c3"),
+        Arguments.of(
+            "fc-bucket-id-2",
+            "user@aou",
+            "a759e5aef091fd22bbf40bf8ee7cfde4988c668541c18633bd79ab84b274d622"),
+        // catches an edge case where the hash has a leading 0
+        Arguments.of(
+            "fc-5ac6bde3-f225-44ca-ad4d-92eed68df7db",
+            "brubenst2@fake-research-aou.org",
+            "060c0b2ef2385804b7b69a4b4477dd9661be35db270c940525c2282d081aef56"));
+  }
 
-    for (final String[] test : knownTestData) {
-      final String bucket = test[0];
-      final String email = test[1];
-      final String hash = test[2];
-
-      assertThat(notebooksController.notebookLockingEmailHash(bucket, email)).isEqualTo(hash);
-    }
+  @ParameterizedTest
+  @MethodSource("notebookLockingCases")
+  public void notebookLockingEmailHashTest(String bucket, String email, String hash) {
+    assertThat(notebooksController.notebookLockingEmailHash(bucket, email)).isEqualTo(hash);
   }
 
   @Test
@@ -549,7 +546,7 @@ public class NotebooksControllerTest extends SpringTest {
         ForbiddenException.class,
         () ->
             notebooksController.cloneNotebook(
-                workspace.getWorkspaceNamespace(), workspace.getName(), "notebook"));
+                workspace.getWorkspaceNamespace(), workspace.getFirecloudName(), "notebook"));
   }
 
   @Test
@@ -564,7 +561,7 @@ public class NotebooksControllerTest extends SpringTest {
         ForbiddenException.class,
         () ->
             notebooksController.renameNotebook(
-                workspace.getWorkspaceNamespace(), workspace.getName(), request));
+                workspace.getWorkspaceNamespace(), workspace.getFirecloudName(), request));
   }
 
   @Test
@@ -575,7 +572,7 @@ public class NotebooksControllerTest extends SpringTest {
 
     CopyRequest copyNotebookRequest =
         new CopyRequest()
-            .toWorkspaceName(workspace.getName())
+            .toWorkspaceName(workspace.getFirecloudName())
             .toWorkspaceNamespace(workspace.getWorkspaceNamespace())
             .newName("x");
 
@@ -583,7 +580,10 @@ public class NotebooksControllerTest extends SpringTest {
         ForbiddenException.class,
         () ->
             notebooksController.copyNotebook(
-                workspace.getWorkspaceNamespace(), workspace.getName(), "z", copyNotebookRequest));
+                workspace.getWorkspaceNamespace(),
+                workspace.getFirecloudName(),
+                "z",
+                copyNotebookRequest));
   }
 
   private void assertNotebookLockingMetadata(
@@ -711,7 +711,7 @@ public class NotebooksControllerTest extends SpringTest {
     return new DbWorkspace()
         .setName("name")
         .setCreator(currentUser)
-        .setFirecloudName("name")
+        .setFirecloudName("fc-name")
         .setWorkspaceNamespace("namespace")
         .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE)
         .setBillingMigrationStatusEnum(BillingMigrationStatus.NEW)
@@ -725,10 +725,16 @@ public class NotebooksControllerTest extends SpringTest {
 
   private DbWorkspace createWorkspace(String namespace, String name) {
     return createWorkspace(
-        newWorkspace().setWorkspaceNamespace(namespace).setName(name).setFirecloudName(name));
+        newWorkspace()
+            .setWorkspaceNamespace(namespace)
+            .setName(name)
+            .setFirecloudName("fc-" + name));
   }
 
   private DbWorkspace createWorkspace(DbWorkspace workspace) {
+    assertWithMessage("test code issue: name and firecloudName should be distinct")
+        .that(workspace.getFirecloudName())
+        .isNotEqualTo(workspace.getName());
     return workspaceDao.save(workspace);
   }
 
@@ -753,7 +759,8 @@ public class NotebooksControllerTest extends SpringTest {
   }
 
   private void stubGetWorkspace(DbWorkspace workspace, WorkspaceAccessLevel access) {
-    when(mockFireCloudService.getWorkspace(workspace.getWorkspaceNamespace(), workspace.getName()))
+    when(mockFireCloudService.getWorkspace(
+            workspace.getWorkspaceNamespace(), workspace.getFirecloudName()))
         .thenReturn(
             new FirecloudWorkspaceResponse()
                 .accessLevel(access.toString())

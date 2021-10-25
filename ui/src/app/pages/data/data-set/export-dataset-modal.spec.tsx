@@ -9,14 +9,14 @@ import {currentWorkspaceStore} from 'app/utils/navigation';
 import {
   DataSetApi, DataSetExportRequest,
   DataSetRequest,
-  KernelTypeEnum, NotebooksApi, PrePackagedConceptSetEnum,
-  WorkspacesApi
+  KernelTypeEnum,
+  NotebooksApi,
+  PrePackagedConceptSetEnum
 } from 'generated/fetch';
 import {act} from 'react-dom/test-utils';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {DataSetApiStub} from 'testing/stubs/data-set-api-stub';
 import {workspaceDataStub} from 'testing/stubs/workspaces';
-import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 import { NotebooksApiStub } from 'testing/stubs/notebooks-api-stub';
 
 describe('ExportDatasetModal', () => {

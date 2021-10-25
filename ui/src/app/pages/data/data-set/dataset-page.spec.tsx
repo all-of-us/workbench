@@ -13,8 +13,11 @@ import {
   CohortsApi,
   ConceptSetsApi,
   DataSetApi,
-  Domain, NotebooksApi, PrePackagedConceptSetEnum,
-  WorkspaceAccessLevel, WorkspacesApi
+  Domain,
+  NotebooksApi,
+  PrePackagedConceptSetEnum,
+  WorkspaceAccessLevel,
+  WorkspacesApi
 } from 'generated/fetch';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {CdrVersionsApiStub, cdrVersionTiersResponse} from 'testing/stubs/cdr-versions-api-stub';

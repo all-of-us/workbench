@@ -14,6 +14,7 @@ import javax.inject.Provider;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
+import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.model.CopyRequest;
@@ -216,7 +217,7 @@ public class NotebooksController implements NotebooksApiDelegate {
       // convert to printable hex text
       return BaseEncoding.base16().lowerCase().encode(hash);
     } catch (final NoSuchAlgorithmException e) {
-      throw new RuntimeException(e);
+      throw new ServerErrorException(e);
     }
   }
 }
