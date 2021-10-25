@@ -4,7 +4,7 @@ buildscript {
     }
     dependencies {
         classpath 'org.liquibase:liquibase-gradle-plugin:1.2.4'
-        classpath 'mysql:mysql-connector-java:8.0.27'
+        classpath 'mysql:mysql-connector-java:5.1.37'
     }
 }
 apply plugin: 'org.liquibase.gradle'
