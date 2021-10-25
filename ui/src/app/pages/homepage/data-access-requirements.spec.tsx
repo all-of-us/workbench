@@ -3,12 +3,7 @@ import {mount} from "enzyme";
 
 import defaultServerConfig from 'testing/default-server-config';
 import {AccessModule, InstitutionApi, Profile, ProfileApi} from 'generated/fetch';
-import {
-    allModules,
-    DataAccessRequirements,
-    getActiveModule,
-    getVisibleModules
-} from './data-access-requirements';
+import {allModules, DataAccessRequirements, getActiveModule, getVisibleModules} from './data-access-requirements';
 import {InstitutionApiStub} from 'testing/stubs/institution-api-stub';
 import {ProfileApiStub, ProfileStubVariables} from 'testing/stubs/profile-api-stub';
 import {profileApi, registerApiClient} from 'app/services/swagger-fetch-clients';
@@ -49,6 +44,8 @@ describe('DataAccessRequirements', () => {
       .find('[data-test-id="ineligible"]');
 
     const findControlledTierCard = (wrapper) => wrapper.find('[data-test-id="controlled-card"]')
+
+    const findContactUs = (wrapper) => wrapper.find('[data-test-id="contact-us"]');
 
     beforeEach(async() => {
         registerApiClient(InstitutionApi, new InstitutionApiStub());
@@ -486,7 +483,7 @@ describe('DataAccessRequirements', () => {
         expect(spyCompliance).toHaveBeenCalledTimes(0);
     });
 
-    it ('Should not show Era Commons Module for Registered Tier if the institution does not require eRa', async() => {
+    it('Should not show Era Commons Module for Registered Tier if the institution does not require eRa', async() => {
         let wrapper = component();
         await waitOneTickAndUpdate(wrapper);
         expect(findModule(wrapper, AccessModule.ERACOMMONS).exists()).toBeTruthy();
@@ -526,7 +523,7 @@ describe('DataAccessRequirements', () => {
         expect(findModule(wrapper, AccessModule.ERACOMMONS).exists()).toBeTruthy();
     });
 
-    it ("Should display Institution has signed agreement when the user has a Tier Eligibility object for CT", async() => {
+    it("Should display Institution has signed agreement when the user has a Tier Eligibility object for CT", async() => {
         let wrapper = component();
         await waitOneTickAndUpdate(wrapper);
 
@@ -548,7 +545,7 @@ describe('DataAccessRequirements', () => {
         expect(findControlledSignedStepIneligible(wrapper).exists()).toBeFalsy();
     });
 
-    it ("Should not display Institution has signed agreement when the user doesn't have a Tier Eligibility object for CT", async() => {
+    it("Should not display Institution has signed agreement when the user doesn't have a Tier Eligibility object for CT", async() => {
         let wrapper = component();
         await waitOneTickAndUpdate(wrapper);
 
@@ -570,7 +567,7 @@ describe('DataAccessRequirements', () => {
         expect(findControlledSignedStepIneligible(wrapper).exists()).toBeTruthy();
     });
 
-    it ("Should display Institution allows you to access CT when the user's CT Tier Eligibility object has eligible=true", async() => {
+    it("Should display Institution allows you to access CT when the user's CT Tier Eligibility object has eligible=true", async() => {
         let wrapper = component();
         await waitOneTickAndUpdate(wrapper);
 
@@ -593,7 +590,7 @@ describe('DataAccessRequirements', () => {
         expect(findControlledUserIneligible(wrapper).exists()).toBeFalsy();
     });
 
-    it ("Should not display Institution allows you to access CT when the user's CT Tier Eligibility object has eligible=false", async() => {
+    it("Should not display Institution allows you to access CT when the user's CT Tier Eligibility object has eligible=false", async() => {
         let wrapper = component();
         await waitOneTickAndUpdate(wrapper);
 
@@ -616,7 +613,7 @@ describe('DataAccessRequirements', () => {
         expect(findControlledUserIneligible(wrapper).exists()).toBeTruthy();
     });
 
-    it ("Should not display Institution allows you to access CT when the user does not have a CT Tier Eligibility object", async() => {
+    it("Should not display Institution allows you to access CT when the user does not have a CT Tier Eligibility object", async() => {
         let wrapper = component();
         await waitOneTickAndUpdate(wrapper);
 
@@ -640,7 +637,7 @@ describe('DataAccessRequirements', () => {
         expect(findControlledUserIneligible(wrapper).exists()).toBeTruthy();
     });
 
-    it ("Should display the CT card when the environment has a Controlled Tier", async() => {
+    it("Should display the CT card when the environment has a Controlled Tier", async() => {
         environment.accessTiersVisibleToUsers = [AccessTierShortNames.Registered, AccessTierShortNames.Controlled];
 
         let wrapper = component();
@@ -648,7 +645,7 @@ describe('DataAccessRequirements', () => {
         expect(findControlledTierCard(wrapper).exists()).toBeTruthy();
     });
 
-    it ("Should not display the CT card when the environment does not have a Controlled Tier", async() => {
+    it("Should not display the CT card when the environment does not have a Controlled Tier", async() => {
         environment.accessTiersVisibleToUsers = [AccessTierShortNames.Registered];
 
         let wrapper = component();
@@ -657,7 +654,7 @@ describe('DataAccessRequirements', () => {
     });
 
 
-    it ("Should display eraCommons module in CT card " +
+    it("Should display eraCommons module in CT card " +
         "when the user institution has signed agreement and CT requires eraCommons and RT does not", async() => {
         environment.accessTiersVisibleToUsers = [AccessTierShortNames.Registered, AccessTierShortNames.Controlled];
         let wrapper = component();
@@ -685,7 +682,7 @@ describe('DataAccessRequirements', () => {
         expect(findModule(findControlledTierCard(wrapper), AccessModule.ERACOMMONS).exists()).toBeTruthy();
     });
 
-    it ("Should not display eraCommons module in CT card " +
+    it("Should not display eraCommons module in CT card " +
         "when RT requires eraCommons", async() => {
         let wrapper = component();
         await waitOneTickAndUpdate(wrapper);
@@ -712,7 +709,7 @@ describe('DataAccessRequirements', () => {
         expect(findModule(findControlledTierCard(wrapper), AccessModule.ERACOMMONS).exists()).toBeFalsy();
     });
 
-    it ("Should not display eraCommons module in CT card " +
+    it("Should not display eraCommons module in CT card " +
         "when user's institution has not signed CT Institution agreement", async() => {
         let wrapper = component();
         await waitOneTickAndUpdate(wrapper);
@@ -736,7 +733,7 @@ describe('DataAccessRequirements', () => {
         expect(findModule(findControlledTierCard(wrapper), AccessModule.ERACOMMONS).exists()).toBeFalsy();
     });
 
-    it ("Should not display eraCommons module in CT card " +
+    it("Should not display eraCommons module in CT card " +
         "when eraCommons is disabled via the environment config", async() => {
         serverConfigStore.set({config: {...defaultServerConfig, enableEraCommons: false}});
 
@@ -763,5 +760,37 @@ describe('DataAccessRequirements', () => {
         wrapper = component();
         await waitOneTickAndUpdate(wrapper);
         expect(findModule(findControlledTierCard(wrapper), AccessModule.ERACOMMONS).exists()).toBeFalsy();
+    });
+
+    it("Should show the RAS help text component when it is incomplete", async() => {
+        const wrapper = component();
+        await waitOneTickAndUpdate(wrapper);
+
+        expect(findCompleteModule(wrapper, AccessModule.RASLINKLOGINGOV).exists()).toBeFalsy();
+        expect(findIncompleteModule(wrapper, AccessModule.RASLINKLOGINGOV).exists()).toBeTruthy();
+
+        expect(findContactUs(wrapper).exists()).toBeTruthy();
+    });
+
+    it("Should not show the RAS help text component when it is complete", async() => {
+
+        profileStore.set({
+            profile: {
+                ...ProfileStubVariables.PROFILE_STUB,
+                accessModules: {
+                    modules: [{moduleName: AccessModule.RASLINKLOGINGOV, completionEpochMillis: 1}]
+                }
+            },
+            load,
+            reload,
+            updateCache});
+
+        const wrapper = component();
+        await waitOneTickAndUpdate(wrapper);
+
+        expect(findCompleteModule(wrapper, AccessModule.RASLINKLOGINGOV).exists()).toBeTruthy();
+        expect(findIncompleteModule(wrapper, AccessModule.RASLINKLOGINGOV).exists()).toBeFalsy();
+
+        expect(findContactUs(wrapper).exists()).toBeFalsy();
     });
 });

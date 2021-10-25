@@ -397,6 +397,40 @@ const TemporaryRASModule = () => {
   </FlexRow>;
 };
 
+const ContactUs = (props: {profile: Profile}) => {
+  const {profile: {givenName, familyName, username, contactEmail}} = props;
+  return <div data-test-id='contact-us'>
+        <span style={styles.link} onClick={(e) => {
+          openZendeskWidget(givenName, familyName, username, contactEmail);
+          // prevents the enclosing Clickable's onClick() from triggering instead
+          e.stopPropagation();
+        }}>Contact us</span> if you’re having trouble completing this step.
+  </div>;
+}
+
+const LoginGovHelpText = (props: {profile: Profile, afterInitialClick: boolean}) => {
+  const {profile, afterInitialClick} = props;
+
+  // don't return help text if complete or bypassed
+  const needsHelp = !isCompliant(getAccessModuleStatusByName(profile, AccessModule.RASLINKLOGINGOV));
+
+  return needsHelp &&
+    (afterInitialClick
+      ? <div style={styles.loginGovHelp}>
+        <div>
+          Looks like you still need to complete this action, please try again.
+        </div>
+        <ContactUs profile={profile}/>
+      </div>
+      : <div style={styles.loginGovHelp}>
+        <div>
+          Verifying your identity helps us keep participant data safe.
+          You’ll need to provide your state ID, social security number, and phone number.
+        </div>
+        <ContactUs profile={profile}/>
+      </div>);
+}
+
 interface ModuleProps {
   profile: Profile,
   moduleName: AccessModule;
@@ -439,21 +473,6 @@ const MaybeModule = ({profile, moduleName, active, spinnerProps}: ModuleProps): 
 
   const Module = ({profile}) => {
     const status = getAccessModuleStatusByName(profile, moduleName)
-    const {givenName, familyName, username, contactEmail} = profile;
-    // RW-7461
-    const loginGovHelpText = <div style={styles.loginGovHelp}>
-      <div>
-        Verifying your identity helps us keep participant data safe.
-        You’ll need to provide your state ID, social security number, and phone number.
-      </div>
-      <div>
-        <span style={styles.link} onClick={(e) => {
-          openZendeskWidget(givenName, familyName, username, contactEmail);
-          // prevents the enclosing Clickable's onClick() from triggering instead
-          e.stopPropagation();
-        }}>Contact us</span> if you’re having trouble completing this step.
-      </div>
-    </div>;
 
     return <FlexRow data-test-id={`module-${moduleName}`}>
       <FlexRow style={styles.moduleCTA}>
@@ -468,7 +487,7 @@ const MaybeModule = ({profile, moduleName, active, spinnerProps}: ModuleProps): 
         <FlexColumn>
           <div style={active ? styles.activeModuleText : styles.inactiveModuleText}>
             <DARTitleComponent/>
-            {(moduleName === AccessModule.RASLINKLOGINGOV) && loginGovHelpText}
+            {(moduleName === AccessModule.RASLINKLOGINGOV) && <LoginGovHelpText profile={profile} afterInitialClick={showRefresh}/>}
           </div>
           {isCompliant(status) && <div style={styles.moduleDate}>{getStatusText(status)}</div>}
         </FlexColumn>
