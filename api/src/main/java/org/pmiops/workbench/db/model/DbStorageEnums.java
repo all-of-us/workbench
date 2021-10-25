@@ -270,6 +270,7 @@ public final class DbStorageEnums {
           .put(Domain.FITBIT_INTRADAY_STEPS, "Fitbit: Intraday Steps - Minute-Level")
           .put(Domain.PHYSICAL_MEASUREMENT_CSS, "Physical Measurement CSS")
           .put(Domain.WHOLE_GENOME_VARIANT, "Whole Genome Variant")
+          .put(Domain.ZIP_CODE_SOCIOECONOMIC, "Zip Code Socioeconomic Status")
           .build();
 
   public static Domain domainFromStorage(Short domain) {
