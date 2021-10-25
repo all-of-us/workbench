@@ -678,8 +678,7 @@ public class DbWorkspace {
   }
 
   public DbWorkspace setBillingMigrationStatusEnum(BillingMigrationStatus status) {
-    this.billingMigrationStatus = DbStorageEnums.billingMigrationStatusToStorage(status);
-    return this;
+    return setBillingMigrationStatus(DbStorageEnums.billingMigrationStatusToStorage(status));
   }
 
   @Column(name = "billing_migration_status")
