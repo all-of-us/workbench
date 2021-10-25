@@ -241,7 +241,9 @@ public class AccessModuleServiceImpl implements AccessModuleService {
     switch (module) {
       case ERA_COMMONS:
         return accessConfig.enableEraCommons;
+      // COMPLIANCE training (or RT Compliance training ) and CT Compliance training are controlled by the same feature flag
       case COMPLIANCE_TRAINING:
+      case CT_COMPLIANCE_TRAINING:
         return accessConfig.enableComplianceTraining;
       case RAS_LINK_LOGIN_GOV:
         return accessConfig.enforceRasLoginGovLinking;

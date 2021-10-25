@@ -218,17 +218,7 @@ public class UserServiceAccessTest {
 
     dbUser = updateUserWithRetries(registerUserNow);
     assertRegisteredTierEnabled(dbUser);
-    assertUserNotInControlledTier(dbUser);
-  }
-
-  @Test
-  public void test_updateUserWithRetries_addToControlledTier() {
-    providedWorkbenchConfig.featureFlags.unsafeAllowAccessToAllTiersForRegisteredUsers = false;
-    assertThat(userAccessTierDao.findAll()).isEmpty();
-
-    dbUser = updateUserWithRetries(this::completeCTRequirements);
-    assertRegisteredTierEnabled(dbUser);
-    assertControlledTierEnabled(dbUser);
+    assertUserNotInAccessTier(dbUser, controlledTier);
   }
 
   @Test
@@ -1099,7 +1089,75 @@ public class UserServiceAccessTest {
     assertRegisteredTierEnabled(dbUser);
   }
 
-  // adds `days` days plus most of another day (to demonstrate we are truncating, not rounding)
+  @Test
+  public void test_updateUserWithRetries_addToControlledTier() {
+    providedWorkbenchConfig.featureFlags.unsafeAllowAccessToAllTiersForRegisteredUsers = false;
+    assertThat(userAccessTierDao.findAll()).isEmpty();
+
+    dbUser = updateUserWithRetries(this::completeRTAndCTRequirements);
+    assertRegisteredTierEnabled(dbUser);
+    assertControlledTierEnabled(dbUser);
+  }
+
+  @Test
+  public void test_updateUserWithRetries_emailNotValidForRT() {
+  }
+
+  @Test
+  public void test_updateUserWithRetries_updateInvalidEmailForRT() {
+  }
+
+  @Test
+  public void test_updateUserWithRetries_completeCTRequirementsOnly() {
+    providedWorkbenchConfig.featureFlags.unsafeAllowAccessToAllTiersForRegisteredUsers = false;
+    assertThat(userAccessTierDao.findAll()).isEmpty();
+
+    dbUser = updateUserWithRetries(this::completeCTRequirements);
+    assertUserNotInAccessTier(dbUser, registeredTier);
+    assertUserNotInAccessTier(dbUser, controlledTier);
+  }
+
+  @Test
+  public void test_updateUserWithRetries_inCompleteCTRequirements() {
+//    split it into Compliance and era
+  }
+
+  @Test
+  public void test_updateUserWithRetries_eraNotRequiredForCT() {
+//    Institution does not require era
+  }
+
+  @Test
+  public void test_updateUserWithRetries_emailValidForRTButNotValidForCT() {
+  }
+
+  @Test
+  public void test_updateUserWithRetries_updateInvalidEmailForCT() {
+  }
+
+  @Test
+  public void test_updateUserWithRetries_didNotSignCTAgreement() {
+  }
+
+  @Test
+  public void test_updateUserWithRetries_eraFFisOff_CT() {
+  }
+
+  @Test
+  public void test_updateUserWithRetries_ct_complianceTrainingFFisOff_CT() {
+  }
+
+  @Test
+  public void test_updateUserWithRetries_noCTUnsafeAllowAccessToAllTiersForRegisteredUsersIsTrue() {
+//    CT does not exist anywhere
+  }
+
+  @Test
+  public void test_updateUserWithRetries_noCTUnsafeAllowAccessToAllTiersForRegisteredUsersIsFalse() {
+    //    CT does not exist anywhere
+  }
+
+    // adds `days` days plus most of another day (to demonstrate we are truncating, not rounding)
   private Duration daysPlusSome(long days) {
     return Duration.ofDays(days).plus(Duration.ofHours(18));
   }
@@ -1162,12 +1220,11 @@ public class UserServiceAccessTest {
     assertControlledTierMembershipWithStatus(dbUser, TierAccessStatus.DISABLED);
   }
 
-  // JOEL NOTE: I finished up this check that we were discussing
-  private void assertUserNotInControlledTier(DbUser dbUser) {
+  private void assertUserNotInAccessTier(DbUser dbUser, DbAccessTier accessTier) {
     // if not present, we're done
     // if present: assert that the row is disabled
     Optional<DbUserAccessTier> userAccessMaybe =
-        userAccessTierDao.getByUserAndAccessTier(dbUser, controlledTier);
+        userAccessTierDao.getByUserAndAccessTier(dbUser, accessTier);
     userAccessMaybe.ifPresent(
         userAccess ->
             assertThat(userAccess.getTierAccessStatusEnum()).isEqualTo(TierAccessStatus.DISABLED));
@@ -1226,10 +1283,15 @@ public class UserServiceAccessTest {
 
   private DbUser completeCTRequirements(DbUser user) {
     addCTConfigToInstitution(institutionService.getByUser(user).get());
-    user = registerUser(new Timestamp(PROVIDED_CLOCK.millis()), user);
+    accessModuleService.updateBypassTime(user.getUserId(), AccessModule.ERA_COMMONS, true);
     accessModuleService.updateBypassTime(
         user.getUserId(), AccessModule.CT_COMPLIANCE_TRAINING, true);
     return user;
+  }
+
+  private DbUser completeRTAndCTRequirements(DbUser user) {
+    user = registerUser(new Timestamp(PROVIDED_CLOCK.millis()), user);
+    return completeCTRequirements(user);
   }
 
   private void createAffiliation(final DbUser user) {
