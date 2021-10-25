@@ -1,4 +1,4 @@
-import { ElementHandle, Frame, Page, WaitForSelectorOptions } from 'puppeteer';
+import { Frame, Page } from 'puppeteer';
 import Link from 'app/element/link';
 import { getPropValue } from 'utils/element-utils';
 import AuthenticatedPage from './authenticated-page';
@@ -31,7 +31,9 @@ export default class NotebookPreviewPage extends AuthenticatedPage {
    * Click "Edit" link to open notebook in Edit mode.
    */
   async openEditMode(notebookName: string): Promise<NotebookPage> {
-    await this.getEditLink().click();
+    const editLink = await this.getEditLink();
+    await editLink.waitUntilEnabled();
+    await editLink.click();
     // Restarting notebook server may take a while.
     await waitWhileLoading(this.page, 60 * 20 * 1000);
 
@@ -41,12 +43,11 @@ export default class NotebookPreviewPage extends AuthenticatedPage {
   }
 
   async getFormattedCode(): Promise<string[]> {
-    const css = '#notebook-container pre';
-    await this.waitForCssSelector(css);
-    const textContents = await this.findNotebookIframe().then((frame) => {
-      return frame.$$(css);
-    });
-    return Promise.all(textContents.map(async (content) => await getPropValue<string>(content, 'textContent')));
+    const css = '#notebook .code_cell.rendered pre';
+    const iframe = await this.findNotebookIframe();
+    await iframe.waitForSelector(css, { visible: true });
+    const elements = await iframe.$$(css);
+    return Promise.all(elements.map(async (content) => await getPropValue<string>(content, 'textContent')));
   }
 
   getEditLink(): Link {
@@ -69,11 +70,6 @@ export default class NotebookPreviewPage extends AuthenticatedPage {
     const analysisPage = new WorkspaceAnalysisPage(this.page);
     await analysisPage.waitForLoad();
     return analysisPage;
-  }
-
-  private async waitForCssSelector(selector: string, options?: WaitForSelectorOptions): Promise<ElementHandle> {
-    const notebookIframe = await this.findNotebookIframe();
-    return notebookIframe.waitForSelector(selector, options);
   }
 
   private async findNotebookIframe(): Promise<Frame> {

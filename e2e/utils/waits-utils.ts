@@ -371,10 +371,20 @@ export async function waitWhileLoading(
     waitForRuntime ? '' : ':not([aria-hidden="true"]):not([data-test-id*="runtime-status"])'
   }`;
 
-  // Prevent checking in Login page.
-  await page.waitForSelector('[data-test-id="sign-in-page"]', { timeout: 1000 }).catch(() => {
-    return;
-  });
+  await Promise.race([
+    page.waitForXPath(process.env.AUTHENTICATED_TEST_ID_XPATH), // authenticated page
+    page.waitForXPath(process.env.UNAUTHENTICATED_TEST_ID_XPATH) // Login and Create Account pages
+  ]);
+
+  // Prevent checking in Login and Create Account pages.
+  await page
+    .waitForXPath(process.env.UNAUTHENTICATED_TEST_ID_XPATH, { timeout: 10 })
+    .then(() => {
+      return;
+    })
+    .catch(() => {
+      // Ignore and continue.
+    });
 
   // Prevent checking in blank page: wait for loading spinner or some elements exists in DOM.
   await Promise.race([page.waitForSelector(notBlankPageSelector), page.waitForSelector(spinElementsSelector)]);
