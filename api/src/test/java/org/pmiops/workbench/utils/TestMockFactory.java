@@ -153,11 +153,11 @@ public class TestMockFactory {
   }
 
   public static FirecloudWorkspaceDetails createFirecloudWorkspace(
-      String ns, String name, String creator) {
+      String ns, String rwName, String fcName, String creator) {
     return new FirecloudWorkspaceDetails()
         .namespace(ns)
-        .workspaceId(ns)
-        .name(name)
+        .name(rwName)
+        .workspaceId(fcName)
         .createdBy(creator)
         .bucketName(WORKSPACE_BUCKET_NAME)
         .googleProject(DEFAULT_GOOGLE_PROJECT);
