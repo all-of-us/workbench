@@ -10,6 +10,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import com.google.cloud.storage.Blob;
@@ -463,6 +464,23 @@ public class NotebooksControllerTest extends SpringTest {
         .deleteBlob(BlobId.of(TestMockFactory.WORKSPACE_BUCKET_NAME, nb1));
     verify(mockUserRecentResourceService)
         .deleteNotebookEntry(eq(workspace.getWorkspaceId()), anyLong(), eq(fullPath));
+  }
+
+  @Test
+  public void testDeleteNotebook_reader() {
+    DbWorkspace workspace = createWorkspace();
+    stubGetWorkspace(workspace, WorkspaceAccessLevel.READER);
+
+    assertThrows(
+        ForbiddenException.class,
+        () ->
+            notebooksController.deleteNotebook(
+                workspace.getWorkspaceNamespace(),
+                workspace.getFirecloudName(),
+                NotebooksService.withNotebookExtension("nb1")));
+
+    verifyZeroInteractions(mockCloudStorageClient);
+    verifyZeroInteractions(mockUserRecentResourceService);
   }
 
   private static Stream<Arguments> notebookLockingCases() {
