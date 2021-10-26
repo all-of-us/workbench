@@ -72,8 +72,8 @@ import org.springframework.test.annotation.DirtiesContext;
  * UserService#updateUserWithRetries(java.util.function.Function,
  * org.pmiops.workbench.db.model.DbUser, org.pmiops.workbench.actionaudit.Agent)} with different
  * configurations, which ultimately executes the private method {@link
- * UserServiceImpl#shouldUserBeRegistered(org.pmiops.workbench.db.model.DbUser)} to make this
- * determination.
+ * UserServiceImpl#shouldGrantUserTierAccess(org.pmiops.workbench.db.model.DbUser, List, String)} to
+ * make this determination.
  */
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -1107,14 +1107,8 @@ public class UserServiceAccessTest {
     providedWorkbenchConfig.featureFlags.unsafeAllowAccessToAllTiersForRegisteredUsers = false;
     assertThat(userAccessTierDao.findAll()).isEmpty();
     dbUser = completeRTAndCTRequirements(dbUser);
-    Institution institution = institutionService.getByUser(dbUser).get();
-    institution.getTierConfigs().stream()
-        .filter(
-            tier -> tier.getAccessTierShortName() == AccessTierService.REGISTERED_TIER_SHORT_NAME)
-        .findFirst()
-        .get()
-        .setEmailDomains(Arrays.asList("fakeDomain.com"));
-    institutionService.updateInstitution(institution.getShortName(), institution);
+    rtTierConfig.setEmailDomains(Arrays.asList("fakeDomain.com"));
+    updateInstitutionTier(rtTierConfig);
 
     dbUser = updateUserWithRetries(Function.identity());
 
@@ -1124,30 +1118,10 @@ public class UserServiceAccessTest {
 
   @Test
   public void test_updateUserWithRetries_updateInvalidEmailForRT() {
-    providedWorkbenchConfig.featureFlags.unsafeAllowAccessToAllTiersForRegisteredUsers = false;
-    assertThat(userAccessTierDao.findAll()).isEmpty();
-    dbUser = completeRTAndCTRequirements(dbUser);
-    Institution institution = institutionService.getByUser(dbUser).get();
-    institution.getTierConfigs().stream()
-        .filter(
-            tier -> tier.getAccessTierShortName() == AccessTierService.REGISTERED_TIER_SHORT_NAME)
-        .findFirst()
-        .get()
-        .setEmailDomains(Arrays.asList("fakeDomain.com"));
-    institutionService.updateInstitution(institution.getShortName(), institution);
+    test_updateUserWithRetries_emailNotValidForRT();
+    rtTierConfig.setEmailDomains(Arrays.asList("domain.com"));
+    updateInstitutionTier(rtTierConfig);
 
-    dbUser = updateUserWithRetries(Function.identity());
-
-    assertUserNotInAccessTier(dbUser, registeredTier);
-    assertUserNotInAccessTier(dbUser, controlledTier);
-
-    institution.getTierConfigs().stream()
-        .filter(
-            tier -> tier.getAccessTierShortName() == AccessTierService.REGISTERED_TIER_SHORT_NAME)
-        .findFirst()
-        .get()
-        .setEmailDomains(Arrays.asList("domain.com"));
-    institutionService.updateInstitution(institution.getShortName(), institution);
     dbUser = updateUserWithRetries(Function.identity());
 
     assertRegisteredTierEnabled(dbUser);
@@ -1192,22 +1166,11 @@ public class UserServiceAccessTest {
 
     // Setting eraRequired to false for RT just so user can still have access to RT even after NOT
     // bypassing era
-    Institution institution = institutionService.getByUser(dbUser).get();
-    institution.getTierConfigs().stream()
-        .filter(
-            tier ->
-                tier.getAccessTierShortName().equals(AccessTierService.REGISTERED_TIER_SHORT_NAME))
-        .findFirst()
-        .get()
-        .setEraRequired(false);
-    institution.getTierConfigs().stream()
-        .filter(
-            tier ->
-                tier.getAccessTierShortName().equals(AccessTierService.CONTROLLED_TIER_SHORT_NAME))
-        .findFirst()
-        .get()
-        .setEraRequired(true);
-    institutionService.updateInstitution(institution.getShortName(), institution);
+    rtTierConfig.setEraRequired(false);
+    updateInstitutionTier(rtTierConfig);
+
+    ctTierConfig.setEraRequired(true);
+    updateInstitutionTier(ctTierConfig);
 
     dbUser =
         updateUserWithRetries(
@@ -1224,17 +1187,12 @@ public class UserServiceAccessTest {
   @Test
   public void test_updateUserWithRetries_eraNotRequiredForCT() {
     //    Institution does not require era
-    dbUser = completeRTAndCTRequirements(dbUser);
-    Institution institution = institutionService.getByUser(dbUser).get();
-    institution.getTierConfigs().stream()
-        .filter(
-            tier -> tier.getAccessTierShortName() == AccessTierService.CONTROLLED_TIER_SHORT_NAME)
-        .findFirst()
-        .get()
-        .setEraRequired(false);
-    institutionService.updateInstitution(institution.getShortName(), institution);
     providedWorkbenchConfig.featureFlags.unsafeAllowAccessToAllTiersForRegisteredUsers = false;
     assertThat(userAccessTierDao.findAll()).isEmpty();
+
+    dbUser = completeRTAndCTRequirements(dbUser);
+    ctTierConfig.setEraRequired(false);
+    updateInstitutionTier(ctTierConfig);
 
     dbUser = updateUserWithRetries(Function.identity());
 
@@ -1247,14 +1205,9 @@ public class UserServiceAccessTest {
     providedWorkbenchConfig.featureFlags.unsafeAllowAccessToAllTiersForRegisteredUsers = false;
     assertThat(userAccessTierDao.findAll()).isEmpty();
     dbUser = completeRTAndCTRequirements(dbUser);
-    Institution institution = institutionService.getByUser(dbUser).get();
-    institution.getTierConfigs().stream()
-        .filter(
-            tier -> tier.getAccessTierShortName() == AccessTierService.CONTROLLED_TIER_SHORT_NAME)
-        .findFirst()
-        .get()
-        .setEmailDomains(Arrays.asList("fakeDomain.com"));
-    institutionService.updateInstitution(institution.getShortName(), institution);
+
+    ctTierConfig.setEmailDomains(Arrays.asList("fakeDomain.com"));
+    updateInstitutionTier(ctTierConfig);
 
     dbUser = updateUserWithRetries(Function.identity());
 
@@ -1263,7 +1216,17 @@ public class UserServiceAccessTest {
   }
 
   @Test
-  public void test_updateUserWithRetries_updateInvalidEmailForCT() {}
+  public void test_updateUserWithRetries_updateInvalidEmailForCT() {
+    test_updateUserWithRetries_emailValidForRTButNotValidForCT();
+
+    ctTierConfig.setEmailDomains(Arrays.asList("domain.com"));
+    updateInstitutionTier(ctTierConfig);
+
+    dbUser = updateUserWithRetries(Function.identity());
+
+    assertRegisteredTierEnabled(dbUser);
+    assertControlledTierEnabled(dbUser);
+  }
 
   @Test
   public void test_updateUserWithRetries_didNotSignCTAgreement() {
@@ -1294,22 +1257,11 @@ public class UserServiceAccessTest {
 
     // Setting eraRequired to false for RT just so user can still have access to RT even after NOT
     // bypassing era
-    Institution institution = institutionService.getByUser(dbUser).get();
-    institution.getTierConfigs().stream()
-        .filter(
-            tier ->
-                tier.getAccessTierShortName().equals(AccessTierService.REGISTERED_TIER_SHORT_NAME))
-        .findFirst()
-        .get()
-        .setEraRequired(false);
-    institution.getTierConfigs().stream()
-        .filter(
-            tier ->
-                tier.getAccessTierShortName().equals(AccessTierService.CONTROLLED_TIER_SHORT_NAME))
-        .findFirst()
-        .get()
-        .setEraRequired(true);
-    institutionService.updateInstitution(institution.getShortName(), institution);
+    rtTierConfig.setEraRequired(false);
+    updateInstitutionTier(rtTierConfig);
+
+    ctTierConfig.setEraRequired(true);
+    updateInstitutionTier(ctTierConfig);
 
     dbUser = updateUserWithRetries(Function.identity());
 
@@ -1426,6 +1378,19 @@ public class UserServiceAccessTest {
   // we can trim the signature since we always call this in the same way
   private DbUser updateUserWithRetries(Function<DbUser, DbUser> userModifier) {
     return userService.updateUserWithRetries(userModifier, dbUser, Agent.asUser(dbUser));
+  }
+
+  private void updateInstitutionTier(InstitutionTierConfig updatedTierConfig) {
+    Institution institution = institutionService.getByUser(dbUser).get();
+    institution
+        .getTierConfigs()
+        .removeIf(
+            tierConfig ->
+                tierConfig
+                    .getAccessTierShortName()
+                    .equals(updatedTierConfig.getAccessTierShortName()));
+    institution.addTierConfigsItem(updatedTierConfig);
+    institutionService.updateInstitution(institution.getShortName(), institution);
   }
 
   private void assertRegisteredTierEnabled(DbUser dbUser) {
