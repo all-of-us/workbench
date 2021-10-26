@@ -14,6 +14,7 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdateResponseList;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
+import org.pmiops.workbench.utils.RandomUtils;
 
 /**
  * Encapsulate Firecloud API interaction details and provide a simple/mockable interface for
@@ -63,6 +64,19 @@ public interface FireCloudService {
    */
   void removeOwnerFromBillingProject(
       String ownerEmailToRemove, String projectName, Optional<String> callerAccessToken);
+
+  int NUM_RANDOM_CHARS = 20;
+  String RANDOM_CHARS = "abcdefghijklmnopqrstuvwxyz";
+
+  static String toFirecloudName(String workbenchName) {
+    // Find a unique workspace namespace based off of the provided name.
+    String strippedName = workbenchName.toLowerCase().replaceAll("[^0-9a-z]", "");
+    // If the stripped name has no chars, generate a random name.
+    if (strippedName.isEmpty()) {
+      strippedName = RandomUtils.generateRandomChars(RANDOM_CHARS, NUM_RANDOM_CHARS);
+    }
+    return strippedName;
+  }
 
   /** Creates a new FC workspace. */
   FirecloudWorkspaceDetails createWorkspace(

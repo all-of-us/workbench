@@ -157,7 +157,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   private FirecloudWorkspaceId generateFirecloudWorkspaceId(String namespace, String name) {
-    return new FirecloudWorkspaceId(namespace, WorkspaceService.toFirecloudName(name));
+    return new FirecloudWorkspaceId(namespace, FireCloudService.toFirecloudName(name));
   }
 
   @Override

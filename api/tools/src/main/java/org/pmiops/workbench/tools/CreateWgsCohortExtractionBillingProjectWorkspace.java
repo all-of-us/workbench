@@ -21,13 +21,13 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.api.BillingV2Api;
 import org.pmiops.workbench.firecloud.model.FirecloudCreateRawlsV2BillingProjectFullRequest;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceIngest;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
-import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -134,7 +134,7 @@ public class CreateWgsCohortExtractionBillingProjectWorkspace {
       billingV2Api.createBillingProjectFullV2(billingProjectRequest);
       DbWorkspace.FirecloudWorkspaceId workspaceId =
           new DbWorkspace.FirecloudWorkspaceId(
-              billingProjectName, WorkspaceService.toFirecloudName(workspaceName));
+              billingProjectName, FireCloudService.toFirecloudName(workspaceName));
 
       FirecloudWorkspaceIngest workspaceIngest =
           new FirecloudWorkspaceIngest()
