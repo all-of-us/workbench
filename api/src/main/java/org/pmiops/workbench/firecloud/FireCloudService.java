@@ -69,7 +69,7 @@ public interface FireCloudService {
   String RANDOM_CHARS = "abcdefghijklmnopqrstuvwxyz";
 
   static String toFirecloudName(String workbenchName) {
-    // Find a unique workspace namespace based off of the provided name.
+    // Derive a firecloud-compatible name from the provided name.
     String strippedName = workbenchName.toLowerCase().replaceAll("[^0-9a-z]", "");
     // If the stripped name has no chars, generate a random name.
     if (strippedName.isEmpty()) {
