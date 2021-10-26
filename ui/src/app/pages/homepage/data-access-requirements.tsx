@@ -158,7 +158,7 @@ const styles = reactStyles({
   },
   requestAccess: {
     marginTop: '0.5rem',
-    marginBotton: '0.5rem',
+    marginBottom: '0.5rem',
   },
   modulesContainer: {
     marginLeft: 'auto',
@@ -648,9 +648,13 @@ const ControlledTierCard = (props: {profile: Profile, spinnerProps: WithSpinnerO
       </FlexRow>
       {isEligible
         ? <div data-test-id='eligible-text' style={styles.dataDetails}>You are eligible to access Controlled Tier Data</div>
-        : <div data-test-id='ineligible-text' style={styles.dataDetails}>
-          You are not currently eligible; action by {institutionDisplayName} required.
-          <SupportButton style={styles.requestAccess} label='Request Access'/>
+        : <div>
+          <div data-test-id='ineligible-text' style={styles.dataDetails}>
+            You are not currently eligible; action by {institutionDisplayName} required.
+          </div>
+          <div style={styles.requestAccess}>
+            <SupportButton label='Request Access'/>
+          </div>
         </div>}
       <div style={styles.dataDetails}>In addition to Registered Tier data, the Controlled Tier curated dataset contains:</div>
       <DataDetail icon='genomic' text='Genomic data'/>
