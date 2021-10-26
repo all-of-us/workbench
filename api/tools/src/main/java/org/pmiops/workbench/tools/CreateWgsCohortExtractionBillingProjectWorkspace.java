@@ -21,6 +21,7 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.api.BillingV2Api;
 import org.pmiops.workbench.firecloud.model.FirecloudCreateRawlsV2BillingProjectFullRequest;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdate;
@@ -131,9 +132,9 @@ public class CreateWgsCohortExtractionBillingProjectWorkspace {
               .projectName(opts.getOptionValue(billingProjectNameOpt.getLongOpt()));
       BillingV2Api billingV2Api = apiClientFactory.billingV2Api();
       billingV2Api.createBillingProjectFullV2(billingProjectRequest);
-      String strippedName = workspaceName.toLowerCase().replaceAll("[^0-9a-z]", "");
       DbWorkspace.FirecloudWorkspaceId workspaceId =
-          new DbWorkspace.FirecloudWorkspaceId(billingProjectName, strippedName);
+          new DbWorkspace.FirecloudWorkspaceId(
+              billingProjectName, FireCloudService.toFirecloudName(workspaceName));
 
       FirecloudWorkspaceIngest workspaceIngest =
           new FirecloudWorkspaceIngest()
