@@ -17,7 +17,7 @@ public interface NotebooksService {
         : notebookName.concat(NOTEBOOK_EXTENSION);
   }
 
-  List<FileDetail> getNotebooks(String workspaceNamespace, String workspaceName);
+  List<FileDetail> getNotebooks(String workspaceNamespace, String firecloudName);
 
   /**
    * Retrieve all notebooks in the given cloud storage bucket. This method is authenticated as the
@@ -30,31 +30,31 @@ public interface NotebooksService {
 
   FileDetail copyNotebook(
       String fromWorkspaceNamespace,
-      String fromWorkspaceName,
+      String fromWorkspaceFirecloudName,
       String fromNotebookName,
       String toWorkspaceNamespace,
-      String toWorkspaceName,
+      String toWorkspaceFirecloudName,
       String newNotebookName);
 
-  FileDetail cloneNotebook(String workspaceNamespace, String workspaceName, String notebookName);
+  FileDetail cloneNotebook(String workspaceNamespace, String firecloudName, String notebookName);
 
-  void deleteNotebook(String workspaceNamespace, String workspaceName, String notebookName);
+  void deleteNotebook(String workspaceNamespace, String firecloudName, String notebookName);
 
   FileDetail renameNotebook(
-      String workspaceNamespace, String workspaceName, String notebookName, String newName);
+      String workspaceNamespace, String firecloudName, String notebookName, String newName);
 
   JSONObject getNotebookContents(String bucketName, String notebookName);
 
   KernelTypeEnum getNotebookKernel(JSONObject notebookFile);
 
   KernelTypeEnum getNotebookKernel(
-      String workspaceNamespace, String workspaceName, String notebookName);
+      String workspaceNamespace, String firecloudName, String notebookName);
 
   void saveNotebook(String bucketName, String notebookName, JSONObject notebookContents);
 
-  public String convertNotebookToHtml(byte[] notebook);
+  String convertNotebookToHtml(byte[] notebook);
 
-  String getReadOnlyHtml(String workspaceNamespace, String workspaceName, String notebookName);
+  String getReadOnlyHtml(String workspaceNamespace, String firecloudName, String notebookName);
 
-  String adminGetReadOnlyHtml(String workspaceNamespace, String workspaceName, String notebookName);
+  String adminGetReadOnlyHtml(String workspaceNamespace, String firecloudName, String notebookName);
 }
