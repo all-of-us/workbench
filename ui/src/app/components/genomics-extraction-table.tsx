@@ -5,6 +5,13 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import {faSyncAlt} from '@fortawesome/free-solid-svg-icons/faSyncAlt';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
+import * as fp from 'lodash/fp';
+import * as React from 'react';
+import {useEffect, useState} from 'react';
+import {CSSTransition, SwitchTransition} from 'react-transition-group';
+import moment from 'moment'
+import {Column} from 'primereact/column';
+import {DataTable} from 'primereact/datatable';
 
 import {FlexRow} from 'app/components/flex';
 import {GenomicsExtractionMenu} from 'app/components/genomics-extraction-menu';
@@ -18,13 +25,7 @@ import {formatUsd} from 'app/utils/numbers';
 import {genomicExtractionStore, updateGenomicExtractionStore, withStore} from 'app/utils/stores';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {GenomicExtractionJob, TerraJobStatus} from 'generated/fetch';
-import * as fp from 'lodash/fp';
-import moment from 'moment'
-import {Column} from 'primereact/column';
-import {DataTable} from 'primereact/datatable';
-import * as React from 'react';
-import {useEffect, useState} from 'react';
-import {CSSTransition, SwitchTransition} from 'react-transition-group';
+import {SupportMailto} from "./support";
 
 const styles = {
   spinStyles: {
@@ -165,7 +166,7 @@ const FailedRequestMessage = () => <div style={{textAlign: 'center'}}>
         Failed to retrieve genomic extraction jobs.
       </span>
         <span>
-        Please try again or contact <a href='mailto:support@researchallofus.org'>support@researchallofus.org</a>.
+        Please try again or contact <SupportMailto/>.
       </span>
     </TextColumn>
   </FlexRow>

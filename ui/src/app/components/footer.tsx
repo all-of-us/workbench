@@ -1,3 +1,5 @@
+import * as React from 'react';
+
 import { LinkButton, StyledExternalLink, StyledRouterLink } from 'app/components/buttons';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {SemiBoldHeader} from 'app/components/headers';
@@ -6,11 +8,10 @@ import colors from 'app/styles/colors';
 import {reactStyles, withUserProfile} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
-import { environment } from 'environments/environment';
-import * as React from 'react';
-
+import {environment} from 'environments/environment';
 import aouFooterLogo from 'assets/images/all-of-us-logo-footer.svg';
 import nihFooterLogo from 'assets/images/nih-logo-footer.png';
+import {SUPPORT_EMAIL} from "./support";
 
 const styles = reactStyles({
   footerAnchor: {
@@ -198,8 +199,6 @@ const WorkbenchFooter = withUserProfile()(
     }
   });
 
-const supportEmailAddress = 'support@researchallofus.org';
-
 const RegistrationFooter = ({style = {}, ...props}) => {
   return <FooterTemplate {...props}>
     <FlexColumn>
@@ -207,9 +206,9 @@ const RegistrationFooter = ({style = {}, ...props}) => {
         <DataBrowserLink />
         <ResearchHubLink style={{marginLeft: '1.5rem'}} />
         <div style={{fontSize: 12, marginLeft: '1.5rem'}}>
-          Contact Us: <FooterAnchorTag href={'mailto:' + supportEmailAddress}
+          Contact Us: <FooterAnchorTag href={`mailto:${SUPPORT_EMAIL}`}
                                        analyticsFn={() => AnalyticsTracker.Footer.ContactUs('Email')}>
-            {supportEmailAddress}
+            {SUPPORT_EMAIL}
           </FooterAnchorTag>
         </div>
       </FlexRow>
