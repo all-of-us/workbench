@@ -48,6 +48,7 @@ import {AccessTierShortNames} from 'app/utils/access-tiers';
 import {environment} from 'environments/environment';
 import {useQuery} from 'app/components/app-router';
 import {openZendeskWidget} from 'app/utils/zendesk';
+import {SupportButton} from 'app/components/support';
 
 const styles = reactStyles({
   headerFlexColumn: {
@@ -154,6 +155,10 @@ const styles = reactStyles({
     fontSize: '14px',
     fontWeight: 100,
     marginBottom: '0.5em',
+  },
+  requestAccess: {
+    marginTop: '0.5rem',
+    marginBotton: '0.5rem',
   },
   modulesContainer: {
     marginLeft: 'auto',
@@ -643,7 +648,10 @@ const ControlledTierCard = (props: {profile: Profile, spinnerProps: WithSpinnerO
       </FlexRow>
       {isEligible
         ? <div data-test-id='eligible-text' style={styles.dataDetails}>You are eligible to access Controlled Tier Data</div>
-        : <div data-test-id='ineligible-text' style={styles.dataDetails}>nope</div>}
+        : <div data-test-id='ineligible-text' style={styles.dataDetails}>
+          You are not currently eligible; action by {institutionDisplayName} required.
+          <SupportButton style={styles.requestAccess} label='Request Access'/>
+        </div>}
       <div style={styles.dataDetails}>In addition to Registered Tier data, the Controlled Tier curated dataset contains:</div>
       <DataDetail icon='genomic' text='Genomic data'/>
       <DataDetail icon='additional' text='Additional demographic details'/>
