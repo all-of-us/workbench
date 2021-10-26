@@ -737,8 +737,7 @@ public class NotebooksControllerTest {
 
   private DbWorkspace newWorkspace() {
     final String rwName = "RW Name";
-    // see WorkspacesController.generateFirecloudWorkspaceId()
-    final String fcName = rwName.toLowerCase().replaceAll("[^0-9a-z]", "");
+    final String fcName = FireCloudService.toFirecloudName(rwName);
     assertWithMessage("rwName and fcName must be distinct for a valid test")
         .that(fcName)
         .isNotEqualTo(rwName);
@@ -747,7 +746,6 @@ public class NotebooksControllerTest {
         .setName(rwName)
         .setFirecloudName(fcName)
         .setCreator(currentUser)
-        .setFirecloudName("fc-name")
         .setWorkspaceNamespace("namespace")
         .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE)
         .setCdrVersion(cdrVersion)
@@ -759,17 +757,13 @@ public class NotebooksControllerTest {
   }
 
   private DbWorkspace createWorkspace(String namespace, String rwName) {
-    // see WorkspacesController.generateFirecloudWorkspaceId()
-    final String fcName = rwName.toLowerCase().replaceAll("[^0-9a-z]", "");
+    final String fcName = FireCloudService.toFirecloudName(rwName);
     assertWithMessage("rwName and fcName must be distinct for a valid test")
         .that(fcName)
         .isNotEqualTo(rwName);
 
     return createWorkspace(
-        newWorkspace()
-            .setWorkspaceNamespace(namespace)
-            .setName(name)
-            .setFirecloudName("fc-" + name));
+        newWorkspace().setWorkspaceNamespace(namespace).setName(rwName).setFirecloudName(fcName));
   }
 
   private DbWorkspace createWorkspace(DbWorkspace workspace) {
