@@ -31,7 +31,6 @@ import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.UserAccessTierDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
-import org.pmiops.workbench.db.dao.UserServiceImpl;
 import org.pmiops.workbench.db.dao.VerifiedInstitutionalAffiliationDao;
 import org.pmiops.workbench.db.model.DbAccessModule;
 import org.pmiops.workbench.db.model.DbAccessModule.AccessModuleName;
@@ -71,7 +70,7 @@ import org.springframework.test.annotation.DirtiesContext;
  * Tests to cover access change determinations by executing {@link
  * UserService#updateUserWithRetries(java.util.function.Function,
  * org.pmiops.workbench.db.model.DbUser, org.pmiops.workbench.actionaudit.Agent)} with different
- * configurations, which ultimately executes the private method {@link
+ * configurations, which ultimately executes the private method {
  * UserServiceImpl#shouldGrantUserTierAccess(org.pmiops.workbench.db.model.DbUser, List, String)} to
  * make this determination.
  */
@@ -1405,10 +1404,6 @@ public class UserServiceAccessTest {
     assertControlledTierMembershipWithStatus(dbUser, TierAccessStatus.ENABLED);
   }
 
-  private void assertControlledTierDisabled(DbUser dbUser) {
-    assertControlledTierMembershipWithStatus(dbUser, TierAccessStatus.DISABLED);
-  }
-
   private void assertUserNotInAccessTier(DbUser dbUser, DbAccessTier accessTier) {
     // if not present, we're done
     // if present: assert that the row is disabled
@@ -1479,8 +1474,7 @@ public class UserServiceAccessTest {
   }
 
   private DbUser completeRTAndCTRequirements(DbUser user) {
-    user = registerUser(new Timestamp(PROVIDED_CLOCK.millis()), user);
-    return completeCTRequirements(user);
+    return completeCTRequirements(registerUser(new Timestamp(PROVIDED_CLOCK.millis()), user));
   }
 
   private void createAffiliation(final DbUser user) {
