@@ -392,17 +392,6 @@ public class WorkspacesControllerTest extends SpringTest {
                     .put("canShare", true)));
   }
 
-  private FirecloudWorkspaceACL createWorkspaceACLNoAccess() {
-    return createWorkspaceACL(
-        new JSONObject()
-            .put(
-                "other-user@gmail.com",
-                new JSONObject()
-                    .put("accessLevel", "OWNER")
-                    .put("canCompute", true)
-                    .put("canShare", true)));
-  }
-
   private FirecloudWorkspaceACL createWorkspaceACL(JSONObject acl) {
     return new Gson()
         .fromJson(new JSONObject().put("acl", acl).toString(), FirecloudWorkspaceACL.class);
