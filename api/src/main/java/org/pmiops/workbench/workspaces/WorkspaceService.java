@@ -5,6 +5,7 @@ import org.pmiops.workbench.db.model.DbUserRecentWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.WorkspaceResponse;
+import org.pmiops.workbench.utils.RandomUtils;
 
 /*
  * WorkspaceService is primarily an interface for coordinating the three Workspace models.
@@ -21,6 +22,18 @@ import org.pmiops.workbench.model.WorkspaceResponse;
  *
  */
 public interface WorkspaceService {
+  int NUM_RANDOM_CHARS = 20;
+  String RANDOM_CHARS = "abcdefghijklmnopqrstuvwxyz";
+
+  static String toFirecloudName(String workbenchName) {
+    // Find a unique workspace namespace based off of the provided name.
+    String strippedName = workbenchName.toLowerCase().replaceAll("[^0-9a-z]", "");
+    // If the stripped name has no chars, generate a random name.
+    if (strippedName.isEmpty()) {
+      strippedName = RandomUtils.generateRandomChars(RANDOM_CHARS, NUM_RANDOM_CHARS);
+    }
+    return strippedName;
+  }
 
   WorkspaceResponse getWorkspace(String workspaceNamespace, String workspaceId);
 

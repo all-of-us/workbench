@@ -67,7 +67,6 @@ import org.pmiops.workbench.monitoring.LogsBasedMetricService;
 import org.pmiops.workbench.monitoring.MeasurementBundle;
 import org.pmiops.workbench.monitoring.labels.MetricLabel;
 import org.pmiops.workbench.monitoring.views.DistributionMetric;
-import org.pmiops.workbench.utils.RandomUtils;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.pmiops.workbench.workspaces.WorkspaceService;
@@ -80,9 +79,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
   private static final Logger log = Logger.getLogger(WorkspacesController.class.getName());
 
-  private static final int NUM_RANDOM_CHARS = 20;
   private static final Level OPERATION_TIME_LOG_LEVEL = Level.FINE;
-  private static final String RANDOM_CHARS = "abcdefghijklmnopqrstuvwxyz";
 
   private final CdrVersionDao cdrVersionDao;
   private final Clock clock;
@@ -160,13 +157,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   private FirecloudWorkspaceId generateFirecloudWorkspaceId(String namespace, String name) {
-    // Find a unique workspace namespace based off of the provided name.
-    String strippedName = name.toLowerCase().replaceAll("[^0-9a-z]", "");
-    // If the stripped name has no chars, generate a random name.
-    if (strippedName.isEmpty()) {
-      strippedName = RandomUtils.generateRandomChars(RANDOM_CHARS, NUM_RANDOM_CHARS);
-    }
-    return new FirecloudWorkspaceId(namespace, strippedName);
+    return new FirecloudWorkspaceId(namespace, WorkspaceService.toFirecloudName(name));
   }
 
   @Override

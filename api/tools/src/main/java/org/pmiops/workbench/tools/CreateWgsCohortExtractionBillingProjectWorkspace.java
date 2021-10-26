@@ -27,6 +27,7 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceIngest;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -131,9 +132,9 @@ public class CreateWgsCohortExtractionBillingProjectWorkspace {
               .projectName(opts.getOptionValue(billingProjectNameOpt.getLongOpt()));
       BillingV2Api billingV2Api = apiClientFactory.billingV2Api();
       billingV2Api.createBillingProjectFullV2(billingProjectRequest);
-      String strippedName = workspaceName.toLowerCase().replaceAll("[^0-9a-z]", "");
       DbWorkspace.FirecloudWorkspaceId workspaceId =
-          new DbWorkspace.FirecloudWorkspaceId(billingProjectName, strippedName);
+          new DbWorkspace.FirecloudWorkspaceId(
+              billingProjectName, WorkspaceService.toFirecloudName(workspaceName));
 
       FirecloudWorkspaceIngest workspaceIngest =
           new FirecloudWorkspaceIngest()
