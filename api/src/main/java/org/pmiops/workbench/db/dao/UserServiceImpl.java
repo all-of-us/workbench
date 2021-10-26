@@ -254,16 +254,18 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       return accessTierService.getAllTiers();
     }
 
-
     DbAccessTier registeredAccessTier =
         accessTierService.getAccessTierByName(REGISTERED_TIER_SHORT_NAME).get();
-    DbAccessTier controlledAccessTier =
-        accessTierService.getAccessTierByName(CONTROLLED_TIER_SHORT_NAME).get();
+    Optional<DbAccessTier> controlledAccessTier =
+        accessTierService.getAccessTierByName(CONTROLLED_TIER_SHORT_NAME);
 
-   // If unsafeAllowAccessToAllTiersForRegisteredUsers is true OR if user has completed all The CT Steps
-   // send both Registered Access Tier and Controlled Access Tier, else just send Registered Access Tier
-    return shouldGrantUserTierAccess(dbUser, requiredModulesForControlledTier, CONTROLLED_TIER_SHORT_NAME)
-        ? Arrays.asList(registeredAccessTier, controlledAccessTier)
+    // If unsafeAllowAccessToAllTiersForRegisteredUsers is true OR if user has completed all The CT
+    // Steps. Send both Registered Access Tier and Controlled Access Tier, else just send Registered
+    // Access Tier
+    return shouldGrantUserTierAccess(
+                dbUser, requiredModulesForControlledTier, CONTROLLED_TIER_SHORT_NAME)
+            && controlledAccessTier.isPresent()
+        ? Arrays.asList(registeredAccessTier, controlledAccessTier.get())
         : Arrays.asList(registeredAccessTier);
   }
 
