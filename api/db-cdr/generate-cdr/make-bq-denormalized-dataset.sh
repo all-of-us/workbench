@@ -223,6 +223,7 @@ echo "CREATE TABLE - ds_activity_summary"
 bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.ds_activity_summary\`
 (
+    PERSON_ID                       INT64,
     DATE                            DATE,
     ACTIVITY_CALORIES               FLOAT64,
     CALORIES_BMR                    FLOAT64,
@@ -234,16 +235,15 @@ bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
     MARGINAL_CALORIES               FLOAT64,
     SEDENTARY_MINUTES               FLOAT64,
     STEPS                           INT64,
-    VERY_ACTIVE_MINUTES             FLOAT64,
-    PERSON_ID                       INT64
+    VERY_ACTIVE_MINUTES             FLOAT64
 )"
 
 echo "CREATE TABLE - ds_heart_rate_minute_level"
 bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.ds_heart_rate_minute_level\`
 (
-    DATETIME                        DATETIME,
     PERSON_ID                       INT64,
+    DATETIME                        DATETIME,
     HEART_RATE_VALUE                INT64
 )"
 
@@ -264,9 +264,9 @@ echo "CREATE TABLE - ds_steps_intraday"
 bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.ds_steps_intraday\`
 (
+    PERSON_ID                       INT64,
     DATETIME                        DATETIME,
-    STEPS                           NUMERIC,
-    PERSON_ID                       INT64
+    STEPS                           NUMERIC
 )"
 
 if [[ "$TABLE_LIST" == *"zip3_ses_map"* ]]; then
@@ -276,15 +276,15 @@ if [[ "$TABLE_LIST" == *"zip3_ses_map"* ]]; then
   (
       PERSON_ID                       INT64,
       OBSERVATION_DATETIME            TIMESTAMP,
-      ZIP_CODE                        STRING,
-      ASSISTED_INCOME                 FLOAT64,
-      HIGH_SCHOOL_EDUCATION           FLOAT64,
+      ZIP3_AS_STRING                  STRING,
+      FRACTION_ASSISTED_INCOME        FLOAT64,
+      FRACTION_HIGH_SCHOOL_EDU        FLOAT64,
       MEDIAN_INCOME                   FLOAT64,
-      NO_HEALTH_INSURANCE             FLOAT64,
-      POVERTY                         FLOAT64,
-      VACANT_HOUSING                  FLOAT64,
+      FRACTION_NO_HEALTH_INS          FLOAT64,
+      FRACTION_POVERTY                FLOAT64,
+      FRACTION_VACANT_HOUSING         FLOAT64,
       DEPRIVATION_INDEX               FLOAT64,
-      AMERICAN_COMMUNITY_SURVEY_YEAR  INT64
+      ACS                             INT64
   )"
 fi
 
@@ -522,7 +522,7 @@ if [[ "$TABLE_LIST" == *"zip3_ses_map"* ]]; then
   echo "ds_zip_code_socioeconomic - inserting data"
   bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
   "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_zip_code_socioeconomic\`
-  (PERSON_ID, OBSERVATION_DATETIME, ZIP_CODE, ASSISTED_INCOME, HIGH_SCHOOL_EDUCATION, MEDIAN_INCOME, NO_HEALTH_INSURANCE, POVERTY, VACANT_HOUSING, DEPRIVATION_INDEX, AMERICAN_COMMUNITY_SURVEY_YEAR)
+  (PERSON_ID, OBSERVATION_DATETIME, ZIP3_AS_STRING, FRACTION_ASSISTED_INCOME, FRACTION_HIGH_SCHOOL_EDU, MEDIAN_INCOME, FRACTION_NO_HEALTH_INS, FRACTION_POVERTY, FRACTION_VACANT_HOUSING, DEPRIVATION_INDEX, ACS)
   select o.person_id,
   o.observation_datetime,
   zip.zip3_as_string,
