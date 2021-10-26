@@ -44,6 +44,8 @@ describe('DataAccessRequirements', () => {
       .find('[data-test-id="ineligible"]');
 
     const findControlledTierCard = (wrapper) => wrapper.find('[data-test-id="controlled-card"]')
+    const findEligibleText = (wrapper) => wrapper.find(`[data-test-id="eligible-text"]`);
+    const findIneligibleText = (wrapper) => wrapper.find(`[data-test-id="ineligible-text"]`);
 
     const findContactUs = (wrapper) => wrapper.find('[data-test-id="contact-us"]');
 
@@ -543,6 +545,10 @@ describe('DataAccessRequirements', () => {
         await waitOneTickAndUpdate(wrapper);
         expect(findControlledSignedStepEligible(wrapper).exists()).toBeTruthy();
         expect(findControlledSignedStepIneligible(wrapper).exists()).toBeFalsy();
+
+        // but this is not enough; the user needs to be made eligible by email as well
+        expect(findEligibleText(findControlledTierCard(wrapper)).exists()).toBeFalsy();
+        expect(findIneligibleText(findControlledTierCard(wrapper)).exists()).toBeTruthy();
     });
 
     it("Should not display Institution has signed agreement when the user doesn't have a Tier Eligibility object for CT", async() => {
@@ -565,6 +571,10 @@ describe('DataAccessRequirements', () => {
         await waitOneTickAndUpdate(wrapper);
         expect(findControlledSignedStepEligible(wrapper).exists()).toBeFalsy();
         expect(findControlledSignedStepIneligible(wrapper).exists()).toBeTruthy();
+
+        // but this is not enough; the user needs to be made eligible by email as well
+        expect(findEligibleText(findControlledTierCard(wrapper)).exists()).toBeFalsy();
+        expect(findIneligibleText(findControlledTierCard(wrapper)).exists()).toBeTruthy();
     });
 
     it("Should display Institution allows you to access CT when the user's CT Tier Eligibility object has eligible=true", async() => {
@@ -588,6 +598,9 @@ describe('DataAccessRequirements', () => {
         await waitOneTickAndUpdate(wrapper);
         expect(findControlledUserEligible(wrapper).exists()).toBeTruthy();
         expect(findControlledUserIneligible(wrapper).exists()).toBeFalsy();
+
+        expect(findEligibleText(findControlledTierCard(wrapper)).exists()).toBeTruthy();
+        expect(findIneligibleText(findControlledTierCard(wrapper)).exists()).toBeFalsy();
     });
 
     it("Should not display Institution allows you to access CT when the user's CT Tier Eligibility object has eligible=false", async() => {
@@ -611,6 +624,9 @@ describe('DataAccessRequirements', () => {
         await waitOneTickAndUpdate(wrapper);
         expect(findControlledUserEligible(wrapper).exists()).toBeFalsy();
         expect(findControlledUserIneligible(wrapper).exists()).toBeTruthy();
+
+        expect(findEligibleText(findControlledTierCard(wrapper)).exists()).toBeFalsy();
+        expect(findIneligibleText(findControlledTierCard(wrapper)).exists()).toBeTruthy();
     });
 
     it("Should not display Institution allows you to access CT when the user does not have a CT Tier Eligibility object", async() => {
@@ -635,6 +651,9 @@ describe('DataAccessRequirements', () => {
         await waitOneTickAndUpdate(wrapper);
         expect(findControlledUserEligible(wrapper).exists()).toBeFalsy();
         expect(findControlledUserIneligible(wrapper).exists()).toBeTruthy();
+
+        expect(findEligibleText(findControlledTierCard(wrapper)).exists()).toBeFalsy();
+        expect(findIneligibleText(findControlledTierCard(wrapper)).exists()).toBeTruthy();
     });
 
     it("Should display the CT card when the environment has a Controlled Tier", async() => {

@@ -641,7 +641,9 @@ const ControlledTierCard = (props: {profile: Profile, spinnerProps: WithSpinnerO
         <div style={styles.dataHeader}>Controlled Tier data - </div>
         <div style={styles.ctDataOptional}>&nbsp;Optional</div>
       </FlexRow>
-      <div style={styles.dataDetails}>You are eligible to access Controlled Tier Data</div>
+      {isEligible
+        ? <div data-test-id='eligible-text' style={styles.dataDetails}>You are eligible to access Controlled Tier Data</div>
+        : <div data-test-id='ineligible-text' style={styles.dataDetails}>nope</div>}
       <div style={styles.dataDetails}>In addition to Registered Tier data, the Controlled Tier curated dataset contains:</div>
       <DataDetail icon='genomic' text='Genomic data'/>
       <DataDetail icon='additional' text='Additional demographic details'/>
