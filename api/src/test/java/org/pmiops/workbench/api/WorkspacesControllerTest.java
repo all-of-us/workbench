@@ -509,7 +509,7 @@ public class WorkspacesControllerTest {
   }
 
   private Workspace createWorkspace() {
-    return TestMockFactory.createWorkspace("namespace", "name");
+    return TestMockFactory.createWorkspace("namespace", "Workspace Name");
   }
 
   public Cohort createDefaultCohort(String name) {
