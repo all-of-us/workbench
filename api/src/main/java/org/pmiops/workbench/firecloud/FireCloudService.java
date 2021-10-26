@@ -4,7 +4,6 @@ import com.google.common.annotations.VisibleForTesting;
 import java.util.List;
 import java.util.Optional;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.firecloud.model.FirecloudBillingProjectMembership;
 import org.pmiops.workbench.firecloud.model.FirecloudBillingProjectStatus;
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
 import org.pmiops.workbench.firecloud.model.FirecloudMe;
@@ -44,15 +43,15 @@ public interface FireCloudService {
   void registerUser(String contactEmail, String firstName, String lastName);
 
   /** Creates a billing project owned by AllOfUs. */
-  String createAllOfUsBillingProject(String projectName, String servicePerimeter);
+  String createAllOfUsBillingProject(String billingProjectName, String servicePerimeter);
 
-  void deleteBillingProject(String billingProject);
+  void deleteBillingProject(String billingProjectName);
 
   /** Get Billing Project Status */
-  FirecloudBillingProjectStatus getBillingProjectStatus(String projectName);
+  FirecloudBillingProjectStatus getBillingProjectStatus(String billingProjectName);
 
   /** Adds the specified user as an owner to the specified billing project. */
-  void addOwnerToBillingProject(String ownerEmail, String projectName);
+  void addOwnerToBillingProject(String ownerEmail, String billingProjectName);
 
   /**
    * Removes the specified user as an owner from the specified billing project. Since FireCloud
@@ -80,34 +79,37 @@ public interface FireCloudService {
 
   /** Creates a new FC workspace. */
   FirecloudWorkspaceDetails createWorkspace(
-      String projectName, String workspaceName, String authDomainName);
+      String workspaceNamespace, String workspaceName, String authDomainName);
 
   FirecloudWorkspaceDetails cloneWorkspace(
-      String fromProject, String fromName, String toProject, String toName, String authDomainName);
+      String fromWorkspaceNamespace,
+      String fromFirecloudName,
+      String toWorkspaceNamespace,
+      String toFirecloudName,
+      String authDomainName);
 
-  /** Retrieves all billing project memberships for the user from FireCloud. */
-  List<FirecloudBillingProjectMembership> getBillingProjectMemberships();
-
-  FirecloudWorkspaceACL getWorkspaceAclAsService(String projectName, String workspaceName);
+  FirecloudWorkspaceACL getWorkspaceAclAsService(String workspaceNamespace, String firecloudName);
 
   FirecloudWorkspaceACLUpdateResponseList updateWorkspaceACL(
-      String projectName, String workspaceName, List<FirecloudWorkspaceACLUpdate> aclUpdates);
+      String workspaceNamespace,
+      String firecloudName,
+      List<FirecloudWorkspaceACLUpdate> aclUpdates);
 
-  FirecloudWorkspaceResponse getWorkspaceAsService(String projectName, String workspaceName);
+  FirecloudWorkspaceResponse getWorkspaceAsService(String workspaceNamespace, String firecloudName);
 
   /**
    * Requested field options specified here:
    * https://docs.google.com/document/d/1YS95Q7ViRztaCSfPK-NS6tzFPrVpp5KUo0FaWGx7VHw/edit#heading=h.xgjl2srtytjt
    */
-  FirecloudWorkspaceResponse getWorkspace(String projectName, String workspaceName);
+  FirecloudWorkspaceResponse getWorkspace(String workspaceNamespace, String firecloudName);
 
   Optional<FirecloudWorkspaceResponse> getWorkspace(DbWorkspace dbWorkspace);
 
   List<FirecloudWorkspaceResponse> getWorkspaces();
 
-  void deleteWorkspace(String projectName, String workspaceName);
+  void deleteWorkspace(String workspaceNamespace, String firecloudName);
 
-  FirecloudManagedGroupWithMembers getGroup(String groupname);
+  FirecloudManagedGroupWithMembers getGroup(String groupName);
 
   FirecloudManagedGroupWithMembers createGroup(String groupName);
 
@@ -120,9 +122,10 @@ public interface FireCloudService {
   String staticNotebooksConvert(byte[] notebook);
 
   /** Update billing account using end user credential. */
-  void updateBillingAccount(String billingProject, String billingAccount);
+  void updateBillingAccount(String billingProjectName, String billingAccount);
+
   /** Update billing account using APP's service account. */
-  void updateBillingAccountAsService(String billingProject, String billingAccount);
+  void updateBillingAccountAsService(String billingProjectName, String billingAccount);
 
   /**
    * Fetches the status of the currently-authenticated user's linkage to NIH's eRA Commons system.
