@@ -445,9 +445,6 @@ interface ModuleProps {
   profile: Profile,
   moduleName: AccessModule;
   active: boolean;    // is this the currently-active module that the user should complete
-
-  // TODO RW-7059
-  // eligible: boolean;  // is the user eligible to complete this module (does the inst. allow it)
   spinnerProps: WithSpinnerOverlayProps;
 }
 
@@ -651,10 +648,10 @@ const ControlledTierCard = (props: {profile: Profile, spinnerProps: WithSpinnerO
     </FlexColumn>
     <FlexColumn style={styles.modulesContainer}>
       <ControlledTierStep data-test-id='controlled-signed'
-                          enable={isSigned}
+                          enabled={isSigned}
                           text={`${institutionDisplayName} must sign an institutional agreement`}/>
       <ControlledTierStep data-test-id='controlled-user-email'
-                          enable={isEligible}
+                          enabled={isEligible}
                           text={`${institutionDisplayName} must allow you to access controlled tier data`}/>
       {displayEraCommons &&
          <ControlledTierEraModule profile={profile} spinnerProps={spinnerProps}/>}
@@ -662,13 +659,13 @@ const ControlledTierCard = (props: {profile: Profile, spinnerProps: WithSpinnerO
   </FlexRow>
 };
 
-const ControlledTierStep = (props: {enable: boolean, text: String}) => {
+const ControlledTierStep = (props: {enabled: boolean, text: String}) => {
   return <FlexRow>
     <FlexRow style={styles.moduleCTA}/>
     {/* Since Institution access steps does not require user interaction, will display them as inactive*/}
     <FlexRow style={styles.backgroundModuleBox}>
       <div style={styles.moduleIcon}>
-        {props.enable
+        {props.enabled
           ? <CheckCircle data-test-id='eligible' style={{color: colors.success}}/>
           : <MinusCircle data-test-id='ineligible' style={{color: colors.disabled}}/>}
       </div>
