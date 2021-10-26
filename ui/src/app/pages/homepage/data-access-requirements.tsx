@@ -637,7 +637,7 @@ const ControlledTierCard = (props: {profile: Profile, spinnerProps: WithSpinnerO
   // 2) Registered Tier DOES NOT require era
   // 3) CT Requirement DOES require era
   const displayEraCommons = isSigned && !registeredTierEligibility?.eraRequired && controlledTierEligibility.eraRequired;
-  return <FlexRow data-test-id='controlled-card' style={{...styles.card, height: 300}}>
+  return <FlexRow data-test-id='controlled-card' style={styles.card}>
     <FlexColumn>
       <div style={styles.cardStep}>Step 2</div>
       <div style={styles.cardHeader}>Additional Data Access</div>
