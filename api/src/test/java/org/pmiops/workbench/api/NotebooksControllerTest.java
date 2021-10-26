@@ -467,6 +467,19 @@ public class NotebooksControllerTest extends SpringTest {
   }
 
   @Test
+  public void testDeleteNotebook_writer() {
+    DbWorkspace workspace = createWorkspace();
+    stubGetWorkspace(workspace, WorkspaceAccessLevel.WRITER);
+
+    notebooksController.deleteNotebook(
+        workspace.getWorkspaceNamespace(),
+        workspace.getFirecloudName(),
+        NotebooksService.withNotebookExtension("nb1"));
+    verify(mockCloudStorageClient).deleteBlob(any());
+    verify(mockUserRecentResourceService).deleteNotebookEntry(anyLong(), anyLong(), anyString());
+  }
+
+  @Test
   public void testDeleteNotebook_reader() {
     DbWorkspace workspace = createWorkspace();
     stubGetWorkspace(workspace, WorkspaceAccessLevel.READER);
