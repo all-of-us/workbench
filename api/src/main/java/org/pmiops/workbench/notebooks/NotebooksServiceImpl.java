@@ -201,6 +201,9 @@ public class NotebooksServiceImpl implements NotebooksService {
 
   @Override
   public void deleteNotebook(String workspaceNamespace, String workspaceName, String notebookName) {
+    workspaceAuthService.enforceWorkspaceAccessLevel(
+        workspaceNamespace, workspaceName, WorkspaceAccessLevel.WRITER);
+
     GoogleCloudLocators notebookLocators =
         getNotebookLocators(workspaceNamespace, workspaceName, notebookName);
     cloudStorageClient.deleteBlob(notebookLocators.blobId);
