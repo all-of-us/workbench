@@ -8,7 +8,6 @@ import com.google.common.collect.ImmutableList;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -211,12 +210,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   private void updateUserAccessTiers(DbUser dbUser, Agent agent) {
     final List<DbAccessTier> previousAccessTiers = accessTierService.getAccessTiersForUser(dbUser);
 
-    final List<DbAccessTier> newAccessTiers =
-        shouldGrantUserTierAccess(
-                dbUser, requiredModulesForRegisteredTier, REGISTERED_TIER_SHORT_NAME)
-            ? getUserAccessTiersList(dbUser)
-            : Collections.emptyList();
-
+    final List<DbAccessTier> newAccessTiers = getUserAccessTiersList(dbUser);
     if (!newAccessTiers.equals(previousAccessTiers)) {
       userServiceAuditor.fireUpdateAccessTiersAction(
           dbUser, previousAccessTiers, newAccessTiers, agent);
@@ -246,27 +240,40 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       ImmutableList.of(AccessModuleName.CT_COMPLIANCE_TRAINING);
 
   private List<DbAccessTier> getUserAccessTiersList(DbUser dbUser) {
+    // If user does NOT have access to RT user should not have access to any TIER
+    if (!shouldGrantUserTierAccess(
+        dbUser, requiredModulesForRegisteredTier, REGISTERED_TIER_SHORT_NAME)) {
+      return Collections.emptyList();
+    }
     // This is a temporary measure until Controlled Tier Beta access controls is implemented.
     boolean allowAccessToAllTiersForRegisteredUsers =
         configProvider.get().featureFlags.unsafeAllowAccessToAllTiersForRegisteredUsers;
 
+    // If unsafeAllowAccessToAllTiersForRegisteredUsers is true send ALL tier regardless the user
+    // has access/qualify for it
     if (allowAccessToAllTiersForRegisteredUsers) {
       return accessTierService.getAllTiers();
     }
 
-    DbAccessTier registeredAccessTier =
-        accessTierService.getAccessTierByName(REGISTERED_TIER_SHORT_NAME).get();
-    Optional<DbAccessTier> controlledAccessTier =
-        accessTierService.getAccessTierByName(CONTROLLED_TIER_SHORT_NAME);
+    // User is already qualified for RT
+    List<DbAccessTier> userAccessTiers =
+        com.google.common.collect.Lists.newArrayList(accessTierService.getRegisteredTierOrThrow());
 
-    // If unsafeAllowAccessToAllTiersForRegisteredUsers is true OR if user has completed all The CT
-    // Steps. Send both Registered Access Tier and Controlled Access Tier, else just send Registered
+    // If unsafeAllowAccessToAllTiersForRegisteredUsers is false AND if user has completed all The
+    // CT
+    // Steps. Add Controlled Access Tier to the list, else just send Registered
     // Access Tier
-    return shouldGrantUserTierAccess(
-                dbUser, requiredModulesForControlledTier, CONTROLLED_TIER_SHORT_NAME)
-            && controlledAccessTier.isPresent()
-        ? Arrays.asList(registeredAccessTier, controlledAccessTier.get())
-        : Arrays.asList(registeredAccessTier);
+    accessTierService
+        .getAccessTierByName(CONTROLLED_TIER_SHORT_NAME)
+        .ifPresent(
+            tier -> {
+              if (shouldGrantUserTierAccess(
+                  dbUser, requiredModulesForControlledTier, CONTROLLED_TIER_SHORT_NAME)) {
+                userAccessTiers.add(tier);
+              }
+            });
+
+    return userAccessTiers;
   }
 
   private boolean shouldGrantUserTierAccess(

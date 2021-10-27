@@ -65,5 +65,7 @@ public interface AccessTierService {
 
   List<DbUser> getAllRegisteredTierUsers();
 
+  DbAccessTier getRegisteredTierOrThrow();
+
   Optional<DbAccessTier> getAccessTierByName(String accessTierShortName);
 }

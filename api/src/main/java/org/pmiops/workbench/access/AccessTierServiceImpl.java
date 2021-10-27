@@ -192,7 +192,8 @@ public class AccessTierServiceImpl implements AccessTierService {
     return accessTierDao.findOneByShortName(accessTierShortName);
   }
 
-  private DbAccessTier getRegisteredTierOrThrow() {
+  @Override
+  public DbAccessTier getRegisteredTierOrThrow() {
     return accessTierDao
         .findOneByShortName(REGISTERED_TIER_SHORT_NAME)
         .orElseThrow(() -> new ServerErrorException("Cannot find Registered Tier in database."));
