@@ -1100,33 +1100,6 @@ public class UserServiceAccessTest {
     assertControlledTierEnabled(dbUser);
   }
 
-  // TODO Check w/ Joel: tests below are dupl.
-  @Test
-  public void test_updateUserWithRetries_emailNotValidForRT() {
-    providedWorkbenchConfig.featureFlags.unsafeAllowAccessToAllTiersForRegisteredUsers = false;
-    assertThat(userAccessTierDao.findAll()).isEmpty();
-    dbUser = completeRTAndCTRequirements(dbUser);
-    rtTierConfig.setEmailDomains(Arrays.asList("fakeDomain.com"));
-    updateInstitutionTier(rtTierConfig);
-
-    dbUser = updateUserWithRetries(Function.identity());
-
-    assertUserNotInAccessTier(dbUser, registeredTier);
-    assertUserNotInAccessTier(dbUser, controlledTier);
-  }
-
-  @Test
-  public void test_updateUserWithRetries_updateInvalidEmailForRT() {
-    test_updateUserWithRetries_emailNotValidForRT();
-    rtTierConfig.setEmailDomains(Arrays.asList("domain.com"));
-    updateInstitutionTier(rtTierConfig);
-
-    dbUser = updateUserWithRetries(Function.identity());
-
-    assertRegisteredTierEnabled(dbUser);
-    assertControlledTierEnabled(dbUser);
-  }
-
   @Test
   public void test_updateUserWithRetries_completeCTRequirementsOnly() {
     providedWorkbenchConfig.featureFlags.unsafeAllowAccessToAllTiersForRegisteredUsers = false;
@@ -1185,7 +1158,7 @@ public class UserServiceAccessTest {
 
   @Test
   public void test_updateUserWithRetries_eraNotRequiredForCT() {
-    //    Institution does not require era
+    // era Is required for RT  but not for CT
     providedWorkbenchConfig.featureFlags.unsafeAllowAccessToAllTiersForRegisteredUsers = false;
     assertThat(userAccessTierDao.findAll()).isEmpty();
 
@@ -1254,8 +1227,8 @@ public class UserServiceAccessTest {
 
     dbUser = completeRTAndCTRequirements(dbUser);
 
-    // Setting eraRequired to false for RT just so user can still have access to RT even after NOT
-    // bypassing era
+    // UserAccessTest will skip era check for RT because eraRequired in Institution is false
+    // for CT it eraCommon check will return yes since the flag enableEraCommons is false
     rtTierConfig.setEraRequired(false);
     updateInstitutionTier(rtTierConfig);
 
@@ -1303,7 +1276,6 @@ public class UserServiceAccessTest {
     assertControlledTierEnabled(dbUser);
   }
 
-  // TODO check w/ Joel: should the institution have controlled access tier?
   @Test
   public void test_updateUserWithRetries_noCTUnsafeAllowAccessToAllTiersForRegisteredUsersIsTrue() {
     providedWorkbenchConfig.featureFlags.unsafeAllowAccessToAllTiersForRegisteredUsers = true;
@@ -1311,6 +1283,7 @@ public class UserServiceAccessTest {
 
     dbUser = registerUser(new Timestamp(PROVIDED_CLOCK.millis()), dbUser);
     TestMockFactory.removeControlledTierForTests(accessTierDao);
+    removeCTConfigFromInstitution();
     dbUser = updateUserWithRetries(Function.identity());
 
     assertRegisteredTierEnabled(dbUser);
@@ -1326,6 +1299,8 @@ public class UserServiceAccessTest {
 
     dbUser = registerUser(new Timestamp(PROVIDED_CLOCK.millis()), dbUser);
     TestMockFactory.removeControlledTierForTests(accessTierDao);
+    removeCTConfigFromInstitution();
+
     dbUser = updateUserWithRetries(Function.identity());
 
     assertRegisteredTierEnabled(dbUser);
@@ -1462,6 +1437,16 @@ public class UserServiceAccessTest {
             .eraRequired(true)
             .membershipRequirement(InstitutionMembershipRequirement.DOMAINS)
             .addEmailDomainsItem("domain.com"));
+    institutionService.updateInstitution(institution.getShortName(), institution);
+  }
+
+  private void removeCTConfigFromInstitution() {
+    Institution institution = institutionService.getByUser(dbUser).get();
+    institution
+        .getTierConfigs()
+        .removeIf(
+            tier ->
+                tier.getAccessTierShortName().equals(AccessTierService.CONTROLLED_TIER_SHORT_NAME));
     institutionService.updateInstitution(institution.getShortName(), institution);
   }
 
