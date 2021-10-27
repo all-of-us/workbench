@@ -1,7 +1,7 @@
 import {leoRuntimesApi} from 'app/services/notebooks-swagger-fetch-clients';
 import {disksApi, runtimeApi} from 'app/services/swagger-fetch-clients';
 import {DEFAULT, switchCase, withAsyncErrorHandling} from 'app/utils';
-import {ExceededActionCountError, LeoRuntimeInitializationAbortedError, LeoRuntimeInitializer, } from 'app/utils/leo-runtime-initializer';
+import { ExceededActionCountError, ExceededErrorCountError, LeoRuntimeInitializationAbortedError, LeoRuntimeInitializer, } from 'app/utils/leo-runtime-initializer';
 import {
   AutopauseMinuteThresholds,
   ComputeType,
@@ -19,11 +19,21 @@ import {
   useStore
 } from 'app/utils/stores';
 
-import {DataprocConfig, GpuConfig, Runtime, RuntimeStatus} from 'generated/fetch';
+import { DataprocConfig, ErrorCode, GpuConfig, Runtime, RuntimeStatus, SecuritySuspendedErrorParameters} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
 const {useState, useEffect} = React;
+
+export class ComputeSecuritySuspendedError extends Error {
+  constructor(public params: SecuritySuspendedErrorParameters) {
+    super('user is suspended from compute');
+    // See https://github.com/Microsoft/TypeScript/wiki/Breaking-Changes#extending-built-ins-like-error-array-and-map-may-no-longer-work
+    Object.setPrototypeOf(this, ComputeSecuritySuspendedError.prototype);
+
+    this.name = 'ComputeSecuritySuspendedError';
+  }
+}
 
 export enum RuntimeStatusRequest {
   DeleteRuntime = 'DeleteRuntime',
@@ -72,6 +82,29 @@ export interface RuntimeCtx {
   dataprocExists: boolean;
   pdExists: boolean;
   enablePD: boolean;
+}
+
+const errorToSecuritySuspendedParams = async(error): Promise<SecuritySuspendedErrorParameters> => {
+  if (error?.status !== 412) {
+    return null;
+  }
+  const body = await error?.json();
+  if (body?.errorCode !== ErrorCode.COMPUTESECURITYSUSPENDED) {
+    return null;
+  }
+
+  return body?.parameters as SecuritySuspendedErrorParameters;
+}
+
+export const maybeUnwrapSecuritySuspendedError = async(error: Error): Promise<Error> => {
+  if (error instanceof ExceededErrorCountError) {
+    error = error.lastError;
+  }
+  const suspendedParams = await errorToSecuritySuspendedParams(error);
+  if (suspendedParams) {
+    return new ComputeSecuritySuspendedError(suspendedParams);
+  }
+  return error;
 }
 
 // Visible for testing only.

@@ -6,6 +6,7 @@ import {NavigationProps} from 'app/utils/navigation';
 import {fetchAbortableRetry} from 'app/utils/retry';
 import {MatchParams, RuntimeStore} from 'app/utils/stores';
 
+
 import {Button} from 'app/components/buttons';
 import {FlexRow} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
@@ -23,7 +24,7 @@ import {
   withUserProfile
 } from 'app/utils';
 import {Kernels} from 'app/utils/notebook-kernels';
-import {maybeInitializeRuntime, withRuntimeStore} from 'app/utils/runtime-utils';
+import { maybeUnwrapSecuritySuspendedError, ComputeSecuritySuspendedError, maybeInitializeRuntime, withRuntimeStore} from 'app/utils/runtime-utils';
 import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {environment} from 'environments/environment';
@@ -31,6 +32,8 @@ import {Profile, Runtime, RuntimeStatus} from 'generated/fetch';
 import {RouteComponentProps, withRouter} from 'react-router-dom';
 import {appendNotebookFileSuffix, dropNotebookFileSuffix} from './util';
 import {parseQueryParams} from "app/components/app-router";
+import { ErrorMode, NotebookFrameError, SecuritySuspendedMessage } from './notebook-frame-error';
+import { ExceededErrorCountError } from 'app/utils/leo-runtime-initializer';
 
 export enum LeoApplicationType {
   Notebook,
@@ -240,7 +243,7 @@ const ProgressCard: React.FunctionComponent<{progressState: Progress, cardState:
 
 interface State {
   leoUrl: string;
-  showErrorModal: boolean;
+  error: Error;
   progress: Progress;
   progressComplete: Map<Progress, boolean>;
 }
@@ -275,7 +278,7 @@ export const LeonardoAppLauncher = fp.flow(
       super(props);
       this.state = {
         leoUrl: undefined,
-        showErrorModal: false,
+        error: undefined,
         progress: Progress.Unknown,
         progressComplete: new Map<Progress, boolean>(),
       };
@@ -365,7 +368,12 @@ export const LeonardoAppLauncher = fp.flow(
 
       // Only kick off the initialization process once the runtime is loaded.
       if (this.state.progress === Progress.Unknown && runtime !== undefined) {
-        this.initializeRuntimeStatusChecking(workspace.namespace);
+        this.initializeRuntimeStatusChecking(workspace.namespace)
+            .catch(async(error) => {
+              this.setState({
+                error: await maybeUnwrapSecuritySuspendedError(error)
+              })
+            });
       }
 
       // If we're already loaded (viewing the notebooks iframe), and the
@@ -480,9 +488,22 @@ export const LeonardoAppLauncher = fp.flow(
     }
 
     render() {
-      const {showErrorModal, progress, progressComplete, leoUrl} = this.state;
+      const {error, progress, progressComplete, leoUrl} = this.state;
       const {leoAppType} = this.props;
       const creatingNewNotebook = this.isCreatingNewNotebook();
+
+
+      if (error) {
+        return <NotebookFrameError>
+          {error instanceof ComputeSecuritySuspendedError ?
+           <SecuritySuspendedMessage error={error} /> :
+           <>
+             Unknown error loading analysis environment, please try again.
+           </>
+          }
+
+        </NotebookFrameError>;
+      }
       return <React.Fragment>
         {progress !== Progress.Loaded ? <div style={styles.main}>
           <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}
@@ -518,17 +539,6 @@ export const LeonardoAppLauncher = fp.flow(
           <div style={{borderBottom: '5px solid #2691D0', width: '100%'}}/>
           <Iframe frameBorder={0} url={leoUrl} width='100%' height='100%'/>
         </div>}
-        {showErrorModal && <Modal>
-          <ModalTitle>
-            {creatingNewNotebook ? 'Error creating notebook.' : 'Error fetching notebook'}
-          </ModalTitle>
-          <ModalBody>
-            Please refresh and try again.
-          </ModalBody>
-          <ModalFooter>
-            <Button type='secondary' onClick={() => window.history.back()}>Go Back</Button>
-          </ModalFooter>
-        </Modal>}
       </React.Fragment>;
     }
   });

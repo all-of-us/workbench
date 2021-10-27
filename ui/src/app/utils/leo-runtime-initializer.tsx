@@ -41,7 +41,7 @@ export class ExceededActionCountError extends LeoRuntimeInitializationFailedErro
 }
 
 export class ExceededErrorCountError extends LeoRuntimeInitializationFailedError {
-  constructor(message, runtime?: Runtime) {
+  constructor(message, public readonly lastError: Error, runtime?: Runtime) {
     super(message, runtime);
     Object.setPrototypeOf(this, ExceededErrorCountError.prototype);
 
@@ -235,6 +235,10 @@ export class LeoRuntimeInitializer {
     return e instanceof Response && e.status === 404;
   }
 
+  private isClientError(e: any): boolean {
+    return e instanceof Response && e.status >= 400 && e.status < 500;
+  }
+
   private handleUnknownError(e: any) {
     if (e instanceof Response && e.status >= 500 && e.status < 600) {
       this.serverErrorCount++;
@@ -304,12 +308,16 @@ export class LeoRuntimeInitializer {
         // hasn't been created yet.
         this.currentRuntime = null;
         this.onPoll(null);
+      } else if (this.isClientError(e)) {
+          return this.reject(
+            new ExceededErrorCountError(
+              `Encountered unexpected client error (${e.status})`, e, this.currentRuntime));
       } else {
         this.handleUnknownError(e);
         if (this.hasTooManyServerErrors()) {
           return this.reject(
             new ExceededErrorCountError(
-              `Reached max server error count (${this.maxServerErrorCount})`, this.currentRuntime));
+              `Reached max server error count (${this.maxServerErrorCount})`, e, this.currentRuntime));
         }
       }
     }
@@ -344,7 +352,7 @@ export class LeoRuntimeInitializer {
         if (this.hasTooManyServerErrors()) {
           return this.reject(
             new ExceededErrorCountError(
-              `Reached max server error count (${this.maxServerErrorCount})`, this.currentRuntime));
+              `Reached max server error count (${this.maxServerErrorCount})`, e, this.currentRuntime));
         }
       }
     }
