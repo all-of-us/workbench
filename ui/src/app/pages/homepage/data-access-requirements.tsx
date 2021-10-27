@@ -44,7 +44,7 @@ import {ReactComponent as individual} from 'assets/icons/DAR/individual.svg';
 import {ReactComponent as physical} from 'assets/icons/DAR/physical.svg';
 import {ReactComponent as survey} from 'assets/icons/DAR/survey.svg';
 import {ReactComponent as wearable} from 'assets/icons/DAR/wearable.svg';
-import {AccessTierShortNames} from 'app/utils/access-tiers';
+import {AccessTierDisplayNames, AccessTierShortNames} from 'app/utils/access-tiers';
 import {environment} from 'environments/environment';
 import {useQuery} from 'app/components/app-router';
 import {openZendeskWidget} from 'app/utils/zendesk';
@@ -609,13 +609,14 @@ const DataDetail = (props: {icon: string, text: string}) => {
 
 const RegisteredTierCard = (props: {profile: Profile, activeModule: AccessModule, spinnerProps: WithSpinnerOverlayProps}) => {
   const {profile, activeModule, spinnerProps} = props;
+  const rtDisplayName = AccessTierDisplayNames.Registered;
   return <FlexRow style={styles.card}>
     <FlexColumn>
       <div style={styles.cardStep}>Step 1</div>
       <div style={styles.cardHeader}>Complete Registration</div>
       <FlexRow>
         <RegisteredTierBadge/>
-        <div style={styles.dataHeader}>Registered Tier data</div>
+        <div style={styles.dataHeader}>{rtDisplayName} data</div>
       </FlexRow>
       <div style={styles.dataDetails}>Once registered, you’ll have access to:</div>
       <DataDetail icon='individual' text='Individual (not aggregated) data'/>
@@ -641,17 +642,19 @@ const ControlledTierCard = (props: {profile: Profile, spinnerProps: WithSpinnerO
   // 2) Registered Tier DOES NOT require era
   // 3) CT Requirement DOES require era
   const displayEraCommons = isSigned && !registeredTierEligibility?.eraRequired && controlledTierEligibility.eraRequired;
+  const rtDisplayName = AccessTierDisplayNames.Registered;
+  const ctDisplayName = AccessTierDisplayNames.Controlled;
   return <FlexRow data-test-id='controlled-card' style={styles.card}>
     <FlexColumn>
       <div style={styles.cardStep}>Step 2</div>
       <div style={styles.cardHeader}>Additional Data Access</div>
       <FlexRow>
         <ControlledTierBadge/>
-        <div style={styles.dataHeader}>Controlled Tier data - </div>
+        <div style={styles.dataHeader}>{ctDisplayName} data - </div>
         <div style={styles.ctDataOptional}>&nbsp;Optional</div>
       </FlexRow>
       {isEligible
-        ? <div data-test-id='eligible-text' style={styles.dataDetails}>You are eligible to access Controlled Tier Data</div>
+        ? <div data-test-id='eligible-text' style={styles.dataDetails}>You are eligible to access {ctDisplayName} data</div>
         : <div>
           <div data-test-id='ineligible-text' style={styles.dataDetails}>
             You are not currently eligible; action by {institutionDisplayName} required.
@@ -660,7 +663,7 @@ const ControlledTierCard = (props: {profile: Profile, spinnerProps: WithSpinnerO
             <SupportButton label='Request Access'/>
           </div>
         </div>}
-      <div style={styles.dataDetails}>In addition to Registered Tier data, the Controlled Tier curated dataset contains:</div>
+      <div style={styles.dataDetails}>In addition to {rtDisplayName} data, the {ctDisplayName} curated dataset contains:</div>
       <DataDetail icon='genomic' text='Genomic data'/>
       <DataDetail icon='additional' text='Additional demographic details'/>
     </FlexColumn>
@@ -670,7 +673,7 @@ const ControlledTierCard = (props: {profile: Profile, spinnerProps: WithSpinnerO
                           text={`${institutionDisplayName} must sign an institutional agreement`}/>
       <ControlledTierStep data-test-id='controlled-user-email'
                           enabled={isEligible}
-                          text={`${institutionDisplayName} must allow you to access controlled tier data`}/>
+                          text={`${institutionDisplayName} must allow you to access ${ctDisplayName} data`}/>
       {displayEraCommons &&
          <ControlledTierEraModule profile={profile} eligible={isEligible} spinnerProps={spinnerProps}/>}
     </FlexColumn>
