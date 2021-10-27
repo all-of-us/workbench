@@ -169,7 +169,7 @@ const styles = reactStyles({
     alignSelf: 'center',
     paddingRight: '0.5em',
   },
-  foregroundModuleBox: {
+  clickableModuleBox: {
     padding: '0.5em',
     margin: '0.2em',
     width: '593px',
@@ -437,11 +437,11 @@ const LoginGovHelpText = (props: {profile: Profile, afterInitialClick: boolean})
       </div>);
 }
 
-const ModuleBox = (props: {foreground: boolean, action: Function, children}) => {
-  const {foreground, action, children} = props;
-  return foreground
+const ModuleBox = (props: {clickable: boolean, action: Function, children}) => {
+  const {clickable, action, children} = props;
+  return clickable
     ? <Clickable onClick={() => action()}>
-      <FlexRow style={styles.foregroundModuleBox}>{children}</FlexRow>
+      <FlexRow style={styles.clickableModuleBox}>{children}</FlexRow>
     </Clickable>
     : <FlexRow style={styles.backgroundModuleBox}>{children}</FlexRow>;
 };
@@ -486,7 +486,7 @@ const MaybeModule = ({profile, moduleName, active, spinnerProps}: ModuleProps): 
                 showSpinner={spinnerProps.showSpinner}/>
             : <Next/>)}
       </FlexRow>
-      <ModuleBox foreground={active} action={() => { setShowRefresh(true); moduleAction(); }}>
+      <ModuleBox clickable={active} action={() => { setShowRefresh(true); moduleAction(); }}>
         <ModuleIcon moduleName={moduleName} completedOrBypassed={isCompliant(status)}/>
         <FlexColumn>
           <div style={active ? styles.activeModuleText : styles.inactiveModuleText}>
@@ -526,7 +526,7 @@ const ControlledTierEraModule = (props: {profile: Profile, eligible: boolean, sp
         {showRefresh && refreshAction
           && <Refresh refreshAction={refreshAction} showSpinner={spinnerProps.showSpinner}/>}
       </FlexRow>
-      <ModuleBox foreground={eligible && !isCompliant(status)} action={() => { setShowRefresh(true); redirectToNiH(); }}>
+      <ModuleBox clickable={eligible && !isCompliant(status)} action={() => { setShowRefresh(true); redirectToNiH(); }}>
         <ModuleIcon moduleName={moduleName} eligible={eligible} completedOrBypassed={isCompliant(status)}/>
         <FlexColumn>
           <div style={(!eligible || isCompliant(status)) ? styles.inactiveModuleText : styles.activeModuleText}>
