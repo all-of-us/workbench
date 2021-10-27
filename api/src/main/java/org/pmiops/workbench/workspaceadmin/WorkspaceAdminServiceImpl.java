@@ -155,10 +155,10 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
 
   @Override
   public AdminWorkspaceCloudStorageCounts getAdminWorkspaceCloudStorageCounts(
-      String workspaceNamespace, String workspaceName) {
+      String workspaceNamespace, String firecloudName) {
     String bucketName =
         fireCloudService
-            .getWorkspaceAsService(workspaceNamespace, workspaceName)
+            .getWorkspaceAsService(workspaceNamespace, firecloudName)
             .getWorkspace()
             .getBucketName();
 
@@ -319,11 +319,11 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
   // NOTE: may be an undercount since we only retrieve the first Page of Storage List results
   @Override
   public List<FileDetail> listFiles(String workspaceNamespace) {
-    final String workspaceName =
+    final String firecloudName =
         getWorkspaceByNamespaceOrThrow(workspaceNamespace).getFirecloudName();
     final String bucketName =
         fireCloudService
-            .getWorkspaceAsService(workspaceNamespace, workspaceName)
+            .getWorkspaceAsService(workspaceNamespace, firecloudName)
             .getWorkspace()
             .getBucketName();
 
