@@ -54,6 +54,7 @@ import * as fp from 'lodash/fp';
 import {Column} from 'primereact/column';
 import {DataTable} from 'primereact/datatable';
 import * as React from 'react';
+import {useState} from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 
 export const styles = reactStyles({
@@ -198,6 +199,18 @@ export const styles = reactStyles({
     fontSize: '12px',
     padding: '0.5rem',
     borderRadius: '0.5em'
+  },
+  cohortItemName: {
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap'
+  },
+  listItemName: {
+    lineHeight: '1.5rem',
+    color: colors.primary,
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap'
   }
 });
 
@@ -245,30 +258,40 @@ export const COMPARE_DOMAINS_FOR_DISPLAY = (a: Domain, b: Domain) => {
 
 const ImmutableListItem: React.FunctionComponent <{
   name: string, onChange: Function, checked: boolean}> = ({name, onChange, checked}) => {
+  const [showNameTooltip, setShowNameTooltip] = useState(false);
     return <div style={styles.listItem}>
       <input type='checkbox' value={name} onChange={() => onChange()}
              style={styles.listItemCheckbox} checked={checked}/>
-      <div style={{lineHeight: '1.5rem', color: colors.primary}}>{name}</div>
+      <TooltipTrigger disabled={!showNameTooltip} content={<div>{name}</div>}>
+        <div style={styles.listItemName}
+             onMouseOver={(e) => setShowNameTooltip(checkNameWidth(e.target as HTMLDivElement))}>{name}</div>
+      </TooltipTrigger>
     </div>;
   };
 
 const ImmutableWorkspaceCohortListItem: React.FunctionComponent<{
   name: string, onChange: Function, checked: boolean, cohortId: number, namespace: string, wid: string}>
     = ({name, onChange, checked, cohortId, namespace, wid}) => {
+      const [showNameTooltip, setShowNameTooltip] = useState(false);
       return <div style={styles.listItem}>
         <input type='checkbox' value={name} onChange={() => onChange()}
                style={styles.listItemCheckbox} checked={checked}/>
-        <FlexRow style={{lineHeight: '1.5rem', color: colors.primary, width: '100%'}}>
-          <div>{name}</div>
+        <FlexRow style={{lineHeight: '1.5rem', color: colors.primary, width: '100%', minWidth: 0}}>
+          <TooltipTrigger disabled={!showNameTooltip} content={<div>{name}</div>}>
+            <div style={styles.cohortItemName}
+                 onMouseOver={(e) => setShowNameTooltip(checkNameWidth(e.target as HTMLDivElement))}>{name}</div>
+          </TooltipTrigger>
           <div style={{marginLeft: 'auto', paddingRight: '1rem'}}>
             <a href={'/workspaces/' + namespace + '/' + wid + '/data/cohorts/' + cohortId + '/review/cohort-description'}
             target='_blank'>
               <ClrIcon size='20' shape='bar-chart'/>
             </a>
           </div>
-    </FlexRow>
-  </div>;
+        </FlexRow>
+      </div>;
     };
+
+const checkNameWidth = (element: HTMLDivElement) => element.offsetWidth < element.scrollWidth;
 
 const Subheader = (props) => {
   return <div style={{...styles.subheader, ...props.style}}>{props.children}</div>;
