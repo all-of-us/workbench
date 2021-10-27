@@ -390,14 +390,14 @@ public class CohortsControllerTest {
   }
 
   private void stubGetWorkspaceAcl(
-      String ns, String name, String creator, WorkspaceAccessLevel access) {
+      String ns, String firecloudName, String creator, WorkspaceAccessLevel access) {
     FirecloudWorkspaceACL workspaceAccessLevelResponse = new FirecloudWorkspaceACL();
     FirecloudWorkspaceAccessEntry accessLevelEntry =
         new FirecloudWorkspaceAccessEntry().accessLevel(access.toString());
     Map<String, FirecloudWorkspaceAccessEntry> userEmailToAccessEntry =
         ImmutableMap.of(creator, accessLevelEntry);
     workspaceAccessLevelResponse.setAcl(userEmailToAccessEntry);
-    when(fireCloudService.getWorkspaceAclAsService(ns, name))
+    when(fireCloudService.getWorkspaceAclAsService(ns, firecloudName))
         .thenReturn(workspaceAccessLevelResponse);
   }
 

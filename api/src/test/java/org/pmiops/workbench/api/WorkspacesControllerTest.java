@@ -548,12 +548,12 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void testCreateWorkspace() throws Exception {
+  public void testCreateWorkspace() {
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
     verify(fireCloudService)
         .createWorkspace(
-            workspace.getNamespace(), workspace.getName(), accessTier.getAuthDomainName());
+            workspace.getNamespace(), workspace.getId(), accessTier.getAuthDomainName());
     stubGetWorkspace(
         workspace.getNamespace(),
         workspace.getName(),
@@ -1944,7 +1944,7 @@ public class WorkspacesControllerTest {
 
     when(fireCloudService.getWorkspaceAclAsService("cloned-ns", "cloned"))
         .thenReturn(workspaceAclsFromCloned);
-    when(fireCloudService.getWorkspaceAclAsService(workspace.getNamespace(), workspace.getName()))
+    when(fireCloudService.getWorkspaceAclAsService(workspace.getNamespace(), workspace.getId()))
         .thenReturn(workspaceAclsFromOriginal);
 
     currentUser = cloner;
