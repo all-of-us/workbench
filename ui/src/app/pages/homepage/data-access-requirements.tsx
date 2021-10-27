@@ -512,7 +512,8 @@ const MaybeModule = ({profile, moduleName, active, spinnerProps}: ModuleProps): 
   return isEnabledInEnvironment ? <Module profile={profile}/> : null;
 };
 
-const ControlledTierEraModule = ({profile, spinnerProps}): JSX.Element => {
+const ControlledTierEraModule = (props: {profile: Profile, eligible: boolean, spinnerProps: WithSpinnerOverlayProps}): JSX.Element => {
+  const {profile, eligible, spinnerProps} = props;
   // whether to show the refresh button: this module has been clicked
   const [showRefresh, setShowRefresh] = useState(false);
   const moduleName = AccessModule.ERACOMMONS;
@@ -525,10 +526,10 @@ const ControlledTierEraModule = ({profile, spinnerProps}): JSX.Element => {
         {showRefresh && refreshAction
           && <Refresh refreshAction={refreshAction} showSpinner={spinnerProps.showSpinner}/>}
       </FlexRow>
-      <ModuleBox foreground={!isCompliant(status)} action={() => { setShowRefresh(true); redirectToNiH(); }}>
-        <ModuleIcon moduleName={moduleName} completedOrBypassed={isCompliant(status)}/>
+      <ModuleBox foreground={eligible && !isCompliant(status)} action={() => { setShowRefresh(true); redirectToNiH(); }}>
+        <ModuleIcon moduleName={moduleName} eligible={eligible} completedOrBypassed={isCompliant(status)}/>
         <FlexColumn>
-          <div style={isCompliant(status) ? styles.inactiveModuleText : styles.activeModuleText}>
+          <div style={(!eligible || isCompliant(status)) ? styles.inactiveModuleText : styles.activeModuleText}>
             <DARTitleComponent/>
           </div>
           {isCompliant(status) && <div style={styles.moduleDate}>{getStatusText(status)}</div>}
@@ -668,7 +669,7 @@ const ControlledTierCard = (props: {profile: Profile, spinnerProps: WithSpinnerO
                           enabled={isEligible}
                           text={`${institutionDisplayName} must allow you to access controlled tier data`}/>
       {displayEraCommons &&
-         <ControlledTierEraModule profile={profile} spinnerProps={spinnerProps}/>}
+         <ControlledTierEraModule profile={profile} eligible={isEligible} spinnerProps={spinnerProps}/>}
     </FlexColumn>
   </FlexRow>
 };
