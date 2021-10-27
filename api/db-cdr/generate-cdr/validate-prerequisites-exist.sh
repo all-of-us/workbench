@@ -40,7 +40,7 @@ DEPENDENT_TABLES=("activity_summary"
             "visit_occurrence"
             "visit_occurrence_ext"
             "vocabulary")
-INCOMPATIBLE_DATASETS=("R2019Q4R3" "R2019Q4R4")
+INCOMPATIBLE_DATASETS=("R2019Q4R3" "R2019Q4R4", "R2020Q4R3")
 
 function loadCSVFile() {
   local file=$1
