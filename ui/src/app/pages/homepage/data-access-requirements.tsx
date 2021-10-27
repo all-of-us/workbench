@@ -189,10 +189,10 @@ const styles = reactStyles({
     marginLeft: '0.2em',
     marginRight: '1em',
   },
-  activeModuleText: {
+  clickableModuleText: {
     color: colors.primary,
   },
-  inactiveModuleText: {
+  backgroundModuleText: {
     opacity: '0.5',
   },
   moduleDate: {
@@ -392,7 +392,7 @@ const TemporaryRASModule = () => {
     <FlexRow style={styles.moduleCTA}/>
     <FlexRow style={styles.backgroundModuleBox}>
       <ModuleIcon moduleName={moduleName} completedOrBypassed={false} eligible={false}/>
-      <FlexColumn style={styles.inactiveModuleText}>
+      <FlexColumn style={styles.backgroundModuleText}>
         <DARTitleComponent/>
         <div style={{fontSize: '14px', marginTop: '0.5em'}}>
           <b>Temporarily disabled.</b> Due to technical difficulties, this step is disabled.
@@ -489,7 +489,7 @@ const MaybeModule = ({profile, moduleName, active, spinnerProps}: ModuleProps): 
       <ModuleBox clickable={active} action={() => { setShowRefresh(true); moduleAction(); }}>
         <ModuleIcon moduleName={moduleName} completedOrBypassed={isCompliant(status)}/>
         <FlexColumn>
-          <div style={active ? styles.activeModuleText : styles.inactiveModuleText}>
+          <div style={active ? styles.clickableModuleText : styles.backgroundModuleText}>
             <DARTitleComponent/>
             {(moduleName === AccessModule.RASLINKLOGINGOV) && <LoginGovHelpText profile={profile} afterInitialClick={showRefresh}/>}
           </div>
@@ -520,16 +520,19 @@ const ControlledTierEraModule = (props: {profile: Profile, eligible: boolean, sp
   const {DARTitleComponent, refreshAction, isEnabledInEnvironment} = getAccessModuleConfig(moduleName);
   const status = getAccessModuleStatusByName(profile, moduleName)
 
+  // module is not clickable if (user is ineligible for CT) or (user has completed/bypassed module already)
+  const clickable = eligible && !isCompliant(status);
+
   const Module = () => {
     return <FlexRow data-test-id={`module-${moduleName}`}>
       <FlexRow style={styles.moduleCTA}>
         {showRefresh && refreshAction
           && <Refresh refreshAction={refreshAction} showSpinner={spinnerProps.showSpinner}/>}
       </FlexRow>
-      <ModuleBox clickable={eligible && !isCompliant(status)} action={() => { setShowRefresh(true); redirectToNiH(); }}>
+      <ModuleBox clickable={clickable} action={() => { setShowRefresh(true); redirectToNiH(); }}>
         <ModuleIcon moduleName={moduleName} eligible={eligible} completedOrBypassed={isCompliant(status)}/>
         <FlexColumn>
-          <div style={(!eligible || isCompliant(status)) ? styles.inactiveModuleText : styles.activeModuleText}>
+          <div style={clickable ? styles.clickableModuleText : styles.backgroundModuleText}>
             <DARTitleComponent/>
           </div>
           {isCompliant(status) && <div style={styles.moduleDate}>{getStatusText(status)}</div>}
@@ -684,7 +687,7 @@ const ControlledTierStep = (props: {enabled: boolean, text: String}) => {
           ? <CheckCircle data-test-id='eligible' style={{color: colors.success}}/>
           : <MinusCircle data-test-id='ineligible' style={{color: colors.disabled}}/>}
       </div>
-      <FlexColumn style={styles.inactiveModuleText}>
+      <FlexColumn style={styles.backgroundModuleText}>
         <div>{props.text}
         </div>
        </FlexColumn>
