@@ -657,7 +657,7 @@ const ControlledTierCard = (props: {profile: Profile, spinnerProps: WithSpinnerO
         ? <div data-test-id='eligible-text' style={styles.dataDetails}>You are eligible to access {ctDisplayName} data</div>
         : <div>
           <div data-test-id='ineligible-text' style={styles.dataDetails}>
-            You are not currently eligible; action by {institutionDisplayName} required.
+            You are not currently eligible; action by {institutionDisplayName} is required.
           </div>
           <div style={styles.requestAccess}>
             <SupportButton label='Request Access'/>
