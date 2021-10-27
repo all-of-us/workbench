@@ -139,12 +139,12 @@ public class NotebooksController implements NotebooksApiDelegate {
 
   @Override
   public ResponseEntity<NotebookLockingMetadataResponse> getNotebookLockingMetadata(
-      String workspaceNamespace, String workspaceName, String notebookName) {
+      String workspaceNamespace, String firecloudName, String notebookName) {
 
     // Retrieving the workspace is done first, which acts as an access check.
     String bucketName =
         fireCloudService
-            .getWorkspace(workspaceNamespace, workspaceName)
+            .getWorkspace(workspaceNamespace, firecloudName)
             .getWorkspace()
             .getBucketName();
 
