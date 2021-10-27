@@ -38,8 +38,10 @@ public class OfflineEgressController implements OfflineEgressApiDelegate {
       taskQueueService.pushEgressEventTask(eventId);
     }
 
-    log.warning(
-        String.format("found and re-enqueued %d old PENDING events", oldPendingEventIds.size()));
+    if (oldPendingEventIds.size() > 0) {
+      log.warning(
+          String.format("found and re-enqueued %d old PENDING events", oldPendingEventIds.size()));
+    }
     return ResponseEntity.noContent().build();
   }
 }
