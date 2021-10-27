@@ -199,6 +199,18 @@ export const styles = reactStyles({
     fontSize: '12px',
     padding: '0.5rem',
     borderRadius: '0.5em'
+  },
+  cohortItemName: {
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap'
+  },
+  listItemName: {
+    lineHeight: '1.5rem',
+    color: colors.primary,
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap'
   }
 });
 
@@ -246,10 +258,14 @@ export const COMPARE_DOMAINS_FOR_DISPLAY = (a: Domain, b: Domain) => {
 
 const ImmutableListItem: React.FunctionComponent <{
   name: string, onChange: Function, checked: boolean}> = ({name, onChange, checked}) => {
+  const [showNameTooltip, setShowNameTooltip] = useState(false);
     return <div style={styles.listItem}>
       <input type='checkbox' value={name} onChange={() => onChange()}
              style={styles.listItemCheckbox} checked={checked}/>
-      <div style={{lineHeight: '1.5rem', color: colors.primary}}>{name}</div>
+      <TooltipTrigger disabled={!showNameTooltip} content={<div>{name}</div>}>
+        <div style={styles.listItemName}
+             onMouseOver={(e) => setShowNameTooltip(checkNameWidth(e.target as HTMLDivElement))}>{name}</div>
+      </TooltipTrigger>
     </div>;
   };
 
@@ -262,10 +278,8 @@ const ImmutableWorkspaceCohortListItem: React.FunctionComponent<{
                style={styles.listItemCheckbox} checked={checked}/>
         <FlexRow style={{lineHeight: '1.5rem', color: colors.primary, width: '100%', minWidth: 0}}>
           <TooltipTrigger disabled={!showNameTooltip} content={<div>{name}</div>}>
-            <div style={{overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}
-                 onMouseOver={(e) => setShowNameTooltip(checkNameWidth(e.target as HTMLDivElement))}>
-              {name}
-            </div>
+            <div style={styles.cohortItemName}
+                 onMouseOver={(e) => setShowNameTooltip(checkNameWidth(e.target as HTMLDivElement))}>{name}</div>
           </TooltipTrigger>
           <div style={{marginLeft: 'auto', paddingRight: '1rem'}}>
             <a href={'/workspaces/' + namespace + '/' + wid + '/data/cohorts/' + cohortId + '/review/cohort-description'}
