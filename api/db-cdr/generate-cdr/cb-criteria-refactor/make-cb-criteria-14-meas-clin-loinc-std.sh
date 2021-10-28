@@ -107,7 +107,7 @@ bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
     , 0 as is_group
     , 1 as is_selectable
     , 0 as has_attribute
-    , 1 as has_hierarchy
+    , 0 as has_hierarchy
     FROM
     (
     SELECT

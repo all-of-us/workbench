@@ -10,10 +10,10 @@ echo "PID "$$
 set -e
 # vars are purposely hard-coded for iterative testing
 export BQ_PROJECT='all-of-us-ehr-dev'       # project
-export DATASET_PAR='ChenchalDummyPar'        # dataset
-export DATASET_SEQ='ChenchalDummySeq'        # dataset
-export DATASET_MULT='Chenchal_Multi_R2021Q3R2'        # dataset
-export DATASET_ORI='ChenchalDummyOri'        # dataset
+export DATASET_PAR='BillDummyPar'        # dataset
+export DATASET_SEQ='BillDummySeq'        # dataset
+export DATASET_MULT='BillDummyMult'        # dataset
+export DATASET_ORI='BillDummyOri'        # dataset
 
 run_in_parallel=$1
 if [[ $run_in_parallel == "par" ]]; then
@@ -105,12 +105,10 @@ else
   prep_tables=(
   make-bq-prep-icd10-rel-cm-src-tables.sh
   make-bq-prep-icd10pcs-rel-src-tables.sh
-  make-bq-prep-snomed-rel-cm-src-tables.sh
   make-bq-prep-snomed-rel-cm-tables.sh
   make-bq-prep-loinc-rel-tables.sh
   make-bq-prep-snomed-rel-meas-tables.sh
   make-bq-prep-atc-rel-in-data.sh
-  make-bq-prep-snomed-rel-pcs-src-tables.sh
   make-bq-prep-snomed-rel-pcs-tables.sh
   )
   for f in "${prep_tables[@]}"; do
@@ -130,7 +128,7 @@ else
   echo "###########################################################################"
   #source make-cb-criteria-00-main-tables.sh "$BQ_PROJECT" "$BQ_DATASET" "$run_in_parallel"
   # vars are purposely hard-coded
-  source make-cb-criteria-00-main-tables.sh "$run_in_parallel"
+  #source make-cb-criteria-00-main-tables.sh "$run_in_parallel"
 fi
 wait
 echo "Running all scripts done total time $(timeIt script_start)"

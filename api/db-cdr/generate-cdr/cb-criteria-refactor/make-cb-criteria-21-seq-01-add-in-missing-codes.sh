@@ -86,7 +86,7 @@ FROM
             and a.condition_source_concept_id != 0
             and a.condition_source_concept_id is not null
             and b.concept_id is not null
-            and b.vocabulary_id != 'PPI'
+            and b.vocabulary_id not in ('PPI', 'SNOMED')
             and (b.domain_id LIKE 'Condition%' OR c.domain_id = 'Condition')
         GROUP BY 1,2,3,4
     ) x"
@@ -201,7 +201,7 @@ FROM
             and a.procedure_source_concept_id != 0
             and a.procedure_source_concept_id is not null
             and b.concept_id is not null
-            and b.vocabulary_id != 'PPI'
+            and b.vocabulary_id not in ('PPI', 'SNOMED')
             and (b.domain_id = 'Procedure' OR c.domain_id = 'Procedure')
         GROUP BY 1,2,3,4
     ) x"

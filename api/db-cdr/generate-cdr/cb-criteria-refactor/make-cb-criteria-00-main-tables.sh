@@ -10,10 +10,10 @@ echo "PID "$$
 set -e
 # vars are purposely hard-coded for iterative testing
 export BQ_PROJECT='all-of-us-ehr-dev'      # project
-export DATASET_PAR='ChenchalDummyPar'        # dataset
-export DATASET_SEQ='ChenchalDummySeq'        # dataset
-export DATASET_MULT='Chenchal_Multi_R2021Q3R2'        # dataset
-export DATASET_ORI='ChenchalDummyOri'        # dataset
+export DATASET_PAR='BillDummyPar'        # dataset
+export DATASET_SEQ='BillDummySeq'        # dataset
+export DATASET_MULT='BillDummyMult'        # dataset
+export DATASET_ORI='BillDummyOri'        # dataset
 
 run_in_parallel=$1
 if [[ $run_in_parallel == "par" ]]; then
@@ -53,13 +53,11 @@ make-cb-criteria-08-visit.sh
 make-cb-criteria-09-icd9-src.sh
 make-cb-criteria-10-icd10-cm-src.sh
 make-cb-criteria-11-icd10-pcs-src.sh
-make-cb-criteria-12-cond-occur-snomed-src.sh
 make-cb-criteria-13-cond-occur-snomed-std.sh
 make-cb-criteria-14-meas-clin-loinc-std.sh
 make-cb-criteria-15-meas-labs-loinc-std.sh
 make-cb-criteria-16-meas-snomed-std.sh
 make-cb-criteria-17-drug-rxnorm.sh
-make-cb-criteria-18-proc-occur-snomed-src.sh
 make-cb-criteria-19-proc-occur-snomed-std.sh
 make-cb-criteria-20-observation.sh
 )
