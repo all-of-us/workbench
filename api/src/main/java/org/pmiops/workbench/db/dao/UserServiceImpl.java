@@ -240,7 +240,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       ImmutableList.of(AccessModuleName.CT_COMPLIANCE_TRAINING);
 
   private List<DbAccessTier> getUserAccessTiersList(DbUser dbUser) {
-    // If user does NOT have access to RT user should not have access to any TIER
+    // If user does NOT have access to RT, they should not have access to any TIER
     if (!shouldGrantUserTierAccess(
         dbUser, requiredModulesForRegisteredTier, REGISTERED_TIER_SHORT_NAME)) {
       return Collections.emptyList();
@@ -249,8 +249,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     boolean allowAccessToAllTiersForRegisteredUsers =
         configProvider.get().featureFlags.unsafeAllowAccessToAllTiersForRegisteredUsers;
 
-    // If unsafeAllowAccessToAllTiersForRegisteredUsers is true send ALL tier regardless the user
-    // has access/qualify for it
+    // If Feature flag unsafeAllowAccessToAllTiersForRegisteredUsers is true: return ALL access tiers
     if (allowAccessToAllTiersForRegisteredUsers) {
       return accessTierService.getAllTiers();
     }
@@ -259,10 +258,9 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     List<DbAccessTier> userAccessTiers =
         com.google.common.collect.Lists.newArrayList(accessTierService.getRegisteredTierOrThrow());
 
-    // If unsafeAllowAccessToAllTiersForRegisteredUsers is false AND if user has completed all The
-    // CT
-    // Steps. Add Controlled Access Tier to the list, else just send Registered
-    // Access Tier
+    // Add Controlled Access Tier to the list, if:
+    // a) unsafeAllowAccessToAllTiersForRegisteredUsers is false AND
+    // b) user has completed/bypassed all CT Steps.
     accessTierService
         .getAccessTierByName(CONTROLLED_TIER_SHORT_NAME)
         .ifPresent(

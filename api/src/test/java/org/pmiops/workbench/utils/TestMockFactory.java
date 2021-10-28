@@ -292,7 +292,7 @@ public class TestMockFactory {
   }
 
   public static void removeControlledTierForTests(AccessTierDao accessTierDao) {
-    DbAccessTier controlledAccessTier = accessTierDao.findOneByShortName("controlled").get();
+    DbAccessTier controlledAccessTier = accessTierDao.findOneByShortName(AccessTierService.CONTROLLED_TIER_SHORT_NAME).get();
     accessTierDao.delete(controlledAccessTier);
   }
 
