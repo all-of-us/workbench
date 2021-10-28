@@ -249,7 +249,8 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     boolean allowAccessToAllTiersForRegisteredUsers =
         configProvider.get().featureFlags.unsafeAllowAccessToAllTiersForRegisteredUsers;
 
-    // If Feature flag unsafeAllowAccessToAllTiersForRegisteredUsers is true: return ALL access tiers
+    // If Feature flag unsafeAllowAccessToAllTiersForRegisteredUsers is true: return ALL access
+    // tiers
     if (allowAccessToAllTiersForRegisteredUsers) {
       return accessTierService.getAllTiers();
     }
