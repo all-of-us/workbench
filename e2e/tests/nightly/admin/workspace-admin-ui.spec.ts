@@ -2,24 +2,40 @@ import { signInWithAccessToken } from 'utils/test-utils';
 import { config } from 'resources/workbench-config';
 import navigation, { NavLink } from 'app/component/navigation';
 import WorkspaceAdminPage from 'app/page/admin-workspace-page';
-import { WorkspaceHeadings, CloudStorageHeader } from 'app/text-labels';
+import { ConceptSetSelectValue, WorkspaceHeadings, CloudStorageHeader, Language } from 'app/text-labels';
 import RuntimePanel from 'app/component/runtime-panel';
 import WorkspacesPage from 'app/page/workspaces-page';
 import WorkspaceCard from 'app/component/workspace-card';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import AdminNotebookPreviewPage from 'app/page/admin-notebook-preview-page';
+import { waitForDocumentTitle } from 'utils/waits-utils';
+import { Page } from 'puppeteer';
+import NotebookPreviewPage from 'app/page/notebook-preview-page';
+
+
 
 describe('Workspace Admin', () => {
-  const workspaceNamespace = 'aou-rw-test-8c5cdbaf';
-  const workspaceName = 'e2eWorkspaceAdmin';
+  const workspaceName = 'e2eAdminWorkspace';
+  const pyNotebookName = 'e2eAdminNotebook';
   const noActiveRuntimeText = 'No active runtimes exist for this workspace.';
+  let workspaceNamespace = "";
+  
 
   beforeEach(async () => {
     await signInWithAccessToken(page, config.ADMIN_TEST_USER);
     await navigation.navMenu(page, NavLink.WORKSPACE_ADMIN);
   });
 
+
   test('check the Workspace Admin page UI', async () => {
+    const workspacesPage = new WorkspacesPage(page);
+    await workspacesPage.load();
+    await workspacesPage.createWorkspace(workspaceName);
+    await waitForDocumentTitle(page, 'Data Page');
+    const dataPage = new WorkspaceDataPage(page);
+    workspaceNamespace = await dataPage.extractWorkspaceNamespace();
+    await createNotebook(page, pyNotebookName);
+    await navigation.navMenu(page, NavLink.WORKSPACE_ADMIN);
     const workspaceAdminPage = new WorkspaceAdminPage(page);
     await workspaceAdminPage.waitForLoad();
     await workspaceAdminPage.getWorkspaceNamespaceInput().type(workspaceNamespace);
@@ -83,7 +99,7 @@ describe('Workspace Admin', () => {
     expect(await workspaceAdminPage.getNoActiveRuntimeText()).toEqual(noActiveRuntimeText);
     await new WorkspacesPage(page).load();
     const workspaceCard = await WorkspaceCard.findCard(page, workspaceName);
-    await workspaceCard.clickWorkspaceName();
+    await workspaceCard.clickWorkspaceName(true);
     await new WorkspaceDataPage(page).waitForLoad();
     const runtimePanel = new RuntimePanel(page);
     await runtimePanel.open();
@@ -101,10 +117,41 @@ describe('Workspace Admin', () => {
     const deleteRuntimeModal = await workspaceAdminPage.clickRuntimeDeleteButton();
     await deleteRuntimeModal.clickCancelButton();
     await workspaceAdminPage.waitForLoad();
+    await workspaceAdminPage.clickRuntimeDeleteButton();
     // delete the runtime
     await deleteRuntimeModal.clickDeleteButton();
     await workspaceAdminPage.waitForLoad();
     //verify the runtime status is deleting
-    expect(await workspaceAdminPage.getRuntimeDeleteStatus()).toEqual('Deleting');
+    expect(await workspaceAdminPage.getRuntimeStatus()).toEqual('Deleting');
+    await page.waitForTimeout(2000);
   });
+
+
+  async function createNotebook(page: Page, pyNotebookName: string): Promise<NotebookPreviewPage> {
+    const dataPage = new WorkspaceDataPage(page);
+    const datasetBuildPage = await dataPage.clickAddDatasetButton();
+
+    // Step 1 Select Cohort: Choose "All Participants"
+    await datasetBuildPage.selectCohorts(['All Participants']);
+
+    // Step 2 Select Concept Sets (Rows): select Demographics checkbox.
+    await datasetBuildPage.selectConceptSets([ConceptSetSelectValue.Demographics]);
+
+    const createModal = await datasetBuildPage.clickCreateButton();
+    await createModal.createDataset();
+
+    // // Preview table exists and has one or more table rows.
+    // const previewTable = await datasetBuildPage.getPreviewTable();
+    // expect(await previewTable.exists()).toBe(true);
+    // expect(await previewTable.getRowCount()).toBeGreaterThan(1);
+
+    const exportModal = await datasetBuildPage.clickAnalyzeButton();
+
+    await exportModal.enterNotebookName(pyNotebookName);
+    await exportModal.pickLanguage(Language.Python);
+    await exportModal.clickExportButton();
+    const notebookPreviewPage = new NotebookPreviewPage(page);
+    return await notebookPreviewPage.waitForLoad();
+  }
+
 });
