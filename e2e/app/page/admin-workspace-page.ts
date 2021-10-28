@@ -82,6 +82,13 @@ export default class WorkspaceAdminPage extends AuthenticatedPage {
     return namespaceHeadings;
   }
 
+  async getAllHeadings(): Promise<string[]> {
+    const headings2: Array<string> = await this.getAllHeadings2();
+    const headings3: Array<string> = await this.getAllHeadings3();
+    const allHeadingNames = headings2.concat(headings3);
+    return allHeadingNames;
+  }
+
   // get the Notebook preview button
   getNotebookPreviewButton(): Button {
     return Button.findByName(this.page, { name: LinkText.Preview });
@@ -127,15 +134,9 @@ export default class WorkspaceAdminPage extends AuthenticatedPage {
 
   // get the runtime status in the Status col
   async getRuntimeStatus(): Promise<string> {
-    const xpath = '//div[text()="Delete" and @role="button"]/preceding-sibling::div[1]';
+    const xpath = '//div[text()="Delete" and @role="button"]/preceding-sibling::*[1]';
     const element = BaseElement.asBaseElement(this.page, await this.page.waitForXPath(xpath, { visible: true }));
     return element.getTextContent();
   }
 
-  // get the runtime status (delete) in the Status col
-  async getRuntimeDeleteStatus(): Promise<string> {
-    const xpath = '//div[text()="Delete" and @role="button"]/preceding-sibling::div[1][contains(text(),"Deleting")]';
-    const element = BaseElement.asBaseElement(this.page, await this.page.waitForXPath(xpath, { visible: true }));
-    return element.getTextContent();
-  }
 }
