@@ -168,7 +168,7 @@ export const MIN_DISK_SIZE_GB = 80;
 
 const defaultMachineName = 'n1-standard-4';
 const defaultMachineType: Machine = findMachineByName(defaultMachineName);
-const defaultDiskSize = 100;
+const defaultDiskSize = 120;
 
 // Returns true if two runtimes are equivalent in terms of the fields which are
 // affected by runtime presets.
