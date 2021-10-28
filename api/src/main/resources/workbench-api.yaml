@@ -6252,9 +6252,6 @@ definitions:
         "$ref": "#/definitions/ConceptSet"
       dataSet:
         "$ref": "#/definitions/DataSet"
-      modifiedTime:
-        description: DEPRECATED because string formatting is ambiguous. Use lastModifiedEpochMillis.
-        type: string
       lastModifiedEpochMillis:
         description: the resource's last modified time, in milliseconds since the epoch
         type: integer

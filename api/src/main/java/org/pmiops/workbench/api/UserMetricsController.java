@@ -71,7 +71,6 @@ public class UserMetricsController implements UserMetricsApiDelegate {
         resource.setConceptSet(TO_CLIENT_CONCEPT_SET.apply(userRecentResource.getConceptSet()));
         FileDetail fileDetail = convertStringToFileDetail(userRecentResource.getNotebookName());
         resource.setNotebook(fileDetail);
-        resource.setModifiedTime(userRecentResource.getLastAccessDate().toString());
         resource.setLastModifiedEpochMillis(userRecentResource.getLastAccessDate().getTime());
         resource.setWorkspaceId(userRecentResource.getWorkspaceId());
         return resource;
