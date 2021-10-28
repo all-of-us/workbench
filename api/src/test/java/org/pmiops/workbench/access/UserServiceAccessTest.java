@@ -1157,15 +1157,45 @@ public class UserServiceAccessTest {
   }
 
   @Test
-  public void test_updateUserWithRetries_eraNotRequiredForCT() {
-    // era Is required for RT  but not for CT
+  public void test_updateUserWithRetries_eraNotRequiredForTiers() {
     providedWorkbenchConfig.featureFlags.unsafeAllowAccessToAllTiersForRegisteredUsers = false;
     assertThat(userAccessTierDao.findAll()).isEmpty();
 
     dbUser = completeRTAndCTRequirements(dbUser);
+    rtTierConfig.setEraRequired(false);
+    updateInstitutionTier(rtTierConfig);
     ctTierConfig.setEraRequired(false);
     updateInstitutionTier(ctTierConfig);
 
+    dbUser =
+        updateUserWithRetries(
+            user -> {
+              accessModuleService.updateBypassTime(
+                  user.getUserId(), AccessModule.ERA_COMMONS, false);
+              return userDao.save(user);
+            });
+
+    assertRegisteredTierEnabled(dbUser);
+    assertControlledTierEnabled(dbUser);
+  }
+
+  @Test
+  public void testInstitutionRequirement_rtEraDoesNotAffectCTEra() {
+    providedWorkbenchConfig.featureFlags.unsafeAllowAccessToAllTiersForRegisteredUsers = false;
+    assertThat(userAccessTierDao.findAll()).isEmpty();
+    providedWorkbenchConfig.access.enableEraCommons = true;
+    providedWorkbenchConfig.access.enableRasLoginGovLinking = true;
+
+    dbUser = completeRTAndCTRequirements(dbUser);
+    ctTierConfig.setEraRequired(true);
+    updateInstitutionTier(ctTierConfig);
+    dbUser = updateUserWithRetries(Function.identity());
+
+    assertRegisteredTierEnabled(dbUser);
+    assertControlledTierEnabled(dbUser);
+
+    ctTierConfig.setEraRequired(false);
+    updateInstitutionTier(ctTierConfig);
     dbUser = updateUserWithRetries(Function.identity());
 
     assertRegisteredTierEnabled(dbUser);
@@ -1226,11 +1256,6 @@ public class UserServiceAccessTest {
     assertThat(userAccessTierDao.findAll()).isEmpty();
 
     dbUser = completeRTAndCTRequirements(dbUser);
-
-    // UserAccessTest will skip era check for RT because eraRequired in Institution is false
-    // for CT it eraCommon check will return yes since the flag enableEraCommons is false
-    rtTierConfig.setEraRequired(false);
-    updateInstitutionTier(rtTierConfig);
 
     ctTierConfig.setEraRequired(true);
     updateInstitutionTier(ctTierConfig);
