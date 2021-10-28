@@ -1212,7 +1212,7 @@ paths:
         directory notebook.'
       operationId: getNoteBookList
       tags:
-      - workspaces
+      - notebooks
       parameters:
       - in: path
         name: workspaceNamespace
@@ -1529,6 +1529,46 @@ paths:
           description: success
           schema:
             "$ref": "#/definitions/CloudStorageTraffic"
+  "/v1/admin/workspaces/{workspaceNamespace}/notebooks/{notebookName}/readonly":
+    parameters:
+      - "$ref": "#/parameters/workspaceNamespace"
+    post:
+      tags:
+        - workspaceAdmin
+      description: Get the HTML for a read only view of the notebook. RESEARCHER_DATA_VIEW authority required.
+      operationId: adminReadOnlyNotebook
+      parameters:
+      - in: path
+        name: notebookName
+        required: true
+        type: string
+      - in: body
+        name: accessReason
+        required: true
+        schema:
+          "$ref": "#/definitions/AccessReason"
+      responses:
+        200:
+          description: HTML Read Only version of the notebook
+          schema:
+            "$ref": "#/definitions/ReadOnlyNotebookResponse"
+  "/v1/admin/workspaces/{workspaceNamespace}/files":
+    parameters:
+      - "$ref": "#/parameters/workspaceNamespace"
+    get:
+      tags:
+        - workspaceAdmin
+      description: >
+        Get a list of files corresponding to the storage objects associated with the Workspace.
+        RESEARCHER_DATA_VIEW authority required.
+      operationId: listFiles
+      responses:
+        200:
+          description: List of files in this Workspace's storage bucket
+          schema:
+            type: array
+            items:
+              "$ref": "#/definitions/FileDetail"
   "/v1/admin/sumo/egressEvent":
     post:
       tags:
@@ -1722,13 +1762,32 @@ paths:
         204:
           description: No content.
 
+  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/notebooks/{notebookName}/readonly":
+    parameters:
+    - "$ref": "#/parameters/workspaceNamespace"
+    - "$ref": "#/parameters/workspaceId"
+    post:
+      tags:
+      - notebooks
+      description: Get the HTML for a read only view of the notebook
+      operationId: readOnlyNotebook
+      parameters:
+      - in: path
+        name: notebookName
+        required: true
+        type: string
+      responses:
+        200:
+          description: HTML Read Only version of the notebook
+          schema:
+            "$ref": "#/definitions/ReadOnlyNotebookResponse"
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}/notebooks/rename":
     parameters:
     - "$ref": "#/parameters/workspaceNamespace"
     - "$ref": "#/parameters/workspaceId"
     post:
       tags:
-      - workspaces
+      - notebooks
       consumes:
       - application/json
       description: Renames specified notebook
@@ -1756,7 +1815,7 @@ paths:
     - "$ref": "#/parameters/workspaceId"
     post:
       tags:
-      - workspaces
+      - notebooks
       description: Duplicates specified notebook
       operationId: cloneNotebook
       parameters:
@@ -1779,7 +1838,7 @@ paths:
       type: string
     post:
       tags:
-      - workspaces
+      - notebooks
       description: Copy specified notebook in path to specified workspace in body
       operationId: copyNotebook
       parameters:
@@ -1799,7 +1858,7 @@ paths:
       - "$ref": "#/parameters/workspaceId"
     get:
       tags:
-        - workspaces
+        - notebooks
       description: Get Kernel Type of notebook
       operationId: getNotebookKernel
       parameters:
@@ -1818,7 +1877,7 @@ paths:
     - "$ref": "#/parameters/workspaceId"
     delete:
       tags:
-      - workspaces
+      - notebooks
       description: Deletes specified notebook
       operationId: deleteNotebook
       parameters:
@@ -1831,72 +1890,13 @@ paths:
           description: Successful delete
           schema:
             "$ref": "#/definitions/EmptyResponse"
-  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/notebooks/{notebookName}/readonly":
-    parameters:
-    - "$ref": "#/parameters/workspaceNamespace"
-    - "$ref": "#/parameters/workspaceId"
-    post:
-      tags:
-      - workspaces
-      description: Get the HTML for a read only view of the notebook
-      operationId: readOnlyNotebook
-      parameters:
-      - in: path
-        name: notebookName
-        required: true
-        type: string
-      responses:
-        200:
-          description: HTML Read Only version of the notebook
-          schema:
-            "$ref": "#/definitions/ReadOnlyNotebookResponse"
-  "/v1/admin/workspaces/{workspaceNamespace}/notebooks/{notebookName}/readonly":
-    parameters:
-      - "$ref": "#/parameters/workspaceNamespace"
-    post:
-      tags:
-        - workspaceAdmin
-      description: Get the HTML for a read only view of the notebook. RESEARCHER_DATA_VIEW authority required.
-      operationId: adminReadOnlyNotebook
-      parameters:
-      - in: path
-        name: notebookName
-        required: true
-        type: string
-      - in: body
-        name: accessReason
-        required: true
-        schema:
-          "$ref": "#/definitions/AccessReason"
-      responses:
-        200:
-          description: HTML Read Only version of the notebook
-          schema:
-            "$ref": "#/definitions/ReadOnlyNotebookResponse"
-  "/v1/admin/workspaces/{workspaceNamespace}/files":
-    parameters:
-      - "$ref": "#/parameters/workspaceNamespace"
-    get:
-      tags:
-        - workspaceAdmin
-      description: >
-        Get a list of files corresponding to the storage objects associated with the Workspace.
-        RESEARCHER_DATA_VIEW authority required.
-      operationId: listFiles
-      responses:
-        200:
-          description: List of files in this Workspace's storage bucket
-          schema:
-            type: array
-            items:
-              "$ref": "#/definitions/FileDetail"
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}/notebooks/{notebookName}/lockingMetadata":
     parameters:
     - "$ref": "#/parameters/workspaceNamespace"
     - "$ref": "#/parameters/workspaceId"
     get:
       tags:
-      - workspaces
+      - notebooks
       summary: Get the locking metadata for a notebook
       description: |
         Get the locking metadata for a notebook, if available.  If the notebook is not locked
@@ -3866,6 +3866,7 @@ definitions:
     - FITBIT_INTRADAY_STEPS
     - PHYSICAL_MEASUREMENT_CSS
     - WHOLE_GENOME_VARIANT
+    - ZIP_CODE_SOCIOECONOMIC
   Surveys:
     type: string
     description: a survey for concepts
@@ -5123,6 +5124,7 @@ definitions:
     - FITBIT_INTRADAY_STEPS
     - WHOLE_GENOME
     - BOTH
+    - ZIP_CODE_SOCIOECONOMIC
   DataSetExportRequest:
     type: object
     required:
@@ -6223,7 +6225,7 @@ definitions:
       - cdrVersionId
       - accessTierShortName
       - permission
-      - modifiedTime
+      - lastModifiedEpochMillis
     properties:
       workspaceId:
         type: integer
@@ -6250,8 +6252,10 @@ definitions:
         "$ref": "#/definitions/ConceptSet"
       dataSet:
         "$ref": "#/definitions/DataSet"
-      modifiedTime:
-        type: string
+      lastModifiedEpochMillis:
+        description: the resource's last modified time, in milliseconds since the epoch
+        type: integer
+        format: int64
   RecentResourceRequest:
     type: object
     properties:

@@ -35,6 +35,7 @@ import {
   Profile,
   PublicInstitutionDetails,
 } from 'generated/fetch';
+import {SupportMailto} from 'app/components/support';
 
 const styles = reactStyles({
   ...commonStyles,
@@ -245,7 +246,7 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
     if (checkEmailError) {
       return <ErrorDiv data-test-id='check-email-error'>
         An error occurred checking institution membership of this email. Please try again or
-        contact <a href='mailto:support@researchallofus.org'>support@researchallofus.org</a>.
+        contact <SupportMailto/>.
       </ErrorDiv>;
     }
 
@@ -363,7 +364,7 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
             {this.state.institutionLoadError &&
             <ErrorDiv data-test-id='data-load-error'>
               An error occurred loading the institution list. Please try again or contact
-              <a href='mailto:support@researchallofus.org'>support@researchallofus.org</a>.
+              <SupportMailto/>.
             </ErrorDiv>
             }
             <div style={{marginTop: '.5rem'}}>

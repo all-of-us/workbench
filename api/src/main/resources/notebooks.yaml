@@ -143,6 +143,37 @@ paths:
         "500":
           description: Internal Error
 
+  "/proxy/{googleProject}/{runtimeName}/jupyter/terminals/{terminalName}":
+    get:
+      summary: Connect to a jupyter terminal
+      operationId: connectToTerminal
+      tags:
+        - proxy
+      parameters:
+        - in: path
+          name: googleProject
+          required: true
+          type: string
+        - in: path
+          name: runtimeName
+          description: runtimeName
+          required: true
+          type: string
+        - in: path
+          name: terminalName
+          description: terminalName
+          required: true
+          type: string
+      responses:
+        "204":
+          description: Successfully connect to a terminal
+        "401":
+          description: Proxy connection unauthorized
+        "404":
+          description: Runtime not found
+        "500":
+          description: Internal Error
+
   /proxy/invalidateToken:
     get:
       summary: Invalidates a token

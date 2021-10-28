@@ -13,7 +13,7 @@ import {withConfirmDeleteModal, WithConfirmDeleteModalProps} from 'app/component
 import {withErrorModal, WithErrorModalProps} from 'app/components/with-error-modal';
 import {withSpinnerOverlay, WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {dropNotebookFileSuffix} from 'app/pages/analysis/util';
-import {workspacesApi} from 'app/services/swagger-fetch-clients';
+import {notebooksApi} from 'app/services/swagger-fetch-clients';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {getDisplayName, getType} from 'app/utils/resources';
 import {ACTION_DISABLED_INVALID_BILLING} from 'app/utils/strings';
@@ -100,7 +100,7 @@ export const NotebookResourceCard = fp.flow(
 
   renameNotebook(newName) {
     const {resource} = this.props;
-    return workspacesApi().renameNotebook(
+    return notebooksApi().renameNotebook(
       resource.workspaceNamespace,
       resource.workspaceFirecloudName,
       {
@@ -116,7 +116,7 @@ export const NotebookResourceCard = fp.flow(
   duplicateNotebook() {
     this.props.showSpinner();
 
-    return workspacesApi().cloneNotebook(
+    return notebooksApi().cloneNotebook(
       this.props.resource.workspaceNamespace,
       this.props.resource.workspaceFirecloudName,
       this.props.resource.notebook.name)
@@ -133,7 +133,7 @@ export const NotebookResourceCard = fp.flow(
   }
 
   deleteNotebook() {
-    return workspacesApi().deleteNotebook(
+    return notebooksApi().deleteNotebook(
       this.props.resource.workspaceNamespace,
       this.props.resource.workspaceFirecloudName,
       this.props.resource.notebook.name)
@@ -145,7 +145,7 @@ export const NotebookResourceCard = fp.flow(
   copyNotebook(copyRequest: CopyRequest) {
     AnalyticsTracker.Notebooks.Copy();
 
-    return workspacesApi().copyNotebook(
+    return notebooksApi().copyNotebook(
       this.props.resource.workspaceNamespace,
       this.props.resource.workspaceFirecloudName,
       dropNotebookFileSuffix(this.props.resource.notebook.name),

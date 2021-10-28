@@ -1,10 +1,10 @@
 import {CohortPage} from 'app/cohort-search/cohort-page/cohort-page.component';
 import {AppRoute, withRouteData} from 'app/components/app-router';
-import {NOTEBOOK_PAGE_KEY} from 'app/components/help-sidebar';
+import {LEONARDO_APP_PAGE_KEY} from 'app/components/help-sidebar';
 import {withRoutingSpinner} from 'app/components/with-routing-spinner';
 import {InteractiveNotebook} from 'app/pages/analysis/interactive-notebook';
 import {NotebookList} from 'app/pages/analysis/notebook-list';
-import {NotebookRedirect} from 'app/pages/analysis/notebook-redirect';
+import {LeonardoAppLauncher} from 'app/pages/analysis/leonardo-app-launcher';
 import {CohortReview} from 'app/pages/data/cohort-review/cohort-review';
 import {DetailPage} from 'app/pages/data/cohort-review/detail-page';
 import {QueryReport} from 'app/pages/data/cohort-review/query-report.component';
@@ -17,6 +17,7 @@ import {DataComponent} from 'app/pages/data/data-component';
 import {DatasetPage} from 'app/pages/data/data-set/dataset-page';
 import {WorkspaceAbout} from 'app/pages/workspace/workspace-about';
 import {WorkspaceEdit, WorkspaceEditMode} from 'app/pages/workspace/workspace-edit';
+import {LeoApplicationType} from 'app/pages/analysis/leonardo-app-launcher';
 import {BreadcrumbType} from 'app/utils/navigation';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
@@ -33,7 +34,7 @@ const DataSetComponentPage = fp.flow(withRouteData, withRoutingSpinner)(DatasetP
 const DetailPagePage = fp.flow(withRouteData, withRoutingSpinner)(DetailPage);
 const InteractiveNotebookPage = fp.flow(withRouteData, withRoutingSpinner)(InteractiveNotebook);
 const NotebookListPage = fp.flow(withRouteData, withRoutingSpinner)(NotebookList);
-const NotebookRedirectPage = fp.flow(withRouteData, withRoutingSpinner)(NotebookRedirect);
+const LeonardoAppRedirectPage = fp.flow(withRouteData, withRoutingSpinner)(LeonardoAppLauncher);
 const ParticipantsTablePage = fp.flow(withRouteData, withRoutingSpinner)(ParticipantsTable);
 const QueryReportPage = fp.flow(withRouteData, withRoutingSpinner)(QueryReport);
 const WorkspaceAboutPage = fp.flow(withRouteData, withRoutingSpinner)(WorkspaceAbout);
@@ -85,23 +86,41 @@ export const WorkspaceRoutes = () => {
       <InteractiveNotebookPage routeData={{
         pathElementForTitle: 'nbName',
         breadcrumb: BreadcrumbType.Notebook,
-        pageKey: NOTEBOOK_PAGE_KEY,
+        pageKey: LEONARDO_APP_PAGE_KEY,
         workspaceNavBarTab: 'notebooks',
         minimizeChrome: true
       }}/>
     </AppRoute>
     <AppRoute exact path={`${path}/notebooks/:nbName`}>
-      <NotebookRedirectPage routeData={{
-        pathElementForTitle: 'nbName',
-        breadcrumb: BreadcrumbType.Notebook,
-        // The iframe we use to display the Jupyter notebook does something strange
-        // to the height calculation of the container, which is normally set to auto.
-        // Setting this flag sets the container to 100% so that no content is clipped.
-        contentFullHeightOverride: true,
-        pageKey: NOTEBOOK_PAGE_KEY,
-        workspaceNavBarTab: 'notebooks',
-        minimizeChrome: true
-      }}/>
+      <LeonardoAppRedirectPage
+          routeData={{
+            pathElementForTitle: 'nbName',
+            breadcrumb: BreadcrumbType.Notebook,
+            // The iframe we use to display the Jupyter notebook does something strange
+            // to the height calculation of the container, which is normally set to auto.
+            // Setting this flag sets the container to 100% so that no content is clipped.
+            contentFullHeightOverride: true,
+            pageKey: LEONARDO_APP_PAGE_KEY,
+            workspaceNavBarTab: 'notebooks',
+            minimizeChrome: true
+          }}
+          leoAppType={LeoApplicationType.Notebook}
+      />
+    </AppRoute>
+    <AppRoute exact path={`${path}/terminals`}>
+      <LeonardoAppRedirectPage
+          routeData={{
+            breadcrumb: BreadcrumbType.Terminal,
+            pageKey: LEONARDO_APP_PAGE_KEY,
+            // The iframe we use to display the Jupyter notebook does something strange
+            // to the height calculation of the container, which is normally set to auto.
+            // Setting this flag sets the container to 100% so that no content is clipped.
+            contentFullHeightOverride: true,
+            workspaceNavBarTab: 'terminals',
+            minimizeChrome: true
+          }}
+          leoAppType={LeoApplicationType.Terminal}
+      />
     </AppRoute>
     <AppRoute exact path={`${path}/data`}>
       <DataComponentPage routeData={{

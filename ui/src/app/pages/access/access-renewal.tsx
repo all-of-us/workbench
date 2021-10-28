@@ -26,6 +26,8 @@ import {
 import {useNavigation} from 'app/utils/navigation';
 import {profileStore, serverConfigStore, useStore} from 'app/utils/stores';
 import {AccessModule, AccessModuleStatus} from 'generated/fetch';
+import {SupportMailto} from 'app/components/support';
+
 
 const {useState, useEffect} = React;
 
@@ -270,7 +272,7 @@ export const AccessRenewal = fp.flow(
              If you are lead on or part of a publication or presentation that hasn’t been reported to the
              program, <a target='_blank' style={{textDecoration: 'underline'}}
               href={'https://redcap.pmi-ops.org/surveys/?s=MKYL8MRD4N'}>please report it now.</a> For any questions,
-             please contact <a href='mailto:support@researchallofus.org'>support@researchallofus.org</a>
+             please contact <SupportMailto/>
         </div>
         <div style={{marginTop: 'auto', display: 'grid', columnGap: '0.25rem', gridTemplateColumns: 'auto 1rem 1fr', alignItems: 'center'}}>
           <ActionButton

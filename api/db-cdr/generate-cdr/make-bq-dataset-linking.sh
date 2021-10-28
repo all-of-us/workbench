@@ -294,3 +294,21 @@ VALUES
   ('DATETIME', 'CAST(steps_intraday.datetime as DATE) as date', 'from \`\${projectId}.\${dataSetId}.steps_intraday\` steps_intraday', 'Fitbit_intraday_steps'),
   ('STEPS', 'SUM(CAST(steps_intraday.STEPS AS INT64)) AS sum_steps', 'from \`\${projectId}.\${dataSetId}.steps_intraday\` steps_intraday', 'Fitbit_intraday_steps')"
 
+echo "ds_linking - inserting zip code socioeconimic data"
+
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
+VALUES
+  ('CORE_TABLE_FOR_DOMAIN', 'CORE_TABLE_FOR_DOMAIN', 'from \`\${projectId}.\${dataSetId}.zip3_ses_map\` zip_code', 'Zip_code_socioeconomic'),
+  ('PERSON_ID', 'observation.PERSON_ID', 'JOIN \`\${projectId}.\${dataSetId}.observation\` observation on CAST(SUBSTR(observation.value_as_string, 0, STRPOS(observation.value_as_string, \'*\') - 1) as INT64) = zip_code.ZIP3', 'Zip_code_socioeconomic'),
+  ('OBSERVATION_DATETIME', 'observation.OBSERVATION_DATETIME', 'JOIN \`\${projectId}.\${dataSetId}.observation\` observation on CAST(SUBSTR(observation.value_as_string, 0, STRPOS(observation.value_as_string, \'*\') - 1) as INT64) = zip_code.ZIP3', 'Zip_code_socioeconomic'),
+  ('ZIP_CODE', 'zip_code.ZIP3_AS_STRING as ZIP_CODE', 'from \`\${projectId}.\${dataSetId}.zip3_ses_map\` zip_code', 'Zip_code_socioeconomic'),
+  ('ASSISTED_INCOME', 'zip_code.FRACTION_ASSISTED_INCOME as ASSISTED_INCOME', 'from \`\${projectId}.\${dataSetId}.zip3_ses_map\` zip_code', 'Zip_code_socioeconomic'),
+  ('HIGH_SCHOOL_EDUCATION', 'zip_code.FRACTION_HIGH_SCHOOL_EDU as HIGH_SCHOOL_EDUCATION', 'from \`\${projectId}.\${dataSetId}.zip3_ses_map\` zip_code', 'Zip_code_socioeconomic'),
+  ('MEDIAN_INCOME', 'zip_code.MEDIAN_INCOME', 'from \`\${projectId}.\${dataSetId}.zip3_ses_map\` zip_code', 'Zip_code_socioeconomic'),
+  ('NO_HEALTH_INSURANCE', 'zip_code.FRACTION_NO_HEALTH_INS as NO_HEALTH_INSURANCE', 'from \`\${projectId}.\${dataSetId}.zip3_ses_map\` zip_code', 'Zip_code_socioeconomic'),
+  ('POVERTY', 'zip_code.FRACTION_POVERTY as POVERTY', 'from \`\${projectId}.\${dataSetId}.zip3_ses_map\` zip_code', 'Zip_code_socioeconomic'),
+  ('VACANT_HOUSING', 'zip_code.FRACTION_VACANT_HOUSING as VACANT_HOUSING', 'from \`\${projectId}.\${dataSetId}.zip3_ses_map\` zip_code', 'Zip_code_socioeconomic'),
+  ('DEPRIVATION_INDEX', 'zip_code.DEPRIVATION_INDEX', 'from \`\${projectId}.\${dataSetId}.zip3_ses_map\` zip_code', 'Zip_code_socioeconomic'),
+  ('AMERICAN_COMMUNITY_SURVEY_YEAR', 'zip_code.ACS as AMERICAN_COMMUNITY_SURVEY_YEAR', 'from \`\${projectId}.\${dataSetId}.zip3_ses_map\` zip_code', 'Zip_code_socioeconomic')"
+

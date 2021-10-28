@@ -44,7 +44,10 @@ describe('DataAccessRequirements', () => {
       .find('[data-test-id="ineligible"]');
 
     const findControlledTierCard = (wrapper) => wrapper.find('[data-test-id="controlled-card"]')
+    const findEligibleText = (wrapper) => wrapper.find(`[data-test-id="eligible-text"]`);
+    const findIneligibleText = (wrapper) => wrapper.find(`[data-test-id="ineligible-text"]`);
 
+    const findContactUs = (wrapper) => wrapper.find('[data-test-id="contact-us"]');
 
     beforeEach(async() => {
         registerApiClient(InstitutionApi, new InstitutionApiStub());
@@ -482,7 +485,7 @@ describe('DataAccessRequirements', () => {
         expect(spyCompliance).toHaveBeenCalledTimes(0);
     });
 
-    it ('Should not show Era Commons Module for Registered Tier if the institution does not require eRa', async() => {
+    it('Should not show Era Commons Module for Registered Tier if the institution does not require eRa', async() => {
         let wrapper = component();
         await waitOneTickAndUpdate(wrapper);
         expect(findModule(wrapper, AccessModule.ERACOMMONS).exists()).toBeTruthy();
@@ -522,7 +525,7 @@ describe('DataAccessRequirements', () => {
         expect(findModule(wrapper, AccessModule.ERACOMMONS).exists()).toBeTruthy();
     });
 
-    it ("Should display Institution has signed agreement when the user has a Tier Eligibility object for CT", async() => {
+    it("Should display Institution has signed agreement when the user has a Tier Eligibility object for CT", async() => {
         let wrapper = component();
         await waitOneTickAndUpdate(wrapper);
 
@@ -542,9 +545,13 @@ describe('DataAccessRequirements', () => {
         await waitOneTickAndUpdate(wrapper);
         expect(findControlledSignedStepEligible(wrapper).exists()).toBeTruthy();
         expect(findControlledSignedStepIneligible(wrapper).exists()).toBeFalsy();
+
+        // but this is not enough; the user needs to be made eligible by email as well
+        expect(findEligibleText(findControlledTierCard(wrapper)).exists()).toBeFalsy();
+        expect(findIneligibleText(findControlledTierCard(wrapper)).exists()).toBeTruthy();
     });
 
-    it ("Should not display Institution has signed agreement when the user doesn't have a Tier Eligibility object for CT", async() => {
+    it("Should not display Institution has signed agreement when the user doesn't have a Tier Eligibility object for CT", async() => {
         let wrapper = component();
         await waitOneTickAndUpdate(wrapper);
 
@@ -564,9 +571,13 @@ describe('DataAccessRequirements', () => {
         await waitOneTickAndUpdate(wrapper);
         expect(findControlledSignedStepEligible(wrapper).exists()).toBeFalsy();
         expect(findControlledSignedStepIneligible(wrapper).exists()).toBeTruthy();
+
+        // but this is not enough; the user needs to be made eligible by email as well
+        expect(findEligibleText(findControlledTierCard(wrapper)).exists()).toBeFalsy();
+        expect(findIneligibleText(findControlledTierCard(wrapper)).exists()).toBeTruthy();
     });
 
-    it ("Should display Institution allows you to access CT when the user's CT Tier Eligibility object has eligible=true", async() => {
+    it("Should display Institution allows you to access CT when the user's CT Tier Eligibility object has eligible=true", async() => {
         let wrapper = component();
         await waitOneTickAndUpdate(wrapper);
 
@@ -587,9 +598,12 @@ describe('DataAccessRequirements', () => {
         await waitOneTickAndUpdate(wrapper);
         expect(findControlledUserEligible(wrapper).exists()).toBeTruthy();
         expect(findControlledUserIneligible(wrapper).exists()).toBeFalsy();
+
+        expect(findEligibleText(findControlledTierCard(wrapper)).exists()).toBeTruthy();
+        expect(findIneligibleText(findControlledTierCard(wrapper)).exists()).toBeFalsy();
     });
 
-    it ("Should not display Institution allows you to access CT when the user's CT Tier Eligibility object has eligible=false", async() => {
+    it("Should not display Institution allows you to access CT when the user's CT Tier Eligibility object has eligible=false", async() => {
         let wrapper = component();
         await waitOneTickAndUpdate(wrapper);
 
@@ -610,9 +624,12 @@ describe('DataAccessRequirements', () => {
         await waitOneTickAndUpdate(wrapper);
         expect(findControlledUserEligible(wrapper).exists()).toBeFalsy();
         expect(findControlledUserIneligible(wrapper).exists()).toBeTruthy();
+
+        expect(findEligibleText(findControlledTierCard(wrapper)).exists()).toBeFalsy();
+        expect(findIneligibleText(findControlledTierCard(wrapper)).exists()).toBeTruthy();
     });
 
-    it ("Should not display Institution allows you to access CT when the user does not have a CT Tier Eligibility object", async() => {
+    it("Should not display Institution allows you to access CT when the user does not have a CT Tier Eligibility object", async() => {
         let wrapper = component();
         await waitOneTickAndUpdate(wrapper);
 
@@ -634,9 +651,12 @@ describe('DataAccessRequirements', () => {
         await waitOneTickAndUpdate(wrapper);
         expect(findControlledUserEligible(wrapper).exists()).toBeFalsy();
         expect(findControlledUserIneligible(wrapper).exists()).toBeTruthy();
+
+        expect(findEligibleText(findControlledTierCard(wrapper)).exists()).toBeFalsy();
+        expect(findIneligibleText(findControlledTierCard(wrapper)).exists()).toBeTruthy();
     });
 
-    it ("Should display the CT card when the environment has a Controlled Tier", async() => {
+    it("Should display the CT card when the environment has a Controlled Tier", async() => {
         environment.accessTiersVisibleToUsers = [AccessTierShortNames.Registered, AccessTierShortNames.Controlled];
 
         let wrapper = component();
@@ -644,7 +664,7 @@ describe('DataAccessRequirements', () => {
         expect(findControlledTierCard(wrapper).exists()).toBeTruthy();
     });
 
-    it ("Should not display the CT card when the environment does not have a Controlled Tier", async() => {
+    it("Should not display the CT card when the environment does not have a Controlled Tier", async() => {
         environment.accessTiersVisibleToUsers = [AccessTierShortNames.Registered];
 
         let wrapper = component();
@@ -652,4 +672,144 @@ describe('DataAccessRequirements', () => {
         expect(findControlledTierCard(wrapper).exists()).toBeFalsy();
     });
 
+
+    it("Should display eraCommons module in CT card " +
+        "when the user institution has signed agreement and CT requires eraCommons and RT does not", async() => {
+        environment.accessTiersVisibleToUsers = [AccessTierShortNames.Registered, AccessTierShortNames.Controlled];
+        let wrapper = component();
+        await waitOneTickAndUpdate(wrapper);
+
+        profileStore.set({
+            profile: {
+                ...ProfileStubVariables.PROFILE_STUB,
+                tierEligibilities: [{
+                    accessTierShortName: AccessTierShortNames.Controlled,
+                    eraRequired: true,
+                    eligible: true
+                },{
+                    accessTierShortName: AccessTierShortNames.Registered,
+                    eraRequired: false,
+                    eligible: false
+                },]
+            },
+            load,
+            reload,
+            updateCache
+        });
+        wrapper = component();
+        await waitOneTickAndUpdate(wrapper);
+        expect(findModule(findControlledTierCard(wrapper), AccessModule.ERACOMMONS).exists()).toBeTruthy();
+    });
+
+    it("Should not display eraCommons module in CT card " +
+        "when RT requires eraCommons", async() => {
+        let wrapper = component();
+        await waitOneTickAndUpdate(wrapper);
+
+        profileStore.set({
+            profile: {
+                ...ProfileStubVariables.PROFILE_STUB,
+                tierEligibilities: [{
+                    accessTierShortName: AccessTierShortNames.Registered,
+                    eraRequired: true,
+                    eligible: false
+                },{
+                    accessTierShortName: AccessTierShortNames.Controlled,
+                    eraRequired: true,
+                    eligible: true
+                }]
+            },
+            load,
+            reload,
+            updateCache
+        });
+        wrapper = component();
+        await waitOneTickAndUpdate(wrapper);
+        expect(findModule(findControlledTierCard(wrapper), AccessModule.ERACOMMONS).exists()).toBeFalsy();
+    });
+
+    it("Should not display eraCommons module in CT card " +
+        "when user's institution has not signed CT Institution agreement", async() => {
+        let wrapper = component();
+        await waitOneTickAndUpdate(wrapper);
+
+        profileStore.set({
+            profile: {
+                ...ProfileStubVariables.PROFILE_STUB,
+                // no CT eligibility object
+                tierEligibilities: [{
+                    accessTierShortName: AccessTierShortNames.Registered,
+                    eraRequired: false,
+                    eligible: false
+                }]
+            },
+            load,
+            reload,
+            updateCache
+        });
+        wrapper = component();
+        await waitOneTickAndUpdate(wrapper);
+        expect(findModule(findControlledTierCard(wrapper), AccessModule.ERACOMMONS).exists()).toBeFalsy();
+    });
+
+    it("Should not display eraCommons module in CT card " +
+        "when eraCommons is disabled via the environment config", async() => {
+        serverConfigStore.set({config: {...defaultServerConfig, enableEraCommons: false}});
+
+        let wrapper = component();
+        await waitOneTickAndUpdate(wrapper);
+
+        profileStore.set({
+            profile: {
+                ...ProfileStubVariables.PROFILE_STUB,
+                tierEligibilities: [{
+                    accessTierShortName: AccessTierShortNames.Registered,
+                    eraRequired: false,
+                    eligible: false
+                },{
+                    accessTierShortName: AccessTierShortNames.Controlled,
+                    eraRequired: true,
+                    eligible: true
+                }]
+            },
+            load,
+            reload,
+            updateCache
+        });
+        wrapper = component();
+        await waitOneTickAndUpdate(wrapper);
+        expect(findModule(findControlledTierCard(wrapper), AccessModule.ERACOMMONS).exists()).toBeFalsy();
+    });
+
+    it("Should show the RAS help text component when it is incomplete", async() => {
+        const wrapper = component();
+        await waitOneTickAndUpdate(wrapper);
+
+        expect(findCompleteModule(wrapper, AccessModule.RASLINKLOGINGOV).exists()).toBeFalsy();
+        expect(findIncompleteModule(wrapper, AccessModule.RASLINKLOGINGOV).exists()).toBeTruthy();
+
+        expect(findContactUs(wrapper).exists()).toBeTruthy();
+    });
+
+    it("Should not show the RAS help text component when it is complete", async() => {
+
+        profileStore.set({
+            profile: {
+                ...ProfileStubVariables.PROFILE_STUB,
+                accessModules: {
+                    modules: [{moduleName: AccessModule.RASLINKLOGINGOV, completionEpochMillis: 1}]
+                }
+            },
+            load,
+            reload,
+            updateCache});
+
+        const wrapper = component();
+        await waitOneTickAndUpdate(wrapper);
+
+        expect(findCompleteModule(wrapper, AccessModule.RASLINKLOGINGOV).exists()).toBeTruthy();
+        expect(findIncompleteModule(wrapper, AccessModule.RASLINKLOGINGOV).exists()).toBeFalsy();
+
+        expect(findContactUs(wrapper).exists()).toBeFalsy();
+    });
 });

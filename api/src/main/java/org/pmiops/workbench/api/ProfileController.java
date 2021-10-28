@@ -583,6 +583,7 @@ public class ProfileController implements ProfileApiDelegate {
   }
 
   @Override
+  @AuthorityRequired({Authority.RESEARCHER_DATA_VIEW})
   public ResponseEntity<UserAuditLogQueryResponse> getAuditLogEntries(
       String usernameWithoutGsuiteDomain,
       Integer limit,

@@ -43,7 +43,7 @@ describe('Cohort review set tests', () => {
     await modal.waitForLoad();
 
     await modal.fillInNumberOfParticipants(reviewSetNumberOfParticipants_1);
-    await modal.clickButton(LinkText.CreateSet);
+    await modal.clickButton(LinkText.CreateSet, { waitForClose: true });
 
     const cohortReviewPage = new CohortReviewPage(page);
     await cohortReviewPage.waitForLoad();

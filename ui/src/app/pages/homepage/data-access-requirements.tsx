@@ -2,7 +2,6 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {useEffect, useState} from 'react';
 
-import {useQuery} from 'app/components/app-router';
 import {Button, Clickable} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
@@ -45,8 +44,11 @@ import {ReactComponent as individual} from 'assets/icons/DAR/individual.svg';
 import {ReactComponent as physical} from 'assets/icons/DAR/physical.svg';
 import {ReactComponent as survey} from 'assets/icons/DAR/survey.svg';
 import {ReactComponent as wearable} from 'assets/icons/DAR/wearable.svg';
-import {AccessTierShortNames} from 'app/utils/access-tiers';
+import {AccessTierDisplayNames, AccessTierShortNames} from 'app/utils/access-tiers';
 import {environment} from 'environments/environment';
+import {useQuery} from 'app/components/app-router';
+import {openZendeskWidget} from 'app/utils/zendesk';
+import {SupportButton} from 'app/components/support';
 
 const styles = reactStyles({
   headerFlexColumn: {
@@ -134,19 +136,29 @@ const styles = reactStyles({
     lineHeight: '22px',
     marginBottom: '0.5em',
   },
-  rtData: {
+  dataHeader: {
     fontSize: '16px',
     fontWeight: 600,
     marginBottom: '0.5em',
     marginLeft: '0.5em',
   },
-  rtDetailsIcon: {
+  ctDataOptional: {
+    fontSize: '16px',
+    fontStyle: 'italic',
+    fontWeight: 'normal',
+    marginBottom: '0.5em'
+  },
+  dataDetailsIcon: {
     marginRight: '0.5em',
   },
-  rtDataDetails: {
+  dataDetails: {
     fontSize: '14px',
     fontWeight: 100,
     marginBottom: '0.5em',
+  },
+  requestAccess: {
+    marginTop: '0.5rem',
+    marginBottom: '0.5rem',
   },
   modulesContainer: {
     marginLeft: 'auto',
@@ -157,7 +169,7 @@ const styles = reactStyles({
     alignSelf: 'center',
     paddingRight: '0.5em',
   },
-  activeModuleBox: {
+  clickableModuleBox: {
     padding: '0.5em',
     margin: '0.2em',
     width: '593px',
@@ -166,7 +178,7 @@ const styles = reactStyles({
     border: '1px solid',
     borderColor: colors.accent,
   },
-  inactiveModuleBox: {
+  backgroundModuleBox: {
     padding: '0.5em',
     margin: '0.2em',
     width: '593px',
@@ -177,10 +189,10 @@ const styles = reactStyles({
     marginLeft: '0.2em',
     marginRight: '1em',
   },
-  activeModuleText: {
+  clickableModuleText: {
     color: colors.primary,
   },
-  inactiveModuleText: {
+  backgroundModuleText: {
     opacity: '0.5',
   },
   moduleDate: {
@@ -214,6 +226,16 @@ const styles = reactStyles({
     fontSize: '18px',
     paddingRight: '4px',
   },
+  link: {
+    color: colors.accent,
+    cursor: 'pointer',
+    textDecoration: 'underline',
+  },
+  loginGovHelp: {
+    opacity: '0.5',
+    fontSize: '12px',
+    lineHeight: '22px',
+  },
 });
 
 // in display order
@@ -224,33 +246,25 @@ const rtModules = [
   AccessModule.COMPLIANCETRAINING,
 ];
 
-// TODO RW-7059
-const ctModules = [];
-
 const duccModule = AccessModule.DATAUSERCODEOFCONDUCT;
 
 // in display order
 // exported for test
 export const allModules: AccessModule[] = [
   ...rtModules,
-  ...ctModules,
   duccModule,
 ];
 
-// this function does double duty:
-// - returns appropriate text for completed and bypassed modules and null for incomplete modules
-// - because of this, truthy return values indicate that a module is either complete or bypassed
-const bypassedOrCompletedText = (status: AccessModuleStatus) => {
-  const {completionEpochMillis, bypassEpochMillis}: AccessModuleStatus = status || {};
-  const userCompletedModule = !!completionEpochMillis;
-  const userBypassedModule = !!bypassEpochMillis;
+const isCompleted = (status: AccessModuleStatus) => status && !!status.completionEpochMillis
+const isBypassed = (status: AccessModuleStatus) => status && !!status.bypassEpochMillis
+const isCompliant = (status: AccessModuleStatus) => isCompleted(status) || isBypassed(status)
 
-  return cond(
-      [userCompletedModule, () => `Completed on: ${displayDateWithoutHours(completionEpochMillis)}`],
-      [userBypassedModule, () => `Bypassed on: ${displayDateWithoutHours(bypassEpochMillis)}`],
-      // return nothing if there's no text
-    () => null
-  );
+const getStatusText = (status: AccessModuleStatus) => {
+  console.assert(isCompliant(status), 'Cannot provide status text for incomplete module')
+  const {completionEpochMillis, bypassEpochMillis}: AccessModuleStatus = status || {};
+  return isCompleted(status)
+    ? `Completed on: ${displayDateWithoutHours(status.completionEpochMillis)}`
+    : `Bypassed on: ${displayDateWithoutHours(status.bypassEpochMillis)}`
 };
 
 const handleTerraShibbolethCallback = (token: string, spinnerProps: WithSpinnerOverlayProps, reloadProfile: Function) => {
@@ -322,10 +336,8 @@ export const getVisibleModules = (modules: AccessModule[], profile: Profile): Ac
     fp.map(moduleConfig => moduleConfig.moduleName)
 )(modules);
 
-const incompleteModules = (modules: AccessModule[], profile: Profile): AccessModule[] => modules.filter(moduleName => {
-  const status = getAccessModuleStatusByName(profile, moduleName);
-  return !bypassedOrCompletedText(status);
-});
+const incompleteModules = (modules: AccessModule[], profile: Profile): AccessModule[] =>
+  modules.filter(moduleName => !isCompliant(getAccessModuleStatusByName(profile, moduleName)));
 
 const syncIncompleteModules = (modules: AccessModule[], profile: Profile, reloadProfile: Function) => {
   incompleteModules(modules, profile).map(async moduleName => {
@@ -378,9 +390,9 @@ const TemporaryRASModule = () => {
   const {DARTitleComponent} = getAccessModuleConfig(moduleName);
   return <FlexRow data-test-id={`module-${moduleName}`}>
     <FlexRow style={styles.moduleCTA}/>
-    <FlexRow style={styles.inactiveModuleBox}>
+    <FlexRow style={styles.backgroundModuleBox}>
       <ModuleIcon moduleName={moduleName} completedOrBypassed={false} eligible={false}/>
-      <FlexColumn style={styles.inactiveModuleText}>
+      <FlexColumn style={styles.backgroundModuleText}>
         <DARTitleComponent/>
         <div style={{fontSize: '14px', marginTop: '0.5em'}}>
           <b>Temporarily disabled.</b> Due to technical difficulties, this step is disabled.
@@ -391,13 +403,53 @@ const TemporaryRASModule = () => {
   </FlexRow>;
 };
 
+const ContactUs = (props: {profile: Profile}) => {
+  const {profile: {givenName, familyName, username, contactEmail}} = props;
+  return <div data-test-id='contact-us'>
+        <span style={styles.link} onClick={(e) => {
+          openZendeskWidget(givenName, familyName, username, contactEmail);
+          // prevents the enclosing Clickable's onClick() from triggering instead
+          e.stopPropagation();
+        }}>Contact us</span> if you’re having trouble completing this step.
+  </div>;
+}
+
+const LoginGovHelpText = (props: {profile: Profile, afterInitialClick: boolean}) => {
+  const {profile, afterInitialClick} = props;
+
+  // don't return help text if complete or bypassed
+  const needsHelp = !isCompliant(getAccessModuleStatusByName(profile, AccessModule.RASLINKLOGINGOV));
+
+  return needsHelp &&
+    (afterInitialClick
+      ? <div style={styles.loginGovHelp}>
+        <div>
+          Looks like you still need to complete this action, please try again.
+        </div>
+        <ContactUs profile={profile}/>
+      </div>
+      : <div style={styles.loginGovHelp}>
+        <div>
+          Verifying your identity helps us keep participant data safe.
+          You’ll need to provide your state ID, social security number, and phone number.
+        </div>
+        <ContactUs profile={profile}/>
+      </div>);
+}
+
+const ModuleBox = (props: {clickable: boolean, action: Function, children}) => {
+  const {clickable, action, children} = props;
+  return clickable
+    ? <Clickable onClick={() => action()}>
+      <FlexRow style={styles.clickableModuleBox}>{children}</FlexRow>
+    </Clickable>
+    : <FlexRow style={styles.backgroundModuleBox}>{children}</FlexRow>;
+};
+
 interface ModuleProps {
   profile: Profile,
   moduleName: AccessModule;
   active: boolean;    // is this the currently-active module that the user should complete
-
-  // TODO RW-7059
-  // eligible: boolean;  // is the user eligible to complete this module (does the inst. allow it)
   spinnerProps: WithSpinnerOverlayProps;
 }
 
@@ -423,16 +475,8 @@ const MaybeModule = ({profile, moduleName, active, spinnerProps}: ModuleProps): 
 
   const {DARTitleComponent, refreshAction, isEnabledInEnvironment} = getAccessModuleConfig(moduleName);
 
-  const ModuleBox = ({children}) => {
-    return active
-        ? <Clickable onClick={() => { setShowRefresh(true); moduleAction(); }}>
-            <FlexRow style={styles.activeModuleBox}>{children}</FlexRow>
-          </Clickable>
-        : <FlexRow style={styles.inactiveModuleBox}>{children}</FlexRow>;
-  };
-
   const Module = ({profile}) => {
-    const statusTextMaybe = bypassedOrCompletedText(getAccessModuleStatusByName(profile, moduleName));
+    const status = getAccessModuleStatusByName(profile, moduleName)
 
     return <FlexRow data-test-id={`module-${moduleName}`}>
       <FlexRow style={styles.moduleCTA}>
@@ -442,13 +486,14 @@ const MaybeModule = ({profile, moduleName, active, spinnerProps}: ModuleProps): 
                 showSpinner={spinnerProps.showSpinner}/>
             : <Next/>)}
       </FlexRow>
-      <ModuleBox>
-        <ModuleIcon moduleName={moduleName} completedOrBypassed={!!statusTextMaybe}/>
+      <ModuleBox clickable={active} action={() => { setShowRefresh(true); moduleAction(); }}>
+        <ModuleIcon moduleName={moduleName} completedOrBypassed={isCompliant(status)}/>
         <FlexColumn>
-          <div style={active ? styles.activeModuleText : styles.inactiveModuleText}>
+          <div style={active ? styles.clickableModuleText : styles.backgroundModuleText}>
             <DARTitleComponent/>
+            {(moduleName === AccessModule.RASLINKLOGINGOV) && <LoginGovHelpText profile={profile} afterInitialClick={showRefresh}/>}
           </div>
-          {statusTextMaybe && <div style={styles.moduleDate}>{statusTextMaybe}</div>}
+          {isCompliant(status) && <div style={styles.moduleDate}>{getStatusText(status)}</div>}
         </FlexColumn>
       </ModuleBox>
       {showTwoFactorAuthModal && <TwoFactorAuthModal
@@ -465,6 +510,38 @@ const MaybeModule = ({profile, moduleName, active, spinnerProps}: ModuleProps): 
     }
   }
   return isEnabledInEnvironment ? <Module profile={profile}/> : null;
+};
+
+const ControlledTierEraModule = (props: {profile: Profile, eligible: boolean, spinnerProps: WithSpinnerOverlayProps}): JSX.Element => {
+  const {profile, eligible, spinnerProps} = props;
+  // whether to show the refresh button: this module has been clicked
+  const [showRefresh, setShowRefresh] = useState(false);
+  const moduleName = AccessModule.ERACOMMONS;
+  const {DARTitleComponent, refreshAction, isEnabledInEnvironment} = getAccessModuleConfig(moduleName);
+  const status = getAccessModuleStatusByName(profile, moduleName)
+
+  // module is not clickable if (user is ineligible for CT) or (user has completed/bypassed module already)
+  const clickable = eligible && !isCompliant(status);
+
+  const Module = () => {
+    return <FlexRow data-test-id={`module-${moduleName}`}>
+      <FlexRow style={styles.moduleCTA}>
+        {showRefresh && refreshAction
+          && <Refresh refreshAction={refreshAction} showSpinner={spinnerProps.showSpinner}/>}
+      </FlexRow>
+      <ModuleBox clickable={clickable} action={() => { setShowRefresh(true); redirectToNiH(); }}>
+        <ModuleIcon moduleName={moduleName} eligible={eligible} completedOrBypassed={isCompliant(status)}/>
+        <FlexColumn>
+          <div style={clickable ? styles.clickableModuleText : styles.backgroundModuleText}>
+            <DARTitleComponent/>
+          </div>
+          {isCompliant(status) && <div style={styles.moduleDate}>{getStatusText(status)}</div>}
+        </FlexColumn>
+      </ModuleBox>
+    </FlexRow>;
+  };
+
+  return isEnabledInEnvironment ? <Module data-test-id={`module-${AccessModule.ERACOMMONS}`} /> : null;
 };
 
 const DARHeader = () => <FlexColumn style={styles.headerFlexColumn}>
@@ -512,35 +589,36 @@ const Survey = survey;
 const Wearable = wearable;
 
 const renderIcon = (iconName: string) => switchCase(iconName,
-    ['additional', () => <Additional style={styles.rtDetailsIcon}/>],
-    ['electronic', () => <Electronic style={styles.rtDetailsIcon}/>],
-    ['genomic', () => <Genomic style={styles.rtDetailsIcon}/>],
-    ['identifying', () => <Identifying style={styles.rtDetailsIcon}/>],
-    ['individual', () => <Individual style={styles.rtDetailsIcon}/>],
-    ['physical', () => <Physical style={styles.rtDetailsIcon}/>],
-    ['survey', () => <Survey style={styles.rtDetailsIcon}/>],
-    ['wearable', () => <Wearable style={styles.rtDetailsIcon}/>],
+    ['additional', () => <Additional style={styles.dataDetailsIcon}/>],
+    ['electronic', () => <Electronic style={styles.dataDetailsIcon}/>],
+    ['genomic', () => <Genomic style={styles.dataDetailsIcon}/>],
+    ['identifying', () => <Identifying style={styles.dataDetailsIcon}/>],
+    ['individual', () => <Individual style={styles.dataDetailsIcon}/>],
+    ['physical', () => <Physical style={styles.dataDetailsIcon}/>],
+    ['survey', () => <Survey style={styles.dataDetailsIcon}/>],
+    ['wearable', () => <Wearable style={styles.dataDetailsIcon}/>],
 );
 
 const DataDetail = (props: {icon: string, text: string}) => {
   const {icon, text} = props;
   return <FlexRow>
     {renderIcon(icon)}
-    <div style={styles.rtDataDetails}>{text}</div>
+    <div style={styles.dataDetails}>{text}</div>
   </FlexRow>;
 };
 
 const RegisteredTierCard = (props: {profile: Profile, activeModule: AccessModule, spinnerProps: WithSpinnerOverlayProps}) => {
   const {profile, activeModule, spinnerProps} = props;
+  const rtDisplayName = AccessTierDisplayNames.Registered;
   return <FlexRow style={styles.card}>
     <FlexColumn>
       <div style={styles.cardStep}>Step 1</div>
       <div style={styles.cardHeader}>Complete Registration</div>
       <FlexRow>
         <RegisteredTierBadge/>
-        <div style={styles.rtData}>Registered Tier data</div>
+        <div style={styles.dataHeader}>{rtDisplayName} data</div>
       </FlexRow>
-      <div style={styles.rtDataDetails}>Once registered, you’ll have access to:</div>
+      <div style={styles.dataDetails}>Once registered, you’ll have access to:</div>
       <DataDetail icon='individual' text='Individual (not aggregated) data'/>
       <DataDetail icon='identifying' text='Identifying information removed'/>
       <DataDetail icon='electronic' text='Electronic health records'/>
@@ -552,47 +630,67 @@ const RegisteredTierCard = (props: {profile: Profile, activeModule: AccessModule
   </FlexRow>;
 };
 
-const ControlledTierCard = (props: {profile: Profile}) => {
-  const {profile} = props;
+const ControlledTierCard = (props: {profile: Profile, spinnerProps: WithSpinnerOverlayProps}) => {
+  const {profile, spinnerProps} = props;
   const controlledTierEligibility = profile.tierEligibilities.find(tier=> tier.accessTierShortName === AccessTierShortNames.Controlled);
+  const registeredTierEligibility = profile.tierEligibilities.find(tier=> tier.accessTierShortName === AccessTierShortNames.Registered);
   const isSigned = !!controlledTierEligibility;
-  const hasAccess = isSigned && controlledTierEligibility.eligible;
+  const isEligible = isSigned && controlledTierEligibility.eligible;
   const {verifiedInstitutionalAffiliation: {institutionDisplayName}} = profile;
-  return <FlexRow data-test-id='controlled-card' style={{...styles.card, height: 300}}>
+  // Display era in CT if:
+  // 1) Institution has signed the CT institution agreement,
+  // 2) Registered Tier DOES NOT require era
+  // 3) CT Requirement DOES require era
+  const displayEraCommons = isSigned && !registeredTierEligibility?.eraRequired && controlledTierEligibility.eraRequired;
+  const rtDisplayName = AccessTierDisplayNames.Registered;
+  const ctDisplayName = AccessTierDisplayNames.Controlled;
+  return <FlexRow data-test-id='controlled-card' style={styles.card}>
     <FlexColumn>
       <div style={styles.cardStep}>Step 2</div>
       <div style={styles.cardHeader}>Additional Data Access</div>
       <FlexRow>
         <ControlledTierBadge/>
-        <div style={styles.rtData}>Controlled Tier data</div>
+        <div style={styles.dataHeader}>{ctDisplayName} data - </div>
+        <div style={styles.ctDataOptional}>&nbsp;Optional</div>
       </FlexRow>
-      <div style={styles.rtDataDetails}>You are eligible to access Controlled Tier Data</div>
-      <div style={styles.rtDataDetails}>In addition to Registered Tier data, the Controlled Tier curated dataset contains:</div>
+      {isEligible
+        ? <div data-test-id='eligible-text' style={styles.dataDetails}>You are eligible to access {ctDisplayName} data</div>
+        : <div>
+          <div data-test-id='ineligible-text' style={styles.dataDetails}>
+            You are not currently eligible; action by {institutionDisplayName} is required.
+          </div>
+          <div style={styles.requestAccess}>
+            <SupportButton label='Request Access'/>
+          </div>
+        </div>}
+      <div style={styles.dataDetails}>In addition to {rtDisplayName} data, the {ctDisplayName} curated dataset contains:</div>
       <DataDetail icon='genomic' text='Genomic data'/>
       <DataDetail icon='additional' text='Additional demographic details'/>
     </FlexColumn>
     <FlexColumn style={styles.modulesContainer}>
       <ControlledTierStep data-test-id='controlled-signed'
-                          enable={isSigned}
+                          enabled={isSigned}
                           text={`${institutionDisplayName} must sign an institutional agreement`}/>
       <ControlledTierStep data-test-id='controlled-user-email'
-                          enable={hasAccess}
-                          text={`${institutionDisplayName} must allow you to access controlled tier data`}/>
+                          enabled={isEligible}
+                          text={`${institutionDisplayName} must allow you to access ${ctDisplayName} data`}/>
+      {displayEraCommons &&
+         <ControlledTierEraModule profile={profile} eligible={isEligible} spinnerProps={spinnerProps}/>}
     </FlexColumn>
   </FlexRow>
 };
 
-const ControlledTierStep = (props: {enable: boolean, text: String}) => {
+const ControlledTierStep = (props: {enabled: boolean, text: String}) => {
   return <FlexRow>
     <FlexRow style={styles.moduleCTA}/>
     {/* Since Institution access steps does not require user interaction, will display them as inactive*/}
-    <FlexRow style={styles.inactiveModuleBox}>
+    <FlexRow style={styles.backgroundModuleBox}>
       <div style={styles.moduleIcon}>
-        {props.enable
+        {props.enabled
           ? <CheckCircle data-test-id='eligible' style={{color: colors.success}}/>
           : <MinusCircle data-test-id='ineligible' style={{color: colors.disabled}}/>}
       </div>
-      <FlexColumn style={styles.inactiveModuleText}>
+      <FlexColumn style={styles.backgroundModuleText}>
         <div>{props.text}
         </div>
        </FlexColumn>
@@ -649,7 +747,7 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
   const showCtCard = environment.accessTiersVisibleToUsers.includes(AccessTierShortNames.Controlled)
 
   const rtCard = <RegisteredTierCard key='rt' profile={profile} activeModule={activeModule} spinnerProps={spinnerProps}/>
-  const ctCard = showCtCard ? <ControlledTierCard key='ct' profile={profile}/> : null
+  const ctCard = showCtCard ? <ControlledTierCard key='ct' profile={profile} spinnerProps={spinnerProps}/> : null
   const dCard = <DuccCard
     key='dt'
     profile={profile}

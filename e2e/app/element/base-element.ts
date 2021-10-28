@@ -421,4 +421,31 @@ export default class BaseElement {
         return false;
       });
   }
+
+  /**
+   * Wait until button is clickable (enabled).
+   * @param {string} xpathSelector (Optional) Button Xpath selector.
+   * @throws Timeout exception if button is not enabled after waiting.
+   */
+  async waitUntilEnabled(xpathSelector?: string): Promise<void> {
+    const selector = xpathSelector || this.getXpath();
+    await this.page.waitForXPath(selector, { visible: true });
+    await this.page
+      .waitForFunction(
+        (xpath) => {
+          const elemt = document.evaluate(xpath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null)
+            .singleNodeValue;
+          const style = window.getComputedStyle(elemt as Element);
+          const propValue = style.getPropertyValue('cursor');
+          return propValue === 'pointer';
+        },
+        {},
+        selector
+      )
+      .catch((err) => {
+        logger.error(`waitUntilEnabled() failed: xpath=${selector}`);
+        logger.error(err);
+        throw new Error(err);
+      });
+  }
 }

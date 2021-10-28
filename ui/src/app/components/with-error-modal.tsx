@@ -1,6 +1,7 @@
 import {TextModal} from 'app/components/text-modal';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
+import {SupportMailto} from "./support";
 
 interface State {
   show: boolean;
@@ -59,8 +60,7 @@ export const withProfileErrorWrapper = WrappedComponent => {
         "{message}"
     </div>
     <div>
-        Please try again or contact <a
-        href='mailto:support@researchallofus.org'>support@researchallofus.org</a>.
+        Please try again or contact <SupportMailto/>.
     </div>
   </React.Fragment>);
 

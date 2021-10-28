@@ -84,6 +84,7 @@ import org.pmiops.workbench.monitoring.GaugeDataCollector;
 import org.pmiops.workbench.monitoring.MeasurementBundle;
 import org.pmiops.workbench.monitoring.labels.MetricLabel;
 import org.pmiops.workbench.monitoring.views.GaugeMetric;
+import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -124,7 +125,8 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
           Domain.FITBIT_HEART_RATE_LEVEL,
           Domain.FITBIT_HEART_RATE_SUMMARY,
           Domain.FITBIT_INTRADAY_STEPS,
-          Domain.WHOLE_GENOME_VARIANT);
+          Domain.WHOLE_GENOME_VARIANT,
+          Domain.ZIP_CODE_SOCIOECONOMIC);
 
   // See https://cloud.google.com/appengine/articles/deadlineexceedederrors for details
   private static final long APP_ENGINE_HARD_TIMEOUT_MSEC_MINUS_FIVE_SEC = 55000L;
@@ -310,6 +312,11 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
           .put(Domain.SURVEY, "answer")
           .put(Domain.VISIT, "visit")
           .put(Domain.PHYSICAL_MEASUREMENT_CSS, "measurement")
+          .put(Domain.FITBIT_HEART_RATE_LEVEL, "heart_rate_minute_level")
+          .put(Domain.FITBIT_INTRADAY_STEPS, "steps_intraday")
+          .put(Domain.FITBIT_ACTIVITY, "activity_summary")
+          .put(Domain.FITBIT_HEART_RATE_SUMMARY, "heart_rate_summary")
+          .put(Domain.ZIP_CODE_SOCIOECONOMIC, "observation")
           .build();
 
   @Override
@@ -641,6 +648,12 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
           == 1) {
         queryBuilder.append(", DATE");
       }
+    }
+
+    if (domain == Domain.ZIP_CODE_SOCIOECONOMIC) {
+      queryBuilder.append(
+          "\nAND observation_source_concept_id = 1585250"
+              + "\nAND observation.value_as_string not like 'Res%'");
     }
 
     if (OUTER_QUERY_DOMAIN.contains(domain)) {
@@ -1394,9 +1407,15 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
                 + "\"\"\"";
         dataFrameSection =
             namespace
-                + "df = pandas.read_gbq("
+                + "df = pandas.read_gbq(\n"
+                + "    "
                 + namespace
-                + "sql, dialect=\"standard\", progress_bar_type=\"tqdm_notebook\")";
+                + "sql,\n"
+                + "    dialect=\"standard\",\n"
+                + "    use_bqstorage_api=(\""
+                + LeonardoNotebooksClient.BIGQUERY_STORAGE_API_ENABLED_ENV_KEY
+                + "\" in os.environ),\n"
+                + "    progress_bar_type=\"tqdm_notebook\")";
         displayHeadSection = namespace + "df.head(5)";
         break;
       case R:

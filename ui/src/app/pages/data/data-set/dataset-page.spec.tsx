@@ -13,8 +13,11 @@ import {
   CohortsApi,
   ConceptSetsApi,
   DataSetApi,
-  Domain, PrePackagedConceptSetEnum,
-  WorkspaceAccessLevel, WorkspacesApi
+  Domain,
+  NotebooksApi,
+  PrePackagedConceptSetEnum,
+  WorkspaceAccessLevel,
+  WorkspacesApi
 } from 'generated/fetch';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {CdrVersionsApiStub, cdrVersionTiersResponse} from 'testing/stubs/cdr-versions-api-stub';
@@ -25,6 +28,7 @@ import {workspaceDataStub, workspaceStubs} from 'testing/stubs/workspaces';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 import { MemoryRouter, Route } from 'react-router-dom';
 import { mockNavigateByUrl } from 'setupTests';
+import { NotebooksApiStub } from 'testing/stubs/notebooks-api-stub';
 
 describe('DataSetPage', () => {
   let datasetApiStub;
@@ -36,6 +40,7 @@ describe('DataSetPage', () => {
     registerApiClient(DataSetApi, datasetApiStub);
     registerApiClient(CdrVersionsApi, new CdrVersionsApiStub());
     registerApiClient(WorkspacesApi, new WorkspacesApiStub());
+    registerApiClient(NotebooksApi, new NotebooksApiStub());
     serverConfigStore.set({config: {enableGenomicExtraction: true, gsuiteDomain: ''}});
     currentWorkspaceStore.next(workspaceDataStub);
     cdrVersionStore.set(cdrVersionTiersResponse);

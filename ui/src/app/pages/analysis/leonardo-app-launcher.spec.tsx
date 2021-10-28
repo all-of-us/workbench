@@ -17,11 +17,18 @@ import {LeoRuntimesApiStub} from 'testing/stubs/leo-runtimes-api-stub';
 import {ProfileStubVariables} from 'testing/stubs/profile-api-stub';
 import {workspaceStubs} from 'testing/stubs/workspaces';
 import {mockNavigate} from 'setupTests';
-import {NotebookRedirect, Progress, ProgressCardState, progressStrings} from './notebook-redirect';
+import {
+  LeonardoAppLauncher,
+  Progress,
+  ProgressCardState,
+  notebookProgressStrings,
+  terminalProgressStrings,
+  LeoApplicationType
+} from 'app/pages/analysis/leonardo-app-launcher';
 import { Route, Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 
-describe('NotebookRedirect', () => {
+describe('NotebookLauncher', () => {
   const workspace = {
     ...workspaceStubs[0],
     accessLevel: WorkspaceAccessLevel.OWNER,
@@ -33,14 +40,15 @@ describe('NotebookRedirect', () => {
 
   let runtimeStub;
 
-  const initialUrl = '/workspaces/namespace/id/notebooks/wharrgarbl'
-  let history = createMemoryHistory({initialEntries: [initialUrl]});
+  const notebookInitialUrl = '/workspaces/namespace/id/notebooks/wharrgarbl'
+  let history = createMemoryHistory({initialEntries: [notebookInitialUrl]});
 
-  const component = async() => {
+  const notebookComponent = async() => {
     const c = mount(<Router history={history}>
       <Route path='/workspaces/:ns/:wsid/notebooks/:nbName'>
-        <NotebookRedirect hideSpinner={() => {}}
-                          showSpinner={() => {}}/>
+        <LeonardoAppLauncher hideSpinner={() => {}}
+                             showSpinner={() => {}}
+                             leoAppType={LeoApplicationType.Notebook}/>
       </Route>
     </Router>);
     await waitOneTickAndUpdate(c);
@@ -65,7 +73,7 @@ describe('NotebookRedirect', () => {
     registerApiClientNotebooks(LeoRuntimesApi, new LeoRuntimesApiStub());
 
     serverConfigStore.set({config: {gsuiteDomain: 'x'}});
-    history.push(initialUrl + '?kernelType=R?creating=true');
+    history.push(notebookInitialUrl + '?kernelType=R?creating=true');
     currentWorkspaceStore.next(workspace);
     profileStore.set({profile, load, reload, updateCache});
     runtimeStore.set({workspaceNamespace: workspace.namespace, runtime: undefined, runtimeLoaded: true});
@@ -79,26 +87,26 @@ describe('NotebookRedirect', () => {
   });
 
   it('should render', async() => {
-    const wrapper = await component();
+    const wrapper = await notebookComponent();
     expect(wrapper).toBeTruthy();
   });
 
   it('should show redirect display before showing notebook', async() => {
-    const wrapper = await component();
-    expect(wrapper.exists('[data-test-id="notebook-redirect"]')).toBeTruthy();
+    const wrapper = await notebookComponent();
+    expect(wrapper.exists('[data-test-id="leo-app-launcher"]')).toBeTruthy();
   });
 
   it('should be "Initializing" until a Creating runtime for an existing notebook is running', async() => {
     runtimeStub.runtime.status = RuntimeStatus.Creating;
 
-    const wrapper = await component();
+    const wrapper = await notebookComponent();
     await waitForFakeTimersAndUpdate(wrapper);
 
     expect(wrapper
       .exists(getCardSpinnerTestId(ProgressCardState.UnknownInitializingResuming)))
       .toBeTruthy();
     expect(currentCardText(wrapper))
-      .toContain(progressStrings.get(Progress.Initializing));
+      .toContain(notebookProgressStrings.get(Progress.Initializing));
 
     runtimeStub.runtime.status = RuntimeStatus.Running;
     await waitForFakeTimersAndUpdate(wrapper);
@@ -107,20 +115,20 @@ describe('NotebookRedirect', () => {
       .exists(getCardSpinnerTestId(ProgressCardState.Redirecting)))
       .toBeTruthy();
     expect(currentCardText(wrapper))
-      .toContain(progressStrings.get(Progress.Redirecting));
+      .toContain(notebookProgressStrings.get(Progress.Redirecting));
   });
 
   it('should be "Initializing" until a Creating runtime for a new notebook is running', async() => {
     runtimeStub.runtime.status = RuntimeStatus.Creating;
 
-    const wrapper = await component();
+    const wrapper = await notebookComponent();
     await waitForFakeTimersAndUpdate(wrapper);
 
     expect(wrapper
       .exists(getCardSpinnerTestId(ProgressCardState.UnknownInitializingResuming)))
       .toBeTruthy();
     expect(currentCardText(wrapper))
-      .toContain(progressStrings.get(Progress.Initializing));
+      .toContain(notebookProgressStrings.get(Progress.Initializing));
 
     runtimeStub.runtime.status = RuntimeStatus.Running;
     await waitForFakeTimersAndUpdate(wrapper);
@@ -129,21 +137,21 @@ describe('NotebookRedirect', () => {
       .exists(getCardSpinnerTestId(ProgressCardState.Redirecting)))
       .toBeTruthy();
     expect(currentCardText(wrapper))
-      .toContain(progressStrings.get(Progress.Redirecting));
+      .toContain(notebookProgressStrings.get(Progress.Redirecting));
   });
 
   it('should be "Resuming" until a Stopped runtime for an existing notebook is running', async() => {
-    history.push(initialUrl + '?kernelType=R?creating=false');
+    history.push(notebookInitialUrl + '?kernelType=R?creating=false');
     runtimeStub.runtime.status = RuntimeStatus.Stopped;
 
-    const wrapper = await component();
+    const wrapper = await notebookComponent();
     await waitForFakeTimersAndUpdate(wrapper);
 
     expect(wrapper
       .exists(getCardSpinnerTestId(ProgressCardState.UnknownInitializingResuming)))
       .toBeTruthy();
     expect(currentCardText(wrapper))
-      .toContain(progressStrings.get(Progress.Resuming));
+      .toContain(notebookProgressStrings.get(Progress.Resuming));
 
     runtimeStub.runtime.status = RuntimeStatus.Running;
     await waitForFakeTimersAndUpdate(wrapper);
@@ -152,20 +160,20 @@ describe('NotebookRedirect', () => {
       .exists(getCardSpinnerTestId(ProgressCardState.Redirecting)))
       .toBeTruthy();
     expect(currentCardText(wrapper))
-      .toContain(progressStrings.get(Progress.Redirecting));
+      .toContain(notebookProgressStrings.get(Progress.Redirecting));
   });
 
   it('should be "Resuming" until a Stopped runtime for a new notebook is running', async() => {
     runtimeStub.runtime.status = RuntimeStatus.Stopped;
 
-    const wrapper = await component();
+    const wrapper = await notebookComponent();
     await waitForFakeTimersAndUpdate(wrapper);
 
     expect(wrapper
       .exists(getCardSpinnerTestId(ProgressCardState.UnknownInitializingResuming)))
       .toBeTruthy();
     expect(currentCardText(wrapper))
-      .toContain(progressStrings.get(Progress.Resuming));
+      .toContain(notebookProgressStrings.get(Progress.Resuming));
 
     runtimeStub.runtime.status = RuntimeStatus.Running;
     await waitForFakeTimersAndUpdate(wrapper);
@@ -174,42 +182,42 @@ describe('NotebookRedirect', () => {
       .exists(getCardSpinnerTestId(ProgressCardState.Redirecting)))
       .toBeTruthy();
     expect(currentCardText(wrapper))
-      .toContain(progressStrings.get(Progress.Redirecting));
+      .toContain(notebookProgressStrings.get(Progress.Redirecting));
   });
 
   it('should be "Redirecting" when the runtime is initially Running for an existing notebook', async() => {
-    history.push(initialUrl + '?kernelType=R?creating=false');
+    history.push(notebookInitialUrl + '?kernelType=R?creating=false');
     runtimeStub.runtime.status = RuntimeStatus.Running;
 
-    const wrapper = await component();
+    const wrapper = await notebookComponent();
     await waitForFakeTimersAndUpdate(wrapper);
 
     expect(wrapper
       .exists(getCardSpinnerTestId(ProgressCardState.Redirecting)))
       .toBeTruthy();
     expect(currentCardText(wrapper))
-      .toContain(progressStrings.get(Progress.Redirecting));
+      .toContain(notebookProgressStrings.get(Progress.Redirecting));
   });
 
 
   it('should be "Redirecting" when the runtime is initially Running for a new notebook', async() => {
     runtimeStub.runtime.status = RuntimeStatus.Running;
 
-    const wrapper = await component();
+    const wrapper = await notebookComponent();
     await waitForFakeTimersAndUpdate(wrapper);
 
     expect(wrapper
       .exists(getCardSpinnerTestId(ProgressCardState.Redirecting)))
       .toBeTruthy();
     expect(currentCardText(wrapper))
-      .toContain(progressStrings.get(Progress.Redirecting));
+      .toContain(notebookProgressStrings.get(Progress.Redirecting));
   });
 
   it('should navigate away after runtime transitions to deleting', async() => {
-    history.push(initialUrl + '?kernelType=R?creating=false');
+    history.push(notebookInitialUrl + '?kernelType=R?creating=false');
     runtimeStub.runtime.status = RuntimeStatus.Running;
 
-    const wrapper = await component();
+    const wrapper = await notebookComponent();
     await waitForFakeTimersAndUpdate(wrapper);
 
     // Wait for the "redirecting" timer to elapse, rendering the iframe.
@@ -237,13 +245,13 @@ describe('NotebookRedirect', () => {
   });
 
 
-  it('should not navigate after runtime transitions to updating', async() => {
+  it('should not navigate to notebook after runtime transitions to updating', async() => {
     const navSpy = jest.fn();
 
-    history.push(initialUrl + '?kernelType=R?creating=false');
+    history.push(notebookInitialUrl + '?kernelType=R?creating=false');
     runtimeStub.runtime.status = RuntimeStatus.Running;
 
-    const wrapper = await component();
+    const wrapper = await notebookComponent();
     await waitForFakeTimersAndUpdate(wrapper);
 
     // Wait for the "redirecting" timer to elapse, rendering the iframe.
@@ -270,3 +278,84 @@ describe('NotebookRedirect', () => {
     expect(mockNavigate).not.toHaveBeenCalled();
   });
 });
+
+describe('TerminalLauncher', () => {
+  const workspace = {
+    ...workspaceStubs[0],
+    accessLevel: WorkspaceAccessLevel.OWNER,
+  };
+  const profile = ProfileStubVariables.PROFILE_STUB;
+  const load = jest.fn();
+  const reload = jest.fn();
+  const updateCache = jest.fn();
+
+  let runtimeStub;
+
+  const terminalInitialUrl = '/workspaces/namespace/id/terminals'
+  let history = createMemoryHistory({initialEntries: [terminalInitialUrl]});
+
+  const terminalComponent = async() => {
+    const t = mount(<Router history={history}>
+      <Route path='/workspaces/:ns/:wsid/terminals'>
+        <LeonardoAppLauncher hideSpinner={() => {}}
+                             showSpinner={() => {}}
+                             leoAppType={LeoApplicationType.Terminal}/>
+      </Route>
+    </Router>);
+    await waitOneTickAndUpdate(t);
+    return t;
+  };
+
+  function currentCardText(wrapper: ReactWrapper) {
+    return wrapper.find('[data-test-id="current-progress-card"]').first().text();
+  }
+
+  function getCardSpinnerTestId(cardState: ProgressCardState) {
+    return '[data-test-id="progress-card-spinner-' + cardState.valueOf() + '"]';
+  }
+
+  beforeEach(() => {
+    runtimeStub = new RuntimeApiStub();
+    runtimeStub.runtime.status = RuntimeStatus.Creating;
+
+    registerApiClient(RuntimeApi, runtimeStub);
+    registerApiClientNotebooks(JupyterApi, new JupyterApiStub());
+    registerApiClientNotebooks(ProxyApi, new ProxyApiStub());
+    registerApiClientNotebooks(LeoRuntimesApi, new LeoRuntimesApiStub());
+
+    serverConfigStore.set({config: {gsuiteDomain: 'x'}});
+    currentWorkspaceStore.next(workspace);
+    profileStore.set({profile, load, reload, updateCache});
+    runtimeStore.set({workspaceNamespace: workspace.namespace, runtime: undefined, runtimeLoaded: true});
+
+    jest.useFakeTimers();
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+    jest.clearAllMocks();
+  });
+
+  it('should display terminal state header correcrly when RuntimeStatus changes', async() => {
+    runtimeStub.runtime.status = RuntimeStatus.Creating;
+
+    const wrapper = await terminalComponent();
+    await waitForFakeTimersAndUpdate(wrapper);
+
+    expect(wrapper
+        .exists(getCardSpinnerTestId(ProgressCardState.UnknownInitializingResuming)))
+        .toBeTruthy();
+    expect(currentCardText(wrapper))
+        .toContain(terminalProgressStrings.get(Progress.Initializing));
+
+    runtimeStub.runtime.status = RuntimeStatus.Running;
+    await waitForFakeTimersAndUpdate(wrapper);
+
+    expect(wrapper
+        .exists(getCardSpinnerTestId(ProgressCardState.Redirecting)))
+        .toBeTruthy();
+    expect(currentCardText(wrapper))
+        .toContain(terminalProgressStrings.get(Progress.Redirecting));
+  });
+});
+

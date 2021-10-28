@@ -26,7 +26,6 @@ import org.pmiops.workbench.firecloud.api.ProfileApi;
 import org.pmiops.workbench.firecloud.api.StaticNotebooksApi;
 import org.pmiops.workbench.firecloud.api.StatusApi;
 import org.pmiops.workbench.firecloud.api.WorkspacesApi;
-import org.pmiops.workbench.firecloud.model.FirecloudBillingProjectMembership;
 import org.pmiops.workbench.firecloud.model.FirecloudBillingProjectStatus;
 import org.pmiops.workbench.firecloud.model.FirecloudCreateRawlsV2BillingProjectFullRequest;
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupRef;
@@ -210,18 +209,18 @@ public class FireCloudServiceImpl implements FireCloudService {
   }
 
   @Override
-  public String createAllOfUsBillingProject(String projectName, String servicePerimeter) {
-    if (projectName.contains(WORKSPACE_DELIMITER)) {
+  public String createAllOfUsBillingProject(String billingProjectName, String servicePerimeter) {
+    if (billingProjectName.contains(WORKSPACE_DELIMITER)) {
       throw new IllegalArgumentException(
           String.format(
               "Attempting to create billing project with name (%s) that contains workspace delimiter (%s)",
-              projectName, WORKSPACE_DELIMITER));
+              billingProjectName, WORKSPACE_DELIMITER));
     }
 
     FirecloudCreateRawlsV2BillingProjectFullRequest request =
         new FirecloudCreateRawlsV2BillingProjectFullRequest()
             .billingAccount(configProvider.get().billing.freeTierBillingAccountName())
-            .projectName(projectName)
+            .projectName(billingProjectName)
             .servicePerimeter(servicePerimeter);
     BillingV2Api billingV2Api = serviceAccountBillingV2ApiProvider.get();
     retryHandler.run(
@@ -229,47 +228,47 @@ public class FireCloudServiceImpl implements FireCloudService {
           billingV2Api.createBillingProjectFullV2(request);
           return null;
         });
-    return projectName;
+    return billingProjectName;
   }
 
   @Override
-  public void deleteBillingProject(String billingProject) {
+  public void deleteBillingProject(String billingProjectName) {
     BillingV2Api billingV2Api = serviceAccountBillingV2ApiProvider.get();
     retryHandler.run(
         (context) -> {
-          billingV2Api.deleteBillingProject(billingProject);
+          billingV2Api.deleteBillingProject(billingProjectName);
           return null;
         });
   }
 
   @Override
-  public FirecloudBillingProjectStatus getBillingProjectStatus(String projectName) {
+  public FirecloudBillingProjectStatus getBillingProjectStatus(String billingProjectName) {
     return retryHandler.run(
-        (context) -> billingApiProvider.get().billingProjectStatus(projectName));
+        (context) -> billingApiProvider.get().billingProjectStatus(billingProjectName));
   }
 
   @Override
-  public void updateBillingAccount(String billingProject, String billingAccount) {
+  public void updateBillingAccount(String billingProjectName, String billingAccount) {
     retryHandler.run(
         (context) -> {
           endUserBillingV2ApiProvider
               .get()
               .updateBillingProjectBillingAccount(
                   new FirecloudUpdateRawlsBillingAccountRequest().billingAccount(billingAccount),
-                  billingProject);
+                  billingProjectName);
           return null;
         });
   }
 
   @Override
-  public void updateBillingAccountAsService(String billingProject, String billingAccount) {
+  public void updateBillingAccountAsService(String billingProjectName, String billingAccount) {
     retryHandler.run(
         (context) -> {
           serviceAccountBillingV2ApiProvider
               .get()
               .updateBillingProjectBillingAccount(
                   new FirecloudUpdateRawlsBillingAccountRequest().billingAccount(billingAccount),
-                  billingProject);
+                  billingProjectName);
           return null;
         });
   }
@@ -286,8 +285,8 @@ public class FireCloudServiceImpl implements FireCloudService {
   }
 
   @Override
-  public void addOwnerToBillingProject(String ownerEmail, String projectName) {
-    addRoleToBillingProject(ownerEmail, projectName, OWNER_FC_ROLE);
+  public void addOwnerToBillingProject(String ownerEmail, String billingProjectName) {
+    addRoleToBillingProject(ownerEmail, billingProjectName, OWNER_FC_ROLE);
   }
 
   @Override
@@ -318,11 +317,11 @@ public class FireCloudServiceImpl implements FireCloudService {
 
   @Override
   public FirecloudWorkspaceDetails createWorkspace(
-      String projectName, String workspaceName, String authDomainName) {
+      String workspaceNamespace, String workspaceName, String authDomainName) {
     WorkspacesApi workspacesApi = endUserWorkspacesApiProvider.get();
     FirecloudWorkspaceIngest workspaceIngest =
         new FirecloudWorkspaceIngest()
-            .namespace(projectName)
+            .namespace(workspaceNamespace)
             .name(workspaceName)
             .authorizationDomain(
                 ImmutableList.of(new FirecloudManagedGroupRef().membersGroupName(authDomainName)));
@@ -332,12 +331,16 @@ public class FireCloudServiceImpl implements FireCloudService {
 
   @Override
   public FirecloudWorkspaceDetails cloneWorkspace(
-      String fromProject, String fromName, String toProject, String toName, String authDomainName) {
+      String fromWorkspaceNamespace,
+      String fromFirecloudName,
+      String toWorkspaceNamespace,
+      String toFirecloudName,
+      String authDomainName) {
     WorkspacesApi workspacesApi = endUserWorkspacesApiProvider.get();
     FirecloudWorkspaceRequestClone cloneRequest =
         new FirecloudWorkspaceRequestClone()
-            .namespace(toProject)
-            .name(toName)
+            .namespace(toWorkspaceNamespace)
+            .name(toFirecloudName)
             // We copy only the notebooks/ subdirectory as a heuristic to avoid unintentionally
             // propagating copies of large data files elswhere in the bucket.
             .copyFilesWithPrefix("notebooks/")
@@ -345,48 +348,48 @@ public class FireCloudServiceImpl implements FireCloudService {
                 ImmutableList.of(new FirecloudManagedGroupRef().membersGroupName(authDomainName)))
             .bucketLocation(GOOGLE_BUCKETS_LOCATION);
     return retryHandler.run(
-        (context) -> workspacesApi.cloneWorkspace(cloneRequest, fromProject, fromName));
-  }
-
-  @Override
-  public List<FirecloudBillingProjectMembership> getBillingProjectMemberships() {
-    return retryHandler.run((context) -> profileApiProvider.get().billing());
+        (context) ->
+            workspacesApi.cloneWorkspace(cloneRequest, fromWorkspaceNamespace, fromFirecloudName));
   }
 
   @Override
   public FirecloudWorkspaceACLUpdateResponseList updateWorkspaceACL(
-      String projectName, String workspaceName, List<FirecloudWorkspaceACLUpdate> aclUpdates) {
+      String workspaceNamespace,
+      String firecloudName,
+      List<FirecloudWorkspaceACLUpdate> aclUpdates) {
     WorkspacesApi workspacesApi = endUserWorkspacesApiProvider.get();
     // TODO: set authorization domain here
     return retryHandler.run(
         (context) ->
-            workspacesApi.updateWorkspaceACL(aclUpdates, projectName, workspaceName, false));
+            workspacesApi.updateWorkspaceACL(aclUpdates, workspaceNamespace, firecloudName, false));
   }
 
   @Override
-  public FirecloudWorkspaceACL getWorkspaceAclAsService(String projectName, String workspaceName) {
+  public FirecloudWorkspaceACL getWorkspaceAclAsService(
+      String workspaceNamespace, String firecloudName) {
     WorkspacesApi workspacesApi = serviceAccountWorkspaceApiProvider.get();
-    return retryHandler.run((context) -> workspacesApi.getWorkspaceAcl(projectName, workspaceName));
+    return retryHandler.run(
+        (context) -> workspacesApi.getWorkspaceAcl(workspaceNamespace, firecloudName));
   }
 
   @Override
-  public FirecloudWorkspaceResponse getWorkspaceAsService(String projectName, String workspaceName)
-      throws WorkbenchException {
+  public FirecloudWorkspaceResponse getWorkspaceAsService(
+      String workspaceNamespace, String firecloudName) throws WorkbenchException {
     WorkspacesApi workspacesApi = serviceAccountWorkspaceApiProvider.get();
     return retryHandler.run(
         (context) ->
             workspacesApi.getWorkspace(
-                projectName, workspaceName, FIRECLOUD_WORKSPACE_REQUIRED_FIELDS));
+                workspaceNamespace, firecloudName, FIRECLOUD_WORKSPACE_REQUIRED_FIELDS));
   }
 
   @Override
-  public FirecloudWorkspaceResponse getWorkspace(String projectName, String workspaceName)
+  public FirecloudWorkspaceResponse getWorkspace(String workspaceNamespace, String firecloudName)
       throws WorkbenchException {
     WorkspacesApi workspacesApi = endUserWorkspacesApiProvider.get();
     return retryHandler.run(
         (context) ->
             workspacesApi.getWorkspace(
-                projectName, workspaceName, FIRECLOUD_WORKSPACE_REQUIRED_FIELDS));
+                workspaceNamespace, firecloudName, FIRECLOUD_WORKSPACE_REQUIRED_FIELDS));
   }
 
   @Override
@@ -416,11 +419,12 @@ public class FireCloudServiceImpl implements FireCloudService {
   }
 
   @Override
-  public void deleteWorkspace(String projectName, String workspaceName) throws WorkbenchException {
+  public void deleteWorkspace(String workspaceNamespace, String firecloudName)
+      throws WorkbenchException {
     WorkspacesApi workspacesApi = endUserWorkspacesApiProvider.get();
     retryHandler.run(
         (context) -> {
-          workspacesApi.deleteWorkspace(projectName, workspaceName);
+          workspacesApi.deleteWorkspace(workspaceNamespace, firecloudName);
           return null;
         });
   }
