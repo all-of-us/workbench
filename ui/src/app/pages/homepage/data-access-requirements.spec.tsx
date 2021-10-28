@@ -200,6 +200,7 @@ describe('DataAccessRequirements', () => {
         expect(activeModule).toBeUndefined();
     });
 
+    // TODO: For Joel and Alex Not sure if this is the right way of fix this test for CT_COMPLAINCE_TRAINING
     it('should not indicate the RAS module as active when a user has completed it', () => {
         // initially, the user has completed all modules except RAS (the standard case at RAS launch time)
         const testProfile = {
