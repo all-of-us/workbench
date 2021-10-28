@@ -138,5 +138,4 @@ export default class WorkspaceAdminPage extends AuthenticatedPage {
     const element = BaseElement.asBaseElement(this.page, await this.page.waitForXPath(xpath, { visible: true }));
     return element.getTextContent();
   }
-
 }

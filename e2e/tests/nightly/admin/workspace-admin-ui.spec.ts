@@ -12,20 +12,16 @@ import { waitForDocumentTitle } from 'utils/waits-utils';
 import { Page } from 'puppeteer';
 import NotebookPreviewPage from 'app/page/notebook-preview-page';
 
-
-
 describe('Workspace Admin', () => {
   const workspaceName = 'e2eAdminWorkspace';
   const pyNotebookName = 'e2eAdminNotebook';
   const noActiveRuntimeText = 'No active runtimes exist for this workspace.';
-  let workspaceNamespace = "";
-  
+  let workspaceNamespace = '';
 
   beforeEach(async () => {
     await signInWithAccessToken(page, config.ADMIN_TEST_USER);
     await navigation.navMenu(page, NavLink.WORKSPACE_ADMIN);
   });
-
 
   test('check the Workspace Admin page UI', async () => {
     const workspacesPage = new WorkspacesPage(page);
@@ -126,7 +122,6 @@ describe('Workspace Admin', () => {
     await page.waitForTimeout(2000);
   });
 
-
   async function createNotebook(page: Page, pyNotebookName: string): Promise<NotebookPreviewPage> {
     const dataPage = new WorkspaceDataPage(page);
     const datasetBuildPage = await dataPage.clickAddDatasetButton();
@@ -153,5 +148,4 @@ describe('Workspace Admin', () => {
     const notebookPreviewPage = new NotebookPreviewPage(page);
     return await notebookPreviewPage.waitForLoad();
   }
-
 });
