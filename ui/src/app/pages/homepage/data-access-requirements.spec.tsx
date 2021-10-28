@@ -382,12 +382,14 @@ describe('DataAccessRequirements', () => {
     });
 
     it('should render a mix of complete and incomplete modules, as appropriate', () => {
+        const allModulesSize = allModules.length;
         const incompleteModules = [AccessModule.RASLINKLOGINGOV];
         const completeModules = allModules.filter(module => module !== AccessModule.RASLINKLOGINGOV);
+        const newSize = allModulesSize - incompleteModules.length;
 
         // sanity check
         expect(incompleteModules.length).toEqual(1);
-        expect(completeModules.length).toEqual(4);
+        expect(completeModules.length).toEqual(newSize);
 
         profileStore.set({
             profile: {

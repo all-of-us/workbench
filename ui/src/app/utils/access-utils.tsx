@@ -134,6 +134,14 @@ export const getAccessModuleConfig = (moduleName: AccessModule): AccessModuleCon
       refreshAction: async () => await profileApi().syncComplianceTrainingStatus(),
     })],
 
+    [AccessModule.CTCOMPLIANCETRAINING, () => ({
+      moduleName,
+      isEnabledInEnvironment: enableComplianceTraining,
+      DARTitleComponent: () => <div>Complete <AoU/> research Controlled Tier training</div>,
+      // externalSyncAction: async () => await profileApi().syncComplianceTrainingStatus(),
+      // refreshAction: async () => await profileApi().syncComplianceTrainingStatus(),
+    })],
+
     [AccessModule.DATAUSERCODEOFCONDUCT, () => ({
       moduleName,
       isEnabledInEnvironment: true,
