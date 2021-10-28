@@ -19,6 +19,7 @@ import { Visits } from './cohort-participants-group';
 import CriteriaSearchPage from './criteria-search-page';
 import WorkspaceEditPage from './workspace-edit-page';
 
+
 const PageTitle = 'Data Page';
 
 export default class WorkspaceDataPage extends WorkspaceBase {
@@ -220,4 +221,12 @@ export default class WorkspaceDataPage extends WorkspaceBase {
     await this.waitForLoad();
     return cloneName;
   }
+
+  async extractWorkspaceNamespace(): Promise<string> {
+    const href = await page.evaluate(() => location.href);
+    console.log(`href: ${href}`);
+    const pathArray = href.split('/');
+    let workspaceNamespace = pathArray[4];
+    return workspaceNamespace;
+ } 
 }
