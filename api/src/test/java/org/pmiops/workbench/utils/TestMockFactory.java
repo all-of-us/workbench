@@ -291,6 +291,12 @@ public class TestMockFactory {
             .setServicePerimeter("controlled/tier/perimeter"));
   }
 
+  public static void removeControlledTierForTests(AccessTierDao accessTierDao) {
+    DbAccessTier controlledAccessTier =
+        accessTierDao.findOneByShortName(AccessTierService.CONTROLLED_TIER_SHORT_NAME).get();
+    accessTierDao.delete(controlledAccessTier);
+  }
+
   /** Prepare AccessModules inmemory cache. */
   public static List<DbAccessModule> createAccessModules(AccessModuleDao accessModuleDao) {
     accessModuleDao.saveAll(DEFAULT_ACCESS_MODULES);

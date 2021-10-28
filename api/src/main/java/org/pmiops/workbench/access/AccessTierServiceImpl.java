@@ -2,7 +2,6 @@ package org.pmiops.workbench.access;
 
 import java.sql.Timestamp;
 import java.time.Clock;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -180,27 +179,6 @@ public class AccessTierServiceImpl implements AccessTierService {
         .collect(Collectors.toList());
   }
 
-  /**
-   * Return a list of access tiers which Registered users have access to. Depending on environment,
-   * this will either be the Registered Tier or all tiers. This is a temporary measure until we
-   * implement Controlled Tier Beta access controls.
-   *
-   * <p>See https://precisionmedicineinitiative.atlassian.net/browse/RW-6237
-   *
-   * @return the list of tiers which Registered users have access to.
-   */
-  @Override
-  public List<DbAccessTier> getTiersForRegisteredUsers() {
-    // sanity check this regardless of feature flag
-    final DbAccessTier registeredTier = getRegisteredTierOrThrow();
-
-    if (configProvider.get().featureFlags.unsafeAllowAccessToAllTiersForRegisteredUsers) {
-      return getAllTiers();
-    } else {
-      return Collections.singletonList(registeredTier);
-    }
-  }
-
   @Override
   public List<DbUser> getAllRegisteredTierUsers() {
     return userAccessTierDao.getAllByAccessTier(getRegisteredTierOrThrow()).stream()
@@ -209,7 +187,13 @@ public class AccessTierServiceImpl implements AccessTierService {
         .collect(Collectors.toList());
   }
 
-  private DbAccessTier getRegisteredTierOrThrow() {
+  @Override
+  public Optional<DbAccessTier> getAccessTierByName(String accessTierShortName) {
+    return accessTierDao.findOneByShortName(accessTierShortName);
+  }
+
+  @Override
+  public DbAccessTier getRegisteredTierOrThrow() {
     return accessTierDao
         .findOneByShortName(REGISTERED_TIER_SHORT_NAME)
         .orElseThrow(() -> new ServerErrorException("Cannot find Registered Tier in database."));
