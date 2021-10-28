@@ -255,7 +255,7 @@ export const SelectionList = fp.flow(withCurrentCohortCriteria(), withCurrentCoh
         }
       });
       this.subscription.add(currentCohortCriteriaStore.subscribe(() => {
-        if (!!cohortContext) {
+        if (!!this.props.cohortContext) {
           // Each time the criteria changes, we check for disabling the Save Criteria button again
           setTimeout(() => this.checkCriteriaChanges());
         }
