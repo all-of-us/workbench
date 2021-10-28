@@ -53,7 +53,7 @@ describe('DataAccessRequirements', () => {
         registerApiClient(InstitutionApi, new InstitutionApiStub());
         registerApiClient(ProfileApi, new ProfileApiStub());
 
-        serverConfigStore.set({config: defaultServerConfig});
+        serverConfigStore.set({config: {...defaultServerConfig, unsafeAllowSelfBypass: true}});
         profileStore.set({profile, load, reload, updateCache});
     });
 
@@ -210,6 +210,7 @@ describe('DataAccessRequirements', () => {
                     {moduleName: AccessModule.ERACOMMONS, completionEpochMillis: 1},
                     {moduleName: AccessModule.COMPLIANCETRAINING, completionEpochMillis: 1},
                     {moduleName: AccessModule.DATAUSERCODEOFCONDUCT, completionEpochMillis: 1},
+                    {moduleName: AccessModule.CTCOMPLIANCETRAINING, completionEpochMillis: 1}
                 ]
             }
         };
