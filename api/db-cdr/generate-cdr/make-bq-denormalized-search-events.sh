@@ -366,6 +366,30 @@ LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` vo on (vo.visit_occurrenc
 WHERE o.observation_concept_id is not null
     and o.observation_concept_id != 0"
 
+############################################################
+# insert standard device data into cb_search_all_events
+############################################################
+echo "Inserting standard device data into cb_search_all_events"
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\`
+    (person_id, entry_date, entry_datetime, is_standard, concept_id, domain, age_at_event, visit_concept_id, visit_occurrence_id)
+SELECT p.person_id,
+    de.device_exposure_start_date as entry_date,
+    de.device_exposure_start_datetime as entry_datetime,
+    1 as is_standard,
+    de.device_concept_id as concept_id,
+    'Device' as domain,
+    DATE_DIFF(de.device_exposure_start_date,date(p.BIRTH_DATETIME), YEAR) - IF(EXTRACT(MONTH FROM date(p.BIRTH_DATETIME))*100 + EXTRACT(DAY FROM date(p.BIRTH_DATETIME)) > EXTRACT(MONTH FROM de.device_exposure_start_date)*100 + EXTRACT(DAY FROM de.device_exposure_start_date),1,0) as age_at_event,
+    vo.visit_concept_id,
+    vo.visit_occurrence_id
+FROM \`$BQ_PROJECT.$BQ_DATASET.device_exposure\` de
+JOIN \`$BQ_PROJECT.$BQ_DATASET.person\` p on p.person_id = de.person_id
+JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c on (c.concept_id = de.device_concept_id)
+LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` vo on (vo.visit_occurrence_id = de.visit_occurrence_id)
+where c.standard_concept = 'S'
+and c.domain_id = 'Device'
+and de.device_concept_id != 0"
+
 #######################################################
 #   insert source drug data into cb_search_all_events
 #######################################################
