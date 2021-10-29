@@ -6,11 +6,9 @@ import {NavigationProps} from 'app/utils/navigation';
 import {fetchAbortableRetry} from 'app/utils/retry';
 import {MatchParams, RuntimeStore} from 'app/utils/stores';
 
-
 import {Button} from 'app/components/buttons';
 import {FlexRow} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
-import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {Spinner} from 'app/components/spinners';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {NotebookIcon} from 'app/icons/notebook-icon';
@@ -24,7 +22,12 @@ import {
   withUserProfile
 } from 'app/utils';
 import {Kernels} from 'app/utils/notebook-kernels';
-import { maybeUnwrapSecuritySuspendedError, ComputeSecuritySuspendedError, maybeInitializeRuntime, withRuntimeStore} from 'app/utils/runtime-utils';
+import {
+  maybeUnwrapSecuritySuspendedError,
+  ComputeSecuritySuspendedError,
+  maybeInitializeRuntime,
+  withRuntimeStore
+} from 'app/utils/runtime-utils';
 import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {environment} from 'environments/environment';
@@ -32,8 +35,11 @@ import {Profile, Runtime, RuntimeStatus} from 'generated/fetch';
 import {RouteComponentProps, withRouter} from 'react-router-dom';
 import {appendNotebookFileSuffix, dropNotebookFileSuffix} from './util';
 import {parseQueryParams} from "app/components/app-router";
-import { ErrorMode, NotebookFrameError, SecuritySuspendedMessage } from './notebook-frame-error';
-import { ExceededErrorCountError } from 'app/utils/leo-runtime-initializer';
+import {
+  ErrorMode,
+  NotebookFrameError,
+  SecuritySuspendedMessage
+} from './notebook-frame-error';
 
 export enum LeoApplicationType {
   Notebook,

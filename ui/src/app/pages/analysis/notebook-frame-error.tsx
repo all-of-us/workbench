@@ -3,13 +3,12 @@ import moment from 'moment';
 
 import {ClrIcon} from 'app/components/icons';
 import {StyledExternalLink} from 'app/components/buttons';
-import {hasNewValidProps, reactStyles, withCurrentWorkspace} from 'app/utils';
+import {reactStyles} from 'app/utils';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import { SecuritySuspendedErrorParameters } from 'generated/fetch';
-import { ComputeSecuritySuspendedError } from 'app/utils/runtime-utils';
-import { SupportMailto } from 'app/components/support';
+import {ComputeSecuritySuspendedError} from 'app/utils/runtime-utils';
+import {SupportMailto} from 'app/components/support';
 import {TooltipTrigger} from 'app/components/popups';
-import { supportUrls } from 'app/utils/zendesk';
+import {supportUrls} from 'app/utils/zendesk';
 
 const {useState, useEffect} = React;
 

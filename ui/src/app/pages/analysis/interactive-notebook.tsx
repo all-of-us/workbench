@@ -3,7 +3,6 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 
 import {IconButton} from 'app/components/buttons';
-
 import {ClrIcon} from 'app/components/icons';
 import { ErrorMode, NotebookFrameError, SecuritySuspendedMessage } from './notebook-frame-error';
 import {PlaygroundIcon} from 'app/components/icons';
@@ -15,17 +14,25 @@ import {ConfirmPlaygroundModeModal} from 'app/pages/analysis/confirm-playground-
 import {NotebookInUseModal} from 'app/pages/analysis/notebook-in-use-modal';
 import {notebooksApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import { switchCase, DEFAULT, hasNewValidProps, reactStyles, withCurrentWorkspace} from 'app/utils';
+import {hasNewValidProps, reactStyles, withCurrentWorkspace} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {NavigationProps} from 'app/utils/navigation';
-import { maybeUnwrapSecuritySuspendedError, ComputeSecuritySuspendedError, maybeInitializeRuntime, withRuntimeStore} from 'app/utils/runtime-utils';
+import {
+  maybeUnwrapSecuritySuspendedError,
+  ComputeSecuritySuspendedError,
+  maybeInitializeRuntime,
+  withRuntimeStore
+} from 'app/utils/runtime-utils';
 import {MatchParams, profileStore, RuntimeStore} from 'app/utils/stores';
 import {ACTION_DISABLED_INVALID_BILLING} from 'app/utils/strings';
 import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {BillingStatus, RuntimeStatus} from 'generated/fetch';
-import { RouteComponentProps, withRouter } from 'react-router-dom';
+import {
+  RouteComponentProps,
+  withRouter
+} from 'react-router-dom';
 
 
 const styles = reactStyles({
@@ -155,8 +162,8 @@ export const InteractiveNotebook = fp.flow(
       try {
         await maybeInitializeRuntime(this.props.match.params.ns, this.pollAborter.signal);
         onRuntimeReady();
-      } catch (err) {
-        this.setState({error: await maybeUnwrapSecuritySuspendedError(err)});
+      } catch (e) {
+        this.setState({error: await maybeUnwrapSecuritySuspendedError(e)});
       }
     }
 
