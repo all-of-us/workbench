@@ -371,15 +371,23 @@ export async function waitWhileLoading(
     waitForRuntime ? '' : ':not([aria-hidden="true"]):not([data-test-id*="runtime-status"])'
   }`;
 
+  const parseHrtimeToSeconds = (hrtime) => {
+    const seconds = (hrtime[0] + hrtime[1] / 1e9).toFixed(3);
+    return seconds;
+  };
+
+  const funcStartTime = process.hrtime();
+
   await Promise.race([
-    page.waitForXPath(process.env.AUTHENTICATED_TEST_ID_XPATH), // authenticated page
-    page.waitForXPath(process.env.UNAUTHENTICATED_TEST_ID_XPATH) // Login and Create Account pages
+    page.waitForXPath(process.env.AUTHENTICATED_TEST_ID_XPATH, { timeout }), // authenticated page
+    page.waitForXPath(process.env.UNAUTHENTICATED_TEST_ID_XPATH, { timeout }) // Login and Create Account pages
   ]);
 
   // Prevent checking in Login and Create Account pages.
   await page
-    .waitForXPath(process.env.UNAUTHENTICATED_TEST_ID_XPATH, { timeout: 10 })
+    .waitForXPath(process.env.UNAUTHENTICATED_TEST_ID_XPATH, { timeout: 100 })
     .then(() => {
+      console.timeEnd('loading-spinner-time');
       return;
     })
     .catch(() => {
@@ -389,7 +397,6 @@ export async function waitWhileLoading(
   // Prevent checking in blank page: wait for loading spinner or some elements exists in DOM.
   await Promise.race([page.waitForSelector(notBlankPageSelector), page.waitForSelector(spinElementsSelector)]);
 
-  // Wait for loading spinner to stop and no longer exists.
   try {
     await Promise.all([
       page.waitForFunction(
@@ -401,7 +408,6 @@ export async function waitWhileLoading(
       ),
       page.waitForSelector(spinElementsSelector, { hidden: true, timeout })
     ]);
-    await page.waitForTimeout(500);
   } catch (err) {
     logger.error(`ERROR: Loading spinner has not stopped. spinner xpath is "${spinElementsSelector}"`);
     if (err.message.includes('Target closed')) {
@@ -415,6 +421,8 @@ export async function waitWhileLoading(
       throw new Error(err.message);
     }
   }
+  const funcElapsedSeconds = parseHrtimeToSeconds(process.hrtime(funcStartTime));
+  console.log(`Function waitWhileLoading finished in ${funcElapsedSeconds} seconds.`);
 }
 
 export async function waitUntilEnabled(page: Page, cssSelector: string): Promise<boolean> {

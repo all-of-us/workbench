@@ -66,7 +66,7 @@ export const shouldLogResponse = (request: Request): boolean => {
     '/chartinfo/',
     '/page-visits',
     '/generateCode/',
-    '/criteria/CONDITION/search/',
+    '/cohortbuilder/',
     '/criteria/',
     '/cdrVersions',
     '/config',
@@ -116,6 +116,15 @@ const getResponseText = async (request: Request): Promise<string> => {
   }
 };
 
+const notOptionsRequest = (request: Request): boolean => {
+  try {
+    console.log(`request resourceType: ${request.resourceType()}`);
+    return request && request.method() !== 'OPTIONS';
+  } catch (err) {
+    return false;
+  }
+};
+
 export const logRequestError = async (request: Request): Promise<void> => {
   const response = request.response();
   const status = response ? response.status() : '';
@@ -149,4 +158,9 @@ export const isLoggable = fp.flow(isWorkbenchRequest, includeXhrResourceType, no
 
 export const getRequestData = fp.flow(getRequestPostData, stringifyData);
 
-export const showFailedResponse = fp.flow(isWorkbenchRequest, includeXhrResourceType, notRedirectRequest);
+export const showFailedResponse = fp.flow(
+  isWorkbenchRequest,
+  includeXhrResourceType,
+  notRedirectRequest,
+  notOptionsRequest
+);
