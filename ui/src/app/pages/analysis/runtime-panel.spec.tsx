@@ -372,9 +372,9 @@ describe('RuntimePanel', () => {
     if (enablePd) {
       await pickComputeType(wrapper, ComputeType.Dataproc);
 
-      await pickMainDiskSize(wrapper, 100);
+      await pickMainDiskSize(wrapper, MIN_DISK_SIZE_GB);
     } else {
-      await pickMainDiskSize(wrapper, 100);
+      await pickMainDiskSize(wrapper, MIN_DISK_SIZE_GB);
 
       await pickComputeType(wrapper, ComputeType.Dataproc);
     }
@@ -392,7 +392,7 @@ describe('RuntimePanel', () => {
       .toEqual(RuntimeConfigurationType.UserOverride);
     expect(runtimeApiStub.runtime.dataprocConfig).toEqual({
       masterMachineType: 'n1-standard-2',
-      masterDiskSize: 100,
+      masterDiskSize: MIN_DISK_SIZE_GB,
       workerMachineType: 'n1-standard-8',
       workerDiskSize: 300,
       numberOfWorkers: 10,
@@ -759,7 +759,7 @@ describe('RuntimePanel', () => {
     await pickWorkerRam(wrapper, 60);
     await pickNumPreemptibleWorkers(wrapper, 3);
     await pickNumWorkers(wrapper, 5);
-    await pickWorkerDiskSize(wrapper, 100);
+    await pickWorkerDiskSize(wrapper, MIN_DISK_SIZE_GB);
 
     await mustClickButton(wrapper, 'Next');
     await mustClickButton(wrapper, 'Cancel');
@@ -771,7 +771,7 @@ describe('RuntimePanel', () => {
     expect(getWorkerRam(wrapper)).toBe(60);
     expect(getNumPreemptibleWorkers(wrapper)).toBe(3);
     expect(getNumWorkers(wrapper)).toBe(5);
-    expect(getWorkerDiskSize(wrapper)).toBe(100);
+    expect(getWorkerDiskSize(wrapper)).toBe(MIN_DISK_SIZE_GB);
   });
 
   it('should disable Next button if Runtime is in between states', async() => {
