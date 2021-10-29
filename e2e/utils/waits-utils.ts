@@ -371,13 +371,6 @@ export async function waitWhileLoading(
     waitForRuntime ? '' : ':not([aria-hidden="true"]):not([data-test-id*="runtime-status"])'
   }`;
 
-  const parseHrtimeToSeconds = (hrtime) => {
-    const seconds = (hrtime[0] + hrtime[1] / 1e9).toFixed(3);
-    return seconds;
-  };
-
-  const funcStartTime = process.hrtime();
-
   await Promise.race([
     page.waitForXPath(process.env.AUTHENTICATED_TEST_ID_XPATH, { timeout }), // authenticated page
     page.waitForXPath(process.env.UNAUTHENTICATED_TEST_ID_XPATH, { timeout }) // Login and Create Account pages
@@ -421,8 +414,6 @@ export async function waitWhileLoading(
       throw new Error(err.message);
     }
   }
-  const funcElapsedSeconds = parseHrtimeToSeconds(process.hrtime(funcStartTime));
-  console.log(`Function waitWhileLoading finished in ${funcElapsedSeconds} seconds.`);
 }
 
 export async function waitUntilEnabled(page: Page, cssSelector: string): Promise<boolean> {
