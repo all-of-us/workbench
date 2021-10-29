@@ -98,7 +98,7 @@
   "featureFlags": {
     "unsafeAllowDeleteUser": false,
     "unsafeAllowAccessToAllTiersForRegisteredUsers": true,
-    "enableBillingUpgrade": false,
+    "enableBillingUpgrade": true,
     "enableEventDateModifier": false,
     "enableResearchPurposePrompt": false,
     "enableGenomicExtraction": true,
