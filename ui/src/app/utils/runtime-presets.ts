@@ -13,7 +13,7 @@ export const runtimePresets: {
       // TODO: Support specifying toolDockerImage here.
       gceConfig: {
         machineType: 'n1-standard-4',
-        diskSize: 120,
+        diskSize: 100,
         gpuConfig: null,
       },
     }
@@ -25,9 +25,9 @@ export const runtimePresets: {
       autopauseThreshold: DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES,
       dataprocConfig: {
         masterMachineType: 'n1-standard-4',
-        masterDiskSize: 120,
+        masterDiskSize: 100,
         workerMachineType: 'n1-standard-4',
-        workerDiskSize: 120,
+        workerDiskSize: 100,
         numberOfWorkers: 2,
         numberOfPreemptibleWorkers: 0
       }

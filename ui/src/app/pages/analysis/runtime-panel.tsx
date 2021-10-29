@@ -164,11 +164,11 @@ const styles = reactStyles({
 });
 
 // exported for testing
-export const MIN_DISK_SIZE_GB = 120;
+export const MIN_DISK_SIZE_GB = 100;
 
 const defaultMachineName = 'n1-standard-4';
 const defaultMachineType: Machine = findMachineByName(defaultMachineName);
-const defaultDiskSize = 120;
+const defaultDiskSize = 100;
 
 // Returns true if two runtimes are equivalent in terms of the fields which are
 // affected by runtime presets.
