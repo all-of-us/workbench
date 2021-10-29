@@ -820,4 +820,9 @@ describe('DataAccessRequirements', () => {
 
         expect(findContactUs(wrapper).exists()).toBeFalsy();
     });
+
+    // Add test: unsafeAllowSelfBypass false no CT  Complaince training
+    // Test: no CT Complaince training module if enableComplianceTraining flag is off
+   // User not eligible for CT: (say diff email) : ineligible Compliance training and eraCommons Module
+    // User not eligible for CT: (institution not signed) : inelgiible COmpliance training and eraCommons Module
 });

@@ -21,6 +21,7 @@ import {cond, daysFromNow, displayDateWithoutHours, switchCase} from "./index";
 import {AccessTierShortNames} from 'app/utils/access-tiers';
 import {TooltipTrigger} from 'app/components/popups';
 import {InfoIcon} from 'app/components/icons';
+import {environment} from 'environments/environment';
 
 const {useState, useEffect} = React;
 
@@ -137,7 +138,7 @@ export const getAccessModuleConfig = (moduleName: AccessModule): AccessModuleCon
     [AccessModule.CTCOMPLIANCETRAINING, () => ({
       moduleName,
       isEnabledInEnvironment: enableComplianceTraining,
-      DARTitleComponent: () => <div>Complete <AoU/> research Controlled Tier training</div>,
+      DARTitleComponent: () => <div>Bypass {environment.displayTag} <AoU/> research Controlled Tier training </div>,
       // externalSyncAction: async () => await profileApi().syncComplianceTrainingStatus(),
       // refreshAction: async () => await profileApi().syncComplianceTrainingStatus(),
     })],
