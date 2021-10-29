@@ -108,7 +108,9 @@ export const SecuritySuspendedMessage = ({error}: SuspendedMessageProps) => {
     {until.isAfter(new Date()) ?
        <>
          <b>Your analysis environment is suspended due to security egress concerns</b>.&nbsp;
-         Your runtime will become available again&nbsp;
+         Your runtime will become available again
+         {/* Line break here to avoid splitting duration tooltip trigger. */}
+         <br/>
          <TooltipTrigger content={<div>{untilFull}</div>}>
            <b style={{textDecoration: 'underline'}}>{duration}</b>
          </TooltipTrigger>.

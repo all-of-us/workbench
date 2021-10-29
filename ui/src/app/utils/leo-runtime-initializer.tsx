@@ -240,7 +240,7 @@ export class LeoRuntimeInitializer {
   }
 
   private handleUnknownError(e: any) {
-    if (e instanceof Response && e.status >= 500 && e.status < 600) {
+    if (!(e instanceof Response) || e.status >= 500) {
       this.serverErrorCount++;
     }
     reportError(e);
