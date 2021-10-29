@@ -380,7 +380,6 @@ export async function waitWhileLoading(
   await page
     .waitForXPath(process.env.UNAUTHENTICATED_TEST_ID_XPATH, { timeout: 100 })
     .then(() => {
-      console.timeEnd('loading-spinner-time');
       return;
     })
     .catch(() => {
