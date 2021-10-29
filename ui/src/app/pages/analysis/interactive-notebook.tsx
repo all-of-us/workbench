@@ -5,7 +5,7 @@ import * as React from 'react';
 import {IconButton} from 'app/components/buttons';
 
 import {ClrIcon} from 'app/components/icons';
-import {NotebookFrameError, ErrorMode} from './notebook-frame-error'
+import { ErrorMode, NotebookFrameError, SecuritySuspendedMessage } from './notebook-frame-error';
 import {PlaygroundIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
@@ -15,11 +15,10 @@ import {ConfirmPlaygroundModeModal} from 'app/pages/analysis/confirm-playground-
 import {NotebookInUseModal} from 'app/pages/analysis/notebook-in-use-modal';
 import {notebooksApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {hasNewValidProps, reactStyles, withCurrentWorkspace} from 'app/utils';
+import { switchCase, DEFAULT, hasNewValidProps, reactStyles, withCurrentWorkspace} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {NavigationProps} from 'app/utils/navigation';
-import {withRuntimeStore} from 'app/utils/runtime-utils';
-import {maybeInitializeRuntime} from 'app/utils/runtime-utils';
+import { maybeUnwrapSecuritySuspendedError, ComputeSecuritySuspendedError, maybeInitializeRuntime, withRuntimeStore} from 'app/utils/runtime-utils';
 import {MatchParams, profileStore, RuntimeStore} from 'app/utils/stores';
 import {ACTION_DISABLED_INVALID_BILLING} from 'app/utils/strings';
 import {withNavigation} from 'app/utils/with-navigation-hoc';
@@ -91,8 +90,7 @@ interface State {
   showInUseModal: boolean;
   showPlaygroundModeModal: boolean;
   userRequestedExecutableNotebook: boolean;
-  previewErrorMode: ErrorMode;
-  previewErrorMessage: string;
+  error: Error;
 }
 
 export const InteractiveNotebook = fp.flow(
@@ -113,8 +111,7 @@ export const InteractiveNotebook = fp.flow(
         showInUseModal: false,
         showPlaygroundModeModal: false,
         userRequestedExecutableNotebook: false,
-        previewErrorMode: ErrorMode.NONE,
-        previewErrorMessage: ''
+        error: null
       };
     }
 
@@ -143,15 +140,7 @@ export const InteractiveNotebook = fp.flow(
         const {html} = await notebooksApi().readOnlyNotebook(ns, wsid, nbName);
         this.setState({html: html});
       } catch (e) {
-        let previewErrorMode = ErrorMode.ERROR;
-        let previewErrorMessage = 'Failed to render preview due to an unknown error, ' +
-            'please try reloading or opening the notebook in edit or playground mode.';
-        if (e.status === 412) {
-          previewErrorMode = ErrorMode.INVALID;
-          previewErrorMessage = 'Notebook is too large to display in preview mode, please use edit mode or ' +
-              'playground mode to view this notebook.';
-        }
-        this.setState({previewErrorMode, previewErrorMessage});
+        this.setState({error: await maybeUnwrapSecuritySuspendedError(e)});
       }
 
       notebooksApi().getNotebookLockingMetadata(ns, wsid, nbName).then((resp) => {
@@ -165,11 +154,10 @@ export const InteractiveNotebook = fp.flow(
     private async runRuntime(onRuntimeReady: Function): Promise<void> {
       try {
         await maybeInitializeRuntime(this.props.match.params.ns, this.pollAborter.signal);
+        onRuntimeReady();
       } catch (err) {
-
-        debugger;
+        this.setState({error: await maybeUnwrapSecuritySuspendedError(err)});
       }
-      onRuntimeReady();
     }
 
     private startEditMode() {
@@ -271,14 +259,28 @@ export const InteractiveNotebook = fp.flow(
     }
 
     private renderPreviewContents() {
-      const {html, previewErrorMode, previewErrorMessage} = this.state;
+      const {html, error} = this.state;
+      if (error) {
+        if (error instanceof ComputeSecuritySuspendedError) {
+          return <NotebookFrameError errorMode={ErrorMode.FORBIDDEN}>
+            <SecuritySuspendedMessage error={error} />
+          </NotebookFrameError>;
+        }
+        const status = error instanceof Response ? error.status : 500;
+        if (status === 412) {
+          return <NotebookFrameError errorMode={ErrorMode.INVALID}>
+            Notebook is too large to display in preview mode, please use edit
+            mode or playground mode to view this notebook.
+          </NotebookFrameError>;
+        } else {
+          return <NotebookFrameError errorMode={ErrorMode.ERROR}>
+            Failed to render preview due to an unknown error, please try
+            reloading or opening the notebook in edit or playground mode.
+          </NotebookFrameError>;
+        }
+      }
       if (html) {
         return (<iframe id='notebook-frame' style={styles.previewFrame} srcDoc={html}/>);
-      }
-      if (previewErrorMode !== ErrorMode.NONE) {
-        return <NotebookFrameError errorMode={previewErrorMode} >
-          {previewErrorMessage}
-        </NotebookFrameError>
       }
       return <SpinnerOverlay/>;
     }
@@ -289,6 +291,7 @@ export const InteractiveNotebook = fp.flow(
         showInUseModal,
         showPlaygroundModeModal,
         userRequestedExecutableNotebook,
+        error
       } = this.state;
       return (
         <div>
@@ -296,7 +299,7 @@ export const InteractiveNotebook = fp.flow(
             <div style={{...styles.navBarItem, ...styles.active}}>
               Preview (Read-Only)
             </div>
-            {userRequestedExecutableNotebook ? (
+            {(userRequestedExecutableNotebook && !error) ? (
               <div style={{...styles.navBarItem, textTransform: 'none'}}>
                 <ClrIcon shape='sync' style={{...styles.navBarIcon, ...styles.rotate}}/>
                 {this.renderNotebookText()}

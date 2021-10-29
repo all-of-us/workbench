@@ -494,15 +494,17 @@ export const LeonardoAppLauncher = fp.flow(
 
 
       if (error) {
-        return <NotebookFrameError>
-          {error instanceof ComputeSecuritySuspendedError ?
-           <SecuritySuspendedMessage error={error} /> :
-           <>
-             Unknown error loading analysis environment, please try again.
-           </>
-          }
-
-        </NotebookFrameError>;
+        if (error instanceof ComputeSecuritySuspendedError) {
+          return <NotebookFrameError errorMode={ErrorMode.FORBIDDEN}>
+            <SecuritySuspendedMessage error={error} />
+          </NotebookFrameError>;
+        } else {
+          return <NotebookFrameError>
+            <>
+              Unknown error loading analysis environment, please try again.
+            </>
+          </NotebookFrameError>;
+        }
       }
       return <React.Fragment>
         {progress !== Progress.Loaded ? <div style={styles.main}>
