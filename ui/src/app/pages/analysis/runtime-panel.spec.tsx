@@ -305,9 +305,19 @@ describe('RuntimePanel', () => {
   };
 
   it('should allow creation when runtime has error status', async() => {
-    runtimeApiStub.runtime.status = RuntimeStatus.Error;
-    runtimeApiStub.runtime.errors = [{errorMessage: "I'm sorry Dave, I'm afraid I can't do that"}]
-    runtimeStoreStub.runtime = runtimeApiStub.runtime;
+    const runtime = {...runtimeApiStub.runtime,
+      status: RuntimeStatus.Error,
+      errors: [{errorMessage: "I'm sorry Dave, I'm afraid I can't do that"}],
+      configurationType: RuntimeConfigurationType.GeneralAnalysis,
+      gceConfig: {
+        ...defaultGceConfig(),
+        machineType: 'n1-standard-16',
+        diskSize: 100
+      },
+      dataprocConfig: null
+    };
+    runtimeApiStub.runtime = runtime;
+    runtimeStoreStub.runtime = runtime;
 
     const wrapper = await component();
 
@@ -342,7 +352,7 @@ describe('RuntimePanel', () => {
 
     await pickMainCpu(wrapper, 8);
     await pickMainRam(wrapper, 52);
-    await pickMainDiskSize(wrapper, MIN_DISK_SIZE_GB + 5);
+    await pickMainDiskSize(wrapper, MIN_DISK_SIZE_GB + 10);
 
     await mustClickButton(wrapper, 'Create');
 
@@ -351,7 +361,7 @@ describe('RuntimePanel', () => {
       .toEqual(RuntimeConfigurationType.UserOverride);
     expect(runtimeApiStub.runtime.gceConfig).toEqual({
       machineType: 'n1-highmem-8',
-      diskSize: MIN_DISK_SIZE_GB + 5,
+      diskSize: MIN_DISK_SIZE_GB + 10,
       gpuConfig: null
     });
     expect(runtimeApiStub.runtime.dataprocConfig).toBeFalsy();
@@ -415,7 +425,7 @@ describe('RuntimePanel', () => {
 
     // Ensure set the form to something non-standard to start
     await pickMainCpu(wrapper, 8);
-    await pickMainDiskSize(wrapper, MIN_DISK_SIZE_GB + 5);
+    await pickMainDiskSize(wrapper, MIN_DISK_SIZE_GB + 10);
     await pickComputeType(wrapper, ComputeType.Dataproc);
 
     await pickPreset(wrapper, runtimePresets.generalAnalysis);
@@ -703,7 +713,7 @@ describe('RuntimePanel', () => {
   it('should warn user about deletion if there are updates that require one - Decrease Disk', async() => {
     const wrapper = await component();
 
-    await pickMainDiskSize(wrapper, getMainDiskSize(wrapper) - 5);
+    await pickMainDiskSize(wrapper, getMainDiskSize(wrapper) - 10);
     await mustClickButton(wrapper, 'Next');
 
     expect(wrapper.find(WarningMessage).text().includes('deletion')).toBeTruthy();
@@ -752,7 +762,7 @@ describe('RuntimePanel', () => {
 
     const wrapper = await component();
 
-    await pickMainDiskSize(wrapper, MIN_DISK_SIZE_GB + 5);
+    await pickMainDiskSize(wrapper, MIN_DISK_SIZE_GB + 10);
     await pickMainCpu(wrapper, 8);
     await pickMainRam(wrapper, 30);
     await pickWorkerCpu(wrapper, 16);
@@ -764,7 +774,7 @@ describe('RuntimePanel', () => {
     await mustClickButton(wrapper, 'Next');
     await mustClickButton(wrapper, 'Cancel');
 
-    expect(getMainDiskSize(wrapper)).toBe(MIN_DISK_SIZE_GB + 5);
+    expect(getMainDiskSize(wrapper)).toBe(MIN_DISK_SIZE_GB + 10);
     expect(getMainCpu(wrapper)).toBe(8);
     expect(getMainRam(wrapper)).toBe(30);
     expect(getWorkerCpu(wrapper)).toBe(16);
@@ -866,7 +876,7 @@ describe('RuntimePanel', () => {
     await pickWorkerCpu(wrapper, 8);
     await pickWorkerRam(wrapper, 30);
     await pickWorkerDiskSize(wrapper, 300);
-    expect(runningCost().text()).toEqual('$2.88/hr');
+    expect(runningCost().text()).toEqual('$2.87/hr');
     expect(storageCost().text()).toEqual('$0.14/hr');
   });
 

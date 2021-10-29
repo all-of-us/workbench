@@ -10,7 +10,7 @@ import {
 import {stubNotImplementedError} from 'testing/stubs/stub-utils';
 
 export const defaultGceConfig = (): GceConfig => ({
-  diskSize: 100,
+  diskSize: 120,
   machineType: 'n1-standard-4'
 });
 
