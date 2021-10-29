@@ -250,10 +250,14 @@ const duccModule = AccessModule.DATAUSERCODEOFCONDUCT;
 
 // in display order
 // exported for test
-export const allModules: AccessModule[] = [
+export const requiredModules: AccessModule[] = [
   ...rtModules,
-  ctModule,
   duccModule
+];
+
+export const allModules: AccessModule[] = [
+  ...requiredModules,
+  ctModule
 ];
 
 const isCompleted = (status: AccessModuleStatus) => status && !!status.completionEpochMillis
@@ -748,10 +752,9 @@ const DuccCard = (props: {profile: Profile, activeModule: AccessModule, spinnerP
 export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerProps: WithSpinnerOverlayProps) => {
   const {profile, reload} = useStore(profileStore);
   const {config: {unsafeAllowSelfBypass}} = useStore(serverConfigStore);
-  const visibleModules = getVisibleModules(allModules, profile);
 
   useEffect(() => {
-    syncIncompleteModules(visibleModules, profile, reload);
+    syncIncompleteModules(getVisibleModules(allModules, profile), profile, reload);
     spinnerProps.hideSpinner();
   }, []);
 
@@ -771,13 +774,13 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
     }
   }, [code]);
 
-
+  // Active module: Required Modules: (rt steps + ducc) i.e the required steps user need to complete to grant RT Access
   // which module are we currently guiding the user to complete?
   const [activeModule, setActiveModule] = useState(null);
 
-  // whenever the profile changes, setActiveModule(the first incomplete enabled module)
+  // whenever the profile changes, setActiveModule(the first incomplete visible required module)
   useEffect(() => {
-    setActiveModule(getActiveModule(visibleModules, profile));
+    setActiveModule(getActiveModule(getVisibleModules(requiredModules, profile), profile));
   }, [profile]);
 
   const showCtCard = environment.accessTiersVisibleToUsers.includes(AccessTierShortNames.Controlled)
