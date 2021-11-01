@@ -163,6 +163,7 @@ export const AdminUsers = withUserProfile()(class extends React.Component<Props,
         user={{...user}}
         onBypassModuleUpdate={() => this.loadProfiles()}/>,
       complianceTraining: this.accessModuleCellContents(user, 'complianceTraining'),
+      ctComplianceTraining: '?',
       contactEmail: user.contactEmail,
       dataUseAgreement: this.accessModuleCellContents(user, 'dataUseAgreement'),
       eraCommons: this.accessModuleCellContents(user, 'eraCommons'),
@@ -267,8 +268,14 @@ export const AdminUsers = withUserProfile()(class extends React.Component<Props,
           {enableComplianceTraining && <Column field='complianceTraining'
                   bodyStyle={{...styles.colStyle, textAlign: 'center'}}
                   excludeGlobalFilter={true}
-                  header='Training'
+                  header='RT RCR'
                   headerStyle={{...styles.colStyle, width: '80px'}}
+          />}
+          {enableComplianceTraining && <Column field='ctComplianceTraining'
+                  bodyStyle={{...styles.colStyle, textAlign: 'center'}}
+                   excludeGlobalFilter={true}
+                   header='CT RCR'
+                   headerStyle={{...styles.colStyle, width: '80px'}}
           />}
           {enableEraCommons && <Column field='eraCommons'
                   bodyStyle={{...styles.colStyle, textAlign: 'center'}}
