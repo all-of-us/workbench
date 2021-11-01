@@ -10,15 +10,14 @@ export BQ_DATASET=$2  # dataset
 ################################################
 # CREATE LINKING TABLE
 ################################################
-echo "CREATE TABLE - ds_linking"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
-"CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.ds_linking\`
-(
-    DENORMALIZED_NAME               STRING,
-    OMOP_SQL                        STRING,
-    JOIN_VALUE                      STRING,
-    DOMAIN                          STRING
-)"
+schema_path=generate-cdr/bq-schemas
+create_tables=(ds_linking)
+
+for t in "${create_tables[@]}"
+do
+    bq --project_id="$BQ_PROJECT" rm -f "$BQ_DATASET.$t"
+    bq --quiet --project_id="$BQ_PROJECT" mk --schema="$schema_path/$t.json" "$BQ_DATASET.$t"
+done
 
 ################################################
 # INSERT DATA
@@ -26,289 +25,289 @@ bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 echo "ds_linking - inserting condition data"
 
 bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (ID, DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
 VALUES
     # We add the core table for domain row to ensure we have a single place to make certain we load in the base table.
-    ('CORE_TABLE_FOR_DOMAIN', 'CORE_TABLE_FOR_DOMAIN', 'from \`\${projectId}.\${dataSetId}.condition_occurrence\` c_occurrence', 'Condition'),
-    ('PERSON_ID', 'c_occurrence.PERSON_ID', 'from \`\${projectId}.\${dataSetId}.condition_occurrence\` c_occurrence', 'Condition'),
-    ('CONDITION_CONCEPT_ID', 'c_occurrence.CONDITION_CONCEPT_ID', 'from \`\${projectId}.\${dataSetId}.condition_occurrence\` c_occurrence', 'Condition'),
-    ('STANDARD_CONCEPT_NAME', 'c_standard_concept.concept_name as STANDARD_CONCEPT_NAME', 'left join \`\${projectId}.\${dataSetId}.concept\` c_standard_concept on c_occurrence.CONDITION_CONCEPT_ID = c_standard_concept.CONCEPT_ID', 'Condition'),
-    ('STANDARD_CONCEPT_CODE', 'c_standard_concept.concept_code as STANDARD_CONCEPT_CODE', 'left join \`\${projectId}.\${dataSetId}.concept\` c_standard_concept on c_occurrence.CONDITION_CONCEPT_ID = c_standard_concept.CONCEPT_ID', 'Condition'),
-    ('STANDARD_VOCABULARY', 'c_standard_concept.vocabulary_id as STANDARD_VOCABULARY', 'left join \`\${projectId}.\${dataSetId}.concept\` c_standard_concept on c_occurrence.CONDITION_CONCEPT_ID = c_standard_concept.CONCEPT_ID', 'Condition'),
-    ('CONDITION_START_DATETIME', 'c_occurrence.CONDITION_START_DATETIME', 'from \`\${projectId}.\${dataSetId}.condition_occurrence\` c_occurrence', 'Condition'),
-    ('CONDITION_END_DATETIME', 'c_occurrence.CONDITION_END_DATETIME', 'from \`\${projectId}.\${dataSetId}.condition_occurrence\` c_occurrence', 'Condition'),
-    ('CONDITION_TYPE_CONCEPT_ID', 'c_occurrence.CONDITION_TYPE_CONCEPT_ID', 'from \`\${projectId}.\${dataSetId}.condition_occurrence\` c_occurrence', 'Condition'),
-    ('CONDITION_TYPE_CONCEPT_NAME', 'c_type.concept_name as CONDITION_TYPE_CONCEPT_NAME', 'left join \`\${projectId}.\${dataSetId}.concept\` c_type on c_occurrence.CONDITION_TYPE_CONCEPT_ID = c_type.CONCEPT_ID', 'Condition'),
-    ('STOP_REASON', 'c_occurrence.STOP_REASON', 'from \`\${projectId}.\${dataSetId}.condition_occurrence\` c_occurrence', 'Condition'),
-    ('VISIT_OCCURRENCE_ID', 'c_occurrence.VISIT_OCCURRENCE_ID', 'from \`\${projectId}.\${dataSetId}.condition_occurrence\` c_occurrence', 'Condition'),
-    ('VISIT_OCCURRENCE_CONCEPT_NAME', 'visit.concept_name as VISIT_OCCURRENCE_CONCEPT_NAME', 'left join \`\${projectId}.\${dataSetId}.visit_occurrence\` v on c_occurrence.VISIT_OCCURRENCE_ID = v.VISIT_OCCURRENCE_ID left join \`\${projectId}.\${dataSetId}.concept\` visit on v.visit_concept_id = visit.concept_id', 'Condition'),
-    ('CONDITION_SOURCE_VALUE', 'c_occurrence.CONDITION_SOURCE_VALUE', 'from \`\${projectId}.\${dataSetId}.condition_occurrence\` c_occurrence', 'Condition'),
-    ('CONDITION_SOURCE_CONCEPT_ID', 'c_occurrence.CONDITION_SOURCE_CONCEPT_ID', 'from \`\${projectId}.\${dataSetId}.condition_occurrence\` c_occurrence', 'Condition'),
-    ('SOURCE_CONCEPT_NAME', 'c_source_concept.concept_name as SOURCE_CONCEPT_NAME', 'left join \`\${projectId}.\${dataSetId}.concept\` c_source_concept on c_occurrence.CONDITION_SOURCE_CONCEPT_ID = c_source_concept.CONCEPT_ID', 'Condition'),
-    ('SOURCE_CONCEPT_CODE', 'c_source_concept.concept_code as SOURCE_CONCEPT_CODE', 'left join \`\${projectId}.\${dataSetId}.concept\` c_source_concept on c_occurrence.CONDITION_SOURCE_CONCEPT_ID = c_source_concept.CONCEPT_ID', 'Condition'),
-    ('SOURCE_VOCABULARY', 'c_source_concept.vocabulary_id as SOURCE_VOCABULARY', 'left join \`\${projectId}.\${dataSetId}.concept\` c_source_concept on c_occurrence.CONDITION_SOURCE_CONCEPT_ID = c_source_concept.CONCEPT_ID', 'Condition'),
-    ('CONDITION_STATUS_SOURCE_VALUE', 'c_occurrence.CONDITION_STATUS_SOURCE_VALUE', 'from \`\${projectId}.\${dataSetId}.condition_occurrence\` c_occurrence', 'Condition'),
-    ('CONDITION_STATUS_CONCEPT_ID', 'c_occurrence.CONDITION_STATUS_CONCEPT_ID', 'from \`\${projectId}.\${dataSetId}.condition_occurrence\` c_occurrence', 'Condition'),
-    ('CONDITION_STATUS_CONCEPT_NAME', 'c_status.concept_name as CONDITION_STATUS_CONCEPT_NAME', 'left join \`\${projectId}.\${dataSetId}.concept\` c_status on c_occurrence.CONDITION_STATUS_CONCEPT_ID = c_status.CONCEPT_ID', 'Condition')"
+    (1, 'CORE_TABLE_FOR_DOMAIN', 'CORE_TABLE_FOR_DOMAIN', 'FROM \`\${projectId}.\${dataSetId}.condition_occurrence\` c_occurrence', 'Condition'),
+    (2, 'PERSON_ID', 'c_occurrence.person_id', 'FROM \`\${projectId}.\${dataSetId}.condition_occurrence\` c_occurrence', 'Condition'),
+    (3, 'CONDITION_CONCEPT_ID', 'c_occurrence.condition_concept_id', 'FROM \`\${projectId}.\${dataSetId}.condition_occurrence\` c_occurrence', 'Condition'),
+    (4, 'STANDARD_CONCEPT_NAME', 'c_standard_concept.concept_name as standard_concept_name', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` c_standard_concept ON c_occurrence.condition_concept_id = c_standard_concept.concept_id', 'Condition'),
+    (5, 'STANDARD_CONCEPT_CODE', 'c_standard_concept.concept_code as standard_concept_code', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` c_standard_concept ON c_occurrence.condition_concept_id = c_standard_concept.concept_id', 'Condition'),
+    (6, 'STANDARD_VOCABULARY', 'c_standard_concept.vocabulary_id as standard_vocabulary', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` c_standard_concept ON c_occurrence.condition_concept_id = c_standard_concept.concept_id', 'Condition'),
+    (7, 'CONDITION_START_DATETIME', 'c_occurrence.condition_start_datetime', 'FROM \`\${projectId}.\${dataSetId}.condition_occurrence\` c_occurrence', 'Condition'),
+    (8, 'CONDITION_END_DATETIME', 'c_occurrence.condition_end_datetime', 'FROM \`\${projectId}.\${dataSetId}.condition_occurrence\` c_occurrence', 'Condition'),
+    (9, 'CONDITION_TYPE_CONCEPT_ID', 'c_occurrence.condition_type_concept_id', 'FROM \`\${projectId}.\${dataSetId}.condition_occurrence\` c_occurrence', 'Condition'),
+    (10, 'CONDITION_TYPE_CONCEPT_NAME', 'c_type.concept_name as condition_type_concept_name', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` c_type ON c_occurrence.condition_type_concept_id = c_type.concept_id', 'Condition'),
+    (11, 'STOP_REASON', 'c_occurrence.stop_reason', 'FROM \`\${projectId}.\${dataSetId}.condition_occurrence\` c_occurrence', 'Condition'),
+    (12, 'VISIT_OCCURRENCE_ID', 'c_occurrence.visit_occurrence_id', 'FROM \`\${projectId}.\${dataSetId}.condition_occurrence\` c_occurrence', 'Condition'),
+    (13, 'VISIT_OCCURRENCE_CONCEPT_NAME', 'visit.concept_name as visit_occurrence_concept_name', 'LEFT JOIN \`\${projectId}.\${dataSetId}.visit_occurrence\` v ON c_occurrence.visit_occurrence_id = v.visit_occurrence_id LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` visit ON v.visit_concept_id = visit.concept_id', 'Condition'),
+    (14, 'CONDITION_SOURCE_VALUE', 'c_occurrence.condition_source_value', 'FROM \`\${projectId}.\${dataSetId}.condition_occurrence\` c_occurrence', 'Condition'),
+    (15, 'CONDITION_SOURCE_CONCEPT_ID', 'c_occurrence.condition_source_concept_id', 'FROM \`\${projectId}.\${dataSetId}.condition_occurrence\` c_occurrence', 'Condition'),
+    (16, 'SOURCE_CONCEPT_NAME', 'c_source_concept.concept_name as source_concept_name', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` c_source_concept ON c_occurrence.condition_source_concept_id = c_source_concept.concept_id', 'Condition'),
+    (17, 'SOURCE_CONCEPT_CODE', 'c_source_concept.concept_code as source_concept_code', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` c_source_concept ON c_occurrence.condition_source_concept_id = c_source_concept.concept_id', 'Condition'),
+    (18, 'SOURCE_VOCABULARY', 'c_source_concept.vocabulary_id as source_vocabulary', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` c_source_concept ON c_occurrence.condition_source_concept_id = c_source_concept.concept_id', 'Condition'),
+    (19, 'CONDITION_STATUS_SOURCE_VALUE', 'c_occurrence.condition_status_source_value', 'FROM \`\${projectId}.\${dataSetId}.condition_occurrence\` c_occurrence', 'Condition'),
+    (20, 'CONDITION_STATUS_CONCEPT_ID', 'c_occurrence.condition_status_concept_id', 'FROM \`\${projectId}.\${dataSetId}.condition_occurrence\` c_occurrence', 'Condition'),
+    (21, 'CONDITION_STATUS_CONCEPT_NAME', 'c_status.concept_name as condition_status_concept_name', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` c_status ON c_occurrence.condition_status_concept_id = c_status.concept_id', 'Condition')"
 
 echo "ds_linking - inserting drug exposure data"
 
 bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (ID, DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
 VALUES
-    ('CORE_TABLE_FOR_DOMAIN', 'CORE_TABLE_FOR_DOMAIN', 'from \`\${projectId}.\${dataSetId}.drug_exposure\` d_exposure', 'Drug'),
-    ('PERSON_ID', 'd_exposure.PERSON_ID', 'from \`\${projectId}.\${dataSetId}.drug_exposure\` d_exposure', 'Drug'),
-    ('DRUG_CONCEPT_ID', 'd_exposure.DRUG_CONCEPT_ID', 'from \`\${projectId}.\${dataSetId}.drug_exposure\` d_exposure', 'Drug'),
-    ('STANDARD_CONCEPT_NAME', 'd_standard_concept.concept_name as STANDARD_CONCEPT_NAME', 'left join \`\${projectId}.\${dataSetId}.concept\` d_standard_concept on d_exposure.DRUG_CONCEPT_ID = d_standard_concept.CONCEPT_ID', 'Drug'),
-    ('STANDARD_CONCEPT_CODE', 'd_standard_concept.concept_code as STANDARD_CONCEPT_CODE', 'left join \`\${projectId}.\${dataSetId}.concept\` d_standard_concept on d_exposure.DRUG_CONCEPT_ID = d_standard_concept.CONCEPT_ID', 'Drug'),
-    ('STANDARD_VOCABULARY', 'd_standard_concept.vocabulary_id as STANDARD_VOCABULARY', 'left join \`\${projectId}.\${dataSetId}.concept\` d_standard_concept on d_exposure.DRUG_CONCEPT_ID = d_standard_concept.CONCEPT_ID', 'Drug'),
-    ('DRUG_EXPOSURE_START_DATETIME', 'd_exposure.DRUG_EXPOSURE_START_DATETIME', 'from \`\${projectId}.\${dataSetId}.drug_exposure\` d_exposure', 'Drug'),
-    ('DRUG_EXPOSURE_END_DATETIME', 'd_exposure.DRUG_EXPOSURE_END_DATETIME', 'from \`\${projectId}.\${dataSetId}.drug_exposure\` d_exposure', 'Drug'),
-    ('VERBATIM_END_DATE', 'd_exposure.VERBATIM_END_DATE', 'from \`\${projectId}.\${dataSetId}.drug_exposure\` d_exposure', 'Drug'),
-    ('DRUG_TYPE_CONCEPT_ID', 'd_exposure.DRUG_TYPE_CONCEPT_ID', 'from \`\${projectId}.\${dataSetId}.drug_exposure\` d_exposure', 'Drug'),
-    ('DRUG_TYPE_CONCEPT_NAME', 'd_type.concept_name as DRUG_TYPE_CONCEPT_NAME', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` d_type on d_exposure.drug_type_concept_id = d_type.CONCEPT_ID', 'Drug'),
-    ('STOP_REASON', 'd_exposure.STOP_REASON', 'from \`\${projectId}.\${dataSetId}.drug_exposure\` d_exposure', 'Drug'),
-    ('REFILLS', 'd_exposure.REFILLS', 'from \`\${projectId}.\${dataSetId}.drug_exposure\` d_exposure', 'Drug'),
-    ('QUANTITY', 'd_exposure.QUANTITY', 'from \`\${projectId}.\${dataSetId}.drug_exposure\` d_exposure', 'Drug'),
-    ('DAYS_SUPPLY', 'd_exposure.DAYS_SUPPLY', 'from \`\${projectId}.\${dataSetId}.drug_exposure\` d_exposure', 'Drug'),
-    ('SIG', 'd_exposure.SIG', 'from \`\${projectId}.\${dataSetId}.drug_exposure\` d_exposure', 'Drug'),
-    ('ROUTE_CONCEPT_ID', 'd_exposure.ROUTE_CONCEPT_ID', 'from \`\${projectId}.\${dataSetId}.drug_exposure\` d_exposure', 'Drug'),
-    ('ROUTE_CONCEPT_NAME', 'd_route.concept_name as ROUTE_CONCEPT_NAME', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` d_route on d_exposure.ROUTE_CONCEPT_ID = d_route.CONCEPT_ID', 'Drug'),
-    ('LOT_NUMBER', 'd_exposure.LOT_NUMBER', 'from \`\${projectId}.\${dataSetId}.drug_exposure\` d_exposure', 'Drug'),
-    ('VISIT_OCCURRENCE_ID', 'd_exposure.VISIT_OCCURRENCE_ID', 'from \`\${projectId}.\${dataSetId}.drug_exposure\` d_exposure', 'Drug'),
-    ('VISIT_OCCURRENCE_CONCEPT_NAME', 'd_visit.concept_name as VISIT_OCCURRENCE_CONCEPT_NAME', 'left join \`\${projectId}.\${dataSetId}.visit_occurrence\` v on d_exposure.VISIT_OCCURRENCE_ID = v.VISIT_OCCURRENCE_ID LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` d_visit on v.VISIT_CONCEPT_ID = d_visit.CONCEPT_ID', 'Drug'),
-    ('DRUG_SOURCE_VALUE', 'd_exposure.DRUG_SOURCE_VALUE', 'from \`\${projectId}.\${dataSetId}.drug_exposure\` d_exposure', 'Drug'),
-    ('DRUG_SOURCE_CONCEPT_ID', 'd_exposure.DRUG_SOURCE_CONCEPT_ID', 'from \`\${projectId}.\${dataSetId}.drug_exposure\` d_exposure', 'Drug'),
-    ('SOURCE_CONCEPT_NAME', 'd_source_concept.concept_name as SOURCE_CONCEPT_NAME', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` d_source_concept on d_exposure.DRUG_SOURCE_CONCEPT_ID = d_source_concept.CONCEPT_ID', 'Drug'),
-    ('SOURCE_CONCEPT_CODE', 'd_source_concept.concept_code as SOURCE_CONCEPT_CODE', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` d_source_concept on d_exposure.DRUG_SOURCE_CONCEPT_ID = d_source_concept.CONCEPT_ID', 'Drug'),
-    ('SOURCE_VOCABULARY', 'd_source_concept.vocabulary_id as SOURCE_VOCABULARY', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` d_source_concept on d_exposure.DRUG_SOURCE_CONCEPT_ID = d_source_concept.CONCEPT_ID', 'Drug'),
-    ('ROUTE_SOURCE_VALUE', 'd_exposure.ROUTE_SOURCE_VALUE', 'from \`\${projectId}.\${dataSetId}.drug_exposure\` d_exposure', 'Drug'),
-    ('DOSE_UNIT_SOURCE_VALUE', 'd_exposure.DOSE_UNIT_SOURCE_VALUE', 'from \`\${projectId}.\${dataSetId}.drug_exposure\` d_exposure', 'Drug')"
+    (22, 'CORE_TABLE_FOR_DOMAIN', 'CORE_TABLE_FOR_DOMAIN', 'FROM \`\${projectId}.\${dataSetId}.drug_exposure\` d_exposure', 'Drug'),
+    (23, 'PERSON_ID', 'd_exposure.person_id', 'FROM \`\${projectId}.\${dataSetId}.drug_exposure\` d_exposure', 'Drug'),
+    (24, 'DRUG_CONCEPT_ID', 'd_exposure.drug_concept_id', 'FROM \`\${projectId}.\${dataSetId}.drug_exposure\` d_exposure', 'Drug'),
+    (25, 'STANDARD_CONCEPT_NAME', 'd_standard_concept.concept_name as standard_concept_name', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` d_standard_concept ON d_exposure.drug_concept_id = d_standard_concept.concept_id', 'Drug'),
+    (26, 'STANDARD_CONCEPT_CODE', 'd_standard_concept.concept_code as standard_concept_code', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` d_standard_concept ON d_exposure.drug_concept_id = d_standard_concept.concept_id', 'Drug'),
+    (27, 'STANDARD_VOCABULARY', 'd_standard_concept.vocabulary_id as standard_vocabulary', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` d_standard_concept ON d_exposure.drug_concept_id = d_standard_concept.concept_id', 'Drug'),
+    (28, 'DRUG_EXPOSURE_START_DATETIME', 'd_exposure.drug_exposure_start_datetime', 'FROM \`\${projectId}.\${dataSetId}.drug_exposure\` d_exposure', 'Drug'),
+    (29, 'DRUG_EXPOSURE_END_DATETIME', 'd_exposure.drug_exposure_end_datetime', 'FROM \`\${projectId}.\${dataSetId}.drug_exposure\` d_exposure', 'Drug'),
+    (30, 'VERBATIM_END_DATE', 'd_exposure.verbatim_end_date', 'FROM \`\${projectId}.\${dataSetId}.drug_exposure\` d_exposure', 'Drug'),
+    (31, 'DRUG_TYPE_CONCEPT_ID', 'd_exposure.drug_type_concept_id', 'FROM \`\${projectId}.\${dataSetId}.drug_exposure\` d_exposure', 'Drug'),
+    (32, 'DRUG_TYPE_CONCEPT_NAME', 'd_type.concept_name as drug_type_concept_name', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` d_type ON d_exposure.drug_type_concept_id = d_type.concept_id', 'Drug'),
+    (33, 'STOP_REASON', 'd_exposure.stop_reason', 'FROM \`\${projectId}.\${dataSetId}.drug_exposure\` d_exposure', 'Drug'),
+    (34, 'REFILLS', 'd_exposure.refills', 'FROM \`\${projectId}.\${dataSetId}.drug_exposure\` d_exposure', 'Drug'),
+    (35, 'QUANTITY', 'd_exposure.quantity', 'FROM \`\${projectId}.\${dataSetId}.drug_exposure\` d_exposure', 'Drug'),
+    (36, 'DAYS_SUPPLY', 'd_exposure.days_supply', 'FROM \`\${projectId}.\${dataSetId}.drug_exposure\` d_exposure', 'Drug'),
+    (37, 'SIG', 'd_exposure.sig', 'FROM \`\${projectId}.\${dataSetId}.drug_exposure\` d_exposure', 'Drug'),
+    (38, 'ROUTE_CONCEPT_ID', 'd_exposure.route_concept_id', 'FROM \`\${projectId}.\${dataSetId}.drug_exposure\` d_exposure', 'Drug'),
+    (39, 'ROUTE_CONCEPT_NAME', 'd_route.concept_name as route_concept_name', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` d_route ON d_exposure.route_concept_id = d_route.concept_id', 'Drug'),
+    (40, 'LOT_NUMBER', 'd_exposure.lot_number', 'FROM \`\${projectId}.\${dataSetId}.drug_exposure\` d_exposure', 'Drug'),
+    (41, 'VISIT_OCCURRENCE_ID', 'd_exposure.visit_occurrence_id', 'FROM \`\${projectId}.\${dataSetId}.drug_exposure\` d_exposure', 'Drug'),
+    (42, 'VISIT_OCCURRENCE_CONCEPT_NAME', 'd_visit.concept_name as visit_occurrence_concept_name', 'LEFT JOIN \`\${projectId}.\${dataSetId}.visit_occurrence\` v ON d_exposure.visit_occurrence_id = v.visit_occurrence_id LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` d_visit ON v.visit_concept_id = d_visit.concept_id', 'Drug'),
+    (43, 'DRUG_SOURCE_VALUE', 'd_exposure.drug_source_value', 'FROM \`\${projectId}.\${dataSetId}.drug_exposure\` d_exposure', 'Drug'),
+    (44, 'DRUG_SOURCE_CONCEPT_ID', 'd_exposure.drug_source_concept_id', 'FROM \`\${projectId}.\${dataSetId}.drug_exposure\` d_exposure', 'Drug'),
+    (45, 'SOURCE_CONCEPT_NAME', 'd_source_concept.concept_name as source_concept_name', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` d_source_concept ON d_exposure.drug_source_concept_id = d_source_concept.concept_id', 'Drug'),
+    (46, 'SOURCE_CONCEPT_CODE', 'd_source_concept.concept_code as source_concept_code', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` d_source_concept ON d_exposure.drug_source_concept_id = d_source_concept.concept_id', 'Drug'),
+    (47, 'SOURCE_VOCABULARY', 'd_source_concept.vocabulary_id as source_vocabulary', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` d_source_concept ON d_exposure.drug_source_concept_id = d_source_concept.concept_id', 'Drug'),
+    (48, 'ROUTE_SOURCE_VALUE', 'd_exposure.route_source_value', 'FROM \`\${projectId}.\${dataSetId}.drug_exposure\` d_exposure', 'Drug'),
+    (49, 'DOSE_UNIT_SOURCE_VALUE', 'd_exposure.dose_unit_source_value', 'FROM \`\${projectId}.\${dataSetId}.drug_exposure\` d_exposure', 'Drug')"
 
 echo "ds_linking - inserting measurement data"
 
 bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (ID, DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
 VALUES
-    ('CORE_TABLE_FOR_DOMAIN', 'CORE_TABLE_FOR_DOMAIN', 'from \`\${projectId}.\${dataSetId}.measurement\` measurement', 'Measurement'),
-    ('PERSON_ID', 'measurement.PERSON_ID', 'from \`\${projectId}.\${dataSetId}.measurement\` measurement', 'Measurement'),
-    ('MEASUREMENT_CONCEPT_ID', 'measurement.MEASUREMENT_CONCEPT_ID', 'from \`\${projectId}.\${dataSetId}.measurement\` measurement', 'Measurement'),
-    ('STANDARD_CONCEPT_NAME', 'm_standard_concept.concept_name as STANDARD_CONCEPT_NAME', 'left join \`\${projectId}.\${dataSetId}.concept\` m_standard_concept on measurement.measurement_concept_id = m_standard_concept.concept_id', 'Measurement'),
-    ('STANDARD_CONCEPT_CODE', 'm_standard_concept.concept_code as STANDARD_CONCEPT_CODE', 'left join \`\${projectId}.\${dataSetId}.concept\` m_standard_concept on measurement.measurement_concept_id = m_standard_concept.concept_id', 'Measurement'),
-    ('STANDARD_VOCABULARY', 'm_standard_concept.vocabulary_id as STANDARD_VOCABULARY', 'left join \`\${projectId}.\${dataSetId}.concept\` m_standard_concept on measurement.measurement_concept_id = m_standard_concept.concept_id', 'Measurement'),
-    ('MEASUREMENT_DATETIME', 'measurement.MEASUREMENT_DATETIME', 'from \`\${projectId}.\${dataSetId}.measurement\` measurement', 'Measurement'),
-    ('MEASUREMENT_TYPE_CONCEPT_ID', 'measurement.MEASUREMENT_TYPE_CONCEPT_ID', 'from \`\${projectId}.\${dataSetId}.measurement\` measurement', 'Measurement'),
-    ('MEASUREMENT_TYPE_CONCEPT_NAME', 'm_type.concept_name as MEASUREMENT_TYPE_CONCEPT_NAME', 'left join \`\${projectId}.\${dataSetId}.concept\` m_type on measurement.measurement_type_concept_id = m_type.concept_id', 'Measurement'),
-    ('OPERATOR_CONCEPT_ID', 'measurement.OPERATOR_CONCEPT_ID', 'from \`\${projectId}.\${dataSetId}.measurement\` measurement', 'Measurement'),
-    ('OPERATOR_CONCEPT_NAME', 'm_operator.concept_name as OPERATOR_CONCEPT_NAME', 'left join \`\${projectId}.\${dataSetId}.concept\` m_operator on measurement.operator_concept_id = m_operator.concept_id', 'Measurement'),
-    ('VALUE_AS_NUMBER', 'measurement.VALUE_AS_NUMBER', 'from \`\${projectId}.\${dataSetId}.measurement\` measurement', 'Measurement'),
-    ('VALUE_AS_CONCEPT_ID', 'measurement.VALUE_AS_CONCEPT_ID', 'from \`\${projectId}.\${dataSetId}.measurement\` measurement', 'Measurement'),
-    ('VALUE_AS_CONCEPT_NAME', 'm_value.concept_name as VALUE_AS_CONCEPT_NAME', 'left join \`\${projectId}.\${dataSetId}.concept\` m_value on measurement.value_as_concept_id = m_value.concept_id', 'Measurement'),
-    ('UNIT_CONCEPT_ID', 'measurement.UNIT_CONCEPT_ID', 'from \`\${projectId}.\${dataSetId}.measurement\` measurement', 'Measurement'),
-    ('UNIT_CONCEPT_NAME', 'm_unit.concept_name as UNIT_CONCEPT_NAME', 'left join \`\${projectId}.\${dataSetId}.concept\` m_unit on measurement.unit_concept_id = m_unit.concept_id', 'Measurement'),
-    ('RANGE_LOW', 'measurement.RANGE_LOW', 'from \`\${projectId}.\${dataSetId}.measurement\` measurement', 'Measurement'),
-    ('RANGE_HIGH', 'measurement.RANGE_HIGH', 'from \`\${projectId}.\${dataSetId}.measurement\` measurement', 'Measurement'),
-    ('VISIT_OCCURRENCE_ID', 'measurement.VISIT_OCCURRENCE_ID', 'from \`\${projectId}.\${dataSetId}.measurement\` measurement', 'Measurement'),
-    ('VISIT_OCCURRENCE_CONCEPT_NAME', 'm_visit.concept_name as VISIT_OCCURRENCE_CONCEPT_NAME', 'left join \`\${projectId}.\${dataSetId}.visit_occurrence\` v on measurement.visit_occurrence_id = v.visit_occurrence_id left join \`\${projectId}.\${dataSetId}.concept\` m_visit on v.visit_concept_id = m_visit.concept_id', 'Measurement'),
-    ('MEASUREMENT_SOURCE_VALUE', 'measurement.MEASUREMENT_SOURCE_VALUE', 'from \`\${projectId}.\${dataSetId}.measurement\` measurement', 'Measurement'),
-    ('MEASUREMENT_SOURCE_CONCEPT_ID', 'measurement.MEASUREMENT_SOURCE_CONCEPT_ID', 'from \`\${projectId}.\${dataSetId}.measurement\` measurement', 'Measurement'),
-    ('SOURCE_CONCEPT_NAME', 'm_source_concept.concept_name as SOURCE_CONCEPT_NAME', 'left join \`\${projectId}.\${dataSetId}.concept\` m_source_concept on measurement.measurement_source_concept_id = m_source_concept.concept_id', 'Measurement'),
-    ('SOURCE_CONCEPT_CODE', 'm_source_concept.concept_code as SOURCE_CONCEPT_CODE', 'left join \`\${projectId}.\${dataSetId}.concept\` m_source_concept on measurement.measurement_source_concept_id = m_source_concept.concept_id', 'Measurement'),
-    ('SOURCE_VOCABULARY', 'm_source_concept.vocabulary_id as SOURCE_VOCABULARY', 'left join \`\${projectId}.\${dataSetId}.concept\` m_source_concept on measurement.measurement_source_concept_id = m_source_concept.concept_id', 'Measurement'),
-    ('UNIT_SOURCE_VALUE', 'measurement.UNIT_SOURCE_VALUE', 'from \`\${projectId}.\${dataSetId}.measurement\` measurement', 'Measurement'),
-    ('VALUE_SOURCE_VALUE', 'measurement.VALUE_SOURCE_VALUE', 'from \`\${projectId}.\${dataSetId}.measurement\` measurement', 'Measurement')"
+    (50, 'CORE_TABLE_FOR_DOMAIN', 'CORE_TABLE_FOR_DOMAIN', 'FROM \`\${projectId}.\${dataSetId}.measurement\` measurement', 'Measurement'),
+    (51, 'PERSON_ID', 'measurement.person_id', 'FROM \`\${projectId}.\${dataSetId}.measurement\` measurement', 'Measurement'),
+    (52, 'MEASUREMENT_CONCEPT_ID', 'measurement.measurement_concept_id', 'FROM \`\${projectId}.\${dataSetId}.measurement\` measurement', 'Measurement'),
+    (53, 'STANDARD_CONCEPT_NAME', 'm_standard_concept.concept_name as standard_concept_name', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` m_standard_concept ON measurement.measurement_concept_id = m_standard_concept.concept_id', 'Measurement'),
+    (54, 'STANDARD_CONCEPT_CODE', 'm_standard_concept.concept_code as standard_concept_code', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` m_standard_concept ON measurement.measurement_concept_id = m_standard_concept.concept_id', 'Measurement'),
+    (55, 'STANDARD_VOCABULARY', 'm_standard_concept.vocabulary_id as standard_vocabulary', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` m_standard_concept ON measurement.measurement_concept_id = m_standard_concept.concept_id', 'Measurement'),
+    (56, 'MEASUREMENT_DATETIME', 'measurement.measurement_datetime', 'FROM \`\${projectId}.\${dataSetId}.measurement\` measurement', 'Measurement'),
+    (57, 'MEASUREMENT_TYPE_CONCEPT_ID', 'measurement.measurement_type_concept_id', 'FROM \`\${projectId}.\${dataSetId}.measurement\` measurement', 'Measurement'),
+    (58, 'MEASUREMENT_TYPE_CONCEPT_NAME', 'm_type.concept_name as measurement_type_concept_name', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` m_type ON measurement.measurement_type_concept_id = m_type.concept_id', 'Measurement'),
+    (59, 'OPERATOR_CONCEPT_ID', 'measurement.operator_concept_id', 'FROM \`\${projectId}.\${dataSetId}.measurement\` measurement', 'Measurement'),
+    (60, 'OPERATOR_CONCEPT_NAME', 'm_operator.concept_name as operator_concept_name', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` m_operator ON measurement.operator_concept_id = m_operator.concept_id', 'Measurement'),
+    (61, 'VALUE_AS_NUMBER', 'measurement.value_as_number', 'FROM \`\${projectId}.\${dataSetId}.measurement\` measurement', 'Measurement'),
+    (62, 'VALUE_AS_CONCEPT_ID', 'measurement.value_as_concept_id', 'FROM \`\${projectId}.\${dataSetId}.measurement\` measurement', 'Measurement'),
+    (63, 'VALUE_AS_CONCEPT_NAME', 'm_value.concept_name as value_as_concept_name', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` m_value ON measurement.value_as_concept_id = m_value.concept_id', 'Measurement'),
+    (64, 'UNIT_CONCEPT_ID', 'measurement.unit_concept_id', 'FROM \`\${projectId}.\${dataSetId}.measurement\` measurement', 'Measurement'),
+    (65, 'UNIT_CONCEPT_NAME', 'm_unit.concept_name as unit_concept_name', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` m_unit ON measurement.unit_concept_id = m_unit.concept_id', 'Measurement'),
+    (66, 'RANGE_LOW', 'measurement.range_low', 'FROM \`\${projectId}.\${dataSetId}.measurement\` measurement', 'Measurement'),
+    (67, 'RANGE_HIGH', 'measurement.range_high', 'FROM \`\${projectId}.\${dataSetId}.measurement\` measurement', 'Measurement'),
+    (68, 'VISIT_OCCURRENCE_ID', 'measurement.visit_occurrence_id', 'FROM \`\${projectId}.\${dataSetId}.measurement\` measurement', 'Measurement'),
+    (69, 'VISIT_OCCURRENCE_CONCEPT_NAME', 'm_visit.concept_name as visit_occurrence_concept_name', 'LEFT JOIn \`\${projectId}.\${dataSetId}.visit_occurrence\` v ON measurement.visit_occurrence_id = v.visit_occurrence_id LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` m_visit ON v.visit_concept_id = m_visit.concept_id', 'Measurement'),
+    (70, 'MEASUREMENT_SOURCE_VALUE', 'measurement.measurement_source_value', 'FROM \`\${projectId}.\${dataSetId}.measurement\` measurement', 'Measurement'),
+    (71, 'MEASUREMENT_SOURCE_CONCEPT_ID', 'measurement.measurement_source_concept_id', 'FROM \`\${projectId}.\${dataSetId}.measurement\` measurement', 'Measurement'),
+    (72, 'SOURCE_CONCEPT_NAME', 'm_source_concept.concept_name as source_concept_name', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` m_source_concept ON measurement.measurement_source_concept_id = m_source_concept.concept_id', 'Measurement'),
+    (73, 'SOURCE_CONCEPT_CODE', 'm_source_concept.concept_code as source_concept_code', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` m_source_concept ON measurement.measurement_source_concept_id = m_source_concept.concept_id', 'Measurement'),
+    (74, 'SOURCE_VOCABULARY', 'm_source_concept.vocabulary_id as source_vocabulary', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` m_source_concept ON measurement.measurement_source_concept_id = m_source_concept.concept_id', 'Measurement'),
+    (75, 'UNIT_SOURCE_VALUE', 'measurement.unit_source_value', 'FROM \`\${projectId}.\${dataSetId}.measurement\` measurement', 'Measurement'),
+    (76, 'VALUE_SOURCE_VALUE', 'measurement.value_source_value', 'FROM \`\${projectId}.\${dataSetId}.measurement\` measurement', 'Measurement')"
 
 echo "ds_linking - inserting observation data"
 
 bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (ID, DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
 VALUES
-    ('CORE_TABLE_FOR_DOMAIN', 'CORE_TABLE_FOR_DOMAIN', 'from \`\${projectId}.\${dataSetId}.ds_observation\` observation', 'Observation'),
-    ('PERSON_ID', 'observation.PERSON_ID', 'from \`\${projectId}.\${dataSetId}.ds_observation\` observation', 'Observation'),
-    ('OBSERVATION_CONCEPT_ID', 'observation.OBSERVATION_CONCEPT_ID', 'from \`\${projectId}.\${dataSetId}.ds_observation\` observation', 'Observation'),
-    ('STANDARD_CONCEPT_NAME', 'o_standard_concept.concept_name as STANDARD_CONCEPT_NAME', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` o_standard_concept on observation.OBSERVATION_CONCEPT_ID = o_standard_concept.CONCEPT_ID', 'Observation'),
-    ('STANDARD_CONCEPT_CODE', 'o_standard_concept.concept_code as STANDARD_CONCEPT_CODE', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` o_standard_concept on observation.OBSERVATION_CONCEPT_ID = o_standard_concept.CONCEPT_ID', 'Observation'),
-    ('STANDARD_VOCABULARY', 'o_standard_concept.vocabulary_id as STANDARD_VOCABULARY', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` o_standard_concept on observation.OBSERVATION_CONCEPT_ID = o_standard_concept.CONCEPT_ID', 'Observation'),
-    ('OBSERVATION_DATETIME', 'observation.OBSERVATION_DATETIME', 'from \`\${projectId}.\${dataSetId}.ds_observation\` observation', 'Observation'),
-    ('OBSERVATION_TYPE_CONCEPT_ID', 'observation.OBSERVATION_TYPE_CONCEPT_ID', 'from \`\${projectId}.\${dataSetId}.ds_observation\` observation', 'Observation'),
-    ('OBSERVATION_TYPE_CONCEPT_NAME', 'o_type.concept_name as OBSERVATION_TYPE_CONCEPT_NAME', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` o_type on observation.OBSERVATION_TYPE_CONCEPT_ID = o_type.CONCEPT_ID', 'Observation'),
-    ('VALUE_AS_NUMBER', 'observation.VALUE_AS_NUMBER', 'from \`\${projectId}.\${dataSetId}.ds_observation\` observation', 'Observation'),
-    ('VALUE_AS_STRING', 'observation.VALUE_AS_STRING', 'from \`\${projectId}.\${dataSetId}.ds_observation\` observation', 'Observation'),
-    ('VALUE_AS_CONCEPT_ID', 'observation.VALUE_AS_CONCEPT_ID', 'from \`\${projectId}.\${dataSetId}.ds_observation\` observation', 'Observation'),
-    ('VALUE_AS_CONCEPT_NAME', 'o_value.concept_name as VALUE_AS_CONCEPT_NAME', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` o_value on observation.value_as_concept_id = o_value.CONCEPT_ID', 'Observation'),
-    ('QUALIFIER_CONCEPT_ID', 'observation.QUALIFIER_CONCEPT_ID', 'from \`\${projectId}.\${dataSetId}.ds_observation\` observation', 'Observation'),
-    ('QUALIFIER_CONCEPT_NAME', 'o_qualifier.concept_name as QUALIFIER_CONCEPT_NAME', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` o_qualifier on observation.qualifier_concept_id = o_qualifier.CONCEPT_ID', 'Observation'),
-    ('UNIT_CONCEPT_ID', 'observation.UNIT_CONCEPT_ID', 'from \`\${projectId}.\${dataSetId}.ds_observation\` observation', 'Observation'),
-    ('UNIT_CONCEPT_NAME', 'o_unit.concept_name as UNIT_CONCEPT_NAME', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` o_unit on observation.unit_concept_id = o_unit.CONCEPT_ID', 'Observation'),
-    ('VISIT_OCCURRENCE_ID', 'observation.VISIT_OCCURRENCE_ID', 'from \`\${projectId}.\${dataSetId}.ds_observation\` observation', 'Observation'),
-    ('VISIT_OCCURRENCE_CONCEPT_NAME', 'o_visit.concept_name as VISIT_OCCURRENCE_CONCEPT_NAME', 'left join \`\${projectId}.\${dataSetId}.visit_occurrence\` v on observation.VISIT_OCCURRENCE_ID = v.VISIT_OCCURRENCE_ID left join \`\${projectId}.\${dataSetId}.concept\` o_visit on v.visit_concept_id = o_visit.concept_id', 'Observation'),
-    ('OBSERVATION_SOURCE_VALUE', 'observation.OBSERVATION_SOURCE_VALUE', 'from \`\${projectId}.\${dataSetId}.ds_observation\` observation', 'Observation'),
-    ('OBSERVATION_SOURCE_CONCEPT_ID', 'observation.OBSERVATION_SOURCE_CONCEPT_ID', 'from \`\${projectId}.\${dataSetId}.ds_observation\` observation', 'Observation'),
-    ('SOURCE_CONCEPT_NAME', 'o_source_concept.concept_name as SOURCE_CONCEPT_NAME', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` o_source_concept on observation.OBSERVATION_SOURCE_CONCEPT_ID = o_source_concept.CONCEPT_ID', 'Observation'),
-    ('SOURCE_CONCEPT_CODE', 'o_source_concept.concept_code as SOURCE_CONCEPT_CODE', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` o_source_concept on observation.OBSERVATION_SOURCE_CONCEPT_ID = o_source_concept.CONCEPT_ID', 'Observation'),
-    ('SOURCE_VOCABULARY', 'o_source_concept.vocabulary_id as SOURCE_VOCABULARY', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` o_source_concept on observation.OBSERVATION_SOURCE_CONCEPT_ID = o_source_concept.CONCEPT_ID', 'Observation'),
-    ('UNIT_SOURCE_VALUE', 'observation.UNIT_SOURCE_VALUE', 'from \`\${projectId}.\${dataSetId}.ds_observation\` observation', 'Observation'),
-    ('QUALIFIER_SOURCE_VALUE', 'observation.QUALIFIER_SOURCE_VALUE', 'from \`\${projectId}.\${dataSetId}.ds_observation\` observation', 'Observation'),
-    ('value_source_concept_id', 'observation.value_source_concept_id', 'from \`\${projectId}.\${dataSetId}.ds_observation\` observation', 'Observation'),
-    ('value_source_value', 'observation.value_source_value', 'from \`\${projectId}.\${dataSetId}.ds_observation\` observation', 'Observation'),
-    ('questionnaire_response_id', 'observation.questionnaire_response_id', 'from \`\${projectId}.\${dataSetId}.ds_observation\` observation', 'Observation')"
+    (77, 'CORE_TABLE_FOR_DOMAIN', 'CORE_TABLE_FOR_DOMAIN', 'FROM \`\${projectId}.\${dataSetId}.ds_observation\` observation', 'Observation'),
+    (78, 'PERSON_ID', 'observation.person_id', 'FROM \`\${projectId}.\${dataSetId}.ds_observation\` observation', 'Observation'),
+    (79, 'OBSERVATION_CONCEPT_ID', 'observation.observation_concept_id', 'FROM \`\${projectId}.\${dataSetId}.ds_observation\` observation', 'Observation'),
+    (80, 'STANDARD_CONCEPT_NAME', 'o_standard_concept.concept_name as standard_concept_name', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` o_standard_concept ON observation.observation_concept_id = o_standard_concept.concept_id', 'Observation'),
+    (81, 'STANDARD_CONCEPT_CODE', 'o_standard_concept.concept_code as standard_concept_code', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` o_standard_concept ON observation.observation_concept_id = o_standard_concept.concept_id', 'Observation'),
+    (82, 'STANDARD_VOCABULARY', 'o_standard_concept.vocabulary_id as standard_vocabulary', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` o_standard_concept ON observation.observation_concept_id = o_standard_concept.concept_id', 'Observation'),
+    (83, 'OBSERVATION_DATETIME', 'observation.observation_datetime', 'FROM \`\${projectId}.\${dataSetId}.ds_observation\` observation', 'Observation'),
+    (84, 'OBSERVATION_TYPE_CONCEPT_ID', 'observation.observation_type_concept_id', 'FROM \`\${projectId}.\${dataSetId}.ds_observation\` observation', 'Observation'),
+    (85, 'OBSERVATION_TYPE_CONCEPT_NAME', 'o_type.concept_name as observation_type_concept_name', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` o_type ON observation.observation_type_concept_id = o_type.concept_id', 'Observation'),
+    (86, 'VALUE_AS_NUMBER', 'observation.value_as_number', 'FROM \`\${projectId}.\${dataSetId}.ds_observation\` observation', 'Observation'),
+    (87, 'VALUE_AS_STRING', 'observation.value_as_string', 'FROM \`\${projectId}.\${dataSetId}.ds_observation\` observation', 'Observation'),
+    (88, 'VALUE_AS_CONCEPT_ID', 'observation.value_as_concept_id', 'FROM \`\${projectId}.\${dataSetId}.ds_observation\` observation', 'Observation'),
+    (89, 'VALUE_AS_CONCEPT_NAME', 'o_value.concept_name as value_as_concept_name', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` o_value ON observation.value_as_concept_id = o_value.concept_id', 'Observation'),
+    (90, 'QUALIFIER_CONCEPT_ID', 'observation.qualifier_concept_id', 'FROM \`\${projectId}.\${dataSetId}.ds_observation\` observation', 'Observation'),
+    (91, 'QUALIFIER_CONCEPT_NAME', 'o_qualifier.concept_name as qualifier_concept_name', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` o_qualifier ON observation.qualifier_concept_id = o_qualifier.concept_id', 'Observation'),
+    (92, 'UNIT_CONCEPT_ID', 'observation.unit_concept_id', 'FROM \`\${projectId}.\${dataSetId}.ds_observation\` observation', 'Observation'),
+    (93, 'UNIT_CONCEPT_NAME', 'o_unit.concept_name as unit_concept_name', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` o_unit ON observation.unit_concept_id = o_unit.concept_id', 'Observation'),
+    (94, 'VISIT_OCCURRENCE_ID', 'observation.visit_occurrence_id', 'FROM \`\${projectId}.\${dataSetId}.ds_observation\` observation', 'Observation'),
+    (95, 'VISIT_OCCURRENCE_CONCEPT_NAME', 'o_visit.concept_name as visit_occurrence_concept_name', 'LEFT JOIN \`\${projectId}.\${dataSetId}.visit_occurrence\` v ON observation.visit_occurrence_id = v.visit_occurrence_id LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` o_visit ON v.visit_concept_id = o_visit.concept_id', 'Observation'),
+    (96, 'OBSERVATION_SOURCE_VALUE', 'observation.observation_source_value', 'FROM \`\${projectId}.\${dataSetId}.ds_observation\` observation', 'Observation'),
+    (97, 'OBSERVATION_SOURCE_CONCEPT_ID', 'observation.observation_source_concept_id', 'FROM \`\${projectId}.\${dataSetId}.ds_observation\` observation', 'Observation'),
+    (98, 'SOURCE_CONCEPT_NAME', 'o_source_concept.concept_name as source_concept_name', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` o_source_concept ON observation.observation_source_concept_id = o_source_concept.concept_id', 'Observation'),
+    (99, 'SOURCE_CONCEPT_CODE', 'o_source_concept.concept_code as source_concept_code', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` o_source_concept ON observation.observation_source_concept_id = o_source_concept.concept_id', 'Observation'),
+    (100, 'SOURCE_VOCABULARY', 'o_source_concept.vocabulary_id as source_vocabulary', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` o_source_concept ON observation.observation_source_concept_id = o_source_concept.concept_id', 'Observation'),
+    (101, 'UNIT_SOURCE_VALUE', 'observation.unit_source_value', 'FROM \`\${projectId}.\${dataSetId}.ds_observation\` observation', 'Observation'),
+    (102, 'QUALIFIER_SOURCE_VALUE', 'observation.qualifier_source_value', 'FROM \`\${projectId}.\${dataSetId}.ds_observation\` observation', 'Observation'),
+    (103, 'value_source_concept_id', 'observation.value_source_concept_id', 'FROM \`\${projectId}.\${dataSetId}.ds_observation\` observation', 'Observation'),
+    (104, 'value_source_value', 'observation.value_source_value', 'FROM \`\${projectId}.\${dataSetId}.ds_observation\` observation', 'Observation'),
+    (105, 'questionnaire_response_id', 'observation.questionnaire_response_id', 'FROM \`\${projectId}.\${dataSetId}.ds_observation\` observation', 'Observation')"
 
 
 echo "ds_linking - inserting person data"
 
 bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (ID, DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
 VALUES
-    ('CORE_TABLE_FOR_DOMAIN', 'CORE_TABLE_FOR_DOMAIN', 'FROM \`\${projectId}.\${dataSetId}.person\` person', 'Person'),
-    ('PERSON_ID', 'person.PERSON_ID', 'FROM \`\${projectId}.\${dataSetId}.person\` person', 'Person'),
-    ('GENDER_CONCEPT_ID', 'person.GENDER_CONCEPT_ID', 'FROM \`\${projectId}.\${dataSetId}.person\` person', 'Person'),
-    ('GENDER', 'p_gender_concept.concept_name as GENDER', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` p_gender_concept on person.gender_concept_id = p_gender_concept.CONCEPT_ID', 'Person'),
-    ('DATE_OF_BIRTH', 'person.BIRTH_DATETIME as DATE_OF_BIRTH', 'FROM \`\${projectId}.\${dataSetId}.person\` person', 'Person'),
-    ('RACE_CONCEPT_ID', 'person.RACE_CONCEPT_ID', 'FROM \`\${projectId}.\${dataSetId}.person\` person', 'Person'),
-    ('RACE', 'p_race_concept.concept_name as RACE', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` p_race_concept on person.race_concept_id = p_race_concept.CONCEPT_ID', 'Person'),
-    ('ETHNICITY_CONCEPT_ID', 'person.ETHNICITY_CONCEPT_ID', 'FROM \`\${projectId}.\${dataSetId}.person\` person', 'Person'),
-    ('ETHNICITY', 'p_ethnicity_concept.concept_name as ETHNICITY', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` p_ethnicity_concept on person.ethnicity_concept_id = p_ethnicity_concept.CONCEPT_ID', 'Person'),
-    ('SEX_AT_BIRTH_CONCEPT_ID', 'person.SEX_AT_BIRTH_CONCEPT_ID', 'FROM \`\${projectId}.\${dataSetId}.person\` person', 'Person'),
-    ('SEX_AT_BIRTH', 'p_sex_at_birth_concept.concept_name as SEX_AT_BIRTH', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` p_sex_at_birth_concept on person.sex_at_birth_concept_id = p_sex_at_birth_concept.CONCEPT_ID', 'Person')"
+    (106, 'CORE_TABLE_FOR_DOMAIN', 'CORE_TABLE_FOR_DOMAIN', 'FROM \`\${projectId}.\${dataSetId}.person\` person', 'Person'),
+    (107, 'PERSON_ID', 'person.person_id', 'FROM \`\${projectId}.\${dataSetId}.person\` person', 'Person'),
+    (108, 'GENDER_CONCEPT_ID', 'person.gender_concept_id', 'FROM \`\${projectId}.\${dataSetId}.person\` person', 'Person'),
+    (109, 'GENDER', 'p_gender_concept.concept_name as gender', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` p_gender_concept ON person.gender_concept_id = p_gender_concept.concept_id', 'Person'),
+    (110, 'DATE_OF_BIRTH', 'person.birth_datetime as date_of_birth', 'FROM \`\${projectId}.\${dataSetId}.person\` person', 'Person'),
+    (111, 'RACE_CONCEPT_ID', 'person.race_concept_id', 'FROM \`\${projectId}.\${dataSetId}.person\` person', 'Person'),
+    (112, 'RACE', 'p_race_concept.concept_name as race', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` p_race_concept ON person.race_concept_id = p_race_concept.concept_id', 'Person'),
+    (113, 'ETHNICITY_CONCEPT_ID', 'person.ethnicity_concept_id', 'FROM \`\${projectId}.\${dataSetId}.person\` person', 'Person'),
+    (114, 'ETHNICITY', 'p_ethnicity_concept.concept_name as ethnicity', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` p_ethnicity_concept ON person.ethnicity_concept_id = p_ethnicity_concept.concept_id', 'Person'),
+    (115, 'SEX_AT_BIRTH_CONCEPT_ID', 'person.sex_at_birth_concept_id', 'FROM \`\${projectId}.\${dataSetId}.person\` person', 'Person'),
+    (116, 'SEX_AT_BIRTH', 'p_sex_at_birth_concept.concept_name as sex_at_birth', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` p_sex_at_birth_concept ON person.sex_at_birth_concept_id = p_sex_at_birth_concept.concept_id', 'Person')"
 
 echo "ds_linking - inserting procedure data"
 
 bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (ID, DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
 VALUES
-    ('CORE_TABLE_FOR_DOMAIN', 'CORE_TABLE_FOR_DOMAIN', 'from \`\${projectId}.\${dataSetId}.procedure_occurrence\` procedure', 'Procedure'),
-    ('PERSON_ID', 'procedure.PERSON_ID', 'from \`\${projectId}.\${dataSetId}.procedure_occurrence\` procedure', 'Procedure'),
-    ('PROCEDURE_CONCEPT_ID', 'procedure.PROCEDURE_CONCEPT_ID', 'from \`\${projectId}.\${dataSetId}.procedure_occurrence\` procedure', 'Procedure'),
-    ('STANDARD_CONCEPT_NAME', 'p_standard_concept.concept_name as STANDARD_CONCEPT_NAME', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` p_standard_concept on procedure.PROCEDURE_CONCEPT_ID = p_standard_concept.CONCEPT_ID', 'Procedure'),
-    ('STANDARD_CONCEPT_CODE', 'p_standard_concept.concept_code as STANDARD_CONCEPT_CODE', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` p_standard_concept on procedure.PROCEDURE_CONCEPT_ID = p_standard_concept.CONCEPT_ID', 'Procedure'),
-    ('STANDARD_VOCABULARY', 'p_standard_concept.vocabulary_id as STANDARD_VOCABULARY', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` p_standard_concept on procedure.PROCEDURE_CONCEPT_ID = p_standard_concept.CONCEPT_ID', 'Procedure'),
-    ('PROCEDURE_DATETIME', 'procedure.PROCEDURE_DATETIME', 'from \`\${projectId}.\${dataSetId}.procedure_occurrence\` procedure', 'Procedure'),
-    ('PROCEDURE_TYPE_CONCEPT_ID', 'procedure.PROCEDURE_TYPE_CONCEPT_ID', 'from \`\${projectId}.\${dataSetId}.procedure_occurrence\` procedure', 'Procedure'),
-    ('PROCEDURE_TYPE_CONCEPT_NAME', 'p_type.concept_name as PROCEDURE_TYPE_CONCEPT_NAME', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` p_type on procedure.PROCEDURE_TYPE_CONCEPT_ID = p_type.CONCEPT_ID', 'Procedure'),
-    ('MODIFIER_CONCEPT_ID', 'procedure.MODIFIER_CONCEPT_ID', 'from \`\${projectId}.\${dataSetId}.procedure_occurrence\` procedure', 'Procedure'),
-    ('MODIFIER_CONCEPT_NAME', 'p_modifier.concept_name as MODIFIER_CONCEPT_NAME', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` p_modifier on procedure.MODIFIER_CONCEPT_ID = p_modifier.CONCEPT_ID', 'Procedure'),
-    ('QUANTITY', 'procedure.QUANTITY', 'from \`\${projectId}.\${dataSetId}.procedure_occurrence\` procedure', 'Procedure'),
-    ('VISIT_OCCURRENCE_ID', 'procedure.VISIT_OCCURRENCE_ID', 'from \`\${projectId}.\${dataSetId}.procedure_occurrence\` procedure', 'Procedure'),
-    ('VISIT_OCCURRENCE_CONCEPT_NAME', 'p_visit.concept_name as VISIT_OCCURRENCE_CONCEPT_NAME', 'left join \`\${projectId}.\${dataSetId}.visit_occurrence\` v on procedure.VISIT_OCCURRENCE_ID = v.VISIT_OCCURRENCE_ID left join \`\${projectId}.\${dataSetId}.concept\` p_visit on v.visit_concept_id = p_visit.concept_id', 'Procedure'),
-    ('PROCEDURE_SOURCE_VALUE', 'procedure.PROCEDURE_SOURCE_VALUE', 'from \`\${projectId}.\${dataSetId}.procedure_occurrence\` procedure', 'Procedure'),
-    ('PROCEDURE_SOURCE_CONCEPT_ID', 'procedure.PROCEDURE_SOURCE_CONCEPT_ID', 'from \`\${projectId}.\${dataSetId}.procedure_occurrence\` procedure', 'Procedure'),
-    ('SOURCE_CONCEPT_NAME', 'p_source_concept.concept_name as SOURCE_CONCEPT_NAME', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` p_source_concept on procedure.PROCEDURE_SOURCE_CONCEPT_ID = p_source_concept.CONCEPT_ID', 'Procedure'),
-    ('SOURCE_CONCEPT_CODE', 'p_source_concept.concept_code as SOURCE_CONCEPT_CODE', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` p_source_concept on procedure.PROCEDURE_SOURCE_CONCEPT_ID = p_source_concept.CONCEPT_ID', 'Procedure'),
-    ('SOURCE_VOCABULARY', 'p_source_concept.vocabulary_id as SOURCE_VOCABULARY', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` p_source_concept on procedure.PROCEDURE_SOURCE_CONCEPT_ID = p_source_concept.CONCEPT_ID', 'Procedure'),
-    ('QUALIFIER_SOURCE_VALUE', 'procedure.QUALIFIER_SOURCE_VALUE', 'from \`\${projectId}.\${dataSetId}.procedure_occurrence\` procedure', 'Procedure')"
+    (117, 'CORE_TABLE_FOR_DOMAIN', 'CORE_TABLE_FOR_DOMAIN', 'FROM \`\${projectId}.\${dataSetId}.procedure_occurrence\` procedure', 'Procedure'),
+    (118, 'PERSON_ID', 'procedure.person_id', 'FROM \`\${projectId}.\${dataSetId}.procedure_occurrence\` procedure', 'Procedure'),
+    (119, 'PROCEDURE_CONCEPT_ID', 'procedure.procedure_concept_id', 'FROM \`\${projectId}.\${dataSetId}.procedure_occurrence\` procedure', 'Procedure'),
+    (120, 'STANDARD_CONCEPT_NAME', 'p_standard_concept.concept_name as standard_concept_name', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` p_standard_concept ON procedure.procedure_concept_id = p_standard_concept.concept_id', 'Procedure'),
+    (121, 'STANDARD_CONCEPT_CODE', 'p_standard_concept.concept_code as standard_concept_code', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` p_standard_concept ON procedure.procedure_concept_id = p_standard_concept.concept_id', 'Procedure'),
+    (122, 'STANDARD_VOCABULARY', 'p_standard_concept.vocabulary_id as standard_vocabulary', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` p_standard_concept ON procedure.procedure_concept_id = p_standard_concept.concept_id', 'Procedure'),
+    (123, 'PROCEDURE_DATETIME', 'procedure.procedure_datetime', 'FROM \`\${projectId}.\${dataSetId}.procedure_occurrence\` procedure', 'Procedure'),
+    (124, 'PROCEDURE_TYPE_CONCEPT_ID', 'procedure.procedure_type_concept_id', 'FROM \`\${projectId}.\${dataSetId}.procedure_occurrence\` procedure', 'Procedure'),
+    (125, 'PROCEDURE_TYPE_CONCEPT_NAME', 'p_type.concept_name as procedure_type_concept_name', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` p_type ON procedure.procedure_type_concept_id = p_type.concept_id', 'Procedure'),
+    (126, 'MODIFIER_CONCEPT_ID', 'procedure.modifier_concept_id', 'FROM \`\${projectId}.\${dataSetId}.procedure_occurrence\` procedure', 'Procedure'),
+    (127, 'MODIFIER_CONCEPT_NAME', 'p_modifier.concept_name as modifier_concept_name', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` p_modifier ON procedure.modifier_concept_id = p_modifier.concept_id', 'Procedure'),
+    (128, 'QUANTITY', 'procedure.quantity', 'FROM \`\${projectId}.\${dataSetId}.procedure_occurrence\` procedure', 'Procedure'),
+    (129, 'VISIT_OCCURRENCE_ID', 'procedure.visit_occurrence_id', 'FROM \`\${projectId}.\${dataSetId}.procedure_occurrence\` procedure', 'Procedure'),
+    (130, 'VISIT_OCCURRENCE_CONCEPT_NAME', 'p_visit.concept_name as visit_occurrence_concept_name', 'LEFT JOIN \`\${projectId}.\${dataSetId}.visit_occurrence\` v ON procedure.visit_occurrence_id = v.visit_occurrence_id LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` p_visit ON v.visit_concept_id = p_visit.concept_id', 'Procedure'),
+    (131, 'PROCEDURE_SOURCE_VALUE', 'procedure.procedure_source_value', 'FROM \`\${projectId}.\${dataSetId}.procedure_occurrence\` procedure', 'Procedure'),
+    (132, 'PROCEDURE_SOURCE_CONCEPT_ID', 'procedure.procedure_source_concept_id', 'FROM \`\${projectId}.\${dataSetId}.procedure_occurrence\` procedure', 'Procedure'),
+    (133, 'SOURCE_CONCEPT_NAME', 'p_source_concept.concept_name as source_concept_name', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` p_source_concept ON procedure.procedure_source_concept_id = p_source_concept.concept_id', 'Procedure'),
+    (134, 'SOURCE_CONCEPT_CODE', 'p_source_concept.concept_code as source_concept_code', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` p_source_concept ON procedure.procedure_source_concept_id = p_source_concept.concept_id', 'Procedure'),
+    (135, 'SOURCE_VOCABULARY', 'p_source_concept.vocabulary_id as source_vocabulary', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` p_source_concept ON procedure.procedure_source_concept_id = p_source_concept.concept_id', 'Procedure'),
+    (136, 'QUALIFIER_SOURCE_VALUE', 'procedure.qualifier_source_value', 'FROM \`\${projectId}.\${dataSetId}.procedure_occurrence\` procedure', 'Procedure')"
 
 echo "ds_linking - inserting survey data"
 
 bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (ID, DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
 VALUES
-    ('CORE_TABLE_FOR_DOMAIN', 'CORE_TABLE_FOR_DOMAIN', ' FROM \`\${projectId}.\${dataSetId}.ds_survey\` answer', 'Survey'),
-    ('PERSON_ID', 'answer.person_id', ' ', 'Survey'),
-    ('SURVEY_DATETIME', 'answer.survey_datetime', ' ', 'Survey'),
-    ('SURVEY', 'answer.survey', ' ', 'Survey'),
-    ('QUESTION_CONCEPT_ID', 'answer.question_concept_id', ' ', 'Survey'),
-    ('QUESTION', 'answer.question', ' ', 'Survey'),
-    ('ANSWER_CONCEPT_ID', 'answer.answer_concept_id', ' ', 'Survey'),
-    ('ANSWER', 'answer.answer', ' ', 'Survey'),
-    ('SURVEY_VERSION_CONCEPT_ID', 'answer.survey_version_concept_id', ' ', 'Survey'),
-    ('SURVEY_VERSION_NAME', 'answer.survey_version_name', ' ', 'Survey')"
+    (137, 'CORE_TABLE_FOR_DOMAIN', 'CORE_TABLE_FOR_DOMAIN', ' FROM \`\${projectId}.\${dataSetId}.ds_survey\` answer', 'Survey'),
+    (138, 'PERSON_ID', 'answer.person_id', ' ', 'Survey'),
+    (139, 'SURVEY_DATETIME', 'answer.survey_datetime', ' ', 'Survey'),
+    (140, 'SURVEY', 'answer.survey', ' ', 'Survey'),
+    (141, 'QUESTION_CONCEPT_ID', 'answer.question_concept_id', ' ', 'Survey'),
+    (142, 'QUESTION', 'answer.question', ' ', 'Survey'),
+    (143, 'ANSWER_CONCEPT_ID', 'answer.answer_concept_id', ' ', 'Survey'),
+    (144, 'ANSWER', 'answer.answer', ' ', 'Survey'),
+    (145, 'SURVEY_VERSION_CONCEPT_ID', 'answer.survey_version_concept_id', ' ', 'Survey'),
+    (146, 'SURVEY_VERSION_NAME', 'answer.survey_version_name', ' ', 'Survey')"
 
 echo "ds_linking - inserting visit data"
 
 bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (ID, DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
 VALUES
-    ('CORE_TABLE_FOR_DOMAIN', 'CORE_TABLE_FOR_DOMAIN', 'from \`\${projectId}.\${dataSetId}.procedure_occurrence\` visit', 'Visit'),
-    ('PERSON_ID', 'visit.PERSON_ID', 'from \`\${projectId}.\${dataSetId}.procedure_occurrence\` visit', 'Visit'),
-    ('VISIT_CONCEPT_ID', 'visit.VISIT_CONCEPT_ID', 'from \`\${projectId}.\${dataSetId}.procedure_occurrence\` visit', 'Visit'),
-    ('STANDARD_CONCEPT_NAME', 'v_standard_concept.concept_name as STANDARD_CONCEPT_NAME', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` v_standard_concept on visit.VISIT_CONCEPT_ID = v_standard_concept.CONCEPT_ID', 'Visit'),
-    ('STANDARD_CONCEPT_CODE', 'v_standard_concept.concept_code as STANDARD_CONCEPT_CODE', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` v_standard_concept on visit.VISIT_CONCEPT_ID = v_standard_concept.CONCEPT_ID', 'Visit'),
-    ('STANDARD_VOCABULARY', 'v_standard_concept.vocabulary_id as STANDARD_VOCABULARY', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` v_standard_concept on visit.VISIT_CONCEPT_ID = v_standard_concept.CONCEPT_ID', 'Visit'),
-    ('VISIT_START_DATETIME', 'visit.VISIT_START_DATETIME', 'from \`\${projectId}.\${dataSetId}.procedure_occurrence\` visit', 'Visit'),
-    ('VISIT_END_DATETIME', 'visit.VISIT_END_DATETIME', 'from \`\${projectId}.\${dataSetId}.procedure_occurrence\` visit', 'Visit'),
-    ('VISIT_TYPE_CONCEPT_ID', 'visit.VISIT_TYPE_CONCEPT_ID', 'from \`\${projectId}.\${dataSetId}.procedure_occurrence\` visit', 'Visit'),
-    ('VISIT_TYPE_CONCEPT_NAME', 'v_type.concept_name as VISIT_TYPE_CONCEPT_NAME', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` v_type on visit.VISIT_TYPE_CONCEPT_ID = v_type.CONCEPT_ID', 'Visit'),
-    ('VISIT_SOURCE_VALUE', 'visit.VISIT_SOURCE_VALUE', 'from \`\${projectId}.\${dataSetId}.procedure_occurrence\` visit', 'Visit'),
-    ('VISIT_SOURCE_CONCEPT_ID', 'visit.VISIT_SOURCE_CONCEPT_ID', 'from \`\${projectId}.\${dataSetId}.procedure_occurrence\` visit', 'Visit'),
-    ('SOURCE_CONCEPT_NAME', 'v_source_concept.concept_name as SOURCE_CONCEPT_NAME', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` v_source_concept on visit.VISIT_SOURCE_CONCEPT_ID = v_source_concept.CONCEPT_ID', 'Visit'),
-    ('SOURCE_CONCEPT_CODE', 'v_source_concept.concept_code as SOURCE_CONCEPT_CODE', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` v_source_concept on visit.VISIT_SOURCE_CONCEPT_ID = v_source_concept.CONCEPT_ID', 'Visit'),
-    ('SOURCE_VOCABULARY', 'v_source_concept.vocabulary_id as SOURCE_VOCABULARY', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` v_source_concept on visit.VISIT_SOURCE_CONCEPT_ID = v_source_concept.CONCEPT_ID', 'Visit'),
-    ('ADMITTING_SOURCE_CONCEPT_ID', 'visit.ADMITTING_SOURCE_CONCEPT_ID', 'from \`\${projectId}.\${dataSetId}.procedure_occurrence\` visit', 'Visit'),
-    ('ADMITTING_SOURCE_CONCEPT_NAME', 'v_admitting_source_concept.concept_name as ADMITTING_SOURCE_CONCEPT_NAME', 'left join \`\${projectId}.\${dataSetId}.concept\` v_admitting_source_concept on visit.ADMITTING_SOURCE_CONCEPT_ID = v_admitting_source_concept.CONCEPT_ID', 'Visit'),
-    ('ADMITTING_SOURCE_VALUE', 'visit.ADMITTING_SOURCE_VALUE', 'from \`\${projectId}.\${dataSetId}.procedure_occurrence\` visit', 'Visit'),
-    ('DISCHARGE_TO_CONCEPT_ID', 'visit.DISCHARGE_TO_CONCEPT_ID', 'from \`\${projectId}.\${dataSetId}.procedure_occurrence\` visit', 'Visit'),
-    ('DISCHARGE_TO_CONCEPT_NAME', 'v_discharge.concept_name as DISCHARGE_TO_CONCEPT_NAME', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` v_discharge on visit.DISCHARGE_TO_CONCEPT_ID = v_discharge.CONCEPT_ID', 'Visit'),
-    ('DISCHARGE_TO_SOURCE_VALUE', 'visit.DISCHARGE_TO_SOURCE_VALUE', 'from \`\${projectId}.\${dataSetId}.procedure_occurrence\` visit', 'Visit')"
+    (148, 'CORE_TABLE_FOR_DOMAIN', 'CORE_TABLE_FOR_DOMAIN', 'FROM \`\${projectId}.\${dataSetId}.procedure_occurrence\` visit', 'Visit'),
+    (149, 'PERSON_ID', 'visit.PERSON_ID', 'FROM \`\${projectId}.\${dataSetId}.procedure_occurrence\` visit', 'Visit'),
+    (150, 'VISIT_CONCEPT_ID', 'visit.visit_concept_id', 'FROM \`\${projectId}.\${dataSetId}.procedure_occurrence\` visit', 'Visit'),
+    (151, 'STANDARD_CONCEPT_NAME', 'v_standard_concept.concept_name as standard_concept_name', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` v_standard_concept ON visit.visit_concept_id = v_standard_concept.concept_id', 'Visit'),
+    (152, 'STANDARD_CONCEPT_CODE', 'v_standard_concept.concept_code as standard_concept_code', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` v_standard_concept ON visit.visit_concept_id = v_standard_concept.concept_id', 'Visit'),
+    (153, 'STANDARD_VOCABULARY', 'v_standard_concept.vocabulary_id as standard_vocabulary', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` v_standard_concept ON visit.visit_concept_id = v_standard_concept.concept_id', 'Visit'),
+    (154, 'VISIT_START_DATETIME', 'visit.visit_start_datetime', 'FROM \`\${projectId}.\${dataSetId}.procedure_occurrence\` visit', 'Visit'),
+    (155, 'VISIT_END_DATETIME', 'visit.visit_end_datetime', 'FROM \`\${projectId}.\${dataSetId}.procedure_occurrence\` visit', 'Visit'),
+    (156, 'VISIT_TYPE_CONCEPT_ID', 'visit.visit_type_concept_id', 'FROM \`\${projectId}.\${dataSetId}.procedure_occurrence\` visit', 'Visit'),
+    (157, 'VISIT_TYPE_CONCEPT_NAME', 'v_type.concept_name as visit_type_concept_name', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` v_type ON visit.visit_type_concept_id = v_type.concept_id', 'Visit'),
+    (158, 'VISIT_SOURCE_VALUE', 'visit.visit_source_value', 'FROM \`\${projectId}.\${dataSetId}.procedure_occurrence\` visit', 'Visit'),
+    (159, 'VISIT_SOURCE_CONCEPT_ID', 'visit.visit_source_concept_id', 'FROM \`\${projectId}.\${dataSetId}.procedure_occurrence\` visit', 'Visit'),
+    (160, 'SOURCE_CONCEPT_NAME', 'v_source_concept.concept_name as source_concept_name', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` v_source_concept ON visit.visit_source_concept_id = v_source_concept.concept_id', 'Visit'),
+    (161, 'SOURCE_CONCEPT_CODE', 'v_source_concept.concept_code as source_concept_code', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` v_source_concept ON visit.visit_source_concept_id = v_source_concept.concept_id', 'Visit'),
+    (162, 'SOURCE_VOCABULARY', 'v_source_concept.vocabulary_id as source_vocabulary', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` v_source_concept ON visit.visit_source_concept_id = v_source_concept.concept_id', 'Visit'),
+    (163, 'ADMITTING_SOURCE_CONCEPT_ID', 'visit.admitting_source_concept_id', 'FROM \`\${projectId}.\${dataSetId}.procedure_occurrence\` visit', 'Visit'),
+    (164, 'ADMITTING_SOURCE_CONCEPT_NAME', 'v_admitting_source_concept.concept_name as admitting_source_concept_name', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` v_admitting_source_concept ON visit.admitting_source_concept_id = v_admitting_source_concept.concept_id', 'Visit'),
+    (165, 'ADMITTING_SOURCE_VALUE', 'visit.admitting_source_value', 'FROM \`\${projectId}.\${dataSetId}.procedure_occurrence\` visit', 'Visit'),
+    (166, 'DISCHARGE_TO_CONCEPT_ID', 'visit.discharge_to_concept_id', 'FROM \`\${projectId}.\${dataSetId}.procedure_occurrence\` visit', 'Visit'),
+    (167, 'DISCHARGE_TO_CONCEPT_NAME', 'v_discharge.concept_name as discharge_to_concept_name', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` v_discharge ON visit.discharge_to_concept_id = v_discharge.concept_id', 'Visit'),
+    (168, 'DISCHARGE_TO_SOURCE_VALUE', 'visit.discharge_to_source_value', 'FROM \`\${projectId}.\${dataSetId}.procedure_occurrence\` visit', 'Visit')"
 
 echo "ds_linking - inserting fitbit heart_rate_summary data"
 
 bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (ID, DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
 VALUES
-  ('CORE_TABLE_FOR_DOMAIN', 'CORE_TABLE_FOR_DOMAIN', 'from \`\${projectId}.\${dataSetId}.heart_rate_summary\` heart_rate_summary', 'Fitbit_heart_rate_summary'),
-  ('PERSON_ID', 'heart_rate_summary.PERSON_ID', 'from \`\${projectId}.\${dataSetId}.heart_rate_summary\` heart_rate_summary', 'Fitbit_heart_rate_summary'),
-  ('DATETIME', 'heart_rate_summary.DATETIME', 'from \`\${projectId}.\${dataSetId}.heart_rate_summary\` heart_rate_summary', 'Fitbit_heart_rate_summary'),
-  ('ZONE_NAME', 'heart_rate_summary.ZONE_NAME', 'from \`\${projectId}.\${dataSetId}.heart_rate_summary\` heart_rate_summary', 'Fitbit_heart_rate_summary'),
-  ('MIN_HEART_RATE', 'heart_rate_summary.MIN_HEART_RATE', 'from \`\${projectId}.\${dataSetId}.heart_rate_summary\` heart_rate_summary', 'Fitbit_heart_rate_summary'),
-  ('MAX_HEART_RATE', 'heart_rate_summary.MAX_HEART_RATE', 'from \`\${projectId}.\${dataSetId}.heart_rate_summary\` heart_rate_summary', 'Fitbit_heart_rate_summary'),
-  ('MINUTE_IN_ZONE', 'heart_rate_summary.MINUTE_IN_ZONE', 'from \`\${projectId}.\${dataSetId}.heart_rate_summary\` heart_rate_summary', 'Fitbit_heart_rate_summary'),
-  ('CALORIE_COUNT', 'heart_rate_summary.CALORIE_COUNT', 'from \`\${projectId}.\${dataSetId}.heart_rate_summary\` heart_rate_summary', 'Fitbit_heart_rate_summary')"
+  (169, 'CORE_TABLE_FOR_DOMAIN', 'CORE_TABLE_FOR_DOMAIN', 'FROM \`\${projectId}.\${dataSetId}.heart_rate_summary\` heart_rate_summary', 'Fitbit_heart_rate_summary'),
+  (170, 'PERSON_ID', 'heart_rate_summary.person_id', 'FROM \`\${projectId}.\${dataSetId}.heart_rate_summary\` heart_rate_summary', 'Fitbit_heart_rate_summary'),
+  (171, 'DATETIME', 'heart_rate_summary.datetime', 'FROM \`\${projectId}.\${dataSetId}.heart_rate_summary\` heart_rate_summary', 'Fitbit_heart_rate_summary'),
+  (172, 'ZONE_NAME', 'heart_rate_summary.zone_name', 'FROM \`\${projectId}.\${dataSetId}.heart_rate_summary\` heart_rate_summary', 'Fitbit_heart_rate_summary'),
+  (173, 'MIN_HEART_RATE', 'heart_rate_summary.min_heart_rate', 'FROM \`\${projectId}.\${dataSetId}.heart_rate_summary\` heart_rate_summary', 'Fitbit_heart_rate_summary'),
+  (174, 'MAX_HEART_RATE', 'heart_rate_summary.max_heart_rate', 'FROM \`\${projectId}.\${dataSetId}.heart_rate_summary\` heart_rate_summary', 'Fitbit_heart_rate_summary'),
+  (175, 'MINUTE_IN_ZONE', 'heart_rate_summary.minute_in_zone', 'FROM \`\${projectId}.\${dataSetId}.heart_rate_summary\` heart_rate_summary', 'Fitbit_heart_rate_summary'),
+  (176, 'CALORIE_COUNT', 'heart_rate_summary.calorie_count', 'FROM \`\${projectId}.\${dataSetId}.heart_rate_summary\` heart_rate_summary', 'Fitbit_heart_rate_summary')"
 
 echo "ds_linking - inserting fitbit heart_rate_level data"
 
 bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (ID, DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
 VALUES
-  ('CORE_TABLE_FOR_DOMAIN', 'CORE_TABLE_FOR_DOMAIN', 'from \`\${projectId}.\${dataSetId}.heart_rate_minute_level\` heart_rate_minute_level', 'Fitbit_heart_rate_level'),
-  ('PERSON_ID', 'heart_rate_minute_level.PERSON_ID', 'from \`\${projectId}.\${dataSetId}.heart_rate_minute_level\` heart_rate_minute_level', 'Fitbit_heart_rate_level'),
-  ('DATETIME', 'CAST(heart_rate_minute_level.datetime as DATE) as date', 'from \`\${projectId}.\${dataSetId}.heart_rate_minute_level\` heart_rate_minute_level', 'Fitbit_heart_rate_level'),
-  ('HEART_RATE_VALUE', 'AVG(heart_rate_value) avg_rate', 'from \`\${projectId}.\${dataSetId}.heart_rate_minute_level\` heart_rate_minute_level', 'Fitbit_heart_rate_level')"
+  (177, 'CORE_TABLE_FOR_DOMAIN', 'CORE_TABLE_FOR_DOMAIN', 'FROM \`\${projectId}.\${dataSetId}.heart_rate_minute_level\` heart_rate_minute_level', 'Fitbit_heart_rate_level'),
+  (178, 'PERSON_ID', 'heart_rate_minute_level.person_id', 'FROM \`\${projectId}.\${dataSetId}.heart_rate_minute_level\` heart_rate_minute_level', 'Fitbit_heart_rate_level'),
+  (179, 'DATETIME', 'CAST(heart_rate_minute_level.datetime AS DATE) as date', 'FROM \`\${projectId}.\${dataSetId}.heart_rate_minute_level\` heart_rate_minute_level', 'Fitbit_heart_rate_level'),
+  (180, 'HEART_RATE_VALUE', 'AVG(heart_rate_value) avg_rate', 'FROM \`\${projectId}.\${dataSetId}.heart_rate_minute_level\` heart_rate_minute_level', 'Fitbit_heart_rate_level')"
 
 echo "ds_linking - inserting fitbit activity_summary data"
 
 bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (ID, DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
 VALUES
-  ('CORE_TABLE_FOR_DOMAIN', 'CORE_TABLE_FOR_DOMAIN', 'from \`\${projectId}.\${dataSetId}.activity_summary\` activity_summary', 'Fitbit_activity'),
-  ('PERSON_ID', 'activity_summary.PERSON_ID', 'from \`\${projectId}.\${dataSetId}.activity_summary\` activity_summary', 'Fitbit_activity'),
-  ('DATE', 'activity_summary.date', 'from \`\${projectId}.\${dataSetId}.activity_summary\` activity_summary', 'Fitbit_activity'),
-  ('ACTIVITY_CALORIES', 'activity_summary.activity_calories', 'from \`\${projectId}.\${dataSetId}.activity_summary\` activity_summary', 'Fitbit_activity'),
-  ('CALORIES_BMR', 'activity_summary.calories_bmr', 'from \`\${projectId}.\${dataSetId}.activity_summary\` activity_summary', 'Fitbit_activity'),
-  ('CALORIES_OUT', 'activity_summary.calories_out', 'from \`\${projectId}.\${dataSetId}.activity_summary\` activity_summary', 'Fitbit_activity'),
-  ('ELEVATION', 'activity_summary.elevation', 'from \`\${projectId}.\${dataSetId}.activity_summary\` activity_summary', 'Fitbit_activity'),
-  ('FAIRLY_ACTIVE_MINUTES', 'activity_summary.fairly_active_minutes', 'from \`\${projectId}.\${dataSetId}.activity_summary\` activity_summary', 'Fitbit_activity'),
-  ('FLOOR', 'activity_summary.floor', 'from \`\${projectId}.\${dataSetId}.activity_summary\` activity_summary', 'Fitbit_activity'),
-  ('LIGHTLY_ACTIVE_MINUTES', 'activity_summary.lightly_active_minutes', 'from \`\${projectId}.\${dataSetId}.activity_summary\` activity_summary', 'Fitbit_activity'),
-  ('MARGINAL_CALORIES', 'activity_summary.marginal_calories', 'from \`\${projectId}.\${dataSetId}.activity_summary\` activity_summary', 'Fitbit_activity'),
-  ('SEDENTARY_MINUTES', 'activity_summary.sedentary_minutes', 'from \`\${projectId}.\${dataSetId}.activity_summary\` activity_summary', 'Fitbit_activity'),
-  ('VERY_ACTIVE_MINUTES', 'activity_summary.very_active_minutes', 'from \`\${projectId}.\${dataSetId}.activity_summary\` activity_summary', 'Fitbit_activity')"
+  (181, 'CORE_TABLE_FOR_DOMAIN', 'CORE_TABLE_FOR_DOMAIN', 'FROM \`\${projectId}.\${dataSetId}.activity_summary\` activity_summary', 'Fitbit_activity'),
+  (182, 'PERSON_ID', 'activity_summary.person_id', 'FROM \`\${projectId}.\${dataSetId}.activity_summary\` activity_summary', 'Fitbit_activity'),
+  (183, 'DATE', 'activity_summary.date', 'FROM \`\${projectId}.\${dataSetId}.activity_summary\` activity_summary', 'Fitbit_activity'),
+  (184, 'ACTIVITY_CALORIES', 'activity_summary.activity_calories', 'FROM \`\${projectId}.\${dataSetId}.activity_summary\` activity_summary', 'Fitbit_activity'),
+  (185, 'CALORIES_BMR', 'activity_summary.calories_bmr', 'FROM \`\${projectId}.\${dataSetId}.activity_summary\` activity_summary', 'Fitbit_activity'),
+  (186, 'CALORIES_OUT', 'activity_summary.calories_out', 'FROM \`\${projectId}.\${dataSetId}.activity_summary\` activity_summary', 'Fitbit_activity'),
+  (187, 'ELEVATION', 'activity_summary.elevation', 'FROM \`\${projectId}.\${dataSetId}.activity_summary\` activity_summary', 'Fitbit_activity'),
+  (188, 'FAIRLY_ACTIVE_MINUTES', 'activity_summary.fairly_active_minutes', 'FROM \`\${projectId}.\${dataSetId}.activity_summary\` activity_summary', 'Fitbit_activity'),
+  (189, 'FLOOR', 'activity_summary.floor', 'FROM \`\${projectId}.\${dataSetId}.activity_summary\` activity_summary', 'Fitbit_activity'),
+  (190, 'LIGHTLY_ACTIVE_MINUTES', 'activity_summary.lightly_active_minutes', 'FROM \`\${projectId}.\${dataSetId}.activity_summary\` activity_summary', 'Fitbit_activity'),
+  (191, 'MARGINAL_CALORIES', 'activity_summary.marginal_calories', 'FROM \`\${projectId}.\${dataSetId}.activity_summary\` activity_summary', 'Fitbit_activity'),
+  (192, 'SEDENTARY_MINUTES', 'activity_summary.sedentary_minutes', 'FROM \`\${projectId}.\${dataSetId}.activity_summary\` activity_summary', 'Fitbit_activity'),
+  (193, 'VERY_ACTIVE_MINUTES', 'activity_summary.very_active_minutes', 'FROM \`\${projectId}.\${dataSetId}.activity_summary\` activity_summary', 'Fitbit_activity')"
 
 
 echo "ds_linking - inserting fitbit steps_intraday data"
 
 bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (ID, DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
 VALUES
-  ('CORE_TABLE_FOR_DOMAIN', 'CORE_TABLE_FOR_DOMAIN', 'from \`\${projectId}.\${dataSetId}.steps_intraday\` steps_intraday', 'Fitbit_intraday_steps'),
-  ('PERSON_ID', 'steps_intraday.PERSON_ID', 'from \`\${projectId}.\${dataSetId}.steps_intraday\` steps_intraday', 'Fitbit_intraday_steps'),
-  ('DATETIME', 'CAST(steps_intraday.datetime as DATE) as date', 'from \`\${projectId}.\${dataSetId}.steps_intraday\` steps_intraday', 'Fitbit_intraday_steps'),
-  ('STEPS', 'SUM(CAST(steps_intraday.STEPS AS INT64)) AS sum_steps', 'from \`\${projectId}.\${dataSetId}.steps_intraday\` steps_intraday', 'Fitbit_intraday_steps')"
+  (194, 'CORE_TABLE_FOR_DOMAIN', 'CORE_TABLE_FOR_DOMAIN', 'FROM \`\${projectId}.\${dataSetId}.steps_intraday\` steps_intraday', 'Fitbit_intraday_steps'),
+  (195, 'PERSON_ID', 'steps_intraday.person_id', 'FROM \`\${projectId}.\${dataSetId}.steps_intraday\` steps_intraday', 'Fitbit_intraday_steps'),
+  (196, 'DATETIME', 'CAST(steps_intraday.datetime AS DATE) as date', 'FROM \`\${projectId}.\${dataSetId}.steps_intraday\` steps_intraday', 'Fitbit_intraday_steps'),
+  (197, 'STEPS', 'SUM(CAST(steps_intraday.steps AS INT64)) as sum_steps', 'FROM \`\${projectId}.\${dataSetId}.steps_intraday\` steps_intraday', 'Fitbit_intraday_steps')"
 
 echo "ds_linking - inserting zip code socioeconimic data"
 
 bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (ID, DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
 VALUES
-  ('CORE_TABLE_FOR_DOMAIN', 'CORE_TABLE_FOR_DOMAIN', 'from \`\${projectId}.\${dataSetId}.zip3_ses_map\` zip_code', 'Zip_code_socioeconomic'),
-  ('PERSON_ID', 'observation.PERSON_ID', 'JOIN \`\${projectId}.\${dataSetId}.observation\` observation on CAST(SUBSTR(observation.value_as_string, 0, STRPOS(observation.value_as_string, \'*\') - 1) as INT64) = zip_code.ZIP3', 'Zip_code_socioeconomic'),
-  ('OBSERVATION_DATETIME', 'observation.OBSERVATION_DATETIME', 'JOIN \`\${projectId}.\${dataSetId}.observation\` observation on CAST(SUBSTR(observation.value_as_string, 0, STRPOS(observation.value_as_string, \'*\') - 1) as INT64) = zip_code.ZIP3', 'Zip_code_socioeconomic'),
-  ('ZIP_CODE', 'zip_code.ZIP3_AS_STRING as ZIP_CODE', 'from \`\${projectId}.\${dataSetId}.zip3_ses_map\` zip_code', 'Zip_code_socioeconomic'),
-  ('ASSISTED_INCOME', 'zip_code.FRACTION_ASSISTED_INCOME as ASSISTED_INCOME', 'from \`\${projectId}.\${dataSetId}.zip3_ses_map\` zip_code', 'Zip_code_socioeconomic'),
-  ('HIGH_SCHOOL_EDUCATION', 'zip_code.FRACTION_HIGH_SCHOOL_EDU as HIGH_SCHOOL_EDUCATION', 'from \`\${projectId}.\${dataSetId}.zip3_ses_map\` zip_code', 'Zip_code_socioeconomic'),
-  ('MEDIAN_INCOME', 'zip_code.MEDIAN_INCOME', 'from \`\${projectId}.\${dataSetId}.zip3_ses_map\` zip_code', 'Zip_code_socioeconomic'),
-  ('NO_HEALTH_INSURANCE', 'zip_code.FRACTION_NO_HEALTH_INS as NO_HEALTH_INSURANCE', 'from \`\${projectId}.\${dataSetId}.zip3_ses_map\` zip_code', 'Zip_code_socioeconomic'),
-  ('POVERTY', 'zip_code.FRACTION_POVERTY as POVERTY', 'from \`\${projectId}.\${dataSetId}.zip3_ses_map\` zip_code', 'Zip_code_socioeconomic'),
-  ('VACANT_HOUSING', 'zip_code.FRACTION_VACANT_HOUSING as VACANT_HOUSING', 'from \`\${projectId}.\${dataSetId}.zip3_ses_map\` zip_code', 'Zip_code_socioeconomic'),
-  ('DEPRIVATION_INDEX', 'zip_code.DEPRIVATION_INDEX', 'from \`\${projectId}.\${dataSetId}.zip3_ses_map\` zip_code', 'Zip_code_socioeconomic'),
-  ('AMERICAN_COMMUNITY_SURVEY_YEAR', 'zip_code.ACS as AMERICAN_COMMUNITY_SURVEY_YEAR', 'from \`\${projectId}.\${dataSetId}.zip3_ses_map\` zip_code', 'Zip_code_socioeconomic')"
+  (198, 'CORE_TABLE_FOR_DOMAIN', 'CORE_TABLE_FOR_DOMAIN', 'FROM \`\${projectId}.\${dataSetId}.zip3_ses_map\` zip_code', 'Zip_code_socioeconomic'),
+  (199, 'PERSON_ID', 'observation.person_id', 'JOIN \`\${projectId}.\${dataSetId}.observation\` observation ON CAST(SUBSTR(observation.value_as_string, 0, STRPOS(observation.value_as_string, \'*\') - 1) AS INT64) = zip_code.zip3', 'Zip_code_socioeconomic'),
+  (200, 'OBSERVATION_DATETIME', 'observation.observation_datetime', 'JOIN \`\${projectId}.\${dataSetId}.observation\` observation ON CAST(SUBSTR(observation.value_as_string, 0, STRPOS(observation.value_as_string, \'*\') - 1) AS INT64) = zip_code.zip3', 'Zip_code_socioeconomic'),
+  (201, 'ZIP_CODE', 'zip_code.zip3_as_string as zip_code', 'FROM \`\${projectId}.\${dataSetId}.zip3_ses_map\` zip_code', 'Zip_code_socioeconomic'),
+  (202, 'ASSISTED_INCOME', 'zip_code.fraction_assisted_income as assisted_income', 'FROM \`\${projectId}.\${dataSetId}.zip3_ses_map\` zip_code', 'Zip_code_socioeconomic'),
+  (203, 'HIGH_SCHOOL_EDUCATION', 'zip_code.fraction_high_school_edu as high_school_education', 'FROM \`\${projectId}.\${dataSetId}.zip3_ses_map\` zip_code', 'Zip_code_socioeconomic'),
+  (204, 'MEDIAN_INCOME', 'zip_code.median_income', 'FROM \`\${projectId}.\${dataSetId}.zip3_ses_map\` zip_code', 'Zip_code_socioeconomic'),
+  (205, 'NO_HEALTH_INSURANCE', 'zip_code.fraction_no_health_ins as no_health_insurance', 'FROM \`\${projectId}.\${dataSetId}.zip3_ses_map\` zip_code', 'Zip_code_socioeconomic'),
+  (206, 'POVERTY', 'zip_code.fraction_poverty as poverty', 'FROM \`\${projectId}.\${dataSetId}.zip3_ses_map\` zip_code', 'Zip_code_socioeconomic'),
+  (207, 'VACANT_HOUSING', 'zip_code.fraction_vacant_housing as vacant_housing', 'FROM \`\${projectId}.\${dataSetId}.zip3_ses_map\` zip_code', 'Zip_code_socioeconomic'),
+  (208, 'DEPRIVATION_INDEX', 'zip_code.deprivation_index', 'FROM \`\${projectId}.\${dataSetId}.zip3_ses_map\` zip_code', 'Zip_code_socioeconomic'),
+  (209, 'AMERICAN_COMMUNITY_SURVEY_YEAR', 'zip_code.acs as american_community_survey_year', 'FROM \`\${projectId}.\${dataSetId}.zip3_ses_map\` zip_code', 'Zip_code_socioeconomic')"
 
