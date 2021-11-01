@@ -15,8 +15,10 @@ import {
   CohortAnnotationDefinitionApi,
   CohortReviewApi,
   DataSetApi,
+  ErrorCode,
   RuntimeApi,
   RuntimeStatus,
+  SecuritySuspendedErrorParameters,
   TerraJobStatus,
   WorkspaceAccessLevel,
   WorkspacesApi
@@ -40,6 +42,7 @@ import {ConfirmDeleteModal} from './confirm-delete-modal';
 import {HelpSidebar} from './help-sidebar';
 import {WorkspacesApiStub} from "testing/stubs/workspaces-api-stub";
 import {DataSetApiStub} from "testing/stubs/data-set-api-stub";
+import {ComputeSecuritySuspendedError} from 'app/utils/runtime-utils';
 
 const sidebarContent = require('assets/json/help-sidebar.json');
 
@@ -75,7 +78,7 @@ describe('HelpSidebar', () => {
 
   const component = async() => {
     const c = mount(<HelpSidebar {...props} />, {attachTo: document.getElementById('root')});
-    await waitOneTickAndUpdate(c);
+    await waitForFakeTimersAndUpdate(c);
     return c;
   };
 
@@ -124,7 +127,7 @@ describe('HelpSidebar', () => {
     cdrVersionStore.set(cdrVersionTiersResponse);
 
     // mock timers
-    jest.useFakeTimers();
+    jest.useFakeTimers('modern');
   });
 
   afterEach(() => {
@@ -251,6 +254,30 @@ describe('HelpSidebar', () => {
     act(() => clearRuntime());
     await waitForFakeTimersAndUpdate(wrapper);
     expect(runtimeStatusIcon(wrapper).prop('style').color).toEqual(colors.asyncOperationStatus.starting);
+  });
+
+  fit('should display security suspended UX on compute suspended', async() => {
+    const suspendedParams: SecuritySuspendedErrorParameters = {
+      suspendedUntil: new Date('2000-01-01 03:00:00').toISOString()
+    };
+    runtimeStub.runtime = null;
+    runtimeStub.getRuntime = () => Promise.reject(new Response(JSON.stringify({
+      errorCode: ErrorCode.COMPUTESECURITYSUSPENDED,
+      parameters: suspendedParams
+    }), {
+      status: 412
+    }));
+    runtimeStore.set({
+      workspaceNamespace: workspaceDataStub.namespace,
+      runtime: undefined,
+      runtimeLoaded: false,
+      loadingError: new ComputeSecuritySuspendedError(suspendedParams)
+    });
+    const wrapper = await component();
+    await waitForFakeTimersAndUpdate(wrapper);
+
+    expect(runtimeStatusIcon(wrapper).prop('style').color).toEqual(colors.asyncOperationStatus.stopped);
+
   });
 
   it('should display "running" icon when extract currently running', async() => {
