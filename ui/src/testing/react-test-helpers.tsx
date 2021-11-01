@@ -6,12 +6,6 @@ import {InputSwitch} from "primereact/inputswitch";
 import {MemoryRouter} from 'react-router';
 import {Dropdown} from "primereact/dropdown";
 
-// This file is necessary because angular imports complain if there
-// is no zone, regardless of whether the imports are used.
-// The error is from:
-//   import {ComponentFixture, tick} from '@angular/core/testing';
-// And fails with:
-//   ReferenceError: Zone is not defined
 export async function waitOneTickAndUpdate(wrapper: ReactWrapper) {
   const waitImmediate = () => new Promise<void>(resolve => setImmediate(resolve))
   await act(waitImmediate);
@@ -27,8 +21,9 @@ export async function waitOnTimersAndUpdate(wrapper: ReactWrapper){
 }
 
 export async function waitForFakeTimersAndUpdate(wrapper: ReactWrapper) {
-  act(() => {
+  await act(() => {
     jest.runOnlyPendingTimers();
+    return Promise.resolve();
   });
   wrapper.update();
 }

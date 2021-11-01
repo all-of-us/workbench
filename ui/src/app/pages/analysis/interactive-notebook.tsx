@@ -147,7 +147,7 @@ export const InteractiveNotebook = fp.flow(
         const {html} = await notebooksApi().readOnlyNotebook(ns, wsid, nbName);
         this.setState({html: html});
       } catch (e) {
-        this.setState({error: await maybeUnwrapSecuritySuspendedError(e)});
+        this.setState({error: e});
       }
 
       notebooksApi().getNotebookLockingMetadata(ns, wsid, nbName).then((resp) => {
@@ -163,7 +163,7 @@ export const InteractiveNotebook = fp.flow(
         await maybeInitializeRuntime(this.props.match.params.ns, this.pollAborter.signal);
         onRuntimeReady();
       } catch (e) {
-        this.setState({error: await maybeUnwrapSecuritySuspendedError(e)});
+        this.setState({error: e});
       }
     }
 

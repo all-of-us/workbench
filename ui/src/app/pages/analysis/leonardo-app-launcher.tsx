@@ -23,7 +23,6 @@ import {
 } from 'app/utils';
 import {Kernels} from 'app/utils/notebook-kernels';
 import {
-  maybeUnwrapSecuritySuspendedError,
   ComputeSecuritySuspendedError,
   maybeInitializeRuntime,
   withRuntimeStore
@@ -284,7 +283,7 @@ export const LeonardoAppLauncher = fp.flow(
       super(props);
       this.state = {
         leoUrl: undefined,
-        error: undefined,
+        error: props.runtimeStore.loadingError,
         progress: Progress.Unknown,
         progressComplete: new Map<Progress, boolean>(),
       };
@@ -370,22 +369,22 @@ export const LeonardoAppLauncher = fp.flow(
     }
 
     componentDidUpdate(prevProps: Props) {
-      const {runtimeStore: {runtime}, workspace} = this.props;
+      const {runtimeStore: {runtime, runtimeLoaded, loadingError}, workspace} = this.props;
+
+      if (loadingError && !prevProps.runtimeStore.loadingError) {
+        this.setState({error: loadingError});
+      }
 
       // Only kick off the initialization process once the runtime is loaded.
-      if (this.state.progress === Progress.Unknown && runtime !== undefined) {
+      if (this.state.progress === Progress.Unknown && runtimeLoaded) {
         this.initializeRuntimeStatusChecking(workspace.namespace)
-            .catch(async(error) => {
-              this.setState({
-                error: await maybeUnwrapSecuritySuspendedError(error)
-              })
-            });
+            .catch(async(error) => this.setState({error}));
       }
 
       // If we're already loaded (viewing the notebooks iframe), and the
       // runtime transitions out of an interactive state, navigate back to
       // the preview page as the iframe will start erroring.
-      const isLoaded = runtime !== undefined && this.state.progress === Progress.Loaded;
+      const isLoaded = runtimeLoaded && this.state.progress === Progress.Loaded;
       const {status: prevStatus = null} = prevProps.runtimeStore.runtime || {};
       const {status: curStatus = null} = runtime || {};
       if (isLoaded && interactiveRuntimeStatuses.has(prevStatus) && !interactiveRuntimeStatuses.has(curStatus)) {

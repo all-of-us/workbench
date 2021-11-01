@@ -45,11 +45,11 @@ describe('SecuritySuspendedMessage', () => {
     const wrapper = component(nowPlusFiveMinutes);
     expect(wrapper).toBeTruthy();
 
-    waitForFakeTimersAndUpdate(wrapper);
+    await waitForFakeTimersAndUpdate(wrapper);
     expect(wrapper.text()).toContain('in 5 minutes');
 
     jest.setSystemTime(nowPlusFiveMinutes);
-    waitForFakeTimersAndUpdate(wrapper);
+    await waitForFakeTimersAndUpdate(wrapper);
 
     expect(wrapper.text()).toContain('Reload the page to continue');
   });

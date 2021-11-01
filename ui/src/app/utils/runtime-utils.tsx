@@ -404,17 +404,28 @@ const useRuntime = (currentWorkspaceNamespace) => {
     }
 
     const getRuntime = withAsyncErrorHandling(
-      () => runtimeStore.set({workspaceNamespace: null, runtime: null, runtimeLoaded: false}),
+      () => runtimeStore.set({
+        workspaceNamespace: undefined,
+        runtime: undefined,
+        runtimeLoaded: false
+      }),
       async() => {
         let leoRuntime;
         try {
           leoRuntime = await runtimeApi().getRuntime(currentWorkspaceNamespace);
         } catch (e) {
-          if (!(e instanceof Response && e.status === 404)) {
-            throw e;
+          if (e instanceof Response && e.status === 404) {
+            // null on the runtime store indicates no existing runtime
+            leoRuntime = null;
+          } else {
+            runtimeStore.set({
+              workspaceNamespace: undefined,
+              runtime: undefined,
+              runtimeLoaded: false,
+              loadingError: await maybeUnwrapSecuritySuspendedError(e)
+            });
+            return;
           }
-          // null on the runtime store indicates no existing runtime
-          leoRuntime = null;
         }
         if (currentWorkspaceNamespace === runtimeStore.get().workspaceNamespace) {
           runtimeStore.set({
@@ -442,7 +453,11 @@ export const maybeInitializeRuntime = async(workspaceNamespace: string, signal: 
     });
   }
 
-  return await LeoRuntimeInitializer.initialize({workspaceNamespace, pollAbortSignal: signal});
+  try {
+    return await LeoRuntimeInitializer.initialize({workspaceNamespace, pollAbortSignal: signal});
+  } catch (error) {
+    throw await maybeUnwrapSecuritySuspendedError(error);
+  }
 };
 
 // useDisk hook is a simple hook to populate the disk store.
