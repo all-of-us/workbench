@@ -774,8 +774,8 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
     }
   }, [code]);
 
-  // Only required Modules: (rt steps + ducc) i.e the steps user need to complete to grant RT
-  // Access can only be active
+  // The requiredModules represent those which are required for RT access: RT modules + DUCC
+  // The activeModule must be one of the requiredModules
   const [activeModule, setActiveModule] = useState(null);
 
   // whenever the profile changes, setActiveModule(the first incomplete visible required module)
