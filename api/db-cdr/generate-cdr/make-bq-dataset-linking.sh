@@ -15,8 +15,8 @@ create_tables=(ds_linking)
 
 for t in "${create_tables[@]}"
 do
-    bq --project_id=$BQ_PROJECT rm -f $BQ_DATASET.$t
-    bq --quiet --project_id=$BQ_PROJECT mk --schema=$schema_path/$t.json $BQ_DATASET.$t
+    bq --project_id="$BQ_PROJECT" rm -f "$BQ_DATASET.$t"
+    bq --quiet --project_id="$BQ_PROJECT" mk --schema="$schema_path/$t.json" "$BQ_DATASET.$t"
 done
 
 ################################################
