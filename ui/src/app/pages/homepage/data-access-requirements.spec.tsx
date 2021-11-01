@@ -760,6 +760,59 @@ describe('DataAccessRequirements', () => {
         expect(findModule(findControlledTierCard(wrapper), AccessModule.ERACOMMONS).exists()).toBeFalsy();
     });
 
+
+    it("Should not display CT Compliance Training module in CT card " +
+        "when user's institution has not signed CT Institution agreement", async() => {
+        let wrapper = component();
+        await waitOneTickAndUpdate(wrapper);
+
+        profileStore.set({
+            profile: {
+                ...ProfileStubVariables.PROFILE_STUB,
+                // no CT eligibility object
+                tierEligibilities: [{
+                    accessTierShortName: AccessTierShortNames.Registered,
+                    eraRequired: false,
+                    eligible: false
+                }]
+            },
+            load,
+            reload,
+            updateCache
+        });
+        wrapper = component();
+        await waitOneTickAndUpdate(wrapper);
+        expect(findIneligibleModule(findControlledTierCard(wrapper), AccessModule.CTCOMPLIANCETRAINING).exists()).toBeTruthy();
+    });
+
+    it("Should not display CT Compliance Training module in CT card " +
+        "when user is not eligible for CT", async() => {
+        let wrapper = component();
+        await waitOneTickAndUpdate(wrapper);
+
+        profileStore.set({
+            profile: {
+                ...ProfileStubVariables.PROFILE_STUB,
+                // no CT eligibility object
+                tierEligibilities: [{
+                    accessTierShortName: AccessTierShortNames.Registered,
+                    eraRequired: false,
+                    eligible: true
+                }, {
+                    accessTierShortName: AccessTierShortNames.Controlled,
+                    eraRequired: false,
+                    eligible: false
+                }]
+            },
+            load,
+            reload,
+            updateCache
+        });
+        wrapper = component();
+        await waitOneTickAndUpdate(wrapper);
+        expect(findIneligibleModule(findControlledTierCard(wrapper), AccessModule.CTCOMPLIANCETRAINING).exists()).toBeTruthy();
+    });
+
     it("Should not display eraCommons module in CT card " +
         "when eraCommons is disabled via the environment config", async() => {
         serverConfigStore.set({config: {...defaultServerConfig, enableEraCommons: false}});
@@ -821,8 +874,61 @@ describe('DataAccessRequirements', () => {
         expect(findContactUs(wrapper).exists()).toBeFalsy();
     });
 
-    // Add test: unsafeAllowSelfBypass false no CT  Complaince training
-    // Test: no CT Complaince training module if enableComplianceTraining flag is off
-   // User not eligible for CT: (say diff email) : ineligible Compliance training and eraCommons Module
-    // User not eligible for CT: (institution not signed) : inelgiible COmpliance training and eraCommons Module
+    it("Should not display CT Compliance Training module in CT card " +
+        "when unsafeAllowSelfBypass is false", async() => {
+        serverConfigStore.set({config: {...defaultServerConfig, unsafeAllowSelfBypass: false}});
+
+        let wrapper = component();
+        await waitOneTickAndUpdate(wrapper);
+
+        profileStore.set({
+            profile: {
+                ...ProfileStubVariables.PROFILE_STUB,
+                tierEligibilities: [{
+                    accessTierShortName: AccessTierShortNames.Registered,
+                    eraRequired: false,
+                    eligible: false
+                },{
+                    accessTierShortName: AccessTierShortNames.Controlled,
+                    eraRequired: true,
+                    eligible: true
+                }]
+            },
+            load,
+            reload,
+            updateCache
+        });
+        wrapper = component();
+        await waitOneTickAndUpdate(wrapper);
+        expect(findModule(findControlledTierCard(wrapper), AccessModule.CTCOMPLIANCETRAINING).exists()).toBeFalsy();
+    });
+
+    it("Should not display ct Compliance Training module in CT card " +
+        "when enableComplianceTraining is false", async() => {
+        serverConfigStore.set({config: {...defaultServerConfig, enableComplianceTraining: false}});
+
+        let wrapper = component();
+        await waitOneTickAndUpdate(wrapper);
+
+        profileStore.set({
+            profile: {
+                ...ProfileStubVariables.PROFILE_STUB,
+                tierEligibilities: [{
+                    accessTierShortName: AccessTierShortNames.Registered,
+                    eraRequired: false,
+                    eligible: false
+                },{
+                    accessTierShortName: AccessTierShortNames.Controlled,
+                    eraRequired: true,
+                    eligible: true
+                }]
+            },
+            load,
+            reload,
+            updateCache
+        });
+        wrapper = component();
+        await waitOneTickAndUpdate(wrapper);
+        expect(findModule(findControlledTierCard(wrapper), AccessModule.CTCOMPLIANCETRAINING).exists()).toBeFalsy();
+    });
 });
