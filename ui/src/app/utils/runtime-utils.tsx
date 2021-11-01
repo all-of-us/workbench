@@ -1,7 +1,16 @@
 import {leoRuntimesApi} from 'app/services/notebooks-swagger-fetch-clients';
 import {disksApi, runtimeApi} from 'app/services/swagger-fetch-clients';
-import {DEFAULT, switchCase, withAsyncErrorHandling} from 'app/utils';
-import {ExceededActionCountError, LeoRuntimeInitializationAbortedError, LeoRuntimeInitializer, } from 'app/utils/leo-runtime-initializer';
+import {
+  DEFAULT,
+  switchCase,
+  withAsyncErrorHandling
+} from 'app/utils';
+import {
+  ExceededActionCountError,
+  ExceededErrorCountError,
+  LeoRuntimeInitializationAbortedError,
+  LeoRuntimeInitializer
+} from 'app/utils/leo-runtime-initializer';
 import {
   AutopauseMinuteThresholds,
   ComputeType,
@@ -19,11 +28,28 @@ import {
   useStore
 } from 'app/utils/stores';
 
-import {DataprocConfig, GpuConfig, Runtime, RuntimeStatus} from 'generated/fetch';
+import {
+  DataprocConfig,
+  ErrorCode,
+  GpuConfig,
+  Runtime,
+  RuntimeStatus,
+  SecuritySuspendedErrorParameters
+} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
 const {useState, useEffect} = React;
+
+export class ComputeSecuritySuspendedError extends Error {
+  constructor(public params: SecuritySuspendedErrorParameters) {
+    super('user is suspended from compute');
+    // See https://github.com/Microsoft/TypeScript/wiki/Breaking-Changes#extending-built-ins-like-error-array-and-map-may-no-longer-work
+    Object.setPrototypeOf(this, ComputeSecuritySuspendedError.prototype);
+
+    this.name = 'ComputeSecuritySuspendedError';
+  }
+}
 
 export enum RuntimeStatusRequest {
   DeleteRuntime = 'DeleteRuntime',
@@ -72,6 +98,29 @@ export interface RuntimeCtx {
   dataprocExists: boolean;
   pdExists: boolean;
   enablePD: boolean;
+}
+
+const errorToSecuritySuspendedParams = async(error): Promise<SecuritySuspendedErrorParameters> => {
+  if (error?.status !== 412) {
+    return null;
+  }
+  const body = await error?.json();
+  if (body?.errorCode !== ErrorCode.COMPUTESECURITYSUSPENDED) {
+    return null;
+  }
+
+  return body?.parameters as SecuritySuspendedErrorParameters;
+}
+
+export const maybeUnwrapSecuritySuspendedError = async(error: Error): Promise<Error> => {
+  if (error instanceof ExceededErrorCountError) {
+    error = error.lastError;
+  }
+  const suspendedParams = await errorToSecuritySuspendedParams(error);
+  if (suspendedParams) {
+    return new ComputeSecuritySuspendedError(suspendedParams);
+  }
+  return error;
 }
 
 // Visible for testing only.
@@ -355,17 +404,28 @@ const useRuntime = (currentWorkspaceNamespace) => {
     }
 
     const getRuntime = withAsyncErrorHandling(
-      () => runtimeStore.set({workspaceNamespace: null, runtime: null, runtimeLoaded: false}),
+      () => runtimeStore.set({
+        workspaceNamespace: undefined,
+        runtime: undefined,
+        runtimeLoaded: false
+      }),
       async() => {
         let leoRuntime;
         try {
           leoRuntime = await runtimeApi().getRuntime(currentWorkspaceNamespace);
         } catch (e) {
-          if (!(e instanceof Response && e.status === 404)) {
-            throw e;
+          if (e instanceof Response && e.status === 404) {
+            // null on the runtime store indicates no existing runtime
+            leoRuntime = null;
+          } else {
+            runtimeStore.set({
+              workspaceNamespace: undefined,
+              runtime: undefined,
+              runtimeLoaded: false,
+              loadingError: await maybeUnwrapSecuritySuspendedError(e)
+            });
+            return;
           }
-          // null on the runtime store indicates no existing runtime
-          leoRuntime = null;
         }
         if (currentWorkspaceNamespace === runtimeStore.get().workspaceNamespace) {
           runtimeStore.set({
@@ -393,7 +453,11 @@ export const maybeInitializeRuntime = async(workspaceNamespace: string, signal: 
     });
   }
 
-  return await LeoRuntimeInitializer.initialize({workspaceNamespace, pollAbortSignal: signal});
+  try {
+    return await LeoRuntimeInitializer.initialize({workspaceNamespace, pollAbortSignal: signal});
+  } catch (error) {
+    throw await maybeUnwrapSecuritySuspendedError(error);
+  }
 };
 
 // useDisk hook is a simple hook to populate the disk store.

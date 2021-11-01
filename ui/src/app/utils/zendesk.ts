@@ -5,6 +5,7 @@ interface ZendeskUrls {
   billing: string;
   communityForum: string;
   createBillingAccount: string;
+  egressFaq: string;
   dataDictionary: string;
   faq: string;
   gettingStarted: string;
@@ -56,6 +57,7 @@ export const supportUrls: ZendeskUrls = ((env) => {
       billing: section('360008099991'),
       createBillingAccount: article('360039539411'),
       dataDictionary: article('360033200232'),
+      egressFaq: article('4407354684052'),
       faq: category('360002157532'),
       gettingStarted: category('360002157352'),
       tableOfContents: category('360002625291'),
@@ -67,6 +69,7 @@ export const supportUrls: ZendeskUrls = ((env) => {
       billing: section('360012893532'),
       createBillingAccount: article('360060301171'),
       dataDictionary: article('360058949792'),
+      egressFaq: article('404'),
       faq: category('360005877792'),
       gettingStarted: category('360005884571'),
       tableOfContents: category('360005884591'),
@@ -78,6 +81,7 @@ export const supportUrls: ZendeskUrls = ((env) => {
       billing: section('360009142932'),
       createBillingAccount: article('360044792211'),
       dataDictionary: article('360044793611'),
+      egressFaq: article('404'),
       faq: category('360003453651'),
       gettingStarted: category('360003430652'),
       tableOfContents: category('360003430672'),
