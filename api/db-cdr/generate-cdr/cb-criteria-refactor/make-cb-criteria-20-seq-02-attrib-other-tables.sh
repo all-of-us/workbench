@@ -1,17 +1,13 @@
 #!/bin/bash
-# set -ex
 # do not output cmd-line for now
 set -e
 SQL_FOR='POPULATE OTHER CB_* TABLES'
 
 ####### common block for all make-cb-criteria-dd-*.sh scripts ###########
-export BQ_PROJECT=$1        # project
-export BQ_DATASET=$2        # dataset
-# export DATA_BROWSER=$3      # data browser flag
 # MUST BE RUN AFTER ALL PARALLEL COMPLETES AND
-# make-cb-criteria-21-seq-01-add-in-missing-codes.sh COMPLETES
+# make-cb-criteria-19-seq-01-add-in-missing-codes.sh COMPLETES
 ####### end common block ###########
-# make-cb-criteria-22-seq-02-attrib-other-tables.sh
+# make-cb-criteria-20-seq-02-attrib-other-tables.sh
 #6151 - #6471: make-bq-criteria-tables.sh
 # ORDER - 22.1: #6151 - #6340: - CB_CRITERIA_ATTRIBUTE---------
 # ORDER - 22.2: #6342 - #6423: - CB_SURVEY_ATTRIBUTE---------

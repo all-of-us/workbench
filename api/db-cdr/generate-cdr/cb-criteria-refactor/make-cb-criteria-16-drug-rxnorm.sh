@@ -1,9 +1,8 @@
 #!/bin/bash
-# set -ex
 # do not output cmd-line for now
 set -e
 SQL_FOR='DRUG_EXPOSURE - ATC/RXNORM'
-SQL_SCRIPT_ORDER=17
+SQL_SCRIPT_ORDER=16
 TBL_CBC='cb_criteria'
 TBL_PCA='prep_concept_ancestor'
 TBL_CBA='cb_criteria_ancestor'
@@ -21,31 +20,16 @@ function cpToMain(){
   bq cp --append_table=true --quiet --project_id=$BQ_PROJECT \
      $BQ_DATASET.$1 $BQ_DATASET.$tbl_to
 }
-export BQ_PROJECT=$1        # project
-export BQ_DATASET=$2        # dataset
-# export DATA_BROWSER=$3      # data browser flag
-RUN_PARALLEL=$3
-if [[ "$RUN_PARALLEL" == "par" ]]; then
-  echo "Running in parallel mode - " "$SQL_SCRIPT_ORDER - $SQL_FOR"
-  STEP=$SQL_SCRIPT_ORDER
-  CB_CRITERIA_START_ID=$[$STEP*10**9] # 3  billion
-  CB_CRITERIA_END_ID=$[$[STEP+1]*10**9] # 4  billion
-elif [[ "$RUN_PARALLEL" == "seq" ]]; then
-    echo "Running in sequential mode - "  "$SQL_SCRIPT_ORDER - $SQL_FOR"
-    CB_CRITERIA_START_ID=0
-    CB_CRITERIA_END_ID=$[50*10**9] # MAX(id) FROM cb_criteria
-elif [[ "$RUN_PARALLEL" == "mult" ]]; then
-    echo "Running in parallel and Multitable mode - " "$SQL_SCRIPT_ORDER - $SQL_FOR"
-    STEP=$SQL_SCRIPT_ORDER
-    CB_CRITERIA_START_ID=$[$STEP*10**9] # 3  billion
-    CB_CRITERIA_END_ID=$[$[STEP+1]*10**9] # 4  billion
-    echo "Creating temp table for $TBL_CBC"
-    TBL_CBC=$(createTmpTable $TBL_CBC)
-    TBL_PCA=$(createTmpTable $TBL_PCA)
-    TBL_CBA=$(createTmpTable $TBL_CBA)
-fi
+echo "Running in parallel and Multitable mode - " "$SQL_SCRIPT_ORDER - $SQL_FOR"
+STEP=$SQL_SCRIPT_ORDER
+CB_CRITERIA_START_ID=$[$STEP*10**9] # 3  billion
+CB_CRITERIA_END_ID=$[$[STEP+1]*10**9] # 4  billion
+echo "Creating temp table for $TBL_CBC"
+TBL_CBC=$(createTmpTable $TBL_CBC)
+TBL_PCA=$(createTmpTable $TBL_PCA)
+TBL_CBA=$(createTmpTable $TBL_CBA)
 ####### end common block ###########
-# make-cb-criteria-17-drug-rxnorm.sh
+# make-cb-criteria-16-drug-rxnorm.sh
 #4659 - #4979: make-bq-criteria-tables.sh
 # ---------ORDER - 17 - DRUG_EXPOSURE - ATC/RXNORM ---------
 #ORDER - 17: #4659 - #4979: - DRUG_EXPOSURE - ATC/RXNORM ---------
@@ -651,10 +635,8 @@ and descendant_concept_id in
 #wait for process to end before copying
 wait
 ## copy temp tables back to main tables, and delete temp?
-if [[ "$RUN_PARALLEL" == "mult" ]]; then
-  cpToMain "$TBL_CBC" &
-  cpToMain "$TBL_PCA" &
-  cpToMain "$TBL_CBA" &
-  wait
-fi
+cpToMain "$TBL_CBC" &
+cpToMain "$TBL_PCA" &
+cpToMain "$TBL_CBA" &
+wait
 

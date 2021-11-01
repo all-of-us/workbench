@@ -1,10 +1,5 @@
 #!/bin/bash
-#set -ex
 set -e
-
-export BQ_PROJECT=$1        # project
-export BQ_DATASET=$2        # dataset
-#export DATA_BROWSER=$3      # data browser flag
 
 # make-bq-prep-loinc-rel-tables.sh
 #3547 - #3570 : prep_loinc_rel : make-bq-criteria-tables.sh

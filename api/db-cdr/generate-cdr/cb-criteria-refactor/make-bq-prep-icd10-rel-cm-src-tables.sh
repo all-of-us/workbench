@@ -1,10 +1,5 @@
 #!/bin/bash
-#set -ex
 set -e
-
-export BQ_PROJECT=$1        # project
-export BQ_DATASET=$2        # dataset
-#export DATA_BROWSER=$3      # data browser flag
 
 # make-bq-prep-icd10-rel-cm-src-tables.sh
 #1719 - #1815 : prep_icd10_rel_cm_src : make-bq-criteria-tables.sh

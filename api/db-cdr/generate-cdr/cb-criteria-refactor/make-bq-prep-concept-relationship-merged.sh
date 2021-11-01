@@ -1,10 +1,5 @@
 #!/bin/bash
-#set -ex
 set -e
-
-export BQ_PROJECT=$1        # project
-export BQ_DATASET=$2        # dataset
-#export DATA_BROWSER=$3      # data browser flag
 
 # make-bq-prep-concept-relationship-merged.sh
 #253 - #259 : prep_concept_relationship_merged : make-bq-criteria-tables.sh

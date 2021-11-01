@@ -1,10 +1,5 @@
 #!/bin/bash
-#set -ex
 set -e
-
-export BQ_PROJECT=$1        # project
-export BQ_DATASET=$2        # dataset
-#export DATA_BROWSER=$3      # data browser flag
 
 # make-bq-prep-snomed-rel-meas-tables.sh
 #4102 - #4129 : prep_snomed_rel_meas : make-bq-criteria-tables.sh

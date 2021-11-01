@@ -1,9 +1,8 @@
 #!/bin/bash
-# set -ex
 # do not output cmd-line for now
 set -e
 SQL_FOR='OBSERVATION'
-SQL_SCRIPT_ORDER=20
+SQL_SCRIPT_ORDER=18
 TBL_CBC='cb_criteria'
 TBL_CBAT='cb_criteria_attribute';
 ####### common block for all make-cb-criteria-dd-*.sh scripts ###########
@@ -20,31 +19,16 @@ function cpToMain(){
   bq cp --append_table=true --quiet --project_id=$BQ_PROJECT \
      $BQ_DATASET.$1 $BQ_DATASET.$tbl_to
 }
-export BQ_PROJECT=$1        # project
-export BQ_DATASET=$2        # dataset
-# export DATA_BROWSER=$3      # data browser flag
-RUN_PARALLEL=$3
-if [[ "$RUN_PARALLEL" == "par" ]]; then
-  echo "Running in parallel mode - " "$SQL_SCRIPT_ORDER - $SQL_FOR"
-  STEP=$SQL_SCRIPT_ORDER
-  CB_CRITERIA_START_ID=$[$STEP*10**9] # 3  billion
-  CB_CRITERIA_END_ID=$[$[STEP+1]*10**9] # 4  billion
-elif [[ "$RUN_PARALLEL" == "seq" ]]; then
-    echo "Running in sequential mode - "  "$SQL_SCRIPT_ORDER - $SQL_FOR"
-    CB_CRITERIA_START_ID=0
-    CB_CRITERIA_END_ID=$[50*10**9] # MAX(id) FROM cb_criteria
-elif [[ "$RUN_PARALLEL" == "mult" ]]; then
-    echo "Running in parallel and Multitable mode - " "$SQL_SCRIPT_ORDER - $SQL_FOR"
-    STEP=$SQL_SCRIPT_ORDER
-    CB_CRITERIA_START_ID=$[$STEP*10**9] # 3  billion
-    CB_CRITERIA_END_ID=$[$[STEP+1]*10**9] # 4  billion
-    echo "Creating temp table for $TBL_CBC"
-    TBL_CBC=$(createTmpTable $TBL_CBC)
-    echo "Creating temp table for $TBL_CBAT"
-    TBL_CBAT=$(createTmpTable $TBL_CBAT)
-fi
+echo "Running in parallel and Multitable mode - " "$SQL_SCRIPT_ORDER - $SQL_FOR"
+STEP=$SQL_SCRIPT_ORDER
+CB_CRITERIA_START_ID=$[$STEP*10**9] # 3  billion
+CB_CRITERIA_END_ID=$[$[STEP+1]*10**9] # 4  billion
+echo "Creating temp table for $TBL_CBC"
+TBL_CBC=$(createTmpTable $TBL_CBC)
+echo "Creating temp table for $TBL_CBAT"
+TBL_CBAT=$(createTmpTable $TBL_CBAT)
 ####### end common block ###########
-# make-cb-criteria-20-observation.sh
+# make-cb-criteria-18-observation.sh
 #5895 - #5952: make-bq-criteria-tables.sh
 # ---------ORDER - 20 - OBSERVATION---------
 # Order - 20: #5895 - #5952: - OBSERVATION---------
@@ -235,9 +219,7 @@ WHERE domain_id = 'OBSERVATION'
 #wait for process to end before copying
 wait
 ## copy temp tables back to main tables, and delete temp?
-if [[ "$RUN_PARALLEL" == "mult" ]]; then
-  cpToMain "$TBL_CBC" &
-  cpToMain "$TBL_CBAT" &
-  wait
-fi
+cpToMain "$TBL_CBC" &
+cpToMain "$TBL_CBAT" &
+wait
 
