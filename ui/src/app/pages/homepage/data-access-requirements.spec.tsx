@@ -391,11 +391,11 @@ describe('DataAccessRequirements', () => {
         const allModulesSize = allModules.length;
         const incompleteModules = [AccessModule.RASLINKLOGINGOV];
         const completeModules = allModules.filter(module => module !== AccessModule.RASLINKLOGINGOV);
-        const newSize = allModulesSize - incompleteModules.length;
+        const completeModulesSize = allModulesSize - incompleteModules.length;
 
         // sanity check
         expect(incompleteModules.length).toEqual(1);
-        expect(completeModules.length).toEqual(newSize);
+        expect(completeModules.length).toEqual(completeModulesSize);
 
         profileStore.set({
             profile: {
@@ -793,7 +793,6 @@ describe('DataAccessRequirements', () => {
         profileStore.set({
             profile: {
                 ...ProfileStubVariables.PROFILE_STUB,
-                // no CT eligibility object
                 tierEligibilities: [{
                     accessTierShortName: AccessTierShortNames.Registered,
                     eraRequired: false,
@@ -801,6 +800,8 @@ describe('DataAccessRequirements', () => {
                 }, {
                     accessTierShortName: AccessTierShortNames.Controlled,
                     eraRequired: false,
+                    // User not eligible for CT i.e user email doesnt match
+                    // Institution's Controlled Tier email list
                     eligible: false
                 }]
             },

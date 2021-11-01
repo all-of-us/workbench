@@ -550,7 +550,7 @@ const ControlledTierEraModule = (props: {profile: Profile, eligible: boolean, sp
   return isEnabledInEnvironment ? <Module data-test-id={`module-${moduleName}`} /> : null;
 };
 
-const ControlledTierFakeTrainingModule =
+const SelfBypassCTComplianceTrainingModule =
   (props: {
     profile: Profile, reload: Function, eligible: boolean, spinnerProps: WithSpinnerOverlayProps
   }): JSX.Element => {
@@ -715,7 +715,7 @@ const ControlledTierCard = (props: {profile: Profile, reload: Function, spinnerP
       {displayEraCommons &&
          <ControlledTierEraModule profile={profile} eligible={isEligible} spinnerProps={spinnerProps}/>}
       {unsafeAllowSelfBypass &&
-        <ControlledTierFakeTrainingModule profile={profile} reload={reload} eligible={isEligible} spinnerProps={spinnerProps}/>}
+        <SelfBypassCTComplianceTrainingModule profile={profile} reload={reload} eligible={isEligible} spinnerProps={spinnerProps}/>}
     </FlexColumn>
   </FlexRow>
 };
@@ -774,8 +774,8 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
     }
   }, [code]);
 
-  // Active module: Required Modules: (rt steps + ducc) i.e the required steps user need to complete to grant RT Access
-  // which module are we currently guiding the user to complete?
+  // Only required Modules: (rt steps + ducc) i.e the steps user need to complete to grant RT
+  // Access can only be active
   const [activeModule, setActiveModule] = useState(null);
 
   // whenever the profile changes, setActiveModule(the first incomplete visible required module)
