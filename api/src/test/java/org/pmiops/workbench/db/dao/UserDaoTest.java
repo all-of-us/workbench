@@ -177,6 +177,8 @@ public class UserDaoTest extends SpringTest {
         accessModuleDao.findOneByName(AccessModuleName.TWO_FACTOR_AUTH).get();
     final DbAccessModule rtTrainingModule =
         accessModuleDao.findOneByName(AccessModuleName.RT_COMPLIANCE_TRAINING).get();
+    final DbAccessModule ctTrainingModule =
+        accessModuleDao.findOneByName(AccessModuleName.CT_COMPLIANCE_TRAINING).get();
     final DbAccessModule eRACommonsModule =
         accessModuleDao.findOneByName(AccessModuleName.ERA_COMMONS).get();
     final DbAccessModule duccModule =
@@ -193,10 +195,13 @@ public class UserDaoTest extends SpringTest {
     Timestamp duccBypassTime = Timestamp.from(now.minusSeconds(70));
     Timestamp duccCompleteTime = Timestamp.from(now.minusSeconds(80));
     Timestamp rasBypassTime = Timestamp.from(now.minusSeconds(90));
+    Timestamp ctTrainingBypassTime = Timestamp.from(now.minusSeconds(100));
+    Timestamp ctTrainingCompleteTime = Timestamp.from(now.minusSeconds(110));
     Timestamp rasCompleteTime = Timestamp.from(now);
     addUserAccessModule(
         user, twoFactorAuthModule, twoFactorAuthBypassTime, twoFactorAuthCompleteTime);
     addUserAccessModule(user, rtTrainingModule, rtTrainingBypassTime, rtTrainingCompleteTime);
+    addUserAccessModule(user, ctTrainingModule, ctTrainingBypassTime, ctTrainingCompleteTime);
     addUserAccessModule(user, eRACommonsModule, eRABypassTime, eRACompleteTime);
     addUserAccessModule(user, duccModule, duccBypassTime, duccCompleteTime);
     addUserAccessModule(user, rasConfirmModule, rasBypassTime, rasCompleteTime);
@@ -206,6 +211,9 @@ public class UserDaoTest extends SpringTest {
     assertThat(rows.get(0).getEraCommonsCompletionTime()).isEqualTo(eRACompleteTime);
     assertThat(rows.get(0).getComplianceTrainingBypassTime()).isEqualTo(rtTrainingBypassTime);
     assertThat(rows.get(0).getComplianceTrainingCompletionTime()).isEqualTo(rtTrainingCompleteTime);
+    assertThat(rows.get(0).getCtComplianceTrainingBypassTime()).isEqualTo(ctTrainingBypassTime);
+    assertThat(rows.get(0).getCtComplianceTrainingCompletionTime())
+        .isEqualTo(ctTrainingCompleteTime);
     assertThat(rows.get(0).getDataUseAgreementBypassTime()).isEqualTo(duccBypassTime);
     assertThat(rows.get(0).getDataUseAgreementCompletionTime()).isEqualTo(duccCompleteTime);
     assertThat(rows.get(0).getTwoFactorAuthBypassTime()).isEqualTo(twoFactorAuthBypassTime);
