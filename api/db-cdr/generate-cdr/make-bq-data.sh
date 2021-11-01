@@ -166,7 +166,7 @@ echo "Inserting ds_linking"
 bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$OUTPUT_PROJECT.$OUTPUT_DATASET.ds_linking\`
 (ID, DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
-SELECT ROW_NUMBER() OVER() ID, DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN
+SELECT ID, DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN
 FROM \`$BQ_PROJECT.$BQ_DATASET.ds_linking\`"
 
 # Populate some tables from cdr data

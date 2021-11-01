@@ -1188,7 +1188,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
                 : domainName);
 
     final List<DbDSLinking> valuesLinkingTableResult =
-        dsLinkingDao.findByDomainAndDenormalizedNameIn(
+        dsLinkingDao.findByDomainAndDenormalizedNameInOrderById(
             domainFirstCharacterCapitalized, valuesUppercaseBuilder.build());
 
     final ImmutableList<String> valueSelects =
