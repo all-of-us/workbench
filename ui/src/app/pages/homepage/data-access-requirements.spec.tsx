@@ -761,7 +761,7 @@ describe('DataAccessRequirements', () => {
     });
 
 
-    it("Should not display CT Compliance Training module in CT card " +
+    it("Should display ineligible CT Compliance Training module in CT card " +
         "when user's institution has not signed CT Institution agreement", async() => {
         let wrapper = component();
         await waitOneTickAndUpdate(wrapper);
@@ -785,7 +785,7 @@ describe('DataAccessRequirements', () => {
         expect(findIneligibleModule(findControlledTierCard(wrapper), AccessModule.CTCOMPLIANCETRAINING).exists()).toBeTruthy();
     });
 
-    it("Should not display CT Compliance Training module in CT card " +
+    it("Should display ineligible CT Compliance Training module in CT card " +
         "when user is not eligible for CT", async() => {
         let wrapper = component();
         await waitOneTickAndUpdate(wrapper);
