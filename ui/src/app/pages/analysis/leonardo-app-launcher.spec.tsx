@@ -64,6 +64,18 @@ describe('NotebookLauncher', () => {
     return '[data-test-id="progress-card-spinner-' + cardState.valueOf() + '"]';
   }
 
+  async function updateRuntime(updateFn: (r: Runtime) => Runtime) {
+    await act(() => {
+      runtimeStub.runtime = updateFn(runtimeStub.runtime);
+      runtimeStore.set({
+        workspaceNamespace: workspace.namespace,
+        runtime: runtimeStub.runtime,
+        runtimeLoaded: true
+      });
+      return Promise.resolve();
+    });
+  }
+
   beforeEach(() => {
     runtimeStub = new RuntimeApiStub();
     runtimeStub.runtime.status = RuntimeStatus.Creating;
@@ -77,7 +89,7 @@ describe('NotebookLauncher', () => {
     history.push(notebookInitialUrl + '?kernelType=R?creating=true');
     currentWorkspaceStore.next(workspace);
     profileStore.set({profile, load, reload, updateCache});
-    runtimeStore.set({workspaceNamespace: workspace.namespace, runtime: undefined, runtimeLoaded: true});
+    runtimeStore.set({workspaceNamespace: workspace.namespace, runtime: undefined, runtimeLoaded: false});
 
     jest.useFakeTimers('modern');
   });
@@ -232,14 +244,9 @@ describe('NotebookLauncher', () => {
     expect(mockNavigate).not.toHaveBeenCalled();
 
     // Simulate transition to deleting - should navigate away.
-    act(() => {
-      runtimeStub.runtime = {...runtimeStub.runtime, status: RuntimeStatus.Deleting};
-      runtimeStore.set({
-        workspaceNamespace: workspace.namespace,
-        runtime: runtimeStub.runtime,
-        runtimeLoaded: true
-      });
-    });
+    await updateRuntime(runtime => ({
+      ...runtime, status: RuntimeStatus.Deleting
+    }));
     await waitForFakeTimersAndUpdate(wrapper);
 
     expect(mockNavigate).toHaveBeenCalled();
@@ -266,14 +273,10 @@ describe('NotebookLauncher', () => {
     expect(mockNavigate).not.toHaveBeenCalled();
 
     // Simulate transition to updating.
-    act(() => {
-      runtimeStub.runtime = {...runtimeStub.runtime, status: RuntimeStatus.Updating};
-      runtimeStore.set({
-        workspaceNamespace: workspace.namespace,
-        runtime: runtimeStub.runtime,
-        runtimeLoaded: true
-      });
-    });
+    await updateRuntime(runtime => ({
+      ...runtime,
+      status: RuntimeStatus.Updating
+    }));
     await waitForFakeTimersAndUpdate(wrapper);
 
     expect(mockNavigate).not.toHaveBeenCalled();
@@ -297,6 +300,10 @@ describe('NotebookLauncher', () => {
   });
 
   it('should show error on mid-load compute suspension', async() => {
+    await updateRuntime(runtime => ({
+      ...runtime, status: RuntimeStatus.Starting
+    }));
+
     runtimeStub.getRuntime = () => Promise.reject(new Response(JSON.stringify({
       errorCode: ErrorCode.COMPUTESECURITYSUSPENDED,
       parameters: {
