@@ -70,9 +70,10 @@ VALUES
 (9,0,'Domains','MEASUREMENT','','Labs and Measurements',0,9),
 (10,0,'Domains','VISIT','VISIT','Visits',0,10),
 (11,0,'Domains','OBSERVATION','','Observations',0,11),
-(12,1,'Program Data','PERSON','AGE','Age',0,1),
-(13,1,'Program Data','PERSON','DECEASED','Deceased',0,2),
-(14,1,'Program Data','PERSON','ETHNICITY','Ethnicity',0,3),
-(15,1,'Program Data','PERSON','GENDER','Gender Identity',0,4),
-(16,1,'Program Data','PERSON','RACE','Race',0,5),
-(17,1,'Program Data','PERSON','SEX','Sex Assigned at Birth',0,6)"
+(12,0,'Domains','DEVICE','','Devices',0,12),
+(13,1,'Program Data','PERSON','AGE','Age',0,1),
+(14,1,'Program Data','PERSON','DECEASED','Deceased',0,2),
+(15,1,'Program Data','PERSON','ETHNICITY','Ethnicity',0,3),
+(16,1,'Program Data','PERSON','GENDER','Gender Identity',0,4),
+(17,1,'Program Data','PERSON','RACE','Race',0,5),
+(18,1,'Program Data','PERSON','SEX','Sex Assigned at Birth',0,6)"
