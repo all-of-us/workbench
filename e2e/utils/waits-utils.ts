@@ -372,13 +372,13 @@ export async function waitWhileLoading(
   }`;
 
   await Promise.race([
-    page.waitForXPath(process.env.AUTHENTICATED_TEST_ID_XPATH), // authenticated page
-    page.waitForXPath(process.env.UNAUTHENTICATED_TEST_ID_XPATH) // Login and Create Account pages
+    page.waitForXPath(process.env.AUTHENTICATED_TEST_ID_XPATH, { timeout }), // authenticated page
+    page.waitForXPath(process.env.UNAUTHENTICATED_TEST_ID_XPATH, { timeout }) // Login and Create Account pages
   ]);
 
   // Prevent checking in Login and Create Account pages.
   await page
-    .waitForXPath(process.env.UNAUTHENTICATED_TEST_ID_XPATH, { timeout: 10 })
+    .waitForXPath(process.env.UNAUTHENTICATED_TEST_ID_XPATH, { timeout: 100 })
     .then(() => {
       return;
     })
@@ -389,7 +389,6 @@ export async function waitWhileLoading(
   // Prevent checking in blank page: wait for loading spinner or some elements exists in DOM.
   await Promise.race([page.waitForSelector(notBlankPageSelector), page.waitForSelector(spinElementsSelector)]);
 
-  // Wait for loading spinner to stop and no longer exists.
   try {
     await Promise.all([
       page.waitForFunction(
@@ -401,7 +400,6 @@ export async function waitWhileLoading(
       ),
       page.waitForSelector(spinElementsSelector, { hidden: true, timeout })
     ]);
-    await page.waitForTimeout(500);
   } catch (err) {
     logger.error(`ERROR: Loading spinner has not stopped. spinner xpath is "${spinElementsSelector}"`);
     if (err.message.includes('Target closed')) {

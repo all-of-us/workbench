@@ -50,7 +50,7 @@ export default abstract class AuthenticatedPage extends BasePage {
    */
   async loadPageUrl(url: string): Promise<void> {
     await this.gotoUrl(url);
-    const signedIn = await this.isSignedIn(5000);
+    const signedIn = await this.isSignedIn();
     if (!signedIn) {
       await this.page.reload();
     }

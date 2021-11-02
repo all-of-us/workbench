@@ -223,8 +223,7 @@ export const initPageBeforeTest = async (page: Page): Promise<void> => {
       await Promise.all(message.args().map((jsHandle) => describeJsHandle(jsHandle)))
         .then((args) => {
           const allMessages = args.filter((arg) => !!arg).join('\n');
-          const msgType = message.type() === 'warning' ? 'warn' : message.type();
-          logger.info(`Page Console ${msgType.toUpperCase()}: "${title}"\n${allMessages}`);
+          logger.info(`Page Console ${message.type().toUpperCase()}: "${title}"\n${allMessages}`);
         })
         .catch((ex1) => {
           logger.error(`Exception thrown when reading page console: ${ex1}`);
