@@ -171,7 +171,7 @@ public class UserDaoTest extends SpringTest {
     final DbInstitution institution = createInstitution();
     user = userDao.save(user);
     createAffiliation(user, institution);
-    addUserToTier(user, registeredTier, TierAccessStatus.ENABLED);
+    addUserToTier(user, registeredTier);
 
     final DbAccessModule twoFactorAuthModule =
         accessModuleDao.findOneByName(AccessModuleName.TWO_FACTOR_AUTH).get();
@@ -325,6 +325,44 @@ public class UserDaoTest extends SpringTest {
   }
 
   @Test
+  public void test_findUsersBySearchStringAndTier_controlled_match() {
+    DbUser user = new DbUser();
+    user.setGivenName("Alice");
+    user = userDao.save(user);
+    addUserToTier(user, registeredTier);
+
+    final DbAccessTier controlledTier = TestMockFactory.createControlledTierForTests(accessTierDao);
+    addUserToTier(user, controlledTier);
+
+    final Sort ascendingByUsername = Sort.by(Sort.Direction.ASC, "username");
+    List<DbUser> result =
+        userDao.findUsersBySearchStringAndTier(
+            "A", ascendingByUsername, controlledTier.getShortName());
+    assertThat(result).containsExactly(user);
+  }
+
+  // RW-7533 regression test: confirm that a user does not appear in CT search results if they
+  // previously had Controlled Tier access but now do not
+
+  @Test
+  public void test_findUsersBySearchStringAndTier_controlled_disabled() {
+    DbUser user = new DbUser();
+    user.setGivenName("Alice");
+    user = userDao.save(user);
+    addUserToTier(user, registeredTier);
+
+    final DbAccessTier controlledTier = TestMockFactory.createControlledTierForTests(accessTierDao);
+    addUserToTier(user, controlledTier);
+    removeUserFromTier(user, controlledTier);
+
+    final Sort ascendingByUsername = Sort.by(Sort.Direction.ASC, "username");
+    List<DbUser> result =
+        userDao.findUsersBySearchStringAndTier(
+            "A", ascendingByUsername, controlledTier.getShortName());
+    assertThat(result).isEmpty();
+  }
+
+  @Test
   public void test_findUsersBySearchStringAndTier_multi() {
     DbUser alice = new DbUser();
     alice.setGivenName("Alice");
@@ -404,6 +442,18 @@ public class UserDaoTest extends SpringTest {
     return userAccessTierDao.save(entryToInsert);
   }
 
+  private DbUserAccessTier addUserToTier(DbUser user, DbAccessTier tier) {
+    return addUserToTier(user, tier, TierAccessStatus.ENABLED);
+  }
+
+  private void removeUserFromTier(DbUser user, DbAccessTier tier) {
+    // if not present, do nothing
+    userAccessTierDao
+        .getByUserAndAccessTier(user, tier)
+        .ifPresent(
+            uat -> userAccessTierDao.save(uat.setTierAccessStatus(TierAccessStatus.DISABLED)));
+  }
+
   @Transactional
   public DbUserAccessModule addUserAccessModule(
       DbUser user, DbAccessModule accessModule, Timestamp bypassTime, Timestamp completionTime) {
@@ -413,10 +463,6 @@ public class UserDaoTest extends SpringTest {
             .setAccessModule(accessModule)
             .setBypassTime(bypassTime)
             .setCompletionTime(completionTime));
-  }
-
-  private DbUserAccessTier addUserToTier(DbUser user, DbAccessTier tier) {
-    return addUserToTier(user, tier, TierAccessStatus.ENABLED);
   }
 
   @NotNull

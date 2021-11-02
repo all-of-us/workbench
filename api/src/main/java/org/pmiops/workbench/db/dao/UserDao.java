@@ -44,10 +44,11 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
       "SELECT dbUser FROM DbUser dbUser "
           + "JOIN DbUserAccessTier uat ON uat.user.userId = dbUser.userId "
           + "JOIN DbAccessTier tier ON uat.accessTier.accessTierId = tier.accessTierId "
-          + "WHERE tier.shortName = :shortName AND "
-          + "  (lower(dbUser.username) LIKE lower(concat('%', :term, '%')) "
-          + "  OR lower(dbUser.familyName) LIKE lower(concat('%', :term, '%')) "
-          + "  OR lower(dbUser.givenName) LIKE lower(concat('%', :term, '%')))")
+          + "WHERE tier.shortName = :shortName "
+          + "  AND uat.tierAccessStatus = 1 " // TierAccessStatus.ENABLED
+          + "  AND (lower(dbUser.username) LIKE lower(concat('%', :term, '%')) "
+          + "    OR lower(dbUser.familyName) LIKE lower(concat('%', :term, '%')) "
+          + "    OR lower(dbUser.givenName) LIKE lower(concat('%', :term, '%')))")
   List<DbUser> findUsersBySearchStringAndTier(
       @Param("term") String term, Sort sort, @Param("shortName") String accessTierShortName);
 
