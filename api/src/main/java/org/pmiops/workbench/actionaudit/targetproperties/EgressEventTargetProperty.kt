@@ -11,8 +11,8 @@ import org.pmiops.workbench.model.SumologicEgressEvent
  */
 enum class EgressEventTargetProperty
 constructor(
-        override val propertyName: String,
-        override val extractor: (SumologicEgressEvent) -> String?
+    override val propertyName: String,
+    override val extractor: (SumologicEgressEvent) -> String?
 ) : ModelBackedTargetProperty<SumologicEgressEvent> {
     EGRESS_MIB("egress_mib",
             { it.egressMib?.toString() }),
@@ -32,8 +32,8 @@ constructor(
  */
 enum class DbEgressEventTargetProperty
 constructor(
-        override val propertyName: String,
-        override val extractor: (DbEgressEvent) -> String?
+    override val propertyName: String,
+    override val extractor: (DbEgressEvent) -> String?
 ) : ModelBackedTargetProperty<DbEgressEvent> {
     EGRESS_EVENT_ID("egress_event_id",
             { it.egressEventId.toString() }),
@@ -47,8 +47,8 @@ constructor(
  */
 enum class EgressEscalationTargetProperty
 constructor(
-        override val propertyName: String,
-        override val extractor: (WorkbenchConfig.EgressAlertRemediationPolicy.Escalation) -> String?
+    override val propertyName: String,
+    override val extractor: (WorkbenchConfig.EgressAlertRemediationPolicy.Escalation) -> String?
 ) : ModelBackedTargetProperty<WorkbenchConfig.EgressAlertRemediationPolicy.Escalation> {
     REMEDIATION("remediation",
             {
