@@ -43,8 +43,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.support.SimpleThreadScope;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.web.context.WebApplicationContext;
 
+@SpringJUnitConfig
 public class FireCloudServiceImplTest {
 
   private static final String EMAIL_ADDRESS = "abc@fake-research-aou.org";

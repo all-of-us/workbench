@@ -43,6 +43,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.web.method.HandlerMethod;
 
 /** mimicing a Swagger-generated wrapper */
@@ -56,6 +57,7 @@ class FakeController {
   public void handle() {}
 }
 
+@SpringJUnitConfig
 public class AuthInterceptorTest {
 
   private static final long USER_ID = 123L;

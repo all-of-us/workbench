@@ -20,7 +20,9 @@ import org.pmiops.workbench.model.AuditTargetPropertyChange;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
+@SpringJUnitConfig
 public class AuditLogEntryMapperTest {
 
   private static final OffsetDateTime EVENT_TIME_1 = OffsetDateTime.parse("2010-06-30T01:20+02:00");

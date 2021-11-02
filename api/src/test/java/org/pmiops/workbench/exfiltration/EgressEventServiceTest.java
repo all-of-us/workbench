@@ -62,9 +62,11 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 @DataJpaTest
 @Import({FakeClockConfiguration.class, JpaFakeDateTimeConfiguration.class})
+@SpringJUnitConfig
 public class EgressEventServiceTest {
 
   private static final Instant NOW = Instant.parse("2020-06-11T01:30:00.02Z");

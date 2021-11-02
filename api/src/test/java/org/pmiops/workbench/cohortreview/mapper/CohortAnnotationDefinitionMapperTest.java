@@ -17,7 +17,9 @@ import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
+@SpringJUnitConfig
 public class CohortAnnotationDefinitionMapperTest {
 
   @Autowired private CohortAnnotationDefinitionMapper cohortAnnotationDefinitionMapper;
