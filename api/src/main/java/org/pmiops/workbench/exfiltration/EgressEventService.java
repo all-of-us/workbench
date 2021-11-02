@@ -1,7 +1,7 @@
 package org.pmiops.workbench.exfiltration;
 
-import org.pmiops.workbench.model.EgressEvent;
+import org.pmiops.workbench.model.SumologicEgressEvent;
 
 public interface EgressEventService {
-  void handleEvent(EgressEvent egressEvent);
+  void handleEvent(SumologicEgressEvent egressEvent);
 }

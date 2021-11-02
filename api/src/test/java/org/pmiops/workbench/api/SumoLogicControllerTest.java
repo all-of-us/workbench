@@ -22,7 +22,8 @@ import org.pmiops.workbench.exceptions.UnauthorizedException;
 import org.pmiops.workbench.exfiltration.EgressEventService;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.model.EgressEvent;
-import org.pmiops.workbench.model.EgressEventRequest;
+import org.pmiops.workbench.model.SumologicEgressEvent;
+import org.pmiops.workbench.model.SumologicEgressEventRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -42,8 +43,8 @@ public class SumoLogicControllerTest extends SpringTest {
 
   @Autowired private SumoLogicController sumoLogicController;
 
-  private EgressEventRequest request;
-  private EgressEvent event;
+  private SumologicEgressEventRequest request;
+  private SumologicEgressEvent event;
 
   private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -61,16 +62,18 @@ public class SumoLogicControllerTest extends SpringTest {
   public void setUp() throws JsonProcessingException {
     config = WorkbenchConfig.createEmptyConfig();
 
-    event = new EgressEvent();
-    event.setProjectName("aou-rw-test-c7dec260");
-    event.setEgressMibThreshold(100.0);
-    event.setEgressMib(123.0);
-    event.setEnvironment(EgressEvent.EnvironmentEnum.TEST);
-    event.setTimeWindowDuration(Duration.ofSeconds(300).getSeconds());
-    event.setTimeWindowStart(Instant.now().toEpochMilli());
+    event =
+        new SumologicEgressEvent()
+            .projectName("aou-rw-test-c7dec260")
+            .egressMibThreshold(100.0)
+            .egressMib(123.0)
+            .environment(SumologicEgressEvent.EnvironmentEnum.TEST)
+            .timeWindowDuration(Duration.ofSeconds(300).getSeconds())
+            .timeWindowStart(Instant.now().toEpochMilli());
 
-    request = new EgressEventRequest();
-    request.setEventsJsonArray(objectMapper.writeValueAsString(Collections.singletonList(event)));
+    request =
+        new SumologicEgressEventRequest()
+            .eventsJsonArray(objectMapper.writeValueAsString(Collections.singletonList(event)));
 
     when(mockCloudStorageClient.getCredentialsBucketString(
             SumoLogicController.SUMOLOGIC_KEY_FILENAME))

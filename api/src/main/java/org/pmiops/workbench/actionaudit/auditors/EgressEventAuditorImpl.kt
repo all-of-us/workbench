@@ -19,8 +19,8 @@ import org.pmiops.workbench.db.dao.UserDao
 import org.pmiops.workbench.db.dao.WorkspaceDao
 import org.pmiops.workbench.db.model.DbEgressEvent
 import org.pmiops.workbench.exceptions.BadRequestException
-import org.pmiops.workbench.model.EgressEvent
-import org.pmiops.workbench.model.EgressEventRequest
+import org.pmiops.workbench.model.SumologicEgressEvent
+import org.pmiops.workbench.model.SumologicEgressEventRequest
 import org.pmiops.workbench.workspaces.WorkspaceService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
@@ -37,7 +37,7 @@ constructor(
     @Qualifier("ACTION_ID") private val actionIdProvider: Provider<String>
 ) : EgressEventAuditor {
 
-    override fun fireEgressEvent(event: EgressEvent) {
+    override fun fireEgressEvent(event: SumologicEgressEvent) {
         // Load the workspace via the GCP project name
         val dbWorkspaceMaybe = workspaceDao.getByGoogleProject(event.projectName)
         if (!dbWorkspaceMaybe.isPresent()) {
@@ -106,19 +106,19 @@ constructor(
         ), egressEvent = dbEvent, escalation = escalation)
     }
 
-    override fun fireFailedToParseEgressEventRequest(request: EgressEventRequest) {
+    override fun fireFailedToParseEgressEventRequest(request: SumologicEgressEventRequest) {
         fireEventSet(baseEvent = getGenericBaseEvent(), comment = String.format(
                 "Failed to parse egress event JSON from SumoLogic. Field contents: %s",
                 request.eventsJsonArray))
     }
 
-    override fun fireBadApiKey(apiKey: String, request: EgressEventRequest) {
+    override fun fireBadApiKey(apiKey: String, request: SumologicEgressEventRequest) {
         fireEventSet(baseEvent = getGenericBaseEvent(), comment = String.format(
                 "Received bad API key from SumoLogic. Bad key: %s, full request: %s",
                 apiKey, request.toString()))
     }
 
-    private fun fireFailedToFindWorkspace(event: EgressEvent) {
+    private fun fireFailedToFindWorkspace(event: SumologicEgressEvent) {
         fireEventSet(baseEvent = getGenericBaseEvent(), egressEvent = event, comment = String.format(
                 "Failed to find workspace for high-egress event: %s",
                 event.toString()))
@@ -129,7 +129,7 @@ constructor(
      * to record properties of the egress event and a human-readable comment. Either the egress event
      * or the comment may be null, in which case those row(s) won't be generated.
      */
-    private fun fireEventSet(baseEvent: ActionAuditEvent, egressEvent: EgressEvent? = null, comment: String? = null) {
+    private fun fireEventSet(baseEvent: ActionAuditEvent, egressEvent: SumologicEgressEvent? = null, comment: String? = null) {
         var events = ArrayList<ActionAuditEvent>()
         if (egressEvent != null) {
             val propertyValues = TargetPropertyExtractor.getPropertyValuesByName(
