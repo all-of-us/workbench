@@ -34,6 +34,7 @@ interface State {
 const getBypassedModules = (user: AdminTableUser): Array<AccessModule> => {
   return [
     ...(user.complianceTrainingBypassTime ? [AccessModule.COMPLIANCETRAINING] : []),
+    ...(user.ctComplianceTrainingBypassTime ? [AccessModule.CTCOMPLIANCETRAINING] : []),
     ...(user.dataUseAgreementBypassTime ? [AccessModule.DATAUSERCODEOFCONDUCT] : []),
     ...(user.eraCommonsBypassTime ? [AccessModule.ERACOMMONS] : []),
     ...(user.twoFactorAuthBypassTime ? [AccessModule.TWOFACTORAUTH] : []),
@@ -126,6 +127,12 @@ export class AdminUserBypass extends React.Component<Props, State> {
                   data-test-id='compliance-training-toggle'
                   onToggle={() => {this.setState({selectedModules:
                       fp.xor(selectedModules, [AccessModule.COMPLIANCETRAINING])}); }}
+          />}
+          {enableComplianceTraining && <Toggle name='CT Compliance Training'
+                  checked={selectedModules.includes(AccessModule.CTCOMPLIANCETRAINING)}
+                  data-test-id='ct-compliance-training-toggle'
+                  onToggle={() => {this.setState({selectedModules:
+                      fp.xor(selectedModules, [AccessModule.CTCOMPLIANCETRAINING])}); }}
           />}
           {enableEraCommons && <Toggle name='eRA Commons Linking'
                   checked={selectedModules.includes(AccessModule.ERACOMMONS)}

@@ -163,7 +163,7 @@ export const AdminUsers = withUserProfile()(class extends React.Component<Props,
         user={{...user}}
         onBypassModuleUpdate={() => this.loadProfiles()}/>,
       complianceTraining: this.accessModuleCellContents(user, 'complianceTraining'),
-      ctComplianceTraining: '?',
+      ctComplianceTraining: this.accessModuleCellContents(user, 'ctComplianceTraining'),
       contactEmail: user.contactEmail,
       dataUseAgreement: this.accessModuleCellContents(user, 'dataUseAgreement'),
       eraCommons: this.accessModuleCellContents(user, 'eraCommons'),

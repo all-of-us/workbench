@@ -5543,6 +5543,12 @@ definitions:
       complianceTrainingCompletionTime:
         type: integer
         format: int64
+      ctComplianceTrainingBypassTime:
+        type: integer
+        format: int64
+      ctComplianceTrainingCompletionTime:
+        type: integer
+        format: int64
       dataUseAgreementBypassTime:
         type: integer
         format: int64
