@@ -606,7 +606,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     if (OUTER_QUERY_DOMAIN.contains(domain)) {
       queryBuilder
           .append(String.join(", ", valuesLinkingPair.getSelects()))
-          .append(" from ( SELECT * ")
+          .append(" FROM ( SELECT * ")
           .append(valuesLinkingPair.getDomainTable());
     } else {
       queryBuilder

@@ -87,6 +87,9 @@ export function domainToTitle(domain: any): string {
     case Domain.OBSERVATION:
       domain = 'Observations';
       break;
+    case Domain.DEVICE:
+      domain = 'Devices';
+      break;
     case Domain.LAB:
       domain = 'Labs';
       break;
