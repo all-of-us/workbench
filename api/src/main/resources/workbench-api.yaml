@@ -1569,6 +1569,25 @@ paths:
             type: array
             items:
               "$ref": "#/definitions/FileDetail"
+
+  "/v1/admin/egressEvents":
+    post:
+      tags:
+        - egressEventsAdmin
+      description: >
+        Administrative API to receive a paginated list of egress events. Optionally
+        filtered by different criteria.
+      operationId: listEgressEvents
+      parameters:
+        - in: body
+          name: request
+          schema:
+            "$ref": "#/definitions/ListEgressEventsRequest"
+      responses:
+        200:
+          description: success
+          schema:
+            "$ref": "#/definitions/ListEgressEventsResponse"
   "/v1/admin/sumo/egressEvent":
     post:
       tags:
@@ -6335,14 +6354,14 @@ definitions:
       link:
         description: 'A URL linking to an incident report where users can read more'
         type: string
-  EgressEventRequest:
+  SumologicEgressEventRequest:
     type: object
     properties:
       eventsJsonArray:
         type: string
         description: 'A JSON string containing an array of JSON-encoded egress events.
-          See the EgressEvent definition for the expected schema of each event.'
-  EgressEvent:
+          See the SumologicEgressEvent definition for the expected schema of each event.'
+  SumologicEgressEvent:
     type: object
     required:
       - project_name
@@ -6403,6 +6422,75 @@ definitions:
         description: Prefix of the research VM(s) that generated egress, including
           the user ID, e.g. all-of-us-260.
         type: string
+  ListEgressEventsRequest:
+    type: object
+    properties:
+      sourceUserEmail:
+        type: string
+        description: >
+          If specified, only return events which were caused by this user. Should
+          include the email domain of the user.
+      sourceWorkspaceNamespace:
+        type: string
+        description: >
+          If specified, only return event which were detected within the given
+          workspace.
+      pageSize:
+        type: number
+        description: >
+          The number of egress events to return, per page. If unspecified, a
+          system default is used.
+      pageToken:
+        type: string
+        description: >
+          Pagination token used to receive the next page of results. Provide this
+          value from the nextPageToken of a prior response.
+  ListEgressEventsResponse:
+    type: object
+    properties:
+      events:
+        type: array
+        items:
+          "$ref": "#/definitions/EgressEvent"
+      nextPageToken:
+        type: string
+        description: >
+          If present, this token can be provided to retrieve the next page of results.
+          If null or empty, there are no further pages in the result stream.
+  EgressEventStatus:
+    type: string
+    description: Workbench processing status for this egress event.
+    enum:
+    - PENDING
+    - REMEDIATED
+    - VERIFIED_FALSE_POSITIVE
+  EgressEvent:
+    type: object
+    properties:
+      egressEventId:
+        type: string
+        description: Unique identifier for this egress event.
+      sourceUserEmail:
+        type: string
+        description: Researcher email for the user associated with this event, if known.
+      sourceWorkspaceNamespace:
+        type: string
+        description: Workspace in which the event fired, if known.
+      sourceGoogleProject:
+        type: string
+        description: Google project in which the event fired, if known.
+      egressMegabytes:
+        type: number
+        format: double
+        description: Volume of egress which triggered the alert, in Megabytes.
+      egressWindowSeconds:
+        type: number
+        description: Window duration over which the egress was detected, in seconds.
+      creationTime:
+        type: string
+        description: Time at which the egress event was recorded, in ISO 8601 format.
+      status:
+        $ref: "#/definitions/EgressEventStatus"
   ArrayOfLong:
     type: array
     items:
