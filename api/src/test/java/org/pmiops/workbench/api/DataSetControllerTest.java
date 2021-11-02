@@ -47,7 +47,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.invocation.InvocationOnMock;
-import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.access.AccessTierServiceImpl;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
@@ -157,7 +156,7 @@ import org.springframework.transaction.annotation.Transactional;
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
-public class DataSetControllerTest extends SpringTest {
+public class DataSetControllerTest {
 
   private static final String CONCEPT_SET_ONE_NAME = "concept set";
   private static final String CONCEPT_SET_TWO_NAME = "concept set two";
@@ -212,6 +211,7 @@ public class DataSetControllerTest extends SpringTest {
 
   @TestConfiguration
   @Import({
+    FakeClockConfiguration.class,
     CohortFactoryImpl.class,
     CohortMapperImpl.class,
     CohortReviewMapperImpl.class,

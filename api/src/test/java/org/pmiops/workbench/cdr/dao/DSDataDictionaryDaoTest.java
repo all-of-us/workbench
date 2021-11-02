@@ -4,7 +4,6 @@ import static com.google.common.truth.Truth.assertThat;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.cdr.model.DbDSDataDictionary;
 import org.pmiops.workbench.model.Domain;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +12,7 @@ import org.springframework.test.annotation.DirtiesContext;
 
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-public class DSDataDictionaryDaoTest extends SpringTest {
+public class DSDataDictionaryDaoTest {
 
   @Autowired private DSDataDictionaryDao dsDataDictionaryDao;
 

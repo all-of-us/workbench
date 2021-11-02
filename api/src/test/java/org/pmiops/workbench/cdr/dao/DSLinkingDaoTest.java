@@ -6,7 +6,6 @@ import com.google.common.collect.ImmutableList;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.cdr.model.DbDSLinking;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -14,7 +13,7 @@ import org.springframework.test.annotation.DirtiesContext;
 
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-public class DSLinkingDaoTest extends SpringTest {
+public class DSLinkingDaoTest {
 
   @Autowired private DSLinkingDao dsLinkingDao;
   private DbDSLinking dbDSLinking1;

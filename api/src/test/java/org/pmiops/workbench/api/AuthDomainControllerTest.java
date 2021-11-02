@@ -14,7 +14,6 @@ import javax.inject.Provider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
-import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.auditors.AuthDomainAuditor;
@@ -48,7 +47,7 @@ import org.springframework.test.annotation.DirtiesContext;
 
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-public class AuthDomainControllerTest extends SpringTest {
+public class AuthDomainControllerTest {
 
   private static final String GIVEN_NAME = "Bob";
   private static final String FAMILY_NAME = "Bobberson";

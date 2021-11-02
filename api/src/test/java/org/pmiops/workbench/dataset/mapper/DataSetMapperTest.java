@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.api.Etags;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
@@ -51,7 +50,7 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 
-public class DataSetMapperTest extends SpringTest {
+public class DataSetMapperTest {
 
   private DbDataset dbDataset;
   private DbDSDataDictionary dbDataDictionaryEntry;
@@ -63,6 +62,7 @@ public class DataSetMapperTest extends SpringTest {
 
   @TestConfiguration
   @Import({
+    FakeClockConfiguration.class,
     DataSetMapperImpl.class,
     CommonMappers.class,
     ConceptSetService.class,

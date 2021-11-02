@@ -29,7 +29,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mockito;
-import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.monitoring.LogsBasedMetricServiceImpl.PayloadKey;
@@ -43,7 +42,7 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 
-public class LogsBasedMetricsServiceTest extends SpringTest {
+public class LogsBasedMetricsServiceTest {
 
   private static final Duration OPERATION_DURATION = Duration.ofMillis(15);
   private static MonitoredResource MONITORED_RESOURCE =
@@ -59,7 +58,7 @@ public class LogsBasedMetricsServiceTest extends SpringTest {
   @Autowired LogsBasedMetricService logsBasedMetricService;
 
   @TestConfiguration
-  @Import({LogsBasedMetricServiceImpl.class})
+  @Import({FakeClockConfiguration.class, LogsBasedMetricServiceImpl.class})
   static class Configuration {}
 
   @BeforeEach

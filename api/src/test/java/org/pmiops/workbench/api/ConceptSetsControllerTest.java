@@ -17,7 +17,6 @@ import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
-import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.access.AccessTierServiceImpl;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
@@ -98,7 +97,7 @@ import org.springframework.transaction.annotation.Transactional;
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
-public class ConceptSetsControllerTest extends SpringTest {
+public class ConceptSetsControllerTest {
 
   private static final Criteria CLIENT_CRITERIA_1 =
       new Criteria()
@@ -189,6 +188,7 @@ public class ConceptSetsControllerTest extends SpringTest {
 
   @TestConfiguration
   @Import({
+    FakeClockConfiguration.class,
     CommonMappers.class,
     CohortBuilderMapperImpl.class,
     CohortBuilderServiceImpl.class,

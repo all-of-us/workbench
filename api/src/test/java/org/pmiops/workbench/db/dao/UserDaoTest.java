@@ -12,7 +12,6 @@ import javax.jdo.annotations.Transactional;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.db.dao.UserDao.DbAdminTableUser;
 import org.pmiops.workbench.db.dao.UserDao.UserCountByDisabledAndAccessTiers;
 import org.pmiops.workbench.db.model.DbAccessModule;
@@ -35,7 +34,7 @@ import org.springframework.test.annotation.DirtiesContext;
 
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-public class UserDaoTest extends SpringTest {
+public class UserDaoTest {
   private static final String STREET_ADDRESS_1 = "101 Main St";
   private static final String STREET_ADDRESS_2 = "# 202";
   private static final String CITY = "New Braunfels";

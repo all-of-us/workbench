@@ -16,7 +16,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.EgressAlertRemediationPolicy;
 import org.pmiops.workbench.db.model.DbUser;
@@ -34,7 +33,7 @@ import org.pmiops.workbench.mandrill.model.RecipientType;
 import org.pmiops.workbench.model.SendBillingSetupEmailRequest;
 import org.pmiops.workbench.test.Providers;
 
-public class MailServiceImplTest extends SpringTest {
+public class MailServiceImplTest {
 
   private MailServiceImpl service;
   private static final String CONTACT_EMAIL = "bob@example.com";

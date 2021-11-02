@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cohortreview.util.PageRequest;
 import org.pmiops.workbench.config.CommonConfig;
@@ -32,7 +31,7 @@ import org.springframework.test.annotation.DirtiesContext.ClassMode;
 
 @Import({TestJpaConfig.class, CommonConfig.class})
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
-public class ParticipantCohortStatusDaoTest extends SpringTest {
+public class ParticipantCohortStatusDaoTest {
   private static final Long COHORT_REVIEW_ID = 1L;
   private static final Date birthDate = new Date(System.currentTimeMillis());
   private static final int PAGE = 0;

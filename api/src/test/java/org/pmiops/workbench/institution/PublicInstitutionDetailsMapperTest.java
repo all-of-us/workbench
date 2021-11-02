@@ -3,7 +3,6 @@ package org.pmiops.workbench.institution;
 import static com.google.common.truth.Truth.assertThat;
 
 import org.junit.jupiter.api.Test;
-import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbInstitutionTierRequirement.MembershipRequirement;
 import org.pmiops.workbench.model.InstitutionMembershipRequirement;
@@ -15,7 +14,7 @@ import org.springframework.context.annotation.Import;
 
 @Import(PublicInstitutionDetailsMapperImpl.class)
 @DataJpaTest
-public class PublicInstitutionDetailsMapperTest extends SpringTest {
+public class PublicInstitutionDetailsMapperTest {
   @Autowired PublicInstitutionDetailsMapper mapper;
 
   @Test

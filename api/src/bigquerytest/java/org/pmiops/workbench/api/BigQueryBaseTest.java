@@ -24,7 +24,6 @@ import java.util.Map;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.TestInstance;
-import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.testconfig.TestBigQueryConfig;
 import org.pmiops.workbench.testconfig.TestWorkbenchConfig;
 import org.pmiops.workbench.testconfig.WorkbenchConfigConfig;
@@ -35,7 +34,7 @@ import org.springframework.test.context.TestPropertySource;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(classes = {TestBigQueryConfig.class, WorkbenchConfigConfig.class})
 @TestPropertySource(properties = "spring.main.allow-bean-definition-overriding=true")
-public abstract class BigQueryBaseTest extends SpringTest {
+public abstract class BigQueryBaseTest {
 
   public static final String CB_DATA = "cbdata";
   public static final String MATERIALIZED_DATA = "materializeddata";

@@ -3,7 +3,6 @@ package org.pmiops.workbench.cohortbuilder.mapper;
 import static com.google.common.truth.Truth.assertThat;
 
 import org.junit.jupiter.api.Test;
-import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.cdr.model.DbAgeTypeCount;
 import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.cdr.model.DbCriteriaAttribute;
@@ -21,12 +20,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Import;
 
-public class CohortBuilderMapperTest extends SpringTest {
+public class CohortBuilderMapperTest {
 
   @Autowired private CohortBuilderMapper cohortBuilderMapper;
 
   @TestConfiguration
-  @Import({CohortBuilderMapperImpl.class})
+  @Import({FakeClockConfiguration.class, CohortBuilderMapperImpl.class})
   static class Configuration {}
 
   @Test

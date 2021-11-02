@@ -22,7 +22,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
-import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.api.ProfileApi;
 import org.pmiops.workbench.auth.UserInfoService;
@@ -56,7 +55,7 @@ class FakeController {
   public void handle() {}
 }
 
-public class AuthInterceptorTest extends SpringTest {
+public class AuthInterceptorTest {
 
   private static final long USER_ID = 123L;
 
@@ -78,7 +77,7 @@ public class AuthInterceptorTest extends SpringTest {
   @Autowired private AuthInterceptor interceptor;
 
   @TestConfiguration
-  @Import({AuthInterceptor.class})
+  @Import({FakeClockConfiguration.class, AuthInterceptor.class})
   static class Configuration {
     @Bean
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)

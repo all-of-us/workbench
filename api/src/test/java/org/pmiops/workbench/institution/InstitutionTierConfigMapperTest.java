@@ -11,7 +11,6 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import org.junit.jupiter.api.Test;
-import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbInstitutionEmailAddress;
@@ -29,7 +28,7 @@ import org.springframework.test.annotation.DirtiesContext;
 @Import(InstitutionTierConfigMapperImpl.class)
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-public class InstitutionTierConfigMapperTest extends SpringTest {
+public class InstitutionTierConfigMapperTest {
   private static final String RT_ACCESS_TIER_SHORT_NAME = "registered";
   private static final String CT_ACCESS_TIER_SHORT_NAME = "controlled";
   private static final DbAccessTier RT_ACCESS_TIER =

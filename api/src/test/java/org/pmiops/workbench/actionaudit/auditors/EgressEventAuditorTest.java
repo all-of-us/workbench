@@ -17,7 +17,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.actionaudit.ActionAuditEvent;
 import org.pmiops.workbench.actionaudit.ActionAuditService;
 import org.pmiops.workbench.actionaudit.ActionType;
@@ -43,7 +42,7 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 
-public class EgressEventAuditorTest extends SpringTest {
+public class EgressEventAuditorTest {
 
   private static final long USER_ID = 1L;
   private static final String USER_EMAIL = "user@researchallofus.org";
@@ -72,6 +71,7 @@ public class EgressEventAuditorTest extends SpringTest {
 
   @TestConfiguration
   @Import({
+    FakeClockConfiguration.class,
     // Import the impl class to allow autowiring the bean.
     EgressEventAuditorImpl.class,
     // Import common action audit beans.

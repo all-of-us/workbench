@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.VerifiedInstitutionalAffiliationDao;
@@ -44,7 +43,7 @@ import org.springframework.context.annotation.Import;
   InstitutionUserInstructionsMapperImpl.class,
   InstitutionTierConfigMapperImpl.class,
 })
-public class InstitutionServiceTest extends SpringTest {
+public class InstitutionServiceTest {
 
   @Autowired private InstitutionService service;
   @Autowired private UserDao userDao;

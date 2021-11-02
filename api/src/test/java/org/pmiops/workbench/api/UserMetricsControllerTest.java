@@ -17,7 +17,6 @@ import javax.inject.Provider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
-import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.cohorts.CohortMapper;
 import org.pmiops.workbench.cohorts.CohortMapperImpl;
 import org.pmiops.workbench.db.dao.AccessTierDao;
@@ -51,7 +50,7 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Import;
 
 @DataJpaTest
-public class UserMetricsControllerTest extends SpringTest {
+public class UserMetricsControllerTest {
 
   @Mock private CloudStorageClient mockCloudStorageClient;
   @Mock private UserRecentResourceService mockUserRecentResourceService;
@@ -77,7 +76,12 @@ public class UserMetricsControllerTest extends SpringTest {
   private DbWorkspace dbWorkspace2;
 
   @TestConfiguration
-  @Import({CohortMapperImpl.class, CommonMappers.class, FirecloudMapperImpl.class})
+  @Import({
+    FakeClockConfiguration.class,
+    CohortMapperImpl.class,
+    CommonMappers.class,
+    FirecloudMapperImpl.class
+  })
   static class Configuration {}
 
   @BeforeEach

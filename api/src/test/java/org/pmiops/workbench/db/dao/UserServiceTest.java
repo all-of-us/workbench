@@ -25,7 +25,6 @@ import java.util.function.Supplier;
 import javax.annotation.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.access.AccessModuleServiceImpl;
 import org.pmiops.workbench.access.AccessTierServiceImpl;
@@ -68,7 +67,7 @@ import org.springframework.test.annotation.DirtiesContext;
 
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-public class UserServiceTest extends SpringTest {
+public class UserServiceTest {
 
   private static final String USERNAME = "abc@fake-research-aou.org";
 
@@ -98,6 +97,7 @@ public class UserServiceTest extends SpringTest {
   @SpyBean private AccessModuleService accessModuleService;
 
   @Import({
+    FakeClockConfiguration.class,
     UserServiceTestConfiguration.class,
     AccessTierServiceImpl.class,
     AccessModuleServiceImpl.class,

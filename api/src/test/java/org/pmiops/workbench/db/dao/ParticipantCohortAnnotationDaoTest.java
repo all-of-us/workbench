@@ -5,7 +5,6 @@ import static com.google.common.truth.Truth.assertThat;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.config.CommonConfig;
 import org.pmiops.workbench.db.model.DbCohortAnnotationDefinition;
 import org.pmiops.workbench.db.model.DbCohortAnnotationEnumValue;
@@ -19,7 +18,7 @@ import org.springframework.test.annotation.DirtiesContext;
 @Import({CommonConfig.class})
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-public class ParticipantCohortAnnotationDaoTest extends SpringTest {
+public class ParticipantCohortAnnotationDaoTest {
 
   private static long COHORT_ID = 1;
   @Autowired private ParticipantCohortAnnotationDao participantCohortAnnotationDao;

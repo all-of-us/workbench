@@ -18,7 +18,6 @@ import java.util.Random;
 import org.apache.commons.collections4.ListUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.access.AccessModuleServiceImpl;
 import org.pmiops.workbench.access.AccessTierServiceImpl;
 import org.pmiops.workbench.access.UserAccessModuleMapperImpl;
@@ -61,7 +60,7 @@ import org.springframework.test.annotation.DirtiesContext;
 
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-public class UserControllerTest extends SpringTest {
+public class UserControllerTest {
 
   @Autowired private FakeClock fakeClock;
   private static final WorkbenchConfig config = WorkbenchConfig.createEmptyConfig();
@@ -70,6 +69,7 @@ public class UserControllerTest extends SpringTest {
 
   @TestConfiguration
   @Import({
+    FakeClockConfiguration.class,
     UserController.class,
     UserServiceTestConfiguration.class,
     AccessTierServiceImpl.class,

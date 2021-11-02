@@ -5,7 +5,6 @@ import static com.google.common.truth.Truth.assertThat;
 import java.sql.Timestamp;
 import java.time.Instant;
 import org.junit.jupiter.api.Test;
-import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.db.model.DbAccessModule;
 import org.pmiops.workbench.db.model.DbAccessModule.AccessModuleName;
 import org.pmiops.workbench.db.model.DbUserAccessModule;
@@ -16,7 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 
 @Import({UserAccessModuleMapperImpl.class, CommonMappers.class})
-public class UserAccessModuleMapperTest extends SpringTest {
+public class UserAccessModuleMapperTest {
   @Autowired private UserAccessModuleMapper mapper;
 
   private static final Instant NOW = Instant.now();

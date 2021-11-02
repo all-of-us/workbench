@@ -6,7 +6,6 @@ import java.io.IOException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.captcha.api.CaptchaApi;
 import org.pmiops.workbench.captcha.model.CaptchaVerificationResponse;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -19,7 +18,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 
-public class CaptchaVerificationServiceTest extends SpringTest {
+public class CaptchaVerificationServiceTest {
 
   final String prodAllOfUsUrl = "https://workbench.researchallofus.org/login";
   final String testUrl = "testkey.google.com";
@@ -33,7 +32,7 @@ public class CaptchaVerificationServiceTest extends SpringTest {
   private static WorkbenchConfig config;
 
   @TestConfiguration
-  @Import({CaptchaVerificationServiceImpl.class, CaptchaApi.class})
+  @Import({FakeClockConfiguration.class, CaptchaVerificationServiceImpl.class, CaptchaApi.class})
   static class Configuration {
     @Bean
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)

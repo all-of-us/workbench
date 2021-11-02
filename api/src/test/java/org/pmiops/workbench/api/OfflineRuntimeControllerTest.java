@@ -14,7 +14,6 @@ import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
-import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.leonardo.api.RuntimesApi;
 import org.pmiops.workbench.leonardo.model.LeonardoAuditInfo;
@@ -32,13 +31,13 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 
-public class OfflineRuntimeControllerTest extends SpringTest {
+public class OfflineRuntimeControllerTest {
   private static final Instant NOW = FakeClockConfiguration.NOW.toInstant();
   private static final Duration MAX_AGE = Duration.ofDays(14);
   private static final Duration IDLE_MAX_AGE = Duration.ofDays(7);
 
   @TestConfiguration
-  @Import({OfflineRuntimeController.class, LeonardoMapperImpl.class})
+  @Import({FakeClockConfiguration.class, OfflineRuntimeController.class, LeonardoMapperImpl.class})
   static class Configuration {
     @Bean
     public WorkbenchConfig workbenchConfig() {

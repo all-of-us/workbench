@@ -6,7 +6,6 @@ import com.google.common.collect.ImmutableList;
 import java.sql.Timestamp;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -21,7 +20,7 @@ import org.springframework.test.annotation.DirtiesContext;
 
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-public class CohortDaoTest extends SpringTest {
+public class CohortDaoTest {
 
   @Autowired CohortDao cohortDao;
   @Autowired UserDao userDao;
@@ -33,7 +32,7 @@ public class CohortDaoTest extends SpringTest {
   private DbWorkspace dbWorkspace;
 
   @TestConfiguration
-  @Import({ReportingTestConfig.class})
+  @Import({FakeClockConfiguration.class, ReportingTestConfig.class})
   public static class conifg {}
 
   @BeforeEach

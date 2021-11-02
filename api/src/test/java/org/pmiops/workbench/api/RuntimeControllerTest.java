@@ -33,7 +33,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.pmiops.workbench.FakeClockConfiguration;
-import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.access.AccessTierServiceImpl;
 import org.pmiops.workbench.actionaudit.auditors.LeonardoRuntimeAuditor;
@@ -130,7 +129,7 @@ import org.springframework.transaction.annotation.Transactional;
 @DataJpaTest
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
-public class RuntimeControllerTest extends SpringTest {
+public class RuntimeControllerTest {
   private static final String WORKSPACE_NS = "workspace-ns";
   private static final String GOOGLE_PROJECT_ID = "aou-gcp-id";
   private static final String GOOGLE_PROJECT_ID_2 = "aou-gcp-id-2";
@@ -159,6 +158,7 @@ public class RuntimeControllerTest extends SpringTest {
 
   @TestConfiguration
   @Import({
+    FakeClockConfiguration.class,
     RuntimeController.class,
     CohortMapperImpl.class,
     CohortReviewMapperImpl.class,

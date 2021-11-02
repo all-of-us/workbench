@@ -17,7 +17,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.actionaudit.ActionAuditEvent;
 import org.pmiops.workbench.actionaudit.ActionAuditService;
 import org.pmiops.workbench.actionaudit.ActionType;
@@ -25,7 +24,7 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
-public class LeonardoRuntimeAuditorTest extends SpringTest {
+public class LeonardoRuntimeAuditorTest {
   private DbUser user1;
   private static final long Y2K_EPOCH_MILLIS =
       Instant.parse("2000-01-01T00:00:00.00Z").toEpochMilli();

@@ -6,7 +6,6 @@ import java.sql.Timestamp;
 import java.util.Calendar;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbCohortReview;
 import org.pmiops.workbench.db.model.DbStorageEnums;
@@ -18,7 +17,7 @@ import org.springframework.test.annotation.DirtiesContext;
 
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-public class CohortReviewDaoTest extends SpringTest {
+public class CohortReviewDaoTest {
 
   private static long CDR_VERSION_ID = 1;
   @Autowired WorkspaceDao workspaceDao;

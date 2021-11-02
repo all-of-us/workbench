@@ -41,7 +41,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.pmiops.workbench.FakeClockConfiguration;
-import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.model.BillingStatus;
@@ -66,7 +65,7 @@ import org.springframework.context.annotation.Import;
  * complex (e.g. by having multiple public methods on each service), then we could share the setup
  * code and have separate tests.
  */
-public class ReportingUploadServiceTest extends SpringTest {
+public class ReportingUploadServiceTest {
 
   private static final Instant NOW = FakeClockConfiguration.NOW.toInstant();
   private static final Instant THEN_INSTANT = Instant.parse("1989-02-17T00:00:00.00Z");
@@ -85,7 +84,11 @@ public class ReportingUploadServiceTest extends SpringTest {
   @Captor private ArgumentCaptor<InsertAllRequest> insertAllRequestCaptor;
 
   @TestConfiguration
-  @Import({ReportingUploadServiceImpl.class, ReportingTestConfig.class})
+  @Import({
+    FakeClockConfiguration.class,
+    ReportingUploadServiceImpl.class,
+    ReportingTestConfig.class
+  })
   @MockBean({ReportingVerificationService.class})
   public static class Config {}
 

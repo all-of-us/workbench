@@ -4,7 +4,6 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
-import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbInstitutionUserInstructions;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -17,7 +16,7 @@ import org.springframework.test.annotation.DirtiesContext;
 @Import(InstitutionUserInstructionsMapperImpl.class)
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-public class InstitutionUserInstructionsMapperTest extends SpringTest {
+public class InstitutionUserInstructionsMapperTest {
   @Autowired InstitutionUserInstructionsMapper mapper;
 
   @Test

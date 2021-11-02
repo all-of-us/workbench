@@ -9,7 +9,6 @@ import java.time.Instant;
 import java.util.Collections;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.api.Etags;
 import org.pmiops.workbench.cohortreview.mapper.CohortReviewMapperImpl;
 import org.pmiops.workbench.cohorts.CohortMapperImpl;
@@ -39,7 +38,7 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 
-public class WorkspaceMapperTest extends SpringTest {
+public class WorkspaceMapperTest {
   private static final String FIRECLOUD_NAMESPACE = "aou-xxxxxxx";
   private static final String CREATOR_EMAIL = "ojc@verily.biz";
   private static final long CREATOR_USER_ID = 101L;
@@ -68,6 +67,7 @@ public class WorkspaceMapperTest extends SpringTest {
 
   @TestConfiguration
   @Import({
+    FakeClockConfiguration.class,
     CohortMapperImpl.class,
     CohortReviewMapperImpl.class,
     CommonMappers.class,

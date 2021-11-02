@@ -8,7 +8,6 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbCohortReview;
@@ -20,7 +19,7 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 
-public class CohortMapperTest extends SpringTest {
+public class CohortMapperTest {
 
   private Cohort sourceClientCohort;
   private DbCohort sourceDbCohort;
@@ -29,7 +28,7 @@ public class CohortMapperTest extends SpringTest {
   @Autowired private UserDao mockUserDao;
 
   @TestConfiguration
-  @Import({CohortMapperImpl.class, CommonMappers.class})
+  @Import({FakeClockConfiguration.class, CohortMapperImpl.class, CommonMappers.class})
   @MockBean({UserDao.class})
   static class Configuration {}
 

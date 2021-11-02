@@ -22,7 +22,6 @@ import java.util.Collections;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
-import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.monitoring.views.EventMetric;
 import org.pmiops.workbench.monitoring.views.GaugeMetric;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +29,7 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 
-public class MonitoringServiceTest extends SpringTest {
+public class MonitoringServiceTest {
 
   // These objects are not injected by Spring.
   @Mock private MeasureMap mockMeasureMap;
@@ -46,7 +45,7 @@ public class MonitoringServiceTest extends SpringTest {
   @Autowired private MonitoringService monitoringService;
 
   @TestConfiguration
-  @Import({MonitoringServiceImpl.class})
+  @Import({FakeClockConfiguration.class, MonitoringServiceImpl.class})
   @MockBean({
     ViewManager.class,
     StatsRecorder.class,

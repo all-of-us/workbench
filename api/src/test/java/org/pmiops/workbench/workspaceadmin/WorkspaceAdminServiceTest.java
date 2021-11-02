@@ -29,7 +29,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.actionaudit.ActionAuditQueryService;
 import org.pmiops.workbench.actionaudit.auditors.AdminAuditor;
 import org.pmiops.workbench.actionaudit.auditors.LeonardoRuntimeAuditor;
@@ -79,7 +78,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 
-public class WorkspaceAdminServiceTest extends SpringTest {
+public class WorkspaceAdminServiceTest {
 
   private static final long DB_WORKSPACE_ID = 2222L;
   private static final String GOOGLE_PROJECT_ID = DEFAULT_GOOGLE_PROJECT;
@@ -108,6 +107,7 @@ public class WorkspaceAdminServiceTest extends SpringTest {
 
   @TestConfiguration
   @Import({
+    FakeClockConfiguration.class,
     CohortMapperImpl.class,
     WorkspaceAdminServiceImpl.class,
     WorkspaceMapperImpl.class,

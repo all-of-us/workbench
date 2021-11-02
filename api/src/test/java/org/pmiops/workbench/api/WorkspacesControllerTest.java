@@ -45,7 +45,6 @@ import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.actionaudit.auditors.WorkspaceAuditor;
@@ -187,7 +186,7 @@ import org.springframework.transaction.annotation.Transactional;
 @DataJpaTest
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
-public class WorkspacesControllerTest extends SpringTest {
+public class WorkspacesControllerTest {
   private static final String LOGGED_IN_USER_EMAIL = "bob@gmail.com";
 
   private static final Concept CLIENT_CONCEPT_1 =
@@ -239,6 +238,7 @@ public class WorkspacesControllerTest extends SpringTest {
 
   @TestConfiguration
   @Import({
+    FakeClockConfiguration.class,
     CdrVersionService.class,
     CohortAnnotationDefinitionController.class,
     CohortAnnotationDefinitionMapperImpl.class,

@@ -28,7 +28,6 @@ import javax.inject.Provider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
-import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.access.AccessModuleServiceImpl;
 import org.pmiops.workbench.access.AccessTierService;
@@ -67,7 +66,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 
 @DataJpaTest
-public class RasLinkServiceTest extends SpringTest {
+public class RasLinkServiceTest {
   private static final Timestamp NOW = Timestamp.from(Instant.now());
   private static final FakeClock CLOCK = new FakeClock(NOW.toInstant(), ZoneId.systemDefault());
 
@@ -129,6 +128,7 @@ public class RasLinkServiceTest extends SpringTest {
 
   @TestConfiguration
   @Import({
+    FakeClockConfiguration.class,
     AccessModuleServiceImpl.class,
     UserAccessModuleMapperImpl.class,
     CommonMappers.class,

@@ -4,7 +4,6 @@ import static com.google.common.truth.Truth.assertThat;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbInstitutionEmailDomain;
@@ -16,7 +15,7 @@ import org.springframework.test.annotation.DirtiesContext.ClassMode;
 
 @DataJpaTest
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
-public class InstitutionEmailDomainDaoTest extends SpringTest {
+public class InstitutionEmailDomainDaoTest {
 
   @Autowired InstitutionDao institutionDao;
   @Autowired AccessTierDao accessTierDao;

@@ -14,7 +14,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.actionaudit.auditors.EgressEventAuditor;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -32,7 +31,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 
-public class SumoLogicControllerTest extends SpringTest {
+public class SumoLogicControllerTest {
 
   private static final String API_KEY = "12345";
 
@@ -49,7 +48,7 @@ public class SumoLogicControllerTest extends SpringTest {
   private final ObjectMapper objectMapper = new ObjectMapper();
 
   @TestConfiguration
-  @Import({SumoLogicController.class})
+  @Import({FakeClockConfiguration.class, SumoLogicController.class})
   static class Configuration {
     @Bean
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)

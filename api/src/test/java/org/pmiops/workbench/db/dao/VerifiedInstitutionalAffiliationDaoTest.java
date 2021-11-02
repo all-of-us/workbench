@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
@@ -18,7 +17,7 @@ import org.springframework.test.annotation.DirtiesContext;
 
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-public class VerifiedInstitutionalAffiliationDaoTest extends SpringTest {
+public class VerifiedInstitutionalAffiliationDaoTest {
   @Autowired VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
   @Autowired InstitutionDao institutionDao;
   @Autowired UserDao userDao;
