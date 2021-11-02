@@ -238,7 +238,6 @@ export const ConceptHomepage = fp.flow(withCurrentCohortSearchContext(), withCur
       this.setState({conceptDomainCards, conceptSurveysList});
     }
 
-    // Temp function to use the correct endpoint based on the enableStandardSourceDomains config flag
     getDomainCounts(domain: string, standard: boolean) {
       const {id, namespace} = this.props.workspace;
       const {currentInputString} = this.state;

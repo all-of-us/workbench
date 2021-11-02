@@ -43,7 +43,7 @@ describe('ConceptHomepage', () => {
     registerApiClient(ConceptSetsApi, new ConceptSetsApiStub());
     registerApiClient(CohortBuilderApi, new CohortBuilderServiceStub());
     currentWorkspaceStore.next(workspaceDataStub);
-    serverConfigStore.set({config: {...defaultServerConfig, enableStandardSourceDomains: false}});
+    serverConfigStore.set({config: {...defaultServerConfig}});
   });
 
   it('should render', () => {

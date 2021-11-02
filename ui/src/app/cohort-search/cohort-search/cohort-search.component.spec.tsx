@@ -41,7 +41,7 @@ describe('CohortSearch', () => {
   beforeEach(() => {
     currentWorkspaceStore.next(workspaceDataStub);
     registerApiClient(CohortBuilderApi, new CohortBuilderServiceStub());
-    serverConfigStore.set({config: {...defaultServerConfig, enableStandardSourceDomains: false}});
+    serverConfigStore.set({config: {...defaultServerConfig}});
   });
 
   it('should render', () => {
