@@ -9,6 +9,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
+import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.AuditAction;
 import org.pmiops.workbench.model.AuditAgent;

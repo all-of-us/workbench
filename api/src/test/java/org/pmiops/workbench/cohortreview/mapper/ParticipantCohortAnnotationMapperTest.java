@@ -4,6 +4,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import java.sql.Date;
 import org.junit.jupiter.api.Test;
+import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.db.model.DbParticipantCohortAnnotation;
 import org.pmiops.workbench.model.ParticipantCohortAnnotation;
 import org.pmiops.workbench.utils.mappers.CommonMappers;

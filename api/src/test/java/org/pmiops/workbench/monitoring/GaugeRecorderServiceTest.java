@@ -13,6 +13,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.cohortreview.CohortReviewService;
 import org.pmiops.workbench.monitoring.views.GaugeMetric;
 import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;

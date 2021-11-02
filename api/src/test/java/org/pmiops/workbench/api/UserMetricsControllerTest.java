@@ -17,6 +17,7 @@ import javax.inject.Provider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.cohorts.CohortMapper;
 import org.pmiops.workbench.cohorts.CohortMapperImpl;
 import org.pmiops.workbench.db.dao.AccessTierDao;

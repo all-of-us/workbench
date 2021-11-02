@@ -6,6 +6,7 @@ import java.io.IOException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.captcha.api.CaptchaApi;
 import org.pmiops.workbench.captcha.model.CaptchaVerificationResponse;
 import org.pmiops.workbench.config.WorkbenchConfig;

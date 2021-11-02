@@ -29,6 +29,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mockito;
+import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.monitoring.LogsBasedMetricServiceImpl.PayloadKey;

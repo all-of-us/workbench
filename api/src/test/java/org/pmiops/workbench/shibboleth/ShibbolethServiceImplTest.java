@@ -4,6 +4,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import org.junit.jupiter.api.Test;
+import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.config.RetryConfig;
 import org.pmiops.workbench.shibboleth.api.ShibbolethApi;
 import org.springframework.beans.factory.annotation.Autowired;

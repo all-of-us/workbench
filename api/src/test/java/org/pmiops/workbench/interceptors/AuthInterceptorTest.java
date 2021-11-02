@@ -22,6 +22,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
+import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.api.ProfileApi;
 import org.pmiops.workbench.auth.UserInfoService;

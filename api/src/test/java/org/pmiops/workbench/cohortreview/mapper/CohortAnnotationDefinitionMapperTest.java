@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import org.junit.jupiter.api.Test;
+import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.api.Etags;
 import org.pmiops.workbench.db.model.DbCohortAnnotationDefinition;
 import org.pmiops.workbench.db.model.DbCohortAnnotationEnumValue;

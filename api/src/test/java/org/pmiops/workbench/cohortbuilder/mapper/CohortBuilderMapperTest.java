@@ -3,6 +3,7 @@ package org.pmiops.workbench.cohortbuilder.mapper;
 import static com.google.common.truth.Truth.assertThat;
 
 import org.junit.jupiter.api.Test;
+import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.cdr.model.DbAgeTypeCount;
 import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.cdr.model.DbCriteriaAttribute;

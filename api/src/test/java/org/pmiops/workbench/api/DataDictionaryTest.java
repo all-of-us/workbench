@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.cdr.CdrVersionMapper;
 import org.pmiops.workbench.cdr.CdrVersionService;
