@@ -1601,7 +1601,7 @@ paths:
         name: request
         description: Egress event request
         schema:
-          "$ref": "#/definitions/EgressEventRequest"
+          "$ref": "#/definitions/SumologicEgressEventRequest"
       - in: header
         name: X-API-KEY
         description: 'Semi-secret API key sent by SumoLogic. This will be checked

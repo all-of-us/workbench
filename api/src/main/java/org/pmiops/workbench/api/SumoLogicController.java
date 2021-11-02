@@ -9,15 +9,13 @@ import java.util.Arrays;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.inject.Provider;
 import org.pmiops.workbench.actionaudit.auditors.EgressEventAuditor;
-import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.UnauthorizedException;
 import org.pmiops.workbench.exfiltration.EgressEventService;
 import org.pmiops.workbench.google.CloudStorageClient;
-import org.pmiops.workbench.model.EgressEvent;
-import org.pmiops.workbench.model.EgressEventRequest;
+import org.pmiops.workbench.model.SumologicEgressEvent;
+import org.pmiops.workbench.model.SumologicEgressEventRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -36,32 +34,30 @@ public class SumoLogicController implements SumoLogicApiDelegate {
   private final CloudStorageClient cloudStorageClient;
   private final EgressEventAuditor egressEventAuditor;
   private final EgressEventService egressEventService;
-  private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @Autowired
   SumoLogicController(
       CloudStorageClient cloudStorageClient,
       EgressEventAuditor egressEventAuditor,
-      EgressEventService egressEventService,
-      Provider<WorkbenchConfig> workbenchConfigProvider) {
+      EgressEventService egressEventService) {
     this.cloudStorageClient = cloudStorageClient;
     this.egressEventAuditor = egressEventAuditor;
     this.egressEventService = egressEventService;
-    this.workbenchConfigProvider = workbenchConfigProvider;
   }
 
   @Override
-  public ResponseEntity<Void> logEgressEvent(String X_API_KEY, EgressEventRequest request) {
+  public ResponseEntity<Void> logEgressEvent(
+      String X_API_KEY, SumologicEgressEventRequest request) {
     authorizeRequest(X_API_KEY, request);
     ObjectMapper mapper = new ObjectMapper();
-    EgressEvent[] events;
+    SumologicEgressEvent[] events;
     try {
       // Try to deserialize input with default ObjectMapper configuration. If failed to deserialize,
       // log it then
       // disable unknown properties restriction and try again.
       // The "eventsJsonArray" field is a JSON-formatted array of EgressEvent JSON objects. Parse
       // this out so we can work with each event as a model object.
-      events = mapper.readValue(request.getEventsJsonArray(), EgressEvent[].class);
+      events = mapper.readValue(request.getEventsJsonArray(), SumologicEgressEvent[].class);
     } catch (JsonProcessingException e) {
       log.log(
           Level.WARNING,
@@ -71,7 +67,7 @@ public class SumoLogicController implements SumoLogicApiDelegate {
           e);
       mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
       try {
-        events = mapper.readValue(request.getEventsJsonArray(), EgressEvent[].class);
+        events = mapper.readValue(request.getEventsJsonArray(), SumologicEgressEvent[].class);
       } catch (IOException ioException) {
         log.log(
             Level.SEVERE,
@@ -105,7 +101,7 @@ public class SumoLogicController implements SumoLogicApiDelegate {
    * @param apiKey
    * @param request
    */
-  private void authorizeRequest(String apiKey, EgressEventRequest request) {
+  private void authorizeRequest(String apiKey, SumologicEgressEventRequest request) {
     try {
       Set<String> validApiKeys = getSumoLogicApiKeys();
       if (!validApiKeys.contains(apiKey)) {

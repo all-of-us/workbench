@@ -1,9 +1,5 @@
 package org.pmiops.workbench.actionaudit.auditors
 
-import java.time.Clock
-import java.util.Optional
-import java.util.logging.Logger
-import javax.inject.Provider
 import org.pmiops.workbench.actionaudit.ActionAuditEvent
 import org.pmiops.workbench.actionaudit.ActionAuditService
 import org.pmiops.workbench.actionaudit.ActionType
@@ -19,25 +15,29 @@ import org.pmiops.workbench.db.dao.UserDao
 import org.pmiops.workbench.db.dao.WorkspaceDao
 import org.pmiops.workbench.db.model.DbEgressEvent
 import org.pmiops.workbench.exceptions.BadRequestException
-import org.pmiops.workbench.model.EgressEvent
-import org.pmiops.workbench.model.EgressEventRequest
+import org.pmiops.workbench.model.SumologicEgressEvent
+import org.pmiops.workbench.model.SumologicEgressEventRequest
 import org.pmiops.workbench.workspaces.WorkspaceService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
+import java.time.Clock
+import java.util.Optional
+import java.util.logging.Logger
+import javax.inject.Provider
 
 @Service
 class EgressEventAuditorImpl @Autowired
 constructor(
-    private val actionAuditService: ActionAuditService,
-    private val workspaceService: WorkspaceService,
-    private val workspaceDao: WorkspaceDao,
-    private val userDao: UserDao,
-    private val clock: Clock,
-    @Qualifier("ACTION_ID") private val actionIdProvider: Provider<String>
+        private val actionAuditService: ActionAuditService,
+        private val workspaceService: WorkspaceService,
+        private val workspaceDao: WorkspaceDao,
+        private val userDao: UserDao,
+        private val clock: Clock,
+        @Qualifier("ACTION_ID") private val actionIdProvider: Provider<String>
 ) : EgressEventAuditor {
 
-    override fun fireEgressEvent(event: EgressEvent) {
+    override fun fireEgressEvent(event: SumologicEgressEvent) {
         // Load the workspace via the GCP project name
         val dbWorkspaceMaybe = workspaceDao.getByGoogleProject(event.projectName)
         if (!dbWorkspaceMaybe.isPresent()) {
@@ -89,8 +89,8 @@ constructor(
     }
 
     override fun fireRemediateEgressEvent(
-        dbEvent: DbEgressEvent,
-        escalation: WorkbenchConfig.EgressAlertRemediationPolicy.Escalation?
+            dbEvent: DbEgressEvent,
+            escalation: WorkbenchConfig.EgressAlertRemediationPolicy.Escalation?
     ) {
         val dbWorkspaceMaybe = Optional.ofNullable(dbEvent.workspace)
         val actionId = actionIdProvider.get()
@@ -106,19 +106,19 @@ constructor(
         ), egressEvent = dbEvent, escalation = escalation)
     }
 
-    override fun fireFailedToParseEgressEventRequest(request: EgressEventRequest) {
+    override fun fireFailedToParseEgressEventRequest(request: SumologicEgressEventRequest) {
         fireEventSet(baseEvent = getGenericBaseEvent(), comment = String.format(
                 "Failed to parse egress event JSON from SumoLogic. Field contents: %s",
                 request.eventsJsonArray))
     }
 
-    override fun fireBadApiKey(apiKey: String, request: EgressEventRequest) {
+    override fun fireBadApiKey(apiKey: String, request: SumologicEgressEventRequest) {
         fireEventSet(baseEvent = getGenericBaseEvent(), comment = String.format(
                 "Received bad API key from SumoLogic. Bad key: %s, full request: %s",
                 apiKey, request.toString()))
     }
 
-    private fun fireFailedToFindWorkspace(event: EgressEvent) {
+    private fun fireFailedToFindWorkspace(event: SumologicEgressEvent) {
         fireEventSet(baseEvent = getGenericBaseEvent(), egressEvent = event, comment = String.format(
                 "Failed to find workspace for high-egress event: %s",
                 event.toString()))
@@ -129,7 +129,7 @@ constructor(
      * to record properties of the egress event and a human-readable comment. Either the egress event
      * or the comment may be null, in which case those row(s) won't be generated.
      */
-    private fun fireEventSet(baseEvent: ActionAuditEvent, egressEvent: EgressEvent? = null, comment: String? = null) {
+    private fun fireEventSet(baseEvent: ActionAuditEvent, egressEvent: SumologicEgressEvent? = null, comment: String? = null) {
         var events = ArrayList<ActionAuditEvent>()
         if (egressEvent != null) {
             val propertyValues = TargetPropertyExtractor.getPropertyValuesByName(
@@ -150,9 +150,9 @@ constructor(
     }
 
     private fun fireRemediationEventSet(
-        baseEvent: ActionAuditEvent,
-        egressEvent: DbEgressEvent? = null,
-        escalation: WorkbenchConfig.EgressAlertRemediationPolicy.Escalation? = null
+            baseEvent: ActionAuditEvent,
+            egressEvent: DbEgressEvent? = null,
+            escalation: WorkbenchConfig.EgressAlertRemediationPolicy.Escalation? = null
     ) {
         var events = ArrayList<ActionAuditEvent>()
         if (egressEvent != null) {

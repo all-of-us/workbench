@@ -3,7 +3,7 @@ package org.pmiops.workbench.actionaudit.targetproperties
 import io.opencensus.common.Timestamp
 import org.pmiops.workbench.config.WorkbenchConfig
 import org.pmiops.workbench.db.model.DbEgressEvent
-import org.pmiops.workbench.model.EgressEvent
+import org.pmiops.workbench.model.SumologicEgressEvent
 
 /**
  * Action properties relating to high-egress events received by the Workbench. These
@@ -11,9 +11,9 @@ import org.pmiops.workbench.model.EgressEvent
  */
 enum class EgressEventTargetProperty
 constructor(
-    override val propertyName: String,
-    override val extractor: (EgressEvent) -> String?
-) : ModelBackedTargetProperty<EgressEvent> {
+        override val propertyName: String,
+        override val extractor: (SumologicEgressEvent) -> String?
+) : ModelBackedTargetProperty<SumologicEgressEvent> {
     EGRESS_MIB("egress_mib",
             { it.egressMib?.toString() }),
     TIME_WINDOW_START("time_window_start",
@@ -32,8 +32,8 @@ constructor(
  */
 enum class DbEgressEventTargetProperty
 constructor(
-    override val propertyName: String,
-    override val extractor: (DbEgressEvent) -> String?
+        override val propertyName: String,
+        override val extractor: (DbEgressEvent) -> String?
 ) : ModelBackedTargetProperty<DbEgressEvent> {
     EGRESS_EVENT_ID("egress_event_id",
             { it.egressEventId.toString() }),
@@ -47,8 +47,8 @@ constructor(
  */
 enum class EgressEscalationTargetProperty
 constructor(
-    override val propertyName: String,
-    override val extractor: (WorkbenchConfig.EgressAlertRemediationPolicy.Escalation) -> String?
+        override val propertyName: String,
+        override val extractor: (WorkbenchConfig.EgressAlertRemediationPolicy.Escalation) -> String?
 ) : ModelBackedTargetProperty<WorkbenchConfig.EgressAlertRemediationPolicy.Escalation> {
     REMEDIATION("remediation",
             {

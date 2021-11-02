@@ -34,8 +34,8 @@ import org.pmiops.workbench.db.model.DbEgressEvent;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
-import org.pmiops.workbench.model.EgressEvent;
-import org.pmiops.workbench.model.EgressEventRequest;
+import org.pmiops.workbench.model.SumologicEgressEvent;
+import org.pmiops.workbench.model.SumologicEgressEventRequest;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -100,7 +100,7 @@ public class EgressEventAuditorTest extends SpringTest {
   @Test
   public void testFireEgressEvent() {
     egressEventAuditor.fireEgressEvent(
-        new EgressEvent()
+        new SumologicEgressEvent()
             .projectName(EGRESS_EVENT_PROJECT_NAME)
             .vmPrefix(EGRESS_EVENT_VM_PREFIX)
             .timeWindowStart(0l)
@@ -153,7 +153,7 @@ public class EgressEventAuditorTest extends SpringTest {
         BadRequestException.class,
         () ->
             egressEventAuditor.fireEgressEvent(
-                new EgressEvent()
+                new SumologicEgressEvent()
                     .projectName(EGRESS_EVENT_PROJECT_NAME)
                     .vmPrefix(EGRESS_EVENT_VM_PREFIX)));
     verify(mockActionAuditService).send(eventsCaptor.capture());
@@ -325,7 +325,7 @@ public class EgressEventAuditorTest extends SpringTest {
     // When the inbound request parsing fails, an event is logged at the system agent.
     when(workspaceDao.getByGoogleProject(GOOGLE_PROJECT)).thenReturn(null);
     egressEventAuditor.fireFailedToParseEgressEventRequest(
-        new EgressEventRequest().eventsJsonArray("asdf"));
+        new SumologicEgressEventRequest().eventsJsonArray("asdf"));
     verify(mockActionAuditService).send(eventsCaptor.capture());
     Collection<ActionAuditEvent> events = eventsCaptor.getValue();
 
@@ -346,7 +346,7 @@ public class EgressEventAuditorTest extends SpringTest {
   public void testBadApiKey() {
     // When the inbound request parsing fails, an event is logged at the system agent.
     when(workspaceDao.getByGoogleProject(GOOGLE_PROJECT)).thenReturn(null);
-    egressEventAuditor.fireBadApiKey("ASDF", new EgressEventRequest());
+    egressEventAuditor.fireBadApiKey("ASDF", new SumologicEgressEventRequest());
     verify(mockActionAuditService).send(eventsCaptor.capture());
     Collection<ActionAuditEvent> events = eventsCaptor.getValue();
 
