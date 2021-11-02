@@ -30,6 +30,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.JpaFakeDateTimeConfiguration;
 import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.actionaudit.auditors.EgressEventAuditor;
@@ -44,8 +45,8 @@ import org.pmiops.workbench.db.model.DbEgressEvent.EgressEventStatus;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.institution.InstitutionService;
-import org.pmiops.workbench.model.EgressEvent;
 import org.pmiops.workbench.model.Institution;
+import org.pmiops.workbench.model.SumologicEgressEvent;
 import org.pmiops.workbench.model.User;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
@@ -184,7 +185,7 @@ public class EgressEventServiceTest extends SpringTest {
   public void testCreateEgressEventAlert() throws ApiException {
     when(mockAlertApi.createAlert(any())).thenReturn(new SuccessResponse().requestId("12345"));
 
-    EgressEvent event = recentEgressEventForUser(dbUser1);
+    SumologicEgressEvent event = recentEgressEventForUser(dbUser1);
     egressEventService.handleEvent(event);
     verify(mockAlertApi).createAlert(alertRequestCaptor.capture());
     verify(egressEventAuditor).fireEgressEvent(event);
@@ -209,7 +210,7 @@ public class EgressEventServiceTest extends SpringTest {
   @Test
   public void testCreateEgressEventAlert_v2() throws ApiException {
     workbenchConfig.featureFlags.enableEgressAlertingV2 = true;
-    EgressEvent event = recentEgressEventForUser(dbUser1);
+    SumologicEgressEvent event = recentEgressEventForUser(dbUser1);
     egressEventService.handleEvent(event);
     verify(egressEventAuditor).fireEgressEvent(event);
     verify(mockTaskQueueService).pushEgressEventTask(anyLong());
@@ -255,7 +256,7 @@ public class EgressEventServiceTest extends SpringTest {
     when(mockAlertApi.createAlert(any())).thenReturn(new SuccessResponse().requestId("12345"));
 
     String notFoundProjectName = "NOT_FOUND123";
-    EgressEvent event = recentEgressEventForUser(dbUser1).projectName(notFoundProjectName);
+    SumologicEgressEvent event = recentEgressEventForUser(dbUser1).projectName(notFoundProjectName);
     egressEventService.handleEvent(event);
     verify(mockAlertApi).createAlert(alertRequestCaptor.capture());
     verify(egressEventAuditor).fireEgressEvent(event);
@@ -280,7 +281,7 @@ public class EgressEventServiceTest extends SpringTest {
   public void testCreateEgressEventAlert_staleEvent() throws ApiException {
     when(mockAlertApi.createAlert(any())).thenReturn(new SuccessResponse().requestId("12345"));
 
-    EgressEvent oldEgressEvent =
+    SumologicEgressEvent oldEgressEvent =
         recentEgressEventForUser(dbUser1)
             .timeWindowDuration(60 * 60L)
             .timeWindowStart(NOW.minus(Duration.ofMinutes(125)).toEpochMilli());
@@ -301,7 +302,7 @@ public class EgressEventServiceTest extends SpringTest {
   public void testCreateEgressEventAlert_stalePersistedEvent_v2() {
     workbenchConfig.featureFlags.enableEgressAlertingV2 = true;
 
-    EgressEvent oldEgressEvent =
+    SumologicEgressEvent oldEgressEvent =
         recentEgressEventForUser(dbUser1)
             .timeWindowDuration(60 * 60L)
             .timeWindowStart(NOW.minus(Duration.ofMinutes(125)).toEpochMilli());
@@ -327,7 +328,7 @@ public class EgressEventServiceTest extends SpringTest {
   public void testCreateEgressEventAlert_staleEventsMultiwindow_v2() {
     workbenchConfig.featureFlags.enableEgressAlertingV2 = true;
 
-    EgressEvent oldEgressEvent =
+    SumologicEgressEvent oldEgressEvent =
         recentEgressEventForUser(dbUser1)
             .timeWindowDuration(60 * 60L)
             .timeWindowStart(NOW.minus(Duration.ofMinutes(125)).toEpochMilli());
@@ -353,7 +354,7 @@ public class EgressEventServiceTest extends SpringTest {
   public void testCreateEgressEventAlert_staleEventsDifferentUsers_v2() {
     workbenchConfig.featureFlags.enableEgressAlertingV2 = true;
 
-    EgressEvent oldEgressEvent =
+    SumologicEgressEvent oldEgressEvent =
         recentEgressEventForUser(dbUser1)
             .timeWindowDuration(60 * 60L)
             .timeWindowStart(NOW.minus(Duration.ofMinutes(125)).toEpochMilli());
@@ -380,7 +381,7 @@ public class EgressEventServiceTest extends SpringTest {
   public void testCreateEgressEventAlert_staleEventShortWindowPersisted_v2() {
     workbenchConfig.featureFlags.enableEgressAlertingV2 = true;
 
-    EgressEvent oldEgressEvent =
+    SumologicEgressEvent oldEgressEvent =
         recentEgressEventForUser(dbUser1)
             // > 2 windows into the past
             .timeWindowStart(NOW.minus(Duration.ofMinutes(3)).toEpochMilli())
@@ -404,8 +405,8 @@ public class EgressEventServiceTest extends SpringTest {
     assertThat(dbEvents).hasSize(2);
   }
 
-  private static EgressEvent recentEgressEventForUser(DbUser user) {
-    return new EgressEvent()
+  private static SumologicEgressEvent recentEgressEventForUser(DbUser user) {
+    return new SumologicEgressEvent()
         .projectName(DEFAULT_GOOGLE_PROJECT)
         .vmPrefix("all-of-us-" + user.getUserId())
         .egressMib(120.7)
