@@ -30,7 +30,9 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
+@SpringJUnitConfig
 public class OfflineRuntimeControllerTest {
   private static final Instant NOW = FakeClockConfiguration.NOW.toInstant();
   private static final Duration MAX_AGE = Duration.ofDays(14);

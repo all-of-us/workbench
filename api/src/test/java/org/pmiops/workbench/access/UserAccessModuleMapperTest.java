@@ -14,8 +14,10 @@ import org.pmiops.workbench.model.AccessModuleStatus;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 @Import({FakeClockConfiguration.class, UserAccessModuleMapperImpl.class, CommonMappers.class})
+@SpringJUnitConfig
 public class UserAccessModuleMapperTest {
   @Autowired private UserAccessModuleMapper mapper;
 

@@ -59,12 +59,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 /**
  * Test all implementations of ReportingUploadService to save on setup code. If this becomes too
  * complex (e.g. by having multiple public methods on each service), then we could share the setup
  * code and have separate tests.
  */
+@SpringJUnitConfig
 public class ReportingUploadServiceTest {
 
   private static final Instant NOW = FakeClockConfiguration.NOW.toInstant();

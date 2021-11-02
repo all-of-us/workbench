@@ -16,9 +16,11 @@ import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.api.OfflineAuditApi;
 import org.pmiops.workbench.api.WorkspacesApi;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.web.method.HandlerMethod;
 
 @Import(FakeClockConfiguration.class)
+@SpringJUnitConfig
 public class CronInterceptorTest {
   @Rule public MockitoRule mockitoRule = MockitoJUnit.rule();
 

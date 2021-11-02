@@ -17,12 +17,14 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.actionaudit.ActionAuditEvent;
 import org.pmiops.workbench.actionaudit.ActionAuditService;
 import org.pmiops.workbench.actionaudit.ActionType;
 import org.pmiops.workbench.db.model.DbUser;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 
 public class LeonardoRuntimeAuditorTest {
   private DbUser user1;
@@ -43,6 +45,7 @@ public class LeonardoRuntimeAuditorTest {
   @Mock private Provider<DbUser> mockUserProvider;
 
   @TestConfiguration
+  @Import(FakeClockConfiguration.class)
   @MockBean(value = {ActionAuditService.class})
   static class Configuration {}
 

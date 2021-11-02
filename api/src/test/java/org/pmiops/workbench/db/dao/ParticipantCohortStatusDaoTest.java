@@ -29,9 +29,11 @@ import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 @Import({FakeClockConfiguration.class, TestJpaConfig.class, CommonConfig.class})
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
+@SpringJUnitConfig
 public class ParticipantCohortStatusDaoTest {
   private static final Long COHORT_REVIEW_ID = 1L;
   private static final Date birthDate = new Date(System.currentTimeMillis());
