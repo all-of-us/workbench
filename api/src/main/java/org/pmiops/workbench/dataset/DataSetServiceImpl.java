@@ -401,8 +401,8 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
               .collect(Collectors.joining(" UNION DISTINCT "));
       queryBuilder.append(
           supportsConceptSets(domain)
-              ? " AND PERSON_ID in (" + unionedCohortQuery + ")"
-              : " WHERE PERSON_ID in (" + unionedCohortQuery + ")");
+              ? " AND person_id IN (" + unionedCohortQuery + ")"
+              : " WHERE person_id IN (" + unionedCohortQuery + ")");
 
       // now merge all the individual maps from each configuration
       mergedQueryParameterValues.putAll(
@@ -606,7 +606,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     if (OUTER_QUERY_DOMAIN.contains(domain)) {
       queryBuilder
           .append(String.join(", ", valuesLinkingPair.getSelects()))
-          .append(" from ( SELECT * ")
+          .append(" FROM ( SELECT * ")
           .append(valuesLinkingPair.getDomainTable());
     } else {
       queryBuilder
@@ -643,17 +643,17 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     }
 
     if (domain == Domain.FITBIT_HEART_RATE_LEVEL || domain == Domain.FITBIT_INTRADAY_STEPS) {
-      queryBuilder.append("\nGROUP BY PERSON_ID");
+      queryBuilder.append("\nGROUP BY person_id");
       if (valuesLinkingPair.getSelects().stream().filter(select -> select.contains("DATE")).count()
           == 1) {
-        queryBuilder.append(", DATE");
+        queryBuilder.append(", date");
       }
     }
 
     if (domain == Domain.ZIP_CODE_SOCIOECONOMIC) {
       queryBuilder.append(
           "\nAND observation_source_concept_id = 1585250"
-              + "\nAND observation.value_as_string not like 'Res%'");
+              + "\nAND observation.value_as_string NOT LIKE 'Res%'");
     }
 
     if (OUTER_QUERY_DOMAIN.contains(domain)) {
