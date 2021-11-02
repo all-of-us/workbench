@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.config.CommonConfig;
 import org.pmiops.workbench.db.model.DbInstitution;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +16,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 
-@Import({CommonConfig.class})
+@Import({FakeClockConfiguration.class, CommonConfig.class})
 @DataJpaTest
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 public class InstitutionDaoTest {

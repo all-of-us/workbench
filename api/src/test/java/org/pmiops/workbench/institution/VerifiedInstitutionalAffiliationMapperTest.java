@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.DbUser;
@@ -21,6 +22,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
 
 @Import({
+  FakeClockConfiguration.class,
   VerifiedInstitutionalAffiliationMapperImpl.class,
   InstitutionServiceImpl.class,
   InstitutionMapperImpl.class,

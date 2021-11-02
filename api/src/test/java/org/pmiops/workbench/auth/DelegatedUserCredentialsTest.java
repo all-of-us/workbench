@@ -32,8 +32,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.test.FakeClock;
+import org.springframework.context.annotation.Import;
 
+@Import(FakeClockConfiguration.class)
 public class DelegatedUserCredentialsTest {
 
   static final String USER_EMAIL = "john.doe@researchallofus.org";

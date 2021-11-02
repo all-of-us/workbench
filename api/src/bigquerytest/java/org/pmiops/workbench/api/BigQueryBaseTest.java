@@ -24,16 +24,19 @@ import java.util.Map;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.TestInstance;
+import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.testconfig.TestBigQueryConfig;
 import org.pmiops.workbench.testconfig.TestWorkbenchConfig;
 import org.pmiops.workbench.testconfig.WorkbenchConfigConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestPropertySource;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(classes = {TestBigQueryConfig.class, WorkbenchConfigConfig.class})
 @TestPropertySource(properties = "spring.main.allow-bean-definition-overriding=true")
+@Import(FakeClockConfiguration.class)
 public abstract class BigQueryBaseTest {
 
   public static final String CB_DATA = "cbdata";

@@ -26,8 +26,11 @@ import java.util.Optional;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.springframework.context.annotation.Import;
 
+@Import(FakeClockConfiguration.class)
 public class QueryParameterValuesTest {
 
   private static final Map<String, QueryParameterValue> PARAM_MAP = new HashMap<>();

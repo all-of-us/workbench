@@ -9,12 +9,15 @@ import java.time.Clock;
 import java.util.Collections;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbCohortReview;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.ReviewStatus;
+import org.springframework.context.annotation.Import;
 
+@Import(FakeClockConfiguration.class)
 public class CohortFactoryTest {
 
   private CohortFactory cohortFactory;

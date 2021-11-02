@@ -8,6 +8,7 @@ import java.time.Instant;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.config.CommonConfig;
 import org.pmiops.workbench.db.model.DbAccessModule;
 import org.pmiops.workbench.db.model.DbAccessModule.AccessModuleName;
@@ -18,7 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 
-@Import({CommonConfig.class})
+@Import({FakeClockConfiguration.class, CommonConfig.class})
 @DataJpaTest
 public class UserAccessModuleDaoTest {
   @Autowired private UserDao userDao;

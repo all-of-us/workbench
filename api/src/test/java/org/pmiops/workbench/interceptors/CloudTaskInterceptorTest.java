@@ -12,11 +12,14 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
+import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.api.CloudTaskRdrExportApi;
 import org.pmiops.workbench.api.WorkspacesApi;
 import org.pmiops.workbench.model.ArrayOfLong;
+import org.springframework.context.annotation.Import;
 import org.springframework.web.method.HandlerMethod;
 
+@Import(FakeClockConfiguration.class)
 public class CloudTaskInterceptorTest {
   @Rule public MockitoRule mockitoRule = MockitoJUnit.rule();
 

@@ -12,6 +12,7 @@ import javax.jdo.annotations.Transactional;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.db.dao.UserDao.DbAdminTableUser;
 import org.pmiops.workbench.db.dao.UserDao.UserCountByDisabledAndAccessTiers;
 import org.pmiops.workbench.db.model.DbAccessModule;
@@ -29,11 +30,13 @@ import org.pmiops.workbench.model.TierAccessStatus;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Sort;
 import org.springframework.test.annotation.DirtiesContext;
 
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+@Import(FakeClockConfiguration.class)
 public class UserDaoTest {
   private static final String STREET_ADDRESS_1 = "101 Main St";
   private static final String STREET_ADDRESS_2 = "# 202";
