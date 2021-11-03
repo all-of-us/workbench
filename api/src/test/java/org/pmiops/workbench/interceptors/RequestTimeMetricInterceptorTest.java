@@ -28,9 +28,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.ModelAndView;
 
+@SpringJUnitConfig
 public class RequestTimeMetricInterceptorTest {
 
   private static final Instant START_INSTANT = FakeClockConfiguration.NOW.toInstant();

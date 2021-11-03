@@ -25,7 +25,9 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
+@SpringJUnitConfig
 public class LeonardoRuntimeAuditorTest {
   private DbUser user1;
   private static final long Y2K_EPOCH_MILLIS =

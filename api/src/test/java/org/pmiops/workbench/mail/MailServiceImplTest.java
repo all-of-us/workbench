@@ -34,8 +34,10 @@ import org.pmiops.workbench.mandrill.model.RecipientType;
 import org.pmiops.workbench.model.SendBillingSetupEmailRequest;
 import org.pmiops.workbench.test.Providers;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 @Import(FakeClockConfiguration.class)
+@SpringJUnitConfig
 public class MailServiceImplTest {
 
   private MailServiceImpl service;
