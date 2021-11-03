@@ -321,7 +321,29 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
         String.format(
             "called setLockedState on wsns %s with desiredLockState %b",
             workspaceNamespace, desiredLockState));
+
     // TODO but what should I do with it?
+
+    Optional<DbWorkspace> dbWorkspaceOptional = getFirstWorkspaceByNamespace(workspaceNamespace);
+    dbWorkspaceOptional.ifPresent(dbWorkspace -> setLockedState(dbWorkspace, desiredLockState));
+  }
+
+  private FirecloudWorkspaceDetails setLockedState(
+      DbWorkspace dbWorkspace, boolean desiredLockState) {
+    log.info(
+        String.format(
+            "Found workspace in DB: ID %d, Name '%s'",
+            dbWorkspace.getWorkspaceId(), dbWorkspace.getName()));
+
+    FirecloudWorkspaceDetails fcWorkspace =
+        fireCloudService
+            .getWorkspaceAsService(
+                dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName())
+            .getWorkspace();
+
+    log.info(String.format("Found workspace in Terra: isLocked = %B", fcWorkspace.isIsLocked()));
+
+    return fcWorkspace;
   }
 
   // NOTE: may be an undercount since we only retrieve the first Page of Storage List results
