@@ -930,6 +930,76 @@ paths:
           description: Internal Server Error
           content: {}
       x-codegen-request-body-name: workspace
+  /api/workspaces/{workspaceNamespace}/{workspaceName}/lock:
+    put:
+      tags:
+        - Workspaces
+      summary: Lock Workspace
+      operationId: lockWorkspace
+      parameters:
+        - name: workspaceNamespace
+          in: path
+          description: Workspace Namespace
+          required: true
+          schema:
+            type: string
+        - name: workspaceName
+          in: path
+          description: Workspace Name
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: No response was specified
+          content: {}
+        204:
+          description: Successful Request
+          content: {}
+        403:
+          description: Not Owner
+          content: {}
+        404:
+          description: Workspace Not Found
+          content: {}
+        500:
+          description: Internal Server Error
+          content: {}
+  /api/workspaces/{workspaceNamespace}/{workspaceName}/unlock:
+    put:
+      tags:
+        - Workspaces
+      summary: Unlock Workspace
+      operationId: unlockWorkspace
+      parameters:
+        - name: workspaceNamespace
+          in: path
+          description: Workspace Namespace
+          required: true
+          schema:
+            type: string
+        - name: workspaceName
+          in: path
+          description: Workspace Name
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: No response was specified
+          content: {}
+        204:
+          description: Successful Request
+          content: {}
+        403:
+          description: Not Owner
+          content: {}
+        404:
+          description: Workspace Not Found
+          content: {}
+        500:
+          description: Internal Server Error
+          content: {}
   /api/staticNotebooks/convert:
     post:
       tags:
