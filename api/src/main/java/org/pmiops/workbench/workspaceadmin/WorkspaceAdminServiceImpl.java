@@ -346,7 +346,9 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
                 dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName())
             .getWorkspace();
 
-    log.info(String.format("Found workspace in Terra: isLocked = %B", fcWorkspace.isIsLocked()));
+    log.info(
+        String.format(
+            "Found workspace in Terra: isLocked = %s", printBoolean(fcWorkspace.isIsLocked())));
 
     if (desiredLockState) {
       fcWorkspace =
@@ -362,8 +364,18 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
               .getWorkspace();
     }
 
-    log.info(String.format("Updated workspace in Terra: isLocked = %B", fcWorkspace.isIsLocked()));
+    log.info(
+        String.format(
+            "Updated workspace in Terra: isLocked = %s", printBoolean(fcWorkspace.isIsLocked())));
     return fcWorkspace;
+  }
+
+  private String printBoolean(Boolean value) {
+    if (value == null) {
+      return "null";
+    } else {
+      return value.toString();
+    }
   }
 
   // NOTE: may be an undercount since we only retrieve the first Page of Storage List results
