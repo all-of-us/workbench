@@ -343,6 +343,19 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
 
     log.info(String.format("Found workspace in Terra: isLocked = %B", fcWorkspace.isIsLocked()));
 
+    if (desiredLockState) {
+      fcWorkspace = fireCloudService
+          .lockWorkspaceAsService(
+              dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName())
+          .getWorkspace();
+    } else {
+      fcWorkspace = fireCloudService
+          .unlockWorkspaceAsService(
+              dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName())
+          .getWorkspace();
+    }
+
+    log.info(String.format("Updated workspace in Terra: isLocked = %B", fcWorkspace.isIsLocked()));
     return fcWorkspace;
   }
 

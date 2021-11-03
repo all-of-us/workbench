@@ -377,9 +377,29 @@ public class FireCloudServiceImpl implements FireCloudService {
       String workspaceNamespace, String firecloudName) throws WorkbenchException {
     WorkspacesApi workspacesApi = serviceAccountWorkspaceApiProvider.get();
     return retryHandler.run(
-        (context) ->
-            workspacesApi.getWorkspace(
-                workspaceNamespace, firecloudName, FIRECLOUD_WORKSPACE_REQUIRED_FIELDS));
+        (context) -> getWorkspace(workspacesApi, workspaceNamespace, firecloudName));
+  }
+
+  @Override
+  public FirecloudWorkspaceResponse lockWorkspaceAsService(
+      String workspaceNamespace, String firecloudName) {
+    WorkspacesApi workspacesApi = serviceAccountWorkspaceApiProvider.get();
+    return retryHandler.run(
+        (context) -> {
+          workspacesApi.lockWorkspace(workspaceNamespace, firecloudName);
+          return getWorkspace(workspacesApi, workspaceNamespace, firecloudName);
+        });
+  }
+
+  @Override
+  public FirecloudWorkspaceResponse unlockWorkspaceAsService(
+      String workspaceNamespace, String firecloudName) {
+    WorkspacesApi workspacesApi = serviceAccountWorkspaceApiProvider.get();
+    return retryHandler.run(
+        (context) -> {
+          workspacesApi.unlockWorkspace(workspaceNamespace, firecloudName);
+          return getWorkspace(workspacesApi, workspaceNamespace, firecloudName);
+        });
   }
 
   @Override
@@ -387,9 +407,7 @@ public class FireCloudServiceImpl implements FireCloudService {
       throws WorkbenchException {
     WorkspacesApi workspacesApi = endUserWorkspacesApiProvider.get();
     return retryHandler.run(
-        (context) ->
-            workspacesApi.getWorkspace(
-                workspaceNamespace, firecloudName, FIRECLOUD_WORKSPACE_REQUIRED_FIELDS));
+        (context) -> getWorkspace(workspacesApi, workspaceNamespace, firecloudName));
   }
 
   @Override
@@ -514,5 +532,12 @@ public class FireCloudServiceImpl implements FireCloudService {
       projectNamePrefix = projectNamePrefix + "-";
     }
     return projectNamePrefix + randomString;
+  }
+
+  private FirecloudWorkspaceResponse getWorkspace(
+      WorkspacesApi workspacesApi, String workspaceNamespace, String firecloudName)
+      throws ApiException {
+    return workspacesApi.getWorkspace(
+        workspaceNamespace, firecloudName, FIRECLOUD_WORKSPACE_REQUIRED_FIELDS);
   }
 }

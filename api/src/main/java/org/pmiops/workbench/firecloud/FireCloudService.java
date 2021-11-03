@@ -97,6 +97,12 @@ public interface FireCloudService {
 
   FirecloudWorkspaceResponse getWorkspaceAsService(String workspaceNamespace, String firecloudName);
 
+  FirecloudWorkspaceResponse lockWorkspaceAsService(
+      String workspaceNamespace, String firecloudName);
+
+  FirecloudWorkspaceResponse unlockWorkspaceAsService(
+      String workspaceNamespace, String firecloudName);
+
   /**
    * Requested field options specified here:
    * https://docs.google.com/document/d/1YS95Q7ViRztaCSfPK-NS6tzFPrVpp5KUo0FaWGx7VHw/edit#heading=h.xgjl2srtytjt
