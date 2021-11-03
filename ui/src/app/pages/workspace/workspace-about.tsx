@@ -170,17 +170,6 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withCdrVersions())
     }
   }
 
-  workspaceRuntimeBillingProjectId(): string {
-    const {workspace} = this.state;
-    if (workspace === undefined) {
-      return null;
-    }
-    if ([WorkspaceAccessLevel.WRITER, WorkspaceAccessLevel.OWNER].includes(workspace.accessLevel)) {
-      return workspace.namespace;
-    }
-    return null;
-  }
-
   async publishUnpublishWorkspace(publish: boolean) {
     const {workspace} = this.state;
     const {namespace, id} = workspace;
