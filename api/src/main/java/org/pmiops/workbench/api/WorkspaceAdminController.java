@@ -1,6 +1,7 @@
 package org.pmiops.workbench.api;
 
 import java.util.List;
+import java.util.Optional;
 import javax.annotation.Nullable;
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.model.AccessReason;
@@ -86,10 +87,11 @@ public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
   }
 
   @Override
-  @AuthorityRequired({Authority.RESEARCHER_DATA_VIEW})
+  @AuthorityRequired({Authority.ACCESS_CONTROL_ADMIN})
   public ResponseEntity<EmptyResponse> setWorkspaceLockedState(
       String workspaceNamespace, LockedState lockedState) {
-    // do stuff
+    final boolean desiredLockState = Optional.ofNullable(lockedState.getValue()).orElse(false);
+    workspaceAdminService.setLockedState(workspaceNamespace, desiredLockState);
     return ResponseEntity.ok().build();
   }
 }

@@ -314,6 +314,16 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
         .collect(Collectors.toList());
   }
 
+  @Override
+  public void setLockedState(String workspaceNamespace, boolean desiredLockState) {
+    // OK I got your request
+    log.info(
+        String.format(
+            "called setLockedState on wsns %s with desiredLockState %b",
+            workspaceNamespace, desiredLockState));
+    // TODO but what should I do with it?
+  }
+
   // NOTE: may be an undercount since we only retrieve the first Page of Storage List results
   private int getNonNotebookFileCount(String bucketName) {
     return (int)
