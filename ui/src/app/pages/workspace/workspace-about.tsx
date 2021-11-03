@@ -111,7 +111,7 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withCdrVersions())
   componentDidMount() {
     this.props.hideSpinner();
     this.setVisits();
-    const workspace = this.reloadWorkspace(currentWorkspaceStore.getValue());
+    const workspace = this.updateWorkspaceState(currentWorkspaceStore.getValue());
     this.loadFreeTierUsage(workspace);
     this.loadUserRoles(workspace);
   }
@@ -129,7 +129,7 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withCdrVersions())
     }
   }
 
-  reloadWorkspace(workspace: WorkspaceData): WorkspaceData {
+  updateWorkspaceState(workspace: WorkspaceData): WorkspaceData {
     this.setState({workspace});
     return workspace;
   }
@@ -176,15 +176,16 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withCdrVersions())
   }
 
   async publishUnpublishWorkspace(publish: boolean) {
+    const {workspace} = this.state;
+    const {namespace, id} = workspace;
     this.setState({publishing: true});
     try {
       if (publish) {
-        await workspacesApi()
-          .publishWorkspace(this.state.workspace.namespace, this.state.workspace.id);
+        await workspacesApi().publishWorkspace(namespace, id);
       } else {
-        await workspacesApi()
-          .unpublishWorkspace(this.state.workspace.namespace, this.state.workspace.id);
+        await workspacesApi().unpublishWorkspace(namespace, id);
       }
+      this.updateWorkspaceState({...workspace, published: publish});
     } catch (error) {
       console.error(error);
     } finally {
@@ -194,25 +195,26 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withCdrVersions())
 
   onShare() {
     this.setState({sharing: false});
-    const workspace = this.reloadWorkspace(currentWorkspaceStore.getValue());
+    const workspace = this.updateWorkspaceState(currentWorkspaceStore.getValue());
     this.loadUserRoles(workspace);
   }
 
   render() {
     const {profileState: {profile}, cdrVersionTiersResponse} = this.props;
     const {workspace, workspaceUserRoles, sharing, publishing} = this.state;
+    const published = workspace?.published;
     return <div style={styles.mainPage}>
       <FlexColumn style={{margin: '1rem', width: '98%'}}>
         <ResearchPurpose data-test-id='researchPurpose'/>
         {hasAuthorityForAction(profile, AuthorityGuardedAction.PUBLISH_WORKSPACE) &&
           <div style={{display: 'flex', justifyContent: 'flex-end'}}>
               <Button data-test-id='unpublish-button'
-                      disabled={publishing}
+                      disabled={publishing || !published}
                       type='secondary'
                       onClick={() => this.publishUnpublishWorkspace(false)}>Unpublish</Button>
               <Button data-test-id='publish-button'
                       onClick={() => this.publishUnpublishWorkspace(true)}
-                      disabled={publishing}
+                      disabled={publishing || published}
                       style={{marginLeft: '0.5rem'}}>Publish</Button>
         </div>}
       </FlexColumn>
