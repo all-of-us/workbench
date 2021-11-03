@@ -215,12 +215,13 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withCdrVersions())
         {hasAuthorityForAction(profile, AuthorityGuardedAction.PUBLISH_WORKSPACE) &&
           <div style={{display: 'flex', justifyContent: 'flex-end'}}>
               <Button data-test-id='unpublish-button'
+                      onClick={() => this.publishUnpublishWorkspace(false)}
                       disabled={publishing || !published}
-                      type='secondary'
-                      onClick={() => this.publishUnpublishWorkspace(false)}>Unpublish</Button>
+                      type={published ? 'primary' : 'secondary'}>Unpublish</Button>
               <Button data-test-id='publish-button'
                       onClick={() => this.publishUnpublishWorkspace(true)}
                       disabled={publishing || published}
+                      type={published ? 'secondary' : 'primary'}
                       style={{marginLeft: '0.5rem'}}>Publish</Button>
         </div>}
       </FlexColumn>
