@@ -111,7 +111,7 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withCdrVersions())
   componentDidMount() {
     this.props.hideSpinner();
     this.setVisits();
-    const workspace = this.updateWorkspaceState(currentWorkspaceStore.getValue());
+    const workspace = this.reloadWorkspace(currentWorkspaceStore.getValue());
     this.loadFreeTierUsage(workspace);
     this.loadUserRoles(workspace);
   }
@@ -129,9 +129,15 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withCdrVersions())
     }
   }
 
-  updateWorkspaceState(workspace: WorkspaceData): WorkspaceData {
+  reloadWorkspace(workspace: WorkspaceData): WorkspaceData {
     this.setState({workspace});
     return workspace;
+  }
+
+  // update the component state AND the store with the new workspace object
+  updateWorkspaceState(workspace: WorkspaceData): void {
+    currentWorkspaceStore.next(workspace);
+    this.setState({workspace});
   }
 
   loadUserRoles(workspace: WorkspaceData) {
@@ -195,7 +201,7 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withCdrVersions())
 
   onShare() {
     this.setState({sharing: false});
-    const workspace = this.updateWorkspaceState(currentWorkspaceStore.getValue());
+    const workspace = this.reloadWorkspace(currentWorkspaceStore.getValue());
     this.loadUserRoles(workspace);
   }
 
