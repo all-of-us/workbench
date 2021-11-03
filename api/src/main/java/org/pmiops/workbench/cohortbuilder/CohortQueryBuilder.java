@@ -247,7 +247,7 @@ public class CohortQueryBuilder {
       String mainTable,
       Map<String, QueryParameterValue> params,
       Boolean excludeSQL) {
-    StringJoiner joiner = new StringJoiner("and ");
+    StringJoiner joiner = new StringJoiner("AND ");
     List<String> queryParts = new ArrayList<>();
     for (SearchGroup includeGroup : groups) {
       SearchGroupItemQueryBuilder.buildQuery(params, queryParts, includeGroup);

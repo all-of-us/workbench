@@ -172,16 +172,16 @@ public class CohortMaterializationServiceTest extends SpringTest {
     assertThat(cdrQuery.getColumns()).isEqualTo(ImmutableList.of("person_id"));
     assertThat(cdrQuery.getSql())
         .isEqualTo(
-            "select person.person_id person_id\n"
-                + "from `project_id.data_set_id.person` person\n"
-                + "where\n"
-                + "person.person_id in (select person_id\n"
-                + "from `project_id.data_set_id.person` p\n"
-                + "where\n"
-                + "gender_concept_id in unnest(@p0)\n"
+            "SELECT person.person_id person_id\n"
+                + "FROM `project_id.data_set_id.person` person\n"
+                + "WHERE\n"
+                + "person.person_id IN (SELECT person_id\n"
+                + "FROM `project_id.data_set_id.person` p\n"
+                + "WHERE\n"
+                + "gender_concept_id IN unnest(@p0)\n"
                 + ")\n"
-                + "and person.person_id not in unnest(@person_id_blacklist)\n\n"
-                + "order by person.person_id\n");
+                + "AND person.person_id NOT IN unnest(@person_id_blacklist)\n\n"
+                + "ORDER BY person.person_id\n");
     Map<String, Map<String, Object>> params = getParameters(cdrQuery);
     Map<String, Object> genderParam = params.get("p0");
     Map<String, Object> personIdBlacklistParam = params.get("person_id_blacklist");
@@ -208,26 +208,26 @@ public class CohortMaterializationServiceTest extends SpringTest {
         .isEqualTo(ImmutableList.of("person_id", "measurement_concept.concept_name"));
     assertThat(cdrQuery.getSql())
         .isEqualTo(
-            "select inner_results.person_id, "
+            "SELECT inner_results.person_id, "
                 + "measurement_concept.concept_name measurement_concept__concept_name\n"
-                + "from (select measurement.person_id person_id, "
+                + "FROM (SELECT measurement.person_id person_id, "
                 + "measurement.measurement_concept_id measurement_measurement_concept_id, "
                 + "measurement.person_id measurement_person_id, "
                 + "measurement.measurement_id measurement_measurement_id\n"
-                + "from `project_id.data_set_id.measurement` measurement\n"
-                + "where\n"
-                + "measurement.person_id in (select person_id\n"
-                + "from `project_id.data_set_id.person` p\n"
-                + "where\n"
-                + "gender_concept_id in unnest(@p0)\n"
+                + "FROM `project_id.data_set_id.measurement` measurement\n"
+                + "WHERE\n"
+                + "measurement.person_id IN (SELECT person_id\n"
+                + "FROM `project_id.data_set_id.person` p\n"
+                + "WHERE\n"
+                + "gender_concept_id IN unnest(@p0)\n"
                 + ")\n"
-                + "and measurement.person_id not in unnest(@person_id_blacklist)\n"
+                + "AND measurement.person_id NOT IN unnest(@person_id_blacklist)\n"
                 + "\n"
-                + "order by measurement.person_id, measurement.measurement_id\n"
+                + "ORDER BY measurement.person_id, measurement.measurement_id\n"
                 + ") inner_results\n"
                 + "LEFT OUTER JOIN `project_id.data_set_id.concept` measurement_concept ON "
                 + "inner_results.measurement_measurement_concept_id = measurement_concept.concept_id\n"
-                + "order by measurement_person_id, measurement_measurement_id");
+                + "ORDER BY measurement_person_id, measurement_measurement_id");
     Map<String, Map<String, Object>> params = getParameters(cdrQuery);
     Map<String, Object> genderParam = params.get("p0");
     Map<String, Object> personIdBlacklistParam = params.get("person_id_blacklist");
