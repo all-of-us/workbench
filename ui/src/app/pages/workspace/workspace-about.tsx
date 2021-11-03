@@ -19,12 +19,12 @@ import {currentWorkspaceStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {
-  BillingAccountType,
   CdrVersionTiersResponse,
   Profile,
   UserRole,
   WorkspaceAccessLevel
 } from 'generated/fetch';
+import {isUsingFreeTierBillingAccount} from "app/utils/workspace-utils";
 
 interface WorkspaceProps extends WithSpinnerOverlayProps {
   profileState: {profile: Profile, reload: Function, updateCache: Function};
@@ -261,7 +261,7 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withCdrVersions())
               fp.capitalize(workspace.accessTierShortName) : 'Loading...'}</div>
           </div>
           {workspace && WorkspacePermissionsUtil.canWrite(workspace.accessLevel)
-            && workspace.billingAccountType === BillingAccountType.FREETIER &&
+            && isUsingFreeTierBillingAccount(workspace) &&
               <div style={{...styles.infoBox, height: '2.5rem'}}>
                 <div style={styles.infoBoxHeader}>Workspace Free Credit Usage</div>
                 <div style={{fontSize: '0.5rem'}}>{this.state.workspaceFreeTierUsage !== undefined ?

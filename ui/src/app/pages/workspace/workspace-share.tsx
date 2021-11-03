@@ -20,13 +20,13 @@ import {AnalyticsTracker} from 'app/utils/analytics';
 import {currentWorkspaceStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {
-  BillingAccountType,
   Profile,
   User,
   UserRole,
   WorkspaceAccessLevel,
   WorkspaceUserRolesResponse,
 } from 'generated/fetch/api';
+import {isUsingFreeTierBillingAccount} from "app/utils/workspace-utils";
 
 const styles = reactStyles( {
   tooltipLabel: {
@@ -362,7 +362,7 @@ export const WorkspaceShare = fp.flow(withUserProfile())(class extends React.Com
               <InfoIcon style={{width: '14px', height: '14px', marginLeft: '.4rem'}}/>
             </TooltipTrigger>
           </FlexRow>
-          {this.props.workspace.billingAccountType === BillingAccountType.FREETIER &&
+          {isUsingFreeTierBillingAccount(this.props.workspace) &&
             <div style={{color: colors.primary, fontSize: 14, fontWeight: 400}}>
                 When you share this workspace as a ‘Writer’ or an ‘Owner’, the free credits of the creator of the
                 workspace ({this.props.workspace.creator}) will be used for all analysis in this workspace.

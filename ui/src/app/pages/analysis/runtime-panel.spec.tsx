@@ -29,7 +29,7 @@ import {
 import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
 import {workspaceStubs} from 'testing/stubs/workspaces';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
-import {BillingAccountType, BillingStatus} from 'generated/fetch';
+import {BillingStatus} from 'generated/fetch';
 import {
   cdrVersionStore,
   clearCompoundRuntimeOperations,
@@ -47,6 +47,7 @@ describe('RuntimePanel', () => {
   let onClose: () => void;
   let enablePd: boolean;
   let enableGpu: boolean;
+  let freeTierBillingAccountId: string;
 
   const component = async(propOverrides?: object) => {
     const allProps = {...props, ...propOverrides}
@@ -62,6 +63,7 @@ describe('RuntimePanel', () => {
     serverConfigStore.set({config: {...defaultServerConfig}});
     enablePd = serverConfigStore.get().config.enablePersistentDisk;
     enableGpu = serverConfigStore.get().config.enableGpu;
+    freeTierBillingAccountId = serverConfigStore.get().config.freeTierBillingAccountId;
 
     runtimeApiStub = new RuntimeApiStub();
     registerApiClient(RuntimeApi, runtimeApiStub);
@@ -87,7 +89,7 @@ describe('RuntimePanel', () => {
     currentWorkspaceStore.next({
       ...workspaceStubs[0],
       accessLevel: WorkspaceAccessLevel.WRITER,
-      billingAccountType: BillingAccountType.FREETIER,
+      billingAccountName: 'billingAccounts/' + freeTierBillingAccountId,
       cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID
     });
 
@@ -1031,13 +1033,31 @@ describe('RuntimePanel', () => {
     expect(getCreateButton().prop('disabled')).toBeFalsy();
   });
 
+  it('should allow runtime creation when running cost is too high for user provided billing', async() => {
+    currentWorkspaceStore.next({
+      ...workspaceStubs[0],
+      billingAccountName: 'user provided billing',
+    });
+
+    runtimeApiStub.runtime = null;
+    runtimeStoreStub.runtime = null;
+    const wrapper = await component();
+    await mustClickButton(wrapper, 'Customize');
+    const getCreateButton = () => wrapper.find({'aria-label': 'Create'}).first();
+
+    await pickComputeType(wrapper, ComputeType.Dataproc);
+
+    // This should make the cost about $50/hr.
+    await pickNumWorkers(wrapper, 20000);
+    expect(getCreateButton().prop('disabled')).toBeFalsy();
+  });
+
   it('should prevent runtime creation when running cost is too high for paid tier', async() => {
     runtimeApiStub.runtime = null;
     runtimeStoreStub.runtime = null;
     currentWorkspaceStore.next({
       ...workspaceStubs[0],
       accessLevel: WorkspaceAccessLevel.WRITER,
-      billingAccountType: BillingAccountType.USERPROVIDED,
       cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID
     });
     const wrapper = await component();

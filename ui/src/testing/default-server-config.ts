@@ -15,7 +15,8 @@ const defaultServerConfig: ConfigResponse = {
   rasClientId: '903cfaeb-57d9-4ef6-5659-04377794ed65',
   enableRasLoginGovLinking: true,
   enablePersistentDisk: true,
-  accessRenewalLookback: 330
+  accessRenewalLookback: 330,
+  freeTierBillingAccountId: 'freetier'
 };
 
 export default defaultServerConfig;
