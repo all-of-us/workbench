@@ -12,7 +12,7 @@ buildscript {
     // outside of the buildscsript block aren't usable here.
     ext {
         GAE_VERSION = '1.9.64'
-        GSON_VERSION = '2.8.5'
+        GSON_VERSION = '2.8.9'
         JACKSON_DATABIND_VERSION = '2.11.3'
         JACKSON_VERSION = '2.11.3'
         JODA_VERSION = '2.10'
