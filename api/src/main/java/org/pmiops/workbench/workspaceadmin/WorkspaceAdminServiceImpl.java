@@ -326,6 +326,11 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
 
     Optional<DbWorkspace> dbWorkspaceOptional = getFirstWorkspaceByNamespace(workspaceNamespace);
     dbWorkspaceOptional.ifPresent(dbWorkspace -> setLockedState(dbWorkspace, desiredLockState));
+
+    if (!dbWorkspaceOptional.isPresent()) {
+      log.info(
+          "could not find workspace in DB.  Is this wsns invalid, or from a different environment?");
+    }
   }
 
   private FirecloudWorkspaceDetails setLockedState(
@@ -344,15 +349,17 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
     log.info(String.format("Found workspace in Terra: isLocked = %B", fcWorkspace.isIsLocked()));
 
     if (desiredLockState) {
-      fcWorkspace = fireCloudService
-          .lockWorkspaceAsService(
-              dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName())
-          .getWorkspace();
+      fcWorkspace =
+          fireCloudService
+              .lockWorkspaceAsService(
+                  dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName())
+              .getWorkspace();
     } else {
-      fcWorkspace = fireCloudService
-          .unlockWorkspaceAsService(
-              dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName())
-          .getWorkspace();
+      fcWorkspace =
+          fireCloudService
+              .unlockWorkspaceAsService(
+                  dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName())
+              .getWorkspace();
     }
 
     log.info(String.format("Updated workspace in Terra: isLocked = %B", fcWorkspace.isIsLocked()));
