@@ -24,7 +24,7 @@ import {
   UserRole,
   WorkspaceAccessLevel
 } from 'generated/fetch';
-import {isUsingFreeTierBillingAccount} from "app/utils/workspace-utils";
+import {isUsingFreeTierBillingAccount} from 'app/utils/workspace-utils';
 
 interface WorkspaceProps extends WithSpinnerOverlayProps {
   profileState: {profile: Profile, reload: Function, updateCache: Function};

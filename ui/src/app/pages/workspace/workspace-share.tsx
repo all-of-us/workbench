@@ -26,7 +26,7 @@ import {
   WorkspaceAccessLevel,
   WorkspaceUserRolesResponse,
 } from 'generated/fetch/api';
-import {isUsingFreeTierBillingAccount} from "app/utils/workspace-utils";
+import {isUsingFreeTierBillingAccount} from 'app/utils/workspace-utils';
 
 const styles = reactStyles( {
   tooltipLabel: {

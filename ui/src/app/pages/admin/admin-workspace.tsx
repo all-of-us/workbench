@@ -30,7 +30,7 @@ import {Column} from 'primereact/column';
 import {DataTable} from 'primereact/datatable';
 import {ReactFragment, useState} from 'react';
 import { Link, RouteComponentProps, withRouter } from 'react-router-dom';
-import {isUsingFreeTierBillingAccount} from "app/utils/workspace-utils";
+import {isUsingFreeTierBillingAccount} from 'app/utils/workspace-utils';
 
 const styles = reactStyles({
   infoRow: {

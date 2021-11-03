@@ -718,7 +718,7 @@ import computeStopping from 'assets/icons/compute-stopping.svg';
 import computeError from 'assets/icons/compute-error.svg';
 import computeStopped from 'assets/icons/compute-stopped.svg';
 import computeNone from 'assets/icons/compute-none.svg';
-import {isUsingFreeTierBillingAccount} from "app/utils/workspace-utils";
+import {isUsingFreeTierBillingAccount} from 'app/utils/workspace-utils';
 
 const StartStopRuntimeButton = ({workspaceNamespace, googleProject}) => {
   const [status, setRuntimeStatus] = useRuntimeStatus(workspaceNamespace, googleProject);
