@@ -375,17 +375,17 @@ export const HelpSidebar = fp.flow(
           label: 'Cloud Icon',
           showIcon: () => true,
           style: {height: '22px', width: '22px'},
-          tooltip: this.runtimeTooltip,
+          tooltip: this.runtimeTooltip('Cloud Analysis Environment'),
           hasContent: true,
         },
         'terminal': {
           id: 'terminal',
-          disabled: false,
+          disabled: !!this.props.runtimeStore.loadingError,
           faIcon: faTerminal,
           label: 'Terminal Icon',
           showIcon: () => true,
           style: {height: '22px', width: '22px'},
-          tooltip:  'Cloud Analysis Terminal',
+          tooltip: this.runtimeTooltip('Cloud Analysis Terminal'),
           hasContent: false,
         },
         'genomicExtractions': {
@@ -751,15 +751,16 @@ export const HelpSidebar = fp.flow(
       return fp.getOr('14', 'bodyWidthRem', this.sidebarContent(this.state.activeIcon));
     }
 
-    get runtimeTooltip(): string {
+
+    private runtimeTooltip(baseTooltip: string): string {
       const {loadingError} = this.props.runtimeStore;
       if (loadingError) {
         if (loadingError instanceof ComputeSecuritySuspendedError) {
-          return 'Security suspended: Cloud Analysis Environment';
+          return `Security suspended: ${baseTooltip}`;
         }
-        return 'Cloud Analysis Environment (unknown error)';
+        return `${baseTooltip} (unknown error)`;
       }
-      return 'Cloud Analysis Environment';
+      return baseTooltip;
     }
 
     sidebarContent(activeIcon): {
