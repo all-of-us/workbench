@@ -55,7 +55,6 @@ import {AoU} from 'app/components/text-wrappers';
 import {findCdrVersion} from 'app/utils/cdr-versions';
 import {supportUrls} from 'app/utils/zendesk';
 import {
-  BillingAccountType,
   BillingStatus,
   DataprocConfig,
   DiskType,
@@ -719,6 +718,7 @@ import computeStopping from 'assets/icons/compute-stopping.svg';
 import computeError from 'assets/icons/compute-error.svg';
 import computeStopped from 'assets/icons/compute-stopped.svg';
 import computeNone from 'assets/icons/compute-none.svg';
+import {isUsingFreeTierBillingAccount} from 'app/utils/workspace-utils';
 
 const StartStopRuntimeButton = ({workspaceNamespace, googleProject}) => {
   const [status, setRuntimeStatus] = useRuntimeStatus(workspaceNamespace, googleProject);
@@ -958,21 +958,21 @@ const CostInfo = ({runtimeChanged, runtimeConfig, currentUser, workspace, creato
       <CostEstimator runtimeParameters={runtimeConfig} runtimeCtx={runtimeCtx}/>
     </div>
     {
-      workspace.billingAccountType === BillingAccountType.FREETIER
+      isUsingFreeTierBillingAccount(workspace)
       && currentUser === workspace.creator
       && <div style={styles.costsDrawnFrom}>
         Costs will draw from your remaining {remainingCredits} of free credits.
       </div>
     }
     {
-      workspace.billingAccountType === BillingAccountType.FREETIER
+      isUsingFreeTierBillingAccount(workspace)
       && currentUser !== workspace.creator
       && <div style={styles.costsDrawnFrom}>
         Costs will draw from workspace creator's remaining {remainingCredits} of free credits.
       </div>
     }
     {
-      workspace.billingAccountType === BillingAccountType.USERPROVIDED
+      !isUsingFreeTierBillingAccount(workspace)
       && <div style={styles.costsDrawnFrom}>
         Costs will be charged to billing account {workspace.billingAccountName}.
       </div>
@@ -1274,7 +1274,7 @@ const RuntimePanel = fp.flow(
   // disk that is way too big and expensive on free tier ($.22 an hour). 64 TB is the GCE limit on
   // persistent disk.
   const diskSizeValidatorWithMessage = (diskType = 'standard' || 'master' || 'worker') => {
-    const maxDiskSize = workspace.billingAccountType === BillingAccountType.FREETIER
+    const maxDiskSize = isUsingFreeTierBillingAccount(workspace)
         ? 4000
         : 64000;
     const message = {
@@ -1293,7 +1293,7 @@ const RuntimePanel = fp.flow(
   };
 
   const costErrorsAsWarnings = (
-    workspace.billingAccountType === BillingAccountType.USERPROVIDED ||
+    !isUsingFreeTierBillingAccount(workspace) ||
     // We've increased the workspace creator's free credits. This means they may be expecting to run
     // a more expensive analysis, and the program has extended some further trust for free credit
     // use. Allow them to provision a larger runtime (still warn them). Block them if they get below
@@ -1302,9 +1302,7 @@ const RuntimePanel = fp.flow(
     creatorFreeCreditsRemaining > serverConfigStore.get().config.defaultFreeCreditsDollarLimit);
 
   const runningCostValidatorWithMessage = () => {
-    const maxRunningCost = workspace.billingAccountType === BillingAccountType.FREETIER
-      ? 25
-      : 150;
+    const maxRunningCost = isUsingFreeTierBillingAccount(workspace) ? 25: 150;
     const message = costErrorsAsWarnings
       ? '^Your runtime is expensive. Are you sure you wish to proceed?'
       : `^Your runtime is too expensive. To proceed using free credits, reduce your running costs below $${maxRunningCost}/hr.`;

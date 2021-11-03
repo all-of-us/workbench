@@ -1,4 +1,4 @@
-import {profileStore} from 'app/utils/stores';
+import {profileStore, serverConfigStore} from 'app/utils/stores';
 import {mount} from 'enzyme';
 import * as fp from 'lodash/fp';
 import * as Lolex from 'lolex';
@@ -19,6 +19,7 @@ import {
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {UserApiStub} from 'testing/stubs/user-api-stub';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
+import defaultServerConfig from 'testing/default-server-config';
 
 describe('WorkspaceShare', () => {
   let props: Props;
@@ -50,6 +51,7 @@ describe('WorkspaceShare', () => {
   beforeEach(() => {
     registerApiClient(UserApi, new UserApiStub([harryRole, hermioneRole, ronRole, lunaRole]));
     registerApiClient(WorkspacesApi, new WorkspacesApiStub([tomRiddleDiary], tomRiddleDiaryUserRoles));
+    serverConfigStore.set({config: {...defaultServerConfig}});
 
     props = {
       workspace: tomRiddleDiary,
