@@ -91,7 +91,7 @@ public class DataSetServiceTest extends SpringTest {
 
   private static final QueryJobConfiguration QUERY_JOB_CONFIGURATION_1 =
       QueryJobConfiguration.newBuilder(
-              "SELECT * FROM person_id from `${projectId}.${dataSetId}.person` person")
+              "SELECT person_id FROM `${projectId}.${dataSetId}.person` person")
           .addNamedParameter(
               "foo",
               QueryParameterValue.newBuilder()
@@ -325,19 +325,19 @@ public class DataSetServiceTest extends SpringTest {
             domain1, ImmutableList.of(conceptSet1, conceptSet2));
     assertThat(listClauseMaybe.map(String::trim).orElse(""))
         .isEqualTo(
-            "( condition_concept_id in  (select distinct c.concept_id\n"
-                + "from `${projectId}.${dataSetId}.cb_criteria` c\n"
-                + "join (select cast(cr.id as string) as id\n"
-                + "from `${projectId}.${dataSetId}.cb_criteria` cr\n"
-                + "where domain_id = 'CONDITION'\n"
-                + "and is_standard = 1\n"
-                + "and concept_id in (3, 2, 1, 6, 5, 4)\n"
-                + "and is_selectable = 1\n"
-                + "and full_text like '%[condition_rank1]%') a\n"
-                + "on (c.path like concat('%.', a.id, '.%') or c.path like concat('%.', a.id) or c.path like concat(a.id, '.%') or c.path = a.id)\n"
-                + "where domain_id = 'CONDITION'\n"
-                + "and is_standard = 1\n"
-                + "and is_selectable = 1))");
+            "( condition_concept_id IN  (SELECT DISTINCT c.concept_id\n"
+                + "FROM `${projectId}.${dataSetId}.cb_criteria` c\n"
+                + "JOIN (select cast(cr.id as string) as id\n"
+                + "FROM `${projectId}.${dataSetId}.cb_criteria` cr\n"
+                + "WHERE domain_id = 'CONDITION'\n"
+                + "AND is_standard = 1\n"
+                + "AND concept_id IN (3, 2, 1, 6, 5, 4)\n"
+                + "AND is_selectable = 1\n"
+                + "AND full_text LIKE '%[condition_rank1]%') a\n"
+                + "ON (c.path LIKE CONCAT('%.', a.id, '.%') OR c.path LIKE CONCAT('%.', a.id) OR c.path LIKE CONCAT(a.id, '.%') OR c.path = a.id)\n"
+                + "WHERE domain_id = 'CONDITION'\n"
+                + "AND is_standard = 1\n"
+                + "AND is_selectable = 1))");
   }
 
   @Test
@@ -350,19 +350,19 @@ public class DataSetServiceTest extends SpringTest {
             Domain.CONDITION, ImmutableList.of(conceptSet1, conceptSet2));
     assertThat(listClauseMaybe.map(String::trim).orElse(""))
         .isEqualTo(
-            "( condition_concept_id in  (select distinct c.concept_id\n"
-                + "from `${projectId}.${dataSetId}.cb_criteria` c\n"
-                + "join (select cast(cr.id as string) as id\n"
-                + "from `${projectId}.${dataSetId}.cb_criteria` cr\n"
-                + "where domain_id = 'CONDITION'\n"
-                + "and is_standard = 1\n"
-                + "and concept_id in (3, 2, 1)\n"
-                + "and is_selectable = 1\n"
-                + "and full_text like '%[condition_rank1]%') a\n"
-                + "on (c.path like concat('%.', a.id, '.%') or c.path like concat('%.', a.id) or c.path like concat(a.id, '.%') or c.path = a.id)\n"
-                + "where domain_id = 'CONDITION'\n"
-                + "and is_standard = 1\n"
-                + "and is_selectable = 1))");
+            "( condition_concept_id IN  (SELECT DISTINCT c.concept_id\n"
+                + "FROM `${projectId}.${dataSetId}.cb_criteria` c\n"
+                + "JOIN (select cast(cr.id as string) as id\n"
+                + "FROM `${projectId}.${dataSetId}.cb_criteria` cr\n"
+                + "WHERE domain_id = 'CONDITION'\n"
+                + "AND is_standard = 1\n"
+                + "AND concept_id IN (3, 2, 1)\n"
+                + "AND is_selectable = 1\n"
+                + "AND full_text LIKE '%[condition_rank1]%') a\n"
+                + "ON (c.path LIKE CONCAT('%.', a.id, '.%') OR c.path LIKE CONCAT('%.', a.id) OR c.path LIKE CONCAT(a.id, '.%') OR c.path = a.id)\n"
+                + "WHERE domain_id = 'CONDITION'\n"
+                + "AND is_standard = 1\n"
+                + "AND is_selectable = 1))");
   }
 
   @Test
@@ -458,7 +458,7 @@ public class DataSetServiceTest extends SpringTest {
         dataSetServiceImpl.domainToBigQueryConfig(dataSetRequest);
     assertThat(result).hasSize(1);
     assertThat(result.get(Domain.FITBIT_HEART_RATE_LEVEL.name()).getQuery())
-        .contains("GROUP BY PERSON_ID, DATE");
+        .contains("GROUP BY person_id, date");
   }
 
   @Test

@@ -9,7 +9,7 @@ public enum BigQueryDataSetTableInfo {
   CONDITION(
       Domain.CONDITION,
       "ds_condition_occurrence",
-      " condition_concept_id in "
+      " condition_concept_id IN "
           + String.format(
               CHILD_LOOKUP_SQL,
               Constants.CONDITION,
@@ -18,7 +18,7 @@ public enum BigQueryDataSetTableInfo {
               Constants.CONDITION_RANK,
               Constants.CONDITION,
               1),
-      " condition_source_concept_id in "
+      " condition_source_concept_id IN "
           + String.format(
               CHILD_LOOKUP_SQL,
               Constants.CONDITION,
@@ -30,7 +30,7 @@ public enum BigQueryDataSetTableInfo {
   PROCEDURE(
       Domain.PROCEDURE,
       "ds_procedure_occurrence",
-      " procedure_concept_id in "
+      " procedure_concept_id IN "
           + String.format(
               CHILD_LOOKUP_SQL,
               Constants.PROCEDURE,
@@ -39,7 +39,7 @@ public enum BigQueryDataSetTableInfo {
               Constants.PROCEDURE_RANK,
               Constants.PROCEDURE,
               1),
-      " procedure_source_concept_id in "
+      " procedure_source_concept_id IN "
           + String.format(
               CHILD_LOOKUP_SQL,
               Constants.PROCEDURE,
@@ -51,7 +51,7 @@ public enum BigQueryDataSetTableInfo {
   DRUG(
       Domain.DRUG,
       "ds_drug_exposure",
-      " drug_concept_id in "
+      " drug_concept_id IN "
           + String.format(
               DRUG_CHILD_LOOKUP_SQL,
               Constants.DRUG,
@@ -60,7 +60,7 @@ public enum BigQueryDataSetTableInfo {
               Constants.DRUG_RANK,
               Constants.DRUG,
               1),
-      " drug_source_concept_id in "
+      " drug_source_concept_id IN "
           + String.format(
               DRUG_CHILD_LOOKUP_SQL,
               Constants.DRUG,
@@ -72,7 +72,7 @@ public enum BigQueryDataSetTableInfo {
   MEASUREMENT(
       Domain.MEASUREMENT,
       "ds_measurement",
-      " measurement_concept_id in "
+      " measurement_concept_id IN "
           + String.format(
               CHILD_LOOKUP_SQL,
               Constants.MEASUREMENT,
@@ -81,7 +81,7 @@ public enum BigQueryDataSetTableInfo {
               Constants.MEASUREMENT_RANK,
               Constants.MEASUREMENT,
               1),
-      " measurement_source_concept_id in "
+      " measurement_source_concept_id IN "
           + String.format(
               CHILD_LOOKUP_SQL,
               Constants.MEASUREMENT,
@@ -93,15 +93,15 @@ public enum BigQueryDataSetTableInfo {
   PHYSICAL_MEASUREMENT_CSS(
       Domain.PHYSICAL_MEASUREMENT_CSS,
       "ds_measurement",
-      " measurement_concept_id in unnest(@standardConceptIds)",
-      " measurement_source_concept_id in unnest(@sourceConceptIds)"),
-  SURVEY(Domain.SURVEY, "ds_survey", null, " question_concept_id in unnest(@sourceConceptIds)"),
+      " measurement_concept_id IN unnest(@standardConceptIds)",
+      " measurement_source_concept_id IN unnest(@sourceConceptIds)"),
+  SURVEY(Domain.SURVEY, "ds_survey", null, " question_concept_id IN unnest(@sourceConceptIds)"),
   PERSON(Domain.PERSON, "ds_person", null, null),
   OBSERVATION(
       Domain.OBSERVATION,
       "ds_observation",
-      " observation_concept_id in unnest(@standardConceptIds)",
-      " observation_source_concept_id in unnest(@sourceConceptIds)"),
+      " observation_concept_id IN unnest(@standardConceptIds)",
+      " observation_source_concept_id IN unnest(@sourceConceptIds)"),
   FITBIT_HEART_RATE_SUMMARY(Domain.FITBIT_HEART_RATE_SUMMARY, "ds_heart_rate_summary", null, null),
   FITBIT_HEART_RATE_LEVEL(Domain.FITBIT_HEART_RATE_LEVEL, "ds_heart_rate_minute_level", null, null),
   FITBIT_ACTIVITY(Domain.FITBIT_ACTIVITY, "ds_activity_summary", null, null),
