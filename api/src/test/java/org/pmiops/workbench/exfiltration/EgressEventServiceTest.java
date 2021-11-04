@@ -30,8 +30,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.JpaFakeDateTimeConfiguration;
-import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.actionaudit.auditors.EgressEventAuditor;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -64,8 +64,8 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 
 @DataJpaTest
-@Import({JpaFakeDateTimeConfiguration.class})
-public class EgressEventServiceTest extends SpringTest {
+@Import({FakeClockConfiguration.class, JpaFakeDateTimeConfiguration.class})
+public class EgressEventServiceTest {
 
   private static final Instant NOW = Instant.parse("2020-06-11T01:30:00.02Z");
   private static final String INSTITUTION_2_NAME = "Auburn University";
@@ -124,7 +124,7 @@ public class EgressEventServiceTest extends SpringTest {
   private DbWorkspace dbWorkspace;
 
   @TestConfiguration
-  @Import({EgressEventServiceImpl.class})
+  @Import({FakeClockConfiguration.class, EgressEventServiceImpl.class})
   static class Configuration {
 
     @Bean

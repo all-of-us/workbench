@@ -7,7 +7,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
-import org.pmiops.workbench.SpringTest;
+import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
 import org.pmiops.workbench.cohortbuilder.mapper.CohortBuilderMapper;
@@ -28,14 +28,14 @@ import org.springframework.test.annotation.DirtiesContext;
 
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-public class ConceptSetServiceTest extends SpringTest {
+public class ConceptSetServiceTest {
 
   @Autowired WorkspaceDao workspaceDao;
   @Autowired ConceptSetService conceptSetService;
   @Autowired ConceptSetMapper conceptSetMapper;
 
   @TestConfiguration
-  @Import({ConceptSetService.class, ConceptSetMapperImpl.class})
+  @Import({FakeClockConfiguration.class, ConceptSetService.class, ConceptSetMapperImpl.class})
   @MockBean({
     CommonMappers.class,
     CohortBuilderMapper.class,

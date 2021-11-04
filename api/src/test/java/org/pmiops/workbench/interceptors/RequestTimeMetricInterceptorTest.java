@@ -19,7 +19,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.pmiops.workbench.FakeClockConfiguration;
-import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.monitoring.LogsBasedMetricService;
 import org.pmiops.workbench.monitoring.MeasurementBundle;
 import org.pmiops.workbench.monitoring.labels.MetricLabel;
@@ -29,10 +28,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.ModelAndView;
 
-public class RequestTimeMetricInterceptorTest extends SpringTest {
+@SpringJUnitConfig
+public class RequestTimeMetricInterceptorTest {
 
   private static final Instant START_INSTANT = FakeClockConfiguration.NOW.toInstant();
   private static final long DURATION_MILLIS = 1500L;
@@ -55,7 +56,7 @@ public class RequestTimeMetricInterceptorTest extends SpringTest {
   @Autowired FakeClock fakeClock;
 
   @TestConfiguration
-  @Import({RequestTimeMetricInterceptor.class})
+  @Import({FakeClockConfiguration.class, RequestTimeMetricInterceptor.class})
   public static class Config {}
 
   @BeforeEach

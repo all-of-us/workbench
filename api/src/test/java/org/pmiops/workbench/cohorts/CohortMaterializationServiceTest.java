@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.pmiops.workbench.SpringTest;
+import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderServiceImpl;
@@ -71,6 +71,7 @@ import org.springframework.transaction.annotation.Transactional;
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 @Import({
+  FakeClockConfiguration.class,
   LiquibaseAutoConfiguration.class,
   FieldSetQueryBuilder.class,
   AnnotationQueryBuilder.class,
@@ -86,7 +87,7 @@ import org.springframework.transaction.annotation.Transactional;
   CdrJpaConfig.class
 })
 @MockBean({BigQuery.class})
-public class CohortMaterializationServiceTest extends SpringTest {
+public class CohortMaterializationServiceTest {
 
   private static final String DATA_SET_ID = "data_set_id";
   private static final String PROJECT_ID = "project_id";

@@ -15,7 +15,7 @@ import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
-import org.pmiops.workbench.SpringTest;
+import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.UserDao;
@@ -43,7 +43,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 
 @DataJpaTest
-public class NotebooksServiceTest extends SpringTest {
+public class NotebooksServiceTest {
   private static final JSONObject NOTEBOOK_CONTENTS =
       new JSONObject().put("who", "I'm a notebook!");
   private static final String BUCKET_NAME = "notebook.bucket";
@@ -71,7 +71,7 @@ public class NotebooksServiceTest extends SpringTest {
   @Autowired private NotebooksService notebooksService;
 
   @TestConfiguration
-  @Import({NotebooksServiceImpl.class})
+  @Import({FakeClockConfiguration.class, NotebooksServiceImpl.class})
   @MockBean({UserRecentResourceService.class, WorkspaceAuthService.class})
   static class Configuration {
 

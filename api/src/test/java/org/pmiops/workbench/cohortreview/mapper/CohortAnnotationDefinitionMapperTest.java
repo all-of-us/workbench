@@ -6,7 +6,7 @@ import java.util.Arrays;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import org.junit.jupiter.api.Test;
-import org.pmiops.workbench.SpringTest;
+import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.api.Etags;
 import org.pmiops.workbench.db.model.DbCohortAnnotationDefinition;
 import org.pmiops.workbench.db.model.DbCohortAnnotationEnumValue;
@@ -17,13 +17,19 @@ import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
-public class CohortAnnotationDefinitionMapperTest extends SpringTest {
+@SpringJUnitConfig
+public class CohortAnnotationDefinitionMapperTest {
 
   @Autowired private CohortAnnotationDefinitionMapper cohortAnnotationDefinitionMapper;
 
   @TestConfiguration
-  @Import({CohortAnnotationDefinitionMapperImpl.class, CommonMappers.class})
+  @Import({
+    FakeClockConfiguration.class,
+    CohortAnnotationDefinitionMapperImpl.class,
+    CommonMappers.class
+  })
   static class Configuration {}
 
   @Test

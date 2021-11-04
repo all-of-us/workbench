@@ -23,7 +23,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.JpaFakeDateTimeConfiguration;
-import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.actionaudit.auditors.EgressEventAuditor;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.EgressAlertRemediationPolicy;
@@ -53,8 +52,8 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 
 @DataJpaTest
-@Import({JpaFakeDateTimeConfiguration.class})
-public class EgressRemediationServiceTest extends SpringTest {
+@Import({FakeClockConfiguration.class, JpaFakeDateTimeConfiguration.class})
+public class EgressRemediationServiceTest {
 
   private static final String USER_EMAIL = "asdf@fake-research-aou.org";
   private static WorkbenchConfig workbenchConfig;
@@ -76,7 +75,7 @@ public class EgressRemediationServiceTest extends SpringTest {
   private DbWorkspace dbWorkspace2;
 
   @TestConfiguration
-  @Import({EgressRemediationService.class})
+  @Import({FakeClockConfiguration.class, EgressRemediationService.class})
   static class Configuration {
 
     @Bean

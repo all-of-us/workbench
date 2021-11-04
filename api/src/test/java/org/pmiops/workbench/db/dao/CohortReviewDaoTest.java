@@ -6,7 +6,7 @@ import java.sql.Timestamp;
 import java.util.Calendar;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.pmiops.workbench.SpringTest;
+import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbCohortReview;
 import org.pmiops.workbench.db.model.DbStorageEnums;
@@ -14,11 +14,13 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
 
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-public class CohortReviewDaoTest extends SpringTest {
+@Import(FakeClockConfiguration.class)
+public class CohortReviewDaoTest {
 
   private static long CDR_VERSION_ID = 1;
   @Autowired WorkspaceDao workspaceDao;

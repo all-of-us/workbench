@@ -10,7 +10,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.pmiops.workbench.SpringTest;
+import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbUser;
@@ -24,8 +24,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
-public class DevUserRegistrationServiceTest extends SpringTest {
+@SpringJUnitConfig
+public class DevUserRegistrationServiceTest {
 
   @MockBean private DirectoryService directoryService;
   @MockBean private InstitutionService institutionService;
@@ -38,7 +40,11 @@ public class DevUserRegistrationServiceTest extends SpringTest {
   @Autowired private DevUserRegistrationService service;
 
   @TestConfiguration
-  @Import({DevUserRegistrationServiceImpl.class, VerifiedInstitutionalAffiliationMapperImpl.class})
+  @Import({
+    FakeClockConfiguration.class,
+    DevUserRegistrationServiceImpl.class,
+    VerifiedInstitutionalAffiliationMapperImpl.class
+  })
   static class Configuration {}
 
   @BeforeEach
