@@ -100,7 +100,8 @@ public class FireCloudServiceImpl implements FireCloudService {
           "workspace.namespace",
           "workspace.googleProject",
           "workspace.bucketName",
-          "workspace.createdBy");
+          "workspace.createdBy",
+          "workspace.isLocked");
 
   @Autowired
   public FireCloudServiceImpl(
