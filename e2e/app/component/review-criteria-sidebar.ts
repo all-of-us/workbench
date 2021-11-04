@@ -112,12 +112,12 @@ export default class ReviewCriteriaSidebar extends BaseHelpSidebar {
   }
 
   async removeSelectedCriteria(criteriaName: string): Promise<void> {
-    const removeIconLink = await this.getRemoveCriteriaIconLink(criteriaName);
+    const removeIconLink = this.getRemoveCriteriaIconLink(criteriaName);
     await removeIconLink.click();
     await this.page.waitForXPath(removeIconLink.getXpath(), { hidden: true });
   }
 
-  async getRemoveCriteriaIconLink(criteriaName: string): Promise<ClrIconLink> {
+  getRemoveCriteriaIconLink(criteriaName: string): ClrIconLink {
     const removeCriteriaIconXpath = buildXPath(
       {
         type: ElementType.Icon,
