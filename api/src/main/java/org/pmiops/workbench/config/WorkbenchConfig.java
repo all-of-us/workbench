@@ -313,7 +313,7 @@ public class WorkbenchConfig {
   public static class RasConfig {
     // RAS hostname
     public String host;
-    // RAS client jiraId to finish the OAuth flow.
+    // RAS client id to finish the OAuth flow.
     public String clientId;
     // The URL that can sign out RAS login session.
     public String logoutUrl;
