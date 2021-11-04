@@ -193,10 +193,10 @@ export default class CohortParticipantsGroup {
   async deleteCriteria(criteriaName: string): Promise<void> {
     await this.clickCriteriaSnowmanIcon(criteriaName);
     await this.selectSnowmanMenu(MenuOption.DeleteCriteria);
-    await waitWhileLoading(this.page);
-    // Criteria should be removed.
+    // The criteria should be removed.
     const snowmanIconLink = this.getCriteriaSnowmanIconLink(criteriaName);
     await this.page.waitForXPath(snowmanIconLink.getXpath(), { hidden: true });
+    await waitWhileLoading(this.page);
   }
 
   /**
