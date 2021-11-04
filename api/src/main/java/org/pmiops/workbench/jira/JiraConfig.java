@@ -9,6 +9,7 @@ import org.pmiops.workbench.jira.api.JiraApi;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.web.context.annotation.RequestScope;
 
 @Configuration
@@ -31,6 +32,7 @@ public class JiraConfig {
   }
 
   @Bean
+  @Lazy
   public ApiClient apiClient(
       @Qualifier(JIRA_CREDS_CACHE) Supplier<JiraCredentials> jiraCredsCache) {
     ApiClient client = new ApiClient();
@@ -41,6 +43,7 @@ public class JiraConfig {
   }
 
   @Bean
+  @Lazy
   @Qualifier(JIRA_CREDS_CACHE)
   Supplier<JiraCredentials> getJiraCredsCache(CloudStorageClient storageClient) {
     return Suppliers.memoizeWithExpiration(
