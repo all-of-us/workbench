@@ -22,6 +22,8 @@ const userAgent =
   'Chrome/80.0.3987.149 Safari/537.36' +
   (CIRCLE_BUILD_NUM ? ` (circle-build-number/${CIRCLE_BUILD_NUM})` : '');
 
+export const requestsMap = new Map();
+
 /**
  * Launch new Chrome.
  * @param launchOpts: {@link LaunchOptions} New browser launch options.
@@ -134,6 +136,9 @@ export const initPageBeforeTest = async (page: Page): Promise<void> => {
    * In order to intercept and mutate requests, see page.setRequestInterceptionEnabled.
    */
   page.on('request', (request: Request) => {
+    // @ts-ignore
+    const requestId = request._interceptionId;
+    requestsMap.set(requestId, '');
     if (isLoggable(request)) {
       const requestBody = getRequestData(request);
       const body = requestBody.length === 0 ? '' : `\n${requestBody}`;
@@ -151,18 +156,27 @@ export const initPageBeforeTest = async (page: Page): Promise<void> => {
   });
 
   // Emitted when a request fails: 4xx..5xx status codes
-  page.on('requestfailed', async (request) => {
+  page.on('requestfailed', async (request: Request) => {
+    // @ts-ignore
+    const requestId = request._interceptionId;
+    requestsMap.delete(requestId);
     if (showFailedResponse(request)) {
       await logRequestError(request);
     }
   });
 
-  /** Emitted when a request finishes. */
+  /**
+   * Emitted when a request finishes successfully.
+   * NOTE: HTTP Error responses such as 404 or 503, are considered successful responses as 'requestfinished' event.
+   */
   page.on('requestfinished', async (request: Request) => {
     let method;
     let url;
     let status;
     try {
+      // @ts-ignore
+      const requestId = request._interceptionId;
+      requestsMap.delete(requestId);
       method = request.method();
       const resp = request.response();
       url = resp.url();
@@ -173,7 +187,8 @@ export const initPageBeforeTest = async (page: Page): Promise<void> => {
         if (isLoggable(request)) {
           let text = `Request finished: ${status} ${method} ${url}`;
           if (request.method() !== 'OPTIONS' && shouldLogResponse(request)) {
-            text = `${text}\n${await formatResponseBody(request)}`;
+            const respBody = await formatResponseBody(request);
+            text = `${text}\n${respBody}`;
           }
           logger.log('info', text);
         }
