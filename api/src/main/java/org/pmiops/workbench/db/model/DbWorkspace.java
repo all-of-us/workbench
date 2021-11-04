@@ -125,6 +125,7 @@ public class DbWorkspace {
       DbStorageEnums.billingAccountTypeToStorage(BillingAccountType.FREE_TIER);
   private Short needsRPReviewPrompt;
   private String googleProject;
+  private boolean adminLocked;
 
   public DbWorkspace() {
     setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
@@ -743,5 +744,14 @@ public class DbWorkspace {
   public DbWorkspace setNeedsReviewPrompt(Boolean needsReviewRPPrompt) {
     this.needsRPReviewPrompt = (short) (needsReviewRPPrompt ? 0 : 1);
     return this;
+  }
+
+  @Column(name = "admin_locked")
+  public boolean isAdminLocked() {
+    return adminLocked;
+  }
+
+  public void setAdminLocked(boolean adminLocked) {
+    this.adminLocked = adminLocked;
   }
 }

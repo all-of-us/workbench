@@ -340,14 +340,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
             "Found workspace in DB: ID %d, Name '%s'",
             dbWorkspace.getWorkspaceId(), dbWorkspace.getName()));
 
-  }
-
-  private String printBoolean(Boolean value) {
-    if (value == null) {
-      return "null";
-    } else {
-      return value.toString();
-    }
+    workspaceDao.save(dbWorkspace.setAdminLocked(desiredLockState));
   }
 
   // NOTE: may be an undercount since we only retrieve the first Page of Storage List results
