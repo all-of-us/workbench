@@ -1505,11 +1505,11 @@ paths:
         - workspaceAdmin
       consumes:
         - application/json
-      description: Set locked or unlocked state for the workspace
-      operationId: setWorkspaceLockedState
+      description: Set admin locked or unlocked state for the workspace
+      operationId: setAdminLockedState
       parameters:
         - in: body
-          name: lockedState
+          name: AdminLockedState
           required: true
           schema:
             type: object

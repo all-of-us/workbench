@@ -315,7 +315,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
   }
 
   @Override
-  public void setLockedState(String workspaceNamespace, boolean desiredLockState) {
+  public void setAdminLockedState(String workspaceNamespace, boolean desiredLockState) {
     // OK I got your request
     log.info(
         String.format(
@@ -325,7 +325,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
     // TODO but what should I do with it?
 
     Optional<DbWorkspace> dbWorkspaceOptional = getFirstWorkspaceByNamespace(workspaceNamespace);
-    dbWorkspaceOptional.ifPresent(dbWorkspace -> setLockedState(dbWorkspace, desiredLockState));
+    dbWorkspaceOptional.ifPresent(dbWorkspace -> setAdminLockedState(dbWorkspace, desiredLockState));
 
     if (!dbWorkspaceOptional.isPresent()) {
       log.info(
@@ -333,41 +333,13 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
     }
   }
 
-  private FirecloudWorkspaceDetails setLockedState(
+  private void setAdminLockedState(
       DbWorkspace dbWorkspace, boolean desiredLockState) {
     log.info(
         String.format(
             "Found workspace in DB: ID %d, Name '%s'",
             dbWorkspace.getWorkspaceId(), dbWorkspace.getName()));
 
-    FirecloudWorkspaceDetails fcWorkspace =
-        fireCloudService
-            .getWorkspaceAsService(
-                dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName())
-            .getWorkspace();
-
-    log.info(
-        String.format(
-            "Found workspace in Terra: isLocked = %s", printBoolean(fcWorkspace.isIsLocked())));
-
-    if (desiredLockState) {
-      fcWorkspace =
-          fireCloudService
-              .lockWorkspaceAsService(
-                  dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName())
-              .getWorkspace();
-    } else {
-      fcWorkspace =
-          fireCloudService
-              .unlockWorkspaceAsService(
-                  dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName())
-              .getWorkspace();
-    }
-
-    log.info(
-        String.format(
-            "Updated workspace in Terra: isLocked = %s", printBoolean(fcWorkspace.isIsLocked())));
-    return fcWorkspace;
   }
 
   private String printBoolean(Boolean value) {

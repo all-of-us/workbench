@@ -5,6 +5,7 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.model.AccessReason;
+import org.pmiops.workbench.model.AdminLockedState;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.CloudStorageTraffic;
 import org.pmiops.workbench.model.EmptyResponse;
@@ -88,10 +89,10 @@ public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
 
   @Override
   @AuthorityRequired({Authority.ACCESS_CONTROL_ADMIN})
-  public ResponseEntity<EmptyResponse> setWorkspaceLockedState(
-      String workspaceNamespace, LockedState lockedState) {
+  public ResponseEntity<EmptyResponse> setAdminLockedState(
+      String workspaceNamespace, AdminLockedState lockedState) {
     final boolean desiredLockState = Optional.ofNullable(lockedState.getValue()).orElse(false);
-    workspaceAdminService.setLockedState(workspaceNamespace, desiredLockState);
+    workspaceAdminService.setAdminLockedState(workspaceNamespace, desiredLockState);
     return ResponseEntity.ok().build();
   }
 }
