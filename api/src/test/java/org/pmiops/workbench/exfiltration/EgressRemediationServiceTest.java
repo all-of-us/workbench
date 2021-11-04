@@ -52,7 +52,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 
 @DataJpaTest
-@Import({FakeClockConfiguration.class, JpaFakeDateTimeConfiguration.class})
 public class EgressRemediationServiceTest {
 
   private static final String USER_EMAIL = "asdf@fake-research-aou.org";
@@ -75,7 +74,11 @@ public class EgressRemediationServiceTest {
   private DbWorkspace dbWorkspace2;
 
   @TestConfiguration
-  @Import({FakeClockConfiguration.class, EgressRemediationService.class})
+  @Import({
+    EgressRemediationService.class,
+    FakeClockConfiguration.class,
+    JpaFakeDateTimeConfiguration.class,
+  })
   static class Configuration {
 
     @Bean
