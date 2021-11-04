@@ -227,7 +227,7 @@ describe('Build cohort page actions', () => {
     // Include Group 1 has 1 criteria after delete 1.
     await waitForExpect(async () => {
       expect((await group1.findGroupCriteriaList()).length).toBe(1);
-    }, 10000); // Wait for the UNDO button to be gone
+    }, 20000); // Wait for the UNDO button to be gone
 
     // Add Exclude Group 3: add Ethnicity criteria.
     const excludeGroup3 = cohortBuildPage.findExcludeParticipantsGroup('Group 3');

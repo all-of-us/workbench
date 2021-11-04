@@ -3,7 +3,7 @@ import { logger } from 'libs/logger';
 import { takeScreenshot } from './save-file-utils';
 import Container from 'app/container';
 import { makeDateTimeStr } from './str-utils';
-import { requestsMap } from '../libs/page-manager';
+import { requestsMap } from 'libs/page-manager';
 
 export const waitForFn = async (fn: () => any, interval = 2000, timeout = 10000): Promise<boolean> => {
   const start = Date.now();
@@ -390,13 +390,19 @@ export async function waitWhileLoading(
   // Prevent checking in blank page: wait for loading spinner or some elements exists in DOM.
   await Promise.race([page.waitForSelector(notBlankPageSelector), page.waitForSelector(spinElementsSelector)]);
 
-  const waitUntilRequestDone = (timeout: number) =>
-    new Promise((resolve) =>
-      setTimeout(() => {
-        console.log(`requestsMap.size: ${requestsMap.size}`);
-        resolve(requestsMap.size > 0 ? 'done' : 'unfinished');
-      }, timeout)
-    );
+  const isZero = async value =>
+      new Promise(resolve =>
+          setTimeout(() => resolve(value === 0 ? 'ok': 'no'), 1000))
+
+  const waitUntilRequestDone = async () => {
+    let result = null
+    while (result != 'ok') {
+      console.log(result);
+      console.log(`requestsMap.size: ${requestsMap.size}`);
+      result = await isZero(requestsMap.size)
+    }
+    console.log('all requests have finished');
+  }
 
   try {
     await Promise.all([
@@ -408,7 +414,7 @@ export async function waitWhileLoading(
         spinElementsSelector
       ),
       page.waitForSelector(spinElementsSelector, { hidden: true, timeout }),
-      waitUntilRequestDone(timeout)
+      waitUntilRequestDone()
     ]);
   } catch (err) {
     logger.error(`ERROR: Loading spinner has not stopped. spinner xpath is "${spinElementsSelector}"`);
