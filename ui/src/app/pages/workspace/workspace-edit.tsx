@@ -1,8 +1,10 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import validate from 'validate.js';
+import {Dropdown} from 'primereact/dropdown';
+import {OverlayPanel} from 'primereact/overlaypanel';
 
-import {Button, Clickable, LinkButton, StyledExternalLink} from 'app/components/buttons';
+import {Button, LinkButton, StyledExternalLink} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {InfoIcon} from 'app/components/icons';
@@ -16,7 +18,6 @@ import {AoU, AouTitle} from 'app/components/text-wrappers';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {CreateBillingAccountModal} from 'app/pages/workspace/create-billing-account-modal';
 import {WorkspaceEditSection} from 'app/pages/workspace/workspace-edit-section';
-import {Select} from 'app/components/inputs';
 import {
   disseminateFindings,
   PrimaryPurposeItems,
@@ -44,7 +45,7 @@ import {
   withCurrentWorkspace,
   withUserProfile
 } from 'app/utils';
-import {AccessTierShortNames} from 'app/utils/access-tiers';
+import {AccessTierShortNames, displayNameForTier, hasTierAccess} from 'app/utils/access-tiers';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {
   ensureBillingScope,
@@ -78,9 +79,9 @@ import {
   Workspace,
   WorkspaceAccessLevel
 } from 'generated/fetch';
-import {Dropdown} from 'primereact/dropdown';
-import {OverlayPanel} from 'primereact/overlaypanel';
 import {OldCdrVersionModal} from './old-cdr-version-modal';
+import {environment} from 'environments/environment';
+import {TierUnavailableModal} from "./tier-unavailable-modal";
 
 export const styles = reactStyles({
   categoryRow: {
@@ -295,6 +296,7 @@ export interface WorkspaceEditState {
   workspaceCreationErrorMessage: string;
   workspaceNewAclDelayed: boolean;
   workspaceNewAclDelayedContinueFn: Function;
+  tierUnavailable?: string;
 }
 
 export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), withUserProfile(), withNavigation)(
@@ -1098,9 +1100,27 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
 
     // show the Access Tiers selection dropdown only when there are multiple tiers to choose from
     enableAccessTierSelection(): boolean {
-      const {tiers} = this.props.cdrVersionTiersResponse || {tiers: []};
-      return tiers.length > 1;
+      return environment.accessTiersVisibleToUsers.length > 1;
     }
+
+    onAccessTierChange(profile: Profile, cdrVersionTiersResponse: CdrVersionTiersResponse) {
+      return (v: React.FormEvent<HTMLSelectElement>) => {
+        const selectedTier = v.currentTarget.value;
+
+        if (hasTierAccess(profile, selectedTier)) {
+          this.setState(fp.flow(
+            fp.set(['tierUnavailable'], ''),
+            fp.set(['workspace', 'accessTierShortName'], selectedTier),
+            fp.set(['cdrVersions'], this.getCdrVersions(selectedTier)),
+            fp.set(['workspace', 'cdrVersionId'],
+              getDefaultCdrVersionForTier(selectedTier, cdrVersionTiersResponse).cdrVersionId)
+          ));
+        } else {
+          this.setState({tierUnavailable: selectedTier});
+        }
+      };
+    }
+
 
     render() {
       const {enableBillingUpgrade} = serverConfigStore.get().config;
@@ -1129,9 +1149,11 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
         workspaceCreationConflictError,
         workspaceCreationError,
         workspaceCreationErrorMessage,
-        workspaceNewAclDelayed
+        workspaceNewAclDelayed,
+        tierUnavailable,
       } = this.state;
-      const {cdrVersionTiersResponse, profileState: {profile: {freeTierDollarQuota, freeTierUsage}}} = this.props;
+      const {cdrVersionTiersResponse, profileState: {profile}} = this.props;
+      const {freeTierDollarQuota, freeTierUsage} = profile;
       const freeTierCreditsBalance = freeTierDollarQuota - freeTierUsage;
       // defined below in the OverlayPanel declaration
       let freeTierBalancePanel: OverlayPanel;
@@ -1154,6 +1176,9 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
               destWorkspace={this.state.workspace}
               cdrVersionTiersResponse={cdrVersionTiersResponse}
           />}
+          {tierUnavailable && <TierUnavailableModal
+            accessTierShortName={tierUnavailable}
+            onCancel={() => this.setState({tierUnavailable: ''})}/>}
           <WorkspaceEditSection header={this.renderHeader()} tooltip={toolTipText.header}
                                 style={{marginTop: '24px'}} largeHeader
                                 required={!this.isMode(WorkspaceEditMode.Duplicate)}>
@@ -1184,18 +1209,11 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
                   <div data-test-id='select-access-tier' style={{...styles.select, ...styles.accessTierSpacing}}>
                     <select style={{...styles.selectInput, ...styles.accessTierSpacing}}
                             value={accessTierShortName}
-                            onChange={(v: React.FormEvent<HTMLSelectElement>) => {
-                              const selectedTier = v.currentTarget.value;
-                              this.setState(fp.flow(
-                                fp.set(['workspace', 'accessTierShortName'], selectedTier),
-                                fp.set(['cdrVersions'], this.getCdrVersions(selectedTier)),
-                                fp.set(['workspace', 'cdrVersionId'],
-                                  getDefaultCdrVersionForTier(selectedTier, cdrVersionTiersResponse).cdrVersionId)));
-                            }}
+                            onChange={this.onAccessTierChange(profile, cdrVersionTiersResponse)}
                             disabled={!this.isMode(WorkspaceEditMode.Create)}>
-                      {cdrVersionTiersResponse.tiers.map((tier, i) => (
-                          <option key={tier.accessTierShortName} value={tier.accessTierShortName}>
-                            {tier.accessTierDisplayName}
+                      {environment.accessTiersVisibleToUsers.map((shortName, i) => (
+                          <option key={shortName} value={shortName}>
+                            {displayNameForTier(shortName)}
                           </option>
                       ))}
                     </select>

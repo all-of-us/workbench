@@ -1,12 +1,14 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {mount, ReactWrapper, ShallowWrapper} from 'enzyme';
+import {Dropdown} from "primereact/dropdown";
 
-import {profileApi, registerApiClient} from 'app/services/swagger-fetch-clients';
+import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {
-  DisseminateResearchEnum, ProfileApi,
+  DisseminateResearchEnum,
+  ProfileApi,
   ResearchOutcomeEnum,
   SpecificPopulationEnum,
   UserApi,
@@ -16,6 +18,7 @@ import {
 import {simulateSelection, waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {
   altCdrVersion,
+  CdrVersionsStubVariables,
   cdrVersionTiersResponse,
   controlledCdrVersion,
   defaultCdrVersion,
@@ -25,15 +28,15 @@ import {workspaceStubs} from 'testing/stubs/workspaces';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 import {WorkspaceEdit, WorkspaceEditMode} from 'app/pages/workspace/workspace-edit';
 import {WorkspaceEditSection} from 'app/pages/workspace/workspace-edit-section';
-import {CdrVersionsStubVariables} from 'testing/stubs/cdr-versions-api-stub';
 import {cdrVersionStore, profileStore, serverConfigStore} from 'app/utils/stores';
 import {AccessTierShortNames} from 'app/utils/access-tiers';
-import {ProfileApiStub} from "testing/stubs/profile-api-stub";
-import {Dropdown} from "primereact/dropdown";
-
+import {ProfileApiStub, ProfileStubVariables} from "testing/stubs/profile-api-stub";
 import * as Authentication from "app/utils/authentication";
+import {mockNavigate} from 'setupTests';
+import {environment} from 'environments/environment';
+
 import SpyInstance = jest.SpyInstance;
-import { mockNavigate } from 'setupTests';
+import {MemoryRouter} from "react-router";
 
 type AnyWrapper = (ShallowWrapper|ReactWrapper);
 
@@ -55,7 +58,9 @@ describe('WorkspaceEdit', () => {
   let workspaceEditMode: WorkspaceEditMode;
 
   const component = () => {
-    return mount(<WorkspaceEdit cancel={() => {}} hideSpinner={() => {}} showSpinner={() => {}} workspaceEditMode={workspaceEditMode}/>);
+    return mount(<MemoryRouter>
+      <WorkspaceEdit cancel={() => {}} hideSpinner={() => {}} showSpinner={() => {}} workspaceEditMode={workspaceEditMode}/>
+    </MemoryRouter>);
   };
 
   beforeEach(async () => {
@@ -88,15 +93,19 @@ describe('WorkspaceEdit', () => {
 
     registerApiClient(ProfileApi, new ProfileApiStub());
     profileStore.set({
-      profile: await profileApi().getMe(),
+      profile: ProfileStubVariables.PROFILE_STUB,
       load: jest.fn(),
       reload: jest.fn(),
       updateCache: jest.fn()
     });
     currentWorkspaceStore.next(workspace);
     cdrVersionStore.set(cdrVersionTiersResponse);
-    serverConfigStore.set({config: {enableBillingUpgrade: true, freeTierBillingAccountId: 'freetier',
-        defaultFreeCreditsDollarLimit: 100.0, gsuiteDomain: ''}});
+    serverConfigStore.set({config: {
+      enableBillingUpgrade: true,
+        freeTierBillingAccountId: 'freetier',
+        defaultFreeCreditsDollarLimit: 100.0,
+        gsuiteDomain: ''
+    }});
 
     mockHasBillingScope = jest.spyOn(Authentication, 'hasBillingScope');
     mockEnsureBillingScope = jest.spyOn(Authentication, 'ensureBillingScope');
@@ -294,7 +303,7 @@ describe('WorkspaceEdit', () => {
   });
 
   it('does not display the access tier dropdown when multiple tiers are not available', async() => {
-    cdrVersionStore.set( {tiers: [cdrVersionTiersResponse.tiers[0]]});
+    environment.accessTiersVisibleToUsers = [AccessTierShortNames.Registered];
 
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
@@ -302,8 +311,12 @@ describe('WorkspaceEdit', () => {
     expect(wrapper.find('[data-test-id="select-access-tier"]').exists()).toBeFalsy();
   });
 
-  it('enables access tier selection on creation when multiple tiers are available', async() => {
+  it('enables access tier selection on creation when multiple tiers are present' +
+    ' and the user has access to multiple', async() => {
+    const twoTiers = [AccessTierShortNames.Registered, AccessTierShortNames.Controlled];
+    environment.accessTiersVisibleToUsers = twoTiers;
     workspaceEditMode = WorkspaceEditMode.Create;
+    profileStore.set({...profileStore.get(), profile: {...profileStore.get().profile, accessTierShortNames: twoTiers}});
 
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
@@ -331,6 +344,47 @@ describe('WorkspaceEdit', () => {
 
     expect(cdrVersionsSelect().props().value).toBe(controlledCdrVersion.cdrVersionId);
     expect(cdrVersionSelectOptions()).toEqual([controlledCdrVersion.cdrVersionId]);
+  });
+
+  it('enables the access tier selection dropdown on creation when multiple tiers are present' +
+    ' but prevents selection when the user does not have access', async() => {
+    const twoTiers = [AccessTierShortNames.Registered, AccessTierShortNames.Controlled];
+    environment.accessTiersVisibleToUsers = twoTiers;
+    workspaceEditMode = WorkspaceEditMode.Create;
+    profileStore.set({...profileStore.get(), profile: {
+      ...profileStore.get().profile,
+        accessTierShortNames: [AccessTierShortNames.Registered]
+    }});
+
+    const wrapper = component();
+    await waitOneTickAndUpdate(wrapper);
+
+    const accessTierSelection = wrapper.find('[data-test-id="select-access-tier"]').find('select');
+    expect(accessTierSelection.exists()).toBeTruthy();
+
+    // defaults to registered
+    const selectionProps = accessTierSelection.props();
+    expect(selectionProps.disabled).toBeFalsy();
+    expect(selectionProps.value).toBe(AccessTierShortNames.Registered);
+
+    // when Registered is selected, the CDR Version dropdown lists the registered tier CDR Versions
+    // defaultCdrVersion and altCdrVersion, with defaultCdrVersion selected
+
+    const cdrVersionsSelect = () => wrapper.find('[data-test-id="select-cdr-version"]').find('select');
+    expect(cdrVersionsSelect().props().value).toBe(defaultCdrVersion.cdrVersionId);
+
+    const cdrVersionSelectOptions = (): Array<string> => cdrVersionsSelect().children().map(o => o.props().value);
+    expect(cdrVersionSelectOptions()).toEqual([defaultCdrVersion.cdrVersionId, altCdrVersion.cdrVersionId]);
+
+    // when Controlled is selected, the Tier Unavailable Modal appears, and the CDR Version dropdown continues to
+    // list the registered tier CDR Versions
+
+    await simulateSelection(accessTierSelection, AccessTierShortNames.Controlled);
+
+    expect(wrapper.find('[data-test-id="tier-unavailable-modal"]').exists()).toBeTruthy();
+
+    expect(cdrVersionsSelect().props().value).toBe(defaultCdrVersion.cdrVersionId);
+    expect(cdrVersionSelectOptions()).toEqual([defaultCdrVersion.cdrVersionId, altCdrVersion.cdrVersionId]);
   });
 
   it('retains the tier on edit and does not permit changes - Registered', async() => {
