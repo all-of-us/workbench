@@ -78,7 +78,7 @@ export default class Container {
     return this.page.waitForXPath(this.xpath, { timeout: 1000, visible: true }).then((elemt) => elemt.asElement());
   }
 
-  async findButton(buttonLabel: LinkText): Promise<Button> {
+  async findButton(buttonLabel: LinkText | string): Promise<Button> {
     const button = Button.findByName(this.page, { normalizeSpace: buttonLabel }, this);
     await button.waitUntilEnabled();
     return button;

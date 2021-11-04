@@ -34,7 +34,7 @@ export default class ReviewCriteriaSidebar extends BaseHelpSidebar {
     const title = await this.getTitle();
     await this.waitUntilSectionVisible(SectionSelectors.SelectionList);
     await Promise.race([this.findButton(LinkText.SaveCriteria), this.findButton(LinkText.AddThis)]);
-    await this.findButton(LinkText.Back);
+    await Promise.race([this.findButton('BACK'), this.findButton('Back')]);
     await waitWhileLoading(this.page);
     logger.info(`"${title}" sidebar is opened`);
   }
