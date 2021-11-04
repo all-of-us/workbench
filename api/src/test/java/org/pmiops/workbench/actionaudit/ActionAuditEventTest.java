@@ -5,10 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.time.Instant;
 import org.junit.jupiter.api.Test;
-import org.pmiops.workbench.FakeClockConfiguration;
-import org.springframework.context.annotation.Import;
 
-@Import(FakeClockConfiguration.class)
 public class ActionAuditEventTest {
 
   private static final String ACTION_ID = "foo";

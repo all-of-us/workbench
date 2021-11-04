@@ -63,7 +63,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
-import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -88,7 +87,6 @@ import org.springframework.transaction.annotation.Transactional;
   CdrJpaConfig.class
 })
 @MockBean({BigQuery.class})
-@SpringJUnitConfig
 public class CohortMaterializationServiceTest {
 
   private static final String DATA_SET_ID = "data_set_id";

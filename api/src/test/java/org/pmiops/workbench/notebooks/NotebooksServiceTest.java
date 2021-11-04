@@ -41,10 +41,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
-import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 @DataJpaTest
-@SpringJUnitConfig
 public class NotebooksServiceTest {
   private static final JSONObject NOTEBOOK_CONTENTS =
       new JSONObject().put("who", "I'm a notebook!");

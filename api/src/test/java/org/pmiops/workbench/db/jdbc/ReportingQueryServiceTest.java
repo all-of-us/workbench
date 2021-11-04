@@ -72,7 +72,6 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
-import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -81,7 +80,6 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @DataJpaTest
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
-@SpringJUnitConfig
 public class ReportingQueryServiceTest {
 
   public static final int BATCH_SIZE = 2;
