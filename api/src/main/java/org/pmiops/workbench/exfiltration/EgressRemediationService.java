@@ -1,9 +1,13 @@
 package org.pmiops.workbench.exfiltration;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.gson.Gson;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
@@ -23,11 +27,18 @@ import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbEgressEvent;
 import org.pmiops.workbench.db.model.DbEgressEvent.EgressEventStatus;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
+import org.pmiops.workbench.jira.ApiException;
+import org.pmiops.workbench.jira.JiraService;
+import org.pmiops.workbench.jira.JiraService.IssueProperty;
+import org.pmiops.workbench.jira.JiraService.IssueType;
+import org.pmiops.workbench.jira.model.IssueBean;
+import org.pmiops.workbench.jira.model.SearchResults;
 import org.pmiops.workbench.mail.MailService;
-import org.pmiops.workbench.mail.MailService.EgressRemediationAction;
+import org.pmiops.workbench.model.SumologicEgressEvent;
 import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
 import org.springframework.stereotype.Service;
 
@@ -43,6 +54,9 @@ public class EgressRemediationService {
   private static final Duration EGRESS_NOTIFY_DEBOUNCE_TIME = Duration.ofHours(1L);
 
   private static final Logger log = Logger.getLogger(EgressRemediationService.class.getName());
+  private static final ZoneId jiraTimeZone = ZoneId.of("America/Chicago");
+  private static final DateTimeFormatter jiraDateFormatter =
+      DateTimeFormatter.ofPattern("MM/dd/yy").withZone(jiraTimeZone);
 
   private final Clock clock;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
@@ -51,6 +65,7 @@ public class EgressRemediationService {
   private final LeonardoNotebooksClient leonardoNotebooksClient;
   private final EgressEventAuditor egressEventAuditor;
   private final EgressEventDao egressEventDao;
+  private final JiraService jiraService;
 
   public EgressRemediationService(
       Clock clock,
@@ -59,7 +74,8 @@ public class EgressRemediationService {
       MailService mailService,
       LeonardoNotebooksClient leonardoNotebooksClient,
       EgressEventAuditor egressEventAuditor,
-      EgressEventDao egressEventDao) {
+      EgressEventDao egressEventDao,
+      JiraService jiraService) {
     this.clock = clock;
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.userService = userService;
@@ -67,6 +83,7 @@ public class EgressRemediationService {
     this.leonardoNotebooksClient = leonardoNotebooksClient;
     this.egressEventAuditor = egressEventAuditor;
     this.egressEventDao = egressEventDao;
+    this.jiraService = jiraService;
   }
 
   public void remediateEgressEvent(long egressEventId) {
@@ -94,14 +111,14 @@ public class EgressRemediationService {
     int egressIncidentCount = getEgressIncidentCountForUser(user);
 
     // Determine escalating remediation action, if any
-    Optional<Escalation> escalation =
-        matchEscalation(
-            workbenchConfigProvider.get().egressAlertRemediationPolicy, egressIncidentCount);
+    EgressAlertRemediationPolicy egressPolicy =
+        workbenchConfigProvider.get().egressAlertRemediationPolicy;
+    Optional<Escalation> escalation = matchEscalation(egressPolicy, egressIncidentCount);
 
     // Execute the action, if any
     escalation.ifPresent(
         e -> {
-          EgressRemediationAction action = null;
+          EgressRemediationAction action;
           if (e.disableUser != null) {
             disableUser(user);
             action = EgressRemediationAction.DISABLE_USER;
@@ -110,6 +127,14 @@ public class EgressRemediationService {
             action = EgressRemediationAction.SUSPEND_COMPUTE;
           } else {
             throw new ServerErrorException("egress alert policy is invalid: " + e);
+          }
+
+          if (egressPolicy != null && egressPolicy.enableJiraTicketing) {
+            try {
+              logEventToJira(event, action);
+            } catch (ApiException ex) {
+              throw new ServerErrorException("failed to log event to Jira", ex);
+            }
           }
 
           if (shouldNotifyForEvent(event)) {
@@ -252,5 +277,100 @@ public class EgressRemediationService {
   private void stopUserRuntimes(String userEmail) {
     int stopCount = leonardoNotebooksClient.stopAllUserRuntimesAsService(userEmail);
     log.info(String.format("stopped %d runtimes for user", stopCount));
+  }
+
+  /**
+   * File a Jira investigation ticket if no open ticket exists for this VM. Identify matching
+   * tickets by the "Egress VM Prefix" and "RW Environment" custom fields on the ticket. If a ticket
+   * already exists, add a comment instead.
+   */
+  private void logEventToJira(DbEgressEvent event, EgressRemediationAction action)
+      throws ApiException {
+    String envShortName = workbenchConfigProvider.get().server.shortName;
+    SearchResults results =
+        jiraService.searchIssues(
+            // Ideally we would use Resolution = Unresolved here, but due to a misconfiguration of
+            // RW Jira, transitioning to Won't Fix / Duplicate do not currently resolve an issue.
+            String.format(
+                "\"%s\" ~ \"%s\""
+                    + " AND \"%s\" ~ \"%s\""
+                    + " AND status not in (Done, \"Won't Fix\", Duplicate)"
+                    + " ORDER BY created DESC",
+                IssueProperty.EGRESS_VM_PREFIX.key(),
+                event.getUser().getRuntimeName(),
+                IssueProperty.RW_ENVIRONMENT.key(),
+                envShortName));
+
+    if (results.getIssues().isEmpty()) {
+      jiraService.createIssue(
+          IssueType.TASK,
+          jiraEventDescription(event, action),
+          ImmutableMap.<IssueProperty, Object>builder()
+              .put(
+                  IssueProperty.SUMMARY,
+                  String.format(
+                      "(%s) Investigate egress from %s",
+                      jiraDateFormatter.format(clock.instant()), event.getUser().getUsername()))
+              .put(IssueProperty.EGRESS_VM_PREFIX, event.getUser().getRuntimeName())
+              .put(IssueProperty.RW_ENVIRONMENT, envShortName)
+              .put(IssueProperty.LABELS, new String[] {"high-egress"})
+              .build());
+    } else {
+      IssueBean existingIssue = results.getIssues().get(0);
+      if (results.getIssues().size() > 1) {
+        log.warning(
+            String.format(
+                "found multiple (%d) open Jira tickets for the same user VM prefix, updating the most recent ticket",
+                results.getIssues().size()));
+      }
+      jiraService.commentIssue(existingIssue.getId(), jiraEventComment(event, action));
+    }
+  }
+
+  private String jiraEventDescription(DbEgressEvent event, EgressRemediationAction action) {
+    Optional<DbUser> user = Optional.ofNullable(event.getUser());
+    SumologicEgressEvent originalEvent =
+        new Gson().fromJson(event.getSumologicEvent(), SumologicEgressEvent.class);
+    return String.format(
+        String.format("Notebook server VM prefix: %s\n", originalEvent.getVmPrefix())
+            + String.format(
+                "User running notebook: %s\n\n", user.map(DbUser::getUsername).orElse("unknown"))
+            + jiraEventDescriptionShort(event, action));
+  }
+
+  private String jiraEventComment(DbEgressEvent event, EgressRemediationAction action) {
+    return "Additional egress detected\n\n" + jiraEventDescriptionShort(event, action);
+  }
+
+  private String jiraEventDescriptionShort(DbEgressEvent event, EgressRemediationAction action) {
+    Optional<DbWorkspace> workspace = Optional.ofNullable(event.getWorkspace());
+    SumologicEgressEvent originalEvent =
+        new Gson().fromJson(event.getSumologicEvent(), SumologicEgressEvent.class);
+    return String.format(
+        String.format("Action taken: %s\n\n", action)
+            + String.format(
+                "Terra Billing Project/workspace Namespace: %s\n",
+                workspace.map(DbWorkspace::getWorkspaceNamespace).orElse("unknown"))
+            + String.format("Google Project Id: %s\n\n", originalEvent.getProjectName())
+            + String.format(
+                "Detected @ %s",
+                Instant.ofEpochMilli(originalEvent.getTimeWindowStart()).atZone(jiraTimeZone))
+            + String.format(
+                "Total egress detected: %.2f MiB in %d secs\n",
+                originalEvent.getEgressMib(), originalEvent.getTimeWindowDuration())
+            + String.format(
+                "egress breakdown: GCE - %.2f MiB, Dataproc - %.2fMiB via master, %.2fMiB via workers\n\n",
+                originalEvent.getGceEgressMib(),
+                originalEvent.getDataprocMasterEgressMib(),
+                originalEvent.getDataprocWorkerEgressMib())
+            + String.format(
+                "Workspace Admin Console (Workbench Admin User): %s\n",
+                workspace
+                    .map(
+                        w ->
+                            workbenchConfigProvider.get().server.uiBaseUrl
+                                + "/admin/workspaces/"
+                                + w.getWorkspaceNamespace())
+                    .orElse("unknown")));
   }
 }

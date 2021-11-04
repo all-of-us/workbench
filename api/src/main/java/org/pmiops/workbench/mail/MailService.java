@@ -3,14 +3,10 @@ package org.pmiops.workbench.mail;
 import java.time.Instant;
 import javax.mail.MessagingException;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.exfiltration.EgressRemediationAction;
 import org.pmiops.workbench.model.SendBillingSetupEmailRequest;
 
 public interface MailService {
-  enum EgressRemediationAction {
-    SUSPEND_COMPUTE,
-    DISABLE_USER
-  }
-
   void sendWelcomeEmail(final String contactEmail, final String password, final String username)
       throws MessagingException;
 
