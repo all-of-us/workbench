@@ -6,14 +6,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import com.google.common.collect.ImmutableMap;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
-import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.monitoring.labels.MetricLabel;
 import org.pmiops.workbench.monitoring.views.GaugeMetric;
 import org.pmiops.workbench.monitoring.views.Metric;
-import org.springframework.context.annotation.Import;
 
-@Import(FakeClockConfiguration.class)
 public class MeasurementBundleTest {
 
   private static final long USER_COUNT = 1000L;
