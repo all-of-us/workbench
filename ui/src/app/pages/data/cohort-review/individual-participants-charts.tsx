@@ -18,7 +18,8 @@ export class IndividualParticipantsCharts extends React.Component<{
 
   getOptions() {
     const {chartData: {conditionTitle, items}} = this.props;
-    const names = ['', ...fp.uniq(items.map(item => item.standardName))];
+    // reverse the array so top records show at the top of the graph
+    const names = ['', ...fp.uniq(items.map(item => item.standardName)).reverse()];
     const nameIndexes = fp.mapValues(n => +n, fp.invert(names));
     const data = items.map(({startDate, standardName, standardVocabulary, ageAtEvent}) => {
       return {
