@@ -1,6 +1,9 @@
 #!/bin/bash
 set -e
 
+export BQ_PROJECT=$1        # project
+export BQ_DATASET=$2        # dataset
+
 # make-bq-prep-atc-rel-in-data.sh
 #4527 - #4658 : prep_atc_rel_in_data : make-bq-criteria-tables.sh
 #----- RXNORM / RXNORM EXTENSION -----

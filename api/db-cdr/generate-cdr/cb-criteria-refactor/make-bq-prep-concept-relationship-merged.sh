@@ -1,5 +1,7 @@
 #!/bin/bash
 set -e
+export BQ_PROJECT=$1        # project
+export BQ_DATASET=$2        # dataset
 
 # make-bq-prep-concept-relationship-merged.sh
 #253 - #259 : prep_concept_relationship_merged : make-bq-criteria-tables.sh

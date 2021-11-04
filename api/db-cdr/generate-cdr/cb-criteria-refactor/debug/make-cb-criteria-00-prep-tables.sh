@@ -42,7 +42,7 @@ function createReplaceEmptyTables() {
     for table in "${empty_tables[@]}"
     do
       (bq rm -f --project_id=$BQ_PROJECT $BQ_DATASET.$table
-       bq mk --project_id=$BQ_PROJECT $BQ_DATASET.$table ./$table.json) &
+       bq mk --project_id=$BQ_PROJECT $BQ_DATASET.$table ../../bq-schemas/$table.json) &
        pids[${i}]=$!
     done
     for pid in "${pids[@]}" ; do
@@ -87,14 +87,14 @@ else
   #245 - #251 : prep_concept_merged : make-bq-criteria-tables.sh
   st_time=$SECONDS
   echo "Running script done populate prep_concept_merged..."
-  ./make-bq-prep-concept-merged.sh $BQ_PROJECT $BQ_DATASET
+  ../make-bq-prep-concept-merged.sh $BQ_PROJECT $BQ_DATASET
   echo "Running script done populating prep_concept_merged - $(timeIt $st_time) secs - total time - $(timeIt script_start) secs"
   echo
   # make-bq-prep-concept-relationship-merged.sh
   #253 - #259 : prep_concept_relationship_merged : make-bq-criteria-tables.sh
   st_time=$SECONDS
   echo "Running script done populate prep_concept_relationship_merged..."
-  ./make-bq-prep-concept-relationship-merged.sh $BQ_PROJECT $BQ_DATASET
+  ../make-bq-prep-concept-relationship-merged.sh $BQ_PROJECT $BQ_DATASET
   echo "Running scripts done populating prep_concept_relationship_merged - $(timeIt $st_time) secs - total time - $(timeIt script_start) secs"
   echo "Running scripts to create and populate prep_* tables started after $(timeIt $script_start) secs"
   ################################################
@@ -103,13 +103,13 @@ else
   ###############################################
   ## TODO check EXIST required tables?
   prep_tables=(
-  make-bq-prep-icd10-rel-cm-src-tables.sh
-  make-bq-prep-icd10pcs-rel-src-tables.sh
-  make-bq-prep-snomed-rel-cm-tables.sh
-  make-bq-prep-loinc-rel-tables.sh
-  make-bq-prep-snomed-rel-meas-tables.sh
-  make-bq-prep-atc-rel-in-data.sh
-  make-bq-prep-snomed-rel-pcs-tables.sh
+  ../make-bq-prep-icd10-rel-cm-src-tables.sh
+  ../make-bq-prep-icd10pcs-rel-src-tables.sh
+  ../make-bq-prep-snomed-rel-cm-tables.sh
+  ../make-bq-prep-loinc-rel-tables.sh
+  ../make-bq-prep-snomed-rel-meas-tables.sh
+  ../make-bq-prep-atc-rel-in-data.sh
+  ../make-bq-prep-snomed-rel-pcs-tables.sh
   )
   for f in "${prep_tables[@]}"; do
     st_time=$SECONDS

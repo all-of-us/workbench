@@ -5,6 +5,8 @@ SQL_FOR='PPI SURVEYS'
 SQL_SCRIPT_ORDER=3
 TBL_CBC='cb_criteria'
 TBL_PCA='prep_concept_ancestor'
+export BQ_PROJECT=$1        # project
+export BQ_DATASET=$2        # dataset
 ####### common block for all make-cb-criteria-dd-*.sh scripts ###########
 function createTmpTable(){
   local tmpTbl="prep_temp_"$1"_"$SQL_SCRIPT_ORDER

@@ -2,6 +2,8 @@
 # do not output cmd-line for now
 set -e
 SQL_FOR='ADD IN OTHER CODES NOT ALREADY CAPTURED'
+export BQ_PROJECT=$1        # project
+export BQ_DATASET=$2        # dataset
 
 # MUST BE RUN AFTER ALL PARALLEL COMPLETES
 ####### end common block ###########

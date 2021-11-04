@@ -5,6 +5,8 @@ SQL_FOR='OBSERVATION'
 SQL_SCRIPT_ORDER=18
 TBL_CBC='cb_criteria'
 TBL_CBAT='cb_criteria_attribute';
+export BQ_PROJECT=$1        # project
+export BQ_DATASET=$2        # dataset
 ####### common block for all make-cb-criteria-dd-*.sh scripts ###########
 function createTmpTable(){
   local tmpTbl="prep_temp_"$1"_"$SQL_SCRIPT_ORDER

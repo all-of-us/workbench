@@ -1,6 +1,9 @@
 #!/bin/bash
 set -e
 
+export BQ_PROJECT=$1        # project
+export BQ_DATASET=$2        # dataset
+
 # make-bq-prep-icd10-rel-cm-src-tables.sh
 #1719 - #1815 : prep_icd10_rel_cm_src : make-bq-criteria-tables.sh
 #     	Uses tables: prep_concept_merged, prep_concept_relationship_merged,

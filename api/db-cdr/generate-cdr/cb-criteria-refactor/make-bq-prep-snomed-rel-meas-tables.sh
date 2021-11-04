@@ -1,6 +1,9 @@
 #!/bin/bash
 set -e
 
+export BQ_PROJECT=$1        # project
+export BQ_DATASET=$2        # dataset
+
 # make-bq-prep-snomed-rel-meas-tables.sh
 #4102 - #4129 : prep_snomed_rel_meas : make-bq-criteria-tables.sh
 #       Uses tables: concept_relationship, concept, relationship

@@ -42,24 +42,24 @@ function runScript(){
 
 ## TODO check EXIST required tables?
 main_tables=(
-make-cb-criteria-01-proc-cpt4.sh
-make-cb-criteria-02-ppi-phys-meas.sh
-make-cb-criteria-03-ppi-surveys.sh
-make-cb-criteria-04-pm-concept-set.sh
-make-cb-criteria-05-fitbit.sh
-make-cb-criteria-06-whole-genome-variant.sh
-make-cb-criteria-07-demographics.sh
-make-cb-criteria-08-visit.sh
-make-cb-criteria-09-icd9-src.sh
-make-cb-criteria-10-icd10-cm-src.sh
-make-cb-criteria-11-icd10-pcs-src.sh
-make-cb-criteria-13-cond-occur-snomed-std.sh
-make-cb-criteria-14-meas-clin-loinc-std.sh
-make-cb-criteria-15-meas-labs-loinc-std.sh
-make-cb-criteria-16-meas-snomed-std.sh
-make-cb-criteria-17-drug-rxnorm.sh
-make-cb-criteria-19-proc-occur-snomed-std.sh
-make-cb-criteria-20-observation.sh
+../make-cb-criteria-01-proc-cpt4.sh
+../make-cb-criteria-02-ppi-phys-meas.sh
+../make-cb-criteria-03-ppi-surveys.sh
+../make-cb-criteria-04-pm-concept-set.sh
+../make-cb-criteria-05-fitbit.sh
+../make-cb-criteria-06-whole-genome-variant.sh
+../make-cb-criteria-07-demographics.sh
+../make-cb-criteria-08-visit.sh
+../make-cb-criteria-09-icd9-src.sh
+../make-cb-criteria-10-icd10-cm-src.sh
+../make-cb-criteria-11-icd10-pcs-src.sh
+../make-cb-criteria-12-cond-occur-snomed-std.sh
+../make-cb-criteria-13-meas-clin-loinc-std.sh
+../make-cb-criteria-14-meas-labs-loinc-std.sh
+../make-cb-criteria-15-meas-snomed-std.sh
+../make-cb-criteria-16-drug-rxnorm.sh
+../make-cb-criteria-17-proc-occur-snomed-std.sh
+../make-cb-criteria-18-observation.sh
 )
 if [[ "$run_in_parallel" == "ori" ]]; then
   echo "for 'ori' running make-bq-criteria-tables.sh script directly!"
@@ -84,9 +84,9 @@ else
   # wait for all processes to finish
   wait
   run_in_order=(
-  make-cb-criteria-21-seq-01-add-in-missing-codes.sh
-  make-cb-criteria-22-seq-02-attrib-other-tables.sh
-  make-cb-criteria-23-seq-03-clean-up-text-synonym.sh
+  ../make-cb-criteria-19-seq-01-add-in-missing-codes.sh
+  ../make-cb-criteria-20-seq-02-attrib-other-tables.sh
+  ../make-cb-criteria-21-seq-03-clean-up-text-synonym.sh
   )
   for f in "${run_in_order[@]}" ; do
     runScript "$f" "$BQ_PROJECT" "$BQ_DATASET" seq

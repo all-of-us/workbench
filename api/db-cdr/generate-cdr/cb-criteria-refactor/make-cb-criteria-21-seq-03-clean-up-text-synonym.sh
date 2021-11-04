@@ -2,6 +2,8 @@
 # do not output cmd-line for now
 set -e
 SQL_FOR='POPULATE OTHER CB_* TABLES'
+export BQ_PROJECT=$1        # project
+export BQ_DATASET=$2        # dataset
 
 ####### common block for all make-cb-criteria-dd-*.sh scripts ###########
 # MUST BE RUN AFTER ALL PARALLEL COMPLETES AND

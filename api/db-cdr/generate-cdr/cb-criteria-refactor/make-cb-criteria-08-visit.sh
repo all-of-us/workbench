@@ -4,6 +4,8 @@ set -e
 SQL_FOR='VISIT_OCCURRENCE (VISITS/ENCOUNTERS)'
 SQL_SCRIPT_ORDER=8
 TBL_CBC='cb_criteria'
+export BQ_PROJECT=$1        # project
+export BQ_DATASET=$2        # dataset
 ####### common block for all make-cb-criteria-dd-*.sh scripts ###########
 function createTmpTable(){
   local tmpTbl="prep_temp_"$1"_"$SQL_SCRIPT_ORDER
