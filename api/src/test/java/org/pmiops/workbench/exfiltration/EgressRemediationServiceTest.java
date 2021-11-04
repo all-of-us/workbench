@@ -33,6 +33,7 @@ import org.pmiops.workbench.config.WorkbenchConfig.EgressAlertRemediationPolicy;
 import org.pmiops.workbench.config.WorkbenchConfig.EgressAlertRemediationPolicy.Escalation;
 import org.pmiops.workbench.config.WorkbenchConfig.EgressAlertRemediationPolicy.Escalation.DisableUser;
 import org.pmiops.workbench.config.WorkbenchConfig.EgressAlertRemediationPolicy.Escalation.SuspendCompute;
+import org.pmiops.workbench.config.WorkbenchConfig.ServerConfig;
 import org.pmiops.workbench.db.dao.EgressEventDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
@@ -107,6 +108,8 @@ public class EgressRemediationServiceTest {
   @BeforeEach
   public void setUp() {
     workbenchConfig = WorkbenchConfig.createEmptyConfig();
+    workbenchConfig.server = new ServerConfig();
+    workbenchConfig.server.shortName = "Test";
     workbenchConfig.egressAlertRemediationPolicy = new EgressAlertRemediationPolicy();
 
     DbUser dbUser = new DbUser();
