@@ -109,6 +109,19 @@ public class WorkspaceDaoTest {
     }
   }
 
+  @Test
+  public void testAdminLocked() {
+    workspaceDao.deleteAll();
+
+    DbWorkspace ws = new DbWorkspace();
+    assertThat(ws.isAdminLocked()).isFalse();
+
+    ws.setAdminLocked(true);
+    ws = workspaceDao.save(ws);
+    assertThat(ws.isAdminLocked()).isTrue();
+  }
+
+
   private DbWorkspace createWorkspace() {
     DbWorkspace workspace = new DbWorkspace();
     workspace.setVersion(1);

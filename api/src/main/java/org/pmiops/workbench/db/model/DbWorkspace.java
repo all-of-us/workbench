@@ -751,7 +751,8 @@ public class DbWorkspace {
     return adminLocked;
   }
 
-  public void setAdminLocked(boolean adminLocked) {
+  public DbWorkspace setAdminLocked(boolean adminLocked) {
     this.adminLocked = adminLocked;
+    return this;
   }
 }
