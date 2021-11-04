@@ -137,8 +137,12 @@ export default class CohortParticipantsGroup {
   }
 
   async clickCriteriaSnowmanIcon(criteriaName: string): Promise<void> {
-    const snowmanIcon = new ClrIconLink(this.page, this.getCriteriaXpath(criteriaName));
+    const snowmanIcon = this.getCriteriaSnowmanIconLink(criteriaName);
     await snowmanIcon.click();
+  }
+
+  getCriteriaSnowmanIconLink(criteriaName: string): ClrIconLink {
+    return new ClrIconLink(this.page, this.getCriteriaXpath(criteriaName));
   }
 
   /**
@@ -190,6 +194,9 @@ export default class CohortParticipantsGroup {
     await this.clickCriteriaSnowmanIcon(criteriaName);
     await this.selectSnowmanMenu(MenuOption.DeleteCriteria);
     await waitWhileLoading(this.page);
+    // Criteria should be removed.
+    const snowmanIconLink = this.getCriteriaSnowmanIconLink(criteriaName);
+    await this.page.waitForXPath(snowmanIconLink.getXpath(), { hidden: true });
   }
 
   /**

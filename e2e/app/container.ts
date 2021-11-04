@@ -51,10 +51,7 @@ export default class Container {
   ): Promise<void> {
     const { waitForNav = false, waitForClose = false, timeout } = waitOptions;
 
-    const button = Button.findByName(this.page, { normalizeSpace: buttonLabel }, this);
-    await button.waitUntilEnabled();
-    await button.focus();
-
+    const button = await this.findButton(buttonLabel);
     await Promise.all(
       fp.flow(
         fp.filter<{ shouldWait: boolean; waitFn: () => Promise<void> }>('shouldWait'),
@@ -79,5 +76,11 @@ export default class Container {
 
   async asElement(): Promise<ElementHandle | null> {
     return this.page.waitForXPath(this.xpath, { timeout: 1000, visible: true }).then((elemt) => elemt.asElement());
+  }
+
+  async findButton(buttonLabel: LinkText): Promise<Button> {
+    const button = Button.findByName(this.page, { normalizeSpace: buttonLabel }, this);
+    await button.waitUntilEnabled();
+    return button;
   }
 }

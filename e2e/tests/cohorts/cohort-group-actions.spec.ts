@@ -5,7 +5,7 @@ import { MenuOption, ResourceCard } from 'app/text-labels';
 import { makeRandomName, makeWorkspaceName } from 'utils/str-utils';
 import { findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
 import { waitWhileLoading } from 'utils/waits-utils';
-import { getPropValue, waitUntilChanged } from 'utils/element-utils';
+import { getPropValue } from 'utils/element-utils';
 import ClrIconLink from 'app/element/clr-icon-link';
 import { Ethnicity, PhysicalMeasurementsCriteria } from 'app/page/cohort-participants-group';
 
@@ -222,11 +222,6 @@ describe('Build cohort page actions', () => {
     await group1.deleteCriteria(fitbitName);
     // Calculated new Total Count is less than before delete criteria.
     expect(await cohortBuildPage.getTotalCount()).toBeLessThan(totalCount);
-
-    const undoDeleteButton = group1.getUndoDeleteCriteriaButton();
-    expect(await undoDeleteButton.exists()).toBe(true);
-    // Wait until UNDO button is gone.
-    await waitUntilChanged(page, await undoDeleteButton.asElementHandle());
 
     // Include Group 1 has 1 criteria after delete 1.
     expect((await group1.findGroupCriteriaList()).length).toBe(1);
