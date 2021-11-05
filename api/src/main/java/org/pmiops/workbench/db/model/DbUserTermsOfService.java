@@ -4,14 +4,17 @@ import java.sql.Timestamp;
 import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import org.hibernate.annotations.CreationTimestamp;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
 @Table(name = "user_terms_of_service")
+@EntityListeners(AuditingEntityListener.class)
 public class DbUserTermsOfService {
   private long userTermsOfServiceId;
   private long userId;
@@ -52,7 +55,7 @@ public class DbUserTermsOfService {
   // may be due to the way the in-memory H2 database interacts with a column that is auto-populated
   // via the Hibernate CreationTimestamp annotation.
   @Column(name = "agreement_time")
-  @CreationTimestamp
+  @CreatedDate
   public Timestamp getAgreementTime() {
     return agreementTime;
   }

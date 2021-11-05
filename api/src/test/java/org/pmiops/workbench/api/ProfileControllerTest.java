@@ -29,8 +29,8 @@ import java.util.Random;
 import javax.mail.MessagingException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.pmiops.workbench.FakeClockConfiguration;
+import org.pmiops.workbench.JpaFakeDateTimeConfiguration;
 import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.access.AccessModuleServiceImpl;
 import org.pmiops.workbench.access.AccessTierService;
@@ -113,6 +113,7 @@ import org.pmiops.workbench.utils.mappers.AuditLogEntryMapperImpl;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
@@ -124,10 +125,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+@DataJpaTest
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
-@ExtendWith(SpringExtension.class)
 public class ProfileControllerTest extends BaseControllerTest {
   @MockBean private CaptchaVerificationService mockCaptchaVerificationService;
   @MockBean private CloudStorageClient mockCloudStorageClient;
@@ -206,6 +206,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     VerifiedInstitutionalAffiliationMapperImpl.class,
     AccessTierServiceImpl.class,
     FakeClockConfiguration.class,
+    JpaFakeDateTimeConfiguration.class,
   })
   @MockBean({BigQueryService.class})
   static class Configuration {
