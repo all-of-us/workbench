@@ -71,7 +71,7 @@ public class DataSetController implements DataSetApiDelegate {
 
   private static final String DATE_FORMAT_STRING = "yyyy/MM/dd HH:mm:ss";
   public static final String EMPTY_CELL_MARKER = "";
-  public static final String WHOLE_GENOME_VALUE = "VCF Files(s)";
+  public static final String WHOLE_GENOME_VALUE = "VCF Files";
 
   private static final Logger log = Logger.getLogger(DataSetController.class.getName());
 
