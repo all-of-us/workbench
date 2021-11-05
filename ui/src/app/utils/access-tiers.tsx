@@ -1,6 +1,5 @@
-import * as fp from 'lodash/fp';
-
 import {switchCase} from './index';
+import {Profile} from 'generated/fetch';
 
 export enum AccessTierShortNames {
     Registered = 'registered',
@@ -13,13 +12,16 @@ export enum AccessTierDisplayNames {
 }
 
 /**
- * Determine whether the given access level is Registered. This is required to do most things in the Workbench app
- * (outside of local/test development).
- *
- * TODO: make separate evaluations by tier
+ * Determine whether the given user has at least Registered Tier access
+ * This is required to do most things in the Workbench app
  */
-export function hasRegisteredAccess(accessTierShortNames: Array<string>): boolean {
-  return fp.includes(AccessTierShortNames.Registered, accessTierShortNames);
+
+export function hasRegisteredTierAccess(profile: Profile): boolean {
+  return hasTierAccess(profile, AccessTierShortNames.Registered);
+}
+
+export function hasTierAccess(profile: Profile, shortName): boolean {
+  return profile.accessTierShortNames.includes(shortName);
 }
 
 export const displayNameForTier = (shortName: string) => switchCase(shortName,
