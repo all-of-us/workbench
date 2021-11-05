@@ -81,7 +81,7 @@ import {
 } from 'generated/fetch';
 import {OldCdrVersionModal} from './old-cdr-version-modal';
 import {environment} from 'environments/environment';
-import {TierUnavailableModal} from "./tier-unavailable-modal";
+import {UnavailableTierModal} from "./unavailable-tier-modal";
 
 export const styles = reactStyles({
   categoryRow: {
@@ -296,7 +296,7 @@ export interface WorkspaceEditState {
   workspaceCreationErrorMessage: string;
   workspaceNewAclDelayed: boolean;
   workspaceNewAclDelayedContinueFn: Function;
-  tierUnavailable?: string;
+  unavailableTier?: string;
 }
 
 export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), withUserProfile(), withNavigation)(
@@ -1116,7 +1116,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
               getDefaultCdrVersionForTier(selectedTier, cdrVersionTiersResponse).cdrVersionId)
           ));
         } else {
-          this.setState({tierUnavailable: selectedTier});
+          this.setState({unavailableTier: selectedTier});
         }
       };
     }
@@ -1150,7 +1150,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
         workspaceCreationError,
         workspaceCreationErrorMessage,
         workspaceNewAclDelayed,
-        tierUnavailable,
+        unavailableTier,
       } = this.state;
       const {cdrVersionTiersResponse, profileState: {profile}} = this.props;
       const {freeTierDollarQuota, freeTierUsage} = profile;
@@ -1176,9 +1176,9 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
               destWorkspace={this.state.workspace}
               cdrVersionTiersResponse={cdrVersionTiersResponse}
           />}
-          {tierUnavailable && <TierUnavailableModal
-            accessTierShortName={tierUnavailable}
-            onCancel={() => this.setState({tierUnavailable: ''})}/>}
+          {unavailableTier && <UnavailableTierModal
+            accessTierShortName={unavailableTier}
+            onCancel={() => this.setState({unavailableTier: ''})}/>}
           <WorkspaceEditSection header={this.renderHeader()} tooltip={toolTipText.header}
                                 style={{marginTop: '24px'}} largeHeader
                                 required={!this.isMode(WorkspaceEditMode.Duplicate)}>

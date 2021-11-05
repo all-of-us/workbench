@@ -378,12 +378,12 @@ describe('WorkspaceEdit', () => {
     const cdrVersionSelectOptions = (): Array<string> => cdrVersionsSelect().children().map(o => o.props().value);
     expect(cdrVersionSelectOptions()).toEqual([defaultCdrVersion.cdrVersionId, altCdrVersion.cdrVersionId]);
 
-    // when Controlled is selected, the Tier Unavailable Modal appears, and the CDR Version dropdown continues to
+    // when Controlled is selected, the UnavailableTierModal appears, and the CDR Version dropdown continues to
     // list the registered tier CDR Versions
 
     await simulateSelection(accessTierSelection, AccessTierShortNames.Controlled);
 
-    expect(wrapper.find('[data-test-id="tier-unavailable-modal"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-id="unavailable-tier-modal"]').exists()).toBeTruthy();
 
     expect(cdrVersionsSelect().props().value).toBe(defaultCdrVersion.cdrVersionId);
     expect(cdrVersionSelectOptions()).toEqual([defaultCdrVersion.cdrVersionId, altCdrVersion.cdrVersionId]);

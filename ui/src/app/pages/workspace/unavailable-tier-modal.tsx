@@ -9,10 +9,10 @@ interface Props {
   onCancel: Function;
 }
 
-export const TierUnavailableModal = (props: Props) => {
+export const UnavailableTierModal = (props: Props) => {
   const {accessTierShortName, onCancel} = props;
   return <Modal onRequestClose={() => onCancel()}>
-        <ModalTitle data-test-id='tier-unavailable-modal'>
+        <ModalTitle data-test-id='unavailable-tier-modal'>
           <div>You have selected the {displayNameForTier(accessTierShortName)} but you don't have access</div>
         </ModalTitle>
         <ModalBody>Before creating your workspace, please complete the data access requirements to gain access.</ModalBody>
