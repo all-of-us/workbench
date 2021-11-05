@@ -256,7 +256,7 @@ describe('HelpSidebar', () => {
     expect(runtimeStatusIcon(wrapper).prop('style').color).toEqual(colors.asyncOperationStatus.starting);
   });
 
-  fit('should display security suspended UX on compute suspended', async() => {
+  it('should display security suspended UX on compute suspended', async() => {
     const suspendedParams: SecuritySuspendedErrorParameters = {
       suspendedUntil: new Date('2000-01-01 03:00:00').toISOString()
     };
