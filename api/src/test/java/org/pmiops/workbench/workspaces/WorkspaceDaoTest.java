@@ -121,7 +121,6 @@ public class WorkspaceDaoTest {
     assertThat(ws.isAdminLocked()).isTrue();
   }
 
-
   private DbWorkspace createWorkspace() {
     DbWorkspace workspace = new DbWorkspace();
     workspace.setVersion(1);

@@ -325,7 +325,8 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
     // TODO but what should I do with it?
 
     Optional<DbWorkspace> dbWorkspaceOptional = getFirstWorkspaceByNamespace(workspaceNamespace);
-    dbWorkspaceOptional.ifPresent(dbWorkspace -> setAdminLockedState(dbWorkspace, desiredLockState));
+    dbWorkspaceOptional.ifPresent(
+        dbWorkspace -> setAdminLockedState(dbWorkspace, desiredLockState));
 
     if (!dbWorkspaceOptional.isPresent()) {
       log.info(
@@ -333,8 +334,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
     }
   }
 
-  private void setAdminLockedState(
-      DbWorkspace dbWorkspace, boolean desiredLockState) {
+  private void setAdminLockedState(DbWorkspace dbWorkspace, boolean desiredLockState) {
     log.info(
         String.format(
             "Found workspace in DB: ID %d, Name '%s'",
