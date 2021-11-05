@@ -1,14 +1,12 @@
 package org.pmiops.workbench.jira;
 
 import com.google.common.collect.ImmutableMap;
-import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.pmiops.workbench.jira.api.JiraApi;
-import org.pmiops.workbench.jira.model.AtlassianContent;
 import org.pmiops.workbench.jira.model.AtlassianDocument;
 import org.pmiops.workbench.jira.model.Comment;
 import org.pmiops.workbench.jira.model.CreatedIssue;
@@ -93,7 +91,7 @@ public class JiraService {
   }
 
   public CreatedIssue createIssue(
-      IssueType type, String description, Map<IssueProperty, Object> issueProps)
+      IssueType type, AtlassianDocument description, Map<IssueProperty, Object> issueProps)
       throws ApiException {
 
     Map<IssueProperty, Object> mergedProps = new HashMap<>(issueProps);
@@ -101,7 +99,7 @@ public class JiraService {
         ImmutableMap.<IssueProperty, Object>builder()
             .put(IssueProperty.PROJECT, new Project().key(PROJECT_KEY))
             .put(IssueProperty.ISSUE_TYPE, new IssueTypeDetails().id(type.jiraId()))
-            .put(IssueProperty.DESCRIPTION, textAsMinimalAtlassianDocument(description))
+            .put(IssueProperty.DESCRIPTION, description)
             .build());
     try {
       return apiProvider
@@ -118,11 +116,9 @@ public class JiraService {
     }
   }
 
-  public void commentIssue(String issueId, String body) throws ApiException {
+  public void commentIssue(String issueId, AtlassianDocument body) throws ApiException {
     try {
-      apiProvider
-          .get()
-          .addComment(new Comment().body(textAsMinimalAtlassianDocument(body)), issueId);
+      apiProvider.get().addComment(new Comment().body(body), issueId);
     } catch (ApiException e) {
       logJiraErrorPayload(e);
       throw e;
@@ -140,21 +136,6 @@ public class JiraService {
       logJiraErrorPayload(e);
       throw e;
     }
-  }
-
-  /**
-   * Several fields in the Jira API expect content in the Atlassian Document format, which is fairly
-   * verbose. This method wraps text in a minimal document. See
-   * https://developer.atlassian.com/cloud/jira/platform/apis/document/structure/
-   */
-  private AtlassianDocument textAsMinimalAtlassianDocument(String text) {
-    return new AtlassianDocument()
-        .type("doc")
-        .version(BigDecimal.ONE)
-        .addContentItem(
-            new AtlassianContent()
-                .type("paragraph")
-                .addContentItem(new AtlassianContent().type("text").text(text)));
   }
 
   private void logJiraErrorPayload(ApiException e) {

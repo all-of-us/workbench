@@ -43,12 +43,13 @@ import org.pmiops.workbench.db.model.DbEgressEvent.EgressEventStatus;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.jira.JiraContent;
 import org.pmiops.workbench.jira.JiraService;
 import org.pmiops.workbench.jira.JiraService.IssueProperty;
 import org.pmiops.workbench.jira.api.JiraApi;
-import org.pmiops.workbench.jira.model.AtlassianContent;
 import org.pmiops.workbench.jira.model.AtlassianDocument;
 import org.pmiops.workbench.jira.model.Comment;
+import org.pmiops.workbench.jira.model.CreatedIssue;
 import org.pmiops.workbench.jira.model.IssueBean;
 import org.pmiops.workbench.jira.model.IssueUpdateDetails;
 import org.pmiops.workbench.jira.model.SearchResults;
@@ -408,6 +409,7 @@ public class EgressRemediationServiceTest {
 
     when(mockJiraApi.searchForIssuesUsingJqlPost(any()))
         .thenReturn(new SearchResults().issues(ImmutableList.of()));
+    when(mockJiraApi.createIssue(any(), any())).thenReturn(new CreatedIssue().key("RW-1234"));
     workbenchConfig.egressAlertRemediationPolicy.escalations =
         ImmutableList.of(suspendComputeAfter(1, Duration.ofMinutes(1)));
 
@@ -433,7 +435,7 @@ public class EgressRemediationServiceTest {
             .findFirst();
     assertThat(description.isPresent()).isTrue();
     AtlassianDocument doc = (AtlassianDocument) description.get();
-    assertThat(mustConvertMinimalAtlassianDocumentToText(doc))
+    assertThat(JiraContent.documentToString(doc))
         .contains("User running notebook: " + getDbUser().getUsername());
   }
 
@@ -456,8 +458,7 @@ public class EgressRemediationServiceTest {
     assertThat(comment.getBody()).isInstanceOf(AtlassianDocument.class);
 
     AtlassianDocument doc = (AtlassianDocument) comment.getBody();
-    assertThat(mustConvertMinimalAtlassianDocumentToText(doc))
-        .contains("Additional egress detected");
+    assertThat(JiraContent.documentToString(doc)).contains("Additional egress detected");
   }
 
   private void saveOldEvents(Duration... ages) {
@@ -555,18 +556,5 @@ public class EgressRemediationServiceTest {
 
   private DbUser getDbUser() {
     return userDao.findUserByUserId(userId);
-  }
-
-  /** Inverse of {@code JiraService.textToMinimalAtlassianDocument}. */
-  private String mustConvertMinimalAtlassianDocumentToText(AtlassianDocument doc) {
-    assertThat(doc).isNotNull();
-    assertThat(doc.getContent()).hasSize(1);
-
-    AtlassianContent content = doc.getContent().get(0);
-    assertThat(content.getContent()).hasSize(1);
-
-    AtlassianContent innerContent = content.getContent().get(0);
-    assertThat(innerContent.getText()).isNotNull();
-    return innerContent.getText();
   }
 }

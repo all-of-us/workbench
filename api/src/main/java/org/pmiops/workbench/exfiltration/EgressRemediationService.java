@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import javax.inject.Provider;
 import javax.mail.MessagingException;
@@ -32,9 +33,11 @@ import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.jira.ApiException;
+import org.pmiops.workbench.jira.JiraContent;
 import org.pmiops.workbench.jira.JiraService;
 import org.pmiops.workbench.jira.JiraService.IssueProperty;
 import org.pmiops.workbench.jira.JiraService.IssueType;
+import org.pmiops.workbench.jira.model.AtlassianContent;
 import org.pmiops.workbench.jira.model.CreatedIssue;
 import org.pmiops.workbench.jira.model.IssueBean;
 import org.pmiops.workbench.jira.model.SearchResults;
@@ -306,7 +309,7 @@ public class EgressRemediationService {
       CreatedIssue createdIssue =
           jiraService.createIssue(
               IssueType.TASK,
-              jiraEventDescription(event, action),
+              JiraContent.contentAsMinimalAtlassianDocument(jiraEventDescription(event, action)),
               ImmutableMap.<IssueProperty, Object>builder()
                   .put(
                       IssueProperty.SUMMARY,
@@ -326,66 +329,84 @@ public class EgressRemediationService {
                 "found multiple (%d) open Jira tickets for the same user VM prefix, updating the most recent ticket",
                 results.getIssues().size()));
       }
-      jiraService.commentIssue(existingIssue.getId(), jiraEventComment(event, action));
+      jiraService.commentIssue(
+          existingIssue.getId(),
+          JiraContent.contentAsMinimalAtlassianDocument(jiraEventComment(event, action)));
       log.info("commented on existing egress Jira ticket: " + existingIssue.getKey());
     }
   }
 
-  private String jiraEventDescription(DbEgressEvent event, EgressRemediationAction action) {
+  private Stream<AtlassianContent> jiraEventDescription(
+      DbEgressEvent event, EgressRemediationAction action) {
     Optional<DbUser> user = Optional.ofNullable(event.getUser());
     WorkbenchConfig config = workbenchConfigProvider.get();
     SumologicEgressEvent originalEvent =
         new Gson().fromJson(event.getSumologicEvent(), SumologicEgressEvent.class);
-    return String.format(
-        String.format("Notebook server VM prefix: %s\n", originalEvent.getVmPrefix())
-            + String.format(
-                "User running notebook: %s\n", user.map(DbUser::getUsername).orElse("unknown"))
-            + String.format(
-                "User Admin Console (Workbench Admin User): %s\n",
-                user.map(
-                        u ->
-                            config.server.uiBaseUrl
-                                + "/admin/users/"
-                                + u.getUsername()
-                                    .replaceFirst(
-                                        "@" + config.googleDirectoryService.gSuiteDomain, ""))
-                    .orElse("unknown"))
-            + jiraEventDescriptionShort(event, action));
+    return Stream.concat(
+        Stream.of(
+            JiraContent.text(
+                String.format("Notebook server VM prefix: %s\n", originalEvent.getVmPrefix())),
+            JiraContent.text(
+                String.format(
+                    "User running notebook: %s\n",
+                    user.map(DbUser::getUsername).orElse("unknown"))),
+            JiraContent.text("User Admin Console (Workbench Admin User): "),
+            user.map(
+                    u ->
+                        JiraContent.link(
+                            String.format(
+                                config.server.uiBaseUrl
+                                    + "/admin/users/"
+                                    + u.getUsername()
+                                        .replaceFirst(
+                                            "@" + config.googleDirectoryService.gSuiteDomain, ""))))
+                .orElse(JiraContent.text("unknown")),
+            JiraContent.text("\n\n")),
+        jiraEventDescriptionShort(event, action));
   }
 
-  private String jiraEventComment(DbEgressEvent event, EgressRemediationAction action) {
-    return "Additional egress detected\n\n" + jiraEventDescriptionShort(event, action);
+  private Stream<AtlassianContent> jiraEventComment(
+      DbEgressEvent event, EgressRemediationAction action) {
+    return Stream.concat(
+        Stream.of(JiraContent.text("Additional egress detected\n\n")),
+        jiraEventDescriptionShort(event, action));
   }
 
-  private String jiraEventDescriptionShort(DbEgressEvent event, EgressRemediationAction action) {
+  private Stream<AtlassianContent> jiraEventDescriptionShort(
+      DbEgressEvent event, EgressRemediationAction action) {
     Optional<DbWorkspace> workspace = Optional.ofNullable(event.getWorkspace());
     SumologicEgressEvent originalEvent =
         new Gson().fromJson(event.getSumologicEvent(), SumologicEgressEvent.class);
-    return String.format(
-        String.format("Action taken: %s\n\n", action)
-            + String.format(
+    return Stream.of(
+        JiraContent.text(String.format("Action taken: %s\n\n", action)),
+        JiraContent.text(
+            String.format(
                 "Terra Billing Project/workspace Namespace: %s\n",
-                workspace.map(DbWorkspace::getWorkspaceNamespace).orElse("unknown"))
-            + String.format("Google Project Id: %s\n\n", originalEvent.getProjectName())
-            + String.format(
-                "Detected @ %s",
-                Instant.ofEpochMilli(originalEvent.getTimeWindowStart()).atZone(jiraTimeZone))
-            + String.format(
+                workspace.map(DbWorkspace::getWorkspaceNamespace).orElse("unknown"))),
+        JiraContent.text(
+            String.format("Google Project Id: %s\n\n", originalEvent.getProjectName())),
+        JiraContent.text(
+            String.format(
+                "Detected @ %s\n",
+                Instant.ofEpochMilli(originalEvent.getTimeWindowStart()).atZone(jiraTimeZone))),
+        JiraContent.text(
+            String.format(
                 "Total egress detected: %.2f MiB in %d secs\n",
-                originalEvent.getEgressMib(), originalEvent.getTimeWindowDuration())
-            + String.format(
+                originalEvent.getEgressMib(), originalEvent.getTimeWindowDuration())),
+        JiraContent.text(
+            String.format(
                 "egress breakdown: GCE - %.2f MiB, Dataproc - %.2fMiB via master, %.2fMiB via workers\n\n",
                 originalEvent.getGceEgressMib(),
                 originalEvent.getDataprocMasterEgressMib(),
-                originalEvent.getDataprocWorkerEgressMib())
-            + String.format(
-                "Workspace Admin Console (Workbench Admin User): %s\n",
-                workspace
-                    .map(
-                        w ->
-                            workbenchConfigProvider.get().server.uiBaseUrl
-                                + "/admin/workspaces/"
-                                + w.getWorkspaceNamespace())
-                    .orElse("unknown")));
+                originalEvent.getDataprocWorkerEgressMib())),
+        JiraContent.text("Workspace Admin Console (Workbench Admin User):"),
+        workspace
+            .map(
+                w ->
+                    JiraContent.link(
+                        workbenchConfigProvider.get().server.uiBaseUrl
+                            + "/admin/workspaces/"
+                            + w.getWorkspaceNamespace()))
+            .orElse(JiraContent.text("unknown")));
   }
 }
