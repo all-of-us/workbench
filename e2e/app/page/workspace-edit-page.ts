@@ -461,8 +461,8 @@ export default class WorkspaceEditPage extends WorkspaceBase {
   }
 
   /**
-   * Question 6. Request for Review of Research Purpose Description
-   * @param selected: True means select "Yes, Request Review" radiobutton. False means select "No, Request Review" radiobutton.
+   * Question 6. RequestId for Review of Research Purpose Description
+   * @param selected: True means select "Yes, RequestId Review" radiobutton. False means select "No, RequestId Review" radiobutton.
    */
   async requestForReviewRadiobutton(selected: boolean): Promise<void> {
     let radioComponent;

@@ -164,7 +164,7 @@ export const defaultAnswersPopulationOfInterest = [
   }
 ];
 
-// Question #6: Request for Review of Research Purpose Description
+// Question #6: RequestId for Review of Research Purpose Description
 export const defaultAnswersRequestForReview = [
   {
     id: FIELD.REQUEST_FOR_REVIEW.noRequestReviewRadiobutton,

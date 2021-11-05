@@ -73,7 +73,7 @@ describe('Creating new workspaces', () => {
     // fill out question #5 - Population interest
     await performActions(page, testData.defaultAnswersPopulationOfInterest);
 
-    // fill out question #6 - Request for Review of Research Purpose Description
+    // fill out question #6 - RequestId for Review of Research Purpose Description
     // -- No Review Required
     await performActions(page, testData.defaultAnswersRequestForReview);
 

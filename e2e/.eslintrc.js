@@ -104,7 +104,6 @@ module.exports = {
         asyncArrow: 'always'
       }
     ],
-    'quote-props': [2, 'consistent-as-needed'],
-    "@typescript-eslint/ban-ts-comment": "off"
+    'quote-props': [2, 'consistent-as-needed']
   }
 };
