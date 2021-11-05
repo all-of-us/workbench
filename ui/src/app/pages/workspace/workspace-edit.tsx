@@ -1108,7 +1108,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
 
       if (hasTierAccess(profile, selectedTier)) {
         this.setState(fp.flow(
-          fp.set(['tierUnavailable'], ''),
+          fp.set(['unavailableTier'], ''),
           fp.set(['workspace', 'accessTierShortName'], selectedTier),
           fp.set(['cdrVersions'], this.getCdrVersions(selectedTier)),
           fp.set(['workspace', 'cdrVersionId'],
