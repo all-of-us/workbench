@@ -1103,24 +1103,21 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
       return environment.accessTiersVisibleToUsers.length > 1;
     }
 
-    onAccessTierChange(profile: Profile, cdrVersionTiersResponse: CdrVersionTiersResponse) {
-      return (v: React.FormEvent<HTMLSelectElement>) => {
-        const selectedTier = v.currentTarget.value;
+    onAccessTierChange(v: React.FormEvent<HTMLSelectElement>, profile: Profile, cdrVersionTiersResponse: CdrVersionTiersResponse) {
+      const selectedTier = v.currentTarget.value;
 
-        if (hasTierAccess(profile, selectedTier)) {
-          this.setState(fp.flow(
-            fp.set(['tierUnavailable'], ''),
-            fp.set(['workspace', 'accessTierShortName'], selectedTier),
-            fp.set(['cdrVersions'], this.getCdrVersions(selectedTier)),
-            fp.set(['workspace', 'cdrVersionId'],
-              getDefaultCdrVersionForTier(selectedTier, cdrVersionTiersResponse).cdrVersionId)
-          ));
-        } else {
-          this.setState({unavailableTier: selectedTier});
-        }
-      };
+      if (hasTierAccess(profile, selectedTier)) {
+        this.setState(fp.flow(
+          fp.set(['tierUnavailable'], ''),
+          fp.set(['workspace', 'accessTierShortName'], selectedTier),
+          fp.set(['cdrVersions'], this.getCdrVersions(selectedTier)),
+          fp.set(['workspace', 'cdrVersionId'],
+            getDefaultCdrVersionForTier(selectedTier, cdrVersionTiersResponse).cdrVersionId)
+        ));
+      } else {
+        this.setState({unavailableTier: selectedTier});
+      }
     }
-
 
     render() {
       const {enableBillingUpgrade} = serverConfigStore.get().config;
@@ -1209,7 +1206,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
                   <div data-test-id='select-access-tier' style={{...styles.select, ...styles.accessTierSpacing}}>
                     <select style={{...styles.selectInput, ...styles.accessTierSpacing}}
                             value={accessTierShortName}
-                            onChange={this.onAccessTierChange(profile, cdrVersionTiersResponse)}
+                            onChange={(value) => this.onAccessTierChange(value, profile, cdrVersionTiersResponse)}
                             disabled={!this.isMode(WorkspaceEditMode.Create)}>
                       {environment.accessTiersVisibleToUsers.map((shortName, i) => (
                           <option key={shortName} value={shortName}>
