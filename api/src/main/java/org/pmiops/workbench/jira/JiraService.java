@@ -25,7 +25,7 @@ import org.springframework.stereotype.Service;
  *
  * <p>To get the schema for RW issues (including all field names):
  *
- * <p><code>
+ * <pre><code>
  * # Get USER / API KEY from credentials bucket.
  * curl --request GET \
  *   --url "https://precisionmedicineinitiative.atlassian.net/rest/api/3/issue/createmeta?projectKeys=RW&expand=projects.issuetypes.fields" \
@@ -158,6 +158,9 @@ public class JiraService {
   }
 
   private void logJiraErrorPayload(ApiException e) {
+    // Logging at this level and rethrowing is not ideal, but unfortunately the default error
+    // message for ApiException completely omits the error message returned from the API, which is
+    // found in the response body.
     log.severe("Jira error payload details: " + e.getResponseBody());
   }
 }
