@@ -39,7 +39,6 @@ public class JiraConfig {
     JiraCredentials creds = jiraCredsCache.get();
     client.setUsername(creds.username);
     client.setPassword(creds.apiToken);
-    client.setDebugging(true);
     return client;
   }
 

@@ -35,6 +35,7 @@ import org.pmiops.workbench.jira.ApiException;
 import org.pmiops.workbench.jira.JiraService;
 import org.pmiops.workbench.jira.JiraService.IssueProperty;
 import org.pmiops.workbench.jira.JiraService.IssueType;
+import org.pmiops.workbench.jira.model.CreatedIssue;
 import org.pmiops.workbench.jira.model.IssueBean;
 import org.pmiops.workbench.jira.model.SearchResults;
 import org.pmiops.workbench.mail.MailService;
@@ -302,19 +303,21 @@ public class EgressRemediationService {
                 envShortName));
 
     if (results.getIssues().isEmpty()) {
-      jiraService.createIssue(
-          IssueType.TASK,
-          jiraEventDescription(event, action),
-          ImmutableMap.<IssueProperty, Object>builder()
-              .put(
-                  IssueProperty.SUMMARY,
-                  String.format(
-                      "(%s) Investigate egress from %s",
-                      jiraDateFormatter.format(clock.instant()), event.getUser().getUsername()))
-              .put(IssueProperty.EGRESS_VM_PREFIX, event.getUser().getRuntimeName())
-              .put(IssueProperty.RW_ENVIRONMENT, envShortName)
-              .put(IssueProperty.LABELS, new String[] {"high-egress"})
-              .build());
+      CreatedIssue createdIssue =
+          jiraService.createIssue(
+              IssueType.TASK,
+              jiraEventDescription(event, action),
+              ImmutableMap.<IssueProperty, Object>builder()
+                  .put(
+                      IssueProperty.SUMMARY,
+                      String.format(
+                          "(%s) Investigate egress from %s",
+                          jiraDateFormatter.format(clock.instant()), event.getUser().getUsername()))
+                  .put(IssueProperty.EGRESS_VM_PREFIX, event.getUser().getRuntimeName())
+                  .put(IssueProperty.RW_ENVIRONMENT, envShortName)
+                  .put(IssueProperty.LABELS, new String[] {"high-egress"})
+                  .build());
+      log.info("created new egress Jira ticket: " + createdIssue.getKey());
     } else {
       IssueBean existingIssue = results.getIssues().get(0);
       if (results.getIssues().size() > 1) {
@@ -324,6 +327,7 @@ public class EgressRemediationService {
                 results.getIssues().size()));
       }
       jiraService.commentIssue(existingIssue.getId(), jiraEventComment(event, action));
+      log.info("commented on existing egress Jira ticket: " + existingIssue.getKey());
     }
   }
 
