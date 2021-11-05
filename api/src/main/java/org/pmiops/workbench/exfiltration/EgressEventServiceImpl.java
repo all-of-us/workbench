@@ -26,7 +26,7 @@ import org.pmiops.workbench.db.dao.EgressEventDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbEgressEvent;
-import org.pmiops.workbench.db.model.DbEgressEvent.EgressEventStatus;
+import org.pmiops.workbench.db.model.DbEgressEvent.DbEgressEventStatus;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.institution.InstitutionService;
@@ -272,9 +272,9 @@ public class EgressEventServiceImpl implements EgressEventService {
 
     // Ahead of the feature launch, events are still handled manually by the oncall, so store
     // them immediately as REMEDIATED. In all cases, we want to store the event in our database.
-    EgressEventStatus status = EgressEventStatus.REMEDIATED;
+    DbEgressEventStatus status = DbEgressEventStatus.REMEDIATED;
     if (workbenchConfigProvider.get().featureFlags.enableEgressAlertingV2) {
-      status = EgressEventStatus.PENDING;
+      status = DbEgressEventStatus.PENDING;
     }
 
     return Optional.of(

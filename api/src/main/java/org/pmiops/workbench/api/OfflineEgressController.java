@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.db.dao.EgressEventDao;
 import org.pmiops.workbench.db.model.DbEgressEvent;
-import org.pmiops.workbench.db.model.DbEgressEvent.EgressEventStatus;
+import org.pmiops.workbench.db.model.DbEgressEvent.DbEgressEventStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -30,7 +30,7 @@ public class OfflineEgressController implements OfflineEgressApiDelegate {
     List<Long> oldPendingEventIds =
         egressEventDao
             .findAllByStatusAndLastModifiedTimeLessThan(
-                EgressEventStatus.PENDING, latestModifiedTime)
+                DbEgressEventStatus.PENDING, latestModifiedTime)
             .stream()
             .map(DbEgressEvent::getEgressEventId)
             .collect(Collectors.toList());

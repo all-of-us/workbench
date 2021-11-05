@@ -40,7 +40,7 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbEgressEvent;
-import org.pmiops.workbench.db.model.DbEgressEvent.EgressEventStatus;
+import org.pmiops.workbench.db.model.DbEgressEvent.DbEgressEventStatus;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.institution.InstitutionService;
@@ -315,7 +315,7 @@ public class EgressEventServiceTest {
             .setEgressWindowSeconds(oldEgressEvent.getTimeWindowDuration())
             .setUser(dbUser1)
             .setWorkspace(dbWorkspace)
-            .setStatus(EgressEventStatus.PENDING));
+            .setStatus(DbEgressEventStatus.PENDING));
 
     fakeClock.setInstant(NOW);
     egressEventService.handleEvent(oldEgressEvent);
@@ -341,7 +341,7 @@ public class EgressEventServiceTest {
             .setEgressWindowSeconds(10 * 60L)
             .setUser(dbUser1)
             .setWorkspace(dbWorkspace)
-            .setStatus(EgressEventStatus.PENDING));
+            .setStatus(DbEgressEventStatus.PENDING));
 
     fakeClock.setInstant(NOW);
     egressEventService.handleEvent(oldEgressEvent);
@@ -367,7 +367,7 @@ public class EgressEventServiceTest {
             // Different user, otherwise metadata matches
             .setUser(dbUser2)
             .setWorkspace(dbWorkspace)
-            .setStatus(EgressEventStatus.PENDING));
+            .setStatus(DbEgressEventStatus.PENDING));
 
     fakeClock.setInstant(NOW);
     egressEventService.handleEvent(oldEgressEvent);
@@ -395,7 +395,7 @@ public class EgressEventServiceTest {
             .setEgressWindowSeconds(oldEgressEvent.getTimeWindowDuration())
             .setUser(dbUser1)
             .setWorkspace(dbWorkspace)
-            .setStatus(EgressEventStatus.PENDING));
+            .setStatus(DbEgressEventStatus.PENDING));
 
     fakeClock.setInstant(NOW);
     egressEventService.handleEvent(oldEgressEvent);

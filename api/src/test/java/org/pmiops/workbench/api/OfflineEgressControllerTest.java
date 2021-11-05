@@ -14,7 +14,7 @@ import org.pmiops.workbench.FakeJpaDateTimeConfiguration;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.db.dao.EgressEventDao;
 import org.pmiops.workbench.db.model.DbEgressEvent;
-import org.pmiops.workbench.db.model.DbEgressEvent.EgressEventStatus;
+import org.pmiops.workbench.db.model.DbEgressEvent.DbEgressEventStatus;
 import org.pmiops.workbench.test.FakeClock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -62,7 +62,7 @@ public class OfflineEgressControllerTest {
   @Test
   public void testCheckPendingEgressEvents_noMatches() {
     fakeClock.setInstant(TWO_HOURS_AGO);
-    egressEventDao.save(newEvent().setStatus(EgressEventStatus.REMEDIATED));
+    egressEventDao.save(newEvent().setStatus(DbEgressEventStatus.REMEDIATED));
 
     fakeClock.setInstant(TEN_MINUTES_AGO);
     egressEventDao.save(newEvent());
@@ -74,6 +74,6 @@ public class OfflineEgressControllerTest {
   }
 
   private DbEgressEvent newEvent() {
-    return new DbEgressEvent().setStatus(EgressEventStatus.PENDING);
+    return new DbEgressEvent().setStatus(DbEgressEventStatus.PENDING);
   }
 }
