@@ -2,6 +2,7 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {mount, ReactWrapper, ShallowWrapper} from 'enzyme';
 import {Dropdown} from "primereact/dropdown";
+import {MemoryRouter} from "react-router";
 
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore} from 'app/utils/navigation';
@@ -35,8 +36,6 @@ import * as Authentication from "app/utils/authentication";
 import {mockNavigate} from 'setupTests';
 import {environment} from 'environments/environment';
 
-import SpyInstance = jest.SpyInstance;
-import {MemoryRouter} from "react-router";
 
 type AnyWrapper = (ShallowWrapper|ReactWrapper);
 
@@ -44,8 +43,8 @@ jest.mock('app/utils/workbench-gapi-client', () => ({
   getBillingAccountInfo: () => new Promise(resolve => resolve({billingAccountName: 'billing-account'}))
 }));
 
-let mockHasBillingScope: SpyInstance;
-let mockEnsureBillingScope: SpyInstance;
+let mockHasBillingScope: jest.SpyInstance;
+let mockEnsureBillingScope: jest.SpyInstance;
 
 function getSaveButtonDisableMsg(wrapper: AnyWrapper, attributeName: string) {
   return wrapper.find('[data-test-id="workspace-save-btn"]').first().prop('disabled')[attributeName];
@@ -316,7 +315,10 @@ describe('WorkspaceEdit', () => {
     const twoTiers = [AccessTierShortNames.Registered, AccessTierShortNames.Controlled];
     environment.accessTiersVisibleToUsers = twoTiers;
     workspaceEditMode = WorkspaceEditMode.Create;
-    profileStore.set({...profileStore.get(), profile: {...profileStore.get().profile, accessTierShortNames: twoTiers}});
+    profileStore.set({...profileStore.get(), profile: {
+      ...profileStore.get().profile,
+        accessTierShortNames: twoTiers
+    }});
 
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
