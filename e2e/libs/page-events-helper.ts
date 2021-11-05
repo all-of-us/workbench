@@ -123,7 +123,7 @@ export const logRequestError = async (request: Request): Promise<void> => {
   const responseText = stringifyData(await getResponseText(request));
   logger.log(
     'error',
-    'RequestId failed: %s %s %s\n%s %s',
+    'Request failed: %s %s %s\n%s %s',
     status,
     request.method(),
     request.url(),

@@ -165,7 +165,7 @@ export default class WorkspacesPage extends AuthenticatedPage {
     const noRadiobutton = RadioButton.findByName(this.page, EDIT_FIELD.POPULATION_OF_INTEREST.noRadiobutton.textOption);
     await noRadiobutton.select();
 
-    // 6. RequestId for Review of Research Purpose Description. Using default value
+    // 6. Request for Review of Research Purpose Description. Using default value
     await editPage.requestForReviewRadiobutton(reviewRequest);
 
     return editPage;
