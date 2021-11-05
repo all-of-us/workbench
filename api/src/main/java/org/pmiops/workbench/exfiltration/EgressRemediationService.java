@@ -329,12 +329,23 @@ public class EgressRemediationService {
 
   private String jiraEventDescription(DbEgressEvent event, EgressRemediationAction action) {
     Optional<DbUser> user = Optional.ofNullable(event.getUser());
+    WorkbenchConfig config = workbenchConfigProvider.get();
     SumologicEgressEvent originalEvent =
         new Gson().fromJson(event.getSumologicEvent(), SumologicEgressEvent.class);
     return String.format(
         String.format("Notebook server VM prefix: %s\n", originalEvent.getVmPrefix())
             + String.format(
-                "User running notebook: %s\n\n", user.map(DbUser::getUsername).orElse("unknown"))
+                "User running notebook: %s\n", user.map(DbUser::getUsername).orElse("unknown"))
+            + String.format(
+                "User Admin Console (Workbench Admin User): %s\n",
+                user.map(
+                        u ->
+                            config.server.uiBaseUrl
+                                + "/admin/users/"
+                                + u.getUsername()
+                                    .replaceFirst(
+                                        "@" + config.googleDirectoryService.gSuiteDomain, ""))
+                    .orElse("unknown"))
             + jiraEventDescriptionShort(event, action));
   }
 
