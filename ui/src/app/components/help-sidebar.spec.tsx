@@ -24,7 +24,7 @@ import {
   WorkspacesApi
 } from 'generated/fetch';
 import defaultServerConfig from 'testing/default-server-config';
-import {waitForFakeTimersAndUpdate, waitOneTickAndUpdate} from 'testing/react-test-helpers';
+import {waitForFakeTimersAndUpdate} from 'testing/react-test-helpers';
 import {CohortAnnotationDefinitionServiceStub} from 'testing/stubs/cohort-annotation-definition-service-stub';
 import {CohortReviewServiceStub, cohortReviewStubs} from 'testing/stubs/cohort-review-service-stub';
 import {workspaceDataStub} from 'testing/stubs/workspaces';
@@ -107,7 +107,7 @@ describe('HelpSidebar', () => {
 
   const setActiveIcon = async(wrapper, activeIconKey) => {
     setSidebarActiveIconStore.next(activeIconKey);
-    await waitOneTickAndUpdate(wrapper);
+    await waitForFakeTimersAndUpdate(wrapper);
   };
 
   beforeEach(() => {
@@ -170,7 +170,7 @@ describe('HelpSidebar', () => {
     const wrapper = await component();
     wrapper.find({'data-test-id': 'workspace-menu-button'}).first().simulate('click');
     wrapper.find({'data-test-id': 'Delete-menu-item'}).first().simulate('click');
-    await waitOneTickAndUpdate(wrapper);
+    await waitForFakeTimersAndUpdate(wrapper);
     expect(wrapper.find(ConfirmDeleteModal).exists()).toBeTruthy();
   });
 
@@ -178,7 +178,7 @@ describe('HelpSidebar', () => {
     const wrapper = await component();
     wrapper.find({'data-test-id': 'workspace-menu-button'}).first().simulate('click');
     wrapper.find({'data-test-id': 'Share-menu-item'}).first().simulate('click');
-    await waitOneTickAndUpdate(wrapper);
+    await waitForFakeTimersAndUpdate(wrapper);
     expect(wrapper.find(MockWorkspaceShare).exists()).toBeTruthy();
   });
 

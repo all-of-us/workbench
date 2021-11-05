@@ -617,9 +617,7 @@ export const HelpSidebar = fp.flow(
         <img data-test-id={'help-sidebar-icon-' + icon.id} src={proIcons[icon.id]} style={{...icon.style, position: 'absolute'}} />
         <FlexRow data-test-id='runtime-status-icon-container' style={styles.statusIconContainer}>
           {(() => {
-          console.log('container')
           if (runtimeStore.loadingError) {
-          console.log('error')
               return <FontAwesomeIcon icon={faLock} style={{
                 ...styles.asyncOperationStatusIcon,
                 color: colors.asyncOperationStatus.stopped,
