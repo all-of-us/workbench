@@ -189,7 +189,7 @@ swaggerSources {
             '--model-name-prefix', 'Firecloud'
     ])
     notebooks swagger2JavaClient("notebooks.yaml", "notebooks")
-    jira swagger2JavaClient("jira.yaml", "jira")
+    jira swagger3JavaClient("jira.yaml", "jira")
     mandrill swagger2JavaClient("mandrill.yaml", "mandrill")
     moodle swagger2JavaClient("moodle.yaml", "moodle")
     rdr swagger2JavaClient("rdr.yaml", "rdr")

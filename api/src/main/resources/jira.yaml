@@ -1,143 +1,854 @@
-#This file provide the end points for jira interactions
-# JIRA REST API information can be found at :
-# https://developer.atlassian.com/cloud/jira/platform/rest/
-
-swagger: '2.0'
-
+# This file provide the end points for jira interactions
+#
+# Copied from https://developer.atlassian.com/cloud/jira/platform/swagger-v3.v3.json
+# The following updates were applied:
+#  - Only the relevant subset of endpoints/models were copied
+#  - all tags switch to "Jira", to consolidate the client interface
+#  - some unused fields were dropped, in particular where they depended on another high
+#    complexity model
+#  - remove all "read-only: true"; this removed the ability to manipulate models for testing
+---
+openapi: 3.0.1
 info:
-  title: Jira
-  description: |
-    Service for Jira Interactions.
-  version: "0.1"
-
-host: "precisionmedicineinitiative.atlassian.net"
-schemes:
-  - "https"
-basePath: /rest/api/2
-
-produces:
-  - application/json
-
-securityDefinitions:
-  AdminSecurity:
-    type: basic
+  title: The Jira Cloud platform REST API
+  description: Jira Cloud platform REST API documentation
+  termsOfService: http://atlassian.com/terms/
+  contact:
+    email: ecosystem@atlassian.com
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1001.0.0-SNAPSHOT
+servers:
+  - url: https://precisionmedicineinitiative.atlassian.net
 
 ##########################################################################################
 ## PATHS
 ##########################################################################################
 
 paths:
- /issue:
+  "/rest/api/3/issue":
     post:
-      summary: Create issue in jira.
-      description: "Creates issue in JIRA and return IssueResponse"
       tags:
-        - Jira
-      consumes:
-        - application/json
+        - jira
+      summary: Create issue
+      description: |-
+        Creates an issue or, where the option to create subtasks is enabled in Jira, a subtask. A transition may be applied, to move the issue or subtask to a workflow step other than the default start step, and issue properties set.
+
+        The content of the issue or subtask is defined using `update` and `fields`. The fields that can be set in the issue or subtask are determined using the [ Get create issue metadata](#api-rest-api-3-issue-createmeta-get). These are the same fields that appear on the issue's create screen. Note that the `description`, `environment`, and any `textarea` type custom fields (multi-line text fields) take Atlassian Document Format content. Single line custom fields (`textfield`) accept a string and don't handle Atlassian Document Format content.
+
+        Creating a subtask differs from creating an issue as follows:
+
+         *  `issueType` must be set to a subtask issue type (use [ Get create issue metadata](#api-rest-api-3-issue-createmeta-get) to find subtask issue types).
+         *  `parent` must contain the ID or key of the parent issue.
+
+        In a next-gen project any issue may be made a child providing that the parent and child are members of the same project. In a classic project the parent field is only valid for subtasks.
+
+        **[Permissions](#permissions) required:** *Browse projects* and *Create issues* [project permissions](https://confluence.atlassian.com/x/yodKLg) for the project in which the issue or subtask is created.
       operationId: createIssue
       parameters:
-        - name: fields
-          in: body
-          description: Attributes for creating issue
+        - name: updateHistory
+          in: query
+          description: Whether the project in which the issue is created is added to the
+            user's **Recently viewed** project list, as shown under **Projects** in Jira.
+            When provided, the issue type and request type are added to the user's history
+            for a project. These values are then used to provide defaults on the issue
+            create screen.
           schema:
-            $ref: '#/definitions/IssueRequest'
+            type: boolean
+            default: false
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/IssueUpdateDetails"
+        required: true
       responses:
-        200:
-          description: File saved
-          schema:
-            $ref: '#/definitions/IssueResponse'
-        400:
-          description: Bad request, check the summary/description field
-        500:
-          description: JIRA Internal Error
+        '201':
+          description: Returned if the request is successful.
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/CreatedIssue"
+              example: '{"jiraId":"10000","key":"ED-24","self":"https://your-domain.atlassian.net/rest/api/3/issue/10000","transition":{"status":200,"errorCollection":{"errorMessages":[],"errors":{}}}}'
+        '400':
+          description: |-
+            Returned if the request:
+
+             *  is missing required fields.
+             *  contains invalid field values.
+             *  contains fields that cannot be set for the issue type.
+             *  is by a user who does not have the necessary permission.
+             *  is to create a subtype in a project different that of the parent issue.
+             *  is for a subtask when the option to create subtasks is disabled.
+             *  is invalid for any other reason.
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorCollection"
+              example: '{"errorMessages":["Field ''priority'' is required"],"errors":{}}'
+        '401':
+          description: Returned if the authentication credentials are incorrect or missing.
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorCollection"
+        '403':
+          description: Returned if the user does not have the necessary permission.
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorCollection"
+      deprecated: false
       security:
-        - AdminSecurity: []
+        - basicAuth: [ ]
+        - OAuth2:
+            - write:jira-work
+        - { }
+      x-atlassian-connect-scope: WRITE
+  "/rest/api/3/issue/{issueIdOrKey}/comment":
+    post:
+      tags:
+        - jira
+      summary: Add comment
+      description: |-
+        Adds a comment to an issue.
 
- /issue/{issueKey}/attachments:
-   post:
-     summary: Add attachment to the jira ticket
-     tags:
-       - Jira
-     operationId: addAttachments
-     consumes:
-       - multipart/form-data
-     parameters:
-       - in: path
-         name: issueKey
-         type: string
-         required: true
-       - name: file
-         in: formData
-         description: Upload file as attachment
-         required: true
-         type: file
-       - in: header
-         name: X-Atlassian-Token
-         type: string
-         default: nocheck
-     responses:
-       200:
-         description: File saved
-       403:
-         description: Attachments are disabled
-       404:
-         description: Issue Not Found/Attachments exceeds the maximum configured attachment size
-       413:
-         description: Attachment is too big
-     security:
-       - AdminSecurity: []
+        This operation can be accessed anonymously.
+
+        **[Permissions](#permissions) required:**
+
+         *  *Browse projects* and *Add comments* [ project permission](https://confluence.atlassian.com/x/yodKLg) for the project that the issue containing the comment is in.
+         *  If [issue-level security](https://confluence.atlassian.com/x/J4lKLg) is configured, issue-level security permission to view the issue.
+      operationId: addComment
+      parameters:
+        - name: issueIdOrKey
+          in: path
+          description: The ID or key of the issue.
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/Comment"
+            example:
+              visibility:
+                type: role
+                value: Administrators
+              body:
+                type: doc
+                version: 1
+                content:
+                  - type: paragraph
+                    content:
+                      - text: Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                          Pellentesque eget venenatis elit. Duis eu justo eget augue iaculis
+                          fermentum. Sed semper quam laoreet nisi egestas at posuere augue
+                          semper.
+                        type: text
+        required: true
+      responses:
+        '201':
+          description: Returned if the request is successful.
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Comment"
+              example: '{"self":"https://your-domain.atlassian.net/rest/api/3/issue/10010/comment/10000","jiraId":"10000","author":{"self":"https://your-domain.atlassian.net/rest/api/3/user?accountId=5b10a2844c20165700ede21g","accountId":"5b10a2844c20165700ede21g","displayName":"Mia
+                Krystof","active":false},"body":{"type":"doc","version":1,"content":[{"type":"paragraph","content":[{"type":"text","text":"Lorem
+                ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque eget
+                venenatis elit. Duis eu justo eget augue iaculis fermentum. Sed semper
+                quam laoreet nisi egestas at posuere augue semper."}]}]},"updateAuthor":{"self":"https://your-domain.atlassian.net/rest/api/3/user?accountId=5b10a2844c20165700ede21g","accountId":"5b10a2844c20165700ede21g","displayName":"Mia
+                Krystof","active":false},"created":"2021-11-02T02:26:07.309+0000","updated":"2021-11-02T02:26:07.309+0000","visibility":{"type":"role","value":"Administrators"}}'
+        '400':
+          description: Returned if the request is invalid.
+        '401':
+          description: Returned if the authentication credentials are incorrect.
+        '404':
+          description: Returned if the issue is not found or the user does not have
+            permission to view it.
+      deprecated: false
+      security:
+        - basicAuth: [ ]
+        - OAuth2:
+            - write:jira-work
+        - { }
+      x-atlassian-connect-scope: WRITE
+  "/rest/api/3/search":
+    post:
+      tags:
+        - jira
+      summary: Search for issues using JQL (POST)
+      description: |-
+        Searches for issues using [JQL](https://confluence.atlassian.com/x/egORLQ).
+
+        There is a [GET](#api-rest-api-3-search-get) version of this resource that can be used for smaller JQL query expressions.
+
+        This operation can be accessed anonymously.
+
+        **[Permissions](#permissions) required:** Issues are included in the response where the user has:
+         *  *Browse projects* [project permission](https://confluence.atlassian.com/x/yodKLg) for the project containing the issue.
+         *  If [issue-level security](https://confluence.atlassian.com/x/J4lKLg) is configured, issue-level security permission to view the issue.
+      operationId: searchForIssuesUsingJqlPost
+      parameters: [ ]
+      requestBody:
+        description: A JSON object containing the search request.
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/SearchRequestBean"
+            example:
+              expand:
+                - names
+                - schema
+                - operations
+              jql: project = HSP
+              maxResults: 15
+              fieldsByKeys: false
+              fields:
+                - summary
+                - status
+                - assignee
+              startAt: 0
+        required: true
+      responses:
+        '200':
+          description: Returned if the request is successful.
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/SearchResults"
+        '400':
+          description: Returned if the JQL query is invalid.
+        '401':
+          description: Returned if the authentication credentials are incorrect or missing.
+      security:
+        - basicAuth: [ ]
+        - OAuth2:
+            - write:jira-work
+        - { }
+      x-atlassian-connect-scope: READ
 
 ##########################################################################################
-## DEFINITIONS
+## COMPONENTS
 ##########################################################################################
-definitions:
-  IssueRequest:
-      description: Details required for creating issue project info, summary, description etc
-      required:
-        - fields
+
+components:
+  schemas:
+    IssueUpdateDetails:
+      type: object
       properties:
+        transition:
+          description: Details of a transition. Required when performing a transition,
+            optional when creating or editing an issue.
+          allOf:
+            - "$ref": "#/components/schemas/IssueTransition"
         fields:
-          $ref: '#/definitions/FieldsDetails'
-
-  FieldsDetails:
-      description: Fields information like project id, issue type etc
-      required:
-        - project
-      properties:
-        project:
-          $ref: '#/definitions/ProjectDetails'
-        summary:
-          type: string
-        description:
-          type: string
-        issuetype:
-          $ref: '#/definitions/IssueType'
-
-  ProjectDetails:
-      description: Project information
-      required:
-        - key
-      properties:
-        key:
-          type: string
-
-  IssueType:
-      required:
-        - name
-      properties:
-        name:
-          type: string
-
-  IssueResponse:
-      required:
-        - id
-        - key
+          type: object
+          additionalProperties: { }
+          description: List of issue screen fields to update, specifying the sub-field
+            to update and its value for each field. This field provides a straightforward
+            option when setting a sub-field. When multiple sub-fields or other operations
+            are required, use `update`. Fields included in here cannot be included in
+            `update`.
+        update:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              "$ref": "#/components/schemas/FieldUpdateOperation"
+          description: A Map containing the field field name and a list of operations
+            to perform on the issue screen field. Note that fields included in here cannot
+            be included in `fields`.
+        properties:
+          type: array
+          description: Details of issue properties to be add or update.
+          items:
+            "$ref": "#/components/schemas/EntityProperty"
+      description: Details of an issue update request.
+    IssueTransition:
+      type: object
       properties:
         id:
           type: string
-        key:
+          description: The ID of the issue transition. Required when specifying a
+            transition to undertake.
+        name:
           type: string
+          description: The name of the issue transition.
+        to:
+          description: Details of the issue status after the transition.
+          allOf:
+            - "$ref": "#/components/schemas/StatusDetails"
+        hasScreen:
+          type: boolean
+          description: Whether there is a screen associated with the issue transition.
+        isGlobal:
+          type: boolean
+          description: Whether the issue transition is global, that is, the transition
+            is applied to issues regardless of their status.
+        isInitial:
+          type: boolean
+          description: Whether this is the initial issue transition for the workflow.
+        isAvailable:
+          type: boolean
+          description: Whether the transition is available to be performed.
+        isConditional:
+          type: boolean
+          description: Whether the issue has to meet criteria before the issue transition
+            is applied.
+        fields:
+          type: object
+          additionalProperties:
+            "$ref": "#/components/schemas/FieldMetadata"
+          description: Details of the fields associated with the issue transition
+            screen. Use this information to populate `fields` and `update` in a transition
+            request.
+        expand:
+          type: string
+          description: Expand options that include additional transition details in
+            the response.
+        looped:
+          type: boolean
+      additionalProperties: true
+      description: Details of an issue transition.
+    StatusDetails:
+      type: object
+      properties:
         self:
           type: string
+          description: The URL of the status.
+        description:
+          type: string
+          description: The description of the status.
+        iconUrl:
+          type: string
+          description: The URL of the icon used to represent the status.
+        name:
+          type: string
+          description: The name of the status.
+        id:
+          type: string
+          description: The ID of the status.
+        statusCategory:
+          description: The category assigned to the status.
+          allOf:
+            - "$ref": "#/components/schemas/StatusCategory"
+      additionalProperties: true
+      description: A status.
+    StatusCategory:
+      type: object
+      properties:
+        self:
+          type: string
+          description: The URL of the status category.
+        id:
+          type: integer
+          description: The ID of the status category.
+          format: int64
+        key:
+          type: string
+          description: The key of the status category.
+        colorName:
+          type: string
+          description: The name of the color used to represent the status category.
+        name:
+          type: string
+          description: The name of the status category.
+      additionalProperties: true
+      description: A status category.
+    FieldUpdateOperation:
+      type: object
+      properties:
+        add:
+          description: The value to add to the field.
+          example: triaged
+        set:
+          description: The value to set in the field.
+          example: A new summary
+        remove:
+          description: The value to removed from the field.
+          example: blocker
+        edit:
+          description: The value to edit in the field.
+          example:
+            remainingEstimate: 4d
+            originalEstimate: 1w 1d
+      additionalProperties: false
+      description: Details of an operation to perform on a field.
+    FieldMetadata:
+      required:
+        - key
+        - name
+        - operations
+        - required
+        - schema
+      type: object
+      properties:
+        required:
+          type: boolean
+          description: Whether the field is required.
+        schema:
+          description: The data type of the field.
+          allOf:
+            - "$ref": "#/components/schemas/JsonTypeBean"
+        name:
+          type: string
+          description: The name of the field.
+        key:
+          type: string
+          description: The key of the field.
+        autoCompleteUrl:
+          type: string
+          description: The URL that can be used to automatically complete the field.
+        hasDefaultValue:
+          type: boolean
+          description: Whether the field has a default value.
+        operations:
+          type: array
+          description: The list of operations that can be performed on the field.
+          items:
+            type: string
+        allowedValues:
+          type: array
+          description: The list of values allowed in the field.
+          items:
+        defaultValue:
+          description: The default value of the field.
+      additionalProperties: false
+      description: The metadata describing an issue field.
+      xml:
+        name: availableField
+    JsonTypeBean:
+      required:
+        - type
+      type: object
+      properties:
+        type:
+          type: string
+          description: The data type of the field.
+        items:
+          type: string
+          description: When the data type is an array, the name of the field items
+            within the array.
+        system:
+          type: string
+          description: If the field is a system field, the name of the field.
+        custom:
+          type: string
+          description: If the field is a custom field, the URI of the field.
+        customId:
+          type: integer
+          description: If the field is a custom field, the custom ID of the field.
+          format: int64
+        configuration:
+          type: object
+          additionalProperties:
+          description: If the field is a custom field, the configuration of the field.
+      additionalProperties: false
+      description: The schema of a field.
+    EntityProperty:
+      type: object
+      properties:
+        key:
+          type: string
+          description: The key of the property. Required on create and update.
+        value:
+          description: The value of the property. Required on create and update.
+      additionalProperties: false
+      description: An entity property, for more information see [Entity properties](https://developer.atlassian.com/cloud/jira/platform/jira-entity-properties/).
+    CreatedIssue:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The ID of the created issue or subtask.
+        key:
+          type: string
+          description: The key of the created issue or subtask.
+        self:
+          type: string
+          description: The URL of the created issue or subtask.
+        transition:
+          description: The response code and messages related to any requested transition.
+          allOf:
+            - "$ref": "#/components/schemas/NestedResponse"
+      additionalProperties: false
+      description: Details about a created issue or subtask.
+    NestedResponse:
+      type: object
+      properties:
+        status:
+          type: integer
+          format: int32
+        errorCollection:
+          "$ref": "#/components/schemas/ErrorCollection"
+      additionalProperties: false
+    ErrorCollection:
+      type: object
+      properties:
+        errorMessages:
+          type: array
+          description: The list of error messages produced by this operation. For example,
+            "input parameter 'key' must be provided"
+          items:
+            type: string
+        errors:
+          type: object
+          additionalProperties:
+            type: string
+          description: 'The list of errors by parameter returned by the operation. For
+            example,"projectKey": "Project keys must start with an uppercase letter, followed
+            by one or more uppercase alphanumeric characters."'
+        status:
+          type: integer
+          format: int32
+      additionalProperties: false
+      description: Error messages from an operation.
+    SearchResults:
+      type: object
+      properties:
+        expand:
+          type: string
+          description: Expand options that include additional search result details in
+            the response.
+        startAt:
+          type: integer
+          description: The index of the first item returned on the page.
+          format: int32
+        maxResults:
+          type: integer
+          description: The maximum number of results that could be on the page.
+          format: int32
+        total:
+          type: integer
+          description: The number of results on the page.
+          format: int32
+        issues:
+          type: array
+          description: The list of issues found by the search.
+          items:
+            "$ref": "#/components/schemas/IssueBean"
+        warningMessages:
+          type: array
+          description: Any warnings related to the JQL query.
+          items:
+            type: string
+        names:
+          type: object
+          additionalProperties:
+            type: string
+          description: The ID and name of each field in the search results.
+        schema:
+          type: object
+          additionalProperties:
+            "$ref": "#/components/schemas/JsonTypeBean"
+          description: The schema describing the field types in the search results.
+      additionalProperties: false
+      description: The result of a JQL search.
+    IssueBean:
+      type: object
+      properties:
+        expand:
+          type: string
+          description: Expand options that include additional issue details in the response.
+          xml:
+            attribute: true
+        id:
+          type: string
+          description: The ID of the issue.
+        self:
+          type: string
+          description: The URL of the issue details.
+          format: uri
+        key:
+          type: string
+          description: The key of the issue.
+        renderedFields:
+          type: object
+          additionalProperties:
+          description: The rendered value of each field present on the issue.
+        properties:
+          type: object
+          additionalProperties:
+          description: Details of the issue properties identified in the request.
+        names:
+          type: object
+          additionalProperties:
+            type: string
+          description: The ID and name of each field present on the issue.
+        schema:
+          type: object
+          additionalProperties:
+            "$ref": "#/components/schemas/JsonTypeBean"
+          description: The schema describing each field present on the issue.
+        transitions:
+          type: array
+          description: The transitions that can be performed on the issue.
+          items:
+            "$ref": "#/components/schemas/IssueTransition"
+        versionedRepresentations:
+          type: object
+          additionalProperties:
+            type: object
+            additionalProperties:
+          description: The versions of each field on the issue.
+        fieldsToInclude:
+          "$ref": "#/components/schemas/IncludedFields"
+        fields:
+          type: object
+          additionalProperties: { }
+      additionalProperties: false
+      description: Details about an issue.
+      xml:
+        name: issue
+    IncludedFields:
+      type: object
+      properties:
+        excluded:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+        included:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+        actuallyIncluded:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+      additionalProperties: false
+    SearchRequestBean:
+      type: object
+      properties:
+        jql:
+          type: string
+          description: A [JQL](https://confluence.atlassian.com/x/egORLQ) expression.
+        startAt:
+          type: integer
+          description: The index of the first item to return in the page of results
+            (page offset). The base index is `0`.
+          format: int32
+        maxResults:
+          type: integer
+          description: The maximum number of items to return per page.
+          format: int32
+          default: 50
+        fields:
+          type: array
+          description: |-
+            A list of fields to return for each issue, use it to retrieve a subset of fields. This parameter accepts a comma-separated list. Expand options include:
 
+             *  `*all` Returns all fields.
+             *  `*navigable` Returns navigable fields.
+             *  Any issue field, prefixed with a minus to exclude.
+
+            The default is `*navigable`.
+
+            Examples:
+
+             *  `summary,comment` Returns the summary and comments fields only.
+             *  `-description` Returns all navigable (default) fields except description.
+             *  `*all,-comment` Returns all fields except comments.
+
+            Multiple `fields` parameters can be included in a request.
+
+            Note: All navigable fields are returned by default. This differs from [GET issue](#api-rest-api-3-issue-issueIdOrKey-get) where the default is all fields.
+          items:
+            type: string
+        validateQuery:
+          type: string
+          description: |-
+            Determines how to validate the JQL query and treat the validation results. Supported values:
+
+             *  `strict` Returns a 400 response code if any errors are found, along with a list of all errors (and warnings).
+             *  `warn` Returns all errors as warnings.
+             *  `none` No validation is performed.
+             *  `true` *Deprecated* A legacy synonym for `strict`.
+             *  `false` *Deprecated* A legacy synonym for `warn`.
+
+            The default is `strict`.
+
+            Note: If the JQL is not correctly formed a 400 response code is returned, regardless of the `validateQuery` value.
+          enum:
+            - strict
+            - warn
+            - none
+            - 'true'
+            - 'false'
+        expand:
+          type: array
+          description: |-
+            Use [expand](em>#expansion) to include additional information about issues in the response. Note that, unlike the majority of instances where `expand` is specified, `expand` is defined as a list of values. The expand options are:
+
+             *  `renderedFields` Returns field values rendered in HTML format.
+             *  `names` Returns the display name of each field.
+             *  `schema` Returns the schema describing a field type.
+             *  `transitions` Returns all possible transitions for the issue.
+             *  `operations` Returns all possible operations for the issue.
+             *  `editmeta` Returns information about how each field can be edited.
+             *  `changelog` Returns a list of recent updates to an issue, sorted by date, starting from the most recent.
+             *  `versionedRepresentations` Instead of `fields`, returns `versionedRepresentations` a JSON array containing each version of a field's value, with the highest numbered item representing the most recent version.
+          items:
+            type: string
+        properties:
+          type: array
+          description: A list of up to 5 issue properties to include in the results.
+            This parameter accepts a comma-separated list.
+          items:
+            type: string
+        fieldsByKeys:
+          type: boolean
+          description: Reference fields by their key (rather than ID). The default
+            is `false`.
+      additionalProperties: false
+    FieldReferenceData:
+      type: object
+      properties:
+        value:
+          type: string
+          description: The field identifier.
+        displayName:
+          type: string
+          description: |-
+            The display name contains the following:
+
+             *  for system fields, the field name. For example, `Summary`.
+             *  for collapsed custom fields, the field name followed by a hyphen and then the field name and field type. For example, `Component - Component[Dropdown]`.
+             *  for other custom fields, the field name followed by a hyphen and then the custom field ID. For example, `Component - cf[10061]`.
+        orderable:
+          type: string
+          description: Whether the field can be used in a query's `ORDER BY` clause.
+          enum:
+            - 'true'
+            - 'false'
+        searchable:
+          type: string
+          description: Whether the content of this field can be searched.
+          enum:
+            - 'true'
+            - 'false'
+        auto:
+          type: string
+          description: Whether the field provide auto-complete suggestions.
+          enum:
+            - 'true'
+            - 'false'
+        cfid:
+          type: string
+          description: If the item is a custom field, the ID of the custom field.
+        operators:
+          type: array
+          description: The valid search operators for the field.
+          items:
+            type: string
+        types:
+          type: array
+          description: The data types of items in the field.
+          items:
+            type: string
+      additionalProperties: false
+      description: Details of a field that can be used in advanced searches.
+    Comment:
+      type: object
+      properties:
+        self:
+          type: string
+          description: The URL of the comment.
+        id:
+          type: string
+          description: The ID of the comment.
+        body:
+          description: The comment text in [Atlassian Document Format](https://developer.atlassian.com/cloud/jira/platform/apis/document/structure/).
+        renderedBody:
+          type: string
+          description: The rendered version of the comment.
+        created:
+          type: string
+          description: The date and time at which the comment was created.
+        updated:
+          type: string
+          description: The date and time at which the comment was updated last.
+        jsdPublic:
+          type: boolean
+          description: Whether the comment is visible in Jira Service Desk. Defaults
+            to true when comments are created in the Jira Cloud Platform. This includes
+            when the site doesn't use Jira Service Desk or the project isn't a Jira
+            Service Desk project and, therefore, there is no Jira Service Desk for
+            the issue to be visible on. To create a comment with its visibility in
+            Jira Service Desk set to false, use the Jira Service Desk REST API [Create
+            request comment](https://developer.atlassian.com/cloud/jira/service-desk/rest/#api-rest-servicedeskapi-request-issueIdOrKey-comment-post)
+            operation.
+        properties:
+          type: array
+          description: A list of comment properties. Optional on create and update.
+          items:
+            "$ref": "#/components/schemas/EntityProperty"
+      description: A comment.
+    Project:
+      type: object
+      properties:
+        key:
+          type: string
+          description: The key of the project.
+    IssueTypeDetails:
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID of the issue type.
+
+    AtlassianDocument:
+      type: object
+      properties:
+        type:
+          type: string
+        version:
+          type: number
+        content:
+          type: array
+          items:
+            "$ref": "#/components/schemas/AtlassianContent"
+    AtlassianContent:
+      type: object
+      properties:
+        text:
+          type: string
+        type:
+          type: string
+        content:
+          type: array
+          items:
+            "$ref": "#/components/schemas/AtlassianContent"
+  securitySchemes:
+    basicAuth:
+      type: http
+      description: You can access this resource via basic auth.
+      scheme: basic
+    OAuth2:
+      type: oauth2
+      description: OAuth2 scopes for Jira
+      flows:
+        authorizationCode:
+          authorizationUrl: https://auth.atlassian.com/authorize
+          tokenUrl: https://auth.atlassian.com/oauth/token
+          scopes:
+            read:jira-user: View user information in Jira that you have access to,
+              including usernames, email addresses, and avatars.
+            read:jira-work: Read project and issue data. Search for issues and objects
+              associated with issues (such as attachments and worklogs).
+            write:jira-work: Create and edit issues in Jira, post comments, create
+              worklogs, and delete issues.
+            manage:jira-project: Create and edit project settings and create new project-level
+              objects, for example, versions, components.
+            manage:jira-configuration: Configure Jira settings that require the Jira
+              administrators permission, for example, create projects and custom fields,
+              view workflows, manage issue link types.
+            manage:jira-webhook: Manage Jira webhooks. Enables an OAuth app to register
+              and unregister dynamic webhooks in Jira. It also provides for fetching
+              of registered webhooks.
