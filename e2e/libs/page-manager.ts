@@ -22,8 +22,6 @@ const userAgent =
   'Chrome/80.0.3987.149 Safari/537.36' +
   (CIRCLE_BUILD_NUM ? ` (circle-build-number/${CIRCLE_BUILD_NUM})` : '');
 
-export const requestsMap = new Set();
-
 /**
  * Launch new Chrome.
  * @param launchOpts: {@link LaunchOptions} New browser launch options.
