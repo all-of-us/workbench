@@ -87,12 +87,15 @@ public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
         workspaceAdminService.deleteRuntimesInWorkspace(workspaceNamespace, runtimesToDelete));
   }
 
+private boolean toPrimitive(Boolean value) {
+  return Optional.ofNullable(value).orElse(false);
+}
+
   @Override
   @AuthorityRequired({Authority.ACCESS_CONTROL_ADMIN})
   public ResponseEntity<EmptyResponse> setAdminLockedState(
       String workspaceNamespace, AdminLockedState lockedState) {
-    final boolean desiredLockState = Optional.ofNullable(lockedState.getValue()).orElse(false);
-    workspaceAdminService.setAdminLockedState(workspaceNamespace, desiredLockState);
+    workspaceAdminService.setAdminLockedState(workspaceNamespace, toPrimitive(lockedState.getValue()));
     return ResponseEntity.ok().build();
   }
 }
