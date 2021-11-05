@@ -5,9 +5,10 @@ import { MenuOption, ResourceCard } from 'app/text-labels';
 import { makeRandomName, makeWorkspaceName } from 'utils/str-utils';
 import { findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
 import { waitWhileLoading } from 'utils/waits-utils';
-import { getPropValue, waitUntilChanged } from 'utils/element-utils';
+import { getPropValue } from 'utils/element-utils';
 import ClrIconLink from 'app/element/clr-icon-link';
 import { Ethnicity, PhysicalMeasurementsCriteria } from 'app/page/cohort-participants-group';
+import waitForExpect from 'wait-for-expect';
 
 describe('Build cohort page actions', () => {
   beforeEach(async () => {
@@ -223,13 +224,10 @@ describe('Build cohort page actions', () => {
     // Calculated new Total Count is less than before delete criteria.
     expect(await cohortBuildPage.getTotalCount()).toBeLessThan(totalCount);
 
-    const undoDeleteButton = group1.getUndoDeleteCriteriaButton();
-    expect(await undoDeleteButton.exists()).toBe(true);
-    // Wait until UNDO button is gone.
-    await waitUntilChanged(page, await undoDeleteButton.asElementHandle());
-
-    // Include Group 1 has 1 criteria after delete 1.
-    expect((await group1.findGroupCriteriaList()).length).toBe(1);
+    // Include Group 1 has 1 criteria after delete 1. expect with retries because the UNDO button if displayed could take some time to disappear.
+    await waitForExpect(async () => {
+      expect((await group1.findGroupCriteriaList()).length).toBe(1);
+    }, 20000);
 
     // Add Exclude Group 3: add Ethnicity criteria.
     const excludeGroup3 = cohortBuildPage.findExcludeParticipantsGroup('Group 3');
