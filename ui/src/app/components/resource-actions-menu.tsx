@@ -1,5 +1,6 @@
 import {IconDefinition} from '@fortawesome/free-solid-svg-icons';
 import * as React from 'react';
+
 import {MenuItem, SnowmanButton} from './buttons';
 import {PopupTrigger, TooltipTrigger} from './popups';
 

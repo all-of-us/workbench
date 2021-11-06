@@ -1,7 +1,7 @@
-import {mount} from 'enzyme';
-
-import {waitForFakeTimersAndUpdate} from 'testing/react-test-helpers';
 import {ComputeSecuritySuspendedError} from 'app/utils/runtime-utils';
+import {mount} from 'enzyme';
+import {waitForFakeTimersAndUpdate} from 'testing/react-test-helpers';
+
 import {SecuritySuspendedMessage} from './notebook-frame-error';
 
 describe('SecuritySuspendedMessage', () => {

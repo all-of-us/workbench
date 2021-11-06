@@ -1,6 +1,3 @@
-import * as fp from 'lodash/fp';
-import * as React from 'react';
-
 import {domainToTitle} from 'app/cohort-search/utils';
 import {Button} from 'app/components/buttons';
 import {FlexRow, FlexRowWrap} from 'app/components/flex';
@@ -21,6 +18,8 @@ import {
 import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {ConceptSet, Criteria, Domain, DomainCount, UpdateConceptSetRequest} from 'generated/fetch';
+import * as fp from 'lodash/fp';
+import * as React from 'react';
 
 const styles = reactStyles({
   sectionTitle: {

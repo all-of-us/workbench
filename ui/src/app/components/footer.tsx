@@ -1,5 +1,3 @@
-import * as React from 'react';
-
 import { LinkButton, StyledExternalLink, StyledRouterLink } from 'app/components/buttons';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {SemiBoldHeader} from 'app/components/headers';
@@ -8,9 +6,11 @@ import colors from 'app/styles/colors';
 import {reactStyles, withUserProfile} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
-import {environment} from 'environments/environment';
 import aouFooterLogo from 'assets/images/all-of-us-logo-footer.svg';
 import nihFooterLogo from 'assets/images/nih-logo-footer.png';
+import {environment} from 'environments/environment';
+import * as React from 'react';
+
 import {SUPPORT_EMAIL} from "./support";
 
 const styles = reactStyles({

@@ -1,3 +1,4 @@
+import {getRegisteredTierConfig} from "app/utils/institutions";
 import {
   CheckEmailRequest,
   CheckEmailResponse,
@@ -9,7 +10,6 @@ import {
   OrganizationType,
 } from 'generated/fetch';
 import {stubNotImplementedError} from 'testing/stubs/stub-utils';
-import {getRegisteredTierConfig} from "app/utils/institutions";
 
 export const VUMC: Institution = {
   shortName: 'VUMC',

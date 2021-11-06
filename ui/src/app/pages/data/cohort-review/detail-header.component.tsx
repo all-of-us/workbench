@@ -1,9 +1,3 @@
-import * as fp from 'lodash/fp';
-import moment from 'moment'
-import {RadioButton} from 'primereact/radiobutton';
-import * as React from 'react';
-import {validate, validators} from 'validate.js';
-
 import {DatePicker, NumberInput, Select, ValidationError} from 'app/components/inputs';
 import {filterStateStore, reviewPaginationStore, visitsFilterOptions} from 'app/services/review-state.service';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
@@ -27,7 +21,12 @@ import {
   ParticipantCohortStatus,
   SortOrder
 } from 'generated/fetch';
+import * as fp from 'lodash/fp';
+import moment from 'moment'
+import {RadioButton} from 'primereact/radiobutton';
+import * as React from 'react';
 import {RouteComponentProps, withRouter} from 'react-router-dom';
+import {validate, validators} from 'validate.js';
 
 validators.dateFormat = (value: string) => {
   return moment(value, 'YYYY-MM-DD', true).isValid() ? null : 'must be in format \'YYYY-MM-DD\'';

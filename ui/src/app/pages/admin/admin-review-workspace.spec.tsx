@@ -1,14 +1,14 @@
-import {mount} from 'enzyme';
-import * as React from 'react';
-
-import {serverConfigStore} from 'app/utils/stores';
-import {Profile, ProfileApi, WorkspacesApi} from 'generated/fetch';
-import {AdminReviewWorkspace} from './admin-review-workspace';
-import {ProfileApiStub, ProfileStubVariables} from 'testing/stubs/profile-api-stub';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
+import {serverConfigStore} from 'app/utils/stores';
+import {mount} from 'enzyme';
+import {Profile, ProfileApi, WorkspacesApi} from 'generated/fetch';
+import * as React from 'react';
+import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
+import {ProfileApiStub, ProfileStubVariables} from 'testing/stubs/profile-api-stub';
 import {workspaceStubs} from 'testing/stubs/workspaces';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
-import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
+
+import {AdminReviewWorkspace} from './admin-review-workspace';
 
 describe('AdminReviewWorkspace', () => {
   let props: {profile: Profile, hideSpinner: Function, showSpinner: Function};

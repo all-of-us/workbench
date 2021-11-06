@@ -1,5 +1,4 @@
 import {faBan, faEllipsisV, faTrash} from '@fortawesome/free-solid-svg-icons';
-
 import {faLocationCircle} from '@fortawesome/pro-solid-svg-icons';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {MenuItem} from 'app/components/buttons';

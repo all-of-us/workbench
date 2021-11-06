@@ -1,7 +1,3 @@
-import * as fp from 'lodash/fp';
-import * as React from 'react';
-import {validate} from 'validate.js';
-
 import {Button} from 'app/components/buttons';
 import {NumberInput, ValidationError} from 'app/components/inputs';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
@@ -13,8 +9,10 @@ import {triggerEvent} from 'app/utils/analytics';
 import {currentCohortReviewStore, NavigationProps} from 'app/utils/navigation';
 import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {Cohort} from 'generated/fetch';
-import {CohortReview} from 'generated/fetch';
+import {Cohort,CohortReview} from 'generated/fetch';
+import * as fp from 'lodash/fp';
+import * as React from 'react';
+import {validate} from 'validate.js';
 
 const styles = reactStyles({
   title: {

@@ -1,7 +1,3 @@
-import * as fp from 'lodash/fp';
-import {Menu} from 'primereact/menu';
-import * as React from 'react';
-
 import {GenderChart} from 'app/cohort-search/gender-chart/gender-chart.component';
 import {searchRequestStore} from 'app/cohort-search/search-state.service';
 import {ageTypeToText, genderOrSexTypeToText, mapRequest} from 'app/cohort-search/utils';
@@ -30,6 +26,9 @@ import {
   TemporalTime,
   WorkspaceAccessLevel
 } from 'generated/fetch';
+import * as fp from 'lodash/fp';
+import {Menu} from 'primereact/menu';
+import * as React from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 
 const COHORT_TYPE = 'AoU_Discover';

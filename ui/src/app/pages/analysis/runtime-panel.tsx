@@ -1,11 +1,12 @@
 import {Button, Clickable, LinkButton} from 'app/components/buttons';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
+import {CheckBox, RadioButton} from 'app/components/inputs';
 import {ErrorMessage, WarningMessage} from 'app/components/messages';
 import {TooltipTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
 import {TextColumn} from 'app/components/text-column';
-
+import {AoU} from 'app/components/text-wrappers';
 import {disksApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {addOpacity, colorWithWhiteness} from 'app/styles/colors';
 import {
@@ -18,6 +19,7 @@ import {
   withCurrentWorkspace,
   withUserProfile
 } from 'app/utils';
+import {findCdrVersion} from 'app/utils/cdr-versions';
 import {
   AutopauseMinuteThresholds,
   ComputeType,
@@ -49,11 +51,14 @@ import {
   useRuntimeStatus
 } from 'app/utils/runtime-utils';
 import {diskStore, runtimeStore, serverConfigStore, useStore, withStore} from 'app/utils/stores';
-
-import {CheckBox, RadioButton} from 'app/components/inputs';
-import {AoU} from 'app/components/text-wrappers';
-import {findCdrVersion} from 'app/utils/cdr-versions';
+import {isUsingFreeTierBillingAccount} from 'app/utils/workspace-utils';
 import {supportUrls} from 'app/utils/zendesk';
+import computeError from 'assets/icons/compute-error.svg';
+import computeNone from 'assets/icons/compute-none.svg';
+import computeRunning from 'assets/icons/compute-running.svg';
+import computeStarting from 'assets/icons/compute-starting.svg';
+import computeStopped from 'assets/icons/compute-stopped.svg';
+import computeStopping from 'assets/icons/compute-stopping.svg';
 import {
   BillingStatus,
   DataprocConfig,
@@ -711,14 +716,6 @@ const PresetSelector = ({
       return false;
     }} />;
 };
-
-import computeStarting from 'assets/icons/compute-starting.svg';
-import computeRunning from 'assets/icons/compute-running.svg';
-import computeStopping from 'assets/icons/compute-stopping.svg';
-import computeError from 'assets/icons/compute-error.svg';
-import computeStopped from 'assets/icons/compute-stopped.svg';
-import computeNone from 'assets/icons/compute-none.svg';
-import {isUsingFreeTierBillingAccount} from 'app/utils/workspace-utils';
 
 const StartStopRuntimeButton = ({workspaceNamespace, googleProject}) => {
   const [status, setRuntimeStatus] = useRuntimeStatus(workspaceNamespace, googleProject);

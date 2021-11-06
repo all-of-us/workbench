@@ -1,7 +1,6 @@
+import {CohortResourceCard} from 'app/pages/data/cohort/cohort-resource-card';
 import {mount} from 'enzyme';
 import * as React from 'react';
-
-import {CohortResourceCard} from 'app/pages/data/cohort/cohort-resource-card';
 import {MemoryRouter} from 'react-router';
 
 

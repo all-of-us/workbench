@@ -1,20 +1,20 @@
-import {mount} from 'enzyme';
-import * as React from 'react';
-import {ProfileApi} from 'generated/fetch';
-import {MemoryRouter} from 'react-router';
-
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
+import {cdrVersionStore, profileStore, serverConfigStore} from "app/utils/stores";
+import {mount} from 'enzyme';
+import {ProfileApi} from 'generated/fetch';
+import {CohortsApi, ConceptSetsApi, UserMetricsApi, WorkspacesApi} from 'generated/fetch/api';
+import * as React from 'react';
+import {MemoryRouter} from 'react-router';
+import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
+import {cdrVersionTiersResponse} from "testing/stubs/cdr-versions-api-stub";
+import {CohortsApiStub} from 'testing/stubs/cohorts-api-stub';
+import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
 import {ProfileApiStub, ProfileStubVariables} from 'testing/stubs/profile-api-stub';
 import {stubResource} from 'testing/stubs/resources-stub';
-import {Homepage} from './homepage';
-import {CohortsApi, ConceptSetsApi, UserMetricsApi, WorkspacesApi} from 'generated/fetch/api';
-import {CohortsApiStub} from 'testing/stubs/cohorts-api-stub';
 import {UserMetricsApiStub} from 'testing/stubs/user-metrics-api-stub';
-import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
-import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
-import {cdrVersionStore, profileStore, serverConfigStore} from "app/utils/stores";
-import {cdrVersionTiersResponse} from "testing/stubs/cdr-versions-api-stub";
+
+import {Homepage} from './homepage';
 
 describe('HomepageComponent', () => {
   const profile = ProfileStubVariables.PROFILE_STUB;

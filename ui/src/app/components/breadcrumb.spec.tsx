@@ -1,9 +1,7 @@
 import {getTrail} from 'app/components/breadcrumb'
-import {BreadcrumbType, currentWorkspaceStore} from 'app/utils/navigation';
 import {registerApiClient} from "app/services/swagger-fetch-clients";
-
+import {BreadcrumbType, currentWorkspaceStore} from 'app/utils/navigation';
 import {WorkspacesApi} from "generated/fetch";
-
 import {cohortReviewStubs} from 'testing/stubs/cohort-review-service-stub';
 import {exampleCohortStubs} from "testing/stubs/cohorts-api-stub";
 import {ConceptSetsApiStub} from "testing/stubs/concept-sets-api-stub";

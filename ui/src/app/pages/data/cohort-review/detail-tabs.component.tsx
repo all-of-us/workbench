@@ -1,6 +1,3 @@
-import * as fp from 'lodash/fp';
-import * as React from 'react';
-
 import { domainToTitle } from 'app/cohort-search/utils';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {DetailTabTable} from 'app/pages/data/cohort-review/detail-tab-table.component';
@@ -17,7 +14,9 @@ import {triggerEvent} from 'app/utils/analytics';
 import { MatchParams } from 'app/utils/stores';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {CohortReview, Domain, FilterColumns} from 'generated/fetch';
+import * as fp from 'lodash/fp';
 import {TabPanel, TabView} from 'primereact/tabview';
+import * as React from 'react';
 import {RouteComponentProps, withRouter} from 'react-router-dom';
 
 const styles = reactStyles({

@@ -1,12 +1,12 @@
+import {createEmptyProfile} from 'app/pages/login/sign-in';
+import colors from 'app/styles/colors';
+import {serverConfigStore} from 'app/utils/stores';
 import {mount, ReactWrapper} from 'enzyme';
+import {Profile} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
-import {serverConfigStore} from 'app/utils/stores';
-import {Profile} from 'generated/fetch';
-import {createEmptyProfile} from 'app/pages/login/sign-in';
 import {AccountCreation, AccountCreationProps} from './account-creation';
-import colors from 'app/styles/colors';
 
 let props: AccountCreationProps;
 const component = () => {

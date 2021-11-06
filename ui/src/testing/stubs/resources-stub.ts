@@ -1,3 +1,4 @@
+import {AccessTierShortNames} from 'app/utils/access-tiers';
 import {convertToResource} from 'app/utils/resources';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {
@@ -12,7 +13,6 @@ import {
 } from 'generated/fetch';
 import {CdrVersionsStubVariables} from 'testing/stubs/cdr-versions-api-stub';
 import {WorkspaceStubVariables} from 'testing/stubs/workspaces';
-import {AccessTierShortNames} from 'app/utils/access-tiers';
 
 type InputResource = FileDetail | Cohort | CohortReview | ConceptSet | DataSet;
 export function convertToResources(

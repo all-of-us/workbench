@@ -7,6 +7,7 @@ module.exports = {
     'prefer-arrow',
     '@typescript-eslint',
     'simple-import-sort',
+    'import',
     'prettier',
     'jest'
   ],
@@ -57,6 +58,13 @@ module.exports = {
     // '@typescript-eslint/semi': 'warn',
     // 'space-before-function-paren': ['warn', { 'anonymous': 'never', 'named': 'never', 'asyncArrow': 'always' }],
 
+    /* Imports */
+    'simple-import-sort/imports': 'warn',
+    'simple-import-sort/exports': 'warn',
+    'import/first': 'warn',
+    'import/newline-after-import': 'warn',
+    'import/no-duplicates': 'warn',
+
     /* Functionality */
     'curly': 'warn',
     'guard-for-in': 'warn',
@@ -79,7 +87,7 @@ module.exports = {
     // '@typescript-eslint/no-use-before-define': 'warn',
     // 'no-unused-vars': 'off', // Needed for TS 
     // '@typescript-eslint/no-unused-vars': 'warn', 
-    'react/jsx-curly-spacing': ["warn", {'when': 'never'}],
+    'react/jsx-curly-spacing': ['warn', {'when': 'never'}],
     'react/jsx-uses-vars': 'warn',
     'no-var': 'warn',
     'radix': 'warn', // Add radix on parseInt

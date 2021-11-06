@@ -1,13 +1,13 @@
+import {registerApiClient} from 'app/services/swagger-fetch-clients';
+import {serverConfigStore} from 'app/utils/stores';
 import {mount} from 'enzyme';
-import * as React from 'react';
+import {AuthDomainApi, Profile, ProfileApi} from 'generated/fetch';
 import * as fp from 'lodash/fp';
+import * as React from 'react';
+import {AuthDomainApiStub} from 'testing/stubs/auth-domain-api-stub';
+import {ProfileApiStub, ProfileStubVariables} from 'testing/stubs/profile-api-stub';
 
 import {AdminUsers} from './admin-users';
-import {AuthDomainApi, Profile, ProfileApi} from 'generated/fetch';
-import {serverConfigStore} from 'app/utils/stores';
-import {ProfileApiStub, ProfileStubVariables} from 'testing/stubs/profile-api-stub';
-import {registerApiClient} from 'app/services/swagger-fetch-clients';
-import {AuthDomainApiStub} from 'testing/stubs/auth-domain-api-stub';
 
 
 describe('AdminUsers', () => {

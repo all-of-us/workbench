@@ -1,17 +1,15 @@
-import * as fp from 'lodash/fp';
-import * as React from 'react';
-import {useEffect} from 'react';
-
 import {Button} from 'app/components/buttons';
 import {ErrorMessage, WarningMessage} from 'app/components/messages';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
+import {TooltipTrigger} from 'app/components/popups';
 import {TextColumn} from 'app/components/text-column';
 import {dataSetApi} from 'app/services/swagger-fetch-clients';
-
-import {TooltipTrigger} from 'app/components/popups';
 import {genomicExtractionStore, updateGenomicExtractionStore, useStore} from 'app/utils/stores';
 import {DataSet, GenomicExtractionJob, TerraJobStatus} from 'generated/fetch';
+import * as fp from 'lodash/fp';
 import moment from 'moment'
+import * as React from 'react';
+import {useEffect} from 'react';
 
 const {useState} = React;
 

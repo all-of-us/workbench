@@ -1,5 +1,4 @@
-import {Button} from 'app/components/buttons';
-import {StyledExternalLink} from 'app/components/buttons';
+import {Button,StyledExternalLink} from 'app/components/buttons';
 import {CookieBanner} from 'app/components/cookie-banner';
 import {GoogleSignInButton} from 'app/components/google-sign-in';
 import {Header, SmallHeader} from 'app/components/headers';

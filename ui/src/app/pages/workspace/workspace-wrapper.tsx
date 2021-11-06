@@ -3,8 +3,8 @@ import {Spinner} from 'app/components/spinners';
 import {WorkspaceNavBar} from 'app/pages/workspace/workspace-nav-bar';
 import {WorkspaceRoutes} from 'app/routing/workspace-app-routing';
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
-import {reportError} from 'app/utils/errors';
 import {withCurrentWorkspace} from 'app/utils';
+import {reportError} from 'app/utils/errors';
 import {
   ExceededActionCountError,
   LeoRuntimeInitializationAbortedError,

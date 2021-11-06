@@ -1,6 +1,3 @@
-import * as React from 'react';
-import {Link} from 'react-router-dom';
-
 import {FlexRow} from 'app/components/flex';
 import {CheckCircle, ControlledTierBadge, RegisteredTierBadge} from 'app/components/icons';
 import {styles} from 'app/pages/profile/profile-styles';
@@ -8,6 +5,8 @@ import colors from 'app/styles/colors';
 import {useId} from 'app/utils';
 import {AccessTierShortNames, displayNameForTier} from 'app/utils/access-tiers';
 import {environment} from 'environments/environment';
+import * as React from 'react';
+import {Link} from 'react-router-dom';
 
 
 interface TierProps {

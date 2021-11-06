@@ -9,7 +9,6 @@ import {
   Surveys,
   UpdateConceptSetRequest
 } from 'generated/fetch';
-
 import {stubNotImplementedError} from 'testing/stubs/stub-utils';
 
 export class ConceptStubVariables {

@@ -13,8 +13,7 @@ import {
 } from 'app/utils/institutions';
 import {NavigationProps} from 'app/utils/navigation';
 import {withNavigation} from 'app/utils/with-navigation-hoc';
-import {Institution, InstitutionMembershipRequirement} from 'generated/fetch';
-import {OrganizationType} from 'generated/fetch';
+import {Institution, InstitutionMembershipRequirement,OrganizationType} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import {Column} from 'primereact/column';
 import {DataTable} from 'primereact/datatable';

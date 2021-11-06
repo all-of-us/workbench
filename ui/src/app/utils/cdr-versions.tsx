@@ -28,9 +28,9 @@ function getCdrVersion(workspace: Workspace, cdrTiers: CdrVersionTiersResponse):
 }
 
 export {
+    findCdrVersion,
+    getCdrVersion,
     getCdrVersionTier,
     getDefaultCdrVersionForTier,
     hasDefaultCdrVersion,
-    findCdrVersion,
-    getCdrVersion,
 };

@@ -1,10 +1,4 @@
-import {bindApiClients as notebooksBindApiClients} from 'app/services/notebooks-swagger-fetch-clients';
-import * as fp from 'lodash/fp';
-import outdatedBrowserRework from 'outdated-browser-rework';
-import {useEffect, useState} from 'react';
-import * as React from 'react';
-import {Switch, useHistory} from 'react-router-dom';
-import {StackdriverErrorReporter} from 'stackdriver-errors-js';
+import 'rxjs/Rx';
 
 import {
   AppRoute,
@@ -21,6 +15,7 @@ import {SignInAgain} from 'app/pages/sign-in-again';
 import {SignedIn} from 'app/pages/signed-in/signed-in';
 import {UserDisabled} from 'app/pages/user-disabled';
 import {disabledGuard, signInGuard} from 'app/routing/guards';
+import {bindApiClients as notebooksBindApiClients} from 'app/services/notebooks-swagger-fetch-clients';
 import {bindApiClients, configApi, getApiBaseUrl} from 'app/services/swagger-fetch-clients';
 import {useIsUserDisabled} from 'app/utils/access-utils';
 import {initializeAnalytics} from 'app/utils/analytics';
@@ -36,12 +31,16 @@ import {
   stackdriverErrorReporterStore,
   useStore
 } from 'app/utils/stores';
+import { WorkspaceData } from 'app/utils/workspace-data';
+import logo from 'assets/images/all-of-us-logo.svg'
 import {environment} from 'environments/environment';
 import {Configuration} from 'generated/fetch';
-import 'rxjs/Rx';
-import { WorkspaceData } from 'app/utils/workspace-data';
-
-import logo from 'assets/images/all-of-us-logo.svg'
+import * as fp from 'lodash/fp';
+import outdatedBrowserRework from 'outdated-browser-rework';
+import {useEffect, useState} from 'react';
+import * as React from 'react';
+import {Switch, useHistory} from 'react-router-dom';
+import {StackdriverErrorReporter} from 'stackdriver-errors-js';
 
 declare const gapi: any;
 

@@ -1,21 +1,19 @@
-import * as React from 'react';
-
-import {AccessRenewalNotificationMaybe} from 'app/pages/signed-in/access-renewal-notification';
 import {Breadcrumb} from 'app/components/breadcrumb';
 import {Button} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
-import {LoginGovIAL2NotificationMaybe} from 'app/pages/signed-in/login-gov-ial2-notification';
 import {SideNav} from 'app/components/side-nav';
 import {StatusAlertBanner} from 'app/components/status-alert-banner';
+import {AccessRenewalNotificationMaybe} from 'app/pages/signed-in/access-renewal-notification';
+import {LoginGovIAL2NotificationMaybe} from 'app/pages/signed-in/login-gov-ial2-notification';
 import {statusAlertApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
 import {cookiesEnabled} from 'app/utils/cookies';
-import {profileStore, ProfileStore, useStore} from 'app/utils/stores';
-import {environment} from 'environments/environment';
-import {useEffect, useRef, useState} from 'react';
-
+import {ProfileStore, profileStore, useStore} from 'app/utils/stores';
 import logo from 'assets/images/all-of-us-logo.svg'
+import {environment} from 'environments/environment';
+import * as React from 'react';
+import {useEffect, useRef, useState} from 'react';
 
 const styles = reactStyles({
   headerContainer: {

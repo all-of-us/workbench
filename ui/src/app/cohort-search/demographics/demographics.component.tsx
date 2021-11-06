@@ -1,6 +1,3 @@
-import Nouislider from 'nouislider-react';
-import * as React from 'react';
-
 import {typeToTitle} from 'app/cohort-search/utils';
 import {Button} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
@@ -12,6 +9,8 @@ import {reactStyles} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {currentWorkspaceStore} from 'app/utils/navigation';
 import {AttrName, CriteriaType, Domain, Operator} from 'generated/fetch';
+import Nouislider from 'nouislider-react';
+import * as React from 'react';
 
 const styles = reactStyles({
   ageContainer: {

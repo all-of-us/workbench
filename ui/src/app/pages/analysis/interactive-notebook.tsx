@@ -1,11 +1,5 @@
-import * as Cookies from 'js-cookie';
-import * as fp from 'lodash/fp';
-import * as React from 'react';
-
 import {IconButton} from 'app/components/buttons';
-import {ClrIcon} from 'app/components/icons';
-import { ErrorMode, NotebookFrameError, SecuritySuspendedMessage } from './notebook-frame-error';
-import {PlaygroundIcon} from 'app/components/icons';
+import {ClrIcon,PlaygroundIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
@@ -18,9 +12,9 @@ import {hasNewValidProps, reactStyles, withCurrentWorkspace} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {NavigationProps} from 'app/utils/navigation';
 import {
-  maybeUnwrapSecuritySuspendedError,
   ComputeSecuritySuspendedError,
   maybeInitializeRuntime,
+  maybeUnwrapSecuritySuspendedError,
   withRuntimeStore
 } from 'app/utils/runtime-utils';
 import {MatchParams, profileStore, RuntimeStore} from 'app/utils/stores';
@@ -29,10 +23,15 @@ import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {BillingStatus, RuntimeStatus} from 'generated/fetch';
+import * as Cookies from 'js-cookie';
+import * as fp from 'lodash/fp';
+import * as React from 'react';
 import {
   RouteComponentProps,
   withRouter
 } from 'react-router-dom';
+
+import { ErrorMode, NotebookFrameError, SecuritySuspendedMessage } from './notebook-frame-error';
 
 
 const styles = reactStyles({

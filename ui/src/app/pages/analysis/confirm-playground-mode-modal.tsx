@@ -1,10 +1,9 @@
-import * as Cookies from 'js-cookie';
-import * as React from 'react';
-
 import {Button} from 'app/components/buttons';
 import {CheckBox} from 'app/components/inputs';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import colors from 'app/styles/colors';
+import * as Cookies from 'js-cookie';
+import * as React from 'react';
 
 export interface Props {
   onCancel: Function;

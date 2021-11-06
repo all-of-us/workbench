@@ -1,12 +1,10 @@
-import * as React from 'react';
-
 import {DemographicSurvey} from 'app/pages/profile/demographic-survey';
 import {profileApi} from 'app/services/swagger-fetch-clients';
-
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {environment} from 'environments/environment';
 import {Profile} from 'generated/fetch';
 import * as fp from 'lodash/fp';
+import * as React from 'react';
 
 
 export interface AccountCreationSurveyProps {

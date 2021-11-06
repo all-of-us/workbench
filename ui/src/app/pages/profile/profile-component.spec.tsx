@@ -10,8 +10,7 @@ import {profileStore, serverConfigStore} from 'app/utils/stores';
 import {InstitutionApi, ProfileApi} from 'generated/fetch';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {InstitutionApiStub} from 'testing/stubs/institution-api-stub';
-import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
-import {ProfileStubVariables} from 'testing/stubs/profile-api-stub';
+import {ProfileApiStub,ProfileStubVariables} from 'testing/stubs/profile-api-stub';
 
 
 describe('ProfilePageComponent', () => {

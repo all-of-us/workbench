@@ -1,5 +1,3 @@
-import * as fp from 'lodash/fp';
-
 import {
   AgeType,
   CriteriaSubType,
@@ -12,6 +10,8 @@ import {
   TemporalMention,
   TemporalTime
 } from 'generated/fetch';
+import * as fp from 'lodash/fp';
+
 import {idsInUse} from './search-state.service';
 
 export function typeDisplay(parameter): string {

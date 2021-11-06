@@ -1,5 +1,3 @@
-import * as React from 'react';
-
 import {MODIFIERS_MAP} from 'app/cohort-search/constant';
 import {encountersStore, searchRequestStore} from 'app/cohort-search/search-state.service';
 import {domainToTitle, getTypeAndStandard, mapGroupItem, typeToTitle} from 'app/cohort-search/utils';
@@ -15,6 +13,7 @@ import {WorkspaceData} from 'app/utils/workspace-data';
 import {CriteriaType, Domain, Modifier, ModifierType, ResourceType, SearchGroupItem as Item, SearchRequest} from 'generated/fetch';
 import {Menu} from 'primereact/menu';
 import {OverlayPanel} from 'primereact/overlaypanel';
+import * as React from 'react';
 
 const styles = reactStyles({
   menu: {

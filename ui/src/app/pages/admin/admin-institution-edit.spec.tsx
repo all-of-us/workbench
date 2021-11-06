@@ -1,16 +1,16 @@
-import {mount} from 'enzyme';
-import * as fp from 'lodash/fp';
-import {Dropdown} from 'primereact/dropdown';
-import * as React from 'react';
-import {InputSwitch} from "primereact/inputswitch";
-import {MemoryRouter, Route} from 'react-router-dom';
-
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {serverConfigStore} from 'app/utils/stores';
+import {mount} from 'enzyme';
 import {InstitutionApi, InstitutionMembershipRequirement} from 'generated/fetch';
+import * as fp from 'lodash/fp';
+import {Dropdown} from 'primereact/dropdown';
+import {InputSwitch} from "primereact/inputswitch";
+import * as React from 'react';
+import {MemoryRouter, Route} from 'react-router-dom';
 import defaultServerConfig from 'testing/default-server-config';
 import {simulateComponentChange, waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {InstitutionApiStub, VERILY, VERILY_WITHOUT_CT} from 'testing/stubs/institution-api-stub';
+
 import {AdminInstitutionEdit} from './admin-institution-edit';
 
 const findRTDetails = (wrapper) => wrapper.find('[data-test-id="registered-card-details"]');

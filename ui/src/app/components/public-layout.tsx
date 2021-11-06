@@ -1,8 +1,7 @@
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
-import * as React from 'react';
-
 import headerImage from 'assets/images/all-of-us-logo.svg'
+import * as React from 'react';
 
 const styles = reactStyles({
   content: {

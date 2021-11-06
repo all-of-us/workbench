@@ -1,8 +1,3 @@
-import {InputSwitch} from 'primereact/inputswitch';
-import {Menu} from 'primereact/menu';
-import {TieredMenu} from 'primereact/tieredmenu';
-import * as React from 'react';
-
 import {SearchGroupItem} from 'app/cohort-search/search-group-item/search-group-item.component';
 import {criteriaMenuOptionsStore, searchRequestStore} from 'app/cohort-search/search-state.service';
 import {domainToTitle, generateId, mapGroup, typeToTitle} from 'app/cohort-search/utils';
@@ -19,6 +14,10 @@ import {triggerEvent} from 'app/utils/analytics';
 import {isAbortError} from 'app/utils/errors';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {Domain, ResourceType, SearchRequest, TemporalMention, TemporalTime} from 'generated/fetch';
+import {InputSwitch} from 'primereact/inputswitch';
+import {Menu} from 'primereact/menu';
+import {TieredMenu} from 'primereact/tieredmenu';
+import * as React from 'react';
 
 const styles = reactStyles({
   card: {

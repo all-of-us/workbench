@@ -1,11 +1,10 @@
-import {mount, ReactWrapper, ShallowWrapper} from 'enzyme';
-import {Dropdown} from 'primereact/dropdown';
-import * as React from 'react';
-
 import {ppiQuestions, ppiSurveys} from 'app/cohort-search/search-state.service';
 import {cohortBuilderApi, registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore} from 'app/utils/navigation';
+import {mount, ReactWrapper, ShallowWrapper} from 'enzyme';
 import {CohortBuilderApi, Operator} from 'generated/fetch';
+import {Dropdown} from 'primereact/dropdown';
+import * as React from 'react';
 import SpyInstance = jest.SpyInstance;
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {
@@ -15,6 +14,7 @@ import {
   SurveyQuestionStubVariables
 } from 'testing/stubs/cohort-builder-service-stub'
 import {workspaceDataStub} from 'testing/stubs/workspaces';
+
 import {AttributesPage, Props} from './attributes-page.component';
 
 type AnyWrapper = (ShallowWrapper|ReactWrapper);

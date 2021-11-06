@@ -1,7 +1,4 @@
-import * as fp from 'lodash/fp';
-import * as React from 'react';
-import {useEffect, useState} from 'react';
-
+import {useQuery} from 'app/components/app-router';
 import {Button, Clickable} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
@@ -15,12 +12,14 @@ import {
   Repeat
 } from 'app/components/icons';
 import {withErrorModal} from 'app/components/modals';
+import {SupportButton} from 'app/components/support';
 import {AoU} from 'app/components/text-wrappers';
 import {withProfileErrorModal} from 'app/components/with-error-modal';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {cond, displayDateWithoutHours, reactStyles, switchCase} from 'app/utils';
+import {AccessTierDisplayNames, AccessTierShortNames} from 'app/utils/access-tiers';
 import {
   buildRasRedirectUrl,
   bypassAll,
@@ -31,11 +30,10 @@ import {
   redirectToRas,
   redirectToTraining,
 } from 'app/utils/access-utils';
+import {AnalyticsTracker} from 'app/utils/analytics';
 import {useNavigation} from 'app/utils/navigation';
 import {profileStore, serverConfigStore, useStore} from 'app/utils/stores';
-import {AccessModule, AccessModuleStatus, Profile} from 'generated/fetch';
-import {TwoFactorAuthModal} from './two-factor-auth-modal';
-import {AnalyticsTracker} from 'app/utils/analytics';
+import {openZendeskWidget} from 'app/utils/zendesk';
 import {ReactComponent as additional} from 'assets/icons/DAR/additional.svg';
 import {ReactComponent as electronic} from 'assets/icons/DAR/electronic.svg';
 import {ReactComponent as genomic} from 'assets/icons/DAR/genomic.svg';
@@ -44,11 +42,13 @@ import {ReactComponent as individual} from 'assets/icons/DAR/individual.svg';
 import {ReactComponent as physical} from 'assets/icons/DAR/physical.svg';
 import {ReactComponent as survey} from 'assets/icons/DAR/survey.svg';
 import {ReactComponent as wearable} from 'assets/icons/DAR/wearable.svg';
-import {AccessTierDisplayNames, AccessTierShortNames} from 'app/utils/access-tiers';
 import {environment} from 'environments/environment';
-import {useQuery} from 'app/components/app-router';
-import {openZendeskWidget} from 'app/utils/zendesk';
-import {SupportButton} from 'app/components/support';
+import {AccessModule, AccessModuleStatus, Profile} from 'generated/fetch';
+import * as fp from 'lodash/fp';
+import * as React from 'react';
+import {useEffect, useState} from 'react';
+
+import {TwoFactorAuthModal} from './two-factor-auth-modal';
 
 const styles = reactStyles({
   headerFlexColumn: {

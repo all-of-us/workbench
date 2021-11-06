@@ -1,8 +1,7 @@
-import * as React from 'react';
-
+import {NotificationBanner} from 'app/components/notification-banner';
 import {maybeDaysRemaining} from 'app/utils/access-utils';
 import {profileStore, useStore} from 'app/utils/stores';
-import {NotificationBanner} from 'app/components/notification-banner';
+import * as React from 'react';
 
 export const AccessRenewalNotificationMaybe = () => {
   const {profile} = useStore(profileStore);

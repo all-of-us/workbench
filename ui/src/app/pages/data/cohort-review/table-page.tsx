@@ -1,9 +1,3 @@
-import * as fp from 'lodash/fp';
-import {Column} from 'primereact/column';
-import {DataTable} from 'primereact/datatable';
-import {OverlayPanel} from 'primereact/overlaypanel';
-import * as React from 'react';
-
 import {Button} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
 import {NumberInput} from 'app/components/inputs';
@@ -38,6 +32,11 @@ import {
   ParticipantCohortStatus,
   SortOrder,
 } from 'generated/fetch';
+import * as fp from 'lodash/fp';
+import {Column} from 'primereact/column';
+import {DataTable} from 'primereact/datatable';
+import {OverlayPanel} from 'primereact/overlaypanel';
+import * as React from 'react';
 import {RouteComponentProps, withRouter} from 'react-router-dom';
 
 const fields = [

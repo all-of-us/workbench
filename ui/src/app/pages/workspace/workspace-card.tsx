@@ -1,8 +1,3 @@
-import * as fp from 'lodash/fp';
-import * as React from 'react';
-
-import {ResourceType, Workspace, WorkspaceAccessLevel} from 'generated/fetch';
-
 import {Button, Clickable, MenuItem, SnowmanButton} from 'app/components/buttons';
 import {WorkspaceCardBase} from 'app/components/card';
 import {ConfirmDeleteModal} from 'app/components/confirm-delete-modal';
@@ -21,6 +16,9 @@ import {currentWorkspaceStore, NavigationProps, useNavigation} from 'app/utils/n
 import {serverConfigStore} from 'app/utils/stores';
 import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
+import {ResourceType, Workspace, WorkspaceAccessLevel} from 'generated/fetch';
+import * as fp from 'lodash/fp';
+import * as React from 'react';
 
 const EVENT_CATEGORY = 'Workspace list';
 

@@ -1,8 +1,16 @@
-import * as React from "react";
+import {profileApi, registerApiClient} from 'app/services/swagger-fetch-clients';
+import {AccessTierShortNames} from 'app/utils/access-tiers';
+import {profileStore, serverConfigStore} from 'app/utils/stores';
+import {environment} from 'environments/environment';
 import {mount} from "enzyme";
-
-import defaultServerConfig from 'testing/default-server-config';
 import {AccessModule, InstitutionApi, Profile, ProfileApi} from 'generated/fetch';
+import * as React from "react";
+import {MemoryRouter} from 'react-router-dom';
+import defaultServerConfig from 'testing/default-server-config';
+import {waitForFakeTimersAndUpdate, waitOneTickAndUpdate} from 'testing/react-test-helpers';
+import {InstitutionApiStub} from 'testing/stubs/institution-api-stub';
+import {ProfileApiStub, ProfileStubVariables} from 'testing/stubs/profile-api-stub';
+
 import {
     allModules,
     DataAccessRequirements,
@@ -10,14 +18,6 @@ import {
     getVisibleModules,
     requiredModules
 } from './data-access-requirements';
-import {InstitutionApiStub} from 'testing/stubs/institution-api-stub';
-import {ProfileApiStub, ProfileStubVariables} from 'testing/stubs/profile-api-stub';
-import {profileApi, registerApiClient} from 'app/services/swagger-fetch-clients';
-import {profileStore, serverConfigStore} from 'app/utils/stores';
-import {MemoryRouter} from 'react-router-dom';
-import {waitForFakeTimersAndUpdate, waitOneTickAndUpdate} from 'testing/react-test-helpers';
-import {AccessTierShortNames} from 'app/utils/access-tiers';
-import {environment} from 'environments/environment';
 
 
 const profile = ProfileStubVariables.PROFILE_STUB as Profile;

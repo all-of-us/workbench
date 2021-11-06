@@ -1,5 +1,3 @@
-import * as React from 'react';
-
 import {Divider} from 'app/components/divider';
 import {
   PageHeader,
@@ -12,6 +10,7 @@ import {
 } from 'app/pages/login/account-creation/account-creation-modals';
 import colors from 'app/styles/colors';
 import {Profile} from 'generated/fetch/api';
+import * as React from 'react';
 
 const styles = {
   buttonLinkStyling: {

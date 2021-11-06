@@ -1,6 +1,3 @@
-import * as fp from 'lodash/fp';
-import * as React from 'react';
-
 import {CopyModal} from 'app/components/copy-modal';
 import {RenameModal} from 'app/components/rename-modal';
 import {Action, ResourceActionsMenu} from 'app/components/resource-actions-menu';
@@ -18,6 +15,8 @@ import {AnalyticsTracker} from 'app/utils/analytics';
 import {getDisplayName, getType} from 'app/utils/resources';
 import {ACTION_DISABLED_INVALID_BILLING} from 'app/utils/strings';
 import {CopyRequest, WorkspaceResource} from 'generated/fetch';
+import * as fp from 'lodash/fp';
+import * as React from 'react';
 
 interface Props extends WithConfirmDeleteModalProps, WithErrorModalProps, WithSpinnerOverlayProps {
   resource: WorkspaceResource;

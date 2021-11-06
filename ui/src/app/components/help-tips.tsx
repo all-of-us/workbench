@@ -3,6 +3,7 @@ import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {highlightSearchTerm, reactStyles} from 'app/utils';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
+
 const sidebarContent = require('assets/json/help-sidebar.json');
 
 const styles = reactStyles({

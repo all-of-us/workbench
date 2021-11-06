@@ -1,5 +1,4 @@
 import {Button} from 'app/components/buttons';
-
 import {FlexRow} from 'app/components/flex';
 import {SmallHeader, styles as headerStyles} from 'app/components/headers';
 import {RadioButton, Select, TextInput} from 'app/components/inputs';
@@ -8,7 +7,6 @@ import {AnimatedModal, ModalBody, ModalFooter, ModalTitle} from 'app/components/
 import {TooltipTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
 import {appendNotebookFileSuffix} from 'app/pages/analysis/util';
-
 import {dataSetApi, notebooksApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, summarizeErrors, withCurrentWorkspace} from 'app/utils';

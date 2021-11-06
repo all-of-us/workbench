@@ -1,6 +1,7 @@
-import {Modal, ModalBody, ModalFooter, ModalTitle} from "./modals";
 import * as React from "react";
+
 import { Button } from "./buttons";
+import {Modal, ModalBody, ModalFooter, ModalTitle} from "./modals";
 
 export const RuntimeErrorModal = ({errors, closeFunction, openRuntimePanel}) => {
   return <Modal>

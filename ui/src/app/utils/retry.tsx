@@ -1,6 +1,5 @@
 import {convertAPIError, isAbortError} from 'app/utils/errors';
 import {globalErrorStore} from 'app/utils/navigation';
-
 import {ErrorCode} from 'generated/fetch';
 
 // Retry a fetch `maxRetries` number of times with a `timeoutMillis` wait between retries

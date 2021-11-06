@@ -1,5 +1,3 @@
-import * as React from 'react';
-
 import {PREDEFINED_ATTRIBUTES} from 'app/cohort-search/constant';
 import {ppiQuestions} from 'app/cohort-search/search-state.service';
 import {domainToTitle, subTypeToTitle} from 'app/cohort-search/utils';
@@ -18,6 +16,7 @@ import {
   setSidebarActiveIconStore
 } from 'app/utils/navigation';
 import {AttrName, Criteria, CriteriaSubType, CriteriaType, Domain, Operator} from 'generated/fetch';
+import * as React from 'react';
 
 const COPE_SURVEY_ID = 1333342;
 export const COPE_SURVEY_GROUP_NAME = 'COVID-19 Participant Experience (COPE) Survey';

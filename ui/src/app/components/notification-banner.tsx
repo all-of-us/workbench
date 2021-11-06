@@ -1,10 +1,10 @@
+import colors from 'app/styles/colors';
+import {reactStyles} from 'app/utils';
 import * as React from "react";
 
+import {Button} from "./buttons";
 import {FlexRow} from "./flex";
 import {AlarmExclamation} from "./icons";
-import {Button} from "./buttons";
-import {reactStyles} from 'app/utils';
-import colors from 'app/styles/colors';
 
 const styles = reactStyles({
     box: {

@@ -1,5 +1,3 @@
-import * as fp from 'lodash/fp';
-
 import {dropNotebookFileSuffix} from 'app/pages/analysis/util';
 import {
     Cohort,
@@ -11,6 +9,8 @@ import {
     WorkspaceAccessLevel,
     WorkspaceResource
 } from 'generated/fetch';
+import * as fp from 'lodash/fp';
+
 import {encodeURIComponentStrict, UrlObj} from './navigation';
 import {WorkspaceData} from './workspace-data';
 

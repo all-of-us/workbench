@@ -1,10 +1,7 @@
-import {Select} from 'app/components/inputs';
-import * as fp from 'lodash/fp';
-import * as React from 'react';
-
 import {Button} from 'app/components/buttons';
 import {FlexRow} from 'app/components/flex';
 import {ClrIcon, InfoIcon} from 'app/components/icons';
+import {Select} from 'app/components/inputs';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
 import {Spinner, SpinnerOverlay} from 'app/components/spinners';
@@ -19,6 +16,7 @@ import {
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {currentWorkspaceStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
+import {isUsingFreeTierBillingAccount} from 'app/utils/workspace-utils';
 import {
   Profile,
   User,
@@ -26,7 +24,8 @@ import {
   WorkspaceAccessLevel,
   WorkspaceUserRolesResponse,
 } from 'generated/fetch/api';
-import {isUsingFreeTierBillingAccount} from 'app/utils/workspace-utils';
+import * as fp from 'lodash/fp';
+import * as React from 'react';
 
 const styles = reactStyles( {
   tooltipLabel: {

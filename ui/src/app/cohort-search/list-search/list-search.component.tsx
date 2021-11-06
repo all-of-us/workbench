@@ -1,8 +1,3 @@
-import * as fp from 'lodash/fp';
-import {InputSwitch} from 'primereact/inputswitch';
-import * as React from 'react';
-import {CSSProperties} from 'react';
-
 import {domainToTitle} from 'app/cohort-search/utils';
 import {AlertDanger} from 'app/components/alert';
 import {Clickable, StyledExternalLink} from 'app/components/buttons';
@@ -32,6 +27,10 @@ import {
   CriteriaType,
   Domain
 } from 'generated/fetch';
+import * as fp from 'lodash/fp';
+import {InputSwitch} from 'primereact/inputswitch';
+import * as React from 'react';
+import {CSSProperties} from 'react';
 
 const borderStyle = `1px solid ${colorWithWhiteness(colors.dark, 0.7)}`;
 const styles = reactStyles({

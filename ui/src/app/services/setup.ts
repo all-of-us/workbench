@@ -1,7 +1,7 @@
-import validate from 'validate.js';
-import {environment} from "environments/environment";
 import {LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN} from "app/utils/cookies";
+import {environment} from "environments/environment";
 import outdatedBrowserRework from "outdated-browser-rework";
+import validate from 'validate.js';
 
 export const setupCustomValidators = () => {
   validate.validators.custom = (value, options, key, attributes) => {

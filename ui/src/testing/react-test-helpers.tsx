@@ -1,10 +1,10 @@
 import {mount, ReactWrapper} from 'enzyme';
+import * as fp from 'lodash/fp';
+import {Dropdown} from "primereact/dropdown";
+import {InputSwitch} from "primereact/inputswitch";
 import * as React from 'react';
 import {act} from 'react-dom/test-utils';
-import * as fp from 'lodash/fp';
-import {InputSwitch} from "primereact/inputswitch";
 import {MemoryRouter} from 'react-router';
-import {Dropdown} from "primereact/dropdown";
 
 export async function waitOneTickAndUpdate(wrapper: ReactWrapper) {
   const waitImmediate = () => new Promise<void>(resolve => setImmediate(resolve))

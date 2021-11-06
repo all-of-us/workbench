@@ -1,5 +1,3 @@
-import * as React from 'react';
-
 import {Clickable} from 'app/components/buttons';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
@@ -8,16 +6,16 @@ import {Scroll} from 'app/icons/scroll';
 import colors, {addOpacity} from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
+import cohortBuilder from 'assets/images/cohort-builder.png';
+import datasetBuilder from 'assets/images/dataset-builder.png';
+import intro from 'assets/images/intro-workbench.png';
+import snippets from 'assets/images/notebook-code-snippets.png';
+import thumbnail from 'assets/images/QT-thumbnail.svg';
+import support from 'assets/images/user-support.png';
+import * as React from 'react';
 import {useEffect, useRef, useState} from 'react';
 
 import {QuickTourReact} from './quick-tour-modal';
-
-import thumbnail from 'assets/images/QT-thumbnail.svg';
-import intro from 'assets/images/intro-workbench.png';
-import cohortBuilder from 'assets/images/cohort-builder.png';
-import datasetBuilder from 'assets/images/dataset-builder.png';
-import snippets from 'assets/images/notebook-code-snippets.png';
-import support from 'assets/images/user-support.png';
 
 export const styles = reactStyles({
   quickTourCardsRow: {

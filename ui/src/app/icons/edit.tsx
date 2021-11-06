@@ -1,5 +1,4 @@
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-
 import * as React from 'react';
 
 export interface EditComponentProps {

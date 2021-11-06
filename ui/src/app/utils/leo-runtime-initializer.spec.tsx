@@ -1,5 +1,4 @@
-import * as React from 'react';
-
+import {expect} from '@jest/globals';
 import {
   leoRuntimesApi,
   registerApiClient as registerApiClientNotebooks
@@ -9,13 +8,14 @@ import {
   LeoRuntimeInitializer,
   LeoRuntimeInitializerOptions
 } from 'app/utils/leo-runtime-initializer';
+import {serverConfigStore} from "app/utils/stores";
 import {Runtime, RuntimeConfigurationType, RuntimeStatus} from 'generated/fetch';
 import {RuntimeApi} from 'generated/fetch/api';
-import {expect} from '@jest/globals';
 import {RuntimesApi as LeoRuntimesApi} from 'notebooks-generated/fetch';
-import {defaultRuntime, RuntimeApiStub} from 'testing/stubs/runtime-api-stub';
+import * as React from 'react';
 import {LeoRuntimesApiStub} from 'testing/stubs/leo-runtimes-api-stub';
-import {serverConfigStore} from "app/utils/stores";
+import {defaultRuntime, RuntimeApiStub} from 'testing/stubs/runtime-api-stub';
+
 import {runtimePresets} from './runtime-presets';
 import SpyInstance = jest.SpyInstance;
 

@@ -1,14 +1,13 @@
-import {mount} from 'enzyme';
-import * as React from 'react';
-
 import {ConceptHomepage} from 'app/pages/data/concept/concept-homepage';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore} from 'app/utils/navigation';
+import {mount} from 'enzyme';
 import {
   CohortBuilderApi,
   ConceptSetsApi,
   WorkspacesApi
 } from 'generated/fetch';
+import * as React from 'react';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {CohortBuilderServiceStub, DomainStubVariables, SurveyStubVariables} from 'testing/stubs/cohort-builder-service-stub';
 import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';

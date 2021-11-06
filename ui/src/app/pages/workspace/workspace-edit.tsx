@@ -1,12 +1,8 @@
-import * as fp from 'lodash/fp';
-import * as React from 'react';
-import validate from 'validate.js';
-
 import {Button, Clickable, LinkButton, StyledExternalLink} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {InfoIcon} from 'app/components/icons';
-import {CheckBox, RadioButton, TextArea, TextInput} from 'app/components/inputs';
+import {CheckBox, RadioButton, Select,TextArea, TextInput} from 'app/components/inputs';
 import {BulletAlignedUnorderedList} from 'app/components/lists';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
@@ -16,7 +12,6 @@ import {AoU, AouTitle} from 'app/components/text-wrappers';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {CreateBillingAccountModal} from 'app/pages/workspace/create-billing-account-modal';
 import {WorkspaceEditSection} from 'app/pages/workspace/workspace-edit-section';
-import {Select} from 'app/components/inputs';
 import {
   disseminateFindings,
   PrimaryPurposeItems,
@@ -78,8 +73,12 @@ import {
   Workspace,
   WorkspaceAccessLevel
 } from 'generated/fetch';
+import * as fp from 'lodash/fp';
 import {Dropdown} from 'primereact/dropdown';
 import {OverlayPanel} from 'primereact/overlaypanel';
+import * as React from 'react';
+import validate from 'validate.js';
+
 import {OldCdrVersionModal} from './old-cdr-version-modal';
 
 export const styles = reactStyles({

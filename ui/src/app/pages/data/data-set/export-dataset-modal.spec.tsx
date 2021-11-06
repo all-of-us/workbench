@@ -1,11 +1,9 @@
-import {mount} from 'enzyme';
-import * as React from 'react';
-
-import {ExportDatasetModal} from 'app/pages/data/data-set/export-dataset-modal';
 import {Select} from 'app/components/inputs';
 import {Tooltip} from 'app/components/popups';
+import {ExportDatasetModal} from 'app/pages/data/data-set/export-dataset-modal';
 import {dataSetApi, registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore} from 'app/utils/navigation';
+import {mount} from 'enzyme';
 import {
   DataSetApi, DataSetExportRequest,
   DataSetRequest,
@@ -13,11 +11,12 @@ import {
   NotebooksApi,
   PrePackagedConceptSetEnum
 } from 'generated/fetch';
+import * as React from 'react';
 import {act} from 'react-dom/test-utils';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {DataSetApiStub} from 'testing/stubs/data-set-api-stub';
-import {workspaceDataStub} from 'testing/stubs/workspaces';
 import { NotebooksApiStub } from 'testing/stubs/notebooks-api-stub';
+import {workspaceDataStub} from 'testing/stubs/workspaces';
 
 describe('ExportDatasetModal', () => {
   let dataset;

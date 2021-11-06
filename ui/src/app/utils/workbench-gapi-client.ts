@@ -1,4 +1,5 @@
 import { isTestAccessTokenActive } from "app/utils/authentication";
+
 import {LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN} from './cookies';
 
 declare const gapi: any;

@@ -1,7 +1,3 @@
-import * as fp from 'lodash/fp';
-import * as React from 'react';
-import {useEffect, useState} from 'react';
-
 import {Clickable} from 'app/components/buttons';
 import {FlexRow} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
@@ -19,7 +15,11 @@ import {
 import {useNavigation} from 'app/utils/navigation';
 import {MatchParams, serverConfigStore} from 'app/utils/stores';
 import {CdrVersionTiersResponse, Workspace} from 'generated/fetch';
+import * as fp from 'lodash/fp';
+import * as React from 'react';
+import {useEffect, useState} from 'react';
 import {useParams} from 'react-router-dom';
+
 import {CdrVersionUpgradeModal} from './cdr-version-upgrade-modal';
 
 const styles = reactStyles({

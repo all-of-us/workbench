@@ -1,11 +1,10 @@
-import * as React from 'react';
-
 import {Button, Clickable} from 'app/components/buttons';
 import {FlexRow} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import colors from 'app/styles/colors';
 import {AnalyticsTracker} from 'app/utils/analytics';
+import * as React from 'react';
 
 interface Props {
   defaultCdrVersionName: string;

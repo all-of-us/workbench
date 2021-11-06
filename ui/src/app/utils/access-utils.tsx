@@ -1,14 +1,15 @@
-import * as fp from 'lodash/fp';
-import * as React from 'react';
-import {Redirect} from "react-router-dom";
-
+import {parseQueryParams} from "app/components/app-router";
 import {Button} from 'app/components/buttons';
+import {InfoIcon} from 'app/components/icons';
+import {TooltipTrigger} from 'app/components/popups';
 import {AoU} from 'app/components/text-wrappers';
 import {profileApi} from 'app/services/swagger-fetch-clients';
+import {AccessTierShortNames} from 'app/utils/access-tiers';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {convertAPIError} from 'app/utils/errors';
 import {encodeURIComponentStrict} from 'app/utils/navigation';
 import {authStore, profileStore, serverConfigStore, useStore} from 'app/utils/stores';
+import {environment} from 'environments/environment';
 import {
   AccessModule,
   AccessModuleStatus,
@@ -16,12 +17,11 @@ import {
   Profile,
   UserTierEligibility
 } from 'generated/fetch';
-import {parseQueryParams} from "app/components/app-router";
+import * as fp from 'lodash/fp';
+import * as React from 'react';
+import {Redirect} from "react-router-dom";
+
 import {cond, daysFromNow, displayDateWithoutHours, switchCase} from "./index";
-import {AccessTierShortNames} from 'app/utils/access-tiers';
-import {TooltipTrigger} from 'app/components/popups';
-import {InfoIcon} from 'app/components/icons';
-import {environment} from 'environments/environment';
 
 const {useState, useEffect} = React;
 

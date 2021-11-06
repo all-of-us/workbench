@@ -1,10 +1,8 @@
-import * as React from 'react';
-
-import {ResearchPurposeItems, SpecificPopulationItems} from 'app/pages/workspace/workspace-edit-text';
-import {PrimaryPurposeItems, ResearchPurposeItem} from 'app/pages/workspace/workspace-edit-text';
+import {PrimaryPurposeItems, ResearchPurposeItem,ResearchPurposeItems, SpecificPopulationItems} from 'app/pages/workspace/workspace-edit-text';
 import colors from 'app/styles/colors';
 import {ResearchPurpose} from 'generated/fetch';
 import * as fp from 'lodash/fp';
+import * as React from 'react';
 
 const styles = {
   researchPurposeItemHeader: {

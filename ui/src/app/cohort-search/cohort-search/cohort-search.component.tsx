@@ -1,8 +1,3 @@
-import * as fp from 'lodash/fp';
-import {Growl} from 'primereact/growl';
-import * as React from 'react';
-import {Subscription} from 'rxjs/Subscription';
-
 import {Demographics} from 'app/cohort-search/demographics/demographics.component';
 import {searchRequestStore} from 'app/cohort-search/search-state.service';
 import {Selection} from 'app/cohort-search/selection-list/selection-list.component';
@@ -22,10 +17,13 @@ import {
   setSidebarActiveIconStore,
 } from 'app/utils/navigation';
 import { MatchParams } from 'app/utils/stores';
-import {CriteriaType, Domain, TemporalMention, TemporalTime} from 'generated/fetch';
-import {RouteComponentProps, withRouter} from 'react-router-dom';
-
 import arrowIcon from 'assets/icons/arrow-left-regular.svg';
+import {CriteriaType, Domain, TemporalMention, TemporalTime} from 'generated/fetch';
+import * as fp from 'lodash/fp';
+import {Growl} from 'primereact/growl';
+import * as React from 'react';
+import {RouteComponentProps, withRouter} from 'react-router-dom';
+import {Subscription} from 'rxjs/Subscription';
 
 const styles = reactStyles({
   arrowIcon: {

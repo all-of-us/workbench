@@ -1,7 +1,7 @@
 import {shallow} from 'enzyme';
+import {Domain} from 'generated/fetch';
 import * as React from 'react';
 
-import {Domain} from 'generated/fetch';
 import {SelectionList} from './selection-list.component';
 
 describe('SelectionList', () => {

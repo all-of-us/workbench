@@ -1,6 +1,3 @@
-import * as fp from 'lodash/fp';
-import * as React from 'react';
-
 import {SearchBar} from 'app/cohort-search/search-bar/search-bar.component';
 import {ppiSurveys} from 'app/cohort-search/search-state.service';
 import {TreeNode} from 'app/cohort-search/tree-node/tree-node.component';
@@ -13,6 +10,7 @@ import {reactStyles, withCdrVersions, withCurrentConcept, withCurrentWorkspace} 
 import {getCdrVersion} from 'app/utils/cdr-versions';
 import {currentCohortCriteriaStore, currentWorkspaceStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
+import arrow from 'assets/icons/arrow-left-regular.svg';
 import {
   CdrVersionTiersResponse,
   Criteria,
@@ -20,8 +18,8 @@ import {
   CriteriaType,
   Domain
 } from 'generated/fetch';
-
-import arrow from 'assets/icons/arrow-left-regular.svg';
+import * as fp from 'lodash/fp';
+import * as React from 'react';
 
 const styles = reactStyles({
   error: {

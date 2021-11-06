@@ -1,9 +1,8 @@
-import * as React from 'react';
-
+import {NotificationBanner} from 'app/components/notification-banner';
 import {getAccessModuleStatusByName} from 'app/utils/access-utils';
 import {profileStore, serverConfigStore, useStore} from 'app/utils/stores';
 import {AccessModule} from 'generated/fetch';
-import {NotificationBanner} from 'app/components/notification-banner';
+import * as React from 'react';
 
 export const LoginGovIAL2NotificationMaybe = () => {
   const {profile} = useStore(profileStore);

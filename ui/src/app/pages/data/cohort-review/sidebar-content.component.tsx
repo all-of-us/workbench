@@ -1,7 +1,3 @@
-import * as fp from 'lodash/fp';
-import moment from 'moment'
-import * as React from 'react';
-
 import {Button} from 'app/components/buttons';
 import {styles as headerStyles} from 'app/components/headers';
 import {ClrIcon} from 'app/components/icons';
@@ -21,6 +17,9 @@ import {
   ParticipantCohortStatus,
   WorkspaceAccessLevel
 } from 'generated/fetch';
+import * as fp from 'lodash/fp';
+import moment from 'moment'
+import * as React from 'react';
 
 const styles = {
   header: {

@@ -14,7 +14,6 @@ import {
 } from 'app/pages/login/account-creation/common';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, toggleIncludes} from 'app/utils';
-
 import {convertAPIError, reportError} from 'app/utils/errors';
 import {environment} from 'environments/environment';
 import {Disability, GenderIdentity, Profile, Race, SexAtBirth} from 'generated/fetch';

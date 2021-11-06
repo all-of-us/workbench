@@ -1,8 +1,3 @@
-import * as fp from 'lodash/fp';
-import {Dropdown} from 'primereact/dropdown';
-import * as React from 'react';
-import validate from 'validate.js';
-
 import {Button} from 'app/components/buttons';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {FormSection} from 'app/components/forms';
@@ -11,6 +6,7 @@ import {Error as ErrorDiv, styles as inputStyles, TextInputWithLabel} from 'app/
 import {BulletAlignedUnorderedList} from 'app/components/lists';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
+import {SupportMailto} from 'app/components/support';
 import {AouTitle} from 'app/components/text-wrappers';
 import {PubliclyDisplayed} from 'app/icons/publicly-displayed-icon';
 import {
@@ -35,7 +31,10 @@ import {
   Profile,
   PublicInstitutionDetails,
 } from 'generated/fetch';
-import {SupportMailto} from 'app/components/support';
+import * as fp from 'lodash/fp';
+import {Dropdown} from 'primereact/dropdown';
+import * as React from 'react';
+import validate from 'validate.js';
 
 const styles = reactStyles({
   ...commonStyles,

@@ -1,11 +1,4 @@
-import * as fp from 'lodash/fp';
-import * as React from 'react';
-import Iframe from 'react-iframe';
-
-import {NavigationProps} from 'app/utils/navigation';
-import {fetchAbortableRetry} from 'app/utils/retry';
-import {MatchParams, RuntimeStore} from 'app/utils/stores';
-
+import {parseQueryParams} from "app/components/app-router";
 import {Button} from 'app/components/buttons';
 import {FlexRow} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
@@ -21,24 +14,30 @@ import {
   withCurrentWorkspace,
   withUserProfile
 } from 'app/utils';
+import {NavigationProps} from 'app/utils/navigation';
 import {Kernels} from 'app/utils/notebook-kernels';
+import {fetchAbortableRetry} from 'app/utils/retry';
 import {
   ComputeSecuritySuspendedError,
   maybeInitializeRuntime,
   withRuntimeStore
 } from 'app/utils/runtime-utils';
+import {MatchParams, RuntimeStore} from 'app/utils/stores';
 import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {environment} from 'environments/environment';
 import {Profile, Runtime, RuntimeStatus} from 'generated/fetch';
+import * as fp from 'lodash/fp';
+import * as React from 'react';
+import Iframe from 'react-iframe';
 import {RouteComponentProps, withRouter} from 'react-router-dom';
-import {appendNotebookFileSuffix, dropNotebookFileSuffix} from './util';
-import {parseQueryParams} from "app/components/app-router";
+
 import {
   ErrorMode,
   NotebookFrameError,
   SecuritySuspendedMessage
 } from './notebook-frame-error';
+import {appendNotebookFileSuffix, dropNotebookFileSuffix} from './util';
 
 export enum LeoApplicationType {
   Notebook,

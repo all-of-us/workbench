@@ -1,8 +1,8 @@
+import {currentWorkspaceStore} from 'app/utils/navigation';
 import {shallow} from 'enzyme';
 import * as React from 'react';
-
-import {currentWorkspaceStore} from 'app/utils/navigation';
 import {workspaceDataStub} from 'testing/stubs/workspaces';
+
 import {ComboChart} from './combo-chart.component';
 
 describe('GenderChart', () => {

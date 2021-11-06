@@ -1,17 +1,10 @@
-import * as fp from 'lodash/fp';
-import {Dropdown} from 'primereact/dropdown';
-import * as React from 'react';
-import validate from 'validate.js';
-import {withRouter, RouteComponentProps} from 'react-router-dom';
-
 import {Button} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {ExclamationTriangle} from 'app/components/icons';
 import {TextAreaWithLengthValidationMessage, TextInput, ValidationError} from 'app/components/inputs';
 import {BulletAlignedUnorderedList} from 'app/components/lists';
-import {Modal} from 'app/components/modals';
-import {withErrorModal, withSuccessModal} from 'app/components/modals';
+import {Modal,withErrorModal, withSuccessModal} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {AoU} from 'app/components/text-wrappers';
@@ -31,8 +24,13 @@ import {wasReferredFromRenewal} from 'app/utils/access-utils';
 import {convertAPIError, reportError} from 'app/utils/errors';
 import {NavigationProps} from 'app/utils/navigation';
 import {withNavigation} from 'app/utils/with-navigation-hoc';
-import {AccessModule, InstitutionalRole, Profile} from 'generated/fetch';
-import {PublicInstitutionDetails} from 'generated/fetch';
+import {AccessModule, InstitutionalRole, Profile,PublicInstitutionDetails} from 'generated/fetch';
+import * as fp from 'lodash/fp';
+import {Dropdown} from 'primereact/dropdown';
+import * as React from 'react';
+import {RouteComponentProps,withRouter} from 'react-router-dom';
+import validate from 'validate.js';
+
 import {DataAccessPanel} from './data-access-panel';
 
 

@@ -1,14 +1,7 @@
-import {profileStore, serverConfigStore} from 'app/utils/stores';
-import {mount} from 'enzyme';
-import * as fp from 'lodash/fp';
-import * as Lolex from 'lolex';
-import * as React from 'react';
-import Select from 'react-select';
-
-import {Props, WorkspaceShare} from './workspace-share';
-
 import {registerApiClient, workspacesApi} from 'app/services/swagger-fetch-clients';
+import {profileStore, serverConfigStore} from 'app/utils/stores';
 import {WorkspaceData} from 'app/utils/workspace-data';
+import {mount} from 'enzyme';
 import {
   User,
   UserApi,
@@ -16,10 +9,16 @@ import {
   WorkspaceAccessLevel,
   WorkspacesApi
 } from 'generated/fetch';
+import * as fp from 'lodash/fp';
+import * as Lolex from 'lolex';
+import * as React from 'react';
+import Select from 'react-select';
+import defaultServerConfig from 'testing/default-server-config';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {UserApiStub} from 'testing/stubs/user-api-stub';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
-import defaultServerConfig from 'testing/default-server-config';
+
+import {Props, WorkspaceShare} from './workspace-share';
 
 describe('WorkspaceShare', () => {
   let props: Props;

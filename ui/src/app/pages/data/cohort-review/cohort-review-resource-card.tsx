@@ -1,6 +1,3 @@
-import * as fp from 'lodash/fp';
-import * as React from 'react';
-
 import {RenameModal} from 'app/components/rename-modal';
 import {Action, ResourceActionsMenu} from 'app/components/resource-actions-menu';
 import {canDelete, canWrite, ResourceCard} from 'app/components/resource-card';
@@ -10,6 +7,8 @@ import {withSpinnerOverlay, WithSpinnerOverlayProps} from 'app/components/with-s
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import {getDescription, getDisplayName, getType} from 'app/utils/resources';
 import {WorkspaceResource} from 'generated/fetch';
+import * as fp from 'lodash/fp';
+import * as React from 'react';
 
 interface Props extends WithConfirmDeleteModalProps, WithErrorModalProps, WithSpinnerOverlayProps {
   resource: WorkspaceResource;

@@ -1,8 +1,8 @@
 import {mount} from 'enzyme';
+import {ResourceType} from 'generated/fetch';
 import * as React from 'react';
 
 import {RenameModal} from './rename-modal';
-import {ResourceType} from 'generated/fetch';
 
 describe('RenameModal', () => {
   const existingNames = [];

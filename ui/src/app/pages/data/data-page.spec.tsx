@@ -1,22 +1,19 @@
-import {mount} from 'enzyme';
-import * as React from 'react';
-import {MemoryRouter} from 'react-router';
-
-
 import {ResourceCardBase} from 'app/components/card';
 import {DataComponent} from 'app/pages/data/data-component';
-
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore} from 'app/utils/navigation';
+import {serverConfigStore} from 'app/utils/stores';
+import {mount} from 'enzyme';
 import {CohortReviewApi, CohortsApi, ConceptSetsApi, DataSetApi, WorkspacesApi} from 'generated/fetch';
+import * as React from 'react';
+import {MemoryRouter} from 'react-router';
+import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {CohortReviewServiceStub, cohortReviewStubs} from 'testing/stubs/cohort-review-service-stub';
 import {CohortsApiStub, exampleCohortStubs} from 'testing/stubs/cohorts-api-stub';
 import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
 import {DataSetApiStub} from 'testing/stubs/data-set-api-stub';
 import {workspaceDataStub} from 'testing/stubs/workspaces';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
-import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
-import {serverConfigStore} from 'app/utils/stores';
 
 
 describe('DataPage', () => {

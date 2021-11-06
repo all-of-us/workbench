@@ -1,12 +1,12 @@
-import {mount} from 'enzyme';
-import * as React from 'react';
-
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
+import {mount} from 'enzyme';
 import {FeaturedWorkspacesConfigApi, WorkspacesApi} from 'generated/fetch';
+import * as React from 'react';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {FeaturedWorkspacesConfigApiStub} from 'testing/stubs/featured-workspaces-config-api-stub';
 import {buildWorkspaceStubs} from 'testing/stubs/workspaces';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
+
 import {WorkspaceLibrary} from './workspace-library';
 
 describe('WorkspaceLibrary', () => {

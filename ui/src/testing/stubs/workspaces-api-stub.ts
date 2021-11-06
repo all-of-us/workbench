@@ -1,5 +1,3 @@
-import * as fp from 'lodash/fp';
-
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {
   CloneWorkspaceRequest,
@@ -23,7 +21,9 @@ import {
   WorkspacesApi,
   WorkspaceUserRolesResponse
 } from 'generated/fetch';
+import * as fp from 'lodash/fp';
 import {stubNotImplementedError} from 'testing/stubs/stub-utils';
+
 import {CdrVersionsStubVariables} from './cdr-versions-api-stub';
 import {cohortReviewStubs} from './cohort-review-service-stub';
 import {exampleCohortStubs} from './cohorts-api-stub';

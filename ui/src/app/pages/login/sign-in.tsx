@@ -1,7 +1,9 @@
-import * as fp from 'lodash/fp';
-
+import {FlexColumn} from 'app/components/flex';
+import {Footer, FooterTypeEnum} from 'app/components/footer';
 import {PUBLIC_HEADER_IMAGE} from 'app/components/public-layout';
+import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {AccountCreation} from 'app/pages/login/account-creation/account-creation';
+import {AccountCreationInstitution} from 'app/pages/login/account-creation/account-creation-institution';
 import {AccountCreationSuccess} from 'app/pages/login/account-creation/account-creation-success';
 import {AccountCreationSurvey} from 'app/pages/login/account-creation/account-creation-survey';
 import {AccountCreationTos} from 'app/pages/login/account-creation/account-creation-tos';
@@ -13,20 +15,14 @@ import {
   withWindowSize,
 } from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
-
-import {Degree, Profile} from 'generated/fetch';
-
-import {FlexColumn} from 'app/components/flex';
-import {Footer, FooterTypeEnum} from 'app/components/footer';
-import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
-import {AccountCreationInstitution} from 'app/pages/login/account-creation/account-creation-institution';
-import {environment} from 'environments/environment';
-import * as React from 'react';
-
-import landingBackgroundImage from 'assets/images/login-group.png';
-import landingSmallerBackgroundImage from 'assets/images/login-standing.png';
 import successBackgroundImage from 'assets/images/congrats-female.png';
 import successSmallerBackgroundImage from 'assets/images/congrats-female-standing.png';
+import landingBackgroundImage from 'assets/images/login-group.png';
+import landingSmallerBackgroundImage from 'assets/images/login-standing.png';
+import {environment} from 'environments/environment';
+import {Degree, Profile} from 'generated/fetch';
+import * as fp from 'lodash/fp';
+import * as React from 'react';
 
 // A template function which returns the appropriate style config based on window size and
 // background images.
