@@ -128,7 +128,10 @@ const WorkspaceCardMenu: React.FunctionComponent<WorkspaceCardMenuProps> = ({
       </React.Fragment>
     }
   >
-    <SnowmanButton style={{marginLeft: 0, cursor: disabled ? 'not-allowed' : 'pointer', disabled}} data-test-id='workspace-card-menu'  disabled={disabled}/>
+    <SnowmanButton
+      style={{marginLeft: 0, cursor: disabled ? 'not-allowed' : 'pointer', disabled}}
+      data-test-id='workspace-card-menu'
+      disabled={disabled}/>
   </PopupTrigger>;
 };
 
