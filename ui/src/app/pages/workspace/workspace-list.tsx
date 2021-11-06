@@ -9,12 +9,14 @@ import {NewWorkspaceButton} from 'app/pages/workspace/new-workspace-button';
 import {WorkspaceCard} from 'app/pages/workspace/workspace-card';
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import {
-  reactStyles
+  reactStyles, withCdrVersions, withUserProfile
 } from 'app/utils';
 import {convertAPIError} from 'app/utils/errors';
 import {WorkspacePermissions} from 'app/utils/workspace-permissions';
 import * as React from 'react';
 import RSelect from 'react-select';
+import * as fp from "lodash/fp";
+import {Profile} from "generated/fetch";
 
 const styles = reactStyles({
   fadeBox: {
@@ -25,6 +27,10 @@ const styles = reactStyles({
   }
 });
 
+interface WorkspaceListProps extends WithSpinnerOverlayProps {
+  profileState: {profile: Profile, reload: Function, updateCache: Function};
+}
+
 interface State {
   workspacesLoading: boolean;
   workspaceList: WorkspacePermissions[];
@@ -32,7 +38,8 @@ interface State {
   firstSignIn: Date;
 }
 
-export class WorkspaceList extends React.Component<WithSpinnerOverlayProps, State> {
+export const WorkspaceList = fp.flow(withUserProfile())
+(class extends React.Component<WorkspaceListProps, State> {
 
   private timer: NodeJS.Timer;
 
@@ -49,6 +56,7 @@ export class WorkspaceList extends React.Component<WithSpinnerOverlayProps, Stat
   componentDidMount() {
     this.props.hideSpinner();
     this.reloadWorkspaces(null);
+    console.log(this.props.profileState.profile)
   }
 
   componentWillUnmount() {
@@ -70,6 +78,11 @@ export class WorkspaceList extends React.Component<WithSpinnerOverlayProps, Stat
       const response = await convertAPIError(e);
       this.setState({errorText: response.message});
     }
+  }
+
+  canAccessCTWorkspace(tierShortName: string) {
+    const shortNames = this.props.profileState.profile.accessTierShortNames;
+    return !shortNames.includes(tierShortName);
   }
 
   render() {
@@ -115,6 +128,7 @@ export class WorkspaceList extends React.Component<WithSpinnerOverlayProps, Stat
                     workspace={wp.workspace}
                     accessLevel={wp.accessLevel}
                     reload={() => this.reloadWorkspaces(null)}
+                    disabled={this.canAccessCTWorkspace(wp.workspace.accessTierShortName)}
                   />;
                 })}
               </div>)}
@@ -123,4 +137,4 @@ export class WorkspaceList extends React.Component<WithSpinnerOverlayProps, Stat
       </FadeBox>
     </React.Fragment>;
   }
-}
+});

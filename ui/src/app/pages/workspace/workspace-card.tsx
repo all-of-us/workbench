@@ -43,8 +43,7 @@ const styles = reactStyles({
     color: colors.accent,
     marginBottom: '0.5rem',
     fontSize: 18,
-    wordBreak: 'break-all',
-    cursor: 'pointer',
+    wordBreak: 'break-all'
   },
   permissionBox: {
     color: colors.white,
@@ -69,13 +68,15 @@ const WorkspaceCardMenu: React.FunctionComponent<WorkspaceCardMenuProps> = ({
   workspace,
   accessLevel,
   onShare,
-  onDelete
+  onDelete,
+  disabled
 }) => {
   const [navigate, ] = useNavigation();
 
   const wsPathPrefix = 'workspaces/' + workspace.namespace + '/' + workspace.id;
 
   return <PopupTrigger
+    disabled={disabled}
     side='bottom'
     closeOnClick
     content={
@@ -127,7 +128,7 @@ const WorkspaceCardMenu: React.FunctionComponent<WorkspaceCardMenuProps> = ({
       </React.Fragment>
     }
   >
-    <SnowmanButton style={{marginLeft: 0}} data-test-id='workspace-card-menu'/>
+    <SnowmanButton style={{marginLeft: 0, cursor: disabled ? 'not-allowed' : 'pointer', disabled}} data-test-id='workspace-card-menu'  disabled={disabled}/>
   </PopupTrigger>;
 };
 
@@ -143,6 +144,8 @@ interface WorkspaceCardProps extends NavigationProps {
   // A reload function that can be called by this component to reqeust a refresh
   // of the workspace contained in this card.
   reload(): Promise<void>;
+  // non-CT users cannot click or see on CT workspaces.
+  disabled?: boolean;
 }
 
 export const WorkspaceCard = fp.flow(withNavigation)(
@@ -203,7 +206,7 @@ export const WorkspaceCard = fp.flow(withNavigation)(
     }
 
     render() {
-      const {workspace, workspace: {accessTierShortName}, accessLevel} = this.props;
+      const {workspace, workspace: {accessTierShortName}, accessLevel, disabled} = this.props;
       const {confirmDeleting, showShareModal, showResearchPurposeReviewModal} = this.state;
 
       return <React.Fragment>
@@ -222,7 +225,7 @@ export const WorkspaceCard = fp.flow(withNavigation)(
                   triggerEvent(EVENT_CATEGORY, 'share', 'Card menu - click share');
                   this.setState({showShareModal: true});
                 }}
-                disabled={false}
+                disabled={disabled}
               />
             </FlexColumn>
             <FlexColumn
@@ -234,12 +237,14 @@ export const WorkspaceCard = fp.flow(withNavigation)(
             >
               <FlexColumn style={{marginBottom: 'auto'}}>
                 <FlexRow style={{ alignItems: 'flex-start' }}>
-                  <Clickable>
+                  <Clickable style={{cursor: disabled ? 'not-allowed' : 'pointer', ...styles}} disabled={disabled}>
+                    <TooltipTrigger content={'Controlled Tier workspace is not accessible.'} disabled={!disabled}>
                     <div style={styles.workspaceName}
                          data-test-id='workspace-card-name'
-                         onClick={() => this.onClick()}>
+                         onClick={() => !disabled ? this.onClick() : {}}>
                       {workspace.name}
                     </div>
+                    </TooltipTrigger>
                   </Clickable>
                 </FlexRow>
                 {
