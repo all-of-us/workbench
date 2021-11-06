@@ -6,7 +6,7 @@ import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {Profile, ProfileApi} from 'generated/fetch';
 import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
 import {ProfileStubVariables} from 'testing/stubs/profile-api-stub';
-import {profileStore} from "app/utils/stores";
+import {profileStore} from 'app/utils/stores';
 
 describe('BugReport', () => {
   const description = 'test';

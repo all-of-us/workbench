@@ -533,7 +533,7 @@ const GpuConfigSelector = ({disabled, onChange, selectedMachine, gpuConfig})  =>
 
   return <FlexColumn style={{marginTop: '1rem', justifyContent: 'space-between'}}>
     <FlexRow >
-      <CheckBox id={`enable-gpu`}
+      <CheckBox id={'enable-gpu'}
                 label='Enable GPUs'
                 checked={enableGpu}
                 onChange={() => {
@@ -545,7 +545,7 @@ const GpuConfigSelector = ({disabled, onChange, selectedMachine, gpuConfig})  =>
     <FlexRow style={styles.formGrid}>
         <FlexRow style={styles.labelAndInput}>
         <label style={{...styles.label, minWidth: '3.0rem'}} htmlFor='gpu-type'>Gpu Type</label>
-        <Dropdown id={`gpu-type`}
+        <Dropdown id={'gpu-type'}
                   style={{width: '7rem'}}
                   options={validGpuNames}
                   onChange={
@@ -557,7 +557,7 @@ const GpuConfigSelector = ({disabled, onChange, selectedMachine, gpuConfig})  =>
         </FlexRow>
         <FlexRow style={styles.labelAndInput}>
         <label style={{...styles.label, minWidth: '2.0rem'}} htmlFor='gpu-num'>GPUs</label>
-        <Dropdown id={`gpu-num`}
+        <Dropdown id={'gpu-num'}
                   options={validNumGpusOptions}
                   onChange={({value}) => setSelectedNumOfGpus(value)}
                   disabled={disabled}
@@ -574,7 +574,7 @@ const PersistentDiskSizeSelector = ({onChange, disabled, selectedDiskSize, diskS
       <a href= 'https://support.terra.bio/hc/en-us/articles/360047318551'>Learn more about persistent disks and where your disk is mounted.
       </a>
     </div>
-    <InputNumber id={`persistent-disk`}
+    <InputNumber id={'persistent-disk'}
                  showButtons
                  disabled={disabled}
                  decrementButtonClassName='p-button-secondary'

@@ -1,6 +1,6 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
-import {Redirect} from "react-router-dom";
+import {Redirect} from 'react-router-dom';
 
 import {Button} from 'app/components/buttons';
 import {AoU} from 'app/components/text-wrappers';
@@ -16,8 +16,8 @@ import {
   Profile,
   UserTierEligibility
 } from 'generated/fetch';
-import {parseQueryParams} from "app/components/app-router";
-import {cond, daysFromNow, displayDateWithoutHours, switchCase} from "./index";
+import {parseQueryParams} from 'app/components/app-router';
+import {cond, daysFromNow, displayDateWithoutHours, switchCase} from './index';
 import {AccessTierShortNames} from 'app/utils/access-tiers';
 import {TooltipTrigger} from 'app/components/popups';
 import {InfoIcon} from 'app/components/icons';

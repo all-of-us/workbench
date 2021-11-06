@@ -1,8 +1,8 @@
-import * as React from "react";
+import * as React from 'react';
 
-import {FlexRow} from "./flex";
-import {AlarmExclamation} from "./icons";
-import {Button} from "./buttons";
+import {FlexRow} from './flex';
+import {AlarmExclamation} from './icons';
+import {Button} from './buttons';
 import {reactStyles} from 'app/utils';
 import colors from 'app/styles/colors';
 

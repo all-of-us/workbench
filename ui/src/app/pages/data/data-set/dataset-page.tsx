@@ -595,7 +595,7 @@ export const DatasetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), wi
         };
       }
       // Add Zipcode Socioeconomic status data if were in controlled tier dataset
-      if (getCdrVersion(this.props.workspace, this.props.cdrVersionTiersResponse).accessTierShortName === "controlled") {
+      if (getCdrVersion(this.props.workspace, this.props.cdrVersionTiersResponse).accessTierShortName === 'controlled') {
         PREPACKAGED_DOMAINS = {
           ...PREPACKAGED_DOMAINS,
           ...PREPACKAGED_WITH_ZIP_CODE_SOCIOECONOMIC

@@ -10,7 +10,7 @@ import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 import {WorkspaceLibrary} from './workspace-library';
 
 describe('WorkspaceLibrary', () => {
-  const suffixes = [" Phenotype Library", " Tutorial Workspace", " Published Workspace"];
+  const suffixes = [' Phenotype Library', ' Tutorial Workspace', ' Published Workspace'];
 
   const props = {
     enablePublishedWorkspaces: true,

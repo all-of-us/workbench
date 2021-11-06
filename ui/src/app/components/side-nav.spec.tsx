@@ -11,8 +11,8 @@ describe('SideNav', () => {
     onToggleSideNav: () => {},
   };
 
-  const spy = jest.spyOn(ProfilePicture, "getProfilePictureSrc");
-  spy.mockReturnValue("lol.png");
+  const spy = jest.spyOn(ProfilePicture, 'getProfilePictureSrc');
+  spy.mockReturnValue('lol.png');
 
   const component = () => mount(<SideNav {...props}/>);
 
@@ -28,7 +28,7 @@ describe('SideNav', () => {
       givenName: 'Tester',
       familyName: 'MacTesterson'
     }}/>);
-    wrapper.find(`[data-test-id="TesterMacTesterson-menu-item"]`).first().simulate('click');
+    wrapper.find('[data-test-id="TesterMacTesterson-menu-item"]').first().simulate('click');
     // These are our expected items to be disabled when you are not registered
     let disabledItemText = ['Your Workspaces', 'Featured Workspaces', 'User Support Hub'];
     const sideNavItems = wrapper.find(SideNavItem);

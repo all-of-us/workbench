@@ -73,7 +73,7 @@ enum Tabs {
 const descriptions = {
   datasets: `A dataset is a table containing data about a cohort that can
   be exported for analysis. `,
-  cohorts: `A cohort is a group of participants based on specific criteria.`,
+  cohorts: 'A cohort is a group of participants based on specific criteria.',
 };
 
 const resourceTypesToFetch = [ResourceType.COHORT, ResourceType.COHORTREVIEW, ResourceType.CONCEPTSET, ResourceType.DATASET];
@@ -155,7 +155,7 @@ export const DataComponent = withCurrentWorkspace()((props: Props) => {
     <div style={{paddingLeft: '1.5rem'}}>
       <div style={styles.cardButtonArea}>
         <TooltipTrigger content={!writePermission &&
-        `Write permission required to create cohorts`} side='top'>
+        'Write permission required to create cohorts'} side='top'>
           <CardButton style={styles.resourceTypeButton} disabled={!writePermission}
                       onClick={() => {
                         navigate(['workspaces', workspace.namespace, workspace.id, 'data', 'cohorts', 'build']);
@@ -170,12 +170,12 @@ export const DataComponent = withCurrentWorkspace()((props: Props) => {
             {/*Because the container can stretch based on window size, but the height
               can't we set a max width to cap the height based on aspect ratio*/}
             <div style={{width: '100%', maxWidth: '425px', paddingTop: '1rem'}}>
-              <img data-test-id={"cohort-diagram"} src={cohortImg}/>
+              <img data-test-id={'cohort-diagram'} src={cohortImg}/>
             </div>
           </CardButton>
         </TooltipTrigger>
         <TooltipTrigger content={!writePermission &&
-        `Write permission required to create datasets`} side='top'>
+        'Write permission required to create datasets'} side='top'>
           <CardButton
               style={{...styles.resourceTypeButton, ...styles.resourceTypeButtonLast}}
               disabled={!writePermission}
@@ -193,7 +193,7 @@ export const DataComponent = withCurrentWorkspace()((props: Props) => {
             {/*Because the container can stretch based on window size, but the height
                can't we set a max width to cap the height based on aspect ratio*/}
             <div style={{width: '100%', maxWidth: '425px', paddingTop: '1.5rem'}}>
-              <img data-test-id={"dataset-diagram"} src={dataSetImg}/>
+              <img data-test-id={'dataset-diagram'} src={dataSetImg}/>
             </div>
           </CardButton>
         </TooltipTrigger>

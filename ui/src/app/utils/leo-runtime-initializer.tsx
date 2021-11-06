@@ -335,7 +335,7 @@ export class LeoRuntimeInitializer {
         // If runtime is in error state, stop polling so we can display the error.
         reportError(
           `Runtime ${this.currentRuntime.googleProject}/${this.currentRuntime.runtimeName}` +
-          ` has reached an ERROR status`);
+          ' has reached an ERROR status');
         return this.resolve(this.currentRuntime);
       }
     } catch (e) {

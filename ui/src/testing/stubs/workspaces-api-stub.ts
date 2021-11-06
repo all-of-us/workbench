@@ -137,7 +137,7 @@ export class WorkspacesApiStub extends WorkspacesApi {
         }
       });
       if (deletionIndex === -1) {
-        throw new Error(`Error deleting. Workspace with `
+        throw new Error('Error deleting. Workspace with '
           + `id: ${workspaceId} does not exist.`);
       }
       this.workspaces.splice(deletionIndex, 1);
