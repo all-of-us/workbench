@@ -45,8 +45,7 @@ public class EgressEventsAdminController implements EgressEventsAdminApiDelegate
     Pageable pageable = PageRequest.of(0, pageSize);
     if (!Strings.isNullOrEmpty(request.getPageToken())) {
       PaginationToken token = PaginationToken.fromBase64(request.getPageToken());
-      if (!token.matchesParameters(
-          request.getSourceUserEmail(), request.getSourceWorkspaceNamespace())) {
+      if (!token.matchesParameters(toPaginationParams(request))) {
         throw new BadRequestException("search parameters changed between paginated calls");
       }
       pageable = PageRequest.of((int) token.getOffset(), pageSize);
@@ -76,10 +75,10 @@ public class EgressEventsAdminController implements EgressEventsAdminApiDelegate
 
     Page<DbEgressEvent> page;
     if (userFilter == null && workspaceFilter == null) {
-      page = egressEventDao.findAllOrderByCreationTimeDesc(pageable);
-    } else if (userFilter != null) {
+      page = egressEventDao.findAllByOrderByCreationTimeDesc(pageable);
+    } else if (workspaceFilter == null) {
       page = egressEventDao.findAllByUserOrderByCreationTimeDesc(userFilter, pageable);
-    } else if (workspaceFilter != null) {
+    } else if (userFilter == null) {
       page = egressEventDao.findAllByWorkspaceOrderByCreationTimeDesc(workspaceFilter, pageable);
     } else {
       page =
@@ -90,15 +89,17 @@ public class EgressEventsAdminController implements EgressEventsAdminApiDelegate
     String nextPageToken = null;
     if (!page.isLast()) {
       nextPageToken =
-          PaginationToken.of(
-                  pageable.getOffset() + page.getSize(),
-                  request.getSourceUserEmail(),
-                  request.getSourceWorkspaceNamespace())
-              .toBase64();
+          PaginationToken.of(pageable.getPageNumber() + 1, toPaginationParams(request)).toBase64();
     }
     return ResponseEntity.ok(
         new ListEgressEventsResponse()
             .events(page.stream().map(egressEventMapper::toApiEvent).collect(Collectors.toList()))
             .nextPageToken(nextPageToken));
+  }
+
+  private Object[] toPaginationParams(ListEgressEventsRequest req) {
+    return new Object[] {
+      req.getSourceUserEmail(), req.getSourceWorkspaceNamespace(), req.getPageSize()
+    };
   }
 }

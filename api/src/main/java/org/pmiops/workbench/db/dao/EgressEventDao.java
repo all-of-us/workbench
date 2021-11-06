@@ -11,11 +11,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.PagingAndSortingRepository;
 
 public interface EgressEventDao extends PagingAndSortingRepository<DbEgressEvent, Long> {
-  Page<DbEgressEvent> findAllOrderByCreationTimeDesc(Pageable p);
+  // The extra "By" infix is necessary in combination with OrderBy...
+  Page<DbEgressEvent> findAllByOrderByCreationTimeDesc(Pageable p);
 
   Page<DbEgressEvent> findAllByUserOrderByCreationTimeDesc(DbUser user, Pageable p);
-
-  Page<DbEgressEvent> findAllByUser(DbUser user, Pageable p);
 
   Page<DbEgressEvent> findAllByWorkspaceOrderByCreationTimeDesc(DbWorkspace workspace, Pageable p);
 
