@@ -92,6 +92,7 @@
     "codelyzer": "^4.1.0",
     "enzyme": "^3.11.0",
     "enzyme-adapter-react-16": "^1.15.6",
+    "eslint-plugin-import": "^2.25.2",
     "eslint-plugin-jest": "^24.3.2",
     "eslint-plugin-jsx-a11y": "^6.2.3",
     "eslint-plugin-prefer-arrow": "^1.2.0",

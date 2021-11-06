@@ -53,7 +53,6 @@ module.exports = {
     'no-trailing-spaces': 'warn',
     'no-undef-init': 'warn',
     // 'brace-style': ['warn', '1tbs'],
-    // 'simple-import-sort/sort': 'warn',
     // 'quotes': ['warn', 'single'], 
     // '@typescript-eslint/semi': 'warn',
     // 'space-before-function-paren': ['warn', { 'anonymous': 'never', 'named': 'never', 'asyncArrow': 'always' }],
@@ -64,6 +63,7 @@ module.exports = {
     'import/first': 'warn',
     'import/newline-after-import': 'warn',
     'import/no-duplicates': 'warn',
+    'import/no-relative-parent-imports': 'warn',
 
     /* Functionality */
     'curly': 'warn',
