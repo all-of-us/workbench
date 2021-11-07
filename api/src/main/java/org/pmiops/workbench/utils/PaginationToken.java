@@ -44,7 +44,12 @@ public final class PaginationToken {
   }
 
   public static PaginationToken fromBase64(String str) {
-    String json = new String(Base64.getDecoder().decode(str), UTF_8);
+    String json;
+    try {
+      json = new String(Base64.getDecoder().decode(str), UTF_8);
+    } catch (IllegalArgumentException e) {
+      throw new BadRequestException("Invalid pagination token");
+    }
     try {
       PaginationToken result = new Gson().fromJson(json, PaginationToken.class);
       if (result.getOffset() < 0) {

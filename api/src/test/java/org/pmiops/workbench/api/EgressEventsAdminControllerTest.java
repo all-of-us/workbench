@@ -1,6 +1,7 @@
 package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
@@ -14,6 +15,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -26,9 +28,12 @@ import org.pmiops.workbench.db.model.DbEgressEvent;
 import org.pmiops.workbench.db.model.DbEgressEvent.DbEgressEventStatus;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.ListEgressEventsRequest;
 import org.pmiops.workbench.model.ListEgressEventsResponse;
 import org.pmiops.workbench.test.FakeClock;
+import org.pmiops.workbench.utils.PaginationToken;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.EgressEventMapperImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -239,6 +244,63 @@ public class EgressEventsAdminControllerTest {
     for (int i = 0; i < gotPages.size(); i++) {
       assertThat(gotPages.get(i)).isEqualTo(expectedPages[i]);
     }
+  }
+
+  @Test
+  public void testListEgressEvents_notFoundUser() {
+    assertThrows(
+        NotFoundException.class,
+        () ->
+            controller.listEgressEvents(
+                new ListEgressEventsRequest().sourceUserEmail("not-found@asdf.com")));
+  }
+
+  @Test
+  public void testListEgressEvents_notFoundWorkspace() {
+    assertThrows(
+        NotFoundException.class,
+        () ->
+            controller.listEgressEvents(
+                new ListEgressEventsRequest().sourceWorkspaceNamespace("not-found")));
+  }
+
+  @Test
+  public void testListEgressEvents_badPageToken() {
+    assertThrows(
+        BadRequestException.class,
+        () -> controller.listEgressEvents(new ListEgressEventsRequest().pageToken("malformed")));
+  }
+
+  @Test
+  public void testListEgressEvents_offsetPageTokenOverscan() {
+    assertThat(
+            controller
+                .listEgressEvents(
+                    new ListEgressEventsRequest()
+                        .pageToken(PaginationToken.of(13L, null, null, null).toBase64()))
+                .getBody()
+                .getEvents())
+        .hasSize(0);
+  }
+
+  @Test
+  public void testListEgressEvents_pageTokenWithChangedParameters() {
+    saveNewEvent(user1, workspace1, timeMinusHours(1));
+    saveNewEvent(user1, workspace1, timeMinusHours(2));
+
+    String nextPageToken =
+        controller
+            .listEgressEvents(new ListEgressEventsRequest().pageSize(BigDecimal.valueOf(1L)))
+            .getBody()
+            .getNextPageToken();
+
+    assertThrows(
+        BadRequestException.class,
+        () ->
+            controller.listEgressEvents(
+                new ListEgressEventsRequest()
+                    .pageSize(BigDecimal.valueOf(10L))
+                    .pageToken(nextPageToken)));
   }
 
   private Instant timeMinusHours(Integer h) {
