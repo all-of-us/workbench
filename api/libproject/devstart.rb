@@ -800,7 +800,7 @@ def make_bq_prep(cmd_name, *args)
 
   common = Common.new
   Dir.chdir('db-cdr') do
-    common.run_inline %W{./generate-cdr/cb-criteria-refactor/make-bq-prep-#{op.opts.script}.sh #{op.opts.bq_project} #{op.opts.bq_dataset}}
+    common.run_inline %W{./generate-cdr/cb-criteria-parallel/make-bq-prep-#{op.opts.script}.sh #{op.opts.bq_project} #{op.opts.bq_dataset}}
   end
 end
 
@@ -837,7 +837,7 @@ def make_cb_criteria(cmd_name, *args)
 
   common = Common.new
   Dir.chdir('db-cdr') do
-    common.run_inline %W{./generate-cdr/cb-criteria-refactor/make-cb-criteria-#{op.opts.script}.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.id_prefix}}
+    common.run_inline %W{./generate-cdr/cb-criteria-parallel/make-cb-criteria-#{op.opts.script}.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.id_prefix}}
   end
 end
 
