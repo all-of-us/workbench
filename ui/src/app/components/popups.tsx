@@ -296,7 +296,6 @@ interface PopupTriggerProps {
   onOpen?: () => void;
   onClose?: () => void;
   side?: string;
-  disabled?: boolean;
 }
 
 export class PopupTrigger extends React.Component<PopupTriggerProps> {
@@ -322,7 +321,7 @@ export class PopupTrigger extends React.Component<PopupTriggerProps> {
   }
 
   render() {
-    const {children, content, onOpen, onClose, closeOnClick, disabled, ...props} = this.props;
+    const {children, content, onOpen, onClose, closeOnClick, ...props} = this.props;
     const {open} = this.state;
     const child = React.Children.only(children);
     return <React.Fragment>
@@ -342,7 +341,7 @@ export class PopupTrigger extends React.Component<PopupTriggerProps> {
           this.setState({open: !open});
         }
       })}
-      {open && !disabled && <Popup
+      {open && <Popup
           target={this.id}
           handleClickOutside={() => this.close()}
           outsideClickIgnoreClass={this.id}

@@ -75,8 +75,7 @@ const WorkspaceCardMenu: React.FunctionComponent<WorkspaceCardMenuProps> = ({
 
   const wsPathPrefix = 'workspaces/' + workspace.namespace + '/' + workspace.id;
 
-  return <PopupTrigger
-    disabled={disabled}
+  return !disabled &&  <PopupTrigger
     side='bottom'
     closeOnClick
     content={
@@ -129,7 +128,6 @@ const WorkspaceCardMenu: React.FunctionComponent<WorkspaceCardMenuProps> = ({
     }
   >
     <SnowmanButton
-      style={{marginLeft: 0, cursor: disabled ? 'not-allowed' : 'pointer', disabled}}
       data-test-id='workspace-card-menu'
       disabled={disabled}/>
   </PopupTrigger>;
