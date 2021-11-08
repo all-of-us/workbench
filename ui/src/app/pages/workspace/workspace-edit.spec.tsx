@@ -1,8 +1,8 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {mount, ReactWrapper, ShallowWrapper} from 'enzyme';
-import {Dropdown} from "primereact/dropdown";
-import {MemoryRouter} from "react-router";
+import {Dropdown} from 'primereact/dropdown';
+import {MemoryRouter} from 'react-router';
 
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore} from 'app/utils/navigation';
@@ -31,8 +31,8 @@ import {WorkspaceEdit, WorkspaceEditMode} from 'app/pages/workspace/workspace-ed
 import {WorkspaceEditSection} from 'app/pages/workspace/workspace-edit-section';
 import {cdrVersionStore, profileStore, serverConfigStore} from 'app/utils/stores';
 import {AccessTierShortNames} from 'app/utils/access-tiers';
-import {ProfileApiStub, ProfileStubVariables} from "testing/stubs/profile-api-stub";
-import * as Authentication from "app/utils/authentication";
+import {ProfileApiStub, ProfileStubVariables} from 'testing/stubs/profile-api-stub';
+import * as Authentication from 'app/utils/authentication';
 import {mockNavigate} from 'setupTests';
 import {environment} from 'environments/environment';
 

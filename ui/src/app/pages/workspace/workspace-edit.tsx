@@ -81,7 +81,7 @@ import {
 } from 'generated/fetch';
 import {OldCdrVersionModal} from './old-cdr-version-modal';
 import {environment} from 'environments/environment';
-import {UnavailableTierModal} from "./unavailable-tier-modal";
+import {UnavailableTierModal} from './unavailable-tier-modal';
 
 export const styles = reactStyles({
   categoryRow: {
