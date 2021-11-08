@@ -31,7 +31,7 @@ TBL_CBC=$(createTmpTable $TBL_CBC)
 TBL_PAS=$(createTmpTable $TBL_PAS)
 TBL_PCA=$(createTmpTable $TBL_PCA)
 ####### end common block ###########
-# make-cb-criteria-15-meas-snomed-std.sh
+# make-cb-criteria-meas-snomed-std.sh
 #4186 - #4520 : make-bq-criteria-tables.sh
 # ---------ORDER - 16 - MEASUREMENT - SNOMED - STANDARD---------
 # Order 16: #4186 - #4520:  MEASUREMENT - SNOMED - STANDARD - add roots

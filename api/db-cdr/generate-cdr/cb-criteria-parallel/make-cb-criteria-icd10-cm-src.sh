@@ -31,7 +31,7 @@ TBL_CBC=$(createTmpTable $TBL_CBC)
 TBL_PAS=$(createTmpTable $TBL_PAS)
 TBL_PCA=$(createTmpTable $TBL_PCA)
 ####### end common block ###########
-# make-cb-criteria-10-icd10-cm-src.sh
+# make-cb-criteria-icd10-cm-src.sh
 #1868 - #2132 : make-bq-criteria-tables.sh
 ################################################
 # ICD10CM - SOURCE

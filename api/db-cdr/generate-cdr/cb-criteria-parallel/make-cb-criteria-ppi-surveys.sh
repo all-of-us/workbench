@@ -30,7 +30,7 @@ TBL_CBC=$(createTmpTable $TBL_CBC)
 echo "Creating temp table for $TBL_PCA"
 TBL_PCA=$(createTmpTable $TBL_PCA)
 ####### end common block ###########
-# make-cb-criteria-03-ppi-surveys.sh
+# make-cb-criteria-ppi-surveys.sh
 #634 - #890 : make-bq-criteria-tables.sh
 # ---------ORDER - 3 - PPI SURVEYS---------634
 # ORDER 3: #634 - #890: PPI SURVEYS

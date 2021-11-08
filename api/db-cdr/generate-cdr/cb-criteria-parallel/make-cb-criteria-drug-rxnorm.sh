@@ -31,7 +31,7 @@ TBL_CBC=$(createTmpTable $TBL_CBC)
 TBL_PCA=$(createTmpTable $TBL_PCA)
 TBL_CBA=$(createTmpTable $TBL_CBA)
 ####### end common block ###########
-# make-cb-criteria-16-drug-rxnorm.sh
+# make-cb-criteria-drug-rxnorm.sh
 #4659 - #4979: make-bq-criteria-tables.sh
 # ---------ORDER - 17 - DRUG_EXPOSURE - ATC/RXNORM ---------
 #ORDER - 17: #4659 - #4979: - DRUG_EXPOSURE - ATC/RXNORM ---------

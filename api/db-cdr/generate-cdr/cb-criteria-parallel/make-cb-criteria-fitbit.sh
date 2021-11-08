@@ -27,7 +27,7 @@ CB_CRITERIA_END_ID=$[$[ID_PREFIX+1]*10**9] # 4  billion
 echo "Creating temp table for $TBL_CBC"
 TBL_CBC=$(createTmpTable $TBL_CBC)
 ####### end common block ###########
-# make-cb-criteria-05-fitbit.sh
+# make-cb-criteria-fitbit.sh
 #949 - #978 : make-bq-criteria-tables.sh
 # ---------ORDER - 5 - FITBIT DATA---------
 # ORDER 5: #949 - #978: FITBIT DATA

@@ -30,7 +30,7 @@ TBL_CBC=$(createTmpTable $TBL_CBC)
 echo "Creating temp table for $TBL_CBAT"
 TBL_CBAT=$(createTmpTable $TBL_CBAT)
 ####### end common block ###########
-# make-cb-criteria-18-observation.sh
+# make-cb-criteria-observation.sh
 #5895 - #5952: make-bq-criteria-tables.sh
 # ---------ORDER - 20 - OBSERVATION---------
 # Order - 20: #5895 - #5952: - OBSERVATION---------

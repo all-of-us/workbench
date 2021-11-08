@@ -27,7 +27,7 @@ CB_CRITERIA_END_ID=$[$[ID_PREFIX+1]*10**9] # 4  billion
 echo "Creating temp table for $TBL_CBC"
 TBL_CBC=$(createTmpTable $TBL_CBC)
 ####### end common block ###########
-# make-cb-criteria-04-pm-concept-set.sh
+# make-cb-criteria-pm-concept-set.sh
 #892 - #890 : make-bq-criteria-tables.sh
 # ---------ORDER - 4 - PHYSICAL MEASUREMENTS - CONCEPT SET---------
 # ORDER 4: #891 - #947: PHYSICAL MEASUREMENTS - CONCEPT SET

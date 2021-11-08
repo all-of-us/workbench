@@ -7,9 +7,9 @@ export BQ_DATASET=$2        # dataset
 
 ####### common block for all make-cb-criteria-dd-*.sh scripts ###########
 # MUST BE RUN AFTER ALL PARALLEL COMPLETES AND
-# make-cb-criteria-19-seq-01-add-in-missing-codes.sh COMPLETES
+# make-cb-criteria-seq-01-add-in-missing-codes.sh COMPLETES
 ####### end common block ###########
-# make-cb-criteria-20-seq-02-attrib-other-tables.sh
+# make-cb-criteria-seq-02-attrib-other-tables.sh
 #6151 - #6471: make-bq-criteria-tables.sh
 # ORDER - 22.1: #6151 - #6340: - CB_CRITERIA_ATTRIBUTE---------
 # ORDER - 22.2: #6342 - #6423: - CB_SURVEY_ATTRIBUTE---------

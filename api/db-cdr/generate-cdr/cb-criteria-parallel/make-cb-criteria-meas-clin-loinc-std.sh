@@ -27,7 +27,7 @@ CB_CRITERIA_END_ID=$[$[ID_PREFIX+1]*10**9] # 4  billion
 echo "Creating temp table for $TBL_CBC"
 TBL_CBC=$(createTmpTable $TBL_CBC)
 ####### end common block ###########
-# make-cb-criteria-13-meas-clin-loinc-std.sh
+# make-cb-criteria-meas-clin-loinc-std.sh
 #3467 - #3543 : make-bq-criteria-tables.sh
 # ---------ORDER - 14 - MEASUREMENT - Clinical - STANDARD LOINC---------
 # ORDER - 14: #3467 - #3543: MEASUREMENT - Clinical - STANDARD LOINC---------

@@ -7,7 +7,7 @@ export BQ_DATASET=$2        # dataset
 
 # MUST BE RUN AFTER ALL PARALLEL COMPLETES
 ####### end common block ###########
-# make-cb-criteria-19-seq-01-add-in-missing-codes.sh
+# make-cb-criteria-seq-01-add-in-missing-codes.sh
 #5986 - #6117: make-bq-criteria-tables.sh
 ########MUST BE RUN SEQUENTIAL - IN ORDER FROM HERE ON#########
 # ---------ORDER - 21 - ADD IN OTHER CODES NOT ALREADY CAPTURED---------
@@ -25,7 +25,7 @@ export BQ_DATASET=$2        # dataset
 # 21.6: #6118 : DRUG_EXPOSURE - add other standard concepts
   #cb_criteria: Uses : cb_criteria, drug_exposure, concept, cb_criteria_ancestor
   #### Note - #5954 - #5982 :  CB_CRITERIA_ANCESTOR
-  #### added to make-cb-criteria-16-drug-rxnorm.sh
+  #### added to make-cb-criteria-drug-rxnorm.sh
   #### which runs before this script
 ################################################
 ## ADD IN OTHER CODES NOT ALREADY CAPTURED

@@ -32,7 +32,7 @@ TBL_CBC=$(createTmpTable $TBL_CBC)
 TBL_PAS=$(createTmpTable $TBL_PAS)
 TBL_PCA=$(createTmpTable $TBL_PCA)
 ####### end common block ###########
-# make-cb-criteria-09-icd9-src.sh
+# make-cb-criteria-icd9-src.sh
 #1009 - #1254 : make-bq-criteria-tables.sh
 # ---------ORDER - 9 - ICD9 - SOURCE---------
 # Order 9: #1304 - #1713: ICD9 - SOURCE

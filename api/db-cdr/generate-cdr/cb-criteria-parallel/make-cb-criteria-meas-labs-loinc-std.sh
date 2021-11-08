@@ -31,7 +31,7 @@ TBL_CBC=$(createTmpTable $TBL_CBC)
 TBL_PAS=$(createTmpTable $TBL_PAS)
 TBL_PCA=$(createTmpTable $TBL_PCA)
 ####### end common block ###########
-# make-cb-criteria-14-meas-labs-loinc-std.sh
+# make-cb-criteria-meas-labs-loinc-std.sh
 #3624 - #4097 : make-bq-criteria-tables.sh
 # ---------ORDER - 15 - MEASUREMENT - Labs - STANDARD LOINC ---------
 # ORDER - 15: #3624 - #4097: MEASUREMENT - Labs - STANDARD LOINC ---------
