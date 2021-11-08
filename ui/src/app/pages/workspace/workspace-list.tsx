@@ -57,7 +57,6 @@ export const WorkspaceList = fp.flow(withUserProfile())
   componentDidMount() {
     this.props.hideSpinner();
     this.reloadWorkspaces(null);
-    console.log(this.props.profileState.profile)
   }
 
   componentWillUnmount() {
