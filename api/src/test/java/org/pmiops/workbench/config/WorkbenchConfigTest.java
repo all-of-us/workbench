@@ -62,8 +62,6 @@ public class WorkbenchConfigTest {
     assertThat(workbenchConfig.access.unsafeAllowSelfBypass).isFalse();
     assertThat(workbenchConfig.access.unsafeAllowUserCreationFromGSuiteData).isFalse();
     assertThat(workbenchConfig.featureFlags.unsafeAllowDeleteUser).isFalse();
-    assertThat(workbenchConfig.featureFlags.unsafeAllowAccessToAllTiersForRegisteredUsers)
-        .isFalse();
   }
 
   @Test

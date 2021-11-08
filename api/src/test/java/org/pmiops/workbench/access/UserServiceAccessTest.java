@@ -214,44 +214,11 @@ public class UserServiceAccessTest {
 
   @Test
   public void test_updateUserWithRetries_register() {
-    providedWorkbenchConfig.featureFlags.unsafeAllowAccessToAllTiersForRegisteredUsers = false;
     assertThat(userAccessTierDao.findAll()).isEmpty();
 
     dbUser = updateUserWithRetries(registerUserNow);
     assertRegisteredTierEnabled(dbUser);
     assertUserNotInAccessTier(dbUser, controlledTier);
-  }
-
-  @Test
-  public void test_updateUserWithRetries_register_includes_others() {
-    providedWorkbenchConfig.featureFlags.unsafeAllowAccessToAllTiersForRegisteredUsers = true;
-
-    DbAccessTier controlledTier = TestMockFactory.createControlledTierForTests(accessTierDao);
-    DbAccessTier aThirdTierWhyNot =
-        accessTierDao.save(
-            new DbAccessTier()
-                .setAccessTierId(3)
-                .setShortName("three")
-                .setDisplayName("Third Tier")
-                .setAuthDomainName("Third Tier Auth Domain")
-                .setAuthDomainGroupEmail("t3-users@fake-research-aou.org")
-                .setServicePerimeter("tier/3/perimeter"));
-
-    assertThat(userAccessTierDao.findAll()).isEmpty();
-
-    dbUser = updateUserWithRetries(registerUserNow);
-
-    List<DbAccessTier> expectedTiers =
-        ImmutableList.of(registeredTier, controlledTier, aThirdTierWhyNot);
-
-    assertThat(userAccessTierDao.findAll()).hasSize(expectedTiers.size());
-    for (DbAccessTier tier : expectedTiers) {
-      Optional<DbUserAccessTier> userAccessMaybe =
-          userAccessTierDao.getByUserAndAccessTier(dbUser, tier);
-      assertThat(userAccessMaybe).isPresent();
-      assertThat(userAccessMaybe.get().getTierAccessStatusEnum())
-          .isEqualTo(TierAccessStatus.ENABLED);
-    }
   }
 
   @Test
@@ -1092,7 +1059,6 @@ public class UserServiceAccessTest {
 
   @Test
   public void test_updateUserWithRetries_addToControlledTier() {
-    providedWorkbenchConfig.featureFlags.unsafeAllowAccessToAllTiersForRegisteredUsers = false;
     assertThat(userAccessTierDao.findAll()).isEmpty();
 
     dbUser = updateUserWithRetries(this::completeRTAndCTRequirements);
@@ -1102,7 +1068,6 @@ public class UserServiceAccessTest {
 
   @Test
   public void test_updateUserWithRetries_completeCTRequirementsOnly() {
-    providedWorkbenchConfig.featureFlags.unsafeAllowAccessToAllTiersForRegisteredUsers = false;
     assertThat(userAccessTierDao.findAll()).isEmpty();
 
     dbUser = updateUserWithRetries(this::completeCTRequirements);
@@ -1112,7 +1077,6 @@ public class UserServiceAccessTest {
 
   @Test
   public void test_updateUserWithRetries_inCompleteCTRequirements_CTCompliance() {
-    providedWorkbenchConfig.featureFlags.unsafeAllowAccessToAllTiersForRegisteredUsers = false;
     assertThat(userAccessTierDao.findAll()).isEmpty();
 
     dbUser = completeRTAndCTRequirements(dbUser);
@@ -1131,7 +1095,6 @@ public class UserServiceAccessTest {
 
   @Test
   public void test_updateUserWithRetries_inCompleteCTRequirements_eraRequired() {
-    providedWorkbenchConfig.featureFlags.unsafeAllowAccessToAllTiersForRegisteredUsers = false;
     assertThat(userAccessTierDao.findAll()).isEmpty();
 
     dbUser = completeRTAndCTRequirements(dbUser);
@@ -1158,7 +1121,6 @@ public class UserServiceAccessTest {
 
   @Test
   public void test_updateUserWithRetries_eraNotRequiredForTiers() {
-    providedWorkbenchConfig.featureFlags.unsafeAllowAccessToAllTiersForRegisteredUsers = false;
     assertThat(userAccessTierDao.findAll()).isEmpty();
 
     dbUser = completeRTAndCTRequirements(dbUser);
@@ -1181,7 +1143,6 @@ public class UserServiceAccessTest {
 
   @Test
   public void testInstitutionRequirement_rtEraDoesNotAffectCTEra() {
-    providedWorkbenchConfig.featureFlags.unsafeAllowAccessToAllTiersForRegisteredUsers = false;
     assertThat(userAccessTierDao.findAll()).isEmpty();
     providedWorkbenchConfig.access.enableEraCommons = true;
     providedWorkbenchConfig.access.enableRasLoginGovLinking = true;
@@ -1204,7 +1165,6 @@ public class UserServiceAccessTest {
 
   @Test
   public void test_updateUserWithRetries_emailValidForRTButNotValidForCT() {
-    providedWorkbenchConfig.featureFlags.unsafeAllowAccessToAllTiersForRegisteredUsers = false;
     assertThat(userAccessTierDao.findAll()).isEmpty();
     dbUser = completeRTAndCTRequirements(dbUser);
 
@@ -1232,7 +1192,6 @@ public class UserServiceAccessTest {
 
   @Test
   public void test_updateUserWithRetries_didNotSignCTAgreement() {
-    providedWorkbenchConfig.featureFlags.unsafeAllowAccessToAllTiersForRegisteredUsers = false;
     assertThat(userAccessTierDao.findAll()).isEmpty();
     dbUser = completeRTAndCTRequirements(dbUser);
     Institution institution = institutionService.getByUser(dbUser).get();
@@ -1252,7 +1211,6 @@ public class UserServiceAccessTest {
   @Test
   public void test_updateUserWithRetries_eraFFisOff_CT() {
     providedWorkbenchConfig.access.enableEraCommons = false;
-    providedWorkbenchConfig.featureFlags.unsafeAllowAccessToAllTiersForRegisteredUsers = false;
     assertThat(userAccessTierDao.findAll()).isEmpty();
 
     dbUser = completeRTAndCTRequirements(dbUser);
@@ -1280,7 +1238,6 @@ public class UserServiceAccessTest {
   @Test
   public void test_updateUserWithRetries_ct_complianceTrainingFFisOff_CT() {
     providedWorkbenchConfig.access.enableComplianceTraining = false;
-    providedWorkbenchConfig.featureFlags.unsafeAllowAccessToAllTiersForRegisteredUsers = false;
     assertThat(userAccessTierDao.findAll()).isEmpty();
 
     dbUser = completeRTAndCTRequirements(dbUser);
@@ -1302,24 +1259,8 @@ public class UserServiceAccessTest {
   }
 
   @Test
-  public void test_updateUserWithRetries_noCTUnsafeAllowAccessToAllTiersForRegisteredUsersIsTrue() {
-    providedWorkbenchConfig.featureFlags.unsafeAllowAccessToAllTiersForRegisteredUsers = true;
-    assertThat(userAccessTierDao.findAll()).isEmpty();
-
-    dbUser = registerUser(new Timestamp(PROVIDED_CLOCK.millis()), dbUser);
-    TestMockFactory.removeControlledTierForTests(accessTierDao);
-    removeCTConfigFromInstitution();
-    dbUser = updateUserWithRetries(Function.identity());
-
-    assertRegisteredTierEnabled(dbUser);
-    assertUserNotInAccessTier(dbUser, controlledTier);
-  }
-
-  @Test
-  public void
-      test_updateUserWithRetries_noCTUnsafeAllowAccessToAllTiersForRegisteredUsersIsFalse() {
-    //    CT does not exist anywhere
-    providedWorkbenchConfig.featureFlags.unsafeAllowAccessToAllTiersForRegisteredUsers = false;
+  public void test_updateUserWithRetries_noCT() {
+    // CT does not exist anywhere
     assertThat(userAccessTierDao.findAll()).isEmpty();
 
     dbUser = registerUser(new Timestamp(PROVIDED_CLOCK.millis()), dbUser);
