@@ -241,7 +241,9 @@ export const WorkspaceCard = fp.flow(withNavigation)(
             >
               <FlexColumn style={{marginBottom: 'auto'}}>
                 <FlexRow style={{ alignItems: 'flex-start' }}>
-                  <Clickable style={{cursor: tierAccessDisabled ? 'not-allowed' : 'pointer', ...styles}} onClick={() => this.onClick()} disabled={tierAccessDisabled}>
+                  <Clickable style={{cursor: tierAccessDisabled ? 'not-allowed' : 'pointer', ...styles}}
+                             onClick={() => this.onClick()}
+                             disabled={tierAccessDisabled}>
                     <TooltipTrigger content={tierAccessDisabled && <div>
                       This workspace is a {displayNameForTier(accessTierShortName)} workspace. You do not have access.
                       Please complete the data access requirements to gain access.

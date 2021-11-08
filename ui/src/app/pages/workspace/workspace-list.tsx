@@ -9,7 +9,7 @@ import {NewWorkspaceButton} from 'app/pages/workspace/new-workspace-button';
 import {WorkspaceCard} from 'app/pages/workspace/workspace-card';
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import {
-  reactStyles, withCdrVersions, withUserProfile
+  reactStyles, withUserProfile
 } from 'app/utils';
 import {convertAPIError} from 'app/utils/errors';
 import {WorkspacePermissions} from 'app/utils/workspace-permissions';
