@@ -322,18 +322,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
             "called setLockedState on wsns %s with desiredLockState %b",
             workspaceNamespace, desiredLockState));
 
-    // TODO but what should I do with it?
-
     DbWorkspace dbWorkspace = getWorkspaceByNamespaceOrThrow(workspaceNamespace);
-    setAdminLockedState(dbWorkspace, desiredLockState);
-  }
-
-  private void setAdminLockedState(DbWorkspace dbWorkspace, boolean desiredLockState) {
-    log.info(
-        String.format(
-            "Found workspace in DB: ID %d, Name '%s'",
-            dbWorkspace.getWorkspaceId(), dbWorkspace.getName()));
-
     workspaceDao.save(dbWorkspace.setAdminLocked(desiredLockState));
   }
 
