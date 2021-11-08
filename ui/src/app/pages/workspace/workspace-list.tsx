@@ -126,7 +126,7 @@ export const WorkspaceList = fp.flow(withUserProfile())
                     workspace={wp.workspace}
                     accessLevel={wp.accessLevel}
                     reload={() => this.reloadWorkspaces(null)}
-                    disabled={!hasTierAccess(profile, wp.workspace.accessTierShortName)}
+                    tierAccessDisabled={!hasTierAccess(profile, wp.workspace.accessTierShortName)}
                   />;
                 })}
               </div>)}
