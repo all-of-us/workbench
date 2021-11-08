@@ -240,11 +240,10 @@ export const WorkspaceCard = fp.flow(withNavigation)(
             >
               <FlexColumn style={{marginBottom: 'auto'}}>
                 <FlexRow style={{ alignItems: 'flex-start' }}>
-                  <Clickable style={{cursor: disabled ? 'not-allowed' : 'pointer', ...styles}} disabled={disabled}>
-                    <TooltipTrigger content={'Controlled Tier workspace is not accessible.'} disabled={!disabled}>
+                  <Clickable style={{cursor: disabled ? 'not-allowed' : 'pointer', ...styles}} onClick={() => this.onClick()} disabled={disabled}>
+                    <TooltipTrigger content={'Controlled Tier workspace is not accessible.'}>
                     <div style={styles.workspaceName}
-                         data-test-id='workspace-card-name'
-                         onClick={() => !disabled ? this.onClick() : {}}>
+                         data-test-id='workspace-card-name'>
                       {workspace.name}
                     </div>
                     </TooltipTrigger>

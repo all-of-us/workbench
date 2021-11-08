@@ -17,6 +17,7 @@ import * as React from 'react';
 import RSelect from 'react-select';
 import * as fp from "lodash/fp";
 import {Profile} from "generated/fetch";
+import {hasTierAccess} from "app/utils/access-tiers";
 
 const styles = reactStyles({
   fadeBox: {
@@ -80,17 +81,14 @@ export const WorkspaceList = fp.flow(withUserProfile())
     }
   }
 
-  canAccessCTWorkspace(tierShortName: string) {
-    const shortNames = this.props.profileState.profile.accessTierShortNames;
-    return !shortNames.includes(tierShortName);
-  }
-
   render() {
     const {
       errorText,
       workspaceList,
       workspacesLoading
     } = this.state;
+
+    const {profile} = this.props.profileState
 
     // Maps each "Filter by" dropdown element to a set of access levels to display.
     const filters = [
@@ -128,7 +126,7 @@ export const WorkspaceList = fp.flow(withUserProfile())
                     workspace={wp.workspace}
                     accessLevel={wp.accessLevel}
                     reload={() => this.reloadWorkspaces(null)}
-                    disabled={this.canAccessCTWorkspace(wp.workspace.accessTierShortName)}
+                    disabled={!hasTierAccess(profile, wp.workspace.accessTierShortName)}
                   />;
                 })}
               </div>)}
