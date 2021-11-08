@@ -9,27 +9,10 @@ echo "PID "$$
 
 set -e
 # vars are purposely hard-coded for iterative testing
-export BQ_PROJECT='all-of-us-ehr-dev'       # project
-export DATASET_PAR='BillDummyPar'        # dataset
-export DATASET_SEQ='BillDummySeq'        # dataset
-export DATASET_MULT='BillDummyMult'        # dataset
-export DATASET_ORI='BillDummyOri'        # dataset
+export BQ_PROJECT=$1       # project - 'all-of-us-ehr-dev'
+export BQ_DATASET=$2       # dataset - 'BillDummyMult'
 
-run_in_parallel=$1
-if [[ $run_in_parallel == "par" ]]; then
-  BQ_DATASET=$DATASET_PAR
-elif [[ $run_in_parallel == "seq" ]]; then
-  BQ_DATASET=$DATASET_SEQ
-elif [[ $run_in_parallel == "mult" ]]; then
-  BQ_DATASET=$DATASET_MULT
-elif [[ $run_in_parallel == "ori" ]]; then
-  BQ_DATASET=$DATASET_ORI
-else
-  echo "Unknown run-type $run_in_parallel"
-  exit 1
-fi
-
-echo "Using run-type: $run_in_parallel, Dataset: $BQ_DATASET"
+echo "Using run-type: mult, Dataset: $BQ_DATASET"
 echo ""
 ################################################
 # CREATE EMPTY CB_CRITERIA RELATED TABLES
@@ -74,62 +57,54 @@ prep_snomed_rel_pcs_in_data
 prep_snomed_rel_pcs_src_in_data
 )
 script_start=$SECONDS
-if [[ "$run_in_parallel" == "ori" ]]; then
-    source make-cb-criteria-00-main-tables.sh "$run_in_parallel"
-else
-  createReplaceEmptyTables
-  wait
-  echo "Running scripts done making empty tables for populating data - $(timeIt $script_start) secs"
-  ################################################
-  # These tables are needed for creating / populating prep_* tables
-  ################################################
-  # make-bq-prep-concept-merged.sh
-  #245 - #251 : prep_concept_merged : make-bq-criteria-tables.sh
+createReplaceEmptyTables
+wait
+echo "Running scripts done making empty tables for populating data - $(timeIt $script_start) secs"
+################################################
+# These tables are needed for creating / populating prep_* tables
+################################################
+# make-bq-prep-concept-merged.sh
+#245 - #251 : prep_concept_merged : make-bq-criteria-tables.sh
+st_time=$SECONDS
+echo "Running script done populate prep_concept_merged..."
+../make-bq-prep-concept-merged.sh $BQ_PROJECT $BQ_DATASET
+echo "Running script done populating prep_concept_merged - $(timeIt $st_time) secs - total time - $(timeIt script_start) secs"
+echo
+# make-bq-prep-concept-relationship-merged.sh
+#253 - #259 : prep_concept_relationship_merged : make-bq-criteria-tables.sh
+st_time=$SECONDS
+echo "Running script done populate prep_concept_relationship_merged..."
+../make-bq-prep-concept-relationship-merged.sh $BQ_PROJECT $BQ_DATASET
+echo "Running scripts done populating prep_concept_relationship_merged - $(timeIt $st_time) secs - total time - $(timeIt script_start) secs"
+echo "Running scripts to create and populate prep_* tables started after $(timeIt $script_start) secs"
+################################################
+# These prep_* tables can be created / populated independently/in-parallel
+# as they are not dependent on prep tables from other domain/type(?)
+###############################################
+## TODO check EXIST required tables?
+prep_tables=(
+../make-bq-prep-icd10-rel-cm-src-tables.sh
+../make-bq-prep-icd10pcs-rel-src-tables.sh
+../make-bq-prep-snomed-rel-cm-tables.sh
+../make-bq-prep-loinc-rel-tables.sh
+../make-bq-prep-snomed-rel-meas-tables.sh
+../make-bq-prep-atc-rel-in-data.sh
+../make-bq-prep-snomed-rel-pcs-tables.sh
+)
+for f in "${prep_tables[@]}"; do
   st_time=$SECONDS
-  echo "Running script done populate prep_concept_merged..."
-  ../make-bq-prep-concept-merged.sh $BQ_PROJECT $BQ_DATASET
-  echo "Running script done populating prep_concept_merged - $(timeIt $st_time) secs - total time - $(timeIt script_start) secs"
-  echo
-  # make-bq-prep-concept-relationship-merged.sh
-  #253 - #259 : prep_concept_relationship_merged : make-bq-criteria-tables.sh
-  st_time=$SECONDS
-  echo "Running script done populate prep_concept_relationship_merged..."
-  ../make-bq-prep-concept-relationship-merged.sh $BQ_PROJECT $BQ_DATASET
-  echo "Running scripts done populating prep_concept_relationship_merged - $(timeIt $st_time) secs - total time - $(timeIt script_start) secs"
-  echo "Running scripts to create and populate prep_* tables started after $(timeIt $script_start) secs"
-  ################################################
-  # These prep_* tables can be created / populated independently/in-parallel
-  # as they are not dependent on prep tables from other domain/type(?)
-  ###############################################
-  ## TODO check EXIST required tables?
-  prep_tables=(
-  ../make-bq-prep-icd10-rel-cm-src-tables.sh
-  ../make-bq-prep-icd10pcs-rel-src-tables.sh
-  ../make-bq-prep-snomed-rel-cm-tables.sh
-  ../make-bq-prep-loinc-rel-tables.sh
-  ../make-bq-prep-snomed-rel-meas-tables.sh
-  ../make-bq-prep-atc-rel-in-data.sh
-  ../make-bq-prep-snomed-rel-pcs-tables.sh
-  )
-  for f in "${prep_tables[@]}"; do
-    st_time=$SECONDS
-    if [[ "$run_in_parallel" == "seq" ]]; then
-      runScript "$f" "$BQ_PROJECT" "$BQ_DATASET"
-    else
-      runScript "$f" "$BQ_PROJECT" "$BQ_DATASET" &
-      sleep 1
-    fi
-  done
-  # wait for all prep_pids to complete
-  wait
-  echo "Running scripts done creating and populating all prep tables for cb_criteria total time $(timeIt script_start) secs"
-  echo "###########################################################################"
-  echo "# Running script for cb_criteria main tables....run time reset to 0 secs  #"
-  echo "###########################################################################"
-  #source make-cb-criteria-00-main-tables.sh "$BQ_PROJECT" "$BQ_DATASET" "$run_in_parallel"
-  # vars are purposely hard-coded
-  #source make-cb-criteria-00-main-tables.sh "$run_in_parallel"
-fi
+  runScript "$f" "$BQ_PROJECT" "$BQ_DATASET" &
+  sleep 1
+done
+# wait for all prep_pids to complete
+wait
+echo "Running scripts done creating and populating all prep tables for cb_criteria total time $(timeIt script_start) secs"
+echo "###########################################################################"
+echo "# Running script for cb_criteria main tables....run time reset to 0 secs  #"
+echo "###########################################################################"
+#source make-cb-criteria-00-main-tables.sh "$BQ_PROJECT" "$BQ_DATASET" "$run_in_parallel"
+# vars are purposely hard-coded
+#source make-cb-criteria-00-main-tables.sh "$run_in_parallel"
 wait
 echo "Running all scripts done total time $(timeIt script_start)"
 echo ""

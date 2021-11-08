@@ -9,22 +9,10 @@ echo "PID "$$
 
 set -e
 # vars are purposely hard-coded for iterative testing
-export BQ_PROJECT='all-of-us-ehr-dev'      # project
-export DATASET_PAR='BillDummyPar'        # dataset
-export DATASET_SEQ='BillDummySeq'        # dataset
-export DATASET_MULT='BillDummyMult'        # dataset
-export DATASET_ORI='BillDummyOri'        # dataset
+export BQ_PROJECT=$1       # project - 'all-of-us-ehr-dev'
+export BQ_DATASET=$2       # dataset - 'BillDummyMult'
 
 run_in_parallel=$1
-if [[ $run_in_parallel == "par" ]]; then
-  BQ_DATASET=$DATASET_PAR
-elif [[ $run_in_parallel == "seq" ]]; then
-  BQ_DATASET=$DATASET_SEQ
-elif [[ $run_in_parallel == "mult" ]]; then
-  BQ_DATASET=$DATASET_MULT
-elif [[ $run_in_parallel == "ori" ]]; then
-  BQ_DATASET=$DATASET_ORI # not used
-fi
 
 ################################################
 # CREATE EMPTY CB_CRITERIA RELATED TABLES
@@ -42,56 +30,42 @@ function runScript(){
 
 ## TODO check EXIST required tables?
 main_tables=(
-../make-cb-criteria-01-proc-cpt4.sh
-../make-cb-criteria-02-ppi-phys-meas.sh
-../make-cb-criteria-03-ppi-surveys.sh
-../make-cb-criteria-04-pm-concept-set.sh
-../make-cb-criteria-05-fitbit.sh
-../make-cb-criteria-06-whole-genome-variant.sh
-../make-cb-criteria-07-demographics.sh
-../make-cb-criteria-08-visit.sh
-../make-cb-criteria-09-icd9-src.sh
-../make-cb-criteria-10-icd10-cm-src.sh
-../make-cb-criteria-11-icd10-pcs-src.sh
-../make-cb-criteria-12-cond-occur-snomed-std.sh
-../make-cb-criteria-13-meas-clin-loinc-std.sh
-../make-cb-criteria-14-meas-labs-loinc-std.sh
-../make-cb-criteria-15-meas-snomed-std.sh
-../make-cb-criteria-16-drug-rxnorm.sh
-../make-cb-criteria-17-proc-occur-snomed-std.sh
-../make-cb-criteria-18-observation.sh
+../make-cb-criteria-proc-cpt4.sh
+../make-cb-criteria-ppi-phys-meas.sh
+../make-cb-criteria-ppi-surveys.sh
+../make-cb-criteria-pm-concept-set.sh
+../make-cb-criteria-fitbit.sh
+../make-cb-criteria-whole-genome-variant.sh
+../make-cb-criteria-demographics.sh
+../make-cb-criteria-visit.sh
+../make-cb-criteria-icd9-src.sh
+../make-cb-criteria-icd10-cm-src.sh
+../make-cb-criteria-icd10-pcs-src.sh
+../make-cb-criteria-cond-occur-snomed-std.sh
+../make-cb-criteria-meas-clin-loinc-std.sh
+../make-cb-criteria-meas-labs-loinc-std.sh
+../make-cb-criteria-meas-snomed-std.sh
+../make-cb-criteria-drug-rxnorm.sh
+../make-cb-criteria-proc-occur-snomed-std.sh
+../make-cb-criteria-observation.sh
 )
-if [[ "$run_in_parallel" == "ori" ]]; then
-  echo "for 'ori' running make-bq-criteria-tables.sh script directly!"
-  source make-bq-criteria-tables.sh
-else
-  if [[ "$run_in_parallel" == "seq" ]]; then
-    echo " $run_in_parallel - sequential run"
-    for f in "${main_tables[@]}" ; do
-      runScript "$f" "$BQ_PROJECT" "$BQ_DATASET" seq
-    done
-  elif [[ "$run_in_parallel" == "par" ]]; then
-    echo " $run_in_parallel - parallel run"
-    for f in "${main_tables[@]}" ; do
-      runScript "$f" "$BQ_PROJECT" "$BQ_DATASET" par &
-    done
-  elif [[ "$run_in_parallel" == "mult" ]]; then
-    echo " $run_in_parallel - parallel multi run"
-    for f in "${main_tables[@]}" ; do
-      runScript "$f" "$BQ_PROJECT" "$BQ_DATASET" mult &
-    done
-  fi
-  # wait for all processes to finish
-  wait
-  run_in_order=(
-  ../make-cb-criteria-19-seq-01-add-in-missing-codes.sh
-  ../make-cb-criteria-20-seq-02-attrib-other-tables.sh
-  ../make-cb-criteria-21-seq-03-clean-up-text-synonym.sh
-  )
-  for f in "${run_in_order[@]}" ; do
-    runScript "$f" "$BQ_PROJECT" "$BQ_DATASET" seq
-  done
-fi
+
+echo "multi run"
+i=1
+for f in "${main_tables[@]}" ; do
+  runScript "$f" "$BQ_PROJECT" "$BQ_DATASET" i &
+  i=$i+1
+done
+# wait for all processes to finish
+wait
+run_in_order=(
+../make-cb-criteria-seq-01-add-in-missing-codes.sh
+../make-cb-criteria-seq-02-attrib-other-tables.sh
+../make-cb-criteria-seq-03-clean-up-text-synonym.sh
+)
+for f in "${run_in_order[@]}" ; do
+  runScript "$f" "$BQ_PROJECT" "$BQ_DATASET" seq
+done
 # wait to finish
 wait
 echo "Running scripts *all from make-cb-criteria-00-main-tables.sh* done in $(timeIt main_start) secs"

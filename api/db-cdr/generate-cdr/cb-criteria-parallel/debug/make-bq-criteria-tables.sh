@@ -17,8 +17,8 @@ block_start=$SECONDS
 
 set -e
 
-export BQ_PROJECT='all-of-us-ehr-dev'        # project
-export BQ_DATASET='ChenchalDummyOri'        # dataset
+export BQ_PROJECT=$1        # project - 'all-of-us-ehr-dev'
+export BQ_DATASET=$2        # dataset - 'ChenchalDummyOri'
 #export DATA_BROWSER=$3      # data browser flag
 
 ################################################
