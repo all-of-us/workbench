@@ -827,12 +827,17 @@ def make_cb_criteria(cmd_name, *args)
     ->(opts, v) { opts.script = v},
     "Script. Required."
   )
+  op.add_option(
+    "--id-prefix [id-prefix]",
+    ->(opts, v) { opts.id_prefix = v},
+    "ID Prefix."
+  )
   op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset and opts.script }
   op.parse.validate
 
   common = Common.new
   Dir.chdir('db-cdr') do
-    common.run_inline %W{./generate-cdr/cb-criteria-refactor/make-cb-criteria-#{op.opts.script}.sh #{op.opts.bq_project} #{op.opts.bq_dataset}}
+    common.run_inline %W{./generate-cdr/cb-criteria-refactor/make-cb-criteria-#{op.opts.script}.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.id_prefix}}
   end
 end
 

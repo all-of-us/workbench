@@ -2,13 +2,14 @@
 # do not output cmd-line for now
 set -e
 SQL_FOR='PHYSICAL MEASUREMENTS - CONCEPT SET'
-SQL_SCRIPT_ORDER=4
 TBL_CBC='cb_criteria'
 export BQ_PROJECT=$1        # project
 export BQ_DATASET=$2        # dataset
+ID_PREFIX=$3
+
 ####### common block for all make-cb-criteria-dd-*.sh scripts ###########
 function createTmpTable(){
-  local tmpTbl="prep_temp_"$1"_"$SQL_SCRIPT_ORDER
+  local tmpTbl="prep_temp_"$1"_"$ID_PREFIX
   res=$(bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
     "CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.$tmpTbl\` AS
       SELECT * FROM \`$BQ_PROJECT.$BQ_DATASET.$1\` LIMIT 0")
@@ -16,14 +17,13 @@ function createTmpTable(){
   echo "$tmpTbl"
 }
 function cpToMain(){
-  local tbl_to=`echo "$1" | perl -pe 's/(prep_temp_)|(_\d+)//g'`
+  local tbl_to=`echo "$1" | sed -e 's/prep_temp_\(.*\)_[0-9]*/\1/'`
   bq cp --append_table=true --quiet --project_id=$BQ_PROJECT \
      $BQ_DATASET.$1 $BQ_DATASET.$tbl_to
 }
-echo "Running in parallel and Multitable mode - " "$SQL_SCRIPT_ORDER - $SQL_FOR"
-STEP=$SQL_SCRIPT_ORDER
-CB_CRITERIA_START_ID=$[$STEP*10**9] # 3  billion
-CB_CRITERIA_END_ID=$[$[STEP+1]*10**9] # 4  billion
+echo "Running in parallel and Multitable mode - " "$ID_PREFIX - $SQL_FOR"
+CB_CRITERIA_START_ID=$[$ID_PREFIX*10**9] # 3  billion
+CB_CRITERIA_END_ID=$[$[ID_PREFIX+1]*10**9] # 4  billion
 echo "Creating temp table for $TBL_CBC"
 TBL_CBC=$(createTmpTable $TBL_CBC)
 ####### end common block ###########
