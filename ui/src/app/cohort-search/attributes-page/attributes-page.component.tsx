@@ -110,7 +110,7 @@ const styles = reactStyles({
   },
   calculateButton: {
     height: '1.75rem',
-    border: `1px solid`,
+    border: '1px solid',
     borderColor: colors.accent,
     borderRadius: '2px',
     fontWeight: 100
@@ -527,7 +527,7 @@ export const AttributesPage = fp.flow(withCurrentWorkspace(), withCurrentCohortC
       if (!isCOPESurvey && form.anyValue) {
         paramName = name + ` (${optionUtil.ANY.display})`;
       } else if (isCOPESurvey && form.anyValue && form.anyVersion) {
-        paramName = name + ` (Any version AND any value)`;
+        paramName = name + ' (Any version AND any value)';
       } else {
         form.num.filter(at => at.operator).forEach(({operator, operands, conceptId}) => {
           const attr = {name: AttrName.NUM, operator, operands};

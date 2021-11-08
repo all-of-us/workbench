@@ -1,6 +1,6 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
-import {CSSProperties} from "react";
+import {CSSProperties} from 'react';
 
 import {AccountCreationOptions} from 'app/pages/login/account-creation/account-creation-options';
 import {institutionApi} from 'app/services/swagger-fetch-clients';

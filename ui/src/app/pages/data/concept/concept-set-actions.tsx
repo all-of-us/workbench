@@ -58,11 +58,11 @@ const styles = reactStyles({
 const actionCards = [
   {
     title: 'Create another Concept Set',
-    description: `Create another concept set for the same or a different domain.`,
+    description: 'Create another concept set for the same or a different domain.',
     action: 'newConceptSet'
   }, {
     title: 'Create a Dataset',
-    description: `Create an analysis ready dataset that can be exported to notebooks.`,
+    description: 'Create an analysis ready dataset that can be exported to notebooks.',
     action: 'dataSet'
   }
 ];
@@ -115,13 +115,13 @@ export const ConceptSetActions = fp.flow(withCurrentWorkspace(), withNavigation,
           url += `data/concepts/sets/${conceptSet.id}`;
           break;
         case 'newConceptSet':
-          url += `data/concepts`;
+          url += 'data/concepts';
           break;
         case 'notebook':
-          url += `notebooks`;
+          url += 'notebooks';
           break;
         case 'dataSet':
-          url += `data/data-sets`;
+          url += 'data/data-sets';
           break;
       }
       return url;

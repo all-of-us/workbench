@@ -309,7 +309,7 @@ describe('RuntimePanel', () => {
   it('should allow creation when runtime has error status', async() => {
     const runtime = {...runtimeApiStub.runtime,
       status: RuntimeStatus.Error,
-      errors: [{errorMessage: "I'm sorry Dave, I'm afraid I can't do that"}],
+      errors: [{errorMessage: 'I\'m sorry Dave, I\'m afraid I can\'t do that'}],
       configurationType: RuntimeConfigurationType.GeneralAnalysis,
       gceConfig: {
         ...defaultGceConfig(),

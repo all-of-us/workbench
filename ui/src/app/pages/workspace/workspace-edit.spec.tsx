@@ -1,8 +1,8 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {mount, ReactWrapper, ShallowWrapper} from 'enzyme';
-import {Dropdown} from "primereact/dropdown";
-import {MemoryRouter} from "react-router";
+import {Dropdown} from 'primereact/dropdown';
+import {MemoryRouter} from 'react-router';
 
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore} from 'app/utils/navigation';
@@ -31,8 +31,8 @@ import {WorkspaceEdit, WorkspaceEditMode} from 'app/pages/workspace/workspace-ed
 import {WorkspaceEditSection} from 'app/pages/workspace/workspace-edit-section';
 import {cdrVersionStore, profileStore, serverConfigStore} from 'app/utils/stores';
 import {AccessTierShortNames} from 'app/utils/access-tiers';
-import {ProfileApiStub, ProfileStubVariables} from "testing/stubs/profile-api-stub";
-import * as Authentication from "app/utils/authentication";
+import {ProfileApiStub, ProfileStubVariables} from 'testing/stubs/profile-api-stub';
+import * as Authentication from 'app/utils/authentication';
 import {mockNavigate} from 'setupTests';
 import {environment} from 'environments/environment';
 
@@ -159,7 +159,7 @@ describe('WorkspaceEdit', () => {
 
     // Ensure the radiobox and checkbox are pre-filled for the "specific
     // populations" section.
-    expect(wrapper.find(`[data-test-id="specific-population-yes"]`)
+    expect(wrapper.find('[data-test-id="specific-population-yes"]')
       .first().prop('checked')).toEqual(true);
     expect(wrapper.find(`[data-test-id="${SpecificPopulationEnum.AGECHILDREN}-checkbox"]`)
       .first().prop('checked')).toEqual(true);
@@ -176,7 +176,7 @@ describe('WorkspaceEdit', () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
 
-    expect(wrapper.find(`[data-test-id="specific-population-yes"]`)
+    expect(wrapper.find('[data-test-id="specific-population-yes"]')
       .first().prop('checked')).toEqual(true);
     expect(wrapper.find(`[data-test-id="${SpecificPopulationEnum.AGECHILDREN}-checkbox"]`)
       .first().prop('checked')).toEqual(true);
@@ -612,7 +612,7 @@ describe('WorkspaceEdit', () => {
 
   it ('should show error message if Other text for Special Population is more than 100 characters', async() => {
     const wrapper = component();
-    expect(wrapper.find(`[data-test-id="specific-population-yes"]`)
+    expect(wrapper.find('[data-test-id="specific-population-yes"]')
       .first().prop('checked')).toEqual(true);
     wrapper.find('[data-test-id="other-specialPopulation-checkbox"]').at(1).
     simulate('change', { target: { checked: true } });
@@ -648,7 +648,7 @@ describe('WorkspaceEdit', () => {
     let billingDropDown = wrapper.find('[data-test-id="billing-dropdown"]').instance() as Dropdown;
 
     expect(mockEnsureBillingScope).toHaveBeenCalledTimes(0);
-    expect(billingDropDown.props.value).toEqual("billingAccounts/freetier");
+    expect(billingDropDown.props.value).toEqual('billingAccounts/freetier');
     expect(billingDropDown.props.options.map(o => o.value))
       .toEqual(['billingAccounts/freetier']);
     expect(billingDropDown.props.options.map(o => o.label))
@@ -663,7 +663,7 @@ describe('WorkspaceEdit', () => {
 
     billingDropDown = wrapper.find('[data-test-id="billing-dropdown"]').instance() as Dropdown;
     expect(mockEnsureBillingScope).toHaveBeenCalledTimes(1);
-    expect(billingDropDown.props.value).toEqual("free-tier");
+    expect(billingDropDown.props.value).toEqual('free-tier');
     expect(billingDropDown.props.options.map(o => o.value))
       .toEqual(['free-tier', 'user-billing']);
     expect(billingDropDown.props.options.map(o => o.label))
@@ -678,7 +678,7 @@ describe('WorkspaceEdit', () => {
 
     const billingDropDown = wrapper.find('[data-test-id="billing-dropdown"]').instance() as Dropdown;
 
-    expect(billingDropDown.props.value).toEqual("free-tier");
+    expect(billingDropDown.props.value).toEqual('free-tier');
     expect(billingDropDown.props.options.map(o => o.value))
       .toEqual(['free-tier', 'user-billing']);
     expect(billingDropDown.props.options.map(o => o.label))
@@ -694,7 +694,7 @@ describe('WorkspaceEdit', () => {
     const billingDropDown = wrapper.find('[data-test-id="billing-dropdown"]').instance() as Dropdown;
 
     expect(mockEnsureBillingScope).toHaveBeenCalledTimes(0);
-    expect(billingDropDown.props.value).toEqual("free-tier");
+    expect(billingDropDown.props.value).toEqual('free-tier');
     expect(billingDropDown.props.options.map(o => o.value))
       .toEqual(['free-tier', 'user-billing']);
     expect(billingDropDown.props.options.map(o => o.label))
@@ -712,7 +712,7 @@ describe('WorkspaceEdit', () => {
     expect(mockEnsureBillingScope).toHaveBeenCalledTimes(0);
     // 'billing-account' is workspace's current billing account.
     // There would be 3 options: Free tier, user's billing account, workspace billing account
-    expect(billingDropDown.props.value).toEqual("billing-account");
+    expect(billingDropDown.props.value).toEqual('billing-account');
     expect(billingDropDown.props.options.map(o => o.value))
       .toEqual(['free-tier', 'user-billing', 'billing-account']);
     expect(billingDropDown.props.options.map(o => o.label))
@@ -729,7 +729,7 @@ describe('WorkspaceEdit', () => {
     expect(mockEnsureBillingScope).toHaveBeenCalledTimes(0);
     // 'billing-account' is workspace's current billing account.
     // There would be 4 options: Free tier, user's billing account, workspace billing account
-    expect(billingDropDown.props.value).toEqual("billing-account");
+    expect(billingDropDown.props.value).toEqual('billing-account');
     expect(billingDropDown.props.options.map(o => o.value))
       .toEqual(['billing-account']);
     expect(billingDropDown.props.options.map(o => o.label))
@@ -744,7 +744,7 @@ describe('WorkspaceEdit', () => {
 
     billingDropDown = wrapper.find('[data-test-id="billing-dropdown"]').instance() as Dropdown;
     expect(mockEnsureBillingScope).toHaveBeenCalledTimes(1);
-    expect(billingDropDown.props.value).toEqual("billing-account");
+    expect(billingDropDown.props.value).toEqual('billing-account');
     expect(billingDropDown.props.options.map(o => o.value))
       .toEqual(['free-tier', 'user-billing', 'billing-account']);
     expect(billingDropDown.props.options.map(o => o.label))
