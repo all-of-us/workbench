@@ -324,14 +324,8 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
 
     // TODO but what should I do with it?
 
-    Optional<DbWorkspace> dbWorkspaceOptional = getFirstWorkspaceByNamespace(workspaceNamespace);
-    dbWorkspaceOptional.ifPresent(
-        dbWorkspace -> setAdminLockedState(dbWorkspace, desiredLockState));
-
-    if (!dbWorkspaceOptional.isPresent()) {
-      log.info(
-          "could not find workspace in DB.  Is this wsns invalid, or from a different environment?");
-    }
+    DbWorkspace dbWorkspace = getWorkspaceByNamespaceOrThrow(workspaceNamespace);
+    setAdminLockedState(dbWorkspace, desiredLockState);
   }
 
   private void setAdminLockedState(DbWorkspace dbWorkspace, boolean desiredLockState) {
