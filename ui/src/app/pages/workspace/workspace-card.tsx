@@ -15,7 +15,7 @@ import {WorkspaceShare} from 'app/pages/workspace/workspace-share';
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {displayDate, reactStyles} from 'app/utils';
-import {AccessTierShortNames} from 'app/utils/access-tiers';
+import {AccessTierShortNames, displayNameForTier} from 'app/utils/access-tiers';
 import {AnalyticsTracker, triggerEvent} from 'app/utils/analytics';
 import {currentWorkspaceStore, NavigationProps, useNavigation} from 'app/utils/navigation';
 import {serverConfigStore} from 'app/utils/stores';
@@ -41,6 +41,12 @@ const styles = reactStyles({
   },
   workspaceName: {
     color: colors.accent,
+    marginBottom: '0.5rem',
+    fontSize: 18,
+    wordBreak: 'break-all'
+  },
+  workspaceNameDisabled: {
+    color: colors.disabled,
     marginBottom: '0.5rem',
     fontSize: 18,
     wordBreak: 'break-all'
@@ -239,8 +245,12 @@ export const WorkspaceCard = fp.flow(withNavigation)(
               <FlexColumn style={{marginBottom: 'auto'}}>
                 <FlexRow style={{ alignItems: 'flex-start' }}>
                   <Clickable style={{cursor: disabled ? 'not-allowed' : 'pointer', ...styles}} onClick={() => this.onClick()} disabled={disabled}>
-                    <TooltipTrigger content={'Controlled Tier workspace is not accessible.'}>
-                    <div style={styles.workspaceName}
+                    <TooltipTrigger content={disabled && <div>
+                      This workspace is a {displayNameForTier(accessTierShortName)} workspace. You do not have access.
+                      Please complete the data access requirements to gain access.
+                    </div>
+                    }>
+                    <div style={disabled ? styles.workspaceNameDisabled : styles.workspaceName}
                          data-test-id='workspace-card-name'>
                       {workspace.name}
                     </div>
