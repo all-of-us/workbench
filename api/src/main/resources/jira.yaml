@@ -240,14 +240,9 @@ components:
     IssueUpdateDetails:
       type: object
       properties:
-        transition:
-          description: Details of a transition. Required when performing a transition,
-            optional when creating or editing an issue.
-          allOf:
-            - "$ref": "#/components/schemas/IssueTransition"
         fields:
           type: object
-          additionalProperties: { }
+          additionalProperties: true
           description: List of issue screen fields to update, specifying the sub-field
             to update and its value for each field. This field provides a straightforward
             option when setting a sub-field. When multiple sub-fields or other operations
@@ -268,52 +263,6 @@ components:
           items:
             "$ref": "#/components/schemas/EntityProperty"
       description: Details of an issue update request.
-    IssueTransition:
-      type: object
-      properties:
-        id:
-          type: string
-          description: The ID of the issue transition. Required when specifying a
-            transition to undertake.
-        name:
-          type: string
-          description: The name of the issue transition.
-        to:
-          description: Details of the issue status after the transition.
-          allOf:
-            - "$ref": "#/components/schemas/StatusDetails"
-        hasScreen:
-          type: boolean
-          description: Whether there is a screen associated with the issue transition.
-        isGlobal:
-          type: boolean
-          description: Whether the issue transition is global, that is, the transition
-            is applied to issues regardless of their status.
-        isInitial:
-          type: boolean
-          description: Whether this is the initial issue transition for the workflow.
-        isAvailable:
-          type: boolean
-          description: Whether the transition is available to be performed.
-        isConditional:
-          type: boolean
-          description: Whether the issue has to meet criteria before the issue transition
-            is applied.
-        fields:
-          type: object
-          additionalProperties:
-            "$ref": "#/components/schemas/FieldMetadata"
-          description: Details of the fields associated with the issue transition
-            screen. Use this information to populate `fields` and `update` in a transition
-            request.
-        expand:
-          type: string
-          description: Expand options that include additional transition details in
-            the response.
-        looped:
-          type: boolean
-      additionalProperties: true
-      description: Details of an issue transition.
     StatusDetails:
       type: object
       properties:
@@ -332,47 +281,26 @@ components:
         id:
           type: string
           description: The ID of the status.
-        statusCategory:
-          description: The category assigned to the status.
-          allOf:
-            - "$ref": "#/components/schemas/StatusCategory"
       additionalProperties: true
       description: A status.
-    StatusCategory:
-      type: object
-      properties:
-        self:
-          type: string
-          description: The URL of the status category.
-        id:
-          type: integer
-          description: The ID of the status category.
-          format: int64
-        key:
-          type: string
-          description: The key of the status category.
-        colorName:
-          type: string
-          description: The name of the color used to represent the status category.
-        name:
-          type: string
-          description: The name of the status category.
-      additionalProperties: true
-      description: A status category.
     FieldUpdateOperation:
       type: object
       properties:
         add:
           description: The value to add to the field.
+          type: string
           example: triaged
         set:
           description: The value to set in the field.
+          type: string
           example: A new summary
         remove:
           description: The value to removed from the field.
+          type: string
           example: blocker
         edit:
           description: The value to edit in the field.
+          type: object
           example:
             remainingEstimate: 4d
             originalEstimate: 1w 1d
@@ -390,10 +318,6 @@ components:
         required:
           type: boolean
           description: Whether the field is required.
-        schema:
-          description: The data type of the field.
-          allOf:
-            - "$ref": "#/components/schemas/JsonTypeBean"
         name:
           type: string
           description: The name of the field.
@@ -415,7 +339,9 @@ components:
           type: array
           description: The list of values allowed in the field.
           items:
+            type: string
         defaultValue:
+          type: string
           description: The default value of the field.
       additionalProperties: false
       description: The metadata describing an issue field.
@@ -443,10 +369,6 @@ components:
           type: integer
           description: If the field is a custom field, the custom ID of the field.
           format: int64
-        configuration:
-          type: object
-          additionalProperties:
-          description: If the field is a custom field, the configuration of the field.
       additionalProperties: false
       description: The schema of a field.
     EntityProperty:
@@ -456,6 +378,7 @@ components:
           type: string
           description: The key of the property. Required on create and update.
         value:
+          type: string
           description: The value of the property. Required on create and update.
       additionalProperties: false
       description: An entity property, for more information see [Entity properties](https://developer.atlassian.com/cloud/jira/platform/jira-entity-properties/).
@@ -471,21 +394,8 @@ components:
         self:
           type: string
           description: The URL of the created issue or subtask.
-        transition:
-          description: The response code and messages related to any requested transition.
-          allOf:
-            - "$ref": "#/components/schemas/NestedResponse"
       additionalProperties: false
       description: Details about a created issue or subtask.
-    NestedResponse:
-      type: object
-      properties:
-        status:
-          type: integer
-          format: int32
-        errorCollection:
-          "$ref": "#/components/schemas/ErrorCollection"
-      additionalProperties: false
     ErrorCollection:
       type: object
       properties:
@@ -568,38 +478,30 @@ components:
           description: The key of the issue.
         renderedFields:
           type: object
-          additionalProperties:
+          additionalProperties: true
           description: The rendered value of each field present on the issue.
         properties:
           type: object
-          additionalProperties:
+          additionalProperties: true
           description: Details of the issue properties identified in the request.
         names:
           type: object
-          additionalProperties:
-            type: string
+          additionalProperties: true
           description: The ID and name of each field present on the issue.
         schema:
           type: object
           additionalProperties:
             "$ref": "#/components/schemas/JsonTypeBean"
           description: The schema describing each field present on the issue.
-        transitions:
-          type: array
-          description: The transitions that can be performed on the issue.
-          items:
-            "$ref": "#/components/schemas/IssueTransition"
         versionedRepresentations:
           type: object
-          additionalProperties:
-            type: object
-            additionalProperties:
+          additionalProperties: true
           description: The versions of each field on the issue.
         fieldsToInclude:
           "$ref": "#/components/schemas/IncludedFields"
         fields:
           type: object
-          additionalProperties: { }
+          additionalProperties: true
       additionalProperties: false
       description: Details about an issue.
       xml:
@@ -764,6 +666,7 @@ components:
           type: string
           description: The ID of the comment.
         body:
+          type: object
           description: The comment text in [Atlassian Document Format](https://developer.atlassian.com/cloud/jira/platform/apis/document/structure/).
         renderedBody:
           type: string
@@ -835,8 +738,7 @@ components:
         type:
           type: string
         attrs:
-          schema:
-            "$ref": "#/components/schemas/AtlassianMarkAttributes"
+          "$ref": "#/components/schemas/AtlassianMarkAttributes"
     AtlassianMarkAttributes:
       type: object
       properties:
