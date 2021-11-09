@@ -82,7 +82,7 @@ export default class NotebookPage extends NotebookFrame {
       if (Date.now() - startTime > timeOut - pollPeriod) {
         throw new Error('timed out waiting for security suspension status = ' + suspended);
       }
-      await page.waitForTimeout(pollPeriod);
+      await this.page.waitForTimeout(pollPeriod);
     }
   }
 
