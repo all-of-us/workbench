@@ -97,7 +97,6 @@
   },
   "featureFlags": {
     "unsafeAllowDeleteUser": true,
-    "unsafeAllowAccessToAllTiersForRegisteredUsers": false,
     "enableBillingUpgrade": true,
     "enableEventDateModifier": false,
     "enableResearchPurposePrompt": false,
