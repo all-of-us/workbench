@@ -378,6 +378,7 @@ public class WorkbenchConfig {
     }
 
     public String notifyFromEmail;
+    public boolean enableJiraTicketing;
     public List<Escalation> escalations;
   }
 }

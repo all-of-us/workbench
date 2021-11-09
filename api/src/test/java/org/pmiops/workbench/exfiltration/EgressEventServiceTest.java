@@ -44,6 +44,7 @@ import org.pmiops.workbench.db.model.DbEgressEvent.EgressEventStatus;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.institution.InstitutionService;
+import org.pmiops.workbench.jira.api.JiraApi;
 import org.pmiops.workbench.model.Institution;
 import org.pmiops.workbench.model.SumologicEgressEvent;
 import org.pmiops.workbench.model.User;
@@ -73,6 +74,7 @@ public class EgressEventServiceTest {
   private static WorkbenchConfig workbenchConfig;
 
   @MockBean private AlertApi mockAlertApi;
+  @MockBean private JiraApi mockJiraApi;
   @MockBean private EgressEventAuditor egressEventAuditor;
   @MockBean private InstitutionService mockInstitutionService;
   @MockBean private UserService mockUserService;

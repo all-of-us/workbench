@@ -825,6 +825,23 @@ components:
           type: array
           items:
             "$ref": "#/components/schemas/AtlassianContent"
+        marks:
+          type: array
+          items:
+            "$ref": "#/components/schemas/AtlassianMark"
+    AtlassianMark:
+      type: object
+      properties:
+        type:
+          type: string
+        attrs:
+          schema:
+            "$ref": "#/components/schemas/AtlassianMarkAttributes"
+    AtlassianMarkAttributes:
+      type: object
+      properties:
+        href:
+          type: string
   securitySchemes:
     basicAuth:
       type: http
