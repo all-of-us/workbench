@@ -11,6 +11,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -59,8 +60,12 @@ public class EgressRemediationService {
 
   private static final Logger log = Logger.getLogger(EgressRemediationService.class.getName());
   private static final ZoneId jiraTimeZone = ZoneId.of("America/Chicago");
-  private static final DateTimeFormatter jiraDateFormatter =
-      DateTimeFormatter.ofPattern("MM/dd/yy").withZone(jiraTimeZone);
+  private static final DateTimeFormatter jiraSummaryDateFormat =
+      DateTimeFormatter.ofPattern("MM/dd/yy").withLocale(Locale.US).withZone(jiraTimeZone);
+  private static final DateTimeFormatter jiraDetailedDateFormat =
+      DateTimeFormatter.ofPattern("MMMM d, yyyy 'at' h:mm a 'Central Time'")
+          .withLocale(Locale.US)
+          .withZone(jiraTimeZone);
 
   private final Clock clock;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
@@ -315,7 +320,8 @@ public class EgressRemediationService {
                       IssueProperty.SUMMARY,
                       String.format(
                           "(%s) Investigate egress from %s",
-                          jiraDateFormatter.format(clock.instant()), event.getUser().getUsername()))
+                          jiraSummaryDateFormat.format(clock.instant()),
+                          event.getUser().getUsername()))
                   .put(IssueProperty.EGRESS_VM_PREFIX, event.getUser().getRuntimeName())
                   .put(IssueProperty.RW_ENVIRONMENT, envShortName)
                   .put(IssueProperty.LABELS, new String[] {"high-egress"})
@@ -350,7 +356,7 @@ public class EgressRemediationService {
                 String.format(
                     "User running notebook: %s\n",
                     user.map(DbUser::getUsername).orElse("unknown"))),
-            JiraContent.text("User Admin Console (Workbench Admin User): "),
+            JiraContent.text("User admin console (as workbench admin user): "),
             user.map(
                     u ->
                         JiraContent.link(
@@ -381,25 +387,26 @@ public class EgressRemediationService {
         JiraContent.text(String.format("Action taken: %s\n\n", action)),
         JiraContent.text(
             String.format(
-                "Terra Billing Project/workspace Namespace: %s\n",
+                "Terra billing project / workspace namespace: %s\n",
                 workspace.map(DbWorkspace::getWorkspaceNamespace).orElse("unknown"))),
         JiraContent.text(
-            String.format("Google Project Id: %s\n\n", originalEvent.getProjectName())),
+            String.format("Google project ID: %s\n\n", originalEvent.getProjectName())),
         JiraContent.text(
             String.format(
                 "Detected @ %s\n",
-                Instant.ofEpochMilli(originalEvent.getTimeWindowStart()).atZone(jiraTimeZone))),
+                jiraDetailedDateFormat.format(
+                    Instant.ofEpochMilli(originalEvent.getTimeWindowStart())))),
         JiraContent.text(
             String.format(
                 "Total egress detected: %.2f MiB in %d secs\n",
                 originalEvent.getEgressMib(), originalEvent.getTimeWindowDuration())),
         JiraContent.text(
             String.format(
-                "egress breakdown: GCE - %.2f MiB, Dataproc - %.2fMiB via master, %.2fMiB via workers\n\n",
+                "Egress breakdown: GCE - %.2f MiB, Dataproc - %.2fMiB via master, %.2fMiB via workers\n\n",
                 originalEvent.getGceEgressMib(),
                 originalEvent.getDataprocMasterEgressMib(),
                 originalEvent.getDataprocWorkerEgressMib())),
-        JiraContent.text("Workspace Admin Console (Workbench Admin User):"),
+        JiraContent.text("Workspace admin console (as workbench admin user):"),
         workspace
             .map(
                 w ->
