@@ -1,11 +1,14 @@
 package org.pmiops.workbench.api;
 
 import java.util.List;
+import java.util.Optional;
 import javax.annotation.Nullable;
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.model.AccessReason;
+import org.pmiops.workbench.model.AdminLockedState;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.CloudStorageTraffic;
+import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.ListRuntimeDeleteRequest;
 import org.pmiops.workbench.model.ListRuntimeResponse;
@@ -81,5 +84,18 @@ public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
       String workspaceNamespace, ListRuntimeDeleteRequest runtimesToDelete) {
     return ResponseEntity.ok(
         workspaceAdminService.deleteRuntimesInWorkspace(workspaceNamespace, runtimesToDelete));
+  }
+
+  private boolean toPrimitive(Boolean value) {
+    return Optional.ofNullable(value).orElse(false);
+  }
+
+  @Override
+  @AuthorityRequired({Authority.ACCESS_CONTROL_ADMIN})
+  public ResponseEntity<EmptyResponse> setAdminLockedState(
+      String workspaceNamespace, AdminLockedState lockedState) {
+    workspaceAdminService.setAdminLockedState(
+        workspaceNamespace, toPrimitive(lockedState.getValue()));
+    return ResponseEntity.ok().build();
   }
 }

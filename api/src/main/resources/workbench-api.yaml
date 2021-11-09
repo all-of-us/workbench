@@ -1497,6 +1497,33 @@ paths:
           description: success
           schema:
             "$ref": "#/definitions/EmptyResponse"
+  "/v1/admin/workspaces/{workspaceNamespace}/locked":
+    parameters:
+      - "$ref": "#/parameters/workspaceNamespace"
+    post:
+      tags:
+        - workspaceAdmin
+      consumes:
+        - application/json
+      description: Set admin locked or unlocked state for the workspace
+      operationId: setAdminLockedState
+      parameters:
+        - in: body
+          name: AdminLockedState
+          required: true
+          schema:
+            type: object
+            required:
+              - value
+            properties:
+              value:
+                type: boolean
+      responses:
+        200:
+          description: success
+          schema:
+            "$ref": "#/definitions/EmptyResponse"
+
   "/v1/admin/workspaces/{workspaceNamespace}":
     parameters:
     - "$ref": "#/parameters/workspaceNamespace"
