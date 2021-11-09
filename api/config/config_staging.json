@@ -103,8 +103,7 @@
     "enableGenomicExtraction": true,
     "enableGpu": false,
     "enablePersistentDisk": false,
-    "enableEgressAlertingV2": false,
-    "enableStandardSourceDomains": true
+    "enableEgressAlertingV2": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-staging",
@@ -131,7 +130,7 @@
   },
   "accessRenewal": {
     "expiryDays": 365,
-    "expiryDaysWarningThresholds": [ 1, 3, 7, 15, 30 ],
+    "expiryDaysWarningThresholds": [1, 3, 7, 15, 30],
     "lookbackPeriod": 330
   },
   "offlineBatch": {

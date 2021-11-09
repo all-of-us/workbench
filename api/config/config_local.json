@@ -103,8 +103,7 @@
     "enableGenomicExtraction": true,
     "enableGpu": true,
     "enablePersistentDisk": true,
-    "enableEgressAlertingV2": true,
-    "enableStandardSourceDomains": true
+    "enableEgressAlertingV2": true
   },
   "actionAudit": {
     "logName": "workbench-action-audit-local",
@@ -131,7 +130,7 @@
   },
   "accessRenewal": {
     "expiryDays": 365,
-    "expiryDaysWarningThresholds": [ 1, 3, 7, 15, 30 ],
+    "expiryDaysWarningThresholds": [1, 3, 7, 15, 30],
     "lookbackPeriod": 330
   },
   "offlineBatch": {
@@ -142,11 +141,13 @@
   "egressAlertRemediationPolicy": {
     "enableJiraTicketing": false,
     "notifyFromEmail": "workbench-notificatio-aaaaekogch7vg3c6hi4sgyx4le@pmi-engteam.slack.com",
-    "escalations": [{
-      "afterIncidentCount": 1,
-      "suspendCompute": {
-        "durationMinutes": 5
+    "escalations": [
+      {
+        "afterIncidentCount": 1,
+        "suspendCompute": {
+          "durationMinutes": 5
+        }
       }
-    }]
+    ]
   }
 }

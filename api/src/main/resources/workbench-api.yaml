@@ -4273,10 +4273,6 @@ definitions:
         type: boolean
         default: false
         description: Whether egress alerting V2 is enabled.
-      enableStandardSourceDomains:
-        type: boolean
-        default: false
-        description: Whether to show separate source and standard domains
       enableGpu:
         type: boolean
         default: false
