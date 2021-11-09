@@ -16,7 +16,7 @@ describe('egress suspension', () => {
   const egressFilename = 'generate-egress.py';
   const egressFilePath = path.relative(process.cwd(), __dirname + `../../../resources/python-code/${egressFilename}`);
 
-  test('VM egress suspends user\'s compute', async () => {
+  test("VM egress suspends user's compute", async () => {
     await findOrCreateWorkspace(page);
 
     const dataPage = new WorkspaceDataPage(page);

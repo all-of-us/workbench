@@ -74,7 +74,7 @@ export default class NotebookPage extends NotebookFrame {
     while (true) {
       await this.reloadPage();
 
-      if (await this.isSecuritySuspended() === suspended) {
+      if ((await this.isSecuritySuspended()) === suspended) {
         // Success
         break;
       }
@@ -88,7 +88,7 @@ export default class NotebookPage extends NotebookFrame {
 
   private async isSecuritySuspended(): Promise<boolean> {
     try {
-      await this.page.waitForXPath('//*[@data-test-id="security-suspended-msg"]', {visible: true});
+      await this.page.waitForXPath('//*[@data-test-id="security-suspended-msg"]', { visible: true });
     } catch (e) {
       return false;
     }
