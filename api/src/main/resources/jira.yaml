@@ -378,6 +378,7 @@ components:
           type: string
           description: The key of the property. Required on create and update.
         value:
+          type: string
           description: The value of the property. Required on create and update.
       additionalProperties: false
       description: An entity property, for more information see [Entity properties](https://developer.atlassian.com/cloud/jira/platform/jira-entity-properties/).
@@ -486,18 +487,12 @@ components:
         names:
           type: object
           additionalProperties: true
-            type: string
           description: The ID and name of each field present on the issue.
         schema:
           type: object
           additionalProperties:
             "$ref": "#/components/schemas/JsonTypeBean"
           description: The schema describing each field present on the issue.
-        transitions:
-          type: array
-          description: The transitions that can be performed on the issue.
-          items:
-            "$ref": "#/components/schemas/IssueTransition"
         versionedRepresentations:
           type: object
           additionalProperties: true
