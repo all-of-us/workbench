@@ -30,7 +30,7 @@ import javax.mail.MessagingException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
-import org.pmiops.workbench.JpaFakeDateTimeConfiguration;
+import org.pmiops.workbench.FakeJpaDateTimeConfiguration;
 import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.access.AccessModuleServiceImpl;
 import org.pmiops.workbench.access.AccessTierService;
@@ -206,7 +206,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     VerifiedInstitutionalAffiliationMapperImpl.class,
     AccessTierServiceImpl.class,
     FakeClockConfiguration.class,
-    JpaFakeDateTimeConfiguration.class,
+    FakeJpaDateTimeConfiguration.class,
   })
   @MockBean({BigQueryService.class})
   static class Configuration {

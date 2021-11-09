@@ -24,7 +24,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
  */
 @Configuration
 @EnableJpaAuditing(dateTimeProviderRef = "fakeDateTimeProvider")
-public class JpaFakeDateTimeConfiguration {
+public class FakeJpaDateTimeConfiguration {
   @Bean(name = "fakeDateTimeProvider")
   public DateTimeProvider dateTimeProvider(Clock clock) {
     return () -> Optional.of(clock.instant());
