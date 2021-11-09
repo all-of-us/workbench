@@ -1,0 +1,43 @@
+[
+  {
+    "mode": "NULLABLE",
+    "name": "p_concept_id",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "p_concept_code",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "p_concept_name",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "p_domain_id",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "concept_id",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "concept_code",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "concept_name",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "domain_id",
+    "type": "STRING"
+  }
+]
+
