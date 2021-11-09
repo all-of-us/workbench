@@ -93,8 +93,8 @@ public class CommonMappers {
         .orElse(null);
   }
 
-  @Named("cdrVersionToEtag")
-  public String cdrVersionToEtag(int cdrVersion) {
+  @Named("versionToEtag")
+  public String versionToEtag(int cdrVersion) {
     return Etags.fromVersion(cdrVersion);
   }
 
