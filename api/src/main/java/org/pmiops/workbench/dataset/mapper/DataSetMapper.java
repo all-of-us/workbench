@@ -39,7 +39,7 @@ public interface DataSetMapper {
   @Mapping(target = "cohorts", ignore = true)
   // This is stored in a subtable, we may not want to fetch all the time
   @Mapping(target = "domainValuePairs", ignore = true)
-  @Mapping(target = "etag", source = "version", qualifiedByName = "cdrVersionToEtag")
+  @Mapping(target = "etag", source = "version", qualifiedByName = "versionToEtag")
   // TODO (RW-4756): Define a DatasetLight type.
   @Named("dbModelToClientLight")
   DataSet dbModelToClientLight(DbDataset dbDataset);
@@ -63,7 +63,7 @@ public interface DataSetMapper {
   @Mapping(target = "conceptSets", source = "conceptSetIds")
   @Mapping(target = "cohorts", source = "cohortIds")
   @Mapping(target = "domainValuePairs", source = "values")
-  @Mapping(target = "etag", source = "version", qualifiedByName = "cdrVersionToEtag")
+  @Mapping(target = "etag", source = "version", qualifiedByName = "versionToEtag")
   DataSet dbModelToClient(DbDataset dbDataset);
 
   @AfterMapping

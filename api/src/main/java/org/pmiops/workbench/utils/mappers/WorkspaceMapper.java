@@ -30,7 +30,7 @@ import org.pmiops.workbench.workspaces.resources.WorkspaceResourceMapper;
 public interface WorkspaceMapper {
 
   @Mapping(target = "researchPurpose", source = "dbWorkspace")
-  @Mapping(target = "etag", source = "dbWorkspace.version", qualifiedByName = "cdrVersionToEtag")
+  @Mapping(target = "etag", source = "dbWorkspace.version", qualifiedByName = "versionToEtag")
   @Mapping(target = "name", source = "dbWorkspace.name")
   @Mapping(target = "id", source = "fcWorkspace.name")
   @Mapping(target = "googleBucketName", source = "fcWorkspace.bucketName")
@@ -42,7 +42,7 @@ public interface WorkspaceMapper {
 
   @Mapping(target = "cdrVersionId", source = "cdrVersion")
   @Mapping(target = "creator", source = "creator.username")
-  @Mapping(target = "etag", source = "version", qualifiedByName = "cdrVersionToEtag")
+  @Mapping(target = "etag", source = "version", qualifiedByName = "versionToEtag")
   @Mapping(
       target = "googleBucketName",
       ignore =
