@@ -1,6 +1,5 @@
 package org.pmiops.workbench.api;
 
-import com.google.common.collect.ImmutableList;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.sql.Timestamp;
@@ -19,7 +18,6 @@ import javax.annotation.Nullable;
 import javax.inject.Provider;
 import org.json.JSONObject;
 import org.pmiops.workbench.actionaudit.auditors.LeonardoRuntimeAuditor;
-import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
@@ -36,13 +34,10 @@ import org.pmiops.workbench.leonardo.model.LeonardoClusterError;
 import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
-import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.ErrorCode;
 import org.pmiops.workbench.model.ErrorResponse;
 import org.pmiops.workbench.model.GceWithPdConfig;
-import org.pmiops.workbench.model.ListRuntimeDeleteRequest;
-import org.pmiops.workbench.model.ListRuntimeResponse;
 import org.pmiops.workbench.model.PersistentDiskRequest;
 import org.pmiops.workbench.model.Runtime;
 import org.pmiops.workbench.model.RuntimeLocalizeRequest;
@@ -110,60 +105,6 @@ public class RuntimeController implements RuntimeApiDelegate {
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.userRecentResourceService = userRecentResourceService;
     this.leonardoMapper = leonardoMapper;
-  }
-
-  private Stream<LeonardoListRuntimeResponse> filterByRuntimesInList(
-      Stream<LeonardoListRuntimeResponse> clustersToFilter, List<String> runtimeNames) {
-    // Null means keep all clusters.
-    return clustersToFilter.filter(
-        cluster -> runtimeNames == null || runtimeNames.contains(cluster.getRuntimeName()));
-  }
-
-  @Override
-  @AuthorityRequired(Authority.SECURITY_ADMIN)
-  public ResponseEntity<List<ListRuntimeResponse>> deleteRuntimesInProject(
-      String billingProjectId, ListRuntimeDeleteRequest req) {
-    if (billingProjectId == null) {
-      throw new BadRequestException("Must specify billing project");
-    }
-    List<LeonardoListRuntimeResponse> runtimesToDelete =
-        filterByRuntimesInList(
-                leonardoNotebooksClient.listRuntimesByProjectAsService(billingProjectId).stream(),
-                req.getRuntimesToDelete())
-            .collect(Collectors.toList());
-
-    runtimesToDelete.forEach(
-        runtime ->
-            leonardoNotebooksClient.deleteRuntimeAsService(
-                runtime.getGoogleProject(), runtime.getRuntimeName()));
-    List<LeonardoListRuntimeResponse> runtimesInProjectAffected =
-        filterByRuntimesInList(
-                leonardoNotebooksClient.listRuntimesByProjectAsService(billingProjectId).stream(),
-                req.getRuntimesToDelete())
-            .collect(Collectors.toList());
-    // DELETED is an acceptable status from an implementation standpoint, but we will never
-    // receive runtimes with that status from Leo. We don't want to because we reuse runtime
-    // names and thus could have >1 deleted runtimes with the same name in the project.
-    List<LeonardoRuntimeStatus> acceptableStates =
-        ImmutableList.of(LeonardoRuntimeStatus.DELETING, LeonardoRuntimeStatus.ERROR);
-    runtimesInProjectAffected.stream()
-        .filter(runtime -> !acceptableStates.contains(runtime.getStatus()))
-        .forEach(
-            clusterInBadState ->
-                log.log(
-                    Level.SEVERE,
-                    String.format(
-                        "Runtime %s/%s is not in a deleting state",
-                        clusterInBadState.getGoogleProject(), clusterInBadState.getRuntimeName())));
-    leonardoRuntimeAuditor.fireDeleteRuntimesInProject(
-        billingProjectId,
-        runtimesToDelete.stream()
-            .map(LeonardoListRuntimeResponse::getRuntimeName)
-            .collect(Collectors.toList()));
-    return ResponseEntity.ok(
-        runtimesInProjectAffected.stream()
-            .map(leonardoMapper::toApiListRuntimeResponse)
-            .collect(Collectors.toList()));
   }
 
   private DbWorkspace lookupWorkspace(String workspaceNamespace) throws NotFoundException {
