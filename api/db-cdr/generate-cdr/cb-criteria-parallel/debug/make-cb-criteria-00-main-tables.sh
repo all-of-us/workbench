@@ -12,8 +12,6 @@ set -e
 export BQ_PROJECT=$1       # project - 'all-of-us-ehr-dev'
 export BQ_DATASET=$2       # dataset - 'BillDummyMult'
 
-run_in_parallel=$1
-
 ################################################
 # CREATE EMPTY CB_CRITERIA RELATED TABLES
 ################################################

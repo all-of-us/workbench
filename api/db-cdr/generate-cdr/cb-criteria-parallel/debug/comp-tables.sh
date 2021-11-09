@@ -5,7 +5,6 @@ BQ_DATASET=$2        # dataset - 'BillDummyMult'
 BQ_ORIG_DATASET= $3  #'Chenchal_R2021Q3R2_v2'
 
 crit_table=cb_criteria_sorted
-#orig_crit_table=cb_criteria_original
 orig_crit_table=cb_criteria_sorted
 bucket=bill-comp-bucket
 
