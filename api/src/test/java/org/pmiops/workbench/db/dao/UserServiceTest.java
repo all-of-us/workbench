@@ -25,7 +25,7 @@ import javax.annotation.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
-import org.pmiops.workbench.JpaFakeDateTimeConfiguration;
+import org.pmiops.workbench.FakeJpaDateTimeConfiguration;
 import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.access.AccessModuleServiceImpl;
 import org.pmiops.workbench.access.AccessTierServiceImpl;
@@ -99,7 +99,7 @@ public class UserServiceTest {
 
   @Import({
     FakeClockConfiguration.class,
-    JpaFakeDateTimeConfiguration.class,
+    FakeJpaDateTimeConfiguration.class,
     UserServiceTestConfiguration.class,
     AccessTierServiceImpl.class,
     AccessModuleServiceImpl.class,

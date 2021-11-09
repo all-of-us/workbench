@@ -26,7 +26,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.pmiops.workbench.FakeClockConfiguration;
-import org.pmiops.workbench.JpaFakeDateTimeConfiguration;
+import org.pmiops.workbench.FakeJpaDateTimeConfiguration;
 import org.pmiops.workbench.actionaudit.auditors.EgressEventAuditor;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.EgressAlertRemediationPolicy;
@@ -93,7 +93,7 @@ public class EgressRemediationServiceTest {
   @Import({
     EgressRemediationService.class,
     FakeClockConfiguration.class,
-    JpaFakeDateTimeConfiguration.class,
+    FakeJpaDateTimeConfiguration.class,
     JiraService.class
   })
   static class Configuration {
