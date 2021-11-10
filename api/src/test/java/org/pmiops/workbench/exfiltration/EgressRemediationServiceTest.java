@@ -54,8 +54,6 @@ import org.pmiops.workbench.jira.model.IssueBean;
 import org.pmiops.workbench.jira.model.IssueUpdateDetails;
 import org.pmiops.workbench.jira.model.SearchResults;
 import org.pmiops.workbench.mail.MailService;
-import org.pmiops.workbench.mail.MailService.EgressRemediationAction;
-import org.pmiops.workbench.model.EgressEventStatus;
 import org.pmiops.workbench.model.SumologicEgressEvent;
 import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
 import org.pmiops.workbench.test.FakeClock;
@@ -513,7 +511,7 @@ public class EgressRemediationServiceTest {
         .setUser(getDbUser())
         .setWorkspace(dbWorkspace)
         .setCreationTime(FakeClockConfiguration.NOW)
-        .setStatus(EgressEventStatus.PENDING)
+        .setStatus(DbEgressEventStatus.PENDING)
         .setSumologicEvent(
             new Gson()
                 .toJson(

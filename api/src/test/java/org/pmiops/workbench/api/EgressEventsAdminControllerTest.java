@@ -20,7 +20,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.pmiops.workbench.FakeClockConfiguration;
-import org.pmiops.workbench.JpaFakeDateTimeConfiguration;
+import org.pmiops.workbench.FakeJpaDateTimeConfiguration;
 import org.pmiops.workbench.db.dao.EgressEventDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
@@ -75,7 +75,7 @@ public class EgressEventsAdminControllerTest {
     EgressEventMapperImpl.class,
     CommonMappers.class,
     FakeClockConfiguration.class,
-    JpaFakeDateTimeConfiguration.class
+    FakeJpaDateTimeConfiguration.class
   })
   static class Configuration {}
 
