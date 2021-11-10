@@ -897,17 +897,6 @@ paths:
           description: Bad Request
           schema:
             $ref: "#/definitions/ErrorResponse"
-  "/v1/getFeaturedWorkspace":
-    get:
-      tags:
-      - workspaces
-      description: Return workspace
-      operationId: getFeatureWorkspace
-      responses:
-        200:
-          description: A featured workspace
-          schema:
-            "$ref": "#/definitions/WorkspaceResponse"
   "/v1/workspaces":
     get:
       tags:

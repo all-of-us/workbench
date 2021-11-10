@@ -25,6 +25,17 @@ const styles = {
   heading: {
     color: colors.primary,
     fontSize: 20, fontWeight: 600, lineHeight: '24px'
+  },
+  cloneNotebookCard: {
+    backgroundColor: colorWithWhiteness(colors.disabled, 0.9),
+    minWidth: '200px', maxWidth: '200px',
+    minHeight: '223px', maxHeight: '223px'
+  },
+  cloneNotebookMsg: {
+    color: colors.primary,
+    fontSize: '14px',
+    fontWeight: 600,
+    paddingTop: '2rem'
   }
 };
 
@@ -114,11 +125,10 @@ export const NotebookList = withCurrentWorkspace()(class extends React.Component
       this.setState({notebookList});
       const notebookNameList = notebookList.map(fd => fd.name.slice(0, -('.ipynb'.length)));
       this.setState({notebookNameList});
-        this.setState({loading: false});
-      } catch (error) {
+    } catch (error) {
       console.error(error);
     } finally {
-     // this.setState({loading: false});
+      this.setState({loading: false});
     }
   }
 
@@ -162,11 +172,10 @@ export const NotebookList = withCurrentWorkspace()(class extends React.Component
         <div style={{display: 'flex', flexWrap: 'wrap', justifyContent: 'flex-start' }}>
           {cloneLoadingNotebookMsg && <CardButton
               disabled={cloneLoadingNotebookMsg}
-              style={{backgroundColor: colorWithWhiteness(colors.disabled, 0.9),  minWidth: '200px', maxWidth: '200px',
-                minHeight: '223px', maxHeight: '223px'}}
+              style={styles.cloneNotebookCard}
               type='small'
               onClick={() => {}}>
-            <FlexColumn style={{color: colors.primary, fontSize: '14px', fontWeight: 600, paddingTop: '2rem'}}>
+            <FlexColumn style={styles.cloneNotebookMsg}>
               <ClrIcon shape="clock"></ClrIcon>
               <div>Copying 1 or more notebooks from another workspace. May take a few minutes.</div>
             </FlexColumn>
