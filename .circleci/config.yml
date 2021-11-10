@@ -335,7 +335,7 @@ commands:
           working_directory: ~/workbench/e2e
           command: |
             cp .env.circleci.<< parameters.env_name >> .env
-            echo "export PUPPETEER_ACCESS_TEST=$ACCESS_TEST_USER" >> "$BASH_ENV"
+            echo "export PUPPETEER_ACCESS_TEST=${ACCESS_TEST_USER}" >> "$BASH_ENV"
             source $BASH_ENV
       - run:
           working_directory: ~/workbench/api
@@ -748,8 +748,7 @@ workflows:
       - api-bigquery-test
       - puppeteer-env-setup
       - puppeteer-test:
-          parallel_num: 2
-          env_name: "test"
+          parallel_num: 3
           test_mode: "nightly-integration"
           optional_steps:
             - puppeteer-access-test-user-setup
