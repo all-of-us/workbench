@@ -105,7 +105,9 @@
     "enableGpu": true,
     "enablePersistentDisk": true,
     "enableEgressAlertingV2": true,
-    "enableStandardSourceDomains": true
+    "enableStandardSourceDomains": true,
+    "enablePrivateDataprocWorker": true,
+    "grantLifescienceApiRunnerAcl": true
   },
   "actionAudit": {
     "logName": "workbench-action-audit-local",

@@ -266,6 +266,11 @@ public class WorkbenchConfig {
     public boolean enableGpu;
     // If true, the backend and UI will support persistent disk as the default notebook storage
     public boolean enablePersistentDisk;
+    // If true, ask Leo to set dataproc worker VMs not having internet access.
+    public boolean enablePrivateDataprocWorker;
+    // If true, workspace owner and writers will have Google Lifesience Runner permission, and their
+    // Terra Pet SA can actAs itself.
+    public boolean grantLifescienceApiRunnerAcl;
   }
 
   public static class ActionAuditConfig {

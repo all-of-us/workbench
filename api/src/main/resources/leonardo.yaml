@@ -2776,6 +2776,11 @@ components:
             This can be used for accessing Spark web UIs. See
             https://cloud.google.com/dataproc/docs/concepts/accessing/dataproc-gateways for more details.
             Defaults to false.
+        workerPrivateAccess:
+          type: boolean
+          description: >
+            Optional, specifies whether to prevent public Internet access from the Dataproc worker nodes,
+            if any. Does not affect the master node. Defaults to false.
     UserJupyterExtensionConfig:
       description: Specification of Jupyter Extensions to be installed on the cluster
       properties:
