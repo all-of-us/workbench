@@ -237,7 +237,7 @@ public class FreeTierBillingService {
 
   private Map<DbWorkspace, Double> getFreeTierWorkspaceCostsFromBQ() {
 
-    final Map<String, DbWorkspace> workspacesIndexedByProject =
+    final Map<String, DbWorkspace> workspacesIndexedByGoogleProject =
         // don't record cost for OLD or MIGRATED workspaces - only NEW
         workspaceDao.findAllByBillingMigrationStatus(BillingMigrationStatus.NEW).stream()
             .collect(Collectors.toMap(DbWorkspace::getGoogleProject, Function.identity()));
@@ -252,10 +252,11 @@ public class FreeTierBillingService {
 
     final Map<DbWorkspace, Double> workspaceCosts = new HashMap<>();
     for (FieldValueList tableRow : bigQueryService.executeQuery(queryConfig).getValues()) {
-      final String project = tableRow.get("id").getStringValue();
-      if (workspacesIndexedByProject.containsKey(project)) {
+      final String googleProject = tableRow.get("id").getStringValue();
+      if (workspacesIndexedByGoogleProject.containsKey(googleProject)) {
         workspaceCosts.put(
-            workspacesIndexedByProject.get(project), tableRow.get("cost").getDoubleValue());
+            workspacesIndexedByGoogleProject.get(googleProject),
+            tableRow.get("cost").getDoubleValue());
       }
     }
 
