@@ -337,13 +337,9 @@ commands:
             cp .env.circleci.<< parameters.env_name >> .env
             source .env
 
-            echo "export PUPPETEER_ACCESS_TEST=${ACCESS_TEST_USER}" >> $BASH_ENV
             cat .env | awk '{print "export " $0}' >> $BASH_ENV
+            echo "export PUPPETEER_ACCESS_TEST=${ACCESS_TEST_USER}" >> $BASH_ENV
             source $BASH_ENV
-
-            # set -a; source .env; set +a
-            echo "ACCESS_TEST_USER=${ACCESS_TEST_USER}"
-            echo "PUPPETEER_ACCESS_TEST=${ACCESS_TEST_USER}"
       - run:
           working_directory: ~/workbench/api
           name: Prep the e2e access test user (in Test env) by setting access module timestamps
