@@ -325,6 +325,13 @@ commands:
     steps:
       - gcloud-auth-login
       - run:
+          name: "Set environment variable ACCESS_TEST_USER"
+          working_directory: ~/workbench/e2e
+          command: |
+            cp .env.circleci.<< parameters.env_name >> .env
+            echo "export PUPPETEER_ACCESS_TEST=$ACCESS_TEST_USER" >> "$BASH_ENV"
+            source $BASH_ENV
+      - run:
           working_directory: ~/workbench/api
           name: Prep the e2e access test user (in Test env) by setting access module timestamps
           command: ./project.rb set-access-module-timestamps --user ${PUPPETEER_ACCESS_TEST}
@@ -657,10 +664,11 @@ workflows:
       - puppeteer-env-setup
       - puppeteer-test:
           <<: *filter-pr-branch
-          env_name: "local"
+          env_name: "nightly-integration"
           parallel_num: 4
           optional_steps:
             - halt-puppeteer-check
+            - puppeteer-access-test-user-setup
           requires:
             - puppeteer-env-setup
             # PR commits e2e tests waits for workflow triggered by master branch merge to finish.
