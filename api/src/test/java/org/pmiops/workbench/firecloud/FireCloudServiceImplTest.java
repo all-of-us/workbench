@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
-import org.pmiops.workbench.SpringTest;
+import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.config.RetryConfig;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.ForbiddenException;
@@ -43,9 +43,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.support.SimpleThreadScope;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.web.context.WebApplicationContext;
 
-public class FireCloudServiceImplTest extends SpringTest {
+@SpringJUnitConfig
+public class FireCloudServiceImplTest {
 
   private static final String EMAIL_ADDRESS = "abc@fake-research-aou.org";
 
@@ -75,7 +77,12 @@ public class FireCloudServiceImplTest extends SpringTest {
   @Rule public MockitoRule mockitoRule = MockitoJUnit.rule();
 
   @TestConfiguration
-  @Import({FireCloudCacheConfig.class, FireCloudServiceImpl.class, RetryConfig.class})
+  @Import({
+    FakeClockConfiguration.class,
+    FireCloudCacheConfig.class,
+    FireCloudServiceImpl.class,
+    RetryConfig.class
+  })
   static class Configuration {
     @Bean
     public CustomScopeConfigurer customScopeConfigurer() {

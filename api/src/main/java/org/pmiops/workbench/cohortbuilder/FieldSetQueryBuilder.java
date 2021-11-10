@@ -351,9 +351,9 @@ public class FieldSetQueryBuilder {
       }
       whereSql.append(columnInfo.getColumnName());
       if (operator.equals(Operator.EQUAL)) {
-        whereSql.append(" is null\n");
+        whereSql.append(" IS NULL\n");
       } else {
-        whereSql.append(" is not null\n");
+        whereSql.append(" IS NOT NULL\n");
       }
       return;
     }
@@ -412,7 +412,7 @@ public class FieldSetQueryBuilder {
       queryState.paramMap.put(
           paramName, QueryParameterValue.array(valueStrings.toArray(new String[0]), String.class));
     }
-    whereSql.append(String.format("%s in unnest(@%s)", columnInfo.getColumnName(), paramName));
+    whereSql.append(String.format("%s IN unnest(@%s)", columnInfo.getColumnName(), paramName));
   }
 
   private ColumnInfo getColumnInfo(
@@ -472,7 +472,7 @@ public class FieldSetQueryBuilder {
           "Exactly one of allOf, anyOf, or columnFilter must be " + "specified for result filters");
     }
     if (resultFilters.getIfNot() != null && resultFilters.getIfNot()) {
-      whereSql.append("not ");
+      whereSql.append("NOT ");
     }
     if (resultFilters.getColumnFilter() != null) {
       handleColumnFilter(resultFilters.getColumnFilter(), queryState, whereSql);
@@ -480,10 +480,10 @@ public class FieldSetQueryBuilder {
       String operator;
       List<ResultFilters> childFilters;
       if (resultFilters.getAllOf() != null) {
-        operator = "and";
+        operator = "AND";
         childFilters = resultFilters.getAllOf();
       } else {
-        operator = "or";
+        operator = "OR";
         childFilters = resultFilters.getAnyOf();
       }
       whereSql.append("(");
@@ -627,42 +627,42 @@ public class FieldSetQueryBuilder {
     if (resultSize == null) {
       limitOffsetSql = new StringBuilder("\n");
     } else {
-      limitOffsetSql = new StringBuilder("\nlimit ");
+      limitOffsetSql = new StringBuilder("\nLIMIT ");
       limitOffsetSql.append(resultSize);
     }
     if (offset > 0) {
-      limitOffsetSql.append(" offset ");
+      limitOffsetSql.append(" OFFSET ");
       limitOffsetSql.append(offset);
     }
 
     Joiner commaJoiner = Joiner.on(", ");
-    StringBuilder innerSql = new StringBuilder("select ");
+    StringBuilder innerSql = new StringBuilder("SELECT ");
     innerSql.append(commaJoiner.join(innerSelectExpressions));
     innerSql.append(
-        String.format("\nfrom `${projectId}.${dataSetId}.%s` %s", tableName, tableName));
+        String.format("\nFROM `${projectId}.${dataSetId}.%s` %s", tableName, tableName));
     for (Entry<String, JoinedTableInfo> entry : beforeLimitTables.entrySet()) {
       addJoin(innerSql, entry.getKey(), entry.getValue());
     }
     innerSql.append(whereSql);
     cohortQueryBuilder.addWhereClause(
         participantCriteria, queryState.mainTableName, innerSql, queryState.paramMap);
-    innerSql.append("\norder by ");
+    innerSql.append("\nORDER BY ");
     innerSql.append(commaJoiner.join(innerOrderByExpressions));
 
     innerSql.append(limitOffsetSql);
     if (!hasAfterLimitTables) {
       return innerSql.toString();
     }
-    StringBuilder outerSql = new StringBuilder("select ");
+    StringBuilder outerSql = new StringBuilder("SELECT ");
     outerSql.append(commaJoiner.join(outerSelectExpressions));
-    outerSql.append("\nfrom (");
+    outerSql.append("\nFROM (");
     outerSql.append(innerSql);
     outerSql.append(") inner_results");
     for (Entry<String, JoinedTableInfo> entry : afterLimitTables.entrySet()) {
       addJoin(outerSql, entry.getKey(), entry.getValue());
     }
     // In the outer SQL, refer to the order by columns using their aliases from the inner query.
-    outerSql.append("\norder by ");
+    outerSql.append("\nORDER BY ");
     List<String> outerOrderByExpressions = new ArrayList<>();
     for (OrderByColumn column : orderByColumns) {
       String columnAlias = getColumnAlias(column.columnInfo.getColumnName());
@@ -670,7 +670,7 @@ public class FieldSetQueryBuilder {
     }
     outerSql.append(commaJoiner.join(outerOrderByExpressions));
     if (resultSize != null) {
-      outerSql.append("\nlimit ");
+      outerSql.append("\nLIMIT ");
       outerSql.append(resultSize);
     }
 
@@ -698,11 +698,11 @@ public class FieldSetQueryBuilder {
 
     ImmutableList<SelectedColumn> selectColumns = handleSelect(queryState, tableQuery.getColumns());
 
-    StringBuilder whereSql = new StringBuilder("\nwhere\n");
+    StringBuilder whereSql = new StringBuilder("\nWHERE\n");
 
     if (tableQuery.getFilters() != null) {
       handleResultFilters(tableQuery.getFilters(), queryState, whereSql);
-      whereSql.append("\nand\n");
+      whereSql.append("\nAND\n");
     }
     ImmutableList<OrderByColumn> orderByColumns =
         handleOrderBy(queryState, tableQuery.getOrderBy());

@@ -25,7 +25,7 @@ import {formatUsd} from 'app/utils/numbers';
 import {genomicExtractionStore, updateGenomicExtractionStore, withStore} from 'app/utils/stores';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {GenomicExtractionJob, TerraJobStatus} from 'generated/fetch';
-import {SupportMailto} from "./support";
+import {SupportMailto} from './support';
 
 const styles = {
   spinStyles: {

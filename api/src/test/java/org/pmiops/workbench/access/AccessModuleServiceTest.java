@@ -15,7 +15,6 @@ import javax.annotation.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
-import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.actionaudit.targetproperties.BypassTimeTargetProperty;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -41,7 +40,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 
 @DataJpaTest
-public class AccessModuleServiceTest extends SpringTest {
+public class AccessModuleServiceTest {
   @Autowired private AccessModuleDao accessModuleDao;
   @Autowired private AccessModuleService accessModuleService;
   @Autowired private UserAccessModuleDao userAccessModuleDao;
@@ -53,6 +52,7 @@ public class AccessModuleServiceTest extends SpringTest {
   private static List<DbAccessModule> accessModules;
 
   @Import({
+    FakeClockConfiguration.class,
     AccessModuleServiceImpl.class,
     UserAccessModuleMapperImpl.class,
     CommonMappers.class,

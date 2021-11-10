@@ -13,7 +13,6 @@ import static org.pmiops.workbench.access.AccessTierService.REGISTERED_TIER_SHOR
 
 import com.google.api.services.directory.model.User;
 import java.sql.Timestamp;
-import java.time.Clock;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.HashMap;
@@ -25,7 +24,8 @@ import java.util.function.Supplier;
 import javax.annotation.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.pmiops.workbench.SpringTest;
+import org.pmiops.workbench.FakeClockConfiguration;
+import org.pmiops.workbench.FakeJpaDateTimeConfiguration;
 import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.access.AccessModuleServiceImpl;
 import org.pmiops.workbench.access.AccessTierServiceImpl;
@@ -68,13 +68,12 @@ import org.springframework.test.annotation.DirtiesContext;
 
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-public class UserServiceTest extends SpringTest {
+public class UserServiceTest {
 
   private static final String USERNAME = "abc@fake-research-aou.org";
 
   // An arbitrary timestamp to use as the anchor time for access module test cases.
-  private static final Instant START_INSTANT = Instant.parse("2000-01-01T00:00:00.00Z");
-  private static final FakeClock PROVIDED_CLOCK = new FakeClock(START_INSTANT);
+  private static final Instant START_INSTANT = FakeClockConfiguration.NOW.toInstant();
   private static final int CLOCK_INCREMENT_MILLIS = 1000;
   private static DbUser providedDbUser;
   private static WorkbenchConfig providedWorkbenchConfig;
@@ -93,11 +92,14 @@ public class UserServiceTest extends SpringTest {
   @Autowired private AccessTierDao accessTierDao;
   @Autowired private AccessModuleDao accessModuleDao;
   @Autowired private UserAccessModuleDao userAccessModuleDao;
+  @Autowired private FakeClock fakeClock;
 
   // we need the full service for some tests and mocks for others
   @SpyBean private AccessModuleService accessModuleService;
 
   @Import({
+    FakeClockConfiguration.class,
+    FakeJpaDateTimeConfiguration.class,
     UserServiceTestConfiguration.class,
     AccessTierServiceImpl.class,
     AccessModuleServiceImpl.class,
@@ -109,11 +111,6 @@ public class UserServiceTest extends SpringTest {
   })
   @TestConfiguration
   static class Configuration {
-    @Bean
-    Clock clock() {
-      return PROVIDED_CLOCK;
-    }
-
     @Bean
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     WorkbenchConfig getWorkbenchConfig() {
@@ -153,12 +150,6 @@ public class UserServiceTest extends SpringTest {
     // key UserService logic depends on the existence of the Registered Tier
     registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
 
-    // Since we're injecting the same static instance of this FakeClock,
-    // increments and other mutations will carry across tests if we don't reset it here.
-    // I tried easier ways of ensuring this, like creating new instances for every test run,
-    // but it was injecting null clocks giving NPEs long after construction, and so far this
-    // is the only working approach I've seen.
-    PROVIDED_CLOCK.setInstant(START_INSTANT);
     accessModules = TestMockFactory.createAccessModules(accessModuleDao);
     Institution institution = new Institution();
     when(mockInstitutionService.getByUser(user)).thenReturn(Optional.of(institution));
@@ -172,7 +163,7 @@ public class UserServiceTest extends SpringTest {
   @Test
   public void testSyncComplianceTrainingStatusV2() throws Exception {
     BadgeDetailsV2 retBadge = new BadgeDetailsV2();
-    long expiry = PROVIDED_CLOCK.instant().getEpochSecond() + 100;
+    long expiry = fakeClock.instant().getEpochSecond() + 100;
     retBadge.setDateexpire(expiry);
     retBadge.setValid(true);
 
@@ -202,7 +193,7 @@ public class UserServiceTest extends SpringTest {
   @Test
   public void testUpdateComplianceTrainingStatusV2() throws Exception {
     BadgeDetailsV2 retBadge = new BadgeDetailsV2();
-    long expiry = PROVIDED_CLOCK.instant().getEpochSecond();
+    long expiry = fakeClock.instant().getEpochSecond();
     retBadge.setDateexpire(expiry);
     retBadge.setValid(true);
 
@@ -252,7 +243,7 @@ public class UserServiceTest extends SpringTest {
   }
 
   private void tick() {
-    PROVIDED_CLOCK.increment(CLOCK_INCREMENT_MILLIS);
+    fakeClock.increment(CLOCK_INCREMENT_MILLIS);
   }
 
   @Test
@@ -344,6 +335,8 @@ public class UserServiceTest extends SpringTest {
                 .linkedNihUsername("nih-user")
                 // FireCloud stores the NIH status in seconds, not msecs.
                 .linkExpireTime(START_INSTANT.toEpochMilli() / 1000));
+
+    tick();
     userService.syncEraCommonsStatus();
     Timestamp modifiedTime1 = getLastModified.get();
     assertWithMessage(

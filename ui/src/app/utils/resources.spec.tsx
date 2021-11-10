@@ -1,4 +1,4 @@
-import * as React from "react";
+import * as React from 'react';
 import {
     FileDetail,
     Cohort,
@@ -22,7 +22,7 @@ import {
     isDataSet,
     isNotebook,
     toDisplay,
-} from "./resources";
+} from './resources';
 import {exampleCohortStubs} from 'testing/stubs/cohorts-api-stub';
 import {WorkspaceStubVariables} from 'testing/stubs/workspaces';
 import {stubResource} from 'testing/stubs/resources-stub';

@@ -39,4 +39,6 @@ public interface WorkspaceAdminService {
 
   List<ListRuntimeResponse> deleteRuntimesInWorkspace(
       String workspaceNamespace, ListRuntimeDeleteRequest req);
+
+  void setAdminLockedState(String workspaceNamespace, boolean desiredLockState);
 }

@@ -41,7 +41,7 @@ import {
   PublicInstitutionDetails,
 } from 'generated/fetch';
 import {accessRenewalModules, computeDisplayDates, getAccessModuleConfig} from 'app/utils/access-utils';
-import {hasRegisteredAccess} from 'app/utils/access-tiers';
+import {hasRegisteredTierAccess} from 'app/utils/access-tiers';
 
 const styles = reactStyles({
   semiBold: {
@@ -63,8 +63,8 @@ const CREDIT_LIMIT_DEFAULT_MIN = 300;
 const CREDIT_LIMIT_DEFAULT_MAX = 800;
 const CREDIT_LIMIT_DEFAULT_STEP = 50;
 
-const getUserStatus = ({accessTierShortNames}: Profile) => {
-  return (hasRegisteredAccess(accessTierShortNames))
+const getUserStatus = (profile: Profile) => {
+  return (hasRegisteredTierAccess(profile))
       ? () => <div style={{color: colors.success}}>Enabled</div>
       : () => <div style={{color: colors.danger}}>Disabled</div>;
 }

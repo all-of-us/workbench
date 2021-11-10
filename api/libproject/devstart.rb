@@ -778,6 +778,75 @@ Common.register_command({
   :fn => ->(*args) { stage_redcap_files("stage-redcap-files", *args) }
 })
 
+def make_bq_prep(cmd_name, *args)
+  op = WbOptionsParser.new(cmd_name, args)
+  op.add_option(
+    "--bq-project [bq-project]",
+    ->(opts, v) { opts.bq_project = v},
+    "BQ Project. Required."
+  )
+  op.add_option(
+    "--bq-dataset [bq-dataset]",
+    ->(opts, v) { opts.bq_dataset = v},
+    "BQ dataset. Required."
+  )
+  op.add_option(
+    "--script [script]",
+    ->(opts, v) { opts.script = v},
+    "Script. Required."
+  )
+  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset and opts.script }
+  op.parse.validate
+
+  common = Common.new
+  Dir.chdir('db-cdr') do
+    common.run_inline %W{./generate-cdr/cb-criteria-parallel/make-bq-prep-#{op.opts.script}.sh #{op.opts.bq_project} #{op.opts.bq_dataset}}
+  end
+end
+
+Common.register_command({
+  :invocation => "make-bq-prep",
+  :description => "Runs Prep table script",
+  :fn => ->(*args) { make_bq_prep("make-bq-prep", *args) }
+})
+
+def make_cb_criteria(cmd_name, *args)
+  op = WbOptionsParser.new(cmd_name, args)
+  op.add_option(
+    "--bq-project [bq-project]",
+    ->(opts, v) { opts.bq_project = v},
+    "BQ Project. Required."
+  )
+  op.add_option(
+    "--bq-dataset [bq-dataset]",
+    ->(opts, v) { opts.bq_dataset = v},
+    "BQ dataset. Required."
+  )
+  op.add_option(
+    "--script [script]",
+    ->(opts, v) { opts.script = v},
+    "Script. Required."
+  )
+  op.add_option(
+    "--id-prefix [id-prefix]",
+    ->(opts, v) { opts.id_prefix = v},
+    "ID Prefix."
+  )
+  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset and opts.script }
+  op.parse.validate
+
+  common = Common.new
+  Dir.chdir('db-cdr') do
+    common.run_inline %W{./generate-cdr/cb-criteria-parallel/make-cb-criteria-#{op.opts.script}.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.id_prefix}}
+  end
+end
+
+Common.register_command({
+  :invocation => "make-cb-criteria",
+  :description => "Builds cb_criteria",
+  :fn => ->(*args) { make_cb_criteria("make-cb-criteria", *args) }
+})
+
 def build_cdr_indices(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
   op.opts.data_browser = false

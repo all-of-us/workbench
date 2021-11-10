@@ -103,7 +103,7 @@ export const SecuritySuspendedMessage = ({error}: SuspendedMessageProps) => {
   }, [error]);
 
   const untilFull = moment(error.params.suspendedUntil).format('MMMM Do YYYY, h:mm a');
-  return <>
+  return <div data-test-id="security-suspended-msg">
     <div>
     {until.isAfter(new Date()) ?
        <>
@@ -128,5 +128,5 @@ export const SecuritySuspendedMessage = ({error}: SuspendedMessageProps) => {
         support article
       </StyledExternalLink> or contact <SupportMailto/> with additional questions.
     </div>
-  </>
+  </div>
 };

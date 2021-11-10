@@ -191,7 +191,7 @@ export class SearchBar extends React.Component<Props, State> {
     const {node: {domainId}, searchTerms} = this.props;
     if (searchTerms !== prevProps.searchTerms) {
       if (domainId === Domain.PHYSICALMEASUREMENT.toString() || domainId === Domain.VISIT.toString()) {
-        triggerEvent(`Cohort Builder Search - Physical Measurements`, 'Search', searchTerms);
+        triggerEvent('Cohort Builder Search - Physical Measurements', 'Search', searchTerms);
       } else if (this.state.optionSelected) {
         this.setState({optionSelected: false});
       } else {

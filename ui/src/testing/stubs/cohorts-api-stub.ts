@@ -106,7 +106,7 @@ export class CohortsApiStub extends CohortsApi {
       } else {
         reject(new Error(`Error updating. No cohort with id: ${cid} `
             + `exists in workspace ${ns}, ${wsid} `
-            + `in cohort service stub`));
+            + 'in cohort service stub'));
       }
     });
   }

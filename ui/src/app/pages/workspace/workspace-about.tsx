@@ -134,6 +134,12 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withCdrVersions())
     return workspace;
   }
 
+  // update the component state AND the store with the new workspace object
+  updateWorkspaceState(workspace: WorkspaceData): void {
+    currentWorkspaceStore.next(workspace);
+    this.setState({workspace});
+  }
+
   loadUserRoles(workspace: WorkspaceData) {
     this.setState({workspaceUserRoles: []});
     workspacesApi().getFirecloudWorkspaceUserRoles(workspace.namespace, workspace.id).then(
@@ -164,27 +170,17 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withCdrVersions())
     }
   }
 
-  workspaceRuntimeBillingProjectId(): string {
-    const {workspace} = this.state;
-    if (workspace === undefined) {
-      return null;
-    }
-    if ([WorkspaceAccessLevel.WRITER, WorkspaceAccessLevel.OWNER].includes(workspace.accessLevel)) {
-      return workspace.namespace;
-    }
-    return null;
-  }
-
   async publishUnpublishWorkspace(publish: boolean) {
+    const {workspace} = this.state;
+    const {namespace, id} = workspace;
     this.setState({publishing: true});
     try {
       if (publish) {
-        await workspacesApi()
-          .publishWorkspace(this.state.workspace.namespace, this.state.workspace.id);
+        await workspacesApi().publishWorkspace(namespace, id);
       } else {
-        await workspacesApi()
-          .unpublishWorkspace(this.state.workspace.namespace, this.state.workspace.id);
+        await workspacesApi().unpublishWorkspace(namespace, id);
       }
+      this.updateWorkspaceState({...workspace, published: publish});
     } catch (error) {
       console.error(error);
     } finally {
@@ -201,18 +197,20 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withCdrVersions())
   render() {
     const {profileState: {profile}, cdrVersionTiersResponse} = this.props;
     const {workspace, workspaceUserRoles, sharing, publishing} = this.state;
+    const published = workspace?.published;
     return <div style={styles.mainPage}>
       <FlexColumn style={{margin: '1rem', width: '98%'}}>
         <ResearchPurpose data-test-id='researchPurpose'/>
         {hasAuthorityForAction(profile, AuthorityGuardedAction.PUBLISH_WORKSPACE) &&
           <div style={{display: 'flex', justifyContent: 'flex-end'}}>
               <Button data-test-id='unpublish-button'
-                      disabled={publishing}
-                      type='secondary'
-                      onClick={() => this.publishUnpublishWorkspace(false)}>Unpublish</Button>
+                      onClick={() => this.publishUnpublishWorkspace(false)}
+                      disabled={publishing || !published}
+                      type={published ? 'primary' : 'secondary'}>Unpublish</Button>
               <Button data-test-id='publish-button'
                       onClick={() => this.publishUnpublishWorkspace(true)}
-                      disabled={publishing}
+                      disabled={publishing || published}
+                      type={published ? 'secondary' : 'primary'}
                       style={{marginLeft: '0.5rem'}}>Publish</Button>
         </div>}
       </FlexColumn>

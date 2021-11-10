@@ -27,63 +27,63 @@ public class CohortQueryBuilder {
   private static final String PERSON_TABLE = "person";
 
   private static final String COUNT_SQL_TEMPLATE =
-      "select count(*) as count\n"
-          + "from `${projectId}.${dataSetId}.cb_search_person` cb_search_person\n"
-          + "where ";
+      "SELECT COUNT(*) as count\n"
+          + "FROM `${projectId}.${dataSetId}.cb_search_person` cb_search_person\n"
+          + "WHERE ";
 
   private static final String DEMO_CHART_INFO_SQL_TEMPLATE =
-      "select ${genderOrSex} as name,\n"
+      "SELECT ${genderOrSex} as name,\n"
           + "race,\n"
-          + "case ${ageRange1}\n"
+          + "CASE ${ageRange1}\n"
           + "${ageRange2}\n"
-          + "else '> 65'\n"
-          + "end as ageRange,\n"
-          + "count(*) as count\n"
-          + "from `${projectId}.${dataSetId}.cb_search_person` cb_search_person\n"
-          + "where ";
+          + "ELSE '> 65'\n"
+          + "END as ageRange,\n"
+          + "COUNT(*) as count\n"
+          + "FROM `${projectId}.${dataSetId}.cb_search_person` cb_search_person\n"
+          + "WHERE ";
 
   private static final String DEMO_CHART_INFO_SQL_GROUP_BY =
-      "group by name, race, ageRange\n" + "order by name, race, ageRange\n";
+      "GROUP BY name, race, ageRange\n" + "ORDER BY name, race, ageRange\n";
 
   private static final String DOMAIN_CHART_INFO_SQL_TEMPLATE =
-      "select standard_name as name, standard_concept_id as conceptId, count(distinct person_id) as count\n"
-          + "from `${projectId}.${dataSetId}.cb_review_all_events` cb_review_all_events\n"
-          + "where cb_review_all_events.person_id in (${innerSql})";
+      "SELECT standard_name as name, standard_concept_id as conceptId, COUNT(DISTINCT person_id) as count\n"
+          + "FROM `${projectId}.${dataSetId}.cb_review_all_events` cb_review_all_events\n"
+          + "WHERE cb_review_all_events.person_id IN (${innerSql})";
 
   private static final String DOMAIN_CHART_INFO_SQL_GROUP_BY =
-      "and domain = ${domain}\n"
-          + "and standard_concept_id != 0 \n"
-          + "group by name, conceptId\n"
-          + "order by count desc, name asc\n"
-          + "limit ${limit}\n";
+      "AND domain = ${domain}\n"
+          + "AND standard_concept_id != 0 \n"
+          + "GROUP BY name, conceptId\n"
+          + "ORDER BY count DESC, name ASC\n"
+          + "LIMIT ${limit}\n";
 
   private static final String RANDOM_SQL_TEMPLATE =
-      "select rand() as x, person.person_id, race_concept_id, gender_concept_id, ethnicity_concept_id, sex_at_birth_concept_id, birth_datetime, case when death.person_id is null then false else true end as deceased\n"
-          + "from `${projectId}.${dataSetId}.person` person\n"
-          + "left join `${projectId}.${dataSetId}.death` death on (person.person_id = death.person_id)\n"
-          + "where person.person_id in (${innerSql})";
+      "SELECT RAND() as x, person.person_id, race_concept_id, gender_concept_id, ethnicity_concept_id, sex_at_birth_concept_id, birth_datetime, CASE WHEN death.person_id IS NULL THEN false ELSE true END as deceased\n"
+          + "FROM `${projectId}.${dataSetId}.person` person\n"
+          + "LEFT JOIN `${projectId}.${dataSetId}.death` death ON (person.person_id = death.person_id)\n"
+          + "WHERE person.person_id IN (${innerSql})";
 
-  private static final String RANDOM_SQL_ORDER_BY = "order by x\nlimit";
+  private static final String RANDOM_SQL_ORDER_BY = "ORDER BY x\nLIMIT";
 
-  private static final String OFFSET_SUFFIX = " offset ";
+  private static final String OFFSET_SUFFIX = " OFFSET ";
 
   private static final String ID_SQL_TEMPLATE =
-      "select person_id\n from `${projectId}.${dataSetId}.cb_search_person` cb_search_person\n where\n";
+      "SELECT person_id\n FROM `${projectId}.${dataSetId}.cb_search_person` cb_search_person\n WHERE\n";
 
-  private static final String UNION_TEMPLATE = "union all\n";
+  private static final String UNION_TEMPLATE = "UNION ALL\n";
 
-  private static final String INCLUDE_SQL_TEMPLATE = "${mainTable}.person_id in (${includeSql})\n";
+  private static final String INCLUDE_SQL_TEMPLATE = "${mainTable}.person_id IN (${includeSql})\n";
 
   private static final String PERSON_ID_WHITELIST_PARAM = "person_id_whitelist";
   private static final String PERSON_ID_BLACKLIST_PARAM = "person_id_blacklist";
 
   private static final String PERSON_ID_WHITELIST_TEMPLATE =
-      "${mainTable}.person_id in unnest(@" + PERSON_ID_WHITELIST_PARAM + ")\n";
+      "${mainTable}.person_id IN unnest(@" + PERSON_ID_WHITELIST_PARAM + ")\n";
   private static final String PERSON_ID_BLACKLIST_TEMPLATE =
-      "${mainTable}.person_id not in unnest(@" + PERSON_ID_BLACKLIST_PARAM + ")\n";
+      "${mainTable}.person_id NOT IN unnest(@" + PERSON_ID_BLACKLIST_PARAM + ")\n";
 
   private static final String EXCLUDE_SQL_TEMPLATE =
-      "${mainTable}.person_id not in\n" + "(${excludeSql})\n";
+      "${mainTable}.person_id NOT IN\n" + "(${excludeSql})\n";
 
   private CBCriteriaDao cbCriteriaDao;
   private static final Logger log = Logger.getLogger(CohortQueryBuilder.class.getName());
@@ -247,7 +247,7 @@ public class CohortQueryBuilder {
       String mainTable,
       Map<String, QueryParameterValue> params,
       Boolean excludeSQL) {
-    StringJoiner joiner = new StringJoiner("and ");
+    StringJoiner joiner = new StringJoiner("AND ");
     List<String> queryParts = new ArrayList<>();
     for (SearchGroup includeGroup : groups) {
       SearchGroupItemQueryBuilder.buildQuery(params, queryParts, includeGroup);
@@ -277,7 +277,7 @@ public class CohortQueryBuilder {
             df -> {
               String paramName =
                   QueryParameterUtil.addQueryParameterValue(params, QueryParameterValue.int64(1));
-              queryBuilder.append(" and " + df + " = " + paramName + "\n");
+              queryBuilder.append(" AND " + df + " = " + paramName + "\n");
             });
   }
 
@@ -294,7 +294,7 @@ public class CohortQueryBuilder {
         AgeType.AGE.equals(ageType)
             ? "DATE_DIFF(CURRENT_DATE,dob, YEAR) - IF(EXTRACT(MONTH FROM dob)*100 + EXTRACT(DAY FROM dob) > EXTRACT(MONTH FROM CURRENT_DATE)*100 + EXTRACT(DAY FROM CURRENT_DATE),1,0)"
             : ageType.toString();
-    return "when " + ageSql + " >= " + lo + " and " + ageSql + " <= " + hi + " then '" + lo + "-"
+    return "WHEN " + ageSql + " >= " + lo + " AND " + ageSql + " <= " + hi + " THEN '" + lo + "-"
         + hi + "'";
   }
 }

@@ -2,7 +2,7 @@ import {mount} from 'enzyme';
 import * as fp from 'lodash/fp';
 import {Dropdown} from 'primereact/dropdown';
 import * as React from 'react';
-import {InputSwitch} from "primereact/inputswitch";
+import {InputSwitch} from 'primereact/inputswitch';
 import {MemoryRouter, Route} from 'react-router-dom';
 
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
@@ -460,7 +460,7 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
 describe('AdminInstitutionEditSpec - add mode', () => {
 
   const component = () => {
-    return mount(<MemoryRouter initialEntries={[`/admin/institution/add`]}>
+    return mount(<MemoryRouter initialEntries={['/admin/institution/add']}>
       <Route path='/admin/institution/add'>
         <AdminInstitutionEdit hideSpinner={() => {}} showSpinner={() => {}}/>
       </Route>

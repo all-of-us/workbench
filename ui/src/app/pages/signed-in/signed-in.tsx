@@ -1,4 +1,5 @@
 import * as React from 'react';
+import {useEffect, useState} from 'react';
 
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {Footer, FooterTypeEnum} from 'app/components/footer';
@@ -9,16 +10,17 @@ import {NavBar} from 'app/pages/signed-in/nav-bar';
 import {SignedInRoutes} from 'app/routing/signed-in-app-routing';
 import {cdrVersionsApi} from 'app/services/swagger-fetch-clients';
 import {reactStyles} from 'app/utils';
-import {hasRegisteredAccess} from 'app/utils/access-tiers';
+import {hasRegisteredTierAccess} from 'app/utils/access-tiers';
 import {setInstitutionCategoryState} from 'app/utils/analytics';
 import {
   cdrVersionStore,
   compoundRuntimeOpStore,
   profileStore,
-  routeDataStore, serverConfigStore, useStore
+  routeDataStore,
+  serverConfigStore,
+  useStore
 } from 'app/utils/stores';
 import {environment} from 'environments/environment';
-import {useEffect, useState} from 'react';
 
 import backgroundImage from 'assets/images/BG-Pattern.png';
 
@@ -91,7 +93,7 @@ export const SignedIn = (spinnerProps: WithSpinnerOverlayProps) => {
           return;
         }
         setInstitutionCategoryState(profileState.profile.verifiedInstitutionalAffiliation);
-        if (hasRegisteredAccess(profileState.profile.accessTierShortNames)) {
+        if (hasRegisteredTierAccess(profileState.profile)) {
           if (!tiers) {
             const cdrVersionsByTier = await cdrVersionsApi().getCdrVersionsByTier();
             cdrVersionStore.set(cdrVersionsByTier);
@@ -123,7 +125,7 @@ export const SignedIn = (spinnerProps: WithSpinnerOverlayProps) => {
         config && (
             tiers || (
                 profileState.profile &&
-                !hasRegisteredAccess(profileState.profile.accessTierShortNames)
+                !hasRegisteredTierAccess(profileState.profile)
             )) && <div
           style={
             hideFooter

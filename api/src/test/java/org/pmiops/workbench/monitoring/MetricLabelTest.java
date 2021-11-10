@@ -6,10 +6,9 @@ import com.google.common.collect.ImmutableSet;
 import java.util.Collections;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
-import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.monitoring.labels.MetricLabelBase;
 
-public class MetricLabelTest extends SpringTest {
+public class MetricLabelTest {
 
   // use anonymous inner class implementing AttachmentBase objects so we don't depend on
   // enums directly. That is, we're just checking the interface here.

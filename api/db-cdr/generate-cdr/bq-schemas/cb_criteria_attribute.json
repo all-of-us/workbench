@@ -1,11 +1,11 @@
 [
   {
-    "mode": "REQUIRED",
+    "mode": "NULLABLE",
     "name": "id",
     "type": "INTEGER"
   },
   {
-    "mode": "REQUIRED",
+    "mode": "NULLABLE",
     "name": "concept_id",
     "type": "INTEGER"
   },
@@ -30,3 +30,4 @@
     "type": "STRING"
   }
 ]
+

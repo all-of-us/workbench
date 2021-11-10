@@ -56,7 +56,7 @@ const styles = reactStyles({
 const actionCards = [
   {
     title: 'Create another Cohort',
-    description: `Create another cohort for your analysis.`,
+    description: 'Create another cohort for your analysis.',
     action: 'newCohort'
   }, {
     title: 'Create Review Sets',
@@ -65,7 +65,7 @@ const actionCards = [
     action: 'review'
   }, {
     title: 'Create a Dataset',
-    description: `Create an analysis ready dataset that can be exported to notebooks.`,
+    description: 'Create an analysis ready dataset that can be exported to notebooks.',
     action: 'dataSet'
   },
 ];
@@ -111,7 +111,7 @@ export const CohortActions = fp.flow(
 
       switch (action) {
         case 'cohort':
-          url += `data/cohorts/build`;
+          url += 'data/cohorts/build';
           queryParams = {cohortId: cohort.id};
           break;
         case 'review':
@@ -124,7 +124,7 @@ export const CohortActions = fp.flow(
           url += 'data/data-sets';
           break;
         case 'newCohort':
-          url += `data/cohorts/build`;
+          url += 'data/cohorts/build';
       }
       if (queryParams) {
         url += '?' + querystring.stringify(queryParams)

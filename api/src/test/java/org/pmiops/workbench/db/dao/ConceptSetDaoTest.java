@@ -8,7 +8,7 @@ import java.util.HashSet;
 import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.pmiops.workbench.SpringTest;
+import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbConceptSetConceptId;
 import org.pmiops.workbench.db.model.DbStorageEnums;
@@ -18,11 +18,13 @@ import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.Surveys;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
 
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-public class ConceptSetDaoTest extends SpringTest {
+@Import(FakeClockConfiguration.class)
+public class ConceptSetDaoTest {
 
   @Autowired private ConceptSetDao conceptSetDao;
   @Autowired private UserDao userDao;

@@ -17,6 +17,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.access.AccessTierServiceImpl;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -75,6 +76,7 @@ public class CdrVersionServiceTest {
     CommonMappers.class,
     CdrVersionService.class,
     CdrVersionMapperImpl.class,
+    FakeClockConfiguration.class
   })
   @MockBean({
     FireCloudService.class,

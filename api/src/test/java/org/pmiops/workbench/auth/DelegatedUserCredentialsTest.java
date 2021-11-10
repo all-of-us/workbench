@@ -32,10 +32,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.test.FakeClock;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
-public class DelegatedUserCredentialsTest extends SpringTest {
+@SpringJUnitConfig
+public class DelegatedUserCredentialsTest {
 
   static final String USER_EMAIL = "john.doe@researchallofus.org";
   static final String SERVICE_ACCOUNT_EMAIL = "gsuite-admin@test-project.iam.gserviceaccount.com";

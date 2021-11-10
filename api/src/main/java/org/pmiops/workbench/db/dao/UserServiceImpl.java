@@ -245,23 +245,12 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
         dbUser, requiredModulesForRegisteredTier, REGISTERED_TIER_SHORT_NAME)) {
       return Collections.emptyList();
     }
-    // This is a temporary measure until Controlled Tier Beta access controls is implemented.
-    boolean allowAccessToAllTiersForRegisteredUsers =
-        configProvider.get().featureFlags.unsafeAllowAccessToAllTiersForRegisteredUsers;
-
-    // If Feature flag unsafeAllowAccessToAllTiersForRegisteredUsers is true: return ALL access
-    // tiers
-    if (allowAccessToAllTiersForRegisteredUsers) {
-      return accessTierService.getAllTiers();
-    }
 
     // User is already qualified for RT
     List<DbAccessTier> userAccessTiers =
         com.google.common.collect.Lists.newArrayList(accessTierService.getRegisteredTierOrThrow());
 
-    // Add Controlled Access Tier to the list, if:
-    // a) unsafeAllowAccessToAllTiersForRegisteredUsers is false AND
-    // b) user has completed/bypassed all CT Steps.
+    // Add Controlled Access Tier to the list, if user has completed/bypassed all CT Steps.
     accessTierService
         .getAccessTierByName(CONTROLLED_TIER_SHORT_NAME)
         .ifPresent(

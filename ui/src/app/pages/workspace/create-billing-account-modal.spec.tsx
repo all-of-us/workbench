@@ -2,7 +2,7 @@ import {mount} from 'enzyme';
 import * as React from 'react';
 
 import {profileStore} from 'app/utils/stores';
-import {CreateBillingAccountModal} from "./create-billing-account-modal";
+import {CreateBillingAccountModal} from './create-billing-account-modal';
 import {ProfileStubVariables} from 'testing/stubs/profile-api-stub';
 
 describe('CreateBillingAccountModal', () => {

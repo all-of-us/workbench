@@ -8,6 +8,7 @@ import BaseHelpSidebar, { Selectors } from './base-help-sidebar';
 import { logger } from 'libs/logger';
 import { FilterSign } from 'app/page/cohort-participants-group';
 import { getPropValue } from 'utils/element-utils';
+import ClrIconLink from 'app/element/clr-icon-link';
 
 enum SectionSelectors {
   AttributesForm = '//*[@id="attributes-form"]',
@@ -32,6 +33,9 @@ export default class ReviewCriteriaSidebar extends BaseHelpSidebar {
     await super.waitUntilVisible();
     const title = await this.getTitle();
     await this.waitUntilSectionVisible(SectionSelectors.SelectionList);
+    await Promise.race([this.findButton(LinkText.SaveCriteria), this.findButton(LinkText.AddThis)]);
+    await Promise.race([this.findButton('BACK'), this.findButton('Back')]);
+    await waitWhileLoading(this.page);
     logger.info(`"${title}" sidebar is opened`);
   }
 
@@ -108,7 +112,13 @@ export default class ReviewCriteriaSidebar extends BaseHelpSidebar {
   }
 
   async removeSelectedCriteria(criteriaName: string): Promise<void> {
-    const removeSelectedCriteriaIcon = buildXPath(
+    const removeIconLink = this.getRemoveCriteriaIconLink(criteriaName);
+    await removeIconLink.click();
+    await this.page.waitForXPath(removeIconLink.getXpath(), { hidden: true });
+  }
+
+  getRemoveCriteriaIconLink(criteriaName: string): ClrIconLink {
+    const removeCriteriaIconXpath = buildXPath(
       {
         type: ElementType.Icon,
         iconShape: 'times-circle',
@@ -117,8 +127,6 @@ export default class ReviewCriteriaSidebar extends BaseHelpSidebar {
       },
       this
     );
-    const removeIcon = await this.page.waitForXPath(removeSelectedCriteriaIcon, { visible: true });
-    await removeIcon.click();
-    await this.page.waitForXPath(removeSelectedCriteriaIcon, { hidden: true });
+    return new ClrIconLink(this.page, removeCriteriaIconXpath);
   }
 }

@@ -15,6 +15,7 @@ import * as React from 'react';
 import {CSSTransition, TransitionGroup} from 'react-transition-group';
 
 import {faCircle} from '@fortawesome/free-solid-svg-icons/faCircle';
+import {faLock} from '@fortawesome/free-solid-svg-icons/faLock';
 import {faSyncAlt} from '@fortawesome/free-solid-svg-icons/faSyncAlt';
 import {faTerminal} from '@fortawesome/free-solid-svg-icons/faTerminal';
 import {SelectionList} from 'app/cohort-search/selection-list/selection-list.component';
@@ -41,7 +42,7 @@ import {
   NavigationProps,
   setSidebarActiveIconStore
 } from 'app/utils/navigation';
-import {withRuntimeStore} from 'app/utils/runtime-utils';
+import { ComputeSecuritySuspendedError, withRuntimeStore} from 'app/utils/runtime-utils';
 import {
   CompoundRuntimeOpStore,
   compoundRuntimeOpStore, GenomicExtractionStore, genomicExtractionStore,
@@ -369,22 +370,22 @@ export const HelpSidebar = fp.flow(
         },
         'runtime': {
           id: 'runtime',
-          disabled: false,
+          disabled: !!this.props.runtimeStore.loadingError,
           faIcon: null,
           label: 'Cloud Icon',
           showIcon: () => true,
           style: {height: '22px', width: '22px'},
-          tooltip: 'Cloud Analysis Environment',
+          tooltip: this.runtimeTooltip('Cloud Analysis Environment'),
           hasContent: true,
         },
         'terminal': {
           id: 'terminal',
-          disabled: false,
+          disabled: !!this.props.runtimeStore.loadingError,
           faIcon: faTerminal,
           label: 'Terminal Icon',
           showIcon: () => true,
           style: {height: '22px', width: '22px'},
-          tooltip:  'Cloud Analysis Terminal',
+          tooltip: this.runtimeTooltip('Cloud Analysis Terminal'),
           hasContent: false,
         },
         'genomicExtractions': {
@@ -597,7 +598,7 @@ export const HelpSidebar = fp.flow(
 
     displayRuntimeIcon(icon: IconConfig) {
       const {runtimeStore, compoundRuntimeOps, workspace} = this.props;
-      let status = runtimeStore && runtimeStore.runtime && runtimeStore.runtime.status;
+      let status = runtimeStore?.runtime?.status;
       if ((!status || status === RuntimeStatus.Deleted) &&
           workspace.namespace in compoundRuntimeOps) {
         // If a compound operation is still pending, and we're transitioning
@@ -615,44 +616,49 @@ export const HelpSidebar = fp.flow(
       return <FlexRow style={{height: '100%', alignItems: 'center', justifyContent: 'space-around'}}>
         <img data-test-id={'help-sidebar-icon-' + icon.id} src={proIcons[icon.id]} style={{...icon.style, position: 'absolute'}} />
         <FlexRow data-test-id='runtime-status-icon-container' style={styles.statusIconContainer}>
-          {(status === RuntimeStatus.Creating
-          || status === RuntimeStatus.Starting
-          || status === RuntimeStatus.Updating)
-            && <FontAwesomeIcon icon={faSyncAlt} style={{
-              ...styles.asyncOperationStatusIcon,
-              ...styles.rotate,
-              color: colors.asyncOperationStatus.starting,
-            }}/>
-          }
-          {status === RuntimeStatus.Stopped
-            && <FontAwesomeIcon icon={faCircle} style={{
-              ...styles.asyncOperationStatusIcon,
-              ...styles.runtimeStatusIconOutline,
-              color: colors.asyncOperationStatus.stopped,
-            }}/>
-          }
-          {status === RuntimeStatus.Running
-            && <FontAwesomeIcon icon={faCircle} style={{
-              ...styles.asyncOperationStatusIcon,
-              ...styles.runtimeStatusIconOutline,
-              color: colors.asyncOperationStatus.running,
-            }}/>
-          }
-          {(status === RuntimeStatus.Stopping
-          || status === RuntimeStatus.Deleting)
-            && <FontAwesomeIcon icon={faSyncAlt} style={{
-              ...styles.asyncOperationStatusIcon,
-              ...styles.rotate,
-              color: colors.asyncOperationStatus.stopping,
-            }}/>
-          }
-          {status === RuntimeStatus.Error
-            && <FontAwesomeIcon icon={faCircle} style={{
-              ...styles.asyncOperationStatusIcon,
-              ...styles.runtimeStatusIconOutline,
-              color: colors.asyncOperationStatus.error,
-            }}/>
-          }
+          {(() => {
+          if (runtimeStore.loadingError) {
+              return <FontAwesomeIcon icon={faLock} style={{
+                ...styles.asyncOperationStatusIcon,
+                color: colors.asyncOperationStatus.stopped,
+              }}/>;
+            }
+            switch (status) {
+              case RuntimeStatus.Creating:
+              case RuntimeStatus.Starting:
+              case RuntimeStatus.Updating:
+                  return <FontAwesomeIcon icon={faSyncAlt} style={{
+                    ...styles.asyncOperationStatusIcon,
+                    ...styles.rotate,
+                    color: colors.asyncOperationStatus.starting,
+                  }}/>;
+              case RuntimeStatus.Stopped:
+                return <FontAwesomeIcon icon={faCircle} style={{
+                  ...styles.asyncOperationStatusIcon,
+                  ...styles.runtimeStatusIconOutline,
+                  color: colors.asyncOperationStatus.stopped,
+                }}/>;
+              case RuntimeStatus.Running:
+                return <FontAwesomeIcon icon={faCircle} style={{
+                  ...styles.asyncOperationStatusIcon,
+                  ...styles.runtimeStatusIconOutline,
+                  color: colors.asyncOperationStatus.running,
+                }}/>;
+              case RuntimeStatus.Stopping:
+              case RuntimeStatus.Deleting:
+                return <FontAwesomeIcon icon={faSyncAlt} style={{
+                  ...styles.asyncOperationStatusIcon,
+                  ...styles.rotate,
+                  color: colors.asyncOperationStatus.stopping,
+                }}/>;
+              case RuntimeStatus.Error:
+                return <FontAwesomeIcon icon={faCircle} style={{
+                  ...styles.asyncOperationStatusIcon,
+                  ...styles.runtimeStatusIconOutline,
+                  color: colors.asyncOperationStatus.error,
+              }}/>;
+            }
+          })()}
         </FlexRow>
       </FlexRow>;
     }
@@ -741,6 +747,18 @@ export const HelpSidebar = fp.flow(
 
     get sidebarWidth() {
       return fp.getOr('14', 'bodyWidthRem', this.sidebarContent(this.state.activeIcon));
+    }
+
+
+    private runtimeTooltip(baseTooltip: string): string {
+      const {loadingError} = this.props.runtimeStore;
+      if (loadingError) {
+        if (loadingError instanceof ComputeSecuritySuspendedError) {
+          return `Security suspended: ${baseTooltip}`;
+        }
+        return `${baseTooltip} (unknown error)`;
+      }
+      return baseTooltip;
     }
 
     sidebarContent(activeIcon): {

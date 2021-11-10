@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.pmiops.workbench.SpringTest;
+import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.UserDao;
@@ -41,7 +41,7 @@ import org.springframework.transaction.annotation.Transactional;
 @DataJpaTest
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
-public class OfflineAuditControllerTest extends SpringTest {
+public class OfflineAuditControllerTest {
   private static final Instant NOW = Instant.now();
   private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
   private static final String CDR_V1_PROJECT_ID = "cdr1-project";
@@ -50,7 +50,7 @@ public class OfflineAuditControllerTest extends SpringTest {
   private static final String USER_EMAIL = "falco@lombardi.com";
 
   @TestConfiguration
-  @Import({OfflineAuditController.class})
+  @Import({FakeClockConfiguration.class, OfflineAuditController.class})
   @MockBean({BigQueryService.class, WorkspaceDao.class})
   static class Configuration {
     @Bean

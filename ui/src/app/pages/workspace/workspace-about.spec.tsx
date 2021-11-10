@@ -14,7 +14,7 @@ import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {RuntimeApiStub} from 'testing/stubs/runtime-api-stub';
 import {CdrVersionsStubVariables, cdrVersionTiersResponse} from 'testing/stubs/cdr-versions-api-stub';
 import {SpecificPopulationItems} from './workspace-edit-text';
-import {cdrVersionStore, profileStore, serverConfigStore} from "app/utils/stores";
+import {cdrVersionStore, profileStore, serverConfigStore} from 'app/utils/stores';
 
 describe('WorkspaceAbout', () => {
   const profile = ProfileStubVariables.PROFILE_STUB as unknown as Profile;
@@ -142,4 +142,40 @@ describe('WorkspaceAbout', () => {
     expect(wrapper.exists('[data-test-id="unpublish-button"]')).toBeTruthy()
   });
 
+  it('Publish/Unpublish button styling depends on state - unpublished', async () => {
+    const profileWithAuth = {...ProfileStubVariables.PROFILE_STUB, authorities: [Authority.DEVELOPER]};
+    profileStore.set({profile: profileWithAuth, load, reload, updateCache});
+
+    const wrapper = component();
+    await waitOneTickAndUpdate(wrapper);
+
+    const publishButton = wrapper.find('[data-test-id="publish-button"]');
+    expect(publishButton.exists()).toBeTruthy();
+    expect(publishButton.prop('disabled')).toBeFalsy();
+    expect(publishButton.prop('type')).toEqual('primary');
+
+    const unpublishButton = wrapper.find('[data-test-id="unpublish-button"]');
+    expect(unpublishButton.exists()).toBeTruthy();
+    expect(unpublishButton.prop('disabled')).toBeTruthy();
+    expect(unpublishButton.prop('type')).toEqual('secondary');
+  });
+
+  it('Publish/Unpublish button styling depends on state - published', async () => {
+    const profileWithAuth = {...ProfileStubVariables.PROFILE_STUB, authorities: [Authority.DEVELOPER]};
+    profileStore.set({profile: profileWithAuth, load, reload, updateCache});
+    currentWorkspaceStore.next({...currentWorkspaceStore.getValue(), published: true});
+
+    const wrapper = component();
+    await waitOneTickAndUpdate(wrapper);
+
+    const publishButton = wrapper.find('[data-test-id="publish-button"]');
+    expect(publishButton.exists()).toBeTruthy();
+    expect(publishButton.prop('disabled')).toBeTruthy();
+    expect(publishButton.prop('type')).toEqual('secondary');
+
+    const unpublishButton = wrapper.find('[data-test-id="unpublish-button"]');
+    expect(unpublishButton.exists()).toBeTruthy();
+    expect(unpublishButton.prop('disabled')).toBeFalsy();
+    expect(unpublishButton.prop('type')).toEqual('primary');
+  });
 });

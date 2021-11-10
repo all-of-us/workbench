@@ -3,7 +3,7 @@ import * as React from 'react';
 import * as fp from 'lodash/fp';
 import {MemoryRouter} from 'react-router-dom';
 
-import {LoginGovIAL2NotificationMaybe} from "./login-gov-ial2-notification";
+import {LoginGovIAL2NotificationMaybe} from './login-gov-ial2-notification';
 import {profileStore, serverConfigStore} from 'app/utils/stores';
 import defaultServerConfig from 'testing/default-server-config';
 import {AccessModule} from 'generated/fetch';

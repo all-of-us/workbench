@@ -13,7 +13,7 @@ import com.google.common.collect.ImmutableList;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.pmiops.workbench.SpringTest;
+import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.db.dao.UserDao;
@@ -33,7 +33,7 @@ import org.springframework.test.annotation.DirtiesContext;
 
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-public class CloudTaskUserControllerTest extends SpringTest {
+public class CloudTaskUserControllerTest {
   @Autowired private CloudResourceManagerService mockCloudResourceManagerService;
 
   private long incrementedUserId = 1L;
@@ -46,7 +46,7 @@ public class CloudTaskUserControllerTest extends SpringTest {
   @Autowired private AccessModuleService mockAccessModuleService;
 
   @TestConfiguration
-  @Import({CloudTaskUserController.class})
+  @Import({FakeClockConfiguration.class, CloudTaskUserController.class})
   @MockBean({CloudResourceManagerService.class, UserService.class, AccessModuleService.class})
   static class Configuration {}
 

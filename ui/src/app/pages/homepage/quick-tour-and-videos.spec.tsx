@@ -1,7 +1,7 @@
 import * as React from 'react';
 import {mount, ReactWrapper} from 'enzyme';
 
-import {QuickTourAndVideos} from "./quick-tour-and-videos";
+import {QuickTourAndVideos} from './quick-tour-and-videos';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 
 describe('Quick Tour and Videos', () => {

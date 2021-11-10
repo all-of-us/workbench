@@ -20,6 +20,6 @@ public interface CohortMapper {
   DbCohort clientToDbModel(Cohort source);
 
   @Mapping(target = "id", source = "cohortId")
-  @Mapping(target = "etag", source = "version", qualifiedByName = "cdrVersionToEtag")
+  @Mapping(target = "etag", source = "version", qualifiedByName = "versionToEtag")
   Cohort dbModelToClient(DbCohort destination);
 }

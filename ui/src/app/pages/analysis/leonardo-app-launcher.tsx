@@ -33,7 +33,7 @@ import {environment} from 'environments/environment';
 import {Profile, Runtime, RuntimeStatus} from 'generated/fetch';
 import {RouteComponentProps, withRouter} from 'react-router-dom';
 import {appendNotebookFileSuffix, dropNotebookFileSuffix} from './util';
-import {parseQueryParams} from "app/components/app-router";
+import {parseQueryParams} from 'app/components/app-router';
 import {
   ErrorMode,
   NotebookFrameError,

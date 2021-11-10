@@ -11,7 +11,7 @@ import javax.inject.Provider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
-import org.pmiops.workbench.SpringTest;
+import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.cdr.cache.MySQLStopWords;
 import org.pmiops.workbench.cdr.dao.CBCriteriaAttributeDao;
 import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
@@ -55,7 +55,7 @@ import org.springframework.test.annotation.DirtiesContext;
 
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-public class CohortBuilderControllerTest extends SpringTest {
+public class CohortBuilderControllerTest {
 
   private CohortBuilderController controller;
 
@@ -75,7 +75,7 @@ public class CohortBuilderControllerTest extends SpringTest {
   @Mock private Provider<MySQLStopWords> mySQLStopWordsProvider;
 
   @TestConfiguration
-  @Import({CohortBuilderMapperImpl.class})
+  @Import({FakeClockConfiguration.class, CohortBuilderMapperImpl.class})
   @MockBean({WorkspaceAuthService.class})
   static class Configuration {}
 

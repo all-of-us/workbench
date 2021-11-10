@@ -16,7 +16,7 @@ import org.pmiops.workbench.utils.mappers.MapStructConfig;
     config = MapStructConfig.class,
     uses = {CommonMappers.class, DbStorageEnums.class})
 public interface CohortReviewMapper {
-  @Mapping(target = "etag", source = "version", qualifiedByName = "cdrVersionToEtag")
+  @Mapping(target = "etag", source = "version", qualifiedByName = "versionToEtag")
   // this fetches all participants, and can be large, we don't want to fetch by
   // default. May be removed from object pending design
   @Mapping(target = "participantCohortStatuses", ignore = true)

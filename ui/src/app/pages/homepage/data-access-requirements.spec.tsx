@@ -1,5 +1,5 @@
-import * as React from "react";
-import {mount} from "enzyme";
+import * as React from 'react';
+import {mount} from 'enzyme';
 
 import defaultServerConfig from 'testing/default-server-config';
 import {AccessModule, InstitutionApi, Profile, ProfileApi} from 'generated/fetch';
@@ -50,8 +50,8 @@ describe('DataAccessRequirements', () => {
       .find('[data-test-id="ineligible"]');
 
     const findControlledTierCard = (wrapper) => wrapper.find('[data-test-id="controlled-card"]')
-    const findEligibleText = (wrapper) => wrapper.find(`[data-test-id="eligible-text"]`);
-    const findIneligibleText = (wrapper) => wrapper.find(`[data-test-id="ineligible-text"]`);
+    const findEligibleText = (wrapper) => wrapper.find('[data-test-id="eligible-text"]');
+    const findIneligibleText = (wrapper) => wrapper.find('[data-test-id="ineligible-text"]');
 
     const findContactUs = (wrapper) => wrapper.find('[data-test-id="contact-us"]');
 
@@ -533,7 +533,7 @@ describe('DataAccessRequirements', () => {
         expect(findModule(wrapper, AccessModule.ERACOMMONS).exists()).toBeTruthy();
     });
 
-    it("Should display Institution has signed agreement when the user has a Tier Eligibility object for CT", async() => {
+    it('Should display Institution has signed agreement when the user has a Tier Eligibility object for CT', async() => {
         let wrapper = component();
         await waitOneTickAndUpdate(wrapper);
 
@@ -559,7 +559,7 @@ describe('DataAccessRequirements', () => {
         expect(findIneligibleText(findControlledTierCard(wrapper)).exists()).toBeTruthy();
     });
 
-    it("Should not display Institution has signed agreement when the user doesn't have a Tier Eligibility object for CT", async() => {
+    it('Should not display Institution has signed agreement when the user doesn\'t have a Tier Eligibility object for CT', async() => {
         let wrapper = component();
         await waitOneTickAndUpdate(wrapper);
 
@@ -585,7 +585,7 @@ describe('DataAccessRequirements', () => {
         expect(findIneligibleText(findControlledTierCard(wrapper)).exists()).toBeTruthy();
     });
 
-    it("Should display Institution allows you to access CT when the user's CT Tier Eligibility object has eligible=true", async() => {
+    it('Should display Institution allows you to access CT when the user\'s CT Tier Eligibility object has eligible=true', async() => {
         let wrapper = component();
         await waitOneTickAndUpdate(wrapper);
 
@@ -611,7 +611,7 @@ describe('DataAccessRequirements', () => {
         expect(findIneligibleText(findControlledTierCard(wrapper)).exists()).toBeFalsy();
     });
 
-    it("Should not display Institution allows you to access CT when the user's CT Tier Eligibility object has eligible=false", async() => {
+    it('Should not display Institution allows you to access CT when the user\'s CT Tier Eligibility object has eligible=false', async() => {
         let wrapper = component();
         await waitOneTickAndUpdate(wrapper);
 
@@ -637,7 +637,7 @@ describe('DataAccessRequirements', () => {
         expect(findIneligibleText(findControlledTierCard(wrapper)).exists()).toBeTruthy();
     });
 
-    it("Should not display Institution allows you to access CT when the user does not have a CT Tier Eligibility object", async() => {
+    it('Should not display Institution allows you to access CT when the user does not have a CT Tier Eligibility object', async() => {
         let wrapper = component();
         await waitOneTickAndUpdate(wrapper);
 
@@ -664,7 +664,7 @@ describe('DataAccessRequirements', () => {
         expect(findIneligibleText(findControlledTierCard(wrapper)).exists()).toBeTruthy();
     });
 
-    it("Should display the CT card when the environment has a Controlled Tier", async() => {
+    it('Should display the CT card when the environment has a Controlled Tier', async() => {
         environment.accessTiersVisibleToUsers = [AccessTierShortNames.Registered, AccessTierShortNames.Controlled];
 
         let wrapper = component();
@@ -672,7 +672,7 @@ describe('DataAccessRequirements', () => {
         expect(findControlledTierCard(wrapper).exists()).toBeTruthy();
     });
 
-    it("Should not display the CT card when the environment does not have a Controlled Tier", async() => {
+    it('Should not display the CT card when the environment does not have a Controlled Tier', async() => {
         environment.accessTiersVisibleToUsers = [AccessTierShortNames.Registered];
 
         let wrapper = component();
@@ -681,8 +681,8 @@ describe('DataAccessRequirements', () => {
     });
 
 
-    it("Should display eraCommons module in CT card " +
-        "when the user institution has signed agreement and CT requires eraCommons and RT does not", async() => {
+    it('Should display eraCommons module in CT card ' +
+        'when the user institution has signed agreement and CT requires eraCommons and RT does not', async() => {
         environment.accessTiersVisibleToUsers = [AccessTierShortNames.Registered, AccessTierShortNames.Controlled];
         let wrapper = component();
         await waitOneTickAndUpdate(wrapper);
@@ -709,8 +709,8 @@ describe('DataAccessRequirements', () => {
         expect(findModule(findControlledTierCard(wrapper), AccessModule.ERACOMMONS).exists()).toBeTruthy();
     });
 
-    it("Should not display eraCommons module in CT card " +
-        "when RT requires eraCommons", async() => {
+    it('Should not display eraCommons module in CT card ' +
+        'when RT requires eraCommons', async() => {
         let wrapper = component();
         await waitOneTickAndUpdate(wrapper);
 
@@ -736,8 +736,8 @@ describe('DataAccessRequirements', () => {
         expect(findModule(findControlledTierCard(wrapper), AccessModule.ERACOMMONS).exists()).toBeFalsy();
     });
 
-    it("Should not display eraCommons module in CT card " +
-        "when user's institution has not signed CT Institution agreement", async() => {
+    it('Should not display eraCommons module in CT card ' +
+        'when user\'s institution has not signed CT Institution agreement', async() => {
         let wrapper = component();
         await waitOneTickAndUpdate(wrapper);
 
@@ -761,8 +761,8 @@ describe('DataAccessRequirements', () => {
     });
 
 
-    it("Should display ineligible CT Compliance Training module in CT card " +
-        "when user's institution has not signed CT Institution agreement", async() => {
+    it('Should display ineligible CT Compliance Training module in CT card ' +
+        'when user\'s institution has not signed CT Institution agreement', async() => {
         let wrapper = component();
         await waitOneTickAndUpdate(wrapper);
 
@@ -785,8 +785,8 @@ describe('DataAccessRequirements', () => {
         expect(findIneligibleModule(findControlledTierCard(wrapper), AccessModule.CTCOMPLIANCETRAINING).exists()).toBeTruthy();
     });
 
-    it("Should display ineligible CT Compliance Training module in CT card " +
-        "when user is not eligible for CT", async() => {
+    it('Should display ineligible CT Compliance Training module in CT card ' +
+        'when user is not eligible for CT', async() => {
         let wrapper = component();
         await waitOneTickAndUpdate(wrapper);
 
@@ -814,8 +814,8 @@ describe('DataAccessRequirements', () => {
         expect(findIneligibleModule(findControlledTierCard(wrapper), AccessModule.CTCOMPLIANCETRAINING).exists()).toBeTruthy();
     });
 
-    it("Should not display eraCommons module in CT card " +
-        "when eraCommons is disabled via the environment config", async() => {
+    it('Should not display eraCommons module in CT card ' +
+        'when eraCommons is disabled via the environment config', async() => {
         serverConfigStore.set({config: {...defaultServerConfig, enableEraCommons: false}});
 
         let wrapper = component();
@@ -843,7 +843,7 @@ describe('DataAccessRequirements', () => {
         expect(findModule(findControlledTierCard(wrapper), AccessModule.ERACOMMONS).exists()).toBeFalsy();
     });
 
-    it("Should show the RAS help text component when it is incomplete", async() => {
+    it('Should show the RAS help text component when it is incomplete', async() => {
         const wrapper = component();
         await waitOneTickAndUpdate(wrapper);
 
@@ -853,7 +853,7 @@ describe('DataAccessRequirements', () => {
         expect(findContactUs(wrapper).exists()).toBeTruthy();
     });
 
-    it("Should not show the RAS help text component when it is complete", async() => {
+    it('Should not show the RAS help text component when it is complete', async() => {
 
         profileStore.set({
             profile: {
@@ -875,8 +875,8 @@ describe('DataAccessRequirements', () => {
         expect(findContactUs(wrapper).exists()).toBeFalsy();
     });
 
-    it("Should not display CT Compliance Training module in CT card " +
-        "when unsafeAllowSelfBypass is false", async() => {
+    it('Should not display CT Compliance Training module in CT card ' +
+        'when unsafeAllowSelfBypass is false', async() => {
         serverConfigStore.set({config: {...defaultServerConfig, unsafeAllowSelfBypass: false}});
 
         let wrapper = component();
@@ -904,8 +904,8 @@ describe('DataAccessRequirements', () => {
         expect(findModule(findControlledTierCard(wrapper), AccessModule.CTCOMPLIANCETRAINING).exists()).toBeFalsy();
     });
 
-    it("Should not display ct Compliance Training module in CT card " +
-        "when enableComplianceTraining is false", async() => {
+    it('Should not display ct Compliance Training module in CT card ' +
+        'when enableComplianceTraining is false', async() => {
         serverConfigStore.set({config: {...defaultServerConfig, enableComplianceTraining: false}});
 
         let wrapper = component();

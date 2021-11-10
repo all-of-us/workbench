@@ -1,11 +1,11 @@
 [
   {
-    "mode": "REQUIRED",
+    "mode": "NULLABLE",
     "name": "id",
     "type": "INTEGER"
   },
   {
-    "mode": "REQUIRED",
+    "mode": "NULLABLE",
     "name": "question_concept_id",
     "type": "INTEGER"
   },
@@ -25,3 +25,4 @@
     "type": "INTEGER"
   }
 ]
+
