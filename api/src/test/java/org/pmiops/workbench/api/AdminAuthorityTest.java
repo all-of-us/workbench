@@ -79,8 +79,11 @@ public class AdminAuthorityTest {
    * <p>We walk these relationships to check our heuristic. The following preconditions must hold:
    *
    * <ul>
-   *   <li>all API controllers live in the RW "api" Java package
+   *   <li>all API controllers live in the RW "api" Java package, and are annotated
+   *       with @RestController
    *   <li>Swagger codegen uses the naming pattern of FooApiDelegate and FooApi
+   *   <li>Swagger codegen generates identical method names for the Api interface and delegate (the
+   *       operationId is used currently)
    * </ul>
    */
   @Test
@@ -92,9 +95,10 @@ public class AdminAuthorityTest {
 
     assertThat(controllers).isNotEmpty();
     assertThat(generatedApis).isNotEmpty();
+    assertThat(controllers.size()).isEqualTo(generatedApis.size());
 
     Map<Class<?>, Class<?>> controllerToApi = new HashMap<>();
-    for (Class controller : controllers) {
+    for (Class<?> controller : controllers) {
       Class<?> delegateInterface = controllerToDelegateInterface(controller);
 
       // Here we depend on the Swagger generated naming convention. Not ideal, but we do not have
@@ -105,7 +109,7 @@ public class AdminAuthorityTest {
       controllerToApi.put(controller, generatedApis.get(apiName));
     }
 
-    for (Class controller : controllers) {
+    for (Class<?> controller : controllers) {
       assertWithMessage(
               "could not find associated Swagger generated API interface for "
                   + controller.getName())
