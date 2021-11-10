@@ -35,6 +35,7 @@ import org.pmiops.workbench.leonardo.model.LeonardoGetPersistentDiskResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
+import org.pmiops.workbench.leonardo.model.LeonardoMachineConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.leonardo.model.LeonardoUpdateDiskRequest;
 import org.pmiops.workbench.leonardo.model.LeonardoUpdateRuntimeRequest;
@@ -172,7 +173,11 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
     } else if (runtime.getGceWithPdConfig() != null) {
       return leonardoMapper.toLeonardoGceWithPdConfig(runtime.getGceWithPdConfig());
     } else {
-      return leonardoMapper.toLeonardoMachineConfig(runtime.getDataprocConfig());
+      LeonardoMachineConfig machineConfig = leonardoMapper.toLeonardoMachineConfig(runtime.getDataprocConfig());
+      if(workbenchConfigProvider.get().featureFlags.enablePrivateDataprocWorker) {
+        machineConfig.setWorkerPrivateAccess(true);
+      }
+      return machineConfig;
     }
   }
 
