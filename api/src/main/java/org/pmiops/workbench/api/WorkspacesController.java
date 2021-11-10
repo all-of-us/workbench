@@ -4,6 +4,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import java.sql.Timestamp;
 import java.time.Clock;
+import java.time.OffsetDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -165,6 +166,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
             workspaceId.getWorkspaceNamespace(),
             workspaceId.getWorkspaceName(),
             accessTier.getAuthDomainName());
+    fcWorkspace.setCompletedCloneWorkspaceFileTransfer(OffsetDateTime.now());
     DbWorkspace dbWorkspace = createDbWorkspace(workspace, cdrVersion, user, fcWorkspace);
     try {
       dbWorkspace = workspaceDao.save(dbWorkspace);
@@ -275,6 +277,13 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         new WorkspaceResponseListResponse().items(workspaceService.getWorkspaces()));
   }
 
+
+  @Override
+  public ResponseEntity<Boolean> notebookTransferComplete(String workspaceNamespace,
+      String workspaceId) {
+    return  ResponseEntity.ok(workspaceService.notebookTransferCompleted(workspaceNamespace, workspaceId));
+  }
+
   @Override
   public ResponseEntity<Workspace> updateWorkspace(
       String workspaceNamespace, String workspaceId, UpdateWorkspaceRequest request)
@@ -285,6 +294,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     Workspace workspace = request.getWorkspace();
     FirecloudWorkspaceDetails fcWorkspace =
         fireCloudService.getWorkspace(workspaceNamespace, workspaceId).getWorkspace();
+    fcWorkspace.setCompletedCloneWorkspaceFileTransfer(OffsetDateTime.now());
     if (workspace == null) {
       throw new BadRequestException("No workspace provided in request");
     }

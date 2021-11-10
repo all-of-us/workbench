@@ -136,4 +136,6 @@ public interface FireCloudService {
 
   /** Creates a random Billing Project name. */
   String createBillingProjectName();
+
+  String getCompletedCloneWorkspaceFileTransfer(String workspaceNamespace, String firecloudName);
 }

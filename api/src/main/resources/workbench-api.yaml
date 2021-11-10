@@ -863,6 +863,17 @@ paths:
           description: Bad Request
           schema:
             $ref: "#/definitions/ErrorResponse"
+  "/v1/getFeaturedWorkspace":
+    get:
+      tags:
+      - workspaces
+      description: Return workspace
+      operationId: getFeatureWorkspace
+      responses:
+        200:
+          description: A featured workspace
+          schema:
+            "$ref": "#/definitions/WorkspaceResponse"
   "/v1/workspaces":
     get:
       tags:
@@ -903,6 +914,20 @@ paths:
           description: A list of workspace definitions.
           schema:
             "$ref": "#/definitions/WorkspaceResponseListResponse"
+  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/isNotebookTransferComplete":
+    parameters:
+      - "$ref": "#/parameters/workspaceNamespace"
+      - "$ref": "#/parameters/workspaceId"
+    get:
+      tags:
+        - workspaces
+      description: Returns the workspace definition with the specified ID and namespace
+      operationId: notebookTransferComplete
+      responses:
+        200:
+          description: A workspace response containing workspace and access level
+          schema:
+            type: boolean
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}":
     parameters:
     - "$ref": "#/parameters/workspaceNamespace"
