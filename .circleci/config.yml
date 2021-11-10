@@ -336,8 +336,8 @@ commands:
           command: |
             cp .env.circleci.<< parameters.env_name >> .env
             echo "export PUPPETEER_ACCESS_TEST=${ACCESS_TEST_USER}" >> "$BASH_ENV"
+            export $(cat .env | grep -v '#' | awk '/=/ {print $1}')
             source $BASH_ENV
-            export $(cat .env | sed 's/#.*//g' | xargs)
             echo "PUPPETEER_ACCESS_TEST=${PUPPETEER_ACCESS_TEST}"
       - run:
           working_directory: ~/workbench/api
