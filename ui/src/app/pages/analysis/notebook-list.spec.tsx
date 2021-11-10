@@ -10,7 +10,7 @@ import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {workspaceDataStub} from 'testing/stubs/workspaces';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
-import { NotebooksApiStub } from 'testing/stubs/notebooks-api-stub';
+import {NotebooksApiStub } from 'testing/stubs/notebooks-api-stub';
 
 describe('NotebookList', () => {
   beforeEach(() => {

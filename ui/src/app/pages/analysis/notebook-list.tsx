@@ -7,8 +7,8 @@ import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 
 import {NewNotebookModal} from 'app/pages/analysis/new-notebook-modal';
-import {profileApi, notebooksApi} from 'app/services/swagger-fetch-clients';
-import colors from 'app/styles/colors';
+import {profileApi, notebooksApi, workspacesApi} from 'app/services/swagger-fetch-clients';
+import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {withCurrentWorkspace} from 'app/utils';
 import {WorkspaceData} from 'app/utils/workspace-data';
 
@@ -19,6 +19,7 @@ import {convertToResource} from 'app/utils/resources';
 import {ACTION_DISABLED_INVALID_BILLING} from 'app/utils/strings';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {BillingStatus, FileDetail, ResourceType} from 'generated/fetch';
+import {FlexColumn} from 'app/components/flex';
 
 const styles = {
   heading: {
@@ -36,23 +37,68 @@ export const NotebookList = withCurrentWorkspace()(class extends React.Component
     notebookList: FileDetail[],
     notebookNameList: string[],
     creating: boolean,
-    loading: boolean
+    loading: boolean,
+    delay: number,
+    cloneLoadingNotebookMsg: boolean;
   }> {
+  private interval: NodeJS.Timeout;
   constructor(props) {
     super(props);
-    this.state = {notebookList: [], notebookNameList: [], creating: false, loading: false};
+    this.state = {
+      notebookList: [],
+      notebookNameList: [],
+      creating: false,
+      loading: false,
+      delay: 3000,
+      cloneLoadingNotebookMsg: false
+    };
   }
 
   componentDidMount() {
     this.props.hideSpinner();
     profileApi().updatePageVisits({page: 'notebook'});
-    this.loadNotebooks();
+    this.confirmNotebookTransferIsDone();
   }
 
-  componentDidUpdate(prevProps) {
+  componentDidUpdate(prevProps, prevState) {
     if (this.workspaceChanged(prevProps)) {
       this.loadNotebooks();
     }
+    if (prevState.delay !== this.state.delay) {
+      clearInterval(this.interval);
+      this.interval = setInterval(this.tick, this.state.delay);
+    }
+  }
+
+  componentWillUnmount() {
+    clearInterval(this.interval);
+  }
+
+  async confirmNotebookTransferIsDone() {
+    await workspacesApi()
+        .getCloneFileTransferDetails(this.props.workspace.namespace, this.props.workspace.id).then((transferDone) => {
+          if (!transferDone) {
+            // Set the interval so that file transfer check is done after every 3 sec
+            this.interval = setInterval(this.tick, this.state.delay);
+            this.setState({loading: true, cloneLoadingNotebookMsg: true});
+          } else {
+            // Notebook transfer is done load the notebooks
+            this.loadNotebooks();
+          }
+        });
+  }
+
+  // Will execute after every 3 sec: Call getCloneFileTransferDetails to check if the notebook file transfer is done
+  tick = () => {
+    workspacesApi()
+        .getCloneFileTransferDetails(this.props.workspace.namespace, this.props.workspace.id).then((time)=>{
+          if (!!time) {
+            this.setState({loading: false, cloneLoadingNotebookMsg: false});
+            clearInterval(this.interval);
+            this.loadNotebooks();
+          }
+        }
+    );
   }
 
   private workspaceChanged(prevProps) {
@@ -68,10 +114,11 @@ export const NotebookList = withCurrentWorkspace()(class extends React.Component
       this.setState({notebookList});
       const notebookNameList = notebookList.map(fd => fd.name.slice(0, -('.ipynb'.length)));
       this.setState({notebookNameList});
-    } catch (error) {
+        this.setState({loading: false});
+      } catch (error) {
       console.error(error);
     } finally {
-      this.setState({loading: false});
+     // this.setState({loading: false});
     }
   }
 
@@ -89,7 +136,7 @@ export const NotebookList = withCurrentWorkspace()(class extends React.Component
 
   render() {
     const {workspace} = this.props;
-    const {notebookList, notebookNameList, creating, loading} = this.state;
+    const {notebookList, notebookNameList, creating, loading, cloneLoadingNotebookMsg} = this.state;
     return <FadeBox style={{margin: 'auto', marginTop: '1rem', width: '95.7%'}}>
       <div style={styles.heading}>
         Notebooks&nbsp;
@@ -113,7 +160,18 @@ export const NotebookList = withCurrentWorkspace()(class extends React.Component
           </CardButton>
         </TooltipTrigger>
         <div style={{display: 'flex', flexWrap: 'wrap', justifyContent: 'flex-start' }}>
-          {notebookList.map((notebook, index) => {
+          {cloneLoadingNotebookMsg && <CardButton
+              disabled={cloneLoadingNotebookMsg}
+              style={{backgroundColor: colorWithWhiteness(colors.disabled, 0.9),  minWidth: '200px', maxWidth: '200px',
+                minHeight: '223px', maxHeight: '223px'}}
+              type='small'
+              onClick={() => {}}>
+            <FlexColumn style={{color: colors.primary, fontSize: '14px', fontWeight: 600, paddingTop: '2rem'}}>
+              <ClrIcon shape="clock"></ClrIcon>
+              <div>Copying 1 or more notebooks from another workspace. May take a few minutes.</div>
+            </FlexColumn>
+          </CardButton>}
+          {!cloneLoadingNotebookMsg && notebookList.map((notebook, index) => {
             return <NotebookResourceCard
               key={index}
               resource={convertToResource(notebook, ResourceType.NOTEBOOK, workspace)}

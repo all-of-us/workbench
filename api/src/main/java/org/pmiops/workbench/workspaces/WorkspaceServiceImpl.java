@@ -458,4 +458,11 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
                     .build())
         .collect(ImmutableList.toImmutableList());
   }
+
+  @Override
+  public Boolean notebookTransferCompleted(String workspaceNamespace, String workspaceId) {
+    String fileTransferTime = fireCloudService.getCompletedCloneWorkspaceFileTransfer(workspaceNamespace, workspaceId);
+    boolean fileTransferCompleted =  !(fileTransferTime == null || fileTransferTime.isEmpty() || fileTransferTime.equals("0"));
+    return fileTransferCompleted;
+  }
 }

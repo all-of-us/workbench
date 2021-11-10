@@ -24,6 +24,8 @@ public interface WorkspaceService {
 
   WorkspaceResponse getWorkspace(String workspaceNamespace, String workspaceId);
 
+  Boolean notebookTransferCompleted(String workspaceNamespace, String workspaceId);
+
   List<WorkspaceResponse> getWorkspaces();
 
   List<WorkspaceResponse> getPublishedWorkspaces();
