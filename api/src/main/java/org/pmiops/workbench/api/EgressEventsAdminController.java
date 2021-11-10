@@ -74,16 +74,16 @@ public class EgressEventsAdminController implements EgressEventsAdminApiDelegate
     }
 
     Page<DbEgressEvent> page;
-    if (userFilter == null && workspaceFilter == null) {
-      page = egressEventDao.findAllByOrderByCreationTimeDesc(pageable);
-    } else if (workspaceFilter == null) {
-      page = egressEventDao.findAllByUserOrderByCreationTimeDesc(userFilter, pageable);
-    } else if (userFilter == null) {
-      page = egressEventDao.findAllByWorkspaceOrderByCreationTimeDesc(workspaceFilter, pageable);
-    } else {
+    if (userFilter != null && workspaceFilter != null) {
       page =
           egressEventDao.findAllByUserAndWorkspaceOrderByCreationTimeDesc(
               userFilter, workspaceFilter, pageable);
+    } else if (workspaceFilter != null) {
+      page = egressEventDao.findAllByWorkspaceOrderByCreationTimeDesc(workspaceFilter, pageable);
+    } else if (userFilter != null) {
+      page = egressEventDao.findAllByUserOrderByCreationTimeDesc(userFilter, pageable);
+    } else {
+      page = egressEventDao.findAllByOrderByCreationTimeDesc(pageable);
     }
 
     String nextPageToken = null;
