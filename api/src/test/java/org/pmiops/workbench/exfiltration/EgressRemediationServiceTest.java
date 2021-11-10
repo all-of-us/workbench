@@ -39,7 +39,7 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbEgressEvent;
-import org.pmiops.workbench.db.model.DbEgressEvent.EgressEventStatus;
+import org.pmiops.workbench.db.model.DbEgressEvent.DbEgressEventStatus;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.NotFoundException;
@@ -161,7 +161,7 @@ public class EgressRemediationServiceTest {
 
   @Test
   public void testRemediateEgressEvent_alreadyRemediated() {
-    long eventId = saveNewEvent(newEvent().setStatus(EgressEventStatus.REMEDIATED));
+    long eventId = saveNewEvent(newEvent().setStatus(DbEgressEventStatus.REMEDIATED));
     egressRemediationService.remediateEgressEvent(eventId);
 
     assertThat(getDbUser().getDisabled()).isFalse();
@@ -309,7 +309,7 @@ public class EgressRemediationServiceTest {
     workbenchConfig.egressAlertRemediationPolicy = suspendXMinutesOnXIncidentsPolicy();
 
     saveOldEvents(
-        oldEvent(Duration.ofHours(3)).setStatus(EgressEventStatus.VERIFIED_FALSE_POSITIVE));
+        oldEvent(Duration.ofHours(3)).setStatus(DbEgressEventStatus.VERIFIED_FALSE_POSITIVE));
 
     egressRemediationService.remediateEgressEvent(saveNewEvent());
 
@@ -329,7 +329,7 @@ public class EgressRemediationServiceTest {
     assertComputeSuspended(Duration.ofMinutes(1));
 
     DbEgressEvent event = egressEventDao.findById(eventId).get();
-    assertThat(event.getStatus()).isEqualTo(EgressEventStatus.REMEDIATED);
+    assertThat(event.getStatus()).isEqualTo(DbEgressEventStatus.REMEDIATED);
 
     verify(mockMailService)
         .sendEgressRemediationEmail(any(), eq(EgressRemediationAction.SUSPEND_COMPUTE));
@@ -349,7 +349,7 @@ public class EgressRemediationServiceTest {
     verify(mockLeonardoNotebooksClient).stopAllUserRuntimesAsService(USER_EMAIL);
 
     DbEgressEvent event = egressEventDao.findById(eventId).get();
-    assertThat(event.getStatus()).isEqualTo(EgressEventStatus.REMEDIATED);
+    assertThat(event.getStatus()).isEqualTo(DbEgressEventStatus.REMEDIATED);
 
     verify(mockMailService)
         .sendEgressRemediationEmail(any(), eq(EgressRemediationAction.DISABLE_USER));
@@ -369,7 +369,7 @@ public class EgressRemediationServiceTest {
     workbenchConfig.egressAlertRemediationPolicy.escalations =
         ImmutableList.of(suspendComputeAfter(1, Duration.ofMinutes(1)));
 
-    saveOldEvents(oldEvent(Duration.ofMinutes(30L)).setStatus(EgressEventStatus.REMEDIATED));
+    saveOldEvents(oldEvent(Duration.ofMinutes(30L)).setStatus(DbEgressEventStatus.REMEDIATED));
     egressRemediationService.remediateEgressEvent(saveNewEvent());
 
     verifyZeroInteractions(mockMailService);
@@ -382,9 +382,9 @@ public class EgressRemediationServiceTest {
 
     saveOldEvents(
         oldEvent(Duration.ofMinutes(10L))
-            .setStatus(EgressEventStatus.REMEDIATED)
+            .setStatus(DbEgressEventStatus.REMEDIATED)
             .setWorkspace(dbWorkspace2),
-        oldEvent(Duration.ofHours(2L)).setStatus(EgressEventStatus.REMEDIATED));
+        oldEvent(Duration.ofHours(2L)).setStatus(DbEgressEventStatus.REMEDIATED));
     egressRemediationService.remediateEgressEvent(saveNewEvent());
 
     verify(mockMailService)
@@ -503,7 +503,7 @@ public class EgressRemediationServiceTest {
 
   private DbEgressEvent oldEvent(Duration age) {
     Timestamp creationTime = Timestamp.from(FakeClockConfiguration.NOW.toInstant().minus(age));
-    return newEvent().setStatus(EgressEventStatus.REMEDIATED).setCreationTime(creationTime);
+    return newEvent().setStatus(DbEgressEventStatus.REMEDIATED).setCreationTime(creationTime);
   }
 
   private DbEgressEvent newEvent() {
@@ -511,7 +511,7 @@ public class EgressRemediationServiceTest {
         .setUser(getDbUser())
         .setWorkspace(dbWorkspace)
         .setCreationTime(FakeClockConfiguration.NOW)
-        .setStatus(EgressEventStatus.PENDING)
+        .setStatus(DbEgressEventStatus.PENDING)
         .setSumologicEvent(
             new Gson()
                 .toJson(

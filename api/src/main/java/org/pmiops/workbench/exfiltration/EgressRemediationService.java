@@ -27,7 +27,7 @@ import org.pmiops.workbench.config.WorkbenchConfig.EgressAlertRemediationPolicy.
 import org.pmiops.workbench.db.dao.EgressEventDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbEgressEvent;
-import org.pmiops.workbench.db.model.DbEgressEvent.EgressEventStatus;
+import org.pmiops.workbench.db.model.DbEgressEvent.DbEgressEventStatus;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
@@ -103,7 +103,7 @@ public class EgressRemediationService {
                 () ->
                     new NotFoundException(
                         String.format("egress event %d does not exist", egressEventId)));
-    if (!EgressEventStatus.PENDING.equals(event.getStatus())) {
+    if (!DbEgressEventStatus.PENDING.equals(event.getStatus())) {
       log.warning(
           String.format("ignoring non-PENDING egress event %d, nothing to do", egressEventId));
       return;
@@ -155,7 +155,7 @@ public class EgressRemediationService {
           }
         });
 
-    egressEventDao.save(event.setStatus(EgressEventStatus.REMEDIATED));
+    egressEventDao.save(event.setStatus(DbEgressEventStatus.REMEDIATED));
 
     egressEventAuditor.fireRemediateEgressEvent(event, escalation.orElse(null));
   }
@@ -173,7 +173,7 @@ public class EgressRemediationService {
    */
   private int getEgressIncidentCountForUser(DbUser user) {
     List<DbEgressEvent> events =
-        egressEventDao.findAllByUserAndStatusNot(user, EgressEventStatus.VERIFIED_FALSE_POSITIVE);
+        egressEventDao.findAllByUserAndStatusNot(user, DbEgressEventStatus.VERIFIED_FALSE_POSITIVE);
 
     // If any egress alerts are missing workspace metadata (this should not happen), consider each
     // as unique incidents.
