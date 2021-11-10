@@ -6,8 +6,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
 import com.google.common.hash.Hashing;
-
-import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
@@ -523,13 +521,23 @@ public class FireCloudServiceImpl implements FireCloudService {
   }
 
   @Override
-  public String getCompletedCloneWorkspaceFileTransfer(String workspaceNamespace, String firecloudName) {
+  public String getCompletedCloneWorkspaceFileTransfer(
+      String workspaceNamespace, String firecloudName) {
     WorkspacesApi workspacesApi = endUserWorkspacesApiProvider.get();
     return retryHandler.run(
         (context) -> {
-          FirecloudWorkspaceDetails fcWorkspaceDetails = workspacesApi.getWorkspace(
-                workspaceNamespace, firecloudName, FIRECLOUD_WORKSPACE_REQUIRED_FIELDS_FOR_CLONE_FILE_TRANSFER).getWorkspace();
-          return fcWorkspaceDetails == null? null : fcWorkspaceDetails.getCompletedCloneWorkspaceFileTransfer().format(DateTimeFormatter.ISO_DATE_TIME);
+          FirecloudWorkspaceDetails fcWorkspaceDetails =
+              workspacesApi
+                  .getWorkspace(
+                      workspaceNamespace,
+                      firecloudName,
+                      FIRECLOUD_WORKSPACE_REQUIRED_FIELDS_FOR_CLONE_FILE_TRANSFER)
+                  .getWorkspace();
+          return fcWorkspaceDetails == null
+              ? null
+              : fcWorkspaceDetails
+                  .getCompletedCloneWorkspaceFileTransfer()
+                  .format(DateTimeFormatter.ISO_DATE_TIME);
         });
   }
 }
