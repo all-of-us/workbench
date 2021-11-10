@@ -322,6 +322,12 @@ commands:
           dir_names: "ui e2e .circleci"
 
   puppeteer-access-test-user-setup:
+    parameters:
+      env_name:
+        description: The target environment for run Puppeteer end-to-end test. Must be one of "test", "staging", "local", "perf".
+        default: "test"
+        type: enum
+        enum: [ "test", "staging", "local", "perf" ]
     steps:
       - gcloud-auth-login
       - run:
