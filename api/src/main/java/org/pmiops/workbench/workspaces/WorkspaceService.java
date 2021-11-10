@@ -26,13 +26,37 @@ public interface WorkspaceService {
 
   WorkspaceResponse getWorkspace(String workspaceNamespace, String workspaceId);
 
-  boolean notebookTransferComplete(String workspaceNamespace, String workspaceId);
-
+  /**
+   * Retrieves a list of workspaces which <i>mostly</i> corresponds to the workspaces the user has
+   * access to.
+   *
+   * <p>Includes:
+   *
+   * <ul>
+   *   <li>Workspaces created by the user
+   *   <li>Workspaces shared with the user as Owner, Writer, or Reader
+   *   <li>"No Access" workspaces, which can happen in several ways:
+   *       <ul>
+   *         <li>Workspaces in an access tier that the user can't access
+   *         <li>Workspaces previously shared but now unshared with the user
+   *         <li>Workspaces which were previously published but are now unpublished
+   *       </ul>
+   * </ul>
+   *
+   * Excludes:
+   *
+   * <ul>
+   *   <li>Deleted workspaces (WorkspaceActiveStatus.DELETED in the RW DB)
+   *   <li>Published workspaces (as determined by the RW DB) if the user has Reader or No Access
+   * </ul>
+   */
   List<WorkspaceResponse> getWorkspaces();
 
   List<WorkspaceResponse> getPublishedWorkspaces();
 
   void deleteWorkspace(DbWorkspace dbWorkspace);
+
+  boolean notebookTransferComplete(String workspaceNamespace, String workspaceId);
 
   /*
    * This function will call the Google Cloud Billing API to set the given billing

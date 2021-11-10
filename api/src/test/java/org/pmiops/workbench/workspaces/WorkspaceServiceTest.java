@@ -22,9 +22,13 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.access.AccessTierService;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.actionaudit.bucket.BucketAuditQueryService;
 import org.pmiops.workbench.billing.FreeTierBillingService;
@@ -62,7 +66,7 @@ import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.profile.ProfileMapper;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
-import org.pmiops.workbench.utils.mappers.FirecloudMapper;
+import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
 import org.pmiops.workbench.utils.mappers.UserMapper;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapperImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -87,6 +91,8 @@ public class WorkspaceServiceTest {
     CommonMappers.class,
     ConceptSetMapperImpl.class,
     DataSetMapperImpl.class,
+    FirecloudMapperImpl.class,
+    WorkspaceAuthService.class,
     WorkspaceMapperImpl.class,
     WorkspaceServiceImpl.class,
     WorkspaceAuthService.class,
@@ -100,6 +106,7 @@ public class WorkspaceServiceTest {
     CohortService.class,
     ConceptSetService.class,
     DataSetService.class,
+    FireCloudService.class,
     FirecloudMapper.class,
     FreeTierBillingService.class,
     ProfileMapper.class,
@@ -187,8 +194,6 @@ public class WorkspaceServiceTest {
         DEFAULT_WORKSPACE_NAMESPACE,
         WorkspaceAccessLevel.OWNER,
         WorkspaceActiveStatus.ACTIVE);
-
-    doReturn(firecloudWorkspaceResponses).when(mockFireCloudService).getWorkspaces();
 
     currentUser = new DbUser();
     currentUser.setUsername(DEFAULT_USERNAME);
@@ -287,7 +292,21 @@ public class WorkspaceServiceTest {
   }
 
   @Test
-  public void getWorkspaces_skipDeleted() {
+  public void getWorkspaces_includes_NO_ACCESS() {
+    int currentWorkspacesSize = workspaceService.getWorkspaces().size();
+
+    addMockedWorkspace(
+        workspaceIdIncrementer.getAndIncrement(),
+        "no access",
+        DEFAULT_WORKSPACE_NAMESPACE,
+        WorkspaceAccessLevel.NO_ACCESS,
+        WorkspaceActiveStatus.ACTIVE);
+
+    assertThat(workspaceService.getWorkspaces().size()).isEqualTo(currentWorkspacesSize + 1);
+  }
+
+  @Test
+  public void getWorkspaces_skips_deleted() {
     int currentWorkspacesSize = workspaceService.getWorkspaces().size();
 
     addMockedWorkspace(
@@ -297,6 +316,36 @@ public class WorkspaceServiceTest {
         WorkspaceAccessLevel.OWNER,
         WorkspaceActiveStatus.DELETED);
     assertThat(workspaceService.getWorkspaces().size()).isEqualTo(currentWorkspacesSize);
+  }
+
+  private static Stream<Arguments> accessesToSkip() {
+    return Stream.of(
+        Arguments.of(WorkspaceAccessLevel.OWNER, false),
+        Arguments.of(WorkspaceAccessLevel.WRITER, false),
+        Arguments.of(WorkspaceAccessLevel.READER, true),
+        Arguments.of(WorkspaceAccessLevel.NO_ACCESS, true));
+  }
+
+  @ParameterizedTest(
+      name = "getWorkspaces: user has access level {0} on published workspace, skipExpected = {1}")
+  @MethodSource("accessesToSkip")
+  public void getWorkspaces_skips_published(
+      WorkspaceAccessLevel accessLevel, boolean skipExpected) {
+    int currentWorkspacesSize = workspaceService.getWorkspaces().size();
+    long newWorkspaceId = workspaceIdIncrementer.getAndIncrement();
+
+    addMockedWorkspace(
+        newWorkspaceId,
+        "published-" + accessLevel.toString(),
+        DEFAULT_WORKSPACE_NAMESPACE,
+        accessLevel,
+        WorkspaceActiveStatus.ACTIVE);
+
+    DbWorkspace ws = workspaceDao.findActiveByWorkspaceId(newWorkspaceId).get();
+    workspaceDao.save(ws.setPublished(true));
+
+    int expectedSize = skipExpected ? currentWorkspacesSize : currentWorkspacesSize + 1;
+    assertThat(workspaceService.getWorkspaces().size()).isEqualTo(expectedSize);
   }
 
   @Test
