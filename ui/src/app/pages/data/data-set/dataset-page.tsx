@@ -470,6 +470,11 @@ const PREPACKAGED_WITH_ZIP_CODE_SOCIOECONOMIC = {
 };
 let PREPACKAGED_DOMAINS = PREPACKAGED_SURVEY_PERSON_DOMAIN;
 
+// Temp workaround to prevent errors from mismatched upper and lower case values
+function domainValuePairsToLowercase(domainValuePairs: DomainValuePair[]) {
+  return domainValuePairs.map(({domain, value}) => ({domain, value: value.toLowerCase()}));
+}
+
 interface DataSetPreviewInfo {
   isLoading: boolean;
   errorText: JSX.Element;
@@ -571,7 +576,7 @@ export const DatasetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), wi
         includesAllParticipants: dataset.includesAllParticipants,
         selectedConceptSetIds: dataset.conceptSets.map(cs => cs.id),
         selectedCohortIds: dataset.cohorts.map(c => c.id),
-        selectedDomainValuePairs: dataset.domainValuePairs,
+        selectedDomainValuePairs: domainValuePairsToLowercase(dataset.domainValuePairs),
         selectedDomains: this.getDomainsFromDataSet(dataset),
         selectedPrepackagedConceptSets: this.apiEnumToPrePackageConceptSets(dataset.prePackagedConceptSet)
       });
