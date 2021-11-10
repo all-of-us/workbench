@@ -302,11 +302,11 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     return ResponseEntity.ok(response);
   }
 
-
   @Override
-  public ResponseEntity<Boolean> notebookTransferComplete(String workspaceNamespace,
-      String workspaceId) {
-    return  ResponseEntity.ok(workspaceService.notebookTransferCompleted(workspaceNamespace, workspaceId));
+  public ResponseEntity<Boolean> notebookTransferComplete(
+      String workspaceNamespace, String workspaceId) {
+    return ResponseEntity.ok(
+        workspaceService.notebookTransferCompleted(workspaceNamespace, workspaceId));
   }
 
   @Override
