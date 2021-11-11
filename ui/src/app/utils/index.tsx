@@ -464,10 +464,9 @@ export const withAsyncErrorHandling = fp.curry(
 
 
 // Takes a search string and validates for the most common MySQL use cases.
-// Checks for unbalanced (), unclosed "", trailing + or -, and breaking special characters.
+// Checks for unclosed "", trailing + or -, and breaking special characters.
 export function validateInputForMySQL(searchString: string): Array<string> {
   const inputErrors = new Set<string>(); // use Set to prevent duplicate messages
-  let openParensCount = 0;
   let unclosedQuotes = false;
   for (let i = 0; i < searchString.length; i++) {
     const character = searchString[i];
@@ -480,8 +479,8 @@ export function validateInputForMySQL(searchString: string): Array<string> {
       continue;
     }
     // Check for characters that break search
-    if ('~@[]|<>'.indexOf(character) > -1) {
-      inputErrors.add('The following characters are not allowed in the search string: ~ @ [ ] | < >');
+    if ('~@[]|<>()'.indexOf(character) > -1) {
+      inputErrors.add('The following characters are not allowed in the search string: ~ @ [ ] | < > ( )');
       continue;
     }
     // Check for trailing + or -
@@ -489,25 +488,6 @@ export function validateInputForMySQL(searchString: string): Array<string> {
       inputErrors.add(`Trailing ${character} characters are not allowed in the search string`);
       continue;
     }
-    const parenPosition = '()'.indexOf(character);
-    if (parenPosition === -1) {
-      // Parens are the last character check, so we can continue if it's something else
-      continue;
-    }
-    if (parenPosition === 0) {
-      openParensCount++; // increment the number of unclosed parens
-    } else {
-      if (openParensCount === 0) {
-        // too many closing parens
-        inputErrors.add('There are too many ) characters in the search string');
-        continue;
-      }
-      openParensCount--; // decrement the number of unclosed parens
-    }
-  }
-  if (openParensCount > 0) {
-    // unclosed paren
-    inputErrors.add('There is an unclosed ( in the search string');
   }
   if (unclosedQuotes) {
     // unclosed quote
