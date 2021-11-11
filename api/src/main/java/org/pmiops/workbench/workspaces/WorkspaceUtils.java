@@ -9,12 +9,14 @@ public class WorkspaceUtils {
 
   /** Returns {@code true} if the given billing account is workbench free tier billing account. */
   public static boolean isFreeTier(String billingAccountName, WorkbenchConfig workbenchConfig) {
-    return billingAccountName
-        .equals(workbenchConfig.billing.freeTierBillingAccountName());
+    return billingAccountName.equals(workbenchConfig.billing.freeTierBillingAccountName());
   }
 
   /** Returns {@code BillingAccountType} by given billing account name. */
-  public static BillingAccountType getBillingAccountType(String billingAccountName, WorkbenchConfig workbenchConfig) {
-    return isFreeTier(billingAccountName, workbenchConfig) ? BillingAccountType.FREE_TIER : BillingAccountType.USER_PROVIDED;
+  public static BillingAccountType getBillingAccountType(
+      String billingAccountName, WorkbenchConfig workbenchConfig) {
+    return isFreeTier(billingAccountName, workbenchConfig)
+        ? BillingAccountType.FREE_TIER
+        : BillingAccountType.USER_PROVIDED;
   }
 }

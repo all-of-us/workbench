@@ -427,7 +427,8 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
             new ReportingWorkspace()
                 .accessTierShortName(rs.getString("access_tier_short_name"))
                 .billingAccountType(
-                    getBillingAccountType(rs.getShort("billing_account_name"), workbenchConfigProvider.get()))
+                    getBillingAccountType(
+                        rs.getShort("billing_account_name"), workbenchConfigProvider.get()))
                 .billingStatus(billingStatusFromStorage(rs.getShort("billing_status")))
                 .cdrVersionId(rs.getLong("cdr_version_id"))
                 .creationTime(offsetDateTimeUtc(rs.getTimestamp("creation_time")))

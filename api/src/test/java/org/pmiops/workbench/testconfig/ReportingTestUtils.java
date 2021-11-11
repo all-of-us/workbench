@@ -32,7 +32,7 @@ public class ReportingTestUtils {
       AccessTierService.REGISTERED_TIER_SHORT_NAME;
   public static final BillingAccountType WORKSPACE__BILLING_ACCOUNT_TYPE =
       BillingAccountType.FREE_TIER;
-  public static final String WORKSPACE__BILLING_ACCOUNT_ID= "free_tier";
+  public static final String WORKSPACE__BILLING_ACCOUNT_ID = "free_tier";
   public static final BillingStatus WORKSPACE__BILLING_STATUS = BillingStatus.ACTIVE;
   public static final Long WORKSPACE__CDR_VERSION_ID = 2L;
   public static final Timestamp WORKSPACE__CREATION_TIME =
