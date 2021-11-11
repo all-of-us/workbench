@@ -109,6 +109,9 @@ export const EgressEventsTable = ({sourceUserEmail, sourceWorkspaceNamespace, di
       rows={displayPageSize}
       totalRecords={totalRecords}>
     <Column field='egressEventId'
+            body={({egressEventId}) => (
+              <span data-test-id="egress-event-id">{egressEventId}</span>
+            )}
             header='Event ID'
             headerStyle={{width: '100px'}}
     />
