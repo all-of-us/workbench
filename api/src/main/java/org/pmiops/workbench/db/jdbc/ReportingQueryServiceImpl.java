@@ -11,6 +11,7 @@ import static org.pmiops.workbench.db.model.DbStorageEnums.organizationTypeFromS
 import static org.pmiops.workbench.db.model.DbStorageEnums.raceFromStorage;
 import static org.pmiops.workbench.db.model.DbStorageEnums.sexAtBirthFromStorage;
 import static org.pmiops.workbench.utils.mappers.CommonMappers.offsetDateTimeUtc;
+import static org.pmiops.workbench.workspaces.WorkspaceUtils.getBillingAccountType;
 
 import com.google.common.base.Strings;
 import java.util.Arrays;
@@ -30,7 +31,6 @@ import org.pmiops.workbench.model.ReportingInstitution;
 import org.pmiops.workbench.model.ReportingUser;
 import org.pmiops.workbench.model.ReportingWorkspace;
 import org.pmiops.workbench.model.ReportingWorkspaceFreeTierUsage;
-import org.pmiops.workbench.workspaces.WorkspaceUtils.getBillingAccountType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
@@ -428,7 +428,7 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 .accessTierShortName(rs.getString("access_tier_short_name"))
                 .billingAccountType(
                     getBillingAccountType(
-                        rs.getShort("billing_account_name"), workbenchConfigProvider.get()))
+                        rs.getString("billing_account_name"), workbenchConfigProvider.get()))
                 .billingStatus(billingStatusFromStorage(rs.getShort("billing_status")))
                 .cdrVersionId(rs.getLong("cdr_version_id"))
                 .creationTime(offsetDateTimeUtc(rs.getTimestamp("creation_time")))
