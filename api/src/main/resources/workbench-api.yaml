@@ -4455,7 +4455,6 @@ definitions:
     - name
     example:
       billingAccountName: "billingAccounts/000000-AAAAAA-111111"
-      billingAccountType: "FREE_TIER"
       billingStatus: "ACTIVE"
       cdrVersionId: "2"
       creationTime: 1588097211621
@@ -4520,8 +4519,6 @@ definitions:
         type: string
       billingAccountName:
         type: string
-      billingAccountType:
-        "$ref": "#/definitions/BillingAccountType"
       googleBucketName:
         type: string
       accessTierShortName:
