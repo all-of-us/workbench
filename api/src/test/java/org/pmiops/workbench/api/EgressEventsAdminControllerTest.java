@@ -29,9 +29,13 @@ import org.pmiops.workbench.db.model.DbEgressEvent.DbEgressEventStatus;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.model.EgressEvent;
+import org.pmiops.workbench.model.EgressEventStatus;
 import org.pmiops.workbench.model.ListEgressEventsRequest;
 import org.pmiops.workbench.model.ListEgressEventsResponse;
+import org.pmiops.workbench.model.UpdateEgressEventRequest;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.utils.PaginationToken;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
@@ -303,8 +307,84 @@ public class EgressEventsAdminControllerTest {
                     .pageToken(nextPageToken)));
   }
 
+  @Test
+  public void testUpdateEgressEvent_invalidId() {
+    assertThrows(
+        NotFoundException.class,
+        () -> controller.updateEgressEvent("invalid", new UpdateEgressEventRequest()));
+  }
+
+  @Test
+  public void testUpdateEgressEvent_notFoundEvent() {
+    assertThrows(
+        NotFoundException.class,
+        () -> controller.updateEgressEvent("404", new UpdateEgressEventRequest()));
+  }
+
+  @Test
+  public void testUpdateEgressEvent_eventPending() {
+    String eventId = saveNewEventWithStatus(DbEgressEventStatus.PENDING);
+    assertThrows(
+        FailedPreconditionException.class,
+        () ->
+            controller.updateEgressEvent(
+                eventId,
+                new UpdateEgressEventRequest()
+                    .egressEvent(
+                        new EgressEvent().status(EgressEventStatus.VERIFIED_FALSE_POSITIVE))));
+  }
+
+  @Test
+  public void testUpdateEgressEvent_badRequestNull() {
+    String eventId = saveNewEventWithStatus(DbEgressEventStatus.REMEDIATED);
+    assertThrows(
+        BadRequestException.class,
+        () ->
+            controller.updateEgressEvent(
+                eventId, new UpdateEgressEventRequest().egressEvent(new EgressEvent())));
+  }
+
+  @Test
+  public void testUpdateEgressEvent_badRequestPending() {
+    String eventId = saveNewEventWithStatus(DbEgressEventStatus.REMEDIATED);
+    assertThrows(
+        BadRequestException.class,
+        () ->
+            controller.updateEgressEvent(
+                eventId,
+                new UpdateEgressEventRequest()
+                    .egressEvent(new EgressEvent().status(EgressEventStatus.PENDING))));
+  }
+
+  @Test
+  public void testUpdateEgressEvent() {
+    String eventId = saveNewEventWithStatus(DbEgressEventStatus.REMEDIATED);
+
+    EgressEvent got =
+        controller
+            .updateEgressEvent(
+                eventId,
+                new UpdateEgressEventRequest()
+                    .egressEvent(
+                        new EgressEvent().status(EgressEventStatus.VERIFIED_FALSE_POSITIVE)))
+            .getBody();
+
+    assertThat(got.getStatus()).isEqualTo(EgressEventStatus.VERIFIED_FALSE_POSITIVE);
+
+    // Call another endpoint to verify that the change was actually persisted
+    List<EgressEvent> gotEvents =
+        controller.listEgressEvents(new ListEgressEventsRequest()).getBody().getEvents();
+    assertThat(gotEvents).hasSize(1);
+    assertThat(gotEvents.get(0).getStatus()).isEqualTo(EgressEventStatus.VERIFIED_FALSE_POSITIVE);
+  }
+
   private Instant timeMinusHours(Integer h) {
     return TIME0.minus(Duration.ofHours(h));
+  }
+
+  private String saveNewEventWithStatus(DbEgressEventStatus status) {
+    DbEgressEvent e = egressEventDao.save(new DbEgressEvent().setStatus(status));
+    return Long.toString(e.getEgressEventId());
   }
 
   private String saveNewEvent(DbUser user, DbWorkspace workspace, Instant created) {
