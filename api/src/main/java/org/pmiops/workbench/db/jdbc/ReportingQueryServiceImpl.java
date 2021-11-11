@@ -1,6 +1,5 @@
 package org.pmiops.workbench.db.jdbc;
 
-import static org.pmiops.workbench.db.model.DbStorageEnums.billingAccountTypeFromStorage;
 import static org.pmiops.workbench.db.model.DbStorageEnums.billingStatusFromStorage;
 import static org.pmiops.workbench.db.model.DbStorageEnums.degreeFromStorage;
 import static org.pmiops.workbench.db.model.DbStorageEnums.disabilityFromStorage;
@@ -31,6 +30,7 @@ import org.pmiops.workbench.model.ReportingInstitution;
 import org.pmiops.workbench.model.ReportingUser;
 import org.pmiops.workbench.model.ReportingWorkspace;
 import org.pmiops.workbench.model.ReportingWorkspaceFreeTierUsage;
+import org.pmiops.workbench.workspaces.WorkspaceUtils.getBillingAccountType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
@@ -427,7 +427,7 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
             new ReportingWorkspace()
                 .accessTierShortName(rs.getString("access_tier_short_name"))
                 .billingAccountType(
-                    billingAccountTypeFromStorage(rs.getShort("billing_account_type")))
+                    getBillingAccountType(rs.getShort("billing_account_name"), workbenchConfigProvider.get()))
                 .billingStatus(billingStatusFromStorage(rs.getShort("billing_status")))
                 .cdrVersionId(rs.getLong("cdr_version_id"))
                 .creationTime(offsetDateTimeUtc(rs.getTimestamp("creation_time")))
