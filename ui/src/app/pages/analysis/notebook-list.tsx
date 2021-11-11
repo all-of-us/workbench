@@ -87,7 +87,7 @@ export const NotebookList = withCurrentWorkspace()(class extends React.Component
 
   async confirmNotebookTransferIsDone() {
     await workspacesApi()
-        .getCloneFileTransferDetails(this.props.workspace.namespace, this.props.workspace.id).then((transferDone) => {
+        .notebookTransferComplete(this.props.workspace.namespace, this.props.workspace.id).then((transferDone) => {
           if (!transferDone) {
             // Set the interval so that file transfer check is done after every 3 sec
             this.interval = setInterval(this.tick, this.state.delay);
@@ -102,7 +102,7 @@ export const NotebookList = withCurrentWorkspace()(class extends React.Component
   // Will execute after every 3 sec: Call getCloneFileTransferDetails to check if the notebook file transfer is done
   tick = () => {
     workspacesApi()
-        .getCloneFileTransferDetails(this.props.workspace.namespace, this.props.workspace.id).then((time)=>{
+        .notebookTransferComplete(this.props.workspace.namespace, this.props.workspace.id).then((time)=>{
           if (!!time) {
             this.setState({loading: false, cloneLoadingNotebookMsg: false});
             clearInterval(this.interval);
