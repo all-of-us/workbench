@@ -5,10 +5,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
-import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -123,7 +123,7 @@ public class EgressEventsAdminControllerTest {
               }
             }),
         Arguments.of(
-            new ListEgressEventsRequest().pageSize(BigDecimal.valueOf(1)),
+            new ListEgressEventsRequest().pageSize(1),
             new TestEgressEvent[][] {
               {TestEgressEvent.USER_1_WORKSPACE_1},
               {TestEgressEvent.USER_2_WORKSPACE_2},
@@ -132,14 +132,14 @@ public class EgressEventsAdminControllerTest {
               {TestEgressEvent.NO_USER_NO_WORKSPACE}
             }),
         Arguments.of(
-            new ListEgressEventsRequest().pageSize(BigDecimal.valueOf(2)),
+            new ListEgressEventsRequest().pageSize(2),
             new TestEgressEvent[][] {
               {TestEgressEvent.USER_1_WORKSPACE_1, TestEgressEvent.USER_2_WORKSPACE_2},
               {TestEgressEvent.USER_3_WORKSPACE_1, TestEgressEvent.USER_3_WORKSPACE_2},
               {TestEgressEvent.NO_USER_NO_WORKSPACE}
             }),
         Arguments.of(
-            new ListEgressEventsRequest().pageSize(BigDecimal.valueOf(3)),
+            new ListEgressEventsRequest().pageSize(3),
             new TestEgressEvent[][] {
               {
                 TestEgressEvent.USER_1_WORKSPACE_1,
@@ -149,7 +149,7 @@ public class EgressEventsAdminControllerTest {
               {TestEgressEvent.USER_3_WORKSPACE_2, TestEgressEvent.NO_USER_NO_WORKSPACE}
             }),
         Arguments.of(
-            new ListEgressEventsRequest().pageSize(BigDecimal.valueOf(4)),
+            new ListEgressEventsRequest().pageSize(4),
             new TestEgressEvent[][] {
               {
                 TestEgressEvent.USER_1_WORKSPACE_1,
@@ -160,7 +160,7 @@ public class EgressEventsAdminControllerTest {
               {TestEgressEvent.NO_USER_NO_WORKSPACE}
             }),
         Arguments.of(
-            new ListEgressEventsRequest().pageSize(BigDecimal.valueOf(5)),
+            new ListEgressEventsRequest().pageSize(5),
             new TestEgressEvent[][] {
               {
                 TestEgressEvent.USER_1_WORKSPACE_1,
@@ -232,10 +232,13 @@ public class EgressEventsAdminControllerTest {
             .sourceUserEmail(initialRequest.getSourceUserEmail())
             .sourceWorkspaceNamespace(initialRequest.getSourceWorkspaceNamespace())
             .pageSize(initialRequest.getPageSize());
+    int expectedTotalEvents = Arrays.stream(expectedPages).mapToInt(p -> p.length).sum();
 
     List<TestEgressEvent[]> gotPages = new ArrayList<>();
     do {
       ListEgressEventsResponse resp = controller.listEgressEvents(req).getBody();
+      assertThat(resp.getTotalSize()).isEqualTo(expectedTotalEvents);
+
       gotPages.add(
           resp.getEvents().stream()
               .map(e -> egressEventIds.get(e.getEgressEventId()))
@@ -294,7 +297,7 @@ public class EgressEventsAdminControllerTest {
 
     String nextPageToken =
         controller
-            .listEgressEvents(new ListEgressEventsRequest().pageSize(BigDecimal.valueOf(1L)))
+            .listEgressEvents(new ListEgressEventsRequest().pageSize(1))
             .getBody()
             .getNextPageToken();
 
@@ -302,9 +305,7 @@ public class EgressEventsAdminControllerTest {
         BadRequestException.class,
         () ->
             controller.listEgressEvents(
-                new ListEgressEventsRequest()
-                    .pageSize(BigDecimal.valueOf(10L))
-                    .pageToken(nextPageToken)));
+                new ListEgressEventsRequest().pageSize(10).pageToken(nextPageToken)));
   }
 
   @Test

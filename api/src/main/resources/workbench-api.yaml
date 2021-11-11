@@ -6452,7 +6452,7 @@ definitions:
           If specified, only return event which were detected within the given
           workspace.
       pageSize:
-        type: number
+        type: integer
         description: >
           The number of egress events to return, per page. If unspecified, a
           system default is used.
@@ -6473,6 +6473,9 @@ definitions:
         description: >
           If present, this token can be provided to retrieve the next page of results.
           If null or empty, there are no further pages in the result stream.
+      totalSize:
+        type: integer
+        description: Total size of the result set.
   UpdateEgressEventRequest:
     type: object
     properties:
