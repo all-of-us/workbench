@@ -4466,6 +4466,7 @@ definitions:
       namespace: "aou-rw-test-11112222"
       googleProject: "aou-rw-test-11112222"
       published: false
+      adminLocked: false
       researchPurpose:
         additionalNotes: null
         ancestry: false
@@ -4539,6 +4540,10 @@ definitions:
       published:
         type: boolean
         default: false
+      adminLocked:
+        type: boolean
+        default: false
+        description: Whether an administrator has prevented most actions on the workspace for all users
       googleProject:
         type: string
         description: the google project used by the workspace for compute and storage
