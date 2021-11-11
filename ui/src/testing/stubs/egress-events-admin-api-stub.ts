@@ -1,4 +1,4 @@
-import { EgressEvent, EgressEventsAdminApi, EgressEventStatus, ListEgressEventsRequest, ListEgressEventsResponse, UpdateEgressEventRequest } from "generated/fetch";
+import { EgressEvent, EgressEventsAdminApi, EgressEventStatus, ListEgressEventsRequest, ListEgressEventsResponse, UpdateEgressEventRequest } from 'generated/fetch';
 import {stubNotImplementedError} from 'testing/stubs/stub-utils';
 
 export class EgressEventsAdminApiStub extends EgressEventsAdminApi {
@@ -54,9 +54,9 @@ export class EgressEventsAdminApiStub extends EgressEventsAdminApi {
 
   private newEvent(): EgressEvent {
     return {
-      sourceUserEmail: "asdf@fake-research-aou.org",
-      sourceWorkspaceNamespace: "ns",
-      sourceGoogleProject: "proj",
+      sourceUserEmail: 'asdf@fake-research-aou.org',
+      sourceWorkspaceNamespace: 'ns',
+      sourceGoogleProject: 'proj',
       egressMegabytes: 300.0,
       egressWindowSeconds: 3600,
       status: EgressEventStatus.REMEDIATED,
