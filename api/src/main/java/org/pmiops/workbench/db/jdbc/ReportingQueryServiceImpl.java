@@ -380,7 +380,7 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
     return jdbcTemplate.query(
         String.format(
             "SELECT \n"
-                + "  billing_account_type,\n"
+                + "  billing_account_name,\n"
                 + "  billing_status,\n"
                 + "  w.cdr_version_id AS cdr_version_id,\n"
                 + "  w.creation_time AS creation_time,\n"
