@@ -2,10 +2,11 @@ import {DataTable} from 'primereact/datatable';
 import {Column} from 'primereact/column';
 import {StyledRouterLink} from 'app/components/buttons';
 import {Dropdown} from 'primereact/dropdown';
+import * as fp from 'lodash/fp';
 
 import { useState, useEffect, useCallback} from 'react';
 import { egressEventsAdminApi } from 'app/services/swagger-fetch-clients';
-import { EgressEventStatus } from 'generated/fetch';
+import { EgressEvent, EgressEventStatus } from 'generated/fetch';
 
 
 interface Props {
@@ -17,13 +18,15 @@ interface Props {
 export const EgressEventsTable = ({sourceUserEmail, sourceWorkspaceNamespace, displayPageSize = 20}: Props) => {
   const [loading, setLoading] = useState(false);
   const [first, setFirst] = useState(0);
-  const [events, setEvents] = useState(null);
-  const [nextPageToken, setNextPageToken] = useState(null);
-  const [pendingUpdateEvent, setPendingUpdateEvent] = useState(null);
+  const [events, setEvents] = useState<EgressEvent[]>(null);
+  const [nextPageToken, setNextPageToken] = useState<string>(null);
+  const [totalRecords, setTotalRecords] = useState<number>(null);
+  const [pendingUpdateEvent, setPendingUpdateEvent] = useState<EgressEvent>(null);
 
-  // XXX
-  const totalRecords = 19;
-
+  // This callback fetches more events and appends to the events array, if needed.
+  // This works by continuing to walk the paginated stream until the given event count
+  // is satisfied. Note that the backend pages are independent of the displayed pages
+  // within the DataTable.
   const maybeFetchMoreEvents = useCallback(async(atLeastCount: number): Promise<void> => {
     if (loading || events?.length >= atLeastCount) {
       return;
@@ -42,6 +45,7 @@ export const EgressEventsTable = ({sourceUserEmail, sourceWorkspaceNamespace, di
         sourceWorkspaceNamespace,
         pageToken
       });
+      setTotalRecords(resp.totalSize);
 
       allLoadedEvents.push(...resp.events);
       pageToken = resp.nextPageToken;
@@ -51,18 +55,32 @@ export const EgressEventsTable = ({sourceUserEmail, sourceWorkspaceNamespace, di
     setLoading(false);
   }, [loading, events, nextPageToken]);
 
-  const onRowEditSave = useCallback(() => {
-    // invoke update, apply into events array
-    debugger;
-  }, [pendingUpdateEvent]);
+  const onRowEditSave = useCallback(async() => {
+    if (!pendingUpdateEvent) {
+      return;
+    }
 
-  const statusEditor = (editorProps) => {
+    const i = events.findIndex(({egressEventId}) => egressEventId === pendingUpdateEvent.egressEventId);
+    if (fp.isEqual(events[i], pendingUpdateEvent)) {
+      return;
+    }
+
+    setLoading(true);
+    const updatedEvent = await egressEventsAdminApi().updateEgressEvent(
+      pendingUpdateEvent.egressEventId, {egressEvent: pendingUpdateEvent});
+    const updatedEvents = events.slice();
+    updatedEvents.splice(i, 1, updatedEvent)
+    setEvents(updatedEvents);
+    setLoading(false);
+  }, [events, pendingUpdateEvent]);
+
+  const statusEditor = ({rowData}) => {
     return (
-      <Dropdown value={pendingUpdateEvent?.status ?? editorProps.rowData.status}
+      <Dropdown value={pendingUpdateEvent?.status ?? rowData.status}
                 options={[EgressEventStatus.REMEDIATED, EgressEventStatus.VERIFIEDFALSEPOSITIVE]}
                 onChange={(e)=> {
                   setPendingUpdateEvent({
-                    ...editorProps.rowData,
+                    ...rowData,
                     status: e.value
                   });
                 }}
