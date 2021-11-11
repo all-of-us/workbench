@@ -1,9 +1,14 @@
 package org.pmiops.workbench.api;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Optional;
 import javax.annotation.Nullable;
+import org.apache.commons.lang3.StringUtils;
 import org.pmiops.workbench.annotations.AuthorityRequired;
+import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.AccessReason;
 import org.pmiops.workbench.model.AdminLockedState;
 import org.pmiops.workbench.model.Authority;
@@ -24,6 +29,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
 
   private final WorkspaceAdminService workspaceAdminService;
+
+  private String ADMIN_LOCK_REQUEST_DATE_FORMAT = "MM-dd-yyyy";
 
   @Autowired
   public WorkspaceAdminController(WorkspaceAdminService workspaceAdminService) {
@@ -94,8 +101,26 @@ public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
   @AuthorityRequired({Authority.ACCESS_CONTROL_ADMIN})
   public ResponseEntity<EmptyResponse> setAdminLockedState(
       String workspaceNamespace, AdminLockedState lockedState) {
-    workspaceAdminService.setAdminLockedState(
-        workspaceNamespace, toPrimitive(lockedState.getValue()));
+    if (StringUtils.isBlank(lockedState.getRequestDate())
+        || StringUtils.isBlank(lockedState.getRequestReason())) {
+      throw new BadRequestException(
+          String.format("Cannot have empty Request reason or Request Date"));
+    }
+    try {
+      // Example for date: '2011-12-03'
+      LocalDate requestDate =
+          LocalDate.parse(lockedState.getRequestDate(), DateTimeFormatter.ISO_DATE);
+    } catch (DateTimeParseException e) {
+      throw new BadRequestException(String.format("Request Date should be in correct format"));
+    }
+    workspaceAdminService.setAdminLockedState(workspaceNamespace, toPrimitive(true));
+    return ResponseEntity.ok().build();
+  }
+
+  @Override
+  @AuthorityRequired({Authority.ACCESS_CONTROL_ADMIN})
+  public ResponseEntity<EmptyResponse> setAdminUnlockedState(String workspaceNamespace) {
+    workspaceAdminService.setAdminLockedState(workspaceNamespace, false);
     return ResponseEntity.ok().build();
   }
 }

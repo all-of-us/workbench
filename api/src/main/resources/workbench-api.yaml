@@ -1480,10 +1480,32 @@ paths:
           schema:
             type: object
             required:
-              - value
+              - requestReason
+              - requestDate
             properties:
-              value:
-                type: boolean
+              requestReason:
+                type: string
+              requestDate:
+                type: string
+      responses:
+        200:
+          description: success
+          schema:
+            "$ref": "#/definitions/EmptyResponse"
+        400:
+          description: Bad request
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
+  "/v1/admin/workspaces/{workspaceNamespace}/unlock":
+    parameters:
+      - "$ref": "#/parameters/workspaceNamespace"
+    post:
+      tags:
+        - workspaceAdmin
+      consumes:
+        - application/json
+      description: Set admin unlocked state for the workspace
+      operationId: setAdminUnlockedState
       responses:
         200:
           description: success
