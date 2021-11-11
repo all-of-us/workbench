@@ -103,7 +103,9 @@
     "enableGenomicExtraction": true,
     "enableGpu": false,
     "enablePersistentDisk": false,
-    "enableEgressAlertingV2": false
+    "enableEgressAlertingV2": false,
+    "enablePrivateDataprocWorker": false,
+    "grantLifescienceApiRunnerAcl": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-staging",
@@ -136,5 +138,15 @@
   "offlineBatch": {
     "usersPerAuditTask": 20,
     "usersPerSynchronizeAccessTask": 50
+  },
+  "egressAlertRemediationPolicy": {
+    "enableJiraTicketing": false,
+    "notifyFromEmail": "workbench-notificatio-aaaaekogch7vg3c6hi4sgyx4le@pmi-engteam.slack.com",
+    "escalations": [{
+      "afterIncidentCount": 1,
+      "suspendCompute": {
+        "durationMinutes": 10
+      }
+    }]
   }
 }
