@@ -33,7 +33,6 @@ import {
   RAS_CALLBACK_PATH,
 } from 'app/utils/access-utils';
 import {BreadcrumbType} from 'app/utils/navigation';
-import {environment} from 'environments/environment';
 import {Redirect, Switch} from 'react-router-dom';
 import {expiredGuard, registrationGuard} from './guards';
 
@@ -82,13 +81,13 @@ export const SignedInRoutes = () => {
     <AppRoute exact path='/admin/institution/edit/:institutionId'>
       <InstitutionEditAdminPage routeData={{title: 'Institution Admin', minimizeChrome: true}}/>
     </AppRoute>
-    <AppRoute exact path='/admin/user'> {/* included for backwards compatibility */}
-      <UsersAdminPage routeData={{title: 'User Admin Table', minimizeChrome: true}}/>
-    </AppRoute>
     <AppRoute exact path='/admin/review-workspace'>
       <AdminReviewWorkspacePage routeData={{title: 'Review Workspaces', minimizeChrome: true}}/>
     </AppRoute>
-    <AppRoute exact path='/admin/users'>
+   <AppRoute exact path='/admin/user'> {/* included for backwards compatibility */}
+      <Redirect to={'/admin/users'}/>
+   </AppRoute>
+   <AppRoute exact path='/admin/users'>
       <UsersAdminPage routeData={{title: 'User Admin Table', minimizeChrome: true}}/>
     </AppRoute>
     <AppRoute exact path='/admin/users/:usernameWithoutGsuiteDomain'>
