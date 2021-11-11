@@ -14,7 +14,6 @@
       local deployment in 1 change log file.
     </comment>
 
-    <delete tableName="domain_info"/>
     <delete tableName="survey_module"/>
     <delete tableName="cb_criteria"/>
     <delete tableName="cb_criteria_attribute"/>
@@ -28,18 +27,6 @@
     <delete tableName="cb_criteria_menu"/>
     <delete tableName="ds_data_dictionary"/>
     <delete tableName="domain_card"/>
-
-    <loadData tableName="domain_info" file="csv/domain_info.csv" encoding="UTF-8" quotchar='"'>
-      <column name="concept_id" type="NUMERIC"/>
-      <column name="domain" type="NUMERIC"/>
-      <column name="domain_id" type="STRING"/>
-      <column name="domain_enum" type="STRING"/>
-      <column name="name" type="STRING"/>
-      <column name="description" type="STRING"/>
-      <column name="all_concept_count" type="NUMERIC"/>
-      <column name="standard_concept_count" type="NUMERIC"/>
-      <column name="participant_count" type="NUMERIC"/>
-    </loadData>
 
     <loadData tableName="survey_module" file="csv/survey_module.csv" encoding="UTF-8" quotchar='"'>
       <column name="concept_id" type="NUMERIC"/>

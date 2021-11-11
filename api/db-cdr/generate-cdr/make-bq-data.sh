@@ -43,7 +43,7 @@ cb_cri_anc_table_check=\\bcb_criteria_ancestor\\b
 
 # Create bq tables we have json schema for
 schema_path=generate-cdr/bq-schemas
-create_tables=(cb_survey_attribute cb_survey_version cb_criteria cb_criteria_attribute cb_criteria_relationship cb_criteria_ancestor ds_linking ds_data_dictionary domain_info domain_card survey_module cb_person cb_data_filter cb_criteria_menu)
+create_tables=(cb_survey_attribute cb_survey_version cb_criteria cb_criteria_attribute cb_criteria_relationship cb_criteria_ancestor ds_linking ds_data_dictionary domain_card survey_module cb_person cb_data_filter cb_criteria_menu)
 
 for t in "${create_tables[@]}"
 do
@@ -94,22 +94,6 @@ bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 (survey_version_concept_id,survey_concept_id,display_name,display_order)
 SELECT survey_version_concept_id,survey_concept_id,display_name,display_order
 FROM \`$BQ_PROJECT.$BQ_DATASET.cb_survey_version\`"
-
-# Populate domain_info
-###############
-# domain_info #
-###############
-echo "Inserting domain_info"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$OUTPUT_PROJECT.$OUTPUT_DATASET.domain_info\`
-(concept_id,domain,domain_id,domain_enum,name,description,all_concept_count,standard_concept_count,participant_count)
-VALUES
-(19,0,'Condition','CONDITION','Conditions','Conditions are records of a Person suggesting the presence of a disease or medical condition stated as a diagnosis, a sign or a symptom, which is either observed by a Provider or reported by the patient.',0,0,0),
-(13,3,'Drug','DRUG','Drug Exposures','Drugs biochemical substance formulated in such a way that when administered to a Person it will exert a certain physiological or biochemical effect. The drug exposure domain concepts capture records about the utilization of a Drug when ingested or otherwise introduced into the body.',0,0,0),
-(21,4,'Measurement','MEASUREMENT','Labs and Measurements','Labs and Measurements',0,0,0),
-(10,6,'Procedure','PROCEDURE','Procedures','Procedure',0,0,0),
-(27,5,'Observation','OBSERVATION','Observations','Observation',0,0,0),
-(0,19,'Physical Measurements','PHYSICAL_MEASUREMENT_CSS','Physical Measurements','Participants have the option to provide a standard set of physical measurements as part of the enrollment process',0,0,0)"
 
 # Populate domain_card
 ###############
@@ -217,96 +201,6 @@ if [[ $tables =~ $cb_cri_anc_table_check ]]; then
     SELECT ancestor_id, descendant_id
     FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_ancestor\`"
 fi
-
-##########################################
-# domain info updates                    #
-##########################################
-
-# Set all_concept_count and standard_concept_count on domain_info
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
-"update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.domain_info\` d
-set d.all_concept_count = c.all_concept_count
-from (select domain_id, sum(all_concept_count) as all_concept_count
-      from (select c.domain_id as domain_id, c.is_standard, COUNT(DISTINCT c.concept_id) as all_concept_count
-              from \`$OUTPUT_PROJECT.$OUTPUT_DATASET.cb_criteria\` c
-              join \`$OUTPUT_PROJECT.$OUTPUT_DATASET.domain_info\` d2
-              on d2.domain_enum = c.domain_id and c.is_selectable = 1 and d2.domain_enum != 'PHYSICAL_MEASUREMENT_CSS'
-              group by c.domain_id, c.is_standard ) a
-      group by domain_id) c
-where d.domain_enum = c.domain_id"
-
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
-"update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.domain_info\` d
-set d.standard_concept_count = c.standard_concept_count
-from (select c.domain_id as domain_id, COUNT(DISTINCT c.concept_id) as standard_concept_count
-from \`$OUTPUT_PROJECT.$OUTPUT_DATASET.cb_criteria\` c
-join \`$OUTPUT_PROJECT.$OUTPUT_DATASET.domain_info\` d2
-on d2.domain_enum = c.domain_id and c.is_standard = 1 and c.is_selectable = 1  and d2.domain_enum != 'PHYSICAL_MEASUREMENT_CSS'
-group by c.domain_id) c
-where d.domain_enum = c.domain_id"
-
-# Set all_concept_count on domain_info for Physical Measurements
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
-"update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.domain_info\` d
-set d.all_concept_count = c.all_concept_count, d.standard_concept_count = c.standard_concept_count from
-(SELECT count(distinct concept_id) as all_concept_count, 0 as standard_concept_count
-FROM \`$OUTPUT_PROJECT.$OUTPUT_DATASET.cb_criteria\`
-WHERE type = 'PPI'
-AND domain_id = 'PHYSICAL_MEASUREMENT_CSS') c
-where d.domain = 19"
-
-# Set participant counts for Condition domain
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
-"update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.domain_info\` d
-set d.participant_count = r.count from
-(select count(distinct person_id) as count
-from \`$BQ_PROJECT.$BQ_DATASET.condition_occurrence\` co) as r
-where d.concept_id = 19"
-
-# Set participant counts for Measurement domain
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
-"update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.domain_info\` d
-set d.participant_count = r.count from
-(select count(distinct person_id) as count
-from \`$BQ_PROJECT.$BQ_DATASET.measurement\` m) as r
-where d.concept_id = 21"
-
-# Set participant counts for Procedure domain
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
-"update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.domain_info\` d
-set d.participant_count = r.count from
-(select count(distinct person_id) as count
-from \`$BQ_PROJECT.$BQ_DATASET.procedure_occurrence\` po) as r
-where d.concept_id = 10"
-
-# Set participant counts for Drug domain
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
-"update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.domain_info\` d
-set d.participant_count = r.count from
-(select count(distinct person_id) as count
-from \`$BQ_PROJECT.$BQ_DATASET.drug_exposure\` de) as r
-where d.concept_id = 13"
-
-# Set participant counts for Observation domain
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
-"update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.domain_info\` d
-set d.participant_count = r.count from
-(select count(distinct person_id) as count
-from \`$BQ_PROJECT.$BQ_DATASET.observation\` o) as r
-where d.concept_id = 27"
-
-# Set participant counts for Physical Measurements domain
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
-"update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.domain_info\` d
-set d.participant_count = r.count from
-(SELECT COUNT(DISTINCT person_id) as count
-FROM \`$BQ_PROJECT.$BQ_DATASET.measurement\`
-WHERE measurement_source_concept_id IN (
-SELECT concept_id
-FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
-WHERE type = 'PPI'
-AND domain_id = 'PHYSICAL_MEASUREMENT_CSS')) as r
-where d.domain = 19"
 
 ##########################################
 # domain card updates                    #
