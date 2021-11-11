@@ -337,12 +337,11 @@ commands:
             cp .env.circleci.<< parameters.env_name >> .env
             source .env
             cat .env | awk '{print "export " $0}' >> $BASH_ENV
-            echo "export PUPPETEER_ACCESS_TEST=${ACCESS_TEST_USER}" >> $BASH_ENV
             source $BASH_ENV
       - run:
           working_directory: ~/workbench/api
           name: Prep the e2e access test user (in Test env) by setting access module timestamps
-          command: ./project.rb set-access-module-timestamps --user "${PUPPETEER_ACCESS_TEST}"
+          command: ./project.rb set-access-module-timestamps --user "${ACCESS_TEST_USER}"
 
 # -------------------------
 #        JOBS
