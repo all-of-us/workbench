@@ -51,7 +51,7 @@ public class EgressEventsAdminController implements EgressEventsAdminApiDelegate
       ListEgressEventsRequest request) {
     int pageSize = DEFAULT_PAGE_SIZE;
     if (request.getPageSize() != null && request.getPageSize().intValue() > 0) {
-      pageSize = Math.min(request.getPageSize().intValue(), MAX_PAGE_SIZE);
+      pageSize = Math.min(request.getPageSize(), MAX_PAGE_SIZE);
     }
 
     Pageable pageable = PageRequest.of(0, pageSize);
@@ -106,7 +106,8 @@ public class EgressEventsAdminController implements EgressEventsAdminApiDelegate
     return ResponseEntity.ok(
         new ListEgressEventsResponse()
             .events(page.stream().map(egressEventMapper::toApiEvent).collect(Collectors.toList()))
-            .nextPageToken(nextPageToken));
+            .nextPageToken(nextPageToken)
+            .totalSize((int) page.getTotalElements()));
   }
 
   private Object[] toPaginationParams(ListEgressEventsRequest req) {
