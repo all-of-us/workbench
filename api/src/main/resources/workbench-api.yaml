@@ -3807,7 +3807,7 @@ paths:
           schema:
             type: integer
             format: int64
-  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/chartinfo/{genderOrSex}/{age}":
+  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/chartinfo/{genderOrSex}/{age}/{ethnicity}":
     parameters:
       - "$ref": "#/parameters/workspaceNamespace"
       - "$ref": "#/parameters/workspaceId"
@@ -3829,6 +3829,11 @@ paths:
         type: string
         required: true
         description: represents age, age at consent or age at cdr
+      - in: path
+        name: ethnicity
+        type: boolean
+        required: true
+        description: Include ethnicity data in response
       - in: body
         name: request
         description: object of parameters by which to perform the search

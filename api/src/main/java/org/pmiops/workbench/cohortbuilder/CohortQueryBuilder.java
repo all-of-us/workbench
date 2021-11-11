@@ -34,6 +34,17 @@ public class CohortQueryBuilder {
   private static final String DEMO_CHART_INFO_SQL_TEMPLATE =
       "SELECT ${genderOrSex} as name,\n"
           + "race,\n"
+          + "CASE ${ageRange1}\n"
+          + "${ageRange2}\n"
+          + "ELSE '> 65'\n"
+          + "END as ageRange,\n"
+          + "COUNT(*) as count\n"
+          + "FROM `${projectId}.${dataSetId}.cb_search_person` cb_search_person\n"
+          + "WHERE ";
+
+  private static final String DEMO_CHART_INFO_ETHNICITY_SQL_TEMPLATE =
+      "SELECT ${genderOrSex} as name,\n"
+          + "race,\n"
           + "ethnicity,\n"
           + "CASE ${ageRange1}\n"
           + "${ageRange2}\n"
@@ -44,6 +55,9 @@ public class CohortQueryBuilder {
           + "WHERE ";
 
   private static final String DEMO_CHART_INFO_SQL_GROUP_BY =
+      "GROUP BY name, race, ageRange\n" + "ORDER BY name, race, ageRange\n";
+
+  private static final String DEMO_CHART_INFO_ETHNICITY_SQL_GROUP_BY =
       "GROUP BY name, race, ageRange, ethnicity\n" + "ORDER BY name, race, ageRange, ethnicity\n";
 
   private static final String DOMAIN_CHART_INFO_SQL_TEMPLATE =
@@ -113,9 +127,13 @@ public class CohortQueryBuilder {
    * ParticipantCriteria}.
    */
   public QueryJobConfiguration buildDemoChartInfoCounterQuery(
-      ParticipantCriteria participantCriteria) {
+      ParticipantCriteria participantCriteria, Boolean ethnicity) {
     Map<String, QueryParameterValue> params = new HashMap<>();
-    String sqlTemplate =
+    String sqlTemplate = ethnicity ?
+        DEMO_CHART_INFO_ETHNICITY_SQL_TEMPLATE
+            .replace("${genderOrSex}", participantCriteria.getGenderOrSexType().toString())
+            .replace("${ageRange1}", getAgeRangeSql(18, 44, participantCriteria.getAgeType()))
+            .replace("${ageRange2}", getAgeRangeSql(45, 64, participantCriteria.getAgeType())) :
         DEMO_CHART_INFO_SQL_TEMPLATE
             .replace("${genderOrSex}", participantCriteria.getGenderOrSexType().toString())
             .replace("${ageRange1}", getAgeRangeSql(18, 44, participantCriteria.getAgeType()))
@@ -123,7 +141,7 @@ public class CohortQueryBuilder {
     StringBuilder queryBuilder = new StringBuilder(sqlTemplate);
     addWhereClause(participantCriteria, SEARCH_PERSON_TABLE, queryBuilder, params);
     addDataFilters(participantCriteria.getSearchRequest().getDataFilters(), queryBuilder, params);
-    queryBuilder.append(DEMO_CHART_INFO_SQL_GROUP_BY);
+    queryBuilder.append(ethnicity ? DEMO_CHART_INFO_ETHNICITY_SQL_GROUP_BY : DEMO_CHART_INFO_SQL_GROUP_BY);
 
     return QueryJobConfiguration.newBuilder(queryBuilder.toString())
         .setNamedParameters(params)

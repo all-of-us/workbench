@@ -68,7 +68,7 @@ public interface CohortBuilderService {
   List<DataFilter> findDataFilters();
 
   List<DemoChartInfo> findDemoChartInfo(
-      GenderOrSexType genderOrSexType, AgeType ageType, SearchRequest request);
+      GenderOrSexType genderOrSexType, AgeType ageType, Boolean ethnicity, SearchRequest request);
 
   Long findDomainCountByStandard(String domain, String term, Boolean standard);
 

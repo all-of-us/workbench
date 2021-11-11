@@ -240,7 +240,7 @@ export const QueryReport = fp.flow(withCdrVersions(), withCurrentCohortReview(),
       cohortsApi().getCohort(ns, wsid, +cid).then(cohort => this.setState({cohort}));
       const cdrName = findCdrVersion(cdrVersionId, cdrVersionTiersResponse).name;
       this.setState({cdrName});
-      cohortBuilderApi().findDemoChartInfo(ns, wsid, GenderOrSexType[GenderOrSexType.GENDER], AgeType[AgeType.AGE], request)
+      cohortBuilderApi().findDemoChartInfo(ns, wsid, GenderOrSexType[GenderOrSexType.GENDER], AgeType[AgeType.AGE], true, request)
         .then(response => {
           this.groupChartData(response.items);
           this.setState({data: response.items, chartsLoading: false});

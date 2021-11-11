@@ -296,23 +296,25 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
 
   @Override
   public List<DemoChartInfo> findDemoChartInfo(
-      GenderOrSexType genderOrSexType, AgeType ageType, SearchRequest request) {
+      GenderOrSexType genderOrSexType, AgeType ageType, Boolean ethnicity, SearchRequest request) {
     QueryJobConfiguration qjc =
         bigQueryService.filterBigQueryConfig(
             cohortQueryBuilder.buildDemoChartInfoCounterQuery(
-                new ParticipantCriteria(request, genderOrSexType, ageType)));
+                new ParticipantCriteria(request, genderOrSexType, ageType), ethnicity));
     TableResult result = bigQueryService.executeQuery(qjc);
     Map<String, Integer> rm = bigQueryService.getResultMapper(result);
 
     List<DemoChartInfo> demoChartInfos = new ArrayList<>();
     for (List<FieldValue> row : result.iterateAll()) {
-      demoChartInfos.add(
-          new DemoChartInfo()
-              .name(bigQueryService.getString(row, rm.get("name")))
-              .race(bigQueryService.getString(row, rm.get("race")))
-              .ageRange(bigQueryService.getString(row, rm.get("ageRange")))
-              .ethnicity(bigQueryService.getString(row, rm.get("ethnicity")))
-              .count(bigQueryService.getLong(row, rm.get("count"))));
+      DemoChartInfo demoChartInfo = new DemoChartInfo()
+          .name(bigQueryService.getString(row, rm.get("name")))
+          .race(bigQueryService.getString(row, rm.get("race")))
+          .ageRange(bigQueryService.getString(row, rm.get("ageRange")))
+          .count(bigQueryService.getLong(row, rm.get("count")));
+      if (ethnicity) {
+        demoChartInfo.ethnicity(bigQueryService.getString(row, rm.get("ethnicity")));
+      }
+      demoChartInfos.add(demoChartInfo);
     }
     return demoChartInfos;
   }

@@ -182,6 +182,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
       String workspaceId,
       String genderOrSex,
       String age,
+      Boolean ethnicity,
       SearchRequest request) {
     workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
@@ -192,7 +193,8 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
       return ResponseEntity.ok(response);
     }
     return ResponseEntity.ok(
-        response.items(cohortBuilderService.findDemoChartInfo(genderOrSexType, ageType, request)));
+        response.items(cohortBuilderService.findDemoChartInfo(
+            genderOrSexType, ageType, ethnicity, request)));
   }
 
   @Override

@@ -241,7 +241,7 @@ export const ListOverview = fp.flow(withCurrentWorkspace(), withCdrVersions(), w
       const {id, namespace} = currentWorkspaceStore.getValue();
       const request = mapRequest(searchRequest);
       return cohortBuilderApi()
-        .findDemoChartInfo(namespace, id, genderOrSexType.toString(), ageType.toString(), request, {signal: this.aborter.signal});
+        .findDemoChartInfo(namespace, id, genderOrSexType.toString(), ageType.toString(), false, request, {signal: this.aborter.signal});
     }
 
     get hasActiveItems() {
