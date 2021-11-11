@@ -14,7 +14,6 @@
       local deployment in 1 change log file.
     </comment>
 
-    <delete tableName="domain_info"/>
     <delete tableName="survey_module"/>
     <delete tableName="cb_criteria"/>
     <delete tableName="cb_criteria_attribute"/>
