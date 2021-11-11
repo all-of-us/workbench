@@ -1,59 +1,102 @@
 import {DataTable} from 'primereact/datatable';
 import {Column} from 'primereact/column';
-import {reactStyles} from 'app/utils';
 import {StyledRouterLink} from 'app/components/buttons';
+import {Dropdown} from 'primereact/dropdown';
 
-import {useState, useEffect} from 'react';
-import { egressEventsAdminApi, workspaceAdminApi } from 'app/services/swagger-fetch-clients';
+import { useState, useEffect, useCallback} from 'react';
+import { egressEventsAdminApi } from 'app/services/swagger-fetch-clients';
+import { EgressEventStatus } from 'generated/fetch';
 
-
-const styles = reactStyles({
-  colStyle: {
-    fontSize: 12,
-    height: '60px',
-    lineHeight: '0.5rem',
-    overflow: 'hidden',
-    padding: '.5em',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
-  }
-});
 
 interface Props {
   sourceUserEmail?: string;
   sourceWorkspaceNamespace?: string;
+  displayPageSize?: number;
 }
 
-export const EgressEventsTable = (props: Props) => {
-  const {sourceUserEmail, sourceWorkspaceNamespace} = props;
-
+export const EgressEventsTable = ({sourceUserEmail, sourceWorkspaceNamespace, displayPageSize = 20}: Props) => {
+  const [loading, setLoading] = useState(false);
+  const [first, setFirst] = useState(0);
   const [events, setEvents] = useState(null);
+  const [nextPageToken, setNextPageToken] = useState(null);
+  const [pendingUpdateEvent, setPendingUpdateEvent] = useState(null);
+
+  // XXX
+  const totalRecords = 19;
+
+  const maybeFetchMoreEvents = useCallback(async(atLeastCount: number): Promise<void> => {
+    if (loading || events?.length >= atLeastCount) {
+      return;
+    }
+    if (events && !nextPageToken) {
+      // We've loaded at least one page, and there's no more data to load.
+      return;
+    }
+    setLoading(true);
+
+    let pageToken = nextPageToken;
+    const allLoadedEvents = [...(events || [])];
+    do {
+      const resp = await egressEventsAdminApi().listEgressEvents({
+        sourceUserEmail,
+        sourceWorkspaceNamespace,
+        pageToken
+      });
+
+      allLoadedEvents.push(...resp.events);
+      pageToken = resp.nextPageToken;
+    } while (pageToken && allLoadedEvents.length < atLeastCount);
+    setEvents(allLoadedEvents);
+    setNextPageToken(pageToken);
+    setLoading(false);
+  }, [loading, events, nextPageToken]);
+
+  const onRowEditSave = useCallback(() => {
+    // invoke update, apply into events array
+    debugger;
+  }, [pendingUpdateEvent]);
+
+  const statusEditor = (editorProps) => {
+    return (
+      <Dropdown value={pendingUpdateEvent?.status ?? editorProps.rowData.status}
+                options={[EgressEventStatus.REMEDIATED, EgressEventStatus.VERIFIEDFALSEPOSITIVE]}
+                onChange={(e)=> {
+                  setPendingUpdateEvent({
+                    ...editorProps.rowData,
+                    status: e.value
+                  });
+                }}
+                placeholder="Select a Status"
+      />
+    );
+  };
 
   useEffect(() => {
-    egressEventsAdminApi().listEgressEvents({
-      sourceUserEmail,
-      sourceWorkspaceNamespace
-    }).then(({events}) =>  setEvents(events));
+    maybeFetchMoreEvents(2 * displayPageSize);
   }, []);
 
-  // TODO: pagination, sorting options, filtering
-
-  return <DataTable value={events} paginator={true}>
+  const displayEvents = events?.slice(first, first + displayPageSize);
+  return <DataTable
+      lazy paginator
+      loading={loading}
+      editMode="row"
+      onRowEditSave={onRowEditSave}
+      onRowEditCancel={() => setPendingUpdateEvent(null)}
+      value={displayEvents}
+      onPage={async(e) => {
+        await maybeFetchMoreEvents(e.first + e.rows - 1);
+        setFirst(e.first);
+      }}
+      first={first}
+      rows={displayPageSize}
+      totalRecords={totalRecords}>
     <Column field='egressEventId'
-            bodyStyle={{...styles.colStyle}}
-            filterField={'egressEventId'}
-            filterMatchMode={'contains'}
-            frozen={true}
             header='Event ID'
-            headerStyle={{...styles.colStyle, width: '100px'}}
-            sortable={true}
-            sortField={'egressEventId'}
+            headerStyle={{width: '100px'}}
     />
     <Column field='creationTime'
-            bodyStyle={{...styles.colStyle}}
-            excludeGlobalFilter={true}
             header='Time'
-            headerStyle={{...styles.colStyle, width: '150px'}}
+            headerStyle={{width: '150px'}}
     />
     <Column field='sourceUserEmail'
             body={({sourceUserEmail}) => {
@@ -62,10 +105,8 @@ export const EgressEventsTable = (props: Props) => {
                 {sourceUserEmail}
               </StyledRouterLink>;
             }}
-            bodyStyle={{...styles.colStyle}}
             header='Source User'
-            headerStyle={{...styles.colStyle, width: '300px'}}
-            sortable={true}
+            headerStyle={{width: '300px'}}
     />
     <Column field='sourceWorkspaceNamespace'
             body={({sourceWorkspaceNamespace}) => {
@@ -73,16 +114,18 @@ export const EgressEventsTable = (props: Props) => {
                 {sourceWorkspaceNamespace}
               </StyledRouterLink>;
             }}
-            bodyStyle={{...styles.colStyle}}
             header='Source Workspace Namespace'
-            headerStyle={{...styles.colStyle, width: '250px'}}
-            sortable={true}
+            headerStyle={{width: '250px'}}
     />
     <Column field='status'
-            bodyStyle={{...styles.colStyle}}
+            editor={(options) => statusEditor(options)}
             header='Status'
-            headerStyle={{...styles.colStyle, width: '200px'}}
-            sortable={true}
+            headerStyle={{width: '200px'}}
     />
+    <Column rowEditor
+            headerStyle={{ width: '10%', minWidth: '8rem' }}
+            bodyStyle={{ textAlign: 'center' }}>
+    </Column>
   </DataTable>;
 };
+
