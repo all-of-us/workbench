@@ -173,8 +173,9 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
     } else if (runtime.getGceWithPdConfig() != null) {
       return leonardoMapper.toLeonardoGceWithPdConfig(runtime.getGceWithPdConfig());
     } else {
-      LeonardoMachineConfig machineConfig = leonardoMapper.toLeonardoMachineConfig(runtime.getDataprocConfig());
-      if(workbenchConfigProvider.get().featureFlags.enablePrivateDataprocWorker) {
+      LeonardoMachineConfig machineConfig =
+          leonardoMapper.toLeonardoMachineConfig(runtime.getDataprocConfig());
+      if (workbenchConfigProvider.get().featureFlags.enablePrivateDataprocWorker) {
         machineConfig.setWorkerPrivateAccess(true);
       }
       return machineConfig;
