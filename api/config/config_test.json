@@ -103,7 +103,9 @@
     "enableGenomicExtraction": true,
     "enableGpu": true,
     "enablePersistentDisk": true,
-    "enableEgressAlertingV2": true
+    "enableEgressAlertingV2": true,
+    "enablePrivateDataprocWorker": true,
+    "grantLifescienceApiRunnerAcl": true
   },
   "actionAudit": {
     "logName": "workbench-action-audit-test",
