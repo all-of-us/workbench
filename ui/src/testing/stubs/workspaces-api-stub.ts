@@ -230,4 +230,10 @@ export class WorkspacesApiStub extends WorkspacesApi {
       resolve({freeCreditsRemaining: 123.4});
     });
   }
-}
+
+  notebookTransferComplete(workspaceNamespace: string,
+      workspaceId: string,
+      options?: any): Promise<boolean> {
+    return new Promise<boolean>(resolve => resolve(true));
+  }
+  }
