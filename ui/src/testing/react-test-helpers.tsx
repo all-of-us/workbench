@@ -33,7 +33,7 @@ export async function simulateSelection(selectElement: ReactWrapper, selection: 
   await waitOneTickAndUpdate(selectElement);
 }
 
-export function mountWithRouter(children: string | React.Node) {
+export function mountWithRouter(children: string | React.ReactNode) {
   // It would be ideal to unwrap down to the child wrapper here, but unfortunately
   // wrapper.update() only works on the root node - and most tests need to call that.
   return mount(<MemoryRouter>
