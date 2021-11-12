@@ -42,6 +42,7 @@ import {
 } from 'generated/fetch';
 import {accessRenewalModules, computeDisplayDates, getAccessModuleConfig} from 'app/utils/access-utils';
 import {hasRegisteredTierAccess} from 'app/utils/access-tiers';
+import { EgressEventsTable } from './egress-events-table';
 
 const styles = reactStyles({
   semiBold: {
@@ -234,7 +235,7 @@ export const AdminUser = withRouter(class extends React.Component<Props, State> 
       }
     } = this.state;
 
-    await this.setState({loading: true});
+    this.setState({loading: true});
     // Cancel any outstanding API calls.
     if (this.aborter) {
       this.aborter.abort();
@@ -259,7 +260,7 @@ export const AdminUser = withRouter(class extends React.Component<Props, State> 
         emailValidationResponse: null,
       });
     }
-    await this.setState({loading: false});
+    this.setState({loading: false});
   }
 
   async getUser() {
@@ -325,7 +326,7 @@ export const AdminUser = withRouter(class extends React.Component<Props, State> 
 
   async setVerifiedInstitutionOnProfile(institutionShortName: string) {
     const {verifiedInstitutionOptions} = this.state;
-    await this.setState(fp.flow(
+    this.setState(fp.flow(
       fp.set(['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionShortName'], institutionShortName),
       fp.set(
           ['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionDisplayName'],
@@ -341,7 +342,7 @@ export const AdminUser = withRouter(class extends React.Component<Props, State> 
   }
 
   async setContactEmail(contactEmail: string) {
-    await this.setState(fp.set(['updatedProfile', 'contactEmail'], contactEmail));
+    this.setState(fp.set(['updatedProfile', 'contactEmail'], contactEmail));
     await this.validateEmail();
   }
 
@@ -630,6 +631,12 @@ export const AdminUser = withRouter(class extends React.Component<Props, State> 
             }
             <AccessModuleExpirations modules={updatedProfile.accessModules.modules} UserStatusComponent={getUserStatus(updatedProfile)}/>
           </FlexColumn>
+        </FlexRow>
+        <FlexRow>
+          <h2>Egress event history</h2>
+        </FlexRow>
+        <FlexRow>
+          <EgressEventsTable displayPageSize={10} sourceUserEmail={updatedProfile.username} />
         </FlexRow>
       </FlexColumn>}
       {this.state.loading && <SpinnerOverlay/>}
