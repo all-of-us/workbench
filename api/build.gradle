@@ -27,6 +27,7 @@ buildscript {
         SPRING_SECURITY_VERSION = '4.2.18.RELEASE'
         SWAGGER_2_CODEGEN_VERSION = '2.2.3'
         SWAGGER_3_CODEGEN_VERSION = '3.0.21'
+        SAM_CLIENT = "0.1-61135c7"
     }
 
     project.ext['hibernate.version'] = '5.4.31.Final'
@@ -36,6 +37,9 @@ buildscript {
         mavenCentral()
         maven {
             url "https://plugins.gradle.org/m2/"
+        }
+        maven {
+            url 'https://broadinstitute.jfrog.io/broadinstitute/libs-release/'
         }
     }
 
@@ -490,6 +494,9 @@ dependencies {
     generatedCompile 'org.threeten:threetenbp:1.3.5'
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$project.ext.KOTLIN_VERSION"
+
+    // Sam client library
+    implementation "org.broadinstitute.dsde.workbench:sam-client_2.12:${$project.ext.SAM_CLIENT}"
 
     // war plugin. Add this to scope of the compile configuration, but do not include in .war file.
     providedCompile group: 'javax.servlet', name: 'javax.servlet-api', version: '3.1.0'
