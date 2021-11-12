@@ -3,7 +3,9 @@ package org.pmiops.workbench.api;
 import java.util.List;
 import java.util.Optional;
 import javax.annotation.Nullable;
+import org.apache.commons.lang3.StringUtils;
 import org.pmiops.workbench.annotations.AuthorityRequired;
+import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.AccessReason;
 import org.pmiops.workbench.model.AdminLockedState;
 import org.pmiops.workbench.model.Authority;
@@ -94,8 +96,20 @@ public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
   @AuthorityRequired({Authority.ACCESS_CONTROL_ADMIN})
   public ResponseEntity<EmptyResponse> setAdminLockedState(
       String workspaceNamespace, AdminLockedState lockedState) {
-    workspaceAdminService.setAdminLockedState(
-        workspaceNamespace, toPrimitive(lockedState.getValue()));
+    if (lockedState.getRequestDateInMillis() == null
+        || lockedState.getRequestDateInMillis() == 0
+        || StringUtils.isBlank(lockedState.getRequestReason())) {
+      throw new BadRequestException(
+          String.format("Cannot have empty Request reason or Request Date"));
+    }
+    workspaceAdminService.setAdminLockedState(workspaceNamespace, toPrimitive(true));
+    return ResponseEntity.ok().build();
+  }
+
+  @Override
+  @AuthorityRequired({Authority.ACCESS_CONTROL_ADMIN})
+  public ResponseEntity<EmptyResponse> setAdminUnlockedState(String workspaceNamespace) {
+    workspaceAdminService.setAdminLockedState(workspaceNamespace, false);
     return ResponseEntity.ok().build();
   }
 }

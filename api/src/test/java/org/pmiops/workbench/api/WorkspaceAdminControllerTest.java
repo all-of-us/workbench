@@ -21,6 +21,7 @@ import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.conceptset.mapper.ConceptSetMapperImpl;
 import org.pmiops.workbench.dataset.mapper.DataSetMapperImpl;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
@@ -28,6 +29,7 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.CloudMonitoringService;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
+import org.pmiops.workbench.model.AdminLockedState;
 import org.pmiops.workbench.model.AdminWorkspaceCloudStorageCounts;
 import org.pmiops.workbench.model.AdminWorkspaceObjectsCounts;
 import org.pmiops.workbench.model.AuditLogEntry;
@@ -176,5 +178,53 @@ public class WorkspaceAdminControllerTest {
     assertThrows(
         NotFoundException.class,
         () -> workspaceAdminController.getWorkspaceAdminView(NONSENSE_NAMESPACE));
+  }
+
+  @Test
+  public void getWorkspaceAdmin_setAdminLock_noRequestDate() {
+    AdminLockedState adminLockedState = new AdminLockedState();
+    adminLockedState.setRequestDateInMillis(0l);
+    adminLockedState.setRequestReason("Some reason to lock");
+    assertThrows(
+        BadRequestException.class,
+        () -> workspaceAdminController.setAdminLockedState(WORKSPACE_NAMESPACE, adminLockedState));
+  }
+
+  @Test
+  public void getWorkspaceAdmin_setAdminLock_noRequestReason() {
+    AdminLockedState adminLockedState = new AdminLockedState();
+    adminLockedState.setRequestDateInMillis(23456l);
+    adminLockedState.setRequestReason("");
+    assertThrows(
+        BadRequestException.class,
+        () -> workspaceAdminController.setAdminLockedState(WORKSPACE_NAMESPACE, adminLockedState));
+  }
+
+  @Test
+  public void getWorkspaceAdmin_setAdminLock_nullRequestDate() {
+    AdminLockedState adminLockedState = new AdminLockedState();
+    adminLockedState.setRequestDateInMillis(null);
+    adminLockedState.setRequestReason("Some reason for Locking Workspace");
+    assertThrows(
+        BadRequestException.class,
+        () -> workspaceAdminController.setAdminLockedState(WORKSPACE_NAMESPACE, adminLockedState));
+  }
+
+  @Test
+  public void getWorkspaceAdmin_setAdminLock_nullRequestReason() {
+    AdminLockedState adminLockedState = new AdminLockedState();
+    adminLockedState.setRequestDateInMillis((long) 123456);
+    adminLockedState.setRequestReason(null);
+    assertThrows(
+        BadRequestException.class,
+        () -> workspaceAdminController.setAdminLockedState(WORKSPACE_NAMESPACE, adminLockedState));
+  }
+
+  @Test
+  public void getWorkspaceAdmin_setAdminLock_correctAdminLockedStateRequest() {
+    AdminLockedState adminLockedState = new AdminLockedState();
+    adminLockedState.setRequestDateInMillis(654321l);
+    adminLockedState.setRequestReason("Some reason for Locking Workspace");
+    workspaceAdminController.setAdminLockedState(WORKSPACE_NAMESPACE, adminLockedState);
   }
 }

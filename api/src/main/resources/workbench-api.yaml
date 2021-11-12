@@ -1471,7 +1471,7 @@ paths:
         - workspaceAdmin
       consumes:
         - application/json
-      description: Set admin locked or unlocked state for the workspace
+      description: Set admin locked state for the workspace
       operationId: setAdminLockedState
       parameters:
         - in: body
@@ -1480,10 +1480,33 @@ paths:
           schema:
             type: object
             required:
-              - value
+              - requestReason
+              - requestDateInMillis
             properties:
-              value:
-                type: boolean
+              requestReason:
+                type: string
+              requestDateInMillis:
+                type: integer
+                format: int64
+      responses:
+        200:
+          description: success
+          schema:
+            "$ref": "#/definitions/EmptyResponse"
+        400:
+          description: Bad request
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
+  "/v1/admin/workspaces/{workspaceNamespace}/unlocked":
+    parameters:
+      - "$ref": "#/parameters/workspaceNamespace"
+    post:
+      tags:
+        - workspaceAdmin
+      consumes:
+        - application/json
+      description: Set admin unlocked state for the workspace
+      operationId: setAdminUnlockedState
       responses:
         200:
           description: success
@@ -4467,6 +4490,7 @@ definitions:
       namespace: "aou-rw-test-11112222"
       googleProject: "aou-rw-test-11112222"
       published: false
+      adminLocked: false
       researchPurpose:
         additionalNotes: null
         ancestry: false
@@ -4538,6 +4562,10 @@ definitions:
       published:
         type: boolean
         default: false
+      adminLocked:
+        type: boolean
+        default: false
+        description: Whether an administrator has prevented most actions on the workspace for all users
       googleProject:
         type: string
         description: the google project used by the workspace for compute and storage
