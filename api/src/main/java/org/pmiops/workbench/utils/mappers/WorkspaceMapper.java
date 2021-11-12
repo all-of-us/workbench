@@ -100,7 +100,6 @@ public interface WorkspaceMapper {
   @Mapping(target = "adminLocked", ignore = true)
   @Mapping(target = "approved", ignore = true)
   @Mapping(target = "billingAccountName", ignore = true)
-  @Mapping(target = "billingAccountType", ignore = true)
   @Mapping(target = "billingMigrationStatusEnum", ignore = true)
   @Mapping(target = "billingStatus", ignore = true)
   @Mapping(target = "cdrVersion", ignore = true)

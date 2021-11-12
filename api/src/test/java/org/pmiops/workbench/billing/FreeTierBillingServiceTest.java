@@ -43,7 +43,6 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace.BillingMigrationStatus;
 import org.pmiops.workbench.db.model.DbWorkspaceFreeTierUsage;
 import org.pmiops.workbench.mail.MailService;
-import org.pmiops.workbench.model.BillingAccountType;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.test.FakeClock;
@@ -438,7 +437,6 @@ public class FreeTierBillingServiceTest {
       // retrieve from DB again to reflect update after cron
       DbWorkspace dbWorkspace = workspaceDao.findById(ws.getWorkspaceId()).get();
       assertThat(dbWorkspace.getBillingStatus()).isEqualTo(BillingStatus.INACTIVE);
-      assertThat(dbWorkspace.getBillingAccountType()).isEqualTo(BillingAccountType.FREE_TIER);
     }
 
     final DbWorkspaceFreeTierUsage usage1 = workspaceFreeTierUsageDao.findOneByWorkspace(ws1);
@@ -477,7 +475,6 @@ public class FreeTierBillingServiceTest {
 
     final DbWorkspace dbWorkspace1 = workspaceDao.findById(ws1.getWorkspaceId()).get();
     assertThat(dbWorkspace1.getBillingStatus()).isEqualTo(BillingStatus.INACTIVE);
-    assertThat(dbWorkspace1.getBillingAccountType()).isEqualTo(BillingAccountType.FREE_TIER);
 
     final DbWorkspaceFreeTierUsage usage1 = workspaceFreeTierUsageDao.findOneByWorkspace(ws1);
     assertThat(usage1.getUser()).isEqualTo(user1);
@@ -485,7 +482,6 @@ public class FreeTierBillingServiceTest {
 
     final DbWorkspace dbWorkspace2 = workspaceDao.findById(ws2.getWorkspaceId()).get();
     assertThat(dbWorkspace2.getBillingStatus()).isEqualTo(BillingStatus.INACTIVE);
-    assertThat(dbWorkspace2.getBillingAccountType()).isEqualTo(BillingAccountType.FREE_TIER);
 
     final DbWorkspaceFreeTierUsage usage2 = workspaceFreeTierUsageDao.findOneByWorkspace(ws2);
     assertThat(usage2.getUser()).isEqualTo(user2);
@@ -545,7 +541,6 @@ public class FreeTierBillingServiceTest {
     // retrieve from DB again to reflect update after cron
     DbWorkspace dbWorkspace = workspaceDao.findById(workspace.getWorkspaceId()).get();
     assertThat(dbWorkspace.getBillingStatus()).isEqualTo(BillingStatus.INACTIVE);
-    assertThat(dbWorkspace.getBillingAccountType()).isEqualTo(BillingAccountType.FREE_TIER);
 
     assertThat(workspaceFreeTierUsageDao.count()).isEqualTo(1);
     DbWorkspaceFreeTierUsage dbEntry = workspaceFreeTierUsageDao.findAll().iterator().next();
@@ -689,8 +684,6 @@ public class FreeTierBillingServiceTest {
     final DbWorkspace retrievedWorkspace =
         workspaceDao.findById(userAccountWorkspace.getWorkspaceId()).get();
     assertThat(retrievedWorkspace.getBillingStatus()).isEqualTo(BillingStatus.ACTIVE);
-    // TODO RW-5107
-    // assertThat(retrievedWorkspace.getBillingAccountType()).isEqualTo(BillingAccountType.USER_PROVIDED);
   }
 
   private TableResult mockBQTableResult(final Map<String, Double> costMap) {
@@ -721,7 +714,6 @@ public class FreeTierBillingServiceTest {
     final DbWorkspace workspace =
         workspaceDao.findById(workspaceForQuerying.getWorkspaceId()).get();
     assertThat(workspace.getBillingStatus()).isEqualTo(billingStatus);
-    assertThat(workspace.getBillingAccountType()).isEqualTo(BillingAccountType.FREE_TIER);
 
     assertThat(workspaceFreeTierUsageDao.count()).isEqualTo(1);
     final DbWorkspaceFreeTierUsage dbEntry = workspaceFreeTierUsageDao.findAll().iterator().next();
@@ -749,7 +741,6 @@ public class FreeTierBillingServiceTest {
     workspace.setGoogleProject(project);
     workspace.setBillingMigrationStatusEnum(billingMigrationStatus);
     workspace.setBillingAccountName(workbenchConfig.billing.freeTierBillingAccountName());
-    workspace.setBillingAccountType(BillingAccountType.FREE_TIER);
     return workspaceDao.save(workspace);
   }
 

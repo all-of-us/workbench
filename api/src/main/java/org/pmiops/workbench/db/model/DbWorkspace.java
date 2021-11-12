@@ -21,7 +21,6 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.Version;
-import org.pmiops.workbench.model.BillingAccountType;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.DisseminateResearchEnum;
 import org.pmiops.workbench.model.ResearchOutcomeEnum;
@@ -121,8 +120,6 @@ public class DbWorkspace {
   private Timestamp timeRequested;
   private Short billingStatus = DbStorageEnums.billingStatusToStorage(BillingStatus.ACTIVE);
   private String billingAccountName;
-  private Short billingAccountType =
-      DbStorageEnums.billingAccountTypeToStorage(BillingAccountType.FREE_TIER);
   private Short needsRPReviewPrompt;
   private String googleProject;
   private boolean adminLocked;
@@ -709,16 +706,6 @@ public class DbWorkspace {
 
   public DbWorkspace setBillingAccountName(String billingAccountName) {
     this.billingAccountName = billingAccountName;
-    return this;
-  }
-
-  @Column(name = "billing_account_type")
-  public BillingAccountType getBillingAccountType() {
-    return DbStorageEnums.billingAccountTypeFromStorage(billingAccountType);
-  }
-
-  public DbWorkspace setBillingAccountType(BillingAccountType billingAccountType) {
-    this.billingAccountType = DbStorageEnums.billingAccountTypeToStorage(billingAccountType);
     return this;
   }
 

@@ -35,7 +35,6 @@ import org.pmiops.workbench.dataset.mapper.DataSetMapperImpl;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.model.BillingAccountType;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.Workspace;
@@ -124,7 +123,6 @@ public class WorkspaceAuditorTest {
             .cdrVersionId("1")
             .creator("user@fake-research-aou.org")
             .billingAccountName("big-bux")
-            .billingAccountType(BillingAccountType.FREE_TIER)
             .googleBucketName("bucket o' science")
             .accessTierShortName(AccessTierService.REGISTERED_TIER_SHORT_NAME)
             .researchPurpose(researchPurpose1)
@@ -315,7 +313,6 @@ public class WorkspaceAuditorTest {
         .cdrVersionId(in.getCdrVersionId())
         .creator(in.getCreator())
         .billingAccountName(in.getBillingAccountName())
-        .billingAccountType(in.getBillingAccountType())
         .googleBucketName(in.getGoogleBucketName())
         .accessTierShortName(in.getAccessTierShortName())
         .researchPurpose(in.getResearchPurpose())

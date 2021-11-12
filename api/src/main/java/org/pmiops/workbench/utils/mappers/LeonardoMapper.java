@@ -51,6 +51,7 @@ public interface LeonardoMapper {
   @Mapping(target = "cloudService", ignore = true)
   @Mapping(target = "properties", ignore = true)
   @Mapping(target = "componentGatewayEnabled", ignore = true)
+  @Mapping(target = "workerPrivateAccess", ignore = true)
   LeonardoMachineConfig toLeonardoMachineConfig(DataprocConfig dataprocConfig);
 
   @AfterMapping

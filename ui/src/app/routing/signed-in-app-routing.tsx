@@ -66,46 +66,46 @@ export const SignedInRoutes = () => {
       <AccessRenewalPage routeData={{title: 'Access Renewal'}}/>
     </AppRoute>
     <AppRoute exact path='/admin/banner'>
-      <AdminBannerPage routeData={{title: 'Create Banner'}}/>
+      <AdminBannerPage routeData={{title: 'Create Banner', minimizeChrome: true}}/>
     </AppRoute>
     <AppRoute exact path='/admin/institution'>
-      <InstitutionAdminPage routeData={{title: 'Institution Admin'}}/>
+      <InstitutionAdminPage routeData={{title: 'Institution Admin', minimizeChrome: true}}/>
     </AppRoute>
     <AppRoute exact path='/admin/institution/add'>
-      <InstitutionEditAdminPage routeData={{title: 'Institution Admin'}}/>
+      <InstitutionEditAdminPage routeData={{title: 'Institution Admin', minimizeChrome: true}}/>
     </AppRoute>
     <AppRoute exact path='/admin/institution/edit/:institutionId'>
-      <InstitutionEditAdminPage routeData={{title: 'Institution Admin'}}/>
-    </AppRoute>
-    <AppRoute exact path='/admin/user'> {/* included for backwards compatibility */}
-      <UsersAdminPage routeData={{title: 'User Admin Table'}}/>
+      <InstitutionEditAdminPage routeData={{title: 'Institution Admin', minimizeChrome: true}}/>
     </AppRoute>
     <AppRoute exact path='/admin/review-workspace'>
-      <AdminReviewWorkspacePage routeData={{title: 'Review Workspaces'}}/>
+      <AdminReviewWorkspacePage routeData={{title: 'Review Workspaces', minimizeChrome: true}}/>
+    </AppRoute>
+    <AppRoute exact path='/admin/user'> {/* included for backwards compatibility */}
+      <Redirect to={'/admin/users'}/>
     </AppRoute>
     <AppRoute exact path='/admin/users'>
-      <UsersAdminPage routeData={{title: 'User Admin Table'}}/>
+      <UsersAdminPage routeData={{title: 'User Admin Table', minimizeChrome: true}}/>
     </AppRoute>
     <AppRoute exact path='/admin/users/:usernameWithoutGsuiteDomain'>
-      <UserAdminPage routeData={{title: 'User Admin'}}/>
+      <UserAdminPage routeData={{title: 'User Admin', minimizeChrome: true}}/>
     </AppRoute>
     <AppRoute exact path='/admin/user-audit'>
-      <UserAuditPage routeData={{title: 'User Audit'}}/>
+      <UserAuditPage routeData={{title: 'User Audit', minimizeChrome: true}}/>
     </AppRoute>
     <AppRoute exact path='/admin/user-audit/:username'>
-      <UserAuditPage routeData={{title: 'User Audit'}}/>
+      <UserAuditPage routeData={{title: 'User Audit', minimizeChrome: true}}/>
     </AppRoute>
     <AppRoute exact path='/admin/workspaces'>
-      <WorkspaceSearchAdminPage routeData={{title: 'Workspace Admin'}}/>
+      <WorkspaceSearchAdminPage routeData={{title: 'Workspace Admin', minimizeChrome: true}}/>
     </AppRoute>
     <AppRoute exact path='/admin/workspaces/:ns'>
-      <WorkspaceAdminPage routeData={{title: 'Workspace Admin'}}/>
+      <WorkspaceAdminPage routeData={{title: 'Workspace Admin', minimizeChrome: true}}/>
     </AppRoute>
     <AppRoute exact path='/admin/workspace-audit'>
-      <WorkspaceAuditPage routeData={{title: 'Workspace Audit'}}/>
+      <WorkspaceAuditPage routeData={{title: 'Workspace Audit', minimizeChrome: true}}/>
     </AppRoute>
     <AppRoute exact path='/admin/workspace-audit/:ns'>
-      <WorkspaceAuditPage routeData={{title: 'Workspace Audit'}}/>
+      <WorkspaceAuditPage routeData={{title: 'Workspace Audit', minimizeChrome: true}}/>
     </AppRoute>
     <AppRoute exact path='/admin/workspaces/:ns/:nbName'>
       <AdminNotebookViewPage routeData={{pathElementForTitle: 'nbName', minimizeChrome: true}}/>

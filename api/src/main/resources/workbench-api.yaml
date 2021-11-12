@@ -1604,6 +1604,30 @@ paths:
           description: success
           schema:
             "$ref": "#/definitions/ListEgressEventsResponse"
+  "/v1/admin/egressEvents/{id}":
+    patch:
+      tags:
+        - egressEventsAdmin
+      description: >
+        Administrative API to update an egress event. Currently, only the
+        following fields can be updated - all other fields are ignored:
+          - status (REMEDIATED or VERIFIED_FALSE_POSITIVE)
+      operationId: updateEgressEvent
+      parameters:
+        - in: path
+          name: id
+          description: The egress event ID
+          required: true
+          type: string
+        - in: body
+          name: request
+          schema:
+            "$ref": "#/definitions/UpdateEgressEventRequest"
+      responses:
+        200:
+          description: success
+          schema:
+            "$ref": "#/definitions/EgressEvent"
   "/v1/admin/sumo/egressEvent":
     post:
       tags:
@@ -4454,7 +4478,6 @@ definitions:
     - name
     example:
       billingAccountName: "billingAccounts/000000-AAAAAA-111111"
-      billingAccountType: "FREE_TIER"
       billingStatus: "ACTIVE"
       cdrVersionId: "2"
       creationTime: 1588097211621
@@ -4520,8 +4543,6 @@ definitions:
         type: string
       billingAccountName:
         type: string
-      billingAccountType:
-        "$ref": "#/definitions/BillingAccountType"
       googleBucketName:
         type: string
       accessTierShortName:
@@ -6459,7 +6480,7 @@ definitions:
           If specified, only return event which were detected within the given
           workspace.
       pageSize:
-        type: number
+        type: integer
         description: >
           The number of egress events to return, per page. If unspecified, a
           system default is used.
@@ -6480,6 +6501,14 @@ definitions:
         description: >
           If present, this token can be provided to retrieve the next page of results.
           If null or empty, there are no further pages in the result stream.
+      totalSize:
+        type: integer
+        description: Total size of the result set.
+  UpdateEgressEventRequest:
+    type: object
+    properties:
+      egressEvent:
+        "$ref": "#/definitions/EgressEvent"
   EgressEventStatus:
     type: string
     description: Workbench processing status for this egress event.

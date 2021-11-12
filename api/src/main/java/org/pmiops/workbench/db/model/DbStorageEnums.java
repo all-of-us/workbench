@@ -6,7 +6,6 @@ import org.pmiops.workbench.db.model.DbWorkspace.BillingMigrationStatus;
 import org.pmiops.workbench.model.AnnotationType;
 import org.pmiops.workbench.model.ArchivalStatus;
 import org.pmiops.workbench.model.Authority;
-import org.pmiops.workbench.model.BillingAccountType;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.Degree;
@@ -103,21 +102,6 @@ public final class DbStorageEnums {
 
   public static Short authorityToStorage(Authority authority) {
     return CLIENT_TO_STORAGE_AUTHORITY.get(authority);
-  }
-
-  // BillingAccountType
-  private static final BiMap<BillingAccountType, Short> CLIENT_TO_STORAGE_BILLING_ACCOUNT_TYPE =
-      ImmutableBiMap.<BillingAccountType, Short>builder()
-          .put(BillingAccountType.FREE_TIER, (short) 0)
-          .put(BillingAccountType.USER_PROVIDED, (short) 1)
-          .build();
-
-  public static BillingAccountType billingAccountTypeFromStorage(Short s) {
-    return CLIENT_TO_STORAGE_BILLING_ACCOUNT_TYPE.inverse().get(s);
-  }
-
-  public static Short billingAccountTypeToStorage(BillingAccountType s) {
-    return CLIENT_TO_STORAGE_BILLING_ACCOUNT_TYPE.get(s);
   }
 
   // BillingMigrationStatus

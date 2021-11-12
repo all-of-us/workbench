@@ -5,10 +5,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
-import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -21,6 +21,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.FakeJpaDateTimeConfiguration;
+import org.pmiops.workbench.actionaudit.auditors.EgressEventAuditor;
 import org.pmiops.workbench.db.dao.EgressEventDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
@@ -29,9 +30,13 @@ import org.pmiops.workbench.db.model.DbEgressEvent.DbEgressEventStatus;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.model.EgressEvent;
+import org.pmiops.workbench.model.EgressEventStatus;
 import org.pmiops.workbench.model.ListEgressEventsRequest;
 import org.pmiops.workbench.model.ListEgressEventsResponse;
+import org.pmiops.workbench.model.UpdateEgressEventRequest;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.utils.PaginationToken;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
@@ -39,6 +44,7 @@ import org.pmiops.workbench.utils.mappers.EgressEventMapperImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 
 @DataJpaTest
@@ -59,6 +65,7 @@ public class EgressEventsAdminControllerTest {
   @Autowired private UserDao userDao;
   @Autowired private WorkspaceDao workspaceDao;
   @Autowired private EgressEventDao egressEventDao;
+
   @Autowired private FakeClock fakeClock;
 
   private DbUser user1;
@@ -77,6 +84,7 @@ public class EgressEventsAdminControllerTest {
     FakeClockConfiguration.class,
     FakeJpaDateTimeConfiguration.class
   })
+  @MockBean(EgressEventAuditor.class)
   static class Configuration {}
 
   @BeforeEach
@@ -119,7 +127,7 @@ public class EgressEventsAdminControllerTest {
               }
             }),
         Arguments.of(
-            new ListEgressEventsRequest().pageSize(BigDecimal.valueOf(1)),
+            new ListEgressEventsRequest().pageSize(1),
             new TestEgressEvent[][] {
               {TestEgressEvent.USER_1_WORKSPACE_1},
               {TestEgressEvent.USER_2_WORKSPACE_2},
@@ -128,14 +136,14 @@ public class EgressEventsAdminControllerTest {
               {TestEgressEvent.NO_USER_NO_WORKSPACE}
             }),
         Arguments.of(
-            new ListEgressEventsRequest().pageSize(BigDecimal.valueOf(2)),
+            new ListEgressEventsRequest().pageSize(2),
             new TestEgressEvent[][] {
               {TestEgressEvent.USER_1_WORKSPACE_1, TestEgressEvent.USER_2_WORKSPACE_2},
               {TestEgressEvent.USER_3_WORKSPACE_1, TestEgressEvent.USER_3_WORKSPACE_2},
               {TestEgressEvent.NO_USER_NO_WORKSPACE}
             }),
         Arguments.of(
-            new ListEgressEventsRequest().pageSize(BigDecimal.valueOf(3)),
+            new ListEgressEventsRequest().pageSize(3),
             new TestEgressEvent[][] {
               {
                 TestEgressEvent.USER_1_WORKSPACE_1,
@@ -145,7 +153,7 @@ public class EgressEventsAdminControllerTest {
               {TestEgressEvent.USER_3_WORKSPACE_2, TestEgressEvent.NO_USER_NO_WORKSPACE}
             }),
         Arguments.of(
-            new ListEgressEventsRequest().pageSize(BigDecimal.valueOf(4)),
+            new ListEgressEventsRequest().pageSize(4),
             new TestEgressEvent[][] {
               {
                 TestEgressEvent.USER_1_WORKSPACE_1,
@@ -156,7 +164,7 @@ public class EgressEventsAdminControllerTest {
               {TestEgressEvent.NO_USER_NO_WORKSPACE}
             }),
         Arguments.of(
-            new ListEgressEventsRequest().pageSize(BigDecimal.valueOf(5)),
+            new ListEgressEventsRequest().pageSize(5),
             new TestEgressEvent[][] {
               {
                 TestEgressEvent.USER_1_WORKSPACE_1,
@@ -228,10 +236,13 @@ public class EgressEventsAdminControllerTest {
             .sourceUserEmail(initialRequest.getSourceUserEmail())
             .sourceWorkspaceNamespace(initialRequest.getSourceWorkspaceNamespace())
             .pageSize(initialRequest.getPageSize());
+    int expectedTotalEvents = Arrays.stream(expectedPages).mapToInt(p -> p.length).sum();
 
     List<TestEgressEvent[]> gotPages = new ArrayList<>();
     do {
       ListEgressEventsResponse resp = controller.listEgressEvents(req).getBody();
+      assertThat(resp.getTotalSize()).isEqualTo(expectedTotalEvents);
+
       gotPages.add(
           resp.getEvents().stream()
               .map(e -> egressEventIds.get(e.getEgressEventId()))
@@ -290,7 +301,7 @@ public class EgressEventsAdminControllerTest {
 
     String nextPageToken =
         controller
-            .listEgressEvents(new ListEgressEventsRequest().pageSize(BigDecimal.valueOf(1L)))
+            .listEgressEvents(new ListEgressEventsRequest().pageSize(1))
             .getBody()
             .getNextPageToken();
 
@@ -298,13 +309,87 @@ public class EgressEventsAdminControllerTest {
         BadRequestException.class,
         () ->
             controller.listEgressEvents(
-                new ListEgressEventsRequest()
-                    .pageSize(BigDecimal.valueOf(10L))
-                    .pageToken(nextPageToken)));
+                new ListEgressEventsRequest().pageSize(10).pageToken(nextPageToken)));
+  }
+
+  @Test
+  public void testUpdateEgressEvent_invalidId() {
+    assertThrows(
+        NotFoundException.class,
+        () -> controller.updateEgressEvent("invalid", new UpdateEgressEventRequest()));
+  }
+
+  @Test
+  public void testUpdateEgressEvent_notFoundEvent() {
+    assertThrows(
+        NotFoundException.class,
+        () -> controller.updateEgressEvent("404", new UpdateEgressEventRequest()));
+  }
+
+  @Test
+  public void testUpdateEgressEvent_eventPending() {
+    String eventId = saveNewEventWithStatus(DbEgressEventStatus.PENDING);
+    assertThrows(
+        FailedPreconditionException.class,
+        () ->
+            controller.updateEgressEvent(
+                eventId,
+                new UpdateEgressEventRequest()
+                    .egressEvent(
+                        new EgressEvent().status(EgressEventStatus.VERIFIED_FALSE_POSITIVE))));
+  }
+
+  @Test
+  public void testUpdateEgressEvent_badRequestNull() {
+    String eventId = saveNewEventWithStatus(DbEgressEventStatus.REMEDIATED);
+    assertThrows(
+        BadRequestException.class,
+        () ->
+            controller.updateEgressEvent(
+                eventId, new UpdateEgressEventRequest().egressEvent(new EgressEvent())));
+  }
+
+  @Test
+  public void testUpdateEgressEvent_badRequestPending() {
+    String eventId = saveNewEventWithStatus(DbEgressEventStatus.REMEDIATED);
+    assertThrows(
+        BadRequestException.class,
+        () ->
+            controller.updateEgressEvent(
+                eventId,
+                new UpdateEgressEventRequest()
+                    .egressEvent(new EgressEvent().status(EgressEventStatus.PENDING))));
+  }
+
+  @Test
+  public void testUpdateEgressEvent() {
+    String eventId = saveNewEventWithStatus(DbEgressEventStatus.REMEDIATED);
+
+    EgressEvent got =
+        controller
+            .updateEgressEvent(
+                eventId,
+                new UpdateEgressEventRequest()
+                    .egressEvent(
+                        new EgressEvent().status(EgressEventStatus.VERIFIED_FALSE_POSITIVE)))
+            .getBody();
+
+    assertThat(got.getStatus()).isEqualTo(EgressEventStatus.VERIFIED_FALSE_POSITIVE);
+
+    // Call another endpoint to verify that the change was actually persisted
+    List<EgressEvent> gotEvents =
+        controller.listEgressEvents(new ListEgressEventsRequest()).getBody().getEvents();
+    assertThat(gotEvents).hasSize(1);
+    assertThat(gotEvents.get(0).getStatus()).isEqualTo(EgressEventStatus.VERIFIED_FALSE_POSITIVE);
   }
 
   private Instant timeMinusHours(Integer h) {
     return TIME0.minus(Duration.ofHours(h));
+  }
+
+  private String saveNewEventWithStatus(DbEgressEventStatus status) {
+    DbEgressEvent e = egressEventDao.save(new DbEgressEvent().setStatus(status));
+    return Long.toString(e.getEgressEventId());
   }
 
   private String saveNewEvent(DbUser user, DbWorkspace workspace, Instant created) {

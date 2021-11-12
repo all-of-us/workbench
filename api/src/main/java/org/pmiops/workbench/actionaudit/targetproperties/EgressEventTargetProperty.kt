@@ -38,7 +38,8 @@ constructor(
     EGRESS_EVENT_ID("egress_event_id",
             { it.egressEventId.toString() }),
     USER_ID("user_id", { it.user?.userId.toString() }),
-    CREATION_TIME("creation_time", { it.creationTime?.toString() })
+    CREATION_TIME("creation_time", { it.creationTime?.toString() }),
+    STATUS("status", { it.status?.toString() })
 }
 
 /**
