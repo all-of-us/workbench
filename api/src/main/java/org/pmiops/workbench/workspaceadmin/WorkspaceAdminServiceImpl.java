@@ -37,6 +37,7 @@ import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.model.AccessReason;
+import org.pmiops.workbench.model.AdminLockingRequest;
 import org.pmiops.workbench.model.AdminWorkspaceCloudStorageCounts;
 import org.pmiops.workbench.model.AdminWorkspaceObjectsCounts;
 import org.pmiops.workbench.model.AdminWorkspaceResources;
@@ -315,17 +316,23 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
   }
 
   @Override
-  public void setAdminLockedState(String workspaceNamespace, boolean desiredLockState) {
-    // OK I got your request
-    log.info(
-        String.format(
-            "called setLockedState on wsns %s with desiredLockState %b",
-            workspaceNamespace, desiredLockState));
+  public void setAdminLockedState(
+      String workspaceNamespace, AdminLockingRequest adminLockingRequest) {
+    log.info(String.format("called setAdminLockedState on wsns %s", workspaceNamespace));
 
     DbWorkspace dbWorkspace = getWorkspaceByNamespaceOrThrow(workspaceNamespace);
-    workspaceDao.save(dbWorkspace.setAdminLocked(desiredLockState));
+    workspaceDao.save(dbWorkspace.setAdminLocked(true));
+    adminAuditor.fireLockWorkspaceAction(dbWorkspace.getWorkspaceId(), adminLockingRequest);
   }
 
+  @Override
+  public void setAdminUnlockedState(String workspaceNamespace) {
+    log.info(String.format("called setAdminUnlockedState on wsns %s", workspaceNamespace));
+
+    DbWorkspace dbWorkspace = getWorkspaceByNamespaceOrThrow(workspaceNamespace);
+    workspaceDao.save(dbWorkspace.setAdminLocked(false));
+    adminAuditor.fireUnlockWorkspaceAction(dbWorkspace.getWorkspaceId());
+  }
   // NOTE: may be an undercount since we only retrieve the first Page of Storage List results
   private int getNonNotebookFileCount(String bucketName) {
     return (int)

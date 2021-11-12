@@ -54,6 +54,7 @@ import org.pmiops.workbench.leonardo.model.LeonardoAuditInfo;
 import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
+import org.pmiops.workbench.model.AdminLockingRequest;
 import org.pmiops.workbench.model.AdminWorkspaceCloudStorageCounts;
 import org.pmiops.workbench.model.AdminWorkspaceObjectsCounts;
 import org.pmiops.workbench.model.AdminWorkspaceResources;
@@ -106,6 +107,7 @@ public class WorkspaceAdminServiceTest {
   @MockBean private WorkspaceDao mockWorkspaceDao;
   @MockBean LeonardoRuntimeAuditor mockLeonardoRuntimeAuditor;
   @MockBean LeonardoNotebooksClient mockLeonardoNotebooksClient;
+  @MockBean private AdminAuditor mockAdminAuditor;
   @Autowired private WorkspaceAdminService workspaceAdminService;
 
   @TestConfiguration
@@ -408,5 +410,20 @@ public class WorkspaceAdminServiceTest {
             listRuntimeResponseList.stream()
                 .map(LeonardoListRuntimeResponse::getRuntimeName)
                 .collect(Collectors.toList()));
+  }
+
+  @Test
+  public void testSetAdminLockedStateCallsAuditor() throws Exception {
+    AdminLockingRequest adminLockingRequest = new AdminLockingRequest();
+    adminLockingRequest.setRequestReason("To test auditor");
+    adminLockingRequest.setRequestDateInMillis(12345677l);
+    workspaceAdminService.setAdminLockedState(WORKSPACE_NAMESPACE, adminLockingRequest);
+    verify(mockAdminAuditor).fireLockWorkspaceAction(DB_WORKSPACE_ID, adminLockingRequest);
+  }
+
+  @Test
+  public void testSetAdminUnlockedStateCallsAuditor() throws Exception {
+    workspaceAdminService.setAdminUnlockedState(WORKSPACE_NAMESPACE);
+    verify(mockAdminAuditor).fireUnlockWorkspaceAction(DB_WORKSPACE_ID);
   }
 }

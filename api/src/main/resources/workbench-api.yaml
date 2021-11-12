@@ -1475,7 +1475,7 @@ paths:
       operationId: setAdminLockedState
       parameters:
         - in: body
-          name: AdminLockedState
+          name: AdminLockingRequest
           required: true
           schema:
             type: object
