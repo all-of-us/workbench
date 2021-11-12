@@ -6,7 +6,7 @@ import org.pmiops.workbench.model.AdminLockingRequest
 interface AdminAuditor {
     fun fireViewNotebookAction(workspaceNamespace: String, workspaceName: String, notebookFilename: String, accessReason: AccessReason)
 
-    fun fireLockWorkspaceAction(workspaceId: Long, access: AdminLockingRequest)
+    fun fireLockWorkspaceAction(workspaceId: Long, adminLockingRequest: AdminLockingRequest)
 
     fun fireUnlockWorkspaceAction(workspaceId: Long)
 }

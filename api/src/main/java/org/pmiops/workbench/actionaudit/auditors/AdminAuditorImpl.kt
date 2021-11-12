@@ -52,15 +52,15 @@ constructor(
         actionAuditService.send(events)
     }
 
-    override fun fireLockWorkspaceAction(workspaceId: Long, access: AdminLockingRequest) {
+    override fun fireLockWorkspaceAction(workspaceId: Long, adminLockingRequest: AdminLockingRequest) {
         val dbUser = userProvider.get()
         val actionId = actionIdProvider.get()
         val timestamp = clock.millis()
-        val requestTimestamp = Date(access.requestDateInMillis).toString()
+        val requestTimestamp = Date(adminLockingRequest.requestDateInMillis).toString()
 
         val props = mapOf(
                 "locked" to "true",
-                "reason" to access.requestReason,
+                "reason" to adminLockingRequest.requestReason,
                 "request_date" to requestTimestamp
         )
 
@@ -85,12 +85,7 @@ constructor(
         val actionId = actionIdProvider.get()
         val timestamp = clock.millis()
 
-        val props = mapOf(
-                "locked" to "false"
-        )
-
-        val events = props.map {
-            ActionAuditEvent(
+        val event = ActionAuditEvent(
                     actionId = actionId,
                     actionType = ActionType.EDIT,
                     agentType = AgentType.ADMINISTRATOR,
@@ -98,11 +93,11 @@ constructor(
                     agentIdMaybe = dbUser.userId,
                     targetType = TargetType.WORKSPACE,
                     targetIdMaybe = workspaceId,
-                    targetPropertyMaybe = it.key,
-                    newValueMaybe = it.value,
-                    timestamp = timestamp) }
+                    targetPropertyMaybe = "locked",
+                    newValueMaybe = "false",
+                    timestamp = timestamp)
 
-        actionAuditService.send(events)
+        actionAuditService.send(event)
     }
 
     companion object {
