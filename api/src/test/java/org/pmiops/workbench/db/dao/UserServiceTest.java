@@ -12,6 +12,7 @@ import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.access.AccessTierService.REGISTERED_TIER_SHORT_NAME;
 
 import com.google.api.services.directory.model.User;
+import com.google.common.collect.ImmutableMap;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.Collections;
@@ -33,6 +34,7 @@ import org.pmiops.workbench.access.UserAccessModuleMapperImpl;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.compliance.ComplianceService;
+import org.pmiops.workbench.compliance.ComplianceService.BadgeName;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbAccessModule;
 import org.pmiops.workbench.db.model.DbAccessModule.AccessModuleName;
@@ -162,13 +164,11 @@ public class UserServiceTest {
 
   @Test
   public void testSyncComplianceTrainingStatusV2() throws Exception {
-    BadgeDetailsV2 retBadge = new BadgeDetailsV2();
-    long expiry = fakeClock.instant().getEpochSecond() + 100;
-    retBadge.setDateexpire(expiry);
-    retBadge.setValid(true);
+    long issued = fakeClock.instant().getEpochSecond() - 100;
 
-    Map<String, BadgeDetailsV2> userBadgesByName = new HashMap<>();
-    userBadgesByName.put(mockComplianceService.getResearchEthicsTrainingField(), retBadge);
+    Map<BadgeName, BadgeDetailsV2> userBadgesByName = new HashMap<>();
+    userBadgesByName.put(
+        BadgeName.REGISTERED_TIER_TRAINING, new BadgeDetailsV2().lastissued(issued).valid(true));
 
     when(mockComplianceService.getUserBadgesByBadgeName(USERNAME)).thenReturn(userBadgesByName);
 
@@ -178,9 +178,6 @@ public class UserServiceTest {
     DbUser user = userDao.findUserByUsername(USERNAME);
     assertModuleCompletionEqual(
         AccessModuleName.RT_COMPLIANCE_TRAINING, user, Timestamp.from(START_INSTANT));
-
-    assertThat(user.getComplianceTrainingExpirationTime())
-        .isEqualTo(Timestamp.from(Instant.ofEpochSecond(expiry)));
 
     // Completion timestamp should not change when the method is called again.
     tick();
@@ -192,28 +189,22 @@ public class UserServiceTest {
 
   @Test
   public void testUpdateComplianceTrainingStatusV2() throws Exception {
-    BadgeDetailsV2 retBadge = new BadgeDetailsV2();
-    long expiry = fakeClock.instant().getEpochSecond();
-    retBadge.setDateexpire(expiry);
-    retBadge.setValid(true);
+    long issued = fakeClock.instant().getEpochSecond() - 10;
+    BadgeDetailsV2 retBadge = new BadgeDetailsV2().lastissued(issued).valid(true);
 
-    Map<String, BadgeDetailsV2> userBadgesByName = new HashMap<>();
-    userBadgesByName.put(mockComplianceService.getResearchEthicsTrainingField(), retBadge);
+    Map<BadgeName, BadgeDetailsV2> userBadgesByName = new HashMap<>();
+    userBadgesByName.put(BadgeName.REGISTERED_TIER_TRAINING, retBadge);
 
     when(mockComplianceService.getUserBadgesByBadgeName(USERNAME)).thenReturn(userBadgesByName);
 
     userService.syncComplianceTrainingStatusV2();
 
-    // The user should be updated in the database with a non-empty completion and expiration time.
+    // The user should be updated in the database with a non-empty completion time.
     DbUser user = userDao.findUserByUsername(USERNAME);
-    assertThat(user.getComplianceTrainingExpirationTime())
-        .isEqualTo(Timestamp.from(Instant.ofEpochSecond(expiry)));
     assertModuleCompletionEqual(
         AccessModuleName.RT_COMPLIANCE_TRAINING, user, Timestamp.from(START_INSTANT));
 
     // Deprecate the old training.
-    long newExpiry = expiry - 1;
-    retBadge.setDateexpire(newExpiry);
     retBadge.setValid(false);
 
     // Completion timestamp should be wiped out by the expiry timestamp passing.
@@ -221,25 +212,55 @@ public class UserServiceTest {
     assertModuleCompletionEqual(AccessModuleName.RT_COMPLIANCE_TRAINING, user, null);
 
     // The user does a new training.
-    long newerExpiry = expiry + 1;
-    retBadge.setDateexpire(newerExpiry);
-    retBadge.setValid(true);
+    retBadge.lastissued(issued + 5).valid(true);
 
     // Completion and expiry timestamp should be updated.
     userService.syncComplianceTrainingStatusV2();
-    assertThat(user.getComplianceTrainingExpirationTime())
-        .isEqualTo(Timestamp.from(Instant.ofEpochSecond(newerExpiry)));
     assertModuleCompletionEqual(
         AccessModuleName.RT_COMPLIANCE_TRAINING, user, Timestamp.from(START_INSTANT));
 
-    // A global expiration is set.
-    long globalExpiry = expiry - 1000;
-    retBadge.setGlobalexpiration(globalExpiry);
-    retBadge.setValid(false);
+    // Time passes, user renews training
+    retBadge.lastissued(fakeClock.instant().getEpochSecond() + 1);
+    fakeClock.increment(5000);
 
-    // Completion timestamp should be wiped out by the globalexpiry timestamp passing.
+    // Completion should be updated to the current time.
     userService.syncComplianceTrainingStatusV2();
-    assertModuleCompletionEqual(AccessModuleName.RT_COMPLIANCE_TRAINING, user, null);
+    assertModuleCompletionEqual(
+        AccessModuleName.RT_COMPLIANCE_TRAINING, user, Timestamp.from(fakeClock.instant()));
+  }
+
+  @Test
+  public void testUpdateComplianceTrainingStatusV2_controlled() throws Exception {
+    long issued = fakeClock.instant().getEpochSecond() - 10;
+    BadgeDetailsV2 ctBadge = new BadgeDetailsV2().lastissued(issued).valid(true);
+    Map<BadgeName, BadgeDetailsV2> userBadgesByName =
+        ImmutableMap.<BadgeName, BadgeDetailsV2>builder()
+            .put(
+                BadgeName.REGISTERED_TIER_TRAINING,
+                new BadgeDetailsV2().lastissued(issued).valid(true))
+            .put(BadgeName.CONTROLLED_TIER_TRAINING, ctBadge)
+            .build();
+
+    when(mockComplianceService.getUserBadgesByBadgeName(USERNAME)).thenReturn(userBadgesByName);
+
+    userService.syncComplianceTrainingStatusV2();
+
+    // The user should be updated in the database with a non-empty completion time.
+    DbUser user = userDao.findUserByUsername(USERNAME);
+    assertModuleCompletionEqual(
+        AccessModuleName.RT_COMPLIANCE_TRAINING, user, Timestamp.from(START_INSTANT));
+    assertModuleCompletionEqual(
+        AccessModuleName.CT_COMPLIANCE_TRAINING, user, Timestamp.from(START_INSTANT));
+
+    ctBadge.lastissued(fakeClock.instant().getEpochSecond() + 1);
+    fakeClock.increment(5000);
+
+    // Renewing training updates completion.
+    userService.syncComplianceTrainingStatusV2();
+    assertModuleCompletionEqual(
+        AccessModuleName.RT_COMPLIANCE_TRAINING, user, Timestamp.from(START_INSTANT));
+    assertModuleCompletionEqual(
+        AccessModuleName.CT_COMPLIANCE_TRAINING, user, Timestamp.from(fakeClock.instant()));
   }
 
   private void tick() {
@@ -255,7 +276,7 @@ public class UserServiceTest {
         user, AccessModuleName.RT_COMPLIANCE_TRAINING, new Timestamp(12345));
 
     // An empty map should be returned when we have no badge information.
-    Map<String, BadgeDetailsV2> userBadgesByName = new HashMap<>();
+    Map<BadgeName, BadgeDetailsV2> userBadgesByName = new HashMap<>();
 
     when(mockComplianceService.getUserBadgesByBadgeName(USERNAME)).thenReturn(userBadgesByName);
 

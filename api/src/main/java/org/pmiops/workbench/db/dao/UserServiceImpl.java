@@ -5,6 +5,7 @@ import static org.pmiops.workbench.access.AccessTierService.REGISTERED_TIER_SHOR
 
 import com.google.api.services.oauth2.model.Userinfoplus;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
@@ -32,6 +33,7 @@ import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.compliance.ComplianceService;
+import org.pmiops.workbench.compliance.ComplianceService.BadgeName;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbAccessModule.AccessModuleName;
 import org.pmiops.workbench.db.model.DbAccessTier;
@@ -84,6 +86,12 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
 
   private static final int MAX_RETRIES = 3;
   private static final int CURRENT_TERMS_OF_SERVICE_VERSION = 1;
+
+  private static final Map<AccessModuleName, BadgeName> BADGE_BY_COMPLIANCE_MODULE =
+      ImmutableMap.<AccessModuleName, BadgeName>builder()
+          .put(AccessModuleName.RT_COMPLIANCE_TRAINING, BadgeName.REGISTERED_TIER_TRAINING)
+          .put(AccessModuleName.CT_COMPLIANCE_TRAINING, BadgeName.CONTROLLED_TIER_TRAINING)
+          .build();
 
   private final Provider<WorkbenchConfig> configProvider;
   private final Provider<DbUser> userProvider;
@@ -569,9 +577,8 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
    * rather than user-specific OAuth tokens.
    *
    * <p>Using the user's email, we can get their badges from Moodle's APIs. If the badges are marked
-   * valid, we store their completion/expiration dates in the database. If they are marked invalid,
-   * we clear the completion/expiration dates from the database as the user will need to complete a
-   * new training.
+   * valid, we store their completion dates in the database. If they are marked invalid, we clear
+   * the completion dates from the database as the user will need to complete a new training.
    */
   @Override
   public DbUser syncComplianceTrainingStatusV2(DbUser dbUser, Agent agent)
@@ -583,56 +590,50 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
 
     try {
       Timestamp now = new Timestamp(clock.instant().toEpochMilli());
-      final Timestamp newComplianceTrainingCompletionTime;
-      final Timestamp newComplianceTrainingExpirationTime;
-      Map<String, BadgeDetailsV2> userBadgesByName =
+      Map<BadgeName, BadgeDetailsV2> userBadgesByName =
           complianceService.getUserBadgesByBadgeName(dbUser.getUsername());
 
-      if (userBadgesByName.containsKey(complianceService.getResearchEthicsTrainingField())) {
-        BadgeDetailsV2 complianceBadge =
-            userBadgesByName.get(complianceService.getResearchEthicsTrainingField());
+      Map<AccessModuleName, Optional<Timestamp>> completionTimes =
+          BADGE_BY_COMPLIANCE_MODULE.entrySet().stream()
+              .collect(
+                  Collectors.toMap(
+                      e -> e.getKey(),
+                      e -> {
+                        AccessModuleName moduleName = e.getKey();
+                        Optional<BadgeDetailsV2> badge =
+                            Optional.ofNullable(userBadgesByName.get(e.getValue()))
+                                .filter(BadgeDetailsV2::getValid)
+                                .filter(b -> b.getLastissued() != null);
 
-        if (complianceBadge.getValid()) {
-          final Timestamp dbCompletionTime =
-              accessModuleService
-                  .getAccessModuleStatus(dbUser, AccessModuleName.RT_COMPLIANCE_TRAINING)
-                  .map(AccessModuleStatus::getCompletionEpochMillis)
-                  .map(Timestamp::new)
-                  .orElse(null);
+                        if (!badge.isPresent()) {
+                          return Optional.empty();
+                        }
 
-          if (dbCompletionTime == null) {
-            // The badge was previously invalid and is now valid.
-            newComplianceTrainingCompletionTime = now;
-          } else if (!dbUser
-              .getComplianceTrainingExpirationTime()
-              .equals(Timestamp.from(Instant.ofEpochSecond(complianceBadge.getDateexpire())))) {
-            // The badge was previously valid, but has a new expiration date (and so is a new
-            // training)
-            newComplianceTrainingCompletionTime = now;
-          } else {
-            // The badge status has not changed since the last time the status was synced.
-            newComplianceTrainingCompletionTime = dbCompletionTime;
-          }
+                        Instant badgeTime = Instant.ofEpochSecond(badge.get().getLastissued());
+                        Instant dbCompletionTime =
+                            accessModuleService
+                                .getAccessModuleStatus(dbUser, moduleName)
+                                .map(AccessModuleStatus::getCompletionEpochMillis)
+                                .map(Instant::ofEpochMilli)
+                                .orElse(Instant.EPOCH);
 
-          // Always update the expiration time if the training badge is valid
-          newComplianceTrainingExpirationTime =
-              Timestamp.from(Instant.ofEpochSecond(complianceBadge.getDateexpire()));
-        } else {
-          // The current badge is invalid or expired, the training must be completed or retaken.
-          newComplianceTrainingCompletionTime = null;
-          newComplianceTrainingExpirationTime = null;
-        }
-      } else {
-        // There is no record of this person having taken the training.
-        newComplianceTrainingCompletionTime = null;
-        newComplianceTrainingExpirationTime = null;
-      }
+                        if (badgeTime.isAfter(dbCompletionTime)) {
+                          // First-time badge or renewal: our system recognizes the user as having
+                          // completed training right now, though the badge has been issued some
+                          // time in the past.
+                          return Optional.of(now);
+                        }
+
+                        // No change
+                        return Optional.of(Timestamp.from(dbCompletionTime));
+                      }));
 
       return updateUserWithRetries(
           u -> {
-            accessModuleService.updateCompletionTime(
-                u, AccessModuleName.RT_COMPLIANCE_TRAINING, newComplianceTrainingCompletionTime);
-            u.setComplianceTrainingExpirationTime(newComplianceTrainingExpirationTime);
+            completionTimes.forEach(
+                (accessModuleName, timestamp) ->
+                    accessModuleService.updateCompletionTime(
+                        u, accessModuleName, timestamp.orElse(null)));
             return u;
           },
           dbUser,
