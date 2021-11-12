@@ -30,8 +30,6 @@ public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
 
   private final WorkspaceAdminService workspaceAdminService;
 
-  private String ADMIN_LOCK_REQUEST_DATE_FORMAT = "MM-dd-yyyy";
-
   @Autowired
   public WorkspaceAdminController(WorkspaceAdminService workspaceAdminService) {
     this.workspaceAdminService = workspaceAdminService;
