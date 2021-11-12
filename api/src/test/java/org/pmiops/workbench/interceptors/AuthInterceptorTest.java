@@ -22,7 +22,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
-import org.pmiops.workbench.SpringTest;
+import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.api.ProfileApi;
 import org.pmiops.workbench.auth.UserInfoService;
@@ -43,6 +43,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.web.method.HandlerMethod;
 
 /** mimicing a Swagger-generated wrapper */
@@ -56,7 +57,8 @@ class FakeController {
   public void handle() {}
 }
 
-public class AuthInterceptorTest extends SpringTest {
+@SpringJUnitConfig
+public class AuthInterceptorTest {
 
   private static final long USER_ID = 123L;
 
@@ -78,7 +80,7 @@ public class AuthInterceptorTest extends SpringTest {
   @Autowired private AuthInterceptor interceptor;
 
   @TestConfiguration
-  @Import({AuthInterceptor.class})
+  @Import({FakeClockConfiguration.class, AuthInterceptor.class})
   static class Configuration {
     @Bean
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)

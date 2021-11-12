@@ -28,7 +28,7 @@ import java.util.Optional;
 import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.pmiops.workbench.SpringTest;
+import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.db.dao.RdrExportDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.VerifiedInstitutionalAffiliationDao;
@@ -54,8 +54,10 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
-public class RdrExportServiceImplTest extends SpringTest {
+@SpringJUnitConfig
+public class RdrExportServiceImplTest {
   @Autowired private RdrExportService rdrExportService;
 
   @MockBean private ApiClient mockApiClient;
@@ -78,7 +80,7 @@ public class RdrExportServiceImplTest extends SpringTest {
   private DbUser dbUserWithoutEmail;
 
   @TestConfiguration
-  @Import({RdrExportServiceImpl.class})
+  @Import({FakeClockConfiguration.class, RdrExportServiceImpl.class})
   @MockBean({WorkspaceDao.class, WorkspaceService.class, VerifiedInstitutionalAffiliationDao.class})
   static class Configuration {
     @Bean

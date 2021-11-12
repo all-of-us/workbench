@@ -346,7 +346,7 @@ export const SearchGroupItem = withCurrentWorkspace()(
             </span>
           </div>}
           <ClrIcon style={{...styles.caret, ...(paramListOpen ? {transform: 'rotate(90deg)'} : {})}}
-                   shape={`caret right`} size={18}
+                   shape={'caret right'} size={18}
                    onClick={() => this.setState({paramListOpen: !paramListOpen})} />
         </div>}
         <div style={{...styles.parameterList, maxHeight: paramListOpen ? '15rem' : 0}}>

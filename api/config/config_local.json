@@ -97,7 +97,6 @@
   },
   "featureFlags": {
     "unsafeAllowDeleteUser": true,
-    "unsafeAllowAccessToAllTiersForRegisteredUsers": true,
     "enableBillingUpgrade": true,
     "enableEventDateModifier": false,
     "enableResearchPurposePrompt": false,
@@ -105,7 +104,8 @@
     "enableGpu": true,
     "enablePersistentDisk": true,
     "enableEgressAlertingV2": true,
-    "enableStandardSourceDomains": true
+    "enablePrivateDataprocWorker": true,
+    "grantLifescienceApiRunnerAcl": true
   },
   "actionAudit": {
     "logName": "workbench-action-audit-local",
@@ -132,7 +132,7 @@
   },
   "accessRenewal": {
     "expiryDays": 365,
-    "expiryDaysWarningThresholds": [ 1, 3, 7, 15, 30 ],
+    "expiryDaysWarningThresholds": [1, 3, 7, 15, 30],
     "lookbackPeriod": 330
   },
   "offlineBatch": {
@@ -141,11 +141,12 @@
     "usersPerSynchronizeAccessTask": 50
   },
   "egressAlertRemediationPolicy": {
+    "enableJiraTicketing": false,
     "notifyFromEmail": "workbench-notificatio-aaaaekogch7vg3c6hi4sgyx4le@pmi-engteam.slack.com",
     "escalations": [{
       "afterIncidentCount": 1,
       "suspendCompute": {
-        "durationMinutes": 5
+        "durationMinutes": 10
       }
     }]
   }

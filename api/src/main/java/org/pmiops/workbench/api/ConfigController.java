@@ -45,7 +45,6 @@ public class ConfigController implements ConfigApiDelegate {
             .enforceRasLoginGovLinking(config.access.enforceRasLoginGovLinking)
             .enableGenomicExtraction(config.featureFlags.enableGenomicExtraction)
             .enableEgressAlertingV2(config.featureFlags.enableEgressAlertingV2)
-            .enableStandardSourceDomains(config.featureFlags.enableStandardSourceDomains)
             .enableGpu(config.featureFlags.enableGpu)
             .enablePersistentDisk(config.featureFlags.enablePersistentDisk)
             .rasHost(config.ras.host)

@@ -18,7 +18,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.pmiops.workbench.SpringTest;
+import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchLocationConfigService;
@@ -38,7 +38,7 @@ import org.springframework.test.annotation.DirtiesContext;
 
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-public class OfflineUserControllerTest extends SpringTest {
+public class OfflineUserControllerTest {
   @Autowired private UserService mockUserService;
   @Autowired private OfflineUserController offlineUserController;
   @Autowired private CloudTasksClient mockCloudTasksClient;
@@ -49,6 +49,7 @@ public class OfflineUserControllerTest extends SpringTest {
 
   @TestConfiguration
   @Import({
+    FakeClockConfiguration.class,
     OfflineUserController.class,
     TaskQueueService.class,
     WorkbenchLocationConfigService.class

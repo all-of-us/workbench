@@ -7,7 +7,7 @@ import {registerApiClient as registerApiClientNotebooks} from 'app/services/note
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore} from 'app/utils/navigation';
 import {profileStore, runtimeStore, serverConfigStore} from 'app/utils/stores';
-import {RuntimeApi, RuntimeStatus, WorkspaceAccessLevel} from 'generated/fetch';
+import {ErrorCode, RuntimeApi, RuntimeStatus, WorkspaceAccessLevel} from 'generated/fetch';
 import {RuntimesApi as LeoRuntimesApi, JupyterApi, ProxyApi} from 'notebooks-generated/fetch';
 import {waitOneTickAndUpdate, waitForFakeTimersAndUpdate} from 'testing/react-test-helpers';
 import {RuntimeApiStub} from 'testing/stubs/runtime-api-stub';
@@ -27,6 +27,8 @@ import {
 } from 'app/pages/analysis/leonardo-app-launcher';
 import { Route, Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
+import { SecuritySuspendedMessage } from './notebook-frame-error';
+import { ComputeSecuritySuspendedError } from 'app/utils/runtime-utils';
 
 describe('NotebookLauncher', () => {
   const workspace = {
@@ -51,7 +53,6 @@ describe('NotebookLauncher', () => {
                              leoAppType={LeoApplicationType.Notebook}/>
       </Route>
     </Router>);
-    await waitOneTickAndUpdate(c);
     return c;
   };
 
@@ -61,6 +62,18 @@ describe('NotebookLauncher', () => {
 
   function getCardSpinnerTestId(cardState: ProgressCardState) {
     return '[data-test-id="progress-card-spinner-' + cardState.valueOf() + '"]';
+  }
+
+  async function updateRuntime(updateFn: (r: Runtime) => Runtime) {
+    await act(() => {
+      runtimeStub.runtime = updateFn(runtimeStub.runtime);
+      runtimeStore.set({
+        workspaceNamespace: workspace.namespace,
+        runtime: runtimeStub.runtime,
+        runtimeLoaded: true
+      });
+      return Promise.resolve();
+    });
   }
 
   beforeEach(() => {
@@ -76,9 +89,9 @@ describe('NotebookLauncher', () => {
     history.push(notebookInitialUrl + '?kernelType=R?creating=true');
     currentWorkspaceStore.next(workspace);
     profileStore.set({profile, load, reload, updateCache});
-    runtimeStore.set({workspaceNamespace: workspace.namespace, runtime: undefined, runtimeLoaded: true});
+    runtimeStore.set({workspaceNamespace: workspace.namespace, runtime: undefined, runtimeLoaded: false});
 
-    jest.useFakeTimers();
+    jest.useFakeTimers('modern');
   });
 
   afterEach(() => {
@@ -231,14 +244,9 @@ describe('NotebookLauncher', () => {
     expect(mockNavigate).not.toHaveBeenCalled();
 
     // Simulate transition to deleting - should navigate away.
-    act(() => {
-      runtimeStub.runtime = {...runtimeStub.runtime, status: RuntimeStatus.Deleting};
-      runtimeStore.set({
-        workspaceNamespace: workspace.namespace,
-        runtime: runtimeStub.runtime,
-        runtimeLoaded: true
-      });
-    });
+    await updateRuntime(runtime => ({
+      ...runtime, status: RuntimeStatus.Deleting
+    }));
     await waitForFakeTimersAndUpdate(wrapper);
 
     expect(mockNavigate).toHaveBeenCalled();
@@ -265,17 +273,51 @@ describe('NotebookLauncher', () => {
     expect(mockNavigate).not.toHaveBeenCalled();
 
     // Simulate transition to updating.
-    act(() => {
-      runtimeStub.runtime = {...runtimeStub.runtime, status: RuntimeStatus.Updating};
-      runtimeStore.set({
-        workspaceNamespace: workspace.namespace,
-        runtime: runtimeStub.runtime,
-        runtimeLoaded: true
-      });
-    });
+    await updateRuntime(runtime => ({
+      ...runtime,
+      status: RuntimeStatus.Updating
+    }));
     await waitForFakeTimersAndUpdate(wrapper);
 
     expect(mockNavigate).not.toHaveBeenCalled();
+  });
+
+  it('should show error on initial compute suspension', async() => {
+    runtimeStore.set({
+      workspaceNamespace: workspace.namespace,
+      runtime: undefined,
+      runtimeLoaded: false,
+      loadingError: new ComputeSecuritySuspendedError({
+        suspendedUntil: new Date('2000-01-01 03:00:00').toISOString()
+      })
+    });
+
+    const wrapper = await notebookComponent();
+    await waitForFakeTimersAndUpdate(wrapper);
+
+    expect(wrapper.find(Iframe).exists()).toBeFalsy();
+    expect(wrapper.find(SecuritySuspendedMessage).exists()).toBeTruthy();
+  });
+
+  it('should show error on mid-load compute suspension', async() => {
+    await updateRuntime(runtime => ({
+      ...runtime, status: RuntimeStatus.Starting
+    }));
+
+    runtimeStub.getRuntime = () => Promise.reject(new Response(JSON.stringify({
+      errorCode: ErrorCode.COMPUTESECURITYSUSPENDED,
+      parameters: {
+        suspendedUntil: new Date('2000-01-01 03:00:00').toISOString()
+      }
+    }), {
+      status: 412
+    }));
+
+    const wrapper = await notebookComponent();
+    await waitForFakeTimersAndUpdate(wrapper);
+
+    expect(wrapper.find(Iframe).exists()).toBeFalsy();
+    expect(wrapper.find(SecuritySuspendedMessage).exists()).toBeTruthy();
   });
 });
 
@@ -336,7 +378,7 @@ describe('TerminalLauncher', () => {
     jest.clearAllMocks();
   });
 
-  it('should display terminal state header correcrly when RuntimeStatus changes', async() => {
+  it('should display terminal state header correctly when RuntimeStatus changes', async() => {
     runtimeStub.runtime.status = RuntimeStatus.Creating;
 
     const wrapper = await terminalComponent();

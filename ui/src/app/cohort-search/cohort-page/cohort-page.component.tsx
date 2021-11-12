@@ -26,7 +26,7 @@ import {
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {Cohort, SearchRequest} from 'generated/fetch';
 import {Prompt, RouteComponentProps, withRouter} from 'react-router';
-import {parseQueryParams} from "app/components/app-router";
+import {parseQueryParams} from 'app/components/app-router';
 
 const LOCAL_STORAGE_KEY_COHORT_SEARCH_REQUEST = 'CURRENT_COHORT_SEARCH_REQUEST';
 
@@ -156,7 +156,7 @@ export const CohortPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSearc
         });
       } else {
         this.setState(
-          {cohort: {criteria: `{'includes':[],'excludes':[],'dataFilters':[]}`, name: '', type: ''}},
+          {cohort: {criteria: '{\'includes\':[],\'excludes\':[],\'dataFilters\':[]}', name: '', type: ''}},
           () => {
             if (existingCohort && existingCohort.workspaceId === id && !existingCohort.cohortId) {
               searchRequestStore.next(existingCohort.searchRequest);

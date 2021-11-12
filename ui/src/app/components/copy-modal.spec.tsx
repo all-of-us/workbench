@@ -260,7 +260,7 @@ describe('CopyModal', () => {
     simulateWorkspaceSelection(wrapper, controlledCdrWorkspace);
 
     expect(getAccessTierMismatchError(wrapper).getDOMNode().textContent).toBe(
-        `Can’t copy to that workspace. It has a different access tier ` +
+        'Can’t copy to that workspace. It has a different access tier ' +
         `(${AccessTierShortNames.Controlled}) from the current workspace (${AccessTierShortNames.Registered}).`);
 
     // Type out new name
@@ -386,7 +386,7 @@ describe('CopyModal', () => {
     simulateWorkspaceSelection(wrapper, controlledCdrWorkspace);
 
     expect(getAccessTierMismatchError(wrapper).getDOMNode().textContent).toBe(
-        `Can’t copy to that workspace. It has a different access tier ` +
+        'Can’t copy to that workspace. It has a different access tier ' +
         `(${AccessTierShortNames.Controlled}) from the current workspace (${AccessTierShortNames.Registered}).`);
 
     // Type out new name

@@ -617,40 +617,6 @@ paths:
           description: List of billing accounts
           schema:
             "$ref": "#/definitions/WorkbenchListBillingAccountsResponse"
-  "/v1/admin/security/runtimes/{billingProjectId}/delete-runtimes":
-    post:
-      summary: Delete specified (or all if no specified list) runtimes in a project
-      description: 'An admin gated endpoint that deletes given runtimes in a given
-        billing project.'
-      operationId: deleteRuntimesInProject
-      tags:
-      - runtime
-      parameters:
-      - in: path
-        name: billingProjectId
-        description: The unique identifier of the Google Billing Project containing
-          the runtimes
-        required: true
-        type: string
-      - in: body
-        name: runtimesToDelete
-        description: A list of names of runtimes to delete. To delete all runtimes,
-          use an empty object, without providing a list property at all (e.g., {})
-          An empty list will delete no runtimes.
-        required: true
-        schema:
-          "$ref": "#/definitions/ListRuntimeDeleteRequest"
-      responses:
-        200:
-          description: Runtimes deleted
-          schema:
-            type: array
-            items:
-              "$ref": "#/definitions/ListRuntimeResponse"
-        500:
-          description: Internal Error
-          schema:
-            "$ref": "#/definitions/ErrorResponse"
   "/v1/admin/security/workspaces/{workspaceNamespace}/delete-runtimes":
     post:
       summary: Delete specified (or all if no specified list) runtimes in given workspace namespace.
@@ -1497,6 +1463,33 @@ paths:
           description: success
           schema:
             "$ref": "#/definitions/EmptyResponse"
+  "/v1/admin/workspaces/{workspaceNamespace}/locked":
+    parameters:
+      - "$ref": "#/parameters/workspaceNamespace"
+    post:
+      tags:
+        - workspaceAdmin
+      consumes:
+        - application/json
+      description: Set admin locked or unlocked state for the workspace
+      operationId: setAdminLockedState
+      parameters:
+        - in: body
+          name: AdminLockedState
+          required: true
+          schema:
+            type: object
+            required:
+              - value
+            properties:
+              value:
+                type: boolean
+      responses:
+        200:
+          description: success
+          schema:
+            "$ref": "#/definitions/EmptyResponse"
+
   "/v1/admin/workspaces/{workspaceNamespace}":
     parameters:
     - "$ref": "#/parameters/workspaceNamespace"
@@ -1569,6 +1562,49 @@ paths:
             type: array
             items:
               "$ref": "#/definitions/FileDetail"
+
+  "/v1/admin/egressEvents":
+    post:
+      tags:
+        - egressEventsAdmin
+      description: >
+        Administrative API to receive a paginated list of egress events. Optionally
+        filtered by different criteria.
+      operationId: listEgressEvents
+      parameters:
+        - in: body
+          name: request
+          schema:
+            "$ref": "#/definitions/ListEgressEventsRequest"
+      responses:
+        200:
+          description: success
+          schema:
+            "$ref": "#/definitions/ListEgressEventsResponse"
+  "/v1/admin/egressEvents/{id}":
+    patch:
+      tags:
+        - egressEventsAdmin
+      description: >
+        Administrative API to update an egress event. Currently, only the
+        following fields can be updated - all other fields are ignored:
+          - status (REMEDIATED or VERIFIED_FALSE_POSITIVE)
+      operationId: updateEgressEvent
+      parameters:
+        - in: path
+          name: id
+          description: The egress event ID
+          required: true
+          type: string
+        - in: body
+          name: request
+          schema:
+            "$ref": "#/definitions/UpdateEgressEventRequest"
+      responses:
+        200:
+          description: success
+          schema:
+            "$ref": "#/definitions/EgressEvent"
   "/v1/admin/sumo/egressEvent":
     post:
       tags:
@@ -1582,7 +1618,7 @@ paths:
         name: request
         description: Egress event request
         schema:
-          "$ref": "#/definitions/EgressEventRequest"
+          "$ref": "#/definitions/SumologicEgressEventRequest"
       - in: header
         name: X-API-KEY
         description: 'Semi-secret API key sent by SumoLogic. This will be checked
@@ -4227,10 +4263,6 @@ definitions:
         type: boolean
         default: false
         description: Whether egress alerting V2 is enabled.
-      enableStandardSourceDomains:
-        type: boolean
-        default: false
-        description: Whether to show separate source and standard domains
       enableGpu:
         type: boolean
         default: false
@@ -4423,7 +4455,6 @@ definitions:
     - name
     example:
       billingAccountName: "billingAccounts/000000-AAAAAA-111111"
-      billingAccountType: "FREE_TIER"
       billingStatus: "ACTIVE"
       cdrVersionId: "2"
       creationTime: 1588097211621
@@ -4488,8 +4519,6 @@ definitions:
         type: string
       billingAccountName:
         type: string
-      billingAccountType:
-        "$ref": "#/definitions/BillingAccountType"
       googleBucketName:
         type: string
       accessTierShortName:
@@ -5543,6 +5572,12 @@ definitions:
       complianceTrainingCompletionTime:
         type: integer
         format: int64
+      ctComplianceTrainingBypassTime:
+        type: integer
+        format: int64
+      ctComplianceTrainingCompletionTime:
+        type: integer
+        format: int64
       dataUseAgreementBypassTime:
         type: integer
         format: int64
@@ -6252,9 +6287,6 @@ definitions:
         "$ref": "#/definitions/ConceptSet"
       dataSet:
         "$ref": "#/definitions/DataSet"
-      modifiedTime:
-        description: DEPRECATED because string formatting is ambiguous. Use lastModifiedEpochMillis.
-        type: string
       lastModifiedEpochMillis:
         description: the resource's last modified time, in milliseconds since the epoch
         type: integer
@@ -6338,14 +6370,14 @@ definitions:
       link:
         description: 'A URL linking to an incident report where users can read more'
         type: string
-  EgressEventRequest:
+  SumologicEgressEventRequest:
     type: object
     properties:
       eventsJsonArray:
         type: string
         description: 'A JSON string containing an array of JSON-encoded egress events.
-          See the EgressEvent definition for the expected schema of each event.'
-  EgressEvent:
+          See the SumologicEgressEvent definition for the expected schema of each event.'
+  SumologicEgressEvent:
     type: object
     required:
       - project_name
@@ -6406,6 +6438,83 @@ definitions:
         description: Prefix of the research VM(s) that generated egress, including
           the user ID, e.g. all-of-us-260.
         type: string
+  ListEgressEventsRequest:
+    type: object
+    properties:
+      sourceUserEmail:
+        type: string
+        description: >
+          If specified, only return events which were caused by this user. Should
+          include the email domain of the user.
+      sourceWorkspaceNamespace:
+        type: string
+        description: >
+          If specified, only return event which were detected within the given
+          workspace.
+      pageSize:
+        type: integer
+        description: >
+          The number of egress events to return, per page. If unspecified, a
+          system default is used.
+      pageToken:
+        type: string
+        description: >
+          Pagination token used to receive the next page of results. Provide this
+          value from the nextPageToken of a prior response.
+  ListEgressEventsResponse:
+    type: object
+    properties:
+      events:
+        type: array
+        items:
+          "$ref": "#/definitions/EgressEvent"
+      nextPageToken:
+        type: string
+        description: >
+          If present, this token can be provided to retrieve the next page of results.
+          If null or empty, there are no further pages in the result stream.
+      totalSize:
+        type: integer
+        description: Total size of the result set.
+  UpdateEgressEventRequest:
+    type: object
+    properties:
+      egressEvent:
+        "$ref": "#/definitions/EgressEvent"
+  EgressEventStatus:
+    type: string
+    description: Workbench processing status for this egress event.
+    enum:
+    - PENDING
+    - REMEDIATED
+    - VERIFIED_FALSE_POSITIVE
+  EgressEvent:
+    type: object
+    properties:
+      egressEventId:
+        type: string
+        description: Unique identifier for this egress event.
+      sourceUserEmail:
+        type: string
+        description: Researcher email for the user associated with this event, if known.
+      sourceWorkspaceNamespace:
+        type: string
+        description: Workspace in which the event fired, if known.
+      sourceGoogleProject:
+        type: string
+        description: Google project in which the event fired, if known.
+      egressMegabytes:
+        type: number
+        format: double
+        description: Volume of egress which triggered the alert, in Megabytes.
+      egressWindowSeconds:
+        type: number
+        description: Window duration over which the egress was detected, in seconds.
+      creationTime:
+        type: string
+        description: Time at which the egress event was recorded, in ISO 8601 format.
+      status:
+        $ref: "#/definitions/EgressEventStatus"
   ArrayOfLong:
     type: array
     items:

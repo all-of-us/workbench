@@ -1,5 +1,6 @@
 package org.pmiops.workbench.db.dao;
 
+import static org.pmiops.workbench.access.AccessTierService.CONTROLLED_TIER_SHORT_NAME;
 import static org.pmiops.workbench.access.AccessTierService.REGISTERED_TIER_SHORT_NAME;
 
 import com.google.api.services.oauth2.model.Userinfoplus;
@@ -209,15 +210,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   private void updateUserAccessTiers(DbUser dbUser, Agent agent) {
     final List<DbAccessTier> previousAccessTiers = accessTierService.getAccessTiersForUser(dbUser);
 
-    // TODO for Controlled Tier Beta: different access module evaluation criteria
-    // For Controlled Tier Alpha, we simply evaluate whether the user is qualified for
-    // Registered Tier and set RT+CT or RT only based on the feature flag
-
-    final List<DbAccessTier> newAccessTiers =
-        shouldUserBeRegistered(dbUser)
-            ? accessTierService.getTiersForRegisteredUsers()
-            : Collections.emptyList();
-
+    final List<DbAccessTier> newAccessTiers = getUserAccessTiersList(dbUser);
     if (!newAccessTiers.equals(previousAccessTiers)) {
       userServiceAuditor.fireUpdateAccessTiersAction(
           dbUser, previousAccessTiers, newAccessTiers, agent);
@@ -233,7 +226,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   }
 
   // missing ERA_COMMONS (special-cased below)
-  // missing CT_COMPLIANCE_TRAINING, for controlled tier only
   // see also: AccessModuleServiceImpl.isModuleRequiredInEnvironment()
   private static final List<AccessModuleName> requiredModulesForRegisteredTier =
       ImmutableList.of(
@@ -244,34 +236,60 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
           AccessModuleName.PROFILE_CONFIRMATION,
           AccessModuleName.PUBLICATION_CONFIRMATION);
 
-  private boolean shouldUserBeRegistered(DbUser user) {
-    boolean allStandardRequiredModulesCompliant =
-        requiredModulesForRegisteredTier.stream()
-            .allMatch(moduleName -> accessModuleService.isModuleCompliant(user, moduleName));
+  private static final List<AccessModuleName> requiredModulesForControlledTier =
+      ImmutableList.of(AccessModuleName.CT_COMPLIANCE_TRAINING);
 
+  private List<DbAccessTier> getUserAccessTiersList(DbUser dbUser) {
+    // If user does NOT have access to RT, they should not have access to any TIER
+    if (!shouldGrantUserTierAccess(
+        dbUser, requiredModulesForRegisteredTier, REGISTERED_TIER_SHORT_NAME)) {
+      return Collections.emptyList();
+    }
+
+    // User is already qualified for RT
+    List<DbAccessTier> userAccessTiers =
+        com.google.common.collect.Lists.newArrayList(accessTierService.getRegisteredTierOrThrow());
+
+    // Add Controlled Access Tier to the list, if user has completed/bypassed all CT Steps.
+    accessTierService
+        .getAccessTierByName(CONTROLLED_TIER_SHORT_NAME)
+        .ifPresent(
+            tier -> {
+              if (shouldGrantUserTierAccess(
+                  dbUser, requiredModulesForControlledTier, CONTROLLED_TIER_SHORT_NAME)) {
+                userAccessTiers.add(tier);
+              }
+            });
+
+    return userAccessTiers;
+  }
+
+  private boolean shouldGrantUserTierAccess(
+      DbUser user, List<AccessModuleName> requiredModules, String tierShortName) {
+    boolean allStandardRequiredModulesCompliant =
+        requiredModules.stream()
+            .allMatch(moduleName -> accessModuleService.isModuleCompliant(user, moduleName));
     boolean eraCompliant =
         accessModuleService.isModuleCompliant(user, AccessModuleName.ERA_COMMONS);
 
-    boolean eRARequiredForRegisteredTier = true;
-    boolean institutionalEmailValid = false;
+    boolean eRARequiredForTier = true;
+    boolean institutionalEmailValidForTier = false;
     Optional<Institution> institution = institutionService.getByUser(user);
     if (institution.isPresent()) {
       // eRA is required when login.gov linking is not enabled or user institution requires that in
       // tier requirement.
-      eRARequiredForRegisteredTier =
+      eRARequiredForTier =
           !configProvider.get().access.enableRasLoginGovLinking
-              || institutionService.eRaRequiredForTier(
-                  institution.get(), REGISTERED_TIER_SHORT_NAME);
-      institutionalEmailValid =
+              || institutionService.eRaRequiredForTier(institution.get(), tierShortName);
+      institutionalEmailValidForTier =
           institutionService.validateInstitutionalEmail(
-              institution.get(), user.getContactEmail(), REGISTERED_TIER_SHORT_NAME);
+              institution.get(), user.getContactEmail(), tierShortName);
     } else {
       log.warning(String.format("Institution not found for user %s", user.getUsername()));
     }
-
     return !user.getDisabled()
-        && (!eRARequiredForRegisteredTier || eraCompliant)
-        && institutionalEmailValid
+        && (!eRARequiredForTier || eraCompliant)
+        && institutionalEmailValidForTier
         && allStandardRequiredModulesCompliant;
   }
 

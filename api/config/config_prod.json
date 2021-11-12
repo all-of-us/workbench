@@ -96,15 +96,15 @@
   },
   "featureFlags": {
     "unsafeAllowDeleteUser": false,
-    "unsafeAllowAccessToAllTiersForRegisteredUsers": false,
-    "enableBillingUpgrade": false,
+    "enableBillingUpgrade": true,
     "enableEventDateModifier": false,
     "enableResearchPurposePrompt": false,
     "enableGenomicExtraction": false,
     "enableGpu": false,
     "enablePersistentDisk": false,
     "enableEgressAlertingV2": false,
-    "enableStandardSourceDomains": true
+    "enablePrivateDataprocWorker": false,
+    "grantLifescienceApiRunnerAcl": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-prod",
@@ -131,11 +131,24 @@
   },
   "accessRenewal": {
     "expiryDays": 365,
-    "expiryDaysWarningThresholds": [ 1, 3, 7, 15, 30 ],
+    "expiryDaysWarningThresholds": [1, 3, 7, 15, 30],
     "lookbackPeriod": 330
   },
   "offlineBatch": {
     "usersPerAuditTask": 20,
     "usersPerSynchronizeAccessTask": 50
+  },
+  "egressAlertRemediationPolicy": {
+    "enableJiraTicketing": true,
+    "notifyFromEmail": "egress@pmi-ops.org",
+    "escalations": [{
+      "afterIncidentCount": 1,
+      "suspendCompute": {
+        "durationMinutes": 10
+      }
+    }, {
+      "afterIncidentCount": 3,
+      "disableUser": {}
+    }]
   }
 }

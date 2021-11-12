@@ -1,4 +1,4 @@
-import * as React from "react";
+import * as React from 'react';
 import {mount, ReactWrapper} from 'enzyme';
 
 import {AccessModule, ErrorCode, ProfileApi} from 'generated/fetch';
@@ -14,7 +14,7 @@ import {
   NOTIFICATION_THRESHOLD_DAYS,
   RAS_CALLBACK_PATH,
   useIsUserDisabled
-} from "app/utils/access-utils";
+} from 'app/utils/access-utils';
 import {profileApi, registerApiClient} from 'app/services/swagger-fetch-clients';
 
 // 10 minutes, in millis

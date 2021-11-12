@@ -189,7 +189,7 @@ export const ConceptSetSelectValue = {
 };
 
 export const DatasetValueSelect = {
-  VCFFile: 'VCF Files(s)'
+  VCFFile: 'VCF Files'
 };
 
 export enum AgeSelectionRadioButton {

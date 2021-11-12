@@ -5,9 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.time.Instant;
 import org.junit.jupiter.api.Test;
-import org.pmiops.workbench.SpringTest;
 
-public class ActionAuditEventTest extends SpringTest {
+public class ActionAuditEventTest {
 
   private static final String ACTION_ID = "foo";
   private static final long USER_ID = 333L;

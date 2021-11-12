@@ -2,7 +2,7 @@ import {mount} from 'enzyme';
 import * as React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 
-import {NotificationBanner} from "./notification-banner";
+import {NotificationBanner} from './notification-banner';
 
 describe('NotificationBanner', () => {
     const component = () => {

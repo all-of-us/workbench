@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.pmiops.workbench.SpringTest;
+import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.DbUser;
@@ -22,6 +22,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
 
 @Import({
+  FakeClockConfiguration.class,
   VerifiedInstitutionalAffiliationMapperImpl.class,
   InstitutionServiceImpl.class,
   InstitutionMapperImpl.class,
@@ -34,7 +35,7 @@ import org.springframework.test.annotation.DirtiesContext;
 })
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-public class VerifiedInstitutionalAffiliationMapperTest extends SpringTest {
+public class VerifiedInstitutionalAffiliationMapperTest {
   @Autowired VerifiedInstitutionalAffiliationMapper mapper;
 
   @Autowired InstitutionService institutionService;

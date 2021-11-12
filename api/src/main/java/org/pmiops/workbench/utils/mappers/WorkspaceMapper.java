@@ -30,7 +30,7 @@ import org.pmiops.workbench.workspaces.resources.WorkspaceResourceMapper;
 public interface WorkspaceMapper {
 
   @Mapping(target = "researchPurpose", source = "dbWorkspace")
-  @Mapping(target = "etag", source = "dbWorkspace.version", qualifiedByName = "cdrVersionToEtag")
+  @Mapping(target = "etag", source = "dbWorkspace.version", qualifiedByName = "versionToEtag")
   @Mapping(target = "name", source = "dbWorkspace.name")
   @Mapping(target = "id", source = "fcWorkspace.name")
   @Mapping(target = "googleBucketName", source = "fcWorkspace.bucketName")
@@ -42,7 +42,7 @@ public interface WorkspaceMapper {
 
   @Mapping(target = "cdrVersionId", source = "cdrVersion")
   @Mapping(target = "creator", source = "creator.username")
-  @Mapping(target = "etag", source = "version", qualifiedByName = "cdrVersionToEtag")
+  @Mapping(target = "etag", source = "version", qualifiedByName = "versionToEtag")
   @Mapping(
       target = "googleBucketName",
       ignore =
@@ -97,9 +97,9 @@ public interface WorkspaceMapper {
 
   // This method isn't a full conversion, so we need to mask out the values that don't
   // get set here.
+  @Mapping(target = "adminLocked", ignore = true)
   @Mapping(target = "approved", ignore = true)
   @Mapping(target = "billingAccountName", ignore = true)
-  @Mapping(target = "billingAccountType", ignore = true)
   @Mapping(target = "billingMigrationStatusEnum", ignore = true)
   @Mapping(target = "billingStatus", ignore = true)
   @Mapping(target = "cdrVersion", ignore = true)
@@ -111,19 +111,19 @@ public interface WorkspaceMapper {
   @Mapping(target = "disseminateResearchSet", ignore = true)
   @Mapping(target = "firecloudName", ignore = true)
   @Mapping(target = "firecloudUuid", ignore = true)
+  @Mapping(target = "googleProject", ignore = true)
   @Mapping(target = "lastAccessedTime", ignore = true)
   @Mapping(target = "lastModifiedTime", ignore = true)
   @Mapping(target = "name", ignore = true)
+  @Mapping(target = "needsResearchPurposeReviewPrompt", ignore = true)
   @Mapping(target = "published", ignore = true)
   @Mapping(target = "researchOutcomeSet", ignore = true)
   @Mapping(target = "reviewRequested", ignore = true)
-  @Mapping(target = "needsResearchPurposeReviewPrompt", ignore = true)
   @Mapping(target = "timeRequested", ignore = true)
   @Mapping(target = "version", ignore = true)
   @Mapping(target = "workspaceActiveStatusEnum", ignore = true)
   @Mapping(target = "workspaceId", ignore = true)
   @Mapping(target = "workspaceNamespace", ignore = true)
-  @Mapping(target = "googleProject", ignore = true)
   void mergeResearchPurposeIntoWorkspace(
       @MappingTarget DbWorkspace workspace, ResearchPurpose researchPurpose);
 

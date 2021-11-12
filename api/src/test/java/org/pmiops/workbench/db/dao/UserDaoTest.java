@@ -12,7 +12,7 @@ import javax.jdo.annotations.Transactional;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.pmiops.workbench.SpringTest;
+import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.db.dao.UserDao.DbAdminTableUser;
 import org.pmiops.workbench.db.dao.UserDao.UserCountByDisabledAndAccessTiers;
 import org.pmiops.workbench.db.model.DbAccessModule;
@@ -30,12 +30,14 @@ import org.pmiops.workbench.model.TierAccessStatus;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Sort;
 import org.springframework.test.annotation.DirtiesContext;
 
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-public class UserDaoTest extends SpringTest {
+@Import(FakeClockConfiguration.class)
+public class UserDaoTest {
   private static final String STREET_ADDRESS_1 = "101 Main St";
   private static final String STREET_ADDRESS_2 = "# 202";
   private static final String CITY = "New Braunfels";
@@ -171,12 +173,14 @@ public class UserDaoTest extends SpringTest {
     final DbInstitution institution = createInstitution();
     user = userDao.save(user);
     createAffiliation(user, institution);
-    addUserToTier(user, registeredTier, TierAccessStatus.ENABLED);
+    addUserToTier(user, registeredTier);
 
     final DbAccessModule twoFactorAuthModule =
         accessModuleDao.findOneByName(AccessModuleName.TWO_FACTOR_AUTH).get();
     final DbAccessModule rtTrainingModule =
         accessModuleDao.findOneByName(AccessModuleName.RT_COMPLIANCE_TRAINING).get();
+    final DbAccessModule ctTrainingModule =
+        accessModuleDao.findOneByName(AccessModuleName.CT_COMPLIANCE_TRAINING).get();
     final DbAccessModule eRACommonsModule =
         accessModuleDao.findOneByName(AccessModuleName.ERA_COMMONS).get();
     final DbAccessModule duccModule =
@@ -193,10 +197,13 @@ public class UserDaoTest extends SpringTest {
     Timestamp duccBypassTime = Timestamp.from(now.minusSeconds(70));
     Timestamp duccCompleteTime = Timestamp.from(now.minusSeconds(80));
     Timestamp rasBypassTime = Timestamp.from(now.minusSeconds(90));
+    Timestamp ctTrainingBypassTime = Timestamp.from(now.minusSeconds(100));
+    Timestamp ctTrainingCompleteTime = Timestamp.from(now.minusSeconds(110));
     Timestamp rasCompleteTime = Timestamp.from(now);
     addUserAccessModule(
         user, twoFactorAuthModule, twoFactorAuthBypassTime, twoFactorAuthCompleteTime);
     addUserAccessModule(user, rtTrainingModule, rtTrainingBypassTime, rtTrainingCompleteTime);
+    addUserAccessModule(user, ctTrainingModule, ctTrainingBypassTime, ctTrainingCompleteTime);
     addUserAccessModule(user, eRACommonsModule, eRABypassTime, eRACompleteTime);
     addUserAccessModule(user, duccModule, duccBypassTime, duccCompleteTime);
     addUserAccessModule(user, rasConfirmModule, rasBypassTime, rasCompleteTime);
@@ -206,6 +213,9 @@ public class UserDaoTest extends SpringTest {
     assertThat(rows.get(0).getEraCommonsCompletionTime()).isEqualTo(eRACompleteTime);
     assertThat(rows.get(0).getComplianceTrainingBypassTime()).isEqualTo(rtTrainingBypassTime);
     assertThat(rows.get(0).getComplianceTrainingCompletionTime()).isEqualTo(rtTrainingCompleteTime);
+    assertThat(rows.get(0).getCtComplianceTrainingBypassTime()).isEqualTo(ctTrainingBypassTime);
+    assertThat(rows.get(0).getCtComplianceTrainingCompletionTime())
+        .isEqualTo(ctTrainingCompleteTime);
     assertThat(rows.get(0).getDataUseAgreementBypassTime()).isEqualTo(duccBypassTime);
     assertThat(rows.get(0).getDataUseAgreementCompletionTime()).isEqualTo(duccCompleteTime);
     assertThat(rows.get(0).getTwoFactorAuthBypassTime()).isEqualTo(twoFactorAuthBypassTime);
@@ -317,6 +327,44 @@ public class UserDaoTest extends SpringTest {
   }
 
   @Test
+  public void test_findUsersBySearchStringAndTier_controlled_match() {
+    DbUser user = new DbUser();
+    user.setGivenName("Alice");
+    user = userDao.save(user);
+    addUserToTier(user, registeredTier);
+
+    final DbAccessTier controlledTier = TestMockFactory.createControlledTierForTests(accessTierDao);
+    addUserToTier(user, controlledTier);
+
+    final Sort ascendingByUsername = Sort.by(Sort.Direction.ASC, "username");
+    List<DbUser> result =
+        userDao.findUsersBySearchStringAndTier(
+            "A", ascendingByUsername, controlledTier.getShortName());
+    assertThat(result).containsExactly(user);
+  }
+
+  // RW-7533 regression test: confirm that a user does not appear in CT search results if they
+  // previously had Controlled Tier access but now do not
+
+  @Test
+  public void test_findUsersBySearchStringAndTier_controlled_disabled() {
+    DbUser user = new DbUser();
+    user.setGivenName("Alice");
+    user = userDao.save(user);
+    addUserToTier(user, registeredTier);
+
+    final DbAccessTier controlledTier = TestMockFactory.createControlledTierForTests(accessTierDao);
+    addUserToTier(user, controlledTier);
+    removeUserFromTier(user, controlledTier);
+
+    final Sort ascendingByUsername = Sort.by(Sort.Direction.ASC, "username");
+    List<DbUser> result =
+        userDao.findUsersBySearchStringAndTier(
+            "A", ascendingByUsername, controlledTier.getShortName());
+    assertThat(result).isEmpty();
+  }
+
+  @Test
   public void test_findUsersBySearchStringAndTier_multi() {
     DbUser alice = new DbUser();
     alice.setGivenName("Alice");
@@ -396,6 +444,18 @@ public class UserDaoTest extends SpringTest {
     return userAccessTierDao.save(entryToInsert);
   }
 
+  private DbUserAccessTier addUserToTier(DbUser user, DbAccessTier tier) {
+    return addUserToTier(user, tier, TierAccessStatus.ENABLED);
+  }
+
+  private void removeUserFromTier(DbUser user, DbAccessTier tier) {
+    // if not present, do nothing
+    userAccessTierDao
+        .getByUserAndAccessTier(user, tier)
+        .ifPresent(
+            uat -> userAccessTierDao.save(uat.setTierAccessStatus(TierAccessStatus.DISABLED)));
+  }
+
   @Transactional
   public DbUserAccessModule addUserAccessModule(
       DbUser user, DbAccessModule accessModule, Timestamp bypassTime, Timestamp completionTime) {
@@ -405,10 +465,6 @@ public class UserDaoTest extends SpringTest {
             .setAccessModule(accessModule)
             .setBypassTime(bypassTime)
             .setCompletionTime(completionTime));
-  }
-
-  private DbUserAccessTier addUserToTier(DbUser user, DbAccessTier tier) {
-    return addUserToTier(user, tier, TierAccessStatus.ENABLED);
   }
 
   @NotNull

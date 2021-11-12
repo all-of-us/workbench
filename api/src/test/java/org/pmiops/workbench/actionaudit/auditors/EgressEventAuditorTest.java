@@ -17,7 +17,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.pmiops.workbench.SpringTest;
+import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.actionaudit.ActionAuditEvent;
 import org.pmiops.workbench.actionaudit.ActionAuditService;
 import org.pmiops.workbench.actionaudit.ActionType;
@@ -34,16 +34,18 @@ import org.pmiops.workbench.db.model.DbEgressEvent;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
-import org.pmiops.workbench.model.EgressEvent;
-import org.pmiops.workbench.model.EgressEventRequest;
+import org.pmiops.workbench.model.SumologicEgressEvent;
+import org.pmiops.workbench.model.SumologicEgressEventRequest;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
-public class EgressEventAuditorTest extends SpringTest {
+@SpringJUnitConfig
+public class EgressEventAuditorTest {
 
   private static final long USER_ID = 1L;
   private static final String USER_EMAIL = "user@researchallofus.org";
@@ -72,6 +74,7 @@ public class EgressEventAuditorTest extends SpringTest {
 
   @TestConfiguration
   @Import({
+    FakeClockConfiguration.class,
     // Import the impl class to allow autowiring the bean.
     EgressEventAuditorImpl.class,
     // Import common action audit beans.
@@ -100,7 +103,7 @@ public class EgressEventAuditorTest extends SpringTest {
   @Test
   public void testFireEgressEvent() {
     egressEventAuditor.fireEgressEvent(
-        new EgressEvent()
+        new SumologicEgressEvent()
             .projectName(EGRESS_EVENT_PROJECT_NAME)
             .vmPrefix(EGRESS_EVENT_VM_PREFIX)
             .timeWindowStart(0l)
@@ -153,7 +156,7 @@ public class EgressEventAuditorTest extends SpringTest {
         BadRequestException.class,
         () ->
             egressEventAuditor.fireEgressEvent(
-                new EgressEvent()
+                new SumologicEgressEvent()
                     .projectName(EGRESS_EVENT_PROJECT_NAME)
                     .vmPrefix(EGRESS_EVENT_VM_PREFIX)));
     verify(mockActionAuditService).send(eventsCaptor.capture());
@@ -325,7 +328,7 @@ public class EgressEventAuditorTest extends SpringTest {
     // When the inbound request parsing fails, an event is logged at the system agent.
     when(workspaceDao.getByGoogleProject(GOOGLE_PROJECT)).thenReturn(null);
     egressEventAuditor.fireFailedToParseEgressEventRequest(
-        new EgressEventRequest().eventsJsonArray("asdf"));
+        new SumologicEgressEventRequest().eventsJsonArray("asdf"));
     verify(mockActionAuditService).send(eventsCaptor.capture());
     Collection<ActionAuditEvent> events = eventsCaptor.getValue();
 
@@ -346,7 +349,7 @@ public class EgressEventAuditorTest extends SpringTest {
   public void testBadApiKey() {
     // When the inbound request parsing fails, an event is logged at the system agent.
     when(workspaceDao.getByGoogleProject(GOOGLE_PROJECT)).thenReturn(null);
-    egressEventAuditor.fireBadApiKey("ASDF", new EgressEventRequest());
+    egressEventAuditor.fireBadApiKey("ASDF", new SumologicEgressEventRequest());
     verify(mockActionAuditService).send(eventsCaptor.capture());
     Collection<ActionAuditEvent> events = eventsCaptor.getValue();
 

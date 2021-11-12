@@ -1,14 +1,14 @@
-import * as React from "react";
+import * as React from 'react';
 
-import {GenomicExtractionModal} from "./genomic-extraction-modal";
-import {DataSetApiStub} from "testing/stubs/data-set-api-stub";
-import {registerApiClient} from "app/services/swagger-fetch-clients";
-import {DataSetApi, TerraJobStatus} from "generated/fetch";
-import {mount} from "enzyme";
-import {workspaceDataStub} from "testing/stubs/workspaces";
-import {genomicExtractionStore} from "app/utils/stores";
+import {GenomicExtractionModal} from './genomic-extraction-modal';
+import {DataSetApiStub} from 'testing/stubs/data-set-api-stub';
+import {registerApiClient} from 'app/services/swagger-fetch-clients';
+import {DataSetApi, TerraJobStatus} from 'generated/fetch';
+import {mount} from 'enzyme';
+import {workspaceDataStub} from 'testing/stubs/workspaces';
+import {genomicExtractionStore} from 'app/utils/stores';
 import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
-import moment from "moment";
+import moment from 'moment';
 
 describe('GenomicExtractionModal', () => {
   let dataset;
@@ -70,7 +70,7 @@ describe('GenomicExtractionModal', () => {
     const wrapper = mount(component());
     const warning = wrapper.find('[data-test-id="extract-warning"]');
     expect(warning).toBeTruthy();
-    expect(warning.text()).toContain("An extraction is currently running");
+    expect(warning.text()).toContain('An extraction is currently running');
   });
 
   it('should show a warning message when the most recent extract has succeeded', () => {
@@ -96,7 +96,7 @@ describe('GenomicExtractionModal', () => {
     const wrapper = mount(component());
     const warning = wrapper.find('[data-test-id="extract-warning"]');
     expect(warning).toBeTruthy();
-    expect(warning.text()).toContain("VCF file(s) already exist for this dataset.");
+    expect(warning.text()).toContain('VCF file(s) already exist for this dataset.');
   });
 
   it('should show a warning message the most recent extract has failed', () => {
@@ -122,7 +122,7 @@ describe('GenomicExtractionModal', () => {
     const wrapper = mount(component());
     const warning = wrapper.find('[data-test-id="extract-warning"]');
     expect(warning).toBeTruthy();
-    expect(warning.text()).toContain("Last time a VCF extract was attempted for this workflow, it failed.");
+    expect(warning.text()).toContain('Last time a VCF extract was attempted for this workflow, it failed.');
   });
 
   it('should not show a warning message with no succeeded, failed, or running extracts for this dataset', () => {

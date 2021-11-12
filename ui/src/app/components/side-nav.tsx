@@ -1,16 +1,17 @@
+import * as React from 'react';
+import {useState} from 'react';
+
 import {Clickable} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
-import {hasRegisteredAccess} from 'app/utils/access-tiers';
+import {hasRegisteredTierAccess} from 'app/utils/access-tiers';
 import {signOut} from 'app/utils/authentication';
 import {AuthorityGuardedAction, hasAuthorityForAction} from 'app/utils/authorities';
 import {navigateSignOut, useNavigation} from 'app/utils/navigation';
 import {getProfilePictureSrc} from 'app/utils/profile-picture';
 import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
 import {Profile} from 'generated/fetch';
-import * as React from 'react';
-import {useState} from 'react';
 
 const styles = reactStyles({
   flex: {
@@ -285,7 +286,7 @@ export const SideNav = (props: SideNavProps) => {
         onToggleSideNav={() => onToggleSideNav()}
         href={'/workspaces'}
         active={workspacesActive()}
-        disabled={!hasRegisteredAccess(profile.accessTierShortNames)}
+        disabled={!hasRegisteredTierAccess(profile)}
     />
     <SideNavItem
         icon='star'
@@ -293,14 +294,14 @@ export const SideNav = (props: SideNavProps) => {
         onToggleSideNav={() => onToggleSideNav()}
         href={'/library'}
         active={libraryActive()}
-        disabled={!hasRegisteredAccess(profile.accessTierShortNames)}
+        disabled={!hasRegisteredTierAccess(profile)}
     />
     <SideNavItem
         icon='help'
         content={'User Support Hub'}
         onToggleSideNav={() => onToggleSideNav()}
         parentOnClick={() => window.open(supportUrls.helpCenter, '_blank')}
-        disabled={!hasRegisteredAccess(profile.accessTierShortNames)}
+        disabled={!hasRegisteredTierAccess(profile)}
     />
     <SideNavItem
         icon='envelope'

@@ -110,7 +110,7 @@ const styles = reactStyles({
   },
   calculateButton: {
     height: '1.75rem',
-    border: `1px solid`,
+    border: '1px solid',
     borderColor: colors.accent,
     borderRadius: '2px',
     fontWeight: 100
@@ -384,7 +384,7 @@ export const AttributesPage = fp.flow(withCurrentWorkspace(), withCurrentCohortC
       form.anyValue = checked;
       if (checked) {
         form.num = form.num.map(attr => ({...attr, operator: this.isPhysicalMeasurement ? 'ANY' : null, operands: []}));
-        if (this.isMeasurement) {
+        if (this.isMeasurement || this.isObservation) {
           form.cat = form.cat.map(attr => ({...attr, checked: false}));
         }
       }
@@ -478,7 +478,7 @@ export const AttributesPage = fp.flow(withCurrentWorkspace(), withCurrentCohortC
         }, new Set());
         // The second condition sets formValid to false if this is a Measurements or COPE attribute with no operator selected from the
         // dropdown and no categorical checkboxes checked
-        if (this.isMeasurement && formValid) {
+        if ((this.isMeasurement || this.isObservation) && formValid) {
           formValid = operatorSelected || form.cat.some(attr => attr.checked);
         }
         if (isCOPESurvey && formValid) {
@@ -527,7 +527,7 @@ export const AttributesPage = fp.flow(withCurrentWorkspace(), withCurrentCohortC
       if (!isCOPESurvey && form.anyValue) {
         paramName = name + ` (${optionUtil.ANY.display})`;
       } else if (isCOPESurvey && form.anyValue && form.anyVersion) {
-        paramName = name + ` (Any version AND any value)`;
+        paramName = name + ' (Any version AND any value)';
       } else {
         form.num.filter(at => at.operator).forEach(({operator, operands, conceptId}) => {
           const attr = {name: AttrName.NUM, operator, operands};
@@ -764,7 +764,7 @@ export const AttributesPage = fp.flow(withCurrentWorkspace(), withCurrentCohortC
           {count > -1 && <span style={styles.badge}>{count.toLocaleString()}</span>}
         </div>}
         {!(isCOPESurvey && form.anyVersion) && <React.Fragment>
-          {form.num.length > 0 && <div style={styles.orCircle}>OR</div>}
+          {(form.num.length > 0 || this.isObservation) && <div style={styles.orCircle}>OR</div>}
           {!isCOPESurvey && <div style={styles.label}>Categorical Values</div>}
           {form.cat.map((attr, a) => <div key={a} style={styles.categorical}>
             <CheckBox checked={attr.checked} style={{marginRight: '3px'}}
@@ -801,7 +801,7 @@ export const AttributesPage = fp.flow(withCurrentWorkspace(), withCurrentCohortC
           </div> : <h3 style={{fontWeight: 600, margin: '0 0 0.5rem', textTransform: 'capitalize'}}>
             {this.isPhysicalMeasurement ? name : domainId.toString().toLowerCase()} Detail
           </h3>}
-          {(this.isObservation || this.isSurvey) && <div style={{...styles.label, marginBottom: '0.5rem'}}>
+          {this.isSurvey && <div style={{...styles.label, marginBottom: '0.5rem'}}>
             {subtype === CriteriaSubType.ANSWER
               ? `${ppiQuestions.getValue()[parentId].name} - ${name}`
               : name
@@ -827,9 +827,9 @@ export const AttributesPage = fp.flow(withCurrentWorkspace(), withCurrentCohortC
               {this.renderNumericalAttributes()}
             </div>
             : <div>
-              {this.isMeasurement && <div>
+              {(this.isMeasurement || this.isObservation) && <div>
                 <div style={styles.label}>{this.displayName}</div>
-                <CheckBox onChange={(v) => this.toggleAnyValueCheckbox(v)}/> Any value (lab exists)
+                <CheckBox onChange={(v) => this.toggleAnyValueCheckbox(v)}/> Any value {this.isMeasurement && <span> (lab exists)</span>}
                 {!form.anyValue && form.num.length > 0 && <div style={styles.orCircle}>OR</div>}
               </div>}
               {!form.anyValue && <div style={{minHeight: '10rem'}}>

@@ -66,7 +66,7 @@ export const shouldLogResponse = (request: Request): boolean => {
     '/chartinfo/',
     '/page-visits',
     '/generateCode/',
-    '/criteria/CONDITION/search/',
+    '/cohortbuilder/',
     '/criteria/',
     '/cdrVersions',
     '/config',

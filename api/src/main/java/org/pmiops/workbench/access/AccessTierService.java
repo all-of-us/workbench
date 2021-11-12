@@ -1,12 +1,15 @@
 package org.pmiops.workbench.access;
 
 import java.util.List;
+import java.util.Optional;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbUser;
 
 public interface AccessTierService {
   // TODO remove once we are no longer special-casing the Registered Tier
   String REGISTERED_TIER_SHORT_NAME = "registered";
+
+  String CONTROLLED_TIER_SHORT_NAME = "controlled";
 
   /**
    * Return all access tiers in the database, in alphabetical order by shortName
@@ -60,16 +63,9 @@ public interface AccessTierService {
    */
   List<String> getAccessTierShortNamesForUser(DbUser user);
 
-  /**
-   * Return a list of access tiers which Registered users have access to. Depending on environment,
-   * this will either be the Registered Tier or all tiers. This is a temporary measure until we
-   * implement Controlled Tier Beta access controls.
-   *
-   * <p>See https://precisionmedicineinitiative.atlassian.net/browse/RW-6237
-   *
-   * @return the list of tiers which Registered users have access to.
-   */
-  List<DbAccessTier> getTiersForRegisteredUsers();
-
   List<DbUser> getAllRegisteredTierUsers();
+
+  DbAccessTier getRegisteredTierOrThrow();
+
+  Optional<DbAccessTier> getAccessTierByName(String accessTierShortName);
 }

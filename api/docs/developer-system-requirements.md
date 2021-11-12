@@ -30,7 +30,7 @@ We currently only support MacOS and Linux for development and testing.
 For local development, also install:
 
   * [yarn](https://yarnpkg.com/lang/en/docs/install/#mac-stable)
-  * [Node.js](https://nodejs.org/en/) >= 8.  Currently known to work up to 12.16.
+  * [Node.js](https://nodejs.org/en/) >= 8.  Currently known to work up to 16.13.
   * [Java 8](https://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)
   * [Docker Compose](https://docs.docker.com/compose/install/)
 

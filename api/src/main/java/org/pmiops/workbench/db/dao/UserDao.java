@@ -44,10 +44,11 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
       "SELECT dbUser FROM DbUser dbUser "
           + "JOIN DbUserAccessTier uat ON uat.user.userId = dbUser.userId "
           + "JOIN DbAccessTier tier ON uat.accessTier.accessTierId = tier.accessTierId "
-          + "WHERE tier.shortName = :shortName AND "
-          + "  (lower(dbUser.username) LIKE lower(concat('%', :term, '%')) "
-          + "  OR lower(dbUser.familyName) LIKE lower(concat('%', :term, '%')) "
-          + "  OR lower(dbUser.givenName) LIKE lower(concat('%', :term, '%')))")
+          + "WHERE tier.shortName = :shortName "
+          + "  AND uat.tierAccessStatus = 1 " // TierAccessStatus.ENABLED
+          + "  AND (lower(dbUser.username) LIKE lower(concat('%', :term, '%')) "
+          + "    OR lower(dbUser.familyName) LIKE lower(concat('%', :term, '%')) "
+          + "    OR lower(dbUser.givenName) LIKE lower(concat('%', :term, '%')))")
   List<DbUser> findUsersBySearchStringAndTier(
       @Param("term") String term, Sort sort, @Param("shortName") String accessTierShortName);
 
@@ -114,6 +115,10 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
 
     Timestamp getComplianceTrainingCompletionTime();
 
+    Timestamp getCtComplianceTrainingBypassTime();
+
+    Timestamp getCtComplianceTrainingCompletionTime();
+
     Timestamp getEraCommonsBypassTime();
 
     Timestamp getEraCommonsCompletionTime();
@@ -151,6 +156,8 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
               + "uamd.data_use_agreement_completion_time AS dataUseAgreementCompletionTime, "
               + "uamrt.compliance_training_bypass_time AS complianceTrainingBypassTime, "
               + "uamrt.compliance_training_completion_time AS complianceTrainingCompletionTime, "
+              + "uamct.ct_compliance_training_bypass_time AS ctComplianceTrainingBypassTime, "
+              + "uamct.ct_compliance_training_completion_time AS ctComplianceTrainingCompletionTime, "
               + "uame.era_commons_bypass_time AS eraCommonsBypassTime, "
               + "uame.era_commons_completion_time AS eraCommonsCompletionTime, "
               + "uamt.two_factor_auth_bypass_time AS twoFactorAuthBypassTime, "
@@ -194,6 +201,14 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
               + "  JOIN access_module am ON am.access_module_id=uam.access_module_id "
               + "  WHERE am.name = 'RT_COMPLIANCE_TRAINING' "
               + ") as uamrt ON u.user_id = uamrt.user_id "
+              + "LEFT JOIN ( "
+              + "  SELECT uam.user_id, "
+              + "    uam.bypass_time AS ct_compliance_training_bypass_time, "
+              + "    uam.completion_time AS ct_compliance_training_completion_time "
+              + "  FROM user_access_module uam "
+              + "  JOIN access_module am ON am.access_module_id=uam.access_module_id "
+              + "  WHERE am.name = 'CT_COMPLIANCE_TRAINING' "
+              + ") as uamct ON u.user_id = uamct.user_id "
               + "LEFT JOIN ( "
               + "  SELECT uam.user_id, "
               + "    uam.bypass_time AS data_use_agreement_bypass_time, "

@@ -1,5 +1,7 @@
 package org.pmiops.workbench.testconfig;
 
+import static org.pmiops.workbench.testconfig.ReportingTestUtils.WORKSPACE__BILLING_ACCOUNT_ID;
+
 import com.google.common.base.Stopwatch;
 import java.util.concurrent.TimeUnit;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -23,6 +25,7 @@ public class ReportingTestConfig {
     workbenchConfig.reporting.dataset = "wb_reporting";
     workbenchConfig.reporting.maxRowsPerInsert = 2;
     workbenchConfig.server.projectId = "rw-wb-unit-test";
+    workbenchConfig.billing.accountId = WORKSPACE__BILLING_ACCOUNT_ID;
     return workbenchConfig;
   }
 

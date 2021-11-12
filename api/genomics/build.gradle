@@ -10,11 +10,11 @@ repositories {
 
 dependencies {
     // Genomics dependencies
-    compile "org.broadinstitute:gatk:4.1.8.0"
-    compile "com.github.samtools:htsjdk:2.1.1"
-    compile "com.google.guava:guava:30.0-jre"
-    testCompile "com.google.truth:truth:0.42"
-    testCompile "org.junit.jupiter:junit-jupiter-engine:5.6.2"
+    compile 'org.broadinstitute:gatk:4.2.2.0'
+    compile 'com.github.samtools:htsjdk:2.24.1'
+    compile 'com.google.guava:guava:31.0.1-jre'
+    testCompile "com.google.truth:truth:0.46"
+    testCompile 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
 }
 
 test {

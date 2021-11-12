@@ -4,7 +4,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import java.sql.Timestamp;
 import org.junit.jupiter.api.Test;
-import org.pmiops.workbench.SpringTest;
+import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.api.Etags;
 import org.pmiops.workbench.db.model.DbCohortReview;
 import org.pmiops.workbench.model.CohortReview;
@@ -13,13 +13,15 @@ import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
-public class CohortReviewMapperTest extends SpringTest {
+@SpringJUnitConfig
+public class CohortReviewMapperTest {
 
   @Autowired private CohortReviewMapper cohortReviewMapper;
 
   @TestConfiguration
-  @Import({CohortReviewMapperImpl.class, CommonMappers.class})
+  @Import({FakeClockConfiguration.class, CohortReviewMapperImpl.class, CommonMappers.class})
   static class Configuration {}
 
   @Test

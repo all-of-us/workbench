@@ -241,11 +241,6 @@ public class WorkbenchConfig {
     // Allows a user to delete their own account. This is used for testing purposes so that
     // We can clean up after ourselves. This should never go to prod.
     public boolean unsafeAllowDeleteUser;
-    // Enables access to all tiers in an environment to Registered users.
-    // Intended for use in the Controlled Tier Alpha on Preprod and testing in lower levels.
-    // This will be removed when we implement Controlled Tier access modules for Beta launch.
-    // This should never go to Prod.
-    public boolean unsafeAllowAccessToAllTiersForRegisteredUsers;
     // Setting this to true will enable the use of Billing Accounts controlled by the user
     // See RW-4711.
     public boolean enableBillingUpgrade;
@@ -260,12 +255,15 @@ public class WorkbenchConfig {
     // If true, egress alerts are automatically remediated via cloud tasks. Otherwise, egress
     // alerts will still be stored, but are assumed to be remediated by the oncall.
     public boolean enableEgressAlertingV2;
-    // If true, cohort and concept set will show source domains and standard domains options
-    public boolean enableStandardSourceDomains;
     // If true, the backend and UI will support gpu for standard vm
     public boolean enableGpu;
     // If true, the backend and UI will support persistent disk as the default notebook storage
     public boolean enablePersistentDisk;
+    // If true, ask Leo to set dataproc worker VMs not having internet access.
+    public boolean enablePrivateDataprocWorker;
+    // If true, workspace owner and writers will have Google Lifesience Runner permission, and their
+    // Terra Pet SA can actAs itself.
+    public boolean grantLifescienceApiRunnerAcl;
   }
 
   public static class ActionAuditConfig {
@@ -378,6 +376,7 @@ public class WorkbenchConfig {
     }
 
     public String notifyFromEmail;
+    public boolean enableJiraTicketing;
     public List<Escalation> escalations;
   }
 }
