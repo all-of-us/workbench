@@ -174,7 +174,7 @@ public class UserServiceTest {
 
     userService.syncComplianceTrainingStatusV2();
 
-    // The user should be updated in the database with a non-empty completion and expiration time.
+    // The user should be updated in the database with a non-empty completion.
     DbUser user = userDao.findUserByUsername(USERNAME);
     assertModuleCompletionEqual(
         AccessModuleName.RT_COMPLIANCE_TRAINING, user, Timestamp.from(START_INSTANT));
