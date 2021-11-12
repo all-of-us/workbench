@@ -27,6 +27,14 @@ interface EgressEventAuditor {
     )
 
     /**
+     * Fires an audit log event for an admin update to an egress event.
+     */
+    fun fireAdminEditEgressEvent(
+        previousEvent: DbEgressEvent,
+        updatedEvent: DbEgressEvent
+    )
+
+    /**
      * Fires an audit event log tracking when a Sumologic-reported high-egress event
      * request could not successfully be parsed.
      */

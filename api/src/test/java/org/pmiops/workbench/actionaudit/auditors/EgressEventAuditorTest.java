@@ -5,6 +5,7 @@ import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.google.common.collect.Iterables;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -12,6 +13,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,6 +33,7 @@ import org.pmiops.workbench.config.WorkbenchConfig.EgressAlertRemediationPolicy.
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbEgressEvent;
+import org.pmiops.workbench.db.model.DbEgressEvent.DbEgressEventStatus;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -59,7 +62,7 @@ public class EgressEventAuditorTest {
   private static final String EGRESS_EVENT_VM_PREFIX = "all-of-us-" + USER_ID;
 
   // Pre-built data objects for test.
-  private DbUser dbUser;
+  private static DbUser dbUser;
   private DbWorkspace dbWorkspace;
   private List<UserRole> firecloudUserRoles = new ArrayList<>();
 
@@ -321,6 +324,40 @@ public class EgressEventAuditorTest {
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList()))
         .isEmpty();
+  }
+
+  @Test
+  public void testAdminEditEgressEvent() {
+    Supplier<DbEgressEvent> newEvent =
+        () ->
+            new DbEgressEvent()
+                .setWorkspace(dbWorkspace)
+                .setUser(dbUser)
+                .setEgressEventId(1337)
+                .setCreationTime(NOW);
+    egressEventAuditor.fireAdminEditEgressEvent(
+        newEvent.get().setStatus(DbEgressEventStatus.REMEDIATED),
+        newEvent.get().setStatus(DbEgressEventStatus.VERIFIED_FALSE_POSITIVE));
+
+    verify(mockActionAuditService).send(eventsCaptor.capture());
+    Collection<ActionAuditEvent> events = eventsCaptor.getValue();
+
+    // Ensure all events have the expected set of constant fields.
+    assertThat(events.stream().map(event -> event.getAgentType()).collect(Collectors.toSet()))
+        .containsExactly(AgentType.ADMINISTRATOR);
+    assertThat(events.stream().map(event -> event.getAgentEmailMaybe()).collect(Collectors.toSet()))
+        .containsExactly(ActionAuditTestConfig.ADMINISTRATOR_EMAIL);
+    assertThat(events.stream().map(event -> event.getActionType()).collect(Collectors.toSet()))
+        .containsExactly(ActionType.EDIT);
+    assertThat(events.stream().map(event -> event.getTargetIdMaybe()).collect(Collectors.toSet()))
+        .containsExactly(WORKSPACE_ID);
+
+    assertThat(events).hasSize(1);
+    ActionAuditEvent event = Iterables.getOnlyElement(events);
+    assertThat(event.getTargetPropertyMaybe()).isEqualTo("status");
+    assertThat(event.getPreviousValueMaybe()).isEqualTo(DbEgressEventStatus.REMEDIATED.toString());
+    assertThat(event.getNewValueMaybe())
+        .isEqualTo(DbEgressEventStatus.VERIFIED_FALSE_POSITIVE.toString());
   }
 
   @Test
