@@ -183,7 +183,7 @@ public class WorkspaceAdminControllerTest {
   @Test
   public void getWorkspaceAdmin_setAdminLock_noRequestDate() {
     AdminLockedState adminLockedState = new AdminLockedState();
-    adminLockedState.setRequestDate("");
+    adminLockedState.setRequestDateInMillis(0l);
     adminLockedState.setRequestReason("Some reason to lock");
     assertThrows(
         BadRequestException.class,
@@ -193,18 +193,8 @@ public class WorkspaceAdminControllerTest {
   @Test
   public void getWorkspaceAdmin_setAdminLock_noRequestReason() {
     AdminLockedState adminLockedState = new AdminLockedState();
-    adminLockedState.setRequestDate("2021-10-10");
+    adminLockedState.setRequestDateInMillis(23456l);
     adminLockedState.setRequestReason("");
-    assertThrows(
-        BadRequestException.class,
-        () -> workspaceAdminController.setAdminLockedState(WORKSPACE_NAMESPACE, adminLockedState));
-  }
-
-  @Test
-  public void getWorkspaceAdmin_setAdminLock_incorrectRequestDateFormat() {
-    AdminLockedState adminLockedState = new AdminLockedState();
-    adminLockedState.setRequestDate("20-21-10");
-    adminLockedState.setRequestReason("Some reason for ");
     assertThrows(
         BadRequestException.class,
         () -> workspaceAdminController.setAdminLockedState(WORKSPACE_NAMESPACE, adminLockedState));
@@ -213,7 +203,7 @@ public class WorkspaceAdminControllerTest {
   @Test
   public void getWorkspaceAdmin_setAdminLock_nullRequestDate() {
     AdminLockedState adminLockedState = new AdminLockedState();
-    adminLockedState.setRequestDate(null);
+    adminLockedState.setRequestDateInMillis(null);
     adminLockedState.setRequestReason("Some reason for Locking Workspace");
     assertThrows(
         BadRequestException.class,
@@ -223,7 +213,7 @@ public class WorkspaceAdminControllerTest {
   @Test
   public void getWorkspaceAdmin_setAdminLock_nullRequestReason() {
     AdminLockedState adminLockedState = new AdminLockedState();
-    adminLockedState.setRequestDate("20-21-10");
+    adminLockedState.setRequestDateInMillis((long) 123456);
     adminLockedState.setRequestReason(null);
     assertThrows(
         BadRequestException.class,
@@ -231,9 +221,9 @@ public class WorkspaceAdminControllerTest {
   }
 
   @Test
-  public void getWorkspaceAdmin_setAdminLock_correctRequestDateFormat() {
+  public void getWorkspaceAdmin_setAdminLock_correctAdminLockedStateRequest() {
     AdminLockedState adminLockedState = new AdminLockedState();
-    adminLockedState.setRequestDate("2021-03-03");
+    adminLockedState.setRequestDateInMillis(654321l);
     adminLockedState.setRequestReason("Some reason for Locking Workspace");
     workspaceAdminController.setAdminLockedState(WORKSPACE_NAMESPACE, adminLockedState);
   }

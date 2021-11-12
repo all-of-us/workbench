@@ -1,8 +1,5 @@
 package org.pmiops.workbench.api;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Optional;
 import javax.annotation.Nullable;
@@ -99,17 +96,11 @@ public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
   @AuthorityRequired({Authority.ACCESS_CONTROL_ADMIN})
   public ResponseEntity<EmptyResponse> setAdminLockedState(
       String workspaceNamespace, AdminLockedState lockedState) {
-    if (StringUtils.isBlank(lockedState.getRequestDate())
+    if (lockedState.getRequestDateInMillis() == null
+        || lockedState.getRequestDateInMillis() == 0
         || StringUtils.isBlank(lockedState.getRequestReason())) {
       throw new BadRequestException(
           String.format("Cannot have empty Request reason or Request Date"));
-    }
-    try {
-      // Example for date: '2011-12-03'
-      LocalDate requestDate =
-          LocalDate.parse(lockedState.getRequestDate(), DateTimeFormatter.ISO_DATE);
-    } catch (DateTimeParseException e) {
-      throw new BadRequestException(String.format("Request Date should be in correct format"));
     }
     workspaceAdminService.setAdminLockedState(workspaceNamespace, toPrimitive(true));
     return ResponseEntity.ok().build();
