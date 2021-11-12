@@ -593,40 +593,58 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       Map<BadgeName, BadgeDetailsV2> userBadgesByName =
           complianceService.getUserBadgesByBadgeName(dbUser.getUsername());
 
+      /**
+       * Determine the logical completion time for this user for the given compliance access module.
+       * Three logical outcomes are possible:
+       *
+       * <ul>
+       *   <li>Incomplete or invalid training badge: empty
+       *   <li>Badge has been issued for the first time, or has been reissued since we last marked
+       *       the training complete: now
+       *   <li>Else: existing completion time, i.e. no change
+       * </ul>
+       */
+      Function<AccessModuleName, Optional<Timestamp>> determineCompletionTime =
+          (moduleName) -> {
+            BadgeName badgeName = BADGE_BY_COMPLIANCE_MODULE.get(moduleName);
+            Optional<BadgeDetailsV2> badge =
+                Optional.ofNullable(userBadgesByName.get(badgeName))
+                    .filter(BadgeDetailsV2::getValid);
+
+            if (!badge.isPresent()) {
+              return Optional.empty();
+            }
+
+            if (badge.get().getLastissued() == null) {
+              log.warning(
+                  String.format(
+                      "badge %s is indicated as valid by Moodle, but is missing the lastissued "
+                          + "time, this is unexpected - treating this as an incomplete training",
+                      badgeName));
+              return Optional.empty();
+            }
+            Instant badgeTime = Instant.ofEpochSecond(badge.get().getLastissued());
+            Instant dbCompletionTime =
+                accessModuleService
+                    .getAccessModuleStatus(dbUser, moduleName)
+                    .map(AccessModuleStatus::getCompletionEpochMillis)
+                    .map(Instant::ofEpochMilli)
+                    .orElse(Instant.EPOCH);
+
+            if (badgeTime.isAfter(dbCompletionTime)) {
+              // First-time badge or renewal: our system recognizes the user as having
+              // completed training right now, though the badge has been issued some
+              // time in the past.
+              return Optional.of(now);
+            }
+
+            // No change
+            return Optional.of(Timestamp.from(dbCompletionTime));
+          };
+
       Map<AccessModuleName, Optional<Timestamp>> completionTimes =
-          BADGE_BY_COMPLIANCE_MODULE.entrySet().stream()
-              .collect(
-                  Collectors.toMap(
-                      e -> e.getKey(),
-                      e -> {
-                        AccessModuleName moduleName = e.getKey();
-                        Optional<BadgeDetailsV2> badge =
-                            Optional.ofNullable(userBadgesByName.get(e.getValue()))
-                                .filter(BadgeDetailsV2::getValid)
-                                .filter(b -> b.getLastissued() != null);
-
-                        if (!badge.isPresent()) {
-                          return Optional.empty();
-                        }
-
-                        Instant badgeTime = Instant.ofEpochSecond(badge.get().getLastissued());
-                        Instant dbCompletionTime =
-                            accessModuleService
-                                .getAccessModuleStatus(dbUser, moduleName)
-                                .map(AccessModuleStatus::getCompletionEpochMillis)
-                                .map(Instant::ofEpochMilli)
-                                .orElse(Instant.EPOCH);
-
-                        if (badgeTime.isAfter(dbCompletionTime)) {
-                          // First-time badge or renewal: our system recognizes the user as having
-                          // completed training right now, though the badge has been issued some
-                          // time in the past.
-                          return Optional.of(now);
-                        }
-
-                        // No change
-                        return Optional.of(Timestamp.from(dbCompletionTime));
-                      }));
+          BADGE_BY_COMPLIANCE_MODULE.keySet().stream()
+              .collect(Collectors.toMap(Function.identity(), determineCompletionTime));
 
       return updateUserWithRetries(
           u -> {
