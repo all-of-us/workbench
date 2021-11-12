@@ -1471,7 +1471,7 @@ paths:
         - workspaceAdmin
       consumes:
         - application/json
-      description: Set admin locked or unlocked state for the workspace
+      description: Set admin locked state for the workspace
       operationId: setAdminLockedState
       parameters:
         - in: body
@@ -1481,7 +1481,7 @@ paths:
             type: object
             required:
               - requestReason
-              - requestDate
+              - requestDateInMillis
             properties:
               requestReason:
                 type: string
@@ -1497,7 +1497,7 @@ paths:
           description: Bad request
           schema:
             "$ref": "#/definitions/ErrorResponse"
-  "/v1/admin/workspaces/{workspaceNamespace}/unlock":
+  "/v1/admin/workspaces/{workspaceNamespace}/unlocked":
     parameters:
       - "$ref": "#/parameters/workspaceNamespace"
     post:
