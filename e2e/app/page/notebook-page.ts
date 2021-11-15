@@ -307,7 +307,7 @@ export default class NotebookPage extends NotebookFrame {
     const startTime = Date.now();
     while (Date.now() - startTime < timeOut) {
       // dismiss Connection Failed dialog when found
-      this.page.on('dialog', async (dialog) => {
+      this.page.once('dialog', async (dialog) => {
         const modalMessage = dialog.message();
         console.log(`notebook dialog message: ${modalMessage}`);
         //  don't dismiss dialog if it's not the Connection Failed dialog.
