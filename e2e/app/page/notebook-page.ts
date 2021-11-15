@@ -314,7 +314,7 @@ export default class NotebookPage extends NotebookFrame {
           // Wait 30 seconds before dismiss dialog. Otherwise dialog pops up again quickly.
           await this.page.waitForTimeout(30000);
           await dialog.accept();
-          logger.info('Dismissed Notebook Connection Failed dialog');
+          logger.info('Dismissed "Notebook Connection Failed" dialog');
           ready = false;
         }
       });
