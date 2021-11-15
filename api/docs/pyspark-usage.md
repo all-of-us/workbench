@@ -115,7 +115,7 @@ import os
 import subprocess
 
 # Take the first 5 VCF files in the bucket for testing.
-input_files = !gsutil ls gs://fc-aou-test-datasets-registered/6/wgs/vcf/merged
+input_files = !gsutil ls ${ALL_SAMPLES_WGS_BUCKET}*.vcf.gz
 input_files = input_files[:5]
 
 def script(input_file):
