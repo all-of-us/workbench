@@ -61,9 +61,9 @@ export default class NotebookPage extends NotebookFrame {
       console.warn(`Reloading "${this.documentTitle}" because cannot find the Run button`);
       await this.page.reload();
     }
-    // When open notebook for the first time, notebook websocket can close unexpectedly that causes kernel disconnect unexpectedly.
-    // Thus, a longer sleep interval is required.
-    await this.waitForKernelIdle(10 * 60 * 1000, 10000); // 10 minutes
+    // When open notebook for the first time, notebook connection could fail unexpectedly.
+    // But notebook connection will retry to establish. thus, a longer sleep interval is required.
+    await this.waitForKernelIdle(15 * 60 * 1000, 10000); // 10 minutes
     return true;
   }
 
