@@ -146,14 +146,30 @@ export default class NotebookPage extends NotebookFrame {
     const expectedMessage =
       'It is All of Us data use policy to not upload data or files containing personally identifiable information';
     page.on('dialog', async (dialog) => {
-      await page.waitForTimeout(500);
+      await page.waitForTimeout(250);
       const modalMessage = dialog.message();
       // If this is not the Data Use Policy dialog, error is thrown.
       expect(modalMessage).toContain(expectedMessage);
       await dialog.accept();
       await page.waitForTimeout(500);
-      console.log('Accept "Data Use Policy" dialog');
+      logger.info('Accept "Data Use Policy" dialog');
     });
+  }
+
+  async dismissConnectionFailedDialogWhenFound(page: Page): Promise<boolean> {
+    const message = 'A connection to the notebook server could not be established';
+    page.once('dialog', async (dialog) => {
+      await jestPuppeteer.debug();
+      const modalMessage = dialog.message();
+      //  don't dismiss dialog if it's not the Connection Failed dialog.
+      if (modalMessage.includes(message)) {
+        await dialog.accept();
+        await page.waitForTimeout(500);
+        logger.info('Dismissed Connection Failed dialog');
+        return true;
+      }
+    });
+    return false;
   }
 
   async chooseFile(page: Page, pyFilePath: string): Promise<void> {
@@ -311,6 +327,10 @@ export default class NotebookPage extends NotebookFrame {
       }
       ready = idle;
       await this.page.waitForTimeout(sleepInterval);
+      const notebookConnectionErrExists = await this.dismissConnectionFailedDialogWhenFound(this.page);
+      if (notebookConnectionErrExists) {
+        ready = false;
+      }
     }
     // Throws exception if not ready.
     const status = await this.getKernelStatus();
