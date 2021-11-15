@@ -1,0 +1,73 @@
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
+  <style>
+    body {
+      background-color: #F1F1F1;
+      padding-left: 1rem;
+      padding-top: 1rem;
+    }
+    * {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 300;
+    }
+    .welcome-message {
+      margin-top: 2rem;
+      margin-bottom: 1rem;
+      color: #302C71;
+      font-size: 30px;
+      font-weight: 300;
+      line-height: 36px;
+    }
+    .text {
+      color: rgba(0,0,0,0.87);
+      font-size: 16px;
+      font-weight: 300;
+      line-height: 22px;
+      margin-bottom: 1rem;
+    }
+    .text.thanks {
+      margin-bottom: 0;
+    }
+
+
+
+  </style>
+</head>
+<body>
+<div><img src="${HEADER_IMG}"></div>
+<div>Hello,</div>
+<div>We are writing to you on behalf of the ${ALL_OF_US} Research Program’s Researcher Workbench
+  Support team. A workspace you own titled '${WORKSPACE_NAME}' (${WORKSPACE_NAMESPACE}) has been
+  flagged by the ${ALL_OF_US} Research Program’s Resource Access Board (RAB) as potentially in
+  violation of
+  program policies.</div>
+<div>The reason this workspace was flagged is the following:</div>
+<ul>
+  <li>${LOCKING_REASON}</li>
+</ul>
+<div>As the RAB continues to review your workspace, we are requesting that you take action to
+  sufficiently address the concern above within the next two weeks. Once you have made the
+  requested revisions, please email ${RAB_SUPPORT_EMAIL} to confirm. Failure to address the issue
+  may result in permanent removal of the workspace.</div>
+<div>The following restrictions will be placed on your workspace while it is flagged:</div>
+<ul>
+  <li>The data builder, analyses tab will be frozen out</li>
+  <li>Current workspace actions will be disabled
+  <ul>
+    <li>Cannot duplicate or clone a workspace</li>
+    <li>Cannot copy artifacts out of the workspace into other workspaces</li>
+    <li>Cannot delete a workspace</li>
+    <li>Cannot download a workspace</li>
+    <li>Cannot share a workspace</li>
+  </ul></li>
+  <li>The ‘about (e.g., workspace description)’ tab can still be edited</li>
+  <li>All data in the workspace will be preserved as it was prior to freezing</li>
+</ul>
+<div>If you have any questions about the decision to freeze your workspace and the next steps that
+  are needed from you, please contact the ${ALL_OF_US} Resource Access Board at
+  ${RAB_SUPPORT_EMAIL}. Thank you for your understanding and patience.</div>
+<div>Best,</div>
+<div>The ${ALL_OF_US} Researcher Workbench Support Team</div>
+</body>

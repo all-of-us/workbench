@@ -29,6 +29,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.text.StringSubstitutor;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exfiltration.EgressRemediationAction;
 import org.pmiops.workbench.google.CloudStorageClient;
@@ -51,6 +52,8 @@ public class MailServiceImpl implements MailService {
 
   private static final Logger log = Logger.getLogger(MailServiceImpl.class.getName());
 
+  private static final String RAB_SUPPORT_EMAIL = "aouresourceaccess@od.nih.gov";
+
   private static final String WELCOME_RESOURCE = "emails/welcomeemail/content.html";
   private static final String INSTRUCTIONS_RESOURCE = "emails/instructionsemail/content.html";
   private static final String FREE_TIER_DOLLAR_THRESHOLD_RESOURCE =
@@ -65,6 +68,8 @@ public class MailServiceImpl implements MailService {
       "emails/setup_gcp_billing_account_email/content.html";
   private static final String EGRESS_REMEDIATION_EMAIL =
       "emails/egress_remediation_email/content.html";
+  private static final String WORKSPACE_ADMIN_LOCKED_EMAIL =
+      "emails/workspace_admin_locked_email/content.html";
 
   private enum Status {
     REJECTED,
@@ -195,7 +200,6 @@ public class MailServiceImpl implements MailService {
   @Override
   public void alertUserRegisteredTierExpiration(final DbUser user, Instant expirationTime)
       throws MessagingException {
-    final WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
 
     final String logMsg =
         String.format(
@@ -272,6 +276,28 @@ public class MailServiceImpl implements MailService {
             workbenchConfigProvider.get().egressAlertRemediationPolicy.notifyFromEmail),
         "[Response Required] AoU Researcher Workbench High Data Egress Alert",
         String.format("Egress remediation email for %s", dbUser.getUsername()),
+        htmlMessage);
+  }
+
+  @Override
+  public void sendWorkspaceAdminLockedEmail(
+      DbUser creator, DbWorkspace workspace, String lockingReason) throws MessagingException {
+    String htmlMessage =
+        buildHtml(
+            WORKSPACE_ADMIN_LOCKED_EMAIL,
+            workspaceAdminLockedSubstitutionMap(creator, workspace, lockingReason));
+    String rwSupportEmail = workbenchConfigProvider.get().mandrill.fromEmail;
+    sendWithRetries(
+        // send to the workspace creator AND include a copy in an email to the support team
+        ImmutableList.of(creator.getContactEmail(), rwSupportEmail),
+        ImmutableList.of(rwSupportEmail),
+        "[Response Required] AoU Researcher Workbench Woorkspace Admin Locked",
+        String.format(
+            "Admin locked email for workspace '%s' (%s) sent to creator %s (%s) ",
+            workspace.getName(),
+            workspace.getWorkspaceNamespace(),
+            creator.getUsername(),
+            creator.getContactEmail()),
         htmlMessage);
   }
 
@@ -373,6 +399,19 @@ public class MailServiceImpl implements MailService {
         .put(
             EmailSubstitutionField.NIH_FUNDED,
             BooleanUtils.isTrue(request.getIsNihFunded()) ? "Yes" : "No")
+        .build();
+  }
+
+  private Map<EmailSubstitutionField, String> workspaceAdminLockedSubstitutionMap(
+      DbUser creator, DbWorkspace workspace, String lockingReason) {
+    return ImmutableMap.<EmailSubstitutionField, String>builder()
+        .put(EmailSubstitutionField.HEADER_IMG, getAllOfUsLogo())
+        .put(EmailSubstitutionField.ALL_OF_US, getAllOfUsItalicsText())
+        .put(EmailSubstitutionField.USERNAME, creator.getUsername())
+        .put(EmailSubstitutionField.WORKSPACE_NAME, workspace.getName())
+        .put(EmailSubstitutionField.WORKSPACE_NAMESPACE, workspace.getWorkspaceNamespace())
+        .put(EmailSubstitutionField.LOCKING_REASON, lockingReason)
+        .put(EmailSubstitutionField.RAB_SUPPORT_EMAIL, RAB_SUPPORT_EMAIL)
         .build();
   }
 
