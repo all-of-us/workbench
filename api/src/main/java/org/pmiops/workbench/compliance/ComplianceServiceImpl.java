@@ -16,9 +16,6 @@ import org.springframework.stereotype.Service;
 @Service
 public class ComplianceServiceImpl implements ComplianceService {
   private static final String RESPONSE_FORMAT = "json";
-  private static final String DUA_BADGE_NAME = "data_use_agreement";
-  private static final String RET_BADGE_NAME =
-      "research_ethics_training"; // 'ret' too much like 'return'
   private static final String MOODLE_EXCEPTION = "moodle_exception";
   private static final String MOODLE_USER_NOT_ALLOWED_ERROR_CODE = "guestsarenotallowed";
 
@@ -47,7 +44,7 @@ public class ComplianceServiceImpl implements ComplianceService {
    *     registered in Moodle.
    */
   @Override
-  public Map<String, BadgeDetailsV2> getUserBadgesByBadgeName(String email) throws ApiException {
+  public Map<BadgeName, BadgeDetailsV2> getUserBadgesByBadgeName(String email) throws ApiException {
     UserBadgeResponseV2 response =
         moodleApiProvider.get().getMoodleBadgeV2(RESPONSE_FORMAT, getToken(), email);
     if (response.getException() != null && response.getException().equals(MOODLE_EXCEPTION)) {
@@ -58,17 +55,15 @@ public class ComplianceServiceImpl implements ComplianceService {
         throw new ApiException(response.getMessage());
       }
     }
-    Map<String, BadgeDetailsV2> userBadgesByName = new HashMap<>();
+    Map<BadgeName, BadgeDetailsV2> userBadgesByName = new HashMap<>();
+    // "dua" and "ret" are confusingly named, but according to Moodle team this mapping is correct.
+    // See RW-7438 for details.
     if (response.getDua() != null) {
-      userBadgesByName.put(DUA_BADGE_NAME, response.getDua());
+      userBadgesByName.put(BadgeName.CONTROLLED_TIER_TRAINING, response.getDua());
     }
     if (response.getRet() != null) {
-      userBadgesByName.put(RET_BADGE_NAME, response.getRet());
+      userBadgesByName.put(BadgeName.REGISTERED_TIER_TRAINING, response.getRet());
     }
     return userBadgesByName;
-  }
-
-  public String getResearchEthicsTrainingField() {
-    return RET_BADGE_NAME;
   }
 }

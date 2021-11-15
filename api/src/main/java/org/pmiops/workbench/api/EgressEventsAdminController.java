@@ -5,6 +5,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.pmiops.workbench.actionaudit.auditors.EgressEventAuditor;
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.db.dao.EgressEventDao;
 import org.pmiops.workbench.db.dao.UserDao;
@@ -41,6 +42,7 @@ public class EgressEventsAdminController implements EgressEventsAdminApiDelegate
       ImmutableSet.of(EgressEventStatus.REMEDIATED, EgressEventStatus.VERIFIED_FALSE_POSITIVE);
 
   @Autowired private EgressEventMapper egressEventMapper;
+  @Autowired private EgressEventAuditor egressEventAuditor;
   @Autowired private UserDao userDao;
   @Autowired private WorkspaceDao workspaceDao;
   @Autowired private EgressEventDao egressEventDao;
@@ -147,6 +149,8 @@ public class EgressEventsAdminController implements EgressEventsAdminApiDelegate
     DbEgressEventStatus toStatus =
         egressEventMapper.toDbStatus(request.getEgressEvent().getStatus());
     DbEgressEvent updatedEvent = egressEventDao.save(dbEgressEvent.setStatus(toStatus));
+
+    egressEventAuditor.fireAdminEditEgressEvent(dbEgressEvent, updatedEvent);
 
     return ResponseEntity.ok(egressEventMapper.toApiEvent(updatedEvent));
   }

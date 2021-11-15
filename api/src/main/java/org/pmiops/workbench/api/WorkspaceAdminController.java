@@ -1,13 +1,12 @@
 package org.pmiops.workbench.api;
 
 import java.util.List;
-import java.util.Optional;
 import javax.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.AccessReason;
-import org.pmiops.workbench.model.AdminLockedState;
+import org.pmiops.workbench.model.AdminLockingRequest;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.CloudStorageTraffic;
 import org.pmiops.workbench.model.EmptyResponse;
@@ -88,28 +87,24 @@ public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
         workspaceAdminService.deleteRuntimesInWorkspace(workspaceNamespace, runtimesToDelete));
   }
 
-  private boolean toPrimitive(Boolean value) {
-    return Optional.ofNullable(value).orElse(false);
-  }
-
   @Override
   @AuthorityRequired({Authority.ACCESS_CONTROL_ADMIN})
   public ResponseEntity<EmptyResponse> setAdminLockedState(
-      String workspaceNamespace, AdminLockedState lockedState) {
-    if (lockedState.getRequestDateInMillis() == null
-        || lockedState.getRequestDateInMillis() == 0
-        || StringUtils.isBlank(lockedState.getRequestReason())) {
+      String workspaceNamespace, AdminLockingRequest lockingRequest) {
+    if (lockingRequest.getRequestDateInMillis() == null
+        || lockingRequest.getRequestDateInMillis() == 0
+        || StringUtils.isBlank(lockingRequest.getRequestReason())) {
       throw new BadRequestException(
           String.format("Cannot have empty Request reason or Request Date"));
     }
-    workspaceAdminService.setAdminLockedState(workspaceNamespace, toPrimitive(true));
+    workspaceAdminService.setAdminLockedState(workspaceNamespace, lockingRequest);
     return ResponseEntity.ok().build();
   }
 
   @Override
   @AuthorityRequired({Authority.ACCESS_CONTROL_ADMIN})
   public ResponseEntity<EmptyResponse> setAdminUnlockedState(String workspaceNamespace) {
-    workspaceAdminService.setAdminLockedState(workspaceNamespace, false);
+    workspaceAdminService.setAdminUnlockedState(workspaceNamespace);
     return ResponseEntity.ok().build();
   }
 }
