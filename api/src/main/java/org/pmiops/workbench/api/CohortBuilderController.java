@@ -198,17 +198,14 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
 
   @Override
   public ResponseEntity<EthnicityInfoListResponse> findEthnicityInfo(
-      String workspaceNamespace,
-      String workspaceId,
-      SearchRequest request) {
+      String workspaceNamespace, String workspaceId, SearchRequest request) {
     workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     EthnicityInfoListResponse response = new EthnicityInfoListResponse();
     if (request.getIncludes().isEmpty()) {
       return ResponseEntity.ok(response);
     }
-    return ResponseEntity.ok(
-        response.items(cohortBuilderService.findEthnicityInfo(request)));
+    return ResponseEntity.ok(response.items(cohortBuilderService.findEthnicityInfo(request)));
   }
 
   @Override
