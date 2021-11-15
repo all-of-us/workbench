@@ -156,22 +156,6 @@ export default class NotebookPage extends NotebookFrame {
     });
   }
 
-  async dismissConnectionFailedDialogWhenFound(page: Page): Promise<boolean> {
-    const message = 'A connection to the notebook server could not be established';
-    page.once('dialog', async (dialog) => {
-      await jestPuppeteer.debug();
-      const modalMessage = dialog.message();
-      //  don't dismiss dialog if it's not the Connection Failed dialog.
-      if (modalMessage.includes(message)) {
-        await dialog.accept();
-        await page.waitForTimeout(500);
-        logger.info('Dismissed Connection Failed dialog');
-        return true;
-      }
-    });
-    return false;
-  }
-
   async chooseFile(page: Page, pyFilePath: string): Promise<void> {
     // Upload button that triggers file selection dialog.
     const uploadButtonSelector = 'input#upload_span_input';
@@ -317,21 +301,31 @@ export default class NotebookPage extends NotebookFrame {
    * Wait for notebook kernel becomes ready (idle).
    */
   async waitForKernelIdle(timeOut = 300000, sleepInterval = 5000): Promise<boolean> {
+    const dialogError = 'A connection to the notebook server could not be established';
     // Check kernel status twice with a pause between two checks because kernel status can suddenly become not ready.
     let ready = false;
     const startTime = Date.now();
     while (Date.now() - startTime < timeOut) {
+      // dismiss Connection Failed dialog when found
+      this.page.on('dialog', async (dialog) => {
+        const modalMessage = dialog.message();
+        console.log(`notebook dialog message: ${modalMessage}`);
+        //  don't dismiss dialog if it's not the Connection Failed dialog.
+        if (modalMessage.includes(dialogError)) {
+          await dialog.accept();
+          await this.page.waitForTimeout(500);
+          logger.info('Dismissed Connection Failed dialog');
+          return true;
+        }
+      });
       const idle = await this.isIdle(2000);
       if (ready && idle) {
         return true;
       }
       ready = idle;
       await this.page.waitForTimeout(sleepInterval);
-      const notebookConnectionErrExists = await this.dismissConnectionFailedDialogWhenFound(this.page);
-      if (notebookConnectionErrExists) {
-        ready = false;
-      }
     }
+
     // Throws exception if not ready.
     const status = await this.getKernelStatus();
     throw new Error(
