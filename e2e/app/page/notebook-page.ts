@@ -16,7 +16,7 @@ import expect from 'expect';
 import ReplaceFileModal from 'app/modal/replace-file-modal';
 import { takeScreenshot } from 'utils/save-file-utils';
 import { config } from 'resources/workbench-config';
-import {makeDateTimeStr} from "utils/str-utils";
+import { makeDateTimeStr } from 'utils/str-utils';
 
 // CSS selectors
 const CssSelector = {
@@ -324,7 +324,7 @@ export default class NotebookPage extends NotebookFrame {
         await this.page.waitForTimeout(sleepInterval);
       }
       return false;
-    }
+    };
 
     const isSuccess = await waitAndCheck();
     if (isSuccess) {
@@ -334,7 +334,7 @@ export default class NotebookPage extends NotebookFrame {
     // Retry: reload page if no connection to kernel.
     if (await this.isNoConnectionToKernel()) {
       await takeScreenshot(this.page, `${makeDateTimeStr('reload_notebook_connection')}`);
-      await this.page.reload({ waitUntil: [ 'domcontentloaded', 'networkidle0' ]});
+      await this.page.reload({ waitUntil: ['domcontentloaded', 'networkidle0'] });
       await waitAndCheck();
     }
 
