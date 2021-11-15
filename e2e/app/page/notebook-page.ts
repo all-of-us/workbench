@@ -301,21 +301,20 @@ export default class NotebookPage extends NotebookFrame {
    * Wait for notebook kernel becomes ready (idle).
    */
   async waitForKernelIdle(timeOut = 300000, sleepInterval = 5000): Promise<boolean> {
-    const dialogError = 'A connection to the notebook server could not be established';
+    const connectionFailedError = 'A connection to the notebook server could not be established';
     // Check kernel status twice with a pause between two checks because kernel status can suddenly become not ready.
     let ready = false;
     const startTime = Date.now();
     while (Date.now() - startTime < timeOut) {
-      // dismiss Connection Failed dialog when found
+      // dismiss Connection Failed dialog when found.
       this.page.once('dialog', async (dialog) => {
         const modalMessage = dialog.message();
         console.log(`notebook dialog message: ${modalMessage}`);
-        //  don't dismiss dialog if it's not the Connection Failed dialog.
-        if (modalMessage.includes(dialogError)) {
+        if (modalMessage.includes(connectionFailedError)) {
           // Wait 30 seconds before dismiss dialog. Otherwise dialog pops up again quickly.
           await this.page.waitForTimeout(30000);
           await dialog.accept();
-          logger.info('Dismissed Connection Failed dialog');
+          logger.info('Dismissed Notebook Connection Failed dialog');
           ready = false;
         }
       });
