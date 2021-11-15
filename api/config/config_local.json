@@ -104,7 +104,7 @@
     "enableGpu": true,
     "enablePersistentDisk": true,
     "enableEgressAlertingV2": true,
-    "enablePrivateDataprocWorker": false,
+    "enablePrivateDataprocWorker": true,
     "grantLifescienceApiRunnerAcl": true
   },
   "actionAudit": {
