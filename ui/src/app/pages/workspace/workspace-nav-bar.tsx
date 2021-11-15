@@ -132,8 +132,15 @@ const tabs = [
 const navSeparator = <div style={styles.separator}/>;
 
 function restrictTab(workspace, tab) {
-  return serverConfigStore.get().config.enableResearchReviewPrompt && workspace && workspace.accessLevel === 'OWNER'
-      && workspace.researchPurpose.needsReviewPrompt && tab.name !== 'About';
+  // restrict tab if workspace owner and this workspace needs a review
+  const needsReview = serverConfigStore.get().config.enableResearchReviewPrompt
+    && (workspace?.accessLevel === 'OWNER')
+    && !!workspace?.researchPurpose.needsReviewPrompt;
+
+  // also restrict if the ws is admin-locked
+  const shouldRestrictToAboutTab = needsReview || !!workspace?.adminLocked;
+
+  return shouldRestrictToAboutTab && (tab.name !== 'About');
 }
 
 export const WorkspaceNavBar = fp.flow(
@@ -155,7 +162,7 @@ export const WorkspaceNavBar = fp.flow(
         aria-selected={selected}
         disabled={disabled}
         style={{...styles.tab, ...(selected ? styles.active : {}), ...(disabled ? styles.disabled : {})}}
-        hover={{color: styles.active.color}}
+        hover={(!disabled && {color: styles.active.color})}
         onClick={() => navigate(['workspaces', ns, wsid, link])}
       >
         {name}
