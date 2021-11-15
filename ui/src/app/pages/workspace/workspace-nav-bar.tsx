@@ -135,10 +135,10 @@ function restrictTab(workspace, tab) {
   // restrict tab if workspace owner and this workspace needs a review
   const needsReview = serverConfigStore.get().config.enableResearchReviewPrompt
     && (workspace?.accessLevel === 'OWNER')
-    && !!workspace?.researchPurpose.needsReviewPrompt;
+    && workspace?.researchPurpose.needsReviewPrompt;
 
   // also restrict if the ws is admin-locked
-  const shouldRestrictToAboutTab = needsReview || !!workspace?.adminLocked;
+  const shouldRestrictToAboutTab = needsReview || workspace?.adminLocked;
 
   return shouldRestrictToAboutTab && (tab.name !== 'About');
 }
