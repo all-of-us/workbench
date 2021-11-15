@@ -35,6 +35,7 @@ import {
   Configuration as FetchConfiguration,
   DataSetApi,
   DiskApi,
+  EgressEventsAdminApi,
   FeaturedWorkspacesConfigApi, // internal
   InstitutionApi,
   NotebooksApi,
@@ -96,6 +97,7 @@ export const cohortsApi = bindCtor(CohortsApi);
 export const conceptSetsApi = bindCtor(ConceptSetsApi);
 export const configApi = bindCtor(ConfigApi);
 export const dataSetApi = bindCtor(DataSetApi);
+export const egressEventsAdminApi = bindCtor(EgressEventsAdminApi);
 export const featuredWorkspacesConfigApi = bindCtor(FeaturedWorkspacesConfigApi);
 export const institutionApi = bindCtor(InstitutionApi);
 export const notebooksApi = bindCtor(NotebooksApi);

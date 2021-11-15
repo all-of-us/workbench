@@ -9,6 +9,7 @@ import {
 import {withRoutingSpinner} from 'app/components/with-routing-spinner';
 import {AccessRenewal} from 'app/pages/access/access-renewal';
 import {AdminBanner} from 'app/pages/admin/admin-banner';
+import {AdminEgressEvents} from 'app/pages/admin/admin-egress-events';
 import {AdminInstitution} from 'app/pages/admin/admin-institution';
 import {AdminInstitutionEdit} from 'app/pages/admin/admin-institution-edit';
 import {AdminNotebookView} from 'app/pages/admin/admin-notebook-view';
@@ -32,7 +33,6 @@ import {
   RAS_CALLBACK_PATH,
 } from 'app/utils/access-utils';
 import {BreadcrumbType} from 'app/utils/navigation';
-import {environment} from 'environments/environment';
 import {Redirect, Switch} from 'react-router-dom';
 import {expiredGuard, registrationGuard} from './guards';
 
@@ -40,6 +40,7 @@ const AccessRenewalPage = fp.flow(withRouteData, withRoutingSpinner)(AccessRenew
 const AdminBannerPage = fp.flow(withRouteData, withRoutingSpinner)(AdminBanner);
 const AdminNotebookViewPage = fp.flow(withRouteData, withRoutingSpinner)(AdminNotebookView);
 const AdminReviewWorkspacePage = fp.flow(withRouteData, withRoutingSpinner)(AdminReviewWorkspace);
+const AdminEgressEventsPage = fp.flow(withRouteData, withRoutingSpinner)(AdminEgressEvents);
 const DataAccessRequirementsPage = fp.flow(withRouteData, withRoutingSpinner)(DataAccessRequirements);
 const DataUserCodeOfConductPage = fp.flow(withRouteData, withFullHeight, withRoutingSpinner)(DataUserCodeOfConduct);
 const HomepagePage = fp.flow(withRouteData, withRoutingSpinner)(Homepage);
@@ -68,6 +69,9 @@ export const SignedInRoutes = () => {
     <AppRoute exact path='/admin/banner'>
       <AdminBannerPage routeData={{title: 'Create Banner', minimizeChrome: true}}/>
     </AppRoute>
+    <AppRoute exact path='/admin/egress-events'>
+      <AdminEgressEventsPage routeData={{title: 'Egress Events', minimizeChrome: true}}/>
+    </AppRoute>
     <AppRoute exact path='/admin/institution'>
       <InstitutionAdminPage routeData={{title: 'Institution Admin', minimizeChrome: true}}/>
     </AppRoute>
@@ -80,10 +84,10 @@ export const SignedInRoutes = () => {
     <AppRoute exact path='/admin/review-workspace'>
       <AdminReviewWorkspacePage routeData={{title: 'Review Workspaces', minimizeChrome: true}}/>
     </AppRoute>
-    <AppRoute exact path='/admin/user'> {/* included for backwards compatibility */}
+   <AppRoute exact path='/admin/user'> {/* included for backwards compatibility */}
       <Redirect to={'/admin/users'}/>
-    </AppRoute>
-    <AppRoute exact path='/admin/users'>
+   </AppRoute>
+   <AppRoute exact path='/admin/users'>
       <UsersAdminPage routeData={{title: 'User Admin Table', minimizeChrome: true}}/>
     </AppRoute>
     <AppRoute exact path='/admin/users/:usernameWithoutGsuiteDomain'>
