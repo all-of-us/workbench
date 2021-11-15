@@ -1,3 +1,7 @@
+import * as fp from 'lodash/fp';
+import * as React from 'react';
+import {Redirect, Switch, useParams, useRouteMatch} from 'react-router-dom';
+
 import {CohortPage} from 'app/cohort-search/cohort-page/cohort-page.component';
 import {AppRoute, withRouteData} from 'app/components/app-router';
 import {LEONARDO_APP_PAGE_KEY} from 'app/components/help-sidebar';
@@ -19,9 +23,7 @@ import {WorkspaceAbout} from 'app/pages/workspace/workspace-about';
 import {WorkspaceEdit, WorkspaceEditMode} from 'app/pages/workspace/workspace-edit';
 import {LeoApplicationType} from 'app/pages/analysis/leonardo-app-launcher';
 import {BreadcrumbType} from 'app/utils/navigation';
-import * as fp from 'lodash/fp';
-import * as React from 'react';
-import {Redirect, Switch, useParams, useRouteMatch} from 'react-router-dom';
+import {MatchParams} from 'app/utils/stores';
 
 const CohortPagePage = fp.flow(withRouteData, withRoutingSpinner)(CohortPage);
 const CohortActionsPage = fp.flow(withRouteData, withRoutingSpinner)(CohortActions);
@@ -47,10 +49,9 @@ export const WorkspaceRoutes = (props: {adminLocked: boolean}) => {
   const AppRouteWithAdminLocking = (props) => {
 
     // TODO there is probably a more idiomatic way to do this
+    const {ns, wsid} = useParams<MatchParams>();
+    const redirectToAboutPath = `/workspaces/${ns}/${wsid}/about`;
 
-    const params = useParams();
-    const redirectToAboutPath = `/workspaces/${params['ns']}/${params['wsid']}/about`;
-    
     return adminLocked
       ? <Redirect to={redirectToAboutPath}/>
       : <AppRoute {...props}/>;
