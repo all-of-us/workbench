@@ -133,7 +133,7 @@ sc.parallelize(input_files).map(script).collect()
 
 ```python
 # This is necessary to make hadoop fs work, even though GCS doesn't have the concept of directories.
-! hadoop fs -mkdir -p “${WORKSPACE_BUCKET}/spark-test/outputs”
+! hadoop fs -mkdir -p "${WORKSPACE_BUCKET}/spark-test/outputs"
 
 import os
 import subprocess
