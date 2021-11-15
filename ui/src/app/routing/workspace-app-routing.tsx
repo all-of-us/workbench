@@ -110,7 +110,7 @@ export const WorkspaceRoutes = () => {
     <AppRoute exact path={`${path}/terminals`}>
       <LeonardoAppRedirectPage
           routeData={{
-            breadcrumb: BreadcrumbType.Terminal,
+            breadcrumb: BreadcrumbType.Workspace,
             pageKey: LEONARDO_APP_PAGE_KEY,
             // The iframe we use to display the Jupyter notebook does something strange
             // to the height calculation of the container, which is normally set to auto.

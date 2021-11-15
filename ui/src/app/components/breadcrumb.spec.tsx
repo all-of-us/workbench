@@ -1,7 +1,6 @@
 import {getTrail} from 'app/components/breadcrumb'
 import {BreadcrumbType, currentWorkspaceStore} from 'app/utils/navigation';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
-
 import {WorkspacesApi} from 'generated/fetch';
 
 import {cohortReviewStubs} from 'testing/stubs/cohort-review-service-stub';
@@ -29,4 +28,17 @@ describe('getTrail', () => {
     expect(trail[3].url)
       .toEqual('/workspaces/testns/testwsid/data/cohorts/88/review/participants/77');
   });
+
+  // regression test for RW-7572
+  test.each(Object.keys(BreadcrumbType))('handles breadcrumb type %s', (bType: string) => {
+    const trail = getTrail(BreadcrumbType[bType],
+      workspaceDataStub,
+      exampleCohortStubs[0],
+      cohortReviewStubs[0],
+      ConceptSetsApiStub.stubConceptSets()[0],
+      {ns: 'testns', wsid: 'testwsid', cid: '88', pid: '77'}
+    );
+    expect(trail.length).toBeGreaterThan(0);
+  });
+
 });

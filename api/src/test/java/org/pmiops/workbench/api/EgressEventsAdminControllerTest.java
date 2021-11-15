@@ -21,6 +21,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.FakeJpaDateTimeConfiguration;
+import org.pmiops.workbench.actionaudit.auditors.EgressEventAuditor;
 import org.pmiops.workbench.db.dao.EgressEventDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
@@ -43,6 +44,7 @@ import org.pmiops.workbench.utils.mappers.EgressEventMapperImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 
 @DataJpaTest
@@ -63,6 +65,7 @@ public class EgressEventsAdminControllerTest {
   @Autowired private UserDao userDao;
   @Autowired private WorkspaceDao workspaceDao;
   @Autowired private EgressEventDao egressEventDao;
+
   @Autowired private FakeClock fakeClock;
 
   private DbUser user1;
@@ -81,6 +84,7 @@ public class EgressEventsAdminControllerTest {
     FakeClockConfiguration.class,
     FakeJpaDateTimeConfiguration.class
   })
+  @MockBean(EgressEventAuditor.class)
   static class Configuration {}
 
   @BeforeEach

@@ -4,6 +4,7 @@ import {Authority, Profile} from 'generated/fetch';
 
 // Admin actions guarded by a particular Authority
 enum AuthorityGuardedAction {
+    EGRESS_EVENTS,
     SHOW_ADMIN_MENU,
     USER_ADMIN,
     USER_AUDIT,
@@ -20,9 +21,11 @@ const adminMenuAuthorities = new Set([
   Authority.RESEARCHERDATAVIEW,
   Authority.COMMUNICATIONSADMIN,
   Authority.INSTITUTIONADMIN,
+  Authority.SECURITYADMIN
 ]);
 
 const authorityByPage: Map<AuthorityGuardedAction, Authority> = new Map([
+    [AuthorityGuardedAction.EGRESS_EVENTS, Authority.SECURITYADMIN],
     [AuthorityGuardedAction.USER_ADMIN, Authority.ACCESSCONTROLADMIN],
     [AuthorityGuardedAction.USER_AUDIT, Authority.ACCESSCONTROLADMIN],
     [AuthorityGuardedAction.WORKSPACE_ADMIN, Authority.RESEARCHERDATAVIEW],
