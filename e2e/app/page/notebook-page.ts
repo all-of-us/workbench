@@ -312,10 +312,11 @@ export default class NotebookPage extends NotebookFrame {
         console.log(`notebook dialog message: ${modalMessage}`);
         //  don't dismiss dialog if it's not the Connection Failed dialog.
         if (modalMessage.includes(dialogError)) {
+          // Wait 30 seconds before dismiss dialog. Otherwise dialog pops up again quickly.
+          await this.page.waitForTimeout(30000);
           await dialog.accept();
-          await this.page.waitForTimeout(500);
           logger.info('Dismissed Connection Failed dialog');
-          return true;
+          ready = false;
         }
       });
       const idle = await this.isIdle(2000);
