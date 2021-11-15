@@ -84,7 +84,8 @@
   },
   "moodle": {
     "host": "aou.nnlm.gov",
-    "credentialsKeyV2": "moodle-prod-key-v2.txt"
+    "credentialsKeyV2": "moodle-prod-key-v2.txt",
+    "controlledTrainingPath": ""
   },
   "access": {
     "enableComplianceTraining": true,

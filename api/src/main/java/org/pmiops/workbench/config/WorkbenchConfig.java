@@ -208,6 +208,7 @@ public class WorkbenchConfig {
   public static class MoodleConfig {
     public String host;
     public String credentialsKeyV2;
+    public String controlledTrainingPath;
   }
 
   public static class ZendeskConfig {

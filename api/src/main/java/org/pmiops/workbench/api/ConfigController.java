@@ -36,6 +36,7 @@ public class ConfigController implements ConfigApiDelegate {
             .defaultFreeCreditsDollarLimit(config.billing.defaultFreeCreditsDollarLimit)
             .enableComplianceTraining(config.access.enableComplianceTraining)
             .complianceTrainingHost(config.moodle.host)
+            .complianceTrainingControlledPath(config.moodle.controlledTrainingPath)
             .enableEraCommons(config.access.enableEraCommons)
             .unsafeAllowSelfBypass(config.access.unsafeAllowSelfBypass)
             .enableBillingUpgrade(config.featureFlags.enableBillingUpgrade)

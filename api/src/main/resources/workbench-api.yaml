@@ -4245,6 +4245,12 @@ definitions:
       complianceTrainingHost:
         type: string
         description: The hostname for constructing the compliance training URL.
+      # TODO(RW-7577): remove and use a static path
+      complianceTrainingControlledPath:
+        type: string
+        description: |
+          The URL path to the controlled tier training, to be used in combination with
+          the complianceTrainingHost.
       enableEraCommons:
         type: boolean
         default: false
