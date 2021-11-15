@@ -16,6 +16,7 @@ import expect from 'expect';
 import ReplaceFileModal from 'app/modal/replace-file-modal';
 import { takeScreenshot } from 'utils/save-file-utils';
 import { config } from 'resources/workbench-config';
+import {makeDateTimeStr} from "utils/str-utils";
 
 // CSS selectors
 const CssSelector = {
@@ -45,7 +46,8 @@ export enum Mode {
 
 export enum KernelStatus {
   NotRunning = 'Kernel is not running',
-  Idle = 'Kernel Idle'
+  Idle = 'Kernel Idle',
+  NoConnection = 'No Connection to Kernel'
 }
 
 export default class NotebookPage extends NotebookFrame {
@@ -63,7 +65,7 @@ export default class NotebookPage extends NotebookFrame {
     }
     // When open notebook for the first time, notebook connection could fail unexpectedly.
     // But notebook connection will retry to establish. thus, a longer sleep interval is required.
-    await this.waitForKernelIdle(15 * 60 * 1000, 10000); // 10 minutes
+    await this.waitForKernelIdle(5 * 60 * 1000, 10000); // 10 minutes
     return true;
   }
 
@@ -297,39 +299,49 @@ export default class NotebookPage extends NotebookFrame {
       .catch(() => false);
   }
 
+  async isNoConnectionToKernel(): Promise<boolean> {
+    const kernelStatus = await this.getKernelStatus();
+    if (kernelStatus === KernelStatus.NoConnection) {
+      return true;
+    }
+    return false;
+  }
+
   /**
    * Wait for notebook kernel becomes ready (idle).
    */
   async waitForKernelIdle(timeOut = 300000, sleepInterval = 5000): Promise<boolean> {
-    const connectionFailedError = 'A connection to the notebook server could not be established';
-    // Check kernel status twice with a pause between two checks because kernel status can suddenly become not ready.
-    let ready = false;
-    const startTime = Date.now();
-    while (Date.now() - startTime < timeOut) {
-      // dismiss Connection Failed dialog when found.
-      this.page.once('dialog', async (dialog) => {
-        const modalMessage = dialog.message();
-        console.log(`notebook dialog message: ${modalMessage}`);
-        if (modalMessage.includes(connectionFailedError)) {
-          // Wait 30 seconds before dismiss dialog. Otherwise dialog pops up again quickly.
-          await this.page.waitForTimeout(30000);
-          await dialog.accept();
-          logger.info('Dismissed "Notebook Connection Failed" dialog');
-          ready = false;
+    const waitAndCheck = async (): Promise<boolean> => {
+      // Check kernel status twice with a pause between two checks because kernel status can suddenly become not ready.
+      let ready = false;
+      const startTime = Date.now();
+      while (Date.now() - startTime < timeOut) {
+        const idle = await this.isIdle(2000);
+        if (ready && idle) {
+          return true;
         }
-      });
-      const idle = await this.isIdle(2000);
-      if (ready && idle) {
-        return true;
+        ready = idle;
+        await this.page.waitForTimeout(sleepInterval);
       }
-      ready = idle;
-      await this.page.waitForTimeout(sleepInterval);
+      return false;
+    }
+
+    const isSuccess = await waitAndCheck();
+    if (isSuccess) {
+      return true;
+    }
+
+    // Retry: reload page if no connection to kernel.
+    if (await this.isNoConnectionToKernel()) {
+      await takeScreenshot(this.page, `${makeDateTimeStr('reload_notebook_connection')}`);
+      await this.page.reload({ waitUntil: [ 'domcontentloaded', 'networkidle0' ]});
+      await waitAndCheck();
     }
 
     // Throws exception if not ready.
     const status = await this.getKernelStatus();
     throw new Error(
-      `Notebook kernel is not idle after waiting ${timeOut} seconds. Actual kernel status was ${status}.`
+      `Notebook kernel is not idle after waiting ${timeOut} seconds. Actual kernel status was "${status}".`
     );
   }
 
