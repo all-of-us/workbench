@@ -4,6 +4,7 @@ import Interactive from 'react-interactive';
 import { Link } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { CSSProperties } from 'react';
 
 import { RouteLink } from 'app/components/app-router';
 import { styles as cardStyles } from 'app/components/card';
@@ -101,6 +102,11 @@ export const styles = reactStyles({
 const hoverAlpha = 0.2;
 const disabledAlpha = 0.6;
 
+interface ButtonVariant {
+  style: CSSProperties;
+  disabledStyle: CSSProperties;
+  hover: CSSProperties;
+}
 const buttonVariants = {
   primary: {
     style: {
@@ -113,7 +119,7 @@ const buttonVariants = {
       backgroundColor: colorWithWhiteness(colors.dark, disabledAlpha),
     },
     hover: { backgroundColor: colorWithWhiteness(colors.primary, hoverAlpha) },
-  },
+  } as ButtonVariant,
   secondary: {
     style: {
       ...styles.baseNew,
@@ -125,7 +131,7 @@ const buttonVariants = {
       color: colorWithWhiteness(colors.dark, disabledAlpha),
     },
     hover: { backgroundColor: colors.primary, color: colors.white },
-  },
+  } as ButtonVariant,
   secondaryLight: {
     style: {
       ...styles.baseNew,
@@ -137,7 +143,7 @@ const buttonVariants = {
       color: colorWithWhiteness(colors.dark, disabledAlpha),
     },
     hover: { color: colorWithWhiteness(colors.accent, 0.4) },
-  },
+  } as ButtonVariant,
   secondarySmall: {
     style: {
       ...styles.baseNew,
@@ -159,7 +165,7 @@ const buttonVariants = {
       borderColor: colorWithWhiteness(colors.accent, 0.4),
       color: colorWithWhiteness(colors.accent, 0.4),
     },
-  },
+  } as ButtonVariant,
   primaryOnDarkBackground: {
     style: {
       ...styles.baseNew,
@@ -171,7 +177,7 @@ const buttonVariants = {
       backgroundColor: colorWithWhiteness(colors.dark, disabledAlpha),
     },
     hover: { backgroundColor: 'rgba(255,255,255,0.3)' },
-  },
+  } as ButtonVariant,
   secondaryOnDarkBackground: {
     style: {
       ...styles.baseNew,
@@ -185,7 +191,7 @@ const buttonVariants = {
     hover: {
       backgroundColor: colorWithWhiteness(colors.secondary, hoverAlpha),
     },
-  },
+  } as ButtonVariant,
   purplePrimary: {
     style: {
       ...styles.baseNew,
@@ -196,7 +202,7 @@ const buttonVariants = {
       backgroundColor: colorWithWhiteness(colors.dark, disabledAlpha),
     },
     hover: { backgroundColor: colorWithWhiteness(colors.primary, hoverAlpha) },
-  },
+  } as ButtonVariant,
   purpleSecondary: {
     style: {
       ...styles.baseNew,
@@ -212,7 +218,7 @@ const buttonVariants = {
       color: colors.white,
       borderColor: colorWithWhiteness(colors.primary, hoverAlpha),
     },
-  },
+  } as ButtonVariant,
   link: {
     style: {
       ...styles.baseNew,
@@ -222,11 +228,11 @@ const buttonVariants = {
       color: colorWithWhiteness(colors.dark, disabledAlpha),
     },
     hover: { color: colorWithWhiteness(colors.accent, 0.4) },
-  },
+  } as ButtonVariant,
 };
 
 const computeStyle = (
-  { style = {}, hover = {}, disabledStyle = {} },
+  { style = {}, hover = {}, disabledStyle = {} }: ButtonVariant,
   { disabled }
 ) => {
   return {
