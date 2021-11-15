@@ -47,6 +47,7 @@ import org.pmiops.workbench.model.DataFilter;
 import org.pmiops.workbench.model.DemoChartInfo;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainCard;
+import org.pmiops.workbench.model.EthnicityInfo;
 import org.pmiops.workbench.model.FilterColumns;
 import org.pmiops.workbench.model.GenderOrSexType;
 import org.pmiops.workbench.model.ParticipantDemographics;
@@ -296,27 +297,42 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
 
   @Override
   public List<DemoChartInfo> findDemoChartInfo(
-      GenderOrSexType genderOrSexType, AgeType ageType, Boolean ethnicity, SearchRequest request) {
+      GenderOrSexType genderOrSexType, AgeType ageType, SearchRequest request) {
     QueryJobConfiguration qjc =
         bigQueryService.filterBigQueryConfig(
             cohortQueryBuilder.buildDemoChartInfoCounterQuery(
-                new ParticipantCriteria(request, genderOrSexType, ageType), ethnicity));
+                new ParticipantCriteria(request, genderOrSexType, ageType)));
     TableResult result = bigQueryService.executeQuery(qjc);
     Map<String, Integer> rm = bigQueryService.getResultMapper(result);
 
     List<DemoChartInfo> demoChartInfos = new ArrayList<>();
     for (List<FieldValue> row : result.iterateAll()) {
-      DemoChartInfo demoChartInfo = new DemoChartInfo()
-          .name(bigQueryService.getString(row, rm.get("name")))
-          .race(bigQueryService.getString(row, rm.get("race")))
-          .ageRange(bigQueryService.getString(row, rm.get("ageRange")))
-          .count(bigQueryService.getLong(row, rm.get("count")));
-      if (ethnicity) {
-        demoChartInfo.ethnicity(bigQueryService.getString(row, rm.get("ethnicity")));
-      }
-      demoChartInfos.add(demoChartInfo);
+      demoChartInfos.add(
+          new DemoChartInfo()
+              .name(bigQueryService.getString(row, rm.get("name")))
+              .race(bigQueryService.getString(row, rm.get("race")))
+              .ageRange(bigQueryService.getString(row, rm.get("ageRange")))
+              .count(bigQueryService.getLong(row, rm.get("count"))));
     }
     return demoChartInfos;
+  }
+
+  @Override
+  public List<EthnicityInfo> findEthnicityInfo(SearchRequest request) {
+    QueryJobConfiguration qjc =
+        bigQueryService.filterBigQueryConfig(
+            cohortQueryBuilder.buildEthnicityInfoCounterQuery(new ParticipantCriteria(request)));
+    TableResult result = bigQueryService.executeQuery(qjc);
+    Map<String, Integer> rm = bigQueryService.getResultMapper(result);
+
+    List<EthnicityInfo> ethnicityInfos = new ArrayList<>();
+    for (List<FieldValue> row : result.iterateAll()) {
+      ethnicityInfos.add(
+          new EthnicityInfo()
+              .ethnicity(bigQueryService.getString(row, rm.get("ethnicity")))
+              .count(bigQueryService.getLong(row, rm.get("count"))));
+    }
+    return ethnicityInfos;
   }
 
   @Override

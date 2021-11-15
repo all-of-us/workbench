@@ -14,6 +14,7 @@ import org.pmiops.workbench.model.CriteriaMenu;
 import org.pmiops.workbench.model.DataFilter;
 import org.pmiops.workbench.model.DemoChartInfo;
 import org.pmiops.workbench.model.DomainCard;
+import org.pmiops.workbench.model.EthnicityInfo;
 import org.pmiops.workbench.model.GenderOrSexType;
 import org.pmiops.workbench.model.ParticipantDemographics;
 import org.pmiops.workbench.model.SearchRequest;
@@ -68,7 +69,7 @@ public interface CohortBuilderService {
   List<DataFilter> findDataFilters();
 
   List<DemoChartInfo> findDemoChartInfo(
-      GenderOrSexType genderOrSexType, AgeType ageType, Boolean ethnicity, SearchRequest request);
+      GenderOrSexType genderOrSexType, AgeType ageType, SearchRequest request);
 
   Long findDomainCountByStandard(String domain, String term, Boolean standard);
 
@@ -77,6 +78,8 @@ public interface CohortBuilderService {
   List<Criteria> findDrugBrandOrIngredientByValue(String value, Integer limit);
 
   List<Criteria> findDrugIngredientByConceptId(Long conceptId);
+
+  List<EthnicityInfo> findEthnicityInfo(SearchRequest request);
 
   ParticipantDemographics findParticipantDemographics();
 

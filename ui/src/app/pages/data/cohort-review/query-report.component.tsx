@@ -19,7 +19,9 @@ import {
   CdrVersionTiersResponse,
   Cohort,
   CohortReview,
+  DemoChartInfo,
   Domain,
+  EthnicityInfo,
   GenderOrSexType,
   SearchRequest,
   SortOrder
@@ -198,7 +200,7 @@ export interface QueryReportProps extends WithSpinnerOverlayProps, NavigationPro
 export interface QueryReportState {
   cdrName: string;
   cohort: Cohort;
-  data: any;
+  data: DemoChartInfo[];
   groupedData: any;
   chartsLoading: boolean;
   reviewLoading: boolean;
@@ -240,39 +242,31 @@ export const QueryReport = fp.flow(withCdrVersions(), withCurrentCohortReview(),
       cohortsApi().getCohort(ns, wsid, +cid).then(cohort => this.setState({cohort}));
       const cdrName = findCdrVersion(cdrVersionId, cdrVersionTiersResponse).name;
       this.setState({cdrName});
-      cohortBuilderApi().findDemoChartInfo(ns, wsid, GenderOrSexType[GenderOrSexType.GENDER], AgeType[AgeType.AGE], true, request)
-        .then(response => {
-          this.groupChartData(response.items);
-          this.setState({data: response.items, chartsLoading: false});
-        });
+      const [demoChartInfo, ethnicityInfo] = await Promise.all([
+        cohortBuilderApi().findDemoChartInfo(ns, wsid, GenderOrSexType[GenderOrSexType.GENDER], AgeType[AgeType.AGE], request),
+        cohortBuilderApi().findEthnicityInfo(ns, wsid, request)
+      ]);
+      this.groupChartData([...demoChartInfo.items, ...ethnicityInfo.items]);
+      this.setState({data: demoChartInfo.items, chartsLoading: false});
     }
 
-    groupChartData(data: any) {
+    groupChartData(data: Array<DemoChartInfo | EthnicityInfo>) {
       const groups = ['name', 'ageRange', 'race', 'ethnicity'];
       const init = {name: {}, ageRange: {}, race: {}, ethnicity: {}};
       const groupedData = data.reduce((acc, i) => {
         groups.forEach(group => {
           const key = i[group];
-          if (acc[group][key]) {
-            acc[group][key].count += i.count;
-          } else {
-            acc[group][key] = {name: this.getFormattedName(key), count: i.count};
+          if (key) {
+            if (acc[group][key]) {
+              acc[group][key].count += i.count;
+            } else {
+              acc[group][key] = {name: key, count: i.count};
+            }
           }
         });
         return acc;
       }, init);
       this.setState({groupedData});
-    }
-
-    getFormattedName(name: string) {
-      switch (name) {
-        case 'F' :
-          return 'Female';
-        case 'M' :
-          return 'Male';
-        default:
-          return name;
-      }
     }
 
     getStatisticsHeader(group: string) {

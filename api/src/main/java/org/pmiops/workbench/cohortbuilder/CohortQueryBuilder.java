@@ -42,23 +42,8 @@ public class CohortQueryBuilder {
           + "FROM `${projectId}.${dataSetId}.cb_search_person` cb_search_person\n"
           + "WHERE ";
 
-  private static final String DEMO_CHART_INFO_ETHNICITY_SQL_TEMPLATE =
-      "SELECT ${genderOrSex} as name,\n"
-          + "race,\n"
-          + "ethnicity,\n"
-          + "CASE ${ageRange1}\n"
-          + "${ageRange2}\n"
-          + "ELSE '> 65'\n"
-          + "END as ageRange,\n"
-          + "COUNT(*) as count\n"
-          + "FROM `${projectId}.${dataSetId}.cb_search_person` cb_search_person\n"
-          + "WHERE ";
-
   private static final String DEMO_CHART_INFO_SQL_GROUP_BY =
       "GROUP BY name, race, ageRange\n" + "ORDER BY name, race, ageRange\n";
-
-  private static final String DEMO_CHART_INFO_ETHNICITY_SQL_GROUP_BY =
-      "GROUP BY name, race, ageRange, ethnicity\n" + "ORDER BY name, race, ageRange, ethnicity\n";
 
   private static final String DOMAIN_CHART_INFO_SQL_TEMPLATE =
       "SELECT standard_name as name, standard_concept_id as conceptId, COUNT(DISTINCT person_id) as count\n"
@@ -71,6 +56,15 @@ public class CohortQueryBuilder {
           + "GROUP BY name, conceptId\n"
           + "ORDER BY count DESC, name ASC\n"
           + "LIMIT ${limit}\n";
+
+  private static final String ETHNICITY_INFO_SQL_TEMPLATE =
+      "SELECT ethnicity,\n"
+          + "COUNT(*) as count\n"
+          + "FROM `${projectId}.${dataSetId}.cb_search_person` cb_search_person\n"
+          + "WHERE ";
+
+  private static final String ETHNICITY_INFO_SQL_GROUP_BY =
+      "GROUP BY ethnicity\n" + "ORDER BY ethnicity\n";
 
   private static final String RANDOM_SQL_TEMPLATE =
       "SELECT RAND() as x, person.person_id, race_concept_id, gender_concept_id, ethnicity_concept_id, sex_at_birth_concept_id, birth_datetime, CASE WHEN death.person_id IS NULL THEN false ELSE true END as deceased\n"
@@ -127,13 +121,9 @@ public class CohortQueryBuilder {
    * ParticipantCriteria}.
    */
   public QueryJobConfiguration buildDemoChartInfoCounterQuery(
-      ParticipantCriteria participantCriteria, Boolean ethnicity) {
+      ParticipantCriteria participantCriteria) {
     Map<String, QueryParameterValue> params = new HashMap<>();
-    String sqlTemplate = ethnicity ?
-        DEMO_CHART_INFO_ETHNICITY_SQL_TEMPLATE
-            .replace("${genderOrSex}", participantCriteria.getGenderOrSexType().toString())
-            .replace("${ageRange1}", getAgeRangeSql(18, 44, participantCriteria.getAgeType()))
-            .replace("${ageRange2}", getAgeRangeSql(45, 64, participantCriteria.getAgeType())) :
+    String sqlTemplate =
         DEMO_CHART_INFO_SQL_TEMPLATE
             .replace("${genderOrSex}", participantCriteria.getGenderOrSexType().toString())
             .replace("${ageRange1}", getAgeRangeSql(18, 44, participantCriteria.getAgeType()))
@@ -141,7 +131,25 @@ public class CohortQueryBuilder {
     StringBuilder queryBuilder = new StringBuilder(sqlTemplate);
     addWhereClause(participantCriteria, SEARCH_PERSON_TABLE, queryBuilder, params);
     addDataFilters(participantCriteria.getSearchRequest().getDataFilters(), queryBuilder, params);
-    queryBuilder.append(ethnicity ? DEMO_CHART_INFO_ETHNICITY_SQL_GROUP_BY : DEMO_CHART_INFO_SQL_GROUP_BY);
+    queryBuilder.append(DEMO_CHART_INFO_SQL_GROUP_BY);
+
+    return QueryJobConfiguration.newBuilder(queryBuilder.toString())
+        .setNamedParameters(params)
+        .setUseLegacySql(false)
+        .build();
+  }
+
+  /**
+   * Provides counts with ethnicity info for cohort defined by the provided {@link
+   * ParticipantCriteria}.
+   */
+  public QueryJobConfiguration buildEthnicityInfoCounterQuery(
+      ParticipantCriteria participantCriteria) {
+    Map<String, QueryParameterValue> params = new HashMap<>();
+    StringBuilder queryBuilder = new StringBuilder(ETHNICITY_INFO_SQL_TEMPLATE);
+    addWhereClause(participantCriteria, SEARCH_PERSON_TABLE, queryBuilder, params);
+    addDataFilters(participantCriteria.getSearchRequest().getDataFilters(), queryBuilder, params);
+    queryBuilder.append(ETHNICITY_INFO_SQL_GROUP_BY);
 
     return QueryJobConfiguration.newBuilder(queryBuilder.toString())
         .setNamedParameters(params)
