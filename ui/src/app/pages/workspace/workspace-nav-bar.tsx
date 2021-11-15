@@ -162,7 +162,6 @@ export const WorkspaceNavBar = fp.flow(
         aria-selected={selected}
         disabled={disabled}
         style={{...styles.tab, ...(selected ? styles.active : {}), ...(disabled ? styles.disabled : {})}}
-        hover={(!disabled && {color: styles.active.color})}
         onClick={() => navigate(['workspaces', ns, wsid, link])}
       >
         {name}
