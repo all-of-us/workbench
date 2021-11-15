@@ -21,6 +21,9 @@ import {currentWorkspaceStore, NavigationProps, useNavigation} from 'app/utils/n
 import {serverConfigStore} from 'app/utils/stores';
 import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
+import {faCheck} from '@fortawesome/free-solid-svg-icons';
+import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
+import {faLockAlt} from '@fortawesome/pro-solid-svg-icons';
 
 const EVENT_CATEGORY = 'Workspace list';
 
@@ -59,6 +62,10 @@ const styles = reactStyles({
     textAlign: 'center',
     borderRadius: '0.2rem',
     padding: 0
+  },
+  lockWorkspace: {
+    color: '#F7981C',
+    marginBottom: '0.2rem'
   }
 });
 
@@ -210,9 +217,13 @@ export const WorkspaceCard = fp.flow(withNavigation)(
     }
 
     render() {
-      const {workspace, workspace: {accessTierShortName}, accessLevel, tierAccessDisabled} = this.props;
+      const {
+        workspace,
+        workspace: {accessTierShortName, adminLocked},
+        accessLevel,
+        tierAccessDisabled
+      } = this.props;
       const {confirmDeleting, showShareModal, showResearchPurposeReviewModal} = this.state;
-
       return <React.Fragment>
         <WorkspaceCardBase>
           <FlexRow style={{height: '100%'}}>
@@ -284,6 +295,11 @@ export const WorkspaceCard = fp.flow(withNavigation)(
                 <FlexColumn style={{justifyContent: 'flex-end'}}>
                   {accessTierShortName === AccessTierShortNames.Controlled && <ControlledTierBadge/>}
                 </FlexColumn>
+                {adminLocked && <FlexColumn style={{justifyContent: 'flex-end'}}>
+                  <TooltipTrigger content='Workspace compliance action is required'>
+                    <FontAwesomeIcon icon={faLockAlt} style={styles.lockWorkspace}/>
+                  </TooltipTrigger>
+                </FlexColumn>}
               </FlexRow>
             </FlexColumn>
           </FlexRow>
