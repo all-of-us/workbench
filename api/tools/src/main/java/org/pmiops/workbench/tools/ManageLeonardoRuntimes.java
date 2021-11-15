@@ -108,6 +108,7 @@ public class ManageLeonardoRuntimes {
         break;
 
       case TABULAR:
+      default:
         stream.forEachOrdered(
             (c) -> {
               System.out.println(formatTabular(c));
