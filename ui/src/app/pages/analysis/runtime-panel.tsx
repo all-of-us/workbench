@@ -29,9 +29,6 @@ import {
   gpuTypeToDisplayName,
   Machine,
   machineRunningCost,
-  machineRunningCostBreakdown,
-  machineStorageCost,
-  machineStorageCostBreakdown,
   validLeoDataprocMasterMachineTypes,
   validLeoDataprocWorkerMachineTypes,
   validLeoGceMachineTypes
@@ -719,6 +716,8 @@ import computeError from 'assets/icons/compute-error.svg';
 import computeStopped from 'assets/icons/compute-stopped.svg';
 import computeNone from 'assets/icons/compute-none.svg';
 import {isUsingFreeTierBillingAccount} from 'app/utils/workspace-utils';
+import { RuntimeCostEstimator } from 'app/components/runtime-cost-estimator';
+import { RuntimeSummary } from 'app/components/runtime-summary';
 
 const StartStopRuntimeButton = ({workspaceNamespace, googleProject}) => {
   const [status, setRuntimeStatus] = useRuntimeStatus(workspaceNamespace, googleProject);
@@ -868,81 +867,6 @@ const StartStopRuntimeButton = ({workspaceNamespace, googleProject}) => {
   </FlexRow>;
 };
 
-const CostEstimator = ({
-  runtimeParameters,
-  runtimeCtx,
-  costTextColor = colors.accent
-}) => {
-  const {
-    computeType,
-    diskSize,
-    pdSize,
-    machine,
-    gpuConfig,
-    dataprocConfig
-  } = runtimeParameters;
-  const {
-    numberOfWorkers = 0,
-    workerMachineType = null,
-    workerDiskSize = null,
-    numberOfPreemptibleWorkers = 0
-  } = dataprocConfig || {};
-  const workerMachine = findMachineByName(workerMachineType);
-  const gpu = gpuConfig ? findGpu(gpuConfig.gpuType, gpuConfig.numOfGpus) : null;
-  const costConfig = {
-    computeType, masterMachine: machine, gpu, masterDiskSize: runtimeCtx.enablePD && !runtimeCtx.dataprocExists ? pdSize : diskSize,
-    numberOfWorkers, numberOfPreemptibleWorkers, workerDiskSize, workerMachine
-  };
-  const runningCost = machineRunningCost(costConfig);
-  const runningCostBreakdown = machineRunningCostBreakdown(costConfig);
-  const storageCost = machineStorageCost(costConfig);
-  const storageCostBreakdown = machineStorageCostBreakdown(costConfig);
-  const costPriceFontSize = runtimeCtx.enablePD ? '12px' : '20px';
-  return <FlexRow>
-      <FlexColumn style={{marginRight: '1rem'}}>
-        <div style={{fontSize: '10px', fontWeight: 600}}>Cost when running</div>
-        <TooltipTrigger content={
-          <div>
-            <div>Cost Breakdown</div>
-            {runningCostBreakdown.map((lineItem, i) => <div key={i}>{lineItem}</div>)}
-          </div>
-        }>
-          <div
-              style={{fontSize: costPriceFontSize, color: costTextColor}}
-              data-test-id='running-cost'
-          >
-            {formatUsd(runningCost)}/hr
-          </div>
-        </TooltipTrigger>
-      </FlexColumn>
-      <FlexColumn style={{marginRight: '1rem'}}>
-        <div style={{fontSize: '10px', fontWeight: 600}}>Cost when paused</div>
-        <TooltipTrigger content={
-          <div>
-            <div>Cost Breakdown</div>
-            {storageCostBreakdown.map((lineItem, i) => <div key={i}>{lineItem}</div>)}
-          </div>
-        }>
-          <div
-              style={{fontSize: costPriceFontSize, color: costTextColor}}
-              data-test-id='storage-cost'
-          >
-            {formatUsd(storageCost)}/hr
-          </div>
-        </TooltipTrigger>
-      </FlexColumn>
-    {runtimeCtx.enablePD && computeType === ComputeType.Standard && <FlexColumn>
-      <div style={{fontSize: '10px', fontWeight: 600}}>Persistent disk cost</div>
-        <div
-            style={{fontSize: costPriceFontSize, color: costTextColor}}
-            data-test-id='pd-cost'
-        >
-          {formatUsd(pdSize * diskPricePerMonth)}/month
-        </div>
-    </FlexColumn>}
-  </FlexRow>;
-};
-
 const CostInfo = ({runtimeChanged, runtimeConfig, currentUser, workspace, creatorFreeCreditsRemaining, runtimeCtx}) => {
   const remainingCredits = creatorFreeCreditsRemaining === null ? <Spinner size={10}/> : formatUsd(creatorFreeCreditsRemaining);
 
@@ -955,7 +879,7 @@ const CostInfo = ({runtimeChanged, runtimeConfig, currentUser, workspace, creato
     data-test-id='cost-estimator'
   >
     <div style={{minWidth: '250px', margin: '.33rem .5rem'}}>
-      <CostEstimator runtimeParameters={runtimeConfig} runtimeCtx={runtimeCtx}/>
+      <RuntimeCostEstimator runtimeParameters={runtimeConfig} dataprocExists={runtimeCtx.dataprocExists}/>
     </div>
     {
       isUsingFreeTierBillingAccount(workspace)
@@ -1005,25 +929,7 @@ const CreatePanel = ({creatorFreeCreditsRemaining, profile, setPanelContent, wor
         Customize
       </Button>
     </FlexRow>
-    <label htmlFor='compute-resources' style={{...styles.bold, marginTop: '1rem'}}>Compute Resources</label>
-    <div id='compute-resources'>- Default: compute size of
-      <b> {runtimeConfig.machine.cpu} CPUs</b>,
-      <b> {runtimeConfig.machine.memory} GB memory</b>, and a
-      <b> {runtimeConfig.diskSize} GB disk</b>
-    </div>
-    {runtimeConfig.computeType === ComputeType.Dataproc && <Fragment>
-      <label htmlFor='worker-configuration' style={{...styles.bold, marginTop: '1rem'}}>Worker Configuration</label>
-      <div id='worker-configuration'>- Default:
-        <b> {runtimeConfig.dataprocConfig.numberOfWorkers} worker(s) </b>
-        {
-          runtimeConfig.dataprocConfig.numberOfPreemptibleWorkers > 0 &&
-          <b>and {runtimeConfig.dataprocConfig.numberOfPreemptibleWorkers} preemptible worker(s) </b>
-        }
-        each with compute size of <b>{findMachineByName(runtimeConfig.dataprocConfig.workerMachineType).cpu} CPUs</b>,
-        <b> {findMachineByName(runtimeConfig.dataprocConfig.workerMachineType).memory} GB memory</b>, and a
-        <b> {runtimeConfig.dataprocConfig.workerDiskSize} GB disk</b>
-      </div>
-    </Fragment>}
+    <RuntimeSummary runtimeConfig={runtimeConfig} />
   </div>;
 };
 
@@ -1047,7 +953,7 @@ const ConfirmUpdatePanel = ({initialRuntimeConfig, newRuntimeConfig, onCancel, u
         <div style={{marginRight: '1rem'}}>
           <b style={{fontSize: 10}}>New estimated cost</b>
           <div style={{...styles.costPredictorWrapper, padding: '.25rem .5rem'}}>
-            <CostEstimator runtimeParameters={newRuntimeConfig} runtimeCtx = {runtimeCtx}/>
+            <RuntimeCostEstimator runtimeParameters={newRuntimeConfig} dataprocExists={runtimeCtx.dataprocExists}/>
           </div>
         </div>
         <div>
@@ -1056,7 +962,7 @@ const ConfirmUpdatePanel = ({initialRuntimeConfig, newRuntimeConfig, onCancel, u
             padding: '.25rem .5rem',
             color: 'grey',
             backgroundColor: ''}}>
-            <CostEstimator runtimeParameters={initialRuntimeConfig} runtimeCtx={runtimeCtx} costTextColor='grey'/>
+            <RuntimeCostEstimator runtimeParameters={initialRuntimeConfig} dataprocExists={runtimeCtx.dataprocExists} costTextColor='grey'/>
           </div>
         </div>
       </FlexRow>

@@ -347,7 +347,7 @@ const compareAutopauseThreshold = (oldRuntime: RuntimeConfig, newRuntime: Runtim
   };
 };
 
-const toRuntimeConfig = (runtime: Runtime): RuntimeConfig => {
+export const toRuntimeConfig = (runtime: Runtime): RuntimeConfig => {
   if (runtime.gceConfig) {
     return {
       computeType: ComputeType.Standard,

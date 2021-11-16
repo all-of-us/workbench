@@ -18,7 +18,6 @@ import {hasNewValidProps, reactStyles, withCurrentWorkspace} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {NavigationProps} from 'app/utils/navigation';
 import {
-  maybeUnwrapSecuritySuspendedError,
   ComputeSecuritySuspendedError,
   maybeInitializeRuntime,
   withRuntimeStore
@@ -28,11 +27,13 @@ import {ACTION_DISABLED_INVALID_BILLING} from 'app/utils/strings';
 import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
-import {BillingStatus, RuntimeStatus} from 'generated/fetch';
+import { BillingStatus, Runtime, RuntimeStatus} from 'generated/fetch';
 import {
   RouteComponentProps,
   withRouter
 } from 'react-router-dom';
+import { InitialRuntimeNotFoundError } from 'app/utils/leo-runtime-initializer';
+import { RuntimeInitializerModal } from 'app/components/runtime-initializer-modal';
 
 
 const styles = reactStyles({
@@ -97,6 +98,8 @@ interface State {
   showInUseModal: boolean;
   showPlaygroundModeModal: boolean;
   userRequestedExecutableNotebook: boolean;
+  showRuntimeInitializerModalDefault: Runtime;
+  resolveRuntimeInitializer: (Runtime) => void;
   error: Error;
 }
 
@@ -118,6 +121,8 @@ export const InteractiveNotebook = fp.flow(
         showInUseModal: false,
         showPlaygroundModeModal: false,
         userRequestedExecutableNotebook: false,
+        showRuntimeInitializerModalDefault: null,
+        resolveRuntimeInitializer: null,
         error: null
       };
     }
@@ -158,12 +163,24 @@ export const InteractiveNotebook = fp.flow(
       });
     }
 
-    private async runRuntime(onRuntimeReady: Function): Promise<void> {
+    private async runRuntime(onRuntimeReady: Function, targetRuntime?: Runtime): Promise<void> {
       try {
         await maybeInitializeRuntime(this.props.match.params.ns, this.pollAborter.signal);
         onRuntimeReady();
       } catch (e) {
-        this.setState({error: e});
+        if (e instanceof InitialRuntimeNotFoundError) {
+          const runtimeToCreate = await new Promise((resolve) => {
+            this.setState({
+              showRuntimeInitializerModalDefault: e.defaultRuntime,
+              resolveRuntimeInitializer: resolve
+            });
+          });
+          if (runtimeToCreate) {
+            return this.runRuntime(onRuntimeReady, runtimeToCreate);
+          }
+        } else {
+          this.setState({error: e});
+        }
       }
     }
 
@@ -298,6 +315,7 @@ export const InteractiveNotebook = fp.flow(
         showInUseModal,
         showPlaygroundModeModal,
         userRequestedExecutableNotebook,
+        showRuntimeInitializerModalDefault,
         error
       } = this.state;
       return (
@@ -362,6 +380,23 @@ export const InteractiveNotebook = fp.flow(
               this.startPlaygroundMode();
             }}>
           </NotebookInUseModal>}
+          {showRuntimeInitializerModalDefault &&
+           <RuntimeInitializerModal
+             defaultRuntime={showRuntimeInitializerModalDefault}
+             cancel={() => {
+               this.setState({showRuntimeInitializerModalDefault: null});
+               this.state.resolveRuntimeInitializer(null);
+             }}
+             openRuntimePanel={() => {
+              // XXX: open
+               this.setState({showRuntimeInitializerModalDefault: null});
+               this.state.resolveRuntimeInitializer(null);
+             }}
+             createDefault={() => {
+               this.setState({showRuntimeInitializerModalDefault: null});
+               this.state.resolveRuntimeInitializer(showRuntimeInitializerModalDefault);
+             }} />
+            }
         </div>
       );
     }
