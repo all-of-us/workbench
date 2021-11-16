@@ -671,11 +671,9 @@ workflows:
       - puppeteer-test:
           <<: *filter-pr-branch
           env_name: "local"
-          test_mode: "nightly-integration"
-          parallel_num: 3
+          parallel_num: 4
           optional_steps:
             - halt-puppeteer-check
-            - puppeteer-access-test-user-setup
           requires:
             - puppeteer-env-setup
             # PR commits e2e tests waits for workflow triggered by master branch merge to finish.

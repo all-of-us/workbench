@@ -65,7 +65,7 @@ export default class NotebookPage extends NotebookFrame {
     }
     // When open notebook for the first time, notebook connection could fail unexpectedly.
     // But notebook connection will retry to establish. thus, a longer sleep interval is required.
-    await this.waitForKernelIdle(5 * 60 * 1000, 10000); // 10 minutes
+    await this.waitForKernelIdle(10 * 60 * 1000, 10000); // 10 minutes
     return true;
   }
 
@@ -299,7 +299,7 @@ export default class NotebookPage extends NotebookFrame {
       .catch(() => false);
   }
 
-  async isNoConnectionToKernel(): Promise<boolean> {
+  async isNoConnection(): Promise<boolean> {
     const kernelStatus = await this.getKernelStatus();
     if (kernelStatus === KernelStatus.NoConnection) {
       return true;
@@ -311,7 +311,7 @@ export default class NotebookPage extends NotebookFrame {
    * Wait for notebook kernel becomes ready (idle).
    */
   async waitForKernelIdle(timeOut = 300000, sleepInterval = 5000): Promise<boolean> {
-    const waitAndCheck = async (): Promise<boolean> => {
+    const waitForIdle = async (): Promise<boolean> => {
       // Check kernel status twice with a pause between two checks because kernel status can suddenly become not ready.
       let ready = false;
       const startTime = Date.now();
@@ -326,15 +326,15 @@ export default class NotebookPage extends NotebookFrame {
       return false;
     };
 
-    if (await waitAndCheck()) {
+    if (await waitForIdle()) {
       return true;
     }
 
     // Retry only when kernel status is "no connection to kernel" by reloading the notebook page.
-    if (await this.isNoConnectionToKernel()) {
+    if (await this.isNoConnection()) {
       await takeScreenshot(this.page, `${makeDateTimeStr('reload_notebook_connection')}`);
       await this.reloadPage();
-      if (await waitAndCheck()) {
+      if (await waitForIdle()) {
         return true;
       }
     }
