@@ -24,6 +24,7 @@ import {WorkspaceEdit, WorkspaceEditMode} from 'app/pages/workspace/workspace-ed
 import {LeoApplicationType} from 'app/pages/analysis/leonardo-app-launcher';
 import {BreadcrumbType} from 'app/utils/navigation';
 import {MatchParams} from 'app/utils/stores';
+import {workspaceLockGuard} from 'app/routing/guards';
 
 const CohortPagePage = fp.flow(withRouteData, withRoutingSpinner)(CohortPage);
 const CohortActionsPage = fp.flow(withRouteData, withRoutingSpinner)(CohortActions);
@@ -90,14 +91,14 @@ export const WorkspaceRoutes = (props: {adminLocked: boolean}) => {
           workspaceEditMode={WorkspaceEditMode.Edit}
       />
     </AppRoute>
-    <AppRouteWithAdminLocking exact path={`${path}/notebooks`}>
+    <AppRoute exact path={`${path}/notebooks`} guards={[workspaceLockGuard(adminLocked)]}>
       <NotebookListPage routeData={{
         title: 'View Notebooks',
         pageKey: 'notebooks',
         workspaceNavBarTab: 'notebooks',
         breadcrumb: BreadcrumbType.Workspace
       }}/>
-    </AppRouteWithAdminLocking>
+    </AppRoute>
     <AppRouteWithAdminLocking exact path={`${path}/notebooks/preview/:nbName`}>
       <InteractiveNotebookPage routeData={{
         pathElementForTitle: 'nbName',
