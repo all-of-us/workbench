@@ -249,6 +249,8 @@ const rtModules = [
 const ctModule = AccessModule.CTCOMPLIANCETRAINING;
 const duccModule = AccessModule.DATAUSERCODEOFCONDUCT;
 
+// in display order
+// exported for test
 export const requiredModules: AccessModule[] = [
   ...rtModules,
   duccModule
@@ -336,10 +338,13 @@ const isEraCommonsModuleRequiredByInstitution = (profile: Profile, moduleNames: 
 
 const isEligibleModule = (module: AccessModule, profile: Profile) => {
   if (module !== AccessModule.CTCOMPLIANCETRAINING) {
+    // Currently a user can only be ineligible for CT modules.
+    // Note: eRA Commons is an edge case which is handled elsewhere. It is
+    // technically also possible for CT eRA commons to be ineligible.
     return true;
   }
   const controlledTierEligibility = profile.tierEligibilities.find(tier=> tier.accessTierShortName === AccessTierShortNames.Controlled);
-  return !!(controlledTierEligibility?.eligible);
+  return !!controlledTierEligibility?.eligible;
 }
 
 
@@ -762,7 +767,8 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
   // At any given time, at most two modules will be active in the list:
   //  1. The next module, which we visually direct the user to with a CTA
   //  2. The next required module, which may diverge when the next module is optional.
-  // The first element of the nextModules list gets preferential UX treatment.
+  // This configuration allows the user to skip the optional CT section. The
+  // first element of the nextModules list gets the preferential CTA.
   const [nextModules, setNextModules] = useState([]);
 
   const getNext = (modules: AccessModule[]) => getNextModule(getEligibleModules(modules, profile), profile);
