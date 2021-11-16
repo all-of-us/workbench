@@ -326,16 +326,17 @@ export default class NotebookPage extends NotebookFrame {
       return false;
     };
 
-    const isSuccess = await waitAndCheck();
-    if (isSuccess) {
+    if (await waitAndCheck()) {
       return true;
     }
 
     // Retry: reload page if no connection to kernel.
     if (await this.isNoConnectionToKernel()) {
       await takeScreenshot(this.page, `${makeDateTimeStr('reload_notebook_connection')}`);
-      await this.page.reload({ waitUntil: ['domcontentloaded', 'networkidle0'] });
-      await waitAndCheck();
+      await this.reloadPage();
+      if (await waitAndCheck()) {
+        return true;
+      }
     }
 
     // Throws exception if not ready.
