@@ -64,7 +64,7 @@ const styles = reactStyles({
     padding: 0
   },
   lockWorkspace: {
-    color: '#F7981C',
+    color: colors.warning,
     marginBottom: '0.2rem'
   }
 });
@@ -295,7 +295,7 @@ export const WorkspaceCard = fp.flow(withNavigation)(
                 <FlexColumn style={{justifyContent: 'flex-end'}}>
                   {accessTierShortName === AccessTierShortNames.Controlled && <ControlledTierBadge/>}
                 </FlexColumn>
-                {adminLocked && <FlexColumn style={{justifyContent: 'flex-end'}}>
+                {adminLocked && <FlexColumn data-test-id='workspace-lock' style={{justifyContent: 'flex-end'}}>
                   <TooltipTrigger content='Workspace compliance action is required'>
                     <FontAwesomeIcon icon={faLockAlt} style={styles.lockWorkspace}/>
                   </TooltipTrigger>
