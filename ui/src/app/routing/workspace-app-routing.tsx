@@ -24,7 +24,7 @@ import {WorkspaceEdit, WorkspaceEditMode} from 'app/pages/workspace/workspace-ed
 import {LeoApplicationType} from 'app/pages/analysis/leonardo-app-launcher';
 import {BreadcrumbType} from 'app/utils/navigation';
 import {MatchParams} from 'app/utils/stores';
-import {workspaceLockGuard} from 'app/routing/guards';
+import {adminLockedGuard} from 'app/routing/guards';
 
 const CohortPagePage = fp.flow(withRouteData, withRoutingSpinner)(CohortPage);
 const CohortActionsPage = fp.flow(withRouteData, withRoutingSpinner)(CohortActions);
@@ -43,20 +43,8 @@ const QueryReportPage = fp.flow(withRouteData, withRoutingSpinner)(QueryReport);
 const WorkspaceAboutPage = fp.flow(withRouteData, withRoutingSpinner)(WorkspaceAbout);
 const WorkspaceEditPage = fp.flow(withRouteData, withRoutingSpinner)(WorkspaceEdit);
 
-export const WorkspaceRoutes = (props: {adminLocked: boolean}) => {
-  const {adminLocked} = props;
+export const WorkspaceRoutes = () => {
   const { path } = useRouteMatch();
-
-  const AppRouteWithAdminLocking = (props) => {
-
-    // TODO there is probably a more idiomatic way to do this
-    const {ns, wsid} = useParams<MatchParams>();
-    const redirectToAboutPath = `/workspaces/${ns}/${wsid}/about`;
-
-    return adminLocked
-      ? <Redirect to={redirectToAboutPath}/>
-      : <AppRoute {...props}/>;
-  }
 
   return <Switch>
     {/* admin-locked workspaces are redirected to /about in most cases */}
@@ -70,7 +58,7 @@ export const WorkspaceRoutes = (props: {adminLocked: boolean}) => {
           }}
       />
     </AppRoute>
-    <AppRouteWithAdminLocking exact path={`${path}/duplicate`}>
+    <AppRoute exact path={`${path}/duplicate`} guards={[adminLockedGuard()]}>
       <WorkspaceEditPage
           routeData={{
             title: 'Duplicate Workspace',
@@ -79,7 +67,7 @@ export const WorkspaceRoutes = (props: {adminLocked: boolean}) => {
           }}
           workspaceEditMode={WorkspaceEditMode.Duplicate}
       />
-    </AppRouteWithAdminLocking>
+    </AppRoute>
     {/* admin-locked workspaces can still be edited */}
     <AppRoute exact path={`${path}/edit`}>
       <WorkspaceEditPage
@@ -91,7 +79,7 @@ export const WorkspaceRoutes = (props: {adminLocked: boolean}) => {
           workspaceEditMode={WorkspaceEditMode.Edit}
       />
     </AppRoute>
-    <AppRoute exact path={`${path}/notebooks`} guards={[workspaceLockGuard(adminLocked)]}>
+    <AppRoute exact path={`${path}/notebooks`} guards={[adminLockedGuard()]}>
       <NotebookListPage routeData={{
         title: 'View Notebooks',
         pageKey: 'notebooks',
@@ -99,7 +87,7 @@ export const WorkspaceRoutes = (props: {adminLocked: boolean}) => {
         breadcrumb: BreadcrumbType.Workspace
       }}/>
     </AppRoute>
-    <AppRouteWithAdminLocking exact path={`${path}/notebooks/preview/:nbName`}>
+    <AppRoute exact path={`${path}/notebooks/preview/:nbName`} guards={[adminLockedGuard()]}>
       <InteractiveNotebookPage routeData={{
         pathElementForTitle: 'nbName',
         breadcrumb: BreadcrumbType.Notebook,
@@ -107,8 +95,8 @@ export const WorkspaceRoutes = (props: {adminLocked: boolean}) => {
         workspaceNavBarTab: 'notebooks',
         minimizeChrome: true
       }}/>
-    </AppRouteWithAdminLocking>
-    <AppRouteWithAdminLocking exact path={`${path}/notebooks/:nbName`}>
+    </AppRoute>
+    <AppRoute exact path={`${path}/notebooks/:nbName`} guards={[adminLockedGuard()]}>
       <LeonardoAppRedirectPage
           routeData={{
             pathElementForTitle: 'nbName',
@@ -123,8 +111,8 @@ export const WorkspaceRoutes = (props: {adminLocked: boolean}) => {
           }}
           leoAppType={LeoApplicationType.Notebook}
       />
-    </AppRouteWithAdminLocking>
-    <AppRouteWithAdminLocking exact path={`${path}/terminals`}>
+    </AppRoute>
+    <AppRoute exact path={`${path}/terminals`} guards={[adminLockedGuard()]}>
       <LeonardoAppRedirectPage
           routeData={{
             breadcrumb: BreadcrumbType.Workspace,
@@ -138,111 +126,111 @@ export const WorkspaceRoutes = (props: {adminLocked: boolean}) => {
           }}
           leoAppType={LeoApplicationType.Terminal}
       />
-    </AppRouteWithAdminLocking>
-    <AppRouteWithAdminLocking exact path={`${path}/data`}>
+    </AppRoute>
+    <AppRoute exact path={`${path}/data`} guards={[adminLockedGuard()]}>
       <DataComponentPage routeData={{
         title: 'Data Page',
         breadcrumb: BreadcrumbType.Workspace,
         workspaceNavBarTab: 'data',
         pageKey: 'data'
       }}/>
-    </AppRouteWithAdminLocking>
-    <AppRouteWithAdminLocking exact path={`${path}/data/data-sets`}>
+    </AppRoute>
+    <AppRoute exact path={`${path}/data/data-sets`} guards={[adminLockedGuard()]}>
       <DataSetComponentPage routeData={{
         title: 'Dataset Page',
         breadcrumb: BreadcrumbType.Dataset,
         workspaceNavBarTab: 'data',
         pageKey: 'datasetBuilder'
       }}/>
-    </AppRouteWithAdminLocking>
-    <AppRouteWithAdminLocking exact path={`${path}/data/data-sets/:dataSetId`}>
+    </AppRoute>
+    <AppRoute exact path={`${path}/data/data-sets/:dataSetId`} guards={[adminLockedGuard()]}>
       <DataSetComponentPage routeData={{
         title: 'Edit Dataset',
         breadcrumb: BreadcrumbType.Dataset,
         workspaceNavBarTab: 'data',
         pageKey: 'datasetBuilder'
       }}/>
-    </AppRouteWithAdminLocking>
-    <AppRouteWithAdminLocking exact path={`${path}/data/cohorts/build`}>
+    </AppRoute>
+    <AppRoute exact path={`${path}/data/cohorts/build`} guards={[adminLockedGuard()]}>
       <CohortPagePage routeData={{
         title: 'Build Cohort Criteria',
         breadcrumb: BreadcrumbType.CohortAdd,
         workspaceNavBarTab: 'data',
         pageKey: 'cohortBuilder'
       }}/>
-    </AppRouteWithAdminLocking>
-    <AppRouteWithAdminLocking exact path={`${path}/data/cohorts/:cid/actions`}>
+    </AppRoute>
+    <AppRoute exact path={`${path}/data/cohorts/:cid/actions`} guards={[adminLockedGuard()]}>
       <CohortActionsPage routeData={{
         title: 'Cohort Actions',
         breadcrumb: BreadcrumbType.Cohort,
         workspaceNavBarTab: 'data',
         pageKey: 'cohortBuilder'
       }}/>
-    </AppRouteWithAdminLocking>
-    <AppRouteWithAdminLocking exact path={`${path}/data/cohorts/:cid/review/participants`}>
+    </AppRoute>
+    <AppRoute exact path={`${path}/data/cohorts/:cid/review/participants`} guards={[adminLockedGuard()]}>
       <ParticipantsTablePage routeData={{
         title: 'Review Cohort Participants',
         breadcrumb: BreadcrumbType.Cohort,
         workspaceNavBarTab: 'data',
         pageKey: 'reviewParticipants'
       }}/>
-    </AppRouteWithAdminLocking>
-    <AppRouteWithAdminLocking exact path={`${path}/data/cohorts/:cid/review/participants/:pid`}>
+    </AppRoute>
+    <AppRoute exact path={`${path}/data/cohorts/:cid/review/participants/:pid`} guards={[adminLockedGuard()]}>
       <DetailPagePage routeData={{
         title: 'Participant Detail',
         breadcrumb: BreadcrumbType.Participant,
         workspaceNavBarTab: 'data',
         pageKey: 'reviewParticipantDetail'
       }}/>
-    </AppRouteWithAdminLocking>
-    <AppRouteWithAdminLocking exact path={`${path}/data/cohorts/:cid/review/cohort-description`}>
+    </AppRoute>
+    <AppRoute exact path={`${path}/data/cohorts/:cid/review/cohort-description`} guards={[adminLockedGuard()]}>
       <QueryReportPage routeData={{
         title: 'Review Cohort Description',
         breadcrumb: BreadcrumbType.Cohort,
         workspaceNavBarTab: 'data',
         pageKey: 'cohortDescription'
       }}/>
-    </AppRouteWithAdminLocking>
-    <AppRouteWithAdminLocking exact path={`${path}/data/cohorts/:cid/review`}>
+    </AppRoute>
+    <AppRoute exact path={`${path}/data/cohorts/:cid/review`} guards={[adminLockedGuard()]}>
       <CohortReviewPage routeData={{
         title: 'Review Cohort Participants',
         breadcrumb: BreadcrumbType.Cohort,
         workspaceNavBarTab: 'data',
         pageKey: 'reviewParticipants'
       }}/>
-    </AppRouteWithAdminLocking>
-    <AppRouteWithAdminLocking exact path={`${path}/data/concepts`}>
+    </AppRoute>
+    <AppRoute exact path={`${path}/data/concepts`} guards={[adminLockedGuard()]}>
       <ConceptHomepagePage routeData={{
         title: 'Search Concepts',
         breadcrumb: BreadcrumbType.SearchConcepts,
         workspaceNavBarTab: 'data',
         pageKey: 'searchConceptSets'
       }}/>
-    </AppRouteWithAdminLocking>
-    <AppRouteWithAdminLocking exact path={`${path}/data/concepts/sets/:csid`}>
+    </AppRoute>
+    <AppRoute exact path={`${path}/data/concepts/sets/:csid`} guards={[adminLockedGuard()]}>
       <ConceptSearchPage routeData={{
         title: 'Concept Set',
         breadcrumb: BreadcrumbType.ConceptSet,
         workspaceNavBarTab: 'data',
         pageKey: 'conceptSets'
       }}/>
-    </AppRouteWithAdminLocking>
-    <AppRouteWithAdminLocking exact path={`${path}/data/concepts/:domain`}>
+    </AppRoute>
+    <AppRoute exact path={`${path}/data/concepts/:domain`} guards={[adminLockedGuard()]}>
       <ConceptSearchPage routeData={{
         title: 'Search Concepts',
         breadcrumb: BreadcrumbType.SearchConcepts,
         workspaceNavBarTab: 'data',
         pageKey: 'conceptSets'
       }}/>
-    </AppRouteWithAdminLocking>
-    <AppRouteWithAdminLocking exact path={`${path}/data/concepts/sets/:csid/actions`}>
+    </AppRoute>
+    <AppRoute exact path={`${path}/data/concepts/sets/:csid/actions`} guards={[adminLockedGuard()]}>
       <ConceptSetActionsPage routeData={{
         title: 'Concept Set Actions',
         breadcrumb: BreadcrumbType.ConceptSet,
         workspaceNavBarTab: 'data',
         pageKey: 'conceptSetActions'
       }}/>
-    </AppRouteWithAdminLocking>
+    </AppRoute>
     <AppRoute exact={false} path={`${path}`}>
       <Redirect to={'/not-found'}/>
     </AppRoute>

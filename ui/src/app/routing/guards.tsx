@@ -27,8 +27,7 @@ export const expiredGuard: Guard = {
   allowed: (): boolean => !profileStore.get().profile.accessModules.anyModuleHasExpired,
   redirectPath: '/access-renewal'
 };
-export const workspaceLockGuard = (adminLock: boolean): Guard => ({
-  // allowed: (): boolean => (!adminLock),
+export const adminLockedGuard = (): Guard => ({
   allowed: (): boolean => (!currentWorkspaceStore.getValue().adminLocked),
   redirectPath: `/workspaces/${useParams()['ns']}/${useParams()['wsid']}/about`
 });
