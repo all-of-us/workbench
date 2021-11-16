@@ -220,15 +220,15 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withCdrVersions())
         {workspace?.adminLocked && <div data-test-id='lock-workspace-msg' style={styles.lockMessage}>
           <FlexRow>
             <div style={{marginRight: '1rem', color: colors.warning}}>
-              <FontAwesomeIcon size={'lg'} icon={faLockAlt}/>
+              <FontAwesomeIcon size={'2x'} icon={faLockAlt}/>
             </div>
             <div>
               <b>This workspace has been locked due to a compliance violation of the
               <a href={'/data-code-of-conduct'}> <AoU/> Researcher Workbench Data User Code of Conduct.
               </a></b> The project team should work with the workspace owner to address areas of
               non-compliance by updating the workspace description (e.g. “About” page) and
-              corresponding with the <AoU/> Resources Access Board. For questions, please contact the
-              <StyledExternalLink href={supportUrls.helpCenter} target='_blank'>
+              corresponding with the <AoU/> Resources Access Board. For questions, please contact
+              the <StyledExternalLink href={supportUrls.helpCenter} target='_blank'>
               Researcher Workbench support team.
             </StyledExternalLink>
             </div>
