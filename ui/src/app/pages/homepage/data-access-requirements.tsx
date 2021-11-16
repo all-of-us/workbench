@@ -249,16 +249,15 @@ const rtModules = [
 const ctModule = AccessModule.CTCOMPLIANCETRAINING;
 const duccModule = AccessModule.DATAUSERCODEOFCONDUCT;
 
-// in display order
-// exported for test
 export const requiredModules: AccessModule[] = [
   ...rtModules,
   duccModule
 ];
 
 export const allModules: AccessModule[] = [
-  ...requiredModules,
-  ctModule
+  ...rtModules,
+  ctModule,
+  duccModule
 ];
 
 const isCompleted = (status: AccessModuleStatus) => status && !!status.completionEpochMillis
@@ -335,8 +334,18 @@ const isEraCommonsModuleRequiredByInstitution = (profile: Profile, moduleNames: 
   )(profile.tierEligibilities);
 }
 
+const isEligibleModule = (module: AccessModule, profile: Profile) => {
+  if (module !== AccessModule.CTCOMPLIANCETRAINING) {
+    return true;
+  }
+  const controlledTierEligibility = profile.tierEligibilities.find(tier=> tier.accessTierShortName === AccessTierShortNames.Controlled);
+  return !!(controlledTierEligibility?.eligible);
+}
+
+
 // exported for test
-export const getVisibleModules = (modules: AccessModule[], profile: Profile): AccessModule[] => fp.flow(
+export const getEligibleModules = (modules: AccessModule[], profile: Profile): AccessModule[] => fp.flow(
+    fp.filter((module: AccessModule) => isEligibleModule(module, profile)),
     fp.map(getAccessModuleConfig),
     fp.filter(moduleConfig => moduleConfig.isEnabledInEnvironment),
     fp.filter(moduleConfig => isEraCommonsModuleRequiredByInstitution(profile, moduleConfig.moduleName)),
@@ -357,7 +366,7 @@ const syncIncompleteModules = (modules: AccessModule[], profile: Profile, reload
 }
 
 // exported for test
-export const getActiveModule = (modules: AccessModule[], profile: Profile): AccessModule => incompleteModules(modules, profile)[0];
+export const getNextModule = (modules: AccessModule[], profile: Profile): AccessModule => incompleteModules(modules, profile)[0];
 
 const Refresh = (props: { showSpinner: Function; refreshAction: Function }) => {
   const {showSpinner, refreshAction} = props;
@@ -456,7 +465,7 @@ const ModuleBox = (props: {clickable: boolean, action: Function, children}) => {
 interface ModuleProps {
   profile: Profile,
   moduleName: AccessModule;
-  active: boolean;    // is this the currently-active module that the user should complete
+  active: boolean; // whether the user can interact with this module currently
   spinnerProps: WithSpinnerOverlayProps;
 }
 
@@ -567,20 +576,21 @@ const Completed = () => <FlexRow data-test-id='dar-completed' style={styles.comp
 
 interface CardProps {
   profile: Profile,
-  modules: Array<AccessModule>,
-  activeModule: AccessModule,
+  modules: AccessModule[],
+  nextModules: AccessModule[],
   spinnerProps: WithSpinnerOverlayProps
 }
+
 const ModulesForCard = (props: CardProps) => {
-  const {profile, modules, activeModule, spinnerProps} = props;
+  const {profile, modules, nextModules, spinnerProps} = props;
+
   return <FlexColumn style={styles.modulesContainer}>
-    {modules.map(moduleName =>
-        <MaybeModule
-            key={moduleName}
-            moduleName={moduleName}
-            profile={profile}
-            active={moduleName === activeModule}
-            spinnerProps={spinnerProps}/>
+    {modules.map(moduleName => <MaybeModule
+         key={moduleName}
+         moduleName={moduleName}
+         profile={profile}
+         active={nextModules.includes(moduleName)}
+         spinnerProps={spinnerProps}/>
     )}
   </FlexColumn>;
 };
@@ -615,8 +625,8 @@ const DataDetail = (props: {icon: string, text: string}) => {
   </FlexRow>;
 };
 
-const RegisteredTierCard = (props: {profile: Profile, activeModule: AccessModule, spinnerProps: WithSpinnerOverlayProps}) => {
-  const {profile, activeModule, spinnerProps} = props;
+const RegisteredTierCard = (props: {profile: Profile, nextModules: AccessModule[], spinnerProps: WithSpinnerOverlayProps}) => {
+  const {profile, nextModules, spinnerProps} = props;
   const rtDisplayName = AccessTierDisplayNames.Registered;
   return <FlexRow style={styles.card}>
     <FlexColumn>
@@ -634,12 +644,12 @@ const RegisteredTierCard = (props: {profile: Profile, activeModule: AccessModule
       <DataDetail icon='physical' text='Physical measurements'/>
       <DataDetail icon='wearable' text='Wearable devices'/>
     </FlexColumn>
-    <ModulesForCard profile={profile} modules={getVisibleRTModules(profile)} activeModule={activeModule} spinnerProps={spinnerProps}/>
+    <ModulesForCard profile={profile} modules={getVisibleRTModules(profile)} nextModules={nextModules} spinnerProps={spinnerProps}/>
   </FlexRow>;
 };
 
-const ControlledTierCard = (props: {profile: Profile, activeModule: AccessModule, reload: Function, spinnerProps: WithSpinnerOverlayProps}) => {
-  const {profile, activeModule, reload, spinnerProps} = props;
+const ControlledTierCard = (props: {profile: Profile, nextModules: AccessModule[], reload: Function, spinnerProps: WithSpinnerOverlayProps}) => {
+  const {profile, nextModules, spinnerProps} = props;
   const controlledTierEligibility = profile.tierEligibilities.find(tier=> tier.accessTierShortName === AccessTierShortNames.Controlled);
   const registeredTierEligibility = profile.tierEligibilities.find(tier=> tier.accessTierShortName === AccessTierShortNames.Registered);
   const isSigned = !!controlledTierEligibility;
@@ -685,8 +695,7 @@ const ControlledTierCard = (props: {profile: Profile, activeModule: AccessModule
                           text={`${institutionDisplayName} must allow you to access ${ctDisplayName} data`}/>
       {displayEraCommons &&
        <ControlledTierEraModule profile={profile} eligible={isEligible} spinnerProps={spinnerProps}/>}
-      {/* XXX: ctModule should not be hardcoded here; multiple UX's are possible here. */}
-      <ModulesForCard profile={profile} modules={[ctModule]} activeModule={ctModule} spinnerProps={spinnerProps}/>
+      <ModulesForCard profile={profile} modules={[ctModule]} nextModules={nextModules} spinnerProps={spinnerProps}/>
     </FlexColumn>
   </FlexRow>
 };
@@ -709,14 +718,14 @@ const ControlledTierStep = (props: {enabled: boolean, text: String}) => {
      </FlexRow>;
 }
 
-const DuccCard = (props: {profile: Profile, activeModule: AccessModule, spinnerProps: WithSpinnerOverlayProps, stepNumber: Number}) => {
-  const {profile, activeModule, spinnerProps, stepNumber} = props;
+const DuccCard = (props: {profile: Profile, nextModules: AccessModule[], spinnerProps: WithSpinnerOverlayProps, stepNumber: Number}) => {
+  const {profile, nextModules, spinnerProps, stepNumber} = props;
   return <FlexRow style={{...styles.card, height: '125px'}}>
     <FlexColumn>
       <div style={styles.cardStep}>Step {stepNumber}</div>
       <div style={styles.cardHeader}>Sign the code of conduct</div>
     </FlexColumn>
-    <ModulesForCard profile={profile} modules={[duccModule]} activeModule={activeModule} spinnerProps={spinnerProps}/>
+    <ModulesForCard profile={profile} modules={[duccModule]} nextModules={nextModules} spinnerProps={spinnerProps}/>
   </FlexRow>;
 };
 
@@ -725,7 +734,7 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
   const {config: {unsafeAllowSelfBypass}} = useStore(serverConfigStore);
 
   useEffect(() => {
-    syncIncompleteModules(getVisibleModules(allModules, profile), profile, reload);
+    syncIncompleteModules(getEligibleModules(allModules, profile), profile, reload);
     spinnerProps.hideSpinner();
   }, []);
 
@@ -745,23 +754,35 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
     }
   }, [code]);
 
-  // The requiredModules represent those which are required for RT access: RT modules + DUCC
-  // The activeModule must be one of the requiredModules
-  const [activeModule, setActiveModule] = useState(null);
+  // At any given time, at most two modules will be active in the list:
+  //  1. The next module, which we visually direct the user to with a CTA
+  //  2. The next required module, which may diverge when the next module is optional.
+  // The first element of the nextModules list gets preferential UX treatment.
+  const [nextModules, setNextModules] = useState([]);
 
-  // whenever the profile changes, setActiveModule(the first incomplete visible required module)
+  const getNext = (modules: AccessModule[]) => getNextModule(getEligibleModules(modules, profile), profile);
+  const nextRequired = getNext(requiredModules);
+
+  // whenever the profile changes, update the next modules to complete
   useEffect(() => {
-    setActiveModule(getActiveModule(getVisibleModules(requiredModules, profile), profile));
+    setNextModules(
+      fp.flow(
+        fp.filter(m => !!m),
+        fp.uniq
+      )([
+        getNext(allModules),
+        nextRequired
+      ]));
   }, [profile]);
 
   const showCtCard = environment.accessTiersVisibleToUsers.includes(AccessTierShortNames.Controlled)
 
-  const rtCard = <RegisteredTierCard key='rt' profile={profile} activeModule={activeModule} spinnerProps={spinnerProps}/>
-  const ctCard = showCtCard ? <ControlledTierCard key='ct' profile={profile} activeModule={activeModule} reload={reload} spinnerProps={spinnerProps}/> : null
+  const rtCard = <RegisteredTierCard key='rt' profile={profile} nextModules={nextModules} spinnerProps={spinnerProps}/>
+  const ctCard = showCtCard ? <ControlledTierCard key='ct' profile={profile} nextModules={nextModules} reload={reload} spinnerProps={spinnerProps}/> : null
   const dCard = <DuccCard
     key='dt'
     profile={profile}
-    activeModule={activeModule}
+    nextModules={nextModules}
     spinnerProps={spinnerProps}
     stepNumber={showCtCard ? 3 : 2}/>
 
@@ -769,8 +790,8 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
 
   return <FlexColumn style={styles.pageWrapper}>
       <DARHeader/>
-      {profile && !activeModule && <Completed/>}
-      {unsafeAllowSelfBypass && activeModule && <FlexRow data-test-id='self-bypass' style={styles.selfBypass}>
+      {profile && !nextRequired && <Completed/>}
+      {unsafeAllowSelfBypass && nextRequired && <FlexRow data-test-id='self-bypass' style={styles.selfBypass}>
         <div style={styles.selfBypassText}>[Test environment] Self-service bypass is enabled</div>
         <Button
             style={{marginLeft: '0.5rem'}}
