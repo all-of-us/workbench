@@ -178,4 +178,18 @@ describe('WorkspaceAbout', () => {
     expect(unpublishButton.prop('disabled')).toBeFalsy();
     expect(unpublishButton.prop('type')).toEqual('primary');
   });
+
+  it('Should display locked workspace message if adminLocked is true', async () => {
+    currentWorkspaceStore.next({...currentWorkspaceStore.getValue(), adminLocked: true});
+    const wrapper = component();
+    await waitOneTickAndUpdate(wrapper);
+    expect(wrapper.exists('[data-test-id="lock-workspace-msg"]')).toBeTruthy();
+  })
+
+  it('Should not display locked workspace message if adminLocked is false', async () => {
+    currentWorkspaceStore.next({...currentWorkspaceStore.getValue(), adminLocked: false});
+    const wrapper = component();
+    await waitOneTickAndUpdate(wrapper);
+    expect(wrapper.exists('[data-test-id="lock-workspace-msg"]')).toBeFalsy();
+  })
 });
