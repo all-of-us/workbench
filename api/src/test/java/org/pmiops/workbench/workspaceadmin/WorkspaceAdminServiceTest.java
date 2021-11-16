@@ -54,6 +54,7 @@ import org.pmiops.workbench.leonardo.model.LeonardoAuditInfo;
 import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
+import org.pmiops.workbench.mail.MailServiceImpl;
 import org.pmiops.workbench.model.AdminLockingRequest;
 import org.pmiops.workbench.model.AdminWorkspaceCloudStorageCounts;
 import org.pmiops.workbench.model.AdminWorkspaceObjectsCounts;
@@ -112,11 +113,12 @@ public class WorkspaceAdminServiceTest {
 
   @TestConfiguration
   @Import({
-    FakeClockConfiguration.class,
     CohortMapperImpl.class,
+    FakeClockConfiguration.class,
+    LeonardoMapperImpl.class,
+    MailServiceImpl.class,
     WorkspaceAdminServiceImpl.class,
     WorkspaceMapperImpl.class,
-    LeonardoMapperImpl.class
   })
   @MockBean({
     ActionAuditQueryService.class,
