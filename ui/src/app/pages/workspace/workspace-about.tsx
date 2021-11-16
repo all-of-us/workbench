@@ -1,7 +1,7 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
-import {Button, LinkButton, StyledExternalLink} from 'app/components/buttons';
+import {Button, StyledExternalLink} from 'app/components/buttons';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {InfoIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
@@ -21,8 +21,7 @@ import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {
   CdrVersionTiersResponse,
   Profile,
-  UserRole,
-  WorkspaceAccessLevel
+  UserRole
 } from 'generated/fetch';
 import {isUsingFreeTierBillingAccount} from 'app/utils/workspace-utils';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
