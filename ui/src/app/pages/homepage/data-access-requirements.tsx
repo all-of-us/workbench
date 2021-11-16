@@ -491,10 +491,9 @@ const MaybeModule = ({profile, moduleName, active, spinnerProps}: ModuleProps): 
     }]);
 
   const {DARTitleComponent, refreshAction, isEnabledInEnvironment} = getAccessModuleConfig(moduleName);
-
+  const eligible = isEligibleModule(moduleName, profile);
   const Module = ({profile}) => {
     const status = getAccessModuleStatusByName(profile, moduleName)
-
     return <FlexRow data-test-id={`module-${moduleName}`}>
       <FlexRow style={styles.moduleCTA}>
         {active && ((showRefresh && refreshAction)
@@ -503,10 +502,15 @@ const MaybeModule = ({profile, moduleName, active, spinnerProps}: ModuleProps): 
                 showSpinner={spinnerProps.showSpinner}/>
             : <Next/>)}
       </FlexRow>
-      <ModuleBox clickable={active} action={() => { setShowRefresh(true); moduleAction(); }}>
-        <ModuleIcon moduleName={moduleName} completedOrBypassed={isCompliant(status)}/>
+      <ModuleBox clickable={active} action={() => {
+        setShowRefresh(true);
+        moduleAction();
+      }}>
+        <ModuleIcon moduleName={moduleName} eligible={eligible} completedOrBypassed={isCompliant(status)}/>
         <FlexColumn>
-          <div style={active ? styles.clickableModuleText : styles.backgroundModuleText}>
+          <div
+              data-test-id={`module-${moduleName}-${active ? 'active' : 'inactive'}-text`}
+              style={active ? styles.clickableModuleText : styles.backgroundModuleText}>
             <DARTitleComponent/>
             {(moduleName === AccessModule.RASLINKLOGINGOV) && <LoginGovHelpText profile={profile} afterInitialClick={showRefresh}/>}
           </div>
