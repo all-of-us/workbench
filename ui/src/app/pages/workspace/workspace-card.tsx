@@ -90,11 +90,20 @@ const WorkspaceCardMenu: React.FunctionComponent<WorkspaceCardMenuProps> = ({
 
   const wsPathPrefix = 'workspaces/' + workspace.namespace + '/' + workspace.id;
 
+  const getTooltipContents = (isAdminLocked: boolean): string => {
+    if (isAdminLocked) {
+      return 'Workspace is locked by admin';
+    }
+    return 'Requires Owner Permission';
+  }
+
   return <PopupTrigger
     side='bottom'
     closeOnClick
     content={
       <React.Fragment>
+        <TooltipTrigger content={<div data-test-id='workspace-duplicate-disabled-tooltip'>{getTooltipContents(workspace.adminLocked)}</div>}
+                        disabled={!workspace.adminLocked}>
         <MenuItem icon='copy'
                   onClick={() => {
                     // Using workspace.published here to identify Featured Workspaces. At some point, we will need a separate property for
@@ -103,9 +112,11 @@ const WorkspaceCardMenu: React.FunctionComponent<WorkspaceCardMenuProps> = ({
                       AnalyticsTracker.Workspaces.DuplicateFeatured(workspace.name) :
                       AnalyticsTracker.Workspaces.OpenDuplicatePage('Card');
                     navigate([wsPathPrefix, 'duplicate']);
-                  }}>
+                  }}
+                  disabled={workspace.adminLocked}>
           Duplicate
         </MenuItem>
+        </TooltipTrigger>
         <TooltipTrigger content={<div>Requires Owner Permission</div>}
                         disabled={WorkspacePermissionsUtil.isOwner(accessLevel)}>
           <MenuItem icon='pencil'
@@ -117,25 +128,25 @@ const WorkspaceCardMenu: React.FunctionComponent<WorkspaceCardMenuProps> = ({
             Edit
           </MenuItem>
         </TooltipTrigger>
-        <TooltipTrigger content={<div data-test-id='workspace-share-disabled-tooltip'>Requires Owner Permission</div>}
-                        disabled={WorkspacePermissionsUtil.isOwner(accessLevel)}>
+        <TooltipTrigger content={<div data-test-id='workspace-share-disabled-tooltip'>{getTooltipContents(workspace.adminLocked)}</div>}
+                        disabled={!(!WorkspacePermissionsUtil.isOwner(accessLevel) || workspace.adminLocked)}>
           <MenuItem icon='pencil'
                     onClick={() => {
                       AnalyticsTracker.Workspaces.OpenShareModal('Card');
                       onShare();
                     }}
-                    disabled={!WorkspacePermissionsUtil.isOwner(accessLevel)}>
+                    disabled={!WorkspacePermissionsUtil.isOwner(accessLevel) || workspace.adminLocked}>
             Share
           </MenuItem>
         </TooltipTrigger>
-        <TooltipTrigger content={<div>Requires Owner Permission</div>}
-                        disabled={WorkspacePermissionsUtil.isOwner(accessLevel)}>
+        <TooltipTrigger content={<div>{getTooltipContents(workspace.adminLocked)}</div>}
+                        disabled={!(!WorkspacePermissionsUtil.isOwner(accessLevel) || workspace.adminLocked)}>
           <MenuItem icon='trash'
                     onClick={() => {
                       AnalyticsTracker.Workspaces.OpenDeleteModal('Card');
                       onDelete();
                     }}
-                    disabled={!WorkspacePermissionsUtil.isOwner(accessLevel)}>
+                    disabled={!WorkspacePermissionsUtil.isOwner(accessLevel) || workspace.adminLocked}>
             Delete
           </MenuItem>
         </TooltipTrigger>
