@@ -295,14 +295,19 @@ export const WorkspaceCard = fp.flow(withNavigation)(
                     Last Changed: {displayDate(workspace.lastModifiedTime)}
                   </div>
                 </FlexColumn>
-                <FlexColumn style={{justifyContent: 'flex-end', alignItems: 'flex-end', direction: 'rtl', marginLeft: 15}}>
-                  {accessTierShortName === AccessTierShortNames.Controlled && <ControlledTierBadge/>}
+                <FlexColumn style={{justifyContent: 'flex-end', marginLeft: '0.8rem'}}>
+                  <FlexRow style={{alignContent: 'space-between'}}>
+                    {adminLocked &&
+                    <FlexColumn data-test-id='workspace-lock' style={{justifyContent: 'flex-end'}}>
+                      <TooltipTrigger content='Workspace compliance action is required'>
+                        <FontAwesomeIcon icon={faLockAlt} style={styles.lockWorkspace}/>
+                      </TooltipTrigger>
+                    </FlexColumn>}
+                    {accessTierShortName === AccessTierShortNames.Controlled &&
+                    <ControlledTierBadge/>}
+                  </FlexRow>
                 </FlexColumn>
-                {adminLocked && <FlexColumn data-test-id='workspace-lock' style={{justifyContent: 'flex-end'}}>
-                  <TooltipTrigger content='Workspace compliance action is required'>
-                    <FontAwesomeIcon icon={faLockAlt} style={styles.lockWorkspace}/>
-                  </TooltipTrigger>
-                </FlexColumn>}
+
               </FlexRow>
             </FlexColumn>
           </FlexRow>
