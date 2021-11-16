@@ -301,10 +301,7 @@ export default class NotebookPage extends NotebookFrame {
 
   async isNoConnection(): Promise<boolean> {
     const kernelStatus = await this.getKernelStatus();
-    if (kernelStatus === KernelStatus.NoConnection) {
-      return true;
-    }
-    return false;
+    return kernelStatus === KernelStatus.NoConnection;
   }
 
   /**
