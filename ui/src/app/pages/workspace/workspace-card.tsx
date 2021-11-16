@@ -65,7 +65,10 @@ const styles = reactStyles({
   },
   lockWorkspace: {
     color: colors.warning,
-    marginBottom: '0.2rem'
+    marginBottom: '0.1rem',
+    width: '21px',
+    height: '21px',
+    viewBox: '0 0 25 27'
   }
 });
 
@@ -292,7 +295,7 @@ export const WorkspaceCard = fp.flow(withNavigation)(
                     Last Changed: {displayDate(workspace.lastModifiedTime)}
                   </div>
                 </FlexColumn>
-                <FlexColumn style={{justifyContent: 'flex-end'}}>
+                <FlexColumn style={{justifyContent: 'flex-end', alignItems: 'flex-end', direction: 'rtl', marginLeft: 15}}>
                   {accessTierShortName === AccessTierShortNames.Controlled && <ControlledTierBadge/>}
                 </FlexColumn>
                 {adminLocked && <FlexColumn data-test-id='workspace-lock' style={{justifyContent: 'flex-end'}}>
