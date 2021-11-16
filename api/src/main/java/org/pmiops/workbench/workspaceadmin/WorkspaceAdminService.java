@@ -5,6 +5,7 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.AccessReason;
+import org.pmiops.workbench.model.AdminLockingRequest;
 import org.pmiops.workbench.model.AdminWorkspaceCloudStorageCounts;
 import org.pmiops.workbench.model.AdminWorkspaceObjectsCounts;
 import org.pmiops.workbench.model.CloudStorageTraffic;
@@ -40,5 +41,7 @@ public interface WorkspaceAdminService {
   List<ListRuntimeResponse> deleteRuntimesInWorkspace(
       String workspaceNamespace, ListRuntimeDeleteRequest req);
 
-  void setAdminLockedState(String workspaceNamespace, boolean desiredLockState);
+  void setAdminLockedState(String workspaceNamespace, AdminLockingRequest adminLockingRequest);
+
+  void setAdminUnlockedState(String workspaceNamespace);
 }

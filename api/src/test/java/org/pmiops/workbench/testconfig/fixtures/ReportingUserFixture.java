@@ -161,7 +161,8 @@ public class ReportingUserFixture implements ReportingTestFixture<DbUser, Report
   public DbUser createEntity() {
     final DbUser user = new DbUser();
     user.setAreaOfResearch(USER__AREA_OF_RESEARCH);
-    user.setComplianceTrainingExpirationTime(USER__COMPLIANCE_TRAINING_EXPIRATION_TIME);
+    user.setRegisteredTierComplianceTrainingExpirationTime(
+        USER__COMPLIANCE_TRAINING_EXPIRATION_TIME);
     user.setContactEmail(USER__CONTACT_EMAIL);
     user.setCreationTime(USER__CREATION_TIME);
     user.setDataUseAgreementSignedVersion(USER__DATA_USE_AGREEMENT_SIGNED_VERSION);

@@ -18,6 +18,7 @@ import org.pmiops.workbench.config.WorkbenchConfig
 import org.pmiops.workbench.db.dao.UserDao
 import org.pmiops.workbench.db.dao.WorkspaceDao
 import org.pmiops.workbench.db.model.DbEgressEvent
+import org.pmiops.workbench.db.model.DbUser
 import org.pmiops.workbench.exceptions.BadRequestException
 import org.pmiops.workbench.model.SumologicEgressEvent
 import org.pmiops.workbench.model.SumologicEgressEventRequest
@@ -29,6 +30,7 @@ import org.springframework.stereotype.Service
 @Service
 class EgressEventAuditorImpl @Autowired
 constructor(
+    private val userProvider: Provider<DbUser>,
     private val actionAuditService: ActionAuditService,
     private val workspaceService: WorkspaceService,
     private val workspaceDao: WorkspaceDao,
@@ -104,6 +106,34 @@ constructor(
                 targetType = TargetType.WORKSPACE,
                 targetIdMaybe = dbWorkspaceMaybe.map { it.workspaceId }.orElse(null)
         ), egressEvent = dbEvent, escalation = escalation)
+    }
+
+    override fun fireAdminEditEgressEvent(
+        previousEvent: DbEgressEvent,
+        updatedEvent: DbEgressEvent
+    ) {
+        val changesByProperty = TargetPropertyExtractor.getChangedValuesByName(
+                DbEgressEventTargetProperty.values(),
+                previousEvent,
+                updatedEvent)
+        val dbWorkspaceMaybe = Optional.ofNullable(updatedEvent.workspace)
+        val actionId = actionIdProvider.get()
+        val admin = userProvider.get()
+        actionAuditService.send(changesByProperty.entries.map {
+            ActionAuditEvent(
+                    timestamp = clock.millis(),
+                    actionId = actionId,
+                    actionType = ActionType.EDIT,
+                    agentType = AgentType.ADMINISTRATOR,
+                    agentIdMaybe = admin.userId,
+                    agentEmailMaybe = admin.username,
+                    targetType = TargetType.WORKSPACE,
+                    targetIdMaybe = dbWorkspaceMaybe.map { it.workspaceId }.orElse(null),
+                    targetPropertyMaybe = it.key,
+                    previousValueMaybe = it.value.previousValue,
+                    newValueMaybe = it.value.newValue
+            )
+        })
     }
 
     override fun fireFailedToParseEgressEventRequest(request: SumologicEgressEventRequest) {

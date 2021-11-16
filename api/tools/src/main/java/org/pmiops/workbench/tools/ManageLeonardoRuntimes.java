@@ -13,11 +13,13 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.leonardo.ApiClient;
@@ -40,6 +42,11 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 public class ManageLeonardoRuntimes {
+
+  enum OutputFormat {
+    TABULAR,
+    JSON
+  }
 
   private static final Logger log = Logger.getLogger(ManageLeonardoRuntimes.class.getName());
   private static final String[] LEO_SCOPES =
@@ -88,16 +95,41 @@ public class ManageLeonardoRuntimes {
         runtimeId(r), creator, status, r.getAuditInfo().getCreatedDate());
   }
 
-  private static void listRuntimes(String apiUrl) throws IOException, ApiException {
-    AtomicInteger count = new AtomicInteger();
-    newApiClient(apiUrl).listRuntimes(null, false).stream()
-        .sorted(Comparator.comparing(r -> r.getGoogleProject()))
-        .forEachOrdered(
+  private static void printFormatted(List<LeonardoListRuntimeResponse> runtimes, OutputFormat fmt) {
+    Stream<LeonardoListRuntimeResponse> stream =
+        runtimes.stream()
+            .sorted(
+                Comparator.comparing(LeonardoListRuntimeResponse::getGoogleProject)
+                    .thenComparing(r -> r.getAuditInfo().getCreatedDate()));
+
+    switch (fmt) {
+      case JSON:
+        System.out.println(PRETTY_GSON.toJson(stream.collect(Collectors.toList())));
+        break;
+
+      case TABULAR:
+      default:
+        stream.forEachOrdered(
             (c) -> {
               System.out.println(formatTabular(c));
-              count.getAndIncrement();
             });
-    System.out.println(String.format("listed %d runtimes", count.get()));
+        System.out.println(String.format("listed %d runtimes", runtimes.size()));
+        break;
+    }
+  }
+
+  private static void listRuntimes(
+      String apiUrl, boolean includeDeleted, Optional<String> projectId, OutputFormat fmt)
+      throws IOException, ApiException {
+    RuntimesApi api = newApiClient(apiUrl);
+
+    List<LeonardoListRuntimeResponse> runtimes;
+    if (projectId.isPresent()) {
+      runtimes = api.listRuntimesByProject(projectId.get(), null, includeDeleted);
+    } else {
+      runtimes = api.listRuntimes(null, includeDeleted);
+    }
+    printFormatted(runtimes, fmt);
   }
 
   private static void describeRuntime(
@@ -204,10 +236,14 @@ public class ManageLeonardoRuntimes {
           return;
 
         case "list":
-          if (args.length != 1) {
-            throw new IllegalArgumentException("Expected 1 arg. Got " + Arrays.asList(args));
+          if (args.length != 4) {
+            throw new IllegalArgumentException("Expected 4 args. Got " + Arrays.asList(args));
           }
-          listRuntimes(args[0]);
+          listRuntimes(
+              args[0],
+              Boolean.parseBoolean(args[1]),
+              Optional.of(args[2]).filter(p -> !p.isEmpty()),
+              OutputFormat.valueOf(args[3]));
           return;
 
         case "delete":

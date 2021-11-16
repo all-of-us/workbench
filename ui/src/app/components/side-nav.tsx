@@ -104,6 +104,10 @@ const bannerAdminActive = () =>  {
   return window.location.pathname === '/admin/banner';
 };
 
+const egressAdminActive = () =>  {
+  return window.location.pathname.startsWith('/admin/egress-events');
+};
+
 const userAdminActive = () =>  {
   return window.location.pathname.startsWith('/admin/user');
 };
@@ -363,6 +367,14 @@ export const SideNav = (props: SideNavProps) => {
           onToggleSideNav={() => onToggleSideNav()}
           href={'admin/institution'}
           active={workspaceAdminActive()}
+      />
+    }
+    {
+      hasAuthorityForAction(profile, AuthorityGuardedAction.EGRESS_EVENTS) && showAdminOptions && <SideNavItem
+          content={'Egress Events'}
+          onToggleSideNav={() => onToggleSideNav()}
+          href={'/admin/egress-events'}
+          active={egressAdminActive()}
       />
     }
   </div>;

@@ -31,6 +31,7 @@ import {DataTable} from 'primereact/datatable';
 import {ReactFragment, useState} from 'react';
 import { Link, RouteComponentProps, withRouter } from 'react-router-dom';
 import {isUsingFreeTierBillingAccount} from 'app/utils/workspace-utils';
+import { EgressEventsTable } from './egress-events-table';
 
 const styles = reactStyles({
   infoRow: {
@@ -483,6 +484,13 @@ class AdminWorkspaceImpl extends React.Component<Props, State> {
         </FlexColumn>
       </div>
       }
+      {workspace &&
+        <>
+          <h2>Egress event history</h2>
+          <EgressEventsTable
+            displayPageSize={10}
+            sourceWorkspaceNamespace={workspace.namespace} />
+        </>}
       {confirmDeleteRuntime &&
         <Modal onRequestClose={() => this.cancelDeleteRuntime()}>
           <ModalTitle>Delete Runtime</ModalTitle>
