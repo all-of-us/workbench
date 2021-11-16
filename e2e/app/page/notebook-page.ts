@@ -60,7 +60,7 @@ export default class NotebookPage extends NotebookFrame {
     try {
       await this.findRunButton(120000);
     } catch (err) {
-      console.warn(`Reloading "${this.documentTitle}" because cannot find the Run button`);
+      logger.info(`Reloading "${this.documentTitle}" because cannot find the Run button`);
       await this.page.reload();
     }
     // When open notebook for the first time, notebook connection could fail unexpectedly.
@@ -330,7 +330,7 @@ export default class NotebookPage extends NotebookFrame {
       return true;
     }
 
-    // Retry: reload page if no connection to kernel.
+    // Retry only when kernel status is "no connection to kernel" by reloading the notebook page.
     if (await this.isNoConnectionToKernel()) {
       await takeScreenshot(this.page, `${makeDateTimeStr('reload_notebook_connection')}`);
       await this.reloadPage();
@@ -515,7 +515,7 @@ export default class NotebookPage extends NotebookFrame {
       expect(modalMessage).toContain(replaceFileMessage);
       await replaceFileModal.clickCancelButton();
       await newPage.waitForTimeout(500);
-      console.log(`Cancel to close "Replace file" "${fileName}" dialog`);
+      logger.info(`Cancel to close "Replace file" "${fileName}" dialog`);
     }
 
     // Get file size.
@@ -527,7 +527,7 @@ export default class NotebookPage extends NotebookFrame {
     const fileSize = await getPropValue(fileSizeElement, 'textContent');
 
     // In case page has to be checked after finish.
-    await takeScreenshot(newPage, `notebook-upload-file-${fileName}.png`);
+    await takeScreenshot(newPage, `notebook-upload-file-${fileName}`);
 
     await newPage.close();
     await this.page.bringToFront();
