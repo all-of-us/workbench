@@ -1,7 +1,9 @@
 import {Guard} from 'app/components/app-router';
 import {hasRegisteredTierAccess} from 'app/utils/access-tiers';
-import {authStore, profileStore} from 'app/utils/stores';
+import {authStore, MatchParams, profileStore} from 'app/utils/stores';
 import {eligibleForRegisteredTier} from 'app/utils/access-utils';
+import {useParams} from 'react-router-dom';
+import {currentWorkspaceStore} from 'app/utils/navigation';
 
 export const signInGuard: Guard = {
   allowed: (): boolean => {
@@ -24,4 +26,12 @@ export const registrationGuard: Guard = {
 export const expiredGuard: Guard = {
   allowed: (): boolean => !profileStore.get().profile.accessModules.anyModuleHasExpired,
   redirectPath: '/access-renewal'
+};
+
+export const adminLockedGuard = (): Guard => {
+  const {ns, wsid} = useParams<MatchParams>();
+  return ({
+    allowed: (): boolean => (!currentWorkspaceStore.getValue().adminLocked),
+    redirectPath: `/workspaces/${ns}/${wsid}/about`
+  });
 };
