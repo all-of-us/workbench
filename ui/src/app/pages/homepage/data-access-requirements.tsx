@@ -648,7 +648,8 @@ const RegisteredTierCard = (props: {profile: Profile, nextModules: AccessModule[
   </FlexRow>;
 };
 
-const ControlledTierCard = (props: {profile: Profile, nextModules: AccessModule[], reload: Function, spinnerProps: WithSpinnerOverlayProps}) => {
+const ControlledTierCard = (props: {profile: Profile, nextModules: AccessModule[],
+    reload: Function, spinnerProps: WithSpinnerOverlayProps}) => {
   const {profile, nextModules, spinnerProps} = props;
   const controlledTierEligibility = profile.tierEligibilities.find(tier=> tier.accessTierShortName === AccessTierShortNames.Controlled);
   const registeredTierEligibility = profile.tierEligibilities.find(tier=> tier.accessTierShortName === AccessTierShortNames.Registered);
@@ -778,7 +779,8 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
   const showCtCard = environment.accessTiersVisibleToUsers.includes(AccessTierShortNames.Controlled)
 
   const rtCard = <RegisteredTierCard key='rt' profile={profile} nextModules={nextModules} spinnerProps={spinnerProps}/>
-  const ctCard = showCtCard ? <ControlledTierCard key='ct' profile={profile} nextModules={nextModules} reload={reload} spinnerProps={spinnerProps}/> : null
+  const ctCard = showCtCard ?
+      <ControlledTierCard key='ct' profile={profile} nextModules={nextModules} reload={reload} spinnerProps={spinnerProps}/> : null
   const dCard = <DuccCard
     key='dt'
     profile={profile}
