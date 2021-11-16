@@ -47,6 +47,7 @@ import org.pmiops.workbench.model.DataFilter;
 import org.pmiops.workbench.model.DemoChartInfo;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainCard;
+import org.pmiops.workbench.model.EthnicityInfo;
 import org.pmiops.workbench.model.FilterColumns;
 import org.pmiops.workbench.model.GenderOrSexType;
 import org.pmiops.workbench.model.ParticipantDemographics;
@@ -314,6 +315,24 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
               .count(bigQueryService.getLong(row, rm.get("count"))));
     }
     return demoChartInfos;
+  }
+
+  @Override
+  public List<EthnicityInfo> findEthnicityInfo(SearchRequest request) {
+    QueryJobConfiguration qjc =
+        bigQueryService.filterBigQueryConfig(
+            cohortQueryBuilder.buildEthnicityInfoCounterQuery(new ParticipantCriteria(request)));
+    TableResult result = bigQueryService.executeQuery(qjc);
+    Map<String, Integer> rm = bigQueryService.getResultMapper(result);
+
+    List<EthnicityInfo> ethnicityInfos = new ArrayList<>();
+    for (List<FieldValue> row : result.iterateAll()) {
+      ethnicityInfos.add(
+          new EthnicityInfo()
+              .ethnicity(bigQueryService.getString(row, rm.get("ethnicity")))
+              .count(bigQueryService.getLong(row, rm.get("count"))));
+    }
+    return ethnicityInfos;
   }
 
   @Override

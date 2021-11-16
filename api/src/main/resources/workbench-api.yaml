@@ -3840,6 +3840,29 @@ paths:
           description: A collection of criteria
           schema:
             "$ref": "#/definitions/DemoChartInfoListResponse"
+  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/chartinfo/ethnicity":
+    parameters:
+      - "$ref": "#/parameters/workspaceNamespace"
+      - "$ref": "#/parameters/workspaceId"
+    post:
+      tags:
+      - cohortBuilder
+      consumes:
+      - application/json
+      description: Searches for ethnicity info about subjects.
+      operationId: findEthnicityInfo
+      parameters:
+      - in: body
+        name: request
+        description: object of parameters by which to perform the search
+        schema:
+          "$ref": "#/definitions/SearchRequest"
+        required: true
+      responses:
+        200:
+          description: A collection of ethnicity and counts
+          schema:
+            "$ref": "#/definitions/EthnicityInfoListResponse"
   "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/demographics":
     parameters:
       - "$ref": "#/parameters/workspaceNamespace"
@@ -8374,6 +8397,28 @@ definitions:
         type: string
       ageRange:
         description: age range of subject
+        type: string
+      count:
+        description: number of subjects
+        type: integer
+        format: int64
+  EthnicityInfoListResponse:
+    type: object
+    required:
+      - items
+    properties:
+      items:
+        type: array
+        items:
+          "$ref": "#/definitions/EthnicityInfo"
+  EthnicityInfo:
+    type: object
+    required:
+    - ethnicity
+    - count
+    properties:
+      ethnicity:
+        description: ethnicity of subject
         type: string
       count:
         description: number of subjects
