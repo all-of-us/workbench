@@ -51,6 +51,8 @@ import org.pmiops.workbench.model.DataFilter;
 import org.pmiops.workbench.model.DemoChartInfo;
 import org.pmiops.workbench.model.DemoChartInfoListResponse;
 import org.pmiops.workbench.model.Domain;
+import org.pmiops.workbench.model.EthnicityInfo;
+import org.pmiops.workbench.model.EthnicityInfoListResponse;
 import org.pmiops.workbench.model.GenderOrSexType;
 import org.pmiops.workbench.model.Modifier;
 import org.pmiops.workbench.model.ModifierType;
@@ -2020,6 +2022,18 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
+  public void findEthnicityInfo() {
+    SearchParameter pm = wheelchair().attributes(wheelchairAttributes());
+    SearchRequest searchRequest =
+        createSearchRequests(
+            Domain.PHYSICAL_MEASUREMENT.toString(), ImmutableList.of(pm), new ArrayList<>());
+
+    EthnicityInfoListResponse response =
+        controller.findEthnicityInfo(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest).getBody();
+    assertEthnicity(response);
+  }
+
+  @Test
   public void findDemoChartInfoGenderAgeAtConsentWithEHRData() {
     SearchParameter pm = wheelchair().attributes(wheelchairAttributes());
     SearchRequest searchRequest =
@@ -2133,5 +2147,11 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         .isEqualTo(response.getItems().get(0));
     assertThat(new DemoChartInfo().name("MALE").race("Caucasian").ageRange("18-44").count(1L))
         .isEqualTo(response.getItems().get(1));
+  }
+
+  private void assertEthnicity(EthnicityInfoListResponse response) {
+    assertThat(response.getItems().size()).isEqualTo(1);
+    assertThat(new EthnicityInfo().ethnicity("Not Hispanic or Latino").count(2L))
+        .isEqualTo(response.getItems().get(0));
   }
 }
