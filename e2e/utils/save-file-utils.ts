@@ -32,7 +32,7 @@ export const savePageToFile = async (page: Page, fileName: string): Promise<bool
 export const takeScreenshot = async (page: Page, fileName: string): Promise<void> => {
   const dir = 'logs/screenshot';
   await ensureDir(dir);
-  await page.screenshot({ type: 'png', path: `${dir}/${fileName}.png`, fullPage: true });
+  await page.screenshot({ type: 'png', path: `${dir}/${fileName}`, fullPage: true });
   logger.info(`Saved screenshot file: ${fileName}`);
 };
 

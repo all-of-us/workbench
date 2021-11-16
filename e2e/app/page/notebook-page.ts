@@ -524,7 +524,7 @@ export default class NotebookPage extends NotebookFrame {
     const fileSize = await getPropValue(fileSizeElement, 'textContent');
 
     // In case page has to be checked after finish.
-    await takeScreenshot(newPage, `notebook-upload-file-${fileName}`);
+    await takeScreenshot(newPage, `notebook-upload-file-${fileName}.png`);
 
     await newPage.close();
     await this.page.bringToFront();
