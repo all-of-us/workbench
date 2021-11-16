@@ -41,32 +41,32 @@ export const WorkspaceActionsMenu = (props: WorkspaceActionsProps) => {
   const tooltip = isNotOwner && 'Requires owner permission';
 
   return <React.Fragment>
-          <div style={styles.dropdownHeader}>Workspace Actions</div>
-          <MenuItem
-            icon='copy'
-            onClick={() => onDuplicate()}>
-            Duplicate
-          </MenuItem>
-          <MenuItem
-            icon='pencil'
-            tooltip={tooltip}
-            disabled={isNotOwner}
-            onClick={() => onEdit()}>
-            Edit
-          </MenuItem>
-          <MenuItem
-            icon='share'
-            tooltip={tooltip}
-            disabled={isNotOwner}
-            onClick={() => onShare()}>
-            Share
-          </MenuItem>
-          <MenuItem
-            icon='trash'
-            tooltip={tooltip}
-            disabled={isNotOwner}
-            onClick={() => onDelete()}>
-            Delete
-          </MenuItem>
-        </React.Fragment>;
+    <div style={styles.dropdownHeader}>Workspace Actions</div>
+    <MenuItem
+      icon='copy'
+      onClick={() => onDuplicate()}>
+      Duplicate
+    </MenuItem>
+    <MenuItem
+      icon='pencil'
+      tooltip={tooltip}
+      disabled={isNotOwner}
+      onClick={() => onEdit()}>
+      Edit
+    </MenuItem>
+    <MenuItem
+      icon='share'
+      tooltip={tooltip}
+      disabled={isNotOwner}
+      onClick={() => onShare()}>
+      Share
+    </MenuItem>
+    <MenuItem
+      icon='trash'
+      tooltip={tooltip}
+      disabled={isNotOwner}
+      onClick={() => onDelete()}>
+      Delete
+    </MenuItem>
+  </React.Fragment>;
 }
