@@ -5,15 +5,9 @@ set -e
 
 export BQ_PROJECT=$1        # CDR project
 export BQ_DATASET=$2        # CDR dataset
-export CDR_VERSION=$3       # CDR version
-export DATA_BROWSER=$4      # data browser flag
+export DATA_BROWSER=$3      # data browser flag
 
 schema_path=generate-cdr/bq-schemas
-BUCKET="all-of-us-workbench-private-cloudsql"
-TEMP_FILE_DIR="csv"
-CSV_HOME_DIR="cdr_csv_files"
-PREP_SURVEY="prep_survey.csv"
-ALL_FILES=($PREP_SURVEY)
 DEPENDENT_TABLES=("activity_summary"
             "concept"
             "concept_ancestor"

@@ -861,21 +861,16 @@ def validate_prerequisites_exist(cmd_name, *args)
     "BQ dataset. Required."
   )
   op.add_option(
-    "--cdr-version [cdr-version]",
-    ->(opts, v) { opts.cdr_version = v},
-    "CDR version. Required."
-  )
-  op.add_option(
     "--data-browser [data-browser]",
     ->(opts, v) { opts.data_browser = v},
     "Is this run for data browser. Optional - Default is false"
   )
-  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset and opts.cdr_version }
+  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset }
   op.parse.validate
 
   common = Common.new
   Dir.chdir('db-cdr') do
-    common.run_inline %W{./generate-cdr/validate-prerequisites-exist.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.cdr_version} #{op.opts.data_browser}}
+    common.run_inline %W{./generate-cdr/validate-prerequisites-exist.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.data_browser}}
   end
 end
 
