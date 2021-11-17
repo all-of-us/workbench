@@ -16,7 +16,7 @@ import {notebooksApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {hasNewValidProps, reactStyles, withCurrentWorkspace} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
-import {NavigationProps} from 'app/utils/navigation';
+import { NavigationProps , setSidebarActiveIconStore} from 'app/utils/navigation';
 import {
   ComputeSecuritySuspendedError,
   maybeInitializeRuntime,
@@ -98,7 +98,7 @@ interface State {
   showInUseModal: boolean;
   showPlaygroundModeModal: boolean;
   userRequestedExecutableNotebook: boolean;
-  showRuntimeInitializerModalDefault: Runtime;
+  runtimeInitializerDefault: Runtime;
   resolveRuntimeInitializer: (Runtime) => void;
   error: Error;
 }
@@ -121,7 +121,7 @@ export const InteractiveNotebook = fp.flow(
         showInUseModal: false,
         showPlaygroundModeModal: false,
         userRequestedExecutableNotebook: false,
-        showRuntimeInitializerModalDefault: null,
+        runtimeInitializerDefault: null,
         resolveRuntimeInitializer: null,
         error: null
       };
@@ -144,6 +144,9 @@ export const InteractiveNotebook = fp.flow(
 
     componentWillUnmount(): void {
       this.pollAborter.abort();
+      if (this.state.resolveRuntimeInitializer) {
+        this.state.resolveRuntimeInitializer(null);
+      }
     }
 
     async loadNotebook() {
@@ -164,14 +167,20 @@ export const InteractiveNotebook = fp.flow(
     }
 
     private async runRuntime(onRuntimeReady: Function, targetRuntime?: Runtime): Promise<void> {
+      this.setState({userRequestedExecutableNotebook: true});
       try {
-        await maybeInitializeRuntime(this.props.match.params.ns, this.pollAborter.signal);
+        await maybeInitializeRuntime(this.props.match.params.ns, this.pollAborter.signal, targetRuntime);
         onRuntimeReady();
       } catch (e) {
+        this.setState({userRequestedExecutableNotebook: false});
         if (e instanceof InitialRuntimeNotFoundError) {
+          // By awaiting the promise here, we're effectively blocking on the
+          // user's input to the runtime intializer modal. We invoke this
+          // callback with the targetRuntime configuration, or null if the user
+          // has decided to cancel or change their configuration.
           const runtimeToCreate = await new Promise((resolve) => {
             this.setState({
-              showRuntimeInitializerModalDefault: e.defaultRuntime,
+              runtimeInitializerDefault: e.defaultRuntime,
               resolveRuntimeInitializer: resolve
             });
           });
@@ -187,7 +196,6 @@ export const InteractiveNotebook = fp.flow(
     private startEditMode() {
       if (this.canStartRuntimes) {
         if (!this.notebookInUse) {
-          this.setState({userRequestedExecutableNotebook: true});
           this.runRuntime(() => { this.navigateEditMode(); });
         } else {
           this.setState({
@@ -199,7 +207,6 @@ export const InteractiveNotebook = fp.flow(
 
     private startPlaygroundMode() {
       if (this.canStartRuntimes) {
-        this.setState({userRequestedExecutableNotebook: true});
         this.runRuntime(() => { this.navigatePlaygroundMode(); });
       }
     }
@@ -315,9 +322,17 @@ export const InteractiveNotebook = fp.flow(
         showInUseModal,
         showPlaygroundModeModal,
         userRequestedExecutableNotebook,
-        showRuntimeInitializerModalDefault,
+        runtimeInitializerDefault,
+        resolveRuntimeInitializer,
         error
       } = this.state;
+      const closeRuntimeInitializerModal = (r?: Runtime) => {
+        resolveRuntimeInitializer(r);
+        this.setState({
+          runtimeInitializerDefault: null,
+          resolveRuntimeInitializer: null
+        });
+      };
       return (
         <div>
           <div style={styles.navBar}>
@@ -380,21 +395,14 @@ export const InteractiveNotebook = fp.flow(
               this.startPlaygroundMode();
             }}>
           </NotebookInUseModal>}
-          {showRuntimeInitializerModalDefault &&
+          {resolveRuntimeInitializer &&
            <RuntimeInitializerModal
-             defaultRuntime={showRuntimeInitializerModalDefault}
+             defaultRuntime={runtimeInitializerDefault}
              cancel={() => {
-               this.setState({showRuntimeInitializerModalDefault: null});
-               this.state.resolveRuntimeInitializer(null);
+               closeRuntimeInitializerModal(null);
              }}
-             openRuntimePanel={() => {
-              // XXX: open
-               this.setState({showRuntimeInitializerModalDefault: null});
-               this.state.resolveRuntimeInitializer(null);
-             }}
-             createDefault={() => {
-               this.setState({showRuntimeInitializerModalDefault: null});
-               this.state.resolveRuntimeInitializer(showRuntimeInitializerModalDefault);
+             createAndContinue={() => {
+               closeRuntimeInitializerModal(runtimeInitializerDefault);
              }} />
             }
         </div>

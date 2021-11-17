@@ -1,21 +1,41 @@
 import {Modal, ModalBody, ModalFooter, ModalTitle} from './modals';
 import * as React from 'react';
-import { Button } from './buttons';
+import { Button, Clickable } from './buttons';
 import { Runtime, RuntimeConfigurationType } from 'generated/fetch';
+import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { RuntimeCostEstimator } from './runtime-cost-estimator';
 import { RuntimeSummary } from './runtime-summary';
 import { toRuntimeConfig } from 'app/utils/runtime-utils';
 
+import {useState} from 'react';
+import { ClrIcon } from './icons';
+import { reactStyles } from 'app/utils';
+import { setSidebarActiveIconStore } from 'app/utils/navigation';
+
+
+const styles = reactStyles({
+  bodyElement: {
+    marginTop: '15px'
+  },
+  runtimeDetails: {
+    border: `1px solid ${colorWithWhiteness(colors.dark, 0.8)}`,
+    borderRadius: '5px',
+    marginTop: '10px',
+    padding: '10px'
+  }
+});
+
 interface Props {
   cancel: () => void;
-  openRuntimePanel: () => void;
-  createDefault: () => void;
+  createAndContinue: () => void;
   defaultRuntime: Runtime;
 }
 
-export const RuntimeInitializerModal = ({cancel, openRuntimePanel, createDefault, defaultRuntime}: Props) => {
+export const RuntimeInitializerModal = ({cancel, createAndContinue, defaultRuntime}: Props) => {
+  const [showDetails, setShowDetails] = useState(false);
+
   const defaultRuntimeConfig = toRuntimeConfig(defaultRuntime);
-  return <Modal>
+  return <Modal width={600}>
     <ModalTitle>Create an Analysis Environment</ModalTitle>
     <ModalBody>
       <div>
@@ -25,8 +45,17 @@ export const RuntimeInitializerModal = ({cancel, openRuntimePanel, createDefault
            'Would you like to continue with this default environment?' :
            'Would you like to continue with your most recently used environment settings in this workspace?'}
       </div>
-      <RuntimeCostEstimator runtimeParameters={defaultRuntimeConfig} />
-      <RuntimeSummary runtimeConfig={defaultRuntimeConfig} />
+      <RuntimeCostEstimator
+        runtimeParameters={defaultRuntimeConfig}
+        style={{...styles.bodyElement, justifyContent: 'space-evenly'}} />
+      <Clickable onClick={() => setShowDetails(!showDetails)} style={styles.bodyElement} >
+        Environment details<ClrIcon shape='angle' style={{transform: showDetails ? 'rotate(180deg)' : 'rotate(90deg)'}} />
+      </Clickable>
+     {showDetails &&
+       <div style={styles.runtimeDetails}>
+         <RuntimeSummary runtimeConfig={defaultRuntimeConfig} />
+         <div style={{marginTop: '10px'}}>To change this configuration, click 'Configure' below.</div>
+       </div>}
     </ModalBody>
     <ModalFooter style={{justifyContent: 'space-between'}}>
       <Button
@@ -38,13 +67,14 @@ export const RuntimeInitializerModal = ({cancel, openRuntimePanel, createDefault
       <Button
           type='secondary'
           onClick={() => {
-            openRuntimePanel();
+            setSidebarActiveIconStore.next('runtime');
+            cancel();
           }}
       >
-        Edit
+        Configure
       </Button>
       <Button onClick={() => {
-        createDefault();
+        createAndContinue();
       }}>
         Create Environment
       </Button>

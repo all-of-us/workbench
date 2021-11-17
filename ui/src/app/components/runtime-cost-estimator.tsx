@@ -12,20 +12,23 @@ import {
   machineStorageCostBreakdown,
 } from 'app/utils/machines';
 import {formatUsd} from 'app/utils/numbers';
-import { RuntimeConfig, RuntimeCtx } from 'app/utils/runtime-utils';
+import { RuntimeConfig } from 'app/utils/runtime-utils';
 import { serverConfigStore } from 'app/utils/stores';
+import { CSSProperties } from 'react';
 
 
 interface Props {
   runtimeParameters: RuntimeConfig;
   dataprocExists?: boolean;
   costTextColor?: string;
+  style?: CSSProperties;
 }
 
 export const RuntimeCostEstimator = ({
   runtimeParameters,
   dataprocExists = false,
-  costTextColor = colors.accent
+  costTextColor = colors.accent,
+  style = {}
 }: Props) => {
   const {
     computeType,
@@ -54,7 +57,7 @@ export const RuntimeCostEstimator = ({
   const storageCost = machineStorageCost(costConfig);
   const storageCostBreakdown = machineStorageCostBreakdown(costConfig);
   const costPriceFontSize = enablePersistentDisk ? '12px' : '20px';
-  return <FlexRow>
+  return <FlexRow style={style}>
       <FlexColumn style={{marginRight: '1rem'}}>
         <div style={{fontSize: '10px', fontWeight: 600}}>Cost when running</div>
         <TooltipTrigger content={
@@ -67,7 +70,7 @@ export const RuntimeCostEstimator = ({
               style={{fontSize: costPriceFontSize, color: costTextColor}}
               data-test-id='running-cost'
           >
-            {formatUsd(runningCost)}/hr
+            {formatUsd(runningCost)}/hour
           </div>
         </TooltipTrigger>
       </FlexColumn>
@@ -83,7 +86,7 @@ export const RuntimeCostEstimator = ({
               style={{fontSize: costPriceFontSize, color: costTextColor}}
               data-test-id='storage-cost'
           >
-            {formatUsd(storageCost)}/hr
+            {formatUsd(storageCost)}/hour
           </div>
         </TooltipTrigger>
       </FlexColumn>
