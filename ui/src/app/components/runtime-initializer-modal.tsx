@@ -11,6 +11,7 @@ import {useState} from 'react';
 import { ClrIcon } from './icons';
 import { reactStyles } from 'app/utils';
 import { setSidebarActiveIconStore } from 'app/utils/navigation';
+import { WarningMessage } from './messages';
 
 
 const styles = reactStyles({
@@ -38,13 +39,13 @@ export const RuntimeInitializerModal = ({cancel, createAndContinue, defaultRunti
   return <Modal width={600}>
     <ModalTitle>Create an Analysis Environment</ModalTitle>
     <ModalBody>
-      <div>
+      <WarningMessage iconPosition="top">
         Continuing with this action requires a cloud analysis environment, which will be charged
         to this workspace.&nbsp;
         {defaultRuntime.configurationType === RuntimeConfigurationType.GeneralAnalysis ?
            'Would you like to continue with this default environment?' :
            'Would you like to continue with your most recently used environment settings in this workspace?'}
-      </div>
+      </WarningMessage>
       <RuntimeCostEstimator
         runtimeParameters={defaultRuntimeConfig}
         style={{...styles.bodyElement, justifyContent: 'space-evenly'}} />
