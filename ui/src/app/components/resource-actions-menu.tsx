@@ -12,14 +12,13 @@ export interface Action {
   hoverText?: string;
 }
 
-export const ResourceActionsMenu = (props: { actions: Action[] }) => {
-  const {actions} = props;
+export const ResourceActionsMenu = (props: { actions: Action[], disabled?: boolean}) => {
+  const {actions, disabled} = props;
   return <PopupTrigger
         data-test-id='resource-card-menu'
         side='bottom'
         closeOnClick
-        content={
-            <React.Fragment>
+        content={!disabled && <React.Fragment>
                 {actions.map((action, i) => {
                   return (
                         <TooltipTrigger key={i} content={action.hoverText}>
@@ -35,6 +34,6 @@ export const ResourceActionsMenu = (props: { actions: Action[] }) => {
             </React.Fragment>
         }
     >
-        <SnowmanButton data-test-id='resource-menu'/>
+        <SnowmanButton data-test-id='resource-menu' disabled={disabled}/>
     </PopupTrigger>;
 };

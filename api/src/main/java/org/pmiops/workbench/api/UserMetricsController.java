@@ -286,6 +286,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
     resource.setCdrVersionId(commonMappers.cdrVersionToId(dbWorkspace.getCdrVersion()));
     resource.setAccessTierShortName(dbWorkspace.getCdrVersion().getAccessTier().getShortName());
     resource.setWorkspaceBillingStatus(dbWorkspace.getBillingStatus());
+    resource.setAdminLocked(dbWorkspace.isAdminLocked());
   }
 
   private void buildFromFcWorkspace(

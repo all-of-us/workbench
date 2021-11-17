@@ -107,6 +107,7 @@ export function convertToResource(
     dataSet: resourceType === ResourceType.DATASET ? inputResource as DataSet : null,
     notebook: resourceType === ResourceType.NOTEBOOK ? inputResource as FileDetail : null,
     lastModifiedEpochMillis: inputResource.lastModifiedTime,
+    adminLocked: workspace.adminLocked
   };
 }
 

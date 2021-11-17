@@ -21,6 +21,10 @@ import {
   WorkspaceResourceResponse,
   WorkspaceResponse
 } from 'generated/fetch';
+import {faLockAlt} from '@fortawesome/pro-solid-svg-icons';
+import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
+import colors from 'app/styles/colors';
+import {TooltipTrigger} from 'app/components/popups';
 
 const styles = reactStyles({
   column: {
@@ -121,7 +125,11 @@ export const RecentResources = fp.flow(withCdrVersions())((props: Props) => {
           return {
             menu: renderResourceMenu(r),
             resourceType: <ResourceNavigation resource={r}><StyledResourceType resource={r}/></ResourceNavigation>,
-            resourceName: <ResourceNavigation resource={r} style={styles.navigation}>{getDisplayName(r)}</ResourceNavigation>,
+            resourceName: <ResourceNavigation resource={r} style={styles.navigation}>
+              {r.adminLocked && <TooltipTrigger content={<div>Workspace compliance action required</div>}>
+                <FontAwesomeIcon style={{color: colors.warning, marginRight: '0.5rem'}}size={'sm'} icon={faLockAlt}/>
+              </TooltipTrigger>}
+              {getDisplayName(r)}</ResourceNavigation>,
             workspaceName: <WorkspaceNavigation workspace={getWorkspace(r)} resource={r} style={styles.navigation}/>,
             formattedLastModified: formatWorkspaceResourceDisplayDate(r.lastModifiedEpochMillis),
             cdrVersionName: getCdrVersionName(r),

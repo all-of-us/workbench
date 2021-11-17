@@ -31,4 +31,5 @@ export const stubResource: WorkspaceResource = {
   accessTierShortName: AccessTierShortNames.Registered,
   workspaceBillingStatus: BillingStatus.ACTIVE,
   lastModifiedEpochMillis: 1634763170,
+  adminLocked: false
 };

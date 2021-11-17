@@ -182,7 +182,7 @@ export const NotebookResourceCard = fp.flow(
                    existingNames={this.props.existingNameList}/>
       }
       {menuOnly ?
-          <ResourceActionsMenu actions={this.actions}/> :
+          <ResourceActionsMenu actions={this.actions} disabled={resource.adminLocked}/> :
           <ResourceCard resource={resource} actions={this.actions}/>}
     </React.Fragment>;
   }
