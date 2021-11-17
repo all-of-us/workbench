@@ -89,6 +89,8 @@
       "cdrDbName": "synth_r_2019q4_22",
       "hasFitbitData": true,
       "hasCopeSurveyData": true,
+      "allSamplesWgsDataBucket": "5/wgs/vcf/merged/",
+      "singleSampleArrayDataBucket": "5/microarray/vcf/single_sample/",
       "accessTier": "controlled"
     },
     {
