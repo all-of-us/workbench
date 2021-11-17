@@ -254,10 +254,13 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withCdrVersions())
           <TooltipTrigger content={ShareTooltipText()}>
             <InfoIcon style={{margin: '0 0.3rem'}}/>
           </TooltipTrigger>
+          <TooltipTrigger content={<div>Workspace compliance action is required</div>}
+                          disabled={!workspace?.adminLocked}>
           <Button style={{height: '22px', fontSize: 12, marginRight: '0.5rem',
-            maxWidth: '13px'}} disabled={workspaceUserRoles.length === 0}
+            maxWidth: '13px'}} disabled={workspaceUserRoles.length === 0 || workspace?.adminLocked}
                   data-test-id='workspaceShareButton'
                   onClick={() => this.setState({sharing: true})}>Share</Button>
+          </TooltipTrigger>
         </div>
         {workspaceUserRoles.length > 0 ?
           <React.Fragment>
