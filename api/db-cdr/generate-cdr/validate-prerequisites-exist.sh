@@ -8,6 +8,7 @@ export BQ_DATASET=$2        # CDR dataset
 export CDR_VERSION=$3       # CDR version
 export DATA_BROWSER=$4      # data browser flag
 
+schema_path=generate-cdr/bq-schemas
 BUCKET="all-of-us-workbench-private-cloudsql"
 TEMP_FILE_DIR="csv"
 CSV_HOME_DIR="cdr_csv_files"
@@ -42,18 +43,6 @@ DEPENDENT_TABLES=("activity_summary"
             "vocabulary")
 INCOMPATIBLE_DATASETS=("R2019Q4R3" "R2019Q4R4", "R2020Q4R3")
 
-function loadCSVFile() {
-  local file=$1
-  local tableName=$2
-  # Load the csv file into table
-  echo "Starting load of $file"
-  schema_path=generate-cdr/bq-schemas
-  bq --project_id=$BQ_PROJECT rm -f $BQ_DATASET.$tableName
-  bq load --project_id=$BQ_PROJECT --source_format=CSV $BQ_DATASET.$tableName \
-  gs://$BUCKET/$BQ_DATASET/$CSV_HOME_DIR/$file $schema_path/$tableName.json
-  echo "Finished loading $file"
-}
-
 if [[ ${INCOMPATIBLE_DATASETS[@]} =~ $BQ_DATASET ]];
   then
   echo "Can't run CDR build indices against "$BQ_DATASET"!"
@@ -69,16 +58,5 @@ then
   done
 fi
 
-rm -rf $TEMP_FILE_DIR
-mkdir $TEMP_FILE_DIR
-
-# Process all tables
-if gsutil -m cp gs://$BUCKET/$BQ_DATASET/$CSV_HOME_DIR/*.csv $TEMP_FILE_DIR
-then
-  for file in ${ALL_FILES[@]}; do
-    tableName=${file%.*}
-    loadCSVFile $file $tableName
-  done
-fi
-
-rm -rf $TEMP_FILE_DIR
+bq --project_id="$BQ_PROJECT" rm -f "$BQ_DATASET.prep_survey"
+bq --quiet --project_id="$BQ_PROJECT" mk --schema="$schema_path/prep_survey.json" "$BQ_DATASET.prep_survey"
