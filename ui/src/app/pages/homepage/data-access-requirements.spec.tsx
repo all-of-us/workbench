@@ -6,7 +6,7 @@ import {AccessModule, InstitutionApi, Profile, ProfileApi} from 'generated/fetch
 import {
     allModules,
     DataAccessRequirements,
-    getNextModule,
+    getNextActiveModule,
     getEligibleModules,
     requiredModules
 } from './data-access-requirements';
@@ -100,9 +100,9 @@ describe('DataAccessRequirements', () => {
         expect(enabledModules.includes(AccessModule.COMPLIANCETRAINING)).toBeFalsy();
     });
 
-    it('should return the first module (2FA) from getNextModule when no modules have been completed', () => {
+    it('should return the first module (2FA) from getNextActiveModule when no modules have been completed', () => {
         const enabledModules = getEligibleModules(requiredModules, profile);
-        const activeModule = getNextModule(enabledModules, profile);
+        const activeModule = getNextActiveModule(enabledModules, profile);
 
         expect(activeModule).toEqual(requiredModules[0]);
         expect(activeModule).toEqual(enabledModules[0]);
@@ -111,7 +111,7 @@ describe('DataAccessRequirements', () => {
         expect(activeModule).toEqual(AccessModule.TWOFACTORAUTH)
     });
 
-    it('should return the second module (RAS) from getNextModule when the first module (2FA) has been completed', () => {
+    it('should return the second module (RAS) from getNextActiveModule when the first module (2FA) has been completed', () => {
         const testProfile = {
             ...profile,
             accessModules: {
@@ -120,7 +120,7 @@ describe('DataAccessRequirements', () => {
         };
 
         const enabledModules = getEligibleModules(requiredModules, profile);
-        const activeModule = getNextModule(enabledModules, testProfile);
+        const activeModule = getNextActiveModule(enabledModules, testProfile);
 
         expect(activeModule).toEqual(requiredModules[1]);
         expect(activeModule).toEqual(enabledModules[1]);
@@ -129,7 +129,7 @@ describe('DataAccessRequirements', () => {
         expect(activeModule).toEqual(AccessModule.RASLINKLOGINGOV)
     });
 
-    it('should return the second module (RAS) from getNextModule when the first module (2FA) has been bypassed', () => {
+    it('should return the second module (RAS) from getNextActiveModule when the first module (2FA) has been bypassed', () => {
         const testProfile = {
             ...profile,
             accessModules: {
@@ -138,7 +138,7 @@ describe('DataAccessRequirements', () => {
         };
 
         const enabledModules = getEligibleModules(requiredModules, profile);
-        const activeModule = getNextModule(enabledModules, testProfile);
+        const activeModule = getNextActiveModule(enabledModules, testProfile);
 
         expect(activeModule).toEqual(requiredModules[1]);
         expect(activeModule).toEqual(enabledModules[1]);
@@ -147,7 +147,7 @@ describe('DataAccessRequirements', () => {
         expect(activeModule).toEqual(AccessModule.RASLINKLOGINGOV)
     });
 
-    it('should return the second enabled module (ERA, not RAS) from getNextModule' +
+    it('should return the second enabled module (ERA, not RAS) from getNextActiveModule' +
       ' when the first module (2FA) has been completed and RAS is disabled', () => {
         serverConfigStore.set({config: {...defaultServerConfig, enableRasLoginGovLinking: false, enforceRasLoginGovLinking: false}});
 
@@ -159,7 +159,7 @@ describe('DataAccessRequirements', () => {
         };
 
         const enabledModules = getEligibleModules(requiredModules, profile);
-        const activeModule = getNextModule(enabledModules, testProfile);
+        const activeModule = getNextActiveModule(enabledModules, testProfile);
 
         // update this if the order changes
         expect(activeModule).toEqual(AccessModule.ERACOMMONS)
@@ -171,7 +171,7 @@ describe('DataAccessRequirements', () => {
         expect(activeModule).toEqual(requiredModules[2]);
     });
 
-    it('should return the fourth module (Compliance) from getNextModule when the first 3 modules have been completed', () => {
+    it('should return the fourth module (Compliance) from getNextActiveModule when the first 3 modules have been completed', () => {
         const testProfile = {
             ...profile,
             accessModules: {
@@ -184,7 +184,7 @@ describe('DataAccessRequirements', () => {
         };
 
         const enabledModules = getEligibleModules(requiredModules, profile);
-        const activeModule = getNextModule(enabledModules, testProfile);
+        const activeModule = getNextActiveModule(enabledModules, testProfile);
 
         expect(activeModule).toEqual(requiredModules[3]);
         expect(activeModule).toEqual(enabledModules[3]);
@@ -193,7 +193,7 @@ describe('DataAccessRequirements', () => {
         expect(activeModule).toEqual(AccessModule.COMPLIANCETRAINING)
     });
 
-    it('should return undefined from getNextModule when all modules have been completed', () => {
+    it('should return undefined from getNextActiveModule when all modules have been completed', () => {
         const testProfile = {
             ...profile,
             accessModules: {
@@ -202,7 +202,7 @@ describe('DataAccessRequirements', () => {
         };
 
         const enabledModules = getEligibleModules(requiredModules, profile);
-        const activeModule = getNextModule(enabledModules, testProfile);
+        const activeModule = getNextActiveModule(enabledModules, testProfile);
 
         expect(activeModule).toBeUndefined();
     });
@@ -223,7 +223,7 @@ describe('DataAccessRequirements', () => {
 
         const enabledModules = getEligibleModules(requiredModules, profile);
 
-        let activeModule = getNextModule(enabledModules, testProfile);
+        let activeModule = getNextActiveModule(enabledModules, testProfile);
         expect(activeModule).toEqual(AccessModule.RASLINKLOGINGOV)
 
         // simulate handleRasCallback() by updating the profile
@@ -238,7 +238,7 @@ describe('DataAccessRequirements', () => {
             }
         };
 
-        activeModule = getNextModule(enabledModules, updatedProfile);
+        activeModule = getNextActiveModule(enabledModules, updatedProfile);
         expect(activeModule).toBeUndefined();
     });
 

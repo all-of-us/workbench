@@ -371,7 +371,7 @@ const syncIncompleteModules = (modules: AccessModule[], profile: Profile, reload
 }
 
 // exported for test
-export const getNextModule = (modules: AccessModule[], profile: Profile): AccessModule => incompleteModules(modules, profile)[0];
+export const getNextActiveModule = (modules: AccessModule[], profile: Profile): AccessModule => incompleteModules(modules, profile)[0];
 
 const Refresh = (props: { showSpinner: Function; refreshAction: Function }) => {
   const {showSpinner, refreshAction} = props;
@@ -586,19 +586,19 @@ const Completed = () => <FlexRow data-test-id='dar-completed' style={styles.comp
 interface CardProps {
   profile: Profile,
   modules: AccessModule[],
-  nextModules: AccessModule[],
+  activeModules: AccessModule[],
   spinnerProps: WithSpinnerOverlayProps
 }
 
 const ModulesForCard = (props: CardProps) => {
-  const {profile, modules, nextModules, spinnerProps} = props;
+  const {profile, modules, activeModules, spinnerProps} = props;
 
   return <FlexColumn style={styles.modulesContainer}>
     {modules.map(moduleName => <MaybeModule
          key={moduleName}
          moduleName={moduleName}
          profile={profile}
-         active={nextModules.includes(moduleName)}
+         active={activeModules.includes(moduleName)}
          spinnerProps={spinnerProps}/>
     )}
   </FlexColumn>;
@@ -634,8 +634,8 @@ const DataDetail = (props: {icon: string, text: string}) => {
   </FlexRow>;
 };
 
-const RegisteredTierCard = (props: {profile: Profile, nextModules: AccessModule[], spinnerProps: WithSpinnerOverlayProps}) => {
-  const {profile, nextModules, spinnerProps} = props;
+const RegisteredTierCard = (props: {profile: Profile, activeModules: AccessModule[], spinnerProps: WithSpinnerOverlayProps}) => {
+  const {profile, activeModules, spinnerProps} = props;
   const rtDisplayName = AccessTierDisplayNames.Registered;
   return <FlexRow style={styles.card}>
     <FlexColumn>
@@ -653,13 +653,13 @@ const RegisteredTierCard = (props: {profile: Profile, nextModules: AccessModule[
       <DataDetail icon='physical' text='Physical measurements'/>
       <DataDetail icon='wearable' text='Wearable devices'/>
     </FlexColumn>
-    <ModulesForCard profile={profile} modules={getVisibleRTModules(profile)} nextModules={nextModules} spinnerProps={spinnerProps}/>
+    <ModulesForCard profile={profile} modules={getVisibleRTModules(profile)} activeModules={activeModules} spinnerProps={spinnerProps}/>
   </FlexRow>;
 };
 
-const ControlledTierCard = (props: {profile: Profile, nextModules: AccessModule[],
+const ControlledTierCard = (props: {profile: Profile, activeModules: AccessModule[],
     reload: Function, spinnerProps: WithSpinnerOverlayProps}) => {
-  const {profile, nextModules, spinnerProps} = props;
+  const {profile, activeModules, spinnerProps} = props;
   const controlledTierEligibility = profile.tierEligibilities.find(tier=> tier.accessTierShortName === AccessTierShortNames.Controlled);
   const registeredTierEligibility = profile.tierEligibilities.find(tier=> tier.accessTierShortName === AccessTierShortNames.Registered);
   const isSigned = !!controlledTierEligibility;
@@ -705,7 +705,7 @@ const ControlledTierCard = (props: {profile: Profile, nextModules: AccessModule[
                           text={`${institutionDisplayName} must allow you to access ${ctDisplayName} data`}/>
       {displayEraCommons &&
        <ControlledTierEraModule profile={profile} eligible={isEligible} spinnerProps={spinnerProps}/>}
-      <ModulesForCard profile={profile} modules={[ctModule]} nextModules={nextModules} spinnerProps={spinnerProps}/>
+      <ModulesForCard profile={profile} modules={[ctModule]} activeModules={activeModules} spinnerProps={spinnerProps}/>
     </FlexColumn>
   </FlexRow>
 };
@@ -728,14 +728,14 @@ const ControlledTierStep = (props: {enabled: boolean, text: String}) => {
      </FlexRow>;
 }
 
-const DuccCard = (props: {profile: Profile, nextModules: AccessModule[], spinnerProps: WithSpinnerOverlayProps, stepNumber: Number}) => {
-  const {profile, nextModules, spinnerProps, stepNumber} = props;
+const DuccCard = (props: {profile: Profile, activeModules: AccessModule[], spinnerProps: WithSpinnerOverlayProps, stepNumber: Number}) => {
+  const {profile, activeModules, spinnerProps, stepNumber} = props;
   return <FlexRow style={{...styles.card, height: '125px'}}>
     <FlexColumn>
       <div style={styles.cardStep}>Step {stepNumber}</div>
       <div style={styles.cardHeader}>Sign the code of conduct</div>
     </FlexColumn>
-    <ModulesForCard profile={profile} modules={[duccModule]} nextModules={nextModules} spinnerProps={spinnerProps}/>
+    <ModulesForCard profile={profile} modules={[duccModule]} activeModules={activeModules} spinnerProps={spinnerProps}/>
   </FlexRow>;
 };
 
@@ -768,33 +768,33 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
   //  1. The next module, which we visually direct the user to with a CTA
   //  2. The next required module, which may diverge when the next module is optional.
   // This configuration allows the user to skip the optional CT section. The
-  // first element of the nextModules list gets the preferential CTA.
-  const [nextModules, setNextModules] = useState([]);
+  // first element of the activeModules list gets the preferential CTA.
+  const [activeModules, setActiveModules] = useState([]);
 
-  const getNext = (modules: AccessModule[]) => getNextModule(getEligibleModules(modules, profile), profile);
-  const nextRequired = getNext(requiredModules);
+  const getNextActive = (modules: AccessModule[]) => getNextActiveModule(getEligibleModules(modules, profile), profile);
+  const nextRequired = getNextActive(requiredModules);
 
   // whenever the profile changes, update the next modules to complete
   useEffect(() => {
-    setNextModules(
+    setActiveModules(
       fp.flow(
         fp.filter(m => !!m),
         fp.uniq
       )([
-        getNext(allModules),
+        getNextActive(allModules),
         nextRequired
       ]));
   }, [profile]);
 
   const showCtCard = environment.accessTiersVisibleToUsers.includes(AccessTierShortNames.Controlled)
 
-  const rtCard = <RegisteredTierCard key='rt' profile={profile} nextModules={nextModules} spinnerProps={spinnerProps}/>
+  const rtCard = <RegisteredTierCard key='rt' profile={profile} activeModules={activeModules} spinnerProps={spinnerProps}/>
   const ctCard = showCtCard ?
-      <ControlledTierCard key='ct' profile={profile} nextModules={nextModules} reload={reload} spinnerProps={spinnerProps}/> : null
+      <ControlledTierCard key='ct' profile={profile} activeModules={activeModules} reload={reload} spinnerProps={spinnerProps}/> : null
   const dCard = <DuccCard
     key='dt'
     profile={profile}
-    nextModules={nextModules}
+    activeModules={activeModules}
     spinnerProps={spinnerProps}
     stepNumber={showCtCard ? 3 : 2}/>
 
