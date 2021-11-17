@@ -1,9 +1,9 @@
-import { reactStyles } from "app/utils";
+import { reactStyles } from 'app/utils';
 import {
   ComputeType,
   findMachineByName,
 } from 'app/utils/machines';
-import { RuntimeConfig } from "app/utils/runtime-utils";
+import { RuntimeConfig } from 'app/utils/runtime-utils';
 
 
 const styles = reactStyles({
