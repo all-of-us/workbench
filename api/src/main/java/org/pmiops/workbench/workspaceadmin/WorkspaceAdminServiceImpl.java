@@ -330,7 +330,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
     adminAuditor.fireLockWorkspaceAction(dbWorkspace.getWorkspaceId(), adminLockingRequest);
 
     try {
-      mailService.sendWorkspaceAdminLockedEmail(
+      mailService.sendWorkspaceAdminLockingEmail(
           dbWorkspace.getCreator(), dbWorkspace, adminLockingRequest.getRequestReason());
     } catch (final MessagingException e) {
       log.log(Level.WARNING, e.getMessage());

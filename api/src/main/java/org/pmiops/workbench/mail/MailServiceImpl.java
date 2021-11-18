@@ -280,7 +280,7 @@ public class MailServiceImpl implements MailService {
   }
 
   @Override
-  public void sendWorkspaceAdminLockedEmail(
+  public void sendWorkspaceAdminLockingEmail(
       DbUser creator, DbWorkspace workspace, String lockingReason) throws MessagingException {
 
     WorkbenchConfig config = workbenchConfigProvider.get();
@@ -294,7 +294,7 @@ public class MailServiceImpl implements MailService {
         ccSupportMaybe,
         "[Response Required] AoU Researcher Workbench Workspace Admin Locked",
         String.format(
-            "Admin locked email for workspace '%s' (%s) sent to creator %s (%s) ",
+            "Admin locking email for workspace '%s' (%s) sent to creator %s (%s)",
             workspace.getName(),
             workspace.getWorkspaceNamespace(),
             creator.getUsername(),

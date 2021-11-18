@@ -33,7 +33,7 @@ public interface MailService {
   void sendEgressRemediationEmail(
       final DbUser user, EgressRemediationAction egressRemediationAction) throws MessagingException;
 
-  void sendWorkspaceAdminLockedEmail(
+  void sendWorkspaceAdminLockingEmail(
       final DbUser creator, final DbWorkspace workspace, final String lockingReason)
       throws MessagingException;
 }
