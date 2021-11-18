@@ -674,9 +674,9 @@ workflows:
           parallel_num: 4
           optional_steps:
             - halt-puppeteer-check
+            - puppeteer-access-test-user-setup
           requires:
             - puppeteer-env-setup
-            - puppeteer-access-test-user-setup
             # PR commits e2e tests waits for workflow triggered by master branch merge to finish.
             - wait_until_previous_workflow_done
       # On master branch merges, run Puppeteer tests after ui and api deployed to "test" env successfully
