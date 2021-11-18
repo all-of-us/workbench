@@ -68,8 +68,8 @@ public class MailServiceImpl implements MailService {
       "emails/setup_gcp_billing_account_email/content.html";
   private static final String EGRESS_REMEDIATION_EMAIL =
       "emails/egress_remediation_email/content.html";
-  private static final String WORKSPACE_ADMIN_LOCKED_EMAIL =
-      "emails/workspace_admin_locked_email/content.html";
+  private static final String WORKSPACE_ADMIN_LOCKING_EMAIL =
+      "emails/workspace_admin_locking_email/content.html";
 
   private enum Status {
     REJECTED,
@@ -300,7 +300,7 @@ public class MailServiceImpl implements MailService {
             creator.getUsername(),
             creator.getContactEmail()),
         buildHtml(
-            WORKSPACE_ADMIN_LOCKED_EMAIL,
+            WORKSPACE_ADMIN_LOCKING_EMAIL,
             workspaceAdminLockedSubstitutionMap(creator, workspace, lockingReason)));
   }
 
