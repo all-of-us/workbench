@@ -264,6 +264,8 @@ public class WorkbenchConfig {
     // If true, workspace owner and writers will have Google Lifesience Runner permission, and their
     // Terra Pet SA can actAs itself.
     public boolean grantLifescienceApiRunnerAcl;
+    // If true, copy the support staff when sending Admin Locking emails.
+    public boolean ccSupportWhenAdminLocking;
   }
 
   public static class ActionAuditConfig {

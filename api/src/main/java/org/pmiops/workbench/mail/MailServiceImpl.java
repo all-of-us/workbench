@@ -282,23 +282,26 @@ public class MailServiceImpl implements MailService {
   @Override
   public void sendWorkspaceAdminLockedEmail(
       DbUser creator, DbWorkspace workspace, String lockingReason) throws MessagingException {
-    String htmlMessage =
-        buildHtml(
-            WORKSPACE_ADMIN_LOCKED_EMAIL,
-            workspaceAdminLockedSubstitutionMap(creator, workspace, lockingReason));
-    String rwSupportEmail = workbenchConfigProvider.get().mandrill.fromEmail;
+
+    WorkbenchConfig config = workbenchConfigProvider.get();
+    List<String> ccSupportMaybe =
+        config.featureFlags.ccSupportWhenAdminLocking
+            ? ImmutableList.of(config.mandrill.fromEmail)
+            : Collections.emptyList();
+
     sendWithRetries(
-        // send to the workspace creator AND include a copy in an email to the support team
-        ImmutableList.of(creator.getContactEmail(), rwSupportEmail),
-        ImmutableList.of(rwSupportEmail),
-        "[Response Required] AoU Researcher Workbench Woorkspace Admin Locked",
+        ImmutableList.of(creator.getContactEmail()),
+        ccSupportMaybe,
+        "[Response Required] AoU Researcher Workbench Workspace Admin Locked",
         String.format(
             "Admin locked email for workspace '%s' (%s) sent to creator %s (%s) ",
             workspace.getName(),
             workspace.getWorkspaceNamespace(),
             creator.getUsername(),
             creator.getContactEmail()),
-        htmlMessage);
+        buildHtml(
+            WORKSPACE_ADMIN_LOCKED_EMAIL,
+            workspaceAdminLockedSubstitutionMap(creator, workspace, lockingReason)));
   }
 
   private Map<EmailSubstitutionField, String> welcomeMessageSubstitutionMap(
