@@ -2,7 +2,7 @@ import { Page } from 'puppeteer';
 import Button from 'app/element/button';
 
 const Selector = {
-  runtimeInitializerCreateButton: '//*[@data-test-id="runtime-initializer-create")]'
+  runtimeInitializerCreateButton: '//*[@role="dialog"]//*[text()="Create Environment" and @role="button"]'
 };
 
 export async function initializeRuntimeIfModalPresented(page: Page): Promise<void> {
