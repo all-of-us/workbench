@@ -8876,11 +8876,6 @@ definitions:
         type: string
         format: date-time
         description: Time Compliance Training completed, or null if never completed.
-      complianceTrainingExpirationTime:
-        type: string
-        format: date-time
-        description: Time  User's compliance training will expire, or null training
-          not taken or if bypassed
       contactEmail:
         type: string
         description: User's external email address on file.
