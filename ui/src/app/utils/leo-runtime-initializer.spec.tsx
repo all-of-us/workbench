@@ -6,6 +6,7 @@ import {
 } from 'app/services/notebooks-swagger-fetch-clients';
 import {registerApiClient, runtimeApi} from 'app/services/swagger-fetch-clients';
 import {
+  InitialRuntimeNotFoundError,
   LeoRuntimeInitializer,
   LeoRuntimeInitializerOptions
 } from 'app/utils/leo-runtime-initializer';
@@ -132,7 +133,6 @@ describe('RuntimeInitializer', () => {
     mockGetRuntimeCalls([
       {status: RuntimeStatus.Stopped},
     ]);
-    mockGetRuntime.mockRejectedValueOnce(new Response(null, {status: 404}));
     mockGetRuntimeCalls([
       {status: RuntimeStatus.Starting},
       {status: RuntimeStatus.Starting},
@@ -143,8 +143,6 @@ describe('RuntimeInitializer', () => {
 
     expect(statuses).toEqual([
       RuntimeStatus.Stopped,
-      // A null value is passed when a runtime is not found.
-      null,
       // Note: onStatusUpdate will be called for every status received, not just when the status
       // value is changed.
       RuntimeStatus.Starting,
@@ -162,13 +160,15 @@ describe('RuntimeInitializer', () => {
       {status: RuntimeStatus.Starting},
       {status: RuntimeStatus.Running}
     ]);
-    const runtime = await runInitializerAndTimers();
+    const runtime = await runInitializerAndTimers({
+      targetRuntime: runtimePresets.generalAnalysis.runtimeTemplate
+    });
 
     expect(mockCreateRuntime).toHaveBeenCalled();
     expect(runtime.status).toEqual(RuntimeStatus.Running);
   });
 
-  it('should lazily create user\'s most runtime if a valid one exists', async() => {
+  it('should error and suggest user\'s most runtime if a valid one exists', async() => {
     serverConfigStore.set({config: {gsuiteDomain: 'researchallofus.org'}});
     mockGetRuntime.mockImplementation(namespace => {
       return {
@@ -181,20 +181,23 @@ describe('RuntimeInitializer', () => {
         status: RuntimeStatus.Deleted
       }; });
 
-    LeoRuntimeInitializer.initialize({
-      workspaceNamespace: workspaceNamespace,
-    });
-    await new Promise(setImmediate);
-
-    expect(mockCreateRuntime).toHaveBeenCalledWith(workspaceNamespace, expect.objectContaining({
-      gceConfig: {
-        diskSize: 777,
-        machineType: 'n1-standard-16'
-      }
-    }), expect.any(Object));
+    try {
+      await LeoRuntimeInitializer.initialize({
+        workspaceNamespace: workspaceNamespace,
+      });
+      fail('expected initializer to throw an exception');
+    } catch (e) {
+      expect(e).toBeInstanceOf(InitialRuntimeNotFoundError);
+      expect(e.defaultRuntime).toMatchObject({
+        gceConfig: {
+          diskSize: 777,
+          machineType: 'n1-standard-16'
+        }
+      });
+    }
   });
 
-  it('should use preset values during lazy runtime creation if a preset was selected', async() => {
+  it('should error and suggest preset values if a preset was selected for deleted runtime', async() => {
     serverConfigStore.set({config: {gsuiteDomain: 'researchallofus.org'}});
     mockGetRuntime.mockImplementation(namespace => {
       return {
@@ -208,18 +211,21 @@ describe('RuntimeInitializer', () => {
         status: RuntimeStatus.Deleted
       }; });
 
-    LeoRuntimeInitializer.initialize({
-      workspaceNamespace: workspaceNamespace,
-    });
-    await new Promise(setImmediate);
-
-    expect(mockCreateRuntime).toHaveBeenCalledWith(workspaceNamespace, expect.objectContaining({
-      gceConfig: {
-        diskSize: runtimePresets.generalAnalysis.runtimeTemplate.gceConfig.diskSize,
-        machineType: runtimePresets.generalAnalysis.runtimeTemplate.gceConfig.machineType,
-        gpuConfig: null,
-      }
-    }), expect.any(Object));
+    try {
+      await LeoRuntimeInitializer.initialize({
+        workspaceNamespace: workspaceNamespace
+      });
+      fail('expected initializer to throw an exception');
+    } catch (e) {
+      expect(e).toBeInstanceOf(InitialRuntimeNotFoundError);
+      expect(e.defaultRuntime).toMatchObject({
+        gceConfig: {
+          diskSize: runtimePresets.generalAnalysis.runtimeTemplate.gceConfig.diskSize,
+          machineType: runtimePresets.generalAnalysis.runtimeTemplate.gceConfig.machineType,
+          gpuConfig: null,
+        }
+      });
+    }
   });
 
   it('should not automatically delete errored runtimes', async() => {
@@ -306,11 +312,13 @@ describe('RuntimeInitializer', () => {
   it('should respect the maxCreateCount option', async() => {
     // Ensure that the initializer won't take action on a NOT_FOUND runtime if the maxCreateCount
     // is set to disallow create requests.
-    mockGetRuntime.mockRejectedValueOnce(new Response(null, {status: 404}));
+    mockGetRuntime.mockRejectedValue(new Response(null, {status: 404}));
     try {
-      await runInitializerAndTimers({maxCreateCount: 0});
+      await runInitializerAndTimers({
+        maxCreateCount: 0,
+        targetRuntime: runtimePresets.generalAnalysis.runtimeTemplate
+      });
     } catch (error) {
-      expect(mockCreateRuntime).not.toHaveBeenCalled();
       expect(error.message).toMatch(/max runtime create count/i);
     }
   });

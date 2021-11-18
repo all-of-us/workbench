@@ -319,6 +319,45 @@ describe('NotebookLauncher', () => {
     expect(wrapper.find(Iframe).exists()).toBeFalsy();
     expect(wrapper.find(SecuritySuspendedMessage).exists()).toBeTruthy();
   });
+
+  it('should show runtime initializer modal if runtime not found', async() => {
+    history.push(notebookInitialUrl + '?kernelType=R?creating=false');
+    runtimeStub.runtime = null;
+
+    const wrapper = await notebookComponent();
+    await waitForFakeTimersAndUpdate(wrapper);
+
+    expect(wrapper.exists({'data-test-id': 'runtime-intializer-create'})).toBeTruthy();
+  });
+
+  test.each(['cancel', 'configure'])(
+      'should show retry message on runtime initializer %s', async(action) => {
+    history.push(notebookInitialUrl + '?kernelType=R?creating=false');
+    runtimeStub.runtime = null;
+
+    const wrapper = await notebookComponent();
+    await waitForFakeTimersAndUpdate(wrapper);
+
+    wrapper.find({'data-test-id': `runtime-intializer-${action}`}).simulate('click');
+    await waitForFakeTimersAndUpdate(wrapper);
+
+    expect(wrapper.exists({'data-test-id': `runtime-intializer-${action}`})).toBeFalsy();
+    expect(wrapper.text()).toContain('This action requires an analysis environment.')
+  });
+
+  it('should create runtime on runtime initializer create', async() => {
+    history.push(notebookInitialUrl + '?kernelType=R?creating=false');
+    runtimeStub.runtime = null;
+
+    const wrapper = await notebookComponent();
+    await waitForFakeTimersAndUpdate(wrapper);
+
+    wrapper.find({'data-test-id': 'runtime-intializer-create'}).simulate('click');
+    await waitForFakeTimersAndUpdate(wrapper);
+
+    expect(wrapper.exists({'data-test-id': 'runtime-intializer-create'})).toBeFalsy();
+    expect(runtimeStub.runtime).toBeTruthy();
+  });
 });
 
 describe('TerminalLauncher', () => {
