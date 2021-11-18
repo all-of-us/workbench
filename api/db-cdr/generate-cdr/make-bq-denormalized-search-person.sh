@@ -38,11 +38,11 @@ SELECT
       p.person_id
     , CASE
         WHEN p.gender_concept_id = 0 THEN 'Unknown'
-        ELSE g.concept_name
+        ELSE regexp_replace(g.concept_name, r'^.+:\s', '')
       END as gender
     , CASE
         WHEN p.sex_at_birth_concept_id = 0 THEN 'Unknown'
-        ELSE s.concept_name
+        ELSE regexp_replace(s.concept_name, r'^.+:\s', '')
       END as sex_at_birth
     , CASE
         WHEN p.race_concept_id = 0 THEN 'Unknown'
