@@ -102,7 +102,7 @@
     "enableGenomicExtraction": false,
     "enableGpu": false,
     "enablePersistentDisk": false,
-    "enableEgressAlertingV2": false,
+    "enableEgressAlertingV2": true,
     "enablePrivateDataprocWorker": false,
     "grantLifescienceApiRunnerAcl": false
   },
