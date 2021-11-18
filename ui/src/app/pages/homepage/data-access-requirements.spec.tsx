@@ -7,7 +7,7 @@ import {
     allModules,
     DataAccessRequirements,
     getActiveModule,
-    getVisibleModules,
+    getEligibleModules,
     requiredModules
 } from './data-access-requirements';
 import {InstitutionApiStub} from 'testing/stubs/institution-api-stub';
@@ -37,6 +37,8 @@ describe('DataAccessRequirements', () => {
     const findCompleteModule = (wrapper, module: AccessModule) => wrapper.find(`[data-test-id="module-${module}-complete"]`);
     const findIncompleteModule = (wrapper, module: AccessModule) => wrapper.find(`[data-test-id="module-${module}-incomplete"]`);
 
+    const findNextCtaForModule = (wrapper, module: AccessModule) => findModule(wrapper, module).find('[data-test-id="next-module-cta"]');
+
     const findCompletionBanner = (wrapper) => wrapper.find('[data-test-id="dar-completed"]');
 
     const findControlledSignedStepEligible = (wrapper) => wrapper.find('[data-test-id="controlled-signed"]')
@@ -52,6 +54,7 @@ describe('DataAccessRequirements', () => {
     const findControlledTierCard = (wrapper) => wrapper.find('[data-test-id="controlled-card"]')
     const findEligibleText = (wrapper) => wrapper.find('[data-test-id="eligible-text"]');
     const findIneligibleText = (wrapper) => wrapper.find('[data-test-id="ineligible-text"]');
+    const findClickableModuleText = (wrapper, module: AccessModule) => wrapper.find(`[data-test-id="module-${module}-clickable-text"]`);
 
     const findContactUs = (wrapper) => wrapper.find('[data-test-id="contact-us"]');
 
@@ -69,38 +72,38 @@ describe('DataAccessRequirements', () => {
     })
 
 
-    it('should return all modules from getVisibleModules by default (all FFs enabled)', () => {
-        const enabledModules = getVisibleModules(allModules, profile);
-        allModules.forEach(module => expect(enabledModules.includes(module)).toBeTruthy());
+    it('should return all required modules from getEligibleModules by default (all FFs enabled)', () => {
+        const enabledModules = getEligibleModules(allModules, profile);
+        requiredModules.forEach(module => expect(enabledModules.includes(module)).toBeTruthy());
     });
 
-    it('should not return the RAS module from getVisibleModules when its feature flag is disabled', () => {
+    it('should not return the RAS module from getEligibleModules when its feature flag is disabled', () => {
         serverConfigStore.set({config: {...defaultServerConfig, enableRasLoginGovLinking: false, enforceRasLoginGovLinking: false}});
-        const enabledModules = getVisibleModules(allModules, profile);
+        const enabledModules = getEligibleModules(allModules, profile);
         expect(enabledModules.includes(AccessModule.RASLINKLOGINGOV)).toBeFalsy();
     });
 
-    it('should return the RAS module from getVisibleModules when ' +
+    it('should return the RAS module from getEligibleModules when ' +
         'enforceRasLoginGovLinking is enabled, enableRasLoginGovLinking is not', () => {
         serverConfigStore.set({config: {...defaultServerConfig, enableRasLoginGovLinking: false, enforceRasLoginGovLinking: true}});
-        const enabledModules = getVisibleModules(allModules, profile);
+        const enabledModules = getEligibleModules(allModules, profile);
         expect(enabledModules.includes(AccessModule.RASLINKLOGINGOV)).toBeTruthy();
     });
 
-    it('should not return the ERA module from getVisibleModules when its feature flag is disabled', () => {
+    it('should not return the ERA module from getEligibleModules when its feature flag is disabled', () => {
         serverConfigStore.set({config: {...defaultServerConfig, enableEraCommons: false}});
-        const enabledModules = getVisibleModules(allModules, profile);
+        const enabledModules = getEligibleModules(allModules, profile);
         expect(enabledModules.includes(AccessModule.ERACOMMONS)).toBeFalsy();
     });
 
-    it('should not return the Compliance module from getVisibleModules when its feature flag is disabled', () => {
+    it('should not return the Compliance module from getEligibleModules when its feature flag is disabled', () => {
         serverConfigStore.set({config: {...defaultServerConfig, enableComplianceTraining: false}});
-        const enabledModules = getVisibleModules(allModules, profile);
+        const enabledModules = getEligibleModules(allModules, profile);
         expect(enabledModules.includes(AccessModule.COMPLIANCETRAINING)).toBeFalsy();
     });
 
     it('should return the first module (2FA) from getActiveModule when no modules have been completed', () => {
-        const enabledModules = getVisibleModules(requiredModules, profile);
+        const enabledModules = getEligibleModules(requiredModules, profile);
         const activeModule = getActiveModule(enabledModules, profile);
 
         expect(activeModule).toEqual(requiredModules[0]);
@@ -118,7 +121,7 @@ describe('DataAccessRequirements', () => {
             }
         };
 
-        const enabledModules = getVisibleModules(requiredModules, profile);
+        const enabledModules = getEligibleModules(requiredModules, profile);
         const activeModule = getActiveModule(enabledModules, testProfile);
 
         expect(activeModule).toEqual(requiredModules[1]);
@@ -136,7 +139,7 @@ describe('DataAccessRequirements', () => {
             }
         };
 
-        const enabledModules = getVisibleModules(requiredModules, profile);
+        const enabledModules = getEligibleModules(requiredModules, profile);
         const activeModule = getActiveModule(enabledModules, testProfile);
 
         expect(activeModule).toEqual(requiredModules[1]);
@@ -157,7 +160,7 @@ describe('DataAccessRequirements', () => {
             }
         };
 
-        const enabledModules = getVisibleModules(requiredModules, profile);
+        const enabledModules = getEligibleModules(requiredModules, profile);
         const activeModule = getActiveModule(enabledModules, testProfile);
 
         // update this if the order changes
@@ -182,7 +185,7 @@ describe('DataAccessRequirements', () => {
             }
         };
 
-        const enabledModules = getVisibleModules(requiredModules, profile);
+        const enabledModules = getEligibleModules(requiredModules, profile);
         const activeModule = getActiveModule(enabledModules, testProfile);
 
         expect(activeModule).toEqual(requiredModules[3]);
@@ -200,7 +203,7 @@ describe('DataAccessRequirements', () => {
             }
         };
 
-        const enabledModules = getVisibleModules(requiredModules, profile);
+        const enabledModules = getEligibleModules(requiredModules, profile);
         const activeModule = getActiveModule(enabledModules, testProfile);
 
         expect(activeModule).toBeUndefined();
@@ -220,7 +223,7 @@ describe('DataAccessRequirements', () => {
             }
         };
 
-        const enabledModules = getVisibleModules(requiredModules, profile);
+        const enabledModules = getEligibleModules(requiredModules, profile);
 
         let activeModule = getActiveModule(enabledModules, testProfile);
         expect(activeModule).toEqual(AccessModule.RASLINKLOGINGOV)
@@ -241,7 +244,7 @@ describe('DataAccessRequirements', () => {
         expect(activeModule).toBeUndefined();
     });
 
-    it('should render all modules by default (all FFs enabled)', () => {
+    it('should render all required modules by default (all FFs enabled)', () => {
         const wrapper = component();
         allModules.forEach(module => expect(findModule(wrapper, module).exists()).toBeTruthy());
     });
@@ -271,9 +274,9 @@ describe('DataAccessRequirements', () => {
         expect(findIncompleteModule(wrapper, AccessModule.RASLINKLOGINGOV).exists()).toBeFalsy();
     });
 
-    it('should render all modules as incomplete when the profile accessModules are empty', () => {
+    it('should render all required modules as incomplete when the profile accessModules are empty', () => {
         const wrapper = component();
-        allModules.forEach(module => {
+        requiredModules.forEach(module => {
             expect(findIncompleteModule(wrapper, module).exists()).toBeTruthy();
 
             expect(findCompleteModule(wrapper, module).exists()).toBeFalsy();
@@ -282,12 +285,12 @@ describe('DataAccessRequirements', () => {
         expect(findCompletionBanner(wrapper).exists()).toBeFalsy();
     });
 
-    it('should render all modules as complete when the profile accessModules are all complete', () => {
+    it('should render all required modules as complete when the profile accessModules are all complete', () => {
         profileStore.set({
             profile: {
                 ...ProfileStubVariables.PROFILE_STUB,
                 accessModules: {
-                    modules: allModules.map(module => ({moduleName: module, completionEpochMillis: 1}))
+                    modules: requiredModules.map(module => ({moduleName: module, completionEpochMillis: 1}))
                 }
             },
             load,
@@ -295,7 +298,7 @@ describe('DataAccessRequirements', () => {
             updateCache});
 
         const wrapper = component();
-        allModules.forEach(module => {
+        requiredModules.forEach(module => {
             expect(findCompleteModule(wrapper, module).exists()).toBeTruthy();
 
             expect(findIncompleteModule(wrapper, module).exists()).toBeFalsy();
@@ -309,9 +312,9 @@ describe('DataAccessRequirements', () => {
         // this test is subject to flakiness using real timers
         jest.useFakeTimers();
 
-        // initially, the user has completed all modules except RAS (the standard case at RAS launch time)
+        // initially, the user has completed all required modules except RAS (the standard case at RAS launch time)
 
-        const allExceptRas = allModules.filter(m => m !== AccessModule.RASLINKLOGINGOV);
+        const allExceptRas = requiredModules.filter(m => m !== AccessModule.RASLINKLOGINGOV);
         profileStore.set({
             profile: {
                 ...ProfileStubVariables.PROFILE_STUB,
@@ -339,13 +342,13 @@ describe('DataAccessRequirements', () => {
 
         expect(findCompletionBanner(wrapper).exists()).toBeFalsy();
 
-        // now all modules are complete
+        // now all required modules are complete
 
         profileStore.set({
             profile: {
                 ...ProfileStubVariables.PROFILE_STUB,
                 accessModules: {
-                    modules: allModules.map(module => ({moduleName: module, completionEpochMillis: 1}))
+                    modules: requiredModules.map(module => ({moduleName: module, completionEpochMillis: 1}))
                 }
             },
             load,
@@ -354,7 +357,7 @@ describe('DataAccessRequirements', () => {
 
         await waitForFakeTimersAndUpdate(wrapper);
 
-        allModules.forEach(module => {
+        requiredModules.forEach(module => {
             expect(findCompleteModule(wrapper, module).exists()).toBeTruthy();
 
             expect(findIncompleteModule(wrapper, module).exists()).toBeFalsy();
@@ -365,12 +368,12 @@ describe('DataAccessRequirements', () => {
     });
 
 
-    it('should render all modules as complete when the profile accessModules are all bypassed', () => {
+    it('should render all required modules as complete when the profile accessModules are all bypassed', () => {
         profileStore.set({
             profile: {
                 ...ProfileStubVariables.PROFILE_STUB,
                 accessModules: {
-                    modules: allModules.map(module => {return {moduleName: module, bypassEpochMillis: 1}})
+                    modules: requiredModules.map(module => {return {moduleName: module, bypassEpochMillis: 1}})
                 }
             },
             load,
@@ -378,7 +381,7 @@ describe('DataAccessRequirements', () => {
             updateCache});
 
         const wrapper = component();
-        allModules.forEach(module => {
+        requiredModules.forEach(module => {
             expect(findCompleteModule(wrapper, module).exists()).toBeTruthy();
 
             expect(findIncompleteModule(wrapper, module).exists()).toBeFalsy();
@@ -388,10 +391,10 @@ describe('DataAccessRequirements', () => {
     });
 
     it('should render a mix of complete and incomplete modules, as appropriate', () => {
-        const allModulesSize = allModules.length;
+        const requiredModulesSize = requiredModules.length;
         const incompleteModules = [AccessModule.RASLINKLOGINGOV];
-        const completeModules = allModules.filter(module => module !== AccessModule.RASLINKLOGINGOV);
-        const completeModulesSize = allModulesSize - incompleteModules.length;
+        const completeModules = requiredModules.filter(module => module !== AccessModule.RASLINKLOGINGOV);
+        const completeModulesSize = requiredModulesSize - incompleteModules.length;
 
         // sanity check
         expect(incompleteModules.length).toEqual(1);
@@ -436,13 +439,13 @@ describe('DataAccessRequirements', () => {
         expect(wrapper.find('[data-test-id="self-bypass"]').exists()).toBeTruthy();
     });
 
-    it('should not show self-bypass UI when all modules are complete', () => {
+    it('should not show self-bypass UI when all clickable modules are complete', () => {
         serverConfigStore.set({config: {...serverConfigStore.get().config, unsafeAllowSelfBypass: true}});
         profileStore.set({
             profile: {
                 ...ProfileStubVariables.PROFILE_STUB,
                 accessModules: {
-                    modules: allModules.map(module => {return {moduleName: module, completionEpochMillis: 1}})
+                    modules: requiredModules.map(module => {return {moduleName: module, completionEpochMillis: 1}})
                 }
             },
             load,
@@ -451,6 +454,32 @@ describe('DataAccessRequirements', () => {
 
         const wrapper = component();
         expect(wrapper.find('[data-test-id="self-bypass"]').exists()).toBeFalsy();
+    });
+
+    it('should show self-bypass UI when optional modules are still pending', () => {
+        serverConfigStore.set({config: {...serverConfigStore.get().config, unsafeAllowSelfBypass: true}});
+        profileStore.set({
+          profile: {
+            ...ProfileStubVariables.PROFILE_STUB,
+            accessModules: {
+              modules: requiredModules.map(module => {return {moduleName: module, completionEpochMillis: 1}})
+            },
+            tierEligibilities: [{
+              accessTierShortName: AccessTierShortNames.Controlled,
+              eraRequired: true,
+              eligible: true
+            }, {
+              accessTierShortName: AccessTierShortNames.Registered,
+              eraRequired: false,
+              eligible: true
+            }]
+          },
+          load,
+          reload,
+          updateCache});
+
+        const wrapper = component();
+        expect(wrapper.find('[data-test-id="self-bypass"]').exists()).toBeTruthy();
     });
 
     // regression tests for RW-7384: sync external modules to gain access
@@ -474,7 +503,7 @@ describe('DataAccessRequirements', () => {
             profile: {
                 ...ProfileStubVariables.PROFILE_STUB,
                 accessModules: {
-                    modules: allModules.map(module => ({moduleName: module, completionEpochMillis: 1}))
+                    modules: requiredModules.map(module => ({moduleName: module, completionEpochMillis: 1}))
                 }
             },
             load,
@@ -875,35 +904,6 @@ describe('DataAccessRequirements', () => {
         expect(findContactUs(wrapper).exists()).toBeFalsy();
     });
 
-    it('Should not display CT Compliance Training module in CT card ' +
-        'when unsafeAllowSelfBypass is false', async() => {
-        serverConfigStore.set({config: {...defaultServerConfig, unsafeAllowSelfBypass: false}});
-
-        let wrapper = component();
-        await waitOneTickAndUpdate(wrapper);
-
-        profileStore.set({
-            profile: {
-                ...ProfileStubVariables.PROFILE_STUB,
-                tierEligibilities: [{
-                    accessTierShortName: AccessTierShortNames.Registered,
-                    eraRequired: false,
-                    eligible: false
-                },{
-                    accessTierShortName: AccessTierShortNames.Controlled,
-                    eraRequired: true,
-                    eligible: true
-                }]
-            },
-            load,
-            reload,
-            updateCache
-        });
-        wrapper = component();
-        await waitOneTickAndUpdate(wrapper);
-        expect(findModule(findControlledTierCard(wrapper), AccessModule.CTCOMPLIANCETRAINING).exists()).toBeFalsy();
-    });
-
     it('Should not display ct Compliance Training module in CT card ' +
         'when enableComplianceTraining is false', async() => {
         serverConfigStore.set({config: {...defaultServerConfig, enableComplianceTraining: false}});
@@ -931,5 +931,122 @@ describe('DataAccessRequirements', () => {
         wrapper = component();
         await waitOneTickAndUpdate(wrapper);
         expect(findModule(findControlledTierCard(wrapper), AccessModule.CTCOMPLIANCETRAINING).exists()).toBeFalsy();
+      });
+
+  it('Should display CT training when ineligible', async() => {
+    let wrapper = component();
+    await waitOneTickAndUpdate(wrapper);
+
+    profileStore.set({
+      profile: {
+        ...ProfileStubVariables.PROFILE_STUB,
+        tierEligibilities: [{
+          accessTierShortName: AccessTierShortNames.Registered,
+          eraRequired: false,
+          eligible: false
+        },{
+          accessTierShortName: AccessTierShortNames.Controlled,
+          eraRequired: true,
+          eligible: false
+        }]
+      },
+      load,
+      reload,
+      updateCache
     });
+    wrapper = component();
+    await waitOneTickAndUpdate(wrapper);
+    expect(findIneligibleModule(wrapper, AccessModule.CTCOMPLIANCETRAINING).exists()).toBeTruthy();
+  });
+
+  it('Should display CT training when no institutional DUA', async() => {
+    let wrapper = component();
+    await waitOneTickAndUpdate(wrapper);
+
+    profileStore.set({
+      profile: {
+        ...ProfileStubVariables.PROFILE_STUB,
+        tierEligibilities: [{
+          accessTierShortName: AccessTierShortNames.Registered,
+          eraRequired: false,
+          eligible: false
+        }]
+      },
+      load,
+      reload,
+      updateCache
+    });
+    wrapper = component();
+    await waitOneTickAndUpdate(wrapper);
+    expect(findIneligibleModule(wrapper, AccessModule.CTCOMPLIANCETRAINING).exists()).toBeTruthy();
+  });
+
+  it('Should display CT training when eligible', async() => {
+    let wrapper = component();
+    await waitOneTickAndUpdate(wrapper);
+
+    profileStore.set({
+      profile: {
+        ...ProfileStubVariables.PROFILE_STUB,
+        tierEligibilities: [{
+          accessTierShortName: AccessTierShortNames.Registered,
+          eraRequired: false,
+          eligible: false
+        },{
+          accessTierShortName: AccessTierShortNames.Controlled,
+          eraRequired: true,
+          eligible: true
+        }]
+      },
+      load,
+      reload,
+      updateCache
+    });
+    wrapper = component();
+    await waitOneTickAndUpdate(wrapper);
+    expect(findIncompleteModule(wrapper, AccessModule.CTCOMPLIANCETRAINING).exists()).toBeTruthy();
+  });
+
+  it('Should allow CT and DUCC as simultaneously clickable', async() => {
+    let wrapper = component();
+    await waitOneTickAndUpdate(wrapper);
+
+    profileStore.set({
+      profile: {
+        ...ProfileStubVariables.PROFILE_STUB,
+        accessModules: {
+          modules: allModules.map(moduleName => {
+            if ([
+              AccessModule.CTCOMPLIANCETRAINING,
+              AccessModule.DATAUSERCODEOFCONDUCT
+            ].includes(moduleName)) {
+              return {moduleName};
+            }
+            return {moduleName, completionEpochMillis: 1};
+          })
+        },
+        tierEligibilities: [{
+          accessTierShortName: AccessTierShortNames.Registered,
+          eraRequired: false,
+          eligible: false
+        },{
+          accessTierShortName: AccessTierShortNames.Controlled,
+          eraRequired: true,
+          eligible: true
+        }]
+      },
+      load,
+      reload,
+      updateCache});
+    wrapper = component();
+    await waitOneTickAndUpdate(wrapper);
+
+    // Both are clickable.
+    expect(findClickableModuleText(wrapper, AccessModule.CTCOMPLIANCETRAINING).exists()).toBeTruthy();
+    expect(findClickableModuleText(wrapper, AccessModule.DATAUSERCODEOFCONDUCT).exists()).toBeTruthy();
+
+    // Only the first module is active.
+    expect(findNextCtaForModule(wrapper, AccessModule.CTCOMPLIANCETRAINING).exists()).toBeTruthy();
+    expect(findNextCtaForModule(wrapper, AccessModule.DATAUSERCODEOFCONDUCT).exists()).toBeFalsy();
+  });
 });

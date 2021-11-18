@@ -21,7 +21,7 @@ import {
   getAccessModuleConfig,
   isExpiring,
   maybeDaysRemaining,
-  redirectToTraining,
+  redirectToRegisteredTraining,
 } from 'app/utils/access-utils';
 import {useNavigation} from 'app/utils/navigation';
 import {profileStore, serverConfigStore, useStore} from 'app/utils/stores';
@@ -320,7 +320,7 @@ export const AccessRenewal = fp.flow(
               moduleStatus={modules.find(m => m.moduleName === AccessModule.COMPLIANCETRAINING)}
               onClick={() => {
                 setRefreshButtonDisabled(false);
-                redirectToTraining();
+                redirectToRegisteredTraining();
               }}/>
           {isExpiringAndNotBypassed(AccessModule.COMPLIANCETRAINING, modules) && <Button
             disabled={refreshButtonDisabled}
