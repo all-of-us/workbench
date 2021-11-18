@@ -6345,6 +6345,8 @@ definitions:
         format: int64
       adminLocked:
         type: boolean
+        default: false
+        description: Whether an administrator has prevented most actions on the workspace for all users
   RecentResourceRequest:
     type: object
     properties:

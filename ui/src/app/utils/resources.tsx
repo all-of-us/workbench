@@ -93,7 +93,7 @@ export function convertToResource(
   inputResource: FileDetail | Cohort | CohortReview | ConceptSet | DataSet,
   resourceType: ResourceType,
   workspace: WorkspaceData): WorkspaceResource {
-  const {namespace, id, accessLevel, accessTierShortName, cdrVersionId, billingStatus} = workspace;
+  const {namespace, id, accessLevel, accessTierShortName, adminLocked, cdrVersionId, billingStatus} = workspace;
   return {
     workspaceNamespace: namespace,
     workspaceFirecloudName: id,
@@ -107,7 +107,7 @@ export function convertToResource(
     dataSet: resourceType === ResourceType.DATASET ? inputResource as DataSet : null,
     notebook: resourceType === ResourceType.NOTEBOOK ? inputResource as FileDetail : null,
     lastModifiedEpochMillis: inputResource.lastModifiedTime,
-    adminLocked: workspace.adminLocked
+    adminLocked
   };
 }
 

@@ -112,7 +112,7 @@ export const RecentResources = fp.flow(withCdrVersions())((props: Props) => {
       return wsMap.get(r.workspaceFirecloudName);
     };
 
-    const addAdminLock = () => {
+    const addAdminLockToNameColumn = () => {
       return <TooltipTrigger content={<div>Workspace compliance action required</div>}>
         <FontAwesomeIcon style={{color: colors.warning, marginRight: '0.5rem'}}size={'sm'} icon={faLockAlt}/>
       </TooltipTrigger>;
@@ -132,7 +132,9 @@ export const RecentResources = fp.flow(withCdrVersions())((props: Props) => {
             menu: renderResourceMenu(r),
             resourceType: <ResourceNavigation resource={r}><StyledResourceType resource={r}/></ResourceNavigation>,
             resourceName: <ResourceNavigation resource={r} style={styles.navigation}>
-              {r.adminLocked && addAdminLock()}{getDisplayName(r)}</ResourceNavigation>,
+              {r.adminLocked && addAdminLockToNameColumn()}
+              {getDisplayName(r)}
+            </ResourceNavigation>,
             workspaceName: <WorkspaceNavigation workspace={getWorkspace(r)} resource={r} style={styles.navigation}/>,
             formattedLastModified: formatWorkspaceResourceDisplayDate(r.lastModifiedEpochMillis),
             cdrVersionName: getCdrVersionName(r),
