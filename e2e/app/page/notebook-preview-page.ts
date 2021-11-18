@@ -5,7 +5,6 @@ import AuthenticatedPage from './authenticated-page';
 import NotebookPage from './notebook-page';
 import WorkspaceAnalysisPage from './workspace-analysis-page';
 import { waitWhileLoading } from 'utils/waits-utils';
-import Button from 'app/element/button';
 import { initializeRuntimeIfModalPresented } from 'utils/runtime-utils';
 
 const Selector = {

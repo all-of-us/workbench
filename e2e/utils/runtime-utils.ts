@@ -3,7 +3,7 @@ import Button from 'app/element/button';
 
 const Selector = {
   runtimeInitializerCreateButton: '//*[data-test-id="runtime-initializer-create")]'
-}
+};
 
 export async function initializeRuntimeIfModalPresented(page: Page): Promise<void> {
   let initializeButton: Button;
