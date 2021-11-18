@@ -388,7 +388,7 @@ const Refresh = (props: { showSpinner: Function; refreshAction: Function }) => {
 }
 
 const Next = () => <FlexRow style={styles.nextElement}>
-  <span style={styles.nextText}>NEXT</span> <ArrowRight style={styles.nextIcon}/>
+  <span data-test-id="next-module-cta" style={styles.nextText}>NEXT</span> <ArrowRight style={styles.nextIcon}/>
 </FlexRow>;
 
 const ModuleIcon = (props: {moduleName: AccessModule, completedOrBypassed: boolean, eligible?: boolean}) => {
@@ -499,20 +499,18 @@ const MaybeModule = ({profile, moduleName, active, clickable, spinnerProps}: Mod
   const {DARTitleComponent, refreshAction, isEnabledInEnvironment} = getAccessModuleConfig(moduleName);
   const eligible = isEligibleModule(moduleName, profile);
   const Module = ({profile}) => {
-    const status = getAccessModuleStatusByName(profile, moduleName)
+    const status = getAccessModuleStatusByName(profile, moduleName);
     return <FlexRow data-test-id={`module-${moduleName}`}>
       <FlexRow style={styles.moduleCTA}>
-      {fp.cond([
-        [
-          () => clickable && showRefresh && !!refreshAction,
-          () => <Refresh
-                  refreshAction={refreshAction}
-                  showSpinner={spinnerProps.showSpinner}/>
-        ], [
-          () => active,
-          () => <Next/>
-        ]
-      ])(true)}
+      {cond([
+        clickable && showRefresh && !!refreshAction,
+        () => <Refresh
+                refreshAction={refreshAction}
+                showSpinner={spinnerProps.showSpinner}/>
+      ], [
+        active,
+        () => <Next/>
+      ])}
       </FlexRow>
       <ModuleBox clickable={clickable} action={() => {
         setShowRefresh(true);
@@ -800,18 +798,18 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
   const [clickableModules, setClickableModules] = useState([]);
 
   const getNextActive = (modules: AccessModule[]) => getActiveModule(getEligibleModules(modules, profile), profile);
+  const nextActive = getNextActive(allModules);
   const nextRequired = getNextActive(requiredModules);
 
   // whenever the profile changes, update the next modules to complete
   useEffect(() => {
-    const nextActive = getNextActive(allModules);
     setActiveModule(nextActive);
     setClickableModules(
       fp.flow(
         fp.filter(m => !!m),
         fp.uniq
       )([nextActive, nextRequired]));
-  }, [profile]);
+  }, [nextActive, nextRequired]);
 
   const showCtCard = environment.accessTiersVisibleToUsers.includes(AccessTierShortNames.Controlled)
 
@@ -842,7 +840,7 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
   return <FlexColumn style={styles.pageWrapper}>
       <DARHeader/>
       {profile && !nextRequired && <Completed/>}
-      {unsafeAllowSelfBypass && nextRequired && <FlexRow data-test-id='self-bypass' style={styles.selfBypass}>
+      {unsafeAllowSelfBypass && clickableModules.length > 0 && <FlexRow data-test-id='self-bypass' style={styles.selfBypass}>
         <div style={styles.selfBypassText}>[Test environment] Self-service bypass is enabled</div>
         <Button
             style={{marginLeft: '0.5rem'}}
