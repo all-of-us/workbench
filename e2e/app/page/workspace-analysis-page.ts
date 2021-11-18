@@ -8,6 +8,7 @@ import { getPropValue } from 'utils/element-utils';
 import { waitForDocumentTitle, waitWhileLoading } from 'utils/waits-utils';
 import NotebookPage from './notebook-page';
 import WorkspaceBase from './workspace-base';
+import { initializeRuntimeIfModalPresented } from 'utils/runtime-utils';
 
 const PageTitle = 'View Notebooks';
 
@@ -40,6 +41,8 @@ export default class WorkspaceAnalysisPage extends WorkspaceBase {
     const pageHeadingCss = '[data-test-id="leo-app-launcher"] > h2';
     const headingTextElement = await this.page.waitForSelector(pageHeadingCss, { visible: true });
     const headingText = await getPropValue<string>(headingTextElement, 'textContent');
+
+    await initializeRuntimeIfModalPresented(this.page);
 
     // Log notebook progress text message
     const progressCss = '[data-test-id="current-progress-card"]';

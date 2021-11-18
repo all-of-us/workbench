@@ -5,6 +5,8 @@ import AuthenticatedPage from './authenticated-page';
 import NotebookPage from './notebook-page';
 import WorkspaceAnalysisPage from './workspace-analysis-page';
 import { waitWhileLoading } from 'utils/waits-utils';
+import Button from 'app/element/button';
+import { initializeRuntimeIfModalPresented } from 'utils/runtime-utils';
 
 const Selector = {
   editLink: '//*[contains(normalize-space(text()), "Edit")]',
@@ -34,6 +36,9 @@ export default class NotebookPreviewPage extends AuthenticatedPage {
     const editLink = await this.getEditLink();
     await editLink.waitUntilEnabled();
     await editLink.click();
+
+    await initializeRuntimeIfModalPresented(this.page);
+
     // Restarting notebook server may take a while.
     await waitWhileLoading(this.page, 60 * 20 * 1000);
 
