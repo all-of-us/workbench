@@ -13,16 +13,6 @@ export CDR_VERSION=$6       # CDR version
 export DATA_BROWSER=$7      # data browser flag
 
 echo ""
-echo "Validating that all prerequisites exist"
-if ./generate-cdr/validate-prerequisites-exist.sh "$BQ_PROJECT" "$BQ_DATASET" "$CDR_VERSION" "$DATA_BROWSER"
-then
-    echo "Validation is complete"
-else
-    echo "Validation failed!"
-    exit 1
-fi
-
-echo ""
 echo "Creating static prep tables"
 if ./generate-cdr/make-bq-static-prep-tables.sh "$BQ_PROJECT" "$BQ_DATASET"
 then
