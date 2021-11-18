@@ -298,11 +298,11 @@ export const WorkspaceCard = fp.flow(withNavigation)(
                 <FlexColumn style={{justifyContent: 'flex-end', marginLeft: '0.8rem'}}>
                   <FlexRow style={{alignContent: 'space-between'}}>
                     {adminLocked &&
-                    <div data-test-id='workspace-lock' style={{justifyContent: 'flex-end'}}>
+                    <FlexColumn data-test-id='workspace-lock' style={{justifyContent: 'flex-end'}}>
                       <TooltipTrigger content='Workspace compliance action is required'>
                         <FontAwesomeIcon icon={faLockAlt} style={styles.lockWorkspace}/>
                       </TooltipTrigger>
-                    </div>}
+                    </FlexColumn>}
                     {accessTierShortName === AccessTierShortNames.Controlled &&
                     <ControlledTierBadge/>}
                   </FlexRow>
