@@ -90,8 +90,16 @@ describe('WorkspaceAbout', () => {
       .toBeTruthy();
   });
 
-  it('should disable the share button is workspace is adminLocked', async () => {
-    currentWorkspaceStore.getValue().adminLocked = true;
+  it('should enable the share button if workspace is not adminLocked', async () => {
+    currentWorkspaceStore.next({...currentWorkspaceStore.getValue(), adminLocked: false});
+    const wrapper = component();
+    await waitOneTickAndUpdate(wrapper);
+    expect(wrapper.find('[data-test-id="workspaceShareButton"]')
+        .getElement().props.disabled).toBeFalsy();
+  });
+
+  it('should disable the share button if workspace is adminLocked', async () => {
+    currentWorkspaceStore.next({...currentWorkspaceStore.getValue(), adminLocked: true});
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find('[data-test-id="workspaceShareButton"]')
