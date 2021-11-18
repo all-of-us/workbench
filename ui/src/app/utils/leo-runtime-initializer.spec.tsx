@@ -22,7 +22,6 @@ import SpyInstance = jest.SpyInstance;
 
 let mockGetRuntime: SpyInstance;
 let mockCreateRuntime: SpyInstance;
-let mockDeleteRuntime: SpyInstance;
 let mockStartRuntime: SpyInstance;
 
 const baseRuntime: Runtime = {
@@ -46,7 +45,6 @@ describe('RuntimeInitializer', () => {
 
     mockGetRuntime = jest.spyOn(runtimeApi(), 'getRuntime');
     mockCreateRuntime = jest.spyOn(runtimeApi(), 'createRuntime');
-    mockDeleteRuntime = jest.spyOn(runtimeApi(), 'deleteRuntime');
     mockStartRuntime = jest.spyOn(leoRuntimesApi(), 'startRuntime');
 
     serverConfigStore.set({config: {gsuiteDomain: 'researchallofus.org'}});
@@ -139,7 +137,9 @@ describe('RuntimeInitializer', () => {
       {status: RuntimeStatus.Running}
     ]);
     const statuses = [];
-    await runInitializerAndTimers({onPoll: (runtime) => statuses.push(runtime ? runtime.status : null)});
+    await runInitializerAndTimers({
+      onPoll: (runtime) => statuses.push(runtime ? runtime.status : null)
+    });
 
     expect(statuses).toEqual([
       RuntimeStatus.Stopped,
@@ -147,8 +147,8 @@ describe('RuntimeInitializer', () => {
       // value is changed.
       RuntimeStatus.Starting,
       RuntimeStatus.Starting,
-      RuntimeStatus.Running]
-    );
+      RuntimeStatus.Running
+    ]);
   });
 
   it('should create runtime if it is initially nonexistent', async() => {

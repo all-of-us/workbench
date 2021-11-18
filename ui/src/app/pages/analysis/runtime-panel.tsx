@@ -879,7 +879,7 @@ const CostInfo = ({runtimeChanged, runtimeConfig, currentUser, workspace, creato
     data-test-id='cost-estimator'
   >
     <div style={{minWidth: '250px', margin: '.33rem .5rem'}}>
-      <RuntimeCostEstimator runtimeParameters={runtimeConfig} dataprocExists={runtimeCtx.dataprocExists}/>
+      <RuntimeCostEstimator runtimeParameters={runtimeConfig} usePersistentDisk={runtimeCtx.enablePD && !runtimeCtx.dataprocExists}/>
     </div>
     {
       isUsingFreeTierBillingAccount(workspace)
@@ -936,6 +936,7 @@ const CreatePanel = ({creatorFreeCreditsRemaining, profile, setPanelContent, wor
 const ConfirmUpdatePanel = ({initialRuntimeConfig, newRuntimeConfig, onCancel, updateButton, runtimeCtx}) => {
   const runtimeDiffs = getRuntimeConfigDiffs(initialRuntimeConfig, newRuntimeConfig, runtimeCtx);
   const updateMessaging = diffsToUpdateMessaging(runtimeDiffs);
+  const usePersistentDisk = runtimeCtx.enablePD && !runtimeCtx.dataprocExists;
   return <React.Fragment>
     <div style={styles.controlSection}>
       <h3 style={{...styles.baseHeader, ...styles.sectionHeader, marginTop: '.1rem', marginBottom: '.2rem'}}>Editing your environment</h3>
@@ -953,7 +954,7 @@ const ConfirmUpdatePanel = ({initialRuntimeConfig, newRuntimeConfig, onCancel, u
         <div style={{marginRight: '1rem'}}>
           <b style={{fontSize: 10}}>New estimated cost</b>
           <div style={{...styles.costPredictorWrapper, padding: '.25rem .5rem'}}>
-            <RuntimeCostEstimator runtimeParameters={newRuntimeConfig} dataprocExists={runtimeCtx.dataprocExists}/>
+            <RuntimeCostEstimator runtimeParameters={newRuntimeConfig} usePersistentDisk={usePersistentDisk}/>
           </div>
         </div>
         <div>
@@ -962,7 +963,7 @@ const ConfirmUpdatePanel = ({initialRuntimeConfig, newRuntimeConfig, onCancel, u
             padding: '.25rem .5rem',
             color: 'grey',
             backgroundColor: ''}}>
-            <RuntimeCostEstimator runtimeParameters={initialRuntimeConfig} dataprocExists={runtimeCtx.dataprocExists} costTextColor='grey'/>
+            <RuntimeCostEstimator runtimeParameters={initialRuntimeConfig} usePersistentDisk={usePersistentDisk} costTextColor='grey'/>
           </div>
         </div>
       </FlexRow>

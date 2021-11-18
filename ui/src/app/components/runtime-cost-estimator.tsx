@@ -13,20 +13,21 @@ import {
 } from 'app/utils/machines';
 import {formatUsd} from 'app/utils/numbers';
 import { RuntimeConfig } from 'app/utils/runtime-utils';
-import { serverConfigStore } from 'app/utils/stores';
 import { CSSProperties } from 'react';
 
 
 interface Props {
   runtimeParameters: RuntimeConfig;
-  dataprocExists?: boolean;
+  // TODO(RW-7582): remove this prop, this information should be self-contained
+  // by the RuntimeConfig instead.
+  usePersistentDisk: boolean;
   costTextColor?: string;
   style?: CSSProperties;
 }
 
 export const RuntimeCostEstimator = ({
   runtimeParameters,
-  dataprocExists = false,
+  usePersistentDisk,
   costTextColor = colors.accent,
   style = {}
 }: Props) => {
@@ -46,17 +47,16 @@ export const RuntimeCostEstimator = ({
   } = dataprocConfig || {};
   const workerMachine = findMachineByName(workerMachineType);
   const gpu = gpuConfig ? findGpu(gpuConfig.gpuType, gpuConfig.numOfGpus) : null;
-  const {enablePersistentDisk} = serverConfigStore.get().config;
   const costConfig = {
     computeType, masterMachine: machine, gpu,
-    masterDiskSize: enablePersistentDisk && !dataprocExists ? pdSize : diskSize,
+    masterDiskSize: usePersistentDisk ? pdSize : diskSize,
     numberOfWorkers, numberOfPreemptibleWorkers, workerDiskSize, workerMachine
   };
   const runningCost = machineRunningCost(costConfig);
   const runningCostBreakdown = machineRunningCostBreakdown(costConfig);
   const storageCost = machineStorageCost(costConfig);
   const storageCostBreakdown = machineStorageCostBreakdown(costConfig);
-  const costPriceFontSize = enablePersistentDisk ? '12px' : '20px';
+  const costPriceFontSize = usePersistentDisk ? '12px' : '20px';
   return <FlexRow style={style}>
       <FlexColumn style={{marginRight: '1rem'}}>
         <div style={{fontSize: '10px', fontWeight: 600}}>Cost when running</div>
@@ -90,7 +90,7 @@ export const RuntimeCostEstimator = ({
           </div>
         </TooltipTrigger>
       </FlexColumn>
-    {enablePersistentDisk && computeType === ComputeType.Standard && <FlexColumn>
+    {usePersistentDisk && computeType === ComputeType.Standard && <FlexColumn>
       <div style={{fontSize: '10px', fontWeight: 600}}>Persistent disk cost</div>
         <div
             style={{fontSize: costPriceFontSize, color: costTextColor}}
