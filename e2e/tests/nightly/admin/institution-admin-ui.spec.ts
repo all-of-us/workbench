@@ -8,6 +8,7 @@ import InstitutionEditPage, {
   AcceptedAddressSelectValue,
   InstitutionTypeSelectValue
 } from 'app/page/admin-institution-edit-page';
+import waitForExpect from 'wait-for-expect';
 
 describe('Institution Admin', () => {
   const testInstitutionName = 'Admin testing';
@@ -39,8 +40,10 @@ describe('Institution Admin', () => {
     await institutionEditPage.waitForLoad();
 
     // verify the input fields
-    const institutionName = await institutionEditPage.getInstitutionNameValue();
-    expect(institutionName).toBe(testInstitutionName);
+    await waitForExpect(async () => {
+      expect(await institutionEditPage.getInstitutionNameValue()).toBe(testInstitutionName);
+    }, 10000);
+
     expect(await institutionEditPage.getInstitutionTypeValue()).toBe(InstitutionTypeSelectValue.Other);
     expect(await institutionEditPage.getRtEratoggle().isChecked()).toBe(true);
     expect(await institutionEditPage.getRtEmailAcceptedValue()).toBe(AcceptedAddressSelectValue.Individual);
