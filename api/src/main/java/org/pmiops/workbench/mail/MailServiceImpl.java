@@ -292,7 +292,7 @@ public class MailServiceImpl implements MailService {
     final String ownersStr =
         owners.stream()
             .map(o -> String.format("%s (%s)", o.getUsername(), o.getContactEmail()))
-            .reduce("", String::join);
+            .collect(Collectors.joining(", "));
 
     sendWithRetries(
         owners.stream().map(DbUser::getContactEmail).collect(Collectors.toList()),
