@@ -8,7 +8,7 @@ import WorkspaceEditPage from 'app/page/workspace-edit-page';
 import { waitForFn, waitWhileLoading } from 'utils/waits-utils';
 import { logger } from 'libs/logger';
 import BaseElement from 'app/element/base-element';
-import { isElementReady } from 'utils/test-utils';
+import { asyncFilter, isElementReady } from 'utils/test-utils';
 
 const WorkspaceCardSelector = {
   cardRootXpath: './/*[child::*[@data-test-id="workspace-card"]]', // finds 'workspace-card' parent container node
@@ -56,15 +56,14 @@ export default class WorkspaceCard extends CardBase {
     });
 
     // Turn elements into WorkspaceCard objects.
-    const allCards: WorkspaceCard[] = await Promise.all(
-      (await page.$x(WorkspaceCardSelector.cardRootXpath)).map((card) => new WorkspaceCard(page).asCard(card))
+    const allCards: WorkspaceCard[] = (await page.$x(WorkspaceCardSelector.cardRootXpath)).map((card) =>
+      new WorkspaceCard(page).asCard(card)
     );
+
     console.log(`allCards:\n${allCards}`);
 
     const visibleCards: WorkspaceCard[] = await Promise.all(
-      allCards.filter(async (card) => {
-        await isElementReady(page, card);
-      })
+      await asyncFilter(allCards, async (card) => await isElementReady(page, card))
     );
     console.log(`visibleCards:\n${visibleCards}`);
 
