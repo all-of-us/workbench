@@ -18,14 +18,6 @@ const styles = reactStyles({
     textAlign: 'center',
     verticalAlign: 'middle'
   },
-  dropdownHeader: {
-    fontSize: 12,
-    lineHeight: '30px',
-    color: colors.primary,
-    fontWeight: 600,
-    paddingLeft: 12,
-    width: 160
-  },
 })
 
 interface WorkspaceActionsProps {
@@ -43,7 +35,6 @@ export const WorkspaceActionsMenu = (props: WorkspaceActionsProps) => {
   const lockedTip = 'Workspace is locked by admin';
 
   return <React.Fragment>
-    <div style={styles.dropdownHeader}>Workspace Actions</div>
     <MenuItem
       icon='copy'
       tooltip={adminLocked && lockedTip}
