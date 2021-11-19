@@ -582,11 +582,12 @@ interface CardProps {
   modules: AccessModule[],
   activeModule: AccessModule,
   clickableModules: AccessModule[],
-  spinnerProps: WithSpinnerOverlayProps
+  spinnerProps: WithSpinnerOverlayProps,
+  children?
 }
 
 const ModulesForCard = (props: CardProps) => {
-  const {profile, modules, activeModule, clickableModules, spinnerProps} = props;
+  const {profile, modules, activeModule, clickableModules, spinnerProps, children} = props;
 
   return <FlexColumn style={styles.modulesContainer}>
     {modules.map(moduleName => <MaybeModule
@@ -597,6 +598,7 @@ const ModulesForCard = (props: CardProps) => {
          clickable={clickableModules.includes(moduleName)}
          spinnerProps={spinnerProps}/>
     )}
+    {children}
   </FlexColumn>;
 };
 
@@ -657,8 +659,7 @@ const RegisteredTierCard = (props: {profile: Profile, activeModule: AccessModule
       modules={getEligibleModules(rtModules, profile)}
       activeModule={activeModule}
       clickableModules={clickableModules}
-      spinnerProps={spinnerProps}/>
-    {!enableRasLoginGovLinking && <TemporaryRASModule/>}
+      spinnerProps={spinnerProps}>{!enableRasLoginGovLinking && <TemporaryRASModule/>}</ModulesForCard>
   </FlexRow>;
 };
 
