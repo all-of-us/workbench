@@ -36,35 +36,39 @@ interface WorkspaceActionsProps {
   onDelete: Function,
 }
 export const WorkspaceActionsMenu = (props: WorkspaceActionsProps) => {
-  const {workspace, workspace: {accessLevel}, onDuplicate, onEdit, onShare, onDelete } = props;
+  const {workspace, workspace: {accessLevel, adminLocked}, onDuplicate, onEdit, onShare, onDelete } = props;
   const isNotOwner = !workspace || accessLevel !== WorkspaceAccessLevel.OWNER;
-  const tooltip = isNotOwner && 'Requires owner permission';
+
+  const ownerTip = 'Requires owner permission';
+  const lockedTip = 'Workspace is locked by admin';
 
   return <React.Fragment>
     <div style={styles.dropdownHeader}>Workspace Actions</div>
     <MenuItem
       icon='copy'
+      tooltip={adminLocked && lockedTip}
+      disabled={adminLocked}
       onClick={() => onDuplicate()}>
       Duplicate
     </MenuItem>
     <MenuItem
       icon='pencil'
-      tooltip={tooltip}
+      tooltip={isNotOwner && ownerTip}
       disabled={isNotOwner}
       onClick={() => onEdit()}>
       Edit
     </MenuItem>
     <MenuItem
       icon='share'
-      tooltip={tooltip}
-      disabled={isNotOwner}
+      tooltip={(isNotOwner && ownerTip) || (adminLocked && lockedTip)}
+      disabled={isNotOwner || adminLocked}
       onClick={() => onShare()}>
       Share
     </MenuItem>
     <MenuItem
       icon='trash'
-      tooltip={tooltip}
-      disabled={isNotOwner}
+      tooltip={(isNotOwner && ownerTip) || (adminLocked && lockedTip)}
+      disabled={isNotOwner || adminLocked}
       onClick={() => onDelete()}>
       Delete
     </MenuItem>
