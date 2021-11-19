@@ -3,6 +3,7 @@ package org.pmiops.workbench.mail;
 import java.time.Instant;
 import javax.mail.MessagingException;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exfiltration.EgressRemediationAction;
 import org.pmiops.workbench.model.SendBillingSetupEmailRequest;
 
@@ -31,4 +32,8 @@ public interface MailService {
 
   void sendEgressRemediationEmail(
       final DbUser user, EgressRemediationAction egressRemediationAction) throws MessagingException;
+
+  void sendWorkspaceAdminLockingEmail(
+      final DbUser creator, final DbWorkspace workspace, final String lockingReason)
+      throws MessagingException;
 }

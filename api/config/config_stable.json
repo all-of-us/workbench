@@ -104,7 +104,8 @@
     "enablePersistentDisk": false,
     "enableEgressAlertingV2": true,
     "enablePrivateDataprocWorker": false,
-    "grantLifescienceApiRunnerAcl": false
+    "grantLifescienceApiRunnerAcl": false,
+    "ccSupportWhenAdminLocking": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-stable",

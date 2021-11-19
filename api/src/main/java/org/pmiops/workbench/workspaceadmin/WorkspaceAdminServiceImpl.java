@@ -18,6 +18,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
+import javax.mail.MessagingException;
 import org.apache.commons.lang3.StringUtils;
 import org.pmiops.workbench.actionaudit.ActionAuditQueryService;
 import org.pmiops.workbench.actionaudit.auditors.AdminAuditor;
@@ -36,6 +37,7 @@ import org.pmiops.workbench.google.CloudMonitoringService;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
+import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.AccessReason;
 import org.pmiops.workbench.model.AdminLockingRequest;
 import org.pmiops.workbench.model.AdminWorkspaceCloudStorageCounts;
@@ -66,58 +68,61 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
 
   private final ActionAuditQueryService actionAuditQueryService;
   private final AdminAuditor adminAuditor;
+  private final CloudMonitoringService cloudMonitoringService;
   private final CloudStorageClient cloudStorageClient;
   private final CohortDao cohortDao;
-  private final CloudMonitoringService cloudMonitoringService;
   private final ConceptSetDao conceptSetDao;
   private final DataSetDao dataSetDao;
-  private final LeonardoMapper leonardoMapper;
   private final FireCloudService fireCloudService;
+  private final LeonardoMapper leonardoMapper;
   private final LeonardoNotebooksClient leonardoNotebooksClient;
+  private final LeonardoRuntimeAuditor leonardoRuntimeAuditor;
+  private final MailService mailService;
   private final NotebooksService notebooksService;
   private final UserMapper userMapper;
   private final UserService userService;
   private final WorkspaceDao workspaceDao;
   private final WorkspaceMapper workspaceMapper;
   private final WorkspaceService workspaceService;
-  private final LeonardoRuntimeAuditor leonardoRuntimeAuditor;
 
   @Autowired
   public WorkspaceAdminServiceImpl(
       ActionAuditQueryService actionAuditQueryService,
       AdminAuditor adminAuditor,
+      CloudMonitoringService cloudMonitoringService,
       CloudStorageClient cloudStorageClient,
       CohortDao cohortDao,
-      CloudMonitoringService cloudMonitoringService,
       ConceptSetDao conceptSetDao,
       DataSetDao dataSetDao,
       FireCloudService fireCloudService,
       LeonardoMapper leonardoMapper,
       LeonardoNotebooksClient leonardoNotebooksClient,
+      LeonardoRuntimeAuditor leonardoRuntimeAuditor,
+      MailService mailService,
       NotebooksService notebooksService,
       UserMapper userMapper,
       UserService userService,
       WorkspaceDao workspaceDao,
       WorkspaceMapper workspaceMapper,
-      WorkspaceService workspaceService,
-      LeonardoRuntimeAuditor leonardoRuntimeAuditor) {
+      WorkspaceService workspaceService) {
     this.actionAuditQueryService = actionAuditQueryService;
     this.adminAuditor = adminAuditor;
+    this.cloudMonitoringService = cloudMonitoringService;
     this.cloudStorageClient = cloudStorageClient;
     this.cohortDao = cohortDao;
-    this.cloudMonitoringService = cloudMonitoringService;
     this.conceptSetDao = conceptSetDao;
     this.dataSetDao = dataSetDao;
     this.fireCloudService = fireCloudService;
     this.leonardoMapper = leonardoMapper;
     this.leonardoNotebooksClient = leonardoNotebooksClient;
+    this.leonardoRuntimeAuditor = leonardoRuntimeAuditor;
+    this.mailService = mailService;
     this.notebooksService = notebooksService;
     this.userMapper = userMapper;
     this.userService = userService;
     this.workspaceDao = workspaceDao;
     this.workspaceMapper = workspaceMapper;
     this.workspaceService = workspaceService;
-    this.leonardoRuntimeAuditor = leonardoRuntimeAuditor;
   }
 
   @Override
@@ -323,6 +328,13 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
     DbWorkspace dbWorkspace = getWorkspaceByNamespaceOrThrow(workspaceNamespace);
     workspaceDao.save(dbWorkspace.setAdminLocked(true));
     adminAuditor.fireLockWorkspaceAction(dbWorkspace.getWorkspaceId(), adminLockingRequest);
+
+    try {
+      mailService.sendWorkspaceAdminLockingEmail(
+          dbWorkspace.getCreator(), dbWorkspace, adminLockingRequest.getRequestReason());
+    } catch (final MessagingException e) {
+      log.log(Level.WARNING, e.getMessage());
+    }
   }
 
   @Override
