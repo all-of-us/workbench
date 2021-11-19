@@ -28,6 +28,7 @@ import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.DataSetDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
@@ -49,6 +50,7 @@ import org.pmiops.workbench.model.ListRuntimeDeleteRequest;
 import org.pmiops.workbench.model.ListRuntimeResponse;
 import org.pmiops.workbench.model.TimeSeriesPoint;
 import org.pmiops.workbench.model.UserRole;
+import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceAdminView;
 import org.pmiops.workbench.model.WorkspaceAuditLogQueryResponse;
 import org.pmiops.workbench.model.WorkspaceUserAdminView;
@@ -329,9 +331,16 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
     workspaceDao.save(dbWorkspace.setAdminLocked(true));
     adminAuditor.fireLockWorkspaceAction(dbWorkspace.getWorkspaceId(), adminLockingRequest);
 
+    final List<DbUser> owners =
+        workspaceService.getFirecloudUserRoles(workspaceNamespace, dbWorkspace.getFirecloudName())
+            .stream()
+            .filter(userRole -> userRole.getRole() == WorkspaceAccessLevel.OWNER)
+            .map(UserRole::getEmail)
+            .map(userService::getByUsernameOrThrow)
+            .collect(Collectors.toList());
     try {
       mailService.sendWorkspaceAdminLockingEmail(
-          dbWorkspace.getCreator(), dbWorkspace, adminLockingRequest.getRequestReason());
+          dbWorkspace, adminLockingRequest.getRequestReason(), owners);
     } catch (final MessagingException e) {
       log.log(Level.WARNING, e.getMessage());
     }
