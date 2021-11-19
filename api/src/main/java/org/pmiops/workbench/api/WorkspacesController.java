@@ -343,7 +343,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     workspaceAuditor.fireEditAction(
         originalWorkspace, editedWorkspace, dbWorkspace.getWorkspaceId());
-    return return ResponseEntity.ok(workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace));
+    return ResponseEntity.ok(workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace));
   }
 
   @Override
