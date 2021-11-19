@@ -583,7 +583,7 @@ interface CardProps {
   activeModule: AccessModule,
   clickableModules: AccessModule[],
   spinnerProps: WithSpinnerOverlayProps,
-  children?
+  children?: string | React.ReactNode
 }
 
 const ModulesForCard = (props: CardProps) => {
