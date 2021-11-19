@@ -21,15 +21,15 @@ const styles = reactStyles({
 })
 
 interface WorkspaceActionsProps {
-  workspace: WorkspaceData,
+  workspaceData: WorkspaceData,
   onDuplicate: Function,
   onEdit: Function,
   onShare: Function,
   onDelete: Function,
 }
 export const WorkspaceActionsMenu = (props: WorkspaceActionsProps) => {
-  const {workspace, workspace: {accessLevel, adminLocked}, onDuplicate, onEdit, onShare, onDelete } = props;
-  const isNotOwner = !workspace || accessLevel !== WorkspaceAccessLevel.OWNER;
+  const {workspaceData, workspaceData: {accessLevel, adminLocked}, onDuplicate, onEdit, onShare, onDelete } = props;
+  const isNotOwner = !workspaceData || accessLevel !== WorkspaceAccessLevel.OWNER;
 
   const ownerTip = 'Requires owner permission';
   const lockedTip = 'Workspace is locked by admin';

@@ -820,24 +820,24 @@ export const HelpSidebar = fp.flow(
             content={<React.Fragment>
               <div style={styles.dropdownHeader}>Workspace Actions</div>
               <WorkspaceActionsMenu
-            workspace={workspace}
-            onDuplicate={() => {
-              AnalyticsTracker.Workspaces.OpenDuplicatePage();
-              this.props.navigate(['workspaces', namespace, id, 'duplicate']);
-            }}
-            onEdit={() => {
-              AnalyticsTracker.Workspaces.OpenEditPage();
-              this.props.navigate(['workspaces', namespace, id, 'edit']);
-            }}
-            onShare={() => {
-              AnalyticsTracker.Workspaces.OpenShareModal();
-              this.setState({currentModal: CurrentModal.Share});
-            }}
-            onDelete={() => {
-              AnalyticsTracker.Workspaces.OpenDeleteModal();
-              this.setState({currentModal: CurrentModal.Delete});
-            }}
-          /></React.Fragment>}>
+                workspaceData={workspace}
+                onDuplicate={() => {
+                  AnalyticsTracker.Workspaces.OpenDuplicatePage();
+                  this.props.navigate(['workspaces', namespace, id, 'duplicate']);
+                }}
+                onEdit={() => {
+                  AnalyticsTracker.Workspaces.OpenEditPage();
+                  this.props.navigate(['workspaces', namespace, id, 'edit']);
+                }}
+                onShare={() => {
+                  AnalyticsTracker.Workspaces.OpenShareModal();
+                  this.setState({currentModal: CurrentModal.Share});
+                }}
+                onDelete={() => {
+                  AnalyticsTracker.Workspaces.OpenDeleteModal();
+                  this.setState({currentModal: CurrentModal.Delete});
+                }}
+              /></React.Fragment>}>
             <div data-test-id='workspace-menu-button'>
               <TooltipTrigger content={<div>Menu</div>} side='left'>
                 <div style={styles.icon} onClick={() => this.analyticsEvent('OpenSidebar', 'Sidebar - Menu Icon')}>
