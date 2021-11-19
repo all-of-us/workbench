@@ -37,28 +37,30 @@ export const WorkspaceActionsMenu = (props: WorkspaceActionsProps) => {
   return <React.Fragment>
     <MenuItem
       icon='copy'
-      tooltip={adminLocked && lockedTip}
+      tooltip={adminLocked && <div data-test-id='workspace-duplicate-disabled-tooltip'>{lockedTip}</div>}
       disabled={adminLocked}
       onClick={() => onDuplicate()}>
       Duplicate
     </MenuItem>
     <MenuItem
       icon='pencil'
-      tooltip={isNotOwner && ownerTip}
+      tooltip={isNotOwner && <div data-test-id='workspace-edit-disabled-tooltip'>{ownerTip}</div>}
       disabled={isNotOwner}
       onClick={() => onEdit()}>
       Edit
     </MenuItem>
     <MenuItem
       icon='share'
-      tooltip={(isNotOwner && ownerTip) || (adminLocked && lockedTip)}
+      tooltip={(isNotOwner && <div data-test-id='workspace-share-disabled-tooltip'>{ownerTip}</div>) ||
+        (adminLocked && <div data-test-id='workspace-share-disabled-tooltip'>{lockedTip}</div>)}
       disabled={isNotOwner || adminLocked}
       onClick={() => onShare()}>
       Share
     </MenuItem>
     <MenuItem
       icon='trash'
-      tooltip={(isNotOwner && ownerTip) || (adminLocked && lockedTip)}
+      tooltip={(isNotOwner && <div data-test-id='workspace-delete-disabled-tooltip'>{ownerTip}</div>) ||
+        (adminLocked && <div data-test-id='workspace-delete-disabled-tooltip'>{lockedTip}</div>)}
       disabled={isNotOwner || adminLocked}
       onClick={() => onDelete()}>
       Delete
