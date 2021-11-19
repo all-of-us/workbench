@@ -347,7 +347,7 @@ const compareAutopauseThreshold = (oldRuntime: RuntimeConfig, newRuntime: Runtim
   };
 };
 
-const toRuntimeConfig = (runtime: Runtime): RuntimeConfig => {
+export const toRuntimeConfig = (runtime: Runtime): RuntimeConfig => {
   if (runtime.gceConfig) {
     return {
       computeType: ComputeType.Standard,
@@ -439,7 +439,7 @@ const useRuntime = (currentWorkspaceNamespace) => {
   }, [currentWorkspaceNamespace]);
 };
 
-export const maybeInitializeRuntime = async(workspaceNamespace: string, signal: AbortSignal): Promise<Runtime> => {
+export const maybeInitializeRuntime = async(workspaceNamespace: string, signal: AbortSignal, targetRuntime?: Runtime): Promise<Runtime> => {
   if (workspaceNamespace in compoundRuntimeOpStore.get()) {
     await new Promise<void>((resolve, reject) => {
       signal.addEventListener('abort', reject);
@@ -454,7 +454,7 @@ export const maybeInitializeRuntime = async(workspaceNamespace: string, signal: 
   }
 
   try {
-    return await LeoRuntimeInitializer.initialize({workspaceNamespace, pollAbortSignal: signal});
+    return await LeoRuntimeInitializer.initialize({workspaceNamespace, pollAbortSignal: signal, targetRuntime});
   } catch (error) {
     throw await maybeUnwrapSecuritySuspendedError(error);
   }

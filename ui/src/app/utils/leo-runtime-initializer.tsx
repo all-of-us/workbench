@@ -31,6 +31,15 @@ export class LeoRuntimeInitializationFailedError extends Error {
   }
 }
 
+export class InitialRuntimeNotFoundError extends LeoRuntimeInitializationFailedError {
+  constructor(public readonly defaultRuntime?: Runtime) {
+    super('initial runtime not found');
+    Object.setPrototypeOf(this, InitialRuntimeNotFoundError.prototype);
+
+    this.name = 'InitialRuntimeNotFoundError';
+  }
+}
+
 export class ExceededActionCountError extends LeoRuntimeInitializationFailedError {
   constructor(message, runtime?: Runtime) {
     super(message, runtime);
@@ -184,22 +193,22 @@ export class LeoRuntimeInitializer {
   }
 
   private async createRuntime(): Promise<void> {
+    if (!this.targetRuntime) {
+      // Automatic lazy creation is not supported; the caller must specify a target.
+      let defaultRuntime = {...runtimePresets.generalAnalysis.runtimeTemplate};
+      if (this.currentRuntime) {
+        defaultRuntime = applyPresetOverride(this.currentRuntime);
+      }
+      throw new InitialRuntimeNotFoundError(defaultRuntime);
+    }
+
     if (this.createCount >= this.maxCreateCount) {
       throw new ExceededActionCountError(
         `Reached max runtime create count (${this.maxCreateCount})`, this.currentRuntime);
     }
 
-    let runtime: Runtime;
-    if (this.targetRuntime) {
-      runtime = this.targetRuntime;
-    } else if (this.currentRuntime) {
-      runtime = applyPresetOverride(this.currentRuntime);
-    } else {
-      runtime = {...runtimePresets.generalAnalysis.runtimeTemplate};
-    }
-
     await runtimeApi().createRuntime(this.workspaceNamespace,
-      runtime,
+      this.targetRuntime,
       {signal: this.pollAbortSignal});
     this.createCount++;
   }
@@ -343,9 +352,8 @@ export class LeoRuntimeInitializer {
         return this.reject(
           new LeoRuntimeInitializationAbortedError('Abort signal received during runtime API call',
           this.currentRuntime));
-      } else if (e instanceof ExceededActionCountError) {
-        // This is a signal that we should hard-abort the polling loop due to reaching the max
-        // number of delete or create actions allowed.
+      } else if (e instanceof LeoRuntimeInitializationFailedError) {
+        // Propagate errors created by this library.
         return this.reject(e);
       } else {
         this.handleUnknownError(e);
