@@ -1,11 +1,11 @@
 package org.pmiops.workbench.google;
 
-import static org.pmiops.workbench.google.GoogleConfig.END_USER_CLOUD_BILLING;
 import static org.pmiops.workbench.google.GoogleConfig.SERVICE_ACCOUNT_CLOUD_IAM;
 
 import com.google.api.services.iam.v1.Iam;
 import com.google.api.services.iam.v1.model.Policy;
 import com.google.api.services.iam.v1.model.SetIamPolicyRequest;
+import com.google.cloud.iam.credentials.v1.ServiceAccountName;
 import java.io.IOException;
 import javax.inject.Provider;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,36 +18,33 @@ public class CloudIamClientImpl implements CloudIamClient {
   private final Provider<Iam> iamServiceProvider;
 
   @Autowired
-  public CloudIamClientImpl(@Qualifier(SERVICE_ACCOUNT_CLOUD_IAM) Provider<Iam> iamServiceProvider) {
+  public CloudIamClientImpl(
+      @Qualifier(SERVICE_ACCOUNT_CLOUD_IAM) Provider<Iam> iamServiceProvider) {
     this.iamServiceProvider = iamServiceProvider;
   }
 
   @Override
-  public Policy getServiceAccountIamPolicy(String serviceAccountName) throws IOException {
+  public Policy getServiceAccountIamPolicy(String projectId, String serviceAccountName) throws IOException {
     return iamServiceProvider
         .get()
         .projects()
         .serviceAccounts()
-        .getIamPolicy(serviceAccountName)
+        .getIamPolicy(ServiceAccountName.format(projectId, serviceAccountName))
         .execute();
   }
 
   @Override
-  public Policy setServiceAccountIamPolicy(String serviceAccountName, Policy policy)
+  public Policy setServiceAccountIamPolicy(String projectId, String serviceAccountName, Policy policy)
       throws IOException {
+    System.out.println("~~~~~~~~setServiceAccountIamPolicy");
+    System.out.println("~~~~~~~~setServiceAccountIamPolicy");
+    System.out.println("~~~~~~~~");
+    System.out.println(policy);
     return iamServiceProvider
         .get()
         .projects()
         .serviceAccounts()
-        .setIamPolicy(serviceAccountName, new SetIamPolicyRequest().setPolicy(policy))
+        .setIamPolicy(ServiceAccountName.format(projectId, serviceAccountName), new SetIamPolicyRequest().setPolicy(policy))
         .execute();
-  }
-
-  /**
-   * Returns the service account email based on the project id and the service account id. The
-   * service account id is the "username" of the service account email.
-   */
-  public static String emailFromAccountId(String accountId, String projectId) {
-    return String.format("%s@%s.iam.gserviceaccount.com", accountId, projectId);
   }
 }

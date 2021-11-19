@@ -463,12 +463,11 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     // Note: It is possible for a workspace to be (partially) created and return
     // a 500 to the user if this block of code fails since the workspace is already
     // committed to the database in an earlier call
+    Map<String, WorkspaceAccessLevel> clonedRoles = new HashMap<>();
     if (Optional.ofNullable(body.getIncludeUserRoles()).orElse(false)) {
       Map<String, FirecloudWorkspaceAccessEntry> fromAclsMap =
           workspaceAuthService.getFirecloudWorkspaceAcls(
               fromWorkspace.getWorkspaceNamespace(), fromWorkspace.getFirecloudName());
-
-      Map<String, WorkspaceAccessLevel> clonedRoles = new HashMap<>();
       for (Map.Entry<String, FirecloudWorkspaceAccessEntry> entry : fromAclsMap.entrySet()) {
         if (!entry.getKey().equals(user.getUsername())) {
           clonedRoles.put(
@@ -482,8 +481,18 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     dbWorkspace = workspaceDao.saveWithLastModified(dbWorkspace);
 
+    // Grant the workspace cloner and all from-workspaces users permission to use workflow if
+    // workspace is controlled tier workspace.
     if (accessTier.getShortName().equals(CONTROLLED_TIER_SHORT_NAME)) {
       iamClient.grantWorkflowRunnerRole(dbWorkspace.getGoogleProject());
+      for (Map.Entry<String, WorkspaceAccessLevel> entry : clonedRoles.entrySet()) {
+        if (!entry.getKey().equals(user.getUsername())
+            && (entry.getValue().equals(WorkspaceAccessLevel.OWNER)
+                || entry.getValue().equals(WorkspaceAccessLevel.WRITER))) {
+          iamClient.grantWorkflowRunnerRoleAsService(
+              dbWorkspace.getGoogleProject(), entry.getKey());
+        }
+      }
     }
     final Workspace savedWorkspace = workspaceMapper.toApiWorkspace(dbWorkspace, toFcWorkspace);
     workspaceAuditor.fireDuplicateAction(

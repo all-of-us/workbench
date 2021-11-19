@@ -39,7 +39,7 @@ public class IamClientImpl implements IamClient {
   public void grantWorkflowRunnerRole(String googleProject) {
     System.out.println("~~~~~!!!!!!!!");
     System.out.println("grantWorkflowRunnerRole");
-    grantPetSAWorkflowRunnerPermission(googleProject, endUseGoogleApiProvider.get());
+    grantServiceAccountUserRole(googleProject, endUseGoogleApiProvider.get());
   }
 
   @Override
@@ -51,19 +51,36 @@ public class IamClientImpl implements IamClient {
     } catch (IOException e) {
       throw new ServerErrorException(e);
     }
-    grantPetSAWorkflowRunnerPermission(googleProject, googleApiAsImpersonatedUser);
+    grantServiceAccountUserRole(googleProject, googleApiAsImpersonatedUser);
   }
 
-  private void grantPetSAWorkflowRunnerPermission(String googleProject, GoogleApi googleApi) {
+  private void grantServiceAccountUserRole(String googleProject, GoogleApi googleApi) {
     try {
       String petServiceAccount = googleApi.getPetServiceAccount(googleProject);
       System.out.println("~~~~~~~petServiceAccount");
       System.out.println(petServiceAccount);
-      Policy policy = cloudIamClient.getServiceAccountIamPolicy(petServiceAccount);
+      Policy policy = cloudIamClient.getServiceAccountIamPolicy(googleProject, petServiceAccount);
+      final String serviceAccountUserRole = "roles/iam.serviceAccountUser";
+      List<Binding> bindingList = Optional.ofNullable(policy.getBindings()).orElse(new ArrayList<>());
+      bindingList.add(
+          new Binding()
+              .setRole(serviceAccountUserRole)
+              .setMembers(Collections.singletonList("serviceAccount:" + petServiceAccount)));
+      cloudIamClient.setServiceAccountIamPolicy(googleProject, petServiceAccount, policy.setBindings(bindingList));
+    } catch (IOException | ApiException e) {
+      throw new ServerErrorException(e);
+    }
+  }
+
+  private void grantLifeScienceRunnerRole(String googleProject, GoogleApi googleApi) {
+    try {
+      String petServiceAccount = googleApi.getPetServiceAccount(googleProject);
+      System.out.println("~~~~~~~petServiceAccount");
+      System.out.println(petServiceAccount);
+      Policy policy = cloudIamClient.getServiceAccountIamPolicy(googleProject, petServiceAccount);
       final String lifescienceRunnerRole = "roles/lifesciences.workflowsRunner";
       final String serviceAccountUserRole = "roles/iam.serviceAccountUser";
-      List<Binding> bindingList =
-          Optional.ofNullable(policy.getBindings()).orElse(new ArrayList<>());
+      List<Binding> bindingList = Optional.ofNullable(policy.getBindings()).orElse(new ArrayList<>());
       bindingList.add(
           new Binding()
               .setRole(serviceAccountUserRole)
@@ -72,7 +89,7 @@ public class IamClientImpl implements IamClient {
           new Binding()
               .setRole(lifescienceRunnerRole)
               .setMembers(Collections.singletonList("serviceAccount:" + petServiceAccount)));
-      cloudIamClient.setServiceAccountIamPolicy(petServiceAccount, policy);
+      cloudIamClient.setServiceAccountIamPolicy(googleProject, petServiceAccount, policy.setBindings(bindingList));
     } catch (IOException | ApiException e) {
       throw new ServerErrorException(e);
     }
