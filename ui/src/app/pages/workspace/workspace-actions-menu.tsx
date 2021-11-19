@@ -31,36 +31,34 @@ export const WorkspaceActionsMenu = (props: WorkspaceActionsProps) => {
   const {workspaceData, workspaceData: {accessLevel, adminLocked}, onDuplicate, onEdit, onShare, onDelete } = props;
   const isNotOwner = !workspaceData || accessLevel !== WorkspaceAccessLevel.OWNER;
 
-  const ownerTip = 'Requires owner permission';
-  const lockedTip = 'Workspace is locked by admin';
+  const ownerTip = (action: string) => <div data-test-id={`workspace-${action}-disabled-tooltip`}>Requires owner permission</div>;
+  const lockedTip = (action: string) => <div data-test-id={`workspace-${action}-disabled-tooltip`}>Workspace is locked by admin</div>;
 
   return <React.Fragment>
     <MenuItem
       icon='copy'
-      tooltip={adminLocked && <div data-test-id='workspace-duplicate-disabled-tooltip'>{lockedTip}</div>}
+      tooltip={adminLocked && lockedTip('duplicate')}
       disabled={adminLocked}
       onClick={() => onDuplicate()}>
       Duplicate
     </MenuItem>
     <MenuItem
       icon='pencil'
-      tooltip={isNotOwner && <div data-test-id='workspace-edit-disabled-tooltip'>{ownerTip}</div>}
+      tooltip={isNotOwner && ownerTip('edit')}
       disabled={isNotOwner}
       onClick={() => onEdit()}>
       Edit
     </MenuItem>
     <MenuItem
       icon='share'
-      tooltip={(isNotOwner && <div data-test-id='workspace-share-disabled-tooltip'>{ownerTip}</div>) ||
-        (adminLocked && <div data-test-id='workspace-share-disabled-tooltip'>{lockedTip}</div>)}
+      tooltip={(isNotOwner && ownerTip('share')) || (adminLocked && lockedTip('share'))}
       disabled={isNotOwner || adminLocked}
       onClick={() => onShare()}>
       Share
     </MenuItem>
     <MenuItem
       icon='trash'
-      tooltip={(isNotOwner && <div data-test-id='workspace-delete-disabled-tooltip'>{ownerTip}</div>) ||
-        (adminLocked && <div data-test-id='workspace-delete-disabled-tooltip'>{lockedTip}</div>)}
+      tooltip={(isNotOwner && ownerTip('delete')) || (adminLocked && lockedTip('delete'))}
       disabled={isNotOwner || adminLocked}
       onClick={() => onDelete()}>
       Delete
