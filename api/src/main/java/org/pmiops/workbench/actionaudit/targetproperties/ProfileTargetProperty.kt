@@ -14,6 +14,6 @@ constructor(override val propertyName: String, override val extractor: (Profile)
     DISABLED("disabled", { it.disabled?.toString() }),
     AREA_OF_RESEARCH("area_of_research", Profile::getAreaOfResearch),
     AFFILIATION("affiliation", { it.verifiedInstitutionalAffiliation?.toString() }),
-    DEMOGRAPHIC_SURVEY("demographic_survey_populated", { (it.demographicSurvey != null).toString() }),
-    ADDRESS("address_populated", { (it.address != null).toString() }),
+    DEMOGRAPHIC_SURVEY("demographic_survey_is_present", { (it.demographicSurvey != null).toString() }),
+    ADDRESS("address_is_present", { (it.address != null).toString() }),
 }
