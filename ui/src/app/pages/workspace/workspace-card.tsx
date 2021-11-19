@@ -98,7 +98,7 @@ const WorkspaceCardMenu: React.FunctionComponent<WorkspaceCardMenuProps> = ({
     closeOnClick
     content={
       <React.Fragment>
-        <TooltipTrigger content={lockedTip}
+        <TooltipTrigger content={<div data-test-id='workspace-duplicate-disabled-tooltip'>{lockedTip}</div>}
                         disabled={!workspace.adminLocked}>
         <MenuItem icon='copy'
                   onClick={() => {
@@ -113,7 +113,7 @@ const WorkspaceCardMenu: React.FunctionComponent<WorkspaceCardMenuProps> = ({
           Duplicate
         </MenuItem>
         </TooltipTrigger>
-        <TooltipTrigger content={ownerTip}
+        <TooltipTrigger content={<div data-test-id='workspace-edit-disabled-tooltip'>{ownerTip}</div>}
                         disabled={WorkspacePermissionsUtil.isOwner(accessLevel)}>
           <MenuItem icon='pencil'
                     onClick={() => {
@@ -124,7 +124,7 @@ const WorkspaceCardMenu: React.FunctionComponent<WorkspaceCardMenuProps> = ({
             Edit
           </MenuItem>
         </TooltipTrigger>
-        <TooltipTrigger content={workspace.adminLocked ? lockedTip : ownerTip}
+        <TooltipTrigger content={<div data-test-id='workspace-share-disabled-tooltip'>{workspace.adminLocked ? lockedTip : ownerTip}</div>}
                         disabled={!(!WorkspacePermissionsUtil.isOwner(accessLevel) || workspace.adminLocked)}>
           <MenuItem icon='pencil'
                     onClick={() => {
@@ -135,7 +135,7 @@ const WorkspaceCardMenu: React.FunctionComponent<WorkspaceCardMenuProps> = ({
             Share
           </MenuItem>
         </TooltipTrigger>
-        <TooltipTrigger content={workspace.adminLocked ? lockedTip : ownerTip}
+        <TooltipTrigger content={<div data-test-id='workspace-delete-disabled-tooltip'>{workspace.adminLocked ? lockedTip : ownerTip}</div>}
                         disabled={!(!WorkspacePermissionsUtil.isOwner(accessLevel) || workspace.adminLocked)}>
           <MenuItem icon='trash'
                     onClick={() => {

@@ -41,7 +41,7 @@ export const WorkspaceActionsMenu = (props: WorkspaceActionsProps) => {
 
   const ownerTip = 'Requires owner permission';
   const lockedTip = 'Workspace is locked by admin';
-  
+
   return <React.Fragment>
     <div style={styles.dropdownHeader}>Workspace Actions</div>
     <MenuItem
