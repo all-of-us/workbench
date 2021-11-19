@@ -143,7 +143,6 @@ describe('Cohort UI Test', () => {
     const aWorkspaceCard = fp.shuffle(allWorkspaceCards)[0];
     const workspaceName = aWorkspaceCard.getWorkspaceName();
     await aWorkspaceCard.clickWorkspaceName();
-    3;
     return workspaceName;
   }
 });

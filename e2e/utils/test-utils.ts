@@ -81,6 +81,21 @@ export async function exists(page: Page, selector: string): Promise<boolean> {
 }
 
 /**
+ * Is element visible and ready for action.
+ * @param element
+ * @param page
+ */
+export async function isElementReady(page, element) {
+  const isVisibleHandle = await page.evaluateHandle((elem) => {
+    const style = window.getComputedStyle(elem);
+    return style && style.display !== 'none' && style.visibility !== 'hidden' && style.opacity !== '0';
+  }, element);
+  const visible = await isVisibleHandle.jsonValue();
+  const box = await element.boxModel();
+  return visible && box;
+}
+
+/**
  * Perform array of UI actions defined.
  * @param fields
  */
@@ -249,7 +264,9 @@ export async function findOrCreateWorkspaceCard(
  * Find a suitable workspace among existing workspaces with OWNER role and older than specified time difference.
  */
 export async function findAllCards(page: Page, millisAgo = 1000 * 60 * 30): Promise<WorkspaceCard[]> {
-  const existingCards: WorkspaceCard[] = await WorkspaceCard.findAllCards(page, WorkspaceAccessLevel.Owner);
+  const existingCards: WorkspaceCard[] = await WorkspaceCard.findAllCards(page, {
+    accessLevel: WorkspaceAccessLevel.Owner
+  });
   // Filter to exclude Workspaces younger than 30 minutes.
   const halfHourAgoMillis = Date.now() - millisAgo;
   return Promise.all(
