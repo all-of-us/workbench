@@ -42,8 +42,6 @@ export default class WorkspaceAnalysisPage extends WorkspaceBase {
     const headingTextElement = await this.page.waitForSelector(pageHeadingCss, { visible: true });
     const headingText = await getPropValue<string>(headingTextElement, 'textContent');
 
-    await initializeRuntimeIfModalPresented(this.page);
-
     // Log notebook progress text message
     const progressCss = '[data-test-id="current-progress-card"]';
     const progressTextElement = await this.page.waitForSelector(progressCss, { visible: true });
@@ -67,6 +65,7 @@ export default class WorkspaceAnalysisPage extends WorkspaceBase {
     const redirectingTextsXpath = `//*[@data-test-id and contains(normalize-space(), "${redirectingTexts}")]`;
 
     await Promise.all([
+      initializeRuntimeIfModalPresented(this.page),
       this.page.waitForXPath(warningTextsXpath, { visible: true }),
       this.page.waitForXPath(authenticateTextsXpath, { visible: true }),
       this.page.waitForXPath(creatingTextsXpath, { visible: true }),
