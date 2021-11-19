@@ -56,13 +56,17 @@ export default class WorkspaceCard extends CardBase {
     });
 
     // Turn elements into WorkspaceCard objects.
-    const allCards: WorkspaceCard[] = (await page.$x(WorkspaceCardSelector.cardRootXpath)).map((card) =>
-      new WorkspaceCard(page).asCard(card)
+    const allCards: WorkspaceCard[] = await Promise.all(
+      (await page.$x(WorkspaceCardSelector.cardRootXpath)).map((card) => new WorkspaceCard(page).asCard(card))
     );
+    console.log(`allCards:\n${allCards}`);
 
-    const visibleCards: WorkspaceCard[] = allCards.filter(async (card) => {
-      await isElementReady(page, card);
-    });
+    const visibleCards: WorkspaceCard[] = await Promise.all(
+      allCards.filter(async (card) => {
+        await isElementReady(page, card);
+      })
+    );
+    console.log(`visibleCards:\n${visibleCards}`);
 
     if (accessLevel !== undefined) {
       const matchAccessLevelCards: WorkspaceCard[] = [];
@@ -72,6 +76,7 @@ export default class WorkspaceCard extends CardBase {
           matchAccessLevelCards.push(card);
         }
       }
+      console.log(`matchAccessLevelCards:\n${matchAccessLevelCards}`);
       return matchAccessLevelCards;
     }
     return visibleCards;
