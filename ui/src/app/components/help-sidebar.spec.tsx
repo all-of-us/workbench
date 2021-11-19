@@ -24,7 +24,7 @@ import {
   WorkspacesApi
 } from 'generated/fetch';
 import defaultServerConfig from 'testing/default-server-config';
-import {waitForFakeTimersAndUpdate} from 'testing/react-test-helpers';
+import { mountWithRouter, waitForFakeTimersAndUpdate} from 'testing/react-test-helpers';
 import {CohortAnnotationDefinitionServiceStub} from 'testing/stubs/cohort-annotation-definition-service-stub';
 import {CohortReviewServiceStub, cohortReviewStubs} from 'testing/stubs/cohort-review-service-stub';
 import {workspaceDataStub} from 'testing/stubs/workspaces';
@@ -77,7 +77,7 @@ describe('HelpSidebar', () => {
   let props: {};
 
   const component = async() => {
-    const c = mount(<HelpSidebar {...props} />, {attachTo: document.getElementById('root')});
+    const c = mountWithRouter(<HelpSidebar {...props} />, {attachTo: document.getElementById('root')});
     await waitForFakeTimersAndUpdate(c);
     return c;
   };
@@ -145,7 +145,9 @@ describe('HelpSidebar', () => {
     const wrapper = await component();
     await setActiveIcon(wrapper, 'help');
     expect(wrapper.find('[data-test-id="section-title-0"]').text()).toBe(sidebarContent.data[0].title);
-    wrapper.setProps({pageKey: 'cohortBuilder'});
+    wrapper.setProps({
+      children: <HelpSidebar {...props} pageKey="cohortBuilder" />
+    });
     expect(wrapper.find('[data-test-id="section-title-0"]').text()).toBe(sidebarContent.cohortBuilder[0].title);
   });
 

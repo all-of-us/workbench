@@ -86,6 +86,7 @@ import runtime from 'assets/icons/thunderstorm-solid.svg';
 import times from 'assets/icons/times-light.svg';
 import {RuntimeErrorModal} from './runtime-error-modal';
 import {WorkspaceActionsMenu} from 'app/pages/workspace/workspace-actions-menu';
+import { RouteLink } from './app-router';
 
 export const LOCAL_STORAGE_KEY_SIDEBAR_STATE = 'WORKSPACE_SIDEBAR_STATE';
 
@@ -497,11 +498,6 @@ export const HelpSidebar = fp.flow(
       openZendeskWidget(givenName, familyName, username, contactEmail);
     }
 
-    navigateToTerminal() {
-      const {workspace: {id, namespace}} = this.props;
-      this.props.navigate(['workspaces', namespace, id, 'terminals']);
-    }
-
     analyticsEvent(type: string, label?: string) {
       const {pageKey} = this.props;
       const analyticsLabel = pageKeyToAnalyticsLabels[pageKey];
@@ -854,13 +850,13 @@ export const HelpSidebar = fp.flow(
                         ],
                         ['runtime', () => this.displayRuntimeIcon(icon)],
                         ['terminal',
-                          () =>
+                         () => <RouteLink
+                                 path={`/workspaces/${namespace}/${id}/terminals`} >
                              <FontAwesomeIcon
                                  data-test-id={'help-sidebar-icon-' + icon.id}
-                                 icon={icon.faIcon} style={icon.style}
-                                 onClick={() => this.navigateToTerminal()}/>
-
-                          ],
+                                 icon={icon.faIcon} style={icon.style} />
+                          </RouteLink>
+                        ],
                         ['genomicExtractions', () => this.displayExtractionIcon(icon)],
                         [DEFAULT, () => icon.faIcon === null
                               ? <img data-test-id={'help-sidebar-icon-' + icon.id} src={proIcons[icon.id]} style={icon.style} />
