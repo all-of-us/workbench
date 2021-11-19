@@ -307,20 +307,6 @@ public class DbUser {
     this.dataUseAgreementSignedVersion = dataUseAgreementSignedVersion;
   }
 
-  // TODO(RW-6972): remove
-  @Deprecated
-  @Column(name = "compliance_training_expiration_time")
-  public Timestamp getRegisteredTierComplianceTrainingExpirationTime() {
-    return complianceTrainingExpirationTime;
-  }
-
-  // TODO(RW-6972): remove
-  @Deprecated
-  public void setRegisteredTierComplianceTrainingExpirationTime(
-      Timestamp complianceTrainingExpirationTime) {
-    this.complianceTrainingExpirationTime = complianceTrainingExpirationTime;
-  }
-
   @OneToOne(
       cascade = CascadeType.ALL,
       orphanRemoval = true,
