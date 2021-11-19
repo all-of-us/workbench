@@ -90,19 +90,15 @@ const WorkspaceCardMenu: React.FunctionComponent<WorkspaceCardMenuProps> = ({
 
   const wsPathPrefix = 'workspaces/' + workspace.namespace + '/' + workspace.id;
 
-  const getTooltipContents = (isAdminLocked: boolean): string => {
-    if (isAdminLocked) {
-      return 'Workspace is locked by admin';
-    }
-    return 'Requires Owner Permission';
-  }
+  const lockedTip = 'Workspace is locked by admin';
+  const ownerTip = 'Requires Owner Permission';
 
   return <PopupTrigger
     side='bottom'
     closeOnClick
     content={
       <React.Fragment>
-        <TooltipTrigger content={<div data-test-id='workspace-duplicate-disabled-tooltip'>{getTooltipContents(workspace.adminLocked)}</div>}
+        <TooltipTrigger content={lockedTip}
                         disabled={!workspace.adminLocked}>
         <MenuItem icon='copy'
                   onClick={() => {
@@ -117,7 +113,7 @@ const WorkspaceCardMenu: React.FunctionComponent<WorkspaceCardMenuProps> = ({
           Duplicate
         </MenuItem>
         </TooltipTrigger>
-        <TooltipTrigger content={<div>Requires Owner Permission</div>}
+        <TooltipTrigger content={ownerTip}
                         disabled={WorkspacePermissionsUtil.isOwner(accessLevel)}>
           <MenuItem icon='pencil'
                     onClick={() => {
@@ -128,7 +124,7 @@ const WorkspaceCardMenu: React.FunctionComponent<WorkspaceCardMenuProps> = ({
             Edit
           </MenuItem>
         </TooltipTrigger>
-        <TooltipTrigger content={<div data-test-id='workspace-share-disabled-tooltip'>{getTooltipContents(workspace.adminLocked)}</div>}
+        <TooltipTrigger content={workspace.adminLocked ? lockedTip : ownerTip}
                         disabled={!(!WorkspacePermissionsUtil.isOwner(accessLevel) || workspace.adminLocked)}>
           <MenuItem icon='pencil'
                     onClick={() => {
@@ -139,7 +135,7 @@ const WorkspaceCardMenu: React.FunctionComponent<WorkspaceCardMenuProps> = ({
             Share
           </MenuItem>
         </TooltipTrigger>
-        <TooltipTrigger content={<div>{getTooltipContents(workspace.adminLocked)}</div>}
+        <TooltipTrigger content={workspace.adminLocked ? lockedTip : ownerTip}
                         disabled={!(!WorkspacePermissionsUtil.isOwner(accessLevel) || workspace.adminLocked)}>
           <MenuItem icon='trash'
                     onClick={() => {
