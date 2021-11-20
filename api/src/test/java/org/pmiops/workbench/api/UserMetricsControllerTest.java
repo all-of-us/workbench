@@ -36,6 +36,7 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.model.Domain;
+import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.RecentResourceRequest;
 import org.pmiops.workbench.model.WorkspaceResource;
 import org.pmiops.workbench.model.WorkspaceResourceResponse;
@@ -270,6 +271,19 @@ public class UserMetricsControllerTest {
     assertThat(recentResources.get(0).getNotebook().getPath())
         .isEqualTo("gs://bucketFile/notebooks/notebook.ipynb/");
     assertThat(recentResources.get(0).getNotebook().getName()).isEqualTo("");
+  }
+
+  // RW-7498 regression test
+  @Test
+  public void testGetUserRecentResource_notebookNameWithParen() {
+    dbUserRecentResource1.setNotebookName("gs://bucketFile/notebooks/notebook :).ipynb");
+    when(mockUserRecentResourceService.findAllResourcesByUser(dbUser.getUserId()))
+        .thenReturn(Collections.singletonList(dbUserRecentResource1));
+
+    WorkspaceResourceResponse recentResources =
+        userMetricsController.getUserRecentResources().getBody();
+    assertThat(recentResources.get(0).getNotebook())
+        .isEqualTo(new FileDetail().path("gs://bucketFile/notebooks/").name("notebook :).ipynb"));
   }
 
   @Test
