@@ -626,8 +626,7 @@ const DataProcConfigSelector = ({onChange, disabled, dataprocConfig})  => {
           incrementButtonClassName='p-button-secondary'
           value={selectedNumWorkers}
           inputStyle={styles.inputNumber}
-          onChange={({value}) => setSelectedNumWorkers(value)}
-          min={2}/>
+          onChange={({value}) => setSelectedNumWorkers(value)}/>
       </FlexRow>
       <FlexRow style={styles.labelAndInput}>
         <label style={styles.label} htmlFor='num-preemptible'>Preemptible</label>
@@ -638,8 +637,7 @@ const DataProcConfigSelector = ({onChange, disabled, dataprocConfig})  => {
           incrementButtonClassName='p-button-secondary'
           value={selectedPreemtible}
           inputStyle={styles.inputNumber}
-          onChange={({value}) => setSelectedPreemptible(value)}
-          min={0}/>
+          onChange={({value}) => setSelectedPreemptible(value)}/>
       </FlexRow>
       <div style={{gridColumnEnd: 'span 1'}}/>
       <MachineSelector
@@ -1247,15 +1245,21 @@ const RuntimePanel = fp.flow(
   // above or else we can end up with phantom validation fails
   const dataprocValidators = {
     masterDiskSize: diskSizeValidatorWithMessage('master'),
-    workerDiskSize: diskSizeValidatorWithMessage('worker')
-  };
+    workerDiskSize: diskSizeValidatorWithMessage('worker'),
+    numberOfWorkers: {
+      numericality: {
+        greaterThanOrEqualTo: 2,
+        message: 'Dataproc requires at least 2 worker nodes'
+      }
+    }
+  }
 
-  const {masterDiskSize = null, workerDiskSize = null} = selectedDataprocConfig || {};
+  const {masterDiskSize, workerDiskSize, numberOfWorkers} = selectedDataprocConfig || {};
   const standardDiskErrors = validate({selectedDiskSize}, standardDiskValidator);
   const standardPdErrors = validate({selectedPdSize}, standardPdValidator);
   const runningCostErrors = validate({currentRunningCost}, runningCostValidator);
   const dataprocErrors = selectedCompute === ComputeType.Dataproc
-      ? validate({masterDiskSize, workerDiskSize}, dataprocValidators)
+      ? validate({masterDiskSize, workerDiskSize, numberOfWorkers}, dataprocValidators)
       : undefined;
 
   const getErrorMessageContent = () => {

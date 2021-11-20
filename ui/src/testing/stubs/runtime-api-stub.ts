@@ -19,8 +19,8 @@ export const defaultDataprocConfig = (): DataprocConfig => ({
   masterDiskSize: 100,
   workerDiskSize: 100,
   workerMachineType: 'n1-standard-4',
-  numberOfWorkers: 1,
-  numberOfPreemptibleWorkers: 2,
+  numberOfWorkers: 2,
+  numberOfPreemptibleWorkers: 3,
   numberOfWorkerLocalSSDs: 0
 });
 
