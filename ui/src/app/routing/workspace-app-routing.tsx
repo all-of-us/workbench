@@ -23,7 +23,6 @@ import {WorkspaceAbout} from 'app/pages/workspace/workspace-about';
 import {WorkspaceEdit, WorkspaceEditMode} from 'app/pages/workspace/workspace-edit';
 import {LeoApplicationType} from 'app/pages/analysis/leonardo-app-launcher';
 import {BreadcrumbType} from 'app/utils/navigation';
-import {MatchParams} from 'app/utils/stores';
 import {adminLockedGuard} from 'app/routing/guards';
 
 const CohortPagePage = fp.flow(withRouteData, withRoutingSpinner)(CohortPage);
@@ -98,6 +97,7 @@ export const WorkspaceRoutes = () => {
     </AppRoute>
     <AppRoute exact path={`${path}/notebooks/:nbName`} guards={[adminLockedGuard()]}>
       <LeonardoAppRedirectPage
+          key="notebook"
           routeData={{
             pathElementForTitle: 'nbName',
             breadcrumb: BreadcrumbType.Notebook,
@@ -114,6 +114,7 @@ export const WorkspaceRoutes = () => {
     </AppRoute>
     <AppRoute exact path={`${path}/terminals`} guards={[adminLockedGuard()]}>
       <LeonardoAppRedirectPage
+          key="terminal"
           routeData={{
             breadcrumb: BreadcrumbType.Workspace,
             pageKey: LEONARDO_APP_PAGE_KEY,
