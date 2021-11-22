@@ -461,11 +461,11 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
   }
 
   @Override
-  public Boolean notebookTransferCompleted(String workspaceNamespace, String workspaceId) {
+  public Boolean notebookTransferComplete(String workspaceNamespace, String workspaceId) {
     String fileTransferTime =
-        fireCloudService.getCompletedCloneWorkspaceFileTransfer(workspaceNamespace, workspaceId);
-    boolean fileTransferCompleted =
+        fireCloudService.getDuplicateWorkspaceFileTransferTime(workspaceNamespace, workspaceId);
+    boolean fileTransferComplete =
         !(StringUtils.isEmpty(fileTransferTime) || fileTransferTime.equals("0"));
-    return fileTransferCompleted;
+    return fileTransferComplete;
   }
 }

@@ -59,7 +59,7 @@ public class WorkspaceServiceFakeImpl implements WorkspaceService {
   }
 
   @Override
-  public Boolean notebookTransferCompleted(String workspaceNamepsace, String workspaceId) {
+  public Boolean notebookTransferComplete(String workspaceNamepsace, String workspaceId) {
     return null;
   }
 }

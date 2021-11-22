@@ -944,7 +944,7 @@ paths:
     get:
       tags:
         - workspaces
-      description: Returns the workspace definition with the specified ID and namespace
+      description: Returns true if the notebooks has been copied to the workspace
       operationId: notebookTransferComplete
       responses:
         200:
