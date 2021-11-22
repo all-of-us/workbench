@@ -516,7 +516,7 @@ public class WorkspaceServiceTest {
   }
 
   @Test
-  public void notebookTransferIsNotCompleted() throws Exception {
+  public void notebookTransferHasNotStartedForDuplicateWorkspace() throws Exception {
     when(mockFireCloudService.getDuplicateWorkspaceFileTransferTime(
             DEFAULT_WORKSPACE_NAMESPACE, "FirecloudName"))
         .thenReturn(null);
@@ -535,7 +535,7 @@ public class WorkspaceServiceTest {
   }
 
   @Test
-  public void notebookTransferCompleted() throws Exception {
+  public void notebookTransferDoneForDuplicateWorkspace() throws Exception {
     when(mockFireCloudService.getDuplicateWorkspaceFileTransferTime(
             DEFAULT_WORKSPACE_NAMESPACE, "FirecloudName"))
         .thenReturn("2021-08-06");
