@@ -63,7 +63,12 @@ public class ActionAuditQueryServiceImpl implements ActionAuditQueryService {
     final String whereClausePrefix =
         "jsonPayload.target_id = @workspace_db_id AND\n"
             + "  jsonPayload.target_type = 'WORKSPACE'\n";
-    final String queryString = String.format(QUERY_FORMAT, getTableName(), whereClausePrefix, workbenchConfigProvider.get().actionAudit.partitionColumn);
+    final String queryString =
+        String.format(
+            QUERY_FORMAT,
+            getTableName(),
+            whereClausePrefix,
+            workbenchConfigProvider.get().actionAudit.partitionColumn);
 
     final QueryJobConfiguration queryJobConfiguration =
         QueryJobConfiguration.newBuilder(queryString)
@@ -102,7 +107,12 @@ public class ActionAuditQueryServiceImpl implements ActionAuditQueryService {
         "((jsonPayload.target_id = @user_db_id AND jsonPayload.target_type = 'USER') OR\n"
             + "  (jsonPayload.agent_id = @user_db_id AND jsonPayload.agent_type = 'USER')) AND\n"
             + "  jsonPayload.action_type != 'LOGIN'";
-    final String queryString = String.format(QUERY_FORMAT, getTableName(), whereClausePrefix, workbenchConfigProvider.get().actionAudit.partitionColumn);
+    final String queryString =
+        String.format(
+            QUERY_FORMAT,
+            getTableName(),
+            whereClausePrefix,
+            workbenchConfigProvider.get().actionAudit.partitionColumn);
 
     final QueryJobConfiguration queryJobConfiguration =
         QueryJobConfiguration.newBuilder(queryString)
