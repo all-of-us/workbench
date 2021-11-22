@@ -517,31 +517,31 @@ public class WorkspaceServiceTest {
 
   @Test
   public void notebookTransferIsNotCompleted() throws Exception {
-    when(mockFireCloudService.getCompletedCloneWorkspaceFileTransfer(
+    when(mockFireCloudService.getDuplicateWorkspaceFileTransferTime(
             DEFAULT_WORKSPACE_NAMESPACE, "FirecloudName"))
         .thenReturn(null);
 
     Boolean notebookFileDone =
-        workspaceService.notebookTransferCompleted(DEFAULT_WORKSPACE_NAMESPACE, "FirecloudName");
+        workspaceService.notebookTransferComplete(DEFAULT_WORKSPACE_NAMESPACE, "FirecloudName");
     assertThat(notebookFileDone).isFalse();
 
-    when(mockFireCloudService.getCompletedCloneWorkspaceFileTransfer(
+    when(mockFireCloudService.getDuplicateWorkspaceFileTransferTime(
             DEFAULT_WORKSPACE_NAMESPACE, "FirecloudName"))
         .thenReturn("");
 
     notebookFileDone =
-        workspaceService.notebookTransferCompleted(DEFAULT_WORKSPACE_NAMESPACE, "FirecloudName");
+        workspaceService.notebookTransferComplete(DEFAULT_WORKSPACE_NAMESPACE, "FirecloudName");
     assertThat(notebookFileDone).isFalse();
   }
 
   @Test
   public void notebookTransferCompleted() throws Exception {
-    when(mockFireCloudService.getCompletedCloneWorkspaceFileTransfer(
+    when(mockFireCloudService.getDuplicateWorkspaceFileTransferTime(
             DEFAULT_WORKSPACE_NAMESPACE, "FirecloudName"))
         .thenReturn("2021-08-06");
 
     Boolean notebookFileDone =
-        workspaceService.notebookTransferCompleted(DEFAULT_WORKSPACE_NAMESPACE, "FirecloudName");
+        workspaceService.notebookTransferComplete(DEFAULT_WORKSPACE_NAMESPACE, "FirecloudName");
     assertThat(notebookFileDone).isTrue();
   }
 }

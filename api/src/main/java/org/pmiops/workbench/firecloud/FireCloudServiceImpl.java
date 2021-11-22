@@ -521,7 +521,7 @@ public class FireCloudServiceImpl implements FireCloudService {
   }
 
   @Override
-  public String getCompletedCloneWorkspaceFileTransfer(
+  public String getDuplicateWorkspaceFileTransferTime(
       String workspaceNamespace, String firecloudName) {
     WorkspacesApi workspacesApi = endUserWorkspacesApiProvider.get();
     return retryHandler.run(
