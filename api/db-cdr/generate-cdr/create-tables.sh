@@ -8,12 +8,11 @@ export BQ_PROJECT=$1         # CDR project
 export BQ_DATASET=$2         # CDR dataset
 
 schema_path=generate-cdr/bq-schemas
-create_tables=(prep_survey
-cb_criteria
-prep_survey_concept_ancestor)
 
-for t in "${create_tables[@]}"
+for filename in bq-schemas/*.json;
 do
-    bq --project_id="$BQ_PROJECT" rm -f "$BQ_DATASET.$t"
-    bq --quiet --project_id="$BQ_PROJECT" mk --schema="$schema_path/$t.json" "$BQ_DATASET.$t"
+    json_name=${filename##*/}
+    table_name=${json_name%.json}
+    bq --project_id="$BQ_PROJECT" rm -f "$BQ_DATASET.$table_name"
+    bq --quiet --project_id="$BQ_PROJECT" mk --schema="$schema_path/$json_name" "$BQ_DATASET.$table_name"
 done
