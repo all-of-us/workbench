@@ -185,7 +185,15 @@ const styles = reactStyles({
     borderRadius: '50%',
     display: 'inline-block',
     fontSize: '0.4rem'
-  }
+  },
+  dropdownHeader: {
+    fontSize: 12,
+    lineHeight: '30px',
+    color: colors.primary,
+    fontWeight: 600,
+    paddingLeft: 12,
+    width: 160
+  },
 });
 
 const iconStyles = {
@@ -809,25 +817,27 @@ export const HelpSidebar = fp.flow(
           {shouldRenderWorkspaceMenu && <PopupTrigger
             side='bottom'
             closeOnClick
-            content={<WorkspaceActionsMenu
-            workspace={workspace}
-            onDuplicate={() => {
-              AnalyticsTracker.Workspaces.OpenDuplicatePage();
-              this.props.navigate(['workspaces', namespace, id, 'duplicate']);
-            }}
-            onEdit={() => {
-              AnalyticsTracker.Workspaces.OpenEditPage();
-              this.props.navigate(['workspaces', namespace, id, 'edit']);
-            }}
-            onShare={() => {
-              AnalyticsTracker.Workspaces.OpenShareModal();
-              this.setState({currentModal: CurrentModal.Share});
-            }}
-            onDelete={() => {
-              AnalyticsTracker.Workspaces.OpenDeleteModal();
-              this.setState({currentModal: CurrentModal.Delete});
-            }}
-          />}>
+            content={<React.Fragment>
+              <div style={styles.dropdownHeader}>Workspace Actions</div>
+              <WorkspaceActionsMenu
+                workspaceData={workspace}
+                onDuplicate={() => {
+                  AnalyticsTracker.Workspaces.OpenDuplicatePage();
+                  this.props.navigate(['workspaces', namespace, id, 'duplicate']);
+                }}
+                onEdit={() => {
+                  AnalyticsTracker.Workspaces.OpenEditPage();
+                  this.props.navigate(['workspaces', namespace, id, 'edit']);
+                }}
+                onShare={() => {
+                  AnalyticsTracker.Workspaces.OpenShareModal();
+                  this.setState({currentModal: CurrentModal.Share});
+                }}
+                onDelete={() => {
+                  AnalyticsTracker.Workspaces.OpenDeleteModal();
+                  this.setState({currentModal: CurrentModal.Delete});
+                }}
+              /></React.Fragment>}>
             <div data-test-id='workspace-menu-button'>
               <TooltipTrigger content={<div>Menu</div>} side='left'>
                 <div style={styles.icon} onClick={() => this.analyticsEvent('OpenSidebar', 'Sidebar - Menu Icon')}>

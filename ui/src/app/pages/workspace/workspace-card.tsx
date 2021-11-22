@@ -3,7 +3,7 @@ import * as React from 'react';
 
 import {ResourceType, Workspace, WorkspaceAccessLevel} from 'generated/fetch';
 
-import {Button, Clickable, MenuItem, SnowmanButton} from 'app/components/buttons';
+import {Button, Clickable, SnowmanButton} from 'app/components/buttons';
 import {WorkspaceCardBase} from 'app/components/card';
 import {ConfirmDeleteModal} from 'app/components/confirm-delete-modal';
 import {FlexColumn, FlexRow} from 'app/components/flex';
@@ -20,10 +20,9 @@ import {AnalyticsTracker, triggerEvent} from 'app/utils/analytics';
 import {currentWorkspaceStore, NavigationProps, useNavigation} from 'app/utils/navigation';
 import {serverConfigStore} from 'app/utils/stores';
 import {withNavigation} from 'app/utils/with-navigation-hoc';
-import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
-import {faCheck} from '@fortawesome/free-solid-svg-icons';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {faLockAlt} from '@fortawesome/pro-solid-svg-icons';
+import {WorkspaceActionsMenu} from './workspace-actions-menu';
 
 const EVENT_CATEGORY = 'Workspace list';
 
@@ -71,87 +70,6 @@ const styles = reactStyles({
     viewBox: '0 0 25 27'
   }
 });
-
-interface WorkspaceCardMenuProps {
-  disabled: boolean;
-  workspace: Workspace;
-  accessLevel: WorkspaceAccessLevel;
-  onShare: Function;
-  onDelete: Function;
-}
-
-const WorkspaceCardMenu: React.FunctionComponent<WorkspaceCardMenuProps> = ({
-  workspace,
-  accessLevel,
-  onShare,
-  onDelete
-}) => {
-  const [navigate, ] = useNavigation();
-
-  const wsPathPrefix = 'workspaces/' + workspace.namespace + '/' + workspace.id;
-
-  const lockedTip = 'Workspace is locked by admin';
-  const ownerTip = 'Requires Owner Permission';
-
-  return <PopupTrigger
-    side='bottom'
-    closeOnClick
-    content={
-      <React.Fragment>
-        <TooltipTrigger content={<div data-test-id='workspace-duplicate-disabled-tooltip'>{lockedTip}</div>}
-                        disabled={!workspace.adminLocked}>
-        <MenuItem icon='copy'
-                  onClick={() => {
-                    // Using workspace.published here to identify Featured Workspaces. At some point, we will need a separate property for
-                    // this on the workspace object once users are able to publish their own workspaces
-                    workspace.published ?
-                      AnalyticsTracker.Workspaces.DuplicateFeatured(workspace.name) :
-                      AnalyticsTracker.Workspaces.OpenDuplicatePage('Card');
-                    navigate([wsPathPrefix, 'duplicate']);
-                  }}
-                  disabled={workspace.adminLocked}>
-          Duplicate
-        </MenuItem>
-        </TooltipTrigger>
-        <TooltipTrigger content={<div data-test-id='workspace-edit-disabled-tooltip'>{ownerTip}</div>}
-                        disabled={WorkspacePermissionsUtil.isOwner(accessLevel)}>
-          <MenuItem icon='pencil'
-                    onClick={() => {
-                      AnalyticsTracker.Workspaces.OpenEditPage('Card');
-                      navigate([wsPathPrefix, 'edit']); }
-                    }
-                    disabled={!WorkspacePermissionsUtil.isOwner(accessLevel)}>
-            Edit
-          </MenuItem>
-        </TooltipTrigger>
-        <TooltipTrigger content={<div data-test-id='workspace-share-disabled-tooltip'>{workspace.adminLocked ? lockedTip : ownerTip}</div>}
-                        disabled={!(!WorkspacePermissionsUtil.isOwner(accessLevel) || workspace.adminLocked)}>
-          <MenuItem icon='pencil'
-                    onClick={() => {
-                      AnalyticsTracker.Workspaces.OpenShareModal('Card');
-                      onShare();
-                    }}
-                    disabled={!WorkspacePermissionsUtil.isOwner(accessLevel) || workspace.adminLocked}>
-            Share
-          </MenuItem>
-        </TooltipTrigger>
-        <TooltipTrigger content={<div data-test-id='workspace-delete-disabled-tooltip'>{workspace.adminLocked ? lockedTip : ownerTip}</div>}
-                        disabled={!(!WorkspacePermissionsUtil.isOwner(accessLevel) || workspace.adminLocked)}>
-          <MenuItem icon='trash'
-                    onClick={() => {
-                      AnalyticsTracker.Workspaces.OpenDeleteModal('Card');
-                      onDelete();
-                    }}
-                    disabled={!WorkspacePermissionsUtil.isOwner(accessLevel) || workspace.adminLocked}>
-            Delete
-          </MenuItem>
-        </TooltipTrigger>
-      </React.Fragment>
-    }
-  >
-    <SnowmanButton style={{marginLeft: 0}} data-test-id='workspace-card-menu'/>
-  </PopupTrigger>;
-};
 
 interface WorkspaceCardState {
   confirmDeleting: boolean;
@@ -229,29 +147,47 @@ export const WorkspaceCard = fp.flow(withNavigation)(
     render() {
       const {
         workspace,
-        workspace: {accessTierShortName, adminLocked},
+        workspace: {accessTierShortName, adminLocked, namespace, id},
         accessLevel,
-        tierAccessDisabled
+        tierAccessDisabled,
+        navigate
       } = this.props;
       const {confirmDeleting, showShareModal, showResearchPurposeReviewModal} = this.state;
       return <React.Fragment>
         <WorkspaceCardBase>
           <FlexRow style={{height: '100%'}}>
             <FlexColumn style={styles.workspaceMenuWrapper}>
-              {!tierAccessDisabled && <WorkspaceCardMenu
-                workspace={workspace}
-                accessLevel={accessLevel}
-                onDelete={() => {
-                  triggerEvent(
-                    EVENT_CATEGORY, 'delete', 'Card menu - click delete');
-                  this.setState({confirmDeleting: true});
-                }}
-                onShare={() => {
-                  triggerEvent(EVENT_CATEGORY, 'share', 'Card menu - click share');
-                  this.setState({showShareModal: true});
-                }}
-                disabled={false}
-              />}
+              {!tierAccessDisabled && <PopupTrigger
+                side='bottom'
+                closeOnClick
+                content={<WorkspaceActionsMenu
+                  workspaceData={{...workspace, accessLevel}}
+                  onDuplicate={() => {
+                    // Using workspace.published here to identify Featured Workspaces. At some point, we will need a separate property for
+                    // this on the workspace object once users are able to publish their own workspaces
+                    workspace.published ?
+                      AnalyticsTracker.Workspaces.DuplicateFeatured(workspace.name) :
+                      AnalyticsTracker.Workspaces.OpenDuplicatePage('Card');
+                    navigate(['workspaces', namespace, id, 'duplicate']);
+                  }}
+                  onEdit={() => {
+                    AnalyticsTracker.Workspaces.OpenEditPage('Card');
+                    navigate(['workspaces', namespace, id, 'edit']); }
+                  }
+                  onDelete={() => {
+                    AnalyticsTracker.Workspaces.OpenDeleteModal('Card');
+                    triggerEvent(
+                      EVENT_CATEGORY, 'delete', 'Card menu - click delete');
+                    this.setState({confirmDeleting: true});
+                  }}
+                  onShare={() => {
+                    AnalyticsTracker.Workspaces.OpenShareModal('Card');
+                    triggerEvent(EVENT_CATEGORY, 'share', 'Card menu - click share');
+                    this.setState({showShareModal: true});
+                  }}/>
+                }>
+                <SnowmanButton style={{marginLeft: 0}} data-test-id='workspace-card-menu'/>
+              </PopupTrigger>}
             </FlexColumn>
             <FlexColumn
               style={{
