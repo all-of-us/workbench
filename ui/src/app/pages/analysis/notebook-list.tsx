@@ -5,6 +5,7 @@ import {FadeBox} from 'app/components/containers';
 import {ClrIcon, InfoIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
+import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 
 import {NewNotebookModal} from 'app/pages/analysis/new-notebook-modal';
 import {profileApi, notebooksApi, workspacesApi} from 'app/services/swagger-fetch-clients';
@@ -20,6 +21,7 @@ import {ACTION_DISABLED_INVALID_BILLING} from 'app/utils/strings';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {BillingStatus, FileDetail, ResourceType} from 'generated/fetch';
 import {FlexColumn} from 'app/components/flex';
+import {faClock} from "@fortawesome/pro-regular-svg-icons";
 
 const styles = {
   heading: {
@@ -176,7 +178,7 @@ export const NotebookList = withCurrentWorkspace()(class extends React.Component
               type='small'
               onClick={() => {}}>
             <FlexColumn style={styles.cloneNotebookMsg}>
-              <ClrIcon shape="clock"></ClrIcon>
+              <div><FontAwesomeIcon icon={faClock} size="2x"></FontAwesomeIcon></div>
               <div>Copying 1 or more notebooks from another workspace. May take a few minutes.</div>
             </FlexColumn>
           </CardButton>}
