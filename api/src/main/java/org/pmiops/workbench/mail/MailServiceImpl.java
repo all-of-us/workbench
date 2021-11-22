@@ -289,7 +289,7 @@ public class MailServiceImpl implements MailService {
             ? ImmutableList.of(config.mandrill.fromEmail)
             : Collections.emptyList();
 
-    final String ownersStr =
+    final String ownersInfoStr =
         owners.stream()
             .map(o -> String.format("%s (%s)", o.getUsername(), o.getContactEmail()))
             .collect(Collectors.joining(", "));
@@ -300,7 +300,7 @@ public class MailServiceImpl implements MailService {
         "[Response Required] AoU Researcher Workbench Workspace Admin Locked",
         String.format(
             "Admin locking email for workspace '%s' (%s) sent to owners %s",
-            workspace.getName(), workspace.getWorkspaceNamespace(), ownersStr),
+            workspace.getName(), workspace.getWorkspaceNamespace(), ownersInfoStr),
         buildHtml(
             WORKSPACE_ADMIN_LOCKING_EMAIL,
             workspaceAdminLockedSubstitutionMap(workspace, lockingReason)));
