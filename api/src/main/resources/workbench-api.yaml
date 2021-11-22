@@ -944,11 +944,11 @@ paths:
     get:
       tags:
         - workspaces
-      description: Returns true if the notebooks has been copied to the workspace
+      description: Checks if the notebooks has been copied to the workspace
       operationId: notebookTransferComplete
       responses:
         200:
-          description: A workspace response containing workspace and access level
+          description: Returns true if the notebooks has been copied to the workspace
           schema:
             type: boolean
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}":
