@@ -110,7 +110,8 @@
   "actionAudit": {
     "logName": "workbench-action-audit-prod",
     "bigQueryDataset": "workbench_action_audit_prod",
-    "bigQueryTable": "workbench_action_audit_prod"
+    "bigQueryTable": "workbench_action_audit_prod",
+    "partitionColumn": "_PARTITIONTIME"
   },
   "rdrExport": {
     "host": "all-of-us-rdr-prod.appspot.com",

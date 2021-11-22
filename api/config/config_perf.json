@@ -106,7 +106,8 @@
     "enableEgressAlertingV2": true,
     "enablePrivateDataprocWorker": false,
     "grantLifescienceApiRunnerAcl": false,
-    "ccSupportWhenAdminLocking": false
+    "ccSupportWhenAdminLocking": false,
+    "partitionColumn": "_PARTITIONTIME"
   },
   "actionAudit": {
     "logName": "workbench-action-audit-perf",

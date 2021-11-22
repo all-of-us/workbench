@@ -111,7 +111,8 @@
   "actionAudit": {
     "logName": "workbench-action-audit-test",
     "bigQueryDataset": "workbench_action_audit_test",
-    "bigQueryTable": "workbench_action_audit_test"
+    "bigQueryTable": "workbench_action_audit_test",
+    "partitionColumn": "_PARTITIONTIME"
   },
   "rdrExport": {
     "host": "pmi-drc-api-test.appspot.com",
