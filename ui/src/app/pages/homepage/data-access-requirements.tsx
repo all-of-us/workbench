@@ -318,10 +318,6 @@ const selfBypass = async(spinnerProps: WithSpinnerOverlayProps, reloadProfile: F
   reloadProfile();
 };
 
-const getVisibleRTModules = (profile: Profile): AccessModule[] => {
-  return fp.filter(module=> isEraCommonsModuleRequiredByInstitution(profile, module),rtModules);
-}
-
 const isEraCommonsModuleRequiredByInstitution = (profile: Profile, moduleNames: AccessModule): boolean => {
   // Remove the eRA Commons module when the flag to enable RAS is set and the user's
   // institution does not require eRA Commons for RT.
@@ -533,13 +529,6 @@ const MaybeModule = ({profile, moduleName, active, clickable, spinnerProps}: Mod
     </FlexRow>;
   };
 
-  // temp hack Sep 16: render a special temporary RAS module if disabled
-  if (moduleName === AccessModule.RASLINKLOGINGOV) {
-    const {enableRasLoginGovLinking} = serverConfigStore.get().config;
-    if (!enableRasLoginGovLinking) {
-      return <TemporaryRASModule/>;
-    }
-  }
   return isEnabledInEnvironment ? <Module profile={profile}/> : null;
 };
 
@@ -593,11 +582,12 @@ interface CardProps {
   modules: AccessModule[],
   activeModule: AccessModule,
   clickableModules: AccessModule[],
-  spinnerProps: WithSpinnerOverlayProps
+  spinnerProps: WithSpinnerOverlayProps,
+  children?: string | React.ReactNode
 }
 
 const ModulesForCard = (props: CardProps) => {
-  const {profile, modules, activeModule, clickableModules, spinnerProps} = props;
+  const {profile, modules, activeModule, clickableModules, spinnerProps, children} = props;
 
   return <FlexColumn style={styles.modulesContainer}>
     {modules.map(moduleName => <MaybeModule
@@ -608,6 +598,7 @@ const ModulesForCard = (props: CardProps) => {
          clickable={clickableModules.includes(moduleName)}
          spinnerProps={spinnerProps}/>
     )}
+    {children}
   </FlexColumn>;
 };
 
@@ -645,6 +636,8 @@ const RegisteredTierCard = (props: {profile: Profile, activeModule: AccessModule
     clickableModules: AccessModule[], spinnerProps: WithSpinnerOverlayProps}) => {
   const {profile, activeModule, clickableModules, spinnerProps} = props;
   const rtDisplayName = AccessTierDisplayNames.Registered;
+  const {enableRasLoginGovLinking} = serverConfigStore.get().config;
+
   return <FlexRow style={styles.card}>
     <FlexColumn>
       <div style={styles.cardStep}>Step 1</div>
@@ -663,10 +656,10 @@ const RegisteredTierCard = (props: {profile: Profile, activeModule: AccessModule
     </FlexColumn>
     <ModulesForCard
       profile={profile}
-      modules={getVisibleRTModules(profile)}
+      modules={getEligibleModules(rtModules, profile)}
       activeModule={activeModule}
       clickableModules={clickableModules}
-      spinnerProps={spinnerProps}/>
+      spinnerProps={spinnerProps}>{!enableRasLoginGovLinking && <TemporaryRASModule/>}</ModulesForCard>
   </FlexRow>;
 };
 
