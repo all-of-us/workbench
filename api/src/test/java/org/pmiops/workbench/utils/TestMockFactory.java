@@ -100,7 +100,7 @@ public class TestMockFactory {
   // TODO there's something off about how "workspaceName" here works.  Investigate.
   // For best results, use a lowercase-only workspaceName.
   // To me, this hints at a firecloudName/aouName discrepancy somewhere in here.
-  public Workspace createWorkspace(String workspaceNameSpace, String workspaceName) {
+  public static Workspace createWorkspace(String workspaceNameSpace, String workspaceName) {
     List<DisseminateResearchEnum> disseminateResearchEnumsList = new ArrayList<>();
     disseminateResearchEnumsList.add(DisseminateResearchEnum.PRESENATATION_SCIENTIFIC_CONFERENCES);
     disseminateResearchEnumsList.add(DisseminateResearchEnum.PRESENTATION_ADVISORY_GROUPS);
@@ -160,7 +160,7 @@ public class TestMockFactory {
         .googleProject(DEFAULT_GOOGLE_PROJECT);
   }
 
-  public LeonardoListRuntimeResponse createLeonardoListRuntimesResponse() {
+  public static LeonardoListRuntimeResponse createLeonardoListRuntimesResponse() {
     return new LeonardoListRuntimeResponse()
         .runtimeName("runtime")
         .googleProject("google-project")
