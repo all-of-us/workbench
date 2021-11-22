@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.apache.commons.collections4.CollectionUtils;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.AttrName;
 import org.pmiops.workbench.model.Attribute;
@@ -195,6 +196,11 @@ public final class SearchGroupItemQueryBuilder {
       String query = buildOuterTemporalQuery(queryParams, searchGroup);
       queryParts.add(query);
     } else {
+      if (CollectionUtils.isEmpty(searchGroup.getItems())) {
+        throw new BadRequestException(
+            "SearchGroup Id: " + searchGroup.getId() + " has null/empty items list");
+      }
+
       for (SearchGroupItem searchGroupItem : searchGroup.getItems()) {
         // build regular sql statement
         String query = buildBaseQuery(queryParams, searchGroupItem, searchGroup.getMention());
@@ -211,6 +217,14 @@ public final class SearchGroupItemQueryBuilder {
     Set<SearchParameter> standardSearchParameters = new HashSet<>();
     Set<SearchParameter> sourceSearchParameters = new HashSet<>();
     List<String> queryParts = new ArrayList<>();
+
+    if (CollectionUtils.isEmpty(searchGroupItem.getSearchParameters())) {
+      throw new BadRequestException(
+          "SearchGroupItem Id: "
+              + searchGroupItem.getId()
+              + " has null/empty search parameter list");
+    }
+
     Domain domain = Domain.fromValue(searchGroupItem.getType());
 
     // When building sql for demographics - we query against the person table

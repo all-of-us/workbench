@@ -1,6 +1,7 @@
 package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.utils.TestMockFactory.createRegisteredTierForTests;
@@ -38,6 +39,7 @@ import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.StorageConfig;
 import org.pmiops.workbench.model.AgeType;
@@ -890,6 +892,35 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             filters.contains(
                 new DataFilter().dataFilterId(2L).displayName("displayName2").name("name2")))
         .isTrue();
+  }
+
+  @Test
+  public void countParticipantsSearchGroupNoItems() {
+    List<SearchGroup> groups = new ArrayList<>();
+    groups.add(new SearchGroup().id("sg1"));
+    SearchRequest searchRequest = new SearchRequest().includes(groups);
+    assertThrows(
+        BadRequestException.class,
+        () -> controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest));
+  }
+
+  @Test
+  public void countParticipantsSearchGroupNoSearchParameters() {
+    final SearchGroupItem searchGroupItem =
+        new SearchGroupItem()
+            .id("sgi1")
+            .type(Domain.PERSON.toString())
+            .searchParameters(new ArrayList<>())
+            .modifiers(new ArrayList<>());
+
+    final SearchGroup searchGroup = new SearchGroup().addItemsItem(searchGroupItem);
+
+    List<SearchGroup> groups = new ArrayList<>();
+    groups.add(searchGroup);
+    SearchRequest searchRequest = new SearchRequest().includes(groups);
+    assertThrows(
+        BadRequestException.class,
+        () -> controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest));
   }
 
   @Test

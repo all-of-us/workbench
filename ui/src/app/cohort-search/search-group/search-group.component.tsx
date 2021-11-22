@@ -242,7 +242,7 @@ export const SearchGroup = withCurrentWorkspace()(
     }
 
     componentDidMount(): void {
-      const {group: {id}, updateRequest, workspace: {cdrVersionId}} = this.props;
+      const {group: {id, temporal}, updateRequest, workspace: {cdrVersionId}} = this.props;
       criteriaMenuOptionsStore.subscribe(options => {
         if (!!options[cdrVersionId]) {
           this.setState({criteriaMenuOptions: options[cdrVersionId]});
@@ -263,7 +263,9 @@ export const SearchGroup = withCurrentWorkspace()(
         }
       }
       updateRequest();
-      this.getGroupCount();
+      if (this.hasActiveItems && (!temporal || !this.temporalError)) {
+        this.getGroupCount();
+      }
     }
 
     componentWillUnmount(): void {
