@@ -281,7 +281,7 @@ public class MailServiceImpl implements MailService {
 
   @Override
   public void sendWorkspaceAdminLockingEmail(
-      DbUser creator, DbWorkspace workspace, String lockingReason) throws MessagingException {
+      DbWorkspace workspace, String lockingReason, List<DbUser> owners) throws MessagingException {
 
     WorkbenchConfig config = workbenchConfigProvider.get();
     List<String> ccSupportMaybe =
@@ -289,19 +289,21 @@ public class MailServiceImpl implements MailService {
             ? ImmutableList.of(config.mandrill.fromEmail)
             : Collections.emptyList();
 
+    final String ownersInfoStr =
+        owners.stream()
+            .map(o -> String.format("%s (%s)", o.getUsername(), o.getContactEmail()))
+            .collect(Collectors.joining(", "));
+
     sendWithRetries(
-        ImmutableList.of(creator.getContactEmail()),
+        owners.stream().map(DbUser::getContactEmail).collect(Collectors.toList()),
         ccSupportMaybe,
         "[Response Required] AoU Researcher Workbench Workspace Admin Locked",
         String.format(
-            "Admin locking email for workspace '%s' (%s) sent to creator %s (%s)",
-            workspace.getName(),
-            workspace.getWorkspaceNamespace(),
-            creator.getUsername(),
-            creator.getContactEmail()),
+            "Admin locking email for workspace '%s' (%s) sent to owners %s",
+            workspace.getName(), workspace.getWorkspaceNamespace(), ownersInfoStr),
         buildHtml(
             WORKSPACE_ADMIN_LOCKING_EMAIL,
-            workspaceAdminLockedSubstitutionMap(creator, workspace, lockingReason)));
+            workspaceAdminLockedSubstitutionMap(workspace, lockingReason)));
   }
 
   private Map<EmailSubstitutionField, String> welcomeMessageSubstitutionMap(
@@ -406,11 +408,10 @@ public class MailServiceImpl implements MailService {
   }
 
   private Map<EmailSubstitutionField, String> workspaceAdminLockedSubstitutionMap(
-      DbUser creator, DbWorkspace workspace, String lockingReason) {
+      DbWorkspace workspace, String lockingReason) {
     return ImmutableMap.<EmailSubstitutionField, String>builder()
         .put(EmailSubstitutionField.HEADER_IMG, getAllOfUsLogo())
         .put(EmailSubstitutionField.ALL_OF_US, getAllOfUsItalicsText())
-        .put(EmailSubstitutionField.USERNAME, creator.getUsername())
         .put(EmailSubstitutionField.WORKSPACE_NAME, workspace.getName())
         .put(EmailSubstitutionField.WORKSPACE_NAMESPACE, workspace.getWorkspaceNamespace())
         .put(EmailSubstitutionField.LOCKING_REASON, lockingReason)
