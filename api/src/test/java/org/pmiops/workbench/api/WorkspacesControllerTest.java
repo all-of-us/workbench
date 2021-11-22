@@ -658,21 +658,20 @@ public class WorkspacesControllerTest {
 
   @Test
   public void testCreateWorkspace_resetBillingAccountOnFailedSave() {
-    doThrow(RuntimeException.class).when(workspaceDao).save(any(DbWorkspace.class));
+    final Class<RuntimeException> testException = RuntimeException.class;
+
+    doThrow(testException).when(workspaceDao).save(any(DbWorkspace.class));
     Workspace workspace = createWorkspace();
     TestMockFactory.stubCreateBillingProject(fireCloudService, workspace.getNamespace());
 
-    try {
-      workspacesController.createWorkspace(workspace).getBody();
-    } catch (Exception e) {
+    assertThrows(testException, () -> workspacesController.createWorkspace(workspace));
+
       verify(fireCloudService)
           .updateBillingAccount(workspace.getNamespace(), workspace.getBillingAccountName());
       verify(fireCloudService)
           .updateBillingAccountAsService(
               workspace.getNamespace(), workbenchConfig.billing.freeTierBillingAccountName());
-      return;
-    }
-    fail();
+
   }
 
   @Test
