@@ -21,5 +21,10 @@ do
     json_name=${filename##*/}
     table_name=${json_name%.json}
     bq --project_id="$BQ_PROJECT" rm -f "$BQ_DATASET.$table_name"
-    bq --quiet --project_id="$BQ_PROJECT" mk --schema="$schema_path/$json_name" "$BQ_DATASET.$table_name"
+    if [[ $table_name == 'cb_search_all_events' ]];
+    then
+      bq --quiet --project_id=$BQ_PROJECT mk --schema="$schema_path/$json_name" --time_partitioning_type=DAY --clustering_fields concept_id "$BQ_DATASET.$table_name"
+    else
+      bq --quiet --project_id="$BQ_PROJECT" mk --schema="$schema_path/$json_name" "$BQ_DATASET.$table_name"
+    fi
 done
