@@ -1,6 +1,6 @@
 package org.pmiops.workbench.iam;
 
-public interface IamClient {
+public interface IamService {
   /**
    * Grants user permissions to run Google lifescience jobs.
    *

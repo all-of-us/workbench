@@ -1,13 +1,17 @@
 package org.pmiops.workbench.google;
 
 import static com.google.api.client.googleapis.util.Utils.getDefaultJsonFactory;
+import static org.pmiops.workbench.google.GoogleConfig.SERVICE_ACCOUNT_CLOUD_RESOURCE_MANAGER;
 
 import com.google.api.client.http.HttpTransport;
 import com.google.api.services.cloudresourcemanager.CloudResourceManager;
 import com.google.api.services.cloudresourcemanager.CloudResourceManager.Builder;
 import com.google.api.services.cloudresourcemanager.CloudResourceManagerScopes;
+import com.google.api.services.cloudresourcemanager.model.GetIamPolicyRequest;
 import com.google.api.services.cloudresourcemanager.model.ListProjectsResponse;
+import com.google.api.services.cloudresourcemanager.model.Policy;
 import com.google.api.services.cloudresourcemanager.model.Project;
+import com.google.api.services.cloudresourcemanager.model.SetIamPolicyRequest;
 import com.google.auth.http.HttpCredentialsAdapter;
 import com.google.auth.oauth2.OAuth2Credentials;
 import com.google.cloud.iam.credentials.v1.IamCredentialsClient;
@@ -23,6 +27,7 @@ import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbUser;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -38,17 +43,21 @@ public class CloudResourceManagerServiceImpl implements CloudResourceManagerServ
   private final HttpTransport httpTransport;
   private final GoogleRetryHandler retryHandler;
   private final IamCredentialsClient iamCredentialsClient;
+  private final Provider<CloudResourceManager> serviceCloudResouceManager;
 
   @Autowired
   public CloudResourceManagerServiceImpl(
       Provider<WorkbenchConfig> configProvider,
       HttpTransport httpTransport,
       GoogleRetryHandler retryHandler,
-      IamCredentialsClient iamCredentialsClient) {
+      IamCredentialsClient iamCredentialsClient,
+      @Qualifier(SERVICE_ACCOUNT_CLOUD_RESOURCE_MANAGER)
+          Provider<CloudResourceManager> serviceCloudResouceManager) {
     this.configProvider = configProvider;
     this.httpTransport = httpTransport;
     this.retryHandler = retryHandler;
     this.iamCredentialsClient = iamCredentialsClient;
+    this.serviceCloudResouceManager = serviceCloudResouceManager;
   }
 
   private CloudResourceManager getCloudResourceManagerServiceWithImpersonation(DbUser user)
@@ -92,6 +101,30 @@ public class CloudResourceManagerServiceImpl implements CloudResourceManagerServ
                     .filter(((Predicate<String>) String::isEmpty).negate());
           } while (pageToken.isPresent());
           return projects;
+        });
+  }
+
+  @Override
+  public Policy getIamPolicy(String googleProject) {
+    return retryHandler.run(
+        (context) -> {
+          return serviceCloudResouceManager
+              .get()
+              .projects()
+              .getIamPolicy(googleProject, new GetIamPolicyRequest())
+              .execute();
+        });
+  }
+
+  @Override
+  public Policy setIamPolicy(String googleProject, Policy policy) {
+    return retryHandler.run(
+        (context) -> {
+          return serviceCloudResouceManager
+              .get()
+              .projects()
+              .setIamPolicy(googleProject, new SetIamPolicyRequest().setPolicy(policy))
+              .execute();
         });
   }
 }

@@ -42,7 +42,7 @@ import org.pmiops.workbench.exceptions.TooManyRequestsException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
-import org.pmiops.workbench.iam.IamClient;
+import org.pmiops.workbench.iam.IamService;
 import org.pmiops.workbench.model.ArchivalStatus;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.CloneWorkspaceRequest;
@@ -99,7 +99,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private final WorkspaceDao workspaceDao;
   private final WorkspaceService workspaceService;
   private final WorkspaceAuthService workspaceAuthService;
-  private final IamClient iamClient;
+  private final IamService iamService;
 
   @Autowired
   public WorkspacesController(
@@ -118,7 +118,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       WorkspaceDao workspaceDao,
       WorkspaceService workspaceService,
       WorkspaceAuthService workspaceAuthService,
-      IamClient iamClient) {
+      IamService iamService) {
     this.cdrVersionDao = cdrVersionDao;
     this.clock = clock;
     this.fireCloudService = fireCloudService;
@@ -134,7 +134,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     this.workspaceService = workspaceService;
     this.workspaceAuthService = workspaceAuthService;
     this.workspaceDao = workspaceDao;
-    this.iamClient = iamClient;
+    this.iamService = iamService;
   }
 
   private DbCdrVersion getLiveCdrVersionId(String cdrVersionId) {
@@ -210,7 +210,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     log.log(Level.WARNING, accessTier.getShortName());
     if (accessTier.getShortName().equals(CONTROLLED_TIER_SHORT_NAME)) {
       log.log(Level.WARNING, "CT workspce!!!!");
-      iamClient.grantWorkflowRunnerRole(dbWorkspace.getGoogleProject());
+      iamService.grantWorkflowRunnerRole(dbWorkspace.getGoogleProject());
     }
     final Workspace createdWorkspace = workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace);
     workspaceAuditor.fireCreateAction(createdWorkspace, dbWorkspace.getWorkspaceId());
@@ -484,12 +484,12 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     // Grant the workspace cloner and all from-workspaces users permission to use workflow if
     // workspace is controlled tier workspace.
     if (accessTier.getShortName().equals(CONTROLLED_TIER_SHORT_NAME)) {
-      iamClient.grantWorkflowRunnerRole(dbWorkspace.getGoogleProject());
+      iamService.grantWorkflowRunnerRole(dbWorkspace.getGoogleProject());
       for (Map.Entry<String, WorkspaceAccessLevel> entry : clonedRoles.entrySet()) {
         if (!entry.getKey().equals(user.getUsername())
             && (entry.getValue().equals(WorkspaceAccessLevel.OWNER)
                 || entry.getValue().equals(WorkspaceAccessLevel.WRITER))) {
-          iamClient.grantWorkflowRunnerRoleAsService(
+          iamService.grantWorkflowRunnerRoleAsService(
               dbWorkspace.getGoogleProject(), entry.getKey());
         }
       }
@@ -577,7 +577,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       for (UserRole role : request.getItems()) {
         if (role.getRole().equals(WorkspaceAccessLevel.WRITER)
             || role.getRole().equals(WorkspaceAccessLevel.OWNER)) {
-          iamClient.grantWorkflowRunnerRoleAsService(
+          iamService.grantWorkflowRunnerRoleAsService(
               dbWorkspace.getGoogleProject(), role.getEmail());
         }
       }

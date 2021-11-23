@@ -11,5 +11,8 @@ public interface CloudResourceManagerService {
   List<Project> getAllProjectsForUser(DbUser user) throws IOException;
 
   /** Gets IAM policy on a project. */
-  Policy getIamPolicy(String googleProject) throws IOException;
+  Policy getIamPolicy(String googleProject);
+
+  /** Gets IAM policy on a project. */
+  Policy setIamPolicy(String googleProject, Policy policy);
 }
