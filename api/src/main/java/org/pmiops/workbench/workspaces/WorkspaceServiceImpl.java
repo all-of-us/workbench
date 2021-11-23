@@ -19,7 +19,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
-import org.apache.commons.lang3.StringUtils;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.cdr.CdrVersionContext;
@@ -461,11 +460,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
   }
 
   @Override
-  public Boolean notebookTransferComplete(String workspaceNamespace, String workspaceId) {
-    String fileTransferTime =
-        fireCloudService.getDuplicateWorkspaceFileTransferTime(workspaceNamespace, workspaceId);
-    boolean fileTransferComplete =
-        !(StringUtils.isEmpty(fileTransferTime) || fileTransferTime.equals("0"));
-    return fileTransferComplete;
+  public boolean notebookTransferComplete(String workspaceNamespace, String workspaceId) {
+    return fireCloudService.getDuplicateWorkspaceFileTransferTime(workspaceNamespace, workspaceId);
   }
 }

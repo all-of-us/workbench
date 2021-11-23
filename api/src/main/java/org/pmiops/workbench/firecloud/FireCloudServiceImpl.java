@@ -14,6 +14,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.inject.Provider;
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -521,7 +522,7 @@ public class FireCloudServiceImpl implements FireCloudService {
   }
 
   @Override
-  public String getDuplicateWorkspaceFileTransferTime(
+  public boolean getDuplicateWorkspaceFileTransferTime(
       String workspaceNamespace, String firecloudName) {
     WorkspacesApi workspacesApi = endUserWorkspacesApiProvider.get();
     return retryHandler.run(
@@ -534,10 +535,15 @@ public class FireCloudServiceImpl implements FireCloudService {
                       FIRECLOUD_WORKSPACE_REQUIRED_FIELDS_FOR_CLONE_FILE_TRANSFER)
                   .getWorkspace();
           return fcWorkspaceDetails == null
-              ? null
-              : fcWorkspaceDetails
-                  .getCompletedCloneWorkspaceFileTransfer()
-                  .format(DateTimeFormatter.ISO_DATE_TIME);
+              ? false
+              : notebookTransferComplete(
+                  fcWorkspaceDetails
+                      .getCompletedCloneWorkspaceFileTransfer()
+                      .format(DateTimeFormatter.ISO_DATE_TIME));
         });
+  }
+
+  private boolean notebookTransferComplete(String fileTransferTime) {
+    return !(StringUtils.isEmpty(fileTransferTime) || fileTransferTime.equals("0"));
   }
 }

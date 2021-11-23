@@ -137,5 +137,5 @@ public interface FireCloudService {
   /** Creates a random Billing Project name. */
   String createBillingProjectName();
 
-  String getDuplicateWorkspaceFileTransferTime(String workspaceNamespace, String firecloudName);
+  boolean getDuplicateWorkspaceFileTransferTime(String workspaceNamespace, String firecloudName);
 }

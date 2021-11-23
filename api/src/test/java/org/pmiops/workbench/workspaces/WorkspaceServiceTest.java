@@ -519,17 +519,9 @@ public class WorkspaceServiceTest {
   public void notebookTransferHasNotStartedForDuplicateWorkspace() throws Exception {
     when(mockFireCloudService.getDuplicateWorkspaceFileTransferTime(
             DEFAULT_WORKSPACE_NAMESPACE, "FirecloudName"))
-        .thenReturn(null);
+        .thenReturn(false);
 
     Boolean notebookFileDone =
-        workspaceService.notebookTransferComplete(DEFAULT_WORKSPACE_NAMESPACE, "FirecloudName");
-    assertThat(notebookFileDone).isFalse();
-
-    when(mockFireCloudService.getDuplicateWorkspaceFileTransferTime(
-            DEFAULT_WORKSPACE_NAMESPACE, "FirecloudName"))
-        .thenReturn("");
-
-    notebookFileDone =
         workspaceService.notebookTransferComplete(DEFAULT_WORKSPACE_NAMESPACE, "FirecloudName");
     assertThat(notebookFileDone).isFalse();
   }
@@ -538,7 +530,7 @@ public class WorkspaceServiceTest {
   public void notebookTransferDoneForDuplicateWorkspace() throws Exception {
     when(mockFireCloudService.getDuplicateWorkspaceFileTransferTime(
             DEFAULT_WORKSPACE_NAMESPACE, "FirecloudName"))
-        .thenReturn("2021-08-06");
+        .thenReturn(true);
 
     Boolean notebookFileDone =
         workspaceService.notebookTransferComplete(DEFAULT_WORKSPACE_NAMESPACE, "FirecloudName");
