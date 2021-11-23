@@ -406,8 +406,8 @@ dependencies {
     compile 'com.google.api-client:google-api-client-appengine:1.32.2'
     compile 'com.google.apis:google-api-services-admin-directory:directory_v1-rev20211109-1.32.1'
     compile 'com.google.apis:google-api-services-cloudbilling:v1-rev20211106-1.32.1'
-    compile 'com.google.apis:google-api-services-cloudresourcemanager:v3-rev20211107-1.32.1'
-    compile 'com.google.apis:google-api-services-oauth2:v2-rev20200213-1.32.1'
+    compile 'com.google.apis:google-api-services-cloudresourcemanager:v1-rev572-1.25.0'
+    compile 'com.google.apis:google-api-services-oauth2:v2-rev156-1.25.0'
     compile "com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20211018.2"
     compile "com.opsgenie.integration:sdk:2+"
     compile "com.squareup.okhttp:logging-interceptor:$project.ext.OKHTTP_VERSION"
