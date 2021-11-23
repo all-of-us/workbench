@@ -113,7 +113,7 @@ public class CdrVersionService {
   }
 
   public CdrVersionTiersResponse getCdrVersionsByTier() {
-    List<DbAccessTier> tiers = accessTierService.getAccessTiersForUser(userProvider.get());
+    List<DbAccessTier> tiers = accessTierService.getAllTiers();
     if (tiers.isEmpty()) {
       throw new ForbiddenException("User does not have access to any CDR versions");
     }
