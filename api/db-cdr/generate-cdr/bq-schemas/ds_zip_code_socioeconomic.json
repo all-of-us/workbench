@@ -1,0 +1,46 @@
+[
+  {
+    "name": "PERSON_ID",
+    "type": "INTEGER"
+  },
+  {
+    "name": "OBSERVATION_DATETIME",
+    "type": "TIMESTAMP"
+  },
+  {
+    "name": "ZIP3_AS_STRING",
+    "type": "STRING"
+  },
+  {
+    "name": "FRACTION_ASSISTED_INCOME",
+    "type": "FLOAT"
+  },
+  {
+    "name": "FRACTION_HIGH_SCHOOL_EDU",
+    "type": "FLOAT"
+  },
+  {
+    "name": "MEDIAN_INCOME",
+    "type": "FLOAT"
+  },
+  {
+    "name": "FRACTION_NO_HEALTH_INS",
+    "type": "FLOAT"
+  },
+  {
+    "name": "FRACTION_POVERTY",
+    "type": "FLOAT"
+  },
+  {
+    "name": "FRACTION_VACANT_HOUSING",
+    "type": "FLOAT"
+  },
+  {
+    "name": "DEPRIVATION_INDEX",
+    "type": "FLOAT"
+  },
+  {
+    "name": "ACS",
+    "type": "INTEGER"
+  }
+]

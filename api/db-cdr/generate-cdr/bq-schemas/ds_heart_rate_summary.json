@@ -1,0 +1,30 @@
+[
+  {
+    "name": "PERSON_ID",
+    "type": "INTEGER"
+  },
+  {
+    "name": "DATE",
+    "type": "DATE"
+  },
+  {
+    "name": "ZONE_NAME",
+    "type": "STRING"
+  },
+  {
+    "name": "MIN_HEART_RATE",
+    "type": "INTEGER"
+  },
+  {
+    "name": "MAX_HEART_RATE",
+    "type": "INTEGER"
+  },
+  {
+    "name": "MINUTE_IN_ZONE",
+    "type": "INTEGER"
+  },
+  {
+    "name": "CALORIE_COUNT",
+    "type": "FLOAT"
+  }
+]

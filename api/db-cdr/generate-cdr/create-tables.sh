@@ -7,6 +7,8 @@ set -e
 export BQ_PROJECT=$1         # CDR project
 export BQ_DATASET=$2         # CDR dataset
 
+TABLE_LIST=$(bq ls -n 1000 "$BQ_PROJECT:$BQ_DATASET")
+
 INCOMPATIBLE_DATASETS=("R2019Q4R3" "R2019Q4R4", "R2020Q4R3")
 
 if [[ ${INCOMPATIBLE_DATASETS[@]} =~ $BQ_DATASET ]];
@@ -21,9 +23,21 @@ do
     json_name=${filename##*/}
     table_name=${json_name%.json}
     bq --project_id="$BQ_PROJECT" rm -f "$BQ_DATASET.$table_name"
-    if [[ $table_name == 'cb_search_all_events' ]];
+    if [[ "$table_name" == 'cb_search_all_events' ]]
     then
-      bq --quiet --project_id=$BQ_PROJECT mk --schema="$schema_path/$json_name" --time_partitioning_type=DAY --clustering_fields concept_id "$BQ_DATASET.$table_name"
+      bq --quiet --project_id="$BQ_PROJECT" mk --schema="$schema_path/$json_name" --time_partitioning_type=DAY --clustering_fields concept_id "$BQ_DATASET.$table_name"
+    elif [[ "$table_name" == 'cb_review_survey' || "$table_name" == 'cb_search_person' ]]
+    then
+      bq --quiet --project_id="$BQ_PROJECT" mk --schema="$schema_path/$json_name" --time_partitioning_type=DAY --clustering_fields person_id "$BQ_DATASET.$table_name"
+    elif [[ "$table_name" == 'cb_review_all_events' ]]
+    then
+      bq --quiet --project_id="$BQ_PROJECT" mk --schema="$schema_path/$json_name" --time_partitioning_type=DAY --clustering_fields person_id,domain "$BQ_DATASET.$table_name"
+    elif [[ "$table_name" == 'ds_zip_code_socioeconomic' ]]
+    then
+      if [[ "$TABLE_LIST" == *"zip3_ses_map"* ]]
+      then
+        bq --quiet --project_id="$BQ_PROJECT" mk --schema="$schema_path/$json_name" "$BQ_DATASET.$table_name"
+      fi
     else
       bq --quiet --project_id="$BQ_PROJECT" mk --schema="$schema_path/$json_name" "$BQ_DATASET.$table_name"
     fi
