@@ -4043,6 +4043,7 @@ definitions:
       - accessTierShortName
       - accessTierDisplayName
       - defaultCdrVersionId
+      - defaultCdrVersionCreationTime
       - versions
     properties:
       accessTierShortName:
@@ -4051,7 +4052,12 @@ definitions:
         type: string
       defaultCdrVersionId:
         type: string
+      defaultCdrVersionCreationTime:
+        type: integer
         format: int64
+        description:
+          Milliseconds since the UNIX epoch. This timestamp is derived from the deid dataset name.
+          Ex - deid_output_20191004 -> 2019-10-04 00:00:00Z
       versions:
         type: array
         items:
