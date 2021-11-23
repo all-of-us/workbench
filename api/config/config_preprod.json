@@ -111,7 +111,8 @@
   "actionAudit": {
     "logName": "workbench-action-audit-preprod",
     "bigQueryDataset": "workbench_action_audit_preprod",
-    "bigQueryTable": "workbench_action_audit_preprod"
+    "bigQueryTable": "workbench_action_audit_preprod",
+    "partitionColumn": "timestamp"
   },
   "captcha": {
     "enableCaptcha": true,

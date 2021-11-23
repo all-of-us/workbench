@@ -110,8 +110,9 @@
   },
   "actionAudit": {
     "logName": "workbench-action-audit-staging",
-    "bigQueryDataset": "workbench_action_audit_staging",
-    "bigQueryTable": "workbench_action_audit_staging"
+    "bigQueryDataset": "workspace_action_audit_staging",
+    "bigQueryTable": "workbench_action_audit_staging",
+    "partitionColumn": "_PARTITIONTIME"
   },
   "rdrExport": {
     "host": "all-of-us-rdr-staging.appspot.com",
