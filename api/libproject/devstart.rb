@@ -778,7 +778,7 @@ Common.register_command({
   :fn => ->(*args) { stage_redcap_files("stage-redcap-files", *args) }
 })
 
-def make_bq_prep(cmd_name, *args)
+def build_prep_table(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
   op.add_option(
     "--bq-project [bq-project]",
@@ -800,17 +800,17 @@ def make_bq_prep(cmd_name, *args)
 
   common = Common.new
   Dir.chdir('db-cdr') do
-    common.run_inline %W{./generate-cdr/cb-criteria-parallel/make-bq-prep-#{op.opts.script}.sh #{op.opts.bq_project} #{op.opts.bq_dataset}}
+    common.run_inline %W{./generate-cdr/build-prep-#{op.opts.script}.sh #{op.opts.bq_project} #{op.opts.bq_dataset}}
   end
 end
 
 Common.register_command({
-  :invocation => "make-bq-prep",
-  :description => "Runs Prep table script",
-  :fn => ->(*args) { make_bq_prep("make-bq-prep", *args) }
+  :invocation => "build-prep-table",
+  :description => "Build a prep table",
+  :fn => ->(*args) { build_prep_table("build-prep-table", *args) }
 })
 
-def make_cb_criteria(cmd_name, *args)
+def build_cb_criteria(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
   op.add_option(
     "--bq-project [bq-project]",
@@ -837,14 +837,14 @@ def make_cb_criteria(cmd_name, *args)
 
   common = Common.new
   Dir.chdir('db-cdr') do
-    common.run_inline %W{./generate-cdr/cb-criteria-parallel/make-cb-criteria-#{op.opts.script}.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.id_prefix}}
+    common.run_inline %W{./generate-cdr/build-cb-criteria-#{op.opts.script}.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.id_prefix}}
   end
 end
 
 Common.register_command({
-  :invocation => "make-cb-criteria",
+  :invocation => "build-cb-criteria",
   :description => "Builds cb_criteria",
-  :fn => ->(*args) { make_cb_criteria("make-cb-criteria", *args) }
+  :fn => ->(*args) { build_cb_criteria("build-cb-criteria", *args) }
 })
 
 def create_local_csv_files(cmd_name, *args)
