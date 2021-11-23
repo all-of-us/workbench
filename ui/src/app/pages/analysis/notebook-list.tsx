@@ -75,7 +75,7 @@ export const NotebookList = withCurrentWorkspace()(class extends React.Component
     this.confirmNotebookTransferIsDone();
   }
 
-  componentDidUpdate(prevProps, prevState) {
+  componentDidUpdate(prevProps) {
     if (this.workspaceChanged(prevProps)) {
       this.loadNotebooks();
     }
