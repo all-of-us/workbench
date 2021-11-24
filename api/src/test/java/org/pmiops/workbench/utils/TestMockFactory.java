@@ -317,4 +317,11 @@ public class TestMockFactory {
     cdrVersion.setAccessTier(createRegisteredTierForTests(accessTierDao));
     return cdrVersionDao.save(cdrVersion);
   }
+
+  public static DbCdrVersion createControlledTierCdrVersion(
+      CdrVersionDao cdrVersionDao, AccessTierDao accessTierDao, long id) {
+    DbCdrVersion cdrVersion = createDefaultCdrVersion(cdrVersionDao, accessTierDao, id);
+    cdrVersion.setAccessTier(createControlledTierForTests(accessTierDao));
+    return cdrVersionDao.save(cdrVersion);
+  }
 }

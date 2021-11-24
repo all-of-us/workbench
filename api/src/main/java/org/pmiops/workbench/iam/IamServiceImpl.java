@@ -70,8 +70,7 @@ public class IamServiceImpl implements IamService {
   private String getOrCreatePetServiceAccount(String googleProject, GoogleApi googleApi) {
     return samRetryHandler.run(
         (context) -> {
-          googleApi.getPetServiceAccount(googleProject);
-          return null;
+          return googleApi.getPetServiceAccount(googleProject);
         });
   }
 

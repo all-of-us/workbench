@@ -209,7 +209,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     }
     log.log(Level.WARNING, accessTier.getShortName());
     if (accessTier.getShortName().equals(CONTROLLED_TIER_SHORT_NAME)) {
-      log.log(Level.WARNING, "CT workspce!!!!");
       iamService.grantWorkflowRunnerRole(dbWorkspace.getGoogleProject());
     }
     final Workspace createdWorkspace = workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace);
@@ -486,9 +485,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     if (accessTier.getShortName().equals(CONTROLLED_TIER_SHORT_NAME)) {
       iamService.grantWorkflowRunnerRole(dbWorkspace.getGoogleProject());
       for (Map.Entry<String, WorkspaceAccessLevel> entry : clonedRoles.entrySet()) {
-        if (!entry.getKey().equals(user.getUsername())
-            && (entry.getValue().equals(WorkspaceAccessLevel.OWNER)
-                || entry.getValue().equals(WorkspaceAccessLevel.WRITER))) {
+        if (shouldGrantWorkflowRunnerAsService(user, entry)) {
           iamService.grantWorkflowRunnerRoleAsService(
               dbWorkspace.getGoogleProject(), entry.getKey());
         }
@@ -574,11 +571,10 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         .getAccessTier()
         .getShortName()
         .equals(CONTROLLED_TIER_SHORT_NAME)) {
-      for (UserRole role : request.getItems()) {
-        if (role.getRole().equals(WorkspaceAccessLevel.WRITER)
-            || role.getRole().equals(WorkspaceAccessLevel.OWNER)) {
+      for (Map.Entry<String, WorkspaceAccessLevel> entry : aclsByEmail.entrySet()) {
+        if (shouldGrantWorkflowRunnerAsService(userProvider.get(), entry)) {
           iamService.grantWorkflowRunnerRoleAsService(
-              dbWorkspace.getGoogleProject(), role.getEmail());
+              dbWorkspace.getGoogleProject(), entry.getKey());
         }
       }
     }
@@ -787,5 +783,13 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     return ResponseEntity.ok(
         new WorkspaceCreatorFreeCreditsRemainingResponse()
             .freeCreditsRemaining(freeCreditsRemaining));
+  }
+
+  /** Returns {@true} if the user is 1: workspace OWNER or WRITER; 2: NOT current logged in user */
+  private static boolean shouldGrantWorkflowRunnerAsService(
+      DbUser loggedInUser, Map.Entry<String, WorkspaceAccessLevel> userNameToAclMapEntry) {
+    return !userNameToAclMapEntry.getKey().equals(loggedInUser.getUsername())
+        && (userNameToAclMapEntry.getValue().equals(WorkspaceAccessLevel.OWNER)
+            || userNameToAclMapEntry.getValue().equals(WorkspaceAccessLevel.WRITER));
   }
 }

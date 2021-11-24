@@ -74,7 +74,7 @@ public class ExceptionUtils {
     throw codeToException(e.getCode());
   }
 
-  public static WorkbenchException convertSamException(ApiException e) {
+  public static WorkbenchException convertSamException(org.pmiops.workbench.sam.ApiException e) {
     if (isSocketTimeoutException(e.getCause())) {
       throw new GatewayTimeoutException();
     }

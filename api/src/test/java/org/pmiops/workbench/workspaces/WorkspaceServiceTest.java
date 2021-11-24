@@ -44,6 +44,7 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.CloudBillingClient;
+import org.pmiops.workbench.iam.IamService;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.profile.ProfileMapper;
@@ -81,12 +82,11 @@ public class WorkspaceServiceTest {
     CohortService.class,
     ConceptSetService.class,
     DataSetService.class,
-    FireCloudService.class,
     FirecloudMapper.class,
     FreeTierBillingService.class,
     ProfileMapper.class,
     UserDao.class,
-    UserMapper.class,
+    UserMapper.class, IamService.class,
   })
   static class Configuration {
     @Bean
