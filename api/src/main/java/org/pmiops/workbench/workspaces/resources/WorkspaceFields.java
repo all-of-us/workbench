@@ -6,7 +6,7 @@ import org.pmiops.workbench.model.BillingStatus;
  * A transitional POJO to assist WorkspaceResourceMapper, consisting of the fields sourced from
  * DbWorkspace and WorkspaceAccessLevel
  */
-public class WorkspaceFields {
+class WorkspaceFields {
   private Long workspaceId;
   private String workspaceNamespace;
   private String workspaceFirecloudName;

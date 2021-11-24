@@ -10,7 +10,7 @@ import org.pmiops.workbench.model.FileDetail;
  * A transitional POJO to assist WorkspaceResourceMapper, consisting of the fields sourced from the
  * resources
  */
-public class ResourceFields {
+class ResourceFields {
   private Cohort cohort;
   private CohortReview cohortReview;
   private FileDetail notebook;
