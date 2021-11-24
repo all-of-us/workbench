@@ -70,7 +70,7 @@ public class CdrVersionService {
   }
 
   public Optional<DbCdrVersion> findByCdrVersionId(Long cdrVersionId) {
-    return Optional.ofNullable(cdrVersionDao.findByCdrVersionId(cdrVersionId));
+    return cdrVersionDao.findById(cdrVersionId);
   }
 
   public CdrVersionTiersResponse getCdrVersionsByTier() {
