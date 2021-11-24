@@ -33,6 +33,7 @@ import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
 import {
+  CdrVersion,
   CdrVersionTiersResponse,
   Cohort,
   ConceptSet,
@@ -582,8 +583,13 @@ export const DatasetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), wi
       });
     }
 
+    private getCdrVersion(): CdrVersion {
+      const {workspace, cdrVersionTiersResponse} = this.props;
+      return getCdrVersion(workspace, cdrVersionTiersResponse)
+    }
+
     updatePrepackagedDomains() {
-      if (getCdrVersion(this.props.workspace, this.props.cdrVersionTiersResponse).hasFitbitData) {
+      if (this.getCdrVersion().hasFitbitData) {
         PREPACKAGED_DOMAINS =   {
           ...PREPACKAGED_SURVEY_PERSON_DOMAIN,
           ...PREPACKAGED_WITH_FITBIT_DOMAINS
@@ -593,14 +599,14 @@ export const DatasetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), wi
       // data extraction is possible, since extraction is the only action that
       // can be taken on genomics variant data from the dataset builder.
       if (serverConfigStore.get().config.enableGenomicExtraction &&
-        getCdrVersion(this.props.workspace, this.props.cdrVersionTiersResponse).hasWgsData) {
+        this.getCdrVersion().hasWgsData) {
         PREPACKAGED_DOMAINS = {
           ...PREPACKAGED_DOMAINS,
           ...PREPACKAGED_WITH_WHOLE_GENOME
         };
       }
       // Add Zipcode Socioeconomic status data if were in controlled tier dataset
-      if (getCdrVersion(this.props.workspace, this.props.cdrVersionTiersResponse).accessTierShortName === 'controlled') {
+      if (this.getCdrVersion().accessTierShortName === 'controlled') {
         PREPACKAGED_DOMAINS = {
           ...PREPACKAGED_DOMAINS,
           ...PREPACKAGED_WITH_ZIP_CODE_SOCIOECONOMIC
@@ -751,15 +757,15 @@ export const DatasetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), wi
 
     getPrePackagedList() {
       let prepackagedList = Object.keys(PrepackagedConceptSet);
-      if (!getCdrVersion(this.props.workspace, this.props.cdrVersionTiersResponse).hasFitbitData) {
+      if (!this.getCdrVersion().hasFitbitData) {
         prepackagedList = prepackagedList
             .filter(prepack => !fp.startsWith('FITBIT', prepack));
       }
       if (!serverConfigStore.get().config.enableGenomicExtraction ||
-          !getCdrVersion(this.props.workspace, this.props.cdrVersionTiersResponse).hasWgsData) {
+          !this.getCdrVersion().hasWgsData) {
         prepackagedList = prepackagedList.filter(prepack => prepack !== 'WHOLEGENOME');
       }
-      if (getCdrVersion(this.props.workspace, this.props.cdrVersionTiersResponse).accessTierShortName !== 'controlled') {
+      if (this.getCdrVersion().accessTierShortName !== 'controlled') {
         prepackagedList = prepackagedList.filter(prepack => prepack !== 'ZIPCODESOCIOECONOMIC');
       }
       return prepackagedList;
