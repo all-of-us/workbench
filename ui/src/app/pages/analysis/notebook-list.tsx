@@ -21,7 +21,7 @@ import {ACTION_DISABLED_INVALID_BILLING} from 'app/utils/strings';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {BillingStatus, FileDetail, ResourceType} from 'generated/fetch';
 import {FlexColumn} from 'app/components/flex';
-import {faClock} from "@fortawesome/pro-regular-svg-icons";
+import {faClock} from '@fortawesome/pro-regular-svg-icons';
 
 const styles = {
   heading: {

@@ -23,6 +23,6 @@ describe('NotebookList', () => {
     currentWorkspaceStore.next(workspaceDataStub);
     const wrapper = mount(<MemoryRouter><NotebookList hideSpinner={() => {}} /></MemoryRouter>);
     await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.find('[data-test-id="card-name"]').first().text()).toMatch("mockFile");
+    expect(wrapper.find('[data-test-id="card-name"]').first().text()).toMatch('mockFile');
   });
 });
