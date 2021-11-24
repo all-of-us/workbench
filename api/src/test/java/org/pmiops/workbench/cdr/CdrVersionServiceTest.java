@@ -5,12 +5,10 @@ import static com.google.common.truth.Truth8.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
-import com.google.common.collect.ImmutableList;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -260,51 +258,25 @@ public class CdrVersionServiceTest {
   }
 
   @Test
-  public void testGetCdrVersionsByTierRegisteredOnly() {
-    addMembershipForTest(registeredTier);
-    CdrVersionTiersResponse response = cdrVersionService.getCdrVersionsByTier();
-    assertResponseMultiTier(response, ImmutableList.of("registered"), defaultCdrVersion);
-  }
-
-  @Test
   public void testGetCdrVersionsByTierAllTiers() {
     addMembershipForTest(registeredTier);
     addMembershipForTest(controlledTier);
     CdrVersionTiersResponse response = cdrVersionService.getCdrVersionsByTier();
-    assertResponseMultiTier(
-        response,
-        ImmutableList.of("registered", "controlled"),
-        defaultCdrVersion,
-        controlledCdrVersion);
+    assertExpectedResponse(response);
+  }
+
+  // we still expect to see all tiers returned for an RT-only user
+
+  @Test
+  public void testGetCdrVersionsByTierRegisteredOnly() {
+    addMembershipForTest(registeredTier);
+    CdrVersionTiersResponse response = cdrVersionService.getCdrVersionsByTier();
+    assertExpectedResponse(response);
   }
 
   @Test
   public void testGetCdrVersionsByTierUnregistered() {
-    assertThrows(
-        ForbiddenException.class,
-        () -> {
-          cdrVersionService.getCdrVersionsByTier();
-        });
-  }
-
-  private void assertResponseMultiTier(
-      CdrVersionTiersResponse response,
-      List<String> accessTierShortNames,
-      DbCdrVersion... versions) {
-    List<String> responseTiers =
-        response.getTiers().stream()
-            .map(CdrVersionTier::getAccessTierShortName)
-            .collect(Collectors.toList());
-    assertThat(responseTiers).containsExactlyElementsIn(accessTierShortNames);
-
-    List<CdrVersion> responseVersions =
-        response.getTiers().stream()
-            .map(CdrVersionTier::getVersions)
-            .flatMap(List::stream)
-            .collect(Collectors.toList());
-    List<CdrVersion> expectedVersions =
-        Arrays.stream(versions).map(cdrVersionMapper::dbModelToClient).collect(Collectors.toList());
-    assertThat(responseVersions).containsExactlyElementsIn(expectedVersions);
+    assertThrows(ForbiddenException.class, cdrVersionService::getCdrVersionsByTier);
   }
 
   @Test
@@ -320,6 +292,22 @@ public class CdrVersionServiceTest {
   @Test
   public void testGetCdrVersionsHasWgsData() {
     testGetCdrVersionsHasDataType(CdrVersion::getHasWgsData);
+  }
+
+  private void assertExpectedResponse(CdrVersionTiersResponse response) {
+    List<String> responseTiers =
+        response.getTiers().stream()
+            .map(CdrVersionTier::getAccessTierShortName)
+            .collect(Collectors.toList());
+    assertThat(responseTiers).containsExactly(registeredTier.getShortName(), controlledTier.getShortName());
+
+    List<CdrVersion> responseVersions =
+        response.getTiers().stream()
+            .map(CdrVersionTier::getVersions)
+            .flatMap(List::stream)
+            .collect(Collectors.toList());
+    assertThat(responseVersions).containsExactly(cdrVersionMapper.dbModelToClient(defaultCdrVersion),
+        cdrVersionMapper.dbModelToClient(controlledCdrVersion));
   }
 
   private void testGetCdrVersionsHasDataType(Predicate<CdrVersion> hasType) {

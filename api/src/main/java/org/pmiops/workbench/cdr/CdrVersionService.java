@@ -113,13 +113,13 @@ public class CdrVersionService {
   }
 
   public CdrVersionTiersResponse getCdrVersionsByTier() {
-    List<DbAccessTier> tiers = accessTierService.getAllTiers();
-    if (tiers.isEmpty()) {
+    boolean hasRegisteredTierAccess = accessTierService.getAccessTiersForUser(userProvider.get()).stream().anyMatch(tier -> AccessTierService.REGISTERED_TIER_SHORT_NAME.equals(tier.getShortName()));
+    if (!hasRegisteredTierAccess) {
       throw new ForbiddenException("User does not have access to any CDR versions");
     }
 
     return new CdrVersionTiersResponse()
-        .tiers(tiers.stream().map(this::getVersionsForTier).collect(Collectors.toList()));
+        .tiers(accessTierService.getAllTiers().stream().map(this::getVersionsForTier).collect(Collectors.toList()));
   }
 
   private CdrVersionTier getVersionsForTier(DbAccessTier accessTier) {
