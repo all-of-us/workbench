@@ -207,7 +207,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
           dbWorkspace, workbenchConfigProvider.get().billing.freeTierBillingAccountName());
       throw e;
     }
-    log.log(Level.WARNING, accessTier.getShortName());
     if (accessTier.getShortName().equals(CONTROLLED_TIER_SHORT_NAME)) {
       iamService.grantWorkflowRunnerRole(dbWorkspace.getGoogleProject());
     }
@@ -565,7 +564,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         workspaceService.getFirecloudUserRoles(workspaceNamespace, dbWorkspace.getFirecloudName());
     resp.setItems(updatedUserRoles);
 
-    log.log(Level.WARNING, dbWorkspace.getCdrVersion().getAccessTier().getShortName());
     if (dbWorkspace
         .getCdrVersion()
         .getAccessTier()

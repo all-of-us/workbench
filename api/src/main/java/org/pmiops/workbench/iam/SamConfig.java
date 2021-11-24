@@ -20,8 +20,6 @@ public class SamConfig {
       UserAuthentication userAuthentication, SamApiClientFactory factory) {
     ApiClient apiClient = factory.newApiClient();
     apiClient.setAccessToken(userAuthentication.getCredentials());
-    System.out.println("~~~~!!!!");
-    System.out.println(userAuthentication.getCredentials());
     return apiClient;
   }
 

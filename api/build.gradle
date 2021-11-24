@@ -27,7 +27,6 @@ buildscript {
         SPRING_SECURITY_VERSION = '4.2.18.RELEASE'
         SWAGGER_2_CODEGEN_VERSION = '2.2.3'
         SWAGGER_3_CODEGEN_VERSION = '3.0.21'
-        SAM_CLIENT = "0.1-61135c7"
     }
 
     project.ext['hibernate.version'] = '5.4.31.Final'

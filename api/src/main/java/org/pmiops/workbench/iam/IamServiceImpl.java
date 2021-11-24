@@ -43,8 +43,6 @@ public class IamServiceImpl implements IamService {
 
   @Override
   public void grantWorkflowRunnerRole(String googleProject) {
-    System.out.println("~~~~~!!!!!!!!");
-    System.out.println("grantWorkflowRunnerRole");
     String petServiceAccountName =
         getOrCreatePetServiceAccount(googleProject, endUseGoogleApiProvider.get());
     grantServiceAccountUserRole(googleProject, petServiceAccountName);
@@ -75,8 +73,6 @@ public class IamServiceImpl implements IamService {
   }
 
   private void grantServiceAccountUserRole(String googleProject, String petServiceAccount) {
-    System.out.println("~~~~~~~petServiceAccount");
-    System.out.println(petServiceAccount);
     Policy policy = cloudIamClient.getServiceAccountIamPolicy(googleProject, petServiceAccount);
     final String serviceAccountUserRole = "roles/iam.serviceAccountUser";
     List<Binding> bindingList = Optional.ofNullable(policy.getBindings()).orElse(new ArrayList<>());
@@ -89,8 +85,6 @@ public class IamServiceImpl implements IamService {
   }
 
   private void grantLifeScienceRunnerRole(String googleProject, String petServiceAccount) {
-    System.out.println("~~~~~~~petServiceAccount");
-    System.out.println(petServiceAccount);
     com.google.api.services.cloudresourcemanager.model.Policy policy =
         cloudResourceManagerService.getIamPolicy(googleProject);
     final String lifescienceRunnerRole = "roles/lifesciences.workflowsRunner";
