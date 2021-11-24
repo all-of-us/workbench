@@ -11,7 +11,6 @@ import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.ForbiddenException;
-import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.CdrVersionTier;
 import org.pmiops.workbench.model.CdrVersionTiersResponse;
@@ -70,56 +69,24 @@ public class CdrVersionService {
     CdrVersionContext.setCdrVersionNoCheckAuthDomain(version);
   }
 
-  /**
-   * Sets the active CDR version, after checking to ensure that the requester is in the appropriate
-   * authorization domain. If you have already retrieved a workspace for the requester (and thus
-   * implicitly know they are in the authorization domain for its CDR version), you can instead just
-   * call {@link CdrVersionContext#setCdrVersionNoCheckAuthDomain(DbCdrVersion)} directly.
-   *
-   * @param cdrVersionId
-   */
-  public void setCdrVersion(Long cdrVersionId) {
-    this.setCdrVersion(
-        cdrVersionDao
-            .findById(cdrVersionId)
-            .orElseThrow(
-                () ->
-                    new NotFoundException(
-                        String.format("Cdr version %s does not exist", cdrVersionId))));
-  }
-
-  /**
-   * Sets the active CDR version, after checking to ensure that the requester is in the appropriate
-   * authorization domain. If you have already retrieved a workspace for the requester (and thus
-   * implicitly know they are in the authorization domain for its CDR version), you can instead just
-   * call {@link CdrVersionContext#setCdrVersionNoCheckAuthDomain(DbCdrVersion)} directly.
-   *
-   * @param cdrVersionId
-   */
-  public DbCdrVersion findAndSetCdrVersion(Long cdrVersionId) {
-    DbCdrVersion dbCdrVersion =
-        cdrVersionDao
-            .findById(cdrVersionId)
-            .orElseThrow(
-                () ->
-                    new NotFoundException(
-                        String.format("Cdr version %s does not exist", cdrVersionId)));
-    this.setCdrVersion(dbCdrVersion);
-    return dbCdrVersion;
-  }
-
   public Optional<DbCdrVersion> findByCdrVersionId(Long cdrVersionId) {
     return Optional.ofNullable(cdrVersionDao.findByCdrVersionId(cdrVersionId));
   }
 
   public CdrVersionTiersResponse getCdrVersionsByTier() {
-    boolean hasRegisteredTierAccess = accessTierService.getAccessTiersForUser(userProvider.get()).stream().anyMatch(tier -> AccessTierService.REGISTERED_TIER_SHORT_NAME.equals(tier.getShortName()));
+    boolean hasRegisteredTierAccess =
+        accessTierService.getAccessTiersForUser(userProvider.get()).stream()
+            .anyMatch(
+                tier -> AccessTierService.REGISTERED_TIER_SHORT_NAME.equals(tier.getShortName()));
     if (!hasRegisteredTierAccess) {
       throw new ForbiddenException("User does not have access to any CDR versions");
     }
 
     return new CdrVersionTiersResponse()
-        .tiers(accessTierService.getAllTiers().stream().map(this::getVersionsForTier).collect(Collectors.toList()));
+        .tiers(
+            accessTierService.getAllTiers().stream()
+                .map(this::getVersionsForTier)
+                .collect(Collectors.toList()));
   }
 
   private CdrVersionTier getVersionsForTier(DbAccessTier accessTier) {

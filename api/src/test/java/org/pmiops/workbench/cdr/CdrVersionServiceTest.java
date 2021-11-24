@@ -145,7 +145,7 @@ public class CdrVersionServiceTest {
   @Test
   public void testSetCdrVersionDefaultId() {
     addMembershipForTest(registeredTier);
-    cdrVersionService.setCdrVersion(defaultCdrVersion.getCdrVersionId());
+    cdrVersionService.setCdrVersion(defaultCdrVersion);
     assertThat(CdrVersionContext.getCdrVersion()).isEqualTo(defaultCdrVersion);
   }
 
@@ -153,18 +153,14 @@ public class CdrVersionServiceTest {
   public void testSetCdrVersionDefaultForbiddenNotInTier() {
     assertThrows(
         ForbiddenException.class,
-        () -> {
-          cdrVersionService.setCdrVersion(defaultCdrVersion);
-        });
+        () -> cdrVersionService.setCdrVersion(defaultCdrVersion));
   }
 
   @Test
   public void testSetCdrVersionDefaultIdForbiddenNotInTier() {
     assertThrows(
         ForbiddenException.class,
-        () -> {
-          cdrVersionService.setCdrVersion(defaultCdrVersion.getCdrVersionId());
-        });
+        () -> cdrVersionService.setCdrVersion(defaultCdrVersion));
   }
 
   // these tests fail because the user is in the right tier according to the AoU DB
@@ -192,7 +188,7 @@ public class CdrVersionServiceTest {
           when(fireCloudService.isUserMemberOfGroupWithCache(
                   user.getUsername(), registeredTier.getAuthDomainName()))
               .thenReturn(false);
-          cdrVersionService.setCdrVersion(defaultCdrVersion.getCdrVersionId());
+          cdrVersionService.setCdrVersion(defaultCdrVersion);
         });
   }
 
@@ -206,7 +202,7 @@ public class CdrVersionServiceTest {
   @Test
   public void testSetCdrVersionControlledId() {
     addMembershipForTest(controlledTier);
-    cdrVersionService.setCdrVersion(controlledCdrVersion.getCdrVersionId());
+    cdrVersionService.setCdrVersion(controlledCdrVersion);
     assertThat(CdrVersionContext.getCdrVersion()).isEqualTo(controlledCdrVersion);
   }
 
@@ -214,18 +210,14 @@ public class CdrVersionServiceTest {
   public void testSetCdrVersionControlledForbiddenNotInTier() {
     assertThrows(
         ForbiddenException.class,
-        () -> {
-          cdrVersionService.setCdrVersion(controlledCdrVersion);
-        });
+        () -> cdrVersionService.setCdrVersion(controlledCdrVersion));
   }
 
   @Test
   public void testSetCdrVersionControlledIdForbiddenNotInTier() {
     assertThrows(
         ForbiddenException.class,
-        () -> {
-          cdrVersionService.setCdrVersion(controlledCdrVersion.getCdrVersionId());
-        });
+        () -> cdrVersionService.setCdrVersion(controlledCdrVersion));
   }
 
   // these tests fail because the user is in the right tier according to the AoU DB
@@ -253,7 +245,7 @@ public class CdrVersionServiceTest {
           when(fireCloudService.isUserMemberOfGroupWithCache(
                   user.getUsername(), controlledTier.getAuthDomainName()))
               .thenReturn(false);
-          cdrVersionService.setCdrVersion(controlledCdrVersion.getCdrVersionId());
+          cdrVersionService.setCdrVersion(controlledCdrVersion);
         });
   }
 
@@ -299,15 +291,18 @@ public class CdrVersionServiceTest {
         response.getTiers().stream()
             .map(CdrVersionTier::getAccessTierShortName)
             .collect(Collectors.toList());
-    assertThat(responseTiers).containsExactly(registeredTier.getShortName(), controlledTier.getShortName());
+    assertThat(responseTiers)
+        .containsExactly(registeredTier.getShortName(), controlledTier.getShortName());
 
     List<CdrVersion> responseVersions =
         response.getTiers().stream()
             .map(CdrVersionTier::getVersions)
             .flatMap(List::stream)
             .collect(Collectors.toList());
-    assertThat(responseVersions).containsExactly(cdrVersionMapper.dbModelToClient(defaultCdrVersion),
-        cdrVersionMapper.dbModelToClient(controlledCdrVersion));
+    assertThat(responseVersions)
+        .containsExactly(
+            cdrVersionMapper.dbModelToClient(defaultCdrVersion),
+            cdrVersionMapper.dbModelToClient(controlledCdrVersion));
   }
 
   private void testGetCdrVersionsHasDataType(Predicate<CdrVersion> hasType) {
