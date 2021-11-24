@@ -86,7 +86,8 @@ public class WorkspaceServiceTest {
     FreeTierBillingService.class,
     ProfileMapper.class,
     UserDao.class,
-    UserMapper.class, IamService.class,
+    UserMapper.class,
+    IamService.class,
   })
   static class Configuration {
     @Bean

@@ -207,7 +207,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
           dbWorkspace, workbenchConfigProvider.get().billing.freeTierBillingAccountName());
       throw e;
     }
-    if (accessTier.getShortName().equals(CONTROLLED_TIER_SHORT_NAME)) {
+    if (workbenchConfigProvider.get().featureFlags.grantLifescienceApiRunnerAcl
+        && accessTier.getShortName().equals(CONTROLLED_TIER_SHORT_NAME)) {
       iamService.grantWorkflowRunnerRole(dbWorkspace.getGoogleProject());
     }
     final Workspace createdWorkspace = workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace);
@@ -481,7 +482,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     // Grant the workspace cloner and all from-workspaces users permission to use workflow if
     // workspace is controlled tier workspace.
-    if (accessTier.getShortName().equals(CONTROLLED_TIER_SHORT_NAME)) {
+    if (workbenchConfigProvider.get().featureFlags.grantLifescienceApiRunnerAcl
+        && accessTier.getShortName().equals(CONTROLLED_TIER_SHORT_NAME)) {
       iamService.grantWorkflowRunnerRole(dbWorkspace.getGoogleProject());
       for (Map.Entry<String, WorkspaceAccessLevel> entry : clonedRoles.entrySet()) {
         if (shouldGrantWorkflowRunnerAsService(user, entry)) {
@@ -564,11 +566,12 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         workspaceService.getFirecloudUserRoles(workspaceNamespace, dbWorkspace.getFirecloudName());
     resp.setItems(updatedUserRoles);
 
-    if (dbWorkspace
-        .getCdrVersion()
-        .getAccessTier()
-        .getShortName()
-        .equals(CONTROLLED_TIER_SHORT_NAME)) {
+    if (workbenchConfigProvider.get().featureFlags.grantLifescienceApiRunnerAcl
+        && dbWorkspace
+            .getCdrVersion()
+            .getAccessTier()
+            .getShortName()
+            .equals(CONTROLLED_TIER_SHORT_NAME)) {
       for (Map.Entry<String, WorkspaceAccessLevel> entry : aclsByEmail.entrySet()) {
         if (shouldGrantWorkflowRunnerAsService(userProvider.get(), entry)) {
           iamService.grantWorkflowRunnerRoleAsService(

@@ -346,6 +346,7 @@ public class WorkspacesControllerTest {
   public void setUp() throws Exception {
     workbenchConfig = WorkbenchConfig.createEmptyConfig();
     workbenchConfig.featureFlags.enableBillingUpgrade = true;
+    workbenchConfig.featureFlags.grantLifescienceApiRunnerAcl = true;
     workbenchConfig.billing.accountId = "free-tier";
     workbenchConfig.billing.projectNamePrefix = "aou-local";
 
