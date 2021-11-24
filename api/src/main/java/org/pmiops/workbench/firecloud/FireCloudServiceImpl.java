@@ -522,8 +522,7 @@ public class FireCloudServiceImpl implements FireCloudService {
   }
 
   @Override
-  public boolean getDuplicateWorkspaceFileTransferTime(
-      String workspaceNamespace, String firecloudName) {
+  public boolean workspaceFileTransferComplete(String workspaceNamespace, String fireCloudName) {
     WorkspacesApi workspacesApi = endUserWorkspacesApiProvider.get();
     return retryHandler.run(
         (context) -> {
@@ -531,7 +530,7 @@ public class FireCloudServiceImpl implements FireCloudService {
               workspacesApi
                   .getWorkspace(
                       workspaceNamespace,
-                      firecloudName,
+                      fireCloudName,
                       FIRECLOUD_WORKSPACE_REQUIRED_FIELDS_FOR_CLONE_FILE_TRANSFER)
                   .getWorkspace();
           return fcWorkspaceDetails == null

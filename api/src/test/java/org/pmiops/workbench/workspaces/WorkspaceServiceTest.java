@@ -514,26 +514,4 @@ public class WorkspaceServiceTest {
         FailedPreconditionException.class,
         () -> workspaceService.updateWorkspaceBillingAccount(workspace, newBillingAccount));
   }
-
-  @Test
-  public void notebookTransferHasNotStartedForDuplicateWorkspace() throws Exception {
-    when(mockFireCloudService.getDuplicateWorkspaceFileTransferTime(
-            DEFAULT_WORKSPACE_NAMESPACE, "FirecloudName"))
-        .thenReturn(false);
-
-    Boolean notebookFileDone =
-        workspaceService.notebookTransferComplete(DEFAULT_WORKSPACE_NAMESPACE, "FirecloudName");
-    assertThat(notebookFileDone).isFalse();
-  }
-
-  @Test
-  public void notebookTransferDoneForDuplicateWorkspace() throws Exception {
-    when(mockFireCloudService.getDuplicateWorkspaceFileTransferTime(
-            DEFAULT_WORKSPACE_NAMESPACE, "FirecloudName"))
-        .thenReturn(true);
-
-    Boolean notebookFileDone =
-        workspaceService.notebookTransferComplete(DEFAULT_WORKSPACE_NAMESPACE, "FirecloudName");
-    assertThat(notebookFileDone).isTrue();
-  }
 }

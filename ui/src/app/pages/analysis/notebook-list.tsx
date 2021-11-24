@@ -43,6 +43,8 @@ const styles = {
   }
 };
 
+const NOTEBOOK_TRANSFER_CHECK_INTERVAL = 3000;
+
 interface Props extends WithSpinnerOverlayProps {
   workspace: WorkspaceData;
 }
@@ -53,7 +55,6 @@ export const NotebookList = withCurrentWorkspace()(class extends React.Component
     notebookNameList: string[],
     creating: boolean,
     loading: boolean,
-    notebookTransferCheckInterval: number,
     showWaitingForNotebookTransferMsg: boolean;
   }> {
   private interval: NodeJS.Timeout;
@@ -64,7 +65,6 @@ export const NotebookList = withCurrentWorkspace()(class extends React.Component
       notebookNameList: [],
       creating: false,
       loading: false,
-      notebookTransferCheckInterval: 3000,
       showWaitingForNotebookTransferMsg: false
     };
   }
@@ -90,7 +90,7 @@ export const NotebookList = withCurrentWorkspace()(class extends React.Component
         .notebookTransferComplete(this.props.workspace.namespace, this.props.workspace.id).then((transferDone) => {
           if (!transferDone) {
             // Set the interval so that file transfer check is done after every 3 sec
-            this.interval = setInterval(this.tick, this.state.notebookTransferCheckInterval);
+            this.interval = setInterval(this.tick, NOTEBOOK_TRANSFER_CHECK_INTERVAL);
             this.setState({loading: true, showWaitingForNotebookTransferMsg: true});
           } else {
             // Notebook transfer is done load the notebooks
@@ -170,7 +170,7 @@ export const NotebookList = withCurrentWorkspace()(class extends React.Component
           </CardButton>
         </TooltipTrigger>
         <div style={{display: 'flex', flexWrap: 'wrap', justifyContent: 'flex-start' }}>
-          {showWaitingForNotebookTransferMsg && <CardButton
+          {showWaitingForNotebookTransferMsg ? <CardButton
               disabled={showWaitingForNotebookTransferMsg}
               style={styles.cloneNotebookCard}
               type='small'
@@ -179,8 +179,7 @@ export const NotebookList = withCurrentWorkspace()(class extends React.Component
               <div><FontAwesomeIcon icon={faClock} size="2x"></FontAwesomeIcon></div>
               <div>Copying 1 or more notebooks from another workspace. This may take a few minutes.</div>
             </FlexColumn>
-          </CardButton>}
-          {!showWaitingForNotebookTransferMsg && notebookList.map((notebook, index) => {
+          </CardButton> : notebookList.map((notebook, index) => {
             return <NotebookResourceCard
               key={index}
               resource={convertToResource(notebook, ResourceType.NOTEBOOK, workspace)}
