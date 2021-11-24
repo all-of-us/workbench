@@ -397,7 +397,6 @@ dependencies {
     compile "com.google.apis:google-api-services-cloudbilling:v1-rev48-1.25.0"
     compile "com.google.apis:google-api-services-cloudresourcemanager:v1-rev549-1.25.0"
     compile "com.google.apis:google-api-services-oauth2:v2-rev139-1.23.0"
-    compile 'com.google.apis:google-api-services-iam:v1-rev20211104-1.32.1'
     compile "com.google.appengine:appengine-api-1.0-sdk:$project.ext.GAE_VERSION"
     compile "com.google.appengine:appengine:$project.ext.GAE_VERSION"
     compile "com.google.auth:google-auth-library-appengine:0.19.0"
