@@ -170,24 +170,29 @@ export const NotebookList = withCurrentWorkspace()(class extends React.Component
           </CardButton>
         </TooltipTrigger>
         <div style={{display: 'flex', flexWrap: 'wrap', justifyContent: 'flex-start' }}>
-          {showWaitingForNotebookTransferMsg ? <CardButton
-              disabled={showWaitingForNotebookTransferMsg}
-              style={styles.cloneNotebookCard}
-              type='small'
-              onClick={() => {}}>
-            <FlexColumn style={styles.cloneNotebookMsg}>
-              <div><FontAwesomeIcon icon={faClock} size="2x"></FontAwesomeIcon></div>
-              <div>Copying 1 or more notebooks from another workspace. This may take a few minutes.</div>
-            </FlexColumn>
-          </CardButton> : notebookList.map((notebook, index) => {
-            return <NotebookResourceCard
-              key={index}
-              resource={convertToResource(notebook, ResourceType.NOTEBOOK, workspace)}
-              existingNameList={notebookNameList}
-              onUpdate={() => this.loadNotebooks()}
-              disableDuplicate={workspace.billingStatus === BillingStatus.INACTIVE}
-            />;
-          })}
+          {showWaitingForNotebookTransferMsg
+              ? <CardButton
+                  disabled={showWaitingForNotebookTransferMsg}
+                  style={styles.cloneNotebookCard}
+                  type='small'
+                  onClick={() => {
+                  }}>
+                <FlexColumn style={styles.cloneNotebookMsg}>
+                  <div><FontAwesomeIcon icon={faClock} size="2x"></FontAwesomeIcon></div>
+                  <div>Copying 1 or more notebooks from another workspace. This may take a few
+                    minutes.
+                  </div>
+                </FlexColumn>
+              </CardButton>
+              : notebookList.map((notebook, index) => {
+                return <NotebookResourceCard
+                    key={index}
+                    resource={convertToResource(notebook, ResourceType.NOTEBOOK, workspace)}
+                    existingNameList={notebookNameList}
+                    onUpdate={() => this.loadNotebooks()}
+                    disableDuplicate={workspace.billingStatus === BillingStatus.INACTIVE}
+                />;
+              })}
         </div>
       </div>
       {loading && <SpinnerOverlay />}
