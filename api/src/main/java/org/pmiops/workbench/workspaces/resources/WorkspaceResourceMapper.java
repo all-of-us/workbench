@@ -28,9 +28,6 @@ import org.pmiops.workbench.utils.mappers.MapStructConfig;
       DataSetMapper.class,
     })
 public interface WorkspaceResourceMapper {
-  WorkspaceResource mergeWorkspaceAndResourceFields(
-      WorkspaceFields workspaceFields, ResourceFields resourceFields);
-
   @Mapping(target = "workspaceId", source = "dbWorkspace.workspaceId")
   @Mapping(target = "workspaceFirecloudName", source = "dbWorkspace.firecloudName")
   @Mapping(target = "workspaceBillingStatus", source = "dbWorkspace.billingStatus")
@@ -42,72 +39,66 @@ public interface WorkspaceResourceMapper {
 
   // a WorkspaceResource has one resource object.  Assign it and ignore all others (keep as NULL).
 
-  @Mapping(target = "cohort", source = "dbCohort")
   @Mapping(target = "cohortReview", ignore = true)
   @Mapping(target = "conceptSet", ignore = true)
   @Mapping(target = "dataSet", ignore = true)
   @Mapping(target = "notebook", ignore = true)
-  // This should be set when the resource is set
+  @Mapping(target = "cohort", source = "dbCohort")
   @Mapping(target = "lastModifiedEpochMillis", source = "dbCohort.lastModifiedTime")
   ResourceFields workspaceResourceFromDbCohort(DbCohort dbCohort);
 
   @Mapping(target = "cohort", ignore = true)
-  @Mapping(target = "cohortReview", source = "cohortReview")
   @Mapping(target = "conceptSet", ignore = true)
   @Mapping(target = "dataSet", ignore = true)
   @Mapping(target = "notebook", ignore = true)
-  // This should be set when the resource is set
+  @Mapping(target = "cohortReview", source = "cohortReview")
   @Mapping(target = "lastModifiedEpochMillis", source = "cohortReview.lastModifiedTime")
   ResourceFields workspaceResourceFromCohortReview(CohortReview cohortReview);
 
   @Mapping(target = "cohort", ignore = true)
   @Mapping(target = "cohortReview", ignore = true)
-  @Mapping(target = "conceptSet", source = "conceptSet")
   @Mapping(target = "dataSet", ignore = true)
   @Mapping(target = "notebook", ignore = true)
-  // This should be set when the resource is set
+  @Mapping(target = "conceptSet", source = "conceptSet")
   @Mapping(target = "lastModifiedEpochMillis", source = "conceptSet.lastModifiedTime")
   ResourceFields workspaceResourceFromConceptSet(ConceptSet conceptSet);
 
   @Mapping(target = "cohort", ignore = true)
   @Mapping(target = "cohortReview", ignore = true)
   @Mapping(target = "conceptSet", ignore = true)
-  @Mapping(target = "dataSet", source = "dbDataset", qualifiedByName = "dbModelToClientLight")
   @Mapping(target = "notebook", ignore = true)
-  // This should be set when the resource is set
+  @Mapping(target = "dataSet", source = "dbDataset", qualifiedByName = "dbModelToClientLight")
   @Mapping(target = "lastModifiedEpochMillis", source = "dbDataset.lastModifiedTime")
   ResourceFields workspaceResourceFromDbDataset(DbDataset dbDataset);
-  // TODO: can MapStruct generate these automatically?
+
+  WorkspaceResource mergeWorkspaceAndResourceFields(
+      WorkspaceFields workspaceFields, ResourceFields resourceFields);
 
   default WorkspaceResource dbWorkspaceAndDbCohortToWorkspaceResource(
       DbWorkspace dbWorkspace, WorkspaceAccessLevel accessLevel, DbCohort dbCohort) {
-    final WorkspaceFields workspaceFields =
-        workspaceResourceFromWorkspace(dbWorkspace, accessLevel);
-    final ResourceFields resourceFields = workspaceResourceFromDbCohort(dbCohort);
-    return mergeWorkspaceAndResourceFields(workspaceFields, resourceFields);
+    return mergeWorkspaceAndResourceFields(
+        workspaceResourceFromWorkspace(dbWorkspace, accessLevel),
+        workspaceResourceFromDbCohort(dbCohort));
   }
 
   default WorkspaceResource dbWorkspaceAndCohortReviewToWorkspaceResource(
       DbWorkspace dbWorkspace, WorkspaceAccessLevel accessLevel, CohortReview cohortReview) {
-    final WorkspaceFields workspaceFields =
-        workspaceResourceFromWorkspace(dbWorkspace, accessLevel);
-    final ResourceFields resourceFields = workspaceResourceFromCohortReview(cohortReview);
-    return mergeWorkspaceAndResourceFields(workspaceFields, resourceFields);
+    return mergeWorkspaceAndResourceFields(
+        workspaceResourceFromWorkspace(dbWorkspace, accessLevel),
+        workspaceResourceFromCohortReview(cohortReview));
   }
 
   default WorkspaceResource dbWorkspaceAndConceptSetToWorkspaceResource(
       DbWorkspace dbWorkspace, WorkspaceAccessLevel accessLevel, ConceptSet conceptSet) {
-    final WorkspaceFields workspaceFields =
-        workspaceResourceFromWorkspace(dbWorkspace, accessLevel);
-    final ResourceFields resourceFields = workspaceResourceFromConceptSet(conceptSet);
-    return mergeWorkspaceAndResourceFields(workspaceFields, resourceFields);
+    return mergeWorkspaceAndResourceFields(
+        workspaceResourceFromWorkspace(dbWorkspace, accessLevel),
+        workspaceResourceFromConceptSet(conceptSet));
   }
 
   default WorkspaceResource dbWorkspaceAndDbDatasetToWorkspaceResource(
       DbWorkspace dbWorkspace, WorkspaceAccessLevel accessLevel, DbDataset dbDataset) {
-    final WorkspaceFields workspaceFields =
-        workspaceResourceFromWorkspace(dbWorkspace, accessLevel);
-    final ResourceFields resourceFields = workspaceResourceFromDbDataset(dbDataset);
-    return mergeWorkspaceAndResourceFields(workspaceFields, resourceFields);
+    return mergeWorkspaceAndResourceFields(
+        workspaceResourceFromWorkspace(dbWorkspace, accessLevel),
+        workspaceResourceFromDbDataset(dbDataset));
   }
 }
