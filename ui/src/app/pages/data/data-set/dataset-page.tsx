@@ -598,15 +598,14 @@ export const DatasetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), wi
       // Only allow selection of genomics prepackaged concept sets if genomics
       // data extraction is possible, since extraction is the only action that
       // can be taken on genomics variant data from the dataset builder.
-      if (serverConfigStore.get().config.enableGenomicExtraction &&
-        this.getCdrVersion().hasWgsData) {
+      if (serverConfigStore.get().config.enableGenomicExtraction && this.getCdrVersion().hasWgsData) {
         PREPACKAGED_DOMAINS = {
           ...PREPACKAGED_DOMAINS,
           ...PREPACKAGED_WITH_WHOLE_GENOME
         };
       }
       // Add Zipcode Socioeconomic status data if were in controlled tier dataset
-      if (this.getCdrVersion().accessTierShortName === 'controlled') {
+      if (this.props.workspace.accessTierShortName === 'controlled') {
         PREPACKAGED_DOMAINS = {
           ...PREPACKAGED_DOMAINS,
           ...PREPACKAGED_WITH_ZIP_CODE_SOCIOECONOMIC
@@ -761,11 +760,10 @@ export const DatasetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), wi
         prepackagedList = prepackagedList
             .filter(prepack => !fp.startsWith('FITBIT', prepack));
       }
-      if (!serverConfigStore.get().config.enableGenomicExtraction ||
-          !this.getCdrVersion().hasWgsData) {
+      if (!serverConfigStore.get().config.enableGenomicExtraction || !this.getCdrVersion().hasWgsData) {
         prepackagedList = prepackagedList.filter(prepack => prepack !== 'WHOLEGENOME');
       }
-      if (this.getCdrVersion().accessTierShortName !== 'controlled') {
+      if (this.props.workspace.accessTierShortName !== 'controlled') {
         prepackagedList = prepackagedList.filter(prepack => prepack !== 'ZIPCODESOCIOECONOMIC');
       }
       return prepackagedList;
