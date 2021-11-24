@@ -28,72 +28,77 @@ import org.pmiops.workbench.utils.mappers.MapStructConfig;
       DataSetMapper.class,
     })
 public interface WorkspaceResourceMapper {
-
   @Mapping(target = "workspaceId", source = "dbWorkspace.workspaceId")
   @Mapping(target = "workspaceFirecloudName", source = "dbWorkspace.firecloudName")
   @Mapping(target = "workspaceBillingStatus", source = "dbWorkspace.billingStatus")
   @Mapping(target = "cdrVersionId", source = "dbWorkspace.cdrVersion")
   @Mapping(target = "accessTierShortName", source = "dbWorkspace.cdrVersion.accessTier.shortName")
   @Mapping(target = "permission", source = "accessLevel")
+  WorkspaceFields workspaceResourceFromWorkspace(
+      DbWorkspace dbWorkspace, WorkspaceAccessLevel accessLevel);
+
+  // a WorkspaceResource has one resource object.  Assign it and ignore all others (keep as NULL).
+
+  @Mapping(target = "cohortReview", ignore = true)
+  @Mapping(target = "conceptSet", ignore = true)
+  @Mapping(target = "dataSet", ignore = true)
+  @Mapping(target = "notebook", ignore = true)
   @Mapping(target = "cohort", source = "dbCohort")
-  // All workspaceResources have one object and all others are null.
-  @Mapping(target = "cohortReview", ignore = true)
-  @Mapping(target = "conceptSet", ignore = true)
-  @Mapping(target = "dataSet", ignore = true)
-  @Mapping(target = "notebook", ignore = true)
-  // This should be set when the resource is set
   @Mapping(target = "lastModifiedEpochMillis", source = "dbCohort.lastModifiedTime")
-  WorkspaceResource dbWorkspaceAndDbCohortToWorkspaceResource(
-      DbWorkspace dbWorkspace, WorkspaceAccessLevel accessLevel, DbCohort dbCohort);
+  ResourceFields workspaceResourceFromDbCohort(DbCohort dbCohort);
 
-  @Mapping(target = "workspaceId", source = "dbWorkspace.workspaceId")
-  @Mapping(target = "workspaceFirecloudName", source = "dbWorkspace.firecloudName")
-  @Mapping(target = "workspaceBillingStatus", source = "dbWorkspace.billingStatus")
-  @Mapping(target = "cdrVersionId", source = "dbWorkspace.cdrVersion")
-  @Mapping(target = "accessTierShortName", source = "dbWorkspace.cdrVersion.accessTier.shortName")
-  @Mapping(target = "permission", source = "accessLevel")
+  @Mapping(target = "cohort", ignore = true)
+  @Mapping(target = "conceptSet", ignore = true)
+  @Mapping(target = "dataSet", ignore = true)
+  @Mapping(target = "notebook", ignore = true)
   @Mapping(target = "cohortReview", source = "cohortReview")
-  // All workspaceResources have one object and all others are null.
-  @Mapping(target = "cohort", ignore = true)
-  @Mapping(target = "conceptSet", ignore = true)
-  @Mapping(target = "dataSet", ignore = true)
-  @Mapping(target = "notebook", ignore = true)
-  // This should be set when the resource is set
   @Mapping(target = "lastModifiedEpochMillis", source = "cohortReview.lastModifiedTime")
-  WorkspaceResource dbWorkspaceAndCohortReviewToWorkspaceResource(
-      DbWorkspace dbWorkspace, WorkspaceAccessLevel accessLevel, CohortReview cohortReview);
+  ResourceFields workspaceResourceFromCohortReview(CohortReview cohortReview);
 
-  @Mapping(target = "workspaceId", source = "dbWorkspace.workspaceId")
-  @Mapping(target = "workspaceFirecloudName", source = "dbWorkspace.firecloudName")
-  @Mapping(target = "workspaceBillingStatus", source = "dbWorkspace.billingStatus")
-  @Mapping(target = "cdrVersionId", source = "dbWorkspace.cdrVersion")
-  @Mapping(target = "accessTierShortName", source = "dbWorkspace.cdrVersion.accessTier.shortName")
-  @Mapping(target = "permission", source = "accessLevel")
-  @Mapping(target = "conceptSet", source = "conceptSet")
-  // All workspaceResources have one object and all others are null.
   @Mapping(target = "cohort", ignore = true)
   @Mapping(target = "cohortReview", ignore = true)
   @Mapping(target = "dataSet", ignore = true)
   @Mapping(target = "notebook", ignore = true)
-  // This should be set when the resource is set
+  @Mapping(target = "conceptSet", source = "conceptSet")
   @Mapping(target = "lastModifiedEpochMillis", source = "conceptSet.lastModifiedTime")
-  WorkspaceResource dbWorkspaceAndConceptSetToWorkspaceResource(
-      DbWorkspace dbWorkspace, WorkspaceAccessLevel accessLevel, ConceptSet conceptSet);
+  ResourceFields workspaceResourceFromConceptSet(ConceptSet conceptSet);
 
-  @Mapping(target = "workspaceId", source = "dbWorkspace.workspaceId")
-  @Mapping(target = "workspaceFirecloudName", source = "dbWorkspace.firecloudName")
-  @Mapping(target = "workspaceBillingStatus", source = "dbWorkspace.billingStatus")
-  @Mapping(target = "cdrVersionId", source = "dbWorkspace.cdrVersion")
-  @Mapping(target = "accessTierShortName", source = "dbWorkspace.cdrVersion.accessTier.shortName")
-  @Mapping(target = "permission", source = "accessLevel")
-  @Mapping(target = "dataSet", source = "dbDataset", qualifiedByName = "dbModelToClientLight")
-  // All workspaceResources have one object and all others are null.
   @Mapping(target = "cohort", ignore = true)
   @Mapping(target = "cohortReview", ignore = true)
   @Mapping(target = "conceptSet", ignore = true)
   @Mapping(target = "notebook", ignore = true)
-  // This should be set when the resource is set
+  @Mapping(target = "dataSet", source = "dbDataset", qualifiedByName = "dbModelToClientLight")
   @Mapping(target = "lastModifiedEpochMillis", source = "dbDataset.lastModifiedTime")
-  WorkspaceResource dbWorkspaceAndDbDatasetToWorkspaceResource(
-      DbWorkspace dbWorkspace, WorkspaceAccessLevel accessLevel, DbDataset dbDataset);
+  ResourceFields workspaceResourceFromDbDataset(DbDataset dbDataset);
+
+  WorkspaceResource mergeWorkspaceAndResourceFields(
+      WorkspaceFields workspaceFields, ResourceFields resourceFields);
+
+  default WorkspaceResource dbWorkspaceAndDbCohortToWorkspaceResource(
+      DbWorkspace dbWorkspace, WorkspaceAccessLevel accessLevel, DbCohort dbCohort) {
+    return mergeWorkspaceAndResourceFields(
+        workspaceResourceFromWorkspace(dbWorkspace, accessLevel),
+        workspaceResourceFromDbCohort(dbCohort));
+  }
+
+  default WorkspaceResource dbWorkspaceAndCohortReviewToWorkspaceResource(
+      DbWorkspace dbWorkspace, WorkspaceAccessLevel accessLevel, CohortReview cohortReview) {
+    return mergeWorkspaceAndResourceFields(
+        workspaceResourceFromWorkspace(dbWorkspace, accessLevel),
+        workspaceResourceFromCohortReview(cohortReview));
+  }
+
+  default WorkspaceResource dbWorkspaceAndConceptSetToWorkspaceResource(
+      DbWorkspace dbWorkspace, WorkspaceAccessLevel accessLevel, ConceptSet conceptSet) {
+    return mergeWorkspaceAndResourceFields(
+        workspaceResourceFromWorkspace(dbWorkspace, accessLevel),
+        workspaceResourceFromConceptSet(conceptSet));
+  }
+
+  default WorkspaceResource dbWorkspaceAndDbDatasetToWorkspaceResource(
+      DbWorkspace dbWorkspace, WorkspaceAccessLevel accessLevel, DbDataset dbDataset) {
+    return mergeWorkspaceAndResourceFields(
+        workspaceResourceFromWorkspace(dbWorkspace, accessLevel),
+        workspaceResourceFromDbDataset(dbDataset));
+  }
 }
