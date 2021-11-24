@@ -2143,6 +2143,7 @@ public class WorkspacesControllerTest {
     ArrayList<FirecloudWorkspaceACLUpdate> updateACLRequestList =
         convertUserRolesToUpdateAclRequestList(shareWorkspaceRequest.getItems());
     verify(fireCloudService).updateWorkspaceACL(any(), any(), eq(updateACLRequestList));
+    verify(mockIamService, never()).grantWorkflowRunnerRoleAsService(anyString(), anyString());
   }
 
   @Test
