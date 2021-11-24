@@ -152,15 +152,13 @@ public class CdrVersionServiceTest {
   @Test
   public void testSetCdrVersionDefaultForbiddenNotInTier() {
     assertThrows(
-        ForbiddenException.class,
-        () -> cdrVersionService.setCdrVersion(defaultCdrVersion));
+        ForbiddenException.class, () -> cdrVersionService.setCdrVersion(defaultCdrVersion));
   }
 
   @Test
   public void testSetCdrVersionDefaultIdForbiddenNotInTier() {
     assertThrows(
-        ForbiddenException.class,
-        () -> cdrVersionService.setCdrVersion(defaultCdrVersion));
+        ForbiddenException.class, () -> cdrVersionService.setCdrVersion(defaultCdrVersion));
   }
 
   // these tests fail because the user is in the right tier according to the AoU DB
@@ -209,15 +207,13 @@ public class CdrVersionServiceTest {
   @Test
   public void testSetCdrVersionControlledForbiddenNotInTier() {
     assertThrows(
-        ForbiddenException.class,
-        () -> cdrVersionService.setCdrVersion(controlledCdrVersion));
+        ForbiddenException.class, () -> cdrVersionService.setCdrVersion(controlledCdrVersion));
   }
 
   @Test
   public void testSetCdrVersionControlledIdForbiddenNotInTier() {
     assertThrows(
-        ForbiddenException.class,
-        () -> cdrVersionService.setCdrVersion(controlledCdrVersion));
+        ForbiddenException.class, () -> cdrVersionService.setCdrVersion(controlledCdrVersion));
   }
 
   // these tests fail because the user is in the right tier according to the AoU DB
