@@ -276,6 +276,13 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   @Override
+  public ResponseEntity<Boolean> notebookTransferComplete(
+      String workspaceNamespace, String workspaceId) {
+    return ResponseEntity.ok(
+        workspaceService.notebookTransferComplete(workspaceNamespace, workspaceId));
+  }
+
+  @Override
   public ResponseEntity<Workspace> updateWorkspace(
       String workspaceNamespace, String workspaceId, UpdateWorkspaceRequest request)
       throws NotFoundException {

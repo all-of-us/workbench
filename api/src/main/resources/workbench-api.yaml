@@ -903,6 +903,20 @@ paths:
           description: A list of workspace definitions.
           schema:
             "$ref": "#/definitions/WorkspaceResponseListResponse"
+  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/isNotebookTransferComplete":
+    parameters:
+      - "$ref": "#/parameters/workspaceNamespace"
+      - "$ref": "#/parameters/workspaceId"
+    get:
+      tags:
+        - workspaces
+      description: Checks if the notebooks have been copied to the workspace
+      operationId: notebookTransferComplete
+      responses:
+        200:
+          description: Returns true if the notebooks have been copied to the workspace
+          schema:
+            type: boolean
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}":
     parameters:
     - "$ref": "#/parameters/workspaceNamespace"
