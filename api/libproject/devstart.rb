@@ -41,6 +41,12 @@ def init_new_cdr_db(args)
   end
 end
 
+Common.register_command({
+  :invocation => "init-new-cdr-db",
+  :description => "Generates new mysql database for a cdr version",
+  :fn => ->(*args) { init_new_cdr_db(args) }
+})
+
 def gcs_vars_path(project)
   return "gs://#{project}-credentials/vars.env"
 end
@@ -591,7 +597,7 @@ Common.register_command({
   :fn => ->(*args) { create_cdr_indices("create-cdr-indices", *args) }
 })
 
-def create_prep_survey(cmd_name, *args)
+def build_prep_survey(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
   op.add_option(
       "--project [project]",
@@ -619,14 +625,14 @@ def create_prep_survey(cmd_name, *args)
 
   common = Common.new
   Dir.chdir('db-cdr') do
-    common.run_inline %W{./generate-cdr/create-prep-survey.sh #{ENVIRONMENTS[op.opts.project][:source_cdr_project]} #{op.opts.dataset} #{op.opts.filename} #{op.opts.id_start_block}}
+    common.run_inline %W{./generate-cdr/build-prep-survey.sh #{ENVIRONMENTS[op.opts.project][:source_cdr_project]} #{op.opts.dataset} #{op.opts.filename} #{op.opts.id_start_block}}
   end
 end
 
 Common.register_command({
-  :invocation => "create-prep-survey",
-  :description => "Create the prep_survey table.",
-  :fn => ->(*args) { create_prep_survey("create-prep-survey", *args) }
+  :invocation => "build-prep-survey",
+  :description => "Build the prep_survey table.",
+  :fn => ->(*args) { build_prep_survey("build-prep-survey", *args) }
 })
 
 def create_tables(cmd_name, *args)
@@ -655,6 +661,390 @@ Common.register_command({
   :invocation => "create-tables",
   :description => "Create the CDR indices tables.",
   :fn => ->(*args) { create_tables("create-tables", *args) }
+})
+
+def build_static_prep_tables(cmd_name, *args)
+  op = WbOptionsParser.new(cmd_name, args)
+  op.add_option(
+      "--project [project]",
+      ->(opts, v) { opts.project = v},
+      "Project name"
+  )
+  op.add_option(
+      "--dataset [dataset]",
+      ->(opts, v) { opts.dataset = v},
+      "Dataset name"
+  )
+
+  op.add_validator ->(opts) { raise ArgumentError unless opts.project and opts.dataset}
+  op.parse.validate
+
+  common = Common.new
+  Dir.chdir('db-cdr') do
+    common.run_inline %W{./generate-cdr/build-static-prep-tables.sh #{ENVIRONMENTS[op.opts.project][:source_cdr_project]} #{op.opts.dataset}}
+  end
+end
+
+Common.register_command({
+  :invocation => "build-static-prep-tables",
+  :description => "Create prep tables from csv files in Google bucket",
+  :fn => ->(*args) { build_static_prep_tables("build-static-prep-tables", *args) }
+})
+
+def build_prep_concept_merged(cmd_name, *args)
+  op = WbOptionsParser.new(cmd_name, args)
+  op.add_option(
+      "--project [project]",
+      ->(opts, v) { opts.project = v},
+      "Project name"
+  )
+  op.add_option(
+      "--dataset [dataset]",
+      ->(opts, v) { opts.dataset = v},
+      "Dataset name"
+  )
+
+  op.add_validator ->(opts) { raise ArgumentError unless opts.project and opts.dataset}
+  op.parse.validate
+
+  common = Common.new
+  Dir.chdir('db-cdr') do
+    common.run_inline %W{./generate-cdr/build-prep-concept-merged.sh #{ENVIRONMENTS[op.opts.project][:source_cdr_project]} #{op.opts.dataset}}
+  end
+end
+
+Common.register_command({
+  :invocation => "build-prep-concept-merged",
+  :description => "Create prep concept tables",
+  :fn => ->(*args) { build_prep_concept_merged("build-prep-concept-merged", *args) }
+})
+
+def build_cb_survey_version(cmd_name, *args)
+  op = WbOptionsParser.new(cmd_name, args)
+  op.add_option(
+      "--project [project]",
+      ->(opts, v) { opts.project = v},
+      "Project name"
+  )
+  op.add_option(
+      "--dataset [dataset]",
+      ->(opts, v) { opts.dataset = v},
+      "Dataset name"
+  )
+
+  op.add_validator ->(opts) { raise ArgumentError unless opts.project and opts.dataset}
+  op.parse.validate
+
+  common = Common.new
+  Dir.chdir('db-cdr') do
+    common.run_inline %W{./generate-cdr/build-cb-survey-version.sh #{ENVIRONMENTS[op.opts.project][:source_cdr_project]} #{op.opts.dataset}}
+  end
+end
+
+Common.register_command({
+  :invocation => "build-cb-survey-version",
+  :description => "Generates the cb_survey_version table",
+  :fn => ->(*args) { build_cb_survey_version("build-cb-survey-version", *args) }
+})
+
+def build_ds_linking(cmd_name, *args)
+  op = WbOptionsParser.new(cmd_name, args)
+  op.add_option(
+      "--project [project]",
+      ->(opts, v) { opts.project = v},
+      "Project name"
+  )
+  op.add_option(
+      "--dataset [dataset]",
+      ->(opts, v) { opts.dataset = v},
+      "Dataset name"
+  )
+
+  op.add_validator ->(opts) { raise ArgumentError unless opts.project and opts.dataset}
+  op.parse.validate
+
+  common = Common.new
+  Dir.chdir('db-cdr') do
+    common.run_inline %W{./generate-cdr/build-ds-linking.sh #{ENVIRONMENTS[op.opts.project][:source_cdr_project]} #{op.opts.dataset}}
+  end
+end
+
+Common.register_command({
+  :invocation => "build-ds-linking",
+  :description => "Generates the big query denormalized tables for dataset builder",
+  :fn => ->(*args) { build_ds_linking("build-ds-linking", *args) }
+})
+
+def build_ds_tables(cmd_name, *args)
+  op = WbOptionsParser.new(cmd_name, args)
+  op.add_option(
+      "--project [project]",
+      ->(opts, v) { opts.project = v},
+      "Project name"
+  )
+  op.add_option(
+      "--dataset [dataset]",
+      ->(opts, v) { opts.dataset = v},
+      "Dataset name"
+  )
+
+  op.add_validator ->(opts) { raise ArgumentError unless opts.project and opts.dataset}
+  op.parse.validate
+
+  common = Common.new
+  Dir.chdir('db-cdr') do
+    common.run_inline %W{./generate-cdr/build-ds-tables.sh #{ENVIRONMENTS[op.opts.project][:source_cdr_project]} #{op.opts.dataset}}
+  end
+end
+
+Common.register_command({
+  :invocation => "build-ds-tables",
+  :description => "Generates the big query denormalized tables for dataset builder",
+  :fn => ->(*args) { build_ds_tables("build-ds-tables", *args) }
+})
+
+def build_review_all_events(cmd_name, *args)
+  op = WbOptionsParser.new(cmd_name, args)
+  op.add_option(
+      "--project [project]",
+      ->(opts, v) { opts.project = v},
+      "Project name"
+  )
+  op.add_option(
+      "--dataset [dataset]",
+      ->(opts, v) { opts.dataset = v},
+      "Dataset name"
+  )
+
+  op.add_validator ->(opts) { raise ArgumentError unless opts.project and opts.dataset}
+  op.parse.validate
+
+  common = Common.new
+  Dir.chdir('db-cdr') do
+    common.run_inline %W{./generate-cdr/build-review-all-events.sh #{ENVIRONMENTS[op.opts.project][:source_cdr_project]} #{op.opts.dataset}}
+  end
+end
+
+Common.register_command({
+  :invocation => "build-review-all-events",
+  :description => "Generates the big query denormalized tables for review",
+  :fn => ->(*args) { build_review_all_events("build-review-all-events", *args) }
+})
+
+def build_cb_search_person(cmd_name, *args)
+  op = WbOptionsParser.new(cmd_name, args)
+  op.add_option(
+      "--project [project]",
+      ->(opts, v) { opts.project = v},
+      "Project name"
+  )
+  op.add_option(
+      "--dataset [dataset]",
+      ->(opts, v) { opts.dataset = v},
+      "Dataset name"
+  )
+  op.add_option(
+      "--wgv-project [wgv-project]",
+      ->(opts, v) { opts.wgv_project = v},
+      "Whole genome variant project."
+  )
+  op.add_option(
+      "--wgv-dataset [wgv-dataset]",
+      ->(opts, v) { opts.wgv_dataset = v},
+      "Whole genome variant dataset."
+  )
+  op.add_option(
+      "--wgv-table [wgv-table]",
+      ->(opts, v) { opts.wgv_table = v},
+      "Whole genome variant table."
+  )
+
+  op.add_validator ->(opts) { raise ArgumentError unless opts.project and opts.dataset}
+  op.parse.validate
+
+  common = Common.new
+  Dir.chdir('db-cdr') do
+    common.run_inline %W{./generate-cdr/build-cb-search-person.sh #{ENVIRONMENTS[op.opts.project][:source_cdr_project]} #{op.opts.dataset} #{op.opts.wgv_project} #{op.opts.wgv_dataset} #{op.opts.wgv_table}}
+  end
+end
+
+Common.register_command({
+  :invocation => "build-cb-search-person",
+  :description => "Generates the big query denormalized tables for search",
+  :fn => ->(*args) { build_cb_search_person("build-cb-search-person", *args) }
+})
+
+def build_cb_criteria_missing_codes(cmd_name, *args)
+  op = WbOptionsParser.new(cmd_name, args)
+  op.add_option(
+      "--project [project]",
+      ->(opts, v) { opts.project = v},
+      "Project name"
+  )
+  op.add_option(
+      "--dataset [dataset]",
+      ->(opts, v) { opts.dataset = v},
+      "Dataset name"
+  )
+
+  op.add_validator ->(opts) { raise ArgumentError unless opts.project and opts.dataset}
+  op.parse.validate
+
+  common = Common.new
+  Dir.chdir('db-cdr') do
+    common.run_inline %W{./generate-cdr/build-cb-criteria-missing-codes.sh #{ENVIRONMENTS[op.opts.project][:source_cdr_project]} #{op.opts.dataset}}
+  end
+end
+
+Common.register_command({
+  :invocation => "build-cb-criteria-missing-codes",
+  :description => "Adds other codes not already captured",
+  :fn => ->(*args) { build_cb_criteria_missing_codes("build-cb-criteria-missing-codes", *args) }
+})
+
+def build_cb_criteria_menu(cmd_name, *args)
+  op = WbOptionsParser.new(cmd_name, args)
+  op.add_option(
+      "--project [project]",
+      ->(opts, v) { opts.project = v},
+      "Project name"
+  )
+  op.add_option(
+      "--dataset [dataset]",
+      ->(opts, v) { opts.dataset = v},
+      "Dataset name"
+  )
+
+  op.add_validator ->(opts) { raise ArgumentError unless opts.project and opts.dataset}
+  op.parse.validate
+
+  common = Common.new
+  Dir.chdir('db-cdr') do
+    common.run_inline %W{./generate-cdr/build-cb-criteria-menu.sh #{ENVIRONMENTS[op.opts.project][:source_cdr_project]} #{op.opts.dataset}}
+  end
+end
+
+Common.register_command({
+  :invocation => "build-cb-criteria-menu",
+  :description => "Generates the criteria menu for cohort builder",
+  :fn => ->(*args) { build_cb_criteria_menu("build-cb-criteria-menu", *args) }
+})
+
+def build_cloudsql_tables(cmd_name, *args)
+  op = WbOptionsParser.new(cmd_name, args)
+  op.add_option(
+      "--project [project]",
+      ->(opts, v) { opts.project = v},
+      "Project name"
+  )
+  op.add_option(
+      "--dataset [dataset]",
+      ->(opts, v) { opts.dataset = v},
+      "Dataset name"
+  )
+
+  op.add_validator ->(opts) { raise ArgumentError unless opts.project and opts.dataset}
+  op.parse.validate
+
+  common = Common.new
+  Dir.chdir('db-cdr') do
+    common.run_inline %W{./generate-cdr/build-cloudsql-tables.sh #{ENVIRONMENTS[op.opts.project][:source_cdr_project]} #{op.opts.dataset}}
+  end
+end
+
+Common.register_command({
+  :invocation => "build-cloudsql-tables",
+  :description => "Generates the criteria menu for cohort builder",
+  :fn => ->(*args) { build_cloudsql_tables("build-cloudsql-tables", *args) }
+})
+
+def build_cb_criteria_attribute_tables_and_cleanup(cmd_name, *args)
+  op = WbOptionsParser.new(cmd_name, args)
+  op.add_option(
+      "--project [project]",
+      ->(opts, v) { opts.project = v},
+      "Project name"
+  )
+  op.add_option(
+      "--dataset [dataset]",
+      ->(opts, v) { opts.dataset = v},
+      "Dataset name"
+  )
+
+  op.add_validator ->(opts) { raise ArgumentError unless opts.project and opts.dataset}
+  op.parse.validate
+
+  common = Common.new
+  Dir.chdir('db-cdr') do
+    common.run_inline %W{./generate-cdr/build-cb-criteria-attribute-tables-and-cleanup.sh #{ENVIRONMENTS[op.opts.project][:source_cdr_project]} #{op.opts.dataset}}
+  end
+end
+
+Common.register_command({
+  :invocation => "build-cb-criteria-attribute-tables-and-cleanup",
+  :description => "Populate other cb_* tables",
+  :fn => ->(*args) { build_cb_criteria_attribute_tables_and_cleanup("build-cb-criteria-attribute-tables-and-cleanup", *args) }
+})
+
+def build_cb_criteria_full_text_synonym(cmd_name, *args)
+  op = WbOptionsParser.new(cmd_name, args)
+  op.add_option(
+      "--project [project]",
+      ->(opts, v) { opts.project = v},
+      "Project name"
+  )
+  op.add_option(
+      "--dataset [dataset]",
+      ->(opts, v) { opts.dataset = v},
+      "Dataset name"
+  )
+
+  op.add_validator ->(opts) { raise ArgumentError unless opts.project and opts.dataset}
+  op.parse.validate
+
+  common = Common.new
+  Dir.chdir('db-cdr') do
+    common.run_inline %W{./generate-cdr/build-cb-criteria-full-text-synonym.sh #{ENVIRONMENTS[op.opts.project][:source_cdr_project]} #{op.opts.dataset}}
+  end
+end
+
+Common.register_command({
+  :invocation => "build-cb-criteria-full-text-synonym",
+  :description => "Populate other cb_* tables",
+  :fn => ->(*args) { build_cb_criteria_full_text_synonym("build-cb-criteria-full-text-synonym", *args) }
+})
+
+def make_bq_data_dump(cmd_name, *args)
+  op = WbOptionsParser.new(cmd_name, args)
+  op.add_option(
+      "--project [project]",
+      ->(opts, v) { opts.project = v},
+      "Project name"
+  )
+  op.add_option(
+      "--bucket [bucket]",
+      ->(opts, v) { opts.bucket = v},
+      "Name of the GCS bucket"
+  )
+  op.add_option(
+      "--dataset [dataset]",
+      ->(opts, v) { opts.dataset = v},
+      "Dataset name"
+  )
+
+  op.add_validator ->(opts) { raise ArgumentError unless opts.project and opts.dataset}
+  op.parse.validate
+
+  common = Common.new
+  Dir.chdir('db-cdr') do
+    common.run_inline %W{./generate-cdr/make-bq-data-dump.sh #{ENVIRONMENTS[op.opts.project][:source_cdr_project]} #{op.opts.bucket} #{op.opts.dataset}}
+  end
+end
+
+Common.register_command({
+  :invocation => "make-bq-data-dump",
+  :description => "Puts bq data dump in google cloud storage",
+  :fn => ->(*args) { make_bq_data_dump("make-bq-data-dump", *args) }
 })
 
 def create_survey_criteria(cmd_name, *args)
@@ -987,7 +1377,7 @@ Common.register_command({
   :fn => ->(*args) { make_bq_denormalized_review("make-bq-denormalized-review", *args) }
 })
 
-def make_bq_denormalized_search_events(cmd_name, *args)
+def build_search_all_events(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
   op.opts.data_browser = false
   op.add_option(
@@ -1010,14 +1400,14 @@ def make_bq_denormalized_search_events(cmd_name, *args)
 
   common = Common.new
   Dir.chdir('db-cdr') do
-    common.run_inline %W{./generate-cdr/make-bq-denormalized-search-events.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.data_browser}}
+    common.run_inline %W{./generate-cdr/build-search-all-events.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.data_browser}}
   end
 end
 
 Common.register_command({
-  :invocation => "make-bq-denormalized-search-events",
-  :description => "Generates big query denormalized search. Used by cohort builder. Must be run once when a new cdr is released",
-  :fn => ->(*args) { make_bq_denormalized_search_events("make-bq-denormalized-search-events", *args) }
+  :invocation => "build-search-all-events",
+  :description => "Generates big query denormalized tables for search",
+  :fn => ->(*args) { build_search_all_events("build-search-all-events", *args) }
 })
 
 def make_bq_denormalized_search_person(cmd_name, *args)
