@@ -1927,8 +1927,8 @@ end
 
 def set_authority(cmd_name, *args)
   op = authority_options(cmd_name, args)
-  gcc = GcloudContextV2.new(op)
   op.parse.validate
+  gcc = GcloudContextV2.new(op)
   gcc.validate
 
   with_cloud_proxy_and_db(gcc) do
