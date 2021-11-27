@@ -12,10 +12,9 @@ import {findNodesByExactText, findNodesContainingText, waitOneTickAndUpdate} fro
 import {InstitutionApiStub} from 'testing/stubs/institution-api-stub';
 import {ProfileApiStub, ProfileStubVariables} from 'testing/stubs/profile-api-stub';
 import {accessRenewalModules} from 'app/utils/access-utils';
-import {MILLIS_PER_DAY} from 'app/utils/dates';
+import {nowPlusDays} from 'app/utils/dates';
 
 const EXPIRY_DAYS = 365
-const nowPlusDays = (days: number) => Date.now() + MILLIS_PER_DAY * days;
 const oneYearFromNow = () => nowPlusDays(EXPIRY_DAYS);
 const oneHourAgo = () => Date.now() - 1000 * 60 * 60;
 

@@ -16,8 +16,8 @@ import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors, {addOpacity, colorWithWhiteness} from 'app/styles/colors';
 import {cond, useId, withStyle} from 'app/utils';
 import {
+  computeRenewalDisplayDates,
   accessRenewalModules,
-  computeDisplayDates,
   syncModulesExternal,
   getAccessModuleConfig,
   isExpiring,
@@ -163,7 +163,7 @@ interface CardProps {
 const RenewalCard = withStyle(renewalStyle.card)(
   ({step, moduleStatus, style, children}: CardProps) => {
     const {AARTitleComponent} = getAccessModuleConfig(moduleStatus.moduleName);
-    const {lastConfirmedDate, nextReviewDate} = computeDisplayDates(moduleStatus);
+    const {lastConfirmedDate, nextReviewDate} = computeRenewalDisplayDates(moduleStatus);
     return <FlexColumn style={style}>
       <div style={renewalStyle.h3}>STEP {step}</div>
       <div style={renewalStyle.h3}><AARTitleComponent/></div>
