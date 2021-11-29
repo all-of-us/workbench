@@ -9,7 +9,7 @@ import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {openZendeskWidget} from 'app/utils/zendesk';
 import {Profile} from 'generated/fetch';
-import {ToastBanner} from 'app/components/toast-banner';
+import {ToastBanner, ToastType} from 'app/components/toast-banner';
 
 interface Props extends NavigationProps {
   workspace: WorkspaceData;
@@ -53,8 +53,8 @@ export const InvalidBillingBanner = fp.flow(
   return <ToastBanner
     title={'This workspace has run out of free credits'}
     message={'The free credits for the creator of this workspace have run out. ' + userAction}
-    footer={footer}
     onClose={() => props.onClose()}
-    warningStyle={true}
+    type={ToastType.WARNING}
+    footer={footer}
   />;
 });

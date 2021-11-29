@@ -4,11 +4,10 @@ import * as ReactDOM from 'react-dom';
 import {FlexColumn, FlexRow} from './flex';
 import {ClrIcon} from './icons';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {reactStyles} from 'app/utils';
-import {CSSProperties} from 'react';
+import {reactStyles, switchCase} from 'app/utils';
 
 const styles = reactStyles({
-  banner: {
+  infoBanner: {
     backgroundColor: colorWithWhiteness(colors.accent, .9),
     color: colors.primary,
     fontSize: '12px',
@@ -50,11 +49,6 @@ const styles = reactStyles({
   },
 });
 
-const warningBannerStyle = {
-  ...styles.banner,
-  backgroundColor: colorWithWhiteness(colors.highlight, .5),
-};
-
 const warningIcon = <ClrIcon
   shape={'warning-standard'}
   class={'is-solid'}
@@ -62,20 +56,32 @@ const warningIcon = <ClrIcon
   style={styles.warningIcon}
 />;
 
+export enum ToastType {
+  INFO,
+  WARNING
+}
+
+const styleForType = (tt: ToastType) => switchCase(tt,
+  [ToastType.INFO, () => styles.infoBanner],
+  [ToastType.WARNING, () => ({
+      ...styles.infoBanner,
+      backgroundColor: colorWithWhiteness(colors.highlight, .5),
+  })],
+);
+
 interface ToastProps {
   title: string;
   message: string;
   onClose: Function;
-  warningStyle: boolean;
+  type: ToastType;
   footer?: JSX.Element;
 }
 
 const InnerComponent = (props: ToastProps) => {
-  const {title, message, onClose, warningStyle, footer} = props;
-  const style = warningStyle ? warningBannerStyle : styles.banner;
-  return <FlexColumn style={style}>
+  const {title, message, onClose, type, footer} = props;
+  return <FlexColumn style={styleForType(type)}>
     <FlexRow style={{alignItems: 'center', marginTop: '.1rem'}}>
-      {warningStyle && warningIcon}
+      {type === ToastType.WARNING && warningIcon}
       <div style={styles.title}>{title}</div>
     </FlexRow>
     <div style={styles.message}>{message}</div>

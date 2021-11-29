@@ -1,11 +1,11 @@
 import * as React from 'react';
+import {useEffect, useState} from 'react';
 
 import {cookiesEnabled} from 'app/utils/cookies';
-import {useEffect, useState} from 'react';
 import {statusAlertApi} from 'app/services/swagger-fetch-clients';
 import {Button} from './buttons';
 import {StatusAlert} from 'generated/fetch';
-import {ToastBanner} from './toast-banner';
+import {ToastBanner, ToastType} from './toast-banner';
 
 const STATUS_ALERT_COOKIE_KEY = 'status-alert-banner-dismissed';
 const INITIAL_STATUS_ALERT: StatusAlert = {
@@ -58,8 +58,8 @@ export const StatusAlertBannerMaybe = () => {
     ? <ToastBanner
       title={statusAlertDetails.title}
       message={statusAlertDetails.message}
-      onClose={onStatusAlertBannerUnmount}
-      warningStyle={true}
+      onClose={() => onStatusAlertBannerUnmount()}
+      type={ToastType.WARNING}
       footer={footer}/>
     : null;
 }
