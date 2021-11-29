@@ -30,7 +30,7 @@ for t in "${TABLES_WITH_SCHEMA[@]}"
 do
     temp=${t%_temp}
     bq --project_id=$BQ_PROJECT rm -f $BQ_DATASET.$t
-    bq --quiet --project_id=$BQ_PROJECT mk --schema=$schema_path/$temp.json $BQ_DATASET.$t
+    bq --quiet --project_id="$BQ_PROJECT" mk --schema="$schema_path/$temp.json" "$BQ_DATASET.$t"
 done
 
 
