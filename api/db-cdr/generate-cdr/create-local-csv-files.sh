@@ -36,7 +36,7 @@ done
 
 
 echo "Insert cb_criteria_ancestor_temp"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_ancestor_temp\`
    SELECT *
 FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_ancestor\`"
