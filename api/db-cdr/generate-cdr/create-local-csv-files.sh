@@ -42,7 +42,7 @@ bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
 FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_ancestor\`"
 
 echo "Insert cb_criteria_attribute_temp"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_attribute_temp\`
    SELECT *
 FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_attribute\`"
