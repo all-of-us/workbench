@@ -48,7 +48,7 @@ bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
 FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_attribute\`"
 
 echo "Insert cb_criteria_drug_temp"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_drug_temp\`
 (id,parent_id,domain_id,is_standard,type,subtype,concept_id,code,name,value,est_count,is_group,is_selectable,has_attribute,has_hierarchy,has_ancestor_data,path,synonyms,rollup_count,item_count,full_text,display_synonyms)
    SELECT id,parent_id,domain_id,is_standard,type,subtype,concept_id,code,name,value,est_count,is_group,is_selectable,has_attribute,has_hierarchy,has_ancestor_data,path,synonyms,rollup_count,item_count,full_text,display_synonyms
