@@ -217,7 +217,7 @@ do
     bq extract --project_id "$BQ_PROJECT" --destination_format=CSV --field_delimiter=',' "$BQ_PROJECT:$BQ_DATASET.$i" \
     "gs://$BUCKET/${i%_temp}.csv"
     echo "Deleting tables"
-    bq rm -f -t $BQ_PROJECT:$BQ_DATASET.$i
+    bq rm -f -t "$BQ_PROJECT:$BQ_DATASET.$i"
 done
 
 for i in "${TABLES_WITH_SCHEMA[@]}"
