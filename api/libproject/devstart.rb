@@ -41,12 +41,6 @@ def init_new_cdr_db(args)
   end
 end
 
-Common.register_command({
-  :invocation => "init-new-cdr-db",
-  :description => "Generates new mysql database for a cdr version",
-  :fn => ->(*args) { init_new_cdr_db(args) }
-})
-
 def gcs_vars_path(project)
   return "gs://#{project}-credentials/vars.env"
 end
@@ -747,6 +741,39 @@ Common.register_command({
   :fn => ->(*args) { build_cb_survey_version("build-cb-survey-version", *args) }
 })
 
+def build_search_all_events(cmd_name, *args)
+  op = WbOptionsParser.new(cmd_name, args)
+  op.opts.data_browser = false
+  op.add_option(
+    "--bq-project [bq-project]",
+    ->(opts, v) { opts.bq_project = v},
+    "BQ Project. Required."
+  )
+  op.add_option(
+    "--bq-dataset [bq-dataset]",
+    ->(opts, v) { opts.bq_dataset = v},
+    "BQ dataset. Required."
+  )
+  op.add_option(
+    "--data-browser [data-browser]",
+    ->(opts, v) { opts.data_browser = v},
+    "Is this run for data browser. Default is false"
+  )
+  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset }
+  op.parse.validate
+
+  common = Common.new
+  Dir.chdir('db-cdr') do
+    common.run_inline %W{./generate-cdr/build-search-all-events.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.data_browser}}
+  end
+end
+
+Common.register_command({
+  :invocation => "build-search-all-events",
+  :description => "Generates big query denormalized search. Used by cohort builder. Must be run once when a new cdr is released",
+  :fn => ->(*args) { build_search_all_events("build-search-all-events", *args) }
+})
+
 def build_ds_linking(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
   op.add_option(
@@ -1012,39 +1039,6 @@ Common.register_command({
   :invocation => "build-cb-criteria-full-text-synonym",
   :description => "Populate other cb_* tables",
   :fn => ->(*args) { build_cb_criteria_full_text_synonym("build-cb-criteria-full-text-synonym", *args) }
-})
-
-def make_bq_data_dump(cmd_name, *args)
-  op = WbOptionsParser.new(cmd_name, args)
-  op.add_option(
-      "--project [project]",
-      ->(opts, v) { opts.project = v},
-      "Project name"
-  )
-  op.add_option(
-      "--bucket [bucket]",
-      ->(opts, v) { opts.bucket = v},
-      "Name of the GCS bucket"
-  )
-  op.add_option(
-      "--dataset [dataset]",
-      ->(opts, v) { opts.dataset = v},
-      "Dataset name"
-  )
-
-  op.add_validator ->(opts) { raise ArgumentError unless opts.project and opts.dataset}
-  op.parse.validate
-
-  common = Common.new
-  Dir.chdir('db-cdr') do
-    common.run_inline %W{./generate-cdr/make-bq-data-dump.sh #{ENVIRONMENTS[op.opts.project][:source_cdr_project]} #{op.opts.bucket} #{op.opts.dataset}}
-  end
-end
-
-Common.register_command({
-  :invocation => "make-bq-data-dump",
-  :description => "Puts bq data dump in google cloud storage",
-  :fn => ->(*args) { make_bq_data_dump("make-bq-data-dump", *args) }
 })
 
 def create_survey_criteria(cmd_name, *args)
@@ -1377,7 +1371,7 @@ Common.register_command({
   :fn => ->(*args) { make_bq_denormalized_review("make-bq-denormalized-review", *args) }
 })
 
-def build_search_all_events(cmd_name, *args)
+def make_bq_denormalized_search_events(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
   op.opts.data_browser = false
   op.add_option(
@@ -1400,14 +1394,14 @@ def build_search_all_events(cmd_name, *args)
 
   common = Common.new
   Dir.chdir('db-cdr') do
-    common.run_inline %W{./generate-cdr/build-search-all-events.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.data_browser}}
+    common.run_inline %W{./generate-cdr/make-bq-denormalized-search-events.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.data_browser}}
   end
 end
 
 Common.register_command({
-  :invocation => "build-search-all-events",
-  :description => "Generates big query denormalized tables for search",
-  :fn => ->(*args) { build_search_all_events("build-search-all-events", *args) }
+  :invocation => "make-bq-denormalized-search-events",
+  :description => "Generates big query denormalized search. Used by cohort builder. Must be run once when a new cdr is released",
+  :fn => ->(*args) { make_bq_denormalized_search_events("make-bq-denormalized-search-events", *args) }
 })
 
 def make_bq_denormalized_search_person(cmd_name, *args)
@@ -1587,6 +1581,54 @@ Common.register_command({
   :invocation => "import-cdr-indices-to-cloudsql",
   :description => "Imports CB related tables to mysql/cloudsql to be used by workbench.",
   :fn => ->(*args) { import_cdr_indices_to_cloudsql("import-cdr-indices-to-cloudsql", *args) }
+})
+
+def import_cdr_indices_build_to_cloudsql(cmd_name, *args)
+  op = WbOptionsParser.new(cmd_name, args)
+  op.opts.data_browser = false
+  op.add_option(
+    "--bq-project [bq-project]",
+    ->(opts, v) { opts.bq_project = v},
+    "BQ Project. Required."
+  )
+  op.add_option(
+    "--bq-dataset [bq-dataset]",
+    ->(opts, v) { opts.bq_dataset = v},
+    "BQ dataset. Required."
+  )
+  op.add_option(
+    "--project [project]",
+    ->(opts, v) { opts.project = v},
+    "Project. Required."
+  )
+  op.add_option(
+    "--cdr-version [cdr-version]",
+    ->(opts, v) { opts.cdr_version = v},
+    "CDR version. Required."
+  )
+  op.add_option(
+    "--data-browser [data-browser]",
+    ->(opts, v) { opts.data_browser = v},
+    "Generate for data browser. Optional - Default is false"
+  )
+  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset and opts.project and opts.cdr_version }
+  op.parse.validate
+  gcc = GcloudContextV2.new(op)
+  op.parse.validate
+  gcc.validate()
+
+  with_cloud_proxy_and_db(gcc) do
+    common = Common.new
+    Dir.chdir('db-cdr') do
+      common.run_inline %W{./generate-cdr/import-cdr-indices-build-to-cloudsql.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.project} #{op.opts.cdr_version} #{op.opts.data_browser}}
+    end
+  end
+end
+
+Common.register_command({
+  :invocation => "import-cdr-indices-build-to-cloudsql",
+  :description => "Imports CB related tables to mysql/cloudsql to be used by workbench.",
+  :fn => ->(*args) { import_cdr_indices_build_to_cloudsql("import-cdr-indices-build-to-cloudsql", *args) }
 })
 
 def copy_bq_tables(cmd_name, *args)
