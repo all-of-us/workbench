@@ -2224,7 +2224,7 @@ def list_runtimes(cmd_name, *args)
       "--include-deleted",
       ->(opts, _) { opts.include_deleted = true },
       "Whether to include deleted runtimes in the results; typically should only be used in " +
-       "combination with --runtime-project, otherwise this could be very slow")
+      "combination with --runtime-project, otherwise this could be very slow")
   op.add_option(
       "--format [format]",
       ->(opts, v) { opts.format = v },
