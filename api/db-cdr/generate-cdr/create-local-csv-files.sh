@@ -22,7 +22,7 @@ TABLES_WITHOUT_SCHEMA=("cb_criteria_drug_temp" "cb_criteria_measurement_temp" "c
 
 for t in "${TABLES_WITHOUT_SCHEMA[@]}"
 do
-    bq --project_id=$BQ_PROJECT rm -f $BQ_DATASET.$t
+    bq --project_id="$BQ_PROJECT" rm -f "$BQ_DATASET.$t"
     bq --quiet --project_id=$BQ_PROJECT mk --schema="$schema_path/cb_criteria.json" $BQ_DATASET.$t
 done
 
