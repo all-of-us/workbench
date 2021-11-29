@@ -1,6 +1,5 @@
 package org.pmiops.workbench.workspaces.resources;
 
-import java.util.regex.Matcher;
 import org.mapstruct.CollectionMappingStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -136,10 +135,9 @@ public interface WorkspaceResourceMapper {
     if (!str.startsWith("gs://")) {
       return null;
     }
-    int pos = str.lastIndexOf('/') + 1;
-    String fileName = str.substring(pos);
-    String replacement = Matcher.quoteReplacement(fileName) + "$";
-    String filePath = str.replaceFirst(replacement, "");
-    return new FileDetail().name(fileName).path(filePath);
+    int filenameStart = str.lastIndexOf('/') + 1;
+    return new FileDetail()
+        .name(str.substring(filenameStart))
+        .path(str.substring(0, filenameStart));
   }
 }
