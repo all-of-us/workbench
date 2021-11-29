@@ -13,7 +13,6 @@ class WorkspaceFields {
   private BillingStatus workspaceBillingStatus;
   private String cdrVersionId;
   private String accessTierShortName;
-  private String permission;
   private boolean adminLocked;
 
   public Long getWorkspaceId() {
@@ -62,14 +61,6 @@ class WorkspaceFields {
 
   public void setAccessTierShortName(String accessTierShortName) {
     this.accessTierShortName = accessTierShortName;
-  }
-
-  public String getPermission() {
-    return permission;
-  }
-
-  public void setPermission(String permission) {
-    this.permission = permission;
   }
 
   public boolean isAdminLocked() {

@@ -64,7 +64,7 @@ public class WorkspaceResourcesServiceImpl implements WorkspaceResourcesService 
           cohorts.stream()
               .map(
                   cohort ->
-                      workspaceResourceMapper.dbWorkspaceAndDbCohortToWorkspaceResource(
+                      workspaceResourceMapper.fromDbCohort(
                           dbWorkspace, workspaceAccessLevel, cohort))
               .collect(Collectors.toList()));
     }
@@ -76,7 +76,7 @@ public class WorkspaceResourcesServiceImpl implements WorkspaceResourcesService 
           reviews.stream()
               .map(
                   cohortReview ->
-                      workspaceResourceMapper.dbWorkspaceAndCohortReviewToWorkspaceResource(
+                      workspaceResourceMapper.fromCohortReview(
                           dbWorkspace, workspaceAccessLevel, cohortReview))
               .collect(Collectors.toList()));
     }
@@ -87,7 +87,7 @@ public class WorkspaceResourcesServiceImpl implements WorkspaceResourcesService 
           conceptSets.stream()
               .map(
                   conceptSet ->
-                      workspaceResourceMapper.dbWorkspaceAndConceptSetToWorkspaceResource(
+                      workspaceResourceMapper.fromConceptSet(
                           dbWorkspace, workspaceAccessLevel, conceptSet))
               .collect(Collectors.toList()));
     }
@@ -98,7 +98,7 @@ public class WorkspaceResourcesServiceImpl implements WorkspaceResourcesService 
           datasets.stream()
               .map(
                   dbDataset ->
-                      workspaceResourceMapper.dbWorkspaceAndDbDatasetToWorkspaceResource(
+                      workspaceResourceMapper.fromDbDataset(
                           dbWorkspace, workspaceAccessLevel, dbDataset))
               .collect(Collectors.toList()));
     }

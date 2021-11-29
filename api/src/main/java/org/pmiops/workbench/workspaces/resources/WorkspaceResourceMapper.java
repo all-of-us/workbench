@@ -1,5 +1,6 @@
 package org.pmiops.workbench.workspaces.resources;
 
+import java.util.regex.Matcher;
 import org.mapstruct.CollectionMappingStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -9,12 +10,16 @@ import org.pmiops.workbench.conceptset.mapper.ConceptSetMapper;
 import org.pmiops.workbench.dataset.mapper.DataSetMapper;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbDataset;
+import org.pmiops.workbench.db.model.DbUserRecentResource;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.model.CohortReview;
 import org.pmiops.workbench.model.ConceptSet;
+import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceResource;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
+import org.pmiops.workbench.utils.mappers.FirecloudMapper;
 import org.pmiops.workbench.utils.mappers.MapStructConfig;
 
 @Mapper(
@@ -26,6 +31,7 @@ import org.pmiops.workbench.utils.mappers.MapStructConfig;
       CommonMappers.class,
       ConceptSetMapper.class,
       DataSetMapper.class,
+      FirecloudMapper.class,
     })
 public interface WorkspaceResourceMapper {
   @Mapping(target = "workspaceId", source = "dbWorkspace.workspaceId")
@@ -33,9 +39,7 @@ public interface WorkspaceResourceMapper {
   @Mapping(target = "workspaceBillingStatus", source = "dbWorkspace.billingStatus")
   @Mapping(target = "cdrVersionId", source = "dbWorkspace.cdrVersion")
   @Mapping(target = "accessTierShortName", source = "dbWorkspace.cdrVersion.accessTier.shortName")
-  @Mapping(target = "permission", source = "accessLevel")
-  WorkspaceFields workspaceResourceFromWorkspace(
-      DbWorkspace dbWorkspace, WorkspaceAccessLevel accessLevel);
+  WorkspaceFields fromWorkspace(DbWorkspace dbWorkspace);
 
   // a WorkspaceResource has one resource object.  Assign it and ignore all others (keep as NULL).
 
@@ -45,7 +49,7 @@ public interface WorkspaceResourceMapper {
   @Mapping(target = "notebook", ignore = true)
   @Mapping(target = "cohort", source = "dbCohort")
   @Mapping(target = "lastModifiedEpochMillis", source = "dbCohort.lastModifiedTime")
-  ResourceFields workspaceResourceFromDbCohort(DbCohort dbCohort);
+  ResourceFields fromDbCohort(DbCohort dbCohort);
 
   @Mapping(target = "cohort", ignore = true)
   @Mapping(target = "conceptSet", ignore = true)
@@ -53,7 +57,7 @@ public interface WorkspaceResourceMapper {
   @Mapping(target = "notebook", ignore = true)
   @Mapping(target = "cohortReview", source = "cohortReview")
   @Mapping(target = "lastModifiedEpochMillis", source = "cohortReview.lastModifiedTime")
-  ResourceFields workspaceResourceFromCohortReview(CohortReview cohortReview);
+  ResourceFields fromCohortReview(CohortReview cohortReview);
 
   @Mapping(target = "cohort", ignore = true)
   @Mapping(target = "cohortReview", ignore = true)
@@ -61,7 +65,7 @@ public interface WorkspaceResourceMapper {
   @Mapping(target = "notebook", ignore = true)
   @Mapping(target = "conceptSet", source = "conceptSet")
   @Mapping(target = "lastModifiedEpochMillis", source = "conceptSet.lastModifiedTime")
-  ResourceFields workspaceResourceFromConceptSet(ConceptSet conceptSet);
+  ResourceFields fromConceptSet(ConceptSet conceptSet);
 
   @Mapping(target = "cohort", ignore = true)
   @Mapping(target = "cohortReview", ignore = true)
@@ -69,36 +73,73 @@ public interface WorkspaceResourceMapper {
   @Mapping(target = "notebook", ignore = true)
   @Mapping(target = "dataSet", source = "dbDataset", qualifiedByName = "dbModelToClientLight")
   @Mapping(target = "lastModifiedEpochMillis", source = "dbDataset.lastModifiedTime")
-  ResourceFields workspaceResourceFromDbDataset(DbDataset dbDataset);
+  ResourceFields fromDbDataset(DbDataset dbDataset);
 
+  // TODO why are Cohort Review and Dataset not present in DbUserRecentResource?
+  @Mapping(target = "cohortReview", ignore = true)
+  @Mapping(target = "dataSet", ignore = true)
+  @Mapping(target = "notebook", source = "notebookName")
+  @Mapping(target = "lastModifiedEpochMillis", source = "dbUserRecentResource.lastAccessDate")
+  ResourceFields fromDbUserRecentResource(DbUserRecentResource dbUserRecentResource);
+
+  @Mapping(target = "permission", source = "accessLevel")
   WorkspaceResource mergeWorkspaceAndResourceFields(
-      WorkspaceFields workspaceFields, ResourceFields resourceFields);
+      WorkspaceFields workspaceFields,
+      WorkspaceAccessLevel accessLevel,
+      ResourceFields resourceFields);
 
-  default WorkspaceResource dbWorkspaceAndDbCohortToWorkspaceResource(
+  @Mapping(
+      target = "permission",
+      source = "fcWorkspace.accessLevel",
+      qualifiedByName = "fcToApiWorkspaceAccessLevel")
+  WorkspaceResource mergeWorkspaceAndResourceFields(
+      WorkspaceFields workspaceFields,
+      FirecloudWorkspaceResponse fcWorkspace,
+      ResourceFields resourceFields);
+
+  default WorkspaceResource fromDbCohort(
       DbWorkspace dbWorkspace, WorkspaceAccessLevel accessLevel, DbCohort dbCohort) {
     return mergeWorkspaceAndResourceFields(
-        workspaceResourceFromWorkspace(dbWorkspace, accessLevel),
-        workspaceResourceFromDbCohort(dbCohort));
+        fromWorkspace(dbWorkspace), accessLevel, fromDbCohort(dbCohort));
   }
 
-  default WorkspaceResource dbWorkspaceAndCohortReviewToWorkspaceResource(
+  default WorkspaceResource fromCohortReview(
       DbWorkspace dbWorkspace, WorkspaceAccessLevel accessLevel, CohortReview cohortReview) {
     return mergeWorkspaceAndResourceFields(
-        workspaceResourceFromWorkspace(dbWorkspace, accessLevel),
-        workspaceResourceFromCohortReview(cohortReview));
+        fromWorkspace(dbWorkspace), accessLevel, fromCohortReview(cohortReview));
   }
 
-  default WorkspaceResource dbWorkspaceAndConceptSetToWorkspaceResource(
+  default WorkspaceResource fromConceptSet(
       DbWorkspace dbWorkspace, WorkspaceAccessLevel accessLevel, ConceptSet conceptSet) {
     return mergeWorkspaceAndResourceFields(
-        workspaceResourceFromWorkspace(dbWorkspace, accessLevel),
-        workspaceResourceFromConceptSet(conceptSet));
+        fromWorkspace(dbWorkspace), accessLevel, fromConceptSet(conceptSet));
   }
 
-  default WorkspaceResource dbWorkspaceAndDbDatasetToWorkspaceResource(
+  default WorkspaceResource fromDbDataset(
       DbWorkspace dbWorkspace, WorkspaceAccessLevel accessLevel, DbDataset dbDataset) {
     return mergeWorkspaceAndResourceFields(
-        workspaceResourceFromWorkspace(dbWorkspace, accessLevel),
-        workspaceResourceFromDbDataset(dbDataset));
+        fromWorkspace(dbWorkspace), accessLevel, fromDbDataset(dbDataset));
+  }
+
+  default WorkspaceResource fromDbUserRecentResource(
+      DbUserRecentResource dbUserRecentResource,
+      FirecloudWorkspaceResponse fcWorkspace,
+      DbWorkspace dbWorkspace) {
+    return mergeWorkspaceAndResourceFields(
+        fromWorkspace(dbWorkspace), fcWorkspace, fromDbUserRecentResource(dbUserRecentResource));
+  }
+
+  default FileDetail convertStringToFileDetail(String str) {
+    if (str == null) {
+      return null;
+    }
+    if (!str.startsWith("gs://")) {
+      return null;
+    }
+    int pos = str.lastIndexOf('/') + 1;
+    String fileName = str.substring(pos);
+    String replacement = Matcher.quoteReplacement(fileName) + "$";
+    String filePath = str.replaceFirst(replacement, "");
+    return new FileDetail().name(fileName).path(filePath);
   }
 }
