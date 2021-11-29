@@ -499,7 +499,8 @@ describe('DataAccessRequirements', () => {
         expect(spyCompliance).toHaveBeenCalledTimes(1);
      });
 
-    it('should not sync complete external modules', async() => {
+    // TODO(RW-7610): Fix timeout flake and re-enable.
+    test.skip('should not sync complete external modules', async() => {
         profileStore.set({
             profile: {
                 ...ProfileStubVariables.PROFILE_STUB,
