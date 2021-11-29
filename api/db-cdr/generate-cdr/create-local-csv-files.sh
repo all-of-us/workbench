@@ -210,7 +210,6 @@ FROM \`$BQ_PROJECT.$BQ_DATASET.ds_linking\`"
 
 
 
-
 for i in "${TABLES_WITHOUT_SCHEMA[@]}"
 do
     echo "Inserting into bucket"
@@ -228,15 +227,3 @@ do
     echo "Deleting tables"
     bq rm -f -t "$BQ_PROJECT:$BQ_DATASET.$i"
 done
-
-#for i in "${TABLES_WITHOUT_SCHEMA[@]}"
-#do
-#    echo "Deleting tables"
-#    bq rm -f -t $BQ_PROJECT:$BQ_DATASET.$i
-#done
-#
-#for i in "${TABLES_WITH_SCHEMA[@]}"
-#do
-#    echo "Deleting tables"
-#    bq rm -f -t $BQ_PROJECT:$BQ_DATASET.$i
-#done
