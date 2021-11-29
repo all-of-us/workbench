@@ -152,6 +152,21 @@ public class InstitutionServiceTest {
   }
 
   @Test
+  public void testCreateInstitution_withPeriodInName() {
+    final Institution anotherInst =
+        new Institution()
+            .displayName("a.b .c")
+            .addTierConfigsItem(
+                rtTierConfig
+                    .membershipRequirement(InstitutionMembershipRequirement.DOMAINS)
+                    .eraRequired(false)
+                    .accessTierShortName(registeredTier.getShortName()))
+            .organizationTypeEnum(OrganizationType.INDUSTRY);
+
+    assertThat(service.createInstitution(anotherInst).getShortName().startsWith("abc")).isTrue();
+  }
+
+  @Test
   public void test_deleteInstitution() {
     service.deleteInstitution(testInst.getShortName());
     assertThat(service.getInstitutions()).isEmpty();
