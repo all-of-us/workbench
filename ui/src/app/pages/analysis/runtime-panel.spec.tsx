@@ -1035,6 +1035,25 @@ describe('RuntimePanel', () => {
     expect(getCreateButton().prop('disabled')).toBeFalsy();
   });
 
+  it('should prevent runtime creation when worker count is invalid', async() => {
+    runtimeApiStub.runtime = null;
+    runtimeStoreStub.runtime = null;
+    const wrapper = await component();
+    await mustClickButton(wrapper, 'Customize');
+    const getCreateButton = () => wrapper.find({'aria-label': 'Create'}).first();
+
+    await pickComputeType(wrapper, ComputeType.Dataproc);
+
+    await pickNumWorkers(wrapper, 0);
+    expect(getCreateButton().prop('disabled')).toBeTruthy();
+
+    await pickNumWorkers(wrapper, 1);
+    expect(getCreateButton().prop('disabled')).toBeTruthy();
+
+    await pickNumWorkers(wrapper, 2);
+    expect(getCreateButton().prop('disabled')).toBeFalsy();
+  });
+
   it('should allow runtime creation when running cost is too high for user provided billing', async() => {
     currentWorkspaceStore.next({
       ...workspaceStubs[0],
