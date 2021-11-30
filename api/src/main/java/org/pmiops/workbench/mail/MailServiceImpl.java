@@ -307,10 +307,10 @@ public class MailServiceImpl implements MailService {
                 .put(EmailSubstitutionField.EGRESS_REMEDIATION_DESCRIPTION, remediationDescription)
                 .build());
 
-    sendWithRetries(
+    sendWithRetriesFrom(
+        workbenchConfigProvider.get().egressAlertRemediationPolicy.notifyFromEmail,
         ImmutableList.of(dbUser.getContactEmail()),
-        ImmutableList.of(
-            workbenchConfigProvider.get().egressAlertRemediationPolicy.notifyFromEmail),
+        ImmutableList.of(),
         "[Response Required] AoU Researcher Workbench High Data Egress Alert",
         String.format("Egress remediation email for %s", dbUser.getUsername()),
         htmlMessage);
@@ -524,6 +524,23 @@ public class MailServiceImpl implements MailService {
       String description,
       String htmlMessage)
       throws MessagingException {
+    sendWithRetriesFrom(
+        workbenchConfigProvider.get().mandrill.fromEmail,
+        toRecipientEmails,
+        ccRecipientEmails,
+        subject,
+        description,
+        htmlMessage);
+  }
+
+  private void sendWithRetriesFrom(
+      String from,
+      List<String> toRecipientEmails,
+      List<String> ccRecipientEmails,
+      String subject,
+      String description,
+      String htmlMessage)
+      throws MessagingException {
     List<RecipientAddress> toAddresses =
         toRecipientEmails.stream()
             .map(a -> (validatedRecipient(a, RecipientType.TO)))
@@ -538,7 +555,7 @@ public class MailServiceImpl implements MailService {
             .html(htmlMessage)
             .subject(subject)
             .preserveRecipients(true)
-            .fromEmail(workbenchConfigProvider.get().mandrill.fromEmail);
+            .fromEmail(from);
 
     String apiKey = cloudStorageClientProvider.get().readMandrillApiKey();
     int retries = workbenchConfigProvider.get().mandrill.sendRetries;
