@@ -4334,9 +4334,6 @@ definitions:
       rasHost:
         type: string
         description: The RAS base host name.
-      accessRenewalExpiry:
-        type: number
-        description: Days a user's module completion is good for until it expires.
       accessRenewalLookback:
         type: number
         description: the point when we give users the option to update their compliance items.
