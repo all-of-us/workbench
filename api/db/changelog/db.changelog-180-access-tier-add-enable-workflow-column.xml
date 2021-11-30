@@ -6,7 +6,7 @@
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
   <changeSet author="yonghao" id="changelog-180-access-tier-add-enable-workflow-column">
     <addColumn tableName="access_tier">
-      <column name="enable_user_workflow" type="bigint">
+      <column name="enable_user_workflow" type="boolean" defaultValueBoolean="false">
         <constraints nullable="false"/>
       </column>
     </addColumn>

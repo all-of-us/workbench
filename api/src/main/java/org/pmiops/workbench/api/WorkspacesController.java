@@ -1,7 +1,5 @@
 package org.pmiops.workbench.api;
 
-import static org.pmiops.workbench.access.AccessTierService.CONTROLLED_TIER_SHORT_NAME;
-
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import java.sql.Timestamp;
@@ -190,8 +188,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
           dbWorkspace, workbenchConfigProvider.get().billing.freeTierBillingAccountName());
       throw e;
     }
-    if (workbenchConfigProvider.get().featureFlags.grantLifescienceApiRunnerAcl
-        && CONTROLLED_TIER_SHORT_NAME.equals(accessTier.getShortName())) {
+    if (accessTier.getEnableUserWorkflow()) {
       iamService.grantWorkflowRunnerRole(dbWorkspace.getGoogleProject());
     }
     final Workspace createdWorkspace = workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace);
@@ -447,8 +444,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     // Grant the workspace cloner and all from-workspaces users permission to use workflow if
     // workspace is controlled tier workspace.
-    if (workbenchConfigProvider.get().featureFlags.grantLifescienceApiRunnerAcl
-        && CONTROLLED_TIER_SHORT_NAME.equals(accessTier.getShortName())) {
+    if (accessTier.getEnableUserWorkflow()) {
       iamService.grantWorkflowRunnerRole(dbWorkspace.getGoogleProject());
       for (Map.Entry<String, WorkspaceAccessLevel> entry : clonedRoles.entrySet()) {
         if (shouldGrantWorkflowRunnerAsService(user, entry)) {
@@ -531,12 +527,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         workspaceService.getFirecloudUserRoles(workspaceNamespace, dbWorkspace.getFirecloudName());
     resp.setItems(updatedUserRoles);
 
-    if (workbenchConfigProvider.get().featureFlags.grantLifescienceApiRunnerAcl
-        && dbWorkspace
-            .getCdrVersion()
-            .getAccessTier()
-            .getShortName()
-            .equals(CONTROLLED_TIER_SHORT_NAME)) {
+    if (dbWorkspace.getCdrVersion().getAccessTier().getEnableUserWorkflow()) {
       for (Map.Entry<String, WorkspaceAccessLevel> entry : aclsByEmail.entrySet()) {
         if (shouldGrantWorkflowRunnerAsService(userProvider.get(), entry)) {
           iamService.grantWorkflowRunnerRoleAsService(

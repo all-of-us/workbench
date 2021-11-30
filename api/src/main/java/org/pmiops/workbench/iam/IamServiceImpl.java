@@ -24,7 +24,7 @@ public class IamServiceImpl implements IamService {
   private final SamApiClientFactory samApiClientFactory;
   private final CloudIamClient cloudIamClient;
   private final CloudResourceManagerService cloudResourceManagerService;
-  private final Provider<GoogleApi> endUseGoogleApiProvider;
+  private final Provider<GoogleApi> endUserGoogleApiProvider;
   private final SamRetryHandler samRetryHandler;
 
   @Autowired
@@ -32,19 +32,19 @@ public class IamServiceImpl implements IamService {
       SamApiClientFactory samApiClientFactory,
       CloudIamClient cloudIamClient,
       CloudResourceManagerService cloudResourceManagerService,
-      @Qualifier(SAM_END_USER_GOOGLE_API) Provider<GoogleApi> endUseGoogleApiProvider,
+      @Qualifier(SAM_END_USER_GOOGLE_API) Provider<GoogleApi> endUserGoogleApiProvider,
       SamRetryHandler samRetryHandler) {
     this.samApiClientFactory = samApiClientFactory;
     this.cloudIamClient = cloudIamClient;
     this.cloudResourceManagerService = cloudResourceManagerService;
-    this.endUseGoogleApiProvider = endUseGoogleApiProvider;
+    this.endUserGoogleApiProvider = endUserGoogleApiProvider;
     this.samRetryHandler = samRetryHandler;
   }
 
   @Override
   public void grantWorkflowRunnerRole(String googleProject) {
     String petServiceAccountName =
-        getOrCreatePetServiceAccount(googleProject, endUseGoogleApiProvider.get());
+        getOrCreatePetServiceAccount(googleProject, endUserGoogleApiProvider.get());
     grantServiceAccountUserRole(googleProject, petServiceAccountName);
     grantLifeScienceRunnerRole(googleProject, petServiceAccountName);
   }
