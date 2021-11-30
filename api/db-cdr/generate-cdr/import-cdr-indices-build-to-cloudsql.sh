@@ -17,16 +17,6 @@ then
   startDate=$(date)
   echo $(date) " Starting import-cdr-indices-to-cloudsql $startDate"
 
-  ## Make workbench cdr count data
-  echo "Making BigQuery cdr dataset"
-  if ./generate-cdr/make-bq-data.sh $BQ_PROJECT $BQ_DATASET $WORKBENCH_PROJECT $WORKBENCH_DATASET
-  then
-      echo "BigQuery cdr data generated"
-  else
-      echo "FAILED To generate BigQuery data for cdr $CDR_VERSION"
-      exit 1
-  fi
-
   ## Dump workbench cdr count data
   echo "Dumping BigQuery cdr dataset to .csv"
   if ./generate-cdr/make-bq-data-dump.sh $WORKBENCH_PROJECT "$BUCKET/$BQ_DATASET" $WORKBENCH_DATASET
