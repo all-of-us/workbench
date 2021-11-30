@@ -283,35 +283,39 @@ public class CdrVersionServiceTest {
   }
 
   private void assertExpectedResponse(CdrVersionTiersResponse response) {
-    List<String> responseTiers =
+    List<String> shortNames =
         response.getTiers().stream()
             .map(CdrVersionTier::getAccessTierShortName)
             .collect(Collectors.toList());
-    assertThat(responseTiers)
+    assertThat(shortNames)
         .containsExactly(registeredTier.getShortName(), controlledTier.getShortName());
 
-    List<CdrVersion> responseVersions =
-        response.getTiers().stream()
-            .map(CdrVersionTier::getVersions)
-            .flatMap(List::stream)
-            .collect(Collectors.toList());
-    assertThat(responseVersions)
-        .containsExactly(
-            cdrVersionMapper.dbModelToClient(defaultCdrVersion),
-            cdrVersionMapper.dbModelToClient(controlledCdrVersion));
+    CdrVersionTier rtResponse = parseTier(response, registeredTier.getShortName());
+    CdrVersion rtExpectedVersion = cdrVersionMapper.dbModelToClient(defaultCdrVersion);
+    assertThat(rtResponse.getVersions()).containsExactly(rtExpectedVersion);
+    assertThat(rtResponse.getDefaultCdrVersionId()).isEqualTo(rtExpectedVersion.getCdrVersionId());
+    assertThat(rtResponse.getDefaultCdrVersionCreationTime())
+        .isEqualTo(rtExpectedVersion.getCreationTime());
+
+    CdrVersionTier ctResponse = parseTier(response, controlledTier.getShortName());
+    CdrVersion ctExpectedVersion = cdrVersionMapper.dbModelToClient(controlledCdrVersion);
+    assertThat(ctResponse.getVersions()).containsExactly(ctExpectedVersion);
+    assertThat(ctResponse.getDefaultCdrVersionId()).isEqualTo(ctExpectedVersion.getCdrVersionId());
+    assertThat(ctResponse.getDefaultCdrVersionCreationTime())
+        .isEqualTo(ctExpectedVersion.getCreationTime());
   }
 
   private void testGetCdrVersionsHasDataType(Predicate<CdrVersion> hasType) {
     addMembershipForTest(registeredTier);
     final List<CdrVersion> cdrVersions =
-        parseRegisteredTier(cdrVersionService.getCdrVersionsByTier());
+        parseTierVersions(cdrVersionService.getCdrVersionsByTier(), registeredTier.getShortName());
     // hasFitBitData, hasCopeSurveyData, hasMicroarrayData, and hasWgsData are false by default
     assertThat(cdrVersions.stream().anyMatch(hasType)).isFalse();
 
     makeCdrVersion(
         3L, true, "Test CDR With Data Types", 123L, registeredTier, "wgs", true, true, "", "");
     final List<CdrVersion> newVersions =
-        parseRegisteredTier(cdrVersionService.getCdrVersionsByTier());
+        parseTierVersions(cdrVersionService.getCdrVersionsByTier(), registeredTier.getShortName());
 
     Optional<CdrVersion> cdrVersionMaybe =
         newVersions.stream()
@@ -321,13 +325,19 @@ public class CdrVersionServiceTest {
     assertThat(hasType.test(cdrVersionMaybe.get())).isTrue();
   }
 
-  private List<CdrVersion> parseRegisteredTier(CdrVersionTiersResponse cdrVersionsByTier) {
+  private CdrVersionTier parseTier(
+      CdrVersionTiersResponse cdrVersionsByTier, String accessTierShortName) {
     Optional<CdrVersionTier> tierVersions =
         cdrVersionsByTier.getTiers().stream()
-            .filter(x -> x.getAccessTierShortName().equals(registeredTier.getShortName()))
+            .filter(x -> x.getAccessTierShortName().equals(accessTierShortName))
             .findFirst();
     assertThat(tierVersions).isPresent();
-    return tierVersions.get().getVersions();
+    return tierVersions.get();
+  }
+
+  private List<CdrVersion> parseTierVersions(
+      CdrVersionTiersResponse cdrVersionsByTier, String accessTierShortName) {
+    return parseTier(cdrVersionsByTier, accessTierShortName).getVersions();
   }
 
   private DbCdrVersion makeCdrVersion(
