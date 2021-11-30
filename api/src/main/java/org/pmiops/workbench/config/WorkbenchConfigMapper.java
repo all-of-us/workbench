@@ -12,11 +12,7 @@ import org.pmiops.workbench.model.ConfigResponse;
 import org.pmiops.workbench.model.RuntimeImage;
 import org.pmiops.workbench.utils.mappers.MapStructConfig;
 
-@Mapper(
-    config = MapStructConfig.class,
-    uses = {
-      // CommonMappers.class,
-    })
+@Mapper(config = MapStructConfig.class)
 public interface WorkbenchConfigMapper {
   @Named("dataprocToModel")
   default RuntimeImage dataprocToModel(String imageName) {
