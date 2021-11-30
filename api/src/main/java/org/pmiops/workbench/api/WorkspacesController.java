@@ -448,8 +448,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       iamService.grantWorkflowRunnerRoleToCurrentUser(dbWorkspace.getGoogleProject());
       for (Map.Entry<String, WorkspaceAccessLevel> entry : clonedRoles.entrySet()) {
         if (shouldGrantWorkflowRunnerAsService(user, entry)) {
-          iamService.grantWorkflowRunnerRole(
-              dbWorkspace.getGoogleProject(), entry.getKey());
+          iamService.grantWorkflowRunnerRole(dbWorkspace.getGoogleProject(), entry.getKey());
         }
       }
     }
@@ -534,8 +533,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     if (dbWorkspace.getCdrVersion().getAccessTier().getEnableUserWorkflow()) {
       for (Map.Entry<String, WorkspaceAccessLevel> entry : aclsByEmail.entrySet()) {
         if (shouldGrantWorkflowRunnerAsService(userProvider.get(), entry)) {
-          iamService.grantWorkflowRunnerRole(
-              dbWorkspace.getGoogleProject(), entry.getKey());
+          iamService.grantWorkflowRunnerRole(dbWorkspace.getGoogleProject(), entry.getKey());
         }
       }
     }

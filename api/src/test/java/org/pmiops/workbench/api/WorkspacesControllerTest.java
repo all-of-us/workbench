@@ -2054,10 +2054,8 @@ public class WorkspacesControllerTest {
     verify(mockIamService).grantWorkflowRunnerRoleToCurrentUser(CLONE_GOOGLE_PROJECT_ID);
     // The name LOGGED_IN_USER_EMAIL is confusing. The actually logged in user is cloner,
     // LOGGED_IN_USER_EMAIL just a workspace owner
-    verify(mockIamService)
-        .grantWorkflowRunnerRole(CLONE_GOOGLE_PROJECT_ID, LOGGED_IN_USER_EMAIL);
-    verify(mockIamService)
-        .grantWorkflowRunnerRole(CLONE_GOOGLE_PROJECT_ID, writer.getUsername());
+    verify(mockIamService).grantWorkflowRunnerRole(CLONE_GOOGLE_PROJECT_ID, LOGGED_IN_USER_EMAIL);
+    verify(mockIamService).grantWorkflowRunnerRole(CLONE_GOOGLE_PROJECT_ID, writer.getUsername());
     verify(mockIamService, never())
         .grantWorkflowRunnerRole(CLONE_GOOGLE_PROJECT_ID, reader.getUsername());
   }
@@ -2211,8 +2209,7 @@ public class WorkspacesControllerTest {
         .removeOwnerFromBillingProject(any(), any(), eq(Optional.empty()));
     verify(mockIamService)
         .grantWorkflowRunnerRole(DEFAULT_GOOGLE_PROJECT, writerUser.getUsername());
-    verify(mockIamService)
-        .grantWorkflowRunnerRole(DEFAULT_GOOGLE_PROJECT, ownerUser.getUsername());
+    verify(mockIamService).grantWorkflowRunnerRole(DEFAULT_GOOGLE_PROJECT, ownerUser.getUsername());
     verify(mockIamService, never())
         .grantWorkflowRunnerRole(DEFAULT_GOOGLE_PROJECT, readerUser.getUsername());
     verify(mockIamService, never())
