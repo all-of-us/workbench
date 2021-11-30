@@ -47,6 +47,7 @@ import org.pmiops.workbench.model.DataFilter;
 import org.pmiops.workbench.model.DemoChartInfo;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainCard;
+import org.pmiops.workbench.model.EthnicityInfo;
 import org.pmiops.workbench.model.FilterColumns;
 import org.pmiops.workbench.model.GenderOrSexType;
 import org.pmiops.workbench.model.ParticipantDemographics;
@@ -65,7 +66,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   private static final Integer DEFAULT_TREE_SEARCH_LIMIT = 100;
   private static final Integer DEFAULT_CRITERIA_SEARCH_LIMIT = 250;
   private static final ImmutableList<String> MYSQL_FULL_TEXT_CHARS =
-      ImmutableList.of("\"", "+", "-", "*", "(", ")");
+      ImmutableList.of("\"", "+", "-", "*");
 
   private final BigQueryService bigQueryService;
   private final CohortQueryBuilder cohortQueryBuilder;
@@ -317,6 +318,24 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   }
 
   @Override
+  public List<EthnicityInfo> findEthnicityInfo(SearchRequest request) {
+    QueryJobConfiguration qjc =
+        bigQueryService.filterBigQueryConfig(
+            cohortQueryBuilder.buildEthnicityInfoCounterQuery(new ParticipantCriteria(request)));
+    TableResult result = bigQueryService.executeQuery(qjc);
+    Map<String, Integer> rm = bigQueryService.getResultMapper(result);
+
+    List<EthnicityInfo> ethnicityInfos = new ArrayList<>();
+    for (List<FieldValue> row : result.iterateAll()) {
+      ethnicityInfos.add(
+          new EthnicityInfo()
+              .ethnicity(bigQueryService.getString(row, rm.get("ethnicity")))
+              .count(bigQueryService.getLong(row, rm.get("count"))));
+    }
+    return ethnicityInfos;
+  }
+
+  @Override
   public Long findDomainCountByStandard(String domain, String term, Boolean standard) {
     Long count = cbCriteriaDao.findDomainCountOnCodeAndStandard(term, domain, standard);
     return count == 0
@@ -483,16 +502,12 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   private String modifyTermMatch(String term) {
     term = removeStopWords(term);
     if (MYSQL_FULL_TEXT_CHARS.stream().anyMatch(term::contains)) {
-      return Arrays.stream(term.split("\\s+"))
-          .map(
-              s -> {
-                if (s.startsWith("(")
-                    || (!s.startsWith("+") && !s.startsWith("-") && !s.endsWith(")"))) {
-                  return "+" + s;
-                }
-                return s;
-              })
-          .collect(Collectors.joining(" "));
+      // doesn't start with special char so find exact match
+      if (term.matches("^[a-zA-Z0-9].*")) {
+        return "+\"" + term + "\"";
+      }
+      // starts with a special char so don't mutate.
+      return term;
     }
 
     String[] keywords = term.split("\\W+");

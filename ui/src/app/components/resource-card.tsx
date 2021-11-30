@@ -103,7 +103,7 @@ interface NavProps {
 }
 
 const ResourceNavigation = (props: NavProps) => {
-  const {resource, linkTestId, style = styles.resourceName, children} = props;
+  const {resource, resource: {adminLocked}, linkTestId, style = styles.resourceName, children} = props;
   const url = stringifyUrl(getResourceUrl(resource));
 
   function canNavigate(): boolean {
@@ -117,11 +117,14 @@ const ResourceNavigation = (props: NavProps) => {
     }
   }
 
-  return <Clickable disabled={!canNavigate()}>
-    <RouterLink to={url} style={style} data-test-id={linkTestId} onClick={() => onNavigate()}>
+  return <div>
+    {adminLocked ? <div>
       {children}
-    </RouterLink>
-  </Clickable>;
+    </div> : <Clickable>
+      <RouterLink to={url} style={style} data-test-id={linkTestId} onClick={() => onNavigate()}>
+        {children}
+      </RouterLink>
+    </Clickable>}</div>;
 };
 
 interface Props {

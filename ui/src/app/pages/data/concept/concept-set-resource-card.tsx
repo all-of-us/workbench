@@ -160,7 +160,7 @@ export const ConceptSetResourceCard = fp.flow(
           }}/>
       }
       {menuOnly ?
-          <ResourceActionsMenu actions={this.actions}/> :
+          <ResourceActionsMenu actions={this.actions} disabled={resource.adminLocked}/> :
           <ResourceCard resource={resource} actions={this.actions}/>}
     </React.Fragment>;
   }

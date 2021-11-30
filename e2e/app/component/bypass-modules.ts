@@ -34,7 +34,7 @@ export default class BypassPopup extends BaseMenu {
   // get the module name and the status of each modules in test env
   async getBypassModuleTest(): Promise<boolean[]> {
     const bypassAdminTest = [
-      'Compliance Training',
+      'RT Compliance Training',
       'eRA Commons Linking',
       'Two Factor Auth',
       'Data User Code of Conduct',

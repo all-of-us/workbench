@@ -20,6 +20,7 @@ import org.pmiops.workbench.model.DemoChartInfoListResponse;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainCardResponse;
 import org.pmiops.workbench.model.DomainCount;
+import org.pmiops.workbench.model.EthnicityInfoListResponse;
 import org.pmiops.workbench.model.GenderOrSexType;
 import org.pmiops.workbench.model.ParticipantDemographics;
 import org.pmiops.workbench.model.SearchRequest;
@@ -193,6 +194,18 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     }
     return ResponseEntity.ok(
         response.items(cohortBuilderService.findDemoChartInfo(genderOrSexType, ageType, request)));
+  }
+
+  @Override
+  public ResponseEntity<EthnicityInfoListResponse> findEthnicityInfo(
+      String workspaceNamespace, String workspaceId, SearchRequest request) {
+    workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+        workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+    EthnicityInfoListResponse response = new EthnicityInfoListResponse();
+    if (request.getIncludes().isEmpty()) {
+      return ResponseEntity.ok(response);
+    }
+    return ResponseEntity.ok(response.items(cohortBuilderService.findEthnicityInfo(request)));
   }
 
   @Override

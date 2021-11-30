@@ -8,7 +8,7 @@
     "leoBaseUrl": "https:\/\/notebooks.firecloud.org",
     "xAppIdValue": "preprod-AoU-RW",
     "timeoutInSeconds": 60,
-    "jupyterDockerImage": "us.gcr.io/broad-dsp-gcr-public/terra-jupyter-aou:2.0.1",
+    "jupyterDockerImage": "us.gcr.io/broad-dsp-gcr-public/terra-jupyter-aou:2.0.3",
     "shibbolethApiBaseUrl": "https:\/\/profile-dot-broad-shibboleth-prod.appspot.com",
     "shibbolethUiBaseUrl": "https:\/\/broad-shibboleth-prod.appspot.com",
     "runtimeImages": {
@@ -103,14 +103,16 @@
     "enableGenomicExtraction": true,
     "enableGpu": false,
     "enablePersistentDisk": false,
-    "enableEgressAlertingV2": false,
+    "enableEgressAlertingV2": true,
     "enablePrivateDataprocWorker": false,
-    "grantLifescienceApiRunnerAcl": false
+    "grantLifescienceApiRunnerAcl": false,
+    "ccSupportWhenAdminLocking": true
   },
   "actionAudit": {
     "logName": "workbench-action-audit-preprod",
     "bigQueryDataset": "workbench_action_audit_preprod",
-    "bigQueryTable": "workbench_action_audit_preprod"
+    "bigQueryTable": "workbench_action_audit_preprod",
+    "partitionColumn": "timestamp"
   },
   "captcha": {
     "enableCaptcha": true,
@@ -133,15 +135,5 @@
   "offlineBatch": {
     "usersPerAuditTask": 20,
     "usersPerSynchronizeAccessTask": 50
-  },
-  "egressAlertRemediationPolicy": {
-    "notifyFromEmail": "workbench-notificatio-aaaaekogch7vg3c6hi4sgyx4le@pmi-engteam.slack.com",
-    "enableJiraTicketing": false,
-    "escalations": [{
-      "afterIncidentCount": 1,
-      "suspendCompute": {
-        "durationMinutes": 10
-      }
-    }]
   }
 }

@@ -1,3 +1,5 @@
+import * as React from 'react';
+import * as fp from 'lodash/fp';
 import {faEdit} from '@fortawesome/free-regular-svg-icons';
 import {
   faBook,
@@ -8,16 +10,14 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import {faDna} from '@fortawesome/free-solid-svg-icons/faDna';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
-import * as fp from 'lodash/fp';
 import moment from 'moment'
 import {CSSProperties} from 'react';
-import * as React from 'react';
 import {CSSTransition, TransitionGroup} from 'react-transition-group';
-
 import {faCircle} from '@fortawesome/free-solid-svg-icons/faCircle';
 import {faLock} from '@fortawesome/free-solid-svg-icons/faLock';
 import {faSyncAlt} from '@fortawesome/free-solid-svg-icons/faSyncAlt';
 import {faTerminal} from '@fortawesome/free-solid-svg-icons/faTerminal';
+
 import {SelectionList} from 'app/cohort-search/selection-list/selection-list.component';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {TooltipTrigger} from 'app/components/popups';
@@ -29,7 +29,9 @@ import {participantStore} from 'app/services/review-state.service';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {
   DEFAULT,
-  reactStyles, switchCase, withCdrVersions,
+  reactStyles,
+  switchCase,
+  withCdrVersions,
   withCurrentCohortCriteria,
   withCurrentConcept,
   withCurrentWorkspace,
@@ -45,18 +47,20 @@ import {
 import { ComputeSecuritySuspendedError, withRuntimeStore} from 'app/utils/runtime-utils';
 import {
   CompoundRuntimeOpStore,
-  compoundRuntimeOpStore, GenomicExtractionStore, genomicExtractionStore,
+  compoundRuntimeOpStore,
+  GenomicExtractionStore,
+  genomicExtractionStore,
   routeDataStore,
   runtimeStore,
   RuntimeStore,
-  serverConfigStore, updateGenomicExtractionStore,
+  serverConfigStore,
+  updateGenomicExtractionStore,
   withStore
 } from 'app/utils/stores';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
-
-import {Clickable, MenuItem, StyledExternalLink} from 'app/components/buttons';
+import {Clickable, StyledExternalLink} from 'app/components/buttons';
 import {ConfirmDeleteModal} from 'app/components/confirm-delete-modal';
 import {GenomicsExtractionTable} from 'app/components/genomics-extraction-table';
 import {HelpTips} from 'app/components/help-tips';
@@ -69,18 +73,20 @@ import {getCdrVersion} from 'app/utils/cdr-versions';
 import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {
   CdrVersionTiersResponse,
-  Criteria, GenomicExtractionJob,
+  Criteria,
+  GenomicExtractionJob,
   ParticipantCohortStatus,
   ResourceType,
   RuntimeError,
-  RuntimeStatus, TerraJobStatus,
-  WorkspaceAccessLevel
+  RuntimeStatus,
+  TerraJobStatus,
 } from 'generated/fetch';
-
 import arrowLeft from 'assets/icons/arrow-left-regular.svg';
 import runtime from 'assets/icons/thunderstorm-solid.svg';
 import times from 'assets/icons/times-light.svg';
-import { RuntimeErrorModal } from './runtime-error-modal';
+import {RuntimeErrorModal} from './runtime-error-modal';
+import {WorkspaceActionsMenu} from 'app/pages/workspace/workspace-actions-menu';
+import { RouteLink } from './app-router';
 
 export const LOCAL_STORAGE_KEY_SIDEBAR_STATE = 'WORKSPACE_SIDEBAR_STATE';
 
@@ -169,14 +175,6 @@ const styles = reactStyles({
     cursor: 'pointer',
     textDecoration: 'none'
   },
-  dropdownHeader: {
-    fontSize: 12,
-    lineHeight: '30px',
-    color: colors.primary,
-    fontWeight: 600,
-    paddingLeft: 12,
-    width: 160
-  },
   criteriaCount: {
     position: 'absolute',
     height: '0.8rem',
@@ -188,7 +186,15 @@ const styles = reactStyles({
     borderRadius: '50%',
     display: 'inline-block',
     fontSize: '0.4rem'
-  }
+  },
+  dropdownHeader: {
+    fontSize: 12,
+    lineHeight: '30px',
+    color: colors.primary,
+    fontWeight: 600,
+    paddingLeft: 12,
+    width: 160
+  },
 });
 
 const iconStyles = {
@@ -500,11 +506,6 @@ export const HelpSidebar = fp.flow(
       openZendeskWidget(givenName, familyName, username, contactEmail);
     }
 
-    navigateToTerminal() {
-      const {workspace: {id, namespace}} = this.props;
-      this.props.navigate(['workspaces', namespace, id, 'terminals']);
-    }
-
     analyticsEvent(type: string, label?: string) {
       const {pageKey} = this.props;
       const analyticsLabel = pageKeyToAnalyticsLabels[pageKey];
@@ -520,66 +521,6 @@ export const HelpSidebar = fp.flow(
         width: activeIcon ? `calc(${this.sidebarWidth}rem + 70px)` : 0, // +70px accounts for the width of the icon sidebar + box shadow
         ...(this.props.pageKey === LEONARDO_APP_PAGE_KEY ? styles.notebookOverrides : {})
       };
-    }
-
-    renderWorkspaceMenu() {
-      const {workspace, workspace: {accessLevel, id, namespace}} = this.props;
-      const isNotOwner = !workspace || accessLevel !== WorkspaceAccessLevel.OWNER;
-      const tooltip = isNotOwner && 'Requires owner permission';
-      return <PopupTrigger
-        side='bottom'
-        closeOnClick
-        content={
-          <React.Fragment>
-            <div style={styles.dropdownHeader}>Workspace Actions</div>
-            <MenuItem
-              icon='copy'
-              onClick={() => {
-                AnalyticsTracker.Workspaces.OpenDuplicatePage();
-                this.props.navigate(['workspaces', namespace, id, 'duplicate']);
-              }}>
-              Duplicate
-            </MenuItem>
-            <MenuItem
-              icon='pencil'
-              tooltip={tooltip}
-              disabled={isNotOwner}
-              onClick={() => {
-                AnalyticsTracker.Workspaces.OpenEditPage();
-                this.props.navigate(['workspaces', namespace, id, 'edit']);
-              }}>
-              Edit
-            </MenuItem>
-            <MenuItem
-              icon='share'
-              tooltip={tooltip}
-              disabled={isNotOwner}
-              onClick={() => {
-                AnalyticsTracker.Workspaces.OpenShareModal();
-                this.setState({currentModal: CurrentModal.Share});
-              }}>
-              Share
-            </MenuItem>
-            <MenuItem
-              icon='trash'
-              tooltip={tooltip}
-              disabled={isNotOwner}
-              onClick={() => {
-                AnalyticsTracker.Workspaces.OpenDeleteModal();
-                this.setState({currentModal: CurrentModal.Delete});
-              }}>
-              Delete
-            </MenuItem>
-          </React.Fragment>
-        }>
-        <div data-test-id='workspace-menu-button'>
-          <TooltipTrigger content={<div>Menu</div>} side='left'>
-            <div style={styles.icon} onClick={() => this.analyticsEvent('OpenSidebar', 'Sidebar - Menu Icon')}>
-              <FontAwesomeIcon icon={faEllipsisV} style={{fontSize: '21px'}}/>
-            </div>
-          </TooltipTrigger>
-        </div>
-      </PopupTrigger>;
     }
 
     displayFontAwesomeIcon(icon: IconConfig) {
@@ -863,12 +804,44 @@ export const HelpSidebar = fp.flow(
 
     render() {
       const {activeIcon, runtimeErrors} = this.state;
+      const {workspace, workspace: {namespace, id}} = this.props;
       const sidebarContent = this.sidebarContent(activeIcon);
       const shouldRenderWorkspaceMenu = !this.iconConfig('concept').showIcon() && !this.iconConfig('criteria').showIcon();
 
       return <div id='help-sidebar'>
         <div style={{...styles.iconContainer, ...(this.props.pageKey === LEONARDO_APP_PAGE_KEY ? styles.notebookOverrides : {})}}>
-          {shouldRenderWorkspaceMenu && this.renderWorkspaceMenu()}
+          {shouldRenderWorkspaceMenu && <PopupTrigger
+            side='bottom'
+            closeOnClick
+            content={<React.Fragment>
+              <div style={styles.dropdownHeader}>Workspace Actions</div>
+              <WorkspaceActionsMenu
+                workspaceData={workspace}
+                onDuplicate={() => {
+                  AnalyticsTracker.Workspaces.OpenDuplicatePage();
+                  this.props.navigate(['workspaces', namespace, id, 'duplicate']);
+                }}
+                onEdit={() => {
+                  AnalyticsTracker.Workspaces.OpenEditPage();
+                  this.props.navigate(['workspaces', namespace, id, 'edit']);
+                }}
+                onShare={() => {
+                  AnalyticsTracker.Workspaces.OpenShareModal();
+                  this.setState({currentModal: CurrentModal.Share});
+                }}
+                onDelete={() => {
+                  AnalyticsTracker.Workspaces.OpenDeleteModal();
+                  this.setState({currentModal: CurrentModal.Delete});
+                }}
+              /></React.Fragment>}>
+            <div data-test-id='workspace-menu-button'>
+              <TooltipTrigger content={<div>Menu</div>} side='left'>
+                <div style={styles.icon} onClick={() => this.analyticsEvent('OpenSidebar', 'Sidebar - Menu Icon')}>
+                  <FontAwesomeIcon icon={faEllipsisV} style={{fontSize: '21px'}}/>
+                </div>
+              </TooltipTrigger>
+            </div>
+          </PopupTrigger>}
           {this.icons().map((icon, i) =>
               <div key={i} style={{display: 'table'}}>
                 <TooltipTrigger content={<div>{icon.tooltip}</div>} side='left'>
@@ -887,13 +860,13 @@ export const HelpSidebar = fp.flow(
                         ],
                         ['runtime', () => this.displayRuntimeIcon(icon)],
                         ['terminal',
-                          () =>
+                         () => <RouteLink
+                                 path={`/workspaces/${namespace}/${id}/terminals`} >
                              <FontAwesomeIcon
                                  data-test-id={'help-sidebar-icon-' + icon.id}
-                                 icon={icon.faIcon} style={icon.style}
-                                 onClick={() => this.navigateToTerminal()}/>
-
-                          ],
+                                 icon={icon.faIcon} style={icon.style} />
+                          </RouteLink>
+                        ],
                         ['genomicExtractions', () => this.displayExtractionIcon(icon)],
                         [DEFAULT, () => icon.faIcon === null
                               ? <img data-test-id={'help-sidebar-icon-' + icon.id} src={proIcons[icon.id]} style={icon.style} />

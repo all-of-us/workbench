@@ -16,7 +16,6 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
@@ -286,6 +285,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
     resource.setCdrVersionId(commonMappers.cdrVersionToId(dbWorkspace.getCdrVersion()));
     resource.setAccessTierShortName(dbWorkspace.getCdrVersion().getAccessTier().getShortName());
     resource.setWorkspaceBillingStatus(dbWorkspace.getBillingStatus());
+    resource.setAdminLocked(dbWorkspace.isAdminLocked());
   }
 
   private void buildFromFcWorkspace(
@@ -328,10 +328,9 @@ public class UserMetricsController implements UserMetricsApiDelegate {
       log.log(Level.SEVERE, String.format("Invalid notebook file path found: %s", str));
       return null;
     }
-    int pos = str.lastIndexOf('/') + 1;
-    String fileName = str.substring(pos);
-    String replacement = Matcher.quoteReplacement(fileName) + "$";
-    String filePath = str.replaceFirst(replacement, "");
-    return new FileDetail().name(fileName).path(filePath);
+    int filenameStart = str.lastIndexOf('/') + 1;
+    return new FileDetail()
+        .name(str.substring(filenameStart))
+        .path(str.substring(0, filenameStart));
   }
 }

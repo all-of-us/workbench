@@ -1,3 +1,6 @@
+import * as React from 'react';
+import * as fp from 'lodash/fp';
+
 import {Button, IconButton} from 'app/components/buttons';
 import {FlexColumn} from 'app/components/flex';
 import {Check, ClrIcon, Times} from 'app/components/icons';
@@ -8,8 +11,6 @@ import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {serverConfigStore} from 'app/utils/stores';
 import {AccessModule, AdminTableUser} from 'generated/fetch';
-import * as fp from 'lodash/fp';
-import * as React from 'react';
 
 interface Props {
   // The user to render the bypass panel for.
@@ -122,9 +123,9 @@ export class AdminUserBypass extends React.Component<Props, State> {
         onClose={() => { this.setState({isPopupOpen: false}); this.resetState(); }}
         onOpen={() => this.setState({isPopupOpen: true})}
         content={<FlexColumn style={{padding: '1rem'}}>
-          {enableComplianceTraining && <Toggle name='Compliance Training'
+          {enableComplianceTraining && <Toggle name='RT Compliance Training'
                   checked={selectedModules.includes(AccessModule.COMPLIANCETRAINING)}
-                  data-test-id='compliance-training-toggle'
+                  data-test-id='rt-compliance-training-toggle'
                   onToggle={() => {this.setState({selectedModules:
                       fp.xor(selectedModules, [AccessModule.COMPLIANCETRAINING])}); }}
           />}

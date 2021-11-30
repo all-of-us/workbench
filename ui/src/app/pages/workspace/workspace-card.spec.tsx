@@ -50,4 +50,19 @@ describe('WorkspaceCard', () => {
     expect(wrapper.exists('[data-test-id="workspace-share-modal"]')).toBeFalsy();
   });
 
+  it('should not show locked status for workspace that has adminLocked false', async() => {
+    const wrapper = component(WorkspaceAccessLevel.OWNER);
+    await waitOneTickAndUpdate(wrapper);
+
+    expect(wrapper.exists('[data-test-id="workspace-lock"]')).toBeFalsy();
+  });
+
+  it('show locked status for workspace that has adminLocked true', async() => {
+    workspaceStubs[0].adminLocked = true;
+    const wrapper = component(WorkspaceAccessLevel.OWNER);
+    await waitOneTickAndUpdate(wrapper);
+
+    expect(wrapper.exists('[data-test-id="workspace-lock"]')).toBeTruthy();
+  });
+
 });

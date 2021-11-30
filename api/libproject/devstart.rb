@@ -847,6 +847,66 @@ Common.register_command({
   :fn => ->(*args) { make_cb_criteria("make-cb-criteria", *args) }
 })
 
+def create_local_csv_files(cmd_name, *args)
+  op = WbOptionsParser.new(cmd_name, args)
+  op.add_option(
+    "--project [project]",
+    ->(opts, v) { opts.project = v},
+    "Project name"
+  )
+ op.add_option(
+    "--dataset [dataset]",
+    ->(opts, v) { opts.dataset = v},
+    "Dataset name"
+   )
+  op.add_validator ->(opts) { raise ArgumentError unless opts.project and opts.dataset }
+  op.parse.validate
+
+  common = Common.new
+  Dir.chdir('db-cdr') do
+    common.run_inline %W{./generate-cdr/create-local-csv-files.sh #{ENVIRONMENTS[op.opts.project][:source_cdr_project]} #{op.opts.dataset}}
+  end
+end
+
+Common.register_command({
+  :invocation => "create-local-csv-files",
+  :description => "Loads local data from dataset and project",
+  :fn => ->(*args) { create_local_csv_files("create-local-csv-files", *args) }
+})
+
+def validate_prerequisites_exist(cmd_name, *args)
+  op = WbOptionsParser.new(cmd_name, args)
+  op.opts.data_browser = false
+  op.add_option(
+    "--bq-project [bq-project]",
+    ->(opts, v) { opts.bq_project = v},
+    "BQ Project. Required."
+  )
+  op.add_option(
+    "--bq-dataset [bq-dataset]",
+    ->(opts, v) { opts.bq_dataset = v},
+    "BQ dataset. Required."
+  )
+  op.add_option(
+    "--data-browser [data-browser]",
+    ->(opts, v) { opts.data_browser = v},
+    "Is this run for data browser. Optional - Default is false"
+  )
+  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset }
+  op.parse.validate
+
+  common = Common.new
+  Dir.chdir('db-cdr') do
+    common.run_inline %W{./generate-cdr/validate-prerequisites-exist.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.data_browser}}
+  end
+end
+
+Common.register_command({
+  :invocation => "validate-prerequisites-exist",
+  :description => "Validating that all prerequisites exist",
+  :fn => ->(*args) { validate_prerequisites_exist("validate-prerequisites-exist", *args) }
+})
+
 def build_cdr_indices(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
   op.opts.data_browser = false

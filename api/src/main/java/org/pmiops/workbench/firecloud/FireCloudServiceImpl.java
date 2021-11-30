@@ -6,6 +6,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
 import com.google.common.hash.Hashing;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -13,6 +14,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.inject.Provider;
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -101,6 +103,9 @@ public class FireCloudServiceImpl implements FireCloudService {
           "workspace.googleProject",
           "workspace.bucketName",
           "workspace.createdBy");
+
+  public static final List<String> FIRECLOUD_WORKSPACE_REQUIRED_FIELDS_FOR_CLONE_FILE_TRANSFER =
+      ImmutableList.of("workspace.completedCloneWorkspaceFileTransfer");
 
   @Autowired
   public FireCloudServiceImpl(
@@ -514,5 +519,30 @@ public class FireCloudServiceImpl implements FireCloudService {
       projectNamePrefix = projectNamePrefix + "-";
     }
     return projectNamePrefix + randomString;
+  }
+
+  @Override
+  public boolean workspaceFileTransferComplete(String workspaceNamespace, String fireCloudName) {
+    WorkspacesApi workspacesApi = endUserWorkspacesApiProvider.get();
+    return retryHandler.run(
+        (context) -> {
+          FirecloudWorkspaceDetails fcWorkspaceDetails =
+              workspacesApi
+                  .getWorkspace(
+                      workspaceNamespace,
+                      fireCloudName,
+                      FIRECLOUD_WORKSPACE_REQUIRED_FIELDS_FOR_CLONE_FILE_TRANSFER)
+                  .getWorkspace();
+          return fcWorkspaceDetails == null
+              ? false
+              : notebookTransferComplete(
+                  fcWorkspaceDetails
+                      .getCompletedCloneWorkspaceFileTransfer()
+                      .format(DateTimeFormatter.ISO_DATE_TIME));
+        });
+  }
+
+  private boolean notebookTransferComplete(String fileTransferTime) {
+    return !(StringUtils.isEmpty(fileTransferTime) || fileTransferTime.equals("0"));
   }
 }

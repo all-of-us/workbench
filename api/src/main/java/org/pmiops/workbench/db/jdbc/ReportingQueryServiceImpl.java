@@ -186,7 +186,6 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 + "  u.area_of_research,\n"
                 + "  uamrt.compliance_training_bypass_time,\n"
                 + "  uamrt.compliance_training_completion_time,\n"
-                + "  u.compliance_training_expiration_time,\n"
                 + "  u.contact_email,\n"
                 + "  u.creation_time,\n"
                 + "  uamd.data_use_agreement_bypass_time,\n"
@@ -313,8 +312,6 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                     offsetDateTimeUtc(rs.getTimestamp("compliance_training_bypass_time")))
                 .complianceTrainingCompletionTime(
                     offsetDateTimeUtc(rs.getTimestamp("compliance_training_completion_time")))
-                .complianceTrainingExpirationTime(
-                    offsetDateTimeUtc(rs.getTimestamp("compliance_training_expiration_time")))
                 .contactEmail(rs.getString("contact_email"))
                 .creationTime(offsetDateTimeUtc(rs.getTimestamp("creation_time")))
                 .accessTierShortNames(rs.getString("access_tier_short_names"))

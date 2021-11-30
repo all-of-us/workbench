@@ -29,6 +29,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.text.StringSubstitutor;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exfiltration.EgressRemediationAction;
 import org.pmiops.workbench.google.CloudStorageClient;
@@ -51,6 +52,8 @@ public class MailServiceImpl implements MailService {
 
   private static final Logger log = Logger.getLogger(MailServiceImpl.class.getName());
 
+  private static final String RAB_SUPPORT_EMAIL = "aouresourceaccess@od.nih.gov";
+
   private static final String WELCOME_RESOURCE = "emails/welcomeemail/content.html";
   private static final String INSTRUCTIONS_RESOURCE = "emails/instructionsemail/content.html";
   private static final String FREE_TIER_DOLLAR_THRESHOLD_RESOURCE =
@@ -65,6 +68,8 @@ public class MailServiceImpl implements MailService {
       "emails/setup_gcp_billing_account_email/content.html";
   private static final String EGRESS_REMEDIATION_EMAIL =
       "emails/egress_remediation_email/content.html";
+  private static final String WORKSPACE_ADMIN_LOCKING_EMAIL =
+      "emails/workspace_admin_locking_email/content.html";
 
   private enum Status {
     REJECTED,
@@ -195,7 +200,6 @@ public class MailServiceImpl implements MailService {
   @Override
   public void alertUserRegisteredTierExpiration(final DbUser user, Instant expirationTime)
       throws MessagingException {
-    final WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
 
     final String logMsg =
         String.format(
@@ -273,6 +277,33 @@ public class MailServiceImpl implements MailService {
         "[Response Required] AoU Researcher Workbench High Data Egress Alert",
         String.format("Egress remediation email for %s", dbUser.getUsername()),
         htmlMessage);
+  }
+
+  @Override
+  public void sendWorkspaceAdminLockingEmail(
+      DbWorkspace workspace, String lockingReason, List<DbUser> owners) throws MessagingException {
+
+    WorkbenchConfig config = workbenchConfigProvider.get();
+    List<String> ccSupportMaybe =
+        config.featureFlags.ccSupportWhenAdminLocking
+            ? ImmutableList.of(config.mandrill.fromEmail)
+            : Collections.emptyList();
+
+    final String ownersInfoStr =
+        owners.stream()
+            .map(o -> String.format("%s (%s)", o.getUsername(), o.getContactEmail()))
+            .collect(Collectors.joining(", "));
+
+    sendWithRetries(
+        owners.stream().map(DbUser::getContactEmail).collect(Collectors.toList()),
+        ccSupportMaybe,
+        "[Response Required] AoU Researcher Workbench Workspace Admin Locked",
+        String.format(
+            "Admin locking email for workspace '%s' (%s) sent to owners %s",
+            workspace.getName(), workspace.getWorkspaceNamespace(), ownersInfoStr),
+        buildHtml(
+            WORKSPACE_ADMIN_LOCKING_EMAIL,
+            workspaceAdminLockedSubstitutionMap(workspace, lockingReason)));
   }
 
   private Map<EmailSubstitutionField, String> welcomeMessageSubstitutionMap(
@@ -373,6 +404,18 @@ public class MailServiceImpl implements MailService {
         .put(
             EmailSubstitutionField.NIH_FUNDED,
             BooleanUtils.isTrue(request.getIsNihFunded()) ? "Yes" : "No")
+        .build();
+  }
+
+  private Map<EmailSubstitutionField, String> workspaceAdminLockedSubstitutionMap(
+      DbWorkspace workspace, String lockingReason) {
+    return ImmutableMap.<EmailSubstitutionField, String>builder()
+        .put(EmailSubstitutionField.HEADER_IMG, getAllOfUsLogo())
+        .put(EmailSubstitutionField.ALL_OF_US, getAllOfUsItalicsText())
+        .put(EmailSubstitutionField.WORKSPACE_NAME, workspace.getName())
+        .put(EmailSubstitutionField.WORKSPACE_NAMESPACE, workspace.getWorkspaceNamespace())
+        .put(EmailSubstitutionField.LOCKING_REASON, lockingReason)
+        .put(EmailSubstitutionField.RAB_SUPPORT_EMAIL, RAB_SUPPORT_EMAIL)
         .build();
   }
 

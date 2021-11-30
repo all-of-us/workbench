@@ -47,13 +47,79 @@ describe('WorkspaceNavBar', () => {
   it('should navigate on tab click', () => {
     const wrapper = component();
 
+    wrapper.find({'data-test-id': 'Analysis'}).first().simulate('click');
+    expect(mockNavigate).toHaveBeenCalledWith(
+      ['workspaces', workspaceDataStub.namespace, workspaceDataStub.id, 'notebooks']);
+
     wrapper.find({'data-test-id': 'Data'}).first().simulate('click');
     expect(mockNavigate).toHaveBeenCalledWith(
       ['workspaces', workspaceDataStub.namespace, workspaceDataStub.id, 'data']);
+
+    wrapper.find({'data-test-id': 'About'}).first().simulate('click');
+    expect(mockNavigate).toHaveBeenCalledWith(
+      ['workspaces', workspaceDataStub.namespace, workspaceDataStub.id, 'about']);
+  });
+
+  const setNeedsReviewPrompt = (needsReviewPrompt: boolean) => {
+    const researchPurpose = {...workspaceDataStub.researchPurpose, needsReviewPrompt};
+    currentWorkspaceStore.next({...workspaceDataStub, researchPurpose});
+  }
+
+  const setAdminLocked = (adminLocked: boolean) => {
+    currentWorkspaceStore.next({...workspaceDataStub, adminLocked});
+  }
+
+  it('should not navigate on tab click if tab is disabled because it needs review', () => {
+    // disables Data and Analysis tabs - see restrictTab()
+    setNeedsReviewPrompt(true);
+
+    const wrapper = component();
+
+    wrapper.find({'data-test-id': 'Data'}).first().simulate('click');
+    expect(mockNavigate).not.toHaveBeenCalledWith(
+      ['workspaces', workspaceDataStub.namespace, workspaceDataStub.id, 'data']);
+
+    wrapper.find({'data-test-id': 'Analysis'}).first().simulate('click');
+    expect(mockNavigate).not.toHaveBeenCalledWith(
+      ['workspaces', workspaceDataStub.namespace, workspaceDataStub.id, 'notebooks']);
+  });
+
+  it('should not navigate on tab click if tab is disabled because it is admin-locked', () => {
+    setAdminLocked(true);
+
+    const wrapper = component();
+
+    wrapper.find({'data-test-id': 'Data'}).first().simulate('click');
+    expect(mockNavigate).not.toHaveBeenCalledWith(
+      ['workspaces', workspaceDataStub.namespace, workspaceDataStub.id, 'data']);
+
+    wrapper.find({'data-test-id': 'Analysis'}).first().simulate('click');
+    expect(mockNavigate).not.toHaveBeenCalledWith(
+      ['workspaces', workspaceDataStub.namespace, workspaceDataStub.id, 'notebooks']);
   });
 
   it('should disable Data and Analysis tab if workspace require review research purpose', () => {
-    workspaceDataStub.researchPurpose.needsReviewPrompt = true;
+    setNeedsReviewPrompt(true);
+
+    const wrapper = component();
+
+    expect(wrapper.find({'data-test-id': 'Data'}).first().props().disabled).toBeTruthy();
+    expect(wrapper.find({'data-test-id': 'Analysis'}).first().props().disabled).toBeTruthy();
+    expect(wrapper.find({'data-test-id': 'About'}).first().props().disabled).toBeFalsy();
+  });
+
+  it('should not disable Data and Analysis tab if workspace does not require review research purpose', () => {
+    setNeedsReviewPrompt(false);
+
+    const wrapper = component();
+
+    expect(wrapper.find({'data-test-id': 'Data'}).first().props().disabled).toBeFalsy();
+    expect(wrapper.find({'data-test-id': 'Analysis'}).first().props().disabled).toBeFalsy();
+    expect(wrapper.find({'data-test-id': 'About'}).first().props().disabled).toBeFalsy();
+  });
+
+  it('should disable Data and Analysis tab if the workspace is admin-locked', () => {
+    setAdminLocked(true);
 
     const wrapper = component();
 

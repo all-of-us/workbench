@@ -458,4 +458,9 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
                     .build())
         .collect(ImmutableList.toImmutableList());
   }
+
+  @Override
+  public boolean notebookTransferComplete(String workspaceNamespace, String workspaceId) {
+    return fireCloudService.workspaceFileTransferComplete(workspaceNamespace, workspaceId);
+  }
 }

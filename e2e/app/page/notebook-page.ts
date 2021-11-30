@@ -16,6 +16,7 @@ import expect from 'expect';
 import ReplaceFileModal from 'app/modal/replace-file-modal';
 import { takeScreenshot } from 'utils/save-file-utils';
 import { config } from 'resources/workbench-config';
+import { makeDateTimeStr } from 'utils/str-utils';
 
 // CSS selectors
 const CssSelector = {
@@ -45,7 +46,8 @@ export enum Mode {
 
 export enum KernelStatus {
   NotRunning = 'Kernel is not running',
-  Idle = 'Kernel Idle'
+  Idle = 'Kernel Idle',
+  NoConnection = 'No Connection to Kernel'
 }
 
 export default class NotebookPage extends NotebookFrame {
@@ -58,11 +60,11 @@ export default class NotebookPage extends NotebookFrame {
     try {
       await this.findRunButton(120000);
     } catch (err) {
-      console.warn(`Reloading "${this.documentTitle}" because cannot find the Run button`);
+      logger.info(`Reloading "${this.documentTitle}" because cannot find the Run button`);
       await this.page.reload();
     }
-    // When open notebook for the first time, notebook websocket can close unexpectedly that causes kernel disconnect unexpectedly.
-    // Thus, a longer sleep interval is required.
+    // When open notebook for the first time, notebook connection could fail unexpectedly.
+    // But notebook connection will retry to establish. thus, a longer sleep interval is required.
     await this.waitForKernelIdle(10 * 60 * 1000, 10000); // 10 minutes
     return true;
   }
@@ -146,13 +148,13 @@ export default class NotebookPage extends NotebookFrame {
     const expectedMessage =
       'It is All of Us data use policy to not upload data or files containing personally identifiable information';
     page.on('dialog', async (dialog) => {
-      await page.waitForTimeout(500);
+      await page.waitForTimeout(250);
       const modalMessage = dialog.message();
       // If this is not the Data Use Policy dialog, error is thrown.
       expect(modalMessage).toContain(expectedMessage);
       await dialog.accept();
       await page.waitForTimeout(500);
-      console.log('Accept "Data Use Policy" dialog');
+      logger.info('Accept "Data Use Policy" dialog');
     });
   }
 
@@ -297,25 +299,47 @@ export default class NotebookPage extends NotebookFrame {
       .catch(() => false);
   }
 
+  async isNoConnection(): Promise<boolean> {
+    const kernelStatus = await this.getKernelStatus();
+    return kernelStatus === KernelStatus.NoConnection;
+  }
+
   /**
    * Wait for notebook kernel becomes ready (idle).
    */
   async waitForKernelIdle(timeOut = 300000, sleepInterval = 5000): Promise<boolean> {
-    // Check kernel status twice with a pause between two checks because kernel status can suddenly become not ready.
-    let ready = false;
-    const startTime = Date.now();
-    while (Date.now() - startTime < timeOut) {
-      const idle = await this.isIdle(2000);
-      if (ready && idle) {
+    const waitForIdle = async (): Promise<boolean> => {
+      // Check kernel status twice with a pause between two checks because kernel status can suddenly become not ready.
+      let ready = false;
+      const startTime = Date.now();
+      while (Date.now() - startTime < timeOut) {
+        const idle = await this.isIdle(2000);
+        if (ready && idle) {
+          return true;
+        }
+        ready = idle;
+        await this.page.waitForTimeout(sleepInterval);
+      }
+      return false;
+    };
+
+    if (await waitForIdle()) {
+      return true;
+    }
+
+    // Retry only when kernel status is "no connection to kernel" by reloading the notebook page.
+    if (await this.isNoConnection()) {
+      await takeScreenshot(this.page, `${makeDateTimeStr('reload_notebook_connection')}`);
+      await this.reloadPage();
+      if (await waitForIdle()) {
         return true;
       }
-      ready = idle;
-      await this.page.waitForTimeout(sleepInterval);
     }
+
     // Throws exception if not ready.
     const status = await this.getKernelStatus();
     throw new Error(
-      `Notebook kernel is not idle after waiting ${timeOut} seconds. Actual kernel status was ${status}.`
+      `Notebook kernel is not idle after waiting ${timeOut} seconds. Actual kernel status was "${status}".`
     );
   }
 
@@ -488,7 +512,7 @@ export default class NotebookPage extends NotebookFrame {
       expect(modalMessage).toContain(replaceFileMessage);
       await replaceFileModal.clickCancelButton();
       await newPage.waitForTimeout(500);
-      console.log(`Cancel to close "Replace file" "${fileName}" dialog`);
+      logger.info(`Cancel to close "Replace file" "${fileName}" dialog`);
     }
 
     // Get file size.

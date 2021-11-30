@@ -903,6 +903,20 @@ paths:
           description: A list of workspace definitions.
           schema:
             "$ref": "#/definitions/WorkspaceResponseListResponse"
+  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/isNotebookTransferComplete":
+    parameters:
+      - "$ref": "#/parameters/workspaceNamespace"
+      - "$ref": "#/parameters/workspaceId"
+    get:
+      tags:
+        - workspaces
+      description: Checks if the notebooks have been copied to the workspace
+      operationId: notebookTransferComplete
+      responses:
+        200:
+          description: Returns true if the notebooks have been copied to the workspace
+          schema:
+            type: boolean
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}":
     parameters:
     - "$ref": "#/parameters/workspaceNamespace"
@@ -3840,6 +3854,29 @@ paths:
           description: A collection of criteria
           schema:
             "$ref": "#/definitions/DemoChartInfoListResponse"
+  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/chartinfo/ethnicity":
+    parameters:
+      - "$ref": "#/parameters/workspaceNamespace"
+      - "$ref": "#/parameters/workspaceId"
+    post:
+      tags:
+      - cohortBuilder
+      consumes:
+      - application/json
+      description: Searches for ethnicity info about subjects.
+      operationId: findEthnicityInfo
+      parameters:
+      - in: body
+        name: request
+        description: object of parameters by which to perform the search
+        schema:
+          "$ref": "#/definitions/SearchRequest"
+        required: true
+      responses:
+        200:
+          description: A collection of ethnicity and counts
+          schema:
+            "$ref": "#/definitions/EthnicityInfoListResponse"
   "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/demographics":
     parameters:
       - "$ref": "#/parameters/workspaceNamespace"
@@ -6289,6 +6326,7 @@ definitions:
       - accessTierShortName
       - permission
       - lastModifiedEpochMillis
+      - adminLocked
     properties:
       workspaceId:
         type: integer
@@ -6319,6 +6357,10 @@ definitions:
         description: the resource's last modified time, in milliseconds since the epoch
         type: integer
         format: int64
+      adminLocked:
+        type: boolean
+        default: false
+        description: Whether an administrator has prevented most actions on the workspace for all users
   RecentResourceRequest:
     type: object
     properties:
@@ -8379,6 +8421,28 @@ definitions:
         description: number of subjects
         type: integer
         format: int64
+  EthnicityInfoListResponse:
+    type: object
+    required:
+      - items
+    properties:
+      items:
+        type: array
+        items:
+          "$ref": "#/definitions/EthnicityInfo"
+  EthnicityInfo:
+    type: object
+    required:
+    - ethnicity
+    - count
+    properties:
+      ethnicity:
+        description: ethnicity of subject
+        type: string
+      count:
+        description: number of subjects
+        type: integer
+        format: int64
   ParticipantDemographics:
     type: object
     required:
@@ -8826,11 +8890,6 @@ definitions:
         type: string
         format: date-time
         description: Time Compliance Training completed, or null if never completed.
-      complianceTrainingExpirationTime:
-        type: string
-        format: date-time
-        description: Time  User's compliance training will expire, or null training
-          not taken or if bypassed
       contactEmail:
         type: string
         description: User's external email address on file.

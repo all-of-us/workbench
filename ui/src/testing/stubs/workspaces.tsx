@@ -48,7 +48,8 @@ export function buildWorkspaceStub(suffix = ''): Workspace {
       needsReviewPrompt: false
     },
     published: false,
-    billingAccountName: 'billing-account'
+    billingAccountName: 'billing-account',
+    adminLocked: false
   };
 }
 
