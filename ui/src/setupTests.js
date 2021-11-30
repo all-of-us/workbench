@@ -8,7 +8,6 @@ require('mutationobserver-shim');
  */
 const enzyme = require("enzyme");
 const Adapter = require("enzyme-adapter-react-16");
-const reactDOM = require("react-dom");
 
 const {setupCustomValidators} = require('app/services/setup');
 const {stubPopupDimensions} = require('app/components/popups');
