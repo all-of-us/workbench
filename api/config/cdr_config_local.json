@@ -7,7 +7,8 @@
       "servicePerimeter": "accessPolicies/228353087260/servicePerimeters/terra_dev_aou_test",
       "authDomainName": "all-of-us-registered-test",
       "authDomainGroupEmail": "GROUP_all-of-us-registered-test@dev.test.firecloud.org",
-      "datasetsBucket": "gs://fc-aou-test-datasets-registered/"
+      "datasetsBucket": "gs://fc-aou-test-datasets-registered/",
+      "enableUserWorkflow": false
     },
     {
       "accessTierId": 2,
@@ -16,7 +17,8 @@
       "servicePerimeter": "accessPolicies/228353087260/servicePerimeters/terra_dev_aou_test_2",
       "authDomainName": "all-of-us-test-prototype-3",
       "authDomainGroupEmail": "all-of-us-test-prototype-3@dev.test.firecloud.org",
-      "datasetsBucket": "gs://fc-aou-test-datasets-controlled/"
+      "datasetsBucket": "gs://fc-aou-test-datasets-controlled/",
+      "enableUserWorkflow": true
     }
   ],
   "cdrVersions": [

@@ -191,7 +191,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       throw e;
     }
     if (workbenchConfigProvider.get().featureFlags.grantLifescienceApiRunnerAcl
-        && accessTier.getShortName().equals(CONTROLLED_TIER_SHORT_NAME)) {
+        && CONTROLLED_TIER_SHORT_NAME.equals(accessTier.getShortName())) {
       iamService.grantWorkflowRunnerRole(dbWorkspace.getGoogleProject());
     }
     final Workspace createdWorkspace = workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace);
@@ -448,7 +448,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     // Grant the workspace cloner and all from-workspaces users permission to use workflow if
     // workspace is controlled tier workspace.
     if (workbenchConfigProvider.get().featureFlags.grantLifescienceApiRunnerAcl
-        && accessTier.getShortName().equals(CONTROLLED_TIER_SHORT_NAME)) {
+        && CONTROLLED_TIER_SHORT_NAME.equals(accessTier.getShortName())) {
       iamService.grantWorkflowRunnerRole(dbWorkspace.getGoogleProject());
       for (Map.Entry<String, WorkspaceAccessLevel> entry : clonedRoles.entrySet()) {
         if (shouldGrantWorkflowRunnerAsService(user, entry)) {

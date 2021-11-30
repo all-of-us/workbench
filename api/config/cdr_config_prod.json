@@ -7,7 +7,8 @@
       "servicePerimeter": "accessPolicies/357236995176/servicePerimeters/terra_prod_aou_prod",
       "authDomainName": "all-of-us-registered-prod",
       "authDomainGroupEmail": "all-of-us-registered-prod@firecloud.org",
-      "datasetsBucket": "gs://fc-aou-datasets-registered/"
+      "datasetsBucket": "gs://fc-aou-datasets-registered/",
+      "enableUserWorkflow": false
     }
   ],
   "cdrVersions": [
