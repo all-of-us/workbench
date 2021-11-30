@@ -1503,8 +1503,6 @@ paths:
     post:
       tags:
         - workspaceAdmin
-      consumes:
-        - application/json
       description: Set admin unlocked state for the workspace
       operationId: setAdminUnlockedState
       responses:
