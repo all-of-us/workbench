@@ -11,6 +11,7 @@ import {ClrIcon} from 'app/components/icons';
 import {TextInput} from 'app/components/inputs';
 import {TooltipTrigger} from 'app/components/popups';
 import {Spinner, SpinnerOverlay} from 'app/components/spinners';
+import {AoU} from 'app/components/text-wrappers';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, validateInputForMySQL, withCdrVersions, withCurrentConcept, withCurrentWorkspace} from 'app/utils';
@@ -231,6 +232,13 @@ const columns = [
 ];
 
 const searchTrigger = 2;
+const sourceStandardTooltip = <span>
+  The <AoU/> program receives EHR data from a number of healthcare provider sources across the United States. These sources may code
+  patient health data using a variety of vocabularies, such as ICD10 or SNOMED for conditions. To simplify analysis, the <AoU/> dataset
+  offers a single standardized vocabulary for each domain (e.g. SNOMED for conditions), and corresponding codes from all source
+  vocabularies are mapped to the standard. Therefore, we recommend most users use the standardized items in defining their dataset.
+  However, if you do not wish to rely on this standardization, you may select concepts as coded in the source data.
+</span>;
 
 interface Props {
   cdrVersionTiersResponse: CdrVersionTiersResponse;
@@ -603,6 +611,9 @@ export const ListSearch = fp.flow(withCdrVersions(), withCurrentWorkspace(), wit
                 <span style={{float: 'right'}}>
                   <span style={{display: 'table-cell', paddingRight: '0.35rem'}}>
                     Show results as source concepts (ICD9, ICD10{domain === Domain.PROCEDURE && <span>, CPT</span>})
+                    <TooltipTrigger side='top' content={<div>{sourceStandardTooltip}</div>}>
+                      <ClrIcon style={styles.infoIcon} className='is-solid' shape='info-standard'/>
+                    </TooltipTrigger>
                   </span>
                   <InputSwitch checked={searchSource}
                                disabled={loading}
