@@ -17,6 +17,9 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.exceptions.NotImplementedException;
+import org.pmiops.workbench.model.AuditEgressEventRequest;
+import org.pmiops.workbench.model.AuditEgressEventResponse;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.EgressEvent;
 import org.pmiops.workbench.model.EgressEventStatus;
@@ -153,5 +156,12 @@ public class EgressEventsAdminController implements EgressEventsAdminApiDelegate
     egressEventAuditor.fireAdminEditEgressEvent(dbEgressEvent, updatedEvent);
 
     return ResponseEntity.ok(egressEventMapper.toApiEvent(updatedEvent));
+  }
+
+  @AuthorityRequired(Authority.SECURITY_ADMIN)
+  @Override
+  public ResponseEntity<AuditEgressEventResponse> auditEgressEvent(
+      String id, AuditEgressEventRequest request) {
+    throw new NotImplementedException();
   }
 }
