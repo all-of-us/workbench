@@ -18,7 +18,7 @@ TBL_CBC=$(createTmpTable $TBL_CBC)
 
 echo "PHYSICAL MEASUREMENTS - CONCEPT SET"
 bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
-"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
     (
           id
         , parent_id
@@ -39,7 +39,7 @@ bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
     )
 SELECT
       ROW_NUMBER() OVER (ORDER BY concept_name)
-       + (SELECT COALESCE(MAX(id),$CB_CRITERIA_START_ID) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID ) AS id
+       + (SELECT COALESCE(MAX(id),$CB_CRITERIA_START_ID) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` WHERE id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID ) AS id
     , -1
     , 'PHYSICAL_MEASUREMENT_CSS'
     , 0
@@ -55,7 +55,7 @@ SELECT
     , 0
     , 0
     , CAST(ROW_NUMBER() OVER (ORDER BY concept_name)
-        + (SELECT COALESCE(MAX(id),$CB_CRITERIA_START_ID) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` where id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID) as STRING)
+        + (SELECT COALESCE(MAX(id),$CB_CRITERIA_START_ID) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` where id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID) as STRING)
 FROM
     (
         SELECT *

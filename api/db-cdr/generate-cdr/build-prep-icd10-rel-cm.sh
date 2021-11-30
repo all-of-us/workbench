@@ -101,16 +101,16 @@ done
 
 echo "ICD10CM - SOURCE - temp table inserting level 0"
 bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
-"CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.prep_icd10_rel_src_in_data\`
-    (
-        p_concept_id    INT64,
-        p_concept_code  STRING,
-        p_concept_name  STRING,
-        concept_id      INT64,
-        concept_code    STRING,
-        concept_name    STRING
-    )
-AS SELECT *
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_icd10_rel_src_in_data\`
+      (
+            p_concept_id
+          , p_concept_code
+          , p_concept_name
+          , concept_id
+          , concept_code
+          , concept_name
+      )
+SELECT *
 FROM \`$BQ_PROJECT.$BQ_DATASET.prep_icd10_rel_cm_src\`
 WHERE concept_id in
     (

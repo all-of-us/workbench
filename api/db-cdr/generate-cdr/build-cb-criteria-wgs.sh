@@ -32,7 +32,7 @@ bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
         , has_hierarchy
     )
 SELECT
-    (SELECT COALESCE(MAX(id),$CB_CRITERIA_START_ID) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID ) + 1  AS id
+    (SELECT COALESCE(MAX(id),$CB_CRITERIA_START_ID) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` WHERE id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID ) + 1  AS id
     , -1
     , 'WHOLE_GENOME_VARIANT'
     , 1

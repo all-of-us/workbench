@@ -116,7 +116,7 @@ FROM
         WHERE observation_concept_id in
             (
                 SELECT concept_id
-                FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+                FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
                 WHERE domain_id = 'OBSERVATION'
                     and is_group = 0
             )
@@ -136,7 +136,7 @@ FROM
         WHERE observation_concept_id in
             (
                 SELECT concept_id
-                FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+                FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
                 WHERE domain_id = 'OBSERVATION'
                     and is_group = 0
             )
@@ -177,7 +177,7 @@ FROM
         WHERE observation_concept_id in
             (
                 SELECT concept_id
-                FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+                FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
                 WHERE domain_id = 'OBSERVATION'
                     and is_group = 0
             )
