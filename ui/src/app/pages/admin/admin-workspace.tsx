@@ -365,7 +365,7 @@ export class AdminWorkspaceImpl extends React.Component<Props, State> {
   }
 
 
-  async lockSuccessfulWorkspace() {
+  async reloadWorkspaceStatus() {
     this.setState({loadingLockUnlockStatus: true});
     await this.getFederatedWorkspaceInformation();
     this.setState({loadingLockUnlockStatus: false});
@@ -390,7 +390,7 @@ export class AdminWorkspaceImpl extends React.Component<Props, State> {
     return <div style={{marginTop: '1rem', marginBottom: '1rem'}}>
       {showLockWorkspaceModal && <AdminLockRequest
           workspace={workspace.namespace}
-          onLock={() => {this.lockSuccessfulWorkspace()}}
+          onLock={() => {this.reloadWorkspaceStatus()}}
           onClose={() => {this.setState({showLockWorkspaceModal: false})}}/>}
       {dataLoadError &&
         <ErrorDiv>
@@ -409,7 +409,7 @@ export class AdminWorkspaceImpl extends React.Component<Props, State> {
                         onClick={() => this.lockUnlockWorkspace(workspace.adminLocked)}>
                   <FlexRow>
                     <div style={{paddingRight: '0.3rem'}}>{loadingLockUnlockStatus && <Spinner style={{width: 20, height: 18}}/>}</div>
-                        {workspace.adminLocked ? 'UNLOCK WORKSPACE' : 'LOCK WORKSPACE'}
+                    {workspace.adminLocked ? 'UNLOCK WORKSPACE' : 'LOCK WORKSPACE'}
                 </FlexRow>
               </Button>
               </FlexColumn>
