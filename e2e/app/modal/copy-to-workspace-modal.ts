@@ -59,7 +59,7 @@ export default class CopyToWorkspaceModal extends Modal {
    */
   async copyToAnotherWorkspace(workspaceName: string, newName?: string): Promise<void> {
     await this.beginCopyToAnotherWorkspace(workspaceName, newName);
-    await this.clickButton(LinkText.Copy);
+    await this.clickButton(LinkText.Copy, { waitForClose: true });
     await waitWhileLoading(this.page);
   }
 
