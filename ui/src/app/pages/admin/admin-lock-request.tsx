@@ -53,13 +53,13 @@ export const AdminLockRequest = (props: Props) => {
        {showError && <label style={{color: colors.danger}}>
          Something went Wrong while Locking the workspace.
        </label>}
+
+       {/* Text area to enter the reason for locking workspace */}
        <div>
          <label style={{fontWeight: 'bold', color: colors.primary}}>
            Enter reason for researcher on why workspace access is locked
          </label>
        </div>
-
-       {/* Text area to enter the reason for locking workspace */}
        <div style={{paddingTop: '0.3rem', paddingBottom: '1rem'}}>
          <label style={{color: colors.primary, paddingBottom: '0.3rem'}}>
            <i>Any message in the input box will automatically be sent to researcher when the
