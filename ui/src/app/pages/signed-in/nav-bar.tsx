@@ -1,21 +1,17 @@
 import * as React from 'react';
+import {useEffect, useRef, useState} from 'react';
 
 import {AccessRenewalNotificationMaybe} from 'app/pages/signed-in/access-renewal-notification';
 import {Breadcrumb} from 'app/components/breadcrumb';
-import {Button} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
 import {LoginGovIAL2NotificationMaybe} from 'app/pages/signed-in/login-gov-ial2-notification';
 import {SideNav} from 'app/components/side-nav';
-import {StatusAlertBanner} from 'app/components/status-alert-banner';
-import {statusAlertApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
-import {cookiesEnabled} from 'app/utils/cookies';
 import {profileStore, ProfileStore, useStore} from 'app/utils/stores';
 import {environment} from 'environments/environment';
-import {useEffect, useRef, useState} from 'react';
-
 import logo from 'assets/images/all-of-us-logo.svg'
+import {StatusAlertBannerMaybe} from 'app/components/status-alert-banner-maybe';
 
 const styles = reactStyles({
   headerContainer: {
@@ -89,47 +85,12 @@ export interface State {
 const barsTransformNotRotated = 'rotate(0deg)';
 const barsTransformRotated = 'rotate(90deg)';
 
-const cookieKey = 'status-alert-banner-dismissed';
-
-const shouldShowStatusAlert = (statusAlertId, statusAlertMessage) => {
-  if (cookiesEnabled()) {
-    const cookie = localStorage.getItem(cookieKey);
-    return (!cookie || (cookie && cookie !== `${statusAlertId}`)) && !!statusAlertMessage;
-  } else {
-    return !!statusAlertMessage;
-  }
-};
-
 export const NavBar = () => {
   const [showSideNav, setShowSideNav] = useState(false);
-  const [showStatusAlert, setShowStatusAlert] = useState(false);
-  const [statusAlertDetails, setStatusAlertDetails] = useState({
-    statusAlertId: 0,
-    title: '',
-    message: '',
-    link: ''
-  });
   const [barsTransform, setBarsTransform] = useState(barsTransformNotRotated);
   const [hovering, setHovering] = useState(false);
   const wrapperRef = useRef(null);
   const {profile} = useStore(profileStore);
-
-  useEffect(() => {
-    const getAlert = async() => {
-      const statusAlert = await statusAlertApi().getStatusAlert();
-      if (!!statusAlert) {
-        setShowStatusAlert(shouldShowStatusAlert(statusAlert.statusAlertId, statusAlert.message));
-        setStatusAlertDetails({
-          statusAlertId: statusAlert.statusAlertId,
-          title: statusAlert.title,
-          message: statusAlert.message,
-          link: statusAlert.link
-        });
-      }
-    };
-
-    getAlert();
-  }, []);
 
   const onToggleSideNav = () => {
     setShowSideNav(!showSideNav);
@@ -156,13 +117,6 @@ export const NavBar = () => {
       document.removeEventListener('click', onClickOutside);
     };
   });
-
-  const onStatusAlertBannerUnmount = () => {
-    if (cookiesEnabled()) {
-      localStorage.setItem(cookieKey, `${statusAlertDetails.statusAlertId}`);
-    }
-    setShowStatusAlert(false);
-  };
 
   return <div
       style={styles.headerContainer}
@@ -202,20 +156,7 @@ export const NavBar = () => {
     <Breadcrumb/>
     {window.location.pathname !== '/access-renewal' && <AccessRenewalNotificationMaybe/>}
     {window.location.pathname !== '/data-access-requirements' && <LoginGovIAL2NotificationMaybe/>}
-    {
-      showStatusAlert && <StatusAlertBanner
-          title={statusAlertDetails.title}
-          message={statusAlertDetails.message}
-          footer={
-            statusAlertDetails.link &&
-            <Button data-test-id='status-banner-read-more-button'
-                    onClick={() => window.open(statusAlertDetails.link, '_blank')}>
-              READ MORE
-            </Button>
-          }
-          onClose={onStatusAlertBannerUnmount}
-      />
-    }
+    <StatusAlertBannerMaybe/>
     {
       showSideNav
       && <SideNav
