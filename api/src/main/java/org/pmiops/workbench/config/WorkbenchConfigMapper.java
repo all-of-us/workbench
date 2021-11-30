@@ -6,7 +6,6 @@ import org.mapstruct.BeforeMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
-import org.mapstruct.Named;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeConfig.CloudServiceEnum;
 import org.pmiops.workbench.model.ConfigResponse;
 import org.pmiops.workbench.model.RuntimeImage;
@@ -14,12 +13,10 @@ import org.pmiops.workbench.utils.mappers.MapStructConfig;
 
 @Mapper(config = MapStructConfig.class)
 public interface WorkbenchConfigMapper {
-  @Named("dataprocToModel")
   default RuntimeImage dataprocToModel(String imageName) {
     return new RuntimeImage().cloudService(CloudServiceEnum.DATAPROC.toString()).name(imageName);
   }
 
-  @Named("gceToModel")
   default RuntimeImage gceToModel(String imageName) {
     return new RuntimeImage().cloudService(CloudServiceEnum.GCE.toString()).name(imageName);
   }
