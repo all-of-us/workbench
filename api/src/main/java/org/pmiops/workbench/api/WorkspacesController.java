@@ -189,7 +189,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       throw e;
     }
     if (accessTier.getEnableUserWorkflow()) {
-      iamService.grantWorkflowRunnerRole(dbWorkspace.getGoogleProject());
+      iamService.grantWorkflowRunnerRoleToCurrentUser(dbWorkspace.getGoogleProject());
     }
     final Workspace createdWorkspace = workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace);
     workspaceAuditor.fireCreateAction(createdWorkspace, dbWorkspace.getWorkspaceId());
@@ -445,10 +445,10 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     // Grant the workspace cloner and all from-workspaces users permission to use workflow if
     // workspace is controlled tier workspace.
     if (accessTier.getEnableUserWorkflow()) {
-      iamService.grantWorkflowRunnerRole(dbWorkspace.getGoogleProject());
+      iamService.grantWorkflowRunnerRoleToCurrentUser(dbWorkspace.getGoogleProject());
       for (Map.Entry<String, WorkspaceAccessLevel> entry : clonedRoles.entrySet()) {
         if (shouldGrantWorkflowRunnerAsService(user, entry)) {
-          iamService.grantWorkflowRunnerRoleAsService(
+          iamService.grantWorkflowRunnerRole(
               dbWorkspace.getGoogleProject(), entry.getKey());
         }
       }
@@ -527,10 +527,14 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         workspaceService.getFirecloudUserRoles(workspaceNamespace, dbWorkspace.getFirecloudName());
     resp.setItems(updatedUserRoles);
 
+    // Currently we only grant user workflow permissions for new writer/owners withtout removing
+    // them when unshare. TODO(RW-7615): Revoke workflow permissions when unshare. It might not be
+    // a issue because: (1) Only User pet SA can actAs pet SA. (2) After unshare, user is not able
+    // to access the pet SA in workbench.
     if (dbWorkspace.getCdrVersion().getAccessTier().getEnableUserWorkflow()) {
       for (Map.Entry<String, WorkspaceAccessLevel> entry : aclsByEmail.entrySet()) {
         if (shouldGrantWorkflowRunnerAsService(userProvider.get(), entry)) {
-          iamService.grantWorkflowRunnerRoleAsService(
+          iamService.grantWorkflowRunnerRole(
               dbWorkspace.getGoogleProject(), entry.getKey());
         }
       }

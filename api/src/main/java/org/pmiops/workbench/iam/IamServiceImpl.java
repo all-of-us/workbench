@@ -20,6 +20,8 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class IamServiceImpl implements IamService {
+  private static final String SERVICE_ACCOUNT_USER_ROLE = "roles/iam.serviceAccountUser";
+  private static final String LIFESCIENCE_RUNNER_ROLE = "roles/lifesciences.workflowsRunner";
 
   private final SamApiClientFactory samApiClientFactory;
   private final CloudIamClient cloudIamClient;
@@ -42,7 +44,7 @@ public class IamServiceImpl implements IamService {
   }
 
   @Override
-  public void grantWorkflowRunnerRole(String googleProject) {
+  public void grantWorkflowRunnerRoleToCurrentUser(String googleProject) {
     String petServiceAccountName =
         getOrCreatePetServiceAccount(googleProject, endUserGoogleApiProvider.get());
     grantServiceAccountUserRole(googleProject, petServiceAccountName);
@@ -50,7 +52,7 @@ public class IamServiceImpl implements IamService {
   }
 
   @Override
-  public void grantWorkflowRunnerRoleAsService(String googleProject, String userEmail) {
+  public void grantWorkflowRunnerRole(String googleProject, String userEmail) {
     GoogleApi googleApiAsImpersonatedUser = new GoogleApi();
     try {
       googleApiAsImpersonatedUser.setApiClient(
@@ -74,11 +76,10 @@ public class IamServiceImpl implements IamService {
 
   private void grantServiceAccountUserRole(String googleProject, String petServiceAccount) {
     Policy policy = cloudIamClient.getServiceAccountIamPolicy(googleProject, petServiceAccount);
-    final String serviceAccountUserRole = "roles/iam.serviceAccountUser";
     List<Binding> bindingList = Optional.ofNullable(policy.getBindings()).orElse(new ArrayList<>());
     bindingList.add(
         new Binding()
-            .setRole(serviceAccountUserRole)
+            .setRole(SERVICE_ACCOUNT_USER_ROLE)
             .setMembers(Collections.singletonList("serviceAccount:" + petServiceAccount)));
     cloudIamClient.setServiceAccountIamPolicy(
         googleProject, petServiceAccount, policy.setBindings(bindingList));
@@ -87,12 +88,11 @@ public class IamServiceImpl implements IamService {
   private void grantLifeScienceRunnerRole(String googleProject, String petServiceAccount) {
     com.google.api.services.cloudresourcemanager.model.Policy policy =
         cloudResourceManagerService.getIamPolicy(googleProject);
-    final String lifescienceRunnerRole = "roles/lifesciences.workflowsRunner";
     List<com.google.api.services.cloudresourcemanager.model.Binding> bindingList =
         Optional.ofNullable(policy.getBindings()).orElse(new ArrayList<>());
     bindingList.add(
         new com.google.api.services.cloudresourcemanager.model.Binding()
-            .setRole(lifescienceRunnerRole)
+            .setRole(LIFESCIENCE_RUNNER_ROLE)
             .setMembers(Collections.singletonList("serviceAccount:" + petServiceAccount)));
     cloudResourceManagerService.setIamPolicy(googleProject, policy.setBindings(bindingList));
   }
