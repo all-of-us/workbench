@@ -274,7 +274,8 @@ public class TestMockFactory {
             .setDisplayName("Registered Tier")
             .setAuthDomainName("Registered Tier Auth Domain")
             .setAuthDomainGroupEmail("rt-users@fake-research-aou.org")
-            .setServicePerimeter("registered/tier/perimeter");
+            .setServicePerimeter("registered/tier/perimeter")
+            .setEnableUserWorkflow(false);
     return accessTierDao.save(accessTier);
   }
 
@@ -286,7 +287,8 @@ public class TestMockFactory {
             .setDisplayName("Controlled Tier")
             .setAuthDomainName("Controlled Tier Auth Domain")
             .setAuthDomainGroupEmail("ct-users@fake-research-aou.org")
-            .setServicePerimeter("controlled/tier/perimeter"));
+            .setServicePerimeter("controlled/tier/perimeter")
+            .setEnableUserWorkflow(true));
   }
 
   public static void removeControlledTierForTests(AccessTierDao accessTierDao) {
