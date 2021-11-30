@@ -85,4 +85,17 @@ describe('WorkspaceLibrary', () => {
     expect(cardNameList).toEqual([publishedWorkspaceStubs[2].name]);
   });
 
+  it('should have tutorial workspaces as default tab', async () => {
+    const publishedWorkspaceStubs = buildWorkspaceStubs(suffixes).map(w => ({
+      ...w,
+      published: true
+    }));
+    registerApiClient(WorkspacesApi, new WorkspacesApiStub(publishedWorkspaceStubs));
+    const wrapper = component();
+    await waitOneTickAndUpdate(wrapper);
+    const cardNameList = wrapper.find('[data-test-id="workspace-card-name"]')
+        .map(c => c.text());
+    expect(cardNameList).toEqual([publishedWorkspaceStubs[1].name]);
+  });
+
 });
