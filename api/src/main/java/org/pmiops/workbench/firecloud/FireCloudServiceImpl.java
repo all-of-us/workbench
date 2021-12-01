@@ -190,7 +190,7 @@ public class FireCloudServiceImpl implements FireCloudService {
   }
 
   @Override
-  public void registerUser(String contactEmail, String firstName, String lastName) {
+  public void registerUser(String firstName, String lastName) {
     ProfileApi profileApi = profileApiProvider.get();
     FirecloudProfile profile = new FirecloudProfile();
     profile.setFirstName(firstName);
