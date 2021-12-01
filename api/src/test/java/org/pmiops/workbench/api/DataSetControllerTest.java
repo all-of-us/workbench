@@ -911,8 +911,7 @@ public class DataSetControllerTest {
 
   @Test
   public void exportToNotebook_wgsCodegen_cdrCheck() {
-    DbCdrVersion cdrVersion =
-        cdrVersionDao.findByCdrVersionId(Long.parseLong(workspace.getCdrVersionId()));
+    DbCdrVersion cdrVersion = findCdrVersionOrThrow(workspace);
     cdrVersion.setWgsBigqueryDataset(null);
     cdrVersionDao.save(cdrVersion);
 
@@ -932,8 +931,7 @@ public class DataSetControllerTest {
 
   @Test
   public void exportToNotebook_wgsCodegen_kernelCheck() {
-    DbCdrVersion cdrVersion =
-        cdrVersionDao.findByCdrVersionId(Long.parseLong(workspace.getCdrVersionId()));
+    DbCdrVersion cdrVersion = findCdrVersionOrThrow(workspace);
     cdrVersion.setWgsBigqueryDataset("wgs");
     cdrVersionDao.save(cdrVersion);
 
@@ -1201,5 +1199,12 @@ public class DataSetControllerTest {
         .newNotebook(true)
         .notebookName(notebookName)
         .kernelType(KernelTypeEnum.PYTHON);
+  }
+
+  private DbCdrVersion findCdrVersionOrThrow(Workspace workspace) {
+    String id = workspace.getCdrVersionId();
+    return cdrVersionDao
+        .findById(Long.parseLong(id))
+        .orElseThrow(() -> new NotFoundException(String.format("CDR Version ID %s not found", id)));
   }
 }
