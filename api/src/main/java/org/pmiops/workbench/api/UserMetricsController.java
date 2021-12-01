@@ -4,14 +4,13 @@ import com.google.cloud.storage.BlobId;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Streams;
 import com.google.common.primitives.Longs;
 import java.util.AbstractMap;
-import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Level;
@@ -148,18 +147,13 @@ public class UserMetricsController implements UserMetricsApiDelegate {
 
     final Map<Long, DbWorkspace> idToDbWorkspace =
         workspaceIdList.stream()
-            .map(
-                id ->
-                    workspaceDao
-                        .findActiveByWorkspaceId(id)
-                        .map(
-                            dbWorkspace ->
-                                new AbstractMap.SimpleImmutableEntry<>(
-                                    dbWorkspace.getWorkspaceId(), dbWorkspace)))
+            .map(workspaceDao::findActiveByWorkspaceId)
             .flatMap(Streams::stream)
-            .collect(
-                ImmutableMap.toImmutableMap(
-                    SimpleImmutableEntry::getKey, SimpleImmutableEntry::getValue));
+            .map(
+                dbWorkspace ->
+                    new AbstractMap.SimpleImmutableEntry<>(
+                        dbWorkspace.getWorkspaceId(), dbWorkspace))
+            .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
 
     final Map<Long, FirecloudWorkspaceResponse> idToFirecloudWorkspace =
         idToDbWorkspace.entrySet().stream()
@@ -172,9 +166,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
                                 new AbstractMap.SimpleImmutableEntry<>(
                                     entry.getKey(), workspaceResponse)))
             .flatMap(Streams::stream)
-            .collect(
-                ImmutableMap.toImmutableMap(
-                    SimpleImmutableEntry::getKey, SimpleImmutableEntry::getValue));
+            .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
 
     final ImmutableList<DbUserRecentlyModifiedResource> workspaceFilteredResources =
         userRecentlyModifiedResourceList.stream()
