@@ -9,7 +9,7 @@ if (JavaVersion.current() != JavaVersion.VERSION_1_8) {
 // process itself.
 buildscript {
     // External properties on the default project. Values declared in ext blocks
-    // outside of the buildscsript block aren't usable here.
+    // outside of the buildscript block aren't usable here.
     ext {
         GAE_VERSION = '1.9.92'
         GSON_VERSION = '2.8.9'
@@ -22,9 +22,8 @@ buildscript {
         OKHTTP_VERSION = '2.7.5'
         OPENCENSUS_VERSION = '0.23.0'
         SPRINGFOX_VERSION = '2.6.1'
-        SPRING_BOOT_VERSION = '2.3.9.RELEASE'
+        SPRING_BOOT_VERSION = '2.3.12.RELEASE'
         SPRING_DEPENDENCY_MANAGEMENT_VERSION = '1.0.11.RELEASE'
-        SPRING_SECURITY_VERSION = '4.2.18.RELEASE'
         SWAGGER_2_CODEGEN_VERSION = '2.2.3'
         SWAGGER_3_CODEGEN_VERSION = '3.0.21'
     }
@@ -383,7 +382,7 @@ dependencies {
     __swaggerCodegenV2__ "io.swagger:swagger-codegen-cli:$project.ext.SWAGGER_2_CODEGEN_VERSION"
     __swaggerCodegenV3__ "io.swagger.codegen.v3:swagger-codegen-cli:$project.ext.SWAGGER_3_CODEGEN_VERSION"
 
-    compile "ch.qos.logback:logback-classic:1.2.3"
+    compile "ch.qos.logback:logback-classic:1.2.7"
     compile "com.fasterxml.jackson.core:jackson-annotations:$project.ext.JACKSON_VERSION"
     compile "com.fasterxml.jackson.core:jackson-core:$project.ext.JACKSON_VERSION"
     compile "com.fasterxml.jackson.core:jackson-databind:$project.ext.JACKSON_DATABIND_VERSION"
@@ -424,7 +423,7 @@ dependencies {
     compile "io.swagger:swagger-annotations:1.5.16"
     compile "javax.inject:javax.inject:1"
     compile "joda-time:joda-time:$project.ext.JODA_VERSION"
-    compile "org.liquibase:liquibase-core:3.10.0"
+    compile "org.liquibase:liquibase-core:3.10.3"
     compile "mysql:mysql-connector-java:8.0.27"
     compile "org.apache.commons:commons-collections4:4.4"
     compile "org.apache.commons:commons-lang3:3.6"

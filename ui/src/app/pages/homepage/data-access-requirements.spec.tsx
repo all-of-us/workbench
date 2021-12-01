@@ -484,8 +484,7 @@ describe('DataAccessRequirements', () => {
 
     // regression tests for RW-7384: sync external modules to gain access
 
-    // TODO(RW-7610): Fix timeout flake and re-enable.
-    test.skip('should sync incomplete external modules', async() => {
+    it('should sync incomplete external modules', async() => {
         // profile contains no completed modules, so we sync all (2FA, ERA, Compliance)
         const spy2FA = jest.spyOn(profileApi(), 'syncTwoFactorAuthStatus');
         const spyERA = jest.spyOn(profileApi(), 'syncEraCommonsStatus');
@@ -499,8 +498,7 @@ describe('DataAccessRequirements', () => {
         expect(spyCompliance).toHaveBeenCalledTimes(1);
      });
 
-    // TODO(RW-7610): Fix timeout flake and re-enable.
-    test.skip('should not sync complete external modules', async() => {
+    it('should not sync complete external modules', async() => {
         profileStore.set({
             profile: {
                 ...ProfileStubVariables.PROFILE_STUB,

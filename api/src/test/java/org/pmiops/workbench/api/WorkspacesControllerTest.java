@@ -2207,7 +2207,7 @@ public class WorkspacesControllerTest {
         .removeOwnerFromBillingProject(any(), any(), eq(Optional.empty()));
     verify(mockIamService)
         .grantWorkflowRunnerRoleToUsers(
-            CLONE_GOOGLE_PROJECT_ID,
+            DEFAULT_GOOGLE_PROJECT,
             ImmutableList.of(writerUser.getUsername(), ownerUser.getUsername()));
   }
 

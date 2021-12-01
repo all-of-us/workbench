@@ -189,7 +189,8 @@
   <include file="changelog/db.changelog-177-add-egress-event-table.xml"/>
   <include file="changelog/db.changelog-178-add-compute-security-suspended-column.xml"/>
   <include file="changelog/db.changelog-179-add-workspace-admin-locked-column.xml"/>
-  <include file="changelog/db.changelog-180-access-tier-add-enable-workflow-column.xml"/>
+  <include file="changelog/db.changelog-180-remove-period-from-institution-short-name.xml"/>
+  <include file="changelog/db.changelog-181-access-tier-add-enable-workflow-column.xml"/>
   <!--
    Note: to update the DB locally, do the following:
    - Migrate schema changes: `./project.rb run-local-all-migrations`
