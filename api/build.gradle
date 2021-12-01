@@ -198,6 +198,10 @@ swaggerSources {
             '--model-name-prefix', 'Leonardo'
     ])
 
+    sam swagger3JavaClient("sam.yaml", "sam", [
+            '--model-name-prefix', 'Sam'
+    ])
+
     // Workbench needs a special configuration style, as we generate Spring server
     // bindings in this case.
     workbench {
@@ -391,6 +395,7 @@ dependencies {
     compile "com.google.apis:google-api-services-cloudbilling:v1-rev20211106-1.32.1"
     compile "com.google.apis:google-api-services-cloudresourcemanager:v1-rev572-1.25.0"
     compile "com.google.apis:google-api-services-oauth2:v2-rev156-1.25.0"
+    compile "com.google.apis:google-api-services-iam:v1-rev20211104-1.32.1"
     compile "com.google.appengine:appengine-api-1.0-sdk:$project.ext.GAE_VERSION"
     compile "com.google.appengine:appengine:$project.ext.GAE_VERSION"
     compile "com.google.auth:google-auth-library-appengine:1.2.2"
