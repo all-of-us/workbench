@@ -50,7 +50,7 @@ export const CTAvailableBannerMaybe = () => {
     setShowBanner(false);
   };
 
-  const bannerBody = <div>
+  const bannerBody = <div data-test-id='controlled-tier-available'>
     To access genomic data and more in the <i>All of Us</i> controlled tier,
     <StyledRouterLink path={DAR_PATH}>complete the necessary steps</StyledRouterLink>.
   </div>;
