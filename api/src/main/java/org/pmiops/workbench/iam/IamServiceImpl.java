@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.google.CloudIamClient;
@@ -48,22 +49,26 @@ public class IamServiceImpl implements IamService {
     String petServiceAccountName =
         getOrCreatePetServiceAccount(googleProject, endUserGoogleApiProvider.get());
     grantServiceAccountUserRole(googleProject, petServiceAccountName);
-    grantLifeScienceRunnerRole(googleProject, petServiceAccountName);
+    grantLifeScienceRunnerRole(googleProject, Collections.singletonList(petServiceAccountName));
   }
 
   @Override
-  public void grantWorkflowRunnerRole(String googleProject, String userEmail) {
+  public void grantWorkflowRunnerRoleToUsers(String googleProject, List<String> userEmails) {
     GoogleApi googleApiAsImpersonatedUser = new GoogleApi();
     try {
-      googleApiAsImpersonatedUser.setApiClient(
-          samApiClientFactory.newImpersonatedApiClient(userEmail));
+      List<String> petServiceAccountsToGrantPermission = new ArrayList<>();
+      for (String userEmail : userEmails) {
+        googleApiAsImpersonatedUser.setApiClient(
+            samApiClientFactory.newImpersonatedApiClient(userEmail));
+        String petServiceAccountName =
+            getOrCreatePetServiceAccount(googleProject, googleApiAsImpersonatedUser);
+        petServiceAccountsToGrantPermission.add(petServiceAccountName);
+        grantServiceAccountUserRole(googleProject, petServiceAccountName);
+      }
+      grantLifeScienceRunnerRole(googleProject, petServiceAccountsToGrantPermission);
     } catch (IOException e) {
       throw new ServerErrorException(e);
     }
-    String petServiceAccountName =
-        getOrCreatePetServiceAccount(googleProject, googleApiAsImpersonatedUser);
-    grantServiceAccountUserRole(googleProject, petServiceAccountName);
-    grantLifeScienceRunnerRole(googleProject, petServiceAccountName);
   }
 
   /** Gets a Terra pet service account from SAM. SAM will create one if user does not have it. */
@@ -85,7 +90,8 @@ public class IamServiceImpl implements IamService {
         googleProject, petServiceAccount, policy.setBindings(bindingList));
   }
 
-  private void grantLifeScienceRunnerRole(String googleProject, String petServiceAccount) {
+  /** Grant life science runner role to list of service accounts. */
+  private void grantLifeScienceRunnerRole(String googleProject, List<String> petServiceAccounts) {
     com.google.api.services.cloudresourcemanager.model.Policy policy =
         cloudResourceManagerService.getIamPolicy(googleProject);
     List<com.google.api.services.cloudresourcemanager.model.Binding> bindingList =
@@ -93,7 +99,10 @@ public class IamServiceImpl implements IamService {
     bindingList.add(
         new com.google.api.services.cloudresourcemanager.model.Binding()
             .setRole(LIFESCIENCE_RUNNER_ROLE)
-            .setMembers(Collections.singletonList("serviceAccount:" + petServiceAccount)));
+            .setMembers(
+                petServiceAccounts.stream()
+                    .map(s -> "serviceAccount:" + s)
+                    .collect(Collectors.toList())));
     cloudResourceManagerService.setIamPolicy(googleProject, policy.setBindings(bindingList));
   }
 }

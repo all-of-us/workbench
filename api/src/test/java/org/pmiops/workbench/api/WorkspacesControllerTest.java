@@ -346,7 +346,6 @@ public class WorkspacesControllerTest {
   public void setUp() throws Exception {
     workbenchConfig = WorkbenchConfig.createEmptyConfig();
     workbenchConfig.featureFlags.enableBillingUpgrade = true;
-    workbenchConfig.featureFlags.grantLifescienceApiRunnerAcl = true;
     workbenchConfig.billing.accountId = "free-tier";
     workbenchConfig.billing.projectNamePrefix = "aou-local";
 
@@ -588,7 +587,7 @@ public class WorkspacesControllerTest {
     assertThat(retrievedWorkspace.getBillingAccountName())
         .isEqualTo(TestMockFactory.WORKSPACE_BILLING_ACCOUNT_NAME);
     verify(mockIamService, never()).grantWorkflowRunnerRoleToCurrentUser(anyString());
-    verify(mockIamService, never()).grantWorkflowRunnerRole(anyString(), anyString());
+    verify(mockIamService, never()).grantWorkflowRunnerRoleToUsers(anyString(), anyList());
   }
 
   @Test
@@ -2054,10 +2053,9 @@ public class WorkspacesControllerTest {
     verify(mockIamService).grantWorkflowRunnerRoleToCurrentUser(CLONE_GOOGLE_PROJECT_ID);
     // The name LOGGED_IN_USER_EMAIL is confusing. The actually logged in user is cloner,
     // LOGGED_IN_USER_EMAIL just a workspace owner
-    verify(mockIamService).grantWorkflowRunnerRole(CLONE_GOOGLE_PROJECT_ID, LOGGED_IN_USER_EMAIL);
-    verify(mockIamService).grantWorkflowRunnerRole(CLONE_GOOGLE_PROJECT_ID, writer.getUsername());
-    verify(mockIamService, never())
-        .grantWorkflowRunnerRole(CLONE_GOOGLE_PROJECT_ID, reader.getUsername());
+    verify(mockIamService)
+        .grantWorkflowRunnerRoleToUsers(
+            CLONE_GOOGLE_PROJECT_ID, ImmutableList.of(LOGGED_IN_USER_EMAIL, writer.getUsername()));
   }
 
   @Test
@@ -2142,7 +2140,7 @@ public class WorkspacesControllerTest {
     ArrayList<FirecloudWorkspaceACLUpdate> updateACLRequestList =
         convertUserRolesToUpdateAclRequestList(shareWorkspaceRequest.getItems());
     verify(fireCloudService).updateWorkspaceACL(any(), any(), eq(updateACLRequestList));
-    verify(mockIamService, never()).grantWorkflowRunnerRole(anyString(), anyString());
+    verify(mockIamService, never()).grantWorkflowRunnerRoleToUsers(anyString(), anyList());
   }
 
   @Test
@@ -2208,12 +2206,9 @@ public class WorkspacesControllerTest {
     verify(fireCloudService, never())
         .removeOwnerFromBillingProject(any(), any(), eq(Optional.empty()));
     verify(mockIamService)
-        .grantWorkflowRunnerRole(DEFAULT_GOOGLE_PROJECT, writerUser.getUsername());
-    verify(mockIamService).grantWorkflowRunnerRole(DEFAULT_GOOGLE_PROJECT, ownerUser.getUsername());
-    verify(mockIamService, never())
-        .grantWorkflowRunnerRole(DEFAULT_GOOGLE_PROJECT, readerUser.getUsername());
-    verify(mockIamService, never())
-        .grantWorkflowRunnerRole(DEFAULT_GOOGLE_PROJECT, LOGGED_IN_USER_EMAIL);
+        .grantWorkflowRunnerRoleToUsers(
+            CLONE_GOOGLE_PROJECT_ID,
+            ImmutableList.of(writerUser.getUsername(), ownerUser.getUsername()));
   }
 
   @Test

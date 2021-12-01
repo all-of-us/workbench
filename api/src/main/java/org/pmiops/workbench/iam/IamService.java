@@ -1,5 +1,7 @@
 package org.pmiops.workbench.iam;
 
+import java.util.List;
+
 public interface IamService {
   /**
    * Grants user permissions to run Google lifescience jobs to user in currenet context.
@@ -9,10 +11,10 @@ public interface IamService {
    */
   void grantWorkflowRunnerRoleToCurrentUser(String googleProject);
   /**
-   * Grants permissions to run Google lifescience jobs for the provideded user email.
+   * Grants permissions to run Google lifescience jobs for the provideded user email lists.
    *
    * <p>The users's Terra PET service account will get: lifescienceRunner and serviceAccountUser(on
    * the petSA itself).
    */
-  void grantWorkflowRunnerRole(String googleProject, String userEmail);
+  void grantWorkflowRunnerRoleToUsers(String googleProject, List<String> usersEmail);
 }

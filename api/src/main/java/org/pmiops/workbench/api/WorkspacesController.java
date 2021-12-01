@@ -446,11 +446,13 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     // workspace is controlled tier workspace.
     if (accessTier.getEnableUserWorkflow()) {
       iamService.grantWorkflowRunnerRoleToCurrentUser(dbWorkspace.getGoogleProject());
-      for (Map.Entry<String, WorkspaceAccessLevel> entry : clonedRoles.entrySet()) {
-        if (shouldGrantWorkflowRunnerAsService(user, entry)) {
-          iamService.grantWorkflowRunnerRole(dbWorkspace.getGoogleProject(), entry.getKey());
-        }
-      }
+      List<String> usersGainPermission =
+          clonedRoles.entrySet().stream()
+              .filter(entry -> shouldGrantWorkflowRunnerAsService(user, entry))
+              .map(Map.Entry::getKey)
+              .collect(Collectors.toList());
+      iamService.grantWorkflowRunnerRoleToUsers(
+          dbWorkspace.getGoogleProject(), usersGainPermission);
     }
     final Workspace savedWorkspace = workspaceMapper.toApiWorkspace(dbWorkspace, toFcWorkspace);
     workspaceAuditor.fireDuplicateAction(
@@ -531,11 +533,13 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     // a issue because: (1) Only User pet SA can actAs pet SA. (2) After unshare, user is not able
     // to access the pet SA in workbench.
     if (dbWorkspace.getCdrVersion().getAccessTier().getEnableUserWorkflow()) {
-      for (Map.Entry<String, WorkspaceAccessLevel> entry : aclsByEmail.entrySet()) {
-        if (shouldGrantWorkflowRunnerAsService(userProvider.get(), entry)) {
-          iamService.grantWorkflowRunnerRole(dbWorkspace.getGoogleProject(), entry.getKey());
-        }
-      }
+      List<String> usersGainPermission =
+          aclsByEmail.entrySet().stream()
+              .filter(entry -> shouldGrantWorkflowRunnerAsService(userProvider.get(), entry))
+              .map(Map.Entry::getKey)
+              .collect(Collectors.toList());
+      iamService.grantWorkflowRunnerRoleToUsers(
+          dbWorkspace.getGoogleProject(), usersGainPermission);
     }
 
     workspaceAuditor.fireCollaborateAction(
