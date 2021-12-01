@@ -137,15 +137,15 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
     if (username.trim().length > 64 || username.trim().length < 3) {
       return true;
     }
-    // reject these invalid email patterns
+    // reject these usernames because they would generate invalid emails
     if (username.includes('..') || username.endsWith('.')) {
       return true;
     }
 
     // Our intention here is to support alphanumeric characters, -'s, _'s, apostrophes, and single .'s in a row.
-    // Our desired regex is /^[\w'-][\w.'-]*$/ to match more valid emails (including apostrophes)
+    // Our desired regex is /^[\w'-][\w.'-]*$/ to match more valid usernames (including apostrophes)
     // but Terra does not currently support that (RW-7618)
-    // until they do, we must use Terra's more restrictive regex /^[\w'][\w.']*$/ (no apostrophes)
+    // until they do, we must use a more restrictive regex /^[\w'][\w.']*$/ without apostrophes
 
     return !(new RegExp(/^[\w-][\w.-]*$/).test(username));
   }
