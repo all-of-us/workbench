@@ -600,16 +600,16 @@ export const computeRenewalDisplayDates = (
   );
 };
 
-// return true if user is eligible for registered tier.
+// return true if user is eligible for the given tier.
 // A user loses tier eligibility when they are removed from institution tier requirement
 export const eligibleForTier = (
   profile: Profile,
   accessTierShortName: string
 ): boolean => {
-  const rtEligiblity = profile.tierEligibilities.find(
+  const eligiblity = profile.tierEligibilities.find(
     (t) => t.accessTierShortName === accessTierShortName
   );
-  return rtEligiblity?.eligible;
+  return eligiblity?.eligible;
 };
 
 export const syncModulesExternal = async (moduleNames: AccessModule[]) => {
