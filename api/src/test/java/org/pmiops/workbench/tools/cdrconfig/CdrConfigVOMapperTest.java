@@ -70,7 +70,7 @@ public class CdrConfigVOMapperTest {
             .setServicePerimeter(testTierJson.servicePerimeter)
             .setAuthDomainName(testTierJson.authDomainName)
             .setAuthDomainGroupEmail(testTierJson.authDomainGroupEmail)
-            .setEnableUserWorkflows(true);
+            .setEnableUserWorkflows(testTierJson.enableUserWorkflows);
 
     assertThat(mapper.toDbTier(testTierJson)).isEqualTo(expected);
   }
@@ -103,7 +103,7 @@ public class CdrConfigVOMapperTest {
             .setServicePerimeter(testTierJson.servicePerimeter)
             .setAuthDomainName(testTierJson.authDomainName)
             .setAuthDomainGroupEmail(testTierJson.authDomainGroupEmail)
-            .setEnableUserWorkflows(true);
+            .setEnableUserWorkflows(testTierJson.enableUserWorkflows);
 
     assertThat(mapper.toDbTiers(Collections.singletonList(testTierJson))).containsExactly(expected);
   }

@@ -1183,7 +1183,7 @@ public class WorkspacesControllerTest {
 
   @Test
   public void testCloneWorkspace_controlledTier_grantWorkflowRunner() {
-    final DbAccessTier controlledTier = TestMockFactory.createControlledTierForTests(accessTierDao);
+    TestMockFactory.createControlledTierForTests(accessTierDao);
 
     DbCdrVersion controlledTierCdr =
         TestMockFactory.createControlledTierCdrVersion(cdrVersionDao, accessTierDao, 2);
