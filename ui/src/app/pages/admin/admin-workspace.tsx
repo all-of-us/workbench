@@ -217,7 +217,7 @@ interface State {
   workspaceDetails?: WorkspaceAdminView;
   cloudStorageTraffic?: CloudStorageTraffic;
   loadingData?: boolean;
-  loadingLockUnlockStatus: boolean;
+  loadingWorkspaceAdminLockedStatus: boolean;
   runtimeToDelete?: ListRuntimeResponse;
   confirmDeleteRuntime?: boolean;
   dataLoadError?: Response;
@@ -232,7 +232,7 @@ export class AdminWorkspaceImpl extends React.Component<Props, State> {
     this.state = {
       workspaceDetails: {},
       cloudStorageTraffic: null,
-      loadingLockUnlockStatus: false,
+      loadingWorkspaceAdminLockedStatus: false,
       showLockWorkspaceModal: false
     };
   }
@@ -355,10 +355,10 @@ export class AdminWorkspaceImpl extends React.Component<Props, State> {
      workspaceDetails: {workspace},
    } = this.state;
    try {
-     this.setState({loadingLockUnlockStatus: true});
+     this.setState({loadingWorkspaceAdminLockedStatus: true});
      await workspaceAdminApi().setAdminUnlockedState(workspace.namespace);
      await this.getFederatedWorkspaceInformation();
-     this.setState({loadingLockUnlockStatus: false});
+     this.setState({loadingWorkspaceAdminLockedStatus: false});
    } catch (error) {
      console.log(error);
    }
@@ -366,9 +366,9 @@ export class AdminWorkspaceImpl extends React.Component<Props, State> {
 
 
   async closeLockModalAndReloadWorkspaceStatus() {
-    this.setState({loadingLockUnlockStatus: true, showLockWorkspaceModal: false});
+    this.setState({loadingWorkspaceAdminLockedStatus: true, showLockWorkspaceModal: false});
     await this.getFederatedWorkspaceInformation();
-    this.setState({loadingLockUnlockStatus: false});
+    this.setState({loadingWorkspaceAdminLockedStatus: false});
   }
 
   lockUnlockWorkspace(adminLocked: boolean) {
@@ -385,7 +385,7 @@ export class AdminWorkspaceImpl extends React.Component<Props, State> {
       files,
       workspaceDetails: {collaborators, resources, workspace},
       showLockWorkspaceModal,
-      loadingLockUnlockStatus
+      loadingWorkspaceAdminLockedStatus
   } = this.state;
     return <div style={{marginTop: '1rem', marginBottom: '1rem'}}>
       {showLockWorkspaceModal && <AdminLockRequest
@@ -408,7 +408,9 @@ export class AdminWorkspaceImpl extends React.Component<Props, State> {
                 <Button data-test-id='lockUnlockButton' type ='secondary' style={{border: '2px solid'}}
                         onClick={() => this.lockUnlockWorkspace(workspace.adminLocked)}>
                   <FlexRow>
-                    <div style={{paddingRight: '0.3rem'}}>{loadingLockUnlockStatus && <Spinner style={{width: 20, height: 18}}/>}</div>
+                    <div style={{paddingRight: '0.3rem'}}>
+                      {loadingWorkspaceAdminLockedStatus && <Spinner style={{width: 20, height: 18}}/>}
+                    </div>
                     {workspace.adminLocked ? 'UNLOCK WORKSPACE' : 'LOCK WORKSPACE'}
                 </FlexRow>
               </Button>
