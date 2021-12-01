@@ -88,19 +88,19 @@ public class EgressLogService {
                     Function.identity(),
                     (runtimeLogPattern) -> startBigQueryJob(runtimeLogPattern, baseParams)));
 
-    return bigQueryLogJobs.entrySet().stream()
+    return terraRuntimeLogPatterns.stream()
         .map(
-            (entry) -> {
+            (pattern) -> {
               TableResult result;
               try {
                 result =
-                    entry
-                        .getValue()
+                    bigQueryLogJobs
+                        .get(pattern)
                         .getQueryResults(QueryResultsOption.pageSize(RUNTIME_LOG_LIMIT));
               } catch (InterruptedException e) {
                 throw new ServerErrorException("failed while waiting for BigQuery job", e);
               }
-              return toAuditEgressRuntimeLogGroup(entry.getKey(), result);
+              return toAuditEgressRuntimeLogGroup(pattern, result);
             })
         .collect(Collectors.toList());
   }
