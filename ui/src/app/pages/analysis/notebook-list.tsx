@@ -66,7 +66,7 @@ export const NotebookList = withCurrentWorkspace()(class extends React.Component
       notebookNameList: [],
       creating: false,
       loading: false,
-      showWaitingForNotebookTransferMsg: true
+      showWaitingForNotebookTransferMsg: false
     };
   }
 
