@@ -21,7 +21,7 @@ import {ACTION_DISABLED_INVALID_BILLING} from 'app/utils/strings';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {BillingStatus, FileDetail, ResourceType} from 'generated/fetch';
 import {FlexColumn} from 'app/components/flex';
-import {faClock} from '@fortawesome/pro-regular-svg-icons';
+import {faExclamationTriangle} from '@fortawesome/pro-solid-svg-icons';
 
 const styles = {
   heading: {
@@ -29,17 +29,18 @@ const styles = {
     fontSize: 20, fontWeight: 600, lineHeight: '24px'
   },
   cloneNotebookCard: {
-    backgroundColor: colorWithWhiteness(colors.disabled, 0.9),
+    backgroundColor: colorWithWhiteness(colors.warning, 0.75),
     minWidth: '200px',
     maxWidth: '200px',
     minHeight: '223px',
-    maxHeight: '223px'
+    maxHeight: '223px',
+    border: 'none'
   },
   cloneNotebookMsg: {
     color: colors.primary,
-    fontSize: '14px',
+    fontSize: '12px',
     fontWeight: 600,
-    paddingTop: '2rem'
+    paddingTop: '0.5rem'
   }
 };
 
@@ -65,7 +66,7 @@ export const NotebookList = withCurrentWorkspace()(class extends React.Component
       notebookNameList: [],
       creating: false,
       loading: false,
-      showWaitingForNotebookTransferMsg: false
+      showWaitingForNotebookTransferMsg: true
     };
   }
 
@@ -177,10 +178,14 @@ export const NotebookList = withCurrentWorkspace()(class extends React.Component
                   type='small'
                   onClick={() => {
                   }}>
-                <FlexColumn style={styles.cloneNotebookMsg}>
-                  <div><FontAwesomeIcon icon={faClock} size="2x"></FontAwesomeIcon></div>
-                  <div>Copying 1 or more notebooks from another workspace. This may take a few
-                    minutes.
+                <FlexColumn style={{paddingTop: '0.5rem'}}>
+                  <div>
+                    <FontAwesomeIcon style={{color: colors.warning}}
+                                        icon={faExclamationTriangle} size="2x"/>
+                  </div>
+                  <div style={styles.cloneNotebookMsg}>
+                    Copying 1 or more notebooks from another workspace. This may <b>take a few
+                    minutes</b>.
                   </div>
                 </FlexColumn>
               </CardButton>
