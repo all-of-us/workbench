@@ -365,8 +365,8 @@ export class AdminWorkspaceImpl extends React.Component<Props, State> {
   }
 
 
-  async reloadWorkspaceStatus() {
-    this.setState({loadingLockUnlockStatus: true});
+  async closeLockModalAndReloadWorkspaceStatus() {
+    this.setState({loadingLockUnlockStatus: true, showLockWorkspaceModal: false});
     await this.getFederatedWorkspaceInformation();
     this.setState({loadingLockUnlockStatus: false});
   }
@@ -390,8 +390,8 @@ export class AdminWorkspaceImpl extends React.Component<Props, State> {
     return <div style={{marginTop: '1rem', marginBottom: '1rem'}}>
       {showLockWorkspaceModal && <AdminLockRequest
           workspace={workspace.namespace}
-          onLock={() => {this.reloadWorkspaceStatus()}}
-          onClose={() => {this.setState({showLockWorkspaceModal: false})}}/>}
+          onLock={() => {this.closeLockModalAndReloadWorkspaceStatus()}}
+          onCancel={() => {this.setState({showLockWorkspaceModal: false})}}/>}
       {dataLoadError &&
         <ErrorDiv>
           Error loading data. Please refresh the page or contact the development team.

@@ -13,7 +13,7 @@ import colors from 'app/styles/colors';
 interface Props {
   workspace: string,
   onLock: Function,
-  onClose: Function
+  onCancel: Function
 }
 
 export const AdminLockRequest = (props: Props) => {
@@ -29,7 +29,7 @@ export const AdminLockRequest = (props: Props) => {
       'Request Reason & Request Date are required to lock workspace';
 
   const onLockWorkspace = () => {
-    const {workspace , onClose, onLock} = props;
+    const {workspace , onCancel, onLock} = props;
     const adminLockingRequest = {
       requestReason,
       requestDateInMillis: requestDate.valueOf()
@@ -38,7 +38,6 @@ export const AdminLockRequest = (props: Props) => {
     workspaceAdminApi().setAdminLockedState(workspace, adminLockingRequest)
       .then(() => {
         onLock();
-        onClose();
       })
       .catch(error => {
          setShowError(true);
@@ -51,7 +50,7 @@ export const AdminLockRequest = (props: Props) => {
      </ModalTitle>
      <ModalBody>
        {showError && <label style={{color: colors.danger}}>
-         Something went Wrong while Locking the workspace.
+         Something went wrong while locking the workspace.
        </label>}
 
        {/* Text area to enter the reason for locking workspace */}
@@ -82,7 +81,7 @@ export const AdminLockRequest = (props: Props) => {
        </div>
      </ModalBody>
      <ModalFooter>
-       <Button type='secondary' style={{marginRight: '0.5rem'}} onClick={() => props.onClose()}>
+       <Button type='secondary' style={{marginRight: '0.5rem'}} onClick={() => props.onCancel()}>
          CANCEL
        </Button>
        <TooltipTrigger content={getToolTipContent} disabled={!disableLockWorkspace}>
