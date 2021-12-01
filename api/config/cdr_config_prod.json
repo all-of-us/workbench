@@ -8,7 +8,7 @@
       "authDomainName": "all-of-us-registered-prod",
       "authDomainGroupEmail": "all-of-us-registered-prod@firecloud.org",
       "datasetsBucket": "gs://fc-aou-datasets-registered/",
-      "enableUserWorkflow": false
+      "enableUserWorkflows": false
     }
   ],
   "cdrVersions": [

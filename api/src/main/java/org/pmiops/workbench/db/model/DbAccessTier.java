@@ -17,7 +17,7 @@ public class DbAccessTier {
   private String authDomainName;
   private String authDomainGroupEmail;
   private String datasetsBucket;
-  private Boolean enableUserWorkflow;
+  private Boolean enableUserWorkflows;
 
   public DbAccessTier() {}
 
@@ -92,13 +92,13 @@ public class DbAccessTier {
     return this;
   }
 
-  @Column(name = "enable_user_workflow")
-  public Boolean getEnableUserWorkflow() {
-    return enableUserWorkflow;
+  @Column(name = "enable_user_workflows")
+  public Boolean getenableUserWorkflows() {
+    return enableUserWorkflows;
   }
 
-  public DbAccessTier setEnableUserWorkflow(Boolean enableUserWorkflow) {
-    this.enableUserWorkflow = enableUserWorkflow;
+  public DbAccessTier setenableUserWorkflows(Boolean enableUserWorkflows) {
+    this.enableUserWorkflows = enableUserWorkflows;
     return this;
   }
 

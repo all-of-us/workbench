@@ -16,5 +16,5 @@ public interface IamService {
    * <p>The users's Terra PET service account will get: lifescienceRunner and serviceAccountUser(on
    * the petSA itself).
    */
-  void grantWorkflowRunnerRoleToUsers(String googleProject, List<String> usersEmail);
+  void grantWorkflowRunnerRoleToUsers(String googleProject, List<String> userEmails);
 }

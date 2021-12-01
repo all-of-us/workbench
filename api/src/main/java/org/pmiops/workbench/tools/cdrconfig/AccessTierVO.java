@@ -13,5 +13,5 @@ public class AccessTierVO {
   public String authDomainName;
   public String authDomainGroupEmail;
   public String datasetsBucket;
-  public Boolean enableUserWorkflow;
+  public Boolean enableUserWorkflows;
 }

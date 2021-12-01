@@ -8,7 +8,7 @@
       "authDomainName": "all-of-us-registered-test",
       "authDomainGroupEmail": "GROUP_all-of-us-registered-test@dev.test.firecloud.org",
       "datasetsBucket": "gs://fc-aou-test-datasets-registered/",
-      "enableUserWorkflow": false
+      "enableUserWorkflows": false
     },
     {
       "accessTierId": 2,
@@ -18,7 +18,7 @@
       "authDomainName": "all-of-us-test-prototype-3",
       "authDomainGroupEmail": "all-of-us-test-prototype-3@dev.test.firecloud.org",
       "datasetsBucket": "gs://fc-aou-test-datasets-controlled/",
-      "enableUserWorkflow": true
+      "enableUserWorkflows": true
     }
   ],
   "cdrVersions": [
