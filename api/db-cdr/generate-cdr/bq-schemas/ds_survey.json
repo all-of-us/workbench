@@ -1,0 +1,38 @@
+[
+  {
+    "name": "person_id",
+    "type": "INTEGER"
+  },
+  {
+    "name": "survey_datetime",
+    "type": "TIMESTAMP"
+  },
+  {
+    "name": "survey",
+    "type": "STRING"
+  },
+  {
+    "name": "question_concept_id",
+    "type": "INTEGER"
+  },
+  {
+    "name": "question",
+    "type": "STRING"
+  },
+  {
+    "name": "answer_concept_id",
+    "type": "INTEGER"
+  },
+  {
+    "name": "answer",
+    "type": "STRING"
+  },
+  {
+    "name": "survey_version_concept_id",
+    "type": "INTEGER"
+  },
+  {
+    "name": "survey_version_name",
+    "type": "STRING"
+  }
+]

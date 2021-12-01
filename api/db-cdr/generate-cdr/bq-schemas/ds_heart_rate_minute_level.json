@@ -1,0 +1,14 @@
+[
+  {
+    "name": "PERSON_ID",
+    "type": "INTEGER"
+  },
+  {
+    "name": "DATETIME",
+    "type": "DATETIME"
+  },
+  {
+    "name": "HEART_RATE_VALUE",
+    "type": "INTEGER"
+  }
+]
