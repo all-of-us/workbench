@@ -8,6 +8,7 @@ import com.google.cloud.bigquery.FieldList;
 import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.InsertAllRequest;
 import com.google.cloud.bigquery.InsertAllResponse;
+import com.google.cloud.bigquery.Job;
 import com.google.cloud.bigquery.JobInfo;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.TableId;
@@ -60,13 +61,22 @@ public class BigQueryService {
         .getService();
   }
 
-  /** Execute the provided query using bigquery. */
+  /** Execute the provided query using bigquery and wait for completion. */
   public TableResult executeQuery(QueryJobConfiguration query) {
     return executeQuery(query, defaultBigQueryTimeout.toMillis());
   }
 
-  /** Execute the provided query using bigquery. */
+  /** Execute the provided query using bigquery and wait for completion. */
   public TableResult executeQuery(QueryJobConfiguration query, long waitTime) {
+    try {
+      return startQuery(query).getQueryResults(BigQuery.QueryResultsOption.maxWaitTime(waitTime));
+    } catch (InterruptedException e) {
+      throw new BigQueryException(500, "Something went wrong with BigQuery: " + e.getMessage());
+    }
+  }
+
+  /** Execute the provided query. */
+  public Job startQuery(QueryJobConfiguration query) {
     if (workbenchConfigProvider.get().cdr.debugQueries) {
       logger.log(
           Level.INFO,
@@ -74,11 +84,7 @@ public class BigQueryService {
           new Object[] {query.getQuery(), query.getNamedParameters()});
     }
     try {
-      return getBigQueryService()
-          .create(JobInfo.of(query))
-          .getQueryResults(BigQuery.QueryResultsOption.maxWaitTime(waitTime));
-    } catch (InterruptedException e) {
-      throw new BigQueryException(500, "Something went wrong with BigQuery: " + e.getMessage());
+      return getBigQueryService().create(JobInfo.of(query));
     } catch (BigQueryException e) {
       if (e.getCode() == HttpServletResponse.SC_SERVICE_UNAVAILABLE) {
         throw new ServerUnavailableException(
