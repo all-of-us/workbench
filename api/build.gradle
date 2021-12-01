@@ -15,7 +15,7 @@ buildscript {
         GSON_VERSION = '2.8.9'
         JACKSON_VERSION = '2.13.0'
         JODA_VERSION = '2.10'
-        KOTLIN_VERSION = '1.4.32'
+        KOTLIN_VERSION = '1.5.32'
         MAPSTRUCT_VERSION = '1.4.2.Final'
         MOCKITO_KOTLIN_VERSION = '2.2.0'
         OKHTTP_VERSION = '2.7.5'
