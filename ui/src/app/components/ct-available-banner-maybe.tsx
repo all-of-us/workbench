@@ -4,12 +4,11 @@ import {useEffect, useState} from 'react';
 import {ToastBanner, ToastType} from './toast-banner';
 import {cookiesEnabled} from 'app/utils/cookies';
 import {StyledRouterLink} from './buttons';
-import {environment} from "../../environments/environment";
-import {AccessTierShortNames} from "../utils/access-tiers";
-import {AccessModule, CdrVersionTier, CdrVersionTiersResponse, Profile} from "../../generated/fetch";
-import {eligibleForTier, getAccessModuleStatusByName} from "../utils/access-utils";
-import {getCdrVersionTier} from "../utils/cdr-versions";
-import {cdrVersionStore, profileStore, useStore} from "../utils/stores";
+import {environment} from 'environments/environment';
+import {AccessTierShortNames} from 'app/utils/access-tiers';
+import {AccessModule, CdrVersionTier, Profile} from 'generated/fetch';
+import {eligibleForTier, getAccessModuleStatusByName} from 'app/utils/access-utils';
+import {cdrVersionStore, profileStore, useStore} from 'app/utils/stores';
 
 const CT_COOKIE_KEY = 'controlled-tier-available';
 const DAR_PATH = '/data-access-requirements';
