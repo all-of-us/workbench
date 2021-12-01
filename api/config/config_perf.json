@@ -11,6 +11,7 @@
     "jupyterDockerImage": "us.gcr.io/broad-dsp-gcr-public/terra-jupyter-aou:2.0.3",
     "shibbolethApiBaseUrl": "",
     "shibbolethUiBaseUrl": "",
+    "workspaceLogsProject": "fc-aou-logs-perf",
     "runtimeImages": {
       "gce": [],
       "dataproc": []
