@@ -116,7 +116,8 @@ public class DbAccessTier {
         && Objects.equal(servicePerimeter, that.servicePerimeter)
         && Objects.equal(authDomainName, that.authDomainName)
         && Objects.equal(authDomainGroupEmail, that.authDomainGroupEmail)
-        && Objects.equal(datasetsBucket, that.datasetsBucket);
+        && Objects.equal(datasetsBucket, that.datasetsBucket)
+        && Objects.equal(enableUserWorkflows, that.enableUserWorkflows);
   }
 
   @Override
