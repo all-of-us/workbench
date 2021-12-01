@@ -13,7 +13,7 @@ INCOMPATIBLE_DATASETS=("R2019Q4R3" "R2019Q4R4", "R2020Q4R3")
 
 if [[ ${INCOMPATIBLE_DATASETS[@]} =~ $BQ_DATASET ]];
   then
-  echo "Can't run CDR build indices against "$BQ_DATASET"!"
+  echo "Can't run CDR build indices against $BQ_DATASET!"
   exit 1
 fi
 

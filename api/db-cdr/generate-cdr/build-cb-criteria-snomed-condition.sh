@@ -21,7 +21,7 @@ TBL_PCA=$(createTmpTable $TBL_PCA)
 ####### end common block ###########
 
 echo "CONDITION_OCCURRENCE - SNOMED - STANDARD - adding root"
-bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
     (
           id
@@ -56,7 +56,7 @@ FROM \`$BQ_PROJECT.$BQ_DATASET.concept\`
 WHERE concept_id = 441840"
 
 echo "CONDITION_OCCURRENCE - SNOMED - STANDARD - adding level 0"
-bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
     (
           id
@@ -116,7 +116,7 @@ WHERE p.domain_id = 'CONDITION'
 for i in {1..18};
 do
     echo "CONDITION_OCCURRENCE - SNOMED - STANDARD - adding level $i"
-    bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
+    bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
     "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
         (
               id
@@ -175,7 +175,7 @@ done
 
 # Join Count: 18 - If loop count above is changed, the number of JOINS below must be updated
 echo "CONDITION_OCCURRENCE - SNOMED - STANDARD - add items into staging table for use in next query"
-bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.$TBL_PAS\`
     (
           ancestor_concept_id
@@ -244,7 +244,7 @@ FROM (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_
 
 # Count: 18 - If loop count above is changed, the number of JOINS below must be updated
 echo "CONDITION_OCCURRENCE - SNOMED - STANDARD - add items into ancestor table"
-bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.$TBL_PCA\`
     (
           ancestor_concept_id
@@ -378,7 +378,7 @@ WHERE domain_id = 'CONDITION'
     and is_standard = 1"
 
 echo "CONDITION_OCCURRENCE - SNOMED - STANDARD - item counts"
-bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` x
 SET x.item_count = y.cnt
     , x.est_count = y.cnt
@@ -396,7 +396,7 @@ WHERE x.concept_id = y.concept_id
     and x.is_selectable = 1"
 
 echo "CONDITION_OCCURRENCE - SNOMED - STANDARD - parent counts"
-bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` x
 SET x.rollup_count = y.cnt
     , x.est_count = y.cnt

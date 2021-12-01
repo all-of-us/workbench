@@ -10,18 +10,18 @@ export BQ_DATASET=$2  # dataset
 echo "Getting fitbit count"
 query="select count(*) as count from \`$BQ_PROJECT.$BQ_DATASET.cb_search_person\`
 where has_fitbit = 1"
-fitbitCount=$(bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql "$query" | tr -dc '0-9')
+fitbitCount=$(bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql "$query" | tr -dc '0-9')
 
 echo "Getting wgv count"
 query="select count(*) as count from \`$BQ_PROJECT.$BQ_DATASET.cb_search_person\`
 where has_whole_genome_variant = 1"
-wgvCount=$(bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql "$query" | tr -dc '0-9')
+wgvCount=$(bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql "$query" | tr -dc '0-9')
 
 ###############################
 # CREATE cb_criteria_menu TABLE
 ###############################
 echo "Insert cb_criteria_menu"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_menu\`
     (id,parent_id,category,domain_id,type,name,is_group,sort_order)
 VALUES
@@ -32,7 +32,7 @@ VALUES
 if [[ $fitbitCount > 0 ]];
 then
   echo "Insert fitbit into cb_criteria_menu"
-  bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+  bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
   "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_menu\`
       (id,parent_id,category,domain_id,type,name,is_group,sort_order)
   VALUES
@@ -42,7 +42,7 @@ fi
 if [[ $wgvCount > 0 ]];
 then
   echo "Insert wgv into cb_criteria_menu"
-  bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+  bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
   "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_menu\`
       (id,parent_id,category,domain_id,type,name,is_group,sort_order)
   VALUES
@@ -50,7 +50,7 @@ then
 fi
 
 echo "Insert cb_criteria_menu"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_menu\`
     (id,parent_id,category,domain_id,type,name,is_group,sort_order)
 VALUES

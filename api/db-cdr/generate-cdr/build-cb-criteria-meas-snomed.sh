@@ -21,7 +21,7 @@ TBL_PCA=$(createTmpTable $TBL_PCA)
 ####### end common block ###########
 
 echo "MEASUREMENT - SNOMED - STANDARD - add roots"
-bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
+bq --quiet --project_id=$"BQ_PROJECT" query --batch --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
     (
           id
@@ -78,7 +78,7 @@ FROM
     ) x"
 
 echo "MEASUREMENT - SNOMED - STANDARD - adding level 0"
-bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
     (
           id
@@ -139,7 +139,7 @@ WHERE p.domain_id = 'MEASUREMENT'
 for i in {1..9};
 do
     echo "MEASUREMENT - SNOMED - STANDARD - adding level $i"
-    bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
+    bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
     "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
             (
                   id
@@ -198,7 +198,7 @@ done
 
 # Join Count: 9 - If loop count above is changed, the number of JOINS below must be updated
 echo "MEASUREMENT - SNOMED - STANDARD - add items into staging table for use in next query"
-bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.$TBL_PAS\`
     (
           ancestor_concept_id
@@ -241,7 +241,7 @@ FROM
 
 # Count: 9 - If loop count above is changed, the number of JOINS below must be updated
 echo "MEASUREMENT - SNOMED - STANDARD - add items into ancestor table"
-bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.$TBL_PCA\`
     (
           ancestor_concept_id
@@ -312,7 +312,7 @@ WHERE domain_id = 'MEASUREMENT'
     and is_standard = 1"
 
 echo "MEASUREMENT - SNOMED - STANDARD - item counts"
-bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` x
 SET x.item_count = y.cnt
     , x.est_count = y.cnt
@@ -330,7 +330,7 @@ WHERE x.concept_id = y.concept_id
     and x.is_selectable = 1"
 
 echo "MEASUREMENT - SNOMED - STANDARD - parent counts"
-bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` x
 SET x.rollup_count = y.cnt
     , x.est_count = y.cnt

@@ -11,7 +11,7 @@ export BQ_DATASET=$2  # dataset
 # insert survey data into cb_review_survey #
 #########################################
 echo "Inserting survey data into cb_review_survey"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_review_survey\`
    (person_id, data_id, start_datetime, survey, question, answer)
 SELECT  a.person_id,
@@ -41,7 +41,7 @@ LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` e on a.value_source_concept_id = e
 # insert drug data into cb_review_all_events #
 ###########################################
 echo "Inserting drug data into cb_review_all_events"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_review_all_events\`
  (person_id, data_id, start_datetime, standard_name, standard_code, standard_vocabulary, standard_concept_id, source_name, source_code, source_vocabulary,
  source_concept_id, visit_type, age_at_event, NUM_MENTIONS, FIRST_MENTION, LAST_MENTION, dose, strength, route, domain)
@@ -85,7 +85,7 @@ JOIN \`$BQ_PROJECT.$BQ_DATASET.person\` p on t.PERSON_ID = p.PERSON_ID"
 # insert condition data into cb_review_all_events #
 ################################################
 echo "Inserting conditions data into cb_review_all_events"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_review_all_events\`
  (person_id, data_id, start_datetime, standard_code, standard_vocabulary, standard_name, standard_concept_id, source_code,
  source_vocabulary, source_name, source_concept_id, age_at_event, visit_type, domain)
@@ -114,7 +114,7 @@ JOIN \`$BQ_PROJECT.$BQ_DATASET.person\` p on a.PERSON_ID = p.PERSON_ID"
 # insert lab data into cb_review_all_events #
 ##########################################
 echo "Inserting lab data into cb_review_all_events"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_review_all_events\`
    (person_id, data_id, start_datetime, standard_code, standard_vocabulary, standard_name, standard_concept_id, source_code, source_vocabulary, source_name,
    source_concept_id, value_as_number, unit, ref_range, age_at_event, visit_type, domain)
@@ -151,7 +151,7 @@ where c1.concept_class_id = 'Lab Test'"
 # insert vital data into cb_review_all_events #
 ############################################
 echo "Inserting vital data into cb_review_all_events"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_review_all_events\`
    (person_id, data_id, start_datetime, standard_code, standard_vocabulary, standard_name, standard_concept_id, source_code, source_vocabulary, source_name,
     source_concept_id, value_as_number, unit, ref_range, age_at_event, visit_type, domain)
@@ -188,7 +188,7 @@ where c1.concept_class_id != 'Lab Test'"
 # insert observation data into cb_review_all_events #
 ###################################################
 echo "Inserting observation data into cb_review_all_events"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_review_all_events\`
    (person_id, data_id, start_datetime, standard_name, standard_code, standard_concept_id, standard_vocabulary, source_name,
     source_code, source_concept_id, source_vocabulary, visit_type, age_at_event, domain)
@@ -217,7 +217,7 @@ JOIN \`$BQ_PROJECT.$BQ_DATASET.person\` p on t.PERSON_ID = p.PERSON_ID"
 # insert physicalMeasurement data into cb_review_all_events #
 ##########################################################
 echo "Inserting pm data into cb_review_all_events"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_review_all_events\`
    (person_id, data_id, start_datetime, standard_code, standard_vocabulary, standard_name, standard_concept_id, source_code, source_vocabulary, source_name,
    source_concept_id, value_as_number, unit, age_at_event, domain, visit_type)
@@ -253,7 +253,7 @@ JOIN \`$BQ_PROJECT.$BQ_DATASET.person\` p on t.PERSON_ID = p.PERSON_ID"
 # insert procedure data into cb_review_all_events #
 ################################################
 echo "Inserting procedure data into cb_review_all_events"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_review_all_events\`
    (person_id, data_id, start_datetime, standard_code, standard_vocabulary, standard_name, standard_concept_id, source_code, source_vocabulary, source_name,
    source_concept_id, age_at_event, visit_type, domain)

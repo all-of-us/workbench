@@ -6,7 +6,7 @@ export BQ_PROJECT=$1        # project
 export BQ_DATASET=$2        # dataset
 
 echo "CB_CRITERIA_ATTRIBUTE - PPI SURVEY - add values for certain questions"
-bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_attribute\`
     (
           id
@@ -66,7 +66,7 @@ FROM
 # this will add the min/max values for all numeric measurement concepts
 # this code will filter out any labs WHERE all results = 0
 echo "CB_CRITERIA_ATTRIBUTE - Measurements - add numeric results"
-bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_attribute\`
     (
           id
@@ -126,7 +126,7 @@ FROM
 
 # this will add all categorical values for all measurement concepts where value_as_concept_id is valid
 echo "CB_CRITERIA_ATTRIBUTE - Measurements - add categorical results"
-bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_attribute\`
     (
           id
@@ -168,7 +168,7 @@ FROM
 
 # set has_attribute=1 for any measurement criteria that has data in cb_criteria_attribute
 echo "CB_CRITERIA - update has_attribute"
-bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
 SET has_attribute = 1
 WHERE domain_id = 'MEASUREMENT'
@@ -183,7 +183,7 @@ WHERE domain_id = 'MEASUREMENT'
 # CB_SURVEY_ATTRIBUTE
 ################################################
 echo "CB_SURVEY_ATTRIBUTE - adding data for questions"
-bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_survey_attribute\`
     (
           id
@@ -218,7 +218,7 @@ FROM
     )"
 
 echo "CB_SURVEY_ATTRIBUTE - adding data for answers"
-bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_survey_attribute\`
 SELECT
         ROW_NUMBER() OVER (ORDER BY question_concept_id, answer_concept_id) +
@@ -250,7 +250,7 @@ FROM
 
 # set has_attribute=1 for any criteria that has data in cb_survey_attribute
 echo "CB_SURVEY - update has_attribute"
-bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
 SET has_attribute = 1
 WHERE domain_id = 'SURVEY'
@@ -265,7 +265,7 @@ WHERE domain_id = 'SURVEY'
 # CB_CRITERIA_RELATIONSHIP
 ################################################
 echo "CB_CRITERIA_RELATIONSHIP - Drugs - add drug/ingredient relationships"
-bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_relationship\`
     (
           concept_id_1
@@ -312,31 +312,31 @@ WHERE b.standard_concept = 'S'
 # DATA CLEAN UP
 ################################################
 echo "CLEAN UP - set rollup_count = -1 WHERE the count is NULL"
-bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
 SET rollup_count = -1
 WHERE rollup_count is null"
 
 echo "CLEAN UP - set item_count = -1 WHERE the count is NULL"
-bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
 SET item_count = -1
 WHERE item_count is null"
 
 echo "CLEAN UP - set est_count = -1 WHERE the count is NULL"
-bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
 SET est_count = -1
 WHERE est_count is null"
 
 echo "CLEAN UP - set has_ancestor_data = 0 for all items WHERE it is currently NULL"
-bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
 SET has_ancestor_data = 0
 WHERE has_ancestor_data is null"
 
 echo "CLEAN UP - remove all double quotes FROM criteria names"
-bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
 SET name = REGEXP_REPLACE(name, r'[\"]', '')
 WHERE REGEXP_CONTAINS(name, r'[\"]')"

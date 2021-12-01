@@ -17,7 +17,7 @@ TBL_CBC=$(createTmpTable $TBL_CBC)
 ####### end common block ###########
 
 echo "PHYSICAL MEASUREMENTS - CONCEPT SET"
-bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
     (
           id
