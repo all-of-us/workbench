@@ -18,7 +18,7 @@ if [[ ${INCOMPATIBLE_DATASETS[@]} =~ $BQ_DATASET ]];
 fi
 
 schema_path=generate-cdr/bq-schemas
-for filename in bq-schemas/*.json;
+for filename in generate-cdr/bq-schemas/*.json;
 do
     json_name=${filename##*/}
     table_name=${json_name%.json}
