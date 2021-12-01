@@ -28,8 +28,11 @@ import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.model.AuditEgressRuntimeLogEntry;
 import org.pmiops.workbench.model.AuditEgressRuntimeLogGroup;
 import org.pmiops.workbench.model.SumologicEgressEvent;
+import org.pmiops.workbench.utils.FieldValues;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
+@Service
 public class EgressLogService {
   /**
    * Scan logs ahead of the egress window by this amount, in the even that the egress activity
@@ -63,13 +66,19 @@ public class EgressLogService {
             .filter(Objects::nonNull)
             .map(Instant::ofEpochMilli)
             .orElse(endTime.minus(windowSize))
-            .minus(Duration.ofMinutes(5L));
+            .minus(LOG_START_OFFSET);
 
     Map<String, QueryParameterValue> baseParams =
         ImmutableMap.<String, QueryParameterValue>builder()
             .put("project_id", QueryParameterValue.string(event.getWorkspace().getGoogleProject()))
-            .put("start_time", QueryParameterValue.timestamp(startTime.toEpochMilli()))
-            .put("end_time", QueryParameterValue.timestamp(endTime.toEpochMilli()))
+            .put(
+                "start_time",
+                QueryParameterValue.timestamp(
+                    startTime.toEpochMilli() * FieldValues.MICROSECONDS_IN_MILLISECOND))
+            .put(
+                "end_time",
+                QueryParameterValue.timestamp(
+                    endTime.toEpochMilli() * FieldValues.MICROSECONDS_IN_MILLISECOND))
             .build();
 
     Map<EgressTerraRuntimeLogPattern, Job> bigQueryLogJobs =
@@ -121,7 +130,11 @@ public class EgressLogService {
 
   private AuditEgressRuntimeLogEntry toRuntimeLogEntry(FieldValueList fvl) {
     return new AuditEgressRuntimeLogEntry()
-        .timestamp(Instant.ofEpochMilli(fvl.get("timestamp").getTimestampValue()).toString())
+        .timestamp(
+            Instant.ofEpochMilli(
+                    fvl.get("timestamp").getTimestampValue()
+                        / FieldValues.MICROSECONDS_IN_MILLISECOND)
+                .toString())
         .message(fvl.get("message").getStringValue());
   }
 
