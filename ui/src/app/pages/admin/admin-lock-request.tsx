@@ -21,12 +21,12 @@ export const AdminLockRequest = (props: Props) => {
   const [requestDate, setRequestDate] = useState(new Date());
   const [showError, setShowError] = useState(false);
 
+  const enableLockButton = requestReason?.length > 0 && requestDate?.toString() !== ''
+      && !isNaN(requestDate.valueOf()) && !showError;
 
-  const disableLockWorkspace = !requestReason ||
-      requestReason === '' || !requestDate || requestDate?.toString() === '' || showError;
 
   const getToolTipContent = showError ? 'Error occurred while Locking Workspace' :
-      'Request Reason & Request Date are required to lock workspace';
+      'Request Reason & Valid Request Date (in YYYY-MM-DD Format) are required to lock workspace';
 
   const onLockWorkspace = () => {
     const {workspace , onCancel, onLock} = props;
@@ -84,8 +84,8 @@ export const AdminLockRequest = (props: Props) => {
        <Button type='secondary' style={{marginRight: '0.5rem'}} onClick={() => props.onCancel()}>
          CANCEL
        </Button>
-       <TooltipTrigger content={getToolTipContent} disabled={!disableLockWorkspace}>
-         <Button type='primary' onClick={() => onLockWorkspace()} disabled={disableLockWorkspace}>
+       <TooltipTrigger content={getToolTipContent} disabled={enableLockButton}>
+         <Button type='primary' onClick={() => onLockWorkspace()} disabled={!enableLockButton}>
            LOCK WORKSPACE
          </Button>
        </TooltipTrigger>
