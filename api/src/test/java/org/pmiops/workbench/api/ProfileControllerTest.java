@@ -545,7 +545,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
     Profile profile = profileController.getMe().getBody();
     assertProfile(profile);
-    verify(mockFireCloudService).registerUser(CONTACT_EMAIL, GIVEN_NAME, FAMILY_NAME);
+    verify(mockFireCloudService).registerUser(GIVEN_NAME, FAMILY_NAME);
     verify(mockProfileAuditor).fireLoginAction(dbUser);
   }
 
@@ -554,7 +554,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     createAccountAndDbUserWithAffiliation();
     Profile profile = profileController.getMe().getBody();
     assertProfile(profile);
-    verify(mockFireCloudService).registerUser(CONTACT_EMAIL, GIVEN_NAME, FAMILY_NAME);
+    verify(mockFireCloudService).registerUser(GIVEN_NAME, FAMILY_NAME);
 
     // An additional call to getMe() should have no effect.
     fakeClock.increment(1);
