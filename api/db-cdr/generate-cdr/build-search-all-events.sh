@@ -106,7 +106,7 @@ WHERE po.procedure_concept_id is not null
 # insert source measurement data into cb_search_all_events
 ##############################################################
 echo "Inserting source measurement data into cb_search_all_events"
-bq --quiet --project_id="$BQ_PROJEC"T query --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\`
     (person_id, entry_date, entry_datetime, is_standard, concept_id, domain, age_at_event, visit_concept_id,
     visit_occurrence_id, value_as_number, value_as_concept_id, systolic, diastolic)
