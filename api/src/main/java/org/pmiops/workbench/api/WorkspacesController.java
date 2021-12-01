@@ -188,7 +188,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
           dbWorkspace, workbenchConfigProvider.get().billing.freeTierBillingAccountName());
       throw e;
     }
-    if (accessTier.getenableUserWorkflows()) {
+    if (accessTier.getEnableUserWorkflows()) {
       iamService.grantWorkflowRunnerRoleToCurrentUser(dbWorkspace.getGoogleProject());
     }
     final Workspace createdWorkspace = workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace);
@@ -444,7 +444,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     // Grant the workspace cloner and all from-workspaces users permission to use workflow if
     // workspace is controlled tier workspace.
-    if (accessTier.getenableUserWorkflows()) {
+    if (accessTier.getEnableUserWorkflows()) {
       iamService.grantWorkflowRunnerRoleToCurrentUser(dbWorkspace.getGoogleProject());
       List<String> usersGainPermission =
           clonedRoles.entrySet().stream()
@@ -532,7 +532,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     // them when unshare. TODO(RW-7615): Revoke workflow permissions when unshare. It might not be
     // a issue because: (1) Only User pet SA can actAs pet SA. (2) After unshare, user is not able
     // to access the pet SA in workbench.
-    if (dbWorkspace.getCdrVersion().getAccessTier().getenableUserWorkflows()) {
+    if (dbWorkspace.getCdrVersion().getAccessTier().getEnableUserWorkflows()) {
       List<String> usersGainPermission =
           aclsByEmail.entrySet().stream()
               .filter(entry -> shouldGrantWorkflowRunnerAsService(userProvider.get(), entry))

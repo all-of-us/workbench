@@ -93,11 +93,11 @@ public class DbAccessTier {
   }
 
   @Column(name = "enable_user_workflows")
-  public Boolean getenableUserWorkflows() {
+  public Boolean getEnableUserWorkflows() {
     return enableUserWorkflows;
   }
 
-  public DbAccessTier setenableUserWorkflows(Boolean enableUserWorkflows) {
+  public DbAccessTier setEnableUserWorkflows(Boolean enableUserWorkflows) {
     this.enableUserWorkflows = enableUserWorkflows;
     return this;
   }
