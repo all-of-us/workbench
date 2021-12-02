@@ -9,7 +9,7 @@ import {AccessTierShortNames} from 'app/utils/access-tiers';
 import {environment} from 'environments/environment';
 import {CdrVersionTier, Profile, UserTierEligibility} from 'generated/fetch';
 import {cdrVersionTiersResponse} from 'testing/stubs/cdr-versions-api-stub';
-import {waitOneTickAndUpdate} from "../../testing/react-test-helpers";
+import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 
 // 3 times, in order
 const [TIME1, TIME2, TIME3] = [10000, 20000, 30000];

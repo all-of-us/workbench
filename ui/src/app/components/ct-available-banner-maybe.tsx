@@ -9,19 +9,13 @@ import {AccessTierShortNames} from 'app/utils/access-tiers';
 import {CdrVersionTier, Profile} from 'generated/fetch';
 import {eligibleForTier} from 'app/utils/access-utils';
 import {cdrVersionStore, profileStore, useStore} from 'app/utils/stores';
-import {displayDate} from 'app/utils';
 
-const CT_COOKIE_KEY = 'controlled-tier-available';
+// Visible For Testing
 export const DAR_PATH = '/data-access-requirements';
+const CT_COOKIE_KEY = 'controlled-tier-available';
 
 const shouldShowBanner = (profile: Profile, cdrVersionTiers: CdrVersionTier[]) => {
   const ct = cdrVersionTiers?.find(v => v.accessTierShortName === AccessTierShortNames.Controlled);
-
-  console.log('pathname = ' + window.location.pathname);
-  console.log('eligible = ' + eligibleForTier(profile, AccessTierShortNames.Controlled));
-  console.log('access = ' + profile.accessTierShortNames.includes(AccessTierShortNames.Controlled));
-  console.log('firstSignInTime = ' + displayDate(profile.firstSignInTime));
-  console.log('defaultCdrVersionCreationTime = ' + displayDate(ct?.defaultCdrVersionCreationTime));
 
   // all of the following must be true
   const shouldShow = profile && ct &&
