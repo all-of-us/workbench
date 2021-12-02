@@ -30,67 +30,67 @@ module.exports = {
 
   // The eslint rules can be found here: https://eslint.org/docs/rules/
   rules: {
-    // 'prettier/prettier': 'warn', // Possibly use prettier to handle some formatting
+    // 'prettier/prettier': 'error', // Possibly use prettier to handle some formatting
 
     /* Best Practices */
-    // 'no-multi-spaces': 'warn',
+    // 'no-multi-spaces': 'error',
 
     /* Typescript specific */
     '@typescript-eslint/explicit-member-accessibility': 'off',
-    // '@typescript-eslint/member-ordering': ['warn', { 'classExpressions': ['method', 'field'] }],
-    '@typescript-eslint/no-empty-interface': 'warn',
-    '@typescript-eslint/no-inferrable-types': ['warn', {ignoreParameters: true}],
-    '@typescript-eslint/no-non-null-assertion': 'warn',
-    // 'prefer-arrow/prefer-arrow-functions': ['warn'], // Lots of 'newable' functions in the code base 
-    '@typescript-eslint/type-annotation-spacing': 'warn',
-    '@typescript-eslint/unified-signatures': 'warn',
+    // '@typescript-eslint/member-ordering': ['error', { 'classExpressions': ['method', 'field'] }],
+    '@typescript-eslint/no-empty-interface': 'error',
+    '@typescript-eslint/no-inferrable-types': ['error', {ignoreParameters: true}],
+    '@typescript-eslint/no-non-null-assertion': 'error',
+    // 'prefer-arrow/prefer-arrow-functions': ['error'], // Lots of 'newable' functions in the code base 
+    '@typescript-eslint/type-annotation-spacing': 'error',
+    '@typescript-eslint/unified-signatures': 'error',
 
     /* Style */
-    '@typescript-eslint/prefer-function-type': 'warn',
-    // 'spaced-comment': 'warn',
-    '@typescript-eslint/consistent-type-definitions': ['warn', 'interface'],
-    'no-trailing-spaces': 'warn',
-    'no-undef-init': 'warn',
-    // 'brace-style': ['warn', '1tbs'],
-    // 'simple-import-sort/sort': 'warn',
-    'quotes': ['warn', 'single'],
-    // '@typescript-eslint/semi': 'warn',
-    // 'space-before-function-paren': ['warn', { 'anonymous': 'never', 'named': 'never', 'asyncArrow': 'always' }],
+    '@typescript-eslint/prefer-function-type': 'error',
+    // 'spaced-comment': 'error',
+    '@typescript-eslint/consistent-type-definitions': ['error', 'interface'],
+    'no-trailing-spaces': 'error',
+    'no-undef-init': 'error',
+    // 'brace-style': ['error', '1tbs'],
+    // 'simple-import-sort/sort': 'error',
+    'quotes': ['error', 'single'],
+    // '@typescript-eslint/semi': 'error',
+    // 'space-before-function-paren': ['error', { 'anonymous': 'never', 'named': 'never', 'asyncArrow': 'always' }],
 
     /* Functionality */
-    'curly': 'warn',
-    'guard-for-in': 'warn',
+    'curly': 'error',
+    'guard-for-in': 'error',
     'no-restricted-imports': ['error', {paths: ['rxjs'], patterns: ['../']}],
-    'no-caller': 'warn',
-    'no-bitwise': 'warn',
-    // 'no-console': 'warn', 
-    'no-new-wrappers': 'warn',
-    'no-debugger': 'warn',
-    'constructor-super': 'warn',
-    'no-empty': 'warn',
-    'no-eval': 'warn',
-    'no-irregular-whitespace': 'warn',
-    '@typescript-eslint/no-misused-new': 'warn',
-    // 'no-shadow': 'warn',
-    // 'dot-notation': 'warn',
-    'no-throw-literal': 'warn', 
-    'no-fallthrough': 'warn', // For switch statements
+    'no-caller': 'error',
+    'no-bitwise': 'error',
+    // 'no-console': 'error', 
+    'no-new-wrappers': 'error',
+    'no-debugger': 'error',
+    'constructor-super': 'error',
+    'no-empty': 'error',
+    'no-eval': 'error',
+    'no-irregular-whitespace': 'error',
+    '@typescript-eslint/no-misused-new': 'error',
+    // 'no-shadow': 'error',
+    // 'dot-notation': 'error',
+    'no-throw-literal': 'error', 
+    'no-fallthrough': 'error', // For switch statements
     'no-use-before-define': 'off', // Needed for TS
-    // '@typescript-eslint/no-use-before-define': 'warn',
+    // '@typescript-eslint/no-use-before-define': 'error',
     // 'no-unused-vars': 'off', // Needed for TS 
-    // '@typescript-eslint/no-unused-vars': 'warn', 
+    // '@typescript-eslint/no-unused-vars': 'error', 
     'react/jsx-curly-spacing': ["warn", {'when': 'never'}],
-    'react/jsx-uses-vars': 'warn',
-    'no-var': 'warn',
-    'radix': 'warn', // Add radix on parseInt
-    'eqeqeq': ['warn', 'always', {'null': 'ignore'}],
+    'react/jsx-uses-vars': 'error',
+    'no-var': 'error',
+    'radix': 'error', // Add radix on parseInt
+    'eqeqeq': ['error', 'always', {'null': 'ignore'}],
     
     /* Maintainability */
-    'eol-last': 'warn',
-    'max-len': ['warn', {code: 140, ignorePattern: '^import |^export\\{(.*?)\\}', ignoreComments: true}], 
-    // 'prefer-const': ['warn', {'destructuring': 'all'}],
+    'eol-last': 'error',
+    'max-len': ['error', {code: 140, ignorePattern: '^import |^export\\{(.*?)\\}', ignoreComments: true}], 
+    // 'prefer-const': ['error', {'destructuring': 'all'}],
 
     /* Jest */
-    'jest/no-focused-tests': 'warn',
+    'jest/no-focused-tests': 'error',
   }
 };
