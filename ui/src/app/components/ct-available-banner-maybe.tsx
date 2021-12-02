@@ -32,8 +32,8 @@ const shouldShowBanner = (profile: Profile, cdrVersionTiers: CdrVersionTier[]) =
 
   if (cookiesEnabled()) {
     const cookie = localStorage.getItem(CT_COOKIE_KEY);
-  //   return !cookie && shouldShow;
-  // } else {
+    return !cookie && shouldShow;
+  } else {
     return shouldShow;
   }
 };
