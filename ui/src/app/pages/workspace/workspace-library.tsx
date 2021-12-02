@@ -155,10 +155,10 @@ export const WorkspaceLibrary = (class extends React.Component<Props, State> {
   // environment variable.
   libraryTabs = (this.props.enablePublishedWorkspaces || environment.enablePublishedWorkspaces)
     ? [
-      libraryTabs.PUBLISHED_WORKSPACES,
       libraryTabs.TUTORIAL_WORKSPACES,
       libraryTabs.DEMO_PROJECTS,
-      libraryTabs.PHENOTYPE_LIBRARY
+      libraryTabs.PHENOTYPE_LIBRARY,
+      libraryTabs.PUBLISHED_WORKSPACES
     ]
     : [
       libraryTabs.TUTORIAL_WORKSPACES,
