@@ -21,7 +21,7 @@ TBL_PCA=$(createTmpTable $TBL_PCA)
 ####### end common block ###########
 
 echo "MEASUREMENT - SNOMED - STANDARD - add roots"
-bq --quiet --project_id=$"BQ_PROJECT" query --batch --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
     (
           id
