@@ -10,6 +10,11 @@ import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 import {WorkspaceLibrary} from './workspace-library';
 
 describe('WorkspaceLibrary', () => {
+  let publishedWorkspaceStubs = [];
+  let PHENOTYPE_LIBRARY_WORKSPACES;
+  let TUTORIAL_WORKSPACE;
+  let PUBLISHED_WORKSPACE;
+
   const suffixes = [' Phenotype Library', ' Tutorial Workspace', ' Published Workspace'];
 
   const props = {
@@ -25,6 +30,13 @@ describe('WorkspaceLibrary', () => {
   beforeEach(() => {
     registerApiClient(WorkspacesApi, new WorkspacesApiStub());
     registerApiClient(FeaturedWorkspacesConfigApi, new FeaturedWorkspacesConfigApiStub());
+    publishedWorkspaceStubs = buildWorkspaceStubs(suffixes).map(w => ({
+      ...w,
+      published: true
+    }));
+    PHENOTYPE_LIBRARY_WORKSPACES = publishedWorkspaceStubs[0];
+    TUTORIAL_WORKSPACE = publishedWorkspaceStubs[1];
+    PUBLISHED_WORKSPACE = publishedWorkspaceStubs[2];
   });
 
   it('renders', () => {
@@ -33,10 +45,7 @@ describe('WorkspaceLibrary', () => {
   });
 
   it('should display phenotype library workspaces', async () => {
-    const publishedWorkspaceStubs = buildWorkspaceStubs(suffixes).map(w => ({
-      ...w,
-      published: true
-    }));
+
     registerApiClient(WorkspacesApi, new WorkspacesApiStub(publishedWorkspaceStubs));
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
@@ -44,14 +53,10 @@ describe('WorkspaceLibrary', () => {
     await waitOneTickAndUpdate(wrapper);
     const cardNameList = wrapper.find('[data-test-id="workspace-card-name"]')
       .map(c => c.text());
-    expect(cardNameList).toEqual([publishedWorkspaceStubs[0].name]);
+    expect(cardNameList).toEqual([PHENOTYPE_LIBRARY_WORKSPACES.name]);
   });
 
   it('should display tutorial workspaces', async () => {
-    const publishedWorkspaceStubs = buildWorkspaceStubs(suffixes).map(w => ({
-      ...w,
-      published: true
-    }));
     registerApiClient(WorkspacesApi, new WorkspacesApiStub(publishedWorkspaceStubs));
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
@@ -59,7 +64,7 @@ describe('WorkspaceLibrary', () => {
     await waitOneTickAndUpdate(wrapper);
     const cardNameList = wrapper.find('[data-test-id="workspace-card-name"]')
       .map(c => c.text());
-    expect(cardNameList).toEqual([publishedWorkspaceStubs[1].name]);
+    expect(cardNameList).toEqual([TUTORIAL_WORKSPACE.name]);
   });
 
   it('should not display unpublished workspaces', async () => {
@@ -71,10 +76,7 @@ describe('WorkspaceLibrary', () => {
   });
 
   it('should display published workspaces', async () => {
-    const publishedWorkspaceStubs = buildWorkspaceStubs(suffixes).map(w => ({
-      ...w,
-      published: true,
-    }));
+
     registerApiClient(WorkspacesApi, new WorkspacesApiStub(publishedWorkspaceStubs));
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
@@ -82,7 +84,7 @@ describe('WorkspaceLibrary', () => {
     await waitOneTickAndUpdate(wrapper);
     const cardNameList = wrapper.find('[data-test-id="workspace-card-name"]')
       .map(c => c.text());
-    expect(cardNameList).toEqual([publishedWorkspaceStubs[2].name]);
+    expect(cardNameList).toEqual([PUBLISHED_WORKSPACE.name]);
   });
 
   it('should have tutorial workspaces as default tab', async () => {
@@ -95,7 +97,7 @@ describe('WorkspaceLibrary', () => {
     await waitOneTickAndUpdate(wrapper);
     const cardNameList = wrapper.find('[data-test-id="workspace-card-name"]')
         .map(c => c.text());
-    expect(cardNameList).toEqual([publishedWorkspaceStubs[1].name]);
+    expect(cardNameList).toEqual([TUTORIAL_WORKSPACE.name]);
   });
 
 });
