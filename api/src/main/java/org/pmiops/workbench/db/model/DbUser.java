@@ -15,6 +15,7 @@ import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -25,13 +26,15 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.Version;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.Degree;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
 @Table(name = "user")
+@EntityListeners(AuditingEntityListener.class)
 public class DbUser {
 
   private static final String RUNTIME_NAME_PREFIX = "all-of-us-";
@@ -304,15 +307,6 @@ public class DbUser {
     this.dataUseAgreementSignedVersion = dataUseAgreementSignedVersion;
   }
 
-  @Column(name = "compliance_training_expiration_time")
-  public Timestamp getComplianceTrainingExpirationTime() {
-    return complianceTrainingExpirationTime;
-  }
-
-  public void setComplianceTrainingExpirationTime(Timestamp complianceTrainingExpirationTime) {
-    this.complianceTrainingExpirationTime = complianceTrainingExpirationTime;
-  }
-
   @OneToOne(
       cascade = CascadeType.ALL,
       orphanRemoval = true,
@@ -326,7 +320,7 @@ public class DbUser {
     this.demographicSurvey = demographicSurvey;
   }
 
-  @UpdateTimestamp
+  @LastModifiedDate
   @Column(name = "last_modified_time")
   public Timestamp getLastModifiedTime() {
     return lastModifiedTime;
@@ -337,7 +331,7 @@ public class DbUser {
     this.lastModifiedTime = lastModifiedTime;
   }
 
-  @CreationTimestamp
+  @CreatedDate
   @Column(name = "creation_time")
   public Timestamp getCreationTime() {
     return creationTime;

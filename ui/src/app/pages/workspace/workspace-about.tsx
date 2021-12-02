@@ -1,12 +1,12 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
-import {Button} from 'app/components/buttons';
-import {FlexColumn} from 'app/components/flex';
+import {Button, StyledExternalLink} from 'app/components/buttons';
+import {FlexColumn, FlexRow} from 'app/components/flex';
 import {InfoIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
-import {AouTitle} from 'app/components/text-wrappers';
+import {AoU, AouTitle} from 'app/components/text-wrappers';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {ResearchPurpose} from 'app/pages/workspace/research-purpose';
 import {WorkspaceShare} from 'app/pages/workspace/workspace-share';
@@ -19,12 +19,14 @@ import {currentWorkspaceStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {
-  BillingAccountType,
   CdrVersionTiersResponse,
   Profile,
-  UserRole,
-  WorkspaceAccessLevel
+  UserRole
 } from 'generated/fetch';
+import {isUsingFreeTierBillingAccount} from 'app/utils/workspace-utils';
+import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
+import {faLockAlt} from '@fortawesome/pro-solid-svg-icons';
+import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
 
 interface WorkspaceProps extends WithSpinnerOverlayProps {
   profileState: {profile: Profile, reload: Function, updateCache: Function};
@@ -61,6 +63,21 @@ const styles = reactStyles({
   },
   infoBoxHeader: {
     textTransform: 'uppercase', fontSize: '0.4rem'
+  },
+  lockMessage: {
+      padding: '16px',
+      boxSizing: 'border-box',
+      borderWidth: '1px',
+      borderStyle: 'solid',
+      borderRadius: '5px',
+      color: colors.primary,
+      fontFamily: 'Montserrat',
+      letterSpacing: 0,
+      lineHeight: '22px',
+      borderColor: colors.warning,
+      backgroundColor: colorWithWhiteness(colors.warning, 0.65),
+      maxWidth: 'fit-content',
+      marginBottom: '1rem'
   }
 });
 
@@ -134,6 +151,12 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withCdrVersions())
     return workspace;
   }
 
+  // update the component state AND the store with the new workspace object
+  updateWorkspaceState(workspace: WorkspaceData): void {
+    currentWorkspaceStore.next(workspace);
+    this.setState({workspace});
+  }
+
   loadUserRoles(workspace: WorkspaceData) {
     this.setState({workspaceUserRoles: []});
     workspacesApi().getFirecloudWorkspaceUserRoles(workspace.namespace, workspace.id).then(
@@ -164,27 +187,17 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withCdrVersions())
     }
   }
 
-  workspaceRuntimeBillingProjectId(): string {
-    const {workspace} = this.state;
-    if (workspace === undefined) {
-      return null;
-    }
-    if ([WorkspaceAccessLevel.WRITER, WorkspaceAccessLevel.OWNER].includes(workspace.accessLevel)) {
-      return workspace.namespace;
-    }
-    return null;
-  }
-
   async publishUnpublishWorkspace(publish: boolean) {
+    const {workspace} = this.state;
+    const {namespace, id} = workspace;
     this.setState({publishing: true});
     try {
       if (publish) {
-        await workspacesApi()
-          .publishWorkspace(this.state.workspace.namespace, this.state.workspace.id);
+        await workspacesApi().publishWorkspace(namespace, id);
       } else {
-        await workspacesApi()
-          .unpublishWorkspace(this.state.workspace.namespace, this.state.workspace.id);
+        await workspacesApi().unpublishWorkspace(namespace, id);
       }
+      this.updateWorkspaceState({...workspace, published: publish});
     } catch (error) {
       console.error(error);
     } finally {
@@ -201,18 +214,37 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withCdrVersions())
   render() {
     const {profileState: {profile}, cdrVersionTiersResponse} = this.props;
     const {workspace, workspaceUserRoles, sharing, publishing} = this.state;
+    const published = workspace?.published;
     return <div style={styles.mainPage}>
       <FlexColumn style={{margin: '1rem', width: '98%'}}>
+        {workspace?.adminLocked && <div data-test-id='lock-workspace-msg' style={styles.lockMessage}>
+          <FlexRow>
+            <div style={{marginRight: '1rem', color: colors.warning}}>
+              <FontAwesomeIcon size={'2x'} icon={faLockAlt}/>
+            </div>
+            <div>
+              <b>This workspace has been locked due to a compliance violation of the
+              <a href={'/data-code-of-conduct'}> <AoU/> Researcher Workbench Data User Code of Conduct.
+              </a></b> The project team should work with the workspace owner to address areas of
+              non-compliance by updating the workspace description (e.g. “About” page) and
+              corresponding with the <AoU/> Resources Access Board. For questions, please contact
+              the <StyledExternalLink href={supportUrls.helpCenter} target='_blank'>
+              Researcher Workbench support team.
+            </StyledExternalLink>
+            </div>
+          </FlexRow>
+        </div>}
         <ResearchPurpose data-test-id='researchPurpose'/>
         {hasAuthorityForAction(profile, AuthorityGuardedAction.PUBLISH_WORKSPACE) &&
           <div style={{display: 'flex', justifyContent: 'flex-end'}}>
               <Button data-test-id='unpublish-button'
-                      disabled={publishing}
-                      type='secondary'
-                      onClick={() => this.publishUnpublishWorkspace(false)}>Unpublish</Button>
+                      onClick={() => this.publishUnpublishWorkspace(false)}
+                      disabled={publishing || !published}
+                      type={published ? 'primary' : 'secondary'}>Unpublish</Button>
               <Button data-test-id='publish-button'
                       onClick={() => this.publishUnpublishWorkspace(true)}
-                      disabled={publishing}
+                      disabled={publishing || published}
+                      type={published ? 'secondary' : 'primary'}
                       style={{marginLeft: '0.5rem'}}>Publish</Button>
         </div>}
       </FlexColumn>
@@ -222,10 +254,13 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withCdrVersions())
           <TooltipTrigger content={ShareTooltipText()}>
             <InfoIcon style={{margin: '0 0.3rem'}}/>
           </TooltipTrigger>
+          <TooltipTrigger content={<div>Workspace compliance action is required</div>}
+                          disabled={!workspace?.adminLocked}>
           <Button style={{height: '22px', fontSize: 12, marginRight: '0.5rem',
-            maxWidth: '13px'}} disabled={workspaceUserRoles.length === 0}
+            maxWidth: '13px'}} disabled={workspaceUserRoles.length === 0 || workspace?.adminLocked}
                   data-test-id='workspaceShareButton'
                   onClick={() => this.setState({sharing: true})}>Share</Button>
+          </TooltipTrigger>
         </div>
         {workspaceUserRoles.length > 0 ?
           <React.Fragment>
@@ -261,7 +296,7 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withCdrVersions())
               fp.capitalize(workspace.accessTierShortName) : 'Loading...'}</div>
           </div>
           {workspace && WorkspacePermissionsUtil.canWrite(workspace.accessLevel)
-            && workspace.billingAccountType === BillingAccountType.FREETIER &&
+            && isUsingFreeTierBillingAccount(workspace) &&
               <div style={{...styles.infoBox, height: '2.5rem'}}>
                 <div style={styles.infoBoxHeader}>Workspace Free Credit Usage</div>
                 <div style={{fontSize: '0.5rem'}}>{this.state.workspaceFreeTierUsage !== undefined ?

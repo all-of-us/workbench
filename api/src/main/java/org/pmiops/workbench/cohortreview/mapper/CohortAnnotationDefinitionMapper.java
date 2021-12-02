@@ -19,7 +19,7 @@ import org.pmiops.workbench.utils.mappers.MapStructConfig;
     uses = {CommonMappers.class, DbStorageEnums.class})
 public interface CohortAnnotationDefinitionMapper {
 
-  @Mapping(target = "etag", source = "version", qualifiedByName = "cdrVersionToEtag")
+  @Mapping(target = "etag", source = "version", qualifiedByName = "versionToEtag")
   @Mapping(target = "enumValues", source = "enumValues")
   CohortAnnotationDefinition dbModelToClient(DbCohortAnnotationDefinition source);
 

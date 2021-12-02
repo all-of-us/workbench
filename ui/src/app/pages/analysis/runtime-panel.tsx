@@ -29,9 +29,6 @@ import {
   gpuTypeToDisplayName,
   Machine,
   machineRunningCost,
-  machineRunningCostBreakdown,
-  machineStorageCost,
-  machineStorageCostBreakdown,
   validLeoDataprocMasterMachineTypes,
   validLeoDataprocWorkerMachineTypes,
   validLeoGceMachineTypes
@@ -55,7 +52,6 @@ import {AoU} from 'app/components/text-wrappers';
 import {findCdrVersion} from 'app/utils/cdr-versions';
 import {supportUrls} from 'app/utils/zendesk';
 import {
-  BillingAccountType,
   BillingStatus,
   DataprocConfig,
   DiskType,
@@ -164,7 +160,7 @@ const styles = reactStyles({
 });
 
 // exported for testing
-export const MIN_DISK_SIZE_GB = 80;
+export const MIN_DISK_SIZE_GB = 100;
 
 const defaultMachineName = 'n1-standard-4';
 const defaultMachineType: Machine = findMachineByName(defaultMachineName);
@@ -534,7 +530,7 @@ const GpuConfigSelector = ({disabled, onChange, selectedMachine, gpuConfig})  =>
 
   return <FlexColumn style={{marginTop: '1rem', justifyContent: 'space-between'}}>
     <FlexRow >
-      <CheckBox id={`enable-gpu`}
+      <CheckBox id={'enable-gpu'}
                 label='Enable GPUs'
                 checked={enableGpu}
                 onChange={() => {
@@ -546,7 +542,7 @@ const GpuConfigSelector = ({disabled, onChange, selectedMachine, gpuConfig})  =>
     <FlexRow style={styles.formGrid}>
         <FlexRow style={styles.labelAndInput}>
         <label style={{...styles.label, minWidth: '3.0rem'}} htmlFor='gpu-type'>Gpu Type</label>
-        <Dropdown id={`gpu-type`}
+        <Dropdown id={'gpu-type'}
                   style={{width: '7rem'}}
                   options={validGpuNames}
                   onChange={
@@ -558,7 +554,7 @@ const GpuConfigSelector = ({disabled, onChange, selectedMachine, gpuConfig})  =>
         </FlexRow>
         <FlexRow style={styles.labelAndInput}>
         <label style={{...styles.label, minWidth: '2.0rem'}} htmlFor='gpu-num'>GPUs</label>
-        <Dropdown id={`gpu-num`}
+        <Dropdown id={'gpu-num'}
                   options={validNumGpusOptions}
                   onChange={({value}) => setSelectedNumOfGpus(value)}
                   disabled={disabled}
@@ -575,7 +571,7 @@ const PersistentDiskSizeSelector = ({onChange, disabled, selectedDiskSize, diskS
       <a href= 'https://support.terra.bio/hc/en-us/articles/360047318551'>Learn more about persistent disks and where your disk is mounted.
       </a>
     </div>
-    <InputNumber id={`persistent-disk`}
+    <InputNumber id={'persistent-disk'}
                  showButtons
                  disabled={disabled}
                  decrementButtonClassName='p-button-secondary'
@@ -630,8 +626,7 @@ const DataProcConfigSelector = ({onChange, disabled, dataprocConfig})  => {
           incrementButtonClassName='p-button-secondary'
           value={selectedNumWorkers}
           inputStyle={styles.inputNumber}
-          onChange={({value}) => setSelectedNumWorkers(value)}
-          min={2}/>
+          onChange={({value}) => setSelectedNumWorkers(value)}/>
       </FlexRow>
       <FlexRow style={styles.labelAndInput}>
         <label style={styles.label} htmlFor='num-preemptible'>Preemptible</label>
@@ -642,8 +637,7 @@ const DataProcConfigSelector = ({onChange, disabled, dataprocConfig})  => {
           incrementButtonClassName='p-button-secondary'
           value={selectedPreemtible}
           inputStyle={styles.inputNumber}
-          onChange={({value}) => setSelectedPreemptible(value)}
-          min={0}/>
+          onChange={({value}) => setSelectedPreemptible(value)}/>
       </FlexRow>
       <div style={{gridColumnEnd: 'span 1'}}/>
       <MachineSelector
@@ -719,6 +713,9 @@ import computeStopping from 'assets/icons/compute-stopping.svg';
 import computeError from 'assets/icons/compute-error.svg';
 import computeStopped from 'assets/icons/compute-stopped.svg';
 import computeNone from 'assets/icons/compute-none.svg';
+import {isUsingFreeTierBillingAccount} from 'app/utils/workspace-utils';
+import { RuntimeCostEstimator } from 'app/components/runtime-cost-estimator';
+import { RuntimeSummary } from 'app/components/runtime-summary';
 
 const StartStopRuntimeButton = ({workspaceNamespace, googleProject}) => {
   const [status, setRuntimeStatus] = useRuntimeStatus(workspaceNamespace, googleProject);
@@ -868,81 +865,6 @@ const StartStopRuntimeButton = ({workspaceNamespace, googleProject}) => {
   </FlexRow>;
 };
 
-const CostEstimator = ({
-  runtimeParameters,
-  runtimeCtx,
-  costTextColor = colors.accent
-}) => {
-  const {
-    computeType,
-    diskSize,
-    pdSize,
-    machine,
-    gpuConfig,
-    dataprocConfig
-  } = runtimeParameters;
-  const {
-    numberOfWorkers = 0,
-    workerMachineType = null,
-    workerDiskSize = null,
-    numberOfPreemptibleWorkers = 0
-  } = dataprocConfig || {};
-  const workerMachine = findMachineByName(workerMachineType);
-  const gpu = gpuConfig ? findGpu(gpuConfig.gpuType, gpuConfig.numOfGpus) : null;
-  const costConfig = {
-    computeType, masterMachine: machine, gpu, masterDiskSize: runtimeCtx.enablePD && !runtimeCtx.dataprocExists ? pdSize : diskSize,
-    numberOfWorkers, numberOfPreemptibleWorkers, workerDiskSize, workerMachine
-  };
-  const runningCost = machineRunningCost(costConfig);
-  const runningCostBreakdown = machineRunningCostBreakdown(costConfig);
-  const storageCost = machineStorageCost(costConfig);
-  const storageCostBreakdown = machineStorageCostBreakdown(costConfig);
-  const costPriceFontSize = runtimeCtx.enablePD ? '12px' : '20px';
-  return <FlexRow>
-      <FlexColumn style={{marginRight: '1rem'}}>
-        <div style={{fontSize: '10px', fontWeight: 600}}>Cost when running</div>
-        <TooltipTrigger content={
-          <div>
-            <div>Cost Breakdown</div>
-            {runningCostBreakdown.map((lineItem, i) => <div key={i}>{lineItem}</div>)}
-          </div>
-        }>
-          <div
-              style={{fontSize: costPriceFontSize, color: costTextColor}}
-              data-test-id='running-cost'
-          >
-            {formatUsd(runningCost)}/hr
-          </div>
-        </TooltipTrigger>
-      </FlexColumn>
-      <FlexColumn style={{marginRight: '1rem'}}>
-        <div style={{fontSize: '10px', fontWeight: 600}}>Cost when paused</div>
-        <TooltipTrigger content={
-          <div>
-            <div>Cost Breakdown</div>
-            {storageCostBreakdown.map((lineItem, i) => <div key={i}>{lineItem}</div>)}
-          </div>
-        }>
-          <div
-              style={{fontSize: costPriceFontSize, color: costTextColor}}
-              data-test-id='storage-cost'
-          >
-            {formatUsd(storageCost)}/hr
-          </div>
-        </TooltipTrigger>
-      </FlexColumn>
-    {runtimeCtx.enablePD && computeType === ComputeType.Standard && <FlexColumn>
-      <div style={{fontSize: '10px', fontWeight: 600}}>Persistent disk cost</div>
-        <div
-            style={{fontSize: costPriceFontSize, color: costTextColor}}
-            data-test-id='pd-cost'
-        >
-          {formatUsd(pdSize * diskPricePerMonth)}/month
-        </div>
-    </FlexColumn>}
-  </FlexRow>;
-};
-
 const CostInfo = ({runtimeChanged, runtimeConfig, currentUser, workspace, creatorFreeCreditsRemaining, runtimeCtx}) => {
   const remainingCredits = creatorFreeCreditsRemaining === null ? <Spinner size={10}/> : formatUsd(creatorFreeCreditsRemaining);
 
@@ -955,24 +877,24 @@ const CostInfo = ({runtimeChanged, runtimeConfig, currentUser, workspace, creato
     data-test-id='cost-estimator'
   >
     <div style={{minWidth: '250px', margin: '.33rem .5rem'}}>
-      <CostEstimator runtimeParameters={runtimeConfig} runtimeCtx={runtimeCtx}/>
+      <RuntimeCostEstimator runtimeParameters={runtimeConfig} usePersistentDisk={runtimeCtx.enablePD && !runtimeCtx.dataprocExists}/>
     </div>
     {
-      workspace.billingAccountType === BillingAccountType.FREETIER
+      isUsingFreeTierBillingAccount(workspace)
       && currentUser === workspace.creator
       && <div style={styles.costsDrawnFrom}>
         Costs will draw from your remaining {remainingCredits} of free credits.
       </div>
     }
     {
-      workspace.billingAccountType === BillingAccountType.FREETIER
+      isUsingFreeTierBillingAccount(workspace)
       && currentUser !== workspace.creator
       && <div style={styles.costsDrawnFrom}>
         Costs will draw from workspace creator's remaining {remainingCredits} of free credits.
       </div>
     }
     {
-      workspace.billingAccountType === BillingAccountType.USERPROVIDED
+      !isUsingFreeTierBillingAccount(workspace)
       && <div style={styles.costsDrawnFrom}>
         Costs will be charged to billing account {workspace.billingAccountName}.
       </div>
@@ -1005,31 +927,14 @@ const CreatePanel = ({creatorFreeCreditsRemaining, profile, setPanelContent, wor
         Customize
       </Button>
     </FlexRow>
-    <label htmlFor='compute-resources' style={{...styles.bold, marginTop: '1rem'}}>Compute Resources</label>
-    <div id='compute-resources'>- Default: compute size of
-      <b> {runtimeConfig.machine.cpu} CPUs</b>,
-      <b> {runtimeConfig.machine.memory} GB memory</b>, and a
-      <b> {runtimeConfig.diskSize} GB disk</b>
-    </div>
-    {runtimeConfig.computeType === ComputeType.Dataproc && <Fragment>
-      <label htmlFor='worker-configuration' style={{...styles.bold, marginTop: '1rem'}}>Worker Configuration</label>
-      <div id='worker-configuration'>- Default:
-        <b> {runtimeConfig.dataprocConfig.numberOfWorkers} worker(s) </b>
-        {
-          runtimeConfig.dataprocConfig.numberOfPreemptibleWorkers > 0 &&
-          <b>and {runtimeConfig.dataprocConfig.numberOfPreemptibleWorkers} preemptible worker(s) </b>
-        }
-        each with compute size of <b>{findMachineByName(runtimeConfig.dataprocConfig.workerMachineType).cpu} CPUs</b>,
-        <b> {findMachineByName(runtimeConfig.dataprocConfig.workerMachineType).memory} GB memory</b>, and a
-        <b> {runtimeConfig.dataprocConfig.workerDiskSize} GB disk</b>
-      </div>
-    </Fragment>}
+    <RuntimeSummary runtimeConfig={runtimeConfig} />
   </div>;
 };
 
 const ConfirmUpdatePanel = ({initialRuntimeConfig, newRuntimeConfig, onCancel, updateButton, runtimeCtx}) => {
   const runtimeDiffs = getRuntimeConfigDiffs(initialRuntimeConfig, newRuntimeConfig, runtimeCtx);
   const updateMessaging = diffsToUpdateMessaging(runtimeDiffs);
+  const usePersistentDisk = runtimeCtx.enablePD && !runtimeCtx.dataprocExists;
   return <React.Fragment>
     <div style={styles.controlSection}>
       <h3 style={{...styles.baseHeader, ...styles.sectionHeader, marginTop: '.1rem', marginBottom: '.2rem'}}>Editing your environment</h3>
@@ -1047,7 +952,7 @@ const ConfirmUpdatePanel = ({initialRuntimeConfig, newRuntimeConfig, onCancel, u
         <div style={{marginRight: '1rem'}}>
           <b style={{fontSize: 10}}>New estimated cost</b>
           <div style={{...styles.costPredictorWrapper, padding: '.25rem .5rem'}}>
-            <CostEstimator runtimeParameters={newRuntimeConfig} runtimeCtx = {runtimeCtx}/>
+            <RuntimeCostEstimator runtimeParameters={newRuntimeConfig} usePersistentDisk={usePersistentDisk}/>
           </div>
         </div>
         <div>
@@ -1056,7 +961,7 @@ const ConfirmUpdatePanel = ({initialRuntimeConfig, newRuntimeConfig, onCancel, u
             padding: '.25rem .5rem',
             color: 'grey',
             backgroundColor: ''}}>
-            <CostEstimator runtimeParameters={initialRuntimeConfig} runtimeCtx={runtimeCtx} costTextColor='grey'/>
+            <RuntimeCostEstimator runtimeParameters={initialRuntimeConfig} usePersistentDisk={usePersistentDisk} costTextColor='grey'/>
           </div>
         </div>
       </FlexRow>
@@ -1274,7 +1179,7 @@ const RuntimePanel = fp.flow(
   // disk that is way too big and expensive on free tier ($.22 an hour). 64 TB is the GCE limit on
   // persistent disk.
   const diskSizeValidatorWithMessage = (diskType = 'standard' || 'master' || 'worker') => {
-    const maxDiskSize = workspace.billingAccountType === BillingAccountType.FREETIER
+    const maxDiskSize = isUsingFreeTierBillingAccount(workspace)
         ? 4000
         : 64000;
     const message = {
@@ -1293,7 +1198,7 @@ const RuntimePanel = fp.flow(
   };
 
   const costErrorsAsWarnings = (
-    workspace.billingAccountType === BillingAccountType.USERPROVIDED ||
+    !isUsingFreeTierBillingAccount(workspace) ||
     // We've increased the workspace creator's free credits. This means they may be expecting to run
     // a more expensive analysis, and the program has extended some further trust for free credit
     // use. Allow them to provision a larger runtime (still warn them). Block them if they get below
@@ -1302,9 +1207,7 @@ const RuntimePanel = fp.flow(
     creatorFreeCreditsRemaining > serverConfigStore.get().config.defaultFreeCreditsDollarLimit);
 
   const runningCostValidatorWithMessage = () => {
-    const maxRunningCost = workspace.billingAccountType === BillingAccountType.FREETIER
-      ? 25
-      : 150;
+    const maxRunningCost = isUsingFreeTierBillingAccount(workspace) ? 25: 150;
     const message = costErrorsAsWarnings
       ? '^Your runtime is expensive. Are you sure you wish to proceed?'
       : `^Your runtime is too expensive. To proceed using free credits, reduce your running costs below $${maxRunningCost}/hr.`;
@@ -1342,15 +1245,21 @@ const RuntimePanel = fp.flow(
   // above or else we can end up with phantom validation fails
   const dataprocValidators = {
     masterDiskSize: diskSizeValidatorWithMessage('master'),
-    workerDiskSize: diskSizeValidatorWithMessage('worker')
-  };
+    workerDiskSize: diskSizeValidatorWithMessage('worker'),
+    numberOfWorkers: {
+      numericality: {
+        greaterThanOrEqualTo: 2,
+        message: 'Dataproc requires at least 2 worker nodes'
+      }
+    }
+  }
 
-  const {masterDiskSize = null, workerDiskSize = null} = selectedDataprocConfig || {};
+  const {masterDiskSize, workerDiskSize, numberOfWorkers} = selectedDataprocConfig || {};
   const standardDiskErrors = validate({selectedDiskSize}, standardDiskValidator);
   const standardPdErrors = validate({selectedPdSize}, standardPdValidator);
   const runningCostErrors = validate({currentRunningCost}, runningCostValidator);
   const dataprocErrors = selectedCompute === ComputeType.Dataproc
-      ? validate({masterDiskSize, workerDiskSize}, dataprocValidators)
+      ? validate({masterDiskSize, workerDiskSize, numberOfWorkers}, dataprocValidators)
       : undefined;
 
   const getErrorMessageContent = () => {

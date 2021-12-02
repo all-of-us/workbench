@@ -47,7 +47,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.invocation.InvocationOnMock;
-import org.pmiops.workbench.SpringTest;
+import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.access.AccessTierServiceImpl;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
@@ -103,6 +103,7 @@ import org.pmiops.workbench.genomics.GenomicExtractionService;
 import org.pmiops.workbench.google.CloudBillingClient;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.google.DirectoryService;
+import org.pmiops.workbench.iam.IamService;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.Cohort;
@@ -157,7 +158,7 @@ import org.springframework.transaction.annotation.Transactional;
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
-public class DataSetControllerTest extends SpringTest {
+public class DataSetControllerTest {
 
   private static final String CONCEPT_SET_ONE_NAME = "concept set";
   private static final String CONCEPT_SET_TWO_NAME = "concept set two";
@@ -212,6 +213,7 @@ public class DataSetControllerTest extends SpringTest {
 
   @TestConfiguration
   @Import({
+    FakeClockConfiguration.class,
     CohortFactoryImpl.class,
     CohortMapperImpl.class,
     CohortReviewMapperImpl.class,
@@ -252,6 +254,7 @@ public class DataSetControllerTest extends SpringTest {
     ConceptBigQueryService.class,
     DirectoryService.class,
     FreeTierBillingService.class,
+    IamService.class,
     MailService.class,
     ParticipantCohortAnnotationMapper.class,
     ParticipantCohortStatusMapper.class,
@@ -910,8 +913,7 @@ public class DataSetControllerTest extends SpringTest {
 
   @Test
   public void exportToNotebook_wgsCodegen_cdrCheck() {
-    DbCdrVersion cdrVersion =
-        cdrVersionDao.findByCdrVersionId(Long.parseLong(workspace.getCdrVersionId()));
+    DbCdrVersion cdrVersion = findCdrVersionOrThrow(workspace);
     cdrVersion.setWgsBigqueryDataset(null);
     cdrVersionDao.save(cdrVersion);
 
@@ -931,8 +933,7 @@ public class DataSetControllerTest extends SpringTest {
 
   @Test
   public void exportToNotebook_wgsCodegen_kernelCheck() {
-    DbCdrVersion cdrVersion =
-        cdrVersionDao.findByCdrVersionId(Long.parseLong(workspace.getCdrVersionId()));
+    DbCdrVersion cdrVersion = findCdrVersionOrThrow(workspace);
     cdrVersion.setWgsBigqueryDataset("wgs");
     cdrVersionDao.save(cdrVersion);
 
@@ -1200,5 +1201,12 @@ public class DataSetControllerTest extends SpringTest {
         .newNotebook(true)
         .notebookName(notebookName)
         .kernelType(KernelTypeEnum.PYTHON);
+  }
+
+  private DbCdrVersion findCdrVersionOrThrow(Workspace workspace) {
+    String id = workspace.getCdrVersionId();
+    return cdrVersionDao
+        .findById(Long.parseLong(id))
+        .orElseThrow(() -> new NotFoundException(String.format("CDR Version ID %s not found", id)));
   }
 }

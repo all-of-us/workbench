@@ -26,12 +26,12 @@ import org.pmiops.workbench.db.dao.EgressEventDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbEgressEvent;
-import org.pmiops.workbench.db.model.DbEgressEvent.EgressEventStatus;
+import org.pmiops.workbench.db.model.DbEgressEvent.DbEgressEventStatus;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.institution.InstitutionService;
-import org.pmiops.workbench.model.EgressEvent;
 import org.pmiops.workbench.model.Institution;
+import org.pmiops.workbench.model.SumologicEgressEvent;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAdminView;
 import org.pmiops.workbench.model.WorkspaceUserAdminView;
@@ -88,7 +88,7 @@ public class EgressEventServiceImpl implements EgressEventService {
   }
 
   @Override
-  public void handleEvent(EgressEvent event) {
+  public void handleEvent(SumologicEgressEvent event) {
     // Lookup workspace by googleProject name, and set the workspaceNamespace in EgressEvent.
     Optional<DbWorkspace> dbWorkspaceMaybe =
         workspaceDao.getByGoogleProject(event.getProjectName());
@@ -132,7 +132,7 @@ public class EgressEventServiceImpl implements EgressEventService {
     return this.alertApiProvider.get().createAlert(createAlertRequest);
   }
 
-  private void createEgressEventAlert(EgressEvent egressEvent, String workspaceNamespace) {
+  private void createEgressEventAlert(SumologicEgressEvent egressEvent, String workspaceNamespace) {
     final CreateAlertRequest createAlertRequest =
         egressEventToOpsGenieAlert(egressEvent, workspaceNamespace);
     try {
@@ -150,7 +150,7 @@ public class EgressEventServiceImpl implements EgressEventService {
     }
   }
 
-  private boolean isEventStale(EgressEvent egressEvent) {
+  private boolean isEventStale(SumologicEgressEvent egressEvent) {
     if (egressEvent.getTimeWindowDuration() == null || egressEvent.getTimeWindowStart() == null) {
       logger.warning("egress event is missing window details, cannot determine staleness");
       return false;
@@ -170,7 +170,7 @@ public class EgressEventServiceImpl implements EgressEventService {
   }
 
   private CreateAlertRequest egressEventToOpsGenieAlert(
-      EgressEvent egressEvent, String workspaceNamespace) {
+      SumologicEgressEvent egressEvent, String workspaceNamespace) {
     // Our Sumologic query schedule currently builds in redundancy by overscanning an extra window
     // into the past. This ensures we don't miss alerts if a single scheduled Sumologic query fails,
     // but it also means we will typically receive alert events twice. Label alerts which occurred
@@ -204,7 +204,7 @@ public class EgressEventServiceImpl implements EgressEventService {
   }
 
   @NotNull
-  private String getDescription(EgressEvent egressEvent, String workspaceNamespace) {
+  private String getDescription(SumologicEgressEvent egressEvent, String workspaceNamespace) {
     final WorkspaceAdminView adminWorkspace =
         workspaceAdminService.getWorkspaceAdminView(workspaceNamespace);
     final Workspace workspace = adminWorkspace.getWorkspace();
@@ -263,16 +263,18 @@ public class EgressEventServiceImpl implements EgressEventService {
   }
 
   private Optional<DbEgressEvent> maybePersistEgressEvent(
-      EgressEvent event, Optional<DbUser> userMaybe, Optional<DbWorkspace> workspaceMaybe) {
+      SumologicEgressEvent event,
+      Optional<DbUser> userMaybe,
+      Optional<DbWorkspace> workspaceMaybe) {
     if (isEventStaleAndAlreadyPersisted(event, userMaybe, workspaceMaybe)) {
       return Optional.empty();
     }
 
     // Ahead of the feature launch, events are still handled manually by the oncall, so store
     // them immediately as REMEDIATED. In all cases, we want to store the event in our database.
-    EgressEventStatus status = EgressEventStatus.REMEDIATED;
+    DbEgressEventStatus status = DbEgressEventStatus.REMEDIATED;
     if (workbenchConfigProvider.get().featureFlags.enableEgressAlertingV2) {
-      status = EgressEventStatus.PENDING;
+      status = DbEgressEventStatus.PENDING;
     }
 
     return Optional.of(
@@ -292,7 +294,9 @@ public class EgressEventServiceImpl implements EgressEventService {
   }
 
   private boolean isEventStaleAndAlreadyPersisted(
-      EgressEvent event, Optional<DbUser> userMaybe, Optional<DbWorkspace> workspaceMaybe) {
+      SumologicEgressEvent event,
+      Optional<DbUser> userMaybe,
+      Optional<DbWorkspace> workspaceMaybe) {
     if (event.getTimeWindowDuration() == null
         || !userMaybe.isPresent()
         || !workspaceMaybe.isPresent()) {

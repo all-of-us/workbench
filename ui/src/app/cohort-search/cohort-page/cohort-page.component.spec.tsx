@@ -11,7 +11,7 @@ import {CohortBuilderServiceStub} from 'testing/stubs/cohort-builder-service-stu
 import {CohortsApiStub} from 'testing/stubs/cohorts-api-stub';
 import {workspaceDataStub} from 'testing/stubs/workspaces';
 import {CohortPage} from './cohort-page.component';
-import {Router} from "react-router";
+import {Router} from 'react-router';
 import { createMemoryHistory } from 'history';
 
 describe('CohortPage', () => {

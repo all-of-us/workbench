@@ -6,7 +6,7 @@ import com.google.common.collect.ImmutableList;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.pmiops.workbench.SpringTest;
+import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.cdr.model.DbSurveyVersion;
 import org.pmiops.workbench.model.CriteriaSubType;
@@ -15,6 +15,7 @@ import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.FilterColumns;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
@@ -23,7 +24,8 @@ import org.springframework.test.annotation.DirtiesContext;
 
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-public class CBCriteriaDaoTest extends SpringTest {
+@Import(FakeClockConfiguration.class)
+public class CBCriteriaDaoTest {
 
   @Autowired private CBCriteriaDao cbCriteriaDao;
   @Autowired private JdbcTemplate jdbcTemplate;

@@ -1,6 +1,7 @@
 package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.utils.TestMockFactory.createRegisteredTierForTests;
@@ -38,6 +39,7 @@ import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.StorageConfig;
 import org.pmiops.workbench.model.AgeType;
@@ -51,6 +53,8 @@ import org.pmiops.workbench.model.DataFilter;
 import org.pmiops.workbench.model.DemoChartInfo;
 import org.pmiops.workbench.model.DemoChartInfoListResponse;
 import org.pmiops.workbench.model.Domain;
+import org.pmiops.workbench.model.EthnicityInfo;
+import org.pmiops.workbench.model.EthnicityInfoListResponse;
 import org.pmiops.workbench.model.GenderOrSexType;
 import org.pmiops.workbench.model.Modifier;
 import org.pmiops.workbench.model.ModifierType;
@@ -888,6 +892,35 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             filters.contains(
                 new DataFilter().dataFilterId(2L).displayName("displayName2").name("name2")))
         .isTrue();
+  }
+
+  @Test
+  public void countParticipantsSearchGroupNoItems() {
+    List<SearchGroup> groups = new ArrayList<>();
+    groups.add(new SearchGroup().id("sg1"));
+    SearchRequest searchRequest = new SearchRequest().includes(groups);
+    assertThrows(
+        BadRequestException.class,
+        () -> controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest));
+  }
+
+  @Test
+  public void countParticipantsSearchGroupNoSearchParameters() {
+    final SearchGroupItem searchGroupItem =
+        new SearchGroupItem()
+            .id("sgi1")
+            .type(Domain.PERSON.toString())
+            .searchParameters(new ArrayList<>())
+            .modifiers(new ArrayList<>());
+
+    final SearchGroup searchGroup = new SearchGroup().addItemsItem(searchGroupItem);
+
+    List<SearchGroup> groups = new ArrayList<>();
+    groups.add(searchGroup);
+    SearchRequest searchRequest = new SearchRequest().includes(groups);
+    assertThrows(
+        BadRequestException.class,
+        () -> controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest));
   }
 
   @Test
@@ -2020,6 +2053,18 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
+  public void findEthnicityInfo() {
+    SearchParameter pm = wheelchair().attributes(wheelchairAttributes());
+    SearchRequest searchRequest =
+        createSearchRequests(
+            Domain.PHYSICAL_MEASUREMENT.toString(), ImmutableList.of(pm), new ArrayList<>());
+
+    EthnicityInfoListResponse response =
+        controller.findEthnicityInfo(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest).getBody();
+    assertEthnicity(response);
+  }
+
+  @Test
   public void findDemoChartInfoGenderAgeAtConsentWithEHRData() {
     SearchParameter pm = wheelchair().attributes(wheelchairAttributes());
     SearchRequest searchRequest =
@@ -2133,5 +2178,11 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         .isEqualTo(response.getItems().get(0));
     assertThat(new DemoChartInfo().name("MALE").race("Caucasian").ageRange("18-44").count(1L))
         .isEqualTo(response.getItems().get(1));
+  }
+
+  private void assertEthnicity(EthnicityInfoListResponse response) {
+    assertThat(response.getItems().size()).isEqualTo(1);
+    assertThat(new EthnicityInfo().ethnicity("Not Hispanic or Latino").count(2L))
+        .isEqualTo(response.getItems().get(0));
   }
 }

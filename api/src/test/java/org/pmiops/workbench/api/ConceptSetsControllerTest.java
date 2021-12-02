@@ -17,7 +17,6 @@ import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
-import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.access.AccessTierServiceImpl;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
@@ -60,6 +59,7 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.CloudBillingClient;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.google.DirectoryService;
+import org.pmiops.workbench.iam.IamService;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.ConceptSetConceptId;
@@ -98,7 +98,7 @@ import org.springframework.transaction.annotation.Transactional;
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
-public class ConceptSetsControllerTest extends SpringTest {
+public class ConceptSetsControllerTest {
 
   private static final Criteria CLIENT_CRITERIA_1 =
       new Criteria()
@@ -189,6 +189,7 @@ public class ConceptSetsControllerTest extends SpringTest {
 
   @TestConfiguration
   @Import({
+    FakeClockConfiguration.class,
     CommonMappers.class,
     CohortBuilderMapperImpl.class,
     CohortBuilderServiceImpl.class,
@@ -227,6 +228,7 @@ public class ConceptSetsControllerTest extends SpringTest {
     FireCloudService.class,
     FirecloudMapperImpl.class,
     FreeTierBillingService.class,
+    IamService.class,
     MailService.class,
     NotebooksService.class,
     UserRecentResourceService.class,

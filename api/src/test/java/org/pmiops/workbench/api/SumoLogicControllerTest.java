@@ -14,7 +14,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.pmiops.workbench.SpringTest;
+import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.actionaudit.auditors.EgressEventAuditor;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -22,7 +22,8 @@ import org.pmiops.workbench.exceptions.UnauthorizedException;
 import org.pmiops.workbench.exfiltration.EgressEventService;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.model.EgressEvent;
-import org.pmiops.workbench.model.EgressEventRequest;
+import org.pmiops.workbench.model.SumologicEgressEvent;
+import org.pmiops.workbench.model.SumologicEgressEventRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -30,8 +31,10 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
-public class SumoLogicControllerTest extends SpringTest {
+@SpringJUnitConfig
+public class SumoLogicControllerTest {
 
   private static final String API_KEY = "12345";
 
@@ -42,13 +45,13 @@ public class SumoLogicControllerTest extends SpringTest {
 
   @Autowired private SumoLogicController sumoLogicController;
 
-  private EgressEventRequest request;
-  private EgressEvent event;
+  private SumologicEgressEventRequest request;
+  private SumologicEgressEvent event;
 
   private final ObjectMapper objectMapper = new ObjectMapper();
 
   @TestConfiguration
-  @Import({SumoLogicController.class})
+  @Import({FakeClockConfiguration.class, SumoLogicController.class})
   static class Configuration {
     @Bean
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -61,16 +64,18 @@ public class SumoLogicControllerTest extends SpringTest {
   public void setUp() throws JsonProcessingException {
     config = WorkbenchConfig.createEmptyConfig();
 
-    event = new EgressEvent();
-    event.setProjectName("aou-rw-test-c7dec260");
-    event.setEgressMibThreshold(100.0);
-    event.setEgressMib(123.0);
-    event.setEnvironment(EgressEvent.EnvironmentEnum.TEST);
-    event.setTimeWindowDuration(Duration.ofSeconds(300).getSeconds());
-    event.setTimeWindowStart(Instant.now().toEpochMilli());
+    event =
+        new SumologicEgressEvent()
+            .projectName("aou-rw-test-c7dec260")
+            .egressMibThreshold(100.0)
+            .egressMib(123.0)
+            .environment(SumologicEgressEvent.EnvironmentEnum.TEST)
+            .timeWindowDuration(Duration.ofSeconds(300).getSeconds())
+            .timeWindowStart(Instant.now().toEpochMilli());
 
-    request = new EgressEventRequest();
-    request.setEventsJsonArray(objectMapper.writeValueAsString(Collections.singletonList(event)));
+    request =
+        new SumologicEgressEventRequest()
+            .eventsJsonArray(objectMapper.writeValueAsString(Collections.singletonList(event)));
 
     when(mockCloudStorageClient.getCredentialsBucketString(
             SumoLogicController.SUMOLOGIC_KEY_FILENAME))

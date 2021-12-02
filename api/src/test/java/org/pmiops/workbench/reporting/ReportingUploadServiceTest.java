@@ -41,7 +41,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.pmiops.workbench.FakeClockConfiguration;
-import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.model.BillingStatus;
@@ -60,13 +59,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 /**
  * Test all implementations of ReportingUploadService to save on setup code. If this becomes too
  * complex (e.g. by having multiple public methods on each service), then we could share the setup
  * code and have separate tests.
  */
-public class ReportingUploadServiceTest extends SpringTest {
+@SpringJUnitConfig
+public class ReportingUploadServiceTest {
 
   private static final Instant NOW = FakeClockConfiguration.NOW.toInstant();
   private static final Instant THEN_INSTANT = Instant.parse("1989-02-17T00:00:00.00Z");
@@ -85,7 +86,11 @@ public class ReportingUploadServiceTest extends SpringTest {
   @Captor private ArgumentCaptor<InsertAllRequest> insertAllRequestCaptor;
 
   @TestConfiguration
-  @Import({ReportingUploadServiceImpl.class, ReportingTestConfig.class})
+  @Import({
+    FakeClockConfiguration.class,
+    ReportingUploadServiceImpl.class,
+    ReportingTestConfig.class
+  })
   @MockBean({ReportingVerificationService.class})
   public static class Config {}
 

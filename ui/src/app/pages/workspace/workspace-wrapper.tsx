@@ -3,9 +3,11 @@ import {Spinner} from 'app/components/spinners';
 import {WorkspaceNavBar} from 'app/pages/workspace/workspace-nav-bar';
 import {WorkspaceRoutes} from 'app/routing/workspace-app-routing';
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
+import {reportError} from 'app/utils/errors';
 import {withCurrentWorkspace} from 'app/utils';
 import {
   ExceededActionCountError,
+  InitialRuntimeNotFoundError,
   LeoRuntimeInitializationAbortedError,
   LeoRuntimeInitializer
 } from 'app/utils/leo-runtime-initializer';
@@ -47,8 +49,11 @@ export const WorkspaceWrapper = fp.flow(
         // initialization here.
         // Also ignore LeoRuntimeInitializationAbortedError - this is expected when navigating
         // away from a page during a poll.
-        if (!(e instanceof ExceededActionCountError || e instanceof LeoRuntimeInitializationAbortedError)) {
-          throw e;
+        if (!(e instanceof InitialRuntimeNotFoundError ||
+              e instanceof ExceededActionCountError ||
+              e instanceof LeoRuntimeInitializationAbortedError)) {
+          // Ideally, we would have some top-level error messaging here.
+          reportError(e);
         }
       }
     };

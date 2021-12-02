@@ -151,13 +151,16 @@ export const initPageBeforeTest = async (page: Page): Promise<void> => {
   });
 
   // Emitted when a request fails: 4xx..5xx status codes
-  page.on('requestfailed', async (request) => {
+  page.on('requestfailed', async (request: Request) => {
     if (showFailedResponse(request)) {
       await logRequestError(request);
     }
   });
 
-  /** Emitted when a request finishes. */
+  /**
+   * Emitted when a request finishes successfully.
+   * NOTE: HTTP Error responses such as 404 or 503, are considered successful responses as 'requestfinished' event.
+   */
   page.on('requestfinished', async (request: Request) => {
     let method;
     let url;
@@ -173,7 +176,8 @@ export const initPageBeforeTest = async (page: Page): Promise<void> => {
         if (isLoggable(request)) {
           let text = `Request finished: ${status} ${method} ${url}`;
           if (request.method() !== 'OPTIONS' && shouldLogResponse(request)) {
-            text = `${text}\n${await formatResponseBody(request)}`;
+            const respBody = await formatResponseBody(request);
+            text = `${text}\n${respBody}`;
           }
           logger.log('info', text);
         }
@@ -223,8 +227,7 @@ export const initPageBeforeTest = async (page: Page): Promise<void> => {
       await Promise.all(message.args().map((jsHandle) => describeJsHandle(jsHandle)))
         .then((args) => {
           const allMessages = args.filter((arg) => !!arg).join('\n');
-          const msgType = message.type() === 'warning' ? 'warn' : message.type();
-          logger.info(`Page Console ${msgType.toUpperCase()}: "${title}"\n${allMessages}`);
+          logger.info(`Page Console ${message.type().toUpperCase()}: "${title}"\n${allMessages}`);
         })
         .catch((ex1) => {
           logger.error(`Exception thrown when reading page console: ${ex1}`);

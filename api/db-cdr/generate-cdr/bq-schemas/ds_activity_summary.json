@@ -1,0 +1,54 @@
+[
+  {
+    "name": "PERSON_ID",
+    "type": "INTEGER"
+  },
+  {
+    "name": "DATE",
+    "type": "DATE"
+  },
+  {
+    "name": "ACTIVITY_CALORIES",
+    "type": "FLOAT"
+  },
+  {
+    "name": "CALORIES_BMR",
+    "type": "FLOAT"
+  },
+  {
+    "name": "CALORIES_OUT",
+    "type": "FLOAT"
+  },
+  {
+    "name": "ELEVATION",
+    "type": "FLOAT"
+  },
+  {
+    "name": "FAIRLY_ACTIVE_MINUTES",
+    "type": "FLOAT"
+  },
+  {
+    "name": "FLOORS",
+    "type": "INTEGER"
+  },
+  {
+    "name": "LIGHTLY_ACTIVE_MINUTES",
+    "type": "FLOAT"
+  },
+  {
+    "name": "MARGINAL_CALORIES",
+    "type": "FLOAT"
+  },
+  {
+    "name": "SEDENTARY_MINUTES",
+    "type": "FLOAT"
+  },
+  {
+    "name": "STEPS",
+    "type": "INTEGER"
+  },
+  {
+    "name": "VERY_ACTIVE_MINUTES",
+    "type": "FLOAT"
+  }
+]

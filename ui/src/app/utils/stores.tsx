@@ -123,16 +123,20 @@ export const clearCompoundRuntimeOperations = () => {
 };
 
 // runtime store states: undefined(initial state) -> Runtime (user selected) <--> null (delete only - no recreate)
+// error should be set if there is a failure in initializing the store value. If
+// error is set, runtimeLoaded should be false.
 export interface RuntimeStore {
   workspaceNamespace: string | null | undefined;
   runtime: Runtime | null | undefined;
   runtimeLoaded: boolean;
+  loadingError?: Error;
 }
 
 export const runtimeStore = atom<RuntimeStore>({
   workspaceNamespace: undefined,
   runtime: undefined,
-  runtimeLoaded: false
+  runtimeLoaded: false,
+  loadingError: undefined
 });
 
 // runtime store states: undefined(initial state) -> Runtime (user selected) <--> null (delete only - no recreate)

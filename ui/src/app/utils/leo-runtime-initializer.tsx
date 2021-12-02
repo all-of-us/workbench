@@ -31,6 +31,15 @@ export class LeoRuntimeInitializationFailedError extends Error {
   }
 }
 
+export class InitialRuntimeNotFoundError extends LeoRuntimeInitializationFailedError {
+  constructor(public readonly defaultRuntime?: Runtime) {
+    super('initial runtime not found');
+    Object.setPrototypeOf(this, InitialRuntimeNotFoundError.prototype);
+
+    this.name = 'InitialRuntimeNotFoundError';
+  }
+}
+
 export class ExceededActionCountError extends LeoRuntimeInitializationFailedError {
   constructor(message, runtime?: Runtime) {
     super(message, runtime);
@@ -41,7 +50,7 @@ export class ExceededActionCountError extends LeoRuntimeInitializationFailedErro
 }
 
 export class ExceededErrorCountError extends LeoRuntimeInitializationFailedError {
-  constructor(message, runtime?: Runtime) {
+  constructor(message, public readonly lastError: Error, runtime?: Runtime) {
     super(message, runtime);
     Object.setPrototypeOf(this, ExceededErrorCountError.prototype);
 
@@ -184,22 +193,22 @@ export class LeoRuntimeInitializer {
   }
 
   private async createRuntime(): Promise<void> {
+    if (!this.targetRuntime) {
+      // Automatic lazy creation is not supported; the caller must specify a target.
+      let defaultRuntime = {...runtimePresets.generalAnalysis.runtimeTemplate};
+      if (this.currentRuntime) {
+        defaultRuntime = applyPresetOverride(this.currentRuntime);
+      }
+      throw new InitialRuntimeNotFoundError(defaultRuntime);
+    }
+
     if (this.createCount >= this.maxCreateCount) {
       throw new ExceededActionCountError(
         `Reached max runtime create count (${this.maxCreateCount})`, this.currentRuntime);
     }
 
-    let runtime: Runtime;
-    if (this.targetRuntime) {
-      runtime = this.targetRuntime;
-    } else if (this.currentRuntime) {
-      runtime = applyPresetOverride(this.currentRuntime);
-    } else {
-      runtime = {...runtimePresets.generalAnalysis.runtimeTemplate};
-    }
-
     await runtimeApi().createRuntime(this.workspaceNamespace,
-      runtime,
+      this.targetRuntime,
       {signal: this.pollAbortSignal});
     this.createCount++;
   }
@@ -235,8 +244,12 @@ export class LeoRuntimeInitializer {
     return e instanceof Response && e.status === 404;
   }
 
+  private isClientError(e: any): boolean {
+    return e instanceof Response && e.status >= 400 && e.status < 500;
+  }
+
   private handleUnknownError(e: any) {
-    if (e instanceof Response && e.status >= 500 && e.status < 600) {
+    if (!(e instanceof Response) || e.status >= 500) {
       this.serverErrorCount++;
     }
     reportError(e);
@@ -304,12 +317,16 @@ export class LeoRuntimeInitializer {
         // hasn't been created yet.
         this.currentRuntime = null;
         this.onPoll(null);
+      } else if (this.isClientError(e)) {
+          return this.reject(
+            new ExceededErrorCountError(
+              `Encountered unexpected client error (${e.status})`, e, this.currentRuntime));
       } else {
         this.handleUnknownError(e);
         if (this.hasTooManyServerErrors()) {
           return this.reject(
             new ExceededErrorCountError(
-              `Reached max server error count (${this.maxServerErrorCount})`, this.currentRuntime));
+              `Reached max server error count (${this.maxServerErrorCount})`, e, this.currentRuntime));
         }
       }
     }
@@ -327,7 +344,7 @@ export class LeoRuntimeInitializer {
         // If runtime is in error state, stop polling so we can display the error.
         reportError(
           `Runtime ${this.currentRuntime.googleProject}/${this.currentRuntime.runtimeName}` +
-          ` has reached an ERROR status`);
+          ' has reached an ERROR status');
         return this.resolve(this.currentRuntime);
       }
     } catch (e) {
@@ -335,16 +352,15 @@ export class LeoRuntimeInitializer {
         return this.reject(
           new LeoRuntimeInitializationAbortedError('Abort signal received during runtime API call',
           this.currentRuntime));
-      } else if (e instanceof ExceededActionCountError) {
-        // This is a signal that we should hard-abort the polling loop due to reaching the max
-        // number of delete or create actions allowed.
+      } else if (e instanceof LeoRuntimeInitializationFailedError) {
+        // Propagate errors created by this library.
         return this.reject(e);
       } else {
         this.handleUnknownError(e);
         if (this.hasTooManyServerErrors()) {
           return this.reject(
             new ExceededErrorCountError(
-              `Reached max server error count (${this.maxServerErrorCount})`, this.currentRuntime));
+              `Reached max server error count (${this.maxServerErrorCount})`, e, this.currentRuntime));
         }
       }
     }

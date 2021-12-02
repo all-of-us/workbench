@@ -1,9 +1,11 @@
 package org.pmiops.workbench.db.dao;
 
+import static org.pmiops.workbench.access.AccessTierService.CONTROLLED_TIER_SHORT_NAME;
 import static org.pmiops.workbench.access.AccessTierService.REGISTERED_TIER_SHORT_NAME;
 
 import com.google.api.services.oauth2.model.Userinfoplus;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
@@ -31,6 +33,7 @@ import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.compliance.ComplianceService;
+import org.pmiops.workbench.compliance.ComplianceService.BadgeName;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbAccessModule.AccessModuleName;
 import org.pmiops.workbench.db.model.DbAccessTier;
@@ -83,6 +86,12 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
 
   private static final int MAX_RETRIES = 3;
   private static final int CURRENT_TERMS_OF_SERVICE_VERSION = 1;
+
+  private static final Map<AccessModuleName, BadgeName> BADGE_BY_COMPLIANCE_MODULE =
+      ImmutableMap.<AccessModuleName, BadgeName>builder()
+          .put(AccessModuleName.RT_COMPLIANCE_TRAINING, BadgeName.REGISTERED_TIER_TRAINING)
+          .put(AccessModuleName.CT_COMPLIANCE_TRAINING, BadgeName.CONTROLLED_TIER_TRAINING)
+          .build();
 
   private final Provider<WorkbenchConfig> configProvider;
   private final Provider<DbUser> userProvider;
@@ -209,15 +218,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   private void updateUserAccessTiers(DbUser dbUser, Agent agent) {
     final List<DbAccessTier> previousAccessTiers = accessTierService.getAccessTiersForUser(dbUser);
 
-    // TODO for Controlled Tier Beta: different access module evaluation criteria
-    // For Controlled Tier Alpha, we simply evaluate whether the user is qualified for
-    // Registered Tier and set RT+CT or RT only based on the feature flag
-
-    final List<DbAccessTier> newAccessTiers =
-        shouldUserBeRegistered(dbUser)
-            ? accessTierService.getTiersForRegisteredUsers()
-            : Collections.emptyList();
-
+    final List<DbAccessTier> newAccessTiers = getUserAccessTiersList(dbUser);
     if (!newAccessTiers.equals(previousAccessTiers)) {
       userServiceAuditor.fireUpdateAccessTiersAction(
           dbUser, previousAccessTiers, newAccessTiers, agent);
@@ -233,7 +234,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   }
 
   // missing ERA_COMMONS (special-cased below)
-  // missing CT_COMPLIANCE_TRAINING, for controlled tier only
   // see also: AccessModuleServiceImpl.isModuleRequiredInEnvironment()
   private static final List<AccessModuleName> requiredModulesForRegisteredTier =
       ImmutableList.of(
@@ -244,34 +244,60 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
           AccessModuleName.PROFILE_CONFIRMATION,
           AccessModuleName.PUBLICATION_CONFIRMATION);
 
-  private boolean shouldUserBeRegistered(DbUser user) {
-    boolean allStandardRequiredModulesCompliant =
-        requiredModulesForRegisteredTier.stream()
-            .allMatch(moduleName -> accessModuleService.isModuleCompliant(user, moduleName));
+  private static final List<AccessModuleName> requiredModulesForControlledTier =
+      ImmutableList.of(AccessModuleName.CT_COMPLIANCE_TRAINING);
 
+  private List<DbAccessTier> getUserAccessTiersList(DbUser dbUser) {
+    // If user does NOT have access to RT, they should not have access to any TIER
+    if (!shouldGrantUserTierAccess(
+        dbUser, requiredModulesForRegisteredTier, REGISTERED_TIER_SHORT_NAME)) {
+      return Collections.emptyList();
+    }
+
+    // User is already qualified for RT
+    List<DbAccessTier> userAccessTiers =
+        com.google.common.collect.Lists.newArrayList(accessTierService.getRegisteredTierOrThrow());
+
+    // Add Controlled Access Tier to the list, if user has completed/bypassed all CT Steps.
+    accessTierService
+        .getAccessTierByName(CONTROLLED_TIER_SHORT_NAME)
+        .ifPresent(
+            tier -> {
+              if (shouldGrantUserTierAccess(
+                  dbUser, requiredModulesForControlledTier, CONTROLLED_TIER_SHORT_NAME)) {
+                userAccessTiers.add(tier);
+              }
+            });
+
+    return userAccessTiers;
+  }
+
+  private boolean shouldGrantUserTierAccess(
+      DbUser user, List<AccessModuleName> requiredModules, String tierShortName) {
+    boolean allStandardRequiredModulesCompliant =
+        requiredModules.stream()
+            .allMatch(moduleName -> accessModuleService.isModuleCompliant(user, moduleName));
     boolean eraCompliant =
         accessModuleService.isModuleCompliant(user, AccessModuleName.ERA_COMMONS);
 
-    boolean eRARequiredForRegisteredTier = true;
-    boolean institutionalEmailValid = false;
+    boolean eRARequiredForTier = true;
+    boolean institutionalEmailValidForTier = false;
     Optional<Institution> institution = institutionService.getByUser(user);
     if (institution.isPresent()) {
       // eRA is required when login.gov linking is not enabled or user institution requires that in
       // tier requirement.
-      eRARequiredForRegisteredTier =
+      eRARequiredForTier =
           !configProvider.get().access.enableRasLoginGovLinking
-              || institutionService.eRaRequiredForTier(
-                  institution.get(), REGISTERED_TIER_SHORT_NAME);
-      institutionalEmailValid =
+              || institutionService.eRaRequiredForTier(institution.get(), tierShortName);
+      institutionalEmailValidForTier =
           institutionService.validateInstitutionalEmail(
-              institution.get(), user.getContactEmail(), REGISTERED_TIER_SHORT_NAME);
+              institution.get(), user.getContactEmail(), tierShortName);
     } else {
       log.warning(String.format("Institution not found for user %s", user.getUsername()));
     }
-
     return !user.getDisabled()
-        && (!eRARequiredForRegisteredTier || eraCompliant)
-        && institutionalEmailValid
+        && (!eRARequiredForTier || eraCompliant)
+        && institutionalEmailValidForTier
         && allStandardRequiredModulesCompliant;
   }
 
@@ -551,9 +577,8 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
    * rather than user-specific OAuth tokens.
    *
    * <p>Using the user's email, we can get their badges from Moodle's APIs. If the badges are marked
-   * valid, we store their completion/expiration dates in the database. If they are marked invalid,
-   * we clear the completion/expiration dates from the database as the user will need to complete a
-   * new training.
+   * valid, we store their completion dates in the database. If they are marked invalid, we clear
+   * the completion dates from the database as the user will need to complete a new training.
    */
   @Override
   public DbUser syncComplianceTrainingStatusV2(DbUser dbUser, Agent agent)
@@ -565,56 +590,68 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
 
     try {
       Timestamp now = new Timestamp(clock.instant().toEpochMilli());
-      final Timestamp newComplianceTrainingCompletionTime;
-      final Timestamp newComplianceTrainingExpirationTime;
-      Map<String, BadgeDetailsV2> userBadgesByName =
+      Map<BadgeName, BadgeDetailsV2> userBadgesByName =
           complianceService.getUserBadgesByBadgeName(dbUser.getUsername());
 
-      if (userBadgesByName.containsKey(complianceService.getResearchEthicsTrainingField())) {
-        BadgeDetailsV2 complianceBadge =
-            userBadgesByName.get(complianceService.getResearchEthicsTrainingField());
+      /**
+       * Determine the logical completion time for this user for the given compliance access module.
+       * Three logical outcomes are possible:
+       *
+       * <ul>
+       *   <li>Incomplete or invalid training badge: empty
+       *   <li>Badge has been issued for the first time, or has been reissued since we last marked
+       *       the training complete: now
+       *   <li>Else: existing completion time, i.e. no change
+       * </ul>
+       */
+      Function<AccessModuleName, Optional<Timestamp>> determineCompletionTime =
+          (moduleName) -> {
+            BadgeName badgeName = BADGE_BY_COMPLIANCE_MODULE.get(moduleName);
+            Optional<BadgeDetailsV2> badge =
+                Optional.ofNullable(userBadgesByName.get(badgeName))
+                    .filter(BadgeDetailsV2::getValid);
 
-        if (complianceBadge.getValid()) {
-          final Timestamp dbCompletionTime =
-              accessModuleService
-                  .getAccessModuleStatus(dbUser, AccessModuleName.RT_COMPLIANCE_TRAINING)
-                  .map(AccessModuleStatus::getCompletionEpochMillis)
-                  .map(Timestamp::new)
-                  .orElse(null);
+            if (!badge.isPresent()) {
+              return Optional.empty();
+            }
 
-          if (dbCompletionTime == null) {
-            // The badge was previously invalid and is now valid.
-            newComplianceTrainingCompletionTime = now;
-          } else if (!dbUser
-              .getComplianceTrainingExpirationTime()
-              .equals(Timestamp.from(Instant.ofEpochSecond(complianceBadge.getDateexpire())))) {
-            // The badge was previously valid, but has a new expiration date (and so is a new
-            // training)
-            newComplianceTrainingCompletionTime = now;
-          } else {
-            // The badge status has not changed since the last time the status was synced.
-            newComplianceTrainingCompletionTime = dbCompletionTime;
-          }
+            if (badge.get().getLastissued() == null) {
+              log.warning(
+                  String.format(
+                      "badge %s is indicated as valid by Moodle, but is missing the lastissued "
+                          + "time, this is unexpected - treating this as an incomplete training",
+                      badgeName));
+              return Optional.empty();
+            }
+            Instant badgeTime = Instant.ofEpochSecond(badge.get().getLastissued());
+            Instant dbCompletionTime =
+                accessModuleService
+                    .getAccessModuleStatus(dbUser, moduleName)
+                    .map(AccessModuleStatus::getCompletionEpochMillis)
+                    .map(Instant::ofEpochMilli)
+                    .orElse(Instant.EPOCH);
 
-          // Always update the expiration time if the training badge is valid
-          newComplianceTrainingExpirationTime =
-              Timestamp.from(Instant.ofEpochSecond(complianceBadge.getDateexpire()));
-        } else {
-          // The current badge is invalid or expired, the training must be completed or retaken.
-          newComplianceTrainingCompletionTime = null;
-          newComplianceTrainingExpirationTime = null;
-        }
-      } else {
-        // There is no record of this person having taken the training.
-        newComplianceTrainingCompletionTime = null;
-        newComplianceTrainingExpirationTime = null;
-      }
+            if (badgeTime.isAfter(dbCompletionTime)) {
+              // First-time badge or renewal: our system recognizes the user as having
+              // completed training right now, though the badge has been issued some
+              // time in the past.
+              return Optional.of(now);
+            }
+
+            // No change
+            return Optional.of(Timestamp.from(dbCompletionTime));
+          };
+
+      Map<AccessModuleName, Optional<Timestamp>> completionTimes =
+          BADGE_BY_COMPLIANCE_MODULE.keySet().stream()
+              .collect(Collectors.toMap(Function.identity(), determineCompletionTime));
 
       return updateUserWithRetries(
           u -> {
-            accessModuleService.updateCompletionTime(
-                u, AccessModuleName.RT_COMPLIANCE_TRAINING, newComplianceTrainingCompletionTime);
-            u.setComplianceTrainingExpirationTime(newComplianceTrainingExpirationTime);
+            completionTimes.forEach(
+                (accessModuleName, timestamp) ->
+                    accessModuleService.updateCompletionTime(
+                        u, accessModuleName, timestamp.orElse(null)));
             return u;
           },
           dbUser,

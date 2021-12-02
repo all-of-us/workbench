@@ -32,7 +32,6 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
-import org.pmiops.workbench.model.BillingAccountType;
 import org.pmiops.workbench.model.DisseminateResearchEnum;
 import org.pmiops.workbench.model.ResearchOutcomeEnum;
 import org.pmiops.workbench.model.ResearchPurpose;
@@ -117,7 +116,6 @@ public class TestMockFactory {
         .cdrVersionId(CDR_VERSION_ID)
         .googleBucketName(WORKSPACE_BUCKET_NAME)
         .billingAccountName(WORKSPACE_BILLING_ACCOUNT_NAME)
-        .billingAccountType(BillingAccountType.FREE_TIER)
         .googleProject(DEFAULT_GOOGLE_PROJECT)
         .creationTime(1588097211621L)
         .creator("jay@unit-test-research-aou.org")
@@ -276,7 +274,8 @@ public class TestMockFactory {
             .setDisplayName("Registered Tier")
             .setAuthDomainName("Registered Tier Auth Domain")
             .setAuthDomainGroupEmail("rt-users@fake-research-aou.org")
-            .setServicePerimeter("registered/tier/perimeter");
+            .setServicePerimeter("registered/tier/perimeter")
+            .setEnableUserWorkflows(false);
     return accessTierDao.save(accessTier);
   }
 
@@ -288,7 +287,14 @@ public class TestMockFactory {
             .setDisplayName("Controlled Tier")
             .setAuthDomainName("Controlled Tier Auth Domain")
             .setAuthDomainGroupEmail("ct-users@fake-research-aou.org")
-            .setServicePerimeter("controlled/tier/perimeter"));
+            .setServicePerimeter("controlled/tier/perimeter")
+            .setEnableUserWorkflows(true));
+  }
+
+  public static void removeControlledTierForTests(AccessTierDao accessTierDao) {
+    DbAccessTier controlledAccessTier =
+        accessTierDao.findOneByShortName(AccessTierService.CONTROLLED_TIER_SHORT_NAME).get();
+    accessTierDao.delete(controlledAccessTier);
   }
 
   /** Prepare AccessModules inmemory cache. */
@@ -311,6 +317,13 @@ public class TestMockFactory {
     // run in the workbench schema only.
     cdrVersion.setCdrDbName("");
     cdrVersion.setAccessTier(createRegisteredTierForTests(accessTierDao));
+    return cdrVersionDao.save(cdrVersion);
+  }
+
+  public static DbCdrVersion createControlledTierCdrVersion(
+      CdrVersionDao cdrVersionDao, AccessTierDao accessTierDao, long id) {
+    DbCdrVersion cdrVersion = createDefaultCdrVersion(cdrVersionDao, accessTierDao, id);
+    cdrVersion.setAccessTier(createControlledTierForTests(accessTierDao));
     return cdrVersionDao.save(cdrVersion);
   }
 }

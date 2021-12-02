@@ -24,7 +24,7 @@ const styles = {
   popup: {
     position: 'fixed', top: 0, left: 0, zIndex: 105,
     backgroundColor: colors.white,
-    border: `1px solid`, borderColor: colorWithWhiteness(colors.dark, .6), borderRadius: 4,
+    border: '1px solid', borderColor: colorWithWhiteness(colors.dark, .6), borderRadius: 4,
     boxShadow: '0 3px 2px 0 rgba(0,0,0,0.12)'
   }
 };
@@ -51,7 +51,7 @@ interface WithDynamicPositionProps {
 
 export const withDynamicPosition = () => WrappedComponent => {
   const Wrapper = class WithDynamicPosition extends React.Component {
-    static displayName = `withDynamicPosition()`;
+    static displayName = 'withDynamicPosition()';
 
     props: WithDynamicPositionProps;
     state: any;
@@ -254,7 +254,7 @@ export const Popup = fp.flow(
   onClickOutside,
   withDynamicPosition()
 )(class PopupComponent extends React.Component {
-  static displayName = `Popup`;
+  static displayName = 'Popup';
 
   static readonly defaultProps = {
     side: 'right'

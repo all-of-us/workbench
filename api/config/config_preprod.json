@@ -8,9 +8,10 @@
     "leoBaseUrl": "https:\/\/notebooks.firecloud.org",
     "xAppIdValue": "preprod-AoU-RW",
     "timeoutInSeconds": 60,
-    "jupyterDockerImage": "broadinstitute/terra-jupyter-aou:2.0.1",
+    "jupyterDockerImage": "us.gcr.io/broad-dsp-gcr-public/terra-jupyter-aou:2.0.3",
     "shibbolethApiBaseUrl": "https:\/\/profile-dot-broad-shibboleth-prod.appspot.com",
     "shibbolethUiBaseUrl": "https:\/\/broad-shibboleth-prod.appspot.com",
+    "workspaceLogsProject": "fc-aou-logs-preprod",
     "runtimeImages": {
       "gce": [],
       "dataproc": []
@@ -97,20 +98,22 @@
   },
   "featureFlags": {
     "unsafeAllowDeleteUser": false,
-    "unsafeAllowAccessToAllTiersForRegisteredUsers": true,
-    "enableBillingUpgrade": false,
+    "enableBillingUpgrade": true,
     "enableEventDateModifier": false,
     "enableResearchPurposePrompt": false,
     "enableGenomicExtraction": true,
     "enableGpu": false,
     "enablePersistentDisk": false,
-    "enableEgressAlertingV2": false,
-    "enableStandardSourceDomains": true
+    "enableEgressAlertingV2": true,
+    "enablePrivateDataprocWorker": false,
+    "grantLifescienceApiRunnerAcl": false,
+    "ccSupportWhenAdminLocking": true
   },
   "actionAudit": {
     "logName": "workbench-action-audit-preprod",
     "bigQueryDataset": "workbench_action_audit_preprod",
-    "bigQueryTable": "workbench_action_audit_preprod"
+    "bigQueryTable": "workbench_action_audit_preprod",
+    "partitionColumn": "timestamp"
   },
   "captcha": {
     "enableCaptcha": true,
@@ -127,7 +130,7 @@
   },
   "accessRenewal": {
     "expiryDays": 3650,
-    "expiryDaysWarningThresholds": [ 1, 3, 7, 15, 30 ],
+    "expiryDaysWarningThresholds": [1, 3, 7, 15, 30],
     "lookbackPeriod": 330
   },
   "offlineBatch": {

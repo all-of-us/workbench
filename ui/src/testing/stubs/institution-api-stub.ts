@@ -9,7 +9,7 @@ import {
   OrganizationType,
 } from 'generated/fetch';
 import {stubNotImplementedError} from 'testing/stubs/stub-utils';
-import {getRegisteredTierConfig} from "app/utils/institutions";
+import {getRegisteredTierConfig} from 'app/utils/institutions';
 
 export const VUMC: Institution = {
   shortName: 'VUMC',
@@ -17,10 +17,10 @@ export const VUMC: Institution = {
   organizationTypeEnum: OrganizationType.HEALTHCENTERNONPROFIT,
   tierConfigs: [
     {
-      accessTierShortName: "registered",
+      accessTierShortName: 'registered',
       membershipRequirement: InstitutionMembershipRequirement.DOMAINS,
       eraRequired: true,
-      emailDomains: ["vumc.org"]
+      emailDomains: ['vumc.org']
     }
   ],
   userInstructions: 'Vanderbilt User Instruction'
@@ -32,7 +32,7 @@ export const BROAD: Institution = {
   organizationTypeEnum: OrganizationType.ACADEMICRESEARCHINSTITUTION,
   tierConfigs: [
     {
-      accessTierShortName: "registered",
+      accessTierShortName: 'registered',
       membershipRequirement: InstitutionMembershipRequirement.ADDRESSES,
       eraRequired: true,
       emailAddresses: ['contactEmail@broadinstitute.org', 'broad_institution@broadinstitute.org']
@@ -46,13 +46,13 @@ export const VERILY: Institution = {
   organizationTypeEnum: OrganizationType.INDUSTRY,
   tierConfigs: [
     {
-      accessTierShortName: "registered",
+      accessTierShortName: 'registered',
       membershipRequirement: InstitutionMembershipRequirement.DOMAINS,
       eraRequired: true,
       emailDomains: ['verily.com', 'google.com']
     },
     {
-      accessTierShortName: "controlled",
+      accessTierShortName: 'controlled',
       membershipRequirement: InstitutionMembershipRequirement.ADDRESSES,
       eraRequired: true,
       emailAddresses: ['foo@verily.com']
@@ -67,13 +67,13 @@ export const VERILY_WITHOUT_CT: Institution = {
   organizationTypeEnum: OrganizationType.INDUSTRY,
   tierConfigs: [
     {
-      accessTierShortName: "registered",
+      accessTierShortName: 'registered',
       membershipRequirement: InstitutionMembershipRequirement.DOMAINS,
       eraRequired: true,
       emailDomains: ['verily.com', 'google.com']
     },
     {
-      accessTierShortName: "controlled",
+      accessTierShortName: 'controlled',
       membershipRequirement: InstitutionMembershipRequirement.NOACCESS,
     }
   ],

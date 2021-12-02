@@ -12,8 +12,8 @@ import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.access.AccessTierService.REGISTERED_TIER_SHORT_NAME;
 
 import com.google.api.services.directory.model.User;
+import com.google.common.collect.ImmutableMap;
 import java.sql.Timestamp;
-import java.time.Clock;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.HashMap;
@@ -25,7 +25,8 @@ import java.util.function.Supplier;
 import javax.annotation.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.pmiops.workbench.SpringTest;
+import org.pmiops.workbench.FakeClockConfiguration;
+import org.pmiops.workbench.FakeJpaDateTimeConfiguration;
 import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.access.AccessModuleServiceImpl;
 import org.pmiops.workbench.access.AccessTierServiceImpl;
@@ -33,6 +34,7 @@ import org.pmiops.workbench.access.UserAccessModuleMapperImpl;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.compliance.ComplianceService;
+import org.pmiops.workbench.compliance.ComplianceService.BadgeName;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbAccessModule;
 import org.pmiops.workbench.db.model.DbAccessModule.AccessModuleName;
@@ -68,13 +70,12 @@ import org.springframework.test.annotation.DirtiesContext;
 
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-public class UserServiceTest extends SpringTest {
+public class UserServiceTest {
 
   private static final String USERNAME = "abc@fake-research-aou.org";
 
   // An arbitrary timestamp to use as the anchor time for access module test cases.
-  private static final Instant START_INSTANT = Instant.parse("2000-01-01T00:00:00.00Z");
-  private static final FakeClock PROVIDED_CLOCK = new FakeClock(START_INSTANT);
+  private static final Instant START_INSTANT = FakeClockConfiguration.NOW.toInstant();
   private static final int CLOCK_INCREMENT_MILLIS = 1000;
   private static DbUser providedDbUser;
   private static WorkbenchConfig providedWorkbenchConfig;
@@ -93,11 +94,14 @@ public class UserServiceTest extends SpringTest {
   @Autowired private AccessTierDao accessTierDao;
   @Autowired private AccessModuleDao accessModuleDao;
   @Autowired private UserAccessModuleDao userAccessModuleDao;
+  @Autowired private FakeClock fakeClock;
 
   // we need the full service for some tests and mocks for others
   @SpyBean private AccessModuleService accessModuleService;
 
   @Import({
+    FakeClockConfiguration.class,
+    FakeJpaDateTimeConfiguration.class,
     UserServiceTestConfiguration.class,
     AccessTierServiceImpl.class,
     AccessModuleServiceImpl.class,
@@ -109,11 +113,6 @@ public class UserServiceTest extends SpringTest {
   })
   @TestConfiguration
   static class Configuration {
-    @Bean
-    Clock clock() {
-      return PROVIDED_CLOCK;
-    }
-
     @Bean
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     WorkbenchConfig getWorkbenchConfig() {
@@ -153,12 +152,6 @@ public class UserServiceTest extends SpringTest {
     // key UserService logic depends on the existence of the Registered Tier
     registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
 
-    // Since we're injecting the same static instance of this FakeClock,
-    // increments and other mutations will carry across tests if we don't reset it here.
-    // I tried easier ways of ensuring this, like creating new instances for every test run,
-    // but it was injecting null clocks giving NPEs long after construction, and so far this
-    // is the only working approach I've seen.
-    PROVIDED_CLOCK.setInstant(START_INSTANT);
     accessModules = TestMockFactory.createAccessModules(accessModuleDao);
     Institution institution = new Institution();
     when(mockInstitutionService.getByUser(user)).thenReturn(Optional.of(institution));
@@ -171,25 +164,20 @@ public class UserServiceTest extends SpringTest {
 
   @Test
   public void testSyncComplianceTrainingStatusV2() throws Exception {
-    BadgeDetailsV2 retBadge = new BadgeDetailsV2();
-    long expiry = PROVIDED_CLOCK.instant().getEpochSecond() + 100;
-    retBadge.setDateexpire(expiry);
-    retBadge.setValid(true);
+    long issued = fakeClock.instant().getEpochSecond() - 100;
 
-    Map<String, BadgeDetailsV2> userBadgesByName = new HashMap<>();
-    userBadgesByName.put(mockComplianceService.getResearchEthicsTrainingField(), retBadge);
+    Map<BadgeName, BadgeDetailsV2> userBadgesByName = new HashMap<>();
+    userBadgesByName.put(
+        BadgeName.REGISTERED_TIER_TRAINING, new BadgeDetailsV2().lastissued(issued).valid(true));
 
     when(mockComplianceService.getUserBadgesByBadgeName(USERNAME)).thenReturn(userBadgesByName);
 
     userService.syncComplianceTrainingStatusV2();
 
-    // The user should be updated in the database with a non-empty completion and expiration time.
+    // The user should be updated in the database with a non-empty completion.
     DbUser user = userDao.findUserByUsername(USERNAME);
     assertModuleCompletionEqual(
         AccessModuleName.RT_COMPLIANCE_TRAINING, user, Timestamp.from(START_INSTANT));
-
-    assertThat(user.getComplianceTrainingExpirationTime())
-        .isEqualTo(Timestamp.from(Instant.ofEpochSecond(expiry)));
 
     // Completion timestamp should not change when the method is called again.
     tick();
@@ -201,28 +189,22 @@ public class UserServiceTest extends SpringTest {
 
   @Test
   public void testUpdateComplianceTrainingStatusV2() throws Exception {
-    BadgeDetailsV2 retBadge = new BadgeDetailsV2();
-    long expiry = PROVIDED_CLOCK.instant().getEpochSecond();
-    retBadge.setDateexpire(expiry);
-    retBadge.setValid(true);
+    long issued = fakeClock.instant().getEpochSecond() - 10;
+    BadgeDetailsV2 retBadge = new BadgeDetailsV2().lastissued(issued).valid(true);
 
-    Map<String, BadgeDetailsV2> userBadgesByName = new HashMap<>();
-    userBadgesByName.put(mockComplianceService.getResearchEthicsTrainingField(), retBadge);
+    Map<BadgeName, BadgeDetailsV2> userBadgesByName = new HashMap<>();
+    userBadgesByName.put(BadgeName.REGISTERED_TIER_TRAINING, retBadge);
 
     when(mockComplianceService.getUserBadgesByBadgeName(USERNAME)).thenReturn(userBadgesByName);
 
     userService.syncComplianceTrainingStatusV2();
 
-    // The user should be updated in the database with a non-empty completion and expiration time.
+    // The user should be updated in the database with a non-empty completion time.
     DbUser user = userDao.findUserByUsername(USERNAME);
-    assertThat(user.getComplianceTrainingExpirationTime())
-        .isEqualTo(Timestamp.from(Instant.ofEpochSecond(expiry)));
     assertModuleCompletionEqual(
         AccessModuleName.RT_COMPLIANCE_TRAINING, user, Timestamp.from(START_INSTANT));
 
     // Deprecate the old training.
-    long newExpiry = expiry - 1;
-    retBadge.setDateexpire(newExpiry);
     retBadge.setValid(false);
 
     // Completion timestamp should be wiped out by the expiry timestamp passing.
@@ -230,29 +212,59 @@ public class UserServiceTest extends SpringTest {
     assertModuleCompletionEqual(AccessModuleName.RT_COMPLIANCE_TRAINING, user, null);
 
     // The user does a new training.
-    long newerExpiry = expiry + 1;
-    retBadge.setDateexpire(newerExpiry);
-    retBadge.setValid(true);
+    retBadge.lastissued(issued + 5).valid(true);
 
     // Completion and expiry timestamp should be updated.
     userService.syncComplianceTrainingStatusV2();
-    assertThat(user.getComplianceTrainingExpirationTime())
-        .isEqualTo(Timestamp.from(Instant.ofEpochSecond(newerExpiry)));
     assertModuleCompletionEqual(
         AccessModuleName.RT_COMPLIANCE_TRAINING, user, Timestamp.from(START_INSTANT));
 
-    // A global expiration is set.
-    long globalExpiry = expiry - 1000;
-    retBadge.setGlobalexpiration(globalExpiry);
-    retBadge.setValid(false);
+    // Time passes, user renews training
+    retBadge.lastissued(fakeClock.instant().getEpochSecond() + 1);
+    fakeClock.increment(5000);
 
-    // Completion timestamp should be wiped out by the globalexpiry timestamp passing.
+    // Completion should be updated to the current time.
     userService.syncComplianceTrainingStatusV2();
-    assertModuleCompletionEqual(AccessModuleName.RT_COMPLIANCE_TRAINING, user, null);
+    assertModuleCompletionEqual(
+        AccessModuleName.RT_COMPLIANCE_TRAINING, user, Timestamp.from(fakeClock.instant()));
+  }
+
+  @Test
+  public void testUpdateComplianceTrainingStatusV2_controlled() throws Exception {
+    long issued = fakeClock.instant().getEpochSecond() - 10;
+    BadgeDetailsV2 ctBadge = new BadgeDetailsV2().lastissued(issued).valid(true);
+    Map<BadgeName, BadgeDetailsV2> userBadgesByName =
+        ImmutableMap.<BadgeName, BadgeDetailsV2>builder()
+            .put(
+                BadgeName.REGISTERED_TIER_TRAINING,
+                new BadgeDetailsV2().lastissued(issued).valid(true))
+            .put(BadgeName.CONTROLLED_TIER_TRAINING, ctBadge)
+            .build();
+
+    when(mockComplianceService.getUserBadgesByBadgeName(USERNAME)).thenReturn(userBadgesByName);
+
+    userService.syncComplianceTrainingStatusV2();
+
+    // The user should be updated in the database with a non-empty completion time.
+    DbUser user = userDao.findUserByUsername(USERNAME);
+    assertModuleCompletionEqual(
+        AccessModuleName.RT_COMPLIANCE_TRAINING, user, Timestamp.from(START_INSTANT));
+    assertModuleCompletionEqual(
+        AccessModuleName.CT_COMPLIANCE_TRAINING, user, Timestamp.from(START_INSTANT));
+
+    ctBadge.lastissued(fakeClock.instant().getEpochSecond() + 1);
+    fakeClock.increment(5000);
+
+    // Renewing training updates completion.
+    userService.syncComplianceTrainingStatusV2();
+    assertModuleCompletionEqual(
+        AccessModuleName.RT_COMPLIANCE_TRAINING, user, Timestamp.from(START_INSTANT));
+    assertModuleCompletionEqual(
+        AccessModuleName.CT_COMPLIANCE_TRAINING, user, Timestamp.from(fakeClock.instant()));
   }
 
   private void tick() {
-    PROVIDED_CLOCK.increment(CLOCK_INCREMENT_MILLIS);
+    fakeClock.increment(CLOCK_INCREMENT_MILLIS);
   }
 
   @Test
@@ -264,7 +276,7 @@ public class UserServiceTest extends SpringTest {
         user, AccessModuleName.RT_COMPLIANCE_TRAINING, new Timestamp(12345));
 
     // An empty map should be returned when we have no badge information.
-    Map<String, BadgeDetailsV2> userBadgesByName = new HashMap<>();
+    Map<BadgeName, BadgeDetailsV2> userBadgesByName = new HashMap<>();
 
     when(mockComplianceService.getUserBadgesByBadgeName(USERNAME)).thenReturn(userBadgesByName);
 
@@ -344,6 +356,8 @@ public class UserServiceTest extends SpringTest {
                 .linkedNihUsername("nih-user")
                 // FireCloud stores the NIH status in seconds, not msecs.
                 .linkExpireTime(START_INSTANT.toEpochMilli() / 1000));
+
+    tick();
     userService.syncEraCommonsStatus();
     Timestamp modifiedTime1 = getLastModified.get();
     assertWithMessage(

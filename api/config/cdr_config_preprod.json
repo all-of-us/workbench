@@ -7,7 +7,8 @@
       "servicePerimeter": "accessPolicies/357236995176/servicePerimeters/terra_prod_aou_preprod",
       "authDomainName": "all-of-us-registered-preprod",
       "authDomainGroupEmail": "all-of-us-registered-preprod@firecloud.org",
-      "datasetsBucket": "gs://fc-aou-preprod-datasets-registered/"
+      "datasetsBucket": "gs://fc-aou-preprod-datasets-registered/",
+      "enableUserWorkflows": false
     },
     {
       "accessTierId": 2,
@@ -16,7 +17,8 @@
       "servicePerimeter": "accessPolicies/357236995176/servicePerimeters/terra_prod_aou_preprod_2",
       "authDomainName": "all-of-us-controlled-preprod",
       "authDomainGroupEmail": "all-of-us-controlled-preprod@firecloud.org",
-      "datasetsBucket": "gs://fc-aou-preprod-datasets-controlled/"
+      "datasetsBucket": "gs://fc-aou-preprod-datasets-controlled/",
+      "enableUserWorkflows": false
     }
   ],
   "cdrVersions": [
@@ -87,7 +89,7 @@
       "hasCopeSurveyData": true,
       "accessTier": "controlled",
       "allSamplesWgsDataBucket": "5/wgs/vcf/merged/alpha2",
-      "singleSampleArrayDataBucket": "5/microarray/vcf/single_sample/"
+      "singleSampleArrayDataBucket": "5/microarray/vcf/single_sample/alpha2"
     },
     {
       "cdrVersionId": 6,
@@ -98,7 +100,7 @@
       "creationTime": "2021-08-10 00:00:00Z",
       "releaseNumber": 7,
       "numParticipants": 329070,
-      "cdrDbName": "r_2021q3_3",
+      "cdrDbName": "r_2021q3_4",
       "hasFitbitData": true,
       "hasCopeSurveyData": true,
       "accessTier": "registered"
@@ -109,13 +111,15 @@
       "isDefault": true,
       "bigqueryProject": "fc-aou-cdr-preprod-ct",
       "bigqueryDataset": "C2021Q3R2",
+      "wgsBigqueryDataset": "beta_release",
       "creationTime": "2021-10-06 00:00:00Z",
       "releaseNumber": 8,
       "numParticipants": 331382,
-      "cdrDbName": "c_2021q3_2",
+      "cdrDbName": "c_2021q3_3",
       "hasFitbitData": true,
       "hasCopeSurveyData": true,
-      "accessTier": "controlled"
+      "accessTier": "controlled",
+      "singleSampleArrayDataBucket": "5/microarray/vcf/single_sample/alpha3"
     }
   ]
 }

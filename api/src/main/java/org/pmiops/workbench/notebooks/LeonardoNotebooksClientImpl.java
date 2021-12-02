@@ -30,11 +30,11 @@ import org.pmiops.workbench.leonardo.api.DisksApi;
 import org.pmiops.workbench.leonardo.api.RuntimesApi;
 import org.pmiops.workbench.leonardo.api.ServiceInfoApi;
 import org.pmiops.workbench.leonardo.model.LeonardoCreateRuntimeRequest;
-import org.pmiops.workbench.leonardo.model.LeonardoCreateRuntimeRequest.WelderRegistryEnum;
 import org.pmiops.workbench.leonardo.model.LeonardoGetPersistentDiskResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
+import org.pmiops.workbench.leonardo.model.LeonardoMachineConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.leonardo.model.LeonardoUpdateDiskRequest;
 import org.pmiops.workbench.leonardo.model.LeonardoUpdateRuntimeRequest;
@@ -149,9 +149,6 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
             .addScopesItem("https://www.googleapis.com/auth/userinfo.email")
             .addScopesItem("https://www.googleapis.com/auth/userinfo.profile")
             .toolDockerImage(workbenchConfigProvider.get().firecloud.jupyterDockerImage)
-            // Note: DockerHub must be used over GCR here, since VPC-SC restricts
-            // pulling external images via GCR (since it counts as GCS traffic).
-            .welderRegistry(WelderRegistryEnum.DOCKERHUB)
             .customEnvironmentVariables(customEnvironmentVariables)
             .autopauseThreshold(runtime.getAutopauseThreshold())
             .runtimeConfig(buildRuntimeConfig(runtime));
@@ -172,7 +169,12 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
     } else if (runtime.getGceWithPdConfig() != null) {
       return leonardoMapper.toLeonardoGceWithPdConfig(runtime.getGceWithPdConfig());
     } else {
-      return leonardoMapper.toLeonardoMachineConfig(runtime.getDataprocConfig());
+      LeonardoMachineConfig machineConfig =
+          leonardoMapper.toLeonardoMachineConfig(runtime.getDataprocConfig());
+      if (workbenchConfigProvider.get().featureFlags.enablePrivateDataprocWorker) {
+        machineConfig.setWorkerPrivateAccess(true);
+      }
+      return machineConfig;
     }
   }
 

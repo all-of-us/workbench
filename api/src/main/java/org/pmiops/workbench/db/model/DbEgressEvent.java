@@ -21,7 +21,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @Table(name = "egress_event")
 @EntityListeners(AuditingEntityListener.class)
 public class DbEgressEvent {
-  public enum EgressEventStatus {
+  public enum DbEgressEventStatus {
     PENDING,
     REMEDIATED,
     VERIFIED_FALSE_POSITIVE
@@ -36,7 +36,7 @@ public class DbEgressEvent {
   private Long egressWindowSeconds;
   private Timestamp creationTime;
   private Timestamp lastModifiedTime;
-  private EgressEventStatus status;
+  private DbEgressEventStatus status;
   private String sumologicEvent;
 
   @Id
@@ -127,11 +127,11 @@ public class DbEgressEvent {
 
   @Enumerated(EnumType.STRING)
   @Column(name = "status", nullable = false)
-  public EgressEventStatus getStatus() {
+  public DbEgressEventStatus getStatus() {
     return status;
   }
 
-  public DbEgressEvent setStatus(EgressEventStatus s) {
+  public DbEgressEvent setStatus(DbEgressEventStatus s) {
     this.status = s;
     return this;
   }

@@ -1,6 +1,5 @@
 package org.pmiops.workbench.db.jdbc;
 
-import static org.pmiops.workbench.db.model.DbStorageEnums.billingAccountTypeFromStorage;
 import static org.pmiops.workbench.db.model.DbStorageEnums.billingStatusFromStorage;
 import static org.pmiops.workbench.db.model.DbStorageEnums.degreeFromStorage;
 import static org.pmiops.workbench.db.model.DbStorageEnums.disabilityFromStorage;
@@ -12,6 +11,7 @@ import static org.pmiops.workbench.db.model.DbStorageEnums.organizationTypeFromS
 import static org.pmiops.workbench.db.model.DbStorageEnums.raceFromStorage;
 import static org.pmiops.workbench.db.model.DbStorageEnums.sexAtBirthFromStorage;
 import static org.pmiops.workbench.utils.mappers.CommonMappers.offsetDateTimeUtc;
+import static org.pmiops.workbench.workspaces.WorkspaceUtils.getBillingAccountType;
 
 import com.google.common.base.Strings;
 import java.util.Arrays;
@@ -186,7 +186,6 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 + "  u.area_of_research,\n"
                 + "  uamrt.compliance_training_bypass_time,\n"
                 + "  uamrt.compliance_training_completion_time,\n"
-                + "  u.compliance_training_expiration_time,\n"
                 + "  u.contact_email,\n"
                 + "  u.creation_time,\n"
                 + "  uamd.data_use_agreement_bypass_time,\n"
@@ -313,8 +312,6 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                     offsetDateTimeUtc(rs.getTimestamp("compliance_training_bypass_time")))
                 .complianceTrainingCompletionTime(
                     offsetDateTimeUtc(rs.getTimestamp("compliance_training_completion_time")))
-                .complianceTrainingExpirationTime(
-                    offsetDateTimeUtc(rs.getTimestamp("compliance_training_expiration_time")))
                 .contactEmail(rs.getString("contact_email"))
                 .creationTime(offsetDateTimeUtc(rs.getTimestamp("creation_time")))
                 .accessTierShortNames(rs.getString("access_tier_short_names"))
@@ -380,7 +377,7 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
     return jdbcTemplate.query(
         String.format(
             "SELECT \n"
-                + "  billing_account_type,\n"
+                + "  billing_account_name,\n"
                 + "  billing_status,\n"
                 + "  w.cdr_version_id AS cdr_version_id,\n"
                 + "  w.creation_time AS creation_time,\n"
@@ -427,7 +424,8 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
             new ReportingWorkspace()
                 .accessTierShortName(rs.getString("access_tier_short_name"))
                 .billingAccountType(
-                    billingAccountTypeFromStorage(rs.getShort("billing_account_type")))
+                    getBillingAccountType(
+                        rs.getString("billing_account_name"), workbenchConfigProvider.get()))
                 .billingStatus(billingStatusFromStorage(rs.getShort("billing_status")))
                 .cdrVersionId(rs.getLong("cdr_version_id"))
                 .creationTime(offsetDateTimeUtc(rs.getTimestamp("creation_time")))

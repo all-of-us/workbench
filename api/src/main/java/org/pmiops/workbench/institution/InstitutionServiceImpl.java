@@ -500,7 +500,7 @@ public class InstitutionServiceImpl implements InstitutionService {
   // Take first 76 characters from display Name (with no spaces) and append 3 random number
   private String generateShortName(String displayName) {
     Random r = new Random();
-    displayName = displayName.replaceAll("\\s", "");
+    displayName = displayName.replaceAll("[^a-zA-Z0-9]", "");
     String shortName = displayName.length() > 76 ? displayName.substring(0, 76) : displayName;
     shortName = shortName + r.nextInt(500) + 1;
     return shortName;

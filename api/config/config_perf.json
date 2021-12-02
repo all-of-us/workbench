@@ -8,9 +8,10 @@
     "leoBaseUrl": "https:\/\/leonardo.dsde-perf.broadinstitute.org",
     "xAppIdValue": "perf-AoU-RW",
     "timeoutInSeconds": 60,
-    "jupyterDockerImage": "broadinstitute/terra-jupyter-aou:2.0.1",
+    "jupyterDockerImage": "us.gcr.io/broad-dsp-gcr-public/terra-jupyter-aou:2.0.3",
     "shibbolethApiBaseUrl": "",
     "shibbolethUiBaseUrl": "",
+    "workspaceLogsProject": "fc-aou-logs-perf",
     "runtimeImages": {
       "gce": [],
       "dataproc": []
@@ -97,20 +98,22 @@
   },
   "featureFlags": {
     "unsafeAllowDeleteUser": true,
-    "unsafeAllowAccessToAllTiersForRegisteredUsers": true,
-    "enableBillingUpgrade": false,
+    "enableBillingUpgrade": true,
     "enableEventDateModifier": false,
     "enableResearchPurposePrompt": false,
     "enableGenomicExtraction": true,
     "enableGpu": false,
     "enablePersistentDisk": false,
-    "enableEgressAlertingV2": false,
-    "enableStandardSourceDomains": true
+    "enableEgressAlertingV2": true,
+    "enablePrivateDataprocWorker": false,
+    "grantLifescienceApiRunnerAcl": false,
+    "ccSupportWhenAdminLocking": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-perf",
     "bigQueryDataset": "workbench_action_audit_perf",
-    "bigQueryTable": "workbench_action_audit_perf"
+    "bigQueryTable": "workbench_action_audit_perf",
+    "partitionColumn": "_PARTITIONTIME"
   },
   "rdrExport": {
     "host": "pmi-drc-api-test.appspot.com",
@@ -132,11 +135,21 @@
   },
   "accessRenewal": {
     "expiryDays": 3650,
-    "expiryDaysWarningThresholds": [ 1, 3, 7, 15, 30 ],
+    "expiryDaysWarningThresholds": [1, 3, 7, 15, 30],
     "lookbackPeriod": 330
   },
   "offlineBatch": {
     "usersPerAuditTask": 20,
     "usersPerSynchronizeAccessTask": 50
+  },
+  "egressAlertRemediationPolicy": {
+    "enableJiraTicketing": false,
+    "notifyFromEmail": "workbench-notificatio-aaaaekogch7vg3c6hi4sgyx4le@pmi-engteam.slack.com",
+    "escalations": [{
+      "afterIncidentCount": 1,
+      "suspendCompute": {
+        "durationMinutes": 10
+      }
+    }]
   }
 }

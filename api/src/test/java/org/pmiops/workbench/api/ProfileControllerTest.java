@@ -29,8 +29,8 @@ import java.util.Random;
 import javax.mail.MessagingException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.pmiops.workbench.FakeClockConfiguration;
+import org.pmiops.workbench.FakeJpaDateTimeConfiguration;
 import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.access.AccessModuleServiceImpl;
 import org.pmiops.workbench.access.AccessTierService;
@@ -113,6 +113,7 @@ import org.pmiops.workbench.utils.mappers.AuditLogEntryMapperImpl;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
@@ -124,10 +125,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+@DataJpaTest
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
-@ExtendWith(SpringExtension.class)
 public class ProfileControllerTest extends BaseControllerTest {
   @MockBean private CaptchaVerificationService mockCaptchaVerificationService;
   @MockBean private CloudStorageClient mockCloudStorageClient;
@@ -206,6 +206,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     VerifiedInstitutionalAffiliationMapperImpl.class,
     AccessTierServiceImpl.class,
     FakeClockConfiguration.class,
+    FakeJpaDateTimeConfiguration.class,
   })
   @MockBean({BigQueryService.class})
   static class Configuration {
@@ -544,7 +545,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
     Profile profile = profileController.getMe().getBody();
     assertProfile(profile);
-    verify(mockFireCloudService).registerUser(CONTACT_EMAIL, GIVEN_NAME, FAMILY_NAME);
+    verify(mockFireCloudService).registerUser(GIVEN_NAME, FAMILY_NAME);
     verify(mockProfileAuditor).fireLoginAction(dbUser);
   }
 
@@ -553,7 +554,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     createAccountAndDbUserWithAffiliation();
     Profile profile = profileController.getMe().getBody();
     assertProfile(profile);
-    verify(mockFireCloudService).registerUser(CONTACT_EMAIL, GIVEN_NAME, FAMILY_NAME);
+    verify(mockFireCloudService).registerUser(GIVEN_NAME, FAMILY_NAME);
 
     // An additional call to getMe() should have no effect.
     fakeClock.increment(1);

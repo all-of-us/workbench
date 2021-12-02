@@ -7,6 +7,6 @@ import org.springframework.data.repository.query.Param;
 
 public interface DSLinkingDao extends CrudRepository<DbDSLinking, Long> {
 
-  List<DbDSLinking> findByDomainAndDenormalizedNameIn(
+  List<DbDSLinking> findByDomainAndDenormalizedNameInOrderById(
       @Param("domain") String domain, @Param("names") List<String> names);
 }

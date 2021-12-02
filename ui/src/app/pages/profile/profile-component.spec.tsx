@@ -1,6 +1,6 @@
 import {mount, ReactWrapper} from 'enzyme';
 import * as React from 'react';
-import {MemoryRouter} from "react-router-dom";
+import {MemoryRouter} from 'react-router-dom';
 import SpyInstance = jest.SpyInstance;
 
 import {TextInput} from 'app/components/inputs';

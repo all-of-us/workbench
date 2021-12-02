@@ -20,9 +20,6 @@ public enum UserColumnValueExtractor implements ColumnValueExtractor<ReportingUs
   COMPLIANCE_TRAINING_COMPLETION_TIME(
       "compliance_training_completion_time",
       u -> toInsertRowString(u.getComplianceTrainingCompletionTime())),
-  COMPLIANCE_TRAINING_EXPIRATION_TIME(
-      "compliance_training_expiration_time",
-      u -> toInsertRowString(u.getComplianceTrainingExpirationTime())),
   CONTACT_EMAIL("contact_email", ReportingUser::getContactEmail),
   CREATION_TIME("creation_time", u -> toInsertRowString(u.getCreationTime())),
   DATA_USE_AGREEMENT_BYPASS_TIME(

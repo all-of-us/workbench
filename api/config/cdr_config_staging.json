@@ -7,7 +7,8 @@
       "servicePerimeter": "accessPolicies/357236995176/servicePerimeters/terra_prod_aou_staging",
       "authDomainName": "all-of-us-registered-staging",
       "authDomainGroupEmail": "GROUP_all-of-us-registered-staging@firecloud.org",
-      "datasetsBucket": "gs://fc-aou-staging-datasets-registered/"
+      "datasetsBucket": "gs://fc-aou-staging-datasets-registered/",
+      "enableUserWorkflows": false
     },
     {
       "accessTierId": 2,
@@ -16,7 +17,8 @@
       "servicePerimeter": "accessPolicies/357236995176/servicePerimeters/terra_prod_aou_staging_2",
       "authDomainName": "all-of-us-controlled-staging",
       "authDomainGroupEmail": "all-of-us-controlled-staging@firecloud.org",
-      "datasetsBucket": "gs://fc-aou-staging-datasets-controlled/"
+      "datasetsBucket": "gs://fc-aou-staging-datasets-controlled/",
+      "enableUserWorkflows": false
     }
   ],
   "cdrVersions": [
@@ -84,7 +86,7 @@
       "creationTime": "2019-09-30 00:00:00Z",
       "releaseNumber": 3,
       "numParticipants": 234525,
-      "cdrDbName": "synth_r_2019q4_20",
+      "cdrDbName": "synth_r_2019q4_22",
       "hasFitbitData": true,
       "hasCopeSurveyData": true,
       "accessTier": "registered"
@@ -98,7 +100,7 @@
       "creationTime": "2019-09-30 00:00:00Z",
       "releaseNumber": 4,
       "numParticipants": 234525,
-      "cdrDbName": "synth_r_2019q4_20",
+      "cdrDbName": "synth_r_2019q4_22",
       "hasFitbitData": true,
       "hasCopeSurveyData": true,
       "accessTier": "registered"
@@ -114,7 +116,7 @@
       "creationTime": "2021-04-20 00:00:00Z",
       "releaseNumber": 3,
       "numParticipants": 234525,
-      "cdrDbName": "synth_r_2019q4_20",
+      "cdrDbName": "synth_r_2019q4_22",
       "hasFitbitData": true,
       "hasCopeSurveyData": true
     }

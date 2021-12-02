@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
-import org.pmiops.workbench.SpringTest;
+import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.cohortbuilder.util.QueryParameterValues;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.model.ReportingUser;
@@ -36,8 +36,10 @@ import org.pmiops.workbench.testconfig.fixtures.ReportingTestFixture;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
-public class InsertAllRequestBuilderTest extends SpringTest {
+@SpringJUnitConfig
+public class InsertAllRequestBuilderTest {
 
   private static final InsertAllRequestPayloadTransformer<ReportingUser>
       USER_INSERT_ALL_REQUEST_BUILDER = UserColumnValueExtractor::values;
@@ -63,7 +65,7 @@ public class InsertAllRequestBuilderTest extends SpringTest {
   @Autowired ReportingTestFixture<DbUser, ReportingUser> userFixture;
 
   @TestConfiguration
-  @Import({ReportingTestConfig.class})
+  @Import({FakeClockConfiguration.class, ReportingTestConfig.class})
   public static class Config {}
 
   // regression test for RW-5437

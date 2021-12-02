@@ -13,8 +13,8 @@ import {UserMetricsApiStub} from 'testing/stubs/user-metrics-api-stub';
 import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
-import {cdrVersionStore, profileStore, serverConfigStore} from "app/utils/stores";
-import {cdrVersionTiersResponse} from "testing/stubs/cdr-versions-api-stub";
+import {cdrVersionStore, profileStore, serverConfigStore} from 'app/utils/stores';
+import {cdrVersionTiersResponse} from 'testing/stubs/cdr-versions-api-stub';
 
 describe('HomepageComponent', () => {
   const profile = ProfileStubVariables.PROFILE_STUB;
@@ -93,6 +93,6 @@ describe('HomepageComponent', () => {
 
   it('should not display the zero workspace UI while workspaces are being fetched', async () => {
     const wrapper = component();
-    expect(wrapper.html().includes("Here are some tips to get you started")).toBeFalsy();
+    expect(wrapper.html().includes('Here are some tips to get you started')).toBeFalsy();
   });
 });

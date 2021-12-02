@@ -27,7 +27,7 @@ import javax.persistence.EntityManager;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.pmiops.workbench.SpringTest;
+import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.db.dao.AccessModuleDao;
 import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
@@ -80,7 +80,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @DataJpaTest
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
-public class ReportingQueryServiceTest extends SpringTest {
+public class ReportingQueryServiceTest {
 
   public static final int BATCH_SIZE = 2;
   @Autowired private ReportingQueryService reportingQueryService;
@@ -107,7 +107,12 @@ public class ReportingQueryServiceTest extends SpringTest {
   @Autowired private UserDao userDao;
   @Autowired private WorkspaceDao workspaceDao;
 
-  @Import({ReportingQueryServiceImpl.class, ReportingUserFixture.class, ReportingTestConfig.class})
+  @Import({
+    FakeClockConfiguration.class,
+    ReportingQueryServiceImpl.class,
+    ReportingUserFixture.class,
+    ReportingTestConfig.class
+  })
   @TestConfiguration
   public static class config {}
 

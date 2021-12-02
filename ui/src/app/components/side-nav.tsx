@@ -1,16 +1,17 @@
+import * as React from 'react';
+import {useState} from 'react';
+
 import {Clickable} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
-import {hasRegisteredAccess} from 'app/utils/access-tiers';
+import {hasRegisteredTierAccess} from 'app/utils/access-tiers';
 import {signOut} from 'app/utils/authentication';
 import {AuthorityGuardedAction, hasAuthorityForAction} from 'app/utils/authorities';
 import {navigateSignOut, useNavigation} from 'app/utils/navigation';
 import {getProfilePictureSrc} from 'app/utils/profile-picture';
 import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
 import {Profile} from 'generated/fetch';
-import * as React from 'react';
-import {useState} from 'react';
 
 const styles = reactStyles({
   flex: {
@@ -101,6 +102,10 @@ const getSideNavItemStyles = (active, hovering, disabled) => {
 // However, this component is currently rendered outside of the React router, so useLocation won't work.
 const bannerAdminActive = () =>  {
   return window.location.pathname === '/admin/banner';
+};
+
+const egressAdminActive = () =>  {
+  return window.location.pathname.startsWith('/admin/egress-events');
 };
 
 const userAdminActive = () =>  {
@@ -285,7 +290,7 @@ export const SideNav = (props: SideNavProps) => {
         onToggleSideNav={() => onToggleSideNav()}
         href={'/workspaces'}
         active={workspacesActive()}
-        disabled={!hasRegisteredAccess(profile.accessTierShortNames)}
+        disabled={!hasRegisteredTierAccess(profile)}
     />
     <SideNavItem
         icon='star'
@@ -293,14 +298,14 @@ export const SideNav = (props: SideNavProps) => {
         onToggleSideNav={() => onToggleSideNav()}
         href={'/library'}
         active={libraryActive()}
-        disabled={!hasRegisteredAccess(profile.accessTierShortNames)}
+        disabled={!hasRegisteredTierAccess(profile)}
     />
     <SideNavItem
         icon='help'
         content={'User Support Hub'}
         onToggleSideNav={() => onToggleSideNav()}
         parentOnClick={() => window.open(supportUrls.helpCenter, '_blank')}
-        disabled={!hasRegisteredAccess(profile.accessTierShortNames)}
+        disabled={!hasRegisteredTierAccess(profile)}
     />
     <SideNavItem
         icon='envelope'
@@ -362,6 +367,14 @@ export const SideNav = (props: SideNavProps) => {
           onToggleSideNav={() => onToggleSideNav()}
           href={'admin/institution'}
           active={workspaceAdminActive()}
+      />
+    }
+    {
+      hasAuthorityForAction(profile, AuthorityGuardedAction.EGRESS_EVENTS) && showAdminOptions && <SideNavItem
+          content={'Egress Events'}
+          onToggleSideNav={() => onToggleSideNav()}
+          href={'/admin/egress-events'}
+          active={egressAdminActive()}
       />
     }
   </div>;

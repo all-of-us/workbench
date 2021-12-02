@@ -21,7 +21,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.pmiops.workbench.SpringTest;
+import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.access.AccessTierServiceImpl;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
@@ -73,6 +73,7 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.CloudBillingClient;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.google.DirectoryService;
+import org.pmiops.workbench.iam.IamService;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.model.CohortStatus;
@@ -122,7 +123,7 @@ import org.springframework.transaction.annotation.Transactional;
 @DataJpaTest
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
-public class CohortsControllerTest extends SpringTest {
+public class CohortsControllerTest {
 
   private static final Instant NOW = Instant.now();
   private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
@@ -194,6 +195,7 @@ public class CohortsControllerTest extends SpringTest {
 
   @TestConfiguration
   @Import({
+    FakeClockConfiguration.class,
     CohortCloningService.class,
     CohortFactoryImpl.class,
     CohortMapperImpl.class,
@@ -237,6 +239,7 @@ public class CohortsControllerTest extends SpringTest {
     FireCloudService.class,
     FreeTierBillingService.class,
     LeonardoNotebooksClient.class,
+    IamService.class,
     MailService.class,
     MonitoringService.class,
     ParticipantCohortAnnotationMapper.class,

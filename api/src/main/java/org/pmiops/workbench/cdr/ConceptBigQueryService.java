@@ -26,8 +26,8 @@ public class ConceptBigQueryService {
   private static final ImmutableList<Domain> CHILD_LOOKUP_DOMAINS =
       ImmutableList.of(Domain.CONDITION, Domain.PROCEDURE, Domain.MEASUREMENT, Domain.DRUG);
   public static final String SURVEY_QUESTION_CONCEPT_ID_SQL_TEMPLATE =
-      "select DISTINCT(question_concept_id) as concept_id \n"
-          + "from `${projectId}.${dataSetId}.ds_survey`\n";
+      "SELECT DISTINCT(question_concept_id) as concept_id \n"
+          + "FROM `${projectId}.${dataSetId}.ds_survey`\n";
 
   @Autowired
   public ConceptBigQueryService(BigQueryService bigQueryService) {
@@ -50,21 +50,21 @@ public class ConceptBigQueryService {
     StringBuilder innerSql = new StringBuilder();
     ImmutableMap.Builder<String, QueryParameterValue> paramMap = ImmutableMap.builder();
     if (!standardList.isEmpty()) {
-      innerSql.append("select person_id\n");
-      innerSql.append("from `${projectId}.${dataSetId}.cb_search_all_events`\n");
+      innerSql.append("SELECT person_id\n");
+      innerSql.append("FROM `${projectId}.${dataSetId}.cb_search_all_events`\n");
       generateParentChildLookupSql(
           innerSql, domain, "standardConceptIds", 1, standardList, paramMap);
       innerSql.append("\n");
       if (!sourceList.isEmpty()) {
-        innerSql.append(" union all\n");
+        innerSql.append(" UNION ALL\n");
       }
     }
     if (!sourceList.isEmpty()) {
-      innerSql.append("select person_id\n");
-      innerSql.append("from `${projectId}.${dataSetId}.cb_search_all_events`\n");
+      innerSql.append("SELECT person_id\n");
+      innerSql.append("FROM `${projectId}.${dataSetId}.cb_search_all_events`\n");
       generateParentChildLookupSql(innerSql, domain, "sourceConceptIds", 0, sourceList, paramMap);
     }
-    String finalSql = "select count(distinct person_id) person_count from (\n" + innerSql + ")";
+    String finalSql = "SELECT COUNT(DISTINCT person_id) person_count FROM (\n" + innerSql + ")";
     QueryJobConfiguration jobConfiguration =
         QueryJobConfiguration.newBuilder(finalSql)
             .setNamedParameters(paramMap.build())
@@ -84,7 +84,7 @@ public class ConceptBigQueryService {
       ImmutableMap.Builder<String, QueryParameterValue> paramMap) {
     String standardParam = (standardOrSource == 1 ? "standard" : "source");
     sqlBuilder.append(
-        String.format("where is_standard = %s and concept_id in ", "@" + standardParam));
+        String.format("WHERE is_standard = %s AND concept_id IN ", "@" + standardParam));
     paramMap.put(
         conceptIdsParam, QueryParameterValue.array(conceptIds.toArray(new Long[0]), Long.class));
     paramMap.put(standardParam, QueryParameterValue.int64(standardOrSource));

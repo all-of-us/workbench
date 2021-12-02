@@ -39,8 +39,7 @@ public class ActionAuditQueryServiceImpl implements ActionAuditQueryService {
           + "WHERE %s\n"
           + "  AND @after <= TIMESTAMP_MILLIS(CAST(jsonPayload.timestamp AS INT64))\n"
           + "  AND TIMESTAMP_MILLIS(CAST(jsonPayload.timestamp AS INT64)) < @before\n"
-          + "  AND @after_partition_time <= _PARTITIONTIME\n"
-          + "  AND _PARTITIONTIME < @before_partition_time\n"
+          + "  AND @after_partition_time <= %s AND %<s < @before_partition_time\n"
           + "ORDER BY event_time DESC, agent_id, action_id\n"
           + "LIMIT @limit;";
 
@@ -64,7 +63,12 @@ public class ActionAuditQueryServiceImpl implements ActionAuditQueryService {
     final String whereClausePrefix =
         "jsonPayload.target_id = @workspace_db_id AND\n"
             + "  jsonPayload.target_type = 'WORKSPACE'\n";
-    final String queryString = String.format(QUERY_FORMAT, getTableName(), whereClausePrefix);
+    final String queryString =
+        String.format(
+            QUERY_FORMAT,
+            getTableName(),
+            whereClausePrefix,
+            workbenchConfigProvider.get().actionAudit.partitionColumn);
 
     final QueryJobConfiguration queryJobConfiguration =
         QueryJobConfiguration.newBuilder(queryString)
@@ -76,10 +80,6 @@ public class ActionAuditQueryServiceImpl implements ActionAuditQueryService {
 
     final TableResult tableResult = bigQueryService.executeQuery(queryJobConfiguration);
     final List<AuditLogEntry> logEntries = auditLogEntryMapper.tableResultToLogEntries(tableResult);
-    final String queryHeader =
-        String.format(
-            "Audit trail for workspace DB ID %d\nafter %s and before %s",
-            workspaceDatabaseId, after.toString(), before.toString());
 
     return new WorkspaceAuditLogQueryResponse()
         .logEntries(logEntries)
@@ -107,7 +107,12 @@ public class ActionAuditQueryServiceImpl implements ActionAuditQueryService {
         "((jsonPayload.target_id = @user_db_id AND jsonPayload.target_type = 'USER') OR\n"
             + "  (jsonPayload.agent_id = @user_db_id AND jsonPayload.agent_type = 'USER')) AND\n"
             + "  jsonPayload.action_type != 'LOGIN'";
-    final String queryString = String.format(QUERY_FORMAT, getTableName(), whereClausePrefix);
+    final String queryString =
+        String.format(
+            QUERY_FORMAT,
+            getTableName(),
+            whereClausePrefix,
+            workbenchConfigProvider.get().actionAudit.partitionColumn);
 
     final QueryJobConfiguration queryJobConfiguration =
         QueryJobConfiguration.newBuilder(queryString)
@@ -120,10 +125,6 @@ public class ActionAuditQueryServiceImpl implements ActionAuditQueryService {
     final TableResult tableResult = bigQueryService.executeQuery(queryJobConfiguration);
 
     final List<AuditLogEntry> logEntries = auditLogEntryMapper.tableResultToLogEntries(tableResult);
-    final String queryHeader =
-        String.format(
-            "Audit trail for user DB ID %d\nafter %s and before %s",
-            userDatabaseId, after.toString(), before.toString());
     final String formattedQuery =
         QueryParameterValues.formatQuery(
             QueryParameterValues.replaceNamedParameters(queryJobConfiguration));

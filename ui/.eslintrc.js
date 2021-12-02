@@ -53,7 +53,7 @@ module.exports = {
     'no-undef-init': 'warn',
     // 'brace-style': ['warn', '1tbs'],
     // 'simple-import-sort/sort': 'warn',
-    // 'quotes': ['warn', 'single'], 
+    'quotes': ['warn', 'single'],
     // '@typescript-eslint/semi': 'warn',
     // 'space-before-function-paren': ['warn', { 'anonymous': 'never', 'named': 'never', 'asyncArrow': 'always' }],
 
@@ -88,6 +88,9 @@ module.exports = {
     /* Maintainability */
     'eol-last': 'warn',
     'max-len': ['warn', {code: 140, ignorePattern: '^import |^export\\{(.*?)\\}', ignoreComments: true}], 
-    // 'prefer-const': ['warn', {'destructuring': 'all'}], 
+    // 'prefer-const': ['warn', {'destructuring': 'all'}],
+
+    /* Jest */
+    'jest/no-focused-tests': 'warn',
   }
 };

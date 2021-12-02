@@ -104,7 +104,7 @@ describe('Cohort UI Test', () => {
     await group1.addCriteria([MenuOption.Procedures]);
     await waitWhileLoading(page);
 
-    const resultsTable = await group1.getSearchResultsTable();
+    const resultsTable = group1.getSearchResultsTable();
     const originalRowNum = (await resultsTable.getRows()).length;
     expect(originalRowNum).toBeGreaterThanOrEqual(1);
 

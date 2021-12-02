@@ -224,10 +224,10 @@ const CopyModal = withCdrVersions()(class extends React.Component<HocProps, Copy
     }).catch((response) => {
       const errorMsg = response.status === 409 ?
         `${toDisplay(resourceType)} with the same ` +
-        `name already exists in the targeted workspace.` :
+        'name already exists in the targeted workspace.' :
         response.status === 404 ?
           `${toDisplay(resourceType)} not found in the ` +
-            `original workspace.` :
+            'original workspace.' :
           'An error occurred while copying. Please try again.';
 
       this.setCopyError(errorMsg);
@@ -300,7 +300,7 @@ const CopyModal = withCdrVersions()(class extends React.Component<HocProps, Copy
 
   // OK to copy a notebook with a mismatch, but show a warning message
   setNotebookCdrMismatchWarning(destination: Workspace, fromCdrVersionId: string) {
-    const warningMsg = `The selected destination workspace uses a different dataset version ` +
+    const warningMsg = 'The selected destination workspace uses a different dataset version ' +
         `(${this.cdrName(destination.cdrVersionId)}) from the current workspace (${this.cdrName(fromCdrVersionId)}). ` +
         'Edits may be required to ensure your analysis is functional and accurate.';
     this.setState({ cdrMismatch: warningMsg, destination: destination });
@@ -308,14 +308,14 @@ const CopyModal = withCdrVersions()(class extends React.Component<HocProps, Copy
 
   // not OK to copy a Concept Set with a mismatch.  Show an error message and prevent copy
   setConceptSetCdrMismatchError(destination: Workspace, fromCdrVersionId: string) {
-    const errorMsg = `Can’t copy to that workspace. It uses a different dataset version ` +
+    const errorMsg = 'Can’t copy to that workspace. It uses a different dataset version ' +
         `(${this.cdrName(destination.cdrVersionId)}) from the current workspace (${this.cdrName(fromCdrVersionId)}).`;
     this.setState({ cdrMismatch: errorMsg, destination: null });
   }
 
   // never OK to copy anything across an access tier boundary.  Show an error message and prevent copy
   setAccessTierMismatchError(destination: Workspace, fromAccessTierShortName: string) {
-    const errorMsg = `Can’t copy to that workspace. It has a different access tier ` +
+    const errorMsg = 'Can’t copy to that workspace. It has a different access tier ' +
         `(${destination.accessTierShortName}) from the current workspace (${fromAccessTierShortName}).`;
     this.setState({ accessTierMismatch: errorMsg, destination: null });
   }

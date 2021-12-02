@@ -1,0 +1,18 @@
+[
+  {
+    "mode": "NULLABLE",
+    "name": "ancestor_concept_id",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "descendant_concept_id",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "is_standard",
+    "type": "INTEGER"
+  }
+]
+

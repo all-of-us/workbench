@@ -20,7 +20,7 @@ import {SessionExpired} from 'app/pages/session-expired';
 import {SignInAgain} from 'app/pages/sign-in-again';
 import {SignedIn} from 'app/pages/signed-in/signed-in';
 import {UserDisabled} from 'app/pages/user-disabled';
-import {disabledGuard, signInGuard} from 'app/routing/guards';
+import {disabledGuard, signInGuard, userDisabledPageGuard} from 'app/routing/guards';
 import {bindApiClients, configApi, getApiBaseUrl} from 'app/services/swagger-fetch-clients';
 import {useIsUserDisabled} from 'app/utils/access-utils';
 import {initializeAnalytics} from 'app/utils/analytics';
@@ -172,7 +172,7 @@ const useOverriddenApiUrl = () => {
 export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => {
   const config = useServerConfig();
   const {authLoaded, authError} = useAuthentication();
-  const isUserDisabled = useIsUserDisabled();
+  const isUserDisabledInDb = useIsUserDisabled();
   const overriddenUrl = useOverriddenApiUrl();
 
   const loadLocalStorageAccessToken = () => {
@@ -205,7 +205,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
   const thirdPartyCookiesEnabled = !(authError && authError.length > 0 && authError.includes('Cookies'));
 
   return <React.Fragment>
-    {authLoaded && isUserDisabled !== undefined && <React.Fragment>
+    {authLoaded && isUserDisabledInDb !== undefined && <React.Fragment>
       {/* Once Angular is removed the app structure will change and we can put this in a more appropriate place */}
       <NotificationModal/>
       {
@@ -229,7 +229,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
             <AppRoute exact path='/sign-in-again'>
               <SignInAgainPage routeData={{title: 'You have been signed out'}}/>
             </AppRoute>
-            <AppRoute exact path='/user-disabled'>
+            <AppRoute exact path='/user-disabled' guards={[userDisabledPageGuard(isUserDisabledInDb)]}>
               <UserDisabledPage routeData={{title: 'Disabled'}}/>
             </AppRoute>
             <AppRoute exact path='/not-found'>
@@ -239,7 +239,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
                 path=''
                 exact={false}
                 intermediaryRoute={true}
-                guards={[signInGuard, disabledGuard(isUserDisabled)]}
+                guards={[signInGuard, disabledGuard(isUserDisabledInDb)]}
             >
               <SignedInPage
                   intermediaryRoute={true}

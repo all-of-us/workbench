@@ -7,7 +7,8 @@
       "servicePerimeter": "accessPolicies/357236995176/servicePerimeters/terra_prod_aou_stable",
       "authDomainName": "all-of-us-registered-stable",
       "authDomainGroupEmail": "GROUP_all-of-us-registered-stable@firecloud.org",
-      "datasetsBucket": "gs://fc-aou-stable-datasets-registered/"
+      "datasetsBucket": "gs://fc-aou-stable-datasets-registered/",
+      "enableUserWorkflows": false
     }
   ],
   "cdrVersions": [
@@ -75,7 +76,7 @@
       "creationTime": "2019-09-30 00:00:00Z",
       "releaseNumber": 3,
       "numParticipants": 234525,
-      "cdrDbName": "synth_r_2019q4_20",
+      "cdrDbName": "synth_r_2019q4_22",
       "hasFitbitData": true,
       "hasCopeSurveyData": true,
       "accessTier": "registered"
@@ -89,7 +90,7 @@
       "creationTime": "2019-09-30 00:00:00Z",
       "releaseNumber": 4,
       "numParticipants": 234525,
-      "cdrDbName": "synth_r_2019q4_20",
+      "cdrDbName": "synth_r_2019q4_22",
       "hasFitbitData": true,
       "hasCopeSurveyData": true,
       "accessTier": "registered"

@@ -1,17 +1,9 @@
-import {mount, ReactWrapper} from 'enzyme';
+import { mount, MountRendererProps, ReactWrapper} from 'enzyme';
 import * as React from 'react';
 import {act} from 'react-dom/test-utils';
 import * as fp from 'lodash/fp';
-import {InputSwitch} from "primereact/inputswitch";
 import {MemoryRouter} from 'react-router';
-import {Dropdown} from "primereact/dropdown";
 
-// This file is necessary because angular imports complain if there
-// is no zone, regardless of whether the imports are used.
-// The error is from:
-//   import {ComponentFixture, tick} from '@angular/core/testing';
-// And fails with:
-//   ReferenceError: Zone is not defined
 export async function waitOneTickAndUpdate(wrapper: ReactWrapper) {
   const waitImmediate = () => new Promise<void>(resolve => setImmediate(resolve))
   await act(waitImmediate);
@@ -20,7 +12,6 @@ export async function waitOneTickAndUpdate(wrapper: ReactWrapper) {
 
 // Combining a setTimeout with a delay of 0 (used in UI) and setImmediate can result in a non-deterministic order of events
 // If you are testing code that uses setTimeout this may be a safer choice.
-// If you are using fakeAsync waitOneTickAndUpdate is preferred
 export async function waitOnTimersAndUpdate(wrapper: ReactWrapper){
   const waitForTimeout = () => new Promise<void>(resolve => setTimeout(resolve, 0));
   await act(waitForTimeout);
@@ -28,10 +19,11 @@ export async function waitOnTimersAndUpdate(wrapper: ReactWrapper){
 }
 
 export async function waitForFakeTimersAndUpdate(wrapper: ReactWrapper) {
-  act(() => {
+  await act(() => {
     jest.runOnlyPendingTimers();
+    return Promise.resolve();
   });
-  await waitOneTickAndUpdate(wrapper);
+  wrapper.update();
 }
 
 export async function simulateSelection(selectElement: ReactWrapper, selection: string) {
@@ -40,6 +32,14 @@ export async function simulateSelection(selectElement: ReactWrapper, selection: 
   selectElement.simulate('change', {target: domNode});
   await waitOneTickAndUpdate(selectElement);
 }
+
+export function mountWithRouter(children: string | React.ReactNode, options?: MountRendererProps) {
+  // It would be ideal to unwrap down to the child wrapper here, but unfortunately
+  // wrapper.update() only works on the root node - and most tests need to call that.
+  return mount(<MemoryRouter>
+    {children}
+  </MemoryRouter>, options);
+};
 
 // We only want to check against the actual text node
 // Capturing other nodes in this search will return the parent nodes as well as the text,

@@ -1,7 +1,7 @@
 import {mount} from 'enzyme';
 import * as React from 'react';
 
-import {TwoFactorAuthModal} from "./two-factor-auth-modal";
+import {TwoFactorAuthModal} from './two-factor-auth-modal';
 
 describe('TwoFactorAuthModal', () => {
 

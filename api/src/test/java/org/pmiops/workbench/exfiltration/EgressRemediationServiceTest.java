@@ -11,36 +11,50 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableList;
+import com.google.gson.Gson;
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Arrays;
+import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.pmiops.workbench.FakeClockConfiguration;
-import org.pmiops.workbench.JpaFakeDateTimeConfiguration;
-import org.pmiops.workbench.SpringTest;
+import org.pmiops.workbench.FakeJpaDateTimeConfiguration;
 import org.pmiops.workbench.actionaudit.auditors.EgressEventAuditor;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.EgressAlertRemediationPolicy;
 import org.pmiops.workbench.config.WorkbenchConfig.EgressAlertRemediationPolicy.Escalation;
 import org.pmiops.workbench.config.WorkbenchConfig.EgressAlertRemediationPolicy.Escalation.DisableUser;
 import org.pmiops.workbench.config.WorkbenchConfig.EgressAlertRemediationPolicy.Escalation.SuspendCompute;
+import org.pmiops.workbench.config.WorkbenchConfig.ServerConfig;
 import org.pmiops.workbench.db.dao.EgressEventDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbEgressEvent;
-import org.pmiops.workbench.db.model.DbEgressEvent.EgressEventStatus;
+import org.pmiops.workbench.db.model.DbEgressEvent.DbEgressEventStatus;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.jira.JiraContent;
+import org.pmiops.workbench.jira.JiraService;
+import org.pmiops.workbench.jira.JiraService.IssueProperty;
+import org.pmiops.workbench.jira.api.JiraApi;
+import org.pmiops.workbench.jira.model.AtlassianDocument;
+import org.pmiops.workbench.jira.model.Comment;
+import org.pmiops.workbench.jira.model.CreatedIssue;
+import org.pmiops.workbench.jira.model.IssueBean;
+import org.pmiops.workbench.jira.model.IssueUpdateDetails;
+import org.pmiops.workbench.jira.model.SearchResults;
 import org.pmiops.workbench.mail.MailService;
-import org.pmiops.workbench.mail.MailService.EgressRemediationAction;
+import org.pmiops.workbench.model.SumologicEgressEvent;
 import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
 import org.pmiops.workbench.test.FakeClock;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,8 +67,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 
 @DataJpaTest
-@Import({JpaFakeDateTimeConfiguration.class})
-public class EgressRemediationServiceTest extends SpringTest {
+public class EgressRemediationServiceTest {
 
   private static final String USER_EMAIL = "asdf@fake-research-aou.org";
   private static WorkbenchConfig workbenchConfig;
@@ -63,6 +76,7 @@ public class EgressRemediationServiceTest extends SpringTest {
   @MockBean private LeonardoNotebooksClient mockLeonardoNotebooksClient;
   @MockBean private EgressEventAuditor mockEgressEventAuditor;
   @MockBean private MailService mockMailService;
+  @MockBean private JiraApi mockJiraApi;
 
   @Autowired private FakeClock fakeClock;
   @Autowired private WorkspaceDao workspaceDao;
@@ -76,7 +90,12 @@ public class EgressRemediationServiceTest extends SpringTest {
   private DbWorkspace dbWorkspace2;
 
   @TestConfiguration
-  @Import({EgressRemediationService.class})
+  @Import({
+    EgressRemediationService.class,
+    FakeClockConfiguration.class,
+    FakeJpaDateTimeConfiguration.class,
+    JiraService.class
+  })
   static class Configuration {
 
     @Bean
@@ -89,6 +108,8 @@ public class EgressRemediationServiceTest extends SpringTest {
   @BeforeEach
   public void setUp() {
     workbenchConfig = WorkbenchConfig.createEmptyConfig();
+    workbenchConfig.server = new ServerConfig();
+    workbenchConfig.server.shortName = "Test";
     workbenchConfig.egressAlertRemediationPolicy = new EgressAlertRemediationPolicy();
 
     DbUser dbUser = new DbUser();
@@ -140,7 +161,7 @@ public class EgressRemediationServiceTest extends SpringTest {
 
   @Test
   public void testRemediateEgressEvent_alreadyRemediated() {
-    long eventId = saveNewEvent(newEvent().setStatus(EgressEventStatus.REMEDIATED));
+    long eventId = saveNewEvent(newEvent().setStatus(DbEgressEventStatus.REMEDIATED));
     egressRemediationService.remediateEgressEvent(eventId);
 
     assertThat(getDbUser().getDisabled()).isFalse();
@@ -288,7 +309,7 @@ public class EgressRemediationServiceTest extends SpringTest {
     workbenchConfig.egressAlertRemediationPolicy = suspendXMinutesOnXIncidentsPolicy();
 
     saveOldEvents(
-        oldEvent(Duration.ofHours(3)).setStatus(EgressEventStatus.VERIFIED_FALSE_POSITIVE));
+        oldEvent(Duration.ofHours(3)).setStatus(DbEgressEventStatus.VERIFIED_FALSE_POSITIVE));
 
     egressRemediationService.remediateEgressEvent(saveNewEvent());
 
@@ -308,7 +329,7 @@ public class EgressRemediationServiceTest extends SpringTest {
     assertComputeSuspended(Duration.ofMinutes(1));
 
     DbEgressEvent event = egressEventDao.findById(eventId).get();
-    assertThat(event.getStatus()).isEqualTo(EgressEventStatus.REMEDIATED);
+    assertThat(event.getStatus()).isEqualTo(DbEgressEventStatus.REMEDIATED);
 
     verify(mockMailService)
         .sendEgressRemediationEmail(any(), eq(EgressRemediationAction.SUSPEND_COMPUTE));
@@ -328,7 +349,7 @@ public class EgressRemediationServiceTest extends SpringTest {
     verify(mockLeonardoNotebooksClient).stopAllUserRuntimesAsService(USER_EMAIL);
 
     DbEgressEvent event = egressEventDao.findById(eventId).get();
-    assertThat(event.getStatus()).isEqualTo(EgressEventStatus.REMEDIATED);
+    assertThat(event.getStatus()).isEqualTo(DbEgressEventStatus.REMEDIATED);
 
     verify(mockMailService)
         .sendEgressRemediationEmail(any(), eq(EgressRemediationAction.DISABLE_USER));
@@ -348,7 +369,7 @@ public class EgressRemediationServiceTest extends SpringTest {
     workbenchConfig.egressAlertRemediationPolicy.escalations =
         ImmutableList.of(suspendComputeAfter(1, Duration.ofMinutes(1)));
 
-    saveOldEvents(oldEvent(Duration.ofMinutes(30L)).setStatus(EgressEventStatus.REMEDIATED));
+    saveOldEvents(oldEvent(Duration.ofMinutes(30L)).setStatus(DbEgressEventStatus.REMEDIATED));
     egressRemediationService.remediateEgressEvent(saveNewEvent());
 
     verifyZeroInteractions(mockMailService);
@@ -361,13 +382,83 @@ public class EgressRemediationServiceTest extends SpringTest {
 
     saveOldEvents(
         oldEvent(Duration.ofMinutes(10L))
-            .setStatus(EgressEventStatus.REMEDIATED)
+            .setStatus(DbEgressEventStatus.REMEDIATED)
             .setWorkspace(dbWorkspace2),
-        oldEvent(Duration.ofHours(2L)).setStatus(EgressEventStatus.REMEDIATED));
+        oldEvent(Duration.ofHours(2L)).setStatus(DbEgressEventStatus.REMEDIATED));
     egressRemediationService.remediateEgressEvent(saveNewEvent());
 
     verify(mockMailService)
         .sendEgressRemediationEmail(any(), eq(EgressRemediationAction.SUSPEND_COMPUTE));
+  }
+
+  @Test
+  public void testRemediateEgressEvent_noJiraTicketWhenJiraDisabled() throws Exception {
+    when(mockJiraApi.searchForIssuesUsingJqlPost(any()))
+        .thenReturn(new SearchResults().issues(ImmutableList.of()));
+    workbenchConfig.egressAlertRemediationPolicy.escalations =
+        ImmutableList.of(suspendComputeAfter(1, Duration.ofMinutes(1)));
+
+    egressRemediationService.remediateEgressEvent(saveNewEvent());
+
+    verifyZeroInteractions(mockJiraApi);
+  }
+
+  @Test
+  public void testRemediateEgressEvent_createJiraTicketNoExisting() throws Exception {
+    workbenchConfig.egressAlertRemediationPolicy.enableJiraTicketing = true;
+
+    when(mockJiraApi.searchForIssuesUsingJqlPost(any()))
+        .thenReturn(new SearchResults().issues(ImmutableList.of()));
+    when(mockJiraApi.createIssue(any(), any())).thenReturn(new CreatedIssue().key("RW-1234"));
+    workbenchConfig.egressAlertRemediationPolicy.escalations =
+        ImmutableList.of(suspendComputeAfter(1, Duration.ofMinutes(1)));
+
+    egressRemediationService.remediateEgressEvent(saveNewEvent());
+
+    ArgumentCaptor<IssueUpdateDetails> captor = ArgumentCaptor.forClass(IssueUpdateDetails.class);
+    verify(mockJiraApi).createIssue(captor.capture(), anyBoolean());
+
+    IssueUpdateDetails details = captor.getValue();
+    assertThat(details).isNotNull();
+    Optional<Object> summary =
+        details.getFields().entrySet().stream()
+            .filter(f -> IssueProperty.SUMMARY.key().equals(f.getKey()))
+            .map(Entry::getValue)
+            .findFirst();
+    assertThat(summary.isPresent()).isTrue();
+    assertThat(summary.get().toString()).contains("Investigate egress from " + USER_EMAIL);
+
+    Optional<Object> description =
+        details.getFields().entrySet().stream()
+            .filter(f -> IssueProperty.DESCRIPTION.key().equals(f.getKey()))
+            .map(Entry::getValue)
+            .findFirst();
+    assertThat(description.isPresent()).isTrue();
+    AtlassianDocument doc = (AtlassianDocument) description.get();
+    assertThat(JiraContent.documentToString(doc))
+        .contains("User running notebook: " + getDbUser().getUsername());
+  }
+
+  @Test
+  public void testRemediateEgressEvent_commentExistingJiraTicket() throws Exception {
+    workbenchConfig.egressAlertRemediationPolicy.enableJiraTicketing = true;
+
+    when(mockJiraApi.searchForIssuesUsingJqlPost(any()))
+        .thenReturn(new SearchResults().issues(ImmutableList.of(new IssueBean().id("123"))));
+    workbenchConfig.egressAlertRemediationPolicy.escalations =
+        ImmutableList.of(suspendComputeAfter(1, Duration.ofMinutes(1)));
+
+    egressRemediationService.remediateEgressEvent(saveNewEvent());
+
+    ArgumentCaptor<Comment> captor = ArgumentCaptor.forClass(Comment.class);
+    verify(mockJiraApi).addComment(captor.capture(), eq("123"));
+
+    Comment comment = captor.getValue();
+    assertThat(comment).isNotNull();
+    assertThat(comment.getBody()).isInstanceOf(AtlassianDocument.class);
+
+    AtlassianDocument doc = (AtlassianDocument) comment.getBody();
+    assertThat(JiraContent.documentToString(doc)).contains("Additional egress detected");
   }
 
   private void saveOldEvents(Duration... ages) {
@@ -412,7 +503,7 @@ public class EgressRemediationServiceTest extends SpringTest {
 
   private DbEgressEvent oldEvent(Duration age) {
     Timestamp creationTime = Timestamp.from(FakeClockConfiguration.NOW.toInstant().minus(age));
-    return newEvent().setStatus(EgressEventStatus.REMEDIATED).setCreationTime(creationTime);
+    return newEvent().setStatus(DbEgressEventStatus.REMEDIATED).setCreationTime(creationTime);
   }
 
   private DbEgressEvent newEvent() {
@@ -420,7 +511,19 @@ public class EgressRemediationServiceTest extends SpringTest {
         .setUser(getDbUser())
         .setWorkspace(dbWorkspace)
         .setCreationTime(FakeClockConfiguration.NOW)
-        .setStatus(EgressEventStatus.PENDING);
+        .setStatus(DbEgressEventStatus.PENDING)
+        .setSumologicEvent(
+            new Gson()
+                .toJson(
+                    new SumologicEgressEvent()
+                        .egressMib(200.0)
+                        .timeWindowStart(
+                            FakeClockConfiguration.NOW
+                                .toInstant()
+                                .minus(Duration.ofHours(1L))
+                                .toEpochMilli())
+                        .timeWindowDuration(Duration.ofHours(1L).toMillis())
+                        .vmPrefix(getDbUser().getRuntimeName())));
   }
 
   private Escalation suspendComputeAfter(int afterIncidentCount, Duration duration) {

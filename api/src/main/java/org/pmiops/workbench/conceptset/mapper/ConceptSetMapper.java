@@ -24,7 +24,7 @@ public interface ConceptSetMapper {
   @Mapping(target = "id", source = "conceptSetId")
   @Mapping(target = "domain", source = "domainEnum")
   @Mapping(target = "survey", source = "surveysEnum")
-  @Mapping(target = "etag", source = "version", qualifiedByName = "cdrVersionToEtag")
+  @Mapping(target = "etag", source = "version", qualifiedByName = "versionToEtag")
   @Mapping(target = "criteriums", ignore = true)
   @Mapping(target = "participantCount", ignore = true)
   ConceptSet dbModelToClient(DbConceptSet source);
@@ -32,7 +32,7 @@ public interface ConceptSetMapper {
   @Mapping(target = "id", source = "conceptSetId")
   @Mapping(target = "domain", source = "domainEnum")
   @Mapping(target = "survey", source = "surveysEnum")
-  @Mapping(target = "etag", source = "version", qualifiedByName = "cdrVersionToEtag")
+  @Mapping(target = "etag", source = "version", qualifiedByName = "versionToEtag")
   @Mapping(target = "criteriums", ignore = true)
   @Mapping(target = "participantCount", ignore = true)
   ConceptSet dbModelToClient(

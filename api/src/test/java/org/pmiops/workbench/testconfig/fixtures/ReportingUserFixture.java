@@ -50,8 +50,6 @@ public class ReportingUserFixture implements ReportingTestFixture<DbUser, Report
       Timestamp.from(Instant.parse("2015-05-07T00:00:00.00Z"));
   public static final Timestamp USER__COMPLIANCE_TRAINING_COMPLETION_TIME =
       Timestamp.from(Instant.parse("2015-05-08T00:00:00.00Z"));
-  public static final Timestamp USER__COMPLIANCE_TRAINING_EXPIRATION_TIME =
-      Timestamp.from(Instant.parse("2015-05-09T00:00:00.00Z"));
   public static final String USER__CONTACT_EMAIL = "foo_5";
   public static final Timestamp USER__CREATION_TIME =
       Timestamp.from(Instant.parse("2015-05-11T00:00:00.00Z"));
@@ -113,8 +111,6 @@ public class ReportingUserFixture implements ReportingTestFixture<DbUser, Report
     assertTimeApprox(user.getComplianceTrainingBypassTime(), USER__COMPLIANCE_TRAINING_BYPASS_TIME);
     assertTimeApprox(
         user.getComplianceTrainingCompletionTime(), USER__COMPLIANCE_TRAINING_COMPLETION_TIME);
-    assertTimeApprox(
-        user.getComplianceTrainingExpirationTime(), USER__COMPLIANCE_TRAINING_EXPIRATION_TIME);
     assertThat(user.getContactEmail()).isEqualTo(USER__CONTACT_EMAIL);
     assertThat(user.getAccessTierShortNames()).isEqualTo(USER__ACCESS_TIER_SHORT_NAMES);
     assertTimeApprox(user.getDataUseAgreementBypassTime(), USER__DATA_USE_AGREEMENT_BYPASS_TIME);
@@ -161,7 +157,6 @@ public class ReportingUserFixture implements ReportingTestFixture<DbUser, Report
   public DbUser createEntity() {
     final DbUser user = new DbUser();
     user.setAreaOfResearch(USER__AREA_OF_RESEARCH);
-    user.setComplianceTrainingExpirationTime(USER__COMPLIANCE_TRAINING_EXPIRATION_TIME);
     user.setContactEmail(USER__CONTACT_EMAIL);
     user.setCreationTime(USER__CREATION_TIME);
     user.setDataUseAgreementSignedVersion(USER__DATA_USE_AGREEMENT_SIGNED_VERSION);
@@ -188,8 +183,6 @@ public class ReportingUserFixture implements ReportingTestFixture<DbUser, Report
         .complianceTrainingBypassTime(offsetDateTimeUtc(USER__COMPLIANCE_TRAINING_BYPASS_TIME))
         .complianceTrainingCompletionTime(
             offsetDateTimeUtc(USER__COMPLIANCE_TRAINING_COMPLETION_TIME))
-        .complianceTrainingExpirationTime(
-            offsetDateTimeUtc(USER__COMPLIANCE_TRAINING_EXPIRATION_TIME))
         .contactEmail(USER__CONTACT_EMAIL)
         .creationTime(offsetDateTimeUtc(USER__CREATION_TIME))
         .dataUseAgreementBypassTime(offsetDateTimeUtc(USER__DATA_USE_AGREEMENT_BYPASS_TIME))

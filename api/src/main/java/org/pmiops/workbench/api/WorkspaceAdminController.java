@@ -2,10 +2,14 @@ package org.pmiops.workbench.api;
 
 import java.util.List;
 import javax.annotation.Nullable;
+import org.apache.commons.lang3.StringUtils;
 import org.pmiops.workbench.annotations.AuthorityRequired;
+import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.AccessReason;
+import org.pmiops.workbench.model.AdminLockingRequest;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.CloudStorageTraffic;
+import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.ListRuntimeDeleteRequest;
 import org.pmiops.workbench.model.ListRuntimeResponse;
@@ -81,5 +85,26 @@ public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
       String workspaceNamespace, ListRuntimeDeleteRequest runtimesToDelete) {
     return ResponseEntity.ok(
         workspaceAdminService.deleteRuntimesInWorkspace(workspaceNamespace, runtimesToDelete));
+  }
+
+  @Override
+  @AuthorityRequired({Authority.ACCESS_CONTROL_ADMIN})
+  public ResponseEntity<EmptyResponse> setAdminLockedState(
+      String workspaceNamespace, AdminLockingRequest lockingRequest) {
+    if (lockingRequest.getRequestDateInMillis() == null
+        || lockingRequest.getRequestDateInMillis() == 0
+        || StringUtils.isBlank(lockingRequest.getRequestReason())) {
+      throw new BadRequestException(
+          String.format("Cannot have empty Request reason or Request Date"));
+    }
+    workspaceAdminService.setAdminLockedState(workspaceNamespace, lockingRequest);
+    return ResponseEntity.ok().build();
+  }
+
+  @Override
+  @AuthorityRequired({Authority.ACCESS_CONTROL_ADMIN})
+  public ResponseEntity<EmptyResponse> setAdminUnlockedState(String workspaceNamespace) {
+    workspaceAdminService.setAdminUnlockedState(workspaceNamespace);
+    return ResponseEntity.ok().build();
   }
 }

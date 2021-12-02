@@ -5,6 +5,7 @@ import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.google.common.collect.Iterables;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -12,12 +13,13 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.pmiops.workbench.SpringTest;
+import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.actionaudit.ActionAuditEvent;
 import org.pmiops.workbench.actionaudit.ActionAuditService;
 import org.pmiops.workbench.actionaudit.ActionType;
@@ -31,19 +33,22 @@ import org.pmiops.workbench.config.WorkbenchConfig.EgressAlertRemediationPolicy.
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbEgressEvent;
+import org.pmiops.workbench.db.model.DbEgressEvent.DbEgressEventStatus;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
-import org.pmiops.workbench.model.EgressEvent;
-import org.pmiops.workbench.model.EgressEventRequest;
+import org.pmiops.workbench.model.SumologicEgressEvent;
+import org.pmiops.workbench.model.SumologicEgressEventRequest;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
-public class EgressEventAuditorTest extends SpringTest {
+@SpringJUnitConfig
+public class EgressEventAuditorTest {
 
   private static final long USER_ID = 1L;
   private static final String USER_EMAIL = "user@researchallofus.org";
@@ -57,7 +62,7 @@ public class EgressEventAuditorTest extends SpringTest {
   private static final String EGRESS_EVENT_VM_PREFIX = "all-of-us-" + USER_ID;
 
   // Pre-built data objects for test.
-  private DbUser dbUser;
+  private static DbUser dbUser;
   private DbWorkspace dbWorkspace;
   private List<UserRole> firecloudUserRoles = new ArrayList<>();
 
@@ -72,6 +77,7 @@ public class EgressEventAuditorTest extends SpringTest {
 
   @TestConfiguration
   @Import({
+    FakeClockConfiguration.class,
     // Import the impl class to allow autowiring the bean.
     EgressEventAuditorImpl.class,
     // Import common action audit beans.
@@ -100,7 +106,7 @@ public class EgressEventAuditorTest extends SpringTest {
   @Test
   public void testFireEgressEvent() {
     egressEventAuditor.fireEgressEvent(
-        new EgressEvent()
+        new SumologicEgressEvent()
             .projectName(EGRESS_EVENT_PROJECT_NAME)
             .vmPrefix(EGRESS_EVENT_VM_PREFIX)
             .timeWindowStart(0l)
@@ -153,7 +159,7 @@ public class EgressEventAuditorTest extends SpringTest {
         BadRequestException.class,
         () ->
             egressEventAuditor.fireEgressEvent(
-                new EgressEvent()
+                new SumologicEgressEvent()
                     .projectName(EGRESS_EVENT_PROJECT_NAME)
                     .vmPrefix(EGRESS_EVENT_VM_PREFIX)));
     verify(mockActionAuditService).send(eventsCaptor.capture());
@@ -321,11 +327,45 @@ public class EgressEventAuditorTest extends SpringTest {
   }
 
   @Test
+  public void testAdminEditEgressEvent() {
+    Supplier<DbEgressEvent> newEvent =
+        () ->
+            new DbEgressEvent()
+                .setWorkspace(dbWorkspace)
+                .setUser(dbUser)
+                .setEgressEventId(1337)
+                .setCreationTime(NOW);
+    egressEventAuditor.fireAdminEditEgressEvent(
+        newEvent.get().setStatus(DbEgressEventStatus.REMEDIATED),
+        newEvent.get().setStatus(DbEgressEventStatus.VERIFIED_FALSE_POSITIVE));
+
+    verify(mockActionAuditService).send(eventsCaptor.capture());
+    Collection<ActionAuditEvent> events = eventsCaptor.getValue();
+
+    // Ensure all events have the expected set of constant fields.
+    assertThat(events.stream().map(event -> event.getAgentType()).collect(Collectors.toSet()))
+        .containsExactly(AgentType.ADMINISTRATOR);
+    assertThat(events.stream().map(event -> event.getAgentEmailMaybe()).collect(Collectors.toSet()))
+        .containsExactly(ActionAuditTestConfig.ADMINISTRATOR_EMAIL);
+    assertThat(events.stream().map(event -> event.getActionType()).collect(Collectors.toSet()))
+        .containsExactly(ActionType.EDIT);
+    assertThat(events.stream().map(event -> event.getTargetIdMaybe()).collect(Collectors.toSet()))
+        .containsExactly(WORKSPACE_ID);
+
+    assertThat(events).hasSize(1);
+    ActionAuditEvent event = Iterables.getOnlyElement(events);
+    assertThat(event.getTargetPropertyMaybe()).isEqualTo("status");
+    assertThat(event.getPreviousValueMaybe()).isEqualTo(DbEgressEventStatus.REMEDIATED.toString());
+    assertThat(event.getNewValueMaybe())
+        .isEqualTo(DbEgressEventStatus.VERIFIED_FALSE_POSITIVE.toString());
+  }
+
+  @Test
   public void testFailedParsing() {
     // When the inbound request parsing fails, an event is logged at the system agent.
     when(workspaceDao.getByGoogleProject(GOOGLE_PROJECT)).thenReturn(null);
     egressEventAuditor.fireFailedToParseEgressEventRequest(
-        new EgressEventRequest().eventsJsonArray("asdf"));
+        new SumologicEgressEventRequest().eventsJsonArray("asdf"));
     verify(mockActionAuditService).send(eventsCaptor.capture());
     Collection<ActionAuditEvent> events = eventsCaptor.getValue();
 
@@ -346,7 +386,7 @@ public class EgressEventAuditorTest extends SpringTest {
   public void testBadApiKey() {
     // When the inbound request parsing fails, an event is logged at the system agent.
     when(workspaceDao.getByGoogleProject(GOOGLE_PROJECT)).thenReturn(null);
-    egressEventAuditor.fireBadApiKey("ASDF", new EgressEventRequest());
+    egressEventAuditor.fireBadApiKey("ASDF", new SumologicEgressEventRequest());
     verify(mockActionAuditService).send(eventsCaptor.capture());
     Collection<ActionAuditEvent> events = eventsCaptor.getValue();
 

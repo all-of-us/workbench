@@ -8,7 +8,7 @@ import java.time.Instant;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.pmiops.workbench.SpringTest;
+import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.config.CommonConfig;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbUser;
@@ -20,10 +20,10 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
 
-@Import({CommonConfig.class})
+@Import({FakeClockConfiguration.class, CommonConfig.class})
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-public class UserAccessTierDaoTest extends SpringTest {
+public class UserAccessTierDaoTest {
   @Autowired private UserDao userDao;
   @Autowired private AccessTierDao accessTierDao;
   @Autowired private UserAccessTierDao userAccessTierDao;

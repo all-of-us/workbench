@@ -18,9 +18,10 @@ import org.pmiops.workbench.config.WorkbenchConfig
 import org.pmiops.workbench.db.dao.UserDao
 import org.pmiops.workbench.db.dao.WorkspaceDao
 import org.pmiops.workbench.db.model.DbEgressEvent
+import org.pmiops.workbench.db.model.DbUser
 import org.pmiops.workbench.exceptions.BadRequestException
-import org.pmiops.workbench.model.EgressEvent
-import org.pmiops.workbench.model.EgressEventRequest
+import org.pmiops.workbench.model.SumologicEgressEvent
+import org.pmiops.workbench.model.SumologicEgressEventRequest
 import org.pmiops.workbench.workspaces.WorkspaceService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
@@ -29,6 +30,7 @@ import org.springframework.stereotype.Service
 @Service
 class EgressEventAuditorImpl @Autowired
 constructor(
+    private val userProvider: Provider<DbUser>,
     private val actionAuditService: ActionAuditService,
     private val workspaceService: WorkspaceService,
     private val workspaceDao: WorkspaceDao,
@@ -37,7 +39,7 @@ constructor(
     @Qualifier("ACTION_ID") private val actionIdProvider: Provider<String>
 ) : EgressEventAuditor {
 
-    override fun fireEgressEvent(event: EgressEvent) {
+    override fun fireEgressEvent(event: SumologicEgressEvent) {
         // Load the workspace via the GCP project name
         val dbWorkspaceMaybe = workspaceDao.getByGoogleProject(event.projectName)
         if (!dbWorkspaceMaybe.isPresent()) {
@@ -106,19 +108,47 @@ constructor(
         ), egressEvent = dbEvent, escalation = escalation)
     }
 
-    override fun fireFailedToParseEgressEventRequest(request: EgressEventRequest) {
+    override fun fireAdminEditEgressEvent(
+        previousEvent: DbEgressEvent,
+        updatedEvent: DbEgressEvent
+    ) {
+        val changesByProperty = TargetPropertyExtractor.getChangedValuesByName(
+                DbEgressEventTargetProperty.values(),
+                previousEvent,
+                updatedEvent)
+        val dbWorkspaceMaybe = Optional.ofNullable(updatedEvent.workspace)
+        val actionId = actionIdProvider.get()
+        val admin = userProvider.get()
+        actionAuditService.send(changesByProperty.entries.map {
+            ActionAuditEvent(
+                    timestamp = clock.millis(),
+                    actionId = actionId,
+                    actionType = ActionType.EDIT,
+                    agentType = AgentType.ADMINISTRATOR,
+                    agentIdMaybe = admin.userId,
+                    agentEmailMaybe = admin.username,
+                    targetType = TargetType.WORKSPACE,
+                    targetIdMaybe = dbWorkspaceMaybe.map { it.workspaceId }.orElse(null),
+                    targetPropertyMaybe = it.key,
+                    previousValueMaybe = it.value.previousValue,
+                    newValueMaybe = it.value.newValue
+            )
+        })
+    }
+
+    override fun fireFailedToParseEgressEventRequest(request: SumologicEgressEventRequest) {
         fireEventSet(baseEvent = getGenericBaseEvent(), comment = String.format(
                 "Failed to parse egress event JSON from SumoLogic. Field contents: %s",
                 request.eventsJsonArray))
     }
 
-    override fun fireBadApiKey(apiKey: String, request: EgressEventRequest) {
+    override fun fireBadApiKey(apiKey: String, request: SumologicEgressEventRequest) {
         fireEventSet(baseEvent = getGenericBaseEvent(), comment = String.format(
                 "Received bad API key from SumoLogic. Bad key: %s, full request: %s",
                 apiKey, request.toString()))
     }
 
-    private fun fireFailedToFindWorkspace(event: EgressEvent) {
+    private fun fireFailedToFindWorkspace(event: SumologicEgressEvent) {
         fireEventSet(baseEvent = getGenericBaseEvent(), egressEvent = event, comment = String.format(
                 "Failed to find workspace for high-egress event: %s",
                 event.toString()))
@@ -129,7 +159,7 @@ constructor(
      * to record properties of the egress event and a human-readable comment. Either the egress event
      * or the comment may be null, in which case those row(s) won't be generated.
      */
-    private fun fireEventSet(baseEvent: ActionAuditEvent, egressEvent: EgressEvent? = null, comment: String? = null) {
+    private fun fireEventSet(baseEvent: ActionAuditEvent, egressEvent: SumologicEgressEvent? = null, comment: String? = null) {
         var events = ArrayList<ActionAuditEvent>()
         if (egressEvent != null) {
             val propertyValues = TargetPropertyExtractor.getPropertyValuesByName(

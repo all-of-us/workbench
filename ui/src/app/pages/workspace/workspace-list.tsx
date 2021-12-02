@@ -9,12 +9,15 @@ import {NewWorkspaceButton} from 'app/pages/workspace/new-workspace-button';
 import {WorkspaceCard} from 'app/pages/workspace/workspace-card';
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import {
-  reactStyles
+  reactStyles, withUserProfile
 } from 'app/utils';
 import {convertAPIError} from 'app/utils/errors';
 import {WorkspacePermissions} from 'app/utils/workspace-permissions';
 import * as React from 'react';
 import RSelect from 'react-select';
+import * as fp from 'lodash/fp';
+import {Profile} from 'generated/fetch';
+import {hasTierAccess} from 'app/utils/access-tiers';
 
 const styles = reactStyles({
   fadeBox: {
@@ -25,6 +28,10 @@ const styles = reactStyles({
   }
 });
 
+interface WorkspaceListProps extends WithSpinnerOverlayProps {
+  profileState: {profile: Profile, reload: Function, updateCache: Function};
+}
+
 interface State {
   workspacesLoading: boolean;
   workspaceList: WorkspacePermissions[];
@@ -32,7 +39,8 @@ interface State {
   firstSignIn: Date;
 }
 
-export class WorkspaceList extends React.Component<WithSpinnerOverlayProps, State> {
+export const WorkspaceList = fp.flow(withUserProfile())
+(class extends React.Component<WorkspaceListProps, State> {
 
   private timer: NodeJS.Timer;
 
@@ -79,6 +87,8 @@ export class WorkspaceList extends React.Component<WithSpinnerOverlayProps, Stat
       workspacesLoading
     } = this.state;
 
+    const {profile} = this.props.profileState
+
     // Maps each "Filter by" dropdown element to a set of access levels to display.
     const filters = [
       { label: 'Owner',  value: ['OWNER'] },
@@ -115,6 +125,7 @@ export class WorkspaceList extends React.Component<WithSpinnerOverlayProps, Stat
                     workspace={wp.workspace}
                     accessLevel={wp.accessLevel}
                     reload={() => this.reloadWorkspaces(null)}
+                    tierAccessDisabled={!hasTierAccess(profile, wp.workspace.accessTierShortName)}
                   />;
                 })}
               </div>)}
@@ -123,4 +134,4 @@ export class WorkspaceList extends React.Component<WithSpinnerOverlayProps, Stat
       </FadeBox>
     </React.Fragment>;
   }
-}
+});

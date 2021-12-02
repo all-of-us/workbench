@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -40,6 +39,7 @@ import org.pmiops.workbench.exceptions.TooManyRequestsException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
+import org.pmiops.workbench.iam.IamService;
 import org.pmiops.workbench.model.ArchivalStatus;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.CloneWorkspaceRequest;
@@ -63,10 +63,6 @@ import org.pmiops.workbench.model.WorkspaceResourcesRequest;
 import org.pmiops.workbench.model.WorkspaceResponse;
 import org.pmiops.workbench.model.WorkspaceResponseListResponse;
 import org.pmiops.workbench.model.WorkspaceUserRolesResponse;
-import org.pmiops.workbench.monitoring.LogsBasedMetricService;
-import org.pmiops.workbench.monitoring.MeasurementBundle;
-import org.pmiops.workbench.monitoring.labels.MetricLabel;
-import org.pmiops.workbench.monitoring.views.DistributionMetric;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.pmiops.workbench.workspaces.WorkspaceService;
@@ -79,13 +75,10 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
   private static final Logger log = Logger.getLogger(WorkspacesController.class.getName());
 
-  private static final Level OPERATION_TIME_LOG_LEVEL = Level.FINE;
-
   private final CdrVersionDao cdrVersionDao;
   private final Clock clock;
   private final FireCloudService fireCloudService;
   private final FreeTierBillingService freeTierBillingService;
-  private final LogsBasedMetricService logsBasedMetricService;
   private final Provider<DbUser> userProvider;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final UserDao userDao;
@@ -96,6 +89,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private final WorkspaceDao workspaceDao;
   private final WorkspaceService workspaceService;
   private final WorkspaceAuthService workspaceAuthService;
+  private final IamService iamService;
 
   @Autowired
   public WorkspacesController(
@@ -103,7 +97,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       Clock clock,
       FireCloudService fireCloudService,
       FreeTierBillingService freeTierBillingService,
-      LogsBasedMetricService logsBasedMetricService,
       Provider<DbUser> userProvider,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       UserDao userDao,
@@ -113,12 +106,12 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       WorkspaceResourcesService workspaceResourcesService,
       WorkspaceDao workspaceDao,
       WorkspaceService workspaceService,
-      WorkspaceAuthService workspaceAuthService) {
+      WorkspaceAuthService workspaceAuthService,
+      IamService iamService) {
     this.cdrVersionDao = cdrVersionDao;
     this.clock = clock;
     this.fireCloudService = fireCloudService;
     this.freeTierBillingService = freeTierBillingService;
-    this.logsBasedMetricService = logsBasedMetricService;
     this.userDao = userDao;
     this.userProvider = userProvider;
     this.userService = userService;
@@ -129,6 +122,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     this.workspaceService = workspaceService;
     this.workspaceAuthService = workspaceAuthService;
     this.workspaceDao = workspaceDao;
+    this.iamService = iamService;
   }
 
   private DbCdrVersion getLiveCdrVersionId(String cdrVersionId) {
@@ -162,13 +156,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
   @Override
   public ResponseEntity<Workspace> createWorkspace(Workspace workspace) throws BadRequestException {
-    return ResponseEntity.ok(
-        recordOperationTime(() -> createWorkspaceImpl(workspace), "createWorkspace"));
-  }
-
-  // TODO(jaycarlton): migrate this and other "impl" methods to WorkspaceService &
-  // WorkspaceServiceImpl
-  private Workspace createWorkspaceImpl(Workspace workspace) {
     validateWorkspaceApiModel(workspace);
 
     DbCdrVersion cdrVersion = getLiveCdrVersionId(workspace.getCdrVersionId());
@@ -201,10 +188,12 @@ public class WorkspacesController implements WorkspacesApiDelegate {
           dbWorkspace, workbenchConfigProvider.get().billing.freeTierBillingAccountName());
       throw e;
     }
-
+    if (accessTier.getEnableUserWorkflows()) {
+      iamService.grantWorkflowRunnerRoleToCurrentUser(dbWorkspace.getGoogleProject());
+    }
     final Workspace createdWorkspace = workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace);
     workspaceAuditor.fireCreateAction(createdWorkspace, dbWorkspace.getWorkspaceId());
-    return createdWorkspace;
+    return ResponseEntity.ok(createdWorkspace);
   }
 
   private DbWorkspace createDbWorkspace(
@@ -253,10 +242,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       workspaceService.updateWorkspaceBillingAccount(
           dbWorkspace, workspace.getBillingAccountName());
     } catch (ServerErrorException e) {
-      // Will be addressed with RW-4440
-      throw new ServerErrorException(
-          "This message is going to be swallowed due to a bug in ExceptionAdvice. ",
-          new ServerErrorException("Could not update the workspace's billing account", e));
+      new ServerErrorException("Could not update the workspace's billing account", e);
     }
 
     return dbWorkspace;
@@ -275,43 +261,37 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   @Override
   public ResponseEntity<EmptyResponse> deleteWorkspace(
       String workspaceNamespace, String workspaceId) {
-    recordOperationTime(
-        () -> {
-          DbWorkspace dbWorkspace = workspaceDao.getRequired(workspaceNamespace, workspaceId);
-          workspaceService.deleteWorkspace(dbWorkspace);
-          workspaceAuditor.fireDeleteAction(dbWorkspace);
-        },
-        "deleteWorkspace");
+
+    DbWorkspace dbWorkspace = workspaceDao.getRequired(workspaceNamespace, workspaceId);
+    workspaceService.deleteWorkspace(dbWorkspace);
+    workspaceAuditor.fireDeleteAction(dbWorkspace);
+
     return ResponseEntity.ok(new EmptyResponse());
   }
 
   @Override
   public ResponseEntity<WorkspaceResponse> getWorkspace(
       String workspaceNamespace, String workspaceId) {
-    return ResponseEntity.ok(
-        recordOperationTime(
-            () -> workspaceService.getWorkspace(workspaceNamespace, workspaceId), "getWorkspace"));
+    return ResponseEntity.ok(workspaceService.getWorkspace(workspaceNamespace, workspaceId));
   }
 
   @Override
   public ResponseEntity<WorkspaceResponseListResponse> getWorkspaces() {
-    final WorkspaceResponseListResponse response = new WorkspaceResponseListResponse();
-    response.setItems(recordOperationTime(workspaceService::getWorkspaces, "getWorkspaces"));
-    return ResponseEntity.ok(response);
+    return ResponseEntity.ok(
+        new WorkspaceResponseListResponse().items(workspaceService.getWorkspaces()));
+  }
+
+  @Override
+  public ResponseEntity<Boolean> notebookTransferComplete(
+      String workspaceNamespace, String workspaceId) {
+    return ResponseEntity.ok(
+        workspaceService.notebookTransferComplete(workspaceNamespace, workspaceId));
   }
 
   @Override
   public ResponseEntity<Workspace> updateWorkspace(
       String workspaceNamespace, String workspaceId, UpdateWorkspaceRequest request)
       throws NotFoundException {
-    final Workspace result =
-        recordOperationTime(
-            () -> updateWorkspaceImpl(workspaceNamespace, workspaceId, request), "updateWorkspace");
-    return ResponseEntity.ok(result);
-  }
-
-  private Workspace updateWorkspaceImpl(
-      String workspaceNamespace, String workspaceId, UpdateWorkspaceRequest request) {
     DbWorkspace dbWorkspace = workspaceDao.getRequired(workspaceNamespace, workspaceId);
     workspaceAuthService.enforceWorkspaceAccessLevel(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.OWNER);
@@ -356,10 +336,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         workspaceService.updateWorkspaceBillingAccount(
             dbWorkspace, request.getWorkspace().getBillingAccountName());
       } catch (ServerErrorException e) {
-        // Will be addressed with RW-4440
-        throw new ServerErrorException(
-            "This message is going to be swallowed due to a bug in ExceptionAdvice.",
-            new ServerErrorException("Could not update the workspace's billing account", e));
+        new ServerErrorException("Could not update the workspace's billing account", e);
       }
     }
 
@@ -379,19 +356,13 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     workspaceAuditor.fireEditAction(
         originalWorkspace, editedWorkspace, dbWorkspace.getWorkspaceId());
-    return workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace);
+    return ResponseEntity.ok(workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace));
   }
 
   @Override
   public ResponseEntity<CloneWorkspaceResponse> cloneWorkspace(
       String fromWorkspaceNamespace, String fromWorkspaceId, CloneWorkspaceRequest body)
       throws BadRequestException, TooManyRequestsException {
-    return recordOperationTime(
-        () -> cloneWorkspaceImpl(fromWorkspaceNamespace, fromWorkspaceId, body), "cloneWorkspace");
-  }
-
-  private ResponseEntity<CloneWorkspaceResponse> cloneWorkspaceImpl(
-      String fromWorkspaceNamespace, String fromWorkspaceId, CloneWorkspaceRequest body) {
     Workspace toWorkspace = body.getWorkspace();
     validateWorkspaceApiModel(toWorkspace);
 
@@ -453,12 +424,11 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     // Note: It is possible for a workspace to be (partially) created and return
     // a 500 to the user if this block of code fails since the workspace is already
     // committed to the database in an earlier call
+    Map<String, WorkspaceAccessLevel> clonedRoles = new HashMap<>();
     if (Optional.ofNullable(body.getIncludeUserRoles()).orElse(false)) {
       Map<String, FirecloudWorkspaceAccessEntry> fromAclsMap =
           workspaceAuthService.getFirecloudWorkspaceAcls(
               fromWorkspace.getWorkspaceNamespace(), fromWorkspace.getFirecloudName());
-
-      Map<String, WorkspaceAccessLevel> clonedRoles = new HashMap<>();
       for (Map.Entry<String, FirecloudWorkspaceAccessEntry> entry : fromAclsMap.entrySet()) {
         if (!entry.getKey().equals(user.getUsername())) {
           clonedRoles.put(
@@ -472,6 +442,18 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     dbWorkspace = workspaceDao.saveWithLastModified(dbWorkspace);
 
+    // Grant the workspace cloner and all from-workspaces users permission to use workflow if
+    // workspace is controlled tier workspace.
+    if (accessTier.getEnableUserWorkflows()) {
+      iamService.grantWorkflowRunnerRoleToCurrentUser(dbWorkspace.getGoogleProject());
+      List<String> usersGainPermission =
+          clonedRoles.entrySet().stream()
+              .filter(entry -> shouldGrantWorkflowRunnerAsService(user, entry))
+              .map(Map.Entry::getKey)
+              .collect(Collectors.toList());
+      iamService.grantWorkflowRunnerRoleToUsers(
+          dbWorkspace.getGoogleProject(), usersGainPermission);
+    }
     final Workspace savedWorkspace = workspaceMapper.toApiWorkspace(dbWorkspace, toFcWorkspace);
     workspaceAuditor.fireDuplicateAction(
         fromWorkspace.getWorkspaceId(), dbWorkspace.getWorkspaceId(), savedWorkspace);
@@ -545,6 +527,20 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     List<UserRole> updatedUserRoles =
         workspaceService.getFirecloudUserRoles(workspaceNamespace, dbWorkspace.getFirecloudName());
     resp.setItems(updatedUserRoles);
+
+    // Currently we only grant user workflow permissions for new writer/owners withtout removing
+    // them when unshare. TODO(RW-7615): Revoke workflow permissions when unshare. It might not be
+    // a issue because: (1) Only User pet SA can actAs pet SA. (2) After unshare, user is not able
+    // to access the pet SA in workbench.
+    if (dbWorkspace.getCdrVersion().getAccessTier().getEnableUserWorkflows()) {
+      List<String> usersGainPermission =
+          aclsByEmail.entrySet().stream()
+              .filter(entry -> shouldGrantWorkflowRunnerAsService(userProvider.get(), entry))
+              .map(Map.Entry::getKey)
+              .collect(Collectors.toList());
+      iamService.grantWorkflowRunnerRoleToUsers(
+          dbWorkspace.getGoogleProject(), usersGainPermission);
+    }
 
     workspaceAuditor.fireCollaborateAction(
         dbWorkspace.getWorkspaceId(), aclStringsByUserIdBuilder.build());
@@ -723,23 +719,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     return ResponseEntity.ok(workspaceResourceResponse);
   }
 
-  // TODO(RW-4826): remove this; superceded by tracing interceptor
-  private <T> T recordOperationTime(Supplier<T> operation, String operationName) {
-    log.log(OPERATION_TIME_LOG_LEVEL, String.format("recordOperationTime: %s", operationName));
-    return logsBasedMetricService.recordElapsedTime(
-        MeasurementBundle.builder().addTag(MetricLabel.OPERATION_NAME, operationName),
-        DistributionMetric.WORKSPACE_OPERATION_TIME,
-        operation);
-  }
-
-  private void recordOperationTime(Runnable operation, String operationName) {
-    log.log(OPERATION_TIME_LOG_LEVEL, String.format("recordOperationTime: %s", operationName));
-    logsBasedMetricService.recordElapsedTime(
-        MeasurementBundle.builder().addTag(MetricLabel.OPERATION_NAME, operationName),
-        DistributionMetric.WORKSPACE_OPERATION_TIME,
-        operation);
-  }
-
   public ResponseEntity<WorkspaceCreatorFreeCreditsRemainingResponse>
       getWorkspaceCreatorFreeCreditsRemaining(String workspaceNamespace, String workspaceId) {
     workspaceAuthService.enforceWorkspaceAccessLevel(
@@ -750,5 +729,13 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     return ResponseEntity.ok(
         new WorkspaceCreatorFreeCreditsRemainingResponse()
             .freeCreditsRemaining(freeCreditsRemaining));
+  }
+
+  /** Returns {@true} if the user is 1: workspace OWNER or WRITER; 2: NOT current logged in user */
+  private static boolean shouldGrantWorkflowRunnerAsService(
+      DbUser loggedInUser, Map.Entry<String, WorkspaceAccessLevel> userNameToAclMapEntry) {
+    return !userNameToAclMapEntry.getKey().equals(loggedInUser.getUsername())
+        && (userNameToAclMapEntry.getValue().equals(WorkspaceAccessLevel.OWNER)
+            || userNameToAclMapEntry.getValue().equals(WorkspaceAccessLevel.WRITER));
   }
 }

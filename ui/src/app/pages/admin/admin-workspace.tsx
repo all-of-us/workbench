@@ -30,6 +30,8 @@ import {Column} from 'primereact/column';
 import {DataTable} from 'primereact/datatable';
 import {ReactFragment, useState} from 'react';
 import { Link, RouteComponentProps, withRouter } from 'react-router-dom';
+import {isUsingFreeTierBillingAccount} from 'app/utils/workspace-utils';
+import { EgressEventsTable } from './egress-events-table';
 
 const styles = reactStyles({
   infoRow: {
@@ -371,7 +373,9 @@ class AdminWorkspaceImpl extends React.Component<Props, State> {
             <WorkspaceInfoField labelText='Workspace Namespace'>{workspace.namespace}</WorkspaceInfoField>
             <WorkspaceInfoField labelText='Google Project Id'>{workspace.googleProject}</WorkspaceInfoField>
             <WorkspaceInfoField labelText='Billing Status'>{workspace.billingStatus}</WorkspaceInfoField>
-            <WorkspaceInfoField labelText='Billing Account Type'>{workspace.billingAccountType}</WorkspaceInfoField>
+            <WorkspaceInfoField labelText='Billing Account Type'>
+              {isUsingFreeTierBillingAccount(workspace) ? 'Free tier' : 'User provided'}
+            </WorkspaceInfoField>
             <WorkspaceInfoField labelText='Creation Time'>{new Date(workspace.creationTime).toDateString()}</WorkspaceInfoField>
             <WorkspaceInfoField labelText='Last Modified Time'>{new Date(workspace.lastModifiedTime).toDateString()}</WorkspaceInfoField>
             <WorkspaceInfoField labelText='Workspace Published'>{workspace.published ? 'Yes' : 'No'}</WorkspaceInfoField>
@@ -480,6 +484,13 @@ class AdminWorkspaceImpl extends React.Component<Props, State> {
         </FlexColumn>
       </div>
       }
+      {workspace &&
+        <>
+          <h2>Egress event history</h2>
+          <EgressEventsTable
+            displayPageSize={10}
+            sourceWorkspaceNamespace={workspace.namespace} />
+        </>}
       {confirmDeleteRuntime &&
         <Modal onRequestClose={() => this.cancelDeleteRuntime()}>
           <ModalTitle>Delete Runtime</ModalTitle>

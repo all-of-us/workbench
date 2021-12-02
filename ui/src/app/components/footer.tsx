@@ -11,7 +11,7 @@ import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
 import {environment} from 'environments/environment';
 import aouFooterLogo from 'assets/images/all-of-us-logo-footer.svg';
 import nihFooterLogo from 'assets/images/nih-logo-footer.png';
-import {SUPPORT_EMAIL} from "./support";
+import {SUPPORT_EMAIL} from './support';
 
 const styles = reactStyles({
   footerAnchor: {

@@ -12,6 +12,7 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -30,7 +31,6 @@ import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.UserAccessTierDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
-import org.pmiops.workbench.db.dao.UserServiceImpl;
 import org.pmiops.workbench.db.dao.VerifiedInstitutionalAffiliationDao;
 import org.pmiops.workbench.db.model.DbAccessModule;
 import org.pmiops.workbench.db.model.DbAccessModule.AccessModuleName;
@@ -70,9 +70,9 @@ import org.springframework.test.annotation.DirtiesContext;
  * Tests to cover access change determinations by executing {@link
  * UserService#updateUserWithRetries(java.util.function.Function,
  * org.pmiops.workbench.db.model.DbUser, org.pmiops.workbench.actionaudit.Agent)} with different
- * configurations, which ultimately executes the private method {@link
- * UserServiceImpl#shouldUserBeRegistered(org.pmiops.workbench.db.model.DbUser)} to make this
- * determination.
+ * configurations, which ultimately executes the private method {
+ * UserServiceImpl#shouldGrantUserTierAccess(org.pmiops.workbench.db.model.DbUser, List, String)} to
+ * make this determination.
  */
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -86,6 +86,7 @@ public class UserServiceAccessTest {
   private static WorkbenchConfig providedWorkbenchConfig;
 
   private static DbAccessTier registeredTier;
+  private static DbAccessTier controlledTier;
 
   private Function<Timestamp, Function<DbUser, DbUser>> registerUserWithTime =
       t -> dbu -> registerUser(t, dbu);
@@ -94,6 +95,7 @@ public class UserServiceAccessTest {
   private static List<DbAccessModule> accessModules;
 
   private InstitutionTierConfig rtTierConfig;
+  private InstitutionTierConfig ctTierConfig;
   private Institution institution;
 
   @Autowired private AccessModuleDao accessModuleDao;
@@ -159,17 +161,22 @@ public class UserServiceAccessTest {
     providedWorkbenchConfig.access.enableComplianceTraining = true;
     providedWorkbenchConfig.access.enableEraCommons = true;
     providedWorkbenchConfig.access.enforceRasLoginGovLinking = true;
+    providedWorkbenchConfig.access.enableRasLoginGovLinking = true;
     providedWorkbenchConfig.accessRenewal.expiryDays = EXPIRATION_DAYS;
     providedWorkbenchConfig.accessRenewal.expiryDaysWarningThresholds =
         ImmutableList.of(1L, 3L, 7L, 15L, 30L);
 
     registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
+    controlledTier = TestMockFactory.createControlledTierForTests(accessTierDao);
     accessModules = TestMockFactory.createAccessModules(accessModuleDao);
+
     dbUser = new DbUser();
     dbUser.setUsername(USERNAME);
     dbUser.setContactEmail("user@domain.com");
     dbUser = userDao.save(dbUser);
+
     rtTierConfig = new InstitutionTierConfig().accessTierShortName(registeredTier.getShortName());
+    ctTierConfig = new InstitutionTierConfig().accessTierShortName(controlledTier.getShortName());
     institution =
         new Institution()
             .displayName("institution")
@@ -211,38 +218,7 @@ public class UserServiceAccessTest {
 
     dbUser = updateUserWithRetries(registerUserNow);
     assertRegisteredTierEnabled(dbUser);
-  }
-
-  @Test
-  public void test_updateUserWithRetries_register_includes_others() {
-    providedWorkbenchConfig.featureFlags.unsafeAllowAccessToAllTiersForRegisteredUsers = true;
-
-    DbAccessTier controlledTier = TestMockFactory.createControlledTierForTests(accessTierDao);
-    DbAccessTier aThirdTierWhyNot =
-        accessTierDao.save(
-            new DbAccessTier()
-                .setAccessTierId(3)
-                .setShortName("three")
-                .setDisplayName("Third Tier")
-                .setAuthDomainName("Third Tier Auth Domain")
-                .setAuthDomainGroupEmail("t3-users@fake-research-aou.org")
-                .setServicePerimeter("tier/3/perimeter"));
-
-    assertThat(userAccessTierDao.findAll()).isEmpty();
-
-    dbUser = updateUserWithRetries(registerUserNow);
-
-    List<DbAccessTier> expectedTiers =
-        ImmutableList.of(registeredTier, controlledTier, aThirdTierWhyNot);
-
-    assertThat(userAccessTierDao.findAll()).hasSize(expectedTiers.size());
-    for (DbAccessTier tier : expectedTiers) {
-      Optional<DbUserAccessTier> userAccessMaybe =
-          userAccessTierDao.getByUserAndAccessTier(dbUser, tier);
-      assertThat(userAccessMaybe).isPresent();
-      assertThat(userAccessMaybe.get().getTierAccessStatusEnum())
-          .isEqualTo(TierAccessStatus.ENABLED);
-    }
+    assertUserNotInAccessTier(dbUser, controlledTier);
   }
 
   @Test
@@ -961,7 +937,7 @@ public class UserServiceAccessTest {
   }
 
   @Test
-  public void testInstitutionRequriement_optionalEra() {
+  public void testInstitutionRequirement_optionalEra() {
     assertThat(userAccessTierDao.findAll()).isEmpty();
     providedWorkbenchConfig.access.enableEraCommons = true;
     providedWorkbenchConfig.access.enableRasLoginGovLinking = true;
@@ -1081,6 +1057,222 @@ public class UserServiceAccessTest {
     assertRegisteredTierEnabled(dbUser);
   }
 
+  @Test
+  public void test_updateUserWithRetries_addToControlledTier() {
+    assertThat(userAccessTierDao.findAll()).isEmpty();
+
+    dbUser = updateUserWithRetries(this::completeRTAndCTRequirements);
+    assertRegisteredTierEnabled(dbUser);
+    assertControlledTierEnabled(dbUser);
+  }
+
+  @Test
+  public void test_updateUserWithRetries_completeCTRequirementsOnly() {
+    assertThat(userAccessTierDao.findAll()).isEmpty();
+
+    dbUser = updateUserWithRetries(this::completeCTRequirements);
+    assertUserNotInAccessTier(dbUser, registeredTier);
+    assertUserNotInAccessTier(dbUser, controlledTier);
+  }
+
+  @Test
+  public void test_updateUserWithRetries_inCompleteCTRequirements_CTCompliance() {
+    assertThat(userAccessTierDao.findAll()).isEmpty();
+
+    dbUser = completeRTAndCTRequirements(dbUser);
+
+    dbUser =
+        updateUserWithRetries(
+            user -> {
+              accessModuleService.updateBypassTime(
+                  dbUser.getUserId(), AccessModule.CT_COMPLIANCE_TRAINING, false);
+              return userDao.save(user);
+            });
+
+    assertRegisteredTierEnabled(dbUser);
+    assertUserNotInAccessTier(dbUser, controlledTier);
+  }
+
+  @Test
+  public void test_updateUserWithRetries_inCompleteCTRequirements_eraRequired() {
+    assertThat(userAccessTierDao.findAll()).isEmpty();
+
+    dbUser = completeRTAndCTRequirements(dbUser);
+
+    // Setting eraRequired to false for RT just so user can still have access to RT even after NOT
+    // bypassing era
+    rtTierConfig.setEraRequired(false);
+    updateInstitutionTier(rtTierConfig);
+
+    ctTierConfig.setEraRequired(true);
+    updateInstitutionTier(ctTierConfig);
+
+    dbUser =
+        updateUserWithRetries(
+            user -> {
+              accessModuleService.updateBypassTime(
+                  user.getUserId(), AccessModule.ERA_COMMONS, false);
+              return userDao.save(user);
+            });
+
+    assertRegisteredTierEnabled(dbUser);
+    assertUserNotInAccessTier(dbUser, controlledTier);
+  }
+
+  @Test
+  public void test_updateUserWithRetries_eraNotRequiredForTiers() {
+    assertThat(userAccessTierDao.findAll()).isEmpty();
+
+    dbUser = completeRTAndCTRequirements(dbUser);
+    rtTierConfig.setEraRequired(false);
+    updateInstitutionTier(rtTierConfig);
+    ctTierConfig.setEraRequired(false);
+    updateInstitutionTier(ctTierConfig);
+
+    dbUser =
+        updateUserWithRetries(
+            user -> {
+              accessModuleService.updateBypassTime(
+                  user.getUserId(), AccessModule.ERA_COMMONS, false);
+              return userDao.save(user);
+            });
+
+    assertRegisteredTierEnabled(dbUser);
+    assertControlledTierEnabled(dbUser);
+  }
+
+  @Test
+  public void testInstitutionRequirement_rtEraDoesNotAffectCTEra() {
+    assertThat(userAccessTierDao.findAll()).isEmpty();
+    providedWorkbenchConfig.access.enableEraCommons = true;
+    providedWorkbenchConfig.access.enableRasLoginGovLinking = true;
+
+    dbUser = completeRTAndCTRequirements(dbUser);
+    ctTierConfig.setEraRequired(true);
+    updateInstitutionTier(ctTierConfig);
+    dbUser = updateUserWithRetries(Function.identity());
+
+    assertRegisteredTierEnabled(dbUser);
+    assertControlledTierEnabled(dbUser);
+
+    ctTierConfig.setEraRequired(false);
+    updateInstitutionTier(ctTierConfig);
+    dbUser = updateUserWithRetries(Function.identity());
+
+    assertRegisteredTierEnabled(dbUser);
+    assertControlledTierEnabled(dbUser);
+  }
+
+  @Test
+  public void test_updateUserWithRetries_emailValidForRTButNotValidForCT() {
+    assertThat(userAccessTierDao.findAll()).isEmpty();
+    dbUser = completeRTAndCTRequirements(dbUser);
+
+    ctTierConfig.setEmailDomains(Arrays.asList("fakeDomain.com"));
+    updateInstitutionTier(ctTierConfig);
+
+    dbUser = updateUserWithRetries(Function.identity());
+
+    assertRegisteredTierEnabled(dbUser);
+    assertUserNotInAccessTier(dbUser, controlledTier);
+  }
+
+  @Test
+  public void test_updateUserWithRetries_updateInvalidEmailForCT() {
+    test_updateUserWithRetries_emailValidForRTButNotValidForCT();
+
+    ctTierConfig.setEmailDomains(Arrays.asList("domain.com"));
+    updateInstitutionTier(ctTierConfig);
+
+    dbUser = updateUserWithRetries(Function.identity());
+
+    assertRegisteredTierEnabled(dbUser);
+    assertControlledTierEnabled(dbUser);
+  }
+
+  @Test
+  public void test_updateUserWithRetries_didNotSignCTAgreement() {
+    assertThat(userAccessTierDao.findAll()).isEmpty();
+    dbUser = completeRTAndCTRequirements(dbUser);
+    Institution institution = institutionService.getByUser(dbUser).get();
+    institution
+        .getTierConfigs()
+        .removeIf(
+            tier ->
+                tier.getAccessTierShortName().equals(AccessTierService.CONTROLLED_TIER_SHORT_NAME));
+    institutionService.updateInstitution(institution.getShortName(), institution);
+
+    dbUser = updateUserWithRetries(Function.identity());
+
+    assertRegisteredTierEnabled(dbUser);
+    assertUserNotInAccessTier(dbUser, controlledTier);
+  }
+
+  @Test
+  public void test_updateUserWithRetries_eraFFisOff_CT() {
+    providedWorkbenchConfig.access.enableEraCommons = false;
+    assertThat(userAccessTierDao.findAll()).isEmpty();
+
+    dbUser = completeRTAndCTRequirements(dbUser);
+
+    ctTierConfig.setEraRequired(true);
+    updateInstitutionTier(ctTierConfig);
+
+    dbUser = updateUserWithRetries(Function.identity());
+
+    assertRegisteredTierEnabled(dbUser);
+    assertControlledTierEnabled(dbUser);
+
+    dbUser =
+        updateUserWithRetries(
+            user -> {
+              accessModuleService.updateBypassTime(
+                  user.getUserId(), AccessModule.ERA_COMMONS, false);
+              return userDao.save(user);
+            });
+
+    assertRegisteredTierEnabled(dbUser);
+    assertControlledTierEnabled(dbUser);
+  }
+
+  @Test
+  public void test_updateUserWithRetries_ct_complianceTrainingFFisOff_CT() {
+    providedWorkbenchConfig.access.enableComplianceTraining = false;
+    assertThat(userAccessTierDao.findAll()).isEmpty();
+
+    dbUser = completeRTAndCTRequirements(dbUser);
+    dbUser = updateUserWithRetries(Function.identity());
+
+    assertRegisteredTierEnabled(dbUser);
+    assertControlledTierEnabled(dbUser);
+
+    dbUser =
+        updateUserWithRetries(
+            user -> {
+              accessModuleService.updateBypassTime(
+                  user.getUserId(), AccessModule.CT_COMPLIANCE_TRAINING, false);
+              return userDao.save(user);
+            });
+
+    assertRegisteredTierEnabled(dbUser);
+    assertControlledTierEnabled(dbUser);
+  }
+
+  @Test
+  public void test_updateUserWithRetries_noCT() {
+    // CT does not exist anywhere
+    assertThat(userAccessTierDao.findAll()).isEmpty();
+
+    dbUser = registerUser(new Timestamp(PROVIDED_CLOCK.millis()), dbUser);
+    TestMockFactory.removeControlledTierForTests(accessTierDao);
+    removeCTConfigFromInstitution();
+
+    dbUser = updateUserWithRetries(Function.identity());
+
+    assertRegisteredTierEnabled(dbUser);
+    assertUserNotInAccessTier(dbUser, controlledTier);
+  }
+
   // adds `days` days plus most of another day (to demonstrate we are truncating, not rounding)
   private Duration daysPlusSome(long days) {
     return Duration.ofDays(days).plus(Duration.ofHours(18));
@@ -1128,6 +1320,19 @@ public class UserServiceAccessTest {
     return userService.updateUserWithRetries(userModifier, dbUser, Agent.asUser(dbUser));
   }
 
+  private void updateInstitutionTier(InstitutionTierConfig updatedTierConfig) {
+    Institution institution = institutionService.getByUser(dbUser).get();
+    institution
+        .getTierConfigs()
+        .removeIf(
+            tierConfig ->
+                tierConfig
+                    .getAccessTierShortName()
+                    .equals(updatedTierConfig.getAccessTierShortName()));
+    institution.addTierConfigsItem(updatedTierConfig);
+    institutionService.updateInstitution(institution.getShortName(), institution);
+  }
+
   private void assertRegisteredTierEnabled(DbUser dbUser) {
     assertRegisteredTierMembershipWithStatus(dbUser, TierAccessStatus.ENABLED);
   }
@@ -1136,12 +1341,34 @@ public class UserServiceAccessTest {
     assertRegisteredTierMembershipWithStatus(dbUser, TierAccessStatus.DISABLED);
   }
 
-  private void assertRegisteredTierMembershipWithStatus(DbUser dbUser, TierAccessStatus status) {
-    assertThat(userAccessTierDao.findAll()).hasSize(1);
+  private void assertControlledTierEnabled(DbUser dbUser) {
+    assertControlledTierMembershipWithStatus(dbUser, TierAccessStatus.ENABLED);
+  }
+
+  private void assertUserNotInAccessTier(DbUser dbUser, DbAccessTier accessTier) {
+    // if not present, we're done
+    // if present: assert that the row is disabled
     Optional<DbUserAccessTier> userAccessMaybe =
-        userAccessTierDao.getByUserAndAccessTier(dbUser, registeredTier);
+        userAccessTierDao.getByUserAndAccessTier(dbUser, accessTier);
+    userAccessMaybe.ifPresent(
+        userAccess ->
+            assertThat(userAccess.getTierAccessStatusEnum()).isEqualTo(TierAccessStatus.DISABLED));
+  }
+
+  private void assertTierMembershipWithStatus(
+      DbAccessTier dbAccessTier, DbUser dbUser, TierAccessStatus status) {
+    Optional<DbUserAccessTier> userAccessMaybe =
+        userAccessTierDao.getByUserAndAccessTier(dbUser, dbAccessTier);
     assertThat(userAccessMaybe).isPresent();
     assertThat(userAccessMaybe.get().getTierAccessStatusEnum()).isEqualTo(status);
+  }
+
+  private void assertRegisteredTierMembershipWithStatus(DbUser dbUser, TierAccessStatus status) {
+    assertTierMembershipWithStatus(registeredTier, dbUser, status);
+  }
+
+  private void assertControlledTierMembershipWithStatus(DbUser dbUser, TierAccessStatus status) {
+    assertTierMembershipWithStatus(controlledTier, dbUser, status);
   }
 
   private DbUser registerUser(Timestamp timestamp, DbUser user) {
@@ -1168,6 +1395,37 @@ public class UserServiceAccessTest {
 
     createAffiliation(user);
     return user;
+  }
+
+  private void addCTConfigToInstitution(Institution institution) {
+    institution.addTierConfigsItem(
+        ctTierConfig
+            .eraRequired(true)
+            .membershipRequirement(InstitutionMembershipRequirement.DOMAINS)
+            .addEmailDomainsItem("domain.com"));
+    institutionService.updateInstitution(institution.getShortName(), institution);
+  }
+
+  private void removeCTConfigFromInstitution() {
+    Institution institution = institutionService.getByUser(dbUser).get();
+    institution
+        .getTierConfigs()
+        .removeIf(
+            tier ->
+                tier.getAccessTierShortName().equals(AccessTierService.CONTROLLED_TIER_SHORT_NAME));
+    institutionService.updateInstitution(institution.getShortName(), institution);
+  }
+
+  private DbUser completeCTRequirements(DbUser user) {
+    addCTConfigToInstitution(institutionService.getByUser(user).get());
+    accessModuleService.updateBypassTime(user.getUserId(), AccessModule.ERA_COMMONS, true);
+    accessModuleService.updateBypassTime(
+        user.getUserId(), AccessModule.CT_COMPLIANCE_TRAINING, true);
+    return user;
+  }
+
+  private DbUser completeRTAndCTRequirements(DbUser user) {
+    return completeCTRequirements(registerUser(new Timestamp(PROVIDED_CLOCK.millis()), user));
   }
 
   private void createAffiliation(final DbUser user) {

@@ -27,9 +27,10 @@ import {
   getAccessModuleConfig,
   getAccessModuleStatusByName,
   GetStartedButton,
+  redirectToControlledTraining,
   redirectToNiH,
   redirectToRas,
-  redirectToTraining,
+  redirectToRegisteredTraining,
 } from 'app/utils/access-utils';
 import {useNavigation} from 'app/utils/navigation';
 import {profileStore, serverConfigStore, useStore} from 'app/utils/stores';
@@ -245,14 +246,20 @@ const rtModules = [
   AccessModule.ERACOMMONS,
   AccessModule.COMPLIANCETRAINING,
 ];
-
+const ctModule = AccessModule.CTCOMPLIANCETRAINING;
 const duccModule = AccessModule.DATAUSERCODEOFCONDUCT;
 
 // in display order
 // exported for test
+export const requiredModules: AccessModule[] = [
+  ...rtModules,
+  duccModule
+];
+
 export const allModules: AccessModule[] = [
   ...rtModules,
-  duccModule,
+  ctModule,
+  duccModule
 ];
 
 const isCompleted = (status: AccessModuleStatus) => status && !!status.completionEpochMillis
@@ -304,15 +311,12 @@ const handleRasCallback = (code: string, spinnerProps: WithSpinnerOverlayProps, 
   return handler();
 };
 
-const selfBypass = async(spinnerProps: WithSpinnerOverlayProps, reloadProfile: Function) => {
+const selfBypass = async(spinnerProps: WithSpinnerOverlayProps, reloadProfile: Function, modules: AccessModule[] = allModules) => {
   spinnerProps.showSpinner();
-  await bypassAll(allModules, true);
+  await bypassAll(modules, true);
   spinnerProps.hideSpinner();
   reloadProfile();
 };
-const getVisibleRTModules = (profile: Profile): AccessModule[] => {
-  return fp.filter(module=> isEraCommonsModuleRequiredByInstitution(profile, module),rtModules);
-}
 
 const isEraCommonsModuleRequiredByInstitution = (profile: Profile, moduleNames: AccessModule): boolean => {
   // Remove the eRA Commons module when the flag to enable RAS is set and the user's
@@ -328,8 +332,21 @@ const isEraCommonsModuleRequiredByInstitution = (profile: Profile, moduleNames: 
   )(profile.tierEligibilities);
 }
 
+const isEligibleModule = (module: AccessModule, profile: Profile) => {
+  if (module !== AccessModule.CTCOMPLIANCETRAINING) {
+    // Currently a user can only be ineligible for CT modules.
+    // Note: eRA Commons is an edge case which is handled elsewhere. It is
+    // technically also possible for CT eRA commons to be ineligible.
+    return true;
+  }
+  const controlledTierEligibility = profile.tierEligibilities.find(tier=> tier.accessTierShortName === AccessTierShortNames.Controlled);
+  return !!controlledTierEligibility?.eligible;
+}
+
+
 // exported for test
-export const getVisibleModules = (modules: AccessModule[], profile: Profile): AccessModule[] => fp.flow(
+export const getEligibleModules = (modules: AccessModule[], profile: Profile): AccessModule[] => fp.flow(
+    fp.filter((module: AccessModule) => isEligibleModule(module, profile)),
     fp.map(getAccessModuleConfig),
     fp.filter(moduleConfig => moduleConfig.isEnabledInEnvironment),
     fp.filter(moduleConfig => isEraCommonsModuleRequiredByInstitution(profile, moduleConfig.moduleName)),
@@ -367,7 +384,7 @@ const Refresh = (props: { showSpinner: Function; refreshAction: Function }) => {
 }
 
 const Next = () => <FlexRow style={styles.nextElement}>
-  <span style={styles.nextText}>NEXT</span> <ArrowRight style={styles.nextIcon}/>
+  <span data-test-id="next-module-cta" style={styles.nextText}>NEXT</span> <ArrowRight style={styles.nextIcon}/>
 </FlexRow>;
 
 const ModuleIcon = (props: {moduleName: AccessModule, completedOrBypassed: boolean, eligible?: boolean}) => {
@@ -449,47 +466,57 @@ const ModuleBox = (props: {clickable: boolean, action: Function, children}) => {
 interface ModuleProps {
   profile: Profile,
   moduleName: AccessModule;
-  active: boolean;    // is this the currently-active module that the user should complete
+  active: boolean;
+  clickable: boolean;
   spinnerProps: WithSpinnerOverlayProps;
 }
 
 // Renders a module when it's enabled via feature flags.  Returns null if not.
-const MaybeModule = ({profile, moduleName, active, spinnerProps}: ModuleProps): JSX.Element => {
+const MaybeModule = ({profile, moduleName, active, clickable, spinnerProps}: ModuleProps): JSX.Element => {
   // whether to show the refresh button: this module has been clicked
   const [showRefresh, setShowRefresh] = useState(false);
 
   // whether to show the Two Factor Auth Modal
   const [showTwoFactorAuthModal, setShowTwoFactorAuthModal] = useState(false);
-  const [navigate, ] = useNavigation();
+  const [navigate] = useNavigation();
 
   // outside of the main getAccessModuleConfig() so that function doesn't have to deal with navigate
   const moduleAction: Function = switchCase(moduleName,
     [AccessModule.TWOFACTORAUTH, () => () => setShowTwoFactorAuthModal(true)],
     [AccessModule.RASLINKLOGINGOV, () => redirectToRas],
     [AccessModule.ERACOMMONS, () => redirectToNiH],
-    [AccessModule.COMPLIANCETRAINING, () => redirectToTraining],
+    [AccessModule.COMPLIANCETRAINING, () => redirectToRegisteredTraining],
+    [AccessModule.CTCOMPLIANCETRAINING, () => redirectToControlledTraining],
     [AccessModule.DATAUSERCODEOFCONDUCT, () => () => {
       AnalyticsTracker.Registration.EnterDUCC();
       navigate(['data-code-of-conduct']);
     }]);
 
   const {DARTitleComponent, refreshAction, isEnabledInEnvironment} = getAccessModuleConfig(moduleName);
-
+  const eligible = isEligibleModule(moduleName, profile);
   const Module = ({profile}) => {
-    const status = getAccessModuleStatusByName(profile, moduleName)
-
+    const status = getAccessModuleStatusByName(profile, moduleName);
     return <FlexRow data-test-id={`module-${moduleName}`}>
       <FlexRow style={styles.moduleCTA}>
-        {active && ((showRefresh && refreshAction)
-            ? <Refresh
+      {cond([
+        clickable && showRefresh && !!refreshAction,
+        () => <Refresh
                 refreshAction={refreshAction}
                 showSpinner={spinnerProps.showSpinner}/>
-            : <Next/>)}
+      ], [
+        active,
+        () => <Next/>
+      ])}
       </FlexRow>
-      <ModuleBox clickable={active} action={() => { setShowRefresh(true); moduleAction(); }}>
-        <ModuleIcon moduleName={moduleName} completedOrBypassed={isCompliant(status)}/>
+      <ModuleBox clickable={clickable} action={() => {
+        setShowRefresh(true);
+        moduleAction();
+      }}>
+        <ModuleIcon moduleName={moduleName} eligible={eligible} completedOrBypassed={isCompliant(status)}/>
         <FlexColumn>
-          <div style={active ? styles.clickableModuleText : styles.backgroundModuleText}>
+          <div
+              data-test-id={`module-${moduleName}-${clickable ? 'clickable' : 'unclickable'}-text`}
+              style={clickable ? styles.clickableModuleText : styles.backgroundModuleText}>
             <DARTitleComponent/>
             {(moduleName === AccessModule.RASLINKLOGINGOV) && <LoginGovHelpText profile={profile} afterInitialClick={showRefresh}/>}
           </div>
@@ -502,13 +529,6 @@ const MaybeModule = ({profile, moduleName, active, spinnerProps}: ModuleProps): 
     </FlexRow>;
   };
 
-  // temp hack Sep 16: render a special temporary RAS module if disabled
-  if (moduleName === AccessModule.RASLINKLOGINGOV) {
-    const {enableRasLoginGovLinking} = serverConfigStore.get().config;
-    if (!enableRasLoginGovLinking) {
-      return <TemporaryRASModule/>;
-    }
-  }
   return isEnabledInEnvironment ? <Module profile={profile}/> : null;
 };
 
@@ -541,7 +561,7 @@ const ControlledTierEraModule = (props: {profile: Profile, eligible: boolean, sp
     </FlexRow>;
   };
 
-  return isEnabledInEnvironment ? <Module data-test-id={`module-${AccessModule.ERACOMMONS}`} /> : null;
+  return isEnabledInEnvironment ? <Module data-test-id={`module-${moduleName}`} /> : null;
 };
 
 const DARHeader = () => <FlexColumn style={styles.headerFlexColumn}>
@@ -559,21 +579,26 @@ const Completed = () => <FlexRow data-test-id='dar-completed' style={styles.comp
 
 interface CardProps {
   profile: Profile,
-  modules: Array<AccessModule>,
+  modules: AccessModule[],
   activeModule: AccessModule,
-  spinnerProps: WithSpinnerOverlayProps
+  clickableModules: AccessModule[],
+  spinnerProps: WithSpinnerOverlayProps,
+  children?: string | React.ReactNode
 }
+
 const ModulesForCard = (props: CardProps) => {
-  const {profile, modules, activeModule, spinnerProps} = props;
+  const {profile, modules, activeModule, clickableModules, spinnerProps, children} = props;
+
   return <FlexColumn style={styles.modulesContainer}>
-    {modules.map(moduleName =>
-        <MaybeModule
-            key={moduleName}
-            moduleName={moduleName}
-            profile={profile}
-            active={moduleName === activeModule}
-            spinnerProps={spinnerProps}/>
+    {modules.map(moduleName => <MaybeModule
+         key={moduleName}
+         moduleName={moduleName}
+         profile={profile}
+         active={activeModule === moduleName}
+         clickable={clickableModules.includes(moduleName)}
+         spinnerProps={spinnerProps}/>
     )}
+    {children}
   </FlexColumn>;
 };
 
@@ -607,9 +632,12 @@ const DataDetail = (props: {icon: string, text: string}) => {
   </FlexRow>;
 };
 
-const RegisteredTierCard = (props: {profile: Profile, activeModule: AccessModule, spinnerProps: WithSpinnerOverlayProps}) => {
-  const {profile, activeModule, spinnerProps} = props;
+const RegisteredTierCard = (props: {profile: Profile, activeModule: AccessModule,
+    clickableModules: AccessModule[], spinnerProps: WithSpinnerOverlayProps}) => {
+  const {profile, activeModule, clickableModules, spinnerProps} = props;
   const rtDisplayName = AccessTierDisplayNames.Registered;
+  const {enableRasLoginGovLinking} = serverConfigStore.get().config;
+
   return <FlexRow style={styles.card}>
     <FlexColumn>
       <div style={styles.cardStep}>Step 1</div>
@@ -626,12 +654,18 @@ const RegisteredTierCard = (props: {profile: Profile, activeModule: AccessModule
       <DataDetail icon='physical' text='Physical measurements'/>
       <DataDetail icon='wearable' text='Wearable devices'/>
     </FlexColumn>
-    <ModulesForCard profile={profile} modules={getVisibleRTModules(profile)} activeModule={activeModule} spinnerProps={spinnerProps}/>
+    <ModulesForCard
+      profile={profile}
+      modules={getEligibleModules(rtModules, profile)}
+      activeModule={activeModule}
+      clickableModules={clickableModules}
+      spinnerProps={spinnerProps}>{!enableRasLoginGovLinking && <TemporaryRASModule/>}</ModulesForCard>
   </FlexRow>;
 };
 
-const ControlledTierCard = (props: {profile: Profile, spinnerProps: WithSpinnerOverlayProps}) => {
-  const {profile, spinnerProps} = props;
+const ControlledTierCard = (props: {profile: Profile, activeModule: AccessModule,
+    clickableModules: AccessModule[], reload: Function, spinnerProps: WithSpinnerOverlayProps}) => {
+  const {profile, activeModule, clickableModules, spinnerProps} = props;
   const controlledTierEligibility = profile.tierEligibilities.find(tier=> tier.accessTierShortName === AccessTierShortNames.Controlled);
   const registeredTierEligibility = profile.tierEligibilities.find(tier=> tier.accessTierShortName === AccessTierShortNames.Registered);
   const isSigned = !!controlledTierEligibility;
@@ -644,6 +678,7 @@ const ControlledTierCard = (props: {profile: Profile, spinnerProps: WithSpinnerO
   const displayEraCommons = isSigned && !registeredTierEligibility?.eraRequired && controlledTierEligibility.eraRequired;
   const rtDisplayName = AccessTierDisplayNames.Registered;
   const ctDisplayName = AccessTierDisplayNames.Controlled;
+
   return <FlexRow data-test-id='controlled-card' style={styles.card}>
     <FlexColumn>
       <div style={styles.cardStep}>Step 2</div>
@@ -675,7 +710,13 @@ const ControlledTierCard = (props: {profile: Profile, spinnerProps: WithSpinnerO
                           enabled={isEligible}
                           text={`${institutionDisplayName} must allow you to access ${ctDisplayName} data`}/>
       {displayEraCommons &&
-         <ControlledTierEraModule profile={profile} eligible={isEligible} spinnerProps={spinnerProps}/>}
+       <ControlledTierEraModule profile={profile} eligible={isEligible} spinnerProps={spinnerProps}/>}
+      <ModulesForCard
+        profile={profile}
+        modules={[ctModule]}
+        activeModule={activeModule}
+        clickableModules={clickableModules}
+        spinnerProps={spinnerProps}/>
     </FlexColumn>
   </FlexRow>
 };
@@ -698,24 +739,31 @@ const ControlledTierStep = (props: {enabled: boolean, text: String}) => {
      </FlexRow>;
 }
 
-const DuccCard = (props: {profile: Profile, activeModule: AccessModule, spinnerProps: WithSpinnerOverlayProps, stepNumber: Number}) => {
-  const {profile, activeModule, spinnerProps, stepNumber} = props;
+const DuccCard = (props: {
+      profile: Profile, activeModule: AccessModule, clickableModules: AccessModule[],
+      spinnerProps: WithSpinnerOverlayProps, stepNumber: Number
+    }) => {
+  const {profile, activeModule, clickableModules, spinnerProps, stepNumber} = props;
   return <FlexRow style={{...styles.card, height: '125px'}}>
     <FlexColumn>
       <div style={styles.cardStep}>Step {stepNumber}</div>
       <div style={styles.cardHeader}>Sign the code of conduct</div>
     </FlexColumn>
-    <ModulesForCard profile={profile} modules={[duccModule]} activeModule={activeModule} spinnerProps={spinnerProps}/>
+    <ModulesForCard
+      profile={profile}
+      modules={[duccModule]}
+      activeModule={activeModule}
+      clickableModules={clickableModules}
+      spinnerProps={spinnerProps}/>
   </FlexRow>;
 };
 
 export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerProps: WithSpinnerOverlayProps) => {
   const {profile, reload} = useStore(profileStore);
   const {config: {unsafeAllowSelfBypass}} = useStore(serverConfigStore);
-  const visibleModules = getVisibleModules(allModules, profile);
 
   useEffect(() => {
-    syncIncompleteModules(visibleModules, profile, reload);
+    syncIncompleteModules(getEligibleModules(allModules, profile), profile, reload);
     spinnerProps.hideSpinner();
   }, []);
 
@@ -735,23 +783,48 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
     }
   }, [code]);
 
-
-  // which module are we currently guiding the user to complete?
+  // At any given time, at most two modules will be clickable:
+  //  1. The active module, which we visually direct the user to with a CTA
+  //  2. The next required module, which may diverge when the active module is optional.
+  // This configuration allows the user to skip the optional CT section.
   const [activeModule, setActiveModule] = useState(null);
+  const [clickableModules, setClickableModules] = useState([]);
 
-  // whenever the profile changes, setActiveModule(the first incomplete enabled module)
+  const getNextActive = (modules: AccessModule[]) => getActiveModule(getEligibleModules(modules, profile), profile);
+  const nextActive = getNextActive(allModules);
+  const nextRequired = getNextActive(requiredModules);
+
+  // whenever the profile changes, update the next modules to complete
   useEffect(() => {
-    setActiveModule(getActiveModule(visibleModules, profile));
-  }, [profile]);
+    setActiveModule(nextActive);
+    setClickableModules(
+      fp.flow(
+        fp.filter(m => !!m),
+        fp.uniq
+      )([nextActive, nextRequired]));
+  }, [nextActive, nextRequired]);
 
   const showCtCard = environment.accessTiersVisibleToUsers.includes(AccessTierShortNames.Controlled)
 
-  const rtCard = <RegisteredTierCard key='rt' profile={profile} activeModule={activeModule} spinnerProps={spinnerProps}/>
-  const ctCard = showCtCard ? <ControlledTierCard key='ct' profile={profile} spinnerProps={spinnerProps}/> : null
+  const rtCard = <RegisteredTierCard
+                   key='rt'
+                   profile={profile}
+                   activeModule={activeModule}
+                   clickableModules={clickableModules}
+                   spinnerProps={spinnerProps}/>
+  const ctCard = showCtCard ?
+      <ControlledTierCard
+        key='ct'
+        profile={profile}
+        activeModule={activeModule}
+        clickableModules={clickableModules}
+        reload={reload}
+        spinnerProps={spinnerProps}/> : null
   const dCard = <DuccCard
     key='dt'
     profile={profile}
     activeModule={activeModule}
+    clickableModules={clickableModules}
     spinnerProps={spinnerProps}
     stepNumber={showCtCard ? 3 : 2}/>
 
@@ -759,8 +832,8 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
 
   return <FlexColumn style={styles.pageWrapper}>
       <DARHeader/>
-      {profile && !activeModule && <Completed/>}
-      {unsafeAllowSelfBypass && activeModule && <FlexRow data-test-id='self-bypass' style={styles.selfBypass}>
+      {profile && !nextRequired && <Completed/>}
+      {unsafeAllowSelfBypass && clickableModules.length > 0 && <FlexRow data-test-id='self-bypass' style={styles.selfBypass}>
         <div style={styles.selfBypassText}>[Test environment] Self-service bypass is enabled</div>
         <Button
             style={{marginLeft: '0.5rem'}}

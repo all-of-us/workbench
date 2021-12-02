@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.apache.commons.collections4.CollectionUtils;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.AttrName;
 import org.pmiops.workbench.model.Attribute;
@@ -69,121 +70,121 @@ public final class SearchGroupItemQueryBuilder {
           "has_physical_measurement_data");
 
   // sql parts to help construct BigQuery sql statements
-  private static final String OR = " or ";
-  private static final String AND = " and ";
-  private static final String UNION_TEMPLATE = "union all\n";
-  private static final String DESC = " desc";
+  private static final String OR = " OR ";
+  private static final String AND = " AND ";
+  private static final String UNION_TEMPLATE = "UNION ALL\n";
+  private static final String DESC = " DESC";
   private static final String BASE_SQL =
-      "select distinct person_id, entry_date, concept_id\n"
-          + "from `${projectId}.${dataSetId}.cb_search_all_events`\n"
-          + "where ";
+      "SELECT DISTINCT person_id, entry_date, concept_id\n"
+          + "FROM `${projectId}.${dataSetId}.cb_search_all_events`\n"
+          + "WHERE ";
   private static final String STANDARD_SQL = "is_standard = %s";
-  private static final String CONCEPT_ID_UNNEST_SQL = "concept_id in unnest(%s)";
-  private static final String CONCEPT_ID_IN_SQL = "concept_id in";
+  private static final String CONCEPT_ID_UNNEST_SQL = "concept_id IN unnest(%s)";
+  private static final String CONCEPT_ID_IN_SQL = "concept_id IN";
   private static final String STANDARD_OR_SOURCE_SQL =
       STANDARD_SQL + AND + CONCEPT_ID_UNNEST_SQL + "\n";
   public static final String CHILD_LOOKUP_SQL =
-      " (select distinct c.concept_id\n"
-          + "from `${projectId}.${dataSetId}.cb_criteria` c\n"
-          + "join (select cast(cr.id as string) as id\n"
-          + "from `${projectId}.${dataSetId}.cb_criteria` cr\n"
-          + "where domain_id = %s\n"
-          + "and is_standard = %s\n"
-          + "and concept_id in unnest(%s)\n"
-          + "and is_selectable = 1\n"
-          + "and full_text like %s) a\n"
-          + "on (c.path like concat('%%.', a.id, '.%%') or c.path like concat('%%.', a.id) or c.path like concat(a.id, '.%%') or c.path = a.id)\n"
-          + "where domain_id = %s\n"
-          + "and is_standard = %s\n"
-          + "and is_selectable = 1)";
+      " (SELECT DISTINCT c.concept_id\n"
+          + "FROM `${projectId}.${dataSetId}.cb_criteria` c\n"
+          + "JOIN (select cast(cr.id as string) as id\n"
+          + "FROM `${projectId}.${dataSetId}.cb_criteria` cr\n"
+          + "WHERE domain_id = %s\n"
+          + "AND is_standard = %s\n"
+          + "AND concept_id IN unnest(%s)\n"
+          + "AND is_selectable = 1\n"
+          + "AND full_text LIKE %s) a\n"
+          + "ON (c.path LIKE CONCAT('%%.', a.id, '.%%') OR c.path LIKE CONCAT('%%.', a.id) OR c.path LIKE CONCAT(a.id, '.%%') OR c.path = a.id)\n"
+          + "WHERE domain_id = %s\n"
+          + "AND is_standard = %s\n"
+          + "AND is_selectable = 1)";
   public static final String DRUG_CHILD_LOOKUP_SQL =
-      " (select distinct ca.descendant_id\n"
-          + "from `${projectId}.${dataSetId}.cb_criteria_ancestor` ca\n"
-          + "join (select distinct c.concept_id\n"
-          + "from `${projectId}.${dataSetId}.cb_criteria` c\n"
-          + "join (select cast(cr.id as string) as id\n"
-          + "from `${projectId}.${dataSetId}.cb_criteria` cr\n"
-          + "where domain_id = %s\n"
-          + "and is_standard = %s\n"
-          + "and concept_id in unnest(%s)\n"
-          + "and is_selectable = 1\n"
-          + "and full_text like %s) a\n"
-          + "on (c.path like concat('%%.', a.id, '.%%') or c.path like concat('%%.', a.id) or c.path like concat(a.id, '.%%') or c.path = a.id)\n"
-          + "where domain_id = %s\n"
-          + "and is_standard = %s\n"
-          + "and is_selectable = 1) b on (ca.ancestor_id = b.concept_id))";
+      " (SELECT DISTINCT ca.descendant_id\n"
+          + "FROM `${projectId}.${dataSetId}.cb_criteria_ancestor` ca\n"
+          + "JOIN (select distinct c.concept_id\n"
+          + "FROM `${projectId}.${dataSetId}.cb_criteria` c\n"
+          + "JOIN (select cast(cr.id as string) as id\n"
+          + "FROM `${projectId}.${dataSetId}.cb_criteria` cr\n"
+          + "WHERE domain_id = %s\n"
+          + "AND is_standard = %s\n"
+          + "AND concept_id IN unnest(%s)\n"
+          + "AND is_selectable = 1\n"
+          + "AND full_text LIKE %s) a\n"
+          + "ON (c.path LIKE CONCAT('%%.', a.id, '.%%') OR c.path LIKE CONCAT('%%.', a.id) OR c.path LIKE CONCAT(a.id, '.%%') OR c.path = a.id)\n"
+          + "WHERE domain_id = %s\n"
+          + "AND is_standard = %s\n"
+          + "AND is_selectable = 1) b ON (ca.ancestor_id = b.concept_id))";
   private static final String PARENT_STANDARD_OR_SOURCE_SQL =
       STANDARD_SQL + AND + CONCEPT_ID_IN_SQL + CHILD_LOOKUP_SQL;
   private static final String DRUG_SQL =
       STANDARD_SQL + AND + CONCEPT_ID_IN_SQL + DRUG_CHILD_LOOKUP_SQL;
   private static final String VALUE_AS_NUMBER = " value_as_number %s %s";
-  private static final String VALUE_AS_NUMBER_IS_NOT_NULL = " and value_as_number is not null";
+  private static final String VALUE_AS_NUMBER_IS_NOT_NULL = " AND value_as_number IS NOT NULL";
   private static final String VALUE_AS_CONCEPT_ID = " value_as_concept_id %s unnest(%s)";
   private static final String VALUE_SOURCE_CONCEPT_ID = " value_source_concept_id %s unnest(%s)";
   private static final String SOURCE_CONCEPT_SURVEY_ID =
-      " and survey_version_concept_id %s unnest(%s)";
-  private static final String SYSTOLIC_SQL = " and systolic %s %s";
-  private static final String DIASTOLIC_SQL = " and diastolic %s %s";
+      " AND survey_version_concept_id %s unnest(%s)";
+  private static final String SYSTOLIC_SQL = " AND systolic %s %s";
+  private static final String DIASTOLIC_SQL = " AND diastolic %s %s";
 
   // sql parts to help construct Temporal BigQuery sql
   private static final String SAME_ENC =
-      "temp1.person_id = temp2.person_id and temp1.visit_occurrence_id = temp2.visit_occurrence_id\n";
+      "temp1.person_id = temp2.person_id AND temp1.visit_occurrence_id = temp2.visit_occurrence_id\n";
   private static final String X_DAYS_BEFORE =
-      "temp1.person_id = temp2.person_id and temp1.entry_date <= DATE_SUB(temp2.entry_date, INTERVAL %s DAY)\n";
+      "temp1.person_id = temp2.person_id AND temp1.entry_date <= DATE_SUB(temp2.entry_date, INTERVAL %s DAY)\n";
   private static final String X_DAYS_AFTER =
-      "temp1.person_id = temp2.person_id and temp1."
+      "temp1.person_id = temp2.person_id AND temp1."
           + "entry_date >= DATE_ADD(temp2.entry_date, INTERVAL %s DAY)\n";
   private static final String WITHIN_X_DAYS_OF =
-      "temp1.person_id = temp2.person_id and temp1.entry_date between "
+      "temp1.person_id = temp2.person_id AND temp1.entry_date between "
           + "DATE_SUB(temp2.entry_date, INTERVAL %s DAY) and DATE_ADD(temp2.entry_date, INTERVAL %s DAY)\n";
   private static final String TEMPORAL_EXIST =
-      "select temp1.person_id\n"
-          + "from (%s) temp1\n"
-          + "where exists (select 1\n"
-          + "from (%s) temp2\n"
-          + "where (%s))\n";
+      "SELECT temp1.person_id\n"
+          + "FROM (%s) temp1\n"
+          + "WHERE EXISTS (SELECT 1\n"
+          + "FROM (%s) temp2\n"
+          + "WHERE (%s))\n";
   private static final String TEMPORAL_JOIN =
-      "select temp1.person_id\n"
-          + "from (%s) temp1\n"
-          + "join (select person_id, visit_occurrence_id, entry_date\n"
-          + "from (%s)\n"
+      "SELECT temp1.person_id\n"
+          + "FROM (%s) temp1\n"
+          + "JOIN (SELECT person_id, visit_occurrence_id, entry_date\n"
+          + "FROM (%s)\n"
           + ") temp2 on (%s)\n";
   private static final String TEMPORAL_SQL =
-      "select person_id, visit_occurrence_id, entry_date%s\n"
-          + "from `${projectId}.${dataSetId}.cb_search_all_events`\n"
-          + "where %s\n"
-          + "and person_id in (%s)\n";
+      "SELECT person_id, visit_occurrence_id, entry_date%s\n"
+          + "FROM `${projectId}.${dataSetId}.cb_search_all_events`\n"
+          + "WHERE %s\n"
+          + "AND person_id IN (%s)\n";
   private static final String RANK_1_SQL =
-      ", rank() over (partition by person_id order by entry_date%s) rn";
+      ", RANK() OVER (PARTITION BY person_id ORDER BY entry_date%s) rn";
   private static final String TEMPORAL_RANK_1_SQL =
-      "select person_id, visit_occurrence_id, entry_date\n" + "from (%s) a\n" + "where rn = 1\n";
+      "SELECT person_id, visit_occurrence_id, entry_date\n" + "FROM (%s) a\n" + "WHERE rn = 1\n";
 
   // sql parts to help construct Modifiers BigQuery sql
   private static final String MODIFIER_SQL_TEMPLATE =
-      "select criteria.person_id from (%s) criteria\n";
+      "SELECT criteria.person_id FROM (%s) criteria\n";
   private static final String OCCURRENCES_SQL_TEMPLATE =
-      "group by criteria.person_id, criteria.concept_id\n" + "having count(criteria.person_id) ";
-  private static final String AGE_AT_EVENT_SQL_TEMPLATE = " and age_at_event ";
-  private static final String EVENT_DATE_SQL_TEMPLATE = " and entry_date ";
-  private static final String ENCOUNTERS_SQL_TEMPLATE = " and visit_concept_id ";
+      "GROUP BY criteria.person_id, criteria.concept_id\n" + "HAVING COUNT(criteria.person_id) ";
+  private static final String AGE_AT_EVENT_SQL_TEMPLATE = " AND age_at_event ";
+  private static final String EVENT_DATE_SQL_TEMPLATE = " AND entry_date ";
+  private static final String ENCOUNTERS_SQL_TEMPLATE = " AND visit_concept_id ";
 
   // sql parts to help construct demographic BigQuery sql
   private static final String DEC_SQL =
-      "exists (\n"
+      "EXISTS (\n"
           + "SELECT 'x' FROM `${projectId}.${dataSetId}.death` d\n"
-          + "where d.person_id = p.person_id)\n";
+          + "WHERE d.person_id = p.person_id)\n";
   private static final String DEMO_BASE =
-      "select person_id\n" + "from `${projectId}.${dataSetId}.person` p\nwhere\n";
+      "SELECT person_id\n" + "FROM `${projectId}.${dataSetId}.person` p\nWHERE\n";
   private static final String AGE_SQL =
-      "select person_id\n"
-          + "from `${projectId}.${dataSetId}.cb_search_person` p\nwhere %s %s %s\n";
-  private static final String AGE_DEC_SQL = "and not " + DEC_SQL;
-  private static final String DEMO_IN_SQL = "%s in unnest(%s)\n";
+      "SELECT person_id\n"
+          + "FROM `${projectId}.${dataSetId}.cb_search_person` p\nWHERE %s %s %s\n";
+  private static final String AGE_DEC_SQL = "AND NOT " + DEC_SQL;
+  private static final String DEMO_IN_SQL = "%s IN unnest(%s)\n";
   private static final String HAS_DATA_SQL =
-      "select person_id\n" + "from `${projectId}.${dataSetId}.cb_search_person` p\nwhere %s = 1\n";
+      "SELECT person_id\n" + "FROM `${projectId}.${dataSetId}.cb_search_person` p\nWHERE %s = 1\n";
   private static final String CB_SEARCH_ALL_EVENTS_WHERE =
-      "select person_id from `${projectId}.${dataSetId}.cb_search_all_events`\nwhere ";
-  private static final String PERSON_ID_IN = "person_id in (";
+      "SELECT person_id FROM `${projectId}.${dataSetId}.cb_search_all_events`\nWHERE ";
+  private static final String PERSON_ID_IN = "person_id IN (";
 
   /** Build the inner most sql using search parameters, modifiers and attributes. */
   public static void buildQuery(
@@ -195,6 +196,11 @@ public final class SearchGroupItemQueryBuilder {
       String query = buildOuterTemporalQuery(queryParams, searchGroup);
       queryParts.add(query);
     } else {
+      if (CollectionUtils.isEmpty(searchGroup.getItems())) {
+        throw new BadRequestException(
+            "SearchGroup Id: " + searchGroup.getId() + " has null/empty items list");
+      }
+
       for (SearchGroupItem searchGroupItem : searchGroup.getItems()) {
         // build regular sql statement
         String query = buildBaseQuery(queryParams, searchGroupItem, searchGroup.getMention());
@@ -211,6 +217,14 @@ public final class SearchGroupItemQueryBuilder {
     Set<SearchParameter> standardSearchParameters = new HashSet<>();
     Set<SearchParameter> sourceSearchParameters = new HashSet<>();
     List<String> queryParts = new ArrayList<>();
+
+    if (CollectionUtils.isEmpty(searchGroupItem.getSearchParameters())) {
+      throw new BadRequestException(
+          "SearchGroupItem Id: "
+              + searchGroupItem.getId()
+              + " has null/empty search parameter list");
+    }
+
     Domain domain = Domain.fromValue(searchGroupItem.getType());
 
     // When building sql for demographics - we query against the person table

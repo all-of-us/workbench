@@ -75,7 +75,7 @@ export const encodeURIComponentStrict = (uri: string): string => {
 };
 
 export const navigateSignOut = (continuePath: string = '/login') => {
-  window.location.assign(`https://www.google.com/accounts/Logout?continue=` +
+  window.location.assign('https://www.google.com/accounts/Logout?continue=' +
     `https://appengine.google.com/_ah/logout?continue=${window.location.origin}${continuePath}`);
 };
 
@@ -94,7 +94,6 @@ export enum BreadcrumbType {
   WorkspaceEdit = 'WorkspaceEdit',
   WorkspaceDuplicate = 'WorkspaceDuplicate',
   Notebook = 'Notebook',
-  Terminal = 'Terminal',
   ConceptSet = 'ConceptSet',
   Cohort = 'Cohort',
   CohortReview = 'CohortReview',

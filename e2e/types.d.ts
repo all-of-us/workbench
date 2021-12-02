@@ -23,6 +23,7 @@ export interface IEnvConfig {
   READER_USER: string;
   ACCESS_TEST_USER: string;
   ADMIN_TEST_USER: string;
+  EGRESS_TEST_USER: string;
   DEFAULT_CDR_VERSION_NAME: string;
   OLD_CDR_VERSION_NAME: string;
   CONTROLLED_TIER_CDR_VERSION_NAME: string;

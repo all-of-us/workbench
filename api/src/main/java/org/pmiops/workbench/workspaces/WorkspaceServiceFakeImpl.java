@@ -57,4 +57,9 @@ public class WorkspaceServiceFakeImpl implements WorkspaceService {
   public DbUserRecentWorkspace updateRecentWorkspaces(DbWorkspace workspace) {
     return null;
   }
+
+  @Override
+  public boolean notebookTransferComplete(String workspaceNamespace, String workspaceId) {
+    return false;
+  }
 }

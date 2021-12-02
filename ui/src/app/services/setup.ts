@@ -1,7 +1,7 @@
 import validate from 'validate.js';
-import {environment} from "environments/environment";
-import {LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN} from "app/utils/cookies";
-import outdatedBrowserRework from "outdated-browser-rework";
+import {environment} from 'environments/environment';
+import {LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN} from 'app/utils/cookies';
+import outdatedBrowserRework from 'outdated-browser-rework';
 
 export const setupCustomValidators = () => {
   validate.validators.custom = (value, options, key, attributes) => {
@@ -10,7 +10,7 @@ export const setupCustomValidators = () => {
 
   validate.validators.truthiness = (value) => {
     if (!value) {
-      return `must be true`;
+      return 'must be true';
     } else {
       return undefined;
     }

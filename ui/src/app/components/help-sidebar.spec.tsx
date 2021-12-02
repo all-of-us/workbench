@@ -15,14 +15,16 @@ import {
   CohortAnnotationDefinitionApi,
   CohortReviewApi,
   DataSetApi,
+  ErrorCode,
   RuntimeApi,
   RuntimeStatus,
+  SecuritySuspendedErrorParameters,
   TerraJobStatus,
   WorkspaceAccessLevel,
   WorkspacesApi
 } from 'generated/fetch';
 import defaultServerConfig from 'testing/default-server-config';
-import {waitForFakeTimersAndUpdate, waitOneTickAndUpdate} from 'testing/react-test-helpers';
+import { mountWithRouter, waitForFakeTimersAndUpdate} from 'testing/react-test-helpers';
 import {CohortAnnotationDefinitionServiceStub} from 'testing/stubs/cohort-annotation-definition-service-stub';
 import {CohortReviewServiceStub, cohortReviewStubs} from 'testing/stubs/cohort-review-service-stub';
 import {workspaceDataStub} from 'testing/stubs/workspaces';
@@ -38,8 +40,9 @@ import {
 import {CdrVersionsApiStub, cdrVersionTiersResponse} from 'testing/stubs/cdr-versions-api-stub';
 import {ConfirmDeleteModal} from './confirm-delete-modal';
 import {HelpSidebar} from './help-sidebar';
-import {WorkspacesApiStub} from "testing/stubs/workspaces-api-stub";
-import {DataSetApiStub} from "testing/stubs/data-set-api-stub";
+import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
+import {DataSetApiStub} from 'testing/stubs/data-set-api-stub';
+import {ComputeSecuritySuspendedError} from 'app/utils/runtime-utils';
 
 const sidebarContent = require('assets/json/help-sidebar.json');
 
@@ -74,8 +77,8 @@ describe('HelpSidebar', () => {
   let props: {};
 
   const component = async() => {
-    const c = mount(<HelpSidebar {...props} />, {attachTo: document.getElementById('root')});
-    await waitOneTickAndUpdate(c);
+    const c = mountWithRouter(<HelpSidebar {...props} />, {attachTo: document.getElementById('root')});
+    await waitForFakeTimersAndUpdate(c);
     return c;
   };
 
@@ -104,7 +107,7 @@ describe('HelpSidebar', () => {
 
   const setActiveIcon = async(wrapper, activeIconKey) => {
     setSidebarActiveIconStore.next(activeIconKey);
-    await waitOneTickAndUpdate(wrapper);
+    await waitForFakeTimersAndUpdate(wrapper);
   };
 
   beforeEach(() => {
@@ -124,7 +127,7 @@ describe('HelpSidebar', () => {
     cdrVersionStore.set(cdrVersionTiersResponse);
 
     // mock timers
-    jest.useFakeTimers();
+    jest.useFakeTimers('modern');
   });
 
   afterEach(() => {
@@ -142,7 +145,9 @@ describe('HelpSidebar', () => {
     const wrapper = await component();
     await setActiveIcon(wrapper, 'help');
     expect(wrapper.find('[data-test-id="section-title-0"]').text()).toBe(sidebarContent.data[0].title);
-    wrapper.setProps({pageKey: 'cohortBuilder'});
+    wrapper.setProps({
+      children: <HelpSidebar {...props} pageKey="cohortBuilder" />
+    });
     expect(wrapper.find('[data-test-id="section-title-0"]').text()).toBe(sidebarContent.cohortBuilder[0].title);
   });
 
@@ -167,7 +172,7 @@ describe('HelpSidebar', () => {
     const wrapper = await component();
     wrapper.find({'data-test-id': 'workspace-menu-button'}).first().simulate('click');
     wrapper.find({'data-test-id': 'Delete-menu-item'}).first().simulate('click');
-    await waitOneTickAndUpdate(wrapper);
+    await waitForFakeTimersAndUpdate(wrapper);
     expect(wrapper.find(ConfirmDeleteModal).exists()).toBeTruthy();
   });
 
@@ -175,7 +180,7 @@ describe('HelpSidebar', () => {
     const wrapper = await component();
     wrapper.find({'data-test-id': 'workspace-menu-button'}).first().simulate('click');
     wrapper.find({'data-test-id': 'Share-menu-item'}).first().simulate('click');
-    await waitOneTickAndUpdate(wrapper);
+    await waitForFakeTimersAndUpdate(wrapper);
     expect(wrapper.find(MockWorkspaceShare).exists()).toBeTruthy();
   });
 
@@ -251,6 +256,30 @@ describe('HelpSidebar', () => {
     act(() => clearRuntime());
     await waitForFakeTimersAndUpdate(wrapper);
     expect(runtimeStatusIcon(wrapper).prop('style').color).toEqual(colors.asyncOperationStatus.starting);
+  });
+
+  it('should display security suspended UX on compute suspended', async() => {
+    const suspendedParams: SecuritySuspendedErrorParameters = {
+      suspendedUntil: new Date('2000-01-01 03:00:00').toISOString()
+    };
+    runtimeStub.runtime = null;
+    runtimeStub.getRuntime = () => Promise.reject(new Response(JSON.stringify({
+      errorCode: ErrorCode.COMPUTESECURITYSUSPENDED,
+      parameters: suspendedParams
+    }), {
+      status: 412
+    }));
+    runtimeStore.set({
+      workspaceNamespace: workspaceDataStub.namespace,
+      runtime: undefined,
+      runtimeLoaded: false,
+      loadingError: new ComputeSecuritySuspendedError(suspendedParams)
+    });
+    const wrapper = await component();
+    await waitForFakeTimersAndUpdate(wrapper);
+
+    expect(runtimeStatusIcon(wrapper).prop('style').color).toEqual(colors.asyncOperationStatus.stopped);
+
   });
 
   it('should display "running" icon when extract currently running', async() => {

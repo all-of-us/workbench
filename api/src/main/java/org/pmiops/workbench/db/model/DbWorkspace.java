@@ -21,7 +21,6 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.Version;
-import org.pmiops.workbench.model.BillingAccountType;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.DisseminateResearchEnum;
 import org.pmiops.workbench.model.ResearchOutcomeEnum;
@@ -121,10 +120,9 @@ public class DbWorkspace {
   private Timestamp timeRequested;
   private Short billingStatus = DbStorageEnums.billingStatusToStorage(BillingStatus.ACTIVE);
   private String billingAccountName;
-  private Short billingAccountType =
-      DbStorageEnums.billingAccountTypeToStorage(BillingAccountType.FREE_TIER);
   private Short needsRPReviewPrompt;
   private String googleProject;
+  private boolean adminLocked;
 
   public DbWorkspace() {
     setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
@@ -711,16 +709,6 @@ public class DbWorkspace {
     return this;
   }
 
-  @Column(name = "billing_account_type")
-  public BillingAccountType getBillingAccountType() {
-    return DbStorageEnums.billingAccountTypeFromStorage(billingAccountType);
-  }
-
-  public DbWorkspace setBillingAccountType(BillingAccountType billingAccountType) {
-    this.billingAccountType = DbStorageEnums.billingAccountTypeToStorage(billingAccountType);
-    return this;
-  }
-
   @Column(name = "needs_rp_review_prompt")
   public Short getNeedsResearchPurposeReviewPrompt() {
     if (needsRPReviewPrompt == null) return (short) 1;
@@ -742,6 +730,16 @@ public class DbWorkspace {
 
   public DbWorkspace setNeedsReviewPrompt(Boolean needsReviewRPPrompt) {
     this.needsRPReviewPrompt = (short) (needsReviewRPPrompt ? 0 : 1);
+    return this;
+  }
+
+  @Column(name = "admin_locked")
+  public boolean isAdminLocked() {
+    return adminLocked;
+  }
+
+  public DbWorkspace setAdminLocked(boolean adminLocked) {
+    this.adminLocked = adminLocked;
     return this;
   }
 }

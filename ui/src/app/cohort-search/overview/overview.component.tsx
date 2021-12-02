@@ -178,7 +178,9 @@ export const ListOverview = fp.flow(withCurrentWorkspace(), withCdrVersions(), w
     }
 
     componentDidMount(): void {
-      this.getTotalCount();
+      if (!this.definitionErrors) {
+        this.getTotalCount();
+      }
     }
 
     componentDidUpdate(prevProps: Readonly<Props>): void {
