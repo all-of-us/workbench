@@ -2,7 +2,7 @@
 
 # This generates big query denormalized tables for review.
 
-set -ex
+set -e
 
 export BQ_PROJECT=$1  # project
 export BQ_DATASET=$2  # dataset

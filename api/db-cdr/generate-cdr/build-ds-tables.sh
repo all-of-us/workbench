@@ -2,7 +2,7 @@
 
 # This generates the big query de-normalized tables for dataset builder.
 
-set -ex
+set -e
 
 export BQ_PROJECT=$1  # project
 export BQ_DATASET=$2  # dataset
