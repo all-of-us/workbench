@@ -181,7 +181,8 @@ export const NotebookList = withCurrentWorkspace()(class extends React.Component
                 <FlexColumn style={{paddingTop: '0.5rem'}}>
                   <div>
                     <FontAwesomeIcon style={{color: colors.warning}}
-                                        icon={faExclamationTriangle} size="2x"/>
+                                     icon={faExclamationTriangle}
+                                     size="2x"/>
                   </div>
                   <div style={styles.cloneNotebookMsg}>
                     Copying 1 or more notebooks from another workspace. This may take <b> a few
