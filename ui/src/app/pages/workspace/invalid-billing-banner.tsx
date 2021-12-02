@@ -54,7 +54,8 @@ export const InvalidBillingBanner = fp.flow(
     title={'This workspace has run out of free credits'}
     message={'The free credits for the creator of this workspace have run out. ' + userAction}
     onClose={() => props.onClose()}
-    type={ToastType.WARNING}
+    toastType={ToastType.WARNING}
+    zIndex={500}
     footer={footer}
   />;
 });
