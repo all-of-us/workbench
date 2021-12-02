@@ -363,7 +363,9 @@ export const LinkButton = ({disabled = false, style = {}, children, ...props}) =
   >{children}</Clickable>;
 };
 
-export const StyledRouterLink = ({path, children, disabled = false, propagateDataTestId = false, analyticsFn = null, style = {}, ...props}) => {
+export const StyledRouterLink = ({
+    path, children, disabled = false, propagateDataTestId = false,
+    analyticsFn = null, style = {}, ...props}) => {
   const childProps = propagateDataTestId ? props : fp.omit(['data-test-id'], props);
   const linkStyle = {
     style: {...styles.inlineAnchor}
