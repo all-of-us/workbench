@@ -132,6 +132,7 @@ export const AdminEgressAudit = (props: WithSpinnerOverlayProps) => {
         Cancel
       </Button>
       <Button
+          data-test-id='save-egress-event'
           disabled={!pendingUpdateEvent}
           onClick={() => onSave()}>
         Save
