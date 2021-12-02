@@ -65,7 +65,7 @@ it('should handle username validity ends with .', () => {
   expect(wrapper.exists('#usernameError')).toBeTruthy();
 });
 
-test.each(['user@name', '.user', 'user.', 'user..', "O'Riley", '50%', 'no+plus', 'ælfred', 'money$man'])
+test.each(['user@name', '.user', 'user.', 'user..', 'O\'Riley', '50%', 'no+plus', 'ælfred', 'money$man'])
 ('should mark username %s as invalid', (username) => {
   const wrapper = component();
   expect(wrapper.exists('#username')).toBeTruthy();
