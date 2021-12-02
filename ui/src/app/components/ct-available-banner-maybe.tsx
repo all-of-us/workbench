@@ -63,6 +63,7 @@ export const CTAvailableBannerMaybe = () => {
       message={bannerBody}
       footer='You can also do this later from your profile page.'
       onClose={() => acknowledgeBanner()}
-      toastType={ToastType.INFO}/>
+      toastType={ToastType.INFO}
+      zIndex={200}/>
     : null;
 }
