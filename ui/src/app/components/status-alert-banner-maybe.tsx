@@ -41,7 +41,7 @@ export const StatusAlertBannerMaybe = () => {
     getAlert();
   }, []);
 
-  const onStatusAlertBannerUnmount = () => {
+  const acknowledgeAlert = () => {
     if (cookiesEnabled()) {
       localStorage.setItem(STATUS_ALERT_COOKIE_KEY, `${statusAlertDetails.statusAlertId}`);
     }
@@ -58,8 +58,9 @@ export const StatusAlertBannerMaybe = () => {
     ? <ToastBanner
       title={statusAlertDetails.title}
       message={statusAlertDetails.message}
-      onClose={() => onStatusAlertBannerUnmount()}
-      type={ToastType.WARNING}
+      onClose={() => acknowledgeAlert()}
+      toastType={ToastType.WARNING}
+      zIndex={1000}
       footer={footer}/>
     : null;
 }
