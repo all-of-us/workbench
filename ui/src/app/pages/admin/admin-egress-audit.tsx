@@ -82,6 +82,7 @@ export const AdminEgressAudit = (props: WithSpinnerOverlayProps) => {
   }
 
   const event = egressDetails.egressEvent;
+  const eventChanged = !!pendingUpdateEvent && !fp.equals(pendingUpdateEvent, event);
   const [username,] = event.sourceUserEmail.split('@');
   return <div style={{padding: '0 20px'}}>
     <h2>Egress event {event.egressEventId}</h2>
@@ -126,14 +127,14 @@ export const AdminEgressAudit = (props: WithSpinnerOverlayProps) => {
     </div>
     <FlexRow>
       <Button
-          disabled={!pendingUpdateEvent}
+          disabled={!eventChanged}
           type='secondary'
           onClick={() => setPendingUpdateEvent(null)}>
-        Cancel
+        Discard changes
       </Button>
       <Button
           data-test-id='save-egress-event'
-          disabled={!pendingUpdateEvent}
+          disabled={!eventChanged}
           onClick={() => onSave()}>
         Save
       </Button>
