@@ -147,6 +147,9 @@ export const AdminEgressAudit = (props: WithSpinnerOverlayProps) => {
          }
          return <TabPanel key={group.name} header={`${group.name} (${logCount})`}>
            <DataTable
+             paginator
+             rows={50}
+             rowsPerPageOptions={[50,100,500]}
              value={group.entries} >
              <Column field='timestamp'
                      header='Timestamp'
