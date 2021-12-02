@@ -1,0 +1,111 @@
+# Partialy copied from https://github.com/broadinstitute/firecloud-orchestration/blob/develop/src/main/resources/swagger/api-docs.yaml
+# Once workbench use Java 11, we can consider switch to use SAM generated Client Library.
+openapi: 3.0.1
+info:
+  title: Sam
+  description: |
+    Workbench identity and access management.
+  termsOfService: https://github.com/broadinstitute/sam
+  license:
+    name: BSD
+    url: http://opensource.org/licenses/BSD-3-Clause
+  version: "0.1"
+servers:
+  - url: /
+security:
+  - googleoauth:
+      - openid
+      - email
+      - profile
+paths:
+  /api/google/v1/user/petServiceAccount/{project}:
+    get:
+      tags:
+        - Google
+      summary: gets the pet service account for the specified user
+      operationId: getPetServiceAccount
+      parameters:
+        - name: project
+          in: path
+          description: Google project of the pet
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: user pet service account
+          content:
+            application/json:
+              schema:
+                type: string
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+
+components:
+  schemas:
+    ErrorReport:
+      required:
+        - causes
+        - message
+        - source
+        - stackTrace
+      type: object
+      properties:
+        source:
+          type: string
+          description: service causing error
+        message:
+          type: string
+          description: what went wrong
+        exceptionClass:
+          type: string
+          description: class of exception thrown
+        statusCode:
+          type: integer
+          description: HTTP status code
+        causes:
+          type: array
+          description: errors triggering this one
+          items:
+            $ref: '#/components/schemas/ErrorReport'
+        stackTrace:
+          type: array
+          description: stack trace
+          items:
+            $ref: '#/components/schemas/StackTraceElement'
+      description: ""
+    StackTraceElement:
+      required:
+        - className
+        - fileName
+        - lineNumber
+        - methodName
+      type: object
+      properties:
+        className:
+          type: string
+          description: class name
+        methodName:
+          type: string
+          description: method name
+        fileName:
+          type: string
+          description: source file name
+        lineNumber:
+          type: integer
+          description: line number
+      description: ""
+  securitySchemes:
+    googleoauth:
+      type: oauth2
+      flows:
+        implicit:
+          authorizationUrl: https://accounts.google.com/o/oauth2/auth
+          scopes:
+            openid: open id authorization
+            email: email authorization
+            profile: profile authorization

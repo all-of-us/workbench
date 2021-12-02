@@ -54,6 +54,7 @@ import org.pmiops.workbench.leonardo.model.LeonardoAuditInfo;
 import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
+import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.AdminLockingRequest;
 import org.pmiops.workbench.model.AdminWorkspaceCloudStorageCounts;
 import org.pmiops.workbench.model.AdminWorkspaceObjectsCounts;
@@ -100,27 +101,30 @@ public class WorkspaceAdminServiceTest {
   private LeonardoListRuntimeResponse testLeoListRuntimeResponse;
   private LeonardoListRuntimeResponse testLeoListRuntimeResponse2;
 
+  @MockBean private AdminAuditor mockAdminAuditor;
   @MockBean private CloudMonitoringService mockCloudMonitoringService;
   @MockBean private CloudStorageClient mockCloudStorageClient;
   @MockBean private FireCloudService mockFirecloudService;
+  @MockBean private LeonardoNotebooksClient mockLeonardoNotebooksClient;
+  @MockBean private LeonardoRuntimeAuditor mockLeonardoRuntimeAuditor;
+  @MockBean private MailService mockMailService;
   @MockBean private NotebooksService mockNotebooksService;
   @MockBean private WorkspaceDao mockWorkspaceDao;
-  @MockBean LeonardoRuntimeAuditor mockLeonardoRuntimeAuditor;
-  @MockBean LeonardoNotebooksClient mockLeonardoNotebooksClient;
-  @MockBean private AdminAuditor mockAdminAuditor;
+
   @Autowired private WorkspaceAdminService workspaceAdminService;
 
   @TestConfiguration
   @Import({
-    FakeClockConfiguration.class,
     CohortMapperImpl.class,
+    FakeClockConfiguration.class,
+    LeonardoMapperImpl.class,
     WorkspaceAdminServiceImpl.class,
     WorkspaceMapperImpl.class,
-    LeonardoMapperImpl.class
   })
   @MockBean({
     ActionAuditQueryService.class,
     AdminAuditor.class,
+    MailService.class,
     CohortDao.class,
     CohortReviewMapper.class,
     CommonMappers.class,
@@ -321,7 +325,7 @@ public class WorkspaceAdminServiceTest {
   }
 
   @Test
-  public void testDeleteRuntimesInProject() throws Exception {
+  public void testDeleteRuntimesInProject() {
     List<LeonardoListRuntimeResponse> listRuntimeResponseList =
         ImmutableList.of(testLeoListRuntimeResponse);
     when(mockLeonardoNotebooksClient.listRuntimesByProjectAsService(GOOGLE_PROJECT_ID))
@@ -342,7 +346,7 @@ public class WorkspaceAdminServiceTest {
   }
 
   @Test
-  public void testDeleteRuntimesInProject_DeleteSome() throws Exception {
+  public void testDeleteRuntimesInProject_DeleteSome() {
     List<LeonardoListRuntimeResponse> listRuntimeResponseList =
         ImmutableList.of(testLeoListRuntimeResponse, testLeoListRuntimeResponse2);
     List<String> runtimesToDelete = ImmutableList.of(testLeoRuntime.getRuntimeName());
@@ -358,7 +362,7 @@ public class WorkspaceAdminServiceTest {
   }
 
   @Test
-  public void testDeleteRuntimesInProject_DeleteDoesNotAffectOtherProjects() throws Exception {
+  public void testDeleteRuntimesInProject_DeleteDoesNotAffectOtherProjects() {
     List<LeonardoListRuntimeResponse> listRuntimeResponseList =
         ImmutableList.of(testLeoListRuntimeResponse, testLeoListRuntimeResponse2);
     List<String> runtimesToDelete =
@@ -375,7 +379,7 @@ public class WorkspaceAdminServiceTest {
   }
 
   @Test
-  public void testDeleteRuntimesInProject_NoRuntimes() throws Exception {
+  public void testDeleteRuntimesInProject_NoRuntimes() {
     List<LeonardoListRuntimeResponse> listRuntimeResponseList =
         ImmutableList.of(testLeoListRuntimeResponse);
     when(mockLeonardoNotebooksClient.listRuntimesByProjectAsService(GOOGLE_PROJECT_ID))
@@ -394,7 +398,7 @@ public class WorkspaceAdminServiceTest {
   }
 
   @Test
-  public void testDeleteRuntimesInProject_NullRuntimesList() throws Exception {
+  public void testDeleteRuntimesInProject_NullRuntimesList() {
     List<LeonardoListRuntimeResponse> listRuntimeResponseList =
         ImmutableList.of(testLeoListRuntimeResponse);
     when(mockLeonardoNotebooksClient.listRuntimesByProjectAsService(GOOGLE_PROJECT_ID))
@@ -413,7 +417,7 @@ public class WorkspaceAdminServiceTest {
   }
 
   @Test
-  public void testSetAdminLockedStateCallsAuditor() throws Exception {
+  public void testSetAdminLockedStateCallsAuditor() {
     AdminLockingRequest adminLockingRequest = new AdminLockingRequest();
     adminLockingRequest.setRequestReason("To test auditor");
     adminLockingRequest.setRequestDateInMillis(12345677l);
@@ -422,7 +426,7 @@ public class WorkspaceAdminServiceTest {
   }
 
   @Test
-  public void testSetAdminUnlockedStateCallsAuditor() throws Exception {
+  public void testSetAdminUnlockedStateCallsAuditor() {
     workspaceAdminService.setAdminUnlockedState(WORKSPACE_NAMESPACE);
     verify(mockAdminAuditor).fireUnlockWorkspaceAction(DB_WORKSPACE_ID);
   }

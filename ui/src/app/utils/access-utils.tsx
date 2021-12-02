@@ -25,11 +25,20 @@ import {environment} from 'environments/environment';
 
 const {useState, useEffect} = React;
 
-export async function redirectToTraining() {
-  AnalyticsTracker.Registration.EthicsTraining();
+
+export async function redirectToRegisteredTraining() {
+  AnalyticsTracker.Registration.RegisteredTraining();
   await profileApi().updatePageVisits({page: 'moodle'});
   const {config: {complianceTrainingHost}} = serverConfigStore.get();
   const url = `https://${complianceTrainingHost}/static/data-researcher.html?saml=on'`;
+  window.open(url, '_blank');
+}
+
+export async function redirectToControlledTraining() {
+  AnalyticsTracker.Registration.ControlledTraining();
+  await profileApi().updatePageVisits({page: 'moodle'});
+  const {config: {complianceTrainingHost}} = serverConfigStore.get();
+  const url = `https://${complianceTrainingHost}/static/data-researcher-controlled.html?saml=on'`;
   window.open(url, '_blank');
 }
 
@@ -138,8 +147,9 @@ export const getAccessModuleConfig = (moduleName: AccessModule): AccessModuleCon
     [AccessModule.CTCOMPLIANCETRAINING, () => ({
       moduleName,
       isEnabledInEnvironment: enableComplianceTraining,
-      DARTitleComponent: () => <div>[{environment.displayTag}] Bypass <AoU/> research Controlled Tier training </div>
-      //  TODO: implement externalSyncAction and refreshAction for CT Complaince training
+      DARTitleComponent: () => <div>Complete <AoU/> research Controlled Tier training </div>,
+      externalSyncAction: async () => await profileApi().syncComplianceTrainingStatus(),
+      refreshAction: async () => await profileApi().syncComplianceTrainingStatus(),
     })],
 
     [AccessModule.DATAUSERCODEOFCONDUCT, () => ({

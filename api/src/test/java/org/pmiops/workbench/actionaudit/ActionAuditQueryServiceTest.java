@@ -104,6 +104,9 @@ public class ActionAuditQueryServiceTest {
   private static final Instant DEFAULT_AFTER = Instant.parse("2005-02-14T01:20:00.02Z");
   private static final Instant DEFAULT_BEFORE = Instant.parse("2020-08-30T01:20:00.02Z");
   private static final long USER_DB_ID = 11223344L;
+
+  private static WorkbenchConfig workbenchConfig = WorkbenchConfig.createEmptyConfig();
+
   @MockBean private BigQueryService mockBigQueryService;
   @Autowired private ActionAuditQueryService actionAuditQueryService;
 
@@ -117,9 +120,9 @@ public class ActionAuditQueryServiceTest {
 
     @Bean
     public WorkbenchConfig workbenchConfig() {
-      final WorkbenchConfig workbenchConfig = WorkbenchConfig.createEmptyConfig();
       workbenchConfig.actionAudit.bigQueryDataset = "action_audit_unit_test";
       workbenchConfig.actionAudit.bigQueryTable = "action_audit_unit_test";
+      workbenchConfig.actionAudit.partitionColumn = "_PARTITIONTIME";
       workbenchConfig.server.projectId = "rw-wb-unit-test";
       return workbenchConfig;
     }
@@ -193,5 +196,28 @@ public class ActionAuditQueryServiceTest {
     assertThat(query)
         .containsMatch(
             "AND\\s+_PARTITIONTIME\\s+<\\s+TIMESTAMP\\s+'2020-03-16 09:30:00\\.\\d{6}\\+00:00'");
+  }
+
+  @Test
+  public void testPartitionTimeBuffer_alt_column() {
+    final String partitionColumn = "phase_of_the_moon";
+    workbenchConfig.actionAudit.partitionColumn = partitionColumn;
+
+    doReturn(EMPTY_RESULT).when(mockBigQueryService).executeQuery(any(QueryJobConfiguration.class));
+    final Instant after = Instant.parse("2020-03-10T09:30:00.00Z");
+    final Instant before = after.plus(Duration.ofDays(5));
+
+    final UserAuditLogQueryResponse response =
+        actionAuditQueryService.queryEventsForUser(USER_DB_ID, DEFAULT_LIMIT, after, before);
+
+    final String query = response.getQuery();
+    assertThat(query)
+        .containsMatch(
+            "TIMESTAMP\\s+'2020-03-09 09:30:00\\.\\d{6}\\+00:00'\\s+<=\\s+" + partitionColumn);
+    assertThat(query)
+        .containsMatch(
+            "AND\\s+"
+                + partitionColumn
+                + "\\s+<\\s+TIMESTAMP\\s+'2020-03-16 09:30:00\\.\\d{6}\\+00:00'");
   }
 }

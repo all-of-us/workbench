@@ -28,7 +28,7 @@ let defaultCdrWorkspace: string;
  * @param {string} sourceWorkspaceName: Source workspace name
  * @param {string} to create new destination workspace with CDR Version
  */
-describe('Workspace owner copy notebook tests', () => {
+describe('Workspace owner can copy notebook', () => {
   beforeEach(async () => {
     await signInWithAccessToken(page);
   });
@@ -73,7 +73,10 @@ async function copyNotebookTest(sourceWorkspaceName: string, destCdrVersionName:
 
   // Copy to destination Workspace and give notebook a new name.
   const copiedNotebookName = makeRandomName('copy-of');
-  await analysisPage.copyNotebookToWorkspace(sourceNotebookName, destWorkspace, copiedNotebookName);
+  await analysisPage.copyNotebookToWorkspace(sourceNotebookName, destWorkspace, copiedNotebookName).catch(() => {
+    // Retry. Sometimes POST /notebooks/[notebook-name]/copy request fails.
+    analysisPage.copyNotebookToWorkspace(sourceNotebookName, destWorkspace, copiedNotebookName);
+  });
 
   // Verify Copy Success modal.
   const modal = new Modal(page);

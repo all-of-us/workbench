@@ -5,10 +5,11 @@ import {FadeBox} from 'app/components/containers';
 import {ClrIcon, InfoIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
+import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 
 import {NewNotebookModal} from 'app/pages/analysis/new-notebook-modal';
-import {profileApi, notebooksApi} from 'app/services/swagger-fetch-clients';
-import colors from 'app/styles/colors';
+import {profileApi, notebooksApi, workspacesApi} from 'app/services/swagger-fetch-clients';
+import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {withCurrentWorkspace} from 'app/utils';
 import {WorkspaceData} from 'app/utils/workspace-data';
 
@@ -19,13 +20,30 @@ import {convertToResource} from 'app/utils/resources';
 import {ACTION_DISABLED_INVALID_BILLING} from 'app/utils/strings';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {BillingStatus, FileDetail, ResourceType} from 'generated/fetch';
+import {FlexColumn} from 'app/components/flex';
+import {faClock} from '@fortawesome/pro-regular-svg-icons';
 
 const styles = {
   heading: {
     color: colors.primary,
     fontSize: 20, fontWeight: 600, lineHeight: '24px'
+  },
+  cloneNotebookCard: {
+    backgroundColor: colorWithWhiteness(colors.disabled, 0.9),
+    minWidth: '200px',
+    maxWidth: '200px',
+    minHeight: '223px',
+    maxHeight: '223px'
+  },
+  cloneNotebookMsg: {
+    color: colors.primary,
+    fontSize: '14px',
+    fontWeight: 600,
+    paddingTop: '2rem'
   }
 };
+
+const NOTEBOOK_TRANSFER_CHECK_INTERVAL = 3000;
 
 interface Props extends WithSpinnerOverlayProps {
   workspace: WorkspaceData;
@@ -36,23 +54,62 @@ export const NotebookList = withCurrentWorkspace()(class extends React.Component
     notebookList: FileDetail[],
     notebookNameList: string[],
     creating: boolean,
-    loading: boolean
+    loading: boolean,
+    showWaitingForNotebookTransferMsg: boolean;
   }> {
+  private interval: NodeJS.Timeout;
   constructor(props) {
     super(props);
-    this.state = {notebookList: [], notebookNameList: [], creating: false, loading: false};
+    this.state = {
+      notebookList: [],
+      notebookNameList: [],
+      creating: false,
+      loading: false,
+      showWaitingForNotebookTransferMsg: false
+    };
   }
 
   componentDidMount() {
     this.props.hideSpinner();
     profileApi().updatePageVisits({page: 'notebook'});
-    this.loadNotebooks();
+    this.confirmNotebookTransferIsDone();
   }
 
   componentDidUpdate(prevProps) {
     if (this.workspaceChanged(prevProps)) {
       this.loadNotebooks();
     }
+  }
+
+  componentWillUnmount() {
+    clearInterval(this.interval);
+  }
+
+  async confirmNotebookTransferIsDone() {
+    await workspacesApi()
+        .notebookTransferComplete(this.props.workspace.namespace, this.props.workspace.id).then((transferDone) => {
+          if (!transferDone) {
+            // Set the interval so that file transfer check is done after every 3 sec
+            this.interval = setInterval(this.tick, NOTEBOOK_TRANSFER_CHECK_INTERVAL);
+            this.setState({loading: true, showWaitingForNotebookTransferMsg: true});
+          } else {
+            // Notebook transfer is done load the notebooks
+            this.loadNotebooks();
+          }
+        });
+  }
+
+  // Will execute after every 3 sec: Call getCloneFileTransferDetails to check if the notebook file transfer is done
+  tick = () => {
+    workspacesApi()
+        .notebookTransferComplete(this.props.workspace.namespace, this.props.workspace.id).then((time)=>{
+          if (!!time) {
+            this.setState({loading: false, showWaitingForNotebookTransferMsg: false});
+            clearInterval(this.interval);
+            this.loadNotebooks();
+          }
+        }
+    );
   }
 
   private workspaceChanged(prevProps) {
@@ -89,7 +146,7 @@ export const NotebookList = withCurrentWorkspace()(class extends React.Component
 
   render() {
     const {workspace} = this.props;
-    const {notebookList, notebookNameList, creating, loading} = this.state;
+    const {notebookList, notebookNameList, creating, loading, showWaitingForNotebookTransferMsg} = this.state;
     return <FadeBox style={{margin: 'auto', marginTop: '1rem', width: '95.7%'}}>
       <div style={styles.heading}>
         Notebooks&nbsp;
@@ -113,15 +170,29 @@ export const NotebookList = withCurrentWorkspace()(class extends React.Component
           </CardButton>
         </TooltipTrigger>
         <div style={{display: 'flex', flexWrap: 'wrap', justifyContent: 'flex-start' }}>
-          {notebookList.map((notebook, index) => {
-            return <NotebookResourceCard
-              key={index}
-              resource={convertToResource(notebook, ResourceType.NOTEBOOK, workspace)}
-              existingNameList={notebookNameList}
-              onUpdate={() => this.loadNotebooks()}
-              disableDuplicate={workspace.billingStatus === BillingStatus.INACTIVE}
-            />;
-          })}
+          {showWaitingForNotebookTransferMsg
+              ? <CardButton
+                  disabled={showWaitingForNotebookTransferMsg}
+                  style={styles.cloneNotebookCard}
+                  type='small'
+                  onClick={() => {
+                  }}>
+                <FlexColumn style={styles.cloneNotebookMsg}>
+                  <div><FontAwesomeIcon icon={faClock} size="2x"></FontAwesomeIcon></div>
+                  <div>Copying 1 or more notebooks from another workspace. This may take a few
+                    minutes.
+                  </div>
+                </FlexColumn>
+              </CardButton>
+              : notebookList.map((notebook, index) => {
+                return <NotebookResourceCard
+                    key={index}
+                    resource={convertToResource(notebook, ResourceType.NOTEBOOK, workspace)}
+                    existingNameList={notebookNameList}
+                    onUpdate={() => this.loadNotebooks()}
+                    disableDuplicate={workspace.billingStatus === BillingStatus.INACTIVE}
+                />;
+              })}
         </div>
       </div>
       {loading && <SpinnerOverlay />}

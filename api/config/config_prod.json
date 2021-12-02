@@ -8,9 +8,10 @@
     "leoBaseUrl": "https:\/\/notebooks.firecloud.org",
     "xAppIdValue": "AoU-RW",
     "timeoutInSeconds": 60,
-    "jupyterDockerImage": "us.gcr.io/broad-dsp-gcr-public/terra-jupyter-aou:2.0.1",
+    "jupyterDockerImage": "us.gcr.io/broad-dsp-gcr-public/terra-jupyter-aou:2.0.3",
     "shibbolethApiBaseUrl": "https:\/\/profile-dot-broad-shibboleth-prod.appspot.com",
     "shibbolethUiBaseUrl": "https:\/\/broad-shibboleth-prod.appspot.com",
+    "workspaceLogsProject": "fc-aou-logs-prod",
     "runtimeImages": {
       "gce": [],
       "dataproc": []
@@ -104,12 +105,14 @@
     "enablePersistentDisk": false,
     "enableEgressAlertingV2": true,
     "enablePrivateDataprocWorker": false,
-    "grantLifescienceApiRunnerAcl": false
+    "grantLifescienceApiRunnerAcl": false,
+    "ccSupportWhenAdminLocking": true
   },
   "actionAudit": {
     "logName": "workbench-action-audit-prod",
     "bigQueryDataset": "workbench_action_audit_prod",
-    "bigQueryTable": "workbench_action_audit_prod"
+    "bigQueryTable": "workbench_action_audit_prod",
+    "partitionColumn": "_PARTITIONTIME"
   },
   "rdrExport": {
     "host": "all-of-us-rdr-prod.appspot.com",

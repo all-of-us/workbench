@@ -139,6 +139,10 @@ public class WorkbenchConfig {
     // an authentication round trip with eRA Commons.
     public String shibbolethUiBaseUrl;
 
+    // Project containing aggregated BigQuery log sinks for Terra workspace projects. This contains
+    // information such as runtime VM server logs.
+    public String workspaceLogsProject;
+
     public RuntimeImages runtimeImages;
   }
 
@@ -264,6 +268,8 @@ public class WorkbenchConfig {
     // If true, workspace owner and writers will have Google Lifesience Runner permission, and their
     // Terra Pet SA can actAs itself.
     public boolean grantLifescienceApiRunnerAcl;
+    // If true, copy the support staff when sending Admin Locking emails.
+    public boolean ccSupportWhenAdminLocking;
   }
 
   public static class ActionAuditConfig {
@@ -283,6 +289,8 @@ public class WorkbenchConfig {
     // Table in the BigQuery dataset that receives log events. Currently named the same as the
     // dataset, but this could change in the future.
     public String bigQueryTable;
+    // The column used to partition the action audit dataset.
+    public String partitionColumn;
   }
 
   public static class RdrExportConfig {

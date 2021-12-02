@@ -3,6 +3,7 @@ package org.pmiops.workbench.api;
 import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
+import com.google.gson.Gson;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.actionaudit.auditors.EgressEventAuditor;
@@ -17,6 +18,9 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.exfiltration.EgressLogService;
+import org.pmiops.workbench.model.AuditEgressEventRequest;
+import org.pmiops.workbench.model.AuditEgressEventResponse;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.EgressEvent;
 import org.pmiops.workbench.model.EgressEventStatus;
@@ -41,11 +45,28 @@ public class EgressEventsAdminController implements EgressEventsAdminApiDelegate
   private static final Set<EgressEventStatus> updateableStatuses =
       ImmutableSet.of(EgressEventStatus.REMEDIATED, EgressEventStatus.VERIFIED_FALSE_POSITIVE);
 
-  @Autowired private EgressEventMapper egressEventMapper;
-  @Autowired private EgressEventAuditor egressEventAuditor;
-  @Autowired private UserDao userDao;
-  @Autowired private WorkspaceDao workspaceDao;
-  @Autowired private EgressEventDao egressEventDao;
+  private final EgressLogService egressLogService;
+  private final EgressEventMapper egressEventMapper;
+  private final EgressEventAuditor egressEventAuditor;
+  private final UserDao userDao;
+  private final WorkspaceDao workspaceDao;
+  private final EgressEventDao egressEventDao;
+
+  @Autowired
+  public EgressEventsAdminController(
+      EgressLogService egressLogService,
+      EgressEventMapper egressEventMapper,
+      EgressEventAuditor egressEventAuditor,
+      UserDao userDao,
+      WorkspaceDao workspaceDao,
+      EgressEventDao egressEventDao) {
+    this.egressLogService = egressLogService;
+    this.egressEventMapper = egressEventMapper;
+    this.egressEventAuditor = egressEventAuditor;
+    this.userDao = userDao;
+    this.workspaceDao = workspaceDao;
+    this.egressEventDao = egressEventDao;
+  }
 
   @AuthorityRequired(Authority.SECURITY_ADMIN)
   @Override
@@ -122,16 +143,7 @@ public class EgressEventsAdminController implements EgressEventsAdminApiDelegate
   @Override
   public ResponseEntity<EgressEvent> updateEgressEvent(
       String id, UpdateEgressEventRequest request) {
-    long eventId;
-    try {
-      eventId = Long.parseLong(id);
-    } catch (NumberFormatException e) {
-      throw new NotFoundException("egress event not found (id should be numeric)");
-    }
-    DbEgressEvent dbEgressEvent =
-        egressEventDao
-            .findById(eventId)
-            .orElseThrow(() -> new NotFoundException("egress event not found"));
+    DbEgressEvent dbEgressEvent = mustGetDbEvent(id);
 
     if (request.getEgressEvent() == null
         || !updateableStatuses.contains(request.getEgressEvent().getStatus())) {
@@ -153,5 +165,30 @@ public class EgressEventsAdminController implements EgressEventsAdminApiDelegate
     egressEventAuditor.fireAdminEditEgressEvent(dbEgressEvent, updatedEvent);
 
     return ResponseEntity.ok(egressEventMapper.toApiEvent(updatedEvent));
+  }
+
+  @AuthorityRequired(Authority.SECURITY_ADMIN)
+  @Override
+  public ResponseEntity<AuditEgressEventResponse> auditEgressEvent(
+      String id, AuditEgressEventRequest request) {
+    DbEgressEvent dbEgressEvent = mustGetDbEvent(id);
+
+    return ResponseEntity.ok(
+        new AuditEgressEventResponse()
+            .egressEvent(egressEventMapper.toApiEvent(dbEgressEvent))
+            .sumologicEvent(new Gson().fromJson(dbEgressEvent.getSumologicEvent(), Object.class))
+            .runtimeLogGroups(egressLogService.getRuntimeLogGroups(dbEgressEvent)));
+  }
+
+  private DbEgressEvent mustGetDbEvent(String id) {
+    long eventId;
+    try {
+      eventId = Long.parseLong(id);
+    } catch (NumberFormatException e) {
+      throw new NotFoundException("egress event not found (id should be numeric)");
+    }
+    return egressEventDao
+        .findById(eventId)
+        .orElseThrow(() -> new NotFoundException("egress event not found"));
   }
 }

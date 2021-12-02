@@ -1,0 +1,34 @@
+[
+  {
+    "name": "p_concept_id",
+    "type": "INTEGER"
+  },
+  {
+    "name": "p_concept_code",
+    "type": "STRING"
+  },
+  {
+    "name": "p_concept_name",
+    "type": "STRING"
+  },
+  {
+    "name": "p_domain_id",
+    "type": "STRING"
+  },
+  {
+    "name": "concept_id",
+    "type": "INTEGER"
+  },
+  {
+    "name": "concept_code",
+    "type": "STRING"
+  },
+  {
+    "name": "concept_name",
+    "type": "STRING"
+  },
+  {
+    "name": "domain_id",
+    "type": "STRING"
+  }
+]

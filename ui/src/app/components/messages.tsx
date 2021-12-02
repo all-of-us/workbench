@@ -66,9 +66,9 @@ export const WarningMessage = ({
   iconPosition = 'center',
   children
 }: {
-  iconSize: number,
-  iconPosition: 'top' | 'center' | 'bottom',
-  children
+  iconSize?: number,
+  iconPosition?: 'top' | 'center' | 'bottom',
+  children: string|React.ReactNode
 }) => {
   return <MessageWithIcon
       messageType={'warning'}
@@ -86,7 +86,7 @@ export const ErrorMessage = ({
 }: {
   iconSize?: number,
   iconPosition?: 'top' | 'center' | 'bottom',
-  children
+  children: string|React.ReactNode
 }) => {
   return <MessageWithIcon
       messageType={'error'}

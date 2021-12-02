@@ -8,9 +8,10 @@
     "leoBaseUrl": "https:\/\/leonardo.dsde-dev.broadinstitute.org",
     "xAppIdValue": "test-AoU-RW",
     "timeoutInSeconds": 60,
-    "jupyterDockerImage": "us.gcr.io/broad-dsp-gcr-public/terra-jupyter-aou:2.0.1",
+    "jupyterDockerImage": "us.gcr.io/broad-dsp-gcr-public/terra-jupyter-aou:2.0.3",
     "shibbolethApiBaseUrl": "https:\/\/profile-dot-broad-shibboleth-prod.appspot.com/dev",
     "shibbolethUiBaseUrl": "https:\/\/broad-shibboleth-prod.appspot.com/dev",
+    "workspaceLogsProject": "fc-aou-logs-test",
     "runtimeImages": {
       "gce": [],
       "dataproc": []
@@ -105,12 +106,14 @@
     "enablePersistentDisk": true,
     "enableEgressAlertingV2": true,
     "enablePrivateDataprocWorker": true,
-    "grantLifescienceApiRunnerAcl": true
+    "grantLifescienceApiRunnerAcl": true,
+    "ccSupportWhenAdminLocking": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-test",
     "bigQueryDataset": "workbench_action_audit_test",
-    "bigQueryTable": "workbench_action_audit_test"
+    "bigQueryTable": "workbench_action_audit_test",
+    "partitionColumn": "_PARTITIONTIME"
   },
   "rdrExport": {
     "host": "pmi-drc-api-test.appspot.com",

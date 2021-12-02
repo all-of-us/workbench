@@ -196,8 +196,7 @@ public class ProfileController implements ProfileApiDelegate {
     // On first sign-in, create a FC user, billing project, and set the first sign in time.
     if (dbUser.getFirstSignInTime() == null) {
       // If the user is already registered, their profile will get updated.
-      fireCloudService.registerUser(
-          dbUser.getContactEmail(), dbUser.getGivenName(), dbUser.getFamilyName());
+      fireCloudService.registerUser(dbUser.getGivenName(), dbUser.getFamilyName());
 
       dbUser.setFirstSignInTime(new Timestamp(clock.instant().toEpochMilli()));
       return saveUserWithConflictHandling(dbUser);

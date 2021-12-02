@@ -16,9 +16,8 @@ import {notebooksApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {hasNewValidProps, reactStyles, withCurrentWorkspace} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
-import {NavigationProps} from 'app/utils/navigation';
+import { NavigationProps , setSidebarActiveIconStore} from 'app/utils/navigation';
 import {
-  maybeUnwrapSecuritySuspendedError,
   ComputeSecuritySuspendedError,
   maybeInitializeRuntime,
   withRuntimeStore
@@ -28,11 +27,13 @@ import {ACTION_DISABLED_INVALID_BILLING} from 'app/utils/strings';
 import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
-import {BillingStatus, RuntimeStatus} from 'generated/fetch';
+import { BillingStatus, Runtime, RuntimeStatus} from 'generated/fetch';
 import {
   RouteComponentProps,
   withRouter
 } from 'react-router-dom';
+import { InitialRuntimeNotFoundError } from 'app/utils/leo-runtime-initializer';
+import { RuntimeInitializerModal } from 'app/components/runtime-initializer-modal';
 
 
 const styles = reactStyles({
@@ -97,6 +98,8 @@ interface State {
   showInUseModal: boolean;
   showPlaygroundModeModal: boolean;
   userRequestedExecutableNotebook: boolean;
+  runtimeInitializerDefault: Runtime;
+  resolveRuntimeInitializer: (Runtime) => void;
   error: Error;
 }
 
@@ -118,6 +121,8 @@ export const InteractiveNotebook = fp.flow(
         showInUseModal: false,
         showPlaygroundModeModal: false,
         userRequestedExecutableNotebook: false,
+        runtimeInitializerDefault: null,
+        resolveRuntimeInitializer: null,
         error: null
       };
     }
@@ -139,6 +144,9 @@ export const InteractiveNotebook = fp.flow(
 
     componentWillUnmount(): void {
       this.pollAborter.abort();
+      if (this.state.resolveRuntimeInitializer) {
+        this.state.resolveRuntimeInitializer(null);
+      }
     }
 
     async loadNotebook() {
@@ -158,19 +166,36 @@ export const InteractiveNotebook = fp.flow(
       });
     }
 
-    private async runRuntime(onRuntimeReady: Function): Promise<void> {
+    private async runRuntime(onRuntimeReady: Function, targetRuntime?: Runtime): Promise<void> {
+      this.setState({userRequestedExecutableNotebook: true});
       try {
-        await maybeInitializeRuntime(this.props.match.params.ns, this.pollAborter.signal);
+        await maybeInitializeRuntime(this.props.match.params.ns, this.pollAborter.signal, targetRuntime);
         onRuntimeReady();
       } catch (e) {
-        this.setState({error: e});
+        this.setState({userRequestedExecutableNotebook: false});
+        if (e instanceof InitialRuntimeNotFoundError) {
+          // By awaiting the promise here, we're effectively blocking on the
+          // user's input to the runtime intializer modal. We invoke this
+          // callback with the targetRuntime configuration, or null if the user
+          // has decided to cancel or change their configuration.
+          const runtimeToCreate = await new Promise((resolve) => {
+            this.setState({
+              runtimeInitializerDefault: e.defaultRuntime,
+              resolveRuntimeInitializer: resolve
+            });
+          });
+          if (runtimeToCreate) {
+            return this.runRuntime(onRuntimeReady, runtimeToCreate);
+          }
+        } else {
+          this.setState({error: e});
+        }
       }
     }
 
     private startEditMode() {
       if (this.canStartRuntimes) {
         if (!this.notebookInUse) {
-          this.setState({userRequestedExecutableNotebook: true});
           this.runRuntime(() => { this.navigateEditMode(); });
         } else {
           this.setState({
@@ -182,7 +207,6 @@ export const InteractiveNotebook = fp.flow(
 
     private startPlaygroundMode() {
       if (this.canStartRuntimes) {
-        this.setState({userRequestedExecutableNotebook: true});
         this.runRuntime(() => { this.navigatePlaygroundMode(); });
       }
     }
@@ -298,8 +322,17 @@ export const InteractiveNotebook = fp.flow(
         showInUseModal,
         showPlaygroundModeModal,
         userRequestedExecutableNotebook,
+        runtimeInitializerDefault,
+        resolveRuntimeInitializer,
         error
       } = this.state;
+      const closeRuntimeInitializerModal = (r?: Runtime) => {
+        resolveRuntimeInitializer(r);
+        this.setState({
+          runtimeInitializerDefault: null,
+          resolveRuntimeInitializer: null
+        });
+      };
       return (
         <div>
           <div style={styles.navBar}>
@@ -362,6 +395,16 @@ export const InteractiveNotebook = fp.flow(
               this.startPlaygroundMode();
             }}>
           </NotebookInUseModal>}
+          {resolveRuntimeInitializer &&
+           <RuntimeInitializerModal
+             defaultRuntime={runtimeInitializerDefault}
+             cancel={() => {
+               closeRuntimeInitializerModal(null);
+             }}
+             createAndContinue={() => {
+               closeRuntimeInitializerModal(runtimeInitializerDefault);
+             }} />
+            }
         </div>
       );
     }

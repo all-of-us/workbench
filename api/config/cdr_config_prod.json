@@ -7,7 +7,8 @@
       "servicePerimeter": "accessPolicies/357236995176/servicePerimeters/terra_prod_aou_prod",
       "authDomainName": "all-of-us-registered-prod",
       "authDomainGroupEmail": "all-of-us-registered-prod@firecloud.org",
-      "datasetsBucket": "gs://fc-aou-datasets-registered/"
+      "datasetsBucket": "gs://fc-aou-datasets-registered/",
+      "enableUserWorkflows": false
     }
   ],
   "cdrVersions": [
@@ -102,7 +103,7 @@
       "creationTime": "2021-08-10 00:00:00Z",
       "releaseNumber": 5,
       "numParticipants": 329070,
-      "cdrDbName": "r_2021q3_3",
+      "cdrDbName": "r_2021q3_4",
       "hasFitbitData": true,
       "hasCopeSurveyData": true,
       "accessTier": "registered"

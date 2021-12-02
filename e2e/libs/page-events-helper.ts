@@ -76,7 +76,9 @@ export const shouldLogResponse = (request: Request): boolean => {
     '/data-set/',
     '/data-sets/',
     '/resources',
-    '/concept-sets/'
+    '/concept-sets/',
+    '/institutions',
+    '/admin/users/list'
   ];
   return !filters.some((partialUrl) => request && request.url().includes(partialUrl));
 };

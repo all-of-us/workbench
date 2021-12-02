@@ -18,8 +18,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.pmiops.workbench.FakeClockConfiguration;
+import org.pmiops.workbench.cohortreview.mapper.CohortReviewMapperImpl;
 import org.pmiops.workbench.cohorts.CohortMapper;
 import org.pmiops.workbench.cohorts.CohortMapperImpl;
+import org.pmiops.workbench.cohorts.CohortService;
+import org.pmiops.workbench.conceptset.ConceptSetService;
+import org.pmiops.workbench.conceptset.mapper.ConceptSetMapperImpl;
+import org.pmiops.workbench.dataset.mapper.DataSetMapperImpl;
 import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
@@ -36,6 +41,7 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.model.Domain;
+import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.RecentResourceRequest;
 import org.pmiops.workbench.model.WorkspaceResource;
 import org.pmiops.workbench.model.WorkspaceResourceResponse;
@@ -45,9 +51,12 @@ import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.FirecloudMapper;
 import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
+import org.pmiops.workbench.workspaces.resources.WorkspaceResourceMapper;
+import org.pmiops.workbench.workspaces.resources.WorkspaceResourceMapperImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 
 @DataJpaTest
@@ -60,13 +69,14 @@ public class UserMetricsControllerTest {
   @Mock private WorkspaceDao workspaceDao;
   @Mock private WorkspaceAuthService workspaceAuthService;
 
-  private UserMetricsController userMetricsController;
-  @Autowired private CohortMapper cohortMapper;
-  @Autowired private CommonMappers commonMappers;
-  @Autowired private FirecloudMapper firecloudMapper;
   @Autowired private AccessTierDao accessTierDao;
   @Autowired private CdrVersionDao cdrVersionDao;
+  @Autowired private CohortMapper cohortMapper;
   @Autowired private FakeClock fakeClock;
+  @Autowired private FirecloudMapper firecloudMapper;
+  @Autowired private WorkspaceResourceMapper workspaceResourceMapper;
+
+  private UserMetricsController userMetricsController;
 
   private DbUser dbUser;
   private DbUserRecentResource dbUserRecentResource1;
@@ -78,10 +88,18 @@ public class UserMetricsControllerTest {
 
   @TestConfiguration
   @Import({
-    FakeClockConfiguration.class,
     CohortMapperImpl.class,
+    CohortReviewMapperImpl.class,
     CommonMappers.class,
-    FirecloudMapperImpl.class
+    ConceptSetMapperImpl.class,
+    DataSetMapperImpl.class,
+    FakeClockConfiguration.class,
+    FirecloudMapperImpl.class,
+    WorkspaceResourceMapperImpl.class,
+  })
+  @MockBean({
+    CohortService.class,
+    ConceptSetService.class,
   })
   static class Configuration {}
 
@@ -128,17 +146,12 @@ public class UserMetricsControllerTest {
     dbUserRecentResource1.setUserId(dbUser.getUserId());
     dbUserRecentResource1.setWorkspaceId(dbWorkspace1.getWorkspaceId());
 
-    when(workspaceDao.findActiveByWorkspaceId(dbUserRecentResource1.getWorkspaceId()))
-        .thenReturn(Optional.of(dbWorkspace1));
-
     dbUserRecentResource2 = new DbUserRecentResource();
     dbUserRecentResource2.setNotebookName(null);
     dbUserRecentResource2.setCohort(dbCohort);
     dbUserRecentResource2.setLastAccessDate(new Timestamp(fakeClock.millis() - 10000));
     dbUserRecentResource2.setUserId(dbUser.getUserId());
     dbUserRecentResource2.setWorkspaceId(dbWorkspace2.getWorkspaceId());
-    when(workspaceDao.findActiveByWorkspaceId(dbUserRecentResource2.getWorkspaceId()))
-        .thenReturn(Optional.of(dbWorkspace2));
 
     dbUserRecentResource3 = new DbUserRecentResource();
     dbUserRecentResource3.setNotebookName("gs://bucketFile/notebooks/notebook2.ipynb");
@@ -148,38 +161,28 @@ public class UserMetricsControllerTest {
     dbUserRecentResource3.setUserId(dbUser.getUserId());
     dbUserRecentResource3.setWorkspaceId(dbWorkspace2.getWorkspaceId());
 
-    when(workspaceDao.findActiveByWorkspaceId(dbUserRecentResource3.getWorkspaceId()))
-        .thenReturn(Optional.of(dbWorkspace2));
-
     final FirecloudWorkspaceDetails fcWorkspace1 = new FirecloudWorkspaceDetails();
     fcWorkspace1.setNamespace(dbWorkspace1.getFirecloudName());
 
     final FirecloudWorkspaceDetails fcWorkspace2 = new FirecloudWorkspaceDetails();
     fcWorkspace1.setNamespace(dbWorkspace2.getFirecloudName());
 
-    final FirecloudWorkspaceResponse workspaceResponse = new FirecloudWorkspaceResponse();
-    workspaceResponse.setAccessLevel("OWNER");
-    workspaceResponse.setWorkspace(fcWorkspace1);
+    final FirecloudWorkspaceResponse workspaceResponse1 = new FirecloudWorkspaceResponse();
+    workspaceResponse1.setAccessLevel("OWNER");
+    workspaceResponse1.setWorkspace(fcWorkspace1);
 
     final FirecloudWorkspaceResponse workspaceResponse2 = new FirecloudWorkspaceResponse();
     workspaceResponse2.setAccessLevel("READER");
     workspaceResponse2.setWorkspace(fcWorkspace2);
+
+    mockResponsesForWorkspace(dbWorkspace1, workspaceResponse1);
+    mockResponsesForWorkspace(dbWorkspace2, workspaceResponse2);
 
     when(mockUserProvider.get()).thenReturn(dbUser);
 
     when(mockUserRecentResourceService.findAllResourcesByUser(dbUser.getUserId()))
         .thenReturn(
             Arrays.asList(dbUserRecentResource1, dbUserRecentResource2, dbUserRecentResource3));
-
-    when(workspaceDao.getRequired(
-            dbWorkspace2.getWorkspaceNamespace(), dbWorkspace2.getFirecloudName()))
-        .thenReturn(dbWorkspace2);
-
-    when(mockFireCloudService.getWorkspace(dbWorkspace1))
-        .thenReturn(Optional.of(workspaceResponse));
-
-    when(mockFireCloudService.getWorkspace(dbWorkspace2))
-        .thenReturn(Optional.of(workspaceResponse2));
 
     when(mockCloudStorageClient.getExistingBlobIdsIn(anyList()))
         .then(
@@ -193,15 +196,31 @@ public class UserMetricsControllerTest {
 
     userMetricsController =
         new UserMetricsController(
+            mockCloudStorageClient,
+            mockFireCloudService,
             mockUserProvider,
             mockUserRecentResourceService,
-            workspaceDao,
             workspaceAuthService,
-            mockFireCloudService,
-            mockCloudStorageClient,
-            commonMappers,
-            firecloudMapper);
+            workspaceDao,
+            workspaceResourceMapper);
     userMetricsController.setDistinctWorkspaceLimit(5);
+  }
+
+  private void mockResponsesForWorkspace(
+      DbWorkspace dbWorkspace, FirecloudWorkspaceResponse response) {
+
+    when(workspaceDao.findActiveByWorkspaceId(dbWorkspace.getWorkspaceId()))
+        .thenReturn(Optional.of(dbWorkspace));
+
+    when(workspaceDao.getRequired(
+            dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName()))
+        .thenReturn(dbWorkspace);
+
+    when(mockFireCloudService.getWorkspace(dbWorkspace)).thenReturn(Optional.of(response));
+
+    when(mockFireCloudService.getWorkspace(
+            dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName()))
+        .thenReturn(response);
   }
 
   @Test
@@ -270,6 +289,19 @@ public class UserMetricsControllerTest {
     assertThat(recentResources.get(0).getNotebook().getPath())
         .isEqualTo("gs://bucketFile/notebooks/notebook.ipynb/");
     assertThat(recentResources.get(0).getNotebook().getName()).isEqualTo("");
+  }
+
+  // RW-7498 regression test
+  @Test
+  public void testGetUserRecentResource_notebookNameWithParen() {
+    dbUserRecentResource1.setNotebookName("gs://bucketFile/notebooks/notebook :).ipynb");
+    when(mockUserRecentResourceService.findAllResourcesByUser(dbUser.getUserId()))
+        .thenReturn(Collections.singletonList(dbUserRecentResource1));
+
+    WorkspaceResourceResponse recentResources =
+        userMetricsController.getUserRecentResources().getBody();
+    assertThat(recentResources.get(0).getNotebook())
+        .isEqualTo(new FileDetail().path("gs://bucketFile/notebooks/").name("notebook :).ipynb"));
   }
 
   @Test

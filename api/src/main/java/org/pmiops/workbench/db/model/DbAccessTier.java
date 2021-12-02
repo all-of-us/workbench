@@ -17,6 +17,7 @@ public class DbAccessTier {
   private String authDomainName;
   private String authDomainGroupEmail;
   private String datasetsBucket;
+  private Boolean enableUserWorkflows;
 
   public DbAccessTier() {}
 
@@ -91,6 +92,16 @@ public class DbAccessTier {
     return this;
   }
 
+  @Column(name = "enable_user_workflows")
+  public Boolean getEnableUserWorkflows() {
+    return enableUserWorkflows;
+  }
+
+  public DbAccessTier setEnableUserWorkflows(Boolean enableUserWorkflows) {
+    this.enableUserWorkflows = enableUserWorkflows;
+    return this;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -105,7 +116,8 @@ public class DbAccessTier {
         && Objects.equal(servicePerimeter, that.servicePerimeter)
         && Objects.equal(authDomainName, that.authDomainName)
         && Objects.equal(authDomainGroupEmail, that.authDomainGroupEmail)
-        && Objects.equal(datasetsBucket, that.datasetsBucket);
+        && Objects.equal(datasetsBucket, that.datasetsBucket)
+        && Objects.equal(enableUserWorkflows, that.enableUserWorkflows);
   }
 
   @Override

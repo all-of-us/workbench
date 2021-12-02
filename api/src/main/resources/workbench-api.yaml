@@ -903,6 +903,20 @@ paths:
           description: A list of workspace definitions.
           schema:
             "$ref": "#/definitions/WorkspaceResponseListResponse"
+  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/isNotebookTransferComplete":
+    parameters:
+      - "$ref": "#/parameters/workspaceNamespace"
+      - "$ref": "#/parameters/workspaceId"
+    get:
+      tags:
+        - workspaces
+      description: Checks if the notebooks have been copied to the workspace
+      operationId: notebookTransferComplete
+      responses:
+        200:
+          description: Returns true if the notebooks have been copied to the workspace
+          schema:
+            type: boolean
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}":
     parameters:
     - "$ref": "#/parameters/workspaceNamespace"
@@ -1626,6 +1640,29 @@ paths:
           description: success
           schema:
             "$ref": "#/definitions/EgressEvent"
+  "/v1/admin/egressEvents/{id}/audit":
+    post:
+      tags:
+        - egressEventsAdmin
+      description: >
+        Administrative API to get audit details for an egress event.
+      operationId: auditEgressEvent
+      parameters:
+        - in: path
+          name: id
+          description: The egress event ID
+          required: true
+          type: string
+        - in: body
+          description: Empty request object included for future extension.
+          name: request
+          schema:
+            "$ref": "#/definitions/AuditEgressEventRequest"
+      responses:
+        200:
+          description: success
+          schema:
+            "$ref": "#/definitions/AuditEgressEventResponse"
   "/v1/admin/sumo/egressEvent":
     post:
       tags:
@@ -4318,9 +4355,6 @@ definitions:
       rasHost:
         type: string
         description: The RAS base host name.
-      accessRenewalExpiry:
-        type: number
-        description: Days a user's module completion is good for until it expires.
       accessRenewalLookback:
         type: number
         description: the point when we give users the option to update their compliance items.
@@ -6535,6 +6569,57 @@ definitions:
     properties:
       egressEvent:
         "$ref": "#/definitions/EgressEvent"
+  AuditEgressEventRequest:
+    type: object
+    description: Placeholder request object for future extension.
+  AuditEgressRuntimeLogEntry:
+    type: object
+    properties:
+      timestamp:
+        type: string
+        description: Time at which the log message was written, in ISO 8601 format.
+      message:
+        type: string
+        description: The log message text payload.
+  AuditEgressRuntimeLogGroup:
+    type: object
+    properties:
+      name:
+        type: string
+        description: Display name for this log group
+      pattern:
+        type: string
+        description: Pattern used to match the log message text
+      entries:
+        type: array
+        description: >
+          The log entries matching the specified pattern, in descending timestamp
+          order. May be truncated.
+        items:
+          "$ref": "#/definitions/AuditEgressRuntimeLogEntry"
+      totalEntries:
+        type: integer
+        description: >
+          The total number of log entries matching this pattern. To determine
+          whether entries are truncated, compare against len(entries).
+  AuditEgressEventResponse:
+    type: object
+    properties:
+      egressEvent:
+        "$ref": "#/definitions/EgressEvent"
+      sumologicEvent:
+        type: object
+        description: >
+          Original event received from Sumologic. Should be treated as an opaque
+          JSON payload, as the event schema may change over time; but generally
+          will correspond to SumologicEgressEvent.
+      runtimeLogGroups:
+        type: array
+        description: >
+          A set of heuristically relevant log pattern/configuration groups for
+          investigating the cause of an egress event.
+        items:
+          "$ref": "#/definitions/AuditEgressRuntimeLogGroup"
   EgressEventStatus:
     type: string
     description: Workbench processing status for this egress event.
@@ -8874,11 +8959,6 @@ definitions:
         type: string
         format: date-time
         description: Time Compliance Training completed, or null if never completed.
-      complianceTrainingExpirationTime:
-        type: string
-        format: date-time
-        description: Time  User's compliance training will expire, or null training
-          not taken or if bypassed
       contactEmail:
         type: string
         description: User's external email address on file.

@@ -8,6 +8,7 @@ import { getPropValue } from 'utils/element-utils';
 import { waitForDocumentTitle, waitWhileLoading } from 'utils/waits-utils';
 import NotebookPage from './notebook-page';
 import WorkspaceBase from './workspace-base';
+import { initializeRuntimeIfModalPresented } from 'utils/runtime-utils';
 
 const PageTitle = 'View Notebooks';
 
@@ -17,7 +18,8 @@ export default class WorkspaceAnalysisPage extends WorkspaceBase {
   }
 
   async isLoaded(): Promise<boolean> {
-    await Promise.all([waitForDocumentTitle(this.page, PageTitle), waitWhileLoading(this.page)]);
+    await Promise.all([waitForDocumentTitle(this.page, PageTitle), this.createNewNotebookLink().waitUntilEnabled()]);
+    await waitWhileLoading(this.page);
     return true;
   }
 
@@ -64,6 +66,7 @@ export default class WorkspaceAnalysisPage extends WorkspaceBase {
     const redirectingTextsXpath = `//*[@data-test-id and contains(normalize-space(), "${redirectingTexts}")]`;
 
     await Promise.all([
+      initializeRuntimeIfModalPresented(this.page),
       this.page.waitForXPath(warningTextsXpath, { visible: true }),
       this.page.waitForXPath(authenticateTextsXpath, { visible: true }),
       this.page.waitForXPath(creatingTextsXpath, { visible: true }),

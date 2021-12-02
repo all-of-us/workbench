@@ -746,12 +746,12 @@ workflows:
       - api-bigquery-test
       - puppeteer-env-setup
       - puppeteer-test:
-          parallel_num: 3
+          parallel_num: 4
           test_mode: "nightly-integration"
           optional_steps:
             - puppeteer-access-test-user-setup
           # genomic-extraction-to-vcf.spec takes long time to run.
-          no_output_timeout: 80m
+          no_output_timeout: 90m
           requires:
             - puppeteer-env-setup
 

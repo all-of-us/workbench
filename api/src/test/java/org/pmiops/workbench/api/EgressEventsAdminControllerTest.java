@@ -2,8 +2,21 @@ package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
+import com.google.cloud.PageImpl;
+import com.google.cloud.bigquery.Field;
+import com.google.cloud.bigquery.FieldValue;
+import com.google.cloud.bigquery.FieldValue.Attribute;
+import com.google.cloud.bigquery.FieldValueList;
+import com.google.cloud.bigquery.Job;
+import com.google.cloud.bigquery.LegacySQLTypeName;
+import com.google.cloud.bigquery.Schema;
+import com.google.cloud.bigquery.TableResult;
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import java.time.Duration;
 import java.time.Instant;
@@ -22,6 +35,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.FakeJpaDateTimeConfiguration;
 import org.pmiops.workbench.actionaudit.auditors.EgressEventAuditor;
+import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.config.WorkbenchConfig.FireCloudConfig;
 import org.pmiops.workbench.db.dao.EgressEventDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
@@ -32,6 +47,11 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.exfiltration.EgressLogService;
+import org.pmiops.workbench.model.AuditEgressEventRequest;
+import org.pmiops.workbench.model.AuditEgressEventResponse;
+import org.pmiops.workbench.model.AuditEgressRuntimeLogEntry;
+import org.pmiops.workbench.model.AuditEgressRuntimeLogGroup;
 import org.pmiops.workbench.model.EgressEvent;
 import org.pmiops.workbench.model.EgressEventStatus;
 import org.pmiops.workbench.model.ListEgressEventsRequest;
@@ -45,6 +65,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 
 @DataJpaTest
@@ -67,6 +88,7 @@ public class EgressEventsAdminControllerTest {
   @Autowired private EgressEventDao egressEventDao;
 
   @Autowired private FakeClock fakeClock;
+  @Autowired private BigQueryService mockBigQueryService;
 
   private DbUser user1;
   private DbUser user2;
@@ -78,14 +100,23 @@ public class EgressEventsAdminControllerTest {
 
   @TestConfiguration
   @Import({
+    CommonMappers.class,
     EgressEventsAdminController.class,
     EgressEventMapperImpl.class,
-    CommonMappers.class,
+    EgressLogService.class,
     FakeClockConfiguration.class,
     FakeJpaDateTimeConfiguration.class
   })
-  @MockBean(EgressEventAuditor.class)
-  static class Configuration {}
+  @MockBean({BigQueryService.class, EgressEventAuditor.class})
+  static class Configuration {
+    @Bean
+    WorkbenchConfig config() {
+      WorkbenchConfig c = new WorkbenchConfig();
+      c.firecloud = new FireCloudConfig();
+      c.firecloud.workspaceLogsProject = "fake-terra-logs";
+      return c;
+    }
+  }
 
   @BeforeEach
   public void setUp() {
@@ -383,27 +414,71 @@ public class EgressEventsAdminControllerTest {
     assertThat(gotEvents.get(0).getStatus()).isEqualTo(EgressEventStatus.VERIFIED_FALSE_POSITIVE);
   }
 
+  @Test
+  public void testAuditEgressEvent() throws Exception {
+    String eventId = saveNewEvent(user1, workspace1, TIME0);
+
+    List<List<AuditEgressRuntimeLogEntry>> expected =
+        ImmutableList.of(
+            ImmutableList.of(
+                new AuditEgressRuntimeLogEntry().timestamp(TIME0.toString()).message("log1"),
+                new AuditEgressRuntimeLogEntry()
+                    .timestamp(TIME0.minus(Duration.ofMinutes(5)).toString())
+                    .message("log2")),
+            ImmutableList.of(),
+            ImmutableList.of(
+                new AuditEgressRuntimeLogEntry()
+                    .timestamp(TIME0.minus(Duration.ofMinutes(2)).toString())
+                    .message("log3")));
+
+    Job mockJob = mock(Job.class);
+    when(mockBigQueryService.startQuery(any())).thenReturn(mockJob);
+
+    // Unfortunately we cannot use the variadic form of thenReturn with array inputs, as it is
+    // a templatized method. Calling thenReturn in a loop is also disallowed by Junit.
+    List<TableResult> bigQueryResults =
+        expected.stream().map(this::logEntriesAsTableResult).collect(Collectors.toList());
+    when(mockJob.getQueryResults(any()))
+        .thenReturn(bigQueryResults.get(0))
+        .thenReturn(bigQueryResults.get(1))
+        .thenReturn(bigQueryResults.get(2));
+
+    AuditEgressEventResponse got =
+        controller.auditEgressEvent(eventId, new AuditEgressEventRequest()).getBody();
+
+    assertThat(got.getEgressEvent().getEgressEventId()).isEqualTo(eventId);
+    assertThat(got.getSumologicEvent()).isNotNull();
+
+    List<List<AuditEgressRuntimeLogEntry>> gotEntries =
+        got.getRuntimeLogGroups().stream()
+            .map(AuditEgressRuntimeLogGroup::getEntries)
+            .collect(Collectors.toList());
+    assertThat(gotEntries).containsExactlyElementsIn(expected);
+  }
+
   private Instant timeMinusHours(Integer h) {
     return TIME0.minus(Duration.ofHours(h));
   }
 
   private String saveNewEventWithStatus(DbEgressEventStatus status) {
-    DbEgressEvent e = egressEventDao.save(new DbEgressEvent().setStatus(status));
+    DbEgressEvent e = egressEventDao.save(newEvent().setStatus(status));
     return Long.toString(e.getEgressEventId());
   }
 
   private String saveNewEvent(DbUser user, DbWorkspace workspace, Instant created) {
     Instant originalTime = fakeClock.instant();
     fakeClock.setInstant(created);
-    DbEgressEvent e =
-        egressEventDao.save(
-            new DbEgressEvent()
-                .setUser(user)
-                .setWorkspace(workspace)
-                .setStatus(DbEgressEventStatus.PENDING));
+    DbEgressEvent e = egressEventDao.save(newEvent().setUser(user).setWorkspace(workspace));
 
     fakeClock.setInstant(originalTime);
     return Long.toString(e.getEgressEventId());
+  }
+
+  private DbEgressEvent newEvent() {
+    return new DbEgressEvent()
+        .setStatus(DbEgressEventStatus.PENDING)
+        .setEgressWindowSeconds(600L)
+        .setSumologicEvent("{\"egressWindowStart\": 123}");
   }
 
   private DbUser saveNewUser(String username) {
@@ -414,5 +489,33 @@ public class EgressEventsAdminControllerTest {
 
   private DbWorkspace saveNewWorkspace(String workspaceNamespace) {
     return workspaceDao.save(new DbWorkspace().setWorkspaceNamespace(workspaceNamespace));
+  }
+
+  private TableResult logEntriesAsTableResult(List<AuditEgressRuntimeLogEntry> entries) {
+    Field timestampField = Field.of("timestamp", LegacySQLTypeName.TIMESTAMP);
+    Field messageField = Field.of("message", LegacySQLTypeName.STRING);
+    Schema schema = Schema.of(timestampField, messageField);
+
+    List<FieldValueList> tableRows =
+        entries.stream()
+            .map(
+                e -> {
+                  Instant ts = Instant.parse(e.getTimestamp());
+                  return FieldValueList.of(
+                      ImmutableList.of(
+                          FieldValue.of(
+                              Attribute.PRIMITIVE,
+                              // This reverse engineers the complicated wire encoding used by
+                              // BigQuery, per
+                              // https://github.com/googleapis/java-bigquery/blob/13cc6e608fd501067f7c5dcd2f5b9a03c078b065/google-cloud-bigquery/src/main/java/com/google/cloud/bigquery/FieldValue.java#L184-L190
+                              // The decimal contains microseconds, so we truncate before generating
+                              // the decimal portion.
+                              Double.toString(
+                                  ((double) ts.getEpochSecond()) + ts.getNano() / 1000 / 1e6)),
+                          FieldValue.of(Attribute.PRIMITIVE, e.getMessage())));
+                })
+            .collect(Collectors.toList());
+
+    return new TableResult(schema, tableRows.size(), new PageImpl<>(() -> null, null, tableRows));
   }
 }

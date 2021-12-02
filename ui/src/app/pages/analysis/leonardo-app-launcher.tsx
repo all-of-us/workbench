@@ -39,6 +39,8 @@ import {
   NotebookFrameError,
   SecuritySuspendedMessage
 } from './notebook-frame-error';
+import { InitialRuntimeNotFoundError } from 'app/utils/leo-runtime-initializer';
+import { RuntimeInitializerModal } from 'app/components/runtime-initializer-modal';
 
 export enum LeoApplicationType {
   Notebook,
@@ -249,6 +251,8 @@ const ProgressCard: React.FunctionComponent<{progressState: Progress, cardState:
 interface State {
   leoUrl: string;
   error: Error;
+  runtimeInitializerDefault: Runtime;
+  resolveRuntimeInitializer: (Runtime) => void;
   progress: Progress;
   progressComplete: Map<Progress, boolean>;
 }
@@ -284,6 +288,8 @@ export const LeonardoAppLauncher = fp.flow(
       this.state = {
         leoUrl: undefined,
         error: props.runtimeStore.loadingError,
+        runtimeInitializerDefault: null,
+        resolveRuntimeInitializer: null,
         progress: Progress.Unknown,
         progressComplete: new Map<Progress, boolean>(),
       };
@@ -398,6 +404,9 @@ export const LeonardoAppLauncher = fp.flow(
 
     componentWillUnmount() {
       clearTimeout(this.redirectTimer);
+      if (this.state.resolveRuntimeInitializer) {
+        this.state.resolveRuntimeInitializer(null);
+      }
     }
 
     // check the runtime's status: if it's Running we can connect the notebook to it
@@ -412,7 +421,28 @@ export const LeonardoAppLauncher = fp.flow(
         this.incrementProgress(Progress.Initializing);
       }
 
-      runtime = await maybeInitializeRuntime(billingProjectId, this.pollAborter.signal);
+      try {
+        runtime = await maybeInitializeRuntime(billingProjectId, this.pollAborter.signal);
+      } catch (e) {
+        if (e instanceof InitialRuntimeNotFoundError) {
+          // By awaiting the promise here, we're effectively blocking on the
+          // user's input to the runtime intializer modal. We invoke this
+          // callback with the targetRuntime configuration, or null if the user
+          // has decided to cancel or change their configuration.
+          const runtimeToCreate = await new Promise((resolve) => {
+            this.setState({
+              runtimeInitializerDefault: e.defaultRuntime,
+              resolveRuntimeInitializer: resolve
+            });
+          });
+          if (!runtimeToCreate) {
+            throw e;
+          }
+          runtime = await maybeInitializeRuntime(billingProjectId, this.pollAborter.signal, runtimeToCreate);
+        } else {
+          throw e;
+        }
+      }
       await this.connectToRunningRuntime(runtime);
     }
 
@@ -493,15 +523,30 @@ export const LeonardoAppLauncher = fp.flow(
     }
 
     render() {
-      const {error, progress, progressComplete, leoUrl} = this.state;
+      const {
+        error, progress, runtimeInitializerDefault,
+        resolveRuntimeInitializer, progressComplete, leoUrl
+      } = this.state;
       const {leoAppType} = this.props;
       const creatingNewNotebook = this.isCreatingNewNotebook();
 
+      const closeRuntimeInitializerModal = (r?: Runtime) => {
+        resolveRuntimeInitializer(r);
+        this.setState({
+          runtimeInitializerDefault: null,
+          resolveRuntimeInitializer: null
+        });
+      };
 
       if (error) {
         if (error instanceof ComputeSecuritySuspendedError) {
           return <NotebookFrameError errorMode={ErrorMode.FORBIDDEN}>
             <SecuritySuspendedMessage error={error} />
+          </NotebookFrameError>;
+        } else if (error instanceof InitialRuntimeNotFoundError) {
+          return <NotebookFrameError errorMode={ErrorMode.INVALID}>
+            This action requires an analysis environment. Please configure your environment
+            via the cloud analysis panel and refresh to try again.
           </NotebookFrameError>;
         } else {
           return <NotebookFrameError>
@@ -546,6 +591,15 @@ export const LeonardoAppLauncher = fp.flow(
           <div style={{borderBottom: '5px solid #2691D0', width: '100%'}}/>
           <Iframe frameBorder={0} url={leoUrl} width='100%' height='100%'/>
         </div>}
+        {resolveRuntimeInitializer &&
+         <RuntimeInitializerModal
+            defaultRuntime={runtimeInitializerDefault}
+            cancel={() => {
+              closeRuntimeInitializerModal(null);
+            }}
+            createAndContinue={() => {
+              closeRuntimeInitializerModal(runtimeInitializerDefault);
+            }} />}
       </React.Fragment>;
     }
   });

@@ -234,7 +234,7 @@ export const Button = ({
     </Clickable>
 };
 
-export const MenuItem = ({icon = null, faIcon = null, tooltip = '', disabled = false, children, style = {}, ...props}) => {
+export const MenuItem = ({icon = null, faIcon = null, tooltip = '' as any, disabled = false, children, style = {}, ...props}) => {
   return <TooltipTrigger side='left' content={tooltip}>
     <Clickable
       // data-test-id is the text within the MenuItem, with whitespace removed
