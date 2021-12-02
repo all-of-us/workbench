@@ -2,7 +2,7 @@
 
 # This generates big query count databases cdr that get put in cloudsql for workbench
 
-set -ex
+set -e
 
 export BQ_PROJECT=$1  # project
 export BQ_DATASET=$2  # dataset

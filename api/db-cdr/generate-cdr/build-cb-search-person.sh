@@ -2,7 +2,7 @@
 
 # This generates big query denormalized tables for search.
 
-set -ex
+set -e
 
 export BQ_PROJECT=$1        # CDR project
 export BQ_DATASET=$2        # CDR dataset
