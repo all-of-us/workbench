@@ -591,7 +591,8 @@ appengine {  // App Engine tasks configuration
     deploy {   // deploy configuration
         stopPreviousVersion = true  // default - stop the current version
         promote = true              // default - & make this the current version
-        projectId = "all-of-us-workbench-test"              // default - & make this the current version
+        // Place holder for required field, we are not using gradle to deploy this APP.
+        projectId = "all-of-us-workbench-test"
     }
 }
 
