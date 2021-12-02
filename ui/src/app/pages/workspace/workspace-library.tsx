@@ -140,7 +140,7 @@ export const WorkspaceLibrary = (class extends React.Component<Props, State> {
   constructor(props) {
     super(props);
     this.state = {
-      currentTab: libraryTabs.PHENOTYPE_LIBRARY,
+      currentTab: libraryTabs.TUTORIAL_WORKSPACES,
       errorText: '',
       featuredWorkspaces: [],
       workspaceList: [],
@@ -155,15 +155,15 @@ export const WorkspaceLibrary = (class extends React.Component<Props, State> {
   // environment variable.
   libraryTabs = (this.props.enablePublishedWorkspaces || environment.enablePublishedWorkspaces)
     ? [
-      libraryTabs.PUBLISHED_WORKSPACES,
-      libraryTabs.PHENOTYPE_LIBRARY,
       libraryTabs.TUTORIAL_WORKSPACES,
-      libraryTabs.DEMO_PROJECTS
+      libraryTabs.DEMO_PROJECTS,
+      libraryTabs.PHENOTYPE_LIBRARY,
+      libraryTabs.PUBLISHED_WORKSPACES
     ]
     : [
-      libraryTabs.PHENOTYPE_LIBRARY,
       libraryTabs.TUTORIAL_WORKSPACES,
-      libraryTabs.DEMO_PROJECTS
+      libraryTabs.DEMO_PROJECTS,
+      libraryTabs.PHENOTYPE_LIBRARY
     ];
 
   async componentDidMount() {
