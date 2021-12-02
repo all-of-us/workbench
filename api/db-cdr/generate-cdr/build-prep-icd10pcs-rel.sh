@@ -6,7 +6,7 @@ export BQ_DATASET=$2        # dataset
 
 echo "ICD10PCS - SOURCE - create prep_icd10pcs_rel_src"
 bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
-"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_icd10pcs_rel_src\` AS
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_icd10pcs_rel_src\`
 SELECT DISTINCT
       c1.concept_id AS p_concept_id
     , c1.concept_code AS p_concept_code
@@ -32,7 +32,7 @@ bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
             concept_code    STRING,
             concept_name    STRING
         )
-AS SELECT *
+SELECT *
 FROM \`$BQ_PROJECT.$BQ_DATASET.prep_icd10pcs_rel_src\`
 WHERE concept_id in
     (
