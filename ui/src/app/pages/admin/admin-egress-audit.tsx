@@ -1,14 +1,17 @@
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import { egressEventsAdminApi } from 'app/services/swagger-fetch-clients';
-import { AuditEgressEventResponse } from 'generated/fetch';
-import { useState, useEffect} from 'react';
+import { AuditEgressEventResponse, EgressEvent } from 'generated/fetch';
+import { useState, useEffect, useCallback} from 'react';
 import { MatchParams } from 'app/utils/stores';
 import {useParams} from 'react-router';
 import {Column} from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
 import { TabPanel, TabView } from 'primereact/tabview';
 import { FlexRow } from 'app/components/flex';
-import { StyledRouterLink } from 'app/components/buttons';
+import { Button, StyledRouterLink } from 'app/components/buttons';
+import { Dropdown } from 'primereact/dropdown';
+import { mutableEgressEventStatuses } from 'app/utils/egress-events';
+import * as fp from 'lodash/fp';
 
 
 const DetailRow = ({label, children}: {label: string, children: React.ReactNode|string}) => {
@@ -39,6 +42,7 @@ const HighlightedLogMessage = ({logPattern, msg}: {logPattern: string, msg: stri
 export const AdminEgressAudit = (props: WithSpinnerOverlayProps) => {
   const {eventId = ''} = useParams<MatchParams>();
   const [egressDetails, setEgressDetails] = useState<AuditEgressEventResponse>(null);
+  const [pendingUpdateEvent, setPendingUpdateEvent] = useState<EgressEvent>(null);
   const [activeLogGroup, setActiveLogGroup] = useState<number>(0);
 
   useEffect(() => {
@@ -53,15 +57,35 @@ export const AdminEgressAudit = (props: WithSpinnerOverlayProps) => {
     return () => aborter.abort();
   }, []);
 
+  const onSave = useCallback(async() => {
+    if (!pendingUpdateEvent) {
+      return;
+    }
+
+    if (fp.isEqual(egressDetails.egressEvent, pendingUpdateEvent)) {
+      return;
+    }
+
+    props.showSpinner();
+    const updatedEvent = await egressEventsAdminApi().updateEgressEvent(
+      pendingUpdateEvent.egressEventId, {egressEvent: pendingUpdateEvent});
+    setEgressDetails({
+      ...egressDetails,
+      egressEvent: updatedEvent
+    });
+    setPendingUpdateEvent(null);
+    props.hideSpinner();
+  }, [egressDetails, pendingUpdateEvent]);
+
   if (!egressDetails) {
     return null;
   }
 
   const event = egressDetails.egressEvent;
   const [username,] = event.sourceUserEmail.split('@');
-  return <>
+  return <div style={{padding: '0 20px'}}>
     <h2>Egress event {event.egressEventId}</h2>
-    <div style={{display: 'table'}}>
+    <div style={{display: 'table', marginBottom: '15px'}}>
       <DetailRow label="Detection time">
         {(new Date(event.creationTime)).toString()}
       </DetailRow>
@@ -78,13 +102,41 @@ export const AdminEgressAudit = (props: WithSpinnerOverlayProps) => {
       <DetailRow label="Google project">
         {event.sourceGoogleProject}
       </DetailRow>
+      <DetailRow label="Egress volume">
+        {event.egressMegabytes?.toFixed(2)} MB (over {event.egressWindowSeconds / 60} min)
+      </DetailRow>
       <DetailRow label="Status">
-        {event.status}
+        <Dropdown
+          value={pendingUpdateEvent?.status ?? event.status}
+          options={mutableEgressEventStatuses}
+          onChange={(e)=> {
+            setPendingUpdateEvent({
+              ...event,
+              status: e.value
+            });
+          }}
+          placeholder="Select a Status" />
       </DetailRow>
       <DetailRow label="Sumologic event">
-        <textarea readOnly style={{width: '400px'}} value={JSON.stringify(egressDetails.sumologicEvent, null, 2)} />
+        <textarea
+          readOnly
+          style={{width: '400px'}}
+          value={JSON.stringify(egressDetails.sumologicEvent, null, 2)} />
       </DetailRow>
     </div>
+    <FlexRow>
+      <Button
+          disabled={!pendingUpdateEvent}
+          type='secondary'
+          onClick={() => setPendingUpdateEvent(null)}>
+        Cancel
+      </Button>
+      <Button
+          disabled={!pendingUpdateEvent}
+          onClick={() => onSave()}>
+        Save
+      </Button>
+    </FlexRow>
     <h2>Log entries</h2>
     <TabView activeIndex={activeLogGroup} onTabChange={(e) => setActiveLogGroup(e.index)}>
       {egressDetails.runtimeLogGroups.map((group) => <TabPanel key={group.name} header={group.name}>
@@ -92,7 +144,8 @@ export const AdminEgressAudit = (props: WithSpinnerOverlayProps) => {
           value={group.entries} >
           <Column field='timestamp'
                   header='Timestamp'
-                  headerStyle={{width: '200px'}} />
+                  headerStyle={{width: '180px'}}
+                  body={({timestamp}) => (new Date(timestamp)).toLocaleString()} />
           <Column field='message'
                   header='Log Message'
                   body={({message}) => (
@@ -103,5 +156,5 @@ export const AdminEgressAudit = (props: WithSpinnerOverlayProps) => {
         </DataTable>
       </TabPanel>)}
     </TabView>
-  </>;
+  </div>;
 }
