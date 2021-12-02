@@ -140,22 +140,28 @@ export const AdminEgressAudit = (props: WithSpinnerOverlayProps) => {
     </FlexRow>
     <h2>Log entries</h2>
     <TabView activeIndex={activeLogGroup} onTabChange={(e) => setActiveLogGroup(e.index)}>
-      {egressDetails.runtimeLogGroups.map((group) => <TabPanel key={group.name} header={group.name}>
-        <DataTable
-          value={group.entries} >
-          <Column field='timestamp'
-                  header='Timestamp'
-                  headerStyle={{width: '180px'}}
-                  body={({timestamp}) => (new Date(timestamp)).toLocaleString()} />
-          <Column field='message'
-                  header='Log Message'
-                  body={({message}) => (
-                    <HighlightedLogMessage
-                      logPattern={group.pattern}
-                      msg={message} />
-                  )} />
-        </DataTable>
-      </TabPanel>)}
+      {egressDetails.runtimeLogGroups.map((group) => {
+         let logCount = `${group.entries.length}`;
+         if (group.entries.length < group.totalEntries) {
+           logCount += '+';
+         }
+         return <TabPanel key={group.name} header={`${group.name} (${logCount})`}>
+           <DataTable
+             value={group.entries} >
+             <Column field='timestamp'
+                     header='Timestamp'
+                     headerStyle={{width: '180px'}}
+                     body={({timestamp}) => (new Date(timestamp)).toLocaleString()} />
+             <Column field='message'
+                     header='Log Message'
+                     body={({message}) => (
+                       <HighlightedLogMessage
+                         logPattern={group.pattern}
+                         msg={message} />
+                     )} />
+           </DataTable>
+         </TabPanel>;
+      })}
     </TabView>
   </div>;
 }
