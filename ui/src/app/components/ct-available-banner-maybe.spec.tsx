@@ -2,19 +2,16 @@ import * as React from 'react';
 import {MemoryRouter} from 'react-router-dom';
 import {mount} from 'enzyme';
 
-import {CTAvailableBannerMaybe} from './ct-available-banner-maybe';
+import {CTAvailableBannerMaybe, DAR_PATH} from './ct-available-banner-maybe';
 import {cdrVersionStore, profileStore} from 'app/utils/stores';
 import {ProfileStubVariables} from 'testing/stubs/profile-api-stub';
 import {AccessTierShortNames} from 'app/utils/access-tiers';
 import {environment} from 'environments/environment';
-import {
-  AccessModule,
-  AccessModuleStatus,
-  CdrVersionTier,
-  Profile,
-  UserTierEligibility
-} from 'generated/fetch';
+import {CdrVersionTier, Profile, UserTierEligibility} from 'generated/fetch';
 import {cdrVersionTiersResponse} from 'testing/stubs/cdr-versions-api-stub';
+
+// 3 times, in order
+const [TIME1, TIME2, TIME3] = [10000, 20000, 30000];
 
 describe('CTAvailableBannerMaybe', () => {
   const load = jest.fn();
@@ -27,19 +24,19 @@ describe('CTAvailableBannerMaybe', () => {
 
   const ctBannerExists = (wrapper) => wrapper.find('[data-test-id="controlled-tier-available"]').exists();
 
-  const updateProfile = (newTierEligibilities?: UserTierEligibility[], newUserTiers?: string[], newModuleStatus?: AccessModuleStatus) => {
+  interface ProfileUpdate {
+    newTierEligibilities?: UserTierEligibility[],
+    newUserTiers?: string[],
+    newFirstSignIn?: number
+  }
+  const updateProfile = (props: ProfileUpdate) => {
     const originalProfile = ProfileStubVariables.PROFILE_STUB;
-
-    const unchangedAccessModules: AccessModuleStatus[] =
-      originalProfile.accessModules.modules.filter(m => m.moduleName !== newModuleStatus?.moduleName);
 
     const profile: Profile = {
       ...originalProfile,
-      tierEligibilities : newTierEligibilities || originalProfile.tierEligibilities,
-      accessTierShortNames: newUserTiers || originalProfile.accessTierShortNames,
-      accessModules: {
-        modules: [...unchangedAccessModules, newModuleStatus]
-      }
+      tierEligibilities : props.newTierEligibilities ?? originalProfile.tierEligibilities,
+      accessTierShortNames: props.newUserTiers ?? originalProfile.accessTierShortNames,
+      firstSignInTime : props.newFirstSignIn ?? originalProfile.firstSignInTime,
     }
 
     profileStore.set({profile, load, reload, updateCache});
@@ -51,8 +48,11 @@ describe('CTAvailableBannerMaybe', () => {
   }
 
   const fulfillAllBannerRequirements = () => {
+    // the environment allows users to see the CT (in the UI)
+    environment.accessTiersVisibleToUsers = [AccessTierShortNames.Registered, AccessTierShortNames.Controlled];
+
     // the user is eligible for the CT
-    const userEligible: UserTierEligibility[] = [
+    const newTierEligibilities: UserTierEligibility[] = [
       {
         accessTierShortName: AccessTierShortNames.Registered,
         eraRequired: false,
@@ -66,25 +66,19 @@ describe('CTAvailableBannerMaybe', () => {
     ];
 
     // the user does not currently have CT access
-    const userTiers: string[] = [AccessTierShortNames.Registered];
+    const newUserTiers: string[] = [AccessTierShortNames.Registered];
 
-    // the environment allows users to see the CT (in the UI)
-    environment.accessTiersVisibleToUsers = [AccessTierShortNames.Registered, AccessTierShortNames.Controlled];
-
-    // the user's DUCC access module completion time was before the release of the default CT CDR Version
-    const duccStatus: AccessModuleStatus = {
-      moduleName: AccessModule.DATAUSERCODEOFCONDUCT,
-      completionEpochMillis: 1000
-    }
+    // the user's first sign-in time was before the release of the default CT CDR Version
+    const newFirstSignIn = TIME1;
     const controlledTierCdrVersions: CdrVersionTier = {
       ...cdrVersionTiersResponse.tiers.find(t => t.accessTierShortName === AccessTierShortNames.Controlled),
-      defaultCdrVersionCreationTime: 2000
+      defaultCdrVersionCreationTime: TIME2
     }
 
     // the user is not currently visiting the DAR page
     window.location.pathname = '/';
 
-    updateProfile(userEligible, userTiers, duccStatus);
+    updateProfile({newTierEligibilities, newUserTiers, newFirstSignIn});
     updateCdrVersions(controlledTierCdrVersions);
   }
 
@@ -102,23 +96,44 @@ describe('CTAvailableBannerMaybe', () => {
     expect(ctBannerExists(wrapper)).toBeTruthy();
   });
 
-  it('should not render if all of the requirements are met, except that the user is not CT eligible', () => {
-    fulfillAllBannerRequirements();
-
-    const userIneligible: UserTierEligibility[] = [
+  const ctNotVisible = () => {
+    environment.accessTiersVisibleToUsers = [AccessTierShortNames.Registered];
+  }
+  const userIneligible = () => {
+    const newTierEligibilities: UserTierEligibility[] = [
       {
         accessTierShortName: AccessTierShortNames.Registered,
         eraRequired: false,
         eligible: true
-      }
-    ];
+      }];
 
-    updateProfile(userIneligible);
+    updateProfile({newTierEligibilities});
+  };
+  const ctAccess = () => {
+    updateProfile({newUserTiers: [AccessTierShortNames.Registered, AccessTierShortNames.Controlled]});
+  }
+  const userIsNew = () => {
+    updateProfile({newFirstSignIn: TIME3});
+  }
+  const darActive = () => {
+    window.location.pathname = DAR_PATH;
+  }
+
+  test.each([
+    ['there is no visible CT', ctNotVisible],
+    ['the user is not CT eligible', userIneligible],
+    ['the user has CT access already', ctAccess],
+    ['the user is too new', userIsNew],
+    ['the user is currently visiting the DAR', darActive],
+  ])
+  ('should not render if all of the requirements are met, except that %s', (unused, modifier) => {
+    fulfillAllBannerRequirements();
+
+    modifier();
 
     const wrapper = component();
     expect(wrapper.exists()).toBeTruthy();
 
     expect(ctBannerExists(wrapper)).toBeFalsy();
-  });
-
+  })
 });

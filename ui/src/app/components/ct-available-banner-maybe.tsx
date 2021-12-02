@@ -11,20 +11,21 @@ import {eligibleForTier, getAccessModuleStatusByName} from 'app/utils/access-uti
 import {cdrVersionStore, profileStore, useStore} from 'app/utils/stores';
 
 const CT_COOKIE_KEY = 'controlled-tier-available';
-const DAR_PATH = '/data-access-requirements';
+export const DAR_PATH = '/data-access-requirements';
 
 const shouldShowBanner = (profile: Profile, cdrVersionTiers: CdrVersionTier[]) => {
+  const ct = cdrVersionTiers?.find(v => v.accessTierShortName === AccessTierShortNames.Controlled);
+
   // all of the following must be true
-  const shouldShow =
+  const shouldShow = profile && ct &&
+    // the environment allows users to see the CT (in the UI)
+    environment.accessTiersVisibleToUsers.includes(AccessTierShortNames.Controlled) &&
     // the user is eligible for the CT
     eligibleForTier(profile, AccessTierShortNames.Controlled) &&
     // the user does not currently have CT access
     !profile.accessTierShortNames.includes(AccessTierShortNames.Controlled) &&
-    // the environment allows users to see the CT (in the UI)
-    environment.accessTiersVisibleToUsers.includes(AccessTierShortNames.Controlled) &&
-    // the user's DUCC access module completion time was before the release of the default CT CDR Version
-    (getAccessModuleStatusByName(profile, AccessModule.DATAUSERCODEOFCONDUCT).completionEpochMillis <
-      cdrVersionTiers.find(v => v.accessTierShortName === AccessTierShortNames.Controlled)?.defaultCdrVersionCreationTime) &&
+    // the user's first sign-in time was before the release of the default CT CDR Version
+    (profile.firstSignInTime < ct.defaultCdrVersionCreationTime) &&
     // the user is not currently visiting the DAR page
     (window.location.pathname !== DAR_PATH);
 
