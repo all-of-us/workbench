@@ -9,7 +9,7 @@ import {FlexColumn, FlexRow} from 'app/components/flex';
 import {Error as ErrorDiv, TextArea} from 'app/components/inputs';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
-import {SpinnerOverlay} from 'app/components/spinners';
+import {Spinner, SpinnerOverlay} from 'app/components/spinners';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {workspaceAdminApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
@@ -32,6 +32,7 @@ import {ReactFragment, useState} from 'react';
 import { Link, RouteComponentProps, withRouter } from 'react-router-dom';
 import {isUsingFreeTierBillingAccount} from 'app/utils/workspace-utils';
 import { EgressEventsTable } from './egress-events-table';
+import {AdminLockRequest} from './admin-lock-request';
 
 const styles = reactStyles({
   infoRow: {
@@ -216,19 +217,23 @@ interface State {
   workspaceDetails?: WorkspaceAdminView;
   cloudStorageTraffic?: CloudStorageTraffic;
   loadingData?: boolean;
+  loadingWorkspaceAdminLockedStatus: boolean;
   runtimeToDelete?: ListRuntimeResponse;
   confirmDeleteRuntime?: boolean;
   dataLoadError?: Response;
   files?: Array<FileDetail>;
+  showLockWorkspaceModal: boolean;
 }
 
-class AdminWorkspaceImpl extends React.Component<Props, State> {
+export class AdminWorkspaceImpl extends React.Component<Props, State> {
   constructor(props) {
     super(props);
 
     this.state = {
       workspaceDetails: {},
       cloudStorageTraffic: null,
+      loadingWorkspaceAdminLockedStatus: false,
+      showLockWorkspaceModal: false
     };
   }
 
@@ -345,6 +350,31 @@ class AdminWorkspaceImpl extends React.Component<Props, State> {
     });
   }
 
+ async unLockWorkspace() {
+   const {
+     workspaceDetails: {workspace},
+   } = this.state;
+   try {
+     this.setState({loadingWorkspaceAdminLockedStatus: true});
+     await workspaceAdminApi().setAdminUnlockedState(workspace.namespace);
+     await this.getFederatedWorkspaceInformation();
+     this.setState({loadingWorkspaceAdminLockedStatus: false});
+   } catch (error) {
+     console.log(error);
+   }
+  }
+
+
+  async closeLockModalAndReloadWorkspaceStatus() {
+    this.setState({loadingWorkspaceAdminLockedStatus: true, showLockWorkspaceModal: false});
+    await this.getFederatedWorkspaceInformation();
+    this.setState({loadingWorkspaceAdminLockedStatus: false});
+  }
+
+  lockUnlockWorkspace(adminLocked: boolean) {
+    adminLocked ? this.unLockWorkspace() : this.setState({showLockWorkspaceModal: true});
+  }
+
   render() {
     const {
       cloudStorageTraffic,
@@ -354,9 +384,14 @@ class AdminWorkspaceImpl extends React.Component<Props, State> {
       dataLoadError,
       files,
       workspaceDetails: {collaborators, resources, workspace},
-    } = this.state;
+      showLockWorkspaceModal,
+      loadingWorkspaceAdminLockedStatus
+  } = this.state;
     return <div style={{marginTop: '1rem', marginBottom: '1rem'}}>
-
+      {showLockWorkspaceModal && <AdminLockRequest
+          workspace={workspace.namespace}
+          onLock={() => {this.closeLockModalAndReloadWorkspaceStatus()}}
+          onCancel={() => {this.setState({showLockWorkspaceModal: false})}}/>}
       {dataLoadError &&
         <ErrorDiv>
           Error loading data. Please refresh the page or contact the development team.
@@ -366,7 +401,22 @@ class AdminWorkspaceImpl extends React.Component<Props, State> {
 
       {workspace &&
         <div>
-          <h2>Workspace</h2>
+          <h2>
+            <FlexRow style={{ justifyContent: 'space-between'}}>
+              <FlexColumn style={{justifyContent:'flex-start'}}>Workspace</FlexColumn>
+              <FlexColumn style={{justifyContent:'flex-end', marginRight: '3rem'}}>
+                <Button data-test-id='lockUnlockButton' type ='secondary' style={{border: '2px solid'}}
+                        onClick={() => this.lockUnlockWorkspace(workspace.adminLocked)}>
+                  <FlexRow>
+                    <div style={{paddingRight: '0.3rem'}}>
+                      {loadingWorkspaceAdminLockedStatus && <Spinner style={{width: 20, height: 18}}/>}
+                    </div>
+                    {workspace.adminLocked ? 'UNLOCK WORKSPACE' : 'LOCK WORKSPACE'}
+                </FlexRow>
+              </Button>
+              </FlexColumn>
+            </FlexRow>
+          </h2>
           <h3>Basic Information</h3>
           <div className='basic-info' style={{marginTop: '1rem'}}>
             <WorkspaceInfoField labelText='Workspace Name'>{workspace.name}</WorkspaceInfoField>

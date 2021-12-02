@@ -98,13 +98,13 @@ public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
           String.format("Cannot have empty Request reason or Request Date"));
     }
     workspaceAdminService.setAdminLockedState(workspaceNamespace, lockingRequest);
-    return ResponseEntity.ok().build();
+    return ResponseEntity.ok(new EmptyResponse());
   }
 
   @Override
   @AuthorityRequired({Authority.ACCESS_CONTROL_ADMIN})
   public ResponseEntity<EmptyResponse> setAdminUnlockedState(String workspaceNamespace) {
     workspaceAdminService.setAdminUnlockedState(workspaceNamespace);
-    return ResponseEntity.ok().build();
+    return ResponseEntity.ok(new EmptyResponse());
   }
 }
