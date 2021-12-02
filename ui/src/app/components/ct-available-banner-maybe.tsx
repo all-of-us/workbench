@@ -6,15 +6,22 @@ import {cookiesEnabled} from 'app/utils/cookies';
 import {StyledRouterLink} from './buttons';
 import {environment} from 'environments/environment';
 import {AccessTierShortNames} from 'app/utils/access-tiers';
-import {AccessModule, CdrVersionTier, Profile} from 'generated/fetch';
-import {eligibleForTier, getAccessModuleStatusByName} from 'app/utils/access-utils';
+import {CdrVersionTier, Profile} from 'generated/fetch';
+import {eligibleForTier} from 'app/utils/access-utils';
 import {cdrVersionStore, profileStore, useStore} from 'app/utils/stores';
+import {displayDate} from 'app/utils';
 
 const CT_COOKIE_KEY = 'controlled-tier-available';
 export const DAR_PATH = '/data-access-requirements';
 
 const shouldShowBanner = (profile: Profile, cdrVersionTiers: CdrVersionTier[]) => {
   const ct = cdrVersionTiers?.find(v => v.accessTierShortName === AccessTierShortNames.Controlled);
+
+  console.log('pathname = ' + window.location.pathname);
+  console.log('eligible = ' + eligibleForTier(profile, AccessTierShortNames.Controlled));
+  console.log('access = ' + profile.accessTierShortNames.includes(AccessTierShortNames.Controlled));
+  console.log('firstSignInTime = ' + displayDate(profile.firstSignInTime));
+  console.log('defaultCdrVersionCreationTime = ' + displayDate(ct?.defaultCdrVersionCreationTime));
 
   // all of the following must be true
   const shouldShow = profile && ct &&
@@ -31,8 +38,8 @@ const shouldShowBanner = (profile: Profile, cdrVersionTiers: CdrVersionTier[]) =
 
   if (cookiesEnabled()) {
     const cookie = localStorage.getItem(CT_COOKIE_KEY);
-    return !cookie && shouldShow;
-  } else {
+  //   return !cookie && shouldShow;
+  // } else {
     return shouldShow;
   }
 };
@@ -42,7 +49,7 @@ export const CTAvailableBannerMaybe = () => {
   const {profile} = useStore(profileStore);
   const {tiers} = useStore(cdrVersionStore);
 
-  useEffect(() => setShowBanner(shouldShowBanner(profile, tiers)), []);
+  useEffect(() => setShowBanner(shouldShowBanner(profile, tiers)), [profile, tiers]);
 
   const acknowledgeBanner = () => {
     if (cookiesEnabled()) {
