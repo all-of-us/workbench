@@ -66,7 +66,9 @@ public class CdrVersionServiceTest {
   private DbAccessTier controlledTier;
 
   private DbCdrVersion defaultCdrVersion;
+  private DbCdrVersion nonDefaultCdrVersion;
   private DbCdrVersion controlledCdrVersion;
+  private DbCdrVersion controlledNonDefaultCdrVersion;
 
   @TestConfiguration
   @Import({
@@ -118,14 +120,38 @@ public class CdrVersionServiceTest {
             null,
             "",
             "");
+    nonDefaultCdrVersion =
+        makeCdrVersion(
+            2L,
+            /* isDefault */ false,
+            "Old Registered CDR",
+            123L,
+            registeredTier,
+            null,
+            null,
+            null,
+            "",
+            "");
 
     controlledTier = TestMockFactory.createControlledTierForTests(accessTierDao);
 
     controlledCdrVersion =
         makeCdrVersion(
-            2L,
+            3L,
             /* isDefault */ true,
             "Test Controlled CDR",
+            456L,
+            controlledTier,
+            null,
+            null,
+            null,
+            "gs://lol",
+            "gs://lol");
+    controlledNonDefaultCdrVersion =
+        makeCdrVersion(
+            4L,
+            /* isDefault */ false,
+            "Old Controlled CDR",
             456L,
             controlledTier,
             null,
@@ -291,18 +317,24 @@ public class CdrVersionServiceTest {
         .containsExactly(registeredTier.getShortName(), controlledTier.getShortName());
 
     CdrVersionTier rtResponse = parseTier(response, registeredTier.getShortName());
-    CdrVersion rtExpectedVersion = cdrVersionMapper.dbModelToClient(defaultCdrVersion);
-    assertThat(rtResponse.getVersions()).containsExactly(rtExpectedVersion);
-    assertThat(rtResponse.getDefaultCdrVersionId()).isEqualTo(rtExpectedVersion.getCdrVersionId());
+    assertThat(rtResponse.getVersions())
+        .containsExactly(
+            cdrVersionMapper.dbModelToClient(defaultCdrVersion),
+            cdrVersionMapper.dbModelToClient(nonDefaultCdrVersion));
+    CdrVersion rtExpectedDefault = cdrVersionMapper.dbModelToClient(defaultCdrVersion);
+    assertThat(rtResponse.getDefaultCdrVersionId()).isEqualTo(rtExpectedDefault.getCdrVersionId());
     assertThat(rtResponse.getDefaultCdrVersionCreationTime())
-        .isEqualTo(rtExpectedVersion.getCreationTime());
+        .isEqualTo(rtExpectedDefault.getCreationTime());
 
     CdrVersionTier ctResponse = parseTier(response, controlledTier.getShortName());
-    CdrVersion ctExpectedVersion = cdrVersionMapper.dbModelToClient(controlledCdrVersion);
-    assertThat(ctResponse.getVersions()).containsExactly(ctExpectedVersion);
-    assertThat(ctResponse.getDefaultCdrVersionId()).isEqualTo(ctExpectedVersion.getCdrVersionId());
+    assertThat(ctResponse.getVersions())
+        .containsExactly(
+            cdrVersionMapper.dbModelToClient(controlledCdrVersion),
+            cdrVersionMapper.dbModelToClient(controlledNonDefaultCdrVersion));
+    CdrVersion ctExpectedDefault = cdrVersionMapper.dbModelToClient(controlledCdrVersion);
+    assertThat(ctResponse.getDefaultCdrVersionId()).isEqualTo(ctExpectedDefault.getCdrVersionId());
     assertThat(ctResponse.getDefaultCdrVersionCreationTime())
-        .isEqualTo(ctExpectedVersion.getCreationTime());
+        .isEqualTo(ctExpectedDefault.getCreationTime());
   }
 
   private void testGetCdrVersionsHasDataType(Predicate<CdrVersion> hasType) {
@@ -313,7 +345,7 @@ public class CdrVersionServiceTest {
     assertThat(cdrVersions.stream().anyMatch(hasType)).isFalse();
 
     makeCdrVersion(
-        3L, true, "Test CDR With Data Types", 123L, registeredTier, "wgs", true, true, "", "");
+        5L, true, "Test CDR With Data Types", 123L, registeredTier, "wgs", true, true, "", "");
     final List<CdrVersion> newVersions =
         parseTierVersions(cdrVersionService.getCdrVersionsByTier(), registeredTier.getShortName());
 
