@@ -77,8 +77,8 @@ interface ToastProps {
   message: string | JSX.Element;
   onClose: Function;
   toastType: ToastType;
-  footer?: string | JSX.Element;
   zIndex: any;  // TODO better type
+  footer?: string | JSX.Element;
 }
 export const ToastBanner = (props: ToastProps) => {
   const {title, message, onClose, toastType, zIndex, footer} = props;
