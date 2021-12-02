@@ -5,7 +5,6 @@ import static com.google.common.truth.Truth8.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
-import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -110,55 +109,19 @@ public class CdrVersionServiceTest {
 
     defaultCdrVersion =
         makeCdrVersion(
-            1L,
-            /* isDefault */ true,
-            "Test Registered CDR",
-            123L,
-            registeredTier,
-            null,
-            null,
-            null,
-            "",
-            "");
+            1L, /* isDefault */ true, "Test Registered CDR", registeredTier, null, false, false);
     nonDefaultCdrVersion =
         makeCdrVersion(
-            2L,
-            /* isDefault */ false,
-            "Old Registered CDR",
-            123L,
-            registeredTier,
-            null,
-            null,
-            null,
-            "",
-            "");
+            2L, /* isDefault */ false, "Old Registered CDR", registeredTier, null, false, false);
 
     controlledTier = TestMockFactory.createControlledTierForTests(accessTierDao);
 
     controlledCdrVersion =
         makeCdrVersion(
-            3L,
-            /* isDefault */ true,
-            "Test Controlled CDR",
-            456L,
-            controlledTier,
-            null,
-            null,
-            null,
-            "gs://lol",
-            "gs://lol");
+            3L, /* isDefault */ true, "Test Controlled CDR", controlledTier, null, false, false);
     controlledNonDefaultCdrVersion =
         makeCdrVersion(
-            4L,
-            /* isDefault */ false,
-            "Old Controlled CDR",
-            456L,
-            controlledTier,
-            null,
-            null,
-            null,
-            "gs://lol",
-            "gs://lol");
+            4L, /* isDefault */ false, "Old Controlled CDR", controlledTier, null, false, false);
   }
 
   @Test
@@ -344,8 +307,7 @@ public class CdrVersionServiceTest {
     // hasFitBitData, hasCopeSurveyData, hasMicroarrayData, and hasWgsData are false by default
     assertThat(cdrVersions.stream().anyMatch(hasType)).isFalse();
 
-    makeCdrVersion(
-        5L, true, "Test CDR With Data Types", 123L, registeredTier, "wgs", true, true, "", "");
+    makeCdrVersion(5L, true, "Test CDR With Data Types", registeredTier, "wgs", true, true);
     final List<CdrVersion> newVersions =
         parseTierVersions(cdrVersionService.getCdrVersionsByTier(), registeredTier.getShortName());
 
@@ -376,29 +338,21 @@ public class CdrVersionServiceTest {
       long cdrVersionId,
       boolean isDefault,
       String name,
-      long creationTime,
       DbAccessTier accessTier,
       String wgsDataset,
-      Boolean hasFitbit,
-      Boolean hasCopeSurveyData,
-      String allSamplesWgsDataBucket,
-      String singleSampleArrayDataBucket) {
+      boolean hasFitbit,
+      boolean hasCopeSurveyData) {
     DbCdrVersion cdrVersion = new DbCdrVersion();
     cdrVersion.setIsDefault(isDefault);
     cdrVersion.setBigqueryDataset("a");
     cdrVersion.setBigqueryProject("b");
     cdrVersion.setCdrDbName("c");
     cdrVersion.setCdrVersionId(cdrVersionId);
-    cdrVersion.setCreationTime(new Timestamp(creationTime));
     cdrVersion.setAccessTier(accessTier);
     cdrVersion.setName(name);
-    cdrVersion.setNumParticipants(123);
-    cdrVersion.setReleaseNumber((short) 1);
     cdrVersion.setWgsBigqueryDataset(wgsDataset);
     cdrVersion.setHasFitbitData(hasFitbit);
     cdrVersion.setHasCopeSurveyData(hasCopeSurveyData);
-    cdrVersion.setAllSamplesWgsDataBucket(allSamplesWgsDataBucket);
-    cdrVersion.setSingleSampleArrayDataBucket(singleSampleArrayDataBucket);
     return cdrVersionDao.save(cdrVersion);
   }
 
