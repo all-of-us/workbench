@@ -45,12 +45,28 @@ public class EgressEventsAdminController implements EgressEventsAdminApiDelegate
   private static final Set<EgressEventStatus> updateableStatuses =
       ImmutableSet.of(EgressEventStatus.REMEDIATED, EgressEventStatus.VERIFIED_FALSE_POSITIVE);
 
-  @Autowired private EgressLogService egressLogService;
-  @Autowired private EgressEventMapper egressEventMapper;
-  @Autowired private EgressEventAuditor egressEventAuditor;
-  @Autowired private UserDao userDao;
-  @Autowired private WorkspaceDao workspaceDao;
-  @Autowired private EgressEventDao egressEventDao;
+  private final EgressLogService egressLogService;
+  private final EgressEventMapper egressEventMapper;
+  private final EgressEventAuditor egressEventAuditor;
+  private final UserDao userDao;
+  private final WorkspaceDao workspaceDao;
+  private final EgressEventDao egressEventDao;
+
+  @Autowired
+  public EgressEventsAdminController(
+      EgressLogService egressLogService,
+      EgressEventMapper egressEventMapper,
+      EgressEventAuditor egressEventAuditor,
+      UserDao userDao,
+      WorkspaceDao workspaceDao,
+      EgressEventDao egressEventDao) {
+    this.egressLogService = egressLogService;
+    this.egressEventMapper = egressEventMapper;
+    this.egressEventAuditor = egressEventAuditor;
+    this.userDao = userDao;
+    this.workspaceDao = workspaceDao;
+    this.egressEventDao = egressEventDao;
+  }
 
   @AuthorityRequired(Authority.SECURITY_ADMIN)
   @Override

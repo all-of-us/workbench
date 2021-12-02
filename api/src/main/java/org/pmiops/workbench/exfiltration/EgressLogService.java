@@ -48,8 +48,15 @@ public class EgressLogService {
           new EgressTerraRuntimeLogPattern("File downloads", "%download%"),
           new EgressTerraRuntimeLogPattern("Errors", "%error%"));
 
-  @Autowired private Provider<WorkbenchConfig> workbenchConfigProvider;
-  @Autowired private BigQueryService bigQueryService;
+  private final Provider<WorkbenchConfig> workbenchConfigProvider;
+  private final BigQueryService bigQueryService;
+
+  @Autowired
+  public EgressLogService(
+      Provider<WorkbenchConfig> workbenchConfigProvider, BigQueryService bigQueryService) {
+    this.workbenchConfigProvider = workbenchConfigProvider;
+    this.bigQueryService = bigQueryService;
+  }
 
   /**
    * Fetches groups of runtime logs for the given egress events which may be relevant to
