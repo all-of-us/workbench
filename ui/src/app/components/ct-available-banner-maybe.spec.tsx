@@ -9,6 +9,7 @@ import {AccessTierShortNames} from 'app/utils/access-tiers';
 import {environment} from 'environments/environment';
 import {CdrVersionTier, Profile, UserTierEligibility} from 'generated/fetch';
 import {cdrVersionTiersResponse} from 'testing/stubs/cdr-versions-api-stub';
+import {waitOneTickAndUpdate} from "../../testing/react-test-helpers";
 
 // 3 times, in order
 const [TIME1, TIME2, TIME3] = [10000, 20000, 30000];
@@ -120,19 +121,22 @@ describe('CTAvailableBannerMaybe', () => {
   }
 
   test.each([
-    ['there is no visible CT', ctNotVisible],
-    ['the user is not CT eligible', userIneligible],
-    ['the user has CT access already', ctAccess],
-    ['the user is too new', userIsNew],
-    ['the user is currently visiting the DAR', darActive],
+    ['there is no visible CT', ctNotVisible, () => {}],
+    ['the user is not CT eligible', userIneligible, () => {}],
+    ['the user has CT access already', ctAccess, () => {}],
+    ['the user is too new', userIsNew, () => {}],
+    ['the user is currently visiting the DAR', () => {}, darActive],
   ])
-  ('should not render if all of the requirements are met, except that %s', (unused, modifier) => {
+  ('should not render if all of the requirements are met, except that %s', (desc, preMountModifier, postMountModifier) => {
     fulfillAllBannerRequirements();
 
-    modifier();
+    preMountModifier();
 
     const wrapper = component();
     expect(wrapper.exists()).toBeTruthy();
+
+    postMountModifier();
+    waitOneTickAndUpdate(wrapper);
 
     expect(ctBannerExists(wrapper)).toBeFalsy();
   })
