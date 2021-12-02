@@ -39,6 +39,7 @@ import org.pmiops.workbench.exceptions.TooManyRequestsException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
+import org.pmiops.workbench.iam.IamService;
 import org.pmiops.workbench.model.ArchivalStatus;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.CloneWorkspaceRequest;
@@ -88,6 +89,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private final WorkspaceDao workspaceDao;
   private final WorkspaceService workspaceService;
   private final WorkspaceAuthService workspaceAuthService;
+  private final IamService iamService;
 
   @Autowired
   public WorkspacesController(
@@ -104,7 +106,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       WorkspaceResourcesService workspaceResourcesService,
       WorkspaceDao workspaceDao,
       WorkspaceService workspaceService,
-      WorkspaceAuthService workspaceAuthService) {
+      WorkspaceAuthService workspaceAuthService,
+      IamService iamService) {
     this.cdrVersionDao = cdrVersionDao;
     this.clock = clock;
     this.fireCloudService = fireCloudService;
@@ -119,6 +122,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     this.workspaceService = workspaceService;
     this.workspaceAuthService = workspaceAuthService;
     this.workspaceDao = workspaceDao;
+    this.iamService = iamService;
   }
 
   private DbCdrVersion getLiveCdrVersionId(String cdrVersionId) {
@@ -184,7 +188,9 @@ public class WorkspacesController implements WorkspacesApiDelegate {
           dbWorkspace, workbenchConfigProvider.get().billing.freeTierBillingAccountName());
       throw e;
     }
-
+    if (accessTier.getEnableUserWorkflows()) {
+      iamService.grantWorkflowRunnerRoleToCurrentUser(dbWorkspace.getGoogleProject());
+    }
     final Workspace createdWorkspace = workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace);
     workspaceAuditor.fireCreateAction(createdWorkspace, dbWorkspace.getWorkspaceId());
     return ResponseEntity.ok(createdWorkspace);
@@ -418,12 +424,11 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     // Note: It is possible for a workspace to be (partially) created and return
     // a 500 to the user if this block of code fails since the workspace is already
     // committed to the database in an earlier call
+    Map<String, WorkspaceAccessLevel> clonedRoles = new HashMap<>();
     if (Optional.ofNullable(body.getIncludeUserRoles()).orElse(false)) {
       Map<String, FirecloudWorkspaceAccessEntry> fromAclsMap =
           workspaceAuthService.getFirecloudWorkspaceAcls(
               fromWorkspace.getWorkspaceNamespace(), fromWorkspace.getFirecloudName());
-
-      Map<String, WorkspaceAccessLevel> clonedRoles = new HashMap<>();
       for (Map.Entry<String, FirecloudWorkspaceAccessEntry> entry : fromAclsMap.entrySet()) {
         if (!entry.getKey().equals(user.getUsername())) {
           clonedRoles.put(
@@ -437,6 +442,18 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     dbWorkspace = workspaceDao.saveWithLastModified(dbWorkspace);
 
+    // Grant the workspace cloner and all from-workspaces users permission to use workflow if
+    // workspace is controlled tier workspace.
+    if (accessTier.getEnableUserWorkflows()) {
+      iamService.grantWorkflowRunnerRoleToCurrentUser(dbWorkspace.getGoogleProject());
+      List<String> usersGainPermission =
+          clonedRoles.entrySet().stream()
+              .filter(entry -> shouldGrantWorkflowRunnerAsService(user, entry))
+              .map(Map.Entry::getKey)
+              .collect(Collectors.toList());
+      iamService.grantWorkflowRunnerRoleToUsers(
+          dbWorkspace.getGoogleProject(), usersGainPermission);
+    }
     final Workspace savedWorkspace = workspaceMapper.toApiWorkspace(dbWorkspace, toFcWorkspace);
     workspaceAuditor.fireDuplicateAction(
         fromWorkspace.getWorkspaceId(), dbWorkspace.getWorkspaceId(), savedWorkspace);
@@ -510,6 +527,20 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     List<UserRole> updatedUserRoles =
         workspaceService.getFirecloudUserRoles(workspaceNamespace, dbWorkspace.getFirecloudName());
     resp.setItems(updatedUserRoles);
+
+    // Currently we only grant user workflow permissions for new writer/owners withtout removing
+    // them when unshare. TODO(RW-7615): Revoke workflow permissions when unshare. It might not be
+    // a issue because: (1) Only User pet SA can actAs pet SA. (2) After unshare, user is not able
+    // to access the pet SA in workbench.
+    if (dbWorkspace.getCdrVersion().getAccessTier().getEnableUserWorkflows()) {
+      List<String> usersGainPermission =
+          aclsByEmail.entrySet().stream()
+              .filter(entry -> shouldGrantWorkflowRunnerAsService(userProvider.get(), entry))
+              .map(Map.Entry::getKey)
+              .collect(Collectors.toList());
+      iamService.grantWorkflowRunnerRoleToUsers(
+          dbWorkspace.getGoogleProject(), usersGainPermission);
+    }
 
     workspaceAuditor.fireCollaborateAction(
         dbWorkspace.getWorkspaceId(), aclStringsByUserIdBuilder.build());
@@ -698,5 +729,13 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     return ResponseEntity.ok(
         new WorkspaceCreatorFreeCreditsRemainingResponse()
             .freeCreditsRemaining(freeCreditsRemaining));
+  }
+
+  /** Returns {@true} if the user is 1: workspace OWNER or WRITER; 2: NOT current logged in user */
+  private static boolean shouldGrantWorkflowRunnerAsService(
+      DbUser loggedInUser, Map.Entry<String, WorkspaceAccessLevel> userNameToAclMapEntry) {
+    return !userNameToAclMapEntry.getKey().equals(loggedInUser.getUsername())
+        && (userNameToAclMapEntry.getValue().equals(WorkspaceAccessLevel.OWNER)
+            || userNameToAclMapEntry.getValue().equals(WorkspaceAccessLevel.WRITER));
   }
 }

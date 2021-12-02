@@ -139,6 +139,10 @@ public class WorkbenchConfig {
     // an authentication round trip with eRA Commons.
     public String shibbolethUiBaseUrl;
 
+    // Project containing aggregated BigQuery log sinks for Terra workspace projects. This contains
+    // information such as runtime VM server logs.
+    public String workspaceLogsProject;
+
     public RuntimeImages runtimeImages;
   }
 

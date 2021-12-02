@@ -36,11 +36,10 @@ public interface FireCloudService {
   /**
    * Registers the user in Firecloud.
    *
-   * @param contactEmail an email address that can be used to contact this user
    * @param firstName the user's first name
    * @param lastName the user's last name
    */
-  void registerUser(String contactEmail, String firstName, String lastName);
+  void registerUser(String firstName, String lastName);
 
   /** Creates a billing project owned by AllOfUs. */
   String createAllOfUsBillingProject(String billingProjectName, String servicePerimeter);

@@ -13,32 +13,26 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
-import org.pmiops.workbench.db.model.DbCohort;
-import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserRecentResource;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.CloudStorageClient;
-import org.pmiops.workbench.model.Cohort;
-import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.RecentResourceRequest;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceResource;
 import org.pmiops.workbench.model.WorkspaceResourceResponse;
-import org.pmiops.workbench.utils.mappers.CommonMappers;
-import org.pmiops.workbench.utils.mappers.FirecloudMapper;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
+import org.pmiops.workbench.workspaces.resources.WorkspaceResourceMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -46,91 +40,36 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class UserMetricsController implements UserMetricsApiDelegate {
 
-  private static final Logger logger = Logger.getLogger(UserMetricsController.class.getName());
-
   private static final int MAX_RECENT_NOTEBOOKS = 8;
+
   private static final Logger log = Logger.getLogger(UserMetricsController.class.getName());
+
+  private final CloudStorageClient cloudStorageClient;
+  private final FireCloudService fireCloudService;
   private final Provider<DbUser> userProvider;
   private final UserRecentResourceService userRecentResourceService;
-  private final WorkspaceDao workspaceDao;
   private final WorkspaceAuthService workspaceAuthService;
-  private final FireCloudService fireCloudService;
-  private final CloudStorageClient cloudStorageClient;
-  private final CommonMappers commonMappers;
-  private FirecloudMapper firecloudMapper;
+  private final WorkspaceDao workspaceDao;
+  private final WorkspaceResourceMapper workspaceResourceMapper;
+
   private int distinctWorkspaceLimit = 5;
-
-  // TODO(jaycarlton): migrate these private functions to MapStruct
-  // Converts DB model to client Model
-  // RW-5638
-  private final Function<DbUserRecentResource, WorkspaceResource> TO_CLIENT =
-      userRecentResource -> {
-        WorkspaceResource resource = new WorkspaceResource();
-        resource.setCohort(TO_CLIENT_COHORT.apply(userRecentResource.getCohort()));
-        resource.setConceptSet(TO_CLIENT_CONCEPT_SET.apply(userRecentResource.getConceptSet()));
-        FileDetail fileDetail = convertStringToFileDetail(userRecentResource.getNotebookName());
-        resource.setNotebook(fileDetail);
-        resource.setLastModifiedEpochMillis(userRecentResource.getLastAccessDate().getTime());
-        resource.setWorkspaceId(userRecentResource.getWorkspaceId());
-        return resource;
-      };
-
-  private static final Function<DbCohort, Cohort> TO_CLIENT_COHORT =
-      cohort -> {
-        if (cohort == null) {
-          return null;
-        }
-        Cohort result =
-            new Cohort()
-                .etag(Etags.fromVersion(cohort.getVersion()))
-                .lastModifiedTime(cohort.getLastModifiedTime().getTime())
-                .creationTime(cohort.getCreationTime().getTime())
-                .criteria(cohort.getCriteria())
-                .description(cohort.getDescription())
-                .id(cohort.getCohortId())
-                .name(cohort.getName())
-                .type(cohort.getType());
-        if (cohort.getCreator() != null) {
-          result.setCreator(cohort.getCreator().getUsername());
-        }
-        return result;
-      };
-
-  private static final Function<DbConceptSet, ConceptSet> TO_CLIENT_CONCEPT_SET =
-      conceptSet -> {
-        if (conceptSet == null) {
-          return null;
-        }
-        ConceptSet result =
-            new ConceptSet()
-                .domain(conceptSet.getDomainEnum())
-                .etag(Etags.fromVersion(conceptSet.getVersion()))
-                .lastModifiedTime(conceptSet.getLastModifiedTime().getTime())
-                .creationTime(conceptSet.getCreationTime().getTime())
-                .description(conceptSet.getDescription())
-                .id(conceptSet.getConceptSetId())
-                .name(conceptSet.getName());
-        return result;
-      };
 
   @Autowired
   UserMetricsController(
+      CloudStorageClient cloudStorageClient,
+      FireCloudService fireCloudService,
       Provider<DbUser> userProvider,
       UserRecentResourceService userRecentResourceService,
-      WorkspaceDao workspaceDao,
       WorkspaceAuthService workspaceAuthService,
-      FireCloudService fireCloudService,
-      CloudStorageClient cloudStorageClient,
-      CommonMappers commonMappers,
-      FirecloudMapper firecloudMapper) {
+      WorkspaceDao workspaceDao,
+      WorkspaceResourceMapper workspaceResourceMapper) {
+    this.cloudStorageClient = cloudStorageClient;
+    this.fireCloudService = fireCloudService;
     this.userProvider = userProvider;
     this.userRecentResourceService = userRecentResourceService;
-    this.workspaceDao = workspaceDao;
     this.workspaceAuthService = workspaceAuthService;
-    this.fireCloudService = fireCloudService;
-    this.cloudStorageClient = cloudStorageClient;
-    this.commonMappers = commonMappers;
-    this.firecloudMapper = firecloudMapper;
+    this.workspaceDao = workspaceDao;
+    this.workspaceResourceMapper = workspaceResourceMapper;
   }
 
   @VisibleForTesting
@@ -143,25 +82,28 @@ public class UserMetricsController implements UserMetricsApiDelegate {
       String workspaceNamespace, String workspaceId, RecentResourceRequest recentResourceRequest) {
     workspaceAuthService.enforceWorkspaceAccessLevel(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
-    // this is only ever used for Notebooks because we update/add to the cache for the other
-    // resources in the backend
-    // Because we don't store notebooks in our database the way we do other resources.
-    long wId = getWorkspaceId(workspaceNamespace, workspaceId);
-    String notebookPath;
+
+    final FirecloudWorkspaceResponse fcWorkspace =
+        fireCloudService.getWorkspace(workspaceNamespace, workspaceId);
+
+    final String notebookPath;
     if (recentResourceRequest.getNotebookName().startsWith("gs://")) {
       notebookPath = recentResourceRequest.getNotebookName();
     } else {
-      String bucket =
-          fireCloudService
-              .getWorkspace(workspaceNamespace, workspaceId)
-              .getWorkspace()
-              .getBucketName();
+      String bucket = fcWorkspace.getWorkspace().getBucketName();
       notebookPath = "gs://" + bucket + "/notebooks/" + recentResourceRequest.getNotebookName();
     }
-    DbUserRecentResource recentResource =
+
+    // this is only ever used for Notebooks because we update/add to the cache for the other
+    // resources in the backend
+    // Because we don't store notebooks in our database the way we do other resources.
+    final DbWorkspace dbWorkspace = workspaceDao.getRequired(workspaceNamespace, workspaceId);
+    final DbUserRecentResource recentResource =
         userRecentResourceService.updateNotebookEntry(
-            wId, userProvider.get().getUserId(), notebookPath);
-    return ResponseEntity.ok(TO_CLIENT.apply(recentResource));
+            dbWorkspace.getWorkspaceId(), userProvider.get().getUserId(), notebookPath);
+
+    return ResponseEntity.ok(
+        workspaceResourceMapper.fromDbUserRecentResource(recentResource, fcWorkspace, dbWorkspace));
   }
 
   @Override
@@ -266,34 +208,16 @@ public class UserMetricsController implements UserMetricsApiDelegate {
         .orElse(true);
   }
 
-  // TODO RW-5638 reimplement all this in MapStruct
   private WorkspaceResource buildRecentResource(
       Map<Long, DbWorkspace> idToDbWorkspace,
       Map<Long, FirecloudWorkspaceResponse> idToFcWorkspaceResponse,
       DbUserRecentResource dbUserRecentResource) {
 
-    WorkspaceResource resource = TO_CLIENT.apply(dbUserRecentResource);
     final long workspaceId = dbUserRecentResource.getWorkspaceId();
-
-    buildFromDbWorkspace(resource, idToDbWorkspace.get(workspaceId));
-    buildFromFcWorkspace(resource, idToFcWorkspaceResponse.get(workspaceId));
-
-    return resource;
-  }
-
-  private void buildFromDbWorkspace(WorkspaceResource resource, DbWorkspace dbWorkspace) {
-    resource.setCdrVersionId(commonMappers.cdrVersionToId(dbWorkspace.getCdrVersion()));
-    resource.setAccessTierShortName(dbWorkspace.getCdrVersion().getAccessTier().getShortName());
-    resource.setWorkspaceBillingStatus(dbWorkspace.getBillingStatus());
-    resource.setAdminLocked(dbWorkspace.isAdminLocked());
-  }
-
-  private void buildFromFcWorkspace(
-      WorkspaceResource resource, FirecloudWorkspaceResponse workspaceDetails) {
-    resource.setPermission(
-        firecloudMapper.fcToApiWorkspaceAccessLevel(workspaceDetails.getAccessLevel()).toString());
-    resource.setWorkspaceNamespace(workspaceDetails.getWorkspace().getNamespace());
-    resource.setWorkspaceFirecloudName(workspaceDetails.getWorkspace().getName());
+    return workspaceResourceMapper.fromDbUserRecentResource(
+        dbUserRecentResource,
+        idToFcWorkspaceResponse.get(workspaceId),
+        idToDbWorkspace.get(workspaceId));
   }
 
   // Retrieves Database workspace ID

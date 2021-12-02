@@ -54,6 +54,10 @@ public interface WorkspaceMapper {
   @Mapping(target = "accessTierShortName", source = "dbWorkspace.cdrVersion.accessTier.shortName")
   Workspace toApiWorkspace(DbWorkspace dbWorkspace);
 
+  @Mapping(
+      target = "accessLevel",
+      source = "accessLevel",
+      qualifiedByName = "fcToApiWorkspaceAccessLevel")
   WorkspaceResponse toApiWorkspaceResponse(Workspace workspace, String accessLevel);
 
   default WorkspaceResponse toApiWorkspaceResponse(

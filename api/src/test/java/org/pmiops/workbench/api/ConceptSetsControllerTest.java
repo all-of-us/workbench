@@ -59,6 +59,7 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.CloudBillingClient;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.google.DirectoryService;
+import org.pmiops.workbench.iam.IamService;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.ConceptSetConceptId;
@@ -227,6 +228,7 @@ public class ConceptSetsControllerTest {
     FireCloudService.class,
     FirecloudMapperImpl.class,
     FreeTierBillingService.class,
+    IamService.class,
     MailService.class,
     NotebooksService.class,
     UserRecentResourceService.class,

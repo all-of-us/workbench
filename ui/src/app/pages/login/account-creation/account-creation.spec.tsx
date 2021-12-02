@@ -65,11 +65,12 @@ it('should handle username validity ends with .', () => {
   expect(wrapper.exists('#usernameError')).toBeTruthy();
 });
 
-it('should handle username validity contains special chars', () => {
+test.each(['user@name', '.user', 'user.', 'user..', 'O\'Riley', '50%', 'no+plus', 'ælfred', 'money$man'])
+('should mark username %s as invalid', (username) => {
   const wrapper = component();
   expect(wrapper.exists('#username')).toBeTruthy();
   expect(wrapper.exists('#usernameError')).toBeFalsy();
-  wrapper.find('input#username').simulate('change', {target: {value: 'user@name'}});
+  wrapper.find('input#username').simulate('change', {target: {value: username}});
   expect(wrapper.exists('#usernameError')).toBeTruthy();
 });
 

@@ -18,7 +18,8 @@ export default class WorkspaceAnalysisPage extends WorkspaceBase {
   }
 
   async isLoaded(): Promise<boolean> {
-    await Promise.all([waitForDocumentTitle(this.page, PageTitle), waitWhileLoading(this.page)]);
+    await Promise.all([waitForDocumentTitle(this.page, PageTitle), this.createNewNotebookLink().waitUntilEnabled()]);
+    await waitWhileLoading(this.page);
     return true;
   }
 
