@@ -52,7 +52,6 @@ import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.BillingProjectStatus;
 import org.pmiops.workbench.model.CreateAccountRequest;
 import org.pmiops.workbench.model.EmptyResponse;
-import org.pmiops.workbench.model.Institution;
 import org.pmiops.workbench.model.NihToken;
 import org.pmiops.workbench.model.PageVisit;
 import org.pmiops.workbench.model.Profile;
@@ -482,31 +481,6 @@ public class ProfileController implements ProfileApiDelegate {
     userService.confirmProfile(updatedUser);
 
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-  }
-
-  @AuthorityRequired(Authority.ACCESS_CONTROL_ADMIN)
-  @Override
-  @Deprecated // use updateAccountProperties()
-  public ResponseEntity<EmptyResponse> updateVerifiedInstitutionalAffiliation(
-      Long userId, VerifiedInstitutionalAffiliation verifiedAffiliation) {
-    DbUser dbUser = userDao.findUserByUserId(userId);
-    Profile updatedProfile = profileService.getProfile(dbUser);
-
-    if (verifiedAffiliation == null) {
-      throw new BadRequestException("Cannot delete Verified Institutional Affiliation.");
-    }
-
-    Optional<Institution> institution =
-        institutionService.getInstitution(verifiedAffiliation.getInstitutionShortName());
-    institution.ifPresent(i -> verifiedAffiliation.setInstitutionDisplayName(i.getDisplayName()));
-
-    updatedProfile.setVerifiedInstitutionalAffiliation(verifiedAffiliation);
-
-    Profile oldProfile = profileService.getProfile(dbUser);
-
-    profileService.updateProfile(dbUser, updatedProfile, oldProfile);
-
-    return ResponseEntity.ok(new EmptyResponse());
   }
 
   @Override
