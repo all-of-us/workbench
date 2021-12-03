@@ -21,12 +21,16 @@ define([
     // on top of the button to gain click priority.
     $('.dynamic-buttons .download-button').empty().append(
         '<span id="aou-download-button-overlay">Download</span>');
-    $('#aou-download-button-overlay').click(() => confirm(
+    $('#aou-download-button-overlay').click(() => {
+      const affirm = prompt(
         'The All of Us Data Use Policies prohibit you from removing participant-level data from ' +
         'the workbench. You are also prohibited from publishing or otherwise distributing any data ' +
         'or aggregate statistics corresponding to fewer than 20 participants unless ' +
-        'expressly permitted by our data use policies. By continuing, you affirm that this ' +
-        'download will be used in accordance with the All of Us data use policy.'));
+        'expressly permitted by our data use policies.\n\n' +
+        'To continue, affirm that this download will be used in accordance with the All of Us ' +
+        'data use policy by typing "affirm" below.');
+      return !!affirm && 'affirm' === affirm.replace(/\W/g, '').toLowerCase();
+    });
   };
 
   return {
