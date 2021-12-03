@@ -12,6 +12,7 @@ import {profileStore, ProfileStore, useStore} from 'app/utils/stores';
 import {environment} from 'environments/environment';
 import logo from 'assets/images/all-of-us-logo.svg'
 import {StatusAlertBannerMaybe} from 'app/components/status-alert-banner-maybe';
+import {CTAvailableBannerMaybe} from 'app//components/ct-available-banner-maybe';
 
 const styles = reactStyles({
   headerContainer: {
@@ -157,6 +158,7 @@ export const NavBar = () => {
     {window.location.pathname !== '/access-renewal' && <AccessRenewalNotificationMaybe/>}
     {window.location.pathname !== '/data-access-requirements' && <LoginGovIAL2NotificationMaybe/>}
     <StatusAlertBannerMaybe/>
+    <CTAvailableBannerMaybe/>
     {
       showSideNav
       && <SideNav
