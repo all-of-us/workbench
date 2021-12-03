@@ -167,6 +167,7 @@ export interface MatchParams {
   csid?: string;
   dataSetId?: string;
   domain?: string;
+  eventId?: string;
   institutionId?: string;
   nbName?: string;
   ns?: string;

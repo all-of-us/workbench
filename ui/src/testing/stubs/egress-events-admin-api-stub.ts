@@ -1,4 +1,4 @@
-import { EgressEvent, EgressEventsAdminApi, EgressEventStatus, ListEgressEventsRequest, ListEgressEventsResponse, UpdateEgressEventRequest } from 'generated/fetch';
+import { AuditEgressEventRequest, AuditEgressEventResponse, EgressEvent, EgressEventsAdminApi, EgressEventStatus, ListEgressEventsRequest, ListEgressEventsResponse, UpdateEgressEventRequest } from 'generated/fetch';
 import {stubNotImplementedError} from 'testing/stubs/stub-utils';
 
 export class EgressEventsAdminApiStub extends EgressEventsAdminApi {
@@ -42,6 +42,47 @@ export class EgressEventsAdminApiStub extends EgressEventsAdminApi {
 
       event.status = request.egressEvent.status;
       accept(event);
+    });
+  }
+
+  public auditEgressEvent(id: string, request?: AuditEgressEventRequest, options?: any): Promise<AuditEgressEventResponse> {
+    return new Promise((accept) => {
+      const event = this.events.find(({egressEventId}) => egressEventId === id);
+      if (!event) {
+        throw new Error(`egress event ${id} not found`);
+      }
+
+      accept({
+        egressEvent: event,
+        sumologicEvent: {
+          vmPrefix: 'all-of-us-1',
+          egressWindowStart: new Date('2000-01-01 05:00:00').getTime() / 1000,
+          egressMib: 188.99
+        },
+        runtimeLogGroups: [{
+          name: 'Notebook interactions',
+          pattern: '%.ipynb%',
+          totalEntries: 100,
+          entries: [{
+            timestamp: new Date('2000-01-01 05:00:00').toISOString(),
+            message: 'user opened asdf.ipynb'
+          }, {
+            timestamp: new Date('2000-01-01 03:00:00').toISOString(),
+            message: 'user opened foo.txt'
+          }]
+        }, {
+          name: 'Downloads',
+          pattern: '%download%',
+          totalEntries: 100,
+          entries: [{
+            timestamp: new Date('2000-01-01 06:00:00').toISOString(),
+            message: 'user downloaded asdf.ipynb'
+          }, {
+            timestamp: new Date('2000-01-01 04:00:00').toISOString(),
+            message: 'user downloaded foo.txt'
+          }]
+        }]
+      });
     });
   }
 
