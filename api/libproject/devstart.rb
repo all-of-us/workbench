@@ -969,13 +969,23 @@ def build_cloudsql_tables(cmd_name, *args)
       ->(opts, v) { opts.bq_dataset = v},
       "BQ dataset. Required."
   )
+  op.add_option(
+      "--output-project [output-project]",
+      ->(opts, v) { opts.output_project = v},
+      "Output Project. Required."
+  )
+  op.add_option(
+      "--output-dataset [output-dataset]",
+      ->(opts, v) { opts.output_dataset = v},
+      "Output dataset. Required."
+  )
 
-  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset}
+  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset and opts.output_project and opts.output_dataset}
   op.parse.validate
 
   common = Common.new
   Dir.chdir('db-cdr') do
-    common.run_inline %W{./generate-cdr/build-cloudsql-tables.sh #{op.opts.bq_project} #{op.opts.bq_dataset}}
+    common.run_inline %W{./generate-cdr/build-cloudsql-tables.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.output_project} #{op.opts.output_dataset}}
   end
 end
 
