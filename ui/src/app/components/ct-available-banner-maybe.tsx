@@ -5,10 +5,11 @@ import {ToastBanner, ToastType} from './toast-banner';
 import {cookiesEnabled} from 'app/utils/cookies';
 import {StyledRouterLink} from './buttons';
 import {environment} from 'environments/environment';
-import {AccessTierShortNames} from 'app/utils/access-tiers';
+import {AccessTierDisplayNames, AccessTierShortNames} from 'app/utils/access-tiers';
 import {CdrVersionTier, Profile} from 'generated/fetch';
 import {eligibleForTier} from 'app/utils/access-utils';
 import {cdrVersionStore, profileStore, useStore} from 'app/utils/stores';
+import {AoU} from './text-wrappers';
 
 // Visible For Testing
 export const DAR_PATH = '/data-access-requirements';
@@ -53,13 +54,13 @@ export const CTAvailableBannerMaybe = () => {
   };
 
   const bannerBody = <div data-test-id='controlled-tier-available'>
-    To access genomic data and more in the <i>All of Us</i> controlled tier,
+    To access genomic data and more in the <AoU/> {AccessTierDisplayNames.Controlled},
     <StyledRouterLink path={DAR_PATH}>complete the necessary steps</StyledRouterLink>.
   </div>;
 
   return showBanner
     ? <ToastBanner
-      title='Controlled tier data now available.'
+      title={`${AccessTierDisplayNames.Controlled} data now available.`}
       message={bannerBody}
       footer='You can also do this later from your profile page.'
       onClose={() => acknowledgeBanner()}
