@@ -19,7 +19,7 @@ set -x
 sudo -E -u jupyter /opt/conda/bin/jupyter nbextension enable snippets_menu/main
 
 # Section represents the jupyter page to which the extension will be applied to
-sudo -E -u jupyter /opt/conda/bin/jupyter nbextension enable aou-upload-policy-extension/main --section=tree
+sudo -E -u jupyter /opt/conda/bin/jupyter nbextension enable aou-file-tree-policy-extension/main --section=tree
 
 sudo -E -u jupyter /opt/conda/bin/nbstripout --install --global
 

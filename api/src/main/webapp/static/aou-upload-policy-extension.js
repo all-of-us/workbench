@@ -1,3 +1,6 @@
+// TODO(calbach): Remove this file 2w after aou-file-tree-policy-extension.js is live.
+// This file is being kept so that old runtimes can continue to reference it.
+
 // Workbench "Upload policy" extension, to show the policy before letting user upload any file
 
 define([
