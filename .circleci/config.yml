@@ -34,13 +34,13 @@ anchors:
   env-db: &env-db
     MYSQL_ROOT_PASSWORD: root-notasecret
 
-  # Job runs for master branch only
-  filter-master-branch: &filter-master-branch
+  # Job runs for main branch only
+  filter-main-branch: &filter-main-branch
     filters:
       tags:
         ignore: /.*/
       branches:
-        only: master
+        only: main
 
   # Job runs for no branch and only for tags starting with ‘v’
   filter-release-tags: &filter-release-tags
@@ -57,7 +57,7 @@ anchors:
       tags:
         ignore: /.*/
       branches:
-        ignore: master
+        ignore: main
 
 # -------------------------
 #   EXECUTORS
@@ -179,12 +179,12 @@ commands:
     steps:
       - run:
           command: |
-            if [ ${CIRCLE_BRANCH} != "" ] && [ ${CIRCLE_BRANCH} != "master" ]; then
-              diff=$(git diff --name-only $(git merge-base origin/master ${CIRCLE_BRANCH}) -- api/src/main/resources | wc -l | xargs)
+            if [ ${CIRCLE_BRANCH} != "" ] && [ ${CIRCLE_BRANCH} != "main" ]; then
+              diff=$(git diff --name-only $(git merge-base origin/main ${CIRCLE_BRANCH}) -- api/src/main/resources | wc -l | xargs)
               if [ ${diff} -eq 0 ]; then
                 changed=false
                 for dir_name in << parameters.dir_names >>; do
-                  dir_diff=$(git diff --name-only $(git merge-base origin/master ${CIRCLE_BRANCH}) -- ${dir_name} | wc -l | xargs)
+                  dir_diff=$(git diff --name-only $(git merge-base origin/main ${CIRCLE_BRANCH}) -- ${dir_name} | wc -l | xargs)
                   if [ ${dir_diff} -gt 0 ]; then
                     changed=true
                     break
@@ -648,21 +648,21 @@ workflows:
       # Running two or more build-test-deploy workflows concurrently may result in failures to
       #  puppeteer-test, api-deploy-to-test or/and ui-deploy-to-test jobs.
       - wait_until_previous_workflow_done
-      # Always run basic test/lint/compilation (open PRs, master branch merge)
+      # Always run basic test/lint/compilation (open PRs, main branch merge)
       # Note: by default tags are not picked up.
       - api-local-test
       - api-unit-test
       - ui-unit-test
       - api-bigquery-test
       - api-integration-test
-      # Deploy to "test" on master branch merges
+      # Deploy to "test" on main branch merges
       - api-deploy-to-test:
-          <<: *filter-master-branch
+          <<: *filter-main-branch
           requires:
             - api-unit-test
             - wait_until_previous_workflow_done
       - ui-deploy-to-test:
-          <<: *filter-master-branch
+          <<: *filter-main-branch
           requires:
             - ui-unit-test
             - wait_until_previous_workflow_done
@@ -676,13 +676,13 @@ workflows:
             - halt-puppeteer-check
           requires:
             - puppeteer-env-setup
-            # PR commits e2e tests waits for workflow triggered by master branch merge to finish.
+            # PR commits e2e tests waits for workflow triggered by main branch merge to finish.
             - wait_until_previous_workflow_done
-      # On master branch merges, run Puppeteer tests after ui and api deployed to "test" env successfully
+      # On main branch merges, run Puppeteer tests after ui and api deployed to "test" env successfully
       - puppeteer-test:
           parallel_num: 4
           env_name: "test"
-          <<: *filter-master-branch
+          <<: *filter-main-branch
           requires:
             - puppeteer-env-setup
             - api-deploy-to-test
@@ -741,7 +741,7 @@ workflows:
           filters:
             branches:
               only:
-                - master
+                - main
     jobs:
       - api-bigquery-test
       - puppeteer-env-setup
@@ -759,4 +759,4 @@ experimental:
   notify:
     branches:
       only:
-        - master
+        - main

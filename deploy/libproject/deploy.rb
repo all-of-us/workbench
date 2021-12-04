@@ -153,7 +153,7 @@ def deploy(cmd_name, args)
   op.add_option(
     "--git-version [git version]",
     ->(opts, v) { opts.git_version = v},
-    "GitHub tag or branch, e.g. 'v1-0-rc1', 'origin/master'. Branch names " +
+    "GitHub tag or branch, e.g. 'v1-0-rc1', 'origin/main'. Branch names " +
     "must be prefixed with 'origin/'. By default, uses the current live " +
     "staging release tag (if staging is in a good state)"
   )

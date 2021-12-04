@@ -1,7 +1,7 @@
 # All-of-Us Test Automation with Puppeteer in Chrome or Chromium
 
 Puppeteer `e2e` end-to-end integration tests. These tests are run in CircleCI for every PR and merge to
-master ([example](https://app.circleci.com/pipelines/github/all-of-us/workbench/4074/workflows/ca636d7c-8c11-463e-bfdc-39ea63b6df52/jobs/100294))
+main ([example](https://app.circleci.com/pipelines/github/all-of-us/workbench/4074/workflows/ca636d7c-8c11-463e-bfdc-39ea63b6df52/jobs/100294))
 .
 
 * See [Puppeteer API](https://github.com/puppeteer/puppeteer/blob/v5.0.0/docs/api.md). Puppeteer supports the
@@ -33,7 +33,7 @@ use these users for local development.
 All users have bypassed access modules. Free credits: $800.
 See [doc](https://docs.google.com/document/d/1rbAlU6CVgfh6R_o2BdD476AXrZR6qB7167yrhMf4KMA/edit?usp=sharing).
 
-* Master branch (after merge)
+* Main branch (after merge)
     - `puppeteer-tester-1@fake-research-aou.org`
     - `puppeteer-collaborator-1@fake-research-aou.org`
     - `puppeteer-reader-1@fake-research-aou.org`

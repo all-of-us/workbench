@@ -5,7 +5,7 @@ individual services, see [../api/project.rb](../api/project.rb) `deploy-api`
 and [../ui/project.rb](../ui/project.rb) `deploy-ui`. Test and staging are
 automatically pushed by CircleCI.
 
-- test: pushed by Circle on every master branch merge
+- test: pushed by Circle on every main branch merge
 - staging: pushed by Circle when someone tags a new release
 - stable: manually pushed using a tagged staging release
 
@@ -16,7 +16,7 @@ these processes locally.
 
 ## Deploy to staging
 
-- Verify that the most recent master commit [passed on Circle](https://circleci.com/gh/all-of-us/workflows/workbench/tree/master)
+- Verify that the most recent main commit [passed on Circle](https://circleci.com/gh/all-of-us/workflows/workbench/tree/main)
 - Go to the [GitHub releases page](https://github.com/all-of-us/workbench/releases);
   note the latest version (e.g. v0-1-rc1)
 - Click "Draft new release"

@@ -1058,7 +1058,7 @@ def circle_build_cdr_indices(cmd_name, args)
   op.add_option(
     "--branch [--branch]",
     ->(opts, v) { opts.branch = v},
-    "Branch. Optional - Default is master."
+    "Branch. Optional - Default is main."
   )
   op.add_option(
     "--project [--project]",

@@ -104,7 +104,7 @@ interface AccessModuleConfig {
 // Important: The completion criteria here needs to be kept synchronized with
 // the server-side logic, else users can get stuck on the DAR
 // without a next step:
-// https://github.com/all-of-us/workbench/blob/master/api/src/main/java/org/pmiops/workbench/db/dao/UserServiceImpl.java#L240-L272
+// https://github.com/all-of-us/workbench/blob/main/api/src/main/java/org/pmiops/workbench/db/dao/UserServiceImpl.java#L240-L272
 export const getAccessModuleConfig = (moduleName: AccessModule): AccessModuleConfig => {
   const {enableRasLoginGovLinking, enforceRasLoginGovLinking, enableEraCommons, enableComplianceTraining} = serverConfigStore.get().config;
   return switchCase(moduleName,
