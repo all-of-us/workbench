@@ -1105,11 +1105,11 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     switch (resourceType) {
       case COHORT:
         cohortDao.getRequiredByWorkspaceIdAndCohortId(workspaceId, resourceId);
-        dbDataSets = dataSetDao.findDataSetsByCohortIdsAndWorkspaceId(resourceId, workspaceId);
+        dbDataSets = dataSetDao.findDataSetsByCohortIdsAndWorkspaceIdAndInvalid(resourceId, workspaceId, false);
         break;
       case CONCEPT_SET:
         conceptSetDao.getRequiredByWorkspaceIdAndConceptId(workspaceId, resourceId);
-        dbDataSets = dataSetDao.findDataSetsByConceptSetIdsAndWorkspaceId(resourceId, workspaceId);
+        dbDataSets = dataSetDao.findDataSetsByConceptSetIdsAndWorkspaceIdAndInvalid(resourceId, workspaceId, false);
         break;
     }
     return dbDataSets;

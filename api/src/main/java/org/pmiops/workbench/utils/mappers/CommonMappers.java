@@ -6,7 +6,6 @@ import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.util.Optional;
 import org.mapstruct.Named;
 import org.pmiops.workbench.api.Etags;
 import org.pmiops.workbench.db.model.DbCdrVersion;
