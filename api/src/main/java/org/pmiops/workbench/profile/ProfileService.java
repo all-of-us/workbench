@@ -254,7 +254,7 @@ public class ProfileService {
     // update institution and synchronize access tiers
     final DbUser updatedUser =
         userService.updateUserWithRetries(
-            u -> updateAffiliation(u, updatedProfile.getVerifiedInstitutionalAffiliation()),
+            u -> upsertAffiliation(u, updatedProfile.getVerifiedInstitutionalAffiliation()),
             user,
             agent);
     final Profile appliedUpdatedProfile = getProfile(updatedUser);
@@ -264,14 +264,14 @@ public class ProfileService {
 
   // Save the verified institutional affiliation in the DB. The affiliation has already been
   // verified as part of the `validateProfile` call.
-  private DbUser updateAffiliation(DbUser dbUser, VerifiedInstitutionalAffiliation affiliation) {
+  private DbUser upsertAffiliation(DbUser dbUser, VerifiedInstitutionalAffiliation affiliation) {
 
     DbVerifiedInstitutionalAffiliation newAffiliation =
         verifiedInstitutionalAffiliationMapper.modelToDbWithoutUser(
             affiliation, institutionService);
     newAffiliation.setUser(dbUser);
 
-    // If this user already has an affiliation, replace the ID of the newAffiliation
+    // If this user already has an affiliation, set the ID of the newAffiliation to it
     verifiedInstitutionalAffiliationDao
         .findFirstByUser(dbUser)
         .map(DbVerifiedInstitutionalAffiliation::getVerifiedInstitutionalAffiliationId)
