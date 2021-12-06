@@ -16,6 +16,7 @@ import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
@@ -34,13 +35,17 @@ import org.pmiops.workbench.conceptset.mapper.ConceptSetMapperImpl;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.dataset.DataSetService;
 import org.pmiops.workbench.dataset.mapper.DataSetMapperImpl;
+import org.pmiops.workbench.db.dao.AccessTierDao;
+import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserRecentWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
+import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
@@ -49,6 +54,7 @@ import org.pmiops.workbench.iam.IamService;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.profile.ProfileMapper;
+import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.FirecloudMapper;
 import org.pmiops.workbench.utils.mappers.UserMapper;
@@ -111,6 +117,9 @@ public class WorkspaceServiceTest {
   @MockBean private CloudBillingClient mockCloudBillingClient;
   @Autowired private WorkspaceDao workspaceDao;
   @Autowired private WorkspaceService workspaceService;
+  @MockBean private AccessTierService accessTierService;
+  @Autowired private AccessTierDao accessTierDao;
+  @Autowired private CdrVersionDao cdrVersionDao;
 
   private static DbUser currentUser;
 
@@ -229,6 +238,24 @@ public class WorkspaceServiceTest {
                 workspaceNamespace,
                 activeStatus));
 
+    dbWorkspaces.add(dbWorkspace);
+    return dbWorkspace;
+  }
+
+  private DbWorkspace addMockedWorkspace(DbWorkspace dbWorkspace) {
+
+    FirecloudWorkspaceResponse mockWorkspaceResponse =
+        mockFirecloudWorkspaceResponse(
+            Long.toString(dbWorkspace.getWorkspaceId()),
+            dbWorkspace.getName(),
+            dbWorkspace.getWorkspaceNamespace(),
+            WorkspaceAccessLevel.OWNER);
+    firecloudWorkspaceResponses.add(mockWorkspaceResponse);
+    doReturn(mockWorkspaceResponse)
+        .when(mockFireCloudService)
+        .getWorkspace(dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getName());
+
+    workspaceDao.save(dbWorkspace);
     dbWorkspaces.add(dbWorkspace);
     return dbWorkspace;
   }
@@ -516,5 +543,44 @@ public class WorkspaceServiceTest {
     assertThrows(
         FailedPreconditionException.class,
         () -> workspaceService.updateWorkspaceBillingAccount(workspace, newBillingAccount));
+  }
+
+  @Test
+  public void userWithNoCtTierAccessCTWorkspace() {
+    DbWorkspace dbWorkspace =
+        buildDbWorkspace(
+            workspaceIdIncrementer.getAndIncrement(),
+            "Controlled Tier Es",
+            DEFAULT_WORKSPACE_NAMESPACE,
+            WorkspaceActiveStatus.ACTIVE);
+    DbCdrVersion dbCdrVersion =
+        TestMockFactory.createControlledTierCdrVersion(cdrVersionDao, accessTierDao, 1);
+    dbWorkspace.setCdrVersion(dbCdrVersion);
+    workspaceDao.save(dbWorkspace);
+    assertThrows(
+        ForbiddenException.class,
+        () ->
+            workspaceService.getWorkspace(
+                DEFAULT_WORKSPACE_NAMESPACE, dbWorkspace.getFirecloudName()));
+  }
+
+  @Test
+  public void userWithCtTierAccessCTWorkspace() {
+    DbWorkspace dbWorkspace =
+        buildDbWorkspace(
+            workspaceIdIncrementer.getAndIncrement(),
+            "Controlled Tier Workspace",
+            DEFAULT_WORKSPACE_NAMESPACE,
+            WorkspaceActiveStatus.ACTIVE);
+    DbCdrVersion dbCdrVersion =
+        TestMockFactory.createControlledTierCdrVersion(cdrVersionDao, accessTierDao, 1);
+    dbWorkspace.setCdrVersion(dbCdrVersion);
+
+    addMockedWorkspace(dbWorkspace);
+
+    when(accessTierService.getAccessTierShortNamesForUser(currentUser))
+        .thenReturn(Collections.singletonList(AccessTierService.CONTROLLED_TIER_SHORT_NAME));
+
+    workspaceService.getWorkspace(DEFAULT_WORKSPACE_NAMESPACE, dbWorkspace.getFirecloudName());
   }
 }
