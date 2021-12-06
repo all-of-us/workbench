@@ -22,6 +22,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.cohortreview.mapper.CohortReviewMapperImpl;
@@ -77,6 +78,7 @@ public class WorkspaceServiceTest {
     WorkspaceAuthService.class
   })
   @MockBean({
+    AccessTierService.class,
     BillingProjectAuditor.class,
     CohortCloningService.class,
     CohortService.class,
