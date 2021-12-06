@@ -12,4 +12,9 @@ then
   echo Current branch is main, aborting commit.
   echo Please commit to a working branch and push it to GitHub for review/merge.
   exit 1
+elif [ "$CURRENT_BRANCH" = "master" ]
+then
+  echo Branch master has now been named to main, aborting commit.
+  echo please run git checkout main.
+  exit 1
 fi
