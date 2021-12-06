@@ -40,8 +40,6 @@ public interface UserService {
       DbDemographicSurvey dbDemographicSurvey,
       DbVerifiedInstitutionalAffiliation dbVerifiedAffiliation);
 
-  DbUser updateUserWithConflictHandling(DbUser user);
-
   // TODO(jaycarlton): Move compliance-related methods to a new UserComplianceService or similar
   DbUser submitDUCC(DbUser user, Integer duccSignedVersion, String initials);
 
