@@ -209,9 +209,10 @@ public class ProfileService {
   /**
    * Updates a profile for a given user and persists all information to the database.
    *
-   * @param user
-   * @param updatedProfile
-   * @param previousProfile
+   * @param user the DbUser whose profile we're updating
+   * @param agent is the user updating their own profile, or is it an admin?
+   * @param updatedProfile new version of profile
+   * @param previousProfile old version of profile
    */
   public DbUser updateProfile(
       DbUser user, Agent agent, Profile updatedProfile, Profile previousProfile) {
