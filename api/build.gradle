@@ -840,27 +840,3 @@ compileTestKotlin {
         jvmTarget = "1.8"
     }
 }
-
-// This is a hack to populate the (empty) output directory for the Kotlin
-// compileGenerated source set. This source set is devoid of Kotlin code - but
-// there appears to be no way to opt out of the Kotlin plugin for a specific Java
-// source set. Normally this task would create the output directory along with
-// the output files, but in this case the task :compileGenerateKotlin is skipped
-// due to a lack of input files, and the output directory is skipped as well as
-// it seems the Kotlin plugin does not properly declare its outputs:
-// https://youtrack.jetbrains.com/issue/KT-23807 .
-//
-// Without this workaround, compilation fails with:
-// """
-// A problem was found with the configuration of task ':compileGeneratedJava'.
-// > Directory '/usr/local/google/home/calbach/aou/workbench/api/build/classes/kotlin/generated'
-//   specified for property 'compileGeneratedKotlinOutputClasses' does not exist.
-// """
-task prepareKotlinGeneratedDir() {
-    ext.out_path = "$projectDir/build/classes/kotlin/generated"
-    outputs.dir file(ext.out_path)
-    doLast {
-        mkdir ext.out_path
-    }
-}
-compileGeneratedKotlin.dependsOn 'prepareKotlinGeneratedDir'
