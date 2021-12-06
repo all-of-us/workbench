@@ -14,7 +14,7 @@ buildscript {
         MAPSTRUCT_VERSION = '1.4.2.Final'
         MOCKITO_KOTLIN_VERSION = '2.2.0'
         OKHTTP_VERSION = '2.7.5'
-        OPENCENSUS_VERSION = '0.23.0'
+        OPENCENSUS_VERSION = '0.28.3'
         SPRINGFOX_VERSION = '2.6.1'
         SPRING_BOOT_VERSION = '2.3.12.RELEASE'
         SWAGGER_2_CODEGEN_VERSION = '2.2.3'
@@ -374,7 +374,7 @@ dependencies {
     compile "com.fasterxml.jackson.module:jackson-module-kotlin:$project.ext.JACKSON_VERSION"
     compile "com.github.java-json-tools:json-patch:1.13"
     compile "com.github.rholder:guava-retrying:2.0.0"
-    compile "org.javers:javers-core:5.10.1"
+    compile 'org.javers:javers-core:6.5.1'
     compile "com.google.api-client:google-api-client-appengine:1.32.2"
     compile "com.google.apis:google-api-services-admin-directory:directory_v1-rev20211109-1.32.1"
     compile "com.google.apis:google-api-services-cloudbilling:v1-rev20211106-1.32.1"
@@ -467,10 +467,10 @@ dependencies {
     // TODO(calbach): The duplicated deps here are highly suspect. Investigate
     // removing the generated sourceSet, or else fixing the runtime deps.
     compile 'io.swagger.core.v3:swagger-annotations:2.0.0'
-    compile 'io.gsonfire:gson-fire:1.8.3'
+    compile 'io.gsonfire:gson-fire:1.8.5'
     compile 'org.threeten:threetenbp:1.3.5'
     generatedCompile 'io.swagger.core.v3:swagger-annotations:2.0.0'
-    generatedCompile 'io.gsonfire:gson-fire:1.8.3'
+    generatedCompile 'io.gsonfire:gson-fire:1.8.5'
     generatedCompile 'org.threeten:threetenbp:1.3.5'
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$project.ext.KOTLIN_VERSION"
