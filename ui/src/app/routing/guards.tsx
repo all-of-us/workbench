@@ -1,7 +1,7 @@
 import {Guard} from 'app/components/app-router';
-import {hasRegisteredTierAccess} from 'app/utils/access-tiers';
+import {AccessTierShortNames, hasRegisteredTierAccess} from 'app/utils/access-tiers';
 import {authStore, MatchParams, profileStore} from 'app/utils/stores';
-import {eligibleForRegisteredTier} from 'app/utils/access-utils';
+import {eligibleForTier} from 'app/utils/access-utils';
 import {useParams} from 'react-router-dom';
 import {currentWorkspaceStore} from 'app/utils/navigation';
 
@@ -13,7 +13,7 @@ export const signInGuard: Guard = {
 };
 
 const userIsEnabled = (userDisabledInDb: boolean) =>
-    (!userDisabledInDb && eligibleForRegisteredTier(profileStore.get().profile.tierEligibilities));
+  (!userDisabledInDb && eligibleForTier(profileStore.get().profile, AccessTierShortNames.Registered));
 
 export const disabledGuard = (userDisabledInDb: boolean): Guard => ({
   // Show disabled screen when user account is disabled by admin or removed from institution registered tier requirement.
