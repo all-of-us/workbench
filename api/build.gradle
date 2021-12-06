@@ -576,10 +576,6 @@ tasks.withType(Test) {
 }
 
 appengine {  // App Engine tasks configuration
-    tools {
-        // Keep in sync with ci/Dockerfile.circle_build
-        cloudSdkVersion = '321.0.0'
-    }
     run {      // local (dev_appserver) configuration (standard environments only)
         port = 8081                 // default
         host = "0.0.0.0"
