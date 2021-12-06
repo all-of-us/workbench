@@ -37,6 +37,7 @@ import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.access.AccessTierServiceImpl;
 import org.pmiops.workbench.access.UserAccessModuleMapperImpl;
 import org.pmiops.workbench.actionaudit.ActionAuditQueryServiceImpl;
+import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.auditors.ProfileAuditor;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.actionaudit.targetproperties.BypassTimeTargetProperty;
@@ -1091,7 +1092,8 @@ public class ProfileControllerTest extends BaseControllerTest {
     final Profile retrieved = profileService.updateAccountProperties(request);
     assertThat(retrieved.getContactEmail()).isEqualTo(newContactEmail);
 
-    verify(mockProfileAuditor).fireUpdateAction(original, retrieved);
+    final Agent adminAgent = Agent.asAdmin(userDao.findUserByUserId(original.getUserId()));
+    verify(mockProfileAuditor).fireUpdateAction(original, retrieved, adminAgent);
   }
 
   @Test
@@ -1182,7 +1184,8 @@ public class ProfileControllerTest extends BaseControllerTest {
     final Profile retrieved = profileService.updateAccountProperties(request);
     assertThat(retrieved.getVerifiedInstitutionalAffiliation()).isEqualTo(newAffiliation);
 
-    verify(mockProfileAuditor).fireUpdateAction(original, retrieved);
+    final Agent adminAgent = Agent.asAdmin(userDao.findUserByUserId(original.getUserId()));
+    verify(mockProfileAuditor).fireUpdateAction(original, retrieved, adminAgent);
   }
 
   @Test
@@ -1287,7 +1290,8 @@ public class ProfileControllerTest extends BaseControllerTest {
     final Profile retrieved = profileService.updateAccountProperties(request);
     assertThat(retrieved.getContactEmail()).isEqualTo(newContactEmail);
     assertThat(retrieved.getVerifiedInstitutionalAffiliation()).isEqualTo(newAffiliation);
-    verify(mockProfileAuditor).fireUpdateAction(original, retrieved);
+    final Agent adminAgent = Agent.asAdmin(userDao.findUserByUserId(original.getUserId()));
+    verify(mockProfileAuditor).fireUpdateAction(original, retrieved, adminAgent);
   }
 
   @Test
@@ -1403,8 +1407,9 @@ public class ProfileControllerTest extends BaseControllerTest {
     assertThat(getBypassEpochMillis(retrieved2, AccessModule.TWO_FACTOR_AUTH)).isNotNull();
 
     // TODO(RW-6930): Make Profile contain the new AccessModule block, then read from there.
-    verify(mockProfileAuditor).fireUpdateAction(original, retrieved1);
-    verify(mockProfileAuditor).fireUpdateAction(retrieved1, retrieved2);
+    final Agent adminAgent = Agent.asAdmin(userDao.findUserByUserId(original.getUserId()));
+    verify(mockProfileAuditor).fireUpdateAction(original, retrieved1, adminAgent);
+    verify(mockProfileAuditor).fireUpdateAction(retrieved1, retrieved2, adminAgent);
 
     // DUCC and COMPLIANCE x2, one for each request
     verify(mockUserServiceAuditor, times(2))

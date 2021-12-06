@@ -33,8 +33,6 @@ import org.springframework.test.context.junit4.SpringRunner
 
 @RunWith(SpringRunner::class)
 class ProfileAuditorTest {
-
-    private val mockUserProvider = mock<Provider<DbUser>>()
     private val mockActionAuditService = mock<ActionAuditService>()
     private val mockClock = mock<Clock>()
     private val mockActionIdProvider = mock<Provider<String>>()
@@ -49,12 +47,10 @@ class ProfileAuditorTest {
                 .apply { username = USER_EMAIL }
 
         profileAuditAdapter = ProfileAuditorImpl(
-                userProvider = mockUserProvider,
                 actionAuditService = mockActionAuditService,
                 clock = mockClock,
                 actionIdProvider = mockActionIdProvider)
         whenever(mockClock.millis()).thenReturn(Y2K_EPOCH_MILLIS)
-        whenever(mockUserProvider.get()).thenReturn(user)
         whenever(mockActionIdProvider.get()).thenReturn(ACTION_ID)
     }
 

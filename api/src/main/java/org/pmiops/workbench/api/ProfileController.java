@@ -19,6 +19,7 @@ import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.actionaudit.ActionAuditQueryService;
+import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.auditors.ProfileAuditor;
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.auth.UserAuthentication;
@@ -477,7 +478,8 @@ public class ProfileController implements ProfileApiDelegate {
       throw new BadRequestException("Cannot update Verified Institutional Affiliation");
     }
 
-    DbUser updatedUser = profileService.updateProfile(user, updatedProfile, previousProfile);
+    DbUser updatedUser =
+        profileService.updateProfile(user, Agent.asUser(user), updatedProfile, previousProfile);
     userService.confirmProfile(updatedUser);
 
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
