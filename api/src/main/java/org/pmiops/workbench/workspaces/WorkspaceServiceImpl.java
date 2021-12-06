@@ -176,9 +176,10 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
   @Override
   public WorkspaceResponse getWorkspace(String workspaceNamespace, String workspaceId) {
     DbWorkspace dbWorkspace = workspaceDao.getRequired(workspaceNamespace, workspaceId);
+    validateControlledTierAccess(dbWorkspace);
+
     FirecloudWorkspaceResponse fcResponse;
     FirecloudWorkspaceDetails fcWorkspace;
-    validateControlledTierAccess(dbWorkspace);
     WorkspaceResponse workspaceResponse = new WorkspaceResponse();
 
     // This enforces access controls.

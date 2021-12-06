@@ -223,12 +223,7 @@ public class WorkspaceServiceTest {
       WorkspaceActiveStatus activeStatus) {
 
     FirecloudWorkspaceResponse mockWorkspaceResponse =
-        mockFirecloudWorkspaceResponse(
-            Long.toString(workspaceId), workspaceName, workspaceNamespace, accessLevel);
-    firecloudWorkspaceResponses.add(mockWorkspaceResponse);
-    doReturn(mockWorkspaceResponse)
-        .when(mockFireCloudService)
-        .getWorkspace(workspaceNamespace, workspaceName);
+        mockFirecloudWorkspaceResponse(workspaceId, workspaceName, workspaceNamespace, accessLevel);
 
     DbWorkspace dbWorkspace =
         workspaceDao.save(
@@ -244,20 +239,30 @@ public class WorkspaceServiceTest {
 
   private DbWorkspace addMockedWorkspace(DbWorkspace dbWorkspace) {
 
-    FirecloudWorkspaceResponse mockWorkspaceResponse =
-        mockFirecloudWorkspaceResponse(
-            Long.toString(dbWorkspace.getWorkspaceId()),
-            dbWorkspace.getName(),
-            dbWorkspace.getWorkspaceNamespace(),
-            WorkspaceAccessLevel.OWNER);
-    firecloudWorkspaceResponses.add(mockWorkspaceResponse);
-    doReturn(mockWorkspaceResponse)
-        .when(mockFireCloudService)
-        .getWorkspace(dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getName());
+    mockFirecloudWorkspaceResponse(
+        dbWorkspace.getWorkspaceId(),
+        dbWorkspace.getName(),
+        dbWorkspace.getWorkspaceNamespace(),
+        WorkspaceAccessLevel.OWNER);
 
     workspaceDao.save(dbWorkspace);
     dbWorkspaces.add(dbWorkspace);
     return dbWorkspace;
+  }
+
+  private FirecloudWorkspaceResponse mockFirecloudWorkspaceResponse(
+      long workspaceId,
+      String workspaceName,
+      String workspaceNamespace,
+      WorkspaceAccessLevel accessLevel) {
+    FirecloudWorkspaceResponse mockWorkspaceResponse =
+        mockFirecloudWorkspaceResponse(
+            Long.toString(workspaceId), workspaceName, workspaceNamespace, accessLevel);
+    firecloudWorkspaceResponses.add(mockWorkspaceResponse);
+    doReturn(mockWorkspaceResponse)
+        .when(mockFireCloudService)
+        .getWorkspace(workspaceNamespace, workspaceName);
+    return mockWorkspaceResponse;
   }
 
   @Test
@@ -550,7 +555,7 @@ public class WorkspaceServiceTest {
     DbWorkspace dbWorkspace =
         buildDbWorkspace(
             workspaceIdIncrementer.getAndIncrement(),
-            "Controlled Tier Es",
+            "Controlled Tier Workspace",
             DEFAULT_WORKSPACE_NAMESPACE,
             WorkspaceActiveStatus.ACTIVE);
     DbCdrVersion dbCdrVersion =

@@ -27,7 +27,7 @@ export const WorkspaceWrapper = fp.flow(
 )(({workspace, hideSpinner}) => {
   useEffect(() => hideSpinner(), []);
   const routeData = useStore(routeDataStore);
-  const [navigate, ] = useNavigation();
+  const [navigate] = useNavigation();
 
 
   const [pollAborter, setPollAborter] = useState(new AbortController());

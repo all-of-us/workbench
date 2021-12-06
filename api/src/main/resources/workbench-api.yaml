@@ -932,7 +932,7 @@ paths:
           schema:
             "$ref": "#/definitions/WorkspaceResponse"
         403:
-          description: User doesnt have the correct access tier as workspace
+          description: User doesnt have access to the workspace's access tier
           schema:
             "$ref": "#/definitions/ErrorResponse"
     patch:
