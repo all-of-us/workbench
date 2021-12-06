@@ -35,6 +35,7 @@ import {ProfileApiStub, ProfileStubVariables} from 'testing/stubs/profile-api-st
 import * as Authentication from 'app/utils/authentication';
 import {mockNavigate} from 'setupTests';
 import {environment} from 'environments/environment';
+import {SpecificPopulationItems} from './workspace-edit-text';
 
 
 type AnyWrapper = (ShallowWrapper|ReactWrapper);
@@ -167,8 +168,6 @@ describe('WorkspaceEdit', () => {
 
   it('should clear all selected specific populations if NO underrepresented populations study is selected',
       async () => {
-    // Set the workspace state to represent a workspace which is studying a
-    // specific population group.
     workspace.researchPurpose.populationDetails = [SpecificPopulationEnum.AGECHILDREN,
       SpecificPopulationEnum.RACEMENA, SpecificPopulationEnum.DISABILITYSTATUS];
 
@@ -196,6 +195,36 @@ describe('WorkspaceEdit', () => {
 
     expect(workspacesApi.workspaces[0].researchPurpose.populationDetails.length).toBe(0);
   });
+
+  it('should disallow create/update workspace when not finishing population details',
+    async () => {
+      workspace.researchPurpose.populationDetails = [SpecificPopulationEnum.AGECHILDREN,
+        SpecificPopulationEnum.RACEMENA, SpecificPopulationEnum.DISABILITYSTATUS];
+
+      workspaceEditMode = WorkspaceEditMode.Edit
+      const wrapper = component();
+      await waitOneTickAndUpdate(wrapper);
+
+      expect(wrapper.find('[data-test-id="specific-population-yes"]')
+        .first().prop('checked')).toEqual(true);
+      let saveButton = wrapper.find('[data-test-id="workspace-save-btn"]')
+        .first().prop('disabled');
+      expect(saveButton).toBeTruthy();
+    });
+
+  it('should allow create/update workspace when all population details selected',
+    async () => {
+      workspace.researchPurpose.populationDetails = SpecificPopulationItems.map(s => s.shortName);
+      workspaceEditMode = WorkspaceEditMode.Edit
+      const wrapper = component();
+      await waitOneTickAndUpdate(wrapper);
+
+      expect(wrapper.find('[data-test-id="specific-population-yes"]')
+        .first().prop('checked')).toEqual(true);
+      let saveButton = wrapper.find('[data-test-id="workspace-save-btn"]')
+        .first().prop('disabled');
+      expect(saveButton).toBeFalsy();
+    });
 
   it ('should select Research Purpose checkbox if sub category is selected', async () => {
     const wrapper = component();

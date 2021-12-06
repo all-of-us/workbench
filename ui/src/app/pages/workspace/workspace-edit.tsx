@@ -1048,7 +1048,10 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
       if (populationChecked) {
         values = {...values, populationDetails};
         constraints['populationDetails'] = {
-          presence: true
+          presence: true,
+          length: {
+            minimum : SpecificPopulationItems.length
+          }
         };
       }
       if (populationDetails &&
