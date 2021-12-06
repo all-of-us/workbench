@@ -10,15 +10,17 @@ import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {WorkspaceCard} from 'app/pages/workspace/workspace-card';
 import {featuredWorkspacesConfigApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {reactStyles} from 'app/utils';
+import {reactStyles, withUserProfile} from 'app/utils';
 import {convertAPIError} from 'app/utils/errors';
 import {WorkspacePermissions} from 'app/utils/workspace-permissions';
 import {environment} from 'environments/environment';
-import {FeaturedWorkspace, FeaturedWorkspaceCategory} from 'generated/fetch';
+import {FeaturedWorkspace, FeaturedWorkspaceCategory, Profile} from 'generated/fetch';
 
 import phenotypeLibrary from 'assets/icons/phenotype-library.svg';
 import tutorialWorkspaces from 'assets/icons/tutorial-workspaces.svg';
 import demonstration from 'assets/icons/demonstration.svg';
+import {hasTierAccess} from 'app/utils/access-tiers';
+import * as fp from 'lodash/fp';
 
 const styles = reactStyles({
   navPanel: {
@@ -126,6 +128,7 @@ interface CurrentTab {
 
 interface Props extends WithSpinnerOverlayProps {
   enablePublishedWorkspaces: boolean;
+  profileState: {profile: Profile, reload: Function, updateCache: Function};
 }
 
 interface State {
@@ -136,7 +139,8 @@ interface State {
   pendingWorkspaceRequests: number;
 }
 
-export const WorkspaceLibrary = (class extends React.Component<Props, State> {
+export const WorkspaceLibrary = fp.flow(withUserProfile())
+  (class extends React.Component<Props, State> {
   constructor(props) {
     super(props);
     this.state = {
@@ -233,6 +237,7 @@ export const WorkspaceLibrary = (class extends React.Component<Props, State> {
       currentTab,
       errorText
     } = this.state;
+    const {profile} = this.props.profileState
     return <FlexRow style={{height: '100%'}}>
       <div style={styles.navPanel}>
         <FlexColumn>
@@ -270,7 +275,9 @@ export const WorkspaceLibrary = (class extends React.Component<Props, State> {
                   return <WorkspaceCard key={wp.workspace.name}
                                         workspace={wp.workspace}
                                         accessLevel={wp.accessLevel}
-                                        reload={() => this.updateWorkspaces()}/>;
+                                        reload={() => this.updateWorkspaces()}
+                                        tierAccessDisabled={!hasTierAccess(profile, wp.workspace.accessTierShortName)}
+                  />;
                 })}
               </div>)}
           </div>
