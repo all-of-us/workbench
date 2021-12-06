@@ -228,11 +228,11 @@ describe('Genomics Extraction Test', () => {
     }
     // Take screenshot for manual checking.
     await runtimeSidebar.open();
-    await takeScreenshot(page, 'genomic-extraction-test-runtime-sidebar.png');
+    await takeScreenshot(page, 'genomic-extraction-test-runtime-sidebar');
     await runtimeSidebar.close();
 
     await genomicSidebar.open();
-    await takeScreenshot(page, 'genomic-extraction-test-history-sidebar.png');
+    await takeScreenshot(page, 'genomic-extraction-test-history-sidebar');
     await genomicSidebar.close();
 
     throw new Error('Runtime is not running or/and genomic extraction is not done.');

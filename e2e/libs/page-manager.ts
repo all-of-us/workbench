@@ -83,7 +83,7 @@ export const withPageTest = (launchOpts?: LaunchOptions) => async (
       // Take screenshot and save html contents immediately after failure.
       await fs.ensureDir(failScreenshotDir);
       await fs.ensureDir(failHtmlDir);
-      await takeScreenshot(incognitoPage, `${__SPEC_NAME__}.png`);
+      await takeScreenshot(incognitoPage, __SPEC_NAME__);
       await savePageToFile(incognitoPage, `${__SPEC_NAME__}.html`);
       throw err;
     } finally {
