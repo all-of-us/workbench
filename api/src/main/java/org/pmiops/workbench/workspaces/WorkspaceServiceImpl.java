@@ -30,10 +30,12 @@ import org.pmiops.workbench.dataset.DataSetService;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentWorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbUserAccessTier;
 import org.pmiops.workbench.db.model.DbUserRecentWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -112,7 +114,6 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
       WorkspaceDao workspaceDao,
       WorkspaceMapper workspaceMapper,
       WorkspaceAuthService workspaceAuthService) {
-    this.accessTierService = accessTierService;
     this.cloudBillingClient = cloudBillingClient;
     this.billingProjectAuditor = billingProjectAuditor;
     this.clock = clock;
@@ -129,6 +130,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
     this.workspaceDao = workspaceDao;
     this.workspaceMapper = workspaceMapper;
     this.workspaceAuthService = workspaceAuthService;
+    this.accessTierService = accessTierService;
   }
 
   @Override
@@ -305,12 +307,13 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
   public DbWorkspace setPublished(
       String workspaceNamespace, String firecloudName, boolean publish) {
     final DbWorkspace dbWorkspace = workspaceDao.getRequired(workspaceNamespace, firecloudName);
+    final DbAccessTier dbAccessTier = accessTierService.getRegisteredTierOrThrow();
 
     final WorkspaceAccessLevel accessLevel =
         publish ? WorkspaceAccessLevel.READER : WorkspaceAccessLevel.NO_ACCESS;
 
     final FirecloudManagedGroupWithMembers authDomainGroup =
-        fireCloudService.getGroup(dbWorkspace.getCdrVersion().getAccessTier().getAuthDomainName());
+        fireCloudService.getGroup(dbAccessTier.getAuthDomainName());
 
     final FirecloudWorkspaceACLUpdate currentUpdate =
         WorkspaceAuthService.updateFirecloudAclsOnUser(

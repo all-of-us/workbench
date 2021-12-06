@@ -100,6 +100,7 @@ public class DeleteWorkspaces {
         userRecentWorkspaceDao,
         workspaceDao,
         null,
+        null,
         null);
   }
 
