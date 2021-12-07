@@ -22,6 +22,7 @@ import org.mockito.ArgumentCaptor;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.access.AccessTierService;
+import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.auditors.ProfileAuditor;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.config.CommonConfig;
@@ -369,22 +370,20 @@ public class ProfileServiceTest {
             newAffiliation, mockInstitutionService))
         .thenReturn(dbVerifiedInstitutionalAffiliation);
 
-    profileService.updateProfile(user, updatedProfile, previousProfile);
+    profileService.updateProfile(
+        user, Agent.asAdmin(loggedInUser), updatedProfile, previousProfile);
   }
 
   @Test
   public void updateProfile_cant_change_contactEmail() {
+
+    Profile previousProfile = createValidProfile().contactEmail("researcher@nih.gov");
+    Profile updatedProfile = createValidProfile().contactEmail("other-researcher@nih.gov");
     assertThrows(
         BadRequestException.class,
-        () -> {
-          Profile previousProfile = createValidProfile().contactEmail("researcher@nih.gov");
-          Profile updatedProfile = createValidProfile().contactEmail("other-researcher@nih.gov");
-          DbUser user = new DbUser();
-          user.setUserId(10);
-          user.setGivenName("John");
-          user.setFamilyName("Doe");
-          profileService.updateProfile(user, updatedProfile, previousProfile);
-        });
+        () ->
+            profileService.updateProfile(
+                loggedInUser, Agent.asUser(loggedInUser), updatedProfile, previousProfile));
   }
 
   @Test
@@ -427,7 +426,8 @@ public class ProfileServiceTest {
     targetUser.setGivenName("John");
     targetUser.setFamilyName("Doe");
 
-    profileService.updateProfile(targetUser, updatedProfile, previousProfile);
+    profileService.updateProfile(
+        targetUser, Agent.asAdmin(loggedInUser), updatedProfile, previousProfile);
 
     assertThat(profileService.getProfile(targetUser).getContactEmail())
         .isEqualTo("other-researcher@verily.com");

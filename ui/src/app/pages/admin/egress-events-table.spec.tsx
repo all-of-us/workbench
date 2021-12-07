@@ -1,5 +1,4 @@
 import * as fp from 'lodash/fp';
-import {mount} from 'enzyme';
 import * as React from 'react';
 import {act} from 'react-dom/test-utils';
 
@@ -8,9 +7,6 @@ import {EgressEventsTable} from './egress-events-table';
 import { EgressEventsAdminApiStub } from 'testing/stubs/egress-events-admin-api-stub';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { EgressEventsAdminApi, EgressEventStatus } from 'generated/fetch';
-import { MemoryRouter } from 'react-router';
-import { DataTable } from 'primereact/datatable';
-import { Dropdown } from 'primereact/dropdown';
 
 describe('EgressEventsTable', () => {
 

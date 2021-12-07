@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -ex
+set -e
 
 export BQ_PROJECT=$1  # project
 export BQ_DATASET=$2  # dataset

@@ -9,6 +9,7 @@ import {
 import {withRoutingSpinner} from 'app/components/with-routing-spinner';
 import {AccessRenewal} from 'app/pages/access/access-renewal';
 import {AdminBanner} from 'app/pages/admin/admin-banner';
+import {AdminEgressAudit} from 'app/pages/admin/admin-egress-audit';
 import {AdminEgressEvents} from 'app/pages/admin/admin-egress-events';
 import {AdminInstitution} from 'app/pages/admin/admin-institution';
 import {AdminInstitutionEdit} from 'app/pages/admin/admin-institution-edit';
@@ -40,6 +41,7 @@ const AccessRenewalPage = fp.flow(withRouteData, withRoutingSpinner)(AccessRenew
 const AdminBannerPage = fp.flow(withRouteData, withRoutingSpinner)(AdminBanner);
 const AdminNotebookViewPage = fp.flow(withRouteData, withRoutingSpinner)(AdminNotebookView);
 const AdminReviewWorkspacePage = fp.flow(withRouteData, withRoutingSpinner)(AdminReviewWorkspace);
+const AdminEgressAuditPage = fp.flow(withRouteData, withRoutingSpinner)(AdminEgressAudit);
 const AdminEgressEventsPage = fp.flow(withRouteData, withRoutingSpinner)(AdminEgressEvents);
 const DataAccessRequirementsPage = fp.flow(withRouteData, withRoutingSpinner)(DataAccessRequirements);
 const DataUserCodeOfConductPage = fp.flow(withRouteData, withFullHeight, withRoutingSpinner)(DataUserCodeOfConduct);
@@ -71,6 +73,9 @@ export const SignedInRoutes = () => {
     </AppRoute>
     <AppRoute exact path='/admin/egress-events'>
       <AdminEgressEventsPage routeData={{title: 'Egress Events', minimizeChrome: true}}/>
+    </AppRoute>
+    <AppRoute exact path='/admin/egress-events/:eventId'>
+      <AdminEgressAuditPage routeData={{title: 'Egress Event Audit', minimizeChrome: true}}/>
     </AppRoute>
     <AppRoute exact path='/admin/institution'>
       <InstitutionAdminPage routeData={{title: 'Institution Admin', minimizeChrome: true}}/>

@@ -19,6 +19,7 @@ import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.actionaudit.ActionAuditQueryService;
+import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.auditors.ProfileAuditor;
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.auth.UserAuthentication;
@@ -52,7 +53,6 @@ import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.BillingProjectStatus;
 import org.pmiops.workbench.model.CreateAccountRequest;
 import org.pmiops.workbench.model.EmptyResponse;
-import org.pmiops.workbench.model.Institution;
 import org.pmiops.workbench.model.NihToken;
 import org.pmiops.workbench.model.PageVisit;
 import org.pmiops.workbench.model.Profile;
@@ -478,35 +478,11 @@ public class ProfileController implements ProfileApiDelegate {
       throw new BadRequestException("Cannot update Verified Institutional Affiliation");
     }
 
-    DbUser updatedUser = profileService.updateProfile(user, updatedProfile, previousProfile);
+    DbUser updatedUser =
+        profileService.updateProfile(user, Agent.asUser(user), updatedProfile, previousProfile);
     userService.confirmProfile(updatedUser);
 
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-  }
-
-  @AuthorityRequired(Authority.ACCESS_CONTROL_ADMIN)
-  @Override
-  @Deprecated // use updateAccountProperties()
-  public ResponseEntity<EmptyResponse> updateVerifiedInstitutionalAffiliation(
-      Long userId, VerifiedInstitutionalAffiliation verifiedAffiliation) {
-    DbUser dbUser = userDao.findUserByUserId(userId);
-    Profile updatedProfile = profileService.getProfile(dbUser);
-
-    if (verifiedAffiliation == null) {
-      throw new BadRequestException("Cannot delete Verified Institutional Affiliation.");
-    }
-
-    Optional<Institution> institution =
-        institutionService.getInstitution(verifiedAffiliation.getInstitutionShortName());
-    institution.ifPresent(i -> verifiedAffiliation.setInstitutionDisplayName(i.getDisplayName()));
-
-    updatedProfile.setVerifiedInstitutionalAffiliation(verifiedAffiliation);
-
-    Profile oldProfile = profileService.getProfile(dbUser);
-
-    profileService.updateProfile(dbUser, updatedProfile, oldProfile);
-
-    return ResponseEntity.ok(new EmptyResponse());
   }
 
   @Override

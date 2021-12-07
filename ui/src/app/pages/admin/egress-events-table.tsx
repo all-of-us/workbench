@@ -6,7 +6,8 @@ import * as fp from 'lodash/fp';
 
 import { useState, useEffect, useCallback} from 'react';
 import { egressEventsAdminApi } from 'app/services/swagger-fetch-clients';
-import { EgressEvent, EgressEventStatus } from 'generated/fetch';
+import { EgressEvent } from 'generated/fetch';
+import { mutableEgressEventStatuses } from 'app/utils/egress-events';
 
 
 interface Props {
@@ -77,7 +78,7 @@ export const EgressEventsTable = ({sourceUserEmail, sourceWorkspaceNamespace, di
   const statusEditor = ({rowData}) => {
     return (
       <Dropdown value={pendingUpdateEvent?.status ?? rowData.status}
-                options={[EgressEventStatus.REMEDIATED, EgressEventStatus.VERIFIEDFALSEPOSITIVE]}
+                options={mutableEgressEventStatuses}
                 onChange={(e)=> {
                   setPendingUpdateEvent({
                     ...rowData,
@@ -110,7 +111,11 @@ export const EgressEventsTable = ({sourceUserEmail, sourceWorkspaceNamespace, di
       totalRecords={totalRecords}>
     <Column field='egressEventId'
             body={({egressEventId}) => (
-              <span data-test-id="egress-event-id">{egressEventId}</span>
+              <StyledRouterLink
+                  data-test-id="egress-event-id"
+                  path={`/admin/egress-events/${egressEventId}`}>
+                {egressEventId}
+              </StyledRouterLink>
             )}
             header='Event ID'
             headerStyle={{width: '100px'}}

@@ -13,7 +13,7 @@ sudo chgrp circleci /creds/sa-key.json
 sudo chmod g+r /creds/sa-key.json
 sudo chown -R circleci ~/.gradle
 sudo mkdir -p ~/.cache/yarn
-sudo chown -R circleci ~/.cache/yarn
+sudo chown -R circleci ~/.cache
 
 if [[ ! -d ~/workbench/.git ]]; then
   sudo git clone https://github.com/all-of-us/workbench ~/workbench

@@ -329,7 +329,7 @@ export default class NotebookPage extends NotebookFrame {
 
     // Retry only when kernel status is "no connection to kernel" by reloading the notebook page.
     if (await this.isNoConnection()) {
-      await takeScreenshot(this.page, `${makeDateTimeStr('reload_notebook_connection')}`);
+      await takeScreenshot(this.page, makeDateTimeStr('reload_notebook_connection'));
       await this.reloadPage();
       if (await waitForIdle()) {
         return true;
@@ -524,7 +524,7 @@ export default class NotebookPage extends NotebookFrame {
     const fileSize = await getPropValue(fileSizeElement, 'textContent');
 
     // In case page has to be checked after finish.
-    await takeScreenshot(newPage, `notebook-upload-file-${fileName}.png`);
+    await takeScreenshot(newPage, `notebook-upload-file-${fileName}`);
 
     await newPage.close();
     await this.page.bringToFront();

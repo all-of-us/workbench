@@ -17,6 +17,7 @@ import org.javers.core.diff.changetype.NewObject;
 import org.javers.core.diff.changetype.PropertyChange;
 import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.access.AccessTierService;
+import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.auditors.ProfileAuditor;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.db.dao.InstitutionDao;
@@ -208,11 +209,13 @@ public class ProfileService {
   /**
    * Updates a profile for a given user and persists all information to the database.
    *
-   * @param user
-   * @param updatedProfile
-   * @param previousProfile
+   * @param user the DbUser whose profile we're updating
+   * @param agent is the user updating their own profile, or is it an admin?
+   * @param updatedProfile new version of profile
+   * @param previousProfile old version of profile
    */
-  public DbUser updateProfile(DbUser user, Profile updatedProfile, Profile previousProfile) {
+  public DbUser updateProfile(
+      DbUser user, Agent agent, Profile updatedProfile, Profile previousProfile) {
     // Apply cleaning methods to both the previous and updated profile, to avoid false positive
     // field diffs due to null-to-empty-object changes.
     cleanProfile(updatedProfile);
@@ -271,7 +274,7 @@ public class ProfileService {
     this.verifiedInstitutionalAffiliationDao.save(newAffiliation);
 
     final Profile appliedUpdatedProfile = getProfile(user);
-    profileAuditor.fireUpdateAction(previousProfile, appliedUpdatedProfile);
+    profileAuditor.fireUpdateAction(previousProfile, appliedUpdatedProfile, agent);
     return updatedUser;
   }
 
@@ -517,7 +520,7 @@ public class ProfileService {
     Optional.ofNullable(request.getAffiliation())
         .ifPresent(updatedProfile::setVerifiedInstitutionalAffiliation);
 
-    updateProfile(dbUser, updatedProfile, originalProfile);
+    updateProfile(dbUser, Agent.asAdmin(userProvider.get()), updatedProfile, originalProfile);
 
     return getProfile(dbUser);
   }

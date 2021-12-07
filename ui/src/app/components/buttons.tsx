@@ -363,7 +363,10 @@ export const LinkButton = ({disabled = false, style = {}, children, ...props}) =
   >{children}</Clickable>;
 };
 
-export const StyledRouterLink = ({path, children, disabled = false, analyticsFn = null, style = {}, ...props}) => {
+export const StyledRouterLink = ({
+    path, children, disabled = false, propagateDataTestId = false,
+    analyticsFn = null, style = {}, ...props}) => {
+  const childProps = propagateDataTestId ? props : fp.omit(['data-test-id'], props);
   const linkStyle = {
     style: {...styles.inlineAnchor}
   }
@@ -371,12 +374,12 @@ export const StyledRouterLink = ({path, children, disabled = false, analyticsFn 
   // A react-router Link will attempt to navigate whenever you click on it; it has no concept
   // of 'disabled'. So if it is disabled, we render a span instead.
   return disabled
-    ? <span {...computedStyles} {...props}>{children}</span>
+    ? <span {...computedStyles} {...childProps}>{children}</span>
     : <Link
         to={path}
         onClick={() => analyticsFn && analyticsFn()}
         {...computedStyles}
-        {...props}
+        {...childProps}
     >
       {children}
     </Link>;

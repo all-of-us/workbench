@@ -409,7 +409,7 @@ export async function waitWhileLoading(
       // Error: Protocol error (Runtime.callFunctionOn): Target closed.
     } else {
       logger.error(err.stack);
-      await takeScreenshot(page, `${makeDateTimeStr('ERROR_Spinner_Timeout')}.jpg`);
+      await takeScreenshot(page, makeDateTimeStr('ERROR_Spinner_Timeout'));
       throw new Error(err.message);
     }
   }

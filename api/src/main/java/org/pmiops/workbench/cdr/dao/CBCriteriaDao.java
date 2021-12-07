@@ -113,10 +113,10 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
               + "from DbCriteria c1 "
               + "where c1.domainId = 'SURVEY' "
               + "and c1.subtype = 'QUESTION' "
-              + "and c1.conceptId in ( select c.conceptId "
-              + "                      from DbCriteria c "
-              + "                     where c.domainId = 'SURVEY' "
-              + "                       and match(c.path, :id) > 0) "
+              + "and c1.id in ( select c.id "
+              + "                 from DbCriteria c "
+              + "                where c.domainId = 'SURVEY' "
+              + "                  and match(c.path, :id) > 0) "
               + "order by c1.count desc")
   Page<DbCriteria> findSurveyQuestionByPath(@Param("id") Long id, Pageable page);
 

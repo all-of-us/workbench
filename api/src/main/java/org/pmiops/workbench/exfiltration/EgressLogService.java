@@ -35,7 +35,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class EgressLogService {
   /**
-   * Scan logs ahead of the egress window by this amount, in the even that the egress activity
+   * Scan logs ahead of the egress window by this amount, in the event that the egress activity
    * started before or near the beginning. This is not guaranteed to catch all relevant logs.
    */
   public static final Duration LOG_START_OFFSET = Duration.ofMinutes(5L);

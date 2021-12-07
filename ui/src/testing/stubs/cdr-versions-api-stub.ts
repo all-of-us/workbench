@@ -20,6 +20,7 @@ export const cdrVersionTiersResponse: CdrVersionTiersResponse = {
     accessTierShortName: AccessTierShortNames.Registered,
     accessTierDisplayName: AccessTierDisplayNames.Registered,
     defaultCdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
+    defaultCdrVersionCreationTime: 0,
     versions: [
       {
         name: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION,
@@ -44,6 +45,7 @@ export const cdrVersionTiersResponse: CdrVersionTiersResponse = {
       accessTierShortName: AccessTierShortNames.Controlled,
       accessTierDisplayName: AccessTierDisplayNames.Controlled,
       defaultCdrVersionId: CdrVersionsStubVariables.CONTROLLED_TIER_CDR_VERSION_ID,
+      defaultCdrVersionCreationTime: 0,
       versions: [
         {
           name: CdrVersionsStubVariables.CONTROLLED_TIER_CDR_VERSION,

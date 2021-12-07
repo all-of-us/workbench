@@ -305,7 +305,7 @@ export const computeDisplayDates = ({completionEpochMillis, expirationEpochMilli
 
 // return true if user is eligible for registered tier.
 // A user loses tier eligibility when they are removed from institution tier requirement
-export const eligibleForRegisteredTier = (tierEligiblities: Array<UserTierEligibility>): boolean => {
-  const rtEligiblity = tierEligiblities.find(t => t.accessTierShortName === AccessTierShortNames.Registered)
+export const eligibleForTier = (profile: Profile, accessTierShortName: string): boolean => {
+  const rtEligiblity = profile.tierEligibilities.find(t => t.accessTierShortName === accessTierShortName)
   return rtEligiblity?.eligible
 };
