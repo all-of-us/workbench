@@ -12,7 +12,6 @@ import { waitForDocumentTitle } from 'utils/waits-utils';
 import { Page } from 'puppeteer';
 import NotebookPreviewPage from 'app/page/notebook-preview-page';
 
-
 describe('Workspace Admin', () => {
   const workspaceName = 'e2eAdminWorkspace';
   const pyNotebookName = 'e2eAdminNotebook';
@@ -54,7 +53,7 @@ describe('Workspace Admin', () => {
     //click on the LOCK WORKSPACE button
     const lockWorkspacedModal = await workspaceAdminPage.clickLockWorkspaceButton();
     expect(await lockWorkspacedModal.getLockWorkspaceButton().isCursorNotAllowed()).toBe(true);
-   
+
     await lockWorkspacedModal.createLockWorkspaceMessage();
     expect(await lockWorkspacedModal.getLockWorkspaceButton().isCursorNotAllowed()).toBe(false);
     lockWorkspacedModal.clickCancelButton();
