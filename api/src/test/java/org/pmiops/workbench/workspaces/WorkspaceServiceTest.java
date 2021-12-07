@@ -570,6 +570,21 @@ public class WorkspaceServiceTest {
   }
 
   @Test
+  public void userWithoutRegisterTierAccessRTWorkspace() {
+    DbWorkspace dbWorkspace = dbWorkspaces.get(0);
+    DbCdrVersion dbCdrVersion =
+        TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao);
+    dbWorkspace.setCdrVersion(dbCdrVersion);
+    when(accessTierService.getAccessTierShortNamesForUser(currentUser))
+        .thenReturn(Collections.singletonList(AccessTierService.CONTROLLED_TIER_SHORT_NAME));
+    assertThrows(
+        ForbiddenException.class,
+        () ->
+            workspaceService.getWorkspace(
+                DEFAULT_WORKSPACE_NAMESPACE, dbWorkspace.getFirecloudName()));
+  }
+
+  @Test
   public void userWithCtTierAccessCTWorkspace() {
     DbWorkspace dbWorkspace =
         buildDbWorkspace(

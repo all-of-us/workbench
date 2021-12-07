@@ -176,7 +176,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
   @Override
   public WorkspaceResponse getWorkspace(String workspaceNamespace, String workspaceId) {
     DbWorkspace dbWorkspace = workspaceDao.getRequired(workspaceNamespace, workspaceId);
-    validateControlledTierAccess(dbWorkspace);
+    validateWorkspaceTierAccess(dbWorkspace);
 
     FirecloudWorkspaceResponse fcResponse;
     FirecloudWorkspaceDetails fcWorkspace;
@@ -335,24 +335,18 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
   }
 
   /**
-   * Throw ForbiddenException if : a) The workspace being access if Controlled Tier and b) The
-   * logged in user doesnt have controlled Tier Access
+   * Throw ForbiddenException if logged in user doesnt have the same Tier Access as that of
+   * workspace
    *
    * @param dbWorkspace
    */
-  private void validateControlledTierAccess(DbWorkspace dbWorkspace) {
-    // Return if the workspace is not Controlled Tier
-    if (!dbWorkspace
-        .getCdrVersion()
-        .getAccessTier()
-        .getShortName()
-        .equals(AccessTierService.CONTROLLED_TIER_SHORT_NAME)) {
-      return;
-    }
-    // Get logged in user's access Tiers
+  private void validateWorkspaceTierAccess(DbWorkspace dbWorkspace) {
+    String workspaceAccessTier = dbWorkspace.getCdrVersion().getAccessTier().getShortName();
+
     List<String> accessTiers = accessTierService.getAccessTierShortNamesForUser(userProvider.get());
-    if (!accessTiers.contains(AccessTierService.CONTROLLED_TIER_SHORT_NAME)) {
-      throw new ForbiddenException("User does not have access to control tier");
+
+    if (!accessTiers.contains(workspaceAccessTier)) {
+      throw new ForbiddenException("User does not have access to the workspace tier");
     }
   }
 
