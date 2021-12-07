@@ -79,7 +79,8 @@ describe('WorkspaceEdit', () => {
         scientificApproach: 'scientificApproach ',
         drugDevelopment: true,
         disseminateResearchFindingList: [DisseminateResearchEnum.PUBLICATIONPERSONALBLOG],
-        researchOutcomeList: [ResearchOutcomeEnum.DECREASEILLNESSBURDEN]
+        researchOutcomeList: [ResearchOutcomeEnum.DECREASEILLNESSBURDEN],
+        populationDetails: SpecificPopulationItems.map(s => s.shortName)
       }
     };
 
