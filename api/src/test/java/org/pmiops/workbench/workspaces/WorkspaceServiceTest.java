@@ -551,7 +551,7 @@ public class WorkspaceServiceTest {
   }
 
   @Test
-  public void userWithNoCtTierAccessCTWorkspace() {
+  public void userWithoutCtTierAccessCTWorkspace() {
     DbWorkspace dbWorkspace =
         buildDbWorkspace(
             workspaceIdIncrementer.getAndIncrement(),
