@@ -2,12 +2,12 @@ import {mount} from 'enzyme';
 import * as React from 'react';
 
 import {serverConfigStore} from 'app/utils/stores';
-import {Profile, ProfileApi, WorkspacesApi} from 'generated/fetch';
+import { Profile, ProfileApi, WorkspaceAdminApi} from 'generated/fetch';
 import {AdminReviewWorkspace} from './admin-review-workspace';
 import {ProfileApiStub, ProfileStubVariables} from 'testing/stubs/profile-api-stub';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {workspaceStubs} from 'testing/stubs/workspaces';
-import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
+import {WorkspaceAdminApiStub} from 'testing/stubs/workspaces-admin-api-stub';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 
 describe('AdminReviewWorkspace', () => {
@@ -30,7 +30,7 @@ describe('AdminReviewWorkspace', () => {
       showSpinner: () => {}
     };
     registerApiClient(ProfileApi, new ProfileApiStub());
-    registerApiClient(WorkspacesApi, new WorkspacesApiStub());
+    registerApiClient(WorkspaceAdminApi, new WorkspaceAdminApiStub());
   });
 
   it('should render and display a table', async() => {

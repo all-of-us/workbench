@@ -30,21 +30,12 @@ public class WorkspaceServiceFakeImpl implements WorkspaceService {
   public void updateWorkspaceBillingAccount(DbWorkspace workspace, String newBillingAccountName) {}
 
   @Override
-  public void setResearchPurposeApproved(String ns, String firecloudName, boolean approved) {}
-
-  @Override
   public DbWorkspace saveAndCloneCohortsConceptSetsAndDataSets(DbWorkspace from, DbWorkspace to) {
     return null;
   }
 
   @Override
   public List<UserRole> getFirecloudUserRoles(String workspaceNamespace, String firecloudName) {
-    return null;
-  }
-
-  @Override
-  public DbWorkspace setPublished(
-      String workspaceNamespace, String firecloudName, boolean publish) {
     return null;
   }
 

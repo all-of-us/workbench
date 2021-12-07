@@ -10,7 +10,7 @@ import {AoU, AouTitle} from 'app/components/text-wrappers';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {ResearchPurpose} from 'app/pages/workspace/research-purpose';
 import {WorkspaceShare} from 'app/pages/workspace/workspace-share';
-import {profileApi, workspacesApi} from 'app/services/swagger-fetch-clients';
+import { profileApi, workspaceAdminApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, withCdrVersions, withUserProfile} from 'app/utils';
 import {AuthorityGuardedAction, hasAuthorityForAction} from 'app/utils/authorities';
@@ -195,9 +195,9 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withCdrVersions())
     this.setState({publishing: true});
     try {
       if (publish) {
-        await workspacesApi().publishWorkspace(namespace, id);
+        await workspaceAdminApi().publishWorkspace(namespace, id);
       } else {
-        await workspacesApi().unpublishWorkspace(namespace, id);
+        await workspaceAdminApi().unpublishWorkspace(namespace, id);
       }
       this.updateWorkspaceState({...workspace, published: publish});
     } catch (error) {
