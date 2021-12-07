@@ -236,6 +236,7 @@ public class WorkspacesControllerTest {
   @Autowired private WorkspacesController workspacesController;
   @Autowired FakeClock fakeClock;
 
+  @MockBean AccessTierService accessTierService;
   @MockBean FreeTierBillingService mockFreeTierBillingService;
   @MockBean CloudBillingClient mockCloudBillingClient;
   @MockBean IamService mockIamService;
@@ -275,6 +276,7 @@ public class WorkspacesControllerTest {
     WorkspaceServiceImpl.class,
   })
   @MockBean({
+    AccessTierService.class,
     BigQueryService.class,
     BillingProjectAuditor.class,
     CdrBigQuerySchemaConfigService.class,
@@ -293,7 +295,6 @@ public class WorkspacesControllerTest {
     UserService.class,
     GenomicExtractionService.class,
     WorkspaceAuditor.class,
-    AccessTierService.class,
     CdrVersionService.class,
   })
   static class Configuration {
@@ -351,7 +352,6 @@ public class WorkspacesControllerTest {
 
     testMockFactory = new TestMockFactory();
     currentUser = createUser(LOGGED_IN_USER_EMAIL);
-
     accessTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
 
     cdrVersion = TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao, 1);
@@ -376,6 +376,9 @@ public class WorkspacesControllerTest {
 
     when(mockCloudBillingClient.pollUntilBillingAccountLinked(any(), any()))
         .thenReturn(new ProjectBillingInfo().setBillingEnabled(true));
+
+    when(accessTierService.getAccessTierShortNamesForUser(currentUser))
+        .thenReturn(Arrays.asList(AccessTierService.REGISTERED_TIER_SHORT_NAME));
   }
 
   private DbUser createUser(String email) {
