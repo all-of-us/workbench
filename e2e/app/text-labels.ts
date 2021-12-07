@@ -106,6 +106,7 @@ export enum LinkText {
   GoToCopiedNotebook = 'Go to Copied Notebook',
   KeepEditing = 'Keep Editing',
   LoadWorkspace = 'Load Workspace',
+  LockWorkspace = 'LOCK WORKSPACE',
   Next = 'Next',
   No = 'No',
   OK = 'OK',
@@ -198,15 +199,6 @@ export enum AgeSelectionRadioButton {
   AgeAtCdrDate = 'Age at CDR Date',
   CurrentAge = 'Current Age',
   AgeAtConsent = 'Age at Consent'
-}
-export enum WorkspaceHeadings {
-  BasicInformation = 'Basic Information',
-  Collaborators = 'Collaborators',
-  CohortBuilder = 'Cohort Builder',
-  CloudStorageObjects = 'Cloud Storage Objects',
-  ResearchPurpose = 'Research Purpose',
-  CloudStorageTraffic = 'Cloud Storage Traffic',
-  Runtimes = 'Runtimes'
 }
 
 export enum CloudStorageHeader {
