@@ -129,7 +129,9 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withCdrVersions())
     this.props.hideSpinner();
     this.setVisits();
     const workspace = this.reloadWorkspace(currentWorkspaceStore.getValue());
-    this.loadFreeTierUsage(workspace);
+    if(WorkspacePermissionsUtil.canWrite(workspace.accessLevel)) {
+      this.loadFreeTierUsage(workspace);
+    }
     this.loadUserRoles(workspace);
   }
 
