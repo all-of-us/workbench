@@ -9,6 +9,7 @@ import { getPropValue } from 'utils/element-utils';
 import Table from 'app/component/table';
 import BaseElement from 'app/element/base-element';
 import DeleteRuntimeModal from 'app/modal/delete-runtime.modal';
+import LockWorkspaceModal from 'app/modal/lock-workspace-modal';
 
 const PageTitle = 'Workspace Admin | All of Us Researcher Workbench';
 
@@ -43,21 +44,30 @@ export default class WorkspaceAdminPage extends AuthenticatedPage {
     await waitWhileLoading(this.page);
   }
 
-  // get the h2 page header (workspace)
-  async getWorkspaceHeader(): Promise<string> {
-    const h2 = await this.page.waitForXPath('//h2', { visible: true });
-    return getPropValue<string>(h2, 'textContent');
+  getLockWorkspaceButton(): Button {
+    return Button.findByName(this.page, { normalizeSpace: LinkText.LockWorkspace });
   }
 
-  // get all the h3 headers
-  async getAllHeadings3(): Promise<string[]> {
-    await this.page.waitForXPath('//h3', { visible: true });
-    const headings = await this.page.$$eval('h3', (headers) => {
-      return headers.map((header) => header.textContent);
-    });
-    // get only the first-5 headings(h3)
-    const namespaceHeadings = headings.slice(0, 5);
-    return namespaceHeadings;
+  async clickLockWorkspaceButton(): Promise<LockWorkspaceModal> {
+    const button = this.getLockWorkspaceButton();
+    await button.click();
+    const modal = new LockWorkspaceModal(this.page);
+    await modal.waitForLoad();
+    return modal;
+  }
+
+  // extract only the Workspace Namespace text for verification
+  async getWorkspaceNamespaceText(): Promise<string> {
+    const xpath = '//label[contains(normalize-space(),"Workspace Namespace")]//following-sibling::div';
+    const element = BaseElement.asBaseElement(this.page, await this.page.waitForXPath(xpath, { visible: true }));
+    const textContent = element.getTextContent();
+    return textContent;
+  }
+
+  // get the page header (workspace)
+  async getWorkspaceHeader(): Promise<string> {
+    const pageHeader = await this.page.waitForXPath('//div[contains(text(), "")]', { visible: true });
+    return getPropValue<string>(pageHeader, 'textContent');
   }
 
   getCloudStorageTable(): Table {
@@ -70,23 +80,6 @@ export default class WorkspaceAdminPage extends AuthenticatedPage {
     const cloudStorageTable = this.getCloudStorageTable();
     const cloudStorageColNames = cloudStorageTable.getColumnNames();
     return cloudStorageColNames;
-  }
-
-  async getAllHeadings2(): Promise<string[]> {
-    await this.page.waitForXPath('//h2', { visible: true });
-    const headings = await this.page.$$eval('h2', (headers) => {
-      return headers.map((header) => header.textContent);
-    });
-    // get only the 2nd and 3rd headings(h2)
-    const namespaceHeadings = headings.slice(1, 3);
-    return namespaceHeadings;
-  }
-
-  async getAllHeadings(): Promise<string[]> {
-    const headings2: Array<string> = await this.getAllHeadings2();
-    const headings3: Array<string> = await this.getAllHeadings3();
-    const allHeadingNames = headings2.concat(headings3);
-    return allHeadingNames;
   }
 
   // get the Notebook preview button
