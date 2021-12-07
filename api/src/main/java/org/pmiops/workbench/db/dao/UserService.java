@@ -18,7 +18,18 @@ import org.pmiops.workbench.model.UserAccessExpiration;
 import org.springframework.data.domain.Sort;
 
 public interface UserService {
+  /**
+   * Updates a user record with a modifier function.
+   *
+   * <p>Ensures that the data access tiers for the user reflect the state of other fields on the
+   * user; handles conflicts with concurrent updates by retrying.
+   */
   DbUser updateUserWithRetries(Function<DbUser, DbUser> userModifier, DbUser dbUser, Agent agent);
+
+  /**
+   * Ensures that the data access tiers for the user reflect the state of other fields on the user
+   */
+  void updateUserAccessTiers(DbUser dbUser, Agent agent);
 
   DbUser createServiceAccountUser(String email);
 

@@ -215,7 +215,11 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     }
   }
 
-  private void updateUserAccessTiers(DbUser dbUser, Agent agent) {
+  /**
+   * Ensures that the data access tiers for the user reflect the state of other fields on the user
+   */
+  @Override
+  public void updateUserAccessTiers(DbUser dbUser, Agent agent) {
     final List<DbAccessTier> previousAccessTiers = accessTierService.getAccessTiersForUser(dbUser);
 
     final List<DbAccessTier> newAccessTiers = getUserAccessTiersList(dbUser);
@@ -628,16 +632,12 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
           BADGE_BY_COMPLIANCE_MODULE.keySet().stream()
               .collect(Collectors.toMap(Function.identity(), determineCompletionTime));
 
-      return updateUserWithRetries(
-          u -> {
-            completionTimes.forEach(
-                (accessModuleName, timestamp) ->
-                    accessModuleService.updateCompletionTime(
-                        u, accessModuleName, timestamp.orElse(null)));
-            return u;
-          },
-          dbUser,
-          agent);
+      completionTimes.forEach(
+          (accessModuleName, timestamp) ->
+              accessModuleService.updateCompletionTime(
+                  dbUser, accessModuleName, timestamp.orElse(null)));
+      updateUserAccessTiers(dbUser, agent);
+      return dbUser;
     } catch (NumberFormatException e) {
       log.severe("Incorrect date expire format from Moodle");
       throw e;
@@ -742,27 +742,24 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       return targetUser;
     }
 
-    return updateUserWithRetries(
-        user -> {
-          if (isEnrolledIn2FA) {
-            final boolean needsDbCompletionUpdate =
-                accessModuleService
-                    .getAccessModuleStatus(user, AccessModuleName.TWO_FACTOR_AUTH)
-                    .map(status -> status.getCompletionEpochMillis() == null)
-                    .orElse(true);
+    if (isEnrolledIn2FA) {
+      final boolean needsDbCompletionUpdate =
+          accessModuleService
+              .getAccessModuleStatus(targetUser, AccessModuleName.TWO_FACTOR_AUTH)
+              .map(status -> status.getCompletionEpochMillis() == null)
+              .orElse(true);
 
-            if (needsDbCompletionUpdate) {
-              Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
-              accessModuleService.updateCompletionTime(
-                  user, AccessModuleName.TWO_FACTOR_AUTH, timestamp);
-            }
-          } else {
-            accessModuleService.updateCompletionTime(user, AccessModuleName.TWO_FACTOR_AUTH, null);
-          }
-          return user;
-        },
-        targetUser,
-        agent);
+      if (needsDbCompletionUpdate) {
+        Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
+        accessModuleService.updateCompletionTime(
+            targetUser, AccessModuleName.TWO_FACTOR_AUTH, timestamp);
+      }
+    } else {
+      accessModuleService.updateCompletionTime(targetUser, AccessModuleName.TWO_FACTOR_AUTH, null);
+    }
+
+    updateUserAccessTiers(targetUser, agent);
+    return targetUser;
   }
 
   @Override
@@ -773,22 +770,19 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       return targetUser;
     }
 
-    return updateUserWithRetries(
-        user -> {
-          // convert Integer to int to prevent a NPE from comparison-unboxing
-          final int signedVersionForComparison =
-              Optional.ofNullable(signedDuccVersion)
-                  // null is invalid, so convert to a known-invalid int
-                  .orElse(accessModuleService.getCurrentDuccVersion() - 1);
+    // convert Integer to int to prevent a NPE from comparison-unboxing
+    final int signedVersionForComparison =
+        Optional.ofNullable(signedDuccVersion)
+            // null is invalid, so convert to a known-invalid int
+            .orElse(accessModuleService.getCurrentDuccVersion() - 1);
 
-          if (signedVersionForComparison != accessModuleService.getCurrentDuccVersion()) {
-            accessModuleService.updateCompletionTime(
-                user, AccessModuleName.DATA_USER_CODE_OF_CONDUCT, null);
-          }
-          return user;
-        },
-        targetUser,
-        agent);
+    if (signedVersionForComparison != accessModuleService.getCurrentDuccVersion()) {
+      accessModuleService.updateCompletionTime(
+          targetUser, AccessModuleName.DATA_USER_CODE_OF_CONDUCT, null);
+    }
+
+    updateUserAccessTiers(targetUser, agent);
+    return targetUser;
   }
 
   @Override
@@ -881,30 +875,24 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   /** Confirm that a user's profile is up to date, for annual renewal compliance purposes. */
   @Override
   public DbUser confirmProfile(DbUser dbUser) {
-    return updateUserWithRetries(
-        user -> {
-          Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
-          accessModuleService.updateCompletionTime(
-              user, AccessModuleName.PROFILE_CONFIRMATION, timestamp);
-          return user;
-        },
-        dbUser,
-        Agent.asUser(dbUser));
+    Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
+    accessModuleService.updateCompletionTime(
+        dbUser, AccessModuleName.PROFILE_CONFIRMATION, timestamp);
+
+    updateUserAccessTiers(dbUser, Agent.asUser(dbUser));
+    return dbUser;
   }
 
   /** Confirm that a user has either reported any AoU-related publications, or has none. */
   @Override
   public DbUser confirmPublications() {
     final DbUser dbUser = userProvider.get();
-    return updateUserWithRetries(
-        user -> {
-          Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
-          accessModuleService.updateCompletionTime(
-              user, AccessModuleName.PUBLICATION_CONFIRMATION, timestamp);
-          return user;
-        },
-        dbUser,
-        Agent.asUser(dbUser));
+    Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
+    accessModuleService.updateCompletionTime(
+        dbUser, AccessModuleName.PUBLICATION_CONFIRMATION, timestamp);
+
+    updateUserAccessTiers(dbUser, Agent.asUser(dbUser));
+    return dbUser;
   }
 
   /** Send an Access Renewal Expiration or Warning email to the user, if appropriate */
