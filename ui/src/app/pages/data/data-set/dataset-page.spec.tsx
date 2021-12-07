@@ -456,4 +456,22 @@ describe('DataSetPage', () => {
     expect(wrapper.find(GenomicExtractionModal).exists()).toBeTruthy();
   });
 
+  it('should enable Save Dataset button when selecting All Participants prepackaged cohort', async() => {
+    datasetApiStub.getDatasetMock = {
+      ...stubDataSet(),
+      conceptSets: [{id: 345, domain: Domain.PERSON}],
+      cohorts: [{id: 1}],
+      domainValuePairs: [{domain: Domain.PERSON, value: 'person'}],
+    };
+    const wrapper = component();
+    await waitOneTickAndUpdate(wrapper);
+
+    // Save button is disabled since no changes have been made
+    expect(wrapper.find(Button).find('[data-test-id="save-button"]').first().prop('disabled')).toBeTruthy();
+
+    wrapper.find('[data-test-id="all-participant"]').first().find('input').first().simulate('change');
+    // Save button should enable after selection
+    expect(wrapper.find(Button).find('[data-test-id="save-button"]').first().prop('disabled')).toBeFalsy();
+  });
+
 });
