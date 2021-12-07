@@ -17,7 +17,6 @@ import javax.inject.Provider;
 import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
-import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.actionaudit.ActionAuditQueryService;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.auditors.ProfileAuditor;
@@ -40,7 +39,6 @@ import org.pmiops.workbench.exceptions.UnauthorizedException;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudBillingProjectMembership.CreationStatusEnum;
-import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapper;
@@ -108,11 +106,9 @@ public class ProfileController implements ProfileApiDelegate {
 
   private static final Logger log = Logger.getLogger(ProfileController.class.getName());
 
-  private final AccessModuleService accessModuleService;
   private final ActionAuditQueryService actionAuditQueryService;
   private final CaptchaVerificationService captchaVerificationService;
   private final Clock clock;
-  private final CloudStorageClient cloudStorageClient;
   private final DemographicSurveyMapper demographicSurveyMapper;
   private final DirectoryService directoryService;
   private final FireCloudService fireCloudService;
@@ -132,11 +128,9 @@ public class ProfileController implements ProfileApiDelegate {
 
   @Autowired
   ProfileController(
-      AccessModuleService accessModuleService,
       ActionAuditQueryService actionAuditQueryService,
       CaptchaVerificationService captchaVerificationService,
       Clock clock,
-      CloudStorageClient cloudStorageClient,
       DemographicSurveyMapper demographicSurveyMapper,
       DirectoryService directoryService,
       FireCloudService fireCloudService,
@@ -153,11 +147,9 @@ public class ProfileController implements ProfileApiDelegate {
       UserService userService,
       VerifiedInstitutionalAffiliationMapper verifiedInstitutionalAffiliationMapper,
       RasLinkService rasLinkService) {
-    this.accessModuleService = accessModuleService;
     this.actionAuditQueryService = actionAuditQueryService;
     this.captchaVerificationService = captchaVerificationService;
     this.clock = clock;
-    this.cloudStorageClient = cloudStorageClient;
     this.demographicSurveyMapper = demographicSurveyMapper;
     this.directoryService = directoryService;
     this.fireCloudService = fireCloudService;
