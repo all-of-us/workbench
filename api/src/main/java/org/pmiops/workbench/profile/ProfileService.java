@@ -251,31 +251,34 @@ public class ProfileService {
     }
     user.setDemographicSurvey(dbDemographicSurvey);
 
-    DbUser updatedUser = userService.updateUserWithConflictHandling(user);
+    // update institution and synchronize access tiers
+    final DbUser updatedUser =
+        userService.updateUserWithRetries(
+            u -> upsertAffiliation(u, updatedProfile.getVerifiedInstitutionalAffiliation()),
+            user,
+            agent);
+    final Profile appliedUpdatedProfile = getProfile(updatedUser);
+    profileAuditor.fireUpdateAction(previousProfile, appliedUpdatedProfile, agent);
+    return updatedUser;
+  }
 
-    // FIXME: why not do a getOrCreateAffiliation() here and then update that object & save?
+  // Save the verified institutional affiliation in the DB. The affiliation has already been
+  // verified as part of the `validateProfile` call.
+  private DbUser upsertAffiliation(DbUser dbUser, VerifiedInstitutionalAffiliation affiliation) {
 
-    // Save the verified institutional affiliation in the DB. The affiliation has already been
-    // verified as part of the `validateProfile` call.
     DbVerifiedInstitutionalAffiliation newAffiliation =
         verifiedInstitutionalAffiliationMapper.modelToDbWithoutUser(
-            updatedProfile.getVerifiedInstitutionalAffiliation(), institutionService);
-    newAffiliation.setUser(
-        user); // Why are we calling a non-user mapping function and then adding a user?
+            affiliation, institutionService);
+    newAffiliation.setUser(dbUser);
 
-    // This is 1:1 in terms of our current usage, but not modelled that way (aside from the unique
-    // constraint on user_id).
-
-    // If this user already has an affiliation, replace the ID of hte
+    // If this user already has an affiliation, set the ID of the newAffiliation to it
     verifiedInstitutionalAffiliationDao
-        .findFirstByUser(user)
+        .findFirstByUser(dbUser)
         .map(DbVerifiedInstitutionalAffiliation::getVerifiedInstitutionalAffiliationId)
         .ifPresent(newAffiliation::setVerifiedInstitutionalAffiliationId);
     this.verifiedInstitutionalAffiliationDao.save(newAffiliation);
 
-    final Profile appliedUpdatedProfile = getProfile(user);
-    profileAuditor.fireUpdateAction(previousProfile, appliedUpdatedProfile, agent);
-    return updatedUser;
+    return dbUser;
   }
 
   public void cleanProfile(Profile profile) {

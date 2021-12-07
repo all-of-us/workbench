@@ -420,24 +420,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     return dbUser;
   }
 
-  /**
-   * Save updated dbUser object and transform ObjectOptimisticLockingFailureException into
-   * ConflictException
-   *
-   * @param dbUser
-   * @return
-   */
-  @Override
-  public DbUser updateUserWithConflictHandling(DbUser dbUser) {
-    try {
-      dbUser = userDao.save(dbUser);
-    } catch (ObjectOptimisticLockingFailureException e) {
-      log.log(Level.WARNING, "version conflict for user update", e);
-      throw new ConflictException("Failed due to concurrent modification");
-    }
-    return dbUser;
-  }
-
   @Override
   public DbUser submitDUCC(DbUser dbUser, Integer duccSignedVersion, String initials) {
     // FIXME: this should not be hardcoded
