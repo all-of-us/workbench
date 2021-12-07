@@ -10,6 +10,15 @@ import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 import {WorkspaceLibrary} from './workspace-library';
 import {ProfileApiStub} from "testing/stubs/profile-api-stub";
 import {profileStore} from "app/utils/stores";
+import {AccessTierShortNames} from "app/utils/access-tiers";
+
+interface TestWorkspace {
+  namespace: string,
+  name: string,
+  id: string,
+  cdrVersionId: string,
+  accessTierShortName: string,
+}
 
 describe('WorkspaceLibrary', () => {
   let publishedWorkspaceStubs = [];
@@ -44,18 +53,18 @@ describe('WorkspaceLibrary', () => {
       ...w,
       published: true
     }));
+    publishedWorkspaceStubs[0].accessTierShortName = AccessTierShortNames.Controlled;
     PHENOTYPE_LIBRARY_WORKSPACES = publishedWorkspaceStubs[0];
     TUTORIAL_WORKSPACE = publishedWorkspaceStubs[1];
     PUBLISHED_WORKSPACE = publishedWorkspaceStubs[2];
   });
 
-  it('renders', () => {
+  it('renders',() => {
     const wrapper = component();
     expect(wrapper).toBeTruthy();
   });
 
   it('should display phenotype library workspaces', async () => {
-
     registerApiClient(WorkspacesApi, new WorkspacesApiStub(publishedWorkspaceStubs));
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
@@ -108,6 +117,42 @@ describe('WorkspaceLibrary', () => {
     const cardNameList = wrapper.find('[data-test-id="workspace-card-name"]')
         .map(c => c.text());
     expect(cardNameList).toEqual([TUTORIAL_WORKSPACE.name]);
+  });
+
+  it('controlled tier workspace is not clickable for non-ct user', async () => {
+    registerApiClient(WorkspacesApi, new WorkspacesApiStub(publishedWorkspaceStubs));
+
+    const wrapper = component();
+    await waitOneTickAndUpdate(wrapper);
+
+    wrapper.find('[data-test-id="Phenotype Library"]').simulate('click');
+    await waitOneTickAndUpdate(wrapper);
+
+    const cardNameList = wrapper.find('[data-test-id="workspace-card-name"]')
+      .map(c => c.text());
+    expect(cardNameList.length).toEqual(1);
+
+    const styleCursor = wrapper.find('[data-test-id="workspace-card"]').first().find('[role="button"]')
+      .map(c => c.prop('style').cursor);
+    expect(styleCursor).toEqual(['not-allowed']);
+  });
+
+  it('controlled tier workspace is clickable for ct user', async () => {
+    profileStore.set({...profileStore.get(), profile: {
+        ...profileStore.get().profile,
+        accessTierShortNames: [AccessTierShortNames.Registered, AccessTierShortNames.Controlled]
+      }});
+
+    registerApiClient(WorkspacesApi, new WorkspacesApiStub(publishedWorkspaceStubs));
+    const wrapper = component();
+    await waitOneTickAndUpdate(wrapper);
+
+    wrapper.find('[data-test-id="Phenotype Library"]').simulate('click');
+    await waitOneTickAndUpdate(wrapper);
+
+    const styleCursor = wrapper.find('[data-test-id="workspace-card"]').first().find('[role="button"]')
+      .map(c => c.prop('style').cursor);
+    expect(styleCursor).toEqual(['pointer']);
   });
 
 });
