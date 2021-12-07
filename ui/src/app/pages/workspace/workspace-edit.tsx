@@ -1047,11 +1047,11 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
       }
       if (populationChecked) {
         values = {...values, populationDetails};
+        validate.validators.populationDetailsFilled = (filledDetails: [SpecificPopulationEnum]) => {
+          SpecificPopulationItems.every(s => s.subCategory.some(sub => filledDetails.includes(sub.shortName)))
+        };
         constraints['populationDetails'] = {
-          presence: true,
-          length: {
-            minimum : SpecificPopulationItems.length
-          }
+          populationDetailsFilled : true
         };
       }
       if (populationDetails &&
