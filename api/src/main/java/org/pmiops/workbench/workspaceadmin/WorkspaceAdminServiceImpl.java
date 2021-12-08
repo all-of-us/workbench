@@ -333,7 +333,8 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
     log.info(String.format("called setAdminLockedState on wsns %s", workspaceNamespace));
 
     DbWorkspace dbWorkspace = getWorkspaceByNamespaceOrThrow(workspaceNamespace);
-    workspaceDao.save(dbWorkspace.setAdminLocked(true));
+    dbWorkspace.setAdminLocked(true).setAdminLockedReason(adminLockingRequest.getRequestReason());
+    dbWorkspace = workspaceDao.save(dbWorkspace);
     adminAuditor.fireLockWorkspaceAction(dbWorkspace.getWorkspaceId(), adminLockingRequest);
 
     final List<DbUser> owners =
