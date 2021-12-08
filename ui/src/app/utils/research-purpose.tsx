@@ -59,10 +59,11 @@ function researchPurposeDivs(primaryPurposeItems: Array<ResearchPurposeItem>, re
 
 export function getSelectedPopulations(researchPurpose: ResearchPurpose) {
   const categories = fp.cloneDeep(SpecificPopulationItems.filter(specificPopulationItem => specificPopulationItem
-    .subCategory.filter(item => researchPurpose.populationDetails.includes(item.shortName)).length > 0));
-  categories.filter(category => category.subCategory = category.subCategory
-    .filter(subCategoryItem => researchPurpose.populationDetails.includes(subCategoryItem.shortName)));
-  if(researchPurpose.otherPopulationDetails !== '') {
+    .subCategory.some(item => researchPurpose.populationDetails.includes(item.shortName))));
+  categories.forEach(category => {
+    category.subCategory = category.subCategory.filter(({shortName}) => researchPurpose.populationDetails.includes(shortName));
+  });
+  if (researchPurpose.otherPopulationDetails) {
     categories.push({
       label: 'Other',
       shortName: SpecificPopulationEnum.OTHER,
