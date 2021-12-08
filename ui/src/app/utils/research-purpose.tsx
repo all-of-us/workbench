@@ -1,9 +1,13 @@
 import * as React from 'react';
 
-import {ResearchPurposeItems, SpecificPopulationItems} from 'app/pages/workspace/workspace-edit-text';
-import {PrimaryPurposeItems, ResearchPurposeItem} from 'app/pages/workspace/workspace-edit-text';
+import {
+  PrimaryPurposeItems,
+  ResearchPurposeItem,
+  ResearchPurposeItems,
+  SpecificPopulationItems
+} from 'app/pages/workspace/workspace-edit-text';
 import colors from 'app/styles/colors';
-import {ResearchPurpose} from 'generated/fetch';
+import {ResearchPurpose, SpecificPopulationEnum} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 
 const styles = {
@@ -55,9 +59,20 @@ function researchPurposeDivs(primaryPurposeItems: Array<ResearchPurposeItem>, re
 
 export function getSelectedPopulations(researchPurpose: ResearchPurpose) {
   const categories = fp.cloneDeep(SpecificPopulationItems.filter(specificPopulationItem => specificPopulationItem
-    .subCategory.filter(item => researchPurpose.populationDetails.includes(item.shortName)).length > 0));
-  categories.filter(category => category.subCategory = category.subCategory
-    .filter(subCategoryItem => researchPurpose.populationDetails.includes(subCategoryItem.shortName)));
+    .subCategory.some(item => researchPurpose.populationDetails.includes(item.shortName))));
+  categories.forEach(category => {
+    category.subCategory = category.subCategory.filter(({shortName}) => researchPurpose.populationDetails.includes(shortName));
+  });
+  // The 'Other' type of population is stored in otherPopulationDetails field, not populationDetails field.
+  if (researchPurpose.otherPopulationDetails) {
+    categories.push({
+      label: 'Other',
+      shortName: SpecificPopulationEnum.OTHER,
+      ubrLabel: 'other',
+      ubrDescription: 'other',
+      subCategory: [{label: researchPurpose.otherPopulationDetails, shortName: SpecificPopulationEnum.OTHER}]
+    })
+  }
   return categories.map((selectedPopulationOfInterest, index) => {
     return <React.Fragment key={index}>
       {/*Generate a header for each section of underserved populations*/}
