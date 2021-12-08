@@ -75,16 +75,15 @@ public class DeleteWorkspaces {
 
   @Bean
   public WorkspaceService workspaceService(
-      AccessTierService accessTierService,
       BillingProjectAuditor billingProjectAuditor,
       Clock clock,
       FireCloudService fireCloudService,
       Provider<DbUser> dbUserProvider,
       CloudBillingClient cloudBillingClient,
       UserRecentWorkspaceDao userRecentWorkspaceDao,
-      WorkspaceDao workspaceDao) {
+      WorkspaceDao workspaceDao,
+      AccessTierService accessTierService) {
     return new WorkspaceServiceImpl(
-        accessTierService,
         billingProjectAuditor,
         clock,
         null,
