@@ -45,7 +45,7 @@ import org.springframework.stereotype.Service;
  * "token_type":"Bearer",
  * "expires_in":1800,
  * "refresh_token":"refresh token",
- * "scope":"openid profile email ga4gh_passport_v1",
+ * "scope":"openid profile email",
  * "sub":"subId",
  * "id_token":"JWT token"
  * "id_token_type":"urn:ietf:params:oauth:grant-type:jwt-bearer"

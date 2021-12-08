@@ -47,5 +47,5 @@ public class RasLinkConstants {
 
   // The required scopes to finish RAS OAuth flow, and get enough information AoU needs.
   static final Set<String> RAS_AUTH_CODE_SCOPES =
-      ImmutableSet.of("ga4gh_passport_v1", "openid", "profile", "federated_identities");
+      ImmutableSet.of("openid", "profile", "federated_identities");
 }

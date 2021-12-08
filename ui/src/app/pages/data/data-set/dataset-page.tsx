@@ -825,12 +825,13 @@ export const DatasetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), wi
     }
 
     selectPrePackagedCohort(): void {
-      // Un-select any workspace Cohort if Pre Packaged cohort is selected
-      if (!this.state.includesAllParticipants) {
-        this.setState({includesAllParticipants: !this.state.includesAllParticipants, selectedCohortIds: []});
-      } else {
-        this.setState({includesAllParticipants: !this.state.includesAllParticipants});
-      }
+      const {includesAllParticipants, selectedCohortIds} = this.state;
+      this.setState({
+        dataSetTouched: true,
+        includesAllParticipants: !includesAllParticipants,
+        // Un-select any workspace Cohort if Pre Packaged cohort is selected
+        selectedCohortIds: !includesAllParticipants ? [] : selectedCohortIds
+      });
     }
 
     selectDomainValue(domain: Domain, domainValue: DomainValue): void {

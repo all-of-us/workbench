@@ -5,6 +5,7 @@ import javax.inject.Provider
 import org.pmiops.workbench.actionaudit.ActionAuditEvent
 import org.pmiops.workbench.actionaudit.ActionAuditService
 import org.pmiops.workbench.actionaudit.ActionType
+import org.pmiops.workbench.actionaudit.Agent
 import org.pmiops.workbench.actionaudit.AgentType
 import org.pmiops.workbench.actionaudit.TargetType
 import org.pmiops.workbench.actionaudit.targetproperties.ProfileTargetProperty
@@ -18,7 +19,6 @@ import org.springframework.stereotype.Service
 @Service
 class ProfileAuditorImpl @Autowired
 constructor(
-    private val userProvider: Provider<DbUser>,
     private val actionAuditService: ActionAuditService,
     private val clock: Clock,
     @Qualifier("ACTION_ID") private val actionIdProvider: Provider<String>
@@ -48,7 +48,7 @@ constructor(
         actionAuditService.send(createEvents)
     }
 
-    override fun fireUpdateAction(previousProfile: Profile, updatedProfile: Profile) {
+    override fun fireUpdateAction(previousProfile: Profile, updatedProfile: Profile, agent: Agent) {
         // determine changed fields
         val changesByProperty = TargetPropertyExtractor.getChangedValuesByName(
                 ProfileTargetProperty.values(),
@@ -60,11 +60,11 @@ constructor(
                             timestamp = clock.millis(),
                             actionId = actionIdProvider.get(),
                             actionType = ActionType.EDIT,
-                            agentType = AgentType.USER,
-                            agentIdMaybe = userProvider.get().userId,
-                            agentEmailMaybe = userProvider.get().username,
+                            agentType = agent.agentType,
+                            agentIdMaybe = agent.idMaybe,
+                            agentEmailMaybe = agent.emailMaybe,
                             targetType = TargetType.PROFILE,
-                            targetIdMaybe = userProvider.get().userId,
+                            targetIdMaybe = previousProfile.userId,
                             targetPropertyMaybe = it.key,
                             previousValueMaybe = it.value.previousValue,
                             newValueMaybe = it.value.newValue)

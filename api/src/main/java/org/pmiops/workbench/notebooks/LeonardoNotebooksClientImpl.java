@@ -125,7 +125,9 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
             .put("aou-snippets-menu", assetsBaseUrl + "/aou-snippets-menu.js")
             .put("aou-download-extension", assetsBaseUrl + "/aou-download-policy-extension.js")
             .put("aou-activity-checker-extension", assetsBaseUrl + "/activity-checker-extension.js")
-            .put("aou-upload-policy-extension", assetsBaseUrl + "/aou-upload-policy-extension.js")
+            .put(
+                "aou-file-tree-policy-extension",
+                assetsBaseUrl + "/aou-file-tree-policy-extension.js")
             .build();
 
     Map<String, String> runtimeLabels =

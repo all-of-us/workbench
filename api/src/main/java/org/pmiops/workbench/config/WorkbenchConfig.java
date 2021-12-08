@@ -256,9 +256,8 @@ public class WorkbenchConfig {
     // If true, enable genomic extraction functionality for datasets which have genomics data
     // associated with their CDRs.
     public boolean enableGenomicExtraction;
-    // If true, egress alerts are automatically remediated via cloud tasks. Otherwise, egress
-    // alerts will still be stored, but are assumed to be remediated by the oncall.
-    public boolean enableEgressAlertingV2;
+    // TODO(RW-7372): remove.
+    @Deprecated public boolean enableEgressAlertingV2;
     // If true, the backend and UI will support gpu for standard vm
     public boolean enableGpu;
     // If true, the backend and UI will support persistent disk as the default notebook storage

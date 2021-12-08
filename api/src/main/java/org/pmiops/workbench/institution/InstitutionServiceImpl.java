@@ -174,28 +174,36 @@ public class InstitutionServiceImpl implements InstitutionService {
   @Transactional
   @Override
   public Optional<Institution> updateInstitution(
-      final String shortName, final Institution institutionToUpdate) {
-    validateInstitution(institutionToUpdate);
-    try {
-      return institutionDao
-          .findOneByShortName(shortName)
-          .map(DbInstitution::getInstitutionId)
-          .map(
-              dbId -> {
-                // create new DB object, but mark it with the original's ID to indicate that this is
-                // an update
+      final String shortName, final Institution updatedInstitution) {
 
-                final DbInstitution dbObjectToUpdate =
-                    institutionDao.save(
-                        institutionMapper.modelToDb(institutionToUpdate).setInstitutionId(dbId));
-                populateAuxTables(institutionToUpdate, dbObjectToUpdate);
-                return toModel(dbObjectToUpdate);
-              });
+    validateInstitution(updatedInstitution);
+
+    return institutionDao
+        .findOneByShortName(shortName)
+        .map(dbInst -> updateExistingInstitution(dbInst, updatedInstitution));
+  }
+
+  private Institution updateExistingInstitution(
+      DbInstitution dbInstitution, Institution updatedInstitution) {
+    // create new DB object, but mark it with the original's ID to indicate that this is
+    // an update
+    DbInstitution dbObjectToUpdate =
+        institutionMapper
+            .modelToDb(updatedInstitution)
+            .setInstitutionId(dbInstitution.getInstitutionId());
+
+    try {
+      institutionDao.save(dbObjectToUpdate);
+      populateAuxTables(updatedInstitution, dbObjectToUpdate);
     } catch (DataIntegrityViolationException ex) {
       throw new ConflictException(
-          "DataIntegrityException: Please check that you are not creating an Institute which already exists",
+          String.format(
+              "DataIntegrityException: Conflict updating Institute '%s' (id %d)",
+              updatedInstitution.getShortName(), dbInstitution.getInstitutionId()),
           ex);
     }
+
+    return toModel(dbObjectToUpdate);
   }
 
   @Override
@@ -440,12 +448,11 @@ public class InstitutionServiceImpl implements InstitutionService {
       final List<DbAccessTier> dbAccessTiers) {
     institutionEmailDomainDao.deleteByInstitution(dbInstitution);
     for (DbAccessTier dbAccessTier : dbAccessTiers) {
-      institutionTierConfigMapper
-          .emailDomainsToDb(
+      institutionEmailDomainDao.saveAll(
+          institutionTierConfigMapper.emailDomainsToDb(
               getEmailDomainsByTierOrEmptySet(modelInstitution, dbAccessTier.getShortName()),
               dbInstitution,
-              dbAccessTier)
-          .forEach(institutionEmailDomainDao::save);
+              dbAccessTier));
     }
   }
 
@@ -456,12 +463,11 @@ public class InstitutionServiceImpl implements InstitutionService {
       final List<DbAccessTier> dbAccessTiers) {
     institutionEmailAddressDao.deleteByInstitution(dbInstitution);
     for (DbAccessTier dbAccessTier : dbAccessTiers) {
-      institutionTierConfigMapper
-          .emailAddressesToDb(
+      institutionEmailAddressDao.saveAll(
+          institutionTierConfigMapper.emailAddressesToDb(
               getEmailAddressesByTierOrEmptySet(modelInstitution, dbAccessTier.getShortName()),
               dbInstitution,
-              dbAccessTier)
-          .forEach(institutionEmailAddressDao::save);
+              dbAccessTier));
     }
   }
 
@@ -482,8 +488,8 @@ public class InstitutionServiceImpl implements InstitutionService {
     // If requirement is NO_ACCESS, it is possible that this tier does not exist yet. Skip the
     // saving.
     if (modelInstitution.getTierConfigs() != null) {
-      institutionTierConfigMapper
-          .tierConfigsToDbTierRequirements(
+      institutionTierRequirementDao.saveAll(
+          institutionTierConfigMapper.tierConfigsToDbTierRequirements(
               modelInstitution.getTierConfigs().stream()
                   .filter(
                       i ->
@@ -492,8 +498,7 @@ public class InstitutionServiceImpl implements InstitutionService {
                                   != InstitutionMembershipRequirement.NO_ACCESS))
                   .collect(Collectors.toList()),
               dbInstitution,
-              dbAccessTiers)
-          .forEach(institutionTierRequirementDao::save);
+              dbAccessTiers));
     }
   }
 

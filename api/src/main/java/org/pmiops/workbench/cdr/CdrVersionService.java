@@ -12,6 +12,7 @@ import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.model.CdrVersion;
 import org.pmiops.workbench.model.CdrVersionTier;
 import org.pmiops.workbench.model.CdrVersionTiersResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,6 +74,10 @@ public class CdrVersionService {
     return cdrVersionDao.findById(cdrVersionId);
   }
 
+  /**
+   * Assemble a CdrVersionTiersResponse consisting of all the CDR Versions in each tier, along with
+   * the default CDR Version's ID and creation time for each tier.
+   */
   public CdrVersionTiersResponse getCdrVersionsByTier() {
     boolean hasRegisteredTierAccess =
         accessTierService.getAccessTiersForUser(userProvider.get()).stream()
@@ -99,11 +104,24 @@ public class CdrVersionService {
               accessTier.getShortName()));
     }
 
-    List<Long> defaultVersions =
-        cdrVersions.stream()
-            .filter(DbCdrVersion::getIsDefaultNotNull)
-            .map(DbCdrVersion::getCdrVersionId)
-            .collect(Collectors.toList());
+    CdrVersion defaultVersion =
+        cdrVersionMapper.dbModelToClient(getDefaultVersionForTier(accessTier, cdrVersions));
+
+    return new CdrVersionTier()
+        .versions(
+            cdrVersions.stream()
+                .map(cdrVersionMapper::dbModelToClient)
+                .collect(Collectors.toList()))
+        .defaultCdrVersionId(defaultVersion.getCdrVersionId())
+        .defaultCdrVersionCreationTime(defaultVersion.getCreationTime())
+        .accessTierShortName(accessTier.getShortName())
+        .accessTierDisplayName(accessTier.getDisplayName());
+  }
+
+  private DbCdrVersion getDefaultVersionForTier(
+      DbAccessTier accessTier, List<DbCdrVersion> cdrVersions) {
+    List<DbCdrVersion> defaultVersions =
+        cdrVersions.stream().filter(DbCdrVersion::getIsDefaultNotNull).collect(Collectors.toList());
     if (defaultVersions.isEmpty()) {
       throw new ForbiddenException(
           String.format(
@@ -116,14 +134,6 @@ public class CdrVersionService {
               "Found multiple (%d) default CDR versions in access tier '%s', picking one",
               defaultVersions.size(), accessTier.getShortName()));
     }
-
-    return new CdrVersionTier()
-        .versions(
-            cdrVersions.stream()
-                .map(cdrVersionMapper::dbModelToClient)
-                .collect(Collectors.toList()))
-        .defaultCdrVersionId(String.valueOf(defaultVersions.get(0)))
-        .accessTierShortName(accessTier.getShortName())
-        .accessTierDisplayName(accessTier.getDisplayName());
+    return defaultVersions.get(0);
   }
 }

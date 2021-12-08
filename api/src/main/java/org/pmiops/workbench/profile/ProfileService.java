@@ -17,6 +17,7 @@ import org.javers.core.diff.changetype.NewObject;
 import org.javers.core.diff.changetype.PropertyChange;
 import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.access.AccessTierService;
+import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.auditors.ProfileAuditor;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.db.dao.InstitutionDao;
@@ -208,11 +209,13 @@ public class ProfileService {
   /**
    * Updates a profile for a given user and persists all information to the database.
    *
-   * @param user
-   * @param updatedProfile
-   * @param previousProfile
+   * @param user the DbUser whose profile we're updating
+   * @param agent is the user updating their own profile, or is it an admin?
+   * @param updatedProfile new version of profile
+   * @param previousProfile old version of profile
    */
-  public DbUser updateProfile(DbUser user, Profile updatedProfile, Profile previousProfile) {
+  public DbUser updateProfile(
+      DbUser user, Agent agent, Profile updatedProfile, Profile previousProfile) {
     // Apply cleaning methods to both the previous and updated profile, to avoid false positive
     // field diffs due to null-to-empty-object changes.
     cleanProfile(updatedProfile);
@@ -248,31 +251,35 @@ public class ProfileService {
     }
     user.setDemographicSurvey(dbDemographicSurvey);
 
-    DbUser updatedUser = userService.updateUserWithConflictHandling(user);
+    // save user, update institution, and synchronize access tiers
+    DbUser updatedUser =
+        userService.updateUserWithRetries(
+            u -> upsertAffiliation(u, updatedProfile.getVerifiedInstitutionalAffiliation()),
+            user,
+            agent);
 
-    // FIXME: why not do a getOrCreateAffiliation() here and then update that object & save?
+    final Profile appliedUpdatedProfile = getProfile(updatedUser);
+    profileAuditor.fireUpdateAction(previousProfile, appliedUpdatedProfile, agent);
+    return updatedUser;
+  }
 
-    // Save the verified institutional affiliation in the DB. The affiliation has already been
-    // verified as part of the `validateProfile` call.
+  // Save the verified institutional affiliation in the DB. The affiliation has already been
+  // verified as part of the `validateProfile` call.
+  private DbUser upsertAffiliation(DbUser dbUser, VerifiedInstitutionalAffiliation affiliation) {
+
     DbVerifiedInstitutionalAffiliation newAffiliation =
         verifiedInstitutionalAffiliationMapper.modelToDbWithoutUser(
-            updatedProfile.getVerifiedInstitutionalAffiliation(), institutionService);
-    newAffiliation.setUser(
-        user); // Why are we calling a non-user mapping function and then adding a user?
+            affiliation, institutionService);
+    newAffiliation.setUser(dbUser);
 
-    // This is 1:1 in terms of our current usage, but not modelled that way (aside from the unique
-    // constraint on user_id).
-
-    // If this user already has an affiliation, replace the ID of hte
+    // If this user already has an affiliation, set the ID of the newAffiliation to it
     verifiedInstitutionalAffiliationDao
-        .findFirstByUser(user)
+        .findFirstByUser(dbUser)
         .map(DbVerifiedInstitutionalAffiliation::getVerifiedInstitutionalAffiliationId)
         .ifPresent(newAffiliation::setVerifiedInstitutionalAffiliationId);
     this.verifiedInstitutionalAffiliationDao.save(newAffiliation);
 
-    final Profile appliedUpdatedProfile = getProfile(user);
-    profileAuditor.fireUpdateAction(previousProfile, appliedUpdatedProfile);
-    return updatedUser;
+    return dbUser;
   }
 
   public void cleanProfile(Profile profile) {
@@ -517,7 +524,7 @@ public class ProfileService {
     Optional.ofNullable(request.getAffiliation())
         .ifPresent(updatedProfile::setVerifiedInstitutionalAffiliation);
 
-    updateProfile(dbUser, updatedProfile, originalProfile);
+    updateProfile(dbUser, Agent.asAdmin(userProvider.get()), updatedProfile, originalProfile);
 
     return getProfile(dbUser);
   }

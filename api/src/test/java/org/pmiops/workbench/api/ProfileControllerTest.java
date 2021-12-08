@@ -37,6 +37,7 @@ import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.access.AccessTierServiceImpl;
 import org.pmiops.workbench.access.UserAccessModuleMapperImpl;
 import org.pmiops.workbench.actionaudit.ActionAuditQueryServiceImpl;
+import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.auditors.ProfileAuditor;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.actionaudit.targetproperties.BypassTimeTargetProperty;
@@ -640,74 +641,12 @@ public class ProfileControllerTest extends BaseControllerTest {
   }
 
   @Test
-  public void updateVerifiedInstitutionalAffiliation_noSuchInstitution() {
-    assertThrows(
-        NotFoundException.class,
-        () -> {
-          // ProfileController.updateVerifiedInstitutionalAffiliation() is gated on
-          // ACCESS_CONTROL_ADMIN
-          // Authority which is also checked in ProfileService.validateProfile()
-          boolean grantAdminAuthority = true;
-          final VerifiedInstitutionalAffiliation original =
-              createVerifiedInstitutionalAffiliation();
-          createAccountAndDbUserWithAffiliation(original, grantAdminAuthority);
-          final VerifiedInstitutionalAffiliation newAffil =
-              new VerifiedInstitutionalAffiliation()
-                  .institutionShortName("NotTheBroad")
-                  .institutionDisplayName("The Narrow Institute?")
-                  .institutionalRoleEnum(InstitutionalRole.PRE_DOCTORAL);
-          profileController.updateVerifiedInstitutionalAffiliation(dbUser.getUserId(), newAffil);
-        });
-  }
-
-  @Test
-  public void updateVerifiedInstitutionalAffiliation_update() {
-    // ProfileController.updateVerifiedInstitutionalAffiliation() is gated on ACCESS_CONTROL_ADMIN
-    // Authority which is also checked in ProfileService.validateProfile()
-    boolean grantAdminAuthority = true;
-
-    VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation =
-        createVerifiedInstitutionalAffiliation();
-    createAccountAndDbUserWithAffiliation(verifiedInstitutionalAffiliation, grantAdminAuthority);
-
-    // original is PROJECT_PERSONNEL
-    verifiedInstitutionalAffiliation.setInstitutionalRoleEnum(InstitutionalRole.ADMIN);
-    profileController.updateVerifiedInstitutionalAffiliation(
-        dbUser.getUserId(), verifiedInstitutionalAffiliation);
-
-    Profile updatedProfile = profileService.getProfile(dbUser);
-    assertThat(updatedProfile.getVerifiedInstitutionalAffiliation())
-        .isEqualTo(verifiedInstitutionalAffiliation);
-  }
-
-  @Test
   public void updateProfile_removeVerifiedInstitutionalAffiliationForbidden() {
-    assertThrows(
-        BadRequestException.class,
-        () -> {
-          final VerifiedInstitutionalAffiliation original =
-              createVerifiedInstitutionalAffiliation();
-          createAccountAndDbUserWithAffiliation(original);
-          final Profile profile = profileController.getMe().getBody();
-          profile.setVerifiedInstitutionalAffiliation(null);
-          profileController.updateProfile(profile);
-        });
-  }
-
-  @Test
-  public void updateVerifiedInstitutionalAffiliation_removeForbidden() {
-    assertThrows(
-        BadRequestException.class,
-        () -> {
-          // ProfileController.updateVerifiedInstitutionalAffiliation() is gated on
-          // ACCESS_CONTROL_ADMIN
-          // Authority which is also checked in ProfileService.validateProfile()
-          boolean grantAdminAuthority = true;
-          final VerifiedInstitutionalAffiliation original =
-              createVerifiedInstitutionalAffiliation();
-          createAccountAndDbUserWithAffiliation(original, grantAdminAuthority);
-          profileController.updateVerifiedInstitutionalAffiliation(dbUser.getUserId(), null);
-        });
+    final VerifiedInstitutionalAffiliation original = createVerifiedInstitutionalAffiliation();
+    createAccountAndDbUserWithAffiliation(original);
+    final Profile profile = profileController.getMe().getBody();
+    profile.setVerifiedInstitutionalAffiliation(null);
+    assertThrows(BadRequestException.class, () -> profileController.updateProfile(profile));
   }
 
   @Test
@@ -1153,7 +1092,8 @@ public class ProfileControllerTest extends BaseControllerTest {
     final Profile retrieved = profileService.updateAccountProperties(request);
     assertThat(retrieved.getContactEmail()).isEqualTo(newContactEmail);
 
-    verify(mockProfileAuditor).fireUpdateAction(original, retrieved);
+    final Agent adminAgent = Agent.asAdmin(userDao.findUserByUserId(original.getUserId()));
+    verify(mockProfileAuditor).fireUpdateAction(original, retrieved, adminAgent);
   }
 
   @Test
@@ -1244,38 +1184,66 @@ public class ProfileControllerTest extends BaseControllerTest {
     final Profile retrieved = profileService.updateAccountProperties(request);
     assertThat(retrieved.getVerifiedInstitutionalAffiliation()).isEqualTo(newAffiliation);
 
-    verify(mockProfileAuditor).fireUpdateAction(original, retrieved);
+    final Agent adminAgent = Agent.asAdmin(userDao.findUserByUserId(original.getUserId()));
+    verify(mockProfileAuditor).fireUpdateAction(original, retrieved, adminAgent);
   }
 
   @Test
   public void test_updateAccountProperties_newAffiliation_no_match() {
     // ProfileController.updateAccountProperties() is gated on ACCESS_CONTROL_ADMIN Authority
-    assertThrows(
-        BadRequestException.class,
-        () -> {
-          // ProfileController.updateAccountProperties() is gated on ACCESS_CONTROL_ADMIN Authority
-          // which is also checked in ProfileService.validateProfile()
-          boolean grantAdminAuthority = true;
-          createAccountAndDbUserWithAffiliation(grantAdminAuthority);
-          // define a new affiliation which will not match the user's CONTACT_EMAIL
-          final Institution massGeneral =
-              new Institution()
-                  .shortName("MGH123")
-                  .displayName("Massachusetts General Hospital")
-                  .addTierConfigsItem(
-                      rtDomainsConfig.emailDomains(
-                          ImmutableList.of("mgh.org", "massgeneral.hospital")))
-                  .organizationTypeEnum(OrganizationType.HEALTH_CENTER_NON_PROFIT);
-          institutionService.createInstitution(massGeneral);
-          final VerifiedInstitutionalAffiliation newAffiliation =
-              new VerifiedInstitutionalAffiliation()
-                  .institutionShortName(massGeneral.getShortName())
-                  .institutionDisplayName(massGeneral.getDisplayName())
-                  .institutionalRoleEnum(InstitutionalRole.POST_DOCTORAL);
-          final AccountPropertyUpdate request =
-              new AccountPropertyUpdate().username(FULL_USER_NAME).affiliation(newAffiliation);
-          profileService.updateAccountProperties(request);
-        });
+    // which is also checked in ProfileService.validateProfile()
+    boolean grantAdminAuthority = true;
+    createAccountAndDbUserWithAffiliation(grantAdminAuthority);
+    // define a new affiliation which will not match the user's CONTACT_EMAIL
+    final Institution massGeneral =
+        new Institution()
+            .shortName("MGH123")
+            .displayName("Massachusetts General Hospital")
+            .addTierConfigsItem(
+                rtDomainsConfig.emailDomains(ImmutableList.of("mgh.org", "massgeneral.hospital")))
+            .organizationTypeEnum(OrganizationType.HEALTH_CENTER_NON_PROFIT);
+    institutionService.createInstitution(massGeneral);
+    final VerifiedInstitutionalAffiliation newAffiliation =
+        new VerifiedInstitutionalAffiliation()
+            .institutionShortName(massGeneral.getShortName())
+            .institutionDisplayName(massGeneral.getDisplayName())
+            .institutionalRoleEnum(InstitutionalRole.POST_DOCTORAL);
+    final AccountPropertyUpdate request =
+        new AccountPropertyUpdate().username(FULL_USER_NAME).affiliation(newAffiliation);
+    assertThrows(BadRequestException.class, () -> profileService.updateAccountProperties(request));
+  }
+
+  @Test
+  public void test_updateAccountProperties_newAffiliation_inst_not_found() {
+    // ProfileController.updateAccountProperties() is gated on ACCESS_CONTROL_ADMIN Authority
+    // which is also checked in ProfileService.validateProfile()
+    boolean grantAdminAuthority = true;
+    createAccountAndDbUserWithAffiliation(grantAdminAuthority);
+    // define a new affiliation with an inst that doesn't exist
+    final VerifiedInstitutionalAffiliation newAffiliation =
+        new VerifiedInstitutionalAffiliation()
+            .institutionShortName("not found")
+            .institutionDisplayName("Not a real institution")
+            .institutionalRoleEnum(InstitutionalRole.POST_DOCTORAL);
+    final AccountPropertyUpdate request =
+        new AccountPropertyUpdate().username(FULL_USER_NAME).affiliation(newAffiliation);
+    assertThrows(NotFoundException.class, () -> profileService.updateAccountProperties(request));
+  }
+
+  @Test
+  public void test_updateAccountProperties_remove_affiliation() {
+    // ProfileController.updateAccountProperties() is gated on ACCESS_CONTROL_ADMIN Authority
+    // which is also checked in ProfileService.validateProfile()
+    boolean grantAdminAuthority = true;
+    createAccountAndDbUserWithAffiliation(grantAdminAuthority);
+
+    // define an affiliation without an institution
+    final VerifiedInstitutionalAffiliation newAffiliation =
+        new VerifiedInstitutionalAffiliation()
+            .institutionalRoleEnum(InstitutionalRole.POST_DOCTORAL);
+    final AccountPropertyUpdate request =
+        new AccountPropertyUpdate().username(FULL_USER_NAME).affiliation(newAffiliation);
+    assertThrows(NotFoundException.class, () -> profileService.updateAccountProperties(request));
   }
 
   @Test
@@ -1322,7 +1290,8 @@ public class ProfileControllerTest extends BaseControllerTest {
     final Profile retrieved = profileService.updateAccountProperties(request);
     assertThat(retrieved.getContactEmail()).isEqualTo(newContactEmail);
     assertThat(retrieved.getVerifiedInstitutionalAffiliation()).isEqualTo(newAffiliation);
-    verify(mockProfileAuditor).fireUpdateAction(original, retrieved);
+    final Agent adminAgent = Agent.asAdmin(userDao.findUserByUserId(original.getUserId()));
+    verify(mockProfileAuditor).fireUpdateAction(original, retrieved, adminAgent);
   }
 
   @Test
@@ -1438,8 +1407,9 @@ public class ProfileControllerTest extends BaseControllerTest {
     assertThat(getBypassEpochMillis(retrieved2, AccessModule.TWO_FACTOR_AUTH)).isNotNull();
 
     // TODO(RW-6930): Make Profile contain the new AccessModule block, then read from there.
-    verify(mockProfileAuditor).fireUpdateAction(original, retrieved1);
-    verify(mockProfileAuditor).fireUpdateAction(retrieved1, retrieved2);
+    final Agent adminAgent = Agent.asAdmin(userDao.findUserByUserId(original.getUserId()));
+    verify(mockProfileAuditor).fireUpdateAction(original, retrieved1, adminAgent);
+    verify(mockProfileAuditor).fireUpdateAction(retrieved1, retrieved2, adminAgent);
 
     // DUCC and COMPLIANCE x2, one for each request
     verify(mockUserServiceAuditor, times(2))

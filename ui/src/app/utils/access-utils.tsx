@@ -82,7 +82,7 @@ export const redirectToRas = (openInNewTab: boolean = true): void => {
   // The scopes are also used in backend for fetching user info.
   const url = serverConfigStore.get().config.rasHost + '/auth/oauth/v2/authorize?client_id=' + serverConfigStore.get().config.rasClientId
     + '&prompt=login+consent&redirect_uri=' + buildRasRedirectUrl()
-    + '&response_type=code&scope=openid+profile+email+ga4gh_passport_v1+federated_identities';
+    + '&response_type=code&scope=openid+profile+email+federated_identities';
 
   openInNewTab ? window.open(url, '_blank') : <Redirect to={url}/>;
 };
@@ -305,7 +305,7 @@ export const computeDisplayDates = ({completionEpochMillis, expirationEpochMilli
 
 // return true if user is eligible for registered tier.
 // A user loses tier eligibility when they are removed from institution tier requirement
-export const eligibleForRegisteredTier = (tierEligiblities: Array<UserTierEligibility>): boolean => {
-  const rtEligiblity = tierEligiblities.find(t => t.accessTierShortName === AccessTierShortNames.Registered)
+export const eligibleForTier = (profile: Profile, accessTierShortName: string): boolean => {
+  const rtEligiblity = profile.tierEligibilities.find(t => t.accessTierShortName === accessTierShortName)
   return rtEligiblity?.eligible
 };

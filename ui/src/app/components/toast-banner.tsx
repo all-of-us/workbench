@@ -19,7 +19,6 @@ const styles = reactStyles({
     position: 'absolute',
     top: '0',
     right: '0',
-    zIndex: 103,
   },
   title: {
     fontWeight: 600,
@@ -61,40 +60,42 @@ export enum ToastType {
   WARNING
 }
 
-const styleForType = (tt: ToastType) => switchCase(tt,
-  [ToastType.INFO, () => styles.infoBanner],
+const styleForType = (toastType: ToastType, zIndex): React.CSSProperties => switchCase(toastType,
+  [ToastType.INFO, () => ({
+    ...styles.infoBanner,
+    zIndex
+  })],
   [ToastType.WARNING, () => ({
-      ...styles.infoBanner,
-      backgroundColor: colorWithWhiteness(colors.highlight, .5),
+    ...styles.infoBanner,
+    zIndex,
+    backgroundColor: colorWithWhiteness(colors.highlight, .5),
   })],
 );
 
 interface ToastProps {
   title: string;
-  message: string;
+  message: string | JSX.Element;
   onClose: Function;
-  type: ToastType;
-  footer?: JSX.Element;
+  toastType: ToastType;
+  zIndex: any;  // TODO better type
+  footer?: string | JSX.Element;
 }
-
-const InnerComponent = (props: ToastProps) => {
-  const {title, message, onClose, type, footer} = props;
-  return <FlexColumn style={styleForType(type)}>
-    <FlexRow style={{alignItems: 'center', marginTop: '.1rem'}}>
-      {type === ToastType.WARNING && warningIcon}
-      <div style={styles.title}>{title}</div>
-    </FlexRow>
-    <div style={styles.message}>{message}</div>
-    <div style={styles.footer}>{footer}</div>
-    <ClrIcon
-      shape={'times'}
-      size={20}
-      style={styles.closeIcon}
-      onClick={() => onClose()}
-    />
-  </FlexColumn>;
-}
-
 export const ToastBanner = (props: ToastProps) => {
-  return ReactDOM.createPortal(<InnerComponent {...props}/>, document.getElementsByTagName('body')[0]);
+  const {title, message, onClose, toastType, zIndex, footer} = props;
+  return ReactDOM.createPortal(
+    <FlexColumn style={styleForType(toastType, zIndex)}>
+      <FlexRow style={{alignItems: 'center', marginTop: '.1rem'}}>
+        {toastType === ToastType.WARNING && warningIcon}
+        <div style={styles.title}>{title}</div>
+      </FlexRow>
+      <div style={styles.message}>{message}</div>
+      <div style={styles.footer}>{footer}</div>
+      <ClrIcon
+        shape={'times'}
+        size={20}
+        style={styles.closeIcon}
+        onClick={() => onClose()}
+      />
+    </FlexColumn>,
+    document.getElementsByTagName('body')[0]);
 }
