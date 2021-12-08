@@ -370,7 +370,7 @@ public class ProfileServiceTest {
             newAffiliation, mockInstitutionService))
         .thenReturn(dbVerifiedInstitutionalAffiliation);
 
-    when(mockUserService.updateUserAccessTiers(any(), any())).thenReturn(user);
+    when(mockUserService.updateUserWithRetries(any(), any(), any())).thenReturn(user);
 
     profileService.updateProfile(
         user, Agent.asAdmin(loggedInUser), updatedProfile, previousProfile);
@@ -428,7 +428,7 @@ public class ProfileServiceTest {
     targetUser.setGivenName("John");
     targetUser.setFamilyName("Doe");
 
-    when(mockUserService.updateUserAccessTiers(any(), any())).thenReturn(targetUser);
+    when(mockUserService.updateUserWithRetries(any(), any(), any())).thenReturn(targetUser);
 
     profileService.updateProfile(
         targetUser, Agent.asAdmin(loggedInUser), updatedProfile, previousProfile);

@@ -470,7 +470,7 @@ public class ProfileController implements ProfileApiDelegate {
       throw new BadRequestException("Cannot update Verified Institutional Affiliation");
     }
 
-    DbUser updatedUser =
+    final DbUser updatedUser =
         profileService.updateProfile(user, Agent.asUser(user), updatedProfile, previousProfile);
     userService.confirmProfile(updatedUser);
 
