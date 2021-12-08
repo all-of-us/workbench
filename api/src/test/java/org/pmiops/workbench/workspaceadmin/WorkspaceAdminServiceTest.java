@@ -426,6 +426,15 @@ public class WorkspaceAdminServiceTest {
     AdminLockingRequest adminLockingRequest = new AdminLockingRequest();
     adminLockingRequest.setRequestReason("To test auditor");
     adminLockingRequest.setRequestDateInMillis(12345677l);
+
+    Workspace workspace =
+        TestMockFactory.createWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME);
+    DbWorkspace dbWorkspace =
+        TestMockFactory.createDbWorkspaceStub(workspace, DB_WORKSPACE_ID);
+    doReturn(dbWorkspace)
+        .when(mockWorkspaceDao)
+        .save(any()); // TODO make it work with dbWorkspace
+
     workspaceAdminService.setAdminLockedState(WORKSPACE_NAMESPACE, adminLockingRequest);
     verify(mockAdminAuditor)
         .fireLockWorkspaceAction(dbWorkspace.getWorkspaceId(), adminLockingRequest);

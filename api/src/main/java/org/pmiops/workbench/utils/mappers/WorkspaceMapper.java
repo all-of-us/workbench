@@ -102,6 +102,7 @@ public interface WorkspaceMapper {
   // This method isn't a full conversion, so we need to mask out the values that don't
   // get set here.
   @Mapping(target = "adminLocked", ignore = true)
+  @Mapping(target = "adminLockedReason", ignore = true)
   @Mapping(target = "approved", ignore = true)
   @Mapping(target = "billingAccountName", ignore = true)
   @Mapping(target = "billingMigrationStatusEnum", ignore = true)
