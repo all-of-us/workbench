@@ -880,7 +880,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
         dbUser, AccessModuleName.PROFILE_CONFIRMATION, timestamp);
 
     return updateUserAccessTiers(dbUser, Agent.asUser(dbUser));
-    ;
   }
 
   /** Confirm that a user has either reported any AoU-related publications, or has none. */
