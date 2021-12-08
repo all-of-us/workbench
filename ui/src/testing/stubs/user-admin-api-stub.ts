@@ -1,6 +1,6 @@
-import { AccessBypassRequest, AdminUserListResponse, EmptyResponse, Profile, UserAdminApi } from "generated/fetch";
-import { ProfileStubVariables } from "./profile-api-stub";
-import { stubNotImplementedError } from "./stub-utils";
+import { AccessBypassRequest, AdminUserListResponse, EmptyResponse, Profile, UserAdminApi } from 'generated/fetch';
+import { ProfileStubVariables } from './profile-api-stub';
+import { stubNotImplementedError } from './stub-utils';
 
 export class UserAdminApiStub extends UserAdminApi {
   constructor(public profile = ProfileStubVariables.PROFILE_STUB) {
