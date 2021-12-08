@@ -251,10 +251,12 @@ public class ProfileService {
     }
     user.setDemographicSurvey(dbDemographicSurvey);
 
-    // update institution and synchronize access tiers
+    // save user, update institution, and synchronize access tiers
     DbUser updatedUser =
-        upsertAffiliation(user, updatedProfile.getVerifiedInstitutionalAffiliation());
-    updatedUser = userService.updateUserAccessTiers(updatedUser, agent);
+        userService.updateUserWithRetries(
+            u -> upsertAffiliation(u, updatedProfile.getVerifiedInstitutionalAffiliation()),
+            user,
+            agent);
 
     final Profile appliedUpdatedProfile = getProfile(updatedUser);
     profileAuditor.fireUpdateAction(previousProfile, appliedUpdatedProfile, agent);
