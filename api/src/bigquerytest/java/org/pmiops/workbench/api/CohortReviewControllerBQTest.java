@@ -18,6 +18,7 @@ import java.util.Map;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
@@ -120,6 +121,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     WorkspaceAuthService.class
   })
   @MockBean({
+    AccessTierService.class,
     BillingProjectAuditor.class,
     CohortBuilderService.class,
     CohortFactory.class,

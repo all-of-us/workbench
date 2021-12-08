@@ -19,6 +19,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
+import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.cdr.CdrVersionContext;
@@ -74,6 +75,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
   protected static final int RECENT_WORKSPACE_COUNT = 4;
   private static final Logger log = Logger.getLogger(WorkspaceService.class.getName());
 
+  private final AccessTierService accessTierService;
   private final BillingProjectAuditor billingProjectAuditor;
   private final Clock clock;
   private final CohortCloningService cohortCloningService;
@@ -93,6 +95,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
 
   @Autowired
   public WorkspaceServiceImpl(
+      AccessTierService accessTierService,
       BillingProjectAuditor billingProjectAuditor,
       Clock clock,
       CohortCloningService cohortCloningService,
@@ -109,6 +112,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
       WorkspaceDao workspaceDao,
       WorkspaceMapper workspaceMapper,
       WorkspaceAuthService workspaceAuthService) {
+    this.accessTierService = accessTierService;
     this.cloudBillingClient = cloudBillingClient;
     this.billingProjectAuditor = billingProjectAuditor;
     this.clock = clock;
@@ -172,9 +176,10 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
   @Override
   public WorkspaceResponse getWorkspace(String workspaceNamespace, String workspaceId) {
     DbWorkspace dbWorkspace = workspaceDao.getRequired(workspaceNamespace, workspaceId);
+    validateWorkspaceTierAccess(dbWorkspace);
+
     FirecloudWorkspaceResponse fcResponse;
     FirecloudWorkspaceDetails fcWorkspace;
-
     WorkspaceResponse workspaceResponse = new WorkspaceResponse();
 
     // This enforces access controls.
@@ -327,6 +332,22 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
     List<DbUserRecentWorkspace> userRecentWorkspaces =
         userRecentWorkspaceDao.findByUserIdOrderByLastAccessDateDesc(userId);
     return pruneInaccessibleRecentWorkspaces(userRecentWorkspaces, userId);
+  }
+
+  /**
+   * Throw ForbiddenException if logged in user doesnt have the same Tier Access as that of
+   * workspace
+   *
+   * @param dbWorkspace
+   */
+  private void validateWorkspaceTierAccess(DbWorkspace dbWorkspace) {
+    String workspaceAccessTier = dbWorkspace.getCdrVersion().getAccessTier().getShortName();
+
+    List<String> accessTiers = accessTierService.getAccessTierShortNamesForUser(userProvider.get());
+
+    if (!accessTiers.contains(workspaceAccessTier)) {
+      throw new ForbiddenException("User does not have access to the workspace tier");
+    }
   }
 
   private List<DbUserRecentWorkspace> pruneInaccessibleRecentWorkspaces(
