@@ -63,6 +63,7 @@ export function getSelectedPopulations(researchPurpose: ResearchPurpose) {
   categories.forEach(category => {
     category.subCategory = category.subCategory.filter(({shortName}) => researchPurpose.populationDetails.includes(shortName));
   });
+  // The 'Other' type of population is stored in otherPopulationDetails field, not populationDetails field.
   if (researchPurpose.otherPopulationDetails) {
     categories.push({
       label: 'Other',
