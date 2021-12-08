@@ -51,7 +51,6 @@ import org.pmiops.workbench.model.InstitutionTierConfig;
 import org.pmiops.workbench.model.InstitutionalRole;
 import org.pmiops.workbench.model.OrganizationType;
 import org.pmiops.workbench.model.TierAccessStatus;
-import org.pmiops.workbench.model.UserAccessExpiration;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.testconfig.UserServiceTestConfiguration;
 import org.pmiops.workbench.utils.TestMockFactory;
@@ -762,88 +761,6 @@ public class UserServiceAccessTest {
     userService.maybeSendAccessExpirationEmail(dbUser);
 
     verifyZeroInteractions(mailService);
-  }
-
-  @Test
-  public void test_getRegisteredTierExpirations_empty() {
-    assertThat(userService.getRegisteredTierExpirations()).isEmpty();
-  }
-
-  @Test
-  public void test_getRegisteredTierExpirations_one_year() {
-    // register user by setting 2 bypassable modules' bypass to now
-    // and the 2 unbypassable modules' completions to now
-
-    dbUser = updateUserWithRetries(registerUserNow);
-    assertRegisteredTierEnabled(dbUser);
-
-    // the 2 unbypassable modules will expire in a year
-    final String aYearFromNow =
-        PROVIDED_CLOCK.instant().plus(EXPIRATION_DAYS, ChronoUnit.DAYS).toString();
-
-    final List<UserAccessExpiration> expirations = userService.getRegisteredTierExpirations();
-    assertThat(expirations.size()).isEqualTo(1);
-    assertThat(expirations.get(0).getUserName()).isEqualTo(dbUser.getUsername());
-    assertThat(expirations.get(0).getContactEmail()).isEqualTo(dbUser.getContactEmail());
-    assertThat(expirations.get(0).getGivenName()).isEqualTo(dbUser.getGivenName());
-    assertThat(expirations.get(0).getFamilyName()).isEqualTo(dbUser.getFamilyName());
-
-    assertThat(expirations.get(0).getExpirationDate()).isEqualTo(aYearFromNow);
-  }
-
-  // regression test: confirm that expirations are returned when the compliance module is disabled
-  // and the user has not completed or bypassed compliance
-
-  @Test
-  public void test_getRegisteredTierExpirations_one_year_compliance_disabled() {
-    providedWorkbenchConfig.access.enableComplianceTraining = false;
-
-    // register user by setting the DUCC bypass to now
-    // and the 2 unbypassable modules' completions to now
-
-    final Timestamp now = Timestamp.from(PROVIDED_CLOCK.instant());
-    dbUser =
-        updateUserWithRetries(
-            user -> {
-
-              // this is sufficient to fully register the user when the compliance module is
-              // disabled
-              user.setDisabled(false);
-              accessModuleService.updateBypassTime(
-                  user.getUserId(), AccessModule.TWO_FACTOR_AUTH, true);
-              accessModuleService.updateBypassTime(
-                  user.getUserId(), AccessModule.RAS_LINK_LOGIN_GOV, true);
-              accessModuleService.updateBypassTime(
-                  user.getUserId(), AccessModule.ERA_COMMONS, true);
-              accessModuleService.updateBypassTime(
-                  user.getUserId(), AccessModule.DATA_USER_CODE_OF_CONDUCT, true);
-              accessModuleService.updateCompletionTime(
-                  user, AccessModuleName.PUBLICATION_CONFIRMATION, now);
-              accessModuleService.updateCompletionTime(
-                  user, AccessModuleName.PROFILE_CONFIRMATION, now);
-
-              // ensure there is nothing set for compliance
-              accessModuleService.updateCompletionTime(
-                  user, AccessModuleName.RT_COMPLIANCE_TRAINING, null);
-              accessModuleService.updateBypassTime(
-                  user.getUserId(), AccessModule.COMPLIANCE_TRAINING, false);
-
-              return user;
-            });
-    assertRegisteredTierEnabled(dbUser);
-
-    // the 2 unbypassable modules will expire in a year
-    final String aYearFromNow =
-        PROVIDED_CLOCK.instant().plus(EXPIRATION_DAYS, ChronoUnit.DAYS).toString();
-
-    final List<UserAccessExpiration> expirations = userService.getRegisteredTierExpirations();
-    assertThat(expirations.size()).isEqualTo(1);
-    assertThat(expirations.get(0).getUserName()).isEqualTo(dbUser.getUsername());
-    assertThat(expirations.get(0).getContactEmail()).isEqualTo(dbUser.getContactEmail());
-    assertThat(expirations.get(0).getGivenName()).isEqualTo(dbUser.getGivenName());
-    assertThat(expirations.get(0).getFamilyName()).isEqualTo(dbUser.getFamilyName());
-
-    assertThat(expirations.get(0).getExpirationDate()).isEqualTo(aYearFromNow);
   }
 
   @Test
