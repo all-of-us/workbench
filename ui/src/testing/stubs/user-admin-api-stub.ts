@@ -12,11 +12,6 @@ export class UserAdminApiStub extends UserAdminApi {
     return new Promise<EmptyResponse>(() => {});
   }
 
-
-  public getUser(userId: number): Promise<Profile> {
-    return Promise.resolve(this.profile);
-  }
-
   public getAllUsers(): Promise<AdminUserListResponse> {
     return Promise.resolve({users: [{
       userId: 1,

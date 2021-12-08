@@ -1,7 +1,6 @@
 package org.pmiops.workbench.api;
 
 import java.time.Instant;
-import java.util.List;
 import java.util.Optional;
 import javax.annotation.Nullable;
 import javax.inject.Provider;
@@ -18,7 +17,6 @@ import org.pmiops.workbench.model.AdminUserListResponse;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.Profile;
-import org.pmiops.workbench.model.UserAccessExpiration;
 import org.pmiops.workbench.model.UserAuditLogQueryResponse;
 import org.pmiops.workbench.profile.ProfileService;
 import org.springframework.http.ResponseEntity;
@@ -82,28 +80,6 @@ public class UserAdminController implements UserAdminApiDelegate {
         Optional.ofNullable(beforeMillis).map(Instant::ofEpochMilli).orElse(Instant.now());
     return ResponseEntity.ok(
         actionAuditQueryService.queryEventsForUser(userDatabaseId, limit, after, before));
-  }
-
-  /**
-   * Gets a JSON list of users and their registered tier access expiration dates.
-   *
-   * <p>This endpoint is intended as a temporary manual measure to assist with user communication
-   * during the rollout of Annual Access Renewal (AAR).
-   *
-   * <p>Once fully rolled out, we will have an automated expiration email process and this can
-   * likely be removed. See RW-6689 and RW-6703.
-   */
-  @Override
-  @AuthorityRequired({Authority.ACCESS_CONTROL_ADMIN})
-  public ResponseEntity<List<UserAccessExpiration>> getRegisteredTierAccessExpirations() {
-    return ResponseEntity.ok(userService.getRegisteredTierExpirations());
-  }
-
-  @Override
-  @AuthorityRequired({Authority.ACCESS_CONTROL_ADMIN})
-  public ResponseEntity<Profile> getUser(Long userId) {
-    DbUser user = userDao.findUserByUserId(userId);
-    return ResponseEntity.ok(profileService.getProfile(user));
   }
 
   @Override
