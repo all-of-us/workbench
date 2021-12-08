@@ -901,7 +901,7 @@ describe('RuntimePanel', () => {
         numberOfWorkers: 2,
         numberOfPreemptibleWorkers: 0,
         workerMachineType: 'n1-standard-4',
-        workerDiskSize: MIN_DISK_SIZE_GB,
+        workerDiskSize: DATAPROC_WORKER_MIN_DISK_SIZE_GB,
       }
     };
     runtimeApiStub.runtime = runtime;
