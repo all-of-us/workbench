@@ -1248,7 +1248,7 @@ paths:
   "/v1/admin/unsafe-self-bypass-access-requirement":
     post:
       tags:
-      - profile
+      - userAdmin
       consumes:
       - application/json
       description: 'Updates the given user to bypass the request access requirement'
@@ -1276,7 +1276,7 @@ paths:
   "/v1/admin/users/{usernameWithoutGsuiteDomain}/audit":
     get:
       tags:
-        - profile
+        - userAdmin
       description: >
         Fetch audit logs involving this user as either a subject or object. Requires the
         RESEARCHER_DATA_VIEW authority.
@@ -1329,7 +1329,7 @@ paths:
   "/v1/admin/users/{userId}/bypass-access-requirement":
     post:
       tags:
-      - profile
+      - userAdmin
       consumes:
       - application/json
       description: 'Updates the given user to bypass the request access requirement,
@@ -1359,7 +1359,7 @@ paths:
   "/v1/admin/users/updateAccount":
     post:
       tags:
-        - profile
+        - userAdmin
       consumes:
         - application/json
       description: 'Updates a subset of a user''s account metadata, as defined by the AccountPropertyUpdate object.  Requires ACCESS_CONTROL_ADMIN authority.'
@@ -1386,7 +1386,7 @@ paths:
   "/v1/admin/accessExpirations":
     get:
       tags:
-        - profile
+        - userAdmin
       description: 'Retrieves a mapping of users to access expiration times.  Requires ACCESS_CONTROL_ADMIN authority.'
       operationId: getRegisteredTierAccessExpirations
       responses:
@@ -1403,7 +1403,7 @@ paths:
   "/v1/admin/users/{userId}":
     get:
       tags:
-      - profile
+      - userAdmin
       description: 'Returns a user''s profile for review.  Requires ACCESS_CONTROL_ADMIN
         authority.'
       parameters:
@@ -1421,7 +1421,7 @@ paths:
   "/v1/admin/users/getUserByUsername":
     get:
       tags:
-        - profile
+        - userAdmin
       description: 'Returns a user''s profile for review. Requires ACCESS_CONTROL_ADMIN authority.'
       parameters:
         - in: query
@@ -1441,7 +1441,7 @@ paths:
   "/v1/admin/users/list":
     get:
       tags:
-      - profile
+      - userAdmin
       description: 'Returns a list of profiles for users to be reviewed. Requires
         ACCESS_CONTROL_ADMIN authority.'
       operationId: getAllUsers
