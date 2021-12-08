@@ -34,7 +34,7 @@ if [[ "$STATUS" -eq 1 ]]; then
 fi
 
 # Exiting on PR branch when all (changed) file names matched ignore pattern.
-git diff --name-only $(git merge-base origin/master ${CIRCLE_BRANCH}) | grep -qvFf .circleci/e2e-job-ignore-patterns.txt
+git diff --name-only $(git merge-base origin/main ${CIRCLE_BRANCH}) | grep -qvFf .circleci/e2e-job-ignore-patterns.txt
 STATUS=$?
 if [[ "$STATUS" -eq 1 ]]; then
   echo "Workbench application code were not changed. Exiting job."

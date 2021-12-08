@@ -2,7 +2,7 @@
 
 ## What are they?
 
-This document refers to the command line tools that reside in [workbench-api.yaml](https://github.com/all-of-us/workbench/blob/master/api/tools).
+This document refers to the command line tools that reside in [workbench-api.yaml](https://github.com/all-of-us/workbench/blob/main/api/tools).
 They're usually used to invoke operational or one-off tasks that are more complex than a small bash script but 
 haven't made it into our standard code base yet. The tools are able to compile and use classes from the 
 standard code base so they are relatively quick to write but difficult to maintain. It's not uncommon for a tool to silently break because one of its dependencies in
@@ -41,7 +41,7 @@ Invoking an API tool will generally follow this flow of
 
 ### project.rb
 
-The first step in writing a tool is to register the command in [devstart.rb](https://github.com/all-of-us/workbench/blob/master/api/libproject/devstart.rb) 
+The first step in writing a tool is to register the command in [devstart.rb](https://github.com/all-of-us/workbench/blob/main/api/libproject/devstart.rb) 
 and write the argument parsing code. This step is mostly boilerplate and you just need to figure out what pieces
 you need to pull in.
 

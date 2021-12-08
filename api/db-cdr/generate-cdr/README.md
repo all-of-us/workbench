@@ -24,7 +24,7 @@ for a step-by-step guide to creating all pre-requisite tables. All relevant comm
 
 ## Prep Table commands
 
-### Build prep ppi tables from surveys in redcap - [Install Python](https://github.com/all-of-us/workbench/tree/master/api/db-cdr/prep-ppi-tables)
+### Build prep ppi tables from surveys in redcap - [Install Python](https://github.com/all-of-us/workbench/tree/main/api/db-cdr/prep-ppi-tables)
 `./project.rb make-prep-ppi-csv-files --project all-of-us-workbench-test --dataset DummySR --date 2021-04-21`
 
 ### Build prep_survey table from prep ppi tables in previous command

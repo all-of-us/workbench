@@ -19,7 +19,7 @@ We currently only support MacOS and Linux for development and testing.
   * [gcloud](https://cloud.google.com/sdk/docs/#install_the_latest_cloud_tools_version_cloudsdk_current_version)
     * Command-line interface for Google Cloud Platform.
     * Recent versions of gcloud are expected to work. However, a specific version is used in
-      CircleCI, which is guaranteed to work: https://github.com/all-of-us/workbench/blob/master/ci/Dockerfile.circle_build
+      CircleCI, which is guaranteed to work: https://github.com/all-of-us/workbench/blob/main/ci/Dockerfile.circle_build
     * For use with Stackdriver alert policies and certain other new features you may
     need to install `alpha` or `beta` channels via 
     ```text

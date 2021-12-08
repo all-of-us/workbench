@@ -9,12 +9,12 @@ set -o functrace
 # *******************
 API_ROOT="https://circleci.com/api/v1/"
 # polling branch name. Other branches (PRs) are excluded from consideration.
-BRANCH="master"
+BRANCH="main"
 # Polling workflow name. Other workflow names (nightly-tests and deploy-staging) are excluded from consideration.
 WORKFLOW_NAME="build-test-deploy"
 PROJECT_SLUG="all-of-us/workbench"
 
-# List of jobs that have depend on upstream jobs in build-test-deploy workflow on master branch.
+# List of jobs that have depend on upstream jobs in build-test-deploy workflow on main branch.
 JOB_LIST=("puppeteer-test-2-1" "ui-deploy-to-test" "api-deploy-to-test")
 
 
@@ -62,7 +62,7 @@ fetch_current_pipeline_start_time() {
 }
 
 # Function takes start_time parameter.
-# Fetch list of builds on master branch that are running, pending or queued.
+# Fetch list of builds on main branch that are running, pending or queued.
 fetch_older_pipelines() {
   printf '%s\n' "Fetching workflow id (Older than ${1} on \"${BRANCH}\" branch that are running, pending or queued)."
   local get_path="project/${PROJECT_SLUG}/tree/${BRANCH}?filter=running&shallow=true"
@@ -121,9 +121,9 @@ fi
 fetch_older_pipelines "${current_pipeline_start_time}"
 pipeline_workflow_ids=$__
 
-# Exit if there are no running workflows on master branch.
+# Exit if there are no running workflows on main branch.
 if [[ -z $pipeline_workflow_ids ]]; then
-  printf "%s\n" "No workflow currently running on master branch."
+  printf "%s\n" "No workflow currently running on main branch."
   exit 0
 fi
 
