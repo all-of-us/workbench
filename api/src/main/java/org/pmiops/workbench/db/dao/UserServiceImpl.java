@@ -166,7 +166,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     int statementClosedCount = 0;
     while (true) {
       dbUser = userModifier.apply(dbUser);
-      updateUserAccessTiers(dbUser, agent);
+      dbUser = updateUserAccessTiers(dbUser, agent);
       try {
         return userDao.save(dbUser);
       } catch (ObjectOptimisticLockingFailureException e) {
@@ -219,7 +219,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
    * Ensures that the data access tiers for the user reflect the state of other fields on the user
    */
   @Override
-  public void updateUserAccessTiers(DbUser dbUser, Agent agent) {
+  public DbUser updateUserAccessTiers(DbUser dbUser, Agent agent) {
     final List<DbAccessTier> previousAccessTiers = accessTierService.getAccessTiersForUser(dbUser);
 
     final List<DbAccessTier> newAccessTiers = getUserAccessTiersList(dbUser);
@@ -235,6 +235,8 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     final List<DbAccessTier> tiersForRemoval =
         Lists.difference(accessTierService.getAllTiers(), newAccessTiers);
     tiersForRemoval.forEach(tier -> accessTierService.removeUserFromTier(dbUser, tier));
+
+    return dbUser;
   }
 
   // missing ERA_COMMONS (special-cased below)
@@ -636,8 +638,8 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
           (accessModuleName, timestamp) ->
               accessModuleService.updateCompletionTime(
                   dbUser, accessModuleName, timestamp.orElse(null)));
-      updateUserAccessTiers(dbUser, agent);
-      return dbUser;
+
+      return updateUserAccessTiers(dbUser, agent);
     } catch (NumberFormatException e) {
       log.severe("Incorrect date expire format from Moodle");
       throw e;
@@ -758,8 +760,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       accessModuleService.updateCompletionTime(targetUser, AccessModuleName.TWO_FACTOR_AUTH, null);
     }
 
-    updateUserAccessTiers(targetUser, agent);
-    return targetUser;
+    return updateUserAccessTiers(targetUser, agent);
   }
 
   @Override
@@ -781,8 +782,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
           targetUser, AccessModuleName.DATA_USER_CODE_OF_CONDUCT, null);
     }
 
-    updateUserAccessTiers(targetUser, agent);
-    return targetUser;
+    return updateUserAccessTiers(targetUser, agent);
   }
 
   @Override
@@ -879,8 +879,8 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     accessModuleService.updateCompletionTime(
         dbUser, AccessModuleName.PROFILE_CONFIRMATION, timestamp);
 
-    updateUserAccessTiers(dbUser, Agent.asUser(dbUser));
-    return dbUser;
+    return updateUserAccessTiers(dbUser, Agent.asUser(dbUser));
+    ;
   }
 
   /** Confirm that a user has either reported any AoU-related publications, or has none. */
@@ -891,8 +891,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     accessModuleService.updateCompletionTime(
         dbUser, AccessModuleName.PUBLICATION_CONFIRMATION, timestamp);
 
-    updateUserAccessTiers(dbUser, Agent.asUser(dbUser));
-    return dbUser;
+    return updateUserAccessTiers(dbUser, Agent.asUser(dbUser));
   }
 
   /** Send an Access Renewal Expiration or Warning email to the user, if appropriate */

@@ -1293,8 +1293,8 @@ public class UserServiceAccessTest {
     return userService.updateUserWithRetries(userModifier, dbUser, Agent.asUser(dbUser));
   }
 
-  private void updateUserAccessTiers() {
-    userService.updateUserAccessTiers(dbUser, Agent.asUser(dbUser));
+  private DbUser updateUserAccessTiers() {
+    return userService.updateUserAccessTiers(dbUser, Agent.asUser(dbUser));
   }
 
   private void updateInstitutionTier(InstitutionTierConfig updatedTierConfig) {

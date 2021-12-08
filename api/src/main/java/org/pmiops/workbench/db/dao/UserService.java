@@ -29,7 +29,7 @@ public interface UserService {
   /**
    * Ensures that the data access tiers for the user reflect the state of other fields on the user
    */
-  void updateUserAccessTiers(DbUser dbUser, Agent agent);
+  DbUser updateUserAccessTiers(DbUser dbUser, Agent agent);
 
   DbUser createServiceAccountUser(String email);
 
