@@ -69,8 +69,10 @@ import org.springframework.test.annotation.DirtiesContext;
 /**
  * Tests to cover access change determinations by executing {@link
  * UserService#updateUserWithRetries(java.util.function.Function,
- * org.pmiops.workbench.db.model.DbUser, org.pmiops.workbench.actionaudit.Agent)} with different
- * configurations, which ultimately executes the private method {
+ * org.pmiops.workbench.db.model.DbUser, org.pmiops.workbench.actionaudit.Agent)} or {@link
+ * UserService#updateUserAccessTiers(org.pmiops.workbench.db.model.DbUser,
+ * org.pmiops.workbench.actionaudit.Agent)} with different configurations, which ultimately executes
+ * the private method {
  * UserServiceImpl#shouldGrantUserTierAccess(org.pmiops.workbench.db.model.DbUser, List, String)} to
  * make this determination.
  */
@@ -202,7 +204,7 @@ public class UserServiceAccessTest {
   public void test_updateUserWithRetries_never_registered() {
     assertThat(userAccessTierDao.findAll()).isEmpty();
 
-    dbUser = updateUserWithRetries(Function.identity());
+    dbUser = updateUserAccessTiers();
 
     // the user has never been registered so they have no DbUserAccessTier entry
 
@@ -240,20 +242,13 @@ public class UserServiceAccessTest {
 
     // Simulate time passing, user is no longer compliant
     advanceClockDays(2);
-    dbUser = updateUserWithRetries(Function.identity());
+    dbUser = updateUserAccessTiers();
     assertRegisteredTierDisabled(dbUser);
 
     // Simulate user filling out DUA, becoming compliant again
-    dbUser =
-        updateUserWithRetries(
-            user -> {
-              accessModuleService.updateCompletionTime(
-                  dbUser,
-                  AccessModuleName.DATA_USER_CODE_OF_CONDUCT,
-                  new Timestamp(PROVIDED_CLOCK.millis()));
-              return user;
-            });
-
+    accessModuleService.updateCompletionTime(
+        dbUser, AccessModuleName.DATA_USER_CODE_OF_CONDUCT, new Timestamp(PROVIDED_CLOCK.millis()));
+    dbUser = updateUserAccessTiers();
     assertRegisteredTierEnabled(dbUser);
   }
 
@@ -951,14 +946,14 @@ public class UserServiceAccessTest {
     // Now make user eRA not complete, expect user removed from Registered tier;
     accessModuleService.updateBypassTime(dbUser.getUserId(), AccessModule.ERA_COMMONS, false);
     accessModuleService.updateCompletionTime(dbUser, AccessModuleName.ERA_COMMONS, null);
-    updateUserWithRetries(Function.identity());
+    dbUser = updateUserAccessTiers();
     assertRegisteredTierDisabled(dbUser);
 
     // Make eRA is optional for that institution, verify user become registered
     institutionService.updateInstitution(
         institution.getShortName(),
         institution.tierConfigs(ImmutableList.of(rtTierConfig.eraRequired(false))));
-    updateUserWithRetries(Function.identity());
+    dbUser = updateUserAccessTiers();
     assertRegisteredTierEnabled(dbUser);
   }
 
@@ -974,12 +969,12 @@ public class UserServiceAccessTest {
         institution.tierConfigs(ImmutableList.of(rtTierConfig.eraRequired(false))));
     accessModuleService.updateBypassTime(dbUser.getUserId(), AccessModule.ERA_COMMONS, false);
     accessModuleService.updateCompletionTime(dbUser, AccessModuleName.ERA_COMMONS, null);
-    updateUserWithRetries(Function.identity());
+    dbUser = updateUserAccessTiers();
     assertRegisteredTierEnabled(dbUser);
 
     // Now login.gov flag disabled, eRA is always required.
     providedWorkbenchConfig.access.enableRasLoginGovLinking = false;
-    updateUserWithRetries(Function.identity());
+    dbUser = updateUserAccessTiers();
     assertRegisteredTierDisabled(dbUser);
   }
 
@@ -995,7 +990,7 @@ public class UserServiceAccessTest {
         institution.tierConfigs(ImmutableList.of(rtTierConfig.eraRequired(true))));
     accessModuleService.updateBypassTime(dbUser.getUserId(), AccessModule.ERA_COMMONS, false);
     accessModuleService.updateCompletionTime(dbUser, AccessModuleName.ERA_COMMONS, null);
-    updateUserWithRetries(Function.identity());
+    dbUser = updateUserAccessTiers();
     assertRegisteredTierEnabled(dbUser);
   }
 
@@ -1009,13 +1004,13 @@ public class UserServiceAccessTest {
     // Incomplete RAS module, expect user removed from Registered tier;
     accessModuleService.updateBypassTime(
         dbUser.getUserId(), AccessModule.RAS_LINK_LOGIN_GOV, false);
-    updateUserWithRetries(Function.identity());
+    dbUser = updateUserAccessTiers();
     assertRegisteredTierDisabled(dbUser);
 
     // Complete RAS Linking, verify user become registered
     accessModuleService.updateCompletionTime(
         dbUser, AccessModuleName.RAS_LOGIN_GOV, new Timestamp(PROVIDED_CLOCK.millis()));
-    updateUserWithRetries(Function.identity());
+    dbUser = updateUserAccessTiers();
     assertRegisteredTierEnabled(dbUser);
   }
 
@@ -1030,7 +1025,7 @@ public class UserServiceAccessTest {
     // Incomplete RAS module, expect user is still Registered;
     accessModuleService.updateBypassTime(
         dbUser.getUserId(), AccessModule.RAS_LINK_LOGIN_GOV, false);
-    updateUserWithRetries(Function.identity());
+    dbUser = updateUserAccessTiers();
     assertRegisteredTierEnabled(dbUser);
   }
 
@@ -1047,13 +1042,13 @@ public class UserServiceAccessTest {
     // Incomplete RAS module, expect user removed from Registered tier;
     accessModuleService.updateBypassTime(
         dbUser.getUserId(), AccessModule.RAS_LINK_LOGIN_GOV, false);
-    updateUserWithRetries(Function.identity());
+    dbUser = updateUserAccessTiers();
     assertRegisteredTierDisabled(dbUser);
 
     // Complete RAS Linking, verify user become registered
     accessModuleService.updateCompletionTime(
         dbUser, AccessModuleName.RAS_LOGIN_GOV, new Timestamp(PROVIDED_CLOCK.millis()));
-    updateUserWithRetries(Function.identity());
+    dbUser = updateUserAccessTiers();
     assertRegisteredTierEnabled(dbUser);
   }
 
@@ -1081,13 +1076,9 @@ public class UserServiceAccessTest {
 
     dbUser = completeRTAndCTRequirements(dbUser);
 
-    dbUser =
-        updateUserWithRetries(
-            user -> {
-              accessModuleService.updateBypassTime(
-                  dbUser.getUserId(), AccessModule.CT_COMPLIANCE_TRAINING, false);
-              return userDao.save(user);
-            });
+    accessModuleService.updateBypassTime(
+        dbUser.getUserId(), AccessModule.CT_COMPLIANCE_TRAINING, false);
+    dbUser = updateUserAccessTiers();
 
     assertRegisteredTierEnabled(dbUser);
     assertUserNotInAccessTier(dbUser, controlledTier);
@@ -1107,13 +1098,8 @@ public class UserServiceAccessTest {
     ctTierConfig.setEraRequired(true);
     updateInstitutionTier(ctTierConfig);
 
-    dbUser =
-        updateUserWithRetries(
-            user -> {
-              accessModuleService.updateBypassTime(
-                  user.getUserId(), AccessModule.ERA_COMMONS, false);
-              return userDao.save(user);
-            });
+    accessModuleService.updateBypassTime(dbUser.getUserId(), AccessModule.ERA_COMMONS, false);
+    dbUser = updateUserAccessTiers();
 
     assertRegisteredTierEnabled(dbUser);
     assertUserNotInAccessTier(dbUser, controlledTier);
@@ -1129,13 +1115,8 @@ public class UserServiceAccessTest {
     ctTierConfig.setEraRequired(false);
     updateInstitutionTier(ctTierConfig);
 
-    dbUser =
-        updateUserWithRetries(
-            user -> {
-              accessModuleService.updateBypassTime(
-                  user.getUserId(), AccessModule.ERA_COMMONS, false);
-              return userDao.save(user);
-            });
+    accessModuleService.updateBypassTime(dbUser.getUserId(), AccessModule.ERA_COMMONS, false);
+    dbUser = updateUserAccessTiers();
 
     assertRegisteredTierEnabled(dbUser);
     assertControlledTierEnabled(dbUser);
@@ -1150,14 +1131,14 @@ public class UserServiceAccessTest {
     dbUser = completeRTAndCTRequirements(dbUser);
     ctTierConfig.setEraRequired(true);
     updateInstitutionTier(ctTierConfig);
-    dbUser = updateUserWithRetries(Function.identity());
+    dbUser = updateUserAccessTiers();
 
     assertRegisteredTierEnabled(dbUser);
     assertControlledTierEnabled(dbUser);
 
     ctTierConfig.setEraRequired(false);
     updateInstitutionTier(ctTierConfig);
-    dbUser = updateUserWithRetries(Function.identity());
+    dbUser = updateUserAccessTiers();
 
     assertRegisteredTierEnabled(dbUser);
     assertControlledTierEnabled(dbUser);
@@ -1171,7 +1152,7 @@ public class UserServiceAccessTest {
     ctTierConfig.setEmailDomains(Arrays.asList("fakeDomain.com"));
     updateInstitutionTier(ctTierConfig);
 
-    dbUser = updateUserWithRetries(Function.identity());
+    dbUser = updateUserAccessTiers();
 
     assertRegisteredTierEnabled(dbUser);
     assertUserNotInAccessTier(dbUser, controlledTier);
@@ -1184,7 +1165,7 @@ public class UserServiceAccessTest {
     ctTierConfig.setEmailDomains(Arrays.asList("domain.com"));
     updateInstitutionTier(ctTierConfig);
 
-    dbUser = updateUserWithRetries(Function.identity());
+    dbUser = updateUserAccessTiers();
 
     assertRegisteredTierEnabled(dbUser);
     assertControlledTierEnabled(dbUser);
@@ -1202,7 +1183,7 @@ public class UserServiceAccessTest {
                 tier.getAccessTierShortName().equals(AccessTierService.CONTROLLED_TIER_SHORT_NAME));
     institutionService.updateInstitution(institution.getShortName(), institution);
 
-    dbUser = updateUserWithRetries(Function.identity());
+    dbUser = updateUserAccessTiers();
 
     assertRegisteredTierEnabled(dbUser);
     assertUserNotInAccessTier(dbUser, controlledTier);
@@ -1218,18 +1199,13 @@ public class UserServiceAccessTest {
     ctTierConfig.setEraRequired(true);
     updateInstitutionTier(ctTierConfig);
 
-    dbUser = updateUserWithRetries(Function.identity());
+    dbUser = updateUserAccessTiers();
 
     assertRegisteredTierEnabled(dbUser);
     assertControlledTierEnabled(dbUser);
 
-    dbUser =
-        updateUserWithRetries(
-            user -> {
-              accessModuleService.updateBypassTime(
-                  user.getUserId(), AccessModule.ERA_COMMONS, false);
-              return userDao.save(user);
-            });
+    accessModuleService.updateBypassTime(dbUser.getUserId(), AccessModule.ERA_COMMONS, false);
+    dbUser = updateUserAccessTiers();
 
     assertRegisteredTierEnabled(dbUser);
     assertControlledTierEnabled(dbUser);
@@ -1241,18 +1217,14 @@ public class UserServiceAccessTest {
     assertThat(userAccessTierDao.findAll()).isEmpty();
 
     dbUser = completeRTAndCTRequirements(dbUser);
-    dbUser = updateUserWithRetries(Function.identity());
+    dbUser = updateUserAccessTiers();
 
     assertRegisteredTierEnabled(dbUser);
     assertControlledTierEnabled(dbUser);
 
-    dbUser =
-        updateUserWithRetries(
-            user -> {
-              accessModuleService.updateBypassTime(
-                  user.getUserId(), AccessModule.CT_COMPLIANCE_TRAINING, false);
-              return userDao.save(user);
-            });
+    accessModuleService.updateBypassTime(
+        dbUser.getUserId(), AccessModule.CT_COMPLIANCE_TRAINING, false);
+    dbUser = updateUserAccessTiers();
 
     assertRegisteredTierEnabled(dbUser);
     assertControlledTierEnabled(dbUser);
@@ -1267,7 +1239,7 @@ public class UserServiceAccessTest {
     TestMockFactory.removeControlledTierForTests(accessTierDao);
     removeCTConfigFromInstitution();
 
-    dbUser = updateUserWithRetries(Function.identity());
+    dbUser = updateUserAccessTiers();
 
     assertRegisteredTierEnabled(dbUser);
     assertUserNotInAccessTier(dbUser, controlledTier);
@@ -1315,9 +1287,14 @@ public class UserServiceAccessTest {
     assertRegisteredTierDisabled(dbUser);
   }
 
-  // we can trim the signature since we always call this in the same way
+  // we can trim the signatures since we always call these in the same way
+
   private DbUser updateUserWithRetries(Function<DbUser, DbUser> userModifier) {
     return userService.updateUserWithRetries(userModifier, dbUser, Agent.asUser(dbUser));
+  }
+
+  private DbUser updateUserAccessTiers() {
+    return userService.updateUserAccessTiers(dbUser, Agent.asUser(dbUser));
   }
 
   private void updateInstitutionTier(InstitutionTierConfig updatedTierConfig) {

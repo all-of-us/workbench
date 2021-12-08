@@ -110,7 +110,7 @@ public class CloudTaskUserControllerTest {
 
     // normally we would expect the userService sync methods to add to this count, but userService
     // is mocked so we only see the direct calls from synchronizeUserAccess(), one per user
-    verify(mockUserService, times(2)).updateUserWithRetries(any(), any(), any());
+    verify(mockUserService, times(2)).updateUserAccessTiers(any(), any());
     verifyNoMoreInteractions(mockUserService);
   }
 }

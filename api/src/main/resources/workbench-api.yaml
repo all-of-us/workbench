@@ -931,6 +931,10 @@ paths:
           description: A workspace response containing workspace and access level
           schema:
             "$ref": "#/definitions/WorkspaceResponse"
+        403:
+          description: User doesnt have access to the workspace's access tier
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
     patch:
       tags:
       - workspaces

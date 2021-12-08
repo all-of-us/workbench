@@ -173,7 +173,6 @@ public class CohortsControllerTest {
   SearchRequest searchRequest;
   String cohortCriteria;
   String badCohortCriteria;
-  private TestMockFactory testMockFactory;
 
   @Autowired CdrVersionService cdrVersionService;
   @Autowired CloudStorageClient cloudStorageClient;
@@ -282,9 +281,8 @@ public class CohortsControllerTest {
 
   @BeforeEach
   public void setUp() {
-    testMockFactory = new TestMockFactory();
-    testMockFactory.stubCreateBillingProject(fireCloudService);
-    testMockFactory.stubCreateFcWorkspace(fireCloudService);
+    TestMockFactory.stubCreateBillingProject(fireCloudService);
+    TestMockFactory.stubCreateFcWorkspace(fireCloudService);
     DbUser user = new DbUser();
     user.setUsername(CREATOR_EMAIL);
     user.setUserId(123L);

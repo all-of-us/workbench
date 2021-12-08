@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -139,7 +138,7 @@ public class CloudTaskUserController implements CloudTaskUserApiDelegate {
         // should result in access expiration changes here, but this is also a backstop for ensuring
         // the database is consistent with our access tier groups, e.g. due to partial system
         // failures or bugs.
-        userService.updateUserWithRetries(Function.identity(), user, Agent.asSystem());
+        userService.updateUserAccessTiers(user, Agent.asSystem());
       } catch (WorkbenchException e) {
         log.log(Level.SEVERE, "failed to synchronize access for user " + user.getUsername(), e);
         errorCount++;

@@ -148,8 +148,6 @@ public class WorkspaceAdminServiceTest {
 
   @BeforeEach
   public void setUp() {
-    final TestMockFactory testMockFactory = new TestMockFactory();
-
     when(mockFirecloudService.getWorkspaceAsService(any(), any()))
         .thenReturn(
             new FirecloudWorkspaceResponse()
@@ -159,7 +157,7 @@ public class WorkspaceAdminServiceTest {
                         .namespace(WORKSPACE_NAMESPACE)));
 
     final Workspace workspace =
-        testMockFactory.createWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME);
+        TestMockFactory.createWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME);
     final DbWorkspace dbWorkspace =
         TestMockFactory.createDbWorkspaceStub(workspace, DB_WORKSPACE_ID);
     doReturn(Optional.of(dbWorkspace))
