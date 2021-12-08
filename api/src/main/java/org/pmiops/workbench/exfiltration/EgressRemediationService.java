@@ -384,7 +384,12 @@ public class EgressRemediationService {
     SumologicEgressEvent originalEvent =
         new Gson().fromJson(event.getSumologicEvent(), SumologicEgressEvent.class);
     return Stream.of(
-        JiraContent.text(String.format("Action taken: %s\n\n", action)),
+        JiraContent.text(String.format("Egress event details (as RW admin): ", action)),
+        JiraContent.link(
+            workbenchConfigProvider.get().server.uiBaseUrl
+                + "/admin/egress-events/"
+                + event.getEgressEventId()),
+        JiraContent.text(String.format("\n\nAction taken: %s\n\n", action)),
         JiraContent.text(
             String.format(
                 "Terra billing project / workspace namespace: %s\n",
@@ -406,7 +411,7 @@ public class EgressRemediationService {
                 originalEvent.getGceEgressMib(),
                 originalEvent.getDataprocMasterEgressMib(),
                 originalEvent.getDataprocWorkerEgressMib())),
-        JiraContent.text("Workspace admin console (as workbench admin user):"),
+        JiraContent.text("Workspace admin console (as RW admin):"),
         workspace
             .map(
                 w ->
