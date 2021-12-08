@@ -921,7 +921,7 @@ describe('RuntimePanel', () => {
     await pickMainRam(wrapper, 26);
     await pickMainDiskSize(wrapper, 2000);
     expect(runningCost().text()).toEqual('$0.87/hour');
-    expect(storageCost().text()).toEqual('$0.12/hour');
+    expect(storageCost().text()).toEqual('$0.13/hour');
   });
 
   it('should allow runtime deletion', async() => {
