@@ -120,13 +120,11 @@ public class WorkspaceAdminControllerTest {
 
   @BeforeEach
   public void setUp() {
-    final TestMockFactory testMockFactory = new TestMockFactory();
-
     when(mockWorkspaceAdminService.getFirstWorkspaceByNamespace(anyString()))
         .thenReturn(Optional.empty());
 
     final Workspace workspace =
-        testMockFactory.createWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME);
+        TestMockFactory.createWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME);
     final DbWorkspace dbWorkspace =
         TestMockFactory.createDbWorkspaceStub(workspace, DB_WORKSPACE_ID);
     when(mockWorkspaceAdminService.getFirstWorkspaceByNamespace(WORKSPACE_NAMESPACE))
@@ -154,7 +152,7 @@ public class WorkspaceAdminControllerTest {
         .thenReturn(cloudStorageCounts);
 
     LeonardoListRuntimeResponse leonardoListRuntimeResponse =
-        testMockFactory.createLeonardoListRuntimesResponse();
+        TestMockFactory.createLeonardoListRuntimesResponse();
     List<LeonardoListRuntimeResponse> runtimes = ImmutableList.of(leonardoListRuntimeResponse);
     when(mockLeonardoNotebooksClient.listRuntimesByProjectAsService(WORKSPACE_NAMESPACE))
         .thenReturn(runtimes);

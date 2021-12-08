@@ -341,8 +341,6 @@ public class WorkspacesControllerTest {
   private String cdrVersionId;
   private String archivedCdrVersionId;
 
-  private TestMockFactory testMockFactory;
-
   @BeforeEach
   public void setUp() throws Exception {
     workbenchConfig = WorkbenchConfig.createEmptyConfig();
@@ -350,7 +348,6 @@ public class WorkspacesControllerTest {
     workbenchConfig.billing.accountId = "free-tier";
     workbenchConfig.billing.projectNamePrefix = "aou-local";
 
-    testMockFactory = new TestMockFactory();
     currentUser = createUser(LOGGED_IN_USER_EMAIL);
     accessTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
 
@@ -371,8 +368,8 @@ public class WorkspacesControllerTest {
     archivedCdrVersion = cdrVersionDao.save(archivedCdrVersion);
     archivedCdrVersionId = Long.toString(archivedCdrVersion.getCdrVersionId());
 
-    testMockFactory.stubCreateBillingProject(fireCloudService);
-    testMockFactory.stubCreateFcWorkspace(fireCloudService);
+    TestMockFactory.stubCreateBillingProject(fireCloudService);
+    TestMockFactory.stubCreateFcWorkspace(fireCloudService);
 
     when(mockCloudBillingClient.pollUntilBillingAccountLinked(any(), any()))
         .thenReturn(new ProjectBillingInfo().setBillingEnabled(true));
@@ -425,7 +422,7 @@ public class WorkspacesControllerTest {
 
   private void stubGetWorkspace(
       String ns, String name, String creator, WorkspaceAccessLevel access) {
-    stubGetWorkspace(testMockFactory.createFirecloudWorkspace(ns, name, creator), access);
+    stubGetWorkspace(TestMockFactory.createFirecloudWorkspace(ns, name, creator), access);
   }
 
   private void stubGetWorkspace(
@@ -497,7 +494,7 @@ public class WorkspacesControllerTest {
   }
 
   private Workspace createWorkspace() {
-    return testMockFactory.createWorkspace("namespace", "name");
+    return TestMockFactory.createWorkspace("namespace", "name");
   }
 
   public Cohort createDefaultCohort(String name) {
@@ -527,7 +524,7 @@ public class WorkspacesControllerTest {
 
     FirecloudWorkspaceResponse fcResponse = new FirecloudWorkspaceResponse();
     fcResponse.setWorkspace(
-        testMockFactory.createFirecloudWorkspace(
+        TestMockFactory.createFirecloudWorkspace(
             workspace.getNamespace(), workspace.getName(), null));
     fcResponse.setAccessLevel(WorkspaceAccessLevel.OWNER.toString());
     doReturn(Collections.singletonList(fcResponse)).when(fireCloudService).getWorkspaces();
@@ -597,7 +594,7 @@ public class WorkspacesControllerTest {
   public void testCreateWorkspace_resetBillingAccountOnFailedSave() throws Exception {
     doThrow(RuntimeException.class).when(workspaceDao).save(any(DbWorkspace.class));
     Workspace workspace = createWorkspace();
-    testMockFactory.stubCreateBillingProject(fireCloudService, workspace.getNamespace());
+    TestMockFactory.stubCreateBillingProject(fireCloudService, workspace.getNamespace());
 
     try {
       workspacesController.createWorkspace(workspace).getBody();
@@ -2499,7 +2496,7 @@ public class WorkspacesControllerTest {
 
     FirecloudWorkspaceResponse fcResponse = new FirecloudWorkspaceResponse();
     fcResponse.setWorkspace(
-        testMockFactory.createFirecloudWorkspace(
+        TestMockFactory.createFirecloudWorkspace(
             workspace.getNamespace(), workspace.getName(), null));
     fcResponse.setAccessLevel(WorkspaceAccessLevel.OWNER.toString());
     doReturn(Collections.singletonList(fcResponse)).when(fireCloudService).getWorkspaces();
@@ -2519,7 +2516,7 @@ public class WorkspacesControllerTest {
 
     FirecloudWorkspaceResponse fcResponse = new FirecloudWorkspaceResponse();
     fcResponse.setWorkspace(
-        testMockFactory.createFirecloudWorkspace(
+        TestMockFactory.createFirecloudWorkspace(
             workspace.getNamespace(), workspace.getName(), null));
     fcResponse.setAccessLevel(WorkspaceAccessLevel.OWNER.toString());
     doReturn(Collections.singletonList(fcResponse)).when(fireCloudService).getWorkspaces();
@@ -2538,7 +2535,7 @@ public class WorkspacesControllerTest {
 
     FirecloudWorkspaceResponse fcResponse = new FirecloudWorkspaceResponse();
     fcResponse.setWorkspace(
-        testMockFactory.createFirecloudWorkspace(
+        TestMockFactory.createFirecloudWorkspace(
             workspace.getNamespace(), workspace.getName(), null));
     fcResponse.setAccessLevel(WorkspaceAccessLevel.WRITER.toString());
     doReturn(Collections.singletonList(fcResponse)).when(fireCloudService).getWorkspaces();
@@ -2557,7 +2554,7 @@ public class WorkspacesControllerTest {
 
     FirecloudWorkspaceResponse fcResponse = new FirecloudWorkspaceResponse();
     fcResponse.setWorkspace(
-        testMockFactory.createFirecloudWorkspace(
+        TestMockFactory.createFirecloudWorkspace(
             workspace.getNamespace(), workspace.getName(), null));
     fcResponse.setAccessLevel(WorkspaceAccessLevel.READER.toString());
     doReturn(Collections.singletonList(fcResponse)).when(fireCloudService).getWorkspaces();
