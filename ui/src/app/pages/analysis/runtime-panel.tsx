@@ -161,6 +161,7 @@ const styles = reactStyles({
 
 // exported for testing
 export const MIN_DISK_SIZE_GB = 100;
+export const DATAPROC_WORKER_MIN_DISK_SIZE_GB = 150;
 
 const defaultMachineName = 'n1-standard-4';
 const defaultMachineType: Machine = findMachineByName(defaultMachineName);
@@ -586,7 +587,7 @@ const PersistentDiskSizeSelector = ({onChange, disabled, selectedDiskSize, diskS
 const DataProcConfigSelector = ({onChange, disabled, dataprocConfig})  => {
   const {
     workerMachineType = defaultMachineName,
-    workerDiskSize = MIN_DISK_SIZE_GB,
+    workerDiskSize = DATAPROC_WORKER_MIN_DISK_SIZE_GB,
     numberOfWorkers = 2,
     numberOfPreemptibleWorkers = 0
   } = dataprocConfig || {};
@@ -1185,12 +1186,12 @@ const RuntimePanel = fp.flow(
     const message = {
       standard: `^Disk size must be between ${MIN_DISK_SIZE_GB} and ${maxDiskSize} GB`,
       master: `^Master disk size must be between ${MIN_DISK_SIZE_GB} and ${maxDiskSize} GB`,
-      worker: `^Worker disk size must be between ${MIN_DISK_SIZE_GB} and ${maxDiskSize} GB`
+      worker: `^Worker disk size must be between ${DATAPROC_WORKER_MIN_DISK_SIZE_GB} and ${maxDiskSize} GB`
     };
 
     return {
       numericality: {
-        greaterThanOrEqualTo: MIN_DISK_SIZE_GB,
+        greaterThanOrEqualTo: diskType === 'worker' ? DATAPROC_WORKER_MIN_DISK_SIZE_GB: MIN_DISK_SIZE_GB,
         lessThanOrEqualTo: maxDiskSize,
         message: message[diskType]
       }

@@ -27,7 +27,7 @@ export const runtimePresets: {
         masterMachineType: 'n1-standard-4',
         masterDiskSize: 100,
         workerMachineType: 'n1-standard-4',
-        workerDiskSize: 100,
+        workerDiskSize: 150,
         numberOfWorkers: 2,
         numberOfPreemptibleWorkers: 0
       }
