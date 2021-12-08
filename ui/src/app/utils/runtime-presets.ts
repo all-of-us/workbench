@@ -1,6 +1,7 @@
+import {MIN_DISK_SIZE_GB, DATAPROC_WORKER_MIN_DISK_SIZE_GB} from 'app/pages/analysis/runtime-panel';
 import {Runtime, RuntimeConfigurationType} from 'generated/fetch';
 import * as fp from 'lodash/fp';
-import {DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES} from './machines';
+import {DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES} from 'app/utils/machines';
 
 export const runtimePresets: {
   [runtimePresetName: string]: {displayName: string, runtimeTemplate: Runtime}
@@ -13,7 +14,7 @@ export const runtimePresets: {
       // TODO: Support specifying toolDockerImage here.
       gceConfig: {
         machineType: 'n1-standard-4',
-        diskSize: 100,
+        diskSize: MIN_DISK_SIZE_GB,
         gpuConfig: null,
       },
     }
@@ -25,9 +26,9 @@ export const runtimePresets: {
       autopauseThreshold: DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES,
       dataprocConfig: {
         masterMachineType: 'n1-standard-4',
-        masterDiskSize: 100,
+        masterDiskSize: MIN_DISK_SIZE_GB,
         workerMachineType: 'n1-standard-4',
-        workerDiskSize: 100,
+        workerDiskSize: DATAPROC_WORKER_MIN_DISK_SIZE_GB,
         numberOfWorkers: 2,
         numberOfPreemptibleWorkers: 0
       }
