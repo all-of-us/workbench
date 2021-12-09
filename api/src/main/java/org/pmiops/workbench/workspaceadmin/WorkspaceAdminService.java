@@ -52,6 +52,4 @@ public interface WorkspaceAdminService {
       String workspaceNamespace, String firecloudName, boolean approved);
 
   DbWorkspace setPublished(String workspaceNamespace, String firecloudName, boolean publish);
-
-  String getAdminLockedReason(String workspaceNamespace);
 }
