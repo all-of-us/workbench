@@ -1,19 +1,22 @@
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath 'mysql:mysql-connector-java:5.1.37'
-    }
-}
 
 plugins {
-    id 'org.liquibase.gradle' version '1.2.4'
+    id 'org.liquibase.gradle' version '2.1.0'
+}
+
+repositories {
+    mavenCentral()
 }
 
 def db_host = System.getenv("DB_HOST") ?: "localhost"
 def db_port = System.getenv("DB_PORT") ?: "3306"
 def liquibase_password = System.getenv("LIQUIBASE_DB_PASSWORD") ?: "lb-notasecret"
+
+dependencies {
+    liquibaseRuntime 'org.liquibase:liquibase-core:4.5.0'
+    liquibaseRuntime 'org.liquibase:liquibase-groovy-dsl:3.0.0'
+    liquibaseRuntime 'info.picocli:picocli:4.6.1'
+    liquibaseRuntime 'mysql:mysql-connector-java:5.1.37'
+}
 
 liquibase {
     activities {
