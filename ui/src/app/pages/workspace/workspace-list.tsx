@@ -16,7 +16,7 @@ import {WorkspacePermissions} from 'app/utils/workspace-permissions';
 import * as React from 'react';
 import RSelect from 'react-select';
 import * as fp from 'lodash/fp';
-import { Profile, WorkspaceAccessLevel} from 'generated/fetch';
+import {Profile, WorkspaceAccessLevel} from 'generated/fetch';
 import {hasTierAccess} from 'app/utils/access-tiers';
 
 const styles = reactStyles({

@@ -1,10 +1,10 @@
-import { mount, ReactWrapper} from 'enzyme';
+import {mount, ReactWrapper} from 'enzyme';
 import * as React from 'react';
 
 import {
   registerApiClient
 } from 'app/services/swagger-fetch-clients';
-import { Profile, ProfileApi, WorkspaceAccessLevel, WorkspacesApi} from 'generated/fetch';
+import {Profile, ProfileApi, WorkspaceAccessLevel, WorkspacesApi} from 'generated/fetch';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
 import {ProfileStubVariables} from 'testing/stubs/profile-api-stub';
@@ -13,7 +13,7 @@ import RSelect from 'react-select';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 import {WorkspaceList} from './workspace-list';
 import {profileStore, serverConfigStore} from 'app/utils/stores';
-import { mockNavigate } from 'setupTests';
+import {mockNavigate} from 'setupTests';
 
 describe('WorkspaceList', () => {
   const profile = ProfileStubVariables.PROFILE_STUB as unknown as Profile;
