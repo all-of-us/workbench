@@ -115,10 +115,14 @@ public class WorkspaceDaoTest {
 
     DbWorkspace ws = new DbWorkspace();
     assertThat(ws.isAdminLocked()).isFalse();
+    assertThat(ws.getAdminLockedReason()).isNull();
 
+    String reason = "just because";
     ws.setAdminLocked(true);
+    ws.setAdminLockedReason(reason);
     ws = workspaceDao.save(ws);
     assertThat(ws.isAdminLocked()).isTrue();
+    assertThat(ws.getAdminLockedReason()).isEqualTo(reason);
   }
 
   private DbWorkspace createWorkspace() {
