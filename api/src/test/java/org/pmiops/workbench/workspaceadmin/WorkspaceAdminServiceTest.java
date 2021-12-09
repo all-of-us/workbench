@@ -146,6 +146,8 @@ public class WorkspaceAdminServiceTest {
     }
   }
 
+  public DbWorkspace dbWorkspace = new DbWorkspace();
+
   @BeforeEach
   public void setUp() {
     final TestMockFactory testMockFactory = new TestMockFactory();
@@ -160,8 +162,7 @@ public class WorkspaceAdminServiceTest {
 
     final Workspace workspace =
         testMockFactory.createWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME);
-    final DbWorkspace dbWorkspace =
-        TestMockFactory.createDbWorkspaceStub(workspace, DB_WORKSPACE_ID);
+    dbWorkspace = TestMockFactory.createDbWorkspaceStub(workspace, DB_WORKSPACE_ID);
     doReturn(Optional.of(dbWorkspace))
         .when(mockWorkspaceDao)
         .findFirstByWorkspaceNamespaceOrderByFirecloudNameAsc(WORKSPACE_NAMESPACE);
@@ -422,13 +423,8 @@ public class WorkspaceAdminServiceTest {
     adminLockingRequest.setRequestReason("To test auditor");
     adminLockingRequest.setRequestDateInMillis(12345677l);
 
-    Workspace workspace =
-        TestMockFactory.createWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME);
-    DbWorkspace dbWorkspace =
-        TestMockFactory.createDbWorkspaceStub(workspace, DB_WORKSPACE_ID);
-    doReturn(dbWorkspace)
-        .when(mockWorkspaceDao)
-        .save(any()); // TODO make it work with dbWorkspace
+    dbWorkspace.setAdminLocked(true).setAdminLockedReason("To test auditor");
+    doReturn(dbWorkspace).when(mockWorkspaceDao).save(dbWorkspace);
 
     workspaceAdminService.setAdminLockedState(WORKSPACE_NAMESPACE, adminLockingRequest);
     verify(mockAdminAuditor).fireLockWorkspaceAction(DB_WORKSPACE_ID, adminLockingRequest);
