@@ -403,24 +403,24 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
 
   @Override
   public DbWorkspace setPublished(
-          String workspaceNamespace, String firecloudName, boolean publish) {
+      String workspaceNamespace, String firecloudName, boolean publish) {
     final DbWorkspace dbWorkspace = workspaceDao.getRequired(workspaceNamespace, firecloudName);
 
     final WorkspaceAccessLevel accessLevel =
-            publish ? WorkspaceAccessLevel.READER : WorkspaceAccessLevel.NO_ACCESS;
+        publish ? WorkspaceAccessLevel.READER : WorkspaceAccessLevel.NO_ACCESS;
 
     final DbAccessTier dbAccessTier = accessTierService.getRegisteredTierOrThrow();
     final FirecloudManagedGroupWithMembers authDomainGroup =
-            fireCloudService.getGroup(dbAccessTier.getAuthDomainName());
+        fireCloudService.getGroup(dbAccessTier.getAuthDomainName());
 
     final FirecloudWorkspaceACLUpdate currentUpdate =
-            WorkspaceAuthService.updateFirecloudAclsOnUser(
-                    accessLevel, new FirecloudWorkspaceACLUpdate().email(authDomainGroup.getGroupEmail()));
+        WorkspaceAuthService.updateFirecloudAclsOnUser(
+            accessLevel, new FirecloudWorkspaceACLUpdate().email(authDomainGroup.getGroupEmail()));
 
     fireCloudService.updateWorkspaceACL(
-            dbWorkspace.getWorkspaceNamespace(),
-            dbWorkspace.getFirecloudName(),
-            Collections.singletonList(currentUpdate));
+        dbWorkspace.getWorkspaceNamespace(),
+        dbWorkspace.getFirecloudName(),
+        Collections.singletonList(currentUpdate));
 
     dbWorkspace.setPublished(publish);
     return workspaceDao.saveWithLastModified(dbWorkspace);
