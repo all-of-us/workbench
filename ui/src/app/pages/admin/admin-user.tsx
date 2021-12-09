@@ -279,7 +279,7 @@ export const AdminUser = withRouter(class extends React.Component<Props, State> 
     const {oldProfile: {freeTierDollarQuota}} = this.state;
 
     // gotcha: argument order for rangeStep is (step, start, end)
-    // IntelliJ incorrectly believes takes the order is (start, end, step)
+    // IntelliJ incorrectly believes the order is (start, end, step)
     const below1000 = fp.rangeStep(100, 300, 1000+1);
     const over1000 = fp.rangeStep(500, 1000, 10000+1);
 
