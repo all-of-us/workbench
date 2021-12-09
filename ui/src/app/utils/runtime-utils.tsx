@@ -556,7 +556,7 @@ export const useRuntimeStatus = (currentWorkspaceNamespace, currentGoogleProject
 
 export const getRuntimeCtx = (runtime: Runtime, pendingRuntime: Runtime) => {
   const pdFeatureFlag = serverConfigStore.get().config.enablePersistentDisk;
-  const runtimeExists = (runtime.status && ![RuntimeStatus.Deleted, RuntimeStatus.Error].includes(runtime.status)) || !!pendingRuntime;
+  const runtimeExists = (runtime?.status && ![RuntimeStatus.Deleted, RuntimeStatus.Error].includes(runtime.status)) || !!pendingRuntime;
   const {dataprocConfig = null} = pendingRuntime || runtime || {} as Partial<Runtime>;
   const initialCompute = dataprocConfig ? ComputeType.Dataproc : ComputeType.Standard;
   const gceExists = runtimeExists &&  initialCompute === ComputeType.Standard;
@@ -634,7 +634,7 @@ export const useCustomRuntime = (currentWorkspaceNamespace, detachablePd):
                 requestedRuntime.gceWithPdConfig.persistentDisk.size);
             }
           }
-        } else if (runtime.status === RuntimeStatus.Error) {
+        } else if (runtime?.status === RuntimeStatus.Error) {
           await runtimeApi().deleteRuntime(currentWorkspaceNamespace, false, {
             signal: aborter.signal
           });
