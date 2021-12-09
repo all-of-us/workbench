@@ -83,7 +83,6 @@ import org.springframework.context.annotation.Import;
 @DataJpaTest
 public class WorkspaceAdminServiceTest {
 
-  private static final long DB_WORKSPACE_ID = 2222L;
   private static final String GOOGLE_PROJECT_ID = DEFAULT_GOOGLE_PROJECT;
   private static final String GOOGLE_PROJECT_ID_2 = "aou-gcp-id-2";
   private static final String WORKSPACE_NAMESPACE = "aou-rw-12345";
@@ -106,9 +105,7 @@ public class WorkspaceAdminServiceTest {
   @MockBean private FireCloudService mockFirecloudService;
   @MockBean private LeonardoNotebooksClient mockLeonardoNotebooksClient;
   @MockBean private LeonardoRuntimeAuditor mockLeonardoRuntimeAuditor;
-  @MockBean private MailService mockMailService;
   @MockBean private NotebooksService mockNotebooksService;
-  @MockBean private WorkspaceDao mockWorkspaceDao;
 
   @Autowired private CdrVersionDao cdrVersionDao;
   @Autowired private AccessTierDao accessTierDao;
@@ -163,7 +160,7 @@ public class WorkspaceAdminServiceTest {
 
     final Workspace workspace =
         TestMockFactory.createWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME);
-    dbWorkspace = TestMockFactory.createDbWorkspaceStub(workspace, DB_WORKSPACE_ID);
+    dbWorkspace = workspaceDao.save(TestMockFactory.createDbWorkspaceStub(workspace, 1L));
 
     when(mockFirecloudService.getGroup(anyString()))
         .thenReturn(new FirecloudManagedGroupWithMembers().groupEmail("test@firecloud.org"));
@@ -423,9 +420,6 @@ public class WorkspaceAdminServiceTest {
     AdminLockingRequest adminLockingRequest = new AdminLockingRequest();
     adminLockingRequest.setRequestReason("To test auditor");
     adminLockingRequest.setRequestDateInMillis(12345677l);
-
-    dbWorkspace.setAdminLocked(true).setAdminLockedReason(adminLockingRequest.getRequestReason());
-    doReturn(dbWorkspace).when(mockWorkspaceDao).save(dbWorkspace);
 
     workspaceAdminService.setAdminLockedState(WORKSPACE_NAMESPACE, adminLockingRequest);
     verify(mockAdminAuditor)
