@@ -1,10 +1,10 @@
 package org.pmiops.workbench.workspaceadmin;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -25,7 +25,6 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -38,14 +37,18 @@ import org.pmiops.workbench.cohorts.CohortMapperImpl;
 import org.pmiops.workbench.conceptset.mapper.ConceptSetMapper;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.dataset.mapper.DataSetMapper;
+import org.pmiops.workbench.db.dao.AccessTierDao;
+import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.DataSetDao;
-import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.CloudMonitoringService;
@@ -76,16 +79,15 @@ import org.pmiops.workbench.utils.mappers.UserMapper;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapperImpl;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
-@SpringJUnitConfig
+@DataJpaTest
 public class WorkspaceAdminServiceTest {
 
-  private static final long DB_WORKSPACE_ID = 2222L;
   private static final String GOOGLE_PROJECT_ID = DEFAULT_GOOGLE_PROJECT;
   private static final String GOOGLE_PROJECT_ID_2 = "aou-gcp-id-2";
   private static final String WORKSPACE_NAMESPACE = "aou-rw-12345";
@@ -95,6 +97,7 @@ public class WorkspaceAdminServiceTest {
   private static final String RUNTIME_NAME_2 = "all-of-us-runtime-2";
   private static final String EXTRA_RUNTIME_NAME_DIFFERENT_PROJECT = "all-of-us-different-project";
 
+  private DbWorkspace dbWorkspace;
   private LeonardoGetRuntimeResponse testLeoRuntime;
   private LeonardoGetRuntimeResponse testLeoRuntime2;
   private LeonardoGetRuntimeResponse testLeoRuntimeDifferentProject;
@@ -109,9 +112,13 @@ public class WorkspaceAdminServiceTest {
   @MockBean private LeonardoRuntimeAuditor mockLeonardoRuntimeAuditor;
   @MockBean private MailService mockMailService;
   @MockBean private NotebooksService mockNotebooksService;
-  @MockBean private WorkspaceDao mockWorkspaceDao;
 
+  @Autowired private CdrVersionDao cdrVersionDao;
+  @Autowired private AccessTierDao accessTierDao;
+  @Autowired private WorkspaceDao workspaceDao;
   @Autowired private WorkspaceAdminService workspaceAdminService;
+
+  private DbCdrVersion cdrVersion;
 
   @TestConfiguration
   @Import({
@@ -134,7 +141,6 @@ public class WorkspaceAdminServiceTest {
     DataSetMapper.class,
     FirecloudMapper.class,
     LeonardoNotebooksClient.class,
-    UserDao.class,
     UserMapper.class,
     UserService.class,
     WorkspaceService.class
@@ -148,6 +154,8 @@ public class WorkspaceAdminServiceTest {
 
   @BeforeEach
   public void setUp() {
+    cdrVersion = TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao);
+
     when(mockFirecloudService.getWorkspaceAsService(any(), any()))
         .thenReturn(
             new FirecloudWorkspaceResponse()
@@ -158,11 +166,10 @@ public class WorkspaceAdminServiceTest {
 
     final Workspace workspace =
         TestMockFactory.createWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME);
-    final DbWorkspace dbWorkspace =
-        TestMockFactory.createDbWorkspaceStub(workspace, DB_WORKSPACE_ID);
-    doReturn(Optional.of(dbWorkspace))
-        .when(mockWorkspaceDao)
-        .findFirstByWorkspaceNamespaceOrderByFirecloudNameAsc(WORKSPACE_NAMESPACE);
+    dbWorkspace = workspaceDao.save(TestMockFactory.createDbWorkspaceStub(workspace, 1L));
+
+    when(mockFirecloudService.getGroup(anyString()))
+        .thenReturn(new FirecloudManagedGroupWithMembers().groupEmail("test@firecloud.org"));
 
     // required to enable the use of default method blobToFileDetail()
     when(mockCloudStorageClient.blobToFileDetail(any(), anyString())).thenCallRealMethod();
@@ -420,12 +427,75 @@ public class WorkspaceAdminServiceTest {
     adminLockingRequest.setRequestReason("To test auditor");
     adminLockingRequest.setRequestDateInMillis(12345677l);
     workspaceAdminService.setAdminLockedState(WORKSPACE_NAMESPACE, adminLockingRequest);
-    verify(mockAdminAuditor).fireLockWorkspaceAction(DB_WORKSPACE_ID, adminLockingRequest);
+    verify(mockAdminAuditor)
+        .fireLockWorkspaceAction(dbWorkspace.getWorkspaceId(), adminLockingRequest);
   }
 
   @Test
   public void testSetAdminUnlockedStateCallsAuditor() {
     workspaceAdminService.setAdminUnlockedState(WORKSPACE_NAMESPACE);
-    verify(mockAdminAuditor).fireUnlockWorkspaceAction(DB_WORKSPACE_ID);
+    verify(mockAdminAuditor).fireUnlockWorkspaceAction(dbWorkspace.getWorkspaceId());
+  }
+
+  @Test
+  public void testApproveWorkspace() {
+    DbWorkspace w = workspaceDao.save(stubWorkspace("ns", "n").setReviewRequested(true));
+    workspaceAdminService.setResearchPurposeApproved(
+        w.getWorkspaceNamespace(), w.getFirecloudName(), true);
+
+    assertThat(mustGetDbWorkspace(w).getApproved()).isTrue();
+  }
+
+  @Test
+  public void testRejectAfterApproveThrows() {
+    DbWorkspace w = workspaceDao.save(stubWorkspace("ns", "n").setReviewRequested(true));
+    workspaceAdminService.setResearchPurposeApproved(
+        w.getWorkspaceNamespace(), w.getFirecloudName(), true);
+
+    assertThrows(
+        BadRequestException.class,
+        () ->
+            workspaceAdminService.setResearchPurposeApproved(
+                w.getWorkspaceNamespace(), w.getFirecloudName(), false));
+  }
+
+  @Test
+  public void testListForApproval() {
+    List<Workspace> forApproval = workspaceAdminService.getWorkspacesForReview();
+    assertThat(forApproval).isEmpty();
+
+    // requested approval, but not approved
+    DbWorkspace pendingWorkspace =
+        workspaceDao.save(stubWorkspace("ws1", "1").setReviewRequested(true));
+    // already approved
+    workspaceDao.save(stubWorkspace("ws2", "2").setReviewRequested(true).setApproved(true));
+    // no approval requested
+    workspaceDao.save(stubWorkspace("ws3", "3"));
+
+    forApproval = workspaceAdminService.getWorkspacesForReview();
+    assertThat(forApproval.size()).isEqualTo(1);
+    assertThat(forApproval.get(0).getId()).isEqualTo(pendingWorkspace.getFirecloudName());
+  }
+
+  @Test
+  public void testPublishUnpublishWorkspace() {
+    DbWorkspace w = workspaceDao.save(stubWorkspace("ns", "n"));
+    workspaceAdminService.setPublished(w.getWorkspaceNamespace(), w.getFirecloudName(), true);
+    assertThat(mustGetDbWorkspace(w).getPublished()).isTrue();
+
+    workspaceAdminService.setPublished(w.getWorkspaceNamespace(), w.getFirecloudName(), false);
+    assertThat(mustGetDbWorkspace(w).getPublished()).isFalse();
+  }
+
+  private DbWorkspace stubWorkspace(String namespace, String name) {
+    return new DbWorkspace()
+        .setCdrVersion(cdrVersion)
+        .setWorkspaceNamespace(namespace)
+        .setName(name)
+        .setFirecloudName("fc-" + name);
+  }
+
+  private DbWorkspace mustGetDbWorkspace(DbWorkspace w) {
+    return workspaceDao.findDbWorkspaceByWorkspaceId(w.getWorkspaceId());
   }
 }
