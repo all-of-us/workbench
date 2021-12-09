@@ -588,14 +588,13 @@ export const useCustomRuntime = (currentWorkspaceNamespace, detachablePd):
     let mounted = true;
     const aborter = new AbortController();
     const runAction = async() => {
-      // Only delete if the runtime already exists.
       // TODO: It is likely more correct here to use the LeoRuntimeInitializer wait for the runtime
       // to reach a terminal status before attempting deletion.
+      const runtimeCtx = getRuntimeCtx(runtime, pendingRuntime);
       try {
-        if (runtime) {
+        if (runtimeCtx.runtimeExists) {
           const oldRuntimeConfig = toRuntimeConfig(runtime);
           const newRuntimeConfig = toRuntimeConfig(requestedRuntime);
-          const runtimeCtx = getRuntimeCtx(runtime, pendingRuntime);
           const runtimeDiffTypes = getRuntimeConfigDiffs(oldRuntimeConfig, newRuntimeConfig, runtimeCtx).map(diff => diff.differenceType);
           const pdIncreased = runtimeCtx.pdExists && (newRuntimeConfig.pdSize > detachablePd.size);
 
@@ -613,11 +612,9 @@ export const useCustomRuntime = (currentWorkspaceNamespace, detachablePd):
               });
             }
           } else if (runtimeDiffTypes.includes(RuntimeDiffState.NEEDS_DELETE_RUNTIME)) {
-            if (runtime.status !== RuntimeStatus.Deleted) {
-              await runtimeApi().deleteRuntime(currentWorkspaceNamespace, false, {
-                signal: aborter.signal
-              });
-            }
+            await runtimeApi().deleteRuntime(currentWorkspaceNamespace, false, {
+              signal: aborter.signal
+            });
           } else if (runtimeDiffTypes.includes(RuntimeDiffState.CAN_UPDATE_WITH_REBOOT) ||
               runtimeDiffTypes.includes(RuntimeDiffState.CAN_UPDATE_IN_PLACE)) {
             if (runtime.status === RuntimeStatus.Running || runtime.status === RuntimeStatus.Stopped) {
@@ -636,13 +633,11 @@ export const useCustomRuntime = (currentWorkspaceNamespace, detachablePd):
               await disksApi().updateDisk(currentWorkspaceNamespace, diskStore.get().persistentDisk.name,
                 requestedRuntime.gceWithPdConfig.persistentDisk.size);
             }
-          } else if (runtime.status === RuntimeStatus.Error) {
-            await runtimeApi().deleteRuntime(currentWorkspaceNamespace, false, {
-              signal: aborter.signal
-            });
-          } else {
-            // There are no differences, no extra requests needed
           }
+        } else if (runtime.status === RuntimeStatus.Error) {
+          await runtimeApi().deleteRuntime(currentWorkspaceNamespace, false, {
+            signal: aborter.signal
+          });
         }
 
         await LeoRuntimeInitializer.initialize({
