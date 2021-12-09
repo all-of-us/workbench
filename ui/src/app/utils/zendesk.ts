@@ -25,7 +25,7 @@ const zendeskConfigs = {
     widgetKey: '41815bdd-7e8f-4450-aadf-dd5957093233'
   },
   [ZendeskEnv.Sandbox]: {
-    baseUrl: 'https://aousupporthelp1580753096.zendesk.com/hc',
+    baseUrl: 'https://aousupporthelp1634849601.zendesk.com/hc',
     widgetKey: 'df0a2e39-f8a8-482b-baf5-af82e14d38f9'
   }
 };
