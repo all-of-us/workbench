@@ -1102,7 +1102,7 @@ paths:
     - "$ref": "#/parameters/workspaceId"
     post:
       tags:
-      - workspaces
+      - workspaceAdmin
       description: 'Makes a workspace public to all AoU registered users. Requires
         FEATURED_WORKSPACE_ADMIN authority.'
       operationId: publishWorkspace
@@ -1117,7 +1117,7 @@ paths:
     - "$ref": "#/parameters/workspaceId"
     post:
       tags:
-      - workspaces
+      - workspaceAdmin
       description: 'Makes a workspace public to all AoU registered users. Requires
         FEATURED_WORKSPACE_ADMIN authority.'
       operationId: unpublishWorkspace
@@ -1130,7 +1130,7 @@ paths:
   "/v1/admin/workspaces/review":
     get:
       tags:
-      - workspaces
+      - workspaceAdmin
       description: 'Returns workspaces that need research purpose review. Requires
         REVIEW_RESEARCH_PURPOSE authority.'
       operationId: getWorkspacesForReview
@@ -1139,6 +1139,28 @@ paths:
           description: A list of workspaces
           schema:
             "$ref": "#/definitions/WorkspaceListResponse"
+  "/v1/admin/workspaces/{workspaceNamespace}/{workspaceId}/review":
+    parameters:
+    - "$ref": "#/parameters/workspaceNamespace"
+    - "$ref": "#/parameters/workspaceId"
+    post:
+      tags:
+      - workspaceAdmin
+      consumes:
+      - application/json
+      description: Sets a research purpose review result.
+      operationId: reviewWorkspace
+      parameters:
+      - in: body
+        name: review
+        description: result of the research purpose review
+        schema:
+          "$ref": "#/definitions/ResearchPurposeReviewRequest"
+      responses:
+        200:
+          description: success
+          schema:
+            "$ref": "#/definitions/EmptyResponse"
   "/v1/admin/workspaces/{workspaceNamespace}/audit":
     get:
       tags:
@@ -1432,28 +1454,6 @@ paths:
           description: User doesn't have the ACCESS_CONTROL_ADMIN authority
           schema:
             "$ref": "#/definitions/ErrorResponse"
-  "/v1/admin/workspaces/{workspaceNamespace}/{workspaceId}/review":
-    parameters:
-    - "$ref": "#/parameters/workspaceNamespace"
-    - "$ref": "#/parameters/workspaceId"
-    post:
-      tags:
-      - workspaces
-      consumes:
-      - application/json
-      description: Sets a research purpose review result.
-      operationId: reviewWorkspace
-      parameters:
-      - in: body
-        name: review
-        description: result of the research purpose review
-        schema:
-          "$ref": "#/definitions/ResearchPurposeReviewRequest"
-      responses:
-        200:
-          description: success
-          schema:
-            "$ref": "#/definitions/EmptyResponse"
   "/v1/admin/workspaces/{workspaceNamespace}/locked":
     parameters:
       - "$ref": "#/parameters/workspaceNamespace"

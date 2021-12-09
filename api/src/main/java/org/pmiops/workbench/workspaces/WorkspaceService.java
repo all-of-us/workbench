@@ -39,13 +39,9 @@ public interface WorkspaceService {
    */
   void updateWorkspaceBillingAccount(DbWorkspace workspace, String newBillingAccountName);
 
-  void setResearchPurposeApproved(String ns, String firecloudName, boolean approved);
-
   DbWorkspace saveAndCloneCohortsConceptSetsAndDataSets(DbWorkspace from, DbWorkspace to);
 
   List<UserRole> getFirecloudUserRoles(String workspaceNamespace, String firecloudName);
-
-  DbWorkspace setPublished(String workspaceNamespace, String firecloudName, boolean publish);
 
   List<DbUserRecentWorkspace> getRecentWorkspaces();
 

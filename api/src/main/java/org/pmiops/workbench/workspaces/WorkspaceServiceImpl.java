@@ -7,7 +7,6 @@ import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -36,14 +35,11 @@ import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserRecentWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
@@ -229,23 +225,6 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
   }
 
   @Override
-  public void setResearchPurposeApproved(String ns, String firecloudName, boolean approved) {
-    DbWorkspace workspace = workspaceDao.getRequired(ns, firecloudName);
-    if (workspace.getReviewRequested() == null || !workspace.getReviewRequested()) {
-      throw new BadRequestException(
-          String.format("No review requested for workspace %s/%s.", ns, firecloudName));
-    }
-    if (workspace.getApproved() != null) {
-      throw new BadRequestException(
-          String.format(
-              "DbWorkspace %s/%s already %s.",
-              ns, firecloudName, workspace.getApproved() ? "approved" : "rejected"));
-    }
-    workspace.setApproved(approved);
-    workspaceDao.saveWithLastModified(workspace);
-  }
-
-  @Override
   @Transactional
   public DbWorkspace saveAndCloneCohortsConceptSetsAndDataSets(DbWorkspace from, DbWorkspace to) {
     // Save the workspace first to allocate an ID.
@@ -299,30 +278,6 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
         .sorted(
             Comparator.comparing(UserRole::getRole).thenComparing(UserRole::getEmail).reversed())
         .collect(Collectors.toList());
-  }
-
-  @Override
-  public DbWorkspace setPublished(
-      String workspaceNamespace, String firecloudName, boolean publish) {
-    final DbWorkspace dbWorkspace = workspaceDao.getRequired(workspaceNamespace, firecloudName);
-
-    final WorkspaceAccessLevel accessLevel =
-        publish ? WorkspaceAccessLevel.READER : WorkspaceAccessLevel.NO_ACCESS;
-
-    final FirecloudManagedGroupWithMembers authDomainGroup =
-        fireCloudService.getGroup(dbWorkspace.getCdrVersion().getAccessTier().getAuthDomainName());
-
-    final FirecloudWorkspaceACLUpdate currentUpdate =
-        WorkspaceAuthService.updateFirecloudAclsOnUser(
-            accessLevel, new FirecloudWorkspaceACLUpdate().email(authDomainGroup.getGroupEmail()));
-
-    fireCloudService.updateWorkspaceACL(
-        dbWorkspace.getWorkspaceNamespace(),
-        dbWorkspace.getFirecloudName(),
-        Collections.singletonList(currentUpdate));
-
-    dbWorkspace.setPublished(publish);
-    return workspaceDao.saveWithLastModified(dbWorkspace);
   }
 
   @Override

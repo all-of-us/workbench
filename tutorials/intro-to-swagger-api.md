@@ -8,7 +8,7 @@ In this module we will modify some of our swagger API signatures, bring up the A
 ## Overview
 Our API is public, it is always theoretically possible for a user to bypass any UI controls we set up by hitting the endpoints directly or via tools.  The UI has restrictions as well, but ultimately its purpose is as a more friendly interface to the API rather than a security mechanism in itself.
 
-For more details on our API endpoints see the [README](https://github.com/all-of-us/workbench) and the [API Code Structure](https://github.com/all-of-us/workbench/blob/master/api/docs/code-structure.md).
+For more details on our API endpoints see the [README](https://github.com/all-of-us/workbench) and the [API Code Structure](https://github.com/all-of-us/workbench/blob/main/api/docs/code-structure.md).
 
 Note that we often refer to the AoU RW's back end GAE application as "the api" but we also use "the api" to refer to the collection of endpoints we expose. It can get tricky!
 

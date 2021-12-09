@@ -2,7 +2,7 @@
 
 ## Opening a Pull Request
 
-You most likely want to do your work on a feature branch based on master.
+You most likely want to do your work on a feature branch based on main.
 Typical naming convention is `username/feature`. Username could be 
 your initials or some other similar identifier. Feature could be a short 
 description of the feature or a reference to the jira ticket number

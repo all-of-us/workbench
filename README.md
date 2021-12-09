@@ -29,7 +29,7 @@ MapStruct [Best Practices](api/docs/mapstruct.md) and [Tutorial](tutorials/mapst
 To make changes, do:
 
 ```shell
-git checkout master
+git checkout main
 git pull
 git checkout -b <USERNAME>/<BRANCH_NAME>
 # (make changes and git add / commit them)
