@@ -348,8 +348,9 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
     if (!accessTiers.contains(workspaceAccessTier)) {
       throw new ForbiddenException(
           String.format(
-              "User with username %s does not have access to the workspace '%s' tier",
-              userProvider.get().getUsername(), dbWorkspace.getName()));
+              "User with username %s does not have access to the '%s' access tier required by "
+                  + "workspace '%s'",
+              userProvider.get().getUsername(), workspaceAccessTier, dbWorkspace.getName()));
     }
   }
 
