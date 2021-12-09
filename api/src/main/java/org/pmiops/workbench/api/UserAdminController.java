@@ -7,7 +7,6 @@ import javax.inject.Provider;
 import org.pmiops.workbench.actionaudit.ActionAuditQueryService;
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.ForbiddenException;
@@ -28,7 +27,6 @@ public class UserAdminController implements UserAdminApiDelegate {
   private final UserService userService;
   private final ProfileService profileService;
   private final ActionAuditQueryService actionAuditQueryService;
-  private final UserDao userDao;
   private final Provider<DbUser> userProvider;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
@@ -36,13 +34,11 @@ public class UserAdminController implements UserAdminApiDelegate {
       UserService userService,
       ProfileService profileService,
       ActionAuditQueryService actionAuditQueryService,
-      UserDao userDao,
       Provider<DbUser> userProvider,
       Provider<WorkbenchConfig> workbenchConfigProvider) {
     this.userService = userService;
     this.profileService = profileService;
     this.actionAuditQueryService = actionAuditQueryService;
-    this.userDao = userDao;
     this.userProvider = userProvider;
     this.workbenchConfigProvider = workbenchConfigProvider;
   }
@@ -50,8 +46,8 @@ public class UserAdminController implements UserAdminApiDelegate {
   @Override
   @AuthorityRequired({Authority.ACCESS_CONTROL_ADMIN})
   public ResponseEntity<EmptyResponse> bypassAccessRequirement(
-      Long userId, AccessBypassRequest bypassed) {
-    userService.updateBypassTime(userId, bypassed);
+      Long userId, AccessBypassRequest request) {
+    userService.updateBypassTime(userId, request);
     return ResponseEntity.ok(new EmptyResponse());
   }
 
@@ -91,12 +87,12 @@ public class UserAdminController implements UserAdminApiDelegate {
 
   @Override
   public ResponseEntity<EmptyResponse> unsafeSelfBypassAccessRequirement(
-      AccessBypassRequest bypassed) {
+      AccessBypassRequest request) {
     if (!workbenchConfigProvider.get().access.unsafeAllowSelfBypass) {
       throw new ForbiddenException("Self bypass is disallowed in this environment.");
     }
     long userId = userProvider.get().getUserId();
-    userService.updateBypassTime(userId, bypassed);
+    userService.updateBypassTime(userId, request);
     return ResponseEntity.ok(new EmptyResponse());
   }
 

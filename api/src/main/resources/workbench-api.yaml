@@ -1254,7 +1254,7 @@ paths:
       description: 'Updates the given user to bypass the request access requirement'
       parameters:
       - in: body
-        name: bypassed
+        name: request
         schema:
           "$ref": "#/definitions/AccessBypassRequest"
         description: 'Whether the requirement should be bypassed or not. Defaults
@@ -1337,7 +1337,7 @@ paths:
       parameters:
       - "$ref": "#/parameters/userId"
       - in: body
-        name: bypassed
+        name: request
         schema:
           "$ref": "#/definitions/AccessBypassRequest"
         description: 'Whether the requirement should be bypassed or not. Defaults
