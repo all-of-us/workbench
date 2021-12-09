@@ -213,7 +213,7 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
   }
 
   updateContactEmail(contactEmail: string) {
-    this.setState(fp.set(['profile', 'contactEmail'], contactEmail));
+    this.setState(fp.set(['profile', 'contactEmail'], contactEmail.trim()));
   }
 
   /**
