@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
+import org.pmiops.workbench.access.AccessTierServiceImpl;
 import org.pmiops.workbench.actionaudit.ActionAuditQueryService;
 import org.pmiops.workbench.actionaudit.auditors.AdminAuditor;
 import org.pmiops.workbench.actionaudit.auditors.LeonardoRuntimeAuditor;
@@ -122,6 +123,7 @@ public class WorkspaceAdminServiceTest {
 
   @TestConfiguration
   @Import({
+    AccessTierServiceImpl.class,
     CohortMapperImpl.class,
     FakeClockConfiguration.class,
     LeonardoMapperImpl.class,
