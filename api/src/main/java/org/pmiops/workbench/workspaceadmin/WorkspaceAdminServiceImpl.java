@@ -362,15 +362,6 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
   }
 
   @Override
-  public String getAdminLockedReason(String workspaceNamespace) {
-    log.info(String.format("called getAdminLockedReason on wsns %s", workspaceNamespace));
-
-    DbWorkspace dbWorkspace = getWorkspaceByNamespaceOrThrow(workspaceNamespace);
-    return dbWorkspace.getAdminLockedReason();
-  }
-
-
-  @Override
   public void setResearchPurposeApproved(
       String workspaceNamespace, String firecloudName, boolean approved) {
     DbWorkspace workspace = workspaceDao.getRequired(workspaceNamespace, firecloudName);

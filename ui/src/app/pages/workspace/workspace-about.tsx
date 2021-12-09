@@ -27,7 +27,6 @@ import {isUsingFreeTierBillingAccount} from 'app/utils/workspace-utils';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {faLockAlt} from '@fortawesome/pro-solid-svg-icons';
 import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
-import {workspaceAdminApi} from 'app/services/swagger-fetch-clients';
 
 interface WorkspaceProps extends WithSpinnerOverlayProps {
   profileState: {profile: Profile, reload: Function, updateCache: Function};
@@ -208,10 +207,6 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withCdrVersions())
     }
   }
 
-  get adminLockedReason(): string {
-    return this.state.workspace.adminLockedReason;
-  }
-
   onShare() {
     this.setState({sharing: false});
     const workspace = this.reloadWorkspace(currentWorkspaceStore.getValue());
@@ -234,7 +229,7 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withCdrVersions())
               <a href={'/data-code-of-conduct'}> <AoU/> Researcher Workbench Data User Code of Conduct.
               </a></b>
               <div style={{fontSize: '0.6rem', paddingLeft: '2em', textIndent: '-2em'}}>
-                REASON:  {this.adminLockedReason}
+                REASON:  {workspace.adminLockedReason}
               </div>
               <p>
               The project team should work with the workspace owner to address areas of

@@ -4,12 +4,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.pmiops.workbench.utils.TestMockFactory.DEFAULT_GOOGLE_PROJECT;
 
 import com.google.cloud.Date;
@@ -88,6 +83,7 @@ import org.springframework.context.annotation.Import;
 @DataJpaTest
 public class WorkspaceAdminServiceTest {
 
+  private static final long DB_WORKSPACE_ID = 2222L;
   private static final String GOOGLE_PROJECT_ID = DEFAULT_GOOGLE_PROJECT;
   private static final String GOOGLE_PROJECT_ID_2 = "aou-gcp-id-2";
   private static final String WORKSPACE_NAMESPACE = "aou-rw-12345";
@@ -112,6 +108,7 @@ public class WorkspaceAdminServiceTest {
   @MockBean private LeonardoRuntimeAuditor mockLeonardoRuntimeAuditor;
   @MockBean private MailService mockMailService;
   @MockBean private NotebooksService mockNotebooksService;
+  @MockBean private WorkspaceDao mockWorkspaceDao;
 
   @Autowired private CdrVersionDao cdrVersionDao;
   @Autowired private AccessTierDao accessTierDao;
@@ -166,7 +163,7 @@ public class WorkspaceAdminServiceTest {
 
     final Workspace workspace =
         TestMockFactory.createWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME);
-    dbWorkspace = workspaceDao.save(TestMockFactory.createDbWorkspaceStub(workspace, 1L));
+    dbWorkspace = TestMockFactory.createDbWorkspaceStub(workspace, DB_WORKSPACE_ID);
 
     when(mockFirecloudService.getGroup(anyString()))
         .thenReturn(new FirecloudManagedGroupWithMembers().groupEmail("test@firecloud.org"));
@@ -427,13 +424,8 @@ public class WorkspaceAdminServiceTest {
     adminLockingRequest.setRequestReason("To test auditor");
     adminLockingRequest.setRequestDateInMillis(12345677l);
 
-    Workspace workspace =
-        TestMockFactory.createWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME);
-    DbWorkspace dbWorkspace =
-        TestMockFactory.createDbWorkspaceStub(workspace, DB_WORKSPACE_ID);
-    doReturn(dbWorkspace)
-        .when(mockWorkspaceDao)
-        .save(any()); // TODO make it work with dbWorkspace
+    dbWorkspace.setAdminLocked(true).setAdminLockedReason(adminLockingRequest.getRequestReason());
+    doReturn(dbWorkspace).when(mockWorkspaceDao).save(dbWorkspace);
 
     workspaceAdminService.setAdminLockedState(WORKSPACE_NAMESPACE, adminLockingRequest);
     verify(mockAdminAuditor)
