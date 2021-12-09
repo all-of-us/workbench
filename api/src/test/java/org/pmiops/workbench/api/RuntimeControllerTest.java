@@ -1419,25 +1419,6 @@ public class RuntimeControllerTest {
   }
 
   @Test
-  public void getRuntime_validateActiveBilling() {
-    doThrow(ForbiddenException.class)
-        .when(mockWorkspaceAuthService)
-        .validateActiveBilling(WORKSPACE_NS, WORKSPACE_ID);
-
-    assertThrows(ForbiddenException.class, () -> runtimeController.getRuntime(WORKSPACE_NS));
-  }
-
-  @Test
-  public void getRuntime_validateActiveBilling_checkAccessFirst() {
-    doThrow(ForbiddenException.class)
-        .when(mockWorkspaceAuthService)
-        .enforceWorkspaceAccessLevel(WORKSPACE_NS, WORKSPACE_ID, WorkspaceAccessLevel.WRITER);
-
-    assertThrows(ForbiddenException.class, () -> runtimeController.getRuntime(WORKSPACE_NS));
-    verify(mockWorkspaceAuthService, never()).validateActiveBilling(anyString(), anyString());
-  }
-
-  @Test
   public void localize_validateActiveBilling() {
     doThrow(ForbiddenException.class)
         .when(mockWorkspaceAuthService)
