@@ -337,6 +337,30 @@ describe('RuntimePanel', () => {
     expect(runtimeApiStub.runtime.status).toEqual('Deleting');
   });
 
+  it('should allow creation with update from error', async() => {
+    const runtime = {...runtimeApiStub.runtime,
+      status: RuntimeStatus.Error,
+      errors: [{errorMessage: 'I\'m sorry Dave, I\'m afraid I can\'t do that'}],
+      configurationType: RuntimeConfigurationType.GeneralAnalysis,
+      gceConfig: {
+        ...defaultGceConfig(),
+        machineType: 'n1-standard-16',
+        diskSize: 100
+      },
+      dataprocConfig: null
+    };
+    runtimeApiStub.runtime = runtime;
+    runtimeStoreStub.runtime = runtime;
+
+    const wrapper = await component();
+
+    await pickMainCpu(wrapper, 8);
+    await mustClickButton(wrapper, 'Try Again');
+
+    // Kicks off a deletion to first clear the error status runtime.
+    expect(runtimeApiStub.runtime.status).toEqual('Deleting');
+  });
+
   it('should disable controls when runtime has non-updateable status', async() => {
     runtimeApiStub.runtime.status = RuntimeStatus.Stopping;
     runtimeStoreStub.runtime = runtimeApiStub.runtime;
