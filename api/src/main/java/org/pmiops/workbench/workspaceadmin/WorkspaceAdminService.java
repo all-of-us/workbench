@@ -44,4 +44,6 @@ public interface WorkspaceAdminService {
   void setAdminLockedState(String workspaceNamespace, AdminLockingRequest adminLockingRequest);
 
   void setAdminUnlockedState(String workspaceNamespace);
+
+  String getAdminLockedReason(String workspaceNamespace);
 }

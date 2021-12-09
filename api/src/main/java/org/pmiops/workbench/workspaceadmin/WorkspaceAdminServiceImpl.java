@@ -355,6 +355,15 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
     workspaceDao.save(dbWorkspace.setAdminLocked(false));
     adminAuditor.fireUnlockWorkspaceAction(dbWorkspace.getWorkspaceId());
   }
+
+  @Override
+  public String getAdminLockedReason(String workspaceNamespace) {
+    log.info(String.format("called getAdminLockedReason on wsns %s", workspaceNamespace));
+
+    DbWorkspace dbWorkspace = getWorkspaceByNamespaceOrThrow(workspaceNamespace);
+    return dbWorkspace.getAdminLockedReason();
+  }
+
   // NOTE: may be an undercount since we only retrieve the first Page of Storage List results
   private int getNonNotebookFileCount(String bucketName) {
     return (int)
