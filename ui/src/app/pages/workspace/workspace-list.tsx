@@ -16,7 +16,7 @@ import {WorkspacePermissions} from 'app/utils/workspace-permissions';
 import * as React from 'react';
 import RSelect from 'react-select';
 import * as fp from 'lodash/fp';
-import {Profile} from 'generated/fetch';
+import {Profile, WorkspaceAccessLevel} from 'generated/fetch';
 import {hasTierAccess} from 'app/utils/access-tiers';
 
 const styles = reactStyles({
@@ -35,6 +35,7 @@ interface WorkspaceListProps extends WithSpinnerOverlayProps {
 interface State {
   workspacesLoading: boolean;
   workspaceList: WorkspacePermissions[];
+  filterLevels: WorkspaceAccessLevel[] | null;
   errorText: string;
   firstSignIn: Date;
 }
@@ -49,6 +50,7 @@ export const WorkspaceList = fp.flow(withUserProfile())
     this.state = {
       workspacesLoading: true,
       workspaceList: [],
+      filterLevels: null,
       errorText: '',
       firstSignIn: undefined
     };
@@ -56,24 +58,23 @@ export const WorkspaceList = fp.flow(withUserProfile())
 
   componentDidMount() {
     this.props.hideSpinner();
-    this.reloadWorkspaces(null);
+    this.reloadWorkspaces();
   }
 
   componentWillUnmount() {
     clearTimeout(this.timer);
   }
 
-  async reloadWorkspaces(filter) {
-    filter = filter ? filter : (() => true);
+  async reloadWorkspaces() {
     this.setState({workspacesLoading: true});
     try {
-      const workspacesReceived = (await workspacesApi().getWorkspaces())
-        .items.filter(response => filter(response.accessLevel));
+      const workspacesReceived = (await workspacesApi().getWorkspaces()).items;
       workspacesReceived.sort(
         (a, b) => a.workspace.name.localeCompare(b.workspace.name));
-      this.setState({workspaceList: workspacesReceived
-        .map(w => new WorkspacePermissions(w))});
-      this.setState({workspacesLoading: false});
+      this.setState({
+        workspaceList: workspacesReceived.map(w => new WorkspacePermissions(w)),
+        workspacesLoading: false
+      });
     } catch (e) {
       const response = await convertAPIError(e);
       this.setState({errorText: response.message});
@@ -83,6 +84,7 @@ export const WorkspaceList = fp.flow(withUserProfile())
   render() {
     const {
       errorText,
+      filterLevels,
       workspaceList,
       workspacesLoading
     } = this.state;
@@ -94,7 +96,7 @@ export const WorkspaceList = fp.flow(withUserProfile())
       { label: 'Owner',  value: ['OWNER'] },
       { label: 'Writer', value: ['WRITER'] },
       { label: 'Reader', value: ['READER'] },
-      { label: 'All',    value: ['OWNER', 'READER', 'WRITER'] },
+      { label: 'All',    value: null },
     ];
     const defaultFilter = filters.find(f => f.label === 'All');
 
@@ -104,11 +106,11 @@ export const WorkspaceList = fp.flow(withUserProfile())
           <ListPageHeader>Workspaces</ListPageHeader>
           <FlexRow style={{marginTop: '0.5em'}}>
             <div style={{margin: '0', padding: '0.5em 0.75em 0 0'}}>Filter by</div>
-            <RSelect options={filters}
+            <RSelect
+              data-test-id="access-level-filter"
+              options={filters}
               defaultValue={defaultFilter}
-              onChange={(levels) => {
-                this.reloadWorkspaces(level => levels.value.includes(level));
-              }}/>
+              onChange={({value}) => this.setState({filterLevels: value})} />
           </FlexRow>
           {errorText && <AlertDanger>
             <ClrIcon shape='exclamation-circle'/>
@@ -119,12 +121,14 @@ export const WorkspaceList = fp.flow(withUserProfile())
               (<Spinner style={{margin: '1.5rem auto'}}/>) :
               (<div style={{display: 'flex', marginTop: '1.5rem', flexWrap: 'wrap'}}>
                 <NewWorkspaceButton />
-                {workspaceList.map(wp => {
+                {workspaceList
+                  .filter(({accessLevel}) => !filterLevels || filterLevels.includes(accessLevel))
+                   .map(wp => {
                   return <WorkspaceCard
                     key={wp.workspace.namespace}
                     workspace={wp.workspace}
                     accessLevel={wp.accessLevel}
-                    reload={() => this.reloadWorkspaces(null)}
+                    reload={() => this.reloadWorkspaces()}
                     tierAccessDisabled={!hasTierAccess(profile, wp.workspace.accessTierShortName)}
                   />;
                 })}
