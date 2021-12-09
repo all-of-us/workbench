@@ -12,14 +12,6 @@ import {ProfileApiStub} from "testing/stubs/profile-api-stub";
 import {profileStore} from "app/utils/stores";
 import {AccessTierShortNames} from "app/utils/access-tiers";
 
-interface TestWorkspace {
-  namespace: string,
-  name: string,
-  id: string,
-  cdrVersionId: string,
-  accessTierShortName: string,
-}
-
 describe('WorkspaceLibrary', () => {
   let publishedWorkspaceStubs = [];
   let PHENOTYPE_LIBRARY_WORKSPACES;
@@ -53,7 +45,6 @@ describe('WorkspaceLibrary', () => {
       ...w,
       published: true
     }));
-    publishedWorkspaceStubs[0].accessTierShortName = AccessTierShortNames.Controlled;
     PHENOTYPE_LIBRARY_WORKSPACES = publishedWorkspaceStubs[0];
     TUTORIAL_WORKSPACE = publishedWorkspaceStubs[1];
     PUBLISHED_WORKSPACE = publishedWorkspaceStubs[2];
@@ -121,6 +112,7 @@ describe('WorkspaceLibrary', () => {
   });
 
   it('controlled tier workspace is not clickable for non-ct user', async () => {
+    PHENOTYPE_LIBRARY_WORKSPACES.accessTierShortName = AccessTierShortNames.Controlled;
     registerApiClient(WorkspacesApi, new WorkspacesApiStub(publishedWorkspaceStubs));
 
     const wrapper = component();
@@ -143,6 +135,8 @@ describe('WorkspaceLibrary', () => {
         ...profileStore.get().profile,
         accessTierShortNames: [AccessTierShortNames.Registered, AccessTierShortNames.Controlled]
       }});
+
+    PHENOTYPE_LIBRARY_WORKSPACES.accessTierShortName = AccessTierShortNames.Controlled;
 
     registerApiClient(WorkspacesApi, new WorkspacesApiStub(publishedWorkspaceStubs));
     const wrapper = component();
