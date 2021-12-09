@@ -409,6 +409,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
     final WorkspaceAccessLevel accessLevel =
         publish ? WorkspaceAccessLevel.READER : WorkspaceAccessLevel.NO_ACCESS;
 
+    // Enable all users in RT or higher tiers to see all published workspaces regardless of tier
     final DbAccessTier dbAccessTier = accessTierService.getRegisteredTierOrThrow();
     final FirecloudManagedGroupWithMembers authDomainGroup =
         fireCloudService.getGroup(dbAccessTier.getAuthDomainName());
