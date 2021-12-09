@@ -8,7 +8,6 @@ buildscript {
 }
 
 plugins {
-    id 'application'
     id 'org.liquibase.gradle' version '1.2.4'
 }
 
