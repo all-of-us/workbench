@@ -2,13 +2,12 @@ buildscript {
     repositories {
         mavenCentral()
     }
-    dependencies {
-        classpath 'org.liquibase:liquibase-gradle-plugin:1.2.4'
-        classpath 'mysql:mysql-connector-java:5.1.37'
-    }
 }
-apply plugin: 'org.liquibase.gradle'
-apply plugin: 'application'
+
+plugins {
+    id 'application'
+    id 'org.liquibase.gradle' version '1.2.4'
+}
 
 def db_host = System.getenv("DB_HOST") ?: "db"
 def db_port = System.getenv("DB_PORT") ?: "3306"
