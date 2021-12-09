@@ -43,6 +43,7 @@ import {
   RuntimeApi,
   StatusAlertApi,
   StatusApi,
+  UserAdminApi,
   UserApi,
   UserMetricsApi,
   WorkspaceAdminApi,
@@ -105,6 +106,7 @@ export const profileApi = bindCtor(ProfileApi);
 export const runtimeApi = bindCtor(RuntimeApi);
 export const statusApi = bindCtor(StatusApi);
 export const statusAlertApi = bindCtor(StatusAlertApi);
+export const userAdminApi = bindCtor(UserAdminApi);
 export const userApi = bindCtor(UserApi);
 export const userMetricsApi = bindCtor(UserMetricsApi);
 export const workspaceAdminApi = bindCtor(WorkspaceAdminApi);

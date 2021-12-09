@@ -21,7 +21,6 @@ import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.inject.Provider;
@@ -57,7 +56,6 @@ import org.pmiops.workbench.model.AccessModuleStatus;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.Degree;
 import org.pmiops.workbench.model.Institution;
-import org.pmiops.workbench.model.UserAccessExpiration;
 import org.pmiops.workbench.monitoring.GaugeDataCollector;
 import org.pmiops.workbench.monitoring.MeasurementBundle;
 import org.pmiops.workbench.monitoring.labels.MetricLabel;
@@ -900,34 +898,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
 
     final Optional<Timestamp> rtExpiration = getRegisteredTierExpirationForEmails(user);
     rtExpiration.ifPresent(expiration -> maybeSendRegisteredTierExpirationEmail(user, expiration));
-  }
-
-  /**
-   * Return a mapping of users to their Annual Access Renewal expiration date for Registered Tier,
-   * for users who have them
-   */
-  @Override
-  public List<UserAccessExpiration> getRegisteredTierExpirations() {
-    // restrict to current RT users
-    return accessTierService.getAllRegisteredTierUsers().stream()
-        .flatMap(this::maybeAccessExpiration)
-        .collect(Collectors.toList());
-  }
-
-  // streams a UserAccessExpiration object, if the user has an expiration
-  private Stream<UserAccessExpiration> maybeAccessExpiration(DbUser user) {
-    return getRegisteredTierExpirationForEmails(user)
-        .map(
-            exp ->
-                Stream.of(
-                    new UserAccessExpiration()
-                        .userName(user.getUsername())
-                        .contactEmail(user.getContactEmail())
-                        .givenName(user.getGivenName())
-                        .familyName(user.getFamilyName())
-                        // converts to UTC
-                        .expirationDate(exp.toInstant().toString())))
-        .orElse(Stream.empty());
   }
 
   /**

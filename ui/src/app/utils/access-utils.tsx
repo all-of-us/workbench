@@ -4,7 +4,7 @@ import {Redirect} from 'react-router-dom';
 
 import {Button} from 'app/components/buttons';
 import {AoU} from 'app/components/text-wrappers';
-import {profileApi} from 'app/services/swagger-fetch-clients';
+import { profileApi, userAdminApi} from 'app/services/swagger-fetch-clients';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {convertAPIError} from 'app/utils/errors';
 import {encodeURIComponentStrict} from 'app/utils/navigation';
@@ -247,7 +247,7 @@ export const getAccessModuleStatusByName = (profile: Profile, moduleName: Access
 
 export const bypassAll = async(accessModules: AccessModule[], isBypassed: boolean) => {
   for (const module of accessModules) {
-    await profileApi().unsafeSelfBypassAccessRequirement({
+    await userAdminApi().unsafeSelfBypassAccessRequirement({
       moduleName: module,
       isBypassed: isBypassed
     });

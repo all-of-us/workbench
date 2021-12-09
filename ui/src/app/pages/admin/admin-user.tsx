@@ -11,7 +11,7 @@ import {SmallHeader} from 'app/components/headers';
 import {ClrIcon} from 'app/components/icons';
 import {TextInputWithLabel, Toggle} from 'app/components/inputs';
 import {SpinnerOverlay} from 'app/components/spinners';
-import {institutionApi, profileApi} from 'app/services/swagger-fetch-clients';
+import { institutionApi, userAdminApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {
   formatFreeCreditsUSD,
@@ -262,7 +262,7 @@ export const AdminUser = withRouter(class extends React.Component<Props, State> 
   async getUser() {
     const {gsuiteDomain} = serverConfigStore.get().config;
     try {
-      const profile = await profileApi().getUserByUsername(this.props.match.params.usernameWithoutGsuiteDomain + '@' + gsuiteDomain);
+      const profile = await userAdminApi().getUserByUsername(this.props.match.params.usernameWithoutGsuiteDomain + '@' + gsuiteDomain);
       this.setState({oldProfile: profile, updatedProfile: profile, profileLoadingError: ''});
     } catch (error) {
       this.setState({profileLoadingError: 'Could not find user - please check spelling of username and try again'});
@@ -383,7 +383,7 @@ export const AdminUser = withRouter(class extends React.Component<Props, State> 
     };
 
     this.setState({loading: true});
-    profileApi().updateAccountProperties(request).then((response) => {
+    userAdminApi().updateAccountProperties(request).then((response) => {
       this.setState({oldProfile: response, updatedProfile: response, loading: false});
     });
   }

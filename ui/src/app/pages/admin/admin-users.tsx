@@ -8,7 +8,7 @@ import {TooltipTrigger} from 'app/components/popups';
 import {Spinner, SpinnerOverlay} from 'app/components/spinners';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {AdminUserBypass} from 'app/pages/admin/admin-user-bypass';
-import {authDomainApi, profileApi} from 'app/services/swagger-fetch-clients';
+import { authDomainApi, userAdminApi} from 'app/services/swagger-fetch-clients';
 import {reactStyles, withUserProfile} from 'app/utils';
 import {usernameWithoutDomain} from 'app/utils/audit-utils';
 import {serverConfigStore} from 'app/utils/stores';
@@ -81,7 +81,7 @@ export const AdminUsers = withUserProfile()(class extends React.Component<Props,
   }
 
   async loadProfiles() {
-    const userListResponse = await profileApi().getAllUsers();
+    const userListResponse = await userAdminApi().getAllUsers();
     this.setState({users: userListResponse.users});
   }
 
