@@ -34,7 +34,7 @@ import {recentWorkspaceStubs, userRolesStub, workspaceStubs, WorkspaceStubVariab
 
 export class WorkspacesApiStub extends WorkspacesApi {
   public workspaces: Workspace[];
-  workspaceAccess: Map<string, WorkspaceAccessLevel>;
+  public workspaceAccess: Map<string, WorkspaceAccessLevel>;
   workspaceUserRoles: Map< string, UserRole[]>;
   recentWorkspaces: RecentWorkspaceResponse;
   newWorkspaceCount = 0;
