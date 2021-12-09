@@ -17,7 +17,6 @@ import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import javax.inject.Provider;
 import org.json.JSONObject;
-import org.pmiops.workbench.actionaudit.auditors.LeonardoRuntimeAuditor;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
@@ -73,7 +72,6 @@ public class RuntimeController implements RuntimeApiDelegate {
   private static final Logger log = Logger.getLogger(RuntimeController.class.getName());
 
   private final Clock clock;
-  private final LeonardoRuntimeAuditor leonardoRuntimeAuditor;
   private final LeonardoNotebooksClient leonardoNotebooksClient;
   private final Provider<DbUser> userProvider;
   private final WorkspaceAuthService workspaceAuthService;
@@ -86,7 +84,6 @@ public class RuntimeController implements RuntimeApiDelegate {
   @Autowired
   RuntimeController(
       Clock clock,
-      LeonardoRuntimeAuditor leonardoRuntimeAuditor,
       LeonardoNotebooksClient leonardoNotebooksClient,
       Provider<DbUser> userProvider,
       WorkspaceAuthService workspaceAuthService,
@@ -96,7 +93,6 @@ public class RuntimeController implements RuntimeApiDelegate {
       UserRecentResourceService userRecentResourceService,
       LeonardoMapper leonardoMapper) {
     this.clock = clock;
-    this.leonardoRuntimeAuditor = leonardoRuntimeAuditor;
     this.leonardoNotebooksClient = leonardoNotebooksClient;
     this.userProvider = userProvider;
     this.workspaceAuthService = workspaceAuthService;
@@ -119,12 +115,7 @@ public class RuntimeController implements RuntimeApiDelegate {
     enforceComputeSecuritySuspension(user);
 
     DbWorkspace dbWorkspace = lookupWorkspace(workspaceNamespace);
-    String firecloudWorkspaceName = dbWorkspace.getFirecloudName();
     String googleProject = dbWorkspace.getGoogleProject();
-    workspaceAuthService.enforceWorkspaceAccessLevel(
-        workspaceNamespace, firecloudWorkspaceName, WorkspaceAccessLevel.WRITER);
-    workspaceAuthService.validateActiveBilling(workspaceNamespace, firecloudWorkspaceName);
-
     try {
       LeonardoGetRuntimeResponse leoRuntimeResponse =
           leonardoNotebooksClient.getRuntime(googleProject, user.getRuntimeName());
@@ -282,9 +273,6 @@ public class RuntimeController implements RuntimeApiDelegate {
     enforceComputeSecuritySuspension(user);
 
     DbWorkspace dbWorkspace = lookupWorkspace(workspaceNamespace);
-    String firecloudWorkspaceName = dbWorkspace.getFirecloudName();
-    workspaceAuthService.enforceWorkspaceAccessLevel(
-        workspaceNamespace, firecloudWorkspaceName, WorkspaceAccessLevel.WRITER);
 
     leonardoNotebooksClient.deleteRuntime(
         dbWorkspace.getGoogleProject(),
