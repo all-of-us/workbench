@@ -477,7 +477,7 @@ jobs:
           # Lint last; it's more important to surface test failures early.
           name: Lint typescript
           working_directory: ~/workbench/ui
-          command: yarn run lint
+          command: yarn run lint --max-warnings 0
       - persist_to_workspace:
           root: .
           paths:
