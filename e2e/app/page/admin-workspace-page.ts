@@ -36,7 +36,7 @@ export default class WorkspaceAdminPage extends AuthenticatedPage {
     return Button.findByName(this.page, { name: LinkText.LoadWorkspace });
   }
 
-  //click "Load workspace" button 
+  
   async clickLoadWorkspaceButton(): Promise<void> {
     const button = this.getLoadWorkspaceButton();
     const navPromise = this.page.waitForNavigation({ waitUntil: ['load', 'networkidle0'] });
