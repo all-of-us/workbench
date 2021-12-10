@@ -6,7 +6,7 @@
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
   <changeSet author="alex" id="changelog-182-workspace-admin-locked-reason">
     <addColumn tableName="workspace">
-      <column name="admin_locked_reason" type="varchar(255)">
+      <column name="admin_locked_reason" type="varchar(4000)">
         <constraints nullable="true"/>
       </column>
     </addColumn>

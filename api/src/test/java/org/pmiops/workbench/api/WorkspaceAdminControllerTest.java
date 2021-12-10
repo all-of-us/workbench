@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 import com.google.common.collect.ImmutableList;
 import java.util.List;
 import java.util.Optional;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
@@ -197,6 +198,41 @@ public class WorkspaceAdminControllerTest {
     AdminLockingRequest adminLockingRequest = new AdminLockingRequest();
     adminLockingRequest.setRequestDateInMillis(654321l);
     adminLockingRequest.setRequestReason("Some reason for Locking Workspace");
+    workspaceAdminController.setAdminLockedState(WORKSPACE_NAMESPACE, adminLockingRequest);
+    verify(mockWorkspaceAdminService).setAdminLockedState(WORKSPACE_NAMESPACE, adminLockingRequest);
+  }
+
+  @Test
+  public void getWorkspaceAdmin_setAdminLock_lockingReason_lessThan10() {
+    AdminLockingRequest adminLockingRequest = new AdminLockingRequest();
+    adminLockingRequest.setRequestDateInMillis(654321l);
+    adminLockingRequest.setRequestReason("Something");
+    assertThrows(
+        BadRequestException.class,
+        () ->
+            workspaceAdminController.setAdminLockedState(WORKSPACE_NAMESPACE, adminLockingRequest),
+        "Locking Reason text length should be atleast 10 characters long and at most 4000 characters");
+  }
+
+  @Test
+  public void getWorkspaceAdmin_setAdminLock_lockingReason_moreThanAllowed() {
+    AdminLockingRequest adminLockingRequest = new AdminLockingRequest();
+    adminLockingRequest.setRequestDateInMillis(654321l);
+    // Send locking Reason of length 4001
+    adminLockingRequest.setRequestReason(StringUtils.repeat("abcd", 1000) + "1");
+    assertThrows(
+        BadRequestException.class,
+        () ->
+            workspaceAdminController.setAdminLockedState(WORKSPACE_NAMESPACE, adminLockingRequest),
+        "Locking Reason text length should be atleast 10 characters long and at most 4000 characters");
+  }
+
+  @Test
+  public void getWorkspaceAdmin_setAdminLock_lockingReason_exactCharacter() {
+    AdminLockingRequest adminLockingRequest = new AdminLockingRequest();
+    adminLockingRequest.setRequestDateInMillis(654321l);
+    // Send locking Reason of length 4000
+    adminLockingRequest.setRequestReason(StringUtils.repeat("abcd", 1000));
     workspaceAdminController.setAdminLockedState(WORKSPACE_NAMESPACE, adminLockingRequest);
     verify(mockWorkspaceAdminService).setAdminLockedState(WORKSPACE_NAMESPACE, adminLockingRequest);
   }

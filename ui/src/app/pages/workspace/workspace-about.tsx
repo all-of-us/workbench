@@ -229,10 +229,12 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withCdrVersions())
               <a href={'/data-code-of-conduct'}> <AoU/> Researcher Workbench Data User Code of Conduct.
               </a></b>
               <p></p>
-              <div style={{fontSize: '0.6rem', paddingLeft: '1em'}}>
+              {/* This is a temp solution in case admin have locked some workspaces already before workbench introduced the ability to save locking reason */}
+              {workspace.adminLockedReason && <div style={{fontSize: '0.6rem', paddingLeft: '1em'}}>
                 <b>REASON:  {workspace.adminLockedReason}</b>
+                <br/>
               </div>
-              <p></p>
+              }
               The project team should work with the workspace owner to address areas of
               non-compliance by updating the workspace description (e.g. “About” page) and
               corresponding with the <AoU/> Resources Access Board. For questions, please contact
