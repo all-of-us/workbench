@@ -230,9 +230,8 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withCdrVersions())
               </a></b>
               <p></p>
               {/* This is a temp solution in case admin have locked some workspaces already before workbench introduced the ability to save locking reason */}
-              {workspace.adminLockedReason && <div style={{fontSize: '0.6rem', paddingLeft: '1em'}}>
+              {workspace.adminLockedReason && <div style={{fontSize: '0.6rem', paddingLeft: '1em', paddingBottom: '1em'}}>
                 <b>REASON:  {workspace.adminLockedReason}</b>
-                <br/>
               </div>
               }
               The project team should work with the workspace owner to address areas of
