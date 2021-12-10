@@ -14,7 +14,7 @@ def liquibase_password = System.getenv("LIQUIBASE_DB_PASSWORD") ?: "lb-notasecre
 applicationDefaultJvmArgs = ["-Xmx2048m","-Xms2048m"]
 
 dependencies {
-    liquibaseRuntime 'org.liquibase:liquibase-core:4.5.0'
+    liquibaseRuntime 'org.liquibase:liquibase-core:3.10.0'
     liquibaseRuntime 'org.liquibase:liquibase-groovy-dsl:3.0.0'
     liquibaseRuntime 'info.picocli:picocli:4.6.1'
     liquibaseRuntime 'mysql:mysql-connector-java:5.1.37'
