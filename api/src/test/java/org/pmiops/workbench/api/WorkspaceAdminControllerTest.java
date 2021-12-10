@@ -58,6 +58,10 @@ public class WorkspaceAdminControllerTest {
   private static final String DB_WORKSPACE_FIRECLOUD_NAME = "gonewiththewind";
   private static final String WORKSPACE_NAMESPACE = "aou-rw-12345";
   private static final String NONSENSE_NAMESPACE = "wharrgarbl_wharrgarbl";
+  private static final String BAD_EXCEPTION_NULL_REQUEST_DATE_REASON =
+      "Cannot have empty Request reason or Request Date";
+  private static final String BAD_EXCEPTION_REQUEST_REASON_CHAR =
+      "Locking Reason text length should be atleast 10 characters long and at most 4000 characters";
 
   @MockBean private ActionAuditQueryService mockActionAuditQueryService;
   @MockBean private CloudMonitoringService mockCloudMonitoringService;
@@ -157,7 +161,8 @@ public class WorkspaceAdminControllerTest {
     assertThrows(
         BadRequestException.class,
         () ->
-            workspaceAdminController.setAdminLockedState(WORKSPACE_NAMESPACE, adminLockingRequest));
+            workspaceAdminController.setAdminLockedState(WORKSPACE_NAMESPACE, adminLockingRequest),
+        BAD_EXCEPTION_NULL_REQUEST_DATE_REASON);
   }
 
   @Test
@@ -168,7 +173,8 @@ public class WorkspaceAdminControllerTest {
     assertThrows(
         BadRequestException.class,
         () ->
-            workspaceAdminController.setAdminLockedState(WORKSPACE_NAMESPACE, adminLockingRequest));
+            workspaceAdminController.setAdminLockedState(WORKSPACE_NAMESPACE, adminLockingRequest),
+        BAD_EXCEPTION_NULL_REQUEST_DATE_REASON);
   }
 
   @Test
@@ -179,7 +185,8 @@ public class WorkspaceAdminControllerTest {
     assertThrows(
         BadRequestException.class,
         () ->
-            workspaceAdminController.setAdminLockedState(WORKSPACE_NAMESPACE, adminLockingRequest));
+            workspaceAdminController.setAdminLockedState(WORKSPACE_NAMESPACE, adminLockingRequest),
+        BAD_EXCEPTION_NULL_REQUEST_DATE_REASON);
   }
 
   @Test
@@ -190,7 +197,8 @@ public class WorkspaceAdminControllerTest {
     assertThrows(
         BadRequestException.class,
         () ->
-            workspaceAdminController.setAdminLockedState(WORKSPACE_NAMESPACE, adminLockingRequest));
+            workspaceAdminController.setAdminLockedState(WORKSPACE_NAMESPACE, adminLockingRequest),
+        BAD_EXCEPTION_NULL_REQUEST_DATE_REASON);
   }
 
   @Test
@@ -211,7 +219,7 @@ public class WorkspaceAdminControllerTest {
         BadRequestException.class,
         () ->
             workspaceAdminController.setAdminLockedState(WORKSPACE_NAMESPACE, adminLockingRequest),
-        "Locking Reason text length should be atleast 10 characters long and at most 4000 characters");
+        BAD_EXCEPTION_REQUEST_REASON_CHAR);
   }
 
   @Test
@@ -224,7 +232,7 @@ public class WorkspaceAdminControllerTest {
         BadRequestException.class,
         () ->
             workspaceAdminController.setAdminLockedState(WORKSPACE_NAMESPACE, adminLockingRequest),
-        "Locking Reason text length should be atleast 10 characters long and at most 4000 characters");
+        BAD_EXCEPTION_REQUEST_REASON_CHAR);
   }
 
   @Test
