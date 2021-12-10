@@ -13,7 +13,7 @@
 #
 # We use OpenJDK 8, Node, and some common browsers from CircleCI's base image
 # see: https://circleci.com/docs/2.0/circleci-images/#language-image-variants
-FROM circleci/openjdk:8-buster-node-browsers
+FROM circleci/openjdk:11-buster-node-browsers
 
 USER circleci
 
