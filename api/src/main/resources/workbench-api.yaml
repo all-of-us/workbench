@@ -931,6 +931,10 @@ paths:
           description: A workspace response containing workspace and access level
           schema:
             "$ref": "#/definitions/WorkspaceResponse"
+        403:
+          description: User doesnt have access to the workspace's access tier
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
     patch:
       tags:
       - workspaces
@@ -1098,7 +1102,7 @@ paths:
     - "$ref": "#/parameters/workspaceId"
     post:
       tags:
-      - workspaces
+      - workspaceAdmin
       description: 'Makes a workspace public to all AoU registered users. Requires
         FEATURED_WORKSPACE_ADMIN authority.'
       operationId: publishWorkspace
@@ -1113,7 +1117,7 @@ paths:
     - "$ref": "#/parameters/workspaceId"
     post:
       tags:
-      - workspaces
+      - workspaceAdmin
       description: 'Makes a workspace public to all AoU registered users. Requires
         FEATURED_WORKSPACE_ADMIN authority.'
       operationId: unpublishWorkspace
@@ -1126,7 +1130,7 @@ paths:
   "/v1/admin/workspaces/review":
     get:
       tags:
-      - workspaces
+      - workspaceAdmin
       description: 'Returns workspaces that need research purpose review. Requires
         REVIEW_RESEARCH_PURPOSE authority.'
       operationId: getWorkspacesForReview
@@ -1135,6 +1139,28 @@ paths:
           description: A list of workspaces
           schema:
             "$ref": "#/definitions/WorkspaceListResponse"
+  "/v1/admin/workspaces/{workspaceNamespace}/{workspaceId}/review":
+    parameters:
+    - "$ref": "#/parameters/workspaceNamespace"
+    - "$ref": "#/parameters/workspaceId"
+    post:
+      tags:
+      - workspaceAdmin
+      consumes:
+      - application/json
+      description: Sets a research purpose review result.
+      operationId: reviewWorkspace
+      parameters:
+      - in: body
+        name: review
+        description: result of the research purpose review
+        schema:
+          "$ref": "#/definitions/ResearchPurposeReviewRequest"
+      responses:
+        200:
+          description: success
+          schema:
+            "$ref": "#/definitions/EmptyResponse"
   "/v1/admin/workspaces/{workspaceNamespace}/audit":
     get:
       tags:
@@ -1222,13 +1248,13 @@ paths:
   "/v1/admin/unsafe-self-bypass-access-requirement":
     post:
       tags:
-      - profile
+      - userAdmin
       consumes:
       - application/json
       description: 'Updates the given user to bypass the request access requirement'
       parameters:
       - in: body
-        name: bypassed
+        name: request
         schema:
           "$ref": "#/definitions/AccessBypassRequest"
         description: 'Whether the requirement should be bypassed or not. Defaults
@@ -1250,7 +1276,7 @@ paths:
   "/v1/admin/users/{usernameWithoutGsuiteDomain}/audit":
     get:
       tags:
-        - profile
+        - userAdmin
       description: >
         Fetch audit logs involving this user as either a subject or object. Requires the
         RESEARCHER_DATA_VIEW authority.
@@ -1303,7 +1329,7 @@ paths:
   "/v1/admin/users/{userId}/bypass-access-requirement":
     post:
       tags:
-      - profile
+      - userAdmin
       consumes:
       - application/json
       description: 'Updates the given user to bypass the request access requirement,
@@ -1311,7 +1337,7 @@ paths:
       parameters:
       - "$ref": "#/parameters/userId"
       - in: body
-        name: bypassed
+        name: request
         schema:
           "$ref": "#/definitions/AccessBypassRequest"
         description: 'Whether the requirement should be bypassed or not. Defaults
@@ -1333,7 +1359,7 @@ paths:
   "/v1/admin/users/updateAccount":
     post:
       tags:
-        - profile
+        - userAdmin
       consumes:
         - application/json
       description: 'Updates a subset of a user''s account metadata, as defined by the AccountPropertyUpdate object.  Requires ACCESS_CONTROL_ADMIN authority.'
@@ -1357,45 +1383,10 @@ paths:
           description: User associated with request could not be found
           schema:
             "$ref": "#/definitions/ErrorResponse"
-  "/v1/admin/accessExpirations":
-    get:
-      tags:
-        - profile
-      description: 'Retrieves a mapping of users to access expiration times.  Requires ACCESS_CONTROL_ADMIN authority.'
-      operationId: getRegisteredTierAccessExpirations
-      responses:
-        200:
-          description: 'An array of users and their access expirations'
-          schema:
-            type: array
-            items:
-              "$ref": "#/definitions/UserAccessExpiration"
-        403:
-          description: User doesn't have the ACCESS_CONTROL_ADMIN authority
-          schema:
-            "$ref": "#/definitions/ErrorResponse"
-  "/v1/admin/users/{userId}":
-    get:
-      tags:
-      - profile
-      description: 'Returns a user''s profile for review.  Requires ACCESS_CONTROL_ADMIN
-        authority.'
-      parameters:
-      - "$ref": "#/parameters/userId"
-      operationId: getUser
-      responses:
-        200:
-          description: A user's profile
-          schema:
-            "$ref": "#/definitions/Profile"
-        403:
-          description: User doesn't have the ACCESS_CONTROL_ADMIN authority
-          schema:
-            "$ref": "#/definitions/ErrorResponse"
   "/v1/admin/users/getUserByUsername":
     get:
       tags:
-        - profile
+        - userAdmin
       description: 'Returns a user''s profile for review. Requires ACCESS_CONTROL_ADMIN authority.'
       parameters:
         - in: query
@@ -1415,7 +1406,7 @@ paths:
   "/v1/admin/users/list":
     get:
       tags:
-      - profile
+      - userAdmin
       description: 'Returns a list of profiles for users to be reviewed. Requires
         ACCESS_CONTROL_ADMIN authority.'
       operationId: getAllUsers
@@ -1428,28 +1419,6 @@ paths:
           description: User doesn't have the ACCESS_CONTROL_ADMIN authority
           schema:
             "$ref": "#/definitions/ErrorResponse"
-  "/v1/admin/workspaces/{workspaceNamespace}/{workspaceId}/review":
-    parameters:
-    - "$ref": "#/parameters/workspaceNamespace"
-    - "$ref": "#/parameters/workspaceId"
-    post:
-      tags:
-      - workspaces
-      consumes:
-      - application/json
-      description: Sets a research purpose review result.
-      operationId: reviewWorkspace
-      parameters:
-      - in: body
-        name: review
-        description: result of the research purpose review
-        schema:
-          "$ref": "#/definitions/ResearchPurposeReviewRequest"
-      responses:
-        200:
-          description: success
-          schema:
-            "$ref": "#/definitions/EmptyResponse"
   "/v1/admin/workspaces/{workspaceNamespace}/locked":
     parameters:
       - "$ref": "#/parameters/workspaceNamespace"
@@ -4319,10 +4288,6 @@ definitions:
         type: boolean
         default: false
         description: Whether to enable genomic data extraction for eligible datasets.
-      enableEgressAlertingV2:
-        type: boolean
-        default: false
-        description: Whether egress alerting V2 is enabled.
       enableGpu:
         type: boolean
         default: false
@@ -5785,25 +5750,6 @@ definitions:
         type: integer
         format: int64
         description: When this module is bypassed if applicable
-
-  UserAccessExpiration:
-    type: object
-    properties:
-      userName:
-        type: string
-        description: a full All of Us email userName
-      contactEmail:
-        type: string
-        description: the institutional contact email of the user
-      givenName:
-        type: string
-        description: the user's given name (first name)
-      familyName:
-        type: string
-        description: the user's family name (last name)
-      expirationDate:
-        type: string
-        description: the time a user's access will expire, in ISO-8601 format
 
   DemographicSurvey:
     type: object

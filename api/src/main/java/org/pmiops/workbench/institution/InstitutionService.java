@@ -26,8 +26,16 @@ public interface InstitutionService {
 
   void deleteInstitution(final String shortName);
 
+  /**
+   * Update an institution in the DB if one matches the shortName.
+   *
+   * @param shortName
+   * @param updatedInstitution
+   * @return the updated institution, if an institution with the short name existed and the
+   *     operation was successful. Empty if there was no matching institution to update.
+   */
   Optional<Institution> updateInstitution(
-      final String shortName, final Institution institutionToUpdate);
+      final String shortName, final Institution updatedInstitution);
 
   /**
    * Checks that the user's institutional affiliation is valid by calling

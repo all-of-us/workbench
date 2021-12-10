@@ -14,7 +14,6 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.pmiops.workbench.actionaudit.auditors.WorkspaceAuditor;
-import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdrselector.WorkspaceResourcesService;
@@ -41,14 +40,12 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
 import org.pmiops.workbench.iam.IamService;
 import org.pmiops.workbench.model.ArchivalStatus;
-import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.CloneWorkspaceRequest;
 import org.pmiops.workbench.model.CloneWorkspaceResponse;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.RecentWorkspace;
 import org.pmiops.workbench.model.RecentWorkspaceResponse;
 import org.pmiops.workbench.model.ResearchPurpose;
-import org.pmiops.workbench.model.ResearchPurposeReviewRequest;
 import org.pmiops.workbench.model.ShareWorkspaceRequest;
 import org.pmiops.workbench.model.UpdateWorkspaceRequest;
 import org.pmiops.workbench.model.UserRole;
@@ -57,7 +54,6 @@ import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.model.WorkspaceBillingUsageResponse;
 import org.pmiops.workbench.model.WorkspaceCreatorFreeCreditsRemainingResponse;
-import org.pmiops.workbench.model.WorkspaceListResponse;
 import org.pmiops.workbench.model.WorkspaceResourceResponse;
 import org.pmiops.workbench.model.WorkspaceResourcesRequest;
 import org.pmiops.workbench.model.WorkspaceResponse;
@@ -547,45 +543,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     return ResponseEntity.ok(resp);
   }
 
-  /** Record approval or rejection of research purpose. */
-  @Override
-  @AuthorityRequired({Authority.REVIEW_RESEARCH_PURPOSE})
-  public ResponseEntity<EmptyResponse> reviewWorkspace(
-      String ns, String id, ResearchPurposeReviewRequest review) {
-    DbWorkspace workspace = workspaceDao.getRequired(ns, id);
-
-    // RW-7087 replace with a new workspaceAuditor action (fireReviewAction?)
-    // because this uses the deprecated DbAdminActionHistory
-    userService.logAdminWorkspaceAction(
-        workspace.getWorkspaceId(),
-        "research purpose approval",
-        workspace.getApproved(),
-        review.getApproved());
-    workspaceService.setResearchPurposeApproved(ns, id, review.getApproved());
-    return ResponseEntity.ok(new EmptyResponse());
-  }
-
-  // Note we do not paginate the workspaces list, since we expect few workspaces
-  // to require review.
-  //
-  // We can add pagination in the DAO by returning Slice<DbWorkspace> if we want the method to
-  // return
-  // pagination information (e.g. are there more workspaces to get), and Page<DbWorkspace> if we
-  // want the method to return both pagination information and a total count.
-  @Override
-  @AuthorityRequired({Authority.REVIEW_RESEARCH_PURPOSE})
-  public ResponseEntity<WorkspaceListResponse> getWorkspacesForReview() {
-    WorkspaceListResponse response = new WorkspaceListResponse();
-    List<DbWorkspace> workspaces = findForReview();
-    response.setItems(
-        workspaces.stream().map(workspaceMapper::toApiWorkspace).collect(Collectors.toList()));
-    return ResponseEntity.ok(response);
-  }
-
-  private List<DbWorkspace> findForReview() {
-    return workspaceDao.findByApprovedIsNullAndReviewRequestedTrueOrderByTimeRequested();
-  }
-
   @Override
   public ResponseEntity<Workspace> markResearchPurposeReviewed(
       String workspaceNamespace, String workspaceId) {
@@ -620,22 +577,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     WorkspaceResponseListResponse response = new WorkspaceResponseListResponse();
     response.setItems(workspaceService.getPublishedWorkspaces());
     return ResponseEntity.ok(response);
-  }
-
-  @Override
-  @AuthorityRequired({Authority.FEATURED_WORKSPACE_ADMIN})
-  public ResponseEntity<EmptyResponse> publishWorkspace(
-      String workspaceNamespace, String workspaceId) {
-    workspaceService.setPublished(workspaceNamespace, workspaceId, true);
-    return ResponseEntity.ok(new EmptyResponse());
-  }
-
-  @Override
-  @AuthorityRequired({Authority.FEATURED_WORKSPACE_ADMIN})
-  public ResponseEntity<EmptyResponse> unpublishWorkspace(
-      String workspaceNamespace, String workspaceId) {
-    workspaceService.setPublished(workspaceNamespace, workspaceId, false);
-    return ResponseEntity.ok(new EmptyResponse());
   }
 
   @Override

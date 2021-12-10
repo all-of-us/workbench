@@ -7,7 +7,7 @@ import {Check, ClrIcon, Times} from 'app/components/icons';
 import {Toggle} from 'app/components/inputs';
 import {PopupTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
-import {profileApi} from 'app/services/swagger-fetch-clients';
+import { profileApi, userAdminApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {serverConfigStore} from 'app/utils/stores';
 import {AccessModule, AdminTableUser} from 'generated/fetch';
@@ -78,7 +78,7 @@ export class AdminUserBypass extends React.Component<Props, State> {
     this.setState({isSaving: true});
     try {
       for (const module of changedModules) {
-        await profileApi()
+        await userAdminApi()
           .bypassAccessRequirement(user.userId,
           {isBypassed: selectedModules.includes(module), moduleName: module});
       }

@@ -53,7 +53,6 @@ public interface WorkbenchConfigMapper {
   @Mapping(target = "enableRasLoginGovLinking", source = "access.enableRasLoginGovLinking")
   @Mapping(target = "enforceRasLoginGovLinking", source = "access.enforceRasLoginGovLinking")
   @Mapping(target = "enableGenomicExtraction", source = "featureFlags.enableGenomicExtraction")
-  @Mapping(target = "enableEgressAlertingV2", source = "featureFlags.enableEgressAlertingV2")
   @Mapping(target = "enableGpu", source = "featureFlags.enableGpu")
   @Mapping(target = "enablePersistentDisk", source = "featureFlags.enablePersistentDisk")
   @Mapping(target = "rasHost", source = "ras.host")

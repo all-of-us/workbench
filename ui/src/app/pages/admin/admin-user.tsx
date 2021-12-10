@@ -11,7 +11,7 @@ import {SmallHeader} from 'app/components/headers';
 import {ClrIcon} from 'app/components/icons';
 import {TextInputWithLabel, Toggle} from 'app/components/inputs';
 import {SpinnerOverlay} from 'app/components/spinners';
-import {institutionApi, profileApi} from 'app/services/swagger-fetch-clients';
+import { institutionApi, userAdminApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {
   formatFreeCreditsUSD,
@@ -59,10 +59,6 @@ const styles = reactStyles({
     marginTop: '1rem'
   }
 });
-
-const CREDIT_LIMIT_DEFAULT_MIN = 300;
-const CREDIT_LIMIT_DEFAULT_MAX = 800;
-const CREDIT_LIMIT_DEFAULT_STEP = 50;
 
 const getUserStatus = (profile: Profile) => {
   return (hasRegisteredTierAccess(profile))
@@ -157,7 +153,7 @@ const AccessModuleExpirations = ({modules, UserStatusComponent}: ExpirationProps
       const status: AccessModuleStatus = modules.find(s => s.moduleName === moduleName) || {moduleName};
       const {lastConfirmedDate, nextReviewDate} = computeDisplayDates(status);
       const {AARTitleComponent} = getAccessModuleConfig(moduleName);
-      return <FlexRow style={{marginTop: '0.5rem'}}>
+      return <FlexRow key={zeroBasedStep} style={{marginTop: '0.5rem'}}>
         <FlexColumn>
           <label style={styles.semiBold}>Step {zeroBasedStep + 1}: <AARTitleComponent/></label>
           <div>Last Updated On: {lastConfirmedDate}</div>
@@ -266,21 +262,28 @@ export const AdminUser = withRouter(class extends React.Component<Props, State> 
   async getUser() {
     const {gsuiteDomain} = serverConfigStore.get().config;
     try {
-      const profile = await profileApi().getUserByUsername(this.props.match.params.usernameWithoutGsuiteDomain + '@' + gsuiteDomain);
+      const profile = await userAdminApi().getUserByUsername(this.props.match.params.usernameWithoutGsuiteDomain + '@' + gsuiteDomain);
       this.setState({oldProfile: profile, updatedProfile: profile, profileLoadingError: ''});
     } catch (error) {
       this.setState({profileLoadingError: 'Could not find user - please check spelling of username and try again'});
     }
   }
 
+  /**
+   * Present an ordered list of dollar options with the following values:
+   * $300 to $1000, in $100 increments
+   * $1000 to $10,000, in $500 increments
+   * Plus the user's current quota value, if it's not already one of these
+   */
   getFreeCreditLimitOptions() {
     const {oldProfile: {freeTierDollarQuota}} = this.state;
 
-    const defaultsPlusMaybeOverride = new Set(
-      // gotcha: argument order for rangeStep is (step, start, end)
-      // IntelliJ incorrectly believes takes the order is (start, end, step)
-      fp.rangeStep(CREDIT_LIMIT_DEFAULT_STEP, CREDIT_LIMIT_DEFAULT_MIN, CREDIT_LIMIT_DEFAULT_MAX + 1))
-      .add(freeTierDollarQuota);
+    // gotcha: argument order for rangeStep is (step, start, end)
+    // IntelliJ incorrectly believes the order is (start, end, step)
+    const below1000 = fp.rangeStep(100, 300, 1000+1);
+    const over1000 = fp.rangeStep(500, 1000, 10000+1);
+
+    const defaultsPlusMaybeOverride = new Set([...below1000, ...over1000, freeTierDollarQuota]);
 
     // gotcha: JS sorts numbers lexicographically by default
     const numericallySorted = Array.from(defaultsPlusMaybeOverride).sort((a, b) => a - b);
@@ -380,7 +383,7 @@ export const AdminUser = withRouter(class extends React.Component<Props, State> 
     };
 
     this.setState({loading: true});
-    profileApi().updateAccountProperties(request).then((response) => {
+    userAdminApi().updateAccountProperties(request).then((response) => {
       this.setState({oldProfile: response, updatedProfile: response, loading: false});
     });
   }

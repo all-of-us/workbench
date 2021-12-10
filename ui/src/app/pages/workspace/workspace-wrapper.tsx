@@ -11,7 +11,11 @@ import {
   LeoRuntimeInitializationAbortedError,
   LeoRuntimeInitializer
 } from 'app/utils/leo-runtime-initializer';
-import {currentWorkspaceStore, nextWorkspaceWarmupStore} from 'app/utils/navigation';
+import {
+  currentWorkspaceStore,
+  navigateSignOut,
+  nextWorkspaceWarmupStore, useNavigation
+} from 'app/utils/navigation';
 import {diskStore, MatchParams, routeDataStore, runtimeStore, useStore} from 'app/utils/stores';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
@@ -23,6 +27,8 @@ export const WorkspaceWrapper = fp.flow(
 )(({workspace, hideSpinner}) => {
   useEffect(() => hideSpinner(), []);
   const routeData = useStore(routeDataStore);
+  const [navigate] = useNavigation();
+
 
   const [pollAborter, setPollAborter] = useState(new AbortController());
   const params = useParams<MatchParams>();
@@ -57,16 +63,20 @@ export const WorkspaceWrapper = fp.flow(
         }
       }
     };
-
     const getWorkspaceAndUpdateStores = async(namespace, id) => {
-      // No destructuring because otherwise it shadows the workspace in props
-      const wsResponse = await workspacesApi().getWorkspace(namespace, id);
-      currentWorkspaceStore.next({
-        ...wsResponse.workspace,
-        accessLevel: wsResponse.accessLevel
-      });
-
-      updateStores(wsResponse.workspace.namespace);
+       try {
+         // No destructuring because otherwise it shadows the workspace in props
+         const wsResponse = await workspacesApi().getWorkspace(namespace, id)
+         currentWorkspaceStore.next({
+           ...wsResponse.workspace,
+           accessLevel: wsResponse.accessLevel
+         });
+         updateStores(wsResponse.workspace.namespace);
+       } catch(ex) {
+         if (ex.status === 403) {
+           navigate(['/workspaces']);
+         }
+       }
     };
 
     if (

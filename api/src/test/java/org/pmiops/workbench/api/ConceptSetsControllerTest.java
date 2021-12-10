@@ -263,9 +263,7 @@ public class ConceptSetsControllerTest {
 
   @BeforeEach
   public void setUp() {
-    TestMockFactory testMockFactory = new TestMockFactory();
-
-    testMockFactory.stubCreateBillingProject(fireCloudService);
+    TestMockFactory.stubCreateBillingProject(fireCloudService);
     TestMockFactory.stubCreateFcWorkspace(fireCloudService);
 
     DbUser user = new DbUser();

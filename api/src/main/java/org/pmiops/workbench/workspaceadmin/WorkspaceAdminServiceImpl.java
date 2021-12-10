@@ -9,6 +9,7 @@ import com.google.protobuf.util.Timestamps;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -33,6 +34,8 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
 import org.pmiops.workbench.google.CloudMonitoringService;
 import org.pmiops.workbench.google.CloudStorageClient;
@@ -50,6 +53,7 @@ import org.pmiops.workbench.model.ListRuntimeDeleteRequest;
 import org.pmiops.workbench.model.ListRuntimeResponse;
 import org.pmiops.workbench.model.TimeSeriesPoint;
 import org.pmiops.workbench.model.UserRole;
+import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceAdminView;
 import org.pmiops.workbench.model.WorkspaceAuditLogQueryResponse;
@@ -59,6 +63,7 @@ import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.utils.mappers.LeonardoMapper;
 import org.pmiops.workbench.utils.mappers.UserMapper;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
+import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -354,6 +359,67 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
     workspaceDao.save(dbWorkspace.setAdminLocked(false));
     adminAuditor.fireUnlockWorkspaceAction(dbWorkspace.getWorkspaceId());
   }
+
+  @Override
+  public void setResearchPurposeApproved(
+      String workspaceNamespace, String firecloudName, boolean approved) {
+    DbWorkspace workspace = workspaceDao.getRequired(workspaceNamespace, firecloudName);
+    if (workspace.getReviewRequested() == null || !workspace.getReviewRequested()) {
+      throw new BadRequestException(
+          String.format(
+              "No review requested for workspace %s/%s.", workspaceNamespace, firecloudName));
+    }
+
+    Boolean existingApproval = workspace.getApproved();
+    if (existingApproval != null) {
+      throw new BadRequestException(
+          String.format(
+              "DbWorkspace %s/%s already %s.",
+              workspaceNamespace, firecloudName, existingApproval ? "approved" : "rejected"));
+    }
+    workspace.setApproved(approved);
+    workspaceDao.saveWithLastModified(workspace);
+
+    // RW-7087 replace with a new workspaceAuditor action (fireReviewAction?)
+    // because this uses the deprecated DbAdminActionHistory
+    userService.logAdminWorkspaceAction(
+        workspace.getWorkspaceId(),
+        "research purpose approval",
+        workspace.getApproved(),
+        existingApproval);
+  }
+
+  @Override
+  public List<Workspace> getWorkspacesForReview() {
+    return workspaceDao.findByApprovedIsNullAndReviewRequestedTrueOrderByTimeRequested().stream()
+        .map(workspaceMapper::toApiWorkspace)
+        .collect(Collectors.toList());
+  }
+
+  @Override
+  public DbWorkspace setPublished(
+      String workspaceNamespace, String firecloudName, boolean publish) {
+    final DbWorkspace dbWorkspace = workspaceDao.getRequired(workspaceNamespace, firecloudName);
+
+    final WorkspaceAccessLevel accessLevel =
+        publish ? WorkspaceAccessLevel.READER : WorkspaceAccessLevel.NO_ACCESS;
+
+    final FirecloudManagedGroupWithMembers authDomainGroup =
+        fireCloudService.getGroup(dbWorkspace.getCdrVersion().getAccessTier().getAuthDomainName());
+
+    final FirecloudWorkspaceACLUpdate currentUpdate =
+        WorkspaceAuthService.updateFirecloudAclsOnUser(
+            accessLevel, new FirecloudWorkspaceACLUpdate().email(authDomainGroup.getGroupEmail()));
+
+    fireCloudService.updateWorkspaceACL(
+        dbWorkspace.getWorkspaceNamespace(),
+        dbWorkspace.getFirecloudName(),
+        Collections.singletonList(currentUpdate));
+
+    dbWorkspace.setPublished(publish);
+    return workspaceDao.saveWithLastModified(dbWorkspace);
+  }
+
   // NOTE: may be an undercount since we only retrieve the first Page of Storage List results
   private int getNonNotebookFileCount(String bucketName) {
     return (int)

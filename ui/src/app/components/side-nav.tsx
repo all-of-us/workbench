@@ -140,6 +140,10 @@ const profileActive = () =>  {
   return window.location.pathname === '/profile';
 };
 
+const institutionAdminActive = () =>  {
+  return window.location.pathname.startsWith('/admin/institution');
+};
+
 interface SideNavItemProps {
   icon?: string;
   hasProfileImage?: boolean;
@@ -366,7 +370,7 @@ export const SideNav = (props: SideNavProps) => {
           content={'Institution Admin'}
           onToggleSideNav={() => onToggleSideNav()}
           href={'admin/institution'}
-          active={workspaceAdminActive()}
+          active={institutionAdminActive()}
       />
     }
     {

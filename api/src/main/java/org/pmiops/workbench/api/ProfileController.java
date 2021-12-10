@@ -5,11 +5,8 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import java.sql.Timestamp;
 import java.time.Clock;
-import java.time.Instant;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -17,11 +14,8 @@ import javax.inject.Provider;
 import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
-import org.pmiops.workbench.access.AccessModuleService;
-import org.pmiops.workbench.actionaudit.ActionAuditQueryService;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.auditors.ProfileAuditor;
-import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.auth.UserAuthentication.UserType;
 import org.pmiops.workbench.captcha.CaptchaVerificationService;
@@ -40,19 +34,13 @@ import org.pmiops.workbench.exceptions.UnauthorizedException;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudBillingProjectMembership.CreationStatusEnum;
-import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapper;
 import org.pmiops.workbench.mail.MailService;
-import org.pmiops.workbench.model.AccessBypassRequest;
-import org.pmiops.workbench.model.AccountPropertyUpdate;
 import org.pmiops.workbench.model.Address;
-import org.pmiops.workbench.model.AdminUserListResponse;
-import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.BillingProjectStatus;
 import org.pmiops.workbench.model.CreateAccountRequest;
-import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.NihToken;
 import org.pmiops.workbench.model.PageVisit;
 import org.pmiops.workbench.model.Profile;
@@ -60,8 +48,6 @@ import org.pmiops.workbench.model.RasLinkRequestBody;
 import org.pmiops.workbench.model.ResendWelcomeEmailRequest;
 import org.pmiops.workbench.model.SendBillingSetupEmailRequest;
 import org.pmiops.workbench.model.UpdateContactEmailRequest;
-import org.pmiops.workbench.model.UserAccessExpiration;
-import org.pmiops.workbench.model.UserAuditLogQueryResponse;
 import org.pmiops.workbench.model.UsernameTakenResponse;
 import org.pmiops.workbench.model.VerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.moodle.ApiException;
@@ -108,11 +94,8 @@ public class ProfileController implements ProfileApiDelegate {
 
   private static final Logger log = Logger.getLogger(ProfileController.class.getName());
 
-  private final AccessModuleService accessModuleService;
-  private final ActionAuditQueryService actionAuditQueryService;
   private final CaptchaVerificationService captchaVerificationService;
   private final Clock clock;
-  private final CloudStorageClient cloudStorageClient;
   private final DemographicSurveyMapper demographicSurveyMapper;
   private final DirectoryService directoryService;
   private final FireCloudService fireCloudService;
@@ -132,11 +115,8 @@ public class ProfileController implements ProfileApiDelegate {
 
   @Autowired
   ProfileController(
-      AccessModuleService accessModuleService,
-      ActionAuditQueryService actionAuditQueryService,
       CaptchaVerificationService captchaVerificationService,
       Clock clock,
-      CloudStorageClient cloudStorageClient,
       DemographicSurveyMapper demographicSurveyMapper,
       DirectoryService directoryService,
       FireCloudService fireCloudService,
@@ -153,11 +133,8 @@ public class ProfileController implements ProfileApiDelegate {
       UserService userService,
       VerifiedInstitutionalAffiliationMapper verifiedInstitutionalAffiliationMapper,
       RasLinkService rasLinkService) {
-    this.accessModuleService = accessModuleService;
-    this.actionAuditQueryService = actionAuditQueryService;
     this.captchaVerificationService = captchaVerificationService;
     this.clock = clock;
-    this.cloudStorageClient = cloudStorageClient;
     this.demographicSurveyMapper = demographicSurveyMapper;
     this.directoryService = directoryService;
     this.fireCloudService = fireCloudService;
@@ -478,57 +455,11 @@ public class ProfileController implements ProfileApiDelegate {
       throw new BadRequestException("Cannot update Verified Institutional Affiliation");
     }
 
-    DbUser updatedUser =
+    final DbUser updatedUser =
         profileService.updateProfile(user, Agent.asUser(user), updatedProfile, previousProfile);
     userService.confirmProfile(updatedUser);
 
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-  }
-
-  @Override
-  @AuthorityRequired({Authority.ACCESS_CONTROL_ADMIN})
-  public ResponseEntity<AdminUserListResponse> getAllUsers() {
-    return ResponseEntity.ok(
-        new AdminUserListResponse().users(profileService.getAdminTableUsers()));
-  }
-
-  @Override
-  @AuthorityRequired({Authority.ACCESS_CONTROL_ADMIN})
-  public ResponseEntity<Profile> getUser(Long userId) {
-    DbUser user = userDao.findUserByUserId(userId);
-    return ResponseEntity.ok(profileService.getProfile(user));
-  }
-
-  @Override
-  @AuthorityRequired({Authority.ACCESS_CONTROL_ADMIN})
-  public ResponseEntity<Profile> getUserByUsername(String username) {
-    DbUser user = userService.getByUsernameOrThrow(username);
-    return ResponseEntity.ok(profileService.getProfile(user));
-  }
-
-  @Override
-  @AuthorityRequired({Authority.ACCESS_CONTROL_ADMIN})
-  public ResponseEntity<EmptyResponse> bypassAccessRequirement(
-      Long userId, AccessBypassRequest request) {
-    userService.updateBypassTime(userId, request);
-    return ResponseEntity.ok(new EmptyResponse());
-  }
-
-  @Override
-  public ResponseEntity<EmptyResponse> unsafeSelfBypassAccessRequirement(
-      AccessBypassRequest request) {
-    if (!workbenchConfigProvider.get().access.unsafeAllowSelfBypass) {
-      throw new ForbiddenException("Self bypass is disallowed in this environment.");
-    }
-    long userId = userProvider.get().getUserId();
-    userService.updateBypassTime(userId, request);
-    return ResponseEntity.ok(new EmptyResponse());
-  }
-
-  @Override
-  @AuthorityRequired({Authority.ACCESS_CONTROL_ADMIN})
-  public ResponseEntity<Profile> updateAccountProperties(AccountPropertyUpdate request) {
-    return ResponseEntity.ok(profileService.updateAccountProperties(request));
   }
 
   @Override
@@ -558,26 +489,6 @@ public class ProfileController implements ProfileApiDelegate {
   }
 
   @Override
-  @AuthorityRequired({Authority.RESEARCHER_DATA_VIEW})
-  public ResponseEntity<UserAuditLogQueryResponse> getAuditLogEntries(
-      String usernameWithoutGsuiteDomain,
-      Integer limit,
-      Long afterMillis,
-      Long beforeMillisNullable) {
-    final String username =
-        String.format(
-            "%s@%s",
-            usernameWithoutGsuiteDomain,
-            workbenchConfigProvider.get().googleDirectoryService.gSuiteDomain);
-    final long userDatabaseId = userService.getByUsernameOrThrow(username).getUserId();
-    final Instant after = Instant.ofEpochMilli(afterMillis);
-    final Instant before =
-        Optional.ofNullable(beforeMillisNullable).map(Instant::ofEpochMilli).orElse(Instant.now());
-    return ResponseEntity.ok(
-        actionAuditQueryService.queryEventsForUser(userDatabaseId, limit, after, before));
-  }
-
-  @Override
   public ResponseEntity<Profile> linkRasAccount(RasLinkRequestBody body) {
     DbUser dbUser =
         rasLinkService.linkRasLoginGovAccount(body.getAuthCode(), body.getRedirectUrl());
@@ -594,20 +505,5 @@ public class ProfileController implements ProfileApiDelegate {
   public ResponseEntity<Void> confirmPublications() {
     userService.confirmPublications();
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-  }
-
-  /**
-   * Gets a JSON list of users and their registered tier access expiration dates.
-   *
-   * <p>This endpoint is intended as a temporary manual measure to assist with user communication
-   * during the rollout of Annual Access Renewal (AAR).
-   *
-   * <p>Once fully rolled out, we will have an automated expiration email process and this can
-   * likely be removed. See RW-6689 and RW-6703.
-   */
-  @Override
-  @AuthorityRequired({Authority.ACCESS_CONTROL_ADMIN})
-  public ResponseEntity<List<UserAccessExpiration>> getRegisteredTierAccessExpirations() {
-    return ResponseEntity.ok(userService.getRegisteredTierExpirations());
   }
 }

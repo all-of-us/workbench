@@ -6,7 +6,7 @@ import {BugReportModal} from 'app/components/bug-report';
 import {Button} from 'app/components/buttons';
 import {Spinner, SpinnerOverlay} from 'app/components/spinners';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
-import {workspacesApi} from 'app/services/swagger-fetch-clients';
+import {workspaceAdminApi} from 'app/services/swagger-fetch-clients';
 import {reactStyles, withUserProfile} from 'app/utils';
 import {Profile, Workspace} from 'generated/fetch';
 
@@ -58,7 +58,7 @@ export const AdminReviewWorkspace = withUserProfile()(class extends React.Compon
   async componentDidMount() {
     this.props.hideSpinner();
     try {
-      const resp = await workspacesApi().getWorkspacesForReview();
+      const resp = await workspaceAdminApi().getWorkspacesForReview();
       this.setState({workspaces: resp.items, contentLoaded: true});
     } catch (error) {
       this.setState({fetchingWorkspaceError: true});
@@ -69,7 +69,7 @@ export const AdminReviewWorkspace = withUserProfile()(class extends React.Compon
     const {workspaces} = this.state;
     this.setState({reviewedWorkspace: workspace});
     try {
-      await workspacesApi()
+      await workspaceAdminApi()
         .reviewWorkspace(workspace.namespace, workspace.id, {approved});
       const i = workspaces.indexOf(workspace, 0);
       if (i >= 0) {

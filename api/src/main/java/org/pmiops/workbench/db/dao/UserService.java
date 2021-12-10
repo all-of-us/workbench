@@ -14,11 +14,21 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.AccessBypassRequest;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.Degree;
-import org.pmiops.workbench.model.UserAccessExpiration;
 import org.springframework.data.domain.Sort;
 
 public interface UserService {
+  /**
+   * Updates a user record with a modifier function.
+   *
+   * <p>Ensures that the data access tiers for the user reflect the state of other fields on the
+   * user; handles conflicts with concurrent updates by retrying.
+   */
   DbUser updateUserWithRetries(Function<DbUser, DbUser> userModifier, DbUser dbUser, Agent agent);
+
+  /**
+   * Ensures that the data access tiers for the user reflect the state of other fields on the user
+   */
+  DbUser updateUserAccessTiers(DbUser dbUser, Agent agent);
 
   DbUser createServiceAccountUser(String email);
 
@@ -39,8 +49,6 @@ public interface UserService {
       DbAddress dbAddress,
       DbDemographicSurvey dbDemographicSurvey,
       DbVerifiedInstitutionalAffiliation dbVerifiedAffiliation);
-
-  DbUser updateUserWithConflictHandling(DbUser user);
 
   // TODO(jaycarlton): Move compliance-related methods to a new UserComplianceService or similar
   DbUser submitDUCC(DbUser user, Integer duccSignedVersion, String initials);
@@ -139,10 +147,4 @@ public interface UserService {
 
   /** Send an Access Renewal Expiration or Warning email to the user, if appropriate */
   void maybeSendAccessExpirationEmail(DbUser user);
-
-  /**
-   * Return a mapping of users to their Annual Access Renewal expiration date for Registered Tier,
-   * for users who have them
-   */
-  List<UserAccessExpiration> getRegisteredTierExpirations();
 }

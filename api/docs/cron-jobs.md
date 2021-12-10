@@ -31,9 +31,9 @@ All cron jobs are configured as App Engine scheduled tasks; see the
 
 It's straightforward to copy existing patterns when creating a new cron job. Key file locations:
 
-- [workbench-api.yaml](https://github.com/all-of-us/workbench/blob/master/api/src/main/resources/workbench-api.yaml) (API definition; search for "cron")
-- [OfflineClusterController.java](https://github.com/all-of-us/workbench/blob/master/api/src/main/java/org/pmiops/workbench/api/OfflineClusterController.java) (controller)
-- [cron_base.yaml](https://github.com/all-of-us/workbench/blob/master/api/src/main/webapp/WEB-INF/cron_base.yaml) (App Engine cron config)
+- [workbench-api.yaml](https://github.com/all-of-us/workbench/blob/main/api/src/main/resources/workbench-api.yaml) (API definition; search for "cron")
+- [OfflineClusterController.java](https://github.com/all-of-us/workbench/blob/main/api/src/main/java/org/pmiops/workbench/api/OfflineClusterController.java) (controller)
+- [cron_base.yaml](https://github.com/all-of-us/workbench/blob/main/api/src/main/webapp/WEB-INF/cron_base.yaml) (App Engine cron config)
 
 ## Alternative behavior by environment
 

@@ -1058,7 +1058,7 @@ def circle_build_cdr_indices(cmd_name, args)
   op.add_option(
     "--branch [--branch]",
     ->(opts, v) { opts.branch = v},
-    "Branch. Optional - Default is master."
+    "Branch. Optional - Default is main."
   )
   op.add_option(
     "--project [--project]",
@@ -1238,6 +1238,33 @@ Common.register_command({
   :invocation => "create-local-csv-files",
   :description => "Loads local data from dataset and project",
   :fn => ->(*args) { create_local_csv_files("create-local-csv-files", *args) }
+})
+
+def validate_cdr(cmd_name, *args)
+  op = WbOptionsParser.new(cmd_name, args)
+  op.add_option(
+    "--project [project]",
+    ->(opts, v) { opts.project = v},
+    "Project name"
+  )
+ op.add_option(
+    "--dataset [dataset]",
+    ->(opts, v) { opts.dataset = v},
+    "Dataset name"
+   )
+  op.add_validator ->(opts) { raise ArgumentError unless opts.project and opts.dataset }
+  op.parse.validate
+
+  common = Common.new
+  Dir.chdir('db-cdr') do
+    common.run_inline %W{./generate-cdr/validate-cdr.sh #{ENVIRONMENTS[op.opts.project][:source_cdr_project]} #{op.opts.dataset}}
+  end
+end
+
+Common.register_command({
+  :invocation => "validate-cdr",
+  :description => "Validates synthetic data and CDR",
+  :fn => ->(*args) { validate_cdr("validate-cdr", *args) }
 })
 
 def validate_prerequisites_exist(cmd_name, *args)

@@ -99,7 +99,6 @@ public class NotebooksControllerTest {
 
   private static DbUser currentUser;
 
-  private TestMockFactory testMockFactory;
   private FirecloudWorkspaceACL fcWorkspaceAcl;
   private DbCdrVersion cdrVersion;
 
@@ -115,8 +114,6 @@ public class NotebooksControllerTest {
 
   @BeforeEach
   public void setUp() {
-    testMockFactory = new TestMockFactory();
-
     currentUser = createUser(LOGGED_IN_USER_EMAIL);
     fcWorkspaceAcl = createWorkspaceACL();
 
@@ -628,7 +625,7 @@ public class NotebooksControllerTest {
     final String testNotebook = NotebooksService.withNotebookExtension("test-notebook");
 
     FirecloudWorkspaceDetails fcWorkspace =
-        testMockFactory.createFirecloudWorkspace(
+        TestMockFactory.createFirecloudWorkspace(
             testWorkspaceNamespace, testWorkspaceName, LOGGED_IN_USER_EMAIL);
     fcWorkspace.setBucketName(TestMockFactory.WORKSPACE_BUCKET_NAME);
     stubGetWorkspace(fcWorkspace, WorkspaceAccessLevel.OWNER);

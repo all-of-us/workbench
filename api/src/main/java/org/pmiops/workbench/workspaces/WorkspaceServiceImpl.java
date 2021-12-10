@@ -7,7 +7,6 @@ import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -19,6 +18,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
+import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.cdr.CdrVersionContext;
@@ -35,14 +35,11 @@ import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserRecentWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
@@ -74,6 +71,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
   protected static final int RECENT_WORKSPACE_COUNT = 4;
   private static final Logger log = Logger.getLogger(WorkspaceService.class.getName());
 
+  private final AccessTierService accessTierService;
   private final BillingProjectAuditor billingProjectAuditor;
   private final Clock clock;
   private final CohortCloningService cohortCloningService;
@@ -93,6 +91,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
 
   @Autowired
   public WorkspaceServiceImpl(
+      AccessTierService accessTierService,
       BillingProjectAuditor billingProjectAuditor,
       Clock clock,
       CohortCloningService cohortCloningService,
@@ -109,6 +108,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
       WorkspaceDao workspaceDao,
       WorkspaceMapper workspaceMapper,
       WorkspaceAuthService workspaceAuthService) {
+    this.accessTierService = accessTierService;
     this.cloudBillingClient = cloudBillingClient;
     this.billingProjectAuditor = billingProjectAuditor;
     this.clock = clock;
@@ -172,9 +172,10 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
   @Override
   public WorkspaceResponse getWorkspace(String workspaceNamespace, String workspaceId) {
     DbWorkspace dbWorkspace = workspaceDao.getRequired(workspaceNamespace, workspaceId);
+    validateWorkspaceTierAccess(dbWorkspace);
+
     FirecloudWorkspaceResponse fcResponse;
     FirecloudWorkspaceDetails fcWorkspace;
-
     WorkspaceResponse workspaceResponse = new WorkspaceResponse();
 
     // This enforces access controls.
@@ -221,23 +222,6 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
               "Error deleting billing project %s: %s", billingProjectName, e.getMessage());
       log.warning(msg);
     }
-  }
-
-  @Override
-  public void setResearchPurposeApproved(String ns, String firecloudName, boolean approved) {
-    DbWorkspace workspace = workspaceDao.getRequired(ns, firecloudName);
-    if (workspace.getReviewRequested() == null || !workspace.getReviewRequested()) {
-      throw new BadRequestException(
-          String.format("No review requested for workspace %s/%s.", ns, firecloudName));
-    }
-    if (workspace.getApproved() != null) {
-      throw new BadRequestException(
-          String.format(
-              "DbWorkspace %s/%s already %s.",
-              ns, firecloudName, workspace.getApproved() ? "approved" : "rejected"));
-    }
-    workspace.setApproved(approved);
-    workspaceDao.saveWithLastModified(workspace);
   }
 
   @Override
@@ -297,36 +281,32 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
   }
 
   @Override
-  public DbWorkspace setPublished(
-      String workspaceNamespace, String firecloudName, boolean publish) {
-    final DbWorkspace dbWorkspace = workspaceDao.getRequired(workspaceNamespace, firecloudName);
-
-    final WorkspaceAccessLevel accessLevel =
-        publish ? WorkspaceAccessLevel.READER : WorkspaceAccessLevel.NO_ACCESS;
-
-    final FirecloudManagedGroupWithMembers authDomainGroup =
-        fireCloudService.getGroup(dbWorkspace.getCdrVersion().getAccessTier().getAuthDomainName());
-
-    final FirecloudWorkspaceACLUpdate currentUpdate =
-        WorkspaceAuthService.updateFirecloudAclsOnUser(
-            accessLevel, new FirecloudWorkspaceACLUpdate().email(authDomainGroup.getGroupEmail()));
-
-    fireCloudService.updateWorkspaceACL(
-        dbWorkspace.getWorkspaceNamespace(),
-        dbWorkspace.getFirecloudName(),
-        Collections.singletonList(currentUpdate));
-
-    dbWorkspace.setPublished(publish);
-    return workspaceDao.saveWithLastModified(dbWorkspace);
-  }
-
-  @Override
   @Transactional
   public List<DbUserRecentWorkspace> getRecentWorkspaces() {
     long userId = userProvider.get().getUserId();
     List<DbUserRecentWorkspace> userRecentWorkspaces =
         userRecentWorkspaceDao.findByUserIdOrderByLastAccessDateDesc(userId);
     return pruneInaccessibleRecentWorkspaces(userRecentWorkspaces, userId);
+  }
+
+  /**
+   * Throw ForbiddenException if logged in user doesnt have the same Tier Access as that of
+   * workspace
+   *
+   * @param dbWorkspace
+   */
+  private void validateWorkspaceTierAccess(DbWorkspace dbWorkspace) {
+    String workspaceAccessTier = dbWorkspace.getCdrVersion().getAccessTier().getShortName();
+
+    List<String> accessTiers = accessTierService.getAccessTierShortNamesForUser(userProvider.get());
+
+    if (!accessTiers.contains(workspaceAccessTier)) {
+      throw new ForbiddenException(
+          String.format(
+              "User with username %s does not have access to the '%s' access tier required by "
+                  + "workspace '%s'",
+              userProvider.get().getUsername(), workspaceAccessTier, dbWorkspace.getName()));
+    }
   }
 
   private List<DbUserRecentWorkspace> pruneInaccessibleRecentWorkspaces(

@@ -4,7 +4,7 @@ import {Redirect} from 'react-router-dom';
 
 import {Button} from 'app/components/buttons';
 import {AoU} from 'app/components/text-wrappers';
-import {profileApi} from 'app/services/swagger-fetch-clients';
+import { profileApi, userAdminApi} from 'app/services/swagger-fetch-clients';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {convertAPIError} from 'app/utils/errors';
 import {encodeURIComponentStrict} from 'app/utils/navigation';
@@ -82,7 +82,7 @@ export const redirectToRas = (openInNewTab: boolean = true): void => {
   // The scopes are also used in backend for fetching user info.
   const url = serverConfigStore.get().config.rasHost + '/auth/oauth/v2/authorize?client_id=' + serverConfigStore.get().config.rasClientId
     + '&prompt=login+consent&redirect_uri=' + buildRasRedirectUrl()
-    + '&response_type=code&scope=openid+profile+email+ga4gh_passport_v1+federated_identities';
+    + '&response_type=code&scope=openid+profile+email+federated_identities';
 
   openInNewTab ? window.open(url, '_blank') : <Redirect to={url}/>;
 };
@@ -104,7 +104,7 @@ interface AccessModuleConfig {
 // Important: The completion criteria here needs to be kept synchronized with
 // the server-side logic, else users can get stuck on the DAR
 // without a next step:
-// https://github.com/all-of-us/workbench/blob/master/api/src/main/java/org/pmiops/workbench/db/dao/UserServiceImpl.java#L240-L272
+// https://github.com/all-of-us/workbench/blob/main/api/src/main/java/org/pmiops/workbench/db/dao/UserServiceImpl.java#L240-L272
 export const getAccessModuleConfig = (moduleName: AccessModule): AccessModuleConfig => {
   const {enableRasLoginGovLinking, enforceRasLoginGovLinking, enableEraCommons, enableComplianceTraining} = serverConfigStore.get().config;
   return switchCase(moduleName,
@@ -247,7 +247,7 @@ export const getAccessModuleStatusByName = (profile: Profile, moduleName: Access
 
 export const bypassAll = async(accessModules: AccessModule[], isBypassed: boolean) => {
   for (const module of accessModules) {
-    await profileApi().unsafeSelfBypassAccessRequirement({
+    await userAdminApi().unsafeSelfBypassAccessRequirement({
       moduleName: module,
       isBypassed: isBypassed
     });

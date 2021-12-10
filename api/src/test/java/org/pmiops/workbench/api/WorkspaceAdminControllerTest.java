@@ -7,10 +7,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableList;
-import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
-import org.joda.time.DateTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
@@ -33,11 +31,9 @@ import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.model.AdminLockingRequest;
 import org.pmiops.workbench.model.AdminWorkspaceCloudStorageCounts;
 import org.pmiops.workbench.model.AdminWorkspaceObjectsCounts;
-import org.pmiops.workbench.model.AuditLogEntry;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
-import org.pmiops.workbench.model.WorkspaceAuditLogQueryResponse;
 import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.utils.TestMockFactory;
@@ -61,33 +57,6 @@ public class WorkspaceAdminControllerTest {
   private static final String DB_WORKSPACE_FIRECLOUD_NAME = "gonewiththewind";
   private static final String WORKSPACE_NAMESPACE = "aou-rw-12345";
   private static final String NONSENSE_NAMESPACE = "wharrgarbl_wharrgarbl";
-  private static final int QUERY_LIMIT = 50;
-  private static final String ACTION_ID = "b937413e-ff66-4e7b-a639-f7947730b2c0";
-  private static final WorkspaceAuditLogQueryResponse QUERY_RESPONSE =
-      new WorkspaceAuditLogQueryResponse()
-          .logEntries(
-              ImmutableList.of(
-                  new AuditLogEntry()
-                      .actionId(ACTION_ID)
-                      .actionType("CREATE")
-                      .agentId(1111L)
-                      .agentType("ADMINISTRATOR")
-                      .agentUsername(FIRECLOUD_WORKSPACE_CREATOR_USERNAME)
-                      .eventTime(
-                          OffsetDateTime.parse("2020-02-10T01:20+02:00").toInstant().toEpochMilli())
-                      .newValue("true")
-                      .previousValue(null)
-                      .targetId(DB_WORKSPACE_ID)
-                      .targetProperty("approved")
-                      .targetType("WORKSPACE")))
-          .query("select foo from bar")
-          .workspaceDatabaseId(DB_WORKSPACE_ID);
-  private static final WorkspaceAuditLogQueryResponse EMPTY_QUERY_RESPONSE =
-      new WorkspaceAuditLogQueryResponse()
-          .query("select foo from bar")
-          .workspaceDatabaseId(DB_WORKSPACE_ID);
-  private static final DateTime DEFAULT_AFTER_INCLUSIVE = DateTime.parse("2001-02-14T01:20+02:00");
-  private static final DateTime DEFAULT_BEFORE_EXCLUSIVE = DateTime.parse("2020-05-01T01:20+02:00");
 
   @MockBean private ActionAuditQueryService mockActionAuditQueryService;
   @MockBean private CloudMonitoringService mockCloudMonitoringService;
@@ -120,13 +89,11 @@ public class WorkspaceAdminControllerTest {
 
   @BeforeEach
   public void setUp() {
-    final TestMockFactory testMockFactory = new TestMockFactory();
-
     when(mockWorkspaceAdminService.getFirstWorkspaceByNamespace(anyString()))
         .thenReturn(Optional.empty());
 
     final Workspace workspace =
-        testMockFactory.createWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME);
+        TestMockFactory.createWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME);
     final DbWorkspace dbWorkspace =
         TestMockFactory.createDbWorkspaceStub(workspace, DB_WORKSPACE_ID);
     when(mockWorkspaceAdminService.getFirstWorkspaceByNamespace(WORKSPACE_NAMESPACE))
@@ -154,7 +121,7 @@ public class WorkspaceAdminControllerTest {
         .thenReturn(cloudStorageCounts);
 
     LeonardoListRuntimeResponse leonardoListRuntimeResponse =
-        testMockFactory.createLeonardoListRuntimesResponse();
+        TestMockFactory.createLeonardoListRuntimesResponse();
     List<LeonardoListRuntimeResponse> runtimes = ImmutableList.of(leonardoListRuntimeResponse);
     when(mockLeonardoNotebooksClient.listRuntimesByProjectAsService(WORKSPACE_NAMESPACE))
         .thenReturn(runtimes);
