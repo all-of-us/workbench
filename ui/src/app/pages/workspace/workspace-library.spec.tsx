@@ -8,9 +8,9 @@ import {FeaturedWorkspacesConfigApiStub} from 'testing/stubs/featured-workspaces
 import {buildWorkspaceStubs} from 'testing/stubs/workspaces';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 import {WorkspaceLibrary} from './workspace-library';
-import {ProfileApiStub} from "testing/stubs/profile-api-stub";
-import {profileStore} from "app/utils/stores";
-import {AccessTierShortNames} from "app/utils/access-tiers";
+import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
+import {profileStore} from 'app/utils/stores';
+import {AccessTierShortNames} from 'app/utils/access-tiers';
 
 describe('WorkspaceLibrary', () => {
   let publishedWorkspaceStubs = [];
