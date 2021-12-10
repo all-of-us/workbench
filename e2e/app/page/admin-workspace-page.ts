@@ -36,7 +36,7 @@ export default class WorkspaceAdminPage extends AuthenticatedPage {
     return Button.findByName(this.page, { name: LinkText.LoadWorkspace });
   }
 
-  
+ 
   async clickLoadWorkspaceButton(): Promise<void> {
     const button = this.getLoadWorkspaceButton();
     const navPromise = this.page.waitForNavigation({ waitUntil: ['load', 'networkidle0'] });
@@ -72,7 +72,7 @@ export default class WorkspaceAdminPage extends AuthenticatedPage {
     return getPropValue<string>(pageHeader, 'textContent');
   }
 
-
+  
   getCloudStorageTable(): Table {
     const selector = '//table[@class="p-datatable-scrollable-header-table"]';
     return new Table(this.page, selector);
