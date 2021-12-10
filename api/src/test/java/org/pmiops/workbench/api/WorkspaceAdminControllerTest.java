@@ -19,7 +19,6 @@ import org.pmiops.workbench.cohorts.CohortService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.conceptset.mapper.ConceptSetMapperImpl;
 import org.pmiops.workbench.dataset.mapper.DataSetMapperImpl;
-import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
@@ -61,7 +60,6 @@ public class WorkspaceAdminControllerTest {
 
   @MockBean private ActionAuditQueryService mockActionAuditQueryService;
   @MockBean private CloudMonitoringService mockCloudMonitoringService;
-  @MockBean private AccessTierDao mockAccessTierDao;
   @MockBean private FireCloudService mockFirecloudService;
   @MockBean private LeonardoNotebooksClient mockLeonardoNotebooksClient;
   @MockBean private WorkspaceAdminService mockWorkspaceAdminService;
@@ -136,7 +134,6 @@ public class WorkspaceAdminControllerTest {
     when(mockFirecloudService.getWorkspaceAsService(
             WORKSPACE_NAMESPACE, DB_WORKSPACE_FIRECLOUD_NAME))
         .thenReturn(fcWorkspaceResponse);
-    TestMockFactory.createRegisteredTierForTests(mockAccessTierDao);
   }
 
   @Test

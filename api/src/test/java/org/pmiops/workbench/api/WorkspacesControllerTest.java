@@ -366,6 +366,10 @@ public class WorkspacesControllerTest {
     currentUser = createUser(LOGGED_IN_USER_EMAIL);
     accessTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
 
+    when(accessTierService.getAccessTierShortNamesForUser(currentUser))
+        .thenReturn(Arrays.asList(AccessTierService.REGISTERED_TIER_SHORT_NAME));
+    when(accessTierService.getRegisteredTierOrThrow()).thenReturn(accessTier);
+
     cdrVersion = TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao, 1);
     cdrVersion.setName("1");
     // set the db name to be empty since test cases currently
@@ -388,9 +392,6 @@ public class WorkspacesControllerTest {
 
     when(mockCloudBillingClient.pollUntilBillingAccountLinked(any(), any()))
         .thenReturn(new ProjectBillingInfo().setBillingEnabled(true));
-
-    when(accessTierService.getAccessTierShortNamesForUser(currentUser))
-        .thenReturn(Arrays.asList(AccessTierService.REGISTERED_TIER_SHORT_NAME));
   }
 
   private DbUser createUser(String email) {
