@@ -36,7 +36,7 @@ export default class WorkspaceAdminPage extends AuthenticatedPage {
     return Button.findByName(this.page, { name: LinkText.LoadWorkspace });
   }
 
-  // click "Load workspace" button 
+  //click "Load workspace" button 
   async clickLoadWorkspaceButton(): Promise<void> {
     const button = this.getLoadWorkspaceButton();
     const navPromise = this.page.waitForNavigation({ waitUntil: ['load', 'networkidle0'] });
@@ -49,7 +49,7 @@ export default class WorkspaceAdminPage extends AuthenticatedPage {
     return Button.findByName(this.page, { normalizeSpace: LinkText.LockWorkspace });
   }
 
- // click "Lock Workspace" button
+  //click "Lock Workspace" button
   async clickLockWorkspaceButton(): Promise<LockWorkspaceModal> {
     const button = this.getLockWorkspaceButton();
     await button.click();
@@ -72,7 +72,7 @@ export default class WorkspaceAdminPage extends AuthenticatedPage {
     return getPropValue<string>(pageHeader, 'textContent');
   }
 
-
+  
   getCloudStorageTable(): Table {
     const selector = '//table[@class="p-datatable-scrollable-header-table"]';
     return new Table(this.page, selector);
