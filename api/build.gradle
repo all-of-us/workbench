@@ -220,9 +220,9 @@ task generate_appengine_cron_yaml(type: Exec) {
 }
 
 // Generate AppEngine Web Configration XML file
-task generate_appengine_web_xml(type: Exec) {
+task generate_appengine_yaml(type: Exec) {
     executable "ruby"
-    args "libproject/generate_appengine_web_xml.rb"
+    args "libproject/generate_appengine_yaml.rb"
 }
 
 
@@ -342,7 +342,7 @@ project.tasks.ideaModule.dependsOn(generateSwaggerCode)
 // Swagger sources, per the swaggerSources tuple above.
 project.tasks.compileGeneratedJava.dependsOn(generateSwaggerCode)
 
-project.tasks.bootWar.dependsOn(['compileGeneratedJava', 'generate_appengine_web_xml',
+project.tasks.bootWar.dependsOn(['compileGeneratedJava', 'generate_appengine_yaml',
                                  'generate_appengine_cron_yaml'])
 
 // Clear out generated Java sorces before cleaning the project.
@@ -637,7 +637,7 @@ task listProjectAPIs(type: GenerateAPIListingTask)
 // this task is executed.
 //
 // N.B. these properties should be kept roughly in sync with the App Engine configuration
-// XML file under src/main/webapp/WEB-INF/appengine-web.xml
+// YAML file under src/main/webapp/WEB-INF/app.yaml
 def db_host = System.getenv("DB_HOST")
 def db_port = System.getenv("DB_PORT")
 
