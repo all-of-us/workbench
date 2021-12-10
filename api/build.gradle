@@ -54,11 +54,6 @@ plugins {
     id 'org.springframework.boot' version '2.3.12.RELEASE'
 }
 
-
-if (JavaVersion.current() != JavaVersion.VERSION_1_8) {
-    throw new GradleException("This build must be run with Java 8. See developer-system-initialization.md")
-}
-
 // Artifact configurations derived from base configs. Configuration names
 // are concatenated by the Java plugin.
 // https://docs.gradle.org/current/userguide/java_plugin.html#java_source_set_configurations
@@ -476,6 +471,7 @@ dependencies {
     generatedCompile 'io.swagger.core.v3:swagger-annotations:2.0.0'
     generatedCompile 'io.gsonfire:gson-fire:1.8.3'
     generatedCompile 'org.threeten:threetenbp:1.3.5'
+    generatedCompile 'javax.xml.bind:jaxb-api:2.3.1'
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$project.ext.KOTLIN_VERSION"
 
@@ -612,8 +608,8 @@ appengineStart {
 group = 'org.pmiops.allofus.workbench'
 version = '0.1.0'          // Version in generated output
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+sourceCompatibility = 11
+targetCompatibility = 11
 
 task incrementalHotSwap(type: IncrementalHotSwapTask, dependsOn: 'compileJava') {
     inputDir = sourceSets.main.java.outputDir
@@ -817,11 +813,11 @@ task setAccessModuleTimestamps(type: JavaExec) {
 
 compileKotlin {
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "11"
     }
 }
 compileTestKotlin {
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "11"
     }
 }
