@@ -18,6 +18,7 @@ import {cond, useId, withStyle} from 'app/utils';
 import {
   accessRenewalModules,
   computeDisplayDates,
+  externalSyncModules,
   getAccessModuleConfig,
   isExpiring,
   maybeDaysRemaining,
@@ -89,7 +90,7 @@ const confirmPublications = fp.flow(
 )(async() => await profileApi().confirmPublications());
 
 
-const syncAndReload = fp.flow(
+const syncAndReloadTraining = fp.flow(
   withSuccessModal({
     title: 'Compliance Status Refreshed',
     message: 'Your compliance training has been refreshed. If you are not seeing the correct status, try again in a few minutes.',
@@ -178,14 +179,12 @@ const RenewalCard = withStyle(renewalStyle.card)(
 );
 
 // Page to render
-export const AccessRenewal = fp.flow(
-  withProfileErrorModal
-)((spinnerProps: WithSpinnerOverlayProps) => {
-  useEffect(() => spinnerProps.hideSpinner(), []);
+export const AccessRenewal = fp.flow(withProfileErrorModal)((spinnerProps: WithSpinnerOverlayProps) => {
   // State
-  const {profile: {
-    accessModules: {modules}},
-    profile
+  const {
+    profile,
+    reload,
+    profile: {accessModules: {modules}},
   } = useStore(profileStore);
   const {config: {enableComplianceTraining}} = useStore(serverConfigStore);
   const [publications, setPublications] = useState<boolean>(null);
@@ -194,18 +193,6 @@ export const AccessRenewal = fp.flow(
   const [refreshButtonDisabled, setRefreshButtonDisabled] = useState(true);
   const [loading, setLoading] = useState(false);
   const [, navigateByUrl] = useNavigation();
-
-
-  // onMount - as we move between pages, let's make sure we have the latest profile
-  useEffect(() => {
-    const getProfile = async() => {
-      setLoading(true);
-      await reloadProfile();
-      setLoading(false);
-    };
-
-    getProfile();
-  }, []);
 
   const expirableModules = modules.filter(moduleStatus => accessRenewalModules.includes(moduleStatus.moduleName));
 
@@ -216,6 +203,22 @@ export const AccessRenewal = fp.flow(
   }
 
   const allModulesCompleteOrBypassed = fp.flow(fp.map('moduleName'), fp.all(completeOrBypassed))(expirableModules);
+
+  // onMount - as we move between pages, let's make sure we have the latest profile and external module information
+  useEffect(() => {
+    const getProfile = async() => {
+      setLoading(true);
+      await reloadProfile();
+      setLoading(false);
+    };
+    const expiringModules = expirableModules
+      .filter(status => isExpiring(status.expirationEpochMillis))
+      .map(status => status.moduleName);
+
+    externalSyncModules(expiringModules, reload);
+    getProfile();
+    spinnerProps.hideSpinner();
+  }, []);
 
   // Render
   return <FadeBox style={{margin: '1rem auto 0', color: colors.primary}}>
@@ -326,7 +329,7 @@ export const AccessRenewal = fp.flow(
             disabled={refreshButtonDisabled}
             onClick={async() => {
               setLoading(true);
-              await syncAndReload();
+              await syncAndReloadTraining();
               setLoading(false);
             }}
             style={{height: '1.6rem', marginLeft: '0.75rem', width: 'max-content'}}>Refresh</Button>}

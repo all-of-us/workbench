@@ -309,3 +309,14 @@ export const eligibleForTier = (profile: Profile, accessTierShortName: string): 
   const rtEligiblity = profile.tierEligibilities.find(t => t.accessTierShortName === accessTierShortName)
   return rtEligiblity?.eligible
 };
+
+export const externalSyncModules = (moduleNames: AccessModule[], reloadProfile: Function) => {
+  moduleNames.map(async moduleName => {
+    const {externalSyncAction} = getAccessModuleConfig(moduleName);
+    if (externalSyncAction) {
+      await externalSyncAction();
+    }
+  });
+  reloadProfile();
+}
+
