@@ -123,6 +123,7 @@ public class DbWorkspace {
   private Short needsRPReviewPrompt;
   private String googleProject;
   private boolean adminLocked;
+  private String adminLockedReason;
 
   public DbWorkspace() {
     setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
@@ -740,6 +741,16 @@ public class DbWorkspace {
 
   public DbWorkspace setAdminLocked(boolean adminLocked) {
     this.adminLocked = adminLocked;
+    return this;
+  }
+
+  @Column(name = "admin_locked_reason")
+  public String getAdminLockedReason() {
+    return adminLockedReason;
+  }
+
+  public DbWorkspace setAdminLockedReason(String adminLockedReason) {
+    this.adminLockedReason = adminLockedReason;
     return this;
   }
 }

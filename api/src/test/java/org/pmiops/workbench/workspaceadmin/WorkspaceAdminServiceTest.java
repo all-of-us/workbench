@@ -110,7 +110,6 @@ public class WorkspaceAdminServiceTest {
   @MockBean private FireCloudService mockFirecloudService;
   @MockBean private LeonardoNotebooksClient mockLeonardoNotebooksClient;
   @MockBean private LeonardoRuntimeAuditor mockLeonardoRuntimeAuditor;
-  @MockBean private MailService mockMailService;
   @MockBean private NotebooksService mockNotebooksService;
 
   @Autowired private CdrVersionDao cdrVersionDao;
