@@ -103,7 +103,7 @@ public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
     if (lockingReason.length() < 10 || lockingReason.length() > 4000) {
       throw new BadRequestException(
           "Locking Reason text length should be "
-              + "atleast 10 characters long and at most 4000 characters");
+              + "at least 10 characters long and at most 4000 characters");
     }
     workspaceAdminService.setAdminLockedState(workspaceNamespace, lockingRequest);
     return ResponseEntity.ok(new EmptyResponse());

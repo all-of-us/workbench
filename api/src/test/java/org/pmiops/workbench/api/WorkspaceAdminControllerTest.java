@@ -61,7 +61,7 @@ public class WorkspaceAdminControllerTest {
   private static final String BAD_EXCEPTION_NULL_REQUEST_DATE_REASON =
       "Cannot have empty Request reason or Request Date";
   private static final String BAD_EXCEPTION_REQUEST_REASON_CHAR =
-      "Locking Reason text length should be atleast 10 characters long and at most 4000 characters";
+      "Locking Reason text length should be at least 10 characters long and at most 4000 characters";
 
   @MockBean private ActionAuditQueryService mockActionAuditQueryService;
   @MockBean private CloudMonitoringService mockCloudMonitoringService;
