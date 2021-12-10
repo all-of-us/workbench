@@ -66,15 +66,18 @@ describe('Workspace Admin', () => {
     await workspaceAdminPage.getWorkspaceNamespaceInput().type(workspaceNamespace);
     workspaceAdminPage.clickLoadWorkspaceButton();
     await workspaceAdminPage.waitForLoad();
+
     //verify that the Notebook Preview button is disabled
     expect(await workspaceAdminPage.getNotebookPreviewButton().isCursorNotAllowed()).toBe(true);
     const accessReasonText = 'testing purposes';
     await workspaceAdminPage.getAccessReasonTextArea().type(accessReasonText);
+
     //verify that the Notebook Preview button is now enabled
     expect(await workspaceAdminPage.getNotebookPreviewButton().isCursorNotAllowed()).toBe(false);
     await workspaceAdminPage.clickNotebookPreviewButton();
     const adminNotebookPreviewPage = new AdminNotebookPreviewPage(page);
     await adminNotebookPreviewPage.waitForLoad();
+
     // verify that the notebook preview page loaded
     const previewCode = await adminNotebookPreviewPage.getFormattedCode();
 
@@ -82,6 +85,7 @@ describe('Workspace Admin', () => {
     expect(previewCode.some((item) => item.includes('import pandas'))).toBe(true);
     expect(previewCode.some((item) => item.includes('import os'))).toBe(true);
     expect(await adminNotebookPreviewPage.getNamespaceText()).toEqual(workspaceNamespace);
+
     // click on the namespace link to navigate back to the workpsace-admin page
     await adminNotebookPreviewPage.clickNamespaceLink();
     await workspaceAdminPage.waitForLoad();
@@ -99,17 +103,20 @@ describe('Workspace Admin', () => {
     // Create runtime
     await runtimePanel.createRuntime();
     await page.waitForTimeout(2000);
+
     // navigate back to workspace admin page
     await navigation.navMenu(page, NavLink.WORKSPACE_ADMIN);
     await workspaceAdminPage.waitForLoad();
     await workspaceAdminPage.getWorkspaceNamespaceInput().type(workspaceNamespace);
     await workspaceAdminPage.clickLoadWorkspaceButton();
     await workspaceAdminPage.waitForLoad();
+
     //verify the runtime status is running
     expect(await workspaceAdminPage.getRuntimeStatus()).toEqual('Running');
     const deleteRuntimeModal = await workspaceAdminPage.clickRuntimeDeleteButton();
     await deleteRuntimeModal.clickCancelButton();
     await workspaceAdminPage.waitForLoad();
+
     await workspaceAdminPage.clickRuntimeDeleteButton();
     // delete the runtime
     await deleteRuntimeModal.clickDeleteButton();
