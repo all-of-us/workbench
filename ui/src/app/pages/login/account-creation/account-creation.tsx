@@ -178,6 +178,13 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
     this.setState(fp.set(['profile', 'address', attribute], value));
   }
 
+  private ensureScheme(url: string): string {
+    if (/^https?:\/\//.test(url)) {
+      return url;
+    }
+    return `http://${url}`;
+  }
+
   validate(): {[key: string]: string} {
     const {gsuiteDomain} = serverConfigStore.get().config;
 
@@ -287,8 +294,10 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
       };
     }
 
+    // validatejs requires a scheme, which we don't necessarily need in the profile; rather than
+    // forking their website regex, just ensure a scheme ahead of validation.
     const urlError = validationData.professionalUrl
-      ? validate({website: validationData.professionalUrl}, {
+      ? validate({website: this.ensureScheme(validationData.professionalUrl)}, {
         website: { url: { message: '^Professional URL %{value} is not a valid URL' } }
       })
       : undefined;
