@@ -1348,7 +1348,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
             <WorkspaceResearchSummary
                 researchPurpose={researchPurposeQuestions[2]}
                 researchValue={intendedStudy}
-                onChange={v => this.updateResearchPurpose('intendedStudy', v)}
+                onChange={v => this.updateResearchPurpose('intendedStudy', v.trim())}
                 index='2.1'
                 id='intendedStudyText'
             />
@@ -1357,7 +1357,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
             <WorkspaceResearchSummary
                 researchPurpose={researchPurposeQuestions[3]}
                 researchValue={scientificApproach}
-                onChange={v => this.updateResearchPurpose('scientificApproach', v)}
+                onChange={v => this.updateResearchPurpose('scientificApproach', v.trim())}
                 index='2.2'
                 id='scientificApproachText'
             />
@@ -1365,7 +1365,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
             <WorkspaceResearchSummary
                 researchPurpose={researchPurposeQuestions[4]}
                 researchValue={anticipatedFindings}
-                onChange={v => this.updateResearchPurpose('anticipatedFindings', v)}
+                onChange={v => this.updateResearchPurpose('anticipatedFindings', v.trim())}
                 index='2.3'
                 id='anticipatedFindingsText'
             />
@@ -1438,7 +1438,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
                            disabled={!fp.includes(SpecificPopulationEnum.OTHER, populationDetails)}
                            data-test-id='other-specialPopulation-text'
                            onChange={v => this.setState(fp.set(
-                             ['workspace', 'researchPurpose', 'otherPopulationDetails'], v))}/>
+                             ['workspace', 'researchPurpose', 'otherPopulationDetails'], v.trim()))}/>
               </FlexColumn>
             </FlexRow>
             <hr/>
