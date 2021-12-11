@@ -195,13 +195,13 @@ const FileDetailsTable = (props: FileDetailsProps) => {
 
   return <FlexColumn>
     <DataTable
+        paginator scrollable
         data-test-id='object-details-table'
         value={tableData}
         style={styles.fileDetailsTable}
-        scrollable={true}
-        paginator={true}
-        paginatorTemplate='CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown'
-        currentPageReportTemplate='Showing {first} to {last} of {totalRecords} entries'>
+        rows={100}
+        paginatorTemplate='CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink'
+        currentPageReportTemplate='Showing {first} to {last} of {totalRecords} entries' >
       <Column field='location' header='Location'/>
       <Column field='nameCell' header='Filename'/>
       <Column field='size' header='File size (MB)' style={{textAlign: 'right'}}/>
