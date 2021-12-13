@@ -27,6 +27,7 @@ import {
   getAccessModuleConfig,
   getAccessModuleStatusByName,
   GetStartedButton,
+  syncModulesExternal,
   redirectToControlledTraining,
   redirectToNiH,
   redirectToRas,
@@ -355,16 +356,6 @@ export const getEligibleModules = (modules: AccessModule[], profile: Profile): A
 
 const incompleteModules = (modules: AccessModule[], profile: Profile): AccessModule[] =>
   modules.filter(moduleName => !isCompliant(getAccessModuleStatusByName(profile, moduleName)));
-
-const syncIncompleteModules = (modules: AccessModule[], profile: Profile, reloadProfile: Function) => {
-  incompleteModules(modules, profile).map(async moduleName => {
-    const {externalSyncAction} = getAccessModuleConfig(moduleName);
-    if (externalSyncAction) {
-      await externalSyncAction();
-    }
-  });
-  reloadProfile();
-}
 
 // exported for test
 export const getActiveModule = (modules: AccessModule[], profile: Profile): AccessModule => incompleteModules(modules, profile)[0];
@@ -763,9 +754,14 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
   const {config: {unsafeAllowSelfBypass}} = useStore(serverConfigStore);
 
   useEffect(() => {
-    syncIncompleteModules(getEligibleModules(allModules, profile), profile, reload);
-    spinnerProps.hideSpinner();
-  }, []);
+      const onMount = async () => {
+        await syncModulesExternal(incompleteModules(getEligibleModules(allModules, profile), profile));
+        await reload();
+        spinnerProps.hideSpinner();
+      };
+
+      onMount();
+    }, []);
 
   // handle the route /nih-callback?token=<token>
   // handle the route /ras-callback?code=<code>

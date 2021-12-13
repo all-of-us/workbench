@@ -14,17 +14,13 @@ import {
   AccessModuleStatus,
   ErrorCode,
   Profile,
-  UserTierEligibility
 } from 'generated/fetch';
 import {parseQueryParams} from 'app/components/app-router';
 import {cond, daysFromNow, displayDateWithoutHours, switchCase} from './index';
-import {AccessTierShortNames} from 'app/utils/access-tiers';
 import {TooltipTrigger} from 'app/components/popups';
 import {InfoIcon} from 'app/components/icons';
-import {environment} from 'environments/environment';
 
 const {useState, useEffect} = React;
-
 
 export async function redirectToRegisteredTraining() {
   AnalyticsTracker.Registration.RegisteredTraining();
@@ -309,3 +305,13 @@ export const eligibleForTier = (profile: Profile, accessTierShortName: string): 
   const rtEligiblity = profile.tierEligibilities.find(t => t.accessTierShortName === accessTierShortName)
   return rtEligiblity?.eligible
 };
+
+export const syncModulesExternal = async(moduleNames: AccessModule[]) => {
+  return Promise.all(moduleNames.map(async moduleName => {
+    const {externalSyncAction} = getAccessModuleConfig(moduleName);
+    if (externalSyncAction) {
+      await externalSyncAction();
+    }
+  }));
+}
+
