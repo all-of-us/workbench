@@ -330,15 +330,15 @@ describe('Access Renewal Page', () => {
   // RW-7473: sync expiring/expired Training module to gain access
 
   test.each([
-    ['should', 'expired', 1, () => updateOneModuleExpirationTime(AccessModule.COMPLIANCETRAINING, oneHourAgo())],
-    ['should', 'expiring', 1, () => updateOneModuleExpirationTime(AccessModule.COMPLIANCETRAINING, addDaysFromNow(10))],
-    ['should not', 'complete', 0, () => updateOneModuleExpirationTime(AccessModule.COMPLIANCETRAINING, oneYearFromNow())],
-    ['should not', 'incomplete', 0, () => {}],
+    ['should', 'expired', 1, oneHourAgo()],
+    ['should', 'expiring', 1, addDaysFromNow(10)],
+    ['should not', 'complete', 0, oneYearFromNow()],
+    ['should not', 'incomplete', 0, null],
   ])
-  ('%s externally sync %s Compliance Training module status', async(desc1, desc2, expected, modifier) => {
+  ('%s externally sync %s Compliance Training module status', async(desc1, desc2, expected, expirationTime) => {
     const spy = jest.spyOn(profileApi(), 'syncComplianceTrainingStatus');
 
-    modifier();
+    updateOneModuleExpirationTime(AccessModule.COMPLIANCETRAINING, expirationTime);
 
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);

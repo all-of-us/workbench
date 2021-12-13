@@ -211,7 +211,7 @@ export const AccessRenewal = fp.flow(withProfileErrorModal)((spinnerProps: WithS
       setLoading(false);
     };
     const expiringModules = expirableModules
-      .filter(status => isExpiring(status.expirationEpochMillis))
+      .filter(status => status.expirationEpochMillis && isExpiring(status.expirationEpochMillis))
       .map(status => status.moduleName);
 
     externalSyncModules(expiringModules);
