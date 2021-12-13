@@ -31,7 +31,7 @@ import {AnalyticsTracker} from 'app/utils/analytics';
 import {serverConfigStore} from 'app/utils/stores';
 import {NOT_ENOUGH_CHARACTERS_RESEARCH_DESCRIPTION} from 'app/utils/strings';
 import {Profile} from 'generated/fetch';
-import { canonicalizeUrl } from 'app/utils/urls';
+import {canonicalizeUrl} from 'app/utils/urls';
 
 const styles = reactStyles({
   ...commonStyles,
