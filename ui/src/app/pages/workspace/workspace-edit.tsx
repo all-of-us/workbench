@@ -1057,7 +1057,8 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
       if (disseminateResearchFindingList &&
           disseminateResearchFindingList.includes(DisseminateResearchEnum.OTHER)) {
         values = {...values, otherDisseminateResearchFindings};
-        constraints['otherDisseminateResearchFindings'] = requiredStringWithMaxLength(100, 'Other methods of disseminating research findings');
+        constraints['otherDisseminateResearchFindings'] =
+          requiredStringWithMaxLength(100, 'Other methods of disseminating research findings');
       }
       return validate(values, constraints, {fullMessages: false});
     }
