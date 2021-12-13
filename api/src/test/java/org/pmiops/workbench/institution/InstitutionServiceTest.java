@@ -688,41 +688,6 @@ public class InstitutionServiceTest {
   }
 
   @Test
-  public void test_emailValidation_changedShortName() {
-    final String oldShortName = "Broad";
-    final String newShortName = "TheBroad";
-
-    final Institution inst =
-        service.createInstitution(
-            new Institution()
-                .shortName(oldShortName)
-                .displayName("The Broad Institute")
-                .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION)
-                .tierConfigs(
-                    ImmutableList.of(
-                        rtTierConfig
-                            .membershipRequirement(InstitutionMembershipRequirement.DOMAINS)
-                            .eraRequired(false)
-                            .accessTierShortName(registeredTier.getShortName())
-                            .emailDomains(ImmutableList.of("broad.org", "lab.broad.org")))));
-
-    final DbUser user = createUser("user@broad.org");
-    final DbVerifiedInstitutionalAffiliation affiliation =
-        createAffiliation(user, inst.getShortName());
-
-    assertThat(service.validateAffiliation(affiliation, user.getContactEmail())).isTrue();
-
-    final Institution renamed = inst.shortName(newShortName);
-    service.updateInstitution(oldShortName, renamed);
-
-    final DbVerifiedInstitutionalAffiliation updatedAffiliation =
-        verifiedInstitutionalAffiliationDao.findFirstByUser(user).get();
-
-    assertThat(updatedAffiliation.getInstitution().getShortName()).isEqualTo(newShortName);
-    assertThat(service.validateAffiliation(updatedAffiliation, user.getContactEmail())).isTrue();
-  }
-
-  @Test
   public void getInstitutionUserInstructions_empty() {
     assertThat(service.getInstitutionUserInstructions(testInst.getShortName())).isEmpty();
   }
