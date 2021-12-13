@@ -60,14 +60,14 @@ export default class WorkspaceCard extends CardBase {
     );
 
     if (accessLevel !== undefined) {
-      const matchAccessLevelCards: WorkspaceCard[] = [];
+      const filtered: WorkspaceCard[] = [];
       for (const card of allCards) {
         const cardAccessLevel = await card.getWorkspaceAccessLevel();
         if (cardAccessLevel === accessLevel) {
-          matchAccessLevelCards.push(card);
+          filtered.push(card);
         }
       }
-      return matchAccessLevelCards;
+      return filtered;
     }
     return allCards;
   }
@@ -86,7 +86,7 @@ export default class WorkspaceCard extends CardBase {
       ` and normalize-space(text())="${workspaceName}"]]`;
     return page
       .waitForXPath(selector, { timeout, visible: true })
-      .then((element: ElementHandle) => {
+      .then((element) => {
         logger.info(`Found workspace card: "${workspaceName}"`);
         return new WorkspaceCard(page).asCard(element);
       })
