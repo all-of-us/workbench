@@ -185,6 +185,11 @@ public class InstitutionServiceImpl implements InstitutionService {
 
   private Institution updateExistingInstitution(
       DbInstitution dbInstitution, Institution updatedInstitution) {
+    // first, validate that the shortName is not changed
+    if (!updatedInstitution.getShortName().equals(dbInstitution.getShortName())) {
+      throw new BadRequestException("Cannot change institution shortName");
+    }
+
     // create new DB object, but mark it with the original's ID to indicate that this is
     // an update
     DbInstitution dbObjectToUpdate =
