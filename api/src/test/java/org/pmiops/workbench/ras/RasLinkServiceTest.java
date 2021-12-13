@@ -279,7 +279,7 @@ public class RasLinkServiceTest {
     if (!dbAccessModule.isPresent()) {
       assertThat(timestamp).isNull();
     } else {
-      assertThat(dbAccessModule.get().getCompletionTime()).isEqualTo(timestamp.getTime());
+      assertThat(dbAccessModule.get().getCompletionTime().getTime()).isEqualTo(timestamp.getTime());
     }
   }
 }
