@@ -27,7 +27,7 @@ import {
   getAccessModuleConfig,
   getAccessModuleStatusByName,
   GetStartedButton,
-  externalSyncModules,
+  syncModulesExternal,
   redirectToControlledTraining,
   redirectToNiH,
   redirectToRas,
@@ -754,10 +754,14 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
   const {config: {unsafeAllowSelfBypass}} = useStore(serverConfigStore);
 
   useEffect(() => {
-    externalSyncModules(incompleteModules(getEligibleModules(allModules, profile), profile));
-    reload();
-    spinnerProps.hideSpinner();
-  }, []);
+      const onMount = async () => {
+        await syncModulesExternal(incompleteModules(getEligibleModules(allModules, profile), profile));
+        await reload();
+        spinnerProps.hideSpinner();
+      };
+
+      onMount();
+    }, []);
 
   // handle the route /nih-callback?token=<token>
   // handle the route /ras-callback?code=<code>

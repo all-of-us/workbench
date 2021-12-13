@@ -18,7 +18,7 @@ import {cond, useId, withStyle} from 'app/utils';
 import {
   accessRenewalModules,
   computeDisplayDates,
-  externalSyncModules,
+  syncModulesExternal,
   getAccessModuleConfig,
   isExpiring,
   maybeDaysRemaining,
@@ -205,18 +205,19 @@ export const AccessRenewal = fp.flow(withProfileErrorModal)((spinnerProps: WithS
 
   // onMount - as we move between pages, let's make sure we have the latest profile and external module information
   useEffect(() => {
-    const getProfile = async() => {
-      setLoading(true);
-      await reloadProfile();
-      setLoading(false);
-    };
     const expiringModules = expirableModules
       .filter(status => status.expirationEpochMillis && isExpiring(status.expirationEpochMillis))
       .map(status => status.moduleName);
 
-    externalSyncModules(expiringModules);
-    getProfile();
-    spinnerProps.hideSpinner();
+    const onMount = async() => {
+      setLoading(true);
+      await syncModulesExternal(expiringModules);
+      await reloadProfile();
+      setLoading(false);
+      spinnerProps.hideSpinner();
+    };
+
+    onMount();
   }, []);
 
   // Render

@@ -306,12 +306,12 @@ export const eligibleForTier = (profile: Profile, accessTierShortName: string): 
   return rtEligiblity?.eligible
 };
 
-export const externalSyncModules = (moduleNames: AccessModule[]) => {
-  moduleNames.map(async moduleName => {
+export const syncModulesExternal = async(moduleNames: AccessModule[]) => {
+  return Promise.all(moduleNames.map(async moduleName => {
     const {externalSyncAction} = getAccessModuleConfig(moduleName);
     if (externalSyncAction) {
       await externalSyncAction();
     }
-  });
+  }));
 }
 
