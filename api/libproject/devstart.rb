@@ -182,7 +182,7 @@ def run_api_incremental()
     common.status "Starting API server..."
     # appengineStart must be run with the Gradle daemon or it will stop outputting logs as soon as
     # the application has finished starting.
-    common.run_inline "./gradlew --daemon appengineRun &"
+    common.run_inline "./gradlew --daemon bootRun &"
 
     # incrementalHotSwap must be run without the Gradle daemon or stdout and stderr will not appear
     # in the output.

@@ -41,7 +41,7 @@ plugins {
 
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
     id 'com.diffplug.spotless' version '5.12.5'
-    id 'com.google.cloud.tools.appengine-appenginewebxml' version '2.4.2'
+    id 'com.google.cloud.tools.appengine-appyaml' version '2.4.2'
     id 'org.jetbrains.kotlin.jvm' version '1.5.32'
     id 'net.ltgt.apt-idea' version '0.21'
     // Note: if you plan to upgrade the version of swagger-codegen beyond 2.2.3, be aware of two
@@ -561,17 +561,17 @@ appengine {  // App Engine tasks configuration
         // Keep in sync with ci/Dockerfile.circle_build
         cloudSdkVersion = '321.0.0'
     }
-    run {      // local (dev_appserver) configuration (standard environments only)
-        port = 8081                 // default
-        host = "0.0.0.0"
-        // Allows you to attach a debugger on port 8001 when running locally.
-        jvmFlags = ['-Xdebug', '-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=8001']
-        // Give dev_appserver 2 minutes to start up when running appengineStart; by
-        // default it will fail after 1 minute. (This is particularly a problem in CircleCI.)
-        startSuccessTimeout = 120
-
-        environment = [GOOGLE_APPLICATION_CREDENTIALS: file("$rootDir/sa-key.json").getAbsolutePath()]
-    }
+//    run {      // local (dev_appserver) configuration (standard environments only)
+//        port = 8081                 // default
+//        host = "0.0.0.0"
+//        // Allows you to attach a debugger on port 8001 when running locally.
+//        jvmFlags = ['-Xdebug', '-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=8001']
+//        // Give dev_appserver 2 minutes to start up when running appengineStart; by
+//        // default it will fail after 1 minute. (This is particularly a problem in CircleCI.)
+//        startSuccessTimeout = 120
+//
+//        environment = [GOOGLE_APPLICATION_CREDENTIALS: file("$rootDir/sa-key.json").getAbsolutePath()]
+//    }
 
     deploy {   // deploy configuration
         stopPreviousVersion = true  // default - stop the current version
@@ -579,6 +579,12 @@ appengine {  // App Engine tasks configuration
         // Place holder for required field, we are not using gradle to deploy this APP.
         projectId = "all-of-us-workbench-test"
     }
+}
+
+bootRun {
+    environment = [
+        'GOOGLE_APPLICATION_CREDENTIALS': file("$rootDir/sa-key.json").getAbsolutePath()
+    ]
 }
 
 task startCronEmulator(dependsOn: [':appengine-cron-emulator:jar', 'generate_appengine_cron_yaml']) {
@@ -597,13 +603,7 @@ task startCronEmulator(dependsOn: [':appengine-cron-emulator:jar', 'generate_app
 }
 
 // AppEngine plugin tasks
-project.tasks.appengineRun.dependsOn project.tasks.startCronEmulator
-project.tasks.appengineStart.dependsOn project.tasks.startCronEmulator
-appengineStart {
-    // This task has the side-effect of running a local server, and therefore
-    // should not be cacheable.
-    outputs.upToDateWhen { false }
-}
+project.tasks.bootRun.dependsOn project.tasks.startCronEmulator
 
 group = 'org.pmiops.allofus.workbench'
 version = '0.1.0'          // Version in generated output
