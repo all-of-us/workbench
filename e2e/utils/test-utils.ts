@@ -85,14 +85,15 @@ export async function exists(page: Page, selector: string): Promise<boolean> {
  * @param element
  * @param page
  */
-export async function isElementReady(page, element) {
-  const isVisibleHandle = await page.evaluateHandle((elem) => {
+export async function isVisibleReady(element: ElementHandle): Promise<boolean> {
+  const handle = await element.asElement();
+  const visibleHandle = await handle.evaluateHandle((elem) => {
     const style = window.getComputedStyle(elem);
     return style && style.display !== 'none' && style.visibility !== 'hidden' && style.opacity !== '0';
   }, element);
-  const visible = await isVisibleHandle.jsonValue();
+  const visible = await visibleHandle.jsonValue() as boolean;
   const box = await element.boxModel();
-  return visible && box;
+  return visible && box !== null;
 }
 
 /**
@@ -269,9 +270,10 @@ export async function findAllCards(page: Page, millisAgo = 1000 * 60 * 30): Prom
   });
   // Filter to exclude Workspaces younger than 30 minutes.
   const halfHourAgoMillis = Date.now() - millisAgo;
-  return Promise.all(
+  await Promise.all(
     await asyncFilter(existingCards, async (card) => halfHourAgoMillis > Date.parse(await card.getLastChangedTime()))
   );
+  return existingCards;
 }
 
 export async function centerPoint(element: ElementHandle): Promise<[number, number]> {
@@ -314,7 +316,7 @@ export function isValidDate(date: string) {
   return d.toISOString().slice(0, 10) === date;
 }
 
-export const asyncFilter = async (arr, predicate) =>
+const asyncFilter = async (arr, predicate) =>
   arr.reduce(async (items, item) => ((await predicate(item)) ? [...(await items), item] : items), []);
 
 /**

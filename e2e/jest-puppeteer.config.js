@@ -43,7 +43,6 @@ module.exports = {
     ignoreDefaultArgs: true,
     args: SWITCHES // Chrome switches to pass to the browser instance
   },
-  browser: 'chromium',
   browserContext: process.env.INCOGNITO || true ? 'incognito' : 'default',
   exitOnPageError: false
 };

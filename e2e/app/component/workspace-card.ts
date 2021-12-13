@@ -8,7 +8,6 @@ import WorkspaceEditPage from 'app/page/workspace-edit-page';
 import { waitForFn, waitWhileLoading } from 'utils/waits-utils';
 import { logger } from 'libs/logger';
 import BaseElement from 'app/element/base-element';
-import { asyncFilter, isElementReady } from 'utils/test-utils';
 
 const WorkspaceCardSelector = {
   cardRootXpath: './/*[child::*[@data-test-id="workspace-card"]]', // finds 'workspace-card' parent container node
@@ -60,25 +59,17 @@ export default class WorkspaceCard extends CardBase {
       new WorkspaceCard(page).asCard(card)
     );
 
-    console.log(`allCards:\n${allCards}`);
-
-    const visibleCards: WorkspaceCard[] = await Promise.all(
-      await asyncFilter(allCards, async (card) => await isElementReady(page, card))
-    );
-    console.log(`visibleCards:\n${visibleCards}`);
-
     if (accessLevel !== undefined) {
       const matchAccessLevelCards: WorkspaceCard[] = [];
-      for (const card of visibleCards) {
+      for (const card of allCards) {
         const cardAccessLevel = await card.getWorkspaceAccessLevel();
         if (cardAccessLevel === accessLevel) {
           matchAccessLevelCards.push(card);
         }
       }
-      console.log(`matchAccessLevelCards:\n${matchAccessLevelCards}`);
       return matchAccessLevelCards;
     }
-    return visibleCards;
+    return allCards;
   }
 
   static async findAnyCard(page: Page): Promise<WorkspaceCard> {
