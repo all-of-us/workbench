@@ -183,7 +183,6 @@ export const AccessRenewal = fp.flow(withProfileErrorModal)((spinnerProps: WithS
   // State
   const {
     profile,
-    reload,
     profile: {accessModules: {modules}},
   } = useStore(profileStore);
   const {config: {enableComplianceTraining}} = useStore(serverConfigStore);
@@ -215,7 +214,7 @@ export const AccessRenewal = fp.flow(withProfileErrorModal)((spinnerProps: WithS
       .filter(status => isExpiring(status.expirationEpochMillis))
       .map(status => status.moduleName);
 
-    externalSyncModules(expiringModules, reload);
+    externalSyncModules(expiringModules);
     getProfile();
     spinnerProps.hideSpinner();
   }, []);

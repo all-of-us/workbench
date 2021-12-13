@@ -754,7 +754,8 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
   const {config: {unsafeAllowSelfBypass}} = useStore(serverConfigStore);
 
   useEffect(() => {
-    externalSyncModules(incompleteModules(getEligibleModules(allModules, profile), profile), reload);
+    externalSyncModules(incompleteModules(getEligibleModules(allModules, profile), profile));
+    reload();
     spinnerProps.hideSpinner();
   }, []);
 
