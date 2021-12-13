@@ -31,6 +31,7 @@ import {AnalyticsTracker} from 'app/utils/analytics';
 import {serverConfigStore} from 'app/utils/stores';
 import {NOT_ENOUGH_CHARACTERS_RESEARCH_DESCRIPTION} from 'app/utils/strings';
 import {Profile} from 'generated/fetch';
+import { canonicalizeUrl } from 'app/utils/urls';
 
 const styles = reactStyles({
   ...commonStyles,
@@ -178,13 +179,6 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
     this.setState(fp.set(['profile', 'address', attribute], value));
   }
 
-  private ensureScheme(url: string): string {
-    if (/^https?:\/\//.test(url)) {
-      return url;
-    }
-    return `http://${url}`;
-  }
-
   validate(): {[key: string]: string} {
     const {gsuiteDomain} = serverConfigStore.get().config;
 
@@ -297,7 +291,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
     // validatejs requires a scheme, which we don't necessarily need in the profile; rather than
     // forking their website regex, just ensure a scheme ahead of validation.
     const urlError = validationData.professionalUrl
-      ? validate({website: this.ensureScheme(validationData.professionalUrl)}, {
+      ? validate({website: validationData.professionalUrl}, {
         website: { url: { message: '^Professional URL %{value} is not a valid URL' } }
       })
       : undefined;
@@ -540,7 +534,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
               value={professionalUrl}
               labelText={<div>Paste Professional URL here</div>}
               containerStyle={{width: '26rem', marginTop: '.25rem'}}
-              onChange={value => this.updateProfileObject('professionalUrl', value)}
+              onChange={value => this.updateProfileObject('professionalUrl', canonicalizeUrl(value))}
             />
           </Section>
           <FormSection style={{marginTop: '4rem', paddingBottom: '1rem'}}>

@@ -34,6 +34,7 @@ import {AccessModule, InstitutionalRole, Profile} from 'generated/fetch';
 import {PublicInstitutionDetails} from 'generated/fetch';
 import {DataAccessPanel} from './data-access-panel';
 import {displayDateWithoutHours} from 'app/utils/dates';
+import {canonicalizeUrl} from 'app/utils/urls';
 
 
 // validators for validate.js
@@ -251,7 +252,7 @@ export const ProfileComponent = fp.flow(
       };
       const errors = fp.isEmpty(errorMessages) ? undefined : errorMessages;
 
-      const makeProfileInput = ({title, valueKey, isLong = false, ...props}) => {
+      const makeProfileInput = ({title, valueKey, isLong = false, sanitize = (v: any) => v, ...props}) => {
         let errorText = profile && errors && errors[valueKey];
         if (valueKey && !Array.isArray(valueKey)) {
           valueKey = [valueKey];
@@ -261,7 +262,7 @@ export const ProfileComponent = fp.flow(
         }
         const inputProps = {
           value: fp.get(valueKey, currentProfile) || '',
-          onChange: v => this.setState(fp.set(['currentProfile', ...valueKey], v)),
+          onChange: v => this.setState(fp.set(['currentProfile', ...valueKey], sanitize(v))),
           invalid: !!errorText,
           style: props.style,
           maxCharacters: props.maxCharacters,
@@ -352,9 +353,10 @@ export const ProfileComponent = fp.flow(
 
             <FlexRow style={{width: '100%'}}>
               {makeProfileInput({
-                title: 'Professional URL',
-                valueKey: 'professionalUrl',
-                style: {width: '26rem'}
+                 title: 'Professional URL',
+                 valueKey: 'professionalUrl',
+                 sanitize: (v) => canonicalizeUrl(v),
+                 style: {width: '26rem'}
               })}
             </FlexRow>
             <FlexRow>
