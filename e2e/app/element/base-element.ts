@@ -124,7 +124,7 @@ export default class BaseElement {
         .catch(() => {
           return null;
         });
-      return await elementHandle.jsonValue() as boolean;
+      return (await elementHandle.jsonValue()) as boolean;
     };
 
     const boxModel = async (element) => {

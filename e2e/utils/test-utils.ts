@@ -91,7 +91,7 @@ export async function isVisibleReady(element: ElementHandle): Promise<boolean> {
     const style = window.getComputedStyle(elem);
     return style && style.display !== 'none' && style.visibility !== 'hidden' && style.opacity !== '0';
   }, element);
-  const visible = await visibleHandle.jsonValue() as boolean;
+  const visible = (await visibleHandle.jsonValue()) as boolean;
   const box = await element.boxModel();
   return visible && box !== null;
 }
