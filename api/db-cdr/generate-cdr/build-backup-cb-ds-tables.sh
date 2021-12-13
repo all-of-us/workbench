@@ -10,13 +10,13 @@ export OUTPUT_PROJECT=$3 # output project
 export OUTPUT_DATASET=$4 # output dataset
 
 # Make dataset for backup
-datasets=$(bq --project_id=$OUTPUT_PROJECT ls --max_results=1000)
+datasets=$(bq --project_id="$OUTPUT_PROJECT" ls --max_results=1000)
 re=\\b$BACKUP_DATASET\\b
 if [[ $datasets =~ $re ]]; then
   echo "$BACKUP_DATASET exists"
 else
   echo "Creating $BACKUP_DATASET"
-  bq --project_id=$OUTPUT_PROJECT mk $BACKUP_DATASET
+  bq --project_id="$OUTPUT_PROJECT" mk "$BACKUP_DATASET"
 fi
 
 # Create bq tables we have json schema for
