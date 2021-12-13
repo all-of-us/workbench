@@ -25,7 +25,7 @@ handlers:
     Content-Security-Policy: "default-src 'none'; frame-ancestors 'none'; report-uri /content-security-report"
 instance_class: "${GAE_INSTANCE_CLASS}"
 automatic_scaling:
- min_idle_instances "${GAE_MIN_IDLE_INSTANCES}"
- max_instances: "${GAE_MAX_INSTANCES}"
+ min_idle_instances: ${GAE_MIN_IDLE_INSTANCES}
+ max_instances: "{GAE_MAX_INSTANCES}
 inbound_services:
 -warmup
