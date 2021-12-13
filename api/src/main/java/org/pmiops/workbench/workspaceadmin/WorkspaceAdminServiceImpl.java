@@ -21,6 +21,7 @@ import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import javax.mail.MessagingException;
 import org.apache.commons.lang3.StringUtils;
+import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.ActionAuditQueryService;
 import org.pmiops.workbench.actionaudit.auditors.AdminAuditor;
 import org.pmiops.workbench.actionaudit.auditors.LeonardoRuntimeAuditor;
@@ -29,6 +30,7 @@ import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.DataSetDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -73,6 +75,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
   private static final Logger log = Logger.getLogger(WorkspaceAdminServiceImpl.class.getName());
   private static final Duration TRAILING_TIME_TO_QUERY = Duration.ofHours(6);
 
+  private final AccessTierService accessTierService;
   private final ActionAuditQueryService actionAuditQueryService;
   private final AdminAuditor adminAuditor;
   private final CloudMonitoringService cloudMonitoringService;
@@ -94,6 +97,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
 
   @Autowired
   public WorkspaceAdminServiceImpl(
+      AccessTierService accessTierService,
       ActionAuditQueryService actionAuditQueryService,
       AdminAuditor adminAuditor,
       CloudMonitoringService cloudMonitoringService,
@@ -112,6 +116,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
       WorkspaceDao workspaceDao,
       WorkspaceMapper workspaceMapper,
       WorkspaceService workspaceService) {
+    this.accessTierService = accessTierService;
     this.actionAuditQueryService = actionAuditQueryService;
     this.adminAuditor = adminAuditor;
     this.cloudMonitoringService = cloudMonitoringService;
@@ -405,8 +410,10 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
     final WorkspaceAccessLevel accessLevel =
         publish ? WorkspaceAccessLevel.READER : WorkspaceAccessLevel.NO_ACCESS;
 
+    // Enable all users in RT or higher tiers to see all published workspaces regardless of tier
+    final DbAccessTier dbAccessTier = accessTierService.getRegisteredTierOrThrow();
     final FirecloudManagedGroupWithMembers authDomainGroup =
-        fireCloudService.getGroup(dbWorkspace.getCdrVersion().getAccessTier().getAuthDomainName());
+        fireCloudService.getGroup(dbAccessTier.getAuthDomainName());
 
     final FirecloudWorkspaceACLUpdate currentUpdate =
         WorkspaceAuthService.updateFirecloudAclsOnUser(
