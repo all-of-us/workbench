@@ -195,7 +195,8 @@ const FileDetailsTable = (props: FileDetailsProps) => {
 
   return <FlexColumn>
     <DataTable
-        paginator scrollable
+        paginator
+        scrollable
         data-test-id='object-details-table'
         value={tableData}
         style={styles.fileDetailsTable}
