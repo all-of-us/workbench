@@ -227,9 +227,12 @@ export const ProfileComponent = fp.flow(
       )(profile.accessModules.modules);
       const hasExpired = profileExpiration && profileExpiration < Date.now();
 
-      const urlError = professionalUrl
-      ? validate({website: professionalUrl}, {website: {url: {message: '^Professional URL %{value} is not a valid URL'}}})
-      : undefined;
+      const urlError =
+        professionalUrl ?
+        validate(
+          {website: canonicalizeUrl(professionalUrl)},
+          {website: {url: {message: '^Professional URL %{value} is not a valid URL'}}})
+        : undefined;
       const errorMessages = {
         ...urlError,
         ...validate({
@@ -252,7 +255,7 @@ export const ProfileComponent = fp.flow(
       };
       const errors = fp.isEmpty(errorMessages) ? undefined : errorMessages;
 
-      const makeProfileInput = ({title, valueKey, isLong = false, sanitize = (v: any) => v, ...props}) => {
+      const makeProfileInput = ({title, valueKey, isLong = false, ...props}) => {
         let errorText = profile && errors && errors[valueKey];
         if (valueKey && !Array.isArray(valueKey)) {
           valueKey = [valueKey];
@@ -262,7 +265,7 @@ export const ProfileComponent = fp.flow(
         }
         const inputProps = {
           value: fp.get(valueKey, currentProfile) || '',
-          onChange: v => this.setState(fp.set(['currentProfile', ...valueKey], sanitize(v))),
+          onChange: v => this.setState(fp.set(['currentProfile', ...valueKey], v)),
           invalid: !!errorText,
           style: props.style,
           maxCharacters: props.maxCharacters,
@@ -355,7 +358,6 @@ export const ProfileComponent = fp.flow(
               {makeProfileInput({
                  title: 'Professional URL',
                  valueKey: 'professionalUrl',
-                 sanitize: (v) => canonicalizeUrl(v),
                  style: {width: '26rem'}
               })}
             </FlexRow>

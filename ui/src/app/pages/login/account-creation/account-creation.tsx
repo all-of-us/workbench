@@ -291,7 +291,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
     // validatejs requires a scheme, which we don't necessarily need in the profile; rather than
     // forking their website regex, just ensure a scheme ahead of validation.
     const urlError = validationData.professionalUrl
-      ? validate({website: validationData.professionalUrl}, {
+      ? validate({website: canonicalizeUrl(validationData.professionalUrl)}, {
         website: { url: { message: '^Professional URL %{value} is not a valid URL' } }
       })
       : undefined;
@@ -534,7 +534,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
               value={professionalUrl}
               labelText={<div>Paste Professional URL here</div>}
               containerStyle={{width: '26rem', marginTop: '.25rem'}}
-              onChange={value => this.updateProfileObject('professionalUrl', canonicalizeUrl(value))}
+              onChange={value => this.updateProfileObject('professionalUrl', value)}
             />
           </Section>
           <FormSection style={{marginTop: '4rem', paddingBottom: '1rem'}}>
