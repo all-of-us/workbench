@@ -198,7 +198,7 @@ public class InstitutionServiceImpl implements InstitutionService {
             .setInstitutionId(dbInstitution.getInstitutionId());
 
     try {
-      institutionDao.save(dbObjectToUpdate);
+      dbObjectToUpdate = institutionDao.save(dbObjectToUpdate);
       populateAuxTables(updatedInstitution, dbObjectToUpdate);
     } catch (DataIntegrityViolationException ex) {
       throw new ConflictException(
@@ -360,6 +360,14 @@ public class InstitutionServiceImpl implements InstitutionService {
         .findFirstByUser(user)
         .map(DbVerifiedInstitutionalAffiliation::getInstitution)
         .map(dbi -> institutionMapper.dbToModel(dbi, this));
+  }
+
+  @Override
+  public List<DbUser> getAffiliatedUsers(String shortName) {
+    return verifiedInstitutionalAffiliationDao
+        .findAllByInstitution(getDbInstitutionOrThrow(shortName)).stream()
+        .map(DbVerifiedInstitutionalAffiliation::getUser)
+        .collect(Collectors.toList());
   }
 
   @Override
