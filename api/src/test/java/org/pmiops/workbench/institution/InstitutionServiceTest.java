@@ -256,10 +256,7 @@ public class InstitutionServiceTest {
     final String oldShortName = testInst.getShortName();
     final String newShortName = "NewShortName";
     final Institution newInst = roundTrippedTestInst.shortName(newShortName);
-    assertThat(service.updateInstitution(oldShortName, newInst)).hasValue(newInst);
-
-    assertThat(service.getInstitution(oldShortName)).isEmpty();
-    assertThat(service.getInstitution(newShortName)).hasValue(newInst);
+    assertThrows(BadRequestException.class, () -> service.updateInstitution(oldShortName, newInst));
   }
 
   @Test
