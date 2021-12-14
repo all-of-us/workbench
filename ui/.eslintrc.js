@@ -72,7 +72,7 @@ module.exports = {
     'no-irregular-whitespace': 'warn',
     '@typescript-eslint/no-misused-new': 'warn',
     // 'no-shadow': 'warn',
-    'dot-notation': 'warn',
+    //'dot-notation': 'warn',
     'no-throw-literal': 'warn',
     'no-fallthrough': 'warn', // For switch statements
     'no-use-before-define': 'off', // Needed for TS
