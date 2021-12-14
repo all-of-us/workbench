@@ -29,8 +29,11 @@ describe('Workspace Admin', () => {
     await workspacesPage.createWorkspace(workspaceName);
     await waitForDocumentTitle(page, 'Data Page');
     const dataPage = new WorkspaceDataPage(page);
+    //extract the Workspace-Namespace
     workspaceNamespace = await dataPage.extractWorkspaceNamespace();
-    await createNotebook(page, pyNotebookName);
+
+    //create the dataset and notebook
+    await createDatasetNotebook(page, pyNotebookName);
     await navigation.navMenu(page, NavLink.WORKSPACE_ADMIN);
     const workspaceAdminPage = new WorkspaceAdminPage(page);
     await workspaceAdminPage.waitForLoad();
@@ -51,12 +54,12 @@ describe('Workspace Admin', () => {
     expect(await workspaceAdminPage.getNoActiveRuntimeText()).toEqual(noActiveRuntimeText);
 
     //click on the LOCK WORKSPACE button
-    const lockWorkspacedModal = await workspaceAdminPage.clickLockWorkspaceButton();
-    expect(await lockWorkspacedModal.getLockWorkspaceButton().isCursorNotAllowed()).toBe(true);
+    const lockWorkspaceModal = await workspaceAdminPage.clickLockWorkspaceButton();
+    expect(await lockWorkspaceModal.getLockWorkspaceButton().isCursorNotAllowed()).toBe(true);
 
-    await lockWorkspacedModal.createLockWorkspaceMessage();
-    expect(await lockWorkspacedModal.getLockWorkspaceButton().isCursorNotAllowed()).toBe(false);
-    lockWorkspacedModal.clickCancelButton();
+    await lockWorkspaceModal.createLockWorkspaceReason();
+    expect(await lockWorkspaceModal.getLockWorkspaceButton().isCursorNotAllowed()).toBe(false);
+    lockWorkspaceModal.clickCancelButton();
     await workspaceAdminPage.waitForLoad();
   });
 
@@ -120,13 +123,13 @@ describe('Workspace Admin', () => {
     await workspaceAdminPage.clickRuntimeDeleteButton();
     // delete the runtime
     await deleteRuntimeModal.clickDeleteButton();
-    await page.waitForTimeout(4000);
+    await page.waitForTimeout(10000);
 
     //verify the runtime status is deleting
     expect(await workspaceAdminPage.getRuntimeStatus()).toEqual('Deleting');
   });
 
-  async function createNotebook(page: Page, pyNotebookName: string): Promise<NotebookPreviewPage> {
+  async function createDatasetNotebook(page: Page, pyNotebookName: string): Promise<NotebookPreviewPage> {
     const dataPage = new WorkspaceDataPage(page);
     const datasetBuildPage = await dataPage.clickAddDatasetButton();
 
