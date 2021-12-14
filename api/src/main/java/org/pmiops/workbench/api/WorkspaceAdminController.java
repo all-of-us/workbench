@@ -93,11 +93,17 @@ public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
   @AuthorityRequired({Authority.ACCESS_CONTROL_ADMIN})
   public ResponseEntity<EmptyResponse> setAdminLockedState(
       String workspaceNamespace, AdminLockingRequest lockingRequest) {
+    String lockingReason = lockingRequest.getRequestReason();
     if (lockingRequest.getRequestDateInMillis() == null
         || lockingRequest.getRequestDateInMillis() == 0
-        || StringUtils.isBlank(lockingRequest.getRequestReason())) {
+        || StringUtils.isBlank(lockingReason)) {
       throw new BadRequestException(
           String.format("Cannot have empty Request reason or Request Date"));
+    }
+    if (lockingReason.length() < 10 || lockingReason.length() > 4000) {
+      throw new BadRequestException(
+          "Locking Reason text length should be "
+              + "at least 10 characters long and at most 4000 characters");
     }
     workspaceAdminService.setAdminLockedState(workspaceNamespace, lockingRequest);
     return ResponseEntity.ok(new EmptyResponse());

@@ -27,6 +27,15 @@ then
       exit 1
   fi
 
+  echo "Making BigQuery backup cb_ and ds_ tables"
+  if ./generate-cdr/build-backup-cb-ds-tables.sh "$BQ_PROJECT" "$BQ_DATASET" "$WORKBENCH_PROJEC"T "$WORKBENCH_DATASET"
+  then
+      echo "cb_ and ds_ tables archived"
+  else
+      echo "FAILED To archive cb_ and ds_ tables for cdr $CDR_VERSION"
+      exit 1
+  fi
+
   ## Dump workbench cdr count data
   echo "Dumping BigQuery cdr dataset to .csv"
   if ./generate-cdr/make-bq-data-dump.sh $WORKBENCH_PROJECT "$BUCKET/$BQ_DATASET" $WORKBENCH_DATASET

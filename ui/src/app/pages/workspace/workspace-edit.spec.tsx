@@ -520,6 +520,15 @@ describe('WorkspaceEdit', () => {
     jest.useRealTimers();
   });
 
+
+  it('should disallow whitespace-only intended study text', async() => {
+    const wrapper = component();
+    const intendedStudySection = wrapper.find('[data-test-id="intendedStudyText"]');
+    intendedStudySection.find('textarea#intendedStudyText').simulate('change', {target: {value: '    '}});
+
+    expect(getSaveButtonDisableMsg(wrapper, 'intendedStudy')).toBeDefined();
+  });
+
   it ('should show warning message if research purpose summary Intended study have answer less than 50 characters', async() => {
     const wrapper = component();
     // Intended Study Text

@@ -185,6 +185,11 @@ public class InstitutionServiceImpl implements InstitutionService {
 
   private Institution updateExistingInstitution(
       DbInstitution dbInstitution, Institution updatedInstitution) {
+    // first, validate that the shortName is not changed
+    if (!updatedInstitution.getShortName().equals(dbInstitution.getShortName())) {
+      throw new BadRequestException("Cannot change institution shortName");
+    }
+
     // create new DB object, but mark it with the original's ID to indicate that this is
     // an update
     DbInstitution dbObjectToUpdate =
@@ -193,7 +198,7 @@ public class InstitutionServiceImpl implements InstitutionService {
             .setInstitutionId(dbInstitution.getInstitutionId());
 
     try {
-      institutionDao.save(dbObjectToUpdate);
+      dbObjectToUpdate = institutionDao.save(dbObjectToUpdate);
       populateAuxTables(updatedInstitution, dbObjectToUpdate);
     } catch (DataIntegrityViolationException ex) {
       throw new ConflictException(
@@ -355,6 +360,14 @@ public class InstitutionServiceImpl implements InstitutionService {
         .findFirstByUser(user)
         .map(DbVerifiedInstitutionalAffiliation::getInstitution)
         .map(dbi -> institutionMapper.dbToModel(dbi, this));
+  }
+
+  @Override
+  public List<DbUser> getAffiliatedUsers(String shortName) {
+    return verifiedInstitutionalAffiliationDao
+        .findAllByInstitution(getDbInstitutionOrThrow(shortName)).stream()
+        .map(DbVerifiedInstitutionalAffiliation::getUser)
+        .collect(Collectors.toList());
   }
 
   @Override
