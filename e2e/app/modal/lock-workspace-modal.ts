@@ -38,12 +38,12 @@ export default class LockWorkspaceModal extends Modal {
   }
 
   /**
-   * @param {string} newMessage new message.
+   * @param {string} reasonText reason Text.
    */
-  async createLockWorkspaceMessage(newMessage?: string): Promise<void> {
-    newMessage = 'locking this workspace';
+  async createLockWorkspaceReason(reasonText?: string): Promise<void> {
+    reasonText = 'locking this workspace';
     // Type new message.
-    const messageInput = this.getLockWorkspaceTextArea();
-    await messageInput.type(newMessage);
+    const reasonInput = this.getLockWorkspaceTextArea();
+    await reasonInput.type(reasonText);
   }
 }
