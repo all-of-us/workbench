@@ -4,6 +4,8 @@ import {authStore, MatchParams, profileStore} from 'app/utils/stores';
 import {eligibleForTier} from 'app/utils/access-utils';
 import {useParams} from 'react-router-dom';
 import {currentWorkspaceStore} from 'app/utils/navigation';
+import {AuthorityGuardedAction, hasAuthorityForAction} from 'app/utils/authorities';
+import { AuthorityMissing } from './authority-missing';
 
 export const signInGuard: Guard = {
   allowed: (): boolean => {
@@ -44,3 +46,8 @@ export const adminLockedGuard = (): Guard => {
     redirectPath: `/workspaces/${ns}/${wsid}/about`
   });
 };
+
+export const authorityGuard = (guardedAction: AuthorityGuardedAction): Guard => ({
+  allowed: () => hasAuthorityForAction(profileStore.get().profile, guardedAction),
+  renderBlocked: () => <AuthorityMissing action={guardedAction} />
+});

@@ -1,3 +1,4 @@
+import { cond } from 'app/utils';
 import {routeDataStore} from 'app/utils/stores';
 import {buildPageTitleForEnvironment} from 'app/utils/title';
 import * as fp from 'lodash/fp';
@@ -18,7 +19,9 @@ import {Modal, ModalBody, ModalFooter, ModalTitle} from './modals';
 
 export interface Guard {
   allowed: () => boolean;
-  redirectPath: string;
+  // One of redirectPath or renderBlocked should be specified
+  redirectPath?: string;
+  renderBlocked?: () => React.ReactElement;
 }
 
 export const usePath = () => {
@@ -102,12 +105,13 @@ export const RouteLink = ({path, style = {}, disabled= false, children}): React.
 }
 
 export const AppRoute = ({path, guards = [], exact, intermediaryRoute = false, children}): React.ReactElement => {
-  const { redirectPath = null } = fp.find(({allowed}) => !allowed(), guards) || {};
+  const { renderBlocked = null, redirectPath = null } = fp.find(({allowed}) => !allowed(), guards) || {};
 
   return <Route exact={exact} path={path}>
-    {redirectPath
-        ? <Redirect to={redirectPath}/>
-        : (children)
+    {cond(
+       [redirectPath, () => <Redirect to={redirectPath}/>],
+       [renderBlocked, () => renderBlocked()],
+       () => (children))
     }
   </Route>;
 };
