@@ -1,9 +1,10 @@
 import * as React from 'react';
+
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {
   SemiBoldHeader
 } from 'app/components/headers';
-import {DatePicker, TextArea, TextAreaWithLengthValidationMessage} from 'app/components/inputs';
+import {DatePicker, TextAreaWithLengthValidationMessage} from 'app/components/inputs';
 import {Button} from 'app/components/buttons';
 import {workspaceAdminApi} from 'app/services/swagger-fetch-clients';
 import {useState} from 'react';
@@ -19,17 +20,18 @@ interface Props {
 export const AdminLockRequest = (props: Props) => {
   const [requestReason, setRequestReason] = useState('');
   const [requestDate, setRequestDate] = useState(new Date());
-  const [showError, setShowError] = useState(false);
+  const [apiError, setApiError] = useState(false);
 
-  const enableLockButton = requestReason?.length > 50 && requestReason?.length <4001 && requestDate?.toString() !== ''
-      && !isNaN(requestDate.valueOf()) && !showError;
+  const enableLockButton = !apiError
+  && requestReason?.length > 50 && requestReason?.length < 4001
+    && requestDate?.toString() !== '' && !isNaN(requestDate.valueOf());
 
 
-  const getToolTipContent = showError ? 'Error occurred while Locking Workspace' :
+  const getToolTipContent = apiError ? 'Error occurred while Locking Workspace' :
       'Request Reason & Valid Request Date (in YYYY-MM-DD Format) are required to lock workspace';
 
   const onLockWorkspace = () => {
-    const {workspace , onCancel, onLock} = props;
+    const {workspace, onLock} = props;
     const adminLockingRequest = {
       requestReason,
       requestDateInMillis: requestDate.valueOf()
@@ -40,7 +42,7 @@ export const AdminLockRequest = (props: Props) => {
         onLock();
       })
       .catch(error => {
-         setShowError(true);
+        setApiError(true);
       });
   }
 
@@ -49,7 +51,7 @@ export const AdminLockRequest = (props: Props) => {
        <SemiBoldHeader>Lock workspace</SemiBoldHeader>
      </ModalTitle>
      <ModalBody>
-       {showError && <label style={{color: colors.danger}}>
+       {apiError && <label style={{color: colors.danger}}>
          Something went wrong while locking the workspace.
        </label>}
 
@@ -70,7 +72,10 @@ export const AdminLockRequest = (props: Props) => {
              id='LOCKED-REASON'
              initialText=''
              maxCharacters={4000}
-             onChange={(s: string) => {setRequestReason(s); setShowError(false);}}
+             onChange={(s: string) => {
+               setApiError(false);
+               setRequestReason(s);
+             }}
              tooLongWarningCharacters={4000}
              tooShortWarningCharacters={50}
              tooShortWarning='Locking Request Reason should be at least 50 characters long'
@@ -85,7 +90,12 @@ export const AdminLockRequest = (props: Props) => {
          <DatePicker
              value={requestDate}
              placeholder='YYYY-MM-DD'
-             onChange={e => {setRequestDate(e);setShowError(false);}}
+             onChange={e => {
+               setApiError(false);
+               // ensure that e is a Date - the user may have input a string
+               const eAsDate = new Date(e);
+               setRequestDate(eAsDate);
+             }}
              maxDate={new Date()}
          />
        </div>
