@@ -11,6 +11,9 @@ import {useState} from 'react';
 import {TooltipTrigger} from 'app/components/popups';
 import colors from 'app/styles/colors';
 
+const MIN_REASON = 10;
+const MAX_REASON = 4000;
+
 interface Props {
   workspace: string,
   onLock: Function,
@@ -23,7 +26,7 @@ export const AdminLockRequest = (props: Props) => {
   const [apiError, setApiError] = useState(false);
 
   const enableLockButton = !apiError
-  && requestReason?.length > 50 && requestReason?.length < 4001
+    && requestReason?.length >= MIN_REASON && requestReason?.length <= MAX_REASON
     && requestDate?.toString() !== '' && !isNaN(requestDate.valueOf());
 
 
@@ -66,18 +69,17 @@ export const AdminLockRequest = (props: Props) => {
            <i>Any message in the input box will automatically be sent to researcher when the
              workspace is locked</i>
          </label>
-         {/*<TextArea value={requestReason} onChange={(text) => setRequestReason(text)}/>*/}
          <TextAreaWithLengthValidationMessage
              textBoxStyleOverrides={{width: '16rem'}}
              id='LOCKED-REASON'
              initialText=''
-             maxCharacters={4000}
+             maxCharacters={MAX_REASON}
              onChange={(s: string) => {
                setApiError(false);
                setRequestReason(s);
              }}
-             tooLongWarningCharacters={4000}
-             tooShortWarningCharacters={50}
+             tooLongWarningCharacters={MAX_REASON}
+             tooShortWarningCharacters={MIN_REASON}
              tooShortWarning='Locking Request Reason should be at least 50 characters long'
           />
        </div>
