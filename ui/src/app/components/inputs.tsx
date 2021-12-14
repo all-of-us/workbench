@@ -12,7 +12,7 @@ import {commonStyles} from 'app/pages/login/account-creation/common';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {withStyle} from 'app/utils';
 import {FlexRow} from './flex';
-import {validDate} from 'app/utils/date';
+import {isDateValid} from 'app/utils/date';
 
 export const inputBorderColor = colorWithWhiteness(colors.dark, 0.6);
 
@@ -387,7 +387,7 @@ export class DatePicker extends React.Component<
   render() {
     const {value, onChange, onBlur, disabled, placeholder, ...props} = this.props;
     let date, text;
-    if (validDate(value)) {
+    if (isDateValid(value)) {
       date = value;
       text = value.toISOString().slice(0, 10);
     } else {

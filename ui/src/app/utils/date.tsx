@@ -20,6 +20,6 @@ export function displayDateWithoutHours(time: number): string {
   return date.toLocaleString('en-us', {month: 'short', day: 'numeric', year: 'numeric'});
 }
 
-export function validDate(date: Date): boolean {
+export function isDateValid(date: Date): boolean {
   return date !== null && typeof date === 'object' && !isBlank(date.toString()) && !isNaN(date.valueOf());
 }

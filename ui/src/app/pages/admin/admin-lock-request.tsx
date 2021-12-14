@@ -10,7 +10,7 @@ import {workspaceAdminApi} from 'app/services/swagger-fetch-clients';
 import {useState} from 'react';
 import {TooltipTrigger} from 'app/components/popups';
 import colors from 'app/styles/colors';
-import {validDate} from 'app/utils/date';
+import {isDateValid} from 'app/utils/date';
 
 const MIN_REASON = 10;
 const MAX_REASON = 4000;
@@ -27,14 +27,14 @@ export const AdminLockRequest = (props: Props) => {
   const [apiError, setApiError] = useState(false);
 
   const invalidReason = !requestReason || requestReason.length < MIN_REASON || requestReason.length > MAX_REASON;
-  const lockButtonDisabled = apiError || invalidReason || validDate(requestDate);
+  const lockButtonDisabled = apiError || invalidReason || !isDateValid(requestDate);
 
   const getToolTipContent = apiError
     ? 'Error occurred while Locking Workspace'
     : <div>Required to lock workspace:
       <ul>
         {invalidReason && <li>Request Reason (minimum length {MIN_REASON}, maximum {MAX_REASON})</li>}
-        {validDate(requestDate) && <li>Valid Request Date (in YYYY-MM-DD Format)</li>}
+        {!isDateValid(requestDate) && <li>Valid Request Date (in YYYY-MM-DD Format)</li>}
       </ul></div>;
 
   const onLockWorkspace = () => {
