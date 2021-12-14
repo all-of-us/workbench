@@ -61,6 +61,11 @@ describe('AppRouter', () => {
     waitOneTickAndUpdate(wrapper);
     expect(wrapper.find('span').first().text()).toEqual('Not Found');
   });
+
+  it('renders content when guard fails', () => {
+    const wrapper = component(['/block-render-route'], 0);
+    expect(wrapper.text()).toEqual('guard component');
+  });
 });
 
 const alwaysFalseGuard: Guard = {
@@ -78,6 +83,11 @@ const otherAlwaysTrueGuard: Guard = {
   redirectPath: '/punting'
 }
 
+const renderingFalseGuard: Guard = {
+  allowed: (): boolean => false,
+  renderBlocked: () => <span>guard component</span>
+}
+
 const makeAppRouter = () => {
   return <AppRouter>
     <Switch>
@@ -85,6 +95,7 @@ const makeAppRouter = () => {
       <AppRoute exact path='/punting'><TestComponent text={'Punting'}/></AppRoute>
       <AppRoute exact path='/unreachable-path' guards={[alwaysFalseGuard]}><TestComponent text={'Unreachable Path'}/></AppRoute>
       <AppRoute exact path='/protected-route' guards={[alwaysTrueGuard]}><TestComponent text={'Protected Route'}/></AppRoute>
+      <AppRoute exact path='/block-render-route' guards={[renderingFalseGuard]}><TestComponent text={'Rendering Route'}/></AppRoute>
       <AppRoute exact path='/other-protected-route' guards={[alwaysTrueGuard]}><TestComponent text={'Other Protected Route'}/></AppRoute>
       <AppRoute exact path='/nested-protected-route' guards={[alwaysTrueGuard, otherAlwaysTrueGuard]}>
         <TestComponent text={'Nested Protected Route'}/>
