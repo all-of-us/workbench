@@ -1,4 +1,4 @@
-import { ClickOptions, ElementHandle, NavigationOptions, Page, WaitForSelectorOptions } from 'puppeteer';
+import { BoxModel, ClickOptions, ElementHandle, NavigationOptions, Page, WaitForSelectorOptions } from 'puppeteer';
 import { getAttrValue, getPropValue } from 'utils/element-utils';
 import { logger } from 'libs/logger';
 import { waitForFn } from 'utils/waits-utils';
@@ -115,7 +115,7 @@ export default class BaseElement {
    * </pre>
    */
   async isVisible(): Promise<boolean> {
-    const computedStyle = async (element) => {
+    const isDisplayed = async (element): Promise<boolean> => {
       const elementHandle = await this.page
         .evaluateHandle((elem) => {
           const style = window.getComputedStyle(elem);
@@ -127,13 +127,13 @@ export default class BaseElement {
       return (await elementHandle.jsonValue()) as boolean;
     };
 
-    const boxModel = async (element) => {
+    const boxModel = async (element): Promise<BoxModel | null> => {
       return element.boxModel();
     };
 
     return this.asElementHandle()
       .then((element) => {
-        return !!(computedStyle(element) && boxModel(element));
+        return !!(isDisplayed(element) && boxModel(element));
       })
       .catch(() => false);
   }

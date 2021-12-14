@@ -81,22 +81,6 @@ export async function exists(page: Page, selector: string): Promise<boolean> {
 }
 
 /**
- * Is element visible and ready for action.
- * @param element
- * @param page
- */
-export async function isVisibleReady(element: ElementHandle): Promise<boolean> {
-  const handle = await element.asElement();
-  const visibleHandle = await handle.evaluateHandle((elem) => {
-    const style = window.getComputedStyle(elem);
-    return style && style.display !== 'none' && style.visibility !== 'hidden' && style.opacity !== '0';
-  }, element);
-  const visible = (await visibleHandle.jsonValue()) as boolean;
-  const box = await element.boxModel();
-  return visible && box !== null;
-}
-
-/**
  * Perform array of UI actions defined.
  * @param fields
  */
