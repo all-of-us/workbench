@@ -244,7 +244,7 @@ function getDiseaseNames(keyword) {
     return response.json();
   }).then((matches) => {
     const labeledMatches = fp.filter((elt) => elt.hasOwnProperty('label'))(matches);
-    const diseases = fp.map((elt) => elt['label'])(labeledMatches);
+    const diseases = fp.map((elt) => elt.label)(labeledMatches);
     return diseases;
   });
 }
@@ -1037,27 +1037,27 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
       // Conditionally include optional fields for validation.
       if (otherPurpose) {
         values = {...values, otherPurposeDetails};
-        constraints['otherPurposeDetails'] = requiredStringWithMaxLength(500, 'Other primary purpose');
+        constraints.otherPurposeDetails = requiredStringWithMaxLength(500, 'Other primary purpose');
       }
       if (populationChecked) {
         values = {...values, populationDetails};
-        constraints['populationDetails'] = {
+        constraints.populationDetails = {
           presence: true
         };
       }
       if (populationDetails &&
           populationDetails.includes(SpecificPopulationEnum.OTHER)) {
         values = {...values, otherPopulationDetails};
-        constraints['otherPopulationDetails'] = requiredStringWithMaxLength(100, 'Other Specific Population');
+        constraints.otherPopulationDetails = requiredStringWithMaxLength(100, 'Other Specific Population');
       }
       if (diseaseFocusedResearch) {
         values = {...values, diseaseOfFocus};
-        constraints['diseaseOfFocus'] = requiredStringWithMaxLength(80, 'Disease of Focus');
+        constraints.diseaseOfFocus = requiredStringWithMaxLength(80, 'Disease of Focus');
       }
       if (disseminateResearchFindingList &&
           disseminateResearchFindingList.includes(DisseminateResearchEnum.OTHER)) {
         values = {...values, otherDisseminateResearchFindings};
-        constraints['otherDisseminateResearchFindings'] =
+        constraints.otherDisseminateResearchFindings =
           requiredStringWithMaxLength(100, 'Other methods of disseminating research findings');
       }
       return validate(values, constraints, {fullMessages: false});

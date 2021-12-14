@@ -15,15 +15,15 @@ module.exports = {
     ecmaVersion: 6,
     sourceType: 'module',
     ecmaFeatures: {
-      jsx: true 
+      jsx: true
     }
   },
   settings: {
     react: {
-      version: 'detect' 
+      version: 'detect'
     }
   },
-  
+
   // These rules were ported over from our common-ui/tslint.json file
   // The rules found here were ported and categorized using the tslint migration roadmap:
   // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/ROADMAP.md
@@ -41,7 +41,7 @@ module.exports = {
     '@typescript-eslint/no-empty-interface': 'warn',
     '@typescript-eslint/no-inferrable-types': ['warn', {ignoreParameters: true}],
     '@typescript-eslint/no-non-null-assertion': 'warn',
-    // 'prefer-arrow/prefer-arrow-functions': ['warn'], // Lots of 'newable' functions in the code base 
+    // 'prefer-arrow/prefer-arrow-functions': ['warn'], // Lots of 'newable' functions in the code base
     '@typescript-eslint/type-annotation-spacing': 'warn',
     '@typescript-eslint/unified-signatures': 'warn',
 
@@ -63,7 +63,7 @@ module.exports = {
     'no-restricted-imports': ['error', {paths: ['rxjs'], patterns: ['../']}],
     'no-caller': 'warn',
     'no-bitwise': 'warn',
-    // 'no-console': 'warn', 
+    // 'no-console': 'warn',
     'no-new-wrappers': 'warn',
     'no-debugger': 'warn',
     'constructor-super': 'warn',
@@ -72,22 +72,22 @@ module.exports = {
     'no-irregular-whitespace': 'warn',
     '@typescript-eslint/no-misused-new': 'warn',
     // 'no-shadow': 'warn',
-    // 'dot-notation': 'warn',
-    'no-throw-literal': 'warn', 
+    'dot-notation': 'warn',
+    'no-throw-literal': 'warn',
     'no-fallthrough': 'warn', // For switch statements
     'no-use-before-define': 'off', // Needed for TS
     // '@typescript-eslint/no-use-before-define': 'warn',
-    // 'no-unused-vars': 'off', // Needed for TS 
-    // '@typescript-eslint/no-unused-vars': 'warn', 
+    // 'no-unused-vars': 'off', // Needed for TS
+    // '@typescript-eslint/no-unused-vars': 'warn',
     'react/jsx-curly-spacing': ["warn", {'when': 'never'}],
     'react/jsx-uses-vars': 'warn',
     'no-var': 'warn',
     'radix': 'warn', // Add radix on parseInt
     'eqeqeq': ['warn', 'always', {'null': 'ignore'}],
-    
+
     /* Maintainability */
     'eol-last': 'warn',
-    'max-len': ['warn', {code: 140, ignorePattern: '^import |^export\\{(.*?)\\}', ignoreComments: true}], 
+    'max-len': ['warn', {code: 140, ignorePattern: '^import |^export\\{(.*?)\\}', ignoreComments: true}],
     // 'prefer-const': ['warn', {'destructuring': 'all'}],
 
     /* Jest */

@@ -62,8 +62,8 @@ export class EditComponentReact extends React.Component<EditComponentProps, Edit
         <path d='M33.82,8.32l-5.9-5.9a2.07,2.07,0,0,0-2.92,0L21.72,5.7l8.83,8.83,3.28-3.28A2.07,
                  2.07,0,0,0,33.82,8.32Z'/>
         <rect x='0' y='0'
-              width={this.state.style['width']}
-              height={this.state.style['height']}
+              width={this.state.style.width}
+              height={this.state.style.height}
               fillOpacity='0'/>
       </svg>
     );
