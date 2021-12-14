@@ -119,7 +119,8 @@
       "hasFitbitData": true,
       "hasCopeSurveyData": true,
       "accessTier": "controlled",
-      "singleSampleArrayDataBucket": "5/microarray/vcf/single_sample/alpha3"
+      "allSamplesWgsDataBucket": "5/wgs/vcf/merged/alpha2",
+      "singleSampleArrayDataBucket": "5/microarray/vcf/single_sample/alpha2"
     }
   ]
 }
