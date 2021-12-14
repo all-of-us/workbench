@@ -20,10 +20,10 @@ import {
   isConceptSet,
   isDataSet,
   isNotebook,
-  formatWorkspaceResourceDisplayDate,
 } from 'app/utils/resources';
 import {WorkspaceResource} from 'generated/fetch';
 import {Action, ResourceActionsMenu} from './resource-actions-menu';
+import {displayDateWithoutHours} from 'app/utils/date';
 
 const styles = reactStyles({
   card: {
@@ -150,7 +150,7 @@ class ResourceCard extends React.Component<Props, {}> {
           </FlexColumn>
           <div style={styles.cardFooter}>
             <div style={styles.lastModified} data-test-id='last-modified'>
-              Last Modified: {formatWorkspaceResourceDisplayDate(resource.lastModifiedEpochMillis)}</div>
+              Last Modified: {displayDateWithoutHours(resource.lastModifiedEpochMillis)}</div>
             <StyledResourceType resource={resource}/>
           </div>
         </ResourceCardBase>;

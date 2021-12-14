@@ -20,7 +20,7 @@ import {withProfileErrorModal} from 'app/components/with-error-modal';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {cond, displayDateWithoutHours, reactStyles, switchCase} from 'app/utils';
+import {cond, reactStyles, switchCase} from 'app/utils';
 import {
   buildRasRedirectUrl,
   bypassAll,
@@ -51,6 +51,7 @@ import {environment} from 'environments/environment';
 import {useQuery} from 'app/components/app-router';
 import {openZendeskWidget} from 'app/utils/zendesk';
 import {SupportButton} from 'app/components/support';
+import {displayDateWithoutHours} from 'app/utils/date';
 
 const styles = reactStyles({
   headerFlexColumn: {

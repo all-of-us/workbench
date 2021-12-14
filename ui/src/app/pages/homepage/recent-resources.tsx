@@ -13,7 +13,7 @@ import {SpinnerOverlay} from 'app/components/spinners';
 import {userMetricsApi} from 'app/services/swagger-fetch-clients';
 import {reactStyles, withCdrVersions} from 'app/utils';
 import {getCdrVersion} from 'app/utils/cdr-versions';
-import {getDisplayName, isNotebook, formatWorkspaceResourceDisplayDate} from 'app/utils/resources';
+import {getDisplayName, isNotebook} from 'app/utils/resources';
 import {
   CdrVersionTiersResponse,
   Workspace,
@@ -25,6 +25,7 @@ import {faLockAlt} from '@fortawesome/pro-solid-svg-icons';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import colors from 'app/styles/colors';
 import {TooltipTrigger} from 'app/components/popups';
+import {displayDateWithoutHours} from 'app/utils/date';
 
 const styles = reactStyles({
   column: {
@@ -136,7 +137,7 @@ export const RecentResources = fp.flow(withCdrVersions())((props: Props) => {
               {getDisplayName(r)}
             </ResourceNavigation>,
             workspaceName: <WorkspaceNavigation workspace={getWorkspace(r)} resource={r} style={styles.navigation}/>,
-            formattedLastModified: formatWorkspaceResourceDisplayDate(r.lastModifiedEpochMillis),
+            formattedLastModified: displayDateWithoutHours(r.lastModifiedEpochMillis),
             cdrVersionName: getCdrVersionName(r),
           };
         }));

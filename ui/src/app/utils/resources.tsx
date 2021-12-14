@@ -110,13 +110,3 @@ export function convertToResource(
     adminLocked
   };
 }
-
-export function formatWorkspaceResourceDisplayDate(time: number): string {
-  if (!time) {
-    return '';
-  }
-
-  const date = new Date(time);
-  // datetime formatting to slice off weekday from readable date string
-  return date.toDateString().split(' ').slice(1).join(' ');
-}

@@ -23,7 +23,6 @@ import {styles} from 'app/pages/profile/profile-styles';
 import {institutionApi, profileApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {
-  displayDateWithoutHours,
   formatFreeCreditsUSD,
   withUserProfile
 } from 'app/utils';
@@ -34,6 +33,7 @@ import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {AccessModule, InstitutionalRole, Profile} from 'generated/fetch';
 import {PublicInstitutionDetails} from 'generated/fetch';
 import {DataAccessPanel} from './data-access-panel';
+import {displayDateWithoutHours} from 'app/utils/date';
 
 
 // validators for validate.js

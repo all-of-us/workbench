@@ -16,9 +16,10 @@ import {
   Profile,
 } from 'generated/fetch';
 import {parseQueryParams} from 'app/components/app-router';
-import {cond, daysFromNow, displayDateWithoutHours, switchCase} from './index';
+import {cond, switchCase} from './index';
 import {TooltipTrigger} from 'app/components/popups';
 import {InfoIcon} from 'app/components/icons';
+import {daysFromNow, displayDateWithoutHours} from './date';
 
 const {useState, useEffect} = React;
 
