@@ -227,11 +227,13 @@ export const ProfileComponent = fp.flow(
       )(profile.accessModules.modules);
       const hasExpired = profileExpiration && profileExpiration < Date.now();
 
+      // validatejs requires a scheme, which we don't necessarily need in the profile; rather than
+      // forking their website regex, just ensure a scheme ahead of validation.
       const urlError =
         professionalUrl ?
         validate(
           {website: canonicalizeUrl(professionalUrl)},
-          {website: {url: {message: '^Professional URL %{value} is not a valid URL'}}})
+          {website: {url: {message: `^Professional URL ${professionalUrl} is not a valid URL`}}})
         : undefined;
       const errorMessages = {
         ...urlError,
