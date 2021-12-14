@@ -4,7 +4,7 @@ import {Redirect} from 'react-router-dom';
 
 import {Button} from 'app/components/buttons';
 import {AoU} from 'app/components/text-wrappers';
-import { profileApi, userAdminApi} from 'app/services/swagger-fetch-clients';
+import {profileApi, userAdminApi} from 'app/services/swagger-fetch-clients';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {convertAPIError} from 'app/utils/errors';
 import {encodeURIComponentStrict} from 'app/utils/navigation';
@@ -19,7 +19,7 @@ import {parseQueryParams} from 'app/components/app-router';
 import {cond, switchCase} from './index';
 import {TooltipTrigger} from 'app/components/popups';
 import {InfoIcon} from 'app/components/icons';
-import {daysFromNow, displayDateWithoutHours} from './date';
+import {daysFromNow, displayDateWithoutHours, MILLIS_PER_DAY} from './date';
 
 const {useState, useEffect} = React;
 
@@ -182,7 +182,6 @@ export const wasReferredFromRenewal = (queryParams): boolean => {
   const renewal = parseQueryParams(queryParams).get('renewal');
   return renewal === '1';
 };
-export const MILLIS_PER_DAY = 24 * 60 * 60 * 1000;
 export const NOTIFICATION_THRESHOLD_DAYS = 30;
 
 // return the number of full days remaining to expiration in the soonest-to-expire module,
