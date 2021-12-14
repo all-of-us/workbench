@@ -21,12 +21,21 @@ const styles = reactStyles({
 
 export const Spinner = ({dark = false, size = 72, style = {}, ...props}) => {
   return <svg
-    xmlns='http://www.w3.org/2000/svg' viewBox='0 0 72 72' width={size} height={size}
-    style={{animation: '1s linear infinite spin', ...style}} {...props}
+    xmlns='http://www.w3.org/2000/svg'
+    viewBox='0 0 72 72'
+    width={size}
+    height={size}
+    style={{animation: '1s linear infinite spin', ...style}}
+    {...props}
   >
-    <circle cx='36' cy='36' r='33' stroke={dark ? styles.darkBackground.stroke : '#000'}
-            strokeOpacity={dark ? styles.darkBackground.strokeOpacity : '.1'}
-            fill='none' strokeWidth='5' />
+    <circle
+      cx='36'
+      cy='36'
+      r='33'
+      stroke={dark ? styles.darkBackground.stroke : '#000'}
+      strokeOpacity={dark ? styles.darkBackground.strokeOpacity : '.1'}
+      fill='none'
+      strokeWidth='5' />
     <path d='M14.3 60.9A33 33 0 0 1 36 3' stroke='#0079b8' fill='none' strokeWidth='5' />
   </svg>;
 };
