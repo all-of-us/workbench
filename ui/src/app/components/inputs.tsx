@@ -12,7 +12,7 @@ import {commonStyles} from 'app/pages/login/account-creation/common';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {withStyle} from 'app/utils';
 import {FlexRow} from './flex';
-import {isDateValid} from 'app/utils/date';
+import {isDateValid} from 'app/utils/dates';
 
 export const inputBorderColor = colorWithWhiteness(colors.dark, 0.6);
 

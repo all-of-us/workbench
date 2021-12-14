@@ -33,7 +33,7 @@ import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {AccessModule, InstitutionalRole, Profile} from 'generated/fetch';
 import {PublicInstitutionDetails} from 'generated/fetch';
 import {DataAccessPanel} from './data-access-panel';
-import {displayDateWithoutHours} from 'app/utils/date';
+import {displayDateWithoutHours} from 'app/utils/dates';
 
 
 // validators for validate.js

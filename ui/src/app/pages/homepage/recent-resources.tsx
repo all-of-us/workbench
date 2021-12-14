@@ -25,7 +25,7 @@ import {faLockAlt} from '@fortawesome/pro-solid-svg-icons';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import colors from 'app/styles/colors';
 import {TooltipTrigger} from 'app/components/popups';
-import {displayDateWithoutHours} from 'app/utils/date';
+import {displayDateWithoutHours} from 'app/utils/dates';
 
 const styles = reactStyles({
   column: {

@@ -10,7 +10,7 @@ import {workspaceAdminApi} from 'app/services/swagger-fetch-clients';
 import {useState} from 'react';
 import {TooltipTrigger} from 'app/components/popups';
 import colors from 'app/styles/colors';
-import {isDateValid} from 'app/utils/date';
+import {isDateValid} from 'app/utils/dates';
 
 const MIN_REASON = 10;
 const MAX_REASON = 4000;

@@ -23,7 +23,7 @@ import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {faLockAlt} from '@fortawesome/pro-solid-svg-icons';
 import {WorkspaceActionsMenu} from './workspace-actions-menu';
-import {displayDate} from 'app/utils/date';
+import {displayDate} from 'app/utils/dates';
 
 const EVENT_CATEGORY = 'Workspace list';
 

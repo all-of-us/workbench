@@ -51,7 +51,7 @@ import {environment} from 'environments/environment';
 import {useQuery} from 'app/components/app-router';
 import {openZendeskWidget} from 'app/utils/zendesk';
 import {SupportButton} from 'app/components/support';
-import {displayDateWithoutHours} from 'app/utils/date';
+import {displayDateWithoutHours} from 'app/utils/dates';
 
 const styles = reactStyles({
   headerFlexColumn: {

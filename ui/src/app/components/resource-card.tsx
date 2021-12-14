@@ -23,7 +23,7 @@ import {
 } from 'app/utils/resources';
 import {WorkspaceResource} from 'generated/fetch';
 import {Action, ResourceActionsMenu} from './resource-actions-menu';
-import {displayDateWithoutHours} from 'app/utils/date';
+import {displayDateWithoutHours} from 'app/utils/dates';
 
 const styles = reactStyles({
   card: {

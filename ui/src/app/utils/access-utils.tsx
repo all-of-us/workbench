@@ -19,7 +19,7 @@ import {parseQueryParams} from 'app/components/app-router';
 import {cond, switchCase} from './index';
 import {TooltipTrigger} from 'app/components/popups';
 import {InfoIcon} from 'app/components/icons';
-import {daysFromNow, displayDateWithoutHours, MILLIS_PER_DAY} from './date';
+import {daysFromNow, displayDateWithoutHours, MILLIS_PER_DAY} from './dates';
 
 const {useState, useEffect} = React;
 

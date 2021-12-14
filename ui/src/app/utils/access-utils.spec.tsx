@@ -15,7 +15,7 @@ import {
   useIsUserDisabled
 } from 'app/utils/access-utils';
 import {profileApi, registerApiClient} from 'app/services/swagger-fetch-clients';
-import {MILLIS_PER_DAY} from './date';
+import {MILLIS_PER_DAY} from './dates';
 
 // 10 minutes, in millis
 const SHORT_TIME_BUFFER = 10 * 60 * 1000;
