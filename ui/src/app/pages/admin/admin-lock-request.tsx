@@ -30,8 +30,13 @@ export const AdminLockRequest = (props: Props) => {
     && requestDate?.toString() !== '' && !isNaN(requestDate.valueOf());
 
 
-  const getToolTipContent = apiError ? 'Error occurred while Locking Workspace' :
-      'Request Reason & Valid Request Date (in YYYY-MM-DD Format) are required to lock workspace';
+  const getToolTipContent = apiError
+    ? 'Error occurred while Locking Workspace'
+    : <div>Required to lock workspace:
+      <ul>
+        <li>Request Reason (minimum length {MIN_REASON}, maximum {MAX_REASON})</li>
+        <li>Valid Request Date (in YYYY-MM-DD Format)</li>
+      </ul></div>;
 
   const onLockWorkspace = () => {
     const {workspace, onLock} = props;
@@ -80,7 +85,7 @@ export const AdminLockRequest = (props: Props) => {
              }}
              tooLongWarningCharacters={MAX_REASON}
              tooShortWarningCharacters={MIN_REASON}
-             tooShortWarning='Locking Request Reason should be at least 50 characters long'
+             tooShortWarning={`Locking Request Reason should be at least ${MIN_REASON} characters long`}
           />
        </div>
 
