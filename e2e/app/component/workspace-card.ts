@@ -61,7 +61,7 @@ export default class WorkspaceCard extends CardBase {
     );
 
     if (accessLevel !== undefined) {
-      await asyncFilter(
+      return asyncFilter(
         allCards,
         async (card: WorkspaceCard) => accessLevel === (await card.getWorkspaceAccessLevel())
       );

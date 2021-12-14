@@ -254,10 +254,12 @@ export async function findAllCards(page: Page, millisAgo = 1000 * 60 * 30): Prom
   });
   // Filter to exclude Workspaces younger than 30 minutes.
   const halfHourAgoMillis = Date.now() - millisAgo;
-  await Promise.all(
-    await asyncFilter(existingCards, async (card) => halfHourAgoMillis > Date.parse(await card.getLastChangedTime()))
+  return Promise.all(
+    await asyncFilter(
+      existingCards,
+      async (card: WorkspaceCard) => halfHourAgoMillis > Date.parse(await card.getLastChangedTime())
+    )
   );
-  return existingCards;
 }
 
 export async function centerPoint(element: ElementHandle): Promise<[number, number]> {
