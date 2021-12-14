@@ -450,11 +450,21 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
                                     onChange={value => this.updateAddress('streetAddress2', value)}/>
               </FlexRow>
               <FlexRow style={{marginTop: '1rem'}}>
-                <TextInputWithLabel dataTestId='city' inputName='city' placeholder='City' value={city} labelText='City'
-                                    onChange={value => this.updateAddress('city', value)}/>
-                <TextInputWithLabel dataTestId='state' inputName='state' placeholder='State' value={state} labelText='State'
-                                    containerStyle={styles.multiInputSpacing}
-                                    onChange={value => this.updateAddress('state', value)}/>
+                <TextInputWithLabel
+                  dataTestId='city'
+                  inputName='city'
+                  placeholder='City'
+                  value={city}
+                  labelText='City'
+                  onChange={value => this.updateAddress('city', value)}/>
+                <TextInputWithLabel
+                  dataTestId='state'
+                  inputName='state'
+                  placeholder='State'
+                  value={state}
+                  labelText='State'
+                  containerStyle={styles.multiInputSpacing}
+                  onChange={value => this.updateAddress('state', value)}/>
               </FlexRow>
               <FlexRow style={{marginTop: '1rem'}}>
                 <TextInputWithLabel dataTestId='zip' inputName='zip' placeholder='Zip code'

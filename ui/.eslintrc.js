@@ -56,6 +56,7 @@ module.exports = {
     'quotes': ['warn', 'single'],
     // '@typescript-eslint/semi': 'warn',
     // 'space-before-function-paren': ['warn', { 'anonymous': 'never', 'named': 'never', 'asyncArrow': 'always' }],
+    "react/jsx-max-props-per-line": ['warn', { "maximum": { "multi": 4 } }],
 
     /* Functionality */
     'curly': 'warn',
