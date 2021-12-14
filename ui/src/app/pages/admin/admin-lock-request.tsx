@@ -3,7 +3,7 @@ import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {
   SemiBoldHeader
 } from 'app/components/headers';
-import {DatePicker, TextArea} from 'app/components/inputs';
+import {DatePicker, TextArea, TextAreaWithLengthValidationMessage} from 'app/components/inputs';
 import {Button} from 'app/components/buttons';
 import {workspaceAdminApi} from 'app/services/swagger-fetch-clients';
 import {useState} from 'react';
@@ -21,7 +21,7 @@ export const AdminLockRequest = (props: Props) => {
   const [requestDate, setRequestDate] = useState(new Date());
   const [showError, setShowError] = useState(false);
 
-  const enableLockButton = requestReason?.length > 0 && requestDate?.toString() !== ''
+  const enableLockButton = requestReason?.length > 50 && requestReason?.length <4001 && requestDate?.toString() !== ''
       && !isNaN(requestDate.valueOf()) && !showError;
 
 
@@ -64,7 +64,17 @@ export const AdminLockRequest = (props: Props) => {
            <i>Any message in the input box will automatically be sent to researcher when the
              workspace is locked</i>
          </label>
-         <TextArea value={requestReason} onChange={(text) => setRequestReason(text)}/>
+         {/*<TextArea value={requestReason} onChange={(text) => setRequestReason(text)}/>*/}
+         <TextAreaWithLengthValidationMessage
+             textBoxStyleOverrides={{width: '16rem'}}
+             id='LOCKED-REASON'
+             initialText=''
+             maxCharacters={4000}
+             onChange={(s: string) => {setRequestReason(s); setShowError(false);}}
+             tooLongWarningCharacters={4000}
+             tooShortWarningCharacters={50}
+             tooShortWarning='Locking Request Reason should be at least 50 characters long'
+          />
        </div>
 
        {/* Locking workspace request Date*/}
@@ -75,7 +85,7 @@ export const AdminLockRequest = (props: Props) => {
          <DatePicker
              value={requestDate}
              placeholder='YYYY-MM-DD'
-             onChange={e => setRequestDate(e)}
+             onChange={e => {setRequestDate(e);setShowError(false);}}
              maxDate={new Date()}
          />
        </div>
