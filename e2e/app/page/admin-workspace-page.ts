@@ -5,7 +5,6 @@ import Button from 'app/element/button';
 import { LinkText } from 'app/text-labels';
 import Textbox from 'app/element/textbox';
 import Textarea from 'app/element/textarea';
-import { getPropValue } from 'utils/element-utils';
 import Table from 'app/component/table';
 import BaseElement from 'app/element/base-element';
 import DeleteRuntimeModal from 'app/modal/delete-runtime.modal';
@@ -65,11 +64,6 @@ export default class WorkspaceAdminPage extends AuthenticatedPage {
     return textContent;
   }
 
-  // get the page header (workspace)
-  async getWorkspaceHeader(): Promise<string> {
-    const pageHeader = await this.page.waitForXPath('//div[contains(text(), "")]', { visible: true });
-    return getPropValue<string>(pageHeader, 'textContent');
-  }
 
   getCloudStorageTable(): Table {
     const selector = '//table[@class="p-datatable-scrollable-header-table"]';
