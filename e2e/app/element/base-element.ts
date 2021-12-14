@@ -133,7 +133,7 @@ export default class BaseElement {
 
     return this.asElementHandle()
       .then((element) => {
-        return !!(isDisplayed(element) && boxModel(element));
+        return isDisplayed(element) && !!boxModel(element);
       })
       .catch(() => false);
   }
