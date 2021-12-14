@@ -257,7 +257,9 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   @Override
   public ResponseEntity<EmptyResponse> deleteWorkspace(
       String workspaceNamespace, String workspaceId) {
-
+    System.out.println("~~~~!!!!!!");
+    log.warning("~~!!!!!!");
+    log.warning(workspaceId);
     DbWorkspace dbWorkspace = workspaceDao.getRequired(workspaceNamespace, workspaceId);
     workspaceService.deleteWorkspace(dbWorkspace);
     workspaceAuditor.fireDeleteAction(dbWorkspace);

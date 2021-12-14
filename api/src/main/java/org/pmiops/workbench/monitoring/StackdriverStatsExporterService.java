@@ -1,9 +1,8 @@
 package org.pmiops.workbench.monitoring;
 
 import com.google.api.MonitoredResource;
-import com.google.appengine.api.modules.ModulesException;
-import com.google.appengine.api.modules.ModulesService;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
 import io.opencensus.exporter.stats.stackdriver.StackdriverStatsConfiguration;
 import io.opencensus.exporter.stats.stackdriver.StackdriverStatsExporter;
@@ -38,13 +37,10 @@ public class StackdriverStatsExporterService {
       ImmutableSet.of(PROJECT_ID_LABEL, LOCATION_LABEL, NAMESPACE_LABEL, NODE_ID_LABEL);
   private boolean initialized;
   private Provider<WorkbenchConfig> workbenchConfigProvider;
-  private ModulesService modulesService;
   private Optional<String> spoofedNodeId;
 
-  public StackdriverStatsExporterService(
-      Provider<WorkbenchConfig> workbenchConfigProvider, ModulesService modulesService) {
+  public StackdriverStatsExporterService(Provider<WorkbenchConfig> workbenchConfigProvider) {
     this.workbenchConfigProvider = workbenchConfigProvider;
-    this.modulesService = modulesService;
     this.initialized = false;
     this.spoofedNodeId = Optional.empty();
   }
@@ -121,9 +117,9 @@ public class StackdriverStatsExporterService {
   }
 
   private String getNodeId() {
-    try {
-      return modulesService.getCurrentInstanceId();
-    } catch (ModulesException e) {
+    // See https://cloud.google.com/appengine/docs/standard/java11/runtime#environment_variables
+    String nodeId = System.getenv("GAE_INSTANCE");
+    if (Strings.isNullOrEmpty(nodeId)) {
       final String newNodeId = getSpoofedNodeId();
       if (workbenchConfigProvider.get().server.shortName.equals("Local")) {
         logger.log(Level.FINE, String.format("Spoofed nodeID for local process is %s.", newNodeId));
@@ -133,7 +129,9 @@ public class StackdriverStatsExporterService {
                 "Failed to retrieve instance ID from ModulesService. Using %s instead.",
                 newNodeId));
       }
-      return getSpoofedNodeId();
+      return newNodeId;
+    } else {
+      return nodeId;
     }
   }
 

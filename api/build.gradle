@@ -37,7 +37,6 @@ plugins {
     id 'eclipse'
     id 'idea'
     id 'java'
-    id 'war'
 
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
     id 'com.diffplug.spotless' version '5.12.5'
@@ -342,7 +341,7 @@ project.tasks.ideaModule.dependsOn(generateSwaggerCode)
 // Swagger sources, per the swaggerSources tuple above.
 project.tasks.compileGeneratedJava.dependsOn(generateSwaggerCode)
 
-project.tasks.bootWar.dependsOn(['compileGeneratedJava', 'generate_appengine_yaml',
+project.tasks.bootJar.dependsOn(['compileGeneratedJava', 'generate_appengine_yaml',
                                  'generate_appengine_cron_yaml'])
 
 // Clear out generated Java sorces before cleaning the project.
@@ -474,9 +473,6 @@ dependencies {
     generatedCompile 'javax.xml.bind:jaxb-api:2.3.1'
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$project.ext.KOTLIN_VERSION"
-
-    // war plugin. Add this to scope of the compile configuration, but do not include in .war file.
-    providedCompile group: 'javax.servlet', name: 'javax.servlet-api', version: '3.1.0'
 
     __tools__Compile 'commons-cli:commons-cli:1.4'
     __tools__Compile 'com.opencsv:opencsv:4.6'
