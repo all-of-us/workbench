@@ -518,3 +518,6 @@ export const cond = <T extends unknown>(...args: ([boolean, () => T] | (() => T)
   }
 };
 
+export const usernameWithoutDomain = (username: string) => {
+  return username ? username.substring(0, username.indexOf('@')) : '';
+};
