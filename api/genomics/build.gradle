@@ -4,13 +4,18 @@ apply plugin: 'idea'
 repositories {
     mavenCentral()
     maven {
-        url 'https://broadinstitute.jfrog.io/broadinstitute/libs-release/'
+        // temporary fix for log4shell
+        // TODO: switch to libs-release when maven stabilizes
+        url 'https://broadinstitute.jfrog.io/broadinstitute/libs-snapshot/'
     }
 }
 
 dependencies {
     // Genomics dependencies
-    compile 'org.broadinstitute:gatk:4.2.3.0'
+
+    // temporary fix for log4shell
+    // TODO: switch to 4.2.4.0 when maven stabilizes
+    compile 'org.broadinstitute:gatk:4.2.4.0-SNAPSHOT'
     compile 'com.github.samtools:htsjdk:2.24.1'
     compile 'com.google.guava:guava:31.0.1-jre'
     testCompile 'com.google.truth:truth:1.1.3'
