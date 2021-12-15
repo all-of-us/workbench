@@ -717,7 +717,7 @@ workflows:
             - wait_until_previous_workflow_done
       # On main branch merges, run Puppeteer tests after ui and api deployed to "test" env successfully
       - puppeteer-test:
-          parallel_num: 4
+          parallel_num: 5
           env_name: "test"
           <<: *filter-main-branch
           requires:
