@@ -12,10 +12,11 @@ import {findNodesByExactText, findNodesContainingText, waitOneTickAndUpdate} fro
 import {InstitutionApiStub} from 'testing/stubs/institution-api-stub';
 import {ProfileApiStub, ProfileStubVariables} from 'testing/stubs/profile-api-stub';
 import {accessRenewalModules} from 'app/utils/access-utils';
+import {MILLIS_PER_DAY} from 'app/utils/dates';
 
 const EXPIRY_DAYS = 365
-const addDaysFromNow = (days: number) => Date.now() + 1000 * 60 * 60 * 24 * days;
-const oneYearFromNow = () => addDaysFromNow(EXPIRY_DAYS);
+const nowPlusDays = (days: number) => Date.now() + MILLIS_PER_DAY * days;
+const oneYearFromNow = () => nowPlusDays(EXPIRY_DAYS);
 const oneHourAgo = () => Date.now() - 1000 * 60 * 60;
 
 describe('Access Renewal Page', () => {
@@ -331,7 +332,7 @@ describe('Access Renewal Page', () => {
 
   test.each([
     ['should', 'expired', 1, oneHourAgo()],
-    ['should', 'expiring', 1, addDaysFromNow(10)],
+    ['should', 'expiring', 1, nowPlusDays(10)],
     ['should not', 'complete', 0, oneYearFromNow()],
     ['should not', 'incomplete', 0, null],
   ])

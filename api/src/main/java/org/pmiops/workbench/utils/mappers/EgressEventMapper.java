@@ -13,6 +13,7 @@ public interface EgressEventMapper {
   @Mapping(target = "sourceUserEmail", source = "user.username")
   @Mapping(target = "sourceWorkspaceNamespace", source = "workspace.workspaceNamespace")
   @Mapping(target = "sourceGoogleProject", source = "workspace.googleProject")
+  @Mapping(target = "creationTime", qualifiedByName = "timestampToIso8601String")
   EgressEvent toApiEvent(DbEgressEvent event);
 
   EgressEventStatus toApiStatus(DbEgressEventStatus status);

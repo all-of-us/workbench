@@ -14,7 +14,7 @@ import {AouTitle} from 'app/components/text-wrappers';
 import {WorkspaceShare} from 'app/pages/workspace/workspace-share';
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {displayDate, reactStyles} from 'app/utils';
+import {reactStyles} from 'app/utils';
 import {AccessTierShortNames, displayNameForTier} from 'app/utils/access-tiers';
 import {AnalyticsTracker, triggerEvent} from 'app/utils/analytics';
 import {currentWorkspaceStore, NavigationProps, useNavigation} from 'app/utils/navigation';
@@ -23,6 +23,7 @@ import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {faLockAlt} from '@fortawesome/pro-solid-svg-icons';
 import {WorkspaceActionsMenu} from './workspace-actions-menu';
+import {displayDate} from 'app/utils/dates';
 
 const EVENT_CATEGORY = 'Workspace list';
 

@@ -350,26 +350,24 @@ export const DetailTabTable = fp.flow(withCurrentCohortReview(), withCurrentWork
             await this.callCountApi(pageFilterRequest).then(async(count) => {
               totalCount = count;
               if (lazyLoad) {
-                if (start > totalCount) {
-                  // If the data was filtered to a smaller count than the previous start, reset to the last page of the new data
-                  start = Math.floor((totalCount - 1) / rowsPerPage) * rowsPerPage;
-                  page = start / rowsPerPage;
-                  pageFilterRequest.page = Math.floor(totalCount / lazyLoadSize);
-                }
+                // reset pagination
+                start = 0;
+                page = 0;
+                pageFilterRequest.page = 0;
+                range[0] = start;
               } else {
                 lazyLoad = totalCount > 1000;
                 if (lazyLoad) {
                   pageFilterRequest.filters = filters;
                   pageFilterRequest.pageSize = lazyLoadSize;
                   if (filters.items.length) {
-                    // if filters exist, call api for count a second time to get the filtered count
+                    // if filters exist, call api for count a second time to get the filtered count and reset pagination
                     await this.callCountApi(pageFilterRequest).then(filteredCount => {
                       totalCount = filteredCount;
-                      if (start > totalCount) {
-                        // If the data was filtered to a smaller count than the previous start, reset to the last page of the new data
-                        start = Math.floor(totalCount / rowsPerPage) * rowsPerPage;
-                        pageFilterRequest.page = Math.floor(totalCount / lazyLoadSize);
-                      }
+                      start = 0;
+                      page = 0;
+                      pageFilterRequest.page = 0;
+                      range[0] = start;
                     });
                   }
                 } else {
@@ -537,7 +535,7 @@ export const DetailTabTable = fp.flow(withCurrentCohortReview(), withCurrentWork
       }
     }
 
-    onPage = (event: any) => {
+    onPage(event: any) {
       const {lazyLoad, page, range, totalCount} = this.state;
       if (lazyLoad) {
         if (event.page < page && event.page > 1 && range[0] >= (event.first - rowsPerPage)) {
@@ -964,7 +962,7 @@ export const DetailTabTable = fp.flow(withCurrentCohortReview(), withCurrentWork
           paginator
           paginatorTemplate={!spinner && !!value ? paginatorTemplate : ''}
           currentPageReportTemplate={!spinner && !!value ? pageReportTemplate : ''}
-          onPage={this.onPage}
+          onPage={(e) => this.onPage(e)}
           alwaysShowPaginator={false}
           first={start}
           rows={rowsPerPage}

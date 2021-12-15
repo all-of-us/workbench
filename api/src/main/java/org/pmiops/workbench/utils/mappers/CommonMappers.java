@@ -70,6 +70,14 @@ public class CommonMappers {
     return null;
   }
 
+  @Named("timestampToIso8601String")
+  public String timestampToIso8601String(Timestamp timestamp) {
+    if (timestamp == null) {
+      return null;
+    }
+    return timestamp.toInstant().toString();
+  }
+
   @Named("dateToString")
   public String dateToString(Date date) {
     // We are using this method because mapstruct defaults to gregorian conversion. The difference

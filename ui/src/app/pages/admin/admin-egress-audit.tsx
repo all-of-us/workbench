@@ -88,7 +88,7 @@ export const AdminEgressAudit = (props: WithSpinnerOverlayProps) => {
     <h2>Egress event {event.egressEventId}</h2>
     <div style={{display: 'table', marginBottom: '15px'}}>
       <DetailRow label="Detection time">
-        {(new Date(event.creationTime)).toString()}
+        {(new Date(event.creationTime)).toLocaleString()}
       </DetailRow>
       <DetailRow label="Source user">
         <StyledRouterLink path={`/admin/users/${username}`}>
