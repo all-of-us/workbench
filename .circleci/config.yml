@@ -562,9 +562,6 @@ jobs:
           working_directory: ~/workbench/e2e
           command: |
             cp .env.circleci.<< parameters.env_name >> .env
-      - run:
-          # Needed for env-cmd to function on Circle.
-          command: touch ~/workbench/e2e/.env
       - gcloud-auth-login:
           # Needed for generate-impersonated-user-token script
           with_application_default_credentials: true
