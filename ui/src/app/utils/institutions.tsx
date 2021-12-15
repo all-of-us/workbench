@@ -44,7 +44,7 @@ export const EmailDomainMismatchErrorMessage = () => {
     Your email does not match your institution</div>;
 };
 
-export const getRoleOptions = (institutions: Array<PublicInstitutionDetails>, institutionShortName: string):
+export const getRoleOptions = (institutions: Array<PublicInstitutionDetails>, institutionShortName?: string):
     Array<{ label: string, value: InstitutionalRole }> => {
   if (isBlank(institutionShortName)) {
     return [];

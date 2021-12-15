@@ -1,7 +1,19 @@
 import React, {useEffect, useState} from 'react';
 import {useParams} from 'react-router-dom';
 
-import {adminGetProfile, UserAdminTableLink, UserAuditLink, commonStyles, getFreeCreditUsage} from './admin-user-common';
+import {
+  adminGetProfile,
+  UserAdminTableLink,
+  UserAuditLink,
+  commonStyles,
+  getFreeCreditUsage,
+  FreeCreditsDropdown,
+  InstitutionDropdown,
+  InstitutionalRoleDropdown,
+  InstitutionalRoleOtherTextInput,
+  getPublicInstitutionDetails,
+  ContactEmailTextInput
+} from './admin-user-common';
 import {FadeBox} from 'app/components/containers';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {MatchParams} from 'app/utils/stores';
@@ -10,7 +22,7 @@ import {FlexColumn, FlexRow} from 'app/components/flex';
 import {displayNameForTier} from 'app/utils/access-tiers';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
-import {Profile} from 'generated/fetch';
+import {Profile, PublicInstitutionDetails} from 'generated/fetch';
 
 const styles = reactStyles({
   ...commonStyles,
@@ -26,15 +38,8 @@ const styles = reactStyles({
     fontWeight: 'bold',
     paddingLeft: '1em',
   },
-  spacer: {
+  uneditableFieldsSpacer: {
     height: '24px',
-  },
-  label: {
-    color: colors.primary,
-    fontSize: '14px',
-    fontWeight: 'bold',
-    paddingLeft: '1em',
-    paddingTop: '1em',
   },
   value: {
     color: colors.primary,
@@ -65,8 +70,6 @@ const UneditableField = (props: {label: string, value: string}) => <FlexColumn>
   <div style={styles.value}>{props.value}</div>
 </FlexColumn>
 
-const Spacer = () => <div style={styles.spacer}/>
-
 const UneditableFields = (props: {profile: Profile}) => {
   const {givenName, familyName, username, accessTierShortNames} = props.profile;
   return <FlexRow style={styles.uneditableFields}>
@@ -76,20 +79,67 @@ const UneditableFields = (props: {profile: Profile}) => {
       <UneditableField label='Free Credits Used' value={getFreeCreditUsage(props.profile)}/>
     </FlexColumn>
     <FlexColumn style={{paddingLeft: '80px'}}>
-      <Spacer/>
+      <div style={styles.uneditableFieldsSpacer}/>
       <UneditableField label='User name' value={username}/>
       <UneditableField label='Access Tiers' value={accessTierShortNames.map(displayNameForTier).join(' ,')}/>
     </FlexColumn>
   </FlexRow>
 }
 
+interface EditableFieldsProps {
+  profile: Profile,
+  originalProfile: Profile,
+  institutions?: PublicInstitutionDetails[],
+}
+const EditableFields = ({profile, originalProfile, institutions}: EditableFieldsProps) => {
+  return <FlexRow style={styles.editableFields}>
+    <FlexColumn>
+      <div style={styles.subHeader}>Edit information</div>
+      <FlexRow>
+        <ContactEmailTextInput
+          contactEmail={profile.contactEmail}
+          //onChange={email => this.setContactEmail(email)}
+          onChange={() => {}}/>
+        <InstitutionDropdown
+          institutions={institutions}
+          initialInstitutionShortName={profile.verifiedInstitutionalAffiliation?.institutionShortName}
+          //onChange={async(event) => this.setVerifiedInstitutionOnProfile(event.value)}
+          onChange={() => {}}/>
+      </FlexRow>
+      <FlexRow>
+        <FreeCreditsDropdown
+          initialLimit={originalProfile.freeTierDollarQuota}
+          currentLimit={profile.freeTierDollarQuota}
+          //onChange={async(event) => this.setFreeTierCreditDollarLimit(event.value)}
+          onChange={() => {}}/>
+        <InstitutionalRoleDropdown
+          institutions={institutions}
+          initialAffiliation={profile.verifiedInstitutionalAffiliation}
+          //onChange={(event) => this.setInstitutionalRoleOnProfile(event.value)}
+          onChange={() => {}}/>
+        <InstitutionalRoleOtherTextInput
+          affiliation={profile.verifiedInstitutionalAffiliation}
+          // onChange={(value) => this.setState(
+          //   fp.set(['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionalRoleOtherText'], value))
+          // }
+          onChange={() => {}}/>
+      </FlexRow>
+    </FlexColumn>
+  </FlexRow>;
+}
+
 export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
   const {usernameWithoutGsuiteDomain} = useParams<MatchParams>();
   const [profile, setProfile] = useState(null);
+  const [originalProfile, setOriginalProfile] = useState(null);
+  const [institutions, setInstitutions] = useState([]);
 
   useEffect(() => {
     const onMount = async() => {
-      setProfile(await adminGetProfile(usernameWithoutGsuiteDomain));
+      const p = await adminGetProfile(usernameWithoutGsuiteDomain);
+      setOriginalProfile(p);
+      setProfile(p);
+      setInstitutions(await getPublicInstitutionDetails());
       spinnerProps.hideSpinner();
     }
     onMount();
@@ -103,9 +153,7 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
     </FlexRow>
     <FlexRow style={{paddingTop: '1em'}}>
       <UneditableFields profile={profile}/>
-      <FlexColumn style={styles.editableFields}>
-        <div style={styles.subHeader}>Edit information</div>
-      </FlexColumn>
+      <EditableFields profile={profile} originalProfile={originalProfile} institutions={institutions}/>
     </FlexRow>
   </FadeBox>;
 }
