@@ -44,7 +44,7 @@ import {
 import {accessRenewalModules, computeDisplayDates, getAccessModuleConfig} from 'app/utils/access-utils';
 import {hasRegisteredTierAccess} from 'app/utils/access-tiers';
 import { EgressEventsTable } from './egress-events-table';
-import {adminGetProfile, UserAdminTableLink, styles} from './admin-user-common';
+import {adminGetProfile, UserAdminTableLink, commonStyles as styles, getFreeCreditUsage} from './admin-user-common';
 
 const getUserStatus = (profile: Profile) => {
   return (hasRegisteredTierAccess(profile))
@@ -274,11 +274,6 @@ export const AdminUser = withRouter(class extends React.Component<Props, State> 
     const numericallySorted = Array.from(defaultsPlusMaybeOverride).sort((a, b) => a - b);
 
     return fp.map((limit) => ({label: formatFreeCreditsUSD(limit), value: limit}), numericallySorted);
-  }
-
-  getFreeCreditUsage(): string {
-    const {updatedProfile: {freeTierDollarQuota, freeTierUsage}} = this.state;
-    return `${formatFreeCreditsUSD(freeTierUsage)} used of ${formatFreeCreditsUSD(freeTierDollarQuota)} limit`;
   }
 
   usageIsAboveLimit(): boolean {
@@ -541,7 +536,7 @@ export const AdminUser = withRouter(class extends React.Component<Props, State> 
             />
             <FreeCreditsUsage
               isAboveLimit={this.usageIsAboveLimit()}
-              usage={this.getFreeCreditUsage()}
+              usage={getFreeCreditUsage(this.state.updatedProfile)}
             />
           </FlexColumn>
           <FlexColumn style={{width: '33%'}}>

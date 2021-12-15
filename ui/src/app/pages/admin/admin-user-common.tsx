@@ -5,14 +5,14 @@ import * as React from 'react';
 import {CSSProperties} from 'react';
 import {Link} from 'react-router-dom';
 
-import {reactStyles} from 'app/utils';
+import {formatFreeCreditsUSD, reactStyles} from 'app/utils';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {Profile} from 'generated/fetch';
 import {serverConfigStore} from 'app/utils/stores';
 import {userAdminApi} from 'app/services/swagger-fetch-clients';
 import {ClrIcon} from 'app/components/icons';
 
-export const styles = reactStyles({
+export const commonStyles = reactStyles({
   semiBold: {
     fontWeight: 600
   },
@@ -33,22 +33,16 @@ export const styles = reactStyles({
     minWidth: '1232px',
     color: colors.primary
   },
-  header: {
-    color: colors.primary,
-    fontSize: '18px',
-    fontWeight: 600,
-    padding: '1em',
-  },
-  auditLink: {
-    color: colors.accent,
-    fontSize: '16px',
-    fontWeight: 500,
-  },
 });
 
 export const adminGetProfile = async(usernameWithoutGsuiteDomain: string): Promise<Profile> => {
   const {gsuiteDomain} = serverConfigStore.get().config;
   return userAdminApi().getUserByUsername(usernameWithoutGsuiteDomain + '@' + gsuiteDomain);
+}
+
+export const getFreeCreditUsage = (profile: Profile): string => {
+  const {freeTierDollarQuota, freeTierUsage} = profile;
+  return `${formatFreeCreditsUSD(freeTierUsage)} used of ${formatFreeCreditsUSD(freeTierDollarQuota)} limit`;
 }
 
 export const UserAdminTableLink = () => <Link to='/admin/users'>
