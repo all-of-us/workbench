@@ -1201,7 +1201,7 @@ describe('RuntimePanel', () => {
     }
   });
 
-  fit('should disable worker count updates for stopped dataproc cluster', async() => {
+  it('should disable worker count updates for stopped dataproc cluster', async() => {
     const runtime = {
       ...runtimeApiStub.runtime,
       status: RuntimeStatus.Stopped,
