@@ -65,7 +65,7 @@ public class EgressEventMapperTest {
                 .sourceUserEmail(user.getUsername())
                 .sourceWorkspaceNamespace("ns")
                 .sourceGoogleProject("proj")
-                .creationTime(Timestamp.from(created).toString())
+                .creationTime("2000-01-01T00:00:00Z")
                 .status(EgressEventStatus.PENDING)
                 .egressMegabytes(201.0)
                 .egressWindowSeconds(BigDecimal.valueOf(3600L)));
@@ -85,7 +85,7 @@ public class EgressEventMapperTest {
         .isEqualTo(
             new EgressEvent()
                 .egressEventId("7")
-                .creationTime(Timestamp.from(created).toString())
+                .creationTime("2000-01-01T00:00:00Z")
                 .status(EgressEventStatus.PENDING));
   }
 }
