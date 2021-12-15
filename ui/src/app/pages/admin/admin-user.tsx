@@ -43,22 +43,7 @@ import {
 import {accessRenewalModules, computeDisplayDates, getAccessModuleConfig} from 'app/utils/access-utils';
 import {hasRegisteredTierAccess} from 'app/utils/access-tiers';
 import { EgressEventsTable } from './egress-events-table';
-
-const styles = reactStyles({
-  semiBold: {
-    fontWeight: 600
-  },
-  backgroundColorDark: {
-    backgroundColor: colorWithWhiteness(colors.primary, .95)
-  },
-  textInput: {
-    width: '17.5rem',
-    opacity: '100%',
-  },
-  textInputContainer: {
-    marginTop: '1rem'
-  }
-});
+import {styles} from './admin-user-common';
 
 const getUserStatus = (profile: Profile) => {
   return (hasRegisteredTierAccess(profile))
@@ -457,15 +442,7 @@ export const AdminUser = withRouter(class extends React.Component<Props, State> 
       institutionalRoleOtherText: {truthiness: true},
       institutionMembership: {truthiness: true}
     });
-    return <FadeBox
-        style={{
-          margin: 'auto',
-          paddingTop: '1rem',
-          width: '96.25%',
-          minWidth: '1232px',
-          color: colors.primary
-        }}
-    >
+    return <FadeBox style={styles.fadeBox}>
       {emailValidationError && <div>{emailValidationError}</div>}
       {institutionsLoadingError && <div>{institutionsLoadingError}</div>}
       {profileLoadingError && <div>{profileLoadingError}</div>}
