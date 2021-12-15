@@ -21,5 +21,5 @@ export function displayDateWithoutHours(time: number): string {
 }
 
 export function isDateValid(date: Date): boolean {
-  return date !== null && typeof date === 'object' && !isBlank(date.toString()) && !isNaN(date.valueOf());
+  return date && typeof date === 'object' && !isBlank(date.toString()) && !isNaN(date.valueOf());
 }
