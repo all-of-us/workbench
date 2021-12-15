@@ -8,6 +8,7 @@ import WorkspaceEditPage from 'app/page/workspace-edit-page';
 import { waitForFn, waitWhileLoading } from 'utils/waits-utils';
 import { logger } from 'libs/logger';
 import BaseElement from 'app/element/base-element';
+import { asyncFilter } from 'utils/test-utils';
 
 const WorkspaceCardSelector = {
   cardRootXpath: './/*[child::*[@data-test-id="workspace-card"]]', // finds 'workspace-card' parent container node
@@ -43,27 +44,29 @@ export default class WorkspaceCard extends CardBase {
    * @param {Page} page
    * @throws TimeoutError if fails to find Card.
    */
-  static async findAllCards(page: Page, accessLevel?: WorkspaceAccessLevel): Promise<WorkspaceCard[]> {
+  static async findAllCards(
+    page: Page,
+    opts: { accessLevel?: WorkspaceAccessLevel; timeout?: number } = {}
+  ): Promise<WorkspaceCard[]> {
+    const { accessLevel, timeout = 5000 } = opts;
     await waitWhileLoading(page);
-    await page.waitForXPath(WorkspaceCardSelector.cardRootXpath, { visible: true, timeout: 10000 }).catch(() => {
-      // Blank
+    // Wait until timeout for one card exists and visible. If none, return an empty array.
+    await page.waitForXPath(WorkspaceCardSelector.cardRootXpath, { visible: true, timeout }).catch(() => {
+      return [];
     });
 
-    const workspaceCards: WorkspaceCard[] = (await page.$x(WorkspaceCardSelector.cardRootXpath)).map((card) =>
+    // Turn elements into WorkspaceCard objects.
+    const allCards: WorkspaceCard[] = (await page.$x(WorkspaceCardSelector.cardRootXpath)).map((card) =>
       new WorkspaceCard(page).asCard(card)
     );
 
-    const filtered: WorkspaceCard[] = [];
     if (accessLevel !== undefined) {
-      for (const card of workspaceCards) {
-        const cardAccessLevel = await card.getWorkspaceAccessLevel();
-        if (cardAccessLevel === accessLevel) {
-          filtered.push(card);
-        }
-      }
-      return filtered;
+      return asyncFilter(
+        allCards,
+        async (card: WorkspaceCard) => accessLevel === (await card.getWorkspaceAccessLevel())
+      );
     }
-    return workspaceCards;
+    return allCards;
   }
 
   static async findAnyCard(page: Page): Promise<WorkspaceCard> {
@@ -80,7 +83,7 @@ export default class WorkspaceCard extends CardBase {
       ` and normalize-space(text())="${workspaceName}"]]`;
     return page
       .waitForXPath(selector, { timeout, visible: true })
-      .then((element) => {
+      .then((element: ElementHandle) => {
         logger.info(`Found workspace card: "${workspaceName}"`);
         return new WorkspaceCard(page).asCard(element);
       })
