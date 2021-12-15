@@ -13,28 +13,44 @@
 # sources). Putting properties onto "spring.datasource.tomcat" (as you might
 # see in Spring documentation) will do nothing. See WorkbenchDbConfig and
 # CdrDbConfig.
-spring.datasource.type=org.apache.tomcat.jdbc.pool.DataSource
-spring.datasource.test-on-borrow=true
-spring.datasource.time-between-eviction-runs-millis=3600000
-spring.datasource.validation-query=SELECT 1
-spring.datasource.initial-size=5
-spring.datasource.max-idle=5
-spring.datasource.min-idle=1
-# Disable liquibase because DB migration handled by anothe gradle task.
-spring.jpa.hibernate.ddl-auto=none
-spring.liquibase.enabled=false
-spring.jpa.properties.hibernate.dialect=org.pmiops.workbench.cdr.MySQLDialect
+spring:
+  datasource:
+    type: org.apache.tomcat.jdbc.pool.DataSource
+    test-on-borrow: true
+    time-between-eviction-runs-millis: 3600000
+    validation-query: SELECT 1
+    initial-size: 5
+    max-idle: 5
+    min-idle: 1
+    driver-class-name: ${DB_DRIVER:com.mysql.jdbc.Driver}
+    url: ${DB_CONNECTION_STRING:jdbc:mysql://127.0.0.1/workbench?useSSL=false}
+    username: ${WORKBENCH_DB_USER:workbench}
+    password: ${WORKBENCH_DB_PASSWORD:wb-notasecret}
+  # Disable liquibase because DB migration handled by anothe gradle task.
+  jpa:
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        dialect: org.pmiops.workbench.cdr.MySQLDialect
+  liquibase:
+    enabled: false
+
+cdr:
+  datasource:
+    url: ${CDR_DB_CONNECTION_STRING:jdbc:mysql://127.0.0.1/workbench?useSSL=false}
+    username: ${CDR_DB_USER:workbench}
+    password: ${CDR_DB_PASSWORD:wb-notasecret}
 # See https://docs.spring.io/spring-boot/docs/2.3.9.RELEASE/reference/html/production-ready-features.html
 # and https://precisionmedicineinitiative.atlassian.net/browse/RW-1478
 # Disable all spring-boot endpoints unless specifically necessary
-management.endpoints.enabled-by-default=false
-server.port=8081
-spring.datasource.driver-class-name=${DB_DRIVER:com.mysql.jdbc.Driver}
-spring.datasource.url=${DB_CONNECTION_STRING:jdbc:mysql://127.0.0.1/workbench?useSSL=false}
-spring.datasource.username=${WORKBENCH_DB_USER:workbench}
-spring.datasource.password=${WORKBENCH_DB_PASSWORD:wb-notasecret}
-cdr.datasource.url=${CDR_DB_CONNECTION_STRING:jdbc:mysql://127.0.0.1/workbench?useSSL=false}
-cdr.datasource.username=${CDR_DB_USER:workbench}
-cdr.datasource.password=${CDR_DB_PASSWORD:wb-notasecret}
-# Workbench API server properities
-workbench.property.local=false
+management:
+  endpoints:
+    enabled-by-default: false
+server:
+  port: 8081
+
+  # Workbench API server properities
+workbench:
+  property:
+    is-local: false

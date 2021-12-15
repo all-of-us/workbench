@@ -182,7 +182,7 @@ def run_api_incremental()
     common.status "Starting API server..."
     # incrementalHotSwap must be run without the Gradle daemon or stdout and stderr will not appear
      # in the output.
-    common.run_inline "./gradlew --daemon bootRun  --args='Dspring.profiles.active=local' &"
+    common.run_inline "./gradlew --daemon bootRun &"
 
     # incrementalHotSwap must be run without the Gradle daemon or stdout and stderr will not appear
     # in the output.
@@ -209,7 +209,6 @@ Common.register_command({
   :description => "Runs the api server (assumes database and config are already up-to-date.)",
   :fn => ->() { run_api_and_db() }
 })
-
 
 def validate_swagger(cmd_name, args)
   Common.new.run_inline %W{./gradlew validateSwagger} + args
