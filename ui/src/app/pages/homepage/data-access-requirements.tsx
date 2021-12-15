@@ -733,7 +733,7 @@ const ControlledTierStep = (props: {enabled: boolean, text: String}) => {
 
 const DuccCard = (props: {
       profile: Profile, activeModule: AccessModule, clickableModules: AccessModule[],
-      spinnerProps: WithSpinnerOverlayProps, stepNumber: Number
+      spinnerProps: WithSpinnerOverlayProps, stepNumber: number
     }) => {
   const {profile, activeModule, clickableModules, spinnerProps, stepNumber} = props;
   return <FlexRow style={{...styles.card, height: '125px'}}>
