@@ -119,6 +119,7 @@ public class StackdriverStatsExporterService {
   private String getNodeId() {
     // See https://cloud.google.com/appengine/docs/standard/java11/runtime#environment_variables
     String nodeId = System.getenv("GAE_INSTANCE");
+    logger.log(Level.INFO, String.format("GAE_INSTANCE is %s.", nodeId));
     if (Strings.isNullOrEmpty(nodeId)) {
       final String newNodeId = getSpoofedNodeId();
       if (workbenchConfigProvider.get().server.shortName.equals("Local")) {

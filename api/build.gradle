@@ -357,6 +357,7 @@ repositories {
 // To show the dependency tree, try: ./project.rb gradle dependencies --configuration compile
 dependencies {
     annotationProcessor "org.mapstruct:mapstruct-processor:$project.ext.MAPSTRUCT_VERSION"
+    annotationProcessor "org.springframework.boot:spring-boot-configuration-processor:$project.ext.SPRING_BOOT_VERSION"
 
     __swaggerCodegenV2__ "io.swagger:swagger-codegen-cli:$project.ext.SWAGGER_2_CODEGEN_VERSION"
     __swaggerCodegenV3__ "io.swagger.codegen.v3:swagger-codegen-cli:$project.ext.SWAGGER_3_CODEGEN_VERSION"
