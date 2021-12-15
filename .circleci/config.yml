@@ -715,9 +715,8 @@ workflows:
             - halt-puppeteer-check
           requires:
             - puppeteer-env-setup
-            # PR commits e2e tests waits for workflow triggered by main branch merge to finish.
             - puppeteer-generate-access-tokens
-            # PR commits e2e tests waits for workflow triggered by master branch merge to finish.
+            # PR commits e2e tests waits for workflow triggered by main branch merge to finish.
             - wait_until_previous_workflow_done
       # On main branch merges, run Puppeteer tests after ui and api deployed to "test" env successfully
       - puppeteer-test:
