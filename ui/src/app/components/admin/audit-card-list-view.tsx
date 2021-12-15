@@ -2,8 +2,7 @@ import {ActionAuditCardBase} from 'app/components/card';
 import {FlexRow} from 'app/components/flex';
 import {CheckBox} from 'app/components/inputs';
 import colors from 'app/styles/colors';
-import {reactStyles} from 'app/utils';
-import {usernameWithoutDomain} from 'app/utils/audit-utils';
+import {reactStyles, usernameWithoutDomain} from 'app/utils';
 import {
   AuditAction,
   AuditAgent,

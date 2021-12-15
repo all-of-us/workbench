@@ -14,6 +14,7 @@ import {SpinnerOverlay} from 'app/components/spinners';
 import { institutionApi, userAdminApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {
+  cond,
   formatFreeCreditsUSD,
   hasNewValidProps,
   isBlank,
@@ -43,7 +44,7 @@ import {
 import {accessRenewalModules, computeDisplayDates, getAccessModuleConfig} from 'app/utils/access-utils';
 import {hasRegisteredTierAccess} from 'app/utils/access-tiers';
 import { EgressEventsTable } from './egress-events-table';
-import {styles} from './admin-user-common';
+import {adminGetProfile, UserAdminTableLink, styles} from './admin-user-common';
 
 const getUserStatus = (profile: Profile) => {
   return (hasRegisteredTierAccess(profile))
@@ -245,9 +246,8 @@ export const AdminUser = withRouter(class extends React.Component<Props, State> 
   }
 
   async getUser() {
-    const {gsuiteDomain} = serverConfigStore.get().config;
     try {
-      const profile = await userAdminApi().getUserByUsername(this.props.match.params.usernameWithoutGsuiteDomain + '@' + gsuiteDomain);
+      const profile = await adminGetProfile(this.props.match.params.usernameWithoutGsuiteDomain);
       this.setState({oldProfile: profile, updatedProfile: profile, profileLoadingError: ''});
     } catch (error) {
       this.setState({profileLoadingError: 'Could not find user - please check spelling of username and try again'});
@@ -448,18 +448,7 @@ export const AdminUser = withRouter(class extends React.Component<Props, State> 
       {profileLoadingError && <div>{profileLoadingError}</div>}
       {updatedProfile && <FlexColumn>
         <FlexRow style={{alignItems: 'center'}}>
-          <RouterLink to='/admin/users'>
-            <ClrIcon
-                shape='arrow'
-                size={37}
-                style={{
-                  backgroundColor: colorWithWhiteness(colors.accent, .85),
-                  color: colors.accent,
-                  borderRadius: '18px',
-                  transform: 'rotate(270deg)'
-                }}
-            />
-          </RouterLink>
+          <UserAdminTableLink/>
           <SmallHeader style={{marginTop: 0, marginLeft: '0.5rem'}}>
             User Profile Information
           </SmallHeader>
