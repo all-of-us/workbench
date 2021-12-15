@@ -109,8 +109,7 @@ function find_info() {
   concept_code,
   observation_source_concept_id as concept_id,
   concept_name,
-  value_source_concept_id,
-  value_source_value
+  value_source_concept_id
   from \`$BQ_PROJECT.$BQ_DATASET.observation\` o
   join \`$BQ_PROJECT.$BQ_DATASET.concept\` c on c.concept_id = o.value_source_concept_id
   where lower(observation_source_value) = lower('$concept_code')
@@ -123,7 +122,7 @@ function find_info() {
   where lower(concept_code) = lower('$concept_code')
   and concept_class_id in ('Question')
   )
-  group by concept_code, observation_source_concept_id, concept_name, value_source_concept_id, value_source_value
+  group by concept_code, observation_source_concept_id, concept_name, value_source_concept_id
   order by ($order_by))
   order by id) order by id"
   echo $(bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql --format=csv "$query" | sed "1 d" | tr '\n' '|')
@@ -165,13 +164,13 @@ do
   # Build custom order by clause
   if [[ -z "$answers" ]]
   then
-    order_by="CASE WHEN lower(value_source_value)=lower('PMI_Skip') THEN 1 ELSE 2 END"
+    order_by="CASE WHEN lower(concept_code)=lower('PMI_Skip') THEN 1 ELSE 2 END"
   else
     order_by="CASE "
     IFS=' ' read -r -a array <<< "$answers"
     for i in "${!array[@]}"
     do
-      order_by+="WHEN lower(value_source_value)=lower('${array[i]}') THEN $((i + 1)) "
+      order_by+="WHEN lower(concept_code)=lower('${array[i]}') THEN $((i + 1)) "
     done
     last_index=$((i + 2))
     order_by+="ELSE $last_index END"
