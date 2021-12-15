@@ -584,7 +584,7 @@ const PersistentDiskSizeSelector = ({onChange, disabled, selectedDiskSize, diskS
   </div>;
 };
 
-const DataProcConfigSelector = ({onChange, disabled, dataprocConfig})  => {
+const DataProcConfigSelector = ({onChange, disabled, runtimeStatus, dataprocConfig})  => {
   const {
     workerMachineType = defaultMachineName,
     workerDiskSize = DATAPROC_WORKER_MIN_DISK_SIZE_GB,
@@ -615,6 +615,14 @@ const DataProcConfigSelector = ({onChange, disabled, dataprocConfig})  => {
     });
   }, [selectedNumWorkers, selectedPreemtible, selectedWorkerMachine, selectedDiskSize]);
 
+  // As a special case in Dataproc, worker counts can be dynamically changed on
+  // a running cluster but not on a stopped cluster. Rather than building a
+  // one-off resume->update workflow into Workbench, just disable the control
+  // and let the user resume themselves.
+  const workerCountDisabledByStopped = runtimeStatus === RuntimeStatus.Stopped;
+  const workerCountTooltip = workerCountDisabledByStopped ?
+      'Cannot update worker counts on a stopped Dataproc environment, please start your environment first.' : undefined;
+
   return <fieldset style={{marginTop: '0.75rem'}}>
     <legend style={styles.workerConfigLabel}>Worker Configuration</legend>
     <div style={styles.formGrid}>
@@ -622,22 +630,24 @@ const DataProcConfigSelector = ({onChange, disabled, dataprocConfig})  => {
         <label style={styles.label} htmlFor='num-workers'>Workers</label>
         <InputNumber id='num-workers'
           showButtons
-          disabled={disabled}
+          disabled={disabled || workerCountDisabledByStopped}
           decrementButtonClassName='p-button-secondary'
           incrementButtonClassName='p-button-secondary'
           value={selectedNumWorkers}
           inputStyle={styles.inputNumber}
+          tooltip={workerCountTooltip}
           onChange={({value}) => setSelectedNumWorkers(value)}/>
       </FlexRow>
       <FlexRow style={styles.labelAndInput}>
         <label style={styles.label} htmlFor='num-preemptible'>Preemptible</label>
         <InputNumber id='num-preemptible'
           showButtons
-          disabled={disabled}
+          disabled={disabled || workerCountDisabledByStopped}
           decrementButtonClassName='p-button-secondary'
           incrementButtonClassName='p-button-secondary'
           value={selectedPreemtible}
           inputStyle={styles.inputNumber}
+          tooltip={workerCountTooltip}
           onChange={({value}) => setSelectedPreemptible(value)}/>
       </FlexRow>
       <div style={{gridColumnEnd: 'span 1'}}/>
@@ -1476,6 +1486,7 @@ const RuntimePanel = fp.flow(
                selectedCompute === ComputeType.Dataproc &&
                <DataProcConfigSelector
                    disabled={disableControls}
+                   runtimeStatus={status}
                    onChange={config => setSelectedDataprocConfig(config)}
                    dataprocConfig={selectedDataprocConfig} />
              }

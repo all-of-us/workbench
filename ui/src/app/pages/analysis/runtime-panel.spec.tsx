@@ -1201,4 +1201,25 @@ describe('RuntimePanel', () => {
     }
   });
 
+  fit('should disable worker count updates for stopped dataproc cluster', async() => {
+    const runtime = {
+      ...runtimeApiStub.runtime,
+      status: RuntimeStatus.Stopped,
+      configurationType: RuntimeConfigurationType.HailGenomicAnalysis,
+      gceConfig: null,
+      dataprocConfig: defaultDataprocConfig()
+    };
+    runtimeApiStub.runtime = runtime;
+    runtimeStoreStub.runtime = runtime;
+
+    const wrapper = await component();
+
+    const workerCountInput = wrapper.find('#num-workers').first();
+    expect(workerCountInput.prop('disabled')).toBeTruthy();
+    expect(workerCountInput.prop('tooltip')).toBeTruthy();
+
+    const preemptibleCountInput = wrapper.find('#num-preemptible').first();
+    expect(preemptibleCountInput.prop('disabled')).toBeTruthy();
+    expect(preemptibleCountInput.prop('tooltip')).toBeTruthy();
+  });
 });
