@@ -34,6 +34,7 @@ import {AccessModule, InstitutionalRole, Profile} from 'generated/fetch';
 import {PublicInstitutionDetails} from 'generated/fetch';
 import {DataAccessPanel} from './data-access-panel';
 import {displayDateWithoutHours} from 'app/utils/dates';
+import {canonicalizeUrl} from 'app/utils/urls';
 
 
 // validators for validate.js
@@ -226,9 +227,14 @@ export const ProfileComponent = fp.flow(
       )(profile.accessModules.modules);
       const hasExpired = profileExpiration && profileExpiration < Date.now();
 
-      const urlError = professionalUrl
-      ? validate({website: professionalUrl}, {website: {url: {message: '^Professional URL %{value} is not a valid URL'}}})
-      : undefined;
+      // validatejs requires a scheme, which we don't necessarily need in the profile; rather than
+      // forking their website regex, just ensure a scheme ahead of validation.
+      const urlError =
+        professionalUrl ?
+        validate(
+          {website: canonicalizeUrl(professionalUrl)},
+          {website: {url: {message: `^Professional URL ${professionalUrl} is not a valid URL`}}})
+        : undefined;
       const errorMessages = {
         ...urlError,
         ...validate({
@@ -352,9 +358,9 @@ export const ProfileComponent = fp.flow(
 
             <FlexRow style={{width: '100%'}}>
               {makeProfileInput({
-                title: 'Professional URL',
-                valueKey: 'professionalUrl',
-                style: {width: '26rem'}
+                 title: 'Professional URL',
+                 valueKey: 'professionalUrl',
+                 style: {width: '26rem'}
               })}
             </FlexRow>
             <FlexRow>
