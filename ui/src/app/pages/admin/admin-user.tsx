@@ -1,24 +1,20 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
-import {Link as RouterLink, RouteComponentProps, withRouter} from 'react-router-dom';
-import {Dropdown} from 'primereact/dropdown';
+import {RouteComponentProps, withRouter} from 'react-router-dom';
 import validate from 'validate.js';
 
 import {Button} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {SmallHeader} from 'app/components/headers';
-import {ClrIcon} from 'app/components/icons';
 import {TextInputWithLabel, Toggle} from 'app/components/inputs';
 import {SpinnerOverlay} from 'app/components/spinners';
-import { institutionApi, userAdminApi} from 'app/services/swagger-fetch-clients';
+import {userAdminApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {
-  cond,
-  formatFreeCreditsUSD,
   hasNewValidProps,
   isBlank,
-  reactStyles
+  reactStyles,
 } from 'app/utils';
 import {BulletAlignedUnorderedList} from 'app/components/lists';
 import {TooltipTrigger} from 'app/components/popups';
@@ -27,7 +23,6 @@ import {
   EmailAddressMismatchErrorMessage,
   EmailDomainMismatchErrorMessage,
   getRegisteredTierConfig,
-  getRoleOptions,
   validateEmail
 } from 'app/utils/institutions';
 import {MatchParams, serverConfigStore} from 'app/utils/stores';
@@ -44,30 +39,45 @@ import {
 import {accessRenewalModules, computeDisplayDates, getAccessModuleConfig} from 'app/utils/access-utils';
 import {hasRegisteredTierAccess} from 'app/utils/access-tiers';
 import { EgressEventsTable } from './egress-events-table';
-import {adminGetProfile, UserAdminTableLink, commonStyles as styles, getFreeCreditUsage} from './admin-user-common';
+import {
+  adminGetProfile,
+  UserAdminTableLink,
+  commonStyles,
+  getFreeCreditUsage,
+  FreeCreditsDropdown,
+  InstitutionDropdown,
+  InstitutionalRoleDropdown,
+  InstitutionalRoleOtherTextInput,
+  getPublicInstitutionDetails,
+  ContactEmailTextInput,
+} from './admin-user-common';
 
+const styles = reactStyles({
+  ...commonStyles,
+  backgroundColorDark: {
+    backgroundColor: colorWithWhiteness(colors.primary, .95)
+  },
+  label: {
+    color: colors.primary,
+    fontSize: '14px',
+    fontWeight: 600,
+    paddingTop: '1em',
+    paddingLeft: 0,
+  },
+  textInput: {
+    width: '17.5rem',
+    opacity: '100%',
+    marginLeft: 0,
+  },
+  textInputContainer: {
+    marginTop: '1rem'
+  },
+})
 const getUserStatus = (profile: Profile) => {
   return (hasRegisteredTierAccess(profile))
       ? () => <div style={{color: colors.success}}>Enabled</div>
       : () => <div style={{color: colors.danger}}>Disabled</div>;
 }
-
-const DropdownWithLabel = ({label, options, initialValue, onChange, disabled= false, dataTestId, dropdownStyle = {}}) => {
-  return <FlexColumn data-test-id={dataTestId} style={{marginTop: '1rem'}}>
-    <label style={styles.semiBold}>{label}</label>
-    <Dropdown
-        style={{
-          minWidth: '70px',
-          width: '14rem',
-          ...dropdownStyle
-        }}
-        options={options}
-        onChange={(e) => onChange(e)}
-        value={initialValue}
-        disabled={disabled}
-    />
-  </FlexColumn>;
-};
 
 const EmailValidationErrorMessage = ({emailValidationResponse, updatedProfile, verifiedInstitutionOptions}) => {
   if (updatedProfile && updatedProfile.verifiedInstitutionalAffiliation) {
@@ -254,28 +264,6 @@ export const AdminUser = withRouter(class extends React.Component<Props, State> 
     }
   }
 
-  /**
-   * Present an ordered list of dollar options with the following values:
-   * $300 to $1000, in $100 increments
-   * $1000 to $10,000, in $500 increments
-   * Plus the user's current quota value, if it's not already one of these
-   */
-  getFreeCreditLimitOptions() {
-    const {oldProfile: {freeTierDollarQuota}} = this.state;
-
-    // gotcha: argument order for rangeStep is (step, start, end)
-    // IntelliJ incorrectly believes the order is (start, end, step)
-    const below1000 = fp.rangeStep(100, 300, 1000+1);
-    const over1000 = fp.rangeStep(500, 1000, 10000+1);
-
-    const defaultsPlusMaybeOverride = new Set([...below1000, ...over1000, freeTierDollarQuota]);
-
-    // gotcha: JS sorts numbers lexicographically by default
-    const numericallySorted = Array.from(defaultsPlusMaybeOverride).sort((a, b) => a - b);
-
-    return fp.map((limit) => ({label: formatFreeCreditsUSD(limit), value: limit}), numericallySorted);
-  }
-
   usageIsAboveLimit(): boolean {
     const {updatedProfile: {freeTierDollarQuota, freeTierUsage}} = this.state;
     return freeTierDollarQuota < freeTierUsage;
@@ -283,23 +271,10 @@ export const AdminUser = withRouter(class extends React.Component<Props, State> 
 
   async getInstitutions() {
     try {
-      const institutionsResponse = await institutionApi().getPublicInstitutionDetails();
-      const institutions = institutionsResponse.institutions;
-      this.setState({verifiedInstitutionOptions: fp.sortBy( 'displayName', institutions)});
+      this.setState({verifiedInstitutionOptions: await getPublicInstitutionDetails()});
     } catch (error) {
       this.setState({institutionsLoadingError: 'Could not get list of verified institutions - please try again later'});
     }
-  }
-
-  getRoleOptionsForProfile() {
-    const {updatedProfile: {verifiedInstitutionalAffiliation}, verifiedInstitutionOptions} = this.state;
-    const institutionShortName = verifiedInstitutionalAffiliation ? verifiedInstitutionalAffiliation.institutionShortName : '';
-    return getRoleOptions(verifiedInstitutionOptions, institutionShortName);
-  }
-
-  getInstitutionDropdownOptions() {
-    const {verifiedInstitutionOptions} = this.state;
-    return fp.map(({displayName, shortName}) => ({label: displayName, value: shortName}), verifiedInstitutionOptions);
   }
 
   isSaveDisabled(errors) {
@@ -422,7 +397,8 @@ export const AdminUser = withRouter(class extends React.Component<Props, State> 
       institutionsLoadingError,
       profileLoadingError,
       updatedProfile,
-      verifiedInstitutionOptions
+      verifiedInstitutionOptions,
+      oldProfile
     } = this.state;
     const errors = validate({
       'verifiedInstitutionalAffiliation': this.validateVerifiedInstitutionalAffiliation(),
@@ -526,73 +502,48 @@ export const AdminUser = withRouter(class extends React.Component<Props, State> 
                 inputStyle={{...styles.textInput, ...styles.backgroundColorDark}}
                 containerStyle={styles.textInputContainer}
             />
-            <TextInputWithLabel
-                labelText={'Contact email'}
-                value={updatedProfile.contactEmail}
-                inputId={'contactEmail'}
-                inputStyle={{...styles.textInput, ...styles.backgroundColorDark}}
-                containerStyle={styles.textInputContainer}
-                onChange={email => this.setContactEmail(email)}
-            />
+            <ContactEmailTextInput
+              contactEmail={updatedProfile.contactEmail}
+              onChange={email => this.setContactEmail(email)}
+              labelStyle={styles.label}
+              inputStyle={styles.textInput}
+              containerStyle={styles.textInputContainer}/>
             <FreeCreditsUsage
               isAboveLimit={this.usageIsAboveLimit()}
               usage={getFreeCreditUsage(this.state.updatedProfile)}
             />
           </FlexColumn>
           <FlexColumn style={{width: '33%'}}>
-            <DropdownWithLabel
-                label={'Free credit limit'}
-                options={this.getFreeCreditLimitOptions()}
-                onChange={async(event) => this.setFreeTierCreditDollarLimit(event.value)}
-                initialValue={updatedProfile.freeTierDollarQuota}
-                dropdownStyle={{width: '4.5rem'}}
-                dataTestId={'freeTierDollarQuota'}
-            />
-            {verifiedInstitutionOptions && <DropdownWithLabel
-                label={'Verified institution'}
-                options={this.getInstitutionDropdownOptions()}
-                onChange={async(event) => this.setVerifiedInstitutionOnProfile(event.value)}
-                initialValue={
-                  updatedProfile.verifiedInstitutionalAffiliation
-                      ? updatedProfile.verifiedInstitutionalAffiliation.institutionShortName
-                      : undefined
-                }
-                dataTestId={'verifiedInstitution'}
-            />}
+            <FreeCreditsDropdown
+              initialLimit={oldProfile?.freeTierDollarQuota}
+              currentLimit={updatedProfile.freeTierDollarQuota}
+              labelStyle={styles.label}
+              dropdownStyle={styles.textInput}
+              onChange={async(event) => this.setFreeTierCreditDollarLimit(event.value)}/>
+            <InstitutionDropdown
+              institutions={verifiedInstitutionOptions}
+              initialInstitutionShortName={updatedProfile.verifiedInstitutionalAffiliation?.institutionShortName}
+              labelStyle={styles.label}
+              dropdownStyle={styles.textInput}
+              onChange={async(event) => this.setVerifiedInstitutionOnProfile(event.value)}/>
             {emailValidationResponse && !emailValidationResponse.isValidMember && <EmailValidationErrorMessage
               emailValidationResponse={emailValidationResponse}
               updatedProfile={updatedProfile}
-              verifiedInstitutionOptions={verifiedInstitutionOptions}
-            />}
-            {verifiedInstitutionOptions
-              && updatedProfile.verifiedInstitutionalAffiliation
-              && <DropdownWithLabel
-                label={'Institutional role'}
-                options={this.getRoleOptionsForProfile() || []}
-                onChange={(event) => this.setInstitutionalRoleOnProfile(event.value)}
-                initialValue={updatedProfile.verifiedInstitutionalAffiliation.institutionalRoleEnum
-                    ? updatedProfile.verifiedInstitutionalAffiliation.institutionalRoleEnum
-                    : undefined
-                }
-                dataTestId={'institutionalRole'}
-                disabled={!updatedProfile.verifiedInstitutionalAffiliation.institutionShortName}
-              />
-            }
-            {
-              verifiedInstitutionOptions
-              && updatedProfile.verifiedInstitutionalAffiliation
-              && updatedProfile.verifiedInstitutionalAffiliation.institutionalRoleEnum === InstitutionalRole.OTHER
-              && <TextInputWithLabel
-                labelText={'Institutional role description'}
-                placeholder={updatedProfile.verifiedInstitutionalAffiliation.institutionalRoleOtherText}
-                onChange={(value) => this.setState(
-                  fp.set(['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionalRoleOtherText'], value))
-                }
-                dataTestId={'institutionalRoleOtherText'}
-                inputStyle={styles.textInput}
-                containerStyle={styles.textInputContainer}
-              />
-            }
+              verifiedInstitutionOptions={verifiedInstitutionOptions}/>}
+            <InstitutionalRoleDropdown
+              institutions={verifiedInstitutionOptions}
+              initialAffiliation={updatedProfile.verifiedInstitutionalAffiliation}
+              labelStyle={styles.label}
+              dropdownStyle={styles.textInput}
+              onChange={(event) => this.setInstitutionalRoleOnProfile(event.value)}/>
+            <InstitutionalRoleOtherTextInput
+              affiliation={updatedProfile.verifiedInstitutionalAffiliation}
+              labelStyle={styles.label}
+              inputStyle={styles.textInput}
+              containerStyle={styles.textInputContainer}
+              onChange={(value) => this.setState(
+                fp.set(['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionalRoleOtherText'], value))
+              }/>
             <AccessModuleExpirations modules={updatedProfile.accessModules.modules} UserStatusComponent={getUserStatus(updatedProfile)}/>
           </FlexColumn>
         </FlexRow>
