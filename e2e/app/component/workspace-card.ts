@@ -176,15 +176,10 @@ export default class WorkspaceCard extends CardBase {
     });
     const element = BaseElement.asBaseElement(this.page, elementHandle);
     const name = await getPropValue<string>(elementHandle, 'textContent');
+    await element.click();
     if (waitForDataPage) {
-      const navPromise = this.page.waitForNavigation({ waitUntil: ['load', 'networkidle0'] });
-      await element.click();
-      await navPromise;
       const dataPage = new WorkspaceDataPage(this.page);
       await dataPage.waitForLoad();
-    } else {
-      await element.click();
-      await waitWhileLoading(this.page);
     }
     logger.info(`Click name "${name}" on Workspace card to open workspace.`);
     return name;
