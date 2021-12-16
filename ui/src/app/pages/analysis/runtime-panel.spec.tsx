@@ -1222,4 +1222,27 @@ describe('RuntimePanel', () => {
     expect(preemptibleCountInput.prop('disabled')).toBeTruthy();
     expect(preemptibleCountInput.prop('tooltip')).toBeTruthy();
   });
+
+  it('should allow worker configuration for stopped GCE runtime', async() => {
+    const runtime = {
+      ...runtimeApiStub.runtime,
+      status: RuntimeStatus.Stopped,
+      configurationType: RuntimeConfigurationType.GeneralAnalysis,
+      gceConfig: defaultGceConfig(),
+      dataprocConfig: null
+    };
+    runtimeApiStub.runtime = runtime;
+    runtimeStoreStub.runtime = runtime;
+
+    const wrapper = await component();
+    await pickComputeType(wrapper, ComputeType.Dataproc);
+
+    const workerCountInput = wrapper.find('#num-workers').first();
+    expect(workerCountInput.prop('disabled')).toBeFalsy();
+    expect(workerCountInput.prop('tooltip')).toBeFalsy();
+
+    const preemptibleCountInput = wrapper.find('#num-preemptible').first();
+    expect(preemptibleCountInput.prop('disabled')).toBeFalsy();
+    expect(preemptibleCountInput.prop('tooltip')).toBeFalsy();
+  });
 });

@@ -584,7 +584,7 @@ const PersistentDiskSizeSelector = ({onChange, disabled, selectedDiskSize, diskS
   </div>;
 };
 
-const DataProcConfigSelector = ({onChange, disabled, runtimeStatus, dataprocConfig})  => {
+const DataProcConfigSelector = ({onChange, disabled, runtimeStatus, dataprocExists, dataprocConfig})  => {
   const {
     workerMachineType = defaultMachineName,
     workerDiskSize = DATAPROC_WORKER_MIN_DISK_SIZE_GB,
@@ -619,7 +619,7 @@ const DataProcConfigSelector = ({onChange, disabled, runtimeStatus, dataprocConf
   // a running cluster but not on a stopped cluster. Rather than building a
   // one-off resume->update workflow into Workbench, just disable the control
   // and let the user resume themselves.
-  const workerCountDisabledByStopped = runtimeStatus === RuntimeStatus.Stopped;
+  const workerCountDisabledByStopped = dataprocExists && runtimeStatus === RuntimeStatus.Stopped;
   const workerCountTooltip = workerCountDisabledByStopped ?
       'Cannot update worker counts on a stopped Dataproc environment, please start your environment first.' : undefined;
 
@@ -1487,6 +1487,7 @@ const RuntimePanel = fp.flow(
                <DataProcConfigSelector
                    disabled={disableControls}
                    runtimeStatus={status}
+                   dataprocExists={runtimeCtx.dataprocExists}
                    onChange={config => setSelectedDataprocConfig(config)}
                    dataprocConfig={selectedDataprocConfig} />
              }
