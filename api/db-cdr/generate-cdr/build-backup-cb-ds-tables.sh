@@ -9,10 +9,11 @@ export BQ_DATASET=$2  # dataset
 export OUTPUT_PROJECT=$3 # output project
 export OUTPUT_DATASET=$4 # output dataset
 
+BACKUP_DATASET=${OUTPUT_DATASET}_backup
+
 # Make dataset for backup
 datasets=$(bq --project_id="$OUTPUT_PROJECT" ls --max_results=1000)
-re=\\b$BACKUP_DATASET\\b
-if [[ $datasets =~ $re ]]; then
+if [[ $datasets =~ $BACKUP_DATASET ]]; then
   echo "$BACKUP_DATASET exists"
 else
   echo "Creating $BACKUP_DATASET"
