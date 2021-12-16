@@ -26,7 +26,7 @@ import {
   EmailAddressMismatchErrorMessage,
   EmailDomainMismatchErrorMessage,
   getRoleOptions,
-  validateEmail
+  checkInstitutionalEmail
 } from 'app/utils/institutions';
 import {
   CheckEmailResponse,
@@ -179,7 +179,7 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
     }
 
     try {
-      const result = await validateEmail(contactEmail, institutionShortName, this.aborter);
+      const result = await checkInstitutionalEmail(contactEmail, institutionShortName, this.aborter);
       this.setState({checkEmailResponse: result});
     } catch (e) {
       this.setState({

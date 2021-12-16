@@ -15,16 +15,14 @@ import {
   isBlank,
   reactStyles,
 } from 'app/utils';
-import {BulletAlignedUnorderedList} from 'app/components/lists';
-import {TooltipTrigger} from 'app/components/popups';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {
   EmailAddressMismatchErrorMessage,
   EmailDomainMismatchErrorMessage,
   getRegisteredTierConfig,
-  validateEmail
+  checkInstitutionalEmail
 } from 'app/utils/institutions';
-import {MatchParams, serverConfigStore, useStore} from 'app/utils/stores';
+import {MatchParams, serverConfigStore} from 'app/utils/stores';
 import {
   AccessModule,
   AccessModuleStatus,
@@ -48,7 +46,9 @@ import {
   InstitutionalRoleOtherTextInput,
   getPublicInstitutionDetails,
   ContactEmailTextInput,
-  updateAccountProperties, enableSave,
+  updateAccountProperties,
+  enableSave,
+  ErrorsTooltip,
 } from './admin-user-common';
 
 const styles = reactStyles({
@@ -240,7 +240,7 @@ export const AdminUser = withRouter(class extends React.Component<Props, State> 
     }
 
     try {
-      const result = await validateEmail(contactEmail, institutionShortName, this.aborter);
+      const result = await checkInstitutionalEmail(contactEmail, institutionShortName, this.aborter);
       this.setState({
         emailValidationError: '',
         emailValidationResponse: result
@@ -325,37 +325,10 @@ export const AdminUser = withRouter(class extends React.Component<Props, State> 
     return false;
   }
 
-  validateVerifiedInstitutionalAffiliation() {
-    const {updatedProfile} = this.state;
-    if (updatedProfile && updatedProfile.verifiedInstitutionalAffiliation) {
-      return updatedProfile.verifiedInstitutionalAffiliation;
-    }
-    return false;
-  }
+  validateInstitutionalRoleOtherText(updatedProfile: Profile) {
+    return updatedProfile?.verifiedInstitutionalAffiliation?.institutionalRoleEnum !== InstitutionalRole.OTHER
+      || !!updatedProfile?.verifiedInstitutionalAffiliation?.institutionalRoleOtherText;
 
-  validateInstitutionShortname() {
-    const {updatedProfile} = this.state;
-    if (updatedProfile && updatedProfile.verifiedInstitutionalAffiliation) {
-      return updatedProfile.verifiedInstitutionalAffiliation.institutionShortName;
-    }
-    return false;
-  }
-
-  validateInstitutionalRoleEnum() {
-    const {updatedProfile} = this.state;
-    if (updatedProfile && updatedProfile.verifiedInstitutionalAffiliation) {
-      return updatedProfile.verifiedInstitutionalAffiliation.institutionalRoleEnum;
-    }
-    return false;
-  }
-
-  validateInstitutionalRoleOtherText() {
-    const {updatedProfile} = this.state;
-    if (updatedProfile && updatedProfile.verifiedInstitutionalAffiliation) {
-      return updatedProfile.verifiedInstitutionalAffiliation.institutionalRoleEnum !== InstitutionalRole.OTHER
-            || !!updatedProfile.verifiedInstitutionalAffiliation.institutionalRoleOtherText;
-    }
-    return false;
   }
 
   render() {
@@ -369,12 +342,16 @@ export const AdminUser = withRouter(class extends React.Component<Props, State> 
       oldProfile
     } = this.state;
     const errors = validate({
-      'verifiedInstitutionalAffiliation': this.validateVerifiedInstitutionalAffiliation(),
-      'institutionShortName': this.validateInstitutionShortname(),
-      'institutionalRoleEnum': this.validateInstitutionalRoleEnum(),
-      'institutionalRoleOtherText': this.validateInstitutionalRoleOtherText(),
+      'contactEmail': !!updatedProfile?.contactEmail,
+      'verifiedInstitutionalAffiliation': !!updatedProfile?.verifiedInstitutionalAffiliation,
+      'institutionShortName': !!updatedProfile?.verifiedInstitutionalAffiliation?.institutionShortName,
+      'institutionalRoleEnum': !!updatedProfile?.verifiedInstitutionalAffiliation?.institutionalRoleEnum,
+      'institutionalRoleOtherText':
+        !!(updatedProfile?.verifiedInstitutionalAffiliation?.institutionalRoleEnum !== InstitutionalRole.OTHER
+          || updatedProfile?.verifiedInstitutionalAffiliation?.institutionalRoleOtherText),
       'institutionMembership': this.validateCheckEmailResponse(),
     }, {
+      contactEmail: {truthiness: true},
       verifiedInstitutionalAffiliation: {truthiness: true},
       institutionShortName: {truthiness: true},
       institutionalRoleEnum: {truthiness: true},
@@ -417,19 +394,7 @@ export const AdminUser = withRouter(class extends React.Component<Props, State> 
                 width={33}
             />
           </FlexRow>
-          <TooltipTrigger
-              data-test-id='user-admin-errors-tooltip'
-              content={
-                errors && !enableSave(oldProfile, updatedProfile, errors) &&
-                <BulletAlignedUnorderedList>
-                  {errors.verifiedInstitutionalAffiliation && <li>Verified institutional affiliation can't be unset or left blank</li>}
-                  {errors.institutionShortName && <li>You must choose an institution</li>}
-                  {errors.institutionalRoleEnum && <li>You must select the user's role at the institution</li>}
-                  {errors.institutionalRoleOtherText && <li>You must describe the user's role if you select Other</li>}
-                  {errors.institutionMembership && <li>The user's contact email does not match the selected institution</li>}
-                </BulletAlignedUnorderedList>
-              }
-          >
+          <ErrorsTooltip errors={errors}>
             <Button
                 type='primary'
                 disabled={!enableSave(oldProfile, updatedProfile, errors)}
@@ -441,7 +406,7 @@ export const AdminUser = withRouter(class extends React.Component<Props, State> 
             >
               Save
             </Button>
-          </TooltipTrigger>
+          </ErrorsTooltip>
         </FlexRow>
         <FlexRow>
           <FlexColumn style={{width: '33%', marginRight: '1rem'}}>

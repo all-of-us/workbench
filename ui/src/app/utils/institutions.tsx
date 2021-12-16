@@ -20,9 +20,9 @@ import {ControlledTierBadge, RegisteredTierBadge} from 'app/components/icons';
 /**
  * Checks that the entered email address is a valid member of the chosen institution.
  */
-export async function validateEmail(contactEmail: string, institutionShortName: string, aborter: AbortController) {
+export async function checkInstitutionalEmail(contactEmail: string, institutionShortName: string, aborter: AbortController) {
   try {
-    return await institutionApi().checkEmail(institutionShortName, {contactEmail: contactEmail}, {signal: aborter.signal});
+    return await institutionApi().checkEmail(institutionShortName, {contactEmail}, {signal: aborter.signal});
   } catch (e) {
     if (isAbortError(e)) {
       // Ignore abort errors.

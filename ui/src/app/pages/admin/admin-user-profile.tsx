@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {useParams} from 'react-router-dom';
+import validate from 'validate.js';
 
 import {
   adminGetProfile,
@@ -14,7 +15,9 @@ import {
   getPublicInstitutionDetails,
   ContactEmailTextInput,
   enableSave,
-
+  getUpdatedProfileValue,
+  updateAccountProperties,
+  ErrorsTooltip,
 } from './admin-user-common';
 import {FadeBox} from 'app/components/containers';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
@@ -23,9 +26,10 @@ import {CaretRight} from 'app/components/icons';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {displayNameForTier} from 'app/utils/access-tiers';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {reactStyles} from 'app/utils';
-import {Profile, PublicInstitutionDetails} from 'generated/fetch';
+import {isBlank, reactStyles} from 'app/utils';
+import {InstitutionalRole, Profile, PublicInstitutionDetails} from 'generated/fetch';
 import {Button} from 'app/components/buttons';
+import {checkInstitutionalEmail} from 'app/utils/institutions';
 
 const styles = reactStyles({
   ...commonStyles,
@@ -93,16 +97,16 @@ interface EditableFieldsProps {
   oldProfile: Profile,
   updatedProfile: Profile,
   institutions?: PublicInstitutionDetails[],
+  onChangeEmail: (contactEmail: string) => void,
 }
-const EditableFields = ({oldProfile, updatedProfile, institutions}: EditableFieldsProps) => {
+const EditableFields = ({oldProfile, updatedProfile, institutions, onChangeEmail}: EditableFieldsProps) => {
   return <FlexRow style={styles.editableFields}>
     <FlexColumn>
       <div style={styles.subHeader}>Edit information</div>
       <FlexRow>
         <ContactEmailTextInput
           contactEmail={updatedProfile.contactEmail}
-          //onChange={email => this.setContactEmail(email)}
-          onChange={() => {}}/>
+          onChange={email => onChangeEmail(email)}/>
         <InstitutionDropdown
           institutions={institutions}
           initialInstitutionShortName={updatedProfile.verifiedInstitutionalAffiliation?.institutionShortName}
@@ -131,12 +135,21 @@ const EditableFields = ({oldProfile, updatedProfile, institutions}: EditableFiel
   </FlexRow>;
 }
 
+enum EmailValidationStatus {
+  UNCHECKED,
+  VALID,
+  INVALID,
+  API_ERROR
+}
+
 export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
   const {config: {gsuiteDomain}} = useStore(serverConfigStore);
   const {usernameWithoutGsuiteDomain} = useParams<MatchParams>();
-  const [oldProfile, setOldProfile] = useState(null);
-  const [updatedProfile, setUpdatedProfile] = useState(null);
-  const [institutions, setInstitutions] = useState([]);
+  const [oldProfile, setOldProfile] = useState<Profile>(null);
+  const [updatedProfile, setUpdatedProfile] = useState<Profile>(null);
+  const [institutions, setInstitutions] = useState<PublicInstitutionDetails[]>([]);
+  const [emailValidationAborter, setEmailValidationAborter] = useState<AbortController>(null);
+  const [emailValidationStatus, setEmailValidationStatus] = useState(EmailValidationStatus.UNCHECKED);
 
   useEffect(() => {
     const onMount = async() => {
@@ -149,6 +162,65 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
     onMount();
   }, []);
 
+  const validateAffiliation = async(contactEmail: string, institutionShortName: string) => {
+    // clean up any currently-running validation
+    if (emailValidationAborter) {
+      emailValidationAborter.abort();
+    }
+
+    // clean up any previously-run validation
+    setEmailValidationStatus(EmailValidationStatus.UNCHECKED);
+
+    if (!isBlank(contactEmail) && !isBlank(institutionShortName)) {
+      const aborter = new AbortController();
+      setEmailValidationAborter(aborter);
+      try {
+        const result = await checkInstitutionalEmail(contactEmail, institutionShortName, aborter);
+        setEmailValidationStatus(result?.isValidMember ? EmailValidationStatus.VALID : EmailValidationStatus.INVALID);
+      } catch (e) {
+        setEmailValidationStatus(EmailValidationStatus.API_ERROR);
+      }
+    }
+  }
+
+  const changed = (field): boolean => !!getUpdatedProfileValue(oldProfile, updatedProfile, field);
+
+  useEffect(() => {
+    const onProfileChange = async () => {
+      const {contactEmail, verifiedInstitutionalAffiliation} = updatedProfile;
+      if (changed('contactEmail') || changed('verifiedInstitutionalAffiliation')) {
+        await validateAffiliation(contactEmail, verifiedInstitutionalAffiliation?.institutionShortName);
+      }
+    }
+
+    if (updatedProfile) {
+      onProfileChange();
+    }
+  }, [updatedProfile])
+
+  const updateProfile = (newUpdates: Partial<Profile>) => {
+    setUpdatedProfile({ ...updatedProfile, ...newUpdates});
+  }
+
+  const errors = validate({
+    'contactEmail': !!updatedProfile?.contactEmail,
+    'verifiedInstitutionalAffiliation': !!updatedProfile?.verifiedInstitutionalAffiliation,
+    'institutionShortName': !!updatedProfile?.verifiedInstitutionalAffiliation?.institutionShortName,
+    'institutionalRoleEnum': !!updatedProfile?.verifiedInstitutionalAffiliation?.institutionalRoleEnum,
+    'institutionalRoleOtherText':
+      !!(updatedProfile?.verifiedInstitutionalAffiliation?.institutionalRoleEnum !== InstitutionalRole.OTHER
+        || updatedProfile?.verifiedInstitutionalAffiliation?.institutionalRoleOtherText),
+    'institutionMembership':
+      (emailValidationStatus === EmailValidationStatus.VALID || emailValidationStatus === EmailValidationStatus.UNCHECKED),
+  }, {
+    contactEmail: {truthiness: true},
+    verifiedInstitutionalAffiliation: {truthiness: true},
+    institutionShortName: {truthiness: true},
+    institutionalRoleEnum: {truthiness: true},
+    institutionalRoleOtherText: {truthiness: true},
+    institutionMembership: {truthiness: true}
+  });
+
   return updatedProfile && <FadeBox style={styles.fadeBox}>
     <FlexRow style={{alignItems: 'center'}}>
       <UserAdminTableLink/>
@@ -157,16 +229,28 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
     </FlexRow>
     <FlexRow style={{paddingTop: '1em'}}>
       <UneditableFields profile={updatedProfile}/>
-      <EditableFields oldProfile={oldProfile} updatedProfile={updatedProfile} institutions={institutions}/>
+      <EditableFields
+        oldProfile={oldProfile}
+        updatedProfile={updatedProfile}
+        institutions={institutions}
+        onChangeEmail={(contactEmail) => updateProfile({contactEmail: contactEmail.trim()})}/>
     </FlexRow>
     <FlexRow style={{paddingTop: '1em'}}>
-      <Button
-        type='primary'
-        disabled={!enableSave(oldProfile, updatedProfile, null)}
-        onClick={() => {}}
-      >
-        Save
+      <ErrorsTooltip errors={errors}>
+        <Button
+          type='primary'
+          disabled={!enableSave(oldProfile, updatedProfile, errors)}
+          onClick={async() => {
+            spinnerProps.showSpinner();
+            const response = await updateAccountProperties(oldProfile, updatedProfile);
+            setOldProfile(response);
+            setUpdatedProfile(response);
+            spinnerProps.hideSpinner();
+          }}
+        >
+          Save
       </Button>
+      </ErrorsTooltip>
       <Button
         type='secondary'
         onClick={() => setUpdatedProfile(oldProfile)}
