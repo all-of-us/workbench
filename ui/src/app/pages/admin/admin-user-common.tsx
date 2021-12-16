@@ -7,7 +7,7 @@ import {Link} from 'react-router-dom';
 import * as fp from 'lodash/fp';
 import {Dropdown} from 'primereact/dropdown';
 
-import {formatFreeCreditsUSD, reactStyles} from 'app/utils';
+import {formatFreeCreditsUSD, reactStyles, usernameWithDomain} from 'app/utils';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {
   AccountPropertyUpdate,
@@ -63,8 +63,7 @@ export const commonStyles = reactStyles({
 });
 
 export const adminGetProfile = async(usernameWithoutGsuiteDomain: string): Promise<Profile> => {
-  const {gsuiteDomain} = serverConfigStore.get().config;
-  return userAdminApi().getUserByUsername(usernameWithoutGsuiteDomain + '@' + gsuiteDomain);
+  return userAdminApi().getUserByUsername(usernameWithDomain(usernameWithoutGsuiteDomain));
 }
 
 export const getPublicInstitutionDetails = async(): Promise<PublicInstitutionDetails[]> => {
