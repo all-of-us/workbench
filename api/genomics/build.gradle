@@ -4,8 +4,9 @@ apply plugin: 'idea'
 repositories {
     mavenCentral()
     maven {
-        // temporary fix for log4shell
-        // TODO: switch to libs-release when maven stabilizes
+        url 'https://broadinstitute.jfrog.io/broadinstitute/libs-release/'
+    }
+    maven {
         url 'https://broadinstitute.jfrog.io/broadinstitute/libs-snapshot/'
     }
 }
