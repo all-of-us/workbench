@@ -9,7 +9,13 @@ import {Dropdown} from 'primereact/dropdown';
 
 import {formatFreeCreditsUSD, reactStyles} from 'app/utils';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {InstitutionalRole, Profile, PublicInstitutionDetails, VerifiedInstitutionalAffiliation} from 'generated/fetch';
+import {
+  AccountPropertyUpdate,
+  InstitutionalRole,
+  Profile,
+  PublicInstitutionDetails,
+  VerifiedInstitutionalAffiliation
+} from 'generated/fetch';
 import {serverConfigStore} from 'app/utils/stores';
 import {institutionApi, userAdminApi} from 'app/services/swagger-fetch-clients';
 import {ClrIcon} from 'app/components/icons';
@@ -94,6 +100,33 @@ export const getFreeCreditLimitOptions = (freeTierDollarQuota?: number) => {
 export const getFreeCreditUsage = (profile: Profile): string => {
   const {freeTierDollarQuota, freeTierUsage} = profile;
   return `${formatFreeCreditsUSD(freeTierUsage)} used of ${formatFreeCreditsUSD(freeTierDollarQuota)} limit`;
+}
+
+// returns the updated profile value only if it has changed
+export const getUpdatedProfileValue = (oldProfile: Profile, updatedProfile: Profile, attribute: string) => {
+  const oldValue = fp.get([attribute], oldProfile);
+  const updatedValue = fp.get([attribute], updatedProfile);
+  if (!fp.isEqual(oldValue, updatedValue)) {
+    return updatedValue;
+  } else {
+    return null;
+  }
+}
+
+export const enableSave = (oldProfile: Profile, updatedProfile: Profile, errors): boolean =>
+  !errors && !fp.isEqual(oldProfile, updatedProfile);
+
+export const updateAccountProperties = async(oldProfile: Profile, updatedProfile: Profile): Promise<Profile> => {
+  const {username} = updatedProfile;
+  const request: AccountPropertyUpdate = {
+    username,
+    freeCreditsLimit: getUpdatedProfileValue(oldProfile, updatedProfile, 'freeTierDollarQuota'),
+    contactEmail: getUpdatedProfileValue(oldProfile, updatedProfile, 'contactEmail'),
+    affiliation: getUpdatedProfileValue(oldProfile, updatedProfile, 'verifiedInstitutionalAffiliation'),
+    accessBypassRequests: [],  // coming soon: RW-4958
+  };
+
+  return userAdminApi().updateAccountProperties(request);
 }
 
 export const DropdownWithLabel =
