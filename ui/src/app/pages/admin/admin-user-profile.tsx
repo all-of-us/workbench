@@ -12,7 +12,9 @@ import {
   InstitutionalRoleDropdown,
   InstitutionalRoleOtherTextInput,
   getPublicInstitutionDetails,
-  ContactEmailTextInput
+  ContactEmailTextInput,
+  enableSave,
+
 } from './admin-user-common';
 import {FadeBox} from 'app/components/containers';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
@@ -23,6 +25,7 @@ import {displayNameForTier} from 'app/utils/access-tiers';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
 import {Profile, PublicInstitutionDetails} from 'generated/fetch';
+import {Button} from 'app/components/buttons';
 
 const styles = reactStyles({
   ...commonStyles,
@@ -87,38 +90,38 @@ const UneditableFields = (props: {profile: Profile}) => {
 }
 
 interface EditableFieldsProps {
-  profile: Profile,
-  originalProfile: Profile,
+  oldProfile: Profile,
+  updatedProfile: Profile,
   institutions?: PublicInstitutionDetails[],
 }
-const EditableFields = ({profile, originalProfile, institutions}: EditableFieldsProps) => {
+const EditableFields = ({oldProfile, updatedProfile, institutions}: EditableFieldsProps) => {
   return <FlexRow style={styles.editableFields}>
     <FlexColumn>
       <div style={styles.subHeader}>Edit information</div>
       <FlexRow>
         <ContactEmailTextInput
-          contactEmail={profile.contactEmail}
+          contactEmail={updatedProfile.contactEmail}
           //onChange={email => this.setContactEmail(email)}
           onChange={() => {}}/>
         <InstitutionDropdown
           institutions={institutions}
-          initialInstitutionShortName={profile.verifiedInstitutionalAffiliation?.institutionShortName}
+          initialInstitutionShortName={updatedProfile.verifiedInstitutionalAffiliation?.institutionShortName}
           //onChange={async(event) => this.setVerifiedInstitutionOnProfile(event.value)}
           onChange={() => {}}/>
       </FlexRow>
       <FlexRow>
         <FreeCreditsDropdown
-          initialLimit={originalProfile.freeTierDollarQuota}
-          currentLimit={profile.freeTierDollarQuota}
+          initialLimit={oldProfile.freeTierDollarQuota}
+          currentLimit={updatedProfile.freeTierDollarQuota}
           //onChange={async(event) => this.setFreeTierCreditDollarLimit(event.value)}
           onChange={() => {}}/>
         <InstitutionalRoleDropdown
           institutions={institutions}
-          initialAffiliation={profile.verifiedInstitutionalAffiliation}
+          initialAffiliation={updatedProfile.verifiedInstitutionalAffiliation}
           //onChange={(event) => this.setInstitutionalRoleOnProfile(event.value)}
           onChange={() => {}}/>
         <InstitutionalRoleOtherTextInput
-          affiliation={profile.verifiedInstitutionalAffiliation}
+          affiliation={updatedProfile.verifiedInstitutionalAffiliation}
           // onChange={(value) => this.setState(
           //   fp.set(['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionalRoleOtherText'], value))
           // }
@@ -130,30 +133,45 @@ const EditableFields = ({profile, originalProfile, institutions}: EditableFields
 
 export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
   const {usernameWithoutGsuiteDomain} = useParams<MatchParams>();
-  const [profile, setProfile] = useState(null);
-  const [originalProfile, setOriginalProfile] = useState(null);
+  const [oldProfile, setOldProfile] = useState(null);
+  const [updatedProfile, setUpdatedProfile] = useState(null);
   const [institutions, setInstitutions] = useState([]);
 
   useEffect(() => {
     const onMount = async() => {
       const p = await adminGetProfile(usernameWithoutGsuiteDomain);
-      setOriginalProfile(p);
-      setProfile(p);
+      setOldProfile(p);
+      setUpdatedProfile(p);
       setInstitutions(await getPublicInstitutionDetails());
       spinnerProps.hideSpinner();
     }
     onMount();
   }, []);
 
-  return profile && <FadeBox style={styles.fadeBox}>
+  return updatedProfile && <FadeBox style={styles.fadeBox}>
     <FlexRow style={{alignItems: 'center'}}>
       <UserAdminTableLink/>
       <span style={styles.header}>User Profile Information</span>
       <UserAuditLink style={styles.auditLink} usernameWithoutDomain={usernameWithoutGsuiteDomain}>AUDIT <CaretRight/></UserAuditLink>
     </FlexRow>
     <FlexRow style={{paddingTop: '1em'}}>
-      <UneditableFields profile={profile}/>
-      <EditableFields profile={profile} originalProfile={originalProfile} institutions={institutions}/>
+      <UneditableFields profile={updatedProfile}/>
+      <EditableFields oldProfile={oldProfile} updatedProfile={updatedProfile} institutions={institutions}/>
+    </FlexRow>
+    <FlexRow style={{paddingTop: '1em'}}>
+      <Button
+        type='primary'
+        disabled={!enableSave(oldProfile, updatedProfile, null)}
+        onClick={() => {}}
+      >
+        Save
+      </Button>
+      <Button
+        type='secondary'
+        onClick={() => setUpdatedProfile(oldProfile)}
+      >
+        Cancel
+      </Button>
     </FlexRow>
   </FadeBox>;
 }

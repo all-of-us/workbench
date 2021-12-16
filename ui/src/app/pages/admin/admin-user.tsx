@@ -9,7 +9,6 @@ import {FlexColumn, FlexRow} from 'app/components/flex';
 import {SmallHeader} from 'app/components/headers';
 import {TextInputWithLabel, Toggle} from 'app/components/inputs';
 import {SpinnerOverlay} from 'app/components/spinners';
-import {userAdminApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {
   hasNewValidProps,
@@ -29,7 +28,6 @@ import {MatchParams, serverConfigStore} from 'app/utils/stores';
 import {
   AccessModule,
   AccessModuleStatus,
-  AccountPropertyUpdate,
   CheckEmailResponse,
   InstitutionalRole,
   InstitutionMembershipRequirement,
@@ -50,6 +48,7 @@ import {
   InstitutionalRoleOtherTextInput,
   getPublicInstitutionDetails,
   ContactEmailTextInput,
+  updateAccountProperties, enableSave,
 } from './admin-user-common';
 
 const styles = reactStyles({
@@ -277,11 +276,6 @@ export const AdminUser = withRouter(class extends React.Component<Props, State> 
     }
   }
 
-  isSaveDisabled(errors) {
-    const {oldProfile, updatedProfile} = this.state;
-    return fp.isEqual(oldProfile, updatedProfile) || errors;
-  }
-
   async setVerifiedInstitutionOnProfile(institutionShortName: string) {
     const {verifiedInstitutionOptions} = this.state;
     this.setState(fp.flow(
@@ -313,34 +307,6 @@ export const AdminUser = withRouter(class extends React.Component<Props, State> 
       fp.set(['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionalRoleEnum'], institutionalRoleEnum),
       fp.set(['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionalRoleOtherText'], undefined)
     ));
-  }
-
-  // returns the updated profile value only if it has changed
-  updatedProfileValue(attribute: string) {
-    const oldValue = fp.get(['oldProfile' , attribute], this.state);
-    const updatedValue = fp.get(['updatedProfile' , attribute], this.state);
-    if (!fp.isEqual(oldValue, updatedValue)) {
-      return updatedValue;
-    } else {
-      return null;
-    }
-  }
-
-  updateAccountProperties() {
-    const {updatedProfile} = this.state;
-    const {username} = updatedProfile;
-    const request: AccountPropertyUpdate = {
-      username,
-      freeCreditsLimit: this.updatedProfileValue('freeTierDollarQuota'),
-      contactEmail: this.updatedProfileValue('contactEmail'),
-      affiliation: this.updatedProfileValue('verifiedInstitutionalAffiliation'),
-      accessBypassRequests: [],  // coming soon: RW-4958
-    };
-
-    this.setState({loading: true});
-    userAdminApi().updateAccountProperties(request).then((response) => {
-      this.setState({oldProfile: response, updatedProfile: response, loading: false});
-    });
   }
 
   validateCheckEmailResponse() {
@@ -452,7 +418,7 @@ export const AdminUser = withRouter(class extends React.Component<Props, State> 
           <TooltipTrigger
               data-test-id='user-admin-errors-tooltip'
               content={
-                errors && this.isSaveDisabled(errors) &&
+                errors && !enableSave(oldProfile, updatedProfile, errors) &&
                 <BulletAlignedUnorderedList>
                   {errors.verifiedInstitutionalAffiliation && <li>Verified institutional affiliation can't be unset or left blank</li>}
                   {errors.institutionShortName && <li>You must choose an institution</li>}
@@ -464,8 +430,12 @@ export const AdminUser = withRouter(class extends React.Component<Props, State> 
           >
             <Button
                 type='primary'
-                disabled={this.isSaveDisabled(errors)}
-                onClick={() => this.updateAccountProperties()}
+                disabled={!enableSave(oldProfile, updatedProfile, errors)}
+                onClick={async() => {
+                  this.setState({loading: true});
+                  const response = await updateAccountProperties(oldProfile, updatedProfile);
+                  this.setState({oldProfile: response, updatedProfile: response, loading: false});
+                }}
             >
               Save
             </Button>
