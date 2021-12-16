@@ -37,7 +37,6 @@ import {BreadcrumbType} from 'app/utils/navigation';
 import {Redirect, Switch} from 'react-router-dom';
 import { authorityGuard, expiredGuard, registrationGuard} from './guards';
 import { AuthorityGuardedAction } from 'app/utils/authorities';
-import {AdminUserProfile} from 'app/pages/admin/admin-user-profile';
 
 const AccessRenewalPage = fp.flow(withRouteData, withRoutingSpinner)(AccessRenewal);
 const AdminBannerPage = fp.flow(withRouteData, withRoutingSpinner)(AdminBanner);
@@ -52,7 +51,6 @@ const InstitutionAdminPage = fp.flow(withRouteData, withRoutingSpinner)(AdminIns
 const InstitutionEditAdminPage = fp.flow(withRouteData, withRoutingSpinner)(AdminInstitutionEdit);
 const ProfilePage = fp.flow(withRouteData, withRoutingSpinner)(ProfileComponent);
 const UserAdminPage = fp.flow(withRouteData, withRoutingSpinner)(AdminUser);
-const UserAdminProfilePage = fp.flow(withRouteData, withRoutingSpinner)(AdminUserProfile);
 const UsersAdminPage = fp.flow(withRouteData, withRoutingSpinner)(AdminUsers);
 const UserAuditPage = fp.flow(withRouteData, withRoutingSpinner)(UserAudit);
 const WorkspaceWrapperPage = fp.flow(withRouteData, withRoutingSpinner)(WorkspaceWrapper);
@@ -109,10 +107,6 @@ export const SignedInRoutes = () => {
     <AppRoute exact path='/admin/users/:usernameWithoutGsuiteDomain'
               guards={[authorityGuard(AuthorityGuardedAction.USER_ADMIN)]}>
       <UserAdminPage routeData={{title: 'User Admin', minimizeChrome: true}}/>
-    </AppRoute>
-    <AppRoute exact path='/admin/users-tmp/:usernameWithoutGsuiteDomain'
-              guards={[authorityGuard(AuthorityGuardedAction.USER_ADMIN)]}>
-      <UserAdminProfilePage routeData={{title: 'User Profile Admin', minimizeChrome: true}}/>
     </AppRoute>
     <AppRoute exact path='/admin/user-audit'
               guards={[authorityGuard(AuthorityGuardedAction.USER_AUDIT)]}>
