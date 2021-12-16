@@ -9,12 +9,14 @@ repositories {
 apply plugin: 'com.github.lkishalmi.gatling'
 apply plugin: 'scala'
 
-// Latest Gatling scala defaults to '2.12.3'
+// [TODO outdated?] Latest Gatling scala defaults to '2.12.3'
 def projectScalaVersion = '2.12.3'
 
+def gatlingVersion = '3.3.0'
+
 dependencies {
-    compile group: 'io.gatling', name: 'gatling-core', version: '3.0.2'
-    compile group: 'io.gatling', name: 'gatling-http', version: '3.0.2'
+    compile group: 'io.gatling', name: 'gatling-core', version: gatlingVersion
+    compile group: 'io.gatling', name: 'gatling-http', version: gatlingVersion
     compile group: 'org.scala-lang', name: 'scala-library', version: projectScalaVersion
 }
 
