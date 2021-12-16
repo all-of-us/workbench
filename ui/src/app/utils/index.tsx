@@ -14,11 +14,9 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 import {ReplaySubject} from 'rxjs/ReplaySubject';
-import {cdrVersionStore, profileStore, withStore} from './stores';
+import {cdrVersionStore, profileStore, serverConfigStore, useStore, withStore} from './stores';
 
 const {useEffect, useState} = React;
-
-export const WINDOW_REF = 'window-ref';
 
 export function isBlank(toTest: String): boolean {
   if (toTest === null || toTest === undefined) {
@@ -520,4 +518,9 @@ export const cond = <T extends unknown>(...args: ([boolean, () => T] | (() => T)
 
 export const usernameWithoutDomain = (username: string) => {
   return username ? username.substring(0, username.indexOf('@')) : '';
+};
+
+export const usernameWithDomain = (usernameWithoutGsuiteDomain: string) => {
+  const {config: {gsuiteDomain}} = useStore(serverConfigStore);
+  return usernameWithoutGsuiteDomain + '@' + gsuiteDomain;
 };
