@@ -24,7 +24,7 @@ import {
   getRegisteredTierConfig,
   validateEmail
 } from 'app/utils/institutions';
-import {MatchParams, serverConfigStore} from 'app/utils/stores';
+import {MatchParams, serverConfigStore, useStore} from 'app/utils/stores';
 import {
   AccessModule,
   AccessModuleStatus,
@@ -255,8 +255,10 @@ export const AdminUser = withRouter(class extends React.Component<Props, State> 
   }
 
   async getUser() {
+    const {usernameWithoutGsuiteDomain} = this.props.match.params;
+    const {gsuiteDomain} = serverConfigStore.get().config;
     try {
-      const profile = await adminGetProfile(this.props.match.params.usernameWithoutGsuiteDomain);
+      const profile = await adminGetProfile(usernameWithoutGsuiteDomain + '@' + gsuiteDomain);
       this.setState({oldProfile: profile, updatedProfile: profile, profileLoadingError: ''});
     } catch (error) {
       this.setState({profileLoadingError: 'Could not find user - please check spelling of username and try again'});

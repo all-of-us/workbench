@@ -7,7 +7,7 @@ import {Link} from 'react-router-dom';
 import * as fp from 'lodash/fp';
 import {Dropdown} from 'primereact/dropdown';
 
-import {formatFreeCreditsUSD, reactStyles, usernameWithDomain} from 'app/utils';
+import {formatFreeCreditsUSD, reactStyles} from 'app/utils';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {
   AccountPropertyUpdate,
@@ -16,7 +16,6 @@ import {
   PublicInstitutionDetails,
   VerifiedInstitutionalAffiliation
 } from 'generated/fetch';
-import {serverConfigStore} from 'app/utils/stores';
 import {institutionApi, userAdminApi} from 'app/services/swagger-fetch-clients';
 import {ClrIcon} from 'app/components/icons';
 import {FlexColumn} from 'app/components/flex';
@@ -62,8 +61,8 @@ export const commonStyles = reactStyles({
   },
 });
 
-export const adminGetProfile = async(usernameWithoutGsuiteDomain: string): Promise<Profile> => {
-  return userAdminApi().getUserByUsername(usernameWithDomain(usernameWithoutGsuiteDomain));
+export const adminGetProfile = async(usernameWithDomain: string): Promise<Profile> => {
+  return userAdminApi().getUserByUsername(usernameWithDomain);
 }
 
 export const getPublicInstitutionDetails = async(): Promise<PublicInstitutionDetails[]> => {

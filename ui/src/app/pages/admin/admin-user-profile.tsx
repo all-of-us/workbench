@@ -18,7 +18,7 @@ import {
 } from './admin-user-common';
 import {FadeBox} from 'app/components/containers';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
-import {MatchParams} from 'app/utils/stores';
+import {MatchParams, serverConfigStore, useStore} from 'app/utils/stores';
 import {CaretRight} from 'app/components/icons';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {displayNameForTier} from 'app/utils/access-tiers';
@@ -132,6 +132,7 @@ const EditableFields = ({oldProfile, updatedProfile, institutions}: EditableFiel
 }
 
 export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
+  const {config: {gsuiteDomain}} = useStore(serverConfigStore);
   const {usernameWithoutGsuiteDomain} = useParams<MatchParams>();
   const [oldProfile, setOldProfile] = useState(null);
   const [updatedProfile, setUpdatedProfile] = useState(null);
@@ -139,7 +140,7 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
 
   useEffect(() => {
     const onMount = async() => {
-      const p = await adminGetProfile(usernameWithoutGsuiteDomain);
+      const p = await adminGetProfile(usernameWithoutGsuiteDomain + '@' + gsuiteDomain);
       setOldProfile(p);
       setUpdatedProfile(p);
       setInstitutions(await getPublicInstitutionDetails());
