@@ -341,7 +341,7 @@ project.tasks.ideaModule.dependsOn(generateSwaggerCode)
 // Swagger sources, per the swaggerSources tuple above.
 project.tasks.compileGeneratedJava.dependsOn(generateSwaggerCode)
 
-project.tasks.bootJar.dependsOn(['compileGeneratedJava', 'generate_appengine_yaml',
+project.tasks.appengineStage.dependsOn(['compileGeneratedJava', 'generate_appengine_yaml',
                                  'generate_appengine_cron_yaml'])
 
 // Clear out generated Java sorces before cleaning the project.
@@ -565,6 +565,12 @@ appengine {  // App Engine tasks configuration
         promote = true              // default - & make this the current version
         // Place holder for required field, we are not using gradle to deploy this APP.
         projectId = "all-of-us-workbench-test"
+        appEngineDirectory = "src/main/webapp/WEB-INF"
+    }
+
+    stage {
+        appEngineDirectory = "src/main/webapp/WEB-INF"
+        extraFilesDirectories = "src/main/webapp"
     }
 }
 

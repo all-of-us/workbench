@@ -1,7 +1,5 @@
 service: api
 runtime: java11
-threadsafe: true
-application: "all-of-us-workbench-test"
 env_variables:
   GAE_PROFILER_MODE: "cpu,heap"
   JAVA_USER_OPTS: "-Djava.util.logging.config.file=webapps/root/WEB-INF/logging.properties"
@@ -13,19 +11,19 @@ env_variables:
   CDR_DATASOURCE_USERNAME: "${CDR_DB_USER}"
   CDR_DATASOURCE_PASSWORD: "${CDR_DB_PASSWORD}"
 error_handlers:
-  file: server_unavailable.html
+  - file: server_unavailable.html
 handlers:
-- url: /static/**
-  static_dir: static
-  upload: static/.*\.(js|html|sh)$
+- url: /static/(.*\.(js|sh))$
+  static_files: static/\1
+  upload: static/.*\.(js|sh)$
   http_headers:
     Strict-Transport-Security: "max-age=31536000; includeSubDomains; preload"
     X-XSS-Protection: "1"
     X-Content-Type-Options: "nosniff"
     Content-Security-Policy: "default-src 'none'; frame-ancestors 'none'; report-uri /content-security-report"
-instance_class: "${GAE_INSTANCE_CLASS}"
+instance_class: ${GAE_INSTANCE_CLASS}
 automatic_scaling:
  min_idle_instances: ${GAE_MIN_IDLE_INSTANCES}
- max_instances: "{GAE_MAX_INSTANCES}
+ max_instances: ${GAE_MAX_INSTANCES}
 inbound_services:
--warmup
+  - warmup

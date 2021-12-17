@@ -5,4 +5,4 @@ ENV.each { |k, v| yaml.gsub! "${#{k}}", v }
 # does not do it when loading environment files.
 yaml.gsub! "$DB_HOST", ENV["DB_HOST"]
 
-File.write("src/main/appengine/app.yaml", yaml)
+File.write("src/main/webapp/WEB-INF/app.yaml", yaml)

@@ -2912,8 +2912,8 @@ def deploy_app(cmd_name, args, with_cron, with_queue)
   run_inline_or_log(op.opts.dry_run, %W{
     gcloud app deploy
       build/staged-app/app.yaml
-  } + (with_cron ? %W{build/staged-app/WEB-INF/appengine-generated/cron.yaml} : []) +
-    (with_queue ? %W{build/staged-app/WEB-INF/appengine-generated/queue.yaml} : []) +
+  } + (with_cron ? %W{build/staged-app/WEB-INF/cron.yaml} : []) +
+    (with_queue ? %W{build/staged-app/WEB-INF/queue.yaml} : []) +
     %W{--project #{gcc.project} #{promote}} +
     (op.opts.quiet ? %W{--quiet} : []) +
     (op.opts.version ? %W{--version #{op.opts.version}} : []))

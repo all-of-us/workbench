@@ -2,7 +2,6 @@ package org.pmiops.workbench.monitoring;
 
 import com.google.api.MonitoredResource;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
 import io.opencensus.exporter.stats.stackdriver.StackdriverStatsConfiguration;
 import io.opencensus.exporter.stats.stackdriver.StackdriverStatsExporter;
@@ -14,6 +13,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.inject.Provider;
 import org.jetbrains.annotations.NotNull;
+import org.pmiops.workbench.config.AppEngineConfig;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.springframework.stereotype.Service;
 
@@ -118,30 +118,27 @@ public class StackdriverStatsExporterService {
 
   private String getNodeId() {
     // See https://cloud.google.com/appengine/docs/standard/java11/runtime#environment_variables
-    String nodeId = System.getenv("GAE_INSTANCE");
+    Optional<String> nodeId = AppEngineConfig.getGaeNodeId();
     logger.log(Level.INFO, String.format("GAE_INSTANCE is %s.", nodeId));
-    if (Strings.isNullOrEmpty(nodeId)) {
+    if (!nodeId.isPresent()) {
       final String newNodeId = getSpoofedNodeId();
       if (workbenchConfigProvider.get().server.shortName.equals("Local")) {
         logger.log(Level.FINE, String.format("Spoofed nodeID for local process is %s.", newNodeId));
       } else {
         logger.warning(
             String.format(
-                "Failed to retrieve instance ID from ModulesService. Using %s instead.",
+                "Failed to retrieve instance ID from environment variable. Using %s instead.",
                 newNodeId));
       }
       return newNodeId;
     } else {
-      return nodeId;
+      return nodeId.get();
     }
   }
 
   /**
-   * Stackdriver instances have very long, random ID strings. When running locally, however, the
-   * ModulesService throws an exception, so we need to assign non-conflicting and non-repeating ID
-   * strings.
-   *
-   * @return
+   * Stackdriver instances have very long, random ID strings. Assign non-conflicting and
+   * non-repeating ID strings to avoid confilication.
    */
   private String getSpoofedNodeId() {
     if (!spoofedNodeId.isPresent()) {

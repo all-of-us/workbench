@@ -1,7 +1,6 @@
 package org.pmiops.workbench.monitoring;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 
 import com.google.api.MonitoredResource;
@@ -24,7 +23,6 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 public class StackdriverStatsExporterServiceTest {
 
   private static final String PROJECT_ID = "fake-project";
-  private static final String FOUND_NODE_ID = "node-11001001";
   @Autowired private ModulesService mockModulesService;
   @Autowired private StackdriverStatsExporterService exporterService;
 
@@ -46,8 +44,6 @@ public class StackdriverStatsExporterServiceTest {
 
   @Test
   public void testMakeConfiguration() {
-    doReturn(FOUND_NODE_ID).when(mockModulesService).getCurrentInstanceId();
-
     StackdriverStatsConfiguration statsConfiguration =
         exporterService.makeStackdriverStatsConfiguration();
     assertThat(statsConfiguration.getProjectId()).isEqualTo(PROJECT_ID);
@@ -58,7 +54,8 @@ public class StackdriverStatsExporterServiceTest {
 
     final Map<String, String> labelToValue = monitoredResource.getLabelsMap();
     assertThat(statsConfiguration.getMonitoredResource().getLabelsMap()).isNotEmpty();
-    assertThat(labelToValue.get("node_id")).isEqualTo(FOUND_NODE_ID);
+    // Non empty SpoofedNodeId is created
+    assertThat(labelToValue.get("node_id").startsWith("unknown-")).isTrue();
   }
 
   @Test
