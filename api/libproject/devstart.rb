@@ -1825,7 +1825,7 @@ def write_db_creds_file(project, cdr_db_name, root_password, workbench_password,
   if db_creds_file
     begin
       db_creds_file.puts "DB_CONNECTION_STRING=jdbc:google:mysql://#{instance_name}/workbench?rewriteBatchedStatements=true"
-      db_creds_file.puts "DB_DRIVER=com.mysql.jdbc.GoogleDriver"
+      db_creds_file.puts "DB_DRIVER=com.mysql.jdbc.Driver"
       db_creds_file.puts "DB_HOST=127.0.0.1"
       db_creds_file.puts "DB_NAME=workbench"
       # TODO: make our CDR migration scripts update *all* CDR versions listed in the cdr_version

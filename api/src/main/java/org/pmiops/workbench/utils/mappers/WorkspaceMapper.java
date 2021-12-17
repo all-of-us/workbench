@@ -66,7 +66,6 @@ public interface WorkspaceMapper {
         toApiWorkspace(dbWorkspace, firecloudWorkspaceResponse.getWorkspace()),
         firecloudWorkspaceResponse.getAccessLevel());
   }
-  ;
 
   @Mapping(target = "timeReviewed", ignore = true)
   @Mapping(target = "populationDetails", source = "specificPopulationsEnum")

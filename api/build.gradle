@@ -224,6 +224,11 @@ task generate_appengine_yaml(type: Exec) {
     args "libproject/generate_appengine_yaml.rb"
 }
 
+// Generate AppEngine Web Configration XML file
+task generate_appengine_web_xml(type: Exec) {
+    executable "ruby"
+    args "libproject/generate_appengine_web_xml.rb"
+}
 
 // Spotless code linter plugin settings
 spotless {
@@ -577,7 +582,6 @@ appengine {  // App Engine tasks configuration
 bootRun {
     environment = [
         'GOOGLE_APPLICATION_CREDENTIALS': file("$rootDir/sa-key.json").getAbsolutePath(),
-        'WORKBENCH_PROPERTY_IS_LOCAL': 'true'
     ]
 }
 

@@ -3,7 +3,7 @@ runtime: java11
 env_variables:
   GAE_PROFILER_MODE: "cpu,heap"
   JAVA_USER_OPTS: "-Djava.util.logging.config.file=webapps/root/WEB-INF/logging.properties"
-  DB_DRIVER: "${DB_DRIVER}"
+  DB_DRIVER: "com.mysql.jdbc.Driver"
   DB_CONNECTION_STRING: "${DB_CONNECTION_STRING}"
   WORKBENCH_DB_USER: "${WORKBENCH_DB_USER}"
   WORKBENCH_DB_PASSWORD: "${WORKBENCH_DB_PASSWORD}"
