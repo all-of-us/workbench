@@ -13,7 +13,7 @@ import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
-import java.time.ZoneOffset;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -54,7 +54,7 @@ public class FieldSetQueryBuilder {
 
   private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat(DATE_FORMAT_PATTERN);
   private static final DateTimeFormatter DATE_TIME_FORMAT =
-      DateTimeFormatter.ofPattern(DATE_TIME_FORMAT_PATTERN).withZone(ZoneOffset.UTC);
+      DateTimeFormatter.ofPattern(DATE_TIME_FORMAT_PATTERN).withZone(ZoneId.of("UTC"));
 
   private final CohortQueryBuilder cohortQueryBuilder;
   private final BigQueryService bigQueryService;
