@@ -12,6 +12,9 @@ import com.google.common.collect.Iterables;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -20,8 +23,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.cohortbuilder.QueryConfiguration.ColumnInfo;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfig;
@@ -53,7 +54,7 @@ public class FieldSetQueryBuilder {
 
   private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat(DATE_FORMAT_PATTERN);
   private static final DateTimeFormatter DATE_TIME_FORMAT =
-      DateTimeFormat.forPattern(DATE_TIME_FORMAT_PATTERN).withZoneUTC();
+      DateTimeFormatter.ofPattern(DATE_TIME_FORMAT_PATTERN).withZone(ZoneOffset.UTC);
 
   private final CohortQueryBuilder cohortQueryBuilder;
   private final BigQueryService bigQueryService;
@@ -317,7 +318,7 @@ public class FieldSetQueryBuilder {
         try {
           long timestamp =
               FieldValues.toTimestampMicroseconds(
-                  DATE_TIME_FORMAT.parseDateTime(columnFilter.getValueDate()));
+                  Instant.from(DATE_TIME_FORMAT.parse(columnFilter.getValueDate())));
           queryState.paramMap.put(paramName, QueryParameterValue.timestamp(timestamp));
         } catch (IllegalArgumentException e) {
           throw new BadRequestException(
@@ -752,7 +753,7 @@ public class FieldSetQueryBuilder {
             value = fieldValue.getStringValue();
             break;
           case TIMESTAMP:
-            value = DATE_TIME_FORMAT.print(FieldValues.getInstant(fieldValue).toEpochMilli());
+            value = DATE_TIME_FORMAT.format(FieldValues.getInstant(fieldValue));
             break;
           default:
             throw new IllegalStateException("Unrecognized column type: " + columnConfig.type);
