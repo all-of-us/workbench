@@ -15,6 +15,8 @@ import com.google.cloud.bigquery.TableId;
 import com.google.cloud.bigquery.TableResult;
 import com.google.common.annotations.VisibleForTesting;
 import java.time.Duration;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -24,8 +26,6 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import javax.servlet.http.HttpServletResponse;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.dataset.BigQueryDataSetTableInfo;
@@ -147,8 +147,9 @@ public class BigQueryService {
     if (row.get(index).isNull()) {
       return null;
     }
-    DateTimeFormatter df = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss zzz").withZoneUTC();
-    return df.print(FieldValues.getInstant(row.get(index)).toEpochMilli());
+    DateTimeFormatter df =
+        DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss zzz").withZone(ZoneId.of("UTC"));
+    return df.format(FieldValues.getInstant(row.get(index)));
   }
 
   public String getDate(List<FieldValue> row, int index) {

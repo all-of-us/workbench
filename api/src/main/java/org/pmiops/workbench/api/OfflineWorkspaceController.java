@@ -1,10 +1,10 @@
 package org.pmiops.workbench.api;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeComparator;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -35,12 +35,7 @@ public class OfflineWorkspaceController implements OfflineWorkspaceApiDelegate {
       // 3. Update workspace
       workspaceList =
           workspaceList.stream()
-              .filter(
-                  workspace -> {
-                    DateTime workspaceCreationDate = new DateTime(workspace.getCreationTime());
-                    DateTime workspaceModifiedDate = new DateTime(workspace.getLastModifiedTime());
-                    return checkReviewDate(workspaceCreationDate, workspaceModifiedDate);
-                  })
+              .filter(this::needsReview)
               .map(
                   filteredWorkspace -> {
                     filteredWorkspace.setNeedsReviewPrompt(true);
@@ -52,9 +47,12 @@ public class OfflineWorkspaceController implements OfflineWorkspaceApiDelegate {
     return ResponseEntity.noContent().build();
   }
 
-  private boolean checkReviewDate(DateTime workspaceCreationDate, DateTime workspaceModifiedDate) {
-    DateTime creationDatePlus15 = workspaceCreationDate.plusDays(15);
-    DateTime creationDatePlus1Year = workspaceCreationDate.plusYears(1);
+  private boolean needsReview(DbWorkspace workspace) {
+    LocalDateTime workspaceCreationDate = workspace.getCreationTime().toLocalDateTime();
+    LocalDateTime creationDatePlus15Days = workspaceCreationDate.plusDays(15);
+    LocalDateTime creationDatePlus1Year = workspaceCreationDate.plusYears(1);
+
+    LocalDateTime workspaceModifiedDate = workspace.getLastModifiedTime().toLocalDateTime();
 
     // True if
     // 1. Current date is creation Date + 1 year or
@@ -63,9 +61,9 @@ public class OfflineWorkspaceController implements OfflineWorkspaceApiDelegate {
     // picking the workspace) and the Workspace has
     // not been modified after 1 year of creation date.
     int compareCreationDatePlus1Year =
-        DateTimeComparator.getDateOnlyInstance().compare(creationDatePlus1Year, null);
+        creationDatePlus1Year.toLocalDate().compareTo(LocalDate.now());
     return compareCreationDatePlus1Year == 0
-        || DateTimeComparator.getDateOnlyInstance().compare(creationDatePlus15, null) == 0
+        || creationDatePlus15Days.toLocalDate().compareTo(LocalDate.now()) == 0
         || (compareCreationDatePlus1Year < 0
             && workspaceModifiedDate.isBefore(creationDatePlus1Year));
   }

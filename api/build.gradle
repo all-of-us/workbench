@@ -10,7 +10,6 @@ buildscript {
         GAE_VERSION = '1.9.92'
         GSON_VERSION = '2.8.9'
         JACKSON_VERSION = '2.13.0'
-        JODA_VERSION = '2.10'
         KOTLIN_VERSION = '1.5.32'
         MAPSTRUCT_VERSION = '1.4.2.Final'
         MOCKITO_KOTLIN_VERSION = '2.2.0'
@@ -406,7 +405,6 @@ dependencies {
     compile "io.opencensus:opencensus-impl:$project.ext.OPENCENSUS_VERSION"
     compile "io.swagger:swagger-annotations:1.5.16"
     compile "javax.inject:javax.inject:1"
-    compile "joda-time:joda-time:$project.ext.JODA_VERSION"
     compile "org.liquibase:liquibase-core:3.10.3"
     compile "mysql:mysql-connector-java:8.0.27"
     compile "org.apache.commons:commons-collections4:4.4"
@@ -459,8 +457,6 @@ dependencies {
     generatedCompile "com.squareup.okhttp:okhttp:$project.ext.OKHTTP_VERSION"
     generatedCompile "com.squareup.okhttp:logging-interceptor:$project.ext.OKHTTP_VERSION"
     generatedCompile "com.google.code.gson:gson:$project.ext.GSON_VERSION"
-    generatedCompile "joda-time:joda-time:$project.ext.JODA_VERSION"
-    generatedCompile "com.fasterxml.jackson.datatype:jackson-datatype-joda:$project.ext.JACKSON_VERSION"
     // OpenCensus is an AoU-specific addition to the default Swagger API dependencies. See the
     // template file api.mustache for more details.
     generatedCompile "io.opencensus:opencensus-api:$project.ext.OPENCENSUS_VERSION"

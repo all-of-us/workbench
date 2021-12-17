@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
-import org.joda.time.DateTime;
 
 /** Utility class for working with FieldValueLists, FieldValues, and Fields */
 public final class FieldValues {
@@ -127,10 +126,6 @@ public final class FieldValues {
 
   public static long toTimestampMicroseconds(Instant instant) {
     return millisecondsToMicros(instant.toEpochMilli());
-  }
-
-  public static long toTimestampMicroseconds(DateTime dateTime) {
-    return millisecondsToMicros(dateTime.getMillis());
   }
 
   @VisibleForTesting
