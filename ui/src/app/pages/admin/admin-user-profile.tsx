@@ -98,13 +98,14 @@ interface EditableFieldsProps {
   updatedProfile: Profile,
   institutions?: PublicInstitutionDetails[],
   onChangeEmail: (contactEmail: string) => void,
+  onChangeFreeCreditLimit: (limit: number) => void,
   onChangeInstitution: (institutionShortName: string) => void,
   onChangeInstitutionalRole: (institutionalRoleEnum: InstitutionalRole) => void,
   onChangeInstitutionOtherText: (otherText: string) => void,
 }
 const EditableFields =
-  ({oldProfile, updatedProfile, institutions,
-     onChangeEmail, onChangeInstitution, onChangeInstitutionalRole, onChangeInstitutionOtherText}: EditableFieldsProps) => {
+  ({oldProfile, updatedProfile, institutions, onChangeEmail, onChangeFreeCreditLimit,
+     onChangeInstitution, onChangeInstitutionalRole, onChangeInstitutionOtherText}: EditableFieldsProps) => {
   return <FlexRow style={styles.editableFields}>
     <FlexColumn>
       <div style={styles.subHeader}>Edit information</div>
@@ -121,8 +122,7 @@ const EditableFields =
         <FreeCreditsDropdown
           initialLimit={oldProfile.freeTierDollarQuota}
           currentLimit={updatedProfile.freeTierDollarQuota}
-          //onChange={async(event) => this.setFreeTierCreditDollarLimit(event.value)}
-          onChange={() => {}}/>
+          onChange={event => onChangeFreeCreditLimit(event.value)}/>
         <InstitutionalRoleDropdown
           institutions={institutions}
           initialAffiliation={updatedProfile.verifiedInstitutionalAffiliation}
@@ -131,7 +131,6 @@ const EditableFields =
       <FlexRow>
         <FlexSpacer/>
         <InstitutionalRoleOtherTextInput
-          //containerStyle={{alignSelf: 'right'}}
           affiliation={updatedProfile.verifiedInstitutionalAffiliation}
           onChange={value => onChangeInstitutionOtherText(value)}/>
       </FlexRow>
@@ -265,6 +264,7 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
         updatedProfile={updatedProfile}
         institutions={institutions}
         onChangeEmail={(contactEmail: string) => updateProfile({contactEmail: contactEmail.trim()})}
+        onChangeFreeCreditLimit={(freeTierDollarQuota: number) => updateProfile({freeTierDollarQuota})}
         onChangeInstitution={(institutionShortName: string) => updateInstitution(institutionShortName)}
         onChangeInstitutionalRole={(institutionalRoleEnum: InstitutionalRole) => updateInstitutionalRole(institutionalRoleEnum)}
         onChangeInstitutionOtherText={(otherText: string) => updateInstitutionalRoleOtherText(otherText.trim())}
