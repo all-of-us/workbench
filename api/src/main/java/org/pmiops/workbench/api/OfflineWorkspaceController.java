@@ -35,14 +35,7 @@ public class OfflineWorkspaceController implements OfflineWorkspaceApiDelegate {
       // 3. Update workspace
       workspaceList =
           workspaceList.stream()
-              .filter(
-                  workspace -> {
-                    LocalDateTime workspaceCreationDate =
-                        workspace.getCreationTime().toLocalDateTime();
-                    LocalDateTime workspaceModifiedDate =
-                        workspace.getLastModifiedTime().toLocalDateTime();
-                    return checkReviewDate(workspaceCreationDate, workspaceModifiedDate);
-                  })
+              .filter(this::needsReview)
               .map(
                   filteredWorkspace -> {
                     filteredWorkspace.setNeedsReviewPrompt(true);
@@ -54,10 +47,12 @@ public class OfflineWorkspaceController implements OfflineWorkspaceApiDelegate {
     return ResponseEntity.noContent().build();
   }
 
-  private boolean checkReviewDate(
-      LocalDateTime workspaceCreationDate, LocalDateTime workspaceModifiedDate) {
-    LocalDateTime creationDatePlus15 = workspaceCreationDate.plusDays(15);
+  private boolean needsReview(DbWorkspace workspace) {
+    LocalDateTime workspaceCreationDate = workspace.getCreationTime().toLocalDateTime();
+    LocalDateTime creationDatePlus15Days = workspaceCreationDate.plusDays(15);
     LocalDateTime creationDatePlus1Year = workspaceCreationDate.plusYears(1);
+
+    LocalDateTime workspaceModifiedDate = workspace.getLastModifiedTime().toLocalDateTime();
 
     // True if
     // 1. Current date is creation Date + 1 year or
@@ -68,7 +63,7 @@ public class OfflineWorkspaceController implements OfflineWorkspaceApiDelegate {
     int compareCreationDatePlus1Year =
         creationDatePlus1Year.toLocalDate().compareTo(LocalDate.now());
     return compareCreationDatePlus1Year == 0
-        || creationDatePlus15.toLocalDate().compareTo(LocalDate.now()) == 0
+        || creationDatePlus15Days.toLocalDate().compareTo(LocalDate.now()) == 0
         || (compareCreationDatePlus1Year < 0
             && workspaceModifiedDate.isBefore(creationDatePlus1Year));
   }
