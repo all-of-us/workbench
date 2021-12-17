@@ -23,11 +23,11 @@ import {FadeBox} from 'app/components/containers';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {MatchParams, serverConfigStore, useStore} from 'app/utils/stores';
 import {CaretRight} from 'app/components/icons';
-import {FlexColumn, FlexRow} from 'app/components/flex';
+import {FlexColumn, FlexRow, FlexSpacer} from 'app/components/flex';
 import {displayNameForTier} from 'app/utils/access-tiers';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {isBlank, reactStyles} from 'app/utils';
-import {InstitutionalRole, Profile, PublicInstitutionDetails} from 'generated/fetch';
+import {InstitutionalRole, Profile, PublicInstitutionDetails, VerifiedInstitutionalAffiliation} from 'generated/fetch';
 import {Button} from 'app/components/buttons';
 import {checkInstitutionalEmail} from 'app/utils/institutions';
 
@@ -98,8 +98,13 @@ interface EditableFieldsProps {
   updatedProfile: Profile,
   institutions?: PublicInstitutionDetails[],
   onChangeEmail: (contactEmail: string) => void,
+  onChangeInstitution: (institutionShortName: string) => void,
+  onChangeInstitutionalRole: (institutionalRoleEnum: InstitutionalRole) => void,
+  onChangeInstitutionOtherText: (otherText: string) => void,
 }
-const EditableFields = ({oldProfile, updatedProfile, institutions, onChangeEmail}: EditableFieldsProps) => {
+const EditableFields =
+  ({oldProfile, updatedProfile, institutions,
+     onChangeEmail, onChangeInstitution, onChangeInstitutionalRole, onChangeInstitutionOtherText}: EditableFieldsProps) => {
   return <FlexRow style={styles.editableFields}>
     <FlexColumn>
       <div style={styles.subHeader}>Edit information</div>
@@ -110,8 +115,7 @@ const EditableFields = ({oldProfile, updatedProfile, institutions, onChangeEmail
         <InstitutionDropdown
           institutions={institutions}
           initialInstitutionShortName={updatedProfile.verifiedInstitutionalAffiliation?.institutionShortName}
-          //onChange={async(event) => this.setVerifiedInstitutionOnProfile(event.value)}
-          onChange={() => {}}/>
+          onChange={event => onChangeInstitution(event.value)}/>
       </FlexRow>
       <FlexRow>
         <FreeCreditsDropdown
@@ -122,14 +126,14 @@ const EditableFields = ({oldProfile, updatedProfile, institutions, onChangeEmail
         <InstitutionalRoleDropdown
           institutions={institutions}
           initialAffiliation={updatedProfile.verifiedInstitutionalAffiliation}
-          //onChange={(event) => this.setInstitutionalRoleOnProfile(event.value)}
-          onChange={() => {}}/>
+          onChange={event => onChangeInstitutionalRole(event.value)}/>
+      </FlexRow>
+      <FlexRow>
+        <FlexSpacer/>
         <InstitutionalRoleOtherTextInput
+          //containerStyle={{alignSelf: 'right'}}
           affiliation={updatedProfile.verifiedInstitutionalAffiliation}
-          // onChange={(value) => this.setState(
-          //   fp.set(['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionalRoleOtherText'], value))
-          // }
-          onChange={() => {}}/>
+          onChange={value => onChangeInstitutionOtherText(value)}/>
       </FlexRow>
     </FlexColumn>
   </FlexRow>;
@@ -202,6 +206,33 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
     setUpdatedProfile({ ...updatedProfile, ...newUpdates});
   }
 
+  const updateInstitution = (institutionShortName: string) => {
+    const verifiedInstitutionalAffiliation: VerifiedInstitutionalAffiliation = {
+      institutionShortName,
+      institutionDisplayName: institutions.find(i => i.shortName === institutionShortName)?.displayName,
+      institutionalRoleEnum: undefined,
+      institutionalRoleOtherText: undefined
+    }
+    updateProfile({verifiedInstitutionalAffiliation});
+  }
+
+  const updateInstitutionalRole = (institutionalRoleEnum: InstitutionalRole) => {
+    const verifiedInstitutionalAffiliation: VerifiedInstitutionalAffiliation = {
+      ...updatedProfile.verifiedInstitutionalAffiliation,
+      institutionalRoleEnum,
+      institutionalRoleOtherText: undefined
+    }
+    updateProfile({verifiedInstitutionalAffiliation});
+  }
+
+  const updateInstitutionalRoleOtherText = (institutionalRoleOtherText: string) => {
+    const verifiedInstitutionalAffiliation: VerifiedInstitutionalAffiliation  = {
+      ...updatedProfile.verifiedInstitutionalAffiliation,
+      institutionalRoleOtherText
+    }
+    updateProfile({verifiedInstitutionalAffiliation});
+  }
+
   const errors = validate({
     'contactEmail': !!updatedProfile?.contactEmail,
     'verifiedInstitutionalAffiliation': !!updatedProfile?.verifiedInstitutionalAffiliation,
@@ -233,7 +264,11 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
         oldProfile={oldProfile}
         updatedProfile={updatedProfile}
         institutions={institutions}
-        onChangeEmail={(contactEmail) => updateProfile({contactEmail: contactEmail.trim()})}/>
+        onChangeEmail={(contactEmail: string) => updateProfile({contactEmail: contactEmail.trim()})}
+        onChangeInstitution={(institutionShortName: string) => updateInstitution(institutionShortName)}
+        onChangeInstitutionalRole={(institutionalRoleEnum: InstitutionalRole) => updateInstitutionalRole(institutionalRoleEnum)}
+        onChangeInstitutionOtherText={(otherText: string) => updateInstitutionalRoleOtherText(otherText.trim())}
+      />
     </FlexRow>
     <FlexRow style={{paddingTop: '1em'}}>
       <ErrorsTooltip errors={errors}>
