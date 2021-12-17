@@ -13,10 +13,7 @@ repositories {
 
 dependencies {
     // Genomics dependencies
-
-    // temporary fix for log4shell
-    // TODO: switch to 4.2.4.0 when maven stabilizes
-    compile 'org.broadinstitute:gatk:4.2.4.0-SNAPSHOT'
+    compile 'org.broadinstitute:gatk:4.2.4.0'
     compile 'com.github.samtools:htsjdk:2.24.1'
     compile 'com.google.guava:guava:31.0.1-jre'
     testCompile 'com.google.truth:truth:1.1.3'
