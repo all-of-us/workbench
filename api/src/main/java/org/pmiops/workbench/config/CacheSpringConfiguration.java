@@ -30,6 +30,26 @@ public class CacheSpringConfiguration {
   @Bean
   @Qualifier("configCache")
   LoadingCache<String, Object> getConfigCache(ConfigDao configDao) {
+    System.out.println("~~~~~~!!!!!!!");
+    System.out.println("~~~~~~!!!!!!!");
+    System.out.println("~~~~~~!!!!!!!");
+    System.out.println("~~~~~~!!!!!!!");
+    System.out.println("~~~~~~!!!!!!!");
+    System.out.println("~~~~~~!!!!!!!");
+    System.out.println("~~~~~~!!!!!!!");
+    System.out.println(System.getProperties());
+    System.out.println("~~~~~~!!!!!!!2222");
+    System.out.println("~~~~~~!!!!!!!2222");
+    System.out.println("~~~~~~!!!!!!!2222");
+    System.out.println("~~~~~~!!!!!!!22222");
+    System.out.println(System.getenv("DB_DRIVER"));
+    System.out.println(System.getenv("DB_CONNECTION_STRING"));
+    System.out.println(System.getenv("DB_WORKBENCH_DB_USERDRIVER"));
+    System.out.println(System.getenv("WORKBENCH_DB_PASSWORD"));
+    System.out.println(System.getenv("CDR_DB_CONNECTION_STRING"));
+    System.out.println(System.getenv("CDR_DB_USER"));
+    System.out.println(System.getenv("CDR_DB_PASSWORD"));
+
     // Cache configuration in memory for ten minutes.
     return CacheBuilder.newBuilder()
         .expireAfterWrite(10, TimeUnit.MINUTES)
