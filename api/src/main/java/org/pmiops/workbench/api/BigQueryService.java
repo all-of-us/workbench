@@ -34,6 +34,7 @@ import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exceptions.ServerUnavailableException;
 import org.pmiops.workbench.model.Domain;
+import org.pmiops.workbench.utils.FieldValues;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -147,7 +148,7 @@ public class BigQueryService {
       return null;
     }
     DateTimeFormatter df = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss zzz").withZoneUTC();
-    return df.print(row.get(index).getTimestampValue() / 1000L);
+    return df.print(FieldValues.getInstant(row.get(index)).toEpochMilli());
   }
 
   public String getDate(List<FieldValue> row, int index) {

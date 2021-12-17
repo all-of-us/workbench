@@ -80,12 +80,10 @@ public class EgressLogService {
             .put("project_id", QueryParameterValue.string(event.getWorkspace().getGoogleProject()))
             .put(
                 "start_time",
-                QueryParameterValue.timestamp(
-                    startTime.toEpochMilli() * FieldValues.MICROSECONDS_IN_MILLISECOND))
+                QueryParameterValue.timestamp(FieldValues.toTimestampMicroseconds(startTime)))
             .put(
                 "end_time",
-                QueryParameterValue.timestamp(
-                    endTime.toEpochMilli() * FieldValues.MICROSECONDS_IN_MILLISECOND))
+                QueryParameterValue.timestamp(FieldValues.toTimestampMicroseconds(endTime)))
             .build();
 
     Map<EgressTerraRuntimeLogPattern, Job> bigQueryLogJobs =
@@ -137,11 +135,7 @@ public class EgressLogService {
 
   private AuditEgressRuntimeLogEntry toRuntimeLogEntry(FieldValueList fvl) {
     return new AuditEgressRuntimeLogEntry()
-        .timestamp(
-            Instant.ofEpochMilli(
-                    fvl.get("timestamp").getTimestampValue()
-                        / FieldValues.MICROSECONDS_IN_MILLISECOND)
-                .toString())
+        .timestamp(FieldValues.getInstant(fvl.get("timestamp")).toString())
         .message(fvl.get("message").getStringValue());
   }
 
