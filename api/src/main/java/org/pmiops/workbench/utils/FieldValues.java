@@ -12,13 +12,13 @@ import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import org.jetbrains.annotations.NotNull;
+import javax.annotation.Nonnull;
 import org.joda.time.DateTime;
 
 /** Utility class for working with FieldValueLists, FieldValues, and Fields */
 public final class FieldValues {
 
-  public static final int MICROSECONDS_IN_MILLISECOND = 1000;
+  private static final int MICROSECONDS_IN_MILLISECOND = 1000;
 
   private FieldValues() {}
 
@@ -114,17 +114,23 @@ public final class FieldValues {
     return FieldValues.getValue(row, fieldName).map(FieldValue::getTimestampValue);
   }
 
-  public static Optional<DateTime> getDateTime(FieldValueList row, int index) {
-    return getTimestampMicroseconds(row, index)
-        .map(FieldValues::microsecondsToMillis)
-        .map(DateTime::new);
-  }
-
   public static Optional<OffsetDateTime> getDateTime(FieldValueList row, String fieldName) {
     return getTimestampMicroseconds(row, fieldName)
         .map(FieldValues::microsecondsToMillis)
         .map(Instant::ofEpochMilli)
         .map(i -> OffsetDateTime.ofInstant(i, ZoneOffset.UTC));
+  }
+
+  public static Instant getInstant(@Nonnull FieldValue fieldValue) {
+    return Instant.ofEpochMilli(microsecondsToMillis(fieldValue.getTimestampValue()));
+  }
+
+  public static long toTimestampMicroseconds(Instant instant) {
+    return millisecondsToMicros(instant.toEpochMilli());
+  }
+
+  public static long toTimestampMicroseconds(DateTime dateTime) {
+    return millisecondsToMicros(dateTime.getMillis());
   }
 
   @VisibleForTesting
@@ -136,8 +142,11 @@ public final class FieldValues {
         schemaFieldList);
   }
 
-  @NotNull
   private static long microsecondsToMillis(long microseconds) {
     return microseconds / MICROSECONDS_IN_MILLISECOND;
+  }
+
+  private static long millisecondsToMicros(long milliseconds) {
+    return milliseconds * MICROSECONDS_IN_MILLISECOND;
   }
 }

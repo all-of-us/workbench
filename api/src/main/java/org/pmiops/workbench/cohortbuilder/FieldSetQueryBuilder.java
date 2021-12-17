@@ -34,6 +34,7 @@ import org.pmiops.workbench.model.FieldSet;
 import org.pmiops.workbench.model.Operator;
 import org.pmiops.workbench.model.ResultFilters;
 import org.pmiops.workbench.model.TableQuery;
+import org.pmiops.workbench.utils.FieldValues;
 import org.pmiops.workbench.utils.OperatorUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -315,7 +316,8 @@ public class FieldSetQueryBuilder {
       } else if (columnConfig.type.equals(ColumnType.TIMESTAMP)) {
         try {
           long timestamp =
-              DATE_TIME_FORMAT.parseDateTime(columnFilter.getValueDate()).getMillis() * 1000;
+              FieldValues.toTimestampMicroseconds(
+                  DATE_TIME_FORMAT.parseDateTime(columnFilter.getValueDate()));
           queryState.paramMap.put(paramName, QueryParameterValue.timestamp(timestamp));
         } catch (IllegalArgumentException e) {
           throw new BadRequestException(
@@ -750,7 +752,7 @@ public class FieldSetQueryBuilder {
             value = fieldValue.getStringValue();
             break;
           case TIMESTAMP:
-            value = DATE_TIME_FORMAT.print(fieldValue.getTimestampValue() / 1000L);
+            value = DATE_TIME_FORMAT.print(FieldValues.getInstant(fieldValue).toEpochMilli());
             break;
           default:
             throw new IllegalStateException("Unrecognized column type: " + columnConfig.type);
