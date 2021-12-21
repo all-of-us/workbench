@@ -21,90 +21,92 @@ import defaultServerConfig from 'testing/default-server-config';
 
 const ONE_MINUTE_IN_MILLIS = 1000 * 60;
 
-const noModules: Profile = {
-  ...ProfileStubVariables.PROFILE_STUB,
-  accessModules: {}
-}
-
-const noExpirableModules: Profile = {
-  ...ProfileStubVariables.PROFILE_STUB,
-  accessModules : {
-    modules: [{
-      moduleName: AccessModule.RASLINKLOGINGOV,
-      expirationEpochMillis: undefined,
-    }]
-  }
-}
-
-const noExpModules: Profile = {
-  ...ProfileStubVariables.PROFILE_STUB,
-  accessModules : {
-    modules: [{
-      moduleName: AccessModule.COMPLIANCETRAINING,
-      expirationEpochMillis: undefined,
-    }]
-  }
-}
-
-const laterExpiration: Profile = {
-  ...ProfileStubVariables.PROFILE_STUB,
-  accessModules : {
-    modules: [{
-      moduleName: AccessModule.COMPLIANCETRAINING,
-      expirationEpochMillis: nowPlusDays(NOTIFICATION_THRESHOLD_DAYS + 1) + ONE_MINUTE_IN_MILLIS,
-    }]
-  }
-}
-
-const expirationsInWindow: Profile = {
-  ...ProfileStubVariables.PROFILE_STUB,
-  accessModules : {
-    modules: [{
-      moduleName: AccessModule.COMPLIANCETRAINING,
-      expirationEpochMillis: nowPlusDays(5) + ONE_MINUTE_IN_MILLIS,
-    }, {
-      moduleName: AccessModule.DATAUSERCODEOFCONDUCT,
-      expirationEpochMillis: nowPlusDays(10) + ONE_MINUTE_IN_MILLIS,
-    }]
-  }
-}
-
-const thirtyDaysPlusExpiration: Profile = {
-  ...ProfileStubVariables.PROFILE_STUB,
-  accessModules : {
-    modules: [{
-      moduleName: AccessModule.COMPLIANCETRAINING,
-      expirationEpochMillis: nowPlusDays(30) + ONE_MINUTE_IN_MILLIS,
-    }, {
-      moduleName: AccessModule.DATAUSERCODEOFCONDUCT,
-      expirationEpochMillis: nowPlusDays(31) + ONE_MINUTE_IN_MILLIS,
-    }]
-  }
-}
-
 describe('maybeDaysRemaining', () => {
   it('returns undefined when the profile has no accessModules', () => {
-     expect(maybeDaysRemaining(noModules)).toBeUndefined();
+    const noModules: Profile = {
+      ...ProfileStubVariables.PROFILE_STUB,
+      accessModules: {}
+    }
+    expect(maybeDaysRemaining(noModules)).toBeUndefined();
   });
 
   it('returns undefined when the profile has no expirable accessModules', () => {
+    const noExpirableModules: Profile = {
+      ...ProfileStubVariables.PROFILE_STUB,
+      accessModules : {
+        modules: [{
+          moduleName: AccessModule.RASLINKLOGINGOV,
+          expirationEpochMillis: undefined,
+        }]
+      }
+    }
+
     expect(maybeDaysRemaining(noExpirableModules)).toBeUndefined();
   });
 
-  it('returns undefined when the profile has no accessModules with expirations', () => {
-     expect(maybeDaysRemaining(noExpModules)).toBeUndefined();
+  it('returns undefined when the profile has no expirable accessModules with expirations', () => {
+    const noExpirations: Profile = {
+      ...ProfileStubVariables.PROFILE_STUB,
+      accessModules : {
+        modules: [{
+          moduleName: AccessModule.COMPLIANCETRAINING,
+          expirationEpochMillis: undefined,
+        }]
+      }
+    }
+
+    expect(maybeDaysRemaining(noExpirations)).toBeUndefined();
   });
 
   it('returns undefined when the accessModules have expirations past the window', () => {
+    const laterExpiration: Profile = {
+      ...ProfileStubVariables.PROFILE_STUB,
+      accessModules : {
+        modules: [{
+          moduleName: AccessModule.COMPLIANCETRAINING,
+          expirationEpochMillis: nowPlusDays(NOTIFICATION_THRESHOLD_DAYS + 1) + ONE_MINUTE_IN_MILLIS,
+        }]
+      }
+    }
+
     expect(maybeDaysRemaining(laterExpiration)).toBeUndefined();
   });
 
   it('returns the soonest of all expirations within the window', () => {
-    expect(maybeDaysRemaining(expirationsInWindow)).toEqual(5);
+    const soonDays = 5;
+    const aBitLater = 10;
+
+    const expirationsInWindow: Profile = {
+      ...ProfileStubVariables.PROFILE_STUB,
+      accessModules : {
+        modules: [{
+          moduleName: AccessModule.COMPLIANCETRAINING,
+          expirationEpochMillis: nowPlusDays(soonDays) + ONE_MINUTE_IN_MILLIS,
+        }, {
+          moduleName: AccessModule.DATAUSERCODEOFCONDUCT,
+          expirationEpochMillis: nowPlusDays(aBitLater) + ONE_MINUTE_IN_MILLIS,
+        }]
+      }
+    }
+
+    expect(maybeDaysRemaining(expirationsInWindow)).toEqual(soonDays);
   });
 
   // regression test for RW-7108
   it('returns 30 days when the max expiration is between 30 and 31 days', () => {
+    const thirtyDaysPlusExpiration: Profile = {
+      ...ProfileStubVariables.PROFILE_STUB,
+      accessModules : {
+        modules: [{
+          moduleName: AccessModule.COMPLIANCETRAINING,
+          expirationEpochMillis: nowPlusDays(30) + ONE_MINUTE_IN_MILLIS,
+        }, {
+          moduleName: AccessModule.DATAUSERCODEOFCONDUCT,
+          expirationEpochMillis: nowPlusDays(31) + ONE_MINUTE_IN_MILLIS,
+        }]
+      }
+    }
+
     expect(maybeDaysRemaining(thirtyDaysPlusExpiration)).toEqual(30);
   });
 });
