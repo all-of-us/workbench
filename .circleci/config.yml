@@ -610,6 +610,9 @@ jobs:
           name: "Restore e2e cache"
           keys:
             - v5-e2e-yarn-{{ .Branch }}-{{ arch }}-{{ checksum "~/workbench/e2e/yarn.lock" }}
+      - gcloud-auth-login:
+          # Needed for gcs-load-test-results
+          with_application_default_credentials: true
       - run:
           name: "Set environment variables for e2e test users"
           working_directory: ~/workbench/e2e
