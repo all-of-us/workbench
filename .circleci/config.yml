@@ -611,7 +611,7 @@ jobs:
           keys:
             - v5-e2e-yarn-{{ .Branch }}-{{ arch }}-{{ checksum "~/workbench/e2e/yarn.lock" }}
       - gcloud-auth-login:
-          # Needed for generate-impersonated-user-token script
+          # Needed for gcs-load-test-results
           with_application_default_credentials: true
       - run:
           name: "Set environment variables for e2e test users"
