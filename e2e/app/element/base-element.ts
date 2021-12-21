@@ -139,7 +139,7 @@ export default class BaseElement {
   }
 
   async click(options?: ClickOptions): Promise<void> {
-    return this.asElementHandle().then(async (element) => {
+    await this.asElementHandle().then(async (element) => {
       // Click workaround: Wait for x,y to stop changing within specified time
       const startTime = Date.now();
       let previousX: number;
@@ -166,6 +166,9 @@ export default class BaseElement {
         }
         await element.hover();
         await this.page.waitForTimeout(500);
+      }
+      if (previousX === undefined || previousY === undefined) {
+        throw new Error(`Failed to click element because the it is not visible in the viewport. (${this.getXpath()})`);
       }
       return element.click(options);
     });
