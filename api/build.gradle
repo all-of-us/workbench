@@ -374,7 +374,7 @@ dependencies {
     compile "com.fasterxml.jackson.module:jackson-module-kotlin:$project.ext.JACKSON_VERSION"
     compile "com.github.java-json-tools:json-patch:1.13"
     compile "com.github.rholder:guava-retrying:2.0.0"
-    compile 'org.javers:javers-core:6.5.1'
+    compile 'org.javers:javers-core:5.15.0'
     compile "com.google.api-client:google-api-client-appengine:1.32.2"
     compile "com.google.apis:google-api-services-admin-directory:directory_v1-rev20211109-1.32.1"
     compile "com.google.apis:google-api-services-cloudbilling:v1-rev20211106-1.32.1"
