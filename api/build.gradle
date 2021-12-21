@@ -9,7 +9,7 @@ buildscript {
     ext {
         GAE_VERSION = '1.9.93'
         GSON_VERSION = '2.8.9'
-        JACKSON_VERSION = '2.13.0'
+        JACKSON_VERSION = '2.13.1'
         KOTLIN_VERSION = '1.5.32'
         MAPSTRUCT_VERSION = '1.4.2.Final'
         MOCKITO_KOTLIN_VERSION = '2.2.0'
@@ -366,7 +366,7 @@ dependencies {
     __swaggerCodegenV2__ "io.swagger:swagger-codegen-cli:$project.ext.SWAGGER_2_CODEGEN_VERSION"
     __swaggerCodegenV3__ "io.swagger.codegen.v3:swagger-codegen-cli:$project.ext.SWAGGER_3_CODEGEN_VERSION"
 
-    compile "ch.qos.logback:logback-classic:1.2.7"
+    compile 'ch.qos.logback:logback-classic:1.2.8'
     compile "com.fasterxml.jackson.core:jackson-annotations:$project.ext.JACKSON_VERSION"
     compile "com.fasterxml.jackson.core:jackson-core:$project.ext.JACKSON_VERSION"
     compile "com.fasterxml.jackson.core:jackson-databind:$project.ext.JACKSON_VERSION"
@@ -408,8 +408,8 @@ dependencies {
     compile "org.liquibase:liquibase-core:3.10.3"
     compile "mysql:mysql-connector-java:8.0.27"
     compile "org.apache.commons:commons-collections4:4.4"
-    compile "org.apache.commons:commons-lang3:3.6"
-    compile "org.apache.commons:commons-text:1.8"
+    compile 'org.apache.commons:commons-lang3:3.12.0'
+    compile 'org.apache.commons:commons-text:1.9'
     compile "org.apache.httpcomponents:httpclient:4.5.13"
     compile 'org.springframework.boot:spring-boot-starter-validation'
     compile "commons-codec:commons-codec:1.15"
@@ -478,7 +478,7 @@ dependencies {
     // war plugin. Add this to scope of the compile configuration, but do not include in .war file.
     providedCompile group: 'javax.servlet', name: 'javax.servlet-api', version: '3.1.0'
 
-    __tools__Compile 'commons-cli:commons-cli:1.4'
+    __tools__Compile 'commons-cli:commons-cli:1.5.0'
     __tools__Compile 'com.opencsv:opencsv:4.6'
 
     testCompile 'org.mockito:mockito-core:2.18.3'
