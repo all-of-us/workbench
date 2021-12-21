@@ -29,7 +29,7 @@ import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {isBlank, reactStyles} from 'app/utils';
 import {InstitutionalRole, Profile, PublicInstitutionDetails, VerifiedInstitutionalAffiliation} from 'generated/fetch';
 import {Button} from 'app/components/buttons';
-import {checkInstitutionalEmail} from 'app/utils/institutions';
+import {checkInstitutionalEmail, getEmailValidationErrorMessage} from 'app/utils/institutions';
 
 const styles = reactStyles({
   ...commonStyles,
@@ -97,6 +97,7 @@ interface EditableFieldsProps {
   oldProfile: Profile,
   updatedProfile: Profile,
   institutions?: PublicInstitutionDetails[],
+  emailValidationStatus: EmailValidationStatus,
   onChangeEmail: (contactEmail: string) => void,
   onChangeFreeCreditLimit: (limit: number) => void,
   onChangeInstitution: (institutionShortName: string) => void,
@@ -104,8 +105,10 @@ interface EditableFieldsProps {
   onChangeInstitutionOtherText: (otherText: string) => void,
 }
 const EditableFields =
-  ({oldProfile, updatedProfile, institutions, onChangeEmail, onChangeFreeCreditLimit,
+  ({oldProfile, updatedProfile, institutions, emailValidationStatus, onChangeEmail, onChangeFreeCreditLimit,
      onChangeInstitution, onChangeInstitutionalRole, onChangeInstitutionOtherText}: EditableFieldsProps) => {
+  const institution: PublicInstitutionDetails = institutions
+    .find(i => i.shortName === updatedProfile?.verifiedInstitutionalAffiliation?.institutionShortName);
   return <FlexRow style={styles.editableFields}>
     <FlexColumn>
       <div style={styles.subHeader}>Edit information</div>
@@ -118,6 +121,7 @@ const EditableFields =
           initialInstitutionShortName={updatedProfile.verifiedInstitutionalAffiliation?.institutionShortName}
           onChange={event => onChangeInstitution(event.value)}/>
       </FlexRow>
+      {emailValidationStatus === EmailValidationStatus.INVALID && getEmailValidationErrorMessage(institution)}
       <FlexRow>
         <FreeCreditsDropdown
           initialLimit={oldProfile.freeTierDollarQuota}
@@ -263,6 +267,7 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
         oldProfile={oldProfile}
         updatedProfile={updatedProfile}
         institutions={institutions}
+        emailValidationStatus={emailValidationStatus}
         onChangeEmail={(contactEmail: string) => updateProfile({contactEmail: contactEmail.trim()})}
         onChangeFreeCreditLimit={(freeTierDollarQuota: number) => updateProfile({freeTierDollarQuota})}
         onChangeInstitution={(institutionShortName: string) => updateInstitution(institutionShortName)}

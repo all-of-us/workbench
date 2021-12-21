@@ -261,6 +261,14 @@ export const UserAuditLink = (props: {usernameWithoutDomain: string, style?: CSS
   {props.children}
 </Link>
 
+export const validationErrorMessages = {
+  contactEmail: 'Institutional contact email can\'t be left blank',
+  verifiedInstitutionalAffiliation: 'Verified institutional affiliation can\'t be unset or left blank',
+  institutionShortName: 'You must choose an institution',
+  institutionalRoleEnum: 'You must select the user\'s role at the institution',
+  institutionalRoleOtherText: 'You must describe the user\'s role if you select Other',
+  institutionMembership: 'The user\'s contact email does not match the selected institution',
+}
 
 interface ErrorsTooltipProps {
   errors,
@@ -270,13 +278,8 @@ export const ErrorsTooltip = ({errors, children}: ErrorsTooltipProps) => {
   return <TooltipTrigger
   data-test-id='user-admin-errors-tooltip'
   content={errors &&
-    <BulletAlignedUnorderedList>
-      {errors.contactEmail && <li>Institutional contact email can't be left blank</li>}
-      {errors.verifiedInstitutionalAffiliation && <li>Verified institutional affiliation can't be unset or left blank</li>}
-      {errors.institutionShortName && <li>You must choose an institution</li>}
-      {errors.institutionalRoleEnum && <li>You must select the user's role at the institution</li>}
-      {errors.institutionalRoleOtherText && <li>You must describe the user's role if you select Other</li>}
-      {errors.institutionMembership && <li>The user's contact email does not match the selected institution</li>}
+    <BulletAlignedUnorderedList>{Object.entries(validationErrorMessages)
+      .map(([field, message], reactKey) => errors?.hasOwnProperty(field) && <li key={reactKey}>{message}</li>)}
     </BulletAlignedUnorderedList>}
   >
     {children}

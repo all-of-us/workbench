@@ -17,10 +17,8 @@ import {
 } from 'app/utils';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {
-  EmailAddressMismatchErrorMessage,
-  EmailDomainMismatchErrorMessage,
-  getRegisteredTierConfig,
-  checkInstitutionalEmail
+  checkInstitutionalEmail,
+  getEmailValidationErrorMessage
 } from 'app/utils/institutions';
 import {MatchParams, serverConfigStore} from 'app/utils/stores';
 import {
@@ -28,7 +26,6 @@ import {
   AccessModuleStatus,
   CheckEmailResponse,
   InstitutionalRole,
-  InstitutionMembershipRequirement,
   Profile,
   PublicInstitutionDetails,
 } from 'generated/fetch';
@@ -78,26 +75,12 @@ const getUserStatus = (profile: Profile) => {
       : () => <div style={{color: colors.danger}}>Disabled</div>;
 }
 
-const EmailValidationErrorMessage = ({emailValidationResponse, updatedProfile, verifiedInstitutionOptions}) => {
-  if (updatedProfile && updatedProfile.verifiedInstitutionalAffiliation) {
-    if (emailValidationResponse.isValidMember) {
-      return null;
-    } else {
-      const {verifiedInstitutionalAffiliation} = updatedProfile;
-      const selectedInstitution = fp.find(
-        institution => institution.shortName === verifiedInstitutionalAffiliation.institutionShortName,
-        verifiedInstitutionOptions
-      );
-      if (getRegisteredTierConfig(selectedInstitution).membershipRequirement === InstitutionMembershipRequirement.ADDRESSES) {
-        // Institution requires an exact email address match and the email is not in allowed emails list
-        return <EmailAddressMismatchErrorMessage/>;
-      } else {
-        // Institution requires email domain matching and the domain is not in the allowed list
-        return <EmailDomainMismatchErrorMessage/>;
-      }
-    }
-  }
-  return null;
+const MaybeEmailValidationErrorMessage = ({updatedProfile, verifiedInstitutionOptions}) => {
+  const selectedInstitution = fp.find(
+    institution => institution.shortName === updatedProfile?.verifiedInstitutionalAffiliation?.institutionShortName,
+    verifiedInstitutionOptions
+  );
+  return selectedInstitution ? getEmailValidationErrorMessage(selectedInstitution) : null;
 };
 
 interface FreeCreditsProps {
@@ -192,7 +175,7 @@ export const AdminUser = withRouter(class extends React.Component<Props, State> 
 
   async componentDidMount() {
     this.props.hideSpinner();
-    this.getUserData();
+    await this.getUserData();
   }
 
   componentDidUpdate(prevProps: Readonly<Props>) {
@@ -203,7 +186,7 @@ export const AdminUser = withRouter(class extends React.Component<Props, State> 
 
   async getUserData() {
     try {
-      Promise.all([
+      await Promise.all([
         this.getUser(),
         this.getInstitutions()
       ]);
@@ -463,8 +446,7 @@ export const AdminUser = withRouter(class extends React.Component<Props, State> 
               labelStyle={styles.label}
               dropdownStyle={styles.textInput}
               onChange={async(event) => this.setVerifiedInstitutionOnProfile(event.value)}/>
-            {emailValidationResponse && !emailValidationResponse.isValidMember && <EmailValidationErrorMessage
-              emailValidationResponse={emailValidationResponse}
+            {emailValidationResponse && !emailValidationResponse.isValidMember && <MaybeEmailValidationErrorMessage
               updatedProfile={updatedProfile}
               verifiedInstitutionOptions={verifiedInstitutionOptions}/>}
             <InstitutionalRoleDropdown
