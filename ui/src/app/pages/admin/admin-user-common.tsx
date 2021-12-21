@@ -10,6 +10,8 @@ import {Dropdown} from 'primereact/dropdown';
 import {formatFreeCreditsUSD, reactStyles} from 'app/utils';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {
+  AccessModule,
+  AccessModuleStatus,
   AccountPropertyUpdate,
   InstitutionalRole,
   Profile,
@@ -18,11 +20,14 @@ import {
 } from 'generated/fetch';
 import {institutionApi, userAdminApi} from 'app/services/swagger-fetch-clients';
 import {ClrIcon} from 'app/components/icons';
-import {FlexColumn} from 'app/components/flex';
+import {FlexColumn, FlexRow} from 'app/components/flex';
 import {getRoleOptions} from 'app/utils/institutions';
 import {TextInputWithLabel} from 'app/components/inputs';
 import {BulletAlignedUnorderedList} from 'app/components/lists';
 import {TooltipTrigger} from 'app/components/popups';
+import {serverConfigStore} from 'app/utils/stores';
+import {accessRenewalModules, computeDisplayDates, getAccessModuleConfig} from 'app/utils/access-utils';
+import {hasRegisteredTierAccess} from 'app/utils/access-tiers';
 
 export const commonStyles = reactStyles({
   semiBold: {
@@ -284,5 +289,38 @@ export const ErrorsTooltip = ({errors, children}: ErrorsTooltipProps) => {
   >
     {children}
   </TooltipTrigger>;
+}
+
+interface ExpirationProps {
+  profile: Profile;
+}
+export const AccessModuleExpirations = ({profile}: ExpirationProps) => {
+  // compliance training is feature-flagged in some environments
+  const {enableComplianceTraining} = serverConfigStore.get().config;
+  const moduleNames = enableComplianceTraining
+    ? accessRenewalModules
+    : accessRenewalModules.filter(moduleName => moduleName !== AccessModule.COMPLIANCETRAINING);
+
+  const accessStatus = hasRegisteredTierAccess(profile)
+    ? <div style={{color: colors.success}}>Enabled</div>
+    : <div style={{color: colors.danger}}>Disabled</div>;
+
+  const modules = profile?.accessModules?.modules;
+
+  return <FlexColumn style={{marginTop: '1rem'}}>
+    <label style={commonStyles.semiBold}>Data Access Status: {accessStatus}</label>
+    {moduleNames.map((moduleName, zeroBasedStep) => {
+      // return the status if found; init an empty status with the moduleName if not
+      const status: AccessModuleStatus = modules.find(s => s.moduleName === moduleName) || {moduleName};
+      const {lastConfirmedDate, nextReviewDate} = computeDisplayDates(status);
+      const {AARTitleComponent} = getAccessModuleConfig(moduleName);
+      return <FlexRow key={zeroBasedStep} style={{marginTop: '0.5rem'}}>
+        <FlexColumn>
+          <label style={commonStyles.semiBold}>Step {zeroBasedStep + 1}: <AARTitleComponent/></label>
+          <div>Last Updated On: {lastConfirmedDate}</div>
+          <div>Next Review: {nextReviewDate}</div>
+        </FlexColumn>
+      </FlexRow>})}
+  </FlexColumn>;
 }
 

@@ -22,15 +22,11 @@ import {
 } from 'app/utils/institutions';
 import {MatchParams, serverConfigStore} from 'app/utils/stores';
 import {
-  AccessModule,
-  AccessModuleStatus,
   CheckEmailResponse,
   InstitutionalRole,
   Profile,
   PublicInstitutionDetails,
 } from 'generated/fetch';
-import {accessRenewalModules, computeDisplayDates, getAccessModuleConfig} from 'app/utils/access-utils';
-import {hasRegisteredTierAccess} from 'app/utils/access-tiers';
 import { EgressEventsTable } from './egress-events-table';
 import {
   adminGetProfile,
@@ -46,6 +42,7 @@ import {
   updateAccountProperties,
   enableSave,
   ErrorsTooltip,
+  AccessModuleExpirations,
 } from './admin-user-common';
 
 const styles = reactStyles({
@@ -69,11 +66,6 @@ const styles = reactStyles({
     marginTop: '1rem'
   },
 })
-const getUserStatus = (profile: Profile) => {
-  return (hasRegisteredTierAccess(profile))
-      ? () => <div style={{color: colors.success}}>Enabled</div>
-      : () => <div style={{color: colors.danger}}>Disabled</div>;
-}
 
 const MaybeEmailValidationErrorMessage = ({updatedProfile, verifiedInstitutionOptions}) => {
   const selectedInstitution = fp.find(
@@ -112,34 +104,6 @@ const FreeCreditsUsage = ({isAboveLimit, usage}: FreeCreditsProps) => {
     {isAboveLimit && <div style={{color: colors.danger}}>Update free credit limit</div>}
   </React.Fragment>;
 };
-
-interface ExpirationProps {
-  modules: Array<AccessModuleStatus>;
-  UserStatusComponent: () => JSX.Element;
-}
-const AccessModuleExpirations = ({modules, UserStatusComponent}: ExpirationProps) => {
-  // compliance training is feature-flagged in some environments
-  const {enableComplianceTraining} = serverConfigStore.get().config;
-  const moduleNames = enableComplianceTraining
-      ? accessRenewalModules
-      : accessRenewalModules.filter(moduleName => moduleName !== AccessModule.COMPLIANCETRAINING);
-
-  return <FlexColumn style={{marginTop: '1rem'}}>
-    <label style={styles.semiBold}>Data Access Status: <UserStatusComponent/></label>
-    {moduleNames.map((moduleName, zeroBasedStep) => {
-      // return the status if found; init an empty status with the moduleName if not
-      const status: AccessModuleStatus = modules.find(s => s.moduleName === moduleName) || {moduleName};
-      const {lastConfirmedDate, nextReviewDate} = computeDisplayDates(status);
-      const {AARTitleComponent} = getAccessModuleConfig(moduleName);
-      return <FlexRow key={zeroBasedStep} style={{marginTop: '0.5rem'}}>
-        <FlexColumn>
-          <label style={styles.semiBold}>Step {zeroBasedStep + 1}: <AARTitleComponent/></label>
-          <div>Last Updated On: {lastConfirmedDate}</div>
-          <div>Next Review: {nextReviewDate}</div>
-        </FlexColumn>
-      </FlexRow>})}
-  </FlexColumn>;
-}
 
 interface Props extends WithSpinnerOverlayProps, RouteComponentProps<MatchParams> {}
 
@@ -463,7 +427,7 @@ export const AdminUser = withRouter(class extends React.Component<Props, State> 
               onChange={(value) => this.setState(
                 fp.set(['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionalRoleOtherText'], value))
               }/>
-            <AccessModuleExpirations modules={updatedProfile.accessModules.modules} UserStatusComponent={getUserStatus(updatedProfile)}/>
+            <AccessModuleExpirations profile={updatedProfile}/>
           </FlexColumn>
         </FlexRow>
         <FlexRow>

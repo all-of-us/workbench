@@ -18,6 +18,7 @@ import {
   getUpdatedProfileValue,
   updateAccountProperties,
   ErrorsTooltip,
+  AccessModuleExpirations,
 } from './admin-user-common';
 import {FadeBox} from 'app/components/containers';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
@@ -298,6 +299,9 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
       >
         Cancel
       </Button>
+    </FlexRow>
+    <FlexRow>
+      <AccessModuleExpirations profile={updatedProfile}/>
     </FlexRow>
     <FlexRow>
       <h2>Egress event history</h2>
