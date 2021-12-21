@@ -195,12 +195,18 @@ export const AccessRenewal = fp.flow(withProfileErrorModal)((spinnerProps: WithS
 
   const expirableModules = modules.filter(moduleStatus => accessRenewalModules.includes(moduleStatus.moduleName));
 
+
+  // does not handle incomplete modules
+
   const completeOrBypassed = moduleName => {
     const status = modules.find(m => m.moduleName === moduleName);
     const wasBypassed = !!status.bypassEpochMillis;
     return wasBypassed || !isExpiring(status.expirationEpochMillis);
   }
 
+  // does not handle incomplete modules
+  // what is the desired behavior?
+  
   const allModulesCompleteOrBypassed = fp.flow(fp.map('moduleName'), fp.all(completeOrBypassed))(expirableModules);
 
   // onMount - as we move between pages, let's make sure we have the latest profile and external module information
