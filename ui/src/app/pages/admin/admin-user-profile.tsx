@@ -30,6 +30,7 @@ import {isBlank, reactStyles} from 'app/utils';
 import {InstitutionalRole, Profile, PublicInstitutionDetails, VerifiedInstitutionalAffiliation} from 'generated/fetch';
 import {Button} from 'app/components/buttons';
 import {checkInstitutionalEmail, getEmailValidationErrorMessage} from 'app/utils/institutions';
+import {EgressEventsTable} from './egress-events-table';
 
 const styles = reactStyles({
   ...commonStyles,
@@ -297,6 +298,12 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
       >
         Cancel
       </Button>
+    </FlexRow>
+    <FlexRow>
+      <h2>Egress event history</h2>
+    </FlexRow>
+    <FlexRow>
+      <EgressEventsTable displayPageSize={10} sourceUserEmail={updatedProfile.username} />
     </FlexRow>
   </FadeBox>;
 }
