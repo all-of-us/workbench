@@ -350,6 +350,7 @@
       <column name="dob" type="DATE"/>
       <column name="age_at_consent" type="NUMERIC"/>
       <column name="age_at_cdr" type="NUMERIC"/>
+      <column name="is_deceased" type="BOOLEAN"/>
     </loadData>
 
     <loadData tableName="cb_data_filter" file="csv/cb_data_filter.csv" encoding="UTF-8"
