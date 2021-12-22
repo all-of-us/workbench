@@ -2107,6 +2107,9 @@ def can_skip_token_generation(token_filenames)
 
     age_minutes = (Time.now - File.ctime(f)) / 60
     return false unless age_minutes < staleness_limit_minutes
+
+    contents = File.readlines(f)
+    return false if contents.nil? || contents.empty?
   end
 
   return true
