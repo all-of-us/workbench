@@ -259,7 +259,8 @@ export const GetStartedButton = ({style = {marginLeft: '0.5rem'}}) => <Button
     location.replace('/');
   }}>Get Started</Button>;
 
-export const isExpiring = (expiration: number): boolean => getWholeDaysFromNow(expiration) <= serverConfigStore.get().config.accessRenewalLookback;
+export const isExpiring = (expiration: number): boolean =>
+  getWholeDaysFromNow(expiration) <= serverConfigStore.get().config.accessRenewalLookback;
 
 const withInvalidDateHandling = date => {
   if (!date) {

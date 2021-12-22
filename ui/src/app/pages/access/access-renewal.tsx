@@ -206,7 +206,7 @@ export const AccessRenewal = fp.flow(withProfileErrorModal)((spinnerProps: WithS
 
   // does not handle incomplete modules
   // what is the desired behavior?
-  
+
   const allModulesCompleteOrBypassed = fp.flow(fp.map('moduleName'), fp.all(completeOrBypassed))(expirableModules);
 
   // onMount - as we move between pages, let's make sure we have the latest profile and external module information
