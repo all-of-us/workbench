@@ -546,7 +546,6 @@ jobs:
         type: enum
         enum: [ "test", "staging", "local", "perf" ]
     steps:
-      - puppeteer-env-setup
       - restore_cache:
           name: "Restore api gradle wrapper cache"
           key: v6-gradle-wrapper-{{ .Branch }}-{{ checksum "~/workbench/api/gradle/wrapper/gradle-wrapper.properties" }}
@@ -565,6 +564,10 @@ jobs:
       - gcloud-auth-login:
           # Needed for generate-impersonated-user-token script
           with_application_default_credentials: true
+      - run:
+          name: "Yarn install and build"
+          working_directory: ~/workbench/e2e
+          command: yarn install --frozen-lockfile --non-interactive && yarn build
       - run:
           name: "Run script: api/project.rb generate-impersonated-user-tokens"
           working_directory: ~/workbench/e2e
