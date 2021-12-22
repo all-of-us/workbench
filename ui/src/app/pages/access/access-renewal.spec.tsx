@@ -3,7 +3,7 @@ import * as React from 'react';
 import {mount} from 'enzyme';
 import SpyInstance = jest.SpyInstance;
 
-import {AccessRenewal} from 'app/pages/access/access-renewal';
+import {AccessRenewal, isExpiring} from 'app/pages/access/access-renewal';
 import {profileApi, registerApiClient} from 'app/services/swagger-fetch-clients';
 import {profileStore, serverConfigStore} from 'app/utils/stores';
 import {AccessModule, InstitutionApi, Profile, ProfileApi} from 'generated/fetch';
@@ -12,7 +12,7 @@ import {findNodesByExactText, findNodesContainingText, waitOneTickAndUpdate} fro
 import {InstitutionApiStub} from 'testing/stubs/institution-api-stub';
 import {ProfileApiStub, ProfileStubVariables} from 'testing/stubs/profile-api-stub';
 import {accessRenewalModules} from 'app/utils/access-utils';
-import {nowPlusDays} from 'app/utils/dates';
+import {nowPlusDays, plusDays} from 'app/utils/dates';
 
 const EXPIRY_DAYS = 365
 const oneYearAgo = () => nowPlusDays(-EXPIRY_DAYS);
@@ -110,8 +110,30 @@ describe('Access Renewal Page', () => {
     registerApiClient(InstitutionApi, institutionApi);
   });
 
+  it('should show the correct state when all items are complete', async () => {
+    expireAllModules()
 
-  it('should render as expected when the user is expired', async () => {
+    const wrapper = component();
+
+    updateOneModuleExpirationTime(AccessModule.PROFILECONFIRMATION, oneYearFromNow());
+    updateOneModuleExpirationTime(AccessModule.PUBLICATIONCONFIRMATION, oneYearFromNow());
+    updateOneModuleExpirationTime(AccessModule.COMPLIANCETRAINING, oneYearFromNow());
+    updateOneModuleExpirationTime(AccessModule.DATAUSERCODEOFCONDUCT, oneYearFromNow());
+
+    setCompletionTimes(() => Date.now());
+
+    await waitOneTickAndUpdate(wrapper);
+
+    // All Complete
+    expect(findNodesByExactText(wrapper, 'Confirmed').length).toBe(2);
+    expect(findNodesByExactText(wrapper, 'Completed').length).toBe(2);
+    expect(findNodesContainingText(wrapper, `${EXPIRY_DAYS - 1} days`).length).toBe(4);
+
+    expectComplete(wrapper);
+    expectNotExpired(wrapper);
+  });
+
+  it('should show the correct state when all modules are expired', async () => {
     expireAllModules()
     const wrapper = component();
 
@@ -124,6 +146,20 @@ describe('Access Renewal Page', () => {
     expect(findNodesByExactText(wrapper, 'Complete Training').length).toBe(1);
 
     expectExpired(wrapper);
+    expectIncomplete(wrapper);
+  });
+
+  it('should show the correct state when all modules are incomplete', async () => {
+    const wrapper = component();
+
+    await waitOneTickAndUpdate(wrapper);
+
+    expect(findNodesByExactText(wrapper, 'Review').length).toBe(1)
+    expect(findNodesByExactText(wrapper, 'Confirm').length).toBe(1)
+    expect(findNodesByExactText(wrapper, 'View & Sign').length).toBe(1)
+    expect(findNodesByExactText(wrapper, 'Complete Training').length).toBe(1);
+
+    expectNotExpired(wrapper);
     expectIncomplete(wrapper);
   });
 
@@ -185,29 +221,6 @@ describe('Access Renewal Page', () => {
 
     expectExpired(wrapper);
     expectIncomplete(wrapper);
-  });
-
-  it('should show the correct state when all items are complete', async () => {
-    expireAllModules()
-
-    const wrapper = component();
-
-    updateOneModuleExpirationTime(AccessModule.PROFILECONFIRMATION, oneYearFromNow());
-    updateOneModuleExpirationTime(AccessModule.PUBLICATIONCONFIRMATION, oneYearFromNow());
-    updateOneModuleExpirationTime(AccessModule.COMPLIANCETRAINING, oneYearFromNow());
-    updateOneModuleExpirationTime(AccessModule.DATAUSERCODEOFCONDUCT, oneYearFromNow());
-
-    setCompletionTimes(() => Date.now());
-
-    await waitOneTickAndUpdate(wrapper);
-
-    // All Complete
-    expect(findNodesByExactText(wrapper, 'Confirmed').length).toBe(2);
-    expect(findNodesByExactText(wrapper, 'Completed').length).toBe(2);
-    expect(findNodesContainingText(wrapper, `${EXPIRY_DAYS - 1} days`).length).toBe(4);
-
-    expectComplete(wrapper);
-    expectNotExpired(wrapper);
   });
 
   it('should ignore modules which are not expirable', async () => {
@@ -354,3 +367,68 @@ describe('Access Renewal Page', () => {
   });
 
 });
+
+describe('isExpiring', () => {
+  const ONE_MINUTE_IN_MILLIS = 1000 * 60;
+  const LOOKBACK_PERIOD = 99;   // arbitrary for testing; actual prod value is 330
+  const EXPIRATION_DAYS = 123;  // arbitrary for testing; actual prod value is 365
+
+  beforeEach(() => {
+    serverConfigStore.set({
+      config: {
+        ...defaultServerConfig,
+        accessRenewalLookback: LOOKBACK_PERIOD
+      }
+    });
+  });
+
+  it('should return isExpiring=true if a module has expired', () => {
+    const completionDaysPast = 555;  // arbitrary for test; completed this many days ago
+
+    // add 1 minute so we don't hit the boundary *exactly*
+    const completionDate = nowPlusDays(-completionDaysPast) + ONE_MINUTE_IN_MILLIS;
+    const expirationDate = plusDays(completionDate, EXPIRATION_DAYS);
+
+    // sanity-check: this test is checking an expiration in the past
+    expect(expirationDate).toBeLessThan(Date.now());
+
+    expect(isExpiring(expirationDate)).toEqual(true);
+  });
+
+  it('should return isExpiring=true if a module will expire in the future and within the lookback period', () => {
+    const completionDaysPast = 44;  // arbitrary for test; completed this many days ago
+
+    // add 1 minute so we don't hit the boundary *exactly*
+    const completionDate = nowPlusDays(-completionDaysPast) + ONE_MINUTE_IN_MILLIS;
+    const expirationDate = plusDays(completionDate, EXPIRATION_DAYS);
+
+    // sanity-check: this test is checking a date within the lookback
+    const endOfLookback = nowPlusDays(LOOKBACK_PERIOD);
+    expect(expirationDate).toBeLessThan(endOfLookback);
+
+    expect(isExpiring(expirationDate)).toEqual(true);
+  });
+
+  it('should return isExpiring=false if a module will expire in the future beyond the lookback period', () => {
+    const completionDaysPast = 3;  // arbitrary for test; completed this many days ago
+
+    // add 1 minute so we don't hit the boundary *exactly*
+    const completionDate = nowPlusDays(-completionDaysPast) + ONE_MINUTE_IN_MILLIS;
+    const expirationDate = plusDays(completionDate, EXPIRATION_DAYS);
+
+    // sanity-check: this test is checking a date beyond the lookback
+    const endOfLookback = nowPlusDays(LOOKBACK_PERIOD);
+    expect(expirationDate).toBeGreaterThan(endOfLookback);
+
+    expect(isExpiring(expirationDate)).toEqual(false);
+  });
+
+  it('should return isExpiring=false if a module has a null expiration', () => {
+    expect(isExpiring(null)).toEqual(false);
+  });
+
+  it('should return isExpiring=false if a module has an undefined expiration', () => {
+    expect(isExpiring(undefined)).toEqual(false);
+  });
+});
+
