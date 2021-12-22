@@ -15,6 +15,7 @@ import {accessRenewalModules} from 'app/utils/access-utils';
 import {nowPlusDays} from 'app/utils/dates';
 
 const EXPIRY_DAYS = 365
+const oneYearAgo = () => nowPlusDays(-EXPIRY_DAYS);
 const oneYearFromNow = () => nowPlusDays(EXPIRY_DAYS);
 const oneHourAgo = () => Date.now() - 1000 * 60 * 60;
 
@@ -110,11 +111,11 @@ describe('Access Renewal Page', () => {
   });
 
 
-  it('should render when the user is expired', async () => {
+  it('should render as expected when the user is expired', async () => {
     expireAllModules()
     const wrapper = component();
 
-    setCompletionTimes(() => Date.now() - 1000 * 60 * 60 * 24 * EXPIRY_DAYS);
+    setCompletionTimes(oneYearAgo);
     await waitOneTickAndUpdate(wrapper);
 
     expect(findNodesByExactText(wrapper, 'Review').length).toBe(1)
@@ -126,7 +127,7 @@ describe('Access Renewal Page', () => {
     expectIncomplete(wrapper);
   });
 
-  it('should show the correct state when profile is complete', async () => {
+  it('should show the correct state when profile confirmation is complete', async () => {
     expireAllModules()
 
     const wrapper = component();
@@ -146,7 +147,7 @@ describe('Access Renewal Page', () => {
     expectIncomplete(wrapper);
   });
 
-  it('should show the correct state when profile and publication are complete', async () => {
+  it('should show the correct state when profile and publication confirmations are complete', async () => {
     expireAllModules()
 
     const wrapper = component();
@@ -218,7 +219,7 @@ describe('Access Renewal Page', () => {
           moduleName: AccessModule.TWOFACTORAUTH,   // not expirable
           completionEpochMillis: null,
           bypassEpochMillis: null,
-          expirationEpochMillis: null,
+          expirationEpochMillis: oneYearAgo(),
         }
     ];
 
@@ -316,7 +317,7 @@ describe('Access Renewal Page', () => {
     updateOneModuleExpirationTime(AccessModule.PUBLICATIONCONFIRMATION, oneYearFromNow());
     updateOneModuleExpirationTime(AccessModule.DATAUSERCODEOFCONDUCT, oneYearFromNow());
 
-    // these modules will not be returned in AccessModules because they are disabled
+    // this module will not be returned in AccessModules because it is disabled
     removeOneModule(AccessModule.COMPLIANCETRAINING);
 
     await waitOneTickAndUpdate(wrapper);
