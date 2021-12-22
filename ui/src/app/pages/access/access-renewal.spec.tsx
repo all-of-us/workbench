@@ -6,7 +6,7 @@ import SpyInstance = jest.SpyInstance;
 import {AccessRenewal, isExpiring} from 'app/pages/access/access-renewal';
 import {profileApi, registerApiClient} from 'app/services/swagger-fetch-clients';
 import {profileStore, serverConfigStore} from 'app/utils/stores';
-import {AccessModule, InstitutionApi, Profile, ProfileApi} from 'generated/fetch';
+import {AccessModule, AccessModuleStatus, InstitutionApi, Profile, ProfileApi} from 'generated/fetch';
 import defaultServerConfig from 'testing/default-server-config';
 import {findNodesByExactText, findNodesContainingText, waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {InstitutionApiStub} from 'testing/stubs/institution-api-stub';
@@ -29,7 +29,10 @@ describe('Access Renewal Page', () => {
     const {profile} = profileStore.get();
 
     const newProfile = fp.set('accessModules',
-        {modules: accessRenewalModules.map(m => ({moduleName: m, expirationEpochMillis: expiredTime}))},
+        {modules: accessRenewalModules.map(m => ({
+            moduleName: m,
+            completionEpochMillis: expiredTime - 1,
+            expirationEpochMillis: expiredTime } as AccessModuleStatus))},
         profile)
     profileStore.set({profile: newProfile, load, reload, updateCache});
   }
@@ -47,8 +50,9 @@ describe('Access Renewal Page', () => {
       ...oldProfile.accessModules.modules.filter(m => m.moduleName !== updateModuleName),
       {
         ...oldProfile.accessModules.modules.find(m => m.moduleName === updateModuleName),
+        completionEpochMillis: time - 1,
         expirationEpochMillis: time
-      }];
+      } as AccessModuleStatus];
     const newProfile = fp.set(['accessModules', 'modules'], newModules, oldProfile)
     profileStore.set({profile: newProfile, load, reload, updateCache});
   }
@@ -279,6 +283,8 @@ describe('Access Renewal Page', () => {
     // Incomplete
     expect(findNodesByExactText(wrapper, 'Review').length).toBe(1)
     expect(findNodesByExactText(wrapper, 'Confirm').length).toBe(1);
+
+    const {profile: {accessModules}} = profileStore.get();
 
     // Bypassed
     expect(findNodesByExactText(wrapper, 'Bypassed').length).toBe(2);
