@@ -270,21 +270,14 @@ describe('Access Renewal Page', () => {
   it('should show the correct state when items are bypassed', async () => {
     expireAllModules()
 
-    const wrapper = component();
-
-    setCompletionTimes(() => Date.now());
+    // won't bypass Profile and Publication confirmation because those are unbypassable
     setBypassTimes(() => Date.now());
 
-    updateOneModuleExpirationTime(AccessModule.PROFILECONFIRMATION, oneHourAgo());
-    updateOneModuleExpirationTime(AccessModule.PUBLICATIONCONFIRMATION, oneHourAgo());
-
-    await waitOneTickAndUpdate(wrapper);
+    const wrapper = component();
 
     // Incomplete
     expect(findNodesByExactText(wrapper, 'Review').length).toBe(1)
     expect(findNodesByExactText(wrapper, 'Confirm').length).toBe(1);
-
-    const {profile: {accessModules}} = profileStore.get();
 
     // Bypassed
     expect(findNodesByExactText(wrapper, 'Bypassed').length).toBe(2);
@@ -300,16 +293,15 @@ describe('Access Renewal Page', () => {
   it('should show the correct state when all items are complete or bypassed', async () => {
     expireAllModules()
 
-    const wrapper = component();
+    setCompletionTimes(() => Date.now());
+
+    // won't bypass Profile and Publication confirmation because those are unbypassable
+    setBypassTimes(() => Date.now());
 
     updateOneModuleExpirationTime(AccessModule.PROFILECONFIRMATION, oneYearFromNow());
     updateOneModuleExpirationTime(AccessModule.PUBLICATIONCONFIRMATION, oneYearFromNow());
 
-    setBypassTimes(oneYearFromNow);
-
-    setCompletionTimes(oneYearFromNow);
-
-    await waitOneTickAndUpdate(wrapper);
+    const wrapper = component();
 
     // Training and DUCC are bypassed
     expect(findNodesByExactText(wrapper, 'Bypassed').length).toBe(2);

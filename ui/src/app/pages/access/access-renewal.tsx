@@ -115,10 +115,10 @@ const isExpiringAndNotBypassed = (moduleName: AccessModule, modules: AccessModul
   return isModuleExpiring(status) && !status.bypassEpochMillis;
 }
 
-const completeOrBypassedAndNotExpiring = (status: AccessModuleStatus) => {
+const completeAndNotExpiringOrBypassed = (status: AccessModuleStatus) => {
   const isComplete = !!status.completionEpochMillis;
   const wasBypassed = !!status.bypassEpochMillis;
-  return (isComplete || wasBypassed) && !isExpiring(status.expirationEpochMillis);
+  return wasBypassed || (isComplete && !isExpiring(status.expirationEpochMillis));
 }
 
 
@@ -152,7 +152,7 @@ interface ActionButtonInterface {
 const ActionButton = (
   {moduleStatus, actionButtonText, completedButtonText, onClick, disabled, style}: ActionButtonInterface) => {
   const wasBypassed = !!moduleStatus.bypassEpochMillis;
-  return completeOrBypassedAndNotExpiring(moduleStatus)
+  return completeAndNotExpiringOrBypassed(moduleStatus)
     ? <CompletedButton buttonText={completedButtonText} wasBypassed={wasBypassed} style={style}/>
     : <Button
         onClick={onClick}
@@ -203,7 +203,7 @@ export const AccessRenewal = fp.flow(withProfileErrorModal)((spinnerProps: WithS
 
   const expirableModules = modules.filter(moduleStatus => accessRenewalModules.includes(moduleStatus.moduleName));
 
-  const allModulesCompleteOrBypassed = expirableModules.every(completeOrBypassedAndNotExpiring);
+  const renewalCompleteAndNotExpiring = expirableModules.every(completeAndNotExpiringOrBypassed);
 
   // onMount - as we move between pages, let's make sure we have the latest profile and external module information
   useEffect(() => {
@@ -224,7 +224,7 @@ export const AccessRenewal = fp.flow(withProfileErrorModal)((spinnerProps: WithS
 
   const maybeHeader = cond(
     // Completed - no icon or button
-    [allModulesCompleteOrBypassed, () => null],
+    [renewalCompleteAndNotExpiring, () => null],
     // Access expired icon
     [maybeDaysRemaining(profile) < 0, () => <React.Fragment>
       <ExclamationTriangle color={colors.warning} style={{height: '1.5rem', width: '1.5rem'}}/>
@@ -241,12 +241,12 @@ export const AccessRenewal = fp.flow(withProfileErrorModal)((spinnerProps: WithS
   return <FadeBox style={{margin: '1rem auto 0', color: colors.primary}}>
     <div style={{display: 'grid', gridTemplateColumns: '1.5rem 1fr', alignItems: 'center', columnGap: '.675rem'}}>
       {maybeHeader}
-      <div style={allModulesCompleteOrBypassed ? {gridColumn: '1 / span 2'} : {gridColumnStart: 2}}>
+      <div style={renewalCompleteAndNotExpiring ? {gridColumn: '1 / span 2'} : {gridColumnStart: 2}}>
         Researchers are required to complete a number of steps as part of the annual renewal
         to maintain access to <AoU/> data. Renewal of access will occur on a rolling basis annually (i.e. for each user, access
         renewal will be due 365 days after the date of authorization to access <AoU/> data.
       </div>
-      {allModulesCompleteOrBypassed && <div style={{...renewalStyle.completionBox, gridColumn: '1 / span 2'}}>
+      {renewalCompleteAndNotExpiring && <div style={{...renewalStyle.completionBox, gridColumn: '1 / span 2'}}>
         <div style={renewalStyle.h2}>Thank you for completing all the necessary steps</div>
         <div>
           Your yearly Researcher Workbench access renewal is complete. You can use the menu icon in the top left to continue your research.
