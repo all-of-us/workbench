@@ -45,6 +45,13 @@ const renewalStyle = {
     fontSize: '0.675rem',
     fontWeight: 600
   },
+  completedButton: {
+    height: '1.6rem',
+    marginTop: 'auto',
+    backgroundColor: colors.success,
+    width: 'max-content',
+    cursor: 'default',
+  },
   completionBox: {
     height: '3.5rem',
     background: `${addOpacity(colors.accent, 0.15)}`,
@@ -64,7 +71,19 @@ const renewalStyle = {
     margin: 0,
     padding: '0.5rem',
     width: 560
-  }
+  },
+  publicationConfirmation: {
+    marginTop: 'auto',
+    display: 'grid',
+    columnGap: '0.25rem',
+    gridTemplateColumns: 'auto 1rem 1fr',
+    alignItems: 'center'
+  },
+  complianceTrainingExpiring: {
+    borderTop: `1px solid ${colorWithWhiteness(colors.dark, 0.8)}`,
+    marginTop: '0.5rem',
+    paddingTop: '0.5rem',
+  },
 };
 
 
@@ -124,21 +143,15 @@ const bypassedOrCompleteAndNotExpiring = (status: AccessModuleStatus) => {
 
 // Helper / Stateless Components
 interface CompletedButtonInterface {
-  buttonText: string;
+  completedText: string;
   wasBypassed: boolean;
   style?: React.CSSProperties;
 }
-const CompletedButton = ({buttonText, wasBypassed, style}: CompletedButtonInterface) => <Button disabled={true}
-    data-test-id='completed-button'
-    style={{
-      height: '1.6rem',
-      marginTop: 'auto',
-      backgroundColor: colors.success,
-      width: 'max-content',
-      cursor: 'default',
-      ...style
-    }}>
-    <ClrIcon shape='check' style={{marginRight: '0.3rem'}}/>{wasBypassed ? 'Bypassed' : buttonText}
+const CompletedOrBypassedButton = ({completedText, wasBypassed, style}: CompletedButtonInterface) =>
+  <Button disabled={true}
+          data-test-id='completed-button'
+          style={{...renewalStyle.completedButton, ...style}}>
+    <ClrIcon shape='check' style={{marginRight: '0.3rem'}}/>{wasBypassed ? 'Bypassed' : completedText}
   </Button>;
 
 interface ActionButtonInterface {
@@ -153,7 +166,7 @@ const ActionButton = (
   {moduleStatus, actionButtonText, completedButtonText, onClick, disabled, style}: ActionButtonInterface) => {
   const wasBypassed = !!moduleStatus.bypassEpochMillis;
   return bypassedOrCompleteAndNotExpiring(moduleStatus)
-    ? <CompletedButton buttonText={completedButtonText} wasBypassed={wasBypassed} style={style}/>
+    ? <CompletedOrBypassedButton completedText={completedButtonText} wasBypassed={wasBypassed} style={style}/>
     : <Button
         onClick={onClick}
         disabled={disabled}
@@ -280,7 +293,7 @@ export const AccessRenewal = fp.flow(withProfileErrorModal)((spinnerProps: WithS
               href={'https://redcap.pmi-ops.org/surveys/?s=MKYL8MRD4N'}>please report it now.</a> For any questions,
              please contact <SupportMailto/>
         </div>
-        <div style={{marginTop: 'auto', display: 'grid', columnGap: '0.25rem', gridTemplateColumns: 'auto 1rem 1fr', alignItems: 'center'}}>
+        <div style={renewalStyle.publicationConfirmation}>
           <ActionButton
               actionButtonText='Confirm'
               completedButtonText='Confirmed'
@@ -316,8 +329,8 @@ export const AccessRenewal = fp.flow(withProfileErrorModal)((spinnerProps: WithS
           the compliance requirements for using the <AoU/> Dataset.
         </div>
         {isExpiringAndNotBypassed(AccessModule.COMPLIANCETRAINING, modules) &&
-          <div style={{borderTop: `1px solid ${colorWithWhiteness(colors.dark, 0.8)}`, marginTop: '0.5rem', paddingTop: '0.5rem'}}>
-            When you have completed the training click the refresh button or reload the page.
+          <div style={renewalStyle.complianceTrainingExpiring}>
+           When you have completed the training click the refresh button or reload the page.
           </div>}
         <FlexRow style={{marginTop: 'auto'}}>
           <ActionButton
