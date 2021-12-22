@@ -42,7 +42,7 @@ export async function signInWithAccessToken(
   // Keep file naming convention synchronized with generate-impersonated-user-tokens
   const token = fs.readFileSync(tokenLocation, 'ascii');
   if (isBlank(token)) {
-    throw Error(`no token found at ${tokenLocation}`);
+    throw Error(`Token found at ${tokenLocation} is blank`);
   }
   logger.info('Sign in with access token to Workbench application');
   const homePage = new HomePage(page);
