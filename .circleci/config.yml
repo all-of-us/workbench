@@ -546,7 +546,7 @@ jobs:
         type: enum
         enum: [ "test", "staging", "local", "perf" ]
     steps:
-      - checkout-code
+      - puppeteer-env-setup
       - restore_cache:
           name: "Restore api gradle wrapper cache"
           key: v6-gradle-wrapper-{{ .Branch }}-{{ checksum "~/workbench/api/gradle/wrapper/gradle-wrapper.properties" }}
