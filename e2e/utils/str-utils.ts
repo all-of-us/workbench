@@ -76,7 +76,7 @@ export function numericalStringToNumber(value: string): number {
   return Number(value.replace(/,/g, ''));
 }
 
-export function isBlank(toTest: String): boolean {
+export function isBlank(toTest: string): boolean {
   if (toTest === null || toTest === undefined) {
     return true;
   } else {

@@ -11,7 +11,7 @@ import WorkspaceCard from 'app/component/workspace-card';
 import { PageUrl, WorkspaceAccessLevel } from 'app/text-labels';
 import WorkspacesPage from 'app/page/workspaces-page';
 import Navigation, { NavLink } from 'app/component/navigation';
-import {isBlank, makeWorkspaceName} from './str-utils';
+import { isBlank, makeWorkspaceName } from './str-utils';
 import { config } from 'resources/workbench-config';
 import { logger } from 'libs/logger';
 import { authenticator } from 'otplib';
