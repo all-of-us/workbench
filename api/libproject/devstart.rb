@@ -2708,7 +2708,7 @@ def list_runtimes(cmd_name, *args)
       "--format [format]",
       ->(opts, v) { opts.format = v },
       "JSON or TABULAR, defaults to TABULAR (summary)")
-  op.opts.runime_project = ""
+  op.opts.runtime_project = ""
   op.opts.include_deleted = false
   op.opts.format = "TABULAR"
 
