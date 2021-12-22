@@ -2107,6 +2107,9 @@ def can_skip_token_generation(token_filenames)
 
     age_minutes = (Time.now - File.ctime(f)) / 60
     return false unless age_minutes < staleness_limit_minutes
+
+    contents = File.readlines(f)
+    return false if contents.nil? || contents.empty?
   end
 
   return true
@@ -2708,7 +2711,7 @@ def list_runtimes(cmd_name, *args)
       "--format [format]",
       ->(opts, v) { opts.format = v },
       "JSON or TABULAR, defaults to TABULAR (summary)")
-  op.opts.runime_project = ""
+  op.opts.runtime_project = ""
   op.opts.include_deleted = false
   op.opts.format = "TABULAR"
 
