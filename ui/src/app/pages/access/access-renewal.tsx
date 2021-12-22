@@ -115,7 +115,7 @@ const isExpiringAndNotBypassed = (moduleName: AccessModule, modules: AccessModul
   return isModuleExpiring(status) && !status.bypassEpochMillis;
 }
 
-const completeAndNotExpiringOrBypassed = (status: AccessModuleStatus) => {
+const bypassedOrCompleteAndNotExpiring = (status: AccessModuleStatus) => {
   const isComplete = !!status.completionEpochMillis;
   const wasBypassed = !!status.bypassEpochMillis;
   return wasBypassed || (isComplete && !isExpiring(status.expirationEpochMillis));
@@ -152,7 +152,7 @@ interface ActionButtonInterface {
 const ActionButton = (
   {moduleStatus, actionButtonText, completedButtonText, onClick, disabled, style}: ActionButtonInterface) => {
   const wasBypassed = !!moduleStatus.bypassEpochMillis;
-  return completeAndNotExpiringOrBypassed(moduleStatus)
+  return bypassedOrCompleteAndNotExpiring(moduleStatus)
     ? <CompletedButton buttonText={completedButtonText} wasBypassed={wasBypassed} style={style}/>
     : <Button
         onClick={onClick}
@@ -203,7 +203,7 @@ export const AccessRenewal = fp.flow(withProfileErrorModal)((spinnerProps: WithS
 
   const expirableModules = modules.filter(moduleStatus => accessRenewalModules.includes(moduleStatus.moduleName));
 
-  const renewalCompleteAndNotExpiring = expirableModules.every(completeAndNotExpiringOrBypassed);
+  const renewalCompleteAndNotExpiring = expirableModules.every(bypassedOrCompleteAndNotExpiring);
 
   // onMount - as we move between pages, let's make sure we have the latest profile and external module information
   useEffect(() => {
