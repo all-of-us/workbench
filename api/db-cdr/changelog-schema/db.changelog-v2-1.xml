@@ -15,7 +15,7 @@
       <column name="domain_id" type="VARCHAR(80)">
         <constraints nullable="true"/>
       </column>
-      <column name="is_standard" type="BOOL">
+      <column name="is_standard" type="TINYINT">
         <constraints nullable="true"/>
       </column>
       <column name="type" type="VARCHAR(20)">
@@ -39,19 +39,19 @@
       <column name="est_count" type="BIGINT">
         <constraints nullable="true"/>
       </column>
-      <column name="is_group" type="BOOL">
+      <column name="is_group" type="TINYINT">
         <constraints nullable="true"/>
       </column>
-      <column name="is_selectable" type="BOOL">
+      <column name="is_selectable" type="TINYINT">
         <constraints nullable="true"/>
       </column>
-      <column name="has_attribute" type="BOOL">
+      <column name="has_attribute" type="TINYINT">
         <constraints nullable="true"/>
       </column>
-      <column name="has_hierarchy" type="BOOL">
+      <column name="has_hierarchy" type="TINYINT">
         <constraints nullable="true"/>
       </column>
-      <column name="has_ancestor_data" type="BOOL">
+      <column name="has_ancestor_data" type="TINYINT">
         <constraints nullable="true"/>
       </column>
       <column name="path" type="VARCHAR(500)">
@@ -112,13 +112,13 @@
 
     <sql dbms="mysql">
       ALTER TABLE cb_criteria
-      ADD FULLTEXT INDEX fulltext_path
+        ADD FULLTEXT INDEX fulltext_path
       (path);
     </sql>
 
     <sql dbms="mysql">
       ALTER TABLE cb_criteria
-      ADD FULLTEXT INDEX cb_criteria_full_text
+        ADD FULLTEXT INDEX cb_criteria_full_text
       (full_text);
     </sql>
 
@@ -242,7 +242,7 @@
       <column name="name" type="VARCHAR(100)">
         <constraints nullable="true"/>
       </column>
-      <column name="is_group" type="BOOL">
+      <column name="is_group" type="TINYINT">
         <constraints nullable="true"/>
       </column>
       <column name="sort_order" type="BIGINT">
@@ -275,7 +275,7 @@
       <column name="age_at_cdr" type="INTEGER">
         <constraints nullable="true"/>
       </column>
-      <column name="is_deceased" type="BOOL">
+      <column name="is_deceased" type="TINYINT">
         <constraints nullable="true"/>
       </column>
     </createTable>
@@ -284,7 +284,7 @@
       <column name="concept_id" type="INTEGER">
         <constraints nullable="false"/>
       </column>
-      <column name="domain" type="tinyint">
+      <column name="domain" type="TINYINT">
         <constraints nullable="false"/>
       </column>
       <column name="domain_id" type="VARCHAR(40)">

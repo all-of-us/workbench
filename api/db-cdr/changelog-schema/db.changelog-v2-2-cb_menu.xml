@@ -23,10 +23,10 @@
       <column name="name" type="VARCHAR(100)">
         <constraints nullable="true"/>
       </column>
-      <column name="is_group" type="BOOL">
+      <column name="is_group" type="TINYINT">
         <constraints nullable="true"/>
       </column>
-      <column name="is_standard" type="BOOL">
+      <column name="is_standard" type="TINYINT">
         <constraints nullable="true"/>
       </column>
       <column name="sort_order" type="BIGINT">
