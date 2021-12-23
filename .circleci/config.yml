@@ -552,11 +552,14 @@ jobs:
           key: v6-gradle-wrapper-{{ .Branch }}-{{ checksum "~/workbench/api/gradle/wrapper/gradle-wrapper.properties" }}
       - restore_cache:
           name: "Restore api gradle cache"
-          key: v6-gradle-cache-{{ .Branch }}-{{ checksum "~/workbench/api/build.gradle" }}
+          keys:
+            - v6-gradle-cache-{{ .Branch }}-{{ checksum "~/workbench/api/build.gradle" }}
+            - v6-gradle-cache-
       - restore_cache:
           name: "Restore e2e yarn cache"
           keys:
             - v5-e2e-yarn-{{ .Branch }}-{{ arch }}-{{ checksum "~/workbench/e2e/yarn.lock" }}
+            - v5-e2e-yarn-
       - run:
           name: "Set environment variables for e2e test users"
           working_directory: ~/workbench/e2e
