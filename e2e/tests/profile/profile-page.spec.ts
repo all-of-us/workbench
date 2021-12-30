@@ -174,7 +174,7 @@ describe('Profile', () => {
   test('Typing an invalid URL disables the save button', async () => {
     const url = profilePage.getProfessionalUrlInput();
     const validUrl = makeUrl(10);
-    const invalidUrls = ['hello', 'hello.com', 'http://', 'https://broad    institute.org', '*http://google.com/'];
+    const invalidUrls = ['hello', 'http://', 'https://broad    institute.org', '*http://google.com/'];
 
     await url.type(validUrl);
 

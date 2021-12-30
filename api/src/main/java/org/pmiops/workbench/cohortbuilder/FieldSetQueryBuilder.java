@@ -12,6 +12,9 @@ import com.google.common.collect.Iterables;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -20,8 +23,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.cohortbuilder.QueryConfiguration.ColumnInfo;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfig;
@@ -34,6 +35,7 @@ import org.pmiops.workbench.model.FieldSet;
 import org.pmiops.workbench.model.Operator;
 import org.pmiops.workbench.model.ResultFilters;
 import org.pmiops.workbench.model.TableQuery;
+import org.pmiops.workbench.utils.FieldValues;
 import org.pmiops.workbench.utils.OperatorUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -52,7 +54,7 @@ public class FieldSetQueryBuilder {
 
   private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat(DATE_FORMAT_PATTERN);
   private static final DateTimeFormatter DATE_TIME_FORMAT =
-      DateTimeFormat.forPattern(DATE_TIME_FORMAT_PATTERN).withZoneUTC();
+      DateTimeFormatter.ofPattern(DATE_TIME_FORMAT_PATTERN).withZone(ZoneId.of("UTC"));
 
   private final CohortQueryBuilder cohortQueryBuilder;
   private final BigQueryService bigQueryService;
@@ -315,7 +317,8 @@ public class FieldSetQueryBuilder {
       } else if (columnConfig.type.equals(ColumnType.TIMESTAMP)) {
         try {
           long timestamp =
-              DATE_TIME_FORMAT.parseDateTime(columnFilter.getValueDate()).getMillis() * 1000;
+              FieldValues.toTimestampMicroseconds(
+                  Instant.from(DATE_TIME_FORMAT.parse(columnFilter.getValueDate())));
           queryState.paramMap.put(paramName, QueryParameterValue.timestamp(timestamp));
         } catch (IllegalArgumentException e) {
           throw new BadRequestException(
@@ -750,7 +753,7 @@ public class FieldSetQueryBuilder {
             value = fieldValue.getStringValue();
             break;
           case TIMESTAMP:
-            value = DATE_TIME_FORMAT.print(fieldValue.getTimestampValue() / 1000L);
+            value = DATE_TIME_FORMAT.format(FieldValues.getInstant(fieldValue));
             break;
           default:
             throw new IllegalStateException("Unrecognized column type: " + columnConfig.type);

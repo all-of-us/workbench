@@ -28,7 +28,7 @@ then
   fi
 
   echo "Making BigQuery backup cb_ and ds_ tables"
-  if ./generate-cdr/build-backup-cb-ds-tables.sh "$BQ_PROJECT" "$BQ_DATASET" "$WORKBENCH_PROJEC"T "$WORKBENCH_DATASET"
+  if ./generate-cdr/build-backup-cb-ds-tables.sh "$BQ_PROJECT" "$BQ_DATASET" "$WORKBENCH_PROJECT" "$WORKBENCH_DATASET"
   then
       echo "cb_ and ds_ tables archived"
   else

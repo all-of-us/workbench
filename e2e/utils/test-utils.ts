@@ -11,7 +11,7 @@ import WorkspaceCard from 'app/component/workspace-card';
 import { PageUrl, WorkspaceAccessLevel } from 'app/text-labels';
 import WorkspacesPage from 'app/page/workspaces-page';
 import Navigation, { NavLink } from 'app/component/navigation';
-import { makeWorkspaceName } from './str-utils';
+import { isBlank, makeWorkspaceName } from './str-utils';
 import { config } from 'resources/workbench-config';
 import { logger } from 'libs/logger';
 import { authenticator } from 'otplib';
@@ -38,8 +38,12 @@ export async function signInWithAccessToken(
   userEmail = config.USER_NAME,
   postSignInPage: AuthenticatedPage = new HomePage(page)
 ): Promise<void> {
+  const tokenLocation = `signin-tokens/${userEmail}.txt`;
   // Keep file naming convention synchronized with generate-impersonated-user-tokens
-  const token = fs.readFileSync(`signin-tokens/${userEmail}.txt`, 'ascii');
+  const token = fs.readFileSync(tokenLocation, 'ascii');
+  if (isBlank(token)) {
+    throw Error(`Token found at ${tokenLocation} is blank`);
+  }
   logger.info('Sign in with access token to Workbench application');
   const homePage = new HomePage(page);
   await homePage.gotoUrl(PageUrl.Home);

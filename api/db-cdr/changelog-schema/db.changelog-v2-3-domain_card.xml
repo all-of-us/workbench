@@ -27,7 +27,7 @@
       <column name="participant_count" defaultValue="0" type="INTEGER">
         <constraints nullable="false"/>
       </column>
-      <column name="is_standard" type="BOOL">
+      <column name="is_standard" type="TINYINT">
         <constraints nullable="false"/>
       </column>
       <column name="sort_order" type="BIGINT">

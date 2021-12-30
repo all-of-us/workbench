@@ -12,7 +12,6 @@ import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.times
 import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.timestampQpvToOffsetDateTime;
 import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.timestampStringToInstant;
 import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.toTimestampQpv;
-import static org.pmiops.workbench.utils.FieldValues.MICROSECONDS_IN_MILLISECOND;
 import static org.pmiops.workbench.utils.TimeAssertions.assertTimeApprox;
 
 import com.google.cloud.bigquery.QueryParameterValue;
@@ -27,6 +26,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.utils.FieldValues;
 
 public class QueryParameterValuesTest {
 
@@ -35,7 +35,7 @@ public class QueryParameterValuesTest {
   private static final OffsetDateTime OFFSET_DATE_TIME =
       OffsetDateTime.ofInstant(INSTANT, ZoneOffset.UTC);
   private static final QueryParameterValue TIMESTAMP_QPV =
-      QueryParameterValue.timestamp(INSTANT.toEpochMilli() * MICROSECONDS_IN_MILLISECOND);
+      QueryParameterValue.timestamp(FieldValues.toTimestampMicroseconds(INSTANT));
 
   @BeforeEach
   public void setup() {

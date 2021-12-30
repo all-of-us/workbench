@@ -75,3 +75,12 @@ export function extractNamespace(url: URL): string {
 export function numericalStringToNumber(value: string): number {
   return Number(value.replace(/,/g, ''));
 }
+
+export function isBlank(toTest: string): boolean {
+  if (toTest === null || toTest === undefined) {
+    return true;
+  } else {
+    toTest = toTest.trim();
+    return toTest === '';
+  }
+}
