@@ -2,13 +2,14 @@ module.exports = {
   root: true,
   parser: '@typescript-eslint/parser',
   plugins: [
-    'react',
-    'sort-keys-fix',
-    'prefer-arrow',
     '@typescript-eslint',
-    'simple-import-sort',
+    'jest',
+    'prefer-arrow',
     'prettier',
-    'jest'
+    'react',
+    'react-hooks',
+    'simple-import-sort',
+    'sort-keys-fix',
   ],
   extends: [],
   parserOptions: {
@@ -24,7 +25,7 @@ module.exports = {
     }
   },
 
-  // These rules were ported over from our common-ui/tslint.json file
+  // Some of these rules were ported over from our common-ui/tslint.json file
   // The rules found here were ported and categorized using the tslint migration roadmap:
   // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/ROADMAP.md
 
@@ -79,11 +80,15 @@ module.exports = {
     // '@typescript-eslint/no-use-before-define': 'warn', // 55 instances as of 3 Jan 2022
     // 'no-unused-vars': 'off', // Needed for the below rule
     // '@typescript-eslint/no-unused-vars': 'warn', // 271 instances as of 3 Jan 2022
-    'react/jsx-curly-spacing': ["warn", {'when': 'never'}],
-    'react/jsx-uses-vars': 'warn',
     'no-var': 'warn',
     'radix': 'warn', // Add radix on parseInt
     'eqeqeq': ['warn', 'always', {'null': 'ignore'}],
+
+    /* React */
+    'react/jsx-curly-spacing': ["warn", {'when': 'never'}],
+    'react/jsx-uses-vars': 'warn',
+    'react-hooks/rules-of-hooks': 'warn',
+    //'react-hooks/exhaustive-deps': 'warn',
 
     /* Maintainability */
     'eol-last': 'warn',
