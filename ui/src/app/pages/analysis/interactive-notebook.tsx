@@ -379,7 +379,8 @@ export const InteractiveNotebook = fp.flow(
           {showPlaygroundModeModal &&
             <ConfirmPlaygroundModeModal
               onCancel={() => {
-                this.setState({showPlaygroundModeModal: false}); }}
+                this.setState({showPlaygroundModeModal: false});
+              }}
               onContinue={() => {
                 this.setState({showPlaygroundModeModal: false});
                 this.startPlaygroundMode();
@@ -388,7 +389,8 @@ export const InteractiveNotebook = fp.flow(
           <NotebookInUseModal
             email={lastLockedBy}
             onCancel={() => {
-              this.setState({showInUseModal: false}); }}
+              this.setState({showInUseModal: false});
+            }}
             onCopy={() => {this.cloneNotebook(); }}
             onPlaygroundMode={() => {
               this.setState({showInUseModal: false});

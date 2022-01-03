@@ -548,7 +548,8 @@ const GpuConfigSelector = ({disabled, onChange, selectedMachine, gpuConfig})  =>
                   options={validGpuNames}
                   onChange={
                     ({value}) => {
-                      setSelectedGpuType(fp.find({name: value}, validGpuOptions).type); }
+                      setSelectedGpuType(fp.find({name: value}, validGpuOptions).type);
+                    }
                   }
                   disabled={disabled}
                   value={gpuTypeToDisplayName(selectedGpuType)}/>
@@ -1387,7 +1388,8 @@ const RuntimePanel = fp.flow(
               }}
               onCancel={() => setPanelContent(PanelContent.Customize)}
           />;
-        }}],
+        }
+      }],
       [PanelContent.DeleteUnattachedPd, () => <ConfirmDeleteUnattachedPD
           onConfirm={async() => {
             await disksApi().deleteDisk(namespace, persistentDisk.name);

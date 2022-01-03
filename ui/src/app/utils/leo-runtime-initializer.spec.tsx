@@ -179,7 +179,8 @@ describe('RuntimeInitializer', () => {
           machineType: 'n1-standard-16'
         },
         status: RuntimeStatus.Deleted
-      }; });
+      };
+    });
 
     try {
       await LeoRuntimeInitializer.initialize({
@@ -209,7 +210,8 @@ describe('RuntimeInitializer', () => {
           gpuConfig: null,
         },
         status: RuntimeStatus.Deleted
-      }; });
+      };
+    });
 
     try {
       await LeoRuntimeInitializer.initialize({

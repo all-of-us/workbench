@@ -398,8 +398,9 @@ export const WorkspaceShare = fp.flow(withUserProfile())(class extends React.Com
                   </div>
                 </div>
                   <div style={{borderTop: '1px solid grey', width: '100%', marginTop: '.5rem'}}/>
-                </div>; })}
-            </div>}
+                  </div>;
+                })}
+              </div>}
           </div>
           {this.state.userNotFound && <div style={{color: 'red'}}>
             {this.state.userNotFound}

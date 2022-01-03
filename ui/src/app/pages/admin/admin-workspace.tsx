@@ -184,7 +184,8 @@ const FileDetailsTable = (props: FileDetailsProps) => {
               workspaceNamespace={workspaceNamespace}
               accessReason={accessReason}/>,
           size: formatMB(file.sizeInBytes),
-        }; })
+        };
+      })
       .sort((a, b) => {
         const locationComparison = a.location.localeCompare(b.location);
         return locationComparison === 0 ? a.rawName.localeCompare(b.rawName) : locationComparison;

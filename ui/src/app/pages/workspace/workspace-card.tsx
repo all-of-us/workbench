@@ -173,7 +173,8 @@ export const WorkspaceCard = fp.flow(withNavigation)(
                   }}
                   onEdit={() => {
                     AnalyticsTracker.Workspaces.OpenEditPage('Card');
-                    navigate(['workspaces', namespace, id, 'edit']); }
+                    navigate(['workspaces', namespace, id, 'edit']);
+                  }
                   }
                   onDelete={() => {
                     AnalyticsTracker.Workspaces.OpenDeleteModal('Card');
