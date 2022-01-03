@@ -59,7 +59,7 @@ export const WorkspaceRoutes = () => {
           }}
       />
     </AppRoute>
-    <AppRoute exact path={`${path}/duplicate`} guards={[adminLockedGuard]}>
+    <AppRoute exact path={`${path}/duplicate`} guards={[adminLockedGuard(ns, wsid)]}>
       <WorkspaceEditPage
           routeData={{
             title: 'Duplicate Workspace',
