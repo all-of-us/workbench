@@ -200,17 +200,17 @@ export const WorkspaceCard = fp.flow(withNavigation)(
               <FlexColumn style={{marginBottom: 'auto'}}>
                 <FlexRow style={{ alignItems: 'flex-start' }}>
                   <Clickable style={{cursor: tierAccessDisabled ? 'not-allowed' : 'pointer', ...styles}}
-                             onClick={() => this.onClick()}
-                             disabled={tierAccessDisabled}>
+                    onClick={() => this.onClick()}
+                    disabled={tierAccessDisabled}>
                     <TooltipTrigger content={tierAccessDisabled && <div>
                       This workspace is a {displayNameForTier(accessTierShortName)} workspace. You do not have access.
                       Please complete the data access requirements to gain access.
                     </div>
                     }>
-                    <div style={tierAccessDisabled ? styles.workspaceNameDisabled : styles.workspaceName}
-                         data-test-id='workspace-card-name'>
-                      {workspace.name}
-                    </div>
+                      <div style={tierAccessDisabled ? styles.workspaceNameDisabled : styles.workspaceName}
+                        data-test-id='workspace-card-name'>
+                        {workspace.name}
+                      </div>
                     </TooltipTrigger>
                   </Clickable>
                 </FlexRow>
@@ -218,8 +218,8 @@ export const WorkspaceCard = fp.flow(withNavigation)(
                   workspace.researchPurpose.reviewRequested === true &&
                   workspace.researchPurpose.approved === false &&
                   <div style={{color: colors.danger}}>
-                      <ClrIcon shape='exclamation-triangle' className='is-solid'
-                               style={{fill: colors.danger}}/>
+                    <ClrIcon shape='exclamation-triangle' className='is-solid'
+                      style={{fill: colors.danger}}/>
                       Rejected
                   </div>
                 }
@@ -258,33 +258,33 @@ export const WorkspaceCard = fp.flow(withNavigation)(
         </WorkspaceCardBase>
         {confirmDeleting &&
         <ConfirmDeleteModal data-test-id='confirm-delete-modal'
-                            resourceType={ResourceType.WORKSPACE}
-                            resourceName={workspace.name}
-                            receiveDelete={() => {
-                              AnalyticsTracker.Workspaces.Delete();
-                              this.deleteWorkspace();
-                            }}
-                            closeFunction={() => {this.setState({confirmDeleting: false}); }}/>}
+          resourceType={ResourceType.WORKSPACE}
+          resourceName={workspace.name}
+          receiveDelete={() => {
+            AnalyticsTracker.Workspaces.Delete();
+            this.deleteWorkspace();
+          }}
+          closeFunction={() => {this.setState({confirmDeleting: false}); }}/>}
         {showShareModal && <WorkspaceShare data-test-id='workspace-share-modal'
-                                           workspace={{...workspace, accessLevel}}
-                                           onClose={() => this.handleShareDialogClose()} />}
+          workspace={{...workspace, accessLevel}}
+          onClose={() => this.handleShareDialogClose()} />}
         {showResearchPurposeReviewModal && <Modal data-test-id='workspace-review-modal'>
-            <ModalTitle>Please review Research Purpose for Workspace '{workspace.name}'</ModalTitle>
-            <ModalBody style={{display: 'flex', flexDirection: 'column'}}>
-                <div>
+          <ModalTitle>Please review Research Purpose for Workspace '{workspace.name}'</ModalTitle>
+          <ModalBody style={{display: 'flex', flexDirection: 'column'}}>
+            <div>
                     Now that you have had some time to explore the Researcher Workbench for your project,
                     please review your workspace description to make sure it is accurate. As a reminder,
                     project descriptions are publicly cataloged in the <AouTitle/>'s <a
-                    href='https://www.researchallofus.org/research-projects-directory/' target='_blank'>
+                href='https://www.researchallofus.org/research-projects-directory/' target='_blank'>
                     Research Project Directory</a> for participants and public to review.
-                </div>
-            </ModalBody>
-            <ModalFooter>
-                <Button type='primary' style={{marginLeft: '1rem', marginRight: '1rem'}}
-                        onClick={() => this.handleReviewResearchPurpose()}>REVIEW NOW</Button>
-                <Button type='secondary'
-                        onClick={() => this.setState({showResearchPurposeReviewModal: false})}>REVIEW LATER</Button>
-            </ModalFooter>
+            </div>
+          </ModalBody>
+          <ModalFooter>
+            <Button type='primary' style={{marginLeft: '1rem', marginRight: '1rem'}}
+              onClick={() => this.handleReviewResearchPurpose()}>REVIEW NOW</Button>
+            <Button type='secondary'
+              onClick={() => this.setState({showResearchPurposeReviewModal: false})}>REVIEW LATER</Button>
+          </ModalFooter>
         </Modal>}
       </React.Fragment>;
 

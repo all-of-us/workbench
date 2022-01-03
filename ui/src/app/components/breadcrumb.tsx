@@ -212,10 +212,10 @@ export const Breadcrumb = fp.flow(
         path: '/workspaces/:ns/:wsid/notebooks/preview/:nbName'
       });
       nbName = notebookMatch
-          ? notebookMatch.params.nbName
-          : notebookPreviewMatch
-              ? notebookPreviewMatch.params.nbName
-              : undefined;
+        ? notebookMatch.params.nbName
+        : notebookPreviewMatch
+          ? notebookPreviewMatch.params.nbName
+          : undefined;
 
       return getTrail(
         this.props.routeData.breadcrumb,

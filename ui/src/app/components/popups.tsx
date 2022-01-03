@@ -135,28 +135,28 @@ export const computePopupPosition = ({side, viewport, target, element, gap}) => 
       ['right', () => overflowsRight ? 'left' : 'right'],
       // Unfortunately, nested switchCase is probably the clearest way to express this.
       ['bottom-left', () => switchCase({ob: overflowsBottom, ol: overflowsLeft},
-          [{ob: false, ol: false}, () => 'bottom-left'],
-          [{ob: false, ol: true}, () => 'bottom-right'],
-          [{ob: true, ol: false}, () => 'top-left'],
-          [{ob: true, ol: true}, () => 'top-right']
+        [{ob: false, ol: false}, () => 'bottom-left'],
+        [{ob: false, ol: true}, () => 'bottom-right'],
+        [{ob: true, ol: false}, () => 'top-left'],
+        [{ob: true, ol: true}, () => 'top-right']
       )],
       ['bottom-right', () => switchCase({ob: overflowsBottom, or: overflowsRight},
-          [{ob: false, or: false}, () => 'bottom-right'],
-          [{ob: false, or: true}, () => 'bottom-left'],
-          [{ob: true, or: false}, () => 'top-right'],
-          [{ob: true, or: true}, () => 'top-left']
+        [{ob: false, or: false}, () => 'bottom-right'],
+        [{ob: false, or: true}, () => 'bottom-left'],
+        [{ob: true, or: false}, () => 'top-right'],
+        [{ob: true, or: true}, () => 'top-left']
       )],
       ['top-left', () => switchCase({ot: overflowsTop, ol: overflowsLeft},
-          [{ot: false, ol: false}, () => 'top-left'],
-          [{ot: false, ol: true}, () => 'top-right'],
-          [{ot: true, ol: false}, () => 'bottom-left'],
-          [{ot: true, ol: true}, () => 'bottom-right']
+        [{ot: false, ol: false}, () => 'top-left'],
+        [{ot: false, ol: true}, () => 'top-right'],
+        [{ot: true, ol: false}, () => 'bottom-left'],
+        [{ot: true, ol: true}, () => 'bottom-right']
       )],
       ['top-right', () => switchCase({ot: overflowsTop, or: overflowsRight},
-          [{ot: false, or: false}, () => 'top-right'],
-          [{ot: false, or: true}, () => 'top-left'],
-          [{ot: true, or: false}, () => 'bottom-right'],
-          [{ot: true, or: true}, () => 'bottom-left']
+        [{ot: false, or: false}, () => 'top-right'],
+        [{ot: false, or: true}, () => 'top-left'],
+        [{ot: true, or: false}, () => 'bottom-right'],
+        [{ot: true, or: true}, () => 'bottom-left']
       )]
     );
   };
@@ -342,11 +342,11 @@ export class PopupTrigger extends React.Component<PopupTriggerProps> {
         }
       })}
       {open && <Popup
-          target={this.id}
-          handleClickOutside={() => this.close()}
-          outsideClickIgnoreClass={this.id}
-          onClick={closeOnClick ? () => this.close() : () => {}}
-          {...props}
+        target={this.id}
+        handleClickOutside={() => this.close()}
+        outsideClickIgnoreClass={this.id}
+        onClick={closeOnClick ? () => this.close() : () => {}}
+        {...props}
       >{content}</Popup>}
     </React.Fragment>;
   }

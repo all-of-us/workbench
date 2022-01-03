@@ -185,7 +185,7 @@ const OPERATIONAL_USER_INSTITUTION_SHORT_NAME = 'AouOps';
 export function setInstitutionCategoryState(affiliation: VerifiedInstitutionalAffiliation) {
   if (affiliation) {
     const category = (OPERATIONAL_USER_INSTITUTION_SHORT_NAME === affiliation.institutionShortName) ?
-        InstitutionCategoryState.OPERATIONS : InstitutionCategoryState.RESEARCHER;
+      InstitutionCategoryState.OPERATIONS : InstitutionCategoryState.RESEARCHER;
     gtagSet({
       [environment.gaUserInstitutionCategoryDimension]: category
     });

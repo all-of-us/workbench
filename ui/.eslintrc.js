@@ -46,6 +46,7 @@ module.exports = {
     '@typescript-eslint/unified-signatures': 'warn',
 
     /* Style */
+    '@typescript-eslint/indent': ['warn', 2],
     '@typescript-eslint/prefer-function-type': 'warn',
     // 'spaced-comment': 'warn',
     '@typescript-eslint/consistent-type-definitions': ['warn', 'interface'],

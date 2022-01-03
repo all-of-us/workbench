@@ -81,15 +81,15 @@ interface FreeCreditsProps {
 
 const FreeCreditsUsage = ({isAboveLimit, usage}: FreeCreditsProps) => {
   const inputStyle = isAboveLimit ?
-  {...styles.textInput,
-    backgroundColor: colorWithWhiteness(colors.danger, .95),
-    borderColor: colors.danger,
-    color: colors.danger,
-  } :
-  {...styles.textInput,
-    ...styles.backgroundColorDark,
-    color: colors.disabled,
-  };
+    {...styles.textInput,
+      backgroundColor: colorWithWhiteness(colors.danger, .95),
+      borderColor: colors.danger,
+      color: colors.danger,
+    } :
+    {...styles.textInput,
+      ...styles.backgroundColorDark,
+      color: colors.disabled,
+    };
 
   return <React.Fragment>
     <TextInputWithLabel
@@ -229,15 +229,15 @@ export const AdminUser = withRouter(class extends React.Component<Props, State> 
     this.setState(fp.flow(
       fp.set(['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionShortName'], institutionShortName),
       fp.set(
-          ['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionDisplayName'],
+        ['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionDisplayName'],
         verifiedInstitutionOptions.find(
-              institution => institution.shortName === institutionShortName,
-              verifiedInstitutionOptions
-          ).displayName
+          institution => institution.shortName === institutionShortName,
+          verifiedInstitutionOptions
+        ).displayName
       ),
       fp.set(['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionRoleEnum'], undefined),
       fp.set(['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionalRoleOtherText'], undefined)
-      ));
+    ));
     await this.validateEmail();
   }
 
@@ -317,38 +317,38 @@ export const AdminUser = withRouter(class extends React.Component<Props, State> 
         </FlexRow>
         <FlexRow style={{width: '100%', marginTop: '1rem', alignItems: 'center', justifyContent: 'space-between'}}>
           <FlexRow
-              style={{
-                alignItems: 'center',
-                backgroundColor: colorWithWhiteness(colors.primary, .85),
-                borderRadius: '5px',
-                padding: '0 .5rem',
-                height: '1.625rem',
-                width: '17.5rem'
-              }}
+            style={{
+              alignItems: 'center',
+              backgroundColor: colorWithWhiteness(colors.primary, .85),
+              borderRadius: '5px',
+              padding: '0 .5rem',
+              height: '1.625rem',
+              width: '17.5rem'
+            }}
           >
             <label style={{fontWeight: 600}}>
               Account access
             </label>
             <Toggle
-                name={updatedProfile.disabled ? 'Disabled' : 'Enabled'}
-                checked={!updatedProfile.disabled}
-                disabled={true}
-                data-test-id='account-access-toggle'
-                onToggle={() => {}}
-                style={{marginLeft: 'auto', paddingBottom: '0px'}}
-                height={18}
-                width={33}
+              name={updatedProfile.disabled ? 'Disabled' : 'Enabled'}
+              checked={!updatedProfile.disabled}
+              disabled={true}
+              data-test-id='account-access-toggle'
+              onToggle={() => {}}
+              style={{marginLeft: 'auto', paddingBottom: '0px'}}
+              height={18}
+              width={33}
             />
           </FlexRow>
           <ErrorsTooltip errors={errors}>
             <Button
-                type='primary'
-                disabled={!enableSave(oldProfile, updatedProfile, errors)}
-                onClick={async() => {
-                  this.setState({loading: true});
-                  const response = await updateAccountProperties(oldProfile, updatedProfile);
-                  this.setState({oldProfile: response, updatedProfile: response, loading: false});
-                }}
+              type='primary'
+              disabled={!enableSave(oldProfile, updatedProfile, errors)}
+              onClick={async() => {
+                this.setState({loading: true});
+                const response = await updateAccountProperties(oldProfile, updatedProfile);
+                this.setState({oldProfile: response, updatedProfile: response, loading: false});
+              }}
             >
               Save
             </Button>
@@ -357,33 +357,33 @@ export const AdminUser = withRouter(class extends React.Component<Props, State> 
         <FlexRow>
           <FlexColumn style={{width: '33%', marginRight: '1rem'}}>
             <TextInputWithLabel
-                labelText={'User name'}
-                placeholder={updatedProfile.givenName + ' ' + updatedProfile.familyName}
-                inputId={'userFullName'}
-                disabled={true}
-                inputStyle={{...styles.textInput, ...styles.backgroundColorDark}}
-                containerStyle={styles.textInputContainer}
+              labelText={'User name'}
+              placeholder={updatedProfile.givenName + ' ' + updatedProfile.familyName}
+              inputId={'userFullName'}
+              disabled={true}
+              inputStyle={{...styles.textInput, ...styles.backgroundColorDark}}
+              containerStyle={styles.textInputContainer}
             />
             <TextInputWithLabel
-                labelText={'Access tiers'}
-                placeholder={
-                  fp.flow(
-                    fp.map(fp.capitalize),
-                    fp.join(', '))
-                  (updatedProfile.accessTierShortNames)
-                }
-                inputId={'accessTiers'}
-                disabled={true}
-                inputStyle={{...styles.textInput, ...styles.backgroundColorDark}}
-                containerStyle={styles.textInputContainer}
+              labelText={'Access tiers'}
+              placeholder={
+                fp.flow(
+                  fp.map(fp.capitalize),
+                  fp.join(', '))
+                (updatedProfile.accessTierShortNames)
+              }
+              inputId={'accessTiers'}
+              disabled={true}
+              inputStyle={{...styles.textInput, ...styles.backgroundColorDark}}
+              containerStyle={styles.textInputContainer}
             />
             <TextInputWithLabel
-                labelText={'Username'}
-                placeholder={updatedProfile.username}
-                inputId={'username'}
-                disabled={true}
-                inputStyle={{...styles.textInput, ...styles.backgroundColorDark}}
-                containerStyle={styles.textInputContainer}
+              labelText={'Username'}
+              placeholder={updatedProfile.username}
+              inputId={'username'}
+              disabled={true}
+              inputStyle={{...styles.textInput, ...styles.backgroundColorDark}}
+              containerStyle={styles.textInputContainer}
             />
             <ContactEmailTextInput
               contactEmail={updatedProfile.contactEmail}

@@ -58,46 +58,46 @@ export const RuntimeCostEstimator = ({
   const storageCostBreakdown = machineStorageCostBreakdown(costConfig);
   const costPriceFontSize = usePersistentDisk ? '12px' : '20px';
   return <FlexRow style={style}>
-      <FlexColumn style={{marginRight: '1rem'}}>
-        <div style={{fontSize: '10px', fontWeight: 600}}>Cost when running</div>
-        <TooltipTrigger content={
-          <div>
-            <div>Cost Breakdown</div>
-            {runningCostBreakdown.map((lineItem, i) => <div key={i}>{lineItem}</div>)}
-          </div>
-        }>
-          <div
-              style={{fontSize: costPriceFontSize, color: costTextColor}}
-              data-test-id='running-cost'
-          >
-            {formatUsd(runningCost)}/hour
-          </div>
-        </TooltipTrigger>
-      </FlexColumn>
-      <FlexColumn style={{marginRight: '1rem'}}>
-        <div style={{fontSize: '10px', fontWeight: 600}}>Cost when paused</div>
-        <TooltipTrigger content={
-          <div>
-            <div>Cost Breakdown</div>
-            {storageCostBreakdown.map((lineItem, i) => <div key={i}>{lineItem}</div>)}
-          </div>
-        }>
-          <div
-              style={{fontSize: costPriceFontSize, color: costTextColor}}
-              data-test-id='storage-cost'
-          >
-            {formatUsd(storageCost)}/hour
-          </div>
-        </TooltipTrigger>
-      </FlexColumn>
+    <FlexColumn style={{marginRight: '1rem'}}>
+      <div style={{fontSize: '10px', fontWeight: 600}}>Cost when running</div>
+      <TooltipTrigger content={
+        <div>
+          <div>Cost Breakdown</div>
+          {runningCostBreakdown.map((lineItem, i) => <div key={i}>{lineItem}</div>)}
+        </div>
+      }>
+        <div
+          style={{fontSize: costPriceFontSize, color: costTextColor}}
+          data-test-id='running-cost'
+        >
+          {formatUsd(runningCost)}/hour
+        </div>
+      </TooltipTrigger>
+    </FlexColumn>
+    <FlexColumn style={{marginRight: '1rem'}}>
+      <div style={{fontSize: '10px', fontWeight: 600}}>Cost when paused</div>
+      <TooltipTrigger content={
+        <div>
+          <div>Cost Breakdown</div>
+          {storageCostBreakdown.map((lineItem, i) => <div key={i}>{lineItem}</div>)}
+        </div>
+      }>
+        <div
+          style={{fontSize: costPriceFontSize, color: costTextColor}}
+          data-test-id='storage-cost'
+        >
+          {formatUsd(storageCost)}/hour
+        </div>
+      </TooltipTrigger>
+    </FlexColumn>
     {usePersistentDisk && computeType === ComputeType.Standard && <FlexColumn>
       <div style={{fontSize: '10px', fontWeight: 600}}>Persistent disk cost</div>
-        <div
-            style={{fontSize: costPriceFontSize, color: costTextColor}}
-            data-test-id='pd-cost'
-        >
-          {formatUsd(pdSize * diskPricePerMonth)}/month
-        </div>
+      <div
+        style={{fontSize: costPriceFontSize, color: costTextColor}}
+        data-test-id='pd-cost'
+      >
+        {formatUsd(pdSize * diskPricePerMonth)}/month
+      </div>
     </FlexColumn>}
   </FlexRow>;
 };

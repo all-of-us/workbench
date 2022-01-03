@@ -25,9 +25,9 @@ function simulateSelect(wrapper: ReactWrapper, reactSelect: Select, selection: s
 
   // Select an option
   wrapper.find(Select).find({type: 'option'})
-      .findWhere(e => e.text() === selection)
-      .first()
-      .simulate('click');
+    .findWhere(e => e.text() === selection)
+    .first()
+    .simulate('click');
 }
 
 interface TestWorkspace {
@@ -104,10 +104,10 @@ describe('CopyModal', () => {
   const fromResourceName = 'notebook';
   const notebookSaveFunction = (copyRequest) => {
     return notebooksApi().copyNotebook(
-        fromWorkspaceNamespace,
-        fromWorkspaceFirecloudName,
-        dropNotebookFileSuffix(fromResourceName),
-        copyRequest
+      fromWorkspaceNamespace,
+      fromWorkspaceFirecloudName,
+      dropNotebookFileSuffix(fromResourceName),
+      copyRequest
     );
   }
 
@@ -229,7 +229,7 @@ describe('CopyModal', () => {
     simulateWorkspaceSelection(wrapper, altCdrWorkspace);
 
     expect(getNotebookCdrMismatchWarning(wrapper).getDOMNode().textContent).toBe(
-        'The selected destination workspace uses a different dataset version ' +
+      'The selected destination workspace uses a different dataset version ' +
         `(${CdrVersionsStubVariables.ALT_WORKSPACE_CDR_VERSION}) from the current workspace ` +
         `(${CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION}). ` +
         'Edits may be required to ensure your analysis is functional and accurate.');
@@ -242,14 +242,14 @@ describe('CopyModal', () => {
     wrapper.find('[data-test-id="copy-button"]').first().simulate('click');
 
     expect(spy).toHaveBeenCalledWith(
-        props.fromWorkspaceNamespace,
-        props.fromWorkspaceFirecloudName,
-        props.fromResourceName,
-        {
-          toWorkspaceName: altCdrWorkspace.id,
-          toWorkspaceNamespace: altCdrWorkspace.namespace,
-          newName: 'Freeblast'
-        }
+      props.fromWorkspaceNamespace,
+      props.fromWorkspaceFirecloudName,
+      props.fromResourceName,
+      {
+        toWorkspaceName: altCdrWorkspace.id,
+        toWorkspaceNamespace: altCdrWorkspace.namespace,
+        newName: 'Freeblast'
+      }
     );
   });
 
@@ -260,7 +260,7 @@ describe('CopyModal', () => {
     simulateWorkspaceSelection(wrapper, controlledCdrWorkspace);
 
     expect(getAccessTierMismatchError(wrapper).getDOMNode().textContent).toBe(
-        'Can’t copy to that workspace. It has a different access tier ' +
+      'Can’t copy to that workspace. It has a different access tier ' +
         `(${AccessTierShortNames.Controlled}) from the current workspace (${AccessTierShortNames.Registered}).`);
 
     // Type out new name
@@ -297,10 +297,10 @@ describe('CopyModal', () => {
     props.fromResourceName = csApiStub.conceptSets[0].name;
     props.saveFunction = (copyRequest) => {
       return conceptSetsApi().copyConceptSet(
-          fromWorkspaceNamespace,
-          fromWorkspaceFirecloudName,
-          props.fromResourceName,
-          copyRequest
+        fromWorkspaceNamespace,
+        fromWorkspaceFirecloudName,
+        props.fromResourceName,
+        copyRequest
       );
     }
 
@@ -317,14 +317,14 @@ describe('CopyModal', () => {
     wrapper.find('[data-test-id="copy-button"]').first().simulate('click');
 
     expect(spy).toHaveBeenCalledWith(
-        props.fromWorkspaceNamespace,
-        props.fromWorkspaceFirecloudName,
-        props.fromResourceName,
-        {
-          toWorkspaceName: workspaces[2].id,
-          toWorkspaceNamespace: workspaces[2].namespace,
-          newName: 'Some Concepts'
-        }
+      props.fromWorkspaceNamespace,
+      props.fromWorkspaceFirecloudName,
+      props.fromResourceName,
+      {
+        toWorkspaceName: workspaces[2].id,
+        toWorkspaceNamespace: workspaces[2].namespace,
+        newName: 'Some Concepts'
+      }
     );
   });
 
@@ -336,10 +336,10 @@ describe('CopyModal', () => {
     props.fromResourceName = csApiStub.conceptSets[0].name;
     props.saveFunction = (copyRequest) => {
       return conceptSetsApi().copyConceptSet(
-          fromWorkspaceNamespace,
-          fromWorkspaceFirecloudName,
-          props.fromResourceName,
-          copyRequest
+        fromWorkspaceNamespace,
+        fromWorkspaceFirecloudName,
+        props.fromResourceName,
+        copyRequest
       );
     }
 
@@ -349,7 +349,7 @@ describe('CopyModal', () => {
     simulateWorkspaceSelection(wrapper, altCdrWorkspace);
 
     expect(getConceptSetCdrMismatchError(wrapper).getDOMNode().textContent).toBe(
-        'Can’t copy to that workspace. It uses a different dataset version ' +
+      'Can’t copy to that workspace. It uses a different dataset version ' +
         `(${CdrVersionsStubVariables.ALT_WORKSPACE_CDR_VERSION}) from the current workspace ` +
         `(${CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION}).`);
 
@@ -373,10 +373,10 @@ describe('CopyModal', () => {
     props.fromResourceName = csApiStub.conceptSets[0].name;
     props.saveFunction = (copyRequest) => {
       return conceptSetsApi().copyConceptSet(
-          fromWorkspaceNamespace,
-          fromWorkspaceFirecloudName,
-          props.fromResourceName,
-          copyRequest
+        fromWorkspaceNamespace,
+        fromWorkspaceFirecloudName,
+        props.fromResourceName,
+        copyRequest
       );
     }
 
@@ -386,7 +386,7 @@ describe('CopyModal', () => {
     simulateWorkspaceSelection(wrapper, controlledCdrWorkspace);
 
     expect(getAccessTierMismatchError(wrapper).getDOMNode().textContent).toBe(
-        'Can’t copy to that workspace. It has a different access tier ' +
+      'Can’t copy to that workspace. It has a different access tier ' +
         `(${AccessTierShortNames.Controlled}) from the current workspace (${AccessTierShortNames.Registered}).`);
 
     // Type out new name

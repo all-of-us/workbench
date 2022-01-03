@@ -125,13 +125,13 @@ export class HelpTips extends React.Component<Props, State> {
 
     return <div>
       {this.props.allowSearch && <div style={styles.textSearch}>
-          <ClrIcon style={{color: colors.primary, margin: '0 0.25rem'}} shape='search' size={16} />
-          <input
-              type='text'
-              style={styles.textInput}
-              value={this.state.searchTerm}
-              onChange={(e) => this.onInputChange(e.target.value)}
-              placeholder={'Search'} />
+        <ClrIcon style={{color: colors.primary, margin: '0 0.25rem'}} shape='search' size={16} />
+        <input
+          type='text'
+          style={styles.textInput}
+          value={this.state.searchTerm}
+          onChange={(e) => this.onInputChange(e.target.value)}
+          placeholder={'Search'} />
       </div>}
       {!!displayContent && displayContent.length > 0
         ? displayContent.map((section, s) => <div key={s}>

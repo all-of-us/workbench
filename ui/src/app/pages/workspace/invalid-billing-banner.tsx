@@ -30,14 +30,14 @@ export const InvalidBillingBanner = fp.flow(
     'Please contact support to extend free credits.';
   const footer = <div style={{display: 'flex', flexDirection: 'column'}}>
     <Button style={{height: '38px', width: '70%', fontWeight: 400}}
-            onClick={() => {
-              openZendeskWidget(
-                props.profileState.profile.givenName,
-                props.profileState.profile.familyName,
-                props.profileState.profile.username,
-                props.profileState.profile.contactEmail,
-              );
-            }}
+      onClick={() => {
+        openZendeskWidget(
+          props.profileState.profile.givenName,
+          props.profileState.profile.familyName,
+          props.profileState.profile.username,
+          props.profileState.profile.contactEmail,
+        );
+      }}
     >
       Request Extension
     </Button>

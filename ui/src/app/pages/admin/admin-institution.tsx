@@ -120,34 +120,34 @@ export const AdminInstitution = fp.flow(withNavigation)(
         <FadeBox style={{marginTop: '1rem', marginLeft: '1rem'}}>
           <SemiBoldHeader style={styles.pageHeader}>
             <label>Institution admin table</label>
-                <Button type='secondaryLight'
-                        style={{padding: '0rem', marginTop: '0.3rem', verticalAlign: 'sub'}}
-                        onClick={() => this.props.navigateByUrl('admin/institution/add')}
-                        data-test-id='add-institution'>
-                  <ClrIcon shape='plus-circle' class='is-solid' size={20}/>
-                </Button>
+            <Button type='secondaryLight'
+              style={{padding: '0rem', marginTop: '0.3rem', verticalAlign: 'sub'}}
+              onClick={() => this.props.navigateByUrl('admin/institution/add')}
+              data-test-id='add-institution'>
+              <ClrIcon shape='plus-circle' class='is-solid' size={20}/>
+            </Button>
           </SemiBoldHeader>
           {institutionLoadError && <div style={{color: colors.danger}}>
             Error while loading Institution. Please try again later</div>}
           <DataTable
-              data-test-id='institution-datatable'
-              value={institutions}
-              paginator={true}
-              rows={10}
-              scrollable={true}
-              frozenWidth='7rem'
-              loading={loadingInstitutions}
-              paginatorTemplate='CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink  RowsPerPageDropdown'
-              currentPageReportTemplate='Showing {first} to {last} of {totalRecords} entries'>
+            data-test-id='institution-datatable'
+            value={institutions}
+            paginator={true}
+            rows={10}
+            scrollable={true}
+            frozenWidth='7rem'
+            loading={loadingInstitutions}
+            paginatorTemplate='CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink  RowsPerPageDropdown'
+            currentPageReportTemplate='Showing {first} to {last} of {totalRecords} entries'>
             <Column field='displayName' header='Institution Name' body={this.renderInstitutionName}
-                    bodyStyle={styles.text} headerStyle={styles.header} frozen={true}/>
+              bodyStyle={styles.text} headerStyle={styles.header} frozen={true}/>
             <Column field='organizationTypeEnum' header='Institution Type'
-                    body={this.renderOrganizationType} bodyStyle={styles.text}
-                    headerStyle={styles.header}/>
+              body={this.renderOrganizationType} bodyStyle={styles.text}
+              headerStyle={styles.header}/>
             <Column field='accessTiers' header='Data access tiers' body={this.renderAccessTiers}
-                    bodyStyle={styles.text} headerStyle={styles.header}/>
+              bodyStyle={styles.text} headerStyle={styles.header}/>
             <Column field='userInstructions' header='User Email Instruction' bodyStyle={styles.text}
-                    headerStyle={{...styles.header, width: '5rem'}}/>
+              headerStyle={{...styles.header, width: '5rem'}}/>
           </DataTable>
         </FadeBox>
       </div>;

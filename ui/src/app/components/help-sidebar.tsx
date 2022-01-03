@@ -456,7 +456,7 @@ export const HelpSidebar = fp.flow(
         // If the runtime status has changed from something that is not Error to Error,
         // and we have error messages, show the error modal.
         if (
-            newRuntime.runtimeLoaded
+          newRuntime.runtimeLoaded
             && newRuntime.workspaceNamespace === this.props.workspace.namespace
             && newRuntime.runtime.status === RuntimeStatus.Error
             && (!oldRuntime.runtime || oldRuntime.runtime.status !== RuntimeStatus.Error)
@@ -528,13 +528,13 @@ export const HelpSidebar = fp.flow(
 
       return <React.Fragment>
         {(icon.id === 'criteria' && criteria && criteria.length > 0) && <span data-test-id='criteria-count'
-                                                         style={styles.criteriaCount}>
+          style={styles.criteriaCount}>
           {criteria.length}</span>}
         {(icon.id === 'concept' && concept && concept.length > 0) && <span data-test-id='concept-count'
-                                                         style={styles.criteriaCount}>
+          style={styles.criteriaCount}>
           {concept.length}</span>}
-            <FontAwesomeIcon data-test-id={'help-sidebar-icon-' + icon.id} icon={icon.faIcon} style={icon.style} />
-          </React.Fragment> ;
+        <FontAwesomeIcon data-test-id={'help-sidebar-icon-' + icon.id} icon={icon.faIcon} style={icon.style} />
+      </React.Fragment> ;
     }
 
     displayRuntimeIcon(icon: IconConfig) {
@@ -558,7 +558,7 @@ export const HelpSidebar = fp.flow(
         <img data-test-id={'help-sidebar-icon-' + icon.id} src={proIcons[icon.id]} style={{...icon.style, position: 'absolute'}} />
         <FlexRow data-test-id='runtime-status-icon-container' style={styles.statusIconContainer}>
           {(() => {
-          if (runtimeStore.loadingError) {
+            if (runtimeStore.loadingError) {
               return <FontAwesomeIcon icon={faLock} style={{
                 ...styles.asyncOperationStatusIcon,
                 color: colors.asyncOperationStatus.stopped,
@@ -568,11 +568,11 @@ export const HelpSidebar = fp.flow(
               case RuntimeStatus.Creating:
               case RuntimeStatus.Starting:
               case RuntimeStatus.Updating:
-                  return <FontAwesomeIcon icon={faSyncAlt} style={{
-                    ...styles.asyncOperationStatusIcon,
-                    ...styles.rotate,
-                    color: colors.asyncOperationStatus.starting,
-                  }}/>;
+                return <FontAwesomeIcon icon={faSyncAlt} style={{
+                  ...styles.asyncOperationStatusIcon,
+                  ...styles.rotate,
+                  color: colors.asyncOperationStatus.starting,
+                }}/>;
               case RuntimeStatus.Stopped:
                 return <FontAwesomeIcon icon={faCircle} style={{
                   ...styles.asyncOperationStatusIcon,
@@ -597,7 +597,7 @@ export const HelpSidebar = fp.flow(
                   ...styles.asyncOperationStatusIcon,
                   ...styles.runtimeStatusIconOutline,
                   color: colors.asyncOperationStatus.error,
-              }}/>;
+                }}/>;
             }
           })()}
         </FlexRow>
@@ -621,7 +621,7 @@ export const HelpSidebar = fp.flow(
       } else if (jobsByStatus[TerraJobStatus.ABORTING]) {
         status = TerraJobStatus.ABORTING;
       } else if (
-          jobsByStatus[TerraJobStatus.SUCCEEDED]
+        jobsByStatus[TerraJobStatus.SUCCEEDED]
           || jobsByStatus[TerraJobStatus.FAILED]
           || jobsByStatus[TerraJobStatus.ABORTED]
       ) {
@@ -721,8 +721,8 @@ export const HelpSidebar = fp.flow(
               </h3>,
             renderBody: () =>
               <HelpTips allowSearch={true}
-                        onSearch={() => this.analyticsEvent('Search')}
-                        pageKey={this.props.pageKey}/>,
+                onSearch={() => this.analyticsEvent('Search')}
+                pageKey={this.props.pageKey}/>,
             showFooter: true
           };
         case 'runtime':
@@ -739,7 +739,7 @@ export const HelpSidebar = fp.flow(
             bodyWidthRem: '30',
             bodyPadding: '0 1.25rem',
             renderBody: () =>
-             <RuntimePanelWrapper onClose={() => this.setActiveIcon(null)}/>,
+              <RuntimePanelWrapper onClose={() => this.setActiveIcon(null)}/>,
             showFooter: false
           };
         case 'notebooksHelp':
@@ -751,7 +751,7 @@ export const HelpSidebar = fp.flow(
               </h3>,
             renderBody: () =>
               <HelpTips allowSearch={false}
-                        pageKey='notebook'/>,
+                pageKey='notebook'/>,
             showFooter: true
           };
         case 'annotations':
@@ -763,7 +763,7 @@ export const HelpSidebar = fp.flow(
               </div>
             ,
             renderBody: () => this.state.participant ?
-               <SidebarContent participant={this.state.participant}/> : <Spinner style={{display: 'block', margin: '3rem auto'}}/>,
+              <SidebarContent participant={this.state.participant}/> : <Spinner style={{display: 'block', margin: '3rem auto'}}/>,
             showFooter: true
           };
         case 'concept':
@@ -843,41 +843,41 @@ export const HelpSidebar = fp.flow(
             </div>
           </PopupTrigger>}
           {this.icons().map((icon, i) =>
-              <div key={i} style={{display: 'table'}}>
-                <TooltipTrigger content={<div>{icon.tooltip}</div>} side='left'>
-                  <div style={activeIcon === icon.id ? iconStyles.active : icon.disabled ? iconStyles.disabled : styles.icon}
-                       onClick={() => {
-                         if (icon.hasContent && !icon.disabled) {
-                           this.onIconClick(icon);
-                         }
-                       }}>
-                    {
-                      switchCase(icon.id,
-                        ['dataDictionary',
-                          () => <a href={supportUrls.dataDictionary} target='_blank'>
-                              <FontAwesomeIcon data-test-id={'help-sidebar-icon-' + icon.id} icon={icon.faIcon} style={icon.style} />
-                            </a>
-                        ],
-                        ['runtime', () => this.displayRuntimeIcon(icon)],
-                        ['terminal',
-                         () => <RouteLink
-                                 path={`/workspaces/${namespace}/${id}/terminals`} >
-                             <FontAwesomeIcon
-                                 data-test-id={'help-sidebar-icon-' + icon.id}
-                                 icon={icon.faIcon} style={icon.style} />
-                          </RouteLink>
-                        ],
-                        ['genomicExtractions', () => this.displayExtractionIcon(icon)],
-                        [DEFAULT, () => icon.faIcon === null
-                              ? <img data-test-id={'help-sidebar-icon-' + icon.id} src={proIcons[icon.id]} style={icon.style} />
-                              : this.displayFontAwesomeIcon(icon)
-                        ]
-                      )
+            <div key={i} style={{display: 'table'}}>
+              <TooltipTrigger content={<div>{icon.tooltip}</div>} side='left'>
+                <div style={activeIcon === icon.id ? iconStyles.active : icon.disabled ? iconStyles.disabled : styles.icon}
+                  onClick={() => {
+                    if (icon.hasContent && !icon.disabled) {
+                      this.onIconClick(icon);
                     }
-                  </div>
-                </TooltipTrigger>
-              </div>
-            )
+                  }}>
+                  {
+                    switchCase(icon.id,
+                      ['dataDictionary',
+                        () => <a href={supportUrls.dataDictionary} target='_blank'>
+                          <FontAwesomeIcon data-test-id={'help-sidebar-icon-' + icon.id} icon={icon.faIcon} style={icon.style} />
+                        </a>
+                      ],
+                      ['runtime', () => this.displayRuntimeIcon(icon)],
+                      ['terminal',
+                        () => <RouteLink
+                          path={`/workspaces/${namespace}/${id}/terminals`} >
+                          <FontAwesomeIcon
+                            data-test-id={'help-sidebar-icon-' + icon.id}
+                            icon={icon.faIcon} style={icon.style} />
+                        </RouteLink>
+                      ],
+                      ['genomicExtractions', () => this.displayExtractionIcon(icon)],
+                      [DEFAULT, () => icon.faIcon === null
+                        ? <img data-test-id={'help-sidebar-icon-' + icon.id} src={proIcons[icon.id]} style={icon.style} />
+                        : this.displayFontAwesomeIcon(icon)
+                      ]
+                    )
+                  }
+                </div>
+              </TooltipTrigger>
+            </div>
+          )
           }
         </div>
 
@@ -903,8 +903,8 @@ export const HelpSidebar = fp.flow(
 
                       <Clickable style={{marginLeft: 'auto'}} onClick={() => this.setActiveIcon(null)}>
                         <img src={proIcons.times}
-                             style={{height: '27px', width: '17px'}}
-                             alt='Close'/>
+                          style={{height: '27px', width: '17px'}}
+                          alt='Close'/>
                       </Clickable>
                     </FlexRow>}
 
@@ -915,12 +915,12 @@ export const HelpSidebar = fp.flow(
 
                   {sidebarContent.showFooter &&
                   <div style={{...styles.footer}}>
-                      <h3 style={{...styles.sectionTitle, marginTop: 0}}>Not finding what you're looking for?</h3>
-                      <p style={styles.contentItem}>
+                    <h3 style={{...styles.sectionTitle, marginTop: 0}}>Not finding what you're looking for?</h3>
+                    <p style={styles.contentItem}>
                           Visit our <StyledExternalLink href={supportUrls.helpCenter}
-                                                        target='_blank' onClick={() => this.analyticsEvent('UserSupport')}> User Support Hub
+                        target='_blank' onClick={() => this.analyticsEvent('UserSupport')}> User Support Hub
                       </StyledExternalLink> page or <span style={styles.link} onClick={() => this.openContactWidget()}> contact us</span>.
-                      </p>
+                    </p>
                   </div>}
                 </div>}
               </div>
@@ -931,16 +931,16 @@ export const HelpSidebar = fp.flow(
         {
           switchCase(this.state.currentModal,
             [CurrentModal.Share, () => <WorkspaceShare workspace={this.props.workspace}
-                                                             onClose={() => this.setState({currentModal: CurrentModal.None})}/>],
+              onClose={() => this.setState({currentModal: CurrentModal.None})}/>],
             [CurrentModal.Delete, () => <ConfirmDeleteModal closeFunction={() => this.setState({currentModal: CurrentModal.None})}
-                                                            resourceType={ResourceType.WORKSPACE}
-                                                            receiveDelete={() => this.deleteWorkspace()}
-                                                            resourceName={this.props.workspace.name}/>],
+              resourceType={ResourceType.WORKSPACE}
+              receiveDelete={() => this.deleteWorkspace()}
+              resourceName={this.props.workspace.name}/>],
             [CurrentModal.RuntimeError, () => <RuntimeErrorModal
-                closeFunction={() => this.setState({currentModal: CurrentModal.None})}
-                openRuntimePanel={() => this.setActiveIcon('runtime')}
-                errors={runtimeErrors}
-              />]
+              closeFunction={() => this.setState({currentModal: CurrentModal.None})}
+              openRuntimePanel={() => this.setActiveIcon('runtime')}
+              errors={runtimeErrors}
+            />]
           )
         }
       </div>;

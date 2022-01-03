@@ -16,10 +16,10 @@ export const LoginGovIAL2NotificationMaybe = () => {
   const shouldShowIal2Notification = enableRasLoginGovLinking &&
       (!loginGovModule || (!loginGovModule.bypassEpochMillis && !loginGovModule.completionEpochMillis));
   return shouldShowIal2Notification
-      ? <NotificationBanner
-          dataTestId='ial2-notification'
-          text='Please verify your identity by 1/31/2022.'
-          buttonText='Get Started'
-          buttonPath='/data-access-requirements'/>
-      : null;
+    ? <NotificationBanner
+      dataTestId='ial2-notification'
+      text='Please verify your identity by 1/31/2022.'
+      buttonText='Get Started'
+      buttonPath='/data-access-requirements'/>
+    : null;
 };

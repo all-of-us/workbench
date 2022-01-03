@@ -15,7 +15,7 @@ describe('AdminEgressAudit', () => {
 
   const component = () => {
     return mount(<MemoryRouter
-                   initialEntries={[`/admin/egress-events/${event.egressEventId}`]}>
+      initialEntries={[`/admin/egress-events/${event.egressEventId}`]}>
       <Route exact path="/admin/egress-events/:eventId">
         <AdminEgressAudit hideSpinner={() => {}} showSpinner={() => {}} />
       </Route>
@@ -31,9 +31,9 @@ describe('AdminEgressAudit', () => {
     jest.useFakeTimers('modern');
   });
 
-   afterEach(() => {
-     jest.useRealTimers();
-   });
+  afterEach(() => {
+    jest.useRealTimers();
+  });
 
   it('should render basic', async() => {
     const wrapper = component();

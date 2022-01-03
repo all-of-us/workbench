@@ -92,7 +92,7 @@ const reloadProfile = withErrorModal({
   title: 'Could Not Load Profile',
   message: 'Profile could not be reloaded. Please refresh the page to get your updated profile'
 },
-  profileStore.get().reload
+profileStore.get().reload
 );
 
 const confirmPublications = fp.flow(
@@ -149,8 +149,8 @@ interface CompletedButtonInterface {
 }
 const CompletedOrBypassedButton = ({completedText, wasBypassed, style}: CompletedButtonInterface) =>
   <Button disabled={true}
-          data-test-id='completed-button'
-          style={{...renewalStyle.completedButton, ...style}}>
+    data-test-id='completed-button'
+    style={{...renewalStyle.completedButton, ...style}}>
     <ClrIcon shape='check' style={{marginRight: '0.3rem'}}/>{wasBypassed ? 'Bypassed' : completedText}
   </Button>;
 
@@ -168,9 +168,9 @@ const ActionButton = (
   return bypassedOrCompleteAndNotExpiring(moduleStatus)
     ? <CompletedOrBypassedButton completedText={completedButtonText} wasBypassed={wasBypassed} style={style}/>
     : <Button
-        onClick={onClick}
-        disabled={disabled}
-        style={{marginTop: 'auto', height: '1.6rem', width: 'max-content', ...style}}>{actionButtonText}</Button>;
+      onClick={onClick}
+      disabled={disabled}
+      style={{marginTop: 'auto', height: '1.6rem', width: 'max-content', ...style}}>{actionButtonText}</Button>;
 };
 
 const BackArrow = withCircleBackground(() => <Arrow style={{height: 21, width: 18}}/>);
@@ -269,62 +269,62 @@ export const AccessRenewal = fp.flow(withProfileErrorModal)((spinnerProps: WithS
     <div style={{display: 'grid', gridTemplateColumns: 'auto 1fr', marginBottom: '1rem', alignItems: 'center', gap: '1rem'}}>
       {/* Profile */}
       <RenewalCard
-          step={1}
-          moduleStatus={modules.find(m => m.moduleName === AccessModule.PROFILECONFIRMATION)}>
+        step={1}
+        moduleStatus={modules.find(m => m.moduleName === AccessModule.PROFILECONFIRMATION)}>
         <div style={{marginBottom: '0.5rem'}}>Please update your profile information if any of it has changed recently.</div>
         <div>Note that you are obliged by the Terms of Use of the Workbench to provide keep your profile
           information up-to-date at all times.
         </div>
         <ActionButton
-            actionButtonText='Review'
-            completedButtonText='Confirmed'
-            moduleStatus={modules.find(m => m.moduleName === AccessModule.PROFILECONFIRMATION)}
-            onClick={() => navigateByUrl('profile', {queryParams: {renewal: 1}})}/>
+          actionButtonText='Review'
+          completedButtonText='Confirmed'
+          moduleStatus={modules.find(m => m.moduleName === AccessModule.PROFILECONFIRMATION)}
+          onClick={() => navigateByUrl('profile', {queryParams: {renewal: 1}})}/>
       </RenewalCard>
       {/* Publications */}
       <RenewalCard
-          step={2}
-          moduleStatus={modules.find(m => m.moduleName === AccessModule.PUBLICATIONCONFIRMATION)}>
+        step={2}
+        moduleStatus={modules.find(m => m.moduleName === AccessModule.PUBLICATIONCONFIRMATION)}>
         <div>The <AoU/> Publication and Presentation Policy requires that you report any upcoming publication or
              presentation resulting from the use of <AoU/> Research Program Data at least two weeks before the date of publication.
              If you are lead on or part of a publication or presentation that hasn’t been reported to the
              program, <a target='_blank' style={{textDecoration: 'underline'}}
-              href={'https://redcap.pmi-ops.org/surveys/?s=MKYL8MRD4N'}>please report it now.</a> For any questions,
+          href={'https://redcap.pmi-ops.org/surveys/?s=MKYL8MRD4N'}>please report it now.</a> For any questions,
              please contact <SupportMailto/>
         </div>
         <div style={renewalStyle.publicationConfirmation}>
           <ActionButton
-              actionButtonText='Confirm'
-              completedButtonText='Confirmed'
-              moduleStatus={modules.find(m => m.moduleName === AccessModule.PUBLICATIONCONFIRMATION)}
-              onClick={async() => {
-                setLoading(true);
-                await confirmPublications();
-                setLoading(false);
-              }}
-              disabled={publications === null}
-              style={{gridRow: '1 / span 2', marginRight: '0.25rem'}}/>
+            actionButtonText='Confirm'
+            completedButtonText='Confirmed'
+            moduleStatus={modules.find(m => m.moduleName === AccessModule.PUBLICATIONCONFIRMATION)}
+            onClick={async() => {
+              setLoading(true);
+              await confirmPublications();
+              setLoading(false);
+            }}
+            disabled={publications === null}
+            style={{gridRow: '1 / span 2', marginRight: '0.25rem'}}/>
           <RadioButton
-              id={noReportId}
-              disabled={!isModuleExpiring(modules.find(m => m.moduleName === AccessModule.PUBLICATIONCONFIRMATION))}
-              style={{justifySelf: 'end'}}
-              checked={publications === true}
-              onChange={() => setPublications(true)}/>
+            id={noReportId}
+            disabled={!isModuleExpiring(modules.find(m => m.moduleName === AccessModule.PUBLICATIONCONFIRMATION))}
+            style={{justifySelf: 'end'}}
+            checked={publications === true}
+            onChange={() => setPublications(true)}/>
           <label htmlFor={noReportId}> At this time, I have nothing to report </label>
           <RadioButton
-              id={reportId}
-              disabled={!isModuleExpiring(modules.find(m => m.moduleName === AccessModule.PUBLICATIONCONFIRMATION))}
-              style={{justifySelf: 'end'}}
-              checked={publications === false}
-              onChange={() => setPublications(false)}/>
+            id={reportId}
+            disabled={!isModuleExpiring(modules.find(m => m.moduleName === AccessModule.PUBLICATIONCONFIRMATION))}
+            style={{justifySelf: 'end'}}
+            checked={publications === false}
+            onChange={() => setPublications(false)}/>
           <label htmlFor={reportId}>Report submitted</label>
         </div>
       </RenewalCard>
       {/* Compliance Training */}
       {enableComplianceTraining && <RenewalCard
-          step={3}
-          moduleStatus={modules.find(m => m.moduleName === AccessModule.COMPLIANCETRAINING)}>
-      <div> You are required to complete the refreshed ethics training courses to understand the privacy safeguards and
+        step={3}
+        moduleStatus={modules.find(m => m.moduleName === AccessModule.COMPLIANCETRAINING)}>
+        <div> You are required to complete the refreshed ethics training courses to understand the privacy safeguards and
           the compliance requirements for using the <AoU/> Dataset.
         </div>
         {isExpiringAndNotBypassed(AccessModule.COMPLIANCETRAINING, modules) &&
@@ -333,13 +333,13 @@ export const AccessRenewal = fp.flow(withProfileErrorModal)((spinnerProps: WithS
           </div>}
         <FlexRow style={{marginTop: 'auto'}}>
           <ActionButton
-              actionButtonText='Complete Training'
-              completedButtonText='Completed'
-              moduleStatus={modules.find(m => m.moduleName === AccessModule.COMPLIANCETRAINING)}
-              onClick={() => {
-                setRefreshButtonDisabled(false);
-                redirectToRegisteredTraining();
-              }}/>
+            actionButtonText='Complete Training'
+            completedButtonText='Completed'
+            moduleStatus={modules.find(m => m.moduleName === AccessModule.COMPLIANCETRAINING)}
+            onClick={() => {
+              setRefreshButtonDisabled(false);
+              redirectToRegisteredTraining();
+            }}/>
           {isExpiringAndNotBypassed(AccessModule.COMPLIANCETRAINING, modules) && <Button
             disabled={refreshButtonDisabled}
             onClick={async() => {
@@ -352,14 +352,14 @@ export const AccessRenewal = fp.flow(withProfileErrorModal)((spinnerProps: WithS
       </RenewalCard>}
       {/* DUCC */}
       <RenewalCard
-          step={enableComplianceTraining ? 4 : 3}
-          moduleStatus={modules.find(m => m.moduleName === AccessModule.DATAUSERCODEOFCONDUCT)}>
+        step={enableComplianceTraining ? 4 : 3}
+        moduleStatus={modules.find(m => m.moduleName === AccessModule.DATAUSERCODEOFCONDUCT)}>
         <div>Please review and sign the data user code of conduct consenting to the <AoU/> data use policy.</div>
         <ActionButton
-            actionButtonText='View & Sign'
-            completedButtonText='Completed'
-            moduleStatus={modules.find(m => m.moduleName === AccessModule.DATAUSERCODEOFCONDUCT)}
-            onClick={() => navigateByUrl('data-code-of-conduct', {queryParams: {renewal: 1}})}/>
+          actionButtonText='View & Sign'
+          completedButtonText='Completed'
+          moduleStatus={modules.find(m => m.moduleName === AccessModule.DATAUSERCODEOFCONDUCT)}
+          onClick={() => navigateByUrl('data-code-of-conduct', {queryParams: {renewal: 1}})}/>
       </RenewalCard>
     </div>
     {loading && <SpinnerOverlay dark={true} opacity={0.6}/>}

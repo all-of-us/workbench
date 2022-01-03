@@ -78,14 +78,14 @@ export const EgressEventsTable = ({sourceUserEmail, sourceWorkspaceNamespace, di
   const statusEditor = ({rowData}) => {
     return (
       <Dropdown value={pendingUpdateEvent?.status ?? rowData.status}
-                options={mutableEgressEventStatuses}
-                onChange={(e)=> {
-                  setPendingUpdateEvent({
-                    ...rowData,
-                    status: e.value
-                  });
-                }}
-                placeholder="Select a Status"
+        options={mutableEgressEventStatuses}
+        onChange={(e)=> {
+          setPendingUpdateEvent({
+            ...rowData,
+            status: e.value
+          });
+        }}
+        placeholder="Select a Status"
       />
     );
   };
@@ -96,62 +96,62 @@ export const EgressEventsTable = ({sourceUserEmail, sourceWorkspaceNamespace, di
 
   const displayEvents = events?.slice(first, first + displayPageSize);
   return <DataTable
-      lazy paginator
-      loading={loading}
-      editMode="row"
-      onRowEditSave={onRowEditSave}
-      onRowEditCancel={() => setPendingUpdateEvent(null)}
-      value={displayEvents}
-      onPage={async(e) => {
-        await maybeFetchMoreEvents(e.first + e.rows - 1);
-        setFirst(e.first);
-      }}
-      first={first}
-      rows={displayPageSize}
-      totalRecords={totalRecords}>
+    lazy paginator
+    loading={loading}
+    editMode="row"
+    onRowEditSave={onRowEditSave}
+    onRowEditCancel={() => setPendingUpdateEvent(null)}
+    value={displayEvents}
+    onPage={async(e) => {
+      await maybeFetchMoreEvents(e.first + e.rows - 1);
+      setFirst(e.first);
+    }}
+    first={first}
+    rows={displayPageSize}
+    totalRecords={totalRecords}>
     <Column field='egressEventId'
-            body={({egressEventId}) => (
-              <StyledRouterLink
-                  data-test-id="egress-event-id"
-                  path={`/admin/egress-events/${egressEventId}`}>
-                {egressEventId}
-              </StyledRouterLink>
-            )}
-            header='Event ID'
-            headerStyle={{width: '100px'}}
+      body={({egressEventId}) => (
+        <StyledRouterLink
+          data-test-id="egress-event-id"
+          path={`/admin/egress-events/${egressEventId}`}>
+          {egressEventId}
+        </StyledRouterLink>
+      )}
+      header='Event ID'
+      headerStyle={{width: '100px'}}
     />
     <Column field='creationTime'
-            header='Time'
-            headerStyle={{width: '150px'}}
-            body={({creationTime}) => new Date(creationTime).toLocaleString()}
+      header='Time'
+      headerStyle={{width: '150px'}}
+      body={({creationTime}) => new Date(creationTime).toLocaleString()}
     />
     <Column field='sourceUserEmail'
-            body={({sourceUserEmail}) => {
-              const [username,] = sourceUserEmail.split('@');
-              return <StyledRouterLink path={`/admin/users/${username}`}>
-                {sourceUserEmail}
-              </StyledRouterLink>;
-            }}
-            header='Source User'
-            headerStyle={{width: '300px'}}
+      body={({sourceUserEmail}) => {
+        const [username,] = sourceUserEmail.split('@');
+        return <StyledRouterLink path={`/admin/users/${username}`}>
+          {sourceUserEmail}
+        </StyledRouterLink>;
+      }}
+      header='Source User'
+      headerStyle={{width: '300px'}}
     />
     <Column field='sourceWorkspaceNamespace'
-            body={({sourceWorkspaceNamespace}) => {
-              return <StyledRouterLink path={`/admin/workspaces/${sourceWorkspaceNamespace}`}>
-                {sourceWorkspaceNamespace}
-              </StyledRouterLink>;
-            }}
-            header='Source Workspace Namespace'
-            headerStyle={{width: '250px'}}
+      body={({sourceWorkspaceNamespace}) => {
+        return <StyledRouterLink path={`/admin/workspaces/${sourceWorkspaceNamespace}`}>
+          {sourceWorkspaceNamespace}
+        </StyledRouterLink>;
+      }}
+      header='Source Workspace Namespace'
+      headerStyle={{width: '250px'}}
     />
     <Column field='status'
-            editor={(options) => statusEditor(options)}
-            header='Status'
-            headerStyle={{width: '200px'}}
+      editor={(options) => statusEditor(options)}
+      header='Status'
+      headerStyle={{width: '200px'}}
     />
     <Column rowEditor
-            headerStyle={{ width: '10%', minWidth: '8rem' }}
-            bodyStyle={{ textAlign: 'center' }}>
+      headerStyle={{ width: '10%', minWidth: '8rem' }}
+      bodyStyle={{ textAlign: 'center' }}>
     </Column>
   </DataTable>;
 };

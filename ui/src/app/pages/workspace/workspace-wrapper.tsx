@@ -64,23 +64,23 @@ export const WorkspaceWrapper = fp.flow(
       }
     };
     const getWorkspaceAndUpdateStores = async(namespace, id) => {
-       try {
-         // No destructuring because otherwise it shadows the workspace in props
-         const wsResponse = await workspacesApi().getWorkspace(namespace, id)
-         currentWorkspaceStore.next({
-           ...wsResponse.workspace,
-           accessLevel: wsResponse.accessLevel
-         });
-         updateStores(wsResponse.workspace.namespace);
-       } catch(ex) {
-         if (ex.status === 403) {
-           navigate(['/workspaces']);
-         }
-       }
+      try {
+        // No destructuring because otherwise it shadows the workspace in props
+        const wsResponse = await workspacesApi().getWorkspace(namespace, id)
+        currentWorkspaceStore.next({
+          ...wsResponse.workspace,
+          accessLevel: wsResponse.accessLevel
+        });
+        updateStores(wsResponse.workspace.namespace);
+      } catch(ex) {
+        if (ex.status === 403) {
+          navigate(['/workspaces']);
+        }
+      }
     };
 
     if (
-        !currentWorkspaceStore.getValue()
+      !currentWorkspaceStore.getValue()
         || currentWorkspaceStore.getValue().namespace !== ns
         || currentWorkspaceStore.getValue().id !== wsid
     ) {
@@ -105,16 +105,16 @@ export const WorkspaceWrapper = fp.flow(
 
   return <React.Fragment>
     {workspace
-        ? <React.Fragment>
-          {!routeData.minimizeChrome && <WorkspaceNavBar tabPath={routeData.workspaceNavBarTab}/>}
-          <HelpSidebar pageKey={routeData.pageKey}/>
-          <div style={{marginRight: '45px', height: !routeData.contentFullHeightOverride ? 'auto' : '100%'}}>
-            <WorkspaceRoutes/>
-          </div>
-        </React.Fragment>
-        : <div style={{display: 'flex', height: '100%', width: '100%', justifyContent: 'center', alignItems: 'center'}}>
-          <Spinner />
+      ? <React.Fragment>
+        {!routeData.minimizeChrome && <WorkspaceNavBar tabPath={routeData.workspaceNavBarTab}/>}
+        <HelpSidebar pageKey={routeData.pageKey}/>
+        <div style={{marginRight: '45px', height: !routeData.contentFullHeightOverride ? 'auto' : '100%'}}>
+          <WorkspaceRoutes/>
         </div>
+      </React.Fragment>
+      : <div style={{display: 'flex', height: '100%', width: '100%', justifyContent: 'center', alignItems: 'center'}}>
+        <Spinner />
+      </div>
     }
   </React.Fragment>;
 });

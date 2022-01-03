@@ -30,10 +30,10 @@ describe('ConceptHomepage', () => {
 
   const component = () => {
     return mount(<ConceptHomepage setConceptSetUpdating={() => {}}
-                                  setShowUnsavedModal={() => {}}
-                                  setUnsavedConceptChanges={() => {}}
-                                  hideSpinner={() => {}}
-                                  showSpinner={() => {}}/>);
+      setShowUnsavedModal={() => {}}
+      setUnsavedConceptChanges={() => {}}
+      hideSpinner={() => {}}
+      showSpinner={() => {}}/>);
   };
 
   beforeEach(() => {

@@ -318,9 +318,9 @@ export class LeoRuntimeInitializer {
         this.currentRuntime = null;
         this.onPoll(null);
       } else if (this.isClientError(e)) {
-          return this.reject(
-            new ExceededErrorCountError(
-              `Encountered unexpected client error (${e.status})`, e, this.currentRuntime));
+        return this.reject(
+          new ExceededErrorCountError(
+            `Encountered unexpected client error (${e.status})`, e, this.currentRuntime));
       } else {
         this.handleUnknownError(e);
         if (this.hasTooManyServerErrors()) {
@@ -351,7 +351,7 @@ export class LeoRuntimeInitializer {
       if (isAbortError(e)) {
         return this.reject(
           new LeoRuntimeInitializationAbortedError('Abort signal received during runtime API call',
-          this.currentRuntime));
+            this.currentRuntime));
       } else if (e instanceof LeoRuntimeInitializationFailedError) {
         // Propagate errors created by this library.
         return this.reject(e);

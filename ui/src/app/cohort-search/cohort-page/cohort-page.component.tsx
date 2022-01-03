@@ -187,11 +187,11 @@ export const CohortPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSearc
     unsavedChangesMessage() {
       return `Your cohort has not been saved. If you’d like to save your cohort criteria, please click CANCEL and \
       ${this.showCohortSearch
-        ? 'save your changes in the right sidebar.'
-        : this.state.cohort && this.state.cohort.id
-          ? 'use Save or Save As'
-          : 'click CREATE COHORT'
-      } to save your criteria.`;
+    ? 'save your changes in the right sidebar.'
+    : this.state.cohort && this.state.cohort.id
+      ? 'use Save or Save As'
+      : 'click CREATE COHORT'
+} to save your criteria.`;
     }
 
     updateRequest = () => {
@@ -233,27 +233,27 @@ export const CohortPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSearc
                     </div>}
                     <div id='list-include-groups' style={colStyle('50')}>
                       <SearchGroupList groups={criteria.includes}
-                                       setSearchContext={(c) => this.setSearchContext(c)}
-                                       role='includes'
-                                       updated={updateGroupListsCount}
-                                       updateRequest={() => this.updateRequest()}/>
+                        setSearchContext={(c) => this.setSearchContext(c)}
+                        role='includes'
+                        updated={updateGroupListsCount}
+                        updateRequest={() => this.updateRequest()}/>
                     </div>
                     <div id='list-exclude-groups' style={colStyle('50')}>
                       {overview && <SearchGroupList groups={criteria.excludes}
-                                                    setSearchContext={(c) => this.setSearchContext(c)}
-                                                    role='excludes'
-                                                    updated={updateGroupListsCount}
-                                                    updateRequest={() => this.updateRequest()}/>}
+                        setSearchContext={(c) => this.setSearchContext(c)}
+                        role='excludes'
+                        updated={updateGroupListsCount}
+                        updateRequest={() => this.updateRequest()}/>}
                     </div>
                   </FlexRowWrap>
                 </div>
                 <div style={colStyle('33.33333')}>
                   {!!cohort && overview && <ListOverview
-                      cohort={cohort}
-                      cohortChanged={cohortChanged}
-                      searchRequest={criteria}
-                      updateCount={updateCount}
-                      updating={() => this.setState({userClickedSaveRequest: true})}/>}
+                    cohort={cohort}
+                    cohortChanged={cohortChanged}
+                    searchRequest={criteria}
+                    updateCount={updateCount}
+                    updating={() => this.setState({userClickedSaveRequest: true})}/>}
                 </div>
                 {loading && <SpinnerOverlay/>}
               </FlexRowWrap>

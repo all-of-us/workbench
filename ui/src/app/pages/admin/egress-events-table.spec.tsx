@@ -19,9 +19,9 @@ describe('EgressEventsTable', () => {
     jest.useFakeTimers('modern');
   });
 
-   afterEach(() => {
-     jest.useRealTimers();
-   });
+  afterEach(() => {
+    jest.useRealTimers();
+  });
 
   it('should render basic', async() => {
     const wrapper = mountWithRouter(<EgressEventsTable />);

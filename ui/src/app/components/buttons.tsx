@@ -211,24 +211,24 @@ export const Clickable = ({as = 'div', disabled = false, onClick = null, propaga
 };
 
 export const Button = ({
-                         children,
-                         path='',
-                         type = 'primary',
-                         style = {},
-                         linkStyle={},
-                         disabled = false,
-                         propagateDataTestId = false,
-                         ...props
-                       }) => {
+  children,
+  path='',
+  type = 'primary',
+  style = {},
+  linkStyle={},
+  disabled = false,
+  propagateDataTestId = false,
+  ...props
+}) => {
   // `fp.omit` used to prevent propagation of test IDs to the rendered child component.
   const childProps = propagateDataTestId ? props : fp.omit(['data-test-id'], props);
   const computedStyle = fp.merge(computeStyle(buttonVariants[type], {disabled}), {style})
   return path
     ? <RouteLink path={path} {...computedStyle}>
-        <Clickable disabled={disabled} {...childProps}>
-          {children}
-        </Clickable>
-      </RouteLink>
+      <Clickable disabled={disabled} {...childProps}>
+        {children}
+      </Clickable>
+    </RouteLink>
     : <Clickable disabled={disabled} {...computedStyle} {...childProps}>
       {children}
     </Clickable>
@@ -268,15 +268,15 @@ export const MenuItem = ({icon = null, faIcon = null, tooltip = '' as any, disab
 export const IconButton = ({icon: Icon, style = {}, hover = {}, tooltip = '', disabled = false, ...props}) => {
   return <TooltipTrigger side='left' content={tooltip}>
     <LocalInteractive tagName='div'
-                 style={{
-                   color: disabled ? colors.disabled : colors.accent,
-                   cursor: disabled ? 'auto' : 'pointer',
-                   ...style
-                 }}
-                 hover={{color: !disabled && colorWithWhiteness(colors.accent, 0.2), ...hover}}
-                 disabled={disabled}
-                 {...props}>
-        <Icon disabled={disabled} style={style}/>
+      style={{
+        color: disabled ? colors.disabled : colors.accent,
+        cursor: disabled ? 'auto' : 'pointer',
+        ...style
+      }}
+      hover={{color: !disabled && colorWithWhiteness(colors.accent, 0.2), ...hover}}
+      disabled={disabled}
+      {...props}>
+      <Icon disabled={disabled} style={style}/>
     </LocalInteractive>
   </TooltipTrigger>;
 };
@@ -358,14 +358,14 @@ export const LinkButton = ({disabled = false, style = {}, children, ...props}) =
     hover: {textDecoration: 'underline'}
   };
   return <Clickable
-      disabled={disabled} {...props}
-      {...fp.merge(computeStyle(linkStyle, {disabled}), {style})}
+    disabled={disabled} {...props}
+    {...fp.merge(computeStyle(linkStyle, {disabled}), {style})}
   >{children}</Clickable>;
 };
 
 export const StyledRouterLink = ({
-    path, children, disabled = false, propagateDataTestId = false,
-    analyticsFn = null, style = {}, ...props}) => {
+  path, children, disabled = false, propagateDataTestId = false,
+  analyticsFn = null, style = {}, ...props}) => {
   const childProps = propagateDataTestId ? props : fp.omit(['data-test-id'], props);
   const linkStyle = {
     style: {...styles.inlineAnchor}
@@ -376,10 +376,10 @@ export const StyledRouterLink = ({
   return disabled
     ? <span {...computedStyles} {...childProps}>{children}</span>
     : <Link
-        to={path}
-        onClick={() => analyticsFn && analyticsFn()}
-        {...computedStyles}
-        {...childProps}
+      to={path}
+      onClick={() => analyticsFn && analyticsFn()}
+      {...computedStyles}
+      {...childProps}
     >
       {children}
     </Link>;
@@ -387,9 +387,9 @@ export const StyledRouterLink = ({
 
 export const StyledExternalLink = ({href, children, analyticsFn = null, style = {}, ...props}) => {
   return <a href={href}
-            onClick={() => analyticsFn && analyticsFn()}
-            style={{...styles.inlineAnchor, ...style}}
-            {...props}>{children}</a>;
+    onClick={() => analyticsFn && analyticsFn()}
+    style={{...styles.inlineAnchor, ...style}}
+    {...props}>{children}</a>;
 };
 
 interface SlidingFabState {
@@ -417,11 +417,11 @@ export class SlidingFabReact extends React.Component<SlidingFabProps, SlidingFab
     const {expanded, disable, iconShape, tooltip, tooltipContent} = this.props;
     return <div style={styles.slidingButtonContainer}>
       <div data-test-id='sliding-button'
-           style={disable ? {...styles.slidingButton,
-             ...styles.slidingButtonDisable} : styles.slidingButton}
-           onMouseEnter={() => this.setState({hovering: true})}
-           onMouseLeave={() => this.setState({hovering: false})}
-           onClick={() => disable ? {} : this.props.submitFunction()}>
+        style={disable ? {...styles.slidingButton,
+          ...styles.slidingButtonDisable} : styles.slidingButton}
+        onMouseEnter={() => this.setState({hovering: true})}
+        onMouseLeave={() => this.setState({hovering: false})}
+        onClick={() => disable ? {} : this.props.submitFunction()}>
         <TooltipTrigger content={tooltipContent} disabled={!tooltip}>
           <div style={styles.slidingButtonContent}>
             <div style={hovering ? {...styles.slidingButtonText,

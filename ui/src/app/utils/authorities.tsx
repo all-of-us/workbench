@@ -4,15 +4,15 @@ import {Authority, Profile} from 'generated/fetch';
 
 // Admin actions guarded by a particular Authority
 enum AuthorityGuardedAction {
-    EGRESS_EVENTS,
-    SHOW_ADMIN_MENU,
-    USER_ADMIN,
-    USER_AUDIT,
-    WORKSPACE_ADMIN,
-    WORKSPACE_AUDIT,
-    SERVICE_BANNER,
-    INSTITUTION_ADMIN,
-    PUBLISH_WORKSPACE,
+  EGRESS_EVENTS,
+  SHOW_ADMIN_MENU,
+  USER_ADMIN,
+  USER_AUDIT,
+  WORKSPACE_ADMIN,
+  WORKSPACE_AUDIT,
+  SERVICE_BANNER,
+  INSTITUTION_ADMIN,
+  PUBLISH_WORKSPACE,
 }
 
 // The full set of Authorities which guard admin-menu actions
@@ -25,14 +25,14 @@ const adminMenuAuthorities = new Set([
 ]);
 
 const authorityByPage: Map<AuthorityGuardedAction, Authority> = new Map([
-    [AuthorityGuardedAction.EGRESS_EVENTS, Authority.SECURITYADMIN],
-    [AuthorityGuardedAction.USER_ADMIN, Authority.ACCESSCONTROLADMIN],
-    [AuthorityGuardedAction.USER_AUDIT, Authority.ACCESSCONTROLADMIN],
-    [AuthorityGuardedAction.WORKSPACE_ADMIN, Authority.RESEARCHERDATAVIEW],
-    [AuthorityGuardedAction.WORKSPACE_AUDIT, Authority.RESEARCHERDATAVIEW],
-    [AuthorityGuardedAction.SERVICE_BANNER, Authority.COMMUNICATIONSADMIN],
-    [AuthorityGuardedAction.INSTITUTION_ADMIN, Authority.INSTITUTIONADMIN],
-    [AuthorityGuardedAction.PUBLISH_WORKSPACE, Authority.FEATUREDWORKSPACEADMIN],
+  [AuthorityGuardedAction.EGRESS_EVENTS, Authority.SECURITYADMIN],
+  [AuthorityGuardedAction.USER_ADMIN, Authority.ACCESSCONTROLADMIN],
+  [AuthorityGuardedAction.USER_AUDIT, Authority.ACCESSCONTROLADMIN],
+  [AuthorityGuardedAction.WORKSPACE_ADMIN, Authority.RESEARCHERDATAVIEW],
+  [AuthorityGuardedAction.WORKSPACE_AUDIT, Authority.RESEARCHERDATAVIEW],
+  [AuthorityGuardedAction.SERVICE_BANNER, Authority.COMMUNICATIONSADMIN],
+  [AuthorityGuardedAction.INSTITUTION_ADMIN, Authority.INSTITUTIONADMIN],
+  [AuthorityGuardedAction.PUBLISH_WORKSPACE, Authority.FEATUREDWORKSPACEADMIN],
 ]);
 
 const hasAuthorityForAction = (profile: Profile, action: AuthorityGuardedAction): boolean => {
@@ -50,6 +50,6 @@ const hasAuthorityForAction = (profile: Profile, action: AuthorityGuardedAction)
 };
 
 export {
-    AuthorityGuardedAction,
-    hasAuthorityForAction,
+  AuthorityGuardedAction,
+  hasAuthorityForAction,
 };

@@ -51,13 +51,13 @@ interface Props extends WithSpinnerOverlayProps {
 }
 
 export const NotebookList = withCurrentWorkspace()(class extends React.Component<
-  Props, {
-    notebookList: FileDetail[],
-    notebookNameList: string[],
-    creating: boolean,
-    loading: boolean,
-    showWaitingForNotebookTransferMsg: boolean;
-  }> {
+Props, {
+  notebookList: FileDetail[],
+  notebookNameList: string[],
+  creating: boolean,
+  loading: boolean,
+  showWaitingForNotebookTransferMsg: boolean;
+}> {
   private interval: NodeJS.Timeout;
   constructor(props) {
     super(props);
@@ -88,29 +88,29 @@ export const NotebookList = withCurrentWorkspace()(class extends React.Component
 
   async confirmNotebookTransferIsDone() {
     await workspacesApi()
-        .notebookTransferComplete(this.props.workspace.namespace, this.props.workspace.id).then((transferDone) => {
-          if (!transferDone) {
-            // Set the interval so that file transfer check is done after every 3 sec
-            this.interval = setInterval(this.tick, NOTEBOOK_TRANSFER_CHECK_INTERVAL);
-            this.setState({loading: true, showWaitingForNotebookTransferMsg: true});
-          } else {
-            // Notebook transfer is done load the notebooks
-            this.loadNotebooks();
-          }
-        });
+      .notebookTransferComplete(this.props.workspace.namespace, this.props.workspace.id).then((transferDone) => {
+        if (!transferDone) {
+          // Set the interval so that file transfer check is done after every 3 sec
+          this.interval = setInterval(this.tick, NOTEBOOK_TRANSFER_CHECK_INTERVAL);
+          this.setState({loading: true, showWaitingForNotebookTransferMsg: true});
+        } else {
+          // Notebook transfer is done load the notebooks
+          this.loadNotebooks();
+        }
+      });
   }
 
   // Will execute after every 3 sec: Call getCloneFileTransferDetails to check if the notebook file transfer is done
   tick = () => {
     workspacesApi()
-        .notebookTransferComplete(this.props.workspace.namespace, this.props.workspace.id).then((time)=>{
-          if (!!time) {
-            this.setState({loading: false, showWaitingForNotebookTransferMsg: false});
-            clearInterval(this.interval);
-            this.loadNotebooks();
-          }
+      .notebookTransferComplete(this.props.workspace.namespace, this.props.workspace.id).then((time)=>{
+        if (!!time) {
+          this.setState({loading: false, showWaitingForNotebookTransferMsg: false});
+          clearInterval(this.interval);
+          this.loadNotebooks();
         }
-    );
+      }
+      );
   }
 
   private workspaceChanged(prevProps) {
@@ -172,33 +172,33 @@ export const NotebookList = withCurrentWorkspace()(class extends React.Component
         </TooltipTrigger>
         <div style={{display: 'flex', flexWrap: 'wrap', justifyContent: 'flex-start' }}>
           {showWaitingForNotebookTransferMsg
-              ? <CardButton
-                  disabled={showWaitingForNotebookTransferMsg}
-                  style={styles.cloneNotebookCard}
-                  type='small'
-                  onClick={() => {
-                  }}>
-                <FlexColumn style={{paddingTop: '0.5rem'}}>
-                  <div>
-                    <FontAwesomeIcon style={{color: colors.warning}}
-                                     icon={faExclamationTriangle}
-                                     size="2x"/>
-                  </div>
-                  <div style={styles.cloneNotebookMsg}>
+            ? <CardButton
+              disabled={showWaitingForNotebookTransferMsg}
+              style={styles.cloneNotebookCard}
+              type='small'
+              onClick={() => {
+              }}>
+              <FlexColumn style={{paddingTop: '0.5rem'}}>
+                <div>
+                  <FontAwesomeIcon style={{color: colors.warning}}
+                    icon={faExclamationTriangle}
+                    size="2x"/>
+                </div>
+                <div style={styles.cloneNotebookMsg}>
                     Copying 1 or more notebooks from another workspace. This may take <b> a few
                     minutes</b>.
-                  </div>
-                </FlexColumn>
-              </CardButton>
-              : notebookList.map((notebook, index) => {
-                return <NotebookResourceCard
-                    key={index}
-                    resource={convertToResource(notebook, ResourceType.NOTEBOOK, workspace)}
-                    existingNameList={notebookNameList}
-                    onUpdate={() => this.loadNotebooks()}
-                    disableDuplicate={workspace.billingStatus === BillingStatus.INACTIVE}
-                />;
-              })}
+                </div>
+              </FlexColumn>
+            </CardButton>
+            : notebookList.map((notebook, index) => {
+              return <NotebookResourceCard
+                key={index}
+                resource={convertToResource(notebook, ResourceType.NOTEBOOK, workspace)}
+                existingNameList={notebookNameList}
+                onUpdate={() => this.loadNotebooks()}
+                disableDuplicate={workspace.billingStatus === BillingStatus.INACTIVE}
+              />;
+            })}
         </div>
       </div>
       {loading && <SpinnerOverlay />}

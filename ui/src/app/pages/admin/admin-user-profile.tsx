@@ -108,41 +108,41 @@ interface EditableFieldsProps {
 }
 const EditableFields =
   ({oldProfile, updatedProfile, institutions, emailValidationStatus, onChangeEmail, onChangeFreeCreditLimit,
-     onChangeInstitution, onChangeInstitutionalRole, onChangeInstitutionOtherText}: EditableFieldsProps) => {
-  const institution: PublicInstitutionDetails = institutions
-    .find(i => i.shortName === updatedProfile?.verifiedInstitutionalAffiliation?.institutionShortName);
-  return <FlexRow style={styles.editableFields}>
-    <FlexColumn>
-      <div style={styles.subHeader}>Edit information</div>
-      <FlexRow>
-        <ContactEmailTextInput
-          contactEmail={updatedProfile.contactEmail}
-          onChange={email => onChangeEmail(email)}/>
-        <InstitutionDropdown
-          institutions={institutions}
-          initialInstitutionShortName={updatedProfile.verifiedInstitutionalAffiliation?.institutionShortName}
-          onChange={event => onChangeInstitution(event.value)}/>
-      </FlexRow>
-      {emailValidationStatus === EmailValidationStatus.INVALID && getEmailValidationErrorMessage(institution)}
-      <FlexRow>
-        <FreeCreditsDropdown
-          initialLimit={oldProfile.freeTierDollarQuota}
-          currentLimit={updatedProfile.freeTierDollarQuota}
-          onChange={event => onChangeFreeCreditLimit(event.value)}/>
-        <InstitutionalRoleDropdown
-          institutions={institutions}
-          initialAffiliation={updatedProfile.verifiedInstitutionalAffiliation}
-          onChange={event => onChangeInstitutionalRole(event.value)}/>
-      </FlexRow>
-      <FlexRow>
-        <FlexSpacer/>
-        <InstitutionalRoleOtherTextInput
-          affiliation={updatedProfile.verifiedInstitutionalAffiliation}
-          onChange={value => onChangeInstitutionOtherText(value)}/>
-      </FlexRow>
-    </FlexColumn>
-  </FlexRow>;
-}
+    onChangeInstitution, onChangeInstitutionalRole, onChangeInstitutionOtherText}: EditableFieldsProps) => {
+    const institution: PublicInstitutionDetails = institutions
+      .find(i => i.shortName === updatedProfile?.verifiedInstitutionalAffiliation?.institutionShortName);
+    return <FlexRow style={styles.editableFields}>
+      <FlexColumn>
+        <div style={styles.subHeader}>Edit information</div>
+        <FlexRow>
+          <ContactEmailTextInput
+            contactEmail={updatedProfile.contactEmail}
+            onChange={email => onChangeEmail(email)}/>
+          <InstitutionDropdown
+            institutions={institutions}
+            initialInstitutionShortName={updatedProfile.verifiedInstitutionalAffiliation?.institutionShortName}
+            onChange={event => onChangeInstitution(event.value)}/>
+        </FlexRow>
+        {emailValidationStatus === EmailValidationStatus.INVALID && getEmailValidationErrorMessage(institution)}
+        <FlexRow>
+          <FreeCreditsDropdown
+            initialLimit={oldProfile.freeTierDollarQuota}
+            currentLimit={updatedProfile.freeTierDollarQuota}
+            onChange={event => onChangeFreeCreditLimit(event.value)}/>
+          <InstitutionalRoleDropdown
+            institutions={institutions}
+            initialAffiliation={updatedProfile.verifiedInstitutionalAffiliation}
+            onChange={event => onChangeInstitutionalRole(event.value)}/>
+        </FlexRow>
+        <FlexRow>
+          <FlexSpacer/>
+          <InstitutionalRoleOtherTextInput
+            affiliation={updatedProfile.verifiedInstitutionalAffiliation}
+            onChange={value => onChangeInstitutionOtherText(value)}/>
+        </FlexRow>
+      </FlexColumn>
+    </FlexRow>;
+  }
 
 enum EmailValidationStatus {
   UNCHECKED,
@@ -291,7 +291,7 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
           }}
         >
           Save
-      </Button>
+        </Button>
       </ErrorsTooltip>
       <Button
         type='secondary'

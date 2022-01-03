@@ -14,7 +14,7 @@ const styles = reactStyles({
 
 export const RuntimeSummary = ({runtimeConfig}: {runtimeConfig: RuntimeConfig}) => {
   return <>
-<label htmlFor='compute-resources' style={{...styles.bold, marginTop: '1rem'}}>Compute Resources</label>
+    <label htmlFor='compute-resources' style={{...styles.bold, marginTop: '1rem'}}>Compute Resources</label>
     <div id='compute-resources'>- Compute size of
       <b> {runtimeConfig.machine.cpu} CPUs</b>,
       <b> {runtimeConfig.machine.memory} GB memory</b>, and a

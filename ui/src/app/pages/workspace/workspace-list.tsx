@@ -123,15 +123,15 @@ export const WorkspaceList = fp.flow(withUserProfile())
                 <NewWorkspaceButton />
                 {workspaceList
                   .filter(({accessLevel}) => !filterLevels || filterLevels.includes(accessLevel))
-                   .map(wp => {
-                  return <WorkspaceCard
-                    key={wp.workspace.namespace}
-                    workspace={wp.workspace}
-                    accessLevel={wp.accessLevel}
-                    reload={() => this.reloadWorkspaces()}
-                    tierAccessDisabled={!hasTierAccess(profile, wp.workspace.accessTierShortName)}
-                  />;
-                })}
+                  .map(wp => {
+                    return <WorkspaceCard
+                      key={wp.workspace.namespace}
+                      workspace={wp.workspace}
+                      accessLevel={wp.accessLevel}
+                      reload={() => this.reloadWorkspaces()}
+                      tierAccessDisabled={!hasTierAccess(profile, wp.workspace.accessTierShortName)}
+                    />;
+                  })}
               </div>)}
           </div>
         </div>

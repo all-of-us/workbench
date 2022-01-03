@@ -26,30 +26,30 @@ describe('LoginGovIAL2Notification', () => {
 
   it('should show notification when login.gov feature flag enabled', () => {
     serverConfigStore.set({config: {
-        ...defaultServerConfig,
-        enableRasLoginGovLinking: true
-      }});
+      ...defaultServerConfig,
+      enableRasLoginGovLinking: true
+    }});
     const wrapper = component();
     expect(wrapper.find('[data-test-id="ial2-notification"]').exists()).toBeTruthy();
   });
 
   it('should not show notification when login.gov feature flag disabled', () => {
     serverConfigStore.set({config: {
-        ...defaultServerConfig,
-        enableRasLoginGovLinking: false
-      }});
+      ...defaultServerConfig,
+      enableRasLoginGovLinking: false
+    }});
     const wrapper = component();
     expect(wrapper.find('[data-test-id="ial2-notification"]').exists()).toBeFalsy();
   });
 
   it('should not show notification when login.gov complete', () => {
     serverConfigStore.set({config: {
-        ...defaultServerConfig,
-        enableRasLoginGovLinking: true
-      }});
+      ...defaultServerConfig,
+      enableRasLoginGovLinking: true
+    }});
     const newProfile = fp.set('accessModules', {modules: [
-        {moduleName: AccessModule.RASLINKLOGINGOV, completionEpochMillis: Date.now()},
-      ]}, profile)
+      {moduleName: AccessModule.RASLINKLOGINGOV, completionEpochMillis: Date.now()},
+    ]}, profile)
     profileStore.set({profile: newProfile, load, reload, updateCache});
 
     const wrapper = component();
@@ -58,12 +58,12 @@ describe('LoginGovIAL2Notification', () => {
 
   it('should not show notification when login.gov bypassed', () => {
     serverConfigStore.set({config: {
-        ...defaultServerConfig,
-        enableRasLoginGovLinking: true
-      }});
+      ...defaultServerConfig,
+      enableRasLoginGovLinking: true
+    }});
     const newProfile = fp.set('accessModules', {modules: [
-        {moduleName: AccessModule.RASLINKLOGINGOV, bypassEpochMillis: Date.now()},
-      ]}, profile)
+      {moduleName: AccessModule.RASLINKLOGINGOV, bypassEpochMillis: Date.now()},
+    ]}, profile)
     profileStore.set({profile: newProfile, load, reload, updateCache});
 
     const wrapper = component();

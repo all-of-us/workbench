@@ -43,54 +43,54 @@ export const styles = reactStyles({
 
 export const LoginReactComponent: React.FunctionComponent<{
   onCreateAccount: Function }> = ({onCreateAccount}) => {
-    return <React.Fragment>
-      <div data-test-id='login' style={{marginBottom: '.5rem', marginTop: '5.5rem',  paddingLeft: '3rem'}}>
-        <div>
-          <Header style={{width: '14rem', lineHeight: '30px'}}>
+  return <React.Fragment>
+    <div data-test-id='login' style={{marginBottom: '.5rem', marginTop: '5.5rem',  paddingLeft: '3rem'}}>
+      <div>
+        <Header style={{width: '14rem', lineHeight: '30px'}}>
             Already have a
             Researcher Workbench account?
-          </Header>
-          <div>
-            <GoogleSignInButton />
-          </div>
-          <StyledExternalLink
-            target='_blank'
-            href='https://www.researchallofus.org/faq/what-if-i-have-trouble-signing-in-to-the-workbench'
-            style={{marginTop: '0.625rem', lineHeight: '0.75rem'}}>
+        </Header>
+        <div>
+          <GoogleSignInButton />
+        </div>
+        <StyledExternalLink
+          target='_blank'
+          href='https://www.researchallofus.org/faq/what-if-i-have-trouble-signing-in-to-the-workbench'
+          style={{marginTop: '0.625rem', lineHeight: '0.75rem'}}>
               Trouble Signing In?
-          </StyledExternalLink>
-        </div>
-        <div style={{paddingTop: '1.25rem'}}>
-          <SmallHeader>
+        </StyledExternalLink>
+      </div>
+      <div style={{paddingTop: '1.25rem'}}>
+        <SmallHeader>
             Don't have an account?
-          </SmallHeader>
-          <Button type='secondary' style={styles.createAccountButton}
-                  onClick={onCreateAccount}>
+        </SmallHeader>
+        <Button type='secondary' style={styles.createAccountButton}
+          onClick={onCreateAccount}>
             Create Account
-          </Button>
-        </div>
-        <div style={{width: '400px'}}>
-          <h4 style={{...styles.fismaCommon, ...styles.fismaHeader}}>Warning Notice</h4>
-          <div style={{...styles.fismaCommon, ...styles.fismaSection}}>
+        </Button>
+      </div>
+      <div style={{width: '400px'}}>
+        <h4 style={{...styles.fismaCommon, ...styles.fismaHeader}}>Warning Notice</h4>
+        <div style={{...styles.fismaCommon, ...styles.fismaSection}}>
             You are accessing a web site created by the <AouTitle/>, funded by the National Institutes
             of Health.
-          </div>
-          <div style={{...styles.fismaCommon, ...styles.fismaSection}}>
+        </div>
+        <div style={{...styles.fismaCommon, ...styles.fismaSection}}>
             Unauthorized attempts to upload information, change information, or use of this web site
             may result in disciplinary action, civil, and/or criminal penalties. Unauthorized users
             of this website should have no expectation of privacy regarding any communications or
             data processed by this website.
-          </div>
-          <div style={{...styles.fismaCommon, ...styles.fismaSection}}>
+        </div>
+        <div style={{...styles.fismaCommon, ...styles.fismaSection}}>
             By continuing to log in, anyone accessing this website expressly consents to monitoring
             of their actions and all communications or data transiting or stored on related to this
             website and is advised that if such monitoring reveals possible evidence of criminal
             activity, NIH may provide that evidence to law enforcement officials.
-          </div>
         </div>
       </div>
-      <CookieBanner/>
-    </React.Fragment>;
-  };
+    </div>
+    <CookieBanner/>
+  </React.Fragment>;
+};
 
 export default LoginReactComponent;

@@ -66,7 +66,7 @@ export const WhyWillSomeInformationBePublic: React.FunctionComponent = () => {
       with participants about who can access their data and for what purpose. Therefore, we will display
       your name, institution, role, research background/interests, and a link to your professional
       profile (if available) in the
-      <a target='_blank' href='https://www.researchallofus.org/research-projects-directory/'>
+    <a target='_blank' href='https://www.researchallofus.org/research-projects-directory/'>
         &nbsp;Research Projects Directory</a> on our public website.
     </div>
     <div style={commonStyles.asideText}>
@@ -119,10 +119,10 @@ export const OptionalSection = (props) => {
 export const DropDownSection = (props) => {
   return <Section header={props.header} subHeader={props.subHeader} subHeaderStyle={props.subHeaderStyle}>
     <Dropdown placeholder='Select'
-              options={props.options}
-              style={{width: '50%'}}
-              value={props.value}
-              onChange={(e) => props.onChange(e.value)}/>
+      options={props.options}
+      style={{width: '50%'}}
+      value={props.value}
+      onChange={(e) => props.onChange(e.value)}/>
   </Section>;
 };
 

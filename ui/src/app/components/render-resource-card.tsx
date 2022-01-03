@@ -21,11 +21,11 @@ function renderResourceCard(props: RenderResourceCardProps) {
   const inactiveBilling = (resource.workspaceBillingStatus === BillingStatus.INACTIVE);
 
   return fp.cond([
-      [isCohort, () => <CohortResourceCard {...props}/>],
-      [isCohortReview, () => <CohortReviewResourceCard {...props}/>],
-      [isConceptSet, () => <ConceptSetResourceCard {...props}/>],
-      [isDataSet, () => <DatasetResourceCard {...props} inactiveBilling={inactiveBilling}/>],
-      [isNotebook, () => <NotebookResourceCard {...props} disableDuplicate={inactiveBilling}/>]
+    [isCohort, () => <CohortResourceCard {...props}/>],
+    [isCohortReview, () => <CohortReviewResourceCard {...props}/>],
+    [isConceptSet, () => <ConceptSetResourceCard {...props}/>],
+    [isDataSet, () => <DatasetResourceCard {...props} inactiveBilling={inactiveBilling}/>],
+    [isNotebook, () => <NotebookResourceCard {...props} disableDuplicate={inactiveBilling}/>]
   ])(resource);
 }
 

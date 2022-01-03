@@ -146,18 +146,18 @@ export const RecentResources = fp.flow(withCdrVersions())((props: Props) => {
 
   return (resources && wsMap && !loading) ? <React.Fragment>
     <SmallHeader>Recently Accessed Items</SmallHeader>
-      <div data-test-id='recent-resources-table'><DataTable
-          value={tableData}
-          scrollable={true}
-          paginator={true}
-          paginatorTemplate='CurrentPageReport'
-          currentPageReportTemplate='Showing {totalRecords} most recent items'>
-        <Column field='menu' style={styles.menu}/>
-        <Column field='resourceType' header='Item type' style={styles.typeColumn}/>
-        <Column field='resourceName' header='Name' style={styles.column}/>
-        <Column field='workspaceName' header='Workspace name' style={styles.column}/>
-        <Column field='formattedLastModified' header='Last changed' style={styles.column}/>
-        <Column field='cdrVersionName' header='Dataset' style={styles.column}/>
-      </DataTable></div>
+    <div data-test-id='recent-resources-table'><DataTable
+      value={tableData}
+      scrollable={true}
+      paginator={true}
+      paginatorTemplate='CurrentPageReport'
+      currentPageReportTemplate='Showing {totalRecords} most recent items'>
+      <Column field='menu' style={styles.menu}/>
+      <Column field='resourceType' header='Item type' style={styles.typeColumn}/>
+      <Column field='resourceName' header='Name' style={styles.column}/>
+      <Column field='workspaceName' header='Workspace name' style={styles.column}/>
+      <Column field='formattedLastModified' header='Last changed' style={styles.column}/>
+      <Column field='cdrVersionName' header='Dataset' style={styles.column}/>
+    </DataTable></div>
   </React.Fragment> : <SpinnerOverlay/>;
 });

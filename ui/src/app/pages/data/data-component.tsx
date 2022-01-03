@@ -157,9 +157,9 @@ export const DataComponent = withCurrentWorkspace()((props: Props) => {
         <TooltipTrigger content={!writePermission &&
         'Write permission required to create cohorts'} side='top'>
           <CardButton style={styles.resourceTypeButton} disabled={!writePermission}
-                      onClick={() => {
-                        navigate(['workspaces', workspace.namespace, workspace.id, 'data', 'cohorts', 'build']);
-                      }}>
+            onClick={() => {
+              navigate(['workspaces', workspace.namespace, workspace.id, 'data', 'cohorts', 'build']);
+            }}>
             <div style={styles.cardHeader}>
               <h2 style={styles.cardHeaderText(!writePermission)}>Cohorts</h2>
               <ClrIcon shape='plus-circle' class='is-solid' size={18} style={{marginTop: 5}}/>
@@ -177,12 +177,12 @@ export const DataComponent = withCurrentWorkspace()((props: Props) => {
         <TooltipTrigger content={!writePermission &&
         'Write permission required to create datasets'} side='top'>
           <CardButton
-              style={{...styles.resourceTypeButton, ...styles.resourceTypeButtonLast}}
-              disabled={!writePermission}
-              onClick={() => {
-                AnalyticsTracker.DatasetBuilder.OpenCreatePage();
-                navigate(['workspaces', workspace.namespace, workspace.id, 'data', 'data-sets']);
-              }}>
+            style={{...styles.resourceTypeButton, ...styles.resourceTypeButtonLast}}
+            disabled={!writePermission}
+            onClick={() => {
+              AnalyticsTracker.DatasetBuilder.OpenCreatePage();
+              navigate(['workspaces', workspace.namespace, workspace.id, 'data', 'data-sets']);
+            }}>
             <div style={styles.cardHeader}>
               <h2 style={styles.cardHeaderText(!writePermission)}>Datasets</h2>
               <ClrIcon shape='plus-circle' class='is-solid' size={18} style={{marginTop: 5}}/>
@@ -209,19 +209,19 @@ export const DataComponent = withCurrentWorkspace()((props: Props) => {
           Show All
         </TabButton>
         <TabButton active={activeTab === Tabs.COHORTS} onClick={() => setActiveTab(Tabs.COHORTS)}
-                   data-test-id='view-only-cohorts'>
+          data-test-id='view-only-cohorts'>
           Cohorts
         </TabButton>
         <TabButton active={activeTab === Tabs.COHORTREVIEWS} onClick={() => setActiveTab(Tabs.COHORTREVIEWS)}
-                   data-test-id='view-only-cohort-reviews'>
+          data-test-id='view-only-cohort-reviews'>
           Cohort Reviews
         </TabButton>
         <TabButton active={activeTab === Tabs.CONCEPTSETS} onClick={() => setActiveTab(Tabs.CONCEPTSETS)}
-                   data-test-id='view-only-concept-sets'>
+          data-test-id='view-only-concept-sets'>
           Concept Sets
         </TabButton>
         <TabButton active={activeTab === Tabs.DATASETS} onClick={() => setActiveTab(Tabs.DATASETS)}
-                   data-test-id='view-only-data-sets'>
+          data-test-id='view-only-data-sets'>
           Datasets
         </TabButton>
       </div>

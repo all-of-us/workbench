@@ -17,9 +17,9 @@ describe('NotebookResourceCard', () => {
 
     return mount(<MemoryRouter>
       <NotebookResourceCard
-      resource={props}
-      existingNameList={[]}
-      onUpdate={() => {}}/>);
+        resource={props}
+        existingNameList={[]}
+        onUpdate={() => {}}/>);
     </MemoryRouter>
     );
   };

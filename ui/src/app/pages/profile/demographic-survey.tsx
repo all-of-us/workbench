@@ -80,34 +80,34 @@ export const DemographicSurvey = withProfileErrorModal(
       };
     }
 
-  // Clicking this checkbox will remove other answers within the 'checkbox group'
+    // Clicking this checkbox will remove other answers within the 'checkbox group'
     createNoAnswerCheckbox({value, label}, optionKey: string) {
       const {profile: {demographicSurvey}} = this.state;
 
       return <CheckBox label={label}
-                     data-test-id={`checkbox-${optionKey}-${value}`}
-                     style={styles.checkbox}
-                     key={value.toString()}
-                     checked={isChecked(demographicSurvey, optionKey, value)}
-                     wrapperStyle={styles.checkboxWrapper} labelStyle={styles.checkboxLabel}
-                     manageOwnState={false}
-                     onChange={nextValue => this.setState(fp.set(['profile', 'demographicSurvey', optionKey], nextValue ? [value] : []))}
-    />;
+        data-test-id={`checkbox-${optionKey}-${value}`}
+        style={styles.checkbox}
+        key={value.toString()}
+        checked={isChecked(demographicSurvey, optionKey, value)}
+        wrapperStyle={styles.checkboxWrapper} labelStyle={styles.checkboxLabel}
+        manageOwnState={false}
+        onChange={nextValue => this.setState(fp.set(['profile', 'demographicSurvey', optionKey], nextValue ? [value] : []))}
+      />;
     }
 
-  // Clicking one of these options will remove the prefer not to answer selection, if selected
+    // Clicking one of these options will remove the prefer not to answer selection, if selected
     createOptionCheckbox(optionKey: string, optionObject: any, preferNoAnswerValue: any) {
       const {profile: {demographicSurvey}} = this.state;
       const initialValue = demographicSurvey && demographicSurvey[optionKey] && demographicSurvey[optionKey].includes(optionObject.value);
 
       return <CheckBox label={optionObject.label}
-                     data-test-id={'checkbox-' + optionObject.value.toString()}
-                     style={styles.checkbox} key={optionObject.value.toString()}
-                     checked={initialValue}
-                     manageOwnState={false}
-                     wrapperStyle={styles.checkboxWrapper} labelStyle={styles.checkboxLabel}
-                     onChange={(value) => this.updateList(optionKey, optionObject.value, preferNoAnswerValue)}
-    />;
+        data-test-id={'checkbox-' + optionObject.value.toString()}
+        style={styles.checkbox} key={optionObject.value.toString()}
+        checked={initialValue}
+        manageOwnState={false}
+        wrapperStyle={styles.checkboxWrapper} labelStyle={styles.checkboxLabel}
+        onChange={(value) => this.updateList(optionKey, optionObject.value, preferNoAnswerValue)}
+      />;
     }
 
     captureCaptchaResponse(token) {
@@ -119,7 +119,7 @@ export const DemographicSurvey = withProfileErrorModal(
         fp.remove({value: pntaOption}), // Remove the PNTA checkbox from the list, return list w/o PNTA
         fp.map(item => this.createOptionCheckbox(optionKey, item, pntaOption)), // Create checkboxes sans PNTA
         v => [...v, this.createNoAnswerCheckbox(fp.find({value: pntaOption}, allOptions), optionKey )] // Append PNTA checkbox to list
-    )(allOptions);
+      )(allOptions);
     }
 
     updateList(key, value, preferNoAnswerValue) {
@@ -127,7 +127,7 @@ export const DemographicSurvey = withProfileErrorModal(
       const attributeList = fp.flow(
         toggleIncludes(value),
         fp.remove(v => v === preferNoAnswerValue)
-    )(this.state.profile.demographicSurvey[key] || []);
+      )(this.state.profile.demographicSurvey[key] || []);
       this.updateDemographicAttribute(key, attributeList);
     }
 
@@ -183,168 +183,168 @@ export const DemographicSurvey = withProfileErrorModal(
       const errors = this.validateDemographicSurvey(demographicSurvey);
 
       return <div style={{marginTop: '1rem', paddingLeft: '1rem', width: '32rem'}}>
-      <TextColumn>
-        <div style={{fontSize: 28, fontWeight: 400, marginBottom: '.8rem'}}>Demographics Survey</div>
-        {this.props.showStepCount &&
+        <TextColumn>
+          <div style={{fontSize: 28, fontWeight: 400, marginBottom: '.8rem'}}>Demographics Survey</div>
+          {this.props.showStepCount &&
           <div style={{fontSize: 16, marginBottom: '.5rem'}}>
             Please complete Step 3 of 3
           </div>
-        }
-        <div style={{
-          backgroundColor: colorWithWhiteness(colors.accent, .75),
-          padding: '1rem',
-          borderRadius: '5px'
-        }}>
+          }
+          <div style={{
+            backgroundColor: colorWithWhiteness(colors.accent, .75),
+            padding: '1rem',
+            borderRadius: '5px'
+          }}>
           The <AouTitle/> will
           use this information to measure our success at reaching diverse researchers.
           We will not share your individual answers.
-        </div>
-      </TextColumn>
+          </div>
+        </TextColumn>
 
-      {/*Race section*/}
-      <Section header='Race'>
-        <SelectAllText/>
-        <FlexColumn style={styles.checkboxAreaContainer}>
-          { this.checkboxArea('race', Race.PREFERNOANSWER, AccountCreationOptions.race) }
-        </FlexColumn>
-      </Section>
+        {/*Race section*/}
+        <Section header='Race'>
+          <SelectAllText/>
+          <FlexColumn style={styles.checkboxAreaContainer}>
+            { this.checkboxArea('race', Race.PREFERNOANSWER, AccountCreationOptions.race) }
+          </FlexColumn>
+        </Section>
 
-      {/*Ethnicity section*/}
-      <DropDownSection data-test-id='dropdown-ethnicity'
-                       header='Ethnicity'
-                       options={AccountCreationOptions.ethnicity}
-                       value={!!demographicSurvey ? demographicSurvey.ethnicity : null}
-                       onChange={(e) => this.updateDemographicAttribute('ethnicity', e)}/>
+        {/*Ethnicity section*/}
+        <DropDownSection data-test-id='dropdown-ethnicity'
+          header='Ethnicity'
+          options={AccountCreationOptions.ethnicity}
+          value={!!demographicSurvey ? demographicSurvey.ethnicity : null}
+          onChange={(e) => this.updateDemographicAttribute('ethnicity', e)}/>
 
-      {/*Gender Identity section*/}
-      <Section header='Gender Identity'>
-        <SelectAllText/>
-        <FlexColumn style={{...styles.checkboxAreaContainer, height: '5rem'}}>
-          { this.checkboxArea('genderIdentityList', GenderIdentity.PREFERNOANSWER, AccountCreationOptions.genderIdentity) }
-        </FlexColumn>
-      </Section>
+        {/*Gender Identity section*/}
+        <Section header='Gender Identity'>
+          <SelectAllText/>
+          <FlexColumn style={{...styles.checkboxAreaContainer, height: '5rem'}}>
+            { this.checkboxArea('genderIdentityList', GenderIdentity.PREFERNOANSWER, AccountCreationOptions.genderIdentity) }
+          </FlexColumn>
+        </Section>
 
-      <Section header='Do you identify as lesbian, gay, bisexual, transgender, queer (LGBTQ),
+        <Section header='Do you identify as lesbian, gay, bisexual, transgender, queer (LGBTQ),
 or another sexual and/or gender minority?'>
-        <FlexColumn>
-          <FlexRow style={{alignItems: 'baseline'}}>
-            <RadioButton data-test-id='radio-lgbtq-yes'
-                         id='radio-lgbtq-yes'
-                         onChange={() => this.updateDemographicAttribute('identifiesAsLgbtq', true)}
-                         checked={!!demographicSurvey ? demographicSurvey.identifiesAsLgbtq === true : false}
-                         style={{marginRight: '0.5rem'}}/>
-            <label htmlFor='radio-lgbtq-yes' style={{paddingRight: '3rem', color: colors.primary}}>Yes</label>
-          </FlexRow>
-          <FlexRow style={{alignItems: 'baseline'}}>
-            <RadioButton data-test-id='radio-lgbtq-no'
-                         id='radio-lgbtq-no'
-                         onChange={() => this.updateDemographicAttribute('identifiesAsLgbtq', false)}
-                         checked={!!demographicSurvey ? demographicSurvey.identifiesAsLgbtq === false : false}
-                         style={{marginRight: '0.5rem'}}/>
-            <label htmlFor='radio-lgbtq-no' style={{color: colors.primary}}>No</label>
-          </FlexRow>
-          <FlexRow style={{alignItems: 'baseline'}}>
-            <RadioButton data-test-id='radio-lgbtq-pnta'
-                         id='radio-lgbtq-pnta'
-                         onChange={() => this.updateDemographicAttribute('identifiesAsLgbtq', null)}
-                         checked={!!demographicSurvey ? demographicSurvey.identifiesAsLgbtq === null : false}
-                         style={{marginRight: '0.5rem'}}/>
-            <label htmlFor='radio-lgbtq-pnta' style={{color: colors.primary}}>Prefer not to answer</label>
-          </FlexRow>
-        </FlexColumn>
-        <label></label>
-        <TextInputWithLabel labelText='If yes, please tell us about your LGBTQ+ identity'
-                            value={!!demographicSurvey ? demographicSurvey.lgbtqIdentity : ''} inputName='lgbtqIdentity'
-                            containerStyle={{width: '26rem', marginTop: '0.5rem'}} inputStyle={{width: '26rem'}}
-                            onChange={(value) => this.updateDemographicAttribute('lgbtqIdentity', value)}
-                            disabled={!!demographicSurvey ? !demographicSurvey.identifiesAsLgbtq : true}/>
-      </Section>
+          <FlexColumn>
+            <FlexRow style={{alignItems: 'baseline'}}>
+              <RadioButton data-test-id='radio-lgbtq-yes'
+                id='radio-lgbtq-yes'
+                onChange={() => this.updateDemographicAttribute('identifiesAsLgbtq', true)}
+                checked={!!demographicSurvey ? demographicSurvey.identifiesAsLgbtq === true : false}
+                style={{marginRight: '0.5rem'}}/>
+              <label htmlFor='radio-lgbtq-yes' style={{paddingRight: '3rem', color: colors.primary}}>Yes</label>
+            </FlexRow>
+            <FlexRow style={{alignItems: 'baseline'}}>
+              <RadioButton data-test-id='radio-lgbtq-no'
+                id='radio-lgbtq-no'
+                onChange={() => this.updateDemographicAttribute('identifiesAsLgbtq', false)}
+                checked={!!demographicSurvey ? demographicSurvey.identifiesAsLgbtq === false : false}
+                style={{marginRight: '0.5rem'}}/>
+              <label htmlFor='radio-lgbtq-no' style={{color: colors.primary}}>No</label>
+            </FlexRow>
+            <FlexRow style={{alignItems: 'baseline'}}>
+              <RadioButton data-test-id='radio-lgbtq-pnta'
+                id='radio-lgbtq-pnta'
+                onChange={() => this.updateDemographicAttribute('identifiesAsLgbtq', null)}
+                checked={!!demographicSurvey ? demographicSurvey.identifiesAsLgbtq === null : false}
+                style={{marginRight: '0.5rem'}}/>
+              <label htmlFor='radio-lgbtq-pnta' style={{color: colors.primary}}>Prefer not to answer</label>
+            </FlexRow>
+          </FlexColumn>
+          <label></label>
+          <TextInputWithLabel labelText='If yes, please tell us about your LGBTQ+ identity'
+            value={!!demographicSurvey ? demographicSurvey.lgbtqIdentity : ''} inputName='lgbtqIdentity'
+            containerStyle={{width: '26rem', marginTop: '0.5rem'}} inputStyle={{width: '26rem'}}
+            onChange={(value) => this.updateDemographicAttribute('lgbtqIdentity', value)}
+            disabled={!!demographicSurvey ? !demographicSurvey.identifiesAsLgbtq : true}/>
+        </Section>
 
-      {/*Sex at birth section*/}
-      <Section header='Sex at birth'>
-        <SelectAllText/>
-        <FlexColumn style={{...styles.checkboxAreaContainer, height: '5rem'}}>
-          { this.checkboxArea('sexAtBirth', SexAtBirth.PREFERNOANSWER, AccountCreationOptions.sexAtBirth) }
-        </FlexColumn>
-      </Section>
+        {/*Sex at birth section*/}
+        <Section header='Sex at birth'>
+          <SelectAllText/>
+          <FlexColumn style={{...styles.checkboxAreaContainer, height: '5rem'}}>
+            { this.checkboxArea('sexAtBirth', SexAtBirth.PREFERNOANSWER, AccountCreationOptions.sexAtBirth) }
+          </FlexColumn>
+        </Section>
 
-      {/*Year of birth section*/}
-      <DropDownSection data-test-id='year-of-birth'
-                       header='Year of Birth'
-                       options={AccountCreationOptions.Years}
-                       value={!!demographicSurvey ? demographicSurvey.yearOfBirth : null}
-                       onChange={(e) => this.updateDemographicAttribute('yearOfBirth', e)}
-      />
-      {/*Disability section*/}
-      <Section header='Do you have a physical or cognitive disability?'>
-        <FlexColumn>
-          <FlexRow style={{alignItems: 'baseline'}}>
-            <RadioButton id='radio-disability-yes'
-                         onChange={() => this.updateDemographicAttribute('disability', Disability.True)}
-                         checked={!!demographicSurvey ? demographicSurvey.disability === Disability.True : false}
-                         style={{marginRight: '0.5rem'}}/>
-            <label htmlFor='radio-disability-yes' style={{paddingRight: '3rem', color: colors.primary}}>Yes</label>
-          </FlexRow>
-          <FlexRow style={{alignItems: 'baseline'}}>
-            <RadioButton id='radio-disability-no'
-                         onChange={() => this.updateDemographicAttribute('disability', Disability.False)}
-                         checked={!!demographicSurvey ? demographicSurvey.disability === Disability.False : false}
-                         style={{marginRight: '0.5rem'}}/>
-            <label htmlFor='radio-disability-no' style={{color: colors.primary}}>No</label>
-          </FlexRow>
-          <FlexRow style={{alignItems: 'baseline'}}>
-            <RadioButton id='radio-disability-pnta'
-                         onChange={() => this.updateDemographicAttribute('disability', Disability.PREFERNOANSWER)}
-                         checked={!!demographicSurvey ? demographicSurvey.disability === Disability.PREFERNOANSWER : false}
-                         style={{marginRight: '0.5rem'}}/>
-            <label htmlFor='radio-disability-pnta' style={{color: colors.primary}}>Prefer not to answer</label>
-          </FlexRow>
-        </FlexColumn>
-      </Section>
-      {/*Education section*/}
-      <DropDownSection data-test-id='highest-education-level'
-                       header='Highest Level of Education Completed'
-                       options={AccountCreationOptions.levelOfEducation}
-                       value={!!demographicSurvey ? demographicSurvey.education : null}
-                       onChange={(e) => this.updateDemographicAttribute('education', e)}/>
-      {environment.enableCaptcha && this.props.enableCaptcha && <div style={{paddingTop: '1rem'}}>
-        <ReCAPTCHA sitekey={environment.captchaSiteKey}
-                   ref = {this.captchaRef}
-                   onChange={(value) => this.captureCaptchaResponse(value)}/>
-      </div>}
-      <FormSection style={{paddingBottom: '1rem'}}>
-        {this.props.enablePrevious && <Button type='secondary' style={{marginRight: '1rem'}} disabled={loading}
-                onClick={() => this.props.onPreviousClick(this.state.profile)}>
+        {/*Year of birth section*/}
+        <DropDownSection data-test-id='year-of-birth'
+          header='Year of Birth'
+          options={AccountCreationOptions.Years}
+          value={!!demographicSurvey ? demographicSurvey.yearOfBirth : null}
+          onChange={(e) => this.updateDemographicAttribute('yearOfBirth', e)}
+        />
+        {/*Disability section*/}
+        <Section header='Do you have a physical or cognitive disability?'>
+          <FlexColumn>
+            <FlexRow style={{alignItems: 'baseline'}}>
+              <RadioButton id='radio-disability-yes'
+                onChange={() => this.updateDemographicAttribute('disability', Disability.True)}
+                checked={!!demographicSurvey ? demographicSurvey.disability === Disability.True : false}
+                style={{marginRight: '0.5rem'}}/>
+              <label htmlFor='radio-disability-yes' style={{paddingRight: '3rem', color: colors.primary}}>Yes</label>
+            </FlexRow>
+            <FlexRow style={{alignItems: 'baseline'}}>
+              <RadioButton id='radio-disability-no'
+                onChange={() => this.updateDemographicAttribute('disability', Disability.False)}
+                checked={!!demographicSurvey ? demographicSurvey.disability === Disability.False : false}
+                style={{marginRight: '0.5rem'}}/>
+              <label htmlFor='radio-disability-no' style={{color: colors.primary}}>No</label>
+            </FlexRow>
+            <FlexRow style={{alignItems: 'baseline'}}>
+              <RadioButton id='radio-disability-pnta'
+                onChange={() => this.updateDemographicAttribute('disability', Disability.PREFERNOANSWER)}
+                checked={!!demographicSurvey ? demographicSurvey.disability === Disability.PREFERNOANSWER : false}
+                style={{marginRight: '0.5rem'}}/>
+              <label htmlFor='radio-disability-pnta' style={{color: colors.primary}}>Prefer not to answer</label>
+            </FlexRow>
+          </FlexColumn>
+        </Section>
+        {/*Education section*/}
+        <DropDownSection data-test-id='highest-education-level'
+          header='Highest Level of Education Completed'
+          options={AccountCreationOptions.levelOfEducation}
+          value={!!demographicSurvey ? demographicSurvey.education : null}
+          onChange={(e) => this.updateDemographicAttribute('education', e)}/>
+        {environment.enableCaptcha && this.props.enableCaptcha && <div style={{paddingTop: '1rem'}}>
+          <ReCAPTCHA sitekey={environment.captchaSiteKey}
+            ref = {this.captchaRef}
+            onChange={(value) => this.captureCaptchaResponse(value)}/>
+        </div>}
+        <FormSection style={{paddingBottom: '1rem'}}>
+          {this.props.enablePrevious && <Button type='secondary' style={{marginRight: '1rem'}} disabled={loading}
+            onClick={() => this.props.onPreviousClick(this.state.profile)}>
           Previous
-        </Button>}
-        {!this.props.enablePrevious && <Button
+          </Button>}
+          {!this.props.enablePrevious && <Button
             type={'secondary'}
             style={{marginRight: '1rem'}}
             disabled={loading}
             onClick={() => this.props.onCancelClick(this.state.profile)}>
           Cancel
-        </Button>}
-        <TooltipTrigger content={errors && <React.Fragment>
-          <div>Please review the following: </div>
-          <ul>
-            {Object.keys(errors).map((key) => <li key={errors[key][0]}>{errors[key][0]}</li>)}
-            <li>You may select "Prefer not to answer" for each unfilled item to continue</li>
-          </ul>
-        </React.Fragment>}>
-          <Button type='primary'
-                  disabled={
-                    loading
+          </Button>}
+          <TooltipTrigger content={errors && <React.Fragment>
+            <div>Please review the following: </div>
+            <ul>
+              {Object.keys(errors).map((key) => <li key={errors[key][0]}>{errors[key][0]}</li>)}
+              <li>You may select "Prefer not to answer" for each unfilled item to continue</li>
+            </ul>
+          </React.Fragment>}>
+            <Button type='primary'
+              disabled={
+                loading
                     || (errors && Object.keys(errors).length > 0)
                     || (!environment.enableCaptcha && !this.props.enableCaptcha && !captcha)
-                  }
-                  onClick={_ => this.saveSurvey()}
-                  data-test-id={'submit-button'}
-          >
+              }
+              onClick={_ => this.saveSurvey()}
+              data-test-id={'submit-button'}
+            >
             Submit
-          </Button>
-        </TooltipTrigger>
-      </FormSection>
-      {loading && <SpinnerOverlay overrideStylesOverlay={{position: 'fixed'}}/>}
-    </div>;
+            </Button>
+          </TooltipTrigger>
+        </FormSection>
+        {loading && <SpinnerOverlay overrideStylesOverlay={{position: 'fixed'}}/>}
+      </div>;
     }
   });

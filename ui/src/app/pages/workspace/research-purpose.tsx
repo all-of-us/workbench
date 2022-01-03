@@ -101,40 +101,40 @@ export const ResearchPurpose = fp.flow(withCurrentWorkspace(), withNavigation)(
     return <FadeBox>
       <div style={styles.mainHeader}>Primary purpose of project
         <Clickable disabled={!isOwner}
-                   style={{display: 'flex', alignItems: 'center', marginLeft: '.5rem'}}
-                   data-test-id='edit-workspace'
-                   onClick={() => navigate(
-                     ['workspaces',  workspace.namespace, workspace.id, 'edit'])}>
+          style={{display: 'flex', alignItems: 'center', marginLeft: '.5rem'}}
+          data-test-id='edit-workspace'
+          onClick={() => navigate(
+            ['workspaces',  workspace.namespace, workspace.id, 'edit'])}>
           <EditComponentReact enableHoverEffect={true}
-                              disabled={!isOwner}
-                              style={styles.editIcon}/>
+            disabled={!isOwner}
+            style={styles.editIcon}/>
         </Clickable>
       </div>
       {serverConfigStore.get().config.enableResearchReviewPrompt && isOwner
         && workspace.researchPurpose.needsReviewPrompt && <FlexRow style={styles.reviewPurposeReminder}>
         <ClrIcon style={{color: colors.warning, marginLeft: '0.3rem'}} className='is-solid'
-        shape='exclamation-triangle' size='25'/>
+          shape='exclamation-triangle' size='25'/>
         <FlexColumn style={{paddingRight: '0.5rem', paddingLeft: '0.5rem', color: colors.primary}}>
-        <label style={{fontWeight: 600, fontSize: '14px', flex: 1}}>
+          <label style={{fontWeight: 600, fontSize: '14px', flex: 1}}>
           Please review your workspace description to make sure it is accurate.</label>
           <label>Project descriptions are publicly cataloged in the <a
-              href='https://www.researchallofus.org/research-projects-directory/' target='_blank'>
+            href='https://www.researchallofus.org/research-projects-directory/' target='_blank'>
             Research Project Directory</a> for participants and public to review.</label>
         </FlexColumn>
         <div style={{marginLeft: 'auto', marginRight: '0.5rem'}}>
-        <a style={{marginRight: '0.5rem'}} onClick={() => looksGoodEvent()}>Looks
+          <a style={{marginRight: '0.5rem'}} onClick={() => looksGoodEvent()}>Looks
         Good</a>
         |
-        <a style={{marginLeft: '0.5rem'}} onClick={() => updateWorkspaceEvent()}>Update</a>
+          <a style={{marginLeft: '0.5rem'}} onClick={() => updateWorkspaceEvent()}>Update</a>
         </div>
-        </FlexRow>}
+      </FlexRow>}
       <div style={styles.sectionContentContainer}>
         {selectedResearchPurposeItems && selectedResearchPurposeItems.length > 0 && <div
-             style={styles.sectionSubHeader}>Research Purpose</div>
+          style={styles.sectionSubHeader}>Research Purpose</div>
         }
         {selectedResearchPurposeItems.map((selectedResearchPurposeItem, i) => <div key={i}>
           <div data-test-id='primaryResearchPurpose'
-               style={{marginTop: i > 0 ? '1rem' : '0.3rem', marginLeft: '1rem'}}>{selectedResearchPurposeItem}</div>
+            style={{marginTop: i > 0 ? '1rem' : '0.3rem', marginLeft: '1rem'}}>{selectedResearchPurposeItem}</div>
         </div>)}
       </div>
       <div style={styles.sectionContentContainer}>

@@ -53,68 +53,68 @@ export const AdminLockRequest = (props: Props) => {
       });
   }
 
-   return <Modal>
-     <ModalTitle>
-       <SemiBoldHeader>Lock workspace</SemiBoldHeader>
-     </ModalTitle>
-     <ModalBody>
-       {apiError && <label style={{color: colors.danger}}>
+  return <Modal>
+    <ModalTitle>
+      <SemiBoldHeader>Lock workspace</SemiBoldHeader>
+    </ModalTitle>
+    <ModalBody>
+      {apiError && <label style={{color: colors.danger}}>
          Something went wrong while locking the workspace.
-       </label>}
+      </label>}
 
-       {/* Text area to enter the reason for locking workspace */}
-       <div>
-         <label style={{fontWeight: 'bold', color: colors.primary}}>
+      {/* Text area to enter the reason for locking workspace */}
+      <div>
+        <label style={{fontWeight: 'bold', color: colors.primary}}>
            Enter reason for researchers on why workspace access is locked
-         </label>
-       </div>
-       <div style={{paddingTop: '0.3rem', paddingBottom: '1rem'}}>
-         <label style={{color: colors.primary, paddingBottom: '0.3rem'}}>
-           <i>Any message in the input box will automatically be sent to researchers when the
+        </label>
+      </div>
+      <div style={{paddingTop: '0.3rem', paddingBottom: '1rem'}}>
+        <label style={{color: colors.primary, paddingBottom: '0.3rem'}}>
+          <i>Any message in the input box will automatically be sent to researchers when the
              workspace is locked</i>
-         </label>
-         <TextAreaWithLengthValidationMessage
-             textBoxStyleOverrides={{width: '16rem'}}
-             id='LOCKED-REASON'
-             initialText=''
-             maxCharacters={MAX_REASON}
-             onChange={(s: string) => {
-               setApiError(false);
-               setRequestReason(s);
-             }}
-             tooLongWarningCharacters={MAX_REASON}
-             tooShortWarningCharacters={MIN_REASON}
-             tooShortWarning={`Locking Request Reason should be at least ${MIN_REASON} characters long`}
-          />
-       </div>
+        </label>
+        <TextAreaWithLengthValidationMessage
+          textBoxStyleOverrides={{width: '16rem'}}
+          id='LOCKED-REASON'
+          initialText=''
+          maxCharacters={MAX_REASON}
+          onChange={(s: string) => {
+            setApiError(false);
+            setRequestReason(s);
+          }}
+          tooLongWarningCharacters={MAX_REASON}
+          tooShortWarningCharacters={MIN_REASON}
+          tooShortWarning={`Locking Request Reason should be at least ${MIN_REASON} characters long`}
+        />
+      </div>
 
-       {/* Locking workspace request Date*/}
-       <div>
-         <div style={{fontWeight: 'bold', color: colors.primary, paddingBottom: '0.3rem'}}>
+      {/* Locking workspace request Date*/}
+      <div>
+        <div style={{fontWeight: 'bold', color: colors.primary, paddingBottom: '0.3rem'}}>
            Add date of RAB request
-         </div>
-         <DatePicker
-             value={requestDate}
-             placeholder='YYYY-MM-DD'
-             onChange={e => {
-               setApiError(false);
-               // ensure that e is a Date - the user may have input a string
-               const eAsDate = new Date(e);
-               setRequestDate(eAsDate);
-             }}
-             maxDate={new Date()}
-         />
-       </div>
-     </ModalBody>
-     <ModalFooter>
-       <Button type='secondary' style={{marginRight: '0.5rem'}} onClick={() => props.onCancel()}>
+        </div>
+        <DatePicker
+          value={requestDate}
+          placeholder='YYYY-MM-DD'
+          onChange={e => {
+            setApiError(false);
+            // ensure that e is a Date - the user may have input a string
+            const eAsDate = new Date(e);
+            setRequestDate(eAsDate);
+          }}
+          maxDate={new Date()}
+        />
+      </div>
+    </ModalBody>
+    <ModalFooter>
+      <Button type='secondary' style={{marginRight: '0.5rem'}} onClick={() => props.onCancel()}>
          CANCEL
-       </Button>
-       <TooltipTrigger content={getToolTipContent} disabled={!lockButtonDisabled}>
-         <Button type='primary' onClick={() => onLockWorkspace()} disabled={lockButtonDisabled}>
+      </Button>
+      <TooltipTrigger content={getToolTipContent} disabled={!lockButtonDisabled}>
+        <Button type='primary' onClick={() => onLockWorkspace()} disabled={lockButtonDisabled}>
            LOCK WORKSPACE
-         </Button>
-       </TooltipTrigger>
-     </ModalFooter>
-   </Modal>;
+        </Button>
+      </TooltipTrigger>
+    </ModalFooter>
+  </Modal>;
 }

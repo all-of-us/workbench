@@ -38,9 +38,9 @@ export const WorkspaceAudit = (spinnerProps: WithSpinnerOverlayProps) => {
 
   const {ns = ''} = useParams<MatchParams>();
   return <AuditPageComponent auditSubjectType='Workspace'
-                             buttonLabel='Workspace namespace (begins with aou-rw-)'
-                             initialAuditSubject={ns}
-                             getNextAuditPath={getNextAuditPath}
-                             queryAuditLog={queryAuditLog}
-                             getAdminPageUrl={getAdminPageUrl}/>;
+    buttonLabel='Workspace namespace (begins with aou-rw-)'
+    initialAuditSubject={ns}
+    getNextAuditPath={getNextAuditPath}
+    queryAuditLog={queryAuditLog}
+    getAdminPageUrl={getAdminPageUrl}/>;
 };

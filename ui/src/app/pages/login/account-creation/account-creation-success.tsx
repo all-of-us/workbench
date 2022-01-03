@@ -93,24 +93,24 @@ export class AccountCreationSuccess
             Your contact email is: {this.props.profile.contactEmail}
           </div>
           <a style={{marginTop: '.25rem'}}
-                  onClick={() => this.setState({resendModal: true})}>
+            onClick={() => this.setState({resendModal: true})}>
             Resend Instructions
           </a>
         </TextColumn>
 
       </div>
       {this.state.resendModal && <AccountCreationResendModal
-          username={this.props.profile.username}
-          creationNonce={this.props.profile.creationNonce}
-          onClose={() => this.setState({resendModal: false})}
+        username={this.props.profile.username}
+        creationNonce={this.props.profile.creationNonce}
+        onClose={() => this.setState({resendModal: false})}
       />}
       {this.state.updateModal && <AccountCreationUpdateModal
-          username={this.props.profile.username}
-          creationNonce={this.props.profile.creationNonce}
-          onDone={(newEmail: string) => {
-            this.setState({contactEmail: newEmail, updateModal: false});
-          }}
-          onClose={() => this.setState({updateModal: false})}
+        username={this.props.profile.username}
+        creationNonce={this.props.profile.creationNonce}
+        onDone={(newEmail: string) => {
+          this.setState({contactEmail: newEmail, updateModal: false});
+        }}
+        onClose={() => this.setState({updateModal: false})}
       />}
       <div style={{marginBottom: '.5rem', paddingTop: '1rem'}}>
         <div style={styles.borderStyle}>

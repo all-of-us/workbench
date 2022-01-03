@@ -71,20 +71,20 @@ export const HtmlViewer = withWindowSize()( class extends React.Component<Props,
     return <div aria-label={ariaLabel} style={{ flex: '1 1 0', position: 'relative', ...containerStyles }}>
       { loading && <SpinnerOverlay/> }
       {iframeFailed ?
-      'Content failed to load - please try refreshing the page' :
-      <iframe
-        style={{
-          border: 'none',
-          position: 'absolute',
-          padding: '0 2rem',
-          bottom: 0,
-          top: 0,
-          height: '100%',
-          width: '100%'}}
+        'Content failed to load - please try refreshing the page' :
+        <iframe
+          style={{
+            border: 'none',
+            position: 'absolute',
+            padding: '0 2rem',
+            bottom: 0,
+            top: 0,
+            height: '100%',
+            width: '100%'}}
           src = {filePath}
           ref = {this.iframeRef}
           onLoad={() => this.handleIframeLoaded()}>
-      </iframe>}
+        </iframe>}
     </div>;
   }
 });

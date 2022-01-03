@@ -42,19 +42,19 @@ export function getSelectedPrimaryPurposeItems(researchPurpose: ResearchPurpose)
 
 function researchPurposeDivs(primaryPurposeItems: Array<ResearchPurposeItem>, researchPurpose: ResearchPurpose) {
   return primaryPurposeItems.filter((item) =>
-      researchPurpose[item.shortName]).map((item) => {
-        const headerContent = <div style={styles.researchPurposeItemHeader}>{item.shortDescription}</div>;
-        let descriptiveContent = <div style={styles.researchPurposeItemDescription}>{item.longDescription}</div>;
-        if (item.shortName === 'otherPurpose') {
-          descriptiveContent = <div style={styles.researchPurposeItemDescription}>{researchPurpose.otherPurposeDetails}</div>;
-        } else if (item.shortName === 'diseaseFocusedResearch') {
-          descriptiveContent = <div style={{...styles.researchPurposeItemDescription,
-            backgroundColor: colors.white, borderRadius: '3px', padding: '10px'}}>
-            {researchPurpose.diseaseOfFocus}
-          </div>;
-        }
-        return <div>{headerContent}{descriptiveContent}</div>;
-      });
+    researchPurpose[item.shortName]).map((item) => {
+    const headerContent = <div style={styles.researchPurposeItemHeader}>{item.shortDescription}</div>;
+    let descriptiveContent = <div style={styles.researchPurposeItemDescription}>{item.longDescription}</div>;
+    if (item.shortName === 'otherPurpose') {
+      descriptiveContent = <div style={styles.researchPurposeItemDescription}>{researchPurpose.otherPurposeDetails}</div>;
+    } else if (item.shortName === 'diseaseFocusedResearch') {
+      descriptiveContent = <div style={{...styles.researchPurposeItemDescription,
+        backgroundColor: colors.white, borderRadius: '3px', padding: '10px'}}>
+        {researchPurpose.diseaseOfFocus}
+      </div>;
+    }
+    return <div>{headerContent}{descriptiveContent}</div>;
+  });
 }
 
 export function getSelectedPopulations(researchPurpose: ResearchPurpose) {

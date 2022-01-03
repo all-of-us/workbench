@@ -85,7 +85,7 @@ const getWindowSize = (): WindowSize => {
 
 export const withWindowSize = () => WrappedComponent => {
   class Wrapper extends React.Component<any,
-    { windowSize: WindowSize }> {
+  { windowSize: WindowSize }> {
     constructor(props) {
       super(props);
       this.state = {windowSize: getWindowSize()};
@@ -300,9 +300,9 @@ export const withCdrVersions = () => {
 
 export function formatDomainString(domainString: string): string {
   return domainString === Domain.PHYSICALMEASUREMENTCSS.toString()
-      ? fp.capitalize(Domain.PHYSICALMEASUREMENT.toString())
-      : domainString === Domain.WHOLEGENOMEVARIANT.toString()
-          ? 'VCF Files' : fp.capitalize(domainString);
+    ? fp.capitalize(Domain.PHYSICALMEASUREMENT.toString())
+    : domainString === Domain.WHOLEGENOMEVARIANT.toString()
+      ? 'VCF Files' : fp.capitalize(domainString);
 }
 
 export function formatDomain(domain: Domain): string {
@@ -389,11 +389,11 @@ export function highlightSearchTerm(searchTerm: string, stringToHighlight: strin
       words.push(splits[0]);
     }
     return words.map((word, w) => <span key={w}
-                                        style={matchString.test(word.toLowerCase()) ? {
-                                          color: colorWithWhiteness(highlightColor, -0.4),
-                                          backgroundColor: colorWithWhiteness(highlightColor, 0.7),
-                                          display: 'inline-block'
-                                        } : {}}>
+      style={matchString.test(word.toLowerCase()) ? {
+        color: colorWithWhiteness(highlightColor, -0.4),
+        backgroundColor: colorWithWhiteness(highlightColor, 0.7),
+        display: 'inline-block'
+      } : {}}>
       {word}
     </span>);
   } catch (e) {

@@ -563,9 +563,9 @@ export const DetailTabTable = fp.flow(withCurrentCohortReview(), withCurrentWork
           {column.field === `${vocab}Name` && <NameContainer data={rowData} vocab={vocab} />}
           {(valueField || nameField)
           && <i className='pi pi-caret-down' style={styles.caretIcon}
-              onClick={(e) => vl.toggle(e)}/>}
+            onClick={(e) => vl.toggle(e)}/>}
           <OverlayPanel className='labOverlay' ref={(el) => vl = el}
-                        showCloseIcon={true} dismissable={true}>
+            showCloseIcon={true} dismissable={true}>
             {(rowData.refRange &&  column.field === 'value') &&
             <div style={{paddingBottom: '0.2rem'}}>Reference Range: {rowData.refRange}</div>}
             {(rowData.unit && column.field === 'value') &&
@@ -694,7 +694,7 @@ export const DetailTabTable = fp.flow(withCurrentCohortReview(), withCurrentWork
       }
       return <div style={styles.error}>
         <ClrIcon style={{margin: '0 0.5rem 0 0.25rem'}} className='is-solid'
-        shape='exclamation-triangle' size='22'/>
+          shape='exclamation-triangle' size='22'/>
         {message}
       </div>;
     }
@@ -756,8 +756,8 @@ export const DetailTabTable = fp.flow(withCurrentCohortReview(), withCurrentWork
             acc.push(<React.Fragment key={i}>
               {opt.name !== 'Select All' && <div style={{padding: '0.3rem 0 0.3rem 0.4rem'}}>
                 <input style={{width: '0.7rem', height: '0.7rem'}} type='checkbox' name={opt.name}
-                       checked={columnFilters[column].includes(opt.name)}
-                       onChange={($event) => this.updateData($event, column, options)}/>
+                  checked={columnFilters[column].includes(opt.name)}
+                  onChange={($event) => this.updateData($event, column, options)}/>
                 <label> {opt.name} </label>
               </div>}
             </React.Fragment>);
@@ -767,13 +767,13 @@ export const DetailTabTable = fp.flow(withCurrentCohortReview(), withCurrentWork
       let fl: any;
       return <React.Fragment>
         <i className='pi pi-filter'
-           style={filterStyle}
-           onClick={(e) => {
-             this.filterEvent(column);
-             fl.toggle(e);
-           }}/>
+          style={filterStyle}
+          onClick={(e) => {
+            this.filterEvent(column);
+            fl.toggle(e);
+          }}/>
         <OverlayPanel style={{left: '359.531px!important', textAlign: 'left'}} className='filterOverlay'
-                      ref={(el) => fl = el} showCloseIcon={true} dismissable={true}>
+          ref={(el) => fl = el} showCloseIcon={true} dismissable={true}>
           {column === `${vocab}Code` && <div style={styles.textSearch}>
             <i className='pi pi-search' style={{margin: '0 5px'}} />
             <TextInput
@@ -786,8 +786,8 @@ export const DetailTabTable = fp.flow(withCurrentCohortReview(), withCurrentWork
           </div>
           <div style={{borderTop: '1px solid #ccc', padding: '0.5rem 0.5rem'}}>
             <input style={{width: '0.7rem',  height: '0.7rem'}} type='checkbox' name='Select All'
-                   checked={columnFilters[column].includes('Select All')}
-                   onChange={($event) => this.updateData($event, column, options)}/>
+              checked={columnFilters[column].includes('Select All')}
+              onChange={($event) => this.updateData($event, column, options)}/>
             <label> Select All </label>
           </div>
         </OverlayPanel>

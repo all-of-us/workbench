@@ -171,19 +171,19 @@ export const NotebookResourceCard = fp.flow(
 
       {this.state.showRenameModal &&
       <RenameModal resourceType={getType(resource)}
-                   onRename={(newName) => {
-                     AnalyticsTracker.Notebooks.Rename();
-                     this.renameNotebook(newName);
-                   }}
-                   onCancel={() => this.setState({showRenameModal: false})}
-                   hideDescription={true}
-                   oldName={getDisplayName(resource)}
-                   nameFormat={(name) => this.fullNotebookName(name)}
-                   existingNames={this.props.existingNameList}/>
+        onRename={(newName) => {
+          AnalyticsTracker.Notebooks.Rename();
+          this.renameNotebook(newName);
+        }}
+        onCancel={() => this.setState({showRenameModal: false})}
+        hideDescription={true}
+        oldName={getDisplayName(resource)}
+        nameFormat={(name) => this.fullNotebookName(name)}
+        existingNames={this.props.existingNameList}/>
       }
       {menuOnly ?
-          <ResourceActionsMenu actions={this.actions} disabled={resource.adminLocked}/> :
-          <ResourceCard resource={resource} actions={this.actions}/>}
+        <ResourceActionsMenu actions={this.actions} disabled={resource.adminLocked}/> :
+        <ResourceCard resource={resource} actions={this.actions}/>}
     </React.Fragment>;
   }
 });

@@ -45,8 +45,8 @@ interface AccountCreationUpdateModalState {
 }
 
 export class AccountCreationUpdateModal extends React.Component<
-  AccountCreationUpdateModalProps,
-  AccountCreationUpdateModalState
+AccountCreationUpdateModalProps,
+AccountCreationUpdateModalState
 > {
   constructor(props: AccountCreationUpdateModalProps) {
     super(props);

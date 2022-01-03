@@ -19,7 +19,7 @@ export const NewWorkspaceButton = () => {
     AnalyticsTracker.Workspaces.OpenCreatePage();
     navigate(['workspaces', 'build']);
   }}
-              style={styles.addCard}>
+  style={styles.addCard}>
     Create a <br/> New Workspace
     <ClrIcon shape='plus-circle' style={{height: '32px', width: '32px'}}/>
   </CardButton>;

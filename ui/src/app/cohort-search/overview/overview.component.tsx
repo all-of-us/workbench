@@ -427,10 +427,10 @@ export const ListOverview = fp.flow(withCurrentWorkspace(), withCdrVersions(), w
                   Save Cohort <ClrIcon shape='caret down'/>
                 </Button>
               </React.Fragment>
-              : <Button type='primary'
-                onClick={() => this.openSaveModal()}
-                style={styles.saveButton}
-                disabled={this.disableSaveButton}>Create Cohort</Button>}
+                : <Button type='primary'
+                  onClick={() => this.openSaveModal()}
+                  style={styles.saveButton}
+                  disabled={this.disableSaveButton}>Create Cohort</Button>}
               <TooltipTrigger content={<div>Export to notebook</div>}>
                 <Clickable style={{...styles.actionIcon, ...styles.disabled}}
                   onClick={() => this.navigateTo('notebook')} disabled>
@@ -454,13 +454,13 @@ export const ListOverview = fp.flow(withCurrentWorkspace(), withCdrVersions(), w
               Total Count: &nbsp;
               {this.definitionErrors ? <span>
                 -- <TooltipTrigger content={this.hasTemporalError ?
-                'Please complete criteria selections before saving temporal relationship.' :
-                `All criteria are suppressed. Un-suppress criteria to update the total count
+                  'Please complete criteria selections before saving temporal relationship.' :
+                  `All criteria are suppressed. Un-suppress criteria to update the total count
                      based on the visible criteria.`}>
                   <ClrIcon style={{color: '#F57600'}} shape='warning-standard' size={18} />
                 </TooltipTrigger>
               </span>
-              : loading ? <Spinner size={18} /> : <span>{this.showTotalCount && total.toLocaleString()}</span>}
+                : loading ? <Spinner size={18} /> : <span>{this.showTotalCount && total.toLocaleString()}</span>}
             </h2>
           </div>
           {apiError && !this.definitionErrors && <div style={styles.totalError}>
@@ -522,10 +522,10 @@ export const ListOverview = fp.flow(withCurrentWorkspace(), withCdrVersions(), w
         </div>
 
         {saveModalOpen && <CreateModal entityName='Cohort'
-                                       title='Save Cohort as'
-                                       getExistingNames={() => this.getCohortNames()}
-                                       save={(name, desc) => this.createCohort(name, desc)}
-                                       close={() => this.setState({saveModalOpen: false})}/>}
+          title='Save Cohort as'
+          getExistingNames={() => this.getCohortNames()}
+          save={(name, desc) => this.createCohort(name, desc)}
+          close={() => this.setState({saveModalOpen: false})}/>}
 
         {deleting && <ConfirmDeleteModal closeFunction={this.cancelDelete}
           resourceType={ResourceType.COHORT}

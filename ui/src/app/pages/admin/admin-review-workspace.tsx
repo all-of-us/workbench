@@ -83,21 +83,21 @@ export const AdminReviewWorkspace = withUserProfile()(class extends React.Compon
 
   convertWorkspaceToFields(workspaces: Workspace[]) {
     return workspaces.map(ws => ({...ws, description: <div>
-        <i>Field of intended study:</i>
-        <br/>{ws.researchPurpose.intendedStudy}<br/>
-        <i>Reason for choosing All of Us:</i>
-        <br/>{ws.researchPurpose.reasonForAllOfUs}<br/>
-        <i>Anticipated findings:</i>
-        <br/>{ws.researchPurpose.anticipatedFindings}<br/>
+      <i>Field of intended study:</i>
+      <br/>{ws.researchPurpose.intendedStudy}<br/>
+      <i>Reason for choosing All of Us:</i>
+      <br/>{ws.researchPurpose.reasonForAllOfUs}<br/>
+      <i>Anticipated findings:</i>
+      <br/>{ws.researchPurpose.anticipatedFindings}<br/>
     </div>, actions: <div>
-        {this.state.reviewedWorkspace === ws ? <Spinner size={50}/> :
+      {this.state.reviewedWorkspace === ws ? <Spinner size={50}/> :
         <React.Fragment>
           <Button onClick={() => this.approve(ws, true)}
-                  data-test-id='approve'>Approve</Button>
+            data-test-id='approve'>Approve</Button>
           <Button type='secondary' onClick={() => this.approve(ws, false)}
-                style={{marginLeft: '0.5rem'}}>Reject</Button>
+            style={{marginLeft: '0.5rem'}}>Reject</Button>
         </React.Fragment>}
-      </div>}));
+    </div>}));
   }
 
   render() {
@@ -107,15 +107,15 @@ export const AdminReviewWorkspace = withUserProfile()(class extends React.Compon
       <h2>Review Workspaces</h2>
       {contentLoaded ?
         <DataTable value={this.convertWorkspaceToFields(workspaces)} style={styles.tableStyle}
-                   data-test-id='reviewWorkspacesTable'>
+          data-test-id='reviewWorkspacesTable'>
           <Column field='name' header='Workspace Name' headerStyle={{width: '20%'}}
-                  bodyStyle={{...styles.colStyle, fontSize: 14, fontWeight: 600}}
-                  sortable={true} data-test-id='workspaceName'/>
+            bodyStyle={{...styles.colStyle, fontSize: 14, fontWeight: 600}}
+            sortable={true} data-test-id='workspaceName'/>
           <Column field='creator' header='Workspace Author' headerStyle={{width: '20%'}}
-                  sortable={true}/>
+            sortable={true}/>
           <Column field='description' header='Research Purpose' headerStyle={{width: '40%'}}/>
           <Column field='actions' header='Approve/Reject' headerStyle={{width: '20%'}}
-                  bodyStyle={{textAlign: 'center'}} data-test-id='actionButtons'/>
+            bodyStyle={{textAlign: 'center'}} data-test-id='actionButtons'/>
         </DataTable> :
         <div>
           Loading workspaces for review...
@@ -128,7 +128,7 @@ export const AdminReviewWorkspace = withUserProfile()(class extends React.Compon
       {reviewError &&
       <BugReportModal bugReportDescription={'Could not review workspace ' +
           reviewedWorkspace.namespace + '/' + reviewedWorkspace.name}
-        onClose={() => this.setState({reviewError: false, reviewedWorkspace: null})}/>}
+      onClose={() => this.setState({reviewError: false, reviewedWorkspace: null})}/>}
     </div>;
   }
 });

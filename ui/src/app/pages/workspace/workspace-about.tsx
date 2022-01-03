@@ -65,19 +65,19 @@ const styles = reactStyles({
     textTransform: 'uppercase', fontSize: '0.4rem'
   },
   lockMessage: {
-      padding: '16px',
-      boxSizing: 'border-box',
-      borderWidth: '1px',
-      borderStyle: 'solid',
-      borderRadius: '5px',
-      color: colors.primary,
-      fontFamily: 'Montserrat',
-      letterSpacing: 0,
-      lineHeight: '22px',
-      borderColor: colors.warning,
-      backgroundColor: colorWithWhiteness(colors.warning, 0.65),
-      maxWidth: 'fit-content',
-      marginBottom: '1rem'
+    padding: '16px',
+    boxSizing: 'border-box',
+    borderWidth: '1px',
+    borderStyle: 'solid',
+    borderRadius: '5px',
+    color: colors.primary,
+    fontFamily: 'Montserrat',
+    letterSpacing: 0,
+    lineHeight: '22px',
+    borderColor: colors.warning,
+    backgroundColor: colorWithWhiteness(colors.warning, 0.65),
+    maxWidth: 'fit-content',
+    marginBottom: '1rem'
   }
 });
 
@@ -226,8 +226,8 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withCdrVersions())
             </div>
             <div>
               <b>This workspace has been locked due to a compliance violation of the
-              <a href={'/data-code-of-conduct'}> <AoU/> Researcher Workbench Data User Code of Conduct.
-              </a></b>
+                <a href={'/data-code-of-conduct'}> <AoU/> Researcher Workbench Data User Code of Conduct.
+                </a></b>
               <p></p>
               {/* This is a temp solution in case admin have locked some workspaces already before workbench introduced the ability to save locking reason */}
               {workspace.adminLockedReason && <div style={{fontSize: '0.6rem', paddingLeft: '1em', paddingBottom: '1em'}}>
@@ -246,16 +246,16 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withCdrVersions())
         <ResearchPurpose data-test-id='researchPurpose'/>
         {hasAuthorityForAction(profile, AuthorityGuardedAction.PUBLISH_WORKSPACE) &&
           <div style={{display: 'flex', justifyContent: 'flex-end'}}>
-              <Button data-test-id='unpublish-button'
-                      onClick={() => this.publishUnpublishWorkspace(false)}
-                      disabled={publishing || !published}
-                      type={published ? 'primary' : 'secondary'}>Unpublish</Button>
-              <Button data-test-id='publish-button'
-                      onClick={() => this.publishUnpublishWorkspace(true)}
-                      disabled={publishing || published}
-                      type={published ? 'secondary' : 'primary'}
-                      style={{marginLeft: '0.5rem'}}>Publish</Button>
-        </div>}
+            <Button data-test-id='unpublish-button'
+              onClick={() => this.publishUnpublishWorkspace(false)}
+              disabled={publishing || !published}
+              type={published ? 'primary' : 'secondary'}>Unpublish</Button>
+            <Button data-test-id='publish-button'
+              onClick={() => this.publishUnpublishWorkspace(true)}
+              disabled={publishing || published}
+              type={published ? 'secondary' : 'primary'}
+              style={{marginLeft: '0.5rem'}}>Publish</Button>
+          </div>}
       </FlexColumn>
       <div style={styles.rightSidebar}>
         <div style={styles.shareHeader}>
@@ -264,11 +264,11 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withCdrVersions())
             <InfoIcon style={{margin: '0 0.3rem'}}/>
           </TooltipTrigger>
           <TooltipTrigger content={<div>Workspace compliance action is required</div>}
-                          disabled={!workspace?.adminLocked}>
-          <Button style={{height: '22px', fontSize: 12, marginRight: '0.5rem',
-            maxWidth: '13px'}} disabled={workspaceUserRoles.length === 0 || workspace?.adminLocked}
-                  data-test-id='workspaceShareButton'
-                  onClick={() => this.setState({sharing: true})}>Share</Button>
+            disabled={!workspace?.adminLocked}>
+            <Button style={{height: '22px', fontSize: 12, marginRight: '0.5rem',
+              maxWidth: '13px'}} disabled={workspaceUserRoles.length === 0 || workspace?.adminLocked}
+            data-test-id='workspaceShareButton'
+            onClick={() => this.setState({sharing: true})}>Share</Button>
           </TooltipTrigger>
         </div>
         {workspaceUserRoles.length > 0 ?
@@ -316,11 +316,11 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withCdrVersions())
         </div>
       </div>
       {sharing && <WorkspaceShare workspace={workspace}
-                                  accessLevel={workspace.accessLevel}
-                                  userEmail={profile.username}
-                                  onClose={() => this.onShare()}
-                                  userRoles={workspaceUserRoles}
-                                  data-test-id='workspaceShareModal'/>}
+        accessLevel={workspace.accessLevel}
+        userEmail={profile.username}
+        onClose={() => this.onShare()}
+        userRoles={workspaceUserRoles}
+        data-test-id='workspaceShareModal'/>}
     </div>;
   }
 });

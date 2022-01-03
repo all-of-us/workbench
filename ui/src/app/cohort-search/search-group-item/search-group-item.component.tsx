@@ -109,7 +109,7 @@ class SearchGroupItemParameter extends React.Component<{parameter: any}, {toolti
     const showCode = [Domain.CONDITION, Domain.DRUG, Domain.MEASUREMENT, Domain.PROCEDURE].includes(domainId);
     return <div ref={el => this.element = el} style={styles.parameter}>
       <span style={domainId === Domain.PERSON ? {textTransform: 'capitalize'} : {}}
-            onMouseEnter={(e) => tooltip && this.overlay.show(e)} onMouseLeave={() => tooltip && this.overlay.hide()}>
+        onMouseEnter={(e) => tooltip && this.overlay.show(e)} onMouseLeave={() => tooltip && this.overlay.hide()}>
         {showCode && <b>{parameter.code}</b>} {parameter.name}
       </span>
       {tooltip && <OverlayPanel style={{maxWidth: '30%'}} ref={el => this.overlay = el} appendTo={document.body}>
@@ -346,8 +346,8 @@ export const SearchGroupItem = withCurrentWorkspace()(
             </span>
           </div>}
           <ClrIcon style={{...styles.caret, ...(paramListOpen ? {transform: 'rotate(90deg)'} : {})}}
-                   shape={'caret right'} size={18}
-                   onClick={() => this.setState({paramListOpen: !paramListOpen})} />
+            shape={'caret right'} size={18}
+            onClick={() => this.setState({paramListOpen: !paramListOpen})} />
         </div>}
         <div style={{...styles.parameterList, maxHeight: paramListOpen ? '15rem' : 0}}>
           {searchParameters.slice(0, 5).map((param, p) => <SearchGroupItemParameter key={p} parameter={param} />)}

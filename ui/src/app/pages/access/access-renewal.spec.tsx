@@ -29,11 +29,11 @@ describe('Access Renewal Page', () => {
     const {profile} = profileStore.get();
 
     const newProfile = fp.set('accessModules',
-        {modules: accessRenewalModules.map(m => ({
-            moduleName: m,
-            completionEpochMillis: expiredTime - 1,
-            expirationEpochMillis: expiredTime } as AccessModuleStatus))},
-        profile)
+      {modules: accessRenewalModules.map(m => ({
+        moduleName: m,
+        completionEpochMillis: expiredTime - 1,
+        expirationEpochMillis: expiredTime } as AccessModuleStatus))},
+      profile)
     profileStore.set({profile: newProfile, load, reload, updateCache});
   }
 
@@ -74,8 +74,8 @@ describe('Access Renewal Page', () => {
       bypassEpochMillis:
           // profile and publication are not bypassable.
           (moduleStatus.moduleName === AccessModule.PROFILECONFIRMATION || moduleStatus.moduleName === AccessModule.PUBLICATIONCONFIRMATION)
-          ? null
-          : bypassFn(),
+            ? null
+            : bypassFn(),
     }), oldProfile.accessModules.modules);
     const newProfile = fp.set(['accessModules', 'modules'], newModules, oldProfile)
     profileStore.set({profile: newProfile,  load, reload, updateCache});
@@ -231,13 +231,13 @@ describe('Access Renewal Page', () => {
     expireAllModules();
 
     const newModules = [
-        ...profileStore.get().profile.accessModules.modules,
-        {
-          moduleName: AccessModule.TWOFACTORAUTH,   // not expirable
-          completionEpochMillis: null,
-          bypassEpochMillis: null,
-          expirationEpochMillis: oneYearAgo(),
-        }
+      ...profileStore.get().profile.accessModules.modules,
+      {
+        moduleName: AccessModule.TWOFACTORAUTH,   // not expirable
+        completionEpochMillis: null,
+        bypassEpochMillis: null,
+        expirationEpochMillis: oneYearAgo(),
+      }
     ];
 
     const newProfile: Profile = {
@@ -317,7 +317,7 @@ describe('Access Renewal Page', () => {
   it('should show the correct state when modules are disabled', async () => {
     serverConfigStore.set({config: {
       ...defaultServerConfig,
-        enableComplianceTraining: false
+      enableComplianceTraining: false
     }});
 
     const wrapper = component();

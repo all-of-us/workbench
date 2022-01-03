@@ -95,8 +95,8 @@ const UserInput = ({initialAuditSubject, auditSubjectType, getNextAuditPath, but
     />
     <TooltipTrigger content={`Retrieve the audit trail for selected ${auditSubjectType}.`}>
       <Button style={buttonStyle}
-              disabled={fp.isEmpty(auditSubject)}
-              onClick={onAuditClick}>
+        disabled={fp.isEmpty(auditSubject)}
+        onClick={onAuditClick}>
       Audit
       </Button>
     </TooltipTrigger>
@@ -107,29 +107,29 @@ const UserInput = ({initialAuditSubject, auditSubjectType, getNextAuditPath, but
       textAlign: 'center',
       fontWeight: 600
     }}>
-    <TooltipTrigger content={'BigQuery Console page (use pmi-ops.org account)'}>
-      <StyledExternalLink href={getBigQueryConsoleUrl()}
-                          target='_blank'>
+      <TooltipTrigger content={'BigQuery Console page (use pmi-ops.org account)'}>
+        <StyledExternalLink href={getBigQueryConsoleUrl()}
+          target='_blank'>
         BigQuery Console
-      </StyledExternalLink>
-    </TooltipTrigger>
+        </StyledExternalLink>
+      </TooltipTrigger>
     &nbsp;|&nbsp;
-    <TooltipTrigger content={`Admin Page for ${auditSubjectType} ${auditSubject || 'n/a'}`}>
-      <StyledRouterLink
+      <TooltipTrigger content={`Admin Page for ${auditSubjectType} ${auditSubject || 'n/a'}`}>
+        <StyledRouterLink
           path={auditSubject ? getAdminPageUrl(auditSubject) : undefined}
           style={auditSubject ? {} : {cursor: 'not-allowed', color: colors.disabled}}
           disabled={!auditSubject}
-      >
-        {auditSubjectType} Admin
-      </StyledRouterLink>
-    </TooltipTrigger>
+        >
+          {auditSubjectType} Admin
+        </StyledRouterLink>
+      </TooltipTrigger>
     </div>
     <TooltipTrigger content={'Download actual SQL query for BigQuery Action Audit table. Useful' +
       ' for developers or analysts interested in basing other ad hoc queries off' +
       ' this audit query in the BigQuery console or bq tool.'}>
       <Button style={buttonStyle}
-              disabled={fp.isEmpty(queryText)}
-              onClick={() => setDownloadSqlFile(true)}>
+        disabled={fp.isEmpty(queryText)}
+        onClick={() => setDownloadSqlFile(true)}>
         Download SQL
       </Button>
     </TooltipTrigger>
@@ -188,18 +188,18 @@ export const AuditPageComponent = (props: AuditPageProps) => {
 
   return !loading
     ? <React.Fragment>
-        <div style={{marginLeft: '1rem'}}>
-          <UserInput initialAuditSubject={initialAuditSubject}
-                     auditSubjectType={auditSubjectType}
-                     getNextAuditPath={getNextAuditPath}
-                     buttonLabel={buttonLabel}
-                     queryText={query}
-                     getAdminPageUrl={getAdminPageUrl}/>
-          <NumActions onChange={setDisplayNum} totalActions={actions.length}/>
-          <div>{getTitle()}</div>
-        </div>
-        <AuditActionCardListView actions={fp.slice(0, displayNum, actions)}/>
-      </React.Fragment>
+      <div style={{marginLeft: '1rem'}}>
+        <UserInput initialAuditSubject={initialAuditSubject}
+          auditSubjectType={auditSubjectType}
+          getNextAuditPath={getNextAuditPath}
+          buttonLabel={buttonLabel}
+          queryText={query}
+          getAdminPageUrl={getAdminPageUrl}/>
+        <NumActions onChange={setDisplayNum} totalActions={actions.length}/>
+        <div>{getTitle()}</div>
+      </div>
+      <AuditActionCardListView actions={fp.slice(0, displayNum, actions)}/>
+    </React.Fragment>
     : <div>Loading Audit for {auditSubjectType} {initialAuditSubject}...</div>;
 };
 

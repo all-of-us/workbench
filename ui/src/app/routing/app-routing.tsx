@@ -236,25 +236,25 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
               <NotFoundPage routeData={{title: 'Not Found'}}/>
             </AppRoute>
             <AppRoute
-                path=''
-                exact={false}
-                intermediaryRoute={true}
-                guards={[signInGuard, disabledGuard(isUserDisabledInDb)]}
+              path=''
+              exact={false}
+              intermediaryRoute={true}
+              guards={[signInGuard, disabledGuard(isUserDisabledInDb)]}
             >
               <SignedInPage
-                  intermediaryRoute={true}
-                  routeData={{}}
+                intermediaryRoute={true}
+                routeData={{}}
               />
             </AppRoute>
           </Switch>
         </AppRouter>
       }
       {
-       overriddenUrl && <div style={{position: 'absolute', top: 0, left: '1rem'}}>
-        <span style={{fontSize: '80%', color: 'darkred'}}>
+        overriddenUrl && <div style={{position: 'absolute', top: 0, left: '1rem'}}>
+          <span style={{fontSize: '80%', color: 'darkred'}}>
           API URL: {overriddenUrl}
-        </span>
-       </div>
+          </span>
+        </div>
       }
       <div id='outdated'/> {/* for outdated-browser-rework */}
     </React.Fragment>}
@@ -269,9 +269,9 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
           <div style={{fontSize: '14pt', color: '#000000'}}>
             For full functionality of this site it is necessary to enable cookies.
             Here are the <a href='https://support.google.com/accounts/answer/61416'
-                            style={{color: '#2691D0'}}
-                            target='_blank'
-                            rel='noopener noreferrer'>
+              style={{color: '#2691D0'}}
+              target='_blank'
+              rel='noopener noreferrer'>
             instructions how to enable cookies in your web browser</a>.
           </div>
         </div>

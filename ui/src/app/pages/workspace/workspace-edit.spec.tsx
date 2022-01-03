@@ -101,9 +101,9 @@ describe('WorkspaceEdit', () => {
     cdrVersionStore.set(cdrVersionTiersResponse);
     serverConfigStore.set({config: {
       enableBillingUpgrade: true,
-        freeTierBillingAccountId: 'freetier',
-        defaultFreeCreditsDollarLimit: 100.0,
-        gsuiteDomain: ''
+      freeTierBillingAccountId: 'freetier',
+      defaultFreeCreditsDollarLimit: 100.0,
+      gsuiteDomain: ''
     }});
 
     mockHasBillingScope = jest.spyOn(Authentication, 'hasBillingScope');
@@ -166,36 +166,36 @@ describe('WorkspaceEdit', () => {
   });
 
   it('should clear all selected specific populations if NO underrepresented populations study is selected',
-      async () => {
+    async () => {
     // Set the workspace state to represent a workspace which is studying a
     // specific population group.
-    workspace.researchPurpose.populationDetails = [SpecificPopulationEnum.AGECHILDREN,
-      SpecificPopulationEnum.RACEMENA, SpecificPopulationEnum.DISABILITYSTATUS];
+      workspace.researchPurpose.populationDetails = [SpecificPopulationEnum.AGECHILDREN,
+        SpecificPopulationEnum.RACEMENA, SpecificPopulationEnum.DISABILITYSTATUS];
 
-    workspaceEditMode = WorkspaceEditMode.Edit
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
+      workspaceEditMode = WorkspaceEditMode.Edit
+      const wrapper = component();
+      await waitOneTickAndUpdate(wrapper);
 
-    expect(wrapper.find('[data-test-id="specific-population-yes"]')
-      .first().prop('checked')).toEqual(true);
-    expect(wrapper.find(`[data-test-id="${SpecificPopulationEnum.AGECHILDREN}-checkbox"]`)
-      .first().prop('checked')).toEqual(true);
-    expect(wrapper.find(`[data-test-id="${SpecificPopulationEnum.RACEMENA}-checkbox"]`)
-      .first().prop('checked')).toEqual(true);
-    expect(wrapper.find(`[data-test-id="${SpecificPopulationEnum.DISABILITYSTATUS}-checkbox"]`)
-      .first().prop('checked')).toEqual(true);
+      expect(wrapper.find('[data-test-id="specific-population-yes"]')
+        .first().prop('checked')).toEqual(true);
+      expect(wrapper.find(`[data-test-id="${SpecificPopulationEnum.AGECHILDREN}-checkbox"]`)
+        .first().prop('checked')).toEqual(true);
+      expect(wrapper.find(`[data-test-id="${SpecificPopulationEnum.RACEMENA}-checkbox"]`)
+        .first().prop('checked')).toEqual(true);
+      expect(wrapper.find(`[data-test-id="${SpecificPopulationEnum.DISABILITYSTATUS}-checkbox"]`)
+        .first().prop('checked')).toEqual(true);
 
-    wrapper.find('[data-test-id="specific-population-no"]').first().simulate('click');
-    await waitOneTickAndUpdate(wrapper);
+      wrapper.find('[data-test-id="specific-population-no"]').first().simulate('click');
+      await waitOneTickAndUpdate(wrapper);
 
-    wrapper.find('[data-test-id="workspace-save-btn"]').first().simulate('click');
-    await waitOneTickAndUpdate(wrapper);
+      wrapper.find('[data-test-id="workspace-save-btn"]').first().simulate('click');
+      await waitOneTickAndUpdate(wrapper);
 
-    wrapper.find('[data-test-id="workspace-confirm-save-btn"]').first().simulate('click');
-    await waitOneTickAndUpdate(wrapper);
+      wrapper.find('[data-test-id="workspace-confirm-save-btn"]').first().simulate('click');
+      await waitOneTickAndUpdate(wrapper);
 
-    expect(workspacesApi.workspaces[0].researchPurpose.populationDetails.length).toBe(0);
-  });
+      expect(workspacesApi.workspaces[0].researchPurpose.populationDetails.length).toBe(0);
+    });
 
   it ('should select Research Purpose checkbox if sub category is selected', async () => {
     const wrapper = component();
@@ -238,7 +238,7 @@ describe('WorkspaceEdit', () => {
 
 
     const saveButton = wrapper.find('[data-test-id="workspace-save-btn"]')
-        .first().prop('disabled');
+      .first().prop('disabled');
     expect(saveButton).toBeTruthy();
     await waitOneTickAndUpdate(wrapper);
   });
@@ -317,7 +317,7 @@ describe('WorkspaceEdit', () => {
     workspaceEditMode = WorkspaceEditMode.Create;
     profileStore.set({...profileStore.get(), profile: {
       ...profileStore.get().profile,
-        accessTierShortNames: twoTiers
+      accessTierShortNames: twoTiers
     }});
 
     const wrapper = component();
@@ -355,7 +355,7 @@ describe('WorkspaceEdit', () => {
     workspaceEditMode = WorkspaceEditMode.Create;
     profileStore.set({...profileStore.get(), profile: {
       ...profileStore.get().profile,
-        accessTierShortNames: [AccessTierShortNames.Registered]
+      accessTierShortNames: [AccessTierShortNames.Registered]
     }});
 
     const wrapper = component();
@@ -624,7 +624,7 @@ describe('WorkspaceEdit', () => {
     expect(wrapper.find('[data-test-id="specific-population-yes"]')
       .first().prop('checked')).toEqual(true);
     wrapper.find('[data-test-id="other-specialPopulation-checkbox"]').at(1).
-    simulate('change', { target: { checked: true } });
+      simulate('change', { target: { checked: true } });
 
     const validInput = fp.repeat(100, 'a');
     wrapper.find('[data-test-id="other-specialPopulation-text"]').first().simulate('change', {target: {value: validInput}});

@@ -93,10 +93,10 @@ export const gpuTypes = [
 
 export const gpuTypeToDisplayName = type => {
   return switchCase(type,
-      ['nvidia-tesla-k80', () => 'NVIDIA Tesla K80'],
-      ['nvidia-tesla-p4', () => 'NVIDIA Tesla P4'],
-      ['nvidia-tesla-v100', () => 'NVIDIA Tesla V100'],
-      [DEFAULT, () => 'NVIDIA Tesla T4']
+    ['nvidia-tesla-k80', () => 'NVIDIA Tesla K80'],
+    ['nvidia-tesla-p4', () => 'NVIDIA Tesla P4'],
+    ['nvidia-tesla-v100', () => 'NVIDIA Tesla V100'],
+    [DEFAULT, () => 'NVIDIA Tesla T4']
   );
 };
 
@@ -146,10 +146,10 @@ const dataprocSurcharge = ({masterMachine, numberOfWorkers, numberOfPreemptibleW
 // https://github.com/DataBiosphere/terra-ui/blob/cf5ec4408db3bd1fcdbcc5302da62d42e4d03ca3/src/components/ClusterManager.js#L85
 
 export const machineStorageCost = ({
-    masterDiskSize,
-    numberOfPreemptibleWorkers,
-    numberOfWorkers,
-    workerDiskSize
+  masterDiskSize,
+  numberOfPreemptibleWorkers,
+  numberOfWorkers,
+  workerDiskSize
 }) => {
   return fp.sum([
     masterDiskSize * diskPrice,
@@ -159,10 +159,10 @@ export const machineStorageCost = ({
 };
 
 export const machineStorageCostBreakdown = ({
-    masterDiskSize,
-    numberOfPreemptibleWorkers,
-    numberOfWorkers,
-    workerDiskSize
+  masterDiskSize,
+  numberOfPreemptibleWorkers,
+  numberOfWorkers,
+  workerDiskSize
 }) => {
   const costs = [];
   if (workerDiskSize) {
@@ -198,11 +198,11 @@ export const machineRunningCost = ({
         workerMachine: workerMachine
       }),
       workerMachine
-          ? fp.sum([
-            numberOfWorkers * workerMachine.price,
-            numberOfPreemptibleWorkers * workerMachine.preemptiblePrice
-          ])
-          : 0
+        ? fp.sum([
+          numberOfWorkers * workerMachine.price,
+          numberOfPreemptibleWorkers * workerMachine.preemptiblePrice
+        ])
+        : 0
     ])
     : 0;
   return fp.sum([

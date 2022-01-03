@@ -232,8 +232,8 @@ export class WorkspacesApiStub extends WorkspacesApi {
   }
 
   notebookTransferComplete(workspaceNamespace: string,
-      workspaceId: string,
-      options?: any): Promise<boolean> {
+    workspaceId: string,
+    options?: any): Promise<boolean> {
     return new Promise<boolean>(resolve => resolve(true));
   }
-  }
+}

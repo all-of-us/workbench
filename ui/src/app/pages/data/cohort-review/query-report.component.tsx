@@ -357,38 +357,38 @@ export const QueryReport = fp.flow(withCdrVersions(), withCurrentCohortReview(),
                     {/*  disabled={!groupedData}*/}
                     {/*  shape='printer'*/}
                     {/*  size={32} />*/}
-                </div>
-              </div>
-              {groupedData && Object.keys(groupedData).map((group, g) => (
-                <div key={g}>
-                  <div style={styles.container}>
-                    <div style={{...styles.container, ...styles.groupHeader}}>
-                      <div style={{...columns.col7, ...styles.groupText}}>
-                        {this.getStatisticsHeader(group)}
-                      </div>
-                      {g === 0 && <div style={{...columns.col2, ...styles.groupText}}>
-                        Total
-                      </div>}
-                      {g === 0 && <div style={{...columns.col3, ...styles.groupText}}>
-                        % of Cohort
-                      </div>}
-                    </div>
                   </div>
-                  {Object.keys(groupedData[group]).map((row, r) => (
-                    <div key={r} style={styles.container}>
-                      <div style={{...styles.row, ...styles.groupContent}}>
-                        <div style={columns.col7}>
-                          {groupedData[group][row].name}
+                </div>
+                {groupedData && Object.keys(groupedData).map((group, g) => (
+                  <div key={g}>
+                    <div style={styles.container}>
+                      <div style={{...styles.container, ...styles.groupHeader}}>
+                        <div style={{...columns.col7, ...styles.groupText}}>
+                          {this.getStatisticsHeader(group)}
                         </div>
-                        <div style={columns.col2}>
-                          {groupedData[group][row].count.toLocaleString()}
-                        </div>
-                        <div style={columns.col3}>
-                          {Math.round(groupedData[group][row].count / cohortReview.matchedParticipantCount * 100)}%
-                        </div>
+                        {g === 0 && <div style={{...columns.col2, ...styles.groupText}}>
+                        Total
+                        </div>}
+                        {g === 0 && <div style={{...columns.col3, ...styles.groupText}}>
+                        % of Cohort
+                        </div>}
                       </div>
                     </div>
-                  ))}
+                    {Object.keys(groupedData[group]).map((row, r) => (
+                      <div key={r} style={styles.container}>
+                        <div style={{...styles.row, ...styles.groupContent}}>
+                          <div style={columns.col7}>
+                            {groupedData[group][row].name}
+                          </div>
+                          <div style={columns.col2}>
+                            {groupedData[group][row].count.toLocaleString()}
+                          </div>
+                          <div style={columns.col3}>
+                            {Math.round(groupedData[group][row].count / cohortReview.matchedParticipantCount * 100)}%
+                          </div>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 ))}
                 {chartsLoading && <SpinnerOverlay />}

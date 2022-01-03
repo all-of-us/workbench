@@ -5,7 +5,7 @@ import * as React from 'react';
 
 
 export class ReviewDomainChartsComponent extends React.Component<
-  {unitData: any}> {
+{unitData: any}> {
   chart: any;
   constructor(props) {
     super(props);

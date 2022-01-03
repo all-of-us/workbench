@@ -31,14 +31,14 @@ describe('ConceptSearch', () => {
 
   const component = () => {
     return mount(<MemoryRouter
-        initialEntries={[`/workspaces/${workspaceDataStub.namespace}/${workspaceDataStub.id}/data/concepts/sets/${conceptSet.id}`]}
+      initialEntries={[`/workspaces/${workspaceDataStub.namespace}/${workspaceDataStub.id}/data/concepts/sets/${conceptSet.id}`]}
     >
       <Route path='/workspaces/:ns/:wsid/data/concepts/sets/:csid'>
         <ConceptSearch setConceptSetUpdating={() => {}}
-                       setShowUnsavedModal={() => {}}
-                       setUnsavedConceptChanges={() => {}}
-                       hideSpinner={() => {}}
-                       showSpinner={() => {}}
+          setShowUnsavedModal={() => {}}
+          setUnsavedConceptChanges={() => {}}
+          hideSpinner={() => {}}
+          showSpinner={() => {}}
         />
       </Route>
     </MemoryRouter>);

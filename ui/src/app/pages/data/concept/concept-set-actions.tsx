@@ -136,7 +136,7 @@ export const ConceptSetActions = fp.flow(withCurrentWorkspace(), withNavigation,
           <div style={{marginTop: '0.25rem'}}>
             The concept set
             <RouteLink style={{color: colors.accent, margin: '0 4px'}}
-               path={this.getNavigationPath('conceptSet')}>
+              path={this.getNavigationPath('conceptSet')}>
               {conceptSet.name}
             </RouteLink>
             has been saved.

@@ -22,11 +22,11 @@ describe('SidebarContent', () => {
     const {namespace, id} = workspaceDataStub;
     const {cohortId, participantCohortStatuses} = cohortReviewStubs[0]
     const wrapper = mount(
-        <MemoryRouter>
-          <SidebarContent
-              participant={cohortReviewStubs[0].participantCohortStatuses[0]}
-          />
-        </MemoryRouter>
+      <MemoryRouter>
+        <SidebarContent
+          participant={cohortReviewStubs[0].participantCohortStatuses[0]}
+        />
+      </MemoryRouter>
     );
     expect(wrapper.exists()).toBeTruthy();
   });

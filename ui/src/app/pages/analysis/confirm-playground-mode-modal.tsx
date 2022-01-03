@@ -43,19 +43,19 @@ export class ConfirmPlaygroundModeModal extends React.Component<Props, State> {
       </ModalBody>
       <ModalFooter style={{alignItems: 'center'}}>
         <CheckBox id='show-again-checkbox'
-                  checked={this.state.checked}
-                  onChange={(checked) => { this.handleCheckboxChange(checked); }} />
+          checked={this.state.checked}
+          onChange={(checked) => { this.handleCheckboxChange(checked); }} />
         <label htmlFor='show-again-checkbox'
-               style={{marginLeft: '8px', marginRight: 'auto', color: colors.primary}}>
+          style={{marginLeft: '8px', marginRight: 'auto', color: colors.primary}}>
           Don't show again
         </label>
         <Button type='secondary'
-                style={{margin: '0 10px'}}
-                onClick={() => { this.props.onCancel(); }}>
+          style={{margin: '0 10px'}}
+          onClick={() => { this.props.onCancel(); }}>
           Cancel
         </Button>
         <Button type='primary'
-                onClick={() => { this.props.onContinue(); }}>
+          onClick={() => { this.props.onContinue(); }}>
           Continue
         </Button>
       </ModalFooter>

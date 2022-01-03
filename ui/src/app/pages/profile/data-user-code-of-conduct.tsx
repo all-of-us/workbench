@@ -65,20 +65,20 @@ export enum DataUserCodeOfConductPage {
 const DuccTextInput = (props) => {
   // `fp.omit` used to prevent propagation of test IDs to the rendered child component.
   return <TextInput {...fp.omit(['data-test-id'], props)}
-                    style={{
-                      ...styles.textInput,
-                      ...props.style
-                    }}/>;
+    style={{
+      ...styles.textInput,
+      ...props.style
+    }}/>;
 };
 
 const InitialsAgreement = (props) => {
   return <div style={{display: 'flex', marginTop: '0.5rem'}}>
     <DuccTextInput
-        onChange={props.onChange}
-        value={props.value}
-        placeholder='INITIALS'
-        data-test-id='ducc-initials-input'
-        style={{width: '4ex', textAlign: 'center', padding: 0}}/>
+      onChange={props.onChange}
+      value={props.value}
+      placeholder='INITIALS'
+      data-test-id='ducc-initials-input'
+      style={{width: '4ex', textAlign: 'center', padding: 0}}/>
     <div style={{marginLeft: '0.5rem'}}>{props.children}</div>
   </div>;
 };
@@ -153,130 +153,130 @@ export const DataUserCodeOfConduct = fp.flow(withUserProfile(), withNavigation, 
         }
       });
       return <FlexColumn style={styles.dataUserCodeOfConductPage}>
-          {
-            page === DataUserCodeOfConductPage.CONTENT && <React.Fragment>
-              <HtmlViewer
-                  ariaLabel='data user code of conduct agreement'
-                  containerStyles={{margin: '2rem 0 1rem'}}
-                  filePath={'/data-user-code-of-conduct.html'}
-                  onLastPage={() => this.setState({proceedDisabled: false})}
-              />
-              <FlexRow style={styles.dataUserCodeOfConductFooter}>
+        {
+          page === DataUserCodeOfConductPage.CONTENT && <React.Fragment>
+            <HtmlViewer
+              ariaLabel='data user code of conduct agreement'
+              containerStyles={{margin: '2rem 0 1rem'}}
+              filePath={'/data-user-code-of-conduct.html'}
+              onLastPage={() => this.setState({proceedDisabled: false})}
+            />
+            <FlexRow style={styles.dataUserCodeOfConductFooter}>
                 Please read the above document in its entirety before proceeding to sign the Data User Code of Conduct.
-                <Button
-                    type={'link'}
-                    style={{marginLeft: 'auto'}}
-                    onClick={() => history.back()}
-                >
+              <Button
+                type={'link'}
+                style={{marginLeft: 'auto'}}
+                onClick={() => history.back()}
+              >
                   Back
-                </Button>
-                <Button
-                    data-test-id={'ducc-next-button'}
-                    disabled={proceedDisabled}
-                    onClick={() => this.setState({page: DataUserCodeOfConductPage.SIGNATURE})}
-                >
+              </Button>
+              <Button
+                data-test-id={'ducc-next-button'}
+                disabled={proceedDisabled}
+                onClick={() => this.setState({page: DataUserCodeOfConductPage.SIGNATURE})}
+              >
                   Proceed
-                </Button>
-              </FlexRow>
-            </React.Fragment>
-          }
-          {
-            page === DataUserCodeOfConductPage.SIGNATURE && <React.Fragment>
-              <FlexColumn>
-                {submitting && <SpinnerOverlay/>}
-                <h1>Accept Data User Code of Conduct</h1>
-                <div style={{...styles.bold, ...styles.smallTopMargin}}>
+              </Button>
+            </FlexRow>
+          </React.Fragment>
+        }
+        {
+          page === DataUserCodeOfConductPage.SIGNATURE && <React.Fragment>
+            <FlexColumn>
+              {submitting && <SpinnerOverlay/>}
+              <h1>Accept Data User Code of Conduct</h1>
+              <div style={{...styles.bold, ...styles.smallTopMargin}}>
                   I
-                  <DuccTextInput style={{margin: '0 1ex'}}
-                     disabled
-                     value={profile.givenName + ' ' + profile.familyName}
-                     data-test-id='ducc-name-input'/>
+                <DuccTextInput style={{margin: '0 1ex'}}
+                  disabled
+                  value={profile.givenName + ' ' + profile.familyName}
+                  data-test-id='ducc-name-input'/>
                    ("Authorized Data User") have personally reviewed this Data User Code of Conduct.
                    I agree to follow each of the policies and procedures it describes.
-                </div>
-                <div style={styles.smallTopMargin}>
+              </div>
+              <div style={styles.smallTopMargin}>
                   By entering my initials next to each statement below, I acknowledge that:
-                </div>
-                <InitialsAgreement onChange={(v) => this.setState({initialMonitoring: v})}>
+              </div>
+              <InitialsAgreement onChange={(v) => this.setState({initialMonitoring: v})}>
                   My work, including any external data, files, or software I upload into the
                    Researcher Workbench, will be logged and monitored by the <AoU/> Research
                    Program to ensure compliance with policies and procedures.
-                </InitialsAgreement>
-                <InitialsAgreement onChange={(v) => this.setState({initialPublic: v})}>
+              </InitialsAgreement>
+              <InitialsAgreement onChange={(v) => this.setState({initialPublic: v})}>
                   My name, affiliation, profile information and research description will be made
                    public. My research description will be used by the <AoU/> Research
                    Program to provide participants with meaningful information about the research
                    being conducted.
-                </InitialsAgreement>
-                <div style={{...styles.bold, ...styles.smallTopMargin}}>
+              </InitialsAgreement>
+              <div style={{...styles.bold, ...styles.smallTopMargin}}>
                   I acknowledge that failure to comply with the requirements outlined in this Data
                    User Code of Conduct may result in termination of my <AoU/> Research
                    Program account and/or other sanctions, including, but not limited to:
-                </div>
-                <ul style={{...styles.bold, ...styles.smallTopMargin}}>
-                  <li>
+              </div>
+              <ul style={{...styles.bold, ...styles.smallTopMargin}}>
+                <li>
                     the posting of my name and affiliation on a publicly accessible list of
                      violators, and
-                  </li>
-                  <li>
+                </li>
+                <li>
                     notification of the National Institutes of Health or other federal agencies as
                      to my actions.
-                  </li>
-                </ul>
-                <div style={{...styles.bold, ...styles.smallTopMargin}}>
+                </li>
+              </ul>
+              <div style={{...styles.bold, ...styles.smallTopMargin}}>
                   I understand that failure to comply with these requirements may also carry
                    financial or legal repercussions. Any misuse of the <AoU/> Research
                    Hub, Researcher Workbench or data resources is taken very seriously, and other
                   sanctions may be sought.
-                </div>
-                <label style={{...styles.bold, ...styles.largeTopMargin}}>Authorized Data User Name</label>
-                <DuccTextInput
-                    disabled
-                    data-test-id='ducc-username-input'
-                    value={profile.givenName + ' ' + profile.familyName}
-                />
-                <label style={{...styles.bold, ...styles.largeTopMargin}}>User ID</label>
-                <DuccTextInput
-                    disabled
-                    data-test-id='ducc-user-id-input'
-                    value={profile.username}
-                />
-                <label style={{...styles.bold, ...styles.largeTopMargin}}>Date</label>
-                <DuccTextInput type='text' disabled value={new Date().toLocaleDateString()}/>
-              </FlexColumn>
-              <FlexRow style={styles.dataUserCodeOfConductFooter}>
-                <Button
-                    type={'link'}
-                    style={{marginLeft: 'auto'}}
-                    onClick={() => this.setState({page: DataUserCodeOfConductPage.CONTENT})}
-                >
+              </div>
+              <label style={{...styles.bold, ...styles.largeTopMargin}}>Authorized Data User Name</label>
+              <DuccTextInput
+                disabled
+                data-test-id='ducc-username-input'
+                value={profile.givenName + ' ' + profile.familyName}
+              />
+              <label style={{...styles.bold, ...styles.largeTopMargin}}>User ID</label>
+              <DuccTextInput
+                disabled
+                data-test-id='ducc-user-id-input'
+                value={profile.username}
+              />
+              <label style={{...styles.bold, ...styles.largeTopMargin}}>Date</label>
+              <DuccTextInput type='text' disabled value={new Date().toLocaleDateString()}/>
+            </FlexColumn>
+            <FlexRow style={styles.dataUserCodeOfConductFooter}>
+              <Button
+                type={'link'}
+                style={{marginLeft: 'auto'}}
+                onClick={() => this.setState({page: DataUserCodeOfConductPage.CONTENT})}
+              >
                   Back
-                </Button>
-                <TooltipTrigger content={errors && <div>
-                  <div>All fields must be initialed</div>
-                  <div>All initials must match</div>
-                  <div>Initials must be six letters or fewer</div>
-                </div>}>
-                  <Button
-                      data-test-id={'submit-ducc-button'}
-                      disabled={errors || submitting}
-                      onClick={() => {
-                        this.setState({submitting: true});
-                        // This may record extra GA events if the user views & accepts the DUCC from their profile. If the additional events
-                        // are an issue, we may need further changes, possibly disable the Accept button after initial submit.
-                        AnalyticsTracker.Registration.AcceptDUCC();
-                        wasReferredFromRenewal(this.props.location.search)
-                          ? this.submitCodeOfConductWithRenewal(initialMonitoring)
-                          : this.submitDataUserCodeOfConduct(initialMonitoring);
-                        this.setState({submitting: false});
-                      }}
-                  >
+              </Button>
+              <TooltipTrigger content={errors && <div>
+                <div>All fields must be initialed</div>
+                <div>All initials must match</div>
+                <div>Initials must be six letters or fewer</div>
+              </div>}>
+                <Button
+                  data-test-id={'submit-ducc-button'}
+                  disabled={errors || submitting}
+                  onClick={() => {
+                    this.setState({submitting: true});
+                    // This may record extra GA events if the user views & accepts the DUCC from their profile. If the additional events
+                    // are an issue, we may need further changes, possibly disable the Accept button after initial submit.
+                    AnalyticsTracker.Registration.AcceptDUCC();
+                    wasReferredFromRenewal(this.props.location.search)
+                      ? this.submitCodeOfConductWithRenewal(initialMonitoring)
+                      : this.submitDataUserCodeOfConduct(initialMonitoring);
+                    this.setState({submitting: false});
+                  }}
+                >
                     Accept
-                  </Button>
-                </TooltipTrigger>
-              </FlexRow>
-            </React.Fragment>
-          }
-        </FlexColumn>;
+                </Button>
+              </TooltipTrigger>
+            </FlexRow>
+          </React.Fragment>
+        }
+      </FlexColumn>;
     }
   });

@@ -199,8 +199,8 @@ export const CriteriaTree = fp.flow(withCurrentWorkspace(), withCurrentConcept()
       const {cdrVersionId, id: workspaceId, namespace} = currentWorkspaceStore.getValue();
       const criteriaType = domainId === Domain.DRUG.toString() ? CriteriaType.ATC.toString() : type;
       const promises = this.sendOnlyCriteriaType(domainId)
-          ? [cohortBuilderApi().findCriteriaBy(namespace, workspaceId, domainId, criteriaType)]
-          : [cohortBuilderApi().findCriteriaBy(namespace, workspaceId, domainId, criteriaType, isStandard, id)];
+        ? [cohortBuilderApi().findCriteriaBy(namespace, workspaceId, domainId, criteriaType)]
+        : [cohortBuilderApi().findCriteriaBy(namespace, workspaceId, domainId, criteriaType, isStandard, id)];
       if (this.criteriaLookupNeeded) {
         const criteriaRequest = {
           sourceConceptIds: currentCohortCriteriaStore.getValue().filter(s => !s.isStandard).map(s => s.conceptId),
@@ -323,8 +323,8 @@ export const CriteriaTree = fp.flow(withCurrentWorkspace(), withCurrentConcept()
   showNode(node: Criteria) {
     const {workspace, cdrVersionTiersResponse} = this.props;
     return node.subtype === CriteriaSubType.SURVEY.toString() && node.name.includes('COPE')
-        ? getCdrVersion(workspace, cdrVersionTiersResponse).hasCopeSurveyData
-        : true;
+      ? getCdrVersion(workspace, cdrVersionTiersResponse).hasCopeSurveyData
+      : true;
   }
 
   selectIconDisabled() {
@@ -354,10 +354,10 @@ export const CriteriaTree = fp.flow(withCurrentWorkspace(), withCurrentConcept()
       </div>}
       <div style={styles.searchBarContainer}>
         <SearchBar node={node}
-                   searchTerms={searchTerms}
-                   selectOption={selectOption}
-                   setIngredients={(i) => this.setState({ingredients: i})}
-                   setInput={(v) => setSearchTerms(v)}/>
+          searchTerms={searchTerms}
+          selectOption={selectOption}
+          setIngredients={(i) => this.setState({ingredients: i})}
+          setInput={(v) => setSearchTerms(v)}/>
       </div>
       {!loading && <div style={{paddingTop: this.showHeader ? '1.5rem' : 0, width: '99%'}}>
         {this.showHeader && <div style={{...styles.treeHeader, border: `1px solid ${colorWithWhiteness(colors.black, 0.8)}`}}>
@@ -375,22 +375,22 @@ export const CriteriaTree = fp.flow(withCurrentWorkspace(), withCurrentConcept()
         <div style={this.showHeader ? styles.node : {...styles.node, border: 'none'}} className='show-scrollbar'>
           {node.domainId === Domain.PHYSICALMEASUREMENT.toString() && <div style={{margin: '0.5rem 0 0 0.5rem'}}>
             <CheckBox manageOwnState={false}
-                      checked={hasAnyPM}
-                      onChange={() => this.onHasAnyPMChange()}/>
+              checked={hasAnyPM}
+              onChange={() => this.onHasAnyPMChange()}/>
             <span style={{color: colors.primary, marginLeft: '0.5rem'}}>Has Any Physical Measurements Data</span>
             {!hasAnyPM && <div style={styles.orCircle}>OR</div>}
           </div>}
           {!!children && !hasAnyPM && children.map((child, c) => this.showNode(child) &&
             <TreeNode key={c}
-                      source={source}
-                      autocompleteSelection={autocompleteSelection}
-                      groupSelections={groupSelections}
-                      node={child}
-                      scrollToMatch={scrollToMatch}
-                      searchTerms={searchTerms}
-                      select={(s) => select(s)}
-                      selectedIds={selectedIds}
-                      setAttributes={setAttributes}/>
+              source={source}
+              autocompleteSelection={autocompleteSelection}
+              groupSelections={groupSelections}
+              node={child}
+              scrollToMatch={scrollToMatch}
+              searchTerms={searchTerms}
+              select={(s) => select(s)}
+              selectedIds={selectedIds}
+              setAttributes={setAttributes}/>
           )}
         </div>
       </div>}

@@ -42,15 +42,15 @@ export const panels = [
     content: <div>A Workspace is your place to store and analyze data for a specific project.
       You can share this Workspace with other users, allowing them to view or edit
       your work. The dataset referenced by a workspace is in
-      {' '}<StyledExternalLink href={OMOPDataSetLink} target='_blank'>
+    {' '}<StyledExternalLink href={OMOPDataSetLink} target='_blank'>
         OMOP common data model
-      </StyledExternalLink>{' '}
+    </StyledExternalLink>{' '}
       format. Here are some
-      {' '}<StyledExternalLink href={OMOPTutorialsLink} target='_blank'>
+    {' '}<StyledExternalLink href={OMOPTutorialsLink} target='_blank'>
         tutorials
-      </StyledExternalLink>{' '}
+    </StyledExternalLink>{' '}
       to understand OMOP data model.
-      <br/><br/>
+    <br/><br/>
       When you create your Workspace, you will be prompted
       to state your research purpose. For example, when you create a Workspace to study Type
       2 Diabetes, for research purpose you could enter: “I will use this Workspace to
@@ -64,7 +64,7 @@ export const panels = [
     content: <div>A “Cohort” is a group of participants you are interested in researching.
       The Cohort Builder allows you to create and review cohorts and annotate
       participants in your study group.
-      <br/><br/>
+    <br/><br/>
       For example, you can build a Cohort called “diabetes cases,” to include people
       who have been diagnosed with type II diabetes, using a combination of billing codes and
       laboratory values. You can also have a “controls” Cohort. Once you build your cohorts,
@@ -81,7 +81,7 @@ export const panels = [
       In the Workbench we refer to subject areas such as conditions, drugs, measurements
       etc. as “domains.” You can search for and save collections of concepts from a
       particular domain as a “Concept Set.”
-      <br/><br/>
+    <br/><br/>
       For example, if you want to select height, weight and blood pressure information
       (concepts) from your “diabetes cases” Cohort, you can search for the 3 concepts
       from the “Labs and Measurements” domain and call it “biometrics” Concept Set. You can then
@@ -94,7 +94,7 @@ export const panels = [
     content: <div>Datasets are analysis-ready tables that can be exported to a Notebook.
       You can build and preview a dataset for one or more cohorts by selecting the desired
       concept sets and values for the cohorts.
-      <br/><br/>
+    <br/><br/>
       For example, select your cohort called “diabetes cases” and your concept set called
       “biometrics” and then the values from the concept set you want to see. Before exporting
       the dataset, you can preview the resulting data frame that will be sent to the notebook.</div>,
@@ -107,7 +107,7 @@ export const panels = [
       programming knowledge in R or Python. Several template Notebooks and resources
       are available within your Workspace that will guide you how to import your
       Cohort(s) and Concept Set(s) into the Notebook and can assist with basic analyses.
-      <br/><br/>
+    <br/><br/>
       For example, you can launch a Notebook
       to import your “diabetes cases” Cohort and then select your “biometrics” Concept Set, to
       get biometrics data for the participants in your Cohort. You can then analyze the data to
@@ -326,12 +326,12 @@ export class QuickTourReact extends React.Component<QuickTourReactProps, QuickTo
     return fullImage ?
       <div style={{...styles.mainStyling, height: '35%'}}>
         <div style={{position: 'relative', display: 'inline-block'}}
-             data-test-id='full-image-wrapper'>
+          data-test-id='full-image-wrapper'>
           <img src={panels[selected].image} style={{height: '100%', width: '100%'}}/>
           <div onClick={() => this.toggleImage()}
-               data-test-id='shrink-icon'
-               style={{position: 'absolute', right: '5%', bottom: '5%',
-                 cursor: 'pointer', width: '28px'}}>
+            data-test-id='shrink-icon'
+            style={{position: 'absolute', right: '5%', bottom: '5%',
+              cursor: 'pointer', width: '28px'}}>
             <img src={shrinkIcon}/>
           </div>
         </div>
@@ -348,10 +348,10 @@ export class QuickTourReact extends React.Component<QuickTourReactProps, QuickTo
                 so setting a width would offset the entire selection area by half a connector length*/}
                 <div style={{width: i !== panels.length - 1 ? '128px' : null}}>
                   <div style={selected ? completedStyles.circleCompleted : styles.circle}
-                       data-test-id={'breadcrumb' + i}
-                       onClick={() => this.selectPanel(i)}>
+                    data-test-id={'breadcrumb' + i}
+                    onClick={() => this.selectPanel(i)}>
                     {(i < selected) && <div style={styles.check}>
-                        <img src={checkImg}/>
+                      <img src={checkImg}/>
                     </div>}
                     {(i === selected) && <div style={styles.current}/>}
                   </div>
@@ -377,7 +377,7 @@ export class QuickTourReact extends React.Component<QuickTourReactProps, QuickTo
           }}>
             <div style={{gridArea: 'content', overflowX: 'hidden', overflowY: 'auto'}}>
               <div style={styles.panelTitle}
-                   data-test-id='panel-title'>
+                data-test-id='panel-title'>
                 {panels[selected].title}
               </div>
               <div style={styles.panelContents}>
@@ -391,28 +391,28 @@ export class QuickTourReact extends React.Component<QuickTourReactProps, QuickTo
                 position: 'absolute', right: '5%',
                 bottom: '5%', height: '1rem', width: '1rem'
               }}>
-                  <div style={{position: 'absolute', zIndex: 2, cursor: 'pointer', width: '28px'}}
-                       data-test-id='expand-icon'
-                       onClick={() => this.toggleImage()}>
-                      <img src={expandIcon}/>
-                  </div>
+                <div style={{position: 'absolute', zIndex: 2, cursor: 'pointer', width: '28px'}}
+                  data-test-id='expand-icon'
+                  onClick={() => this.toggleImage()}>
+                  <img src={expandIcon}/>
+                </div>
               </div>}
             </div>
             <div style={{...styles.controls, alignItems: 'center', gridArea: 'controls', }}>
               <div style={{width: '50%'}}>
                 {selected !== 0 &&
                 <Button type='primaryOnDarkBackground' data-test-id='previous'
-                        style={{marginLeft: '10%'}}
-                        onClick={() => this.previous()}>Previous</Button>}
+                  style={{marginLeft: '10%'}}
+                  onClick={() => this.previous()}>Previous</Button>}
               </div>
               <div style={{display: 'flex', justifyContent: 'flex-end', width: '49%'}}>
                 {selected !== (panels.length - 1) &&
                 <Button type='primaryOnDarkBackground' data-test-id='close'
-                        onClick={() => this.close()}
-                        style={{marginLeft: '10%', marginRight: '0.25rem'}}>Close</Button>}
+                  onClick={() => this.close()}
+                  style={{marginLeft: '10%', marginRight: '0.25rem'}}>Close</Button>}
                 <Button type='secondaryOnDarkBackground' data-test-id='next'
-                        style={{marginRight: '10%'}}
-                        onClick={() => this.next()}>{this.lastButtonText()}</Button>
+                  style={{marginRight: '10%'}}
+                  onClick={() => this.next()}>{this.lastButtonText()}</Button>
               </div>
             </div>
           </div>

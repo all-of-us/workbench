@@ -126,7 +126,7 @@ class SearchBarOption extends React.Component<OptionProps, OptionState> {
           onClick={() => onClick()}
           onMouseEnter={() => this.setState({hover: true})}
           onMouseLeave={() => this.setState({hover: false})}>
-            {displayText}
+          {displayText}
         </button>
       </TooltipTrigger>
     </div>;
@@ -305,10 +305,10 @@ export class SearchBar extends React.Component<Props, State> {
         {options.length === 0
           ? <em style={{padding: '0.15rem 1.25rem'}}>No results based on your search</em>
           : options.map((opt, o) => <SearchBarOption key={o}
-                                            option={opt}
-                                            searchTerm={this.props.searchTerms}
-                                            highlighted={o === highlightedOption}
-                                            onClick={() => this.selectOption(opt)}/>)}
+            option={opt}
+            searchTerm={this.props.searchTerms}
+            highlighted={o === highlightedOption}
+            onClick={() => this.selectOption(opt)}/>)}
       </div>}
     </div>;
   }

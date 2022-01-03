@@ -33,7 +33,7 @@ describe('DataPage', () => {
   const component = () => {
     return mount(<MemoryRouter>
       <DataComponent hideSpinner={() => {}}
-                     showSpinner={() => {}}/>
+        showSpinner={() => {}}/>
     </MemoryRouter>);
   };
 

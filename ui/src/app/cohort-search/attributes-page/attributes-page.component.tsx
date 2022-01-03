@@ -190,15 +190,15 @@ export const CalculateFooter = (props: CalculateFooterProps) => {
     </FlexRowWrap>
     <FlexRowWrap style={{flexDirection: 'row-reverse', marginTop: '0.5rem'}}>
       <Button type='primary'
-              data-test-id='attributes-add-btn'
-              disabled={disableAdd}
-              style={styles.addButton}
-              onClick={() => addFn()}>
+        data-test-id='attributes-add-btn'
+        disabled={disableAdd}
+        style={styles.addButton}
+        onClick={() => addFn()}>
         {addButtonText}
       </Button>
       <Button type='link'
-              style={{color: colors.primary, marginRight: '0.75rem'}}
-              onClick={() => backFn()}>
+        style={{color: colors.primary, marginRight: '0.75rem'}}
+        onClick={() => backFn()}>
         BACK
       </Button>
     </FlexRowWrap>
@@ -722,28 +722,28 @@ export const AttributesPage = fp.flow(withCurrentWorkspace(), withCurrentCohortC
           {this.isBloodPressure && <div style={styles.label}>{attr.name}</div>}
           {isCOPESurvey && <div style={styles.orCircle}>OR</div>}
           <Dropdown data-test-id={`numerical-dropdown-${a}`}
-                    style={{marginBottom: '0.5rem', width: '100%'}}
-                    value={attr.operator}
-                    options={options}
-                    placeholder='Select Operator'
-                    onChange={(e) => this.selectChange(a, e.value)}/>
+            style={{marginBottom: '0.5rem', width: '100%'}}
+            value={attr.operator}
+            options={options}
+            placeholder='Select Operator'
+            onChange={(e) => this.selectChange(a, e.value)}/>
           <FlexRowWrap>
             {![null, 'ANY'].includes(attr.operator) && <div style={{width: '33%'}}>
               <NumberInput data-test-id={`numerical-input-${a}-0`}
-                           style={{padding: '0 0.25rem', ...(this.hasUnits ? {width: '70%'} : {})}}
-                           value={attr.operands[0] || ''}
-                           min={attr.MIN} max={attr.MAX}
-                           onChange={(v) => this.inputChange(v, a, 0)}/>
+                style={{padding: '0 0.25rem', ...(this.hasUnits ? {width: '70%'} : {})}}
+                value={attr.operands[0] || ''}
+                min={attr.MIN} max={attr.MAX}
+                onChange={(v) => this.inputChange(v, a, 0)}/>
               {this.hasUnits && <span> {PM_UNITS[subtype]}</span>}
             </div>}
             {attr.operator === Operator.BETWEEN && <React.Fragment>
               <div style={{padding: '0.2rem 1.5rem 0 1rem'}}>and</div>
               <div style={{width: '33%'}}>
                 <NumberInput data-test-id={`numerical-input-${a}-1`}
-                             style={{padding: '0 0.25rem', ...(this.hasUnits ? {width: '70%'} : {})}}
-                             value={attr.operands[1] || ''}
-                             min={attr.MIN} max={attr.MAX}
-                             onChange={(v) => this.inputChange(v, a, 1)}/>
+                  style={{padding: '0 0.25rem', ...(this.hasUnits ? {width: '70%'} : {})}}
+                  value={attr.operands[1] || ''}
+                  min={attr.MIN} max={attr.MAX}
+                  onChange={(v) => this.inputChange(v, a, 1)}/>
                 {this.hasUnits && <span> {PM_UNITS[subtype]}</span>}
               </div>
             </React.Fragment>}
@@ -768,7 +768,7 @@ export const AttributesPage = fp.flow(withCurrentWorkspace(), withCurrentCohortC
           {!isCOPESurvey && <div style={styles.label}>Categorical Values</div>}
           {form.cat.map((attr, a) => <div key={a} style={styles.categorical}>
             <CheckBox checked={attr.checked} style={{marginRight: '3px'}}
-                      onChange={(v) => this.checkboxChange(v, a)}/>
+              onChange={(v) => this.checkboxChange(v, a)}/>
             {attr.conceptName}
             <span style={styles.badge}>{parseInt(attr.estCount, 10).toLocaleString()}</span>
           </div>)}
@@ -839,13 +839,13 @@ export const AttributesPage = fp.flow(withCurrentWorkspace(), withCurrentCohortC
             </div>
           }
           <CalculateFooter addButtonText='ADD THIS'
-                           addFn={() => this.addParameterToSearchItem()}
-                           backFn={() => back()}
-                           calculateFn={() => this.requestPreview()}
-                           calculating={calculating}
-                           count={count}
-                           disableAdd={this.disableAddButton}
-                           disableCalculate={this.disableCalculateButton}/>
+            addFn={() => this.addParameterToSearchItem()}
+            backFn={() => back()}
+            calculateFn={() => this.requestPreview()}
+            calculating={calculating}
+            count={count}
+            disableAdd={this.disableAddButton}
+            disableCalculate={this.disableCalculateButton}/>
         </div>
       );
     }

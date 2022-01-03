@@ -25,7 +25,7 @@ export const styles = reactStyles({
 export const GoogleSignInButton: React.FunctionComponent = () =>
   <Button type='primary' style={styles.button} onClick={() => signIn()}>
     <img src={googleIcon}
-         style={{ height: '54px', width: '54px', margin: '-3px 19px -3px -3px'}}/>
+      style={{ height: '54px', width: '54px', margin: '-3px 19px -3px -3px'}}/>
     <div>
       Sign In
     </div>

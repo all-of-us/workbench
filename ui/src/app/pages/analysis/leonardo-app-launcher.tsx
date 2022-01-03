@@ -231,20 +231,20 @@ const ProgressCard: React.FunctionComponent<{progressState: Progress, cardState:
 
     const icon = progressCardIcons.get(cardState);
     return <div data-test-id={isCurrent ? 'current-progress-card' : ''}
-                style={isCurrent ? {...styles.progressCard, backgroundColor: '#F2FBE9'} :
-      styles.progressCard}>
+      style={isCurrent ? {...styles.progressCard, backgroundColor: '#F2FBE9'} :
+        styles.progressCard}>
       {isCurrent ? <Spinner style={{width: '46px', height: '46px'}}
-                            data-test-id={'progress-card-spinner-' + cardState.valueOf()}/> :
+        data-test-id={'progress-card-spinner-' + cardState.valueOf()}/> :
         <React.Fragment>
           {icon.shape === 'notebook' ? <NotebookIcon style={styles.progressIcon}/> :
-          <ClrIcon shape={icon.shape} style={isComplete ?
-          {...styles.progressIcon, ...styles.progressIconDone,
-            transform: icon.rotation} :
-            {...styles.progressIcon, transform: icon.rotation}}/>}
+            <ClrIcon shape={icon.shape} style={isComplete ?
+              {...styles.progressIcon, ...styles.progressIconDone,
+                transform: icon.rotation} :
+              {...styles.progressIcon, transform: icon.rotation}}/>}
         </React.Fragment>}
-        <div style={styles.progressText}>
-          {renderText()}
-        </div>
+      <div style={styles.progressText}>
+        {renderText()}
+      </div>
     </div>;
   };
 
@@ -322,13 +322,13 @@ export const LeonardoAppLauncher = fp.flow(
     private getLeoAppUrl(runtime: Runtime, nbName: string): string {
       if (this.isOpeningTerminal()) {
         return encodeURI(
-            environment.leoApiUrl + '/proxy/'
+          environment.leoApiUrl + '/proxy/'
             + runtime.googleProject + '/'
             + runtime.runtimeName + '/jupyter/terminals/'
             + terminalName);
       } else {
         return encodeURI(
-            environment.leoApiUrl + '/proxy/'
+          environment.leoApiUrl + '/proxy/'
             + runtime.googleProject + '/'
             + runtime.runtimeName + '/jupyter/notebooks/' + nbName);
       }
@@ -384,7 +384,7 @@ export const LeonardoAppLauncher = fp.flow(
       // Only kick off the initialization process once the runtime is loaded.
       if (this.state.progress === Progress.Unknown && runtimeLoaded) {
         this.initializeRuntimeStatusChecking(workspace.namespace)
-            .catch(async(error) => this.setState({error}));
+          .catch(async(error) => this.setState({error}));
       }
 
       // If we're already loaded (viewing the notebooks iframe), and the
@@ -472,8 +472,8 @@ export const LeonardoAppLauncher = fp.flow(
         const {workspace} = this.props;
         this.incrementProgress(Progress.Creating);
         const resp = await this.runtimeRetry(() => runtimeApi().localize(
-            workspace.namespace, null,
-            {signal: this.pollAborter.signal}));
+          workspace.namespace, null,
+          {signal: this.pollAborter.signal}));
         return resp.runtimeLocalDirectory;
       } else {
         if (this.isCreatingNewNotebook()) {
@@ -559,7 +559,7 @@ export const LeonardoAppLauncher = fp.flow(
       return <React.Fragment>
         {progress !== Progress.Loaded ? <div style={styles.main}>
           <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}
-               data-test-id='leo-app-launcher'>
+            data-test-id='leo-app-launcher'>
             <h2 style={{lineHeight: 0}}>
               {this.getPageTitle()}
             </h2>
@@ -568,9 +568,9 @@ export const LeonardoAppLauncher = fp.flow(
           <div style={{display: 'flex', flexDirection: 'row', marginTop: '1rem'}}>
             {Array.from(progressCardStates, ([key, _], index) => {
               return <ProgressCard key={index} progressState={progress} cardState={key}
-                                   creatingNewNotebook={creatingNewNotebook}
-                                   progressComplete={progressComplete}
-                                   leoAppType = {leoAppType}/>;
+                creatingNewNotebook={creatingNewNotebook}
+                progressComplete={progressComplete}
+                leoAppType = {leoAppType}/>;
             })}
           </div>
           <FlexRow style={styles.reminderText}>
@@ -593,13 +593,13 @@ export const LeonardoAppLauncher = fp.flow(
         </div>}
         {resolveRuntimeInitializer &&
          <RuntimeInitializerModal
-            defaultRuntime={runtimeInitializerDefault}
-            cancel={() => {
-              closeRuntimeInitializerModal(null);
-            }}
-            createAndContinue={() => {
-              closeRuntimeInitializerModal(runtimeInitializerDefault);
-            }} />}
+           defaultRuntime={runtimeInitializerDefault}
+           cancel={() => {
+             closeRuntimeInitializerModal(null);
+           }}
+           createAndContinue={() => {
+             closeRuntimeInitializerModal(runtimeInitializerDefault);
+           }} />}
       </React.Fragment>;
     }
   });

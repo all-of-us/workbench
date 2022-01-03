@@ -96,14 +96,14 @@ export const NavBar = () => {
   const onToggleSideNav = () => {
     setShowSideNav(!showSideNav);
     setBarsTransform(barsTransform === barsTransformNotRotated
-        ? barsTransformRotated
-        : barsTransformNotRotated
+      ? barsTransformRotated
+      : barsTransformNotRotated
     );
   };
 
   const onClickOutside = (event) => {
     if (
-        wrapperRef
+      wrapperRef
         && !wrapperRef.current.contains(event.target)
         && showSideNav
     ) {
@@ -120,8 +120,8 @@ export const NavBar = () => {
   });
 
   return <div
-      style={styles.headerContainer}
-      ref={wrapperRef}
+    style={styles.headerContainer}
+    ref={wrapperRef}
   >
     <div style={{
       transform: barsTransform,
@@ -130,21 +130,21 @@ export const NavBar = () => {
       transition: 'transform 0.5s',
     }}>
       <ClrIcon
-          shape='bars'
-          onClick={() => onToggleSideNav()}
-          onMouseEnter={() => setHovering(true)}
-          onMouseLeave={() => setHovering(false)}
-          style={hovering
-              ? {...styles.sidenavIcon, ...styles.sidenavIconHovering}
-              : {...styles.sidenavIcon}}
+        shape='bars'
+        onClick={() => onToggleSideNav()}
+        onMouseEnter={() => setHovering(true)}
+        onMouseLeave={() => setHovering(false)}
+        style={hovering
+          ? {...styles.sidenavIcon, ...styles.sidenavIconHovering}
+          : {...styles.sidenavIcon}}
       >
       </ClrIcon>
     </div>
     <div>
       <a href={'/'}>
         <img
-            src={logo}
-            style={styles.headerImage}
+          src={logo}
+          style={styles.headerImage}
         />
       </a>
       {
@@ -162,10 +162,10 @@ export const NavBar = () => {
     {
       showSideNav
       && <SideNav
-          profile={profile}
-          // Passing the function itself deliberately, we want to be able to
-          // toggle the nav whenever we click anything in it
-          onToggleSideNav={onToggleSideNav}
+        profile={profile}
+        // Passing the function itself deliberately, we want to be able to
+        // toggle the nav whenever we click anything in it
+        onToggleSideNav={onToggleSideNav}
       />
     }
   </div>;

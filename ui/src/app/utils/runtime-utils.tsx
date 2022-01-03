@@ -203,7 +203,7 @@ export const compareGpu = (oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig)
     differenceType: (!oldGpuExists && !newGpuExists) || (oldGpuExists && newGpuExists &&
         oldRuntime.gpuConfig.gpuType === newRuntime.gpuConfig.gpuType &&
         oldRuntime.gpuConfig.numOfGpus === newRuntime.gpuConfig.numOfGpus) ?
-        RuntimeDiffState.NO_CHANGE : RuntimeDiffState.NEEDS_DELETE_RUNTIME
+      RuntimeDiffState.NO_CHANGE : RuntimeDiffState.NEEDS_DELETE_RUNTIME
   };
 };
 
@@ -478,7 +478,7 @@ export const useDisk = (currentWorkspaceNamespace) => {
           if (!(e instanceof Response && e.status === 404)) {
             throw e;
           }
-            // null on the disk store indicates no existing persistent disk
+          // null on the disk store indicates no existing persistent disk
           pd = null;
         }
         if (currentWorkspaceNamespace === diskStore.get().workspaceNamespace) {
@@ -505,11 +505,11 @@ export const useRuntimeStatus = (currentWorkspaceNamespace, currentGoogleProject
   useEffect(() => {
     // Additional status changes can be put here
     const resolutionCondition: (r: Runtime) => boolean = switchCase(runtimeStatus,
-        [RuntimeStatusRequest.DeleteRuntime, () => (r) => r === null || r.status === RuntimeStatus.Deleted],
-        [RuntimeStatusRequest.DeleteRuntimeAndPD, () => (r) => r === null || r.status === RuntimeStatus.Deleted],
-        [RuntimeStatusRequest.DeletePD, () => (r) => r.status === RuntimeStatus.Running || r.status === RuntimeStatus.Stopped],
-        [RuntimeStatusRequest.Start, () => (r) => r.status === RuntimeStatus.Running],
-        [RuntimeStatusRequest.Stop, () => (r) => r.status === RuntimeStatus.Stopped]
+      [RuntimeStatusRequest.DeleteRuntime, () => (r) => r === null || r.status === RuntimeStatus.Deleted],
+      [RuntimeStatusRequest.DeleteRuntimeAndPD, () => (r) => r === null || r.status === RuntimeStatus.Deleted],
+      [RuntimeStatusRequest.DeletePD, () => (r) => r.status === RuntimeStatus.Running || r.status === RuntimeStatus.Stopped],
+      [RuntimeStatusRequest.Start, () => (r) => r.status === RuntimeStatus.Running],
+      [RuntimeStatusRequest.Stop, () => (r) => r.status === RuntimeStatus.Stopped]
     );
     const initializePolling = async() => {
       if (!!runtimeStatus) {
@@ -574,7 +574,7 @@ export const getRuntimeCtx = (runtime: Runtime, pendingRuntime: Runtime) => {
 // The LeoRuntimeInitializer could potentially be rolled into this code to completely manage
 // all runtime state.
 export const useCustomRuntime = (currentWorkspaceNamespace, detachablePd):
-    [{currentRuntime: Runtime, pendingRuntime: Runtime}, (runtime: Runtime) => void] => {
+[{currentRuntime: Runtime, pendingRuntime: Runtime}, (runtime: Runtime) => void] => {
 
   const {runtime, workspaceNamespace} = useStore(runtimeStore);
   const runtimeOps = useStore(compoundRuntimeOpStore);

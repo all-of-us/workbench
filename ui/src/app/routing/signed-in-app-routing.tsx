@@ -72,74 +72,74 @@ export const SignedInRoutes = () => {
       <AccessRenewalPage routeData={{title: 'Access Renewal'}}/>
     </AppRoute>
     <AppRoute exact path='/admin/banner'
-              guards={[authorityGuard(AuthorityGuardedAction.SERVICE_BANNER)]}>
+      guards={[authorityGuard(AuthorityGuardedAction.SERVICE_BANNER)]}>
       <AdminBannerPage routeData={{title: 'Create Banner', minimizeChrome: true}}/>
     </AppRoute>
     <AppRoute exact path='/admin/egress-events'
-              guards={[authorityGuard(AuthorityGuardedAction.EGRESS_EVENTS)]}>
+      guards={[authorityGuard(AuthorityGuardedAction.EGRESS_EVENTS)]}>
       <AdminEgressEventsPage routeData={{title: 'Egress Events', minimizeChrome: true}}/>
     </AppRoute>
     <AppRoute exact path='/admin/egress-events/:eventId'
-              guards={[authorityGuard(AuthorityGuardedAction.EGRESS_EVENTS)]}>
+      guards={[authorityGuard(AuthorityGuardedAction.EGRESS_EVENTS)]}>
       <AdminEgressAuditPage routeData={{title: 'Egress Event Audit', minimizeChrome: true}}/>
     </AppRoute>
     <AppRoute exact path='/admin/institution'
-              guards={[authorityGuard(AuthorityGuardedAction.INSTITUTION_ADMIN)]}>
+      guards={[authorityGuard(AuthorityGuardedAction.INSTITUTION_ADMIN)]}>
       <InstitutionAdminPage routeData={{title: 'Institution Admin', minimizeChrome: true}}/>
     </AppRoute>
     <AppRoute exact path='/admin/institution/add'
-              guards={[authorityGuard(AuthorityGuardedAction.INSTITUTION_ADMIN)]}>
+      guards={[authorityGuard(AuthorityGuardedAction.INSTITUTION_ADMIN)]}>
       <InstitutionEditAdminPage routeData={{title: 'Institution Admin', minimizeChrome: true}}/>
     </AppRoute>
     <AppRoute exact path='/admin/institution/edit/:institutionId'
-              guards={[authorityGuard(AuthorityGuardedAction.INSTITUTION_ADMIN)]}>
+      guards={[authorityGuard(AuthorityGuardedAction.INSTITUTION_ADMIN)]}>
       <InstitutionEditAdminPage routeData={{title: 'Institution Admin', minimizeChrome: true}}/>
     </AppRoute>
     <AppRoute exact path='/admin/review-workspace'
-                  guards={[authorityGuard(AuthorityGuardedAction.WORKSPACE_ADMIN)]}>
+      guards={[authorityGuard(AuthorityGuardedAction.WORKSPACE_ADMIN)]}>
       <AdminReviewWorkspacePage routeData={{title: 'Review Workspaces', minimizeChrome: true}}/>
     </AppRoute>
-   <AppRoute exact path='/admin/user'> {/* included for backwards compatibility */}
+    <AppRoute exact path='/admin/user'> {/* included for backwards compatibility */}
       <Redirect to={'/admin/users'}/>
-   </AppRoute>
-   <AppRoute exact path='/admin/users'
-             guards={[authorityGuard(AuthorityGuardedAction.USER_ADMIN)]}>
+    </AppRoute>
+    <AppRoute exact path='/admin/users'
+      guards={[authorityGuard(AuthorityGuardedAction.USER_ADMIN)]}>
       <UsersAdminPage routeData={{title: 'User Admin Table', minimizeChrome: true}}/>
     </AppRoute>
     <AppRoute exact path='/admin/users/:usernameWithoutGsuiteDomain'
-              guards={[authorityGuard(AuthorityGuardedAction.USER_ADMIN)]}>
+      guards={[authorityGuard(AuthorityGuardedAction.USER_ADMIN)]}>
       <UserAdminPage routeData={{title: 'User Admin', minimizeChrome: true}}/>
     </AppRoute>
     <AppRoute exact path='/admin/users-tmp/:usernameWithoutGsuiteDomain'
-              guards={[authorityGuard(AuthorityGuardedAction.USER_ADMIN)]}>
+      guards={[authorityGuard(AuthorityGuardedAction.USER_ADMIN)]}>
       <UserAdminProfilePage routeData={{title: 'User Profile Admin', minimizeChrome: true}}/>
     </AppRoute>
     <AppRoute exact path='/admin/user-audit'
-              guards={[authorityGuard(AuthorityGuardedAction.USER_AUDIT)]}>
+      guards={[authorityGuard(AuthorityGuardedAction.USER_AUDIT)]}>
       <UserAuditPage routeData={{title: 'User Audit', minimizeChrome: true}}/>
     </AppRoute>
     <AppRoute exact path='/admin/user-audit/:username'
-              guards={[authorityGuard(AuthorityGuardedAction.USER_AUDIT)]}>
+      guards={[authorityGuard(AuthorityGuardedAction.USER_AUDIT)]}>
       <UserAuditPage routeData={{title: 'User Audit', minimizeChrome: true}}/>
     </AppRoute>
     <AppRoute exact path='/admin/workspaces'
-              guards={[authorityGuard(AuthorityGuardedAction.WORKSPACE_ADMIN)]}>
+      guards={[authorityGuard(AuthorityGuardedAction.WORKSPACE_ADMIN)]}>
       <WorkspaceSearchAdminPage routeData={{title: 'Workspace Admin', minimizeChrome: true}}/>
     </AppRoute>
     <AppRoute exact path='/admin/workspaces/:ns'
-              guards={[authorityGuard(AuthorityGuardedAction.WORKSPACE_ADMIN)]}>
+      guards={[authorityGuard(AuthorityGuardedAction.WORKSPACE_ADMIN)]}>
       <WorkspaceAdminPage routeData={{title: 'Workspace Admin', minimizeChrome: true}}/>
     </AppRoute>
     <AppRoute exact path='/admin/workspace-audit'
-              guards={[authorityGuard(AuthorityGuardedAction.WORKSPACE_AUDIT)]}>
+      guards={[authorityGuard(AuthorityGuardedAction.WORKSPACE_AUDIT)]}>
       <WorkspaceAuditPage routeData={{title: 'Workspace Audit', minimizeChrome: true}}/>
     </AppRoute>
     <AppRoute exact path='/admin/workspace-audit/:ns'
-              guards={[authorityGuard(AuthorityGuardedAction.WORKSPACE_AUDIT)]}>
+      guards={[authorityGuard(AuthorityGuardedAction.WORKSPACE_AUDIT)]}>
       <WorkspaceAuditPage routeData={{title: 'Workspace Audit', minimizeChrome: true}}/>
     </AppRoute>
     <AppRoute exact path='/admin/workspaces/:ns/:nbName'
-              guards={[authorityGuard(AuthorityGuardedAction.WORKSPACE_ADMIN)]}>
+      guards={[authorityGuard(AuthorityGuardedAction.WORKSPACE_ADMIN)]}>
       <AdminNotebookViewPage routeData={{pathElementForTitle: 'nbName', minimizeChrome: true}}/>
     </AppRoute>
     <AppRoute exact path='/data-access-requirements'>

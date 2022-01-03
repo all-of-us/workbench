@@ -199,7 +199,7 @@ export const ConfirmDelete = ({onCancel, onConfirm}) => {
     <div style={styles.confirmWarning}>
       <div style={{display: 'flex', justifyContent: 'center'}}>
         <ClrIcon style={{color: colors.warning, gridColumn: 1, gridRow: 1}} className='is-solid'
-                 shape='exclamation-triangle' size='20'/>
+          shape='exclamation-triangle' size='20'/>
       </div>
       <h3 style={{...styles.baseHeader, ...styles.bold, gridColumn: 2, gridRow: 1}}>Delete your environment</h3>
       <p style={{...styles.confirmWarningText, gridColumn: 2, gridRow: 2}}>
@@ -245,7 +245,7 @@ export const ConfirmDeleteUnattachedPD = ({onConfirm, onCancel}) => {
   return <Fragment>
     <div style={{display: 'flex',  marginRight: '0.5rem'}}>
       <ClrIcon style={{color: colors.warning, marginRight: '0.25rem'}} className='is-solid'
-               shape='exclamation-triangle' size='20'/>
+        shape='exclamation-triangle' size='20'/>
       <h3 style={{...styles.baseHeader, ...styles.bold}}>Delete environment options</h3>
     </div>
 
@@ -253,8 +253,8 @@ export const ConfirmDeleteUnattachedPD = ({onConfirm, onCancel}) => {
       <h3 style={{...styles.baseHeader, ...styles.bold, gridColumn: 1, gridRow: 1}}>
         <div data-test-id='delete-unattached-pd' style={{display: 'inline-block', marginRight: '0.5rem'}}>
           <RadioButton style={{marginRight: '0.25rem'}}
-                       onChange={() => setDeleting(true)}
-                       checked={deleting === true}/>
+            onChange={() => setDeleting(true)}
+            checked={deleting === true}/>
           <label>Delete persistent disk</label>
         </div>
       </h3>
@@ -265,32 +265,32 @@ export const ConfirmDeleteUnattachedPD = ({onConfirm, onCancel}) => {
         If you want to permanently save some files from the disk before deleting it,
         you will need to create a new cloud environment to access it. </p>
     </div>
-      <div>
-        <div>To backup and share files, such as input data, analysis outputs,
+    <div>
+      <div>To backup and share files, such as input data, analysis outputs,
           or installed packages, <a href={supportUrls.workspaceBucket}>move them to the workspace bucket.</a>
-        </div>
-        <div>Note: Jupyter notebooks are autosaved to the workspace bucket, and deleting your disk will not delete your notebooks.</div>
+      </div>
+      <div>Note: Jupyter notebooks are autosaved to the workspace bucket, and deleting your disk will not delete your notebooks.</div>
     </div>
     <FlexRow style={{justifyContent: 'flex-end'}}>
       <Button
-          type='secondaryLight'
-          aria-label={'Cancel'}
-          style={{marginRight: '.6rem'}}
-          onClick={() => onCancel()}>
+        type='secondaryLight'
+        aria-label={'Cancel'}
+        style={{marginRight: '.6rem'}}
+        onClick={() => onCancel()}>
         Cancel
       </Button>
       <Button
-          aria-label={'Delete'}
-          disabled={!deleting}
-          onClick={async() => {
-            setDeleting(true);
-            try {
-              await onConfirm();
-            } catch (err) {
-              setDeleting(false);
-              throw err;
-            }
-          }}>
+        aria-label={'Delete'}
+        disabled={!deleting}
+        onClick={async() => {
+          setDeleting(true);
+          try {
+            await onConfirm();
+          } catch (err) {
+            setDeleting(false);
+            throw err;
+          }
+        }}>
         Delete
       </Button>
     </FlexRow>
@@ -305,9 +305,9 @@ export const ConfirmDeleteRuntimeWithPD = ({onCancel, onConfirm, computeType, pd
       <h3 style={{...styles.baseHeader, ...styles.bold, gridColumn: 1, gridRow: 1}}>
         <div data-test-id='delete-runtime' style={{display: 'inline-block', marginRight: '0.5rem'}}>
           <RadioButton name='ageType'
-                       style={{marginRight: '0.25rem'}}
-                       onChange={() => setRuntimeStatusReq(RuntimeStatusRequest.DeleteRuntime)}
-                       checked={runtimeStatusReq === RuntimeStatusRequest.DeleteRuntime}/>
+            style={{marginRight: '0.25rem'}}
+            onChange={() => setRuntimeStatusReq(RuntimeStatusRequest.DeleteRuntime)}
+            checked={runtimeStatusReq === RuntimeStatusRequest.DeleteRuntime}/>
           <label>Keep persistent disk, delete environment</label>
         </div>
       </h3>
@@ -330,9 +330,9 @@ export const ConfirmDeleteRuntimeWithPD = ({onCancel, onConfirm, computeType, pd
       <h3 style={{...styles.baseHeader, ...styles.bold, gridColumn: 1, gridRow: 1}}>
         <div data-test-id='delete-runtime-and-pd' style={{display: 'inline-block', marginRight: '0.5rem'}}>
           <RadioButton name='ageType'
-                       style={{marginRight: '0.25rem'}}
-                       onChange={() => setRuntimeStatusReq(RuntimeStatusRequest.DeleteRuntimeAndPD)}
-                       checked={runtimeStatusReq === RuntimeStatusRequest.DeleteRuntimeAndPD}/>
+            style={{marginRight: '0.25rem'}}
+            onChange={() => setRuntimeStatusReq(RuntimeStatusRequest.DeleteRuntimeAndPD)}
+            checked={runtimeStatusReq === RuntimeStatusRequest.DeleteRuntimeAndPD}/>
           <label>Delete persistent disk and environment</label>
         </div>
       </h3>
@@ -346,8 +346,8 @@ export const ConfirmDeleteRuntimeWithPD = ({onCancel, onConfirm, computeType, pd
       <h3 style={{...styles.baseHeader, ...styles.bold, gridColumn: 1, gridRow: 1}}>
         <div data-test-id='delete-runtime' style={{display: 'inline-block', marginRight: '0.5rem'}}>
           <RadioButton style={{marginRight: '0.25rem'}}
-                       onChange={() => setRuntimeStatusReq(RuntimeStatusRequest.DeleteRuntime)}
-                       checked={runtimeStatusReq === RuntimeStatusRequest.DeleteRuntime}/>
+            onChange={() => setRuntimeStatusReq(RuntimeStatusRequest.DeleteRuntime)}
+            checked={runtimeStatusReq === RuntimeStatusRequest.DeleteRuntime}/>
           <label>Delete application configuration and cloud compute profile</label>
         </div>
       </h3>
@@ -362,8 +362,8 @@ export const ConfirmDeleteRuntimeWithPD = ({onCancel, onConfirm, computeType, pd
       <h3 style={{...styles.baseHeader, ...styles.bold, gridColumn: 1, gridRow: 1}}>
         <div data-test-id='delete-unattached-pd' style={{display: 'inline-block', marginRight: '0.5rem'}}>
           <RadioButton style={{marginRight: '0.25rem'}}
-                       onChange={() => setRuntimeStatusReq(RuntimeStatusRequest.DeletePD)}
-                       checked={runtimeStatusReq === RuntimeStatusRequest.DeletePD}/>
+            onChange={() => setRuntimeStatusReq(RuntimeStatusRequest.DeletePD)}
+            checked={runtimeStatusReq === RuntimeStatusRequest.DeletePD}/>
           <label>Delete unattached persistent disk</label>
         </div>
       </h3>
@@ -380,41 +380,41 @@ export const ConfirmDeleteRuntimeWithPD = ({onCancel, onConfirm, computeType, pd
   </div>;
   return <Fragment>
     <div style={{display: 'flex',  marginRight: '0.5rem'}}>
-        <ClrIcon style={{color: colors.warning, marginRight: '0.25rem'}} className='is-solid'
-                 shape='exclamation-triangle' size='20'/>
-        <h3 style={{...styles.baseHeader, ...styles.bold}}>Delete environment options</h3>
+      <ClrIcon style={{color: colors.warning, marginRight: '0.25rem'}} className='is-solid'
+        shape='exclamation-triangle' size='20'/>
+      <h3 style={{...styles.baseHeader, ...styles.bold}}>Delete environment options</h3>
     </div>
-      {computeType === ComputeType.Standard ? standardvmDeleteOption : dataprocDeleteOption}
-      <div>
-        <div>To backup and share files, such as input data, analysis outputs, or installed packages,
-          <a href={supportUrls.workspaceBucket}>move them to the workspace bucket.</a></div>
-        <div>Note: Jupyter notebooks are autosaved to the workspace bucket, and deleting your disk will not delete your notebooks.</div>
-      </div>
-      <FlexRow style={{justifyContent: 'flex-end'}}>
-        <Button
-            type='secondaryLight'
-            aria-label={'Cancel'}
-            disabled={deleting}
-            style={{marginRight: '.6rem'}}
-            onClick={() => onCancel()}>
+    {computeType === ComputeType.Standard ? standardvmDeleteOption : dataprocDeleteOption}
+    <div>
+      <div>To backup and share files, such as input data, analysis outputs, or installed packages,
+        <a href={supportUrls.workspaceBucket}>move them to the workspace bucket.</a></div>
+      <div>Note: Jupyter notebooks are autosaved to the workspace bucket, and deleting your disk will not delete your notebooks.</div>
+    </div>
+    <FlexRow style={{justifyContent: 'flex-end'}}>
+      <Button
+        type='secondaryLight'
+        aria-label={'Cancel'}
+        disabled={deleting}
+        style={{marginRight: '.6rem'}}
+        onClick={() => onCancel()}>
           Cancel
-        </Button>
-        <Button
-            aria-label={'Delete'}
-            disabled={deleting}
-            onClick={async() => {
-              setDeleting(true);
-              try {
-                await onConfirm(runtimeStatusReq);
-              } catch (err) {
-                setDeleting(false);
-                throw err;
-              }
-            }}>
+      </Button>
+      <Button
+        aria-label={'Delete'}
+        disabled={deleting}
+        onClick={async() => {
+          setDeleting(true);
+          try {
+            await onConfirm(runtimeStatusReq);
+          } catch (err) {
+            setDeleting(false);
+            throw err;
+          }
+        }}>
           Delete
-        </Button>
-      </FlexRow>
-    </Fragment>;
+      </Button>
+    </FlexRow>
+  </Fragment>;
 };
 
 const MachineSelector = ({
@@ -434,23 +434,23 @@ const MachineSelector = ({
     <FlexRow style={styles.labelAndInput}>
       <label style={{...styles.label, ...cpuLabelStyles}} htmlFor={`${idPrefix}-cpu`}>CPUs</label>
       <Dropdown id={`${idPrefix}-cpu`}
-                options={fp.flow(
-                    // Show all CPU options.
-                  fp.map('cpu'),
-                    // In the event that was remove a machine type from our set of valid
-                    // configs, we want to continue to allow rendering of the value here.
-                    // Union also makes the CPU values unique.
-                  fp.union([cpu]),
-                  fp.sortBy(fp.identity)
-                )(validMachineTypes)}
-                onChange={
-                  ({value}) => fp.flow(
-                    fp.sortBy('memory'),
-                    fp.find({cpu: value}),
-                    onChange)(validMachineTypes)
-                }
-                disabled={disabled}
-                value={cpu}/>
+        options={fp.flow(
+          // Show all CPU options.
+          fp.map('cpu'),
+          // In the event that was remove a machine type from our set of valid
+          // configs, we want to continue to allow rendering of the value here.
+          // Union also makes the CPU values unique.
+          fp.union([cpu]),
+          fp.sortBy(fp.identity)
+        )(validMachineTypes)}
+        onChange={
+          ({value}) => fp.flow(
+            fp.sortBy('memory'),
+            fp.find({cpu: value}),
+            onChange)(validMachineTypes)
+        }
+        disabled={disabled}
+        value={cpu}/>
     </FlexRow>
     <FlexRow style={styles.labelAndInput}>
       <label style={{...styles.label, ...ramLabelStyles}} htmlFor={`${idPrefix}-ram`}>RAM (GB)</label>
@@ -469,45 +469,45 @@ const MachineSelector = ({
             // If the selected machine is not different from the current machine return null
             // maybeGetMachine,
             onChange
-            )(validMachineTypes)}
+          )(validMachineTypes)}
         disabled={disabled}
         value={memory}
-        />
+      />
     </FlexRow>
   </Fragment>;
 };
 
 const DisabledPanel = () => {
   return <WarningMessage
-        data-test-id='runtime-disabled-panel'
-        iconSize={16}
-        iconPosition={'top'}
-    >
-      {
-        <TextColumn>
-          <div style={{fontWeight: 600}}>Cloud services are disabled for this workspace.</div>
-          <div style={{marginTop: '0.5rem'}}>
+    data-test-id='runtime-disabled-panel'
+    iconSize={16}
+    iconPosition={'top'}
+  >
+    {
+      <TextColumn>
+        <div style={{fontWeight: 600}}>Cloud services are disabled for this workspace.</div>
+        <div style={{marginTop: '0.5rem'}}>
             You cannot run or edit notebooks in this workspace because billed services are disabled
             for the workspace creator's <AoU/> Researcher account.
-          </div>
-        </TextColumn>
-      }
-    </WarningMessage>;
+        </div>
+      </TextColumn>
+    }
+  </WarningMessage>;
 };
 
 const DiskSizeSelector = ({onChange, disabled, selectedDiskSize, diskSize, idPrefix}) => {
   return <FlexRow  style={styles.labelAndInput}>
-      <label style={styles.label} htmlFor={`${idPrefix}-disk`}>Disk (GB)</label>
-      <InputNumber id={`${idPrefix}-disk`}
-                   showButtons
-                   disabled={disabled}
-                   decrementButtonClassName='p-button-secondary'
-                   incrementButtonClassName='p-button-secondary'
-                   value={selectedDiskSize || diskSize}
-                   inputStyle={styles.inputNumber}
-                   onChange={({value}) => onChange(value)}
-      />
-    </FlexRow>;
+    <label style={styles.label} htmlFor={`${idPrefix}-disk`}>Disk (GB)</label>
+    <InputNumber id={`${idPrefix}-disk`}
+      showButtons
+      disabled={disabled}
+      decrementButtonClassName='p-button-secondary'
+      incrementButtonClassName='p-button-secondary'
+      value={selectedDiskSize || diskSize}
+      inputStyle={styles.inputNumber}
+      onChange={({value}) => onChange(value)}
+    />
+  </FlexRow>;
 };
 
 const GpuConfigSelector = ({disabled, onChange, selectedMachine, gpuConfig})  => {
@@ -532,35 +532,35 @@ const GpuConfigSelector = ({disabled, onChange, selectedMachine, gpuConfig})  =>
   return <FlexColumn style={{marginTop: '1rem', justifyContent: 'space-between'}}>
     <FlexRow >
       <CheckBox id={'enable-gpu'}
-                label='Enable GPUs'
-                checked={enableGpu}
-                onChange={() => {
-                  setEnableGpu(!enableGpu);
-                }}/>
+        label='Enable GPUs'
+        checked={enableGpu}
+        onChange={() => {
+          setEnableGpu(!enableGpu);
+        }}/>
       <a href= 'https://support.terra.bio/hc/en-us/articles/4403006001947'>Learn more about GPU cost and restrictions.</a>
     </FlexRow>
     { enableGpu &&
     <FlexRow style={styles.formGrid}>
-        <FlexRow style={styles.labelAndInput}>
+      <FlexRow style={styles.labelAndInput}>
         <label style={{...styles.label, minWidth: '3.0rem'}} htmlFor='gpu-type'>Gpu Type</label>
         <Dropdown id={'gpu-type'}
-                  style={{width: '7rem'}}
-                  options={validGpuNames}
-                  onChange={
-                    ({value}) => {
-                      setSelectedGpuType(fp.find({name: value}, validGpuOptions).type); }
-                  }
-                  disabled={disabled}
-                  value={gpuTypeToDisplayName(selectedGpuType)}/>
-        </FlexRow>
-        <FlexRow style={styles.labelAndInput}>
+          style={{width: '7rem'}}
+          options={validGpuNames}
+          onChange={
+            ({value}) => {
+              setSelectedGpuType(fp.find({name: value}, validGpuOptions).type); }
+          }
+          disabled={disabled}
+          value={gpuTypeToDisplayName(selectedGpuType)}/>
+      </FlexRow>
+      <FlexRow style={styles.labelAndInput}>
         <label style={{...styles.label, minWidth: '2.0rem'}} htmlFor='gpu-num'>GPUs</label>
         <Dropdown id={'gpu-num'}
-                  options={validNumGpusOptions}
-                  onChange={({value}) => setSelectedNumOfGpus(value)}
-                  disabled={disabled}
-                  value={selectedNumOfGpus}/>
-        </FlexRow>
+          options={validNumGpusOptions}
+          onChange={({value}) => setSelectedNumOfGpus(value)}
+          disabled={disabled}
+          value={selectedNumOfGpus}/>
+      </FlexRow>
     </FlexRow>}
   </FlexColumn>;
 };
@@ -573,13 +573,13 @@ const PersistentDiskSizeSelector = ({onChange, disabled, selectedDiskSize, diskS
       </a>
     </div>
     <InputNumber id={'persistent-disk'}
-                 showButtons
-                 disabled={disabled}
-                 decrementButtonClassName='p-button-secondary'
-                 incrementButtonClassName='p-button-secondary'
-                 value={selectedDiskSize || diskSize}
-                 inputStyle={styles.inputNumber}
-                 onChange={({value}) => onChange(value)}
+      showButtons
+      disabled={disabled}
+      decrementButtonClassName='p-button-secondary'
+      incrementButtonClassName='p-button-secondary'
+      value={selectedDiskSize || diskSize}
+      inputStyle={styles.inputNumber}
+      onChange={({value}) => onChange(value)}
     />
   </div>;
 };
@@ -621,7 +621,7 @@ const DataProcConfigSelector = ({onChange, disabled, runtimeStatus, dataprocExis
   // and let the user resume themselves.
   const workerCountDisabledByStopped = dataprocExists && runtimeStatus === RuntimeStatus.Stopped;
   const workerCountTooltip = workerCountDisabledByStopped ?
-      'Cannot update worker counts on a stopped Dataproc environment, please start your environment first.' : undefined;
+    'Cannot update worker counts on a stopped Dataproc environment, please start your environment first.' : undefined;
 
   return <fieldset style={{marginTop: '0.75rem'}}>
     <legend style={styles.workerConfigLabel}>Worker Configuration</legend>
@@ -685,7 +685,7 @@ const PresetSelector = ({
       fp.values,
       fp.filter(({runtimeTemplate}) => allowDataproc || !runtimeTemplate.dataprocConfig),
       fp.map(({displayName, runtimeTemplate}) => ({label: displayName, value: runtimeTemplate}))
-      )(runtimePresets)
+    )(runtimePresets)
     }
     onChange={({value}) => {
       const {presetDiskSize, presetMachineName, presetCompute} = fp.cond([
@@ -853,25 +853,25 @@ const StartStopRuntimeButton = ({workspaceNamespace, googleProject}) => {
         <FlexRow style={iconWrapperStyle}>
           <Clickable onClick={() => onClick()}>
             <img
-                alt={altText}
-                src={iconSrc}
-                style={styleOverrides}
-                data-test-id={dataTestId}
+              alt={altText}
+              src={iconSrc}
+              style={styleOverrides}
+              data-test-id={dataTestId}
             />
           </Clickable>
         </FlexRow>
       </TooltipTrigger>
     }
     {!onClick && <TooltipTrigger content={<div>{altText}</div>} side='left'>
-        <FlexRow style={iconWrapperStyle}>
-          <img
-              alt={altText}
-              src={iconSrc}
-              style={styleOverrides}
-              data-test-id={dataTestId}
-          />
-        </FlexRow>
-      </TooltipTrigger>
+      <FlexRow style={iconWrapperStyle}>
+        <img
+          alt={altText}
+          src={iconSrc}
+          style={styleOverrides}
+          data-test-id={dataTestId}
+        />
+      </FlexRow>
+    </TooltipTrigger>
     }
   </FlexRow>;
 };
@@ -921,19 +921,19 @@ const CreatePanel = ({creatorFreeCreditsRemaining, profile, setPanelContent, wor
     <FlexRow style={styles.costPredictorWrapper}>
       <StartStopRuntimeButton workspaceNamespace={workspace.namespace} googleProject={workspace.googleProject}/>
       <CostInfo runtimeChanged={false}
-                runtimeConfig={runtimeConfig}
-                currentUser={profile.username}
-                workspace={workspace}
-                creatorFreeCreditsRemaining={creatorFreeCreditsRemaining}
-                runtimeCtx = {runtimeCtx}
+        runtimeConfig={runtimeConfig}
+        currentUser={profile.username}
+        workspace={workspace}
+        creatorFreeCreditsRemaining={creatorFreeCreditsRemaining}
+        runtimeCtx = {runtimeCtx}
       />
     </FlexRow>
     <FlexRow style={{justifyContent: 'space-between', alignItems: 'center'}}>
       <h3 style={{...styles.sectionHeader, ...styles.bold}}>Recommended Environment for {displayName}</h3>
       <Button
-          type='secondarySmall'
-          onClick={() => setPanelContent(PanelContent.Customize)}
-          aria-label='Customize'
+        type='secondarySmall'
+        onClick={() => setPanelContent(PanelContent.Customize)}
+        aria-label='Customize'
       >
         Customize
       </Button>
@@ -1042,7 +1042,7 @@ const RuntimePanel = fp.flow(
     [([, r, s]) => r === null || r === undefined || s === RuntimeStatus.Unknown, () => PanelContent.Create],
     [([, r, ]) => r.status === RuntimeStatus.Deleted &&
       ([RuntimeConfigurationType.GeneralAnalysis, RuntimeConfigurationType.HailGenomicAnalysis].includes(r.configurationType)),
-      () => PanelContent.Create],
+    () => PanelContent.Create],
     [() => true, () => PanelContent.Customize]
   ])([workspace.billingStatus, currentRuntime, status]);
   const [panelContent, setPanelContent] = useState<PanelContent>(initialPanelContent);
@@ -1062,7 +1062,7 @@ const RuntimePanel = fp.flow(
   const [selectedGpuConfig, setSelectedGpuConfig] = useState<GpuConfig | null>(gpuConfig);
 
   const validMainMachineTypes = selectedCompute === ComputeType.Standard ?
-      validLeoGceMachineTypes : validLeoDataprocMasterMachineTypes;
+    validLeoGceMachineTypes : validLeoDataprocMasterMachineTypes;
   // The compute type affects the set of valid machine types, so revert to the
   // default machine type if switching compute types would invalidate the main
   // machine type choice.
@@ -1191,8 +1191,8 @@ const RuntimePanel = fp.flow(
   // persistent disk.
   const diskSizeValidatorWithMessage = (diskType = 'standard' || 'master' || 'worker') => {
     const maxDiskSize = isUsingFreeTierBillingAccount(workspace)
-        ? 4000
-        : 64000;
+      ? 4000
+      : 64000;
     const message = {
       standard: `^Disk size must be between ${MIN_DISK_SIZE_GB} and ${maxDiskSize} GB`,
       master: `^Master disk size must be between ${MIN_DISK_SIZE_GB} and ${maxDiskSize} GB`,
@@ -1270,8 +1270,8 @@ const RuntimePanel = fp.flow(
   const standardPdErrors = validate({selectedPdSize}, standardPdValidator);
   const runningCostErrors = validate({currentRunningCost}, runningCostValidator);
   const dataprocErrors = selectedCompute === ComputeType.Dataproc
-      ? validate({masterDiskSize, workerDiskSize, numberOfWorkers}, dataprocValidators)
-      : undefined;
+    ? validate({masterDiskSize, workerDiskSize, numberOfWorkers}, dataprocValidators)
+    : undefined;
 
   const getErrorMessageContent = () => {
     const errorDivs = [];
@@ -1330,12 +1330,12 @@ const RuntimePanel = fp.flow(
 
   const renderTryAgainButton = () => {
     return <Button
-        aria-label='Try Again'
-        disabled={!runtimeCanBeCreated}
-        onClick={() => {
-          setRequestedRuntime(createRuntimeRequest(newRuntimeConfig));
-          onClose();
-        }}>
+      aria-label='Try Again'
+      disabled={!runtimeCanBeCreated}
+      onClick={() => {
+        setRequestedRuntime(createRuntimeRequest(newRuntimeConfig));
+        onClose();
+      }}>
       Try Again
     </Button>;
   };
@@ -1354,60 +1354,60 @@ const RuntimePanel = fp.flow(
   return <div id='runtime-panel'>
     {switchCase(panelContent,
       [PanelContent.Create, () =>
-            <Fragment>
-              <CreatePanel
-                  creatorFreeCreditsRemaining={creatorFreeCreditsRemaining}
-                  profile={profile}
-                  setPanelContent={(value) => setPanelContent(value)}
-                  workspace={workspace}
-                  runtimeConfig={newRuntimeConfig}
-                  runtimeCtx = {runtimeCtx}
-              />
-              <FlexRow style={{justifyContent: 'flex-end', marginTop: '1rem'}}>
-                {renderCreateButton()}
-              </FlexRow>
-            </Fragment>
+        <Fragment>
+          <CreatePanel
+            creatorFreeCreditsRemaining={creatorFreeCreditsRemaining}
+            profile={profile}
+            setPanelContent={(value) => setPanelContent(value)}
+            workspace={workspace}
+            runtimeConfig={newRuntimeConfig}
+            runtimeCtx = {runtimeCtx}
+          />
+          <FlexRow style={{justifyContent: 'flex-end', marginTop: '1rem'}}>
+            {renderCreateButton()}
+          </FlexRow>
+        </Fragment>
       ],
       [PanelContent.DeleteRuntime, () => {
         if (runtimeCtx.enablePD && runtimeCtx.pdExists) {
           return  <ConfirmDeleteRuntimeWithPD
-              onConfirm={async(runtimeStatusReq) => {
-                await setRuntimeStatus(runtimeStatusReq);
-                onClose();
-              }}
-              onCancel={() => setPanelContent(PanelContent.Customize)}
-              computeType = {initialCompute}
-              pdSize = {selectedPdSize}
+            onConfirm={async(runtimeStatusReq) => {
+              await setRuntimeStatus(runtimeStatusReq);
+              onClose();
+            }}
+            onCancel={() => setPanelContent(PanelContent.Customize)}
+            computeType = {initialCompute}
+            pdSize = {selectedPdSize}
           />;
         } else {
           return <ConfirmDelete
-              onConfirm={async() => {
-                await setRuntimeStatus(RuntimeStatusRequest.DeleteRuntime);
-                onClose();
-              }}
-              onCancel={() => setPanelContent(PanelContent.Customize)}
+            onConfirm={async() => {
+              await setRuntimeStatus(RuntimeStatusRequest.DeleteRuntime);
+              onClose();
+            }}
+            onCancel={() => setPanelContent(PanelContent.Customize)}
           />;
         }}],
       [PanelContent.DeleteUnattachedPd, () => <ConfirmDeleteUnattachedPD
-          onConfirm={async() => {
-            await disksApi().deleteDisk(namespace, persistentDisk.name);
-            onClose();
-          }}
-          onCancel={() => setPanelContent(PanelContent.Customize)}
+        onConfirm={async() => {
+          await disksApi().deleteDisk(namespace, persistentDisk.name);
+          onClose();
+        }}
+        onCancel={() => setPanelContent(PanelContent.Customize)}
       />],
       [PanelContent.Customize, () => <Fragment>
-            <div style={styles.controlSection}>
-              <FlexRow style={styles.costPredictorWrapper}>
-                <StartStopRuntimeButton workspaceNamespace={workspace.namespace} googleProject={workspace.googleProject}/>
-                <CostInfo runtimeChanged={runtimeChanged}
-                  runtimeConfig={newRuntimeConfig}
-                  currentUser={profile.username}
-                  workspace={workspace}
-                  creatorFreeCreditsRemaining={creatorFreeCreditsRemaining}
-                          runtimeCtx = {runtimeCtx}
-                  />
-              </FlexRow>
-              {currentRuntime && currentRuntime.errors && currentRuntime.errors.length > 0
+        <div style={styles.controlSection}>
+          <FlexRow style={styles.costPredictorWrapper}>
+            <StartStopRuntimeButton workspaceNamespace={workspace.namespace} googleProject={workspace.googleProject}/>
+            <CostInfo runtimeChanged={runtimeChanged}
+              runtimeConfig={newRuntimeConfig}
+              currentUser={profile.username}
+              workspace={workspace}
+              creatorFreeCreditsRemaining={creatorFreeCreditsRemaining}
+              runtimeCtx = {runtimeCtx}
+            />
+          </FlexRow>
+          {currentRuntime && currentRuntime.errors && currentRuntime.errors.length > 0
                 && <ErrorMessage iconPosition={'top'} iconSize={16}>
                   <div>An error was encountered with your cloud environment. Please re-attempt creation of the
                     environment and contact support if the error persists.</div>
@@ -1418,148 +1418,148 @@ const RuntimePanel = fp.flow(
                     </div>
                   })}
                 </ErrorMessage>
-              }
-              <PresetSelector
-                allowDataproc={allowDataproc}
-                disabled={disableControls}
-                setSelectedDiskSize={(disk) => setSelectedDiskSize(disk)}
-                setSelectedMachine={(machine) => setSelectedMachine(machine)}
-                setSelectedCompute={(compute) => setSelectedCompute(compute)}
-                setSelectedDataprocConfig={(dataproc) => setSelectedDataprocConfig(dataproc)}
-              />
-              {/* Runtime customization: change detailed machine configuration options. */}
-              <h3 style={{...styles.sectionHeader, ...styles.bold}}>Cloud compute profile</h3>
-              <div style={styles.formGrid}>
-                <MachineSelector
-                  idPrefix='runtime'
-                  disabled={disableControls}
-                  selectedMachine={selectedMachine}
-                  onChange={(value) => setSelectedMachine(value)}
-                  validMachineTypes={validMainMachineTypes}
-                  machineType={machineName}/>
-                {(!runtimeCtx.enablePD || selectedCompute !== ComputeType.Standard) &&
+          }
+          <PresetSelector
+            allowDataproc={allowDataproc}
+            disabled={disableControls}
+            setSelectedDiskSize={(disk) => setSelectedDiskSize(disk)}
+            setSelectedMachine={(machine) => setSelectedMachine(machine)}
+            setSelectedCompute={(compute) => setSelectedCompute(compute)}
+            setSelectedDataprocConfig={(dataproc) => setSelectedDataprocConfig(dataproc)}
+          />
+          {/* Runtime customization: change detailed machine configuration options. */}
+          <h3 style={{...styles.sectionHeader, ...styles.bold}}>Cloud compute profile</h3>
+          <div style={styles.formGrid}>
+            <MachineSelector
+              idPrefix='runtime'
+              disabled={disableControls}
+              selectedMachine={selectedMachine}
+              onChange={(value) => setSelectedMachine(value)}
+              validMachineTypes={validMainMachineTypes}
+              machineType={machineName}/>
+            {(!runtimeCtx.enablePD || selectedCompute !== ComputeType.Standard) &&
                     <DiskSizeSelector
-                        idPrefix='runtime'
-                        selectedDiskSize={selectedDiskSize}
-                        onChange={(value) => {
-                          setSelectedDiskSize(value);
-                        }}
-                        disabled={disableControls}
-                        diskSize={diskSize}
-                    />}
-             </div>
-              <FlexRow style={{justifyContent: 'space-between'}}>
-                {enableGpu && selectedCompute === ComputeType.Standard &&
-                <GpuConfigSelector
-                    disabled={disableControls}
-                    onChange={config => {
-                      setSelectedGpuConfig(config);
-                    }}
-                    selectedMachine={selectedMachine}
-                    gpuConfig={selectedGpuConfig}/>
-                }
-              </FlexRow>
-             <FlexRow style={{marginTop: '1rem', justifyContent: 'space-between'}}>
-               <FlexColumn>
-                 <label style={styles.label} htmlFor='runtime-compute'>Compute type</label>
-                 <Dropdown id='runtime-compute'
-                           disabled={!allowDataproc || disableControls}
-                           style={{width: '10rem'}}
-                           options={[ComputeType.Standard, ComputeType.Dataproc]}
-                           value={selectedCompute || ComputeType.Standard}
-                           onChange={({value}) => {setSelectedCompute(value); }}
-                 />
-
-               </FlexColumn>
-               <FlexColumn>
-                 <label style={styles.label} htmlFor='runtime-autopause'>Automatically pause after idle for</label>
-                 <Dropdown id='runtime-autopause'
-                           disabled={disableControls}
-                           style={{width: '10rem'}}
-                           options={Array.from(AutopauseMinuteThresholds.entries()).map(entry => ({label: entry[1], value: entry[0]}))}
-                           value={selectedAutopauseThreshold || DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES}
-                           onChange={({value}) => setSelectedAutopauseThreshold(value)}
-                 />
-               </FlexColumn>
-             </FlexRow>
-             {
-               selectedCompute === ComputeType.Dataproc &&
-               <DataProcConfigSelector
-                   disabled={disableControls}
-                   runtimeStatus={status}
-                   dataprocExists={runtimeCtx.dataprocExists}
-                   onChange={config => setSelectedDataprocConfig(config)}
-                   dataprocConfig={selectedDataprocConfig} />
-             }
-              <FlexRow style={{justifyContent: 'space-between', marginTop: '.75rem'}}>
-                {runtimeCtx.enablePD && selectedCompute === ComputeType.Standard &&
-                <div>
-                  <PersistentDiskSizeSelector
-                      selectedDiskSize={selectedPdSize}
+                      idPrefix='runtime'
+                      selectedDiskSize={selectedDiskSize}
                       onChange={(value) => {
-                        setSelectedPdSize(value);
+                        setSelectedDiskSize(value);
                       }}
                       disabled={disableControls}
-                      diskSize={pdSize}
+                      diskSize={diskSize}
+                    />}
+          </div>
+          <FlexRow style={{justifyContent: 'space-between'}}>
+            {enableGpu && selectedCompute === ComputeType.Standard &&
+                <GpuConfigSelector
+                  disabled={disableControls}
+                  onChange={config => {
+                    setSelectedGpuConfig(config);
+                  }}
+                  selectedMachine={selectedMachine}
+                  gpuConfig={selectedGpuConfig}/>
+            }
+          </FlexRow>
+          <FlexRow style={{marginTop: '1rem', justifyContent: 'space-between'}}>
+            <FlexColumn>
+              <label style={styles.label} htmlFor='runtime-compute'>Compute type</label>
+              <Dropdown id='runtime-compute'
+                disabled={!allowDataproc || disableControls}
+                style={{width: '10rem'}}
+                options={[ComputeType.Standard, ComputeType.Dataproc]}
+                value={selectedCompute || ComputeType.Standard}
+                onChange={({value}) => {setSelectedCompute(value); }}
+              />
+
+            </FlexColumn>
+            <FlexColumn>
+              <label style={styles.label} htmlFor='runtime-autopause'>Automatically pause after idle for</label>
+              <Dropdown id='runtime-autopause'
+                disabled={disableControls}
+                style={{width: '10rem'}}
+                options={Array.from(AutopauseMinuteThresholds.entries()).map(entry => ({label: entry[1], value: entry[0]}))}
+                value={selectedAutopauseThreshold || DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES}
+                onChange={({value}) => setSelectedAutopauseThreshold(value)}
+              />
+            </FlexColumn>
+          </FlexRow>
+          {
+            selectedCompute === ComputeType.Dataproc &&
+               <DataProcConfigSelector
+                 disabled={disableControls}
+                 runtimeStatus={status}
+                 dataprocExists={runtimeCtx.dataprocExists}
+                 onChange={config => setSelectedDataprocConfig(config)}
+                 dataprocConfig={selectedDataprocConfig} />
+          }
+          <FlexRow style={{justifyContent: 'space-between', marginTop: '.75rem'}}>
+            {runtimeCtx.enablePD && selectedCompute === ComputeType.Standard &&
+                <div>
+                  <PersistentDiskSizeSelector
+                    selectedDiskSize={selectedPdSize}
+                    onChange={(value) => {
+                      setSelectedPdSize(value);
+                    }}
+                    disabled={disableControls}
+                    diskSize={pdSize}
                   /> </div>
-                }
-              </FlexRow>
-           </div>
-           {runtimeExists && updateMessaging.warn &&
+            }
+          </FlexRow>
+        </div>
+        {runtimeExists && updateMessaging.warn &&
              <WarningMessage iconSize={30} iconPosition={'center'}>
-                <div>{updateMessaging.warn}</div>
+               <div>{updateMessaging.warn}</div>
              </WarningMessage>
-           }
-           {getErrorMessageContent().length > 0 &&
+        }
+        {getErrorMessageContent().length > 0 &&
              <ErrorMessage iconSize={16} iconPosition={'top'} data-test-id={'runtime-error-messages'}>
                {getErrorMessageContent()}
              </ErrorMessage>
-           }
-           {getWarningMessageContent().length > 0 &&
+        }
+        {getWarningMessageContent().length > 0 &&
             <WarningMessage iconSize={16} iconPosition={'top'} data-test-id={'runtime-warning-messages'}>
               {getWarningMessageContent()}
             </WarningMessage>
-           }
-        {runtimeCtx.unattachedPdExists && !runtimeExists ?
-            <FlexRow style={{justifyContent: 'space-between', marginTop: '.75rem'}}>
-                <LinkButton
-                    style={{...styles.deleteLink, ...(
-                          (disableControls) ?
-                              {color: colorWithWhiteness(colors.dark, .4)} : {}
-                      )}}
-                    aria-label='Delete Persistent Disk'
-                    disabled={disableControls}
-                    onClick={() => setPanelContent(PanelContent.DeleteUnattachedPd)}>Delete Persistent Disk</LinkButton>
-                {!pdSizeReduced ? renderCreateButton() : renderNextButton()}
-            </FlexRow> :
-            <FlexRow style={{justifyContent: 'space-between', marginTop: '.75rem'}}>
-              <LinkButton
-                  style={{...styles.deleteLink, ...(
-                        (disableControls || !runtimeExists) ?
-                            {color: colorWithWhiteness(colors.dark, .4)} : {}
-                    )}}
-                  aria-label='Delete Environment'
-                  disabled={disableControls || !runtimeExists}
-                  onClick={() => setPanelContent(PanelContent.DeleteRuntime)}>Delete Environment</LinkButton>
-              {
-                cond(
-                    [runtimeExists || (pdExists && pdSizeReduced), () => renderNextButton()],
-                    [currentRuntime && currentRuntime.errors && currentRuntime.errors.length > 0, () => renderTryAgainButton()],
-                    () => renderCreateButton()
-                )
-              }
-            </FlexRow>
         }
-    </Fragment>],
+        {runtimeCtx.unattachedPdExists && !runtimeExists ?
+          <FlexRow style={{justifyContent: 'space-between', marginTop: '.75rem'}}>
+            <LinkButton
+              style={{...styles.deleteLink, ...(
+                (disableControls) ?
+                  {color: colorWithWhiteness(colors.dark, .4)} : {}
+              )}}
+              aria-label='Delete Persistent Disk'
+              disabled={disableControls}
+              onClick={() => setPanelContent(PanelContent.DeleteUnattachedPd)}>Delete Persistent Disk</LinkButton>
+            {!pdSizeReduced ? renderCreateButton() : renderNextButton()}
+          </FlexRow> :
+          <FlexRow style={{justifyContent: 'space-between', marginTop: '.75rem'}}>
+            <LinkButton
+              style={{...styles.deleteLink, ...(
+                (disableControls || !runtimeExists) ?
+                  {color: colorWithWhiteness(colors.dark, .4)} : {}
+              )}}
+              aria-label='Delete Environment'
+              disabled={disableControls || !runtimeExists}
+              onClick={() => setPanelContent(PanelContent.DeleteRuntime)}>Delete Environment</LinkButton>
+            {
+              cond(
+                [runtimeExists || (pdExists && pdSizeReduced), () => renderNextButton()],
+                [currentRuntime && currentRuntime.errors && currentRuntime.errors.length > 0, () => renderTryAgainButton()],
+                () => renderCreateButton()
+              )
+            }
+          </FlexRow>
+        }
+      </Fragment>],
       [PanelContent.Confirm, () => <ConfirmUpdatePanel initialRuntimeConfig={initialRuntimeConfig}
-                                                         newRuntimeConfig={newRuntimeConfig}
-                                                         onCancel={() => {
-                                                           setPanelContent(PanelContent.Customize);
-                                                         }}
-                                                         updateButton={renderUpdateButton()}
-                                                         runtimeCtx={runtimeCtx}
-        />],
-        [PanelContent.Disabled, () => <DisabledPanel/>])}
+        newRuntimeConfig={newRuntimeConfig}
+        onCancel={() => {
+          setPanelContent(PanelContent.Customize);
+        }}
+        updateButton={renderUpdateButton()}
+        runtimeCtx={runtimeCtx}
+      />],
+      [PanelContent.Disabled, () => <DisabledPanel/>])}
   </div > ;
 });
 

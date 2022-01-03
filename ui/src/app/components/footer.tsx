@@ -57,9 +57,9 @@ const styles = reactStyles({
 
 const FooterAnchorTag = ({style = {}, href, ...props}) => {
   return <StyledRouterLink
-      style={{...styles.footerAnchor, ...style}}
-      path={href}
-      {...props}
+    style={{...styles.footerAnchor, ...style}}
+    path={href}
+    {...props}
   >
     {props.children}
   </StyledRouterLink>;
@@ -67,10 +67,10 @@ const FooterAnchorTag = ({style = {}, href, ...props}) => {
 
 const NewTabFooterAnchorTag = ({style = {}, href, ...props}) => {
   return <StyledExternalLink
-      style={{...styles.footerAnchor, ...styles}}
-      href={href}
-      target='_blank'
-      {...props}
+    style={{...styles.footerAnchor, ...styles}}
+    href={href}
+    target='_blank'
+    {...props}
   >
     {props.children}
   </StyledExternalLink>;
@@ -78,16 +78,16 @@ const NewTabFooterAnchorTag = ({style = {}, href, ...props}) => {
 
 const DataBrowserLink = (props) => (
   <NewTabFooterAnchorTag href={environment.publicUiUrl}
-                         analyticsFn={AnalyticsTracker.Footer.DataBrowser}
-                         {...props}>
+    analyticsFn={AnalyticsTracker.Footer.DataBrowser}
+    {...props}>
     Data Browser
   </NewTabFooterAnchorTag>
 );
 
 const ResearchHubLink = (props) => (
   <NewTabFooterAnchorTag href='https://researchallofus.org'
-                         analyticsFn={AnalyticsTracker.Footer.ResearchHub}
-                         {...props}>
+    analyticsFn={AnalyticsTracker.Footer.ResearchHub}
+    {...props}>
     Research Hub
   </NewTabFooterAnchorTag>
 );
@@ -104,8 +104,8 @@ const FooterTemplate = ({style = {}, ...props}) => {
         <div style={{...styles.footerAside, marginTop: '20px'}}>
           The <AoU/> logo is a service mark of the&nbsp;
           <NewTabFooterAnchorTag
-              href='https://www.hhs.gov'
-              analyticsFn={AnalyticsTracker.Footer.HHS}>
+            href='https://www.hhs.gov'
+            analyticsFn={AnalyticsTracker.Footer.HHS}>
             U.S. Department of Health and Human Services
           </NewTabFooterAnchorTag>.<br/>
           The <AoU/> platform is for research only and does not provide medical advice, diagnosis or treatment. Copyright 2020.
@@ -142,15 +142,15 @@ const WorkbenchFooter = withUserProfile()(
             <FlexRow>
               <FlexColumn style={{width: '50%'}}>
                 <FooterAnchorTag href='/'
-                                 analyticsFn={tracker.Home}>
+                  analyticsFn={tracker.Home}>
                   Home
                 </FooterAnchorTag>
                 <FooterAnchorTag href='library'
-                                 analyticsFn={tracker.FeaturedWorkspaces}>
+                  analyticsFn={tracker.FeaturedWorkspaces}>
                   Featured Workspaces
                 </FooterAnchorTag>
                 <FooterAnchorTag href='workspaces'
-                                 analyticsFn={tracker.YourWorkspaces}>
+                  analyticsFn={tracker.YourWorkspaces}>
                   Your Workspaces
                 </FooterAnchorTag>
               </FlexColumn>
@@ -167,17 +167,17 @@ const WorkbenchFooter = withUserProfile()(
                   Getting Started
                 </NewTabFooterAnchorTag>
                 <NewTabFooterAnchorTag href={supportUrls.tableOfContents}
-                                       analyticsFn={tracker.SupportDocs}>
+                  analyticsFn={tracker.SupportDocs}>
                   Documentation
                 </NewTabFooterAnchorTag>
                 <NewTabFooterAnchorTag href={supportUrls.communityForum}
-                                       analyticsFn={tracker.CommunityForum}>
+                  analyticsFn={tracker.CommunityForum}>
                   Community Forum
                 </NewTabFooterAnchorTag>
               </FlexColumn>
               <FlexColumn style={{width: '50%'}}>
                 <NewTabFooterAnchorTag href={supportUrls.faq}
-                                       analyticsFn={tracker.SupportFAQ}>
+                  analyticsFn={tracker.SupportFAQ}>
                   FAQs
                 </NewTabFooterAnchorTag>
                 <LinkButton style={styles.footerAnchor} onClick={() => {
@@ -207,7 +207,7 @@ const RegistrationFooter = ({style = {}, ...props}) => {
         <ResearchHubLink style={{marginLeft: '1.5rem'}} />
         <div style={{fontSize: 12, marginLeft: '1.5rem'}}>
           Contact Us: <FooterAnchorTag href={`mailto:${SUPPORT_EMAIL}`}
-                                       analyticsFn={() => AnalyticsTracker.Footer.ContactUs('Email')}>
+            analyticsFn={() => AnalyticsTracker.Footer.ContactUs('Email')}>
             {SUPPORT_EMAIL}
           </FooterAnchorTag>
         </div>

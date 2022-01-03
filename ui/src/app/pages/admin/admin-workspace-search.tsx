@@ -18,20 +18,20 @@ export const AdminWorkspaceSearch = (spinnerProps: WithSpinnerOverlayProps) => {
   return <FlexRow style={{justifyContent: 'flex-start', alignItems: 'center', marginTop: '1rem'}}>
     <label style={{color: colors.primary, marginRight: '1rem'}}>Workspace namespace</label>
     <TextInput
-        style={{
-          width: '10rem',
-          marginRight: '1rem'
-        }}
-        onChange={value => setWorkspaceNamespace(value)}
-        onKeyDown={(event: KeyboardEvent) => {
-          if (event.key === 'Enter') {
-            navigateToWorkspace();
-          }
-        }}
+      style={{
+        width: '10rem',
+        marginRight: '1rem'
+      }}
+      onChange={value => setWorkspaceNamespace(value)}
+      onKeyDown={(event: KeyboardEvent) => {
+        if (event.key === 'Enter') {
+          navigateToWorkspace();
+        }
+      }}
     />
     <Button
-        style={{height: '1.5rem'}}
-        onClick={() => navigateToWorkspace()}
+      style={{height: '1.5rem'}}
+      onClick={() => navigateToWorkspace()}
     >
       Load Workspace
     </Button>

@@ -95,7 +95,7 @@ describe('WorkspaceAbout', () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find('[data-test-id="workspaceShareButton"]')
-        .getElement().props.disabled).toBeFalsy();
+      .getElement().props.disabled).toBeFalsy();
   });
 
   it('should disable the share button if workspace is adminLocked', async () => {
@@ -103,7 +103,7 @@ describe('WorkspaceAbout', () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find('[data-test-id="workspaceShareButton"]')
-        .getElement().props.disabled).toBeTruthy();
+      .getElement().props.disabled).toBeTruthy();
   });
 
   it('should display cdr version', async () => {

@@ -69,34 +69,34 @@ export const CreateModal = ({entityName, title, getExistingNames, save, close}: 
     <ModalTitle style={inputErrorMsg ? {marginBottom: 0} : {}}>{title || `Create ${entityName}`}</ModalTitle>
     <ModalBody style={{marginTop: '0.2rem'}}>
       {saveErrorMsg && <div style={styles.error}>
-          <ClrIcon className='is-solid' shape='exclamation-triangle' size={22} />
-          {saveErrorMsg}
+        <ClrIcon className='is-solid' shape='exclamation-triangle' size={22} />
+        {saveErrorMsg}
       </div>}
       {inputErrorMsg && <div style={styles.invalid}>{inputErrorMsg}</div>}
 
       <TextInput style={{marginBottom: '0.5rem'}}
-                 value={name}
-                 placeholder={entityName.toUpperCase() + ' NAME'}
-                 onChange={(v) => {
-                   setName(v);
-                   setNameTouched(true);
-                 }}
-                 disabled={saving}/>
+        value={name}
+        placeholder={entityName.toUpperCase() + ' NAME'}
+        onChange={(v) => {
+          setName(v);
+          setNameTouched(true);
+        }}
+        disabled={saving}/>
       <TextArea value={description}
-                placeholder='DESCRIPTION'
-                disabled={saving}
-                onChange={(v) => setDescription(v)}/>
+        placeholder='DESCRIPTION'
+        disabled={saving}
+        onChange={(v) => setDescription(v)}/>
     </ModalBody>
     <ModalFooter>
       <Button style={{color: colors.primary}}
-              type='link'
-              onClick={() => close()}
-              disabled={saving}>
+        type='link'
+        onClick={() => close()}
+        disabled={saving}>
         Cancel
       </Button>
       <Button type='primary'
-              disabled={disableSaveButton}
-              onClick={() => onSave()}>
+        disabled={disableSaveButton}
+        onClick={() => onSave()}>
         {saving && <Spinner style={{marginRight: '0.25rem'}} size={18} />}
         Save
       </Button>

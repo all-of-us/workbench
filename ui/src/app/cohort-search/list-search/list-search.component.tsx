@@ -494,7 +494,7 @@ export const ListSearch = fp.flow(withCdrVersions(), withCurrentWorkspace(), wit
             }
             {selected && <ClrIcon style={styles.selectedIcon} shape='check-circle' size='20'/>}
             {unselected && <ClrIcon style={selectIconStyle} shape='plus-circle' size='16'
-                                    onClick={() => this.selectItem(row)}/>}
+              onClick={() => this.selectItem(row)}/>}
             {brand && !loadingIngredients &&
               <ClrIcon style={styles.brandIcon}
                 shape={'angle ' + (open ? 'down' : 'right')} size='20'
@@ -504,9 +504,9 @@ export const ListSearch = fp.flow(withCdrVersions(), withCurrentWorkspace(), wit
           </div>}
           <TooltipTrigger disabled={hoverId !== elementId} content={<div>{displayName}</div>}>
             <div data-test-id='name-column-value'
-                 style={styles.nameDiv}
-                 onMouseOver={(e) => this.onNameHover(e.target as HTMLDivElement, elementId)}
-                 onMouseOut={() => this.setState({hoverId: undefined})}>
+              style={styles.nameDiv}
+              onMouseOver={(e) => this.onNameHover(e.target as HTMLDivElement, elementId)}
+              onMouseOut={() => this.setState({hoverId: undefined})}>
               {displayName}
             </div>
           </TooltipTrigger>
@@ -521,9 +521,9 @@ export const ListSearch = fp.flow(withCdrVersions(), withCurrentWorkspace(), wit
         <td style={{...columnBodyStyle, paddingLeft: '0.2rem', paddingRight: '0.5rem'}}>
           <TooltipTrigger disabled={hoverId !== elementId} content={<div>{row.code}</div>}>
             <div data-test-id='code-column-value'
-                 style={styles.nameDiv}
-                 onMouseOver={(e) => this.onNameHover(e.target as HTMLDivElement, elementId)}
-                 onMouseOut={() => this.setState({hoverId: undefined})}>
+              style={styles.nameDiv}
+              onMouseOver={(e) => this.onNameHover(e.target as HTMLDivElement, elementId)}
+              onMouseOut={() => this.setState({hoverId: undefined})}>
               {row.code}
             </div>
           </TooltipTrigger></td>
@@ -563,13 +563,13 @@ export const ListSearch = fp.flow(withCdrVersions(), withCurrentWorkspace(), wit
           <div style={styles.searchBar}>
             <ClrIcon shape='search' size='18'/>
             <TextInput data-test-id='list-search-input'
-                       style={styles.searchInput}
-                       value={searchTerms}
-                       placeholder={this.textInputPlaceholder}
-                       onChange={(e) => this.setState({searchTerms: e})}
-                       onKeyPress={this.handleInput}/>
+              style={styles.searchInput}
+              value={searchTerms}
+              placeholder={this.textInputPlaceholder}
+              onChange={(e) => this.setState({searchTerms: e})}
+              onKeyPress={this.handleInput}/>
             {source === 'conceptSetDetails' && searching && <Clickable style={styles.clearSearchIcon}
-                onClick={() => this.setState({data: concept, searching: false, searchTerms: ''})}>
+              onClick={() => this.setState({data: concept, searching: false, searchTerms: ''})}>
               <ClrIcon size={24} shape='times-circle'/>
             </Clickable>}
           </div>
@@ -597,8 +597,8 @@ export const ListSearch = fp.flow(withCdrVersions(), withCurrentWorkspace(), wit
                   There are no standard matches for source code {sourceMatch.code}
                 </span>}
                 &nbsp;<Clickable style={styles.vocabLink}
-                                 onMouseDown={() => this.trackEvent('Source Vocab Hyperlink')}
-                                 onClick={() => this.setState({standardOnly: false})}>
+                  onMouseDown={() => this.trackEvent('Source Vocab Hyperlink')}
+                  onClick={() => this.setState({standardOnly: false})}>
                   Return to source code
                 </Clickable>.
               </div>}
@@ -616,9 +616,9 @@ export const ListSearch = fp.flow(withCdrVersions(), withCurrentWorkspace(), wit
                     </TooltipTrigger>
                   </span>
                   <InputSwitch checked={searchSource}
-                               disabled={loading}
-                               onChange={() => this.toggleSearchSource()}
-                               style={{display: 'table-cell', boxShadow: 0}}/>
+                    disabled={loading}
+                    onChange={() => this.toggleSearchSource()}
+                    style={{display: 'table-cell', boxShadow: 0}}/>
                 </span>
               }
             </div>
@@ -640,30 +640,30 @@ export const ListSearch = fp.flow(withCdrVersions(), withCurrentWorkspace(), wit
             </style>
             <div style={{height: '15rem'}} className='tablebody'>
               <table data-test-id='list-search-results-table'
-                     className='p-datatable'
-                     style={{...styles.table, ...styles.tableBody}}>
+                className='p-datatable'
+                style={{...styles.table, ...styles.tableBody}}>
                 <tbody className='p-datatable-tbody'>
-                {displayData.map((row, index) => {
-                  const open = ingredients[row.id] && ingredients[row.id].open;
-                  const err = ingredients[row.id] && ingredients[row.id].error;
-                  return <React.Fragment key={index}>
-                    {this.renderRow(row, false, index)}
-                    {open && !err && ingredients[row.id].items.map((item, i) => {
-                      return <React.Fragment key={i}>
-                        {this.renderRow(item, true, `${index}.${i}`)}
-                      </React.Fragment>;
-                    })}
-                    {open && err && <tr>
-                      <td colSpan={5}>
-                        <div style={{...styles.error, marginTop: 0}}>
-                          <ClrIcon style={{margin: '0 0.5rem 0 0.25rem'}} className='is-solid' shape='exclamation-triangle' size='22'/>
+                  {displayData.map((row, index) => {
+                    const open = ingredients[row.id] && ingredients[row.id].open;
+                    const err = ingredients[row.id] && ingredients[row.id].error;
+                    return <React.Fragment key={index}>
+                      {this.renderRow(row, false, index)}
+                      {open && !err && ingredients[row.id].items.map((item, i) => {
+                        return <React.Fragment key={i}>
+                          {this.renderRow(item, true, `${index}.${i}`)}
+                        </React.Fragment>;
+                      })}
+                      {open && err && <tr>
+                        <td colSpan={5}>
+                          <div style={{...styles.error, marginTop: 0}}>
+                            <ClrIcon style={{margin: '0 0.5rem 0 0.25rem'}} className='is-solid' shape='exclamation-triangle' size='22'/>
                           Sorry, the request cannot be completed. Please try again or contact Support in the left hand navigation.
-                        </div>
-                      </td>
-                    </tr>}
-                  </React.Fragment>;
-                })}
-              </tbody>
+                          </div>
+                        </td>
+                      </tr>}
+                    </React.Fragment>;
+                  })}
+                </tbody>
               </table>
             </div>
           </React.Fragment>}

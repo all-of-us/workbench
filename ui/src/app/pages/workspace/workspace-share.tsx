@@ -372,34 +372,34 @@ export const WorkspaceShare = fp.flow(withUserProfile())(class extends React.Com
           <div ref={node => this.searchingNode = node} style={styles.dropdown} >
             <ClrIcon shape='search' style={{width: '21px', height: '21px', paddingLeft: '3px'}}/>
             <input data-test-id='search' style={styles.noBorder} type='text'
-                   placeholder='Find Collaborators'
-                   disabled={!this.hasPermission}
-                   onChange={e => this.searchTermChangedEvent(e.target.value)}
-                   onFocus={() => this.openDropdown()}/>
+              placeholder='Find Collaborators'
+              disabled={!this.hasPermission}
+              onChange={e => this.searchTermChangedEvent(e.target.value)}
+              onFocus={() => this.openDropdown()}/>
             {this.state.autocompleteLoading && <span style={styles.spinner}/>}
             {this.showAutocompleteNoResults &&
               <div data-test-id='drop-down'
-                   style={{...styles.dropdownMenu, ...styles.open, overflowY: 'hidden'}}>
-              <div style={{height: '60px'}}>
-                <em>No results based on your search</em>
-              </div></div>}
+                style={{...styles.dropdownMenu, ...styles.open, overflowY: 'hidden'}}>
+                <div style={{height: '60px'}}>
+                  <em>No results based on your search</em>
+                </div></div>}
             {this.showSearchResults &&
               <div data-test-id='drop-down' style={{...styles.dropdownMenu, ...styles.open}}>
-              {this.state.autocompleteUsers.map((user) => {
-                return <div key={user.email}><div style={styles.wrapper}>
-                  <div style={styles.box}>
-                    <h5 style={styles.userName}>{user.givenName} {user.familyName}</h5>
-                    <div data-test-id='user-email' style={styles.userName}>{user.email}</div>
+                {this.state.autocompleteUsers.map((user) => {
+                  return <div key={user.email}><div style={styles.wrapper}>
+                    <div style={styles.box}>
+                      <h5 style={styles.userName}>{user.givenName} {user.familyName}</h5>
+                      <div data-test-id='user-email' style={styles.userName}>{user.email}</div>
+                    </div>
+                    <div style={styles.collaboratorIcon}>
+                      <ClrIcon shape='plus-circle' data-test-id={'add-collab-' + user.email}
+                        style={{height: '21px', width: '21px'}}
+                        onClick={() => { this.addCollaborator(user); }}/>
+                    </div>
                   </div>
-                  <div style={styles.collaboratorIcon}>
-                    <ClrIcon shape='plus-circle' data-test-id={'add-collab-' + user.email}
-                             style={{height: '21px', width: '21px'}}
-                             onClick={() => { this.addCollaborator(user); }}/>
-                  </div>
-                </div>
                   <div style={{borderTop: '1px solid grey', width: '100%', marginTop: '.5rem'}}/>
-                </div>; })}
-            </div>}
+                  </div>; })}
+              </div>}
           </div>
           {this.state.userNotFound && <div style={{color: 'red'}}>
             {this.state.userNotFound}
@@ -416,28 +416,28 @@ export const WorkspaceShare = fp.flow(withUserProfile())(class extends React.Com
                   <div data-test-id='collab-user-row' style={styles.wrapper}>
                     <div style={styles.box}>
                       <h5 data-test-id='collab-user-name'
-                          style={{...styles.userName, ...styles.collabUser}}>
+                        style={{...styles.userName, ...styles.collabUser}}>
                         {user.givenName} {user.familyName}
                       </h5>
                       <div data-test-id='collab-user-email'
-                           style={styles.userName}>{user.email}</div>
+                        style={styles.userName}>{user.email}</div>
                       {/* Minimally, the z-index must be higher than that of the
                         modal. See https://react-select.com/advanced#portaling */}
                       <Select value={user.role}
-                              styles={{menuPortal: base => ({ ...base, zIndex: 110 })}}
-                              menuPortalTarget={document.getElementById('popup-root')}
-                              isDisabled={user.email === this.props.profileState.profile.username}
-                              classNamePrefix={this.cleanClassNameForSelect(user.email)}
-                              data-test-id={user.email + '-user-role'}
-                              onChange={e => this.setRole(e, user)}
-                              options={UserRoleOptions}/>
+                        styles={{menuPortal: base => ({ ...base, zIndex: 110 })}}
+                        menuPortalTarget={document.getElementById('popup-root')}
+                        isDisabled={user.email === this.props.profileState.profile.username}
+                        classNamePrefix={this.cleanClassNameForSelect(user.email)}
+                        data-test-id={user.email + '-user-role'}
+                        onChange={e => this.setRole(e, user)}
+                        options={UserRoleOptions}/>
                     </div>
                     <div style={styles.box}>
                       <div style={styles.collaboratorIcon}>
                         {(this.hasPermission && (user.email !== this.props.profileState.profile.username)) &&
                         <ClrIcon data-test-id={'remove-collab-' + user.email} shape='minus-circle'
-                                 style={{height: '21px', width: '21px'}}
-                                 onClick={() => this.removeCollaborator(user)}/>}
+                          style={{height: '21px', width: '21px'}}
+                          onClick={() => this.removeCollaborator(user)}/>}
                       </div>
                     </div>
                   </div>
@@ -449,13 +449,13 @@ export const WorkspaceShare = fp.flow(withUserProfile())(class extends React.Com
           }
         </ModalBody>
         <ModalFooter style={{alignItems: 'center'}}>
-            <Button type='link' style={{marginRight: '.8rem', border: 'none'}}
-                    onClick={() => this.onCancel()}>Cancel</Button>
-            <Button type='primary' data-test-id='save' disabled={!this.hasPermission}
-                    onClick={() => {
-                      AnalyticsTracker.Workspaces.Share();
-                      this.save();
-                    }}>Save</Button>
+          <Button type='link' style={{marginRight: '.8rem', border: 'none'}}
+            onClick={() => this.onCancel()}>Cancel</Button>
+          <Button type='primary' data-test-id='save' disabled={!this.hasPermission}
+            onClick={() => {
+              AnalyticsTracker.Workspaces.Share();
+              this.save();
+            }}>Save</Button>
         </ModalFooter>
       </Modal>}
       {!this.state.workspaceFound && <div>

@@ -15,20 +15,20 @@ interface Props {
 
 export const WorkspaceResearchSummary = (props: Props) => {
   return <WorkspaceEditSection
-        data-test-id={props.id}
-        header={props.researchPurpose.header}
-        description={props.researchPurpose.description}
-        index={props.index}
-        indent
-    >
-      <TextAreaWithLengthValidationMessage
-          id={props.id}
-          initialText={props.researchValue}
-          maxCharacters={1000}
-          onChange={(s: string) => props.onChange(s)}
-          tooLongWarningCharacters={950}
-          tooShortWarningCharacters={100}
-          tooShortWarning={NOT_ENOUGH_CHARACTERS_RESEARCH_DESCRIPTION}
-       />
-    </WorkspaceEditSection>;
+    data-test-id={props.id}
+    header={props.researchPurpose.header}
+    description={props.researchPurpose.description}
+    index={props.index}
+    indent
+  >
+    <TextAreaWithLengthValidationMessage
+      id={props.id}
+      initialText={props.researchValue}
+      maxCharacters={1000}
+      onChange={(s: string) => props.onChange(s)}
+      tooLongWarningCharacters={950}
+      tooShortWarningCharacters={100}
+      tooShortWarning={NOT_ENOUGH_CHARACTERS_RESEARCH_DESCRIPTION}
+    />
+  </WorkspaceEditSection>;
 };

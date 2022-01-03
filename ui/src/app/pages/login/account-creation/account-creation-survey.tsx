@@ -43,15 +43,15 @@ export class AccountCreationSurvey extends React.Component<AccountCreationSurvey
 
   render() {
     return <DemographicSurvey
-          profile={fp.set('demographicSurvey', fp.mapValues(() => undefined, this.props.profile.demographicSurvey), this.props.profile)}
-          saveProfile={(profile, captchaToken) => {
-            AnalyticsTracker.Registration.DemographicSurvey();
-            return this.createAccount(profile, captchaToken);
-          }}
-          onPreviousClick={(profile) => this.props.onPreviousClick(profile)}
-          enableCaptcha={true}
-          enablePrevious={true}
-          showStepCount={true}
-      />;
+      profile={fp.set('demographicSurvey', fp.mapValues(() => undefined, this.props.profile.demographicSurvey), this.props.profile)}
+      saveProfile={(profile, captchaToken) => {
+        AnalyticsTracker.Registration.DemographicSurvey();
+        return this.createAccount(profile, captchaToken);
+      }}
+      onPreviousClick={(profile) => this.props.onPreviousClick(profile)}
+      enableCaptcha={true}
+      enablePrevious={true}
+      showStepCount={true}
+    />;
   }
 }

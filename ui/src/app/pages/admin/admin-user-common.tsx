@@ -136,17 +136,17 @@ export const updateAccountProperties = async(oldProfile: Profile, updatedProfile
 
 export const DropdownWithLabel =
   ({label, options, initialValue, onChange, disabled= false, dataTestId, labelStyle = {}, dropdownStyle = {}}) => {
-  return <FlexColumn data-test-id={dataTestId} style={{marginTop: '1rem'}}>
-    <label style={{...commonStyles.label, ...labelStyle}}>{label}</label>
-    <Dropdown
-      style={{...commonStyles.dropdown, ...dropdownStyle}}
-      options={options}
-      onChange={(e) => onChange(e)}
-      value={initialValue}
-      disabled={disabled}
-    />
-  </FlexColumn>;
-};
+    return <FlexColumn data-test-id={dataTestId} style={{marginTop: '1rem'}}>
+      <label style={{...commonStyles.label, ...labelStyle}}>{label}</label>
+      <Dropdown
+        style={{...commonStyles.dropdown, ...dropdownStyle}}
+        options={options}
+        onChange={(e) => onChange(e)}
+        value={initialValue}
+        disabled={disabled}
+      />
+    </FlexColumn>;
+  };
 
 interface ContactEmailTextInputProps {
   contactEmail: string,
@@ -193,18 +193,18 @@ interface InstitutionDropdownProps {
 }
 export const InstitutionDropdown =
   ({institutions, initialInstitutionShortName, onChange, labelStyle, dropdownStyle}: InstitutionDropdownProps) => {
-  const options = fp.map(({displayName, shortName}) => ({label: displayName, value: shortName}), institutions);
-  return institutions
-    ? <DropdownWithLabel
-      dataTestId={'verifiedInstitution'}
-      label={'Verified institution'}
-      options={options}
-      initialValue={initialInstitutionShortName}
-      labelStyle={labelStyle}
-      dropdownStyle={dropdownStyle}
-      onChange={(event) => onChange(event)}/>
-    : null;
-}
+    const options = fp.map(({displayName, shortName}) => ({label: displayName, value: shortName}), institutions);
+    return institutions
+      ? <DropdownWithLabel
+        dataTestId={'verifiedInstitution'}
+        label={'Verified institution'}
+        options={options}
+        initialValue={initialInstitutionShortName}
+        labelStyle={labelStyle}
+        dropdownStyle={dropdownStyle}
+        onChange={(event) => onChange(event)}/>
+      : null;
+  }
 
 interface InstitutionalRoleDropdownProps {
   institutions?: PublicInstitutionDetails[],
@@ -215,19 +215,19 @@ interface InstitutionalRoleDropdownProps {
 }
 export const InstitutionalRoleDropdown =
   ({institutions, initialAffiliation, onChange, labelStyle, dropdownStyle}: InstitutionalRoleDropdownProps) => {
-  const options = getRoleOptions(institutions, initialAffiliation?.institutionShortName);
-  return (institutions && initialAffiliation)
-    ? <DropdownWithLabel
-      dataTestId={'institutionalRole'}
-      label={'Institutional role'}
-      disabled={!initialAffiliation.institutionShortName}
-      options={options}
-      initialValue={initialAffiliation.institutionalRoleEnum}
-      labelStyle={labelStyle}
-      dropdownStyle={dropdownStyle}
-      onChange={(event) => onChange(event)}/>
-    : null;
-}
+    const options = getRoleOptions(institutions, initialAffiliation?.institutionShortName);
+    return (institutions && initialAffiliation)
+      ? <DropdownWithLabel
+        dataTestId={'institutionalRole'}
+        label={'Institutional role'}
+        disabled={!initialAffiliation.institutionShortName}
+        options={options}
+        initialValue={initialAffiliation.institutionalRoleEnum}
+        labelStyle={labelStyle}
+        dropdownStyle={dropdownStyle}
+        onChange={(event) => onChange(event)}/>
+      : null;
+  }
 
 interface InstitutionalRoleOtherTextProps {
   affiliation?: VerifiedInstitutionalAffiliation,
@@ -238,17 +238,17 @@ interface InstitutionalRoleOtherTextProps {
 }
 export const InstitutionalRoleOtherTextInput =
   ({affiliation, onChange, labelStyle, inputStyle, containerStyle}: InstitutionalRoleOtherTextProps) => {
-  return (affiliation?.institutionalRoleEnum === InstitutionalRole.OTHER)
-    ? <TextInputWithLabel
-      dataTestId={'institutionalRoleOtherText'}
-      labelText={'Institutional role description'}
-      placeholder={affiliation?.institutionalRoleOtherText}
-      labelStyle={{...commonStyles.label, ...labelStyle}}
-      inputStyle={{...commonStyles.textInput, ...inputStyle}}
-      containerStyle={{...commonStyles.textInputContainer, ...containerStyle}}
-      onChange={(value) => onChange(value)}/>
-    : null;
-}
+    return (affiliation?.institutionalRoleEnum === InstitutionalRole.OTHER)
+      ? <TextInputWithLabel
+        dataTestId={'institutionalRoleOtherText'}
+        labelText={'Institutional role description'}
+        placeholder={affiliation?.institutionalRoleOtherText}
+        labelStyle={{...commonStyles.label, ...labelStyle}}
+        inputStyle={{...commonStyles.textInput, ...inputStyle}}
+        containerStyle={{...commonStyles.textInputContainer, ...containerStyle}}
+        onChange={(value) => onChange(value)}/>
+      : null;
+  }
 
 export const UserAdminTableLink = () => <Link to='/admin/users'>
   <ClrIcon
@@ -281,8 +281,8 @@ interface ErrorsTooltipProps {
 }
 export const ErrorsTooltip = ({errors, children}: ErrorsTooltipProps) => {
   return <TooltipTrigger
-  data-test-id='user-admin-errors-tooltip'
-  content={errors &&
+    data-test-id='user-admin-errors-tooltip'
+    content={errors &&
     <BulletAlignedUnorderedList>{Object.entries(validationErrorMessages)
       .map(([field, message], reactKey) => errors?.hasOwnProperty(field) && <li key={reactKey}>{message}</li>)}
     </BulletAlignedUnorderedList>}

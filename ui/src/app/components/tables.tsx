@@ -11,7 +11,7 @@ const styles = {
 
 export const PaddedTableCell = ({left, content, leftWidth = '50%', rightWidth = '50%'}) => {
   return <div style={{padding: '.2rem', width: left ? leftWidth :
-      rightWidth, display: 'flex'}}>
+    rightWidth, display: 'flex'}}>
     <div style={{...styles.paddedTable, width: '100%'}}>{content}</div>
   </div>;
 };
@@ -22,17 +22,17 @@ export const TwoColPaddedTable = ({style = {}, header = false, headerLeft = '',
     {header &&
       <FlexRow key='header' style={{height: '100%'}}>
         <PaddedTableCell key='header_l' left={true} leftWidth={cellWidth.left}
-                         content={<strong>{headerLeft}</strong>}/>
+          content={<strong>{headerLeft}</strong>}/>
         <PaddedTableCell key='header_r' left={false} rightWidth={cellWidth.right}
-                         content={<strong>{headerRight}</strong>}/>
+          content={<strong>{headerRight}</strong>}/>
       </FlexRow>}
     {contentLeft.map((c, i) =>
       <FlexRow key={i}>
         <PaddedTableCell key={i + '_l'} left={true} content={c}
-                         leftWidth={cellWidth.left}/>
+          leftWidth={cellWidth.left}/>
         {contentRight.length >= i + 1 &&
         <PaddedTableCell key={i + '_r'} left={false} content={contentRight[i]}
-                         rightWidth={cellWidth.right}/>}
+          rightWidth={cellWidth.right}/>}
       </FlexRow>
     )}
   </FlexColumn>;

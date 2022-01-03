@@ -12,9 +12,9 @@ import {
 
 export const BugReportModal = withUserProfile()
 (class extends React.Component<
-    {profileState: { profile: Profile, reload: Function },
-      bugReportDescription: string, onClose: Function},
-    {}> {
+{profileState: { profile: Profile, reload: Function },
+  bugReportDescription: string, onClose: Function},
+{}> {
 
   constructor(props) {
     super(props);
@@ -36,8 +36,8 @@ export const BugReportModal = withUserProfile()
         <ModalFooter>
           <Button type='secondary' onClick={onClose}>Cancel</Button>
           <Button style={{marginLeft: '0.5rem'}}
-                  data-test-id='submit-bug-report'
-                  onClick={() => {this.openZendesk(); onClose(); }}>Submit Bug Report</Button>
+            data-test-id='submit-bug-report'
+            onClick={() => {this.openZendesk(); onClose(); }}>Submit Bug Report</Button>
         </ModalFooter>
       </ModalBody>
     </Modal>;

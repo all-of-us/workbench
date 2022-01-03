@@ -18,8 +18,8 @@ describe('BugReport', () => {
 
   const component = () => {
     return mount(<BugReportModal
-        bugReportDescription={description}
-        onClose={() => {}}
+      bugReportDescription={description}
+      onClose={() => {}}
     />);
   };
 

@@ -225,7 +225,7 @@ export class SearchInput extends React.Component<SearchInputProps, SearchInputSt
             {this.state.matches.map((match, j) => {
               return (
                 <div data-test-id={`search-input-drop-down-element-${j}`}
-                     key={j} style={this.state.hover[j] ? styles.boxHover : styles.box}
+                  key={j} style={this.state.hover[j] ? styles.boxHover : styles.box}
                   onMouseOver={this._onMouseOver.bind(this, j)}
                   onMouseOut={this._onMouseOut.bind(this, j)}
                   onMouseDown={this._onMouseDown.bind(this, match)}>

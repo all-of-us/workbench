@@ -105,20 +105,20 @@ const styles = reactStyles({
 });
 
 const AccessTierMismatch = (props: {text: string}) =>
-    <div data-test-id='access-tier-mismatch-error' style={styles.mismatchError}>{props.text}</div>;
+  <div data-test-id='access-tier-mismatch-error' style={styles.mismatchError}>{props.text}</div>;
 
 const ConceptSetCdrMismatch = (props: {text: string}) =>
-    <div data-test-id='concept-set-cdr-mismatch-error' style={styles.mismatchError}>{props.text}</div>;
+  <div data-test-id='concept-set-cdr-mismatch-error' style={styles.mismatchError}>{props.text}</div>;
 
 const NotebookCdrMismatch = (props: {text: string}) =>
-    <div data-test-id='notebook-cdr-mismatch-warning' style={styles.mismatchWarning}>
-      <FlexRow>
-        <div style={{paddingRight: '0.5rem'}}>
-          <ClrIcon shape='warning-standard' class='is-solid' style={styles.warningIcon}/>
-        </div>
-        {props.text}
-      </FlexRow>
-    </div>;
+  <div data-test-id='notebook-cdr-mismatch-warning' style={styles.mismatchWarning}>
+    <FlexRow>
+      <div style={{paddingRight: '0.5rem'}}>
+        <ClrIcon shape='warning-standard' class='is-solid' style={styles.warningIcon}/>
+      </div>
+      {props.text}
+    </FlexRow>
+  </div>;
 
 const ConceptSetRestrictionText = () => <div style={styles.restriction}>
   Concept sets can only be copied to workspaces using the same access tier and CDR version.
@@ -176,7 +176,7 @@ const CopyModal = withCdrVersions()(class extends React.Component<HocProps, Copy
       options: workspacesByCdr[versionId].map(workspace => ({
         'value': workspace,
         'label': this.isDestinationSameWorkspace(workspace) ?
-            `${workspace.name} (current workspace)` : workspace.name,
+          `${workspace.name} (current workspace)` : workspace.name,
       })),
     }));
   }
@@ -185,8 +185,8 @@ const CopyModal = withCdrVersions()(class extends React.Component<HocProps, Copy
     workspacesApi().getWorkspaces()
       .then((response) => {
         const writeableWorkspaces = response.items
-            .filter(item => new WorkspacePermissions(item).canWrite)
-            .map(workspaceResponse => workspaceResponse.workspace);
+          .filter(item => new WorkspacePermissions(item).canWrite)
+          .map(workspaceResponse => workspaceResponse.workspace);
 
         this.setState({
           workspaceOptions: this.groupWorkspacesByCdrVersion(writeableWorkspaces),
@@ -275,9 +275,9 @@ const CopyModal = withCdrVersions()(class extends React.Component<HocProps, Copy
       this.state.requestState === RequestState.COPY_ERROR) {
       return (
         <Button style={{ marginLeft: '0.5rem' }}
-                disabled={this.state.destination === null || this.state.loading}
-                onClick={() => this.save()}
-                data-test-id='copy-button'>
+          disabled={this.state.destination === null || this.state.loading}
+          onClick={() => this.save()}
+          data-test-id='copy-button'>
           Copy {resourceType}
         </Button>
       );
@@ -285,8 +285,8 @@ const CopyModal = withCdrVersions()(class extends React.Component<HocProps, Copy
       const {namespace, id} = this.state.destination;
       return (
         <Button
-            path={`/workspaces/${namespace}/${id}/${ResourceTypeHomeTabs.get(this.props.resourceType)}`}
-            style={{ marginLeft: '0.5rem' }}
+          path={`/workspaces/${namespace}/${id}/${ResourceTypeHomeTabs.get(this.props.resourceType)}`}
+          style={{ marginLeft: '0.5rem' }}
         >
           Go to Copied {resourceType}
         </Button>
@@ -332,9 +332,9 @@ const CopyModal = withCdrVersions()(class extends React.Component<HocProps, Copy
     const isConceptSet: boolean = resourceType === ResourceType.CONCEPTSET;
 
     cond([accessTierMismatch, () => this.setAccessTierMismatchError(destination, fromAccessTierShortName)],
-        [cdrVersionMismatch && isConceptSet, () => this.setConceptSetCdrMismatchError(destination, fromCdrVersionId)],
-        // notebooks can be copied to different versions; warn only.
-        [cdrVersionMismatch && isNotebook, () => this.setNotebookCdrMismatchWarning(destination, fromCdrVersionId)]);
+      [cdrVersionMismatch && isConceptSet, () => this.setConceptSetCdrMismatchError(destination, fromCdrVersionId)],
+      // notebooks can be copied to different versions; warn only.
+      [cdrVersionMismatch && isNotebook, () => this.setNotebookCdrMismatchWarning(destination, fromCdrVersionId)]);
   }
 
   showCdrMismatch(type: ResourceType) {

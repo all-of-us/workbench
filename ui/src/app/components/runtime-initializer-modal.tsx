@@ -44,8 +44,8 @@ export const RuntimeInitializerModal = ({cancel, createAndContinue, defaultRunti
         Continuing with this action requires a cloud analysis environment, which will be charged
         to this workspace.&nbsp;
         {defaultRuntime.configurationType === RuntimeConfigurationType.GeneralAnalysis ?
-           'Would you like to continue with this default environment?' :
-           'Would you like to continue with your most recently used environment settings in this workspace?'}
+          'Would you like to continue with this default environment?' :
+          'Would you like to continue with your most recently used environment settings in this workspace?'}
       </WarningMessage>
       <RuntimeCostEstimator
         runtimeParameters={defaultRuntimeConfig}
@@ -54,7 +54,7 @@ export const RuntimeInitializerModal = ({cancel, createAndContinue, defaultRunti
       <Clickable onClick={() => setShowDetails(!showDetails)} style={styles.bodyElement} >
         Environment details<ClrIcon shape='angle' style={{transform: showDetails ? 'rotate(180deg)' : 'rotate(90deg)'}} />
       </Clickable>
-     {showDetails &&
+      {showDetails &&
        <div style={styles.runtimeDetails}>
          <RuntimeSummary runtimeConfig={defaultRuntimeConfig} />
          <div style={{marginTop: '10px'}}>To change this configuration, click 'Configure' below.</div>
@@ -62,19 +62,19 @@ export const RuntimeInitializerModal = ({cancel, createAndContinue, defaultRunti
     </ModalBody>
     <ModalFooter style={{justifyContent: 'space-between'}}>
       <Button
-          data-test-id='runtime-intializer-cancel'
-          type='secondary'
-          onClick={() => cancel()}
+        data-test-id='runtime-intializer-cancel'
+        type='secondary'
+        onClick={() => cancel()}
       >
         Cancel
       </Button>
       <Button
-          data-test-id='runtime-intializer-configure'
-          type='secondary'
-          onClick={() => {
-            setSidebarActiveIconStore.next('runtime');
-            cancel();
-          }}
+        data-test-id='runtime-intializer-configure'
+        type='secondary'
+        onClick={() => {
+          setSidebarActiveIconStore.next('runtime');
+          cancel();
+        }}
       >
         Configure
       </Button>

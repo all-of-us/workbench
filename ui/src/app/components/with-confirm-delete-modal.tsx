@@ -11,8 +11,8 @@ interface State {
 
 export interface WithConfirmDeleteModalProps {
   showConfirmDeleteModal: (displayName: string,
-                           resourceType: ResourceType,
-                           receiveDelete: () => Promise<void>) => void;
+    resourceType: ResourceType,
+    receiveDelete: () => Promise<void>) => void;
 }
 
 export const withConfirmDeleteModal = () => {
@@ -54,7 +54,7 @@ export const withConfirmDeleteModal = () => {
 
           <WrappedComponent showConfirmDeleteModal={(displayName, resourceType, receiveDelete) =>
             this.show(displayName, resourceType, receiveDelete)}
-                            {...this.props} />
+          {...this.props} />
         </React.Fragment>;
       }
     };

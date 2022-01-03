@@ -189,119 +189,119 @@ export const AdminUsers = withUserProfile()(class extends React.Component<Props,
       <h2>User Admin Table</h2>
       {loading &&
         <SpinnerOverlay opacity={0.6}
-                        overrideStylesOverlay={{alignItems: 'flex-start', marginTop: '2rem'}}/>
+          overrideStylesOverlay={{alignItems: 'flex-start', marginTop: '2rem'}}/>
       }
       {!contentLoaded && <div>Loading user profiles...</div>}
       {contentLoaded && <div>
         <input data-test-id='search'
-               style={{marginBottom: '.5em', width: '300px'}}
-               type='text'
-               placeholder='Search'
-               onChange={e => this.debounceUpdateFilter(e.target.value)}
+          style={{marginBottom: '.5em', width: '300px'}}
+          type='text'
+          placeholder='Search'
+          onChange={e => this.debounceUpdateFilter(e.target.value)}
         />
         <DataTable value={this.convertProfilesToFields(users)}
-                   frozenWidth='200px'
-                   globalFilter={filter}
-                   paginator={true}
-                   rows={50}
-                   scrollable
-                   sortField={'firstSignInTimestamp'}
-                   style={styles.tableStyle}>
+          frozenWidth='200px'
+          globalFilter={filter}
+          paginator={true}
+          rows={50}
+          scrollable
+          sortField={'firstSignInTimestamp'}
+          style={styles.tableStyle}>
           <Column field='name'
-                  bodyStyle={{...styles.colStyle}}
-                  filterField={'nameText'}
-                  filterMatchMode={'contains'}
-                  frozen={true}
-                  header='Name'
-                  headerStyle={{...styles.colStyle, width: '200px'}}
-                  sortable={true}
-                  sortField={'nameText'}
+            bodyStyle={{...styles.colStyle}}
+            filterField={'nameText'}
+            filterMatchMode={'contains'}
+            frozen={true}
+            header='Name'
+            headerStyle={{...styles.colStyle, width: '200px'}}
+            sortable={true}
+            sortField={'nameText'}
           />
           <Column field='status'
-                  bodyStyle={{...styles.colStyle}}
-                  excludeGlobalFilter={true}
-                  header='Status'
-                  headerStyle={{...styles.colStyle, width: '80px'}}
+            bodyStyle={{...styles.colStyle}}
+            excludeGlobalFilter={true}
+            header='Status'
+            headerStyle={{...styles.colStyle, width: '80px'}}
           />
           <Column field='institutionName'
-                  bodyStyle={{...styles.colStyle}}
-                  header='Institution'
-                  headerStyle={{...styles.colStyle, width: '180px'}}
-                  sortable={true}
+            bodyStyle={{...styles.colStyle}}
+            header='Institution'
+            headerStyle={{...styles.colStyle, width: '180px'}}
+            sortable={true}
           />
           <Column field='username'
-                  bodyStyle={{...styles.colStyle}}
-                  header='User Name'
-                  headerStyle={{...styles.colStyle, width: '200px'}}
-                  sortable={true}
+            bodyStyle={{...styles.colStyle}}
+            header='User Name'
+            headerStyle={{...styles.colStyle, width: '200px'}}
+            sortable={true}
           />
           <Column field='contactEmail'
-                  bodyStyle={{...styles.colStyle}}
-                  header='Contact Email'
-                  headerStyle={{...styles.colStyle, width: '180px'}}
-                  sortable={true}
+            bodyStyle={{...styles.colStyle}}
+            header='Contact Email'
+            headerStyle={{...styles.colStyle, width: '180px'}}
+            sortable={true}
           />
           <Column field='userLockout'
-                  bodyStyle={{...styles.colStyle}}
-                  excludeGlobalFilter={true}
-                  header='User Lockout'
-                  headerStyle={{...styles.colStyle, width: '150px'}}
+            bodyStyle={{...styles.colStyle}}
+            excludeGlobalFilter={true}
+            header='User Lockout'
+            headerStyle={{...styles.colStyle, width: '150px'}}
           />
           <Column field='firstSignInTime'
-                  bodyStyle={{...styles.colStyle}}
-                  excludeGlobalFilter={true}
-                  header='First Sign-in'
-                  headerStyle={{...styles.colStyle, width: '180px'}}
-                  sortable={true}
-                  sortField={'firstSignInTimestamp'}
+            bodyStyle={{...styles.colStyle}}
+            excludeGlobalFilter={true}
+            header='First Sign-in'
+            headerStyle={{...styles.colStyle, width: '180px'}}
+            sortable={true}
+            sortField={'firstSignInTimestamp'}
           />
           <Column field='twoFactorAuth'
-                  bodyStyle={{...styles.colStyle, textAlign: 'center'}}
-                  excludeGlobalFilter={true}
-                  header='2FA'
-                  headerStyle={{...styles.colStyle, width: '80px'}}
+            bodyStyle={{...styles.colStyle, textAlign: 'center'}}
+            excludeGlobalFilter={true}
+            header='2FA'
+            headerStyle={{...styles.colStyle, width: '80px'}}
           />
           {enableComplianceTraining && <Column field='complianceTraining'
-                  bodyStyle={{...styles.colStyle, textAlign: 'center'}}
-                  excludeGlobalFilter={true}
-                  header='RT RCR'
-                  headerStyle={{...styles.colStyle, width: '80px'}}
+            bodyStyle={{...styles.colStyle, textAlign: 'center'}}
+            excludeGlobalFilter={true}
+            header='RT RCR'
+            headerStyle={{...styles.colStyle, width: '80px'}}
           />}
           {enableComplianceTraining && <Column field='ctComplianceTraining'
-                  bodyStyle={{...styles.colStyle, textAlign: 'center'}}
-                   excludeGlobalFilter={true}
-                   header='CT RCR'
-                   headerStyle={{...styles.colStyle, width: '80px'}}
+            bodyStyle={{...styles.colStyle, textAlign: 'center'}}
+            excludeGlobalFilter={true}
+            header='CT RCR'
+            headerStyle={{...styles.colStyle, width: '80px'}}
           />}
           {enableEraCommons && <Column field='eraCommons'
-                  bodyStyle={{...styles.colStyle, textAlign: 'center'}}
-                  excludeGlobalFilter={true}
-                  header='eRA Commons'
-                  headerStyle={{...styles.colStyle, width: '80px'}}
+            bodyStyle={{...styles.colStyle, textAlign: 'center'}}
+            excludeGlobalFilter={true}
+            header='eRA Commons'
+            headerStyle={{...styles.colStyle, width: '80px'}}
           />}
           <Column field='dataUseAgreement'
-                  bodyStyle={{...styles.colStyle, textAlign: 'center'}}
-                  excludeGlobalFilter={true}
-                  header='DUCC'
-                  headerStyle={{...styles.colStyle, width: '80px'}}
+            bodyStyle={{...styles.colStyle, textAlign: 'center'}}
+            excludeGlobalFilter={true}
+            header='DUCC'
+            headerStyle={{...styles.colStyle, width: '80px'}}
           />
           {enableRasLoginGovLinking && <Column field='rasLinkLoginGov'
-                  bodyStyle={{...styles.colStyle, textAlign: 'center'}}
-                  excludeGlobalFilter={true}
-                  header='RAS Login.gov Link'
-                  headerStyle={{...styles.colStyle, width: '80px'}}
+            bodyStyle={{...styles.colStyle, textAlign: 'center'}}
+            excludeGlobalFilter={true}
+            header='RAS Login.gov Link'
+            headerStyle={{...styles.colStyle, width: '80px'}}
           />}
           <Column field='bypass'
-                  bodyStyle={{...styles.colStyle}}
-                  excludeGlobalFilter={true}
-                  header='Bypass'
-                  headerStyle={{...styles.colStyle, width: '150px'}}
+            bodyStyle={{...styles.colStyle}}
+            excludeGlobalFilter={true}
+            header='Bypass'
+            headerStyle={{...styles.colStyle, width: '150px'}}
           />
           <Column field='audit'
-                  bodyStyle={{...styles.colStyle}}
-                  excludeGlobalFilter={true}
-                  header='Audit'
-                  headerStyle={{width: '60px'}}
+            bodyStyle={{...styles.colStyle}}
+            excludeGlobalFilter={true}
+            header='Audit'
+            headerStyle={{width: '60px'}}
           />
         </DataTable>
       </div>

@@ -50,8 +50,8 @@ interface AccountCreationTosState {
 }
 
 export class AccountCreationTos extends React.Component<
-  AccountCreationTosProps,
-  AccountCreationTosState
+AccountCreationTosProps,
+AccountCreationTosState
 > {
   constructor(props: AccountCreationTosProps) {
     super(props);
@@ -66,12 +66,12 @@ export class AccountCreationTos extends React.Component<
     const {hasReadEntireTos, hasAckedTermsOfService, hasAckedPrivacyStatement} = this.state;
 
     return <FlexColumn data-test-id='account-creation-tos'
-                       style={{flex: 1, padding: '1rem 3rem 0 3rem'}}>
+      style={{flex: 1, padding: '1rem 3rem 0 3rem'}}>
       <HtmlViewer
-          ariaLabel='terms of service agreement'
-          containerStyles={{backgroundColor: colors.white}}
-          onLastPage={() => this.setState({hasReadEntireTos: true})}
-          filePath={this.props.filePath}
+        ariaLabel='terms of service agreement'
+        containerStyles={{backgroundColor: colors.white}}
+        onLastPage={() => this.setState({hasReadEntireTos: true})}
+        filePath={this.props.filePath}
       />
       <FlexRow
         style={{display: 'inline-flex', padding: '1rem', maxWidth: '1000px', margin: 'auto'}}>
@@ -87,37 +87,37 @@ export class AccountCreationTos extends React.Component<
           </div>
           <div style={{marginBottom: '.25rem'}}>
             <CheckBox data-test-id='privacy-statement-check'
-                      checked={hasAckedPrivacyStatement}
-                      disabled={!hasReadEntireTos}
-                      onChange={checked => this.setState({hasAckedPrivacyStatement: checked})}
-                      style={styles.checkbox}
-                      labelStyle={hasReadEntireTos ?
-                        styles.checkboxLabel :
-                        styles.disabledCheckboxLabel}
-                      wrapperStyle={{marginBottom: '0.5rem'}}
-                      label={<span>
+              checked={hasAckedPrivacyStatement}
+              disabled={!hasReadEntireTos}
+              onChange={checked => this.setState({hasAckedPrivacyStatement: checked})}
+              style={styles.checkbox}
+              labelStyle={hasReadEntireTos ?
+                styles.checkboxLabel :
+                styles.disabledCheckboxLabel}
+              wrapperStyle={{marginBottom: '0.5rem'}}
+              label={<span>
               I have read, understand, and agree to the <AoU/> Program Privacy Statement.</span>}
             /></div>
           <div>
             <CheckBox data-test-id='terms-of-service-check'
-                      checked={hasAckedTermsOfService}
-                      disabled={!hasReadEntireTos}
-                      onChange={checked => this.setState({hasAckedTermsOfService: checked})}
-                      style={styles.checkbox}
-                      labelStyle={hasReadEntireTos ?
-                        styles.checkboxLabel :
-                        styles.disabledCheckboxLabel}
-                      wrapperStyle={{marginBottom: '0.5rem'}}
-                      label={<span>
+              checked={hasAckedTermsOfService}
+              disabled={!hasReadEntireTos}
+              onChange={checked => this.setState({hasAckedTermsOfService: checked})}
+              style={styles.checkbox}
+              labelStyle={hasReadEntireTos ?
+                styles.checkboxLabel :
+                styles.disabledCheckboxLabel}
+              wrapperStyle={{marginBottom: '0.5rem'}}
+              label={<span>
               I have read, understand, and agree to the Terms of Use described above.</span>}
             /></div>
         </div>
         <FlexColumn style={{paddingLeft: '3rem', alignItems: 'center', justifyContent: 'center'}}>
           <Button data-test-id='next-button'
-                  style={{width: '5rem', height: '2rem', margin: '.25rem .5rem .25rem 0'}}
-                  disabled={!hasReadEntireTos || !hasAckedPrivacyStatement ||
+            style={{width: '5rem', height: '2rem', margin: '.25rem .5rem .25rem 0'}}
+            disabled={!hasReadEntireTos || !hasAckedPrivacyStatement ||
                   !hasAckedTermsOfService}
-                  onClick={() => this.props.onComplete()}>
+            onClick={() => this.props.onComplete()}>
             Next
           </Button>
         </FlexColumn>

@@ -83,8 +83,8 @@ const StyledResourceType = (props: {resource: WorkspaceResource}) => {
     ])(resource);
   }
   return <div data-test-id='card-type'
-              style={{...styles.resourceType, backgroundColor: getColor()}}
-       >{fp.startCase(fp.camelCase(getTypeString(resource)))}</div>;
+    style={{...styles.resourceType, backgroundColor: getColor()}}
+  >{fp.startCase(fp.camelCase(getTypeString(resource)))}</div>;
 };
 
 function canWrite(resource: WorkspaceResource): boolean {
@@ -141,19 +141,19 @@ class ResourceCard extends React.Component<Props, {}> {
   render() {
     const {actions, resource} = this.props;
     return <ResourceCardBase style={styles.card} data-test-id='card'>
-          <FlexColumn style={{alignItems: 'flex-start'}}>
-            <FlexRow style={{alignItems: 'flex-start'}}>
-              <ResourceActionsMenu actions={actions}/>
-              <ResourceNavigation resource={resource} linkTestId='card-name'>{getDisplayName(resource)}</ResourceNavigation>
-            </FlexRow>
-            <div style={styles.resourceDescription}>{getDescription(resource)}</div>
-          </FlexColumn>
-          <div style={styles.cardFooter}>
-            <div style={styles.lastModified} data-test-id='last-modified'>
+      <FlexColumn style={{alignItems: 'flex-start'}}>
+        <FlexRow style={{alignItems: 'flex-start'}}>
+          <ResourceActionsMenu actions={actions}/>
+          <ResourceNavigation resource={resource} linkTestId='card-name'>{getDisplayName(resource)}</ResourceNavigation>
+        </FlexRow>
+        <div style={styles.resourceDescription}>{getDescription(resource)}</div>
+      </FlexColumn>
+      <div style={styles.cardFooter}>
+        <div style={styles.lastModified} data-test-id='last-modified'>
               Last Modified: {displayDateWithoutHours(resource.lastModifiedEpochMillis)}</div>
-            <StyledResourceType resource={resource}/>
-          </div>
-        </ResourceCardBase>;
+        <StyledResourceType resource={resource}/>
+      </div>
+    </ResourceCardBase>;
   }
 }
 

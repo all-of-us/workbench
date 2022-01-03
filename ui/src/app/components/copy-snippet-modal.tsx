@@ -22,17 +22,17 @@ export const CopySnippetModal = ({title, copyText, closeFunction}: Props) => {
       <ModalBody style={{color: colors.primary}}>{copyText}</ModalBody>
       <ModalFooter style={{justifyContent: 'space-between'}}>
         <Button type='secondaryLight'
-                style={{paddingLeft: '0'}}
-                onClick={() => {
-                  // @ts-ignore: Unreachable code error. TODO: We can remove this once TS is upgraded to >= 3.4
-                  navigator.clipboard.writeText(copyText);
-                  setIsCopied(true);
+          style={{paddingLeft: '0'}}
+          onClick={() => {
+            // @ts-ignore: Unreachable code error. TODO: We can remove this once TS is upgraded to >= 3.4
+            navigator.clipboard.writeText(copyText);
+            setIsCopied(true);
 
-                  // The desired behavior is that clicking the button will always copy the text onto the clipboard
-                  // but the "Copied" state is only shown for two seconds after the latest click
-                  clearTimeout(timer);
-                  setTimer(setTimeout(() => setIsCopied(false), 2000));
-                }}>
+            // The desired behavior is that clicking the button will always copy the text onto the clipboard
+            // but the "Copied" state is only shown for two seconds after the latest click
+            clearTimeout(timer);
+            setTimer(setTimeout(() => setIsCopied(false), 2000));
+          }}>
           {
             isCopied
               ? <React.Fragment><FontAwesomeIcon icon={faCheck} style={{marginRight: '0.4rem'}}/>Copied to Clipboard</React.Fragment>

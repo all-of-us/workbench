@@ -50,7 +50,7 @@ export const StatusAlertBannerMaybe = () => {
 
   const footer = statusAlertDetails.link &&
     <Button data-test-id='status-banner-read-more-button'
-            onClick={() => window.open(statusAlertDetails.link, '_blank')}>
+      onClick={() => window.open(statusAlertDetails.link, '_blank')}>
       READ MORE
     </Button>;
 

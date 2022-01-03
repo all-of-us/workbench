@@ -117,15 +117,15 @@ export const ValidationError = ({children}) => {
 
 export const TextArea = ({style = {}, onChange, ...props}) => {
   return <textarea
-      {...props}
-      onChange={onChange ? (e => onChange(e.target.value)) : undefined}
-      style={{
-        width: '100%',
-        borderColor: inputBorderColor, borderWidth: 1, borderStyle: 'solid', borderRadius: 3,
-        padding: '0.25rem 0.5rem',
-        backgroundColor: colors.white,
-        ...style
-      }}
+    {...props}
+    onChange={onChange ? (e => onChange(e.target.value)) : undefined}
+    style={{
+      width: '100%',
+      borderColor: inputBorderColor, borderWidth: 1, borderStyle: 'solid', borderRadius: 3,
+      padding: '0.25rem 0.5rem',
+      backgroundColor: colors.white,
+      ...style
+    }}
   />;
 };
 
@@ -147,8 +147,8 @@ interface TextAreaWithLengthValidationMessageState {
 }
 
 export class TextAreaWithLengthValidationMessage extends React.Component<
-  TextAreaWithLengthValidationMessageProps,
-  TextAreaWithLengthValidationMessageState
+TextAreaWithLengthValidationMessageProps,
+TextAreaWithLengthValidationMessageState
 > {
   constructor(props: TextAreaWithLengthValidationMessageProps) {
     super(props);
@@ -168,7 +168,7 @@ export class TextAreaWithLengthValidationMessage extends React.Component<
 
   updateShowTooShortWarning() {
     if (
-        this.state.text
+      this.state.text
         && this.props.tooShortWarningCharacters
         && this.props.tooShortWarning
         && this.state.text.length < this.props.tooShortWarningCharacters
@@ -181,8 +181,8 @@ export class TextAreaWithLengthValidationMessage extends React.Component<
 
   renderCharacterLimitMessage(textColor: string, message: string) {
     return <div
-        data-test-id='characterLimit'
-        style={{color: textColor, marginLeft: 'auto', flex: '0 0 auto'}}
+      data-test-id='characterLimit'
+      style={{color: textColor, marginLeft: 'auto', flex: '0 0 auto'}}
     >
       {message}
     </div>;
@@ -194,23 +194,23 @@ export class TextAreaWithLengthValidationMessage extends React.Component<
 
     return <React.Fragment>
       <TextArea
-          style={{...styles.textBoxWithLengthValidationTextBoxStyle, ...this.props.textBoxStyleOverrides, ...this.props.heightOverride}}
-          id={id}
-          value={text}
-          onBlur={() => this.updateShowTooShortWarning()}
-          onChange={v => this.onTextUpdate(v)}
+        style={{...styles.textBoxWithLengthValidationTextBoxStyle, ...this.props.textBoxStyleOverrides, ...this.props.heightOverride}}
+        id={id}
+        value={text}
+        onBlur={() => this.updateShowTooShortWarning()}
+        onChange={v => this.onTextUpdate(v)}
       />
       <FlexRow
-          style={{...styles.textBoxWithLengthValidationValidationStyle, ...this.props.textBoxStyleOverrides}}
+        style={{...styles.textBoxWithLengthValidationValidationStyle, ...this.props.textBoxStyleOverrides}}
       >
         {showTooShortWarning &&
           <label
-              data-test-id='warning'
-              style={{
-                color: colors.danger,
-                justifyContent: 'flex-start',
-                marginRight: '.25rem'
-              }}
+            data-test-id='warning'
+            style={{
+              color: colors.danger,
+              justifyContent: 'flex-start',
+              marginRight: '.25rem'
+            }}
           >
             {tooShortWarning}
           </label>
@@ -238,8 +238,8 @@ export const FormValidationErrorMessage = withStyle({
 })('div');
 
 export const TextInput = React.forwardRef(({style = {}, onChange, onBlur, ...props}:
-      {style?: React.CSSProperties, onChange: Function, onBlur: Function, [key: string]: any},
-                                           ref: React.Ref<HTMLInputElement>) => {
+{style?: React.CSSProperties, onChange: Function, onBlur: Function, [key: string]: any},
+ref: React.Ref<HTMLInputElement>) => {
   return <input
     {...props}
     ref = {ref}
@@ -251,10 +251,10 @@ export const TextInput = React.forwardRef(({style = {}, onChange, onBlur, ...pro
 });
 
 export const NumberInput = React.forwardRef((
-    {style = {}, value, onChange, onBlur, ...props}:
-    {style?: React.CSSProperties, value: string, onChange: Function, onBlur?: Function, [key: string]: any},
-    ref: React.Ref<HTMLInputElement>
-  ) => {
+  {style = {}, value, onChange, onBlur, ...props}:
+  {style?: React.CSSProperties, value: string, onChange: Function, onBlur?: Function, [key: string]: any},
+  ref: React.Ref<HTMLInputElement>
+) => {
   return <input
     {...props}
     ref={ref}
@@ -355,9 +355,9 @@ export class CheckBox extends React.Component<CheckBoxProps, CheckBoxState> {
     if (label) {
       return <span style={wrapperStyle}>{input}
         <label htmlFor={this.uniqueId}
-               style={{...styles.checkboxLabel,
-                 ...labelStyle,
-                 ...maybeDisabledOverrides}}>{label}</label>
+          style={{...styles.checkboxLabel,
+            ...labelStyle,
+            ...maybeDisabledOverrides}}>{label}</label>
       </span>;
     } else {
       return input;
@@ -375,8 +375,8 @@ export const Select = ({value, options, onChange, ...props}) => {
 };
 
 export class DatePicker extends React.Component<
-  {value: Date, onChange: Function, onBlur?: Function, maxDate?: Date, disabled?: boolean,
-    placeholder?: string}
+{value: Date, onChange: Function, onBlur?: Function, maxDate?: Date, disabled?: boolean,
+  placeholder?: string}
 > {
   popup: React.RefObject<any>;
   constructor(props) {
@@ -454,12 +454,12 @@ export class Toggle extends React.Component<ToggleProps>  {
     const {name, checked, disabled, onToggle, style, height, width} = this.props;
     return <label style={{display: 'flex', flexDirection: 'row', alignItems: 'center', paddingBottom: '.5rem', ...style}}>
       <Switch
-          onChange={onToggle}
-          checked={checked}
-          checkedIcon={false}
-          disabled={disabled}
-          height={height}
-          width={width}
+        onChange={onToggle}
+        checked={checked}
+        checkedIcon={false}
+        disabled={disabled}
+        height={height}
+        width={width}
       />
       <span style={{marginLeft: '.5rem'}}>{name}</span>
     </label>;
@@ -483,15 +483,15 @@ export function TextInputWithLabel(props) {
     }}>{props.labelText}</label>}
     <div style={{marginTop: '0.1rem'}}>
       <TextInput data-test-id={props.inputId}
-                 id={props.inputId}
-                 name={props.inputName}
-                 placeholder={props.placeholder}
-                 value={props.value}
-                 disabled={props.disabled}
-                 onChange={props.onChange}
-                 onBlur={props.onBlur}
-                 invalid={props.invalid ? props.invalid.toString() : undefined}
-                 style={{...commonStyles.sectionInput, ...props.inputStyle}}/>
+        id={props.inputId}
+        name={props.inputName}
+        placeholder={props.placeholder}
+        value={props.value}
+        disabled={props.disabled}
+        onChange={props.onChange}
+        onBlur={props.onBlur}
+        invalid={props.invalid ? props.invalid.toString() : undefined}
+        style={{...commonStyles.sectionInput, ...props.inputStyle}}/>
       {props.children}
     </div>
   </div>;

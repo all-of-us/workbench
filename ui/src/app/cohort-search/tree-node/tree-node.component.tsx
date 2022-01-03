@@ -355,21 +355,21 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
           {(selectable && (source === 'cohort' || node.subtype !== 'ANSWER')) && <button style={styles.iconButton}>
             {hasAttributes && source === 'cohort'
               ? <ClrIcon style={{color: colors.accent}}
-                  shape='slider' dir='right' size='20'
-                  onClick={(e) => this.setAttributes(e, node)}/>
+                shape='slider' dir='right' size='20'
+                onClick={(e) => this.setAttributes(e, node)}/>
               : this.nodeIsSelected
                 ? <ClrIcon style={{...styles.selectIcon, ...styles.disableIcon}}
-                    shape='check-circle' size='20'/>
+                  shape='check-circle' size='20'/>
                 : <ClrIcon style={selectIconStyle}
-                    shape='plus-circle' size='20'
-                    onClick={(e) => this.select(e)}/>
+                  shape='plus-circle' size='20'
+                  onClick={(e) => this.select(e)}/>
             }
           </button>}
           {this.showCode && <div style={styles.code}>{code}</div>}
           <TooltipTrigger content={<div>{displayName}</div>} disabled={!this.state.truncated}>
             <div style={styles.name} ref={(e) => this.name = e}>
               <span data-test-id='displayName' style={searchMatch ? styles.searchMatch : {}}>{displayName}
-              {this.isCOPESurvey && <span style={{paddingRight: '0.1rem'}}> - <i> Versioned</i> </span>}
+                {this.isCOPESurvey && <span style={{paddingRight: '0.1rem'}}> - <i> Versioned</i> </span>}
               </span>
             </div>
           </TooltipTrigger>
@@ -381,16 +381,16 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
       {!!nodeChildren && nodeChildren.length > 0 &&
         <div style={{display: expanded ? 'block' : 'none', marginLeft: nodeChildren[0].group ? '0.875rem' : '2rem'}}>
           {nodeChildren.map((child, c) => <TreeNode key={c}
-                                                      autocompleteSelection={autocompleteSelection}
-                                                      expand={() => this.setState({expanded: true})}
-                                                      groupSelections={groupSelections}
-                                                      node={child}
-                                                      source={source}
-                                                      scrollToMatch={scrollToMatch}
-                                                      searchTerms={searchTerms}
-                                                      select={(s) => select(s)}
-                                                      selectedIds={selectedIds}
-                                                      setAttributes={setAttributes}/>)
+            autocompleteSelection={autocompleteSelection}
+            expand={() => this.setState({expanded: true})}
+            groupSelections={groupSelections}
+            node={child}
+            source={source}
+            scrollToMatch={scrollToMatch}
+            searchTerms={searchTerms}
+            select={(s) => select(s)}
+            selectedIds={selectedIds}
+            setAttributes={setAttributes}/>)
           }
         </div>
       }

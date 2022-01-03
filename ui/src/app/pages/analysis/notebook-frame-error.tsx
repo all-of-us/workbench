@@ -69,7 +69,7 @@ export const NotebookFrameError = ({errorMode = ErrorMode.ERROR, children}: Prop
     case ErrorMode.FORBIDDEN:
       return <div style={{...styles.previewMessageBase, ...styles.previewForbidden}}>
         <ClrIcon style={{color: colors.warning, margin: '0 0.5rem 0 0.25rem', flexShrink: 0}} className='is-solid'
-                 shape='lock' size='30'/>
+          shape='lock' size='30'/>
         <div>
           {children}
         </div>
@@ -77,7 +77,7 @@ export const NotebookFrameError = ({errorMode = ErrorMode.ERROR, children}: Prop
     case ErrorMode.ERROR:
       return <div style={{...styles.previewMessageBase, ...styles.previewError}}>
         <ClrIcon style={{margin: '0 0.5rem 0 0.25rem', flexShrink: 0}} className='is-solid'
-                 shape='exclamation-triangle' size='30'/>
+          shape='exclamation-triangle' size='30'/>
         <div>
           {children}
         </div>
@@ -105,19 +105,19 @@ export const SecuritySuspendedMessage = ({error}: SuspendedMessageProps) => {
   const untilFull = moment(error.params.suspendedUntil).format('MMMM Do YYYY, h:mm a');
   return <div data-test-id="security-suspended-msg">
     <div>
-    {until.isAfter(new Date()) ?
-       <>
-         <b>Your analysis environment is suspended due to security egress concerns</b>.&nbsp;
+      {until.isAfter(new Date()) ?
+        <>
+          <b>Your analysis environment is suspended due to security egress concerns</b>.&nbsp;
          Your runtime will become available again
-         {/* Line break here to avoid splitting duration tooltip trigger. */}
-         <br/>
-         <TooltipTrigger content={<div>{untilFull}</div>}>
-           <b style={{textDecoration: 'underline'}}>{duration}</b>
-         </TooltipTrigger>.
-       </> : <>
+          {/* Line break here to avoid splitting duration tooltip trigger. */}
+          <br/>
+          <TooltipTrigger content={<div>{untilFull}</div>}>
+            <b style={{textDecoration: 'underline'}}>{duration}</b>
+          </TooltipTrigger>.
+        </> : <>
          Your analysis environment was temporarily suspended but is now available for use.
          Reload the page to continue.
-       </>}
+        </>}
       &nbsp;Please <b>check your contact email inbox</b> for follow-up and respond
       promptly to verify your activity.
     </div>
@@ -126,7 +126,7 @@ export const SecuritySuspendedMessage = ({error}: SuspendedMessageProps) => {
     <div>To learn how to avoid common causes of accidental egress, please review
       this <StyledExternalLink href={supportUrls.egressFaq} target='_blank'>
         support article
-      </StyledExternalLink> or contact <SupportMailto/> with additional questions.
+    </StyledExternalLink> or contact <SupportMailto/> with additional questions.
     </div>
   </div>
 };

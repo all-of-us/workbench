@@ -17,7 +17,7 @@ describe('DataUserCodeOfConduct', () => {
 
   const component = () => mount(<MemoryRouter>
     <DataUserCodeOfConduct hideSpinner={() => {}}
-                           showSpinner={() => {}}/>
+      showSpinner={() => {}}/>
   </MemoryRouter>);
 
   const duccComponent = (wrapper) => wrapper.childAt(0).childAt(0).childAt(0).childAt(0).childAt(0);

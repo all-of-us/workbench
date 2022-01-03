@@ -344,33 +344,33 @@ export const InteractiveNotebook = fp.flow(
                 <ClrIcon shape='sync' style={{...styles.navBarIcon, ...styles.rotate}}/>
                 {this.renderNotebookText()}
               </div>) : (
-                  <div style={{display: 'flex'}}>
-                    <TooltipTrigger content={this.billingLocked && ACTION_DISABLED_INVALID_BILLING}>
-                      <div style={this.buttonStyleObj}
-                           onClick={() => {
-                             AnalyticsTracker.Notebooks.Edit();
-                             this.startEditMode();
-                           }}>
-                        <EditComponentReact enableHoverEffect={false}
-                                            disabled={!this.canStartRuntimes}
-                                            style={styles.navBarIcon}/>
+              <div style={{display: 'flex'}}>
+                <TooltipTrigger content={this.billingLocked && ACTION_DISABLED_INVALID_BILLING}>
+                  <div style={this.buttonStyleObj}
+                    onClick={() => {
+                      AnalyticsTracker.Notebooks.Edit();
+                      this.startEditMode();
+                    }}>
+                    <EditComponentReact enableHoverEffect={false}
+                      disabled={!this.canStartRuntimes}
+                      style={styles.navBarIcon}/>
                         Edit {this.notebookInUse && '(In Use)'}
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipTrigger content={this.billingLocked && ACTION_DISABLED_INVALID_BILLING}>
-                      <div style={this.buttonStyleObj}
-                           onClick={() => {
-                             AnalyticsTracker.Notebooks.Run();
-                             this.onPlaygroundModeClick();
-                           }}>
-                        <IconButton icon={PlaygroundIcon}
-                                    disabled={!this.canStartRuntimes}
-                                    style={styles.navBarIcon}/>
-                        Run (Playground Mode)
-                      </div>
-                    </TooltipTrigger>
                   </div>
-              )
+                </TooltipTrigger>
+                <TooltipTrigger content={this.billingLocked && ACTION_DISABLED_INVALID_BILLING}>
+                  <div style={this.buttonStyleObj}
+                    onClick={() => {
+                      AnalyticsTracker.Notebooks.Run();
+                      this.onPlaygroundModeClick();
+                    }}>
+                    <IconButton icon={PlaygroundIcon}
+                      disabled={!this.canStartRuntimes}
+                      style={styles.navBarIcon}/>
+                        Run (Playground Mode)
+                  </div>
+                </TooltipTrigger>
+              </div>
+            )
             }
           </div>
           <div style={styles.previewDiv}>
@@ -404,7 +404,7 @@ export const InteractiveNotebook = fp.flow(
              createAndContinue={() => {
                closeRuntimeInitializerModal(runtimeInitializerDefault);
              }} />
-            }
+          }
         </div>
       );
     }

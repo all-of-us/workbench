@@ -17,8 +17,8 @@ export const RuntimeErrorModal = ({errors, closeFunction, openRuntimePanel}) => 
     </ModalBody>
     <ModalFooter style={{justifyContent: 'space-between'}}>
       <Button
-          type='secondary'
-          onClick={() => closeFunction()}
+        type='secondary'
+        onClick={() => closeFunction()}
       >
         Close
       </Button>

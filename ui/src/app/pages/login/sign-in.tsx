@@ -270,8 +270,8 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
           onPreviousClick={onPrevious}/>;
       case SignInStep.ACCOUNT_DETAILS:
         return <AccountCreation profile={this.state.profile}
-                                onComplete={onComplete}
-                                onPreviousClick={onPrevious}/>;
+          onComplete={onComplete}
+          onPreviousClick={onPrevious}/>;
       case SignInStep.DEMOGRAPHIC_SURVEY:
         return <AccountCreationSurvey
           profile={this.state.profile}
@@ -292,9 +292,9 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
     const backgroundImages = StepToImageConfig.get(this.state.currentStep);
     return <FlexColumn style={styles.signInContainer} data-test-id='sign-in-container'>
       <FlexColumn data-test-id='sign-in-page'
-                  style={backgroundStyleTemplate(this.props.windowSize, backgroundImages)}>
+        style={backgroundStyleTemplate(this.props.windowSize, backgroundImages)}>
         <div><img style={{height: '1.75rem', marginLeft: '1rem', marginTop: '1rem'}}
-                  src={PUBLIC_HEADER_IMAGE}/></div>
+          src={PUBLIC_HEADER_IMAGE}/></div>
         {this.renderSignInStep(this.state.currentStep)}
       </FlexColumn>
       {showFooter && <Footer type={FooterTypeEnum.Registration} />}

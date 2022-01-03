@@ -107,7 +107,7 @@ describe('WorkspaceLibrary', () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     const cardNameList = wrapper.find('[data-test-id="workspace-card-name"]')
-        .map(c => c.text());
+      .map(c => c.text());
     expect(cardNameList).toEqual([TUTORIAL_WORKSPACE.name]);
   });
 
@@ -132,9 +132,9 @@ describe('WorkspaceLibrary', () => {
 
   it('controlled tier workspace is clickable for ct user', async () => {
     profileStore.set({...profileStore.get(), profile: {
-        ...profileStore.get().profile,
-        accessTierShortNames: [AccessTierShortNames.Registered, AccessTierShortNames.Controlled]
-      }});
+      ...profileStore.get().profile,
+      accessTierShortNames: [AccessTierShortNames.Registered, AccessTierShortNames.Controlled]
+    }});
 
     PHENOTYPE_LIBRARY_WORKSPACES.accessTierShortName = AccessTierShortNames.Controlled;
 

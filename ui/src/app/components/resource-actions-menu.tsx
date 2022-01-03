@@ -15,25 +15,25 @@ export interface Action {
 export const ResourceActionsMenu = (props: { actions: Action[], disabled?: boolean}) => {
   const {actions, disabled} = props;
   return <PopupTrigger
-        data-test-id='resource-card-menu'
-        side='bottom'
-        closeOnClick
-        content={!disabled && <React.Fragment>
-                {actions.map((action, i) => {
-                  return (
-                        <TooltipTrigger key={i} content={action.hoverText}>
-                            <MenuItem
-                                icon={action.icon}
-                                faIcon={action.faIcon}
-                                onClick={() => action.onClick()}
-                                disabled={action.disabled}>
-                                {action.displayName}
-                            </MenuItem>
-                        </TooltipTrigger>);
-                })}
-            </React.Fragment>
-        }
-    >
-        <SnowmanButton data-test-id='resource-menu' disabled={disabled}/>
-    </PopupTrigger>;
+    data-test-id='resource-card-menu'
+    side='bottom'
+    closeOnClick
+    content={!disabled && <React.Fragment>
+      {actions.map((action, i) => {
+        return (
+          <TooltipTrigger key={i} content={action.hoverText}>
+            <MenuItem
+              icon={action.icon}
+              faIcon={action.faIcon}
+              onClick={() => action.onClick()}
+              disabled={action.disabled}>
+              {action.displayName}
+            </MenuItem>
+          </TooltipTrigger>);
+      })}
+    </React.Fragment>
+    }
+  >
+    <SnowmanButton data-test-id='resource-menu' disabled={disabled}/>
+  </PopupTrigger>;
 };

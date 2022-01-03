@@ -49,33 +49,33 @@ export const WorkspaceRoutes = () => {
     {/* admin-locked workspaces are redirected to /about in most cases */}
     <AppRoute exact path={`${path}/about`}>
       <WorkspaceAboutPage
-          routeData={{
-            title: 'View Workspace Details',
-            breadcrumb: BreadcrumbType.Workspace,
-            workspaceNavBarTab: 'about',
-            pageKey: 'about'
-          }}
+        routeData={{
+          title: 'View Workspace Details',
+          breadcrumb: BreadcrumbType.Workspace,
+          workspaceNavBarTab: 'about',
+          pageKey: 'about'
+        }}
       />
     </AppRoute>
     <AppRoute exact path={`${path}/duplicate`} guards={[adminLockedGuard()]}>
       <WorkspaceEditPage
-          routeData={{
-            title: 'Duplicate Workspace',
-            breadcrumb: BreadcrumbType.WorkspaceDuplicate,
-            pageKey: 'duplicate'
-          }}
-          workspaceEditMode={WorkspaceEditMode.Duplicate}
+        routeData={{
+          title: 'Duplicate Workspace',
+          breadcrumb: BreadcrumbType.WorkspaceDuplicate,
+          pageKey: 'duplicate'
+        }}
+        workspaceEditMode={WorkspaceEditMode.Duplicate}
       />
     </AppRoute>
     {/* admin-locked workspaces can still be edited */}
     <AppRoute exact path={`${path}/edit`}>
       <WorkspaceEditPage
-          routeData={{
-            title: 'Edit Workspace',
-            breadcrumb: BreadcrumbType.WorkspaceEdit,
-            pageKey: 'edit'
-          }}
-          workspaceEditMode={WorkspaceEditMode.Edit}
+        routeData={{
+          title: 'Edit Workspace',
+          breadcrumb: BreadcrumbType.WorkspaceEdit,
+          pageKey: 'edit'
+        }}
+        workspaceEditMode={WorkspaceEditMode.Edit}
       />
     </AppRoute>
     <AppRoute exact path={`${path}/notebooks`} guards={[adminLockedGuard()]}>
@@ -97,35 +97,35 @@ export const WorkspaceRoutes = () => {
     </AppRoute>
     <AppRoute exact path={`${path}/notebooks/:nbName`} guards={[adminLockedGuard()]}>
       <LeonardoAppRedirectPage
-          key="notebook"
-          routeData={{
-            pathElementForTitle: 'nbName',
-            breadcrumb: BreadcrumbType.Notebook,
-            // The iframe we use to display the Jupyter notebook does something strange
-            // to the height calculation of the container, which is normally set to auto.
-            // Setting this flag sets the container to 100% so that no content is clipped.
-            contentFullHeightOverride: true,
-            pageKey: LEONARDO_APP_PAGE_KEY,
-            workspaceNavBarTab: 'notebooks',
-            minimizeChrome: true
-          }}
-          leoAppType={LeoApplicationType.Notebook}
+        key="notebook"
+        routeData={{
+          pathElementForTitle: 'nbName',
+          breadcrumb: BreadcrumbType.Notebook,
+          // The iframe we use to display the Jupyter notebook does something strange
+          // to the height calculation of the container, which is normally set to auto.
+          // Setting this flag sets the container to 100% so that no content is clipped.
+          contentFullHeightOverride: true,
+          pageKey: LEONARDO_APP_PAGE_KEY,
+          workspaceNavBarTab: 'notebooks',
+          minimizeChrome: true
+        }}
+        leoAppType={LeoApplicationType.Notebook}
       />
     </AppRoute>
     <AppRoute exact path={`${path}/terminals`} guards={[adminLockedGuard()]}>
       <LeonardoAppRedirectPage
-          key="terminal"
-          routeData={{
-            breadcrumb: BreadcrumbType.Workspace,
-            pageKey: LEONARDO_APP_PAGE_KEY,
-            // The iframe we use to display the Jupyter notebook does something strange
-            // to the height calculation of the container, which is normally set to auto.
-            // Setting this flag sets the container to 100% so that no content is clipped.
-            contentFullHeightOverride: true,
-            workspaceNavBarTab: 'terminals',
-            minimizeChrome: true
-          }}
-          leoAppType={LeoApplicationType.Terminal}
+        key="terminal"
+        routeData={{
+          breadcrumb: BreadcrumbType.Workspace,
+          pageKey: LEONARDO_APP_PAGE_KEY,
+          // The iframe we use to display the Jupyter notebook does something strange
+          // to the height calculation of the container, which is normally set to auto.
+          // Setting this flag sets the container to 100% so that no content is clipped.
+          contentFullHeightOverride: true,
+          workspaceNavBarTab: 'terminals',
+          minimizeChrome: true
+        }}
+        leoAppType={LeoApplicationType.Terminal}
       />
     </AppRoute>
     <AppRoute exact path={`${path}/data`} guards={[adminLockedGuard()]}>

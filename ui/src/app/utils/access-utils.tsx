@@ -289,7 +289,7 @@ export const computeRenewalDisplayDates = ({completionEpochMillis, expirationEpo
         nextReviewDate: `${nextReviewDate} ${daysRemainingDisplay}`
       };
     }],
-   );
+  );
 };
 
 // return true if user is eligible for registered tier.

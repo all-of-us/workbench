@@ -80,7 +80,7 @@ export class AdminUserBypass extends React.Component<Props, State> {
       for (const module of changedModules) {
         await userAdminApi()
           .bypassAccessRequirement(user.userId,
-          {isBypassed: selectedModules.includes(module), moduleName: module});
+            {isBypassed: selectedModules.includes(module), moduleName: module});
       }
       this.setState({isSaving: false});
       this.resetState();
@@ -118,61 +118,61 @@ export class AdminUserBypass extends React.Component<Props, State> {
       enableRasLoginGovLinking,
       enforceRasLoginGovLinking} = serverConfigStore.get().config;
     return <PopupTrigger
-        ref={this.popupRef}
-        side='bottom'
-        onClose={() => { this.setState({isPopupOpen: false}); this.resetState(); }}
-        onOpen={() => this.setState({isPopupOpen: true})}
-        content={<FlexColumn style={{padding: '1rem'}}>
-          {enableComplianceTraining && <Toggle name='RT Compliance Training'
-                  checked={selectedModules.includes(AccessModule.COMPLIANCETRAINING)}
-                  data-test-id='rt-compliance-training-toggle'
-                  onToggle={() => {this.setState({selectedModules:
+      ref={this.popupRef}
+      side='bottom'
+      onClose={() => { this.setState({isPopupOpen: false}); this.resetState(); }}
+      onOpen={() => this.setState({isPopupOpen: true})}
+      content={<FlexColumn style={{padding: '1rem'}}>
+        {enableComplianceTraining && <Toggle name='RT Compliance Training'
+          checked={selectedModules.includes(AccessModule.COMPLIANCETRAINING)}
+          data-test-id='rt-compliance-training-toggle'
+          onToggle={() => {this.setState({selectedModules:
                       fp.xor(selectedModules, [AccessModule.COMPLIANCETRAINING])}); }}
-          />}
-          {enableComplianceTraining && <Toggle name='CT Compliance Training'
-                  checked={selectedModules.includes(AccessModule.CTCOMPLIANCETRAINING)}
-                  data-test-id='ct-compliance-training-toggle'
-                  onToggle={() => {this.setState({selectedModules:
+        />}
+        {enableComplianceTraining && <Toggle name='CT Compliance Training'
+          checked={selectedModules.includes(AccessModule.CTCOMPLIANCETRAINING)}
+          data-test-id='ct-compliance-training-toggle'
+          onToggle={() => {this.setState({selectedModules:
                       fp.xor(selectedModules, [AccessModule.CTCOMPLIANCETRAINING])}); }}
-          />}
-          {enableEraCommons && <Toggle name='eRA Commons Linking'
-                  checked={selectedModules.includes(AccessModule.ERACOMMONS)}
-                  data-test-id='era-commons-toggle'
-                  onToggle={() => {this.setState({selectedModules:
+        />}
+        {enableEraCommons && <Toggle name='eRA Commons Linking'
+          checked={selectedModules.includes(AccessModule.ERACOMMONS)}
+          data-test-id='era-commons-toggle'
+          onToggle={() => {this.setState({selectedModules:
                     fp.xor(selectedModules, [AccessModule.ERACOMMONS])}); }}
-          />}
-          <Toggle name='Two Factor Auth'
-                  checked={selectedModules.includes(AccessModule.TWOFACTORAUTH)}
-                  data-test-id='two-factor-auth-toggle'
-                  onToggle={() => {this.setState({selectedModules:
+        />}
+        <Toggle name='Two Factor Auth'
+          checked={selectedModules.includes(AccessModule.TWOFACTORAUTH)}
+          data-test-id='two-factor-auth-toggle'
+          onToggle={() => {this.setState({selectedModules:
                     fp.xor(selectedModules, [AccessModule.TWOFACTORAUTH])}); }}
-          />
-          <Toggle name='Data User Code of Conduct'
-                  checked={selectedModules.includes(AccessModule.DATAUSERCODEOFCONDUCT)}
-                  data-test-id='ducc-toggle'
-                  onToggle={() => {this.setState({selectedModules:
+        />
+        <Toggle name='Data User Code of Conduct'
+          checked={selectedModules.includes(AccessModule.DATAUSERCODEOFCONDUCT)}
+          data-test-id='ducc-toggle'
+          onToggle={() => {this.setState({selectedModules:
                     fp.xor(selectedModules, [AccessModule.DATAUSERCODEOFCONDUCT])}); }}
-          />
-          {(enableRasLoginGovLinking || enforceRasLoginGovLinking) && <Toggle name='RAS Login.gov Link'
-                                       checked={selectedModules.includes(AccessModule.RASLINKLOGINGOV)}
-                                       data-test-id='ras-link-login-gov-toggle'
-                                       onToggle={() => {this.setState({selectedModules:
+        />
+        {(enableRasLoginGovLinking || enforceRasLoginGovLinking) && <Toggle name='RAS Login.gov Link'
+          checked={selectedModules.includes(AccessModule.RASLINKLOGINGOV)}
+          data-test-id='ras-link-login-gov-toggle'
+          onToggle={() => {this.setState({selectedModules:
                                              fp.xor(selectedModules, [AccessModule.RASLINKLOGINGOV])}); }}
-          />}
-          <div style={{display: 'flex', justifyContent: 'flex-end'}}>
-            <IconButton icon={Times}
-                        onClick={() => this.cancel()}
-                        disabled={!this.hasEdited()}/>
-            <IconButton icon={Check}
-                        data-test-id='toggle-save'
-                        onClick={() => this.save()}
-                        disabled={!this.hasEdited()}/>
-          </div>
-          {isSaving && <SpinnerOverlay/>}
-        </FlexColumn>}>
+        />}
+        <div style={{display: 'flex', justifyContent: 'flex-end'}}>
+          <IconButton icon={Times}
+            onClick={() => this.cancel()}
+            disabled={!this.hasEdited()}/>
+          <IconButton icon={Check}
+            data-test-id='toggle-save'
+            onClick={() => this.save()}
+            disabled={!this.hasEdited()}/>
+        </div>
+        {isSaving && <SpinnerOverlay/>}
+      </FlexColumn>}>
       <Button type='secondaryLight' data-test-id='bypass-popup' style={{height: '40px'}}>
         <ClrIcon shape={isPopupOpen ? 'caret down' : 'caret right'} size={19}
-                 style={{color: colors.accent, marginRight: '1px', cursor: 'pointer'}}/>
+          style={{color: colors.accent, marginRight: '1px', cursor: 'pointer'}}/>
         Bypass
       </Button>
     </PopupTrigger>;

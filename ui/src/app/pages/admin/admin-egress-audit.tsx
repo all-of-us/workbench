@@ -127,44 +127,44 @@ export const AdminEgressAudit = (props: WithSpinnerOverlayProps) => {
     </div>
     <FlexRow>
       <Button
-          disabled={!eventChanged}
-          type='secondary'
-          onClick={() => setPendingUpdateEvent(null)}>
+        disabled={!eventChanged}
+        type='secondary'
+        onClick={() => setPendingUpdateEvent(null)}>
         Discard changes
       </Button>
       <Button
-          data-test-id='save-egress-event'
-          disabled={!eventChanged}
-          onClick={() => onSave()}>
+        data-test-id='save-egress-event'
+        disabled={!eventChanged}
+        onClick={() => onSave()}>
         Save
       </Button>
     </FlexRow>
     <h2>Log entries</h2>
     <TabView activeIndex={activeLogGroup} onTabChange={(e) => setActiveLogGroup(e.index)}>
       {egressDetails.runtimeLogGroups.map((group) => {
-         let logCount = `${group.entries.length}`;
-         if (group.entries.length < group.totalEntries) {
-           logCount += '+';
-         }
-         return <TabPanel key={group.name} header={`${group.name} (${logCount})`}>
-           <DataTable
-             paginator
-             rows={50}
-             rowsPerPageOptions={[50,100,500]}
-             value={group.entries} >
-             <Column field='timestamp'
-                     header='Timestamp'
-                     headerStyle={{width: '180px'}}
-                     body={({timestamp}) => (new Date(timestamp)).toLocaleString()} />
-             <Column field='message'
-                     header='Log Message'
-                     body={({message}) => (
-                       <HighlightedLogMessage
-                         logPattern={group.pattern}
-                         msg={message} />
-                     )} />
-           </DataTable>
-         </TabPanel>;
+        let logCount = `${group.entries.length}`;
+        if (group.entries.length < group.totalEntries) {
+          logCount += '+';
+        }
+        return <TabPanel key={group.name} header={`${group.name} (${logCount})`}>
+          <DataTable
+            paginator
+            rows={50}
+            rowsPerPageOptions={[50,100,500]}
+            value={group.entries} >
+            <Column field='timestamp'
+              header='Timestamp'
+              headerStyle={{width: '180px'}}
+              body={({timestamp}) => (new Date(timestamp)).toLocaleString()} />
+            <Column field='message'
+              header='Log Message'
+              body={({message}) => (
+                <HighlightedLogMessage
+                  logPattern={group.pattern}
+                  msg={message} />
+              )} />
+          </DataTable>
+        </TabPanel>;
       })}
     </TabView>
   </div>;

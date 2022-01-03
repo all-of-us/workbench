@@ -55,7 +55,7 @@ export const getEmailValidationErrorMessage = (institution: PublicInstitutionDet
 }
 
 export const getRoleOptions = (institutions: Array<PublicInstitutionDetails>, institutionShortName?: string):
-    Array<{ label: string, value: InstitutionalRole }> => {
+Array<{ label: string, value: InstitutionalRole }> => {
   if (isBlank(institutionShortName)) {
     return [];
   }
@@ -71,11 +71,11 @@ export const getRoleOptions = (institutions: Array<PublicInstitutionDetails>, in
   const {organizationTypeEnum} = matchedInstitution;
   const availableRoles: Array<InstitutionalRole> =
       AccountCreationOptions.institutionalRolesByOrganizationType
-      .find(obj => obj.type === organizationTypeEnum)
-          .roles;
+        .find(obj => obj.type === organizationTypeEnum)
+        .roles;
 
   return AccountCreationOptions.institutionalRoleOptions.filter(option =>
-      availableRoles.includes(option.value)
+    availableRoles.includes(option.value)
   );
 };
 
@@ -88,7 +88,7 @@ export const defaultTierConfig = (accessTier: string): InstitutionTierConfig => 
 });
 
 export function getTierConfigOrDefault(configs: Array<InstitutionTierConfig>, accessTierShortName: string): InstitutionTierConfig {
-   return configs.find(t => t.accessTierShortName === accessTierShortName) || defaultTierConfig(accessTierShortName);
+  return configs.find(t => t.accessTierShortName === accessTierShortName) || defaultTierConfig(accessTierShortName);
 }
 
 export function getTierConfig(institution: Institution, accessTierShortName: string): InstitutionTierConfig {
@@ -124,9 +124,9 @@ function mergeTierConfigs(configs: InstitutionTierConfig[], tierConfig: Institut
 
 // Update the email addresses of a single tier and return the new tier configs.
 export function updateTierEmailAddresses(
-    tierConfigs: Array<InstitutionTierConfig>,
-    accessTierShortName: string,
-    emailAddresses: Array<string>): Array<InstitutionTierConfig> {
+  tierConfigs: Array<InstitutionTierConfig>,
+  accessTierShortName: string,
+  emailAddresses: Array<string>): Array<InstitutionTierConfig> {
 
   return mergeTierConfigs(tierConfigs, {
     ...getTierConfigOrDefault(tierConfigs, accessTierShortName),
@@ -136,9 +136,9 @@ export function updateTierEmailAddresses(
 
 // Update the email domains of a single tier and return the new tier configs.
 export function updateTierEmailDomains(
-    tierConfigs: Array<InstitutionTierConfig>,
-    accessTierShortName: string,
-    emailDomains: Array<string>): Array<InstitutionTierConfig> {
+  tierConfigs: Array<InstitutionTierConfig>,
+  accessTierShortName: string,
+  emailDomains: Array<string>): Array<InstitutionTierConfig> {
 
   return mergeTierConfigs(tierConfigs, {
     ...getTierConfigOrDefault(tierConfigs, accessTierShortName),
@@ -147,9 +147,9 @@ export function updateTierEmailDomains(
 }
 
 export function updateMembershipRequirement(
-    tierConfigs: Array<InstitutionTierConfig>,
-    accessTierShortName: string,
-    membershipRequirement: InstitutionMembershipRequirement): Array<InstitutionTierConfig> {
+  tierConfigs: Array<InstitutionTierConfig>,
+  accessTierShortName: string,
+  membershipRequirement: InstitutionMembershipRequirement): Array<InstitutionTierConfig> {
 
   return mergeTierConfigs(tierConfigs, {
     ...getTierConfigOrDefault(tierConfigs, accessTierShortName),
@@ -158,9 +158,9 @@ export function updateMembershipRequirement(
 }
 
 export function updateRequireEra(
-    tierConfigs: Array<InstitutionTierConfig>,
-    accessTierShortName: string,
-    eraRequired: boolean): Array<InstitutionTierConfig> {
+  tierConfigs: Array<InstitutionTierConfig>,
+  accessTierShortName: string,
+  eraRequired: boolean): Array<InstitutionTierConfig> {
 
   return mergeTierConfigs(tierConfigs, {
     ...getTierConfigOrDefault(tierConfigs, accessTierShortName),
@@ -169,14 +169,14 @@ export function updateRequireEra(
 }
 
 export function updateEnableControlledTier(
-    tierConfigs: Array<InstitutionTierConfig>,
-    accessTierShortName: string,
-    enableCtAccess: boolean): Array<InstitutionTierConfig> {
+  tierConfigs: Array<InstitutionTierConfig>,
+  accessTierShortName: string,
+  enableCtAccess: boolean): Array<InstitutionTierConfig> {
 
   return mergeTierConfigs(tierConfigs, {
     ...getTierConfigOrDefault(tierConfigs, accessTierShortName),
     membershipRequirement: enableCtAccess === true ?
-        InstitutionMembershipRequirement.DOMAINS : InstitutionMembershipRequirement.NOACCESS,
+      InstitutionMembershipRequirement.DOMAINS : InstitutionMembershipRequirement.NOACCESS,
   })
 }
 
@@ -187,6 +187,6 @@ export function getTierBadge(accessTierShortName: string): () => JSX.Element {
   };
 
   return () => switchCase(accessTierShortName,
-      [AccessTierShortNames.Registered, () => <RegisteredTierBadge style={tierBadgeStyle}/>],
-      [AccessTierShortNames.Controlled, () => <ControlledTierBadge style={tierBadgeStyle}/>]);
+    [AccessTierShortNames.Registered, () => <RegisteredTierBadge style={tierBadgeStyle}/>],
+    [AccessTierShortNames.Controlled, () => <ControlledTierBadge style={tierBadgeStyle}/>]);
 }

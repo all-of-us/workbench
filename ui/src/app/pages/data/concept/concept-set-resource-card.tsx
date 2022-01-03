@@ -78,10 +78,10 @@ export const ConceptSetResourceCard = fp.flow(
       description: description
     };
     conceptSetsApi().updateConceptSet(
-        resource.workspaceNamespace,
-        resource.workspaceFirecloudName,
-        resource.conceptSet.id,
-        request
+      resource.workspaceNamespace,
+      resource.workspaceFirecloudName,
+      resource.conceptSet.id,
+      request
     ).then(() => {
       this.props.onUpdate();
     }).catch(error => console.error(error)
@@ -111,12 +111,12 @@ export const ConceptSetResourceCard = fp.flow(
   deleteConceptSet() {
     const {resource} = this.props;
     return conceptSetsApi().deleteConceptSet(
-        resource.workspaceNamespace,
-        resource.workspaceFirecloudName,
-        resource.conceptSet.id)
-        .then(() => {
-          this.props.onUpdate();
-        });
+      resource.workspaceNamespace,
+      resource.workspaceFirecloudName,
+      resource.conceptSet.id)
+      .then(() => {
+        this.props.onUpdate();
+      });
   }
 
   async copy(copyRequest: CopyRequest) {
@@ -131,37 +131,37 @@ export const ConceptSetResourceCard = fp.flow(
     return <React.Fragment>
       {this.state.showRenameModal &&
         <RenameModal onRename={(name, description) => this.rename(name, description)}
-                   resourceType={getType(resource)}
-                   onCancel={() => this.setState({showRenameModal: false})}
-                   oldDescription={getDescription(resource)}
-                   oldName={getDisplayName(resource)}
-                   existingNames={this.props.existingNameList}/>
+          resourceType={getType(resource)}
+          onCancel={() => this.setState({showRenameModal: false})}
+          oldDescription={getDescription(resource)}
+          oldName={getDisplayName(resource)}
+          existingNames={this.props.existingNameList}/>
       }
       {this.state.showCopyModal && <CopyModal
-          fromWorkspaceNamespace={resource.workspaceNamespace}
-          fromWorkspaceFirecloudName={resource.workspaceFirecloudName}
-          fromResourceName={resource.conceptSet.name}
-          fromCdrVersionId={resource.cdrVersionId}
-          fromAccessTierShortName={resource.accessTierShortName}
-          resourceType={getType(resource)}
-          onClose={() => this.setState({showCopyModal: false})}
-          onCopy={() => this.props.onUpdate()}
-          saveFunction={(copyRequest: CopyRequest) => this.copy(copyRequest)}/>
+        fromWorkspaceNamespace={resource.workspaceNamespace}
+        fromWorkspaceFirecloudName={resource.workspaceFirecloudName}
+        fromResourceName={resource.conceptSet.name}
+        fromCdrVersionId={resource.cdrVersionId}
+        fromAccessTierShortName={resource.accessTierShortName}
+        resourceType={getType(resource)}
+        onClose={() => this.setState({showCopyModal: false})}
+        onCopy={() => this.props.onUpdate()}
+        saveFunction={(copyRequest: CopyRequest) => this.copy(copyRequest)}/>
       }
       {this.state.referencingDataSets.length > 0 && <DataSetReferenceModal
-          referencedResource={resource}
-          dataSets={fp.join(', ' , this.state.referencingDataSets.map((data) => data.name))}
-          onCancel={() => {
-            this.setState({referencingDataSets: []});
-          }}
-          deleteResource={() => {
-            this.setState({referencingDataSets: []});
-            return this.deleteConceptSet();
-          }}/>
+        referencedResource={resource}
+        dataSets={fp.join(', ' , this.state.referencingDataSets.map((data) => data.name))}
+        onCancel={() => {
+          this.setState({referencingDataSets: []});
+        }}
+        deleteResource={() => {
+          this.setState({referencingDataSets: []});
+          return this.deleteConceptSet();
+        }}/>
       }
       {menuOnly ?
-          <ResourceActionsMenu actions={this.actions} disabled={resource.adminLocked}/> :
-          <ResourceCard resource={resource} actions={this.actions}/>}
+        <ResourceActionsMenu actions={this.actions} disabled={resource.adminLocked}/> :
+        <ResourceCard resource={resource} actions={this.actions}/>}
     </React.Fragment>;
   }
 });

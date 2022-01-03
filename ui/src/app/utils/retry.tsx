@@ -45,7 +45,7 @@ export async function fetchWithGlobalErrorHandler<T>(fetchFn: () => Promise<T>, 
       }
       switch (errorResponse.statusCode) {
         case 503:
-          // Only retry on 503s
+        // Only retry on 503s
           break;
         case 500:
           globalErrorStore.next(errorResponse);

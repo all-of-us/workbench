@@ -229,7 +229,7 @@ const SearchGroupList = fp.flow(withCurrentWorkspace(), withCdrVersions())(
       const {role} = this.props;
       const {domain, type, standard} = criteria;
       const category = `${role === 'includes' ? 'Add' : 'Excludes'} Criteria`;
-    // If domain is PERSON, list the type as well as the domain in the label
+      // If domain is PERSON, list the type as well as the domain in the label
       const label = domainToTitle(domain) +
       (domain === Domain.PERSON ? ' - ' + typeToTitle(type) : '') +
       ' - Cohort Builder';
@@ -246,40 +246,40 @@ const SearchGroupList = fp.flow(withCurrentWorkspace(), withCdrVersions())(
       const {groups, setSearchContext, role, updated, updateRequest} = this.props;
       const {index} = this.state;
       return <React.Fragment>
-      <style>{css}</style>
-      <div style={{display: 'flex', alignItems: 'center'}}>
-        <h2 style={styles.listHeader}>
-          {role === 'excludes' && <span>And</span>} {role.slice(0, -1)} Participants
-        </h2>
-      </div>
-      {groups.map((group, g) => <div key={g} data-test-id={`${role}-search-group`}>
-        <SearchGroup group={group}
-                     index={g + index}
-                     setSearchContext={setSearchContext}
-                     role={role}
-                     updated={updated}
-                     updateRequest={updateRequest}/>
-        <div style={styles.circleWrapper}>
-          <div style={styles.circle}>AND</div>
+        <style>{css}</style>
+        <div style={{display: 'flex', alignItems: 'center'}}>
+          <h2 style={styles.listHeader}>
+            {role === 'excludes' && <span>And</span>} {role.slice(0, -1)} Participants
+          </h2>
         </div>
-      </div>)}
-      <div style={styles.card}>
-        {/* Group Header */}
-        <div style={styles.cardHeader}>
-          <div style={{marginLeft: '1.15rem'}}>Group {groups.length + index + 1}</div>
-        </div>
-        <div style={styles.cardBlock}>
-          <TieredMenu style={{...styles.menu, padding: '0.5rem 0'}}
-            appendTo={document.body}
-            model={this.criteriaMenuItems}
-            popup
-            ref={el => this.criteriaMenu = el} />
-          <button style={styles.menuButton} onClick={(e) => this.criteriaMenu.toggle(e)}>
+        {groups.map((group, g) => <div key={g} data-test-id={`${role}-search-group`}>
+          <SearchGroup group={group}
+            index={g + index}
+            setSearchContext={setSearchContext}
+            role={role}
+            updated={updated}
+            updateRequest={updateRequest}/>
+          <div style={styles.circleWrapper}>
+            <div style={styles.circle}>AND</div>
+          </div>
+        </div>)}
+        <div style={styles.card}>
+          {/* Group Header */}
+          <div style={styles.cardHeader}>
+            <div style={{marginLeft: '1.15rem'}}>Group {groups.length + index + 1}</div>
+          </div>
+          <div style={styles.cardBlock}>
+            <TieredMenu style={{...styles.menu, padding: '0.5rem 0'}}
+              appendTo={document.body}
+              model={this.criteriaMenuItems}
+              popup
+              ref={el => this.criteriaMenu = el} />
+            <button style={styles.menuButton} onClick={(e) => this.criteriaMenu.toggle(e)}>
             Add Criteria <ClrIcon shape='caret down' size={12}/>
-          </button>
+            </button>
+          </div>
         </div>
-      </div>
-    </React.Fragment>;
+      </React.Fragment>;
     }
   });
 

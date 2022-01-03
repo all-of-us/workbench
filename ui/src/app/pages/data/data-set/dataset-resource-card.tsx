@@ -147,25 +147,25 @@ export const DatasetResourceCard = fp.flow(
     return <React.Fragment>
       {this.state.showExportToNotebookModal &&
           <ExportDatasetModal dataset={resource.dataSet}
-                              closeFunction={() => this.setState({showExportToNotebookModal: false})}/>
+            closeFunction={() => this.setState({showExportToNotebookModal: false})}/>
       }
       {this.state.showGenomicExtractionModal &&
       <GenomicExtractionModal dataSet={resource.dataSet}
-                              workspaceNamespace={resource.workspaceNamespace}
-                              workspaceFirecloudName={resource.workspaceFirecloudName}
-                              closeFunction={() => this.setState({showGenomicExtractionModal: false})}/>
+        workspaceNamespace={resource.workspaceNamespace}
+        workspaceFirecloudName={resource.workspaceFirecloudName}
+        closeFunction={() => this.setState({showGenomicExtractionModal: false})}/>
       }
       {this.state.showRenameModal &&
       <RenameModal onRename={(name, description) => this.rename(name, description)}
-                   resourceType={getType(resource)}
-                   onCancel={() => this.setState({showRenameModal: false})}
-                   oldDescription={getDescription(resource)}
-                   oldName={getDisplayName(resource)}
-                   existingNames={this.props.existingNameList}/>
+        resourceType={getType(resource)}
+        onCancel={() => this.setState({showRenameModal: false})}
+        oldDescription={getDescription(resource)}
+        oldName={getDisplayName(resource)}
+        existingNames={this.props.existingNameList}/>
       }
       {menuOnly ?
-          <ResourceActionsMenu actions={this.actions} disabled={resource.adminLocked}/> :
-          <ResourceCard resource={resource} actions={this.actions}/>}
+        <ResourceActionsMenu actions={this.actions} disabled={resource.adminLocked}/> :
+        <ResourceCard resource={resource} actions={this.actions}/>}
     </React.Fragment>;
   }
 });

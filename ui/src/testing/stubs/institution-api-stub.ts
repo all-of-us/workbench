@@ -81,7 +81,7 @@ export const VERILY_WITHOUT_CT: Institution = {
 };
 
 export const defaultInstitutions: Array<Institution> = [
-    VUMC, BROAD, VERILY, VERILY_WITHOUT_CT
+  VUMC, BROAD, VERILY, VERILY_WITHOUT_CT
 ];
 
 export class InstitutionApiStub extends InstitutionApi {

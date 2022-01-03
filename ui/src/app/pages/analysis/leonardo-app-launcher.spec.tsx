@@ -49,8 +49,8 @@ describe('NotebookLauncher', () => {
     const c = mount(<Router history={history}>
       <Route path='/workspaces/:ns/:wsid/notebooks/:nbName'>
         <LeonardoAppLauncher hideSpinner={() => {}}
-                             showSpinner={() => {}}
-                             leoAppType={LeoApplicationType.Notebook}/>
+          showSpinner={() => {}}
+          leoAppType={LeoApplicationType.Notebook}/>
       </Route>
     </Router>);
     return c;
@@ -331,19 +331,19 @@ describe('NotebookLauncher', () => {
   });
 
   test.each(['cancel', 'configure'])(
-      'should show retry message on runtime initializer %s', async(action) => {
-    history.push(notebookInitialUrl + '?kernelType=R?creating=false');
-    runtimeStub.runtime = null;
+    'should show retry message on runtime initializer %s', async(action) => {
+      history.push(notebookInitialUrl + '?kernelType=R?creating=false');
+      runtimeStub.runtime = null;
 
-    const wrapper = await notebookComponent();
-    await waitForFakeTimersAndUpdate(wrapper);
+      const wrapper = await notebookComponent();
+      await waitForFakeTimersAndUpdate(wrapper);
 
-    wrapper.find({'data-test-id': `runtime-intializer-${action}`}).simulate('click');
-    await waitForFakeTimersAndUpdate(wrapper);
+      wrapper.find({'data-test-id': `runtime-intializer-${action}`}).simulate('click');
+      await waitForFakeTimersAndUpdate(wrapper);
 
-    expect(wrapper.exists({'data-test-id': `runtime-intializer-${action}`})).toBeFalsy();
-    expect(wrapper.text()).toContain('This action requires an analysis environment.')
-  });
+      expect(wrapper.exists({'data-test-id': `runtime-intializer-${action}`})).toBeFalsy();
+      expect(wrapper.text()).toContain('This action requires an analysis environment.')
+    });
 
   it('should create runtime on runtime initializer create', async() => {
     history.push(notebookInitialUrl + '?kernelType=R?creating=false');
@@ -379,8 +379,8 @@ describe('TerminalLauncher', () => {
     const t = mount(<Router history={history}>
       <Route path='/workspaces/:ns/:wsid/terminals'>
         <LeonardoAppLauncher hideSpinner={() => {}}
-                             showSpinner={() => {}}
-                             leoAppType={LeoApplicationType.Terminal}/>
+          showSpinner={() => {}}
+          leoAppType={LeoApplicationType.Terminal}/>
       </Route>
     </Router>);
     await waitOneTickAndUpdate(t);
@@ -424,19 +424,19 @@ describe('TerminalLauncher', () => {
     await waitForFakeTimersAndUpdate(wrapper);
 
     expect(wrapper
-        .exists(getCardSpinnerTestId(ProgressCardState.UnknownInitializingResuming)))
-        .toBeTruthy();
+      .exists(getCardSpinnerTestId(ProgressCardState.UnknownInitializingResuming)))
+      .toBeTruthy();
     expect(currentCardText(wrapper))
-        .toContain(terminalProgressStrings.get(Progress.Initializing));
+      .toContain(terminalProgressStrings.get(Progress.Initializing));
 
     runtimeStub.runtime.status = RuntimeStatus.Running;
     await waitForFakeTimersAndUpdate(wrapper);
 
     expect(wrapper
-        .exists(getCardSpinnerTestId(ProgressCardState.Redirecting)))
-        .toBeTruthy();
+      .exists(getCardSpinnerTestId(ProgressCardState.Redirecting)))
+      .toBeTruthy();
     expect(currentCardText(wrapper))
-        .toContain(terminalProgressStrings.get(Progress.Redirecting));
+      .toContain(terminalProgressStrings.get(Progress.Redirecting));
   });
 });
 

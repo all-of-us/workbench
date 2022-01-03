@@ -80,15 +80,15 @@ const getUserConfirmation = (message, callback) => {
 
   ReactDOM.render(
     <Modal>
-        <ModalTitle>Warning!</ModalTitle>
-        <ModalBody>
-          {message}
-        </ModalBody>
-        <ModalFooter>
-          <Button type='link' onClick={() => withCleanup(false)}>Cancel</Button>
-          <Button type='primary' onClick={() => withCleanup(true)}>Discard Changes</Button>
-        </ModalFooter>
-      </Modal>, modal);
+      <ModalTitle>Warning!</ModalTitle>
+      <ModalBody>
+        {message}
+      </ModalBody>
+      <ModalFooter>
+        <Button type='link' onClick={() => withCleanup(false)}>Cancel</Button>
+        <Button type='primary' onClick={() => withCleanup(true)}>Discard Changes</Button>
+      </ModalFooter>
+    </Modal>, modal);
 };
 
 export const AppRouter = ({children}): React.ReactElement => {
@@ -100,8 +100,8 @@ export const AppRouter = ({children}): React.ReactElement => {
 export const RouteLink = ({path, style = {}, disabled= false, children}): React.ReactElement => {
   const linkStyles = {textDecoration: 'none', color: 'unset'};
   return !disabled
-      ? <Link style={{...linkStyles, ...style}} to={path}>{children}</Link>
-      : <span style={{...linkStyles, ...style}}>{children}</span>;
+    ? <Link style={{...linkStyles, ...style}} to={path}>{children}</Link>
+    : <span style={{...linkStyles, ...style}}>{children}</span>;
 }
 
 export const AppRoute = ({path, guards = [], exact, intermediaryRoute = false, children}): React.ReactElement => {
@@ -109,9 +109,9 @@ export const AppRoute = ({path, guards = [], exact, intermediaryRoute = false, c
 
   return <Route exact={exact} path={path}>
     {cond(
-       [redirectPath, () => <Redirect to={redirectPath}/>],
-       [renderBlocked, () => renderBlocked()],
-       () => (children))
+      [redirectPath, () => <Redirect to={redirectPath}/>],
+      [renderBlocked, () => renderBlocked()],
+      () => (children))
     }
   </Route>;
 };
