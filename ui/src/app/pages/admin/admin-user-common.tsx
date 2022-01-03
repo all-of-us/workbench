@@ -86,12 +86,13 @@ export const getPublicInstitutionDetails = async(): Promise<PublicInstitutionDet
 export const getFreeCreditLimitOptions = (freeTierDollarQuota?: number) => {
   const START1 = 300;
   const END1 = 1000;
+  const START2 = 1000;
   const END2 = 10000;
 
   // gotcha: argument order for rangeStep is (step, start, end)
   // IntelliJ incorrectly believes the order is (start, end, step)
   const below1000 = fp.rangeStep(100, START1, END1+1);
-  const over1000 = fp.rangeStep(500, END1, END2+1);
+  const over1000 = fp.rangeStep(500, START2, END2+1);
 
   const defaultsPlusMaybeOverride = new Set([...below1000, ...over1000, freeTierDollarQuota ?? START1]);
 
