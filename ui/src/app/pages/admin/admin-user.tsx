@@ -54,7 +54,6 @@ const styles = reactStyles({
     color: colors.primary,
     fontSize: '14px',
     fontWeight: 600,
-    paddingTop: '1em',
     paddingLeft: 0,
   },
   textInput: {

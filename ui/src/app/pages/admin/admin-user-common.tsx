@@ -38,7 +38,6 @@ export const commonStyles = reactStyles({
     fontSize: '14px',
     fontWeight: 'bold',
     paddingLeft: '1em',
-    paddingTop: '1em',
   },
   textInput: {
     width: '14rem',
@@ -136,7 +135,7 @@ export const updateAccountProperties = async(oldProfile: Profile, updatedProfile
 
 export const DropdownWithLabel =
   ({label, options, initialValue, onChange, disabled= false, dataTestId, labelStyle = {}, dropdownStyle = {}}) => {
-  return <FlexColumn data-test-id={dataTestId} style={{marginTop: '1em'}}>
+  return <FlexColumn data-test-id={dataTestId} style={{marginTop: '1rem'}}>
     <label style={{...commonStyles.label, ...labelStyle}}>{label}</label>
     <Dropdown
       style={{...commonStyles.dropdown, ...dropdownStyle}}
