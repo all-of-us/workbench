@@ -546,11 +546,7 @@ const GpuConfigSelector = ({disabled, onChange, selectedMachine, gpuConfig})  =>
         <Dropdown id={'gpu-type'}
                   style={{width: '7rem'}}
                   options={validGpuNames}
-                  onChange={
-                    ({value}) => {
-                      setSelectedGpuType(fp.find({name: value}, validGpuOptions).type);
-                    }
-                  }
+                  onChange={({value}) => setSelectedGpuType(fp.find({name: value}, validGpuOptions).type)}
                   disabled={disabled}
                   value={gpuTypeToDisplayName(selectedGpuType)}/>
         </FlexRow>
