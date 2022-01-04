@@ -125,11 +125,10 @@ describe('computeRenewalDisplayDates', () => {
   });
 
   it('returns Unavailable/Incomplete when the module is incomplete', () => {
-    const expected = {
+    expect(computeRenewalDisplayDates({})).toStrictEqual({
       lastConfirmedDate: 'Unavailable (not completed)',
       nextReviewDate: 'Unavailable (not completed)'
-    };
-    expect(computeRenewalDisplayDates({})).toStrictEqual(expected);
+    });
   });
 
   it('returns Unavailable/Incomplete when the module is incomplete, regardless of expiration date', () => {
@@ -137,11 +136,11 @@ describe('computeRenewalDisplayDates', () => {
     const status: AccessModuleStatus = {
       expirationEpochMillis: expirationDate
     };
-    const expected = {
+
+    expect(computeRenewalDisplayDates(status)).toStrictEqual({
       lastConfirmedDate: 'Unavailable (not completed)',
       nextReviewDate: 'Unavailable (not completed)'
-    };
-    expect(computeRenewalDisplayDates(status)).toStrictEqual(expected);
+    });
   });
 
   it('returns Unavailable/Bypassed when the module is bypassed, regardless of bypass date', () => {
@@ -149,12 +148,11 @@ describe('computeRenewalDisplayDates', () => {
     const status: AccessModuleStatus = {
       bypassEpochMillis: bypassDate
     };
-    const expected = {
+
+    expect(computeRenewalDisplayDates(status)).toStrictEqual({
       lastConfirmedDate: displayDateWithoutHours(bypassDate),
       nextReviewDate: 'Unavailable (bypassed)'
-    }
-
-    expect(computeRenewalDisplayDates(status)).toStrictEqual(expected);
+    });
   });
 
   it('returns Unavailable/Bypassed when the module is bypassed, regardless of other fields', () => {
@@ -170,11 +168,11 @@ describe('computeRenewalDisplayDates', () => {
       completionEpochMillis: completionDate,
       expirationEpochMillis: expirationDate,
     };
-    const expected = {
+
+    expect(computeRenewalDisplayDates(status)).toStrictEqual({
       lastConfirmedDate: displayDateWithoutHours(bypassDate),
       nextReviewDate: 'Unavailable (bypassed)'
-    }
-    expect(computeRenewalDisplayDates(status)).toStrictEqual(expected);
+    });
   });
 
   it('returns valid completion and renewal times in the near future (within lookback)', () => {
@@ -192,11 +190,11 @@ describe('computeRenewalDisplayDates', () => {
       completionEpochMillis: completionDate,
       expirationEpochMillis: expirationDate
     };
-    const expected = {
+
+    expect(computeRenewalDisplayDates(status)).toStrictEqual({
       lastConfirmedDate: displayDateWithoutHours(completionDate),
       nextReviewDate: `${displayDateWithoutHours(expirationDate)} (${EXPIRATION_DAYS - completionDaysPast} days)`
-    }
-    expect(computeRenewalDisplayDates(status)).toStrictEqual(expected);
+    });
   });
 
   it('returns valid completion and renewal times in the far future (beyond lookback)', () => {
@@ -214,11 +212,11 @@ describe('computeRenewalDisplayDates', () => {
       completionEpochMillis: completionDate,
       expirationEpochMillis: expirationDate
     };
-    const expected = {
+
+    expect(computeRenewalDisplayDates(status)).toStrictEqual({
       lastConfirmedDate: displayDateWithoutHours(completionDate),
       nextReviewDate: `${displayDateWithoutHours(expirationDate)} (${EXPIRATION_DAYS - completionDaysPast} days)`
-    }
-    expect(computeRenewalDisplayDates(status)).toStrictEqual(expected);
+    });
   });
 
   it('returns a valid completion time and an expired renewal time', () => {
@@ -230,11 +228,11 @@ describe('computeRenewalDisplayDates', () => {
       completionEpochMillis: completionDate,
       expirationEpochMillis: expirationDate
     };
-    const expected = {
+
+    expect(computeRenewalDisplayDates(status)).toStrictEqual({
       lastConfirmedDate: displayDateWithoutHours(completionDate),
       nextReviewDate: `${displayDateWithoutHours(expirationDate)} (expired)`
-    }
-    expect(computeRenewalDisplayDates(status)).toStrictEqual(expected);
+    });
   });
 });
 
