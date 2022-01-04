@@ -246,40 +246,40 @@ const SearchGroupList = fp.flow(withCurrentWorkspace(), withCdrVersions())(
       const {groups, setSearchContext, role, updated, updateRequest} = this.props;
       const {index} = this.state;
       return <React.Fragment>
-      <style>{css}</style>
-      <div style={{display: 'flex', alignItems: 'center'}}>
-        <h2 style={styles.listHeader}>
-          {role === 'excludes' && <span>And</span>} {role.slice(0, -1)} Participants
-        </h2>
-      </div>
-      {groups.map((group, g) => <div key={g} data-test-id={`${role}-search-group`}>
-        <SearchGroup group={group}
+        <style>{css}</style>
+        <div style={{display: 'flex', alignItems: 'center'}}>
+          <h2 style={styles.listHeader}>
+            {role === 'excludes' && <span>And</span>} {role.slice(0, -1)} Participants
+          </h2>
+        </div>
+        {groups.map((group, g) => <div key={g} data-test-id={`${role}-search-group`}>
+          <SearchGroup group={group}
                      index={g + index}
                      setSearchContext={setSearchContext}
                      role={role}
                      updated={updated}
                      updateRequest={updateRequest}/>
-        <div style={styles.circleWrapper}>
-          <div style={styles.circle}>AND</div>
-        </div>
-      </div>)}
-      <div style={styles.card}>
-        {/* Group Header */}
-        <div style={styles.cardHeader}>
-          <div style={{marginLeft: '1.15rem'}}>Group {groups.length + index + 1}</div>
-        </div>
-        <div style={styles.cardBlock}>
-          <TieredMenu style={{...styles.menu, padding: '0.5rem 0'}}
+          <div style={styles.circleWrapper}>
+            <div style={styles.circle}>AND</div>
+          </div>
+        </div>)}
+        <div style={styles.card}>
+          {/* Group Header */}
+          <div style={styles.cardHeader}>
+            <div style={{marginLeft: '1.15rem'}}>Group {groups.length + index + 1}</div>
+          </div>
+          <div style={styles.cardBlock}>
+            <TieredMenu style={{...styles.menu, padding: '0.5rem 0'}}
             appendTo={document.body}
             model={this.criteriaMenuItems}
             popup
             ref={el => this.criteriaMenu = el} />
-          <button style={styles.menuButton} onClick={(e) => this.criteriaMenu.toggle(e)}>
-            Add Criteria <ClrIcon shape='caret down' size={12}/>
-          </button>
+            <button style={styles.menuButton} onClick={(e) => this.criteriaMenu.toggle(e)}>
+              Add Criteria <ClrIcon shape='caret down' size={12}/>
+            </button>
+          </div>
         </div>
-      </div>
-    </React.Fragment>;
+      </React.Fragment>;
     }
   });
 

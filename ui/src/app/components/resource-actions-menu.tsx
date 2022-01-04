@@ -19,21 +19,21 @@ export const ResourceActionsMenu = (props: { actions: Action[], disabled?: boole
         side='bottom'
         closeOnClick
         content={!disabled && <React.Fragment>
-                {actions.map((action, i) => {
+          {actions.map((action, i) => {
                   return (
-                        <TooltipTrigger key={i} content={action.hoverText}>
-                            <MenuItem
+                    <TooltipTrigger key={i} content={action.hoverText}>
+                      <MenuItem
                                 icon={action.icon}
                                 faIcon={action.faIcon}
                                 onClick={() => action.onClick()}
                                 disabled={action.disabled}>
-                                {action.displayName}
-                            </MenuItem>
-                        </TooltipTrigger>);
+                        {action.displayName}
+                      </MenuItem>
+                    </TooltipTrigger>);
                 })}
-            </React.Fragment>
+        </React.Fragment>
         }
     >
-        <SnowmanButton data-test-id='resource-menu' disabled={disabled}/>
-    </PopupTrigger>;
+    <SnowmanButton data-test-id='resource-menu' disabled={disabled}/>
+  </PopupTrigger>;
 };

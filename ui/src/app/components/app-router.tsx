@@ -80,15 +80,15 @@ const getUserConfirmation = (message, callback) => {
 
   ReactDOM.render(
     <Modal>
-        <ModalTitle>Warning!</ModalTitle>
-        <ModalBody>
-          {message}
-        </ModalBody>
-        <ModalFooter>
-          <Button type='link' onClick={() => withCleanup(false)}>Cancel</Button>
-          <Button type='primary' onClick={() => withCleanup(true)}>Discard Changes</Button>
-        </ModalFooter>
-      </Modal>, modal);
+      <ModalTitle>Warning!</ModalTitle>
+      <ModalBody>
+        {message}
+      </ModalBody>
+      <ModalFooter>
+        <Button type='link' onClick={() => withCleanup(false)}>Cancel</Button>
+        <Button type='primary' onClick={() => withCleanup(true)}>Discard Changes</Button>
+      </ModalFooter>
+    </Modal>, modal);
 };
 
 export const AppRouter = ({children}): React.ReactElement => {

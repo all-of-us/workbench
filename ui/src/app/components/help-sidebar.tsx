@@ -533,8 +533,8 @@ export const HelpSidebar = fp.flow(
         {(icon.id === 'concept' && concept && concept.length > 0) && <span data-test-id='concept-count'
                                                          style={styles.criteriaCount}>
           {concept.length}</span>}
-            <FontAwesomeIcon data-test-id={'help-sidebar-icon-' + icon.id} icon={icon.faIcon} style={icon.style} />
-          </React.Fragment> ;
+        <FontAwesomeIcon data-test-id={'help-sidebar-icon-' + icon.id} icon={icon.faIcon} style={icon.style} />
+      </React.Fragment> ;
     }
 
     displayRuntimeIcon(icon: IconConfig) {
@@ -597,7 +597,7 @@ export const HelpSidebar = fp.flow(
                   ...styles.asyncOperationStatusIcon,
                   ...styles.runtimeStatusIconOutline,
                   color: colors.asyncOperationStatus.error,
-              }}/>;
+                }}/>;
             }
           })()}
         </FlexRow>
@@ -739,7 +739,7 @@ export const HelpSidebar = fp.flow(
             bodyWidthRem: '30',
             bodyPadding: '0 1.25rem',
             renderBody: () =>
-             <RuntimePanelWrapper onClose={() => this.setActiveIcon(null)}/>,
+              <RuntimePanelWrapper onClose={() => this.setActiveIcon(null)}/>,
             showFooter: false
           };
         case 'notebooksHelp':
@@ -763,7 +763,7 @@ export const HelpSidebar = fp.flow(
               </div>
             ,
             renderBody: () => this.state.participant ?
-               <SidebarContent participant={this.state.participant}/> : <Spinner style={{display: 'block', margin: '3rem auto'}}/>,
+              <SidebarContent participant={this.state.participant}/> : <Spinner style={{display: 'block', margin: '3rem auto'}}/>,
             showFooter: true
           };
         case 'concept':
@@ -776,7 +776,7 @@ export const HelpSidebar = fp.flow(
             bodyWidthRem: '20',
             bodyPadding: '0.75rem 0.75rem 0',
             renderBody: () => !!currentConceptStore.getValue() &&
-                <ConceptListPage/>,
+              <ConceptListPage/>,
             showFooter: false
           };
         case 'criteria':
@@ -784,7 +784,7 @@ export const HelpSidebar = fp.flow(
             bodyWidthRem: '20',
             bodyPadding: '0.75rem 0.75rem 0',
             renderBody: () => !!currentCohortSearchContextStore.getValue() &&
-                <SelectionList back={() => this.setActiveIcon(null)} selections={[]}/>,
+              <SelectionList back={() => this.setActiveIcon(null)} selections={[]}/>,
             showFooter: false
           };
         case 'genomicExtractions':
@@ -843,29 +843,29 @@ export const HelpSidebar = fp.flow(
             </div>
           </PopupTrigger>}
           {this.icons().map((icon, i) =>
-              <div key={i} style={{display: 'table'}}>
-                <TooltipTrigger content={<div>{icon.tooltip}</div>} side='left'>
-                  <div style={activeIcon === icon.id ? iconStyles.active : icon.disabled ? iconStyles.disabled : styles.icon}
+            <div key={i} style={{display: 'table'}}>
+              <TooltipTrigger content={<div>{icon.tooltip}</div>} side='left'>
+                <div style={activeIcon === icon.id ? iconStyles.active : icon.disabled ? iconStyles.disabled : styles.icon}
                        onClick={() => {
                          if (icon.hasContent && !icon.disabled) {
                            this.onIconClick(icon);
                          }
                        }}>
-                    {
+                  {
                       switchCase(icon.id,
                         ['dataDictionary',
                           () => <a href={supportUrls.dataDictionary} target='_blank'>
-                              <FontAwesomeIcon data-test-id={'help-sidebar-icon-' + icon.id} icon={icon.faIcon} style={icon.style} />
-                            </a>
+                            <FontAwesomeIcon data-test-id={'help-sidebar-icon-' + icon.id} icon={icon.faIcon} style={icon.style} />
+                          </a>
                         ],
                         ['runtime', () => this.displayRuntimeIcon(icon)],
                         ['terminal',
                          () => <RouteLink
                                  path={`/workspaces/${namespace}/${id}/terminals`} >
-                             <FontAwesomeIcon
+                           <FontAwesomeIcon
                                  data-test-id={'help-sidebar-icon-' + icon.id}
                                  icon={icon.faIcon} style={icon.style} />
-                          </RouteLink>
+                         </RouteLink>
                         ],
                         ['genomicExtractions', () => this.displayExtractionIcon(icon)],
                         [DEFAULT, () => icon.faIcon === null
@@ -874,9 +874,9 @@ export const HelpSidebar = fp.flow(
                         ]
                       )
                     }
-                  </div>
-                </TooltipTrigger>
-              </div>
+                </div>
+              </TooltipTrigger>
+            </div>
             )
           }
         </div>
@@ -895,34 +895,34 @@ export const HelpSidebar = fp.flow(
             <div style={this.sidebarContainerStyles(activeIcon)}>
               <div style={this.sidebarStyle} data-test-id='sidebar-content'>
                 {activeIcon && sidebarContent &&
-                <div style={{height: '100%', overflow: sidebarContent.overflow || 'auto'}}>
-                  <FlexColumn style={{height: '100%'}}>
-                    {sidebarContent.renderHeader &&
-                    <FlexRow style={{justifyContent: 'space-between', padding: sidebarContent.headerPadding}}>
-                      {sidebarContent.renderHeader()}
+                  <div style={{height: '100%', overflow: sidebarContent.overflow || 'auto'}}>
+                    <FlexColumn style={{height: '100%'}}>
+                      {sidebarContent.renderHeader &&
+                        <FlexRow style={{justifyContent: 'space-between', padding: sidebarContent.headerPadding}}>
+                          {sidebarContent.renderHeader()}
 
-                      <Clickable style={{marginLeft: 'auto'}} onClick={() => this.setActiveIcon(null)}>
-                        <img src={proIcons.times}
+                          <Clickable style={{marginLeft: 'auto'}} onClick={() => this.setActiveIcon(null)}>
+                            <img src={proIcons.times}
                              style={{height: '27px', width: '17px'}}
                              alt='Close'/>
-                      </Clickable>
-                    </FlexRow>}
+                          </Clickable>
+                        </FlexRow>}
 
-                    <div className='slim-scroll-bar' style={{flex: 1, padding: sidebarContent.bodyPadding || '0 0.5rem 5.5rem'}}>
-                      {sidebarContent.renderBody()}
-                    </div>
-                  </FlexColumn>
+                      <div className='slim-scroll-bar' style={{flex: 1, padding: sidebarContent.bodyPadding || '0 0.5rem 5.5rem'}}>
+                        {sidebarContent.renderBody()}
+                      </div>
+                    </FlexColumn>
 
-                  {sidebarContent.showFooter &&
-                  <div style={{...styles.footer}}>
-                      <h3 style={{...styles.sectionTitle, marginTop: 0}}>Not finding what you're looking for?</h3>
-                      <p style={styles.contentItem}>
+                    {sidebarContent.showFooter &&
+                      <div style={{...styles.footer}}>
+                        <h3 style={{...styles.sectionTitle, marginTop: 0}}>Not finding what you're looking for?</h3>
+                        <p style={styles.contentItem}>
                           Visit our <StyledExternalLink href={supportUrls.helpCenter}
                                                         target='_blank' onClick={() => this.analyticsEvent('UserSupport')}> User Support Hub
-                      </StyledExternalLink> page or <span style={styles.link} onClick={() => this.openContactWidget()}> contact us</span>.
-                      </p>
+                          </StyledExternalLink> page or <span style={styles.link} onClick={() => this.openContactWidget()}> contact us</span>.
+                        </p>
+                      </div>}
                   </div>}
-                </div>}
               </div>
             </div>
           </CSSTransition>

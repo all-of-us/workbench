@@ -105,19 +105,19 @@ export const SecuritySuspendedMessage = ({error}: SuspendedMessageProps) => {
   const untilFull = moment(error.params.suspendedUntil).format('MMMM Do YYYY, h:mm a');
   return <div data-test-id="security-suspended-msg">
     <div>
-    {until.isAfter(new Date()) ?
-       <>
-         <b>Your analysis environment is suspended due to security egress concerns</b>.&nbsp;
-         Your runtime will become available again
-         {/* Line break here to avoid splitting duration tooltip trigger. */}
-         <br/>
-         <TooltipTrigger content={<div>{untilFull}</div>}>
-           <b style={{textDecoration: 'underline'}}>{duration}</b>
-         </TooltipTrigger>.
-       </> : <>
-         Your analysis environment was temporarily suspended but is now available for use.
-         Reload the page to continue.
-       </>}
+      {until.isAfter(new Date()) ?
+        <>
+          <b>Your analysis environment is suspended due to security egress concerns</b>.&nbsp;
+          Your runtime will become available again
+          {/* Line break here to avoid splitting duration tooltip trigger. */}
+          <br/>
+          <TooltipTrigger content={<div>{untilFull}</div>}>
+            <b style={{textDecoration: 'underline'}}>{duration}</b>
+          </TooltipTrigger>.
+        </> : <>
+          Your analysis environment was temporarily suspended but is now available for use.
+          Reload the page to continue.
+        </>}
       &nbsp;Please <b>check your contact email inbox</b> for follow-up and respond
       promptly to verify your activity.
     </div>

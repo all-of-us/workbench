@@ -125,8 +125,8 @@ export class HelpTips extends React.Component<Props, State> {
 
     return <div>
       {this.props.allowSearch && <div style={styles.textSearch}>
-          <ClrIcon style={{color: colors.primary, margin: '0 0.25rem'}} shape='search' size={16} />
-          <input
+        <ClrIcon style={{color: colors.primary, margin: '0 0.25rem'}} shape='search' size={16} />
+        <input
               type='text'
               style={styles.textInput}
               value={this.state.searchTerm}

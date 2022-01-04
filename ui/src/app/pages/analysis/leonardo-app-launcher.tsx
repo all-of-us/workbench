@@ -235,16 +235,16 @@ const ProgressCard: React.FunctionComponent<{progressState: Progress, cardState:
       styles.progressCard}>
       {isCurrent ? <Spinner style={{width: '46px', height: '46px'}}
                             data-test-id={'progress-card-spinner-' + cardState.valueOf()}/> :
-        <React.Fragment>
-          {icon.shape === 'notebook' ? <NotebookIcon style={styles.progressIcon}/> :
-          <ClrIcon shape={icon.shape} style={isComplete ?
+      <React.Fragment>
+        {icon.shape === 'notebook' ? <NotebookIcon style={styles.progressIcon}/> :
+        <ClrIcon shape={icon.shape} style={isComplete ?
           {...styles.progressIcon, ...styles.progressIconDone,
             transform: icon.rotation} :
             {...styles.progressIcon, transform: icon.rotation}}/>}
-        </React.Fragment>}
-        <div style={styles.progressText}>
-          {renderText()}
-        </div>
+      </React.Fragment>}
+      <div style={styles.progressText}>
+        {renderText()}
+      </div>
     </div>;
   };
 
@@ -592,7 +592,7 @@ export const LeonardoAppLauncher = fp.flow(
           <Iframe frameBorder={0} url={leoUrl} width='100%' height='100%'/>
         </div>}
         {resolveRuntimeInitializer &&
-         <RuntimeInitializerModal
+          <RuntimeInitializerModal
             defaultRuntime={runtimeInitializerDefault}
             cancel={() => {
               closeRuntimeInitializerModal(null);

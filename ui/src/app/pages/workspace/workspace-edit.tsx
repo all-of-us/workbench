@@ -607,14 +607,14 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
         </StyledExternalLink> to learn more about the free credit
         program and how it can be used .
         {!enableBillingUpgrade &&
-        <div style={{display: 'inline'}}>Once you have used up your free credits, you can request
-          additional credits by <span style={styles.link} onClick={() => this.openContactWidget()}>
-        contacting support</span>.</div>}
+          <div style={{display: 'inline'}}>Once you have used up your free credits, you can request
+            additional credits by <span style={styles.link} onClick={() => this.openContactWidget()}>
+              contacting support</span>.</div>}
         {enableBillingUpgrade &&
-        <div style={{display: 'inline'}}>Once you have used up your free credits, you can either select a shared billing account or create
-          a new one using either Google Cloud Platform or a Google billing partner.
-          Please note: If creating a billing account via a Google billing partner,
-          it may take a few days to show up in the <b>Select account</b> dropdown.</div>}
+          <div style={{display: 'inline'}}>Once you have used up your free credits, you can either select a shared billing account or create
+            a new one using either Google Cloud Platform or a Google billing partner.
+            Please note: If creating a billing account via a Google billing partner,
+            it may take a few days to show up in the <b>Select account</b> dropdown.</div>}
       </div>;
     }
 
@@ -713,8 +713,8 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
       return <div key={item.label}>
         <div style={{fontWeight: 'bold', marginBottom: '0.3rem'}}>{item.label} *</div>
         {item.subCategory.map((sub, index) =>
-            <FlexRow key={sub.label} style={{...styles.categoryRow, paddingTop: '0rem'}}>
-              <CheckBox
+          <FlexRow key={sub.label} style={{...styles.categoryRow, paddingTop: '0rem'}}>
+            <CheckBox
                   manageOwnState={false}
                   wrapperStyle={styles.checkboxRow}
                   data-test-id={sub.shortName + '-checkbox'}
@@ -723,12 +723,12 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
                   checked={this.specificPopulationCheckboxSelected(sub.shortName)}
                   onChange={v => this.updateSpecificPopulation(sub.shortName, v)}
                   disabled={!this.state.populationChecked}/>
-              <FlexColumn>
-                <label style={styles.text}>
-                  {sub.label}
-                </label>
-              </FlexColumn>
-            </FlexRow>)}
+            <FlexColumn>
+              <label style={styles.text}>
+                {sub.label}
+              </label>
+            </FlexColumn>
+          </FlexRow>)}
       </div>;
     }
 
@@ -1144,56 +1144,56 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
           <WorkspaceEditSection header={this.renderHeader()} tooltip={toolTipText.header}
                                 style={{marginTop: '24px'}} largeHeader
                                 required={!this.isMode(WorkspaceEditMode.Duplicate)}>
-          <FlexRow style={{alignItems: 'baseline'}}>
-            <FlexColumn>
-              <div style={styles.fieldHeader}>
-                Workspace name
-              </div>
-              <TextInput data-test-id='workspace-name'
+            <FlexRow style={{alignItems: 'baseline'}}>
+              <FlexColumn>
+                <div style={styles.fieldHeader}>
+                  Workspace name
+                </div>
+                <TextInput data-test-id='workspace-name'
                          type='text'
                          style={styles.textInput}
                          autoFocus
                          placeholder='Workspace Name'
                          value = {name}
                          onChange={v => this.setState(fp.set(['workspace', 'name'], v))}/>
-            </FlexColumn>
-            {this.enableAccessTierSelection() &&
-              <FlexColumn>
-                <div style={styles.fieldHeader}>
-                  Data access tier
-                  <TooltipTrigger content={toolTipText.tierSelect}>
-                    <InfoIcon style={styles.infoIcon}/>
-                  </TooltipTrigger>
-                </div>
-                <TooltipTrigger
+              </FlexColumn>
+              {this.enableAccessTierSelection() &&
+                <FlexColumn>
+                  <div style={styles.fieldHeader}>
+                    Data access tier
+                    <TooltipTrigger content={toolTipText.tierSelect}>
+                      <InfoIcon style={styles.infoIcon}/>
+                    </TooltipTrigger>
+                  </div>
+                  <TooltipTrigger
                   content='To use a different access tier, create a new workspace.'
                   disabled={this.isMode(WorkspaceEditMode.Create)}>
-                  <div data-test-id='select-access-tier' style={{...styles.select, ...styles.accessTierSpacing}}>
-                    <select style={{...styles.selectInput, ...styles.accessTierSpacing}}
+                    <div data-test-id='select-access-tier' style={{...styles.select, ...styles.accessTierSpacing}}>
+                      <select style={{...styles.selectInput, ...styles.accessTierSpacing}}
                             value={accessTierShortName}
                             onChange={(value) => this.onAccessTierChange(value, profile, cdrVersionTiersResponse)}
                             disabled={!this.isMode(WorkspaceEditMode.Create)}>
-                      {environment.accessTiersVisibleToUsers.map((shortName, i) => (
+                        {environment.accessTiersVisibleToUsers.map((shortName, i) => (
                           <option key={shortName} value={shortName}>
                             {displayNameForTier(shortName)}
                           </option>
                       ))}
-                    </select>
-                  </div>
-                </TooltipTrigger>
-              </FlexColumn>}
-            <FlexColumn>
-              <div style={styles.fieldHeader}>
-                Dataset version
-                <TooltipTrigger content={toolTipText.cdrSelect}>
-                  <InfoIcon style={styles.infoIcon}/>
-                </TooltipTrigger>
-              </div>
-              <TooltipTrigger
+                      </select>
+                    </div>
+                  </TooltipTrigger>
+                </FlexColumn>}
+              <FlexColumn>
+                <div style={styles.fieldHeader}>
+                  Dataset version
+                  <TooltipTrigger content={toolTipText.cdrSelect}>
+                    <InfoIcon style={styles.infoIcon}/>
+                  </TooltipTrigger>
+                </div>
+                <TooltipTrigger
                 content='To use a different dataset version, duplicate or create a new workspace.'
                 disabled={!(this.isMode(WorkspaceEditMode.Edit))}>
-              <div data-test-id='select-cdr-version' style={{...styles.select, ...styles.cdrVersionSpacing}}>
-                <select style={{...styles.selectInput, ...styles.cdrVersionSpacing}}
+                  <div data-test-id='select-cdr-version' style={{...styles.select, ...styles.cdrVersionSpacing}}>
+                    <select style={{...styles.selectInput, ...styles.cdrVersionSpacing}}
                   value={cdrVersionId}
                   onChange={(v: React.FormEvent<HTMLSelectElement>) => {
                     const selectedVersion = v.currentTarget.value;
@@ -1202,115 +1202,115 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
                           getDefaultCdrVersionForTier(this.state.workspace.accessTierShortName, cdrVersionTiersResponse).cdrVersionId});
                   }}
                   disabled={this.isMode(WorkspaceEditMode.Edit)}>
-                    {cdrVersions.map((version, i) => (
-                      <option key={version.cdrVersionId} value={version.cdrVersionId}>
-                        {version.name}
-                      </option>
+                      {cdrVersions.map((version, i) => (
+                        <option key={version.cdrVersionId} value={version.cdrVersionId}>
+                          {version.name}
+                        </option>
                     ))}
-                </select>
-              </div>
-            </TooltipTrigger>
-            </FlexColumn>
-          </FlexRow>
-        </WorkspaceEditSection>
-        {this.isMode(WorkspaceEditMode.Duplicate) &&
-        <WorkspaceEditSection header='Options for duplicate workspace'>
-          <CheckBox
+                    </select>
+                  </div>
+                </TooltipTrigger>
+              </FlexColumn>
+            </FlexRow>
+          </WorkspaceEditSection>
+          {this.isMode(WorkspaceEditMode.Duplicate) &&
+            <WorkspaceEditSection header='Options for duplicate workspace'>
+              <CheckBox
             style={styles.checkboxStyle}
             label='Share workspace with the same set of collaborators'
             labelStyle={styles.text}
             onChange={v => this.setState({cloneUserRole: v})}/>
-        </WorkspaceEditSection>
+            </WorkspaceEditSection>
         }
-        {(!this.isMode(WorkspaceEditMode.Edit) || this.props.workspace.accessLevel === WorkspaceAccessLevel.OWNER) &&
-          <WorkspaceEditSection header={<div><AoU/> billing account</div>}
+          {(!this.isMode(WorkspaceEditMode.Edit) || this.props.workspace.accessLevel === WorkspaceAccessLevel.OWNER) &&
+            <WorkspaceEditSection header={<div><AoU/> billing account</div>}
                                 description={this.renderBillingDescription()} descriptionStyle={{marginLeft: '0rem'}}>
-            {this.state.fetchBillingAccountLoading ? <SpinnerOverlay overrideStylesOverlay={styles.spinner}/> : <div>
-            <div style={styles.fieldHeader}>Select a current billing account</div>
-              {!enableBillingUpgrade && <OverlayPanel ref={(me) => freeTierBalancePanel = me} dismissable={true} appendTo={document.body}>
-                <div style={styles.freeCreditsBalanceOverlay}>
-                  FREE CREDIT BALANCE {formatFreeCreditsUSD(freeTierCreditsBalance)}
-                </div>
-              </OverlayPanel>}
-            <FlexRow>
-              <FlexColumn>
-              <div data-test-id = 'billing-dropdown-div' onClick={() =>  this.requestBillingScopeThenFetchBillingAccount()}>
-                  <Dropdown data-test-id = 'billing-dropdown'
+              {this.state.fetchBillingAccountLoading ? <SpinnerOverlay overrideStylesOverlay={styles.spinner}/> : <div>
+                <div style={styles.fieldHeader}>Select a current billing account</div>
+                {!enableBillingUpgrade && <OverlayPanel ref={(me) => freeTierBalancePanel = me} dismissable={true} appendTo={document.body}>
+                  <div style={styles.freeCreditsBalanceOverlay}>
+                    FREE CREDIT BALANCE {formatFreeCreditsUSD(freeTierCreditsBalance)}
+                  </div>
+                </OverlayPanel>}
+                <FlexRow>
+                  <FlexColumn>
+                    <div data-test-id = 'billing-dropdown-div' onClick={() =>  this.requestBillingScopeThenFetchBillingAccount()}>
+                      <Dropdown data-test-id = 'billing-dropdown'
                       style={{width: '20rem'}}
                         value={billingAccountName}
                         options={this.buildBillingAccountOptions()}
                         disabled={(freeTierCreditsBalance < 0.0) && !enableBillingUpgrade}
                         onChange={e => {this.setState(fp.set(['workspace', 'billingAccountName'], e.value));}}/>
-              </div>
-              </FlexColumn>
-              <FlexColumn>
-                {enableBillingUpgrade &&
-                <Button type='primary' style={{marginLeft: '20px', fontWeight: 400, height: '38px', width: '220px'}}
+                    </div>
+                  </FlexColumn>
+                  <FlexColumn>
+                    {enableBillingUpgrade &&
+                      <Button type='primary' style={{marginLeft: '20px', fontWeight: 400, height: '38px', width: '220px'}}
                         onClick={() => this.setState({showCreateBillingAccountModal: true})}>
-                  CREATE BILLING ACCOUNT
-                </Button>}
-              </FlexColumn>
-            </FlexRow>
-            </div>}
-          </WorkspaceEditSection>}
-        <hr style={{marginTop: '1rem'}}/>
-        <WorkspaceEditSection header={<FlexRow style={{alignItems: 'center'}}>
-          <div>Research Use Statement Questions</div>
-          <StyledExternalLink href={supportUrls.researchPurpose}
+                        CREATE BILLING ACCOUNT
+                      </Button>}
+                  </FlexColumn>
+                </FlexRow>
+              </div>}
+            </WorkspaceEditSection>}
+          <hr style={{marginTop: '1rem'}}/>
+          <WorkspaceEditSection header={<FlexRow style={{alignItems: 'center'}}>
+            <div>Research Use Statement Questions</div>
+            <StyledExternalLink href={supportUrls.researchPurpose}
                               target='_blank' style={{marginLeft: '1rem', fontSize: 14, lineHeight: '18px', fontWeight: 400}}>
-            Best practices for Research Use Statement questions
-          </StyledExternalLink>
-        </FlexRow>} largeHeader={true}
+              Best practices for Research Use Statement questions
+            </StyledExternalLink>
+          </FlexRow>} largeHeader={true}
               description={<div style={styles.researchPurposeDescription}>
                 <div style={{margin: '0.5rem', paddingTop: '0.5rem'}}>{ResearchPurposeDescription}
-              <br/><br/>
-              </div></div>
+                  <br/><br/>
+                </div></div>
             }/>
 
-        {/*Primary purpose */}
+          {/*Primary purpose */}
           <WorkspaceEditSection header={researchPurposeQuestions[0].header} publiclyDisplayed={true}
                                 description={researchPurposeQuestions[0].description} index='1.'
                                 indent={true}>
-          <FlexRow>
-            <FlexColumn>
-              <FlexColumn  style={styles.researchPurposeRow}>
-                <FlexRow>
-                <CheckBox
+            <FlexRow>
+              <FlexColumn>
+                <FlexColumn  style={styles.researchPurposeRow}>
+                  <FlexRow>
+                    <CheckBox
                   data-test-id='researchPurpose-checkbox'
                   manageOwnState={false}
                   style={{...styles.checkboxStyle, margin: '0.1rem 0.25rem 0 0.6rem'}}
                   checked={this.researchPurposeCheck}
                   onChange={v => this.onResearchPurposeChange(v)}/>
-                  <div style={{...styles.shortDescription}}>
-                    <button style={{...styles.shortDescription, border: 'none'}}
+                    <div style={{...styles.shortDescription}}>
+                      <button style={{...styles.shortDescription, border: 'none'}}
                             data-test-id='research-purpose-button'
                             onClick={() => this.setState({showResearchPurpose: !showResearchPurpose})}>
-                      <label style={{fontSize: 14}}>Research purpose</label>
-                      <i className={this.iconClass} style={{verticalAlign: 'middle'}}></i>
-                     </button>
-                  </div>
-                </FlexRow>
+                        <label style={{fontSize: 14}}>Research purpose</label>
+                        <i className={this.iconClass} style={{verticalAlign: 'middle'}}></i>
+                      </button>
+                    </div>
+                  </FlexRow>
                   {showResearchPurpose && <FlexColumn data-test-id='research-purpose-categories'>
                     <div style={{...styles.text, marginLeft: '1.9rem'}}>
                       Choose options below to describe your research purpose
                     </div>
                     <div style={{marginLeft: '2rem'}}>
-                  {ResearchPurposeItems.map(
+                      {ResearchPurposeItems.map(
                     (rp, i) => this.makePrimaryPurposeForm(rp, i))}
-                  </div></FlexColumn>}
+                    </div></FlexColumn>}
+                </FlexColumn>
+
+                {PrimaryPurposeItems.map((rp, i) => this.makePrimaryPurposeForm(rp, i))}
               </FlexColumn>
+            </FlexRow>
+          </WorkspaceEditSection>
 
-              {PrimaryPurposeItems.map((rp, i) => this.makePrimaryPurposeForm(rp, i))}
-            </FlexColumn>
-          </FlexRow>
-        </WorkspaceEditSection>
-
-        <WorkspaceEditSection
+          <WorkspaceEditSection
           header={researchPurposeQuestions[1].header} indent={true} publiclyDisplayed={true}
           description={researchPurposeQuestions[1].description} style={{width: '48rem'}} index='2.'>
-          <FlexColumn>
-            {/* TextBox: scientific question(s) researcher intend to study Section*/}
-            <WorkspaceResearchSummary
+            <FlexColumn>
+              {/* TextBox: scientific question(s) researcher intend to study Section*/}
+              <WorkspaceResearchSummary
                 researchPurpose={researchPurposeQuestions[2]}
                 researchValue={intendedStudy}
                 onChange={v => this.updateResearchPurpose('intendedStudy', v.trim())}
@@ -1318,39 +1318,39 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
                 id='intendedStudyText'
             />
 
-            {/* TextBox: scientific approaches section*/}
-            <WorkspaceResearchSummary
+              {/* TextBox: scientific approaches section*/}
+              <WorkspaceResearchSummary
                 researchPurpose={researchPurposeQuestions[3]}
                 researchValue={scientificApproach}
                 onChange={v => this.updateResearchPurpose('scientificApproach', v.trim())}
                 index='2.2'
                 id='scientificApproachText'
             />
-            {/*TextBox: anticipated findings from the study section*/}
-            <WorkspaceResearchSummary
+              {/*TextBox: anticipated findings from the study section*/}
+              <WorkspaceResearchSummary
                 researchPurpose={researchPurposeQuestions[4]}
                 researchValue={anticipatedFindings}
                 onChange={v => this.updateResearchPurpose('anticipatedFindings', v.trim())}
                 index='2.3'
                 id='anticipatedFindingsText'
             />
-          </FlexColumn>
-        </WorkspaceEditSection>
+            </FlexColumn>
+          </WorkspaceEditSection>
 
           {/*disseminate  research Section */}
-        <WorkspaceEditSection header={researchPurposeQuestions[5].header}
+          <WorkspaceEditSection header={researchPurposeQuestions[5].header}
                               description={researchPurposeQuestions[5].description} style={{width: '48rem'}} index='3.'>
-          <FlexRow>
-            <FlexColumn style={styles.flexColumnBy2}>
-              {disseminateFindings.slice(0, sliceByHalfLength(disseminateFindings)).map(
+            <FlexRow>
+              <FlexColumn style={styles.flexColumnBy2}>
+                {disseminateFindings.slice(0, sliceByHalfLength(disseminateFindings)).map(
                 (rp, i) => this.makeDisseminateForm(rp, rp.shortName))}
-            </FlexColumn>
-            <FlexColumn style={styles.flexColumnBy2}>
-              {disseminateFindings.slice(sliceByHalfLength(disseminateFindings)).map(
+              </FlexColumn>
+              <FlexColumn style={styles.flexColumnBy2}>
+                {disseminateFindings.slice(sliceByHalfLength(disseminateFindings)).map(
                 (rp, i) => this.makeDisseminateForm(rp, rp.shortName))}
-            </FlexColumn>
-          </FlexRow>
-        </WorkspaceEditSection>
+              </FlexColumn>
+            </FlexRow>
+          </WorkspaceEditSection>
 
           {/*Research outcome section*/}
           <WorkspaceEditSection header={researchPurposeQuestions[6].header} index='4.'
@@ -1365,30 +1365,30 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
           </WorkspaceEditSection>
 
           {/*Underrespresented population section*/}
-        <WorkspaceEditSection header={researchPurposeQuestions[7].header} index='5.' indent={true}
+          <WorkspaceEditSection header={researchPurposeQuestions[7].header} index='5.' indent={true}
                               description={researchPurposeQuestions[7].description}
                               style={{width: '48rem'}} publiclyDisplayed={true}>
-          <div style={styles.header}>Will your study focus on any historically underrepresented populations?</div>
-          <div>
-            <RadioButton name='population' style={{marginRight: '0.5rem'}}
+            <div style={styles.header}>Will your study focus on any historically underrepresented populations?</div>
+            <div>
+              <RadioButton name='population' style={{marginRight: '0.5rem'}}
                          data-test-id='specific-population-yes'
                          onChange={v => this.setState({populationChecked: true})}
                          checked={populationChecked ?? false}/>
-            <label style={styles.text}>Yes, my study will focus on one or more specific
-              underrepresented populations, either on their own or in comparison to other groups.</label>
-          </div>
-          <div style={{...styles.text, marginLeft: '1.2rem'}}>
-            <strong>If "Yes,"</strong>&nbsp;please indicate your underrepresented population(s) of
-            interest:
-            <FlexRow style={{flex: '1 1 0', marginTop: '0.5rem'}}>
-              <FlexColumn>
-                {SpecificPopulationItems.slice(0, sliceByHalfLength(SpecificPopulationItems) + 1).map(sp =>
+              <label style={styles.text}>Yes, my study will focus on one or more specific
+                underrepresented populations, either on their own or in comparison to other groups.</label>
+            </div>
+            <div style={{...styles.text, marginLeft: '1.2rem'}}>
+              <strong>If "Yes,"</strong>&nbsp;please indicate your underrepresented population(s) of
+              interest:
+              <FlexRow style={{flex: '1 1 0', marginTop: '0.5rem'}}>
+                <FlexColumn>
+                  {SpecificPopulationItems.slice(0, sliceByHalfLength(SpecificPopulationItems) + 1).map(sp =>
                   this.makeSpecificPopulationForm(sp))}
-              </FlexColumn>
-              <FlexColumn>
-                {SpecificPopulationItems.slice(sliceByHalfLength(SpecificPopulationItems) + 1).map(sp =>
+                </FlexColumn>
+                <FlexColumn>
+                  {SpecificPopulationItems.slice(sliceByHalfLength(SpecificPopulationItems) + 1).map(sp =>
                   this.makeSpecificPopulationForm(sp))}
-                <CheckBox
+                  <CheckBox
                     wrapperStyle={styles.checkboxRow}
                     style={styles.checkboxStyle}
                     data-test-id='other-specialPopulation-checkbox'
@@ -1398,105 +1398,105 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
                     onChange={v => this.updateSpecificPopulation(SpecificPopulationEnum.OTHER, v)}
                     disabled={!populationChecked}
                 />
-                <TextInput type='text' autoFocus placeholder='Please specify'
+                  <TextInput type='text' autoFocus placeholder='Please specify'
                            value={otherPopulationDetails}
                            disabled={!fp.includes(SpecificPopulationEnum.OTHER, populationDetails)}
                            data-test-id='other-specialPopulation-text'
                            onChange={v => this.setState(fp.set(
                              ['workspace', 'researchPurpose', 'otherPopulationDetails'], v.trim()))}/>
-              </FlexColumn>
-            </FlexRow>
-            <hr/>
-            <FlexRow>
-              <div style={{marginRight: '0.2rem'}}>*</div>
-              <div>Demographic variables for which data elements have been altered, partially
-                suppressed, or generalized in the Registered Tier to protect data privacy. Refer to
-                the Data Dictionary for details.</div>
-            </FlexRow>
+                </FlexColumn>
+              </FlexRow>
+              <hr/>
+              <FlexRow>
+                <div style={{marginRight: '0.2rem'}}>*</div>
+                <div>Demographic variables for which data elements have been altered, partially
+                  suppressed, or generalized in the Registered Tier to protect data privacy. Refer to
+                  the Data Dictionary for details.</div>
+              </FlexRow>
 
-            <hr/>
-          </div>
-          <FlexRow style={{marginTop: '0.5rem'}}>
-            <RadioButton name='population'
+              <hr/>
+            </div>
+            <FlexRow style={{marginTop: '0.5rem'}}>
+              <RadioButton name='population'
                          style={{marginRight: '0.5rem', marginTop: '0.3rem'}}
                          data-test-id='specific-population-no'
                          onChange={v => this.setState({populationChecked: false})}
                          checked={populationChecked === false}/>
-            <label style={styles.text}>No, my study will not center on underrepresented populations.
-              I am interested in a diverse sample in general, or I am focused on populations that
-              have been well represented in prior research.</label>
-          </FlexRow>
-        </WorkspaceEditSection>
+              <label style={styles.text}>No, my study will not center on underrepresented populations.
+                I am interested in a diverse sample in general, or I am focused on populations that
+                have been well represented in prior research.</label>
+            </FlexRow>
+          </WorkspaceEditSection>
 
           {/* Request for review section*/}
-        <WorkspaceEditSection header={researchPurposeQuestions[8].header} index='6.' indent={true}>
-          <FlexRow style={styles.text}><div>
-            Any research that focuses on certain population characteristics or&nbsp;
-            <TooltipTrigger content={toolTipTextDemographic} style={{display: 'inline-block'}}>
-              <LinkButton style={{display: 'inline-block'}}>uses
-              demographic variables</LinkButton>
-            </TooltipTrigger>
-            &nbsp;in analyses can result, often unintentionally,
-            in findings that may be misinterpreted or misused by others to foster stigma. While it
-            may not be possible to completely prevent misuse of research for stigmatizing purposes,
-            data users can take important steps to minimize the risk of this happening–taking this
-            step is a condition of your
-            <TooltipTrigger content={toolTipTextDucc}>
-              <LinkButton style={{display: 'inline-block'}}>Data User Code of Conduct agreement.</LinkButton>
-            </TooltipTrigger>
-            &nbsp;If you are concerned that your research could inadvertently stigmatize
-            participants or communities, or if you are unsure, let us know. We encourage you to
-            request a review of your research purpose statement by the <AoU/> Resource Access
-            Board (RAB) as a precaution. The RAB will provide feedback and, if needed, guidance for
-            modifying your research purpose or scope. To learn more, please refer to the&nbsp;
-            <TooltipTrigger content={toolTipTextStigmatization} style={{display: 'inline-block'}}>
-            <LinkButton style={{display: 'inline-block'}}><AoU/> Stigmatizing Research Policy</LinkButton>
-            </TooltipTrigger>. If you
-            request a review, you can expect to receive an initial response within five business days.
-            During the RAB’s review, you may begin working in your workspace.</div>
-          </FlexRow>
-          <FlexRow style={{paddingTop: '0.3rem'}}>
-            <FlexColumn>
-            <label style={{...styles.header, marginBottom: '0.2rem'}}>Would you like to request a
-              review of your research purpose
-              statement by the Resource Access Board?</label>
-            <label style={styles.text}>
-                Note: Your response to this question is private and will not be displayed on the
-              Research Hub.
-            </label>
+          <WorkspaceEditSection header={researchPurposeQuestions[8].header} index='6.' indent={true}>
+            <FlexRow style={styles.text}><div>
+              Any research that focuses on certain population characteristics or&nbsp;
+              <TooltipTrigger content={toolTipTextDemographic} style={{display: 'inline-block'}}>
+                <LinkButton style={{display: 'inline-block'}}>uses
+                  demographic variables</LinkButton>
+              </TooltipTrigger>
+              &nbsp;in analyses can result, often unintentionally,
+              in findings that may be misinterpreted or misused by others to foster stigma. While it
+              may not be possible to completely prevent misuse of research for stigmatizing purposes,
+              data users can take important steps to minimize the risk of this happening–taking this
+              step is a condition of your
+              <TooltipTrigger content={toolTipTextDucc}>
+                <LinkButton style={{display: 'inline-block'}}>Data User Code of Conduct agreement.</LinkButton>
+              </TooltipTrigger>
+              &nbsp;If you are concerned that your research could inadvertently stigmatize
+              participants or communities, or if you are unsure, let us know. We encourage you to
+              request a review of your research purpose statement by the <AoU/> Resource Access
+              Board (RAB) as a precaution. The RAB will provide feedback and, if needed, guidance for
+              modifying your research purpose or scope. To learn more, please refer to the&nbsp;
+              <TooltipTrigger content={toolTipTextStigmatization} style={{display: 'inline-block'}}>
+                <LinkButton style={{display: 'inline-block'}}><AoU/> Stigmatizing Research Policy</LinkButton>
+              </TooltipTrigger>. If you
+              request a review, you can expect to receive an initial response within five business days.
+              During the RAB’s review, you may begin working in your workspace.</div>
+            </FlexRow>
+            <FlexRow style={{paddingTop: '0.3rem'}}>
               <FlexColumn>
-                <FlexRow>
-                <RadioButton style={{marginTop: '0.2rem'}} name='reviewRequested'
+                <label style={{...styles.header, marginBottom: '0.2rem'}}>Would you like to request a
+                  review of your research purpose
+                  statement by the Resource Access Board?</label>
+                <label style={styles.text}>
+                  Note: Your response to this question is private and will not be displayed on the
+                  Research Hub.
+                </label>
+                <FlexColumn>
+                  <FlexRow>
+                    <RadioButton style={{marginTop: '0.2rem'}} name='reviewRequested'
                              data-test-id='review-request-btn-true'
                              onChange={() => {
                                this.updateResearchPurpose('reviewRequested', true);
                              }}
                              checked={reviewRequested ?? false}/>
-                <label style={{...styles.text, marginLeft: '0.5rem'}}>Yes, I would like to request
-                  a review of my research purpose.</label>
-                </FlexRow>
-                <FlexRow>
-                <RadioButton style={{marginTop: '0.2rem'}} name='reviewRequested'
+                    <label style={{...styles.text, marginLeft: '0.5rem'}}>Yes, I would like to request
+                      a review of my research purpose.</label>
+                  </FlexRow>
+                  <FlexRow>
+                    <RadioButton style={{marginTop: '0.2rem'}} name='reviewRequested'
                              data-test-id='review-request-btn-false'
                              onChange={() => {
                                this.updateResearchPurpose('reviewRequested', false);
                              }}
                              checked={reviewRequested === false}/>
-                <label style={{...styles.text, marginLeft: '0.5rem', marginRight: '3rem'}}>No, I
-                  have no concerns at this time about potential stigmatization based on my study.</label>
-                </FlexRow>
+                    <label style={{...styles.text, marginLeft: '0.5rem', marginRight: '3rem'}}>No, I
+                      have no concerns at this time about potential stigmatization based on my study.</label>
+                  </FlexRow>
+                </FlexColumn>
+                <label style={{...styles.text, paddingTop: '0.5rem'}}>{RequestForReviewFooter}</label>
               </FlexColumn>
-              <label style={{...styles.text, paddingTop: '0.5rem'}}>{RequestForReviewFooter}</label>
-            </FlexColumn>
-          </FlexRow>
-        </WorkspaceEditSection>
-        <div>
-          <FlexRow style={{marginTop: '1rem', marginBottom: '1rem'}}>
-            <Button type='secondary' style={{marginRight: '1rem'}}
+            </FlexRow>
+          </WorkspaceEditSection>
+          <div>
+            <FlexRow style={{marginTop: '1rem', marginBottom: '1rem'}}>
+              <Button type='secondary' style={{marginRight: '1rem'}}
                     onClick = {() => this.cancel()}>
-              Cancel
-            </Button>
-            <TooltipTrigger content={
+                Cancel
+              </Button>
+              <TooltipTrigger content={
               errors && <BulletAlignedUnorderedList>
                 {errors.name && <li>{errors.name}</li>}
                 {errors.billingAccountName && <li>
@@ -1521,108 +1521,108 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
                 {errors.reviewRequested && <li>You must pick an answer for review of stigmatizing research (Question 6)</li>}
               </BulletAlignedUnorderedList>
             } disabled={!errors}>
-              <Button type='primary'
+                <Button type='primary'
                       onClick={() => this.setState({showConfirmationModal: true})}
                       disabled={errors || loading || showCdrVersionModal}
                       data-test-id='workspace-save-btn'>
-                {this.renderButtonText()}
-              </Button>
-            </TooltipTrigger>
-          </FlexRow>
-        </div>
-        {workspaceCreationError &&
-        <Modal>
-          <ModalTitle>Error:</ModalTitle>
-          <ModalBody>
-            { workspaceCreationErrorMessage }
-          </ModalBody>
-          <ModalFooter>
-            <Button onClick = {() => this.cancel()}
+                  {this.renderButtonText()}
+                </Button>
+              </TooltipTrigger>
+            </FlexRow>
+          </div>
+          {workspaceCreationError &&
+            <Modal>
+              <ModalTitle>Error:</ModalTitle>
+              <ModalBody>
+                { workspaceCreationErrorMessage }
+              </ModalBody>
+              <ModalFooter>
+                <Button onClick = {() => this.cancel()}
                 type='secondary' style={{marginRight: '2rem'}}>
-              Cancel
-              {this.props.workspaceEditMode === WorkspaceEditMode.Create ?
+                  Cancel
+                  {this.props.workspaceEditMode === WorkspaceEditMode.Create ?
                 ' Creation' : ' Update'}
                 </Button>
-            <Button type='primary' onClick={() => this.resetWorkspaceEditor()}>Keep Editing</Button>
-          </ModalFooter>
-        </Modal>
+                <Button type='primary' onClick={() => this.resetWorkspaceEditor()}>Keep Editing</Button>
+              </ModalFooter>
+            </Modal>
         }
-        {showCreateBillingAccountModal &&
-          <CreateBillingAccountModal onClose={() => this.setState({showCreateBillingAccountModal: false})} />}
-        {workspaceCreationConflictError &&
-        <Modal>
-          <ModalTitle>{this.props.workspaceEditMode === WorkspaceEditMode.Create ?
+          {showCreateBillingAccountModal &&
+            <CreateBillingAccountModal onClose={() => this.setState({showCreateBillingAccountModal: false})} />}
+          {workspaceCreationConflictError &&
+            <Modal>
+              <ModalTitle>{this.props.workspaceEditMode === WorkspaceEditMode.Create ?
               'Error: ' : 'Conflicting update:'}</ModalTitle>
-          <ModalBody>
-            {this.props.workspaceEditMode === WorkspaceEditMode.Create ?
+              <ModalBody>
+                {this.props.workspaceEditMode === WorkspaceEditMode.Create ?
               'You already have a workspace named ' + name +
               ' Please choose another name' :
               'Another client has modified this workspace since the beginning of this editing ' +
               'session. Please reload to avoid overwriting those changes.'}
-          </ModalBody>
-          <ModalFooter>
-            <Button type='secondary' onClick = {() => this.cancel()}
+              </ModalBody>
+              <ModalFooter>
+                <Button type='secondary' onClick = {() => this.cancel()}
                     style={{marginRight: '2rem'}}>Cancel Creation</Button>
-            <Button type='primary' onClick={() => this.resetWorkspaceEditor()}>Keep Editing</Button>
-          </ModalFooter>
-        </Modal>
+                <Button type='primary' onClick={() => this.resetWorkspaceEditor()}>Keep Editing</Button>
+              </ModalFooter>
+            </Modal>
         }
-        {workspaceNewAclDelayed &&
-        <Modal>
-          <ModalTitle>Workspace permissions delay</ModalTitle>
-          <ModalBody>
-            The permissions for this workspace are currently being set up. You can continue to use
-            this workspace as a 'Reader'. Please refresh the workspace page in a few minutes to be
-            able to create Cohorts, Datasets and Notebooks.
-          </ModalBody>
-          <ModalFooter>
-            <Button type='primary' data-test-id='workspace-acl-delay-btn'
+          {workspaceNewAclDelayed &&
+            <Modal>
+              <ModalTitle>Workspace permissions delay</ModalTitle>
+              <ModalBody>
+                The permissions for this workspace are currently being set up. You can continue to use
+                this workspace as a 'Reader'. Please refresh the workspace page in a few minutes to be
+                able to create Cohorts, Datasets and Notebooks.
+              </ModalBody>
+              <ModalFooter>
+                <Button type='primary' data-test-id='workspace-acl-delay-btn'
                     onClick={() => this.state.workspaceNewAclDelayedContinueFn()}>
-              Continue
-            </Button>
-          </ModalFooter>
-        </Modal>
+                  Continue
+                </Button>
+              </ModalFooter>
+            </Modal>
         }
-        {showConfirmationModal &&
-          <Modal width={500}>
-            <ModalTitle style={{fontSize: '16px', marginBottom: 0}}>
-              {this.renderButtonText()}
-            </ModalTitle>
-            <ModalBody style={{color: colors.primary, lineHeight: '1rem', marginTop: '0.25rem'}}>
-              {loading && <SpinnerOverlay overrideStylesOverlay={styles.spinner}/>}
-              <div>Your responses to these questions:</div>
-              <div style={{margin: '0.25rem 0 0.25rem 1rem'}}>
-                <span style={{fontWeight: 600}}>Primary purpose of your project</span> (Question 1)<br/>
-                <span style={{fontWeight: 600}}>Summary of research purpose</span> (Question 2)<br/>
-                <span style={{fontWeight: 600}}>Population of interest</span> (Question 5)<br/>
-              </div>
-              <div style={{marginBottom: '1rem'}}>
-                Will be
-                <a style={{color: colors.accent}}
+          {showConfirmationModal &&
+            <Modal width={500}>
+              <ModalTitle style={{fontSize: '16px', marginBottom: 0}}>
+                {this.renderButtonText()}
+              </ModalTitle>
+              <ModalBody style={{color: colors.primary, lineHeight: '1rem', marginTop: '0.25rem'}}>
+                {loading && <SpinnerOverlay overrideStylesOverlay={styles.spinner}/>}
+                <div>Your responses to these questions:</div>
+                <div style={{margin: '0.25rem 0 0.25rem 1rem'}}>
+                  <span style={{fontWeight: 600}}>Primary purpose of your project</span> (Question 1)<br/>
+                  <span style={{fontWeight: 600}}>Summary of research purpose</span> (Question 2)<br/>
+                  <span style={{fontWeight: 600}}>Population of interest</span> (Question 5)<br/>
+                </div>
+                <div style={{marginBottom: '1rem'}}>
+                  Will be
+                  <a style={{color: colors.accent}}
                   href='https://www.researchallofus.org/research-projects-directory/'
                   target='_blank'> displayed publicly </a>
-                 to inform <AoU/> research participants. Therefore, please verify that you have provided sufficiently detailed
-                 responses in plain language.
-              </div>
-              <div>You can also make changes to your answers after you create your workspace.</div>
-            </ModalBody>
-            <ModalFooter>
-              <Button
+                  to inform <AoU/> research participants. Therefore, please verify that you have provided sufficiently detailed
+                  responses in plain language.
+                </div>
+                <div>You can also make changes to your answers after you create your workspace.</div>
+              </ModalBody>
+              <ModalFooter>
+                <Button
                   type='secondary'
                   disabled={errors || loading}
                   style={{marginRight: '1rem'}}
                   onClick={() => this.setState({showConfirmationModal: false})}>
-                Keep Editing
-              </Button>
-              <Button
+                  Keep Editing
+                </Button>
+                <Button
                   type='primary'
                   disabled={errors || loading || showCdrVersionModal}
                   onClick={() => this.onSaveClick()}
                   data-test-id='workspace-confirm-save-btn'>
-                Confirm
-              </Button>
-            </ModalFooter>
-          </Modal>
+                  Confirm
+                </Button>
+              </ModalFooter>
+            </Modal>
         }
         </div>
       </FadeBox> ;

@@ -291,7 +291,7 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
           }}
         >
           Save
-      </Button>
+        </Button>
       </ErrorsTooltip>
       <Button
         type='secondary'

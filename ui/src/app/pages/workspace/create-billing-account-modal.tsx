@@ -164,56 +164,56 @@ export const CreateBillingAccountModal = ({onClose}: Props) => {
   });
 
   return <Modal width={650} onRequestClose={() => onClose()}>
-        <ModalBody>
-          <FlexColumn>
-            <FlexRow style={{alignItems: 'center', width: '620px', marginBottom: '0.8rem'}}>
-              <GoogleCloudLogoSvg style={{height: '33px', width: '207px', marginLeft: '-0.5rem', marginRight: '0.5rem'}}/>
-              <div style={styles.line}></div>
-              <div style={{paddingTop: 5, marginLeft: '1rem', marginRight: '2rem'}}>
-                <div style={styles.textHeader}>Create billing account</div>
-              </div>
-              {fp.range(1, numSteps).map((i) => <div style={stylesFunction.stepButtonCircle(currentStep, i)} key={i}>{i}</div>)}
-            </FlexRow>
-            {currentStep === 0 && <TextColumn>
-              <div style={styles.textNormal}>Billing accounts are managed via Google Cloud Platform™ service.</div>
-            </TextColumn>}
-            {currentStep !== 0 && currentStep !== numSteps && <TextColumn>
-              <div style={styles.textNormal}>Submit your information below to receive billing and additional information from
-                a Google billing partner representative.</div>
-            </TextColumn>}
-          </FlexColumn>
-        </ModalBody>
-        <hr style={{
+    <ModalBody>
+      <FlexColumn>
+        <FlexRow style={{alignItems: 'center', width: '620px', marginBottom: '0.8rem'}}>
+          <GoogleCloudLogoSvg style={{height: '33px', width: '207px', marginLeft: '-0.5rem', marginRight: '0.5rem'}}/>
+          <div style={styles.line}></div>
+          <div style={{paddingTop: 5, marginLeft: '1rem', marginRight: '2rem'}}>
+            <div style={styles.textHeader}>Create billing account</div>
+          </div>
+          {fp.range(1, numSteps).map((i) => <div style={stylesFunction.stepButtonCircle(currentStep, i)} key={i}>{i}</div>)}
+        </FlexRow>
+        {currentStep === 0 && <TextColumn>
+          <div style={styles.textNormal}>Billing accounts are managed via Google Cloud Platform™ service.</div>
+        </TextColumn>}
+        {currentStep !== 0 && currentStep !== numSteps && <TextColumn>
+          <div style={styles.textNormal}>Submit your information below to receive billing and additional information from
+            a Google billing partner representative.</div>
+        </TextColumn>}
+      </FlexColumn>
+    </ModalBody>
+    <hr style={{
           width: '100%', backgroundColor: '#979797', borderWidth: '0px', height: '1px',
           marginTop: '0.5rem',
           marginBottom: '0.5rem'
-        }}/>
+    }}/>
     <ModalFooter data-test-id={`step-${currentStep}-modal`} style={{marginTop: 0, justifyContent: 'flex-start'}}>
-    {switchCase(currentStep,
+      {switchCase(currentStep,
       [0, () => (<FlexRow style={{justifyContent: 'space-evenly'}}>
-      <FlexColumn>
-        <TextColumn>
-          <p style={styles.textHeader}>Familiar with setting up a Google Cloud Platform account?</p>
-          <p style={styles.textNormal}>Manually set up an account in <br/> Google Cloud Platform.</p>
-        </TextColumn>
-        <Button type='primary'
+        <FlexColumn>
+          <TextColumn>
+            <p style={styles.textHeader}>Familiar with setting up a Google Cloud Platform account?</p>
+            <p style={styles.textNormal}>Manually set up an account in <br/> Google Cloud Platform.</p>
+          </TextColumn>
+          <Button type='primary'
                 style={{marginTop: '0.5rem', fontWeight: 500, fontSize: '14px', height: '39px', width: '188px'}}
                 onClick={() => window.open(supportUrls.createBillingAccount, '_blank')}>
-          Read Directions
-        </Button>
-      </FlexColumn>
-      <FlexColumn>
-        <TextColumn>
-          <p style={styles.textHeader}>Let a Google billing partner create the account for you.</p>
-          <p style={styles.textNormal}>A representative will help you set up <br/>your billing account.<BilingPartnerTooltip/></p>
-        </TextColumn>
-        <Button data-test-id='use-billing-partner-button'
+            Read Directions
+          </Button>
+        </FlexColumn>
+        <FlexColumn>
+          <TextColumn>
+            <p style={styles.textHeader}>Let a Google billing partner create the account for you.</p>
+            <p style={styles.textNormal}>A representative will help you set up <br/>your billing account.<BilingPartnerTooltip/></p>
+          </TextColumn>
+          <Button data-test-id='use-billing-partner-button'
                 type='primary'
                 style={{marginTop: '0.5rem', fontWeight: 500, fontSize: '14px', height: '39px', width: '220px'}}
                 onClick={() => {setCurrentStep(1); }}>
-          USE A BILLING PARTNER
-        </Button>
-       </FlexColumn>
+            USE A BILLING PARTNER
+          </Button>
+        </FlexColumn>
       </FlexRow>)
       ], [1, () => (
         <FlexColumn style={{justifyContent: 'space-evenly', width: '37rem'}}>
@@ -303,57 +303,57 @@ export const CreateBillingAccountModal = ({onClose}: Props) => {
         </FlexColumn>)],
       [
         2, () => (
-        <FlexColumn style={{width: '100%'}}>
-          <div style={styles.textHeader}>Please review your information</div>
-          <TextColumn>
-            <BillingConfirmItem title='First Name' value={givenName} dataTestId='user-first-name-text'/>
-            <BillingConfirmItem title='Last Name' value={familyName} dataTestId='user-last-name-text'/>
-            <BillingConfirmItem title='Phone number' value={phoneNumber} dataTestId='user-phone-number-text'/>
-            <BillingConfirmItem title='Contact email' value={contactEmail} dataTestId='user-contact-email-text'/>
-            <BillingConfirmItem title='Researcher Workbench ID' value={username} dataTestId='user-workbench-id-text'/>
-            <BillingConfirmItem title='Institution' value={verifiedInstitutionalAffiliation.institutionDisplayName}
+          <FlexColumn style={{width: '100%'}}>
+            <div style={styles.textHeader}>Please review your information</div>
+            <TextColumn>
+              <BillingConfirmItem title='First Name' value={givenName} dataTestId='user-first-name-text'/>
+              <BillingConfirmItem title='Last Name' value={familyName} dataTestId='user-last-name-text'/>
+              <BillingConfirmItem title='Phone number' value={phoneNumber} dataTestId='user-phone-number-text'/>
+              <BillingConfirmItem title='Contact email' value={contactEmail} dataTestId='user-contact-email-text'/>
+              <BillingConfirmItem title='Researcher Workbench ID' value={username} dataTestId='user-workbench-id-text'/>
+              <BillingConfirmItem title='Institution' value={verifiedInstitutionalAffiliation.institutionDisplayName}
                                 dataTestId='user-institution-text'/>
-            <BillingConfirmItem title='NiH-funded' value={nihFunded ? 'Yes' : 'No'} dataTestId='nih-funded-text'/>
-          </TextColumn>
-          <FlexRow style={{marginTop: '100px', justifyContent: 'space-between'}}>
-            <Button type='secondary'
+              <BillingConfirmItem title='NiH-funded' value={nihFunded ? 'Yes' : 'No'} dataTestId='nih-funded-text'/>
+            </TextColumn>
+            <FlexRow style={{marginTop: '100px', justifyContent: 'space-between'}}>
+              <Button type='secondary'
                     style={{fontWeight: 400, padding: '0 18px', height: '40px'}}
                     onClick={() => {setCurrentStep(1); }}>
-              Back
-            </Button>
-            <FlexRow style={{justifyContent: 'flex-end'}}>
-              <Button type='secondary'
+                Back
+              </Button>
+              <FlexRow style={{justifyContent: 'flex-end'}}>
+                <Button type='secondary'
                       style={{fontWeight: 400, padding: '0 18px', height: '40px', marginRight: '10px'}}
                       onClick={() => onClose()}>
-                Cancel
-              </Button>
-              <Button data-test-id='submit-button'
+                  Cancel
+                </Button>
+                <Button data-test-id='submit-button'
                       type='primary'
                       style={{fontWeight: 400, padding: '0 18px', height: '40px', width: '93px'}}
                       onClick={() => {sendCreateBillingEmail(); }}>
-                Submit
-              </Button>
+                  Submit
+                </Button>
+              </FlexRow>
             </FlexRow>
-          </FlexRow>
-        </FlexColumn>)
+          </FlexColumn>)
       ], [
         3, () => (
-        <FlexColumn>
-          <div style={styles.textHeader}>Your request has been sent to a Google billing partner.
-            One of their representatives will contact within 1 business day.</div>
-          <br/>
-          <div style={styles.textHeader}>Once your account is set up, you can use it to create
-            a new workspace or change a current workspace billing account.</div>
-          <FlexRow style={{marginTop: '100px', justifyContent: 'flex-end'}}>
-            <Button type='primary'
+          <FlexColumn>
+            <div style={styles.textHeader}>Your request has been sent to a Google billing partner.
+              One of their representatives will contact within 1 business day.</div>
+            <br/>
+            <div style={styles.textHeader}>Once your account is set up, you can use it to create
+              a new workspace or change a current workspace billing account.</div>
+            <FlexRow style={{marginTop: '100px', justifyContent: 'flex-end'}}>
+              <Button type='primary'
                     style={{fontWeight: 400, padding: '0 18px', height: '40px', width: '93px'}}
                     onClick={() => onClose()}>
-              OK
-            </Button>
-          </FlexRow>
-        </FlexColumn>)
+                OK
+              </Button>
+            </FlexRow>
+          </FlexColumn>)
       ])}
-      </ModalFooter>
+    </ModalFooter>
     {currentStep === 0 && <FontAwesomeIcon
         icon={faTimes}
         size='lg'

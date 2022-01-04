@@ -246,7 +246,7 @@ export const WorkspaceLibrary = fp.flow(withUserProfile())
               <LibraryTab icon={tab.icon} title={tab.title} selected={currentTab === tab}
                           onClick={() => this.setState({currentTab: tab})}
                           data-test-id={tab.title}/>
-                {i !== this.libraryTabs.length - 1 &&
+              {i !== this.libraryTabs.length - 1 &&
                 <hr style={styles.libraryTabDivider}/>}
             </React.Fragment>;
           })}

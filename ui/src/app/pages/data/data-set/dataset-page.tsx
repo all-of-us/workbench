@@ -1205,7 +1205,7 @@ export const DatasetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), wi
             {filteredPreviewData.errorText && <div>{filteredPreviewData.errorText}</div>}
             {/* If there is no error that means no data was return*/}
             {!filteredPreviewData.errorText && <div>No Results found for {domainDisplayed}</div>}
-            </div>
+          </div>
         }
       </div>;
     }
@@ -1283,10 +1283,10 @@ export const DatasetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), wi
               <div style={{display: 'flex', backgroundColor: colors.white,
                 border: `1px solid ${colors.light}`}}>
                 <div style={{width: '60%', borderRight: `1px solid ${colors.light}`}}>
-                    <BoxHeader step='2' header='Select Concept Sets' subHeader='Rows'
+                  <BoxHeader step='2' header='Select Concept Sets' subHeader='Rows'
                                style={{paddingRight: '1rem'}}>
-                      <PlusLink dataTestId='concept-sets-link' path={conceptSetsPath} disable={!this.canWrite}/>
-                    </BoxHeader>
+                    <PlusLink dataTestId='concept-sets-link' path={conceptSetsPath} disable={!this.canWrite}/>
+                  </BoxHeader>
                   <div style={{height: '9rem', overflowY: 'auto'}} data-test-id='prePackage-concept-set'>
                     <Subheader>Prepackaged Concept Sets</Subheader>
                     {this.getPrePackagedList()
@@ -1301,7 +1301,7 @@ export const DatasetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), wi
                         })}
                     <Subheader>Workspace Concept Sets</Subheader>
                     {!loadingResources && this.state.conceptSetList.map(conceptSet =>
-                        <ImmutableListItem key={conceptSet.id} name={conceptSet.name}
+                      <ImmutableListItem key={conceptSet.id} name={conceptSet.name}
                                           data-test-id='concept-set-list-item'
                                           checked={selectedConceptSetIds.includes(conceptSet.id)}
                                           onChange={
@@ -1314,7 +1314,7 @@ export const DatasetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), wi
                   </div>
                 </div>
                 <div style={{width: '55%'}}>
-                    <BoxHeader step='3' header='Select Values' subHeader='Columns'>
+                  <BoxHeader step='3' header='Select Values' subHeader='Columns'>
                     <div style={styles.selectAllContainer}>
                       <CheckBox style={{height: 17, width: 17}}
                                 manageOwnState={false}
@@ -1332,18 +1332,18 @@ export const DatasetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), wi
                       top: '2rem', left: 'calc(50% - 36px)'}}/>}
                     {Array.from(selectedDomains).sort(COMPARE_DOMAINS_FOR_DISPLAY).map(domain =>
                       domainValueSetLookup.has(domain) &&
-                      <div key={domain}>
-                        <Subheader style={{fontWeight: 'bold'}}>
-                          {formatDomain(domain)}
-                        </Subheader>
-                        {domainValueSetLookup.get(domain).values.items.map(domainValue =>
-                          <ValueListItem data-test-id='value-list-items'
+                        <div key={domain}>
+                          <Subheader style={{fontWeight: 'bold'}}>
+                            {formatDomain(domain)}
+                          </Subheader>
+                          {domainValueSetLookup.get(domain).values.items.map(domainValue =>
+                            <ValueListItem data-test-id='value-list-items'
                             key={domainValue.value} domain={domain} domainValue={domainValue}
                             onChange={() => this.selectDomainValue(domain, domainValue)}
                             checked={fp.some({domain: domain, value: domainValue.value},
                               selectedDomainValuePairs)}/>
                         )}
-                      </div>)
+                        </div>)
                     }
                   </div>
                   {selectedDomains.size > 0 && <FlexRow style={{
@@ -1363,20 +1363,20 @@ export const DatasetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), wi
           <div style={{backgroundColor: 'white', border: `1px solid ${colors.light}`}}>
             <div style={styles.previewDataHeaderBox}>
               <FlexColumn>
-              <div style={{display: 'flex', alignItems: 'flex-end'}}>
-                <div style={styles.previewDataHeader}>
-                  <div>
-                    <StepNumber step='4'/>
+                <div style={{display: 'flex', alignItems: 'flex-end'}}>
+                  <div style={styles.previewDataHeader}>
+                    <div>
+                      <StepNumber step='4'/>
+                    </div>
+                    <label style={{marginLeft: '0.5rem', color: colors.primary}}>
+                      Preview Dataset
+                    </label>
                   </div>
-                  <label style={{marginLeft: '0.5rem', color: colors.primary}}>
-                    Preview Dataset
-                  </label>
+                  <div style={{color: colors.primary, fontSize: '14px', width: '60%'}}>
+                    A visualization of your data table based on concept sets
+                    and values you selected above. Once complete, export for analysis
+                  </div>
                 </div>
-                <div style={{color: colors.primary, fontSize: '14px', width: '60%'}}>
-                  A visualization of your data table based on concept sets
-                  and values you selected above. Once complete, export for analysis
-                </div>
-              </div>
               </FlexColumn>
               <Clickable data-test-id='preview-button'
                          style={{
@@ -1391,7 +1391,7 @@ export const DatasetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), wi
                            AnalyticsTracker.DatasetBuilder.ViewPreviewTable();
                            this.getPreviewList();
                          }}>
-                  View Preview Table
+                View Preview Table
               </Clickable>
             </div>
             {fp.toPairs(previewList).length > 0 &&
@@ -1417,7 +1417,7 @@ export const DatasetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), wi
                         <FlexRow style={{alignItems: 'center', overflow: 'auto', wordBreak: 'break-all'}}>
                           {formatDomainString(domain)}
                           {previewRow.isLoading &&
-                          <Spinner style={{marginLeft: '4px', height: '18px', width: '18px'}}/>}
+                            <Spinner style={{marginLeft: '4px', height: '18px', width: '18px'}}/>}
                         </FlexRow>
                       </Clickable>
                     </TooltipTrigger>;
@@ -1437,20 +1437,20 @@ export const DatasetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), wi
           </div>
         </FadeBox>
         <div style={styles.stickyFooter}>
-            <TooltipTrigger data-test-id='save-tooltip'
+          <TooltipTrigger data-test-id='save-tooltip'
                             content='Requires Owner or Writer permission' disabled={this.canWrite}>
-              {this.isCreatingNewDataset ?
-                <Button style={{marginBottom: '2rem', marginRight: '1rem'}} data-test-id='save-button'
+            {this.isCreatingNewDataset ?
+              <Button style={{marginBottom: '2rem', marginRight: '1rem'}} data-test-id='save-button'
                         onClick ={() => this.setState({modalState: ModalState.Create})}
                         disabled={this.disableSave() || !this.canWrite || !dataSetTouched}>
-                  Create Dataset
-                </Button> :
-                <Button style={{marginBottom: '2rem', marginRight: '1rem'}} data-test-id='save-button'
+                Create Dataset
+              </Button> :
+              <Button style={{marginBottom: '2rem', marginRight: '1rem'}} data-test-id='save-button'
                         onClick ={() => this.saveDataset()}
                         disabled={this.state.savingDataset || this.disableSave() || !this.canWrite || !dataSetTouched}>
-                  Save Dataset
-                </Button>}
-            </TooltipTrigger>
+                Save Dataset
+              </Button>}
+          </TooltipTrigger>
 
           <TooltipTrigger data-test-id='export-tooltip'
                           content={exportError}

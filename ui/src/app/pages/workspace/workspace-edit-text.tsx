@@ -38,18 +38,18 @@ export const toolTipTextStigmatization = <div>
 
 
 export const ResearchPurposeDescription =
-    <div style={{display: 'inline'}}>The <AouTitle/> requires each data user of the <AoU/> data to
-      provide a meaningful description of the intended purpose of data use for
-      each workspace they create. To provide transparency to <AouTitle/> participants, &nbsp;your
-      answers below will be made available publicly in the <a target='_blank'
+  <div style={{display: 'inline'}}>The <AouTitle/> requires each data user of the <AoU/> data to
+    provide a meaningful description of the intended purpose of data use for
+    each workspace they create. To provide transparency to <AouTitle/> participants, &nbsp;your
+    answers below will be made available publicly in the <a target='_blank'
       href='https://www.researchallofus.org/research-projects-directory/'>Research Hub
       Directory </a> on our public website. <b>Your responses will not be used to make decisions about data access.</b>
-      <hr/>
-      <i>Note that you are required to create separate workspaces for each project
-        for which you access </i> All of Us <i>data, hence the responses below are expected
+    <hr/>
+    <i>Note that you are required to create separate workspaces for each project
+      for which you access </i> All of Us <i>data, hence the responses below are expected
         to be specific to the project for which you are creating this particular
         workspace.</i>
-    </div>;
+  </div>;
 
 export interface ResearchPurposeItem {
   shortName: string;
@@ -145,7 +145,7 @@ export const toolTipText = {
     <div>This dataset includes surveys, electronic health records, biosamples, and physical measurements.</div>
     <div style={{fontWeight: 'bold'}}>Controlled Tier dataset</div>
     <div>This dataset contains expanded participant data, including genomics. Before you can access controlled tier data,
-    your institution will need to sign an amended agreement with the All of Us Data and Research Center.</div></FlexColumn>,
+      your institution will need to sign an amended agreement with the All of Us Data and Research Center.</div></FlexColumn>,
   researchPurpose: <div>You are required to describe your research purpose, or the reason why you
     are conducting this study. This information, along with your name, will be posted on the
     publicly available <AoU/> website (https://www.researchallofus.org/) to inform our
@@ -218,19 +218,19 @@ export const researchPurposeQuestions: Array<ResearchPurposeQuestion> = [
         <div style={{color: colors.secondary}}> uses demographic variables </div>
       </TooltipTrigger>
       <div>in analyses can result, often unintentionally, in findings that may be misinterpreted or
-      misused by others to foster stigma. While it may not be possible to completely prevent misuse
-      of research for stigmatizing purposes, data users can take important steps to minimize the
-      risk of this happening–taking this step is a condition of your</div>
+        misused by others to foster stigma. While it may not be possible to completely prevent misuse
+        of research for stigmatizing purposes, data users can take important steps to minimize the
+        risk of this happening–taking this step is a condition of your</div>
       <TooltipTrigger content={toolTipTextDucc}>
         <div> Data User Code of Conduct agreement. </div>
       </TooltipTrigger>
       <div>If you are concerned that your research could inadvertently stigmatize participants
-      or communities, or if you are unsure, let us know. We encourage you to request a review of
-      your research purpose statement by the <i> All of Us</i> Resource Access Board (RAB) as a
-      precaution. The RAB will provide feedback and, if needed, guidance for modifying your
-      research purpose or scope.To learn more, please refer to the <i> All of Us </i>
-      Stigmatizing Research Policy.If you request a review, you can expect to receive an initial
-      response within five business days. During the RAB’s review, you may begin working in your
+        or communities, or if you are unsure, let us know. We encourage you to request a review of
+        your research purpose statement by the <i> All of Us</i> Resource Access Board (RAB) as a
+        precaution. The RAB will provide feedback and, if needed, guidance for modifying your
+        research purpose or scope.To learn more, please refer to the <i> All of Us </i>
+        Stigmatizing Research Policy.If you request a review, you can expect to receive an initial
+        response within five business days. During the RAB’s review, you may begin working in your
         workspace.</div></span>
   }
 ];

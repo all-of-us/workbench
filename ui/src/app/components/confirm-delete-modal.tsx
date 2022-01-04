@@ -90,7 +90,7 @@ export class ConfirmDeleteModal
           This will permanently delete
           the {toDisplay(this.props.resourceType)}
           {this.props.resourceType === ResourceType.COHORT &&
-          <span> and all associated review sets</span>}.
+            <span> and all associated review sets</span>}.
         </ModalBody>
         <ModalFooter style={{paddingTop: '1rem'}}>
           <Button

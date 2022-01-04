@@ -338,54 +338,54 @@ export const WorkspaceShare = fp.flow(withUserProfile())(class extends React.Com
   render() {
     return <React.Fragment>
       {this.state.workspaceFound &&
-      <Modal width={450}>
-        {this.state.saving && <SpinnerOverlay />}
-        <ModalTitle style={styles.modalTitle}>
-          <FlexRow style={{alignItems: 'center', justifyContent: 'space-between'}}>
-            <div>
-              <label>Share {this.props.workspace.name}</label>
-            </div>
-            <TooltipTrigger content={<div style={styles.tooltipLabel}>
-              Search for a collaborator that has an <AoU/> research account. Collaborators can
-              be assigned different permissions within your Workspace.
-              <ul>
-                <li style={styles.tooltipPoint}>A <span style={{'textDecoration': 'underline'}}>
-                  Reader</span> can view your notebooks, but not make edits, deletes or share
-                  contents of the Workspace.</li>
-                <li style={styles.tooltipPoint}>A <span style={{'textDecoration': 'underline'}}>
-                  Writer</span> can view, edit and delete content in the Workspace but not share
-                  the Workspace with others.</li>
-                <li style={styles.tooltipPoint}>An <span style={{'textDecoration': 'underline'}}>
-                  Owner</span> can view, edit, delete and share contents in the Workspace.</li>
-              </ul>
-            </div>}>
-              <InfoIcon style={{width: '14px', height: '14px', marginLeft: '.4rem'}}/>
-            </TooltipTrigger>
-          </FlexRow>
-          {isUsingFreeTierBillingAccount(this.props.workspace) &&
-            <div style={{color: colors.primary, fontSize: 14, fontWeight: 400}}>
+        <Modal width={450}>
+          {this.state.saving && <SpinnerOverlay />}
+          <ModalTitle style={styles.modalTitle}>
+            <FlexRow style={{alignItems: 'center', justifyContent: 'space-between'}}>
+              <div>
+                <label>Share {this.props.workspace.name}</label>
+              </div>
+              <TooltipTrigger content={<div style={styles.tooltipLabel}>
+                Search for a collaborator that has an <AoU/> research account. Collaborators can
+                be assigned different permissions within your Workspace.
+                <ul>
+                  <li style={styles.tooltipPoint}>A <span style={{'textDecoration': 'underline'}}>
+                    Reader</span> can view your notebooks, but not make edits, deletes or share
+                    contents of the Workspace.</li>
+                  <li style={styles.tooltipPoint}>A <span style={{'textDecoration': 'underline'}}>
+                    Writer</span> can view, edit and delete content in the Workspace but not share
+                    the Workspace with others.</li>
+                  <li style={styles.tooltipPoint}>An <span style={{'textDecoration': 'underline'}}>
+                    Owner</span> can view, edit, delete and share contents in the Workspace.</li>
+                </ul>
+              </div>}>
+                <InfoIcon style={{width: '14px', height: '14px', marginLeft: '.4rem'}}/>
+              </TooltipTrigger>
+            </FlexRow>
+            {isUsingFreeTierBillingAccount(this.props.workspace) &&
+              <div style={{color: colors.primary, fontSize: 14, fontWeight: 400}}>
                 When you share this workspace as a ‘Writer’ or an ‘Owner’, the free credits of the creator of the
                 workspace ({this.props.workspace.creator}) will be used for all analysis in this workspace.
-            </div>}
-        </ModalTitle>
-        <ModalBody style={styles.sharingBody}>
-          <div ref={node => this.searchingNode = node} style={styles.dropdown} >
-            <ClrIcon shape='search' style={{width: '21px', height: '21px', paddingLeft: '3px'}}/>
-            <input data-test-id='search' style={styles.noBorder} type='text'
+              </div>}
+          </ModalTitle>
+          <ModalBody style={styles.sharingBody}>
+            <div ref={node => this.searchingNode = node} style={styles.dropdown} >
+              <ClrIcon shape='search' style={{width: '21px', height: '21px', paddingLeft: '3px'}}/>
+              <input data-test-id='search' style={styles.noBorder} type='text'
                    placeholder='Find Collaborators'
                    disabled={!this.hasPermission}
                    onChange={e => this.searchTermChangedEvent(e.target.value)}
                    onFocus={() => this.openDropdown()}/>
-            {this.state.autocompleteLoading && <span style={styles.spinner}/>}
-            {this.showAutocompleteNoResults &&
-              <div data-test-id='drop-down'
+              {this.state.autocompleteLoading && <span style={styles.spinner}/>}
+              {this.showAutocompleteNoResults &&
+                <div data-test-id='drop-down'
                    style={{...styles.dropdownMenu, ...styles.open, overflowY: 'hidden'}}>
-              <div style={{height: '60px'}}>
-                <em>No results based on your search</em>
-              </div></div>}
-            {this.showSearchResults &&
-              <div data-test-id='drop-down' style={{...styles.dropdownMenu, ...styles.open}}>
-              {this.state.autocompleteUsers.map((user) => {
+                  <div style={{height: '60px'}}>
+                    <em>No results based on your search</em>
+                  </div></div>}
+              {this.showSearchResults &&
+                <div data-test-id='drop-down' style={{...styles.dropdownMenu, ...styles.open}}>
+                  {this.state.autocompleteUsers.map((user) => {
                 return <div key={user.email}><div style={styles.wrapper}>
                   <div style={styles.box}>
                     <h5 style={styles.userName}>{user.givenName} {user.familyName}</h5>
@@ -399,16 +399,16 @@ export const WorkspaceShare = fp.flow(withUserProfile())(class extends React.Com
                 </div>
                   <div style={{borderTop: '1px solid grey', width: '100%', marginTop: '.5rem'}}/>
                 </div>; })}
+                </div>}
+            </div>
+            {this.state.userNotFound && <div style={{color: 'red'}}>
+              {this.state.userNotFound}
             </div>}
-          </div>
-          {this.state.userNotFound && <div style={{color: 'red'}}>
-            {this.state.userNotFound}
-          </div>}
-          {this.state.workspaceShareError && <div style={{color: 'red'}}>
-            Failed to share workspace. Please try again.
-          </div>}
-          <h3>Current Collaborators</h3>
-          {this.state.loadingUserRoles
+            {this.state.workspaceShareError && <div style={{color: 'red'}}>
+              Failed to share workspace. Please try again.
+            </div>}
+            <h3>Current Collaborators</h3>
+            {this.state.loadingUserRoles
             ? <Spinner size={36} style={{margin: 'auto', marginTop: '1rem'}}/>
             : <div style={{overflowY: this.state.dropDown ? 'hidden' : 'auto'}}>
               {this.state.userRoles.map((user, i) => {
@@ -435,20 +435,20 @@ export const WorkspaceShare = fp.flow(withUserProfile())(class extends React.Com
                     <div style={styles.box}>
                       <div style={styles.collaboratorIcon}>
                         {(this.hasPermission && (user.email !== this.props.profileState.profile.username)) &&
-                        <ClrIcon data-test-id={'remove-collab-' + user.email} shape='minus-circle'
+                          <ClrIcon data-test-id={'remove-collab-' + user.email} shape='minus-circle'
                                  style={{height: '21px', width: '21px'}}
                                  onClick={() => this.removeCollaborator(user)}/>}
                       </div>
                     </div>
                   </div>
                   {(this.state.userRoles.length !== i + 1) &&
-                  <div style={{borderTop: '1px solid grey', width: '100%', marginTop: '.5rem'}}/>}
+                    <div style={{borderTop: '1px solid grey', width: '100%', marginTop: '.5rem'}}/>}
                 </div>;
               })}
             </div>
           }
-        </ModalBody>
-        <ModalFooter style={{alignItems: 'center'}}>
+          </ModalBody>
+          <ModalFooter style={{alignItems: 'center'}}>
             <Button type='link' style={{marginRight: '.8rem', border: 'none'}}
                     onClick={() => this.onCancel()}>Cancel</Button>
             <Button type='primary' data-test-id='save' disabled={!this.hasPermission}
@@ -456,8 +456,8 @@ export const WorkspaceShare = fp.flow(withUserProfile())(class extends React.Com
                       AnalyticsTracker.Workspaces.Share();
                       this.save();
                     }}>Save</Button>
-        </ModalFooter>
-      </Modal>}
+          </ModalFooter>
+        </Modal>}
       {!this.state.workspaceFound && <div>
         <h3>The workspace {this.props.workspace.id} could not be found</h3></div>}
       {this.state.workspaceUpdateConflictError && <Modal>

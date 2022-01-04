@@ -132,13 +132,13 @@ export const ErrorHandler = fp.flow(withUserProfile(), withGlobalError())(class 
       {globalError.statusCode === 500 && <div style={styles.errorHandler}>
         <FlexRow style={styles.errorContent}>
           <FlexColumn>
-          Unexpected Error
-          {!isBlank(globalError.errorUniqueId) && <div>
-            Please <Button style={{display: 'inline', padding: 0, fontSize: 14}} type='link'
+            Unexpected Error
+            {!isBlank(globalError.errorUniqueId) && <div>
+              Please <Button style={{display: 'inline', padding: 0, fontSize: 14}} type='link'
                            onClick={() => this.openContactWidget()}>
-              contact support
-            </Button> and use this error code: {globalError.errorUniqueId}
-          </div>}
+                contact support
+              </Button> and use this error code: {globalError.errorUniqueId}
+            </div>}
           </FlexColumn>
           <FontAwesomeIcon icon={faTimes} style={styles.iconStyles} onClick={() => this.closeError()} />
         </FlexRow></div>}
@@ -155,16 +155,16 @@ export const ErrorHandler = fp.flow(withUserProfile(), withGlobalError())(class 
       {(apiDown || firecloudDown || notebooksDown) && !this.state.serverStatusAcknowledged && <Modal>
         <ModalTitle>Service Problems</ModalTitle>
         <ModalBody>
-            <div>One or more of our services is currently down:</div>
-            <ul style={styles.serverStatusList}>
-              {apiDown && <li>Server</li>}
-              {firecloudDown && <li>Workspaces Service</li>}
-              {notebooksDown && <li>Notebooks Service</li>}
-            </ul>
-            <div>Please try again later.</div>
+          <div>One or more of our services is currently down:</div>
+          <ul style={styles.serverStatusList}>
+            {apiDown && <li>Server</li>}
+            {firecloudDown && <li>Workspaces Service</li>}
+            {notebooksDown && <li>Notebooks Service</li>}
+          </ul>
+          <div>Please try again later.</div>
         </ModalBody>
         <ModalFooter>
-            <Button onClick={() => this.setState({serverStatusAcknowledged: true})}>Close</Button>
+          <Button onClick={() => this.setState({serverStatusAcknowledged: true})}>Close</Button>
         </ModalFooter>
       </Modal>}
     </React.Fragment>;

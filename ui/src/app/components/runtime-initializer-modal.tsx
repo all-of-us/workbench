@@ -54,11 +54,11 @@ export const RuntimeInitializerModal = ({cancel, createAndContinue, defaultRunti
       <Clickable onClick={() => setShowDetails(!showDetails)} style={styles.bodyElement} >
         Environment details<ClrIcon shape='angle' style={{transform: showDetails ? 'rotate(180deg)' : 'rotate(90deg)'}} />
       </Clickable>
-     {showDetails &&
-       <div style={styles.runtimeDetails}>
-         <RuntimeSummary runtimeConfig={defaultRuntimeConfig} />
-         <div style={{marginTop: '10px'}}>To change this configuration, click 'Configure' below.</div>
-       </div>}
+      {showDetails &&
+        <div style={styles.runtimeDetails}>
+          <RuntimeSummary runtimeConfig={defaultRuntimeConfig} />
+          <div style={{marginTop: '10px'}}>To change this configuration, click 'Configure' below.</div>
+        </div>}
     </ModalBody>
     <ModalFooter style={{justifyContent: 'space-between'}}>
       <Button

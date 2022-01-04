@@ -214,6 +214,6 @@ export const ConceptListPage = fp.flow(withCurrentWorkspace(), withCurrentConcep
                          selectedConcepts={this.props.concept}
                          onSave={(conceptSet) => this.afterConceptsSaved(conceptSet)}
                          onClose={() => this.closeConceptAddModal()}/>}
-        </div>;
+      </div>;
     }
   });

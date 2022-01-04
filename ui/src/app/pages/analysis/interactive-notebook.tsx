@@ -344,32 +344,32 @@ export const InteractiveNotebook = fp.flow(
                 <ClrIcon shape='sync' style={{...styles.navBarIcon, ...styles.rotate}}/>
                 {this.renderNotebookText()}
               </div>) : (
-                  <div style={{display: 'flex'}}>
-                    <TooltipTrigger content={this.billingLocked && ACTION_DISABLED_INVALID_BILLING}>
-                      <div style={this.buttonStyleObj}
+                <div style={{display: 'flex'}}>
+                  <TooltipTrigger content={this.billingLocked && ACTION_DISABLED_INVALID_BILLING}>
+                    <div style={this.buttonStyleObj}
                            onClick={() => {
                              AnalyticsTracker.Notebooks.Edit();
                              this.startEditMode();
                            }}>
-                        <EditComponentReact enableHoverEffect={false}
+                      <EditComponentReact enableHoverEffect={false}
                                             disabled={!this.canStartRuntimes}
                                             style={styles.navBarIcon}/>
-                        Edit {this.notebookInUse && '(In Use)'}
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipTrigger content={this.billingLocked && ACTION_DISABLED_INVALID_BILLING}>
-                      <div style={this.buttonStyleObj}
+                      Edit {this.notebookInUse && '(In Use)'}
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipTrigger content={this.billingLocked && ACTION_DISABLED_INVALID_BILLING}>
+                    <div style={this.buttonStyleObj}
                            onClick={() => {
                              AnalyticsTracker.Notebooks.Run();
                              this.onPlaygroundModeClick();
                            }}>
-                        <IconButton icon={PlaygroundIcon}
+                      <IconButton icon={PlaygroundIcon}
                                     disabled={!this.canStartRuntimes}
                                     style={styles.navBarIcon}/>
-                        Run (Playground Mode)
-                      </div>
-                    </TooltipTrigger>
-                  </div>
+                      Run (Playground Mode)
+                    </div>
+                  </TooltipTrigger>
+                </div>
               )
             }
           </div>
@@ -385,7 +385,7 @@ export const InteractiveNotebook = fp.flow(
                 this.startPlaygroundMode();
               }}/>}
           {showInUseModal &&
-          <NotebookInUseModal
+            <NotebookInUseModal
             email={lastLockedBy}
             onCancel={() => {
               this.setState({showInUseModal: false}); }}
@@ -394,9 +394,9 @@ export const InteractiveNotebook = fp.flow(
               this.setState({showInUseModal: false});
               this.startPlaygroundMode();
             }}>
-          </NotebookInUseModal>}
+            </NotebookInUseModal>}
           {resolveRuntimeInitializer &&
-           <RuntimeInitializerModal
+            <RuntimeInitializerModal
              defaultRuntime={runtimeInitializerDefault}
              cancel={() => {
                closeRuntimeInitializerModal(null);

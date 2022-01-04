@@ -413,8 +413,8 @@ export class AdminWorkspaceImpl extends React.Component<Props, State> {
                       {loadingWorkspaceAdminLockedStatus && <Spinner style={{width: 20, height: 18}}/>}
                     </div>
                     {workspace.adminLocked ? 'UNLOCK WORKSPACE' : 'LOCK WORKSPACE'}
-                </FlexRow>
-              </Button>
+                  </FlexRow>
+                </Button>
               </FlexColumn>
             </FlexRow>
           </h2>
@@ -475,7 +475,7 @@ export class AdminWorkspaceImpl extends React.Component<Props, State> {
           <div className='research-purpose' style={{marginTop: '1rem'}}>
             <WorkspaceInfoField labelText='Primary purpose of project'>
               {getSelectedPrimaryPurposeItems(workspace.researchPurpose).map((researchPurposeItem, i) =>
-                  <div key={i}>{researchPurposeItem}</div>)}
+                <div key={i}>{researchPurposeItem}</div>)}
             </WorkspaceInfoField>
             <WorkspaceInfoField labelText='Reason for choosing All of Us'>
               {workspace.researchPurpose.reasonForAllOfUs}
@@ -487,9 +487,9 @@ export class AdminWorkspaceImpl extends React.Component<Props, State> {
               {workspace.researchPurpose.anticipatedFindings}
             </WorkspaceInfoField>
             {workspace.researchPurpose.populationDetails.length > 0 &&
-            <WorkspaceInfoField labelText='Population area(s) of focus'>
-              {getSelectedPopulations(workspace.researchPurpose)}
-            </WorkspaceInfoField>}
+              <WorkspaceInfoField labelText='Population area(s) of focus'>
+                {getSelectedPopulations(workspace.researchPurpose)}
+              </WorkspaceInfoField>}
           </div>
         </div>
 
@@ -519,18 +519,18 @@ export class AdminWorkspaceImpl extends React.Component<Props, State> {
             <PurpleLabel style={styles.narrowWithMargin}>Status</PurpleLabel>
           </FlexRow>
           {resources.runtimes.map((runtime, i) =>
-              <FlexRow key={i}>
-                <div style={styles.narrowWithMargin}>{runtime.runtimeName}</div>
-                <div style={styles.narrowWithMargin}>{runtime.googleProject}</div>
-                <div style={styles.narrowWithMargin}>{new Date(runtime.createdDate).toDateString()}</div>
-                <div style={styles.narrowWithMargin}>{new Date(runtime.dateAccessed).toDateString()}</div>
-                <div style={styles.narrowWithMargin}>{runtime.status}</div>
-                <Button onClick={() =>
+            <FlexRow key={i}>
+              <div style={styles.narrowWithMargin}>{runtime.runtimeName}</div>
+              <div style={styles.narrowWithMargin}>{runtime.googleProject}</div>
+              <div style={styles.narrowWithMargin}>{new Date(runtime.createdDate).toDateString()}</div>
+              <div style={styles.narrowWithMargin}>{new Date(runtime.dateAccessed).toDateString()}</div>
+              <div style={styles.narrowWithMargin}>{runtime.status}</div>
+              <Button onClick={() =>
                   this.setState({runtimeToDelete: runtime, confirmDeleteRuntime: true})}
                   disabled={runtimeToDelete && runtimeToDelete.runtimeName === runtime.runtimeName}>
-                  Delete
-                </Button>
-              </FlexRow>
+                Delete
+              </Button>
+            </FlexRow>
           )}
         </FlexColumn>
       </div>
@@ -559,7 +559,7 @@ export class AdminWorkspaceImpl extends React.Component<Props, State> {
                     }}
             >Delete</Button>
           </ModalFooter>
-      </Modal>}
+        </Modal>}
     </div>;
   }
 }

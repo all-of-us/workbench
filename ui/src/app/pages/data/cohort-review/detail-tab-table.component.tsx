@@ -567,11 +567,11 @@ export const DetailTabTable = fp.flow(withCurrentCohortReview(), withCurrentWork
           <OverlayPanel className='labOverlay' ref={(el) => vl = el}
                         showCloseIcon={true} dismissable={true}>
             {(rowData.refRange &&  column.field === 'value') &&
-            <div style={{paddingBottom: '0.2rem'}}>Reference Range: {rowData.refRange}</div>}
+              <div style={{paddingBottom: '0.2rem'}}>Reference Range: {rowData.refRange}</div>}
             {(rowData.unit && column.field === 'value') &&
-            <div>Units: {rowData.unit}</div>}
+              <div>Units: {rowData.unit}</div>}
             {nameField &&
-            <div>Route: {rowData.route}</div>}
+              <div>Route: {rowData.route}</div>}
           </OverlayPanel>
         </div>
       </React.Fragment>;

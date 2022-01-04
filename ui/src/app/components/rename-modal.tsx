@@ -108,7 +108,7 @@ export class RenameModal extends React.Component<Props, States> {
     return <Modal loading={saving}>
       <ModalTitle>Enter new name for {oldName}</ModalTitle>
       <ModalBody>
-         <div style={headerStyles.formLabel}>New Name:</div>
+        <div style={headerStyles.formLabel}>New Name:</div>
         <TextInput autoFocus id='new-name'
           onChange={v => this.setState({newName: v, nameTouched: true})}/>
         <ValidationError>

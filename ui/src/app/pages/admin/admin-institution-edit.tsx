@@ -195,31 +195,31 @@ const TierConfig = (props: TierConfigProps) => {
             to access {displayNameForTier(accessTierShortName)} data if:</label>
           <RequirementDropdown tierConfig={tierConfig} onChange={setTierRequirement}/>
           {tierConfig.membershipRequirement === InstitutionMembershipRequirement.ADDRESSES &&
-          <FlexColumn data-test-id={`${accessTierShortName}-email-address`} style={{width: '16rem'}}>
-            <label style={styles.label}>Accepted Email Addresses</label>
-            <AddressTextArea
+            <FlexColumn data-test-id={`${accessTierShortName}-email-address`} style={{width: '16rem'}}>
+              <label style={styles.label}>Accepted Email Addresses</label>
+              <AddressTextArea
               accessTierShortName={accessTierShortName}
               emailAddresses={emailAddresses}
               onBlur={filterEmptyAddresses}
               onChange={setTierAddresses}/>
-            <p style={{color: colors.primary, fontSize: '12px', lineHeight: '18px'}}>
-              Enter one email address per line.  <br/>
-            </p>
-          </FlexColumn>}
+              <p style={{color: colors.primary, fontSize: '12px', lineHeight: '18px'}}>
+                Enter one email address per line.  <br/>
+              </p>
+            </FlexColumn>}
           {tierConfig.membershipRequirement === InstitutionMembershipRequirement.DOMAINS &&
-          <FlexColumn data-test-id={`${accessTierShortName}-email-domain`} style={{width: '16rem'}}>
-            <label style={styles.label}>Accepted Email Domains</label>
-            <DomainTextArea
+            <FlexColumn data-test-id={`${accessTierShortName}-email-domain`} style={{width: '16rem'}}>
+              <label style={styles.label}>Accepted Email Domains</label>
+              <DomainTextArea
                 accessTierShortName={accessTierShortName}
                 emailDomains={emailDomains}
                 onBlur={filterEmptyDomains}
                 onChange={setTierDomains}/>
-            <p style={{color: colors.primary, fontSize: '12px', lineHeight: '18px'}}>
-              Enter one domain per line. <br/>
-              Note that subdomains are not included, so “university.edu” <br/>
-              matches alice@university.edu but not bob@med.university.edu.
-            </p>
-          </FlexColumn>}
+              <p style={{color: colors.primary, fontSize: '12px', lineHeight: '18px'}}>
+                Enter one domain per line. <br/>
+                Note that subdomains are not included, so “university.edu” <br/>
+                matches alice@university.edu but not bob@med.university.edu.
+              </p>
+            </FlexColumn>}
         </div>}
     </FlexColumn>
   </FlexRow>;
@@ -539,13 +539,13 @@ export const AdminInstitutionEdit = fp.flow(withNavigation, withRouter)(class ex
     return <div>
       <style>{css}</style>
       <FadeBox style={{marginTop: '1rem', marginLeft: '1rem', width: '1239px'}}>
-         <FlexRow>
-           <Scroll
+        <FlexRow>
+          <Scroll
               dir='left'
               onClick={() => this.backButton()}
               style={{width: '1.2rem', margin: '0.4rem 0.4rem 0rem 0rem'}}
           /> <SemiBoldHeader style={{fontSize: '18px', lineHeight: '22px', marginBottom: '1rem'}}>
-          {title}
+            {title}
           </SemiBoldHeader>
         </FlexRow>
         <FlexRow>
@@ -563,7 +563,7 @@ export const AdminInstitutionEdit = fp.flow(withNavigation, withRouter)(class ex
             />
             <div style={{color: colors.danger}} data-test-id='displayNameError'>
               {institution.displayName && errors && errors.displayName}
-              </div>
+            </div>
             <label style={styles.label}>Institution Type</label>
             <Dropdown style={{width: '16rem'}} data-test-id='organization-dropdown'
                       placeholder='Organization Type'
@@ -578,12 +578,12 @@ export const AdminInstitutionEdit = fp.flow(withNavigation, withRouter)(class ex
           </FlexColumn>
           <FlexColumn style={{width: '50%', marginRight: '1rem'}}>
             <label style={{...styles.label, marginTop: '0rem'}}>User Email Instructions Text (Optional)</label>
-              <TextArea
+            <TextArea
                 id={'userEmailInstructions'}
                 value={institution.userInstructions ? institution.userInstructions : ''}
                 onChange={(s: string) => this.setState(fp.set(['institution', 'userInstructions'], s))}
               />
-            </FlexColumn>
+          </FlexColumn>
         </FlexRow>
         <SemiBoldHeader style={{fontSize: '18px', lineHeight: '22px', marginTop: '2rem'}}>
           Data access tiers
@@ -591,7 +591,7 @@ export const AdminInstitutionEdit = fp.flow(withNavigation, withRouter)(class ex
         <hr style={{border: '1px solid #A9B6CB'}}/>
         <FlexRow style={{gap: '2rem'}}>
           {tiers.map(accessTierShortName =>
-          <TierConfig
+            <TierConfig
               key={accessTierShortName}
               accessTierShortName={accessTierShortName}
               institution={institution}
@@ -602,7 +602,7 @@ export const AdminInstitutionEdit = fp.flow(withNavigation, withRouter)(class ex
               setTierAddresses={(addrs) => this.setTierAddresses(accessTierShortName, addrs)}
               filterEmptyDomains={() => this.filterEmptyDomains(accessTierShortName)}
               setTierDomains={(domains) => this.setTierDomains(accessTierShortName, domains)}/>)}
-         </FlexRow>
+        </FlexRow>
         <FlexRow style={{justifyContent: 'flex-start', marginRight: '1rem'}}>
           <div>
             <Button type='secondary' path='/admin/institution' style={{marginRight: '1.5rem'}}>Cancel</Button>
@@ -616,7 +616,7 @@ export const AdminInstitutionEdit = fp.flow(withNavigation, withRouter)(class ex
                     errors.controlledTierEmailAddresses,
                     errors.controlledTierEmailDomains
                   ].map(e => e && <li key={e}>{e}</li>)}
-                {errors.organizationTypeOtherText && <li>Organization Type 'Other' requires additional information</li>}
+                  {errors.organizationTypeOtherText && <li>Organization Type 'Other' requires additional information</li>}
                 </BulletAlignedUnorderedList>
               </div>
             } disable={this.isAddInstitutionMode}>
@@ -638,6 +638,6 @@ export const AdminInstitutionEdit = fp.flow(withNavigation, withRouter)(class ex
             errorMsg={this.state.apiErrorMsg}
             onClose={() => this.setState({showApiError: false})}/>}
       </FadeBox>
-      </div>;
+    </div>;
   }
 });

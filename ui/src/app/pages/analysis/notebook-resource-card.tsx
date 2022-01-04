@@ -157,7 +157,7 @@ export const NotebookResourceCard = fp.flow(
     const {resource, menuOnly} = this.props;
     return <React.Fragment>
       {this.state.showCopyNotebookModal &&
-      <CopyModal
+        <CopyModal
         fromWorkspaceNamespace={resource.workspaceNamespace}
         fromWorkspaceFirecloudName={resource.workspaceFirecloudName}
         fromResourceName={getDisplayName(resource)}
@@ -170,7 +170,7 @@ export const NotebookResourceCard = fp.flow(
       }
 
       {this.state.showRenameModal &&
-      <RenameModal resourceType={getType(resource)}
+        <RenameModal resourceType={getType(resource)}
                    onRename={(newName) => {
                      AnalyticsTracker.Notebooks.Rename();
                      this.renameNotebook(newName);
@@ -182,8 +182,8 @@ export const NotebookResourceCard = fp.flow(
                    existingNames={this.props.existingNameList}/>
       }
       {menuOnly ?
-          <ResourceActionsMenu actions={this.actions} disabled={resource.adminLocked}/> :
-          <ResourceCard resource={resource} actions={this.actions}/>}
+        <ResourceActionsMenu actions={this.actions} disabled={resource.adminLocked}/> :
+        <ResourceCard resource={resource} actions={this.actions}/>}
     </React.Fragment>;
   }
 });

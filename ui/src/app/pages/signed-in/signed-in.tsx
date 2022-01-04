@@ -133,8 +133,8 @@ export const SignedIn = (spinnerProps: WithSpinnerOverlayProps) => {
                 : styles.appContainer
           }
         >
-          <SignedInRoutes/>
-        </div>
+              <SignedInRoutes/>
+            </div>
       }
     </FlexRow>
     {!hideFooter && environment.enableFooter &&

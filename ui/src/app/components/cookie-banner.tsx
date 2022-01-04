@@ -63,14 +63,14 @@ export class CookieBanner extends React.Component<{}, CookieBannerState> {
 
   render() {
     return this.cookieBannerVisible() && <div style={styles.cookiePolicyMessage}>
-            <FlexRow style={{alignItems: 'center'}}>
-                <img src={cookies}/>
-                <div style={{paddingLeft: '1rem', color: colors.primary}}>
-                    We use cookies to help provide you with the best experience we can. By continuing to use our site, you consent
-                    to our <StyledRouterLink path='/cookie-policy' target='_blank'>Cookie Policy</StyledRouterLink>.
-                </div>
-            </FlexRow>
-            <FontAwesomeIcon icon={faTimes} style={styles.iconStyles} onClick={() => this.handleCloseCookies()} />
-        </div>;
+      <FlexRow style={{alignItems: 'center'}}>
+        <img src={cookies}/>
+        <div style={{paddingLeft: '1rem', color: colors.primary}}>
+          We use cookies to help provide you with the best experience we can. By continuing to use our site, you consent
+          to our <StyledRouterLink path='/cookie-policy' target='_blank'>Cookie Policy</StyledRouterLink>.
+        </div>
+      </FlexRow>
+      <FontAwesomeIcon icon={faTimes} style={styles.iconStyles} onClick={() => this.handleCloseCookies()} />
+    </div>;
   }
 }

@@ -48,11 +48,11 @@ describe('DataSetPage', () => {
 
   const component = () => {
     return mount(
-        <MemoryRouter
+      <MemoryRouter
             initialEntries={[`/workspaces/${workspaceDataStub.namespace}/${workspaceDataStub.id}/data/data-sets/${stubDataSet().id}`]}
         >
-          <Route exact path="/workspaces/:ns/:wsid/data/data-sets/:dataSetId">
-            <DatasetPage
+        <Route exact path="/workspaces/:ns/:wsid/data/data-sets/:dataSetId">
+          <DatasetPage
                 hideSpinner={() => {}}
                 showSpinner={() => {}}
                 match={{params: {
@@ -61,8 +61,8 @@ describe('DataSetPage', () => {
                     dataSetId: stubDataSet().id
                   }}}
             />
-          </Route>
-        </MemoryRouter>
+        </Route>
+      </MemoryRouter>
     );
   };
 

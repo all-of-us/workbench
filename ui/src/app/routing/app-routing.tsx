@@ -251,31 +251,31 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
       }
       {
        overriddenUrl && <div style={{position: 'absolute', top: 0, left: '1rem'}}>
-        <span style={{fontSize: '80%', color: 'darkred'}}>
-          API URL: {overriddenUrl}
-        </span>
+         <span style={{fontSize: '80%', color: 'darkred'}}>
+           API URL: {overriddenUrl}
+         </span>
        </div>
       }
       <div id='outdated'/> {/* for outdated-browser-rework */}
     </React.Fragment>}
     {
       !firstPartyCookiesEnabled || !thirdPartyCookiesEnabled &&
-      <div>
-        <div style={{maxWidth: '500px', margin: '1rem', fontFamily: 'Montserrat'}}>
-          <div>
-            <img alt='logo' src={logo} width='155px'/>
-          </div>
-          <div style={{fontSize: '20pt', color: '#2F2E7E', padding: '1rem 0 1rem 0'}}>Cookies are Disabled</div>
-          <div style={{fontSize: '14pt', color: '#000000'}}>
-            For full functionality of this site it is necessary to enable cookies.
-            Here are the <a href='https://support.google.com/accounts/answer/61416'
+        <div>
+          <div style={{maxWidth: '500px', margin: '1rem', fontFamily: 'Montserrat'}}>
+            <div>
+              <img alt='logo' src={logo} width='155px'/>
+            </div>
+            <div style={{fontSize: '20pt', color: '#2F2E7E', padding: '1rem 0 1rem 0'}}>Cookies are Disabled</div>
+            <div style={{fontSize: '14pt', color: '#000000'}}>
+              For full functionality of this site it is necessary to enable cookies.
+              Here are the <a href='https://support.google.com/accounts/answer/61416'
                             style={{color: '#2691D0'}}
                             target='_blank'
                             rel='noopener noreferrer'>
-            instructions how to enable cookies in your web browser</a>.
+                instructions how to enable cookies in your web browser</a>.
+            </div>
           </div>
         </div>
-      </div>
     }
   </React.Fragment>;
 };

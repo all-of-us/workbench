@@ -788,7 +788,7 @@ export const AttributesPage = fp.flow(withCurrentWorkspace(), withCurrentCohortC
             </h3>
             <div style={{lineHeight: '0.75rem', paddingRight: '1.5rem'}}>
               The COPE survey is longitudinal and will change over time. Use the following attributes to select data from one or more
-               versions.
+              versions.
             </div>
             <div style={styles.moreInfo}>
               <StyledExternalLink

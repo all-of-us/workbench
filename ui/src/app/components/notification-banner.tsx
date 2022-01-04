@@ -69,14 +69,14 @@ interface NotificationProps {
 
 export const NotificationBanner = ({dataTestId, text, buttonText, buttonPath}: NotificationProps) => {
     return <FlexRow data-test-id={dataTestId} style={styles.box}>
-        <AlarmExclamation style={styles.icon}/>
-        <div style={styles.text}>
-            {text}
+      <AlarmExclamation style={styles.icon}/>
+      <div style={styles.text}>
+        {text}
+      </div>
+      <Button type='primary' style={styles.button} path={buttonPath}>
+        <div style={styles.buttonText}>
+          {buttonText}
         </div>
-        <Button type='primary' style={styles.button} path={buttonPath}>
-            <div style={styles.buttonText}>
-                {buttonText}
-            </div>
-        </Button>
+      </Button>
     </FlexRow>;
 };

@@ -112,7 +112,7 @@ export class AdminBanner extends React.Component<WithSpinnerOverlayProps, AdminB
                  placeholder='Paste button link'/>
       <TooltipTrigger content={!bannerEnabled && !!errors && 'Headline and description are required.'} side='right'>
         <div style={{marginTop: '1.5rem', display: 'flex', alignItems: 'center', width: '3rem'}}>
-            <ReactSwitch checked={bannerEnabled}
+          <ReactSwitch checked={bannerEnabled}
                          disabled={!bannerEnabled && errors}
                          checkedIcon={false}
                          height={17}

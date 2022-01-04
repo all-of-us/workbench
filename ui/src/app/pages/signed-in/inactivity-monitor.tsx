@@ -144,7 +144,7 @@ export const InactivityMonitor = () => {
 
   return <React.Fragment>
     {showModal &&
-     <TextModal
+      <TextModal
        closeFunction={() => setShowModal(false)}
        title='Your session is about to expire'
        body={`You have been idle for over ${secondsToText(secondsBeforeDisplayingModal)}. ` +

@@ -92,16 +92,16 @@ export const NotificationModal = () => {
   return notification && <Modal>
     <ModalTitle>{title}</ModalTitle>
     <ModalBody>
-        <TextColumn>
-          <div>{message}</div>
-          {showBugReportLink &&
-            <div style={{marginTop: '0.5rem'}}>
-                Please <a onClick={() => {
+      <TextColumn>
+        <div>{message}</div>
+        {showBugReportLink &&
+          <div style={{marginTop: '0.5rem'}}>
+            Please <a onClick={() => {
                   openZendeskWidget(profile.givenName, profile.familyName, profile.username, profile.contactEmail);
                   notificationStore.set(null);
-                }}> submit a bug report. </a>
-            </div>}
-        </TextColumn>
+            }}> submit a bug report. </a>
+          </div>}
+      </TextColumn>
     </ModalBody>
     <ModalFooter>
       <Button onClick={() => notificationStore.set(null)}>OK</Button>

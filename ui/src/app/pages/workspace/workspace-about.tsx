@@ -106,8 +106,8 @@ const WorkspaceInfoTooltipText = () => {
     <br/>The date this workspace was last updated<br/>
     <u>Data Access Tier</u>
     <br/>To make sure data is accessed only by authorized users, users can request
-      and be granted access to data access tiers within the <AouTitle/>.
-      Currently there are 3 tiers  - “Public”, “Registered” and “Controlled”.<br/>
+    and be granted access to data access tiers within the <AouTitle/>.
+    Currently there are 3 tiers  - “Public”, “Registered” and “Controlled”.<br/>
   </div>;
 };
 
@@ -226,8 +226,8 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withCdrVersions())
             </div>
             <div>
               <b>This workspace has been locked due to a compliance violation of the
-              <a href={'/data-code-of-conduct'}> <AoU/> Researcher Workbench Data User Code of Conduct.
-              </a></b>
+                <a href={'/data-code-of-conduct'}> <AoU/> Researcher Workbench Data User Code of Conduct.
+                </a></b>
               <p></p>
               {/* This is a temp solution in case admin have locked some workspaces already before workbench introduced the ability to save locking reason */}
               {workspace.adminLockedReason && <div style={{fontSize: '0.6rem', paddingLeft: '1em', paddingBottom: '1em'}}>
@@ -238,7 +238,7 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withCdrVersions())
               non-compliance by updating the workspace description (e.g. “About” page) and
               corresponding with the <AoU/> Resources Access Board. For questions, please contact
               the <StyledExternalLink href={supportUrls.helpCenter} target='_blank'>
-              Researcher Workbench support team.
+                Researcher Workbench support team.
               </StyledExternalLink>
             </div>
           </FlexRow>
@@ -246,16 +246,16 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withCdrVersions())
         <ResearchPurpose data-test-id='researchPurpose'/>
         {hasAuthorityForAction(profile, AuthorityGuardedAction.PUBLISH_WORKSPACE) &&
           <div style={{display: 'flex', justifyContent: 'flex-end'}}>
-              <Button data-test-id='unpublish-button'
+            <Button data-test-id='unpublish-button'
                       onClick={() => this.publishUnpublishWorkspace(false)}
                       disabled={publishing || !published}
                       type={published ? 'primary' : 'secondary'}>Unpublish</Button>
-              <Button data-test-id='publish-button'
+            <Button data-test-id='publish-button'
                       onClick={() => this.publishUnpublishWorkspace(true)}
                       disabled={publishing || published}
                       type={published ? 'secondary' : 'primary'}
                       style={{marginLeft: '0.5rem'}}>Publish</Button>
-        </div>}
+          </div>}
       </FlexColumn>
       <div style={styles.rightSidebar}>
         <div style={styles.shareHeader}>
@@ -265,7 +265,7 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withCdrVersions())
           </TooltipTrigger>
           <TooltipTrigger content={<div>Workspace compliance action is required</div>}
                           disabled={!workspace?.adminLocked}>
-          <Button style={{height: '22px', fontSize: 12, marginRight: '0.5rem',
+            <Button style={{height: '22px', fontSize: 12, marginRight: '0.5rem',
             maxWidth: '13px'}} disabled={workspaceUserRoles.length === 0 || workspace?.adminLocked}
                   data-test-id='workspaceShareButton'
                   onClick={() => this.setState({sharing: true})}>Share</Button>

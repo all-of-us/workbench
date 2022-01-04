@@ -83,21 +83,21 @@ export const AdminReviewWorkspace = withUserProfile()(class extends React.Compon
 
   convertWorkspaceToFields(workspaces: Workspace[]) {
     return workspaces.map(ws => ({...ws, description: <div>
-        <i>Field of intended study:</i>
-        <br/>{ws.researchPurpose.intendedStudy}<br/>
-        <i>Reason for choosing All of Us:</i>
-        <br/>{ws.researchPurpose.reasonForAllOfUs}<br/>
-        <i>Anticipated findings:</i>
-        <br/>{ws.researchPurpose.anticipatedFindings}<br/>
+      <i>Field of intended study:</i>
+      <br/>{ws.researchPurpose.intendedStudy}<br/>
+      <i>Reason for choosing All of Us:</i>
+      <br/>{ws.researchPurpose.reasonForAllOfUs}<br/>
+      <i>Anticipated findings:</i>
+      <br/>{ws.researchPurpose.anticipatedFindings}<br/>
     </div>, actions: <div>
-        {this.state.reviewedWorkspace === ws ? <Spinner size={50}/> :
-        <React.Fragment>
-          <Button onClick={() => this.approve(ws, true)}
+      {this.state.reviewedWorkspace === ws ? <Spinner size={50}/> :
+      <React.Fragment>
+        <Button onClick={() => this.approve(ws, true)}
                   data-test-id='approve'>Approve</Button>
-          <Button type='secondary' onClick={() => this.approve(ws, false)}
+        <Button type='secondary' onClick={() => this.approve(ws, false)}
                 style={{marginLeft: '0.5rem'}}>Reject</Button>
-        </React.Fragment>}
-      </div>}));
+      </React.Fragment>}
+    </div>}));
   }
 
   render() {
@@ -123,10 +123,10 @@ export const AdminReviewWorkspace = withUserProfile()(class extends React.Compon
         </div>
       }
       {fetchingWorkspaceError &&
-      <BugReportModal bugReportDescription='Could not fetch workspaces for approval'
+        <BugReportModal bugReportDescription='Could not fetch workspaces for approval'
         onClose={() => this.setState({fetchingWorkspaceError: false})}/>}
       {reviewError &&
-      <BugReportModal bugReportDescription={'Could not review workspace ' +
+        <BugReportModal bugReportDescription={'Could not review workspace ' +
           reviewedWorkspace.namespace + '/' + reviewedWorkspace.name}
         onClose={() => this.setState({reviewError: false, reviewedWorkspace: null})}/>}
     </div>;

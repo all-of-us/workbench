@@ -146,17 +146,17 @@ export const DatasetResourceCard = fp.flow(
     const {resource, menuOnly} = this.props;
     return <React.Fragment>
       {this.state.showExportToNotebookModal &&
-          <ExportDatasetModal dataset={resource.dataSet}
+        <ExportDatasetModal dataset={resource.dataSet}
                               closeFunction={() => this.setState({showExportToNotebookModal: false})}/>
       }
       {this.state.showGenomicExtractionModal &&
-      <GenomicExtractionModal dataSet={resource.dataSet}
+        <GenomicExtractionModal dataSet={resource.dataSet}
                               workspaceNamespace={resource.workspaceNamespace}
                               workspaceFirecloudName={resource.workspaceFirecloudName}
                               closeFunction={() => this.setState({showGenomicExtractionModal: false})}/>
       }
       {this.state.showRenameModal &&
-      <RenameModal onRename={(name, description) => this.rename(name, description)}
+        <RenameModal onRename={(name, description) => this.rename(name, description)}
                    resourceType={getType(resource)}
                    onCancel={() => this.setState({showRenameModal: false})}
                    oldDescription={getDescription(resource)}
@@ -164,8 +164,8 @@ export const DatasetResourceCard = fp.flow(
                    existingNames={this.props.existingNameList}/>
       }
       {menuOnly ?
-          <ResourceActionsMenu actions={this.actions} disabled={resource.adminLocked}/> :
-          <ResourceCard resource={resource} actions={this.actions}/>}
+        <ResourceActionsMenu actions={this.actions} disabled={resource.adminLocked}/> :
+        <ResourceCard resource={resource} actions={this.actions}/>}
     </React.Fragment>;
   }
 });

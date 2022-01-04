@@ -28,7 +28,7 @@ const updateCache = jest.fn();
 describe('DataAccessRequirements', () => {
     const component = () => {
         return mount(<MemoryRouter>
-            <DataAccessRequirements hideSpinner={() => {}} showSpinner={() => {}}/>
+          <DataAccessRequirements hideSpinner={() => {}} showSpinner={() => {}}/>
         </MemoryRouter>);
     };
 

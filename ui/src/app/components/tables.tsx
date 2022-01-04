@@ -31,7 +31,7 @@ export const TwoColPaddedTable = ({style = {}, header = false, headerLeft = '',
         <PaddedTableCell key={i + '_l'} left={true} content={c}
                          leftWidth={cellWidth.left}/>
         {contentRight.length >= i + 1 &&
-        <PaddedTableCell key={i + '_r'} left={false} content={contentRight[i]}
+          <PaddedTableCell key={i + '_r'} left={false} content={contentRight[i]}
                          rightWidth={cellWidth.right}/>}
       </FlexRow>
     )}

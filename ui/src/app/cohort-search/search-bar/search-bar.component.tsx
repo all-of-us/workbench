@@ -126,7 +126,7 @@ class SearchBarOption extends React.Component<OptionProps, OptionState> {
           onClick={() => onClick()}
           onMouseEnter={() => this.setState({hover: true})}
           onMouseLeave={() => this.setState({hover: false})}>
-            {displayText}
+          {displayText}
         </button>
       </TooltipTrigger>
     </div>;

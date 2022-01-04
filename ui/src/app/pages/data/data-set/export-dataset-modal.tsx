@@ -226,8 +226,8 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(withCur
             </div>
 
             {creatingNewNotebook && <React.Fragment>
-                <SmallHeader style={{fontSize: 14, marginTop: '1rem'}}>Notebook Name</SmallHeader>
-                <TextInput onChange={v => setNotebookName(v)}
+              <SmallHeader style={{fontSize: 14, marginTop: '1rem'}}>Notebook Name</SmallHeader>
+              <TextInput onChange={v => setNotebookName(v)}
                            value={notebookName} data-test-id='notebook-name-input'/>
             </React.Fragment>}
 
@@ -248,9 +248,9 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(withCur
                 </label>)}
 
             {hasWgs() && kernelType === KernelTypeEnum.Python && <React.Fragment>
-                <div style={headerStyles.formLabel}>
-                    Select analysis tool for genetic variant data
-                </div>
+              <div style={headerStyles.formLabel}>
+                Select analysis tool for genetic variant data
+              </div>
               {genomicsToolRadioButton('Hail', DataSetExportRequest.GenomicsAnalysisToolEnum.HAIL)}
               {genomicsToolRadioButton('PLINK', DataSetExportRequest.GenomicsAnalysisToolEnum.PLINK)}
               {genomicsToolRadioButton('Other VCF-compatible tool', DataSetExportRequest.GenomicsAnalysisToolEnum.NONE)}
@@ -287,9 +287,9 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(withCur
         </div>
 
         {codePreview &&
-        <div style={{flex: 1, marginLeft: '1rem'}}>
-          {codePreview}
-        </div>}
+          <div style={{flex: 1, marginLeft: '1rem'}}>
+            {codePreview}
+          </div>}
       </FlexRow>
     </AnimatedModal>;
   });

@@ -577,7 +577,7 @@ export const ParticipantsTable = fp.flow(withCurrentCohortReview(), withCurrentW
       return <div style={styles.error}>
         <ClrIcon style={{margin: '0 0.5rem 0 0.25rem'}} className='is-solid'
           shape='exclamation-triangle' size='22'/>
-          {message}
+        {message}
       </div>;
     }
 

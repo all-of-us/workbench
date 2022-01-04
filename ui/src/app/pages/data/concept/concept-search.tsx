@@ -313,48 +313,48 @@ export const ConceptSearch = fp.flow(
       <FadeBox style={{margin: 'auto', paddingTop: '1rem', width: '95.7%'}}>
         {this.isDetailPage && conceptSet && <React.Fragment>
           {loading ? <SpinnerOverlay/> :
-            <FlexColumn>
-              <div style={styles.conceptSetHeader}>
-                <FlexRow>
-                  <ConceptSetMenu canDelete={accessLevel === WorkspaceAccessLevel.OWNER}
+          <FlexColumn>
+            <div style={styles.conceptSetHeader}>
+              <FlexRow>
+                <ConceptSetMenu canDelete={accessLevel === WorkspaceAccessLevel.OWNER}
                                   canEdit={WorkspacePermissionsUtil.canWrite(accessLevel)}
                                   onDelete={() => this.setState({deleting: true})}
                                   onEdit={() => this.setState({editing: true})}
                                   onCopy={() => this.setState({copying: true})}/>
-                  <div style={styles.conceptSetMetadataWrapper}>
-                    {editing ?
-                      <FlexColumn>
-                        <TextInput value={editName} disabled={editSaving}
+                <div style={styles.conceptSetMetadataWrapper}>
+                  {editing ?
+                    <FlexColumn>
+                      <TextInput value={editName} disabled={editSaving}
                                    id='edit-name'
                                    style={{marginBottom: '0.5rem'}} data-test-id='edit-name'
                                    onChange={v => this.setState({editName: v})}/>
-                        <TextAreaWithLengthValidationMessage initialText={editDescription}
+                      <TextAreaWithLengthValidationMessage initialText={editDescription}
                                                              id='edit-description'
                                                              textBoxStyleOverrides={{width: '100%'}}
                                                              maxCharacters={1000}
                                                              tooLongWarningCharacters={950}
                                                              onChange={v => this.setState({editDescription: v})}/>
-                        <div style={{margin: '0.5rem 0'}}>
-                          <TooltipTrigger content={this.tooltipContent(errors)}
+                      <div style={{margin: '0.5rem 0'}}>
+                        <TooltipTrigger content={this.tooltipContent(errors)}
                                           disabled={!errors}>
                           <Button type='primary' style={{marginRight: '0.5rem'}}
                                   data-test-id='save-edit-concept-set'
                                   disabled={editSaving || errors}
                                   onClick={() => this.submitEdits()}>Save</Button>
-                          </TooltipTrigger>
-                          <Button type='secondary' disabled={editSaving}
+                        </TooltipTrigger>
+                        <Button type='secondary' disabled={editSaving}
                                   data-test-id='cancel-edit-concept-set'
                                   onClick={() => this.setState({
                                     editing: false,
                                     editName: conceptSet.name,
                                     editDescription: conceptSet.description
                                   })}>Cancel</Button>
-                        </div>
-                      </FlexColumn> :
-                      <React.Fragment>
-                        <div style={styles.conceptSetTitle} data-test-id='concept-set-title'>
-                          {conceptSet.name}
-                          <Clickable disabled={!WorkspacePermissionsUtil.canWrite(accessLevel)}
+                      </div>
+                    </FlexColumn> :
+                    <React.Fragment>
+                      <div style={styles.conceptSetTitle} data-test-id='concept-set-title'>
+                        {conceptSet.name}
+                        <Clickable disabled={!WorkspacePermissionsUtil.canWrite(accessLevel)}
                                      style={{marginLeft: '.5rem'}}
                                      data-test-id='edit-concept-set'
                                      onClick={() => this.setState({editing: true})}>
@@ -362,32 +362,32 @@ export const ConceptSearch = fp.flow(
                                                 disabled={!WorkspacePermissionsUtil.canWrite(accessLevel)}
                                                 style={{marginTop: '0.1rem'}}/>
                           </Clickable>
-                        </div>
-                        <div style={{marginBottom: '1.5rem', color: colors.primary}} data-test-id='concept-set-description'>
-                          {showMoreDescription ?
+                      </div>
+                      <div style={{marginBottom: '1.5rem', color: colors.primary}} data-test-id='concept-set-description'>
+                        {showMoreDescription ?
                             conceptSet.description :
                             conceptSet.description.slice(0, 250)
                           }
-                          {conceptSet.description.length > 250 &&
+                        {conceptSet.description.length > 250 &&
                             <span style={styles.showMore}
                                   onClick={() => this.setState({showMoreDescription: !showMoreDescription})}>
                               Show {showMoreDescription ? 'less' : 'more'}
                             </span>
                           }
-                        </div>
-                      </React.Fragment>}
-                    <div style={styles.conceptSetData}>
-                      <div data-test-id='participant-count'>
-                        Participant Count: {!!conceptSet.participantCount ? conceptSet.participantCount.toLocaleString() : ''}
                       </div>
-                      <div style={{marginLeft: '2rem'}} data-test-id='concept-set-domain'>
-                        Domain: {this.displayDomainName}
-                      </div>
+                    </React.Fragment>}
+                  <div style={styles.conceptSetData}>
+                    <div data-test-id='participant-count'>
+                      Participant Count: {!!conceptSet.participantCount ? conceptSet.participantCount.toLocaleString() : ''}
+                    </div>
+                    <div style={{marginLeft: '2rem'}} data-test-id='concept-set-domain'>
+                      Domain: {this.displayDomainName}
                     </div>
                   </div>
-                </FlexRow>
-              </div>
-            </FlexColumn>
+                </div>
+              </FlexRow>
+            </div>
+          </FlexColumn>
           }
         </React.Fragment>}
         {!loading && <CriteriaSearch backFn={() => this.props.navigate(['workspaces', namespace, id, 'data', 'concepts'])}
@@ -398,7 +398,7 @@ export const ConceptSearch = fp.flow(
                 onClick={() => setSidebarActiveIconStore.next('concept')}>Finish & Review</Button>
       </FadeBox>
       {!loading && deleting &&
-      <ConfirmDeleteModal closeFunction={() => this.setState({deleting: false})}
+        <ConfirmDeleteModal closeFunction={() => this.setState({deleting: false})}
                           receiveDelete={() => this.onDeleteConceptSet()}
                           resourceName={conceptSet.name}
                           resourceType={ResourceType.CONCEPTSET}/>}

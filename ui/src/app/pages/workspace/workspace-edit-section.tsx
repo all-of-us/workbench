@@ -60,13 +60,13 @@ export const WorkspaceEditSection = (props: Props) => {
           {props.header}
         </div>
         {props.publiclyDisplayed &&
-        <PubliclyDisplayed style={{marginLeft: '1.5rem', marginTop: '-0.1rem'}}/>}
+          <PubliclyDisplayed style={{marginLeft: '1.5rem', marginTop: '-0.1rem'}}/>}
       </FlexRow>}
       {!props.index &&
-      <div style={{...styles.header,
+        <div style={{...styles.header,
         fontSize: (props.largeHeader ? 18 : 14)}}>
-        {props.header}
-      </div>
+          {props.header}
+        </div>
       }
       {props.required && <div style={styles.requiredText}>
         (Required)

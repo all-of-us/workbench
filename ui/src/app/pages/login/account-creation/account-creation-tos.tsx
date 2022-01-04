@@ -81,8 +81,8 @@ export class AccountCreationTos extends React.Component<
               Please read through the entire agreement to continue.
             </div>
             <div style={{fontWeight: 400}}>
-                By clicking below, or continuing with the registration process or accessing the
-                Researcher Workbench, you agree to these terms and make the following certifications:
+              By clicking below, or continuing with the registration process or accessing the
+              Researcher Workbench, you agree to these terms and make the following certifications:
             </div>
           </div>
           <div style={{marginBottom: '.25rem'}}>
@@ -96,7 +96,7 @@ export class AccountCreationTos extends React.Component<
                         styles.disabledCheckboxLabel}
                       wrapperStyle={{marginBottom: '0.5rem'}}
                       label={<span>
-              I have read, understand, and agree to the <AoU/> Program Privacy Statement.</span>}
+                        I have read, understand, and agree to the <AoU/> Program Privacy Statement.</span>}
             /></div>
           <div>
             <CheckBox data-test-id='terms-of-service-check'
@@ -109,7 +109,7 @@ export class AccountCreationTos extends React.Component<
                         styles.disabledCheckboxLabel}
                       wrapperStyle={{marginBottom: '0.5rem'}}
                       label={<span>
-              I have read, understand, and agree to the Terms of Use described above.</span>}
+                        I have read, understand, and agree to the Terms of Use described above.</span>}
             /></div>
         </div>
         <FlexColumn style={{paddingLeft: '3rem', alignItems: 'center', justifyContent: 'center'}}>

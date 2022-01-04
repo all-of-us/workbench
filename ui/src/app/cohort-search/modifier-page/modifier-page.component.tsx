@@ -503,9 +503,9 @@ export const ModifierPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSea
               return <div data-test-id={name} key={i} style={{marginTop: '0.75rem'}}>
                 <label style={styles.label}>{label}</label>
                 {name === ModifierType.EVENTDATE &&
-                <TooltipTrigger content={<div>{tooltip}</div>}>
-                  <ClrIcon style={styles.info} className='is-solid' shape='info-standard'/>
-                </TooltipTrigger>
+                  <TooltipTrigger content={<div>{tooltip}</div>}>
+                    <ClrIcon style={styles.info} className='is-solid' shape='info-standard'/>
+                  </TooltipTrigger>
                 }
                 <div style={styles.modifier}>
                   <Dropdown value={operator}

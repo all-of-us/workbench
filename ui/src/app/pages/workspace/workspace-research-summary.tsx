@@ -21,7 +21,7 @@ export const WorkspaceResearchSummary = (props: Props) => {
         index={props.index}
         indent
     >
-      <TextAreaWithLengthValidationMessage
+    <TextAreaWithLengthValidationMessage
           id={props.id}
           initialText={props.researchValue}
           maxCharacters={1000}
@@ -30,5 +30,5 @@ export const WorkspaceResearchSummary = (props: Props) => {
           tooShortWarningCharacters={100}
           tooShortWarning={NOT_ENOUGH_CHARACTERS_RESEARCH_DESCRIPTION}
        />
-    </WorkspaceEditSection>;
+  </WorkspaceEditSection>;
 };

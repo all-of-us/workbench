@@ -32,8 +32,8 @@ const Tier = (props: TierProps) => {
                 size={23}/>
             : <div data-test-id={`${shortName}-tier-access-denied`} style={{ ...styles.dataAccessText, gridArea: 'primary'}}>
               Please complete the data access requirements to gain access.
-        </div>}
-        </div>
+            </div>}
+      </div>
       : null;
 };
 
@@ -56,7 +56,7 @@ export const DataAccessPanel = (props: DataAccessPanelProps) => {
     </FlexRow>
     <hr style={{...styles.verticalLine}}/>
     {orderedTiers.map(tier =>
-        <Tier
+      <Tier
             key={tier}
             shortName={tier}
             userHasAccess={userAccessTiers.includes(tier)}/>)}

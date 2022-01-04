@@ -328,12 +328,12 @@ export const CohortSearch = fp.flow(withCurrentCohortSearchContext(), withRouter
             : {height: 'calc(100% - 3.5rem)'}
         }>
           {domain === Domain.PERSON ? <div data-test-id='demographics' style={{flex: 1, overflow: 'auto'}}>
-              <Demographics
+            <Demographics
                 criteriaType={type}
                 select={this.addSelection}
                 selectedIds={selectedIds}
                 selections={selections}/>
-            </div>
+          </div>
             : <CriteriaSearch backFn={() => this.checkUnsavedChanges()}
                               cohortContext={cohortContext}/>}
         </div>

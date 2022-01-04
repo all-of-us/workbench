@@ -407,7 +407,7 @@ const TemporaryRASModule = () => {
           <b>Temporarily disabled.</b> Due to technical difficulties, this step is disabled.
           In the future, you'll be prompted to complete identity verification to continue using the workbench.
         </div>
-     </FlexColumn>
+      </FlexColumn>
     </FlexRow>
   </FlexRow>;
 };
@@ -415,11 +415,11 @@ const TemporaryRASModule = () => {
 const ContactUs = (props: {profile: Profile}) => {
   const {profile: {givenName, familyName, username, contactEmail}} = props;
   return <div data-test-id='contact-us'>
-        <span style={styles.link} onClick={(e) => {
+    <span style={styles.link} onClick={(e) => {
           openZendeskWidget(givenName, familyName, username, contactEmail);
           // prevents the enclosing Clickable's onClick() from triggering instead
           e.stopPropagation();
-        }}>Contact us</span> if you’re having trouble completing this step.
+    }}>Contact us</span> if you’re having trouble completing this step.
   </div>;
 }
 
@@ -490,7 +490,7 @@ const MaybeModule = ({profile, moduleName, active, clickable, spinnerProps}: Mod
     const status = getAccessModuleStatusByName(profile, moduleName);
     return <FlexRow data-test-id={`module-${moduleName}`}>
       <FlexRow style={styles.moduleCTA}>
-      {cond([
+        {cond([
         clickable && showRefresh && !!refreshAction,
         () => <Refresh
                 refreshAction={refreshAction}
@@ -702,7 +702,7 @@ const ControlledTierCard = (props: {profile: Profile, activeModule: AccessModule
                           enabled={isEligible}
                           text={`${institutionDisplayName} must allow you to access ${ctDisplayName} data`}/>
       {displayEraCommons &&
-       <ControlledTierEraModule profile={profile} eligible={isEligible} spinnerProps={spinnerProps}/>}
+        <ControlledTierEraModule profile={profile} eligible={isEligible} spinnerProps={spinnerProps}/>}
       <ModulesForCard
         profile={profile}
         modules={[ctModule]}
@@ -726,9 +726,9 @@ const ControlledTierStep = (props: {enabled: boolean, text: String}) => {
       <FlexColumn style={styles.backgroundModuleText}>
         <div>{props.text}
         </div>
-       </FlexColumn>
-      </FlexRow>
-     </FlexRow>;
+      </FlexColumn>
+    </FlexRow>
+  </FlexRow>;
 }
 
 const DuccCard = (props: {
@@ -810,7 +810,7 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
                    clickableModules={clickableModules}
                    spinnerProps={spinnerProps}/>
   const ctCard = showCtCard ?
-      <ControlledTierCard
+    <ControlledTierCard
         key='ct'
         profile={profile}
         activeModule={activeModule}
@@ -828,19 +828,19 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
   const cards = showCtCard ? [rtCard, ctCard, dCard] : [rtCard, dCard];
 
   return <FlexColumn style={styles.pageWrapper}>
-      <DARHeader/>
-      {profile && !nextRequired && <Completed/>}
-      {unsafeAllowSelfBypass && clickableModules.length > 0 && <FlexRow data-test-id='self-bypass' style={styles.selfBypass}>
-        <div style={styles.selfBypassText}>[Test environment] Self-service bypass is enabled</div>
-        <Button
+    <DARHeader/>
+    {profile && !nextRequired && <Completed/>}
+    {unsafeAllowSelfBypass && clickableModules.length > 0 && <FlexRow data-test-id='self-bypass' style={styles.selfBypass}>
+      <div style={styles.selfBypassText}>[Test environment] Self-service bypass is enabled</div>
+      <Button
             style={{marginLeft: '0.5rem'}}
             onClick={async() => await selfBypass(spinnerProps, reload)}>Bypass all</Button>
-      </FlexRow>}
-      <FadeBox style={styles.fadeBox}>
-        <div style={styles.pleaseComplete}>
-          Please complete the necessary steps to gain access to the <AoU/> datasets.
-        </div>
-        <React.Fragment>{cards}</React.Fragment>
-      </FadeBox>
-    </FlexColumn>;
+    </FlexRow>}
+    <FadeBox style={styles.fadeBox}>
+      <div style={styles.pleaseComplete}>
+        Please complete the necessary steps to gain access to the <AoU/> datasets.
+      </div>
+      <React.Fragment>{cards}</React.Fragment>
+    </FadeBox>
+  </FlexColumn>;
 });

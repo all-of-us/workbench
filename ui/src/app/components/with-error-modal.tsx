@@ -57,10 +57,10 @@ export const withProfileErrorWrapper = WrappedComponent => {
   const body = ({message}) => (<React.Fragment>
     <div>An error occurred while saving your profile. The following message was returned:</div>
     <div style={{marginTop: '1rem', marginBottom: '1rem'}}>
-        "{message}"
+      "{message}"
     </div>
     <div>
-        Please try again or contact <SupportMailto/>.
+      Please try again or contact <SupportMailto/>.
     </div>
   </React.Fragment>);
 

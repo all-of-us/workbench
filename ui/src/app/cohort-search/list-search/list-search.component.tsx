@@ -643,7 +643,7 @@ export const ListSearch = fp.flow(withCdrVersions(), withCurrentWorkspace(), wit
                      className='p-datatable'
                      style={{...styles.table, ...styles.tableBody}}>
                 <tbody className='p-datatable-tbody'>
-                {displayData.map((row, index) => {
+                  {displayData.map((row, index) => {
                   const open = ingredients[row.id] && ingredients[row.id].open;
                   const err = ingredients[row.id] && ingredients[row.id].error;
                   return <React.Fragment key={index}>
@@ -663,7 +663,7 @@ export const ListSearch = fp.flow(withCdrVersions(), withCurrentWorkspace(), wit
                     </tr>}
                   </React.Fragment>;
                 })}
-              </tbody>
+                </tbody>
               </table>
             </div>
           </React.Fragment>}

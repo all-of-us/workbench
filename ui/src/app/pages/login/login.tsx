@@ -57,7 +57,7 @@ export const LoginReactComponent: React.FunctionComponent<{
             target='_blank'
             href='https://www.researchallofus.org/faq/what-if-i-have-trouble-signing-in-to-the-workbench'
             style={{marginTop: '0.625rem', lineHeight: '0.75rem'}}>
-              Trouble Signing In?
+            Trouble Signing In?
           </StyledExternalLink>
         </div>
         <div style={{paddingTop: '1.25rem'}}>

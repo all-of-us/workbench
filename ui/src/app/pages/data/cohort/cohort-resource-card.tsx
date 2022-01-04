@@ -166,7 +166,7 @@ export const CohortResourceCard = fp.flow(
     const {resource, menuOnly} = this.props;
     return <React.Fragment>
       {this.state.showRenameModal &&
-      <RenameModal onRename={(name, description) => this.rename(name, description)}
+        <RenameModal onRename={(name, description) => this.rename(name, description)}
                    resourceType={getType(resource)}
                    onCancel={() => this.setState({showRenameModal: false})}
                    oldDescription={getDescription(resource)}
@@ -185,8 +185,8 @@ export const CohortResourceCard = fp.flow(
           }}/>
       }
       {menuOnly ?
-          <ResourceActionsMenu actions={this.actions} disabled={resource.adminLocked}/> :
-          <ResourceCard resource={resource} actions={this.actions}/>}
+        <ResourceActionsMenu actions={this.actions} disabled={resource.adminLocked}/> :
+        <ResourceCard resource={resource} actions={this.actions}/>}
     </React.Fragment>;
   }
 });

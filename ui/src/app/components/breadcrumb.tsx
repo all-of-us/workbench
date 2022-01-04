@@ -238,7 +238,7 @@ export const Breadcrumb = fp.flow(
     render() {
       return <React.Fragment>
         {this.state.showInvalidBillingBanner &&
-        <InvalidBillingBanner onClose={() => this.setState({showInvalidBillingBanner: false})}/>}
+          <InvalidBillingBanner onClose={() => this.setState({showInvalidBillingBanner: false})}/>}
 
         <div style={{
           marginLeft: '3.25rem',

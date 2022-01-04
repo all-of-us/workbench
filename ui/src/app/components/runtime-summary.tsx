@@ -14,7 +14,7 @@ const styles = reactStyles({
 
 export const RuntimeSummary = ({runtimeConfig}: {runtimeConfig: RuntimeConfig}) => {
   return <>
-<label htmlFor='compute-resources' style={{...styles.bold, marginTop: '1rem'}}>Compute Resources</label>
+    <label htmlFor='compute-resources' style={{...styles.bold, marginTop: '1rem'}}>Compute Resources</label>
     <div id='compute-resources'>- Compute size of
       <b> {runtimeConfig.machine.cpu} CPUs</b>,
       <b> {runtimeConfig.machine.memory} GB memory</b>, and a
@@ -26,7 +26,7 @@ export const RuntimeSummary = ({runtimeConfig}: {runtimeConfig: RuntimeConfig}) 
         <b> {runtimeConfig.dataprocConfig.numberOfWorkers} worker(s) </b>
         {
           runtimeConfig.dataprocConfig.numberOfPreemptibleWorkers > 0 &&
-          <b>and {runtimeConfig.dataprocConfig.numberOfPreemptibleWorkers} preemptible worker(s) </b>
+            <b>and {runtimeConfig.dataprocConfig.numberOfPreemptibleWorkers} preemptible worker(s) </b>
         }
         each with compute size of <b>{findMachineByName(runtimeConfig.dataprocConfig.workerMachineType).cpu} CPUs</b>,
         <b> {findMachineByName(runtimeConfig.dataprocConfig.workerMachineType).memory} GB memory</b>, and a

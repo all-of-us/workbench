@@ -186,7 +186,7 @@ export const NotebookList = withCurrentWorkspace()(class extends React.Component
                   </div>
                   <div style={styles.cloneNotebookMsg}>
                     Copying 1 or more notebooks from another workspace. This may take <b> a few
-                    minutes</b>.
+                      minutes</b>.
                   </div>
                 </FlexColumn>
               </CardButton>

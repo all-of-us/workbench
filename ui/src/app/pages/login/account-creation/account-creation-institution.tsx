@@ -355,10 +355,10 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
                 onChange={(e) => this.onInstitutionChange(e.value)}
             />
             {this.state.institutionLoadError &&
-            <ErrorDiv data-test-id='data-load-error'>
-              An error occurred loading the institution list. Please try again or contact
-              <SupportMailto/>.
-            </ErrorDiv>
+              <ErrorDiv data-test-id='data-load-error'>
+                An error occurred loading the institution list. Please try again or contact
+                <SupportMailto/>.
+              </ErrorDiv>
             }
             <div style={{marginTop: '.5rem'}}>
               <label style={styles.text}>

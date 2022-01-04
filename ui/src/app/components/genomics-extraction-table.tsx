@@ -104,9 +104,9 @@ const mapJobToTableRow = (job: GenomicExtractionJob, workspace: WorkspaceData) =
   return {
     datasetName: job.datasetName,
     datasetNameDisplay:
-      <span style={{opacity: job.status === TerraJobStatus.RUNNING ? .5 : 1}}>
-        {job.datasetName}
-      </span>,
+  <span style={{opacity: job.status === TerraJobStatus.RUNNING ? .5 : 1}}>
+    {job.datasetName}
+  </span>,
     statusOrdinal: // The true ordering doesn't matter so much as having RUNNING and FAILED be at both ends of the order
       switchCase(job.status,
         [TerraJobStatus.RUNNING, () => 0],
@@ -165,7 +165,7 @@ const FailedRequestMessage = () => <div style={{textAlign: 'center'}}>
       <span>
         Failed to retrieve genomic extraction jobs.
       </span>
-        <span>
+      <span>
         Please try again or contact <SupportMailto/>.
       </span>
     </TextColumn>
@@ -217,7 +217,7 @@ export const GenomicsExtractionTable = fp.flow(
                          sortOrder={-1}
                          value={workspaceExtractionJobs.map(job => mapJobToTableRow(job, workspace))}
                          style={{marginLeft: '0.5rem', marginRight: '0.5rem'}}>
-                    <Column header='Dataset Name'
+                  <Column header='Dataset Name'
                             field='datasetNameDisplay'
                             sortable sortField='datasetName'
                             style={{
@@ -225,23 +225,23 @@ export const GenomicsExtractionTable = fp.flow(
                               textOverflow: 'ellipsis',
                               overflow: 'hidden',
                               whiteSpace: 'nowrap'}}/>
-                    <Column header='Status'
+                  <Column header='Status'
                             field='statusDisplay'
                             sortable sortField='statusOrdinal'/>
-                    <Column header='Date Started'
+                  <Column header='Date Started'
                             field='dateStartedDisplay'
                             sortable sortField='dateStarted'/>
-                    <Column header='Cost'
+                  <Column header='Cost'
                             field='costDisplay'
                             sortable sortField='cost'/>
-                    <Column header='Size'
+                  <Column header='Size'
                         field='sizeDisplay'
                         sortable sortField='size'/>
-                    <Column header='Duration'
+                  <Column header='Duration'
                             field='durationDisplay'
                             sortable sortField='duration'/>
-                    <Column header='' field='menuJsx' />
-                  </DataTable>
+                  <Column header='' field='menuJsx' />
+                </DataTable>
           }
         </CSSTransition>
       </SwitchTransition>

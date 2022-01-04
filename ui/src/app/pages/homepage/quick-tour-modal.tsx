@@ -351,15 +351,15 @@ export class QuickTourReact extends React.Component<QuickTourReactProps, QuickTo
                        data-test-id={'breadcrumb' + i}
                        onClick={() => this.selectPanel(i)}>
                     {(i < selected) && <div style={styles.check}>
-                        <img src={checkImg}/>
+                      <img src={checkImg}/>
                     </div>}
                     {(i === selected) && <div style={styles.current}/>}
                   </div>
                   <div style={styles.breadcrumbTitle}>{p.shortTitle}</div>
                   {(i !== panels.length - 1) &&
-                  <div style={i < selected ?
+                    <div style={i < selected ?
                     completedStyles.connectorCompleted : styles.connector}>
-                  </div>}
+                    </div>}
                 </div>
               </React.Fragment>;
             })}
@@ -387,27 +387,27 @@ export class QuickTourReact extends React.Component<QuickTourReactProps, QuickTo
             <div style={{...styles.panelRight, gridArea: 'image'}}>
               <img src={panels[selected].image} style={styles.panelImage}/>
               {(selected !== 0) &&
-              <div style={{
+                <div style={{
                 position: 'absolute', right: '5%',
                 bottom: '5%', height: '1rem', width: '1rem'
-              }}>
+                }}>
                   <div style={{position: 'absolute', zIndex: 2, cursor: 'pointer', width: '28px'}}
                        data-test-id='expand-icon'
                        onClick={() => this.toggleImage()}>
-                      <img src={expandIcon}/>
+                    <img src={expandIcon}/>
                   </div>
-              </div>}
+                </div>}
             </div>
             <div style={{...styles.controls, alignItems: 'center', gridArea: 'controls', }}>
               <div style={{width: '50%'}}>
                 {selected !== 0 &&
-                <Button type='primaryOnDarkBackground' data-test-id='previous'
+                  <Button type='primaryOnDarkBackground' data-test-id='previous'
                         style={{marginLeft: '10%'}}
                         onClick={() => this.previous()}>Previous</Button>}
               </div>
               <div style={{display: 'flex', justifyContent: 'flex-end', width: '49%'}}>
                 {selected !== (panels.length - 1) &&
-                <Button type='primaryOnDarkBackground' data-test-id='close'
+                  <Button type='primaryOnDarkBackground' data-test-id='close'
                         onClick={() => this.close()}
                         style={{marginLeft: '10%', marginRight: '0.25rem'}}>Close</Button>}
                 <Button type='secondaryOnDarkBackground' data-test-id='next'

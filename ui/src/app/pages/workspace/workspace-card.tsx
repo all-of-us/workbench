@@ -207,21 +207,21 @@ export const WorkspaceCard = fp.flow(withNavigation)(
                       Please complete the data access requirements to gain access.
                     </div>
                     }>
-                    <div style={tierAccessDisabled ? styles.workspaceNameDisabled : styles.workspaceName}
+                      <div style={tierAccessDisabled ? styles.workspaceNameDisabled : styles.workspaceName}
                          data-test-id='workspace-card-name'>
-                      {workspace.name}
-                    </div>
+                        {workspace.name}
+                      </div>
                     </TooltipTrigger>
                   </Clickable>
                 </FlexRow>
                 {
                   workspace.researchPurpose.reviewRequested === true &&
                   workspace.researchPurpose.approved === false &&
-                  <div style={{color: colors.danger}}>
+                    <div style={{color: colors.danger}}>
                       <ClrIcon shape='exclamation-triangle' className='is-solid'
                                style={{fill: colors.danger}}/>
                       Rejected
-                  </div>
+                    </div>
                 }
               </FlexColumn>
               <FlexRow style={{justifyContent: 'space-between'}}>
@@ -242,13 +242,13 @@ export const WorkspaceCard = fp.flow(withNavigation)(
                 <FlexColumn style={{justifyContent: 'flex-end', marginLeft: '0.8rem'}}>
                   <FlexRow style={{alignContent: 'space-between'}}>
                     {adminLocked &&
-                    <FlexColumn data-test-id='workspace-lock' style={{justifyContent: 'flex-end'}}>
-                      <TooltipTrigger content='Workspace compliance action is required'>
-                        <FontAwesomeIcon icon={faLockAlt} style={styles.lockWorkspace}/>
-                      </TooltipTrigger>
-                    </FlexColumn>}
+                      <FlexColumn data-test-id='workspace-lock' style={{justifyContent: 'flex-end'}}>
+                        <TooltipTrigger content='Workspace compliance action is required'>
+                          <FontAwesomeIcon icon={faLockAlt} style={styles.lockWorkspace}/>
+                        </TooltipTrigger>
+                      </FlexColumn>}
                     {accessTierShortName === AccessTierShortNames.Controlled &&
-                    <ControlledTierBadge/>}
+                      <ControlledTierBadge/>}
                   </FlexRow>
                 </FlexColumn>
 
@@ -257,7 +257,7 @@ export const WorkspaceCard = fp.flow(withNavigation)(
           </FlexRow>
         </WorkspaceCardBase>
         {confirmDeleting &&
-        <ConfirmDeleteModal data-test-id='confirm-delete-modal'
+          <ConfirmDeleteModal data-test-id='confirm-delete-modal'
                             resourceType={ResourceType.WORKSPACE}
                             resourceName={workspace.name}
                             receiveDelete={() => {
@@ -269,22 +269,22 @@ export const WorkspaceCard = fp.flow(withNavigation)(
                                            workspace={{...workspace, accessLevel}}
                                            onClose={() => this.handleShareDialogClose()} />}
         {showResearchPurposeReviewModal && <Modal data-test-id='workspace-review-modal'>
-            <ModalTitle>Please review Research Purpose for Workspace '{workspace.name}'</ModalTitle>
-            <ModalBody style={{display: 'flex', flexDirection: 'column'}}>
-                <div>
-                    Now that you have had some time to explore the Researcher Workbench for your project,
-                    please review your workspace description to make sure it is accurate. As a reminder,
-                    project descriptions are publicly cataloged in the <AouTitle/>'s <a
+          <ModalTitle>Please review Research Purpose for Workspace '{workspace.name}'</ModalTitle>
+          <ModalBody style={{display: 'flex', flexDirection: 'column'}}>
+            <div>
+              Now that you have had some time to explore the Researcher Workbench for your project,
+              please review your workspace description to make sure it is accurate. As a reminder,
+              project descriptions are publicly cataloged in the <AouTitle/>'s <a
                     href='https://www.researchallofus.org/research-projects-directory/' target='_blank'>
-                    Research Project Directory</a> for participants and public to review.
-                </div>
-            </ModalBody>
-            <ModalFooter>
-                <Button type='primary' style={{marginLeft: '1rem', marginRight: '1rem'}}
+                Research Project Directory</a> for participants and public to review.
+            </div>
+          </ModalBody>
+          <ModalFooter>
+            <Button type='primary' style={{marginLeft: '1rem', marginRight: '1rem'}}
                         onClick={() => this.handleReviewResearchPurpose()}>REVIEW NOW</Button>
-                <Button type='secondary'
+            <Button type='secondary'
                         onClick={() => this.setState({showResearchPurposeReviewModal: false})}>REVIEW LATER</Button>
-            </ModalFooter>
+          </ModalFooter>
         </Modal>}
       </React.Fragment>;
 

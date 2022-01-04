@@ -192,14 +192,14 @@ export const SideNavItem = (props: SideNavItemProps) => {
           flex: '1 0 auto'
         }}
     >
-        <span
+      <span
             style={
               props.icon || props.hasProfileImage
                   ? {...styles.flex}
                   : {...styles.noIconMargin}
             }
         >
-          {
+        {
             props.icon && <ClrIcon
                 shape={props.icon}
                 className={'is-solid'}
@@ -207,14 +207,14 @@ export const SideNavItem = (props: SideNavItemProps) => {
                 size={iconSize}
             />
           }
-          {
+        {
             props.hasProfileImage && <img
                 src={getProfilePictureSrc()}
                 style={styles.profileImage}
             />
           }
-          {props.content}
-        </span>
+        {props.content}
+      </span>
       {
         props.containsSubItems
         && <ClrIcon

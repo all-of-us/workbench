@@ -57,9 +57,9 @@ const researchPurposeList = [
   <span>Your research training and background</span>,
   <span>How you hope to use <AoU/> data for your research</span>,
   <span>Your research approach and the tools you use for answering your research questions (eg: Large datasets
-     of phenotypes and genotypes, community engagement and community-based participatory research methods, etc.)</span>,
+    of phenotypes and genotypes, community engagement and community-based participatory research methods, etc.)</span>,
   <span>Your experience working with underrepresented populations as a scientist or outside of research, and how that
-     experience may inform your work with <AoU/> data</span>
+    experience may inform your work with <AoU/> data</span>
 ];
 
 const nameLength = 80;
@@ -374,10 +374,10 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
 
               </FlexRow>
               {this.state.usernameConflictError &&
-              <div style={{height: '1.5rem'}}>
-                <FormValidationErrorMessage id='usernameConflictError'>
-                  Username is already taken.
-                </FormValidationErrorMessage></div>}
+                <div style={{height: '1.5rem'}}>
+                  <FormValidationErrorMessage id='usernameConflictError'>
+                    Username is already taken.
+                  </FormValidationErrorMessage></div>}
               {this.usernameInvalidError() &&
                 <div style={{height: '1.5rem'}}><FormValidationErrorMessage id='usernameError'>
                   {username} is not a valid username.
@@ -404,9 +404,9 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
                                     labelText='First Name'
                                     onChange={value => this.updateProfileObject('givenName', value)} />
                 {givenName.length > nameLength &&
-                <ErrorMessage id='givenNameError'>
-                  First Name must be {nameLength} characters or less.
-                </ErrorMessage>}
+                  <ErrorMessage id='givenNameError'>
+                    First Name must be {nameLength} characters or less.
+                  </ErrorMessage>}
                 <TextInputWithLabel value={familyName}
                                     inputId='familyName'
                                     inputName='familyName'
@@ -416,9 +416,9 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
                                     onChange={v => this.updateProfileObject('familyName', v)}
                                     labelText='Last Name'/>
                 {familyName.length > nameLength &&
-                <ErrorMessage id='familyNameError'>
-                  Last Name must be {nameLength} character or less.
-                </ErrorMessage>}
+                  <ErrorMessage id='familyNameError'>
+                    Last Name must be {nameLength} character or less.
+                  </ErrorMessage>}
               </FlexRow>
               <div style={{marginTop: '1rem'}}>
                 <MultiSelectWithLabel placeholder={'Select one or more'}
@@ -433,9 +433,9 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
           </Section>
           <Section
             header={<React.Fragment>
-                <div>Your institutional mailing address</div>
-                <div style={styles.asideText}>We will use your address if we need to send correspondence about the program.</div>
-              </React.Fragment>
+              <div>Your institutional mailing address</div>
+              <div style={styles.asideText}>We will use your address if we need to send correspondence about the program.</div>
+            </React.Fragment>
             }
             style={{marginTop: '2rem'}}
           >
@@ -474,8 +474,8 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
               </FlexRow>
               <div
                 style={{...styles.asideText, marginTop: '.125px'}}>
-                  This information will be posted publicly on the <AoU/> Research Hub website to inform program participants.
-                  <span style={{marginLeft: 2, fontSize: 12}}>(2000 character limit)</span>
+                This information will be posted publicly on the <AoU/> Research Hub website to inform program participants.
+                <span style={{marginLeft: 2, fontSize: 12}}>(2000 character limit)</span>
               </div>
               <div style={{marginTop: '.5rem'}}>
                 <FlexRow style={{color: colors.accent, alignItems: 'center'}}>

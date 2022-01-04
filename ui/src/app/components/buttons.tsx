@@ -225,10 +225,10 @@ export const Button = ({
   const computedStyle = fp.merge(computeStyle(buttonVariants[type], {disabled}), {style})
   return path
     ? <RouteLink path={path} {...computedStyle}>
-        <Clickable disabled={disabled} {...childProps}>
-          {children}
-        </Clickable>
-      </RouteLink>
+      <Clickable disabled={disabled} {...childProps}>
+        {children}
+      </Clickable>
+    </RouteLink>
     : <Clickable disabled={disabled} {...computedStyle} {...childProps}>
       {children}
     </Clickable>
@@ -254,12 +254,12 @@ export const MenuItem = ({icon = null, faIcon = null, tooltip = '' as any, disab
     >
       {icon &&
        // TODO(RW-5682): Use a consistent icon type throughout. For now, support both.
-       <ClrIcon shape={icon} style={{marginRight: 8}} size={15}/>}
+        <ClrIcon shape={icon} style={{marginRight: 8}} size={15}/>}
       {faIcon &&
        // For consistency with ClrIcon: FontAwesome default icon size is ~11px.
        // To align these, we add 2px additional margin on either side.
        // See also https://fontawesome.com/how-to-use/on-the-web/styling/sizing-icons
-       <FontAwesomeIcon icon={faIcon} style={{marginLeft: 2, marginRight: 10}}/>}
+        <FontAwesomeIcon icon={faIcon} style={{marginLeft: 2, marginRight: 10}}/>}
       {children}
     </Clickable>
   </TooltipTrigger>;
@@ -276,7 +276,7 @@ export const IconButton = ({icon: Icon, style = {}, hover = {}, tooltip = '', di
                  hover={{color: !disabled && colorWithWhiteness(colors.accent, 0.2), ...hover}}
                  disabled={disabled}
                  {...props}>
-        <Icon disabled={disabled} style={style}/>
+      <Icon disabled={disabled} style={style}/>
     </LocalInteractive>
   </TooltipTrigger>;
 };

@@ -76,12 +76,12 @@ const PropertyChangeListEntry = (props: {targetProperty?: string, previousValue?
   // empty strings. Since it's not a user-driven change, I'm dropping those rows from the output.
   return isUserDrivenChange(newValue, previousValue)
       && <React.Fragment>
-      <HideableCell content={targetProperty}/>
-      <HideableCell content={previousValue}/>
-      <PossibleLinkCell targetType={targetType}
+        <HideableCell content={targetProperty}/>
+        <HideableCell content={previousValue}/>
+        <PossibleLinkCell targetType={targetType}
                         targetProperty={targetProperty}
                         value={newValue}/>
-    </React.Fragment>;
+      </React.Fragment>;
 };
 
 const infoMessageStyle = {margin: '0.25rem 0 0rem 1rem', fontStyle: 'italic'};
@@ -96,20 +96,20 @@ const PropertyChangeListView = (props: { eventBundle: AuditEventBundle }) => {
         display: 'grid',
         gridTemplateColumns: 'repeat(3, 1fr)'
       }}>
-    <div style={styles.propertyCell}>Changed Property</div>
-    <div style={styles.propertyCell}>Previous Value</div>
-    <div style={styles.propertyCell}>New Value</div>
+        <div style={styles.propertyCell}>Changed Property</div>
+        <div style={styles.propertyCell}>Previous Value</div>
+        <div style={styles.propertyCell}>New Value</div>
         {fp.flow(
           fp.toPairs,
           fp.map(([index, {targetProperty, newValue, previousValue}]) =>
-              <PropertyChangeListEntry targetProperty={targetProperty}
+            <PropertyChangeListEntry targetProperty={targetProperty}
                 previousValue={previousValue}
                 newValue={newValue}
                 targetType={header.target.targetType}
                 key={index}/>
             ))(propertyChanges)
         }
-  </div>
+      </div>
       : <div style={infoMessageStyle}>No Property Changes</div>;
 };
 
@@ -132,10 +132,10 @@ const AgentHeader = (props: {agent: AuditAgent}) => {
 const TargetHeader = (props: {target: AuditTarget}) => {
   const {target} = props;
   return <React.Fragment>
-  <div style={{fontWeight: 600, color: colors.accent}}>Target</div>
-  <div
+    <div style={{fontWeight: 600, color: colors.accent}}>Target</div>
+    <div
       style={{color: colors.accent}}>{`${toTitleCase(target.targetType)} ${target.targetId || ''}`}</div>
-  <div/>
+    <div/>
   </React.Fragment>;
 };
 
@@ -194,20 +194,20 @@ const AuditActionCard = (props: { action: AuditAction }) => {
   (action.eventBundles);
 
   return (<ActionAuditCardBase>
-        <FlexRow style={{
+    <FlexRow style={{
           fontWeight: 200,
           textAlign: 'left',
           fontSize: '0.825rem',
           padding: '5px',
           animation: 'fadeEffect 0.5s'
-        }}>
-          <div>{timeString}</div>
-          <div style={{marginLeft: 'auto'}}>{actionTypes}</div>
-        </FlexRow>
-        {action.eventBundles.map((eventBundle, index) =>
-            <EventBundleView key={index}
+    }}>
+      <div>{timeString}</div>
+      <div style={{marginLeft: 'auto'}}>{actionTypes}</div>
+    </FlexRow>
+    {action.eventBundles.map((eventBundle, index) =>
+      <EventBundleView key={index}
                              eventBundle={eventBundle}/>)}
-      </ActionAuditCardBase>
+  </ActionAuditCardBase>
   );
 };
 
@@ -231,8 +231,8 @@ const ActionTypeFilter = (props: {
   };
 
   return (
-      <React.Fragment>
-        <div style={{
+    <React.Fragment>
+      <div style={{
           marginLeft: '0',
           padding: '2px',
           display: 'flex',
@@ -240,14 +240,14 @@ const ActionTypeFilter = (props: {
           textAlign: 'left',
           border: `1px solid ${colors.secondary}`,
           width: 'fit-content'
-        }}>
+      }}>
         <div style={{fontWeight: 600, color: colors.accent}}>Action Types</div>
-          {
+        {
             fp.flow(
               fp.toPairs,
               fp.toPairs,
               fp.map(([index, [id, entry]]: [number, [string, FilterEntry]]) =>
-                    <CheckBox
+                <CheckBox
                         key={index}
                         id={`${id}_active`}
                         onChange={() => toggleSelectedAction(id)}
@@ -256,7 +256,7 @@ const ActionTypeFilter = (props: {
                         style={{margin: '0.25rem'}}/>)
             )(activeActionTypes)
           }
-        </div>
+      </div>
     </React.Fragment>);
 };
 
@@ -305,13 +305,13 @@ export const AuditActionCardListView = (props: { actions:  AuditAction[]}) => {
   )(actions);
 
   return (
-      <React.Fragment>
-        <ActionTypeFilter activeActionTypes={activeActionTypes}
+    <React.Fragment>
+      <ActionTypeFilter activeActionTypes={activeActionTypes}
                           updateFilter={updateFilterCallback}
         />
-        <div style={{margin: '1rem', width: '30rem'}}>
-          {filteredActions.length ? filteredActions : <div  style={infoMessageStyle}>All cards filtered out.</div>}
-        </div>
-      </React.Fragment>
+      <div style={{margin: '1rem', width: '30rem'}}>
+        {filteredActions.length ? filteredActions : <div  style={infoMessageStyle}>All cards filtered out.</div>}
+      </div>
+    </React.Fragment>
   );
 };

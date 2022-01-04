@@ -112,21 +112,21 @@ export const ResearchPurpose = fp.flow(withCurrentWorkspace(), withNavigation)(
       </div>
       {serverConfigStore.get().config.enableResearchReviewPrompt && isOwner
         && workspace.researchPurpose.needsReviewPrompt && <FlexRow style={styles.reviewPurposeReminder}>
-        <ClrIcon style={{color: colors.warning, marginLeft: '0.3rem'}} className='is-solid'
+          <ClrIcon style={{color: colors.warning, marginLeft: '0.3rem'}} className='is-solid'
         shape='exclamation-triangle' size='25'/>
-        <FlexColumn style={{paddingRight: '0.5rem', paddingLeft: '0.5rem', color: colors.primary}}>
-        <label style={{fontWeight: 600, fontSize: '14px', flex: 1}}>
-          Please review your workspace description to make sure it is accurate.</label>
-          <label>Project descriptions are publicly cataloged in the <a
+          <FlexColumn style={{paddingRight: '0.5rem', paddingLeft: '0.5rem', color: colors.primary}}>
+            <label style={{fontWeight: 600, fontSize: '14px', flex: 1}}>
+              Please review your workspace description to make sure it is accurate.</label>
+            <label>Project descriptions are publicly cataloged in the <a
               href='https://www.researchallofus.org/research-projects-directory/' target='_blank'>
-            Research Project Directory</a> for participants and public to review.</label>
-        </FlexColumn>
-        <div style={{marginLeft: 'auto', marginRight: '0.5rem'}}>
-        <a style={{marginRight: '0.5rem'}} onClick={() => looksGoodEvent()}>Looks
-        Good</a>
-        |
-        <a style={{marginLeft: '0.5rem'}} onClick={() => updateWorkspaceEvent()}>Update</a>
-        </div>
+              Research Project Directory</a> for participants and public to review.</label>
+          </FlexColumn>
+          <div style={{marginLeft: 'auto', marginRight: '0.5rem'}}>
+            <a style={{marginRight: '0.5rem'}} onClick={() => looksGoodEvent()}>Looks
+              Good</a>
+            |
+            <a style={{marginLeft: '0.5rem'}} onClick={() => updateWorkspaceEvent()}>Update</a>
+          </div>
         </FlexRow>}
       <div style={styles.sectionContentContainer}>
         {selectedResearchPurposeItems && selectedResearchPurposeItems.length > 0 && <div

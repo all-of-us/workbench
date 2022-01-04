@@ -99,10 +99,10 @@ export const SignedInRoutes = () => {
                   guards={[authorityGuard(AuthorityGuardedAction.WORKSPACE_ADMIN)]}>
       <AdminReviewWorkspacePage routeData={{title: 'Review Workspaces', minimizeChrome: true}}/>
     </AppRoute>
-   <AppRoute exact path='/admin/user'> {/* included for backwards compatibility */}
+    <AppRoute exact path='/admin/user'> {/* included for backwards compatibility */}
       <Redirect to={'/admin/users'}/>
-   </AppRoute>
-   <AppRoute exact path='/admin/users'
+    </AppRoute>
+    <AppRoute exact path='/admin/users'
              guards={[authorityGuard(AuthorityGuardedAction.USER_ADMIN)]}>
       <UsersAdminPage routeData={{title: 'User Admin Table', minimizeChrome: true}}/>
     </AppRoute>

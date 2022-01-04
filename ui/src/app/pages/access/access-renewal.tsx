@@ -286,11 +286,11 @@ export const AccessRenewal = fp.flow(withProfileErrorModal)((spinnerProps: WithS
           step={2}
           moduleStatus={modules.find(m => m.moduleName === AccessModule.PUBLICATIONCONFIRMATION)}>
         <div>The <AoU/> Publication and Presentation Policy requires that you report any upcoming publication or
-             presentation resulting from the use of <AoU/> Research Program Data at least two weeks before the date of publication.
-             If you are lead on or part of a publication or presentation that hasn’t been reported to the
-             program, <a target='_blank' style={{textDecoration: 'underline'}}
+          presentation resulting from the use of <AoU/> Research Program Data at least two weeks before the date of publication.
+          If you are lead on or part of a publication or presentation that hasn’t been reported to the
+          program, <a target='_blank' style={{textDecoration: 'underline'}}
               href={'https://redcap.pmi-ops.org/surveys/?s=MKYL8MRD4N'}>please report it now.</a> For any questions,
-             please contact <SupportMailto/>
+          please contact <SupportMailto/>
         </div>
         <div style={renewalStyle.publicationConfirmation}>
           <ActionButton
@@ -324,12 +324,12 @@ export const AccessRenewal = fp.flow(withProfileErrorModal)((spinnerProps: WithS
       {enableComplianceTraining && <RenewalCard
           step={3}
           moduleStatus={modules.find(m => m.moduleName === AccessModule.COMPLIANCETRAINING)}>
-      <div> You are required to complete the refreshed ethics training courses to understand the privacy safeguards and
+        <div> You are required to complete the refreshed ethics training courses to understand the privacy safeguards and
           the compliance requirements for using the <AoU/> Dataset.
         </div>
         {isExpiringAndNotBypassed(AccessModule.COMPLIANCETRAINING, modules) &&
           <div style={renewalStyle.complianceTrainingExpiring}>
-           When you have completed the training click the refresh button or reload the page.
+            When you have completed the training click the refresh button or reload the page.
           </div>}
         <FlexRow style={{marginTop: 'auto'}}>
           <ActionButton

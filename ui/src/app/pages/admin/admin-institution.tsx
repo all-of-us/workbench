@@ -120,12 +120,12 @@ export const AdminInstitution = fp.flow(withNavigation)(
         <FadeBox style={{marginTop: '1rem', marginLeft: '1rem'}}>
           <SemiBoldHeader style={styles.pageHeader}>
             <label>Institution admin table</label>
-                <Button type='secondaryLight'
+            <Button type='secondaryLight'
                         style={{padding: '0rem', marginTop: '0.3rem', verticalAlign: 'sub'}}
                         onClick={() => this.props.navigateByUrl('admin/institution/add')}
                         data-test-id='add-institution'>
-                  <ClrIcon shape='plus-circle' class='is-solid' size={20}/>
-                </Button>
+              <ClrIcon shape='plus-circle' class='is-solid' size={20}/>
+            </Button>
           </SemiBoldHeader>
           {institutionLoadError && <div style={{color: colors.danger}}>
             Error while loading Institution. Please try again later</div>}

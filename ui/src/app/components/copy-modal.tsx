@@ -105,20 +105,20 @@ const styles = reactStyles({
 });
 
 const AccessTierMismatch = (props: {text: string}) =>
-    <div data-test-id='access-tier-mismatch-error' style={styles.mismatchError}>{props.text}</div>;
+  <div data-test-id='access-tier-mismatch-error' style={styles.mismatchError}>{props.text}</div>;
 
 const ConceptSetCdrMismatch = (props: {text: string}) =>
-    <div data-test-id='concept-set-cdr-mismatch-error' style={styles.mismatchError}>{props.text}</div>;
+  <div data-test-id='concept-set-cdr-mismatch-error' style={styles.mismatchError}>{props.text}</div>;
 
 const NotebookCdrMismatch = (props: {text: string}) =>
-    <div data-test-id='notebook-cdr-mismatch-warning' style={styles.mismatchWarning}>
-      <FlexRow>
-        <div style={{paddingRight: '0.5rem'}}>
-          <ClrIcon shape='warning-standard' class='is-solid' style={styles.warningIcon}/>
-        </div>
-        {props.text}
-      </FlexRow>
-    </div>;
+  <div data-test-id='notebook-cdr-mismatch-warning' style={styles.mismatchWarning}>
+    <FlexRow>
+      <div style={{paddingRight: '0.5rem'}}>
+        <ClrIcon shape='warning-standard' class='is-solid' style={styles.warningIcon}/>
+      </div>
+      {props.text}
+    </FlexRow>
+  </div>;
 
 const ConceptSetRestrictionText = () => <div style={styles.restriction}>
   Concept sets can only be copied to workspaces using the same access tier and CDR version.

@@ -153,7 +153,7 @@ export const DataUserCodeOfConduct = fp.flow(withUserProfile(), withNavigation, 
         }
       });
       return <FlexColumn style={styles.dataUserCodeOfConductPage}>
-          {
+        {
             page === DataUserCodeOfConductPage.CONTENT && <React.Fragment>
               <HtmlViewer
                   ariaLabel='data user code of conduct agreement'
@@ -180,7 +180,7 @@ export const DataUserCodeOfConduct = fp.flow(withUserProfile(), withNavigation, 
               </FlexRow>
             </React.Fragment>
           }
-          {
+        {
             page === DataUserCodeOfConductPage.SIGNATURE && <React.Fragment>
               <FlexColumn>
                 {submitting && <SpinnerOverlay/>}
@@ -191,42 +191,42 @@ export const DataUserCodeOfConduct = fp.flow(withUserProfile(), withNavigation, 
                      disabled
                      value={profile.givenName + ' ' + profile.familyName}
                      data-test-id='ducc-name-input'/>
-                   ("Authorized Data User") have personally reviewed this Data User Code of Conduct.
-                   I agree to follow each of the policies and procedures it describes.
+                  ("Authorized Data User") have personally reviewed this Data User Code of Conduct.
+                  I agree to follow each of the policies and procedures it describes.
                 </div>
                 <div style={styles.smallTopMargin}>
                   By entering my initials next to each statement below, I acknowledge that:
                 </div>
                 <InitialsAgreement onChange={(v) => this.setState({initialMonitoring: v})}>
                   My work, including any external data, files, or software I upload into the
-                   Researcher Workbench, will be logged and monitored by the <AoU/> Research
-                   Program to ensure compliance with policies and procedures.
+                  Researcher Workbench, will be logged and monitored by the <AoU/> Research
+                  Program to ensure compliance with policies and procedures.
                 </InitialsAgreement>
                 <InitialsAgreement onChange={(v) => this.setState({initialPublic: v})}>
                   My name, affiliation, profile information and research description will be made
-                   public. My research description will be used by the <AoU/> Research
-                   Program to provide participants with meaningful information about the research
-                   being conducted.
+                  public. My research description will be used by the <AoU/> Research
+                  Program to provide participants with meaningful information about the research
+                  being conducted.
                 </InitialsAgreement>
                 <div style={{...styles.bold, ...styles.smallTopMargin}}>
                   I acknowledge that failure to comply with the requirements outlined in this Data
-                   User Code of Conduct may result in termination of my <AoU/> Research
-                   Program account and/or other sanctions, including, but not limited to:
+                  User Code of Conduct may result in termination of my <AoU/> Research
+                  Program account and/or other sanctions, including, but not limited to:
                 </div>
                 <ul style={{...styles.bold, ...styles.smallTopMargin}}>
                   <li>
                     the posting of my name and affiliation on a publicly accessible list of
-                     violators, and
+                    violators, and
                   </li>
                   <li>
                     notification of the National Institutes of Health or other federal agencies as
-                     to my actions.
+                    to my actions.
                   </li>
                 </ul>
                 <div style={{...styles.bold, ...styles.smallTopMargin}}>
                   I understand that failure to comply with these requirements may also carry
-                   financial or legal repercussions. Any misuse of the <AoU/> Research
-                   Hub, Researcher Workbench or data resources is taken very seriously, and other
+                  financial or legal repercussions. Any misuse of the <AoU/> Research
+                  Hub, Researcher Workbench or data resources is taken very seriously, and other
                   sanctions may be sought.
                 </div>
                 <label style={{...styles.bold, ...styles.largeTopMargin}}>Authorized Data User Name</label>
@@ -277,6 +277,6 @@ export const DataUserCodeOfConduct = fp.flow(withUserProfile(), withNavigation, 
               </FlexRow>
             </React.Fragment>
           }
-        </FlexColumn>;
+      </FlexColumn>;
     }
   });

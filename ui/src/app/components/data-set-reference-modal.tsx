@@ -53,19 +53,19 @@ class DataSetReferenceModal extends React.Component<Props, {}> {
     const dataSetsElem = <span style={styles.dataSets}>{dataSets}</span>;
 
     return <Modal>
-            <ModalTitle>WARNING</ModalTitle>
-            <ModalBody>
-                <div style={{paddingBottom: '1rem'}}>
-                    The {resourceWithTypeElem} is referenced by the following datasets: {dataSetsElem}.
-                    Deleting the {resourceWithTypeElem} will make these datasets unavailable for use.
-                    Are you sure you want to delete {resourceElem}?
-                </div>
-                <div style={{float: 'right'}}>
-                    <Button type='secondary' style={{marginRight: '2rem'}} onClick={onCancel}>Cancel</Button>
-                    <Button type='primary' onClick={() => this.markAndDelete()}>YES, DELETE</Button>
-                </div>
-            </ModalBody>
-        </Modal>;
+      <ModalTitle>WARNING</ModalTitle>
+      <ModalBody>
+        <div style={{paddingBottom: '1rem'}}>
+          The {resourceWithTypeElem} is referenced by the following datasets: {dataSetsElem}.
+          Deleting the {resourceWithTypeElem} will make these datasets unavailable for use.
+          Are you sure you want to delete {resourceElem}?
+        </div>
+        <div style={{float: 'right'}}>
+          <Button type='secondary' style={{marginRight: '2rem'}} onClick={onCancel}>Cancel</Button>
+          <Button type='primary' onClick={() => this.markAndDelete()}>YES, DELETE</Button>
+        </div>
+      </ModalBody>
+    </Modal>;
   }
 }
 

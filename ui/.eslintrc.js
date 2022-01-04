@@ -46,6 +46,7 @@ module.exports = {
     '@typescript-eslint/unified-signatures': 'warn',
 
     /* Style */
+    'react/jsx-indent': ['warn', 2, {checkAttributes: true, indentLogicalExpressions: true}],
     '@typescript-eslint/prefer-function-type': 'warn',
     // 'spaced-comment': 'warn',
     '@typescript-eslint/consistent-type-definitions': ['warn', 'interface'],

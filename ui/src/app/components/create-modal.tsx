@@ -69,8 +69,8 @@ export const CreateModal = ({entityName, title, getExistingNames, save, close}: 
     <ModalTitle style={inputErrorMsg ? {marginBottom: 0} : {}}>{title || `Create ${entityName}`}</ModalTitle>
     <ModalBody style={{marginTop: '0.2rem'}}>
       {saveErrorMsg && <div style={styles.error}>
-          <ClrIcon className='is-solid' shape='exclamation-triangle' size={22} />
-          {saveErrorMsg}
+        <ClrIcon className='is-solid' shape='exclamation-triangle' size={22} />
+        {saveErrorMsg}
       </div>}
       {inputErrorMsg && <div style={styles.invalid}>{inputErrorMsg}</div>}
 

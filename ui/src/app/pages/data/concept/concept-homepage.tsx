@@ -305,27 +305,27 @@ export const ConceptHomepage = fp.flow(withCurrentCohortSearchContext(), withCur
                        onChange={(e) => this.setState({currentInputString: e})}
                        onKeyPress={(e) => this.handleSearchKeyPress(e)}/>
             {currentSearchString !== '' && <Clickable onClick={() => this.clearSearch()} data-test-id='clear-search'>
-                <ClrIcon shape='times-circle' style={styles.clearSearchIcon}/>
+              <ClrIcon shape='times-circle' style={styles.clearSearchIcon}/>
             </Clickable>}
           </div>
           {inputErrors.map((error, e) => <AlertDanger key={e} style={styles.inputAlert}>
             <span data-test-id='input-error-alert'>{error}</span>
           </AlertDanger>)}
           {showSearchError && <AlertDanger style={styles.inputAlert}>
-              Minimum concept search length is three characters.
-              <AlertClose style={{width: 'unset'}}
+            Minimum concept search length is three characters.
+            <AlertClose style={{width: 'unset'}}
                           onClick={() => this.setState({showSearchError: false})}/>
           </AlertDanger>}
           {loadingDomains ? <div style={{position: 'relative', minHeight: '10rem'}}><SpinnerOverlay/></div> :
-            <div>
-              <div style={styles.sectionHeader}>
-                Domains
-              </div>
-              <div style={styles.cardList}>
-                {domainInfoError
+          <div>
+            <div style={styles.sectionHeader}>
+              Domains
+            </div>
+            <div style={styles.cardList}>
+              {domainInfoError
                   ? this.errorMessage()
                   : <React.Fragment>
-                      {domainCards.some(domain => domainsLoading.includes(domain.domain))
+                    {domainCards.some(domain => domainsLoading.includes(domain.domain))
                       ? <Spinner size={42}/>
                       : domainCards.every(domain => domain.conceptCount === 0)
                         ? 'No Domain Results. Please type in a new search term.'
@@ -336,14 +336,14 @@ export const ConceptHomepage = fp.flow(withCurrentCohortSearchContext(), withCur
                                                           key={i} data-test-id='domain-box'
                                                           updating={domainsLoading.includes(domain.domain)}/>)
                       }
-                    </React.Fragment>
+                  </React.Fragment>
                 }
-              </div>
-              <div style={styles.sectionHeader}>
-                Survey Questions
-              </div>
-              <div style={styles.cardList}>
-                {surveyInfoError
+            </div>
+            <div style={styles.sectionHeader}>
+              Survey Questions
+            </div>
+            <div style={styles.cardList}>
+              {surveyInfoError
                   ? this.errorMessage()
                   : conceptSurveysList.some(survey => surveysLoading.includes(survey.name))
                     ? <Spinner size={42}/>
@@ -356,13 +356,13 @@ export const ConceptHomepage = fp.flow(withCurrentCohortSearchContext(), withCur
                                                      browseSurvey={() => this.browseDomain(Domain.SURVEY, survey.name)}
                                                      updating={surveysLoading.includes(survey.name)}/>)
                 }
+            </div>
+            {!!physicalMeasurementsCard && <React.Fragment>
+              <div style={styles.sectionHeader}>
+                Program Physical Measurements
               </div>
-              {!!physicalMeasurementsCard && <React.Fragment>
-                <div style={styles.sectionHeader}>
-                  Program Physical Measurements
-                </div>
-                <div style={{...styles.cardList, marginBottom: '1rem'}}>
-                  {domainInfoError
+              <div style={{...styles.cardList, marginBottom: '1rem'}}>
+                {domainInfoError
                     ? this.errorMessage()
                     : domainsLoading.includes(Domain.PHYSICALMEASUREMENTCSS)
                       ? <Spinner size={42}/>
@@ -372,9 +372,9 @@ export const ConceptHomepage = fp.flow(withCurrentCohortSearchContext(), withCur
                                                     browsePhysicalMeasurements={() => this.browseDomain(Domain.PHYSICALMEASUREMENTCSS)}
                                                     updating={domainsLoading.includes(Domain.PHYSICALMEASUREMENTCSS)}/>
                   }
-                </div>
-              </React.Fragment>}
-            </div>
+              </div>
+            </React.Fragment>}
+          </div>
           }
         </FadeBox>
       </React.Fragment>;

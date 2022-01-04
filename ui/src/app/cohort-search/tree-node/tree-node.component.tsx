@@ -369,7 +369,7 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
           <TooltipTrigger content={<div>{displayName}</div>} disabled={!this.state.truncated}>
             <div style={styles.name} ref={(e) => this.name = e}>
               <span data-test-id='displayName' style={searchMatch ? styles.searchMatch : {}}>{displayName}
-              {this.isCOPESurvey && <span style={{paddingRight: '0.1rem'}}> - <i> Versioned</i> </span>}
+                {this.isCOPESurvey && <span style={{paddingRight: '0.1rem'}}> - <i> Versioned</i> </span>}
               </span>
             </div>
           </TooltipTrigger>
