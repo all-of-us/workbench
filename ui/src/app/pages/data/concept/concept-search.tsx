@@ -358,10 +358,10 @@ export const ConceptSearch = fp.flow(
                                      style={{marginLeft: '.5rem'}}
                                      data-test-id='edit-concept-set'
                                      onClick={() => this.setState({editing: true})}>
-                            <EditComponentReact enableHoverEffect={true}
+                          <EditComponentReact enableHoverEffect={true}
                                                 disabled={!WorkspacePermissionsUtil.canWrite(accessLevel)}
                                                 style={{marginTop: '0.1rem'}}/>
-                          </Clickable>
+                        </Clickable>
                       </div>
                       <div style={{marginBottom: '1.5rem', color: colors.primary}} data-test-id='concept-set-description'>
                         {showMoreDescription ?
@@ -369,10 +369,10 @@ export const ConceptSearch = fp.flow(
                             conceptSet.description.slice(0, 250)
                           }
                         {conceptSet.description.length > 250 &&
-                            <span style={styles.showMore}
+                          <span style={styles.showMore}
                                   onClick={() => this.setState({showMoreDescription: !showMoreDescription})}>
-                              Show {showMoreDescription ? 'less' : 'more'}
-                            </span>
+                            Show {showMoreDescription ? 'less' : 'more'}
+                          </span>
                           }
                       </div>
                     </React.Fragment>}
