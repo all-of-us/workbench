@@ -4,10 +4,10 @@ env_variables:
   GAE_PROFILER_MODE: "cpu,heap"
   JAVA_USER_OPTS: "-Djava.util.logging.config.file=webapps/root/WEB-INF/logging.properties"
   DB_DRIVER: "com.mysql.jdbc.Driver"
-  DB_CONNECTION_STRING: "${DB_CONNECTION_STRING}"
+  DB_CONNECTION_STRING: "jdbc:mysql:///workbenchmaindb?cloudSqlInstance=all-of-us-workbench-test:us-central1&socketFactory=com.google.cloud.sql.mysql.SocketFactory"
   WORKBENCH_DB_USER: "${WORKBENCH_DB_USER}"
   WORKBENCH_DB_PASSWORD: "${WORKBENCH_DB_PASSWORD}"
-  CDR_DB_CONNECTION_STRING: "${CDR_DB_CONNECTION_STRING}"
+  CDR_DB_CONNECTION_STRING: "jdbc:mysql:///workbenchmaindb?cloudSqlInstance=all-of-us-workbench-test:us-central1&socketFactory=com.google.cloud.sql.mysql.SocketFactory"
   CDR_DB_USER: "${CDR_DB_USER}"
   CDR_DB_PASSWORD: "${CDR_DB_PASSWORD}"
 error_handlers:

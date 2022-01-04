@@ -180,9 +180,9 @@ def run_api_incremental()
 
   begin
     common.status "Starting API server..."
-    # incrementalHotSwap must be run without the Gradle daemon or stdout and stderr will not appear
-     # in the output.
-    common.run_inline "./gradlew --daemon bootRun &"
+    # appengineStart must be run with the Gradle daemon or it will stop outputting logs as soon as
+    # the application has finished starting.
+    common.run_inline "./gradlew --daemon appengineRun &"
 
     # incrementalHotSwap must be run without the Gradle daemon or stdout and stderr will not appear
     # in the output.
@@ -209,6 +209,7 @@ Common.register_command({
   :description => "Runs the api server (assumes database and config are already up-to-date.)",
   :fn => ->() { run_api_and_db() }
 })
+
 
 def validate_swagger(cmd_name, args)
   Common.new.run_inline %W{./gradlew validateSwagger} + args
@@ -990,8 +991,46 @@ end
 
 Common.register_command({
   :invocation => "build-cloudsql-tables",
-  :description => "Generates the criteria menu for cohort builder",
+  :description => "Generates all tables that will be imported into cloudsql",
   :fn => ->(*args) { build_cloudsql_tables("build-cloudsql-tables", *args) }
+})
+
+def build_backup_cb_ds_tables(cmd_name, *args)
+  op = WbOptionsParser.new(cmd_name, args)
+  op.add_option(
+      "--bq-project [bq-project]",
+      ->(opts, v) { opts.bq_project = v},
+      "BQ Project. Required."
+  )
+  op.add_option(
+      "--bq-dataset [bq-dataset]",
+      ->(opts, v) { opts.bq_dataset = v},
+      "BQ dataset. Required."
+  )
+  op.add_option(
+      "--output-project [output-project]",
+      ->(opts, v) { opts.output_project = v},
+      "Output Project. Required."
+  )
+  op.add_option(
+      "--output-dataset [output-dataset]",
+      ->(opts, v) { opts.output_dataset = v},
+      "Output dataset. Required."
+  )
+
+  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset and opts.output_project and opts.output_dataset}
+  op.parse.validate
+
+  common = Common.new
+  Dir.chdir('db-cdr') do
+    common.run_inline %W{./generate-cdr/build-backup-cb-ds-tables.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.output_project} #{op.opts.output_dataset}}
+  end
+end
+
+Common.register_command({
+  :invocation => "build-backup-cb-ds-tables",
+  :description => "Archive cb_ and ds_ tables",
+  :fn => ->(*args) { build_backup_cb_ds_tables("build-backup-cb-ds-tables", *args) }
 })
 
 def build_cb_criteria_attribute_tables_and_cleanup(cmd_name, *args)
@@ -1825,7 +1864,7 @@ def write_db_creds_file(project, cdr_db_name, root_password, workbench_password,
   if db_creds_file
     begin
       db_creds_file.puts "DB_CONNECTION_STRING=jdbc:google:mysql://#{instance_name}/workbench?rewriteBatchedStatements=true"
-      db_creds_file.puts "DB_DRIVER=com.mysql.jdbc.Driver"
+      db_creds_file.puts "DB_DRIVER=com.mysql.jdbc.GoogleDriver"
       db_creds_file.puts "DB_HOST=127.0.0.1"
       db_creds_file.puts "DB_NAME=workbench"
       # TODO: make our CDR migration scripts update *all* CDR versions listed in the cdr_version
@@ -2912,8 +2951,8 @@ def deploy_app(cmd_name, args, with_cron, with_queue)
   run_inline_or_log(op.opts.dry_run, %W{
     gcloud app deploy
       build/staged-app/app.yaml
-  } + (with_cron ? %W{build/staged-app/WEB-INF/cron.yaml} : []) +
-    (with_queue ? %W{build/staged-app/WEB-INF/queue.yaml} : []) +
+  } + (with_cron ? %W{build/staged-app/WEB-INF/appengine-generated/cron.yaml} : []) +
+    (with_queue ? %W{build/staged-app/WEB-INF/appengine-generated/queue.yaml} : []) +
     %W{--project #{gcc.project} #{promote}} +
     (op.opts.quiet ? %W{--quiet} : []) +
     (op.opts.version ? %W{--version #{op.opts.version}} : []))

@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -143,6 +144,7 @@ public class WorkspaceAuthService {
     Map<String, FirecloudWorkspaceAccessEntry> aclsMap =
         getFirecloudWorkspaceAcls(workspace.getWorkspaceNamespace(), workspace.getFirecloudName());
 
+    aclsMap.entrySet().stream().filter(e -> e.getKey() != "1").collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()))
     // Iterate through existing roles, update/remove them
     List<FirecloudWorkspaceACLUpdate> updateACLRequestList = new ArrayList<>();
     Map<String, WorkspaceAccessLevel> toAdd = new HashMap<>(updatedAclsMap);
