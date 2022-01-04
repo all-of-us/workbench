@@ -112,6 +112,8 @@ public interface InstitutionService {
 
   Optional<Institution> getByUser(DbUser user);
 
+  List<DbUser> getAffiliatedUsers(String shortName);
+
   /**
    * Retrieve list of the {@link InstitutionTierConfig} which specifies how members can access each
    * tier and the requirement for each tier.

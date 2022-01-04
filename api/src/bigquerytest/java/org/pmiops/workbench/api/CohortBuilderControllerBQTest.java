@@ -8,12 +8,12 @@ import static org.pmiops.workbench.utils.TestMockFactory.createRegisteredTierFor
 
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.common.collect.ImmutableList;
+import java.time.LocalDate;
+import java.time.Period;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import javax.inject.Provider;
-import org.joda.time.DateTime;
-import org.joda.time.Period;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -2138,9 +2138,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   private Period getTestPeriod() {
-    DateTime birthDate = new DateTime(1980, 8, 1, 0, 0, 0, 0);
-    DateTime now = new DateTime();
-    return new Period(birthDate, now);
+    LocalDate birthDate = LocalDate.of(1980, 8, 1);
+    return Period.between(birthDate, LocalDate.now());
   }
 
   private SearchRequest createSearchRequests(

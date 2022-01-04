@@ -20,13 +20,14 @@ import {withProfileErrorModal} from 'app/components/with-error-modal';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {cond, displayDateWithoutHours, reactStyles, switchCase} from 'app/utils';
+import {cond, reactStyles, switchCase} from 'app/utils';
 import {
   buildRasRedirectUrl,
   bypassAll,
   getAccessModuleConfig,
   getAccessModuleStatusByName,
   GetStartedButton,
+  syncModulesExternal,
   redirectToControlledTraining,
   redirectToNiH,
   redirectToRas,
@@ -50,6 +51,7 @@ import {environment} from 'environments/environment';
 import {useQuery} from 'app/components/app-router';
 import {openZendeskWidget} from 'app/utils/zendesk';
 import {SupportButton} from 'app/components/support';
+import {displayDateWithoutHours} from 'app/utils/dates';
 
 const styles = reactStyles({
   headerFlexColumn: {
@@ -355,16 +357,6 @@ export const getEligibleModules = (modules: AccessModule[], profile: Profile): A
 
 const incompleteModules = (modules: AccessModule[], profile: Profile): AccessModule[] =>
   modules.filter(moduleName => !isCompliant(getAccessModuleStatusByName(profile, moduleName)));
-
-const syncIncompleteModules = (modules: AccessModule[], profile: Profile, reloadProfile: Function) => {
-  incompleteModules(modules, profile).map(async moduleName => {
-    const {externalSyncAction} = getAccessModuleConfig(moduleName);
-    if (externalSyncAction) {
-      await externalSyncAction();
-    }
-  });
-  reloadProfile();
-}
 
 // exported for test
 export const getActiveModule = (modules: AccessModule[], profile: Profile): AccessModule => incompleteModules(modules, profile)[0];
@@ -741,7 +733,7 @@ const ControlledTierStep = (props: {enabled: boolean, text: String}) => {
 
 const DuccCard = (props: {
       profile: Profile, activeModule: AccessModule, clickableModules: AccessModule[],
-      spinnerProps: WithSpinnerOverlayProps, stepNumber: Number
+      spinnerProps: WithSpinnerOverlayProps, stepNumber: number
     }) => {
   const {profile, activeModule, clickableModules, spinnerProps, stepNumber} = props;
   return <FlexRow style={{...styles.card, height: '125px'}}>
@@ -763,9 +755,14 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
   const {config: {unsafeAllowSelfBypass}} = useStore(serverConfigStore);
 
   useEffect(() => {
-    syncIncompleteModules(getEligibleModules(allModules, profile), profile, reload);
-    spinnerProps.hideSpinner();
-  }, []);
+      const onMount = async () => {
+        await syncModulesExternal(incompleteModules(getEligibleModules(allModules, profile), profile));
+        await reload();
+        spinnerProps.hideSpinner();
+      };
+
+      onMount();
+    }, []);
 
   // handle the route /nih-callback?token=<token>
   // handle the route /ras-callback?code=<code>

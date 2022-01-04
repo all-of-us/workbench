@@ -11,7 +11,7 @@ import WorkspaceCard from 'app/component/workspace-card';
 import { PageUrl, WorkspaceAccessLevel } from 'app/text-labels';
 import WorkspacesPage from 'app/page/workspaces-page';
 import Navigation, { NavLink } from 'app/component/navigation';
-import { makeWorkspaceName } from './str-utils';
+import { isBlank, makeWorkspaceName } from './str-utils';
 import { config } from 'resources/workbench-config';
 import { logger } from 'libs/logger';
 import { authenticator } from 'otplib';
@@ -38,8 +38,12 @@ export async function signInWithAccessToken(
   userEmail = config.USER_NAME,
   postSignInPage: AuthenticatedPage = new HomePage(page)
 ): Promise<void> {
+  const tokenLocation = `signin-tokens/${userEmail}.txt`;
   // Keep file naming convention synchronized with generate-impersonated-user-tokens
-  const token = fs.readFileSync(`signin-tokens/${userEmail}.txt`, 'ascii');
+  const token = fs.readFileSync(tokenLocation, 'ascii');
+  if (isBlank(token)) {
+    throw Error(`Token found at ${tokenLocation} is blank`);
+  }
   logger.info('Sign in with access token to Workbench application');
   const homePage = new HomePage(page);
   await homePage.gotoUrl(PageUrl.Home);
@@ -249,11 +253,16 @@ export async function findOrCreateWorkspaceCard(
  * Find a suitable workspace among existing workspaces with OWNER role and older than specified time difference.
  */
 export async function findAllCards(page: Page, millisAgo = 1000 * 60 * 30): Promise<WorkspaceCard[]> {
-  const existingCards: WorkspaceCard[] = await WorkspaceCard.findAllCards(page, WorkspaceAccessLevel.Owner);
+  const existingCards: WorkspaceCard[] = await WorkspaceCard.findAllCards(page, {
+    accessLevel: WorkspaceAccessLevel.Owner
+  });
   // Filter to exclude Workspaces younger than 30 minutes.
   const halfHourAgoMillis = Date.now() - millisAgo;
   return Promise.all(
-    await asyncFilter(existingCards, async (card) => halfHourAgoMillis > Date.parse(await card.getLastChangedTime()))
+    await asyncFilter(
+      existingCards,
+      async (card: WorkspaceCard) => halfHourAgoMillis > Date.parse(await card.getLastChangedTime())
+    )
   );
 }
 
@@ -297,7 +306,7 @@ export function isValidDate(date: string) {
   return d.toISOString().slice(0, 10) === date;
 }
 
-const asyncFilter = async (arr, predicate) =>
+export const asyncFilter = async (arr, predicate) =>
   arr.reduce(async (items, item) => ((await predicate(item)) ? [...(await items), item] : items), []);
 
 /**

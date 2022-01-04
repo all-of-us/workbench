@@ -4,7 +4,7 @@ import {mount} from 'enzyme';
 import SpyInstance = jest.SpyInstance;
 
 import {AccessRenewal} from 'app/pages/access/access-renewal';
-import {registerApiClient} from 'app/services/swagger-fetch-clients';
+import {profileApi, registerApiClient} from 'app/services/swagger-fetch-clients';
 import {profileStore, serverConfigStore} from 'app/utils/stores';
 import {AccessModule, InstitutionApi, Profile, ProfileApi} from 'generated/fetch';
 import defaultServerConfig from 'testing/default-server-config';
@@ -12,9 +12,11 @@ import {findNodesByExactText, findNodesContainingText, waitOneTickAndUpdate} fro
 import {InstitutionApiStub} from 'testing/stubs/institution-api-stub';
 import {ProfileApiStub, ProfileStubVariables} from 'testing/stubs/profile-api-stub';
 import {accessRenewalModules} from 'app/utils/access-utils';
+import {MILLIS_PER_DAY} from 'app/utils/dates';
 
 const EXPIRY_DAYS = 365
-const oneYearFromNow = () => Date.now() + 1000 * 60 * 60 * 24 * EXPIRY_DAYS
+const nowPlusDays = (days: number) => Date.now() + MILLIS_PER_DAY * days;
+const oneYearFromNow = () => nowPlusDays(EXPIRY_DAYS);
 const oneHourAgo = () => Date.now() - 1000 * 60 * 60;
 
 describe('Access Renewal Page', () => {
@@ -324,6 +326,24 @@ describe('Access Renewal Page', () => {
     // all of the necessary steps = 3 rather than the usual 4
     expect(findNodesByExactText(wrapper, 'Thank you for completing all the necessary steps').length).toBe(1);
     expect(findNodesContainingText(wrapper, 'access has expired').length).toBe(0);
+  });
+
+  // RW-7473: sync expiring/expired Training module to gain access
+
+  test.each([
+    ['should', 'expired', 1, oneHourAgo()],
+    ['should', 'expiring', 1, nowPlusDays(10)],
+    ['should not', 'complete', 0, oneYearFromNow()],
+    ['should not', 'incomplete', 0, null],
+  ])
+  ('%s externally sync %s Compliance Training module status', async(desc1, desc2, expected, expirationTime) => {
+    const spy = jest.spyOn(profileApi(), 'syncComplianceTrainingStatus');
+
+    updateOneModuleExpirationTime(AccessModule.COMPLIANCETRAINING, expirationTime);
+
+    const wrapper = component();
+    await waitOneTickAndUpdate(wrapper);
+    expect(spy).toHaveBeenCalledTimes(expected);
   });
 
 });

@@ -1005,26 +1005,30 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
         'primaryPurpose': this.primaryPurposeIsSelected
       };
 
-      const lengthMessages = (prefix = '') => ({
-        tooShort: `${prefix} cannot be blank`,
-        tooLong: `${prefix} cannot exceed %{count} characters`
+      const requiredStringWithMaxLength = (maximum: number, prefix = '') => ({
+        presence: {
+          allowEmpty: false,
+          message: `${prefix} cannot be blank`
+        },
+        length: {
+          maximum,
+          tooLong: `${prefix} cannot exceed %{count} characters`
+        }
       });
 
       // TODO: This validation spec should include error messages which get
       // surfaced directly. Currently these constraints are entirely separate
       // from the user facing error strings we render.
       const constraints: object = {
-        name: {
-          length: { minimum: 1, maximum: 80, ...lengthMessages('Name')}
-        },
+        name: requiredStringWithMaxLength(80, 'Name'),
         // The prefix for these lengthMessages require HTML formatting
         // The prefix string is omitted here and included in the React template below
         billingAccountName: { presence: true },
-        intendedStudy: { length: { minimum: 1, maximum: 1000, ...lengthMessages() } },
+        intendedStudy: requiredStringWithMaxLength(1000),
         populationChecked: { presence: true },
-        anticipatedFindings: {length: { minimum: 1, maximum: 1000, ...lengthMessages() }},
+        anticipatedFindings: requiredStringWithMaxLength(1000),
         reviewRequested: { presence: true },
-        scientificApproach: { length: { minimum: 1, maximum: 1000, ...lengthMessages() } },
+        scientificApproach: requiredStringWithMaxLength(1000),
         researchOutcomeList: { presence: {allowEmpty: false} },
         disseminateResearchFindingList: { presence: {allowEmpty: false} },
         primaryPurpose: { truthiness: true }
@@ -1032,18 +1036,8 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
 
       // Conditionally include optional fields for validation.
       if (otherPurpose) {
-        const {tooShort, tooLong} = lengthMessages('Other primary purpose');
         values = {...values, otherPurposeDetails};
-        constraints['otherPurposeDetails'] = {
-          presence: {
-            allowEmpty: false,
-            message: tooShort
-          },
-          length: {
-            maximum: 500,
-            tooLong
-          }
-        };
+        constraints['otherPurposeDetails'] = requiredStringWithMaxLength(500, 'Other primary purpose');
       }
       if (populationChecked) {
         values = {...values, populationDetails};
@@ -1053,47 +1047,18 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
       }
       if (populationDetails &&
           populationDetails.includes(SpecificPopulationEnum.OTHER)) {
-        const {tooShort, tooLong} = lengthMessages('Other Specific Population');
         values = {...values, otherPopulationDetails};
-        constraints['otherPopulationDetails'] = {
-          presence: {
-            allowEmpty: false,
-            message: tooShort
-          },
-          length: {
-            maximum: 100,
-            tooLong
-          }
-        };
+        constraints['otherPopulationDetails'] = requiredStringWithMaxLength(100, 'Other Specific Population');
       }
       if (diseaseFocusedResearch) {
-        const {tooShort, tooLong} = lengthMessages('Disease of Focus');
         values = {...values, diseaseOfFocus};
-        constraints['diseaseOfFocus'] = {
-          presence: {
-            allowEmpty: false,
-            message: tooShort
-          },
-          length: {
-            maximum: 80,
-            tooLong
-          }
-        };
+        constraints['diseaseOfFocus'] = requiredStringWithMaxLength(80, 'Disease of Focus');
       }
       if (disseminateResearchFindingList &&
           disseminateResearchFindingList.includes(DisseminateResearchEnum.OTHER)) {
-        const {tooShort, tooLong} = lengthMessages('Other methods of disseminating research findings');
         values = {...values, otherDisseminateResearchFindings};
-        constraints['otherDisseminateResearchFindings'] = {
-          presence: {
-            allowEmpty: false,
-            message: tooShort
-          },
-          length: {
-            maximum: 100,
-            tooLong
-          }
-        };
+        constraints['otherDisseminateResearchFindings'] =
+          requiredStringWithMaxLength(100, 'Other methods of disseminating research findings');
       }
       return validate(values, constraints, {fullMessages: false});
     }
@@ -1348,7 +1313,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
             <WorkspaceResearchSummary
                 researchPurpose={researchPurposeQuestions[2]}
                 researchValue={intendedStudy}
-                onChange={v => this.updateResearchPurpose('intendedStudy', v)}
+                onChange={v => this.updateResearchPurpose('intendedStudy', v.trim())}
                 index='2.1'
                 id='intendedStudyText'
             />
@@ -1357,7 +1322,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
             <WorkspaceResearchSummary
                 researchPurpose={researchPurposeQuestions[3]}
                 researchValue={scientificApproach}
-                onChange={v => this.updateResearchPurpose('scientificApproach', v)}
+                onChange={v => this.updateResearchPurpose('scientificApproach', v.trim())}
                 index='2.2'
                 id='scientificApproachText'
             />
@@ -1365,7 +1330,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
             <WorkspaceResearchSummary
                 researchPurpose={researchPurposeQuestions[4]}
                 researchValue={anticipatedFindings}
-                onChange={v => this.updateResearchPurpose('anticipatedFindings', v)}
+                onChange={v => this.updateResearchPurpose('anticipatedFindings', v.trim())}
                 index='2.3'
                 id='anticipatedFindingsText'
             />
@@ -1438,7 +1403,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
                            disabled={!fp.includes(SpecificPopulationEnum.OTHER, populationDetails)}
                            data-test-id='other-specialPopulation-text'
                            onChange={v => this.setState(fp.set(
-                             ['workspace', 'researchPurpose', 'otherPopulationDetails'], v))}/>
+                             ['workspace', 'researchPurpose', 'otherPopulationDetails'], v.trim()))}/>
               </FlexColumn>
             </FlexRow>
             <hr/>

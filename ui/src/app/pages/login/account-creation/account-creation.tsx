@@ -31,6 +31,7 @@ import {AnalyticsTracker} from 'app/utils/analytics';
 import {serverConfigStore} from 'app/utils/stores';
 import {NOT_ENOUGH_CHARACTERS_RESEARCH_DESCRIPTION} from 'app/utils/strings';
 import {Profile} from 'generated/fetch';
+import {canonicalizeUrl} from 'app/utils/urls';
 
 const styles = reactStyles({
   ...commonStyles,
@@ -287,9 +288,12 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
       };
     }
 
-    const urlError = validationData.professionalUrl
-      ? validate({website: validationData.professionalUrl}, {
-        website: { url: { message: '^Professional URL %{value} is not a valid URL' } }
+    // validatejs requires a scheme, which we don't necessarily need in the profile; rather than
+    // forking their website regex, just ensure a scheme ahead of validation.
+    const {professionalUrl} = validationData;
+    const urlError = professionalUrl
+      ? validate({website: canonicalizeUrl(professionalUrl)}, {
+        website: { url: { message: `^Professional URL ${professionalUrl} is not a valid URL` } }
       })
       : undefined;
 

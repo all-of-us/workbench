@@ -7,15 +7,14 @@ buildscript {
     // External properties on the default project. Values declared in ext blocks
     // outside of the buildscript block aren't usable here.
     ext {
-        GAE_VERSION = '1.9.92'
+        GAE_VERSION = '1.9.93'
         GSON_VERSION = '2.8.9'
-        JACKSON_VERSION = '2.13.0'
-        JODA_VERSION = '2.10'
+        JACKSON_VERSION = '2.13.1'
         KOTLIN_VERSION = '1.5.32'
         MAPSTRUCT_VERSION = '1.4.2.Final'
         MOCKITO_KOTLIN_VERSION = '2.2.0'
         OKHTTP_VERSION = '2.7.5'
-        OPENCENSUS_VERSION = '0.23.0'
+        OPENCENSUS_VERSION = '0.28.3'
         SPRINGFOX_VERSION = '2.6.1'
         SPRING_BOOT_VERSION = '2.3.12.RELEASE'
         SWAGGER_2_CODEGEN_VERSION = '2.2.3'
@@ -367,7 +366,7 @@ dependencies {
     __swaggerCodegenV2__ "io.swagger:swagger-codegen-cli:$project.ext.SWAGGER_2_CODEGEN_VERSION"
     __swaggerCodegenV3__ "io.swagger.codegen.v3:swagger-codegen-cli:$project.ext.SWAGGER_3_CODEGEN_VERSION"
 
-    compile "ch.qos.logback:logback-classic:1.2.7"
+    compile 'ch.qos.logback:logback-classic:1.2.8'
     compile "com.fasterxml.jackson.core:jackson-annotations:$project.ext.JACKSON_VERSION"
     compile "com.fasterxml.jackson.core:jackson-core:$project.ext.JACKSON_VERSION"
     compile "com.fasterxml.jackson.core:jackson-databind:$project.ext.JACKSON_VERSION"
@@ -375,7 +374,7 @@ dependencies {
     compile "com.fasterxml.jackson.module:jackson-module-kotlin:$project.ext.JACKSON_VERSION"
     compile "com.github.java-json-tools:json-patch:1.13"
     compile "com.github.rholder:guava-retrying:2.0.0"
-    compile "org.javers:javers-core:5.10.1"
+    compile 'org.javers:javers-core:5.15.0'
     compile "com.google.api-client:google-api-client-appengine:1.32.2"
     compile "com.google.apis:google-api-services-admin-directory:directory_v1-rev20211109-1.32.1"
     compile "com.google.apis:google-api-services-cloudbilling:v1-rev20211106-1.32.1"
@@ -386,13 +385,13 @@ dependencies {
     compile "com.google.appengine:appengine:$project.ext.GAE_VERSION"
     compile "com.google.auth:google-auth-library-appengine:1.2.2"
     compile "com.google.auth:google-auth-library-oauth2-http:1.2.2"
-    compile "com.google.cloud.sql:mysql-socket-factory:1.4.0"
-    compile "com.google.cloud:google-cloud-bigquery:2.4.0"
-    compile "com.google.cloud:google-cloud-iamcredentials:2.0.6"
-    compile "com.google.cloud:google-cloud-logging:3.4.0"
-    compile "com.google.cloud:google-cloud-monitoring:3.1.0"
-    compile "com.google.cloud:google-cloud-storage:2.2.1"
-    compile "com.google.cloud:google-cloud-tasks:2.0.6"
+    compile 'com.google.cloud.sql:mysql-socket-factory:1.4.1'
+    compile 'com.google.cloud:google-cloud-bigquery:2.5.1'
+    compile 'com.google.cloud:google-cloud-iamcredentials:2.0.7'
+    compile 'com.google.cloud:google-cloud-logging:3.5.1'
+    compile 'com.google.cloud:google-cloud-monitoring:3.2.0'
+    compile 'com.google.cloud:google-cloud-storage:2.2.2'
+    compile 'com.google.cloud:google-cloud-tasks:2.1.0'
     compile "com.google.code.gson:gson:$project.ext.GSON_VERSION"
     compile "com.google.guava:guava:31.0.1-jre"
     compile "com.google.http-client:google-http-client-apache:2.1.2"
@@ -406,12 +405,11 @@ dependencies {
     compile "io.opencensus:opencensus-impl:$project.ext.OPENCENSUS_VERSION"
     compile "io.swagger:swagger-annotations:1.5.16"
     compile "javax.inject:javax.inject:1"
-    compile "joda-time:joda-time:$project.ext.JODA_VERSION"
     compile "org.liquibase:liquibase-core:3.10.3"
     compile "mysql:mysql-connector-java:8.0.27"
     compile "org.apache.commons:commons-collections4:4.4"
-    compile "org.apache.commons:commons-lang3:3.6"
-    compile "org.apache.commons:commons-text:1.8"
+    compile 'org.apache.commons:commons-lang3:3.12.0'
+    compile 'org.apache.commons:commons-text:1.9'
     compile "org.apache.httpcomponents:httpclient:4.5.13"
     compile 'org.springframework.boot:spring-boot-starter-validation'
     compile group: 'org.springframework.cloud', name: 'spring-cloud-gcp-starter-sql-mysql'
@@ -461,8 +459,6 @@ dependencies {
     generatedCompile "com.squareup.okhttp:okhttp:$project.ext.OKHTTP_VERSION"
     generatedCompile "com.squareup.okhttp:logging-interceptor:$project.ext.OKHTTP_VERSION"
     generatedCompile "com.google.code.gson:gson:$project.ext.GSON_VERSION"
-    generatedCompile "joda-time:joda-time:$project.ext.JODA_VERSION"
-    generatedCompile "com.fasterxml.jackson.datatype:jackson-datatype-joda:$project.ext.JACKSON_VERSION"
     // OpenCensus is an AoU-specific addition to the default Swagger API dependencies. See the
     // template file api.mustache for more details.
     generatedCompile "io.opencensus:opencensus-api:$project.ext.OPENCENSUS_VERSION"
@@ -473,23 +469,26 @@ dependencies {
     // TODO(calbach): The duplicated deps here are highly suspect. Investigate
     // removing the generated sourceSet, or else fixing the runtime deps.
     compile 'io.swagger.core.v3:swagger-annotations:2.0.0'
-    compile 'io.gsonfire:gson-fire:1.8.3'
+    compile 'io.gsonfire:gson-fire:1.8.5'
     compile 'org.threeten:threetenbp:1.3.5'
     generatedCompile 'io.swagger.core.v3:swagger-annotations:2.0.0'
-    generatedCompile 'io.gsonfire:gson-fire:1.8.3'
+    generatedCompile 'io.gsonfire:gson-fire:1.8.5'
     generatedCompile 'org.threeten:threetenbp:1.3.5'
     generatedCompile 'javax.xml.bind:jaxb-api:2.3.1'
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$project.ext.KOTLIN_VERSION"
 
-    __tools__Compile 'commons-cli:commons-cli:1.4'
+    // war plugin. Add this to scope of the compile configuration, but do not include in .war file.
+    providedCompile group: 'javax.servlet', name: 'javax.servlet-api', version: '3.1.0'
+
+    __tools__Compile 'commons-cli:commons-cli:1.5.0'
     __tools__Compile 'com.opencsv:opencsv:4.6'
 
     testCompile 'org.mockito:mockito-core:3.3.3'
     testCompile "com.google.appengine:appengine-api-stubs:$project.ext.GAE_VERSION"
     testCompile "com.google.appengine:appengine-tools-sdk:$project.ext.GAE_VERSION"
     testCompile 'com.google.truth:truth:0.42'
-    testCompile 'com.google.truth.extensions:truth-java8-extension:1.0.1'
+    testCompile 'com.google.truth.extensions:truth-java8-extension:1.1.3'
     testCompile 'com.h2database:h2:1.4.194'
     testCompile 'org.liquibase:liquibase-core:3.10.0'
     testCompile 'org.bitbucket.radistao.test:before-after-spring-test-runner:0.1.0'

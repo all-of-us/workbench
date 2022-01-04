@@ -20,9 +20,9 @@ import {ControlledTierBadge, RegisteredTierBadge} from 'app/components/icons';
 /**
  * Checks that the entered email address is a valid member of the chosen institution.
  */
-export async function validateEmail(contactEmail: string, institutionShortName: string, aborter: AbortController) {
+export async function checkInstitutionalEmail(contactEmail: string, institutionShortName: string, aborter: AbortController) {
   try {
-    return await institutionApi().checkEmail(institutionShortName, {contactEmail: contactEmail}, {signal: aborter.signal});
+    return await institutionApi().checkEmail(institutionShortName, {contactEmail}, {signal: aborter.signal});
   } catch (e) {
     if (isAbortError(e)) {
       // Ignore abort errors.
@@ -32,19 +32,29 @@ export async function validateEmail(contactEmail: string, institutionShortName: 
   }
 }
 
-export const EmailAddressMismatchErrorMessage = () => {
+const EmailAddressMismatchErrorMessage = () => {
   return <div data-test-id='email-error-message' style={{color: colors.danger}}>
     The institution has authorized access only to select members.<br/>
     Please <a href='https://www.researchallofus.org/institutional-agreements' target='_blank'>
     click here</a> to request to be added to the institution</div>;
 };
 
-export const EmailDomainMismatchErrorMessage = () => {
+const EmailDomainMismatchErrorMessage = () => {
   return <div data-test-id='email-error-message' style={{color: colors.danger}}>
     Your email does not match your institution</div>;
 };
 
-export const getRoleOptions = (institutions: Array<PublicInstitutionDetails>, institutionShortName: string):
+export const getEmailValidationErrorMessage = (institution: PublicInstitutionDetails) => {
+  if (institution.registeredTierMembershipRequirement === InstitutionMembershipRequirement.ADDRESSES) {
+    // Institution requires an exact email address match and the email is not in allowed emails list
+    return <EmailAddressMismatchErrorMessage/>;
+  } else {
+    // Institution requires email domain matching and the domain is not in the allowed list
+    return <EmailDomainMismatchErrorMessage/>;
+  }
+}
+
+export const getRoleOptions = (institutions: Array<PublicInstitutionDetails>, institutionShortName?: string):
     Array<{ label: string, value: InstitutionalRole }> => {
   if (isBlank(institutionShortName)) {
     return [];

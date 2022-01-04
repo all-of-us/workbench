@@ -2,7 +2,11 @@ package org.pmiops.workbench.api;
 
 import static org.pmiops.workbench.access.AccessTierService.REGISTERED_TIER_SHORT_NAME;
 
+import javax.inject.Provider;
+import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.annotations.AuthorityRequired;
+import org.pmiops.workbench.db.dao.UserService;
+import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.institution.InstitutionService;
@@ -21,10 +25,17 @@ import org.springframework.web.bind.annotation.RestController;
 public class InstitutionController implements InstitutionApiDelegate {
 
   private final InstitutionService institutionService;
+  private final Provider<DbUser> userProvider;
+  private final UserService userService;
 
   @Autowired
-  InstitutionController(final InstitutionService institutionService) {
+  InstitutionController(
+      final InstitutionService institutionService,
+      final Provider<DbUser> userProvider,
+      final UserService userService) {
     this.institutionService = institutionService;
+    this.userProvider = userProvider;
+    this.userService = userService;
   }
 
   private Institution getInstitutionImpl(final String shortName) {
@@ -103,7 +114,9 @@ public class InstitutionController implements InstitutionApiDelegate {
                 () ->
                     new NotFoundException(
                         String.format("Could not update Institution '%s'", shortName)));
-
+    institutionService
+        .getAffiliatedUsers(shortName)
+        .forEach(u -> userService.updateUserAccessTiers(u, Agent.asAdmin(userProvider.get())));
     return ResponseEntity.ok(institution);
   }
 

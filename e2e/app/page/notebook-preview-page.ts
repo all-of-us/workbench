@@ -4,11 +4,11 @@ import { getPropValue } from 'utils/element-utils';
 import AuthenticatedPage from './authenticated-page';
 import NotebookPage from './notebook-page';
 import WorkspaceAnalysisPage from './workspace-analysis-page';
-import { waitWhileLoading } from 'utils/waits-utils';
+import { waitForFn, waitWhileLoading } from 'utils/waits-utils';
 import { initializeRuntimeIfModalPresented } from 'utils/runtime-utils';
 
 const Selector = {
-  editLink: '//*[contains(normalize-space(text()), "Edit")]',
+  editLink: '//div[contains(normalize-space(text()), "Edit")]',
   runPlaygroundModeLink: '//*[contains(normalize-space(text()), "Run")]',
   previewLink: '//*[contains(normalize-space(text()), "Preview")]'
 };
@@ -19,12 +19,13 @@ export default class NotebookPreviewPage extends AuthenticatedPage {
   }
 
   async isLoaded(): Promise<boolean> {
-    await waitWhileLoading(this.page);
     await Promise.all([
       this.page.waitForXPath(Selector.editLink, { visible: true }),
       this.page.waitForXPath(Selector.runPlaygroundModeLink, { visible: true }),
       this.page.waitForXPath(Selector.previewLink, { visible: true })
     ]);
+    await this.waitForNotebookCellsRendered();
+    await waitWhileLoading(this.page);
     return true;
   }
 
@@ -32,7 +33,7 @@ export default class NotebookPreviewPage extends AuthenticatedPage {
    * Click "Edit" link to open notebook in Edit mode.
    */
   async openEditMode(notebookName: string): Promise<NotebookPage> {
-    const editLink = await this.getEditLink();
+    const editLink = this.getEditLink();
     await editLink.waitUntilEnabled();
     await editLink.click();
 
@@ -44,6 +45,17 @@ export default class NotebookPreviewPage extends AuthenticatedPage {
     const notebookPage = new NotebookPage(this.page, notebookName);
     await notebookPage.waitForLoad();
     return notebookPage;
+  }
+
+  async waitForNotebookCellsRendered(): Promise<void> {
+    const iframe = await this.findNotebookIframe();
+    await waitForFn(
+      async () => {
+        return (await iframe.$$('.code_cell')).length === (await iframe.$$('.code_cell.rendered')).length;
+      },
+      1000,
+      30000
+    );
   }
 
   async getFormattedCode(): Promise<string[]> {

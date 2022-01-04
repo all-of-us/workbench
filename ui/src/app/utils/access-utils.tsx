@@ -4,7 +4,7 @@ import {Redirect} from 'react-router-dom';
 
 import {Button} from 'app/components/buttons';
 import {AoU} from 'app/components/text-wrappers';
-import { profileApi, userAdminApi} from 'app/services/swagger-fetch-clients';
+import {profileApi, userAdminApi} from 'app/services/swagger-fetch-clients';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {convertAPIError} from 'app/utils/errors';
 import {encodeURIComponentStrict} from 'app/utils/navigation';
@@ -14,17 +14,14 @@ import {
   AccessModuleStatus,
   ErrorCode,
   Profile,
-  UserTierEligibility
 } from 'generated/fetch';
 import {parseQueryParams} from 'app/components/app-router';
-import {cond, daysFromNow, displayDateWithoutHours, switchCase} from './index';
-import {AccessTierShortNames} from 'app/utils/access-tiers';
+import {cond, switchCase} from './index';
 import {TooltipTrigger} from 'app/components/popups';
 import {InfoIcon} from 'app/components/icons';
-import {environment} from 'environments/environment';
+import {daysFromNow, displayDateWithoutHours, MILLIS_PER_DAY} from './dates';
 
 const {useState, useEffect} = React;
-
 
 export async function redirectToRegisteredTraining() {
   AnalyticsTracker.Registration.RegisteredTraining();
@@ -185,7 +182,6 @@ export const wasReferredFromRenewal = (queryParams): boolean => {
   const renewal = parseQueryParams(queryParams).get('renewal');
   return renewal === '1';
 };
-export const MILLIS_PER_DAY = 24 * 60 * 60 * 1000;
 export const NOTIFICATION_THRESHOLD_DAYS = 30;
 
 // return the number of full days remaining to expiration in the soonest-to-expire module,
@@ -309,3 +305,13 @@ export const eligibleForTier = (profile: Profile, accessTierShortName: string): 
   const rtEligiblity = profile.tierEligibilities.find(t => t.accessTierShortName === accessTierShortName)
   return rtEligiblity?.eligible
 };
+
+export const syncModulesExternal = async(moduleNames: AccessModule[]) => {
+  return Promise.all(moduleNames.map(async moduleName => {
+    const {externalSyncAction} = getAccessModuleConfig(moduleName);
+    if (externalSyncAction) {
+      await externalSyncAction();
+    }
+  }));
+}
+

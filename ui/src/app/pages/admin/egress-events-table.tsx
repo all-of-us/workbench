@@ -123,6 +123,7 @@ export const EgressEventsTable = ({sourceUserEmail, sourceWorkspaceNamespace, di
     <Column field='creationTime'
             header='Time'
             headerStyle={{width: '150px'}}
+            body={({creationTime}) => new Date(creationTime).toLocaleString()}
     />
     <Column field='sourceUserEmail'
             body={({sourceUserEmail}) => {

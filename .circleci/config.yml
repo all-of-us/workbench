@@ -241,7 +241,7 @@ commands:
                 # Start local UI server that connects to "test" api server
                 command: yarn dev-up
                 background: true
-      - run: sleep 30 # sleep for 30 seconds
+      - run: sleep 10 # sleep for 10 seconds
       - run:
           name: "Watch the port for 4m for local UI server start up"
           command: dockerize -wait http://localhost:4200 -timeout 4m
@@ -315,8 +315,10 @@ commands:
     description: "Stop running Puppeteer e2e tests if halt conditions are met"
     steps:
       - run:
+          working_directory: ~/workbench/.circleci
           name: "Check commit message and find changed file names that do not match ignore patterns"
-          command: bash .circleci/skip-e2e-pr-checks.sh
+          command: |
+            ./skip-e2e-pr-checks.sh
       - halt-test-check:
           # Stop running Puppeteer end-to-end test if code in relevant directories is unchanged.
           dir_names: "ui e2e .circleci"
@@ -535,6 +537,46 @@ jobs:
       - deploy-to-staging-perf:
           project_name: "all-of-us-rw-perf"
 
+  puppeteer-generate-access-tokens:
+    executor: puppeteer-executor
+    parameters:
+      env_name:
+        description: The target environment for run Puppeteer end-to-end test. Must be one of "test", "staging", "local", "perf".
+        default: "test"
+        type: enum
+        enum: [ "test", "staging", "local", "perf" ]
+    steps:
+      - checkout-code
+      - restore_cache:
+          name: "Restore api gradle wrapper cache"
+          key: v6-gradle-wrapper-{{ .Branch }}-{{ checksum "~/workbench/api/gradle/wrapper/gradle-wrapper.properties" }}
+      - restore_cache:
+          name: "Restore api gradle cache"
+          keys:
+            - v6-gradle-cache-{{ .Branch }}-{{ checksum "~/workbench/api/build.gradle" }}
+            - v6-gradle-cache-
+      - restore_cache:
+          name: "Restore e2e yarn cache"
+          keys:
+            - v5-e2e-yarn-{{ .Branch }}-{{ arch }}-{{ checksum "~/workbench/e2e/yarn.lock" }}
+            - v5-e2e-yarn-
+      - run:
+          name: "Set environment variables for e2e test users"
+          working_directory: ~/workbench/e2e
+          command: |
+            cp .env.circleci.<< parameters.env_name >> .env
+      - gcloud-auth-login:
+          # Needed for generate-impersonated-user-token script
+          with_application_default_credentials: true
+      - run:
+          name: "Run script: api/project.rb generate-impersonated-user-tokens"
+          working_directory: ~/workbench/e2e
+          command: yarn _impersonate-test-users
+      - persist_to_workspace:
+          root: ~/workbench
+          paths:
+            - .
+
   # Run Puppeteer UI tests on deployed "local", "test" or "staging" environment.
   puppeteer-test:
     executor: puppeteer-executor
@@ -557,19 +599,23 @@ jobs:
         default: []
       no_output_timeout:
         type: string
-        default: 30m
+        default: 35m
     environment:
       WORKBENCH_ENV: << parameters.env_name >>
       TEST_MODE: << parameters.test_mode >>
     parallelism: << parameters.parallel_num >>
     steps:
-      - checkout-code
+      - attach_workspace:
+          at: .
       - steps: << parameters.optional_steps >>
+      - browser-tools/install-browser-tools
       - restore_cache:
           name: "Restore e2e cache"
           keys:
             - v5-e2e-yarn-{{ .Branch }}-{{ arch }}-{{ checksum "~/workbench/e2e/yarn.lock" }}
-      - browser-tools/install-browser-tools
+      - gcloud-auth-login:
+          # Needed for gcs-load-test-results
+          with_application_default_credentials: true
       - run:
           name: "Set environment variables for e2e test users"
           working_directory: ~/workbench/e2e
@@ -584,12 +630,6 @@ jobs:
             equal: [ "local", << parameters.env_name >> ]
           steps:
             - launch-local-ui
-      - gcloud-auth-login:
-          # Needed for yarn test, which invokes generate-impersonated-user-token
-          with_application_default_credentials: true
-      - run:
-          # Needed for env-cmd to function on Circle.
-          command: touch ~/workbench/e2e/.env
       - run:
           name: "Create a file contains test names"
           working_directory: ~/workbench/e2e
@@ -668,23 +708,27 @@ workflows:
             - wait_until_previous_workflow_done
       # Deploy local UI server connected to "test" API server. Run Puppeteer tests for PR commits only
       - puppeteer-env-setup
+      - puppeteer-generate-access-tokens:
+          env_name: "local"
       - puppeteer-test:
           <<: *filter-pr-branch
           env_name: "local"
-          parallel_num: 4
+          parallel_num: 5
           optional_steps:
             - halt-puppeteer-check
           requires:
             - puppeteer-env-setup
+            - puppeteer-generate-access-tokens
             # PR commits e2e tests waits for workflow triggered by main branch merge to finish.
             - wait_until_previous_workflow_done
       # On main branch merges, run Puppeteer tests after ui and api deployed to "test" env successfully
       - puppeteer-test:
-          parallel_num: 4
+          parallel_num: 5
           env_name: "test"
           <<: *filter-main-branch
           requires:
             - puppeteer-env-setup
+            - puppeteer-generate-access-tokens
             - api-deploy-to-test
             - ui-deploy-to-test
             - wait_until_previous_workflow_done
@@ -725,6 +769,9 @@ workflows:
             - ui-unit-test
       - puppeteer-env-setup:
           <<: *filter-release-tags
+      - puppeteer-generate-access-tokens:
+          <<: *filter-release-tags
+          env_name: "staging"
       - puppeteer-test:
           <<: *filter-release-tags
           parallel_num: 2
@@ -732,6 +779,7 @@ workflows:
           requires:
             - deploy-to-staging
             - puppeteer-env-setup
+            - puppeteer-generate-access-tokens
 
   nightly-tests:
     triggers:
@@ -745,6 +793,8 @@ workflows:
     jobs:
       - api-bigquery-test
       - puppeteer-env-setup
+      - puppeteer-generate-access-tokens:
+          env_name: "test"
       - puppeteer-test:
           parallel_num: 4
           test_mode: "nightly-integration"
@@ -754,6 +804,7 @@ workflows:
           no_output_timeout: 90m
           requires:
             - puppeteer-env-setup
+            - puppeteer-generate-access-tokens
 
 experimental:
   notify:

@@ -62,8 +62,9 @@ LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` r on (p.race_concept_id = r.concep
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` e on (p.ethnicity_concept_id = e.concept_id)
 LEFT JOIN
     (
-        SELECT DISTINCT person_id
-        FROM \`$BQ_PROJECT.$BQ_DATASET.death\`
+        SELECT person_id, max(death_date) as death_date
+          FROM \`$BQ_PROJECT.$BQ_DATASET.death\`
+        GROUP BY person_id
     ) d on (p.person_id = d.person_id)
 LEFT JOIN
     (
@@ -127,8 +128,9 @@ LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` r on (p.race_concept_id = r.concep
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` e on (p.ethnicity_concept_id = e.concept_id)
 LEFT JOIN
     (
-        SELECT DISTINCT person_id
-        FROM \`$BQ_PROJECT.$BQ_DATASET.death\`
+        SELECT person_id, max(death_date) as death_date
+          FROM \`$BQ_PROJECT.$BQ_DATASET.death\`
+        GROUP BY person_id
     ) d on (p.person_id = d.person_id)
 LEFT JOIN
     (
