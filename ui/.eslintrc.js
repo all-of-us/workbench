@@ -56,6 +56,7 @@ module.exports = {
     'quotes': ['warn', 'single'],
     // '@typescript-eslint/semi': 'warn',
     // 'space-before-function-paren': ['warn', { 'anonymous': 'never', 'named': 'never', 'asyncArrow': 'always' }],
+    // as of 4 Jan 2022, we have 48 instances of >2 and 281 of >1 per line
     "react/jsx-max-props-per-line": ['warn', { "maximum": { "multi": 3 } }],
 
     /* Functionality */
