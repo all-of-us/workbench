@@ -26,7 +26,7 @@ import {TextInputWithLabel} from 'app/components/inputs';
 import {BulletAlignedUnorderedList} from 'app/components/lists';
 import {TooltipTrigger} from 'app/components/popups';
 import {serverConfigStore} from 'app/utils/stores';
-import {accessRenewalModules, computeDisplayDates, getAccessModuleConfig} from 'app/utils/access-utils';
+import {accessRenewalModules, computeRenewalDisplayDates, getAccessModuleConfig} from 'app/utils/access-utils';
 import {hasRegisteredTierAccess} from 'app/utils/access-tiers';
 
 export const commonStyles = reactStyles({
@@ -312,7 +312,7 @@ export const AccessModuleExpirations = ({profile}: ExpirationProps) => {
     {moduleNames.map((moduleName, zeroBasedStep) => {
       // return the status if found; init an empty status with the moduleName if not
       const status: AccessModuleStatus = modules.find(s => s.moduleName === moduleName) || {moduleName};
-      const {lastConfirmedDate, nextReviewDate} = computeDisplayDates(status);
+      const {lastConfirmedDate, nextReviewDate} = computeRenewalDisplayDates(status);
       const {AARTitleComponent} = getAccessModuleConfig(moduleName);
       return <FlexRow key={zeroBasedStep} style={{marginTop: '0.5rem'}}>
         <FlexColumn>

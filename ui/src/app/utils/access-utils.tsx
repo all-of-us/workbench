@@ -19,7 +19,7 @@ import {parseQueryParams} from 'app/components/app-router';
 import {cond, switchCase} from './index';
 import {TooltipTrigger} from 'app/components/popups';
 import {InfoIcon} from 'app/components/icons';
-import {daysFromNow, displayDateWithoutHours, MILLIS_PER_DAY} from './dates';
+import {getWholeDaysFromNow, displayDateWithoutHours, MILLIS_PER_DAY} from './dates';
 
 const {useState, useEffect} = React;
 
@@ -259,8 +259,6 @@ export const GetStartedButton = ({style = {marginLeft: '0.5rem'}}) => <Button
     location.replace('/');
   }}>Get Started</Button>;
 
-export const isExpiring = (expiration: number): boolean => daysFromNow(expiration) <= serverConfigStore.get().config.accessRenewalLookback;
-
 const withInvalidDateHandling = date => {
   if (!date) {
     return 'Unavailable';
@@ -269,7 +267,7 @@ const withInvalidDateHandling = date => {
   }
 };
 
-export const computeDisplayDates = ({completionEpochMillis, expirationEpochMillis, bypassEpochMillis}: AccessModuleStatus) => {
+export const computeRenewalDisplayDates = ({completionEpochMillis, expirationEpochMillis, bypassEpochMillis}: AccessModuleStatus) => {
   const userCompletedModule = !!completionEpochMillis;
   const userBypassedModule = !!bypassEpochMillis;
   const lastConfirmedDate = withInvalidDateHandling(completionEpochMillis);
@@ -282,21 +280,16 @@ export const computeDisplayDates = ({completionEpochMillis, expirationEpochMilli
     // User never completed training
     [!userCompletedModule && !userBypassedModule, () =>
       ({lastConfirmedDate: 'Unavailable (not completed)', nextReviewDate: 'Unavailable (not completed)'})],
-    // User completed training, but is in the lookback window
-    [userCompletedModule && isExpiring(expirationEpochMillis), () => {
-      const daysRemaining = daysFromNow(expirationEpochMillis);
+    // User completed training; covers expired, within-lookback, and after-lookback cases.
+    [userCompletedModule && !userBypassedModule, () => {
+      const daysRemaining = getWholeDaysFromNow(expirationEpochMillis);
       const daysRemainingDisplay = daysRemaining >= 0 ? `(${daysRemaining} day${daysRemaining !== 1 ? 's' : ''})` : '(expired)';
       return {
         lastConfirmedDate,
         nextReviewDate: `${nextReviewDate} ${daysRemainingDisplay}`
       };
     }],
-    // User completed training and is up to date
-    [userCompletedModule && !isExpiring(expirationEpochMillis), () => {
-      const daysRemaining = daysFromNow(expirationEpochMillis);
-      return {lastConfirmedDate, nextReviewDate: `${nextReviewDate} (${daysRemaining} day${daysRemaining !== 1 ? 's' : ''})`};
-    }]
-  );
+   );
 };
 
 // return true if user is eligible for registered tier.
