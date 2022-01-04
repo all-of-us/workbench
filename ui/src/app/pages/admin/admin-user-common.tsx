@@ -320,7 +320,8 @@ export const AccessModuleExpirations = ({profile}: ExpirationProps) => {
           <div>Last Updated On: {lastConfirmedDate}</div>
           <div>Next Review: {nextReviewDate}</div>
         </FlexColumn>
-      </FlexRow>})}
+      </FlexRow>
+    })}
   </FlexColumn>;
 }
 
