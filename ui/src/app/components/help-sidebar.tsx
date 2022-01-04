@@ -918,6 +918,7 @@ export const HelpSidebar = fp.flow(
                         <h3 style={{...styles.sectionTitle, marginTop: 0}}>Not finding what you're looking for?</h3>
                         <p style={styles.contentItem}>
                           Visit our <StyledExternalLink href={supportUrls.helpCenter}
+                                                        target='_blank'
                                                         onClick={() => this.analyticsEvent('UserSupport')}> User Support Hub
                           </StyledExternalLink> page or <span style={styles.link}
                                                               onClick={() => this.openContactWidget()}> contact us</span>.
