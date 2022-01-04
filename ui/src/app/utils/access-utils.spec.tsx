@@ -254,7 +254,7 @@ describe('useIsUserDisabled', () => {
   };
 
   const simulateSignIn = async(wrapper: ReactWrapper, isSignedIn: boolean) => {
-    authStore.set({authLoaded: true, isSignedIn, authError: ''});
+    authStore.set({authLoaded: true, isSignedIn});
     await waitOnTimersAndUpdate(wrapper);
   };
 
@@ -263,7 +263,7 @@ describe('useIsUserDisabled', () => {
   };
 
   beforeEach(() => {
-    authStore.set({authLoaded: false, isSignedIn: false, authError: ''});
+    authStore.set({authLoaded: false, isSignedIn: false});
     profileStore.set({load, reload, updateCache});
   });
 
