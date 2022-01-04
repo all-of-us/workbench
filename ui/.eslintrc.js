@@ -88,7 +88,7 @@ module.exports = {
     'react/jsx-curly-spacing': ["warn", {'when': 'never'}],
     'react/jsx-uses-vars': 'warn',
     'react-hooks/rules-of-hooks': 'warn',
-    //'react-hooks/exhaustive-deps': 'warn',
+    // 'react-hooks/exhaustive-deps': 'warn',  // 45 instances as of 3 Jan 2022
 
     /* Maintainability */
     'eol-last': 'warn',
