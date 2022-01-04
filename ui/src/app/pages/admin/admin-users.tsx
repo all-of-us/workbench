@@ -2,6 +2,7 @@ import * as fp from 'lodash/fp';
 import {Column} from 'primereact/column';
 import {DataTable} from 'primereact/datatable';
 import * as React from 'react';
+import moment from 'moment'
 
 import {Button} from 'app/components/buttons';
 import {TooltipTrigger} from 'app/components/popups';
@@ -9,14 +10,13 @@ import {Spinner, SpinnerOverlay} from 'app/components/spinners';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {AdminUserBypass} from 'app/pages/admin/admin-user-bypass';
 import { authDomainApi, userAdminApi} from 'app/services/swagger-fetch-clients';
-import {reactStyles, withUserProfile} from 'app/utils';
-import {usernameWithoutDomain} from 'app/utils/audit-utils';
+import {reactStyles, usernameWithoutDomain, withUserProfile} from 'app/utils';
 import {serverConfigStore} from 'app/utils/stores';
 import {
   AdminTableUser,
   Profile,
 } from 'generated/fetch';
-import moment from 'moment'
+import {UserAuditLink} from './admin-user-common';
 
 const styles = reactStyles({
   colStyle: {
@@ -154,11 +154,7 @@ export const AdminUsers = withUserProfile()(class extends React.Component<Props,
 
   convertProfilesToFields(users: AdminTableUser[]) {
     return users.map(user => ({
-      audit: <a
-        href={`/admin/user-audit/${usernameWithoutDomain(user.username)}`}
-        target='_blank'>
-        link
-      </a>,
+      audit: <UserAuditLink usernameWithoutDomain={usernameWithoutDomain(user.username)}>link</UserAuditLink>,
       bypass: <AdminUserBypass
         user={{...user}}
         onBypassModuleUpdate={() => this.loadProfiles()}/>,
