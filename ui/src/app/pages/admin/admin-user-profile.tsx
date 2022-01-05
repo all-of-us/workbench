@@ -196,12 +196,12 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
     }
   }
 
-  const changed = (field): boolean => !!getUpdatedProfileValue(oldProfile, updatedProfile, field);
+  const changed = (attributePath): boolean => !!getUpdatedProfileValue(oldProfile, updatedProfile, attributePath);
 
   useEffect(() => {
     const onProfileChange = async () => {
       const {contactEmail, verifiedInstitutionalAffiliation} = updatedProfile;
-      if (changed('contactEmail') || changed('verifiedInstitutionalAffiliation')) {
+      if (changed(['contactEmail']) || changed(['verifiedInstitutionalAffiliation', 'institutionShortName'])) {
         await validateAffiliation(contactEmail, verifiedInstitutionalAffiliation?.institutionShortName);
       } else {
         clearEmailValidation();
@@ -280,7 +280,7 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
         onChangeFreeCreditLimit={(freeTierDollarQuota: number) => updateProfile({freeTierDollarQuota})}
         onChangeInstitution={(institutionShortName: string) => updateInstitution(institutionShortName)}
         onChangeInstitutionalRole={(institutionalRoleEnum: InstitutionalRole) => updateInstitutionalRole(institutionalRoleEnum)}
-        onChangeInstitutionOtherText={(otherText: string) => updateInstitutionalRoleOtherText(otherText.trim())}
+        onChangeInstitutionOtherText={(otherText: string) => updateInstitutionalRoleOtherText(otherText)}
       />
     </FlexRow>
     <FlexRow style={{paddingTop: '1em'}}>

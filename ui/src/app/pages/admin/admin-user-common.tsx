@@ -108,9 +108,9 @@ export const getFreeCreditUsage = (profile: Profile): string => {
 }
 
 // returns the updated profile value only if it has changed
-export const getUpdatedProfileValue = (oldProfile: Profile, updatedProfile: Profile, attribute: string) => {
-  const oldValue = fp.get([attribute], oldProfile);
-  const updatedValue = fp.get([attribute], updatedProfile);
+export const getUpdatedProfileValue = (oldProfile: Profile, updatedProfile: Profile, attributePath: string[]) => {
+  const oldValue = fp.get(attributePath, oldProfile);
+  const updatedValue = fp.get(attributePath, updatedProfile);
   if (!fp.isEqual(oldValue, updatedValue)) {
     return updatedValue;
   } else {
@@ -125,9 +125,9 @@ export const updateAccountProperties = async(oldProfile: Profile, updatedProfile
   const {username} = updatedProfile;
   const request: AccountPropertyUpdate = {
     username,
-    freeCreditsLimit: getUpdatedProfileValue(oldProfile, updatedProfile, 'freeTierDollarQuota'),
-    contactEmail: getUpdatedProfileValue(oldProfile, updatedProfile, 'contactEmail'),
-    affiliation: getUpdatedProfileValue(oldProfile, updatedProfile, 'verifiedInstitutionalAffiliation'),
+    freeCreditsLimit: getUpdatedProfileValue(oldProfile, updatedProfile, ['freeTierDollarQuota']),
+    contactEmail: getUpdatedProfileValue(oldProfile, updatedProfile, ['contactEmail']),
+    affiliation: getUpdatedProfileValue(oldProfile, updatedProfile, ['verifiedInstitutionalAffiliation']),
     accessBypassRequests: [],  // coming soon: RW-4958
   };
 
