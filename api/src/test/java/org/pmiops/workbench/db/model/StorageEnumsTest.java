@@ -1,9 +1,9 @@
 package org.pmiops.workbench.db.model;
 
-import com.google.api.client.util.Sets;
-import org.junit.jupiter.api.Test;
-import org.pmiops.workbench.model.Domain;
+import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth.assertWithMessage;
 
+import com.google.api.client.util.Sets;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -14,9 +14,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.Truth.assertWithMessage;
+import org.junit.jupiter.api.Test;
+import org.pmiops.workbench.model.Domain;
 
 public class StorageEnumsTest {
   private final Object INDICATES_STATIC_METHOD = null;
@@ -78,7 +77,8 @@ public class StorageEnumsTest {
             .filter(m -> allMappedEnumerationClasses.contains(m.getReturnType()))
             .collect(Collectors.toMap(Method::getReturnType, m -> m));
 
-    // Resource type is being used in user_recent_resource table and we are currently just using a subset of its actual value
+    // Resource type is being used in user_recent_resource table and we are currently just using a
+    // subset of its actual value
     // So removing this for the test for enum missing map properties
     Set<Class> allMappedEnumerationClassesExceptResourceType =
         allMappedEnumerationClasses.stream()
