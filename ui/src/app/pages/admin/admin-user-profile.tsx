@@ -171,14 +171,18 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
     onMount();
   }, []);
 
-  const validateAffiliation = async(contactEmail: string, institutionShortName: string) => {
-    // clean up any currently-running validation
-    if (emailValidationAborter) {
+  // clean up any currently-running or previously-run validation
+  const clearEmailValidation = () => {
+     if (emailValidationAborter) {
       emailValidationAborter.abort();
     }
 
     // clean up any previously-run validation
     setEmailValidationStatus(EmailValidationStatus.UNCHECKED);
+  }
+
+  const validateAffiliation = async(contactEmail: string, institutionShortName: string) => {
+    clearEmailValidation();
 
     if (!isBlank(contactEmail) && !isBlank(institutionShortName)) {
       const aborter = new AbortController();
@@ -199,6 +203,8 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
       const {contactEmail, verifiedInstitutionalAffiliation} = updatedProfile;
       if (changed('contactEmail') || changed('verifiedInstitutionalAffiliation')) {
         await validateAffiliation(contactEmail, verifiedInstitutionalAffiliation?.institutionShortName);
+      } else {
+        clearEmailValidation();
       }
     }
 
