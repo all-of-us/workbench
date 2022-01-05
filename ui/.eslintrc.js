@@ -31,69 +31,67 @@ module.exports = {
 
   // The eslint rules can be found here: https://eslint.org/docs/rules/
   rules: {
-    // 'prettier/prettier': 'warn', // Possibly use prettier to handle some formatting
+    /* Code Quality */
 
-    /* Best Practices */
-    // 'no-multi-spaces': 'warn',
-
-    /* Typescript specific */
-    '@typescript-eslint/explicit-member-accessibility': 'off',
-    // '@typescript-eslint/member-ordering': ['warn', { 'classExpressions': ['method', 'field'] }],
-    '@typescript-eslint/no-empty-interface': 'warn',
-    '@typescript-eslint/no-inferrable-types': ['warn', {ignoreParameters: true}],
-    '@typescript-eslint/no-non-null-assertion': 'warn',
-    // 'prefer-arrow/prefer-arrow-functions': ['warn'], // Lots of 'newable' functions in the code base
-    '@typescript-eslint/type-annotation-spacing': 'warn',
-    '@typescript-eslint/unified-signatures': 'warn',
-
-    /* Style */
-    '@typescript-eslint/prefer-function-type': 'warn',
-    // 'spaced-comment': 'warn',
-    '@typescript-eslint/consistent-type-definitions': ['warn', 'interface'],
-    'no-trailing-spaces': 'warn',
-    'no-undef-init': 'warn',
-    // 'brace-style': ['warn', '1tbs'],
-    // 'simple-import-sort/sort': 'warn',
-    'quotes': ['warn', 'single'],
-    // '@typescript-eslint/semi': 'warn',
-    // 'space-before-function-paren': ['warn', { 'anonymous': 'never', 'named': 'never', 'asyncArrow': 'always' }],
-
-    /* Functionality */
-    'curly': 'warn',
-    'guard-for-in': 'warn',
-    'no-restricted-imports': ['error', {paths: ['rxjs'], patterns: ['../']}],
-    'no-caller': 'warn',
-    'no-bitwise': 'warn',
-    // 'no-console': 'warn',  // 69 instances as of 3 Jan 2022
-    'no-new-wrappers': 'warn',
-    'no-debugger': 'warn',
     'constructor-super': 'warn',
+    'curly': 'warn',
+    'eqeqeq': ['warn', 'always', {'null': 'ignore'}],
+    'guard-for-in': 'warn',
+    'no-bitwise': 'warn',
+    'no-caller': 'warn',
+    'no-debugger': 'warn',
     'no-empty': 'warn',
     'no-eval': 'warn',
-    'no-irregular-whitespace': 'warn',
-    '@typescript-eslint/no-misused-new': 'warn',
-    // 'no-shadow': 'warn', // 54 instances as of 3 Jan 2022
-    // 'dot-notation': 'warn',  // 39 instances as of 3 Jan 2022
-    'no-throw-literal': 'warn',
     'no-fallthrough': 'warn', // For switch statements
+    'no-irregular-whitespace': 'warn',
+    'no-new-wrappers': 'warn',
+    'no-restricted-imports': ['error', {paths: ['rxjs'], patterns: ['../']}],
+    'no-throw-literal': 'warn',
+    'no-undef-init': 'warn',
+    'no-var': 'warn',
+    'radix': 'warn', // Add radix on parseInt
+    // 'dot-notation': 'warn',  // 39 instances as of 3 Jan 2022
+    // 'no-console': 'warn',  // 69 instances as of 3 Jan 2022
+    // 'no-shadow': 'warn', // 54 instances as of 3 Jan 2022
+    // 'prefer-arrow/prefer-arrow-functions': ['warn'], // Lots of 'newable' functions in the code base
+    // 'prefer-const': ['warn', {'destructuring': 'all'}],
+
+    '@typescript-eslint/consistent-type-definitions': ['warn', 'interface'],
+    '@typescript-eslint/explicit-member-accessibility': 'off',
+    '@typescript-eslint/no-empty-interface': 'warn',
+    '@typescript-eslint/no-inferrable-types': ['warn', {ignoreParameters: true}],
+    '@typescript-eslint/no-misused-new': 'warn',
+    '@typescript-eslint/no-non-null-assertion': 'warn',
+    '@typescript-eslint/unified-signatures': 'warn',
+    // '@typescript-eslint/member-ordering': ['warn', { 'classExpressions': ['method', 'field'] }],
     // 'no-use-before-define': 'off', // Needed for the below rule
     // '@typescript-eslint/no-use-before-define': 'warn', // 55 instances as of 3 Jan 2022
     // 'no-unused-vars': 'off', // Needed for the below rule
     // '@typescript-eslint/no-unused-vars': 'warn', // 271 instances as of 3 Jan 2022
-    'no-var': 'warn',
-    'radix': 'warn', // Add radix on parseInt
-    'eqeqeq': ['warn', 'always', {'null': 'ignore'}],
 
-    /* React */
-    'react/jsx-curly-spacing': ["warn", {'when': 'never'}],
     'react/jsx-uses-vars': 'warn',
     'react-hooks/rules-of-hooks': 'warn',
     // 'react-hooks/exhaustive-deps': 'warn',  // 45 instances as of 3 Jan 2022
 
-    /* Maintainability */
+    /* Style */
+
+    // 'prettier/prettier': 'warn', // Possibly use prettier to handle some formatting
+
     'eol-last': 'warn',
     'max-len': ['warn', {code: 140, ignorePattern: '^import |^export\\{(.*?)\\}', ignoreComments: true}],
-    // 'prefer-const': ['warn', {'destructuring': 'all'}],
+    'no-trailing-spaces': 'warn',
+    'quotes': ['warn', 'single'],
+    // 'brace-style': ['warn', '1tbs'],
+    // 'no-multi-spaces': 'warn',
+    // 'simple-import-sort/sort': 'warn',
+    // 'space-before-function-paren': ['warn', { 'anonymous': 'never', 'named': 'never', 'asyncArrow': 'always' }],
+    // 'spaced-comment': 'warn',
+
+    '@typescript-eslint/type-annotation-spacing': 'warn',
+    '@typescript-eslint/prefer-function-type': 'warn',
+    // '@typescript-eslint/semi': 'warn',
+
+    'react/jsx-curly-spacing': ["warn", {'when': 'never'}],
 
     /* Jest */
     'jest/no-focused-tests': 'warn',
