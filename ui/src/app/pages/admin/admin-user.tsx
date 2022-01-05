@@ -384,6 +384,7 @@ export const AdminUser = withRouter(class extends React.Component<Props, State> 
             />
             <ContactEmailTextInput
               contactEmail={updatedProfile.contactEmail}
+              highlightOnChange={false}
               onChange={email => this.setContactEmail(email)}
               labelStyle={styles.label}
               inputStyle={styles.textInput}
@@ -417,6 +418,7 @@ export const AdminUser = withRouter(class extends React.Component<Props, State> 
               onChange={(event) => this.setInstitutionalRoleOnProfile(event.value)}/>
             <InstitutionalRoleOtherTextInput
               affiliation={updatedProfile.verifiedInstitutionalAffiliation}
+              highlightOnChange={false}
               labelStyle={styles.label}
               inputStyle={styles.textInput}
               containerStyle={styles.textInputContainer}

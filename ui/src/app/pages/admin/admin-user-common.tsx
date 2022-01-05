@@ -151,16 +151,18 @@ export const DropdownWithLabel =
 interface ContactEmailTextInputProps {
   contactEmail: string,
   previousContactEmail?: string,
+  highlightOnChange: boolean,
   onChange: Function,
   labelStyle?: CSSProperties,
   inputStyle?: CSSProperties,
   containerStyle?: CSSProperties,
 }
-export const ContactEmailTextInput =
-  ({contactEmail, previousContactEmail, onChange, labelStyle, inputStyle, containerStyle}: ContactEmailTextInputProps) => {
+export const ContactEmailTextInput = ({contactEmail, previousContactEmail, highlightOnChange, onChange, labelStyle,
+                                        inputStyle, containerStyle}: ContactEmailTextInputProps) => {
   return <TextInputWithLabel
     inputId={'contactEmail'}
     labelText={'Contact email'}
+    highlightOnChange={highlightOnChange}
     value={contactEmail}
     previousValue={previousContactEmail}
     labelStyle={{...commonStyles.label, ...labelStyle}}
@@ -235,17 +237,19 @@ export const InstitutionalRoleDropdown =
 interface InstitutionalRoleOtherTextProps {
   affiliation?: VerifiedInstitutionalAffiliation,
   previousOtherText?: string,
+  highlightOnChange: boolean,
   onChange: Function,
   labelStyle?: CSSProperties,
   inputStyle?: CSSProperties,
   containerStyle?: CSSProperties,
 }
-export const InstitutionalRoleOtherTextInput =
-  ({affiliation, previousOtherText, onChange, labelStyle, inputStyle, containerStyle}: InstitutionalRoleOtherTextProps) => {
+export const InstitutionalRoleOtherTextInput = ({affiliation, previousOtherText, highlightOnChange, onChange,
+                                                  labelStyle, inputStyle, containerStyle}: InstitutionalRoleOtherTextProps) => {
   return (affiliation?.institutionalRoleEnum === InstitutionalRole.OTHER)
     ? <TextInputWithLabel
       dataTestId={'institutionalRoleOtherText'}
       labelText={'Institutional role description'}
+      highlightOnChange={highlightOnChange}
       value={affiliation?.institutionalRoleOtherText}
       previousValue={previousOtherText}
       labelStyle={{...commonStyles.label, ...labelStyle}}

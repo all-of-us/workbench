@@ -117,6 +117,7 @@ const EditableFields =
         <ContactEmailTextInput
           contactEmail={updatedProfile.contactEmail}
           previousContactEmail={oldProfile.contactEmail}
+          highlightOnChange
           onChange={email => onChangeEmail(email)}/>
         <InstitutionDropdown
           institutions={institutions}
@@ -139,6 +140,7 @@ const EditableFields =
         <InstitutionalRoleOtherTextInput
           affiliation={updatedProfile.verifiedInstitutionalAffiliation}
           previousOtherText={oldProfile.verifiedInstitutionalAffiliation?.institutionalRoleOtherText}
+          highlightOnChange
           onChange={value => onChangeInstitutionOtherText(value)}/>
       </FlexRow>
     </FlexColumn>
