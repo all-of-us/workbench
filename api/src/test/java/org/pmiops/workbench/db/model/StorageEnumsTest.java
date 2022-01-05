@@ -77,7 +77,15 @@ public class StorageEnumsTest {
             .filter(m -> allMappedEnumerationClasses.contains(m.getReturnType()))
             .collect(Collectors.toMap(Method::getReturnType, m -> m));
 
-    for (final Class enumClass : allMappedEnumerationClasses) {
+    // Resource type is just using a subset of type for enum right now for user_recent_resource
+    // table
+    // So we are removing this from the list of check for missing Map entries
+    Set<Class> allMappedEnumerationClassesExceptResourceType =
+        allMappedEnumerationClasses.stream()
+            .filter(m -> !m.getName().equals("org.pmiops.workbench.model.ResourceType"))
+            .collect(Collectors.toSet());
+
+    for (final Class enumClass : allMappedEnumerationClassesExceptResourceType) {
       for (final Object enumValue : enumClass.getEnumConstants()) {
         final Method enumToStorageMethod = enumClassToStorageMethod.get(enumClass);
         Short shortValue = enumToStorage(enumValue, enumToStorageMethod);

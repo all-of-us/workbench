@@ -1,5 +1,9 @@
 package org.pmiops.workbench.db.dao;
 
+import java.sql.Timestamp;
+import java.time.Clock;
+import java.time.Duration;
+import java.util.List;
 import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.db.DbRetryUtils;
 import org.pmiops.workbench.db.model.DbCohort;
@@ -11,11 +15,6 @@ import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.model.ResourceType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.sql.Timestamp;
-import java.time.Clock;
-import java.time.Duration;
-import java.util.List;
 
 @Service
 public class UserRecentResourceServiceImpl implements UserRecentResourceService {
