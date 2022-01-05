@@ -1,18 +1,18 @@
-import { FlexRow } from 'app/components/flex';
-import { ClrIcon } from 'app/components/icons';
-import colors, { colorWithWhiteness } from 'app/styles/colors';
+import {FlexRow} from 'app/components/flex';
+import colors, {colorWithWhiteness} from 'app/styles/colors';
 import * as React from 'react';
+import {ClrIcon} from './clr-icons';
 
 const MessageWithIcon = ({
   messageType,
   iconSize = 30,
   iconPosition,
-  children,
+  children
 }: {
-  messageType: 'warning' | 'error' | 'success';
-  iconSize: number;
-  iconPosition: 'top' | 'center' | 'bottom';
-  children;
+  messageType: 'warning' | 'error' | 'success',
+  iconSize: number,
+  iconPosition: 'top' | 'center' | 'bottom',
+  children
 }) => {
   const icon = {
     warning: 'warning-standard',
@@ -23,82 +23,76 @@ const MessageWithIcon = ({
   const color = {
     warning: colors.warning,
     error: colors.danger,
-    success: colors.success,
+    success: colors.success
   };
 
   const position = {
-    top: { alignSelf: 'flex-start' },
+    top: {alignSelf: 'flex-start'},
     // not necessary bc of top level align-items, but this does make it explicit what the default does
-    center: { alignSelf: 'center' },
-    bottom: { alignSelf: 'flex-end' },
+    center: {alignSelf: 'center'},
+    bottom: {alignSelf: 'flex-end'}
   };
 
-  return (
-    <FlexRow
+  return <FlexRow
       style={{
         alignItems: 'center',
-        backgroundColor: colorWithWhiteness(color[messageType], 0.9),
+        backgroundColor: colorWithWhiteness(color[messageType], .9),
         border: `1px solid ${color[messageType]}`,
         borderRadius: '5px',
         color: colors.dark,
         marginTop: '.5rem',
         padding: '.5rem 0px',
       }}
-    >
-      <ClrIcon
+  >
+    <ClrIcon
         style={{
           color: color[messageType],
           flex: '0 0 auto',
           marginLeft: '.5rem',
-          ...position[iconPosition],
+          ...position[iconPosition]
         }}
         shape={icon[messageType]}
         size={iconSize}
         class={'is-solid'}
-      />
-      <div style={{ paddingLeft: '0.5rem', paddingRight: '0.5rem' }}>
-        {children}
-      </div>
-    </FlexRow>
-  );
+    />
+    <div style={{paddingLeft: '0.5rem', paddingRight: '0.5rem'}}>
+      {children}
+    </div>
+  </FlexRow>;
 };
 
 export const WarningMessage = ({
   iconSize = 30,
   iconPosition = 'center',
-  children,
+  children
 }: {
-  iconSize?: number;
-  iconPosition?: 'top' | 'center' | 'bottom';
-  children: string | React.ReactNode;
+  iconSize?: number,
+  iconPosition?: 'top' | 'center' | 'bottom',
+  children: string|React.ReactNode
 }) => {
-  return (
-    <MessageWithIcon
+  return <MessageWithIcon
       messageType={'warning'}
       iconSize={iconSize}
       iconPosition={iconPosition}
-    >
-      {children}
-    </MessageWithIcon>
-  );
+  >
+    {children}
+  </MessageWithIcon>;
 };
 
 export const ErrorMessage = ({
   iconSize = 30,
   iconPosition = 'center',
-  children,
+  children
 }: {
-  iconSize?: number;
-  iconPosition?: 'top' | 'center' | 'bottom';
-  children: string | React.ReactNode;
+  iconSize?: number,
+  iconPosition?: 'top' | 'center' | 'bottom',
+  children: string|React.ReactNode
 }) => {
-  return (
-    <MessageWithIcon
+  return <MessageWithIcon
       messageType={'error'}
       iconSize={iconSize}
       iconPosition={iconPosition}
     >
-      {children}
-    </MessageWithIcon>
-  );
+    {children}
+  </MessageWithIcon>;
 };

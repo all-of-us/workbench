@@ -1,45 +1,33 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
-import { domainToTitle } from 'app/cohort-search/utils';
-import { Button } from 'app/components/buttons';
-import { FlexRow, FlexRowWrap } from 'app/components/flex';
-import { ClrIcon } from 'app/components/icons';
-import { SpinnerOverlay } from 'app/components/spinners';
-import { ConceptAddModal } from 'app/pages/data/concept/concept-add-modal';
-import { LOCAL_STORAGE_KEY_CRITERIA_SELECTIONS } from 'app/pages/data/criteria-search';
-import { conceptSetsApi } from 'app/services/swagger-fetch-clients';
+import {domainToTitle} from 'app/cohort-search/utils';
+import {Button} from 'app/components/buttons';
+import {FlexRow, FlexRowWrap} from 'app/components/flex';
+import {SpinnerOverlay} from 'app/components/spinners';
+import {ConceptAddModal} from 'app/pages/data/concept/concept-add-modal';
+import {LOCAL_STORAGE_KEY_CRITERIA_SELECTIONS} from 'app/pages/data/criteria-search';
+import {conceptSetsApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {
-  reactStyles,
-  withCurrentCohortSearchContext,
-  withCurrentConcept,
-  withCurrentConceptSet,
-  withCurrentWorkspace,
-} from 'app/utils';
+import {reactStyles, withCurrentConcept, withCurrentConceptSet, withCurrentWorkspace} from 'app/utils';
 import {
   conceptSetUpdating,
   currentConceptSetStore,
   currentConceptStore,
   NavigationProps,
-  setSidebarActiveIconStore,
+  setSidebarActiveIconStore
 } from 'app/utils/navigation';
-import { withNavigation } from 'app/utils/with-navigation-hoc';
-import { WorkspaceData } from 'app/utils/workspace-data';
-import {
-  ConceptSet,
-  Criteria,
-  Domain,
-  DomainCount,
-  UpdateConceptSetRequest,
-} from 'generated/fetch';
+import {withNavigation} from 'app/utils/with-navigation-hoc';
+import {WorkspaceData} from 'app/utils/workspace-data';
+import {ConceptSet, Criteria, Domain, DomainCount, UpdateConceptSetRequest} from 'generated/fetch';
+import {ClrIcon} from 'app/components/clr-icons';
 
 const styles = reactStyles({
   sectionTitle: {
     marginTop: '0',
     fontWeight: 600,
     color: colors.primary,
-    marginBottom: '1rem',
+    marginBottom: '1rem'
   },
   selectionContainer: {
     background: colors.white,
@@ -59,7 +47,7 @@ const styles = reactStyles({
     display: 'inline-block',
     fontSize: '13px',
     fontWeight: 600,
-    paddingRight: '0.25rem',
+    paddingRight: '0.25rem'
   },
   removeSelection: {
     background: 'none',
@@ -67,32 +55,20 @@ const styles = reactStyles({
     color: colors.danger,
     cursor: 'pointer',
     marginRight: '0.25rem',
-    padding: 0,
+    padding: 0
   },
   saveButton: {
     height: '2rem',
     borderRadius: '5px',
     fontWeight: 600,
-    marginRight: '0.5rem',
-  },
+    marginRight: '0.5rem'
+  }
 });
 
-const getConceptIdsToAddOrRemove = (
-  conceptsToFilter: Array<Criteria>,
-  conceptsToCompare: Array<Criteria>
-) => {
+const getConceptIdsToAddOrRemove = (conceptsToFilter: Array<Criteria>, conceptsToCompare: Array<Criteria>) => {
   return conceptsToFilter.reduce((conceptIds, concept) => {
-    if (
-      !conceptsToCompare.find(
-        (con) =>
-          con.conceptId === concept.conceptId &&
-          con.isStandard === concept.isStandard
-      )
-    ) {
-      conceptIds.push({
-        conceptId: concept.conceptId,
-        standard: concept.isStandard,
-      });
+    if (!conceptsToCompare.find(con => con.conceptId === concept.conceptId && con.isStandard === concept.isStandard)) {
+      conceptIds.push({conceptId: concept.conceptId, standard: concept.isStandard});
     }
     return conceptIds;
   }, []);
@@ -102,119 +78,69 @@ interface Props extends NavigationProps {
   workspace: WorkspaceData;
   concept: Array<any>;
   conceptSet: ConceptSet;
-  cohortContext: any;
 }
 
-export const ConceptListPage = fp.flow(
-  withCurrentCohortSearchContext(),
-  withCurrentConcept(),
-  withCurrentConceptSet(),
-  withCurrentWorkspace(),
-  withNavigation
-)(
+interface State {
+  conceptAddModalOpen: boolean;
+  updating: boolean;
+}
+export const ConceptListPage = fp.flow(withCurrentWorkspace(), withCurrentConcept(), withCurrentConceptSet(), withNavigation)(
   class extends React.Component<Props, State> {
     constructor(props) {
       super(props);
       this.state = {
         conceptAddModalOpen: false,
-        updating: false,
+        updating: false
       };
     }
 
     async updateConceptSet() {
-      const {
-        concept,
-        conceptSet,
-        workspace: { namespace, id },
-      } = this.props;
+      const {concept, conceptSet, workspace: {namespace, id}} = this.props;
       conceptSetUpdating.next(true);
-      this.setState({ updating: true });
+      this.setState({updating: true});
       // Selections that don't exist on the existing concept set are added
-      const addedConceptSetConceptIds = getConceptIdsToAddOrRemove(
-        concept,
-        conceptSet.criteriums
-      );
+      const addedConceptSetConceptIds = getConceptIdsToAddOrRemove(concept, conceptSet.criteriums);
       // Concept ids on the existing concept set that don't exist on the selections get removed
-      const removedConceptSetConceptIds = getConceptIdsToAddOrRemove(
-        conceptSet.criteriums,
-        concept
-      );
+      const removedConceptSetConceptIds = getConceptIdsToAddOrRemove(conceptSet.criteriums, concept);
       const updateConceptSetReq: UpdateConceptSetRequest = {
         etag: conceptSet.etag,
         addedConceptSetConceptIds,
-        removedConceptSetConceptIds,
+        removedConceptSetConceptIds
       };
       try {
-        const updatedConceptSet =
-          await conceptSetsApi().updateConceptSetConcepts(
-            namespace,
-            id,
-            conceptSet.id,
-            updateConceptSetReq
-          );
+        const updatedConceptSet = await conceptSetsApi().updateConceptSetConcepts(namespace, id, conceptSet.id, updateConceptSetReq);
         currentConceptSetStore.next(updatedConceptSet);
-        this.props.navigate([
-          'workspaces',
-          namespace,
-          id,
-          'data',
-          'concepts',
-          'sets',
-          conceptSet.id,
-          'actions',
-        ]);
+        this.props.navigate(['workspaces', namespace, id, 'data', 'concepts', 'sets', conceptSet.id, 'actions']);
       } catch (error) {
         console.error(error);
       }
     }
 
     removeSelection(conceptToDel) {
-      const updatedConceptList = this.props.concept.filter(
-        (concept) => concept !== conceptToDel
-      );
-      localStorage.setItem(
-        LOCAL_STORAGE_KEY_CRITERIA_SELECTIONS,
-        JSON.stringify(updatedConceptList)
-      );
+      const updatedConceptList = this.props.concept.filter((concept) => concept !== conceptToDel);
+      localStorage.setItem(LOCAL_STORAGE_KEY_CRITERIA_SELECTIONS, JSON.stringify(updatedConceptList));
       currentConceptStore.next(updatedConceptList);
     }
 
     afterConceptsSaved(conceptSet: ConceptSet) {
-      const { namespace, id } = this.props.workspace;
-      this.props.navigate([
-        'workspaces',
-        namespace,
-        id,
-        'data',
-        'concepts',
-        'sets',
-        conceptSet.id,
-        'actions',
-      ]);
+      const {namespace, id} = this.props.workspace;
+      this.props.navigate(['workspaces', namespace, id, 'data', 'concepts', 'sets', conceptSet.id, 'actions']);
     }
 
     get disableSaveConceptButton() {
-      const { concept, conceptSet } = this.props;
-      const { updating } = this.state;
-      return (
-        updating ||
-        !concept ||
-        concept.length === 0 ||
-        (!!conceptSet &&
-          JSON.stringify(conceptSet.criteriums.sort()) ===
-            JSON.stringify(concept.sort()))
-      );
+      const {concept, conceptSet} = this.props;
+      const {updating} = this.state;
+      return updating || !concept || concept.length === 0 ||
+        (!!conceptSet && JSON.stringify(conceptSet.criteriums.sort()) === JSON.stringify(concept.sort()));
     }
 
     getDomainCount() {
-      const { domain, type } = this.props.cohortContext;
+      const {domainId, type} = this.props.concept[0];
+      const domain: Domain = domainId === 'Measurement' && type === 'PPI' ? Domain.PHYSICALMEASUREMENT : domainId as Domain;
       const domainCount: DomainCount = {
-        domain:
-          domain === 'Measurement' && type === 'PPI'
-            ? Domain.PHYSICALMEASUREMENT
-            : (domain as Domain),
+        domain: domain,
         name: domainToTitle(domain),
-        conceptCount: this.props.concept.length,
+        conceptCount: this.props.concept.length
       };
       return domainCount;
     }
@@ -223,103 +149,71 @@ export const ConceptListPage = fp.flow(
       if (this.props.conceptSet) {
         this.updateConceptSet();
       } else {
-        this.setState({ conceptAddModalOpen: true });
+        this.setState({conceptAddModalOpen: true});
       }
     }
 
     closeConceptAddModal() {
-      this.setState({ conceptAddModalOpen: false });
+      this.setState({conceptAddModalOpen: false});
       setSidebarActiveIconStore.next(null);
     }
 
     renderSelection(selection: any, index: number) {
-      return (
-        <FlexRow key={index} style={{ lineHeight: '1.25rem' }}>
-          <button
-            style={styles.removeSelection}
-            onClick={() => this.removeSelection(selection)}
-          >
-            <ClrIcon shape='times-circle' />
-          </button>
-          <b style={{ paddingRight: '0.25rem' }}>{selection.conceptCode}</b>
-          {selection.name ? selection.name : selection.question}
-        </FlexRow>
-      );
+      return <FlexRow key={index} style={{lineHeight: '1.25rem'}}>
+        <button style={styles.removeSelection} onClick={() => this.removeSelection(selection)}>
+          <ClrIcon shape='times-circle'/>
+        </button>
+        <b style={{paddingRight: '0.25rem'}}>{selection.conceptCode}</b>
+        {selection.name ? selection.name : selection.question}
+      </FlexRow>;
     }
 
     renderSelections() {
-      const { concept } = this.props;
+      const {concept} = this.props;
       if ([Domain.CONDITION, Domain.PROCEDURE].includes(concept[0].domainId)) {
         // Separate selections by standard and source concepts for Condition and Procedures
-        const standardConcepts = concept.filter((con) => con.isStandard);
-        const sourceConcepts = concept.filter((con) => !con.isStandard);
-        return (
-          <React.Fragment>
-            {standardConcepts.length > 0 && (
-              <div style={{ marginBottom: '0.5rem' }}>
-                <div style={styles.selectionHeader}>Standard Concepts</div>
-                {standardConcepts.map((con, index) =>
-                  this.renderSelection(con, index)
-                )}
-              </div>
-            )}
-            {sourceConcepts.length > 0 && (
-              <div>
-                <div style={styles.selectionHeader}>Source Concepts</div>
-                {sourceConcepts.map((con, index) =>
-                  this.renderSelection(con, index)
-                )}
-              </div>
-            )}
-          </React.Fragment>
-        );
+        const standardConcepts = concept.filter(con => con.isStandard);
+        const sourceConcepts = concept.filter(con => !con.isStandard);
+        return <React.Fragment>
+          {standardConcepts.length > 0 && <div style={{marginBottom: '0.5rem'}}>
+            <div style={styles.selectionHeader}>Standard Concepts</div>
+            {standardConcepts.map((con, index) => this.renderSelection(con, index))}
+          </div>}
+          {sourceConcepts.length > 0 && <div>
+            <div style={styles.selectionHeader}>Source Concepts</div>
+            {sourceConcepts.map((con, index) => this.renderSelection(con, index))}
+          </div>}
+        </React.Fragment>;
       } else {
         return concept.map((con, index) => this.renderSelection(con, index));
       }
     }
 
     render() {
-      const { concept } = this.props;
-      const { conceptAddModalOpen, updating } = this.state;
-      return (
-        <div>
-          <div style={styles.selectionContainer}>
-            {updating && <SpinnerOverlay />}
-            {!!concept && concept.length > 0 && this.renderSelections()}
-          </div>
-          <FlexRowWrap
-            style={{ flexDirection: 'row-reverse', marginTop: '1rem' }}
-          >
-            <Button
-              type='primary'
-              style={styles.saveButton}
-              disabled={this.disableSaveConceptButton}
-              onClick={() => this.onSaveConceptSetClick()}
-            >
-              Save Concept Set
-            </Button>
-            <Button
-              type='link'
-              style={{ color: colors.primary, left: 0 }}
-              onClick={() => setSidebarActiveIconStore.next(null)}
-            >
-              Close
-            </Button>
-          </FlexRowWrap>
-          {conceptAddModalOpen && (
-            <ConceptAddModal
-              activeDomainTab={this.getDomainCount()}
-              selectedConcepts={this.props.concept}
-              onSave={(conceptSet) => this.afterConceptsSaved(conceptSet)}
-              onClose={() => this.closeConceptAddModal()}
-            />
-          )}
+      const {concept} = this.props;
+      const {conceptAddModalOpen, updating} = this.state;
+      return <div>
+        <div style={styles.selectionContainer}>
+          {updating && <SpinnerOverlay/>}
+          {!!concept && concept.length > 0 && this.renderSelections()}
         </div>
-      );
+        <FlexRowWrap style={{flexDirection: 'row-reverse', marginTop: '1rem'}}>
+          <Button type='primary'
+                  style={styles.saveButton}
+                  disabled={this.disableSaveConceptButton}
+                  onClick={() => this.onSaveConceptSetClick()}>
+            Save Concept Set
+          </Button>
+          <Button type='link'
+                  style={{color: colors.primary, left: 0}}
+                  onClick={() => setSidebarActiveIconStore.next(null)}>
+            Close
+          </Button>
+        </FlexRowWrap>
+        {conceptAddModalOpen && <ConceptAddModal activeDomainTab={this.getDomainCount()}
+                         selectedConcepts={this.props.concept}
+                         onSave={(conceptSet) => this.afterConceptsSaved(conceptSet)}
+                         onClose={() => this.closeConceptAddModal()}/>}
+        </div>;
     }
-  }
-);
-interface State {
-  conceptAddModalOpen: boolean;
-  updating: boolean;
-}
+  });

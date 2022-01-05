@@ -1,43 +1,44 @@
 import * as fp from 'lodash/fp';
-import { InputSwitch } from 'primereact/inputswitch';
+import {InputSwitch} from 'primereact/inputswitch';
 import * as React from 'react';
-import { CSSProperties } from 'react';
+import {CSSProperties} from 'react';
 
-import { domainToTitle } from 'app/cohort-search/utils';
-import { AlertDanger } from 'app/components/alert';
-import { Clickable, StyledExternalLink } from 'app/components/buttons';
-import { FlexRow } from 'app/components/flex';
-import { ClrIcon } from 'app/components/icons';
-import { TextInput } from 'app/components/inputs';
-import { TooltipTrigger } from 'app/components/popups';
-import { Spinner, SpinnerOverlay } from 'app/components/spinners';
-import { AoU } from 'app/components/text-wrappers';
-import { cohortBuilderApi } from 'app/services/swagger-fetch-clients';
-import colors, { colorWithWhiteness } from 'app/styles/colors';
-import {
-  reactStyles,
-  validateInputForMySQL,
-  withCdrVersions,
-  withCurrentConcept,
-  withCurrentWorkspace,
-} from 'app/utils';
-import { triggerEvent } from 'app/utils/analytics';
-import { findCdrVersion } from 'app/utils/cdr-versions';
+import {domainToTitle} from 'app/cohort-search/utils';
+import {AlertDanger} from 'app/components/alert';
+import {Clickable, StyledExternalLink} from 'app/components/buttons';
+import {FlexRow} from 'app/components/flex';
+import {TextInput} from 'app/components/inputs';
+import {TooltipTrigger} from 'app/components/popups';
+import {Spinner, SpinnerOverlay} from 'app/components/spinners';
+import {AoU} from 'app/components/text-wrappers';
+import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
+import colors, {colorWithWhiteness} from 'app/styles/colors';
+import {reactStyles, validateInputForMySQL, withCdrVersions, withCurrentConcept, withCurrentWorkspace} from 'app/utils';
+import {triggerEvent} from 'app/utils/analytics';
+import {findCdrVersion} from 'app/utils/cdr-versions';
 import {
   attributesSelectionStore,
   currentCohortSearchContextStore,
-  setSidebarActiveIconStore,
+  setSidebarActiveIconStore
 } from 'app/utils/navigation';
-import { WorkspaceData } from 'app/utils/workspace-data';
-import { environment } from 'environments/environment';
+import {WorkspaceData} from 'app/utils/workspace-data';
+import {environment} from 'environments/environment';
 import {
   CdrVersion,
   CdrVersionTiersResponse,
   Criteria,
   CriteriaSubType,
   CriteriaType,
-  Domain,
+  Domain
 } from 'generated/fetch';
+import {
+  CheckCircleIcon,
+  ClrIcon,
+  ExclamationTriangleIcon, InfoStandardIcon,
+  PlusCircleIcon,
+  SearchIcon, SliderIcon, TimesCircleIcon,
+  TimesIcon
+} from 'app/components/clr-icons';
 
 const borderStyle = `1px solid ${colorWithWhiteness(colors.dark, 0.7)}`;
 const styles = reactStyles({
@@ -65,34 +66,34 @@ const styles = reactStyles({
   attrIcon: {
     marginRight: '0.5rem',
     color: colors.accent,
-    cursor: 'pointer',
+    cursor: 'pointer'
   },
   selectIcon: {
     margin: '2px 0.5rem 2px 2px',
     color: colorWithWhiteness(colors.success, -0.5),
-    cursor: 'pointer',
+    cursor: 'pointer'
   },
   disableSelectIcon: {
     opacity: 0.4,
-    cursor: 'not-allowed',
+    cursor: 'not-allowed'
   },
   selectedIcon: {
     marginRight: '0.4rem',
     color: colorWithWhiteness(colors.success, -0.5),
     opacity: 0.4,
-    cursor: 'not-allowed',
+    cursor: 'not-allowed'
   },
   disabledIcon: {
     marginRight: '0.4rem',
     color: colorWithWhiteness(colors.dark, 0.5),
     opacity: 0.4,
     cursor: 'not-allowed',
-    pointerEvents: 'none',
+    pointerEvents: 'none'
   },
   brandIcon: {
     marginRight: '0.4rem',
     color: colorWithWhiteness(colors.dark, 0.5),
-    cursor: 'pointer',
+    cursor: 'pointer'
   },
   treeIcon: {
     color: colors.accent,
@@ -113,11 +114,11 @@ const styles = reactStyles({
     border: borderStyle,
     borderRadius: '3px 3px 0 0',
     borderBottom: 0,
-    tableLayout: 'fixed',
+    tableLayout: 'fixed'
   },
   tableBody: {
     borderRadius: '0 3px 3px 0',
-    borderTop: 0,
+    borderTop: 0
   },
   columnNameHeader: {
     padding: '0 0 0 0.25rem',
@@ -128,7 +129,7 @@ const styles = reactStyles({
     fontWeight: 600,
     textAlign: 'left',
     verticalAlign: 'middle',
-    lineHeight: '0.75rem',
+    lineHeight: '0.75rem'
   },
   columnBodyName: {
     background: colors.white,
@@ -149,7 +150,7 @@ const styles = reactStyles({
     float: 'left',
     whiteSpace: 'nowrap',
     overflow: 'hidden',
-    textOverflow: 'ellipsis',
+    textOverflow: 'ellipsis'
   },
   error: {
     width: '99%',
@@ -168,62 +169,51 @@ const styles = reactStyles({
   },
   infoIcon: {
     color: colorWithWhiteness(colors.accent, 0.1),
-    marginLeft: '0.25rem',
+    marginLeft: '0.25rem'
   },
   clearSearchIcon: {
     color: colors.accent,
     display: 'inline-block',
     float: 'right',
-    marginTop: '0.25rem',
+    marginTop: '0.25rem'
   },
   inputAlert: {
     justifyContent: 'space-between',
     padding: '0.2rem',
     width: '64.3%',
-  },
+  }
 });
 
-const columnBodyStyle = {
+const columnBodyStyle =  {
   ...styles.columnBodyName,
-  width: '9%',
+  width: '9%'
 };
 
 const columnHeaderStyle = {
   ...styles.columnNameHeader,
-  width: '9%',
+  width: '9%'
 };
 
 const columns = [
   {
     name: 'Name',
     tooltip: 'Name from vocabulary',
-    style: { ...styles.columnNameHeader, width: '31%', borderLeft: 0 },
+    style: {...styles.columnNameHeader, width: '31%', borderLeft: 0},
   },
   {
     name: 'Concept Id',
     tooltip: 'Unique ID for concept in OMOP',
-    style: {
-      ...styles.columnNameHeader,
-      width: '10%',
-      paddingLeft: '0',
-      paddingRight: '0.5rem',
-    },
+    style: {...styles.columnNameHeader, width: '10%', paddingLeft: '0', paddingRight: '0.5rem'},
   },
   {
     name: 'Source/Standard',
-    tooltip:
-      'Indicates if code is an OMOP standard or a source vocabulary code (ICD9/10, CPT, etc)',
-    style: {
-      ...styles.columnNameHeader,
-      width: '10%',
-      paddingLeft: '0',
-      paddingRight: '0.5rem',
-    },
+    tooltip: 'Indicates if code is an OMOP standard or a source vocabulary code (ICD9/10, CPT, etc)',
+    style: {...styles.columnNameHeader, width: '10%', paddingLeft: '0', paddingRight: '0.5rem'},
   },
   {
     name: 'Vocab',
     tooltip: 'Vocabulary for concept',
-    style: { ...columnHeaderStyle, paddingLeft: '0' },
+    style: {...columnHeaderStyle, paddingLeft: '0'},
   },
   {
     name: 'Code',
@@ -232,8 +222,7 @@ const columns = [
   },
   {
     name: 'Roll-up Count',
-    tooltip:
-      'Number of distinct participants that have either the parent concept OR any of the parent’s child concepts',
+    tooltip: 'Number of distinct participants that have either the parent concept OR any of the parent’s child concepts',
     style: columnHeaderStyle,
   },
   {
@@ -244,24 +233,18 @@ const columns = [
   {
     name: 'View Hierarchy',
     tooltip: null,
-    style: { ...styles.columnNameHeader, textAlign: 'center', width: '12%' },
+    style: {...styles.columnNameHeader, textAlign: 'center', width: '12%'},
   },
 ];
 
 const searchTrigger = 2;
-const sourceStandardTooltip = (
-  <span>
-    The <AoU /> program receives EHR data from a number of healthcare provider
-    sources across the United States. These sources may code patient health data
-    using a variety of vocabularies, such as ICD10 or SNOMED for conditions. To
-    simplify analysis, the <AoU /> dataset offers a single standardized
-    vocabulary for each domain (e.g. SNOMED for conditions), and corresponding
-    codes from all source vocabularies are mapped to the standard. Therefore, we
-    recommend most users use the standardized items in defining their dataset.
-    However, if you do not wish to rely on this standardization, you may select
-    concepts as coded in the source data.
-  </span>
-);
+const sourceStandardTooltip = <span>
+  The <AoU/> program receives EHR data from a number of healthcare provider sources across the United States. These sources may code
+  patient health data using a variety of vocabularies, such as ICD10 or SNOMED for conditions. To simplify analysis, the <AoU/> dataset
+  offers a single standardized vocabulary for each domain (e.g. SNOMED for conditions), and corresponding codes from all source
+  vocabularies are mapped to the standard. Therefore, we recommend most users use the standardized items in defining their dataset.
+  However, if you do not wish to rely on this standardization, you may select concepts as coded in the source data.
+</span>;
 
 interface Props {
   cdrVersionTiersResponse: CdrVersionTiersResponse;
@@ -298,11 +281,7 @@ const tableBodyOverlayStyle = `
   }
 `;
 
-export const ListSearch = fp.flow(
-  withCdrVersions(),
-  withCurrentWorkspace(),
-  withCurrentConcept()
-)(
+export const ListSearch = fp.flow(withCdrVersions(), withCurrentWorkspace(), withCurrentConcept())(
   class extends React.Component<Props, State> {
     constructor(props: Props) {
       super(props);
@@ -315,151 +294,96 @@ export const ListSearch = fp.flow(
         hoverId: undefined,
         loading: false,
         searching: false,
-        searchSource:
-          props.searchContext.domain === Domain.PHYSICALMEASUREMENTCSS,
+        searchSource: props.searchContext.domain === Domain.PHYSICALMEASUREMENTCSS,
         searchTerms: props.searchTerms,
         standardOnly: false,
         sourceMatch: undefined,
         standardData: null,
-        totalCount: null,
+        totalCount: null
       };
     }
     componentDidMount(): void {
-      const {
-        cdrVersionTiersResponse,
-        searchTerms,
-        searchContext: { source },
-        workspace: { cdrVersionId },
-      } = this.props;
-      this.setState({
-        cdrVersion: findCdrVersion(cdrVersionId, cdrVersionTiersResponse),
-      });
+      const {cdrVersionTiersResponse, searchTerms, searchContext: {source}, workspace: {cdrVersionId}} = this.props;
+      this.setState({cdrVersion: findCdrVersion(cdrVersionId, cdrVersionTiersResponse)});
       if (source === 'conceptSetDetails') {
-        this.setState({ data: this.props.concept });
+        this.setState({data: this.props.concept});
       } else {
         const searchString = searchTerms || '';
         this.getResultsBySourceOrStandard(searchString);
       }
     }
 
-    componentDidUpdate(prevProps: Readonly<Props>) {
-      const {
-        concept,
-        searchContext: { source },
-      } = this.props;
-      const { searching } = this.state;
-      if (
-        source === 'conceptSetDetails' &&
-        prevProps.concept !== concept &&
-        !searching
-      ) {
-        this.setState({ data: concept });
+    componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<State>, snapshot?: any) {
+      const {concept, searchContext: {source}} = this.props;
+      const {searching} = this.state;
+      if (source === 'conceptSetDetails' && prevProps.concept !== concept && !searching) {
+        this.setState({data: concept});
       }
     }
 
     handleInput = (event: any) => {
-      const {
-        key,
-        target: { value },
-      } = event;
+      const {key, target: {value}} = event;
       if (key === 'Enter') {
         if (value.trim().length < searchTrigger) {
-          this.setState({
-            inputErrors: ['Minimum criteria search length is two characters'],
-          });
+          this.setState({inputErrors: ['Minimum criteria search length is two characters']});
         } else {
           const inputErrors = validateInputForMySQL(value);
           if (inputErrors.length > 0) {
-            this.setState({ inputErrors });
+            this.setState({inputErrors});
           } else {
-            const { searchContext } = this.props;
-            triggerEvent(
-              `Cohort Builder Search - ${domainToTitle(searchContext.domain)}`,
-              'Search',
-              value
-            );
+            const {searchContext} = this.props;
+            triggerEvent(`Cohort Builder Search - ${domainToTitle(searchContext.domain)}`, 'Search', value);
             if (searchContext.source === 'concept') {
               // Update search terms so they will persist if user returns to concept homepage
-              currentCohortSearchContextStore.next({
-                ...searchContext,
-                searchTerms: value,
-              });
+              currentCohortSearchContextStore.next({...searchContext, searchTerms: value});
             }
             this.getResultsBySourceOrStandard(value);
           }
         }
       }
-    };
+    }
 
     // Searches either source or standard based on value of searchSource in state
-    getResultsBySourceOrStandard = async (value: string) => {
+    getResultsBySourceOrStandard = async(value: string) => {
       try {
-        this.setState({
-          data: null,
-          apiError: false,
-          inputErrors: [],
-          loading: true,
-          searching: true,
-        });
-        const {
-          searchContext: { domain, source, selectedSurvey },
-          workspace: { id, namespace },
-        } = this.props;
-        const { searchSource } = this.state;
+        this.setState({data: null, apiError: false, inputErrors: [], loading: true, searching: true});
+        const {searchContext: {domain, source, selectedSurvey}, workspace: {id, namespace}} = this.props;
+        const {searchSource} = this.state;
         const surveyName = selectedSurvey || 'All';
-        const resp = await cohortBuilderApi().findCriteriaByDomain(
-          namespace,
-          id,
-          domain,
-          !searchSource,
-          value.trim(),
-          surveyName
-        );
-        const data =
-          source !== 'cohort' && this.isSurvey
-            ? resp.items.filter(
-                (survey) =>
-                  survey.subtype === CriteriaSubType.QUESTION.toString()
-              )
-            : resp.items;
-        this.setState({ data, totalCount: resp.totalCount });
+        const resp = await cohortBuilderApi().findCriteriaByDomain(namespace, id, domain, !searchSource, value.trim(), surveyName);
+        const data = source !== 'cohort' && this.isSurvey
+          ? resp.items.filter(survey => survey.subtype === CriteriaSubType.QUESTION.toString())
+          : resp.items;
+        this.setState({data, totalCount: resp.totalCount});
       } catch (err) {
         console.error(err);
-        this.setState({ apiError: true });
+        this.setState({apiError: true});
       } finally {
-        this.setState({ loading: false });
+        this.setState({loading: false});
       }
-    };
+    }
 
     showStandardResults() {
       this.trackEvent('Standard Vocab Hyperlink');
-      this.setState({ standardOnly: true });
+      this.setState({standardOnly: true});
     }
 
     get checkSource() {
-      return [Domain.CONDITION, Domain.PROCEDURE].includes(
-        this.props.searchContext.domain
-      );
+      return [Domain.CONDITION, Domain.PROCEDURE].includes(this.props.searchContext.domain);
     }
 
     selectIconDisabled() {
-      const {
-        searchContext: { source },
-        selectedIds,
-      } = this.props;
+      const {searchContext: {source}, selectedIds} = this.props;
       return source !== 'cohort' && selectedIds && selectedIds.length >= 1000;
     }
 
     selectItem = (row: any) => {
-      let param = { parameterId: this.getParamId(row), ...row, attributes: [] };
+      let param = {parameterId: this.getParamId(row), ...row, attributes: []};
       if (row.domainId === Domain.SURVEY) {
-        param = {
-          ...param,
-          surveyName: this.props.searchContext.selectedSurvey,
-        };
+        param = {...param, surveyName: this.props.searchContext.selectedSurvey};
       }
       this.props.select(param);
-    };
+    }
 
     setAttributes(node: any) {
       attributesSelectionStore.next(node);
@@ -469,95 +393,64 @@ export const ListSearch = fp.flow(
     showHierarchy = (row: any) => {
       this.trackEvent('More Info');
       this.props.hierarchy(row);
-    };
+    }
 
     showIngredients = (row: any) => {
-      const { ingredients } = this.state;
+      const {ingredients} = this.state;
       if (ingredients[row.id]) {
         if (ingredients[row.id].error) {
           ingredients[row.id] = undefined;
         } else {
           ingredients[row.id].open = !ingredients[row.id].open;
         }
-        this.setState({ ingredients });
+        this.setState({ingredients});
       } else {
         try {
-          ingredients[row.id] = {
-            open: false,
-            loading: true,
-            error: false,
-            items: [],
-          };
-          this.setState({ ingredients });
-          const {
-            workspace: { id, namespace },
-          } = this.props;
+          ingredients[row.id] = {open: false, loading: true, error: false, items: []};
+          this.setState({ingredients});
+          const {workspace: {id, namespace}} = this.props;
           cohortBuilderApi()
             .findDrugIngredientByConceptId(namespace, id, row.conceptId)
-            .then((resp) => {
-              ingredients[row.id] = {
-                open: true,
-                loading: false,
-                error: false,
-                items: resp.items,
-              };
-              this.setState({ ingredients });
+            .then(resp => {
+              ingredients[row.id] = {open: true, loading: false, error: false, items: resp.items};
+              this.setState({ingredients});
             });
         } catch (error) {
           console.error(error);
-          ingredients[row.id] = {
-            open: true,
-            loading: false,
-            error: true,
-            items: [],
-          };
-          this.setState({ ingredients });
+          ingredients[row.id] = {open: true, loading: false, error: true, items: []};
+          this.setState({ingredients});
         }
       }
-    };
+    }
 
     isSelected = (row: any) => {
-      const { selectedIds } = this.props;
+      const {selectedIds} = this.props;
       const paramId = this.getParamId(row);
       return selectedIds.includes(paramId);
-    };
+    }
 
     getParamId(row: any) {
-      return `param${row.conceptId ? row.conceptId + row.code : row.id}${
-        row.isStandard
-      }`;
+      return `param${row.conceptId ? (row.conceptId + row.code) : row.id}${row.isStandard}`;
     }
 
     trackEvent = (label: string) => {
-      const {
-        searchContext: { domain },
-      } = this.props;
-      triggerEvent(
-        'Cohort Builder Search',
-        'Click',
-        `${label} - ${domainToTitle(domain)} - Cohort Builder Search`
-      );
-    };
+      const {searchContext: {domain}} = this.props;
+      triggerEvent('Cohort Builder Search', 'Click', `${label} - ${domainToTitle(domain)} - Cohort Builder Search`);
+    }
 
     onNameHover(el: HTMLDivElement, id: string) {
       if (el.offsetWidth < el.scrollWidth) {
-        this.setState({ hoverId: id });
+        this.setState({hoverId: id});
       }
     }
 
     get textInputPlaceholder() {
-      const {
-        searchContext: { domain, source, selectedSurvey },
-      } = this.props;
+      const {searchContext: {domain, source, selectedSurvey}} = this.props;
       switch (source) {
         case 'concept':
-          return `Search ${
-            !!selectedSurvey ? selectedSurvey : domainToTitle(domain)
-          } by code or description`;
+          return `Search ${!!selectedSurvey ? selectedSurvey : domainToTitle(domain)} by code or description`;
         case 'conceptSetDetails':
-          return `Search ${this.isSurvey ? 'across all ' : ''}${domainToTitle(
-            domain
-          )} by code or description`;
+          return `Search ${this.isSurvey ? 'across all ' : ''}${domainToTitle(domain)} by code or description`;
         case 'cohort':
           return `Search ${domainToTitle(domain)} by code or description`;
       }
@@ -577,457 +470,220 @@ export const ListSearch = fp.flow(
       return domainToTitle(this.props.searchContext.domain).toLowerCase();
     }
     getConceptLink(conceptId) {
-      return (
-        environment.publicUiUrl +
-        '/ehr/' +
-        this.dataBrowserDomainTitle() +
-        '/' +
-        conceptId
-      );
+      return environment.publicUiUrl + '/ehr/' + this.dataBrowserDomainTitle() + '/' + conceptId;
     }
 
     toggleSearchSource() {
       this.setState(
-        (state) => ({ searchSource: !state.searchSource }),
+        (state) => ({searchSource: !state.searchSource}),
         () => this.getResultsBySourceOrStandard(this.state.searchTerms || '')
       );
     }
 
     renderRow(row: any, child: boolean, elementId: string) {
-      const { hoverId, ingredients } = this.state;
-      const attributes =
-        this.props.searchContext.source === 'cohort' && row.hasAttributes;
+      const {hoverId, ingredients} = this.state;
+      const attributes = this.props.searchContext.source === 'cohort' && row.hasAttributes;
       const brand = row.type === CriteriaType.BRAND;
       const displayName = row.name + (brand ? ' (BRAND NAME)' : '');
-      const selected =
-        !attributes &&
-        !brand &&
-        this.props.selectedIds.includes(this.getParamId(row));
+      const selected = !attributes && !brand && this.props.selectedIds.includes(this.getParamId(row));
       const unselected = !attributes && !brand && !this.isSelected(row);
-      const open = ingredients[row.id]?.open;
-      const loadingIngredients = ingredients[row.id]?.loading;
-      const columnStyle = child
-        ? { ...styles.columnBodyName, paddingLeft: '1.25rem' }
-        : styles.columnBodyName;
-      const selectIconStyle = this.selectIconDisabled()
-        ? { ...styles.selectIcon, ...styles.disableSelectIcon }
-        : styles.selectIcon;
-      return (
-        <tr style={{ height: '1.75rem' }}>
-          <td
-            style={{
-              ...columnStyle,
-              width: '31%',
-              textAlign: 'left',
-              borderLeft: 0,
-              padding: '0 0.25rem',
-            }}
-          >
-            {row.selectable && (
-              <div style={styles.selectDiv}>
-                {attributes && (
-                  <ClrIcon
-                    style={styles.attrIcon}
-                    shape='slider'
-                    dir='right'
-                    size='20'
-                    onClick={() => this.setAttributes(row)}
-                  />
-                )}
-                {selected && (
-                  <ClrIcon
-                    style={styles.selectedIcon}
-                    shape='check-circle'
-                    size='20'
-                  />
-                )}
-                {unselected && (
-                  <ClrIcon
-                    style={selectIconStyle}
-                    shape='plus-circle'
-                    size='16'
-                    onClick={() => this.selectItem(row)}
-                  />
-                )}
-                {brand && !loadingIngredients && (
-                  <ClrIcon
-                    style={styles.brandIcon}
-                    shape={'angle ' + (open ? 'down' : 'right')}
-                    size='20'
-                    onClick={() => this.showIngredients(row)}
-                  />
-                )}
-                {loadingIngredients && <Spinner size={16} />}
-              </div>
-            )}
-            <TooltipTrigger
-              disabled={hoverId !== elementId}
-              content={<div>{displayName}</div>}
-            >
-              <div
-                data-test-id='name-column-value'
-                style={styles.nameDiv}
-                onMouseOver={(e) =>
-                  this.onNameHover(e.target as HTMLDivElement, elementId)
-                }
-                onMouseOut={() => this.setState({ hoverId: undefined })}
-              >
-                {displayName}
-              </div>
-            </TooltipTrigger>
-          </td>
-          <td
-            style={{ ...columnBodyStyle, width: '10%', paddingRight: '0.5rem' }}
-          >
-            <StyledExternalLink
-              href={this.getConceptLink(row.conceptId)}
-              target='_blank'
-            >
-              {row.conceptId}
-            </StyledExternalLink>
-          </td>
-          <td
-            style={{ ...columnBodyStyle, width: '10%', paddingRight: '0.5rem' }}
-          >
-            {row.isStandard ? 'Standard' : 'Source'}
-          </td>
-          <td style={{ ...columnBodyStyle }}>{!brand && row.type}</td>
-          <td
-            style={{
-              ...columnBodyStyle,
-              paddingLeft: '0.2rem',
-              paddingRight: '0.5rem',
-            }}
-          >
-            <TooltipTrigger
-              disabled={hoverId !== elementId}
-              content={<div>{row.code}</div>}
-            >
-              <div
-                data-test-id='code-column-value'
-                style={styles.nameDiv}
-                onMouseOver={(e) =>
-                  this.onNameHover(e.target as HTMLDivElement, elementId)
-                }
-                onMouseOut={() => this.setState({ hoverId: undefined })}
-              >
-                {row.code}
-              </div>
-            </TooltipTrigger>
-          </td>
-          <td style={{ ...columnBodyStyle, paddingLeft: '0.2rem' }}>
-            {row.parentCount > -1 && row.parentCount.toLocaleString()}
-          </td>
-          <td style={{ ...columnBodyStyle, paddingLeft: '0.2rem' }}>
-            {row.childCount > -1 && row.childCount.toLocaleString()}
-          </td>
-          <td style={{ ...columnBodyStyle, textAlign: 'center', width: '12%' }}>
-            {row.hasHierarchy && (
-              <i
-                className='pi pi-sitemap'
-                style={styles.treeIcon}
-                onClick={() => this.showHierarchy(row)}
-              />
-            )}
-          </td>
-        </tr>
-      );
+      const open = ingredients[row.id] && ingredients[row.id].open;
+      const loadingIngredients = ingredients[row.id] && ingredients[row.id].loading;
+      const columnStyle = child ?
+        {...styles.columnBodyName, paddingLeft: '1.25rem'} : styles.columnBodyName;
+      const selectIconStyle = this.selectIconDisabled() ? {...styles.selectIcon, ...styles.disableSelectIcon} : styles.selectIcon;
+      return <tr style={{height: '1.75rem'}}>
+        <td style={{...columnStyle, width: '31%', textAlign: 'left', borderLeft: 0, padding: '0 0.25rem'}}>
+          {row.selectable && <div style={styles.selectDiv}>
+            {attributes &&
+              <SliderIcon style={styles.attrIcon} dir='right' size='20' onClick={() => this.setAttributes(row)}/>
+            }
+            {selected && <CheckCircleIcon style={styles.selectedIcon} size='20'/>}
+            {unselected && <PlusCircleIcon style={selectIconStyle} size='16'
+                                    onClick={() => this.selectItem(row)}/>}
+            {brand && !loadingIngredients &&
+              <ClrIcon style={styles.brandIcon}
+                shape={'angle ' + (open ? 'down' : 'right')} size='20'
+                onClick={() => this.showIngredients(row)}/>
+            }
+            {loadingIngredients && <Spinner size={16}/>}
+          </div>}
+          <TooltipTrigger disabled={hoverId !== elementId} content={<div>{displayName}</div>}>
+            <div data-test-id='name-column-value'
+                 style={styles.nameDiv}
+                 onMouseOver={(e) => this.onNameHover(e.target as HTMLDivElement, elementId)}
+                 onMouseOut={() => this.setState({hoverId: undefined})}>
+              {displayName}
+            </div>
+          </TooltipTrigger>
+        </td>
+        <td style={{...columnBodyStyle, width: '10%', paddingRight: '0.5rem'}}>
+          <StyledExternalLink href={this.getConceptLink(row.conceptId)} target='_blank'>
+            {row.conceptId}
+          </StyledExternalLink>
+        </td>
+        <td style={{...columnBodyStyle, width: '10%', paddingRight: '0.5rem'}}>{row.isStandard ? 'Standard' : 'Source'}</td>
+        <td style={{...columnBodyStyle}}>{!brand && row.type}</td>
+        <td style={{...columnBodyStyle, paddingLeft: '0.2rem', paddingRight: '0.5rem'}}>
+          <TooltipTrigger disabled={hoverId !== elementId} content={<div>{row.code}</div>}>
+            <div data-test-id='code-column-value'
+                 style={styles.nameDiv}
+                 onMouseOver={(e) => this.onNameHover(e.target as HTMLDivElement, elementId)}
+                 onMouseOut={() => this.setState({hoverId: undefined})}>
+              {row.code}
+            </div>
+          </TooltipTrigger></td>
+        <td style={{...columnBodyStyle, paddingLeft: '0.2rem'}}>{row.parentCount > -1 && row.parentCount.toLocaleString()}</td>
+        <td style={{...columnBodyStyle, paddingLeft: '0.2rem'}}>{row.childCount > -1 && row.childCount.toLocaleString()}</td>
+        <td style={{...columnBodyStyle, textAlign: 'center', width: '12%'}}>
+          {row.hasHierarchy && <i className='pi pi-sitemap' style={styles.treeIcon} onClick={() => this.showHierarchy(row)}/>}
+        </td>
+      </tr>;
     }
 
     renderColumnWithToolTip(columnLabel, toolTip) {
-      return (
-        <FlexRow>
-          <label>{columnLabel}</label>
-          <TooltipTrigger side='top' content={<div>{toolTip}</div>}>
-            <ClrIcon
-              style={styles.infoIcon}
-              className='is-solid'
-              shape='info-standard'
-            />
-          </TooltipTrigger>
-        </FlexRow>
-      );
+      return <FlexRow>
+        <label>{columnLabel}</label>
+        <TooltipTrigger side='top' content={<div>{toolTip}</div>}>
+          <InfoStandardIcon style={styles.infoIcon} className='is-solid'/>
+        </TooltipTrigger>
+      </FlexRow>;
     }
 
     render() {
-      const {
-        concept,
-        searchContext: { domain, source },
-      } = this.props;
-      const {
-        apiError,
-        cdrVersion,
-        data,
-        ingredients,
-        inputErrors,
-        loading,
-        searching,
-        searchSource,
-        searchTerms,
-        standardOnly,
-        sourceMatch,
-        standardData,
-        totalCount,
-      } = this.state;
-      const showStandardOption =
-        !standardOnly && !!standardData && standardData.length > 0;
+      const {concept, searchContext: {domain, source}} = this.props;
+      const {apiError, cdrVersion, data, ingredients, inputErrors, loading, searching, searchSource, searchTerms, standardOnly, sourceMatch,
+        standardData, totalCount} = this.state;
+      const showStandardOption = !standardOnly && !!standardData && standardData.length > 0;
       const displayData = standardOnly ? standardData : data;
-      return (
-        <div style={{ overflow: 'auto' }}>
-          <style>{`
+      return <div style={{overflow: 'auto'}}>
+        <style>{`
           body .p-inputswitch.p-inputswitch-focus .p-inputswitch-slider {
             box-shadow: none
           }
         `}</style>
-          {this.selectIconDisabled() && (
-            <div
-              style={{
-                color: colors.warning,
-                fontWeight: 'bold',
-                maxWidth: '1000px',
-              }}
-            >
-              NOTE: Concept Set can have only 1000 concepts. Please delete some
-              concepts before adding more.
-            </div>
-          )}
-          <div style={styles.searchContainer}>
-            <div style={styles.searchBar}>
-              <ClrIcon shape='search' size='18' />
-              <TextInput
-                data-test-id='list-search-input'
-                style={styles.searchInput}
-                value={searchTerms}
-                placeholder={this.textInputPlaceholder}
-                onChange={(e) => this.setState({ searchTerms: e })}
-                onKeyPress={this.handleInput}
-              />
-              {source === 'conceptSetDetails' && searching && (
-                <Clickable
-                  style={styles.clearSearchIcon}
-                  onClick={() =>
-                    this.setState({
-                      data: concept,
-                      searching: false,
-                      searchTerms: '',
-                    })
-                  }
-                >
-                  <ClrIcon size={24} shape='times-circle' />
-                </Clickable>
-              )}
-            </div>
-            {inputErrors.map((error, e) => (
-              <AlertDanger key={e} style={styles.inputAlert}>
-                <span data-test-id='input-error-alert'>{error}</span>
-              </AlertDanger>
-            ))}
+        {this.selectIconDisabled() && <div style={{color: colors.warning, fontWeight: 'bold', maxWidth: '1000px'}}>
+          NOTE: Concept Set can have only 1000 concepts. Please delete some concepts before adding more.
+        </div>}
+        <div style={styles.searchContainer}>
+          <div style={styles.searchBar}>
+            <SearchIcon size='18'/>
+            <TextInput data-test-id='list-search-input'
+                       style={styles.searchInput}
+                       value={searchTerms}
+                       placeholder={this.textInputPlaceholder}
+                       onChange={(e) => this.setState({searchTerms: e})}
+                       onKeyPress={this.handleInput}/>
+            {source === 'conceptSetDetails' && searching && <Clickable style={styles.clearSearchIcon}
+                onClick={() => this.setState({data: concept, searching: false, searchTerms: ''})}>
+              <TimesCircleIcon size={24}/>
+            </Clickable>}
           </div>
-          <div style={{ display: 'table', height: '100%', width: '100%' }}>
-            <div style={styles.helpText}>
-              {domain === Domain.DRUG && (
-                <div>
-                  Your search may bring back brand names, generics and
-                  ingredients. Only ingredients may be added to your search
-                  criteria
-                </div>
-              )}
-              {!loading && (
-                <React.Fragment>
-                  {sourceMatch && !standardOnly && (
-                    <div>
-                      There are {sourceMatch.count.toLocaleString()}{' '}
-                      participants with source code {sourceMatch.code}.
-                      {showStandardOption && (
-                        <span>
-                          {' '}
-                          For more results, browse &nbsp;
-                          <Clickable
-                            style={styles.vocabLink}
-                            onClick={() => this.showStandardResults()}
-                          >
-                            Standard Vocabulary
-                          </Clickable>
-                          .
-                        </span>
-                      )}
-                    </div>
-                  )}
-                  {standardOnly && (
-                    <div>
-                      {!!displayData.length && (
-                        <span>
-                          There are {displayData[0].count.toLocaleString()}{' '}
-                          participants for the standard version of the code you
-                          searched
-                        </span>
-                      )}
-                      {!displayData.length && (
-                        <span>
-                          There are no standard matches for source code{' '}
-                          {sourceMatch.code}
-                        </span>
-                      )}
-                      &nbsp;
-                      <Clickable
-                        style={styles.vocabLink}
-                        onMouseDown={() =>
-                          this.trackEvent('Source Vocab Hyperlink')
-                        }
-                        onClick={() => this.setState({ standardOnly: false })}
-                      >
-                        Return to source code
-                      </Clickable>
-                      .
-                    </div>
-                  )}
-                </React.Fragment>
-              )}
-              <div>
-                {!loading && !!totalCount && (
-                  <span>
-                    There are {totalCount.toLocaleString()} results
-                    {!!cdrVersion && <span> in {cdrVersion.name}</span>}
-                  </span>
-                )}
-                {this.checkSource && (
-                  <span style={{ float: 'right' }}>
-                    <span
-                      style={{ display: 'table-cell', paddingRight: '0.35rem' }}
-                    >
-                      Show results as source concepts (ICD9, ICD10
-                      {domain === Domain.PROCEDURE && <span>, CPT</span>})
-                      <TooltipTrigger
-                        side='top'
-                        content={<div>{sourceStandardTooltip}</div>}
-                      >
-                        <ClrIcon
-                          style={styles.infoIcon}
-                          className='is-solid'
-                          shape='info-standard'
-                        />
-                      </TooltipTrigger>
-                    </span>
-                    <InputSwitch
-                      checked={searchSource}
-                      disabled={loading}
-                      onChange={() => this.toggleSearchSource()}
-                      style={{ display: 'table-cell', boxShadow: 0 }}
-                    />
-                  </span>
-                )}
-              </div>
-            </div>
-          </div>
-          {!loading && !!displayData && (
-            <div style={styles.listContainer}>
-              {!!displayData.length && (
-                <React.Fragment>
-                  <table className='p-datatable' style={styles.table}>
-                    <thead className='p-datatable-thead'>
-                      <tr style={{ height: '2rem' }}>
-                        {columns.map((column, index) => (
-                          <th key={index} style={column.style as CSSProperties}>
-                            {column.tooltip !== null
-                              ? this.renderColumnWithToolTip(
-                                  column.name,
-                                  column.tooltip
-                                )
-                              : column.name}
-                          </th>
-                        ))}
-                      </tr>
-                    </thead>
-                  </table>
-                  <style>{tableBodyOverlayStyle}</style>
-                  <div style={{ height: '15rem' }} className='tablebody'>
-                    <table
-                      data-test-id='list-search-results-table'
-                      className='p-datatable'
-                      style={{ ...styles.table, ...styles.tableBody }}
-                    >
-                      <tbody className='p-datatable-tbody'>
-                        {displayData.map((row, index) => {
-                          const open = ingredients[row.id]?.open;
-                          const err = ingredients[row.id]?.error;
-                          return (
-                            <React.Fragment key={index}>
-                              {this.renderRow(row, false, index)}
-                              {open &&
-                                !err &&
-                                ingredients[row.id].items.map((item, i) => {
-                                  return (
-                                    <React.Fragment key={i}>
-                                      {this.renderRow(
-                                        item,
-                                        true,
-                                        `${index}.${i}`
-                                      )}
-                                    </React.Fragment>
-                                  );
-                                })}
-                              {open && err && (
-                                <tr>
-                                  <td colSpan={5}>
-                                    <div
-                                      style={{ ...styles.error, marginTop: 0 }}
-                                    >
-                                      <ClrIcon
-                                        style={{ margin: '0 0.5rem 0 0.25rem' }}
-                                        className='is-solid'
-                                        shape='exclamation-triangle'
-                                        size='22'
-                                      />
-                                      Sorry, the request cannot be completed.
-                                      Please try again or contact Support in the
-                                      left hand navigation.
-                                    </div>
-                                  </td>
-                                </tr>
-                              )}
-                            </React.Fragment>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
-                </React.Fragment>
-              )}
-              {!standardOnly && !displayData.length && (
-                <div>No results found</div>
-              )}
-            </div>
-          )}
-          {loading && <SpinnerOverlay />}
-          {apiError && (
-            <div
-              style={{
-                ...styles.error,
-                ...(domain === Domain.DRUG ? { marginTop: '3.75rem' } : {}),
-              }}
-            >
-              <ClrIcon
-                style={{ margin: '0 0.5rem 0 0.25rem' }}
-                className='is-solid'
-                shape='exclamation-triangle'
-                size='22'
-              />
-              Sorry, the request cannot be completed. Please try again or
-              contact Support in the left hand navigation.
-              {standardOnly && (
-                <Clickable
-                  style={styles.vocabLink}
-                  onClick={() =>
-                    this.getResultsBySourceOrStandard(sourceMatch.code)
-                  }
-                >
-                  &nbsp;Return to source code.
-                </Clickable>
-              )}
-            </div>
-          )}
+          {inputErrors.map((error, e) => <AlertDanger key={e} style={styles.inputAlert}>
+            <span data-test-id='input-error-alert'>{error}</span>
+          </AlertDanger>)}
         </div>
-      );
+        <div style={{display: 'table', height: '100%', width: '100%'}}>
+          <div style={styles.helpText}>
+            {domain === Domain.DRUG && <div>
+              Your search may bring back brand names, generics and ingredients. Only ingredients may be added to your search criteria
+            </div>}
+            {!loading && <React.Fragment>
+              {sourceMatch && !standardOnly && <div>
+                There are {sourceMatch.count.toLocaleString()} participants with source code {sourceMatch.code}.
+                {showStandardOption && <span> For more results, browse
+                  &nbsp;<Clickable style={styles.vocabLink} onClick={() => this.showStandardResults()}>Standard Vocabulary</Clickable>.
+                </span>}
+              </div>}
+              {standardOnly && <div>
+                {!!displayData.length && <span>
+                  There are {displayData[0].count.toLocaleString()} participants for the standard version of the code you searched
+                </span>}
+                {!displayData.length && <span>
+                  There are no standard matches for source code {sourceMatch.code}
+                </span>}
+                &nbsp;<Clickable style={styles.vocabLink}
+                                 onMouseDown={() => this.trackEvent('Source Vocab Hyperlink')}
+                                 onClick={() => this.setState({standardOnly: false})}>
+                  Return to source code
+                </Clickable>.
+              </div>}
+            </React.Fragment>}
+            <div>
+              {!loading && !!totalCount && <span>
+                There are {totalCount.toLocaleString()} results{!!cdrVersion && <span> in {cdrVersion.name}</span>}
+              </span>}
+              {this.checkSource &&
+                <span style={{float: 'right'}}>
+                  <span style={{display: 'table-cell', paddingRight: '0.35rem'}}>
+                    Show results as source concepts (ICD9, ICD10{domain === Domain.PROCEDURE && <span>, CPT</span>})
+                    <TooltipTrigger side='top' content={<div>{sourceStandardTooltip}</div>}>
+                      <InfoStandardIcon style={styles.infoIcon} className='is-solid'/>
+                    </TooltipTrigger>
+                  </span>
+                  <InputSwitch checked={searchSource}
+                               disabled={loading}
+                               onChange={() => this.toggleSearchSource()}
+                               style={{display: 'table-cell', boxShadow: 0}}/>
+                </span>
+              }
+            </div>
+          </div>
+        </div>
+        {!loading && !!displayData && <div style={styles.listContainer}>
+          {!!displayData.length && <React.Fragment>
+            <table className='p-datatable' style={styles.table}>
+              <thead className='p-datatable-thead'>
+                <tr style={{height: '2rem'}}>
+                  {columns.map((column, index) => <th key={index} style={column.style as CSSProperties}>
+                    {column.tooltip !== null ? this.renderColumnWithToolTip(column.name, column.tooltip) : column.name}
+                  </th>)}
+                </tr>
+              </thead>
+            </table>
+            <style>
+              {tableBodyOverlayStyle}
+            </style>
+            <div style={{height: '15rem'}} className='tablebody'>
+              <table data-test-id='list-search-results-table'
+                     className='p-datatable'
+                     style={{...styles.table, ...styles.tableBody}}>
+                <tbody className='p-datatable-tbody'>
+                {displayData.map((row, index) => {
+                  const open = ingredients[row.id] && ingredients[row.id].open;
+                  const err = ingredients[row.id] && ingredients[row.id].error;
+                  return <React.Fragment key={index}>
+                    {this.renderRow(row, false, index)}
+                    {open && !err && ingredients[row.id].items.map((item, i) => {
+                      return <React.Fragment key={i}>
+                        {this.renderRow(item, true, `${index}.${i}`)}
+                      </React.Fragment>;
+                    })}
+                    {open && err && <tr>
+                      <td colSpan={5}>
+                        <div style={{...styles.error, marginTop: 0}}>
+                          <ExclamationTriangleIcon style={{margin: '0 0.5rem 0 0.25rem'}} className='is-solid' size='22'/>
+                          Sorry, the request cannot be completed. Please try again or contact Support in the left hand navigation.
+                        </div>
+                      </td>
+                    </tr>}
+                  </React.Fragment>;
+                })}
+              </tbody>
+              </table>
+            </div>
+          </React.Fragment>}
+          {!standardOnly && !displayData.length && <div>No results found</div>}
+        </div>}
+        {loading && <SpinnerOverlay/>}
+        {apiError && <div style={{...styles.error, ...(domain === Domain.DRUG ? {marginTop: '3.75rem'} : {})}}>
+          <ExclamationTriangleIcon style={{margin: '0 0.5rem 0 0.25rem'}} className='is-solid' size='22'/>
+          Sorry, the request cannot be completed. Please try again or contact Support in the left hand navigation.
+          {standardOnly && <Clickable style={styles.vocabLink} onClick={() => this.getResultsBySourceOrStandard(sourceMatch.code)}>
+            &nbsp;Return to source code.
+          </Clickable>}
+        </div>}
+      </div>;
     }
   }
 );

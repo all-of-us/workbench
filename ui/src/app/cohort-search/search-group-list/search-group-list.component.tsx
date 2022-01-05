@@ -1,31 +1,19 @@
 import * as fp from 'lodash/fp';
-import { TieredMenu } from 'primereact/tieredmenu';
+import {TieredMenu} from 'primereact/tieredmenu';
 import * as React from 'react';
-import { Subscription } from 'rxjs/Subscription';
+import {Subscription} from 'rxjs/Subscription';
 
-import { SearchGroup } from 'app/cohort-search/search-group/search-group.component';
-import {
-  criteriaMenuOptionsStore,
-  searchRequestStore,
-} from 'app/cohort-search/search-state.service';
-import {
-  domainToTitle,
-  generateId,
-  typeToTitle,
-} from 'app/cohort-search/utils';
-import { ClrIcon } from 'app/components/icons';
-import { cohortBuilderApi } from 'app/services/swagger-fetch-clients';
-import colors, { colorWithWhiteness } from 'app/styles/colors';
-import { reactStyles, withCdrVersions, withCurrentWorkspace } from 'app/utils';
-import { triggerEvent } from 'app/utils/analytics';
-import { currentWorkspaceStore } from 'app/utils/navigation';
-import { WorkspaceData } from 'app/utils/workspace-data';
-import {
-  CdrVersionTiersResponse,
-  CriteriaMenu,
-  Domain,
-  SearchRequest,
-} from 'generated/fetch';
+import {SearchGroup} from 'app/cohort-search/search-group/search-group.component';
+import {criteriaMenuOptionsStore, searchRequestStore} from 'app/cohort-search/search-state.service';
+import {domainToTitle, generateId, typeToTitle} from 'app/cohort-search/utils';
+import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
+import colors, {colorWithWhiteness} from 'app/styles/colors';
+import {reactStyles, withCdrVersions, withCurrentWorkspace} from 'app/utils';
+import {triggerEvent} from 'app/utils/analytics';
+import {currentWorkspaceStore} from 'app/utils/navigation';
+import {WorkspaceData} from 'app/utils/workspace-data';
+import {CdrVersionTiersResponse, CriteriaMenu, Domain, SearchRequest} from 'generated/fetch';
+import {CaretDownIcon, ClrIcon} from 'app/components/clr-icons';
 
 function initItem(id: string, type: string) {
   return {
@@ -35,7 +23,7 @@ function initItem(id: string, type: string) {
     modifiers: [],
     temporalGroup: 0,
     isRequesting: false,
-    status: 'active',
+    status: 'active'
   };
 }
 
@@ -44,15 +32,12 @@ const styles = reactStyles({
     background: colors.white,
     borderColor: 'rgba(215, 215, 215, 0.5)',
     borderRadius: '0.2rem',
-    boxShadow: `0 0.125rem 0.125rem 0 ${colorWithWhiteness(
-      colors.black,
-      0.85
-    )}`,
-    margin: '0 0 0.6rem',
+    boxShadow: `0 0.125rem 0.125rem 0 ${colorWithWhiteness(colors.black, 0.85)}`,
+    margin: '0 0 0.6rem'
   },
   cardBlock: {
     borderBottom: `1px solid ${colors.light}`,
-    padding: '0.5rem 0.5rem 0.5rem 0.75rem',
+    padding: '0.5rem 0.5rem 0.5rem 0.75rem'
   },
   cardHeader: {
     backgroundColor: colorWithWhiteness(colors.light, -0.3),
@@ -60,7 +45,7 @@ const styles = reactStyles({
     fontSize: '14px',
     fontWeight: 600,
     minWidth: '100%',
-    padding: '0.5rem 0.75rem',
+    padding: '0.5rem 0.75rem'
   },
   circle: {
     backgroundColor: 'rgb(226, 226, 233)',
@@ -74,18 +59,18 @@ const styles = reactStyles({
   circleWrapper: {
     width: '100%',
     display: 'flex',
-    justifyContent: 'center',
+    justifyContent: 'center'
   },
   listHeader: {
     fontSize: '16px',
     fontWeight: 'bold',
     margin: 0,
-    textTransform: 'capitalize',
+    textTransform: 'capitalize'
   },
   menu: {
     maxWidth: '15rem',
     minWidth: '5rem',
-    width: 'auto',
+    width: 'auto'
   },
   menuButton: {
     background: colors.white,
@@ -100,7 +85,7 @@ const styles = reactStyles({
     lineHeight: '1.5rem',
     padding: '0 0.5rem',
     textTransform: 'uppercase',
-    verticalAlign: 'middle',
+    verticalAlign: 'middle'
   },
 });
 
@@ -131,7 +116,7 @@ const css = `
 `;
 
 function mapMenuItem(item: CriteriaMenu) {
-  const { category, domainId, group, id, name, sortOrder, type } = item;
+  const {category, domainId, group, id, name, sortOrder, type} = item;
   return {
     category,
     children: null,
@@ -141,7 +126,7 @@ function mapMenuItem(item: CriteriaMenu) {
     name,
     sortOrder,
     standard: domainId === Domain.VISIT.toString() ? true : null,
-    type,
+    type
   };
 }
 
@@ -160,10 +145,7 @@ interface State {
   index: number;
   loadingMenuOptions: boolean;
 }
-const SearchGroupList = fp.flow(
-  withCurrentWorkspace(),
-  withCdrVersions()
-)(
+const SearchGroupList = fp.flow(withCurrentWorkspace(), withCdrVersions())(
   class extends React.Component<Props, State> {
     private criteriaMenu: any;
     private subscription: Subscription;
@@ -172,26 +154,23 @@ const SearchGroupList = fp.flow(
       this.state = {
         criteriaMenuOptions: [],
         index: 0,
-        loadingMenuOptions: false,
+        loadingMenuOptions: false
       };
     }
 
     componentDidMount(): void {
-      const { role } = this.props;
-      const { cdrVersionId } = currentWorkspaceStore.getValue();
-      this.subscription = criteriaMenuOptionsStore.subscribe((options) => {
+      const {role} = this.props;
+      const {cdrVersionId} = currentWorkspaceStore.getValue();
+      this.subscription = criteriaMenuOptionsStore.subscribe(options => {
         if (role === 'includes' && !options[cdrVersionId]) {
           this.getMenuOptions();
         } else if (!!options[cdrVersionId]) {
-          this.setState({ criteriaMenuOptions: options[cdrVersionId] });
+          this.setState({criteriaMenuOptions: options[cdrVersionId]});
         }
       });
       if (role === 'excludes') {
         this.subscription.add(
-          searchRequestStore.subscribe((sr) =>
-            this.setState({ index: sr.includes.length + 1 })
-          )
-        );
+          searchRequestStore.subscribe(sr => this.setState({index: sr.includes.length + 1})));
       }
     }
 
@@ -200,62 +179,45 @@ const SearchGroupList = fp.flow(
     }
 
     getMenuOptions() {
-      this.setState({ loadingMenuOptions: true });
-      const {
-        workspace: { cdrVersionId, id, namespace },
-      } = this.props;
+      this.setState({loadingMenuOptions: true});
+      const {workspace: {cdrVersionId, id, namespace}} = this.props;
       const criteriaMenuOptions = criteriaMenuOptionsStore.getValue();
-      cohortBuilderApi()
-        .findCriteriaMenu(namespace, id, 0)
-        .then(async (res) => {
-          const menuOptions = await Promise.all(
-            res.items.map(async (item) => {
-              const option = mapMenuItem(item);
-              if (option.group) {
-                const children = await cohortBuilderApi().findCriteriaMenu(
-                  namespace,
-                  id,
-                  option.id
-                );
-                option.children = children.items.map(mapMenuItem);
-              }
-              return option;
-            })
-          );
-          criteriaMenuOptions[cdrVersionId] = Object.values(
-            fp.groupBy('category', menuOptions)
-          );
-          criteriaMenuOptionsStore.next(criteriaMenuOptions);
-          this.setState({ loadingMenuOptions: false });
-        });
+      cohortBuilderApi().findCriteriaMenu(namespace, id, 0).then(async res => {
+        const menuOptions = await Promise.all(res.items.map(async item => {
+          const option = mapMenuItem(item);
+          if (option.group) {
+            const children = await cohortBuilderApi().findCriteriaMenu(namespace, id, option.id);
+            option.children = children.items.map(mapMenuItem);
+          }
+          return option;
+        }));
+        criteriaMenuOptions[cdrVersionId] = Object.values(fp.groupBy('category', menuOptions));
+        criteriaMenuOptionsStore.next(criteriaMenuOptions);
+        this.setState({loadingMenuOptions: false});
+      });
     }
 
     mapCriteriaMenuItem(domain: any, temporalGroup: number) {
       if (!!domain.children) {
-        return {
-          label: domain.name,
-          items: domain.children.map((dt) =>
-            this.mapCriteriaMenuItem(dt, temporalGroup)
-          ),
-        };
+        return {label: domain.name, items: domain.children.map((dt) => this.mapCriteriaMenuItem(dt, temporalGroup))};
       }
-      return { label: domain.name, command: () => this.launchSearch(domain) };
+      return {label: domain.name, command: () => this.launchSearch(domain)};
     }
 
     get criteriaMenuItems() {
-      const { criteriaMenuOptions, loadingMenuOptions } = this.state;
+      const {criteriaMenuOptions, loadingMenuOptions} = this.state;
       if (loadingMenuOptions) {
-        return [{ icon: 'pi pi-spin pi-spinner' }];
+        return [{icon: 'pi pi-spin pi-spinner'}];
       } else {
         let menuItems = [];
         criteriaMenuOptions.forEach((options, index) => {
           menuItems = [
             ...menuItems,
-            { label: options[0].category, className: 'menuitem-header' },
-            ...options.map((dt) => this.mapCriteriaMenuItem(dt, 0)),
+            {label: options[0].category, className: 'menuitem-header'},
+            ...options.map((dt) => this.mapCriteriaMenuItem(dt, 0))
           ];
           if (index < criteriaMenuOptions.length - 1) {
-            menuItems.push({ separator: true });
+            menuItems.push({separator: true});
           }
         });
         return menuItems;
@@ -264,79 +226,63 @@ const SearchGroupList = fp.flow(
 
     launchSearch(criteria: any) {
       this.criteriaMenu.hide();
-      const { role } = this.props;
-      const { domain, type, standard } = criteria;
+      const {role} = this.props;
+      const {domain, type, standard} = criteria;
       const category = `${role === 'includes' ? 'Add' : 'Excludes'} Criteria`;
-      // If domain is PERSON, list the type as well as the domain in the label
-      const label =
-        domainToTitle(domain) +
-        (domain === Domain.PERSON ? ' - ' + typeToTitle(type) : '') +
-        ' - Cohort Builder';
-
+    // If domain is PERSON, list the type as well as the domain in the label
+      const label = domainToTitle(domain) +
+      (domain === Domain.PERSON ? ' - ' + typeToTitle(type) : '') +
+      ' - Cohort Builder';
       triggerEvent(category, 'Click', `${category} - ${label}`);
-
+      let context: any;
       const itemId = generateId('items');
       const groupId = null;
       const item = initItem(itemId, domain);
-      const context = { item, domain, type, standard, role, groupId };
+      context = {item, domain, type, standard, role, groupId};
       this.props.setSearchContext(context);
     }
 
     render() {
-      const { groups, setSearchContext, role, updated, updateRequest } =
-        this.props;
-      const { index } = this.state;
-      return (
-        <React.Fragment>
-          <style>{css}</style>
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            <h2 style={styles.listHeader}>
-              {role === 'excludes' && <span>And</span>} {role.slice(0, -1)}{' '}
-              Participants
-            </h2>
-          </div>
-          {groups.map((group, g) => (
-            <div key={g} data-test-id={`${role}-search-group`}>
-              <SearchGroup
-                group={group}
-                index={g + index}
-                setSearchContext={setSearchContext}
-                role={role}
-                updated={updated}
-                updateRequest={updateRequest}
-              />
-              <div style={styles.circleWrapper}>
-                <div style={styles.circle}>AND</div>
-              </div>
-            </div>
-          ))}
-          <div style={styles.card}>
-            {/* Group Header */}
-            <div style={styles.cardHeader}>
-              <div style={{ marginLeft: '1.15rem' }}>
-                Group {groups.length + index + 1}
-              </div>
-            </div>
-            <div style={styles.cardBlock}>
-              <TieredMenu
-                style={{ ...styles.menu, padding: '0.5rem 0' }}
-                appendTo={document.body}
-                model={this.criteriaMenuItems}
-                popup
-                ref={(el) => (this.criteriaMenu = el)}
-              />
-              <button
-                style={styles.menuButton}
-                onClick={(e) => this.criteriaMenu.toggle(e)}
-              >
-                Add Criteria <ClrIcon shape='caret down' size={12} />
-              </button>
-            </div>
-          </div>
-        </React.Fragment>
-      );
+      const {groups, setSearchContext, role, updated, updateRequest} = this.props;
+      const {index} = this.state;
+      return <React.Fragment>
+      <style>{css}</style>
+      <div style={{display: 'flex', alignItems: 'center'}}>
+        <h2 style={styles.listHeader}>
+          {role === 'excludes' && <span>And</span>} {role.slice(0, -1)} Participants
+        </h2>
+      </div>
+      {groups.map((group, g) => <div key={g} data-test-id={`${role}-search-group`}>
+        <SearchGroup group={group}
+                     index={g + index}
+                     setSearchContext={setSearchContext}
+                     role={role}
+                     updated={updated}
+                     updateRequest={updateRequest}/>
+        <div style={styles.circleWrapper}>
+          <div style={styles.circle}>AND</div>
+        </div>
+      </div>)}
+      <div style={styles.card}>
+        {/* Group Header */}
+        <div style={styles.cardHeader}>
+          <div style={{marginLeft: '1.15rem'}}>Group {groups.length + index + 1}</div>
+        </div>
+        <div style={styles.cardBlock}>
+          <TieredMenu style={{...styles.menu, padding: '0.5rem 0'}}
+            appendTo={document.body}
+            model={this.criteriaMenuItems}
+            popup
+            ref={el => this.criteriaMenu = el} />
+          <button style={styles.menuButton} onClick={(e) => this.criteriaMenu.toggle(e)}>
+            Add Criteria <CaretDownIcon size={12}/>
+          </button>
+        </div>
+      </div>
+    </React.Fragment>;
     }
-  }
-);
+  });
 
-export { SearchGroupList };
+export {
+  SearchGroupList
+};

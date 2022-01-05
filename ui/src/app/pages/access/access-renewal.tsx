@@ -173,7 +173,7 @@ const CompletedOrBypassedButton = ({
     data-test-id='completed-button'
     style={{ ...renewalStyle.completedButton, ...style }}
   >
-    <ClrIcon shape='check' style={{ marginRight: '0.3rem' }} />
+    <CheckIcon style={{ marginRight: '0.3rem' }} />
     {wasBypassed ? 'Bypassed' : completedText}
   </Button>
 );

@@ -1,14 +1,14 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 
-import { FlexColumn, FlexRow } from './flex';
-import { ClrIcon } from './icons';
-import colors, { colorWithWhiteness } from 'app/styles/colors';
-import { reactStyles, switchCase } from 'app/utils';
+import {FlexColumn, FlexRow} from './flex';
+import colors, {colorWithWhiteness} from 'app/styles/colors';
+import {reactStyles, switchCase} from 'app/utils';
+import {ClrIcon, WarningStandardIcon} from './clr-icons';
 
 const styles = reactStyles({
   infoBanner: {
-    backgroundColor: colorWithWhiteness(colors.accent, 0.9),
+    backgroundColor: colorWithWhiteness(colors.accent, .9),
     color: colors.primary,
     fontSize: '12px',
     marginRight: '1rem',
@@ -33,13 +33,13 @@ const styles = reactStyles({
     fontSize: '14px',
   },
   footer: {
-    marginTop: '.5rem',
+    marginTop: '.5rem'
   },
   closeIcon: {
     position: 'absolute',
     top: '.3rem',
     right: '.3rem',
-    colors: colors.accent,
+    colors: colors.accent
   },
   warningIcon: {
     color: colors.warning,
@@ -48,53 +48,42 @@ const styles = reactStyles({
   },
 });
 
-const warningIcon = (
-  <ClrIcon
-    shape={'warning-standard'}
-    class={'is-solid'}
-    size={26}
-    style={styles.warningIcon}
-  />
-);
+const warningIcon = <WarningStandardIcon
+  class='is-solid'
+  size={26}
+  style={styles.warningIcon}
+/>;
 
 export enum ToastType {
   INFO,
-  WARNING,
+  WARNING
 }
 
-const styleForType = (toastType: ToastType, zIndex): React.CSSProperties =>
-  switchCase(
-    toastType,
-    [
-      ToastType.INFO,
-      () => ({
-        ...styles.infoBanner,
-        zIndex,
-      }),
-    ],
-    [
-      ToastType.WARNING,
-      () => ({
-        ...styles.infoBanner,
-        zIndex,
-        backgroundColor: colorWithWhiteness(colors.highlight, 0.5),
-      }),
-    ]
-  );
+const styleForType = (toastType: ToastType, zIndex): React.CSSProperties => switchCase(toastType,
+  [ToastType.INFO, () => ({
+    ...styles.infoBanner,
+    zIndex
+  })],
+  [ToastType.WARNING, () => ({
+    ...styles.infoBanner,
+    zIndex,
+    backgroundColor: colorWithWhiteness(colors.highlight, .5),
+  })],
+);
 
 interface ToastProps {
   title: string;
   message: string | JSX.Element;
   onClose: Function;
   toastType: ToastType;
-  zIndex: any; // TODO better type
+  zIndex: any;  // TODO better type
   footer?: string | JSX.Element;
 }
 export const ToastBanner = (props: ToastProps) => {
-  const { title, message, onClose, toastType, zIndex, footer } = props;
+  const {title, message, onClose, toastType, zIndex, footer} = props;
   return ReactDOM.createPortal(
     <FlexColumn style={styleForType(toastType, zIndex)}>
-      <FlexRow style={{ alignItems: 'center', marginTop: '.1rem' }}>
+      <FlexRow style={{alignItems: 'center', marginTop: '.1rem'}}>
         {toastType === ToastType.WARNING && warningIcon}
         <div style={styles.title}>{title}</div>
       </FlexRow>
@@ -107,6 +96,5 @@ export const ToastBanner = (props: ToastProps) => {
         onClick={() => onClose()}
       />
     </FlexColumn>,
-    document.getElementsByTagName('body')[0]
-  );
-};
+    document.getElementsByTagName('body')[0]);
+}

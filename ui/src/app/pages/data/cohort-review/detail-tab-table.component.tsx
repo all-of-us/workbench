@@ -1,52 +1,42 @@
-import { domainToTitle } from 'app/cohort-search/utils';
-import { ClrIcon } from 'app/components/icons';
-import { TextInput } from 'app/components/inputs';
-import { SpinnerOverlay } from 'app/components/spinners';
-import { ReviewDomainChartsComponent } from 'app/pages/data/cohort-review/review-domain-charts';
-import { vocabOptions } from 'app/services/review-state.service';
-import { cohortReviewApi } from 'app/services/swagger-fetch-clients';
+import {domainToTitle} from 'app/cohort-search/utils';
+import {TextInput} from 'app/components/inputs';
+import {SpinnerOverlay} from 'app/components/spinners';
+import {ReviewDomainChartsComponent} from 'app/pages/data/cohort-review/review-domain-charts';
+import {vocabOptions} from 'app/services/review-state.service';
+import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import { datatableStyles } from 'app/styles/datatable';
-import {
-  reactStyles,
-  withCurrentCohortReview,
-  withCurrentWorkspace,
-} from 'app/utils';
-import { triggerEvent } from 'app/utils/analytics';
-import { WorkspaceData } from 'app/utils/workspace-data';
-import {
-  CohortReview,
-  Domain,
-  Operator,
-  PageFilterRequest,
-  SortOrder,
-} from 'generated/fetch';
+import {datatableStyles} from 'app/styles/datatable';
+import {reactStyles, withCurrentCohortReview, withCurrentWorkspace} from 'app/utils';
+import {triggerEvent} from 'app/utils/analytics';
+import {WorkspaceData} from 'app/utils/workspace-data';
+import {CohortReview, Domain, Operator, PageFilterRequest, SortOrder} from 'generated/fetch';
 import * as fp from 'lodash/fp';
-import moment from 'moment';
-import { Column } from 'primereact/column';
-import { DataTable } from 'primereact/datatable';
-import { OverlayPanel } from 'primereact/overlaypanel';
-import { TabPanel, TabView } from 'primereact/tabview';
+import moment from 'moment'
+import {Column} from 'primereact/column';
+import {DataTable} from 'primereact/datatable';
+import {OverlayPanel} from 'primereact/overlaypanel';
+import {TabPanel, TabView} from 'primereact/tabview';
 import * as React from 'react';
+import {ClrIcon} from 'app/components/clr-icons';
 
 const styles = reactStyles({
   container: {
     position: 'relative',
-    minHeight: '15rem',
+    minHeight: '15rem'
   },
   table: {
     fontSize: '12px',
   },
   tableBody: {
     textAlign: 'left',
-    lineHeight: '0.75rem',
+    lineHeight: '0.75rem'
   },
   columnHeader: {
     display: 'inline-block',
     background: '#f4f4f4',
     color: colors.primary,
     fontWeight: 600,
-    maxWidth: '80%',
+    maxWidth: '80%'
   },
   columnBody: {
     background: colors.white,
@@ -73,13 +63,13 @@ const styles = reactStyles({
     padding: '2px 2px 1px 1px',
     borderRadius: '50%',
     fontWeight: 600,
-    float: 'right',
+    float: 'right'
   },
   sortIcon: {
     marginTop: '4px',
     color: colors.accent,
     fontSize: '0.5rem',
-    float: 'right',
+    float: 'right'
   },
   overlayHeader: {
     padding: '0.3rem',
@@ -119,7 +109,7 @@ const styles = reactStyles({
     width: '95%',
     borderRadius: '4px',
     backgroundColor: colors.light,
-    marginLeft: '5px',
+    marginLeft: '5px'
   },
   textInput: {
     width: '75%',
@@ -176,7 +166,7 @@ const filterIcons = {
   default: {
     ...styles.filterIcon,
     color: colors.accent,
-  },
+  }
 };
 
 const rowsPerPage = 25;
@@ -191,14 +181,11 @@ const domains = [
   Domain.VITAL,
 ];
 
-class NameContainer extends React.Component<
-  { data: any; vocab: string },
-  { showMore: boolean }
-> {
+class NameContainer extends React.Component<{data: any, vocab: string}, {showMore: boolean}> {
   container: HTMLDivElement;
   constructor(props: any) {
     super(props);
-    this.state = { showMore: false };
+    this.state = {showMore: false};
   }
 
   handleResize = fp.debounce(100, () => {
@@ -215,41 +202,25 @@ class NameContainer extends React.Component<
   }
 
   checkContainerHeight() {
-    const { offsetHeight, scrollHeight } = this.container;
-    this.setState({ showMore: scrollHeight > offsetHeight });
+    const {offsetHeight, scrollHeight} = this.container;
+    this.setState({showMore: scrollHeight > offsetHeight});
   }
 
   render() {
-    const { data, vocab } = this.props;
-    const { showMore } = this.state;
+    const {data, vocab} = this.props;
+    const {showMore} = this.state;
     let nl: any;
-    return (
-      <div
-        ref={(e) => (this.container = e)}
-        style={{ overflow: 'hidden', maxHeight: '1.2rem' }}
-      >
-        <div style={styles.nameWrapper}>
-          <p style={styles.nameContent}>{data[`${vocab}Name`]}</p>
-        </div>
-        {showMore && (
-          <React.Fragment>
-            <span style={styles.showMore} onClick={(e) => nl.toggle(e)}>
-              Show more
-            </span>
-            <OverlayPanel
-              className='labOverlay'
-              ref={(el) => (nl = el)}
-              showCloseIcon={true}
-              dismissable={true}
-            >
-              <div style={{ paddingBottom: '0.2rem' }}>
-                {data[`${vocab}Name`]}
-              </div>
-            </OverlayPanel>
-          </React.Fragment>
-        )}
+    return <div ref={(e) => this.container = e} style={{overflow: 'hidden', maxHeight: '1.2rem'}}>
+      <div style={styles.nameWrapper}>
+        <p style={styles.nameContent}>{data[`${vocab}Name`]}</p>
       </div>
-    );
+      {showMore && <React.Fragment>
+        <span style={styles.showMore} onClick={(e) => nl.toggle(e)}>Show more</span>
+        <OverlayPanel className='labOverlay' ref={(el) => nl = el} showCloseIcon={true} dismissable={true}>
+          <div style={{paddingBottom: '0.2rem'}}>{data[`${vocab}Name`]}</div>
+        </OverlayPanel>
+      </React.Fragment>}
+    </div>;
   }
 }
 
@@ -285,10 +256,7 @@ interface State {
   tabFilterState: any;
 }
 
-export const DetailTabTable = fp.flow(
-  withCurrentCohortReview(),
-  withCurrentWorkspace()
-)(
+export const DetailTabTable = fp.flow(withCurrentCohortReview(), withCurrentWorkspace())(
   class extends React.Component<Props, State> {
     codeInputChange: Function;
     private countAborter = new AbortController();
@@ -312,9 +280,7 @@ export const DetailTabTable = fp.flow(
         totalCount: null,
         requestPage: 0,
         range: [0, 124],
-        tabFilterState: JSON.parse(
-          JSON.stringify(props.filterState.tabs[props.domain])
-        ),
+        tabFilterState: JSON.parse(JSON.stringify(props.filterState.tabs[props.domain]))
       };
       this.codeInputChange = fp.debounce(300, (e) => this.filterCodes(e));
     }
@@ -324,46 +290,38 @@ export const DetailTabTable = fp.flow(
     }
 
     componentDidUpdate(prevProps: any) {
-      const { domain, filterState, updateState, participantId } = this.props;
-      const { lazyLoad, loading } = this.state;
+      const {domain, filterState, updateState, participantId} = this.props;
+      const {lazyLoad, loading} = this.state;
       if (prevProps.participantId !== participantId) {
         if (loading) {
           // cancel any pending count or data calls
           this.abortPendingApiCalls(true);
         }
-        this.setState(
-          {
-            data: null,
-            filteredData: null,
-            lazyLoad: false,
-            loading: true,
-            error: false,
-            page: 0,
-            start: 0,
-          },
-          () => this.getParticipantData(true)
-        );
+        this.setState({
+          data: null,
+          filteredData: null,
+          lazyLoad: false,
+          loading: true,
+          error: false,
+          page: 0,
+          start: 0,
+        }, () => this.getParticipantData(true));
       } else if (prevProps.updateState !== updateState) {
-        const tabFilterState = JSON.parse(
-          JSON.stringify(filterState.tabs[domain])
-        );
+        const tabFilterState = JSON.parse(JSON.stringify(filterState.tabs[domain]));
         if (lazyLoad) {
           if (loading) {
             // cancel any pending count or data calls
             this.abortPendingApiCalls(true);
           }
-          this.setState(
-            {
-              data: null,
-              filteredData: null,
-              loading: true,
-              error: false,
-              tabFilterState,
-            },
-            () => this.getParticipantData(true)
-          );
+          this.setState({
+            data: null,
+            filteredData: null,
+            loading: true,
+            error: false,
+            tabFilterState
+          }, () => this.getParticipantData(true));
         } else {
-          this.setState({ tabFilterState }, () => this.filterData());
+          this.setState({tabFilterState}, () => this.filterData());
         }
       }
     }
@@ -374,22 +332,22 @@ export const DetailTabTable = fp.flow(
 
     async getParticipantData(getCount: boolean) {
       try {
-        const { columns, domain } = this.props;
-        const { range, sortField, sortOrder } = this.state;
-        let { lazyLoad, page, start, totalCount } = this.state;
+        const {columns, domain} = this.props;
+        const {range, sortField, sortOrder} = this.state;
+        let {lazyLoad, page, start, totalCount} = this.state;
         const filters = this.getFilters();
         if (filters !== null) {
           const pageFilterRequest = {
             page: Math.floor(page / (lazyLoadSize / rowsPerPage)),
             pageSize: lazyLoadSize,
             sortOrder: sortOrder === 1 ? SortOrder.Asc : SortOrder.Desc,
-            sortColumn: columns.find((col) => col.name === sortField).filter,
+            sortColumn: columns.find(col => col.name === sortField).filter,
             domain,
-            filters: lazyLoad ? filters : { items: [] },
+            filters: lazyLoad ? filters : {items: []}
           } as PageFilterRequest;
           if (getCount) {
             // call api for count with no filters to get total count
-            await this.callCountApi(pageFilterRequest).then(async (count) => {
+            await this.callCountApi(pageFilterRequest).then(async(count) => {
               totalCount = count;
               if (lazyLoad) {
                 // reset pagination
@@ -404,15 +362,13 @@ export const DetailTabTable = fp.flow(
                   pageFilterRequest.pageSize = lazyLoadSize;
                   if (filters.items.length) {
                     // if filters exist, call api for count a second time to get the filtered count and reset pagination
-                    await this.callCountApi(pageFilterRequest).then(
-                      (filteredCount) => {
-                        totalCount = filteredCount;
-                        start = 0;
-                        page = 0;
-                        pageFilterRequest.page = 0;
-                        range[0] = start;
-                      }
-                    );
+                    await this.callCountApi(pageFilterRequest).then(filteredCount => {
+                      totalCount = filteredCount;
+                      start = 0;
+                      page = 0;
+                      pageFilterRequest.page = 0;
+                      range[0] = start;
+                    });
                   }
                 } else {
                   pageFilterRequest.pageSize = totalCount;
@@ -420,26 +376,12 @@ export const DetailTabTable = fp.flow(
               }
             });
           }
-          this.callDataApi(pageFilterRequest).then((data) => {
+          this.callDataApi(pageFilterRequest).then(data => {
             if (lazyLoad) {
               const end = Math.min(range[0] + lazyLoadSize, totalCount);
-              this.setState({
-                data,
-                filteredData: data,
-                loading: false,
-                lazyLoad,
-                page,
-                range: [range[0], end],
-                start,
-                totalCount,
-              });
+              this.setState({data, filteredData: data, loading: false, lazyLoad, page, range: [range[0], end], start, totalCount});
             } else {
-              this.setState({
-                data,
-                loading: false,
-                lazyLoad,
-                range: [0, totalCount - 1],
-              });
+              this.setState({data, loading: false, lazyLoad, range: [0, totalCount - 1]});
               this.filterData();
             }
           });
@@ -448,94 +390,62 @@ export const DetailTabTable = fp.flow(
         // Ignore abort errors since those were intentional
         if (error.name !== 'AbortError') {
           console.error(error);
-          this.setState({ loading: false, error: true });
+          this.setState({loading: false, error: true});
         }
       }
     }
 
     updatePageData(previous: boolean) {
       try {
-        this.setState({
-          loadingPrevious: previous,
-          updating: true,
-          error: false,
-        });
-        const { columns, domain } = this.props;
-        const { range, sortField, sortOrder } = this.state;
-        let { filteredData } = this.state;
-        const requestPage = previous
-          ? range[0] / lazyLoadSize
-          : (filteredData.length + range[0]) / lazyLoadSize;
+        this.setState({loadingPrevious: previous, updating: true, error: false});
+        const {columns, domain} = this.props;
+        const {range, sortField, sortOrder} = this.state;
+        let {filteredData} = this.state;
+        const requestPage = previous ? range[0] / lazyLoadSize : (filteredData.length + range[0]) / lazyLoadSize;
         const filters = this.getFilters();
         if (filters !== null) {
           const pageFilterRequest = {
             page: requestPage,
             pageSize: lazyLoadSize,
             sortOrder: sortOrder === 1 ? SortOrder.Asc : SortOrder.Desc,
-            sortColumn: columns.find((col) => col.name === sortField).filter,
+            sortColumn: columns.find(col => col.name === sortField).filter,
             domain: domain,
-            filters,
+            filters
           } as PageFilterRequest;
-          this.callDataApi(pageFilterRequest).then((data) => {
+          this.callDataApi(pageFilterRequest).then(data => {
             if (previous) {
               filteredData = [...data, ...filteredData];
-              if (filteredData.length > lazyLoadSize * 3) {
-                filteredData = filteredData.slice(
-                  0,
-                  filteredData.length - lazyLoadSize
-                );
+              if (filteredData.length > (lazyLoadSize * 3)) {
+                filteredData = filteredData.slice(0, filteredData.length - lazyLoadSize);
                 range[1] -= lazyLoadSize;
               }
             } else {
               filteredData = [...filteredData, ...data];
-              if (filteredData.length > lazyLoadSize * 3) {
+              if (filteredData.length > (lazyLoadSize * 3)) {
                 filteredData = filteredData.slice(lazyLoadSize);
                 range[0] += lazyLoadSize;
               }
             }
-            this.setState({
-              data,
-              filteredData,
-              range,
-              loadingPrevious: false,
-              updating: false,
-            });
+            this.setState({data, filteredData, range, loadingPrevious: false, updating: false});
           });
         }
       } catch (error) {
         console.error(error);
-        this.setState({ loadingPrevious: false, updating: false, error: true });
+        this.setState({loadingPrevious: false, updating: false, error: true});
       }
     }
 
     async callDataApi(request: PageFilterRequest) {
-      const {
-        cohortReview: { cohortReviewId },
-        domain,
-        participantId,
-        workspace: { id, namespace },
-      } = this.props;
+      const {cohortReview: {cohortReviewId}, domain, participantId, workspace: {id, namespace}} = this.props;
       let data = [];
       await cohortReviewApi()
-        .getParticipantData(
-          namespace,
-          id,
-          cohortReviewId,
-          participantId,
-          request,
-          { signal: this.dataAborter.signal }
-        )
-        .then((response) => {
-          data = response.items.map((item) => {
+        .getParticipantData(namespace, id, cohortReviewId, participantId, request, {signal: this.dataAborter.signal})
+        .then(response => {
+          data = response.items.map(item => {
             if (domain === Domain.VITAL || domain === Domain.LAB) {
-              item['itemTime'] = moment(
-                item.itemDate,
-                'YYYY-MM-DD HH:mm Z'
-              ).format('hh:mm a z');
+              item['itemTime'] = moment(item.itemDate, 'YYYY-MM-DD HH:mm Z').format('hh:mm a z');
             }
-            item.itemDate = moment(item.itemDate, 'YYYY-MM-DD HH:mm Z').format(
-              'YYYY-MM-DD'
-            );
+            item.itemDate = moment(item.itemDate, 'YYYY-MM-DD HH:mm Z').format('YYYY-MM-DD');
             return item;
           });
         });
@@ -543,22 +453,11 @@ export const DetailTabTable = fp.flow(
     }
 
     async callCountApi(request: PageFilterRequest) {
-      const {
-        cohortReview: { cohortReviewId },
-        participantId,
-        workspace: { id, namespace },
-      } = this.props;
+      const {cohortReview: {cohortReviewId}, participantId, workspace: {id, namespace}} = this.props;
       let count = null;
       await cohortReviewApi()
-        .getParticipantCount(
-          namespace,
-          id,
-          cohortReviewId,
-          participantId,
-          request,
-          { signal: this.countAborter.signal }
-        )
-        .then((response) => {
+        .getParticipantCount(namespace, id, cohortReviewId, participantId, request, {signal: this.countAborter.signal})
+        .then(response => {
           count = response.count;
         });
       return count;
@@ -574,8 +473,8 @@ export const DetailTabTable = fp.flow(
     }
 
     getFilters() {
-      const { columns, domain, filterState } = this.props;
-      const filters = { items: [] };
+      const {columns, domain, filterState} = this.props;
+      const filters = {items: []};
       const columnFilters = filterState.tabs[domain];
       if (!!columnFilters) {
         for (const col in columnFilters) {
@@ -585,22 +484,22 @@ export const DetailTabTable = fp.flow(
               // checkbox filters
               if (!filter.length) {
                 // No filters checked so clear the data, don't call api
-                this.setState({ data: [], filteredData: null, loading: false });
+                this.setState({data: [], filteredData: null, loading: false});
                 return null;
               } else if (!filter.includes('Select All')) {
                 filters.items.push({
-                  property: columns.find((c) => c.name === col).filter,
+                  property: columns.find(c => c.name === col).filter,
                   operator: Operator.IN,
-                  values: filter,
+                  values: filter
                 });
               }
             } else {
               // text filters
               if (!!filter) {
                 filters.items.push({
-                  property: columns.find((c) => c.name === col).filter,
+                  property: columns.find(c => c.name === col).filter,
                   operator: Operator.LIKE,
-                  values: [filter],
+                  values: [filter]
                 });
               }
             }
@@ -611,127 +510,80 @@ export const DetailTabTable = fp.flow(
     }
 
     onSort = (event: any) => {
-      this.setState({ sortField: event.sortField, sortOrder: event.sortOrder });
-      const { lazyLoad, page } = this.state;
+      this.setState({sortField: event.sortField, sortOrder: event.sortOrder});
+      const {lazyLoad, page} = this.state;
       if (lazyLoad) {
         const start = Math.floor(page / 5) * lazyLoadSize;
         const range = [start, start + lazyLoadSize - 1];
-        this.setState({ loading: true, range }, () =>
-          this.getParticipantData(false)
-        );
+        this.setState({loading: true, range}, () => this.getParticipantData(false));
       }
-    };
+    }
 
     columnSort = (sortField: string) => {
       if (this.state.sortField === sortField) {
         const sortOrder = this.state.sortOrder === 1 ? -1 : 1;
-        this.setState({ sortOrder });
+        this.setState({sortOrder});
       } else {
-        this.setState({ sortField, sortOrder: 1 });
+        this.setState({sortField, sortOrder: 1});
       }
-      const { lazyLoad, start } = this.state;
+      const {lazyLoad, start} = this.state;
       if (lazyLoad) {
         const rangeStart = Math.floor(start / lazyLoadSize) * lazyLoadSize;
         const range = [rangeStart, rangeStart + lazyLoadSize - 1];
         console.log(range);
-        this.setState({ loading: true, range }, () =>
-          this.getParticipantData(false)
-        );
-      }
-    };
-
-    onPage(event: any) {
-      const { lazyLoad, page, range, totalCount } = this.state;
-      if (lazyLoad) {
-        if (
-          event.page < page &&
-          event.page > 1 &&
-          range[0] >= event.first - rowsPerPage
-        ) {
-          range[0] -= lazyLoadSize;
-          this.setState({ page: event.page, range, start: event.first }, () =>
-            this.updatePageData(true)
-          );
-        } else if (
-          event.page > page &&
-          range[1] <= event.first + rowsPerPage * 2 &&
-          range[1] < totalCount
-        ) {
-          range[1] = Math.min(totalCount, range[1] + lazyLoadSize);
-          this.setState({ page: event.page, range, start: event.first }, () =>
-            this.updatePageData(false)
-          );
-        } else {
-          this.setState({ page: event.page, range, start: event.first });
-        }
-      } else {
-        this.setState({ page: event.page, range, start: event.first });
+        this.setState({loading: true, range}, () => this.getParticipantData(false));
       }
     }
 
-    // Scrolls to the bottom of the table content if an overlay or chart is expanded on the last row
-    scrollToBottom(rowIndex, numberOfRows) {
-      if (rowIndex === numberOfRows - 1) {
-        const tableBody = document.getElementsByClassName(
-          'p-datatable-scrollable-body'
-        );
-        tableBody[0].scrollTop = tableBody[0].scrollHeight;
+    onPage(event: any) {
+      const {lazyLoad, page, range, totalCount} = this.state;
+      if (lazyLoad) {
+        if (event.page < page && event.page > 1 && range[0] >= (event.first - rowsPerPage)) {
+          range[0] -= lazyLoadSize;
+          this.setState({page: event.page, range, start: event.first}, () => this.updatePageData(true));
+        } else if (event.page > page && range[1] <= (event.first + (rowsPerPage * 2)) && range[1] < totalCount) {
+          range[1] = Math.min(totalCount, range[1] + lazyLoadSize);
+          this.setState({page: event.page, range, start: event.first}, () => this.updatePageData(false));
+        } else {
+          this.setState({page: event.page, range, start: event.first});
+        }
+      } else {
+        this.setState({page: event.page, range, start: event.first});
       }
     }
 
     overlayTemplate = (rowData: any, column: any) => {
       let vl: any;
-      const {
-        filterState: { vocab },
-      } = this.props;
-      const valueField =
-        (rowData.refRange || rowData.unit) && column.field === 'value';
+      const {filterState: {vocab}} = this.props;
+      const valueField = (rowData.refRange || rowData.unit) && column.field === 'value';
       const nameField = rowData.route && column.field === `${vocab}Name`;
-      return (
-        <React.Fragment>
-          <div style={{ position: 'relative' }}>
-            {column.field === 'value' && <span>{rowData.value}</span>}
-            {column.field === `${vocab}Name` && (
-              <NameContainer data={rowData} vocab={vocab} />
-            )}
-            {(valueField || nameField) && (
-              <i
-                className='pi pi-caret-down'
-                style={styles.caretIcon}
-                onClick={(e) => {
-                  vl.toggle(e);
-                  this.scrollToBottom(column.rowIndex, column.value.length);
-                }}
-              />
-            )}
-            <OverlayPanel
-              className='labOverlay'
-              ref={(el) => (vl = el)}
-              showCloseIcon={true}
-              dismissable={true}
-            >
-              {rowData.refRange && column.field === 'value' && (
-                <div style={{ paddingBottom: '0.2rem' }}>
-                  Reference Range: {rowData.refRange}
-                </div>
-              )}
-              {rowData.unit && column.field === 'value' && (
-                <div>Units: {rowData.unit}</div>
-              )}
-              {nameField && <div>Route: {rowData.route}</div>}
-            </OverlayPanel>
-          </div>
-        </React.Fragment>
-      );
-    };
+      return <React.Fragment>
+        <div style={{position: 'relative'}}>
+          {column.field === 'value' && <span>{rowData.value}</span>}
+          {column.field === `${vocab}Name` && <NameContainer data={rowData} vocab={vocab} />}
+          {(valueField || nameField)
+          && <i className='pi pi-caret-down' style={styles.caretIcon}
+              onClick={(e) => vl.toggle(e)}/>}
+          <OverlayPanel className='labOverlay' ref={(el) => vl = el}
+                        showCloseIcon={true} dismissable={true}>
+            {(rowData.refRange &&  column.field === 'value') &&
+            <div style={{paddingBottom: '0.2rem'}}>Reference Range: {rowData.refRange}</div>}
+            {(rowData.unit && column.field === 'value') &&
+            <div>Units: {rowData.unit}</div>}
+            {nameField &&
+            <div>Route: {rowData.route}</div>}
+          </OverlayPanel>
+        </div>
+      </React.Fragment>;
+    }
 
     updateData = (event, colName, namesArray) => {
-      const { checked, name } = event.target;
-      const { domain, filterState, getFilteredData } = this.props;
+      const {checked, name} = event.target;
+      const {domain, filterState, getFilteredData} = this.props;
       let checkedItems = filterState.tabs[domain][colName];
       if (checked) {
         if (name === 'Select All') {
-          checkedItems = namesArray.map((opt) => opt.name);
+          checkedItems = namesArray.map(opt => opt.name);
         } else {
           checkedItems.push(name);
           if (namesArray.length - 1 === checkedItems.length) {
@@ -743,7 +595,7 @@ export const DetailTabTable = fp.flow(
         if (name === 'Select All') {
           checkedItems = [];
         } else {
-          if (checkedItems.find((s) => s === 'Select All')) {
+          if (checkedItems.find(s => s === 'Select All')) {
             checkedItems.splice(checkedItems.indexOf('Select All'), 1);
           }
           checkedItems.splice(checkedItems.indexOf(name), 1);
@@ -751,23 +603,16 @@ export const DetailTabTable = fp.flow(
       }
       filterState.tabs[domain][colName] = checkedItems;
       getFilteredData(filterState);
-    };
+    }
 
     filterData() {
-      let { data, start } = this.state;
-      const {
-        domain,
-        filterState: {
-          global: { ageMin, ageMax, dateMin, dateMax, visits },
-          tabs,
-          vocab,
-        },
-      } = this.props;
+      let {data, start} = this.state;
+      const {domain, filterState: {global: {ageMin, ageMax, dateMin, dateMax, visits}, tabs, vocab}} = this.props;
       /* Global filters */
       if (dateMin || dateMax) {
         const min = dateMin ? Date.parse(dateMin) : 0;
         const max = dateMax ? Date.parse(dateMax) : 9999999999999;
-        data = data.filter((item) => {
+        data = data.filter(item => {
           const itemDate = Date.parse(item.itemDate);
           return itemDate >= min && itemDate <= max;
         });
@@ -775,16 +620,12 @@ export const DetailTabTable = fp.flow(
       if (domain !== Domain.SURVEY && (ageMin || ageMax)) {
         const min = ageMin || 0;
         const max = ageMax || 120;
-        data = data.filter(
-          (item) => item.ageAtEvent >= min && item.ageAtEvent <= max
-        );
+        data = data.filter(item => item.ageAtEvent >= min && item.ageAtEvent <= max);
       }
-      if (
-        domain !== Domain.SURVEY &&
-        domain !== Domain.PHYSICALMEASUREMENT &&
-        visits
-      ) {
-        data = data.filter((item) => visits === item.visitType);
+      if (domain !== Domain.SURVEY
+        && domain !== Domain.PHYSICALMEASUREMENT
+        && visits) {
+        data = data.filter(item => visits === item.visitType);
       }
       /* Column filters */
       const columnCheck = [
@@ -797,14 +638,14 @@ export const DetailTabTable = fp.flow(
         'firstMention',
         'lastMention',
         'itemTime',
-        'survey',
+        'survey'
       ];
       const columnFilters = tabs[domain];
       if (!columnFilters) {
         if (data.length < start + rowsPerPage) {
           start = Math.floor(data.length / rowsPerPage) * rowsPerPage;
         }
-        this.setState({ filteredData: data, start: start });
+        this.setState({filteredData: data, start: start});
       } else {
         for (const col in columnFilters) {
           if (columnFilters.hasOwnProperty(col)) {
@@ -815,22 +656,15 @@ export const DetailTabTable = fp.flow(
                 if (!columnFilters[col].length) {
                   data = [];
                   break;
-                } else if (
-                  !columnFilters[col].includes('Select All') &&
-                  !(vocab === 'source' && domain === Domain.OBSERVATION)
-                ) {
-                  data = data.filter((row) =>
-                    columnFilters[col].includes(row[col])
-                  );
+                } else if (!columnFilters[col].includes('Select All')
+                  && !(vocab === 'source' && domain === Domain.OBSERVATION)) {
+                  data = data.filter(row => columnFilters[col].includes(row[col]));
                 }
               } else {
                 // text filters
                 if (columnFilters[col]) {
-                  data = data.filter((row) =>
-                    row[col]
-                      ?.toLowerCase()
-                      .includes(columnFilters[col].toLowerCase())
-                  );
+                  data = data.filter(row =>
+                    row[col] && row[col].toLowerCase().includes(columnFilters[col].toLowerCase()));
                 }
               }
             }
@@ -839,52 +673,38 @@ export const DetailTabTable = fp.flow(
         if (data && data.length < start + rowsPerPage) {
           start = Math.floor(data.length / rowsPerPage) * rowsPerPage;
         }
-        this.setState({ filteredData: data, start: start });
+        this.setState({filteredData: data, start: start});
       }
     }
 
     errorMessage = () => {
-      const { tabName } = this.props;
-      const { data, filteredData, error } = this.state;
-      if (filteredData?.length || (!data && !error)) {
+      const {tabName} = this.props;
+      const {data, filteredData, error} = this.state;
+      if ((filteredData && filteredData.length) || (!data && !error)) {
         return false;
       }
       let message: string;
       if (data && data.length === 0) {
         message = 'No ' + tabName + ' data found';
-      } else if (
-        data &&
-        data.length > 0 &&
-        filteredData &&
-        filteredData.length === 0
-      ) {
-        message =
-          'Data cannot be found. Please review your filters and try again.';
+      } else if (data && data.length > 0 && filteredData && filteredData.length === 0) {
+        message = 'Data cannot be found. Please review your filters and try again.';
       } else if (error) {
         message = `Sorry, the request cannot be completed. Please try refreshing the page or
            contact Support in the left hand navigation.`;
       }
-      return (
-        <div style={styles.error}>
-          <ClrIcon
-            style={{ margin: '0 0.5rem 0 0.25rem' }}
-            className='is-solid'
-            shape='exclamation-triangle'
-            size='22'
-          />
-          {message}
-        </div>
-      );
-    };
+      return <div style={styles.error}>
+        <ClrIcon style={{margin: '0 0.5rem 0 0.25rem'}} className='is-solid'
+        shape='exclamation-triangle' size='22'/>
+        {message}
+      </div>;
+    }
 
     filterCodes = (input: string) => {
       if (!input) {
-        this.setState({ codeResults: null });
+        this.setState({codeResults: null});
       } else {
-        const { data } = this.state;
-        const {
-          filterState: { vocab },
-        } = this.props;
+        const {data} = this.state;
+        const {filterState: {vocab}} = this.props;
         const codeType = `${vocab}Code`;
         const codeResults = data.reduce((acc, item) => {
           if (item[codeType].toLowerCase().includes(input.toLowerCase())) {
@@ -892,258 +712,170 @@ export const DetailTabTable = fp.flow(
           }
           return acc;
         }, new Set());
-        this.setState({ codeResults });
+        this.setState({codeResults});
       }
-    };
+    }
 
     filterText = () => {
-      const { domain, filterState, getFilteredData } = this.props;
-      const { tabFilterState } = this.state;
+      const {domain, filterState, getFilteredData} = this.props;
+      const {tabFilterState} = this.state;
       filterState.tabs[domain] = tabFilterState;
       getFilteredData(filterState);
-    };
+    }
 
     filterEvent(column: string) {
-      const { columns, domain } = this.props;
-      const { displayName } = columns.find((col) => col.name === column);
-      triggerEvent(
-        'Review Individual',
-        'Click',
-        `${domainToTitle(domain)} - Filter - ${displayName} - Review Individual`
-      );
+      const {columns, domain} = this.props;
+      const {displayName} = columns.find(col => col.name === column);
+      triggerEvent('Review Individual', 'Click', `${domainToTitle(domain)} - Filter - ${displayName} - Review Individual`);
     }
 
     checkboxFilter(column: string) {
-      const { codeResults } = this.state;
-      const {
-        domain,
-        filterState: { tabs, vocab },
-      } = this.props;
+      const {codeResults} = this.state;
+      const {domain, filterState: {tabs, vocab}} = this.props;
       const columnFilters = tabs[domain];
-      const filterStyle = !columnFilters[column].includes('Select All')
-        ? filterIcons.active
-        : filterIcons.default;
+      const filterStyle = !columnFilters[column].includes('Select All') ? filterIcons.active : filterIcons.default;
       let options: Array<any>;
-      const counts = { total: 0 };
+      const counts = {total: 0};
       switch (column) {
         case 'domain':
-          options = domains.map((name) => ({ name }));
+          options = domains.map(name => ({name}));
           break;
         case `${vocab}Vocabulary`:
-          const vocabs = vocabOptions.getValue()
-            ? vocabOptions.getValue()[vocab]
-            : {};
-          options = vocabs[domain]
-            ? vocabs[domain].map((name) => ({ name }))
-            : [];
+          const vocabs = vocabOptions.getValue() ? vocabOptions.getValue()[vocab] : {};
+          options = vocabs[domain] ? vocabs[domain].map(name => ({name})) : [];
           break;
       }
-      options.push({ name: 'Select All', count: counts.total });
+      options.push({name: 'Select All', count: counts.total});
       if (columnFilters[column].includes('Select All')) {
-        columnFilters[column] = options.map((opt) => opt.name);
+        columnFilters[column] = options.map(opt => opt.name);
       }
-      const checkboxes =
-        codeResults && codeResults.size === 0 ? (
-          <em style={styles.noResults}>No matching codes</em>
-        ) : (
-          options.reduce((acc, opt, i) => {
-            if (!codeResults || codeResults.has(opt.name)) {
-              acc.push(
-                <React.Fragment key={i}>
-                  {opt.name !== 'Select All' && (
-                    <div style={{ padding: '0.3rem 0 0.3rem 0.4rem' }}>
-                      <input
-                        style={{ width: '0.7rem', height: '0.7rem' }}
-                        type='checkbox'
-                        name={opt.name}
-                        checked={columnFilters[column].includes(opt.name)}
-                        onChange={($event) =>
-                          this.updateData($event, column, options)
-                        }
-                      />
-                      <label> {opt.name} </label>
-                    </div>
-                  )}
-                </React.Fragment>
-              );
-            }
-            return acc;
-          }, [])
-        );
+      const checkboxes = codeResults && codeResults.size === 0
+        ? <em style={styles.noResults}>No matching codes</em>
+        : options.reduce((acc, opt, i) => {
+          if (!codeResults || codeResults.has(opt.name)) {
+            acc.push(<React.Fragment key={i}>
+              {opt.name !== 'Select All' && <div style={{padding: '0.3rem 0 0.3rem 0.4rem'}}>
+                <input style={{width: '0.7rem', height: '0.7rem'}} type='checkbox' name={opt.name}
+                       checked={columnFilters[column].includes(opt.name)}
+                       onChange={($event) => this.updateData($event, column, options)}/>
+                <label> {opt.name} </label>
+              </div>}
+            </React.Fragment>);
+          }
+          return acc;
+        }, []);
       let fl: any;
-      return (
-        <React.Fragment>
-          <i
-            className='pi pi-filter'
-            style={filterStyle}
-            onClick={(e) => {
-              this.filterEvent(column);
-              fl.toggle(e);
-            }}
-          />
-          <OverlayPanel
-            style={{ left: '359.531px!important', textAlign: 'left' }}
-            className='filterOverlay'
-            ref={(el) => (fl = el)}
-            showCloseIcon={true}
-            dismissable={true}
-          >
-            {column === `${vocab}Code` && (
-              <div style={styles.textSearch}>
-                <i className='pi pi-search' style={{ margin: '0 5px' }} />
-                <TextInput
-                  style={styles.textInput}
-                  onChange={this.codeInputChange}
-                  placeholder={'Search'}
-                />
-              </div>
-            )}
-            <div style={{ maxHeight: 'calc(100vh - 450px)', overflow: 'auto' }}>
-              {checkboxes}
-            </div>
-            <div
-              style={{ borderTop: '1px solid #ccc', padding: '0.5rem 0.5rem' }}
-            >
-              <input
-                style={{ width: '0.7rem', height: '0.7rem' }}
-                type='checkbox'
-                name='Select All'
-                checked={columnFilters[column].includes('Select All')}
-                onChange={($event) => this.updateData($event, column, options)}
-              />
-              <label> Select All </label>
-            </div>
-          </OverlayPanel>
-        </React.Fragment>
-      );
+      return <React.Fragment>
+        <i className='pi pi-filter'
+           style={filterStyle}
+           onClick={(e) => {
+             this.filterEvent(column);
+             fl.toggle(e);
+           }}/>
+        <OverlayPanel style={{left: '359.531px!important', textAlign: 'left'}} className='filterOverlay'
+                      ref={(el) => fl = el} showCloseIcon={true} dismissable={true}>
+          {column === `${vocab}Code` && <div style={styles.textSearch}>
+            <i className='pi pi-search' style={{margin: '0 5px'}} />
+            <TextInput
+              style={styles.textInput}
+              onChange={this.codeInputChange}
+              placeholder={'Search'}/>
+          </div>}
+          <div style={{maxHeight: 'calc(100vh - 450px)', overflow: 'auto'}}>
+            {checkboxes}
+          </div>
+          <div style={{borderTop: '1px solid #ccc', padding: '0.5rem 0.5rem'}}>
+            <input style={{width: '0.7rem',  height: '0.7rem'}} type='checkbox' name='Select All'
+                   checked={columnFilters[column].includes('Select All')}
+                   onChange={($event) => this.updateData($event, column, options)}/>
+            <label> Select All </label>
+          </div>
+        </OverlayPanel>
+      </React.Fragment>;
     }
 
     textFilter(column: string) {
-      const { domain, filterState } = this.props;
-      const { tabFilterState } = this.state;
+      const {domain, filterState} = this.props;
+      const {tabFilterState} = this.state;
       const columnFilters = filterState.tabs[domain];
       const filtered = !!columnFilters[column];
       let fl: any, ip: any;
-      return (
-        <React.Fragment>
-          <i
-            className='pi pi-filter'
-            style={filtered ? filterIcons.active : filterIcons.default}
-            onClick={(e) => {
-              this.filterEvent(column);
-              fl.toggle(e);
-              ip.focus();
+      return <React.Fragment>
+        <i className='pi pi-filter'
+          style={filtered ? filterIcons.active : filterIcons.default}
+          onClick={(e) => {
+            this.filterEvent(column);
+            fl.toggle(e);
+            ip.focus();
+          }}/>
+        <OverlayPanel style={{left: '359.531px!important'}}
+          className='filterOverlay'
+          ref={(el) => fl = el} dismissable={true}
+          onHide={() => {
+            if (columnFilters[column] !== tabFilterState[column]) {
+              tabFilterState[column] = columnFilters[column];
+              this.setState({tabFilterState});
+            }
+          }}>
+          <div style={styles.textSearch}>
+            <i className='pi pi-search' style={{cursor: 'default', margin: '0 5px'}} />
+            <TextInput
+              ref={(i) => ip = i}
+              style={styles.textInput}
+              value={tabFilterState[column]}
+              onChange={(v) => {
+                tabFilterState[column] = v;
+                this.setState({tabFilterState});
+              }}
+              onKeyUp={e => e.key === 'Enter' && this.filterText()}
+              placeholder={'Search'} />
+            <i className='pi pi-times-circle' style={{margin: '0 5px'}} onClick={() => {
+              tabFilterState[column] = '';
+              this.setState({tabFilterState}, () => this.filterText());
             }}
-          />
-          <OverlayPanel
-            style={{ left: '359.531px!important' }}
-            className='filterOverlay'
-            ref={(el) => (fl = el)}
-            dismissable={true}
-            onHide={() => {
-              if (columnFilters[column] !== tabFilterState[column]) {
-                tabFilterState[column] = columnFilters[column];
-                this.setState({ tabFilterState });
-              }
-            }}
-          >
-            <div style={styles.textSearch}>
-              <i
-                className='pi pi-search'
-                style={{ cursor: 'default', margin: '0 5px' }}
-              />
-              <TextInput
-                ref={(i) => (ip = i)}
-                style={styles.textInput}
-                value={tabFilterState[column]}
-                onChange={(v) => {
-                  tabFilterState[column] = v;
-                  this.setState({ tabFilterState });
-                }}
-                onKeyUp={(e) => e.key === 'Enter' && this.filterText()}
-                placeholder={'Search'}
-              />
-              <i
-                className='pi pi-times-circle'
-                style={{ margin: '0 5px' }}
-                onClick={() => {
-                  tabFilterState[column] = '';
-                  this.setState({ tabFilterState }, () => this.filterText());
-                }}
-                title='Clear filter'
-              />
-            </div>
-          </OverlayPanel>
-        </React.Fragment>
-      );
+            title='Clear filter'/>
+          </div>
+        </OverlayPanel>
+      </React.Fragment>;
     }
 
     rowExpansionTemplate = (rowData: any) => {
-      const { data } = this.state;
-      const {
-        filterState: { vocab },
-      } = this.props;
+      const {data} = this.state;
+      const {filterState: {vocab}} = this.props;
       const conceptIdBasedData = fp.groupBy('standardConceptId', data);
-      const unitsObj = fp.groupBy(
-        'unit',
-        conceptIdBasedData[rowData.standardConceptId]
-      );
+      const unitsObj = fp.groupBy( 'unit', conceptIdBasedData[rowData.standardConceptId]);
       const unitKey = Object.keys(unitsObj);
       let valueArray;
-      return (
-        <React.Fragment>
-          <div style={styles.headerStyle}>{rowData[`${vocab}Name`]}</div>
-          <div style={styles.unitsLabel}>Units:</div>
-          <TabView className='unitTab'>
-            {unitKey.map((k, i) => {
-              const name = k === 'null' ? 'No Unit' : k;
-              {
-                valueArray = unitsObj[k].map((v) => {
-                  return {
-                    values: parseInt(v.value, 10),
-                    date: v.itemDate,
-                  };
-                });
-              }
-              return (
-                <TabPanel header={name} key={i}>
-                  <ReviewDomainChartsComponent unitData={valueArray} />
-                </TabPanel>
-              );
-            })}
-          </TabView>
-        </React.Fragment>
-      );
-    };
+      return <React.Fragment>
+        <div style={styles.headerStyle}>{rowData[`${vocab}Name`]}</div>
+        <div style={styles.unitsLabel}>Units:</div>
+        <TabView className='unitTab'>
+          {unitKey.map((k, i) => {
+            const name = (k === 'null' ? 'No Unit' : k);
+            { valueArray = unitsObj[k].map(v => {
+              return {
+                values: parseInt(v.value, 10),
+                date: v.itemDate,
+              };
+            }); }
+            return <TabPanel header={name} key={i}>
+              <ReviewDomainChartsComponent unitData={valueArray} />
+            </TabPanel>;
+          })}
+        </TabView>
+      </React.Fragment>;
+    }
 
     hideGraphIcon = (rowData: any) => {
-      const {
-        filterState: { vocab },
-      } = this.props;
-      const noConcept =
-        rowData[`${vocab}Name`] &&
-        rowData[`${vocab}Name`] === 'No matching concept';
-      return { graphExpander: noConcept };
-    };
+      const {filterState: {vocab}} = this.props;
+      const noConcept = rowData[`${vocab}Name`]
+        && rowData[`${vocab}Name`] === 'No matching concept';
+      return {'graphExpander' : noConcept};
+    }
 
     render() {
-      const {
-        expandedRows,
-        loading,
-        lazyLoad,
-        loadingPrevious,
-        range,
-        start,
-        sortField,
-        sortOrder,
-        totalCount,
-        updating,
-      } = this.state;
-      const {
-        columns,
-        filterState: { vocab },
-        tabName,
-      } = this.props;
+      const {expandedRows, loading, lazyLoad, loadingPrevious, range, start, sortField, sortOrder, totalCount, updating} = this.state;
+      const {columns, filterState: {vocab}, tabName} = this.props;
       const filteredData = loading ? null : this.state.filteredData;
       let pageReportTemplate;
       let value = null;
@@ -1154,13 +886,9 @@ export const DetailTabTable = fp.flow(
         pageReportTemplate = `${(start + 1).toLocaleString()} -
           ${lastRowOfPage.toLocaleString()} of
           ${max.toLocaleString()} records `;
-        const pageStart = loadingPrevious
-          ? start - range[0] - lazyLoadSize
-          : start - range[0];
+        const pageStart = loadingPrevious ? start - range[0] - lazyLoadSize : start - range[0];
         value = lazyLoad
-          ? loadingPrevious && pageStart < 0
-            ? []
-            : filteredData.slice(pageStart, pageStart + rowsPerPage)
+          ? (loadingPrevious && pageStart < 0 ? [] : filteredData.slice(pageStart, pageStart + rowsPerPage))
           : filteredData;
       }
       let paginatorTemplate = 'CurrentPageReport';
@@ -1187,100 +915,66 @@ export const DetailTabTable = fp.flow(
           'firstMention',
           'lastMention',
           'itemTime',
-          'survey',
+          'survey'
         ].includes(col.name);
-        const isExpanderNeeded =
-          col.name === 'graph' && (tabName === 'Vitals' || tabName === 'Labs');
+        const isExpanderNeeded = col.name === 'graph' &&
+          (tabName === 'Vitals' || tabName === 'Labs');
         const overlayTemplate = colName && this.overlayTemplate;
-        const header = (
-          <React.Fragment>
-            <span
-              onClick={() => this.columnSort(col.name)}
-              style={styles.columnHeader}
-            >
-              {col.displayName}
-            </span>
-            <span
-              style={{
-                display: 'inline-block',
-                marginTop: '-3px',
-                float: 'right',
-              }}
-            >
-              {hasCheckboxFilter && this.checkboxFilter(col.name)}
-              {hasTextFilter && this.textFilter(col.name)}
-              {asc && !isExpanderNeeded && (
-                <i
-                  className='pi pi-arrow-up'
-                  style={styles.sortIcon}
-                  onClick={() => this.columnSort(col.name)}
-                />
-              )}
-              {desc && !isExpanderNeeded && (
-                <i
-                  className='pi pi-arrow-down'
-                  style={styles.sortIcon}
-                  onClick={() => this.columnSort(col.name)}
-                />
-              )}
-            </span>
-          </React.Fragment>
-        );
-        return (
-          <Column
-            expander={isExpanderNeeded}
-            style={styles.tableBody}
-            bodyStyle={
-              isExpanderNeeded ? styles.graphColumnBody : styles.columnBody
-            }
-            key={col.name}
-            field={col.name}
-            header={header}
-            headerStyle={isExpanderNeeded ? styles.graphStyle : {}}
-            sortable={!!col.filter}
-            body={overlayTemplate}
-          />
-        );
+        const header = <React.Fragment>
+          <span
+            onClick={() => this.columnSort(col.name)}
+            style={styles.columnHeader}>
+            {col.displayName}
+          </span>
+          <span style={{display: 'inline-block', marginTop: '-3px', float: 'right'}}>
+            {hasCheckboxFilter && this.checkboxFilter(col.name)}
+            {hasTextFilter && this.textFilter(col.name)}
+            {(asc && !isExpanderNeeded) && <i className='pi pi-arrow-up' style={styles.sortIcon}
+              onClick={() => this.columnSort(col.name)} />}
+            {(desc && !isExpanderNeeded) && <i className='pi pi-arrow-down' style={styles.sortIcon}
+              onClick={() => this.columnSort(col.name)} />}
+          </span>
+        </React.Fragment>;
+        return <Column
+          expander={isExpanderNeeded}
+          style={styles.tableBody}
+          bodyStyle={isExpanderNeeded ? styles.graphColumnBody : styles.columnBody}
+          key={col.name}
+          field={col.name}
+          header={header}
+          headerStyle={isExpanderNeeded ? styles.graphStyle : {}}
+          sortable={!!col.filter}
+          body={overlayTemplate}/>;
       });
-      return (
-        <div style={styles.container}>
-          <style>{datatableStyles}</style>
-          <DataTable
-            expandedRows={expandedRows}
-            onRowToggle={({ data }) => this.setState({ expandedRows: data })}
-            onRowExpand={({ data }) =>
-              setTimeout(() =>
-                this.scrollToBottom(value.indexOf(data), value.length)
-              )
-            }
-            rowExpansionTemplate={this.rowExpansionTemplate}
-            rowClassName={this.hideGraphIcon}
-            style={styles.table}
-            value={value}
-            sortField={sortField}
-            sortOrder={sortOrder}
-            onSort={this.onSort}
-            lazy={lazyLoad}
-            paginator
-            paginatorTemplate={!spinner && !!value ? paginatorTemplate : ''}
-            currentPageReportTemplate={
-              !spinner && !!value ? pageReportTemplate : ''
-            }
-            onPage={(e) => this.onPage(e)}
-            alwaysShowPaginator={false}
-            first={start}
-            rows={rowsPerPage}
-            totalRecords={max}
-            scrollable
-            scrollHeight='calc(100vh - 350px)'
-            autoLayout
-            footer={this.errorMessage()}
-          >
-            {cols}
-          </DataTable>
-          {spinner && <SpinnerOverlay />}
-        </div>
-      );
+      return <div style={styles.container}>
+        <style>{datatableStyles}</style>
+        <DataTable
+          expandedRows={expandedRows}
+          onRowToggle={(e) => this.setState({expandedRows: e.data})}
+          rowExpansionTemplate={this.rowExpansionTemplate}
+          rowClassName = {this.hideGraphIcon}
+          style={styles.table}
+          value={value}
+          sortField={sortField}
+          sortOrder={sortOrder}
+          onSort={this.onSort}
+          lazy={lazyLoad}
+          paginator
+          paginatorTemplate={!spinner && !!value ? paginatorTemplate : ''}
+          currentPageReportTemplate={!spinner && !!value ? pageReportTemplate : ''}
+          onPage={(e) => this.onPage(e)}
+          alwaysShowPaginator={false}
+          first={start}
+          rows={rowsPerPage}
+          totalRecords={max}
+          scrollable
+          scrollHeight='calc(100vh - 350px)'
+          autoLayout
+          footer={this.errorMessage()}>
+          {cols}
+        </DataTable>
+        {spinner && <SpinnerOverlay />}
+      </div>;
     }
   }
 );

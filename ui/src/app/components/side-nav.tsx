@@ -1,20 +1,17 @@
 import * as React from 'react';
-import { useState } from 'react';
+import {useState} from 'react';
 
-import { Clickable } from 'app/components/buttons';
-import { ClrIcon } from 'app/components/icons';
-import colors, { colorWithWhiteness } from 'app/styles/colors';
-import { reactStyles } from 'app/utils';
-import { hasRegisteredTierAccess } from 'app/utils/access-tiers';
-import { signOut } from 'app/utils/authentication';
-import {
-  AuthorityGuardedAction,
-  hasAuthorityForAction,
-} from 'app/utils/authorities';
-import { navigateSignOut, useNavigation } from 'app/utils/navigation';
-import { getProfilePictureSrc } from 'app/utils/profile-picture';
-import { openZendeskWidget, supportUrls } from 'app/utils/zendesk';
-import { Profile } from 'generated/fetch';
+import {Clickable} from 'app/components/buttons';
+import colors, {colorWithWhiteness} from 'app/styles/colors';
+import {reactStyles} from 'app/utils';
+import {hasRegisteredTierAccess} from 'app/utils/access-tiers';
+import {signOut} from 'app/utils/authentication';
+import {AuthorityGuardedAction, hasAuthorityForAction} from 'app/utils/authorities';
+import {navigateSignOut, useNavigation} from 'app/utils/navigation';
+import {getProfilePictureSrc} from 'app/utils/profile-picture';
+import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
+import {Profile} from 'generated/fetch';
+import {ClrIcon} from './clr-icons';
 
 const styles = reactStyles({
   flex: {
@@ -48,21 +45,21 @@ const styles = reactStyles({
     color: colors.white,
   },
   sideNavItemActive: {
-    backgroundColor: colorWithWhiteness(colors.primary, 0.2),
+    backgroundColor: colorWithWhiteness(colors.primary, .2),
     fontWeight: 'bold',
   },
   sideNavItemHover: {
-    backgroundColor: colorWithWhiteness(colors.primary, 0.2),
+    backgroundColor: colorWithWhiteness(colors.primary, .2),
   },
   sideNavItemDisabled: {
     color: colors.disabled,
     cursor: 'auto',
   },
   navIcon: {
-    marginRight: '12px',
+    marginRight: '12px'
   },
   noIconMargin: {
-    marginLeft: '33px',
+    marginLeft: '33px'
   },
   profileImage: {
     // Negative margin is kind of bad, but otherwise I'd need throw conditionals in
@@ -80,74 +77,70 @@ const styles = reactStyles({
   },
   dropdownIconOpen: {
     transform: 'rotate(0deg)',
-  },
+  }
 });
 
 const getSideNavItemStyles = (active, hovering, disabled) => {
   let sideNavItemStyles = {
     ...styles.flex,
-    ...styles.sideNavItem,
+    ...styles.sideNavItem
   };
   if (disabled) {
     // We want to short-circuit in this case.
-    return { ...sideNavItemStyles, ...styles.sideNavItemDisabled };
+    return {...sideNavItemStyles, ...styles.sideNavItemDisabled};
   }
   if (active) {
-    sideNavItemStyles = { ...sideNavItemStyles, ...styles.sideNavItemActive };
+    sideNavItemStyles = {...sideNavItemStyles, ...styles.sideNavItemActive};
   }
   if (hovering) {
-    sideNavItemStyles = { ...sideNavItemStyles, ...styles.sideNavItemHover };
+    sideNavItemStyles = {...sideNavItemStyles, ...styles.sideNavItemHover};
   }
   return sideNavItemStyles;
 };
 
 // TODO RW-7006: Ideally, we would use useLocation to get the path and pass it in to these functions.
 // However, this component is currently rendered outside of the React router, so useLocation won't work.
-const bannerAdminActive = () => {
+const bannerAdminActive = () =>  {
   return window.location.pathname === '/admin/banner';
 };
 
-const egressAdminActive = () => {
+const egressAdminActive = () =>  {
   return window.location.pathname.startsWith('/admin/egress-events');
 };
 
-const userAdminActive = () => {
+const userAdminActive = () =>  {
   return window.location.pathname.startsWith('/admin/user');
 };
 
-const userAccessActive = () => {
-  return window.location.pathname.startsWith('/admin/bulk-sync-user-access');
-};
-
-const userAuditActive = () => {
+const userAuditActive = () =>  {
   return window.location.pathname.startsWith('/admin/user-audit');
 };
 
-const workspaceAdminActive = () => {
+const workspaceAdminActive = () =>  {
   return window.location.pathname.startsWith('/admin/workspaces');
 };
 
-const workspaceAuditActive = () => {
+const workspaceAuditActive = () =>  {
   return window.location.pathname.startsWith('/admin/workspace-audit');
 };
 
-const homeActive = () => {
+const homeActive = () =>  {
   return window.location.pathname === '/';
 };
 
-const libraryActive = () => {
+const libraryActive = () =>  {
   return window.location.pathname === '/library';
 };
 
-const workspacesActive = () => {
+const workspacesActive = () =>  {
   return window.location.pathname === '/workspaces';
 };
 
-const profileActive = () => {
+const profileActive = () =>  {
   return window.location.pathname === '/profile';
 };
 
-const institutionAdminActive = () => {
+const institutionAdminActive = () =>  {
   return window.location.pathname.startsWith('/admin/institution');
 };
 
@@ -166,7 +159,7 @@ interface SideNavItemProps {
 export const SideNavItem = (props: SideNavItemProps) => {
   const [hovering, setHovering] = useState(false);
   const [subItemsOpen, setSubItemsOpen] = useState(false);
-  const [navigate] = useNavigation();
+  const [navigate, ] = useNavigation();
 
   const iconSize = 21;
 
@@ -180,8 +173,7 @@ export const SideNavItem = (props: SideNavItemProps) => {
     }
   };
 
-  return (
-    <Clickable
+  return <Clickable
       // data-test-id is the text within the SideNavItem, with whitespace removed
       // and appended with '-menu-item'
       data-test-id={props.content.toString().replace(/\s/g, '') + '-menu-item'}
@@ -194,42 +186,49 @@ export const SideNavItem = (props: SideNavItemProps) => {
       }}
       onMouseEnter={() => setHovering(true)}
       onMouseLeave={() => setHovering(false)}
+  >
+    <div
+        style={{...styles.flex,
+          flex: '1 0 auto'
+        }}
     >
-      <div style={{ ...styles.flex, flex: '1 0 auto' }}>
         <span
-          style={
-            props.icon || props.hasProfileImage
-              ? { ...styles.flex }
-              : { ...styles.noIconMargin }
-          }
+            style={
+              props.icon || props.hasProfileImage
+                  ? {...styles.flex}
+                  : {...styles.noIconMargin}
+            }
         >
-          {props.icon && (
-            <ClrIcon
-              shape={props.icon}
-              className={'is-solid'}
-              style={styles.navIcon}
-              size={iconSize}
+          {
+            props.icon && <ClrIcon
+                shape={props.icon}
+                className={'is-solid'}
+                style={styles.navIcon}
+                size={iconSize}
             />
-          )}
-          {props.hasProfileImage && (
-            <img src={getProfilePictureSrc()} style={styles.profileImage} />
-          )}
+          }
+          {
+            props.hasProfileImage && <img
+                src={getProfilePictureSrc()}
+                style={styles.profileImage}
+            />
+          }
           {props.content}
         </span>
-        {props.containsSubItems && (
-          <ClrIcon
+      {
+        props.containsSubItems
+        && <ClrIcon
             shape='angle'
             style={
               subItemsOpen
-                ? { ...styles.dropdownIcon, ...styles.dropdownIconOpen }
-                : styles.dropdownIcon
+                  ? {...styles.dropdownIcon, ...styles.dropdownIconOpen}
+                  : styles.dropdownIcon
             }
             size={iconSize}
-          />
-        )}
-      </div>
-    </Clickable>
-  );
+        />
+      }
+    </div>
+  </Clickable>;
 };
 
 export interface SideNavProps {
@@ -245,7 +244,7 @@ export const SideNav = (props: SideNavProps) => {
 
   const onToggleUser = () => setShowUserOptions(!showUserOptions);
 
-  const { profile, onToggleSideNav } = props;
+  const {profile, onToggleSideNav} = props;
 
   const openContactWidget = () => {
     openZendeskWidget(
@@ -256,156 +255,131 @@ export const SideNav = (props: SideNavProps) => {
     );
   };
 
-  return (
-    <div style={styles.sideNav}>
-      <SideNavItem
+  return <div style={styles.sideNav}>
+    <SideNavItem
         hasProfileImage={true}
         content={`${profile.givenName} ${profile.familyName}`}
         parentOnClick={() => onToggleUser()}
         onToggleSideNav={() => onToggleSideNav()}
         containsSubItems={true}
-      />
-      {showUserOptions && (
-        <SideNavItem
+    />
+    {
+      showUserOptions && <SideNavItem
           content={'Profile'}
           onToggleSideNav={() => onToggleSideNav()}
           href='/profile'
           active={profileActive()}
-        />
-      )}
-      {showUserOptions && (
-        <SideNavItem
+      />
+    }
+    {
+      showUserOptions && <SideNavItem
           content={'Sign Out'}
           onToggleSideNav={() => onToggleSideNav()}
           parentOnClick={() => {
             signOut();
             navigateSignOut();
           }}
-        />
-      )}
-      <SideNavItem
+      />
+    }
+    <SideNavItem
         icon='home'
         content='Home'
         onToggleSideNav={() => onToggleSideNav()}
         href='/'
         active={homeActive()}
-      />
-      <SideNavItem
+    />
+    <SideNavItem
         icon='applications'
         content='Your Workspaces'
         onToggleSideNav={() => onToggleSideNav()}
         href={'/workspaces'}
         active={workspacesActive()}
         disabled={!hasRegisteredTierAccess(profile)}
-      />
-      <SideNavItem
+    />
+    <SideNavItem
         icon='star'
         content='Featured Workspaces'
         onToggleSideNav={() => onToggleSideNav()}
         href={'/library'}
         active={libraryActive()}
         disabled={!hasRegisteredTierAccess(profile)}
-      />
-      <SideNavItem
+    />
+    <SideNavItem
         icon='help'
         content={'User Support Hub'}
         onToggleSideNav={() => onToggleSideNav()}
         parentOnClick={() => window.open(supportUrls.helpCenter, '_blank')}
         disabled={!hasRegisteredTierAccess(profile)}
-      />
-      <SideNavItem
+    />
+    <SideNavItem
         icon='envelope'
         content={'Contact Us'}
         onToggleSideNav={() => onToggleSideNav()}
         parentOnClick={() => openContactWidget()}
-      />
-      {hasAuthorityForAction(
-        profile,
-        AuthorityGuardedAction.SHOW_ADMIN_MENU
-      ) && (
-        <SideNavItem
-          icon='user'
-          content='Admin'
-          parentOnClick={() => onToggleAdmin()}
+    />
+    {hasAuthorityForAction(profile, AuthorityGuardedAction.SHOW_ADMIN_MENU) && <SideNavItem
+        icon='user'
+        content='Admin'
+        parentOnClick={() => onToggleAdmin()}
+        onToggleSideNav={() => onToggleSideNav()}
+        containsSubItems={true}
+    />
+    }
+    {
+      hasAuthorityForAction(profile, AuthorityGuardedAction.USER_ADMIN) && showAdminOptions && <SideNavItem
+          content={'User Admin'}
           onToggleSideNav={() => onToggleSideNav()}
-          containsSubItems={true}
-        />
-      )}
-      {hasAuthorityForAction(profile, AuthorityGuardedAction.USER_ADMIN) &&
-        showAdminOptions && (
-          <SideNavItem
-            content={'User Admin'}
-            onToggleSideNav={() => onToggleSideNav()}
-            href={'/admin/user'}
-            active={userAdminActive()}
-          />
-        )}
-      {hasAuthorityForAction(profile, AuthorityGuardedAction.USER_ADMIN) &&
-        showAdminOptions && (
-          <SideNavItem
-            content={'Bulk Sync of User Access'}
-            onToggleSideNav={() => onToggleSideNav()}
-            href={'/admin/bulk-sync-user-access'}
-            active={userAccessActive()}
-          />
-        )}
-      {hasAuthorityForAction(profile, AuthorityGuardedAction.USER_AUDIT) &&
-        showAdminOptions && (
-          <SideNavItem
-            content={'User Audit'}
-            onToggleSideNav={() => onToggleSideNav()}
-            href={'/admin/user-audit/'}
-            active={userAuditActive()}
-          />
-        )}
-      {hasAuthorityForAction(profile, AuthorityGuardedAction.SERVICE_BANNER) &&
-        showAdminOptions && (
-          <SideNavItem
-            content={'Service Banners'}
-            onToggleSideNav={() => onToggleSideNav()}
-            href={'/admin/banner'}
-            active={bannerAdminActive()}
-          />
-        )}
-      {hasAuthorityForAction(profile, AuthorityGuardedAction.WORKSPACE_ADMIN) &&
-        showAdminOptions && (
-          <SideNavItem
-            content={'Workspaces'}
-            onToggleSideNav={() => onToggleSideNav()}
-            href={'admin/workspaces'}
-            active={workspaceAdminActive()}
-          />
-        )}
-      {hasAuthorityForAction(profile, AuthorityGuardedAction.WORKSPACE_AUDIT) &&
-        showAdminOptions && (
-          <SideNavItem
-            content={'Workspace Audit'}
-            onToggleSideNav={() => onToggleSideNav()}
-            href={'/admin/workspace-audit/'}
-            active={workspaceAuditActive()}
-          />
-        )}
-      {hasAuthorityForAction(
-        profile,
-        AuthorityGuardedAction.INSTITUTION_ADMIN
-      ) &&
-        showAdminOptions && (
-          <SideNavItem
-            content={'Institution Admin'}
-            onToggleSideNav={() => onToggleSideNav()}
-            href={'admin/institution'}
-            active={institutionAdminActive()}
-          />
-        )}
-      {hasAuthorityForAction(profile, AuthorityGuardedAction.EGRESS_EVENTS) &&
-        showAdminOptions && (
-          <SideNavItem
-            content={'Egress Events'}
-            onToggleSideNav={() => onToggleSideNav()}
-            href={'/admin/egress-events'}
-            active={egressAdminActive()}
-          />
-        )}
-    </div>
-  );
+          href={'/admin/user'}
+          active={userAdminActive()}
+      />
+    }
+    {
+      hasAuthorityForAction(profile, AuthorityGuardedAction.USER_AUDIT) && showAdminOptions && <SideNavItem
+          content={'User Audit'}
+          onToggleSideNav={() => onToggleSideNav()}
+          href={'/admin/user-audit/'}
+          active={userAuditActive()}
+      />
+    }
+    {
+      hasAuthorityForAction(profile, AuthorityGuardedAction.SERVICE_BANNER) && showAdminOptions && <SideNavItem
+          content={'Service Banners'}
+          onToggleSideNav={() => onToggleSideNav()}
+          href={'/admin/banner'}
+          active={bannerAdminActive()}
+      />
+    }
+    {
+      hasAuthorityForAction(profile, AuthorityGuardedAction.WORKSPACE_ADMIN) && showAdminOptions && <SideNavItem
+          content={'Workspaces'}
+          onToggleSideNav={() => onToggleSideNav()}
+          href={'admin/workspaces'}
+          active={workspaceAdminActive()}
+      />
+    }
+    {
+      hasAuthorityForAction(profile, AuthorityGuardedAction.WORKSPACE_AUDIT) && showAdminOptions && <SideNavItem
+          content={'Workspace Audit'}
+          onToggleSideNav={() => onToggleSideNav()}
+          href={'/admin/workspace-audit/'}
+          active={workspaceAuditActive()}
+      />
+    }
+    {
+      hasAuthorityForAction(profile, AuthorityGuardedAction.INSTITUTION_ADMIN) && showAdminOptions && <SideNavItem
+          content={'Institution Admin'}
+          onToggleSideNav={() => onToggleSideNav()}
+          href={'admin/institution'}
+          active={institutionAdminActive()}
+      />
+    }
+    {
+      hasAuthorityForAction(profile, AuthorityGuardedAction.EGRESS_EVENTS) && showAdminOptions && <SideNavItem
+          content={'Egress Events'}
+          onToggleSideNav={() => onToggleSideNav()}
+          href={'/admin/egress-events'}
+          active={egressAdminActive()}
+      />
+    }
+  </div>;
 };

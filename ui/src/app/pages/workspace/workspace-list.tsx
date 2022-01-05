@@ -1,37 +1,35 @@
-import { AlertDanger } from 'app/components/alert';
-import { FadeBox } from 'app/components/containers';
-import { FlexRow } from 'app/components/flex';
-import { ListPageHeader } from 'app/components/headers';
-import { ClrIcon } from 'app/components/icons';
-import { Spinner } from 'app/components/spinners';
-import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
-import { NewWorkspaceButton } from 'app/pages/workspace/new-workspace-button';
-import { WorkspaceCard } from 'app/pages/workspace/workspace-card';
-import { workspacesApi } from 'app/services/swagger-fetch-clients';
-import { reactStyles, withUserProfile } from 'app/utils';
-import { convertAPIError } from 'app/utils/errors';
-import { WorkspacePermissions } from 'app/utils/workspace-permissions';
+import {AlertDanger} from 'app/components/alert';
+import {FadeBox} from 'app/components/containers';
+import {FlexRow} from 'app/components/flex';
+import {ListPageHeader} from 'app/components/headers';
+import {Spinner} from 'app/components/spinners';
+import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
+import {NewWorkspaceButton} from 'app/pages/workspace/new-workspace-button';
+import {WorkspaceCard} from 'app/pages/workspace/workspace-card';
+import {workspacesApi} from 'app/services/swagger-fetch-clients';
+import {
+  reactStyles, withUserProfile
+} from 'app/utils';
+import {convertAPIError} from 'app/utils/errors';
+import {WorkspacePermissions} from 'app/utils/workspace-permissions';
 import * as React from 'react';
 import RSelect from 'react-select';
 import * as fp from 'lodash/fp';
-import { Profile, WorkspaceAccessLevel } from 'generated/fetch';
-import { hasTierAccess } from 'app/utils/access-tiers';
+import {Profile, WorkspaceAccessLevel} from 'generated/fetch';
+import {hasTierAccess} from 'app/utils/access-tiers';
+import {ClrIcon} from 'app/components/clr-icons';
 
 const styles = reactStyles({
   fadeBox: {
-    margin: '1rem auto 0 auto',
-    width: '97.5%',
-    padding: '0 1rem',
+    margin: '1rem auto 0 auto', width: '97.5%', padding: '0 1rem'
   },
   cardArea: {
-    display: 'flex',
-    justifyContent: 'flex-start',
-    flexWrap: 'wrap',
-  },
+    display: 'flex', justifyContent: 'flex-start', flexWrap: 'wrap'
+  }
 });
 
 interface WorkspaceListProps extends WithSpinnerOverlayProps {
-  profileState: { profile: Profile; reload: Function; updateCache: Function };
+  profileState: {profile: Profile, reload: Function, updateCache: Function};
 }
 
 interface State {
@@ -42,129 +40,102 @@ interface State {
   firstSignIn: Date;
 }
 
-export const WorkspaceList = fp.flow(withUserProfile())(
-  class extends React.Component<WorkspaceListProps, State> {
-    private timer: NodeJS.Timer;
+export const WorkspaceList = fp.flow(withUserProfile())
+(class extends React.Component<WorkspaceListProps, State> {
 
-    constructor(props) {
-      super(props);
-      this.state = {
-        workspacesLoading: true,
-        workspaceList: [],
-        filterLevels: null,
-        errorText: '',
-        firstSignIn: undefined,
-      };
-    }
+  private timer: NodeJS.Timer;
 
-    componentDidMount() {
-      this.props.hideSpinner();
-      this.reloadWorkspaces();
-    }
+  constructor(props) {
+    super(props);
+    this.state = {
+      workspacesLoading: true,
+      workspaceList: [],
+      filterLevels: null,
+      errorText: '',
+      firstSignIn: undefined
+    };
+  }
 
-    componentWillUnmount() {
-      clearTimeout(this.timer);
-    }
+  componentDidMount() {
+    this.props.hideSpinner();
+    this.reloadWorkspaces();
+  }
 
-    async reloadWorkspaces() {
-      this.setState({ workspacesLoading: true });
-      try {
-        const workspacesReceived = (await workspacesApi().getWorkspaces())
-          .items;
-        workspacesReceived.sort((a, b) =>
-          a.workspace.name.localeCompare(b.workspace.name)
-        );
-        this.setState({
-          workspaceList: workspacesReceived.map(
-            (w) => new WorkspacePermissions(w)
-          ),
-          workspacesLoading: false,
-        });
-      } catch (e) {
-        const response = await convertAPIError(e);
-        this.setState({ errorText: response.message });
-      }
-    }
+  componentWillUnmount() {
+    clearTimeout(this.timer);
+  }
 
-    render() {
-      const { errorText, filterLevels, workspaceList, workspacesLoading } =
-        this.state;
-
-      const { profile } = this.props.profileState;
-
-      // Maps each "Filter by" dropdown element to a set of access levels to display.
-      const filters = [
-        { label: 'Owner', value: ['OWNER'] },
-        { label: 'Writer', value: ['WRITER'] },
-        { label: 'Reader', value: ['READER'] },
-        { label: 'All', value: null },
-      ];
-      const defaultFilter = filters.find((f) => f.label === 'All');
-
-      return (
-        <React.Fragment>
-          <FadeBox style={styles.fadeBox}>
-            <div style={{ padding: '0 1rem' }}>
-              <ListPageHeader>Workspaces</ListPageHeader>
-              <FlexRow style={{ marginTop: '0.5em' }}>
-                <div style={{ margin: '0', padding: '0.5em 0.75em 0 0' }}>
-                  Filter by
-                </div>
-                <RSelect
-                  data-test-id='access-level-filter'
-                  options={filters}
-                  defaultValue={defaultFilter}
-                  onChange={({ value }) =>
-                    this.setState({ filterLevels: value })
-                  }
-                />
-              </FlexRow>
-              {errorText && (
-                <AlertDanger>
-                  <ClrIcon shape='exclamation-circle' />
-                  {errorText}
-                </AlertDanger>
-              )}
-              <div style={styles.cardArea}>
-                {workspacesLoading ? (
-                  <Spinner style={{ margin: '1.5rem auto' }} />
-                ) : (
-                  <div
-                    style={{
-                      display: 'flex',
-                      marginTop: '1.5rem',
-                      flexWrap: 'wrap',
-                    }}
-                  >
-                    <NewWorkspaceButton />
-                    {workspaceList
-                      .filter(
-                        ({ accessLevel }) =>
-                          !filterLevels || filterLevels.includes(accessLevel)
-                      )
-                      .map((wp) => {
-                        return (
-                          <WorkspaceCard
-                            key={wp.workspace.namespace}
-                            workspace={wp.workspace}
-                            accessLevel={wp.accessLevel}
-                            reload={() => this.reloadWorkspaces()}
-                            tierAccessDisabled={
-                              !hasTierAccess(
-                                profile,
-                                wp.workspace.accessTierShortName
-                              )
-                            }
-                          />
-                        );
-                      })}
-                  </div>
-                )}
-              </div>
-            </div>
-          </FadeBox>
-        </React.Fragment>
-      );
+  async reloadWorkspaces() {
+    this.setState({workspacesLoading: true});
+    try {
+      const workspacesReceived = (await workspacesApi().getWorkspaces()).items;
+      workspacesReceived.sort(
+        (a, b) => a.workspace.name.localeCompare(b.workspace.name));
+      this.setState({
+        workspaceList: workspacesReceived.map(w => new WorkspacePermissions(w)),
+        workspacesLoading: false
+      });
+    } catch (e) {
+      const response = await convertAPIError(e);
+      this.setState({errorText: response.message});
     }
   }
-);
+
+  render() {
+    const {
+      errorText,
+      filterLevels,
+      workspaceList,
+      workspacesLoading
+    } = this.state;
+
+    const {profile} = this.props.profileState
+
+    // Maps each "Filter by" dropdown element to a set of access levels to display.
+    const filters = [
+      { label: 'Owner',  value: ['OWNER'] },
+      { label: 'Writer', value: ['WRITER'] },
+      { label: 'Reader', value: ['READER'] },
+      { label: 'All',    value: null },
+    ];
+    const defaultFilter = filters.find(f => f.label === 'All');
+
+    return <React.Fragment>
+      <FadeBox style={styles.fadeBox}>
+        <div style={{padding: '0 1rem'}}>
+          <ListPageHeader>Workspaces</ListPageHeader>
+          <FlexRow style={{marginTop: '0.5em'}}>
+            <div style={{margin: '0', padding: '0.5em 0.75em 0 0'}}>Filter by</div>
+            <RSelect
+              data-test-id="access-level-filter"
+              options={filters}
+              defaultValue={defaultFilter}
+              onChange={({value}) => this.setState({filterLevels: value})} />
+          </FlexRow>
+          {errorText && <AlertDanger>
+            <ClrIcon shape='exclamation-circle'/>
+            {errorText}
+          </AlertDanger>}
+          <div style={styles.cardArea}>
+            {workspacesLoading ?
+              (<Spinner style={{margin: '1.5rem auto'}}/>) :
+              (<div style={{display: 'flex', marginTop: '1.5rem', flexWrap: 'wrap'}}>
+                <NewWorkspaceButton />
+                {workspaceList
+                  .filter(({accessLevel}) => !filterLevels || filterLevels.includes(accessLevel))
+                   .map(wp => {
+                  return <WorkspaceCard
+                    key={wp.workspace.namespace}
+                    workspace={wp.workspace}
+                    accessLevel={wp.accessLevel}
+                    reload={() => this.reloadWorkspaces()}
+                    tierAccessDisabled={!hasTierAccess(profile, wp.workspace.accessTierShortName)}
+                  />;
+                })}
+              </div>)}
+          </div>
+        </div>
+      </FadeBox>
+    </React.Fragment>;
+  }
+});
