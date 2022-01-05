@@ -1416,7 +1416,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
                         queryJobConfiguration.getQuery(), kernelTypeEnum),
                     queryJobConfiguration.getNamedParameters())
                 + "\", sep=\"\")\n\n"
-                + "# Formuate a Cloud Storage destination path for the data exported from BigQuery.\n"
+                + "# Formulate a Cloud Storage destination path for the data exported from BigQuery.\n"
                 + "# NOTE: By default data exported multiple times on the same day will overwrite older copies.\n"
                 + "#       But data exported on a different days will write to a new location so that historical\n"
                 + "#       copies can be kept as the dataset definition is changed.\n"
