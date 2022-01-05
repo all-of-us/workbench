@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+  <changeSet author="neha" id="changelog-184-loaddata-new-user-recent-resource-table">
+    <sql>
+    	insert into user_recent_resources (id ,user_id, workspace_id, resource_type, resource_id, last_access_date) 
+    	select id, 
+    	user_id, workspace_id, 
+    	case 
+    	when cohort_id IS NOT NULL then 1
+    	when concept_set_id IS NOT NULL then 2
+    	else 3
+    	end as resource_type,
+    	case 
+    	when cohort_id IS NOT NULL then cohort_id
+    	when concept_set_id IS NOT NULL then concept_set_id
+    	else notebook_name
+    	end  as resource_id, 
+    	lastAccessDate from user_recent_resource;
+    </sql> 
+  </changeSet>
+</databaseChangeLog>
