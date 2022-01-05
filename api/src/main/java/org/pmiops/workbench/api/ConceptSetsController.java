@@ -1,11 +1,6 @@
 package org.pmiops.workbench.api;
 
 import com.google.common.base.Strings;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import javax.inject.Provider;
 import org.apache.commons.collections4.CollectionUtils;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
@@ -23,6 +18,12 @@ import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
+
+import javax.inject.Provider;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 public class ConceptSetsController implements ConceptSetsApiDelegate {
@@ -71,7 +72,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
     ConceptSet conceptSet =
         conceptSetService.getConceptSet(dbWorkspace.getWorkspaceId(), conceptSetId);
     conceptSetService.delete(conceptSet.getId());
-    userRecentResourceService.deleteCohortEntry(
+    userRecentResourceService.deleteConceptSetEntry(
         dbWorkspace.getWorkspaceId(), userProvider.get().getUserId(), conceptSetId);
     return ResponseEntity.ok(new EmptyResponse());
   }
