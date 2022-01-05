@@ -443,7 +443,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
 
     return updateUserWithRetries(
         (user) -> {
-          // TODO: Teardown/reconcile duplicated state between the user profile and DUA.
+          // TODO: Teardown/reconcile duplicated state between the user profile and DUCC.
           user.setDuccSignedVersion(duccSignedVersion);
           accessModuleService.updateCompletionTime(
               user, AccessModuleName.DATA_USER_CODE_OF_CONDUCT, timestamp);

@@ -118,8 +118,7 @@ public class CloudTaskUserController implements CloudTaskUserApiDelegate {
 
       try {
         user =
-            userService.syncDuccVersionStatus(
-                user, Agent.asSystem(), user.getDuccSignedVersion());
+            userService.syncDuccVersionStatus(user, Agent.asSystem(), user.getDuccSignedVersion());
 
         // 2FA synchronization requires an outgoing call to gsuite. For this reason, we
         // optimize to only verify that users who have 2FA enabled, still have it enabled.

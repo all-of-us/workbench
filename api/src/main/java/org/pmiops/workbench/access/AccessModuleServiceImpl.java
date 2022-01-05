@@ -155,8 +155,7 @@ public class AccessModuleServiceImpl implements AccessModuleService {
     // we have an additional check before considering DUCC "complete"
     if (isCompleted && accessModuleName == AccessModuleName.DATA_USER_CODE_OF_CONDUCT) {
       // protect against NPE when unboxing for comparison
-      final int signedVersion =
-          Optional.ofNullable(dbUser.getDuccSignedVersion()).orElse(-1);
+      final int signedVersion = Optional.ofNullable(dbUser.getDuccSignedVersion()).orElse(-1);
       isCompleted = (getCurrentDuccVersion() == signedVersion);
     }
 
