@@ -156,7 +156,7 @@ public class AccessModuleServiceImpl implements AccessModuleService {
     if (isCompleted && accessModuleName == AccessModuleName.DATA_USER_CODE_OF_CONDUCT) {
       // protect against NPE when unboxing for comparison
       final int signedVersion =
-          Optional.ofNullable(dbUser.getDataUseAgreementSignedVersion()).orElse(-1);
+          Optional.ofNullable(dbUser.getDuccSignedVersion()).orElse(-1);
       isCompleted = (getCurrentDuccVersion() == signedVersion);
     }
 

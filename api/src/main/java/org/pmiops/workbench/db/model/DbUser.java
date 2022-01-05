@@ -77,8 +77,7 @@ public class DbUser {
   private String eraCommonsLinkedNihUsername;
   private Timestamp eraCommonsLinkExpireTime;
   private String rasLinkLoginGovUsername;
-  private Integer dataUseAgreementSignedVersion;
-  private Timestamp complianceTrainingExpirationTime;
+  private Integer duccSignedVersion;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -299,12 +298,12 @@ public class DbUser {
   }
 
   @Column(name = "data_use_agreement_signed_version")
-  public Integer getDataUseAgreementSignedVersion() {
-    return dataUseAgreementSignedVersion;
+  public Integer getDuccSignedVersion() {
+    return duccSignedVersion;
   }
 
-  public void setDataUseAgreementSignedVersion(Integer dataUseAgreementSignedVersion) {
-    this.dataUseAgreementSignedVersion = dataUseAgreementSignedVersion;
+  public void setDuccSignedVersion(Integer duccSignedVersion) {
+    this.duccSignedVersion = duccSignedVersion;
   }
 
   @OneToOne(

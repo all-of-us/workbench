@@ -59,7 +59,7 @@ public class ReportingUserFixture implements ReportingTestFixture<DbUser, Report
       Timestamp.from(Instant.parse("2015-05-14T00:00:00.00Z"));
   public static final Timestamp USER__DATA_USE_AGREEMENT_COMPLETION_TIME =
       Timestamp.from(Instant.parse("2015-05-15T00:00:00.00Z"));
-  public static final Integer USER__DATA_USE_AGREEMENT_SIGNED_VERSION = 11;
+  public static final Integer USER__DATA_USER_CODE_OF_CONDUCT_SIGNED_VERSION = 11;
   public static final Timestamp USER__DEMOGRAPHIC_SURVEY_COMPLETION_TIME =
       Timestamp.from(Instant.parse("2015-05-17T00:00:00.00Z"));
   public static final Boolean USER__DISABLED = false;
@@ -117,7 +117,7 @@ public class ReportingUserFixture implements ReportingTestFixture<DbUser, Report
     assertTimeApprox(
         user.getDataUseAgreementCompletionTime(), USER__DATA_USE_AGREEMENT_COMPLETION_TIME);
     assertThat(user.getDataUseAgreementSignedVersion())
-        .isEqualTo(USER__DATA_USE_AGREEMENT_SIGNED_VERSION);
+        .isEqualTo(USER__DATA_USER_CODE_OF_CONDUCT_SIGNED_VERSION);
     assertTimeApprox(
         user.getDemographicSurveyCompletionTime(), USER__DEMOGRAPHIC_SURVEY_COMPLETION_TIME);
     assertThat(user.getDisabled()).isEqualTo(USER__DISABLED);
@@ -159,7 +159,7 @@ public class ReportingUserFixture implements ReportingTestFixture<DbUser, Report
     user.setAreaOfResearch(USER__AREA_OF_RESEARCH);
     user.setContactEmail(USER__CONTACT_EMAIL);
     user.setCreationTime(USER__CREATION_TIME);
-    user.setDataUseAgreementSignedVersion(USER__DATA_USE_AGREEMENT_SIGNED_VERSION);
+    user.setDuccSignedVersion(USER__DATA_USER_CODE_OF_CONDUCT_SIGNED_VERSION);
     user.setDemographicSurveyCompletionTime(USER__DEMOGRAPHIC_SURVEY_COMPLETION_TIME);
     user.setDisabled(USER__DISABLED);
     user.setFamilyName(USER__FAMILY_NAME);
@@ -187,7 +187,7 @@ public class ReportingUserFixture implements ReportingTestFixture<DbUser, Report
         .creationTime(offsetDateTimeUtc(USER__CREATION_TIME))
         .dataUseAgreementBypassTime(offsetDateTimeUtc(USER__DATA_USE_AGREEMENT_BYPASS_TIME))
         .dataUseAgreementCompletionTime(offsetDateTimeUtc(USER__DATA_USE_AGREEMENT_COMPLETION_TIME))
-        .dataUseAgreementSignedVersion(USER__DATA_USE_AGREEMENT_SIGNED_VERSION)
+        .dataUseAgreementSignedVersion(USER__DATA_USER_CODE_OF_CONDUCT_SIGNED_VERSION)
         .demographicSurveyCompletionTime(
             offsetDateTimeUtc(USER__DEMOGRAPHIC_SURVEY_COMPLETION_TIME))
         .disabled(USER__DISABLED)
