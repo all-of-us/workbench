@@ -22,7 +22,7 @@ import {institutionApi, userAdminApi} from 'app/services/swagger-fetch-clients';
 import {ClrIcon} from 'app/components/icons';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {getRoleOptions} from 'app/utils/institutions';
-import {TextInputWithLabel, TextInputWithLabel2} from 'app/components/inputs';
+import {TextInputWithLabel} from 'app/components/inputs';
 import {BulletAlignedUnorderedList} from 'app/components/lists';
 import {TooltipTrigger} from 'app/components/popups';
 import {serverConfigStore} from 'app/utils/stores';
@@ -158,7 +158,7 @@ interface ContactEmailTextInputProps {
 }
 export const ContactEmailTextInput =
   ({contactEmail, previousContactEmail, onChange, labelStyle, inputStyle, containerStyle}: ContactEmailTextInputProps) => {
-  return <TextInputWithLabel2
+  return <TextInputWithLabel
     inputId={'contactEmail'}
     labelText={'Contact email'}
     value={contactEmail}
@@ -234,18 +234,20 @@ export const InstitutionalRoleDropdown =
 
 interface InstitutionalRoleOtherTextProps {
   affiliation?: VerifiedInstitutionalAffiliation,
+  previousOtherText?: string,
   onChange: Function,
   labelStyle?: CSSProperties,
   inputStyle?: CSSProperties,
   containerStyle?: CSSProperties,
 }
 export const InstitutionalRoleOtherTextInput =
-  ({affiliation, onChange, labelStyle, inputStyle, containerStyle}: InstitutionalRoleOtherTextProps) => {
+  ({affiliation, previousOtherText, onChange, labelStyle, inputStyle, containerStyle}: InstitutionalRoleOtherTextProps) => {
   return (affiliation?.institutionalRoleEnum === InstitutionalRole.OTHER)
     ? <TextInputWithLabel
       dataTestId={'institutionalRoleOtherText'}
       labelText={'Institutional role description'}
-      placeholder={affiliation?.institutionalRoleOtherText}
+      value={affiliation?.institutionalRoleOtherText}
+      previousValue={previousOtherText}
       labelStyle={{...commonStyles.label, ...labelStyle}}
       inputStyle={{...commonStyles.textInput, ...inputStyle}}
       containerStyle={{...commonStyles.textInputContainer, ...containerStyle}}

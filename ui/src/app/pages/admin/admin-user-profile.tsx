@@ -138,6 +138,7 @@ const EditableFields =
         <FlexSpacer/>
         <InstitutionalRoleOtherTextInput
           affiliation={updatedProfile.verifiedInstitutionalAffiliation}
+          previousOtherText={oldProfile.verifiedInstitutionalAffiliation?.institutionalRoleOtherText}
           onChange={value => onChangeInstitutionOtherText(value)}/>
       </FlexRow>
     </FlexColumn>

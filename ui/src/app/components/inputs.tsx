@@ -473,31 +473,6 @@ export class Toggle extends React.Component<ToggleProps>  {
  * @constructor
  */
 export function TextInputWithLabel(props) {
-  return <div style={{...props.containerStyle}}>
-    {props.labelContent}
-    {props.labelText && <label style={{
-      fontSize: 14,
-      color: colors.primary,
-      lineHeight: '22px',
-      fontWeight: 600,
-      ...props.labelStyle
-    }}>{props.labelText}</label>}
-    <div style={{marginTop: '0.1rem'}}>
-      <TextInput data-test-id={props.inputId}
-                 id={props.inputId}
-                 name={props.inputName}
-                 placeholder={props.placeholder}
-                 value={props.value}
-                 disabled={props.disabled}
-                 onChange={props.onChange}
-                 onBlur={props.onBlur}
-                 invalid={props.invalid ? props.invalid.toString() : undefined}
-                 style={{...commonStyles.sectionInput, ...props.inputStyle}}/>
-      {props.children}
-    </div>
-  </div>;
-}
-export function TextInputWithLabel2(props) {
   const changed = props.previousValue && (props.previousValue !== props.value);
   const style: CSSProperties = changed ? {...props.inputStyle, backgroundColor: colors.highlight} : props.inputStyle;
   return <div style={{...props.containerStyle}}>
