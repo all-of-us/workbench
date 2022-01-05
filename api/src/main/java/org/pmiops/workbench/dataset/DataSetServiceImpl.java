@@ -819,32 +819,18 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
 
     String qualifier = generateRandomEightCharacterQualifier();
 
-    String prerequisites;
-    switch (dataSetExportRequest.getKernelType()) {
-      case R:
-        prerequisites = "library(bigrquery)";
-        break;
-      case PYTHON:
-        prerequisites = "import pandas\n" + "import os";
-        break;
-      default:
-        throw new BadRequestException(
-            "Kernel Type " + dataSetExportRequest.getKernelType().toString() + " not supported");
-    }
-
     return Stream.concat(
             queriesByDomain.entrySet().stream()
-                .map(
+                .flatMap(
                     entry ->
-                        prerequisites
-                            + "\n\n"
-                            + generateNotebookUserCode(
-                                entry.getValue(),
-                                Domain.fromValue(entry.getKey()),
-                                dataSetExportRequest.getDataSetRequest().getName(),
-                                dbWorkspace.getCdrVersion().getName(),
-                                qualifier,
-                                dataSetExportRequest.getKernelType())),
+                        generateDataframeNotebookCells(
+                            entry.getValue(),
+                            Domain.fromValue(entry.getKey()),
+                            dataSetExportRequest.getDataSetRequest().getName(),
+                            dbWorkspace.getCdrVersion().getName(),
+                            qualifier,
+                            dataSetExportRequest.getKernelType())
+                            .stream()),
             generateWgsCode(dataSetExportRequest, dbWorkspace, qualifier).stream())
         .collect(Collectors.toList());
   }
@@ -868,8 +854,6 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
       return generateGenomicsAnalysisCommentForR();
     }
 
-    // TODO RW-6806: Add some code to print a user friendly message if the extracted VCF files are
-    // not ready yet
     switch (dataSetExportRequest.getGenomicsAnalysisTool()) {
       case HAIL:
         return generateHailCode(qualifier, dataSetExportRequest);
@@ -1374,7 +1358,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     }
   }
 
-  private static String generateNotebookUserCode(
+  private static List<String> generateDataframeNotebookCells(
       QueryJobConfiguration queryJobConfiguration,
       Domain domain,
       String dataSetName,
@@ -1387,26 +1371,26 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     String domainAsString = domain.toString().toLowerCase();
     String namespace = "dataset_" + qualifier + "_" + domainAsString + "_";
     // Comments in R and Python have the same syntax
-    String descriptiveComment =
+    String sqlComment =
         String.format(
             "# This query represents dataset \"%s\" for domain \"%s\" and was generated for %s",
             dataSetName, domainAsString, cdrVersionName);
-    String sqlSection;
-    String dataFrameSection;
-    String displayHeadSection;
 
     switch (kernelTypeEnum) {
       case PYTHON:
-        sqlSection =
-            namespace
+        return ImmutableList.of(
+            "import pandas\n"
+                + "import os\n\n"
+                + sqlComment
+                + "\n"
+                + namespace
                 + "sql = \"\"\""
                 + fillInQueryParams(
                     generateSqlWithEnvironmentVariables(
                         queryJobConfiguration.getQuery(), kernelTypeEnum),
                     queryJobConfiguration.getNamedParameters())
-                + "\"\"\"";
-        dataFrameSection =
-            namespace
+                + "\"\"\"\n\n"
+                + namespace
                 + "df = pandas.read_gbq(\n"
                 + "    "
                 + namespace
@@ -1415,36 +1399,85 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
                 + "    use_bqstorage_api=(\""
                 + LeonardoNotebooksClient.BIGQUERY_STORAGE_API_ENABLED_ENV_KEY
                 + "\" in os.environ),\n"
-                + "    progress_bar_type=\"tqdm_notebook\")";
-        displayHeadSection = namespace + "df.head(5)";
-        break;
+                + "    progress_bar_type=\"tqdm_notebook\")\n\n"
+                + namespace
+                + "df.head(5)");
       case R:
-        sqlSection =
-            namespace
+        String exportName = domainAsString + "_" + qualifier;
+        String exportPathVariable = exportName + "_path";
+        return ImmutableList.of(
+            "library(tidyverse)\nlibrary(bigrquery)\n\n"
+                + sqlComment
+                + "\n"
+                + namespace
                 + "sql <- paste(\""
                 + fillInQueryParams(
                     generateSqlWithEnvironmentVariables(
                         queryJobConfiguration.getQuery(), kernelTypeEnum),
                     queryJobConfiguration.getNamedParameters())
-                + "\", sep=\"\")";
-        dataFrameSection =
-            namespace
-                + "df <- bq_table_download(bq_dataset_query(Sys.getenv(\"WORKSPACE_CDR\"), "
+                + "\", sep=\"\")\n\n"
+                + "# Formulate a Cloud Storage destination path for the data exported from BigQuery.\n"
+                + "# NOTE: By default data exported multiple times on the same day will overwrite older copies.\n"
+                + "#       But data exported on a different days will write to a new location so that historical\n"
+                + "#       copies can be kept as the dataset definition is changed.\n"
+                + exportPathVariable
+                + " <- file.path(\n"
+                + "  Sys.getenv(\"WORKSPACE_BUCKET\"),\n"
+                + "  \"bq_exports\",\n"
+                + "  Sys.getenv(\"OWNER_EMAIL\"),\n"
+                + "  strftime(lubridate::now(), \"%Y%m%d\"),  # Comment out this line if you want the export to always overwrite.\n"
+                + "  \""
+                + exportName
+                + "\",\n"
+                + "  \""
+                + exportName
+                + "_*.csv\")\n"
+                + "message(str_glue('The data will be written to {"
+                + exportPathVariable
+                + "}. Use this path when reading ',\n"
+                + "                 'the data into your notebooks in the future.'))\n\n"
+                + "# Perform the query and export the dataset to Cloud Storage as CSV files.\n"
+                + "# NOTE: You only need to run `bq_table_save` once. After that, you can\n"
+                + "#       just read data from the CSVs in Cloud Storage.\n"
+                + "bq_table_save(\n"
+                + "  bq_dataset_query(Sys.getenv(\"WORKSPACE_CDR\"), "
                 + namespace
-                + "sql, billing=Sys.getenv(\"GOOGLE_PROJECT\")), bigint=\"integer64\")";
-        displayHeadSection = "head(" + namespace + "df, 5)";
-        break;
+                + "sql, billing = Sys.getenv(\"GOOGLE_PROJECT\")),\n"
+                + "  "
+                + exportPathVariable
+                + ",\n"
+                + "  destination_format = \"CSV\")\n\n",
+            "# Read the data directly from Cloud Storage into memory.\n"
+                + "# NOTE: Alternatively you can `gsutil -m cp {"
+                + exportPathVariable
+                + "}` to copy these files\n"
+                + "#       to the Jupyter disk.\n"
+                + "read_bq_export_from_workspace_bucket <- function(export_path) {\n"
+                + "  col_types <- NULL\n"
+                + "  bind_rows(\n"
+                + "    map(system2('gsutil', args = c('ls', export_path), stdout = TRUE, stderr = TRUE),\n"
+                + "        function(csv) {\n"
+                + "          message(str_glue('Loading {csv}.'))\n"
+                + "          chunk <- read_csv(pipe(str_glue('gsutil cat {csv}')), col_types = col_types, show_col_types = FALSE)\n"
+                + "          if (is.null(col_types)) {\n"
+                + "            col_types <- spec(chunk)\n"
+                + "          }\n"
+                + "          chunk\n"
+                + "        }))\n"
+                + "}\n"
+                + namespace
+                + "df <- read_bq_export_from_workspace_bucket("
+                + exportPathVariable
+                + ")\n\n"
+                + "dim("
+                + namespace
+                + "df)\n\n"
+                + "head("
+                + namespace
+                + "df, 5)");
       default:
         throw new BadRequestException("Language " + kernelTypeEnum.toString() + " not supported.");
     }
-
-    return descriptiveComment
-        + "\n"
-        + sqlSection
-        + "\n\n"
-        + dataFrameSection
-        + "\n\n"
-        + displayHeadSection;
   }
 
   private static <T> List<T> nullableListToEmpty(List<T> nullableList) {
