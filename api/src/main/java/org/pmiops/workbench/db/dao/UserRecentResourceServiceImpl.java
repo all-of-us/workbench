@@ -1,5 +1,9 @@
 package org.pmiops.workbench.db.dao;
 
+import java.sql.Timestamp;
+import java.time.Clock;
+import java.time.Duration;
+import java.util.List;
 import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.db.DbRetryUtils;
 import org.pmiops.workbench.db.model.DbCohort;
@@ -11,11 +15,6 @@ import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.model.ResourceType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.sql.Timestamp;
-import java.time.Clock;
-import java.time.Duration;
-import java.util.List;
 
 @Service
 public class UserRecentResourceServiceImpl implements UserRecentResourceService {
@@ -54,22 +53,12 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
     DbUserRecentResource recentResource =
         userRecentResourceDao.findByUserIdAndWorkspaceIdAndNotebookName(
             userId, workspaceId, notebookNameWithPath);
-    DbUserRecentResourcesId recentResourcesId =
-        userRecentResourcesIdDao
-            .findDbUserRecentResourcesIdByUserIdAndWorkspaceIdAndResourceTypeAndResourceId(
-                userId,
-                workspaceId,
-                DbStorageEnums.resourceTypeToStorage(ResourceType.NOTEBOOK),
-                notebookNameWithPath);
     if (recentResource == null) {
       handleUserLimit(userId);
       recentResource = new DbUserRecentResource(workspaceId, userId, notebookNameWithPath, now);
-      recentResourcesId =
-          new DbUserRecentResourcesId(
-              workspaceId, userId, ResourceType.NOTEBOOK, notebookNameWithPath, now);
     }
     recentResource.setLastAccessDate(now);
-    userRecentResourcesIdDao.save(recentResourcesId);
+    updateUserRecentResourceEntry(workspaceId, userId, ResourceType.NOTEBOOK, notebookNameWithPath);
     return userRecentResourceDao.save(recentResource);
   }
 
@@ -86,25 +75,16 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
     DbCohort cohort = cohortDao.findById(cohortId).orElse(null);
     DbUserRecentResource resource =
         userRecentResourceDao.findByUserIdAndWorkspaceIdAndCohort(userId, workspaceId, cohort);
-    DbUserRecentResourcesId recentResourcesId =
-        userRecentResourcesIdDao
-            .findDbUserRecentResourcesIdByUserIdAndWorkspaceIdAndResourceTypeAndResourceId(
-                userId,
-                workspaceId,
-                DbStorageEnums.resourceTypeToStorage(ResourceType.COHORT),
-                String.valueOf(cohortId));
 
     if (resource == null) {
       handleUserLimit(userId);
       resource = new DbUserRecentResource(workspaceId, userId, now);
-      recentResourcesId =
-          new DbUserRecentResourcesId(
-              workspaceId, userId, ResourceType.COHORT, String.valueOf(cohortId), now);
       resource.setCohort(cohort);
     }
     resource.setLastAccessDate(now);
-    userRecentResourcesIdDao.save(recentResourcesId);
     userRecentResourceDao.save(resource);
+    updateUserRecentResourceEntry(
+        workspaceId, userId, ResourceType.COHORT, String.valueOf(cohortId));
   }
 
   @Override
@@ -113,6 +93,8 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
 
     final DbConceptSet conceptSet = conceptSetDao.findById(conceptSetId).orElse(null);
     userRecentResourceDao.save(makeUserRecentResource(workspaceId, userId, now, conceptSet));
+    updateUserRecentResourceEntry(
+        workspaceId, userId, ResourceType.CONCEPT_SET, String.valueOf(conceptSetId));
   }
 
   @NotNull
@@ -121,29 +103,31 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
     DbUserRecentResource resource =
         userRecentResourceDao.findByUserIdAndWorkspaceIdAndConceptSet(
             userId, workspaceId, conceptSet);
+
+    if (resource == null) {
+      handleUserLimit(userId);
+      resource = new DbUserRecentResource(workspaceId, userId, now);
+      resource.setConceptSet(conceptSet);
+    }
+    resource.setLastAccessDate(now);
+    return resource;
+  }
+
+  private void updateUserRecentResourceEntry(
+      long workspaceId, long userId, ResourceType resourceType, String resourceId) {
+    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     DbUserRecentResourcesId recentResourcesId =
         userRecentResourcesIdDao
             .findDbUserRecentResourcesIdByUserIdAndWorkspaceIdAndResourceTypeAndResourceId(
                 userId,
                 workspaceId,
-                DbStorageEnums.resourceTypeToStorage(ResourceType.CONCEPT_SET),
-                String.valueOf(conceptSet.getConceptSetId()));
-
-    if (resource == null) {
-      handleUserLimit(userId);
-      resource = new DbUserRecentResource(workspaceId, userId, now);
+                DbStorageEnums.resourceTypeToStorage(resourceType),
+                resourceId);
+    if (recentResourcesId == null) {
       recentResourcesId =
-          new DbUserRecentResourcesId(
-              workspaceId,
-              userId,
-              ResourceType.CONCEPT_SET,
-              String.valueOf(conceptSet.getConceptSetId()),
-              now);
-      resource.setConceptSet(conceptSet);
+          new DbUserRecentResourcesId(workspaceId, userId, resourceType, resourceId, now);
     }
-    resource.setLastAccessDate(now);
     userRecentResourcesIdDao.save(recentResourcesId);
-    return resource;
   }
 
   /** Deletes notebook entry from user_recent_resource */
