@@ -173,7 +173,7 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
 
   // clean up any currently-running or previously-run validation
   const clearEmailValidation = () => {
-     if (emailValidationAborter) {
+    if (emailValidationAborter) {
       emailValidationAborter.abort();
     }
 
