@@ -13,6 +13,8 @@ repositories {
 
 dependencies {
     // Genomics dependencies
+    compile 'org.broadinstitute:barclay:4.0.2'
+    compile 'com.github.broadinstitute:picard:2.26.9'
     compile 'org.broadinstitute:gatk:4.2.4.1'
     compile 'com.github.samtools:htsjdk:2.24.1'
     compile 'com.google.guava:guava:31.0.1-jre'
