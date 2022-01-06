@@ -22,7 +22,7 @@ import {institutionApi, userAdminApi} from 'app/services/swagger-fetch-clients';
 import {ClrIcon} from 'app/components/icons';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {getRoleOptions} from 'app/utils/institutions';
-import {TextInputWithLabel} from 'app/components/inputs';
+import {Select, TextInputWithLabel} from 'app/components/inputs';
 import {BulletAlignedUnorderedList} from 'app/components/lists';
 import {TooltipTrigger} from 'app/components/popups';
 import {serverConfigStore} from 'app/utils/stores';
@@ -134,24 +134,30 @@ export const updateAccountProperties = async(oldProfile: Profile, updatedProfile
   return userAdminApi().updateAccountProperties(request);
 }
 
-export const DropdownWithLabel =
-  ({label, options, initialValue, onChange, disabled= false, dataTestId, labelStyle = {}, dropdownStyle = {}}) => {
+export const DropdownWithLabel = ({label, options, currentValue, previousValue, highlightOnChange, onChange,
+                                    disabled= false, dataTestId, labelStyle = {}, dropdownStyle = {}}) => {
+
+  const dropdownHighlightStyling =
+    `body .p-dropdown-label.p-inputtext { background-color: ${colors.highlight}; }`;
   return <FlexColumn data-test-id={dataTestId} style={{marginTop: '1rem'}}>
     <label style={{...commonStyles.label, ...labelStyle}}>{label}</label>
-    <Dropdown
-      style={{...commonStyles.dropdown, ...dropdownStyle}}
-      options={options}
-      onChange={(e) => onChange(e)}
-      value={initialValue}
-      disabled={disabled}
-    />
+    <div>
+      {highlightOnChange && (currentValue !== previousValue) && <style>{dropdownHighlightStyling}</style>}
+      <Dropdown
+        style={{...commonStyles.dropdown, ...dropdownStyle}}
+        options={options}
+        onChange={(e) => onChange(e)}
+        value={currentValue}
+        disabled={disabled}/>
+  </div>
   </FlexColumn>;
 };
+
 
 interface ContactEmailTextInputProps {
   contactEmail: string,
   previousContactEmail?: string,
-  highlightOnChange: boolean,
+  highlightOnChange?: boolean,
   onChange: Function,
   labelStyle?: CSSProperties,
   inputStyle?: CSSProperties,
@@ -172,18 +178,22 @@ export const ContactEmailTextInput = ({contactEmail, previousContactEmail, highl
 }
 
 interface FreeCreditsDropdownProps {
-  initialLimit?: number,
   currentLimit?: number,
+  previousLimit?: number,
+  highlightOnChange?: boolean,
   onChange: Function,
   labelStyle?: CSSProperties,
   dropdownStyle?: CSSProperties,
 }
-export const FreeCreditsDropdown = ({initialLimit, currentLimit, onChange, labelStyle, dropdownStyle}: FreeCreditsDropdownProps) => {
+export const FreeCreditsDropdown = ({currentLimit, previousLimit, highlightOnChange,
+                                      onChange, labelStyle, dropdownStyle}: FreeCreditsDropdownProps) => {
   return <DropdownWithLabel
     dataTestId={'freeTierDollarQuota'}
     label={'Free credit limit'}
-    options={getFreeCreditLimitOptions(initialLimit)}
-    initialValue={currentLimit}
+    options={getFreeCreditLimitOptions(previousLimit)}
+    currentValue={currentLimit}
+    previousValue={previousLimit}
+    highlightOnChange={highlightOnChange}
     labelStyle={labelStyle}
     dropdownStyle={dropdownStyle}
     onChange={(event) => onChange(event)}/>;
@@ -191,20 +201,24 @@ export const FreeCreditsDropdown = ({initialLimit, currentLimit, onChange, label
 
 interface InstitutionDropdownProps {
   institutions?: PublicInstitutionDetails[],
-  initialInstitutionShortName?: string,
+  currentInstitutionShortName?: string,
+  previousInstitutionShortName?: string,
+  highlightOnChange?: boolean;
   onChange: Function,
   labelStyle?: CSSProperties,
   dropdownStyle?: CSSProperties,
 }
-export const InstitutionDropdown =
-  ({institutions, initialInstitutionShortName, onChange, labelStyle, dropdownStyle}: InstitutionDropdownProps) => {
+export const InstitutionDropdown = ({institutions, currentInstitutionShortName, previousInstitutionShortName,
+                                      highlightOnChange, onChange, labelStyle, dropdownStyle}: InstitutionDropdownProps) => {
   const options = fp.map(({displayName, shortName}) => ({label: displayName, value: shortName}), institutions);
   return institutions
     ? <DropdownWithLabel
       dataTestId={'verifiedInstitution'}
       label={'Verified institution'}
       options={options}
-      initialValue={initialInstitutionShortName}
+      currentValue={currentInstitutionShortName}
+      previousValue={previousInstitutionShortName}
+      highlightOnChange={highlightOnChange}
       labelStyle={labelStyle}
       dropdownStyle={dropdownStyle}
       onChange={(event) => onChange(event)}/>
@@ -213,21 +227,26 @@ export const InstitutionDropdown =
 
 interface InstitutionalRoleDropdownProps {
   institutions?: PublicInstitutionDetails[],
+  currentAffiliation?: VerifiedInstitutionalAffiliation,
+  previousRole?: InstitutionalRole,
+  highlightOnChange?: boolean,
   initialAffiliation?: VerifiedInstitutionalAffiliation,
   onChange: Function,
   labelStyle?: CSSProperties,
   dropdownStyle?: CSSProperties,
 }
-export const InstitutionalRoleDropdown =
-  ({institutions, initialAffiliation, onChange, labelStyle, dropdownStyle}: InstitutionalRoleDropdownProps) => {
-  const options = getRoleOptions(institutions, initialAffiliation?.institutionShortName);
-  return (institutions && initialAffiliation)
+export const InstitutionalRoleDropdown = ({institutions, currentAffiliation, previousRole, highlightOnChange,
+                                            onChange, labelStyle, dropdownStyle}: InstitutionalRoleDropdownProps) => {
+  const options = getRoleOptions(institutions, currentAffiliation?.institutionShortName);
+  return (institutions && currentAffiliation)
     ? <DropdownWithLabel
       dataTestId={'institutionalRole'}
       label={'Institutional role'}
-      disabled={!initialAffiliation.institutionShortName}
+      disabled={!currentAffiliation?.institutionShortName}
       options={options}
-      initialValue={initialAffiliation.institutionalRoleEnum}
+      currentValue={currentAffiliation?.institutionalRoleEnum}
+      previousValue={previousRole}
+      highlightOnChange={highlightOnChange}
       labelStyle={labelStyle}
       dropdownStyle={dropdownStyle}
       onChange={(event) => onChange(event)}/>
@@ -237,7 +256,7 @@ export const InstitutionalRoleDropdown =
 interface InstitutionalRoleOtherTextProps {
   affiliation?: VerifiedInstitutionalAffiliation,
   previousOtherText?: string,
-  highlightOnChange: boolean,
+  highlightOnChange?: boolean,
   onChange: Function,
   labelStyle?: CSSProperties,
   inputStyle?: CSSProperties,
