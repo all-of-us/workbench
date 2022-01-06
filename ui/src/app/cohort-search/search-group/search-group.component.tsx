@@ -20,7 +20,6 @@ import {WorkspaceData} from 'app/utils/workspace-data';
 import {Domain, ResourceType, SearchRequest, TemporalMention, TemporalTime} from 'generated/fetch';
 import {
   CaretDownIcon,
-  ClrIcon,
   EllipsisVerticalIcon,
   ExclamationTriangleIcon, EyeHideIcon,
   WarningStandardIcon

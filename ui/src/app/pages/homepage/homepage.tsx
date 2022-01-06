@@ -26,7 +26,7 @@ import {QuickTourAndVideos} from './quick-tour-and-videos';
 import workspaceIcon from 'assets/images/workspace-icon.svg';
 import cohortIcon from 'assets/images/cohort-icon.svg';
 import analysisIcon from 'assets/images/analysis-icon.svg';
-import {ClrIcon, PlusCircleIcon} from 'app/components/clr-icons';
+import {PlusCircleIcon} from 'app/components/clr-icons';
 
 export const styles = reactStyles({
   bottomBanner: {

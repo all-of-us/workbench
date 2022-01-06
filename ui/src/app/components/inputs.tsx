@@ -12,7 +12,7 @@ import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {withStyle} from 'app/utils';
 import {FlexRow} from './flex';
 import {isDateValid} from 'app/utils/dates';
-import {ClrIcon} from './clr-icons';
+import {CalendarIcon} from './clr-icons';
 
 export const inputBorderColor = colorWithWhiteness(colors.dark, 0.6);
 
@@ -425,10 +425,7 @@ export class DatePicker extends React.Component<
       >
         <Clickable style={{display: 'flex', alignItems: 'center', flex: 1,
           ...(disabled ? {cursor: 'not-allowed'} : {})}} disabled={disabled}>
-          <ClrIcon
-            style={{flex: 'none', marginLeft: '4px', color: colors.accent}}
-            shape='calendar'
-            size={20} />
+          <CalendarIcon style={{flex: 'none', marginLeft: '4px', color: colors.accent}} size={20} />
         </Clickable>
       </PopupTrigger>
     </div>;

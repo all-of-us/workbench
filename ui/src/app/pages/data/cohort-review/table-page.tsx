@@ -38,7 +38,7 @@ import {
   SortOrder,
 } from 'generated/fetch';
 import {RouteComponentProps, withRouter} from 'react-router-dom';
-import {ClrIcon} from 'app/components/clr-icons';
+import {ExclamationTriangleIcon} from 'app/components/clr-icons';
 
 const fields = [
   {field: 'participantId', name: 'Participant ID'},
@@ -575,8 +575,7 @@ export const ParticipantsTable = fp.flow(withCurrentCohortReview(), withCurrentW
            contact Support in the left hand navigation.`;
       }
       return <div style={styles.error}>
-        <ClrIcon style={{margin: '0 0.5rem 0 0.25rem'}} className='is-solid'
-          shape='exclamation-triangle' size='22'/>
+        <ExclamationTriangleIcon style={{margin: '0 0.5rem 0 0.25rem'}} className='is-solid' size='22'/>
           {message}
       </div>;
     }

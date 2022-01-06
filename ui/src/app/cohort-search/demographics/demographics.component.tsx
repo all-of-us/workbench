@@ -11,7 +11,7 @@ import {reactStyles} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {currentWorkspaceStore} from 'app/utils/navigation';
 import {AttrName, CriteriaType, Domain, Operator} from 'generated/fetch';
-import {CheckCircleIcon, ClrIcon, PlusCircleIcon} from 'app/components/clr-icons';
+import {CheckCircleIcon, PlusCircleIcon} from 'app/components/clr-icons';
 
 const styles = reactStyles({
   ageContainer: {

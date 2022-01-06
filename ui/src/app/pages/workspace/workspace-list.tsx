@@ -17,7 +17,7 @@ import RSelect from 'react-select';
 import * as fp from 'lodash/fp';
 import {Profile, WorkspaceAccessLevel} from 'generated/fetch';
 import {hasTierAccess} from 'app/utils/access-tiers';
-import {ClrIcon} from 'app/components/clr-icons';
+import {ExclamationCircleIcon} from 'app/components/clr-icons';
 
 const styles = reactStyles({
   fadeBox: {
@@ -113,7 +113,7 @@ export const WorkspaceList = fp.flow(withUserProfile())
               onChange={({value}) => this.setState({filterLevels: value})} />
           </FlexRow>
           {errorText && <AlertDanger>
-            <ClrIcon shape='exclamation-circle'/>
+            <ExclamationCircleIcon/>
             {errorText}
           </AlertDanger>}
           <div style={styles.cardArea}>

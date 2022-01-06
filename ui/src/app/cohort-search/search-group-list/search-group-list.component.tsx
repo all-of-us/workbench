@@ -13,7 +13,7 @@ import {triggerEvent} from 'app/utils/analytics';
 import {currentWorkspaceStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {CdrVersionTiersResponse, CriteriaMenu, Domain, SearchRequest} from 'generated/fetch';
-import {CaretDownIcon, ClrIcon} from 'app/components/clr-icons';
+import {CaretDownIcon} from 'app/components/clr-icons';
 
 function initItem(id: string, type: string) {
   return {

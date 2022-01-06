@@ -4,7 +4,7 @@ import * as ReactDOM from 'react-dom';
 import {FlexColumn, FlexRow} from './flex';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, switchCase} from 'app/utils';
-import {ClrIcon, WarningStandardIcon} from './clr-icons';
+import {TimesIcon, WarningStandardIcon} from './clr-icons';
 
 const styles = reactStyles({
   infoBanner: {
@@ -89,8 +89,7 @@ export const ToastBanner = (props: ToastProps) => {
       </FlexRow>
       <div style={styles.message}>{message}</div>
       <div style={styles.footer}>{footer}</div>
-      <ClrIcon
-        shape={'times'}
+      <TimesIcon
         size={20}
         style={styles.closeIcon}
         onClick={() => onClose()}

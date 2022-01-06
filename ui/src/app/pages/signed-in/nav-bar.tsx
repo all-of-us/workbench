@@ -12,7 +12,7 @@ import {environment} from 'environments/environment';
 import logo from 'assets/images/all-of-us-logo.svg'
 import {StatusAlertBannerMaybe} from 'app/components/status-alert-banner-maybe';
 import {CTAvailableBannerMaybe} from 'app//components/ct-available-banner-maybe';
-import {ClrIcon} from 'app/components/clr-icons';
+import {BarsIcon} from 'app/components/clr-icons';
 
 const styles = reactStyles({
   headerContainer: {
@@ -129,16 +129,14 @@ export const NavBar = () => {
       marginLeft: '1rem',
       transition: 'transform 0.5s',
     }}>
-      <ClrIcon
-          shape='bars'
+      <BarsIcon
           onClick={() => onToggleSideNav()}
           onMouseEnter={() => setHovering(true)}
           onMouseLeave={() => setHovering(false)}
           style={hovering
               ? {...styles.sidenavIcon, ...styles.sidenavIconHovering}
               : {...styles.sidenavIcon}}
-      >
-      </ClrIcon>
+      />
     </div>
     <div>
       <a href={'/'}>

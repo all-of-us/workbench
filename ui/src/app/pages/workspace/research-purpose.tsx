@@ -23,7 +23,7 @@ import {serverConfigStore} from 'app/utils/stores';
 import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
-import {ClrIcon} from 'app/components/clr-icons';
+import {ExclamationTriangleIcon} from 'app/components/clr-icons';
 
 const styles = reactStyles({
   editIcon: {
@@ -112,8 +112,7 @@ export const ResearchPurpose = fp.flow(withCurrentWorkspace(), withNavigation)(
       </div>
       {serverConfigStore.get().config.enableResearchReviewPrompt && isOwner
         && workspace.researchPurpose.needsReviewPrompt && <FlexRow style={styles.reviewPurposeReminder}>
-        <ClrIcon style={{color: colors.warning, marginLeft: '0.3rem'}} className='is-solid'
-        shape='exclamation-triangle' size='25'/>
+        <ExclamationTriangleIcon style={{color: colors.warning, marginLeft: '0.3rem'}} className='is-solid' size='25'/>
         <FlexColumn style={{paddingRight: '0.5rem', paddingLeft: '0.5rem', color: colors.primary}}>
         <label style={{fontWeight: 600, fontSize: '14px', flex: 1}}>
           Please review your workspace description to make sure it is accurate.</label>

@@ -723,7 +723,7 @@ import computeNone from 'assets/icons/compute-none.svg';
 import {isUsingFreeTierBillingAccount} from 'app/utils/workspace-utils';
 import { RuntimeCostEstimator } from 'app/components/runtime-cost-estimator';
 import { RuntimeSummary } from 'app/components/runtime-summary';
-import {ClrIcon, ExclamationTriangleIcon} from 'app/components/clr-icons';
+import {ExclamationTriangleIcon} from 'app/components/clr-icons';
 
 const StartStopRuntimeButton = ({workspaceNamespace, googleProject}) => {
   const [status, setRuntimeStatus] = useRuntimeStatus(workspaceNamespace, googleProject);

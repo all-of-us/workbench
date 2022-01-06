@@ -26,7 +26,7 @@ import {
   WorkspaceUserRolesResponse,
 } from 'generated/fetch/api';
 import {isUsingFreeTierBillingAccount} from 'app/utils/workspace-utils';
-import {ClrIcon, InfoIcon} from 'app/components/clr-icons';
+import {InfoIcon, MinusCircleIcon, SearchIcon} from 'app/components/clr-icons';
 import {PlusCircleIcon} from 'app/components/clr-icons';
 
 const styles = reactStyles( {
@@ -371,7 +371,7 @@ export const WorkspaceShare = fp.flow(withUserProfile())(class extends React.Com
         </ModalTitle>
         <ModalBody style={styles.sharingBody}>
           <div ref={node => this.searchingNode = node} style={styles.dropdown} >
-            <ClrIcon shape='search' style={{width: '21px', height: '21px', paddingLeft: '3px'}}/>
+            <SearchIcon style={{width: '21px', height: '21px', paddingLeft: '3px'}}/>
             <input data-test-id='search' style={styles.noBorder} type='text'
                    placeholder='Find Collaborators'
                    disabled={!this.hasPermission}
@@ -436,7 +436,7 @@ export const WorkspaceShare = fp.flow(withUserProfile())(class extends React.Com
                     <div style={styles.box}>
                       <div style={styles.collaboratorIcon}>
                         {(this.hasPermission && (user.email !== this.props.profileState.profile.username)) &&
-                        <ClrIcon data-test-id={'remove-collab-' + user.email} shape='minus-circle'
+                        <MinusCircleIcon data-test-id={'remove-collab-' + user.email}
                                  style={{height: '21px', width: '21px'}}
                                  onClick={() => this.removeCollaborator(user)}/>}
                       </div>

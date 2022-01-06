@@ -11,7 +11,7 @@ import {navigateSignOut, useNavigation} from 'app/utils/navigation';
 import {getProfilePictureSrc} from 'app/utils/profile-picture';
 import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
 import {Profile} from 'generated/fetch';
-import {ClrIcon} from './clr-icons';
+import {AngleIcon, ClrIcon} from './clr-icons';
 
 const styles = reactStyles({
   flex: {
@@ -217,8 +217,7 @@ export const SideNavItem = (props: SideNavItemProps) => {
         </span>
       {
         props.containsSubItems
-        && <ClrIcon
-            shape='angle'
+        && <AngleIcon
             style={
               subItemsOpen
                   ? {...styles.dropdownIcon, ...styles.dropdownIconOpen}

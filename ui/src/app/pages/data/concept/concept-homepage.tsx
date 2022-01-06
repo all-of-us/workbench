@@ -22,11 +22,10 @@ import {
   currentConceptStore,
   NavigationProps
 } from 'app/utils/navigation';
-import {serverConfigStore} from 'app/utils/stores';
 import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {Concept, Domain, DomainCard as ConceptDomainCard, SurveyModule} from 'generated/fetch';
-import {ClrIcon} from 'app/components/clr-icons';
+import {ExclamationTriangleIcon, SearchIcon, TimesCircleIcon} from 'app/components/clr-icons';
 const styles = reactStyles({
   searchBar: {
     boxShadow: '0 4px 12px 0 rgba(0,0,0,0.15)', height: '3rem', width: '64.3%', lineHeight: '19px', paddingLeft: '2rem',
@@ -284,7 +283,7 @@ export const ConceptHomepage = fp.flow(withCurrentCohortSearchContext(), withCur
 
     errorMessage() {
       return <div style={styles.error}>
-        <ClrIcon style={{margin: '0 0.5rem 0 0.25rem'}} className='is-solid' shape='exclamation-triangle' size='22'/>
+        <ExclamationTriangleIcon style={{margin: '0 0.5rem 0 0.25rem'}} className='is-solid' size='22'/>
         Sorry, the request cannot be completed. Please try refreshing the page or contact Support in the left hand navigation.
       </div>;
     }
@@ -297,7 +296,7 @@ export const ConceptHomepage = fp.flow(withCurrentCohortSearchContext(), withCur
       return <React.Fragment>
         <FadeBox style={{margin: 'auto', paddingTop: '1rem', width: '95.7%'}}>
           <div style={{display: 'flex', alignItems: 'center'}}>
-            <ClrIcon shape='search' style={{position: 'absolute', height: '1rem', width: '1rem',
+            <SearchIcon style={{position: 'absolute', height: '1rem', width: '1rem',
               fill: colors.accent, left: 'calc(1rem + 3.5%)'}}/>
             <TextInput style={styles.searchBar} data-test-id='concept-search-input'
                        placeholder='Search concepts in domain'
@@ -305,7 +304,7 @@ export const ConceptHomepage = fp.flow(withCurrentCohortSearchContext(), withCur
                        onChange={(e) => this.setState({currentInputString: e})}
                        onKeyPress={(e) => this.handleSearchKeyPress(e)}/>
             {currentSearchString !== '' && <Clickable onClick={() => this.clearSearch()} data-test-id='clear-search'>
-                <ClrIcon shape='times-circle' style={styles.clearSearchIcon}/>
+                <TimesCircleIcon style={styles.clearSearchIcon}/>
             </Clickable>}
           </div>
           {inputErrors.map((error, e) => <AlertDanger key={e} style={styles.inputAlert}>

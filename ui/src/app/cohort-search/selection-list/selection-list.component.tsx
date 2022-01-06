@@ -20,7 +20,7 @@ import * as fp from 'lodash/fp';
 
 import arrowLeft from 'assets/icons/arrow-left-regular.svg';
 import times from 'assets/icons/times-light.svg';
-import {ClrIcon, TimesCircleIcon} from 'app/components/clr-icons';
+import {TimesCircleIcon} from 'app/components/clr-icons';
 
 const proIcons = {
   arrowLeft: arrowLeft,

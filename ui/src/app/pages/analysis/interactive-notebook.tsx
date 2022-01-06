@@ -33,7 +33,7 @@ import {
 } from 'react-router-dom';
 import { InitialRuntimeNotFoundError } from 'app/utils/leo-runtime-initializer';
 import { RuntimeInitializerModal } from 'app/components/runtime-initializer-modal';
-import {ClrIcon, SyncIcon} from 'app/components/clr-icons';
+import {SyncIcon} from 'app/components/clr-icons';
 
 
 const styles = reactStyles({

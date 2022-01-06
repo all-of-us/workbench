@@ -17,7 +17,7 @@ import {DataTable} from 'primereact/datatable';
 import {OverlayPanel} from 'primereact/overlaypanel';
 import {TabPanel, TabView} from 'primereact/tabview';
 import * as React from 'react';
-import {ClrIcon} from 'app/components/clr-icons';
+import {ExclamationTriangleIcon} from 'app/components/clr-icons';
 
 const styles = reactStyles({
   container: {
@@ -693,8 +693,7 @@ export const DetailTabTable = fp.flow(withCurrentCohortReview(), withCurrentWork
            contact Support in the left hand navigation.`;
       }
       return <div style={styles.error}>
-        <ClrIcon style={{margin: '0 0.5rem 0 0.25rem'}} className='is-solid'
-        shape='exclamation-triangle' size='22'/>
+        <ExclamationTriangleIcon style={{margin: '0 0.5rem 0 0.25rem'}} className='is-solid' size='22'/>
         {message}
       </div>;
     }

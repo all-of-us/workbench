@@ -26,7 +26,7 @@ import {WorkspaceData} from 'app/utils/workspace-data';
 import {Cohort, SearchRequest} from 'generated/fetch';
 import {Prompt, RouteComponentProps, withRouter} from 'react-router';
 import {parseQueryParams} from 'app/components/app-router';
-import {ClrIcon, ExclamationTriangleIcon} from 'app/components/clr-icons';
+import {ExclamationTriangleIcon} from 'app/components/clr-icons';
 
 const LOCAL_STORAGE_KEY_COHORT_SEARCH_REQUEST = 'CURRENT_COHORT_SEARCH_REQUEST';
 

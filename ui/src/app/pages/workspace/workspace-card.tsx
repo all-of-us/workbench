@@ -24,7 +24,7 @@ import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {faLockAlt} from '@fortawesome/pro-solid-svg-icons';
 import {WorkspaceActionsMenu} from './workspace-actions-menu';
 import {displayDate} from 'app/utils/dates';
-import {ClrIcon} from 'app/components/clr-icons';
+import {ExclamationTriangleIcon} from 'app/components/clr-icons';
 
 const EVENT_CATEGORY = 'Workspace list';
 
@@ -219,8 +219,7 @@ export const WorkspaceCard = fp.flow(withNavigation)(
                   workspace.researchPurpose.reviewRequested === true &&
                   workspace.researchPurpose.approved === false &&
                   <div style={{color: colors.danger}}>
-                      <ClrIcon shape='exclamation-triangle' className='is-solid'
-                               style={{fill: colors.danger}}/>
+                      <ExclamationTriangleIcon className='is-solid' style={{fill: colors.danger}}/>
                       Rejected
                   </div>
                 }

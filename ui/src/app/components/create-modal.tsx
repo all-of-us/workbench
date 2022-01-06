@@ -6,7 +6,7 @@ import * as React from 'react';
 
 import {TextArea, TextInput} from './inputs';
 import {Spinner} from './spinners';
-import {ClrIcon} from './clr-icons';
+import {ExclamationTriangleIcon} from './clr-icons';
 
 const styles = {
   error: {
@@ -69,7 +69,7 @@ export const CreateModal = ({entityName, title, getExistingNames, save, close}: 
     <ModalTitle style={inputErrorMsg ? {marginBottom: 0} : {}}>{title || `Create ${entityName}`}</ModalTitle>
     <ModalBody style={{marginTop: '0.2rem'}}>
       {saveErrorMsg && <div style={styles.error}>
-          <ClrIcon className='is-solid' shape='exclamation-triangle' size={22} />
+          <ExclamationTriangleIcon className='is-solid' size={22} />
           {saveErrorMsg}
       </div>}
       {inputErrorMsg && <div style={styles.invalid}>{inputErrorMsg}</div>}

@@ -2,7 +2,7 @@ import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {highlightSearchTerm, reactStyles} from 'app/utils';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
-import {ClrIcon} from './clr-icons';
+import {SearchIcon} from './clr-icons';
 const sidebarContent = require('assets/json/help-sidebar.json');
 
 const styles = reactStyles({
@@ -125,7 +125,7 @@ export class HelpTips extends React.Component<Props, State> {
 
     return <div>
       {this.props.allowSearch && <div style={styles.textSearch}>
-          <ClrIcon style={{color: colors.primary, margin: '0 0.25rem'}} shape='search' size={16} />
+          <SearchIcon style={{color: colors.primary, margin: '0 0.25rem'}} size={16} />
           <input
               type='text'
               style={styles.textInput}

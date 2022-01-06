@@ -20,7 +20,7 @@ import {MatchParams, serverConfigStore} from 'app/utils/stores';
 import {CdrVersionTiersResponse, Workspace} from 'generated/fetch';
 import {useParams} from 'react-router-dom';
 import {CdrVersionUpgradeModal} from './cdr-version-upgrade-modal';
-import {ClrIcon, FlagIcon} from 'app/components/clr-icons';
+import {FlagIcon} from 'app/components/clr-icons';
 
 const styles = reactStyles({
   container: {

@@ -27,7 +27,7 @@ import {TooltipTrigger} from 'app/components/popups';
 import {serverConfigStore} from 'app/utils/stores';
 import {accessRenewalModules, computeRenewalDisplayDates, getAccessModuleConfig} from 'app/utils/access-utils';
 import {hasRegisteredTierAccess} from 'app/utils/access-tiers';
-import {ArrowIcon, ClrIcon} from 'app/components/clr-icons';
+import {ArrowIcon} from 'app/components/clr-icons';
 
 export const commonStyles = reactStyles({
   semiBold: {

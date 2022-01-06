@@ -12,7 +12,7 @@ import { reactStyles } from 'app/utils';
 import { setSidebarActiveIconStore } from 'app/utils/navigation';
 import { WarningMessage } from './messages';
 import { serverConfigStore } from 'app/utils/stores';
-import {ClrIcon} from './clr-icons';
+import {AngleIcon} from './clr-icons';
 
 
 const styles = reactStyles({
@@ -52,7 +52,7 @@ export const RuntimeInitializerModal = ({cancel, createAndContinue, defaultRunti
         usePersistentDisk={serverConfigStore.get().config.enablePersistentDisk}
         style={{...styles.bodyElement, justifyContent: 'space-evenly'}} />
       <Clickable onClick={() => setShowDetails(!showDetails)} style={styles.bodyElement} >
-        Environment details<ClrIcon shape='angle' style={{transform: showDetails ? 'rotate(180deg)' : 'rotate(90deg)'}} />
+        Environment details<AngleIcon style={{transform: showDetails ? 'rotate(180deg)' : 'rotate(90deg)'}} />
       </Clickable>
      {showDetails &&
        <div style={styles.runtimeDetails}>

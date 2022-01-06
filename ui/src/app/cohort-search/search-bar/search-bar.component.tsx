@@ -12,7 +12,7 @@ import {highlightSearchTerm, reactStyles, validateInputForMySQL} from 'app/utils
 import {triggerEvent} from 'app/utils/analytics';
 import {currentWorkspaceStore} from 'app/utils/navigation';
 import {Criteria, CriteriaType, Domain} from 'generated/fetch';
-import {ClrIcon, SearchIcon} from 'app/components/clr-icons';
+import {SearchIcon} from 'app/components/clr-icons';
 
 const styles = reactStyles({
   searchContainer: {

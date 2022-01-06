@@ -56,7 +56,7 @@ import {DataTable} from 'primereact/datatable';
 import * as React from 'react';
 import {useState} from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
-import {ClrIcon, PlusCircleIcon, WarningStandardIcon} from 'app/components/clr-icons';
+import {BarChartIcon, PlusCircleIcon, WarningStandardIcon, AngleIcon } from 'app/components/clr-icons';
 
 export const styles = reactStyles({
   dataDictionaryHeader: {
@@ -285,7 +285,7 @@ const ImmutableWorkspaceCohortListItem: React.FunctionComponent<{
           <div style={{marginLeft: 'auto', paddingRight: '1rem'}}>
             <a href={'/workspaces/' + namespace + '/' + wid + '/data/cohorts/' + cohortId + '/review/cohort-description'}
             target='_blank'>
-              <ClrIcon size='20' shape='bar-chart'/>
+              <BarChartIcon size='20'/>
             </a>
           </div>
         </FlexRow>
@@ -386,7 +386,7 @@ export class ValueListItem extends React.Component<
             <div style={{lineHeight: '1.5rem', paddingLeft: 10, wordWrap: 'break-word', color: colors.primary}}>
               {domainValue.value}</div>
             <Clickable onClick={() => this.toggleDataDictionaryEntry()} data-test-id='value-list-expander'>
-              <ClrIcon shape='angle' style={{transform: showDataDictionaryEntry ? 'rotate(180deg)' : 'rotate(90deg)',
+              <AngleIcon style={{transform: showDataDictionaryEntry ? 'rotate(180deg)' : 'rotate(90deg)',
                 color: colors.accent, height: 18, width: 18}} />
             </Clickable>
           </FlexRow>

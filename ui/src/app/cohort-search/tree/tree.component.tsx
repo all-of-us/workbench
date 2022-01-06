@@ -21,7 +21,7 @@ import {
 } from 'generated/fetch';
 
 import arrow from 'assets/icons/arrow-left-regular.svg';
-import {ClrIcon, ExclamationTriangleIcon} from 'app/components/clr-icons';
+import {ExclamationTriangleIcon} from 'app/components/clr-icons';
 
 const styles = reactStyles({
   error: {

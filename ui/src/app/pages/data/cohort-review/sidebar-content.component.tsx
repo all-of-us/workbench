@@ -20,7 +20,7 @@ import {
   ParticipantCohortStatus,
   WorkspaceAccessLevel
 } from 'generated/fetch';
-import {CheckCircleIcon, ClrIcon, PlusCircleIcon} from 'app/components/clr-icons';
+import {CheckCircleIcon, ExclamationTriangleIcon, PlusCircleIcon} from 'app/components/clr-icons';
 
 const styles = {
   header: {
@@ -248,8 +248,7 @@ const AnnotationItem = fp.flow(
       <div style={{alignItems: 'center', ...headerStyles.formLabel}}>
         <div style={styles.inlineBlock}>{columnName}</div>
         {error && <div style={styles.inlineBlock}>
-          <ClrIcon style={styles.error} shape='exclamation-triangle'
-            size='20' className='is-solid' />
+          <ExclamationTriangleIcon style={styles.error} size='20' className='is-solid' />
           <span style={styles.message}> Save Failed</span>
         </div>}
         {success && <div style={styles.inlineBlock}>
@@ -382,7 +381,7 @@ export const SidebarContent = fp.flow(
         />
       </div>
       {annotationDeleted && <div>
-        <ClrIcon style={styles.success} shape='check-circle' size='20' className='is-solid' />
+        <CheckCircleIcon style={styles.success} size='20' className='is-solid' />
         <span style={styles.message}> Annotation Field Deleted</span>
       </div>}
       <div style={{display: 'flex'}}>

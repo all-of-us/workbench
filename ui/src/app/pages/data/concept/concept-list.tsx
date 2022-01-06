@@ -20,7 +20,7 @@ import {
 import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {ConceptSet, Criteria, Domain, DomainCount, UpdateConceptSetRequest} from 'generated/fetch';
-import {ClrIcon} from 'app/components/clr-icons';
+import {TimesCircleIcon} from 'app/components/clr-icons';
 
 const styles = reactStyles({
   sectionTitle: {
@@ -161,7 +161,7 @@ export const ConceptListPage = fp.flow(withCurrentWorkspace(), withCurrentConcep
     renderSelection(selection: any, index: number) {
       return <FlexRow key={index} style={{lineHeight: '1.25rem'}}>
         <button style={styles.removeSelection} onClick={() => this.removeSelection(selection)}>
-          <ClrIcon shape='times-circle'/>
+          <TimesCircleIcon/>
         </button>
         <b style={{paddingRight: '0.25rem'}}>{selection.conceptCode}</b>
         {selection.name ? selection.name : selection.question}

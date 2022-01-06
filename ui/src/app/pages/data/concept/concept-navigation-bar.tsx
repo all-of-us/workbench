@@ -5,7 +5,7 @@ import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
 import {useNavigation} from 'app/utils/navigation';
 import * as React from 'react';
-import {ClrIcon} from 'app/components/clr-icons';
+import {InfoIcon} from 'app/components/clr-icons';
 
 const styles = reactStyles({
   headerLinks: {
@@ -70,7 +70,7 @@ export const ConceptNavigationBar: React.FunctionComponent<
         Concept Sets
       </Clickable>
       <TooltipTrigger content={tooltipContent}>
-        <ClrIcon shape='info' className='is-solid' style={styles.infoIcon}/>
+        <InfoIcon className='is-solid' style={styles.infoIcon}/>
       </TooltipTrigger>
     </FlexRow>;
   };

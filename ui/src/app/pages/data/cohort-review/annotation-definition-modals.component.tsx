@@ -13,7 +13,7 @@ import {reactStyles, summarizeErrors} from 'app/utils';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import {AnnotationType, CohortAnnotationDefinition} from 'generated/fetch';
 import { matchPath, RouteComponentProps, withRouter } from 'react-router-dom';
-import {ClrIcon, PlusCircleIcon} from 'app/components/clr-icons';
+import {ExclamationTriangleIcon, MinusCircleIcon, PlusCircleIcon} from 'app/components/clr-icons';
 
 const styles = reactStyles({
   editRow: {
@@ -125,7 +125,7 @@ export const AddAnnotationDefinitionModal = withRouter(class extends React.Compo
               <Clickable
                 onClick={() => this.setState(fp.update('enumValues', fp.pullAt(i)))}
                 style={{marginLeft: '0.5rem'}}
-              ><ClrIcon shape='minus-circle' size={18} /></Clickable>
+              ><MinusCircleIcon size={18} /></Clickable>
             </div>;
           })}
           <Button
@@ -227,8 +227,7 @@ export const EditAnnotationDefinitionsModal = withRouter(class extends React.Com
       <ModalBody>
         <div style={{maxHeight: '10rem', overflow: 'auto'}}>
           {(deleteError || renameError) && <div>
-            <ClrIcon style={styles.error} shape='exclamation-triangle'
-              size='20' className='is-solid' />
+            <ExclamationTriangleIcon style={styles.error} size='20' className='is-solid' />
             <span style={{color: colorWithWhiteness(colors.dark, -1)}}>
               {deleteError ? ' Delete' : ' Rename'} Failed
             </span>

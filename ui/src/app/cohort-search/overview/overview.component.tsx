@@ -32,7 +32,6 @@ import {
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import {
   CaretDownIcon,
-  ClrIcon,
   CopyIcon,
   ExclamationTriangleIcon,
   ExportIcon, SortByIcon,

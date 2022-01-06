@@ -16,7 +16,6 @@ import {Menu} from 'primereact/menu';
 import {OverlayPanel} from 'primereact/overlaypanel';
 import {
   CaretRightIcon,
-  ClrIcon,
   EllipsisVerticalIcon,
   ExclamationTriangleIcon,
   EyeHideIcon

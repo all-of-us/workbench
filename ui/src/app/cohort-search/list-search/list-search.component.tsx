@@ -34,10 +34,12 @@ import {
 import {
   CheckCircleIcon,
   ClrIcon,
-  ExclamationTriangleIcon, InfoStandardIcon,
+  ExclamationTriangleIcon,
+  InfoStandardIcon,
   PlusCircleIcon,
-  SearchIcon, SliderIcon, TimesCircleIcon,
-  TimesIcon
+  SearchIcon,
+  SliderIcon,
+  TimesCircleIcon,
 } from 'app/components/clr-icons';
 
 const borderStyle = `1px solid ${colorWithWhiteness(colors.dark, 0.7)}`;

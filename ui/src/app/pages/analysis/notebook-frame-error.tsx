@@ -8,7 +8,7 @@ import {ComputeSecuritySuspendedError} from 'app/utils/runtime-utils';
 import {SupportMailto} from 'app/components/support';
 import {TooltipTrigger} from 'app/components/popups';
 import {supportUrls} from 'app/utils/zendesk';
-import {ClrIcon, ExclamationTriangleIcon, LockIcon} from 'app/components/clr-icons';
+import {ExclamationTriangleIcon, LockIcon} from 'app/components/clr-icons';
 
 const {useState, useEffect} = React;
 

@@ -31,7 +31,7 @@ import {serverConfigStore} from 'app/utils/stores';
 import {NOT_ENOUGH_CHARACTERS_RESEARCH_DESCRIPTION} from 'app/utils/strings';
 import {Profile} from 'generated/fetch';
 import {canonicalizeUrl} from 'app/utils/urls';
-import {ClrIcon, InfoIcon, ValidationIcon} from 'app/components/clr-icons';
+import {AngleIcon, InfoIcon, ValidationIcon} from 'app/components/clr-icons';
 
 const styles = reactStyles({
   ...commonStyles,
@@ -487,7 +487,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
                   >
                     <AoU/> participants are most interested in knowing:
                   </div>
-                  <ClrIcon shape='angle' style={{
+                  <AngleIcon style={{
                     transform: this.state.showMostInterestedInKnowingBlurb ? 'rotate(180deg)' : 'rotate(90deg)'
                   }}/>
                 </FlexRow>

@@ -16,7 +16,7 @@ import {currentCohortSearchContextStore} from 'app/utils/navigation';
 import {serverConfigStore} from 'app/utils/stores';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {Criteria, CriteriaType, Domain, Modifier, ModifierType, Operator} from 'generated/fetch';
-import {ClrIcon, ExclamationTriangleIcon, InfoStandardIcon} from 'app/components/clr-icons';
+import {ExclamationTriangleIcon, InfoStandardIcon} from 'app/components/clr-icons';
 
 
 const styles = reactStyles({

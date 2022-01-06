@@ -56,19 +56,25 @@ export const ValidationIcon = props => {
   }
 };
 
+export const AngleIcon = props => <ClrIcon shape='angle' {...props}/>
 export const ArrowIcon = props => <ClrIcon shape='arrow' {...props}/>
+export const BarChartIcon = props => <ClrIcon shape='bar-chart' {...props}/>
+export const BarsIcon = props => <ClrIcon shape='bars' {...props}/>
+export const CalendarIcon = props => <ClrIcon shape='calendar' {...props}/>
 export const CaretDownIcon = props => <ClrIcon shape='caret down' {...props}/>
 export const CaretRightIcon = props => <ClrIcon shape='caret right' {...props}/>
 export const CheckCircleIcon = props => <ClrIcon shape='check-circle' {...props}/>
 export const CheckIcon = props => <ClrIcon shape='check' {...props}/>
 export const CopyIcon = props => <ClrIcon shape='copy' {...props}/>
 export const EllipsisVerticalIcon = props => <ClrIcon shape='ellipsis-vertical' {...props}/>
+export const ExclamationCircleIcon = props => <ClrIcon shape='exclamation-circle' {...props}/>
 export const ExclamationTriangleIcon = props => <ClrIcon shape='exclamation-triangle' {...props}/>
 export const ExportIcon = props => <ClrIcon shape='export' {...props}/>
 export const EyeHideIcon = props => <ClrIcon shape='eye-hide' {...props}/>
 export const FlagIcon = props => <ClrIcon shape='flag' {...props}/>
 export const InfoStandardIcon = props => <ClrIcon shape='info-standard' {...props}/>
 export const LockIcon = props => <ClrIcon shape='lock' {...props}/>
+export const MinusCircleIcon = props => <ClrIcon shape='minus-circle' {...props}/>
 export const PlusCircleIcon = props => <ClrIcon shape='plus-circle' {...props}/>
 export const SearchIcon = props => <ClrIcon shape='search' {...props}/>
 export const SliderIcon = props => <ClrIcon shape='slider' {...props}/>
