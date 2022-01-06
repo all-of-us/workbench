@@ -259,8 +259,8 @@ public class GenomicExtractionService {
     WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
     Duration runtime =
         Duration.between(
-            dbSubmission.getCompletionTime().toInstant(),
-            dbSubmission.getTerraSubmissionDate().toInstant());
+            dbSubmission.getTerraSubmissionDate().toInstant(),
+            dbSubmission.getCompletionTime().toInstant());
     return Stream.of(
         JiraContent.text(String.format("Terra job details (as pmi-ops.org user):\n")),
         JiraContent.link(
@@ -271,7 +271,8 @@ public class GenomicExtractionService {
                 workbenchConfig.wgsCohortExtraction.operationalTerraWorkspaceName,
                 dbSubmission.getSubmissionId())),
         JiraContent.text(
-            String.format("Cromwell workflow submission ID: %s\n", dbSubmission.getSubmissionId())),
+            String.format(
+                "\n\nCromwell workflow submission ID: %s\n", dbSubmission.getSubmissionId())),
         JiraContent.text(
             String.format(
                 "Workbench extraction database ID: %d\n",
@@ -298,7 +299,7 @@ public class GenomicExtractionService {
                 + dbSubmission.getWorkspace().getWorkspaceNamespace()),
         JiraContent.text(
             String.format(
-                "Workflow failure messages:\n%s",
+                "\nWorkflow failure messages:\n%s",
                 getFailureCauses(firecloudSubmission).stream()
                     .map(m -> "* " + m + "\n")
                     .collect(Collectors.joining()))));
