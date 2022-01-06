@@ -7,7 +7,7 @@ import {Link} from 'react-router-dom';
 import * as fp from 'lodash/fp';
 import {Dropdown} from 'primereact/dropdown';
 
-import {formatFreeCreditsUSD, reactStyles} from 'app/utils';
+import {formatFreeCreditsUSD, randomString, reactStyles} from 'app/utils';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {
   AccessModule,
@@ -137,13 +137,14 @@ export const updateAccountProperties = async(oldProfile: Profile, updatedProfile
 export const DropdownWithLabel = ({label, options, currentValue, previousValue, highlightOnChange, onChange,
                                     disabled= false, dataTestId, labelStyle = {}, dropdownStyle = {}}) => {
 
-  const dropdownHighlightStyling =
-    `body .p-dropdown-label.p-inputtext { background-color: ${colors.highlight}; }`;
+  const uniqueLabelId = randomString(10);
+  const dropdownHighlightStyling = `body .${uniqueLabelId} .p-inputtext { background-color: ${colors.highlight}; }`;
   return <FlexColumn data-test-id={dataTestId} style={{marginTop: '1rem'}}>
     <label style={{...commonStyles.label, ...labelStyle}}>{label}</label>
     <div>
       {highlightOnChange && (currentValue !== previousValue) && <style>{dropdownHighlightStyling}</style>}
       <Dropdown
+        className={uniqueLabelId}
         style={{...commonStyles.dropdown, ...dropdownStyle}}
         options={options}
         onChange={(e) => onChange(e)}
