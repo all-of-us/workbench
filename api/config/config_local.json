@@ -2,6 +2,7 @@
   "firecloud": {
     "baseUrl": "https:\/\/firecloud-orchestration.dsde-dev.broadinstitute.org",
     "samBaseUrl": "https:\/\/sam.dsde-dev.broadinstitute.org",
+    "terraUiBaseUrl": "https:\/\/bvdp-saturn-dev.appspot.com",
     "notebookRuntimeMaxAgeDays": 7,
     "notebookRuntimeIdleMaxAgeDays": 3,
     "debugEndpoints": false,
@@ -52,7 +53,8 @@
     "extractionMethodConfigurationVersion": 4,
     "extractionCohortsDataset": "fc-aou-cdr-synth-test-2.wgs_extraction_cohorts",
     "extractionDestinationDataset": "fc-aou-cdr-synth-test-2.wgs_extracted_cohorts",
-    "extractionTempTablesDataset": "fc-aou-cdr-synth-test-2.wgs_extraction_temp_tables"
+    "extractionTempTablesDataset": "fc-aou-cdr-synth-test-2.wgs_extraction_temp_tables",
+    "enableJiraTicketingOnFailure": false
   },
   "cdr": {
     "debugQueries": false

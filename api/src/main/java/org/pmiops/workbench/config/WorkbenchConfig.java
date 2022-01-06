@@ -115,6 +115,7 @@ public class WorkbenchConfig {
     public boolean debugEndpoints;
     public String baseUrl;
     public String samBaseUrl;
+    public String terraUiBaseUrl;
     public Integer notebookRuntimeMaxAgeDays;
     public Integer notebookRuntimeIdleMaxAgeDays;
     public String leoBaseUrl;
@@ -170,6 +171,7 @@ public class WorkbenchConfig {
     public String extractionCohortsDataset;
     public String extractionDestinationDataset;
     public String extractionTempTablesDataset;
+    public boolean enableJiraTicketingOnFailure;
   }
 
   public static class CdrConfig {
