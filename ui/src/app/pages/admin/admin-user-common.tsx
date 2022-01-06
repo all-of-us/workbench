@@ -22,7 +22,7 @@ import {institutionApi, userAdminApi} from 'app/services/swagger-fetch-clients';
 import {ClrIcon} from 'app/components/icons';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {getRoleOptions} from 'app/utils/institutions';
-import {Select, TextInputWithLabel} from 'app/components/inputs';
+import {TextInputWithLabel} from 'app/components/inputs';
 import {BulletAlignedUnorderedList} from 'app/components/lists';
 import {TooltipTrigger} from 'app/components/popups';
 import {serverConfigStore} from 'app/utils/stores';
@@ -167,9 +167,9 @@ export const ContactEmailTextInput = ({contactEmail, previousContactEmail, highl
   return <TextInputWithLabel
     inputId={'contactEmail'}
     labelText={'Contact email'}
-    highlightOnChange={highlightOnChange}
     value={contactEmail}
     previousValue={previousContactEmail}
+    highlightOnChange={highlightOnChange}
     labelStyle={{...commonStyles.label, ...labelStyle}}
     inputStyle={{...commonStyles.textInput, ...inputStyle}}
     containerStyle={{...commonStyles.textInputContainer, ...containerStyle}}
@@ -267,9 +267,9 @@ export const InstitutionalRoleOtherTextInput = ({affiliation, previousOtherText,
     ? <TextInputWithLabel
       dataTestId={'institutionalRoleOtherText'}
       labelText={'Institutional role description'}
-      highlightOnChange={highlightOnChange}
       value={affiliation?.institutionalRoleOtherText}
       previousValue={previousOtherText}
+      highlightOnChange={highlightOnChange}
       labelStyle={{...commonStyles.label, ...labelStyle}}
       inputStyle={{...commonStyles.textInput, ...inputStyle}}
       containerStyle={{...commonStyles.textInputContainer, ...containerStyle}}
