@@ -137,20 +137,18 @@ export const updateAccountProperties = async(oldProfile: Profile, updatedProfile
 export const DropdownWithLabel = ({label, options, currentValue, previousValue, highlightOnChange, onChange,
                                     disabled= false, dataTestId, labelStyle = {}, dropdownStyle = {}}) => {
 
-  const uniqueLabelId = randomString(10);
-  const dropdownHighlightStyling = `body .${uniqueLabelId} .p-inputtext { background-color: ${colors.highlight}; }`;
+  const uniqueClassId = randomString(10);   // ensures that we don't highlight ALL dropdowns
+  const dropdownHighlightStyling = `body .${uniqueClassId} .p-inputtext { background-color: ${colors.highlight}; }`;
   return <FlexColumn data-test-id={dataTestId} style={{marginTop: '1rem'}}>
+    {highlightOnChange && (currentValue !== previousValue) && <style>{dropdownHighlightStyling}</style>}
     <label style={{...commonStyles.label, ...labelStyle}}>{label}</label>
-    <div>
-      {highlightOnChange && (currentValue !== previousValue) && <style>{dropdownHighlightStyling}</style>}
-      <Dropdown
-        className={uniqueLabelId}
-        style={{...commonStyles.dropdown, ...dropdownStyle}}
-        options={options}
-        onChange={(e) => onChange(e)}
-        value={currentValue}
-        disabled={disabled}/>
-  </div>
+    <Dropdown
+      className={uniqueClassId}
+      style={{...commonStyles.dropdown, ...dropdownStyle}}
+      options={options}
+      onChange={(e) => onChange(e)}
+      value={currentValue}
+      disabled={disabled}/>
   </FlexColumn>;
 };
 
