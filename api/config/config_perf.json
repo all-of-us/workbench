@@ -2,6 +2,7 @@
   "firecloud": {
     "baseUrl": "https:\/\/firecloud-orchestration.dsde-perf.broadinstitute.org",
     "samBaseUrl": "https:\/\/sam.dsde-perf.broadinstitute.org",
+    "terraUiBaseUrl": "https:\/\/bvdp-saturn-perf.appspot.com",
     "notebookRuntimeMaxAgeDays": 7,
     "notebookRuntimeIdleMaxAgeDays": 3,
     "debugEndpoints": false,
@@ -15,7 +16,8 @@
     "runtimeImages": {
       "gce": [],
       "dataproc": []
-    }
+    },
+    "gceVmZone": "us-central1-f"
   },
   "billing": {
     "accountId": "00293C-5DEA2D-6887E7",
@@ -52,7 +54,8 @@
     "extractionMethodConfigurationVersion": 3,
     "extractionCohortsDataset": "fc-aou-cdr-perf-ct.wgs_extraction_cohorts",
     "extractionDestinationDataset": "fc-aou-cdr-perf-ct.wgs_extraction_destination",
-    "extractionTempTablesDataset": "fc-aou-cdr-perf-ct.wgs_extraction_temp_tables"
+    "extractionTempTablesDataset": "fc-aou-cdr-perf-ct.wgs_extraction_temp_tables",
+    "enableJiraTicketingOnFailure": true
   },
   "cdr": {
     "debugQueries": true

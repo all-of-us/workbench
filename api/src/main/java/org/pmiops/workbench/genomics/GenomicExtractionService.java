@@ -1,17 +1,22 @@
 package org.pmiops.workbench.genomics;
 
 import com.google.cloud.storage.Blob;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.primitives.Ints;
 import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.time.Clock;
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.WgsCohortExtractionConfig;
@@ -37,6 +42,12 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkflowOutputsResponse;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.google.StorageConfig;
+import org.pmiops.workbench.jira.JiraContent;
+import org.pmiops.workbench.jira.JiraService;
+import org.pmiops.workbench.jira.JiraService.IssueProperty;
+import org.pmiops.workbench.jira.JiraService.IssueType;
+import org.pmiops.workbench.jira.model.AtlassianContent;
+import org.pmiops.workbench.jira.model.CreatedIssue;
 import org.pmiops.workbench.model.GenomicExtractionJob;
 import org.pmiops.workbench.model.TerraJobStatus;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
@@ -48,6 +59,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class GenomicExtractionService {
+  private static final Logger log = Logger.getLogger(GenomicExtractionService.class.getName());
 
   public static final String EXTRACT_WORKFLOW_NAME = "GvsExtractCohortFromSampleNames";
   // Theoretical maximum is 20K-30K, keep it lower during the initial alpha period.
@@ -58,6 +70,7 @@ public class GenomicExtractionService {
 
   private final DataSetService dataSetService;
   private final FireCloudService fireCloudService;
+  private final JiraService jiraService;
   private final Provider<CloudStorageClient> extractionServiceAccountCloudStorageClientProvider;
   private final Provider<SubmissionsApi> submissionApiProvider;
   private final Provider<MethodConfigurationsApi> methodConfigurationsApiProvider;
@@ -72,6 +85,7 @@ public class GenomicExtractionService {
   public GenomicExtractionService(
       DataSetService dataSetService,
       FireCloudService fireCloudService,
+      JiraService jiraService,
       @Qualifier(StorageConfig.GENOMIC_EXTRACTION_STORAGE_CLIENT)
           Provider<CloudStorageClient> extractionServiceAccountCloudStorageClientProvider,
       Provider<SubmissionsApi> submissionsApiProvider,
@@ -84,6 +98,7 @@ public class GenomicExtractionService {
       Clock clock) {
     this.dataSetService = dataSetService;
     this.fireCloudService = fireCloudService;
+    this.jiraService = jiraService;
     this.submissionApiProvider = submissionsApiProvider;
     this.extractionServiceAccountCloudStorageClientProvider =
         extractionServiceAccountCloudStorageClientProvider;
@@ -142,6 +157,7 @@ public class GenomicExtractionService {
                               cohortExtractionConfig.operationalTerraWorkspaceName,
                               dbSubmission.getSubmissionId());
 
+                  TerraJobStatus oldStatus = dbSubmission.getTerraStatusEnum();
                   TerraJobStatus status =
                       genomicExtractionMapper.convertWorkflowStatus(
                           // Extraction submissions should only have one workflow.
@@ -156,6 +172,10 @@ public class GenomicExtractionService {
                     dbSubmission.setCompletionTime(
                         CommonMappers.timestamp(
                             firecloudSubmission.getWorkflows().get(0).getStatusLastChangedDate()));
+                  }
+
+                  if (TerraJobStatus.FAILED.equals(status) && !status.equals(oldStatus)) {
+                    maybeNotifyOnJobFailure(dbSubmission, firecloudSubmission);
                   }
 
                   wgsExtractCromwellSubmissionDao.save(dbSubmission);
@@ -197,6 +217,100 @@ public class GenomicExtractionService {
     }
 
     return null;
+  }
+
+  private void maybeNotifyOnJobFailure(
+      DbWgsExtractCromwellSubmission dbSubmission, FirecloudSubmission firecloudSubmission) {
+    log.severe(
+        String.format(
+            "genomics extraction workflow failed: '%s'",
+            getFailureCauses(firecloudSubmission).stream().collect(Collectors.joining(","))));
+    if (!workbenchConfigProvider.get().wgsCohortExtraction.enableJiraTicketingOnFailure) {
+      return;
+    }
+
+    String envShortName = workbenchConfigProvider.get().server.shortName;
+    try {
+      CreatedIssue createdIssue =
+          jiraService.createIssue(
+              IssueType.BUG,
+              JiraContent.contentAsMinimalAtlassianDocument(
+                  jiraFailureDescription(dbSubmission, firecloudSubmission)),
+              ImmutableMap.<IssueProperty, Object>builder()
+                  .put(
+                      IssueProperty.SUMMARY,
+                      String.format(
+                          "[P2] %s genomic extraction %s failed @ %s",
+                          envShortName,
+                          dbSubmission.getSubmissionId(),
+                          JiraService.summaryDateFormat.format(clock.instant())))
+                  .put(IssueProperty.RW_ENVIRONMENT, envShortName)
+                  .put(IssueProperty.LABELS, new String[] {"genomic-extraction-failure"})
+                  .build());
+      log.info("created new egress Jira ticket: " + createdIssue.getKey());
+    } catch (org.pmiops.workbench.jira.ApiException e) {
+      log.log(
+          Level.SEVERE, "failed to file Jira ticket for failed genomic extraction, continuing", e);
+    }
+  }
+
+  private Stream<AtlassianContent> jiraFailureDescription(
+      DbWgsExtractCromwellSubmission dbSubmission, FirecloudSubmission firecloudSubmission) {
+    WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
+    Duration runtime =
+        Duration.between(
+            dbSubmission.getTerraSubmissionDate().toInstant(),
+            dbSubmission.getCompletionTime().toInstant());
+    return Stream.of(
+        JiraContent.text(String.format("Terra job details (as pmi-ops.org user):\n")),
+        JiraContent.link(
+            String.format(
+                "%s#workspaces/%s/%s/job_history/%s",
+                workbenchConfig.firecloud.terraUiBaseUrl,
+                workbenchConfig.wgsCohortExtraction.operationalTerraWorkspaceNamespace,
+                workbenchConfig.wgsCohortExtraction.operationalTerraWorkspaceName,
+                dbSubmission.getSubmissionId())),
+        JiraContent.text(
+            String.format(
+                "\n\nCromwell workflow submission ID: %s\n", dbSubmission.getSubmissionId())),
+        JiraContent.text(
+            String.format(
+                "Workbench extraction database ID: %d\n",
+                dbSubmission.getWgsExtractCromwellSubmissionId())),
+        JiraContent.text(
+            String.format(
+                "Failure occurred @ %s (runtime: %dm)\n",
+                JiraService.detailedDateFormat.format(dbSubmission.getCompletionTime().toInstant()),
+                runtime.toMinutes())),
+        JiraContent.text(
+            String.format(
+                "User running extraction: %s\n", dbSubmission.getCreator().getUsername())),
+        JiraContent.text(
+            String.format(
+                "Terra billing project / workspace namespace: %s\n",
+                dbSubmission.getWorkspace().getWorkspaceNamespace())),
+        JiraContent.text(
+            String.format(
+                "Google project ID: %s\n\n", dbSubmission.getWorkspace().getGoogleProject())),
+        JiraContent.text("Workspace admin console (as RW admin): "),
+        JiraContent.link(
+            workbenchConfig.server.uiBaseUrl
+                + "/admin/workspaces/"
+                + dbSubmission.getWorkspace().getWorkspaceNamespace()),
+        JiraContent.text(
+            String.format(
+                "\nWorkflow failure messages:\n%s",
+                getFailureCauses(firecloudSubmission).stream()
+                    .map(m -> "* " + m + "\n")
+                    .collect(Collectors.joining()))));
+  }
+
+  private List<String> getFailureCauses(FirecloudSubmission firecloudSubmission) {
+    return Optional.ofNullable(firecloudSubmission.getWorkflows())
+        .filter(wfs -> !wfs.isEmpty())
+        .map(wfs -> wfs.get(0))
+        .map(wf -> wf.getMessages())
+        .orElse(ImmutableList.of("unknown cause"));
   }
 
   public GenomicExtractionJob submitGenomicExtractionJob(DbWorkspace workspace, DbDataset dataSet)

@@ -1,7 +1,9 @@
 import {isBlank} from './index';
 
 export const MILLIS_PER_DAY = 24 * 60 * 60 * 1000;
-export const daysFromNow = (timeInMillis: number): number => Math.floor((timeInMillis - Date.now()) / MILLIS_PER_DAY);
+export const getWholeDaysFromNow = (timeInMillis: number): number => Math.floor((timeInMillis - Date.now()) / MILLIS_PER_DAY);
+export const plusDays = (date: number, days: number): number => date + (MILLIS_PER_DAY * days);
+export const nowPlusDays = (days: number) => plusDays(Date.now(), days);
 
 // To convert datetime strings into human-readable dates
 export function displayDate(time: number): string {

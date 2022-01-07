@@ -3,19 +3,19 @@ import * as React from 'react';
 import {mount} from 'enzyme';
 import SpyInstance = jest.SpyInstance;
 
-import {AccessRenewal} from 'app/pages/access/access-renewal';
+import {AccessRenewal, isExpiring} from 'app/pages/access/access-renewal';
 import {profileApi, registerApiClient} from 'app/services/swagger-fetch-clients';
 import {profileStore, serverConfigStore} from 'app/utils/stores';
-import {AccessModule, InstitutionApi, Profile, ProfileApi} from 'generated/fetch';
+import {AccessModule, AccessModuleStatus, InstitutionApi, Profile, ProfileApi} from 'generated/fetch';
 import defaultServerConfig from 'testing/default-server-config';
 import {findNodesByExactText, findNodesContainingText, waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {InstitutionApiStub} from 'testing/stubs/institution-api-stub';
 import {ProfileApiStub, ProfileStubVariables} from 'testing/stubs/profile-api-stub';
 import {accessRenewalModules} from 'app/utils/access-utils';
-import {MILLIS_PER_DAY} from 'app/utils/dates';
+import {nowPlusDays, plusDays} from 'app/utils/dates';
 
 const EXPIRY_DAYS = 365
-const nowPlusDays = (days: number) => Date.now() + MILLIS_PER_DAY * days;
+const oneYearAgo = () => nowPlusDays(-EXPIRY_DAYS);
 const oneYearFromNow = () => nowPlusDays(EXPIRY_DAYS);
 const oneHourAgo = () => Date.now() - 1000 * 60 * 60;
 
@@ -29,7 +29,10 @@ describe('Access Renewal Page', () => {
     const {profile} = profileStore.get();
 
     const newProfile = fp.set('accessModules',
-        {modules: accessRenewalModules.map(m => ({moduleName: m, expirationEpochMillis: expiredTime}))},
+        {modules: accessRenewalModules.map(m => ({
+            moduleName: m,
+            completionEpochMillis: expiredTime - 1,
+            expirationEpochMillis: expiredTime } as AccessModuleStatus))},
         profile)
     profileStore.set({profile: newProfile, load, reload, updateCache});
   }
@@ -47,8 +50,9 @@ describe('Access Renewal Page', () => {
       ...oldProfile.accessModules.modules.filter(m => m.moduleName !== updateModuleName),
       {
         ...oldProfile.accessModules.modules.find(m => m.moduleName === updateModuleName),
+        completionEpochMillis: time - 1,
         expirationEpochMillis: time
-      }];
+      } as AccessModuleStatus];
     const newProfile = fp.set(['accessModules', 'modules'], newModules, oldProfile)
     profileStore.set({profile: newProfile, load, reload, updateCache});
   }
@@ -77,6 +81,13 @@ describe('Access Renewal Page', () => {
     profileStore.set({profile: newProfile,  load, reload, updateCache});
   }
 
+  const expectExpired = (wrapper) => expect(findNodesContainingText(wrapper, 'access has expired').length).toBe(1);
+  const expectNotExpired = (wrapper) => expect(findNodesContainingText(wrapper, 'access has expired').length).toBe(0);
+  const expectComplete = (wrapper) =>
+    expect(findNodesByExactText(wrapper, 'Thank you for completing all the necessary steps').length).toBe(1);
+  const expectIncomplete = (wrapper) =>
+    expect(findNodesByExactText(wrapper, 'Thank you for completing all the necessary steps').length).toBe(0);
+
   const profile = ProfileStubVariables.PROFILE_STUB;
 
   let mockUpdateProfile: SpyInstance;
@@ -103,83 +114,6 @@ describe('Access Renewal Page', () => {
     registerApiClient(InstitutionApi, institutionApi);
   });
 
-
-  it('should render when the user is expired', async () => {
-    expireAllModules()
-    const wrapper = component();
-
-    setCompletionTimes(() => Date.now() - 1000 * 60 * 60 * 24 * EXPIRY_DAYS);
-    await waitOneTickAndUpdate(wrapper);
-
-    expect(findNodesByExactText(wrapper, 'Review').length).toBe(1)
-    expect(findNodesByExactText(wrapper, 'Confirm').length).toBe(1)
-    expect(findNodesByExactText(wrapper, 'View & Sign').length).toBe(1)
-    expect(findNodesByExactText(wrapper, 'Complete Training').length).toBe(1);
-
-    expect(findNodesContainingText(wrapper, 'access has expired').length).toBe(1);
-    expect(findNodesByExactText(wrapper, 'Thank you for completing all the necessary steps').length).toBe(0);
-  });
-
-  it('should show the correct state when profile is complete', async () => {
-    expireAllModules()
-
-    const wrapper = component();
-
-    updateOneModuleExpirationTime(AccessModule.PROFILECONFIRMATION, oneYearFromNow());
-    await waitOneTickAndUpdate(wrapper);
-
-    // Complete
-    expect(findNodesByExactText(wrapper, 'Confirmed').length).toBe(1)
-
-    // Incomplete
-    expect(findNodesByExactText(wrapper, 'Confirm').length).toBe(1);
-    expect(findNodesByExactText(wrapper, 'View & Sign').length).toBe(1)
-    expect(findNodesByExactText(wrapper, 'Complete Training').length).toBe(1);
-
-    expect(findNodesContainingText(wrapper, 'access has expired').length).toBe(1);
-    expect(findNodesByExactText(wrapper, 'Thank you for completing all the necessary steps').length).toBe(0);
-  });
-
-  it('should show the correct state when profile and publication are complete', async () => {
-    expireAllModules()
-
-    const wrapper = component();
-
-    updateOneModuleExpirationTime(AccessModule.PROFILECONFIRMATION, oneYearFromNow());
-    updateOneModuleExpirationTime(AccessModule.PUBLICATIONCONFIRMATION, oneYearFromNow());
-    await waitOneTickAndUpdate(wrapper);
-
-    // Complete
-    expect(findNodesByExactText(wrapper, 'Confirmed').length).toBe(2);
-
-    // Incomplete
-    expect(findNodesByExactText(wrapper, 'View & Sign').length).toBe(1)
-    expect(findNodesByExactText(wrapper, 'Complete Training').length).toBe(1);
-
-    expect(findNodesContainingText(wrapper, 'access has expired').length).toBe(1);
-    expect(findNodesByExactText(wrapper, 'Thank you for completing all the necessary steps').length).toBe(0);
-  });
-
-  it('should show the correct state when all items except DUCC are complete', async () => {
-    expireAllModules()
-
-    const wrapper = component();
-
-    updateOneModuleExpirationTime(AccessModule.PROFILECONFIRMATION, oneYearFromNow());
-    updateOneModuleExpirationTime(AccessModule.PUBLICATIONCONFIRMATION, oneYearFromNow());
-    updateOneModuleExpirationTime(AccessModule.COMPLIANCETRAINING, oneYearFromNow());
-    await waitOneTickAndUpdate(wrapper);
-
-    // Complete
-    expect(findNodesByExactText(wrapper, 'Confirmed').length).toBe(2);
-    expect(findNodesByExactText(wrapper, 'Completed').length).toBe(1);
-    // Incomplete
-    expect(findNodesByExactText(wrapper, 'View & Sign').length).toBe(1);
-
-    expect(findNodesContainingText(wrapper, 'access has expired').length).toBe(1);
-    expect(findNodesByExactText(wrapper, 'Thank you for completing all the necessary steps').length).toBe(0);
-  });
-
   it('should show the correct state when all items are complete', async () => {
     expireAllModules()
 
@@ -199,8 +133,98 @@ describe('Access Renewal Page', () => {
     expect(findNodesByExactText(wrapper, 'Completed').length).toBe(2);
     expect(findNodesContainingText(wrapper, `${EXPIRY_DAYS - 1} days`).length).toBe(4);
 
-    expect(findNodesByExactText(wrapper, 'Thank you for completing all the necessary steps').length).toBe(1);
-    expect(findNodesContainingText(wrapper, 'access has expired').length).toBe(0);
+    expectComplete(wrapper);
+    expectNotExpired(wrapper);
+  });
+
+  it('should show the correct state when all modules are expired', async () => {
+    expireAllModules()
+    const wrapper = component();
+
+    setCompletionTimes(oneYearAgo);
+    await waitOneTickAndUpdate(wrapper);
+
+    expect(findNodesByExactText(wrapper, 'Review').length).toBe(1)
+    expect(findNodesByExactText(wrapper, 'Confirm').length).toBe(1)
+    expect(findNodesByExactText(wrapper, 'View & Sign').length).toBe(1)
+    expect(findNodesByExactText(wrapper, 'Complete Training').length).toBe(1);
+
+    expectExpired(wrapper);
+    expectIncomplete(wrapper);
+  });
+
+  it('should show the correct state when all modules are incomplete', async () => {
+    const wrapper = component();
+
+    await waitOneTickAndUpdate(wrapper);
+
+    expect(findNodesByExactText(wrapper, 'Review').length).toBe(1)
+    expect(findNodesByExactText(wrapper, 'Confirm').length).toBe(1)
+    expect(findNodesByExactText(wrapper, 'View & Sign').length).toBe(1)
+    expect(findNodesByExactText(wrapper, 'Complete Training').length).toBe(1);
+
+    expectNotExpired(wrapper);
+    expectIncomplete(wrapper);
+  });
+
+  it('should show the correct state when profile confirmation is complete', async () => {
+    expireAllModules()
+
+    const wrapper = component();
+
+    updateOneModuleExpirationTime(AccessModule.PROFILECONFIRMATION, oneYearFromNow());
+    await waitOneTickAndUpdate(wrapper);
+
+    // Complete
+    expect(findNodesByExactText(wrapper, 'Confirmed').length).toBe(1)
+
+    // Incomplete
+    expect(findNodesByExactText(wrapper, 'Confirm').length).toBe(1);
+    expect(findNodesByExactText(wrapper, 'View & Sign').length).toBe(1)
+    expect(findNodesByExactText(wrapper, 'Complete Training').length).toBe(1);
+
+    expectExpired(wrapper);
+    expectIncomplete(wrapper);
+  });
+
+  it('should show the correct state when profile and publication confirmations are complete', async () => {
+    expireAllModules()
+
+    const wrapper = component();
+
+    updateOneModuleExpirationTime(AccessModule.PROFILECONFIRMATION, oneYearFromNow());
+    updateOneModuleExpirationTime(AccessModule.PUBLICATIONCONFIRMATION, oneYearFromNow());
+    await waitOneTickAndUpdate(wrapper);
+
+    // Complete
+    expect(findNodesByExactText(wrapper, 'Confirmed').length).toBe(2);
+
+    // Incomplete
+    expect(findNodesByExactText(wrapper, 'View & Sign').length).toBe(1)
+    expect(findNodesByExactText(wrapper, 'Complete Training').length).toBe(1);
+
+    expectExpired(wrapper);
+    expectIncomplete(wrapper);
+  });
+
+  it('should show the correct state when all items except DUCC are complete', async () => {
+    expireAllModules()
+
+    const wrapper = component();
+
+    updateOneModuleExpirationTime(AccessModule.PROFILECONFIRMATION, oneYearFromNow());
+    updateOneModuleExpirationTime(AccessModule.PUBLICATIONCONFIRMATION, oneYearFromNow());
+    updateOneModuleExpirationTime(AccessModule.COMPLIANCETRAINING, oneYearFromNow());
+    await waitOneTickAndUpdate(wrapper);
+
+    // Complete
+    expect(findNodesByExactText(wrapper, 'Confirmed').length).toBe(2);
+    expect(findNodesByExactText(wrapper, 'Completed').length).toBe(1);
+    // Incomplete
+    expect(findNodesByExactText(wrapper, 'View & Sign').length).toBe(1);
+
+    expectExpired(wrapper);
+    expectIncomplete(wrapper);
   });
 
   it('should ignore modules which are not expirable', async () => {
@@ -212,7 +236,7 @@ describe('Access Renewal Page', () => {
           moduleName: AccessModule.TWOFACTORAUTH,   // not expirable
           completionEpochMillis: null,
           bypassEpochMillis: null,
-          expirationEpochMillis: null,
+          expirationEpochMillis: oneYearAgo(),
         }
     ];
 
@@ -239,22 +263,17 @@ describe('Access Renewal Page', () => {
     expect(findNodesByExactText(wrapper, 'Completed').length).toBe(2);
     expect(findNodesContainingText(wrapper, `${EXPIRY_DAYS - 1} days`).length).toBe(4);
 
-    expect(findNodesByExactText(wrapper, 'Thank you for completing all the necessary steps').length).toBe(1);
-    expect(findNodesContainingText(wrapper, 'access has expired').length).toBe(0);
+    expectComplete(wrapper);
+    expectNotExpired(wrapper);
   });
 
   it('should show the correct state when items are bypassed', async () => {
     expireAllModules()
 
-    const wrapper = component();
-
-    setCompletionTimes(() => Date.now());
+    // won't bypass Profile and Publication confirmation because those are unbypassable
     setBypassTimes(() => Date.now());
 
-    updateOneModuleExpirationTime(AccessModule.PROFILECONFIRMATION, oneHourAgo());
-    updateOneModuleExpirationTime(AccessModule.PUBLICATIONCONFIRMATION, oneHourAgo());
-
-    await waitOneTickAndUpdate(wrapper);
+    const wrapper = component();
 
     // Incomplete
     expect(findNodesByExactText(wrapper, 'Review').length).toBe(1)
@@ -267,23 +286,22 @@ describe('Access Renewal Page', () => {
     // State check
     expect(findNodesContainingText(wrapper, 'click the refresh button').length).toBe(0);
 
-    expect(findNodesContainingText(wrapper, 'access has expired').length).toBe(1);
-    expect(findNodesByExactText(wrapper, 'Thank you for completing all the necessary steps').length).toBe(0);
+    expectExpired(wrapper);
+    expectIncomplete(wrapper);
   });
 
   it('should show the correct state when all items are complete or bypassed', async () => {
     expireAllModules()
 
-    const wrapper = component();
+    setCompletionTimes(() => Date.now());
+
+    // won't bypass Profile and Publication confirmation because those are unbypassable
+    setBypassTimes(() => Date.now());
 
     updateOneModuleExpirationTime(AccessModule.PROFILECONFIRMATION, oneYearFromNow());
     updateOneModuleExpirationTime(AccessModule.PUBLICATIONCONFIRMATION, oneYearFromNow());
 
-    setBypassTimes(oneYearFromNow);
-
-    setCompletionTimes(oneYearFromNow);
-
-    await waitOneTickAndUpdate(wrapper);
+    const wrapper = component();
 
     // Training and DUCC are bypassed
     expect(findNodesByExactText(wrapper, 'Bypassed').length).toBe(2);
@@ -292,8 +310,8 @@ describe('Access Renewal Page', () => {
     expect(findNodesByExactText(wrapper, 'Confirmed').length).toBe(2);
     expect(findNodesContainingText(wrapper, `${EXPIRY_DAYS - 1} days`).length).toBe(2);
 
-    expect(findNodesByExactText(wrapper, 'Thank you for completing all the necessary steps').length).toBe(1);
-    expect(findNodesContainingText(wrapper, 'access has expired').length).toBe(0);
+    expectComplete(wrapper);
+    expectNotExpired(wrapper);
   });
 
   it('should show the correct state when modules are disabled', async () => {
@@ -310,7 +328,7 @@ describe('Access Renewal Page', () => {
     updateOneModuleExpirationTime(AccessModule.PUBLICATIONCONFIRMATION, oneYearFromNow());
     updateOneModuleExpirationTime(AccessModule.DATAUSERCODEOFCONDUCT, oneYearFromNow());
 
-    // these modules will not be returned in AccessModules because they are disabled
+    // this module will not be returned in AccessModules because it is disabled
     removeOneModule(AccessModule.COMPLIANCETRAINING);
 
     await waitOneTickAndUpdate(wrapper);
@@ -324,8 +342,8 @@ describe('Access Renewal Page', () => {
     expect(findNodesByExactText(wrapper, 'Complete Training').length).toBe(0);
 
     // all of the necessary steps = 3 rather than the usual 4
-    expect(findNodesByExactText(wrapper, 'Thank you for completing all the necessary steps').length).toBe(1);
-    expect(findNodesContainingText(wrapper, 'access has expired').length).toBe(0);
+    expectComplete(wrapper);
+    expectNotExpired(wrapper);
   });
 
   // RW-7473: sync expiring/expired Training module to gain access
@@ -347,3 +365,68 @@ describe('Access Renewal Page', () => {
   });
 
 });
+
+describe('isExpiring', () => {
+  const ONE_MINUTE_IN_MILLIS = 1000 * 60;
+  const LOOKBACK_PERIOD = 99;   // arbitrary for testing; actual prod value is 330
+  const EXPIRATION_DAYS = 123;  // arbitrary for testing; actual prod value is 365
+
+  beforeEach(() => {
+    serverConfigStore.set({
+      config: {
+        ...defaultServerConfig,
+        accessRenewalLookback: LOOKBACK_PERIOD
+      }
+    });
+  });
+
+  it('should return isExpiring=true if a module has expired', () => {
+    const completionDaysPast = 555;  // arbitrary for test; completed this many days ago
+
+    // add 1 minute so we don't hit the boundary *exactly*
+    const completionDate = nowPlusDays(-completionDaysPast) + ONE_MINUTE_IN_MILLIS;
+    const expirationDate = plusDays(completionDate, EXPIRATION_DAYS);
+
+    // sanity-check: this test is checking an expiration in the past
+    expect(expirationDate).toBeLessThan(Date.now());
+
+    expect(isExpiring(expirationDate)).toEqual(true);
+  });
+
+  it('should return isExpiring=true if a module will expire in the future and within the lookback period', () => {
+    const completionDaysPast = 44;  // arbitrary for test; completed this many days ago
+
+    // add 1 minute so we don't hit the boundary *exactly*
+    const completionDate = nowPlusDays(-completionDaysPast) + ONE_MINUTE_IN_MILLIS;
+    const expirationDate = plusDays(completionDate, EXPIRATION_DAYS);
+
+    // sanity-check: this test is checking a date within the lookback
+    const endOfLookback = nowPlusDays(LOOKBACK_PERIOD);
+    expect(expirationDate).toBeLessThan(endOfLookback);
+
+    expect(isExpiring(expirationDate)).toEqual(true);
+  });
+
+  it('should return isExpiring=false if a module will expire in the future beyond the lookback period', () => {
+    const completionDaysPast = 3;  // arbitrary for test; completed this many days ago
+
+    // add 1 minute so we don't hit the boundary *exactly*
+    const completionDate = nowPlusDays(-completionDaysPast) + ONE_MINUTE_IN_MILLIS;
+    const expirationDate = plusDays(completionDate, EXPIRATION_DAYS);
+
+    // sanity-check: this test is checking a date beyond the lookback
+    const endOfLookback = nowPlusDays(LOOKBACK_PERIOD);
+    expect(expirationDate).toBeGreaterThan(endOfLookback);
+
+    expect(isExpiring(expirationDate)).toEqual(false);
+  });
+
+  it('should return isExpiring=false if a module has a null expiration', () => {
+    expect(isExpiring(null)).toEqual(false);
+  });
+
+  it('should return isExpiring=false if a module has an undefined expiration', () => {
+    expect(isExpiring(undefined)).toEqual(false);
+  });
+});
+

@@ -115,6 +115,7 @@ public class WorkbenchConfig {
     public boolean debugEndpoints;
     public String baseUrl;
     public String samBaseUrl;
+    public String terraUiBaseUrl;
     public Integer notebookRuntimeMaxAgeDays;
     public Integer notebookRuntimeIdleMaxAgeDays;
     public String leoBaseUrl;
@@ -144,6 +145,9 @@ public class WorkbenchConfig {
     public String workspaceLogsProject;
 
     public RuntimeImages runtimeImages;
+
+    // The deployment area of the GCE VM. For example, us-east1-a or europe-west2-c
+    public String gceVmZone;
   }
 
   public static class RuntimeImages {
@@ -170,6 +174,7 @@ public class WorkbenchConfig {
     public String extractionCohortsDataset;
     public String extractionDestinationDataset;
     public String extractionTempTablesDataset;
+    public boolean enableJiraTicketingOnFailure;
   }
 
   public static class CdrConfig {

@@ -1,9 +1,4 @@
-import {
-  AuditAction,
-  AuditEventBundle,
-  AuditEventBundleHeader,
-  AuditTargetPropertyChange
-} from 'generated/fetch';
+import {AuditAction, AuditEventBundle, AuditEventBundleHeader, AuditTargetPropertyChange} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 
 export const headerToString = (header?: AuditEventBundleHeader) => {
@@ -36,6 +31,3 @@ export const downloadTextFile = (fileName, contents) => {
   document.body.removeChild(element);
 };
 
-export const usernameWithoutDomain = (username: string) => {
-  return username ? username.substring(0, username.indexOf('@')) : '';
-};

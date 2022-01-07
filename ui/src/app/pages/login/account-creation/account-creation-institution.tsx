@@ -23,10 +23,9 @@ import {isBlank, reactStyles} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {reportError} from 'app/utils/errors';
 import {
-  EmailAddressMismatchErrorMessage,
-  EmailDomainMismatchErrorMessage,
+  getEmailValidationErrorMessage,
   getRoleOptions,
-  validateEmail
+  checkInstitutionalEmail
 } from 'app/utils/institutions';
 import {
   CheckEmailResponse,
@@ -179,7 +178,7 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
     }
 
     try {
-      const result = await validateEmail(contactEmail, institutionShortName, this.aborter);
+      const result = await checkInstitutionalEmail(contactEmail, institutionShortName, this.aborter);
       this.setState({checkEmailResponse: result});
     } catch (e) {
       this.setState({
@@ -253,13 +252,7 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
     // Finally, we distinguish between the two types of InstitutionMembershipRequirements in terms of user messaging.
     const selectedInstitutionObj = fp.find((institution) =>
         institution.shortName === institutionShortName, institutions);
-    if (selectedInstitutionObj.registeredTierMembershipRequirement === InstitutionMembershipRequirement.ADDRESSES) {
-      // Institution requires an exact email address match and the email is not in allowed emails list
-      return <EmailAddressMismatchErrorMessage/>;
-    } else {
-      // Institution requires email domain matching and the domain is not in the allowed list
-      return <EmailDomainMismatchErrorMessage/>;
-    }
+    return getEmailValidationErrorMessage(selectedInstitutionObj);
   }
 
   /**

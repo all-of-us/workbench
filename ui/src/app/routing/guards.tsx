@@ -39,8 +39,7 @@ export const expiredGuard: Guard = {
   redirectPath: '/access-renewal'
 };
 
-export const adminLockedGuard = (): Guard => {
-  const {ns, wsid} = useParams<MatchParams>();
+export const adminLockedGuard = (ns: string, wsid: string): Guard => {
   return ({
     allowed: (): boolean => (!currentWorkspaceStore.getValue().adminLocked),
     redirectPath: `/workspaces/${ns}/${wsid}/about`

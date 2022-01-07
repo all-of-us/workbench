@@ -64,6 +64,8 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.google.StorageConfig;
+import org.pmiops.workbench.jira.JiraService;
+import org.pmiops.workbench.jira.model.CreatedIssue;
 import org.pmiops.workbench.model.GenomicExtractionJob;
 import org.pmiops.workbench.model.TerraJobStatus;
 import org.pmiops.workbench.test.FakeClock;
@@ -97,6 +99,7 @@ public class GenomicExtractionServiceTest {
   @Autowired WorkspaceAuthService workspaceAuthService;
   @Autowired CdrVersionDao cdrVersionDao;
   @Autowired DataSetService mockDataSetService;
+  @Autowired JiraService mockJiraService;
 
   private DbWorkspace targetWorkspace;
 
@@ -115,6 +118,7 @@ public class GenomicExtractionServiceTest {
   @MockBean({
     DataSetService.class,
     FireCloudService.class,
+    JiraService.class,
     MethodConfigurationsApi.class,
     SubmissionsApi.class
   })
@@ -145,13 +149,18 @@ public class GenomicExtractionServiceTest {
   }
 
   @BeforeEach
-  public void setUp() throws ApiException {
+  public void setUp() throws Exception {
     cloudStorageClient = mock(CloudStorageClient.class);
     Blob blob = mock(Blob.class);
     doReturn("bucket").when(blob).getBucket();
     doReturn("filename").when(blob).getName();
     doReturn(blob).when(cloudStorageClient).writeFile(any(), any(), any());
     workbenchConfig = new WorkbenchConfig();
+    workbenchConfig.server = new WorkbenchConfig.ServerConfig();
+    workbenchConfig.server.uiBaseUrl = "https://workbench.researchallofus.org";
+    workbenchConfig.server.shortName = "test";
+    workbenchConfig.firecloud = new WorkbenchConfig.FireCloudConfig();
+    workbenchConfig.firecloud.terraUiBaseUrl = "https://app.terra.bio";
     workbenchConfig.wgsCohortExtraction = new WorkbenchConfig.WgsCohortExtractionConfig();
     workbenchConfig.wgsCohortExtraction.operationalTerraWorkspaceBucket = "terraBucket";
     workbenchConfig.wgsCohortExtraction.extractionMethodConfigurationName = "methodName";
@@ -186,9 +195,9 @@ public class GenomicExtractionServiceTest {
     cdrVersion = cdrVersionDao.save(cdrVersion);
 
     DbWorkspace workspace = new DbWorkspace();
-    workspace.setWorkspaceNamespace("Target DbWorkspace Namespace");
-    workspace.setFirecloudName("Target DbWorkspace Firecloud Name");
-    workspace.setName("Target DbWorkspace");
+    workspace.setWorkspaceNamespace("target-ws-namespace");
+    workspace.setFirecloudName("target-ws-fc-name");
+    workspace.setName("target-ws-name");
     workspace.setWorkspaceId(2);
     workspace.setCdrVersion(cdrVersion);
     targetWorkspace = workspaceDao.save(workspace);
@@ -202,6 +211,10 @@ public class GenomicExtractionServiceTest {
     doReturn(new FirecloudWorkspaceResponse().accessLevel("READER"))
         .when(fireCloudService)
         .getWorkspace(anyString(), anyString());
+
+    doReturn(new CreatedIssue().key("RW-123"))
+        .when(mockJiraService)
+        .createIssue(any(), any(), any());
 
     dataset = createDataset();
   }
@@ -356,6 +369,19 @@ public class GenomicExtractionServiceTest {
     assertThat(dbSubmission.getVcfSizeMb()).isEqualTo(expectedVcfSize.longValue());
   }
 
+  @Test
+  public void getExtractionJobs_reportJiraTicketOnFailure() throws Exception {
+    workbenchConfig.wgsCohortExtraction.enableJiraTicketingOnFailure = true;
+    DbWgsExtractCromwellSubmission dbSubmission =
+        createSubmissionAndMockMonitorCall(
+            FirecloudSubmissionStatus.DONE, FirecloudWorkflowStatus.FAILED);
+
+    genomicExtractionService.getGenomicExtractionJobs(
+        targetWorkspace.getWorkspaceNamespace(), targetWorkspace.getFirecloudName());
+
+    verify(mockJiraService).createIssue(any(), any(), any());
+  }
+
   private DbWgsExtractCromwellSubmission createDbWgsExtractCromwellSubmission() {
     DbWgsExtractCromwellSubmission dbWgsExtractCromwellSubmission =
         new DbWgsExtractCromwellSubmission();
@@ -363,6 +389,7 @@ public class GenomicExtractionServiceTest {
     dbWgsExtractCromwellSubmission.setSubmissionId(UUID.randomUUID().toString());
     dbWgsExtractCromwellSubmission.setCreator(currentUser);
     dbWgsExtractCromwellSubmission.setWorkspace(targetWorkspace);
+    dbWgsExtractCromwellSubmission.setTerraSubmissionDate(Timestamp.from(CLOCK.instant()));
     wgsExtractCromwellSubmissionDao.save(dbWgsExtractCromwellSubmission);
 
     return dbWgsExtractCromwellSubmission;

@@ -6,12 +6,9 @@ import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -59,13 +56,6 @@ public class EgressRemediationService {
   private static final Duration EGRESS_NOTIFY_DEBOUNCE_TIME = Duration.ofHours(1L);
 
   private static final Logger log = Logger.getLogger(EgressRemediationService.class.getName());
-  private static final ZoneId jiraTimeZone = ZoneId.of("America/Chicago");
-  private static final DateTimeFormatter jiraSummaryDateFormat =
-      DateTimeFormatter.ofPattern("MM/dd/yy").withLocale(Locale.US).withZone(jiraTimeZone);
-  private static final DateTimeFormatter jiraDetailedDateFormat =
-      DateTimeFormatter.ofPattern("MMMM d, yyyy 'at' h:mm a 'Central Time'")
-          .withLocale(Locale.US)
-          .withZone(jiraTimeZone);
 
   private final Clock clock;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
@@ -320,7 +310,7 @@ public class EgressRemediationService {
                       IssueProperty.SUMMARY,
                       String.format(
                           "(%s) Investigate egress from %s",
-                          jiraSummaryDateFormat.format(clock.instant()),
+                          JiraService.summaryDateFormat.format(clock.instant()),
                           event.getUser().getUsername()))
                   .put(IssueProperty.EGRESS_VM_PREFIX, event.getUser().getRuntimeName())
                   .put(IssueProperty.RW_ENVIRONMENT, envShortName)
@@ -399,7 +389,7 @@ public class EgressRemediationService {
         JiraContent.text(
             String.format(
                 "Detected @ %s\n",
-                jiraDetailedDateFormat.format(
+                JiraService.detailedDateFormat.format(
                     Instant.ofEpochMilli(originalEvent.getTimeWindowStart())))),
         JiraContent.text(
             String.format(

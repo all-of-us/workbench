@@ -66,6 +66,7 @@ public interface LeonardoMapper {
 
   @Mapping(target = "cloudService", ignore = true)
   @Mapping(target = "bootDiskSize", ignore = true)
+  @Mapping(target = "zone", ignore = true)
   LeonardoGceConfig toLeonardoGceConfig(GceConfig gceConfig);
 
   @AfterMapping
@@ -78,6 +79,7 @@ public interface LeonardoMapper {
   Disk toApiDisk(LeonardoListPersistentDiskResponse disk);
 
   @Mapping(target = "cloudService", ignore = true)
+  @Mapping(target = "zone", ignore = true)
   LeonardoGceWithPdConfig toLeonardoGceWithPdConfig(GceWithPdConfig gceWithPdConfig);
 
   @AfterMapping
