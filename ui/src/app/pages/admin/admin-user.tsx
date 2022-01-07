@@ -395,14 +395,13 @@ export const AdminUser = withRouter(class extends React.Component<Props, State> 
           </FlexColumn>
           <FlexColumn style={{width: '33%'}}>
             <FreeCreditsDropdown
-              initialLimit={oldProfile?.freeTierDollarQuota}
               currentLimit={updatedProfile.freeTierDollarQuota}
               labelStyle={styles.label}
               dropdownStyle={styles.textInput}
               onChange={async(event) => this.setFreeTierCreditDollarLimit(event.value)}/>
             <InstitutionDropdown
               institutions={verifiedInstitutionOptions}
-              initialInstitutionShortName={updatedProfile.verifiedInstitutionalAffiliation?.institutionShortName}
+              currentInstitutionShortName={updatedProfile.verifiedInstitutionalAffiliation?.institutionShortName}
               labelStyle={styles.label}
               dropdownStyle={styles.textInput}
               onChange={async(event) => this.setVerifiedInstitutionOnProfile(event.value)}/>
@@ -411,7 +410,7 @@ export const AdminUser = withRouter(class extends React.Component<Props, State> 
               verifiedInstitutionOptions={verifiedInstitutionOptions}/>}
             <InstitutionalRoleDropdown
               institutions={verifiedInstitutionOptions}
-              initialAffiliation={updatedProfile.verifiedInstitutionalAffiliation}
+              currentAffiliation={updatedProfile.verifiedInstitutionalAffiliation}
               labelStyle={styles.label}
               dropdownStyle={styles.textInput}
               onChange={(event) => this.setInstitutionalRoleOnProfile(event.value)}/>

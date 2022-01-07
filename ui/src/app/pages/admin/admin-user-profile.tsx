@@ -116,27 +116,36 @@ const EditableFields =
       <FlexRow>
         <ContactEmailTextInput
           contactEmail={updatedProfile.contactEmail}
+          previousContactEmail={oldProfile.contactEmail}
+          highlightOnChange
           onChange={email => onChangeEmail(email)}/>
         <InstitutionDropdown
           institutions={institutions}
-          initialInstitutionShortName={updatedProfile.verifiedInstitutionalAffiliation?.institutionShortName}
+          currentInstitutionShortName={updatedProfile.verifiedInstitutionalAffiliation?.institutionShortName}
+          previousInstitutionShortName={oldProfile.verifiedInstitutionalAffiliation?.institutionShortName}
+          highlightOnChange
           onChange={event => onChangeInstitution(event.value)}/>
       </FlexRow>
       {emailValidationStatus === EmailValidationStatus.INVALID && getEmailValidationErrorMessage(institution)}
       <FlexRow>
         <FreeCreditsDropdown
-          initialLimit={oldProfile.freeTierDollarQuota}
           currentLimit={updatedProfile.freeTierDollarQuota}
+          previousLimit={oldProfile.freeTierDollarQuota}
+          highlightOnChange
           onChange={event => onChangeFreeCreditLimit(event.value)}/>
         <InstitutionalRoleDropdown
           institutions={institutions}
-          initialAffiliation={updatedProfile.verifiedInstitutionalAffiliation}
+          currentAffiliation={updatedProfile.verifiedInstitutionalAffiliation}
+          previousRole={oldProfile.verifiedInstitutionalAffiliation?.institutionalRoleEnum}
+          highlightOnChange
           onChange={event => onChangeInstitutionalRole(event.value)}/>
       </FlexRow>
       <FlexRow>
         <FlexSpacer/>
         <InstitutionalRoleOtherTextInput
           affiliation={updatedProfile.verifiedInstitutionalAffiliation}
+          previousOtherText={oldProfile.verifiedInstitutionalAffiliation?.institutionalRoleOtherText}
+          highlightOnChange
           onChange={value => onChangeInstitutionOtherText(value)}/>
       </FlexRow>
     </FlexColumn>
