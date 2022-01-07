@@ -15,7 +15,6 @@ import {
   getPublicInstitutionDetails,
   ContactEmailTextInput,
   enableSave,
-  getUpdatedProfileValue,
   updateAccountProperties,
   ErrorsTooltip,
   AccessModuleExpirations,
@@ -196,28 +195,18 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
     }
   }
 
-  const changed = (attributePath: string[]): boolean => !!getUpdatedProfileValue(oldProfile, updatedProfile, attributePath);
-
-  useEffect(() => {
-    const onProfileChange = async () => {
-      const {contactEmail, verifiedInstitutionalAffiliation} = updatedProfile;
-      if (changed(['contactEmail']) || changed(['verifiedInstitutionalAffiliation', 'institutionShortName'])) {
-        await validateAffiliation(contactEmail, verifiedInstitutionalAffiliation?.institutionShortName);
-      } else {
-        clearEmailValidation();
-      }
-    }
-
-    if (updatedProfile) {
-      onProfileChange();
-    }
-  }, [updatedProfile])
-
   const updateProfile = (newUpdates: Partial<Profile>) => {
     setUpdatedProfile({ ...updatedProfile, ...newUpdates});
   }
 
-  const updateInstitution = (institutionShortName: string) => {
+  const updateContactEmail = async (contactEmail: string) => {
+    await validateAffiliation(contactEmail, updatedProfile.verifiedInstitutionalAffiliation?.institutionShortName);
+    updateProfile({contactEmail});
+  }
+
+  const updateInstitution = async (institutionShortName: string) => {
+    await validateAffiliation(updatedProfile.contactEmail, institutionShortName);
+
     const verifiedInstitutionalAffiliation: VerifiedInstitutionalAffiliation = {
       institutionShortName,
       institutionDisplayName: institutions.find(i => i.shortName === institutionShortName)?.displayName,
@@ -276,7 +265,7 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
         updatedProfile={updatedProfile}
         institutions={institutions}
         emailValidationStatus={emailValidationStatus}
-        onChangeEmail={(contactEmail: string) => updateProfile({contactEmail: contactEmail.trim()})}
+        onChangeEmail={(contactEmail: string) => updateContactEmail(contactEmail.trim())}
         onChangeFreeCreditLimit={(freeTierDollarQuota: number) => updateProfile({freeTierDollarQuota})}
         onChangeInstitution={(institutionShortName: string) => updateInstitution(institutionShortName)}
         onChangeInstitutionalRole={(institutionalRoleEnum: InstitutionalRole) => updateInstitutionalRole(institutionalRoleEnum)}
