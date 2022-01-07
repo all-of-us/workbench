@@ -145,6 +145,9 @@ public class WorkbenchConfig {
     public String workspaceLogsProject;
 
     public RuntimeImages runtimeImages;
+
+    // The deployment area of the GCE VM. For example, us-east1-a or europe-west2-c
+    public String gceVmZone;
   }
 
   public static class RuntimeImages {

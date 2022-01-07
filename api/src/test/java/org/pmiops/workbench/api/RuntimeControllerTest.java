@@ -253,6 +253,7 @@ public class RuntimeControllerTest {
     config = WorkbenchConfig.createEmptyConfig();
     config.server.apiBaseUrl = API_BASE_URL;
     config.access.enableComplianceTraining = true;
+    config.firecloud.gceVmZone = "us-central-1";
 
     user = new DbUser();
     user.setUsername(LOGGED_IN_USER_EMAIL);
@@ -910,6 +911,7 @@ public class RuntimeControllerTest {
     assertThat(createLeonardoGceConfig.getDiskSize()).isEqualTo(50);
 
     assertThat(createLeonardoGceConfig.getMachineType()).isEqualTo("standard");
+    assertThat(createLeonardoGceConfig.getZone()).isEqualTo("us-central-1");
   }
 
   @Test
@@ -955,6 +957,7 @@ public class RuntimeControllerTest {
         .isEqualTo(LeonardoDiskType.SSD);
     assertThat(createLeonardoGceWithPdConfig.getPersistentDisk().getName()).isEqualTo(getPdName());
     assertThat(createLeonardoGceWithPdConfig.getPersistentDisk().getSize()).isEqualTo(500);
+    assertThat(createLeonardoGceWithPdConfig.getZone()).isEqualTo("us-central-1");
   }
 
   @Test
