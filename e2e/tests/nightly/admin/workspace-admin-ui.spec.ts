@@ -97,6 +97,11 @@ describe('Workspace Admin', () => {
   test('Verify that admin is able to delete runtime', async () => {
     const workspaceAdminPage = new WorkspaceAdminPage(page);
     await workspaceAdminPage.waitForLoad();
+    await workspaceAdminPage.getWorkspaceNamespaceInput().type(workspaceNamespace);
+    await workspaceAdminPage.clickLoadWorkspaceButton();
+    await workspaceAdminPage.waitForLoad();
+    expect(await workspaceAdminPage.getNoActiveRuntimeText()).toEqual(noActiveRuntimeText);
+   
     await new WorkspacesPage(page).load();
     const workspaceCard = await WorkspaceCard.findCard(page, workspaceName);
     await workspaceCard.clickWorkspaceName(true);
@@ -123,7 +128,7 @@ describe('Workspace Admin', () => {
     await workspaceAdminPage.clickRuntimeDeleteButton();
     // delete the runtime
     await deleteRuntimeModal.clickDeleteButton();
-    await page.waitForTimeout(10000);
+    await page.waitForTimeout(50000);
 
     //verify the runtime status is deleting
     expect(await workspaceAdminPage.getRuntimeStatus()).toEqual('Deleting');

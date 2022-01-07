@@ -102,7 +102,7 @@ export default class WorkspaceAdminPage extends AuthenticatedPage {
   async getNoActiveRuntimeText(): Promise<string> {
     const xpath = '//h2[contains(text(),"Runtimes")]/following-sibling::p';
     const element = BaseElement.asBaseElement(this.page, await this.page.waitForXPath(xpath, { visible: true }));
-    return await element.getTextContent();
+    return  await element.getTextContent();
   }
 
   // get the Runtime Delete button
@@ -121,7 +121,7 @@ export default class WorkspaceAdminPage extends AuthenticatedPage {
   // get the runtime status in the Status col
   async getRuntimeStatus(): Promise<string> {
     const xpath = '//div[text()="Delete" and @role="button"]/preceding-sibling::*[1]';
-    const element = BaseElement.asBaseElement(this.page, await this.page.waitForXPath(xpath, { visible: true }));
+    const element = BaseElement.asBaseElement(this.page, await this.page.waitForXPath(xpath, { visible: true, timeout: 60000 }));
     return element.getTextContent();
   }
 }
