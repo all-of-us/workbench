@@ -16,7 +16,8 @@
     "runtimeImages": {
       "gce": [],
       "dataproc": []
-    }
+    },
+    "gceVmZone": "us-central1-a"
   },
   "billing": {
     "accountId": "00293C-5DEA2D-6887E7",

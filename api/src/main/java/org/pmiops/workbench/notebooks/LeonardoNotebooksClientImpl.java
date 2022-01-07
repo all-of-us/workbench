@@ -167,9 +167,13 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
 
   private Object buildRuntimeConfig(Runtime runtime) {
     if (runtime.getGceConfig() != null) {
-      return leonardoMapper.toLeonardoGceConfig(runtime.getGceConfig());
+      return leonardoMapper
+          .toLeonardoGceConfig(runtime.getGceConfig())
+          .zone(workbenchConfigProvider.get().firecloud.gceVmZone);
     } else if (runtime.getGceWithPdConfig() != null) {
-      return leonardoMapper.toLeonardoGceWithPdConfig(runtime.getGceWithPdConfig());
+      return leonardoMapper
+          .toLeonardoGceWithPdConfig(runtime.getGceWithPdConfig())
+          .zone(workbenchConfigProvider.get().firecloud.gceVmZone);
     } else {
       LeonardoMachineConfig machineConfig =
           leonardoMapper.toLeonardoMachineConfig(runtime.getDataprocConfig());
