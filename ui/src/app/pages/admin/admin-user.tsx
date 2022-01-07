@@ -168,9 +168,15 @@ export const AdminUser = withRouter(class extends React.Component<Props, State> 
     const {
       updatedProfile: {
         contactEmail,
-        verifiedInstitutionalAffiliation: {institutionShortName}
+        verifiedInstitutionalAffiliation,
       }
     } = this.state;
+    this.setState({emailValidationResponse: null});
+
+    // Early-exit with no result if either input is blank.
+    if (!verifiedInstitutionalAffiliation?.institutionShortName || isBlank(contactEmail)) {
+      return;
+    }
 
     this.setState({loading: true});
     // Cancel any outstanding API calls.
@@ -178,15 +184,9 @@ export const AdminUser = withRouter(class extends React.Component<Props, State> 
       this.aborter.abort();
     }
     this.aborter = new AbortController();
-    this.setState({emailValidationResponse: null});
-
-    // Early-exit with no result if either input is blank.
-    if (!institutionShortName || isBlank(contactEmail)) {
-      return;
-    }
 
     try {
-      const result = await checkInstitutionalEmail(contactEmail, institutionShortName, this.aborter);
+      const result = await checkInstitutionalEmail(contactEmail, verifiedInstitutionalAffiliation.institutionShortName, this.aborter);
       this.setState({
         emailValidationError: '',
         emailValidationResponse: result
