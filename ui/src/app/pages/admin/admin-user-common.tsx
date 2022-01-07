@@ -134,16 +134,15 @@ export const updateAccountProperties = async(oldProfile: Profile, updatedProfile
   return userAdminApi().updateAccountProperties(request);
 }
 
-export const DropdownWithLabel = ({label, options, currentValue, previousValue, highlightOnChange, onChange,
+export const DropdownWithLabel = ({label, className, options, currentValue, previousValue, highlightOnChange, onChange,
                                     disabled= false, dataTestId, labelStyle = {}, dropdownStyle = {}}) => {
 
-  const uniqueClassId = randomString(10);   // ensures that we don't highlight ALL dropdowns
-  const dropdownHighlightStyling = `body .${uniqueClassId} .p-inputtext { background-color: ${colors.highlight}; }`;
+  const dropdownHighlightStyling = `body .${className} .p-inputtext { background-color: ${colors.highlight}; }`;
   return <FlexColumn data-test-id={dataTestId} style={{marginTop: '1rem'}}>
     {highlightOnChange && (currentValue !== previousValue) && <style>{dropdownHighlightStyling}</style>}
     <label style={{...commonStyles.label, ...labelStyle}}>{label}</label>
     <Dropdown
-      className={uniqueClassId}
+      className={className}
       style={{...commonStyles.dropdown, ...dropdownStyle}}
       options={options}
       onChange={(e) => onChange(e)}
@@ -187,8 +186,9 @@ interface FreeCreditsDropdownProps {
 export const FreeCreditsDropdown = ({currentLimit, previousLimit, highlightOnChange,
                                       onChange, labelStyle, dropdownStyle}: FreeCreditsDropdownProps) => {
   return <DropdownWithLabel
-    dataTestId={'freeTierDollarQuota'}
-    label={'Free credit limit'}
+    dataTestId='freeTierDollarQuota'
+    className='free-credits'
+    label='Free credit limit'
     options={getFreeCreditLimitOptions(previousLimit)}
     currentValue={currentLimit}
     previousValue={previousLimit}
@@ -212,8 +212,9 @@ export const InstitutionDropdown = ({institutions, currentInstitutionShortName, 
   const options = fp.map(({displayName, shortName}) => ({label: displayName, value: shortName}), institutions);
   return institutions
     ? <DropdownWithLabel
-      dataTestId={'verifiedInstitution'}
-      label={'Verified institution'}
+      dataTestId='verifiedInstitution'
+      className='institution'
+      label='Verified institution'
       options={options}
       currentValue={currentInstitutionShortName}
       previousValue={previousInstitutionShortName}
@@ -238,8 +239,9 @@ export const InstitutionalRoleDropdown = ({institutions, currentAffiliation, pre
   const options = getRoleOptions(institutions, currentAffiliation?.institutionShortName);
   return (institutions && currentAffiliation)
     ? <DropdownWithLabel
-      dataTestId={'institutionalRole'}
-      label={'Institutional role'}
+      dataTestId='institutionalRole'
+      className='institutional-role'
+      label='Institutional role'
       disabled={!currentAffiliation?.institutionShortName}
       options={options}
       currentValue={currentAffiliation?.institutionalRoleEnum}
