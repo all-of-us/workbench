@@ -229,7 +229,6 @@ interface InstitutionalRoleDropdownProps {
   currentAffiliation?: VerifiedInstitutionalAffiliation,
   previousRole?: InstitutionalRole,
   highlightOnChange?: boolean,
-  initialAffiliation?: VerifiedInstitutionalAffiliation,
   onChange: Function,
   labelStyle?: CSSProperties,
   dropdownStyle?: CSSProperties,
