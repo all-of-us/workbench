@@ -164,17 +164,11 @@ export const AdminUser = withRouter(class extends React.Component<Props, State> 
     }
   }
 
-  async validateEmail() {
-    const {
-      updatedProfile: {
-        contactEmail,
-        verifiedInstitutionalAffiliation,
-      }
-    } = this.state;
+  async validateEmail(contactEmail: string, institutionShortName: string) {
     this.setState({emailValidationResponse: null});
 
     // Early-exit with no result if either input is blank.
-    if (!verifiedInstitutionalAffiliation?.institutionShortName || isBlank(contactEmail)) {
+    if (!institutionShortName || isBlank(contactEmail)) {
       return;
     }
 
@@ -186,7 +180,7 @@ export const AdminUser = withRouter(class extends React.Component<Props, State> 
     this.aborter = new AbortController();
 
     try {
-      const result = await checkInstitutionalEmail(contactEmail, verifiedInstitutionalAffiliation.institutionShortName, this.aborter);
+      const result = await checkInstitutionalEmail(contactEmail, institutionShortName, this.aborter);
       this.setState({
         emailValidationError: '',
         emailValidationResponse: result
@@ -225,6 +219,9 @@ export const AdminUser = withRouter(class extends React.Component<Props, State> 
   }
 
   async setVerifiedInstitutionOnProfile(institutionShortName: string) {
+    const {updatedProfile: {contactEmail}} = this.state;
+    await this.validateEmail(contactEmail, institutionShortName);
+
     const {verifiedInstitutionOptions} = this.state;
     this.setState(fp.flow(
       fp.set(['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionShortName'], institutionShortName),
@@ -238,12 +235,12 @@ export const AdminUser = withRouter(class extends React.Component<Props, State> 
       fp.set(['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionRoleEnum'], undefined),
       fp.set(['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionalRoleOtherText'], undefined)
       ));
-    await this.validateEmail();
   }
 
   async setContactEmail(contactEmail: string) {
+    const {updatedProfile: {verifiedInstitutionalAffiliation}} = this.state;
+    await this.validateEmail(contactEmail, verifiedInstitutionalAffiliation?.institutionShortName);
     this.setState(fp.set(['updatedProfile', 'contactEmail'], contactEmail));
-    await this.validateEmail();
   }
 
   setFreeTierCreditDollarLimit(newLimit: number) {
