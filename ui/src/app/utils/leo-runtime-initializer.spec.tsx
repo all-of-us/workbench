@@ -61,7 +61,7 @@ describe('RuntimeInitializer', () => {
         return {...baseRuntime, ...override};
       });
     for (const runtime of runtimes) {
-      mockGetRuntime.mockImplementationOnce((workspaceNamespace) => {
+      mockGetRuntime.mockImplementationOnce(() => {
         return runtime;
       });
     }
@@ -153,7 +153,7 @@ describe('RuntimeInitializer', () => {
 
   it('should create runtime if it is initially nonexistent', async() => {
     mockGetRuntime.mockRejectedValueOnce(new Response(null, {status: 404}));
-    mockCreateRuntime.mockImplementationOnce(async(workspaceNamespace) => {
+    mockCreateRuntime.mockImplementationOnce(async() => {
       return {status: RuntimeStatus.Creating};
     });
     mockGetRuntimeCalls([
@@ -273,7 +273,7 @@ describe('RuntimeInitializer', () => {
   });
 
   it('should timeout after max delay', async() => {
-    mockGetRuntime.mockImplementation(async(workspaceNamespace) => {
+    mockGetRuntime.mockImplementation(async() => {
       return {status: RuntimeStatus.Starting};
     });
 
@@ -290,7 +290,7 @@ describe('RuntimeInitializer', () => {
   });
 
   it('should reject promise after abort signal', async() => {
-    mockGetRuntime.mockImplementation(async(workspaceNamespace) => {
+    mockGetRuntime.mockImplementation(async() => {
       return {status: RuntimeStatus.Starting};
     });
     const aborter = new AbortController();

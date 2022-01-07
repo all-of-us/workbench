@@ -486,7 +486,7 @@ const MaybeModule = ({profile, moduleName, active, clickable, spinnerProps}: Mod
 
   const {DARTitleComponent, refreshAction, isEnabledInEnvironment} = getAccessModuleConfig(moduleName);
   const eligible = isEligibleModule(moduleName, profile);
-  const Module = ({profile}) => {
+  const Module = () => {
     const status = getAccessModuleStatusByName(profile, moduleName);
     return <FlexRow data-test-id={`module-${moduleName}`}>
       <FlexRow style={styles.moduleCTA}>
@@ -521,7 +521,7 @@ const MaybeModule = ({profile, moduleName, active, clickable, spinnerProps}: Mod
     </FlexRow>;
   };
 
-  return isEnabledInEnvironment ? <Module profile={profile}/> : null;
+  return isEnabledInEnvironment ? <Module/> : null;
 };
 
 const ControlledTierEraModule = (props: {profile: Profile, eligible: boolean, spinnerProps: WithSpinnerOverlayProps}): JSX.Element => {

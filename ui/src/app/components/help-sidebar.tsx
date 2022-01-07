@@ -257,7 +257,7 @@ enum CurrentModal {
   None,
   Share,
   Delete,
-  RuntimeError
+  HasRuntimeError
 }
 
 interface State {
@@ -463,7 +463,7 @@ export const HelpSidebar = fp.flow(
             && newRuntime.runtime.errors
         ) {
           this.setState({
-            currentModal: CurrentModal.RuntimeError,
+            currentModal: CurrentModal.HasRuntimeError,
             runtimeErrors: newRuntime.runtime.errors
           });
         }
@@ -538,8 +538,8 @@ export const HelpSidebar = fp.flow(
     }
 
     displayRuntimeIcon(icon: IconConfig) {
-      const {runtimeStore, compoundRuntimeOps, workspace} = this.props;
-      let status = runtimeStore?.runtime?.status;
+      const {runtimeStore: store, compoundRuntimeOps, workspace} = this.props;
+      let status = store?.runtime?.status;
       if ((!status || status === RuntimeStatus.Deleted) &&
           workspace.namespace in compoundRuntimeOps) {
         // If a compound operation is still pending, and we're transitioning
@@ -936,7 +936,7 @@ export const HelpSidebar = fp.flow(
                                                             resourceType={ResourceType.WORKSPACE}
                                                             receiveDelete={() => this.deleteWorkspace()}
                                                             resourceName={this.props.workspace.name}/>],
-            [CurrentModal.RuntimeError, () => <RuntimeErrorModal
+            [CurrentModal.HasRuntimeError, () => <RuntimeErrorModal
                 closeFunction={() => this.setState({currentModal: CurrentModal.None})}
                 openRuntimePanel={() => this.setActiveIcon('runtime')}
                 errors={runtimeErrors}
