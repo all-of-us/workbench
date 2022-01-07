@@ -68,7 +68,7 @@ public class NotebooksServiceImpl implements NotebooksService {
                   .allowTextIn("style")
                   // <pre> is not included in the prebuilt sanitizers; it is used for monospace code
                   // block formatting
-                  .allowElements("style", "pre")
+                  .allowElements("head", "body", "style", "pre")
 
                   // Allow id/class in order to interact with the style tag.
                   .allowAttributes("id", "class")
@@ -118,7 +118,8 @@ public class NotebooksServiceImpl implements NotebooksService {
   // NOTE: may be an undercount since we only retrieve the first Page of Storage List results
   @Override
   public List<FileDetail> getNotebooksAsService(String bucketName) {
-    return cloudStorageClient.getBlobPageForPrefix(bucketName, NOTEBOOKS_WORKSPACE_DIRECTORY)
+    return cloudStorageClient
+        .getBlobPageForPrefix(bucketName, NOTEBOOKS_WORKSPACE_DIRECTORY)
         .stream()
         .filter(this::isNotebookBlob)
         .map(blob -> cloudStorageClient.blobToFileDetail(blob, bucketName))
