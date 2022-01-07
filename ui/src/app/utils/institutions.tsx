@@ -45,6 +45,10 @@ const EmailDomainMismatchErrorMessage = () => {
 };
 
 export const getEmailValidationErrorMessage = (institution: PublicInstitutionDetails) => {
+  if (!institution) {
+    return null;
+  }
+
   if (institution.registeredTierMembershipRequirement === InstitutionMembershipRequirement.ADDRESSES) {
     // Institution requires an exact email address match and the email is not in allowed emails list
     return <EmailAddressMismatchErrorMessage/>;

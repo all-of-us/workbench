@@ -15,7 +15,6 @@ import {
   getPublicInstitutionDetails,
   ContactEmailTextInput,
   enableSave,
-  getUpdatedProfileValue,
   updateAccountProperties,
   ErrorsTooltip,
   AccessModuleExpirations,
@@ -171,14 +170,18 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
     onMount();
   }, []);
 
-  const validateAffiliation = async(contactEmail: string, institutionShortName: string) => {
-    // clean up any currently-running validation
+  // clean up any currently-running or previously-run validation
+  const clearEmailValidation = () => {
     if (emailValidationAborter) {
       emailValidationAborter.abort();
     }
 
     // clean up any previously-run validation
     setEmailValidationStatus(EmailValidationStatus.UNCHECKED);
+  }
+
+  const validateAffiliation = async(contactEmail: string, institutionShortName: string) => {
+    clearEmailValidation();
 
     if (!isBlank(contactEmail) && !isBlank(institutionShortName)) {
       const aborter = new AbortController();
@@ -192,26 +195,18 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
     }
   }
 
-  const changed = (field): boolean => !!getUpdatedProfileValue(oldProfile, updatedProfile, field);
-
-  useEffect(() => {
-    const onProfileChange = async () => {
-      const {contactEmail, verifiedInstitutionalAffiliation} = updatedProfile;
-      if (changed('contactEmail') || changed('verifiedInstitutionalAffiliation')) {
-        await validateAffiliation(contactEmail, verifiedInstitutionalAffiliation?.institutionShortName);
-      }
-    }
-
-    if (updatedProfile) {
-      onProfileChange();
-    }
-  }, [updatedProfile])
-
   const updateProfile = (newUpdates: Partial<Profile>) => {
     setUpdatedProfile({ ...updatedProfile, ...newUpdates});
   }
 
-  const updateInstitution = (institutionShortName: string) => {
+  const updateContactEmail = async (contactEmail: string) => {
+    await validateAffiliation(contactEmail, updatedProfile.verifiedInstitutionalAffiliation?.institutionShortName);
+    updateProfile({contactEmail});
+  }
+
+  const updateInstitution = async (institutionShortName: string) => {
+    await validateAffiliation(updatedProfile.contactEmail, institutionShortName);
+
     const verifiedInstitutionalAffiliation: VerifiedInstitutionalAffiliation = {
       institutionShortName,
       institutionDisplayName: institutions.find(i => i.shortName === institutionShortName)?.displayName,
@@ -270,11 +265,11 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
         updatedProfile={updatedProfile}
         institutions={institutions}
         emailValidationStatus={emailValidationStatus}
-        onChangeEmail={(contactEmail: string) => updateProfile({contactEmail: contactEmail.trim()})}
+        onChangeEmail={(contactEmail: string) => updateContactEmail(contactEmail.trim())}
         onChangeFreeCreditLimit={(freeTierDollarQuota: number) => updateProfile({freeTierDollarQuota})}
         onChangeInstitution={(institutionShortName: string) => updateInstitution(institutionShortName)}
         onChangeInstitutionalRole={(institutionalRoleEnum: InstitutionalRole) => updateInstitutionalRole(institutionalRoleEnum)}
-        onChangeInstitutionOtherText={(otherText: string) => updateInstitutionalRoleOtherText(otherText.trim())}
+        onChangeInstitutionOtherText={(otherText: string) => updateInstitutionalRoleOtherText(otherText)}
       />
     </FlexRow>
     <FlexRow style={{paddingTop: '1em'}}>
