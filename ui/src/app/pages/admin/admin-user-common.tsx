@@ -7,7 +7,7 @@ import {Link} from 'react-router-dom';
 import * as fp from 'lodash/fp';
 import {Dropdown} from 'primereact/dropdown';
 
-import {formatFreeCreditsUSD, randomString, reactStyles} from 'app/utils';
+import {formatFreeCreditsUSD, reactStyles} from 'app/utils';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {
   AccessModule,
