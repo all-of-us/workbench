@@ -196,7 +196,7 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
     }
   }
 
-  const changed = (attributePath): boolean => !!getUpdatedProfileValue(oldProfile, updatedProfile, attributePath);
+  const changed = (attributePath: string[]): boolean => !!getUpdatedProfileValue(oldProfile, updatedProfile, attributePath);
 
   useEffect(() => {
     const onProfileChange = async () => {
