@@ -57,7 +57,6 @@ export default class ExportToNotebookModal extends Modal {
     return getFormattedPreviewCode(await previewFrame.contentFrame());
   }
 
-
   async clickExportButton(): Promise<NotebookPreviewPage> {
     await this.clickButton(LinkText.Export, { waitForClose: true });
     const notebookPreviewPage = new NotebookPreviewPage(this.page);
