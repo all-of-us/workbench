@@ -160,6 +160,14 @@ export default class NotebookCell extends NotebookFrame {
     return iframe.waitForSelector(selector, { visible: true, timeout: timeOut });
   }
 
+  async findRenderedHtmlElementHandle(timeOut?: number): Promise<ElementHandle> {
+    const selector = `${this.outputSelector(this.getCellIndex())}.rendered_html`;
+    const iframe = await this.getIFrame();
+    await iframe.waitForSelector(selector, { visible: true, timeout: timeOut });
+    const elements = await iframe.$$(selector);
+    return elements[elements.length - 1];
+  }
+
   private async findAllCells(): Promise<ElementHandle[]> {
     const frame = await this.getIFrame();
     const selector = `${this.cellSelector()} .CodeMirror-code`;

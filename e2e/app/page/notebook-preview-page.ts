@@ -51,7 +51,7 @@ export default class NotebookPreviewPage extends AuthenticatedPage {
     const iframe = await this.findNotebookIframe();
     await waitForFn(
       async () => {
-        return (await iframe.$$('.code_cell')).length === (await iframe.$$('.code_cell.rendered')).length;
+        return (await iframe.$$('.jp-CodeCell')).length === (await iframe.$$('.jp-CodeMirrorEditor')).length;
       },
       1000,
       30000
@@ -59,7 +59,7 @@ export default class NotebookPreviewPage extends AuthenticatedPage {
   }
 
   async getFormattedCode(): Promise<string[]> {
-    const css = '#notebook .code_cell.rendered pre';
+    const css = '.jp-CodeMirrorEditor';
     const iframe = await this.findNotebookIframe();
     await iframe.waitForSelector(css, { visible: true });
     const elements = await iframe.$$(css);
