@@ -68,7 +68,7 @@ public class NotebooksServiceImpl implements NotebooksService {
                   .allowTextIn("style")
                   // <pre> is not included in the prebuilt sanitizers; it is used for monospace code
                   // block formatting
-                  .allowElements("style", "pre")
+                  .allowElements("head", "body", "style", "pre")
 
                   // Allow id/class in order to interact with the style tag.
                   .allowAttributes("id", "class")

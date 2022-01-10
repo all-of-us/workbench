@@ -116,6 +116,7 @@ describe('Export dataset to notebook tests', () => {
     const notebookName = makeRandomName('notebook', { includeHyphen: false });
     await exportModal.enterNotebookName(notebookName);
     await exportModal.pickLanguage(kernelLanguage.LANGUAGE);
+    await exportModal.showCodePreview();
     await exportModal.clickExportButton();
 
     // Verify Notebook preview. Not going to start the Jupyter notebook.
