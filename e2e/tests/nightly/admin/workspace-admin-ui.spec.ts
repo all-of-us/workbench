@@ -101,7 +101,7 @@ describe('Workspace Admin', () => {
     await workspaceAdminPage.clickLoadWorkspaceButton();
     await workspaceAdminPage.waitForLoad();
     expect(await workspaceAdminPage.getNoActiveRuntimeText()).toEqual(noActiveRuntimeText);
-   
+
     await new WorkspacesPage(page).load();
     const workspaceCard = await WorkspaceCard.findCard(page, workspaceName);
     await workspaceCard.clickWorkspaceName(true);
