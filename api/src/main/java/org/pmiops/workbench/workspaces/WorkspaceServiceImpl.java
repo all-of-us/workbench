@@ -28,6 +28,7 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.dataset.DataSetService;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentWorkspaceDao;
+import org.pmiops.workbench.db.dao.UserRecentlyModifiedResourceDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbConceptSet;
@@ -85,6 +86,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
   private final UserDao userDao;
   private final UserMapper userMapper;
   private final UserRecentWorkspaceDao userRecentWorkspaceDao;
+  private final UserRecentlyModifiedResourceDao userRecentlyModifiedResourceDao;
   private final WorkspaceDao workspaceDao;
   private final WorkspaceMapper workspaceMapper;
   private final WorkspaceAuthService workspaceAuthService;
@@ -105,6 +107,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
       UserDao userDao,
       UserMapper userMapper,
       UserRecentWorkspaceDao userRecentWorkspaceDao,
+      UserRecentlyModifiedResourceDao userRecentlyModifiedResourceDao,
       WorkspaceDao workspaceDao,
       WorkspaceMapper workspaceMapper,
       WorkspaceAuthService workspaceAuthService) {
@@ -121,6 +124,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
     this.userMapper = userMapper;
     this.userProvider = userProvider;
     this.userRecentWorkspaceDao = userRecentWorkspaceDao;
+    this.userRecentlyModifiedResourceDao = userRecentlyModifiedResourceDao;
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.workspaceDao = workspaceDao;
     this.workspaceMapper = workspaceMapper;
@@ -336,6 +340,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
 
     if (!workspaceIdsToDelete.isEmpty()) {
       userRecentWorkspaceDao.deleteByUserIdAndWorkspaceIdIn(userId, workspaceIdsToDelete);
+      userRecentlyModifiedResourceDao.deleteByUserIdAndWorkspaceIdIn(userId, workspaceIdsToDelete);
     }
 
     return recentWorkspaces.stream()

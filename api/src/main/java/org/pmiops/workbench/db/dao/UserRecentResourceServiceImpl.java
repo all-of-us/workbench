@@ -8,11 +8,9 @@ import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.db.DbRetryUtils;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbConceptSet;
-import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUserRecentResource;
-import org.pmiops.workbench.db.model.DbUserRecentResourcesId;
+import org.pmiops.workbench.db.model.DbUserRecentlyModifiedResource;
 import org.pmiops.workbench.exceptions.ServerErrorException;
-import org.pmiops.workbench.model.ResourceType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,19 +21,19 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
   private CohortDao cohortDao;
   private ConceptSetDao conceptSetDao;
   private UserRecentResourceDao userRecentResourceDao;
-  private UserRecentResourcesIdDao userRecentResourcesIdDao;
+  private UserRecentlyModifiedResourceDao userRecentlyModifiedResourceDao;
 
   @Autowired
   public UserRecentResourceServiceImpl(
       Clock clock,
       CohortDao cohortDao,
       ConceptSetDao conceptSetDao,
-      UserRecentResourcesIdDao userRecentResourcesIdDao,
+      UserRecentlyModifiedResourceDao userRecentlyModifiedResourceDao,
       UserRecentResourceDao userRecentResourceDao) {
     this.clock = clock;
     this.cohortDao = cohortDao;
     this.conceptSetDao = conceptSetDao;
-    this.userRecentResourcesIdDao = userRecentResourcesIdDao;
+    this.userRecentlyModifiedResourceDao = userRecentlyModifiedResourceDao;
     this.userRecentResourceDao = userRecentResourceDao;
   }
 
@@ -58,7 +56,11 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
       recentResource = new DbUserRecentResource(workspaceId, userId, notebookNameWithPath, now);
     }
     recentResource.setLastAccessDate(now);
-    updateUserRecentResourceEntry(workspaceId, userId, ResourceType.NOTEBOOK, notebookNameWithPath);
+    updateUserRecentResourceEntry(
+        workspaceId,
+        userId,
+        DbUserRecentlyModifiedResource.DbUserRecentlyModifiedResourceType.NOTEBOOK,
+        notebookNameWithPath);
     return userRecentResourceDao.save(recentResource);
   }
 
@@ -83,7 +85,10 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
     resource.setLastAccessDate(now);
     userRecentResourceDao.save(resource);
     updateUserRecentResourceEntry(
-        workspaceId, userId, ResourceType.COHORT, String.valueOf(cohortId));
+        workspaceId,
+        userId,
+        DbUserRecentlyModifiedResource.DbUserRecentlyModifiedResourceType.COHORT,
+        String.valueOf(cohortId));
   }
 
   @Override
@@ -93,7 +98,10 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
     final DbConceptSet conceptSet = conceptSetDao.findById(conceptSetId).orElse(null);
     userRecentResourceDao.save(makeUserRecentResource(workspaceId, userId, now, conceptSet));
     updateUserRecentResourceEntry(
-        workspaceId, userId, ResourceType.CONCEPT_SET, String.valueOf(conceptSetId));
+        workspaceId,
+        userId,
+        DbUserRecentlyModifiedResource.DbUserRecentlyModifiedResourceType.CONCEPT_SET,
+        String.valueOf(conceptSetId));
   }
 
   @NotNull
@@ -112,20 +120,20 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
   }
 
   private void updateUserRecentResourceEntry(
-      long workspaceId, long userId, ResourceType resourceType, String resourceId) {
+      long workspaceId,
+      long userId,
+      DbUserRecentlyModifiedResource.DbUserRecentlyModifiedResourceType resourceType,
+      String resourceId) {
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
-    DbUserRecentResourcesId recentResourcesId =
-        userRecentResourcesIdDao
+    DbUserRecentlyModifiedResource recentResourcesId =
+        userRecentlyModifiedResourceDao
             .findDbUserRecentResourcesIdByUserIdAndWorkspaceIdAndResourceTypeAndResourceId(
-                userId,
-                workspaceId,
-                DbStorageEnums.resourceTypeToStorage(resourceType),
-                resourceId);
+                userId, workspaceId, resourceType, resourceId);
     if (recentResourcesId == null) {
       recentResourcesId =
-          new DbUserRecentResourcesId(workspaceId, userId, resourceType, resourceId, now);
+          new DbUserRecentlyModifiedResource(workspaceId, userId, resourceType, resourceId, now);
     }
-    userRecentResourcesIdDao.save(recentResourcesId);
+    userRecentlyModifiedResourceDao.save(recentResourcesId);
   }
 
   /** Deletes notebook entry from user_recent_resource */
@@ -137,34 +145,44 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
     if (resource != null) {
       userRecentResourceDao.delete(resource);
     }
-    deleteEntryFromUserRecentResource(userId, workspaceId, ResourceType.NOTEBOOK, notebookPath);
+    deleteEntryFromUserRecentResource(
+        userId,
+        workspaceId,
+        DbUserRecentlyModifiedResource.DbUserRecentlyModifiedResourceType.NOTEBOOK,
+        notebookPath);
   }
 
   /** Deletes cohort entry from user_recent_resource */
   @Override
   public void deleteCohortEntry(long workspaceId, long userId, long cohortId) {
     deleteEntryFromUserRecentResource(
-        userId, workspaceId, ResourceType.COHORT, String.valueOf(cohortId));
+        userId,
+        workspaceId,
+        DbUserRecentlyModifiedResource.DbUserRecentlyModifiedResourceType.COHORT,
+        String.valueOf(cohortId));
   }
 
   /** Deletes concept set entry from user_recent_resource */
   @Override
   public void deleteConceptSetEntry(long workspaceId, long userId, long conceptSetId) {
     deleteEntryFromUserRecentResource(
-        userId, workspaceId, ResourceType.CONCEPT_SET, String.valueOf(conceptSetId));
+        userId,
+        workspaceId,
+        DbUserRecentlyModifiedResource.DbUserRecentlyModifiedResourceType.CONCEPT_SET,
+        String.valueOf(conceptSetId));
   }
 
   private void deleteEntryFromUserRecentResource(
-      long userId, long workspaceId, ResourceType resourceType, String resourceId) {
-    DbUserRecentResourcesId resourceById =
-        userRecentResourcesIdDao
+      long userId,
+      long workspaceId,
+      DbUserRecentlyModifiedResource.DbUserRecentlyModifiedResourceType resourceType,
+      String resourceId) {
+    DbUserRecentlyModifiedResource resourceById =
+        userRecentlyModifiedResourceDao
             .findDbUserRecentResourcesIdByUserIdAndWorkspaceIdAndResourceTypeAndResourceId(
-                userId,
-                workspaceId,
-                DbStorageEnums.resourceTypeToStorage(resourceType),
-                resourceId);
+                userId, workspaceId, resourceType, resourceId);
     if (resourceById != null) {
-      userRecentResourcesIdDao.delete(resourceById);
+      userRecentlyModifiedResourceDao.delete(resourceById);
     }
   }
   /**
@@ -199,9 +217,9 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
           userRecentResourceDao.findTopByUserIdOrderByLastAccessDate(userId);
       userRecentResourceDao.delete(resource);
 
-      DbUserRecentResourcesId resourceById =
-          userRecentResourcesIdDao.findTopByUserIdOrderByLastAccessDate(userId);
-      userRecentResourcesIdDao.delete(resourceById);
+      DbUserRecentlyModifiedResource resourceById =
+          userRecentlyModifiedResourceDao.findTopByUserIdOrderByLastAccessDate(userId);
+      userRecentlyModifiedResourceDao.delete(resourceById);
     }
   }
 }

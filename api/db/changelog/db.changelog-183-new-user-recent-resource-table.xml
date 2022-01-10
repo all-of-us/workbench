@@ -5,7 +5,7 @@
   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
   <changeSet author="neha" id="changelog-183-new-user-recent-resource-table">
-    <createTable tableName="user_recent_resources">
+    <createTable tableName="user_recently_modified_resource">
       <column name="id" type="bigint" autoIncrement="true">
         <constraints primaryKey="true" nullable="false"/>
       </column>
@@ -15,7 +15,7 @@
       <column name="workspace_id" type="bigint">
         <constraints nullable="false"/>
       </column>
-      <column name="resource_type" type="tinyint">
+      <column name="resource_type" type="ENUM('COHORT','CONCEPT_SET','NOTEBOOK', 'DATA_SET','COHORT_REVIEW')">
         <constraints nullable="false"/>
       </column>
       <column name="resource_id" type="varchar(1024)">
@@ -25,5 +25,15 @@
         <constraints nullable="false"/>
       </column>
     </createTable>
+    <addForeignKeyConstraint baseColumnNames="user_id"
+                             baseTableName="user_recently_modified_resource"
+                             constraintName="fk_user_id_user_recently_modified_resource"
+                             referencedColumnNames="user_id"
+                             referencedTableName="user" onDelete="CASCADE"/>
+    <addForeignKeyConstraint baseColumnNames="workspace_id"
+                             baseTableName="user_recently_modified_resource"
+                             constraintName="fk_workspace_user_recently_modified_resource"
+                             referencedColumnNames="workspace_id"
+                             referencedTableName="workspace" onDelete="CASCADE"/>
   </changeSet>
 </databaseChangeLog>
