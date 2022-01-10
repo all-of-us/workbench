@@ -1868,6 +1868,12 @@ components:
             email: email authorization
             profile: profile authorization
   schemas:
+    AppType:
+      type: string
+      enum:
+        - CROMWELL
+        - CUSTOM
+        - GALAXY
     AppStatus:
       type: string
       enum:
