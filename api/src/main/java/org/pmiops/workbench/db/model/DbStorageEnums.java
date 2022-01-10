@@ -20,7 +20,6 @@ import org.pmiops.workbench.model.OrganizationType;
 import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
 import org.pmiops.workbench.model.Race;
 import org.pmiops.workbench.model.ResearchOutcomeEnum;
-import org.pmiops.workbench.model.ResourceType;
 import org.pmiops.workbench.model.ReviewStatus;
 import org.pmiops.workbench.model.SexAtBirth;
 import org.pmiops.workbench.model.SpecificPopulationEnum;
@@ -522,24 +521,6 @@ public final class DbStorageEnums {
           .put(TierAccessStatus.DISABLED, (short) 0)
           .put(TierAccessStatus.ENABLED, (short) 1)
           .build();
-
-  // ResourceType
-  private static final BiMap<ResourceType, Short> CLIENT_TO_STORAGE_RESOURCE_TYPE =
-      ImmutableBiMap.<ResourceType, Short>builder()
-          .put(ResourceType.COHORT, (short) 1)
-          .put(ResourceType.CONCEPT_SET, (short) 2)
-          .put(ResourceType.NOTEBOOK, (short) 3)
-          .put(ResourceType.DATASET, (short) 4)
-          .put(ResourceType.COHORT_REVIEW, (short) 5)
-          .build();
-
-  public static ResourceType resourceTypeFromStorage(Short t) {
-    return CLIENT_TO_STORAGE_RESOURCE_TYPE.inverse().get(t);
-  }
-
-  public static Short resourceTypeToStorage(ResourceType t) {
-    return CLIENT_TO_STORAGE_RESOURCE_TYPE.get(t);
-  }
 
   public static Race raceFromStorage(Short race) {
     return CLIENT_TO_STORAGE_RACE.inverse().get(race);

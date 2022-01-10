@@ -44,19 +44,6 @@ public class DbUserRecentlyModifiedResource {
     this.lastAccessDate = lastAccessDate;
   }
 
-  public DbUserRecentlyModifiedResource(
-      long workspaceId,
-      long userId,
-      short resourceType,
-      String resourceId,
-      Timestamp lastAccessDate) {
-    this.workspaceId = workspaceId;
-    this.userId = userId;
-    this.resourceId = resourceId;
-    this.resourceType = resourceType;
-    this.lastAccessDate = lastAccessDate;
-  }
-
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   public int getId() {
@@ -84,25 +71,6 @@ public class DbUserRecentlyModifiedResource {
   public void setWorkspaceId(long workspaceId) {
     this.workspaceId = workspaceId;
   }
-
-  //  @Column(name = "resource_type")
-  //  public short getResourceType() {
-  //    return resourceType;
-  //  }
-  //
-  //  public void setResourceType(short resourceType) {
-  //    this.resourceType = resourceType;
-  //  }
-  //
-  //  @Transient
-  //  public ResourceType getResourceTypeEnum() {
-  //    return DbStorageEnums.resourceTypeFromStorage(getResourceType());
-  //  }
-  //
-  //  public void setResourceTypeEnum(ResourceType resourceTypeEnum) {
-  //    this.resourceTypeEnum = resourceTypeEnum;
-  //    setResourceType(DbStorageEnums.resourceTypeToStorage(resourceTypeEnum));
-  //  }
 
   @Enumerated(EnumType.STRING)
   @Column(name = "resource_type", nullable = false)
