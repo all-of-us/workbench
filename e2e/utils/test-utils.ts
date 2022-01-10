@@ -44,7 +44,7 @@ export async function signInWithAccessToken(
   if (isBlank(tokenJson)) {
     throw Error(`Token found at ${tokenLocation} is blank`);
   }
-  const {token} = JSON.parse(tokenJson);
+  const { token } = JSON.parse(tokenJson);
 
   logger.info('Sign in with access token to Workbench application');
   const homePage = new HomePage(page);
