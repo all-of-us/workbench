@@ -1,4 +1,4 @@
-import { ElementHandle, Frame, Page, WaitForSelectorOptions } from 'puppeteer';
+import { Frame, Page } from 'puppeteer';
 import Link from 'app/element/link';
 import AuthenticatedPage from './authenticated-page';
 import { waitForDocumentTitle, waitWhileLoading } from 'utils/waits-utils';
@@ -41,17 +41,11 @@ export default class AdminNotebookPreviewPage extends AuthenticatedPage {
   }
 
   async getFormattedCode(): Promise<string[]> {
-    const css = '#notebook-container pre';
-    await this.waitForCssSelector(css);
-    const textContents = await this.findNotebookIframe().then((frame) => {
-      return frame.$$(css);
-    });
-    return Promise.all(textContents.map(async (content) => await getPropValue<string>(content, 'textContent')));
-  }
-
-  private async waitForCssSelector(selector: string, options?: WaitForSelectorOptions): Promise<ElementHandle> {
-    const notebookIframe = await this.findNotebookIframe();
-    return notebookIframe.waitForSelector(selector, options);
+    const css = '.jp-CodeMirrorEditor';
+    const iframe = await this.findNotebookIframe();
+    await iframe.waitForSelector(css, { visible: true });
+    const elements = await iframe.$$(css);
+    return Promise.all(elements.map(async (content) => await getPropValue<string>(content, 'textContent')));
   }
 
   private async findNotebookIframe(): Promise<Frame> {
