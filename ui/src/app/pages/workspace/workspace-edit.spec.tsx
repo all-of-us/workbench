@@ -100,7 +100,6 @@ describe('WorkspaceEdit', () => {
     currentWorkspaceStore.next(workspace);
     cdrVersionStore.set(cdrVersionTiersResponse);
     serverConfigStore.set({config: {
-      enableBillingUpgrade: true,
         freeTierBillingAccountId: 'freetier',
         defaultFreeCreditsDollarLimit: 100.0,
         gsuiteDomain: ''

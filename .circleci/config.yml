@@ -549,7 +549,9 @@ jobs:
       - checkout-code
       - restore_cache:
           name: "Restore api gradle wrapper cache"
-          key: v6-gradle-wrapper-{{ .Branch }}-{{ checksum "~/workbench/api/gradle/wrapper/gradle-wrapper.properties" }}
+          keys:
+            - v6-gradle-wrapper-{{ .Branch }}-{{ checksum "~/workbench/api/gradle/wrapper/gradle-wrapper.properties" }}
+            - v6-gradle-wrapper-
       - restore_cache:
           name: "Restore api gradle cache"
           keys:

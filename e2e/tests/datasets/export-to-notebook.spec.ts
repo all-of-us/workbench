@@ -131,6 +131,7 @@ describe('Export dataset to notebook tests', () => {
         expect(code.some((item) => item.includes('import os'))).toBe(true);
         break;
       case Language.R:
+        expect(code.some((item) => item.includes('library(tidyverse)'))).toBe(true);
         expect(code.some((item) => item.includes('library(bigrquery)'))).toBe(true);
         break;
     }
@@ -138,15 +139,14 @@ describe('Export dataset to notebook tests', () => {
     // Open notebook in Edit mode.
     const notebookPage = await notebookPreviewPage.openEditMode(notebookName);
 
-    // Run notebook code cell #1.
-    await notebookPage.runCodeCell(1);
+    // Run all cells.
+    await notebookPage.runAllCells();
 
-    const cell1 = notebookPage.findCell(1);
-    const cell1Output = await cell1.findOutputElementHandle();
+    // In both Python / R, the last cell contains a preview of the dataframe.
+    const lastCell = await notebookPage.findLastCell();
 
     // Verify run output: Cell output format should be html table.
-    const outputClassName = await getPropValue<string>(cell1Output, 'className');
-    expect(outputClassName).toContain('rendered_html');
+    await lastCell.findRenderedHtmlElementHandle();
 
     // Verify workspace name is in notebook page.
     const workspaceLink = await notebookPage.getWorkspaceLink().asElementHandle();

@@ -24,10 +24,8 @@ export const InvalidBillingBanner = fp.flow(
   withUserProfile(),
   withNavigation
 )((props: Props) => {
-  const {enableBillingUpgrade} = serverConfigStore.get().config;
-  const userAction = enableBillingUpgrade ?
-    'Please provide a valid billing account or contact support to extend free credits.' :
-    'Please contact support to extend free credits.';
+  const userAction =
+    'Please provide a valid billing account or contact support to extend free credits.';
   const footer = <div style={{display: 'flex', flexDirection: 'column'}}>
     <Button style={{height: '38px', width: '70%', fontWeight: 400}}
             onClick={() => {
@@ -41,13 +39,13 @@ export const InvalidBillingBanner = fp.flow(
     >
       Request Extension
     </Button>
-    {enableBillingUpgrade && <a
+    <a
       style={{marginTop: '.5rem', marginLeft: '.2rem'}}
       onClick={() => {
         props.navigate(['workspaces', props.workspace.namespace, props.workspace.id, 'edit']);
       }}>
       Provide billing account
-    </a>}
+    </a>
   </div>;
 
   return <ToastBanner
