@@ -19,12 +19,6 @@ export default class WorkspaceAnalysisPage extends WorkspaceBase {
 
   async isLoaded(): Promise<boolean> {
     await Promise.all([waitForDocumentTitle(this.page, PageTitle), this.createNewNotebookLink().waitUntilEnabled()]);
-    await this.page.waitForResponse(
-      (response) => {
-        return response.url().endsWith('/notebook-list') && response.request().method() === 'GET';
-      },
-      { timeout: 60000 }
-    );
     await waitWhileLoading(this.page);
     return true;
   }
@@ -38,10 +32,30 @@ export default class WorkspaceAnalysisPage extends WorkspaceBase {
    * @param {Language} language Notebook language.
    */
   async createNotebook(notebookName: string, language: Language = Language.Python): Promise<NotebookPage> {
-    const link = this.createNewNotebookLink();
-    await link.click();
     const modal = new NewNotebookModal(this.page);
-    await modal.waitForLoad();
+
+    let maxRetries = 3;
+    const clickAndWait = async (): Promise<void> => {
+      const link = this.createNewNotebookLink();
+      await link.click();
+      let error;
+      let succeeded = false;
+      try {
+        await modal.waitForLoad();
+        succeeded = true;
+      } catch (err) {
+        error = err;
+      }
+      if (succeeded) {
+        return;
+      }
+      if (maxRetries === 0) {
+        throw new Error(error);
+      }
+      maxRetries--;
+      await this.page.waitForTimeout(1000).then(() => clickAndWait());
+    };
+
     await modal.fillInModal(notebookName, language);
 
     // Log notebook page heading.

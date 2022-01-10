@@ -184,7 +184,7 @@ export default class BaseElement {
       if (previousX === undefined || previousY === undefined) {
         throw new Error(`Failed to click element because the it is not visible. xpath: ${this.getXpath()}`);
       }
-      return element.click(options);
+      await element.click(options);
     });
   }
 
