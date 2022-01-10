@@ -1,6 +1,6 @@
 import {AnalyticsTracker, setLoggedInState} from 'app/utils/analytics';
 import {LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN} from 'app/utils/cookies';
-import {authStore, serverConfigStore, useStore} from 'app/utils/stores';
+import {AuthStore, authStore, serverConfigStore, useStore} from 'app/utils/stores';
 import {delay} from 'app/utils/subscribable';
 import {environment} from 'environments/environment';
 import {ConfigResponse} from 'generated/fetch';
@@ -43,7 +43,7 @@ const makeAuth2 = (config: ConfigResponse): Promise<any> => {
         // onError
         ({error, details}) => {
           const authError = `${error}: ${details}`;
-          authStore.set({...authStore.get(), authError: authError});
+          authStore.set({...authStore.get(), authError});
           reject(authError);
         }
       );
@@ -79,7 +79,7 @@ function clearIdToken(): void {
  * @description React hook that provides the user with the signed-in status of the current user and
  *              handles redirect, etc. as appropriate when that state changes
  */
-export function useAuthentication() {
+export function useAuthentication(): AuthStore {
   const {authLoaded, isSignedIn, authError} = useStore(authStore);
   const {config} = useStore(serverConfigStore);
 

@@ -334,9 +334,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
     formatFreeTierBillingAccountName(): string {
       const {profileState: {profile: {freeTierDollarQuota, freeTierUsage}}} = this.props;
       const freeTierCreditsBalance = freeTierDollarQuota - freeTierUsage;
-      return serverConfigStore.get().config.enableBillingUpgrade ?
-        'Use All of Us initial credits - ' + formatFreeCreditsUSD(freeTierCreditsBalance) + ' left'
-        : 'Use All of Us initial credits'
+      return 'Use All of Us initial credits - ' + formatFreeCreditsUSD(freeTierCreditsBalance) + ' left'
     }
 
     async initialBillingAccountLoad() {
@@ -351,15 +349,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
       // When creating/duplicating workspace, show free tier billing account.
       // When editing existing workspace, show free tier if that is currently being used or 'User Provided Billing Account'
       // if it is user's billing account.
-      if (!serverConfigStore.get().config.enableBillingUpgrade) {
-        if (this.isMode(WorkspaceEditMode.Create) || this.isMode(WorkspaceEditMode.Duplicate)) {
-          this.setState(prevState => fp.set(
-            ['workspace', 'billingAccountName'],
-            freeTierBillingAccount.name,
-            prevState));
-        }
-        this.setState({billingAccounts: [freeTierBillingAccount]});
-      } else if (serverConfigStore.get().config.enableBillingUpgrade && !hasBillingScope()) {
+      if (!hasBillingScope()) {
         if (this.isMode(WorkspaceEditMode.Create) || this.isMode(WorkspaceEditMode.Duplicate)) {
           this.setState(prevState => fp.set(
               ['workspace', 'billingAccountName'],
@@ -454,7 +444,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
     }
 
     async requestBillingScopeThenFetchBillingAccount() {
-      if(serverConfigStore.get().config.enableBillingUpgrade && !this.state.billingAccountFetched) {
+      if(!this.state.billingAccountFetched) {
         await ensureBillingScope();
         await this.fetchBillingAccounts();
       }
@@ -600,21 +590,15 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
     }
 
     renderBillingDescription() {
-      const {enableBillingUpgrade} = serverConfigStore.get().config;
       return <div>
         The <AouTitle/> provides $300 in free credits per user. Please refer to
         <StyledExternalLink href={supportUrls.billing} target='_blank'> &nbsp;this article
         </StyledExternalLink> to learn more about the free credit
         program and how it can be used .
-        {!enableBillingUpgrade &&
-        <div style={{display: 'inline'}}>Once you have used up your free credits, you can request
-          additional credits by <span style={styles.link} onClick={() => this.openContactWidget()}>
-        contacting support</span>.</div>}
-        {enableBillingUpgrade &&
         <div style={{display: 'inline'}}>Once you have used up your free credits, you can either select a shared billing account or create
           a new one using either Google Cloud Platform or a Google billing partner.
           Please note: If creating a billing account via a Google billing partner,
-          it may take a few days to show up in the <b>Select account</b> dropdown.</div>}
+          it may take a few days to show up in the <b>Select account</b> dropdown.</div>
       </div>;
     }
 
@@ -946,7 +930,6 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
     }
 
     buildBillingAccountOptions() {
-      const {enableBillingUpgrade} = serverConfigStore.get().config;
       const options = this.state.billingAccounts.map(a => ({
         label: a.displayName,
         value: a.name,
@@ -1085,7 +1068,6 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
     }
 
     render() {
-      const {enableBillingUpgrade} = serverConfigStore.get().config;
       const {
         workspace: {
           name,
@@ -1227,11 +1209,6 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
                                 description={this.renderBillingDescription()} descriptionStyle={{marginLeft: '0rem'}}>
             {this.state.fetchBillingAccountLoading ? <SpinnerOverlay overrideStylesOverlay={styles.spinner}/> : <div>
             <div style={styles.fieldHeader}>Select a current billing account</div>
-              {!enableBillingUpgrade && <OverlayPanel ref={(me) => freeTierBalancePanel = me} dismissable={true} appendTo={document.body}>
-                <div style={styles.freeCreditsBalanceOverlay}>
-                  FREE CREDIT BALANCE {formatFreeCreditsUSD(freeTierCreditsBalance)}
-                </div>
-              </OverlayPanel>}
             <FlexRow>
               <FlexColumn>
               <div data-test-id = 'billing-dropdown-div' onClick={() =>  this.requestBillingScopeThenFetchBillingAccount()}>
@@ -1239,16 +1216,15 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
                       style={{width: '20rem'}}
                         value={billingAccountName}
                         options={this.buildBillingAccountOptions()}
-                        disabled={(freeTierCreditsBalance < 0.0) && !enableBillingUpgrade}
+                        disabled={(freeTierCreditsBalance < 0.0)}
                         onChange={e => {this.setState(fp.set(['workspace', 'billingAccountName'], e.value));}}/>
               </div>
               </FlexColumn>
               <FlexColumn>
-                {enableBillingUpgrade &&
                 <Button type='primary' style={{marginLeft: '20px', fontWeight: 400, height: '38px', width: '220px'}}
                         onClick={() => this.setState({showCreateBillingAccountModal: true})}>
                   CREATE BILLING ACCOUNT
-                </Button>}
+                </Button>
               </FlexColumn>
             </FlexRow>
             </div>}

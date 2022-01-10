@@ -164,13 +164,13 @@ export const AdminUser = withRouter(class extends React.Component<Props, State> 
     }
   }
 
-  async validateEmail() {
-    const {
-      updatedProfile: {
-        contactEmail,
-        verifiedInstitutionalAffiliation: {institutionShortName}
-      }
-    } = this.state;
+  async validateEmail(contactEmail: string, institutionShortName: string) {
+    this.setState({emailValidationResponse: null});
+
+    // Early-exit with no result if either input is blank.
+    if (!institutionShortName || isBlank(contactEmail)) {
+      return;
+    }
 
     this.setState({loading: true});
     // Cancel any outstanding API calls.
@@ -178,12 +178,6 @@ export const AdminUser = withRouter(class extends React.Component<Props, State> 
       this.aborter.abort();
     }
     this.aborter = new AbortController();
-    this.setState({emailValidationResponse: null});
-
-    // Early-exit with no result if either input is blank.
-    if (!institutionShortName || isBlank(contactEmail)) {
-      return;
-    }
 
     try {
       const result = await checkInstitutionalEmail(contactEmail, institutionShortName, this.aborter);
@@ -225,6 +219,9 @@ export const AdminUser = withRouter(class extends React.Component<Props, State> 
   }
 
   async setVerifiedInstitutionOnProfile(institutionShortName: string) {
+    const {updatedProfile: {contactEmail}} = this.state;
+    await this.validateEmail(contactEmail, institutionShortName);
+
     const {verifiedInstitutionOptions} = this.state;
     this.setState(fp.flow(
       fp.set(['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionShortName'], institutionShortName),
@@ -238,12 +235,12 @@ export const AdminUser = withRouter(class extends React.Component<Props, State> 
       fp.set(['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionRoleEnum'], undefined),
       fp.set(['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionalRoleOtherText'], undefined)
       ));
-    await this.validateEmail();
   }
 
   async setContactEmail(contactEmail: string) {
+    const {updatedProfile: {verifiedInstitutionalAffiliation}} = this.state;
+    await this.validateEmail(contactEmail, verifiedInstitutionalAffiliation?.institutionShortName);
     this.setState(fp.set(['updatedProfile', 'contactEmail'], contactEmail));
-    await this.validateEmail();
   }
 
   setFreeTierCreditDollarLimit(newLimit: number) {
@@ -398,14 +395,13 @@ export const AdminUser = withRouter(class extends React.Component<Props, State> 
           </FlexColumn>
           <FlexColumn style={{width: '33%'}}>
             <FreeCreditsDropdown
-              initialLimit={oldProfile?.freeTierDollarQuota}
               currentLimit={updatedProfile.freeTierDollarQuota}
               labelStyle={styles.label}
               dropdownStyle={styles.textInput}
               onChange={async(event) => this.setFreeTierCreditDollarLimit(event.value)}/>
             <InstitutionDropdown
               institutions={verifiedInstitutionOptions}
-              initialInstitutionShortName={updatedProfile.verifiedInstitutionalAffiliation?.institutionShortName}
+              currentInstitutionShortName={updatedProfile.verifiedInstitutionalAffiliation?.institutionShortName}
               labelStyle={styles.label}
               dropdownStyle={styles.textInput}
               onChange={async(event) => this.setVerifiedInstitutionOnProfile(event.value)}/>
@@ -414,7 +410,7 @@ export const AdminUser = withRouter(class extends React.Component<Props, State> 
               verifiedInstitutionOptions={verifiedInstitutionOptions}/>}
             <InstitutionalRoleDropdown
               institutions={verifiedInstitutionOptions}
-              initialAffiliation={updatedProfile.verifiedInstitutionalAffiliation}
+              currentAffiliation={updatedProfile.verifiedInstitutionalAffiliation}
               labelStyle={styles.label}
               dropdownStyle={styles.textInput}
               onChange={(event) => this.setInstitutionalRoleOnProfile(event.value)}/>

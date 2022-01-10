@@ -1,7 +1,10 @@
 package org.pmiops.workbench.jira;
 
 import com.google.common.collect.ImmutableMap;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -35,6 +38,14 @@ import org.springframework.stereotype.Service;
 public class JiraService {
   private static final String PROJECT_KEY = "RW";
   private static final Logger log = Logger.getLogger(JiraService.class.getName());
+
+  public static final ZoneId displayTimeZone = ZoneId.of("America/Chicago");
+  public static final DateTimeFormatter summaryDateFormat =
+      DateTimeFormatter.ofPattern("MM/dd/yy").withLocale(Locale.US).withZone(displayTimeZone);
+  public static final DateTimeFormatter detailedDateFormat =
+      DateTimeFormatter.ofPattern("MMMM d, yyyy 'at' h:mm a 'Central Time'")
+          .withLocale(Locale.US)
+          .withZone(displayTimeZone);
 
   @Autowired private Provider<JiraApi> apiProvider;
 
@@ -93,7 +104,6 @@ public class JiraService {
   public CreatedIssue createIssue(
       IssueType type, AtlassianDocument description, Map<IssueProperty, Object> issueProps)
       throws ApiException {
-
     Map<IssueProperty, Object> mergedProps = new HashMap<>(issueProps);
     mergedProps.putAll(
         ImmutableMap.<IssueProperty, Object>builder()

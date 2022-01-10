@@ -4,6 +4,7 @@ import * as React from 'react';
 import Calendar from 'react-calendar/dist/entry.nostyle';
 import RSelect from 'react-select';
 import Switch from 'react-switch';
+import {CSSProperties} from 'react';
 
 import {Clickable} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
@@ -472,6 +473,9 @@ export class Toggle extends React.Component<ToggleProps>  {
  * @constructor
  */
 export function TextInputWithLabel(props) {
+  const style: CSSProperties = (props.highlightOnChange && (props.previousValue !== props.value))
+    ? {...props.inputStyle, backgroundColor: colors.highlight}
+    : props.inputStyle;
   return <div style={{...props.containerStyle}}>
     {props.labelContent}
     {props.labelText && <label style={{
@@ -491,7 +495,7 @@ export function TextInputWithLabel(props) {
                  onChange={props.onChange}
                  onBlur={props.onBlur}
                  invalid={props.invalid ? props.invalid.toString() : undefined}
-                 style={{...commonStyles.sectionInput, ...props.inputStyle}}/>
+                 style={{...commonStyles.sectionInput, ...style}}/>
       {props.children}
     </div>
   </div>;

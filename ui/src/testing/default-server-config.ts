@@ -10,7 +10,6 @@ const defaultServerConfig: ConfigResponse = {
   enableEraCommons: true,
   unsafeAllowSelfBypass: false,
   defaultFreeCreditsDollarLimit: 300,
-  enableBillingUpgrade: true,
   rasHost: 'https://stsstg.nih.gov/',
   rasClientId: '903cfaeb-57d9-4ef6-5659-04377794ed65',
   enableRasLoginGovLinking: true,

@@ -25,13 +25,13 @@ export interface RouteDataStore {
 
 export const routeDataStore = atom<RouteDataStore>({});
 
-interface AuthStore {
+export interface AuthStore {
   authLoaded: boolean;
   isSignedIn: boolean;
-  authError: string;
+  authError?: string;
 }
 
-export const authStore = atom<AuthStore>({authLoaded: false, isSignedIn: false, authError: ''});
+export const authStore = atom<AuthStore>({authLoaded: false, isSignedIn: false});
 
 interface CdrVersionStore {
   tiers?: Array<CdrVersionTier>;

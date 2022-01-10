@@ -2,6 +2,7 @@
   "firecloud": {
     "baseUrl": "https:\/\/api.firecloud.org",
     "samBaseUrl": "https:\/\/sam.dsde-prod.broadinstitute.org",
+    "terraUiBaseUrl": "https:\/\/app.terra.bio",
     "notebookRuntimeMaxAgeDays": 14,
     "notebookRuntimeIdleMaxAgeDays": 7,
     "debugEndpoints": false,
@@ -15,7 +16,8 @@
     "runtimeImages": {
       "gce": [],
       "dataproc": []
-    }
+    },
+    "gceVmZone": "us-central1-a"
   },
   "billing": {
     "accountId": "00293C-5DEA2D-6887E7",
@@ -51,7 +53,8 @@
     "extractionMethodConfigurationVersion": 3,
     "extractionCohortsDataset": "fc-aou-cdr-stable-ct.wgs_extraction_cohorts",
     "extractionDestinationDataset": "fc-aou-cdr-stable-ct.wgs_extraction_destination",
-    "extractionTempTablesDataset": "fc-aou-cdr-stable-ct.wgs_extraction_temp_tables"
+    "extractionTempTablesDataset": "fc-aou-cdr-stable-ct.wgs_extraction_temp_tables",
+    "enableJiraTicketingOnFailure": true
   },
   "cdr": {
     "debugQueries": true
@@ -104,7 +107,7 @@
     "enableGpu": false,
     "enablePersistentDisk": false,
     "enablePrivateDataprocWorker": true,
-    "grantLifescienceApiRunnerAcl": false,
+    "grantLifescienceApiRunnerAcl": true,
     "ccSupportWhenAdminLocking": false
   },
   "actionAudit": {

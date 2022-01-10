@@ -26,7 +26,7 @@ import {TextInputWithLabel} from 'app/components/inputs';
 import {BulletAlignedUnorderedList} from 'app/components/lists';
 import {TooltipTrigger} from 'app/components/popups';
 import {serverConfigStore} from 'app/utils/stores';
-import {accessRenewalModules, computeDisplayDates, getAccessModuleConfig} from 'app/utils/access-utils';
+import {accessRenewalModules, computeRenewalDisplayDates, getAccessModuleConfig} from 'app/utils/access-utils';
 import {hasRegisteredTierAccess} from 'app/utils/access-tiers';
 
 export const commonStyles = reactStyles({
@@ -108,9 +108,9 @@ export const getFreeCreditUsage = (profile: Profile): string => {
 }
 
 // returns the updated profile value only if it has changed
-export const getUpdatedProfileValue = (oldProfile: Profile, updatedProfile: Profile, attribute: string) => {
-  const oldValue = fp.get([attribute], oldProfile);
-  const updatedValue = fp.get([attribute], updatedProfile);
+export const getUpdatedProfileValue = (oldProfile: Profile, updatedProfile: Profile, attributePath: string[]) => {
+  const oldValue = fp.get(attributePath, oldProfile);
+  const updatedValue = fp.get(attributePath, updatedProfile);
   if (!fp.isEqual(oldValue, updatedValue)) {
     return updatedValue;
   } else {
@@ -125,41 +125,50 @@ export const updateAccountProperties = async(oldProfile: Profile, updatedProfile
   const {username} = updatedProfile;
   const request: AccountPropertyUpdate = {
     username,
-    freeCreditsLimit: getUpdatedProfileValue(oldProfile, updatedProfile, 'freeTierDollarQuota'),
-    contactEmail: getUpdatedProfileValue(oldProfile, updatedProfile, 'contactEmail'),
-    affiliation: getUpdatedProfileValue(oldProfile, updatedProfile, 'verifiedInstitutionalAffiliation'),
+    freeCreditsLimit: getUpdatedProfileValue(oldProfile, updatedProfile, ['freeTierDollarQuota']),
+    contactEmail: getUpdatedProfileValue(oldProfile, updatedProfile, ['contactEmail']),
+    affiliation: getUpdatedProfileValue(oldProfile, updatedProfile, ['verifiedInstitutionalAffiliation']),
     accessBypassRequests: [],  // coming soon: RW-4958
   };
 
   return userAdminApi().updateAccountProperties(request);
 }
 
-export const DropdownWithLabel =
-  ({label, options, initialValue, onChange, disabled= false, dataTestId, labelStyle = {}, dropdownStyle = {}}) => {
+export const DropdownWithLabel = ({label, className, options, currentValue, previousValue, highlightOnChange, onChange,
+                                    disabled= false, dataTestId, labelStyle = {}, dropdownStyle = {}}) => {
+
+  const dropdownHighlightStyling = `body .${className} .p-inputtext { background-color: ${colors.highlight}; }`;
   return <FlexColumn data-test-id={dataTestId} style={{marginTop: '1rem'}}>
+    {highlightOnChange && (currentValue !== previousValue) && <style>{dropdownHighlightStyling}</style>}
     <label style={{...commonStyles.label, ...labelStyle}}>{label}</label>
     <Dropdown
+      className={className}
       style={{...commonStyles.dropdown, ...dropdownStyle}}
       options={options}
       onChange={(e) => onChange(e)}
-      value={initialValue}
-      disabled={disabled}
-    />
+      value={currentValue}
+      disabled={disabled}/>
   </FlexColumn>;
 };
 
+
 interface ContactEmailTextInputProps {
   contactEmail: string,
+  previousContactEmail?: string,
+  highlightOnChange?: boolean,
   onChange: Function,
   labelStyle?: CSSProperties,
   inputStyle?: CSSProperties,
   containerStyle?: CSSProperties,
 }
-export const ContactEmailTextInput = ({contactEmail, onChange, labelStyle, inputStyle, containerStyle}: ContactEmailTextInputProps) => {
+export const ContactEmailTextInput = ({contactEmail, previousContactEmail, highlightOnChange, onChange, labelStyle,
+                                        inputStyle, containerStyle}: ContactEmailTextInputProps) => {
   return <TextInputWithLabel
     inputId={'contactEmail'}
     labelText={'Contact email'}
     value={contactEmail}
+    previousValue={previousContactEmail}
+    highlightOnChange={highlightOnChange}
     labelStyle={{...commonStyles.label, ...labelStyle}}
     inputStyle={{...commonStyles.textInput, ...inputStyle}}
     containerStyle={{...commonStyles.textInputContainer, ...containerStyle}}
@@ -167,18 +176,23 @@ export const ContactEmailTextInput = ({contactEmail, onChange, labelStyle, input
 }
 
 interface FreeCreditsDropdownProps {
-  initialLimit?: number,
   currentLimit?: number,
+  previousLimit?: number,
+  highlightOnChange?: boolean,
   onChange: Function,
   labelStyle?: CSSProperties,
   dropdownStyle?: CSSProperties,
 }
-export const FreeCreditsDropdown = ({initialLimit, currentLimit, onChange, labelStyle, dropdownStyle}: FreeCreditsDropdownProps) => {
+export const FreeCreditsDropdown = ({currentLimit, previousLimit, highlightOnChange,
+                                      onChange, labelStyle, dropdownStyle}: FreeCreditsDropdownProps) => {
   return <DropdownWithLabel
-    dataTestId={'freeTierDollarQuota'}
-    label={'Free credit limit'}
-    options={getFreeCreditLimitOptions(initialLimit)}
-    initialValue={currentLimit}
+    dataTestId='freeTierDollarQuota'
+    className='free-credits'
+    label='Free credit limit'
+    options={getFreeCreditLimitOptions(previousLimit)}
+    currentValue={currentLimit}
+    previousValue={previousLimit}
+    highlightOnChange={highlightOnChange}
     labelStyle={labelStyle}
     dropdownStyle={dropdownStyle}
     onChange={(event) => onChange(event)}/>;
@@ -186,20 +200,25 @@ export const FreeCreditsDropdown = ({initialLimit, currentLimit, onChange, label
 
 interface InstitutionDropdownProps {
   institutions?: PublicInstitutionDetails[],
-  initialInstitutionShortName?: string,
+  currentInstitutionShortName?: string,
+  previousInstitutionShortName?: string,
+  highlightOnChange?: boolean;
   onChange: Function,
   labelStyle?: CSSProperties,
   dropdownStyle?: CSSProperties,
 }
-export const InstitutionDropdown =
-  ({institutions, initialInstitutionShortName, onChange, labelStyle, dropdownStyle}: InstitutionDropdownProps) => {
+export const InstitutionDropdown = ({institutions, currentInstitutionShortName, previousInstitutionShortName,
+                                      highlightOnChange, onChange, labelStyle, dropdownStyle}: InstitutionDropdownProps) => {
   const options = fp.map(({displayName, shortName}) => ({label: displayName, value: shortName}), institutions);
   return institutions
     ? <DropdownWithLabel
-      dataTestId={'verifiedInstitution'}
-      label={'Verified institution'}
+      dataTestId='verifiedInstitution'
+      className='institution'
+      label='Verified institution'
       options={options}
-      initialValue={initialInstitutionShortName}
+      currentValue={currentInstitutionShortName}
+      previousValue={previousInstitutionShortName}
+      highlightOnChange={highlightOnChange}
       labelStyle={labelStyle}
       dropdownStyle={dropdownStyle}
       onChange={(event) => onChange(event)}/>
@@ -208,21 +227,26 @@ export const InstitutionDropdown =
 
 interface InstitutionalRoleDropdownProps {
   institutions?: PublicInstitutionDetails[],
-  initialAffiliation?: VerifiedInstitutionalAffiliation,
+  currentAffiliation?: VerifiedInstitutionalAffiliation,
+  previousRole?: InstitutionalRole,
+  highlightOnChange?: boolean,
   onChange: Function,
   labelStyle?: CSSProperties,
   dropdownStyle?: CSSProperties,
 }
-export const InstitutionalRoleDropdown =
-  ({institutions, initialAffiliation, onChange, labelStyle, dropdownStyle}: InstitutionalRoleDropdownProps) => {
-  const options = getRoleOptions(institutions, initialAffiliation?.institutionShortName);
-  return (institutions && initialAffiliation)
+export const InstitutionalRoleDropdown = ({institutions, currentAffiliation, previousRole, highlightOnChange,
+                                            onChange, labelStyle, dropdownStyle}: InstitutionalRoleDropdownProps) => {
+  const options = getRoleOptions(institutions, currentAffiliation?.institutionShortName);
+  return (institutions && currentAffiliation)
     ? <DropdownWithLabel
-      dataTestId={'institutionalRole'}
-      label={'Institutional role'}
-      disabled={!initialAffiliation.institutionShortName}
+      dataTestId='institutionalRole'
+      className='institutional-role'
+      label='Institutional role'
+      disabled={!currentAffiliation?.institutionShortName}
       options={options}
-      initialValue={initialAffiliation.institutionalRoleEnum}
+      currentValue={currentAffiliation?.institutionalRoleEnum}
+      previousValue={previousRole}
+      highlightOnChange={highlightOnChange}
       labelStyle={labelStyle}
       dropdownStyle={dropdownStyle}
       onChange={(event) => onChange(event)}/>
@@ -231,18 +255,22 @@ export const InstitutionalRoleDropdown =
 
 interface InstitutionalRoleOtherTextProps {
   affiliation?: VerifiedInstitutionalAffiliation,
+  previousOtherText?: string,
+  highlightOnChange?: boolean,
   onChange: Function,
   labelStyle?: CSSProperties,
   inputStyle?: CSSProperties,
   containerStyle?: CSSProperties,
 }
-export const InstitutionalRoleOtherTextInput =
-  ({affiliation, onChange, labelStyle, inputStyle, containerStyle}: InstitutionalRoleOtherTextProps) => {
+export const InstitutionalRoleOtherTextInput = ({affiliation, previousOtherText, highlightOnChange, onChange,
+                                                  labelStyle, inputStyle, containerStyle}: InstitutionalRoleOtherTextProps) => {
   return (affiliation?.institutionalRoleEnum === InstitutionalRole.OTHER)
     ? <TextInputWithLabel
       dataTestId={'institutionalRoleOtherText'}
       labelText={'Institutional role description'}
-      placeholder={affiliation?.institutionalRoleOtherText}
+      value={affiliation?.institutionalRoleOtherText}
+      previousValue={previousOtherText}
+      highlightOnChange={highlightOnChange}
       labelStyle={{...commonStyles.label, ...labelStyle}}
       inputStyle={{...commonStyles.textInput, ...inputStyle}}
       containerStyle={{...commonStyles.textInputContainer, ...containerStyle}}
@@ -312,7 +340,7 @@ export const AccessModuleExpirations = ({profile}: ExpirationProps) => {
     {moduleNames.map((moduleName, zeroBasedStep) => {
       // return the status if found; init an empty status with the moduleName if not
       const status: AccessModuleStatus = modules.find(s => s.moduleName === moduleName) || {moduleName};
-      const {lastConfirmedDate, nextReviewDate} = computeDisplayDates(status);
+      const {lastConfirmedDate, nextReviewDate} = computeRenewalDisplayDates(status);
       const {AARTitleComponent} = getAccessModuleConfig(moduleName);
       return <FlexRow key={zeroBasedStep} style={{marginTop: '0.5rem'}}>
         <FlexColumn>

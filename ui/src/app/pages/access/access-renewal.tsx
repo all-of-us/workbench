@@ -16,11 +16,10 @@ import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors, {addOpacity, colorWithWhiteness} from 'app/styles/colors';
 import {cond, useId, withStyle} from 'app/utils';
 import {
+  computeRenewalDisplayDates,
   accessRenewalModules,
-  computeDisplayDates,
   syncModulesExternal,
   getAccessModuleConfig,
-  isExpiring,
   maybeDaysRemaining,
   redirectToRegisteredTraining,
 } from 'app/utils/access-utils';
@@ -28,7 +27,7 @@ import {useNavigation} from 'app/utils/navigation';
 import {profileStore, serverConfigStore, useStore} from 'app/utils/stores';
 import {AccessModule, AccessModuleStatus} from 'generated/fetch';
 import {SupportMailto} from 'app/components/support';
-
+import {getWholeDaysFromNow} from 'app/utils/dates';
 
 const {useState, useEffect} = React;
 
@@ -45,6 +44,13 @@ const renewalStyle = {
   h3: {
     fontSize: '0.675rem',
     fontWeight: 600
+  },
+  completedButton: {
+    height: '1.6rem',
+    marginTop: 'auto',
+    backgroundColor: colors.success,
+    width: 'max-content',
+    cursor: 'default',
   },
   completionBox: {
     height: '3.5rem',
@@ -65,7 +71,19 @@ const renewalStyle = {
     margin: 0,
     padding: '0.5rem',
     width: 560
-  }
+  },
+  publicationConfirmation: {
+    marginTop: 'auto',
+    display: 'grid',
+    columnGap: '0.25rem',
+    gridTemplateColumns: 'auto 1rem 1fr',
+    alignItems: 'center'
+  },
+  complianceTrainingExpiring: {
+    borderTop: `1px solid ${colorWithWhiteness(colors.dark, 0.8)}`,
+    marginTop: '0.5rem',
+    paddingTop: '0.5rem',
+  },
 };
 
 
@@ -106,6 +124,9 @@ const syncAndReloadTraining = fp.flow(
 
 // Helper Functions
 
+export const isExpiring = (expiration?: number): boolean =>
+  expiration ? (getWholeDaysFromNow(expiration) <= serverConfigStore.get().config.accessRenewalLookback) : false;
+
 const isModuleExpiring = (status: AccessModuleStatus): boolean => isExpiring(status.expirationEpochMillis);
 
 const isExpiringAndNotBypassed = (moduleName: AccessModule, modules: AccessModuleStatus[]) => {
@@ -113,24 +134,24 @@ const isExpiringAndNotBypassed = (moduleName: AccessModule, modules: AccessModul
   return isModuleExpiring(status) && !status.bypassEpochMillis;
 }
 
+const bypassedOrCompleteAndNotExpiring = (status: AccessModuleStatus) => {
+  const isComplete = !!status.completionEpochMillis;
+  const wasBypassed = !!status.bypassEpochMillis;
+  return wasBypassed || (isComplete && !isExpiring(status.expirationEpochMillis));
+}
+
 
 // Helper / Stateless Components
 interface CompletedButtonInterface {
-  buttonText: string;
+  completedText: string;
   wasBypassed: boolean;
   style?: React.CSSProperties;
 }
-const CompletedButton = ({buttonText, wasBypassed, style}: CompletedButtonInterface) => <Button disabled={true}
-    data-test-id='completed-button'
-    style={{
-      height: '1.6rem',
-      marginTop: 'auto',
-      backgroundColor: colors.success,
-      width: 'max-content',
-      cursor: 'default',
-      ...style
-    }}>
-    <ClrIcon shape='check' style={{marginRight: '0.3rem'}}/>{wasBypassed ? 'Bypassed' : buttonText}
+const CompletedOrBypassedButton = ({completedText, wasBypassed, style}: CompletedButtonInterface) =>
+  <Button disabled={true}
+          data-test-id='completed-button'
+          style={{...renewalStyle.completedButton, ...style}}>
+    <ClrIcon shape='check' style={{marginRight: '0.3rem'}}/>{wasBypassed ? 'Bypassed' : completedText}
   </Button>;
 
 interface ActionButtonInterface {
@@ -144,8 +165,8 @@ interface ActionButtonInterface {
 const ActionButton = (
   {moduleStatus, actionButtonText, completedButtonText, onClick, disabled, style}: ActionButtonInterface) => {
   const wasBypassed = !!moduleStatus.bypassEpochMillis;
-  return wasBypassed || !isModuleExpiring(moduleStatus)
-    ? <CompletedButton buttonText={completedButtonText} wasBypassed={wasBypassed} style={style}/>
+  return bypassedOrCompleteAndNotExpiring(moduleStatus)
+    ? <CompletedOrBypassedButton completedText={completedButtonText} wasBypassed={wasBypassed} style={style}/>
     : <Button
         onClick={onClick}
         disabled={disabled}
@@ -163,7 +184,7 @@ interface CardProps {
 const RenewalCard = withStyle(renewalStyle.card)(
   ({step, moduleStatus, style, children}: CardProps) => {
     const {AARTitleComponent} = getAccessModuleConfig(moduleStatus.moduleName);
-    const {lastConfirmedDate, nextReviewDate} = computeDisplayDates(moduleStatus);
+    const {lastConfirmedDate, nextReviewDate} = computeRenewalDisplayDates(moduleStatus);
     return <FlexColumn style={style}>
       <div style={renewalStyle.h3}>STEP {step}</div>
       <div style={renewalStyle.h3}><AARTitleComponent/></div>
@@ -194,19 +215,12 @@ export const AccessRenewal = fp.flow(withProfileErrorModal)((spinnerProps: WithS
   const [, navigateByUrl] = useNavigation();
 
   const expirableModules = modules.filter(moduleStatus => accessRenewalModules.includes(moduleStatus.moduleName));
-
-  const completeOrBypassed = moduleName => {
-    const status = modules.find(m => m.moduleName === moduleName);
-    const wasBypassed = !!status.bypassEpochMillis;
-    return wasBypassed || !isExpiring(status.expirationEpochMillis);
-  }
-
-  const allModulesCompleteOrBypassed = fp.flow(fp.map('moduleName'), fp.all(completeOrBypassed))(expirableModules);
+  const accessRenewalCompleted = expirableModules.every(bypassedOrCompleteAndNotExpiring);
 
   // onMount - as we move between pages, let's make sure we have the latest profile and external module information
   useEffect(() => {
     const expiringModules = expirableModules
-      .filter(status => status.expirationEpochMillis && isExpiring(status.expirationEpochMillis))
+      .filter(status => isExpiring(status.expirationEpochMillis))
       .map(status => status.moduleName);
 
     const onMount = async() => {
@@ -220,30 +234,31 @@ export const AccessRenewal = fp.flow(withProfileErrorModal)((spinnerProps: WithS
     onMount();
   }, []);
 
+  const maybeHeader = cond(
+    // Completed - no icon or button
+    [accessRenewalCompleted, () => null],
+    // Access expired icon
+    [maybeDaysRemaining(profile) < 0, () => <React.Fragment>
+      <ExclamationTriangle color={colors.warning} style={{height: '1.5rem', width: '1.5rem'}}/>
+      <div style={styles.h1}>Researcher workbench access has expired.</div>
+    </React.Fragment>],
+    // Default - back button
+    () => <React.Fragment>
+      <Clickable onClick={() => history.back()}><BackArrow style={{height: '1.5rem', width: '1.5rem'}}/></Clickable>
+      <div style={styles.h1}>Yearly Researcher Workbench access renewal</div>
+    </React.Fragment>
+  );
+
   // Render
   return <FadeBox style={{margin: '1rem auto 0', color: colors.primary}}>
     <div style={{display: 'grid', gridTemplateColumns: '1.5rem 1fr', alignItems: 'center', columnGap: '.675rem'}}>
-      {cond(
-        // Completed - no icon or button
-        [allModulesCompleteOrBypassed, () => null],
-        // Access expired icon
-        [maybeDaysRemaining(profile) < 0, () => <React.Fragment>
-          <ExclamationTriangle color={colors.warning} style={{height: '1.5rem', width: '1.5rem'}}/>
-          <div style={styles.h1}>Researcher workbench access has expired.</div>
-        </React.Fragment>],
-        // Default - back button
-        () => <React.Fragment>
-          <Clickable onClick={() => history.back()}><BackArrow style={{height: '1.5rem', width: '1.5rem'}}/></Clickable>
-          <div style={styles.h1}>Yearly Researcher Workbench access renewal</div>
-        </React.Fragment>
-        )
-      }
-      <div style={allModulesCompleteOrBypassed ? {gridColumn: '1 / span 2'} : {gridColumnStart: 2}}>
+      {maybeHeader}
+      <div style={accessRenewalCompleted ? {gridColumn: '1 / span 2'} : {gridColumnStart: 2}}>
         Researchers are required to complete a number of steps as part of the annual renewal
         to maintain access to <AoU/> data. Renewal of access will occur on a rolling basis annually (i.e. for each user, access
         renewal will be due 365 days after the date of authorization to access <AoU/> data.
       </div>
-      {allModulesCompleteOrBypassed && <div style={{...renewalStyle.completionBox, gridColumn: '1 / span 2'}}>
+      {accessRenewalCompleted && <div style={{...renewalStyle.completionBox, gridColumn: '1 / span 2'}}>
         <div style={renewalStyle.h2}>Thank you for completing all the necessary steps</div>
         <div>
           Your yearly Researcher Workbench access renewal is complete. You can use the menu icon in the top left to continue your research.
@@ -277,7 +292,7 @@ export const AccessRenewal = fp.flow(withProfileErrorModal)((spinnerProps: WithS
               href={'https://redcap.pmi-ops.org/surveys/?s=MKYL8MRD4N'}>please report it now.</a> For any questions,
              please contact <SupportMailto/>
         </div>
-        <div style={{marginTop: 'auto', display: 'grid', columnGap: '0.25rem', gridTemplateColumns: 'auto 1rem 1fr', alignItems: 'center'}}>
+        <div style={renewalStyle.publicationConfirmation}>
           <ActionButton
               actionButtonText='Confirm'
               completedButtonText='Confirmed'
@@ -313,8 +328,8 @@ export const AccessRenewal = fp.flow(withProfileErrorModal)((spinnerProps: WithS
           the compliance requirements for using the <AoU/> Dataset.
         </div>
         {isExpiringAndNotBypassed(AccessModule.COMPLIANCETRAINING, modules) &&
-          <div style={{borderTop: `1px solid ${colorWithWhiteness(colors.dark, 0.8)}`, marginTop: '0.5rem', paddingTop: '0.5rem'}}>
-            When you have completed the training click the refresh button or reload the page.
+          <div style={renewalStyle.complianceTrainingExpiring}>
+           When you have completed the training click the refresh button or reload the page.
           </div>}
         <FlexRow style={{marginTop: 'auto'}}>
           <ActionButton

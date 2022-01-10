@@ -22,12 +22,13 @@ describe('egress suspension', () => {
     const dataPage = new WorkspaceDataPage(page);
     const notebookPage = await dataPage.createNotebook(notebookName);
 
+    console.log('Generating egress via notebook');
     await notebookPage.uploadFile(egressFilename, egressFilePath);
     await notebookPage.runCodeFile(1, egressFilename, 5 * 60 * 1000);
 
     await notebookPage.save();
 
-    // Wait until we become suspended.
+    console.log('Awaiting security suspension');
     await notebookPage.waitForSecuritySuspendedStatus(true);
   });
 });
