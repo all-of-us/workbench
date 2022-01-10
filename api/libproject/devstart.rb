@@ -568,6 +568,11 @@ def create_cdr_indices(cmd_name, *args)
     ->(opts, v) { opts.data_browser = v},
     "Is this run for data browser. Default is false"
   )
+  op.add_option(
+      "--array-table [array-table]",
+      ->(opts, v) { opts.array_table = v},
+      "Array table."
+    )
 
   op.add_validator ->(opts) { raise ArgumentError unless opts.project and opts.bq_dataset and opts.cdr_version}
   op.parse.validate
@@ -581,7 +586,7 @@ def create_cdr_indices(cmd_name, *args)
   content_type = "Content-Type: application/json"
   accept = "Accept: application/json"
   circle_token = "Circle-Token: "
-  payload = "{ \"branch\": \"#{op.opts.branch}\", \"parameters\": { \"wb_create_cdr_indices\": true, \"cdr_source_project\": \"#{cdr_source}\", \"cdr_source_dataset\": \"#{op.opts.bq_dataset}\", \"wgv_source_project\": \"#{op.opts.wgv_project}\", \"wgv_source_dataset\": \"#{op.opts.wgv_dataset}\", \"wgv_source_table\": \"#{op.opts.wgv_table}\", \"project\": \"#{op.opts.project}\", \"cdr_version_db_name\": \"#{op.opts.cdr_version}\", \"data_browser\": #{op.opts.data_browser} }}"
+  payload = "{ \"branch\": \"#{op.opts.branch}\", \"parameters\": { \"wb_create_cdr_indices\": true, \"cdr_source_project\": \"#{cdr_source}\", \"cdr_source_dataset\": \"#{op.opts.bq_dataset}\", \"wgv_source_project\": \"#{op.opts.wgv_project}\", \"wgv_source_dataset\": \"#{op.opts.wgv_dataset}\", \"wgv_source_table\": \"#{op.opts.wgv_table}\", \"project\": \"#{op.opts.project}\", \"cdr_version_db_name\": \"#{op.opts.cdr_version}\", \"data_browser\": #{op.opts.data_browser}\", \"array_source_table\": #{op.opts.array_table} }}"
   common.run_inline "curl -X POST https://circleci.com/api/v2/project/github/all-of-us/cdr-indices/pipeline -H '#{content_type}' -H '#{accept}' -H \"#{circle_token}\ $(cat ~/.circle-creds/key.txt)\" -d '#{payload}'"
 end
 
@@ -885,13 +890,18 @@ def build_cb_search_person(cmd_name, *args)
       ->(opts, v) { opts.wgv_table = v},
       "Whole genome variant table."
   )
+  op.add_option(
+        "--array-table [array-table]",
+        ->(opts, v) { opts.array_table = v},
+        "Array table."
+    )
 
   op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset}
   op.parse.validate
 
   common = Common.new
   Dir.chdir('db-cdr') do
-    common.run_inline %W{./generate-cdr/build-cb-search-person.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.wgv_project} #{op.opts.wgv_dataset} #{op.opts.wgv_table}}
+    common.run_inline %W{./generate-cdr/build-cb-search-person.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.wgv_project} #{op.opts.wgv_dataset} #{op.opts.wgv_table} #{op.opts.array_table}}
   end
 end
 
@@ -1133,6 +1143,11 @@ def circle_build_cdr_indices(cmd_name, args)
     ->(opts, v) { opts.data_browser = v},
     "Generate for data browser. Optional - Default is false"
   )
+  op.add_option(
+      "--array-table [array-table]",
+      ->(opts, v) { opts.array_table = v},
+      "Array table."
+    )
   op.add_validator ->(opts) { raise ArgumentError unless opts.project and opts.bq_dataset and opts.cdr_version }
   op.parse.validate
 
@@ -1145,7 +1160,7 @@ def circle_build_cdr_indices(cmd_name, args)
   content_type = "Content-Type: application/json"
   accept = "Accept: application/json"
   circle_token = "Circle-Token: "
-  payload = "{ \"branch\": \"#{op.opts.branch}\", \"parameters\": { \"wb_build_cdr_indices\": true, \"cdr_source_project\": \"#{cdr_source}\", \"cdr_source_dataset\": \"#{op.opts.bq_dataset}\", \"wgv_source_project\": \"#{op.opts.wgv_project}\", \"wgv_source_dataset\": \"#{op.opts.wgv_dataset}\", \"wgv_source_table\": \"#{op.opts.wgv_table}\", \"project\": \"#{op.opts.project}\", \"cdr_version_db_name\": \"#{op.opts.cdr_version}\", \"data_browser\": #{op.opts.data_browser} }}"
+  payload = "{ \"branch\": \"#{op.opts.branch}\", \"parameters\": { \"wb_build_cdr_indices\": true, \"cdr_source_project\": \"#{cdr_source}\", \"cdr_source_dataset\": \"#{op.opts.bq_dataset}\", \"wgv_source_project\": \"#{op.opts.wgv_project}\", \"wgv_source_dataset\": \"#{op.opts.wgv_dataset}\", \"wgv_source_table\": \"#{op.opts.wgv_table}\", \"project\": \"#{op.opts.project}\", \"cdr_version_db_name\": \"#{op.opts.cdr_version}\", \"data_browser\": #{op.opts.data_browser}\", \"array_source_table\": #{op.opts.array_table}  }}"
   common.run_inline "curl -X POST https://circleci.com/api/v2/project/github/all-of-us/cdr-indices/pipeline -H '#{content_type}' -H '#{accept}' -H \"#{circle_token}\ $(cat ~/.circle-creds/key.txt)\" -d '#{payload}'"
 end
 
@@ -1479,12 +1494,17 @@ def make_bq_denormalized_search_person(cmd_name, *args)
     ->(opts, v) { opts.wgv_table = v},
     "Whole genome variant table."
   )
+  op.add_option(
+      "--array-table [array-table]",
+      ->(opts, v) { opts.array_table = v},
+      "Array table."
+    )
   op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset }
   op.parse.validate
 
   common = Common.new
   Dir.chdir('db-cdr') do
-    common.run_inline %W{./generate-cdr/make-bq-denormalized-search-person.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.wgv_project} #{op.opts.wgv_dataset} #{op.opts.wgv_table}}
+    common.run_inline %W{./generate-cdr/make-bq-denormalized-search-person.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.wgv_project} #{op.opts.wgv_dataset} #{op.opts.wgv_table} #{op.opts.array_table}}
   end
 end
 

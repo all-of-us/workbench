@@ -9,6 +9,7 @@ export BQ_DATASET=$2        # CDR dataset
 export WGV_PROJECT=$3       # whole genome variant project
 export WGV_DATASET=$4       # whole genome variant dataset
 export WGV_TABLE=$5         # whole genome variant table
+export ARRAY_TABLE=$6       # array data table
 
 # Create bq tables we have json schema for
 schema_path=generate-cdr/bq-schemas
@@ -20,7 +21,7 @@ bq --quiet --project_id=$BQ_PROJECT mk --schema=$schema_path/cb_search_person.js
 # insert person data into cb_search_person
 ################################################
 echo "Inserting person data into cb_search_person"
-if [ -z "$WGV_PROJECT" ]
+if [ -z "$WGV_PROJECT" && -z "$ARRAY_TABLE" ]
 then
 bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_search_person\`
@@ -148,7 +149,8 @@ LEFT JOIN
         union distinct
         SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.steps_intraday\`
     ) f on (p.person_id = f.person_id)
-LEFT JOIN \`$WGV_PROJECT.$WGV_DATASET.$WGV_TABLE\` w on (CAST(p.person_id as STRING) = w.sample_name)"
+LEFT JOIN \`$WGV_PROJECT.$WGV_DATASET.$WGV_TABLE\` w on (CAST(p.person_id as STRING) = w.sample_name)
+LEFT JOIN \`$WGV_PROJECT.$WGV_DATASET.$ARRAY_TABLE\` a on (CAST(p.person_id as STRING) = a.sample_name)"
 fi
 
 ################################################
