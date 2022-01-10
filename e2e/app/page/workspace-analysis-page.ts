@@ -37,20 +37,16 @@ export default class WorkspaceAnalysisPage extends WorkspaceBase {
     const clickCreateButtonWithRetries = async (): Promise<void> => {
       const link = this.createNewNotebookLink();
       await link.click();
-      let succeeded = false;
       try {
         await modal.waitForLoad();
-        succeeded = true;
+        return;
       } catch (err) {
-        if (maxRetries === 0) {
-          throw new Error(err);
+        if (maxRetries < 1) {
+          throw new Error(`Click link "Create a New Notebook" failed after trying ${maxRetries} times.\n${err}`);
         }
       }
-      if (succeeded) {
-        return;
-      }
       if (maxRetries < 1) {
-        throw new Error(`Click link "Create a New Notebook" failed after trying ${maxRetries} times.`);
+        throw new Error('Investigate why waitForLoad() did not throw error. It should not happen.');
       }
       maxRetries--;
       await this.page.waitForTimeout(2000).then(() => clickCreateButtonWithRetries());
