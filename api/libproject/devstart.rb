@@ -11,7 +11,6 @@ require_relative "gcloudcontext"
 require_relative "wboptionsparser"
 require "benchmark"
 require "fileutils"
-require "json"
 require "optparse"
 require "ostruct"
 require "tempfile"
@@ -2105,11 +2104,15 @@ def can_skip_token_generation(token_filenames)
   for f in token_filenames do
     return false unless File.file?(f)
 
-    age_minutes = (Time.now - File.ctime(f)) / 60
-    return false unless age_minutes < staleness_limit_minutes
-
-    contents = File.readlines(f)
+    contents = File.read(f)
     return false if contents.nil? || contents.empty?
+
+    parsed = JSON.parse(contents)
+    return false unless parsed.is_a?(Hash) and parsed.has_key?('token')
+
+    created_at = Time.at(parsed.fetch('created_at_epoch_seconds', 0))
+    age_minutes = (Time.now - created_at) / 60
+    return false unless age_minutes < staleness_limit_minutes
   end
 
   return true
@@ -2133,7 +2136,7 @@ def generate_impersonated_user_tokens(cmd_name, *args)
   op.parse.validate
 
   usernames = op.opts.impersonated_usernames.split(',').uniq
-  token_filenames = usernames.map{ |u| "#{op.opts.output_token_dir}/#{u}.txt" }
+  token_filenames = usernames.map{ |u| "#{op.opts.output_token_dir}/#{u}.json" }
   if can_skip_token_generation(token_filenames)
     common.status("Recent access tokens already exist, skipping generation")
     return

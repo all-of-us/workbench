@@ -38,12 +38,14 @@ export async function signInWithAccessToken(
   userEmail = config.USER_NAME,
   postSignInPage: AuthenticatedPage = new HomePage(page)
 ): Promise<void> {
-  const tokenLocation = `signin-tokens/${userEmail}.txt`;
+  const tokenLocation = `signin-tokens/${userEmail}.json`;
   // Keep file naming convention synchronized with generate-impersonated-user-tokens
-  const token = fs.readFileSync(tokenLocation, 'ascii');
-  if (isBlank(token)) {
+  const tokenJson = fs.readFileSync(tokenLocation, 'ascii');
+  if (isBlank(tokenJson)) {
     throw Error(`Token found at ${tokenLocation} is blank`);
   }
+  const {token} = JSON.parse(tokenJson);
+
   logger.info('Sign in with access token to Workbench application');
   const homePage = new HomePage(page);
   await homePage.gotoUrl(PageUrl.Home);
