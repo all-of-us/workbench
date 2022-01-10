@@ -182,7 +182,7 @@ export default class BaseElement {
       }
       // End the test if previousX or previousY is still undefined after waiting.
       if (previousX === undefined || previousY === undefined) {
-        throw new Error(`Failed to click element because the it is not visible. xpath: ${this.getXpath()}`);
+        throw new Error(`Failed to click element because it is not visible. xpath: ${this.getXpath()}`);
       }
       await element.click(options);
     });
