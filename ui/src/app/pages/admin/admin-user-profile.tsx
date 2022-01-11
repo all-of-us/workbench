@@ -105,7 +105,7 @@ const UneditableFields = (props: { profile: Profile }) => {
         <div style={styles.uneditableFieldsSpacer} />
         <UneditableField label='User name' value={username} />
         <UneditableField
-          label='Access Tiers'
+          label='Data Access Tiers'
           value={accessTierShortNames.map(displayNameForTier).join(' ,')}
         />
       </FlexColumn>
