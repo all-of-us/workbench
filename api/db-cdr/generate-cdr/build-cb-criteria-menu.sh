@@ -56,7 +56,7 @@ fi
 
 if [[ $arrayCount > 0 ]];
 then
-  echo "Insert wgv into cb_criteria_menu"
+  echo "Insert array data into cb_criteria_menu"
   bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
   "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_menu\`
       (id,parent_id,category,domain_id,type,name,is_group,sort_order)
