@@ -205,6 +205,7 @@ public class TestMockFactory {
       doAnswer(
               invocation -> {
                 ProjectBillingInfo projectBillingInfo = invocation.getArgument(1);
+                projectBillingInfo.setBillingEnabled(true);
 
                 Cloudbilling.Projects.UpdateBillingInfo updateBillingInfo =
                     mock(Cloudbilling.Projects.UpdateBillingInfo.class);
