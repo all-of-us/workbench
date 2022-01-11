@@ -5,6 +5,7 @@ import { AnalysisTool, Language, LinkText } from 'app/text-labels';
 import Modal from './modal';
 import { waitForText } from 'utils/waits-utils';
 import NotebookPreviewPage from 'app/page/notebook-preview-page';
+import { getFormattedPreviewCode } from 'utils/notebook-preview-utils';
 
 const title = 'Export Dataset';
 
@@ -47,6 +48,13 @@ export default class ExportToNotebookModal extends Modal {
   pickAnalysisTool(analysisTool: AnalysisTool = AnalysisTool.Hail): RadioButton {
     const radioButtonXpath = this.getRadioButtonXpath(analysisTool);
     return new RadioButton(this.page, radioButtonXpath);
+  }
+
+  async showCodePreview(): Promise<string[]> {
+    await this.clickButton(LinkText.SeeCodePreview);
+
+    const previewFrame = await this.page.waitForSelector('#export-preview-frame');
+    return getFormattedPreviewCode(await previewFrame.contentFrame());
   }
 
   async clickExportButton(): Promise<NotebookPreviewPage> {
