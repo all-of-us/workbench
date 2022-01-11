@@ -48,7 +48,7 @@ describe('Workspace CDR Version Upgrade modal', () => {
     expect(await workspacePage.isLoaded()).toBe(true);
   });
 
-  test('Duplicate Workspace with older CDR version to newer CDR version', async () => {
+  xtest('Duplicate Workspace with older CDR version to newer CDR version', async () => {
     const workspaceCard = await findOrCreateWorkspaceCard(page, {
       workspaceName,
       cdrVersion: config.OLD_CDR_VERSION_NAME
