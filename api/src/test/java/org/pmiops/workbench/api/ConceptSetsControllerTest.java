@@ -5,7 +5,6 @@ import static org.junit.Assert.fail;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
-import com.google.api.services.cloudbilling.Cloudbilling;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import java.time.Instant;
@@ -177,6 +176,8 @@ public class ConceptSetsControllerTest {
 
   @Autowired UserDao userDao;
 
+  @Autowired CloudBillingClient cloudBillingClient;
+
   @Autowired FireCloudService fireCloudService;
 
   @Autowired ConceptSetsController conceptSetsController;
@@ -236,12 +237,6 @@ public class ConceptSetsControllerTest {
     WorkspaceAuditor.class,
   })
   static class Configuration {
-
-    @Bean
-    Cloudbilling cloudbilling() {
-      return TestMockFactory.createMockedCloudbilling();
-    }
-
     @Bean
     Random random() {
       return new FakeLongRandom(123);
@@ -262,9 +257,10 @@ public class ConceptSetsControllerTest {
   }
 
   @BeforeEach
-  public void setUp() {
+  public void setUp() throws Exception {
     TestMockFactory.stubCreateBillingProject(fireCloudService);
     TestMockFactory.stubCreateFcWorkspace(fireCloudService);
+    TestMockFactory.stubPollCloudBillingLinked(cloudBillingClient, "billing-account");
 
     DbUser user = new DbUser();
     user.setUsername(USER_EMAIL);

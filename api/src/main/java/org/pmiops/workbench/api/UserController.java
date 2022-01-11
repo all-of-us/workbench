@@ -218,7 +218,7 @@ public class UserController implements UserApiDelegate {
    *     disabled
    */
   private Stream<BillingAccount> maybeFreeTierBillingAccount() {
-    if (freeTierBillingService.userHasRemainingFreeTierCredits(userProvider.get())) {
+    if (!freeTierBillingService.userHasRemainingFreeTierCredits(userProvider.get())) {
       return Stream.empty();
     }
 
