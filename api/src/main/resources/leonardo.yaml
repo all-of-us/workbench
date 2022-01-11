@@ -1160,6 +1160,15 @@ paths:
           schema:
             type: boolean
             default: false
+        - in: query
+          name: includeLabels
+          description: >
+            Optional label keys of the labels returned in response. Example:
+            Querying by key1,key2,key3
+            returns all labels key1/val1 key2/val2 and key3 and val3 for each app in response
+          required: false
+          schema:
+            type: string
       responses:
         "200":
           description: List of apps
@@ -1219,6 +1228,15 @@ paths:
           schema:
             type: boolean
             default: false
+        - in: query
+          name: includeLabels
+          description: >
+            Optional label keys of the labels returned in response. Example:
+            Querying by key1,key2,key3
+            returns all labels key1/val1 key2/val2 and key3 and val3 for each app in response
+          required: false
+          schema:
+            type: string
       responses:
         "200":
           description: List of apps
@@ -1361,6 +1379,13 @@ paths:
           required: true
           schema:
             type: string
+        - in: query
+          name: deleteDisk
+          description: Whether or not the disk associated with the app should be deleted. Default to false if not specified.
+          required: false
+          schema:
+            type: boolean
+            default: false
       responses:
         "202":
           description: App deletion request accepted
@@ -1368,6 +1393,94 @@ paths:
           description: User does not have permission to perform action on App
         "404":
           description: App not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+        "500":
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+  "/api/google/v1/apps/{googleProject}/{appName}/stop":
+    post:
+      summary: Stops an app with the given project and name
+      description: >
+        Stops the running compute, but retains any data persisted on disk. The app may be restarted with the /start endpoint.
+      operationId: stopApp
+      tags:
+        - apps
+      parameters:
+        - in: path
+          name: googleProject
+          description: googleProject
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: appName
+          description: appName
+          required: true
+          schema:
+            type: string
+      responses:
+        "202":
+          description: App stop request accepted
+        "403":
+          description: User does not have permission to perform action on app
+        "404":
+          description: App not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+        "409":
+          description: App cannot be stopped
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+        "500":
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+
+  "/api/google/v1/apps/{googleProject}/{appName}/start":
+    post:
+      summary: Starts an app with the given project and name
+      description: Starts the stopped app
+      operationId: startApp
+      tags:
+        - apps
+      parameters:
+        - in: path
+          name: googleProject
+          description: googleProject
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: appName
+          description: appName
+          required: true
+          schema:
+            type: string
+      responses:
+        "202":
+          description: App start request accepted
+        "403":
+          description: User does not have permission to perform action on app
+        "404":
+          description: App not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+        "409":
+          description: App cannot be started
           content:
             application/json:
               schema:
@@ -1755,6 +1868,12 @@ components:
             email: email authorization
             profile: profile authorization
   schemas:
+    AppType:
+      type: string
+      enum:
+        - CROMWELL
+        - CUSTOM
+        - GALAXY
     AppStatus:
       type: string
       enum:
@@ -2875,16 +2994,30 @@ components:
         diskConfig:
           $ref: '#/components/schemas/PersistentDiskRequest'
         appType:
-          type: string
-          description: currently only "GALAXY" is supported
+          $ref: '#/components/schemas/AppType'
         kubernetesRuntimeConfig:
           $ref: '#/components/schemas/KubernetesRuntimeConfig'
         labels:
           type: object
           description: The labels to be placed on the cluster. Of type Map[String,String]
+        customEnvironmentVariables:
+          type: object
+          description: Optional environment variables to be set on the app
+        descriptorPath:
+          type: string
+          description: URL path to an app descriptor file. Only used if appType is CUSTOM.
+        extraArgs:
+          type: array
+          items:
+            type: string
+          description: Extra arguments to pass to the application. Only used if appType is CUSTOM.
 
     GetAppResponse:
       description: the configuration of an app
+      required:
+        - kubernetesRuntimeConfig
+        - status
+        - auditInfo
       type: object
       properties:
         kubernetesRuntimeConfig:
@@ -2902,6 +3035,13 @@ components:
         diskName:
           type: string
           description: the name of the disk associated with this app
+        customEnvironmentVariables:
+          type: object
+          description: Optional environment variables to be set on the app
+        auditInfo:
+          $ref: "#/components/schemas/AuditInfo"
+        appType:
+          $ref: '#/components/schemas/AppType'
 
     ListAppResponse:
       description: the configuration of an app
@@ -2985,6 +3125,7 @@ components:
         googleErrorCode:
           type: integer
           description: if the error is associated with an external API call, the error code will be propagated here
+
     GpuConfig:
       description: A config that describes the gpus associated with a runtime
       type: object
