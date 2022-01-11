@@ -11,6 +11,8 @@ export WGV_DATASET=$4       # whole genome variant dataset
 export WGV_TABLE=$5         # whole genome variant table
 export CDR_VERSION=$6       # CDR version
 export DATA_BROWSER=$7      # data browser flag
+export ARRAY_TABLE=$8       # array data table
+
 
 echo ""
 echo "Creating static prep tables"
@@ -57,7 +59,7 @@ then
 
   echo ""
   echo "Making denormalized search person table"
-  if ./generate-cdr/make-bq-denormalized-search-person.sh "$BQ_PROJECT" "$BQ_DATASET" "$WGV_PROJECT" "$WGV_DATASET" "$WGV_TABLE"
+  if ./generate-cdr/make-bq-denormalized-search-person.sh "$BQ_PROJECT" "$BQ_DATASET" "$WGV_PROJECT" "$WGV_DATASET" "$WGV_TABLE" "$ARRAY_TABLE"
   then
       echo "Making denormalized search person table complete"
   else
