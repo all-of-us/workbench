@@ -436,12 +436,12 @@ export const ProfileComponent = fp.flow(
           </div>
           <div style={{width: '20rem', marginRight: '4rem'}}>
             <div style={{marginLeft: '1rem'}}>
-              <div style={styles.title}>Free credits balance</div>
+              <div style={styles.title}>Initial credits balance</div>
               <hr style={{...styles.verticalLine}}/>
               {profile && <FlexRow style={styles.freeCreditsBox}>
                   <FlexColumn style={{marginLeft: '0.8rem'}}>
-                      <div style={{marginTop: '0.4rem'}}><AoU/> free credits used:</div>
-                      <div>Remaining <AoU/> free credits:</div>
+                      <div style={{marginTop: '0.4rem'}}><AoU/> initial credits used:</div>
+                      <div>Remaining <AoU/> initial credits:</div>
                   </FlexColumn>
                   <FlexColumn style={{alignItems: 'flex-end', marginLeft: '1.0rem'}}>
                     <div style={{marginTop: '0.4rem', fontWeight: 600}}>{formatFreeCreditsUSD(profile.freeTierUsage)}</div>

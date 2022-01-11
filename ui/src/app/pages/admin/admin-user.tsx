@@ -93,14 +93,14 @@ const FreeCreditsUsage = ({isAboveLimit, usage}: FreeCreditsProps) => {
 
   return <React.Fragment>
     <TextInputWithLabel
-      labelText='Free credits used'
+      labelText='Initial credits used'
       value={usage}
       inputId='freeTierUsage'
       disabled={true}
       inputStyle={inputStyle}
       containerStyle={styles.textInputContainer}
     />
-    {isAboveLimit && <div style={{color: colors.danger}}>Update free credit limit</div>}
+    {isAboveLimit && <div style={{color: colors.danger}}>Update initial credit limit</div>}
   </React.Fragment>;
 };
 

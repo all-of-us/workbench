@@ -364,7 +364,7 @@ export const WorkspaceShare = fp.flow(withUserProfile())(class extends React.Com
           </FlexRow>
           {isUsingFreeTierBillingAccount(this.props.workspace) &&
             <div style={{color: colors.primary, fontSize: 14, fontWeight: 400}}>
-                When you share this workspace as a ‘Writer’ or an ‘Owner’, the free credits of the creator of the
+                When you share this workspace as a ‘Writer’ or an ‘Owner’, the initial credits of the creator of the
                 workspace ({this.props.workspace.creator}) will be used for all analysis in this workspace.
             </div>}
         </ModalTitle>

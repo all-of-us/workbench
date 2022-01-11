@@ -591,11 +591,11 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
 
     renderBillingDescription() {
       return <div>
-        The <AouTitle/> provides $300 in free credits per user. Please refer to
+        The <AouTitle/> provides $300 in initial credits per user. Please refer to
         <StyledExternalLink href={supportUrls.billing} target='_blank'> &nbsp;this article
-        </StyledExternalLink> to learn more about the free credit
+        </StyledExternalLink> to learn more about the initial credit
         program and how it can be used .
-        <div style={{display: 'inline'}}>Once you have used up your free credits, you can either select a shared billing account or create
+        <div style={{display: 'inline'}}>Once you have used up your initial credits, you can either select a shared billing account or create
           a new one using either Google Cloud Platform or a Google billing partner.
           Please note: If creating a billing account via a Google billing partner,
           it may take a few days to show up in the <b>Select account</b> dropdown.</div>

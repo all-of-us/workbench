@@ -25,7 +25,7 @@ export const InvalidBillingBanner = fp.flow(
   withNavigation
 )((props: Props) => {
   const userAction =
-    'Please provide a valid billing account or contact support to extend free credits.';
+    'Please provide a valid billing account or contact support to extend initial credits.';
   const footer = <div style={{display: 'flex', flexDirection: 'column'}}>
     <Button style={{height: '38px', width: '70%', fontWeight: 400}}
             onClick={() => {
@@ -49,8 +49,8 @@ export const InvalidBillingBanner = fp.flow(
   </div>;
 
   return <ToastBanner
-    title={'This workspace has run out of free credits'}
-    message={'The free credits for the creator of this workspace have run out. ' + userAction}
+    title={'This workspace has run out of initial credits'}
+    message={'The initial credits for the creator of this workspace have run out. ' + userAction}
     onClose={() => props.onClose()}
     toastType={ToastType.WARNING}
     zIndex={500}

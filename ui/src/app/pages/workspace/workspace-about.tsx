@@ -307,7 +307,7 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withCdrVersions())
           {workspace && WorkspacePermissionsUtil.canWrite(workspace.accessLevel)
             && isUsingFreeTierBillingAccount(workspace) &&
               <div style={{...styles.infoBox, height: '2.5rem'}}>
-                <div style={styles.infoBoxHeader}>Workspace Free Credit Usage</div>
+                <div style={styles.infoBoxHeader}>Workspace Initial Credit Usage</div>
                 <div style={{fontSize: '0.5rem'}}>{this.state.workspaceFreeTierUsage !== undefined ?
                   '$' + this.state.workspaceFreeTierUsage.toFixed(2) :
                   <Spinner style={{height: 16, width: 16}}/>
