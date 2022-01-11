@@ -625,18 +625,6 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void testCreateWorkspace_UpdateBillingAccount_flagFalse() {
-    Workspace workspace = createWorkspace();
-    workspace.setBillingAccountName("new-account");
-
-    workspacesController.createWorkspace(workspace);
-
-    // the billing account was not set
-    verify(fireCloudService, never()).updateBillingAccountAsService(anyString(), anyString());
-    verify(fireCloudService, never()).updateBillingAccount(anyString(), anyString());
-  }
-
-  @Test
   public void testCreateWorkspace_doNotUpdateBillingForFreeTier() {
     Workspace workspace = createWorkspace();
     workspace.setBillingAccountName(workbenchConfig.billing.freeTierBillingAccountName());
