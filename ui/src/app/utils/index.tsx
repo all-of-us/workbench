@@ -403,7 +403,7 @@ export function highlightSearchTerm(searchTerm: string, stringToHighlight: strin
 
 // render a float value as US currency, rounded to cents: 255.372793 -> $255.37
 // negative values are rendered as $0
-export function formatFreeCreditsUSD(value: number): string {
+export function formatInitialCreditsUSD(value: number): string {
   value = value || 0.0;
   if (value <= 0.0) {
     return '$0';

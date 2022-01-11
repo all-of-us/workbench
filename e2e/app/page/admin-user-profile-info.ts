@@ -15,8 +15,8 @@ const DataTestIdAlias = {
   UserFullName: 'userFullName',
   Username: 'username',
   ContactEmail: 'contactEmail',
-  FreeCreditsUsed: 'freeTierUsage',
-  FreeCreditLimit: 'freeTierDollarQuota',
+  InitialCreditsUsed: 'initial-credits-used',
+  InitialCreditsDropdown: 'initial-credits-dropdown',
   VerifiedInstitution: 'verifiedInstitution',
   InstitutionalRole: 'institutionalRole',
   EmailErrorMessage: 'email-error-message',
@@ -134,7 +134,7 @@ export default class UserProfileInfo extends AuthenticatedPage {
   }
 
   getFreeCreditsUsedInput(): Textbox {
-    return Textbox.findByName(this.page, { dataTestId: DataTestIdAlias.FreeCreditsUsed });
+    return Textbox.findByName(this.page, { dataTestId: DataTestIdAlias.InitialCreditsUsed });
   }
 
   // get the free credits used value
@@ -147,7 +147,7 @@ export default class UserProfileInfo extends AuthenticatedPage {
 
   // get the free credits limit value
   async getFreeCreditsLimitValue(): Promise<string> {
-    const freeCreditsDropdown = SelectMenu.findByName(this.page, { dataTestId: DataTestIdAlias.FreeCreditLimit });
+    const freeCreditsDropdown = SelectMenu.findByName(this.page, { dataTestId: DataTestIdAlias.InitialCreditsDropdown });
     return await freeCreditsDropdown.getSelectedValue();
   }
 
