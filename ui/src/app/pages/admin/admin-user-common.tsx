@@ -188,7 +188,7 @@ export const FreeCreditsDropdown = ({currentLimit, previousLimit, highlightOnCha
   return <DropdownWithLabel
     dataTestId='freeTierDollarQuota'
     className='free-credits'
-    label='Free credit limit'
+    label='Initial credit limit'
     options={getFreeCreditLimitOptions(previousLimit)}
     currentValue={currentLimit}
     previousValue={previousLimit}

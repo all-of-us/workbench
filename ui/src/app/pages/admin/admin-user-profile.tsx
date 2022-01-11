@@ -84,7 +84,7 @@ const UneditableFields = (props: {profile: Profile}) => {
     <FlexColumn>
       <div style={styles.subHeader}>Researcher information</div>
       <UneditableField label='Name' value={`${givenName} ${familyName}`}/>
-      <UneditableField label='Free Credits Used' value={getFreeCreditUsage(props.profile)}/>
+      <UneditableField label='Initial Credits Used' value={getFreeCreditUsage(props.profile)}/>
     </FlexColumn>
     <FlexColumn style={{paddingLeft: '80px'}}>
       <div style={styles.uneditableFieldsSpacer}/>

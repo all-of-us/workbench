@@ -894,14 +894,14 @@ const CostInfo = ({runtimeChanged, runtimeConfig, currentUser, workspace, creato
       isUsingFreeTierBillingAccount(workspace)
       && currentUser === workspace.creator
       && <div style={styles.costsDrawnFrom}>
-        Costs will draw from your remaining {remainingCredits} of free credits.
+        Costs will draw from your remaining {remainingCredits} of initial credits.
       </div>
     }
     {
       isUsingFreeTierBillingAccount(workspace)
       && currentUser !== workspace.creator
       && <div style={styles.costsDrawnFrom}>
-        Costs will draw from workspace creator's remaining {remainingCredits} of free credits.
+        Costs will draw from workspace creator's remaining {remainingCredits} of initial credits.
       </div>
     }
     {
@@ -1210,10 +1210,10 @@ const RuntimePanel = fp.flow(
 
   const costErrorsAsWarnings = (
     !isUsingFreeTierBillingAccount(workspace) ||
-    // We've increased the workspace creator's free credits. This means they may be expecting to run
-    // a more expensive analysis, and the program has extended some further trust for free credit
+    // We've increased the workspace creator's initial credits. This means they may be expecting to run
+    // a more expensive analysis, and the program has extended some further trust for initial credit
     // use. Allow them to provision a larger runtime (still warn them). Block them if they get below
-    // the default amount of free credits because (1) this can result in overspend and (2) we have
+    // the default amount of initial credits because (1) this can result in overspend and (2) we have
     // easy access to remaining credits, and not the creator's quota.
     creatorFreeCreditsRemaining > serverConfigStore.get().config.defaultFreeCreditsDollarLimit);
 
@@ -1221,7 +1221,7 @@ const RuntimePanel = fp.flow(
     const maxRunningCost = isUsingFreeTierBillingAccount(workspace) ? 25: 150;
     const message = costErrorsAsWarnings
       ? '^Your runtime is expensive. Are you sure you wish to proceed?'
-      : `^Your runtime is too expensive. To proceed using free credits, reduce your running costs below $${maxRunningCost}/hr.`;
+      : `^Your runtime is too expensive. To proceed using initial credits, reduce your running costs below $${maxRunningCost}/hr.`;
     return {
       numericality: {
         lessThan: maxRunningCost,

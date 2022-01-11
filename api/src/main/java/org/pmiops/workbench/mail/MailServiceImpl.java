@@ -144,7 +144,7 @@ public class MailServiceImpl implements MailService {
         Collections.singletonList(user.getContactEmail()),
         Collections.emptyList(),
         String.format(
-            "Reminder - %s Free credit usage in All of Us Researcher Workbench",
+            "Reminder - %s Initial credit usage in All of Us Researcher Workbench",
             formatPercentage(threshold)),
         String.format("User %s passed a free tier dollar threshold", user.getUsername()),
         htmlMessage);
@@ -154,7 +154,7 @@ public class MailServiceImpl implements MailService {
   public void alertUserFreeTierExpiration(final DbUser user) throws MessagingException {
 
     final String expirationMsg =
-        String.format("Free credits have expired for User %s", user.getUsername());
+        String.format("Initial credits have expired for User %s", user.getUsername());
     log.info(expirationMsg);
 
     final String htmlMessage =
@@ -163,7 +163,7 @@ public class MailServiceImpl implements MailService {
     sendWithRetries(
         Collections.singletonList(user.getContactEmail()),
         Collections.emptyList(),
-        "Alert - Free credit expiration in All of Us Researcher Workbench",
+        "Alert - Initial credit expiration in All of Us Researcher Workbench",
         expirationMsg,
         htmlMessage);
   }
