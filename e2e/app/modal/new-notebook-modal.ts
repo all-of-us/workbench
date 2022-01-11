@@ -17,6 +17,7 @@ export default class NewNotebookModal extends Modal {
 
   async isLoaded(): Promise<boolean> {
     await waitForText(this.page, modalTitle, { container: this });
+    await this.name().exists(30000);
     return true;
   }
 

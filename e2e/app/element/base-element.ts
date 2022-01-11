@@ -1,4 +1,12 @@
-import { BoxModel, ClickOptions, ElementHandle, NavigationOptions, Page, WaitForSelectorOptions } from 'puppeteer';
+import {
+  BoxModel,
+  ClickOptions,
+  ElementHandle,
+  JSHandle,
+  NavigationOptions,
+  Page,
+  WaitForSelectorOptions
+} from 'puppeteer';
 import { getAttrValue, getPropValue } from 'utils/element-utils';
 import { logger } from 'libs/logger';
 import { waitForFn } from 'utils/waits-utils';
@@ -115,8 +123,8 @@ export default class BaseElement {
    * </pre>
    */
   async isVisible(): Promise<boolean> {
-    const isDisplayed = async (element): Promise<boolean> => {
-      const elementHandle = await this.page
+    const isDisplayed = async (element: ElementHandle): Promise<boolean> => {
+      const jsHandle: JSHandle = await this.page
         .evaluateHandle((elem) => {
           const style = window.getComputedStyle(elem);
           return style && style.display !== 'none' && style.visibility !== 'hidden' && style.opacity !== '0';
@@ -124,50 +132,59 @@ export default class BaseElement {
         .catch(() => {
           return null;
         });
-      return (await elementHandle.jsonValue()) as boolean;
+      return (await jsHandle.jsonValue()) as boolean;
     };
 
-    const boxModel = async (element): Promise<BoxModel | null> => {
-      return element.boxModel();
+    const boxModel = async (element: ElementHandle): Promise<BoxModel | null> => {
+      const boxModel = await element.boxModel();
+      return boxModel;
     };
 
     return this.asElementHandle()
-      .then((element) => {
-        return isDisplayed(element) && !!boxModel(element);
+      .then(async (element) => {
+        return (await isDisplayed(element)) && (await boxModel(element)) !== null;
       })
       .catch(() => false);
   }
 
   async click(options?: ClickOptions): Promise<void> {
-    return this.asElementHandle().then(async (element) => {
-      // Click workaround: Wait for x,y to stop changing within specified time
+    await this.asElementHandle().then(async (element) => {
+      // Click workaround: Wait for (x,y) to stop changing within specified time
       const startTime = Date.now();
       let previousX: number;
       let previousY: number;
       while (Date.now() - startTime < 30 * 1000) {
-        const viewport = await element.isIntersectingViewport();
-        if (viewport) {
-          const boundingBox = await element.boundingBox();
-          const boxModel = await element.boxModel();
-          if (boundingBox && boxModel) {
-            const x = boundingBox.x + boundingBox.width / 2;
-            const y = boundingBox.y + boundingBox.height / 2;
-            if (previousX !== undefined && previousY !== undefined) {
-              if (
-                parseFloat(previousX.toFixed(7)) === parseFloat(x.toFixed(7)) &&
-                parseFloat(previousY.toFixed(7)) === parseFloat(y.toFixed(7))
-              ) {
-                break;
-              }
-            }
-            previousX = x;
-            previousY = y;
-          }
+        const visible = await this.isVisible();
+        if (!visible) {
+          // Scrolls element into viewport if needed.
+          await element.hover();
+          await element.focus();
+          await this.page.waitForTimeout(1000);
         }
-        await element.hover();
+        const boundingBox = await element.boundingBox();
+        const boxModel = await element.boxModel();
+        if (boundingBox !== null && boxModel !== null) {
+          const x = boundingBox.x + boundingBox.width / 2;
+          const y = boundingBox.y + boundingBox.height / 2;
+          if (previousX !== undefined && previousY !== undefined) {
+            if (
+              parseFloat(previousX.toFixed(7)) === parseFloat(x.toFixed(7)) &&
+              parseFloat(previousY.toFixed(7)) === parseFloat(y.toFixed(7))
+            ) {
+              break;
+            }
+          }
+          previousX = x;
+          previousY = y;
+        }
+        // Half second sleep before getting values of (x, y) again.
         await this.page.waitForTimeout(500);
       }
-      return element.click(options);
+      // End the test if previousX or previousY is still undefined after waiting.
+      if (previousX === undefined || previousY === undefined) {
+        throw new Error(`Failed to click element because it is not visible. xpath: ${this.getXpath()}`);
+      }
+      await element.click(options);
     });
   }
 
@@ -358,7 +375,7 @@ export default class BaseElement {
   async clickWithEval(): Promise<void> {
     const element = await this.asElementHandle();
     await element.focus();
-    await this.page.evaluate((elem) => elem.click(), element);
+    await this.page.evaluate((elem: ElementHandle) => elem.click(), element);
     await this.page.waitForTimeout(500);
   }
 
@@ -381,7 +398,7 @@ export default class BaseElement {
    * @param text
    */
   async paste(text: string): Promise<void> {
-    return this.asElementHandle().then((element) => {
+    return this.asElementHandle().then((element: ElementHandle) => {
       return this.page.evaluate(
         (elemt, textValue) => {
           // Refer to https://stackoverflow.com/a/46012210/440432

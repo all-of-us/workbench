@@ -32,10 +32,27 @@ export default class WorkspaceAnalysisPage extends WorkspaceBase {
    * @param {Language} language Notebook language.
    */
   async createNotebook(notebookName: string, language: Language = Language.Python): Promise<NotebookPage> {
-    const link = this.createNewNotebookLink();
-    await link.click();
     const modal = new NewNotebookModal(this.page);
-    await modal.waitForLoad();
+    let maxRetries = 3;
+    const clickCreateButtonWithRetries = async (): Promise<void> => {
+      const link = this.createNewNotebookLink();
+      await link.click();
+      try {
+        await modal.waitForLoad();
+        return;
+      } catch (err) {
+        if (maxRetries < 1) {
+          throw new Error(`Click link "Create a New Notebook" failed after trying ${maxRetries} times.\n${err}`);
+        }
+      }
+      if (maxRetries < 1) {
+        throw new Error('Investigate why waitForLoad() did not throw error. It should not happen.');
+      }
+      maxRetries--;
+      await this.page.waitForTimeout(2000).then(() => clickCreateButtonWithRetries());
+    };
+
+    await clickCreateButtonWithRetries();
     await modal.fillInModal(notebookName, language);
 
     // Log notebook page heading.
