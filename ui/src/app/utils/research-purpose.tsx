@@ -31,15 +31,6 @@ const styles = {
   },
 };
 
-export function getSelectedResearchPurposeItems(researchPurpose: ResearchPurpose, isResearchPurpose: boolean) {
-  const primaryPurposeItems = isResearchPurpose ? ResearchPurposeItems : PrimaryPurposeItems;
-  return researchPurposeDivs(primaryPurposeItems, researchPurpose);
-}
-
-export function getSelectedPrimaryPurposeItems(researchPurpose: ResearchPurpose) {
-  return researchPurposeDivs(fp.concat(ResearchPurposeItems, PrimaryPurposeItems), researchPurpose);
-}
-
 function researchPurposeDivs(primaryPurposeItems: Array<ResearchPurposeItem>, researchPurpose: ResearchPurpose) {
   return primaryPurposeItems.filter((item) =>
       researchPurpose[item.shortName]).map((item) => {
@@ -55,6 +46,15 @@ function researchPurposeDivs(primaryPurposeItems: Array<ResearchPurposeItem>, re
         }
         return <div>{headerContent}{descriptiveContent}</div>;
       });
+}
+
+export function getSelectedResearchPurposeItems(researchPurpose: ResearchPurpose, isResearchPurpose: boolean) {
+  const primaryPurposeItems = isResearchPurpose ? ResearchPurposeItems : PrimaryPurposeItems;
+  return researchPurposeDivs(primaryPurposeItems, researchPurpose);
+}
+
+export function getSelectedPrimaryPurposeItems(researchPurpose: ResearchPurpose) {
+  return researchPurposeDivs(fp.concat(ResearchPurposeItems, PrimaryPurposeItems), researchPurpose);
 }
 
 export function getSelectedPopulations(researchPurpose: ResearchPurpose) {

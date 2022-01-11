@@ -655,6 +655,24 @@ const RegisteredTierCard = (props: {profile: Profile, activeModule: AccessModule
   </FlexRow>;
 };
 
+const ControlledTierStep = (props: {enabled: boolean, text: String}) => {
+  return <FlexRow>
+    <FlexRow style={styles.moduleCTA}/>
+    {/* Since Institution access steps does not require user interaction, will display them as inactive*/}
+    <FlexRow style={styles.backgroundModuleBox}>
+      <div style={styles.moduleIcon}>
+        {props.enabled
+          ? <CheckCircle data-test-id='eligible' style={{color: colors.success}}/>
+          : <MinusCircle data-test-id='ineligible' style={{color: colors.disabled}}/>}
+      </div>
+      <FlexColumn style={styles.backgroundModuleText}>
+        <div>{props.text}
+        </div>
+      </FlexColumn>
+    </FlexRow>
+  </FlexRow>;
+}
+
 const ControlledTierCard = (props: {profile: Profile, activeModule: AccessModule,
     clickableModules: AccessModule[], reload: Function, spinnerProps: WithSpinnerOverlayProps}) => {
   const {profile, activeModule, clickableModules, spinnerProps} = props;
@@ -712,24 +730,6 @@ const ControlledTierCard = (props: {profile: Profile, activeModule: AccessModule
     </FlexColumn>
   </FlexRow>
 };
-
-const ControlledTierStep = (props: {enabled: boolean, text: String}) => {
-  return <FlexRow>
-    <FlexRow style={styles.moduleCTA}/>
-    {/* Since Institution access steps does not require user interaction, will display them as inactive*/}
-    <FlexRow style={styles.backgroundModuleBox}>
-      <div style={styles.moduleIcon}>
-        {props.enabled
-          ? <CheckCircle data-test-id='eligible' style={{color: colors.success}}/>
-          : <MinusCircle data-test-id='ineligible' style={{color: colors.disabled}}/>}
-      </div>
-      <FlexColumn style={styles.backgroundModuleText}>
-        <div>{props.text}
-        </div>
-       </FlexColumn>
-      </FlexRow>
-     </FlexRow>;
-}
 
 const DuccCard = (props: {
       profile: Profile, activeModule: AccessModule, clickableModules: AccessModule[],

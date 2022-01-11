@@ -58,14 +58,6 @@ export enum Progress {
   Loaded
 }
 
-const getProgressString = (appType: LeoApplicationType, progress: Progress) => {
-  if (appType === LeoApplicationType.Notebook) {
-    return notebookProgressStrings.get(progress)
-  } else {
-    return terminalProgressStrings.get(progress)
-  }
-}
-
 export const notebookProgressStrings: Map<Progress, string> = new Map([
   [Progress.Unknown, 'Connecting to the notebook server'],
   [Progress.Initializing, 'Initializing notebook server, may take up to 5 minutes'],
@@ -85,6 +77,14 @@ export const terminalProgressStrings: Map<Progress, string> = new Map([
   [Progress.Creating, 'Opening the terminal'],
   [Progress.Redirecting, 'Redirecting to the terminal'],
 ]);
+
+const getProgressString = (appType: LeoApplicationType, progress: Progress) => {
+  if (appType === LeoApplicationType.Notebook) {
+    return notebookProgressStrings.get(progress)
+  } else {
+    return terminalProgressStrings.get(progress)
+  }
+}
 
 // Statuses during which the user can interact with the Runtime UIs, e.g. via
 // an iframe. When the runtime is in other states, requests to the runtime host
