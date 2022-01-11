@@ -1,11 +1,12 @@
 import { Frame, Page } from 'puppeteer';
 import Link from 'app/element/link';
-import { getPropValue } from 'utils/element-utils';
 import AuthenticatedPage from './authenticated-page';
 import NotebookPage from './notebook-page';
 import WorkspaceAnalysisPage from './workspace-analysis-page';
-import { waitForFn, waitWhileLoading } from 'utils/waits-utils';
+import { waitWhileLoading } from 'utils/waits-utils';
 import { initializeRuntimeIfModalPresented } from 'utils/runtime-utils';
+import { waitForPreviewCellsRendered } from 'utils/notebook-preview-utils';
+import { getFormattedPreviewCode } from 'utils/notebook-preview-utils';
 
 const Selector = {
   editLink: '//div[contains(normalize-space(text()), "Edit")]',
@@ -48,22 +49,11 @@ export default class NotebookPreviewPage extends AuthenticatedPage {
   }
 
   async waitForNotebookCellsRendered(): Promise<void> {
-    const iframe = await this.findNotebookIframe();
-    await waitForFn(
-      async () => {
-        return (await iframe.$$('.jp-CodeCell')).length === (await iframe.$$('.jp-CodeMirrorEditor')).length;
-      },
-      1000,
-      30000
-    );
+    return waitForPreviewCellsRendered(await this.findNotebookIframe());
   }
 
   async getFormattedCode(): Promise<string[]> {
-    const css = '.jp-CodeMirrorEditor';
-    const iframe = await this.findNotebookIframe();
-    await iframe.waitForSelector(css, { visible: true });
-    const elements = await iframe.$$(css);
-    return Promise.all(elements.map(async (content) => await getPropValue<string>(content, 'textContent')));
+    return getFormattedPreviewCode(await this.findNotebookIframe());
   }
 
   getEditLink(): Link {

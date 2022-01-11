@@ -111,14 +111,14 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(withCur
     function loadHtmlStringIntoIFrame(html) {
       const placeholder = document.createElement('html');
       placeholder.innerHTML = html;
-      // Some styling changes to the jupyter notebook to make it easier to view
-      placeholder.style.overflowY = 'scroll';
-      placeholder.getElementsByTagName('body')[0].style.overflowY = 'scroll';
-      placeholder.querySelector<HTMLElement>('#notebook').style.paddingTop = '0';
 
       // Remove input column from notebook cells. Also possible to strip this out in Calhoun but requires some API changes
-      placeholder.querySelectorAll('.input_prompt').forEach(e => e.remove());
-      return <iframe scrolling='no' style={{width: '100%', height: '100%', border: 'none'}} srcDoc={placeholder.outerHTML}/>;
+      placeholder.querySelectorAll('.jp-InputPrompt').forEach(e => e.remove());
+      return <iframe
+        id='export-preview-frame'
+        scrolling='yes'
+        style={{width: '100%', height: '100%', border: 'none'}}
+        srcDoc={placeholder.outerHTML}/>;
     }
 
     function loadCodePreview() {

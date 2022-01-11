@@ -4264,10 +4264,6 @@ definitions:
         type: number
         format: double
         description: The default dollar amount of free credits allotted to each user
-      enableBillingUpgrade:
-        type: boolean
-        default: false
-        description: Feature flag for billing upgrade
       enableEventDateModifier:
         type: boolean
         default: false

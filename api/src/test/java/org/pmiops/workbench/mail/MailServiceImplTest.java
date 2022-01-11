@@ -6,7 +6,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -202,16 +201,6 @@ public class MailServiceImplTest {
     assertThat(gotHtml).doesNotContain("${");
   }
 
-  @Test
-  public void testSendBillingSetupEmailNotSent_featureDisabled() throws Exception {
-    workbenchConfig.featureFlags.enableBillingUpgrade = false;
-    DbUser user = createDbUser();
-    SendBillingSetupEmailRequest request =
-        new SendBillingSetupEmailRequest().institution("inst").isNihFunded(true).phone("123456");
-    service.sendBillingSetupEmail(user, request);
-    verifyZeroInteractions(mandrillApi);
-  }
-
   private DbUser createDbUser() {
     DbUser user = new DbUser();
     user.setFamilyName("family name");
@@ -228,7 +217,6 @@ public class MailServiceImplTest {
     workbenchConfig.googleCloudStorageService.credentialsBucketName = "test-bucket";
     workbenchConfig.googleDirectoryService.gSuiteDomain = "research.org";
     workbenchConfig.admin.loginUrl = "http://localhost:4200/";
-    workbenchConfig.featureFlags.enableBillingUpgrade = true;
     workbenchConfig.egressAlertRemediationPolicy = new EgressAlertRemediationPolicy();
     return workbenchConfig;
   }
