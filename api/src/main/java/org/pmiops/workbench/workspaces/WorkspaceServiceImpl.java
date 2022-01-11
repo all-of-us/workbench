@@ -2,6 +2,22 @@ package org.pmiops.workbench.workspaces;
 
 import com.google.api.services.cloudbilling.model.ProjectBillingInfo;
 import com.google.common.collect.ImmutableList;
+import java.io.IOException;
+import java.sql.Timestamp;
+import java.time.Clock;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Optional;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
+import javax.inject.Provider;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.billing.FreeTierBillingService;
@@ -43,23 +59,6 @@ import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.inject.Provider;
-import java.io.IOException;
-import java.sql.Timestamp;
-import java.time.Clock;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Optional;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 /**
  * DbWorkspace manipulation and shared business logic which can't be represented by automatic query

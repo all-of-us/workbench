@@ -1,9 +1,8 @@
 package org.pmiops.workbench.db.dao;
 
+import java.util.Collection;
 import org.pmiops.workbench.db.model.DbUserRecentlyModifiedResource;
 import org.springframework.data.repository.CrudRepository;
-
-import java.util.Collection;
 
 public interface UserRecentlyModifiedResourceDao
     extends CrudRepository<DbUserRecentlyModifiedResource, Long> {
