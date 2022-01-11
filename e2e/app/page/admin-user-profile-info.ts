@@ -147,7 +147,9 @@ export default class UserProfileInfo extends AuthenticatedPage {
 
   // get the free credits limit value
   async getFreeCreditsLimitValue(): Promise<string> {
-    const freeCreditsDropdown = SelectMenu.findByName(this.page, { dataTestId: DataTestIdAlias.InitialCreditsDropdown });
+    const freeCreditsDropdown = SelectMenu.findByName(this.page, {
+      dataTestId: DataTestIdAlias.InitialCreditsDropdown
+    });
     return await freeCreditsDropdown.getSelectedValue();
   }
 
