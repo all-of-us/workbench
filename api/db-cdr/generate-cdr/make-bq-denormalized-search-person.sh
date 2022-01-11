@@ -96,6 +96,7 @@ bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
         , is_deceased
         , has_fitbit
         , has_whole_genome_variant
+        , has_array_data
     )
 SELECT
       p.person_id
