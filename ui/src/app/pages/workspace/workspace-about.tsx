@@ -313,6 +313,13 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withCdrVersions())
                   <Spinner style={{height: 16, width: 16}}/>
                 }</div>
               </div>}
+          {workspace && WorkspacePermissionsUtil.canWrite(workspace.accessLevel)<h3 style={{marginBottom: '0.5rem'}}>Billing
+            <TooltipTrigger content={WorkspaceInfoTooltipText()}>
+              <InfoIcon style={{margin: '0 0.3rem'}}/>
+            </TooltipTrigger>
+
+          </h3>}
+          <></>
         </div>
       </div>
       {sharing && <WorkspaceShare workspace={workspace}
