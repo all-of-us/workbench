@@ -122,6 +122,10 @@ SELECT
         WHEN w.sample_name is null THEN 0
         ELSE 1
       END has_whole_genome_variant
+    , CASE
+        WHEN a.sample_name is null THEN 0
+        ELSE 1
+      END has_array_data
 FROM \`$BQ_PROJECT.$BQ_DATASET.person\` p
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` g on (p.gender_concept_id = g.concept_id)
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` s on (p.sex_at_birth_concept_id = s.concept_id)
