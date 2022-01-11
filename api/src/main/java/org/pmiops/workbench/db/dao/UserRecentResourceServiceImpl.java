@@ -1,9 +1,5 @@
 package org.pmiops.workbench.db.dao;
 
-import java.sql.Timestamp;
-import java.time.Clock;
-import java.time.Duration;
-import java.util.List;
 import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.db.DbRetryUtils;
 import org.pmiops.workbench.db.model.DbCohort;
@@ -13,6 +9,11 @@ import org.pmiops.workbench.db.model.DbUserRecentlyModifiedResource;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.sql.Timestamp;
+import java.time.Clock;
+import java.time.Duration;
+import java.util.List;
 
 @Service
 public class UserRecentResourceServiceImpl implements UserRecentResourceService {
@@ -126,9 +127,8 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
       String resourceId) {
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     DbUserRecentlyModifiedResource recentResourcesId =
-        userRecentlyModifiedResourceDao
-            .findDbUserRecentResourcesIdByUserIdAndWorkspaceIdAndResourceTypeAndResourceId(
-                userId, workspaceId, resourceType, resourceId);
+        userRecentlyModifiedResourceDao.findDbUserRecentResources(
+            userId, workspaceId, resourceType, resourceId);
     if (recentResourcesId == null) {
       recentResourcesId =
           new DbUserRecentlyModifiedResource(workspaceId, userId, resourceType, resourceId, now);
@@ -178,9 +178,8 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
       DbUserRecentlyModifiedResource.DbUserRecentlyModifiedResourceType resourceType,
       String resourceId) {
     DbUserRecentlyModifiedResource resourceById =
-        userRecentlyModifiedResourceDao
-            .findDbUserRecentResourcesIdByUserIdAndWorkspaceIdAndResourceTypeAndResourceId(
-                userId, workspaceId, resourceType, resourceId);
+        userRecentlyModifiedResourceDao.findDbUserRecentResources(
+            userId, workspaceId, resourceType, resourceId);
     if (resourceById != null) {
       userRecentlyModifiedResourceDao.delete(resourceById);
     }

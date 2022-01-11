@@ -24,7 +24,6 @@ public class DbUserRecentlyModifiedResource {
   private int id;
   private Long userId;
   private Long workspaceId;
-  private short resourceType;
   private DbUserRecentlyModifiedResourceType resourceTypeEnum;
   private String resourceId;
   private Timestamp lastAccessDate;
