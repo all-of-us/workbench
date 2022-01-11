@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import validate from 'validate.js';
+import { Column } from 'primereact/column';
+import { DataTable } from 'primereact/datatable';
 
 import {
   AccessModuleExpirations,
@@ -28,6 +30,7 @@ import { displayNameForTier } from 'app/utils/access-tiers';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { isBlank, reactStyles } from 'app/utils';
 import {
+  AccessModule,
   InstitutionalRole,
   Profile,
   PublicInstitutionDetails,
@@ -39,6 +42,7 @@ import {
   getEmailValidationErrorMessage,
 } from 'app/utils/institutions';
 import { EgressEventsTable } from './egress-events-table';
+import { getAccessModuleConfig } from 'app/utils/access-utils';
 
 const styles = reactStyles({
   ...commonStyles,
@@ -203,6 +207,41 @@ const EditableFields = ({
         </FlexRow>
       </FlexColumn>
     </FlexRow>
+  );
+};
+
+// I'd like to just say "AccessModule.values()" but that's apparently very difficult in Typescript
+const accessModulesForTable = [
+  AccessModule.DATAUSERCODEOFCONDUCT,
+  AccessModule.COMPLIANCETRAINING,
+  AccessModule.CTCOMPLIANCETRAINING,
+  AccessModule.ERACOMMONS,
+  AccessModule.TWOFACTORAUTH,
+  AccessModule.RASLINKLOGINGOV,
+  AccessModule.PROFILECONFIRMATION,
+  AccessModule.PUBLICATIONCONFIRMATION,
+];
+
+interface TableRow {
+  moduleName: string;
+  bypassToggle: JSX.Element;
+}
+
+const AccessModuleTable = (props: { profile: Profile }) => {
+  const tableData: TableRow[] = accessModulesForTable.map((moduleName) => {
+    const { adminPageTitle, adminBypassable } =
+      getAccessModuleConfig(moduleName);
+    return {
+      moduleName: adminPageTitle,
+      bypassToggle: adminBypassable && <div>TODO</div>,
+    };
+  });
+
+  return (
+    <DataTable style={{ paddingTop: '1em' }} value={tableData}>
+      <Column field='moduleName' header='Access Module' />
+      <Column field='bypassToggle' header='Bypass' />
+    </DataTable>
   );
 };
 
@@ -392,6 +431,7 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
         <FlexRow>
           <AccessModuleTable profile={updatedProfile} />
         </FlexRow>
+        <AccessModuleTable profile={updatedProfile} />
         <FlexRow style={{ paddingTop: '1em' }}>
           <ErrorsTooltip errors={errors}>
             <Button
