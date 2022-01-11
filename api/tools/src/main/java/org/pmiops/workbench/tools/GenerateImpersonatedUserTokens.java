@@ -3,8 +3,11 @@ package org.pmiops.workbench.tools;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.apache.ApacheHttpTransport;
 import com.google.cloud.iam.credentials.v1.IamCredentialsClient;
+import com.google.common.collect.ImmutableMap;
+import com.google.gson.Gson;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.time.Instant;
 import java.util.logging.Logger;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
@@ -40,7 +43,7 @@ public class GenerateImpersonatedUserTokens {
   private static Option outputTokenFilename =
       Option.builder()
           .longOpt("output-token-filename")
-          .desc("Path to an output file for the generated impersonated token")
+          .desc("Path to an output JSON file for the generated impersonated token")
           .required()
           .hasArg()
           .build();
@@ -63,6 +66,7 @@ public class GenerateImpersonatedUserTokens {
     final IamCredentialsClient credsClient = IamCredentialsClient.create();
     final HttpTransport transport = new ApacheHttpTransport();
 
+    final Gson gson = new Gson();
     for (int i = 0; i < usernames.length; i++) {
       final String username = usernames[i];
       final String filename = filenames[i];
@@ -77,7 +81,10 @@ public class GenerateImpersonatedUserTokens {
       final String token = creds.getAccessToken().getTokenValue();
 
       try (FileWriter w = new FileWriter(filename)) {
-        w.write(token);
+        w.write(
+            gson.toJson(
+                ImmutableMap.of(
+                    "created_at_epoch_seconds", Instant.now().getEpochSecond(), "token", token)));
       }
     }
   }
