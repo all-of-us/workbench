@@ -359,7 +359,6 @@ public class WorkspacesControllerTest {
   @BeforeEach
   public void setUp() throws Exception {
     workbenchConfig = WorkbenchConfig.createEmptyConfig();
-    workbenchConfig.featureFlags.enableBillingUpgrade = true;
     workbenchConfig.billing.accountId = "free-tier";
     workbenchConfig.billing.projectNamePrefix = "aou-local";
 
@@ -627,8 +626,6 @@ public class WorkspacesControllerTest {
 
   @Test
   public void testCreateWorkspace_UpdateBillingAccount_flagFalse() {
-    workbenchConfig.featureFlags.enableBillingUpgrade = false;
-
     Workspace workspace = createWorkspace();
     workspace.setBillingAccountName("new-account");
 

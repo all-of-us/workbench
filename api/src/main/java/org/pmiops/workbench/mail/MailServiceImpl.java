@@ -226,9 +226,6 @@ public class MailServiceImpl implements MailService {
   public void sendBillingSetupEmail(DbUser dbUser, SendBillingSetupEmailRequest emailRequest)
       throws MessagingException {
     final WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
-    if (!workbenchConfig.featureFlags.enableBillingUpgrade) {
-      return;
-    }
 
     final String htmlMessage =
         buildHtml(SETUP_BILLING_ACCOUNT_EMAIL, setupBillingAccountEmailMap(dbUser, emailRequest));
@@ -333,13 +330,9 @@ public class MailServiceImpl implements MailService {
   }
 
   private String getFreeCreditsResolutionText() {
-    if (workbenchConfigProvider.get().featureFlags.enableBillingUpgrade) {
-      return "you can request additional free credits by contacting support "
-          + "or provide a new billing account in the Workbench to continue with your analyses. "
-          + "Instructions for providing a new billing account are provided in the Workbench.";
-    } else {
-      return "you can request for an extension of free credits by contacting support.";
-    }
+    return "you can request additional free credits by contacting support "
+        + "or provide a new billing account in the Workbench to continue with your analyses. "
+        + "Instructions for providing a new billing account are provided in the Workbench.";
   }
 
   private ImmutableMap<EmailSubstitutionField, String> freeTierDollarThresholdSubstitutionMap(
