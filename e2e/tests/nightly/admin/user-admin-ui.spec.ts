@@ -106,24 +106,24 @@ describe('User Admin', () => {
         break;
     }
 
-    //verify that userfulName, username and FreeCreditsUsed input fields are disabled
+    //verify that userfulName, username and InitialCreditsUsed input fields are disabled
     expect(await userProfileInfo.getNameInput().isCursorNotAllowed()).toBe(true);
     expect(await userProfileInfo.getUsernameInput().isCursorNotAllowed()).toBe(true);
-    expect(await userProfileInfo.getFreeCreditsUsedInput().isCursorNotAllowed()).toBe(true);
+    expect(await userProfileInfo.getInitialCreditsUsedInput().isCursorNotAllowed()).toBe(true);
 
     // get the username field placeholder to verify the email on user-admin-table page and admin-user-profile page matches
     const userNamePlaceHolder = await userProfileInfo.getUserNamePlaceHolder();
     expect(userNameEmail).toEqual(userNamePlaceHolder);
 
-    //verify the credit limit value matches the max value in the free credits used field
-    const freeCreditLimit = await userProfileInfo.getFreeCreditsLimitValue();
-    const freeCreditMaxValue = await userProfileInfo.getFreeCreditMaxValue();
-    console.log(`newcredit1: ${freeCreditMaxValue}`);
-    expect(freeCreditLimit).toEqual(freeCreditMaxValue);
+    //verify the credit limit value matches the max value in the initial credits used field
+    const initialCreditLimit = await userProfileInfo.getInitialCreditsLimitValue();
+    const initialCreditMaxValue = await userProfileInfo.getInitialCreditMaxValue();
+    console.log(`newcredit1: ${initialCreditMaxValue}`);
+    expect(initialCreditLimit).toEqual(initialCreditMaxValue);
 
-    // verify the admin is able to update the free credit
-    await userProfileInfo.updateFreeCredits();
-    await userProfileInfo.selectFreeCredits(freeCreditLimit);
+    // verify the admin is able to update the initail credit
+    await userProfileInfo.updateInitialCredits();
+    await userProfileInfo.selectInitialCredits(initialCreditLimit);
   });
 
   test('Verify that the user-audit page UI renders correctly', async () => {
