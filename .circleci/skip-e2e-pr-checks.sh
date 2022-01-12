@@ -17,7 +17,7 @@ COMMIT_MESSAGE=$(git log -1 --pretty=format:"%s")
 
 # Double comma is "Parameter Expansion". It converts string to lowercase letters.
 if [[ "${COMMIT_MESSAGE,,}" == *"skip-e2e"* ]]; then
-  echo "Halt job because 'skip-e2e' found in last commit message"
+  echo "[skip-e2e] found in last commit message. Job is halted."
   circleci-agent step halt
 fi
 
