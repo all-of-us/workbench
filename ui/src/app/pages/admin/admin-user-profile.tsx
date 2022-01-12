@@ -94,6 +94,13 @@ const UneditableFields = (props: {profile: Profile}) => {
   </FlexRow>
 }
 
+enum EmailValidationStatus {
+  UNCHECKED,
+  VALID,
+  INVALID,
+  API_ERROR
+}
+
 interface EditableFieldsProps {
   oldProfile: Profile,
   updatedProfile: Profile,
@@ -150,13 +157,6 @@ const EditableFields =
       </FlexRow>
     </FlexColumn>
   </FlexRow>;
-}
-
-enum EmailValidationStatus {
-  UNCHECKED,
-  VALID,
-  INVALID,
-  API_ERROR
 }
 
 export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {

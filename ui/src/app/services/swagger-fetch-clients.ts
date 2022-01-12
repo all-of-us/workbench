@@ -121,6 +121,15 @@ export const getApiBaseUrl = () => {
   }
 };
 
+/**
+ * Registers an API client implementation. Can be used to bind a non-standard
+ * API implementation, e.g. for testing.
+ */
+export function registerApiClient<T extends BaseAPI>(ctor: new() => T, impl: T) {
+  checkFrozen();
+  registry.set(ctor, impl);
+}
+
 // ConfigApi gets special treatment, since it's needed to bootstrap all of the
 // other API services: these require an access token, which in turn requires the
 // oauth client id, which is currently returned by the Config API.
@@ -155,15 +164,6 @@ export function bindApiClients(conf: FetchConfiguration) {
     }());
   }
   frozen = true;
-}
-
-/**
- * Registers an API client implementation. Can be used to bind a non-standard
- * API implementation, e.g. for testing.
- */
-export function registerApiClient<T extends BaseAPI>(ctor: new() => T, impl: T) {
-  checkFrozen();
-  registry.set(ctor, impl);
 }
 
 /**
