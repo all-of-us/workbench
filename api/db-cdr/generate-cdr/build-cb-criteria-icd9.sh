@@ -80,7 +80,7 @@ SELECT
       ROW_NUMBER() OVER (ORDER BY p.parent_id, c.concept_code)
          + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` where id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID) AS id
     , p.id AS parent_id
-    , p.domain_id
+    , UPPER(c.domain_id)
     , p.is_standard
     , p.type
     , c.concept_id AS concept_id
@@ -132,7 +132,7 @@ SELECT
       ROW_NUMBER() OVER (ORDER BY p.id, c.concept_code)
         + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` where id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID) AS id
     , p.id AS parent_id
-    , p.domain_id
+    , UPPER(c.domain_id)
     , p.is_standard
     , p.type
     , c.concept_id AS concept_id
@@ -204,7 +204,7 @@ SELECT
       ROW_NUMBER() OVER (ORDER BY b.id, a.concept_code)
          + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` where id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID) AS id
     , b.id AS parent_id
-    , b.domain_id
+    , UPPER(a.domain_id)
     , b.is_standard
     , a.vocabulary_id AS type
     , a.concept_id
@@ -290,7 +290,7 @@ SELECT
       ROW_NUMBER() OVER (ORDER BY b.id,a.concept_code)
          + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` where id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID) AS id
     , CASE WHEN b.id is not null THEN b.id ELSE c.id END AS parent_id
-    , CASE WHEN b.domain_id is not null THEN b.domain_id ELSE c.domain_id END as domain_id
+    , UPPER(a.domain_id)
     , 0
     , a.vocabulary_id AS type
     , a.concept_id,a.concept_code AS code
