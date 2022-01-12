@@ -15,6 +15,3 @@ pluginManagement {
 
 include ':appengine-cron-emulator'
 project(':appengine-cron-emulator').projectDir = new File(settingsDir, '../appengine-cron-emulator')
-
-include ':genomics'
-project(':genomics').projectDir = new File(settingsDir, '/genomics')
