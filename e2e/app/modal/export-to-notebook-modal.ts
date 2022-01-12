@@ -10,8 +10,8 @@ import { getFormattedPreviewCode } from 'utils/notebook-preview-utils';
 const title = 'Export Dataset';
 
 export default class ExportToNotebookModal extends Modal {
-  constructor(page: Page, xpath?: string) {
-    super(page, xpath);
+  constructor(page: Page, opts?: { xpath?: string; modalIndex?: number }) {
+    super(page, opts);
   }
 
   async isLoaded(): Promise<boolean> {

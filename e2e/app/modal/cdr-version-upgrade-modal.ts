@@ -5,8 +5,8 @@ import ClrIcon from 'app/element/clr-icon-link';
 import Modal from './modal';
 
 export default class CdrVersionUpgradeModal extends Modal {
-  constructor(page: Page, xpath?: string) {
-    super(page, xpath);
+  constructor(page: Page, opts?: { xpath?: string; modalIndex?: number }) {
+    super(page, opts);
   }
 
   async isLoaded(): Promise<boolean> {

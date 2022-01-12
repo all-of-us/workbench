@@ -11,8 +11,8 @@ import Modal from './modal';
 const modalTitle = 'New Notebook';
 
 export default class NewNotebookModal extends Modal {
-  constructor(page: Page, xpath?: string) {
-    super(page, xpath);
+  constructor(page: Page, opts?: { xpath?: string; modalIndex?: number }) {
+    super(page, opts);
   }
 
   async isLoaded(): Promise<boolean> {

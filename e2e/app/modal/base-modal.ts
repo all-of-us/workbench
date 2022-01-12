@@ -10,11 +10,11 @@ import Textbox from 'app/element/textbox';
 import { LinkText } from 'app/text-labels';
 
 const modalRootXpath = '//*[@id="popup-root"]/*[@class="ReactModalPortal"]';
-const modalXpath = '//*[@role="dialog" and contains(@class, "after-open")]';
+const modalXpath = '//*[@role="dialog" and @aria-modal="true" and contains(@class, "after-open")]';
 
 export default abstract class BaseModal extends Container {
-  protected constructor(page: Page, xpath?: string, opts?: { modalIndex: number }) {
-    super(page, xpath ? xpath : `${modalRootXpath}${opts ? [opts.modalIndex] : ''}${modalXpath}`);
+  protected constructor(page: Page, opts: { xpath?: string; modalIndex?: number } = { modalIndex: 1 }) {
+    super(page, opts.xpath ? opts.xpath : `${modalRootXpath}[${opts.modalIndex}]${modalXpath}`);
   }
 
   /**
