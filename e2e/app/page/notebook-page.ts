@@ -148,7 +148,7 @@ export default class NotebookPage extends NotebookFrame {
   /**
    * Run focused cell and insert a new cell below. Click Run button in toolbar.
    */
-  async run(timeout = 60000): Promise<void> {
+  async run(awaitIdle = true, timeout = 60000): Promise<void> {
     logger.info('Click notebook Run button.');
     await this.waitForKernelIdle(timeout, 1000);
     const runButton = await this.findRunButton();
@@ -157,7 +157,9 @@ export default class NotebookPage extends NotebookFrame {
     // Click Run button turns notebook page into Command_mode from Edit mode.
     // Short sleep to avoid check output too soon.
     await this.page.waitForTimeout(200);
-    await this.waitForKernelIdle(timeout, 2000);
+    if (awaitIdle) {
+      await this.waitForKernelIdle(timeout, 2000);
+    }
   }
 
   /**
@@ -402,22 +404,31 @@ export default class NotebookPage extends NotebookFrame {
       logger.info(`Type notebook code:\n--------${notebookCode}\n--------`);
     }
 
-    await this.run(timeOut);
+    await this.run(true, timeOut);
     const codeOutput = await codeCell.waitForOutput(timeOut);
     logger.info(`Notebook code output:\n${codeOutput}`);
     return codeOutput;
   }
 
-  async runCodeFile(cellIndex: number, fileName: string, timeout?: number) {
+  /** Start a code file, but do not await output. */
+  async startCodeFile(cellIndex: number, fileName: string, timeout?: number): Promise<NotebookCell> {
     const codeCell = this.findCell(cellIndex);
     const cellInput = await codeCell.focus();
     // Open file in notebook cell.
     await cellInput.type(`%load ${fileName}`);
-    await this.run(timeout);
+    await this.run(true, timeout);
     await this.waitForKernelIdle(10000, 2000); // load file into cell should be very quick.
     // run code.
     await codeCell.focus();
-    await this.run(timeout);
+
+    await this.run(false, timeout);
+    return codeCell;
+  }
+
+  async runCodeFile(cellIndex: number, fileName: string, timeout?: number) {
+    const codeCell = await this.startCodeFile(cellIndex, fileName, timeout);
+    await this.waitForKernelIdle(timeout, 2000);
+
     const codeOutput = await codeCell.waitForOutput(timeout);
     logger.info(`Notebook load "${fileName}". Code output:\n${codeOutput}`);
     return codeOutput;

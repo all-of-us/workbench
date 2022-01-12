@@ -25,16 +25,11 @@ describe('egress suspension', () => {
 
     await notebookPage.uploadFile(egressFilename, egressFilePath);
 
-    // Let the egress notebook run in the background; intentionally do not await here.
-    // It may not complete since our user may have their compute disabled while
-    // this is still running.
+    // Start the egress notebook and let it run in a tab. It may not complete
+    // since our user may have their compute disabled while this is still
+    // running. Intentionally do not wait for completion or check output.
     console.log('Generating egress via notebook');
-    notebookPage.runCodeFile(1, egressFilename, 5 * 60 * 1000).catch((err) => {
-      if (!page.isClosed()) {
-        console.log(
-          'egress notebook failed to run: this may be expected if the user was suspended during execution', err);
-      }
-    });
+    await notebookPage.startCodeFile(1, egressFilename, 5 * 60 * 1000);
 
     console.log('Awaiting security suspension in a new page');
     const newPage = await browser.newPage();
