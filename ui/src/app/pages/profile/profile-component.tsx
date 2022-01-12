@@ -23,7 +23,7 @@ import {styles} from 'app/pages/profile/profile-styles';
 import {institutionApi, profileApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {
-  formatFreeCreditsUSD,
+  formatInitialCreditsUSD,
   withUserProfile
 } from 'app/utils';
 import {wasReferredFromRenewal} from 'app/utils/access-utils';
@@ -438,14 +438,14 @@ export const ProfileComponent = fp.flow(
             <div style={{marginLeft: '1rem'}}>
               <div style={styles.title}>Initial credits balance</div>
               <hr style={{...styles.verticalLine}}/>
-              {profile && <FlexRow style={styles.freeCreditsBox}>
+              {profile && <FlexRow style={styles.initialCreditsBox}>
                   <FlexColumn style={{marginLeft: '0.8rem'}}>
                       <div style={{marginTop: '0.4rem'}}><AoU/> initial credits used:</div>
                       <div>Remaining <AoU/> initial credits:</div>
                   </FlexColumn>
                   <FlexColumn style={{alignItems: 'flex-end', marginLeft: '1.0rem'}}>
-                    <div style={{marginTop: '0.4rem', fontWeight: 600}}>{formatFreeCreditsUSD(profile.freeTierUsage)}</div>
-                    <div style={{fontWeight: 600}}>{formatFreeCreditsUSD(profile.freeTierDollarQuota - profile.freeTierUsage)}</div>
+                    <div style={{marginTop: '0.4rem', fontWeight: 600}}>{formatInitialCreditsUSD(profile.freeTierUsage)}</div>
+                    <div style={{fontWeight: 600}}>{formatInitialCreditsUSD(profile.freeTierDollarQuota - profile.freeTierUsage)}</div>
                   </FlexColumn>
               </FlexRow>}
             </div>

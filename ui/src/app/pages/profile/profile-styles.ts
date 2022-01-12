@@ -66,7 +66,7 @@ export const styles = reactStyles({
     marginTop: '0.5rem',
     marginBottom: '0.3rem'
   },
-  freeCreditsBox: {
+  initialCreditsBox: {
     borderRadius: '0.4rem',
     height: '3rem',
     marginTop: '0.7rem',

@@ -36,7 +36,7 @@ interface WorkspaceProps extends WithSpinnerOverlayProps {
 interface WorkspaceState {
   sharing: boolean;
   workspace: WorkspaceData;
-  workspaceFreeTierUsage: number;
+  workspaceInitialCreditsUsage: number;
   workspaceUserRoles: UserRole[];
   publishing: boolean;
 }
@@ -119,7 +119,7 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withCdrVersions())
     this.state = {
       sharing: false,
       workspace: undefined,
-      workspaceFreeTierUsage: undefined,
+      workspaceInitialCreditsUsage: undefined,
       workspaceUserRoles: [],
       publishing: false,
     };
@@ -130,15 +130,14 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withCdrVersions())
     this.setVisits();
     const workspace = this.reloadWorkspace(currentWorkspaceStore.getValue());
     if(WorkspacePermissionsUtil.canWrite(workspace.accessLevel)) {
-      this.loadFreeTierUsage(workspace);
+      this.loadInitialCreditsUsage(workspace);
     }
     this.loadUserRoles(workspace);
   }
 
-  async loadFreeTierUsage(workspace: WorkspaceData) {
-    const freeTierUsage = await workspacesApi().getBillingUsage(
-      workspace.namespace, workspace.id);
-    this.setState({workspaceFreeTierUsage: freeTierUsage.cost});
+  async loadInitialCreditsUsage(workspace: WorkspaceData) {
+    const usage = await workspacesApi().getBillingUsage(workspace.namespace, workspace.id);
+    this.setState({workspaceInitialCreditsUsage: usage.cost});
   }
 
   async setVisits() {
@@ -308,8 +307,8 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withCdrVersions())
             && isUsingFreeTierBillingAccount(workspace) &&
               <div style={{...styles.infoBox, height: '2.5rem'}}>
                 <div style={styles.infoBoxHeader}>Workspace Initial Credit Usage</div>
-                <div style={{fontSize: '0.5rem'}}>{this.state.workspaceFreeTierUsage !== undefined ?
-                  '$' + this.state.workspaceFreeTierUsage.toFixed(2) :
+                <div style={{fontSize: '0.5rem'}}>{this.state.workspaceInitialCreditsUsage !== undefined ?
+                  '$' + this.state.workspaceInitialCreditsUsage.toFixed(2) :
                   <Spinner style={{height: 16, width: 16}}/>
                 }</div>
               </div>}
