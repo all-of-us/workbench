@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import colors, {colorWithWhiteness} from 'app/styles/colors';
+import colors, { colorWithWhiteness } from 'app/styles/colors';
 
 const styles = {
   fadeTop: {
@@ -15,14 +15,17 @@ const styles = {
     minHeight: '8rem',
     background: `linear-gradient(180deg, ${colors.white} 0, rgba(255, 255, 255, 0) 8rem)`,
     border: 'solid transparent',
-    borderImage: 'linear-gradient(#b7b7b7, rgba(183, 183, 183, 0) 8rem) 1 100% / 1 / 0 stretch',
-    borderWidth: '0 1px'
-  }
+    borderImage:
+      'linear-gradient(#b7b7b7, rgba(183, 183, 183, 0) 8rem) 1 100% / 1 / 0 stretch',
+    borderWidth: '0 1px',
+  },
 };
 
-export const FadeBox = ({children, ...props}) => {
-  return <div {...props}>
-    <div style={styles.fadeTop} />
-    <div style={styles.fadeBottom}>{children}</div>
-  </div>;
+export const FadeBox = ({ children, ...props }) => {
+  return (
+    <div {...props}>
+      <div style={styles.fadeTop} />
+      <div style={styles.fadeBottom}>{children}</div>
+    </div>
+  );
 };

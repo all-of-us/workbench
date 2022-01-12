@@ -1,8 +1,7 @@
-import {StatusAlert, StatusAlertApi} from 'generated/fetch';
-import {stubNotImplementedError} from 'testing/stubs/stub-utils';
+import { StatusAlert, StatusAlertApi } from 'generated/fetch';
+import { stubNotImplementedError } from 'testing/stubs/stub-utils';
 
 export class StatusAlertApiStub extends StatusAlertApi {
-
   constructor() {
     super(undefined, undefined, (..._: any[]) => {
       throw stubNotImplementedError;
@@ -14,9 +13,8 @@ export class StatusAlertApiStub extends StatusAlertApi {
       statusAlertId: 1,
       title: 'lol',
       message: 'lol lol lol',
-      link: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
+      link: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
     };
-    return new Promise<StatusAlert>(resolve => resolve(statusAlertStub));
+    return new Promise<StatusAlert>((resolve) => resolve(statusAlertStub));
   }
-
 }

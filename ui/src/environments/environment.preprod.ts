@@ -1,11 +1,16 @@
-import {EnvAccessTierShortNames, Environment, ZendeskEnv} from 'environments/environment-type';
+import {
+  EnvAccessTierShortNames,
+  Environment,
+  ZendeskEnv,
+} from 'environments/environment-type';
 
 export const environment: Environment = {
   displayTag: 'preprod',
   shouldShowDisplayTag: true,
   allOfUsApiUrl: 'https://api.preprod-workbench.researchallofus.org',
   captchaSiteKey: '6LceVfYUAAAAAFInPvKl_bGoiyGyA3Y3dVp4o8Ly',
-  clientId: '589109405884-bmoj9ra8849rqeepuamk8jpu102iq363.apps.googleusercontent.com',
+  clientId:
+    '589109405884-bmoj9ra8849rqeepuamk8jpu102iq363.apps.googleusercontent.com',
   leoApiUrl: 'https://notebooks.firecloud.org',
   publicUiUrl: 'https://databrowser.researchallofus.org',
   debug: false,
@@ -20,5 +25,8 @@ export const environment: Environment = {
   enableCaptcha: true,
   enablePublishedWorkspaces: false,
   enableFooter: true,
-  accessTiersVisibleToUsers: [EnvAccessTierShortNames.Registered, EnvAccessTierShortNames.Controlled],
+  accessTiersVisibleToUsers: [
+    EnvAccessTierShortNames.Registered,
+    EnvAccessTierShortNames.Controlled,
+  ],
 };

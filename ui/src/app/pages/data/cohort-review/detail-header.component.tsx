@@ -1,23 +1,37 @@
 import * as fp from 'lodash/fp';
-import moment from 'moment'
-import {RadioButton} from 'primereact/radiobutton';
+import moment from 'moment';
+import { RadioButton } from 'primereact/radiobutton';
 import * as React from 'react';
-import {validate, validators} from 'validate.js';
+import { validate, validators } from 'validate.js';
 
-import {DatePicker, NumberInput, Select, ValidationError} from 'app/components/inputs';
-import {filterStateStore, reviewPaginationStore, visitsFilterOptions} from 'app/services/review-state.service';
-import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
+import {
+  DatePicker,
+  NumberInput,
+  Select,
+  ValidationError,
+} from 'app/components/inputs';
+import {
+  filterStateStore,
+  reviewPaginationStore,
+  visitsFilterOptions,
+} from 'app/services/review-state.service';
+import { cohortReviewApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {reactStyles, summarizeErrors, withCurrentCohortReview, withCurrentWorkspace} from 'app/utils';
-import {triggerEvent} from 'app/utils/analytics';
+import {
+  reactStyles,
+  summarizeErrors,
+  withCurrentCohortReview,
+  withCurrentWorkspace,
+} from 'app/utils';
+import { triggerEvent } from 'app/utils/analytics';
 import {
   currentCohortReviewStore,
   currentWorkspaceStore,
-  NavigationProps
+  NavigationProps,
 } from 'app/utils/navigation';
 import { MatchParams } from 'app/utils/stores';
-import {withNavigation} from 'app/utils/with-navigation-hoc';
-import {WorkspaceData} from 'app/utils/workspace-data';
+import { withNavigation } from 'app/utils/with-navigation-hoc';
+import { WorkspaceData } from 'app/utils/workspace-data';
 import {
   CohortReview,
   Filter,
@@ -25,12 +39,14 @@ import {
   Operator,
   PageFilterRequest,
   ParticipantCohortStatus,
-  SortOrder
+  SortOrder,
 } from 'generated/fetch';
-import {RouteComponentProps, withRouter} from 'react-router-dom';
+import { RouteComponentProps, withRouter } from 'react-router-dom';
 
 validators.dateFormat = (value: string) => {
-  return moment(value, 'YYYY-MM-DD', true).isValid() ? null : 'must be in format \'YYYY-MM-DD\'';
+  return moment(value, 'YYYY-MM-DD', true).isValid()
+    ? null
+    : "must be in format 'YYYY-MM-DD'";
 };
 
 const css = `
@@ -110,7 +126,7 @@ const styles = reactStyles({
   },
   filterDiv: {
     float: 'left',
-    marginRight: '0.5rem'
+    marginRight: '0.5rem',
   },
   resetBtn: {
     float: 'right',
@@ -127,18 +143,18 @@ const styles = reactStyles({
   validation: {
     margin: '0 0 0 25%',
     lineHeight: 1,
-  }
+  },
 });
 const otherStyles = {
   navigation: {
     ...styles.headerSection,
     width: '22%',
     minWidth: '8.5rem',
-    padding: '1.15rem 0.4rem'
+    padding: '1.15rem 0.4rem',
   },
   filters: {
     ...styles.headerSection,
-    minWidth: '16rem'
+    minWidth: '16rem',
   },
   radios: {
     ...styles.headerSection,
@@ -166,7 +182,7 @@ const otherStyles = {
   },
   filterLabel: {
     ...styles.filterDiv,
-    marginTop: '4px'
+    marginTop: '4px',
   },
   filterInput: {
     ...styles.filterDiv,
@@ -175,19 +191,21 @@ const otherStyles = {
   filterSelect: {
     ...styles.filterDiv,
     marginLeft: '1rem',
-    width: '70%'
+    width: '70%',
   },
   filterText: {
     ...styles.filterDiv,
     marginTop: '4px ',
-  }
+  },
 };
 const FILTER_KEYS = {
   AGE: 'Age',
   DATE: 'Date',
-  VISITS: 'Visits'
+  VISITS: 'Visits',
 };
-export interface DetailHeaderProps extends NavigationProps, RouteComponentProps<MatchParams> {
+export interface DetailHeaderProps
+  extends NavigationProps,
+    RouteComponentProps<MatchParams> {
   cohortReview: CohortReview;
   participant: ParticipantCohortStatus;
   workspace: WorkspaceData;
@@ -202,7 +220,12 @@ export interface DetailHeaderState {
   filterTab: string;
 }
 
-export const DetailHeader = fp.flow(withCurrentCohortReview(), withCurrentWorkspace(), withNavigation, withRouter)(
+export const DetailHeader = fp.flow(
+  withCurrentCohortReview(),
+  withCurrentWorkspace(),
+  withNavigation,
+  withRouter
+)(
   class extends React.Component<DetailHeaderProps, DetailHeaderState> {
     constructor(props: DetailHeaderProps) {
       super(props);
@@ -212,7 +235,7 @@ export const DetailHeader = fp.flow(withCurrentCohortReview(), withCurrentWorksp
         priorId: undefined,
         afterId: undefined,
         filterState: filterStateStore.getValue(),
-        filterTab: FILTER_KEYS.DATE
+        filterTab: FILTER_KEYS.DATE,
       };
     }
 
@@ -227,10 +250,15 @@ export const DetailHeader = fp.flow(withCurrentCohortReview(), withCurrentWorksp
     }
 
     update = () => {
-      const {cohortReview: {participantCohortStatuses}, participant} = this.props;
+      const {
+        cohortReview: { participantCohortStatuses },
+        participant,
+      } = this.props;
       const pagination = reviewPaginationStore.getValue();
       const id = participant && participant.participantId;
-      const index = participantCohortStatuses.findIndex(({participantId}) => participantId === id);
+      const index = participantCohortStatuses.findIndex(
+        ({ participantId }) => participantId === id
+      );
 
       // The participant is not on the current page... for now, just log it and ignore it
       // We get here by URL (when a direct link to a detail page is shared, for example)
@@ -244,62 +272,93 @@ export const DetailHeader = fp.flow(withCurrentCohortReview(), withCurrentWorksp
         return;
       }
 
-      const totalPages = Math.ceil(pagination.queryResultSize / pagination.pageSize);
+      const totalPages = Math.ceil(
+        pagination.queryResultSize / pagination.pageSize
+      );
 
       this.setState({
-        afterId: participantCohortStatuses[index + 1] && participantCohortStatuses[index + 1]['participantId'],
+        afterId:
+          participantCohortStatuses[index + 1] &&
+          participantCohortStatuses[index + 1]['participantId'],
         isFirstParticipant: pagination.page === 0 && index === 0,
-        isLastParticipant: (pagination.page + 1) === totalPages && (index + 1) === participantCohortStatuses.length,
-        priorId: participantCohortStatuses[index - 1] && participantCohortStatuses[index - 1]['participantId']
+        isLastParticipant:
+          pagination.page + 1 === totalPages &&
+          index + 1 === participantCohortStatuses.length,
+        priorId:
+          participantCohortStatuses[index - 1] &&
+          participantCohortStatuses[index - 1]['participantId'],
       });
-    }
+    };
 
     backToTable() {
-      const {ns, wsid, cid} = this.props.match.params;
-      this.props.navigate(['workspaces', ns, wsid, 'data', 'cohorts', cid, 'review', 'participants']);
+      const { ns, wsid, cid } = this.props.match.params;
+      this.props.navigate([
+        'workspaces',
+        ns,
+        wsid,
+        'data',
+        'cohorts',
+        cid,
+        'review',
+        'participants',
+      ]);
     }
 
     previous = () => {
       this.navigate(true);
-    }
+    };
 
     next = () => {
       this.navigate(false);
-    }
+    };
 
     navigate = (left: boolean) => {
-      const {afterId, isFirstParticipant, isLastParticipant, priorId} = this.state;
+      const { afterId, isFirstParticipant, isLastParticipant, priorId } =
+        this.state;
       const id = left ? priorId : afterId;
       const hasNext = !(left ? isFirstParticipant : isLastParticipant);
 
       if (id !== undefined) {
         this.navigateById(id);
       } else if (hasNext) {
-        const statusGetter = (statuses: ParticipantCohortStatus[]) => left
-          ? statuses[statuses.length - 1]
-          : statuses[0];
+        const statusGetter = (statuses: ParticipantCohortStatus[]) =>
+          left ? statuses[statuses.length - 1] : statuses[0];
 
-        const {page, pageSize} = reviewPaginationStore.getValue();
-        const {ns, wsid, cid} = this.props.match.params;
-        const {cdrVersionId} = currentWorkspaceStore.getValue();
+        const { page, pageSize } = reviewPaginationStore.getValue();
+        const { ns, wsid, cid } = this.props.match.params;
+        const { cdrVersionId } = currentWorkspaceStore.getValue();
         const request = {
           page: left ? page - 1 : page + 1,
           pageSize: pageSize,
           sortOrder: SortOrder.Asc,
-          filters: {items: this.getRequestFilters()}
+          filters: { items: this.getRequestFilters() },
         } as PageFilterRequest;
-        cohortReviewApi().getParticipantCohortStatuses(ns, wsid, +cid, +cdrVersionId, request).then(response => {
-          currentCohortReviewStore.next(response.cohortReview);
-          const status = statusGetter(response.cohortReview.participantCohortStatuses);
-          this.navigateById(status.participantId);
-        });
+        cohortReviewApi()
+          .getParticipantCohortStatuses(ns, wsid, +cid, +cdrVersionId, request)
+          .then((response) => {
+            currentCohortReviewStore.next(response.cohortReview);
+            const status = statusGetter(
+              response.cohortReview.participantCohortStatuses
+            );
+            this.navigateById(status.participantId);
+          });
       }
-    }
+    };
 
     navigateById = (id: number): void => {
-      const {ns, wsid, cid} = this.props.match.params;
-      this.props.navigate(['workspaces', ns, wsid, 'data', 'cohorts', cid, 'review', 'participants', id]);
-    }
+      const { ns, wsid, cid } = this.props.match.params;
+      this.props.navigate([
+        'workspaces',
+        ns,
+        wsid,
+        'data',
+        'cohorts',
+        cid,
+        'review',
+        'participants',
+        id,
+      ]);
+    };
 
     getRequestFilters = () => {
       const filters = filterStateStore.getValue().participants;
@@ -309,246 +368,300 @@ export const DetailHeader = fp.flow(withCurrentCohortReview(), withCurrentWorksp
           acc.push({
             property: Columns[_type],
             values: [values],
-            operator: Operator.LIKE
+            operator: Operator.LIKE,
           } as Filter);
         } else if (values.length && !values.includes('Select All')) {
           acc.push({
             property: Columns[_type],
             values: values,
-            operator: Operator.IN
+            operator: Operator.IN,
           } as Filter);
         }
         return acc;
       }, []);
-    }
+    };
 
     vocabChange = (event: any) => {
-      const {value} = event;
+      const { value } = event;
       triggerEvent(
         EVENT_CATEGORY,
         'Click',
-        `View ${value.charAt(0).toUpperCase() + value.slice(1)} - Review Individual`
+        `View ${
+          value.charAt(0).toUpperCase() + value.slice(1)
+        } - Review Individual`
       );
-      const {filterState} = this.state;
+      const { filterState } = this.state;
       filterState.vocab = value;
       filterStateStore.next(filterState);
-      this.setState({filterState: filterState});
-    }
+      this.setState({ filterState: filterState });
+    };
     setFilterTab = (filterTab: string) => {
-      triggerEvent(EVENT_CATEGORY, 'Click', `Filter - ${filterTab} - Review Individual`);
-      this.setState({filterTab});
-    }
+      triggerEvent(
+        EVENT_CATEGORY,
+        'Click',
+        `Filter - ${filterTab} - Review Individual`
+      );
+      this.setState({ filterTab });
+    };
 
     setFilter = (value: any, type: string) => {
-      const {filterState} = this.state;
+      const { filterState } = this.state;
       filterState.global[type] = value;
       filterStateStore.next(filterState);
-      this.setState({filterState: filterState});
-    }
+      this.setState({ filterState: filterState });
+    };
 
     clearFilters = () => {
-      triggerEvent(EVENT_CATEGORY, 'Click', 'Filter - Reset - Review Individual');
-      const {filterState} = this.state;
+      triggerEvent(
+        EVENT_CATEGORY,
+        'Click',
+        'Filter - Reset - Review Individual'
+      );
+      const { filterState } = this.state;
       filterState.global = {
         dateMin: null,
         dateMax: null,
         ageMin: '',
         ageMax: '',
-        visits: null
+        visits: null,
       };
       filterStateStore.next(filterState);
-      this.setState({filterState: filterState});
-    }
+      this.setState({ filterState: filterState });
+    };
 
     render() {
-      const {cohortReview: {cohortName, description}, participant} = this.props;
       const {
-        filterState: {global: {ageMin, ageMax, dateMin, dateMax, visits}},
+        cohortReview: { cohortName, description },
+        participant,
+      } = this.props;
+      const {
+        filterState: {
+          global: { ageMin, ageMax, dateMin, dateMax, visits },
+        },
         filterState,
         filterTab,
         isFirstParticipant,
-        isLastParticipant
+        isLastParticipant,
       } = this.state;
-      const errors = validate({ageMin, ageMax, dateMin, dateMax}, {
-        ageMin: {
-          numericality: {
-            onlyInteger: true,
-            greaterThanOrEqualTo: 0,
-            lessThanOrEqualTo: 120,
-            message: 'must be a whole number 0 - 120'
-          }
-        },
-        ageMax: {
-          numericality: {
-            onlyInteger: true,
-            greaterThanOrEqualTo: 0,
-            lessThanOrEqualTo: 120,
-            message: 'must be a whole number 0 - 120'
-          }
-        },
-        dateMin: {
-          dateFormat: {}
-        },
-        dateMax: {
-          dateFormat: {}
+      const errors = validate(
+        { ageMin, ageMax, dateMin, dateMax },
+        {
+          ageMin: {
+            numericality: {
+              onlyInteger: true,
+              greaterThanOrEqualTo: 0,
+              lessThanOrEqualTo: 120,
+              message: 'must be a whole number 0 - 120',
+            },
+          },
+          ageMax: {
+            numericality: {
+              onlyInteger: true,
+              greaterThanOrEqualTo: 0,
+              lessThanOrEqualTo: 120,
+              message: 'must be a whole number 0 - 120',
+            },
+          },
+          dateMin: {
+            dateFormat: {},
+          },
+          dateMax: {
+            dateFormat: {},
+          },
         }
-      });
-      return <div className='detail-header'>
-        <style>{css}</style>
-        <button
-          style={styles.backBtn}
-          type='button'
-          title='Go Back to the review set table'
-          onClick={() => this.backToTable()}>
-          Back to review set
-        </button>
-        <h4 style={styles.title}>{cohortName}</h4>
-        <div style={styles.description}>{description}</div>
-        {errors && <div className='error-messages'>
-          <ValidationError>
-            {summarizeErrors(errors && (
-              (filterTab === FILTER_KEYS.AGE && ((ageMin && errors.ageMin) || (ageMax && errors.ageMax))) ||
-              (filterTab === FILTER_KEYS.DATE && ((dateMin && errors.dateMin) || (dateMax && errors.dateMax)))
-            ))}
-          </ValidationError>
-        </div>}
-        <div style={{height: '3.5rem'}}>
-          <div style={{...otherStyles.navigation, textAlign: 'center'}}>
-            <button
-              style={{
-                ...(isFirstParticipant ? otherStyles.navBtnDisabled : otherStyles.navBtnActive),
-                float: 'left',
-              }}
-              type='button'
-              title='Go To the Prior Participant'
-              disabled={isFirstParticipant}
-              onClick={() => this.previous()}>
-              <i style={styles.icon} className='pi pi-angle-left' />
-            </button>
-            <span style={styles.participantText}>Participant {participant.participantId}</span>
-            <button
-              style={{
-                ...(isLastParticipant ? otherStyles.navBtnDisabled : otherStyles.navBtnActive),
-                float: 'right',
-              }}
-              type='button'
-              title='Go To the Next Participant'
-              disabled={isLastParticipant}
-              onClick={() => this.next()}>
-              <i style={styles.icon} className='pi pi-angle-right' />
-            </button>
-          </div>
-          <div style={otherStyles.filters} className={'global-filters'}>
-            <div style={styles.filterHeader}>
+      );
+      return (
+        <div className='detail-header'>
+          <style>{css}</style>
+          <button
+            style={styles.backBtn}
+            type='button'
+            title='Go Back to the review set table'
+            onClick={() => this.backToTable()}
+          >
+            Back to review set
+          </button>
+          <h4 style={styles.title}>{cohortName}</h4>
+          <div style={styles.description}>{description}</div>
+          {errors && (
+            <div className='error-messages'>
+              <ValidationError>
+                {summarizeErrors(
+                  errors &&
+                    ((filterTab === FILTER_KEYS.AGE &&
+                      ((ageMin && errors.ageMin) ||
+                        (ageMax && errors.ageMax))) ||
+                      (filterTab === FILTER_KEYS.DATE &&
+                        ((dateMin && errors.dateMin) ||
+                          (dateMax && errors.dateMax))))
+                )}
+              </ValidationError>
+            </div>
+          )}
+          <div style={{ height: '3.5rem' }}>
+            <div style={{ ...otherStyles.navigation, textAlign: 'center' }}>
               <button
-                style={filterTab === FILTER_KEYS.DATE ? otherStyles.tabActive : styles.filterTab}
-                onClick={() => this.setFilterTab(FILTER_KEYS.DATE)}>
-                Date Range
+                style={{
+                  ...(isFirstParticipant
+                    ? otherStyles.navBtnDisabled
+                    : otherStyles.navBtnActive),
+                  float: 'left',
+                }}
+                type='button'
+                title='Go To the Prior Participant'
+                disabled={isFirstParticipant}
+                onClick={() => this.previous()}
+              >
+                <i style={styles.icon} className='pi pi-angle-left' />
               </button>
+              <span style={styles.participantText}>
+                Participant {participant.participantId}
+              </span>
               <button
-                style={filterTab === FILTER_KEYS.AGE ? otherStyles.tabActive : styles.filterTab}
-                onClick={() => this.setFilterTab(FILTER_KEYS.AGE)}>
-                Age Range
-              </button>
-              <button
-                style={filterTab === FILTER_KEYS.VISITS ? otherStyles.tabActive : styles.filterTab}
-                onClick={() => this.setFilterTab(FILTER_KEYS.VISITS)}>
-                Visits
-              </button>
-              <button
-                style={styles.resetBtn}
-                onClick={() => this.clearFilters()}>
-                RESET FILTER
+                style={{
+                  ...(isLastParticipant
+                    ? otherStyles.navBtnDisabled
+                    : otherStyles.navBtnActive),
+                  float: 'right',
+                }}
+                type='button'
+                title='Go To the Next Participant'
+                disabled={isLastParticipant}
+                onClick={() => this.next()}
+              >
+                <i style={styles.icon} className='pi pi-angle-right' />
               </button>
             </div>
-            <div style={styles.filterBody}>
-              {filterTab === FILTER_KEYS.DATE && <div>
-                <div style={otherStyles.filterLabel}>
-                  Date Range:
-                </div>
-                <div style={otherStyles.filterInput}>
-                  <DatePicker
-                    value={dateMin}
-                    onChange={v => this.setFilter(v, 'dateMin')}
-                    maxDate={new Date()}
-                  />
-                </div>
-                <div style={otherStyles.filterText}>
-                  and
-                </div>
-                <div style={otherStyles.filterInput}>
-                  <DatePicker
-                    value={dateMax}
-                    onChange={v => this.setFilter(v, 'dateMax')}
-                    maxDate={new Date()}
-                  />
-                </div>
-              </div>}
-              {filterTab === FILTER_KEYS.AGE && <div>
-                <div style={otherStyles.filterLabel}>
-                  Age Range:
-                </div>
-                <div style={otherStyles.filterInput}>
-                  <NumberInput
-                    min='0'
-                    max='120'
-                    value={ageMin}
-                    onChange={(e) => this.setFilter(e, 'ageMin')}
-                  />
-                </div>
-                <div style={otherStyles.filterText}>
-                  and
-                </div>
-                <div style={otherStyles.filterInput}>
-                  <NumberInput
-                    min='0'
-                    max='120'
-                    value={ageMax}
-                    onChange={(e) => this.setFilter(e, 'ageMax')}
-                  />
-                </div>
-              </div>}
-              {filterTab === FILTER_KEYS.VISITS && <div>
-                <div style={otherStyles.filterLabel}>
-                  Visits:
-                </div>
-                <div style={otherStyles.filterSelect}>
-                  <Select
-                    options={visitsFilterOptions.getValue()}
-                    value={visits}
-                    onChange={(e) => this.setFilter(e, 'visits')}
-                    theme={(theme) => ({
-                      ...theme,
-                      colors: {
-                        ...theme.colors,
-                        primary: '#216FB4',
-                      },
-                    })}
-                  />
-                </div>
-              </div>}
+            <div style={otherStyles.filters} className={'global-filters'}>
+              <div style={styles.filterHeader}>
+                <button
+                  style={
+                    filterTab === FILTER_KEYS.DATE
+                      ? otherStyles.tabActive
+                      : styles.filterTab
+                  }
+                  onClick={() => this.setFilterTab(FILTER_KEYS.DATE)}
+                >
+                  Date Range
+                </button>
+                <button
+                  style={
+                    filterTab === FILTER_KEYS.AGE
+                      ? otherStyles.tabActive
+                      : styles.filterTab
+                  }
+                  onClick={() => this.setFilterTab(FILTER_KEYS.AGE)}
+                >
+                  Age Range
+                </button>
+                <button
+                  style={
+                    filterTab === FILTER_KEYS.VISITS
+                      ? otherStyles.tabActive
+                      : styles.filterTab
+                  }
+                  onClick={() => this.setFilterTab(FILTER_KEYS.VISITS)}
+                >
+                  Visits
+                </button>
+                <button
+                  style={styles.resetBtn}
+                  onClick={() => this.clearFilters()}
+                >
+                  RESET FILTER
+                </button>
+              </div>
+              <div style={styles.filterBody}>
+                {filterTab === FILTER_KEYS.DATE && (
+                  <div>
+                    <div style={otherStyles.filterLabel}>Date Range:</div>
+                    <div style={otherStyles.filterInput}>
+                      <DatePicker
+                        value={dateMin}
+                        onChange={(v) => this.setFilter(v, 'dateMin')}
+                        maxDate={new Date()}
+                      />
+                    </div>
+                    <div style={otherStyles.filterText}>and</div>
+                    <div style={otherStyles.filterInput}>
+                      <DatePicker
+                        value={dateMax}
+                        onChange={(v) => this.setFilter(v, 'dateMax')}
+                        maxDate={new Date()}
+                      />
+                    </div>
+                  </div>
+                )}
+                {filterTab === FILTER_KEYS.AGE && (
+                  <div>
+                    <div style={otherStyles.filterLabel}>Age Range:</div>
+                    <div style={otherStyles.filterInput}>
+                      <NumberInput
+                        min='0'
+                        max='120'
+                        value={ageMin}
+                        onChange={(e) => this.setFilter(e, 'ageMin')}
+                      />
+                    </div>
+                    <div style={otherStyles.filterText}>and</div>
+                    <div style={otherStyles.filterInput}>
+                      <NumberInput
+                        min='0'
+                        max='120'
+                        value={ageMax}
+                        onChange={(e) => this.setFilter(e, 'ageMax')}
+                      />
+                    </div>
+                  </div>
+                )}
+                {filterTab === FILTER_KEYS.VISITS && (
+                  <div>
+                    <div style={otherStyles.filterLabel}>Visits:</div>
+                    <div style={otherStyles.filterSelect}>
+                      <Select
+                        options={visitsFilterOptions.getValue()}
+                        value={visits}
+                        onChange={(e) => this.setFilter(e, 'visits')}
+                        theme={(theme) => ({
+                          ...theme,
+                          colors: {
+                            ...theme.colors,
+                            primary: '#216FB4',
+                          },
+                        })}
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-          <div style={{...otherStyles.radios, marginRight: 0}}>
-            <div style={{marginBottom: '0.5rem'}}>
-              <RadioButton
-                name='vocab'
-                value='source'
-                onChange={this.vocabChange}
-                checked={filterState.vocab === 'source'} />
-              <label className='p-radiobutton-label'>View Source Concepts</label>
-            </div>
-            <div>
-              <RadioButton
-                name='vocab'
-                value='standard'
-                onChange={this.vocabChange}
-                checked={filterState.vocab === 'standard'} />
-              <label className='p-radiobutton-label'>View Standard Concepts</label>
+            <div style={{ ...otherStyles.radios, marginRight: 0 }}>
+              <div style={{ marginBottom: '0.5rem' }}>
+                <RadioButton
+                  name='vocab'
+                  value='source'
+                  onChange={this.vocabChange}
+                  checked={filterState.vocab === 'source'}
+                />
+                <label className='p-radiobutton-label'>
+                  View Source Concepts
+                </label>
+              </div>
+              <div>
+                <RadioButton
+                  name='vocab'
+                  value='standard'
+                  onChange={this.vocabChange}
+                  checked={filterState.vocab === 'standard'}
+                />
+                <label className='p-radiobutton-label'>
+                  View Standard Concepts
+                </label>
+              </div>
             </div>
           </div>
         </div>
-      </div>;
+      );
     }
   }
 );

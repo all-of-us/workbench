@@ -1,5 +1,5 @@
-import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
-import {useEffect} from 'react';
+import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
+import { useEffect } from 'react';
 import { EgressEventsTable } from './egress-events-table';
 
 export const AdminEgressEvents = (props: WithSpinnerOverlayProps) => {
@@ -7,7 +7,9 @@ export const AdminEgressEvents = (props: WithSpinnerOverlayProps) => {
     props.hideSpinner();
   }, []);
 
-  return <>
-    <EgressEventsTable />
-  </>;
-}
+  return (
+    <>
+      <EgressEventsTable />
+    </>
+  );
+};

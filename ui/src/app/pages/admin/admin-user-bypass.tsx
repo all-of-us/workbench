@@ -1,16 +1,16 @@
 import * as React from 'react';
 import * as fp from 'lodash/fp';
 
-import {Button, IconButton} from 'app/components/buttons';
-import {FlexColumn} from 'app/components/flex';
-import {Check, ClrIcon, Times} from 'app/components/icons';
-import {Toggle} from 'app/components/inputs';
-import {PopupTrigger} from 'app/components/popups';
-import {SpinnerOverlay} from 'app/components/spinners';
-import { profileApi, userAdminApi} from 'app/services/swagger-fetch-clients';
+import { Button, IconButton } from 'app/components/buttons';
+import { FlexColumn } from 'app/components/flex';
+import { Check, ClrIcon, Times } from 'app/components/icons';
+import { Toggle } from 'app/components/inputs';
+import { PopupTrigger } from 'app/components/popups';
+import { SpinnerOverlay } from 'app/components/spinners';
+import { profileApi, userAdminApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {serverConfigStore} from 'app/utils/stores';
-import {AccessModule, AdminTableUser} from 'generated/fetch';
+import { serverConfigStore } from 'app/utils/stores';
+import { AccessModule, AdminTableUser } from 'generated/fetch';
 
 interface Props {
   // The user to render the bypass panel for.
@@ -34,9 +34,15 @@ interface State {
 
 const getBypassedModules = (user: AdminTableUser): Array<AccessModule> => {
   return [
-    ...(user.complianceTrainingBypassTime ? [AccessModule.COMPLIANCETRAINING] : []),
-    ...(user.ctComplianceTrainingBypassTime ? [AccessModule.CTCOMPLIANCETRAINING] : []),
-    ...(user.dataUseAgreementBypassTime ? [AccessModule.DATAUSERCODEOFCONDUCT] : []),
+    ...(user.complianceTrainingBypassTime
+      ? [AccessModule.COMPLIANCETRAINING]
+      : []),
+    ...(user.ctComplianceTrainingBypassTime
+      ? [AccessModule.CTCOMPLIANCETRAINING]
+      : []),
+    ...(user.dataUseAgreementBypassTime
+      ? [AccessModule.DATAUSERCODEOFCONDUCT]
+      : []),
     ...(user.eraCommonsBypassTime ? [AccessModule.ERACOMMONS] : []),
     ...(user.twoFactorAuthBypassTime ? [AccessModule.TWOFACTORAUTH] : []),
     ...(user.rasLinkLoginGovBypassTime ? [AccessModule.RASLINKLOGINGOV] : []),
@@ -47,17 +53,17 @@ export class AdminUserBypass extends React.Component<Props, State> {
   popupRef: React.RefObject<PopupTrigger>;
   constructor(props: Props) {
     super(props);
-    const {user} = props;
+    const { user } = props;
     this.state = {
       isPopupOpen: false,
       isSaving: false,
-      selectedModules: getBypassedModules(user)
+      selectedModules: getBypassedModules(user),
     };
     this.popupRef = React.createRef<PopupTrigger>();
   }
 
   private resetState() {
-    this.setState({selectedModules: getBypassedModules(this.props.user)});
+    this.setState({ selectedModules: getBypassedModules(this.props.user) });
   }
 
   private closePopup() {
@@ -72,17 +78,18 @@ export class AdminUserBypass extends React.Component<Props, State> {
   }
 
   async save() {
-    const {selectedModules} = this.state;
-    const {user} = this.props;
+    const { selectedModules } = this.state;
+    const { user } = this.props;
     const changedModules = fp.xor(getBypassedModules(user), selectedModules);
-    this.setState({isSaving: true});
+    this.setState({ isSaving: true });
     try {
       for (const module of changedModules) {
-        await userAdminApi()
-          .bypassAccessRequirement(user.userId,
-          {isBypassed: selectedModules.includes(module), moduleName: module});
+        await userAdminApi().bypassAccessRequirement(user.userId, {
+          isBypassed: selectedModules.includes(module),
+          moduleName: module,
+        });
       }
-      this.setState({isSaving: false});
+      this.setState({ isSaving: false });
       this.resetState();
       this.closePopup();
       if (this.props.onBypassModuleUpdate) {
@@ -92,90 +99,171 @@ export class AdminUserBypass extends React.Component<Props, State> {
       // TODO: if we had a toast component, here would be the right place to fire a toast
       // notification that saving failed and the user should retry. Instead, we'll just keep
       // the popup open but remove the spinner.
-      this.setState({isSaving: false});
+      this.setState({ isSaving: false });
     }
   }
 
   hasEdited(): boolean {
-    return fp.xor(this.state.selectedModules, getBypassedModules(this.props.user)).length !== 0;
+    return (
+      fp.xor(this.state.selectedModules, getBypassedModules(this.props.user))
+        .length !== 0
+    );
   }
 
   componentDidUpdate(prevProps: Props) {
-  // Reset the "default" set of selected modules if the rendered user changes.
+    // Reset the "default" set of selected modules if the rendered user changes.
     if (prevProps.user.userId !== this.props.user.userId) {
       this.resetState();
-    } else if (!fp.isEqual(getBypassedModules(prevProps.user), getBypassedModules(this.props.user))) {
+    } else if (
+      !fp.isEqual(
+        getBypassedModules(prevProps.user),
+        getBypassedModules(this.props.user)
+      )
+    ) {
       console.log('User modules changed');
       this.resetState();
     }
   }
 
   render() {
-    const {selectedModules, isPopupOpen, isSaving} = this.state;
+    const { selectedModules, isPopupOpen, isSaving } = this.state;
     const {
       enableComplianceTraining,
       enableEraCommons,
       enableRasLoginGovLinking,
-      enforceRasLoginGovLinking} = serverConfigStore.get().config;
-    return <PopupTrigger
+      enforceRasLoginGovLinking,
+    } = serverConfigStore.get().config;
+    return (
+      <PopupTrigger
         ref={this.popupRef}
         side='bottom'
-        onClose={() => { this.setState({isPopupOpen: false}); this.resetState(); }}
-        onOpen={() => this.setState({isPopupOpen: true})}
-        content={<FlexColumn style={{padding: '1rem'}}>
-          {enableComplianceTraining && <Toggle name='RT Compliance Training'
-                  checked={selectedModules.includes(AccessModule.COMPLIANCETRAINING)}
-                  data-test-id='rt-compliance-training-toggle'
-                  onToggle={() => {this.setState({selectedModules:
-                      fp.xor(selectedModules, [AccessModule.COMPLIANCETRAINING])}); }}
-          />}
-          {enableComplianceTraining && <Toggle name='CT Compliance Training'
-                  checked={selectedModules.includes(AccessModule.CTCOMPLIANCETRAINING)}
-                  data-test-id='ct-compliance-training-toggle'
-                  onToggle={() => {this.setState({selectedModules:
-                      fp.xor(selectedModules, [AccessModule.CTCOMPLIANCETRAINING])}); }}
-          />}
-          {enableEraCommons && <Toggle name='eRA Commons Linking'
-                  checked={selectedModules.includes(AccessModule.ERACOMMONS)}
-                  data-test-id='era-commons-toggle'
-                  onToggle={() => {this.setState({selectedModules:
-                    fp.xor(selectedModules, [AccessModule.ERACOMMONS])}); }}
-          />}
-          <Toggle name='Two Factor Auth'
-                  checked={selectedModules.includes(AccessModule.TWOFACTORAUTH)}
-                  data-test-id='two-factor-auth-toggle'
-                  onToggle={() => {this.setState({selectedModules:
-                    fp.xor(selectedModules, [AccessModule.TWOFACTORAUTH])}); }}
+        onClose={() => {
+          this.setState({ isPopupOpen: false });
+          this.resetState();
+        }}
+        onOpen={() => this.setState({ isPopupOpen: true })}
+        content={
+          <FlexColumn style={{ padding: '1rem' }}>
+            {enableComplianceTraining && (
+              <Toggle
+                name='RT Compliance Training'
+                checked={selectedModules.includes(
+                  AccessModule.COMPLIANCETRAINING
+                )}
+                data-test-id='rt-compliance-training-toggle'
+                onToggle={() => {
+                  this.setState({
+                    selectedModules: fp.xor(selectedModules, [
+                      AccessModule.COMPLIANCETRAINING,
+                    ]),
+                  });
+                }}
+              />
+            )}
+            {enableComplianceTraining && (
+              <Toggle
+                name='CT Compliance Training'
+                checked={selectedModules.includes(
+                  AccessModule.CTCOMPLIANCETRAINING
+                )}
+                data-test-id='ct-compliance-training-toggle'
+                onToggle={() => {
+                  this.setState({
+                    selectedModules: fp.xor(selectedModules, [
+                      AccessModule.CTCOMPLIANCETRAINING,
+                    ]),
+                  });
+                }}
+              />
+            )}
+            {enableEraCommons && (
+              <Toggle
+                name='eRA Commons Linking'
+                checked={selectedModules.includes(AccessModule.ERACOMMONS)}
+                data-test-id='era-commons-toggle'
+                onToggle={() => {
+                  this.setState({
+                    selectedModules: fp.xor(selectedModules, [
+                      AccessModule.ERACOMMONS,
+                    ]),
+                  });
+                }}
+              />
+            )}
+            <Toggle
+              name='Two Factor Auth'
+              checked={selectedModules.includes(AccessModule.TWOFACTORAUTH)}
+              data-test-id='two-factor-auth-toggle'
+              onToggle={() => {
+                this.setState({
+                  selectedModules: fp.xor(selectedModules, [
+                    AccessModule.TWOFACTORAUTH,
+                  ]),
+                });
+              }}
+            />
+            <Toggle
+              name='Data User Code of Conduct'
+              checked={selectedModules.includes(
+                AccessModule.DATAUSERCODEOFCONDUCT
+              )}
+              data-test-id='ducc-toggle'
+              onToggle={() => {
+                this.setState({
+                  selectedModules: fp.xor(selectedModules, [
+                    AccessModule.DATAUSERCODEOFCONDUCT,
+                  ]),
+                });
+              }}
+            />
+            {(enableRasLoginGovLinking || enforceRasLoginGovLinking) && (
+              <Toggle
+                name='RAS Login.gov Link'
+                checked={selectedModules.includes(AccessModule.RASLINKLOGINGOV)}
+                data-test-id='ras-link-login-gov-toggle'
+                onToggle={() => {
+                  this.setState({
+                    selectedModules: fp.xor(selectedModules, [
+                      AccessModule.RASLINKLOGINGOV,
+                    ]),
+                  });
+                }}
+              />
+            )}
+            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+              <IconButton
+                icon={Times}
+                onClick={() => this.cancel()}
+                disabled={!this.hasEdited()}
+              />
+              <IconButton
+                icon={Check}
+                data-test-id='toggle-save'
+                onClick={() => this.save()}
+                disabled={!this.hasEdited()}
+              />
+            </div>
+            {isSaving && <SpinnerOverlay />}
+          </FlexColumn>
+        }
+      >
+        <Button
+          type='secondaryLight'
+          data-test-id='bypass-popup'
+          style={{ height: '40px' }}
+        >
+          <ClrIcon
+            shape={isPopupOpen ? 'caret down' : 'caret right'}
+            size={19}
+            style={{
+              color: colors.accent,
+              marginRight: '1px',
+              cursor: 'pointer',
+            }}
           />
-          <Toggle name='Data User Code of Conduct'
-                  checked={selectedModules.includes(AccessModule.DATAUSERCODEOFCONDUCT)}
-                  data-test-id='ducc-toggle'
-                  onToggle={() => {this.setState({selectedModules:
-                    fp.xor(selectedModules, [AccessModule.DATAUSERCODEOFCONDUCT])}); }}
-          />
-          {(enableRasLoginGovLinking || enforceRasLoginGovLinking) && <Toggle name='RAS Login.gov Link'
-                                       checked={selectedModules.includes(AccessModule.RASLINKLOGINGOV)}
-                                       data-test-id='ras-link-login-gov-toggle'
-                                       onToggle={() => {this.setState({selectedModules:
-                                             fp.xor(selectedModules, [AccessModule.RASLINKLOGINGOV])}); }}
-          />}
-          <div style={{display: 'flex', justifyContent: 'flex-end'}}>
-            <IconButton icon={Times}
-                        onClick={() => this.cancel()}
-                        disabled={!this.hasEdited()}/>
-            <IconButton icon={Check}
-                        data-test-id='toggle-save'
-                        onClick={() => this.save()}
-                        disabled={!this.hasEdited()}/>
-          </div>
-          {isSaving && <SpinnerOverlay/>}
-        </FlexColumn>}>
-      <Button type='secondaryLight' data-test-id='bypass-popup' style={{height: '40px'}}>
-        <ClrIcon shape={isPopupOpen ? 'caret down' : 'caret right'} size={19}
-                 style={{color: colors.accent, marginRight: '1px', cursor: 'pointer'}}/>
-        Bypass
-      </Button>
-    </PopupTrigger>;
+          Bypass
+        </Button>
+      </PopupTrigger>
+    );
   }
-
 }

@@ -11,7 +11,6 @@ require_relative "gcloudcontext"
 require_relative "wboptionsparser"
 require "benchmark"
 require "fileutils"
-require "json"
 require "optparse"
 require "ostruct"
 require "tempfile"
@@ -586,7 +585,7 @@ def create_cdr_indices(cmd_name, *args)
   content_type = "Content-Type: application/json"
   accept = "Accept: application/json"
   circle_token = "Circle-Token: "
-  payload = "{ \"branch\": \"#{op.opts.branch}\", \"parameters\": { \"wb_create_cdr_indices\": true, \"cdr_source_project\": \"#{cdr_source}\", \"cdr_source_dataset\": \"#{op.opts.bq_dataset}\", \"wgv_source_project\": \"#{op.opts.wgv_project}\", \"wgv_source_dataset\": \"#{op.opts.wgv_dataset}\", \"wgv_source_table\": \"#{op.opts.wgv_table}\", \"project\": \"#{op.opts.project}\", \"cdr_version_db_name\": \"#{op.opts.cdr_version}\", \"data_browser\": #{op.opts.data_browser}\", \"array_source_table\": #{op.opts.array_table} }}"
+  payload = "{ \"branch\": \"#{op.opts.branch}\", \"parameters\": { \"wb_create_cdr_indices\": true, \"cdr_source_project\": \"#{cdr_source}\", \"cdr_source_dataset\": \"#{op.opts.bq_dataset}\", \"wgv_source_project\": \"#{op.opts.wgv_project}\", \"wgv_source_dataset\": \"#{op.opts.wgv_dataset}\", \"wgv_source_table\": \"#{op.opts.wgv_table}\", \"project\": \"#{op.opts.project}\", \"cdr_version_db_name\": \"#{op.opts.cdr_version}\", \"array_source_table\": \"#{op.opts.array_table}\", \"data_browser\": #{op.opts.data_browser} }}"
   common.run_inline "curl -X POST https://circleci.com/api/v2/project/github/all-of-us/cdr-indices/pipeline -H '#{content_type}' -H '#{accept}' -H \"#{circle_token}\ $(cat ~/.circle-creds/key.txt)\" -d '#{payload}'"
 end
 
@@ -1160,7 +1159,7 @@ def circle_build_cdr_indices(cmd_name, args)
   content_type = "Content-Type: application/json"
   accept = "Accept: application/json"
   circle_token = "Circle-Token: "
-  payload = "{ \"branch\": \"#{op.opts.branch}\", \"parameters\": { \"wb_build_cdr_indices\": true, \"cdr_source_project\": \"#{cdr_source}\", \"cdr_source_dataset\": \"#{op.opts.bq_dataset}\", \"wgv_source_project\": \"#{op.opts.wgv_project}\", \"wgv_source_dataset\": \"#{op.opts.wgv_dataset}\", \"wgv_source_table\": \"#{op.opts.wgv_table}\", \"project\": \"#{op.opts.project}\", \"cdr_version_db_name\": \"#{op.opts.cdr_version}\", \"data_browser\": #{op.opts.data_browser}\", \"array_source_table\": #{op.opts.array_table}  }}"
+  payload = "{ \"branch\": \"#{op.opts.branch}\", \"parameters\": { \"wb_build_cdr_indices\": true, \"cdr_source_project\": \"#{cdr_source}\", \"cdr_source_dataset\": \"#{op.opts.bq_dataset}\", \"wgv_source_project\": \"#{op.opts.wgv_project}\", \"wgv_source_dataset\": \"#{op.opts.wgv_dataset}\", \"wgv_source_table\": \"#{op.opts.wgv_table}\", \"project\": \"#{op.opts.project}\", \"cdr_version_db_name\": \"#{op.opts.cdr_version}\", \"array_source_table\": \"#{op.opts.array_table}\", \"data_browser\": #{op.opts.data_browser} }}"
   common.run_inline "curl -X POST https://circleci.com/api/v2/project/github/all-of-us/cdr-indices/pipeline -H '#{content_type}' -H '#{accept}' -H \"#{circle_token}\ $(cat ~/.circle-creds/key.txt)\" -d '#{payload}'"
 end
 
@@ -2125,11 +2124,15 @@ def can_skip_token_generation(token_filenames)
   for f in token_filenames do
     return false unless File.file?(f)
 
-    age_minutes = (Time.now - File.ctime(f)) / 60
-    return false unless age_minutes < staleness_limit_minutes
-
-    contents = File.readlines(f)
+    contents = File.read(f)
     return false if contents.nil? || contents.empty?
+
+    parsed = JSON.parse(contents)
+    return false unless parsed.is_a?(Hash) and parsed.has_key?('token')
+
+    created_at = Time.at(parsed.fetch('created_at_epoch_seconds', 0))
+    age_minutes = (Time.now - created_at) / 60
+    return false unless age_minutes < staleness_limit_minutes
   end
 
   return true
@@ -2153,7 +2156,7 @@ def generate_impersonated_user_tokens(cmd_name, *args)
   op.parse.validate
 
   usernames = op.opts.impersonated_usernames.split(',').uniq
-  token_filenames = usernames.map{ |u| "#{op.opts.output_token_dir}/#{u}.txt" }
+  token_filenames = usernames.map{ |u| "#{op.opts.output_token_dir}/#{u}.json" }
   if can_skip_token_generation(token_filenames)
     common.status("Recent access tokens already exist, skipping generation")
     return
@@ -3300,39 +3303,6 @@ Common.register_command({
   :invocation => "setup-cloud-project",
   :description => "Initializes resources within a cloud project that has already been created",
   :fn => ->(*args) { setup_cloud_project("setup-cloud-project", *args) }
-})
-
-def randomize_vcf(cmd_name, *args)
-  op = WbOptionsParser.new(cmd_name, args)
-  op.add_option(
-      "--vcf [vcf]",
-      -> (opts, v) {opts.vcf = v},
-      "Input vcf to randomize. This vcf should be gzipped and its corresponding index file " +
-          "should be in the same folder. The index file can be generated from a gzipped vcf " +
-          "by running tabix -p vcf [vcf path]"
-  )
-  op.add_option(
-      "--sample-names-file [sn]",
-      -> (opts, sn) {opts.sn = sn},
-      "File containing newline separated sample names"
-  )
-  op.add_option(
-      "--output-path [out]",
-      -> (opts, o) {opts.out = o},
-      "Output path at which to put randomized vcf"
-  )
-  op.parse.validate
-
-  basename = File.basename(op.opts.vcf, ".vcf.gz")
-  app_args = "-PappArgs=['-V#{op.opts.vcf}','-O#{op.opts.out}','--sample-names', '#{op.opts.sn}']"
-  Common.new.run_inline %W{./gradlew -p genomics randomizeVcf} + [app_args]
-end
-
-Common.register_command({
-  :invocation => "randomize-vcf",
-  :description => "Given an example vcf and a number of copies to make, generates that many " +
-    "random copies in a given output directory",
-  :fn => ->(*args) { randomize_vcf("randomize-vcf", *args) }
 })
 
 def set_access_module_timestamps(cmd_name, *args)

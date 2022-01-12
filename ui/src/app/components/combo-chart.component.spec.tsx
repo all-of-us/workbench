@@ -1,9 +1,9 @@
-import {shallow} from 'enzyme';
+import { shallow } from 'enzyme';
 import * as React from 'react';
 
-import {currentWorkspaceStore} from 'app/utils/navigation';
-import {workspaceDataStub} from 'testing/stubs/workspaces';
-import {ComboChart} from './combo-chart.component';
+import { currentWorkspaceStore } from 'app/utils/navigation';
+import { workspaceDataStub } from 'testing/stubs/workspaces';
+import { ComboChart } from './combo-chart.component';
 
 describe('GenderChart', () => {
   beforeEach(() => {
@@ -11,7 +11,7 @@ describe('GenderChart', () => {
   });
 
   it('should render', () => {
-    const wrapper = shallow(<ComboChart data={[]} mode='percent'/>);
+    const wrapper = shallow(<ComboChart data={[]} mode='percent' />);
     expect(wrapper.exists()).toBeTruthy();
   });
 });

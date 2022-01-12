@@ -2,23 +2,23 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 
 import { domainToTitle } from 'app/cohort-search/utils';
-import {SpinnerOverlay} from 'app/components/spinners';
-import {DetailTabTable} from 'app/pages/data/cohort-review/detail-tab-table.component';
-import {IndividualParticipantsCharts} from 'app/pages/data/cohort-review/individual-participants-charts';
-import {filterStateStore} from 'app/services/review-state.service';
-import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
+import { SpinnerOverlay } from 'app/components/spinners';
+import { DetailTabTable } from 'app/pages/data/cohort-review/detail-tab-table.component';
+import { IndividualParticipantsCharts } from 'app/pages/data/cohort-review/individual-participants-charts';
+import { filterStateStore } from 'app/services/review-state.service';
+import { cohortReviewApi } from 'app/services/swagger-fetch-clients';
 import {
   hasNewValidProps,
   reactStyles,
   withCurrentCohortReview,
-  withCurrentWorkspace
+  withCurrentWorkspace,
 } from 'app/utils';
-import {triggerEvent} from 'app/utils/analytics';
+import { triggerEvent } from 'app/utils/analytics';
 import { MatchParams } from 'app/utils/stores';
-import {WorkspaceData} from 'app/utils/workspace-data';
-import {CohortReview, Domain, FilterColumns} from 'generated/fetch';
-import {TabPanel, TabView} from 'primereact/tabview';
-import {RouteComponentProps, withRouter} from 'react-router-dom';
+import { WorkspaceData } from 'app/utils/workspace-data';
+import { CohortReview, Domain, FilterColumns } from 'generated/fetch';
+import { TabPanel, TabView } from 'primereact/tabview';
+import { RouteComponentProps, withRouter } from 'react-router-dom';
 
 const styles = reactStyles({
   container: {
@@ -91,7 +91,7 @@ const itemDate = {
   name: 'itemDate',
   classNames: ['date-col'],
   displayName: 'Date',
-  filter: FilterColumns.STARTDATETIME
+  filter: FilterColumns.STARTDATETIME,
 };
 const itemTime = {
   name: 'itemTime',
@@ -101,88 +101,88 @@ const itemTime = {
 const domain = {
   name: 'domain',
   displayName: 'Domain',
-  filter: FilterColumns.DOMAIN
+  filter: FilterColumns.DOMAIN,
 };
 const standardVocabulary = {
   name: 'standardVocabulary',
   classNames: ['vocab-col'],
   displayName: 'Standard Vocabulary',
-  filter: FilterColumns.STANDARDVOCABULARY
+  filter: FilterColumns.STANDARDVOCABULARY,
 };
 const standardName = {
   name: 'standardName',
   displayName: 'Standard Name',
-  filter: FilterColumns.STANDARDNAME
+  filter: FilterColumns.STANDARDNAME,
 };
 const standardCode = {
   name: 'standardCode',
   displayName: 'Standard Code',
-  filter: FilterColumns.STANDARDCODE
+  filter: FilterColumns.STANDARDCODE,
 };
 const sourceVocabulary = {
   name: 'sourceVocabulary',
   classNames: ['vocab-col'],
   displayName: 'Source Vocabulary',
-  filter: FilterColumns.SOURCEVOCABULARY
+  filter: FilterColumns.SOURCEVOCABULARY,
 };
 const sourceName = {
   name: 'sourceName',
   displayName: 'Source Name',
-  filter: FilterColumns.SOURCENAME
+  filter: FilterColumns.SOURCENAME,
 };
 const sourceCode = {
   name: 'sourceCode',
   displayName: 'Source Code',
-  filter: FilterColumns.SOURCECODE
+  filter: FilterColumns.SOURCECODE,
 };
 const value = {
   name: 'value',
   displayName: 'Value',
-  filter: FilterColumns.VALUEASNUMBER
+  filter: FilterColumns.VALUEASNUMBER,
 };
 const ageAtEvent = {
   name: 'ageAtEvent',
   displayName: 'Age At Event',
-  filter: FilterColumns.AGEATEVENT
+  filter: FilterColumns.AGEATEVENT,
 };
 const visitType = {
   name: 'visitType',
   displayName: 'Visit Type',
-  filter: FilterColumns.VISITTYPE
+  filter: FilterColumns.VISITTYPE,
 };
 const numMentions = {
   name: 'numMentions',
   displayName: 'Number Of Mentions',
-  filter: FilterColumns.NUMMENTIONS
+  filter: FilterColumns.NUMMENTIONS,
 };
 const firstMention = {
   name: 'firstMention',
   displayName: 'Date First Mention',
-  filter: FilterColumns.FIRSTMENTION
+  filter: FilterColumns.FIRSTMENTION,
 };
 const lastMention = {
   name: 'lastMention',
   displayName: 'Date Last Mention',
-  filter: FilterColumns.LASTMENTION
+  filter: FilterColumns.LASTMENTION,
 };
 const survey = {
   name: 'survey',
   displayName: 'Survey Name',
-  filter: FilterColumns.SURVEYNAME
+  filter: FilterColumns.SURVEYNAME,
 };
 const question = {
   name: 'question',
   displayName: 'Question',
-  filter: FilterColumns.QUESTION
+  filter: FilterColumns.QUESTION,
 };
 const answer = {
   name: 'answer',
   displayName: 'Answer',
-  filter: FilterColumns.ANSWER
+  filter: FilterColumns.ANSWER,
 };
 const graph = {
   name: 'graph',
-  displayName: ' '
+  displayName: ' ',
 };
 
 const tabs = [
@@ -191,108 +191,201 @@ const tabs = [
     domain: Domain.ALLEVENTS,
     columns: {
       standard: [
-        itemDate, visitType, standardCode, standardVocabulary, standardName, value,
-        domain, ageAtEvent
+        itemDate,
+        visitType,
+        standardCode,
+        standardVocabulary,
+        standardName,
+        value,
+        domain,
+        ageAtEvent,
       ],
       source: [
-        itemDate, visitType, sourceCode, sourceVocabulary, sourceName, value, domain, ageAtEvent
+        itemDate,
+        visitType,
+        sourceCode,
+        sourceVocabulary,
+        sourceName,
+        value,
+        domain,
+        ageAtEvent,
       ],
-    }
-  }, {
+    },
+  },
+  {
     name: 'Conditions',
     domain: Domain.CONDITION,
     columns: {
       standard: [
-        itemDate, standardCode, standardVocabulary, standardName, ageAtEvent, visitType
+        itemDate,
+        standardCode,
+        standardVocabulary,
+        standardName,
+        ageAtEvent,
+        visitType,
       ],
       source: [
-        itemDate, sourceCode, sourceVocabulary, sourceName, ageAtEvent, visitType
+        itemDate,
+        sourceCode,
+        sourceVocabulary,
+        sourceName,
+        ageAtEvent,
+        visitType,
       ],
-    }
-  }, {
+    },
+  },
+  {
     name: 'Procedures',
     domain: Domain.PROCEDURE,
     columns: {
       standard: [
-        itemDate, standardCode, standardVocabulary, standardName, ageAtEvent, visitType
+        itemDate,
+        standardCode,
+        standardVocabulary,
+        standardName,
+        ageAtEvent,
+        visitType,
       ],
       source: [
-        itemDate, sourceCode, sourceVocabulary, sourceName, ageAtEvent, visitType
+        itemDate,
+        sourceCode,
+        sourceVocabulary,
+        sourceName,
+        ageAtEvent,
+        visitType,
       ],
-    }
-  }, {
+    },
+  },
+  {
     name: 'Drugs',
     domain: Domain.DRUG,
     columns: {
       standard: [
-        itemDate, standardName, ageAtEvent, numMentions, firstMention, lastMention, visitType
+        itemDate,
+        standardName,
+        ageAtEvent,
+        numMentions,
+        firstMention,
+        lastMention,
+        visitType,
       ],
       source: [
-        itemDate, standardName, ageAtEvent, numMentions, firstMention, lastMention, visitType
+        itemDate,
+        standardName,
+        ageAtEvent,
+        numMentions,
+        firstMention,
+        lastMention,
+        visitType,
       ],
-    }
-  }, {
+    },
+  },
+  {
     name: 'Observations',
     domain: Domain.OBSERVATION,
     columns: {
       standard: [
-        itemDate, standardName, standardCode, standardVocabulary, ageAtEvent, visitType
+        itemDate,
+        standardName,
+        standardCode,
+        standardVocabulary,
+        ageAtEvent,
+        visitType,
       ],
       source: [
-        itemDate, sourceName, sourceCode, sourceVocabulary, ageAtEvent, visitType
+        itemDate,
+        sourceName,
+        sourceCode,
+        sourceVocabulary,
+        ageAtEvent,
+        visitType,
       ],
-    }
-  }, {
+    },
+  },
+  {
     name: 'Physical Measurements',
     domain: Domain.PHYSICALMEASUREMENT,
     columns: {
       standard: [
-        itemDate, standardCode, standardVocabulary, standardName, value, ageAtEvent
+        itemDate,
+        standardCode,
+        standardVocabulary,
+        standardName,
+        value,
+        ageAtEvent,
       ],
       source: [
-        itemDate, sourceCode, sourceVocabulary, sourceName, value, ageAtEvent
+        itemDate,
+        sourceCode,
+        sourceVocabulary,
+        sourceName,
+        value,
+        ageAtEvent,
       ],
-    }
-  }, {
+    },
+  },
+  {
     name: 'Labs',
     domain: Domain.LAB,
     columns: {
       standard: [
-        itemDate, itemTime, standardName, graph, value, ageAtEvent, visitType
+        itemDate,
+        itemTime,
+        standardName,
+        graph,
+        value,
+        ageAtEvent,
+        visitType,
       ],
       source: [
-        itemDate, itemTime, standardName, graph, value, ageAtEvent, visitType
+        itemDate,
+        itemTime,
+        standardName,
+        graph,
+        value,
+        ageAtEvent,
+        visitType,
       ],
-    }
-  }, {
+    },
+  },
+  {
     name: 'Vitals',
     domain: Domain.VITAL,
     columns: {
       standard: [
-        itemDate, itemTime, standardName, graph, value, ageAtEvent, visitType
+        itemDate,
+        itemTime,
+        standardName,
+        graph,
+        value,
+        ageAtEvent,
+        visitType,
       ],
       source: [
-        itemDate, itemTime, standardName, graph, value, ageAtEvent, visitType
+        itemDate,
+        itemTime,
+        standardName,
+        graph,
+        value,
+        ageAtEvent,
+        visitType,
       ],
-    }
-  }, {
+    },
+  },
+  {
     name: 'Surveys',
     domain: Domain.SURVEY,
     columns: {
-      standard: [
-        itemDate, survey, question, answer
-      ],
-      source: [
-        itemDate, survey, question, answer
-      ],
-    }
-  }
+      standard: [itemDate, survey, question, answer],
+      source: [itemDate, survey, question, answer],
+    },
+  },
 ];
 
 const domainList = [
   Domain[Domain.CONDITION],
   Domain[Domain.PROCEDURE],
-  Domain[Domain.DRUG]
+  Domain[Domain.DRUG],
 ];
 const EVENT_CATEGORY = 'Review Individual';
 
@@ -309,7 +402,11 @@ interface State {
   updateState: number;
 }
 
-export const DetailTabs = fp.flow(withCurrentCohortReview(), withCurrentWorkspace(), withRouter)(
+export const DetailTabs = fp.flow(
+  withCurrentCohortReview(),
+  withCurrentWorkspace(),
+  withRouter
+)(
   class extends React.Component<Props, State> {
     private subscription;
     constructor(props: any) {
@@ -325,17 +422,19 @@ export const DetailTabs = fp.flow(withCurrentCohortReview(), withCurrentWorkspac
     }
 
     componentDidMount() {
-      this.subscription = filterStateStore.subscribe(filterState => {
-        let {updateState} = this.state;
+      this.subscription = filterStateStore.subscribe((filterState) => {
+        let { updateState } = this.state;
         // this.vocab = filterState.vocab;
         updateState++;
-        this.setState({filterState, updateState});
+        this.setState({ filterState, updateState });
       });
       this.loadParticipantChartData();
     }
 
     componentDidUpdate(prevProps) {
-      if (hasNewValidProps(this.props, prevProps, [p => p.match.params.pid])) {
+      if (
+        hasNewValidProps(this.props, prevProps, [(p) => p.match.params.pid])
+      ) {
         this.loadParticipantChartData();
       }
     }
@@ -345,19 +444,19 @@ export const DetailTabs = fp.flow(withCurrentCohortReview(), withCurrentWorkspac
     }
 
     loadParticipantChartData() {
-      const {ns, wsid, pid} = this.props.match.params;
-      fp.map(async(domainName: string) => {
+      const { ns, wsid, pid } = this.props.match.params;
+      fp.map(async (domainName: string) => {
         this.setState((prevState) => ({
           chartData: {
             ...prevState.chartData,
             [domainName]: {
               loading: true,
               conditionTitle: '',
-              items: []
-            }
-          }
+              items: [],
+            },
+          },
         }));
-        const {items} = await cohortReviewApi().getParticipantChartData(
+        const { items } = await cohortReviewApi().getParticipantChartData(
           ns,
           wsid,
           this.props.cohortReview.cohortReviewId,
@@ -371,15 +470,15 @@ export const DetailTabs = fp.flow(withCurrentCohortReview(), withCurrentWorkspac
             [domainName]: {
               loading: false,
               conditionTitle: domainToTitle(domainName),
-              items: items
-            }
-          }
+              items: items,
+            },
+          },
         }));
       })(domainList);
     }
 
     filteredData(_domain: string, checkedItems: any) {
-      const {filterState} = this.state;
+      const { filterState } = this.state;
       filterState[_domain] = checkedItems;
       filterStateStore.next(filterState);
     }
@@ -387,52 +486,78 @@ export const DetailTabs = fp.flow(withCurrentCohortReview(), withCurrentWorkspac
     tabChange = (e: any) => {
       const tab = e.index === 0 ? 'Summary' : tabs[e.index - 1].name;
       triggerEvent(EVENT_CATEGORY, 'Click', `${tab} - Review Individual`);
-      this.setState({activeTab: e.index});
-    }
+      this.setState({ activeTab: e.index });
+    };
 
     chartHover = (data: any) => {
       if (data.conditionTitle) {
-        triggerEvent(EVENT_CATEGORY, 'hover', `${data.conditionTitle} Chart - Review Individual`);
+        triggerEvent(
+          EVENT_CATEGORY,
+          'hover',
+          `${data.conditionTitle} Chart - Review Individual`
+        );
       }
-    }
+    };
 
     render() {
-      const {activeTab, chartData, filterState, updateState} = this.state;
-      return <React.Fragment>
-        <style>{css}</style>
-        <TabView style={{padding: 0}} activeIndex={activeTab} onTabChange={this.tabChange}>
-          <TabPanel header='Summary'>
-            <div style={styles.container}>
-              <div style={styles.row}>
-                {domainList.map((dom, d) => {
-                  return <div key={d} style={styles.col}>
-                    {chartData[dom] && <div onMouseEnter={() => this.chartHover(chartData[dom])}>
-                      {chartData[dom].loading && <SpinnerOverlay/>}
-                      {!chartData[dom].loading && !chartData[dom].items.length && <div>
-                        There are no {chartData[dom].conditionTitle} to show for this participant.
-                      </div>}
-                      <IndividualParticipantsCharts chartData={chartData[dom]}/>
-                    </div>}
-                  </div>;
-                })}
+      const { activeTab, chartData, filterState, updateState } = this.state;
+      return (
+        <React.Fragment>
+          <style>{css}</style>
+          <TabView
+            style={{ padding: 0 }}
+            activeIndex={activeTab}
+            onTabChange={this.tabChange}
+          >
+            <TabPanel header='Summary'>
+              <div style={styles.container}>
+                <div style={styles.row}>
+                  {domainList.map((dom, d) => {
+                    return (
+                      <div key={d} style={styles.col}>
+                        {chartData[dom] && (
+                          <div
+                            onMouseEnter={() => this.chartHover(chartData[dom])}
+                          >
+                            {chartData[dom].loading && <SpinnerOverlay />}
+                            {!chartData[dom].loading &&
+                              !chartData[dom].items.length && (
+                                <div>
+                                  There are no {chartData[dom].conditionTitle}{' '}
+                                  to show for this participant.
+                                </div>
+                              )}
+                            <IndividualParticipantsCharts
+                              chartData={chartData[dom]}
+                            />
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
-          </TabPanel>
-          {tabs.map((tab, t) => {
-            return <TabPanel key={t} header={tab.name}>
-              {filterState && <DetailTabTable
-                getFilteredData={this.filteredData}
-                filterState={filterState}
-                updateState={updateState}
-                tabName={tab.name}
-                columns={tab.columns[filterState.vocab]}
-                domain={tab.domain}
-                participantId={this.props.match.params.pid}
-              />}
-            </TabPanel>;
-          })}
-        </TabView>
-      </React.Fragment>;
+            </TabPanel>
+            {tabs.map((tab, t) => {
+              return (
+                <TabPanel key={t} header={tab.name}>
+                  {filterState && (
+                    <DetailTabTable
+                      getFilteredData={this.filteredData}
+                      filterState={filterState}
+                      updateState={updateState}
+                      tabName={tab.name}
+                      columns={tab.columns[filterState.vocab]}
+                      domain={tab.domain}
+                      participantId={this.props.match.params.pid}
+                    />
+                  )}
+                </TabPanel>
+              );
+            })}
+          </TabView>
+        </React.Fragment>
+      );
     }
   }
 );

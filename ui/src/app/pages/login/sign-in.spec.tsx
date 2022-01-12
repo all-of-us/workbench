@@ -1,15 +1,15 @@
-import {Button} from 'app/components/buttons';
+import { Button } from 'app/components/buttons';
 
-import {mount, shallow} from 'enzyme';
+import { mount, shallow } from 'enzyme';
 import * as React from 'react';
 
-import {AccountCreation} from 'app/pages/login/account-creation/account-creation';
-import {AccountCreationInstitution} from 'app/pages/login/account-creation/account-creation-institution';
-import {AccountCreationSuccess} from 'app/pages/login/account-creation/account-creation-success';
-import {AccountCreationSurvey} from 'app/pages/login/account-creation/account-creation-survey';
-import {AccountCreationTos} from 'app/pages/login/account-creation/account-creation-tos';
+import { AccountCreation } from 'app/pages/login/account-creation/account-creation';
+import { AccountCreationInstitution } from 'app/pages/login/account-creation/account-creation-institution';
+import { AccountCreationSuccess } from 'app/pages/login/account-creation/account-creation-success';
+import { AccountCreationSurvey } from 'app/pages/login/account-creation/account-creation-survey';
+import { AccountCreationTos } from 'app/pages/login/account-creation/account-creation-tos';
 import LoginReactComponent from 'app/pages/login/login';
-import {createEmptyProfile, SignInProps, SignIn} from './sign-in';
+import { createEmptyProfile, SignInProps, SignIn } from './sign-in';
 import { MemoryRouter } from 'react-router-dom';
 
 describe('SignInReact', () => {
@@ -17,11 +17,16 @@ describe('SignInReact', () => {
 
   const signIn = jest.fn();
 
-  const component = () => mount(<MemoryRouter><SignIn {...props}/></MemoryRouter>);
+  const component = () =>
+    mount(
+      <MemoryRouter>
+        <SignIn {...props} />
+      </MemoryRouter>
+    );
 
   // To correctly shallow-render this component wrapped by a HOC, we need to add an extra
   // .shallow() call at the end.
-  const shallowComponent = () => shallow(<SignIn {...props}/>).shallow();
+  const shallowComponent = () => shallow(<SignIn {...props} />).shallow();
 
   const defaultConfig = {
     gsuiteDomain: 'researchallofus.org',
@@ -30,35 +35,40 @@ describe('SignInReact', () => {
   beforeEach(() => {
     window.scrollTo = () => {};
     props = {
-      windowSize: {width: 1700, height: 0},
+      windowSize: { width: 1700, height: 0 },
       hideSpinner: () => {},
-      showSpinner: () => {}
+      showSpinner: () => {},
     };
   });
 
   it('should display login background image and directive by default', () => {
     const wrapper = component();
-    const templateImage = wrapper.find('[data-test-id="sign-in-page"]').hostNodes();
+    const templateImage = wrapper
+      .find('[data-test-id="sign-in-page"]')
+      .hostNodes();
     const backgroundImage = templateImage.prop('style').backgroundImage;
-    expect(backgroundImage).toBe('url(\'' + 'login-group.png' + '\')');
+    expect(backgroundImage).toBe("url('" + 'login-group.png' + "')");
     expect(wrapper.exists('[data-test-id="login"]')).toBeTruthy();
   });
 
   it('should display small background image when window width is moderately sized', () => {
     props.windowSize.width = 999;
     const wrapper = component();
-    const templateImage = wrapper.find('[data-test-id="sign-in-page"]').hostNodes();
+    const templateImage = wrapper
+      .find('[data-test-id="sign-in-page"]')
+      .hostNodes();
     const backgroundImage = templateImage.prop('style').backgroundImage;
 
-    expect(backgroundImage)
-      .toBe('url(\'' + 'login-standing.png' + '\')');
+    expect(backgroundImage).toBe("url('" + 'login-standing.png' + "')");
     expect(wrapper.exists('[data-test-id="login"]')).toBeTruthy();
   });
 
   it('should display invitation key with small image when width is moderately sized ', () => {
     props.windowSize.width = 999;
     const wrapper = component();
-    const createAccountButton = wrapper.find(Button).find({type: 'secondary'});
+    const createAccountButton = wrapper
+      .find(Button)
+      .find({ type: 'secondary' });
     createAccountButton.simulate('click');
     wrapper.update();
     const templateImage = wrapper.find('[data-test-id="sign-in-page"]');
@@ -85,14 +95,20 @@ describe('SignInReact', () => {
     wrapper.find(AccountCreationTos).props().onComplete();
 
     expect(wrapper.exists(AccountCreationInstitution)).toBeTruthy();
-    wrapper.find(AccountCreationInstitution).props().onComplete(createEmptyProfile());
+    wrapper
+      .find(AccountCreationInstitution)
+      .props()
+      .onComplete(createEmptyProfile());
 
     expect(wrapper.exists(AccountCreation)).toBeTruthy();
     wrapper.find(AccountCreation).props().onComplete(createEmptyProfile());
 
     // Account Creation Survey (e.g. demographics) is part of the new-style flow.
     expect(wrapper.exists(AccountCreationSurvey)).toBeTruthy();
-    wrapper.find(AccountCreationSurvey).props().onComplete(createEmptyProfile());
+    wrapper
+      .find(AccountCreationSurvey)
+      .props()
+      .onComplete(createEmptyProfile());
 
     expect(wrapper.exists(AccountCreationSuccess)).toBeTruthy();
   });

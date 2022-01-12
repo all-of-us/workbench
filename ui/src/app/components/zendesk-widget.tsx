@@ -1,7 +1,7 @@
-import {zendeskWidgetKey} from 'app/utils/zendesk';
+import { zendeskWidgetKey } from 'app/utils/zendesk';
 import * as React from 'react';
 
-const {useEffect} = React;
+const { useEffect } = React;
 
 const zendeskSettingsGlobal = 'zESettings';
 
@@ -12,7 +12,8 @@ export const ZendeskWidget = () => {
     const s = document.createElement('script');
     s.type = 'text/javascript';
     s.id = 'ze-snippet';
-    s.src = 'https://static.zdassets.com/ekr/snippet.js?key=' + zendeskWidgetKey();
+    s.src =
+      'https://static.zdassets.com/ekr/snippet.js?key=' + zendeskWidgetKey();
     document.body.appendChild(s);
 
     // This data configures the Zendesk web widget with settings to show only
@@ -25,7 +26,7 @@ export const ZendeskWidget = () => {
         },
         color: {
           // This is an AoU dark purple color.
-          theme: '#262262'
+          theme: '#262262',
         },
         contactForm: {
           attachments: true,
@@ -44,7 +45,7 @@ export const ZendeskWidget = () => {
         talk: {
           suppress: true,
         },
-      }
+      },
     };
     return () => {
       delete window[zendeskSettingsGlobal];

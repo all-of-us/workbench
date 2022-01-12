@@ -6,8 +6,8 @@ import Modal from './modal';
 const title = 'Create Review Set';
 
 export default class CohortReviewModal extends Modal {
-  constructor(page: Page, xpath?: string) {
-    super(page, xpath);
+  constructor(page: Page, opts?: { xpath?: string; modalIndex?: number }) {
+    super(page, opts);
   }
 
   async isLoaded(): Promise<boolean> {

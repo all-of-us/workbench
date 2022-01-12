@@ -1,10 +1,10 @@
-import {faTimes} from '@fortawesome/free-solid-svg-icons';
-import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
-import {StyledRouterLink} from 'app/components/buttons';
-import {FlexRow} from 'app/components/flex';
+import { faTimes } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { StyledRouterLink } from 'app/components/buttons';
+import { FlexRow } from 'app/components/flex';
 import colors from 'app/styles/colors';
-import {reactStyles} from 'app/utils';
-import {cookiesEnabled} from 'app/utils/cookies';
+import { reactStyles } from 'app/utils';
+import { cookiesEnabled } from 'app/utils/cookies';
 import * as React from 'react';
 
 import cookies from 'assets/images/cookies.png';
@@ -21,14 +21,14 @@ const styles = reactStyles({
     bottom: 0,
     backgroundColor: colors.light,
     // Above the footer, under modals / popups.
-    zIndex: 103
+    zIndex: 103,
   },
   iconStyles: {
     height: 24,
     width: 24,
     color: colors.accent,
-    cursor: 'pointer'
-  }
+    cursor: 'pointer',
+  },
 });
 
 const cookieKey = 'aou-cookie-banner-dismissed';
@@ -48,7 +48,7 @@ export class CookieBanner extends React.Component<{}, CookieBannerState> {
 
   handleCloseCookies() {
     if (cookiesEnabled()) {
-      this.setState({cookieBannerClosed: true});
+      this.setState({ cookieBannerClosed: true });
       localStorage.setItem(cookieKey, 'cookie-banner-dismissed');
     }
   }
@@ -62,15 +62,27 @@ export class CookieBanner extends React.Component<{}, CookieBannerState> {
   }
 
   render() {
-    return this.cookieBannerVisible() && <div style={styles.cookiePolicyMessage}>
-            <FlexRow style={{alignItems: 'center'}}>
-                <img src={cookies}/>
-                <div style={{paddingLeft: '1rem', color: colors.primary}}>
-                    We use cookies to help provide you with the best experience we can. By continuing to use our site, you consent
-                    to our <StyledRouterLink path='/cookie-policy' target='_blank'>Cookie Policy</StyledRouterLink>.
-                </div>
-            </FlexRow>
-            <FontAwesomeIcon icon={faTimes} style={styles.iconStyles} onClick={() => this.handleCloseCookies()} />
-        </div>;
+    return (
+      this.cookieBannerVisible() && (
+        <div style={styles.cookiePolicyMessage}>
+          <FlexRow style={{ alignItems: 'center' }}>
+            <img src={cookies} />
+            <div style={{ paddingLeft: '1rem', color: colors.primary }}>
+              We use cookies to help provide you with the best experience we
+              can. By continuing to use our site, you consent to our{' '}
+              <StyledRouterLink path='/cookie-policy' target='_blank'>
+                Cookie Policy
+              </StyledRouterLink>
+              .
+            </div>
+          </FlexRow>
+          <FontAwesomeIcon
+            icon={faTimes}
+            style={styles.iconStyles}
+            onClick={() => this.handleCloseCookies()}
+          />
+        </div>
+      )
+    );
   }
 }

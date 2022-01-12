@@ -1,5 +1,0 @@
-{
-  "base_vcf": "gs://all-of-us-workbench-test-genomics/NA12878_204126160130_R01C01.vcf",
-  "file_of_sample_names": "gs://all-of-us-workbench-test-genomics/sample_names_for_randomization.txt",
-  "output_file": "gs://all-of-us-workbench-test-genomics/NA12878_204126160130_R01C01.randomized.combined.vcf"
-}

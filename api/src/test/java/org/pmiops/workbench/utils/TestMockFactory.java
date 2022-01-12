@@ -1,6 +1,5 @@
 package org.pmiops.workbench.utils;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
@@ -30,6 +29,7 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
+import org.pmiops.workbench.google.CloudBillingClient;
 import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.model.DisseminateResearchEnum;
@@ -197,26 +197,21 @@ public class TestMockFactory {
     doReturn(billingProjectId).when(fireCloudService).createBillingProjectName();
   }
 
+  public static void stubPollCloudBillingLinked(
+      CloudBillingClient cloudBillingClient, String billingAccountName) {
+    try {
+      doReturn(new ProjectBillingInfo().setBillingEnabled(true).setName(billingAccountName))
+          .when(cloudBillingClient)
+          .pollUntilBillingAccountLinked(anyString(), anyString());
+    } catch (IOException | InterruptedException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
   public static Cloudbilling createMockedCloudbilling() {
     Cloudbilling cloudbilling = mock(Cloudbilling.class);
     Cloudbilling.Projects projects = mock(Cloudbilling.Projects.class);
 
-    try {
-      doAnswer(
-              invocation -> {
-                ProjectBillingInfo projectBillingInfo = invocation.getArgument(1);
-
-                Cloudbilling.Projects.UpdateBillingInfo updateBillingInfo =
-                    mock(Cloudbilling.Projects.UpdateBillingInfo.class);
-                doReturn(projectBillingInfo).when(updateBillingInfo).execute();
-
-                return updateBillingInfo;
-              })
-          .when(projects)
-          .updateBillingInfo(anyString(), any(ProjectBillingInfo.class));
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
     doReturn(projects).when(cloudbilling).projects();
 
     Cloudbilling.BillingAccounts billingAccounts = mock(Cloudbilling.BillingAccounts.class);

@@ -5,7 +5,6 @@ import static junit.framework.TestCase.fail;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
-import com.google.api.services.cloudbilling.Cloudbilling;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -176,6 +175,7 @@ public class CohortsControllerTest {
 
   @Autowired CdrVersionService cdrVersionService;
   @Autowired CloudStorageClient cloudStorageClient;
+  @Autowired CloudBillingClient cloudBillingClient;
   @Autowired CohortMaterializationService cohortMaterializationService;
   @Autowired ComplianceService complianceService;
   @Autowired FireCloudService fireCloudService;
@@ -249,12 +249,6 @@ public class CohortsControllerTest {
     WorkspaceAuditor.class,
   })
   static class Configuration {
-
-    @Bean
-    Cloudbilling cloudbilling() {
-      return TestMockFactory.createMockedCloudbilling();
-    }
-
     @Bean
     Clock clock() {
       return CLOCK;
@@ -283,6 +277,7 @@ public class CohortsControllerTest {
   public void setUp() {
     TestMockFactory.stubCreateBillingProject(fireCloudService);
     TestMockFactory.stubCreateFcWorkspace(fireCloudService);
+    TestMockFactory.stubPollCloudBillingLinked(cloudBillingClient, "billing-account");
     DbUser user = new DbUser();
     user.setUsername(CREATOR_EMAIL);
     user.setUserId(123L);

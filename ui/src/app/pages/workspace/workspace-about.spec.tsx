@@ -1,20 +1,34 @@
-import {mount} from 'enzyme';
+import { mount } from 'enzyme';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
-import {WorkspaceAbout} from './workspace-about';
-import {ProfileStubVariables} from 'testing/stubs/profile-api-stub';
-import {Authority, RuntimeApi, Profile, ProfileApi, WorkspaceAccessLevel, WorkspacesApi} from 'generated/fetch';
-import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
-import {registerApiClient} from 'app/services/swagger-fetch-clients';
-import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
-import {currentWorkspaceStore} from 'app/utils/navigation';
-import {userRolesStub, workspaceStubs} from 'testing/stubs/workspaces';
-import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
-import {RuntimeApiStub} from 'testing/stubs/runtime-api-stub';
-import {CdrVersionsStubVariables, cdrVersionTiersResponse} from 'testing/stubs/cdr-versions-api-stub';
-import {SpecificPopulationItems} from './workspace-edit-text';
-import {cdrVersionStore, profileStore, serverConfigStore} from 'app/utils/stores';
+import { WorkspaceAbout } from './workspace-about';
+import { ProfileStubVariables } from 'testing/stubs/profile-api-stub';
+import {
+  Authority,
+  RuntimeApi,
+  Profile,
+  ProfileApi,
+  WorkspaceAccessLevel,
+  WorkspacesApi,
+} from 'generated/fetch';
+import { ProfileApiStub } from 'testing/stubs/profile-api-stub';
+import { registerApiClient } from 'app/services/swagger-fetch-clients';
+import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
+import { currentWorkspaceStore } from 'app/utils/navigation';
+import { userRolesStub, workspaceStubs } from 'testing/stubs/workspaces';
+import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
+import { RuntimeApiStub } from 'testing/stubs/runtime-api-stub';
+import {
+  CdrVersionsStubVariables,
+  cdrVersionTiersResponse,
+} from 'testing/stubs/cdr-versions-api-stub';
+import { SpecificPopulationItems } from './workspace-edit-text';
+import {
+  cdrVersionStore,
+  profileStore,
+  serverConfigStore,
+} from 'app/utils/stores';
 
 describe('WorkspaceAbout', () => {
   const profile = ProfileStubVariables.PROFILE_STUB as unknown as Profile;
@@ -29,7 +43,9 @@ describe('WorkspaceAbout', () => {
   };
 
   const component = () => {
-    return mount(<WorkspaceAbout hideSpinner={() => {}} showSpinner={() => {}} />);
+    return mount(
+      <WorkspaceAbout hideSpinner={() => {}} showSpinner={() => {}} />
+    );
   };
 
   beforeEach(() => {
@@ -40,17 +56,19 @@ describe('WorkspaceAbout', () => {
     // mocking because we don't have access to the angular service
     reload.mockImplementation(async () => {
       const newProfile = await profileApi.getMe();
-      profileStore.set({profile: newProfile, load, reload, updateCache});
+      profileStore.set({ profile: newProfile, load, reload, updateCache });
     });
 
-    profileStore.set({profile, load, reload, updateCache});
+    profileStore.set({ profile, load, reload, updateCache });
     currentWorkspaceStore.next(workspace);
-    serverConfigStore.set({config: {
-      gsuiteDomain: 'fake-research-aou.org',
-      projectId: 'aaa',
-      publicApiKeyForErrorReports: 'aaa',
-      enableEraCommons: true,
-    }});
+    serverConfigStore.set({
+      config: {
+        gsuiteDomain: 'fake-research-aou.org',
+        projectId: 'aaa',
+        publicApiKeyForErrorReports: 'aaa',
+        enableEraCommons: true,
+      },
+    });
     cdrVersionStore.set(cdrVersionTiersResponse);
   });
 
@@ -62,10 +80,11 @@ describe('WorkspaceAbout', () => {
   it('should display research purpose', async () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.exists('[data-test-id="researchPurpose"]'))
-      .toBeTruthy();
+    expect(wrapper.exists('[data-test-id="researchPurpose"]')).toBeTruthy();
     // Research Purpose: Drug, Population and Ethics
-    expect(wrapper.find('[data-test-id="primaryResearchPurpose"]').length).toBe(3);
+    expect(wrapper.find('[data-test-id="primaryResearchPurpose"]').length).toBe(
+      3
+    );
     // Primary Purpose: Education
     expect(wrapper.find('[data-test-id="primaryPurpose"]').length).toBe(1);
   });
@@ -74,7 +93,8 @@ describe('WorkspaceAbout', () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     userRolesStub.forEach((role, i) => {
-      const userRoleText = wrapper.find('[data-test-id="workspaceUser-' + i + '"]')
+      const userRoleText = wrapper
+        .find('[data-test-id="workspaceUser-' + i + '"]')
         .text();
       expect(userRoleText).toContain(role.email);
       expect(userRoleText).toContain(role.role);
@@ -86,81 +106,107 @@ describe('WorkspaceAbout', () => {
     await waitOneTickAndUpdate(wrapper);
     wrapper.find('[data-test-id="workspaceShareButton"]').simulate('click');
     await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.exists('[data-test-id="workspaceShareModal"]'))
-      .toBeTruthy();
+    expect(wrapper.exists('[data-test-id="workspaceShareModal"]')).toBeTruthy();
   });
 
   it('should enable the share button if workspace is not adminLocked', async () => {
-    currentWorkspaceStore.next({...currentWorkspaceStore.getValue(), adminLocked: false});
+    currentWorkspaceStore.next({
+      ...currentWorkspaceStore.getValue(),
+      adminLocked: false,
+    });
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.find('[data-test-id="workspaceShareButton"]')
-        .getElement().props.disabled).toBeFalsy();
+    expect(
+      wrapper.find('[data-test-id="workspaceShareButton"]').getElement().props
+        .disabled
+    ).toBeFalsy();
   });
 
   it('should disable the share button if workspace is adminLocked', async () => {
-    currentWorkspaceStore.next({...currentWorkspaceStore.getValue(), adminLocked: true});
+    currentWorkspaceStore.next({
+      ...currentWorkspaceStore.getValue(),
+      adminLocked: true,
+    });
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.find('[data-test-id="workspaceShareButton"]')
-        .getElement().props.disabled).toBeTruthy();
+    expect(
+      wrapper.find('[data-test-id="workspaceShareButton"]').getElement().props
+        .disabled
+    ).toBeTruthy();
   });
 
   it('should display cdr version', async () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.find('[data-test-id="cdrVersion"]').text())
-      .toContain(CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION);
+    expect(wrapper.find('[data-test-id="cdrVersion"]').text()).toContain(
+      CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION
+    );
   });
 
   it('should display workspace metadata', async () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.find('[data-test-id="accessTierShortName"]').text())
-      .toContain(fp.capitalize(workspace.accessTierShortName));
-    expect(wrapper.find('[data-test-id="creationDate"]').text())
-      .toContain(new Date(workspace.creationTime).toDateString());
-    expect(wrapper.find('[data-test-id="lastUpdated"]').text())
-      .toContain(new Date(workspace.lastModifiedTime).toDateString());
+    expect(
+      wrapper.find('[data-test-id="accessTierShortName"]').text()
+    ).toContain(fp.capitalize(workspace.accessTierShortName));
+    expect(wrapper.find('[data-test-id="creationDate"]').text()).toContain(
+      new Date(workspace.creationTime).toDateString()
+    );
+    expect(wrapper.find('[data-test-id="lastUpdated"]').text()).toContain(
+      new Date(workspace.lastModifiedTime).toDateString()
+    );
   });
 
   it('should not manipulate SpecificPopulationItems object on page load', async () => {
-    const raceSubCategoriesBeforePageload = SpecificPopulationItems[0].subCategory.length;
+    const raceSubCategoriesBeforePageload =
+      SpecificPopulationItems[0].subCategory.length;
     const wrapper = component();
-    const raceSubCategoriesAfterPageLoad = SpecificPopulationItems[0].subCategory.length;
-    expect(raceSubCategoriesBeforePageload).toBe(raceSubCategoriesAfterPageLoad);
+    const raceSubCategoriesAfterPageLoad =
+      SpecificPopulationItems[0].subCategory.length;
+    expect(raceSubCategoriesBeforePageload).toBe(
+      raceSubCategoriesAfterPageLoad
+    );
   });
 
   it('should not display Publish/Unpublish buttons without appropriate Authority', async () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.exists('[data-test-id="publish-button"]')).toBeFalsy()
-    expect(wrapper.exists('[data-test-id="unpublish-button"]')).toBeFalsy()
+    expect(wrapper.exists('[data-test-id="publish-button"]')).toBeFalsy();
+    expect(wrapper.exists('[data-test-id="unpublish-button"]')).toBeFalsy();
   });
 
   it('should display Publish/Unpublish buttons with FEATUREDWORKSPACEADMIN Authority', async () => {
-    const profileWithAuth = {...ProfileStubVariables.PROFILE_STUB, authorities: [Authority.FEATUREDWORKSPACEADMIN]};
-    profileStore.set({profile: profileWithAuth, load, reload, updateCache});
+    const profileWithAuth = {
+      ...ProfileStubVariables.PROFILE_STUB,
+      authorities: [Authority.FEATUREDWORKSPACEADMIN],
+    };
+    profileStore.set({ profile: profileWithAuth, load, reload, updateCache });
 
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.exists('[data-test-id="publish-button"]')).toBeTruthy()
-    expect(wrapper.exists('[data-test-id="unpublish-button"]')).toBeTruthy()
+    expect(wrapper.exists('[data-test-id="publish-button"]')).toBeTruthy();
+    expect(wrapper.exists('[data-test-id="unpublish-button"]')).toBeTruthy();
   });
 
   it('should display Publish/Unpublish buttons with DEVELOPER Authority', async () => {
-    const profileWithAuth = {...ProfileStubVariables.PROFILE_STUB, authorities: [Authority.DEVELOPER]};
-    profileStore.set({profile: profileWithAuth, load, reload, updateCache});
+    const profileWithAuth = {
+      ...ProfileStubVariables.PROFILE_STUB,
+      authorities: [Authority.DEVELOPER],
+    };
+    profileStore.set({ profile: profileWithAuth, load, reload, updateCache });
 
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.exists('[data-test-id="publish-button"]')).toBeTruthy()
-    expect(wrapper.exists('[data-test-id="unpublish-button"]')).toBeTruthy()
+    expect(wrapper.exists('[data-test-id="publish-button"]')).toBeTruthy();
+    expect(wrapper.exists('[data-test-id="unpublish-button"]')).toBeTruthy();
   });
 
   it('Publish/Unpublish button styling depends on state - unpublished', async () => {
-    const profileWithAuth = {...ProfileStubVariables.PROFILE_STUB, authorities: [Authority.DEVELOPER]};
-    profileStore.set({profile: profileWithAuth, load, reload, updateCache});
+    const profileWithAuth = {
+      ...ProfileStubVariables.PROFILE_STUB,
+      authorities: [Authority.DEVELOPER],
+    };
+    profileStore.set({ profile: profileWithAuth, load, reload, updateCache });
 
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
@@ -177,9 +223,15 @@ describe('WorkspaceAbout', () => {
   });
 
   it('Publish/Unpublish button styling depends on state - published', async () => {
-    const profileWithAuth = {...ProfileStubVariables.PROFILE_STUB, authorities: [Authority.DEVELOPER]};
-    profileStore.set({profile: profileWithAuth, load, reload, updateCache});
-    currentWorkspaceStore.next({...currentWorkspaceStore.getValue(), published: true});
+    const profileWithAuth = {
+      ...ProfileStubVariables.PROFILE_STUB,
+      authorities: [Authority.DEVELOPER],
+    };
+    profileStore.set({ profile: profileWithAuth, load, reload, updateCache });
+    currentWorkspaceStore.next({
+      ...currentWorkspaceStore.getValue(),
+      published: true,
+    });
 
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
@@ -196,16 +248,22 @@ describe('WorkspaceAbout', () => {
   });
 
   it('Should display locked workspace message if adminLocked is true', async () => {
-    currentWorkspaceStore.next({...currentWorkspaceStore.getValue(), adminLocked: true});
+    currentWorkspaceStore.next({
+      ...currentWorkspaceStore.getValue(),
+      adminLocked: true,
+    });
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.exists('[data-test-id="lock-workspace-msg"]')).toBeTruthy();
-  })
+  });
 
   it('Should not display locked workspace message if adminLocked is false', async () => {
-    currentWorkspaceStore.next({...currentWorkspaceStore.getValue(), adminLocked: false});
+    currentWorkspaceStore.next({
+      ...currentWorkspaceStore.getValue(),
+      adminLocked: false,
+    });
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.exists('[data-test-id="lock-workspace-msg"]')).toBeFalsy();
-  })
+  });
 });

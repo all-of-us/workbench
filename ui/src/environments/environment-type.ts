@@ -3,7 +3,7 @@
 export enum ZendeskEnv {
   Prod = 'prod',
   Preprod = 'preprod',
-  Sandbox = 'sandbox'
+  Sandbox = 'sandbox',
 }
 
 // A copy of utils/access-tiers.tsx AccessTierShortNames, so there's no circular dependency.

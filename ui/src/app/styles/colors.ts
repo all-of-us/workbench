@@ -24,16 +24,26 @@ export default {
     cohortReview: '#A8385D',
     conceptSet: '#A27BD7',
     dataSet: '#6CACE4',
-    notebook: '#8BC990'
+    notebook: '#8BC990',
   },
   white: '#fff',
   black: '#000',
   workspacePermissionsHighlights: {
-    'OWNER': '#4996A2',
-    'READER': '#8F8E8F',
-    'WRITER': '#92B572'
+    OWNER: '#4996A2',
+    READER: '#8F8E8F',
+    WRITER: '#92B572',
   },
-  chartColors: ['#216FB4', '#6CACE4', '#8BC990', '#F8C954', '#F7981C', '#F0718B', '#F38D7A', '#A27DB7', '#CAB2D6'],
+  chartColors: [
+    '#216FB4',
+    '#6CACE4',
+    '#8BC990',
+    '#F8C954',
+    '#F7981C',
+    '#F0718B',
+    '#F38D7A',
+    '#A27DB7',
+    '#CAB2D6',
+  ],
   // High-contrast colors for runtime / extract status icon
   asyncOperationStatus: {
     starting: '#9FFF00',
@@ -42,7 +52,7 @@ export default {
     stopping: '#FFD700',
     stopped: '#F8C954',
     error: '#DB3214',
-  }
+  },
 };
 
 class Rgba {
@@ -76,10 +86,13 @@ export function hexToRgb(hex: string): Rgba {
   });
 
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  return result ? new Rgba(
-    parseInt(result[1], 16),
-    parseInt(result[2], 16),
-    parseInt(result[3], 16)) : null;
+  return result
+    ? new Rgba(
+        parseInt(result[1], 16),
+        parseInt(result[2], 16),
+        parseInt(result[3], 16)
+      )
+    : null;
 }
 
 export function addOpacity(color: string, opacity: number) {

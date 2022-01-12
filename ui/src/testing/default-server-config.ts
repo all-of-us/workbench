@@ -1,4 +1,4 @@
-import {ConfigResponse} from 'generated/fetch/api';
+import { ConfigResponse } from 'generated/fetch/api';
 
 const defaultServerConfig: ConfigResponse = {
   gsuiteDomain: 'researchallofus.org',
@@ -15,7 +15,7 @@ const defaultServerConfig: ConfigResponse = {
   enableRasLoginGovLinking: true,
   enablePersistentDisk: true,
   accessRenewalLookback: 330,
-  freeTierBillingAccountId: 'freetier'
+  freeTierBillingAccountId: 'freetier',
 };
 
 export default defaultServerConfig;
