@@ -459,7 +459,7 @@ jobs:
       - run:
           working_directory: ~/workbench/.circleci
           name: "undo me"
-          command: bash .circleci/skip-deploy-checks.sh
+          command: bash ./skip-deploy-checks.sh
       - halt-test-check:
           dir_names: "ui"
       - run:
