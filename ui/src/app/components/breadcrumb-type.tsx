@@ -1,0 +1,15 @@
+export enum BreadcrumbType {
+  Workspaces = 'Workspaces',
+  Workspace = 'Workspace',
+  WorkspaceEdit = 'WorkspaceEdit',
+  WorkspaceDuplicate = 'WorkspaceDuplicate',
+  Notebook = 'Notebook',
+  ConceptSet = 'ConceptSet',
+  Cohort = 'Cohort',
+  CohortReview = 'CohortReview',
+  Participant = 'Participant',
+  CohortAdd = 'CohortAdd',
+  SearchConcepts = 'SearchConcepts',
+  Dataset = 'Dataset',
+  Data = 'Data',
+}

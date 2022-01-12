@@ -33,11 +33,11 @@ import {
   NIH_CALLBACK_PATH,
   RAS_CALLBACK_PATH,
 } from 'app/utils/access-utils';
-import {BreadcrumbType} from 'app/utils/navigation';
 import {Redirect, Switch} from 'react-router-dom';
 import { authorityGuard, expiredGuard, registrationGuard} from './guards';
 import { AuthorityGuardedAction } from 'app/utils/authorities';
 import {AdminUserProfile} from 'app/pages/admin/admin-user-profile';
+import {BreadcrumbType} from 'app/components/breadcrumb-type';
 
 const AccessRenewalPage = fp.flow(withRouteData, withRoutingSpinner)(AccessRenewal);
 const AdminBannerPage = fp.flow(withRouteData, withRoutingSpinner)(AdminBanner);

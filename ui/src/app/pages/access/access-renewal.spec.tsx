@@ -97,10 +97,10 @@ describe('Access Renewal Page', () => {
   };
 
   beforeEach(() => {
-    const profileApi = new ProfileApiStub();
+    const profileApiImpl = new ProfileApiStub();
 
-    registerApiClient(ProfileApi, profileApi);
-    mockUpdateProfile = jest.spyOn(profileApi, 'updateProfile');
+    registerApiClient(ProfileApi, profileApiImpl);
+    mockUpdateProfile = jest.spyOn(profileApi(), 'updateProfile');
 
     reload.mockImplementation(async() => {
       profileStore.set({profile: profileStore.get().profile, load, reload, updateCache});

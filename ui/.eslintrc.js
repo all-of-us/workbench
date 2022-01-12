@@ -52,7 +52,6 @@ module.exports = {
     'radix': 'warn', // Add radix on parseInt
     // 'dot-notation': 'warn',  // 39 instances as of 3 Jan 2022
     // 'no-console': 'warn',  // 69 instances as of 3 Jan 2022
-    // 'no-shadow': 'warn', // 54 instances as of 3 Jan 2022
     // 'prefer-arrow/prefer-arrow-functions': ['warn'], // Lots of 'newable' functions in the code base
     // 'prefer-const': ['warn', {'destructuring': 'all'}],
 
@@ -62,6 +61,7 @@ module.exports = {
     '@typescript-eslint/no-inferrable-types': ['warn', {ignoreParameters: true}],
     '@typescript-eslint/no-misused-new': 'warn',
     '@typescript-eslint/no-non-null-assertion': 'warn',
+    '@typescript-eslint/no-shadow': 'warn',
     '@typescript-eslint/unified-signatures': 'warn',
     // '@typescript-eslint/member-ordering': ['warn', { 'classExpressions': ['method', 'field'] }],
     // 'no-use-before-define': 'off', // Needed for the below rule

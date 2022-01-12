@@ -118,12 +118,12 @@ export const QuickTourAndVideos = (props: Props) => {
             <div style={styles.quickTourAndVideosLabel}>Quick Tour and Videos</div>
             <div ref={quickTourResourcesDiv} style={{display: 'flex', position: 'relative'}}>
                 <FlexRow style={styles.quickTourCardsRow}>
-                    {quickTourResources.slice(quickTourResourceOffset, quickTourResourceOffset + limit()).map((thumbnail, i) => {
+                    {quickTourResources.slice(quickTourResourceOffset, quickTourResourceOffset + limit()).map((resource, i) => {
                       return <React.Fragment key={i}>
-                            <Clickable onClick={thumbnail.onClick}
+                            <Clickable onClick={resource.onClick}
                                        data-test-id={'quick-tour-resource-' + (i + quickTourResourceOffset)}>
                                 <img style={{width: '11rem', marginRight: '0.5rem'}}
-                                     src={thumbnail.src}/>
+                                     src={resource.src}/>
                             </Clickable>
                         </React.Fragment>;
                     })}

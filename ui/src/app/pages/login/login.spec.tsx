@@ -5,19 +5,19 @@ import { MemoryRouter } from 'react-router-dom';
 import LoginReactComponent from './login';
 
 describe('LoginComponent', () => {
-  let props: {signIn: Function, onCreateAccount: Function};
+  let loginProps: {signIn: Function, onCreateAccount: Function};
 
   const component = (props) => mount(<MemoryRouter><LoginReactComponent {...props}/></MemoryRouter>);
 
   beforeEach(() => {
-    props = {
+    loginProps = {
       signIn: () => {},
       onCreateAccount: () => {}
     };
   });
 
   it('should render', () => {
-    const wrapper = component(props);
+    const wrapper = component(loginProps);
     expect(wrapper).toBeTruthy();
   });
 });
