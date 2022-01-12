@@ -257,6 +257,8 @@ export const COMPARE_DOMAINS_FOR_DISPLAY = (a: Domain, b: Domain) => {
   return a.toString().localeCompare(b.toString());
 };
 
+const checkNameWidth = (element: HTMLDivElement) => element.offsetWidth < element.scrollWidth;
+
 const ImmutableListItem: React.FunctionComponent <{
   name: string, onChange: Function, checked: boolean}> = ({name, onChange, checked}) => {
   const [showNameTooltip, setShowNameTooltip] = useState(false);
@@ -291,8 +293,6 @@ const ImmutableWorkspaceCohortListItem: React.FunctionComponent<{
         </FlexRow>
       </div>;
     };
-
-const checkNameWidth = (element: HTMLDivElement) => element.offsetWidth < element.scrollWidth;
 
 const Subheader = (props) => {
   return <div style={{...styles.subheader, ...props.style}}>{props.children}</div>;

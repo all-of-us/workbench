@@ -34,8 +34,6 @@ export function toDisplay(resourceType: ResourceType): string {
   ])(resourceType);
 }
 
-export const getTypeString = (resource: WorkspaceResource): string => toDisplay(getType(resource));
-
 export function getDescription(resource: WorkspaceResource): string {
   return fp.cond([
       [isCohort, r => r.cohort.description],
@@ -88,6 +86,8 @@ export function getType(resource: WorkspaceResource): ResourceType {
       [isNotebook, () => ResourceType.NOTEBOOK],
   ])(resource);
 }
+
+export const getTypeString = (resource: WorkspaceResource): string => toDisplay(getType(resource));
 
 export function convertToResource(
   inputResource: FileDetail | Cohort | CohortReview | ConceptSet | DataSet,

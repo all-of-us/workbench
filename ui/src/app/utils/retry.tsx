@@ -65,6 +65,20 @@ export async function fetchWithGlobalErrorHandler<T>(fetchFn: () => Promise<T>, 
   }
 }
 
+async function apiCallWithGatewayTimeoutRetriesAndRetryCount<T>(
+  apiCall: () => Promise<T>, maxRetries = 3, retryCount = 1, initialWaitTime = 1000): Promise<T> {
+  try {
+    return await apiCall();
+  } catch (ex) {
+    if (ex.status !== 504 || retryCount > maxRetries) {
+      throw ex;
+    }
+    await new Promise(resolve => setTimeout(resolve, initialWaitTime * Math.pow(2, retryCount)));
+    return await apiCallWithGatewayTimeoutRetriesAndRetryCount(
+      apiCall, maxRetries, retryCount + 1, initialWaitTime);
+  }
+}
+
 /*
  * A method to run an api call with a specified number of retries and exponential backoff.
  * This method will only error
@@ -78,18 +92,4 @@ export async function fetchWithGlobalErrorHandler<T>(fetchFn: () => Promise<T>, 
 export async function apiCallWithGatewayTimeoutRetries<T>(
   apiCall: () => Promise<T>, maxRetries = 3, initialWaitTime = 1000): Promise<T> {
   return apiCallWithGatewayTimeoutRetriesAndRetryCount(apiCall, maxRetries, 1, initialWaitTime);
-}
-
-async function apiCallWithGatewayTimeoutRetriesAndRetryCount<T>(
-  apiCall: () => Promise<T>, maxRetries = 3, retryCount = 1, initialWaitTime = 1000): Promise<T> {
-  try {
-    return await apiCall();
-  } catch (ex) {
-    if (ex.status !== 504 || retryCount > maxRetries) {
-      throw ex;
-    }
-    await new Promise(resolve => setTimeout(resolve, initialWaitTime * Math.pow(2, retryCount)));
-    return await apiCallWithGatewayTimeoutRetriesAndRetryCount(
-      apiCall, maxRetries, retryCount + 1, initialWaitTime);
-  }
 }

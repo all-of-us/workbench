@@ -55,6 +55,9 @@ module.exports = {
     // 'prefer-arrow/prefer-arrow-functions': ['warn'], // Lots of 'newable' functions in the code base
     // 'prefer-const': ['warn', {'destructuring': 'all'}],
 
+    'no-use-before-define': 'off', // Needed for the below rule
+    '@typescript-eslint/no-use-before-define': 'warn',
+
     '@typescript-eslint/consistent-type-definitions': ['warn', 'interface'],
     '@typescript-eslint/explicit-member-accessibility': 'off',
     '@typescript-eslint/no-empty-interface': 'warn',
@@ -64,8 +67,6 @@ module.exports = {
     '@typescript-eslint/no-shadow': 'warn',
     '@typescript-eslint/unified-signatures': 'warn',
     // '@typescript-eslint/member-ordering': ['warn', { 'classExpressions': ['method', 'field'] }],
-    // 'no-use-before-define': 'off', // Needed for the below rule
-    // '@typescript-eslint/no-use-before-define': 'warn', // 55 instances as of 3 Jan 2022
     // 'no-unused-vars': 'off', // Needed for the below rule
     // '@typescript-eslint/no-unused-vars': 'warn', // 271 instances as of 3 Jan 2022
 
