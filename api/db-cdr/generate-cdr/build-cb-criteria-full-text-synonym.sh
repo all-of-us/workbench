@@ -93,18 +93,62 @@ FROM
     ) y
 WHERE x.id = y.id"
 
-# add [rank1] for all items. this is to deal with the poly-hierarchical issue in many trees
+# add [rank1] for all items except source hierarchies. this is to deal with the poly-hierarchical issue in many trees
 echo "FULL_TEXT - add [rank1]"
 bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
 SET x.full_text = CONCAT(x.full_text, '|', y.rnk)
-   ,x.synonyms = CONCAT(x.full_text, '|', y.rnk)
 FROM
     (
         SELECT MIN(id) as id, CONCAT('[', LOWER(domain_id), '_rank1]') as rnk
         FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
         WHERE full_text is not null
             and ( (is_selectable = 1 and est_count != -1) OR type = 'BRAND')
+            and id not in (
+              SELECT id
+              FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+              WHERE type IN ('ICD10CM', 'ICD9CM', 'ICD10PCS', 'ICD9Proc', 'CPT4')
+              AND is_standard = 0
+              AND has_hierarchy = 1
+              AND is_selectable = 1
+              AND est_count != -1
+            )
+        GROUP BY domain_id, is_standard, type, subtype, concept_id, name
+    ) y
+WHERE x.id = y.id"
+
+# add [rank1] for all condition source hierarchies.
+echo "FULL_TEXT - add [rank1]"
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
+"UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
+SET x.full_text = CONCAT(x.full_text, '|', y.rnk)
+FROM
+    (
+        SELECT MIN(id) as id, '[condition_rank1]' as rnk
+        FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+        WHERE type IN ('ICD10CM', 'ICD9CM')
+        AND is_standard = 0
+        AND has_hierarchy = 1
+        AND is_selectable = 1
+        AND est_count != -1
+        GROUP BY domain_id, is_standard, type, subtype, concept_id, name
+    ) y
+WHERE x.id = y.id"
+
+# add [rank1] for all procedure source hierarchies.
+echo "FULL_TEXT - add [rank1]"
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
+"UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
+SET x.full_text = CONCAT(x.full_text, '|', y.rnk)
+FROM
+    (
+        SELECT MIN(id) as id, '[procedure_rank1]' as rnk
+        FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+        WHERE type IN ('ICD10PCS', 'ICD9Proc', 'CPT4')
+        AND is_standard = 0
+        AND has_hierarchy = 1
+        AND is_selectable = 1
+        AND est_count != -1
         GROUP BY domain_id, is_standard, type, subtype, concept_id, name
     ) y
 WHERE x.id = y.id"
