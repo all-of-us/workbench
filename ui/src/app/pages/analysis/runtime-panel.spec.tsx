@@ -121,6 +121,11 @@ describe('RuntimePanel', () => {
     jest.useRealTimers();
   });
 
+  const expectEqualFields = (a, b, fieldNames) => {
+    const pick = fp.flow(fp.pick(fieldNames));
+    expect(pick(a)).toEqual(pick(b));
+  };
+
   const pickDropdownOption = async (wrapper, id, label) => {
     act(() => {
       wrapper.find(id).first().simulate('click');
@@ -226,11 +231,6 @@ describe('RuntimePanel', () => {
 
     createButton.simulate('click');
     await waitOneTickAndUpdate(wrapper);
-  };
-
-  const expectEqualFields = (a, b, fieldNames) => {
-    const pick = fp.flow(fp.pick(fieldNames));
-    expect(pick(a)).toEqual(pick(b));
   };
 
   it('should show loading spinner while loading', async () => {
@@ -1433,5 +1433,40 @@ describe('RuntimePanel', () => {
     const preemptibleCountInput = wrapper.find('#num-preemptible').first();
     expect(preemptibleCountInput.prop('disabled')).toBeFalsy();
     expect(preemptibleCountInput.prop('tooltip')).toBeFalsy();
+  });
+
+  it('should disable Spark console for non-running cluster', async () => {
+    const runtime = {
+      ...runtimeApiStub.runtime,
+      status: RuntimeStatus.Stopped,
+      configurationType: RuntimeConfigurationType.HailGenomicAnalysis,
+      dataprocConfig: defaultDataprocConfig(),
+    };
+    runtimeApiStub.runtime = runtime;
+    runtimeStoreStub.runtime = runtime;
+
+    const wrapper = await component();
+    const manageButton = wrapper.find('[data-test-id="manage-spark-console"]');
+    expect(manageButton.exists()).toBeTruthy();
+    expect(manageButton.first().prop('disabled')).toBeTruthy();
+  });
+
+  it('should render Spark console links for running cluster', async () => {
+    const runtime = {
+      ...runtimeApiStub.runtime,
+      status: RuntimeStatus.Running,
+      configurationType: RuntimeConfigurationType.HailGenomicAnalysis,
+      dataprocConfig: defaultDataprocConfig(),
+    };
+    runtimeApiStub.runtime = runtime;
+    runtimeStoreStub.runtime = runtime;
+
+    const wrapper = await component();
+    const manageButton = wrapper.find('[data-test-id="manage-spark-console"]');
+    expect(manageButton.exists()).toBeTruthy();
+    manageButton.first().simulate('click');
+
+    wrapper.update();
+    expect(wrapper.text()).toContain('MapReduce History Server');
   });
 });

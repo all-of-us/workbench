@@ -190,6 +190,7 @@ export interface MatchParams {
   nbName?: string;
   ns?: string;
   pid?: string;
+  sparkConsolePath?: string;
   username?: string;
   usernameWithoutGsuiteDomain?: string;
   wsid?: string;

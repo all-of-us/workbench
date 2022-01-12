@@ -19,7 +19,12 @@ import {
 } from 'app/services/notebooks-swagger-fetch-clients';
 import { runtimeApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
-import { reactStyles, withCurrentWorkspace, withUserProfile } from 'app/utils';
+import {
+  reactStyles,
+  switchCase,
+  withCurrentWorkspace,
+  withUserProfile,
+} from 'app/utils';
 import { Kernels } from 'app/utils/notebook-kernels';
 import {
   ComputeSecuritySuspendedError,
@@ -44,6 +49,14 @@ import { RuntimeInitializerModal } from 'app/components/runtime-initializer-moda
 export enum LeoApplicationType {
   Notebook,
   Terminal,
+  SparkConsole,
+}
+
+export enum SparkConsolePath {
+  Yarn = 'yarn',
+  YarnTimeline = 'apphistory',
+  SparkHistory = 'sparkhistory',
+  JobHistory = 'jobhistory',
 }
 
 export enum Progress {
@@ -70,21 +83,21 @@ export const notebookProgressStrings: Map<Progress, string> = new Map([
   [Progress.Redirecting, 'Redirecting to the notebook server'],
 ]);
 
-export const terminalProgressStrings: Map<Progress, string> = new Map([
-  [Progress.Unknown, 'Connecting to the terminal'],
-  [Progress.Initializing, 'Initializing terminal, may take up to 5 minutes'],
-  [Progress.Resuming, 'Resuming terminal, may take up to 1 minute'],
-  [Progress.Authenticating, 'Authenticating with the terminal'],
-  [Progress.Copying, 'Copying notebooks onto the server'],
-  [Progress.Creating, 'Opening the terminal'],
-  [Progress.Redirecting, 'Redirecting to the terminal'],
+export const genericProgressStrings: Map<Progress, string> = new Map([
+  [Progress.Unknown, 'Connecting to the environment'],
+  [Progress.Initializing, 'Initializing environment, may take up to 5 minutes'],
+  [Progress.Resuming, 'Resuming environment, may take up to 1 minute'],
+  [Progress.Authenticating, 'Authenticating with the environment'],
+  [Progress.Copying, 'Copying notebooks into the environment'],
+  [Progress.Creating, 'Opening the application'],
+  [Progress.Redirecting, 'Redirecting to the environment'],
 ]);
 
 const getProgressString = (appType: LeoApplicationType, progress: Progress) => {
   if (appType === LeoApplicationType.Notebook) {
     return notebookProgressStrings.get(progress);
   } else {
-    return terminalProgressStrings.get(progress);
+    return genericProgressStrings.get(progress);
   }
 };
 
@@ -395,27 +408,25 @@ export const LeonardoAppLauncher = fp.flow(
     }
 
     private getLeoAppUrl(runtime: Runtime, nbName: string): string {
-      if (this.isOpeningTerminal()) {
-        return encodeURI(
-          environment.leoApiUrl +
-            '/proxy/' +
-            runtime.googleProject +
-            '/' +
-            runtime.runtimeName +
-            '/jupyter/terminals/' +
-            terminalName
-        );
-      } else {
-        return encodeURI(
-          environment.leoApiUrl +
-            '/proxy/' +
-            runtime.googleProject +
-            '/' +
-            runtime.runtimeName +
-            '/jupyter/notebooks/' +
-            nbName
-        );
-      }
+      const proxyPath = switchCase(
+        this.props.leoAppType,
+        [LeoApplicationType.Notebook, () => `jupyter/notebooks/${nbName}`],
+        [
+          LeoApplicationType.Terminal,
+          () => `jupyter/terminals/${terminalName}`,
+        ],
+        [LeoApplicationType.SparkConsole, () => this.getSparkConsolePath()]
+      );
+
+      return (
+        environment.leoApiUrl +
+        '/proxy/' +
+        runtime.googleProject +
+        '/' +
+        runtime.runtimeName +
+        '/' +
+        proxyPath
+      );
     }
 
     // get notebook name without file suffix
@@ -425,13 +436,25 @@ export const LeonardoAppLauncher = fp.flow(
       return dropNotebookFileSuffix(decodeURIComponent(nbName));
     }
 
+    private getSparkConsolePath(): string {
+      const { sparkConsolePath } = this.props.match.params;
+      if (
+        !Object.values(SparkConsolePath).some((v) => v === sparkConsolePath)
+      ) {
+        throw Error(`invalid sparkConsolePath: '${sparkConsolePath}'`);
+      }
+      return sparkConsolePath;
+    }
+
     private getPageTitle() {
       if (this.isOpeningTerminal()) {
         return 'Loading Terminal';
-      } else {
+      } else if (this.props.leoAppType === LeoApplicationType.Notebook) {
         return this.isCreatingNewNotebook()
           ? 'Creating New Notebook: '
           : 'Loading Notebook: ' + this.getNotebookName();
+      } else {
+        return 'Loading Analysis Environment';
       }
     }
 
@@ -590,16 +613,7 @@ export const LeonardoAppLauncher = fp.flow(
     }
 
     private async getLeoAppPathAndLocalize(runtime: Runtime) {
-      if (this.isOpeningTerminal()) {
-        const { workspace } = this.props;
-        this.incrementProgress(Progress.Creating);
-        const resp = await this.runtimeRetry(() =>
-          runtimeApi().localize(workspace.namespace, null, {
-            signal: this.pollAborter.signal,
-          })
-        );
-        return resp.runtimeLocalDirectory;
-      } else {
+      if (this.props.leoAppType === LeoApplicationType.Notebook) {
         if (this.isCreatingNewNotebook()) {
           this.incrementProgress(Progress.Creating);
           return this.createNotebookAndLocalize(runtime);
@@ -612,6 +626,15 @@ export const LeonardoAppLauncher = fp.flow(
           return `${localizedNotebookDir}/${fullNotebookName}`;
         }
       }
+
+      const { workspace } = this.props;
+      this.incrementProgress(Progress.Creating);
+      const resp = await this.runtimeRetry(() =>
+        runtimeApi().localize(workspace.namespace, null, {
+          signal: this.pollAborter.signal,
+        })
+      );
+      return resp.runtimeLocalDirectory;
     }
 
     private async createNotebookAndLocalize(runtime: Runtime) {
