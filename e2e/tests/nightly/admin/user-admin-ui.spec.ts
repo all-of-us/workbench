@@ -106,7 +106,7 @@ describe('User Admin', () => {
         break;
     }
 
-    //verify that userfulName, username and InitialCreditsUsed input fields are disabled
+    //verify that Name, Username and InitialCreditsUsed input fields are disabled
     expect(await userProfileInfo.getNameInput().isCursorNotAllowed()).toBe(true);
     expect(await userProfileInfo.getUsernameInput().isCursorNotAllowed()).toBe(true);
     expect(await userProfileInfo.getInitialCreditsUsedInput().isCursorNotAllowed()).toBe(true);
@@ -117,7 +117,7 @@ describe('User Admin', () => {
 
     //verify the credit limit value matches the limit value in the initial credits used field
     const initialCreditLimit = await userProfileInfo.getInitialCreditsLimitValue();
-    const initialCreditMaxValue = await userProfileInfo.getInitialCreditUsedValue();
+    const initialCreditMaxValue = await userProfileInfo.getCreditLimitValue();
     expect(initialCreditLimit).toEqual(initialCreditMaxValue);
 
     // verify the admin is able to update the initial credit

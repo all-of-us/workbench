@@ -138,7 +138,7 @@ export default class UserProfileInfo extends AuthenticatedPage {
   }
 
   // get the limit value from the initial credits used field
-  async getInitialCreditUsedValue(): Promise<string> {
+  async getCreditLimitValue(): Promise<string> {
     const initialCreditsUsed = this.getInitialCreditsUsedInput();
     const initialCreditsUsedValue = await initialCreditsUsed.getProperty<string>('value');
     const regexpSize = /\$([0-9.]+) used of \$([0-9.]+) limit/;
