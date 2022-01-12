@@ -396,6 +396,7 @@ dependencies {
     compile "com.google.guava:guava:31.0.1-jre"
     compile "com.google.http-client:google-http-client-apache:2.1.2"
     compile "com.google.oauth-client:google-oauth-client-jetty:1.32.1"
+    compile 'com.google.protobuf:protobuf-java:3.19.2'
     compile "com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20211018.2"
     compile "com.squareup.okhttp:logging-interceptor:$project.ext.OKHTTP_VERSION"
     compile "com.squareup.okhttp:okhttp:$project.ext.OKHTTP_VERSION"
