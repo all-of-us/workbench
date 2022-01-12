@@ -31,7 +31,8 @@ describe('egress suspension', () => {
     console.log('Generating egress via notebook');
     notebookPage.runCodeFile(1, egressFilename, 5 * 60 * 1000).catch((err) => {
       if (!page.isClosed()) {
-        console.log('egress notebook failed to run: this may be expected if the user was suspended during execution', err);
+        console.log(
+          'egress notebook failed to run: this may be expected if the user was suspended during execution', err);
       }
     });
 
