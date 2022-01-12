@@ -6,7 +6,8 @@ export default class Modal extends BaseModal {
     super(page, xpath, opts);
   }
 
-  isLoaded(): Promise<boolean> {
-    return Promise.resolve(true);
+  async isLoaded(): Promise<boolean> {
+    await this.page.waitForXPath(this.getXpath(), { visible: true });
+    return true;
   }
 }
