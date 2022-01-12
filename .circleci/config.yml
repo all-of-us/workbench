@@ -463,7 +463,6 @@ jobs:
     executor: workbench-executor
     steps:
       - checkout-code
-      - halt-deploy-check
       - halt-test-check:
           dir_names: "ui"
       - run:
