@@ -137,20 +137,23 @@ export default class UserProfileInfo extends AuthenticatedPage {
     return Textbox.findByName(this.page, { dataTestId: DataTestIdAlias.InitialCreditsUsed });
   }
 
-  // get the initial credits used value
-  async getInitialCreditMaxValue(): Promise<string> {
-    const initialCreditsMax = this.getInitialCreditsUsedInput();
-    const initialCreditsMaxValue = await initialCreditsMax.getProperty<string>('value');
-    const regex = new RegExp(/(?<=of ).*(?= limit)/);
-    return regex.exec(initialCreditsMaxValue)[0];
+  // get the limit value from the initial credits used field
+  async getInitialCreditUsedValue(): Promise<string> {
+    const initialCreditsUsed = this.getInitialCreditsUsedInput();
+    const initialCreditsUsedValue = await initialCreditsUsed.getProperty<string>('value');
+    const regexpSize = /\$([0-9.]+) used of \$([0-9.]+) limit/;
+    const match = initialCreditsUsedValue.match(regexpSize);
+    // extract the credit limit value
+    const creditLimitValue = "$" + `${match[2]}`;
+    return creditLimitValue;
   }
 
-  // get the initial credits limit value
+  // get the initial credits limit value from dropdown
   async getInitialCreditsLimitValue(): Promise<string> {
     const initialCreditsDropdown = SelectMenu.findByName(this.page, { dataTestId: DataTestIdAlias.InitialCreditLimit });
     return await initialCreditsDropdown.getSelectedValue();
   }
-
+  
   // select a different Verified Institution to verify email match with institution
   async selectVerifiedInstitution(selectTextValue: string): Promise<void> {
     const dropdown = SelectMenu.findByName(this.page, FieldSelector.VerifiedInstitutionSelect.textOption);
@@ -163,12 +166,12 @@ export default class UserProfileInfo extends AuthenticatedPage {
     return dropdown.select(selectTextValue);
   }
 
-  // update initial credit
+  // update initial credit limit
   async updateInitialCredits(): Promise<void> {
     await this.selectInitialCredits(InitialCreditSelectValue.six);
-    const creditValue = await this.getInitialCreditsLimitValue();
-    const newInitialCreditMaxValue = await this.getInitialCreditMaxValue();
-    expect(creditValue).toEqual(newInitialCreditMaxValue);
+    const newInitialCreditValue = await this.getInitialCreditsLimitValue();
+    const newCreditLimit = await this.getInitialCreditUsedValue();
+    expect(newCreditLimit).toEqual(newInitialCreditValue);
     await this.waitForSaveButton(true);
   }
 }
