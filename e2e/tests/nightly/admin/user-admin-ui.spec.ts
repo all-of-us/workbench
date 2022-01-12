@@ -44,7 +44,7 @@ describe('User Admin', () => {
     await userProfileInfo.waitForLoad();
   });
 
-  test('Verify admin-user-profile page ui, update freeCredits and update institution', async () => {
+  test('Verify admin-user-profile page ui, update initialCredits and update institution', async () => {
     const userAdminPage = new UserAdminPage(page);
     await userAdminPage.waitForLoad();
 
@@ -115,16 +115,16 @@ describe('User Admin', () => {
     const userNamePlaceHolder = await userProfileInfo.getUserNamePlaceHolder();
     expect(userNameEmail).toEqual(userNamePlaceHolder);
 
-    //verify the credit limit value matches the max value in the initial credits used field
+    //verify the credit limit value matches the limit value in the initial credits used field
     const initialCreditLimit = await userProfileInfo.getInitialCreditsLimitValue();
-    const initialCreditMaxValue = await userProfileInfo.getInitialCreditMaxValue();
-    console.log(`newcredit1: ${initialCreditMaxValue}`);
+    const initialCreditMaxValue = await userProfileInfo.getInitialCreditUsedValue();
     expect(initialCreditLimit).toEqual(initialCreditMaxValue);
 
-    // verify the admin is able to update the initail credit
+    // verify the admin is able to update the initial credit
     await userProfileInfo.updateInitialCredits();
     await userProfileInfo.selectInitialCredits(initialCreditLimit);
   });
+
 
   test('Verify that the user-audit page UI renders correctly', async () => {
     const userAdminPage = new UserAdminPage(page);
