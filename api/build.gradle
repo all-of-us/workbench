@@ -24,11 +24,7 @@ buildscript {
     project.ext['hibernate.version'] = '5.4.31.Final'
 
     repositories {
-        // Bintray's repository - a fast Maven Central mirror & more
         mavenCentral()
-        maven {
-            url "https://plugins.gradle.org/m2/"
-        }
     }
 }
 
