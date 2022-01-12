@@ -69,34 +69,6 @@ export default class NotebookPage extends NotebookFrame {
     return true;
   }
 
-  async waitForSecuritySuspendedStatus(suspended: boolean, timeOut = 25 * 60 * 1000): Promise<void> {
-    const startTime = Date.now();
-    const pollPeriod = 20 * 1000;
-
-    while (true) {
-      await this.reloadPage();
-
-      if ((await this.isSecuritySuspended()) === suspended) {
-        // Success
-        break;
-      }
-
-      if (Date.now() - startTime > timeOut - pollPeriod) {
-        throw new Error('timed out waiting for security suspension status = ' + suspended);
-      }
-      await this.page.waitForTimeout(pollPeriod);
-    }
-  }
-
-  private async isSecuritySuspended(): Promise<boolean> {
-    try {
-      await this.page.waitForXPath('//*[@data-test-id="security-suspended-msg"]', { visible: true });
-    } catch (e) {
-      return false;
-    }
-    return true;
-  }
-
   /**
    * Click "Notebook" link, goto Workspace Analysis page.
    * This function does not handle Unsaved Changes confirmation.
