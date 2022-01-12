@@ -1,5 +1,4 @@
 #!/bin/bash
-set -xv
 
 # Applying to main branch only: Exiting deploy UI and API jobs early if last commit message contains "skip-deploy" string.
 COMMIT_MESSAGE=$(git log -1 --pretty=format:"%s")
