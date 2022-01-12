@@ -15,8 +15,8 @@ const DataTestIdAlias = {
   UserFullName: 'userFullName',
   Username: 'username',
   ContactEmail: 'contactEmail',
-  InitialCreditsUsed: 'initial-credits-used', 
-  InitialCreditLimit: 'initial-credits-dropdown', 
+  InitialCreditsUsed: 'initial-credits-used',
+  InitialCreditLimit: 'initial-credits-dropdown',
   VerifiedInstitution: 'verifiedInstitution',
   InstitutionalRole: 'institutionalRole',
   EmailErrorMessage: 'email-error-message',
@@ -148,7 +148,7 @@ export default class UserProfileInfo extends AuthenticatedPage {
   // get the initial credits limit value
   async getInitialCreditsLimitValue(): Promise<string> {
     const initialCreditsDropdown = SelectMenu.findByName(this.page, { dataTestId: DataTestIdAlias.InitialCreditLimit });
-    return await initialCreditsDropdown .getSelectedValue();
+    return await initialCreditsDropdown.getSelectedValue();
   }
 
   // select a different Verified Institution to verify email match with institution
