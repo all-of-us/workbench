@@ -218,8 +218,7 @@ public class UserController implements UserApiDelegate {
    *     disabled
    */
   private Stream<BillingAccount> maybeFreeTierBillingAccount() {
-    if (configProvider.get().featureFlags.enableBillingUpgrade
-        && !freeTierBillingService.userHasRemainingFreeTierCredits(userProvider.get())) {
+    if (!freeTierBillingService.userHasRemainingFreeTierCredits(userProvider.get())) {
       return Stream.empty();
     }
 
@@ -232,10 +231,6 @@ public class UserController implements UserApiDelegate {
   }
 
   private Stream<BillingAccount> maybeCloudBillingAccounts() {
-    if (!configProvider.get().featureFlags.enableBillingUpgrade) {
-      return Stream.empty();
-    }
-
     ListBillingAccountsResponse response;
     try {
       response = cloudBillingProvider.get().billingAccounts().list().execute();

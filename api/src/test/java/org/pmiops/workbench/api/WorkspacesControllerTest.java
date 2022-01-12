@@ -359,7 +359,6 @@ public class WorkspacesControllerTest {
   @BeforeEach
   public void setUp() throws Exception {
     workbenchConfig = WorkbenchConfig.createEmptyConfig();
-    workbenchConfig.featureFlags.enableBillingUpgrade = true;
     workbenchConfig.billing.accountId = "free-tier";
     workbenchConfig.billing.projectNamePrefix = "aou-local";
 
@@ -623,20 +622,6 @@ public class WorkspacesControllerTest {
       return;
     }
     fail();
-  }
-
-  @Test
-  public void testCreateWorkspace_UpdateBillingAccount_flagFalse() {
-    workbenchConfig.featureFlags.enableBillingUpgrade = false;
-
-    Workspace workspace = createWorkspace();
-    workspace.setBillingAccountName("new-account");
-
-    workspacesController.createWorkspace(workspace);
-
-    // the billing account was not set
-    verify(fireCloudService, never()).updateBillingAccountAsService(anyString(), anyString());
-    verify(fireCloudService, never()).updateBillingAccount(anyString(), anyString());
   }
 
   @Test

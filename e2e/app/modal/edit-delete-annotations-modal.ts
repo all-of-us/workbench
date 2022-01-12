@@ -7,8 +7,8 @@ import BaseElement from 'app/element/base-element';
 const modalTitle = 'Edit or Delete Review-Wide Annotation Fields';
 
 export default class EditDeleteAnnotationsModal extends Modal {
-  constructor(page: Page, xpath?: string) {
-    super(page, xpath);
+  constructor(page: Page, opts?: { xpath?: string; modalIndex?: number }) {
+    super(page, opts);
   }
 
   async isLoaded(): Promise<boolean> {

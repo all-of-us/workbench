@@ -7,8 +7,8 @@ import {
   UserAdminTableLink,
   UserAuditLink,
   commonStyles,
-  getFreeCreditUsage,
-  FreeCreditsDropdown,
+  getInitalCreditsUsage,
+  InitialCreditsDropdown,
   InstitutionDropdown,
   InstitutionalRoleDropdown,
   InstitutionalRoleOtherTextInput,
@@ -84,7 +84,7 @@ const UneditableFields = (props: {profile: Profile}) => {
     <FlexColumn>
       <div style={styles.subHeader}>Researcher information</div>
       <UneditableField label='Name' value={`${givenName} ${familyName}`}/>
-      <UneditableField label='Free Credits Used' value={getFreeCreditUsage(props.profile)}/>
+      <UneditableField label='Initial Credits Used' value={getInitalCreditsUsage(props.profile)}/>
     </FlexColumn>
     <FlexColumn style={{paddingLeft: '80px'}}>
       <div style={styles.uneditableFieldsSpacer}/>
@@ -100,13 +100,13 @@ interface EditableFieldsProps {
   institutions?: PublicInstitutionDetails[],
   emailValidationStatus: EmailValidationStatus,
   onChangeEmail: (contactEmail: string) => void,
-  onChangeFreeCreditLimit: (limit: number) => void,
+  onChangeInitialCreditsLimit: (limit: number) => void,
   onChangeInstitution: (institutionShortName: string) => void,
   onChangeInstitutionalRole: (institutionalRoleEnum: InstitutionalRole) => void,
   onChangeInstitutionOtherText: (otherText: string) => void,
 }
 const EditableFields =
-  ({oldProfile, updatedProfile, institutions, emailValidationStatus, onChangeEmail, onChangeFreeCreditLimit,
+  ({oldProfile, updatedProfile, institutions, emailValidationStatus, onChangeEmail, onChangeInitialCreditsLimit,
      onChangeInstitution, onChangeInstitutionalRole, onChangeInstitutionOtherText}: EditableFieldsProps) => {
   const institution: PublicInstitutionDetails = institutions
     .find(i => i.shortName === updatedProfile?.verifiedInstitutionalAffiliation?.institutionShortName);
@@ -128,11 +128,11 @@ const EditableFields =
       </FlexRow>
       {emailValidationStatus === EmailValidationStatus.INVALID && getEmailValidationErrorMessage(institution)}
       <FlexRow>
-        <FreeCreditsDropdown
+        <InitialCreditsDropdown
           currentLimit={updatedProfile.freeTierDollarQuota}
           previousLimit={oldProfile.freeTierDollarQuota}
           highlightOnChange
-          onChange={event => onChangeFreeCreditLimit(event.value)}/>
+          onChange={event => onChangeInitialCreditsLimit(event.value)}/>
         <InstitutionalRoleDropdown
           institutions={institutions}
           currentAffiliation={updatedProfile.verifiedInstitutionalAffiliation}
@@ -275,7 +275,7 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
         institutions={institutions}
         emailValidationStatus={emailValidationStatus}
         onChangeEmail={(contactEmail: string) => updateContactEmail(contactEmail.trim())}
-        onChangeFreeCreditLimit={(freeTierDollarQuota: number) => updateProfile({freeTierDollarQuota})}
+        onChangeInitialCreditsLimit={(freeTierDollarQuota: number) => updateProfile({freeTierDollarQuota})}
         onChangeInstitution={(institutionShortName: string) => updateInstitution(institutionShortName)}
         onChangeInstitutionalRole={(institutionalRoleEnum: InstitutionalRole) => updateInstitutionalRole(institutionalRoleEnum)}
         onChangeInstitutionOtherText={(otherText: string) => updateInstitutionalRoleOtherText(otherText)}

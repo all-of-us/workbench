@@ -7,7 +7,7 @@ import {Link} from 'react-router-dom';
 import * as fp from 'lodash/fp';
 import {Dropdown} from 'primereact/dropdown';
 
-import {formatFreeCreditsUSD, reactStyles} from 'app/utils';
+import {formatInitialCreditsUSD, reactStyles} from 'app/utils';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {
   AccessModule,
@@ -83,7 +83,7 @@ export const getPublicInstitutionDetails = async(): Promise<PublicInstitutionDet
  * $1000 to $10,000, in $500 increments
  * Plus the user's current quota value, if it's not already one of these
  */
-export const getFreeCreditLimitOptions = (freeTierDollarQuota?: number) => {
+export const getInitialCreditLimitOptions = (initialCreditLimitOverride?: number) => {
   const START1 = 300;
   const END1 = 1000;
   const START2 = 1000;
@@ -94,17 +94,17 @@ export const getFreeCreditLimitOptions = (freeTierDollarQuota?: number) => {
   const below1000 = fp.rangeStep(100, START1, END1+1);
   const over1000 = fp.rangeStep(500, START2, END2+1);
 
-  const defaultsPlusMaybeOverride = new Set([...below1000, ...over1000, freeTierDollarQuota ?? START1]);
+  const defaultsPlusMaybeOverride = new Set([...below1000, ...over1000, initialCreditLimitOverride ?? START1]);
 
   // gotcha: JS sorts numbers lexicographically by default
   const numericallySorted = Array.from(defaultsPlusMaybeOverride).sort((a, b) => a - b);
 
-  return fp.map((limit) => ({label: formatFreeCreditsUSD(limit), value: limit}), numericallySorted);
+  return fp.map((limit) => ({label: formatInitialCreditsUSD(limit), value: limit}), numericallySorted);
 }
 
-export const getFreeCreditUsage = (profile: Profile): string => {
+export const getInitalCreditsUsage = (profile: Profile): string => {
   const {freeTierDollarQuota, freeTierUsage} = profile;
-  return `${formatFreeCreditsUSD(freeTierUsage)} used of ${formatFreeCreditsUSD(freeTierDollarQuota)} limit`;
+  return `${formatInitialCreditsUSD(freeTierUsage)} used of ${formatInitialCreditsUSD(freeTierDollarQuota)} limit`;
 }
 
 // returns the updated profile value only if it has changed
@@ -175,7 +175,7 @@ export const ContactEmailTextInput = ({contactEmail, previousContactEmail, highl
     onChange={value => onChange(value)}/>;
 }
 
-interface FreeCreditsDropdownProps {
+interface InitialCreditsDropdownProps {
   currentLimit?: number,
   previousLimit?: number,
   highlightOnChange?: boolean,
@@ -183,13 +183,13 @@ interface FreeCreditsDropdownProps {
   labelStyle?: CSSProperties,
   dropdownStyle?: CSSProperties,
 }
-export const FreeCreditsDropdown = ({currentLimit, previousLimit, highlightOnChange,
-                                      onChange, labelStyle, dropdownStyle}: FreeCreditsDropdownProps) => {
+export const InitialCreditsDropdown = ({currentLimit, previousLimit, highlightOnChange,
+                                      onChange, labelStyle, dropdownStyle}: InitialCreditsDropdownProps) => {
   return <DropdownWithLabel
-    dataTestId='freeTierDollarQuota'
-    className='free-credits'
-    label='Free credit limit'
-    options={getFreeCreditLimitOptions(previousLimit)}
+    dataTestId='initial-credits-dropdown'
+    className='initial-credits'
+    label='Initial credit limit'
+    options={getInitialCreditLimitOptions(previousLimit)}
     currentValue={currentLimit}
     previousValue={previousLimit}
     highlightOnChange={highlightOnChange}

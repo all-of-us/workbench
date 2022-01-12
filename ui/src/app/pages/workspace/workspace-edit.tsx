@@ -38,7 +38,7 @@ import {WorkspaceResearchSummary} from 'app/pages/workspace/workspace-research-s
 import {userApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {
-  formatFreeCreditsUSD,
+  formatInitialCreditsUSD,
   reactStyles,
   sliceByHalfLength,
   withCdrVersions,
@@ -114,20 +114,6 @@ export const styles = reactStyles({
   flexColumnBy2: {
     flex: '1 1 0',
     marginLeft: '1rem'
-  },
-  freeCreditsBalanceClickable: {
-    display: 'inline-block',
-    color: colors.accent,
-    padding: '0.25rem 0 0 1rem'
-  },
-  freeCreditsBalanceOverlay: {
-    height: 44,
-    width: 150,
-    color: colors.primary,
-    fontFamily: 'Montserrat',
-    fontSize: 12,
-    letterSpacing: '0',
-    lineHeight: '22px',
   },
   infoIcon: {
     height: '16px',
@@ -333,8 +319,8 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
 
     formatFreeTierBillingAccountName(): string {
       const {profileState: {profile: {freeTierDollarQuota, freeTierUsage}}} = this.props;
-      const freeTierCreditsBalance = freeTierDollarQuota - freeTierUsage;
-      return 'Use All of Us initial credits - ' + formatFreeCreditsUSD(freeTierCreditsBalance) + ' left'
+      const initialCreditsBalance = freeTierDollarQuota - freeTierUsage;
+      return 'Use All of Us initial credits - ' + formatInitialCreditsUSD(initialCreditsBalance) + ' left'
     }
 
     async initialBillingAccountLoad() {
@@ -591,12 +577,12 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
 
     renderBillingDescription() {
       return <div>
-        The <AouTitle/> provides $300 in free credits per user. Please refer to
+        The <AouTitle/> provides $300 in initial credits per user. Please refer to
         <StyledExternalLink href={supportUrls.billing} target='_blank'> &nbsp;this article
-        </StyledExternalLink> to learn more about the free credit
+        </StyledExternalLink> to learn more about the initial credit
         program and how it can be used .
-        <div style={{display: 'inline'}}>Once you have used up your free credits, you can either select a shared billing account or create
-          a new one using either Google Cloud Platform or a Google billing partner.
+        <div style={{display: 'inline'}}>Once you have used up your initial credits, you can either select a shared billing account or
+          create a new one using either Google Cloud Platform or a Google billing partner.
           Please note: If creating a billing account via a Google billing partner,
           it may take a few days to show up in the <b>Select account</b> dropdown.</div>
       </div>;
@@ -1098,9 +1084,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
       } = this.state;
       const {cdrVersionTiersResponse, profileState: {profile}} = this.props;
       const {freeTierDollarQuota, freeTierUsage} = profile;
-      const freeTierCreditsBalance = freeTierDollarQuota - freeTierUsage;
-      // defined below in the OverlayPanel declaration
-      let freeTierBalancePanel: OverlayPanel;
+      const initialCreditsBalance = freeTierDollarQuota - freeTierUsage;
 
       const errors = this.validate();
       return <FadeBox  style={{margin: 'auto', marginTop: '1rem', width: '95.7%'}}>
@@ -1216,7 +1200,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
                       style={{width: '20rem'}}
                         value={billingAccountName}
                         options={this.buildBillingAccountOptions()}
-                        disabled={(freeTierCreditsBalance < 0.0)}
+                        disabled={(initialCreditsBalance < 0.0)}
                         onChange={e => {this.setState(fp.set(['workspace', 'billingAccountName'], e.value));}}/>
               </div>
               </FlexColumn>

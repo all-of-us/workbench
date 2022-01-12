@@ -282,13 +282,12 @@ export default class WorkspaceEditPage extends WorkspaceBase {
   }
 
   async isLoaded(): Promise<boolean> {
-    await Promise.all([waitForDocumentTitle(this.page, PageTitle), waitWhileLoading(this.page)]);
-    const selectXpath = buildXPath(FIELD.billingAccountSelect.textOption);
-    const select = new Select(this.page, selectXpath);
+    await waitForDocumentTitle(this.page, PageTitle);
     // Wait for Workspace name text-field, Billing Account Select.
+    const select = new Select(this.page, buildXPath(FIELD.billingAccountSelect.textOption));
     await Promise.all([this.getWorkspaceNameTextbox().waitForXPath(), select.waitForXPath()]);
-    // Build Workspace page is used for Duplicate and Create. Wait for Create or Duplicate button.
-    await this.getCancelButton().waitForXPath();
+    await this.getCancelButton().waitUntilEnabled();
+    await waitWhileLoading(this.page);
     return true;
   }
 
@@ -465,7 +464,7 @@ export default class WorkspaceEditPage extends WorkspaceBase {
    * @param selected: True means select "Yes, Request Review" radiobutton. False means select "No, Request Review" radiobutton.
    */
   async requestForReviewRadiobutton(selected: boolean): Promise<void> {
-    let radioComponent;
+    let radioComponent: WebComponent;
     if (selected) {
       radioComponent = new WebComponent(this.page, FIELD.REQUEST_FOR_REVIEW.yesRequestReviewRadiobutton.textOption);
     } else {

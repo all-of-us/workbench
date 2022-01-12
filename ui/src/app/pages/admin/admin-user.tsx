@@ -32,8 +32,8 @@ import {
   adminGetProfile,
   UserAdminTableLink,
   commonStyles,
-  getFreeCreditUsage,
-  FreeCreditsDropdown,
+  getInitalCreditsUsage,
+  InitialCreditsDropdown,
   InstitutionDropdown,
   InstitutionalRoleDropdown,
   InstitutionalRoleOtherTextInput,
@@ -74,12 +74,12 @@ const MaybeEmailValidationErrorMessage = ({updatedProfile, verifiedInstitutionOp
   return selectedInstitution ? getEmailValidationErrorMessage(selectedInstitution) : null;
 };
 
-interface FreeCreditsProps {
+interface InitialCreditsProps {
   isAboveLimit: boolean;
   usage: string;
 }
 
-const FreeCreditsUsage = ({isAboveLimit, usage}: FreeCreditsProps) => {
+const InitialCreditsUsage = ({isAboveLimit, usage}: InitialCreditsProps) => {
   const inputStyle = isAboveLimit ?
   {...styles.textInput,
     backgroundColor: colorWithWhiteness(colors.danger, .95),
@@ -93,14 +93,14 @@ const FreeCreditsUsage = ({isAboveLimit, usage}: FreeCreditsProps) => {
 
   return <React.Fragment>
     <TextInputWithLabel
-      labelText='Free credits used'
+      labelText='Initial credits used'
       value={usage}
-      inputId='freeTierUsage'
+      inputId='initial-credits-used'
       disabled={true}
       inputStyle={inputStyle}
       containerStyle={styles.textInputContainer}
     />
-    {isAboveLimit && <div style={{color: colors.danger}}>Update free credit limit</div>}
+    {isAboveLimit && <div style={{color: colors.danger}}>Update initial credit limit</div>}
   </React.Fragment>;
 };
 
@@ -243,7 +243,7 @@ export const AdminUser = withRouter(class extends React.Component<Props, State> 
     this.setState(fp.set(['updatedProfile', 'contactEmail'], contactEmail));
   }
 
-  setFreeTierCreditDollarLimit(newLimit: number) {
+  setInitialCreditsDollarLimitOverride(newLimit: number) {
     this.setState(fp.set(['updatedProfile', 'freeTierDollarQuota'], newLimit));
   }
 
@@ -388,17 +388,17 @@ export const AdminUser = withRouter(class extends React.Component<Props, State> 
               labelStyle={styles.label}
               inputStyle={styles.textInput}
               containerStyle={styles.textInputContainer}/>
-            <FreeCreditsUsage
+            <InitialCreditsUsage
               isAboveLimit={this.usageIsAboveLimit()}
-              usage={getFreeCreditUsage(this.state.updatedProfile)}
+              usage={getInitalCreditsUsage(this.state.updatedProfile)}
             />
           </FlexColumn>
           <FlexColumn style={{width: '33%'}}>
-            <FreeCreditsDropdown
+            <InitialCreditsDropdown
               currentLimit={updatedProfile.freeTierDollarQuota}
               labelStyle={styles.label}
               dropdownStyle={styles.textInput}
-              onChange={async(event) => this.setFreeTierCreditDollarLimit(event.value)}/>
+              onChange={async(event) => this.setInitialCreditsDollarLimitOverride(event.value)}/>
             <InstitutionDropdown
               institutions={verifiedInstitutionOptions}
               currentInstitutionShortName={updatedProfile.verifiedInstitutionalAffiliation?.institutionShortName}

@@ -7,8 +7,8 @@ import { LinkText } from 'app/text-labels';
 const modalTitle = 'Would you like to extract genomic variant data as VCF files?';
 
 export default class GenomicsVariantExtractConfirmationModal extends Modal {
-  constructor(page: Page, xpath?: string) {
-    super(page, xpath);
+  constructor(page: Page, opts?: { xpath?: string; modalIndex?: number }) {
+    super(page, opts);
   }
 
   async isLoaded(): Promise<boolean> {

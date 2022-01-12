@@ -386,16 +386,17 @@ dependencies {
     compile "com.google.auth:google-auth-library-appengine:1.2.2"
     compile "com.google.auth:google-auth-library-oauth2-http:1.2.2"
     compile 'com.google.cloud.sql:mysql-socket-factory:1.4.1'
-    compile 'com.google.cloud:google-cloud-bigquery:2.5.1'
-    compile 'com.google.cloud:google-cloud-iamcredentials:2.0.7'
-    compile 'com.google.cloud:google-cloud-logging:3.5.1'
-    compile 'com.google.cloud:google-cloud-monitoring:3.2.0'
-    compile 'com.google.cloud:google-cloud-storage:2.2.2'
-    compile 'com.google.cloud:google-cloud-tasks:2.1.0'
+    compile 'com.google.cloud:google-cloud-bigquery:2.6.1'
+    compile 'com.google.cloud:google-cloud-iamcredentials:2.0.8'
+    compile 'com.google.cloud:google-cloud-logging:3.5.3'
+    compile 'com.google.cloud:google-cloud-monitoring:3.2.1'
+    compile 'com.google.cloud:google-cloud-storage:2.2.3'
+    compile 'com.google.cloud:google-cloud-tasks:2.1.1'
     compile "com.google.code.gson:gson:$project.ext.GSON_VERSION"
     compile "com.google.guava:guava:31.0.1-jre"
     compile "com.google.http-client:google-http-client-apache:2.1.2"
     compile "com.google.oauth-client:google-oauth-client-jetty:1.32.1"
+    compile 'com.google.protobuf:protobuf-java:3.19.2'
     compile "com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20211018.2"
     compile "com.squareup.okhttp:logging-interceptor:$project.ext.OKHTTP_VERSION"
     compile "com.squareup.okhttp:okhttp:$project.ext.OKHTTP_VERSION"

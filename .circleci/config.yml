@@ -97,6 +97,7 @@ executors:
 
   # Environment with browsers that is used to run Puppeteer end-to-end tests
   puppeteer-executor:
+    resource_class: medium+
     docker:
       - image: << pipeline.parameters.workbench-image >>
         environment:

@@ -126,19 +126,19 @@ export const EgressEventsTable = ({sourceUserEmail, sourceWorkspaceNamespace, di
             body={({creationTime}) => new Date(creationTime).toLocaleString()}
     />
     <Column field='sourceUserEmail'
-            body={({sourceUserEmail}) => {
-              const [username,] = sourceUserEmail.split('@');
+            body={({sourceUserEmail: email}) => {
+              const [username,] = email.split('@');
               return <StyledRouterLink path={`/admin/users/${username}`}>
-                {sourceUserEmail}
+                {email}
               </StyledRouterLink>;
             }}
             header='Source User'
             headerStyle={{width: '300px'}}
     />
     <Column field='sourceWorkspaceNamespace'
-            body={({sourceWorkspaceNamespace}) => {
-              return <StyledRouterLink path={`/admin/workspaces/${sourceWorkspaceNamespace}`}>
-                {sourceWorkspaceNamespace}
+            body={({sourceWorkspaceNamespace: namespace}) => {
+              return <StyledRouterLink path={`/admin/workspaces/${namespace}`}>
+                {namespace}
               </StyledRouterLink>;
             }}
             header='Source Workspace Namespace'

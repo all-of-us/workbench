@@ -1,5 +1,4 @@
 import {profileApi} from 'app/services/swagger-fetch-clients';
-import { BreadcrumbType } from 'app/utils/navigation';
 import {atom, Atom} from 'app/utils/subscribable';
 import {
   CdrVersionTier,
@@ -10,6 +9,7 @@ import {
 } from 'generated/fetch';
 import * as React from 'react';
 import {StackdriverErrorReporter} from 'stackdriver-errors-js';
+import {BreadcrumbType} from 'app/components/breadcrumb-type';
 
 const {useEffect, useState} = React;
 

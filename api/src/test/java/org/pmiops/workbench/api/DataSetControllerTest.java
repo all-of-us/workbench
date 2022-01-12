@@ -11,7 +11,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.pmiops.workbench.google.GoogleConfig.END_USER_CLOUD_BILLING;
 import static org.pmiops.workbench.google.GoogleConfig.SERVICE_ACCOUNT_CLOUD_BILLING;
 
 import com.google.api.services.cloudbilling.Cloudbilling;
@@ -201,6 +200,7 @@ public class DataSetControllerTest {
   @Autowired private WorkspacesController workspacesController;
 
   @MockBean private BigQueryService mockBigQueryService;
+  @MockBean private CloudBillingClient cloudBillingClient;
   @MockBean private CdrBigQuerySchemaConfigService mockCdrBigQuerySchemaConfigService;
   @MockBean private CdrVersionService mockCdrVersionService;
   @MockBean private CohortQueryBuilder mockCohortQueryBuilder;
@@ -264,12 +264,6 @@ public class DataSetControllerTest {
     WorkspaceAuditor.class
   })
   static class Configuration {
-
-    @Bean(END_USER_CLOUD_BILLING)
-    Cloudbilling endUserCloudbilling() {
-      return TestMockFactory.createMockedCloudbilling();
-    }
-
     @Bean(SERVICE_ACCOUNT_CLOUD_BILLING)
     Cloudbilling serviceAccountCloudbilling() {
       return TestMockFactory.createMockedCloudbilling();
@@ -308,6 +302,7 @@ public class DataSetControllerTest {
   public void setUp() throws Exception {
     TestMockFactory.stubCreateFcWorkspace(fireCloudService);
     TestMockFactory.stubCreateBillingProject(fireCloudService);
+    TestMockFactory.stubPollCloudBillingLinked(cloudBillingClient, "billing-account");
 
     Gson gson = new Gson();
     CdrBigQuerySchemaConfig cdrBigQuerySchemaConfig =

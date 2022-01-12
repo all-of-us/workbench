@@ -5,18 +5,11 @@ import {Link as RouterLink, matchPath} from 'react-router-dom';
 import {dropNotebookFileSuffix} from 'app/pages/analysis/util';
 import {InvalidBillingBanner} from 'app/pages/workspace/invalid-billing-banner';
 import colors from 'app/styles/colors';
-import {
-  withCurrentCohort,
-  withCurrentCohortReview,
-  withCurrentConceptSet,
-  withCurrentWorkspace
-} from 'app/utils';
-import {
-  BreadcrumbType
-} from 'app/utils/navigation';
+import {withCurrentCohort, withCurrentCohortReview, withCurrentConceptSet, withCurrentWorkspace} from 'app/utils';
 import {MatchParams, routeDataStore, RouteDataStore, withStore} from 'app/utils/stores';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {BillingStatus, Cohort, CohortReview, ConceptSet} from 'generated/fetch';
+import {BreadcrumbType} from './breadcrumb-type';
 
 const styles = {
   firstLink: {

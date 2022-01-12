@@ -45,7 +45,6 @@ public interface WorkbenchConfigMapper {
   @Mapping(target = "complianceTrainingHost", source = "moodle.host")
   @Mapping(target = "enableEraCommons", source = "access.enableEraCommons")
   @Mapping(target = "unsafeAllowSelfBypass", source = "access.unsafeAllowSelfBypass")
-  @Mapping(target = "enableBillingUpgrade", source = "featureFlags.enableBillingUpgrade")
   @Mapping(target = "enableEventDateModifier", source = "featureFlags.enableEventDateModifier")
   @Mapping(
       target = "enableResearchReviewPrompt",

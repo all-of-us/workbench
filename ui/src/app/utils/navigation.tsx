@@ -1,10 +1,11 @@
-import {Selection} from 'app/cohort-search/selection-list/selection-list.component';
-import {WorkspaceData} from 'app/utils/workspace-data';
-import {Cohort, CohortReview, ConceptSet, Criteria, ErrorResponse} from 'generated/fetch';
 import * as querystring from 'querystring';
 import * as React from 'react';
 import {useHistory} from 'react-router-dom';
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
+
+import {Selection} from 'app/cohort-search/selection-list/selection-list.component';
+import {WorkspaceData} from 'app/utils/workspace-data';
+import {Cohort, CohortReview, ConceptSet, Criteria, ErrorResponse} from 'generated/fetch';
 
 // This is an optional warmup store which can be populated to avoid redundant
 // requests on navigation, e.g. from workspace creation/clone -> data page. It
@@ -88,18 +89,3 @@ export const stringifyUrl = (url: UrlObj) => {
   return url.url + (url.queryParams ? '?' + querystring.stringify(url.queryParams) : '');
 };
 
-export enum BreadcrumbType {
-  Workspaces = 'Workspaces',
-  Workspace = 'Workspace',
-  WorkspaceEdit = 'WorkspaceEdit',
-  WorkspaceDuplicate = 'WorkspaceDuplicate',
-  Notebook = 'Notebook',
-  ConceptSet = 'ConceptSet',
-  Cohort = 'Cohort',
-  CohortReview = 'CohortReview',
-  Participant = 'Participant',
-  CohortAdd = 'CohortAdd',
-  SearchConcepts = 'SearchConcepts',
-  Dataset = 'Dataset',
-  Data = 'Data',
-}

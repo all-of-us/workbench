@@ -7,8 +7,8 @@ import { LinkText } from 'app/text-labels';
 const modalTitle = 'You have confirmed your profile is accurate';
 
 export default class ProfileConfirmationModal extends Modal {
-  constructor(page: Page, xpath?: string) {
-    super(page, xpath);
+  constructor(page: Page, opts?: { xpath?: string; modalIndex?: number }) {
+    super(page, opts);
   }
 
   async isLoaded(): Promise<boolean> {

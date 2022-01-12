@@ -18,5 +18,9 @@ public interface UserRecentResourceService {
 
   void deleteNotebookEntry(long workspaceId, long userId, String notebookName);
 
+  void deleteCohortEntry(long workspaceId, long userId, long cohortId);
+
+  void deleteConceptSetEntry(long workspaceId, long userId, long conceptSetId);
+
   List<DbUserRecentResource> findAllResourcesByUser(long userId);
 }

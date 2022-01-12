@@ -22,9 +22,9 @@ import {DatasetPage} from 'app/pages/data/data-set/dataset-page';
 import {WorkspaceAbout} from 'app/pages/workspace/workspace-about';
 import {WorkspaceEdit, WorkspaceEditMode} from 'app/pages/workspace/workspace-edit';
 import {LeoApplicationType} from 'app/pages/analysis/leonardo-app-launcher';
-import {BreadcrumbType} from 'app/utils/navigation';
 import {adminLockedGuard} from 'app/routing/guards';
 import {MatchParams} from 'app/utils/stores';
+import {BreadcrumbType} from 'app/components/breadcrumb-type';
 
 const CohortPagePage = fp.flow(withRouteData, withRoutingSpinner)(CohortPage);
 const CohortActionsPage = fp.flow(withRouteData, withRoutingSpinner)(CohortActions);
