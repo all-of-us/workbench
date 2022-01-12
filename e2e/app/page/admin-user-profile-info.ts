@@ -170,7 +170,7 @@ export default class UserProfileInfo extends AuthenticatedPage {
   async updateInitialCredits(): Promise<void> {
     await this.selectInitialCredits(InitialCreditSelectValue.six);
     const newInitialCreditValue = await this.getInitialCreditsLimitValue();
-    const newCreditLimit = await this.getInitialCreditUsedValue();
+    const newCreditLimit = await this.getCreditLimitValue();
     expect(newCreditLimit).toEqual(newInitialCreditValue);
     await this.waitForSaveButton(true);
   }
