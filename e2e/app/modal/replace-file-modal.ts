@@ -10,8 +10,8 @@ export enum Xpath {
 }
 
 export default class ReplaceFileModal extends Modal {
-  constructor(page: Page, xpath = Xpath.modal) {
-    super(page, xpath);
+  constructor(page: Page, opts?: { xpath?: string; modalIndex?: number }) {
+    super(page, opts);
   }
 
   async clickCancelButton(): Promise<void> {

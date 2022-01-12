@@ -6,8 +6,8 @@ import { LinkText } from 'app/text-labels';
 const modalTitle = 'Please review Research Purpose for Workspace';
 
 export default class WorkspaceReviewResearchPurposeModal extends Modal {
-  constructor(page: Page, xpath?: string) {
-    super(page, xpath);
+  constructor(page: Page, opts?: { xpath?: string; modalIndex?: number }) {
+    super(page, opts);
   }
 
   async isLoaded(): Promise<boolean> {

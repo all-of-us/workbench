@@ -11,8 +11,8 @@ import { logger } from 'libs/logger';
 const modalText = 'share this workspace';
 
 export default class ShareModal extends Modal {
-  constructor(page: Page, xpath?: string) {
-    super(page, xpath);
+  constructor(page: Page, opts?: { xpath?: string; modalIndex?: number }) {
+    super(page, opts);
   }
 
   async isLoaded(): Promise<boolean> {
