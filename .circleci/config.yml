@@ -456,6 +456,10 @@ jobs:
     executor: workbench-executor
     steps:
       - checkout-code
+      - run:
+          working_directory: ~/workbench/.circleci
+          name: "Halt deploy checking"
+          command: bash .circleci/skip-deploy-checks.sh
       - halt-test-check:
           dir_names: "ui"
       - run:
@@ -489,6 +493,10 @@ jobs:
     executor: workbench-executor
     steps:
       - checkout-code
+      - run:
+          working_directory: ~/workbench/.circleci
+          name: "Halt deploy checking"
+          command: bash .circleci/skip-deploy-checks.sh
       - attach_workspace:
           at: .
       - gcloud-auth-login
@@ -507,6 +515,10 @@ jobs:
     executor: workbench-executor
     steps:
       - checkout-code
+      - run:
+          working_directory: ~/workbench/.circleci
+          name: "Halt deploy checking"
+          command: bash .circleci/skip-deploy-checks.sh
       - attach_workspace:
           at: .
       - gcloud-auth-login
