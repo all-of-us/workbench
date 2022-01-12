@@ -1,6 +1,5 @@
 pluginManagement {
     repositories {
-        gradlePluginPortal()
         mavenCentral()
         // add mavenLocal() if you are using a locally built version of the plugin
     }
