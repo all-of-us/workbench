@@ -1,12 +1,12 @@
 import * as React from 'react';
 
-import {GenomicExtractionModal} from './genomic-extraction-modal';
-import {DataSetApiStub} from 'testing/stubs/data-set-api-stub';
-import {registerApiClient} from 'app/services/swagger-fetch-clients';
-import {DataSetApi, TerraJobStatus} from 'generated/fetch';
-import {mount} from 'enzyme';
-import {workspaceDataStub} from 'testing/stubs/workspaces';
-import {genomicExtractionStore} from 'app/utils/stores';
+import { GenomicExtractionModal } from './genomic-extraction-modal';
+import { DataSetApiStub } from 'testing/stubs/data-set-api-stub';
+import { registerApiClient } from 'app/services/swagger-fetch-clients';
+import { DataSetApi, TerraJobStatus } from 'generated/fetch';
+import { mount } from 'enzyme';
+import { workspaceDataStub } from 'testing/stubs/workspaces';
+import { genomicExtractionStore } from 'app/utils/stores';
 import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
 import moment from 'moment';
 
@@ -17,8 +17,8 @@ describe('GenomicExtractionModal', () => {
   let workspace;
 
   const component = () => {
-    return <GenomicExtractionModal {...testProps}/>;
-  }
+    return <GenomicExtractionModal {...testProps} />;
+  };
 
   beforeEach(() => {
     datasetApiStub = new DataSetApiStub();
@@ -32,8 +32,8 @@ describe('GenomicExtractionModal', () => {
       workspaceNamespace: workspace.namespace,
       workspaceFirecloudName: workspace.id,
       closeFunction: () => {},
-      title: 'Top 10 Egregious Hacks Your Tech Lead Doesn\'t Want You To Know'
-    }
+      title: "Top 10 Egregious Hacks Your Tech Lead Doesn't Want You To Know",
+    };
   });
 
   afterEach(() => {
@@ -63,8 +63,8 @@ describe('GenomicExtractionModal', () => {
           status: TerraJobStatus.FAILED,
           completionTime: moment().subtract(2, 'hour').unix(),
           datasetName: dataset.name,
-        }
-      ]
+        },
+      ],
     });
 
     const wrapper = mount(component());
@@ -89,14 +89,16 @@ describe('GenomicExtractionModal', () => {
         {
           status: TerraJobStatus.RUNNING,
           datasetName: 'some other data set with a different name',
-        }
-      ]
+        },
+      ],
     });
 
     const wrapper = mount(component());
     const warning = wrapper.find('[data-test-id="extract-warning"]');
     expect(warning).toBeTruthy();
-    expect(warning.text()).toContain('VCF file(s) already exist for this dataset.');
+    expect(warning.text()).toContain(
+      'VCF file(s) already exist for this dataset.'
+    );
   });
 
   it('should show a warning message the most recent extract has failed', () => {
@@ -115,14 +117,16 @@ describe('GenomicExtractionModal', () => {
         {
           status: TerraJobStatus.RUNNING,
           datasetName: 'some other data set with a different name',
-        }
-      ]
+        },
+      ],
     });
 
     const wrapper = mount(component());
     const warning = wrapper.find('[data-test-id="extract-warning"]');
     expect(warning).toBeTruthy();
-    expect(warning.text()).toContain('Last time a VCF extract was attempted for this workflow, it failed.');
+    expect(warning.text()).toContain(
+      'Last time a VCF extract was attempted for this workflow, it failed.'
+    );
   });
 
   it('should not show a warning message with no succeeded, failed, or running extracts for this dataset', () => {
@@ -136,25 +140,31 @@ describe('GenomicExtractionModal', () => {
         {
           status: TerraJobStatus.RUNNING,
           datasetName: 'some other data set with a different name',
-        }
-      ]
+        },
+      ],
     });
 
     const wrapper = mount(component());
-    expect(wrapper.find('[data-test-id="extract-warning"]').exists()).toBeFalsy();
+    expect(
+      wrapper.find('[data-test-id="extract-warning"]').exists()
+    ).toBeFalsy();
   });
 
-  it('should show error text on known failed extract', async() => {
-    genomicExtractionStore.set({[workspaceDataStub.namespace]: []});
+  it('should show error text on known failed extract', async () => {
+    genomicExtractionStore.set({ [workspaceDataStub.namespace]: [] });
 
     const message = 'invalid dataset';
-    jest.spyOn(datasetApiStub, 'extractGenomicData').mockRejectedValueOnce(
-      new Response(JSON.stringify({message}), {status: 412}));
+    jest
+      .spyOn(datasetApiStub, 'extractGenomicData')
+      .mockRejectedValueOnce(
+        new Response(JSON.stringify({ message }), { status: 412 })
+      );
 
     const wrapper = mount(component());
     await waitOneTickAndUpdate(wrapper);
 
-    const extractButton = () => wrapper.find('[data-test-id="extract-button"]').first();
+    const extractButton = () =>
+      wrapper.find('[data-test-id="extract-button"]').first();
     extractButton().simulate('click');
     await waitOneTickAndUpdate(wrapper);
 
@@ -166,16 +176,18 @@ describe('GenomicExtractionModal', () => {
     expect(extractButton().prop('disabled')).toBe(true);
   });
 
-  it('should show error text on unknown error', async() => {
-    genomicExtractionStore.set({[workspaceDataStub.namespace]: []});
+  it('should show error text on unknown error', async () => {
+    genomicExtractionStore.set({ [workspaceDataStub.namespace]: [] });
 
-    jest.spyOn(datasetApiStub, 'extractGenomicData').mockRejectedValueOnce(
-      new Response(null, {status: 500}));
+    jest
+      .spyOn(datasetApiStub, 'extractGenomicData')
+      .mockRejectedValueOnce(new Response(null, { status: 500 }));
 
     const wrapper = mount(component());
     await waitOneTickAndUpdate(wrapper);
 
-    const extractButton = () => wrapper.find('[data-test-id="extract-button"]').first();
+    const extractButton = () =>
+      wrapper.find('[data-test-id="extract-button"]').first();
     extractButton().simulate('click');
     await waitOneTickAndUpdate(wrapper);
 

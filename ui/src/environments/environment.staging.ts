@@ -1,11 +1,16 @@
-import {EnvAccessTierShortNames, Environment, ZendeskEnv} from 'environments/environment-type';
+import {
+  EnvAccessTierShortNames,
+  Environment,
+  ZendeskEnv,
+} from 'environments/environment-type';
 
 export const environment: Environment = {
   displayTag: 'Staging',
   shouldShowDisplayTag: true,
   allOfUsApiUrl: 'https://api-dot-all-of-us-rw-staging.appspot.com',
   captchaSiteKey: '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI',
-  clientId: '657299777109-kvb5qafr70bl01i6bnpgsiq5nt6v1o8u.apps.googleusercontent.com',
+  clientId:
+    '657299777109-kvb5qafr70bl01i6bnpgsiq5nt6v1o8u.apps.googleusercontent.com',
   leoApiUrl: 'https://notebooks.firecloud.org',
   publicUiUrl: 'https://aou-db-staging.appspot.com',
   debug: false,
@@ -20,5 +25,8 @@ export const environment: Environment = {
   enableCaptcha: true,
   enablePublishedWorkspaces: false,
   enableFooter: true,
-  accessTiersVisibleToUsers: [EnvAccessTierShortNames.Registered, EnvAccessTierShortNames.Controlled],
+  accessTiersVisibleToUsers: [
+    EnvAccessTierShortNames.Registered,
+    EnvAccessTierShortNames.Controlled,
+  ],
 };

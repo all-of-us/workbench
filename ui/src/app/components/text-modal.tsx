@@ -1,6 +1,4 @@
-import {
-  Button
-} from 'app/components/buttons';
+import { Button } from 'app/components/buttons';
 
 import {
   Modal,
@@ -9,9 +7,7 @@ import {
   ModalTitle,
 } from 'app/components/modals';
 
-
 import * as React from 'react';
-
 
 export interface TextModalProps {
   title: string;
@@ -22,9 +18,8 @@ export interface TextModalProps {
 }
 
 export class TextModal extends React.Component<TextModalProps> {
-
   static defaultProps = {
-    buttonText: 'OK'
+    buttonText: 'OK',
   };
 
   constructor(props: TextModalProps) {
@@ -32,7 +27,13 @@ export class TextModal extends React.Component<TextModalProps> {
   }
 
   render() {
-    const {closeFunction, title, body, buttonText, role = 'dialog'} = this.props;
+    const {
+      closeFunction,
+      title,
+      body,
+      buttonText,
+      role = 'dialog',
+    } = this.props;
     return (
       <React.Fragment>
         <Modal onRequestClose={closeFunction} role={role}>

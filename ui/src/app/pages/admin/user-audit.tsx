@@ -1,9 +1,9 @@
-import {AuditPageComponent} from 'app/components/admin/audit-page-component';
-import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
-import { userAdminApi} from 'app/services/swagger-fetch-clients';
+import { AuditPageComponent } from 'app/components/admin/audit-page-component';
+import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
+import { userAdminApi } from 'app/services/swagger-fetch-clients';
 import * as React from 'react';
-import {useEffect} from 'react';
-import {useParams} from 'react-router-dom';
+import { useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 
 const getAuditLog = (subject: string) => {
   const bqRowLimit = 1000; // Workspaces take many rows because of the Research Purpose fields
@@ -16,7 +16,7 @@ const queryAuditLog = (subject: string) => {
       actions: queryResult.actions,
       sourceId: queryResult.userDatabaseId,
       query: queryResult.query,
-      logEntries: queryResult.logEntries
+      logEntries: queryResult.logEntries,
     };
   });
 };
@@ -32,11 +32,15 @@ const getAdminPageUrl = (subject: string) => {
 export const UserAudit = (spinnerProps: WithSpinnerOverlayProps) => {
   useEffect(() => spinnerProps.hideSpinner(), []);
 
-  const {username = ''} = useParams<{username: string}>();
-  return <AuditPageComponent auditSubjectType='User'
-                             buttonLabel='Username without domain'
-                             initialAuditSubject={username}
-                             getNextAuditPath={getNextAuditPath}
-                             queryAuditLog={queryAuditLog}
-                             getAdminPageUrl={getAdminPageUrl}/>;
+  const { username = '' } = useParams<{ username: string }>();
+  return (
+    <AuditPageComponent
+      auditSubjectType='User'
+      buttonLabel='Username without domain'
+      initialAuditSubject={username}
+      getNextAuditPath={getNextAuditPath}
+      queryAuditLog={queryAuditLog}
+      getAdminPageUrl={getAdminPageUrl}
+    />
+  );
 };

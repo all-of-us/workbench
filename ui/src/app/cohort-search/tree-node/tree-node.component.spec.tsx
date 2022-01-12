@@ -1,12 +1,16 @@
-import {mount} from 'enzyme';
+import { mount } from 'enzyme';
 import * as React from 'react';
 
-import {registerApiClient} from 'app/services/swagger-fetch-clients';
-import {currentCohortCriteriaStore, currentConceptStore, currentWorkspaceStore} from 'app/utils/navigation';
-import {CohortBuilderApi, Domain} from 'generated/fetch';
-import {CohortBuilderServiceStub} from 'testing/stubs/cohort-builder-service-stub';
-import {workspaceDataStub} from 'testing/stubs/workspaces';
-import {NodeProp, TreeNode} from './tree-node.component';
+import { registerApiClient } from 'app/services/swagger-fetch-clients';
+import {
+  currentCohortCriteriaStore,
+  currentConceptStore,
+  currentWorkspaceStore,
+} from 'app/utils/navigation';
+import { CohortBuilderApi, Domain } from 'generated/fetch';
+import { CohortBuilderServiceStub } from 'testing/stubs/cohort-builder-service-stub';
+import { workspaceDataStub } from 'testing/stubs/workspaces';
+import { NodeProp, TreeNode } from './tree-node.component';
 
 const treeNodeStub = {
   children: [],
@@ -22,7 +26,7 @@ const treeNodeStub = {
   predefinedAttributes: null,
   selectable: true,
   subtype: 'HEIGHT',
-  type: 'PM'
+  type: 'PM',
 } as NodeProp;
 
 const surveyCOPETreeNodeStub = {
@@ -39,7 +43,7 @@ const surveyCOPETreeNodeStub = {
   predefinedAttributes: null,
   selectable: true,
   subtype: 'SURVEY',
-  type: 'PM'
+  type: 'PM',
 } as NodeProp;
 describe('TreeNode', () => {
   beforeEach(() => {
@@ -52,27 +56,37 @@ describe('TreeNode', () => {
     });
   });
   it('should create', () => {
-    const wrapper = mount(<TreeNode autocompleteSelection={undefined}
-                                      groupSelections={[]}
-                                      node={treeNodeStub}
-                                      scrollToMatch={() => {}}
-                                      searchTerms={''}
-                                      select={() => {}}
-                                      selectedIds={[]}
-                                      source ='cohort'
-                                      setAttributes={() => {}}/>);
+    const wrapper = mount(
+      <TreeNode
+        autocompleteSelection={undefined}
+        groupSelections={[]}
+        node={treeNodeStub}
+        scrollToMatch={() => {}}
+        searchTerms={''}
+        select={() => {}}
+        selectedIds={[]}
+        source='cohort'
+        setAttributes={() => {}}
+      />
+    );
     expect(wrapper).toBeTruthy();
   });
   it('should display Versioned if SURVEY is COPE', () => {
-    const wrapper = mount(<TreeNode autocompleteSelection={undefined}
-                                    groupSelections={[]}
-                                    node={surveyCOPETreeNodeStub}
-                                    scrollToMatch={() => {}}
-                                    searchTerms={''}
-                                    select={() => {}}
-                                    selectedIds={[]}
-                                    setAttributes={() => {}}/>);
+    const wrapper = mount(
+      <TreeNode
+        autocompleteSelection={undefined}
+        groupSelections={[]}
+        node={surveyCOPETreeNodeStub}
+        scrollToMatch={() => {}}
+        searchTerms={''}
+        select={() => {}}
+        selectedIds={[]}
+        setAttributes={() => {}}
+      />
+    );
     expect(wrapper).toBeTruthy();
-    expect(wrapper.find('[data-test-id="displayName"]').text()).toContain('COVID-19 Participant Experience (COPE) Survey -  Versioned');
+    expect(wrapper.find('[data-test-id="displayName"]').text()).toContain(
+      'COVID-19 Participant Experience (COPE) Survey -  Versioned'
+    );
   });
 });

@@ -1,7 +1,9 @@
 import {
   CohortChartDataListResponse,
   CohortReview,
-  CohortReviewApi, CohortReviewListResponse, CohortReviewWithCountResponse,
+  CohortReviewApi,
+  CohortReviewListResponse,
+  CohortReviewWithCountResponse,
   CohortStatus,
   Domain,
   EmptyResponse,
@@ -12,46 +14,58 @@ import {
   ParticipantDataListResponse,
   ReviewStatus,
   SortOrder,
-  VocabularyListResponse
+  VocabularyListResponse,
 } from 'generated/fetch';
-import {stubNotImplementedError} from 'testing/stubs/stub-utils';
+import { stubNotImplementedError } from 'testing/stubs/stub-utils';
 
 const criteriaStub = {
-  includes: [{
-    items: [{
-      type: 'PM',
-      modifiers: [{
-        name: 'AGE_AT_EVENT',
-        operands: ['60', '30'],
-        operator: 'GREATER_THAN_OR_EQUAL_TO'
-      }],
-      searchParameters: [{
-        name: 'Hypotensive (Systolic <= 90 / Diastolic <= 60)',
-        type: 'PM'
-      }]
-    }]
-  }],
-  excludes: []
+  includes: [
+    {
+      items: [
+        {
+          type: 'PM',
+          modifiers: [
+            {
+              name: 'AGE_AT_EVENT',
+              operands: ['60', '30'],
+              operator: 'GREATER_THAN_OR_EQUAL_TO',
+            },
+          ],
+          searchParameters: [
+            {
+              name: 'Hypotensive (Systolic <= 90 / Diastolic <= 60)',
+              type: 'PM',
+            },
+          ],
+        },
+      ],
+    },
+  ],
+  excludes: [],
 };
 
-export const cohortReviewStubs = [{
-  cohortReviewId: 1,
-  cohortId: 1,
-  cdrVersionId: 1,
-  creationTime: 1,
-  cohortDefinition: JSON.stringify(criteriaStub),
-  cohortName: 'Cohort Name',
-  matchedParticipantCount: 1,
-  reviewSize: 1,
-  reviewedCount: 1,
-  queryResultSize: 1,
-  reviewStatus: ReviewStatus.CREATED,
-  participantCohortStatuses: [{participantId: 1, status: CohortStatus.NOTREVIEWED}],
-  page: 1,
-  pageSize: 1,
-  sortOrder: '',
-  sortColumn: '',
-}];
+export const cohortReviewStubs = [
+  {
+    cohortReviewId: 1,
+    cohortId: 1,
+    cdrVersionId: 1,
+    creationTime: 1,
+    cohortDefinition: JSON.stringify(criteriaStub),
+    cohortName: 'Cohort Name',
+    matchedParticipantCount: 1,
+    reviewSize: 1,
+    reviewedCount: 1,
+    queryResultSize: 1,
+    reviewStatus: ReviewStatus.CREATED,
+    participantCohortStatuses: [
+      { participantId: 1, status: CohortStatus.NOTREVIEWED },
+    ],
+    page: 1,
+    pageSize: 1,
+    sortOrder: '',
+    sortColumn: '',
+  },
+];
 
 const participantAnnotationStub = {
   cohortAnnotationDefinitionId: 1,
@@ -63,7 +77,7 @@ const participantDataStub = {
   itemDate: '',
   standardName: '',
   ageAtEvent: 22,
-  domainType: Domain.CONDITION
+  domainType: Domain.CONDITION,
 };
 
 const participantDataListResponseStub = {
@@ -73,8 +87,8 @@ const participantDataListResponseStub = {
     page: 1,
     pageSize: 25,
     sortOrder: SortOrder.Asc,
-    sortColumn: 'test'
-  }
+    sortColumn: 'test',
+  },
 };
 
 const participantChartDataStub = {
@@ -82,13 +96,13 @@ const participantChartDataStub = {
   standardVocabulary: '',
   startDate: '',
   ageAtEvent: 22,
-  rank: 1
+  rank: 1,
 };
 
 const cohortChartDataStub = {
   name: 'Test',
   conceptId: 123,
-  count: 1
+  count: 1,
 };
 
 export class CohortReviewServiceStub extends CohortReviewApi {
@@ -97,55 +111,77 @@ export class CohortReviewServiceStub extends CohortReviewApi {
   fetch;
 
   constructor() {
-    super(undefined, undefined, (..._: any[]) => { throw stubNotImplementedError; });
+    super(undefined, undefined, (..._: any[]) => {
+      throw stubNotImplementedError;
+    });
   }
 
   getParticipantCohortStatuses(): Promise<CohortReviewWithCountResponse> {
-    return new Promise<CohortReviewWithCountResponse>(resolve => resolve({cohortReview: cohortReviewStubs[0], queryResultSize: 0}));
+    return new Promise<CohortReviewWithCountResponse>((resolve) =>
+      resolve({ cohortReview: cohortReviewStubs[0], queryResultSize: 0 })
+    );
   }
 
   getParticipantData(): Promise<ParticipantDataListResponse> {
-    return new Promise<ParticipantDataListResponse>(resolve =>
-      resolve(participantDataListResponseStub));
+    return new Promise<ParticipantDataListResponse>((resolve) =>
+      resolve(participantDataListResponseStub)
+    );
   }
   getParticipantChartData(): Promise<ParticipantChartDataListResponse> {
-    return new Promise<ParticipantChartDataListResponse>(resolve =>
-      resolve({items: [participantChartDataStub]}));
+    return new Promise<ParticipantChartDataListResponse>((resolve) =>
+      resolve({ items: [participantChartDataStub] })
+    );
   }
   getCohortChartData(): Promise<CohortChartDataListResponse> {
-    return new Promise<CohortChartDataListResponse>(resolve =>
-      resolve({count: 1, items: [cohortChartDataStub]}));
+    return new Promise<CohortChartDataListResponse>((resolve) =>
+      resolve({ count: 1, items: [cohortChartDataStub] })
+    );
   }
   getParticipantCohortStatus(): Promise<ParticipantCohortStatus> {
-    return new Promise<ParticipantCohortStatus>(resolve =>
-      resolve({participantId: 1, status: CohortStatus.NOTREVIEWED}));
+    return new Promise<ParticipantCohortStatus>((resolve) =>
+      resolve({ participantId: 1, status: CohortStatus.NOTREVIEWED })
+    );
   }
   getParticipantCohortAnnotations(): Promise<ParticipantCohortAnnotationListResponse> {
-    return new Promise<ParticipantCohortAnnotationListResponse>(resolve => resolve({items: []}));
+    return new Promise<ParticipantCohortAnnotationListResponse>((resolve) =>
+      resolve({ items: [] })
+    );
   }
   createParticipantCohortAnnotation() {
-    return new Promise<ParticipantCohortAnnotation>(resolve => resolve(participantAnnotationStub));
+    return new Promise<ParticipantCohortAnnotation>((resolve) =>
+      resolve(participantAnnotationStub)
+    );
   }
   deleteParticipantCohortAnnotation() {
-    return new Promise<EmptyResponse>(resolve => resolve({}));
+    return new Promise<EmptyResponse>((resolve) => resolve({}));
   }
   updateParticipantCohortAnnotation(): Promise<ParticipantCohortAnnotation> {
-    return new Promise<ParticipantCohortAnnotation>(resolve =>
-      resolve({cohortAnnotationDefinitionId: 1, cohortReviewId: 1, participantId: 1}));
+    return new Promise<ParticipantCohortAnnotation>((resolve) =>
+      resolve({
+        cohortAnnotationDefinitionId: 1,
+        cohortReviewId: 1,
+        participantId: 1,
+      })
+    );
   }
   updateParticipantCohortStatus(): Promise<ParticipantCohortStatus> {
-    return new Promise<ParticipantCohortStatus>(resolve =>
-      resolve({participantId: 1, status: CohortStatus.NOTREVIEWED}));
+    return new Promise<ParticipantCohortStatus>((resolve) =>
+      resolve({ participantId: 1, status: CohortStatus.NOTREVIEWED })
+    );
   }
   createCohortReview() {
-    return new Promise<CohortReview>(resolve => {
+    return new Promise<CohortReview>((resolve) => {
       resolve(cohortReviewStubs[0]);
     });
   }
   getVocabularies(): Promise<VocabularyListResponse> {
-    return new Promise<VocabularyListResponse>(resolve => resolve({items: []}));
+    return new Promise<VocabularyListResponse>((resolve) =>
+      resolve({ items: [] })
+    );
   }
   getCohortReviewsInWorkspace(): Promise<CohortReviewListResponse> {
-    return new Promise<CohortReviewListResponse>(resolve => resolve({items: cohortReviewStubs}));
+    return new Promise<CohortReviewListResponse>((resolve) =>
+      resolve({ items: cohortReviewStubs })
+    );
   }
 }

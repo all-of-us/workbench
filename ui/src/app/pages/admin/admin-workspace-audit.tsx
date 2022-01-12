@@ -1,11 +1,11 @@
-import {AuditPageComponent} from 'app/components/admin/audit-page-component';
-import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
-import {workspaceAdminApi} from 'app/services/swagger-fetch-clients';
+import { AuditPageComponent } from 'app/components/admin/audit-page-component';
+import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
+import { workspaceAdminApi } from 'app/services/swagger-fetch-clients';
 import { MatchParams } from 'app/utils/stores';
-import {WorkspaceAuditLogQueryResponse} from 'generated/fetch';
+import { WorkspaceAuditLogQueryResponse } from 'generated/fetch';
 import * as React from 'react';
-import {useEffect} from 'react';
-import {useParams} from 'react-router';
+import { useEffect } from 'react';
+import { useParams } from 'react-router';
 
 const getAuditLog = (subject: string) => {
   // Workspace actions take up many rows because of the Research Purpose fields
@@ -14,20 +14,21 @@ const getAuditLog = (subject: string) => {
 };
 
 const queryAuditLog = (subject: string) => {
-  return getAuditLog(subject).then((queryResult: WorkspaceAuditLogQueryResponse) => {
-    return {
-      actions: queryResult.actions,
-      sourceId: queryResult.workspaceDatabaseId,
-      query: queryResult.query,
-      logEntries: queryResult.logEntries
-    };
-  });
+  return getAuditLog(subject).then(
+    (queryResult: WorkspaceAuditLogQueryResponse) => {
+      return {
+        actions: queryResult.actions,
+        sourceId: queryResult.workspaceDatabaseId,
+        query: queryResult.query,
+        logEntries: queryResult.logEntries,
+      };
+    }
+  );
 };
 
 const getNextAuditPath = (subject: string) => {
   return `/admin/workspace-audit/${subject}`;
 };
-
 
 const getAdminPageUrl = (subject: string) => {
   return `/admin/workspaces/${subject}`;
@@ -36,11 +37,15 @@ const getAdminPageUrl = (subject: string) => {
 export const WorkspaceAudit = (spinnerProps: WithSpinnerOverlayProps) => {
   useEffect(() => spinnerProps.hideSpinner(), []);
 
-  const {ns = ''} = useParams<MatchParams>();
-  return <AuditPageComponent auditSubjectType='Workspace'
-                             buttonLabel='Workspace namespace (begins with aou-rw-)'
-                             initialAuditSubject={ns}
-                             getNextAuditPath={getNextAuditPath}
-                             queryAuditLog={queryAuditLog}
-                             getAdminPageUrl={getAdminPageUrl}/>;
+  const { ns = '' } = useParams<MatchParams>();
+  return (
+    <AuditPageComponent
+      auditSubjectType='Workspace'
+      buttonLabel='Workspace namespace (begins with aou-rw-)'
+      initialAuditSubject={ns}
+      getNextAuditPath={getNextAuditPath}
+      queryAuditLog={queryAuditLog}
+      getAdminPageUrl={getAdminPageUrl}
+    />
+  );
 };

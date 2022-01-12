@@ -1,24 +1,23 @@
 import * as React from 'react';
 
-import {PrePackagedConceptSetEnum, WorkspaceResource} from 'generated/fetch';
-import {MemoryRouter} from 'react-router';
-import {exampleCohortStubs} from 'testing/stubs/cohorts-api-stub';
-import {stubDataSet} from 'testing/stubs/data-set-api-stub';
-import {renderResourceCard} from './render-resource-card';
-import {mount} from 'enzyme';
-import {stubResource} from 'testing/stubs/resources-stub';
-import {serverConfigStore} from 'app/utils/stores';
+import { PrePackagedConceptSetEnum, WorkspaceResource } from 'generated/fetch';
+import { MemoryRouter } from 'react-router';
+import { exampleCohortStubs } from 'testing/stubs/cohorts-api-stub';
+import { stubDataSet } from 'testing/stubs/data-set-api-stub';
+import { renderResourceCard } from './render-resource-card';
+import { mount } from 'enzyme';
+import { stubResource } from 'testing/stubs/resources-stub';
+import { serverConfigStore } from 'app/utils/stores';
 
 describe('renderResourceCard', () => {
-
   const component = (card) => {
-    return mount(<MemoryRouter>
-      {card}
-    </MemoryRouter>);
+    return mount(<MemoryRouter>{card}</MemoryRouter>);
   };
 
   beforeEach(() => {
-    serverConfigStore.set({config: {enableGenomicExtraction: true, gsuiteDomain: ''}});
+    serverConfigStore.set({
+      config: { enableGenomicExtraction: true, gsuiteDomain: '' },
+    });
   });
 
   it('renders a CohortResourceCard', () => {
@@ -49,7 +48,7 @@ describe('renderResourceCard', () => {
       menuOnly: false,
     });
     expect(card).toBeFalsy();
-  })
+  });
 
   it('renders a Cohort menu without other card elements', () => {
     const testCohort = {
@@ -73,8 +72,8 @@ describe('renderResourceCard', () => {
       ...stubResource,
       dataSet: {
         ...stubDataSet(),
-        prePackagedConceptSet: [PrePackagedConceptSetEnum.FITBIT]
-      }
+        prePackagedConceptSet: [PrePackagedConceptSetEnum.FITBIT],
+      },
     } as WorkspaceResource;
 
     const menu = renderResourceCard({
@@ -84,7 +83,10 @@ describe('renderResourceCard', () => {
       menuOnly: true,
     });
     const wrapper = component(menu);
-    wrapper.find({'data-test-id': 'resource-card-menu'}).first().simulate('click');
+    wrapper
+      .find({ 'data-test-id': 'resource-card-menu' })
+      .first()
+      .simulate('click');
     expect(wrapper.text()).toContain('Export to Notebook');
     expect(wrapper.text()).not.toContain('Extract VCF Files');
   });
@@ -96,8 +98,8 @@ describe('renderResourceCard', () => {
         ...stubDataSet(),
         prePackagedConceptSet: [
           PrePackagedConceptSetEnum.PERSON,
-          PrePackagedConceptSetEnum.WHOLEGENOME
-        ]
+          PrePackagedConceptSetEnum.WHOLEGENOME,
+        ],
       },
     } as WorkspaceResource;
 
@@ -108,8 +110,11 @@ describe('renderResourceCard', () => {
       menuOnly: true,
     });
     const wrapper = component(menu);
-    wrapper.find({'data-test-id': 'resource-card-menu'}).first().simulate('click');
+    wrapper
+      .find({ 'data-test-id': 'resource-card-menu' })
+      .first()
+      .simulate('click');
     expect(wrapper.text()).toContain('Export to Notebook');
     expect(wrapper.text()).toContain('Extract VCF Files');
   });
-})
+});

@@ -1,18 +1,23 @@
-import {mount} from 'enzyme';
+import { mount } from 'enzyme';
 import * as React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 
 import LoginReactComponent from './login';
 
 describe('LoginComponent', () => {
-  let loginProps: {signIn: Function, onCreateAccount: Function};
+  let loginProps: { signIn: Function; onCreateAccount: Function };
 
-  const component = (props) => mount(<MemoryRouter><LoginReactComponent {...props}/></MemoryRouter>);
+  const component = (props) =>
+    mount(
+      <MemoryRouter>
+        <LoginReactComponent {...props} />
+      </MemoryRouter>
+    );
 
   beforeEach(() => {
     loginProps = {
       signIn: () => {},
-      onCreateAccount: () => {}
+      onCreateAccount: () => {},
     };
   });
 

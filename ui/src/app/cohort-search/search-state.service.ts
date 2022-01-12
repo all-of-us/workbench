@@ -1,7 +1,11 @@
-import {SearchRequest} from 'generated/fetch';
-import {BehaviorSubject} from 'rxjs/BehaviorSubject';
+import { SearchRequest } from 'generated/fetch';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
-export const initSearchRequest = {includes: [], excludes: [], dataFilters: []} as SearchRequest;
+export const initSearchRequest = {
+  includes: [],
+  excludes: [],
+  dataFilters: [],
+} as SearchRequest;
 export const searchRequestStore = new BehaviorSubject<any>(initSearchRequest);
 export const idsInUse = new BehaviorSubject<any>(new Set());
 export const ppiQuestions = new BehaviorSubject<any>({});

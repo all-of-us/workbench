@@ -76,23 +76,25 @@ module.exports = {
 
     /* Style */
 
-    // 'prettier/prettier': 'warn', // Possibly use prettier to handle some formatting
+    'prettier/prettier': 'warn',
 
-    'eol-last': 'warn',
-    'max-len': ['warn', {code: 140, ignorePattern: '^import |^export\\{(.*?)\\}', ignoreComments: true}],
-    'no-trailing-spaces': 'warn',
-    'quotes': ['warn', 'single'],
-    // 'brace-style': ['warn', '1tbs'],
-    // 'no-multi-spaces': 'warn',
-    // 'simple-import-sort/sort': 'warn',
-    // 'space-before-function-paren': ['warn', { 'anonymous': 'never', 'named': 'never', 'asyncArrow': 'always' }],
-    // 'spaced-comment': 'warn',
+    // temp disable others.  re-enable if desired after determining that they don't conflict with prettier.
 
-    '@typescript-eslint/type-annotation-spacing': 'warn',
-    '@typescript-eslint/prefer-function-type': 'warn',
-    // '@typescript-eslint/semi': 'warn',
-
-    'react/jsx-curly-spacing': ["warn", {'when': 'never'}],
+    // 'eol-last': 'warn',
+    // 'max-len': ['warn', {code: 140, ignorePattern: '^import |^export\\{(.*?)\\}', ignoreComments: true}],
+    // 'no-trailing-spaces': 'warn',
+    // 'quotes': ['warn', 'single'],
+    // // 'brace-style': ['warn', '1tbs'],
+    // // 'no-multi-spaces': 'warn',
+    // // 'simple-import-sort/sort': 'warn',
+    // // 'space-before-function-paren': ['warn', { 'anonymous': 'never', 'named': 'never', 'asyncArrow': 'always' }],
+    // // 'spaced-comment': 'warn',
+    //
+    // '@typescript-eslint/type-annotation-spacing': 'warn',
+    // '@typescript-eslint/prefer-function-type': 'warn',
+    // // '@typescript-eslint/semi': 'warn',
+    //
+    // 'react/jsx-curly-spacing': ["warn", {'when': 'never'}],
 
     /* Jest */
     'jest/no-focused-tests': 'warn',

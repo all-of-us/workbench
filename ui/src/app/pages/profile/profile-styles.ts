@@ -1,25 +1,25 @@
-import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {reactStyles} from 'app/utils';
+import colors, { colorWithWhiteness } from 'app/styles/colors';
+import { reactStyles } from 'app/utils';
 
 export const styles = reactStyles({
   h1: {
     color: colors.primary,
     fontSize: 20,
     fontWeight: 600,
-    lineHeight: '24px'
+    lineHeight: '24px',
   },
   inputLabel: {
     color: colors.primary,
     fontSize: 14,
     fontWeight: 600,
     lineHeight: '22px',
-    marginBottom: 6
+    marginBottom: 6,
   },
   inputStyle: {
     width: 300,
     height: 40,
     fontSize: 14,
-    marginRight: 20
+    marginRight: 20,
   },
   dataAccessTier: {
     marginBottom: '0.9rem',
@@ -28,7 +28,7 @@ export const styles = reactStyles({
     width: 459,
     gridTemplateColumns: 'fit-content(2rem) fit-content(10rem) 1fr',
     gridTemplateAreas: `"badge label available"
-                        ". primary primary"`
+                        ". primary primary"`,
   },
   dataAccessText: {
     fontWeight: 500,
@@ -37,7 +37,7 @@ export const styles = reactStyles({
   },
   longInputContainerStyle: {
     width: 420,
-    resize: 'both'
+    resize: 'both',
   },
   longInputHeightStyle: {
     height: 175,
@@ -48,12 +48,12 @@ export const styles = reactStyles({
     fontWeight: 600,
     width: '40%',
     display: 'inline',
-    alignItems: 'flexEnd'
+    alignItems: 'flexEnd',
   },
   fadebox: {
     margin: '1rem 0 0 3%',
     width: '95%',
-    padding: '0 0.1rem'
+    padding: '0 0.1rem',
   },
   verticalLine: {
     marginTop: '0.3rem',
@@ -64,7 +64,7 @@ export const styles = reactStyles({
     fontWeight: 100,
     width: '80%',
     marginTop: '0.5rem',
-    marginBottom: '0.3rem'
+    marginBottom: '0.3rem',
   },
   initialCreditsBox: {
     borderRadius: '0.4rem',
@@ -72,12 +72,12 @@ export const styles = reactStyles({
     marginTop: '0.7rem',
     marginBottom: '1.7rem',
     color: colors.primary,
-    backgroundColor: colorWithWhiteness(colors.disabled, 0.7)
+    backgroundColor: colorWithWhiteness(colors.disabled, 0.7),
   },
   updateSurveyButton: {
     textTransform: 'none',
     padding: 0,
-    height: 'auto'
+    height: 'auto',
   },
   renewalBox: {
     borderRadius: 5,
@@ -87,6 +87,6 @@ export const styles = reactStyles({
     marginBottom: '1.5rem',
     height: '2.1rem',
     marginRight: '0.75rem',
-    border: `1px solid ${colors.warning}`
-  }
+    border: `1px solid ${colors.warning}`,
+  },
 });

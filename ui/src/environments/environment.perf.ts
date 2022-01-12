@@ -1,11 +1,16 @@
-import {EnvAccessTierShortNames, Environment, ZendeskEnv} from 'environments/environment-type';
+import {
+  EnvAccessTierShortNames,
+  Environment,
+  ZendeskEnv,
+} from 'environments/environment-type';
 
 export const environment: Environment = {
   displayTag: 'Perf',
   shouldShowDisplayTag: true,
   allOfUsApiUrl: 'https://api-dot-all-of-us-rw-perf.appspot.com',
   captchaSiteKey: '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI',
-  clientId: '63939010390-aj0r8hro7r8lkt7a45gissu3m73ietl2.apps.googleusercontent.com',
+  clientId:
+    '63939010390-aj0r8hro7r8lkt7a45gissu3m73ietl2.apps.googleusercontent.com',
   leoApiUrl: 'https://leonardo.dsde-perf.broadinstitute.org',
   // There is no perf environment for the data browser
   publicUiUrl: 'https://aou-db-staging.appspot.com',
@@ -21,5 +26,8 @@ export const environment: Environment = {
   enableCaptcha: true,
   enablePublishedWorkspaces: false,
   enableFooter: true,
-  accessTiersVisibleToUsers: [EnvAccessTierShortNames.Registered, EnvAccessTierShortNames.Controlled],
+  accessTiersVisibleToUsers: [
+    EnvAccessTierShortNames.Registered,
+    EnvAccessTierShortNames.Controlled,
+  ],
 };

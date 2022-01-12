@@ -1,21 +1,21 @@
-import {getChartObj} from 'app/cohort-search/utils';
+import { getChartObj } from 'app/cohort-search/utils';
 import * as highCharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import * as React from 'react';
 
-
-export class ReviewDomainChartsComponent extends React.Component<
-  {unitData: any}> {
+export class ReviewDomainChartsComponent extends React.Component<{
+  unitData: any;
+}> {
   chart: any;
   constructor(props) {
     super(props);
   }
 
   getOptions() {
-    const values = this.props.unitData.map(val => {
-      return  val.values;
+    const values = this.props.unitData.map((val) => {
+      return val.values;
     });
-    const date = this.props.unitData.map(val => {
+    const date = this.props.unitData.map((val) => {
       return val.date;
     });
 
@@ -27,10 +27,10 @@ export class ReviewDomainChartsComponent extends React.Component<
         height: 300,
       },
       credits: {
-        enabled: false
+        enabled: false,
       },
       title: {
-        text: ''
+        text: '',
       },
       yAxis: {
         lineWidth: 2,
@@ -39,9 +39,9 @@ export class ReviewDomainChartsComponent extends React.Component<
       plotOptions: {
         series: {
           label: {
-            connectorAllowed: false
+            connectorAllowed: false,
           },
-        }
+        },
       },
       tooltip: {
         headerFormat: '',
@@ -52,20 +52,22 @@ export class ReviewDomainChartsComponent extends React.Component<
         },
         style: {
           color: '#565656',
-          fontSize: 12
+          fontSize: 12,
         },
-        shared: true
+        shared: true,
       },
       xAxis: {
         categories: date,
         lineWidth: 2,
         lineColor: '#979797',
       },
-      series: [{
-        data: values,
-        turboThreshold: 5000,
-        showInLegend: false,
-      }],
+      series: [
+        {
+          data: values,
+          turboThreshold: 5000,
+          showInLegend: false,
+        },
+      ],
     };
   }
 

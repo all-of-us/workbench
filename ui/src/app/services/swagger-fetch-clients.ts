@@ -20,11 +20,14 @@
  * });
  */
 
-import {cookiesEnabled, LOCAL_STORAGE_API_OVERRIDE_KEY} from 'app/utils/cookies';
-import {environment} from 'environments/environment';
+import {
+  cookiesEnabled,
+  LOCAL_STORAGE_API_OVERRIDE_KEY,
+} from 'app/utils/cookies';
+import { environment } from 'environments/environment';
 import {
   AuthDomainApi,
-  BaseAPI,  // internal
+  BaseAPI, // internal
   CdrVersionsApi,
   CohortAnnotationDefinitionApi,
   CohortBuilderApi,
@@ -52,20 +55,21 @@ import {
 
 import * as portableFetch from 'portable-fetch';
 
-
 let frozen = false;
 function checkFrozen() {
   if (frozen) {
-    throw Error('API clients registry is already frozen; cannot be ' +
-        'configured after invocation of bindApiClients()');
+    throw Error(
+      'API clients registry is already frozen; cannot be ' +
+        'configured after invocation of bindApiClients()'
+    );
   }
 }
 
 // All known API client constructors.
-const apiCtors: (new() => BaseAPI)[] = [];
+const apiCtors: (new () => BaseAPI)[] = [];
 
 // Constructor -> implementation.
-const registry: Map<new() => BaseAPI, BaseAPI> = new Map();
+const registry: Map<new () => BaseAPI, BaseAPI> = new Map();
 
 /**
  * Convenience function to minimize boilerplate below per-service while
@@ -74,14 +78,17 @@ const registry: Map<new() => BaseAPI, BaseAPI> = new Map();
  *
  * Returns a getter for the service implementation (backed by the registry).
  */
-function bindCtor<T extends BaseAPI>(ctor: new() => T): () => T {
+function bindCtor<T extends BaseAPI>(ctor: new () => T): () => T {
   apiCtors.push(ctor);
   return () => {
     if (!registry.has(ctor)) {
-      throw Error('API client is not registered: ensure you are not ' +
+      throw Error(
+        'API client is not registered: ensure you are not ' +
           'retrieving an API client before app initialization. In ' +
           'unit tests, be sure to call registerApiClient() for all ' +
-          'API clients in use, else call bindApiClients(): ' + ctor);
+          'API clients in use, else call bindApiClients(): ' +
+          ctor
+      );
     }
     return registry.get(ctor) as T;
   };
@@ -91,7 +98,9 @@ function bindCtor<T extends BaseAPI>(ctor: new() => T): () => T {
 // getters for the API clients, e.g.: runtimeApi().listRuntimes();
 export const authDomainApi = bindCtor(AuthDomainApi);
 export const cdrVersionsApi = bindCtor(CdrVersionsApi);
-export const cohortAnnotationDefinitionApi = bindCtor(CohortAnnotationDefinitionApi);
+export const cohortAnnotationDefinitionApi = bindCtor(
+  CohortAnnotationDefinitionApi
+);
 export const cohortBuilderApi = bindCtor(CohortBuilderApi);
 export const cohortReviewApi = bindCtor(CohortReviewApi);
 export const cohortsApi = bindCtor(CohortsApi);
@@ -99,7 +108,9 @@ export const conceptSetsApi = bindCtor(ConceptSetsApi);
 export const configApi = bindCtor(ConfigApi);
 export const dataSetApi = bindCtor(DataSetApi);
 export const egressEventsAdminApi = bindCtor(EgressEventsAdminApi);
-export const featuredWorkspacesConfigApi = bindCtor(FeaturedWorkspacesConfigApi);
+export const featuredWorkspacesConfigApi = bindCtor(
+  FeaturedWorkspacesConfigApi
+);
 export const institutionApi = bindCtor(InstitutionApi);
 export const notebooksApi = bindCtor(NotebooksApi);
 export const profileApi = bindCtor(ProfileApi);
@@ -115,7 +126,10 @@ export const disksApi = bindCtor(DiskApi);
 
 export const getApiBaseUrl = () => {
   if (cookiesEnabled()) {
-    return localStorage.getItem(LOCAL_STORAGE_API_OVERRIDE_KEY) || environment.allOfUsApiUrl;
+    return (
+      localStorage.getItem(LOCAL_STORAGE_API_OVERRIDE_KEY) ||
+      environment.allOfUsApiUrl
+    );
   } else {
     return environment.allOfUsApiUrl;
   }
@@ -125,7 +139,10 @@ export const getApiBaseUrl = () => {
  * Registers an API client implementation. Can be used to bind a non-standard
  * API implementation, e.g. for testing.
  */
-export function registerApiClient<T extends BaseAPI>(ctor: new() => T, impl: T) {
+export function registerApiClient<T extends BaseAPI>(
+  ctor: new () => T,
+  impl: T
+) {
   checkFrozen();
   registry.set(ctor, impl);
 }
@@ -133,16 +150,19 @@ export function registerApiClient<T extends BaseAPI>(ctor: new() => T, impl: T) 
 // ConfigApi gets special treatment, since it's needed to bootstrap all of the
 // other API services: these require an access token, which in turn requires the
 // oauth client id, which is currently returned by the Config API.
-registerApiClient(ConfigApi, new class extends ConfigApi {
-  constructor() {
-    super();
-    this.configuration = new FetchConfiguration({
-      basePath: getApiBaseUrl()
-    });
-    this.basePath = getApiBaseUrl();
-    this.fetch = portableFetch;
-  }
-});
+registerApiClient(
+  ConfigApi,
+  new (class extends ConfigApi {
+    constructor() {
+      super();
+      this.configuration = new FetchConfiguration({
+        basePath: getApiBaseUrl(),
+      });
+      this.basePath = getApiBaseUrl();
+      this.fetch = portableFetch;
+    }
+  })()
+);
 
 /**
  * Binds standard API clients. To be called at most once for production use,
@@ -154,14 +174,17 @@ export function bindApiClients(conf: FetchConfiguration) {
     // codegen creates API client subclasses which lack a public interface for
     // configuration. Configuration of creds and basePath are only accessible on
     // the parent BaseAPI via protected properties.
-    registerApiClient(ctor, new class extends ctor {
-      constructor() {
-        super();
-        this.configuration = conf;
-        this.basePath = conf.basePath;
-        this.fetch = portableFetch;
-      }
-    }());
+    registerApiClient(
+      ctor,
+      new (class extends ctor {
+        constructor() {
+          super();
+          this.configuration = conf;
+          this.basePath = conf.basePath;
+          this.fetch = portableFetch;
+        }
+      })()
+    );
   }
   frozen = true;
 }

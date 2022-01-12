@@ -1,8 +1,13 @@
-import {BehaviorSubject} from 'rxjs/BehaviorSubject';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
-import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
-import {currentCohortReviewStore} from 'app/utils/navigation';
-import {CohortStatus, FilterColumns, ParticipantCohortStatus, SortOrder} from 'generated/fetch';
+import { cohortReviewApi } from 'app/services/swagger-fetch-clients';
+import { currentCohortReviewStore } from 'app/utils/navigation';
+import {
+  CohortStatus,
+  FilterColumns,
+  ParticipantCohortStatus,
+  SortOrder,
+} from 'generated/fetch';
 
 export const initialFilterState = {
   global: {
@@ -10,7 +15,7 @@ export const initialFilterState = {
     dateMax: null,
     ageMin: '',
     ageMax: '',
-    visits: null
+    visits: null,
   },
   participants: {
     PARTICIPANTID: '',
@@ -24,8 +29,8 @@ export const initialFilterState = {
       CohortStatus.EXCLUDED,
       CohortStatus.NEEDSFURTHERREVIEW,
       CohortStatus.NOTREVIEWED,
-      'Select All'
-    ]
+      'Select All',
+    ],
   },
   tabs: {
     ALL_EVENTS: {
@@ -82,7 +87,7 @@ export const initialFilterState = {
       itemTime: '',
       sourceName: '',
       standardName: '',
-      value: ''
+      value: '',
     },
     VITAL: {
       itemTime: '',
@@ -90,8 +95,8 @@ export const initialFilterState = {
       standardName: '',
     },
     SURVEY: {
-      survey: ''
-    }
+      survey: '',
+    },
   },
   vocab: 'standard',
 };
@@ -100,26 +105,37 @@ const initialPaginationState = {
   page: 0,
   pageSize: 25,
   sortColumn: FilterColumns.PARTICIPANTID,
-  sortOrder: SortOrder.Asc
+  sortOrder: SortOrder.Asc,
 };
 
 export const visitsFilterOptions = new BehaviorSubject<Array<any>>(null);
-export const filterStateStore = new BehaviorSubject<any>(JSON.parse(JSON.stringify(initialFilterState)));
+export const filterStateStore = new BehaviorSubject<any>(
+  JSON.parse(JSON.stringify(initialFilterState))
+);
 export const vocabOptions = new BehaviorSubject<any>(null);
-export const participantStore = new BehaviorSubject<ParticipantCohortStatus>(null);
+export const participantStore = new BehaviorSubject<ParticipantCohortStatus>(
+  null
+);
 export const queryResultSizeStore = new BehaviorSubject<number>(undefined);
-export const reviewPaginationStore = new BehaviorSubject<any>(initialPaginationState);
+export const reviewPaginationStore = new BehaviorSubject<any>(
+  initialPaginationState
+);
 
-export function getVocabOptions(workspaceNamespace: string, workspaceId: string, cohortReviewId: number) {
-  const vocabFilters = {source: {}, standard: {}};
+export function getVocabOptions(
+  workspaceNamespace: string,
+  workspaceId: string,
+  cohortReviewId: number
+) {
+  const vocabFilters = { source: {}, standard: {} };
   try {
-    cohortReviewApi().getVocabularies(workspaceNamespace, workspaceId, cohortReviewId)
-      .then(response => {
-        response.items.forEach(item => {
+    cohortReviewApi()
+      .getVocabularies(workspaceNamespace, workspaceId, cohortReviewId)
+      .then((response) => {
+        response.items.forEach((item) => {
           const type = item.type.toLowerCase();
           vocabFilters[type][item.domain] = [
             ...(vocabFilters[type][item.domain] || []),
-            item.vocabulary
+            item.vocabulary,
           ];
         });
         vocabOptions.next(vocabFilters);
@@ -133,7 +149,9 @@ export function getVocabOptions(workspaceNamespace: string, workspaceId: string,
 export function updateParticipant(participant: ParticipantCohortStatus) {
   const review = currentCohortReviewStore.getValue();
   if (participant && review) {
-    const index = review.participantCohortStatuses.findIndex(p => p.participantId === participant.participantId);
+    const index = review.participantCohortStatuses.findIndex(
+      (p) => p.participantId === participant.participantId
+    );
     if (index !== -1) {
       review.participantCohortStatuses[index] = participant;
       currentCohortReviewStore.next(review);

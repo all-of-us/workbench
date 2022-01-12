@@ -1,5 +1,5 @@
-import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {reactStyles, withStyle} from 'app/utils';
+import colors, { colorWithWhiteness } from 'app/styles/colors';
+import { reactStyles, withStyle } from 'app/utils';
 
 const cardBorderColor = colorWithWhiteness(colors.dark, 0.6);
 
@@ -13,37 +13,43 @@ export const baseStyles = reactStyles({
     display: 'flex',
     flexDirection: 'column',
     padding: '1rem',
-  }
+  },
 });
 
 export const styles = reactStyles({
   workspaceCard: {
     ...baseStyles.card,
     padding: '0px',
-    minWidth: '300px', maxWidth: '300px',
-    minHeight: '223px', maxHeight: '223px',
+    minWidth: '300px',
+    maxWidth: '300px',
+    minHeight: '223px',
+    maxHeight: '223px',
   },
   domainCard: {
     ...baseStyles.card,
     justifyContent: 'space-between',
-    minWidth: '300px', maxWidth: '300px',
-    minHeight: '223px', maxHeight: '223px',
+    minWidth: '300px',
+    maxWidth: '300px',
+    minHeight: '223px',
+    maxHeight: '223px',
   },
   resourceCard: {
     ...baseStyles.card,
-    minWidth: '200px', maxWidth: '200px',
-    minHeight: '223px', maxHeight: '223px'
+    minWidth: '200px',
+    maxWidth: '200px',
+    minHeight: '223px',
+    maxHeight: '223px',
   },
   cohortActionCard: {
     ...baseStyles.card,
     width: '30%',
-    height: '12rem'
+    height: '12rem',
   },
   actionAuditCardBase: {
     ...baseStyles.card,
     width: 'auto',
-    height: 'auto'
-  }
+    height: 'auto',
+  },
 });
 
 export const WorkspaceCardBase = withStyle(styles.workspaceCard)('div');

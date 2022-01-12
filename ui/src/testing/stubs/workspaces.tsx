@@ -1,12 +1,12 @@
-import {AccessTierShortNames} from 'app/utils/access-tiers';
+import { AccessTierShortNames } from 'app/utils/access-tiers';
 import {
   RecentWorkspace,
   RecentWorkspaceResponse,
   SpecificPopulationEnum,
   Workspace,
-  WorkspaceAccessLevel
+  WorkspaceAccessLevel,
 } from 'generated/fetch';
-import {CdrVersionsStubVariables} from './cdr-versions-api-stub';
+import { CdrVersionsStubVariables } from './cdr-versions-api-stub';
 
 export class WorkspaceStubVariables {
   static DEFAULT_WORKSPACE_NS = 'defaultNamespace';
@@ -20,7 +20,8 @@ export function buildWorkspaceStub(suffix = ''): Workspace {
     name: WorkspaceStubVariables.DEFAULT_WORKSPACE_NAME + suffix,
     id: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID + suffix,
     namespace: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS + suffix,
-    cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID + suffix,
+    cdrVersionId:
+      CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID + suffix,
     accessTierShortName: AccessTierShortNames.Registered,
     creationTime: new Date().getTime(),
     lastModifiedTime: new Date().getTime(),
@@ -38,35 +39,40 @@ export function buildWorkspaceStub(suffix = ''): Workspace {
       methodsDevelopment: false,
       otherPurpose: false,
       otherPurposeDetails: '',
-      populationDetails: [SpecificPopulationEnum.AGEOLDERMORETHAN75, SpecificPopulationEnum.RACENHPI],
+      populationDetails: [
+        SpecificPopulationEnum.AGEOLDERMORETHAN75,
+        SpecificPopulationEnum.RACENHPI,
+      ],
       populationHealth: true,
       researchOutcomeList: [],
       ethics: true,
       reviewRequested: false,
       socialBehavioral: false,
       reasonForAllOfUs: '',
-      needsReviewPrompt: false
+      needsReviewPrompt: false,
     },
     published: false,
     billingAccountName: 'billing-account',
-    adminLocked: false
+    adminLocked: false,
   };
 }
 
 export function buildWorkspaceStubs(suffixes: string[]): Workspace[] {
-  return suffixes.map(suffix => buildWorkspaceStub(suffix));
+  return suffixes.map((suffix) => buildWorkspaceStub(suffix));
 }
 
 function buildRecentWorkspaceStub(suffix: string): RecentWorkspace {
   const workspaceStub = buildWorkspaceStub(suffix);
   return {
     workspace: workspaceStub,
-    accessLevel: WorkspaceAccessLevel.OWNER
+    accessLevel: WorkspaceAccessLevel.OWNER,
   };
 }
 
-export function buildRecentWorkspaceResponseStub(suffixes: string[]): RecentWorkspaceResponse {
-  return suffixes.map(suffix => buildRecentWorkspaceStub(suffix));
+export function buildRecentWorkspaceResponseStub(
+  suffixes: string[]
+): RecentWorkspaceResponse {
+  return suffixes.map((suffix) => buildRecentWorkspaceStub(suffix));
 }
 
 export const workspaceStubs = buildWorkspaceStubs(['']);
@@ -78,24 +84,23 @@ export const workspaceDataStub = {
   accessLevel: WorkspaceAccessLevel.OWNER,
 };
 
-
 export const userRolesStub = [
   {
     email: 'sampleuser1@fake-research-aou.org',
     givenName: 'Sample',
     familyName: 'User1',
-    role: WorkspaceAccessLevel.OWNER
+    role: WorkspaceAccessLevel.OWNER,
   },
   {
     email: 'sampleuser2@fake-research-aou.org',
     givenName: 'Sample',
     familyName: 'User2',
-    role: WorkspaceAccessLevel.WRITER
+    role: WorkspaceAccessLevel.WRITER,
   },
   {
     email: 'sampleuser3@fake-research-aou.org',
     givenName: 'Sample',
     familyName: 'User3',
-    role: WorkspaceAccessLevel.READER
+    role: WorkspaceAccessLevel.READER,
   },
 ];

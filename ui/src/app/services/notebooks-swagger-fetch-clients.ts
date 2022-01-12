@@ -11,33 +11,37 @@ import {
   Configuration as FetchConfiguration,
   JupyterApi,
   ProxyApi,
-  RuntimesApi
+  RuntimesApi,
 } from 'notebooks-generated/fetch';
 import * as portableFetch from 'portable-fetch';
-
 
 let frozen = false;
 function checkFrozen() {
   if (frozen) {
-    throw Error('API clients registry is already frozen; cannot be ' +
-      'configured after invocation of bindApiClients()');
+    throw Error(
+      'API clients registry is already frozen; cannot be ' +
+        'configured after invocation of bindApiClients()'
+    );
   }
 }
 
 // All known API client constructors.
-const apiCtors: (new() => BaseAPI)[] = [];
+const apiCtors: (new () => BaseAPI)[] = [];
 
 // Constructor -> implementation.
-const registry: Map<new() => BaseAPI, BaseAPI> = new Map();
+const registry: Map<new () => BaseAPI, BaseAPI> = new Map();
 
-function bindCtor<T extends BaseAPI>(ctor: new() => T): () => T {
+function bindCtor<T extends BaseAPI>(ctor: new () => T): () => T {
   apiCtors.push(ctor);
   return () => {
     if (!registry.has(ctor)) {
-      throw Error('API client is not registered: ensure you are not ' +
-        'retrieving an API client before app initialization. In ' +
-        'unit tests, be sure to call registerApiClient() for all ' +
-        'API clients in use, else call bindApiClients(): ' + ctor);
+      throw Error(
+        'API client is not registered: ensure you are not ' +
+          'retrieving an API client before app initialization. In ' +
+          'unit tests, be sure to call registerApiClient() for all ' +
+          'API clients in use, else call bindApiClients(): ' +
+          ctor
+      );
     }
     return registry.get(ctor) as T;
   };
@@ -49,7 +53,10 @@ export const leoRuntimesApi = bindCtor(RuntimesApi);
 export const proxyApi = bindCtor(ProxyApi);
 export const jupyterApi = bindCtor(JupyterApi);
 
-export function registerApiClient<T extends BaseAPI>(ctor: new() => T, impl: T) {
+export function registerApiClient<T extends BaseAPI>(
+  ctor: new () => T,
+  impl: T
+) {
   checkFrozen();
   registry.set(ctor, impl);
 }
@@ -60,14 +67,17 @@ export function bindApiClients(conf: FetchConfiguration) {
     // codegen creates API client subclasses which lack a public interface for
     // configuration. Configuration of creds and basePath are only accessible on
     // the parent BaseAPI via protected properties.
-    registerApiClient(ctor, new class extends ctor {
-      constructor() {
-        super();
-        this.configuration = conf;
-        this.basePath = conf.basePath;
-        this.fetch = portableFetch;
-      }
-    }());
+    registerApiClient(
+      ctor,
+      new (class extends ctor {
+        constructor() {
+          super();
+          this.configuration = conf;
+          this.basePath = conf.basePath;
+          this.fetch = portableFetch;
+        }
+      })()
+    );
   }
   frozen = true;
 }
