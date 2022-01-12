@@ -9,9 +9,9 @@ import {
   ProfileApi,
 } from 'generated/fetch';
 
-import {AccessTierShortNames} from 'app/utils/access-tiers';
-import {AdminUserListResponse, EmptyResponse} from 'generated/fetch/api';
-import {stubNotImplementedError} from 'testing/stubs/stub-utils';
+import { AccessTierShortNames } from 'app/utils/access-tiers';
+import { AdminUserListResponse, EmptyResponse } from 'generated/fetch/api';
+import { stubNotImplementedError } from 'testing/stubs/stub-utils';
 
 export class ProfileStubVariables {
   static PROFILE_STUB = <Profile>{
@@ -20,7 +20,7 @@ export class ProfileStubVariables {
     accessTierShortNames: [AccessTierShortNames.Registered],
     givenName: 'Tester!@#$%^&*()><script>alert("hello");</script>',
     familyName: 'MacTesterson!@#$%^&*()><script>alert("hello");</script>',
-    pageVisits: [{page: 'test'}],
+    pageVisits: [{ page: 'test' }],
     eraCommonsLinkedNihUsername: null,
     areaOfResearch: 'things',
     complianceTrainingCompletionTime: null,
@@ -36,51 +36,65 @@ export class ProfileStubVariables {
       city: 'Cambridge',
       state: 'MA',
       country: 'USA',
-      zipCode: '02142'
+      zipCode: '02142',
     },
     verifiedInstitutionalAffiliation: {
       institutionShortName: 'Broad',
       institutionDisplayName: 'The Broad Institute',
-      institutionalRoleEnum: InstitutionalRole.FELLOW
+      institutionalRoleEnum: InstitutionalRole.FELLOW,
     },
-    accessModules : {
-      modules: [{
-        moduleName: AccessModule.COMPLIANCETRAINING,
-        expirationEpochMillis: undefined
-      }, {
-        moduleName: AccessModule.DATAUSERCODEOFCONDUCT,
-        expirationEpochMillis: undefined
-      }, {
-        moduleName: AccessModule.PROFILECONFIRMATION,
-        expirationEpochMillis: undefined
-      }, {
-        moduleName: AccessModule.PUBLICATIONCONFIRMATION,
-        expirationEpochMillis: undefined
-      }],
-      anyModuleHasExpired: false
+    accessModules: {
+      modules: [
+        {
+          moduleName: AccessModule.COMPLIANCETRAINING,
+          expirationEpochMillis: undefined,
+        },
+        {
+          moduleName: AccessModule.DATAUSERCODEOFCONDUCT,
+          expirationEpochMillis: undefined,
+        },
+        {
+          moduleName: AccessModule.PROFILECONFIRMATION,
+          expirationEpochMillis: undefined,
+        },
+        {
+          moduleName: AccessModule.PUBLICATIONCONFIRMATION,
+          expirationEpochMillis: undefined,
+        },
+      ],
+      anyModuleHasExpired: false,
     },
-    tierEligibilities : [{
-      accessTierShortName: AccessTierShortNames.Registered,
-      eraRequired: true
-    },{
-      accessTierShortName: AccessTierShortNames.Controlled,
-      eraRequired: false
-    }]
+    tierEligibilities: [
+      {
+        accessTierShortName: AccessTierShortNames.Registered,
+        eraRequired: true,
+      },
+      {
+        accessTierShortName: AccessTierShortNames.Controlled,
+        eraRequired: false,
+      },
+    ],
   };
-  static ADMIN_TABLE_USER_STUB = <AdminTableUser>{...ProfileStubVariables.PROFILE_STUB};
+  static ADMIN_TABLE_USER_STUB = <AdminTableUser>{
+    ...ProfileStubVariables.PROFILE_STUB,
+  };
 }
 
 // TODO: Port functionality from ProfileServiceStub as needed.
 export class ProfileApiStub extends ProfileApi {
-
   profile: Profile;
 
   constructor() {
-    super(undefined, undefined, (..._: any[]) => { throw stubNotImplementedError; });
+    super(undefined, undefined, (..._: any[]) => {
+      throw stubNotImplementedError;
+    });
     this.profile = ProfileStubVariables.PROFILE_STUB;
   }
 
-  public createAccount(request?: CreateAccountRequest, options?: any): Promise<Profile> {
+  public createAccount(
+    request?: CreateAccountRequest,
+    options?: any
+  ): Promise<Profile> {
     return Promise.resolve(this.profile);
   }
 
@@ -90,7 +104,7 @@ export class ProfileApiStub extends ProfileApi {
 
   public updateProfile(updatedProfile?: Profile, options?: any) {
     this.profile = updatedProfile;
-    return Promise.resolve(new Response('', {status: 200}));
+    return Promise.resolve(new Response('', { status: 200 }));
   }
 
   public getMe(options?: any) {
@@ -98,11 +112,11 @@ export class ProfileApiStub extends ProfileApi {
   }
 
   public confirmProfile(options?: any) {
-    return Promise.resolve(new Response('', {status: 200}));
+    return Promise.resolve(new Response('', { status: 200 }));
   }
 
   public confirmPublications(options?: any) {
-    return Promise.resolve(new Response('', {status: 200}));
+    return Promise.resolve(new Response('', { status: 200 }));
   }
 
   public updatePageVisits(pageVisit) {
@@ -122,7 +136,10 @@ export class ProfileApiStub extends ProfileApi {
   }
 
   public bypassAccessRequirement(
-    userId: number, bypassed?: AccessBypassRequest, options?: any): Promise<EmptyResponse> {
+    userId: number,
+    bypassed?: AccessBypassRequest,
+    options?: any
+  ): Promise<EmptyResponse> {
     return new Promise<EmptyResponse>(() => {});
   }
 
@@ -136,9 +153,13 @@ export class ProfileApiStub extends ProfileApi {
   }
 
   public getAllUsers(): Promise<AdminUserListResponse> {
-    return Promise.resolve({users: [{
-      userId: 1,
-      username: ProfileStubVariables.PROFILE_STUB.username,
-    }]});
+    return Promise.resolve({
+      users: [
+        {
+          userId: 1,
+          username: ProfileStubVariables.PROFILE_STUB.username,
+        },
+      ],
+    });
   }
 }

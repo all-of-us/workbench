@@ -2,7 +2,7 @@ import * as highCharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import * as React from 'react';
 
-import {getChartObj} from 'app/cohort-search/utils';
+import { getChartObj } from 'app/cohort-search/utils';
 import colors from 'app/styles/colors';
 
 interface Props {
@@ -17,7 +17,7 @@ interface State {
 export class ComboChart extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
-    this.state = {options: null};
+    this.state = { options: null };
   }
 
   componentDidMount(): void {
@@ -31,38 +31,38 @@ export class ComboChart extends React.Component<Props, State> {
   }
 
   getChartOptions() {
-    const {mode} = this.props;
+    const { mode } = this.props;
     const normalized = mode === 'normalized';
-    const {categories, series} = this.getCategoriesAndSeries();
+    const { categories, series } = this.getCategoriesAndSeries();
     const height = Math.max(categories.length * 30, 200);
     const options = {
       chart: {
         height,
-        type: 'bar'
+        type: 'bar',
       },
       credits: {
-        enabled: false
+        enabled: false,
       },
       title: {
-        text: ''
+        text: '',
       },
       xAxis: {
         categories,
         tickLength: 0,
-        tickPixelInterval: 50
+        tickPixelInterval: 50,
       },
       yAxis: {
         labels: {
-          format: '{value}' + (normalized ? '%' : '')
+          format: '{value}' + (normalized ? '%' : ''),
         },
         min: 0,
         title: {
-          text: ''
-        }
+          text: '',
+        },
       },
       colors: colors.chartColors,
       legend: {
-        enabled: false
+        enabled: false,
       },
       plotOptions: {
         bar: {
@@ -70,51 +70,62 @@ export class ComboChart extends React.Component<Props, State> {
           pointPadding: 0.1,
         },
         series: {
-          stacking: (normalized ? 'percent' : 'normal')
-        }
+          stacking: normalized ? 'percent' : 'normal',
+        },
       },
-      series
+      series,
     };
-    this.setState({options});
+    this.setState({ options });
   }
 
   getCategoriesAndSeries() {
-    const {data} = this.props;
+    const { data } = this.props;
     const codeMap = {
-      'M': 'Male',
-      'F': 'Female',
-      'No matching concept': 'Unknown'
+      M: 'Male',
+      F: 'Female',
+      'No matching concept': 'Unknown',
     };
     const getKey = (dat) => {
       const gender = !!codeMap[dat.name] ? codeMap[dat.name] : dat.name;
       return `${gender} ${dat.ageRange || 'Unknown'}`;
     };
-    const categories = data.reduce((acc, datum) => {
-      const key = getKey(datum);
-      if (!acc.includes(key)) {
-        acc.push(key);
-      }
-      return acc;
-    }, []).sort((a, b) => a > b ? 1 : -1);
-    const series = data.reduce((acc, datum) => {
-      const key = getKey(datum);
-      const obj = {x: categories.indexOf(key), y: datum.count};
-      const index = acc.findIndex(d => d.name === datum.race);
-      if (index === -1) {
-        acc.push({name: datum.race, data: [obj]});
-      } else {
-        acc[index].data.push(obj);
-      }
-      return acc;
-    }, []).sort((a, b) => a['name'] < b['name'] ? 1 : -1);
-    return {categories, series};
+    const categories = data
+      .reduce((acc, datum) => {
+        const key = getKey(datum);
+        if (!acc.includes(key)) {
+          acc.push(key);
+        }
+        return acc;
+      }, [])
+      .sort((a, b) => (a > b ? 1 : -1));
+    const series = data
+      .reduce((acc, datum) => {
+        const key = getKey(datum);
+        const obj = { x: categories.indexOf(key), y: datum.count };
+        const index = acc.findIndex((d) => d.name === datum.race);
+        if (index === -1) {
+          acc.push({ name: datum.race, data: [obj] });
+        } else {
+          acc[index].data.push(obj);
+        }
+        return acc;
+      }, [])
+      .sort((a, b) => (a['name'] < b['name'] ? 1 : -1));
+    return { categories, series };
   }
 
   render() {
-    const {options} = this.state;
-    return <div style={{minHeight: 200}}>
-      {options && <HighchartsReact highcharts={highCharts} options={options} callback={getChartObj} />}
-    </div>;
+    const { options } = this.state;
+    return (
+      <div style={{ minHeight: 200 }}>
+        {options && (
+          <HighchartsReact
+            highcharts={highCharts}
+            options={options}
+            callback={getChartObj}
+          />
+        )}
+      </div>
+    );
   }
 }
-

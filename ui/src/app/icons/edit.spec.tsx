@@ -1,25 +1,21 @@
-import {mount} from 'enzyme';
+import { mount } from 'enzyme';
 import * as React from 'react';
 
-import {
-  EditComponentProps,
-  EditComponentReact
-} from './edit';
+import { EditComponentProps, EditComponentReact } from './edit';
 
 // Note that the description is slightly different from the component for easier test filtering.
 describe('EditIconComponent', () => {
-
   let props: EditComponentProps;
 
   const component = () => {
-    return mount(<EditComponentReact {...props}/>);
+    return mount(<EditComponentReact {...props} />);
   };
 
   beforeEach(() => {
     props = {
       disabled: false,
       enableHoverEffect: true,
-      style: {}
+      style: {},
     };
   });
 
@@ -53,5 +49,4 @@ describe('EditIconComponent', () => {
     const mouseOutStyle = wrapper.find('svg').props().style;
     expect(mouseOutStyle).not.toEqual(hoverStyle);
   });
-
 });

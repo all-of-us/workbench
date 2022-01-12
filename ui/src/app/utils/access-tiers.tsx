@@ -1,14 +1,14 @@
-import {switchCase} from './index';
-import {Profile} from 'generated/fetch';
+import { switchCase } from './index';
+import { Profile } from 'generated/fetch';
 
 export enum AccessTierShortNames {
-    Registered = 'registered',
-    Controlled = 'controlled',
+  Registered = 'registered',
+  Controlled = 'controlled',
 }
 
 export enum AccessTierDisplayNames {
-    Registered = 'Registered Tier',
-    Controlled = 'Controlled Tier',
+  Registered = 'Registered Tier',
+  Controlled = 'Controlled Tier',
 }
 
 export function hasTierAccess(profile: Profile, shortName): boolean {
@@ -23,7 +23,9 @@ export function hasRegisteredTierAccess(profile: Profile): boolean {
   return hasTierAccess(profile, AccessTierShortNames.Registered);
 }
 
-export const displayNameForTier = (shortName: string) => switchCase(shortName,
+export const displayNameForTier = (shortName: string) =>
+  switchCase(
+    shortName,
     [AccessTierShortNames.Registered, () => AccessTierDisplayNames.Registered],
-    [AccessTierShortNames.Controlled, () => AccessTierDisplayNames.Controlled],
-);
+    [AccessTierShortNames.Controlled, () => AccessTierDisplayNames.Controlled]
+  );

@@ -1,23 +1,33 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import validate from 'validate.js';
-import {Dropdown} from 'primereact/dropdown';
-import {OverlayPanel} from 'primereact/overlaypanel';
+import { Dropdown } from 'primereact/dropdown';
+import { OverlayPanel } from 'primereact/overlaypanel';
 
-import {Button, LinkButton, StyledExternalLink} from 'app/components/buttons';
-import {FadeBox} from 'app/components/containers';
-import {FlexColumn, FlexRow} from 'app/components/flex';
-import {InfoIcon} from 'app/components/icons';
-import {CheckBox, RadioButton, TextArea, TextInput} from 'app/components/inputs';
-import {BulletAlignedUnorderedList} from 'app/components/lists';
-import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
-import {TooltipTrigger} from 'app/components/popups';
-import {SearchInput} from 'app/components/search-input';
-import {SpinnerOverlay} from 'app/components/spinners';
-import {AoU, AouTitle} from 'app/components/text-wrappers';
-import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
-import {CreateBillingAccountModal} from 'app/pages/workspace/create-billing-account-modal';
-import {WorkspaceEditSection} from 'app/pages/workspace/workspace-edit-section';
+import { Button, LinkButton, StyledExternalLink } from 'app/components/buttons';
+import { FadeBox } from 'app/components/containers';
+import { FlexColumn, FlexRow } from 'app/components/flex';
+import { InfoIcon } from 'app/components/icons';
+import {
+  CheckBox,
+  RadioButton,
+  TextArea,
+  TextInput,
+} from 'app/components/inputs';
+import { BulletAlignedUnorderedList } from 'app/components/lists';
+import {
+  Modal,
+  ModalBody,
+  ModalFooter,
+  ModalTitle,
+} from 'app/components/modals';
+import { TooltipTrigger } from 'app/components/popups';
+import { SearchInput } from 'app/components/search-input';
+import { SpinnerOverlay } from 'app/components/spinners';
+import { AoU, AouTitle } from 'app/components/text-wrappers';
+import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
+import { CreateBillingAccountModal } from 'app/pages/workspace/create-billing-account-modal';
+import { WorkspaceEditSection } from 'app/pages/workspace/workspace-edit-section';
 import {
   disseminateFindings,
   PrimaryPurposeItems,
@@ -32,40 +42,43 @@ import {
   toolTipText,
   toolTipTextDemographic,
   toolTipTextDucc,
-  toolTipTextStigmatization
+  toolTipTextStigmatization,
 } from 'app/pages/workspace/workspace-edit-text';
-import {WorkspaceResearchSummary} from 'app/pages/workspace/workspace-research-summary';
-import {userApi, workspacesApi} from 'app/services/swagger-fetch-clients';
-import colors, {colorWithWhiteness} from 'app/styles/colors';
+import { WorkspaceResearchSummary } from 'app/pages/workspace/workspace-research-summary';
+import { userApi, workspacesApi } from 'app/services/swagger-fetch-clients';
+import colors, { colorWithWhiteness } from 'app/styles/colors';
 import {
   formatInitialCreditsUSD,
   reactStyles,
   sliceByHalfLength,
   withCdrVersions,
   withCurrentWorkspace,
-  withUserProfile
+  withUserProfile,
 } from 'app/utils';
-import {AccessTierShortNames, displayNameForTier, hasTierAccess} from 'app/utils/access-tiers';
-import {AnalyticsTracker} from 'app/utils/analytics';
 import {
-  ensureBillingScope,
-  hasBillingScope
-} from 'app/utils/authentication';
+  AccessTierShortNames,
+  displayNameForTier,
+  hasTierAccess,
+} from 'app/utils/access-tiers';
+import { AnalyticsTracker } from 'app/utils/analytics';
+import { ensureBillingScope, hasBillingScope } from 'app/utils/authentication';
 import {
   getCdrVersion,
   getCdrVersionTier,
   getDefaultCdrVersionForTier,
-  hasDefaultCdrVersion
+  hasDefaultCdrVersion,
 } from 'app/utils/cdr-versions';
-import {reportError} from 'app/utils/errors';
-import {currentWorkspaceStore, NavigationProps, nextWorkspaceWarmupStore} from 'app/utils/navigation';
-import {serverConfigStore} from 'app/utils/stores';
-import {withNavigation} from 'app/utils/with-navigation-hoc';
+import { reportError } from 'app/utils/errors';
 import {
-  getBillingAccountInfo
-} from 'app/utils/workbench-gapi-client';
-import {WorkspaceData} from 'app/utils/workspace-data';
-import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
+  currentWorkspaceStore,
+  NavigationProps,
+  nextWorkspaceWarmupStore,
+} from 'app/utils/navigation';
+import { serverConfigStore } from 'app/utils/stores';
+import { withNavigation } from 'app/utils/with-navigation-hoc';
+import { getBillingAccountInfo } from 'app/utils/workbench-gapi-client';
+import { WorkspaceData } from 'app/utils/workspace-data';
+import { openZendeskWidget, supportUrls } from 'app/utils/zendesk';
 import {
   ArchivalStatus,
   BillingAccount,
@@ -77,48 +90,48 @@ import {
   ResearchPurpose,
   SpecificPopulationEnum,
   Workspace,
-  WorkspaceAccessLevel
+  WorkspaceAccessLevel,
 } from 'generated/fetch';
-import {OldCdrVersionModal} from './old-cdr-version-modal';
-import {environment} from 'environments/environment';
-import {UnavailableTierModal} from './unavailable-tier-modal';
+import { OldCdrVersionModal } from './old-cdr-version-modal';
+import { environment } from 'environments/environment';
+import { UnavailableTierModal } from './unavailable-tier-modal';
 
 export const styles = reactStyles({
   categoryRow: {
     display: 'flex',
     flexDirection: 'row',
     padding: '0.6rem 0',
-    width: '95%'
+    width: '95%',
   },
   checkboxRow: {
     display: 'inline-block',
     padding: '0.2rem 0',
-    marginRight: '1rem'
+    marginRight: '1rem',
   },
   checkboxStyle: {
     marginRight: '.31667rem',
-    zoom: '1.5'
+    zoom: '1.5',
   },
   header: {
     fontWeight: 600,
     lineHeight: '24px',
-    color: colors.primary
+    color: colors.primary,
   },
   fieldHeader: {
     fontWeight: 600,
     lineHeight: '24px',
     color: colors.primary,
     fontSize: 14,
-    marginBottom: '0.2rem'
+    marginBottom: '0.2rem',
   },
   flexColumnBy2: {
     flex: '1 1 0',
-    marginLeft: '1rem'
+    marginLeft: '1rem',
   },
   infoIcon: {
     height: '16px',
     marginLeft: '0.2rem',
-    width: '16px'
+    width: '16px',
   },
   longDescription: {
     position: 'relative',
@@ -126,7 +139,7 @@ export const styles = reactStyles({
     minHeight: '1rem',
     cursor: 'text',
     lineHeight: '1rem',
-    width: '100%'
+    width: '100%',
   },
   researchPurposeRow: {
     backgroundColor: colors.white,
@@ -134,21 +147,21 @@ export const styles = reactStyles({
     border: `1px solid ${colorWithWhiteness(colors.dark, 0.5)}`,
     marginLeft: '-1rem',
     paddingTop: '0.3rem',
-    paddingBottom: '0.3rem'
+    paddingBottom: '0.3rem',
   },
   select: {
     display: 'inline-block',
     verticalAlign: 'middle',
     position: 'relative',
     overflow: 'visible',
-    marginRight: '20px'
+    marginRight: '20px',
   },
   shortDescription: {
     color: colors.primary,
     fontSize: '16px',
     fontWeight: 600,
     lineHeight: '24px',
-    cursor: 'pointer'
+    cursor: 'pointer',
   },
   spinner: {
     position: 'fixed',
@@ -163,14 +176,14 @@ export const styles = reactStyles({
     fontSize: '14px',
     color: colors.primary,
     fontWeight: 400,
-    lineHeight: '24px'
+    lineHeight: '24px',
   },
   textInput: {
     width: '20rem',
     borderColor: 'rgb(151, 151, 151)',
     borderRadius: '6px',
     marginRight: '20px',
-    marginBottom: '5px'
+    marginBottom: '5px',
   },
   selectInput: {
     borderColor: 'rgb(151, 151, 151)',
@@ -180,12 +193,12 @@ export const styles = reactStyles({
   researchPurposeDescription: {
     marginLeft: '-0.9rem',
     fontSize: 14,
-    backgroundColor: colorWithWhiteness(colors.accent, 0.85)
+    backgroundColor: colorWithWhiteness(colors.accent, 0.85),
   },
   link: {
     color: colors.accent,
     cursor: 'pointer',
-    textDecoration: 'none'
+    textDecoration: 'none',
   },
   cdrVersionUpgrade: {
     padding: '16px',
@@ -206,11 +219,12 @@ export const styles = reactStyles({
   },
   cdrVersionSpacing: {
     width: '30em',
-  }
+  },
 });
 
 const CREATE_BILLING_ACCOUNT_OPTION_VALUE = 'CREATE_BILLING_ACCOUNT_OPTION';
-const SELECT_OR_CREATE_BILLING_ACCOUNT_OPTION_VALUE = 'SELECT_OR_CREATE_BILLING_ACCOUNT_OPTION_VALUE';
+const SELECT_OR_CREATE_BILLING_ACCOUNT_OPTION_VALUE =
+  'SELECT_OR_CREATE_BILLING_ACCOUNT_OPTION_VALUE';
 
 // default to creating workspaces in the Registered Tier
 const DEFAULT_ACCESS_TIER = AccessTierShortNames.Registered;
@@ -221,18 +235,26 @@ const DEFAULT_ACCESS_TIER = AccessTierShortNames.Registered;
 const NEW_ACL_DELAY_POLL_TIMEOUT_MS = 60 * 1000;
 const NEW_ACL_DELAY_POLL_INTERVAL_MS = 10 * 1000;
 
-export enum WorkspaceEditMode { Create = 1, Edit = 2, Duplicate = 3 }
+export enum WorkspaceEditMode {
+  Create = 1,
+  Edit = 2,
+  Duplicate = 3,
+}
 
 function getDiseaseNames(keyword) {
   const baseurl = serverConfigStore.get().config.firecloudURL;
   const url = baseurl + '/duos/autocomplete/' + keyword;
-  return fetch(encodeURI(url)).then((response) => {
-    return response.json();
-  }).then((matches) => {
-    const labeledMatches = fp.filter((elt) => elt.hasOwnProperty('label'))(matches);
-    const diseases = fp.map((elt) => elt['label'])(labeledMatches);
-    return diseases;
-  });
+  return fetch(encodeURI(url))
+    .then((response) => {
+      return response.json();
+    })
+    .then((matches) => {
+      const labeledMatches = fp.filter((elt) => elt.hasOwnProperty('label'))(
+        matches
+      );
+      const diseases = fp.map((elt) => elt['label'])(labeledMatches);
+      return diseases;
+    });
 }
 
 interface UpgradeProps {
@@ -241,17 +263,35 @@ interface UpgradeProps {
   cdrVersionTiersResponse: CdrVersionTiersResponse;
 }
 const CdrVersionUpgrade = (props: UpgradeProps) => {
-  const {srcWorkspace, destWorkspace, cdrVersionTiersResponse} = props;
-  const fromCdrVersion = <span style={{fontWeight: 'bold'}}>{getCdrVersion(srcWorkspace, cdrVersionTiersResponse).name}</span>;
-  const toCdrVersion = <span style={{fontWeight: 'bold'}}>{getCdrVersion(destWorkspace, cdrVersionTiersResponse).name}</span>;
+  const { srcWorkspace, destWorkspace, cdrVersionTiersResponse } = props;
+  const fromCdrVersion = (
+    <span style={{ fontWeight: 'bold' }}>
+      {getCdrVersion(srcWorkspace, cdrVersionTiersResponse).name}
+    </span>
+  );
+  const toCdrVersion = (
+    <span style={{ fontWeight: 'bold' }}>
+      {getCdrVersion(destWorkspace, cdrVersionTiersResponse).name}
+    </span>
+  );
 
-  return <div data-test-id='cdr-version-upgrade' style={styles.cdrVersionUpgrade}>
-    <div>{`You're duplicating the workspace "${srcWorkspace.name}" to upgrade from`} {fromCdrVersion} to {toCdrVersion}.</div>
-    <div>Your original workspace will be unaffected. To work with the new data, simply use the new workspace.</div>
-  </div>;
+  return (
+    <div data-test-id='cdr-version-upgrade' style={styles.cdrVersionUpgrade}>
+      <div>
+        {`You're duplicating the workspace "${srcWorkspace.name}" to upgrade from`}{' '}
+        {fromCdrVersion} to {toCdrVersion}.
+      </div>
+      <div>
+        Your original workspace will be unaffected. To work with the new data,
+        simply use the new workspace.
+      </div>
+    </div>
+  );
 };
 
-export interface WorkspaceEditProps extends WithSpinnerOverlayProps, NavigationProps {
+export interface WorkspaceEditProps
+  extends WithSpinnerOverlayProps,
+    NavigationProps {
   cdrVersionTiersResponse: CdrVersionTiersResponse;
   workspace: WorkspaceData;
   cancel: Function;
@@ -285,17 +325,29 @@ export interface WorkspaceEditState {
   unavailableTier?: string;
 }
 
-export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), withUserProfile(), withNavigation)(
-  class WorkspaceEditCmp extends React.Component<WorkspaceEditProps, WorkspaceEditState> {
+export const WorkspaceEdit = fp.flow(
+  withCurrentWorkspace(),
+  withCdrVersions(),
+  withUserProfile(),
+  withNavigation
+)(
+  class WorkspaceEditCmp extends React.Component<
+    WorkspaceEditProps,
+    WorkspaceEditState
+  > {
     constructor(props: WorkspaceEditProps) {
       super(props);
       this.state = {
         billingAccountFetched: false,
         billingAccounts: [],
-        cdrVersions: props.workspace ? this.getCdrVersions(props.workspace.accessTierShortName) : this.getCdrVersions(DEFAULT_ACCESS_TIER),
+        cdrVersions: props.workspace
+          ? this.getCdrVersions(props.workspace.accessTierShortName)
+          : this.getCdrVersions(DEFAULT_ACCESS_TIER),
         cloneUserRole: false,
         loading: false,
-        populationChecked: props.workspace ? props.workspace.researchPurpose.populationDetails.length > 0 : undefined,
+        populationChecked: props.workspace
+          ? props.workspace.researchPurpose.populationDetails.length > 0
+          : undefined,
         selectResearchPurpose: this.updateSelectedResearch(),
         fetchBillingAccountLoading: false,
         showCdrVersionModal: false,
@@ -318,14 +370,24 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
     }
 
     formatFreeTierBillingAccountName(): string {
-      const {profileState: {profile: {freeTierDollarQuota, freeTierUsage}}} = this.props;
+      const {
+        profileState: {
+          profile: { freeTierDollarQuota, freeTierUsage },
+        },
+      } = this.props;
       const initialCreditsBalance = freeTierDollarQuota - freeTierUsage;
-      return 'Use All of Us initial credits - ' + formatInitialCreditsUSD(initialCreditsBalance) + ' left'
+      return (
+        'Use All of Us initial credits - ' +
+        formatInitialCreditsUSD(initialCreditsBalance) +
+        ' left'
+      );
     }
 
     async initialBillingAccountLoad() {
       const freeTierBillingAccount: BillingAccount = {
-        name: 'billingAccounts/' + serverConfigStore.get().config.freeTierBillingAccountId,
+        name:
+          'billingAccounts/' +
+          serverConfigStore.get().config.freeTierBillingAccountId,
         isFreeTier: true,
         isOpen: true,
         displayName: this.formatFreeTierBillingAccountName(),
@@ -336,26 +398,40 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
       // When editing existing workspace, show free tier if that is currently being used or 'User Provided Billing Account'
       // if it is user's billing account.
       if (!hasBillingScope()) {
-        if (this.isMode(WorkspaceEditMode.Create) || this.isMode(WorkspaceEditMode.Duplicate)) {
-          this.setState(prevState => fp.set(
+        if (
+          this.isMode(WorkspaceEditMode.Create) ||
+          this.isMode(WorkspaceEditMode.Duplicate)
+        ) {
+          this.setState((prevState) =>
+            fp.set(
               ['workspace', 'billingAccountName'],
-            freeTierBillingAccount.name,
-            prevState));
-          this.setState({billingAccounts: [freeTierBillingAccount]});
+              freeTierBillingAccount.name,
+              prevState
+            )
+          );
+          this.setState({ billingAccounts: [freeTierBillingAccount] });
         } else if (this.isMode(WorkspaceEditMode.Edit)) {
           // If the user hasn't grant billing scope to workbench yet, keep the server's current value for
           // billingAccountName and add a shim entry into billingAccounts so the dropdown entry is not empty.
           //
           // The server will not perform an updateBillingInfo call if the received billingAccountName
           // is the same as what is currently stored.
-          if (this.props.workspace.billingAccountName === freeTierBillingAccount.name) {
-            this.setState({billingAccounts: [freeTierBillingAccount]});
+          if (
+            this.props.workspace.billingAccountName ===
+            freeTierBillingAccount.name
+          ) {
+            this.setState({ billingAccounts: [freeTierBillingAccount] });
           } else {
-            this.setState({billingAccounts: [{
-              name: this.props.workspace.billingAccountName,
-              displayName: 'User Provided Billing Account',
-              isFreeTier: false,
-              isOpen: true}]});
+            this.setState({
+              billingAccounts: [
+                {
+                  name: this.props.workspace.billingAccountName,
+                  displayName: 'User Provided Billing Account',
+                  isFreeTier: false,
+                  isOpen: true,
+                },
+              ],
+            });
           }
         }
       } else {
@@ -364,31 +440,49 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
     }
 
     async fetchBillingAccounts() {
-      this.setState({fetchBillingAccountLoading: true});
-      const billingAccounts = (await userApi().listBillingAccounts()).billingAccounts;
+      this.setState({ fetchBillingAccountLoading: true });
+      const billingAccounts = (await userApi().listBillingAccounts())
+        .billingAccounts;
 
       // Replace the free billing account with a new display name that has spend usage.
-      const displayBillingAccounts: Array<BillingAccount> = billingAccounts.map((b) => {
-        if (b.isFreeTier) {
-          return {
-            ...b,
-            displayName: this.formatFreeTierBillingAccountName()
-          };
+      const displayBillingAccounts: Array<BillingAccount> = billingAccounts.map(
+        (b) => {
+          if (b.isFreeTier) {
+            return {
+              ...b,
+              displayName: this.formatFreeTierBillingAccountName(),
+            };
+          }
+          return b;
         }
-        return b;
-      });
+      );
 
-      if (this.isMode(WorkspaceEditMode.Create) || this.isMode(WorkspaceEditMode.Duplicate)) {
-        const maybeFreeTierAccount = displayBillingAccounts.find(billingAccount => billingAccount.isFreeTier);
+      if (
+        this.isMode(WorkspaceEditMode.Create) ||
+        this.isMode(WorkspaceEditMode.Duplicate)
+      ) {
+        const maybeFreeTierAccount = displayBillingAccounts.find(
+          (billingAccount) => billingAccount.isFreeTier
+        );
         if (maybeFreeTierAccount) {
-          this.setState(prevState => fp.set(
-            ['workspace', 'billingAccountName'],
-            maybeFreeTierAccount.name,
-            prevState));
+          this.setState((prevState) =>
+            fp.set(
+              ['workspace', 'billingAccountName'],
+              maybeFreeTierAccount.name,
+              prevState
+            )
+          );
         }
       } else if (this.isMode(WorkspaceEditMode.Edit)) {
-        const fetchedBillingInfo = await getBillingAccountInfo(this.props.workspace.googleProject);
-        if (!displayBillingAccounts.find(billingAccount => billingAccount.name === fetchedBillingInfo.billingAccountName)) {
+        const fetchedBillingInfo = await getBillingAccountInfo(
+          this.props.workspace.googleProject
+        );
+        if (
+          !displayBillingAccounts.find(
+            (billingAccount) =>
+              billingAccount.name === fetchedBillingInfo.billingAccountName
+          )
+        ) {
           // If the user has owner access on the workspace but does not have access to the billing account
           // that it is attached to, keep the server's current value for billingAccountName and add a shim
           // entry into billingAccounts so the dropdown entry is not empty.
@@ -401,10 +495,13 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
             name: this.props.workspace.billingAccountName,
             displayName: 'User Provided Billing Account',
             isFreeTier: false,
-            isOpen: true
+            isOpen: true,
           });
 
-          if (fetchedBillingInfo.billingAccountName !== this.props.workspace.billingAccountName) {
+          if (
+            fetchedBillingInfo.billingAccountName !==
+            this.props.workspace.billingAccountName
+          ) {
             // This should never happen but it means the database is out of sync with Google
             // and does not have the correct billing account stored.
             // We cannot send over the correct billing account info since the current user
@@ -412,25 +509,31 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
 
             reportError({
               name: 'Out of date billing account name',
-              message: `Workspace ${this.props.workspace.namespace} has an out of date billing account name. ` +
+              message:
+                `Workspace ${this.props.workspace.namespace} has an out of date billing account name. ` +
                 `Stored value is ${this.props.workspace.billingAccountName}. ` +
-                `True value is ${fetchedBillingInfo.billingAccountName}`
+                `True value is ${fetchedBillingInfo.billingAccountName}`,
             });
           }
         } else {
           // Otherwise, use this as an opportunity to sync the fetched billing account name from
           // the source of truth, Google
-          this.setState(prevState => fp.set(
-            ['workspace', 'billingAccountName'], fetchedBillingInfo.billingAccountName, prevState));
+          this.setState((prevState) =>
+            fp.set(
+              ['workspace', 'billingAccountName'],
+              fetchedBillingInfo.billingAccountName,
+              prevState
+            )
+          );
         }
       }
-      this.setState({billingAccounts: displayBillingAccounts});
-      this.setState({fetchBillingAccountLoading: false});
-      this.setState({billingAccountFetched: true});
+      this.setState({ billingAccounts: displayBillingAccounts });
+      this.setState({ fetchBillingAccountLoading: false });
+      this.setState({ billingAccountFetched: true });
     }
 
     async requestBillingScopeThenFetchBillingAccount() {
-      if(!this.state.billingAccountFetched) {
+      if (!this.state.billingAccountFetched) {
         await ensureBillingScope();
         await this.fetchBillingAccounts();
       }
@@ -467,7 +570,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
           reviewRequested: undefined,
           socialBehavioral: false,
           reasonForAllOfUs: '',
-        }
+        },
       };
     }
 
@@ -481,9 +584,16 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
      */
     initializeWorkspaceState(): Workspace {
       // create a new Workspace from scratch or copy the props into a new object so our modifications here don't affect them
-      const workspace: Workspace = this.isMode(WorkspaceEditMode.Create) ? this.createWorkspace() : {...this.props.workspace};
+      const workspace: Workspace = this.isMode(WorkspaceEditMode.Create)
+        ? this.createWorkspace()
+        : { ...this.props.workspace };
 
-      if (!fp.includes(DisseminateResearchEnum.OTHER, workspace.researchPurpose.disseminateResearchFindingList)) {
+      if (
+        !fp.includes(
+          DisseminateResearchEnum.OTHER,
+          workspace.researchPurpose.disseminateResearchFindingList
+        )
+      ) {
         workspace.researchPurpose.otherDisseminateResearchFindings = '';
       }
 
@@ -505,8 +615,14 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
 
       // We preselect the default CDR version when a new workspace is being
       // created (via create or duplicate)
-      if (this.isMode(WorkspaceEditMode.Create) || this.isMode(WorkspaceEditMode.Duplicate)) {
-        const cdrVersion = getDefaultCdrVersionForTier(workspace.accessTierShortName, this.props.cdrVersionTiersResponse);
+      if (
+        this.isMode(WorkspaceEditMode.Create) ||
+        this.isMode(WorkspaceEditMode.Duplicate)
+      ) {
+        const cdrVersion = getDefaultCdrVersionForTier(
+          workspace.accessTierShortName,
+          this.props.cdrVersionTiersResponse
+        );
         workspace.cdrVersionId = cdrVersion.cdrVersionId;
       }
 
@@ -533,15 +649,24 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
     }
 
     researchPurposeCategoriesSelected(researchPurpose: ResearchPurpose) {
-      return researchPurpose.ancestry || researchPurpose.controlSet ||
-        researchPurpose.diseaseFocusedResearch || researchPurpose.ethics ||
-        researchPurpose.drugDevelopment || researchPurpose.methodsDevelopment ||
-        researchPurpose.populationHealth || researchPurpose.socialBehavioral;
+      return (
+        researchPurpose.ancestry ||
+        researchPurpose.controlSet ||
+        researchPurpose.diseaseFocusedResearch ||
+        researchPurpose.ethics ||
+        researchPurpose.drugDevelopment ||
+        researchPurpose.methodsDevelopment ||
+        researchPurpose.populationHealth ||
+        researchPurpose.socialBehavioral
+      );
     }
 
     getLiveCdrVersionsForTier(accessTierShortName: string): Array<CdrVersion> {
-      const versionsForTier = this.getAllCdrVersionsForTier(accessTierShortName);
-      const liveCdrVersions = versionsForTier.filter(cdr => cdr.archivalStatus === ArchivalStatus.LIVE);
+      const versionsForTier =
+        this.getAllCdrVersionsForTier(accessTierShortName);
+      const liveCdrVersions = versionsForTier.filter(
+        (cdr) => cdr.archivalStatus === ArchivalStatus.LIVE
+      );
       if (liveCdrVersions.length === 0) {
         throw Error('no live CDR versions were found');
       }
@@ -550,7 +675,10 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
     }
 
     getAllCdrVersionsForTier(accessTierShortName: string): Array<CdrVersion> {
-      return getCdrVersionTier(accessTierShortName, this.props.cdrVersionTiersResponse).versions;
+      return getCdrVersionTier(
+        accessTierShortName,
+        this.props.cdrVersionTiersResponse
+      ).versions;
     }
 
     makeDiseaseInput(): React.ReactNode {
@@ -562,89 +690,136 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
           value={this.state.workspace.researchPurpose.diseaseOfFocus}
           onSearch={getDiseaseNames}
           tooltip='You must select disease focused research to enter a disease of focus'
-          onChange={(disease) => this.setState(fp.set([
-            'workspace',
-            'researchPurpose',
-            'diseaseOfFocus'
-          ], disease))}/>
+          onChange={(disease) =>
+            this.setState(
+              fp.set(
+                ['workspace', 'researchPurpose', 'diseaseOfFocus'],
+                disease
+              )
+            )
+          }
+        />
       );
     }
 
     openContactWidget() {
-      const {profileState: {profile: {contactEmail, familyName, givenName, username}}} = this.props;
+      const {
+        profileState: {
+          profile: { contactEmail, familyName, givenName, username },
+        },
+      } = this.props;
       openZendeskWidget(givenName, familyName, username, contactEmail);
     }
 
     renderBillingDescription() {
-      return <div>
-        The <AouTitle/> provides $300 in initial credits per user. Please refer to
-        <StyledExternalLink href={supportUrls.billing} target='_blank'> &nbsp;this article
-        </StyledExternalLink> to learn more about the initial credit
-        program and how it can be used .
-        <div style={{display: 'inline'}}>Once you have used up your initial credits, you can either select a shared billing account or
-          create a new one using either Google Cloud Platform or a Google billing partner.
-          Please note: If creating a billing account via a Google billing partner,
-          it may take a few days to show up in the <b>Select account</b> dropdown.</div>
-      </div>;
+      return (
+        <div>
+          The <AouTitle /> provides $300 in initial credits per user. Please
+          refer to
+          <StyledExternalLink href={supportUrls.billing} target='_blank'>
+            {' '}
+            &nbsp;this article
+          </StyledExternalLink>{' '}
+          to learn more about the initial credit program and how it can be used
+          .
+          <div style={{ display: 'inline' }}>
+            Once you have used up your initial credits, you can either select a
+            shared billing account or create a new one using either Google Cloud
+            Platform or a Google billing partner. Please note: If creating a
+            billing account via a Google billing partner, it may take a few days
+            to show up in the <b>Select account</b> dropdown.
+          </div>
+        </div>
+      );
     }
 
     onResearchPurposeChange(checked: boolean) {
       // If Checkbox is selected expand the research purpose categories
       if (checked) {
-        this.setState({showResearchPurpose: true, selectResearchPurpose: true});
+        this.setState({
+          showResearchPurpose: true,
+          selectResearchPurpose: true,
+        });
       } else {
-        this.setState({selectResearchPurpose: false});
+        this.setState({ selectResearchPurpose: false });
       }
     }
 
     get researchPurposeCheck(): boolean {
       // If any one of the Research Purpose is selected or if the user has explicitly selected the research purpose
-      return this.state.selectResearchPurpose ||
-        this.researchPurposeCategoriesSelected(this.state.workspace.researchPurpose);
+      return (
+        this.state.selectResearchPurpose ||
+        this.researchPurposeCategoriesSelected(
+          this.state.workspace.researchPurpose
+        )
+      );
     }
 
     get iconClass(): string {
-      return this.state.showResearchPurpose ? 'pi pi-angle-down' : 'pi pi-angle-right';
+      return this.state.showResearchPurpose
+        ? 'pi pi-angle-down'
+        : 'pi pi-angle-right';
     }
     /**
      * Creates a form element containing the checkbox, header, and description
      * (plus optional child elements) for each of the "primary purpose of your
      * project" options.
      */
-    makePrimaryPurposeForm(rp: ResearchPurposeItem, index: number): React.ReactNode {
+    makePrimaryPurposeForm(
+      rp: ResearchPurposeItem,
+      index: number
+    ): React.ReactNode {
       let children: React.ReactNode;
       if (rp.shortName === 'diseaseFocusedResearch') {
         children = this.makeDiseaseInput();
       } else if (rp.shortName === 'otherPurpose') {
-        children = <TextArea value={this.state.workspace.researchPurpose.otherPurposeDetails}
-                  onChange={v => this.updateResearchPurpose('otherPurposeDetails', v)}
-                  disabled={!this.state.workspace.researchPurpose.otherPurpose}
-                  data-test-id='otherPrimaryPurposeText'
-                  style={{marginTop: '0.5rem'}}/>;
+        children = (
+          <TextArea
+            value={this.state.workspace.researchPurpose.otherPurposeDetails}
+            onChange={(v) =>
+              this.updateResearchPurpose('otherPurposeDetails', v)
+            }
+            disabled={!this.state.workspace.researchPurpose.otherPurpose}
+            data-test-id='otherPrimaryPurposeText'
+            style={{ marginTop: '0.5rem' }}
+          />
+        );
       }
 
-      return <div key={index} style={styles.categoryRow}>
-        <CheckBox id={rp.uniqueId}
-                  data-test-id={rp.shortName + '-checkbox'}
-                  style={styles.checkboxStyle}
-                  checked={!!this.state.workspace.researchPurpose[rp.shortName]}
-                  onChange={e => this.updatePrimaryPurpose(rp.shortName, e)}/>
-        <FlexColumn style={{marginTop: '-0.2rem'}}>
-          <label style={{...styles.shortDescription, fontSize: 14}} htmlFor={rp.uniqueId}>
-            {rp.shortDescription}
-          </label>
-          <div>
-            <label style={{...styles.longDescription, ...styles.text}}>
-              {rp.longDescription}
+      return (
+        <div key={index} style={styles.categoryRow}>
+          <CheckBox
+            id={rp.uniqueId}
+            data-test-id={rp.shortName + '-checkbox'}
+            style={styles.checkboxStyle}
+            checked={!!this.state.workspace.researchPurpose[rp.shortName]}
+            onChange={(e) => this.updatePrimaryPurpose(rp.shortName, e)}
+          />
+          <FlexColumn style={{ marginTop: '-0.2rem' }}>
+            <label
+              style={{ ...styles.shortDescription, fontSize: 14 }}
+              htmlFor={rp.uniqueId}
+            >
+              {rp.shortDescription}
             </label>
-            {children}
-          </div>
-        </FlexColumn>
-      </div>;
+            <div>
+              <label style={{ ...styles.longDescription, ...styles.text }}>
+                {rp.longDescription}
+              </label>
+              {children}
+            </div>
+          </FlexColumn>
+        </div>
+      );
     }
 
     updateOtherDisseminateResearch(value) {
-      this.setState(fp.set(['workspace', 'researchPurpose', 'otherDisseminateResearchFindings'], value));
+      this.setState(
+        fp.set(
+          ['workspace', 'researchPurpose', 'otherDisseminateResearchFindings'],
+          value
+        )
+      );
     }
     /**
      * Creates a form element containing the checkbox, header, and description
@@ -653,129 +828,193 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
     makeDisseminateForm(rp, index): React.ReactNode {
       let children: React.ReactNode;
       if (rp.label === 'Other') {
-        children = <TextArea value={this.state.workspace.researchPurpose.otherDisseminateResearchFindings}
-                             onChange={v => this.updateOtherDisseminateResearch(v)}
-                             placeholder={'Specify the name of the forum (journal, scientific conference, blog etc.)' +
-                             ' through which you will disseminate your findings, if available.'}
-                             data-test-id='otherDisseminateResearch-text'
-                             disabled={!this.disseminateCheckboxSelected(DisseminateResearchEnum.OTHER)}
-                             style={{marginTop: '0.5rem', width: '16rem'}}/>;
+        children = (
+          <TextArea
+            value={
+              this.state.workspace.researchPurpose
+                .otherDisseminateResearchFindings
+            }
+            onChange={(v) => this.updateOtherDisseminateResearch(v)}
+            placeholder={
+              'Specify the name of the forum (journal, scientific conference, blog etc.)' +
+              ' through which you will disseminate your findings, if available.'
+            }
+            data-test-id='otherDisseminateResearch-text'
+            disabled={
+              !this.disseminateCheckboxSelected(DisseminateResearchEnum.OTHER)
+            }
+            style={{ marginTop: '0.5rem', width: '16rem' }}
+          />
+        );
       }
 
-      return <div key={index} style={styles.categoryRow}>
-        <CheckBox style={styles.checkboxStyle}
-                  data-test-id={index + '-checkbox'}
-                  checked={this.disseminateCheckboxSelected(rp.shortName)}
-                  onChange={e => this.updateAttribute('disseminateResearchFindingList', rp.shortName, e)}/>
-        <FlexColumn style={{marginTop: '-0.2rem'}}>
-          <label style={styles.text}>
-            {rp.label}
-          </label>
-          {children}
-        </FlexColumn>
-      </div>;
+      return (
+        <div key={index} style={styles.categoryRow}>
+          <CheckBox
+            style={styles.checkboxStyle}
+            data-test-id={index + '-checkbox'}
+            checked={this.disseminateCheckboxSelected(rp.shortName)}
+            onChange={(e) =>
+              this.updateAttribute(
+                'disseminateResearchFindingList',
+                rp.shortName,
+                e
+              )
+            }
+          />
+          <FlexColumn style={{ marginTop: '-0.2rem' }}>
+            <label style={styles.text}>{rp.label}</label>
+            {children}
+          </FlexColumn>
+        </div>
+      );
     }
     /**
      * Creates the form element for each of the "focus on specific populations"
      * options.
      */
     makeSpecificPopulationForm(item: SpecificPopulationItem): React.ReactNode {
-      return <div key={item.label}>
-        <div style={{fontWeight: 'bold', marginBottom: '0.3rem'}}>{item.label} *</div>
-        {item.subCategory.map((sub, index) =>
-            <FlexRow key={sub.label} style={{...styles.categoryRow, paddingTop: '0rem'}}>
+      return (
+        <div key={item.label}>
+          <div style={{ fontWeight: 'bold', marginBottom: '0.3rem' }}>
+            {item.label} *
+          </div>
+          {item.subCategory.map((sub, index) => (
+            <FlexRow
+              key={sub.label}
+              style={{ ...styles.categoryRow, paddingTop: '0rem' }}
+            >
               <CheckBox
-                  manageOwnState={false}
-                  wrapperStyle={styles.checkboxRow}
-                  data-test-id={sub.shortName + '-checkbox'}
-                  style={{...styles.checkboxStyle, marginTop: '0.1rem'}}
-                  key={sub.label}
-                  checked={this.specificPopulationCheckboxSelected(sub.shortName)}
-                  onChange={v => this.updateSpecificPopulation(sub.shortName, v)}
-                  disabled={!this.state.populationChecked}/>
+                manageOwnState={false}
+                wrapperStyle={styles.checkboxRow}
+                data-test-id={sub.shortName + '-checkbox'}
+                style={{ ...styles.checkboxStyle, marginTop: '0.1rem' }}
+                key={sub.label}
+                checked={this.specificPopulationCheckboxSelected(sub.shortName)}
+                onChange={(v) =>
+                  this.updateSpecificPopulation(sub.shortName, v)
+                }
+                disabled={!this.state.populationChecked}
+              />
               <FlexColumn>
-                <label style={styles.text}>
-                  {sub.label}
-                </label>
+                <label style={styles.text}>{sub.label}</label>
               </FlexColumn>
-            </FlexRow>)}
-      </div>;
+            </FlexRow>
+          ))}
+        </div>
+      );
     }
 
     makeOutcomingResearchForm(item, index): React.ReactNode {
-      return <div key={index} style={{...styles.categoryRow, paddingTop: '0rem'}}>
-        <CheckBox
+      return (
+        <div key={index} style={{ ...styles.categoryRow, paddingTop: '0rem' }}>
+          <CheckBox
             style={styles.checkboxStyle}
             key={item.label}
             checked={this.researchOutcomeCheckboxSelected(item.shortName)}
-            onChange={v => this.updateAttribute('researchOutcomeList', item.shortName, v)}
-        />
-        <FlexColumn style={{marginTop: '-0.2rem'}}>
-          <label style={styles.text}>
-            {item.label}
-          </label>
-        </FlexColumn>
-      </div>;
+            onChange={(v) =>
+              this.updateAttribute('researchOutcomeList', item.shortName, v)
+            }
+          />
+          <FlexColumn style={{ marginTop: '-0.2rem' }}>
+            <label style={styles.text}>{item.label}</label>
+          </FlexColumn>
+        </div>
+      );
     }
 
     renderHeader() {
       // use workspace name from props instead of state here
       // because it's a record of the initial value
-      const {workspace, workspaceEditMode} = this.props;
+      const { workspace, workspaceEditMode } = this.props;
       switch (workspaceEditMode) {
         case WorkspaceEditMode.Create:
           return 'Create a new workspace';
         case WorkspaceEditMode.Edit:
-          return 'Edit workspace \"' + workspace.name + '\"';
+          return 'Edit workspace "' + workspace.name + '"';
         case WorkspaceEditMode.Duplicate:
-          return 'Duplicate workspace \"' + workspace.name + '\"';
+          return 'Duplicate workspace "' + workspace.name + '"';
       }
     }
 
     renderButtonText() {
       switch (this.props.workspaceEditMode) {
-        case WorkspaceEditMode.Create: return 'Create Workspace';
-        case WorkspaceEditMode.Edit: return 'Update Workspace';
-        case WorkspaceEditMode.Duplicate: return 'Duplicate Workspace';
+        case WorkspaceEditMode.Create:
+          return 'Create Workspace';
+        case WorkspaceEditMode.Edit:
+          return 'Update Workspace';
+        case WorkspaceEditMode.Duplicate:
+          return 'Duplicate Workspace';
       }
     }
 
     get primaryPurposeIsSelected() {
       const rp = this.state.workspace.researchPurpose;
-      return rp.ancestry || rp.commercialPurpose || rp.controlSet ||
-          rp.diseaseFocusedResearch || rp.ethics || rp.drugDevelopment || rp.educational ||
-          rp.methodsDevelopment || rp.otherPurpose || rp.populationHealth || rp.socialBehavioral;
+      return (
+        rp.ancestry ||
+        rp.commercialPurpose ||
+        rp.controlSet ||
+        rp.diseaseFocusedResearch ||
+        rp.ethics ||
+        rp.drugDevelopment ||
+        rp.educational ||
+        rp.methodsDevelopment ||
+        rp.otherPurpose ||
+        rp.populationHealth ||
+        rp.socialBehavioral
+      );
     }
 
     updatePrimaryPurpose(category, value) {
       this.updateResearchPurpose(category, value);
-      if (!value && !this.researchPurposeCategoriesSelected(this.state.workspace.researchPurpose)) {
+      if (
+        !value &&
+        !this.researchPurposeCategoriesSelected(
+          this.state.workspace.researchPurpose
+        )
+      ) {
         // If all research purpose cateogries are unselected un check the Research Purpose checkbox
-        this.setState({selectResearchPurpose: false});
+        this.setState({ selectResearchPurpose: false });
       }
-
     }
 
     updateResearchPurpose(category, value) {
       if (category === 'population' && !value) {
-        this.setState(fp.set(['workspace', 'researchPurpose', 'populationDetails'], []));
+        this.setState(
+          fp.set(['workspace', 'researchPurpose', 'populationDetails'], [])
+        );
       }
       this.setState(fp.set(['workspace', 'researchPurpose', category], value));
     }
 
     updateAttribute(attribute, populationDetails, value) {
-      const selectedPopulations = fp.get(['workspace', 'researchPurpose' , attribute], this.state);
+      const selectedPopulations = fp.get(
+        ['workspace', 'researchPurpose', attribute],
+        this.state
+      );
       if (value) {
         if (!!selectedPopulations) {
-          this.setState(fp.set(['workspace', 'researchPurpose', attribute],
-            selectedPopulations.concat([populationDetails])));
+          this.setState(
+            fp.set(
+              ['workspace', 'researchPurpose', attribute],
+              selectedPopulations.concat([populationDetails])
+            )
+          );
         } else {
-          this.setState(fp.set(['workspace', 'researchPurpose', attribute],
-              [populationDetails]));
+          this.setState(
+            fp.set(
+              ['workspace', 'researchPurpose', attribute],
+              [populationDetails]
+            )
+          );
         }
       } else {
-        this.setState(fp.set(['workspace', 'researchPurpose', attribute],
-          selectedPopulations.filter(v => v !== populationDetails)));
+        this.setState(
+          fp.set(
+            ['workspace', 'researchPurpose', attribute],
+            selectedPopulations.filter((v) => v !== populationDetails)
+          )
+        );
       }
     }
 
@@ -783,16 +1022,31 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
       this.updateAttribute('populationDetails', populationDetails, value);
     }
 
-    specificPopulationCheckboxSelected(populationEnum: SpecificPopulationEnum): boolean {
-      return fp.includes(populationEnum, this.state.workspace.researchPurpose.populationDetails);
+    specificPopulationCheckboxSelected(
+      populationEnum: SpecificPopulationEnum
+    ): boolean {
+      return fp.includes(
+        populationEnum,
+        this.state.workspace.researchPurpose.populationDetails
+      );
     }
 
-    disseminateCheckboxSelected(disseminateEnum: DisseminateResearchEnum): boolean {
-      return fp.includes(disseminateEnum, this.state.workspace.researchPurpose.disseminateResearchFindingList);
+    disseminateCheckboxSelected(
+      disseminateEnum: DisseminateResearchEnum
+    ): boolean {
+      return fp.includes(
+        disseminateEnum,
+        this.state.workspace.researchPurpose.disseminateResearchFindingList
+      );
     }
 
-    researchOutcomeCheckboxSelected(researchOutcomeEnum: ResearchOutcomeEnum): boolean {
-      return fp.includes(researchOutcomeEnum, this.state.workspace.researchPurpose.researchOutcomeList);
+    researchOutcomeCheckboxSelected(
+      researchOutcomeEnum: ResearchOutcomeEnum
+    ): boolean {
+      return fp.includes(
+        researchOutcomeEnum,
+        this.state.workspace.researchPurpose.researchOutcomeList
+      );
     }
 
     onSaveClick() {
@@ -809,36 +1063,51 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
 
     async saveWorkspace() {
       try {
-        this.setState({loading: true});
+        this.setState({ loading: true });
         let workspace = this.state.workspace;
         if (!this.state.populationChecked) {
           workspace.researchPurpose.populationDetails = [];
         }
 
         if (this.isMode(WorkspaceEditMode.Create)) {
-          workspace =
-            await workspacesApi().createWorkspace(this.state.workspace);
+          workspace = await workspacesApi().createWorkspace(
+            this.state.workspace
+          );
         } else if (this.isMode(WorkspaceEditMode.Duplicate)) {
           const cloneWorkspace = await workspacesApi().cloneWorkspace(
-            this.props.workspace.namespace, this.props.workspace.id,
+            this.props.workspace.namespace,
+            this.props.workspace.id,
             {
               includeUserRoles: this.state.cloneUserRole,
-              workspace: this.state.workspace
-            });
+              workspace: this.state.workspace,
+            }
+          );
           workspace = cloneWorkspace.workspace;
         } else {
           workspace.researchPurpose.needsReviewPrompt = false;
-          workspace = await workspacesApi()
-              .updateWorkspace(this.state.workspace.namespace, this.state.workspace.id,
-                  {workspace: this.state.workspace});
+          workspace = await workspacesApi().updateWorkspace(
+            this.state.workspace.namespace,
+            this.state.workspace.id,
+            { workspace: this.state.workspace }
+          );
           // TODO: Investigate removing this GET call, the response from Update should suffice here.
           await workspacesApi()
-            .getWorkspace(this.state.workspace.namespace, this.state.workspace.id)
-            .then(ws => currentWorkspaceStore.next({
-              ...ws.workspace,
-              accessLevel: ws.accessLevel
-            }));
-          this.props.navigate(['workspaces', workspace.namespace, workspace.id, 'data']);
+            .getWorkspace(
+              this.state.workspace.namespace,
+              this.state.workspace.id
+            )
+            .then((ws) =>
+              currentWorkspaceStore.next({
+                ...ws.workspace,
+                accessLevel: ws.accessLevel,
+              })
+            );
+          this.props.navigate([
+            'workspaces',
+            workspace.namespace,
+            workspace.id,
+            'data',
+          ]);
           return;
         }
 
@@ -846,29 +1115,42 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
         // in this case is to paper over Sam consistency issues on initial creation (see RW-2818).
         let accessLevel = null;
         let pollTimedOut = false;
-        setTimeout(() => pollTimedOut = true, NEW_ACL_DELAY_POLL_TIMEOUT_MS);
+        setTimeout(() => (pollTimedOut = true), NEW_ACL_DELAY_POLL_TIMEOUT_MS);
         while (!pollTimedOut) {
-          ({workspace, accessLevel} = await workspacesApi().getWorkspace(workspace.namespace, workspace.id));
+          ({ workspace, accessLevel } = await workspacesApi().getWorkspace(
+            workspace.namespace,
+            workspace.id
+          ));
           if (accessLevel === WorkspaceAccessLevel.OWNER) {
             break;
           }
-          await new Promise((accept) => setTimeout(accept, NEW_ACL_DELAY_POLL_INTERVAL_MS));
+          await new Promise((accept) =>
+            setTimeout(accept, NEW_ACL_DELAY_POLL_INTERVAL_MS)
+          );
         }
 
         const navigateToWorkspace = () => {
-          this.props.navigate(['workspaces', workspace.namespace, workspace.id, 'data']);
-        }
+          this.props.navigate([
+            'workspaces',
+            workspace.namespace,
+            workspace.id,
+            'data',
+          ]);
+        };
         if (accessLevel !== WorkspaceAccessLevel.OWNER) {
-          reportError(new Error(
-            `ACLs failed to propagate for workspace ${workspace.namespace}/${workspace.id}` +
-            ` accessLevel: ${accessLevel}`));
+          reportError(
+            new Error(
+              `ACLs failed to propagate for workspace ${workspace.namespace}/${workspace.id}` +
+                ` accessLevel: ${accessLevel}`
+            )
+          );
           // We intentionally do not preload the created workspace via nextWorkspaceWarmupStore in
           // this situation. This forces a workspace fetch on navigation, which is desired as ACLs
           // might have finally propagated by the time the navigate button is clicked.
           this.setState({
             loading: false,
             workspaceNewAclDelayed: true,
-            workspaceNewAclDelayedContinueFn: navigateToWorkspace
+            workspaceNewAclDelayedContinueFn: navigateToWorkspace,
           });
           return;
         }
@@ -876,29 +1158,35 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
         // Preload the newly created workspace to avoid a redundant GET on the following navigate.
         // This is also important for guarding against the ACL delay issue, as we have observed
         // that even after confirming OWNER access, subsequent calls to GET may still yield NOACCESS.
-        nextWorkspaceWarmupStore.next({...workspace, accessLevel});
+        nextWorkspaceWarmupStore.next({ ...workspace, accessLevel });
         navigateToWorkspace();
-
       } catch (error) {
         console.log(error);
-        this.setState({loading: false});
+        this.setState({ loading: false });
         if (error.statusCode === 409) {
-          this.setState({workspaceCreationConflictError: true});
+          this.setState({ workspaceCreationConflictError: true });
         } else {
           let errorMsg;
           if (error.statusCode === 429) {
-            errorMsg = 'Server is overloaded. Please try again in a few minutes.';
-          } else if (error.message && error.message.includes('billing account is closed')) {
+            errorMsg =
+              'Server is overloaded. Please try again in a few minutes.';
+          } else if (
+            error.message &&
+            error.message.includes('billing account is closed')
+          ) {
             errorMsg = error.message;
           } else {
             errorMsg = `Could not
-            ${this.props.workspaceEditMode === WorkspaceEditMode.Create ?
-                ' create ' : ' update '} workspace.`;
+            ${
+              this.props.workspaceEditMode === WorkspaceEditMode.Create
+                ? ' create '
+                : ' update '
+            } workspace.`;
           }
 
           this.setState({
             workspaceCreationError: true,
-            workspaceCreationErrorMessage: errorMsg
+            workspaceCreationErrorMessage: errorMsg,
           });
         }
       }
@@ -906,8 +1194,8 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
 
     resetWorkspaceEditor() {
       this.setState({
-        workspaceCreationError : false,
-        workspaceCreationConflictError : false
+        workspaceCreationError: false,
+        workspaceCreationConflictError: false,
       });
     }
 
@@ -916,10 +1204,10 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
     }
 
     buildBillingAccountOptions() {
-      const options = this.state.billingAccounts.map(a => ({
+      const options = this.state.billingAccounts.map((a) => ({
         label: a.displayName,
         value: a.name,
-        disabled: !a.isOpen
+        disabled: !a.isOpen,
       }));
       return options;
     }
@@ -927,11 +1215,13 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
     // are we currently performing a CDR Version Upgrade?
     // i.e. a Duplication from a workspace with an older CDR Version to the default version
     isCdrVersionUpgrade() {
-      const {workspace: srcWorkspace} = this.props;
-      const {workspace: destWorkspace} = this.state;
-      return this.isMode(WorkspaceEditMode.Duplicate) &&
-          srcWorkspace.cdrVersionId !== destWorkspace.cdrVersionId &&
-          hasDefaultCdrVersion(destWorkspace, this.props.cdrVersionTiersResponse);
+      const { workspace: srcWorkspace } = this.props;
+      const { workspace: destWorkspace } = this.state;
+      return (
+        this.isMode(WorkspaceEditMode.Duplicate) &&
+        srcWorkspace.cdrVersionId !== destWorkspace.cdrVersionId &&
+        hasDefaultCdrVersion(destWorkspace, this.props.cdrVersionTiersResponse)
+      );
     }
 
     /**
@@ -957,9 +1247,9 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
             populationDetails,
             scientificApproach,
             researchOutcomeList,
-            reviewRequested
-          }
-        }
+            reviewRequested,
+          },
+        },
       } = this.state;
       let values: object = {
         name,
@@ -971,18 +1261,18 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
         scientificApproach,
         researchOutcomeList,
         disseminateResearchFindingList,
-        'primaryPurpose': this.primaryPurposeIsSelected
+        primaryPurpose: this.primaryPurposeIsSelected,
       };
 
       const requiredStringWithMaxLength = (maximum: number, prefix = '') => ({
         presence: {
           allowEmpty: false,
-          message: `${prefix} cannot be blank`
+          message: `${prefix} cannot be blank`,
         },
         length: {
           maximum,
-          tooLong: `${prefix} cannot exceed %{count} characters`
-        }
+          tooLong: `${prefix} cannot exceed %{count} characters`,
+        },
       });
 
       // TODO: This validation spec should include error messages which get
@@ -998,38 +1288,54 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
         anticipatedFindings: requiredStringWithMaxLength(1000),
         reviewRequested: { presence: true },
         scientificApproach: requiredStringWithMaxLength(1000),
-        researchOutcomeList: { presence: {allowEmpty: false} },
-        disseminateResearchFindingList: { presence: {allowEmpty: false} },
-        primaryPurpose: { truthiness: true }
+        researchOutcomeList: { presence: { allowEmpty: false } },
+        disseminateResearchFindingList: { presence: { allowEmpty: false } },
+        primaryPurpose: { truthiness: true },
       };
 
       // Conditionally include optional fields for validation.
       if (otherPurpose) {
-        values = {...values, otherPurposeDetails};
-        constraints['otherPurposeDetails'] = requiredStringWithMaxLength(500, 'Other primary purpose');
+        values = { ...values, otherPurposeDetails };
+        constraints['otherPurposeDetails'] = requiredStringWithMaxLength(
+          500,
+          'Other primary purpose'
+        );
       }
       if (populationChecked) {
-        values = {...values, populationDetails};
+        values = { ...values, populationDetails };
         constraints['populationDetails'] = {
-          presence: true
+          presence: true,
         };
       }
-      if (populationDetails &&
-          populationDetails.includes(SpecificPopulationEnum.OTHER)) {
-        values = {...values, otherPopulationDetails};
-        constraints['otherPopulationDetails'] = requiredStringWithMaxLength(100, 'Other Specific Population');
+      if (
+        populationDetails &&
+        populationDetails.includes(SpecificPopulationEnum.OTHER)
+      ) {
+        values = { ...values, otherPopulationDetails };
+        constraints['otherPopulationDetails'] = requiredStringWithMaxLength(
+          100,
+          'Other Specific Population'
+        );
       }
       if (diseaseFocusedResearch) {
-        values = {...values, diseaseOfFocus};
-        constraints['diseaseOfFocus'] = requiredStringWithMaxLength(80, 'Disease of Focus');
+        values = { ...values, diseaseOfFocus };
+        constraints['diseaseOfFocus'] = requiredStringWithMaxLength(
+          80,
+          'Disease of Focus'
+        );
       }
-      if (disseminateResearchFindingList &&
-          disseminateResearchFindingList.includes(DisseminateResearchEnum.OTHER)) {
-        values = {...values, otherDisseminateResearchFindings};
+      if (
+        disseminateResearchFindingList &&
+        disseminateResearchFindingList.includes(DisseminateResearchEnum.OTHER)
+      ) {
+        values = { ...values, otherDisseminateResearchFindings };
         constraints['otherDisseminateResearchFindings'] =
-          requiredStringWithMaxLength(100, 'Other methods of disseminating research findings');
+          requiredStringWithMaxLength(
+            100,
+            'Other methods of disseminating research findings'
+          );
       }
-      return validate(values, constraints, {fullMessages: false});
+      return validate(values, constraints, { fullMessages: false });
     }
 
     // show the Access Tiers selection dropdown only when there are multiple tiers to choose from
@@ -1037,19 +1343,28 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
       return environment.accessTiersVisibleToUsers.length > 1;
     }
 
-    onAccessTierChange(v: React.FormEvent<HTMLSelectElement>, profile: Profile, cdrVersionTiersResponse: CdrVersionTiersResponse) {
+    onAccessTierChange(
+      v: React.FormEvent<HTMLSelectElement>,
+      profile: Profile,
+      cdrVersionTiersResponse: CdrVersionTiersResponse
+    ) {
       const selectedTier = v.currentTarget.value;
 
       if (hasTierAccess(profile, selectedTier)) {
-        this.setState(fp.flow(
-          fp.set(['unavailableTier'], ''),
-          fp.set(['workspace', 'accessTierShortName'], selectedTier),
-          fp.set(['cdrVersions'], this.getCdrVersions(selectedTier)),
-          fp.set(['workspace', 'cdrVersionId'],
-            getDefaultCdrVersionForTier(selectedTier, cdrVersionTiersResponse).cdrVersionId)
-        ));
+        this.setState(
+          fp.flow(
+            fp.set(['unavailableTier'], ''),
+            fp.set(['workspace', 'accessTierShortName'], selectedTier),
+            fp.set(['cdrVersions'], this.getCdrVersions(selectedTier)),
+            fp.set(
+              ['workspace', 'cdrVersionId'],
+              getDefaultCdrVersionForTier(selectedTier, cdrVersionTiersResponse)
+                .cdrVersionId
+            )
+          )
+        );
       } else {
-        this.setState({unavailableTier: selectedTier});
+        this.setState({ unavailableTier: selectedTier });
       }
     }
 
@@ -1066,8 +1381,8 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
             scientificApproach,
             otherPopulationDetails,
             populationDetails,
-            reviewRequested
-          }
+            reviewRequested,
+          },
         },
         cdrVersions,
         loading,
@@ -1082,509 +1397,929 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
         workspaceNewAclDelayed,
         unavailableTier,
       } = this.state;
-      const {cdrVersionTiersResponse, profileState: {profile}} = this.props;
-      const {freeTierDollarQuota, freeTierUsage} = profile;
+      const {
+        cdrVersionTiersResponse,
+        profileState: { profile },
+      } = this.props;
+      const { freeTierDollarQuota, freeTierUsage } = profile;
       const initialCreditsBalance = freeTierDollarQuota - freeTierUsage;
 
       const errors = this.validate();
-      return <FadeBox  style={{margin: 'auto', marginTop: '1rem', width: '95.7%'}}>
-        <div style={{width: '1120px'}}>
-          {loading && <SpinnerOverlay overrideStylesOverlay={styles.spinner}/>}
-          {!hasDefaultCdrVersion(this.state.workspace, cdrVersionTiersResponse) && showCdrVersionModal &&
-            <OldCdrVersionModal
-                onCancel={() => {
-                  this.setState(fp.set(['workspace', 'cdrVersionId'],
-                    getDefaultCdrVersionForTier(this.state.workspace.accessTierShortName, cdrVersionTiersResponse).cdrVersionId));
-                  this.setState({showCdrVersionModal: false});
-                }}
-                onContinue={() => this.setState({showCdrVersionModal: false})}
-            />}
-          {this.isCdrVersionUpgrade() && <CdrVersionUpgrade
-              srcWorkspace={this.props.workspace}
-              destWorkspace={this.state.workspace}
-              cdrVersionTiersResponse={cdrVersionTiersResponse}
-          />}
-          {unavailableTier && <UnavailableTierModal
-            accessTierShortName={unavailableTier}
-            onCancel={() => this.setState({unavailableTier: ''})}/>}
-          <WorkspaceEditSection header={this.renderHeader()} tooltip={toolTipText.header}
-                                style={{marginTop: '24px'}} largeHeader
-                                required={!this.isMode(WorkspaceEditMode.Duplicate)}>
-          <FlexRow style={{alignItems: 'baseline'}}>
-            <FlexColumn>
-              <div style={styles.fieldHeader}>
-                Workspace name
-              </div>
-              <TextInput data-test-id='workspace-name'
-                         type='text'
-                         style={styles.textInput}
-                         autoFocus
-                         placeholder='Workspace Name'
-                         value = {name}
-                         onChange={v => this.setState(fp.set(['workspace', 'name'], v))}/>
-            </FlexColumn>
-            {this.enableAccessTierSelection() &&
-              <FlexColumn>
-                <div style={styles.fieldHeader}>
-                  Data access tier
-                  <TooltipTrigger content={toolTipText.tierSelect}>
-                    <InfoIcon style={styles.infoIcon}/>
-                  </TooltipTrigger>
-                </div>
-                <TooltipTrigger
-                  content='To use a different access tier, create a new workspace.'
-                  disabled={this.isMode(WorkspaceEditMode.Create)}>
-                  <div data-test-id='select-access-tier' style={{...styles.select, ...styles.accessTierSpacing}}>
-                    <select style={{...styles.selectInput, ...styles.accessTierSpacing}}
-                            value={accessTierShortName}
-                            onChange={(value) => this.onAccessTierChange(value, profile, cdrVersionTiersResponse)}
-                            disabled={!this.isMode(WorkspaceEditMode.Create)}>
-                      {environment.accessTiersVisibleToUsers.map((shortName, i) => (
-                          <option key={shortName} value={shortName}>
-                            {displayNameForTier(shortName)}
-                          </option>
-                      ))}
-                    </select>
-                  </div>
-                </TooltipTrigger>
-              </FlexColumn>}
-            <FlexColumn>
-              <div style={styles.fieldHeader}>
-                Dataset version
-                <TooltipTrigger content={toolTipText.cdrSelect}>
-                  <InfoIcon style={styles.infoIcon}/>
-                </TooltipTrigger>
-              </div>
-              <TooltipTrigger
-                content='To use a different dataset version, duplicate or create a new workspace.'
-                disabled={!(this.isMode(WorkspaceEditMode.Edit))}>
-              <div data-test-id='select-cdr-version' style={{...styles.select, ...styles.cdrVersionSpacing}}>
-                <select style={{...styles.selectInput, ...styles.cdrVersionSpacing}}
-                  value={cdrVersionId}
-                  onChange={(v: React.FormEvent<HTMLSelectElement>) => {
-                    const selectedVersion = v.currentTarget.value;
-                    this.setState(fp.set(['workspace', 'cdrVersionId'], selectedVersion));
-                    this.setState({showCdrVersionModal: selectedVersion !==
-                          getDefaultCdrVersionForTier(this.state.workspace.accessTierShortName, cdrVersionTiersResponse).cdrVersionId});
+      return (
+        <FadeBox style={{ margin: 'auto', marginTop: '1rem', width: '95.7%' }}>
+          <div style={{ width: '1120px' }}>
+            {loading && (
+              <SpinnerOverlay overrideStylesOverlay={styles.spinner} />
+            )}
+            {!hasDefaultCdrVersion(
+              this.state.workspace,
+              cdrVersionTiersResponse
+            ) &&
+              showCdrVersionModal && (
+                <OldCdrVersionModal
+                  onCancel={() => {
+                    this.setState(
+                      fp.set(
+                        ['workspace', 'cdrVersionId'],
+                        getDefaultCdrVersionForTier(
+                          this.state.workspace.accessTierShortName,
+                          cdrVersionTiersResponse
+                        ).cdrVersionId
+                      )
+                    );
+                    this.setState({ showCdrVersionModal: false });
                   }}
-                  disabled={this.isMode(WorkspaceEditMode.Edit)}>
-                    {cdrVersions.map((version, i) => (
-                      <option key={version.cdrVersionId} value={version.cdrVersionId}>
-                        {version.name}
-                      </option>
-                    ))}
-                </select>
-              </div>
-            </TooltipTrigger>
-            </FlexColumn>
-          </FlexRow>
-        </WorkspaceEditSection>
-        {this.isMode(WorkspaceEditMode.Duplicate) &&
-        <WorkspaceEditSection header='Options for duplicate workspace'>
-          <CheckBox
-            style={styles.checkboxStyle}
-            label='Share workspace with the same set of collaborators'
-            labelStyle={styles.text}
-            onChange={v => this.setState({cloneUserRole: v})}/>
-        </WorkspaceEditSection>
-        }
-        {(!this.isMode(WorkspaceEditMode.Edit) || this.props.workspace.accessLevel === WorkspaceAccessLevel.OWNER) &&
-          <WorkspaceEditSection header={<div><AoU/> billing account</div>}
-                                description={this.renderBillingDescription()} descriptionStyle={{marginLeft: '0rem'}}>
-            {this.state.fetchBillingAccountLoading ? <SpinnerOverlay overrideStylesOverlay={styles.spinner}/> : <div>
-            <div style={styles.fieldHeader}>Select a current billing account</div>
-            <FlexRow>
-              <FlexColumn>
-              <div data-test-id = 'billing-dropdown-div' onClick={() =>  this.requestBillingScopeThenFetchBillingAccount()}>
-                  <Dropdown data-test-id = 'billing-dropdown'
-                      style={{width: '20rem'}}
-                        value={billingAccountName}
-                        options={this.buildBillingAccountOptions()}
-                        disabled={(initialCreditsBalance < 0.0)}
-                        onChange={e => {this.setState(fp.set(['workspace', 'billingAccountName'], e.value));}}/>
-              </div>
-              </FlexColumn>
-              <FlexColumn>
-                <Button type='primary' style={{marginLeft: '20px', fontWeight: 400, height: '38px', width: '220px'}}
-                        onClick={() => this.setState({showCreateBillingAccountModal: true})}>
-                  CREATE BILLING ACCOUNT
-                </Button>
-              </FlexColumn>
-            </FlexRow>
-            </div>}
-          </WorkspaceEditSection>}
-        <hr style={{marginTop: '1rem'}}/>
-        <WorkspaceEditSection header={<FlexRow style={{alignItems: 'center'}}>
-          <div>Research Use Statement Questions</div>
-          <StyledExternalLink href={supportUrls.researchPurpose}
-                              target='_blank' style={{marginLeft: '1rem', fontSize: 14, lineHeight: '18px', fontWeight: 400}}>
-            Best practices for Research Use Statement questions
-          </StyledExternalLink>
-        </FlexRow>} largeHeader={true}
-              description={<div style={styles.researchPurposeDescription}>
-                <div style={{margin: '0.5rem', paddingTop: '0.5rem'}}>{ResearchPurposeDescription}
-              <br/><br/>
-              </div></div>
-            }/>
-
-        {/*Primary purpose */}
-          <WorkspaceEditSection header={researchPurposeQuestions[0].header} publiclyDisplayed={true}
-                                description={researchPurposeQuestions[0].description} index='1.'
-                                indent={true}>
-          <FlexRow>
-            <FlexColumn>
-              <FlexColumn  style={styles.researchPurposeRow}>
-                <FlexRow>
+                  onContinue={() =>
+                    this.setState({ showCdrVersionModal: false })
+                  }
+                />
+              )}
+            {this.isCdrVersionUpgrade() && (
+              <CdrVersionUpgrade
+                srcWorkspace={this.props.workspace}
+                destWorkspace={this.state.workspace}
+                cdrVersionTiersResponse={cdrVersionTiersResponse}
+              />
+            )}
+            {unavailableTier && (
+              <UnavailableTierModal
+                accessTierShortName={unavailableTier}
+                onCancel={() => this.setState({ unavailableTier: '' })}
+              />
+            )}
+            <WorkspaceEditSection
+              header={this.renderHeader()}
+              tooltip={toolTipText.header}
+              style={{ marginTop: '24px' }}
+              largeHeader
+              required={!this.isMode(WorkspaceEditMode.Duplicate)}
+            >
+              <FlexRow style={{ alignItems: 'baseline' }}>
+                <FlexColumn>
+                  <div style={styles.fieldHeader}>Workspace name</div>
+                  <TextInput
+                    data-test-id='workspace-name'
+                    type='text'
+                    style={styles.textInput}
+                    autoFocus
+                    placeholder='Workspace Name'
+                    value={name}
+                    onChange={(v) =>
+                      this.setState(fp.set(['workspace', 'name'], v))
+                    }
+                  />
+                </FlexColumn>
+                {this.enableAccessTierSelection() && (
+                  <FlexColumn>
+                    <div style={styles.fieldHeader}>
+                      Data access tier
+                      <TooltipTrigger content={toolTipText.tierSelect}>
+                        <InfoIcon style={styles.infoIcon} />
+                      </TooltipTrigger>
+                    </div>
+                    <TooltipTrigger
+                      content='To use a different access tier, create a new workspace.'
+                      disabled={this.isMode(WorkspaceEditMode.Create)}
+                    >
+                      <div
+                        data-test-id='select-access-tier'
+                        style={{
+                          ...styles.select,
+                          ...styles.accessTierSpacing,
+                        }}
+                      >
+                        <select
+                          style={{
+                            ...styles.selectInput,
+                            ...styles.accessTierSpacing,
+                          }}
+                          value={accessTierShortName}
+                          onChange={(value) =>
+                            this.onAccessTierChange(
+                              value,
+                              profile,
+                              cdrVersionTiersResponse
+                            )
+                          }
+                          disabled={!this.isMode(WorkspaceEditMode.Create)}
+                        >
+                          {environment.accessTiersVisibleToUsers.map(
+                            (shortName, i) => (
+                              <option key={shortName} value={shortName}>
+                                {displayNameForTier(shortName)}
+                              </option>
+                            )
+                          )}
+                        </select>
+                      </div>
+                    </TooltipTrigger>
+                  </FlexColumn>
+                )}
+                <FlexColumn>
+                  <div style={styles.fieldHeader}>
+                    Dataset version
+                    <TooltipTrigger content={toolTipText.cdrSelect}>
+                      <InfoIcon style={styles.infoIcon} />
+                    </TooltipTrigger>
+                  </div>
+                  <TooltipTrigger
+                    content='To use a different dataset version, duplicate or create a new workspace.'
+                    disabled={!this.isMode(WorkspaceEditMode.Edit)}
+                  >
+                    <div
+                      data-test-id='select-cdr-version'
+                      style={{ ...styles.select, ...styles.cdrVersionSpacing }}
+                    >
+                      <select
+                        style={{
+                          ...styles.selectInput,
+                          ...styles.cdrVersionSpacing,
+                        }}
+                        value={cdrVersionId}
+                        onChange={(v: React.FormEvent<HTMLSelectElement>) => {
+                          const selectedVersion = v.currentTarget.value;
+                          this.setState(
+                            fp.set(
+                              ['workspace', 'cdrVersionId'],
+                              selectedVersion
+                            )
+                          );
+                          this.setState({
+                            showCdrVersionModal:
+                              selectedVersion !==
+                              getDefaultCdrVersionForTier(
+                                this.state.workspace.accessTierShortName,
+                                cdrVersionTiersResponse
+                              ).cdrVersionId,
+                          });
+                        }}
+                        disabled={this.isMode(WorkspaceEditMode.Edit)}
+                      >
+                        {cdrVersions.map((version, i) => (
+                          <option
+                            key={version.cdrVersionId}
+                            value={version.cdrVersionId}
+                          >
+                            {version.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </TooltipTrigger>
+                </FlexColumn>
+              </FlexRow>
+            </WorkspaceEditSection>
+            {this.isMode(WorkspaceEditMode.Duplicate) && (
+              <WorkspaceEditSection header='Options for duplicate workspace'>
                 <CheckBox
-                  data-test-id='researchPurpose-checkbox'
-                  manageOwnState={false}
-                  style={{...styles.checkboxStyle, margin: '0.1rem 0.25rem 0 0.6rem'}}
-                  checked={this.researchPurposeCheck}
-                  onChange={v => this.onResearchPurposeChange(v)}/>
-                  <div style={{...styles.shortDescription}}>
-                    <button style={{...styles.shortDescription, border: 'none'}}
-                            data-test-id='research-purpose-button'
-                            onClick={() => this.setState({showResearchPurpose: !showResearchPurpose})}>
-                      <label style={{fontSize: 14}}>Research purpose</label>
-                      <i className={this.iconClass} style={{verticalAlign: 'middle'}}></i>
-                     </button>
+                  style={styles.checkboxStyle}
+                  label='Share workspace with the same set of collaborators'
+                  labelStyle={styles.text}
+                  onChange={(v) => this.setState({ cloneUserRole: v })}
+                />
+              </WorkspaceEditSection>
+            )}
+            {(!this.isMode(WorkspaceEditMode.Edit) ||
+              this.props.workspace.accessLevel ===
+                WorkspaceAccessLevel.OWNER) && (
+              <WorkspaceEditSection
+                header={
+                  <div>
+                    <AoU /> billing account
+                  </div>
+                }
+                description={this.renderBillingDescription()}
+                descriptionStyle={{ marginLeft: '0rem' }}
+              >
+                {this.state.fetchBillingAccountLoading ? (
+                  <SpinnerOverlay overrideStylesOverlay={styles.spinner} />
+                ) : (
+                  <div>
+                    <div style={styles.fieldHeader}>
+                      Select a current billing account
+                    </div>
+                    <FlexRow>
+                      <FlexColumn>
+                        <div
+                          data-test-id='billing-dropdown-div'
+                          onClick={() =>
+                            this.requestBillingScopeThenFetchBillingAccount()
+                          }
+                        >
+                          <Dropdown
+                            data-test-id='billing-dropdown'
+                            style={{ width: '20rem' }}
+                            value={billingAccountName}
+                            options={this.buildBillingAccountOptions()}
+                            disabled={initialCreditsBalance < 0.0}
+                            onChange={(e) => {
+                              this.setState(
+                                fp.set(
+                                  ['workspace', 'billingAccountName'],
+                                  e.value
+                                )
+                              );
+                            }}
+                          />
+                        </div>
+                      </FlexColumn>
+                      <FlexColumn>
+                        <Button
+                          type='primary'
+                          style={{
+                            marginLeft: '20px',
+                            fontWeight: 400,
+                            height: '38px',
+                            width: '220px',
+                          }}
+                          onClick={() =>
+                            this.setState({
+                              showCreateBillingAccountModal: true,
+                            })
+                          }
+                        >
+                          CREATE BILLING ACCOUNT
+                        </Button>
+                      </FlexColumn>
+                    </FlexRow>
+                  </div>
+                )}
+              </WorkspaceEditSection>
+            )}
+            <hr style={{ marginTop: '1rem' }} />
+            <WorkspaceEditSection
+              header={
+                <FlexRow style={{ alignItems: 'center' }}>
+                  <div>Research Use Statement Questions</div>
+                  <StyledExternalLink
+                    href={supportUrls.researchPurpose}
+                    target='_blank'
+                    style={{
+                      marginLeft: '1rem',
+                      fontSize: 14,
+                      lineHeight: '18px',
+                      fontWeight: 400,
+                    }}
+                  >
+                    Best practices for Research Use Statement questions
+                  </StyledExternalLink>
+                </FlexRow>
+              }
+              largeHeader={true}
+              description={
+                <div style={styles.researchPurposeDescription}>
+                  <div style={{ margin: '0.5rem', paddingTop: '0.5rem' }}>
+                    {ResearchPurposeDescription}
+                    <br />
+                    <br />
+                  </div>
+                </div>
+              }
+            />
+
+            {/*Primary purpose */}
+            <WorkspaceEditSection
+              header={researchPurposeQuestions[0].header}
+              publiclyDisplayed={true}
+              description={researchPurposeQuestions[0].description}
+              index='1.'
+              indent={true}
+            >
+              <FlexRow>
+                <FlexColumn>
+                  <FlexColumn style={styles.researchPurposeRow}>
+                    <FlexRow>
+                      <CheckBox
+                        data-test-id='researchPurpose-checkbox'
+                        manageOwnState={false}
+                        style={{
+                          ...styles.checkboxStyle,
+                          margin: '0.1rem 0.25rem 0 0.6rem',
+                        }}
+                        checked={this.researchPurposeCheck}
+                        onChange={(v) => this.onResearchPurposeChange(v)}
+                      />
+                      <div style={{ ...styles.shortDescription }}>
+                        <button
+                          style={{ ...styles.shortDescription, border: 'none' }}
+                          data-test-id='research-purpose-button'
+                          onClick={() =>
+                            this.setState({
+                              showResearchPurpose: !showResearchPurpose,
+                            })
+                          }
+                        >
+                          <label style={{ fontSize: 14 }}>
+                            Research purpose
+                          </label>
+                          <i
+                            className={this.iconClass}
+                            style={{ verticalAlign: 'middle' }}
+                          ></i>
+                        </button>
+                      </div>
+                    </FlexRow>
+                    {showResearchPurpose && (
+                      <FlexColumn data-test-id='research-purpose-categories'>
+                        <div style={{ ...styles.text, marginLeft: '1.9rem' }}>
+                          Choose options below to describe your research purpose
+                        </div>
+                        <div style={{ marginLeft: '2rem' }}>
+                          {ResearchPurposeItems.map((rp, i) =>
+                            this.makePrimaryPurposeForm(rp, i)
+                          )}
+                        </div>
+                      </FlexColumn>
+                    )}
+                  </FlexColumn>
+
+                  {PrimaryPurposeItems.map((rp, i) =>
+                    this.makePrimaryPurposeForm(rp, i)
+                  )}
+                </FlexColumn>
+              </FlexRow>
+            </WorkspaceEditSection>
+
+            <WorkspaceEditSection
+              header={researchPurposeQuestions[1].header}
+              indent={true}
+              publiclyDisplayed={true}
+              description={researchPurposeQuestions[1].description}
+              style={{ width: '48rem' }}
+              index='2.'
+            >
+              <FlexColumn>
+                {/* TextBox: scientific question(s) researcher intend to study Section*/}
+                <WorkspaceResearchSummary
+                  researchPurpose={researchPurposeQuestions[2]}
+                  researchValue={intendedStudy}
+                  onChange={(v) =>
+                    this.updateResearchPurpose('intendedStudy', v.trim())
+                  }
+                  index='2.1'
+                  id='intendedStudyText'
+                />
+
+                {/* TextBox: scientific approaches section*/}
+                <WorkspaceResearchSummary
+                  researchPurpose={researchPurposeQuestions[3]}
+                  researchValue={scientificApproach}
+                  onChange={(v) =>
+                    this.updateResearchPurpose('scientificApproach', v.trim())
+                  }
+                  index='2.2'
+                  id='scientificApproachText'
+                />
+                {/*TextBox: anticipated findings from the study section*/}
+                <WorkspaceResearchSummary
+                  researchPurpose={researchPurposeQuestions[4]}
+                  researchValue={anticipatedFindings}
+                  onChange={(v) =>
+                    this.updateResearchPurpose('anticipatedFindings', v.trim())
+                  }
+                  index='2.3'
+                  id='anticipatedFindingsText'
+                />
+              </FlexColumn>
+            </WorkspaceEditSection>
+
+            {/*disseminate  research Section */}
+            <WorkspaceEditSection
+              header={researchPurposeQuestions[5].header}
+              description={researchPurposeQuestions[5].description}
+              style={{ width: '48rem' }}
+              index='3.'
+            >
+              <FlexRow>
+                <FlexColumn style={styles.flexColumnBy2}>
+                  {disseminateFindings
+                    .slice(0, sliceByHalfLength(disseminateFindings))
+                    .map((rp, i) => this.makeDisseminateForm(rp, rp.shortName))}
+                </FlexColumn>
+                <FlexColumn style={styles.flexColumnBy2}>
+                  {disseminateFindings
+                    .slice(sliceByHalfLength(disseminateFindings))
+                    .map((rp, i) => this.makeDisseminateForm(rp, rp.shortName))}
+                </FlexColumn>
+              </FlexRow>
+            </WorkspaceEditSection>
+
+            {/*Research outcome section*/}
+            <WorkspaceEditSection
+              header={researchPurposeQuestions[6].header}
+              index='4.'
+              description={researchPurposeQuestions[6].description}
+              style={{ width: '48rem' }}
+            >
+              <FlexRow style={{ marginLeft: '1rem' }}>
+                <FlexColumn style={{ flex: '1 1 0' }}>
+                  {researchOutcomes.map((rp, i) =>
+                    this.makeOutcomingResearchForm(rp, i)
+                  )}
+                </FlexColumn>
+              </FlexRow>
+            </WorkspaceEditSection>
+
+            {/*Underrespresented population section*/}
+            <WorkspaceEditSection
+              header={researchPurposeQuestions[7].header}
+              index='5.'
+              indent={true}
+              description={researchPurposeQuestions[7].description}
+              style={{ width: '48rem' }}
+              publiclyDisplayed={true}
+            >
+              <div style={styles.header}>
+                Will your study focus on any historically underrepresented
+                populations?
+              </div>
+              <div>
+                <RadioButton
+                  name='population'
+                  style={{ marginRight: '0.5rem' }}
+                  data-test-id='specific-population-yes'
+                  onChange={(v) => this.setState({ populationChecked: true })}
+                  checked={populationChecked ?? false}
+                />
+                <label style={styles.text}>
+                  Yes, my study will focus on one or more specific
+                  underrepresented populations, either on their own or in
+                  comparison to other groups.
+                </label>
+              </div>
+              <div style={{ ...styles.text, marginLeft: '1.2rem' }}>
+                <strong>If "Yes,"</strong>&nbsp;please indicate your
+                underrepresented population(s) of interest:
+                <FlexRow style={{ flex: '1 1 0', marginTop: '0.5rem' }}>
+                  <FlexColumn>
+                    {SpecificPopulationItems.slice(
+                      0,
+                      sliceByHalfLength(SpecificPopulationItems) + 1
+                    ).map((sp) => this.makeSpecificPopulationForm(sp))}
+                  </FlexColumn>
+                  <FlexColumn>
+                    {SpecificPopulationItems.slice(
+                      sliceByHalfLength(SpecificPopulationItems) + 1
+                    ).map((sp) => this.makeSpecificPopulationForm(sp))}
+                    <CheckBox
+                      wrapperStyle={styles.checkboxRow}
+                      style={styles.checkboxStyle}
+                      data-test-id='other-specialPopulation-checkbox'
+                      label='Other'
+                      labelStyle={{ ...styles.text, fontWeight: 'bold' }}
+                      checked={
+                        !!this.specificPopulationCheckboxSelected(
+                          SpecificPopulationEnum.OTHER
+                        )
+                      }
+                      onChange={(v) =>
+                        this.updateSpecificPopulation(
+                          SpecificPopulationEnum.OTHER,
+                          v
+                        )
+                      }
+                      disabled={!populationChecked}
+                    />
+                    <TextInput
+                      type='text'
+                      autoFocus
+                      placeholder='Please specify'
+                      value={otherPopulationDetails}
+                      disabled={
+                        !fp.includes(
+                          SpecificPopulationEnum.OTHER,
+                          populationDetails
+                        )
+                      }
+                      data-test-id='other-specialPopulation-text'
+                      onChange={(v) =>
+                        this.setState(
+                          fp.set(
+                            [
+                              'workspace',
+                              'researchPurpose',
+                              'otherPopulationDetails',
+                            ],
+                            v.trim()
+                          )
+                        )
+                      }
+                    />
+                  </FlexColumn>
+                </FlexRow>
+                <hr />
+                <FlexRow>
+                  <div style={{ marginRight: '0.2rem' }}>*</div>
+                  <div>
+                    Demographic variables for which data elements have been
+                    altered, partially suppressed, or generalized in the
+                    Registered Tier to protect data privacy. Refer to the Data
+                    Dictionary for details.
                   </div>
                 </FlexRow>
-                  {showResearchPurpose && <FlexColumn data-test-id='research-purpose-categories'>
-                    <div style={{...styles.text, marginLeft: '1.9rem'}}>
-                      Choose options below to describe your research purpose
-                    </div>
-                    <div style={{marginLeft: '2rem'}}>
-                  {ResearchPurposeItems.map(
-                    (rp, i) => this.makePrimaryPurposeForm(rp, i))}
-                  </div></FlexColumn>}
-              </FlexColumn>
-
-              {PrimaryPurposeItems.map((rp, i) => this.makePrimaryPurposeForm(rp, i))}
-            </FlexColumn>
-          </FlexRow>
-        </WorkspaceEditSection>
-
-        <WorkspaceEditSection
-          header={researchPurposeQuestions[1].header} indent={true} publiclyDisplayed={true}
-          description={researchPurposeQuestions[1].description} style={{width: '48rem'}} index='2.'>
-          <FlexColumn>
-            {/* TextBox: scientific question(s) researcher intend to study Section*/}
-            <WorkspaceResearchSummary
-                researchPurpose={researchPurposeQuestions[2]}
-                researchValue={intendedStudy}
-                onChange={v => this.updateResearchPurpose('intendedStudy', v.trim())}
-                index='2.1'
-                id='intendedStudyText'
-            />
-
-            {/* TextBox: scientific approaches section*/}
-            <WorkspaceResearchSummary
-                researchPurpose={researchPurposeQuestions[3]}
-                researchValue={scientificApproach}
-                onChange={v => this.updateResearchPurpose('scientificApproach', v.trim())}
-                index='2.2'
-                id='scientificApproachText'
-            />
-            {/*TextBox: anticipated findings from the study section*/}
-            <WorkspaceResearchSummary
-                researchPurpose={researchPurposeQuestions[4]}
-                researchValue={anticipatedFindings}
-                onChange={v => this.updateResearchPurpose('anticipatedFindings', v.trim())}
-                index='2.3'
-                id='anticipatedFindingsText'
-            />
-          </FlexColumn>
-        </WorkspaceEditSection>
-
-          {/*disseminate  research Section */}
-        <WorkspaceEditSection header={researchPurposeQuestions[5].header}
-                              description={researchPurposeQuestions[5].description} style={{width: '48rem'}} index='3.'>
-          <FlexRow>
-            <FlexColumn style={styles.flexColumnBy2}>
-              {disseminateFindings.slice(0, sliceByHalfLength(disseminateFindings)).map(
-                (rp, i) => this.makeDisseminateForm(rp, rp.shortName))}
-            </FlexColumn>
-            <FlexColumn style={styles.flexColumnBy2}>
-              {disseminateFindings.slice(sliceByHalfLength(disseminateFindings)).map(
-                (rp, i) => this.makeDisseminateForm(rp, rp.shortName))}
-            </FlexColumn>
-          </FlexRow>
-        </WorkspaceEditSection>
-
-          {/*Research outcome section*/}
-          <WorkspaceEditSection header={researchPurposeQuestions[6].header} index='4.'
-                                description={researchPurposeQuestions[6].description}
-                                style={{width: '48rem'}}>
-            <FlexRow style={{marginLeft: '1rem'}}>
-              <FlexColumn style={{flex: '1 1 0'}}>
-                {researchOutcomes.map(
-                  (rp, i) => this.makeOutcomingResearchForm(rp, i))}
-              </FlexColumn>
-            </FlexRow>
-          </WorkspaceEditSection>
-
-          {/*Underrespresented population section*/}
-        <WorkspaceEditSection header={researchPurposeQuestions[7].header} index='5.' indent={true}
-                              description={researchPurposeQuestions[7].description}
-                              style={{width: '48rem'}} publiclyDisplayed={true}>
-          <div style={styles.header}>Will your study focus on any historically underrepresented populations?</div>
-          <div>
-            <RadioButton name='population' style={{marginRight: '0.5rem'}}
-                         data-test-id='specific-population-yes'
-                         onChange={v => this.setState({populationChecked: true})}
-                         checked={populationChecked ?? false}/>
-            <label style={styles.text}>Yes, my study will focus on one or more specific
-              underrepresented populations, either on their own or in comparison to other groups.</label>
-          </div>
-          <div style={{...styles.text, marginLeft: '1.2rem'}}>
-            <strong>If "Yes,"</strong>&nbsp;please indicate your underrepresented population(s) of
-            interest:
-            <FlexRow style={{flex: '1 1 0', marginTop: '0.5rem'}}>
-              <FlexColumn>
-                {SpecificPopulationItems.slice(0, sliceByHalfLength(SpecificPopulationItems) + 1).map(sp =>
-                  this.makeSpecificPopulationForm(sp))}
-              </FlexColumn>
-              <FlexColumn>
-                {SpecificPopulationItems.slice(sliceByHalfLength(SpecificPopulationItems) + 1).map(sp =>
-                  this.makeSpecificPopulationForm(sp))}
-                <CheckBox
-                    wrapperStyle={styles.checkboxRow}
-                    style={styles.checkboxStyle}
-                    data-test-id='other-specialPopulation-checkbox'
-                    label='Other'
-                    labelStyle={{...styles.text, fontWeight: 'bold'}}
-                    checked={!!this.specificPopulationCheckboxSelected(SpecificPopulationEnum.OTHER)}
-                    onChange={v => this.updateSpecificPopulation(SpecificPopulationEnum.OTHER, v)}
-                    disabled={!populationChecked}
+                <hr />
+              </div>
+              <FlexRow style={{ marginTop: '0.5rem' }}>
+                <RadioButton
+                  name='population'
+                  style={{ marginRight: '0.5rem', marginTop: '0.3rem' }}
+                  data-test-id='specific-population-no'
+                  onChange={(v) => this.setState({ populationChecked: false })}
+                  checked={populationChecked === false}
                 />
-                <TextInput type='text' autoFocus placeholder='Please specify'
-                           value={otherPopulationDetails}
-                           disabled={!fp.includes(SpecificPopulationEnum.OTHER, populationDetails)}
-                           data-test-id='other-specialPopulation-text'
-                           onChange={v => this.setState(fp.set(
-                             ['workspace', 'researchPurpose', 'otherPopulationDetails'], v.trim()))}/>
-              </FlexColumn>
-            </FlexRow>
-            <hr/>
-            <FlexRow>
-              <div style={{marginRight: '0.2rem'}}>*</div>
-              <div>Demographic variables for which data elements have been altered, partially
-                suppressed, or generalized in the Registered Tier to protect data privacy. Refer to
-                the Data Dictionary for details.</div>
-            </FlexRow>
+                <label style={styles.text}>
+                  No, my study will not center on underrepresented populations.
+                  I am interested in a diverse sample in general, or I am
+                  focused on populations that have been well represented in
+                  prior research.
+                </label>
+              </FlexRow>
+            </WorkspaceEditSection>
 
-            <hr/>
-          </div>
-          <FlexRow style={{marginTop: '0.5rem'}}>
-            <RadioButton name='population'
-                         style={{marginRight: '0.5rem', marginTop: '0.3rem'}}
-                         data-test-id='specific-population-no'
-                         onChange={v => this.setState({populationChecked: false})}
-                         checked={populationChecked === false}/>
-            <label style={styles.text}>No, my study will not center on underrepresented populations.
-              I am interested in a diverse sample in general, or I am focused on populations that
-              have been well represented in prior research.</label>
-          </FlexRow>
-        </WorkspaceEditSection>
-
-          {/* Request for review section*/}
-        <WorkspaceEditSection header={researchPurposeQuestions[8].header} index='6.' indent={true}>
-          <FlexRow style={styles.text}><div>
-            Any research that focuses on certain population characteristics or&nbsp;
-            <TooltipTrigger content={toolTipTextDemographic} style={{display: 'inline-block'}}>
-              <LinkButton style={{display: 'inline-block'}}>uses
-              demographic variables</LinkButton>
-            </TooltipTrigger>
-            &nbsp;in analyses can result, often unintentionally,
-            in findings that may be misinterpreted or misused by others to foster stigma. While it
-            may not be possible to completely prevent misuse of research for stigmatizing purposes,
-            data users can take important steps to minimize the risk of this happening–taking this
-            step is a condition of your
-            <TooltipTrigger content={toolTipTextDucc}>
-              <LinkButton style={{display: 'inline-block'}}>Data User Code of Conduct agreement.</LinkButton>
-            </TooltipTrigger>
-            &nbsp;If you are concerned that your research could inadvertently stigmatize
-            participants or communities, or if you are unsure, let us know. We encourage you to
-            request a review of your research purpose statement by the <AoU/> Resource Access
-            Board (RAB) as a precaution. The RAB will provide feedback and, if needed, guidance for
-            modifying your research purpose or scope. To learn more, please refer to the&nbsp;
-            <TooltipTrigger content={toolTipTextStigmatization} style={{display: 'inline-block'}}>
-            <LinkButton style={{display: 'inline-block'}}><AoU/> Stigmatizing Research Policy</LinkButton>
-            </TooltipTrigger>. If you
-            request a review, you can expect to receive an initial response within five business days.
-            During the RAB’s review, you may begin working in your workspace.</div>
-          </FlexRow>
-          <FlexRow style={{paddingTop: '0.3rem'}}>
-            <FlexColumn>
-            <label style={{...styles.header, marginBottom: '0.2rem'}}>Would you like to request a
-              review of your research purpose
-              statement by the Resource Access Board?</label>
-            <label style={styles.text}>
-                Note: Your response to this question is private and will not be displayed on the
-              Research Hub.
-            </label>
-              <FlexColumn>
-                <FlexRow>
-                <RadioButton style={{marginTop: '0.2rem'}} name='reviewRequested'
-                             data-test-id='review-request-btn-true'
-                             onChange={() => {
-                               this.updateResearchPurpose('reviewRequested', true);
-                             }}
-                             checked={reviewRequested ?? false}/>
-                <label style={{...styles.text, marginLeft: '0.5rem'}}>Yes, I would like to request
-                  a review of my research purpose.</label>
-                </FlexRow>
-                <FlexRow>
-                <RadioButton style={{marginTop: '0.2rem'}} name='reviewRequested'
-                             data-test-id='review-request-btn-false'
-                             onChange={() => {
-                               this.updateResearchPurpose('reviewRequested', false);
-                             }}
-                             checked={reviewRequested === false}/>
-                <label style={{...styles.text, marginLeft: '0.5rem', marginRight: '3rem'}}>No, I
-                  have no concerns at this time about potential stigmatization based on my study.</label>
-                </FlexRow>
-              </FlexColumn>
-              <label style={{...styles.text, paddingTop: '0.5rem'}}>{RequestForReviewFooter}</label>
-            </FlexColumn>
-          </FlexRow>
-        </WorkspaceEditSection>
-        <div>
-          <FlexRow style={{marginTop: '1rem', marginBottom: '1rem'}}>
-            <Button type='secondary' style={{marginRight: '1rem'}}
-                    onClick = {() => this.cancel()}>
-              Cancel
-            </Button>
-            <TooltipTrigger content={
-              errors && <BulletAlignedUnorderedList>
-                {errors.name && <li>{errors.name}</li>}
-                {errors.billingAccountName && <li>
-                  You must select a billing account</li>}
-                {errors.primaryPurpose && <li> You must choose at least one primary research
-                  purpose (Question 1)</li>}
-                {errors.diseaseOfFocus && <li>{errors.diseaseOfFocus}</li>}
-                {errors.otherPurposeDetails && <li>{errors.otherPurposeDetails}</li>}
-                {errors.intendedStudy && <li> Answer for<i>What are the specific scientific question(s) you intend to study
-                  (Question 2.1)</i> {errors.intendedStudy}</li>}
-                {errors.scientificApproach && <li> Answer for <i>What are the scientific
-                  approaches you plan to use for your study (Question 2.2)</i> {errors.scientificApproach}</li>}
-                {errors.anticipatedFindings && <li> Answer for <i>What are the anticipated findings
-                  from the study? (Question 2.3)</i> {errors.anticipatedFindings}</li>}
-                {errors.disseminateResearchFindingList && <li>
-                  You must specific how you plan to disseminate your research findings (Question 3)</li>}
-                {errors.otherDisseminateResearchFindings && <li>{errors.otherDisseminateResearchFindings}</li>}
-                {errors.researchOutcomeList && <li> You must specify the outcome of the research (Question 4)</li>}
-                {errors.populationChecked && <li>You must pick an answer Population of interest question (Question 5)</li>}
-                {errors.populationDetails && <li> You must specify a population of study (Question 5)</li>}
-                {errors.otherPopulationDetails && <li>{errors.otherPopulationDetails}</li>}
-                {errors.reviewRequested && <li>You must pick an answer for review of stigmatizing research (Question 6)</li>}
-              </BulletAlignedUnorderedList>
-            } disabled={!errors}>
-              <Button type='primary'
-                      onClick={() => this.setState({showConfirmationModal: true})}
-                      disabled={errors || loading || showCdrVersionModal}
-                      data-test-id='workspace-save-btn'>
-                {this.renderButtonText()}
-              </Button>
-            </TooltipTrigger>
-          </FlexRow>
-        </div>
-        {workspaceCreationError &&
-        <Modal>
-          <ModalTitle>Error:</ModalTitle>
-          <ModalBody>
-            { workspaceCreationErrorMessage }
-          </ModalBody>
-          <ModalFooter>
-            <Button onClick = {() => this.cancel()}
-                type='secondary' style={{marginRight: '2rem'}}>
-              Cancel
-              {this.props.workspaceEditMode === WorkspaceEditMode.Create ?
-                ' Creation' : ' Update'}
-                </Button>
-            <Button type='primary' onClick={() => this.resetWorkspaceEditor()}>Keep Editing</Button>
-          </ModalFooter>
-        </Modal>
-        }
-        {showCreateBillingAccountModal &&
-          <CreateBillingAccountModal onClose={() => this.setState({showCreateBillingAccountModal: false})} />}
-        {workspaceCreationConflictError &&
-        <Modal>
-          <ModalTitle>{this.props.workspaceEditMode === WorkspaceEditMode.Create ?
-              'Error: ' : 'Conflicting update:'}</ModalTitle>
-          <ModalBody>
-            {this.props.workspaceEditMode === WorkspaceEditMode.Create ?
-              'You already have a workspace named ' + name +
-              ' Please choose another name' :
-              'Another client has modified this workspace since the beginning of this editing ' +
-              'session. Please reload to avoid overwriting those changes.'}
-          </ModalBody>
-          <ModalFooter>
-            <Button type='secondary' onClick = {() => this.cancel()}
-                    style={{marginRight: '2rem'}}>Cancel Creation</Button>
-            <Button type='primary' onClick={() => this.resetWorkspaceEditor()}>Keep Editing</Button>
-          </ModalFooter>
-        </Modal>
-        }
-        {workspaceNewAclDelayed &&
-        <Modal>
-          <ModalTitle>Workspace permissions delay</ModalTitle>
-          <ModalBody>
-            The permissions for this workspace are currently being set up. You can continue to use
-            this workspace as a 'Reader'. Please refresh the workspace page in a few minutes to be
-            able to create Cohorts, Datasets and Notebooks.
-          </ModalBody>
-          <ModalFooter>
-            <Button type='primary' data-test-id='workspace-acl-delay-btn'
-                    onClick={() => this.state.workspaceNewAclDelayedContinueFn()}>
-              Continue
-            </Button>
-          </ModalFooter>
-        </Modal>
-        }
-        {showConfirmationModal &&
-          <Modal width={500}>
-            <ModalTitle style={{fontSize: '16px', marginBottom: 0}}>
-              {this.renderButtonText()}
-            </ModalTitle>
-            <ModalBody style={{color: colors.primary, lineHeight: '1rem', marginTop: '0.25rem'}}>
-              {loading && <SpinnerOverlay overrideStylesOverlay={styles.spinner}/>}
-              <div>Your responses to these questions:</div>
-              <div style={{margin: '0.25rem 0 0.25rem 1rem'}}>
-                <span style={{fontWeight: 600}}>Primary purpose of your project</span> (Question 1)<br/>
-                <span style={{fontWeight: 600}}>Summary of research purpose</span> (Question 2)<br/>
-                <span style={{fontWeight: 600}}>Population of interest</span> (Question 5)<br/>
-              </div>
-              <div style={{marginBottom: '1rem'}}>
-                Will be
-                <a style={{color: colors.accent}}
-                  href='https://www.researchallofus.org/research-projects-directory/'
-                  target='_blank'> displayed publicly </a>
-                 to inform <AoU/> research participants. Therefore, please verify that you have provided sufficiently detailed
-                 responses in plain language.
-              </div>
-              <div>You can also make changes to your answers after you create your workspace.</div>
-            </ModalBody>
-            <ModalFooter>
-              <Button
+            {/* Request for review section*/}
+            <WorkspaceEditSection
+              header={researchPurposeQuestions[8].header}
+              index='6.'
+              indent={true}
+            >
+              <FlexRow style={styles.text}>
+                <div>
+                  Any research that focuses on certain population
+                  characteristics or&nbsp;
+                  <TooltipTrigger
+                    content={toolTipTextDemographic}
+                    style={{ display: 'inline-block' }}
+                  >
+                    <LinkButton style={{ display: 'inline-block' }}>
+                      uses demographic variables
+                    </LinkButton>
+                  </TooltipTrigger>
+                  &nbsp;in analyses can result, often unintentionally, in
+                  findings that may be misinterpreted or misused by others to
+                  foster stigma. While it may not be possible to completely
+                  prevent misuse of research for stigmatizing purposes, data
+                  users can take important steps to minimize the risk of this
+                  happening–taking this step is a condition of your
+                  <TooltipTrigger content={toolTipTextDucc}>
+                    <LinkButton style={{ display: 'inline-block' }}>
+                      Data User Code of Conduct agreement.
+                    </LinkButton>
+                  </TooltipTrigger>
+                  &nbsp;If you are concerned that your research could
+                  inadvertently stigmatize participants or communities, or if
+                  you are unsure, let us know. We encourage you to request a
+                  review of your research purpose statement by the <AoU />{' '}
+                  Resource Access Board (RAB) as a precaution. The RAB will
+                  provide feedback and, if needed, guidance for modifying your
+                  research purpose or scope. To learn more, please refer to
+                  the&nbsp;
+                  <TooltipTrigger
+                    content={toolTipTextStigmatization}
+                    style={{ display: 'inline-block' }}
+                  >
+                    <LinkButton style={{ display: 'inline-block' }}>
+                      <AoU /> Stigmatizing Research Policy
+                    </LinkButton>
+                  </TooltipTrigger>
+                  . If you request a review, you can expect to receive an
+                  initial response within five business days. During the RAB’s
+                  review, you may begin working in your workspace.
+                </div>
+              </FlexRow>
+              <FlexRow style={{ paddingTop: '0.3rem' }}>
+                <FlexColumn>
+                  <label style={{ ...styles.header, marginBottom: '0.2rem' }}>
+                    Would you like to request a review of your research purpose
+                    statement by the Resource Access Board?
+                  </label>
+                  <label style={styles.text}>
+                    Note: Your response to this question is private and will not
+                    be displayed on the Research Hub.
+                  </label>
+                  <FlexColumn>
+                    <FlexRow>
+                      <RadioButton
+                        style={{ marginTop: '0.2rem' }}
+                        name='reviewRequested'
+                        data-test-id='review-request-btn-true'
+                        onChange={() => {
+                          this.updateResearchPurpose('reviewRequested', true);
+                        }}
+                        checked={reviewRequested ?? false}
+                      />
+                      <label style={{ ...styles.text, marginLeft: '0.5rem' }}>
+                        Yes, I would like to request a review of my research
+                        purpose.
+                      </label>
+                    </FlexRow>
+                    <FlexRow>
+                      <RadioButton
+                        style={{ marginTop: '0.2rem' }}
+                        name='reviewRequested'
+                        data-test-id='review-request-btn-false'
+                        onChange={() => {
+                          this.updateResearchPurpose('reviewRequested', false);
+                        }}
+                        checked={reviewRequested === false}
+                      />
+                      <label
+                        style={{
+                          ...styles.text,
+                          marginLeft: '0.5rem',
+                          marginRight: '3rem',
+                        }}
+                      >
+                        No, I have no concerns at this time about potential
+                        stigmatization based on my study.
+                      </label>
+                    </FlexRow>
+                  </FlexColumn>
+                  <label style={{ ...styles.text, paddingTop: '0.5rem' }}>
+                    {RequestForReviewFooter}
+                  </label>
+                </FlexColumn>
+              </FlexRow>
+            </WorkspaceEditSection>
+            <div>
+              <FlexRow style={{ marginTop: '1rem', marginBottom: '1rem' }}>
+                <Button
                   type='secondary'
-                  disabled={errors || loading}
-                  style={{marginRight: '1rem'}}
-                  onClick={() => this.setState({showConfirmationModal: false})}>
-                Keep Editing
-              </Button>
-              <Button
-                  type='primary'
-                  disabled={errors || loading || showCdrVersionModal}
-                  onClick={() => this.onSaveClick()}
-                  data-test-id='workspace-confirm-save-btn'>
-                Confirm
-              </Button>
-            </ModalFooter>
-          </Modal>
-        }
-        </div>
-      </FadeBox> ;
+                  style={{ marginRight: '1rem' }}
+                  onClick={() => this.cancel()}
+                >
+                  Cancel
+                </Button>
+                <TooltipTrigger
+                  content={
+                    errors && (
+                      <BulletAlignedUnorderedList>
+                        {errors.name && <li>{errors.name}</li>}
+                        {errors.billingAccountName && (
+                          <li>You must select a billing account</li>
+                        )}
+                        {errors.primaryPurpose && (
+                          <li>
+                            {' '}
+                            You must choose at least one primary research
+                            purpose (Question 1)
+                          </li>
+                        )}
+                        {errors.diseaseOfFocus && (
+                          <li>{errors.diseaseOfFocus}</li>
+                        )}
+                        {errors.otherPurposeDetails && (
+                          <li>{errors.otherPurposeDetails}</li>
+                        )}
+                        {errors.intendedStudy && (
+                          <li>
+                            {' '}
+                            Answer for
+                            <i>
+                              What are the specific scientific question(s) you
+                              intend to study (Question 2.1)
+                            </i>{' '}
+                            {errors.intendedStudy}
+                          </li>
+                        )}
+                        {errors.scientificApproach && (
+                          <li>
+                            {' '}
+                            Answer for{' '}
+                            <i>
+                              What are the scientific approaches you plan to use
+                              for your study (Question 2.2)
+                            </i>{' '}
+                            {errors.scientificApproach}
+                          </li>
+                        )}
+                        {errors.anticipatedFindings && (
+                          <li>
+                            {' '}
+                            Answer for{' '}
+                            <i>
+                              What are the anticipated findings from the study?
+                              (Question 2.3)
+                            </i>{' '}
+                            {errors.anticipatedFindings}
+                          </li>
+                        )}
+                        {errors.disseminateResearchFindingList && (
+                          <li>
+                            You must specific how you plan to disseminate your
+                            research findings (Question 3)
+                          </li>
+                        )}
+                        {errors.otherDisseminateResearchFindings && (
+                          <li>{errors.otherDisseminateResearchFindings}</li>
+                        )}
+                        {errors.researchOutcomeList && (
+                          <li>
+                            {' '}
+                            You must specify the outcome of the research
+                            (Question 4)
+                          </li>
+                        )}
+                        {errors.populationChecked && (
+                          <li>
+                            You must pick an answer Population of interest
+                            question (Question 5)
+                          </li>
+                        )}
+                        {errors.populationDetails && (
+                          <li>
+                            {' '}
+                            You must specify a population of study (Question 5)
+                          </li>
+                        )}
+                        {errors.otherPopulationDetails && (
+                          <li>{errors.otherPopulationDetails}</li>
+                        )}
+                        {errors.reviewRequested && (
+                          <li>
+                            You must pick an answer for review of stigmatizing
+                            research (Question 6)
+                          </li>
+                        )}
+                      </BulletAlignedUnorderedList>
+                    )
+                  }
+                  disabled={!errors}
+                >
+                  <Button
+                    type='primary'
+                    onClick={() =>
+                      this.setState({ showConfirmationModal: true })
+                    }
+                    disabled={errors || loading || showCdrVersionModal}
+                    data-test-id='workspace-save-btn'
+                  >
+                    {this.renderButtonText()}
+                  </Button>
+                </TooltipTrigger>
+              </FlexRow>
+            </div>
+            {workspaceCreationError && (
+              <Modal>
+                <ModalTitle>Error:</ModalTitle>
+                <ModalBody>{workspaceCreationErrorMessage}</ModalBody>
+                <ModalFooter>
+                  <Button
+                    onClick={() => this.cancel()}
+                    type='secondary'
+                    style={{ marginRight: '2rem' }}
+                  >
+                    Cancel
+                    {this.props.workspaceEditMode === WorkspaceEditMode.Create
+                      ? ' Creation'
+                      : ' Update'}
+                  </Button>
+                  <Button
+                    type='primary'
+                    onClick={() => this.resetWorkspaceEditor()}
+                  >
+                    Keep Editing
+                  </Button>
+                </ModalFooter>
+              </Modal>
+            )}
+            {showCreateBillingAccountModal && (
+              <CreateBillingAccountModal
+                onClose={() =>
+                  this.setState({ showCreateBillingAccountModal: false })
+                }
+              />
+            )}
+            {workspaceCreationConflictError && (
+              <Modal>
+                <ModalTitle>
+                  {this.props.workspaceEditMode === WorkspaceEditMode.Create
+                    ? 'Error: '
+                    : 'Conflicting update:'}
+                </ModalTitle>
+                <ModalBody>
+                  {this.props.workspaceEditMode === WorkspaceEditMode.Create
+                    ? 'You already have a workspace named ' +
+                      name +
+                      ' Please choose another name'
+                    : 'Another client has modified this workspace since the beginning of this editing ' +
+                      'session. Please reload to avoid overwriting those changes.'}
+                </ModalBody>
+                <ModalFooter>
+                  <Button
+                    type='secondary'
+                    onClick={() => this.cancel()}
+                    style={{ marginRight: '2rem' }}
+                  >
+                    Cancel Creation
+                  </Button>
+                  <Button
+                    type='primary'
+                    onClick={() => this.resetWorkspaceEditor()}
+                  >
+                    Keep Editing
+                  </Button>
+                </ModalFooter>
+              </Modal>
+            )}
+            {workspaceNewAclDelayed && (
+              <Modal>
+                <ModalTitle>Workspace permissions delay</ModalTitle>
+                <ModalBody>
+                  The permissions for this workspace are currently being set up.
+                  You can continue to use this workspace as a 'Reader'. Please
+                  refresh the workspace page in a few minutes to be able to
+                  create Cohorts, Datasets and Notebooks.
+                </ModalBody>
+                <ModalFooter>
+                  <Button
+                    type='primary'
+                    data-test-id='workspace-acl-delay-btn'
+                    onClick={() =>
+                      this.state.workspaceNewAclDelayedContinueFn()
+                    }
+                  >
+                    Continue
+                  </Button>
+                </ModalFooter>
+              </Modal>
+            )}
+            {showConfirmationModal && (
+              <Modal width={500}>
+                <ModalTitle style={{ fontSize: '16px', marginBottom: 0 }}>
+                  {this.renderButtonText()}
+                </ModalTitle>
+                <ModalBody
+                  style={{
+                    color: colors.primary,
+                    lineHeight: '1rem',
+                    marginTop: '0.25rem',
+                  }}
+                >
+                  {loading && (
+                    <SpinnerOverlay overrideStylesOverlay={styles.spinner} />
+                  )}
+                  <div>Your responses to these questions:</div>
+                  <div style={{ margin: '0.25rem 0 0.25rem 1rem' }}>
+                    <span style={{ fontWeight: 600 }}>
+                      Primary purpose of your project
+                    </span>{' '}
+                    (Question 1)
+                    <br />
+                    <span style={{ fontWeight: 600 }}>
+                      Summary of research purpose
+                    </span>{' '}
+                    (Question 2)
+                    <br />
+                    <span style={{ fontWeight: 600 }}>
+                      Population of interest
+                    </span>{' '}
+                    (Question 5)
+                    <br />
+                  </div>
+                  <div style={{ marginBottom: '1rem' }}>
+                    Will be
+                    <a
+                      style={{ color: colors.accent }}
+                      href='https://www.researchallofus.org/research-projects-directory/'
+                      target='_blank'
+                    >
+                      {' '}
+                      displayed publicly{' '}
+                    </a>
+                    to inform <AoU /> research participants. Therefore, please
+                    verify that you have provided sufficiently detailed
+                    responses in plain language.
+                  </div>
+                  <div>
+                    You can also make changes to your answers after you create
+                    your workspace.
+                  </div>
+                </ModalBody>
+                <ModalFooter>
+                  <Button
+                    type='secondary'
+                    disabled={errors || loading}
+                    style={{ marginRight: '1rem' }}
+                    onClick={() =>
+                      this.setState({ showConfirmationModal: false })
+                    }
+                  >
+                    Keep Editing
+                  </Button>
+                  <Button
+                    type='primary'
+                    disabled={errors || loading || showCdrVersionModal}
+                    onClick={() => this.onSaveClick()}
+                    data-test-id='workspace-confirm-save-btn'
+                  >
+                    Confirm
+                  </Button>
+                </ModalFooter>
+              </Modal>
+            )}
+          </div>
+        </FadeBox>
+      );
     }
-  });
+  }
+);

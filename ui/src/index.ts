@@ -5,14 +5,13 @@ import * as ReactDOM from 'react-dom';
 import * as ReactModal from 'react-modal';
 import * as StackTrace from 'stacktrace-js';
 
-import {ErrorHandler} from 'app/components/error-handler';
+import { ErrorHandler } from 'app/components/error-handler';
 import {
   checkBrowserSupport,
   exposeAccessTokenSetter,
-  setupCustomValidators
+  setupCustomValidators,
 } from 'app/services/setup';
-import {AppRoutingComponent} from './app/routing/app-routing';
-
+import { AppRoutingComponent } from './app/routing/app-routing';
 
 import 'app/styles/genome-extraction-datatable.css';
 import 'app/styles/sidebar.css';

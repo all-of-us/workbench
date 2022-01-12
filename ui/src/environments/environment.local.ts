@@ -1,5 +1,9 @@
-import {EnvAccessTierShortNames, Environment, ZendeskEnv} from 'environments/environment-type';
-import {testEnvironmentBase} from 'environments/test-env-base';
+import {
+  EnvAccessTierShortNames,
+  Environment,
+  ZendeskEnv,
+} from 'environments/environment-type';
+import { testEnvironmentBase } from 'environments/test-env-base';
 
 // This file is used for a local UI server pointed at a local API server
 export const environment: Environment = {
@@ -22,5 +26,8 @@ export const environment: Environment = {
   enableCaptcha: true,
   enablePublishedWorkspaces: false,
   enableFooter: true,
-  accessTiersVisibleToUsers: [EnvAccessTierShortNames.Registered, EnvAccessTierShortNames.Controlled],
+  accessTiersVisibleToUsers: [
+    EnvAccessTierShortNames.Registered,
+    EnvAccessTierShortNames.Controlled,
+  ],
 };

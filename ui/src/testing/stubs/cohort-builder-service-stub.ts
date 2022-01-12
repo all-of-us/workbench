@@ -15,9 +15,9 @@ import {
   SurveyCount,
   SurveyModule,
   SurveysResponse,
-  SurveyVersionListResponse
+  SurveyVersionListResponse,
 } from 'generated/fetch';
-import {stubNotImplementedError} from 'testing/stubs/stub-utils'
+import { stubNotImplementedError } from 'testing/stubs/stub-utils';
 
 export class SurveyStubVariables {
   static STUB_SURVEYS: SurveyModule[] = [
@@ -27,7 +27,7 @@ export class SurveyStubVariables {
       description: 'Basis description',
       questionCount: 101,
       participantCount: 200,
-      orderNumber: 1
+      orderNumber: 1,
     },
     {
       conceptId: 2,
@@ -35,7 +35,7 @@ export class SurveyStubVariables {
       description: 'Overall Health description',
       questionCount: 102,
       participantCount: 300,
-      orderNumber: 2
+      orderNumber: 2,
     },
     {
       conceptId: 3,
@@ -43,8 +43,8 @@ export class SurveyStubVariables {
       description: 'Lifestyle description',
       questionCount: 103,
       participantCount: 300,
-      orderNumber: 3
-    }
+      orderNumber: 3,
+    },
   ];
 }
 
@@ -58,7 +58,7 @@ export class DomainStubVariables {
       name: 'Conditions',
       participantCount: 30,
       sortOrder: 1,
-      standard: true
+      standard: true,
     },
     {
       category: 'Domains',
@@ -68,7 +68,7 @@ export class DomainStubVariables {
       name: 'Labs and Measurements',
       participantCount: 200,
       sortOrder: 3,
-      standard: true
+      standard: true,
     },
   ];
 }
@@ -78,16 +78,18 @@ export class DomainCountStubVariables {
     {
       domain: Domain.CONDITION,
       name: 'Condition',
-      conceptCount: 2
-    }, {
+      conceptCount: 2,
+    },
+    {
       domain: Domain.MEASUREMENT,
       name: 'Measurement',
-      conceptCount: 1
-    }, {
+      conceptCount: 1,
+    },
+    {
       domain: Domain.DRUG,
       name: 'Drug',
-      conceptCount: 2
-    }
+      conceptCount: 2,
+    },
   ];
 }
 
@@ -133,7 +135,7 @@ export const CriteriaStubVariables: Criteria[] = [
     subtype: '',
     type: 'ETHNICITY',
     value: '',
-  }
+  },
 ];
 
 export const CriteriaWithAttributesStubVariables: Criteria[] = [
@@ -219,7 +221,7 @@ export const CriteriaWithAttributesStubVariables: Criteria[] = [
     selectable: true,
     subtype: CriteriaSubType.ANSWER.toString(),
     type: CriteriaType.PPI.toString(),
-    value: ''
+    value: '',
   },
   {
     childCount: 76023,
@@ -240,7 +242,7 @@ export const CriteriaWithAttributesStubVariables: Criteria[] = [
     selectable: true,
     subtype: CriteriaSubType.QUESTION.toString(),
     type: CriteriaType.PPI.toString(),
-    value: ''
+    value: '',
   },
   {
     childCount: 8064,
@@ -283,7 +285,7 @@ export const CriteriaWithAttributesStubVariables: Criteria[] = [
     subtype: CriteriaSubType.ANSWER.toString(),
     type: CriteriaType.PPI.toString(),
     value: '',
-  }
+  },
 ];
 
 export const RootSurveyStubVariables: Criteria[] = [
@@ -306,7 +308,7 @@ export const RootSurveyStubVariables: Criteria[] = [
     selectable: true,
     subtype: CriteriaSubType.SURVEY.toString(),
     type: CriteriaType.PPI.toString(),
-    value: ''
+    value: '',
   },
   {
     childCount: 0,
@@ -328,7 +330,7 @@ export const RootSurveyStubVariables: Criteria[] = [
     subtype: CriteriaSubType.SURVEY.toString(),
     type: CriteriaType.PPI.toString(),
     value: '',
-  }
+  },
 ];
 
 export const SurveyQuestionStubVariables = {
@@ -352,85 +354,117 @@ export const SurveyQuestionStubVariables = {
 const domainCountStub = {
   domain: Domain.CONDITION,
   name: Domain.CONDITION.toString(),
-  conceptCount: 1
+  conceptCount: 1,
 };
 
 const surveyCountStub = {
   name: 'The Basics',
-  conceptCount: 1
+  conceptCount: 1,
 };
 
 export class CohortBuilderServiceStub extends CohortBuilderApi {
-
   constructor() {
-    super(undefined, undefined, (..._: any[]) => { throw stubNotImplementedError; });
+    super(undefined, undefined, (..._: any[]) => {
+      throw stubNotImplementedError;
+    });
   }
 
   findDemoChartInfo(): Promise<DemoChartInfoListResponse> {
-    return new Promise<DemoChartInfoListResponse>(resolve => resolve({items: []}));
+    return new Promise<DemoChartInfoListResponse>((resolve) =>
+      resolve({ items: [] })
+    );
   }
 
   countParticipants(): Promise<number> {
-    return new Promise<number>(resolve => resolve(1));
+    return new Promise<number>((resolve) => resolve(1));
   }
 
   findCriteriaAttributeByConceptId(): Promise<CriteriaAttributeListResponse> {
-    return new Promise<CriteriaAttributeListResponse>(resolve => resolve({items: []}));
+    return new Promise<CriteriaAttributeListResponse>((resolve) =>
+      resolve({ items: [] })
+    );
   }
 
   findCriteriaAutoComplete(): Promise<CriteriaListResponse> {
-    return new Promise<CriteriaListResponse>(resolve => resolve({items: []}));
+    return new Promise<CriteriaListResponse>((resolve) =>
+      resolve({ items: [] })
+    );
   }
 
   findCriteriaBy(): Promise<CriteriaListResponse> {
-    return new Promise<CriteriaListResponse>(resolve => resolve({items: []}));
+    return new Promise<CriteriaListResponse>((resolve) =>
+      resolve({ items: [] })
+    );
   }
 
   findDrugBrandOrIngredientByValue(): Promise<CriteriaListResponse> {
-    return new Promise<CriteriaListResponse>(resolve => resolve({items: []}));
+    return new Promise<CriteriaListResponse>((resolve) =>
+      resolve({ items: [] })
+    );
   }
 
   findDrugIngredientByConceptId(): Promise<CriteriaListResponse> {
-    return new Promise<CriteriaListResponse>(resolve => resolve({items: []}));
+    return new Promise<CriteriaListResponse>((resolve) =>
+      resolve({ items: [] })
+    );
   }
 
   getPPICriteriaParent(): Promise<Criteria> {
-    return new Promise<Criteria>(resolve => resolve(CriteriaStubVariables[0]));
+    return new Promise<Criteria>((resolve) =>
+      resolve(CriteriaStubVariables[0])
+    );
   }
 
   findParticipantDemographics(): Promise<ParticipantDemographics> {
-    return new Promise<ParticipantDemographics>(resolve => resolve({genderList: [], ethnicityList: [], raceList: [], sexAtBirthList: []}));
+    return new Promise<ParticipantDemographics>((resolve) =>
+      resolve({
+        genderList: [],
+        ethnicityList: [],
+        raceList: [],
+        sexAtBirthList: [],
+      })
+    );
   }
 
   findCriteriaMenu(): Promise<CriteriaMenuListResponse> {
-    return new Promise<CriteriaMenuListResponse>(resolve => resolve({items: []}));
+    return new Promise<CriteriaMenuListResponse>((resolve) =>
+      resolve({ items: [] })
+    );
   }
 
   findSurveyModules(): Promise<SurveysResponse> {
-    return new Promise<SurveysResponse>(resolve => resolve({items: SurveyStubVariables.STUB_SURVEYS}));
+    return new Promise<SurveysResponse>((resolve) =>
+      resolve({ items: SurveyStubVariables.STUB_SURVEYS })
+    );
   }
 
   findDomainCards(): Promise<DomainCardResponse> {
-    return new Promise<DomainCardResponse>(resolve => resolve({items: DomainStubVariables.STUB_DOMAINS}));
+    return new Promise<DomainCardResponse>((resolve) =>
+      resolve({ items: DomainStubVariables.STUB_DOMAINS })
+    );
   }
 
   findDomainCount(): Promise<DomainCount> {
-    return new Promise<DomainCount>(resolve => resolve(domainCountStub));
+    return new Promise<DomainCount>((resolve) => resolve(domainCountStub));
   }
 
   findDomainCountByStandardSource(): Promise<DomainCount> {
-    return new Promise<DomainCount>(resolve => resolve(domainCountStub));
+    return new Promise<DomainCount>((resolve) => resolve(domainCountStub));
   }
 
   findSurveyCount(): Promise<SurveyCount> {
-    return new Promise<SurveyCount>(resolve => resolve(surveyCountStub));
+    return new Promise<SurveyCount>((resolve) => resolve(surveyCountStub));
   }
 
   findSurveyVersionByQuestionConceptId(): Promise<SurveyVersionListResponse> {
-    return new Promise<SurveyVersionListResponse>(resolve => resolve({items: []}));
+    return new Promise<SurveyVersionListResponse>((resolve) =>
+      resolve({ items: [] })
+    );
   }
 
   findSurveyVersionByQuestionConceptIdAndAnswerConceptId(): Promise<SurveyVersionListResponse> {
-    return new Promise<SurveyVersionListResponse>(resolve => resolve({items: []}));
+    return new Promise<SurveyVersionListResponse>((resolve) =>
+      resolve({ items: [] })
+    );
   }
 }

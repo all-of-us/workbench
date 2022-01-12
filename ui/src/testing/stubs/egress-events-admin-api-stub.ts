@@ -1,8 +1,16 @@
-import { AuditEgressEventRequest, AuditEgressEventResponse, EgressEvent, EgressEventsAdminApi, EgressEventStatus, ListEgressEventsRequest, ListEgressEventsResponse, UpdateEgressEventRequest } from 'generated/fetch';
-import {stubNotImplementedError} from 'testing/stubs/stub-utils';
+import {
+  AuditEgressEventRequest,
+  AuditEgressEventResponse,
+  EgressEvent,
+  EgressEventsAdminApi,
+  EgressEventStatus,
+  ListEgressEventsRequest,
+  ListEgressEventsResponse,
+  UpdateEgressEventRequest,
+} from 'generated/fetch';
+import { stubNotImplementedError } from 'testing/stubs/stub-utils';
 
 export class EgressEventsAdminApiStub extends EgressEventsAdminApi {
-
   private nextEventId = 1;
 
   constructor(public events: EgressEvent[] = []) {
@@ -11,14 +19,22 @@ export class EgressEventsAdminApiStub extends EgressEventsAdminApi {
     });
   }
 
-  public listEgressEvents(request?: ListEgressEventsRequest, options?: any): Promise<ListEgressEventsResponse> {
+  public listEgressEvents(
+    request?: ListEgressEventsRequest,
+    options?: any
+  ): Promise<ListEgressEventsResponse> {
     return new Promise((accept) => {
       const events = this.events
-        .filter(({sourceUserEmail}) => (
-          !request.sourceUserEmail || sourceUserEmail === request.sourceUserEmail))
-        .filter(({sourceWorkspaceNamespace}) => (
-          !request.sourceWorkspaceNamespace ||
-            sourceWorkspaceNamespace === request.sourceWorkspaceNamespace));
+        .filter(
+          ({ sourceUserEmail }) =>
+            !request.sourceUserEmail ||
+            sourceUserEmail === request.sourceUserEmail
+        )
+        .filter(
+          ({ sourceWorkspaceNamespace }) =>
+            !request.sourceWorkspaceNamespace ||
+            sourceWorkspaceNamespace === request.sourceWorkspaceNamespace
+        );
 
       let offset = 0;
       if (+request.pageToken) {
@@ -28,14 +44,20 @@ export class EgressEventsAdminApiStub extends EgressEventsAdminApi {
       accept({
         events: events.slice(offset, end),
         totalSize: events.length,
-        nextPageToken: end > events.length ? null : String(end)
+        nextPageToken: end > events.length ? null : String(end),
       });
     });
   }
 
-  public updateEgressEvent(id: string, request?: UpdateEgressEventRequest, options?: any): Promise<EgressEvent> {
+  public updateEgressEvent(
+    id: string,
+    request?: UpdateEgressEventRequest,
+    options?: any
+  ): Promise<EgressEvent> {
     return new Promise((accept) => {
-      const event = this.events.find(({egressEventId}) => egressEventId === id);
+      const event = this.events.find(
+        ({ egressEventId }) => egressEventId === id
+      );
       if (!event) {
         throw new Error(`egress event ${id} not found`);
       }
@@ -45,9 +67,15 @@ export class EgressEventsAdminApiStub extends EgressEventsAdminApi {
     });
   }
 
-  public auditEgressEvent(id: string, request?: AuditEgressEventRequest, options?: any): Promise<AuditEgressEventResponse> {
+  public auditEgressEvent(
+    id: string,
+    request?: AuditEgressEventRequest,
+    options?: any
+  ): Promise<AuditEgressEventResponse> {
     return new Promise((accept) => {
-      const event = this.events.find(({egressEventId}) => egressEventId === id);
+      const event = this.events.find(
+        ({ egressEventId }) => egressEventId === id
+      );
       if (!event) {
         throw new Error(`egress event ${id} not found`);
       }
@@ -57,31 +85,40 @@ export class EgressEventsAdminApiStub extends EgressEventsAdminApi {
         sumologicEvent: {
           vmPrefix: 'all-of-us-1',
           egressWindowStart: new Date('2000-01-01 05:00:00').getTime() / 1000,
-          egressMib: 188.99
+          egressMib: 188.99,
         },
-        runtimeLogGroups: [{
-          name: 'Notebook interactions',
-          pattern: '%.ipynb%',
-          totalEntries: 100,
-          entries: [{
-            timestamp: new Date('2000-01-01 05:00:00').toISOString(),
-            message: 'user opened asdf.ipynb'
-          }, {
-            timestamp: new Date('2000-01-01 03:00:00').toISOString(),
-            message: 'user opened foo.txt'
-          }]
-        }, {
-          name: 'Downloads',
-          pattern: '%download%',
-          totalEntries: 100,
-          entries: [{
-            timestamp: new Date('2000-01-01 06:00:00').toISOString(),
-            message: 'user downloaded asdf.ipynb'
-          }, {
-            timestamp: new Date('2000-01-01 04:00:00').toISOString(),
-            message: 'user downloaded foo.txt'
-          }]
-        }]
+        runtimeLogGroups: [
+          {
+            name: 'Notebook interactions',
+            pattern: '%.ipynb%',
+            totalEntries: 100,
+            entries: [
+              {
+                timestamp: new Date('2000-01-01 05:00:00').toISOString(),
+                message: 'user opened asdf.ipynb',
+              },
+              {
+                timestamp: new Date('2000-01-01 03:00:00').toISOString(),
+                message: 'user opened foo.txt',
+              },
+            ],
+          },
+          {
+            name: 'Downloads',
+            pattern: '%download%',
+            totalEntries: 100,
+            entries: [
+              {
+                timestamp: new Date('2000-01-01 06:00:00').toISOString(),
+                message: 'user downloaded asdf.ipynb',
+              },
+              {
+                timestamp: new Date('2000-01-01 04:00:00').toISOString(),
+                message: 'user downloaded foo.txt',
+              },
+            ],
+          },
+        ],
       });
     });
   }
@@ -89,7 +126,7 @@ export class EgressEventsAdminApiStub extends EgressEventsAdminApi {
   public simulateNewEvent(event?: EgressEvent): EgressEvent {
     const e = event || this.newEvent();
     e.egressEventId = String(this.nextEventId++);
-    this.events.push(e)
+    this.events.push(e);
     return e;
   }
 
@@ -101,7 +138,7 @@ export class EgressEventsAdminApiStub extends EgressEventsAdminApi {
       egressMegabytes: 300.0,
       egressWindowSeconds: 3600,
       status: EgressEventStatus.REMEDIATED,
-      creationTime: new Date('2000-01-01 03:00:00').toISOString()
+      creationTime: new Date('2000-01-01 03:00:00').toISOString(),
     };
   }
 }

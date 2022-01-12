@@ -1,26 +1,28 @@
-import {mount} from 'enzyme';
+import { mount } from 'enzyme';
 import * as React from 'react';
 
-import {NotebookResourceCard} from 'app/pages/analysis/notebook-resource-card';
-import {WorkspaceAccessLevel} from 'generated/fetch';
-import {MemoryRouter} from 'react-router';
-
+import { NotebookResourceCard } from 'app/pages/analysis/notebook-resource-card';
+import { WorkspaceAccessLevel } from 'generated/fetch';
+import { MemoryRouter } from 'react-router';
 
 describe('NotebookResourceCard', () => {
   const component = () => {
     const props = {
       notebook: {
-        name: 'name'
+        name: 'name',
       },
-      permission: WorkspaceAccessLevel.WRITER
+      permission: WorkspaceAccessLevel.WRITER,
     };
 
-    return mount(<MemoryRouter>
-      <NotebookResourceCard
-      resource={props}
-      existingNameList={[]}
-      onUpdate={() => {}}/>);
-    </MemoryRouter>
+    return mount(
+      <MemoryRouter>
+        <NotebookResourceCard
+          resource={props}
+          existingNameList={[]}
+          onUpdate={() => {}}
+        />
+        );
+      </MemoryRouter>
     );
   };
 
@@ -28,5 +30,4 @@ describe('NotebookResourceCard', () => {
     const wrapper = component();
     expect(wrapper).toBeTruthy();
   });
-
 });

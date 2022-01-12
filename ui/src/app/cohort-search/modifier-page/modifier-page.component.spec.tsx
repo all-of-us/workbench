@@ -1,16 +1,23 @@
-import {mount, shallow} from 'enzyme';
+import { mount, shallow } from 'enzyme';
 
-import {registerApiClient} from 'app/services/swagger-fetch-clients';
-import {serverConfigStore} from 'app/utils/stores'
-import {currentCohortSearchContextStore, currentWorkspaceStore} from 'app/utils/navigation';
-import {CohortBuilderApi, Domain, ModifierType, WorkspacesApi} from 'generated/fetch';
+import { registerApiClient } from 'app/services/swagger-fetch-clients';
+import { serverConfigStore } from 'app/utils/stores';
+import {
+  currentCohortSearchContextStore,
+  currentWorkspaceStore,
+} from 'app/utils/navigation';
+import {
+  CohortBuilderApi,
+  Domain,
+  ModifierType,
+  WorkspacesApi,
+} from 'generated/fetch';
 import * as React from 'react';
-import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
-import {CohortBuilderServiceStub} from 'testing/stubs/cohort-builder-service-stub';
-import {workspaceDataStub} from 'testing/stubs/workspaces';
-import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
-import {ModifierPage} from './modifier-page.component';
-
+import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
+import { CohortBuilderServiceStub } from 'testing/stubs/cohort-builder-service-stub';
+import { workspaceDataStub } from 'testing/stubs/workspaces';
+import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
+import { ModifierPage } from './modifier-page.component';
 
 describe('ModifierPage', () => {
   beforeEach(() => {
@@ -18,36 +25,46 @@ describe('ModifierPage', () => {
     registerApiClient(CohortBuilderApi, new CohortBuilderServiceStub());
 
     currentWorkspaceStore.next(workspaceDataStub);
-    serverConfigStore.set({config: {
-      enableEventDateModifier: false,
-      gsuiteDomain: 'fake-research-aou.org',
-      projectId: 'aaa',
-      publicApiKeyForErrorReports: 'aaa',
-      enableEraCommons: true,
-    }});
+    serverConfigStore.set({
+      config: {
+        enableEventDateModifier: false,
+        gsuiteDomain: 'fake-research-aou.org',
+        projectId: 'aaa',
+        publicApiKeyForErrorReports: 'aaa',
+        enableEraCommons: true,
+      },
+    });
   });
 
   it('should render', () => {
-    const wrapper = shallow(<ModifierPage closeModifiers={() => {}} selections={[]}/>);
+    const wrapper = shallow(
+      <ModifierPage closeModifiers={() => {}} selections={[]} />
+    );
     expect(wrapper.exists()).toBeTruthy();
   });
 
-  it('should display Only Age Event modifier for SURVEY', async() => {
-    currentCohortSearchContextStore.next({domain: Domain.SURVEY, item: {modifiers: []}});
-    const wrapper = mount(<ModifierPage closeModifiers={() => {}} selections={[]}/>);
+  it('should display Only Age Event modifier for SURVEY', async () => {
+    currentCohortSearchContextStore.next({
+      domain: Domain.SURVEY,
+      item: { modifiers: [] },
+    });
+    const wrapper = mount(
+      <ModifierPage closeModifiers={() => {}} selections={[]} />
+    );
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.exists()).toBeTruthy();
     expect(
-      wrapper.find('[data-test-id="' + ModifierType.AGEATEVENT + '"]').length)
-      .toBeGreaterThan(0);
+      wrapper.find('[data-test-id="' + ModifierType.AGEATEVENT + '"]').length
+    ).toBeGreaterThan(0);
     expect(
-      wrapper.find('[data-test-id="' + ModifierType.NUMOFOCCURRENCES + '"]').length)
-      .toBe(0);
+      wrapper.find('[data-test-id="' + ModifierType.NUMOFOCCURRENCES + '"]')
+        .length
+    ).toBe(0);
     expect(
-      wrapper.find('[data-test-id="' + ModifierType.ENCOUNTERS + '"]').length)
-      .toBe(0);
+      wrapper.find('[data-test-id="' + ModifierType.ENCOUNTERS + '"]').length
+    ).toBe(0);
     expect(
-      wrapper.find('[data-test-id="' + ModifierType.EVENTDATE + '"]').length)
-      .toBe(0);
+      wrapper.find('[data-test-id="' + ModifierType.EVENTDATE + '"]').length
+    ).toBe(0);
   });
 });

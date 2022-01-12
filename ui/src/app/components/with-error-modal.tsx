@@ -1,7 +1,7 @@
-import {TextModal} from 'app/components/text-modal';
+import { TextModal } from 'app/components/text-modal';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
-import {SupportMailto} from './support';
+import { SupportMailto } from './support';
 
 interface State {
   show: boolean;
@@ -16,14 +16,13 @@ export interface WithErrorModalProps {
 export const withErrorModal = () => {
   return (WrappedComponent) => {
     return class ErrorModalWrapper extends React.Component<any, State> {
-
       constructor(props) {
         super(props);
 
         this.state = {
           show: false,
           title: 'Title',
-          body: 'Body'
+          body: 'Body',
         };
       }
 
@@ -31,19 +30,27 @@ export const withErrorModal = () => {
         this.setState({
           show: true,
           title: title,
-          body: body
+          body: body,
         });
       }
 
       render() {
-        return <React.Fragment>
-          {this.state.show && <TextModal role='alertdialog'
-                                         title={this.state.title}
-                                         body={this.state.body}
-                                         closeFunction={() => this.setState({show: false})}/>
-          }
-          <WrappedComponent showErrorModal={this.show.bind(this)} {...this.props}/>
-        </React.Fragment>;
+        return (
+          <React.Fragment>
+            {this.state.show && (
+              <TextModal
+                role='alertdialog'
+                title={this.state.title}
+                body={this.state.body}
+                closeFunction={() => this.setState({ show: false })}
+              />
+            )}
+            <WrappedComponent
+              showErrorModal={this.show.bind(this)}
+              {...this.props}
+            />
+          </React.Fragment>
+        );
       }
     };
   };
@@ -53,22 +60,35 @@ export interface WithProfileErrorModalProps {
   showProfileErrorModal?: (message: string) => void;
 }
 
-export const withProfileErrorWrapper = WrappedComponent => {
-  const body = ({message}) => (<React.Fragment>
-    <div>An error occurred while saving your profile. The following message was returned:</div>
-    <div style={{marginTop: '1rem', marginBottom: '1rem'}}>
-        "{message}"
-    </div>
-    <div>
-        Please try again or contact <SupportMailto/>.
-    </div>
-  </React.Fragment>);
+export const withProfileErrorWrapper = (WrappedComponent) => {
+  const body = ({ message }) => (
+    <React.Fragment>
+      <div>
+        An error occurred while saving your profile. The following message was
+        returned:
+      </div>
+      <div style={{ marginTop: '1rem', marginBottom: '1rem' }}>"{message}"</div>
+      <div>
+        Please try again or contact <SupportMailto />.
+      </div>
+    </React.Fragment>
+  );
 
-  const ProfileErrorWrapper = ({showErrorModal, ...props}) => {
-    return <WrappedComponent showProfileErrorModal={(message) => showErrorModal('Error saving profile', body({message}))} {...props}/>;
+  const ProfileErrorWrapper = ({ showErrorModal, ...props }) => {
+    return (
+      <WrappedComponent
+        showProfileErrorModal={(message) =>
+          showErrorModal('Error saving profile', body({ message }))
+        }
+        {...props}
+      />
+    );
   };
 
   return ProfileErrorWrapper;
 };
 
-export const withProfileErrorModal = fp.flow(withProfileErrorWrapper, withErrorModal());
+export const withProfileErrorModal = fp.flow(
+  withProfileErrorWrapper,
+  withErrorModal()
+);

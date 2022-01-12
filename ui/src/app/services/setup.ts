@@ -1,6 +1,6 @@
 import validate from 'validate.js';
-import {environment} from 'environments/environment';
-import {LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN} from 'app/utils/cookies';
+import { environment } from 'environments/environment';
+import { LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN } from 'app/utils/cookies';
 import outdatedBrowserRework from 'outdated-browser-rework';
 
 export const setupCustomValidators = () => {
@@ -45,22 +45,23 @@ export const checkBrowserSupport = () => {
       Opera: false,
       Firefox: false,
       Vivaldi: false,
-      IE: false
+      IE: false,
     },
     isUnknownBrowserOK: false,
     messages: {
       en: {
-        outOfDate: 'Researcher Workbench may not function correctly in this browser.',
+        outOfDate:
+          'Researcher Workbench may not function correctly in this browser.',
         update: {
           web: `If you experience issues, please install Google Chrome \
             version ${minChromeVersion} or greater.`,
           googlePlay: 'Please install Chrome from Google Play',
-          appStore: 'Please install Chrome from the App Store'
+          appStore: 'Please install Chrome from the App Store',
         },
         url: 'https://www.google.com/chrome/',
         callToAction: 'Download Chrome now',
-        close: 'Close'
-      }
-    }
+        close: 'Close',
+      },
+    },
   });
 };

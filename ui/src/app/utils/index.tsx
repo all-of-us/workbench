@@ -1,4 +1,4 @@
-import {colorWithWhiteness} from 'app/styles/colors';
+import { colorWithWhiteness } from 'app/styles/colors';
 import {
   currentCohortCriteriaStore,
   currentCohortReviewStore,
@@ -7,16 +7,22 @@ import {
   currentConceptSetStore,
   currentConceptStore,
   currentWorkspaceStore,
-  globalErrorStore
+  globalErrorStore,
 } from 'app/utils/navigation';
-import {Domain} from 'generated/fetch';
+import { Domain } from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
-import {BehaviorSubject} from 'rxjs/BehaviorSubject';
-import {ReplaySubject} from 'rxjs/ReplaySubject';
-import {cdrVersionStore, profileStore, serverConfigStore, useStore, withStore} from './stores';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { ReplaySubject } from 'rxjs/ReplaySubject';
+import {
+  cdrVersionStore,
+  profileStore,
+  serverConfigStore,
+  useStore,
+  withStore,
+} from './stores';
 
-const {useEffect, useState} = React;
+const { useEffect, useState } = React;
 
 export function isBlank(toTest: String): boolean {
   if (toTest === null || toTest === undefined) {
@@ -27,7 +33,6 @@ export function isBlank(toTest: String): boolean {
   }
 }
 
-
 /**
  * Random String Generator (simplified version)
  *
@@ -36,10 +41,11 @@ export function isBlank(toTest: String): boolean {
  * Default:   return a random alpha-numeric string
  */
 export function randomString(len): string {
-  let str = '', i = 0;
-  for (; i++ < len;) {
+  let str = '',
+    i = 0;
+  for (; i++ < len; ) {
     let rand = Math.floor(Math.random() * 62);
-    const charCode = rand += rand > 9 ? (rand < 36 ? 55 : 61) : 48;
+    const charCode = (rand += rand > 9 ? (rand < 36 ? 55 : 61) : 48);
     str += String.fromCharCode(charCode);
   }
   return str;
@@ -48,11 +54,14 @@ export function randomString(len): string {
 export const DEFAULT = Symbol();
 
 export const switchCase = (value, ...pairs) => {
-  const match = fp.find(([v]) => fp.isEqual(v, value) || fp.isEqual(v, DEFAULT), pairs);
+  const match = fp.find(
+    ([v]) => fp.isEqual(v, value) || fp.isEqual(v, DEFAULT),
+    pairs
+  );
   return match && match[1]();
 };
 
-const throttleAnimation = fn => {
+const throttleAnimation = (fn) => {
   let running = false;
   return (...args) => {
     if (!running) {
@@ -65,9 +74,12 @@ const throttleAnimation = fn => {
   };
 };
 
-window.addEventListener('resize', throttleAnimation(() => {
-  window.dispatchEvent(new CustomEvent('resizeAnimation'));
-}));
+window.addEventListener(
+  'resize',
+  throttleAnimation(() => {
+    window.dispatchEvent(new CustomEvent('resizeAnimation'));
+  })
+);
 
 export interface WindowSize {
   height: number;
@@ -80,26 +92,25 @@ export interface WindowSizeProps {
 }
 
 const getWindowSize = (): WindowSize => {
-  return {height: window.innerHeight, width: window.innerWidth};
+  return { height: window.innerHeight, width: window.innerWidth };
 };
 
-export const withWindowSize = () => WrappedComponent => {
-  class Wrapper extends React.Component<any,
-    { windowSize: WindowSize }> {
+export const withWindowSize = () => (WrappedComponent) => {
+  class Wrapper extends React.Component<any, { windowSize: WindowSize }> {
     constructor(props) {
       super(props);
-      this.state = {windowSize: getWindowSize()};
+      this.state = { windowSize: getWindowSize() };
     }
 
     static displayName = 'withWindowSize()';
 
     resize = () => {
-      const {windowSize} = this.state;
+      const { windowSize } = this.state;
       const newSize = getWindowSize();
       if (!fp.isEqual(windowSize, newSize)) {
-        this.setState({windowSize: newSize});
+        this.setState({ windowSize: newSize });
       }
-    }
+    };
 
     componentDidMount() {
       window.addEventListener('resizeAnimation', this.resize);
@@ -110,7 +121,7 @@ export const withWindowSize = () => WrappedComponent => {
     }
 
     render() {
-      const {windowSize} = this.state;
+      const { windowSize } = this.state;
       return <WrappedComponent windowSize={windowSize} {...this.props} />;
     }
   }
@@ -118,10 +129,10 @@ export const withWindowSize = () => WrappedComponent => {
   return Wrapper;
 };
 
-export const nextSort = ({field, direction}, newField) => {
-  return newField === field ?
-    {field, direction: direction === 'asc' ? 'desc' : 'asc'} :
-    {field: newField, direction: 'asc'};
+export const nextSort = ({ field, direction }, newField) => {
+  return newField === field
+    ? { field, direction: direction === 'asc' ? 'desc' : 'asc' }
+    : { field: newField, direction: 'asc' };
 };
 
 type ReactStyles<T> = {
@@ -149,7 +160,9 @@ type ReactStyles<T> = {
  *   style2: {color: 'blue', position: 'relative'} as React.CssProperties
  * };
  */
-export function reactStyles<T extends {[key: string]: React.CSSProperties }>(t: T): ReactStyles<T> {
+export function reactStyles<T extends { [key: string]: React.CSSProperties }>(
+  t: T
+): ReactStyles<T> {
   return t;
 }
 
@@ -162,42 +175,55 @@ export function decamelize(str: string, separator: string) {
     .toLowerCase();
 }
 
-export const withStyle = styleObj => WrappedComponent => {
+export const withStyle = (styleObj) => (WrappedComponent) => {
   const Wrapper = React.forwardRef(({ style = {}, ...props }: any, ref) => {
-    return <WrappedComponent ref={ref} style={{...styleObj, ...style}} {...props} />;
+    return (
+      <WrappedComponent
+        ref={ref}
+        style={{ ...styleObj, ...style }}
+        {...props}
+      />
+    );
   });
   Wrapper.displayName = 'withStyle';
   return Wrapper;
 };
 
-export const summarizeErrors = errors => {
+export const summarizeErrors = (errors) => {
   const errorList = fp.cond([
     [fp.isPlainObject, fp.flatMap(fp.values)],
     [fp.isArray, fp.identity],
-    [() => true, () => []]
+    [() => true, () => []],
   ])(errors);
   if (errorList.length) {
     return errorList.map((v, i) => {
-      return <div key={i} style={{marginTop: i !== 0 ? '0.25rem' : undefined}}>{v}</div>;
+      return (
+        <div key={i} style={{ marginTop: i !== 0 ? '0.25rem' : undefined }}>
+          {v}
+        </div>
+      );
     });
   }
 };
 
 export const connectBehaviorSubject = <T extends {}>(
-  subject: BehaviorSubject<T>, name: string, preventRenderUntilDataIsPresent: boolean = false) => {
+  subject: BehaviorSubject<T>,
+  name: string,
+  preventRenderUntilDataIsPresent: boolean = false
+) => {
   return (WrappedComponent) => {
-    class Wrapper extends React.Component<any, {value: T}> {
+    class Wrapper extends React.Component<any, { value: T }> {
       static displayName = 'connectBehaviorSubject()';
       private subscription;
 
       constructor(props) {
         super(props);
-        this.state = {value: subject.getValue()};
+        this.state = { value: subject.getValue() };
       }
 
       componentDidMount() {
-        this.subscription = subject.subscribe(v => {
-          this.setState({value: v});
+        this.subscription = subject.subscribe((v) => {
+          this.setState({ value: v });
         });
       }
 
@@ -206,13 +232,13 @@ export const connectBehaviorSubject = <T extends {}>(
       }
 
       render() {
-        const {value} = this.state;
+        const { value } = this.state;
         // We allow overriding of the currentValue, for reuse of the same
         // logic outside of the scope of a current workspace.
         if (preventRenderUntilDataIsPresent && value == null) {
           return null;
         }
-        return <WrappedComponent {...{[name]: value}} {...this.props}/>;
+        return <WrappedComponent {...{ [name]: value }} {...this.props} />;
       }
     }
 
@@ -220,19 +246,24 @@ export const connectBehaviorSubject = <T extends {}>(
   };
 };
 
-export const connectReplaySubject = <T extends {}>(subject: ReplaySubject<T>, name: string) => {
+export const connectReplaySubject = <T extends {}>(
+  subject: ReplaySubject<T>,
+  name: string
+) => {
   return (WrappedComponent) => {
-    class Wrapper extends React.Component<any, {value: T}> {
+    class Wrapper extends React.Component<any, { value: T }> {
       static displayName = 'connectReplaySubject()';
       private subscription;
 
       constructor(props) {
         super(props);
-        this.state = {value: null};
+        this.state = { value: null };
       }
 
       componentDidMount() {
-        this.subscription = subject.subscribe(v => this.setState({value: v}));
+        this.subscription = subject.subscribe((v) =>
+          this.setState({ value: v })
+        );
       }
 
       componentWillUnmount() {
@@ -240,10 +271,12 @@ export const connectReplaySubject = <T extends {}>(subject: ReplaySubject<T>, na
       }
 
       render() {
-        const {value} = this.state;
+        const { value } = this.state;
         // Since ReplaySubject may not have an initial value, only render the
         // connected value once the value is available.
-        return value && <WrappedComponent {...{[name]: value}} {...this.props}/>;
+        return (
+          value && <WrappedComponent {...{ [name]: value }} {...this.props} />
+        );
       }
     }
 
@@ -276,7 +309,10 @@ export const withCurrentConcept = () => {
 };
 
 export const withCurrentCohortSearchContext = () => {
-  return connectBehaviorSubject(currentCohortSearchContextStore, 'cohortContext');
+  return connectBehaviorSubject(
+    currentCohortSearchContextStore,
+    'cohortContext'
+  );
 };
 
 // HOC that provides a 'conceptSet' prop with current ConceptSet
@@ -300,9 +336,10 @@ export const withCdrVersions = () => {
 
 export function formatDomainString(domainString: string): string {
   return domainString === Domain.PHYSICALMEASUREMENTCSS.toString()
-      ? fp.capitalize(Domain.PHYSICALMEASUREMENT.toString())
-      : domainString === Domain.WHOLEGENOMEVARIANT.toString()
-          ? 'VCF Files' : fp.capitalize(domainString);
+    ? fp.capitalize(Domain.PHYSICALMEASUREMENT.toString())
+    : domainString === Domain.WHOLEGENOMEVARIANT.toString()
+    ? 'VCF Files'
+    : fp.capitalize(domainString);
 }
 
 export function formatDomain(domain: Domain): string {
@@ -314,14 +351,15 @@ export const append = fp.curry((value, arr) => fp.concat(arr, [value]));
 
 // Given a value and an array, return a new array that 'toggles' the presence of the value.
 // E.g. remove if it exists, append if it doesn't.
-export const toggleIncludes = fp.curry(<T extends {}>(value: T, arr: Array<T>) => {
-  return fp.includes(value, arr) ? fp.pull(value, arr) : append(value, arr);
-});
+export const toggleIncludes = fp.curry(
+  <T extends {}>(value: T, arr: Array<T>) => {
+    return fp.includes(value, arr) ? fp.pull(value, arr) : append(value, arr);
+  }
+);
 
 export function sliceByHalfLength(obj) {
   return Math.ceil(obj.length / 2);
 }
-
 
 export function hasNewValidProps(currProps, prevProps, fieldsToCompare) {
   for (const fieldGetter of fieldsToCompare) {
@@ -353,7 +391,7 @@ export function debouncer(action, sensitivityMs) {
     invoke: () => {
       t = Date.now();
     },
-    getTimer: () => timer
+    getTimer: () => timer,
   };
 }
 
@@ -367,17 +405,24 @@ export function resettableTimeout(f, timeoutInSeconds) {
       clearTimeout(timeout);
       timeout = setTimeout(f, timeoutInSeconds);
     },
-    getTimer: () => timeout
+    getTimer: () => timeout,
   };
 }
 
-export function highlightSearchTerm(searchTerm: string, stringToHighlight: string, highlightColor: string) {
+export function highlightSearchTerm(
+  searchTerm: string,
+  stringToHighlight: string,
+  highlightColor: string
+) {
   if (searchTerm.length < 3) {
     return stringToHighlight;
   }
   try {
     const words: string[] = [];
-    const matchString = new RegExp(searchTerm.replace(/([^a-zA-z0-9 \-<>=\/]+)/g, () => '').trim(), 'i');
+    const matchString = new RegExp(
+      searchTerm.replace(/([^a-zA-z0-9 \-<>=\/]+)/g, () => '').trim(),
+      'i'
+    );
     const matches = stringToHighlight.match(new RegExp(matchString, 'gi'));
     const splits = stringToHighlight.split(new RegExp(matchString, 'gi'));
     if (matches) {
@@ -388,14 +433,22 @@ export function highlightSearchTerm(searchTerm: string, stringToHighlight: strin
     } else {
       words.push(splits[0]);
     }
-    return words.map((word, w) => <span key={w}
-                                        style={matchString.test(word.toLowerCase()) ? {
-                                          color: colorWithWhiteness(highlightColor, -0.4),
-                                          backgroundColor: colorWithWhiteness(highlightColor, 0.7),
-                                          display: 'inline-block'
-                                        } : {}}>
-      {word}
-    </span>);
+    return words.map((word, w) => (
+      <span
+        key={w}
+        style={
+          matchString.test(word.toLowerCase())
+            ? {
+                color: colorWithWhiteness(highlightColor, -0.4),
+                backgroundColor: colorWithWhiteness(highlightColor, 0.7),
+                display: 'inline-block',
+              }
+            : {}
+        }
+      >
+        {word}
+      </span>
+    ));
   } catch (e) {
     return stringToHighlight;
   }
@@ -433,14 +486,18 @@ export const useToggle = (): [boolean, Function] => {
 };
 
 export const withAsyncErrorHandling = fp.curry(
-  (handler: (error: Error) => void, fnToTry: (...args: any[]) => Promise<any>) => async(...args) => {
-    try {
-      return await fnToTry(...args);
-    } catch (error) {
-      handler(error);
+  (
+      handler: (error: Error) => void,
+      fnToTry: (...args: any[]) => Promise<any>
+    ) =>
+    async (...args) => {
+      try {
+        return await fnToTry(...args);
+      } catch (error) {
+        handler(error);
+      }
     }
-  });
-
+);
 
 // Takes a search string and validates for the most common MySQL use cases.
 // Checks for unclosed "", trailing + or -, and breaking special characters.
@@ -459,12 +516,19 @@ export function validateInputForMySQL(searchString: string): Array<string> {
     }
     // Check for characters that break search
     if ('~@[]|<>()'.indexOf(character) > -1) {
-      inputErrors.add('The following characters are not allowed in the search string: ~ @ [ ] | < > ( )');
+      inputErrors.add(
+        'The following characters are not allowed in the search string: ~ @ [ ] | < > ( )'
+      );
       continue;
     }
     // Check for trailing + or -
-    if ('+-'.indexOf(character) > -1 && (searchString[i + 1] === ' ' || searchString[i + 1] === undefined)) {
-      inputErrors.add(`Trailing ${character} characters are not allowed in the search string`);
+    if (
+      '+-'.indexOf(character) > -1 &&
+      (searchString[i + 1] === ' ' || searchString[i + 1] === undefined)
+    ) {
+      inputErrors.add(
+        `Trailing ${character} characters are not allowed in the search string`
+      );
       continue;
     }
   }
@@ -478,13 +542,18 @@ export function validateInputForMySQL(searchString: string): Array<string> {
 // lensOnProps - inspired by lenses in RamdaJS https://ramdajs.com/docs/#lens
 // This is a lens implementation that will change the key names of a set of properties
 // lensProps(['a', 'b], ['x', 'y'], {x: 1, y: 2}) -> {a: 1, b: 2}
-export const lensOnProps = fp.curry((setters: string[], getters: string[], obj: object): object => {
-  return fp.flow(
-    fp.zip(getters),
-    fp.map<[string, string], [string, object]>(([fromProp, toProp]) => [toProp, obj[fromProp]]),
-    fp.fromPairs
-  )(setters);
-});
+export const lensOnProps = fp.curry(
+  (setters: string[], getters: string[], obj: object): object => {
+    return fp.flow(
+      fp.zip(getters),
+      fp.map<[string, string], [string, object]>(([fromProp, toProp]) => [
+        toProp,
+        obj[fromProp],
+      ]),
+      fp.fromPairs
+    )(setters);
+  }
+);
 
 // useId: provides a unique ID for an element. Useful for using aria-labelledby
 export const useId = () => {
@@ -496,7 +565,9 @@ export const nothing = {};
 
 // maybe - takes a function and a value. If the value is not defined returns "nothing"
 // Example usage: fp.flow(maybe(doSomethingIfIhaveData), maybe(doAnotherThingIfThereIsAResult))(getData())
-export const maybe = fp.curry((fn, value) => value !== nothing && value ? fn(value) : nothing);
+export const maybe = fp.curry((fn, value) =>
+  value !== nothing && value ? fn(value) : nothing
+);
 
 // cond - useful for representing conditionals as an expression
 // Operates like fp.cond, but a bit more concise - no need for array of arrays and allows for a clear default case
@@ -505,7 +576,9 @@ export const maybe = fp.curry((fn, value) => value !== nothing && value ? fn(val
 //  [v === 2, () => v * 2],
 //  () => 'default' // Default case
 // )
-export const cond = <T extends unknown>(...args: ([boolean, () => T] | (() => T))[]) => {
+export const cond = <T extends unknown>(
+  ...args: ([boolean, () => T] | (() => T))[]
+) => {
   for (const arg of args) {
     // If the arg is an array, conditionally execute (maybe). If not an array, then this is the default case.
     const result = Array.isArray(arg) ? maybe(...fp.reverse(arg)) : arg();

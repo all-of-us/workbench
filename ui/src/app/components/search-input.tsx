@@ -1,7 +1,7 @@
-import {TextInput} from 'app/components/inputs';
-import {TooltipTrigger} from 'app/components/popups';
-import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {reactStyles} from 'app/utils';
+import { TextInput } from 'app/components/inputs';
+import { TooltipTrigger } from 'app/components/popups';
+import colors, { colorWithWhiteness } from 'app/styles/colors';
+import { reactStyles } from 'app/utils';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
@@ -22,7 +22,7 @@ const styles = reactStyles({
   open: {
     position: 'absolute',
     backgroundColor: colors.white,
-    border: '1px solid'
+    border: '1px solid',
   },
   box: {
     borderRadius: '5px',
@@ -61,15 +61,17 @@ function fifo(fn) {
   return (...args) => {
     const thisCallID = nextCallID++;
     return new Promise((accept, reject) => {
-      fn.apply(null, args).then((newResult) => {
-        if (thisCallID > lastCompletedCallID) {
-          lastCompletedCallID = thisCallID;
-          lastCompletedResult = newResult;
-        }
-        accept(lastCompletedResult);
-      }).catch((e) => {
-        reject(e);
-      });
+      fn.apply(null, args)
+        .then((newResult) => {
+          if (thisCallID > lastCompletedCallID) {
+            lastCompletedCallID = thisCallID;
+            lastCompletedResult = newResult;
+          }
+          accept(lastCompletedResult);
+        })
+        .catch((e) => {
+          reject(e);
+        });
     });
   };
 }
@@ -89,7 +91,10 @@ export interface SearchInputProps {
   onChange: (newInput: string) => void;
 }
 
-export class SearchInput extends React.Component<SearchInputProps, SearchInputState> {
+export class SearchInput extends React.Component<
+  SearchInputProps,
+  SearchInputState
+> {
   static defaultProps = {
     enabled: true,
     placeholder: '',
@@ -122,67 +127,70 @@ export class SearchInput extends React.Component<SearchInputProps, SearchInputSt
     this._searchTermChangedEvent = fp.debounce(300, this._search);
 
     // State machine states
-    this._START = 0;   // Input box lacks focus, drop-down invisible
-    this._ACTIVE = 1;  // Input box focused, drop-down invisible
+    this._START = 0; // Input box lacks focus, drop-down invisible
+    this._ACTIVE = 1; // Input box focused, drop-down invisible
     this._SUGGEST = 2; // Input box focused, search results visible
-    this._HOVER = 3;   // Input box focused, search results visible, item activated
+    this._HOVER = 3; // Input box focused, search results visible, item activated
   }
 
   _toggleHover(j) {
     return this.state.hover.map((elt, i) => {
-      return (i === j) ? !elt : elt;
+      return i === j ? !elt : elt;
     });
   }
 
   _search(keyword: string): void {
-    this.setState({matches: []});
+    this.setState({ matches: [] });
     keyword = keyword.trim();
     if (!keyword) {
       return;
     }
-    this._onSearch(keyword).then((matches) => {
-      matches = matches || [];
-      this.setState({
-        matches: matches,
-        state: matches.length > 0 ?
-          this._SUGGEST : this._ACTIVE,
-        hover: matches.map(() => false),
+    this._onSearch(keyword)
+      .then((matches) => {
+        matches = matches || [];
+        this.setState({
+          matches: matches,
+          state: matches.length > 0 ? this._SUGGEST : this._ACTIVE,
+          hover: matches.map(() => false),
+        });
+      })
+      .catch((e) => {
+        console.error(e);
       });
-    }).catch((e) => {
-      console.error(e);
-    });
   }
 
   _onBlur() {
     const state = this.state.state;
-    if (state === this._ACTIVE  ||
-        state === this._SUGGEST ||
-        state === this._HOVER) {
-      this.setState({state: this._START});
+    if (
+      state === this._ACTIVE ||
+      state === this._SUGGEST ||
+      state === this._HOVER
+    ) {
+      this.setState({ state: this._START });
     }
   }
 
   _onChange(match) {
-    this.setState({state: this._ACTIVE});
+    this.setState({ state: this._ACTIVE });
     this._searchTermChangedEvent(match);
     this.props.onChange(match);
   }
 
   _onFocus() {
-    this.setState({state: this._ACTIVE});
+    this.setState({ state: this._ACTIVE });
   }
 
   _onMouseOver(j) {
     this.setState({
       state: this._HOVER,
-      hover: this._toggleHover(j)
+      hover: this._toggleHover(j),
     });
   }
 
   _onMouseOut(j) {
     this.setState({
       state: this._SUGGEST,
-      hover: this._toggleHover(j)
+      hover: this._toggleHover(j),
     });
   }
 
@@ -192,8 +200,8 @@ export class SearchInput extends React.Component<SearchInputProps, SearchInputSt
 
   _suggest() {
     const s = this.state.state;
-    const rval = this.props.enabled &&
-      (s === this._SUGGEST || s === this._HOVER);
+    const rval =
+      this.props.enabled && (s === this._SUGGEST || s === this._HOVER);
     return rval;
   }
 
@@ -202,39 +210,46 @@ export class SearchInput extends React.Component<SearchInputProps, SearchInputSt
     const inputStyle = {
       width: '90%',
       border: `1px solid ${borderColor}`,
-      borderRadius: '5px'
+      borderRadius: '5px',
     };
     return (
-      <div style={{position: 'relative'}}>
+      <div style={{ position: 'relative' }}>
         <TooltipTrigger
           content={this.props.tooltip}
           disabled={this.props.enabled}
-          data-test-id='search-input'>
+          data-test-id='search-input'
+        >
           <TextInput
             value={this.props.value}
             style={inputStyle}
             onFocus={this._onFocus.bind(this)}
             onBlur={this._onBlur.bind(this)}
-            onChange={e => this._onChange(e)}
+            onChange={(e) => this._onChange(e)}
             placeholder={this.props.placeholder}
-            disabled={!this.props.enabled}/>
+            disabled={!this.props.enabled}
+          />
         </TooltipTrigger>
-        {this._suggest() &&
-          <div data-test-id='search-input-drop-down'
-            style={{...styles.dropdownMenu, ...styles.open, minWidth: '90%'}}>
+        {this._suggest() && (
+          <div
+            data-test-id='search-input-drop-down'
+            style={{ ...styles.dropdownMenu, ...styles.open, minWidth: '90%' }}
+          >
             {this.state.matches.map((match, j) => {
               return (
-                <div data-test-id={`search-input-drop-down-element-${j}`}
-                     key={j} style={this.state.hover[j] ? styles.boxHover : styles.box}
+                <div
+                  data-test-id={`search-input-drop-down-element-${j}`}
+                  key={j}
+                  style={this.state.hover[j] ? styles.boxHover : styles.box}
                   onMouseOver={this._onMouseOver.bind(this, j)}
                   onMouseOut={this._onMouseOut.bind(this, j)}
-                  onMouseDown={this._onMouseDown.bind(this, match)}>
+                  onMouseDown={this._onMouseDown.bind(this, match)}
+                >
                   <h5 style={styles.boxHoverElement}>{match}</h5>
                 </div>
               );
             })}
           </div>
-        }
+        )}
       </div>
     );
   }

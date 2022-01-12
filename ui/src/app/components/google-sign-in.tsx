@@ -1,10 +1,10 @@
-import {Button} from 'app/components/buttons';
-import {reactStyles} from 'app/utils';
+import { Button } from 'app/components/buttons';
+import { reactStyles } from 'app/utils';
 
-import {signIn} from 'app/utils/authentication';
+import { signIn } from 'app/utils/authentication';
 import * as React from 'react';
 
-import googleIcon from 'assets/icons/google-icon.png'
+import googleIcon from 'assets/icons/google-icon.png';
 
 export const styles = reactStyles({
   button: {
@@ -18,15 +18,16 @@ export const styles = reactStyles({
     textTransform: 'none',
     borderRadius: '2px',
     justifyContent: 'baseline',
-    width: '6.5rem'
+    width: '6.5rem',
   },
 });
 
-export const GoogleSignInButton: React.FunctionComponent = () =>
+export const GoogleSignInButton: React.FunctionComponent = () => (
   <Button type='primary' style={styles.button} onClick={() => signIn()}>
-    <img src={googleIcon}
-         style={{ height: '54px', width: '54px', margin: '-3px 19px -3px -3px'}}/>
-    <div>
-      Sign In
-    </div>
-  </Button>;
+    <img
+      src={googleIcon}
+      style={{ height: '54px', width: '54px', margin: '-3px 19px -3px -3px' }}
+    />
+    <div>Sign In</div>
+  </Button>
+);

@@ -1,4 +1,3 @@
-
 // Canonicalizes a string as a URL. Suitable for use on user inputs. This does
 // not have any implications around trusting the URL.
 export function canonicalizeUrl(url: string): string {

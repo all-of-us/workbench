@@ -1,4 +1,4 @@
-import {SpinnerOverlay, SpinnerOverlayProps} from 'app/components/spinners';
+import { SpinnerOverlay, SpinnerOverlayProps } from 'app/components/spinners';
 import * as React from 'react';
 
 interface State {
@@ -11,34 +11,38 @@ export interface WithSpinnerOverlayProps {
 }
 
 export const withSpinnerOverlay = (
-    initialShowState = false,
-    spinnerOverlayProps: SpinnerOverlayProps = {}) => {
+  initialShowState = false,
+  spinnerOverlayProps: SpinnerOverlayProps = {}
+) => {
   return (WrappedComponent) => {
     return class WithSpinnerOverlay extends React.Component<any, State> {
-
       constructor(props) {
         super(props);
 
         this.state = {
-          show: initialShowState
+          show: initialShowState,
         };
       }
 
       show() {
-        this.setState({show: true});
+        this.setState({ show: true });
       }
 
       hide() {
-        this.setState({show: false});
+        this.setState({ show: false });
       }
 
       render() {
-        return <React.Fragment>
-          {this.state.show && <SpinnerOverlay {...spinnerOverlayProps}/>}
-          <WrappedComponent showSpinner={() => this.show()}
-                            hideSpinner={() => this.hide()}
-                            {...this.props} />
-        </React.Fragment>;
+        return (
+          <React.Fragment>
+            {this.state.show && <SpinnerOverlay {...spinnerOverlayProps} />}
+            <WrappedComponent
+              showSpinner={() => this.show()}
+              hideSpinner={() => this.hide()}
+              {...this.props}
+            />
+          </React.Fragment>
+        );
       }
     };
   };

@@ -1,24 +1,21 @@
-import {RouteLink} from 'app/components/app-router';
-import {Button} from 'app/components/buttons';
-import {ActionCardBase} from 'app/components/card';
-import {FadeBox} from 'app/components/containers';
-import {FlexColumn, FlexRow} from 'app/components/flex';
-import {SpinnerOverlay} from 'app/components/spinners';
-import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
-import {conceptSetsApi} from 'app/services/swagger-fetch-clients';
+import { RouteLink } from 'app/components/app-router';
+import { Button } from 'app/components/buttons';
+import { ActionCardBase } from 'app/components/card';
+import { FadeBox } from 'app/components/containers';
+import { FlexColumn, FlexRow } from 'app/components/flex';
+import { SpinnerOverlay } from 'app/components/spinners';
+import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
+import { conceptSetsApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {reactStyles, withCurrentWorkspace} from 'app/utils';
-import {
-  conceptSetUpdating,
-  NavigationProps
-} from 'app/utils/navigation';
+import { reactStyles, withCurrentWorkspace } from 'app/utils';
+import { conceptSetUpdating, NavigationProps } from 'app/utils/navigation';
 import { MatchParams } from 'app/utils/stores';
-import {withNavigation} from 'app/utils/with-navigation-hoc';
-import {WorkspaceData} from 'app/utils/workspace-data';
-import {ConceptSet} from 'generated/fetch';
+import { withNavigation } from 'app/utils/with-navigation-hoc';
+import { WorkspaceData } from 'app/utils/workspace-data';
+import { ConceptSet } from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
-import {RouteComponentProps, withRouter} from 'react-router-dom';
+import { RouteComponentProps, withRouter } from 'react-router-dom';
 
 const styles = reactStyles({
   conceptSetsHeader: {
@@ -31,40 +28,54 @@ const styles = reactStyles({
   cardArea: {
     display: 'flex',
     alignItems: 'center',
-    width: '100%'
+    width: '100%',
   },
   card: {
     marginTop: '0.5rem',
     justifyContent: 'space-between',
     marginRight: '1rem',
     padding: '0.75rem 0.75rem 0rem 0.75rem',
-    boxShadow: '0 0 0 0'
+    boxShadow: '0 0 0 0',
   },
   cardName: {
-    fontSize: '18px', fontWeight: 600, lineHeight: '22px', color: colors.primary,
-    wordBreak: 'break-word', textOverflow: 'ellipsis', overflow: 'hidden',
-    display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical'
+    fontSize: '18px',
+    fontWeight: 600,
+    lineHeight: '22px',
+    color: colors.primary,
+    wordBreak: 'break-word',
+    textOverflow: 'ellipsis',
+    overflow: 'hidden',
+    display: '-webkit-box',
+    WebkitLineClamp: 3,
+    WebkitBoxOrient: 'vertical',
   },
   cardDescription: {
-    marginTop: '0.5rem', textOverflow: 'ellipsis', overflow: 'hidden', display: '-webkit-box',
-    WebkitLineClamp: 4, WebkitBoxOrient: 'vertical'
+    marginTop: '0.5rem',
+    textOverflow: 'ellipsis',
+    overflow: 'hidden',
+    display: '-webkit-box',
+    WebkitLineClamp: 4,
+    WebkitBoxOrient: 'vertical',
   },
   cardButton: {
     margin: '1rem 0',
-    height: '2rem'
-  }
+    height: '2rem',
+  },
 });
 
 const actionCards = [
   {
     title: 'Create another Concept Set',
-    description: 'Create another concept set for the same or a different domain.',
-    action: 'newConceptSet'
-  }, {
+    description:
+      'Create another concept set for the same or a different domain.',
+    action: 'newConceptSet',
+  },
+  {
     title: 'Create a Dataset',
-    description: 'Create an analysis ready dataset that can be exported to notebooks.',
-    action: 'dataSet'
-  }
+    description:
+      'Create an analysis ready dataset that can be exported to notebooks.',
+    action: 'dataSet',
+  },
 ];
 
 interface State {
@@ -72,11 +83,18 @@ interface State {
   conceptSetLoading: boolean;
 }
 
-interface Props extends WithSpinnerOverlayProps, NavigationProps, RouteComponentProps<MatchParams> {
+interface Props
+  extends WithSpinnerOverlayProps,
+    NavigationProps,
+    RouteComponentProps<MatchParams> {
   workspace: WorkspaceData;
 }
 
-export const ConceptSetActions = fp.flow(withCurrentWorkspace(), withNavigation, withRouter)(
+export const ConceptSetActions = fp.flow(
+  withCurrentWorkspace(),
+  withNavigation,
+  withRouter
+)(
   class extends React.Component<Props, State> {
     constructor(props: any) {
       super(props);
@@ -89,26 +107,34 @@ export const ConceptSetActions = fp.flow(withCurrentWorkspace(), withNavigation,
     componentDidMount(): void {
       this.props.hideSpinner();
       conceptSetUpdating.next(false);
-      this.setState({conceptSetLoading: true});
+      this.setState({ conceptSetLoading: true });
     }
 
     componentDidUpdate() {
-      const {csid} = this.props.match.params;
+      const { csid } = this.props.match.params;
       if (csid && this.state.conceptSetLoading) {
-        const {namespace, id} = this.props.workspace;
-        conceptSetsApi().getConceptSet(namespace, id, +csid).then(cs => {
-          if (cs) {
-            this.setState({conceptSet: cs, conceptSetLoading: false});
-          } else {
-            this.props.navigate(['workspaces', namespace, id, 'data', 'concepts']);
-          }
-        });
+        const { namespace, id } = this.props.workspace;
+        conceptSetsApi()
+          .getConceptSet(namespace, id, +csid)
+          .then((cs) => {
+            if (cs) {
+              this.setState({ conceptSet: cs, conceptSetLoading: false });
+            } else {
+              this.props.navigate([
+                'workspaces',
+                namespace,
+                id,
+                'data',
+                'concepts',
+              ]);
+            }
+          });
       }
     }
 
     getNavigationPath(action: string): string {
-      const {namespace, id} = this.props.workspace;
-      const {conceptSet} = this.state;
+      const { namespace, id } = this.props.workspace;
+      const { conceptSet } = this.state;
       let url = `/workspaces/${namespace}/${id}/`;
       switch (action) {
         case 'conceptSet':
@@ -128,42 +154,57 @@ export const ConceptSetActions = fp.flow(withCurrentWorkspace(), withNavigation,
     }
 
     render() {
-      const {conceptSet, conceptSetLoading} = this.state;
-      return <FadeBox style={{margin: 'auto', marginTop: '1rem', width: '95.7%'}}>
-        {conceptSetLoading && <SpinnerOverlay />}
-        {conceptSet && <React.Fragment>
-          <h3 style={styles.conceptSetsHeader}>Concept Set Saved Successfully</h3>
-          <div style={{marginTop: '0.25rem'}}>
-            The concept set
-            <RouteLink style={{color: colors.accent, margin: '0 4px'}}
-               path={this.getNavigationPath('conceptSet')}>
-              {conceptSet.name}
-            </RouteLink>
-            has been saved.
-          </div>
-          <h3 style={{...styles.conceptSetsHeader, marginTop: '1.5rem'}}>What Next?</h3>
-          <div style={styles.cardArea}>
-            {actionCards.map((card, i) => {
-              return <ActionCardBase key={i} style={styles.card}>
-                <FlexColumn style={{alignItems: 'flex-start'}}>
-                  <FlexRow style={{alignItems: 'flex-start'}}>
-                    <div style={styles.cardName}>{card.title}</div>
-                  </FlexRow>
-                  <div style={styles.cardDescription}>{card.description}</div>
-                </FlexColumn>
-                <div>
-                  <Button
-                    type='primary'
-                    style={styles.cardButton}
-                    path={this.getNavigationPath(card.action)}>
-                    {card.title}
-                  </Button>
-                </div>
-              </ActionCardBase>;
-            })}
-          </div>
-        </React.Fragment>}
-      </FadeBox>;
+      const { conceptSet, conceptSetLoading } = this.state;
+      return (
+        <FadeBox style={{ margin: 'auto', marginTop: '1rem', width: '95.7%' }}>
+          {conceptSetLoading && <SpinnerOverlay />}
+          {conceptSet && (
+            <React.Fragment>
+              <h3 style={styles.conceptSetsHeader}>
+                Concept Set Saved Successfully
+              </h3>
+              <div style={{ marginTop: '0.25rem' }}>
+                The concept set
+                <RouteLink
+                  style={{ color: colors.accent, margin: '0 4px' }}
+                  path={this.getNavigationPath('conceptSet')}
+                >
+                  {conceptSet.name}
+                </RouteLink>
+                has been saved.
+              </div>
+              <h3 style={{ ...styles.conceptSetsHeader, marginTop: '1.5rem' }}>
+                What Next?
+              </h3>
+              <div style={styles.cardArea}>
+                {actionCards.map((card, i) => {
+                  return (
+                    <ActionCardBase key={i} style={styles.card}>
+                      <FlexColumn style={{ alignItems: 'flex-start' }}>
+                        <FlexRow style={{ alignItems: 'flex-start' }}>
+                          <div style={styles.cardName}>{card.title}</div>
+                        </FlexRow>
+                        <div style={styles.cardDescription}>
+                          {card.description}
+                        </div>
+                      </FlexColumn>
+                      <div>
+                        <Button
+                          type='primary'
+                          style={styles.cardButton}
+                          path={this.getNavigationPath(card.action)}
+                        >
+                          {card.title}
+                        </Button>
+                      </div>
+                    </ActionCardBase>
+                  );
+                })}
+              </div>
+            </React.Fragment>
+          )}
+        </FadeBox>
+      );
     }
   }
 );

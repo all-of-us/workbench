@@ -1,32 +1,31 @@
-import {Button} from 'app/components/buttons';
-import {FadeBox} from 'app/components/containers';
-import {SemiBoldHeader} from 'app/components/headers';
-import {ClrIcon} from 'app/components/icons';
-import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
-import {OrganizationTypeOptions} from 'app/pages/admin/admin-institution-options';
-import {institutionApi} from 'app/services/swagger-fetch-clients';
+import { Button } from 'app/components/buttons';
+import { FadeBox } from 'app/components/containers';
+import { SemiBoldHeader } from 'app/components/headers';
+import { ClrIcon } from 'app/components/icons';
+import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
+import { OrganizationTypeOptions } from 'app/pages/admin/admin-institution-options';
+import { institutionApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {reactStyles} from 'app/utils';
+import { reactStyles } from 'app/utils';
 import {
   getControlledTierConfig,
   getRegisteredTierConfig,
 } from 'app/utils/institutions';
-import {NavigationProps} from 'app/utils/navigation';
-import {withNavigation} from 'app/utils/with-navigation-hoc';
-import {Institution, InstitutionMembershipRequirement} from 'generated/fetch';
-import {OrganizationType} from 'generated/fetch';
+import { NavigationProps } from 'app/utils/navigation';
+import { withNavigation } from 'app/utils/with-navigation-hoc';
+import { Institution, InstitutionMembershipRequirement } from 'generated/fetch';
+import { OrganizationType } from 'generated/fetch';
 import * as fp from 'lodash/fp';
-import {Column} from 'primereact/column';
-import {DataTable} from 'primereact/datatable';
+import { Column } from 'primereact/column';
+import { DataTable } from 'primereact/datatable';
 import * as React from 'react';
-
 
 const styles = reactStyles({
   pageHeader: {
     fontSize: '18px',
     lineHeight: '22px',
     marginBottom: '1rem',
-    marginTop: '0.5rem'
+    marginTop: '0.5rem',
   },
   header: {
     fontSize: '14px',
@@ -48,7 +47,7 @@ const styles = reactStyles({
     overflow: 'auto',
     height: '4rem',
     width: '5rem',
-  }
+  },
 });
 
 interface Props extends WithSpinnerOverlayProps, NavigationProps {}
@@ -66,7 +65,7 @@ export const AdminInstitution = fp.flow(withNavigation)(
       this.state = {
         loadingInstitutions: true,
         institutions: [],
-        institutionLoadError: false
+        institutionLoadError: false,
       };
     }
 
@@ -76,12 +75,12 @@ export const AdminInstitution = fp.flow(withNavigation)(
         const details = await institutionApi().getInstitutions();
         this.setState({
           loadingInstitutions: false,
-          institutions: details.institutions
+          institutions: details.institutions,
         });
       } catch (e) {
         this.setState({
           loadingInstitutions: false,
-          institutionLoadError: true
+          institutionLoadError: true,
         });
       }
     }
@@ -93,8 +92,9 @@ export const AdminInstitution = fp.flow(withNavigation)(
 
     renderOrganizationType(row, col) {
       // This should fail if the organization value is not in list
-      const organizationLabel = OrganizationTypeOptions
-        .filter(organization => organization.value === row['organizationTypeEnum'])[0].label;
+      const organizationLabel = OrganizationTypeOptions.filter(
+        (organization) => organization.value === row['organizationTypeEnum']
+      )[0].label;
       if (row['organizationTypeEnum'] === OrganizationType.OTHER) {
         return organizationLabel + ' - ' + row['organizationTypeOtherText'];
       }
@@ -103,33 +103,52 @@ export const AdminInstitution = fp.flow(withNavigation)(
 
     renderAccessTiers(row, col) {
       let tiers = '';
-      if (getRegisteredTierConfig(row).membershipRequirement !== InstitutionMembershipRequirement.NOACCESS) {
+      if (
+        getRegisteredTierConfig(row).membershipRequirement !==
+        InstitutionMembershipRequirement.NOACCESS
+      ) {
         tiers += 'Registered';
       }
 
-      if (getControlledTierConfig(row)
-        && getControlledTierConfig(row).membershipRequirement !== InstitutionMembershipRequirement.NOACCESS) {
+      if (
+        getControlledTierConfig(row) &&
+        getControlledTierConfig(row).membershipRequirement !==
+          InstitutionMembershipRequirement.NOACCESS
+      ) {
         tiers += ',Controlled';
       }
       return tiers;
     }
 
     render() {
-      const {institutions, institutionLoadError, loadingInstitutions} = this.state;
-      return <div>
-        <FadeBox style={{marginTop: '1rem', marginLeft: '1rem'}}>
-          <SemiBoldHeader style={styles.pageHeader}>
-            <label>Institution admin table</label>
-                <Button type='secondaryLight'
-                        style={{padding: '0rem', marginTop: '0.3rem', verticalAlign: 'sub'}}
-                        onClick={() => this.props.navigateByUrl('admin/institution/add')}
-                        data-test-id='add-institution'>
-                  <ClrIcon shape='plus-circle' class='is-solid' size={20}/>
-                </Button>
-          </SemiBoldHeader>
-          {institutionLoadError && <div style={{color: colors.danger}}>
-            Error while loading Institution. Please try again later</div>}
-          <DataTable
+      const { institutions, institutionLoadError, loadingInstitutions } =
+        this.state;
+      return (
+        <div>
+          <FadeBox style={{ marginTop: '1rem', marginLeft: '1rem' }}>
+            <SemiBoldHeader style={styles.pageHeader}>
+              <label>Institution admin table</label>
+              <Button
+                type='secondaryLight'
+                style={{
+                  padding: '0rem',
+                  marginTop: '0.3rem',
+                  verticalAlign: 'sub',
+                }}
+                onClick={() =>
+                  this.props.navigateByUrl('admin/institution/add')
+                }
+                data-test-id='add-institution'
+              >
+                <ClrIcon shape='plus-circle' class='is-solid' size={20} />
+              </Button>
+            </SemiBoldHeader>
+            {institutionLoadError && (
+              <div style={{ color: colors.danger }}>
+                Error while loading Institution. Please try again later
+              </div>
+            )}
+            <DataTable
               data-test-id='institution-datatable'
               value={institutions}
               paginator={true}
@@ -138,18 +157,40 @@ export const AdminInstitution = fp.flow(withNavigation)(
               frozenWidth='7rem'
               loading={loadingInstitutions}
               paginatorTemplate='CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink  RowsPerPageDropdown'
-              currentPageReportTemplate='Showing {first} to {last} of {totalRecords} entries'>
-            <Column field='displayName' header='Institution Name' body={this.renderInstitutionName}
-                    bodyStyle={styles.text} headerStyle={styles.header} frozen={true}/>
-            <Column field='organizationTypeEnum' header='Institution Type'
-                    body={this.renderOrganizationType} bodyStyle={styles.text}
-                    headerStyle={styles.header}/>
-            <Column field='accessTiers' header='Data access tiers' body={this.renderAccessTiers}
-                    bodyStyle={styles.text} headerStyle={styles.header}/>
-            <Column field='userInstructions' header='User Email Instruction' bodyStyle={styles.text}
-                    headerStyle={{...styles.header, width: '5rem'}}/>
-          </DataTable>
-        </FadeBox>
-      </div>;
+              currentPageReportTemplate='Showing {first} to {last} of {totalRecords} entries'
+            >
+              <Column
+                field='displayName'
+                header='Institution Name'
+                body={this.renderInstitutionName}
+                bodyStyle={styles.text}
+                headerStyle={styles.header}
+                frozen={true}
+              />
+              <Column
+                field='organizationTypeEnum'
+                header='Institution Type'
+                body={this.renderOrganizationType}
+                bodyStyle={styles.text}
+                headerStyle={styles.header}
+              />
+              <Column
+                field='accessTiers'
+                header='Data access tiers'
+                body={this.renderAccessTiers}
+                bodyStyle={styles.text}
+                headerStyle={styles.header}
+              />
+              <Column
+                field='userInstructions'
+                header='User Email Instruction'
+                bodyStyle={styles.text}
+                headerStyle={{ ...styles.header, width: '5rem' }}
+              />
+            </DataTable>
+          </FadeBox>
+        </div>
+      );
     }
-  });
+  }
+);

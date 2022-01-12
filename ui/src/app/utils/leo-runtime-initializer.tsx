@@ -1,9 +1,9 @@
-import {leoRuntimesApi} from 'app/services/notebooks-swagger-fetch-clients';
-import {runtimeApi} from 'app/services/swagger-fetch-clients';
-import {isAbortError, reportError} from 'app/utils/errors';
-import {applyPresetOverride, runtimePresets} from 'app/utils/runtime-presets';
-import {runtimeStore} from 'app/utils/stores';
-import {Runtime, RuntimeStatus} from 'generated/fetch';
+import { leoRuntimesApi } from 'app/services/notebooks-swagger-fetch-clients';
+import { runtimeApi } from 'app/services/swagger-fetch-clients';
+import { isAbortError, reportError } from 'app/utils/errors';
+import { applyPresetOverride, runtimePresets } from 'app/utils/runtime-presets';
+import { runtimeStore } from 'app/utils/stores';
+import { Runtime, RuntimeStatus } from 'generated/fetch';
 
 // We're only willing to wait 20 minutes total for a runtime to initialize. After that we return
 // a rejected promise no matter what.
@@ -99,9 +99,8 @@ const DEFAULT_OPTIONS: Partial<LeoRuntimeInitializerOptions> = {
   maxCreateCount: DEFAULT_MAX_CREATE_COUNT,
   maxResumeCount: DEFAULT_MAX_RESUME_COUNT,
   maxServerErrorCount: DEFAULT_MAX_SERVER_ERROR_COUNT,
-  resolutionCondition: (runtime) => runtime.status === RuntimeStatus.Running
+  resolutionCondition: (runtime) => runtime.status === RuntimeStatus.Running,
 };
-
 
 /**
  * A controller class implementing client-side logic to initialize a Leonardo runtime. This class
@@ -153,8 +152,15 @@ export class LeoRuntimeInitializer {
   private set currentRuntime(nextRuntime: Runtime | null) {
     this.currentRuntimeValue = nextRuntime;
     const storeWorkspaceNamespace = runtimeStore.get().workspaceNamespace;
-    if (storeWorkspaceNamespace === this.workspaceNamespace || storeWorkspaceNamespace === undefined ) {
-      runtimeStore.set({workspaceNamespace: this.workspaceNamespace, runtime: this.currentRuntimeValue, runtimeLoaded: true});
+    if (
+      storeWorkspaceNamespace === this.workspaceNamespace ||
+      storeWorkspaceNamespace === undefined
+    ) {
+      runtimeStore.set({
+        workspaceNamespace: this.workspaceNamespace,
+        runtime: this.currentRuntimeValue,
+        runtimeLoaded: true,
+      });
     }
   }
 
@@ -170,14 +176,16 @@ export class LeoRuntimeInitializer {
    * Creates and runs a runtime initializer. This is the main public entry point to this class.
    * @param options
    */
-  public static initialize(options: LeoRuntimeInitializerOptions): Promise<Runtime> {
+  public static initialize(
+    options: LeoRuntimeInitializerOptions
+  ): Promise<Runtime> {
     return new LeoRuntimeInitializer(options).run();
   }
 
   private constructor(options: LeoRuntimeInitializerOptions) {
     // Assign default values to certain options, which will be overridden by the input options
     // if present.
-    options = {...DEFAULT_OPTIONS, ...options};
+    options = { ...DEFAULT_OPTIONS, ...options };
 
     this.workspaceNamespace = options.workspaceNamespace;
     this.onPoll = options.onPoll ? options.onPoll : () => {};
@@ -195,7 +203,9 @@ export class LeoRuntimeInitializer {
   private async createRuntime(): Promise<void> {
     if (!this.targetRuntime) {
       // Automatic lazy creation is not supported; the caller must specify a target.
-      let defaultRuntime = {...runtimePresets.generalAnalysis.runtimeTemplate};
+      let defaultRuntime = {
+        ...runtimePresets.generalAnalysis.runtimeTemplate,
+      };
       if (this.currentRuntime) {
         defaultRuntime = applyPresetOverride(this.currentRuntime);
       }
@@ -204,22 +214,31 @@ export class LeoRuntimeInitializer {
 
     if (this.createCount >= this.maxCreateCount) {
       throw new ExceededActionCountError(
-        `Reached max runtime create count (${this.maxCreateCount})`, this.currentRuntime);
+        `Reached max runtime create count (${this.maxCreateCount})`,
+        this.currentRuntime
+      );
     }
 
-    await runtimeApi().createRuntime(this.workspaceNamespace,
+    await runtimeApi().createRuntime(
+      this.workspaceNamespace,
       this.targetRuntime,
-      {signal: this.pollAbortSignal});
+      { signal: this.pollAbortSignal }
+    );
     this.createCount++;
   }
 
   private async resumeRuntime(): Promise<void> {
     if (this.resumeCount >= this.maxResumeCount) {
       throw new ExceededActionCountError(
-        `Reached max runtime resume count (${this.maxResumeCount})`, this.currentRuntime);
+        `Reached max runtime resume count (${this.maxResumeCount})`,
+        this.currentRuntime
+      );
     }
     await leoRuntimesApi().startRuntime(
-      this.currentRuntime.googleProject, this.currentRuntime.runtimeName, {signal: this.pollAbortSignal});
+      this.currentRuntime.googleProject,
+      this.currentRuntime.runtimeName,
+      { signal: this.pollAbortSignal }
+    );
     this.resumeCount++;
   }
 
@@ -228,15 +247,23 @@ export class LeoRuntimeInitializer {
   }
 
   private isRuntimeDeleted(): boolean {
-    return this.currentRuntime && this.currentRuntime.status === RuntimeStatus.Deleted;
+    return (
+      this.currentRuntime &&
+      this.currentRuntime.status === RuntimeStatus.Deleted
+    );
   }
 
   private isRuntimeStopped(): boolean {
-    return this.currentRuntime && this.currentRuntime.status === RuntimeStatus.Stopped;
+    return (
+      this.currentRuntime &&
+      this.currentRuntime.status === RuntimeStatus.Stopped
+    );
   }
 
   private isRuntimeErrored(): boolean {
-    return this.currentRuntime && this.currentRuntime.status === RuntimeStatus.Error;
+    return (
+      this.currentRuntime && this.currentRuntime.status === RuntimeStatus.Error
+    );
   }
 
   private isNotFoundError(e: any): boolean {
@@ -283,7 +310,6 @@ export class LeoRuntimeInitializer {
   }
 
   private async poll() {
-
     // Overall strategy: continue polling the get-runtime endpoint, with capped exponential backoff,
     // until we either reach our goal state (a RUNNING runtime) or run up against the overall
     // timeout threshold.
@@ -293,40 +319,60 @@ export class LeoRuntimeInitializer {
     if (this.pollAbortSignal && this.pollAbortSignal.aborted) {
       // We'll bail out early if an abort signal was triggered while waiting for the poll cycle.
       return this.reject(
-        new LeoRuntimeInitializationAbortedError('Request was aborted', this.currentRuntime));
+        new LeoRuntimeInitializationAbortedError(
+          'Request was aborted',
+          this.currentRuntime
+        )
+      );
     }
     if (Date.now() - this.initializeStartTime > this.overallTimeout) {
       return this.reject(
         new LeoRuntimeInitializationFailedError(
           `Initialization attempt took longer than the max time allowed (${this.overallTimeout}ms)`,
-          this.currentRuntime));
+          this.currentRuntime
+        )
+      );
     }
 
     // Fetch the current runtime status, with some graceful error handling for NOT_FOUND response
     // and abort signals.
     try {
-      this.currentRuntime = await runtimeApi().getRuntime(this.workspaceNamespace, {signal: this.pollAbortSignal});
+      this.currentRuntime = await runtimeApi().getRuntime(
+        this.workspaceNamespace,
+        { signal: this.pollAbortSignal }
+      );
       this.onPoll(this.currentRuntime);
     } catch (e) {
       if (isAbortError(e)) {
         return this.reject(
-          new LeoRuntimeInitializationAbortedError('Abort signal received during runtime API call',
-            this.currentRuntime));
+          new LeoRuntimeInitializationAbortedError(
+            'Abort signal received during runtime API call',
+            this.currentRuntime
+          )
+        );
       } else if (this.isNotFoundError(e)) {
         // A not-found error is somewhat expected, if a runtime has recently been deleted or
         // hasn't been created yet.
         this.currentRuntime = null;
         this.onPoll(null);
       } else if (this.isClientError(e)) {
-          return this.reject(
-            new ExceededErrorCountError(
-              `Encountered unexpected client error (${e.status})`, e, this.currentRuntime));
+        return this.reject(
+          new ExceededErrorCountError(
+            `Encountered unexpected client error (${e.status})`,
+            e,
+            this.currentRuntime
+          )
+        );
       } else {
         this.handleUnknownError(e);
         if (this.hasTooManyServerErrors()) {
           return this.reject(
             new ExceededErrorCountError(
-              `Reached max server error count (${this.maxServerErrorCount})`, e, this.currentRuntime));
+              `Reached max server error count (${this.maxServerErrorCount})`,
+              e,
+              this.currentRuntime
+            )
+          );
         }
       }
     }
@@ -344,14 +390,18 @@ export class LeoRuntimeInitializer {
         // If runtime is in error state, stop polling so we can display the error.
         reportError(
           `Runtime ${this.currentRuntime.googleProject}/${this.currentRuntime.runtimeName}` +
-          ' has reached an ERROR status');
+            ' has reached an ERROR status'
+        );
         return this.resolve(this.currentRuntime);
       }
     } catch (e) {
       if (isAbortError(e)) {
         return this.reject(
-          new LeoRuntimeInitializationAbortedError('Abort signal received during runtime API call',
-          this.currentRuntime));
+          new LeoRuntimeInitializationAbortedError(
+            'Abort signal received during runtime API call',
+            this.currentRuntime
+          )
+        );
       } else if (e instanceof LeoRuntimeInitializationFailedError) {
         // Propagate errors created by this library.
         return this.reject(e);
@@ -360,7 +410,11 @@ export class LeoRuntimeInitializer {
         if (this.hasTooManyServerErrors()) {
           return this.reject(
             new ExceededErrorCountError(
-              `Reached max server error count (${this.maxServerErrorCount})`, e, this.currentRuntime));
+              `Reached max server error count (${this.maxServerErrorCount})`,
+              e,
+              this.currentRuntime
+            )
+          );
         }
       }
     }

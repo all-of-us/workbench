@@ -1,25 +1,28 @@
-import {convertToResource} from 'app/utils/resources';
-import {WorkspaceData} from 'app/utils/workspace-data';
+import { convertToResource } from 'app/utils/resources';
+import { WorkspaceData } from 'app/utils/workspace-data';
 import {
-    BillingStatus,
-    Cohort,
-    CohortReview,
-    ConceptSet,
-    DataSet,
-    FileDetail,
-    ResourceType,
-    WorkspaceResource,
+  BillingStatus,
+  Cohort,
+  CohortReview,
+  ConceptSet,
+  DataSet,
+  FileDetail,
+  ResourceType,
+  WorkspaceResource,
 } from 'generated/fetch';
-import {CdrVersionsStubVariables} from 'testing/stubs/cdr-versions-api-stub';
-import {WorkspaceStubVariables} from 'testing/stubs/workspaces';
-import {AccessTierShortNames} from 'app/utils/access-tiers';
+import { CdrVersionsStubVariables } from 'testing/stubs/cdr-versions-api-stub';
+import { WorkspaceStubVariables } from 'testing/stubs/workspaces';
+import { AccessTierShortNames } from 'app/utils/access-tiers';
 
 type InputResource = FileDetail | Cohort | CohortReview | ConceptSet | DataSet;
 export function convertToResources(
   inputResources: InputResource[],
   resourceType: ResourceType,
-  workspace: WorkspaceData): WorkspaceResource[] {
-  return inputResources.map(ir => convertToResource(ir, resourceType, workspace));
+  workspace: WorkspaceData
+): WorkspaceResource[] {
+  return inputResources.map((ir) =>
+    convertToResource(ir, resourceType, workspace)
+  );
 }
 
 export const stubResource: WorkspaceResource = {
@@ -31,5 +34,5 @@ export const stubResource: WorkspaceResource = {
   accessTierShortName: AccessTierShortNames.Registered,
   workspaceBillingStatus: BillingStatus.ACTIVE,
   lastModifiedEpochMillis: 1634763170,
-  adminLocked: false
+  adminLocked: false,
 };

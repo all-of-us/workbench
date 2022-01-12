@@ -1,17 +1,36 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
-import {RenameModal} from 'app/components/rename-modal';
-import {Action, ResourceActionsMenu} from 'app/components/resource-actions-menu';
-import {canDelete, canWrite, ResourceCard} from 'app/components/resource-card';
-import {withConfirmDeleteModal, WithConfirmDeleteModalProps} from 'app/components/with-confirm-delete-modal';
-import {withErrorModal, WithErrorModalProps} from 'app/components/with-error-modal';
-import {withSpinnerOverlay, WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
-import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
-import {getDescription, getDisplayName, getType} from 'app/utils/resources';
-import {WorkspaceResource} from 'generated/fetch';
+import { RenameModal } from 'app/components/rename-modal';
+import {
+  Action,
+  ResourceActionsMenu,
+} from 'app/components/resource-actions-menu';
+import {
+  canDelete,
+  canWrite,
+  ResourceCard,
+} from 'app/components/resource-card';
+import {
+  withConfirmDeleteModal,
+  WithConfirmDeleteModalProps,
+} from 'app/components/with-confirm-delete-modal';
+import {
+  withErrorModal,
+  WithErrorModalProps,
+} from 'app/components/with-error-modal';
+import {
+  withSpinnerOverlay,
+  WithSpinnerOverlayProps,
+} from 'app/components/with-spinner-overlay';
+import { cohortReviewApi } from 'app/services/swagger-fetch-clients';
+import { getDescription, getDisplayName, getType } from 'app/utils/resources';
+import { WorkspaceResource } from 'generated/fetch';
 
-interface Props extends WithConfirmDeleteModalProps, WithErrorModalProps, WithSpinnerOverlayProps {
+interface Props
+  extends WithConfirmDeleteModalProps,
+    WithErrorModalProps,
+    WithSpinnerOverlayProps {
   resource: WorkspaceResource;
   existingNameList: string[];
   onUpdate: () => Promise<void>;
@@ -25,82 +44,100 @@ interface State {
 export const CohortReviewResourceCard = fp.flow(
   withErrorModal(),
   withConfirmDeleteModal(),
-  withSpinnerOverlay(),
-)(class extends React.Component<Props, State> {
+  withSpinnerOverlay()
+)(
+  class extends React.Component<Props, State> {
+    constructor(props: Props) {
+      super(props);
+      this.state = {
+        showRenameModal: false,
+      };
+    }
 
-  constructor(props: Props) {
-    super(props);
-    this.state = {
-      showRenameModal: false,
-    };
-  }
-
-  get actions(): Action[] {
-    const {resource} = this.props;
-    return [
-      {
-        icon: 'note',
-        displayName: 'Rename',
-        onClick: () => {
-          this.setState({showRenameModal: true});
+    get actions(): Action[] {
+      const { resource } = this.props;
+      return [
+        {
+          icon: 'note',
+          displayName: 'Rename',
+          onClick: () => {
+            this.setState({ showRenameModal: true });
+          },
+          disabled: !canWrite(resource),
         },
-        disabled: !canWrite(resource)
-      },
-      {
-        icon: 'trash',
-        displayName: 'Delete',
-        onClick: () => {
-          this.props.showConfirmDeleteModal(getDisplayName(resource),
-            getType(resource), () => this.delete());
+        {
+          icon: 'trash',
+          displayName: 'Delete',
+          onClick: () => {
+            this.props.showConfirmDeleteModal(
+              getDisplayName(resource),
+              getType(resource),
+              () => this.delete()
+            );
+          },
+          disabled: !canDelete(resource),
         },
-        disabled: !canDelete(resource)
-      }
-    ];
-  }
+      ];
+    }
 
-  async delete() {
-    return cohortReviewApi().deleteCohortReview(
-        this.props.resource.workspaceNamespace,
-        this.props.resource.workspaceFirecloudName,
-        this.props.resource.cohortReview.cohortReviewId)
+    async delete() {
+      return cohortReviewApi()
+        .deleteCohortReview(
+          this.props.resource.workspaceNamespace,
+          this.props.resource.workspaceFirecloudName,
+          this.props.resource.cohortReview.cohortReviewId
+        )
         .then(() => {
           this.props.onUpdate();
         });
-  }
+    }
 
-  rename(name, description) {
-    const request = {
-      ...this.props.resource.cohortReview,
-      cohortName: name,
-      description: description
-    };
-    cohortReviewApi().updateCohortReview(
-        this.props.resource.workspaceNamespace,
-        this.props.resource.workspaceFirecloudName,
-        this.props.resource.cohortReview.cohortReviewId,
-        request
-    ).then(() => {
-      this.props.onUpdate();
-    }).catch(error => console.error(error)
-    ).finally(() => {
-      this.setState({showRenameModal: false});
-    });
-  }
+    rename(name, description) {
+      const request = {
+        ...this.props.resource.cohortReview,
+        cohortName: name,
+        description: description,
+      };
+      cohortReviewApi()
+        .updateCohortReview(
+          this.props.resource.workspaceNamespace,
+          this.props.resource.workspaceFirecloudName,
+          this.props.resource.cohortReview.cohortReviewId,
+          request
+        )
+        .then(() => {
+          this.props.onUpdate();
+        })
+        .catch((error) => console.error(error))
+        .finally(() => {
+          this.setState({ showRenameModal: false });
+        });
+    }
 
-  render() {
-    const {resource, menuOnly} = this.props;
-    return <React.Fragment>
-      {this.state.showRenameModal &&
-        <RenameModal onRename={(name, description) => this.rename(name, description)}
-                   resourceType={getType(resource)}
-                   onCancel={() => this.setState({showRenameModal: false})}
-                   oldDescription={getDescription(resource)}
-                   oldName={getDisplayName(resource)}
-                   existingNames={this.props.existingNameList}/>
-      }
-      {menuOnly ?
-          <ResourceActionsMenu actions={this.actions} disabled={resource.adminLocked}/> :
-          <ResourceCard resource={resource} actions={this.actions}/>}
-    </React.Fragment>;
+    render() {
+      const { resource, menuOnly } = this.props;
+      return (
+        <React.Fragment>
+          {this.state.showRenameModal && (
+            <RenameModal
+              onRename={(name, description) => this.rename(name, description)}
+              resourceType={getType(resource)}
+              onCancel={() => this.setState({ showRenameModal: false })}
+              oldDescription={getDescription(resource)}
+              oldName={getDisplayName(resource)}
+              existingNames={this.props.existingNameList}
+            />
+          )}
+          {menuOnly ? (
+            <ResourceActionsMenu
+              actions={this.actions}
+              disabled={resource.adminLocked}
+            />
+          ) : (
+            <ResourceCard resource={resource} actions={this.actions} />
+          )}
+        </React.Fragment>
+      );
+    }
   }
-});
+);
