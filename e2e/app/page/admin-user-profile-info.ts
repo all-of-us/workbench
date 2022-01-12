@@ -144,7 +144,7 @@ export default class UserProfileInfo extends AuthenticatedPage {
     const regexpSize = /\$([0-9.]+) used of \$([0-9.]+) limit/;
     const match = initialCreditsUsedValue.match(regexpSize);
     // extract the credit limit value
-    const creditLimitValue = "$" + `${match[2]}`;
+    const creditLimitValue = '$' + `${match[2]}`;
     return creditLimitValue;
   }
 
@@ -153,7 +153,7 @@ export default class UserProfileInfo extends AuthenticatedPage {
     const initialCreditsDropdown = SelectMenu.findByName(this.page, { dataTestId: DataTestIdAlias.InitialCreditLimit });
     return await initialCreditsDropdown.getSelectedValue();
   }
-  
+
   // select a different Verified Institution to verify email match with institution
   async selectVerifiedInstitution(selectTextValue: string): Promise<void> {
     const dropdown = SelectMenu.findByName(this.page, FieldSelector.VerifiedInstitutionSelect.textOption);

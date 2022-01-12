@@ -125,7 +125,6 @@ describe('User Admin', () => {
     await userProfileInfo.selectInitialCredits(initialCreditLimit);
   });
 
-
   test('Verify that the user-audit page UI renders correctly', async () => {
     const userAdminPage = new UserAdminPage(page);
     await userAdminPage.waitForLoad();
