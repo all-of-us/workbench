@@ -371,18 +371,6 @@ jobs:
                     ./project.rb validate-swagger --project-prop verboseTestLogging=yes
                   fi
             - run:
-                name: Run Java genomics unit tests
-                working_directory: ~/workbench/api
-                command: |
-                  CLASSNAMES=$(circleci tests glob "genomics/src/test/java/**/*Test.java" \
-                    | cut -c 1- \
-                    | sed 's@genomics/src/test/java/@@' \
-                    | sed 's@/@.@g' \
-                    | sed 's/\.[^.]*$//' \
-                    | circleci tests split --split-by=timings --index=$CIRCLE_NODE_INDEX)
-                  GRADLE_ARGS=$(echo $CLASSNAMES | awk '{for (i=1; i<=NF; i++) print "--tests", $i }')
-                  gradle -p genomics test $GRADLE_ARGS
-            - run:
                 name: Run Java api unit tests
                 working_directory: ~/workbench/api
                 # For script logics and explanation, see README.
