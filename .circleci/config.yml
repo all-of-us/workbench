@@ -458,7 +458,7 @@ jobs:
       - checkout-code
       - run:
           working_directory: ~/workbench/.circleci
-          name: "Halt deploy checking"
+          name: "undo me"
           command: bash .circleci/skip-deploy-checks.sh
       - halt-test-check:
           dir_names: "ui"
