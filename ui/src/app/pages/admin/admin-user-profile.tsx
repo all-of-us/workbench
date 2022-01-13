@@ -3,21 +3,21 @@ import { useParams } from 'react-router-dom';
 import validate from 'validate.js';
 
 import {
+  AccessModuleExpirations,
   adminGetProfile,
-  UserAdminTableLink,
-  UserAuditLink,
   commonStyles,
-  getInitalCreditsUsage,
-  InitialCreditsDropdown,
-  InstitutionDropdown,
-  InstitutionalRoleDropdown,
-  InstitutionalRoleOtherTextInput,
-  getPublicInstitutionDetails,
   ContactEmailTextInput,
   enableSave,
-  updateAccountProperties,
   ErrorsTooltip,
-  AccessModuleExpirations,
+  getInitalCreditsUsage,
+  getPublicInstitutionDetails,
+  InitialCreditsDropdown,
+  InstitutionalRoleDropdown,
+  InstitutionalRoleOtherTextInput,
+  InstitutionDropdown,
+  updateAccountProperties,
+  UserAdminTableLink,
+  UserAuditLink,
 } from './admin-user-common';
 import { FadeBox } from 'app/components/containers';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
@@ -75,7 +75,6 @@ const styles = reactStyles({
     paddingTop: '1em',
   },
   editableFields: {
-    height: '221px',
     width: '601px',
     paddingTop: '1em',
   },
@@ -389,6 +388,9 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
               updateInstitutionalRoleOtherText(otherText)
             }
           />
+        </FlexRow>
+        <FlexRow>
+          <AccessModuleTable profile={updatedProfile} />
         </FlexRow>
         <FlexRow style={{ paddingTop: '1em' }}>
           <ErrorsTooltip errors={errors}>
