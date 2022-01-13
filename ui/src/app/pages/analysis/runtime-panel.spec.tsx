@@ -29,7 +29,10 @@ import {
 } from 'generated/fetch';
 import { RuntimeApi } from 'generated/fetch/api';
 import defaultServerConfig from 'testing/default-server-config';
-import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
+import {
+  mountWithRouter,
+  waitOneTickAndUpdate,
+} from 'testing/react-test-helpers';
 import {
   cdrVersionTiersResponse,
   CdrVersionsStubVariables,
@@ -63,7 +66,7 @@ describe('RuntimePanel', () => {
 
   const component = async (propOverrides?: object) => {
     const allProps = { ...props, ...propOverrides };
-    const c = mount(<RuntimePanelWrapper {...allProps} />);
+    const c = mountWithRouter(<RuntimePanelWrapper {...allProps} />);
     await waitOneTickAndUpdate(c);
     return c;
   };
