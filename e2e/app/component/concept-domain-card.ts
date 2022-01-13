@@ -18,8 +18,7 @@ const domainCardSelector = {
 
 export default class ConceptDomainCard extends Container {
   static findDomainCard(page: Page, domain: Domain): ConceptDomainCard {
-    const selector =
-      `${domainCardSelector.cardXpath}` + `[child::*[@tabindex="0" and @role="button" and text()="${domain}"]]`;
+    const selector = `${domainCardSelector.cardXpath}[.//*[@role="button" and text()="${domain}"]]`;
     return new ConceptDomainCard(page, selector);
   }
 
@@ -40,7 +39,7 @@ export default class ConceptDomainCard extends Container {
    * Find displayed number of Participants in this domain.
    */
   async getParticipantsCount(): Promise<string> {
-    const selector = `${this.getXpath()}//*[contains(normalize-space(text()), "participants in domain")]`;
+    const selector = `${this.getXpath()}//*[contains(normalize-space(), "participants in domain")]/div`;
     const num = await this.extractConceptsCount(selector);
     console.log(`Participants in this domain: ${num}`);
     return num;
@@ -50,14 +49,15 @@ export default class ConceptDomainCard extends Container {
    * Find displayed number of Concepts in this domain.
    */
   async getConceptsCount(): Promise<string> {
-    const selector = `${this.getXpath()}//*[contains(normalize-space(text()), "concepts in this domain")]`;
+    const selector = `${this.getXpath()}//*[contains(normalize-space(), "concepts in this domain")]/span`;
     const num = await this.extractConceptsCount(selector);
     console.log(`Concepts in this domain: ${num}`);
     return num;
   }
 
   private async extractConceptsCount(selector: string): Promise<string> {
-    const elemt = await this.page.waitForXPath(selector, { visible: true });
+    await this.page.waitForXPath(this.getXpath(), { visible: true });
+    const elemt = await this.page.waitForXPath(selector);
     const textContent = await getPropValue<string>(elemt, 'textContent');
     const regex = new RegExp(/\d{1,3}(,?\d{3})*/); // Match numbers with comma
     return regex.exec(textContent)[0];

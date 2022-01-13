@@ -912,11 +912,6 @@ export const HelpSidebar = fp.flow(
                 >
                   Cloud analysis environment
                 </h3>
-                <div style={{ padding: '0.5rem 1rem' }}>
-                  Your analysis environment consists of an application and
-                  compute resources. Your cloud environment is unique to this
-                  workspace and not shared with other users.
-                </div>
               </div>
             ),
             bodyWidthRem: '30',

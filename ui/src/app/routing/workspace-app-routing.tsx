@@ -26,7 +26,7 @@ import {
 } from 'app/pages/workspace/workspace-edit';
 import { LeoApplicationType } from 'app/pages/analysis/leonardo-app-launcher';
 import { adminLockedGuard } from 'app/routing/guards';
-import { MatchParams } from 'app/utils/stores';
+import { MatchParams, withParamsKey } from 'app/utils/stores';
 import { BreadcrumbType } from 'app/components/breadcrumb-type';
 
 const CohortPagePage = fp.flow(withRouteData, withRoutingSpinner)(CohortPage);
@@ -70,6 +70,12 @@ const NotebookListPage = fp.flow(
 const LeonardoAppRedirectPage = fp.flow(
   withRouteData,
   withRoutingSpinner
+)(LeonardoAppLauncher);
+const LeonardoSparkConsoleRedirectPage = fp.flow(
+  withRouteData,
+  withRoutingSpinner,
+  // Force remounting on parameter change.
+  withParamsKey('sparkConsolePath')
 )(LeonardoAppLauncher);
 const ParticipantsTablePage = fp.flow(
   withRouteData,
@@ -187,14 +193,27 @@ export const WorkspaceRoutes = () => {
           routeData={{
             breadcrumb: BreadcrumbType.Workspace,
             pageKey: LEONARDO_APP_PAGE_KEY,
-            // The iframe we use to display the Jupyter notebook does something strange
-            // to the height calculation of the container, which is normally set to auto.
-            // Setting this flag sets the container to 100% so that no content is clipped.
             contentFullHeightOverride: true,
-            workspaceNavBarTab: 'terminals',
+            workspaceNavBarTab: 'notebooks',
             minimizeChrome: true,
           }}
           leoAppType={LeoApplicationType.Terminal}
+        />
+      </AppRoute>
+      <AppRoute
+        exact
+        path={`${path}/spark/:sparkConsolePath`}
+        guards={[adminLockedGuard(ns, wsid)]}
+      >
+        <LeonardoSparkConsoleRedirectPage
+          routeData={{
+            breadcrumb: BreadcrumbType.Workspace,
+            pageKey: LEONARDO_APP_PAGE_KEY,
+            contentFullHeightOverride: true,
+            workspaceNavBarTab: 'notebooks',
+            minimizeChrome: true,
+          }}
+          leoAppType={LeoApplicationType.SparkConsole}
         />
       </AppRoute>
       <AppRoute
