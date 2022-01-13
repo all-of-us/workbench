@@ -267,9 +267,6 @@ public class WorkbenchConfig {
     public boolean enablePersistentDisk;
     // If true, ask Leo to set dataproc worker VMs not having internet access.
     public boolean enablePrivateDataprocWorker;
-    // If true, workspace owner and writers will have Google Lifesience Runner permission, and their
-    // Terra Pet SA can actAs itself.
-    public boolean grantLifescienceApiRunnerAcl;
     // If true, copy the support staff when sending Admin Locking emails.
     public boolean ccSupportWhenAdminLocking;
   }
