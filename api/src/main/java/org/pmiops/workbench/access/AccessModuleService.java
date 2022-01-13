@@ -5,10 +5,14 @@ import java.util.List;
 import java.util.Optional;
 import org.pmiops.workbench.db.model.DbAccessModule.AccessModuleName;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.model.AccessBypassRequest;
 import org.pmiops.workbench.model.AccessModule;
 import org.pmiops.workbench.model.AccessModuleStatus;
 
 public interface AccessModuleService {
+  /** Updates bypass time for a module. */
+  void updateBypassTime(long userId, AccessBypassRequest accessBypassRequest);
+
   /** Updates bypass time for a module. */
   void updateBypassTime(long userId, AccessModule accessModuleName, boolean isBypassed);
 
