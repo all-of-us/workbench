@@ -11,6 +11,8 @@ export OUTPUT_DATASET=$4 # output dataset
 
 BACKUP_DATASET=${OUTPUT_DATASET}_backup
 
+TABLE_LIST=$(bq ls -n 1000 "$BQ_PROJECT:$BQ_DATASET")
+
 # Make dataset for backup
 datasets=$(bq --project_id="$OUTPUT_PROJECT" ls --max_results=1000)
 if [[ $datasets =~ $BACKUP_DATASET ]]; then
@@ -286,11 +288,14 @@ bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
 SELECT *
 FROM \`$BQ_PROJECT.$BQ_DATASET.ds_visit_occurrence\`"
 
-#############################
-# ds_zip_code_socioeconomic #
-#############################
-echo "Inserting ds_zip_code_socioeconomic"
-bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
-"INSERT INTO \`$OUTPUT_PROJECT.$BACKUP_DATASET.ds_zip_code_socioeconomic\`
-SELECT *
-FROM \`$BQ_PROJECT.$BQ_DATASET.ds_zip_code_socioeconomic\`"
+if [[ "$TABLE_LIST" == *"ds_zip_code_socioeconomic"* ]]
+then
+  #############################
+  # ds_zip_code_socioeconomic #
+  #############################
+  echo "Inserting ds_zip_code_socioeconomic"
+  bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
+  "INSERT INTO \`$OUTPUT_PROJECT.$BACKUP_DATASET.ds_zip_code_socioeconomic\`
+  SELECT *
+  FROM \`$BQ_PROJECT.$BQ_DATASET.ds_zip_code_socioeconomic\`"
+fi

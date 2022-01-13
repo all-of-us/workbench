@@ -21,7 +21,7 @@ bq --quiet --project_id=$BQ_PROJECT mk --schema=$schema_path/cb_search_person.js
 # insert person data into cb_search_person
 ################################################
 echo "Inserting person data into cb_search_person"
-if [ -z "$WGV_PROJECT" && -z "$ARRAY_TABLE" ]
+if [[ -z "$WGV_PROJECT" && -z "$ARRAY_TABLE" ]]
 then
 bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_search_person\`
