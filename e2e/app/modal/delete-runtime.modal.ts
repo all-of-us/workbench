@@ -6,8 +6,10 @@ import { waitForText } from 'utils/waits-utils';
 const modalTitle = 'Delete Runtime';
 
 export default class DeleteRuntimeModal extends Modal {
-  constructor(page: Page, xpath?: string) {
-    super(page, xpath);
+  // constructor(page: Page, xpath?: string) {
+  //   super(page, xpath);
+  constructor(page: Page, opts?: { xpath?: string; modalIndex?: number }) {
+    super(page, opts);
   }
 
   async isLoaded(): Promise<boolean> {
