@@ -419,6 +419,7 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
     updateProfile({ accessModules });
   };
 
+  // TODO actually it would be better for Save-button behavior to also record bypassrequests directly
   const updateModuleBypassStatus = (
     accessBypassRequest: AccessBypassRequest
   ) => {
