@@ -30,7 +30,9 @@ import { displayNameForTier } from 'app/utils/access-tiers';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { isBlank, reactStyles } from 'app/utils';
 import {
+  AccessBypassRequest,
   AccessModule,
+  AccessModuleStatus,
   InstitutionalRole,
   Profile,
   PublicInstitutionDetails,
@@ -242,35 +244,34 @@ interface TableRow {
 const AccessModuleTable = (props: {
   oldProfile: Profile;
   updatedProfile: Profile;
+  bypassUpdate: (accessBypassRequest: AccessBypassRequest) => void;
 }) => {
   const tableData: TableRow[] = accessModulesForTable.map((moduleName) => {
+    const { oldProfile, updatedProfile, bypassUpdate } = props;
     const { adminPageTitle, adminBypassable } =
       getAccessModuleConfig(moduleName);
-    const status = getAccessModuleStatusByName(
-      props.updatedProfile,
-      moduleName
-    );
-    const bypassed = !!status?.bypassEpochMillis;
+    const status = getAccessModuleStatusByName(updatedProfile, moduleName);
+    const isBypassed = !!status?.bypassEpochMillis;
     const previouslyBypassed = !!getAccessModuleStatusByName(
-      props.oldProfile,
+      oldProfile,
       moduleName
     )?.bypassEpochMillis;
+
     // temporary for development
     const bypassToggleText =
-      (bypassed ? 'BYPASSED' : 'NOT-B') +
+      (isBypassed ? 'BYPASSED' : 'NOT-B') +
       ' ' +
-      (bypassed !== previouslyBypassed ? 'CHANGED' : 'NOT-C');
+      (isBypassed !== previouslyBypassed ? 'CHANGED' : 'NOT-C');
 
-    const toggleBypass = () => {};
     return {
       moduleName: adminPageTitle,
       bypassToggle: adminBypassable && (
         <Toggle
           style={{ paddingBottom: 0, flexGrow: 0 }}
           name={bypassToggleText}
-          checked={bypassed}
+          checked={isBypassed}
           data-test-id={`${moduleName}-toggle`}
-          onToggle={() => toggleBypass()}
+          onToggle={() => bypassUpdate({ moduleName, isBypassed: !isBypassed })}
         />
       ),
     };
@@ -402,6 +403,31 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
     updateProfile({ verifiedInstitutionalAffiliation });
   };
 
+  const updateModuleStatus = (newUpdate: Partial<AccessModuleStatus>) => {
+    const moduleUpdate: AccessModuleStatus = {
+      ...getAccessModuleStatusByName(updatedProfile, newUpdate.moduleName),
+      ...newUpdate,
+    };
+    const unchangedModules = updatedProfile.accessModules.modules.filter(
+      (m) => m.moduleName !== newUpdate.moduleName
+    );
+    const accessModules = {
+      anyModuleHasExpired: updatedProfile.accessModules.anyModuleHasExpired,
+      modules: [...unchangedModules, moduleUpdate],
+    };
+
+    updateProfile({ accessModules });
+  };
+
+  const updateModuleBypassStatus = (
+    accessBypassRequest: AccessBypassRequest
+  ) => {
+    updateModuleStatus({
+      moduleName: accessBypassRequest.moduleName,
+      bypassEpochMillis: accessBypassRequest.isBypassed ? Date.now() : null,
+    });
+  };
+
   const errors = validate(
     {
       contactEmail: !!updatedProfile?.contactEmail,
@@ -474,6 +500,9 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
           <AccessModuleTable
             oldProfile={oldProfile}
             updatedProfile={updatedProfile}
+            bypassUpdate={(accessBypassRequest) =>
+              updateModuleBypassStatus(accessBypassRequest)
+            }
           />
         </FlexRow>
         <FlexRow style={{ paddingTop: '1em' }}>

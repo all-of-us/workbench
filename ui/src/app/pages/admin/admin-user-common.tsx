@@ -7,9 +7,10 @@ import { Link } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 import { Dropdown } from 'primereact/dropdown';
 
-import { formatInitialCreditsUSD, reactStyles } from 'app/utils';
+import { cond, formatInitialCreditsUSD, reactStyles } from 'app/utils';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import {
+  AccessBypassRequest,
   AccessModule,
   AccessModuleStatus,
   AccountPropertyUpdate,
@@ -33,6 +34,7 @@ import {
   accessRenewalModules,
   computeRenewalDisplayDates,
   getAccessModuleConfig,
+  getAccessModuleStatusByName,
 } from 'app/utils/access-utils';
 import { hasRegisteredTierAccess } from 'app/utils/access-tiers';
 
@@ -147,6 +149,25 @@ export const getUpdatedProfileValue = (
   }
 };
 
+export const getBypassChangeRequests = (
+  oldProfile: Profile,
+  updatedProfile: Profile
+): AccessBypassRequest[] => {
+  return updatedProfile.accessModules.modules
+    .filter((updatedModuleStatus) => {
+      const updatedModuleBypassed = !!updatedModuleStatus.bypassEpochMillis;
+      const oldModuleBypassed = !!getAccessModuleStatusByName(
+        oldProfile,
+        updatedModuleStatus.moduleName
+      )?.bypassEpochMillis;
+      return updatedModuleBypassed !== oldModuleBypassed;
+    })
+    .map((updatedModuleStatus) => ({
+      moduleName: updatedModuleStatus.moduleName,
+      isBypassed: !!updatedModuleStatus.bypassEpochMillis,
+    }));
+};
+
 export const enableSave = (
   oldProfile: Profile,
   updatedProfile: Profile,
@@ -169,7 +190,7 @@ export const updateAccountProperties = async (
     affiliation: getUpdatedProfileValue(oldProfile, updatedProfile, [
       'verifiedInstitutionalAffiliation',
     ]),
-    accessBypassRequests: [], // coming soon: RW-4958
+    accessBypassRequests: getBypassChangeRequests(oldProfile, updatedProfile),
   };
 
   return userAdminApi().updateAccountProperties(request);
