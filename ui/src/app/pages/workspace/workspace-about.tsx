@@ -189,6 +189,13 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withCdrVersions())
     }
   }
 
+  get workspaceGcpBillingSpendUrl(): string {
+    return 'https://console.cloud.google.com/billing/'
+      + this.state.workspace.billingAccountName.replace("billingAccounts/", "")
+      + '/reports;grouping=GROUP_BY_SKU?project='
+      + this.state.workspace.googleProject;
+  }
+
   async publishUnpublishWorkspace(publish: boolean) {
     const {workspace} = this.state;
     const {namespace, id} = workspace;
@@ -313,12 +320,16 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withCdrVersions())
                   <Spinner style={{height: 16, width: 16}}/>
                 }</div>
               </div>}
-          {workspace && WorkspacePermissionsUtil.canWrite(workspace.accessLevel)<h3 style={{marginBottom: '0.5rem'}}>Billing
-            <TooltipTrigger content={WorkspaceInfoTooltipText()}>
-              <InfoIcon style={{margin: '0 0.3rem'}}/>
-            </TooltipTrigger>
-
-          </h3>}
+          {workspace && WorkspacePermissionsUtil.isOwner(workspace.accessLevel) &&
+            <div>
+              <h3 style={{marginBottom: '0.5rem'}}>Billing</h3>
+              <StyledExternalLink
+                href={this.workspaceGcpBillingSpendUrl}
+                target='_blank'>
+                View detailed spend report
+              </StyledExternalLink>
+            </div>
+          }
           <></>
         </div>
       </div>
