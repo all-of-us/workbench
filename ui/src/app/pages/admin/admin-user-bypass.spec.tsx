@@ -1,28 +1,30 @@
-import {mount} from 'enzyme';
+import { mount } from 'enzyme';
 import * as React from 'react';
-import {AdminUserBypass} from './admin-user-bypass';
-import {AdminTableUser} from 'generated/fetch';
-import {ProfileStubVariables} from 'testing/stubs/profile-api-stub';
-import {serverConfigStore} from 'app/utils/stores';
+import { AdminUserBypass } from './admin-user-bypass';
+import { AdminTableUser } from 'generated/fetch';
+import { ProfileStubVariables } from 'testing/stubs/profile-api-stub';
+import { serverConfigStore } from 'app/utils/stores';
 
 describe('AdminUserBypassSpec', () => {
-  let props: {user: AdminTableUser};
+  let props: { user: AdminTableUser };
 
   const component = () => {
-    return mount(<AdminUserBypass {...props}/>);
+    return mount(<AdminUserBypass {...props} />);
   };
 
   beforeEach(() => {
-    serverConfigStore.set({config: {
-      gsuiteDomain: 'fake-research-aou.org',
-      projectId: 'aaa',
-      publicApiKeyForErrorReports: 'aaa',
-      enableEraCommons: true,
-      enableRasLoginGovLinking: true,
-      enforceRasLoginGovLinking: true,
-    }});
+    serverConfigStore.set({
+      config: {
+        gsuiteDomain: 'fake-research-aou.org',
+        projectId: 'aaa',
+        publicApiKeyForErrorReports: 'aaa',
+        enableEraCommons: true,
+        enableRasLoginGovLinking: true,
+        enforceRasLoginGovLinking: true,
+      },
+    });
     props = {
-      user: ProfileStubVariables.ADMIN_TABLE_USER_STUB
+      user: ProfileStubVariables.ADMIN_TABLE_USER_STUB,
     };
   });
 

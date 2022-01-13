@@ -1,5 +1,5 @@
-import {environment} from 'environments/environment';
-import {ZendeskEnv} from 'environments/environment-type';
+import { environment } from 'environments/environment';
+import { ZendeskEnv } from 'environments/environment-type';
 
 interface ZendeskUrls {
   billing: string;
@@ -18,16 +18,16 @@ interface ZendeskUrls {
 const zendeskConfigs = {
   [ZendeskEnv.Prod]: {
     baseUrl: 'https://aousupporthelp.zendesk.com/hc',
-    widgetKey: '5a7d70b9-37f9-443b-8d0e-c3bd3c2a55e3'
+    widgetKey: '5a7d70b9-37f9-443b-8d0e-c3bd3c2a55e3',
   },
   [ZendeskEnv.Preprod]: {
     baseUrl: 'https://aoupreprodsupporthelp.zendesk.com/hc',
-    widgetKey: '41815bdd-7e8f-4450-aadf-dd5957093233'
+    widgetKey: '41815bdd-7e8f-4450-aadf-dd5957093233',
   },
   [ZendeskEnv.Sandbox]: {
     baseUrl: 'https://aousupporthelp1634849601.zendesk.com/hc',
-    widgetKey: 'df0a2e39-f8a8-482b-baf5-af82e14d38f9'
-  }
+    widgetKey: 'df0a2e39-f8a8-482b-baf5-af82e14d38f9',
+  },
 };
 
 export const zendeskWidgetKey = () => {
@@ -49,9 +49,9 @@ export const supportUrls: ZendeskUrls = ((env) => {
     // This link in particular needs the "en-us" infix. The other urls will
     // redirect according to detected locale, which is preferred.
     communityForum: `${baseUrl}/en-us/community/topics`,
-    helpCenter: baseUrl
+    helpCenter: baseUrl,
   };
-  const urls: {[key: string]: ZendeskUrls} = {
+  const urls: { [key: string]: ZendeskUrls } = {
     [ZendeskEnv.Prod]: {
       ...commonUrls,
       billing: section('360008099991'),
@@ -87,7 +87,7 @@ export const supportUrls: ZendeskUrls = ((env) => {
       tableOfContents: category('360003430672'),
       researchPurpose: article('360044334652'),
       workspaceBucket: article('360044796611'),
-    }
+    },
   };
   return urls[env];
 })(environment.zendeskEnv);
@@ -97,8 +97,11 @@ export const supportUrls: ZendeskUrls = ((env) => {
 // TODO: investigate whether this will be possible after we migrate to React
 
 export function openZendeskWidget(
-  givenName: string, familyName: string, aouEmailAddress: string,
-  contactEmailAddress: string): void {
+  givenName: string,
+  familyName: string,
+  aouEmailAddress: string,
+  contactEmailAddress: string
+): void {
   // Note: we're string-protecting our access of the 'zE' property, since
   // this property is dynamically loaded by the Zendesk web widget snippet,
   // and can't properly be typed. If for some reason the support widget is

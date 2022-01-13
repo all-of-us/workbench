@@ -1,17 +1,18 @@
-import {profileApi} from 'app/services/swagger-fetch-clients';
-import { BreadcrumbType } from 'app/utils/navigation';
-import {atom, Atom} from 'app/utils/subscribable';
+import { profileApi } from 'app/services/swagger-fetch-clients';
+import { atom, Atom } from 'app/utils/subscribable';
 import {
   CdrVersionTier,
-  ConfigResponse, Disk,
+  ConfigResponse,
+  Disk,
   GenomicExtractionJob,
   Profile,
   Runtime,
 } from 'generated/fetch';
 import * as React from 'react';
-import {StackdriverErrorReporter} from 'stackdriver-errors-js';
+import { StackdriverErrorReporter } from 'stackdriver-errors-js';
+import { BreadcrumbType } from 'app/components/breadcrumb-type';
 
-const {useEffect, useState} = React;
+const { useEffect, useState } = React;
 
 export interface RouteDataStore {
   title?: string;
@@ -31,7 +32,10 @@ export interface AuthStore {
   authError?: string;
 }
 
-export const authStore = atom<AuthStore>({authLoaded: false, isSignedIn: false});
+export const authStore = atom<AuthStore>({
+  authLoaded: false,
+  isSignedIn: false,
+});
 
 interface CdrVersionStore {
   tiers?: Array<CdrVersionTier>;
@@ -45,10 +49,13 @@ export interface GenomicExtractionStore {
 
 export const genomicExtractionStore = atom<GenomicExtractionStore>({});
 
-export const updateGenomicExtractionStore = (workspaceNamespace: string, extractions: GenomicExtractionJob[]) => {
+export const updateGenomicExtractionStore = (
+  workspaceNamespace: string,
+  extractions: GenomicExtractionJob[]
+) => {
   genomicExtractionStore.set({
     ...genomicExtractionStore.get(),
-    [workspaceNamespace]: extractions
+    [workspaceNamespace]: extractions,
   });
 };
 
@@ -61,21 +68,22 @@ export interface ProfileStore {
 
 export const profileStore = atom<ProfileStore>({
   profile: null,
-  load: async() => {
+  load: async () => {
     if (!profileStore.get().profile) {
       await profileStore.get().reload();
     }
     return profileStore.get().profile;
   },
-  reload: async() => {
+  reload: async () => {
     const newProfile = await profileApi().getMe();
     profileStore.get().updateCache(newProfile);
     return profileStore.get().profile;
   },
-  updateCache: (p: Profile): void => profileStore.set({
-    ...profileStore.get(),
-    profile: p
-  })
+  updateCache: (p: Profile): void =>
+    profileStore.set({
+      ...profileStore.get(),
+      profile: p,
+    }),
 });
 
 export interface NotificationStore {
@@ -101,15 +109,21 @@ export interface CompoundRuntimeOpStore {
 // (compound operation of delete -> create).
 export const compoundRuntimeOpStore = atom<CompoundRuntimeOpStore>({});
 
-export const registerCompoundRuntimeOperation = (workspaceNamespace: string, runtimeOperation: CompoundRuntimeOperation) => {
+export const registerCompoundRuntimeOperation = (
+  workspaceNamespace: string,
+  runtimeOperation: CompoundRuntimeOperation
+) => {
   compoundRuntimeOpStore.set({
     ...compoundRuntimeOpStore.get(),
-    [workspaceNamespace]: runtimeOperation
+    [workspaceNamespace]: runtimeOperation,
   });
 };
 
-export const markCompoundRuntimeOperationCompleted = (workspaceNamespace: string) => {
-  const {[workspaceNamespace]: op, ...otherOps} = compoundRuntimeOpStore.get();
+export const markCompoundRuntimeOperationCompleted = (
+  workspaceNamespace: string
+) => {
+  const { [workspaceNamespace]: op, ...otherOps } =
+    compoundRuntimeOpStore.get();
   if (op) {
     op.aborter.abort();
     compoundRuntimeOpStore.set(otherOps);
@@ -118,7 +132,7 @@ export const markCompoundRuntimeOperationCompleted = (workspaceNamespace: string
 
 export const clearCompoundRuntimeOperations = () => {
   const ops = compoundRuntimeOpStore.get();
-  Object.keys(ops).forEach(k => ops[k].aborter.abort());
+  Object.keys(ops).forEach((k) => ops[k].aborter.abort());
   compoundRuntimeOpStore.set({});
 };
 
@@ -136,7 +150,7 @@ export const runtimeStore = atom<RuntimeStore>({
   workspaceNamespace: undefined,
   runtime: undefined,
   runtimeLoaded: false,
-  loadingError: undefined
+  loadingError: undefined,
 });
 
 // runtime store states: undefined(initial state) -> Runtime (user selected) <--> null (delete only - no recreate)
@@ -145,13 +159,17 @@ export interface DiskStore {
   persistentDisk: Disk | null | undefined;
 }
 
-export const diskStore = atom<DiskStore>({workspaceNamespace: undefined, persistentDisk: undefined});
+export const diskStore = atom<DiskStore>({
+  workspaceNamespace: undefined,
+  persistentDisk: undefined,
+});
 
 export interface StackdriverErrorReporterStore {
   reporter?: StackdriverErrorReporter;
 }
 
-export const stackdriverErrorReporterStore = atom<StackdriverErrorReporterStore>({});
+export const stackdriverErrorReporterStore =
+  atom<StackdriverErrorReporterStore>({});
 
 export interface ServerConfigStore {
   config?: ConfigResponse;
@@ -186,7 +204,7 @@ export interface MatchParams {
 export function useStore<T>(theStore: Atom<T>) {
   const [value, setValue] = useState(theStore.get());
   useEffect(() => {
-    return theStore.subscribe(v => setValue(v)).unsubscribe;
+    return theStore.subscribe((v) => setValue(v)).unsubscribe;
   }, [theStore]);
   return value;
 }
@@ -195,10 +213,10 @@ export function useStore<T>(theStore: Atom<T>) {
  * HOC that injects the value of the given store as a prop. When the store changes, the wrapped
  * component will re-render
  */
-export const withStore = (theStore, name) => WrappedComponent => {
+export const withStore = (theStore, name) => (WrappedComponent) => {
   return (props) => {
     const value = useStore(theStore);
-    const storeProp = {[name]: value};
-    return <WrappedComponent {...props} {...storeProp}/> ;
+    const storeProp = { [name]: value };
+    return <WrappedComponent {...props} {...storeProp} />;
   };
 };

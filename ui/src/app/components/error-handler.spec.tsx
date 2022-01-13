@@ -1,19 +1,21 @@
-import {mount} from 'enzyme';
+import { mount } from 'enzyme';
 import * as React from 'react';
 
-import {registerApiClient, statusApi} from 'app/services/swagger-fetch-clients';
-import {fetchWithGlobalErrorHandler} from 'app/utils/retry';
-import {StatusApi} from 'generated/fetch';
-import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
-import {StatusApiStub} from 'testing/stubs/status-api-stub';
-import {ErrorHandler} from './error-handler';
-
+import {
+  registerApiClient,
+  statusApi,
+} from 'app/services/swagger-fetch-clients';
+import { fetchWithGlobalErrorHandler } from 'app/utils/retry';
+import { StatusApi } from 'generated/fetch';
+import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
+import { StatusApiStub } from 'testing/stubs/status-api-stub';
+import { ErrorHandler } from './error-handler';
 
 describe('ErrorHandler', () => {
   const description = 'test';
 
   const component = () => {
-    return mount(<ErrorHandler/>);
+    return mount(<ErrorHandler />);
   };
 
   beforeEach(() => {
@@ -32,7 +34,7 @@ describe('ErrorHandler', () => {
     // of precedence would mean that the error gets swallowed and isn't caught within the global error handler
     // if we explicitly catch.
     try {
-      await fetchWithGlobalErrorHandler(() => Promise.reject({status: 500}));
+      await fetchWithGlobalErrorHandler(() => Promise.reject({ status: 500 }));
     } catch (e) {
       // expected
     }
@@ -47,7 +49,7 @@ describe('ErrorHandler', () => {
     // of precedence would mean that the error gets swallowed and isn't caught within the global error handler
     // if we explicitly catch.
     try {
-      await fetchWithGlobalErrorHandler(() => Promise.reject({status: 503}));
+      await fetchWithGlobalErrorHandler(() => Promise.reject({ status: 503 }));
     } catch (e) {
       // expected
     }
@@ -62,7 +64,7 @@ describe('ErrorHandler', () => {
     // of precedence would mean that the error gets swallowed and isn't caught within the global error handler
     // if we explicitly catch.
     try {
-      await fetchWithGlobalErrorHandler(() => Promise.reject({status: 502}));
+      await fetchWithGlobalErrorHandler(() => Promise.reject({ status: 502 }));
     } catch (e) {
       // expected
     }

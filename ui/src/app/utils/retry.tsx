@@ -1,11 +1,15 @@
-import {convertAPIError, isAbortError} from 'app/utils/errors';
-import {globalErrorStore} from 'app/utils/navigation';
+import { convertAPIError, isAbortError } from 'app/utils/errors';
+import { globalErrorStore } from 'app/utils/navigation';
 
-import {ErrorCode} from 'generated/fetch';
+import { ErrorCode } from 'generated/fetch';
 
 // Retry a fetch `maxRetries` number of times with a `timeoutMillis` wait between retries
 // Respects fetch aborts
-export async function fetchAbortableRetry<T>(fetchFn: () => Promise<T>, timeoutMillis: number, maxRetries: number): Promise<T> {
+export async function fetchAbortableRetry<T>(
+  fetchFn: () => Promise<T>,
+  timeoutMillis: number,
+  maxRetries: number
+): Promise<T> {
   let retries = 0;
   while (true) {
     try {
@@ -16,11 +20,10 @@ export async function fetchAbortableRetry<T>(fetchFn: () => Promise<T>, timeoutM
         throw e;
       }
       // effectively a sleep for timeoutMillis
-      await new Promise(resolve => setTimeout(resolve, timeoutMillis));
+      await new Promise((resolve) => setTimeout(resolve, timeoutMillis));
     }
   }
 }
-
 
 /*
  * A method to run an api call with our global error handling. It also adds retries on 503
@@ -31,7 +34,10 @@ export async function fetchAbortableRetry<T>(fetchFn: () => Promise<T>, timeoutM
  *    maxRetries?: The number of times it will retry before failing. Defaults to 3.
  */
 
-export async function fetchWithGlobalErrorHandler<T>(fetchFn: () => Promise<T>, maxRetries: number = 3): Promise<T> {
+export async function fetchWithGlobalErrorHandler<T>(
+  fetchFn: () => Promise<T>,
+  maxRetries: number = 3
+): Promise<T> {
   let retries = 0;
   while (true) {
     try {
@@ -65,6 +71,30 @@ export async function fetchWithGlobalErrorHandler<T>(fetchFn: () => Promise<T>, 
   }
 }
 
+async function apiCallWithGatewayTimeoutRetriesAndRetryCount<T>(
+  apiCall: () => Promise<T>,
+  maxRetries = 3,
+  retryCount = 1,
+  initialWaitTime = 1000
+): Promise<T> {
+  try {
+    return await apiCall();
+  } catch (ex) {
+    if (ex.status !== 504 || retryCount > maxRetries) {
+      throw ex;
+    }
+    await new Promise((resolve) =>
+      setTimeout(resolve, initialWaitTime * Math.pow(2, retryCount))
+    );
+    return await apiCallWithGatewayTimeoutRetriesAndRetryCount(
+      apiCall,
+      maxRetries,
+      retryCount + 1,
+      initialWaitTime
+    );
+  }
+}
+
 /*
  * A method to run an api call with a specified number of retries and exponential backoff.
  * This method will only error
@@ -76,20 +106,14 @@ export async function fetchWithGlobalErrorHandler<T>(fetchFn: () => Promise<T>, 
  *      2s for the second, etc.
  */
 export async function apiCallWithGatewayTimeoutRetries<T>(
-  apiCall: () => Promise<T>, maxRetries = 3, initialWaitTime = 1000): Promise<T> {
-  return apiCallWithGatewayTimeoutRetriesAndRetryCount(apiCall, maxRetries, 1, initialWaitTime);
-}
-
-async function apiCallWithGatewayTimeoutRetriesAndRetryCount<T>(
-  apiCall: () => Promise<T>, maxRetries = 3, retryCount = 1, initialWaitTime = 1000): Promise<T> {
-  try {
-    return await apiCall();
-  } catch (ex) {
-    if (ex.status !== 504 || retryCount > maxRetries) {
-      throw ex;
-    }
-    await new Promise(resolve => setTimeout(resolve, initialWaitTime * Math.pow(2, retryCount)));
-    return await apiCallWithGatewayTimeoutRetriesAndRetryCount(
-      apiCall, maxRetries, retryCount + 1, initialWaitTime);
-  }
+  apiCall: () => Promise<T>,
+  maxRetries = 3,
+  initialWaitTime = 1000
+): Promise<T> {
+  return apiCallWithGatewayTimeoutRetriesAndRetryCount(
+    apiCall,
+    maxRetries,
+    1,
+    initialWaitTime
+  );
 }

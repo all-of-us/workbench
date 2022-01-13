@@ -1,9 +1,12 @@
-import {Runtime, RuntimeConfigurationType} from 'generated/fetch';
+import { Runtime, RuntimeConfigurationType } from 'generated/fetch';
 import * as fp from 'lodash/fp';
-import {DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES} from './machines';
+import { DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES } from './machines';
 
 export const runtimePresets: {
-  [runtimePresetName: string]: {displayName: string, runtimeTemplate: Runtime}
+  [runtimePresetName: string]: {
+    displayName: string;
+    runtimeTemplate: Runtime;
+  };
 } = {
   generalAnalysis: {
     displayName: 'General Analysis',
@@ -16,7 +19,7 @@ export const runtimePresets: {
         diskSize: 100,
         gpuConfig: null,
       },
-    }
+    },
   },
   hailAnalysis: {
     displayName: 'Hail Genomics Analysis',
@@ -29,10 +32,10 @@ export const runtimePresets: {
         workerMachineType: 'n1-standard-4',
         workerDiskSize: 150,
         numberOfWorkers: 2,
-        numberOfPreemptibleWorkers: 0
-      }
-    }
-  }
+        numberOfPreemptibleWorkers: 0,
+      },
+    },
+  },
 };
 
 export const applyPresetOverride = (runtime) => {
@@ -40,14 +43,21 @@ export const applyPresetOverride = (runtime) => {
     return runtime;
   }
 
-  const newRuntime = {...runtime};
+  const newRuntime = { ...runtime };
 
-  const runtimePresetKey = fp.keys(runtimePresets)
-    .find(key => runtimePresets[key].runtimeTemplate.configurationType === newRuntime.configurationType);
+  const runtimePresetKey = fp
+    .keys(runtimePresets)
+    .find(
+      (key) =>
+        runtimePresets[key].runtimeTemplate.configurationType ===
+        newRuntime.configurationType
+    );
 
   if (runtimePresetKey) {
-    newRuntime.gceConfig = runtimePresets[runtimePresetKey].runtimeTemplate.gceConfig;
-    newRuntime.dataprocConfig = runtimePresets[runtimePresetKey].runtimeTemplate.dataprocConfig;
+    newRuntime.gceConfig =
+      runtimePresets[runtimePresetKey].runtimeTemplate.gceConfig;
+    newRuntime.dataprocConfig =
+      runtimePresets[runtimePresetKey].runtimeTemplate.dataprocConfig;
   }
 
   return newRuntime;

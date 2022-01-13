@@ -1,5 +1,5 @@
-import {ConfirmDeleteModal} from 'app/components/confirm-delete-modal';
-import {ResourceType} from 'generated/fetch';
+import { ConfirmDeleteModal } from 'app/components/confirm-delete-modal';
+import { ResourceType } from 'generated/fetch';
 import * as React from 'react';
 
 interface State {
@@ -10,15 +10,16 @@ interface State {
 }
 
 export interface WithConfirmDeleteModalProps {
-  showConfirmDeleteModal: (displayName: string,
-                           resourceType: ResourceType,
-                           receiveDelete: () => Promise<void>) => void;
+  showConfirmDeleteModal: (
+    displayName: string,
+    resourceType: ResourceType,
+    receiveDelete: () => Promise<void>
+  ) => void;
 }
 
 export const withConfirmDeleteModal = () => {
   return (WrappedComponent) => {
     return class ConfirmDeleteModalWrapper extends React.Component<any, State> {
-
       constructor(props) {
         super(props);
 
@@ -26,7 +27,7 @@ export const withConfirmDeleteModal = () => {
           show: false,
           displayName: 'Name',
           resourceType: null,
-          receiveDelete: null
+          receiveDelete: null,
         };
       }
 
@@ -35,27 +36,38 @@ export const withConfirmDeleteModal = () => {
           show: true,
           displayName: displayName,
           resourceType: resourceType,
-          receiveDelete: receiveDelete
+          receiveDelete: receiveDelete,
         });
       }
 
       hide() {
-        this.setState({show: false});
+        this.setState({ show: false });
       }
 
       render() {
-        return <React.Fragment>
-          {this.state.show && <ConfirmDeleteModal
-            resourceName={this.state.displayName}
-            resourceType={this.state.resourceType}
-            receiveDelete={() => this.state.receiveDelete().then(() => this.hide())}
-            closeFunction={() => this.hide()} />
-          }
+        return (
+          <React.Fragment>
+            {this.state.show && (
+              <ConfirmDeleteModal
+                resourceName={this.state.displayName}
+                resourceType={this.state.resourceType}
+                receiveDelete={() =>
+                  this.state.receiveDelete().then(() => this.hide())
+                }
+                closeFunction={() => this.hide()}
+              />
+            )}
 
-          <WrappedComponent showConfirmDeleteModal={(displayName, resourceType, receiveDelete) =>
-            this.show(displayName, resourceType, receiveDelete)}
-                            {...this.props} />
-        </React.Fragment>;
+            <WrappedComponent
+              showConfirmDeleteModal={(
+                displayName,
+                resourceType,
+                receiveDelete
+              ) => this.show(displayName, resourceType, receiveDelete)}
+              {...this.props}
+            />
+          </React.Fragment>
+        );
       }
     };
   };

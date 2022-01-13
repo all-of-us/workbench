@@ -1,10 +1,15 @@
-import {AnalyticsTracker, setLoggedInState} from 'app/utils/analytics';
-import {LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN} from 'app/utils/cookies';
-import {AuthStore, authStore, serverConfigStore, useStore} from 'app/utils/stores';
-import {delay} from 'app/utils/subscribable';
-import {environment} from 'environments/environment';
-import {ConfigResponse} from 'generated/fetch';
-import {useEffect, useState} from 'react';
+import { AnalyticsTracker, setLoggedInState } from 'app/utils/analytics';
+import { LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN } from 'app/utils/cookies';
+import {
+  AuthStore,
+  authStore,
+  serverConfigStore,
+  useStore,
+} from 'app/utils/stores';
+import { delay } from 'app/utils/subscribable';
+import { environment } from 'environments/environment';
+import { ConfigResponse } from 'generated/fetch';
+import { useEffect, useState } from 'react';
 
 declare const gapi: any;
 
@@ -12,41 +17,53 @@ declare const gapi: any;
 // flow, thereby avoiding inevitable challenges as Google identifies Puppeteer
 // as non-human.
 declare global {
-  interface Window { setTestAccessTokenOverride: (token: string) => void; }
+  interface Window {
+    setTestAccessTokenOverride: (token: string) => void;
+  }
 }
 
 /** Returns true if use access token, this is used by Puppeteer test. */
 export const isTestAccessTokenActive = () => {
-  return environment.allowTestAccessTokenOverride && window.localStorage.getItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN);
+  return (
+    environment.allowTestAccessTokenOverride &&
+    window.localStorage.getItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN)
+  );
 };
 
 const makeAuth2 = (config: ConfigResponse): Promise<any> => {
   return new Promise((resolve, reject) => {
     gapi.load('auth2', () => {
-      gapi.auth2.init({
-        client_id: environment.clientId,
-        hosted_domain: config.gsuiteDomain,
-        scope: 'https://www.googleapis.com/auth/plus.login openid profile'
-      }).then(
-        // onInit
-        () => {
-          authStore.set({
-            ...authStore.get(),
-            authLoaded: true,
-            isSignedIn: gapi.auth2.getAuthInstance().isSignedIn.get()
-          });
+      gapi.auth2
+        .init({
+          client_id: environment.clientId,
+          hosted_domain: config.gsuiteDomain,
+          scope: 'https://www.googleapis.com/auth/plus.login openid profile',
+        })
+        .then(
+          // onInit
+          () => {
+            authStore.set({
+              ...authStore.get(),
+              authLoaded: true,
+              isSignedIn: gapi.auth2.getAuthInstance().isSignedIn.get(),
+            });
 
-          gapi.auth2.getAuthInstance().isSignedIn.listen((nextIsSignedIn: boolean) => {
-            authStore.set({...authStore.get(), isSignedIn: nextIsSignedIn});
-          });
-        },
-        // onError
-        ({error, details}) => {
-          const authError = `${error}: ${details}`;
-          authStore.set({...authStore.get(), authError});
-          reject(authError);
-        }
-      );
+            gapi.auth2
+              .getAuthInstance()
+              .isSignedIn.listen((nextIsSignedIn: boolean) => {
+                authStore.set({
+                  ...authStore.get(),
+                  isSignedIn: nextIsSignedIn,
+                });
+              });
+          },
+          // onError
+          ({ error, details }) => {
+            const authError = `${error}: ${details}`;
+            authStore.set({ ...authStore.get(), authError });
+            reject(authError);
+          }
+        );
       resolve(gapi.auth2);
     });
   });
@@ -57,15 +74,15 @@ export const signIn = (): void => {
 
   gapi.load('auth2', () => {
     gapi.auth2.getAuthInstance().signIn({
-      'prompt': 'select_account',
-      'ux_mode': 'redirect',
-      'redirect_uri': `${window.location.protocol}//${window.location.host}`
+      prompt: 'select_account',
+      ux_mode: 'redirect',
+      redirect_uri: `${window.location.protocol}//${window.location.host}`,
     });
   });
 };
 
 export const signOut = (): void => {
-  authStore.set({...authStore.get(), isSignedIn: false});
+  authStore.set({ ...authStore.get(), isSignedIn: false });
 };
 
 function clearIdToken(): void {
@@ -80,11 +97,11 @@ function clearIdToken(): void {
  *              handles redirect, etc. as appropriate when that state changes
  */
 export function useAuthentication(): AuthStore {
-  const {authLoaded, isSignedIn, authError} = useStore(authStore);
-  const {config} = useStore(serverConfigStore);
+  const { authLoaded, isSignedIn, authError } = useStore(authStore);
+  const { config } = useStore(serverConfigStore);
 
   useEffect(() => {
-    if (config && !(isTestAccessTokenActive())) {
+    if (config && !isTestAccessTokenActive()) {
       makeAuth2(config);
     }
   }, [config]);
@@ -104,7 +121,7 @@ export function useAuthentication(): AuthStore {
     setLoggedInState(isSignedIn);
   }, [isSignedIn, authLoaded]);
 
-  return {authLoaded, isSignedIn, authError};
+  return { authLoaded, isSignedIn, authError };
 }
 
 // The delay before continuing to avoid errors due to delays in applying the new scope grant
@@ -117,7 +134,12 @@ const getAuthInstance = () => {
 export const hasBillingScope = () => {
   // If uses access token, assume users always have billing scope. The token generated by GenerateImpersonatedUserTokens tool sets billing
   // scope.
-  return isTestAccessTokenActive() || getAuthInstance().currentUser.get().hasGrantedScopes('https://www.googleapis.com/auth/cloud-billing');
+  return (
+    isTestAccessTokenActive() ||
+    getAuthInstance()
+      .currentUser.get()
+      .hasGrantedScopes('https://www.googleapis.com/auth/cloud-billing')
+  );
 };
 
 /*
@@ -128,7 +150,7 @@ export const hasBillingScope = () => {
  * be returned. In this case, you'll need to provide something for the user to deliberately click on
  * and retry ensureBillingScope in reaction to the click.
  */
-export const ensureBillingScope = async() => {
+export const ensureBillingScope = async () => {
   if (!hasBillingScope()) {
     const options = new gapi.auth2.SigninOptionsBuilder();
     options.setScope('https://www.googleapis.com/auth/cloud-billing');

@@ -192,6 +192,8 @@
   <include file="changelog/db.changelog-180-remove-period-from-institution-short-name.xml"/>
   <include file="changelog/db.changelog-181-access-tier-add-enable-workflow-column.xml"/>
   <include file="changelog/db.changelog-182-workspace-admin-locked-reason-column.xml"/>
+  <include file="changelog/db.changelog-183-new-user-recent-resource-table.xml"/>
+  <include file="changelog/db.changelog-184-loaddata-new-user-recent-resource-table.xml"/>
   <!--
    Note: to update the DB locally, do the following:
    - Migrate schema changes: `./project.rb run-local-all-migrations`

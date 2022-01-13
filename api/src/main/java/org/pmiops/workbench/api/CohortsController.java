@@ -192,6 +192,8 @@ public class CohortsController implements CohortsApiDelegate {
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
 
     DbCohort dbCohort = getDbCohort(workspaceNamespace, workspaceId, cohortId);
+    userRecentResourceService.deleteCohortEntry(
+        dbCohort.getWorkspaceId(), userProvider.get().getUserId(), dbCohort.getCohortId());
     cohortDao.delete(dbCohort);
     return ResponseEntity.ok(new EmptyResponse());
   }

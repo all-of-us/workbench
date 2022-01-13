@@ -1,10 +1,10 @@
-import {TooltipTrigger} from 'app/components/popups';
-import {SpinnerOverlay} from 'app/components/spinners';
-import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
-import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {reactStyles, withCurrentWorkspace} from 'app/utils';
-import {WorkspaceData} from 'app/utils/workspace-data';
-import {CohortReview} from 'generated/fetch';
+import { TooltipTrigger } from 'app/components/popups';
+import { SpinnerOverlay } from 'app/components/spinners';
+import { cohortReviewApi } from 'app/services/swagger-fetch-clients';
+import colors, { colorWithWhiteness } from 'app/styles/colors';
+import { reactStyles, withCurrentWorkspace } from 'app/utils';
+import { WorkspaceData } from 'app/utils/workspace-data';
+import { CohortReview } from 'generated/fetch';
 import * as React from 'react';
 
 const css = `
@@ -30,7 +30,7 @@ const styles = reactStyles({
     fontSize: '10px',
     textAlign: 'end',
     paddingRight: '0.2rem',
-    fontWeight: 'bold'
+    fontWeight: 'bold',
   },
   lightGrey: {
     backgroundColor: colorWithWhiteness(colors.dark, 0.7),
@@ -43,7 +43,7 @@ const styles = reactStyles({
     minHeight: '1px',
     maxWidth: '58.33333%',
     padding: '0.5rem 0 0 1rem',
-    borderLeft: '1px solid black'
+    borderLeft: '1px solid black',
   },
   dataHeading: {
     flex: '0 0 33.33333%',
@@ -96,7 +96,7 @@ const styles = reactStyles({
     color: colors.primary,
     textTransform: 'capitalize',
     lineHeight: '22px',
-  }
+  },
 });
 
 export interface ParticipantsChartsProps {
@@ -112,7 +112,10 @@ export interface ParticipantsChartsState {
 }
 
 export const ParticipantsCharts = withCurrentWorkspace()(
-  class extends React.Component<ParticipantsChartsProps, ParticipantsChartsState>  {
+  class extends React.Component<
+    ParticipantsChartsProps,
+    ParticipantsChartsState
+  > {
     nameRefs: Array<any> = [];
     constructor(props: ParticipantsChartsProps) {
       super(props);
@@ -124,58 +127,84 @@ export const ParticipantsCharts = withCurrentWorkspace()(
     }
 
     componentDidMount() {
-      const {domain, review, workspace: {id, namespace}} = this.props;
-      cohortReviewApi().getCohortChartData(namespace, id, review.cohortId, domain, 10)
-        .then(resp => {
-          const data = resp.items.map(item => {
+      const {
+        domain,
+        review,
+        workspace: { id, namespace },
+      } = this.props;
+      cohortReviewApi()
+        .getCohortChartData(namespace, id, review.cohortId, domain, 10)
+        .then((resp) => {
+          const data = resp.items.map((item) => {
             this.nameRefs.push(React.createRef());
             const percentCount = Math.round((item.count / resp.count) * 100);
-            return {...item, percentCount};
+            return { ...item, percentCount };
           });
-          this.setState({data, loading: false});
+          this.setState({ data, loading: false });
         });
     }
 
     checkWidth = (i: number) => {
       const el = this.nameRefs[i].current;
       return el ? el.offsetWidth >= el.scrollWidth : true;
-    }
+    };
 
     render() {
-      const {domain} = this.props;
-      const {data, loading} = this.state;
+      const { domain } = this.props;
+      const { data, loading } = this.state;
       const heading = domain.toLowerCase();
-      return <React.Fragment>
-        <style>{css}</style>
-        {data && <div className='page-break' style={styles.chartWidth}>
-          <div style={styles.domainTitle}>Top 10 {heading}s</div>
-          <div className='graph-border'>
-            {data.map((item, i) => (
-              <div key={i} className='row' style={{display: '-webkit-box'}}>
-                <TooltipTrigger content={<div>{item.name}</div>} disabled={this.checkWidth(i)}>
-                  <div style={styles.dataHeading} ref={this.nameRefs[i]}>
-                    {item.name}
-                  </div>
-                </TooltipTrigger>
-                <div style={styles.dataBarContainer}>
-                  <div style={styles.lightGrey}>
-                    <div style={{...styles.dataBlue, width: `${item.percentCount}%`}}>
-                      {item.percentCount >= 90 && <span>{item.count}</span>}
+      return (
+        <React.Fragment>
+          <style>{css}</style>
+          {data && (
+            <div className='page-break' style={styles.chartWidth}>
+              <div style={styles.domainTitle}>Top 10 {heading}s</div>
+              <div className='graph-border'>
+                {data.map((item, i) => (
+                  <div
+                    key={i}
+                    className='row'
+                    style={{ display: '-webkit-box' }}
+                  >
+                    <TooltipTrigger
+                      content={<div>{item.name}</div>}
+                      disabled={this.checkWidth(i)}
+                    >
+                      <div style={styles.dataHeading} ref={this.nameRefs[i]}>
+                        {item.name}
+                      </div>
+                    </TooltipTrigger>
+                    <div style={styles.dataBarContainer}>
+                      <div style={styles.lightGrey}>
+                        <div
+                          style={{
+                            ...styles.dataBlue,
+                            width: `${item.percentCount}%`,
+                          }}
+                        >
+                          {item.percentCount >= 90 && <span>{item.count}</span>}
+                        </div>
+                        <div
+                          style={{
+                            ...styles.count,
+                            width: `${item.percentCount}%`,
+                          }}
+                        >
+                          {item.percentCount < 90 && <span>{item.count}</span>}
+                        </div>
+                      </div>
                     </div>
-                    <div style={{...styles.count, width: `${item.percentCount}%`}}>
-                      {item.percentCount < 90 && <span>{item.count}</span>}
+                    <div style={styles.dataPercent}>
+                      {item.percentCount}% of Cohort
                     </div>
                   </div>
-                </div>
-                <div style={styles.dataPercent}>
-                  {item.percentCount}% of Cohort
-                </div>
+                ))}
               </div>
-            ))}
-          </div>
-        </div>}
-        {loading && <SpinnerOverlay />}
-      </React.Fragment>;
+            </div>
+          )}
+          {loading && <SpinnerOverlay />}
+        </React.Fragment>
+      );
     }
   }
 );

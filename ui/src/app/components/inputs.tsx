@@ -1,39 +1,39 @@
 import * as fp from 'lodash/fp';
-import moment from 'moment'
+import moment from 'moment';
 import * as React from 'react';
 import Calendar from 'react-calendar/dist/entry.nostyle';
 import RSelect from 'react-select';
 import Switch from 'react-switch';
-import {CSSProperties} from 'react';
+import { CSSProperties } from 'react';
 
-import {Clickable} from 'app/components/buttons';
-import {ClrIcon} from 'app/components/icons';
-import {PopupTrigger} from 'app/components/popups';
-import {commonStyles} from 'app/pages/login/account-creation/common';
-import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {withStyle} from 'app/utils';
-import {FlexRow} from './flex';
-import {isDateValid} from 'app/utils/dates';
+import { Clickable } from 'app/components/buttons';
+import { ClrIcon } from 'app/components/icons';
+import { PopupTrigger } from 'app/components/popups';
+import { commonStyles } from 'app/pages/login/account-creation/common';
+import colors, { colorWithWhiteness } from 'app/styles/colors';
+import { withStyle } from 'app/utils';
+import { FlexRow } from './flex';
+import { isDateValid } from 'app/utils/dates';
 
 export const inputBorderColor = colorWithWhiteness(colors.dark, 0.6);
 
 export const styles = {
   successfulInput: {
-    borderColor: colors.success
+    borderColor: colors.success,
   },
 
   checkbox: {
     cursor: 'pointer',
-    verticalAlign: 'middle'
+    verticalAlign: 'middle',
   },
 
   checkboxLabel: {
     cursor: 'pointer',
-    verticalAlign: 'middle'
+    verticalAlign: 'middle',
   },
 
   disabledStyle: {
-    cursor: 'default'
+    cursor: 'default',
   },
 
   error: {
@@ -41,7 +41,7 @@ export const styles = {
     fontWeight: 600,
     color: colors.primary,
     marginTop: '0.2rem',
-    width: '90%'
+    width: '90%',
   },
 
   errorMessage: {
@@ -55,7 +55,7 @@ export const styles = {
     borderRadius: '2px',
     display: 'flex' as 'flex',
     flexDirection: 'row' as 'row',
-    fontSize: '13px'
+    fontSize: '13px',
   },
 
   iconArea: {
@@ -76,7 +76,7 @@ export const styles = {
     borderWidth: 1,
     height: '1.5rem',
     padding: '0 0.5rem',
-    width: '100%'
+    width: '100%',
   },
 
   textBoxWithLengthValidationTextBoxStyle: {
@@ -84,7 +84,7 @@ export const styles = {
     resize: 'none',
     width: '48rem',
     borderRadius: '3px 3px 0 0',
-    borderColor: colorWithWhiteness(colors.dark, 0.5)
+    borderColor: colorWithWhiteness(colors.dark, 0.5),
   },
 
   textBoxWithLengthValidationValidationStyle: {
@@ -94,40 +94,52 @@ export const styles = {
     fontSize: 12,
     colors: colors.primary,
     padding: '0.25rem',
-    borderRadius: '0 0 3px 3px', marginTop: '-0.5rem',
-    border: `1px solid ${colorWithWhiteness(colors.dark, 0.5)}`
-  }
+    borderRadius: '0 0 3px 3px',
+    marginTop: '-0.5rem',
+    border: `1px solid ${colorWithWhiteness(colors.dark, 0.5)}`,
+  },
 };
-
 
 export const Error = withStyle(styles.error)('div');
 export const ErrorMessage = withStyle(styles.errorMessage)('div');
 
-export const ValidationError = ({children}) => {
+export const ValidationError = ({ children }) => {
   if (!children) {
     return null;
   }
-  return <div
-    style={{
-      color: colors.danger,
-      fontSize: 10, fontWeight: 500, textTransform: 'uppercase',
-      marginLeft: '0.5rem', marginTop: '0.25rem'
-    }}
-  >{children}</div>;
+  return (
+    <div
+      style={{
+        color: colors.danger,
+        fontSize: 10,
+        fontWeight: 500,
+        textTransform: 'uppercase',
+        marginLeft: '0.5rem',
+        marginTop: '0.25rem',
+      }}
+    >
+      {children}
+    </div>
+  );
 };
 
-export const TextArea = ({style = {}, onChange, ...props}) => {
-  return <textarea
+export const TextArea = ({ style = {}, onChange, ...props }) => {
+  return (
+    <textarea
       {...props}
-      onChange={onChange ? (e => onChange(e.target.value)) : undefined}
+      onChange={onChange ? (e) => onChange(e.target.value) : undefined}
       style={{
         width: '100%',
-        borderColor: inputBorderColor, borderWidth: 1, borderStyle: 'solid', borderRadius: 3,
+        borderColor: inputBorderColor,
+        borderWidth: 1,
+        borderStyle: 'solid',
+        borderRadius: 3,
         padding: '0.25rem 0.5rem',
         backgroundColor: colors.white,
-        ...style
+        ...style,
       }}
-  />;
+    />
+  );
 };
 
 interface TextAreaWithLengthValidationMessageProps {
@@ -155,129 +167,182 @@ export class TextAreaWithLengthValidationMessage extends React.Component<
     super(props);
     this.state = {
       showTooShortWarning: false,
-      text: props.initialText
+      text: props.initialText,
     };
   }
 
   onTextUpdate(text) {
     if (this.state.showTooShortWarning && text.length >= 50) {
-      this.setState({showTooShortWarning: false});
+      this.setState({ showTooShortWarning: false });
     }
-    this.setState({text: text});
+    this.setState({ text: text });
     this.props.onChange(text);
   }
 
   updateShowTooShortWarning() {
     if (
-        this.state.text
-        && this.props.tooShortWarningCharacters
-        && this.props.tooShortWarning
-        && this.state.text.length < this.props.tooShortWarningCharacters
+      this.state.text &&
+      this.props.tooShortWarningCharacters &&
+      this.props.tooShortWarning &&
+      this.state.text.length < this.props.tooShortWarningCharacters
     ) {
-      this.setState({showTooShortWarning: true});
+      this.setState({ showTooShortWarning: true });
     } else {
-      this.setState({showTooShortWarning: false});
+      this.setState({ showTooShortWarning: false });
     }
   }
 
   renderCharacterLimitMessage(textColor: string, message: string) {
-    return <div
+    return (
+      <div
         data-test-id='characterLimit'
-        style={{color: textColor, marginLeft: 'auto', flex: '0 0 auto'}}
-    >
-      {message}
-    </div>;
+        style={{ color: textColor, marginLeft: 'auto', flex: '0 0 auto' }}
+      >
+        {message}
+      </div>
+    );
   }
 
   render() {
-    const {id, maxCharacters, tooShortWarning} = this.props;
-    const {showTooShortWarning, text} = this.state;
+    const { id, maxCharacters, tooShortWarning } = this.props;
+    const { showTooShortWarning, text } = this.state;
 
-    return <React.Fragment>
-      <TextArea
-          style={{...styles.textBoxWithLengthValidationTextBoxStyle, ...this.props.textBoxStyleOverrides, ...this.props.heightOverride}}
+    return (
+      <React.Fragment>
+        <TextArea
+          style={{
+            ...styles.textBoxWithLengthValidationTextBoxStyle,
+            ...this.props.textBoxStyleOverrides,
+            ...this.props.heightOverride,
+          }}
           id={id}
           value={text}
           onBlur={() => this.updateShowTooShortWarning()}
-          onChange={v => this.onTextUpdate(v)}
-      />
-      <FlexRow
-          style={{...styles.textBoxWithLengthValidationValidationStyle, ...this.props.textBoxStyleOverrides}}
-      >
-        {showTooShortWarning &&
-          <label
+          onChange={(v) => this.onTextUpdate(v)}
+        />
+        <FlexRow
+          style={{
+            ...styles.textBoxWithLengthValidationValidationStyle,
+            ...this.props.textBoxStyleOverrides,
+          }}
+        >
+          {showTooShortWarning && (
+            <label
               data-test-id='warning'
               style={{
                 color: colors.danger,
                 justifyContent: 'flex-start',
-                marginRight: '.25rem'
+                marginRight: '.25rem',
               }}
-          >
-            {tooShortWarning}
-          </label>
-        }
-        {!text &&
-          this.renderCharacterLimitMessage(colors.primary, maxCharacters + ' characters remaining')
-        }
-        {text && text.length < maxCharacters &&
-          this.renderCharacterLimitMessage(colors.primary, (maxCharacters - text.length) + ' characters remaining')
-        }
-        {text && text.length === maxCharacters &&
-          this.renderCharacterLimitMessage(colors.danger, '0 characters remaining')
-        }
-        {text && text.length > maxCharacters &&
-          this.renderCharacterLimitMessage(colors.danger, (text.length - maxCharacters) + ' characters over')
-        }
-      </FlexRow>
-    </React.Fragment>;
+            >
+              {tooShortWarning}
+            </label>
+          )}
+          {!text &&
+            this.renderCharacterLimitMessage(
+              colors.primary,
+              maxCharacters + ' characters remaining'
+            )}
+          {text &&
+            text.length < maxCharacters &&
+            this.renderCharacterLimitMessage(
+              colors.primary,
+              maxCharacters - text.length + ' characters remaining'
+            )}
+          {text &&
+            text.length === maxCharacters &&
+            this.renderCharacterLimitMessage(
+              colors.danger,
+              '0 characters remaining'
+            )}
+          {text &&
+            text.length > maxCharacters &&
+            this.renderCharacterLimitMessage(
+              colors.danger,
+              text.length - maxCharacters + ' characters over'
+            )}
+        </FlexRow>
+      </React.Fragment>
+    );
   }
 }
 
 export const FormValidationErrorMessage = withStyle({
   color: colors.danger,
-  fontSize: 12
+  fontSize: 12,
 })('div');
 
-export const TextInput = React.forwardRef(({style = {}, onChange, onBlur, ...props}:
-      {style?: React.CSSProperties, onChange: Function, onBlur: Function, [key: string]: any},
-                                           ref: React.Ref<HTMLInputElement>) => {
-  return <input
-    {...props}
-    ref = {ref}
-    onChange={onChange ? (e => onChange(e.target.value)) : undefined}
-    onBlur={onBlur ? (e => onBlur(e.target.value)) : undefined}
-    type='text'
-    style={{...styles.inputStyle, ...style}}
-  />;
-});
-
-export const NumberInput = React.forwardRef((
-    {style = {}, value, onChange, onBlur, ...props}:
-    {style?: React.CSSProperties, value: string, onChange: Function, onBlur?: Function, [key: string]: any},
+export const TextInput = React.forwardRef(
+  (
+    {
+      style = {},
+      onChange,
+      onBlur,
+      ...props
+    }: {
+      style?: React.CSSProperties;
+      onChange: Function;
+      onBlur: Function;
+      [key: string]: any;
+    },
     ref: React.Ref<HTMLInputElement>
   ) => {
-  return <input
-    {...props}
-    ref={ref}
-    type='number'
-    style={{...styles.inputStyle, ...style}}
-    value={fp.cond([
-      [fp.isUndefined, () => undefined],
-      [fp.isNull, () => ''],
-      [fp.stubTrue, v => v.toString()]
-    ])(value)}
-    onChange={onChange ? (v => onChange(v.target.value === '' ? null : +v.target.value)) : undefined}
-    onBlur={onBlur ? (v => onBlur(v.target.value)) : undefined}
-  />;
-});
+    return (
+      <input
+        {...props}
+        ref={ref}
+        onChange={onChange ? (e) => onChange(e.target.value) : undefined}
+        onBlur={onBlur ? (e) => onBlur(e.target.value) : undefined}
+        type='text'
+        style={{ ...styles.inputStyle, ...style }}
+      />
+    );
+  }
+);
+
+export const NumberInput = React.forwardRef(
+  (
+    {
+      style = {},
+      value,
+      onChange,
+      onBlur,
+      ...props
+    }: {
+      style?: React.CSSProperties;
+      value: string;
+      onChange: Function;
+      onBlur?: Function;
+      [key: string]: any;
+    },
+    ref: React.Ref<HTMLInputElement>
+  ) => {
+    return (
+      <input
+        {...props}
+        ref={ref}
+        type='number'
+        style={{ ...styles.inputStyle, ...style }}
+        value={fp.cond([
+          [fp.isUndefined, () => undefined],
+          [fp.isNull, () => ''],
+          [fp.stubTrue, (v) => v.toString()],
+        ])(value)}
+        onChange={
+          onChange
+            ? (v) => onChange(v.target.value === '' ? null : +v.target.value)
+            : undefined
+        }
+        onBlur={onBlur ? (v) => onBlur(v.target.value) : undefined}
+      />
+    );
+  }
+);
 
 export const RadioButton = ({ onChange, ...props }) => {
-  return <input
-    type='radio'
-    {...props}
-    onChange={onChange}
-    onClick={onChange}
-  />;
+  return (
+    <input type='radio' {...props} onChange={onChange} onClick={onChange} />
+  );
 };
 
 interface CheckBoxProps {
@@ -313,7 +378,7 @@ interface CheckBoxState {
 export class CheckBox extends React.Component<CheckBoxProps, CheckBoxState> {
   static defaultProps: CheckBoxProps = {
     checked: false,
-    manageOwnState: true
+    manageOwnState: true,
   };
 
   uniqueId?: string = null;
@@ -321,7 +386,7 @@ export class CheckBox extends React.Component<CheckBoxProps, CheckBoxState> {
   constructor(props: CheckBoxProps) {
     super(props);
     this.state = {
-      checked: props.checked
+      checked: props.checked,
     };
 
     this.uniqueId = props.id || fp.uniqueId('checkbox');
@@ -331,7 +396,7 @@ export class CheckBox extends React.Component<CheckBoxProps, CheckBoxState> {
     if (this.props.manageOwnState) {
       // We only track state internally if props aren't being used to render
       // the checkbox value.
-      this.setState({checked: !this.state.checked});
+      this.setState({ checked: !this.state.checked });
     }
     if (this.props.onChange) {
       this.props.onChange(e.target.checked);
@@ -339,46 +404,70 @@ export class CheckBox extends React.Component<CheckBoxProps, CheckBoxState> {
   }
   render() {
     const {
-      checked, disabled, label, labelStyle, onChange, manageOwnState, style, wrapperStyle,
+      checked,
+      disabled,
+      label,
+      labelStyle,
+      onChange,
+      manageOwnState,
+      style,
+      wrapperStyle,
       ...otherProps
     } = this.props;
     const maybeDisabledOverrides = disabled ? styles.disabledStyle : {};
 
-    const input = <input
-      id={this.uniqueId}
-      type='checkbox'
-      checked={manageOwnState ? this.state.checked : checked}
-      disabled={disabled}
-      onChange={e => this.handleChange(e)}
-      style={{...styles.checkbox, ...style, ...maybeDisabledOverrides}}
-      {...otherProps}
-    />;
+    const input = (
+      <input
+        id={this.uniqueId}
+        type='checkbox'
+        checked={manageOwnState ? this.state.checked : checked}
+        disabled={disabled}
+        onChange={(e) => this.handleChange(e)}
+        style={{ ...styles.checkbox, ...style, ...maybeDisabledOverrides }}
+        {...otherProps}
+      />
+    );
     if (label) {
-      return <span style={wrapperStyle}>{input}
-        <label htmlFor={this.uniqueId}
-               style={{...styles.checkboxLabel,
-                 ...labelStyle,
-                 ...maybeDisabledOverrides}}>{label}</label>
-      </span>;
+      return (
+        <span style={wrapperStyle}>
+          {input}
+          <label
+            htmlFor={this.uniqueId}
+            style={{
+              ...styles.checkboxLabel,
+              ...labelStyle,
+              ...maybeDisabledOverrides,
+            }}
+          >
+            {label}
+          </label>
+        </span>
+      );
     } else {
       return input;
     }
   }
 }
 
-export const Select = ({value, options, onChange, ...props}) => {
-  return <RSelect
-    value={options.find(o => o.value === value)}
-    options={options}
-    onChange={o => onChange(o && o.value)}
-    {...props}
-  />;
+export const Select = ({ value, options, onChange, ...props }) => {
+  return (
+    <RSelect
+      value={options.find((o) => o.value === value)}
+      options={options}
+      onChange={(o) => onChange(o && o.value)}
+      {...props}
+    />
+  );
 };
 
-export class DatePicker extends React.Component<
-  {value: Date, onChange: Function, onBlur?: Function, maxDate?: Date, disabled?: boolean,
-    placeholder?: string}
-> {
+export class DatePicker extends React.Component<{
+  value: Date;
+  onChange: Function;
+  onBlur?: Function;
+  maxDate?: Date;
+  disabled?: boolean;
+  placeholder?: string;
+}> {
   popup: React.RefObject<any>;
   constructor(props) {
     super(props);
@@ -386,53 +475,70 @@ export class DatePicker extends React.Component<
   }
 
   render() {
-    const {value, onChange, onBlur, disabled, placeholder, ...props} = this.props;
+    const { value, onChange, onBlur, disabled, placeholder, ...props } =
+      this.props;
     let date, text;
     if (isDateValid(value)) {
       date = value;
       text = value.toISOString().slice(0, 10);
     } else {
       date = moment(value, 'YYYY-MM-DD', true).isValid()
-        ? new Date(new Date(value).toUTCString().substr(0, 25)) : null;
+        ? new Date(new Date(value).toUTCString().substr(0, 25))
+        : null;
       text = value || '';
     }
-    return <div
-      style={{
-        display: 'flex',
-        width: '100%', height: '1.5rem',
-        border: 0,
-        padding: '0',
-        color: colors.dark, background: 'transparent',
-        ...(disabled ? {opacity: .5} : {}),
-      }}
-    >
-      <TextInput
-        value={text}
-        onChange={onChange}
-        onBlur={onBlur}
-        disabled={disabled}
-        placeholder={placeholder}
-        style={{...(disabled ? {cursor: 'not-allowed'} : {})}}/>
-      <PopupTrigger
-        ref={this.popup}
-        content={<Calendar
-          {...props}
-          value={date}
-          onChange={v => {
-            this.popup.current.close();
-            onChange(v);
-          }}
-        />}
+    return (
+      <div
+        style={{
+          display: 'flex',
+          width: '100%',
+          height: '1.5rem',
+          border: 0,
+          padding: '0',
+          color: colors.dark,
+          background: 'transparent',
+          ...(disabled ? { opacity: 0.5 } : {}),
+        }}
       >
-        <Clickable style={{display: 'flex', alignItems: 'center', flex: 1,
-          ...(disabled ? {cursor: 'not-allowed'} : {})}} disabled={disabled}>
-          <ClrIcon
-            style={{flex: 'none', marginLeft: '4px', color: colors.accent}}
-            shape='calendar'
-            size={20} />
-        </Clickable>
-      </PopupTrigger>
-    </div>;
+        <TextInput
+          value={text}
+          onChange={onChange}
+          onBlur={onBlur}
+          disabled={disabled}
+          placeholder={placeholder}
+          style={{ ...(disabled ? { cursor: 'not-allowed' } : {}) }}
+        />
+        <PopupTrigger
+          ref={this.popup}
+          content={
+            <Calendar
+              {...props}
+              value={date}
+              onChange={(v) => {
+                this.popup.current.close();
+                onChange(v);
+              }}
+            />
+          }
+        >
+          <Clickable
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              flex: 1,
+              ...(disabled ? { cursor: 'not-allowed' } : {}),
+            }}
+            disabled={disabled}
+          >
+            <ClrIcon
+              style={{ flex: 'none', marginLeft: '4px', color: colors.accent }}
+              shape='calendar'
+              size={20}
+            />
+          </Clickable>
+        </PopupTrigger>
+      </div>
+    );
   }
 }
 
@@ -446,24 +552,35 @@ interface ToggleProps {
   width?: number;
 }
 
-export class Toggle extends React.Component<ToggleProps>  {
+export class Toggle extends React.Component<ToggleProps> {
   constructor(props) {
     super(props);
   }
 
   render() {
-    const {name, checked, disabled, onToggle, style, height, width} = this.props;
-    return <label style={{display: 'flex', flexDirection: 'row', alignItems: 'center', paddingBottom: '.5rem', ...style}}>
-      <Switch
+    const { name, checked, disabled, onToggle, style, height, width } =
+      this.props;
+    return (
+      <label
+        style={{
+          display: 'flex',
+          flexDirection: 'row',
+          alignItems: 'center',
+          paddingBottom: '.5rem',
+          ...style,
+        }}
+      >
+        <Switch
           onChange={onToggle}
           checked={checked}
           checkedIcon={false}
           disabled={disabled}
           height={height}
           width={width}
-      />
-      <span style={{marginLeft: '.5rem'}}>{name}</span>
-    </label>;
+        />
+        <span style={{ marginLeft: '.5rem' }}>{name}</span>
+      </label>
+    );
   }
 }
 
@@ -473,30 +590,41 @@ export class Toggle extends React.Component<ToggleProps>  {
  * @constructor
  */
 export function TextInputWithLabel(props) {
-  const style: CSSProperties = (props.highlightOnChange && (props.previousValue !== props.value))
-    ? {...props.inputStyle, backgroundColor: colors.highlight}
-    : props.inputStyle;
-  return <div style={{...props.containerStyle}}>
-    {props.labelContent}
-    {props.labelText && <label style={{
-      fontSize: 14,
-      color: colors.primary,
-      lineHeight: '22px',
-      fontWeight: 600,
-      ...props.labelStyle
-    }}>{props.labelText}</label>}
-    <div style={{marginTop: '0.1rem'}}>
-      <TextInput data-test-id={props.inputId}
-                 id={props.inputId}
-                 name={props.inputName}
-                 placeholder={props.placeholder}
-                 value={props.value}
-                 disabled={props.disabled}
-                 onChange={props.onChange}
-                 onBlur={props.onBlur}
-                 invalid={props.invalid ? props.invalid.toString() : undefined}
-                 style={{...commonStyles.sectionInput, ...style}}/>
-      {props.children}
+  const style: CSSProperties =
+    props.highlightOnChange && props.previousValue !== props.value
+      ? { ...props.inputStyle, backgroundColor: colors.highlight }
+      : props.inputStyle;
+  return (
+    <div style={{ ...props.containerStyle }}>
+      {props.labelContent}
+      {props.labelText && (
+        <label
+          style={{
+            fontSize: 14,
+            color: colors.primary,
+            lineHeight: '22px',
+            fontWeight: 600,
+            ...props.labelStyle,
+          }}
+        >
+          {props.labelText}
+        </label>
+      )}
+      <div style={{ marginTop: '0.1rem' }}>
+        <TextInput
+          data-test-id={props.inputId}
+          id={props.inputId}
+          name={props.inputName}
+          placeholder={props.placeholder}
+          value={props.value}
+          disabled={props.disabled}
+          onChange={props.onChange}
+          onBlur={props.onBlur}
+          invalid={props.invalid ? props.invalid.toString() : undefined}
+          style={{ ...commonStyles.sectionInput, ...style }}
+        />
+        {props.children}
+      </div>
     </div>
-  </div>;
+  );
 }

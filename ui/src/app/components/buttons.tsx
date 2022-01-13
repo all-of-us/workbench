@@ -1,33 +1,41 @@
-import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
-import {styles as cardStyles} from 'app/components/card';
-import {ClrIcon, SnowmanIcon} from 'app/components/icons';
-import {Interactive as LocalInteractive} from 'app/components/interactive';
-import {TooltipTrigger} from 'app/components/popups';
-import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {reactStyles} from 'app/utils/index';
-import {useNavigation} from 'app/utils/navigation';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { styles as cardStyles } from 'app/components/card';
+import { ClrIcon, SnowmanIcon } from 'app/components/icons';
+import { Interactive as LocalInteractive } from 'app/components/interactive';
+import { TooltipTrigger } from 'app/components/popups';
+import colors, { colorWithWhiteness } from 'app/styles/colors';
+import { reactStyles } from 'app/utils/index';
+import { useNavigation } from 'app/utils/navigation';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import Interactive from 'react-interactive';
 import { Link } from 'react-router-dom';
 import { RouteLink } from './app-router';
 
-
 export const styles = reactStyles({
   baseNew: {
-    display: 'inline-flex', justifyContent: 'space-around', alignItems: 'center',
-    minWidth: '3rem', maxWidth: '15rem',
+    display: 'inline-flex',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    minWidth: '3rem',
+    maxWidth: '15rem',
     height: 50,
-    fontWeight: 500, fontSize: 14, textTransform: 'uppercase', lineHeight: '18px',
-    overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis',
+    fontWeight: 500,
+    fontSize: 14,
+    textTransform: 'uppercase',
+    lineHeight: '18px',
+    overflow: 'hidden',
+    whiteSpace: 'nowrap',
+    textOverflow: 'ellipsis',
     userSelect: 'none',
-    margin: 0, padding: '0 22px',
+    margin: 0,
+    padding: '0 22px',
     borderRadius: 5,
-    boxSizing: 'border-box'
+    boxSizing: 'border-box',
   },
   inlineAnchor: {
     display: 'inline-block',
-    color: colors.accent
+    color: colors.accent,
   },
   slidingButtonContainer: {
     // Use position sticky so the FAB does not continue past the page footer. We
@@ -48,7 +56,7 @@ export const styles = reactStyles({
     backgroundColor: colors.accent,
     height: '1.8rem',
     minWidth: '1.8rem',
-    cursor: 'pointer'
+    cursor: 'pointer',
   },
 
   slidingButtonContent: {
@@ -56,12 +64,12 @@ export const styles = reactStyles({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    height: '100%'
+    height: '100%',
   },
 
   slidingButtonDisable: {
     backgroundColor: colorWithWhiteness(colors.dark, 0.4),
-    cursor: 'not-allowed'
+    cursor: 'not-allowed',
   },
 
   slidingButtonText: {
@@ -71,7 +79,7 @@ export const styles = reactStyles({
     overflow: 'hidden',
     textTransform: 'uppercase',
     transition: 'max-width 0.5s ease-out, padding 0.1s linear 0.2s',
-    whiteSpace: 'pre'
+    whiteSpace: 'pre',
   },
 
   slidingButtonHovering: {
@@ -80,8 +88,8 @@ export const styles = reactStyles({
      * dynamic. Unfortunately using unset or a higher max-width results in a
      * choppy transition. This constant will need to be increased or made dynamic
      * if we decide to use longer expanded messages. */
-    maxWidth: '200px'
-  }
+    maxWidth: '200px',
+  },
 });
 
 const hoverAlpha = 0.2;
@@ -92,10 +100,13 @@ const buttonVariants = {
     style: {
       ...styles.baseNew,
       borderRadius: '0.3rem',
-      backgroundColor: colors.primary, color: colors.white,
+      backgroundColor: colors.primary,
+      color: colors.white,
     },
-    disabledStyle: {backgroundColor: colorWithWhiteness(colors.dark, disabledAlpha)},
-    hover: {backgroundColor: colorWithWhiteness(colors.primary, hoverAlpha)}
+    disabledStyle: {
+      backgroundColor: colorWithWhiteness(colors.dark, disabledAlpha),
+    },
+    hover: { backgroundColor: colorWithWhiteness(colors.primary, hoverAlpha) },
   },
   secondary: {
     style: {
@@ -105,21 +116,21 @@ const buttonVariants = {
     },
     disabledStyle: {
       borderColor: colorWithWhiteness(colors.dark, disabledAlpha),
-      color: colorWithWhiteness(colors.dark, disabledAlpha)
+      color: colorWithWhiteness(colors.dark, disabledAlpha),
     },
-    hover: {backgroundColor: colors.primary, color: colors.white}
+    hover: { backgroundColor: colors.primary, color: colors.white },
   },
   secondaryLight: {
     style: {
       ...styles.baseNew,
       backgroundColor: 'transparent',
-      color: colors.accent
+      color: colors.accent,
     },
     disabledStyle: {
       borderColor: colorWithWhiteness(colors.dark, disabledAlpha),
-      color: colorWithWhiteness(colors.dark, disabledAlpha)
+      color: colorWithWhiteness(colors.dark, disabledAlpha),
     },
-    hover: {color: colorWithWhiteness(colors.accent, 0.4)}
+    hover: { color: colorWithWhiteness(colors.accent, 0.4) },
   },
   secondarySmall: {
     style: {
@@ -132,42 +143,53 @@ const buttonVariants = {
       color: colors.accent,
       fontSize: '10.5px',
       height: '30px',
-      padding: '0 0.5rem'
+      padding: '0 0.5rem',
     },
     disabledStyle: {
       borderColor: colorWithWhiteness(colors.dark, disabledAlpha),
-      color: colorWithWhiteness(colors.dark, disabledAlpha)
+      color: colorWithWhiteness(colors.dark, disabledAlpha),
     },
     hover: {
       borderColor: colorWithWhiteness(colors.accent, 0.4),
-      color: colorWithWhiteness(colors.accent, 0.4)
-    }
+      color: colorWithWhiteness(colors.accent, 0.4),
+    },
   },
   primaryOnDarkBackground: {
     style: {
       ...styles.baseNew,
       borderRadius: '0.2rem',
-      backgroundColor: colors.primary, color: colors.white
+      backgroundColor: colors.primary,
+      color: colors.white,
     },
-    disabledStyle: {backgroundColor: colorWithWhiteness(colors.dark, disabledAlpha)},
-    hover: {backgroundColor: 'rgba(255,255,255,0.3)'}
+    disabledStyle: {
+      backgroundColor: colorWithWhiteness(colors.dark, disabledAlpha),
+    },
+    hover: { backgroundColor: 'rgba(255,255,255,0.3)' },
   },
   secondaryOnDarkBackground: {
     style: {
       ...styles.baseNew,
       borderRadius: '0.2rem',
-      backgroundColor: colors.secondary, color: colors.white
+      backgroundColor: colors.secondary,
+      color: colors.white,
     },
-    disabledStyle: {backgroundColor: colorWithWhiteness(colors.dark, disabledAlpha)},
-    hover: {backgroundColor: colorWithWhiteness(colors.secondary, hoverAlpha)}
+    disabledStyle: {
+      backgroundColor: colorWithWhiteness(colors.dark, disabledAlpha),
+    },
+    hover: {
+      backgroundColor: colorWithWhiteness(colors.secondary, hoverAlpha),
+    },
   },
   purplePrimary: {
     style: {
       ...styles.baseNew,
-      backgroundColor: colors.primary, color: colors.white,
+      backgroundColor: colors.primary,
+      color: colors.white,
     },
-    disabledStyle: {backgroundColor: colorWithWhiteness(colors.dark, disabledAlpha)},
-    hover: {backgroundColor: colorWithWhiteness(colors.primary, hoverAlpha)}
+    disabledStyle: {
+      backgroundColor: colorWithWhiteness(colors.dark, disabledAlpha),
+    },
+    hover: { backgroundColor: colorWithWhiteness(colors.primary, hoverAlpha) },
   },
   purpleSecondary: {
     style: {
@@ -177,147 +199,243 @@ const buttonVariants = {
     },
     disabledStyle: {
       borderColor: colorWithWhiteness(colors.dark, disabledAlpha),
-      color: colorWithWhiteness(colors.dark, disabledAlpha)
+      color: colorWithWhiteness(colors.dark, disabledAlpha),
     },
-    hover: {backgroundColor: colorWithWhiteness(colors.primary, hoverAlpha),
-      color: colors.white, borderColor: colorWithWhiteness(colors.primary, hoverAlpha)}
+    hover: {
+      backgroundColor: colorWithWhiteness(colors.primary, hoverAlpha),
+      color: colors.white,
+      borderColor: colorWithWhiteness(colors.primary, hoverAlpha),
+    },
   },
   link: {
     style: {
       ...styles.baseNew,
-      color: colors.accent
+      color: colors.accent,
     },
     disabledStyle: {
-      color: colorWithWhiteness(colors.dark, disabledAlpha)
+      color: colorWithWhiteness(colors.dark, disabledAlpha),
     },
-    hover: {color: colorWithWhiteness(colors.accent, 0.4)}
-  }
+    hover: { color: colorWithWhiteness(colors.accent, 0.4) },
+  },
 };
 
-const computeStyle = ({style = {}, hover = {}, disabledStyle = {}}, {disabled}) => {
+const computeStyle = (
+  { style = {}, hover = {}, disabledStyle = {} },
+  { disabled }
+) => {
   return {
-    style: {...style, ...(disabled ? {cursor: 'not-allowed', ...disabledStyle} : {})},
-    hover: disabled ? undefined : hover
+    style: {
+      ...style,
+      ...(disabled ? { cursor: 'not-allowed', ...disabledStyle } : {}),
+    },
+    hover: disabled ? undefined : hover,
   };
 };
 
-export const Clickable = ({as = 'div', disabled = false, onClick = null, propagateDataTestId = false, ...props}) => {
+export const Clickable = ({
+  as = 'div',
+  disabled = false,
+  onClick = null,
+  propagateDataTestId = false,
+  ...props
+}) => {
   // `fp.omit` used to prevent propagation of test IDs to the rendered child component.
-  const childProps = propagateDataTestId ? props : fp.omit(['data-test-id'], props);
-  return <Interactive
-    as={as} {...childProps}
-    onClick={(...args) => onClick && !disabled && onClick(...args)}
-  />;
+  const childProps = propagateDataTestId
+    ? props
+    : fp.omit(['data-test-id'], props);
+  return (
+    <Interactive
+      as={as}
+      {...childProps}
+      onClick={(...args) => onClick && !disabled && onClick(...args)}
+    />
+  );
 };
 
 export const Button = ({
-                         children,
-                         path='',
-                         type = 'primary',
-                         style = {},
-                         linkStyle={},
-                         disabled = false,
-                         propagateDataTestId = false,
-                         ...props
-                       }) => {
+  children,
+  path = '',
+  type = 'primary',
+  style = {},
+  linkStyle = {},
+  disabled = false,
+  propagateDataTestId = false,
+  ...props
+}) => {
   // `fp.omit` used to prevent propagation of test IDs to the rendered child component.
-  const childProps = propagateDataTestId ? props : fp.omit(['data-test-id'], props);
-  const computedStyle = fp.merge(computeStyle(buttonVariants[type], {disabled}), {style})
-  return path
-    ? <RouteLink path={path} {...computedStyle}>
-        <Clickable disabled={disabled} {...childProps}>
-          {children}
-        </Clickable>
-      </RouteLink>
-    : <Clickable disabled={disabled} {...computedStyle} {...childProps}>
+  const childProps = propagateDataTestId
+    ? props
+    : fp.omit(['data-test-id'], props);
+  const computedStyle = fp.merge(
+    computeStyle(buttonVariants[type], { disabled }),
+    { style }
+  );
+  return path ? (
+    <RouteLink path={path} {...computedStyle}>
+      <Clickable disabled={disabled} {...childProps}>
+        {children}
+      </Clickable>
+    </RouteLink>
+  ) : (
+    <Clickable disabled={disabled} {...computedStyle} {...childProps}>
       {children}
     </Clickable>
+  );
 };
 
-export const MenuItem = ({icon = null, faIcon = null, tooltip = '' as any, disabled = false, children, style = {}, ...props}) => {
-  return <TooltipTrigger side='left' content={tooltip}>
-    <Clickable
-      // data-test-id is the text within the MenuItem, with whitespace removed
-      // and appended with '-menu-item'
-      data-test-id={children.toString().replace(/\s/g, '') + '-menu-item'}
-      disabled={disabled}
-      style={{
-        display: 'flex', alignItems: 'center', justifyContent: 'start',
-        fontSize: 12, minWidth: 125, height: 32,
-        color: disabled ? colorWithWhiteness(colors.dark, disabledAlpha) : 'black',
-        padding: '0 12px',
-        cursor: disabled ? 'not-allowed' : 'pointer',
-        ...style
-      }}
-      hover={!disabled ? {backgroundColor: colorWithWhiteness(colors.accent, 0.92)} : undefined}
-      {...props}
-    >
-      {icon &&
-       // TODO(RW-5682): Use a consistent icon type throughout. For now, support both.
-       <ClrIcon shape={icon} style={{marginRight: 8}} size={15}/>}
-      {faIcon &&
-       // For consistency with ClrIcon: FontAwesome default icon size is ~11px.
-       // To align these, we add 2px additional margin on either side.
-       // See also https://fontawesome.com/how-to-use/on-the-web/styling/sizing-icons
-       <FontAwesomeIcon icon={faIcon} style={{marginLeft: 2, marginRight: 10}}/>}
-      {children}
-    </Clickable>
-  </TooltipTrigger>;
+export const MenuItem = ({
+  icon = null,
+  faIcon = null,
+  tooltip = '' as any,
+  disabled = false,
+  children,
+  style = {},
+  ...props
+}) => {
+  return (
+    <TooltipTrigger side='left' content={tooltip}>
+      <Clickable
+        // data-test-id is the text within the MenuItem, with whitespace removed
+        // and appended with '-menu-item'
+        data-test-id={children.toString().replace(/\s/g, '') + '-menu-item'}
+        disabled={disabled}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'start',
+          fontSize: 12,
+          minWidth: 125,
+          height: 32,
+          color: disabled
+            ? colorWithWhiteness(colors.dark, disabledAlpha)
+            : 'black',
+          padding: '0 12px',
+          cursor: disabled ? 'not-allowed' : 'pointer',
+          ...style,
+        }}
+        hover={
+          !disabled
+            ? { backgroundColor: colorWithWhiteness(colors.accent, 0.92) }
+            : undefined
+        }
+        {...props}
+      >
+        {icon && (
+          // TODO(RW-5682): Use a consistent icon type throughout. For now, support both.
+          <ClrIcon shape={icon} style={{ marginRight: 8 }} size={15} />
+        )}
+        {faIcon && (
+          // For consistency with ClrIcon: FontAwesome default icon size is ~11px.
+          // To align these, we add 2px additional margin on either side.
+          // See also https://fontawesome.com/how-to-use/on-the-web/styling/sizing-icons
+          <FontAwesomeIcon
+            icon={faIcon}
+            style={{ marginLeft: 2, marginRight: 10 }}
+          />
+        )}
+        {children}
+      </Clickable>
+    </TooltipTrigger>
+  );
 };
 
-export const IconButton = ({icon: Icon, style = {}, hover = {}, tooltip = '', disabled = false, ...props}) => {
-  return <TooltipTrigger side='left' content={tooltip}>
-    <LocalInteractive tagName='div'
-                 style={{
-                   color: disabled ? colors.disabled : colors.accent,
-                   cursor: disabled ? 'auto' : 'pointer',
-                   ...style
-                 }}
-                 hover={{color: !disabled && colorWithWhiteness(colors.accent, 0.2), ...hover}}
-                 disabled={disabled}
-                 {...props}>
-        <Icon disabled={disabled} style={style}/>
-    </LocalInteractive>
-  </TooltipTrigger>;
+export const IconButton = ({
+  icon: Icon,
+  style = {},
+  hover = {},
+  tooltip = '',
+  disabled = false,
+  ...props
+}) => {
+  return (
+    <TooltipTrigger side='left' content={tooltip}>
+      <LocalInteractive
+        tagName='div'
+        style={{
+          color: disabled ? colors.disabled : colors.accent,
+          cursor: disabled ? 'auto' : 'pointer',
+          ...style,
+        }}
+        hover={{
+          color: !disabled && colorWithWhiteness(colors.accent, 0.2),
+          ...hover,
+        }}
+        disabled={disabled}
+        {...props}
+      >
+        <Icon disabled={disabled} style={style} />
+      </LocalInteractive>
+    </TooltipTrigger>
+  );
 };
 
-export const SnowmanButton = ({...props}) => <IconButton icon={SnowmanIcon} {...props} />;
+export const SnowmanButton = ({ ...props }) => (
+  <IconButton icon={SnowmanIcon} {...props} />
+);
 
 const cardButtonBase = {
   style: {
-    alignItems: 'flex-start', alignContent: 'left', fontWeight: 500,
-    justifyContent: 'center', padding: '0 1rem', color: colors.accent,
+    alignItems: 'flex-start',
+    alignContent: 'left',
+    fontWeight: 500,
+    justifyContent: 'center',
+    padding: '0 1rem',
+    color: colors.accent,
   },
-  disabledStyle: {color: colorWithWhiteness(colors.dark, disabledAlpha), cursor: 'not-allowed'}
-
+  disabledStyle: {
+    color: colorWithWhiteness(colors.dark, disabledAlpha),
+    cursor: 'not-allowed',
+  },
 };
 
 const cardButtonStyle = {
   large: {
     style: {
-      ...cardStyles.workspaceCard, ...cardButtonBase.style,
-      boxShadow: '0 0 2px 0 rgba(0, 0, 0, 0.12), 0 3px 2px 0 rgba(0, 0, 0, 0.12)',
-      fontSize: 20, lineHeight: '28px',
+      ...cardStyles.workspaceCard,
+      ...cardButtonBase.style,
+      boxShadow:
+        '0 0 2px 0 rgba(0, 0, 0, 0.12), 0 3px 2px 0 rgba(0, 0, 0, 0.12)',
+      fontSize: 20,
+      lineHeight: '28px',
     },
-    disabledStyle: {...cardButtonBase.disabledStyle}
+    disabledStyle: { ...cardButtonBase.disabledStyle },
   },
 
   small: {
-    style : {
-      ...cardStyles.resourceCard, ...cardButtonBase.style,
-      fontSize: 18, lineHeight: '22px',
-      minWidth: '200px', maxWidth: '200px', minHeight: '105px', maxHeight: '105px',
-      marginTop: '1rem', marginRight: '1rem',
+    style: {
+      ...cardStyles.resourceCard,
+      ...cardButtonBase.style,
+      fontSize: 18,
+      lineHeight: '22px',
+      minWidth: '200px',
+      maxWidth: '200px',
+      minHeight: '105px',
+      maxHeight: '105px',
+      marginTop: '1rem',
+      marginRight: '1rem',
     },
-    disabledStyle: {...cardButtonBase.disabledStyle}
-  }
+    disabledStyle: { ...cardButtonBase.disabledStyle },
+  },
 };
 
-export const CardButton = ({type = 'large', disabled = false, style = {}, children, ...props}) => {
-  return <Clickable
-    disabled={disabled} {...props}
-    {...fp.merge(computeStyle(cardButtonStyle[type], {disabled}), {style})}
-  >{children}</Clickable>;
+export const CardButton = ({
+  type = 'large',
+  disabled = false,
+  style = {},
+  children,
+  ...props
+}) => {
+  return (
+    <Clickable
+      disabled={disabled}
+      {...props}
+      {...fp.merge(computeStyle(cardButtonStyle[type], { disabled }), {
+        style,
+      })}
+    >
+      {children}
+    </Clickable>
+  );
 };
 
 const tabButtonStyle = {
@@ -329,67 +447,117 @@ const tabButtonStyle = {
     lineHeight: '28px',
   },
   hover: {},
-  disabledStyle: {}
+  disabledStyle: {},
 };
 
 const activeTabButtonStyle = {
   style: {
     borderBottom: `4px solid ${colors.accent}`,
-    fontWeight: 600
-  }
+    fontWeight: 600,
+  },
 };
 
-export const TabButton = ({disabled = false, style = {}, active = false, children, ...props}) => {
+export const TabButton = ({
+  disabled = false,
+  style = {},
+  active = false,
+  children,
+  ...props
+}) => {
   const tabButtonStyleMerged = {
-    style: {...tabButtonStyle.style, ...(active ? activeTabButtonStyle.style : {})},
+    style: {
+      ...tabButtonStyle.style,
+      ...(active ? activeTabButtonStyle.style : {}),
+    },
     hover: tabButtonStyle.hover,
     disabledStyle: tabButtonStyle.disabledStyle,
   };
-  return <Clickable
-    disabled={disabled} {...props}
-    {...fp.merge(computeStyle(tabButtonStyleMerged, {disabled}), {style})}
-  >{children}</Clickable>;
+  return (
+    <Clickable
+      disabled={disabled}
+      {...props}
+      {...fp.merge(computeStyle(tabButtonStyleMerged, { disabled }), { style })}
+    >
+      {children}
+    </Clickable>
+  );
 };
 
 // The intended use of this component is as a button that is styled as a link, but does not actually navigate anywhere.
-export const LinkButton = ({disabled = false, style = {}, children, ...props}) => {
+export const LinkButton = ({
+  disabled = false,
+  style = {},
+  children,
+  ...props
+}) => {
   const linkStyle = {
-    style: {color: colors.accent},
-    hover: {textDecoration: 'underline'}
+    style: { color: colors.accent },
+    hover: { textDecoration: 'underline' },
   };
-  return <Clickable
-      disabled={disabled} {...props}
-      {...fp.merge(computeStyle(linkStyle, {disabled}), {style})}
-  >{children}</Clickable>;
+  return (
+    <Clickable
+      disabled={disabled}
+      {...props}
+      {...fp.merge(computeStyle(linkStyle, { disabled }), { style })}
+    >
+      {children}
+    </Clickable>
+  );
 };
 
 export const StyledRouterLink = ({
-    path, children, disabled = false, propagateDataTestId = false,
-    analyticsFn = null, style = {}, ...props}) => {
-  const childProps = propagateDataTestId ? props : fp.omit(['data-test-id'], props);
+  path,
+  children,
+  disabled = false,
+  propagateDataTestId = false,
+  analyticsFn = null,
+  style = {},
+  ...props
+}) => {
+  const childProps = propagateDataTestId
+    ? props
+    : fp.omit(['data-test-id'], props);
   const linkStyle = {
-    style: {...styles.inlineAnchor}
-  }
-  const computedStyles = fp.merge(computeStyle(linkStyle, {disabled}), {style})
+    style: { ...styles.inlineAnchor },
+  };
+  const computedStyles = fp.merge(computeStyle(linkStyle, { disabled }), {
+    style,
+  });
   // A react-router Link will attempt to navigate whenever you click on it; it has no concept
   // of 'disabled'. So if it is disabled, we render a span instead.
-  return disabled
-    ? <span {...computedStyles} {...childProps}>{children}</span>
-    : <Link
-        to={path}
-        onClick={() => analyticsFn && analyticsFn()}
-        {...computedStyles}
-        {...childProps}
+  return disabled ? (
+    <span {...computedStyles} {...childProps}>
+      {children}
+    </span>
+  ) : (
+    <Link
+      to={path}
+      onClick={() => analyticsFn && analyticsFn()}
+      {...computedStyles}
+      {...childProps}
     >
       {children}
-    </Link>;
-}
+    </Link>
+  );
+};
 
-export const StyledExternalLink = ({href, children, analyticsFn = null, style = {}, ...props}) => {
-  return <a href={href}
-            onClick={() => analyticsFn && analyticsFn()}
-            style={{...styles.inlineAnchor, ...style}}
-            {...props}>{children}</a>;
+export const StyledExternalLink = ({
+  href,
+  children,
+  analyticsFn = null,
+  style = {},
+  ...props
+}) => {
+  return (
+    <a
+      href={href}
+      onClick={() => analyticsFn && analyticsFn()}
+      style={{ ...styles.inlineAnchor, ...style }}
+      {...props}
+    >
+      {children}
+    </a>
+  );
 };
 
 interface SlidingFabState {
@@ -405,34 +573,58 @@ interface SlidingFabProps {
   tooltipContent?: JSX.Element;
 }
 
-export class SlidingFabReact extends React.Component<SlidingFabProps, SlidingFabState> {
-
+export class SlidingFabReact extends React.Component<
+  SlidingFabProps,
+  SlidingFabState
+> {
   constructor(props) {
     super(props);
-    this.state = {hovering: false};
+    this.state = { hovering: false };
   }
 
   render() {
-    const {hovering} = this.state;
-    const {expanded, disable, iconShape, tooltip, tooltipContent} = this.props;
-    return <div style={styles.slidingButtonContainer}>
-      <div data-test-id='sliding-button'
-           style={disable ? {...styles.slidingButton,
-             ...styles.slidingButtonDisable} : styles.slidingButton}
-           onMouseEnter={() => this.setState({hovering: true})}
-           onMouseLeave={() => this.setState({hovering: false})}
-           onClick={() => disable ? {} : this.props.submitFunction()}>
-        <TooltipTrigger content={tooltipContent} disabled={!tooltip}>
-          <div style={styles.slidingButtonContent}>
-            <div style={hovering ? {...styles.slidingButtonText,
-              ...styles.slidingButtonHovering} : styles.slidingButtonText}>
-              {expanded}
+    const { hovering } = this.state;
+    const { expanded, disable, iconShape, tooltip, tooltipContent } =
+      this.props;
+    return (
+      <div style={styles.slidingButtonContainer}>
+        <div
+          data-test-id='sliding-button'
+          style={
+            disable
+              ? { ...styles.slidingButton, ...styles.slidingButtonDisable }
+              : styles.slidingButton
+          }
+          onMouseEnter={() => this.setState({ hovering: true })}
+          onMouseLeave={() => this.setState({ hovering: false })}
+          onClick={() => (disable ? {} : this.props.submitFunction())}
+        >
+          <TooltipTrigger content={tooltipContent} disabled={!tooltip}>
+            <div style={styles.slidingButtonContent}>
+              <div
+                style={
+                  hovering
+                    ? {
+                        ...styles.slidingButtonText,
+                        ...styles.slidingButtonHovering,
+                      }
+                    : styles.slidingButtonText
+                }
+              >
+                {expanded}
+              </div>
+              <ClrIcon
+                shape={iconShape}
+                style={{
+                  height: '1.5rem',
+                  width: '1.5rem',
+                  marginRight: '.145rem',
+                }}
+              />
             </div>
-            <ClrIcon shape={iconShape} style={{height: '1.5rem', width: '1.5rem',
-              marginRight: '.145rem'}}/>
-          </div>
-        </TooltipTrigger>
+          </TooltipTrigger>
+        </div>
       </div>
-    </div>;
+    );
   }
 }

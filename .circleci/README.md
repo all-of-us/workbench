@@ -47,8 +47,5 @@ We use the latest version (2.1) of the CircleCI continuous integration tool.  He
       #   src/test/java/org/pmiops/*********/monitoring/LogsBasedMetricsServiceTest.java src/test/java/org/pmiops/*********/monitoring/MonitoringServiceTest.java
       # Example of Gradle command after formatting:
       #   gradle test --tests org.pmiops.*********.monitoring.LogsBasedMetricsServiceTest --tests org.pmiops.*********.monitoring.MonitoringServiceTest
-      #
-      # We exclude the :genomics:test task below because otherwise gradle will attempt to run all the regular API unit tests under the genomics
-      # submodule and will be unable to find them and will barf
  
  

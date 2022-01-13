@@ -1,7 +1,7 @@
 import * as fp from 'lodash/fp';
 
-export const delay = ms => {
-  return new Promise(resolve => setTimeout(resolve, ms));
+export const delay = (ms) => {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 };
 
 /**
@@ -11,7 +11,9 @@ export const delay = ms => {
  * @function next Send the new value to all subscribers
  **/
 export interface Subscribable<T> {
-  subscribe: (fn: (newValue?: T, oldValue?: T) => void) => { unsubscribe: () => void};
+  subscribe: (fn: (newValue?: T, oldValue?: T) => void) => {
+    unsubscribe: () => void;
+  };
   next: (newValue: T, oldValue: T) => void;
 }
 
@@ -31,29 +33,31 @@ export interface Atom<T> {
 
 export function subscribable<T>(): Subscribable<T> {
   let subscribers = [];
-  type subscriber = ((newValue?: T, oldValue?: T) => void);
+  type subscriber = (newValue?: T, oldValue?: T) => void;
 
   return {
-    subscribe: fn => {
+    subscribe: (fn) => {
       subscribers = fp.concat(subscribers, [fn]);
       return {
         unsubscribe: () => {
           subscribers = fp.without([fn], subscribers);
-        }
+        },
       };
     },
     next: (newValue?: T, oldValue?: T) => {
-      fp.forEach((fn: subscriber) => setTimeout(
-        () => {
-          try {
-            fn(newValue, oldValue);
-          } catch (e) {
-            // Ignore the error - ideally the supplied fn should
-            // supply its error handling
-          }
-        }
-        , 0), subscribers);
-    }
+      fp.forEach(
+        (fn: subscriber) =>
+          setTimeout(() => {
+            try {
+              fn(newValue, oldValue);
+            } catch (e) {
+              // Ignore the error - ideally the supplied fn should
+              // supply its error handling
+            }
+          }, 0),
+        subscribers
+      );
+    },
   };
 }
 
@@ -62,7 +66,7 @@ export function atom<T>(initialValue: T): Atom<T> {
   let value = initialValue;
   const { subscribe, next } = subscribable<T>();
   const get = () => value;
-  const set = newValue => {
+  const set = (newValue) => {
     const oldValue = value;
     value = newValue;
     next(newValue, oldValue);

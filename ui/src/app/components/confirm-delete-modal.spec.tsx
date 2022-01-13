@@ -1,15 +1,22 @@
-import {shallow} from 'enzyme';
+import { shallow } from 'enzyme';
 import * as React from 'react';
 
-import {ConfirmDeleteModal, ConfirmDeleteModalProps, ConfirmDeleteModalState} from './confirm-delete-modal';
-import {ResourceType} from 'generated/fetch';
+import {
+  ConfirmDeleteModal,
+  ConfirmDeleteModalProps,
+  ConfirmDeleteModalState,
+} from './confirm-delete-modal';
+import { ResourceType } from 'generated/fetch';
 
 describe('ConfirmDeleteModalComponent', () => {
   let props: ConfirmDeleteModalProps;
 
   const component = () => {
-    return shallow<ConfirmDeleteModal, ConfirmDeleteModalProps, ConfirmDeleteModalState>
-    (<ConfirmDeleteModal {...props}/>);
+    return shallow<
+      ConfirmDeleteModal,
+      ConfirmDeleteModalProps,
+      ConfirmDeleteModalState
+    >(<ConfirmDeleteModal {...props} />);
   };
 
   beforeEach(() => {
@@ -17,7 +24,7 @@ describe('ConfirmDeleteModalComponent', () => {
       resourceType: ResourceType.NOTEBOOK,
       resourceName: 'testResource',
       receiveDelete: () => {},
-      closeFunction: () => {}
+      closeFunction: () => {},
     };
   });
 
@@ -25,5 +32,4 @@ describe('ConfirmDeleteModalComponent', () => {
     const wrapper = component();
     expect(wrapper).toBeTruthy();
   });
-
 });

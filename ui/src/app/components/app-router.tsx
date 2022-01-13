@@ -1,9 +1,9 @@
 import { cond } from 'app/utils';
-import {routeDataStore} from 'app/utils/stores';
-import {buildPageTitleForEnvironment} from 'app/utils/title';
+import { routeDataStore } from 'app/utils/stores';
+import { buildPageTitleForEnvironment } from 'app/utils/title';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
-import {useEffect} from 'react';
+import { useEffect } from 'react';
 import * as ReactDOM from 'react-dom';
 import {
   BrowserRouter,
@@ -12,10 +12,10 @@ import {
   Route,
   useLocation,
   useParams,
-  useRouteMatch
+  useRouteMatch,
 } from 'react-router-dom';
-import {Button} from './buttons';
-import {Modal, ModalBody, ModalFooter, ModalTitle} from './modals';
+import { Button } from './buttons';
+import { Modal, ModalBody, ModalFooter, ModalTitle } from './modals';
 
 export interface Guard {
   allowed: () => boolean;
@@ -25,13 +25,13 @@ export interface Guard {
 }
 
 export const usePath = () => {
-  const {path} = useRouteMatch();
+  const { path } = useRouteMatch();
   return path;
 };
 
 export const parseQueryParams = (search: string) => {
   return new URLSearchParams(search);
-}
+};
 
 /**
  * Retrieve query parameters from the React Router.
@@ -45,25 +45,35 @@ export const useQuery = (): URLSearchParams => {
   return parseQueryParams(location.search);
 };
 
-export const withRouteData = WrappedComponent => ({intermediaryRoute = false, routeData, ...props}) => {
-  const params = useParams();
+export const withRouteData =
+  (WrappedComponent) =>
+  ({ intermediaryRoute = false, routeData, ...props }) => {
+    const params = useParams();
 
-  useEffect(() => {
-    if (!intermediaryRoute) {
-      if (!fp.isEqual(routeDataStore.get(), routeData)) {
-        routeDataStore.set(routeData);
+    useEffect(() => {
+      if (!intermediaryRoute) {
+        if (!fp.isEqual(routeDataStore.get(), routeData)) {
+          routeDataStore.set(routeData);
+        }
+
+        document.title = buildPageTitleForEnvironment(
+          routeData.title || params[routeData.pathElementForTitle]
+        );
       }
+    }, [routeData]);
 
-      document.title = buildPageTitleForEnvironment(routeData.title || params[routeData.pathElementForTitle]);
-    }
-  }, [routeData]);
+    return <WrappedComponent {...props} />;
+  };
 
-  return <WrappedComponent {...props}/>;
-};
-
-export const withFullHeight = WrappedComponent => ({...props}) => {
-  return <div style={{height: '100%'}}><WrappedComponent {...props} /></div>;
-};
+export const withFullHeight =
+  (WrappedComponent) =>
+  ({ ...props }) => {
+    return (
+      <div style={{ height: '100%' }}>
+        <WrappedComponent {...props} />
+      </div>
+    );
+  };
 
 // This function is invoked if react-router `<Prompt>` is rendered by a component that wants the user to
 // confirm navigating away from the page. The default behavior of <Prompt> is being overridden by this
@@ -80,43 +90,69 @@ const getUserConfirmation = (message, callback) => {
 
   ReactDOM.render(
     <Modal>
-        <ModalTitle>Warning!</ModalTitle>
-        <ModalBody>
-          {message}
-        </ModalBody>
-        <ModalFooter>
-          <Button type='link' onClick={() => withCleanup(false)}>Cancel</Button>
-          <Button type='primary' onClick={() => withCleanup(true)}>Discard Changes</Button>
-        </ModalFooter>
-      </Modal>, modal);
+      <ModalTitle>Warning!</ModalTitle>
+      <ModalBody>{message}</ModalBody>
+      <ModalFooter>
+        <Button type='link' onClick={() => withCleanup(false)}>
+          Cancel
+        </Button>
+        <Button type='primary' onClick={() => withCleanup(true)}>
+          Discard Changes
+        </Button>
+      </ModalFooter>
+    </Modal>,
+    modal
+  );
 };
 
-export const AppRouter = ({children}): React.ReactElement => {
-  return <BrowserRouter getUserConfirmation={getUserConfirmation}>{children}</BrowserRouter>;
+export const AppRouter = ({ children }): React.ReactElement => {
+  return (
+    <BrowserRouter getUserConfirmation={getUserConfirmation}>
+      {children}
+    </BrowserRouter>
+  );
 };
 
 // Most internal routing is done via custom styled Button, not via text, so we only want to use anchor styling
 // if we explicitly set it on the RouteLink
-export const RouteLink = ({path, style = {}, disabled= false, children}): React.ReactElement => {
-  const linkStyles = {textDecoration: 'none', color: 'unset'};
-  return !disabled
-      ? <Link style={{...linkStyles, ...style}} to={path}>{children}</Link>
-      : <span style={{...linkStyles, ...style}}>{children}</span>;
-}
-
-export const AppRoute = ({path, guards = [], exact, intermediaryRoute = false, children}): React.ReactElement => {
-  const { renderBlocked = null, redirectPath = null } = fp.find(({allowed}) => !allowed(), guards) || {};
-
-  return <Route exact={exact} path={path}>
-    {cond(
-       [redirectPath, () => <Redirect to={redirectPath}/>],
-       [renderBlocked, () => renderBlocked()],
-       () => (children))
-    }
-  </Route>;
+export const RouteLink = ({
+  path,
+  style = {},
+  disabled = false,
+  children,
+}): React.ReactElement => {
+  const linkStyles = { textDecoration: 'none', color: 'unset' };
+  return !disabled ? (
+    <Link style={{ ...linkStyles, ...style }} to={path}>
+      {children}
+    </Link>
+  ) : (
+    <span style={{ ...linkStyles, ...style }}>{children}</span>
+  );
 };
 
-export const Navigate = ({to}): React.ReactElement => {
+export const AppRoute = ({
+  path,
+  guards = [],
+  exact,
+  intermediaryRoute = false,
+  children,
+}): React.ReactElement => {
+  const { renderBlocked = null, redirectPath = null } =
+    fp.find(({ allowed }) => !allowed(), guards) || {};
+
+  return (
+    <Route exact={exact} path={path}>
+      {cond(
+        [redirectPath, () => <Redirect to={redirectPath} />],
+        [renderBlocked, () => renderBlocked()],
+        () => children
+      )}
+    </Route>
+  );
+};
+
+export const Navigate = ({ to }): React.ReactElement => {
   const location = useLocation();
-  return <Redirect to={{pathname: to, state: {from: location}}}/>;
+  return <Redirect to={{ pathname: to, state: { from: location } }} />;
 };

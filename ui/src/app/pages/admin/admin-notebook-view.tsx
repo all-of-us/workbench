@@ -1,13 +1,13 @@
-import {SpinnerOverlay} from 'app/components/spinners';
-import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
-import {workspaceAdminApi} from 'app/services/swagger-fetch-clients';
-import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {reactStyles} from 'app/utils';
-import {useQuery} from 'app/components/app-router';
+import { SpinnerOverlay } from 'app/components/spinners';
+import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
+import { workspaceAdminApi } from 'app/services/swagger-fetch-clients';
+import colors, { colorWithWhiteness } from 'app/styles/colors';
+import { reactStyles } from 'app/utils';
+import { useQuery } from 'app/components/app-router';
 import { MatchParams } from 'app/utils/stores';
 import * as React from 'react';
-import {useEffect, useState} from 'react';
-import {useParams} from 'react-router';
+import { useEffect, useState } from 'react';
+import { useParams } from 'react-router';
 
 const styles = reactStyles({
   heading: {
@@ -19,7 +19,7 @@ const styles = reactStyles({
     width: '100%',
     height: 'calc(100% - 40px)',
     position: 'absolute',
-    border: 0
+    border: 0,
   },
   error: {
     marginLeft: 'auto',
@@ -34,7 +34,7 @@ const styles = reactStyles({
     boxSizing: 'border-box',
     color: colors.primary,
     borderColor: colors.warning,
-    backgroundColor: colorWithWhiteness(colors.danger, .9),
+    backgroundColor: colorWithWhiteness(colors.danger, 0.9),
     borderWidth: '1px',
     borderStyle: 'solid',
     borderRadius: '5px',
@@ -48,20 +48,36 @@ interface Props {
 }
 
 const AdminNotebookViewComponent = (props: Props) => {
-  const {workspaceNamespace, notebookName, accessReason} = props;
+  const { workspaceNamespace, notebookName, accessReason } = props;
   const [notebookHtml, setHtml] = useState('');
   const [workspaceName, setWorkspaceName] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
 
   const Header = () => {
-    const workspace = workspaceName ? `Workspace ${workspaceName}` : 'Workspace';
-    const link = <a href={`/admin/workspaces/${workspaceNamespace}`}>{workspace} with namespace {workspaceNamespace}</a>;
-    return <div style={styles.heading}>Viewing {notebookName} in {link} for reason:<div>{accessReason}</div></div>;
+    const workspace = workspaceName
+      ? `Workspace ${workspaceName}`
+      : 'Workspace';
+    const link = (
+      <a href={`/admin/workspaces/${workspaceNamespace}`}>
+        {workspace} with namespace {workspaceNamespace}
+      </a>
+    );
+    return (
+      <div style={styles.heading}>
+        Viewing {notebookName} in {link} for reason:<div>{accessReason}</div>
+      </div>
+    );
   };
 
   const Main = () => {
     if (notebookHtml) {
-      return <iframe id='notebook-frame' style={styles.notebook} srcDoc={notebookHtml}/>;
+      return (
+        <iframe
+          id='notebook-frame'
+          style={styles.notebook}
+          srcDoc={notebookHtml}
+        />
+      );
     } else if (errorMessage) {
       return <div style={styles.error}>{errorMessage}</div>;
     } else {
@@ -70,48 +86,61 @@ const AdminNotebookViewComponent = (props: Props) => {
   };
 
   useEffect(() => {
-    workspaceAdminApi().getWorkspaceAdminView(workspaceNamespace)
-      .then(workspaceAdminView => setWorkspaceName(workspaceAdminView.workspace.name));
+    workspaceAdminApi()
+      .getWorkspaceAdminView(workspaceNamespace)
+      .then((workspaceAdminView) =>
+        setWorkspaceName(workspaceAdminView.workspace.name)
+      );
   }, []);
 
   useEffect(() => {
     if (!accessReason || !accessReason.trim()) {
-      setErrorMessage('Error: must include accessReason query parameter in URL');
+      setErrorMessage(
+        'Error: must include accessReason query parameter in URL'
+      );
       return;
     }
 
-    workspaceAdminApi().adminReadOnlyNotebook(workspaceNamespace, notebookName, {reason: accessReason})
-      .then(response => setHtml(response.html))
+    workspaceAdminApi()
+      .adminReadOnlyNotebook(workspaceNamespace, notebookName, {
+        reason: accessReason,
+      })
+      .then((response) => setHtml(response.html))
       .catch((e) => {
         if (e.status === 404) {
           setErrorMessage(`Notebook ${notebookName} was not found`);
         } else if (e.status === 412) {
           setErrorMessage('Notebook is too large to display in preview mode');
         } else {
-          setErrorMessage('Failed to render notebook preview due to unknown error');
+          setErrorMessage(
+            'Failed to render notebook preview due to unknown error'
+          );
         }
       });
   }, []);
 
-  return <React.Fragment>
-    <Header/>
-    <Main/>
-  </React.Fragment>;
+  return (
+    <React.Fragment>
+      <Header />
+      <Main />
+    </React.Fragment>
+  );
 };
 
 const AdminNotebookView = (spinnerProps: WithSpinnerOverlayProps) => {
   useEffect(() => spinnerProps.hideSpinner(), []);
 
-  const {ns, nbName} = useParams<MatchParams>();
+  const { ns, nbName } = useParams<MatchParams>();
   const accessReason = useQuery().get('accessReason');
 
   // react-router does not handling decoding of URL parameters, they must be decoded here.
-  return <AdminNotebookViewComponent
+  return (
+    <AdminNotebookViewComponent
       workspaceNamespace={ns}
       notebookName={decodeURIComponent(nbName)}
-      accessReason={accessReason}/>;
+      accessReason={accessReason}
+    />
+  );
 };
 
-export {
-  AdminNotebookView
-};
+export { AdminNotebookView };

@@ -1,9 +1,15 @@
-import {Workspace, WorkspaceAccessLevel, WorkspaceResponse} from 'generated/fetch';
+import {
+  Workspace,
+  WorkspaceAccessLevel,
+  WorkspaceResponse,
+} from 'generated/fetch';
 
 export namespace WorkspacePermissionsUtil {
   export function canWrite(accessLevel: WorkspaceAccessLevel) {
-    return accessLevel === WorkspaceAccessLevel.OWNER ||
-      accessLevel === WorkspaceAccessLevel.WRITER;
+    return (
+      accessLevel === WorkspaceAccessLevel.OWNER ||
+      accessLevel === WorkspaceAccessLevel.WRITER
+    );
   }
 
   export function isOwner(accessLevel: WorkspaceAccessLevel) {
@@ -25,9 +31,11 @@ export class WorkspacePermissions {
   }
 
   get canRead() {
-    return this.accessLevel === WorkspaceAccessLevel.OWNER ||
+    return (
+      this.accessLevel === WorkspaceAccessLevel.OWNER ||
       this.accessLevel === WorkspaceAccessLevel.WRITER ||
-      this.accessLevel === WorkspaceAccessLevel.READER;
+      this.accessLevel === WorkspaceAccessLevel.READER
+    );
   }
 
   get isReadOnly() {

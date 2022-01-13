@@ -1,27 +1,50 @@
-import {Selection} from 'app/cohort-search/selection-list/selection-list.component';
-import {WorkspaceData} from 'app/utils/workspace-data';
-import {Cohort, CohortReview, ConceptSet, Criteria, ErrorResponse} from 'generated/fetch';
 import * as querystring from 'querystring';
 import * as React from 'react';
-import {useHistory} from 'react-router-dom';
-import {BehaviorSubject} from 'rxjs/BehaviorSubject';
+import { useHistory } from 'react-router-dom';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+
+import { Selection } from 'app/cohort-search/selection-list/selection-list.component';
+import { WorkspaceData } from 'app/utils/workspace-data';
+import {
+  Cohort,
+  CohortReview,
+  ConceptSet,
+  Criteria,
+  ErrorResponse,
+} from 'generated/fetch';
 
 // This is an optional warmup store which can be populated to avoid redundant
 // requests on navigation, e.g. from workspace creation/clone -> data page. It
 // is not guaranteed to be populated for all workspace transitions. The value
 // should only be consumed by central infrastructure, but can be updated from
 // specific application pages where appropriate.
-export const nextWorkspaceWarmupStore = new BehaviorSubject<WorkspaceData>(undefined);
+export const nextWorkspaceWarmupStore = new BehaviorSubject<WorkspaceData>(
+  undefined
+);
 
-export const currentWorkspaceStore = new BehaviorSubject<WorkspaceData>(undefined);
+export const currentWorkspaceStore = new BehaviorSubject<WorkspaceData>(
+  undefined
+);
 export const currentCohortStore = new BehaviorSubject<Cohort>(undefined);
-export const currentCohortReviewStore = new BehaviorSubject<CohortReview>(undefined);
-export const currentConceptSetStore = new BehaviorSubject<ConceptSet>(undefined);
+export const currentCohortReviewStore = new BehaviorSubject<CohortReview>(
+  undefined
+);
+export const currentConceptSetStore = new BehaviorSubject<ConceptSet>(
+  undefined
+);
 export const globalErrorStore = new BehaviorSubject<ErrorResponse>(undefined);
-export const currentCohortCriteriaStore = new BehaviorSubject<Array<Selection>>(undefined);
-export const currentConceptStore = new BehaviorSubject<Array<Criteria>>(undefined);
-export const attributesSelectionStore = new BehaviorSubject<Criteria>(undefined);
-export const currentCohortSearchContextStore = new BehaviorSubject<any>(undefined);
+export const currentCohortCriteriaStore = new BehaviorSubject<Array<Selection>>(
+  undefined
+);
+export const currentConceptStore = new BehaviorSubject<Array<Criteria>>(
+  undefined
+);
+export const attributesSelectionStore = new BehaviorSubject<Criteria>(
+  undefined
+);
+export const currentCohortSearchContextStore = new BehaviorSubject<any>(
+  undefined
+);
 export const setSidebarActiveIconStore = new BehaviorSubject<string>(null);
 export const conceptSetUpdating = new BehaviorSubject<boolean>(false);
 
@@ -31,17 +54,29 @@ export const useNavigation = () => {
   const navigateByUrl = (url, extras?: NavigateExtras) => {
     url = '/' + url.replace(/^\//, '');
 
-    const preventDefaultIfNoKeysPressed = extras && extras.preventDefaultIfNoKeysPressed && !!extras.event;
+    const preventDefaultIfNoKeysPressed =
+      extras && extras.preventDefaultIfNoKeysPressed && !!extras.event;
 
     // if modifier keys are pressed (like shift or cmd) use the href
     // if no keys are pressed, prevent default behavior and route using navigateByUrl
-    if (preventDefaultIfNoKeysPressed && !(extras.event.shiftKey || extras.event.altKey || extras.event.ctrlKey || extras.event.metaKey)) {
+    if (
+      preventDefaultIfNoKeysPressed &&
+      !(
+        extras.event.shiftKey ||
+        extras.event.altKey ||
+        extras.event.ctrlKey ||
+        extras.event.metaKey
+      )
+    ) {
       extras.event.preventDefault();
     }
 
     history.push({
       pathname: url,
-      search: extras && extras.queryParams ? querystring.stringify(extras.queryParams) : ''
+      search:
+        extras && extras.queryParams
+          ? querystring.stringify(extras.queryParams)
+          : '',
     });
   };
 
@@ -75,8 +110,10 @@ export const encodeURIComponentStrict = (uri: string): string => {
 };
 
 export const navigateSignOut = (continuePath: string = '/login') => {
-  window.location.assign('https://www.google.com/accounts/Logout?continue=' +
-    `https://appengine.google.com/_ah/logout?continue=${window.location.origin}${continuePath}`);
+  window.location.assign(
+    'https://www.google.com/accounts/Logout?continue=' +
+      `https://appengine.google.com/_ah/logout?continue=${window.location.origin}${continuePath}`
+  );
 };
 
 export interface UrlObj {
@@ -85,21 +122,8 @@ export interface UrlObj {
 }
 
 export const stringifyUrl = (url: UrlObj) => {
-  return url.url + (url.queryParams ? '?' + querystring.stringify(url.queryParams) : '');
+  return (
+    url.url +
+    (url.queryParams ? '?' + querystring.stringify(url.queryParams) : '')
+  );
 };
-
-export enum BreadcrumbType {
-  Workspaces = 'Workspaces',
-  Workspace = 'Workspace',
-  WorkspaceEdit = 'WorkspaceEdit',
-  WorkspaceDuplicate = 'WorkspaceDuplicate',
-  Notebook = 'Notebook',
-  ConceptSet = 'ConceptSet',
-  Cohort = 'Cohort',
-  CohortReview = 'CohortReview',
-  Participant = 'Participant',
-  CohortAdd = 'CohortAdd',
-  SearchConcepts = 'SearchConcepts',
-  Dataset = 'Dataset',
-  Data = 'Data',
-}

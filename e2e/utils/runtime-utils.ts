@@ -17,3 +17,35 @@ export async function initializeRuntimeIfModalPresented(page: Page): Promise<voi
 
   await initializeButton.clickAndWait();
 }
+
+async function isSecuritySuspended(page: Page): Promise<boolean> {
+  try {
+    await page.waitForXPath('//*[@data-test-id="security-suspended-msg"]', { visible: true });
+  } catch (e) {
+    return false;
+  }
+  return true;
+}
+
+export async function waitForSecuritySuspendedStatus(
+  page: Page,
+  suspended = true,
+  timeOut = 25 * 60 * 1000
+): Promise<void> {
+  const startTime = Date.now();
+  const pollPeriod = 20 * 1000;
+
+  while (true) {
+    await page.reload({ waitUntil: ['load', 'domcontentloaded'], timeout: 60 * 1000 });
+
+    if ((await isSecuritySuspended(page)) === suspended) {
+      // Success
+      break;
+    }
+
+    if (Date.now() - startTime > timeOut - pollPeriod) {
+      throw new Error('timed out waiting for security suspension status = ' + suspended);
+    }
+    await page.waitForTimeout(pollPeriod);
+  }
+}

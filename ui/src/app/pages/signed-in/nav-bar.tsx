@@ -1,18 +1,18 @@
 import * as React from 'react';
-import {useEffect, useRef, useState} from 'react';
+import { useEffect, useRef, useState } from 'react';
 
-import {AccessRenewalNotificationMaybe} from 'app/pages/signed-in/access-renewal-notification';
-import {Breadcrumb} from 'app/components/breadcrumb';
-import {ClrIcon} from 'app/components/icons';
-import {LoginGovIAL2NotificationMaybe} from 'app/pages/signed-in/login-gov-ial2-notification';
-import {SideNav} from 'app/components/side-nav';
+import { AccessRenewalNotificationMaybe } from 'app/pages/signed-in/access-renewal-notification';
+import { Breadcrumb } from 'app/components/breadcrumb';
+import { ClrIcon } from 'app/components/icons';
+import { LoginGovIAL2NotificationMaybe } from 'app/pages/signed-in/login-gov-ial2-notification';
+import { SideNav } from 'app/components/side-nav';
 import colors from 'app/styles/colors';
-import {reactStyles} from 'app/utils';
-import {profileStore, ProfileStore, useStore} from 'app/utils/stores';
-import {environment} from 'environments/environment';
-import logo from 'assets/images/all-of-us-logo.svg'
-import {StatusAlertBannerMaybe} from 'app/components/status-alert-banner-maybe';
-import {CTAvailableBannerMaybe} from 'app//components/ct-available-banner-maybe';
+import { reactStyles } from 'app/utils';
+import { profileStore, ProfileStore, useStore } from 'app/utils/stores';
+import { environment } from 'environments/environment';
+import logo from 'assets/images/all-of-us-logo.svg';
+import { StatusAlertBannerMaybe } from 'app/components/status-alert-banner-maybe';
+import { CTAvailableBannerMaybe } from 'app//components/ct-available-banner-maybe';
 
 const styles = reactStyles({
   headerContainer: {
@@ -62,7 +62,7 @@ const styles = reactStyles({
     fontSize: '8px',
     lineHeight: '12px',
     textAlign: 'center',
-  }
+  },
 });
 
 export interface Props {
@@ -91,11 +91,12 @@ export const NavBar = () => {
   const [barsTransform, setBarsTransform] = useState(barsTransformNotRotated);
   const [hovering, setHovering] = useState(false);
   const wrapperRef = useRef(null);
-  const {profile} = useStore(profileStore);
+  const { profile } = useStore(profileStore);
 
   const onToggleSideNav = () => {
     setShowSideNav(!showSideNav);
-    setBarsTransform(barsTransform === barsTransformNotRotated
+    setBarsTransform(
+      barsTransform === barsTransformNotRotated
         ? barsTransformRotated
         : barsTransformNotRotated
     );
@@ -103,9 +104,9 @@ export const NavBar = () => {
 
   const onClickOutside = (event) => {
     if (
-        wrapperRef
-        && !wrapperRef.current.contains(event.target)
-        && showSideNav
+      wrapperRef &&
+      !wrapperRef.current.contains(event.target) &&
+      showSideNav
     ) {
       onToggleSideNav();
     }
@@ -119,54 +120,53 @@ export const NavBar = () => {
     };
   });
 
-  return <div
-      style={styles.headerContainer}
-      ref={wrapperRef}
-  >
-    <div style={{
-      transform: barsTransform,
-      display: 'inline-block',
-      marginLeft: '1rem',
-      transition: 'transform 0.5s',
-    }}>
-      <ClrIcon
+  return (
+    <div style={styles.headerContainer} ref={wrapperRef}>
+      <div
+        style={{
+          transform: barsTransform,
+          display: 'inline-block',
+          marginLeft: '1rem',
+          transition: 'transform 0.5s',
+        }}
+      >
+        <ClrIcon
           shape='bars'
           onClick={() => onToggleSideNav()}
           onMouseEnter={() => setHovering(true)}
           onMouseLeave={() => setHovering(false)}
-          style={hovering
-              ? {...styles.sidenavIcon, ...styles.sidenavIconHovering}
-              : {...styles.sidenavIcon}}
-      >
-      </ClrIcon>
-    </div>
-    <div>
-      <a href={'/'}>
-        <img
-            src={logo}
-            style={styles.headerImage}
-        />
-      </a>
-      {
-        environment.shouldShowDisplayTag
-        && <div style={styles.displayTag}>
-          {environment.displayTag}
-        </div>
-      }
-    </div>
-    <Breadcrumb/>
-    {window.location.pathname !== '/access-renewal' && <AccessRenewalNotificationMaybe/>}
-    {window.location.pathname !== '/data-access-requirements' && <LoginGovIAL2NotificationMaybe/>}
-    <StatusAlertBannerMaybe/>
-    <CTAvailableBannerMaybe/>
-    {
-      showSideNav
-      && <SideNav
+          style={
+            hovering
+              ? { ...styles.sidenavIcon, ...styles.sidenavIconHovering }
+              : { ...styles.sidenavIcon }
+          }
+        ></ClrIcon>
+      </div>
+      <div>
+        <a href={'/'}>
+          <img src={logo} style={styles.headerImage} />
+        </a>
+        {environment.shouldShowDisplayTag && (
+          <div style={styles.displayTag}>{environment.displayTag}</div>
+        )}
+      </div>
+      <Breadcrumb />
+      {window.location.pathname !== '/access-renewal' && (
+        <AccessRenewalNotificationMaybe />
+      )}
+      {window.location.pathname !== '/data-access-requirements' && (
+        <LoginGovIAL2NotificationMaybe />
+      )}
+      <StatusAlertBannerMaybe />
+      <CTAvailableBannerMaybe />
+      {showSideNav && (
+        <SideNav
           profile={profile}
           // Passing the function itself deliberately, we want to be able to
           // toggle the nav whenever we click anything in it
           onToggleSideNav={onToggleSideNav}
-      />
-    }
-  </div>;
+        />
+      )}
+    </div>
+  );
 };

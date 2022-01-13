@@ -18,7 +18,7 @@
       "authDomainName": "all-of-us-controlled-staging",
       "authDomainGroupEmail": "all-of-us-controlled-staging@firecloud.org",
       "datasetsBucket": "gs://fc-aou-staging-datasets-controlled/",
-      "enableUserWorkflows": false
+      "enableUserWorkflows": true
     }
   ],
   "cdrVersions": [

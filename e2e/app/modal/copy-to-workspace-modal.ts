@@ -8,8 +8,8 @@ import ReactSelect from 'app/element/react-select';
 const modalTitle = 'Copy to Workspace';
 
 export default class CopyToWorkspaceModal extends Modal {
-  constructor(page: Page, xpath?: string) {
-    super(page, xpath);
+  constructor(page: Page, opts?: { xpath?: string; modalIndex?: number }) {
+    super(page, opts);
   }
 
   async isLoaded(): Promise<boolean> {

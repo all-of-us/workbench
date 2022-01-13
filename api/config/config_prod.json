@@ -107,7 +107,6 @@
     "enableGpu": false,
     "enablePersistentDisk": false,
     "enablePrivateDataprocWorker": false,
-    "grantLifescienceApiRunnerAcl": false,
     "ccSupportWhenAdminLocking": true
   },
   "actionAudit": {

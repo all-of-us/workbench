@@ -1,39 +1,48 @@
-import {mount} from 'enzyme';
+import { mount } from 'enzyme';
 import * as React from 'react';
 
-import {ConceptHomepage} from 'app/pages/data/concept/concept-homepage';
-import {registerApiClient} from 'app/services/swagger-fetch-clients';
-import {currentWorkspaceStore} from 'app/utils/navigation';
+import { ConceptHomepage } from 'app/pages/data/concept/concept-homepage';
+import { registerApiClient } from 'app/services/swagger-fetch-clients';
+import { currentWorkspaceStore } from 'app/utils/navigation';
 import {
   CohortBuilderApi,
   ConceptSetsApi,
-  WorkspacesApi
+  WorkspacesApi,
 } from 'generated/fetch';
-import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
-import {CohortBuilderServiceStub, DomainStubVariables, SurveyStubVariables} from 'testing/stubs/cohort-builder-service-stub';
-import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
-import {workspaceDataStub} from 'testing/stubs/workspaces';
-import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
+import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
+import {
+  CohortBuilderServiceStub,
+  DomainStubVariables,
+  SurveyStubVariables,
+} from 'testing/stubs/cohort-builder-service-stub';
+import { ConceptSetsApiStub } from 'testing/stubs/concept-sets-api-stub';
+import { workspaceDataStub } from 'testing/stubs/workspaces';
+import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
 
 function searchTable(searchTerm: string, wrapper) {
-  wrapper.find('[data-test-id="concept-search-input"]')
-    .find('input').simulate('change', {target: {value: searchTerm}});
-  wrapper.find('[data-test-id="concept-search-input"]')
-    .find('input').simulate('keypress', {key: 'Enter'});
+  wrapper
+    .find('[data-test-id="concept-search-input"]')
+    .find('input')
+    .simulate('change', { target: { value: searchTerm } });
+  wrapper
+    .find('[data-test-id="concept-search-input"]')
+    .find('input')
+    .simulate('keypress', { key: 'Enter' });
 }
 
 const defaultSearchTerm = 'test';
 
-
-
 describe('ConceptHomepage', () => {
-
   const component = () => {
-    return mount(<ConceptHomepage setConceptSetUpdating={() => {}}
-                                  setShowUnsavedModal={() => {}}
-                                  setUnsavedConceptChanges={() => {}}
-                                  hideSpinner={() => {}}
-                                  showSpinner={() => {}}/>);
+    return mount(
+      <ConceptHomepage
+        setConceptSetUpdating={() => {}}
+        setShowUnsavedModal={() => {}}
+        setUnsavedConceptChanges={() => {}}
+        hideSpinner={() => {}}
+        showSpinner={() => {}}
+      />
+    );
   };
 
   beforeEach(() => {
@@ -48,18 +57,20 @@ describe('ConceptHomepage', () => {
     expect(wrapper).toBeTruthy();
   });
 
-  it('should have one card per domain.', async() => {
+  it('should have one card per domain.', async () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.find('[data-test-id="domain-box-name"]').length)
-      .toBe(DomainStubVariables.STUB_DOMAINS.length);
+    expect(wrapper.find('[data-test-id="domain-box-name"]').length).toBe(
+      DomainStubVariables.STUB_DOMAINS.length
+    );
   });
 
-  it('should have one card per survey.', async() => {
+  it('should have one card per survey.', async () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.find('[data-test-id="survey-box-name"]').length)
-      .toBe(SurveyStubVariables.STUB_SURVEYS.length);
+    expect(wrapper.find('[data-test-id="survey-box-name"]').length).toBe(
+      SurveyStubVariables.STUB_SURVEYS.length
+    );
   });
 
   // Need to update with new api calls

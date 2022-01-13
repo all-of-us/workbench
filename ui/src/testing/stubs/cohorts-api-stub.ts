@@ -6,12 +6,12 @@ import {
   ResourceType,
   Workspace,
   WorkspaceAccessLevel,
-  WorkspaceResource
+  WorkspaceResource,
 } from 'generated/fetch';
-import {CohortListResponse} from 'generated/fetch/api';
-import {stubNotImplementedError} from 'testing/stubs/stub-utils';
-import {convertToResources} from './resources-stub';
-import {WorkspaceStubVariables} from './workspaces';
+import { CohortListResponse } from 'generated/fetch/api';
+import { stubNotImplementedError } from 'testing/stubs/stub-utils';
+import { convertToResources } from './resources-stub';
+import { WorkspaceStubVariables } from './workspaces';
 
 export let DEFAULT_COHORT_ID = 1;
 export let DEFAULT_COHORT_ID_2 = 2;
@@ -21,7 +21,8 @@ export const exampleCohortStubs = [
     id: DEFAULT_COHORT_ID,
     name: 'sample name',
     description: 'sample description',
-    criteria: '{"includes":[{"temporal": false,"items":[]},{"temporal": false,"items":[]}],"excludes":[],"dataFilters":[]}',
+    criteria:
+      '{"includes":[{"temporal": false,"items":[]},{"temporal": false,"items":[]}],"excludes":[],"dataFilters":[]}',
     type: '',
     workspaceId: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID,
     creationTime: new Date().getTime(),
@@ -31,13 +32,14 @@ export const exampleCohortStubs = [
     id: DEFAULT_COHORT_ID_2,
     name: 'sample name 2',
     description: 'sample description 2',
-    criteria: '{"includes":[{"temporal": false,"items":[]},{"temporal": false,"items":[]}],' +
+    criteria:
+      '{"includes":[{"temporal": false,"items":[]},{"temporal": false,"items":[]}],' +
       '"excludes":[{"temporal": false,"items":[]}],"dataFilters":[]}',
     type: '',
     workspaceId: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID,
     creationTime: new Date().getTime(),
     lastModifiedTime: new Date().getTime() - 4000,
-  }
+  },
 ];
 
 class CohortStub implements Cohort {
@@ -78,20 +80,30 @@ export class CohortsApiStub extends CohortsApi {
   public resourceList: WorkspaceResource[];
 
   constructor() {
-    super(undefined, undefined, (..._: any[]) => { throw stubNotImplementedError; });
+    super(undefined, undefined, (..._: any[]) => {
+      throw stubNotImplementedError;
+    });
 
     const stubWorkspace: Workspace = {
       name: WorkspaceStubVariables.DEFAULT_WORKSPACE_NAME,
       id: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID,
-      namespace: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS
+      namespace: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
     };
 
     this.cohorts = exampleCohortStubs;
     this.workspaces = [stubWorkspace];
-    this.resourceList = convertToResources(this.cohorts, ResourceType.COHORT, {...stubWorkspace, accessLevel: WorkspaceAccessLevel.OWNER});
+    this.resourceList = convertToResources(this.cohorts, ResourceType.COHORT, {
+      ...stubWorkspace,
+      accessLevel: WorkspaceAccessLevel.OWNER,
+    });
   }
 
-  updateCohort(ns: string, wsid: string, cid: number, newCohort: Cohort): Promise<Cohort> {
+  updateCohort(
+    ns: string,
+    wsid: string,
+    cid: number,
+    newCohort: Cohort
+  ): Promise<Cohort> {
     return new Promise<Cohort>((resolve, reject) => {
       const index = this.cohorts.findIndex((cohort: CohortStub) => {
         if (cohort.id === cid && cohort.workspaceId) {
@@ -104,16 +116,20 @@ export class CohortsApiStub extends CohortsApi {
         this.cohorts[index] = newCohortStub;
         resolve(newCohortStub);
       } else {
-        reject(new Error(`Error updating. No cohort with id: ${cid} `
-            + `exists in workspace ${ns}, ${wsid} `
-            + 'in cohort service stub'));
+        reject(
+          new Error(
+            `Error updating. No cohort with id: ${cid} ` +
+              `exists in workspace ${ns}, ${wsid} ` +
+              'in cohort service stub'
+          )
+        );
       }
     });
   }
 
   deleteCohort(ns: string, wsid: string, id: number): Promise<EmptyResponse> {
-    return new Promise<EmptyResponse>(resolve => {
-      const cohortIndex = this.cohorts.findIndex(cohort => cohort.id === id);
+    return new Promise<EmptyResponse>((resolve) => {
+      const cohortIndex = this.cohorts.findIndex((cohort) => cohort.id === id);
       if (cohortIndex === -1) {
         throw new Error('Cohort not found in workspace.');
       }
@@ -125,7 +141,7 @@ export class CohortsApiStub extends CohortsApi {
   getCohortsInWorkspace(ns: string, wsid: string): Promise<CohortListResponse> {
     return new Promise<CohortListResponse>((resolve, reject) => {
       const cohortsInWorkspace: Cohort[] = [];
-      this.cohorts.forEach(cohort => {
+      this.cohorts.forEach((cohort) => {
         if (cohort.workspaceId === wsid) {
           cohortsInWorkspace.push(cohort);
         }
@@ -133,17 +149,20 @@ export class CohortsApiStub extends CohortsApi {
       if (cohortsInWorkspace.length === 0) {
         reject('No cohorts in workspace.');
       } else {
-        resolve({items: cohortsInWorkspace});
+        resolve({ items: cohortsInWorkspace });
       }
     });
   }
 
   getCohort(namespace, id, cohortId): Promise<Cohort> {
-    const cohort = this.cohorts.find(c => c.id === cohortId) || this.cohorts[0];
-    return new Promise<Cohort>(resolve => resolve(cohort));
+    const cohort =
+      this.cohorts.find((c) => c.id === cohortId) || this.cohorts[0];
+    return new Promise<Cohort>((resolve) => resolve(cohort));
   }
 
   getCohortAnnotations(): Promise<CohortAnnotationsResponse> {
-    return new Promise<CohortAnnotationsResponse>(resolve => resolve({results: []}));
+    return new Promise<CohortAnnotationsResponse>((resolve) =>
+      resolve({ results: [] })
+    );
   }
 }

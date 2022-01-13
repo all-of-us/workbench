@@ -1,17 +1,20 @@
-import {mount} from 'enzyme';
+import { mount } from 'enzyme';
 import * as React from 'react';
 
-import {NotificationModal} from 'app/components/modals';
-import {notificationStore} from 'app/utils/stores';
-import {findNodesByExactText, waitOnTimersAndUpdate} from 'testing/react-test-helpers';
-
+import { NotificationModal } from 'app/components/modals';
+import { notificationStore } from 'app/utils/stores';
+import {
+  findNodesByExactText,
+  waitOnTimersAndUpdate,
+} from 'testing/react-test-helpers';
 
 describe('NotificationModal', () => {
-
   const component = () => {
-    return mount(<div>
-      <NotificationModal/>
-    </div>);
+    return mount(
+      <div>
+        <NotificationModal />
+      </div>
+    );
   };
 
   beforeEach(async () => {
@@ -20,7 +23,7 @@ describe('NotificationModal', () => {
 
   it('should appear and disappear based on store changes', async () => {
     const wrapper = component();
-    const meta = {title: 'Hello', message: 'World'}
+    const meta = { title: 'Hello', message: 'World' };
     // Notification modal should not render
     expect(wrapper.find(NotificationModal)).toEqual({});
     notificationStore.set(meta);

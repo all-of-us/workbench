@@ -1,26 +1,22 @@
 import * as fp from 'lodash/fp';
 
-import {PUBLIC_HEADER_IMAGE} from 'app/components/public-layout';
-import {AccountCreation} from 'app/pages/login/account-creation/account-creation';
-import {AccountCreationSuccess} from 'app/pages/login/account-creation/account-creation-success';
-import {AccountCreationSurvey} from 'app/pages/login/account-creation/account-creation-survey';
-import {AccountCreationTos} from 'app/pages/login/account-creation/account-creation-tos';
-import {LoginReactComponent} from 'app/pages/login/login';
+import { PUBLIC_HEADER_IMAGE } from 'app/components/public-layout';
+import { AccountCreation } from 'app/pages/login/account-creation/account-creation';
+import { AccountCreationSuccess } from 'app/pages/login/account-creation/account-creation-success';
+import { AccountCreationSurvey } from 'app/pages/login/account-creation/account-creation-survey';
+import { AccountCreationTos } from 'app/pages/login/account-creation/account-creation-tos';
+import { LoginReactComponent } from 'app/pages/login/login';
 import colors from 'app/styles/colors';
-import {
-  reactStyles,
-  WindowSizeProps,
-  withWindowSize,
-} from 'app/utils';
-import {AnalyticsTracker} from 'app/utils/analytics';
+import { reactStyles, WindowSizeProps, withWindowSize } from 'app/utils';
+import { AnalyticsTracker } from 'app/utils/analytics';
 
-import {Degree, Profile} from 'generated/fetch';
+import { Degree, Profile } from 'generated/fetch';
 
-import {FlexColumn} from 'app/components/flex';
-import {Footer, FooterTypeEnum} from 'app/components/footer';
-import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
-import {AccountCreationInstitution} from 'app/pages/login/account-creation/account-creation-institution';
-import {environment} from 'environments/environment';
+import { FlexColumn } from 'app/components/flex';
+import { Footer, FooterTypeEnum } from 'app/components/footer';
+import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
+import { AccountCreationInstitution } from 'app/pages/login/account-creation/account-creation-institution';
+import { environment } from 'environments/environment';
 import * as React from 'react';
 
 import landingBackgroundImage from 'assets/images/login-group.png';
@@ -30,11 +26,39 @@ import successSmallerBackgroundImage from 'assets/images/congrats-female-standin
 
 // A template function which returns the appropriate style config based on window size and
 // background images.
-export const backgroundStyleTemplate = (windowSize, imageConfig?: BackgroundImageConfig) => {
+export const backgroundStyleTemplate = (
+  windowSize,
+  imageConfig?: BackgroundImageConfig
+) => {
   // Lower bounds to prevent the small and large images from covering the
   // creation controls, respectively.
   const bgWidthMinPx = 900;
   const bgWidthSmallLimitPx = 1600;
+
+  function calculateImage() {
+    if (!imageConfig) {
+      return null;
+    }
+    let imageUrl = "url('" + imageConfig.backgroundImgSrc + "')";
+    if (
+      windowSize.width > bgWidthMinPx &&
+      windowSize.width <= bgWidthSmallLimitPx
+    ) {
+      imageUrl = "url('" + imageConfig.smallerBackgroundImgSrc + "')";
+    }
+    return imageUrl;
+  }
+
+  function calculateBackgroundPosition() {
+    let position = 'bottom right -1rem';
+    if (
+      windowSize.width > bgWidthMinPx &&
+      windowSize.width <= bgWidthSmallLimitPx
+    ) {
+      position = 'bottom right';
+    }
+    return position;
+  }
 
   return {
     backgroundImage: calculateImage(),
@@ -43,27 +67,8 @@ export const backgroundStyleTemplate = (windowSize, imageConfig?: BackgroundImag
     flex: 1,
     width: '100%',
     backgroundSize: windowSize.width <= bgWidthMinPx ? '0% 0%' : 'contain',
-    backgroundPosition: calculateBackgroundPosition()
+    backgroundPosition: calculateBackgroundPosition(),
   };
-
-  function calculateImage() {
-    if (!imageConfig) {
-      return null;
-    }
-    let imageUrl = 'url(\'' + imageConfig.backgroundImgSrc + '\')';
-    if (windowSize.width > bgWidthMinPx && windowSize.width <= bgWidthSmallLimitPx) {
-      imageUrl = 'url(\'' + imageConfig.smallerBackgroundImgSrc + '\')';
-    }
-    return imageUrl;
-  }
-
-  function calculateBackgroundPosition() {
-    let position = 'bottom right -1rem';
-    if (windowSize.width > bgWidthMinPx && windowSize.width <= bgWidthSmallLimitPx) {
-      position = 'bottom right';
-    }
-    return position;
-  }
 };
 
 const styles = reactStyles({
@@ -74,8 +79,8 @@ const styles = reactStyles({
     justifyContent: 'space-around',
     alignItems: 'flex-start',
     width: 'auto',
-    minHeight: '100vh'
-  }
+    minHeight: '100vh',
+  },
 });
 
 // Tracks each major stage in the sign-in / sign-up flow. Most of the steps are related to new
@@ -92,7 +97,7 @@ export enum SignInStep {
   // Optional demographic survey. Completion of this step triggers actual user creation.
   DEMOGRAPHIC_SURVEY,
   // Account creation success page.
-  SUCCESS_PAGE
+  SUCCESS_PAGE,
 }
 
 interface BackgroundImageConfig {
@@ -100,17 +105,23 @@ interface BackgroundImageConfig {
   smallerBackgroundImgSrc: string;
 }
 
-export const StepToImageConfig: Map<SignInStep, BackgroundImageConfig> = new Map([
-  [SignInStep.LANDING, {
-    backgroundImgSrc: landingBackgroundImage,
-    smallerBackgroundImgSrc: landingSmallerBackgroundImage
-  }],
-  [SignInStep.SUCCESS_PAGE, {
-    backgroundImgSrc: successBackgroundImage,
-    smallerBackgroundImgSrc: successSmallerBackgroundImage
-  }]]
-);
-
+export const StepToImageConfig: Map<SignInStep, BackgroundImageConfig> =
+  new Map([
+    [
+      SignInStep.LANDING,
+      {
+        backgroundImgSrc: landingBackgroundImage,
+        smallerBackgroundImgSrc: landingSmallerBackgroundImage,
+      },
+    ],
+    [
+      SignInStep.SUCCESS_PAGE,
+      {
+        backgroundImgSrc: successBackgroundImage,
+        smallerBackgroundImgSrc: successSmallerBackgroundImage,
+      },
+    ],
+  ]);
 
 export interface SignInProps extends WindowSizeProps, WithSpinnerOverlayProps {
   initialStep?: SignInStep;
@@ -175,7 +186,7 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
       // step component as a prop. When each sub-step completes, it will pass the updated Profile
       // data in its onComplete callback.
       profile: createEmptyProfile(),
-      isPreviousStep: false
+      isPreviousStep: false,
     };
   }
 
@@ -200,7 +211,7 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
       SignInStep.INSTITUTIONAL_AFFILIATION,
       SignInStep.ACCOUNT_DETAILS,
       SignInStep.DEMOGRAPHIC_SURVEY,
-      SignInStep.SUCCESS_PAGE
+      SignInStep.SUCCESS_PAGE,
     ];
   }
 
@@ -233,72 +244,108 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
       this.setState({
         profile: profile,
         currentStep: this.getNextStep(currentStep),
-        isPreviousStep: false
+        isPreviousStep: false,
       });
     };
     const onPrevious = (profile: Profile) => {
       this.setState({
         profile: profile,
         currentStep: this.getPreviousStep(currentStep),
-        isPreviousStep: true
+        isPreviousStep: true,
       });
     };
 
     switch (currentStep) {
       case SignInStep.LANDING:
-        return <LoginReactComponent onCreateAccount={async() => {
-          AnalyticsTracker.Registration.CreateAccount();
-          await this.setState({
-            currentStep: this.getNextStep(currentStep)
-          });
-        }}/>;
+        return (
+          <LoginReactComponent
+            onCreateAccount={async () => {
+              AnalyticsTracker.Registration.CreateAccount();
+              await this.setState({
+                currentStep: this.getNextStep(currentStep),
+              });
+            }}
+          />
+        );
       case SignInStep.TERMS_OF_SERVICE:
-        return <AccountCreationTos
-          filePath='/aou-tos.html'
-          onComplete={() => {
-            AnalyticsTracker.Registration.TOS();
-            this.setState({
-              termsOfServiceVersion: 1,
-              currentStep: this.getNextStep(currentStep),
-              isPreviousStep: false
-            });
-          }} afterPrev={this.state.isPreviousStep}/>;
+        return (
+          <AccountCreationTos
+            filePath='/aou-tos.html'
+            onComplete={() => {
+              AnalyticsTracker.Registration.TOS();
+              this.setState({
+                termsOfServiceVersion: 1,
+                currentStep: this.getNextStep(currentStep),
+                isPreviousStep: false,
+              });
+            }}
+            afterPrev={this.state.isPreviousStep}
+          />
+        );
       case SignInStep.INSTITUTIONAL_AFFILIATION:
-        return <AccountCreationInstitution
-          profile={this.state.profile}
-          onComplete={onComplete}
-          onPreviousClick={onPrevious}/>;
+        return (
+          <AccountCreationInstitution
+            profile={this.state.profile}
+            onComplete={onComplete}
+            onPreviousClick={onPrevious}
+          />
+        );
       case SignInStep.ACCOUNT_DETAILS:
-        return <AccountCreation profile={this.state.profile}
-                                onComplete={onComplete}
-                                onPreviousClick={onPrevious}/>;
+        return (
+          <AccountCreation
+            profile={this.state.profile}
+            onComplete={onComplete}
+            onPreviousClick={onPrevious}
+          />
+        );
       case SignInStep.DEMOGRAPHIC_SURVEY:
-        return <AccountCreationSurvey
-          profile={this.state.profile}
-          termsOfServiceVersion={this.state.termsOfServiceVersion}
-          onComplete={onComplete}
-          onPreviousClick={onPrevious}/>;
+        return (
+          <AccountCreationSurvey
+            profile={this.state.profile}
+            termsOfServiceVersion={this.state.termsOfServiceVersion}
+            onComplete={onComplete}
+            onPreviousClick={onPrevious}
+          />
+        );
       case SignInStep.SUCCESS_PAGE:
-        return <AccountCreationSuccess profile={this.state.profile}/>;
+        return <AccountCreationSuccess profile={this.state.profile} />;
       default:
         throw new Error('Unknown sign-in step: ' + currentStep);
     }
   }
 
-
-
   render() {
-    const showFooter = environment.enableFooter && this.state.currentStep !== SignInStep.TERMS_OF_SERVICE;
+    const showFooter =
+      environment.enableFooter &&
+      this.state.currentStep !== SignInStep.TERMS_OF_SERVICE;
     const backgroundImages = StepToImageConfig.get(this.state.currentStep);
-    return <FlexColumn style={styles.signInContainer} data-test-id='sign-in-container'>
-      <FlexColumn data-test-id='sign-in-page'
-                  style={backgroundStyleTemplate(this.props.windowSize, backgroundImages)}>
-        <div><img style={{height: '1.75rem', marginLeft: '1rem', marginTop: '1rem'}}
-                  src={PUBLIC_HEADER_IMAGE}/></div>
-        {this.renderSignInStep(this.state.currentStep)}
+    return (
+      <FlexColumn
+        style={styles.signInContainer}
+        data-test-id='sign-in-container'
+      >
+        <FlexColumn
+          data-test-id='sign-in-page'
+          style={backgroundStyleTemplate(
+            this.props.windowSize,
+            backgroundImages
+          )}
+        >
+          <div>
+            <img
+              style={{
+                height: '1.75rem',
+                marginLeft: '1rem',
+                marginTop: '1rem',
+              }}
+              src={PUBLIC_HEADER_IMAGE}
+            />
+          </div>
+          {this.renderSignInStep(this.state.currentStep)}
+        </FlexColumn>
+        {showFooter && <Footer type={FooterTypeEnum.Registration} />}
       </FlexColumn>
-      {showFooter && <Footer type={FooterTypeEnum.Registration} />}
-    </FlexColumn>;
+    );
   }
 }
 

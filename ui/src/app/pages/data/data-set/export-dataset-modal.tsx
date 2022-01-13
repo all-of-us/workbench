@@ -1,22 +1,27 @@
-import {Button} from 'app/components/buttons';
+import { Button } from 'app/components/buttons';
 
-import {FlexRow} from 'app/components/flex';
-import {SmallHeader, styles as headerStyles} from 'app/components/headers';
-import {RadioButton, Select, TextInput} from 'app/components/inputs';
-import {ErrorMessage} from 'app/components/messages';
-import {AnimatedModal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
-import {TooltipTrigger} from 'app/components/popups';
-import {Spinner} from 'app/components/spinners';
-import {appendNotebookFileSuffix} from 'app/pages/analysis/util';
+import { FlexRow } from 'app/components/flex';
+import { SmallHeader, styles as headerStyles } from 'app/components/headers';
+import { RadioButton, Select, TextInput } from 'app/components/inputs';
+import { ErrorMessage } from 'app/components/messages';
+import {
+  AnimatedModal,
+  ModalBody,
+  ModalFooter,
+  ModalTitle,
+} from 'app/components/modals';
+import { TooltipTrigger } from 'app/components/popups';
+import { Spinner } from 'app/components/spinners';
+import { appendNotebookFileSuffix } from 'app/pages/analysis/util';
 
-import {dataSetApi, notebooksApi} from 'app/services/swagger-fetch-clients';
+import { dataSetApi, notebooksApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {reactStyles, summarizeErrors, withCurrentWorkspace} from 'app/utils';
-import {AnalyticsTracker} from 'app/utils/analytics';
-import {encodeURIComponentStrict, useNavigation} from 'app/utils/navigation';
-import {ACTION_DISABLED_INVALID_BILLING} from 'app/utils/strings';
-import {WorkspaceData} from 'app/utils/workspace-data';
-import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
+import { reactStyles, summarizeErrors, withCurrentWorkspace } from 'app/utils';
+import { AnalyticsTracker } from 'app/utils/analytics';
+import { encodeURIComponentStrict, useNavigation } from 'app/utils/navigation';
+import { ACTION_DISABLED_INVALID_BILLING } from 'app/utils/strings';
+import { WorkspaceData } from 'app/utils/workspace-data';
+import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
 import {
   BillingStatus,
   DataSet,
@@ -27,8 +32,8 @@ import {
 } from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
-import {useEffect, useState} from 'react';
-import {validate} from 'validate.js';
+import { useEffect, useState } from 'react';
+import { validate } from 'validate.js';
 
 interface Props {
   closeFunction: Function;
@@ -46,251 +51,341 @@ const styles = reactStyles({
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: '1rem',
-    color: colors.primary
-  }
+    color: colors.primary,
+  },
 });
 
-export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(withCurrentWorkspace())(
-  ({workspace, dataset, closeFunction}: HocProps) => {
-    const [existingNotebooks, setExistingNotebooks] = useState(undefined);
-    const [kernelType, setKernelType] = useState(KernelTypeEnum.Python);
-    const [genomicsAnalysisTool, setGenomicsAnalysisTool] = useState(DataSetExportRequest.GenomicsAnalysisToolEnum.HAIL);
-    const [isExporting, setIsExporting] = useState(false);
-    const [creatingNewNotebook, setCreatingNewNotebook] = useState(true);
-    const [notebookName, setNotebookName] = useState('');
-    const [codePreview, setCodePreview] = useState(null);
-    const [loadingNotebook, setIsLoadingNotebook] = useState(false);
-    const [errorMsg, setErrorMsg] = useState(null);
-    const [, navigateByUrl] = useNavigation();
+export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(
+  withCurrentWorkspace()
+)(({ workspace, dataset, closeFunction }: HocProps) => {
+  const [existingNotebooks, setExistingNotebooks] = useState(undefined);
+  const [kernelType, setKernelType] = useState(KernelTypeEnum.Python);
+  const [genomicsAnalysisTool, setGenomicsAnalysisTool] = useState(
+    DataSetExportRequest.GenomicsAnalysisToolEnum.HAIL
+  );
+  const [isExporting, setIsExporting] = useState(false);
+  const [creatingNewNotebook, setCreatingNewNotebook] = useState(true);
+  const [notebookName, setNotebookName] = useState('');
+  const [codePreview, setCodePreview] = useState(null);
+  const [loadingNotebook, setIsLoadingNotebook] = useState(false);
+  const [errorMsg, setErrorMsg] = useState(null);
+  const [, navigateByUrl] = useNavigation();
 
-    async function exportDataset() {
-      AnalyticsTracker.DatasetBuilder.Export(kernelType);
-
-      setErrorMsg(null);
-      setIsExporting(true);
-      try {
-        await dataSetApi().exportToNotebook(workspace.namespace, workspace.id, createExportDatasetRequest());
-        // Open notebook in a new tab and return back to the Data tab
-        const notebookUrl = `/workspaces/${workspace.namespace}/${workspace.id}/notebooks/preview/`
-          + appendNotebookFileSuffix(encodeURIComponentStrict(notebookName));
-        navigateByUrl(notebookUrl);
-      } catch (e) {
-        console.error(e);
-        setIsExporting(false);
-        setErrorMsg('The request cannot be completed. Please try again or contact Support in the left hand navigation');
-      }
-    }
-
-    function createExportDatasetRequest(): DataSetExportRequest {
-      return {
-        dataSetRequest: createDataSetRequest(),
-        kernelType,
-        genomicsAnalysisTool,
-        generateGenomicsAnalysisCode: hasWgs(),
-        notebookName,
-        newNotebook: creatingNewNotebook
-      };
-    }
-
-    function createDataSetRequest(): DataSetRequest {
-      return {
-        name: dataset ? dataset.name : 'dataset',
-        ...(dataset.id
-          ? { dataSetId: dataset.id }
-          : {
+  function createDataSetRequest(): DataSetRequest {
+    return {
+      name: dataset ? dataset.name : 'dataset',
+      ...(dataset.id
+        ? { dataSetId: dataset.id }
+        : {
             dataSetId: dataset.id,
             includesAllParticipants: dataset.includesAllParticipants,
-            conceptSetIds: dataset.conceptSets.map(cs => cs.id),
-            cohortIds: dataset.cohorts.map(c => c.id),
+            conceptSetIds: dataset.conceptSets.map((cs) => cs.id),
+            cohortIds: dataset.cohorts.map((c) => c.id),
             domainValuePairs: dataset.domainValuePairs,
-            prePackagedConceptSet: dataset.prePackagedConceptSet
-          })
-      };
+            prePackagedConceptSet: dataset.prePackagedConceptSet,
+          }),
+    };
+  }
+
+  function hasWgs() {
+    return fp.includes(
+      PrePackagedConceptSetEnum.WHOLEGENOME,
+      dataset.prePackagedConceptSet
+    );
+  }
+
+  function createExportDatasetRequest(): DataSetExportRequest {
+    return {
+      dataSetRequest: createDataSetRequest(),
+      kernelType,
+      genomicsAnalysisTool,
+      generateGenomicsAnalysisCode: hasWgs(),
+      notebookName,
+      newNotebook: creatingNewNotebook,
+    };
+  }
+
+  async function exportDataset() {
+    AnalyticsTracker.DatasetBuilder.Export(kernelType);
+
+    setErrorMsg(null);
+    setIsExporting(true);
+    try {
+      await dataSetApi().exportToNotebook(
+        workspace.namespace,
+        workspace.id,
+        createExportDatasetRequest()
+      );
+      // Open notebook in a new tab and return back to the Data tab
+      const notebookUrl =
+        `/workspaces/${workspace.namespace}/${workspace.id}/notebooks/preview/` +
+        appendNotebookFileSuffix(encodeURIComponentStrict(notebookName));
+      navigateByUrl(notebookUrl);
+    } catch (e) {
+      console.error(e);
+      setIsExporting(false);
+      setErrorMsg(
+        'The request cannot be completed. Please try again or contact Support in the left hand navigation'
+      );
     }
+  }
 
-    function loadHtmlStringIntoIFrame(html) {
-      const placeholder = document.createElement('html');
-      placeholder.innerHTML = html;
+  function loadHtmlStringIntoIFrame(html) {
+    const placeholder = document.createElement('html');
+    placeholder.innerHTML = html;
 
-      // Remove input column from notebook cells. Also possible to strip this out in Calhoun but requires some API changes
-      placeholder.querySelectorAll('.jp-InputPrompt').forEach(e => e.remove());
-      return <iframe
+    // Remove input column from notebook cells. Also possible to strip this out in Calhoun but requires some API changes
+    placeholder.querySelectorAll('.jp-InputPrompt').forEach((e) => e.remove());
+    return (
+      <iframe
         id='export-preview-frame'
         scrolling='yes'
-        style={{width: '100%', height: '100%', border: 'none'}}
-        srcDoc={placeholder.outerHTML}/>;
-    }
+        style={{ width: '100%', height: '100%', border: 'none' }}
+        srcDoc={placeholder.outerHTML}
+      />
+    );
+  }
 
-    function loadCodePreview() {
+  function loadCodePreview() {
+    setIsLoadingNotebook(true);
+    setErrorMsg(null);
+    dataSetApi()
+      .previewExportToNotebook(
+        workspace.namespace,
+        workspace.id,
+        createExportDatasetRequest()
+      )
+      .then((resp) => setCodePreview(loadHtmlStringIntoIFrame(resp.html)))
+      .catch(() =>
+        setErrorMsg(
+          'Could not load code preview. Please try again or continue exporting to a notebook.'
+        )
+      )
+      .finally(() => setIsLoadingNotebook(false));
+  }
+
+  function onCodePreviewClick() {
+    if (codePreview) {
+      setCodePreview(null);
+    } else {
+      AnalyticsTracker.DatasetBuilder.SeeCodePreview();
+      loadCodePreview();
+    }
+  }
+
+  function onNotebookSelect(value) {
+    setCreatingNewNotebook(value === '');
+    setNotebookName(value);
+    setErrorMsg(null);
+
+    if (value === '') {
+      setCreatingNewNotebook(true);
+    } else {
+      setCreatingNewNotebook(false);
       setIsLoadingNotebook(true);
-      setErrorMsg(null);
-      dataSetApi().previewExportToNotebook(workspace.namespace, workspace.id, createExportDatasetRequest())
-        .then(resp => setCodePreview(loadHtmlStringIntoIFrame(resp.html)))
-        .catch(() => setErrorMsg('Could not load code preview. Please try again or continue exporting to a notebook.'))
+      notebooksApi()
+        .getNotebookKernel(workspace.namespace, workspace.id, value)
+        .then((resp) => setKernelType(resp.kernelType))
+        .catch(() =>
+          setErrorMsg(
+            'Could not fetch notebook metadata. Please try again or create a new notebook.'
+          )
+        )
         .finally(() => setIsLoadingNotebook(false));
     }
+  }
 
-    function onCodePreviewClick() {
-      if (codePreview) {
-        setCodePreview(null);
-      } else {
-        AnalyticsTracker.DatasetBuilder.SeeCodePreview();
-        loadCodePreview();
-      }
-    }
-
-    function onNotebookSelect(value) {
-      setCreatingNewNotebook(value === '');
-      setNotebookName(value);
-      setErrorMsg(null);
-
-      if (value === '') {
-        setCreatingNewNotebook(true);
-      } else {
-        setCreatingNewNotebook(false);
-        setIsLoadingNotebook(true);
-        notebooksApi().getNotebookKernel(workspace.namespace, workspace.id, value)
-          .then(resp => setKernelType(resp.kernelType))
-          .catch(() => setErrorMsg('Could not fetch notebook metadata. Please try again or create a new notebook.'))
-          .finally(() => setIsLoadingNotebook(false));
-      }
-    }
-
-    function genomicsToolRadioButton(displayName: string, genomicsTool: DataSetExportRequest.GenomicsAnalysisToolEnum) {
-      return <label key={'genomics-tool-' + genomicsTool} style={styles.radioButtonLabel}>
+  function genomicsToolRadioButton(
+    displayName: string,
+    genomicsTool: DataSetExportRequest.GenomicsAnalysisToolEnum
+  ) {
+    return (
+      <label
+        key={'genomics-tool-' + genomicsTool}
+        style={styles.radioButtonLabel}
+      >
         <RadioButton
-          style={{marginRight: '0.25rem'}}
+          style={{ marginRight: '0.25rem' }}
           disabled={loadingNotebook}
           data-test-id={'genomics-tool-' + genomicsTool}
           checked={genomicsAnalysisTool === genomicsTool}
-          onChange={() => setGenomicsAnalysisTool(genomicsTool)}/>
+          onChange={() => setGenomicsAnalysisTool(genomicsTool)}
+        />
         {displayName}
-      </label>;
+      </label>
+    );
+  }
+
+  useEffect(() => {
+    notebooksApi()
+      .getNoteBookList(workspace.namespace, workspace.id)
+      .then((notebooks) =>
+        setExistingNotebooks(
+          notebooks.map((fileDetail) => fileDetail.name.slice(0, -6))
+        )
+      )
+      .catch(() => setExistingNotebooks([])); // If the request fails, at least let the user create new notebooks
+  }, [workspace]);
+
+  useEffect(() => {
+    if (codePreview) {
+      loadCodePreview();
     }
+  }, [kernelType, genomicsAnalysisTool]);
 
-    function hasWgs() {
-      return fp.includes(PrePackagedConceptSetEnum.WHOLEGENOME, dataset.prePackagedConceptSet);
-    }
-
-    useEffect(() => {
-      notebooksApi().getNoteBookList(workspace.namespace, workspace.id)
-        .then(notebooks => setExistingNotebooks(notebooks.map(fileDetail => fileDetail.name.slice(0, -6))))
-        .catch(() => setExistingNotebooks([])); // If the request fails, at least let the user create new notebooks
-    }, [workspace]);
-
-    useEffect(() => {
-      if (codePreview) {
-        loadCodePreview();
-      }
-    }, [kernelType, genomicsAnalysisTool]);
-
-    const errors = {
-      ...validate({notebookName}, {
+  const errors = {
+    ...validate(
+      { notebookName },
+      {
         notebookName: {
-          presence: {allowEmpty: false},
+          presence: { allowEmpty: false },
           exclusion: {
             within: creatingNewNotebook ? existingNotebooks : [],
-            message: 'already exists'
-          }
+            message: 'already exists',
+          },
+        },
+      }
+    ),
+    ...(workspace.billingStatus === BillingStatus.INACTIVE
+      ? { billing: [ACTION_DISABLED_INVALID_BILLING] }
+      : {}),
+    ...(!WorkspacePermissionsUtil.canWrite(workspace.accessLevel)
+      ? {
+          permission: [
+            'Exporting to a notebook requires write access to the workspace',
+          ],
         }
-      }),
-      ...(workspace.billingStatus === BillingStatus.INACTIVE
-        ? { billing: [ACTION_DISABLED_INVALID_BILLING]}
-        : {}),
-      ...(!WorkspacePermissionsUtil.canWrite(workspace.accessLevel)
-        ? { permission: ['Exporting to a notebook requires write access to the workspace']}
-        : {})
-    };
+      : {}),
+  };
 
-    const isNotebooksLoading = existingNotebooks === undefined;
+  const isNotebooksLoading = existingNotebooks === undefined;
 
-    const selectOptions = [{label: '(Create a new notebook)', value: ''}];
-    if (!isNotebooksLoading) {
-      selectOptions.push(...existingNotebooks.map(notebook => ({
+  const selectOptions = [{ label: '(Create a new notebook)', value: '' }];
+  if (!isNotebooksLoading) {
+    selectOptions.push(
+      ...existingNotebooks.map((notebook) => ({
         value: notebook,
         label: notebook,
-      })));
-    }
+      }))
+    );
+  }
 
-    return <AnimatedModal loading={isExporting || isNotebooksLoading} width={!codePreview ? 450 : 1200}>
+  return (
+    <AnimatedModal
+      loading={isExporting || isNotebooksLoading}
+      width={!codePreview ? 450 : 1200}
+    >
       <FlexRow>
-        <div style={{width: 'calc(450px - 2rem)'}}>
+        <div style={{ width: 'calc(450px - 2rem)' }}>
           <ModalTitle>Export Dataset</ModalTitle>
           <ModalBody>
-
-            <div style={{marginTop: '1rem'}}>
-              <Select value={creatingNewNotebook ? '' : notebookName}
-                      data-test-id='select-notebook'
-                      options={selectOptions}
-                      onChange={(v) => onNotebookSelect(v)}/>
+            <div style={{ marginTop: '1rem' }}>
+              <Select
+                value={creatingNewNotebook ? '' : notebookName}
+                data-test-id='select-notebook'
+                options={selectOptions}
+                onChange={(v) => onNotebookSelect(v)}
+              />
             </div>
 
-            {creatingNewNotebook && <React.Fragment>
-                <SmallHeader style={{fontSize: 14, marginTop: '1rem'}}>Notebook Name</SmallHeader>
-                <TextInput onChange={v => setNotebookName(v)}
-                           value={notebookName} data-test-id='notebook-name-input'/>
-            </React.Fragment>}
+            {creatingNewNotebook && (
+              <React.Fragment>
+                <SmallHeader style={{ fontSize: 14, marginTop: '1rem' }}>
+                  Notebook Name
+                </SmallHeader>
+                <TextInput
+                  onChange={(v) => setNotebookName(v)}
+                  value={notebookName}
+                  data-test-id='notebook-name-input'
+                />
+              </React.Fragment>
+            )}
 
             <div style={headerStyles.formLabel}>
               Select programming language
             </div>
-            {Object.keys(KernelTypeEnum).map(kernelTypeEnumKey => KernelTypeEnum[kernelTypeEnumKey])
-              .map((kernelTypeEnum, i) =>
+            {Object.keys(KernelTypeEnum)
+              .map((kernelTypeEnumKey) => KernelTypeEnum[kernelTypeEnumKey])
+              .map((kernelTypeEnum, i) => (
                 <label key={i} style={styles.radioButtonLabel}>
                   <RadioButton
-                    style={{marginRight: '0.25rem'}}
+                    style={{ marginRight: '0.25rem' }}
                     data-test-id={'kernel-type-' + kernelTypeEnum.toLowerCase()}
                     disabled={loadingNotebook || !creatingNewNotebook}
                     checked={kernelType === kernelTypeEnum}
                     onChange={() => setKernelType(kernelTypeEnum)}
                   />
                   {kernelTypeEnum}
-                </label>)}
+                </label>
+              ))}
 
-            {hasWgs() && kernelType === KernelTypeEnum.Python && <React.Fragment>
+            {hasWgs() && kernelType === KernelTypeEnum.Python && (
+              <React.Fragment>
                 <div style={headerStyles.formLabel}>
-                    Select analysis tool for genetic variant data
+                  Select analysis tool for genetic variant data
                 </div>
-              {genomicsToolRadioButton('Hail', DataSetExportRequest.GenomicsAnalysisToolEnum.HAIL)}
-              {genomicsToolRadioButton('PLINK', DataSetExportRequest.GenomicsAnalysisToolEnum.PLINK)}
-              {genomicsToolRadioButton('Other VCF-compatible tool', DataSetExportRequest.GenomicsAnalysisToolEnum.NONE)}
-            </React.Fragment>}
+                {genomicsToolRadioButton(
+                  'Hail',
+                  DataSetExportRequest.GenomicsAnalysisToolEnum.HAIL
+                )}
+                {genomicsToolRadioButton(
+                  'PLINK',
+                  DataSetExportRequest.GenomicsAnalysisToolEnum.PLINK
+                )}
+                {genomicsToolRadioButton(
+                  'Other VCF-compatible tool',
+                  DataSetExportRequest.GenomicsAnalysisToolEnum.NONE
+                )}
+              </React.Fragment>
+            )}
 
-            <FlexRow style={{marginTop: '1rem', alignItems: 'center'}}>
-              <Button type={'secondarySmall'}
-                      disabled={loadingNotebook}
-                      data-test-id='code-preview-button'
-                      onClick={() => onCodePreviewClick()}>
+            <FlexRow style={{ marginTop: '1rem', alignItems: 'center' }}>
+              <Button
+                type={'secondarySmall'}
+                disabled={loadingNotebook}
+                data-test-id='code-preview-button'
+                onClick={() => onCodePreviewClick()}
+              >
                 {codePreview ? 'Hide Code Preview' : 'See Code Preview'}
               </Button>
-              {loadingNotebook && <Spinner size={24} style={{marginLeft: '0.5rem'}}/>}
+              {loadingNotebook && (
+                <Spinner size={24} style={{ marginLeft: '0.5rem' }} />
+              )}
             </FlexRow>
 
-            {errorMsg && <ErrorMessage iconSize={20}> {errorMsg} </ErrorMessage>}
+            {errorMsg && (
+              <ErrorMessage iconSize={20}> {errorMsg} </ErrorMessage>
+            )}
           </ModalBody>
           <ModalFooter>
-            <Button type='secondary'
-                    data-test-id='export-dataset-modal-cancel-button'
-                    onClick={closeFunction}
-                    style={{marginRight: '2rem'}}>
+            <Button
+              type='secondary'
+              data-test-id='export-dataset-modal-cancel-button'
+              onClick={closeFunction}
+              style={{ marginRight: '2rem' }}
+            >
               Cancel
             </Button>
-            <TooltipTrigger content={summarizeErrors(errors)} data-test-id='export-dataset-tooltip'>
-              <Button type='primary'
-                      data-test-id='export-data-set'
-                      disabled={!fp.isEmpty(errors)}
-                      onClick={() => exportDataset()}>
+            <TooltipTrigger
+              content={summarizeErrors(errors)}
+              data-test-id='export-dataset-tooltip'
+            >
+              <Button
+                type='primary'
+                data-test-id='export-data-set'
+                disabled={!fp.isEmpty(errors)}
+                onClick={() => exportDataset()}
+              >
                 Export
               </Button>
             </TooltipTrigger>
           </ModalFooter>
         </div>
 
-        {codePreview &&
-        <div style={{flex: 1, marginLeft: '1rem'}}>
-          {codePreview}
-        </div>}
+        {codePreview && (
+          <div style={{ flex: 1, marginLeft: '1rem' }}>{codePreview}</div>
+        )}
       </FlexRow>
-    </AnimatedModal>;
-  });
-
+    </AnimatedModal>
+  );
+});

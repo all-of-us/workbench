@@ -1,79 +1,79 @@
-import {AttrName, ModifierType, Operator} from 'generated/fetch';
+import { AttrName, ModifierType, Operator } from 'generated/fetch';
 
 export const PM_UNITS = {
-  'HEIGHT': 'cm',
-  'WEIGHT': 'kg' ,
-  'WC': 'cm',
-  'HC': 'cm',
-  'HR-DETAIL': 'beats/min'
+  HEIGHT: 'cm',
+  WEIGHT: 'kg',
+  WC: 'cm',
+  HC: 'cm',
+  'HR-DETAIL': 'beats/min',
 };
 
 /* Systolic (conceptId: 903118) should always be the first element in the attributes array */
 export const PREDEFINED_ATTRIBUTES = {
-  'Hypotensive': [
+  Hypotensive: [
     {
       conceptId: 903118,
       name: AttrName.NUM,
       operands: ['90'],
-      operator: Operator.LESSTHANOREQUALTO
+      operator: Operator.LESSTHANOREQUALTO,
     },
     {
       conceptId: 903115,
       name: AttrName.NUM,
       operands: ['60'],
-      operator: Operator.LESSTHANOREQUALTO
-    }
+      operator: Operator.LESSTHANOREQUALTO,
+    },
   ],
-  'Normal': [
+  Normal: [
     {
       conceptId: 903118,
       name: AttrName.NUM,
       operands: ['120'],
-      operator: Operator.LESSTHANOREQUALTO
+      operator: Operator.LESSTHANOREQUALTO,
     },
     {
       conceptId: 903115,
       name: AttrName.NUM,
       operands: ['80'],
-      operator: Operator.LESSTHANOREQUALTO
-    }
+      operator: Operator.LESSTHANOREQUALTO,
+    },
   ],
   'Pre-Hypertensive': [
     {
       conceptId: 903118,
       name: AttrName.NUM,
       operands: ['121', '139'],
-      operator: Operator.BETWEEN
+      operator: Operator.BETWEEN,
     },
     {
       conceptId: 903115,
       name: AttrName.NUM,
       operands: ['81', '89'],
-      operator: Operator.BETWEEN
-    }
+      operator: Operator.BETWEEN,
+    },
   ],
-  'Hypertensive': [
+  Hypertensive: [
     {
       conceptId: 903118,
       name: AttrName.NUM,
       operands: ['140'],
-      operator: Operator.GREATERTHANOREQUALTO
+      operator: Operator.GREATERTHANOREQUALTO,
     },
     {
       conceptId: 903115,
       name: AttrName.NUM,
       operands: ['90'],
-      operator: Operator.GREATERTHANOREQUALTO
-    }
+      operator: Operator.GREATERTHANOREQUALTO,
+    },
   ],
-  'BP_DETAIL': [
+  BP_DETAIL: [
     {
       conceptId: 903118,
       name: 'Systolic',
       operands: [],
       operator: AttrName.ANY,
       MIN: 0,
-      MAX: 1000
+      MAX: 1000,
     },
     {
       conceptId: 903115,
@@ -81,8 +81,8 @@ export const PREDEFINED_ATTRIBUTES = {
       operands: [],
       operator: AttrName.ANY,
       MIN: 0,
-      MAX: 1000
-    }
+      MAX: 1000,
+    },
   ],
 };
 
@@ -93,13 +93,13 @@ export const MODIFIERS_MAP = {
       [Operator.BETWEEN]: 'Between',
       [Operator.GREATERTHANOREQUALTO]: 'Greater Than or Equal To',
       [Operator.LESSTHANOREQUALTO]: 'Less Than or Equal To',
-    }
+    },
   },
   [ModifierType.ENCOUNTERS]: {
     name: 'During Visit Type',
     operators: {
-      [Operator.IN]: ''
-    }
+      [Operator.IN]: '',
+    },
   },
   [ModifierType.EVENTDATE]: {
     name: 'Event Date',
@@ -107,12 +107,12 @@ export const MODIFIERS_MAP = {
       [Operator.BETWEEN]: 'Between',
       [Operator.GREATERTHANOREQUALTO]: 'On or After',
       [Operator.LESSTHANOREQUALTO]: 'On or Before',
-    }
+    },
   },
   [ModifierType.NUMOFOCCURRENCES]: {
     name: 'Has Occurrences',
     operators: {
       [Operator.GREATERTHANOREQUALTO]: 'N or More',
-    }
+    },
   },
 };

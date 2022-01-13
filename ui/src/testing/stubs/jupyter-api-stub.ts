@@ -1,17 +1,21 @@
-import {JupyterApi, JupyterContents, Model} from 'notebooks-generated/fetch';
-import {stubNotImplementedError} from 'testing/stubs/stub-utils';
+import { JupyterApi, JupyterContents, Model } from 'notebooks-generated/fetch';
+import { stubNotImplementedError } from 'testing/stubs/stub-utils';
 
 export class JupyterApiStub extends JupyterApi {
-
   constructor() {
     super(undefined, undefined, (..._: any[]) => {
       throw stubNotImplementedError;
     });
   }
 
-  public postContents(googleProject: string, clusterName: string, workspaceDir: string,
-    model?: Model, extraHttpRequestParams?: any): Promise<JupyterContents> {
-    return new Promise<JupyterContents>(resolve => {
+  public postContents(
+    googleProject: string,
+    clusterName: string,
+    workspaceDir: string,
+    model?: Model,
+    extraHttpRequestParams?: any
+  ): Promise<JupyterContents> {
+    return new Promise<JupyterContents>((resolve) => {
       resolve({
         type: JupyterContents.TypeEnum.Notebook,
         name: 'Untitled.ipynb',
@@ -21,15 +25,20 @@ export class JupyterApiStub extends JupyterApi {
         lastModified: null,
         mimetype: null,
         content: null,
-        format: null
+        format: null,
       });
     });
   }
 
   public putContents(
-    googleProject: string, clusterName: string, workspaceDir: string,
-    newName: string, model?: Model, extraHttpRequestParams?: any): Promise<JupyterContents> {
-    return new Promise<JupyterContents>(resolve => {
+    googleProject: string,
+    clusterName: string,
+    workspaceDir: string,
+    newName: string,
+    model?: Model,
+    extraHttpRequestParams?: any
+  ): Promise<JupyterContents> {
+    return new Promise<JupyterContents>((resolve) => {
       resolve({
         type: JupyterContents.TypeEnum.File,
         name: newName,
@@ -39,9 +48,8 @@ export class JupyterApiStub extends JupyterApi {
         lastModified: null,
         mimetype: null,
         content: '',
-        format: 'text'
+        format: 'text',
       });
     });
   }
-
 }

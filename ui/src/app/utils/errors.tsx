@@ -1,10 +1,10 @@
-import {ErrorCode, ErrorResponse} from 'generated/fetch';
-import {stackdriverErrorReporterStore} from './stores';
+import { ErrorCode, ErrorResponse } from 'generated/fetch';
+import { stackdriverErrorReporterStore } from './stores';
 
 /**
  * Reports an error to Stackdriver error logging, if enabled.
  */
-export function reportError(err: (Error|string)) {
+export function reportError(err: Error | string) {
   console.error('Reporting error to Stackdriver: ', err);
   const reporterStore = stackdriverErrorReporterStore.get();
   if (reporterStore && reporterStore.reporter) {
@@ -26,13 +26,15 @@ export function isAbortError(e: Error) {
 // convert error response from API JSON to ErrorResponse object, otherwise, report parse error
 export async function convertAPIError(e): Promise<ErrorResponse> {
   try {
-    const {errorClassName = null,
+    const {
+      errorClassName = null,
       errorCode = null,
       errorUniqueId = null,
       message = null,
-      statusCode = null} = await e.json();
+      statusCode = null,
+    } = await e.json();
     return { errorClassName, errorCode, errorUniqueId, message, statusCode };
-  }  catch {
+  } catch {
     return { statusCode: e.status, errorCode: ErrorCode.PARSEERROR };
   }
 }

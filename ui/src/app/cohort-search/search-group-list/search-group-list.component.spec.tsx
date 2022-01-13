@@ -1,12 +1,12 @@
-import {shallow} from 'enzyme';
+import { shallow } from 'enzyme';
 import * as React from 'react';
 
-import {registerApiClient} from 'app/services/swagger-fetch-clients';
-import {currentWorkspaceStore} from 'app/utils/navigation';
-import {CohortBuilderApi} from 'generated/fetch';
-import {CohortBuilderServiceStub} from 'testing/stubs/cohort-builder-service-stub';
-import {workspaceDataStub} from 'testing/stubs/workspaces';
-import {SearchGroupList} from './search-group-list.component';
+import { registerApiClient } from 'app/services/swagger-fetch-clients';
+import { currentWorkspaceStore } from 'app/utils/navigation';
+import { CohortBuilderApi } from 'generated/fetch';
+import { CohortBuilderServiceStub } from 'testing/stubs/cohort-builder-service-stub';
+import { workspaceDataStub } from 'testing/stubs/workspaces';
+import { SearchGroupList } from './search-group-list.component';
 
 describe('SearchGroupList', () => {
   beforeEach(() => {
@@ -17,11 +17,15 @@ describe('SearchGroupList', () => {
     });
   });
   it('should render', () => {
-    const wrapper = shallow(<SearchGroupList role='includes'
-                                             groups={[]}
-                                             setSearchContext={() => {}}
-                                             updateRequest={() => {}}
-                                             updated={0} />);
+    const wrapper = shallow(
+      <SearchGroupList
+        role='includes'
+        groups={[]}
+        setSearchContext={() => {}}
+        updateRequest={() => {}}
+        updated={0}
+      />
+    );
     expect(wrapper.exists()).toBeTruthy();
   });
 });

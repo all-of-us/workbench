@@ -8,8 +8,8 @@ import {
   InstitutionMembershipRequirement,
   OrganizationType,
 } from 'generated/fetch';
-import {stubNotImplementedError} from 'testing/stubs/stub-utils';
-import {getRegisteredTierConfig} from 'app/utils/institutions';
+import { stubNotImplementedError } from 'testing/stubs/stub-utils';
+import { getRegisteredTierConfig } from 'app/utils/institutions';
 
 export const VUMC: Institution = {
   shortName: 'VUMC',
@@ -20,11 +20,11 @@ export const VUMC: Institution = {
       accessTierShortName: 'registered',
       membershipRequirement: InstitutionMembershipRequirement.DOMAINS,
       eraRequired: true,
-      emailDomains: ['vumc.org']
-    }
+      emailDomains: ['vumc.org'],
+    },
   ],
-  userInstructions: 'Vanderbilt User Instruction'
-}
+  userInstructions: 'Vanderbilt User Instruction',
+};
 
 export const BROAD: Institution = {
   shortName: 'Broad',
@@ -35,9 +35,12 @@ export const BROAD: Institution = {
       accessTierShortName: 'registered',
       membershipRequirement: InstitutionMembershipRequirement.ADDRESSES,
       eraRequired: true,
-      emailAddresses: ['contactEmail@broadinstitute.org', 'broad_institution@broadinstitute.org']
-    }
-  ]
+      emailAddresses: [
+        'contactEmail@broadinstitute.org',
+        'broad_institution@broadinstitute.org',
+      ],
+    },
+  ],
 };
 
 export const VERILY: Institution = {
@@ -49,16 +52,16 @@ export const VERILY: Institution = {
       accessTierShortName: 'registered',
       membershipRequirement: InstitutionMembershipRequirement.DOMAINS,
       eraRequired: true,
-      emailDomains: ['verily.com', 'google.com']
+      emailDomains: ['verily.com', 'google.com'],
     },
     {
       accessTierShortName: 'controlled',
       membershipRequirement: InstitutionMembershipRequirement.ADDRESSES,
       eraRequired: true,
-      emailAddresses: ['foo@verily.com']
-    }
+      emailAddresses: ['foo@verily.com'],
+    },
   ],
-  userInstructions: 'Verily User Instruction'
+  userInstructions: 'Verily User Instruction',
 };
 
 export const VERILY_WITHOUT_CT: Institution = {
@@ -70,39 +73,44 @@ export const VERILY_WITHOUT_CT: Institution = {
       accessTierShortName: 'registered',
       membershipRequirement: InstitutionMembershipRequirement.DOMAINS,
       eraRequired: true,
-      emailDomains: ['verily.com', 'google.com']
+      emailDomains: ['verily.com', 'google.com'],
     },
     {
       accessTierShortName: 'controlled',
       membershipRequirement: InstitutionMembershipRequirement.NOACCESS,
-    }
+    },
   ],
-  userInstructions: 'Verily User Instruction'
+  userInstructions: 'Verily User Instruction',
 };
 
 export const defaultInstitutions: Array<Institution> = [
-    VUMC, BROAD, VERILY, VERILY_WITHOUT_CT
+  VUMC,
+  BROAD,
+  VERILY,
+  VERILY_WITHOUT_CT,
 ];
 
 export class InstitutionApiStub extends InstitutionApi {
   public institutions: Array<Institution>;
 
   constructor(institutions: Array<Institution> = defaultInstitutions) {
-    super(undefined, undefined, (..._: any[]) => { throw stubNotImplementedError; });
+    super(undefined, undefined, (..._: any[]) => {
+      throw stubNotImplementedError;
+    });
 
     this.institutions = institutions;
   }
 
   createInstitution(institution: Institution): Promise<Institution> {
-    return new Promise<Institution>(resolve => {
+    return new Promise<Institution>((resolve) => {
       this.institutions.push(institution);
       resolve(institution);
     });
   }
 
   deleteInstitution(shortName: string): Promise<Response> {
-    return new Promise<Response>(resolve => {
-      this.institutions = this.institutions.filter(institution => {
+    return new Promise<Response>((resolve) => {
+      this.institutions = this.institutions.filter((institution) => {
         return institution.shortName !== shortName;
       });
       resolve(new Response());
@@ -111,63 +119,83 @@ export class InstitutionApiStub extends InstitutionApi {
 
   getInstitution(shortName: string): Promise<Institution> {
     return new Promise((resolve, reject) => {
-      const institution = this.institutions.find(x => x.shortName === shortName);
+      const institution = this.institutions.find(
+        (x) => x.shortName === shortName
+      );
       if (institution) {
         resolve(institution);
       } else {
-        reject(new Response('No institution found', {status: 404}));
+        reject(new Response('No institution found', { status: 404 }));
       }
     });
   }
 
   getInstitutions(shortName: string): Promise<GetInstitutionsResponse> {
     return new Promise((resolve, reject) => {
-      const institution = {institutions: this.institutions};
+      const institution = { institutions: this.institutions };
       resolve(institution);
     });
   }
 
   getPublicInstitutionDetails(): Promise<GetPublicInstitutionDetailsResponse> {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       resolve({
-        institutions: this.institutions.map(x => {
+        institutions: this.institutions.map((x) => {
           return {
             shortName: x.shortName,
             displayName: x.displayName,
             organizationTypeEnum: x.organizationTypeEnum,
-            registeredTierMembershipRequirement: getRegisteredTierConfig(x).membershipRequirement
+            registeredTierMembershipRequirement:
+              getRegisteredTierConfig(x).membershipRequirement,
           };
-        })
+        }),
       });
     });
   }
 
-  updateInstitution(shortName: string, institution: Institution): Promise<Institution> {
-    return new Promise(resolve => {
-      this.institutions = this.institutions.filter(x => x.shortName !== shortName);
+  updateInstitution(
+    shortName: string,
+    institution: Institution
+  ): Promise<Institution> {
+    return new Promise((resolve) => {
+      this.institutions = this.institutions.filter(
+        (x) => x.shortName !== shortName
+      );
       this.institutions.push(institution);
       resolve(institution);
     });
   }
 
-  async checkEmail(shortName: string, request: CheckEmailRequest, options?: any): Promise<CheckEmailResponse> {
-    const {contactEmail} = request;
+  async checkEmail(
+    shortName: string,
+    request: CheckEmailRequest,
+    options?: any
+  ): Promise<CheckEmailResponse> {
+    const { contactEmail } = request;
     const domain = contactEmail.substring(contactEmail.lastIndexOf('@') + 1);
 
-    const institution = this.institutions.find(x => x.shortName === shortName);
+    const institution = this.institutions.find(
+      (x) => x.shortName === shortName
+    );
     if (!institution) {
-      throw new Response('No institution found', {status: 404});
+      throw new Response('No institution found', { status: 404 });
     }
 
     const response: CheckEmailResponse = {
-      isValidMember: false
+      isValidMember: false,
     };
     const tierConfig = getRegisteredTierConfig(institution);
-    if (tierConfig.membershipRequirement === InstitutionMembershipRequirement.ADDRESSES
-        && tierConfig.emailAddresses.includes(contactEmail)) {
+    if (
+      tierConfig.membershipRequirement ===
+        InstitutionMembershipRequirement.ADDRESSES &&
+      tierConfig.emailAddresses.includes(contactEmail)
+    ) {
       response.isValidMember = true;
-    } else if (tierConfig.membershipRequirement === InstitutionMembershipRequirement.DOMAINS
-        && tierConfig.emailDomains.includes(domain)) {
+    } else if (
+      tierConfig.membershipRequirement ===
+        InstitutionMembershipRequirement.DOMAINS &&
+      tierConfig.emailDomains.includes(domain)
+    ) {
       response.isValidMember = true;
     }
     return response;

@@ -18,8 +18,8 @@ export enum SaveOption {
 export default class ConceptSetSaveModal extends Modal {
   modalTitle: string;
 
-  constructor(page: Page) {
-    super(page);
+  constructor(page: Page, opts?: { xpath?: string; modalIndex?: number }) {
+    super(page, opts);
   }
 
   async isLoaded(): Promise<boolean> {
