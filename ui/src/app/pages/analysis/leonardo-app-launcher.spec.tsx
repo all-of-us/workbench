@@ -38,13 +38,21 @@ import {
   Progress,
   ProgressCardState,
   notebookProgressStrings,
-  terminalProgressStrings,
+  genericProgressStrings,
   LeoApplicationType,
 } from 'app/pages/analysis/leonardo-app-launcher';
 import { Route, Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import { SecuritySuspendedMessage } from './notebook-frame-error';
 import { ComputeSecuritySuspendedError } from 'app/utils/runtime-utils';
+
+function currentCardText(wrapper: ReactWrapper) {
+  return wrapper.find('[data-test-id="current-progress-card"]').first().text();
+}
+
+function getCardSpinnerTestId(cardState: ProgressCardState) {
+  return '[data-test-id="progress-card-spinner-' + cardState.valueOf() + '"]';
+}
 
 describe('NotebookLauncher', () => {
   const workspace = {
@@ -75,17 +83,6 @@ describe('NotebookLauncher', () => {
     );
     return c;
   };
-
-  function currentCardText(wrapper: ReactWrapper) {
-    return wrapper
-      .find('[data-test-id="current-progress-card"]')
-      .first()
-      .text();
-  }
-
-  function getCardSpinnerTestId(cardState: ProgressCardState) {
-    return '[data-test-id="progress-card-spinner-' + cardState.valueOf() + '"]';
-  }
 
   async function updateRuntime(updateFn: (r: Runtime) => Runtime) {
     await act(() => {
@@ -456,17 +453,6 @@ describe('TerminalLauncher', () => {
     return t;
   };
 
-  function currentCardText(wrapper: ReactWrapper) {
-    return wrapper
-      .find('[data-test-id="current-progress-card"]')
-      .first()
-      .text();
-  }
-
-  function getCardSpinnerTestId(cardState: ProgressCardState) {
-    return '[data-test-id="progress-card-spinner-' + cardState.valueOf() + '"]';
-  }
-
   beforeEach(() => {
     runtimeStub = new RuntimeApiStub();
     runtimeStub.runtime.status = RuntimeStatus.Creating;
@@ -505,7 +491,7 @@ describe('TerminalLauncher', () => {
       )
     ).toBeTruthy();
     expect(currentCardText(wrapper)).toContain(
-      terminalProgressStrings.get(Progress.Initializing)
+      genericProgressStrings.get(Progress.Initializing)
     );
 
     runtimeStub.runtime.status = RuntimeStatus.Running;
@@ -515,7 +501,91 @@ describe('TerminalLauncher', () => {
       wrapper.exists(getCardSpinnerTestId(ProgressCardState.Redirecting))
     ).toBeTruthy();
     expect(currentCardText(wrapper)).toContain(
-      terminalProgressStrings.get(Progress.Redirecting)
+      genericProgressStrings.get(Progress.Redirecting)
+    );
+  });
+});
+
+describe('SparkConsoleLauncher', () => {
+  const workspace = {
+    ...workspaceStubs[0],
+    accessLevel: WorkspaceAccessLevel.OWNER,
+  };
+  const profile = ProfileStubVariables.PROFILE_STUB;
+  const load = jest.fn();
+  const reload = jest.fn();
+  const updateCache = jest.fn();
+
+  let runtimeStub;
+
+  const terminalInitialUrl = '/workspaces/namespace/id/spark/apphistory';
+  let history = createMemoryHistory({ initialEntries: [terminalInitialUrl] });
+
+  const terminalComponent = async () => {
+    const t = mount(
+      <Router history={history}>
+        <Route path='/workspaces/:ns/:wsid/spark/:sparkConsolePath'>
+          <LeonardoAppLauncher
+            hideSpinner={() => {}}
+            showSpinner={() => {}}
+            leoAppType={LeoApplicationType.SparkConsole}
+          />
+        </Route>
+      </Router>
+    );
+    await waitOneTickAndUpdate(t);
+    return t;
+  };
+
+  beforeEach(() => {
+    runtimeStub = new RuntimeApiStub();
+    runtimeStub.runtime.status = RuntimeStatus.Creating;
+
+    registerApiClient(RuntimeApi, runtimeStub);
+    registerApiClientNotebooks(JupyterApi, new JupyterApiStub());
+    registerApiClientNotebooks(ProxyApi, new ProxyApiStub());
+    registerApiClientNotebooks(LeoRuntimesApi, new LeoRuntimesApiStub());
+
+    serverConfigStore.set({ config: { gsuiteDomain: 'x' } });
+    currentWorkspaceStore.next(workspace);
+    profileStore.set({ profile, load, reload, updateCache });
+    runtimeStore.set({
+      workspaceNamespace: workspace.namespace,
+      runtime: undefined,
+      runtimeLoaded: true,
+    });
+
+    jest.useFakeTimers();
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+    jest.clearAllMocks();
+  });
+
+  it('should display progress correctly when RuntimeStatus changes', async () => {
+    runtimeStub.runtime.status = RuntimeStatus.Creating;
+
+    const wrapper = await terminalComponent();
+    await waitForFakeTimersAndUpdate(wrapper);
+
+    expect(
+      wrapper.exists(
+        getCardSpinnerTestId(ProgressCardState.UnknownInitializingResuming)
+      )
+    ).toBeTruthy();
+    expect(currentCardText(wrapper)).toContain(
+      genericProgressStrings.get(Progress.Initializing)
+    );
+
+    runtimeStub.runtime.status = RuntimeStatus.Running;
+    await waitForFakeTimersAndUpdate(wrapper);
+
+    expect(
+      wrapper.exists(getCardSpinnerTestId(ProgressCardState.Redirecting))
+    ).toBeTruthy();
+    expect(currentCardText(wrapper)).toContain(
+      genericProgressStrings.get(Progress.Redirecting)
     );
   });
 });

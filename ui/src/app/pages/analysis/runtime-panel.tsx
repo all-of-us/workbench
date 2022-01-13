@@ -1,4 +1,10 @@
-import { Button, Clickable, LinkButton } from 'app/components/buttons';
+import {
+  Button,
+  Clickable,
+  LinkButton,
+  StyledExternalLink,
+  StyledRouterLink,
+} from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { ClrIcon } from 'app/components/icons';
 import { ErrorMessage, WarningMessage } from 'app/components/messages';
@@ -35,6 +41,10 @@ import {
 } from 'app/utils/machines';
 import { formatUsd } from 'app/utils/numbers';
 import { applyPresetOverride, runtimePresets } from 'app/utils/runtime-presets';
+import { isUsingFreeTierBillingAccount } from 'app/utils/workspace-utils';
+import { RuntimeCostEstimator } from 'app/components/runtime-cost-estimator';
+import { RuntimeSummary } from 'app/components/runtime-summary';
+import { environment } from 'environments/environment';
 import {
   compareGpu,
   diffsToUpdateMessaging,
@@ -73,6 +83,16 @@ import * as React from 'react';
 import { validate } from 'validate.js';
 
 const { useState, useEffect, Fragment } = React;
+
+import computeStarting from 'assets/icons/compute-starting.svg';
+import computeRunning from 'assets/icons/compute-running.svg';
+import computeStopping from 'assets/icons/compute-stopping.svg';
+import computeError from 'assets/icons/compute-error.svg';
+import computeStopped from 'assets/icons/compute-stopped.svg';
+import computeNone from 'assets/icons/compute-none.svg';
+import { SparkConsolePath } from './leonardo-app-launcher';
+import { RouteLink } from 'app/components/app-router';
+import { WorkspaceData } from 'app/utils/workspace-data';
 
 const styles = reactStyles({
   baseHeader: {
@@ -163,6 +183,26 @@ const styles = reactStyles({
     color: colors.primary,
     margin: 0,
   },
+  sparkConsoleHeader: {
+    color: '#333F52',
+    fontSize: '14px',
+    fontWeight: 600,
+    margin: 0,
+  },
+  sparkConsoleSection: {
+    backgroundColor: colors.light,
+    border: '1px solid #4D72AA',
+    borderRadius: '5px',
+    fontSize: '14px',
+    padding: '21px 17px',
+  },
+  sparkConsoleLaunchButton: {
+    border: '1px solid #4D72AA',
+    borderRadius: '2px',
+    display: 'inline-block',
+    marginTop: '17px',
+    padding: '10px 21px',
+  },
 });
 
 // exported for testing
@@ -192,7 +232,42 @@ enum PanelContent {
   DeleteUnattachedPd = 'DeleteUnattachedPd',
   Disabled = 'Disabled',
   Confirm = 'Confirm',
+  SparkConsole = 'SparkConsole',
 }
+
+const sparkLinkConfigs: {
+  name: string;
+  description: string;
+  path: SparkConsolePath;
+}[] = [
+  {
+    name: 'YARN',
+    description:
+      'YARN Resource Manager provides information about cluster status ' +
+      'and metrics as well as information about the scheduler, nodes, and ' +
+      'applications on the cluster.',
+    path: SparkConsolePath.Yarn,
+  },
+  {
+    name: 'YARN Application Timeline',
+    description:
+      'YARN Application Timeline provides information about current and ' +
+      'historic applications executed on the cluster.',
+    path: SparkConsolePath.YarnTimeline,
+  },
+  {
+    name: 'Spark History Server',
+    description:
+      'Spark History Server provides information about completed Spark applications on the cluster.',
+    path: SparkConsolePath.SparkHistory,
+  },
+  {
+    name: 'MapReduce History Server',
+    description:
+      'MapReduce History Server displays information about completed MapReduce applications on a cluster.',
+    path: SparkConsolePath.JobHistory,
+  },
+];
 
 // this is only used in the test.
 export interface Props {
@@ -568,6 +643,31 @@ export const ConfirmDeleteRuntimeWithPD = ({
         </Button>
       </FlexRow>
     </Fragment>
+  );
+};
+
+const SparkConsolePanel = ({ namespace, id }: WorkspaceData) => {
+  return (
+    <FlexColumn style={{ gap: '24px', paddingBottom: '10px' }}>
+      <h3 style={{ ...styles.baseHeader, ...styles.bold }}>Spark Console</h3>
+      The spark console is used to manage and monitor cluster resources and
+      facilities, such as the YARN resource manager, the Hadoop Distributed File
+      System (HDFS), MapReduce, and Spark.
+      {sparkLinkConfigs.map(({ name, description, path }) => (
+        <FlexColumn key={name} style={styles.sparkConsoleSection}>
+          <h4 style={styles.sparkConsoleHeader}>{name}</h4>
+          <div>{description}</div>
+          <div>
+            <RouteLink
+              path={`/workspaces/${namespace}/${id}/spark/${path}`}
+              style={styles.sparkConsoleLaunchButton}
+            >
+              Launch
+            </RouteLink>
+          </div>
+        </FlexColumn>
+      ))}
+    </FlexColumn>
   );
 };
 
@@ -1008,16 +1108,6 @@ const PresetSelector = ({
   );
 };
 
-import computeStarting from 'assets/icons/compute-starting.svg';
-import computeRunning from 'assets/icons/compute-running.svg';
-import computeStopping from 'assets/icons/compute-stopping.svg';
-import computeError from 'assets/icons/compute-error.svg';
-import computeStopped from 'assets/icons/compute-stopped.svg';
-import computeNone from 'assets/icons/compute-none.svg';
-import { isUsingFreeTierBillingAccount } from 'app/utils/workspace-utils';
-import { RuntimeCostEstimator } from 'app/components/runtime-cost-estimator';
-import { RuntimeSummary } from 'app/components/runtime-summary';
-
 const StartStopRuntimeButton = ({ workspaceNamespace, googleProject }) => {
   const [status, setRuntimeStatus] = useRuntimeStatus(
     workspaceNamespace,
@@ -1227,7 +1317,7 @@ const CostInfo = ({
       {isUsingFreeTierBillingAccount(workspace) &&
         currentUser === workspace.creator && (
           <div style={styles.costsDrawnFrom}>
-            Costs will draw from your remaining {remainingCredits} of initial
+            Costs will draw from your remaining {remainingCredits} of free
             credits.
           </div>
         )}
@@ -1235,7 +1325,7 @@ const CostInfo = ({
         currentUser !== workspace.creator && (
           <div style={styles.costsDrawnFrom}>
             Costs will draw from workspace creator's remaining{' '}
-            {remainingCredits} of initial credits.
+            {remainingCredits} of free credits.
           </div>
         )}
       {!isUsingFreeTierBillingAccount(workspace) && (
@@ -1689,10 +1779,10 @@ const RuntimePanel = fp.flow(
 
     const costErrorsAsWarnings =
       !isUsingFreeTierBillingAccount(workspace) ||
-      // We've increased the workspace creator's initial credits. This means they may be expecting to run
-      // a more expensive analysis, and the program has extended some further trust for initial credit
+      // We've increased the workspace creator's free credits. This means they may be expecting to run
+      // a more expensive analysis, and the program has extended some further trust for free credit
       // use. Allow them to provision a larger runtime (still warn them). Block them if they get below
-      // the default amount of initial credits because (1) this can result in overspend and (2) we have
+      // the default amount of free credits because (1) this can result in overspend and (2) we have
       // easy access to remaining credits, and not the creator's quota.
       creatorFreeCreditsRemaining >
         serverConfigStore.get().config.defaultFreeCreditsDollarLimit;
@@ -1703,7 +1793,7 @@ const RuntimePanel = fp.flow(
         : 150;
       const message = costErrorsAsWarnings
         ? '^Your runtime is expensive. Are you sure you wish to proceed?'
-        : `^Your runtime is too expensive. To proceed using initial credits, reduce your running costs below $${maxRunningCost}/hr.`;
+        : `^Your runtime is too expensive. To proceed using free credits, reduce your running costs below $${maxRunningCost}/hr.`;
       return {
         numericality: {
           lessThan: maxRunningCost,
@@ -1871,6 +1961,21 @@ const RuntimePanel = fp.flow(
 
     return (
       <div id='runtime-panel'>
+        {cond(
+          [
+            [PanelContent.Create, PanelContent.Customize].includes(
+              panelContent
+            ),
+            () => (
+              <div style={{ marginBottom: '1rem' }}>
+                Your analysis environment consists of an application and compute
+                resources. Your cloud environment is unique to this workspace
+                and not shared with other users.
+              </div>
+            ),
+          ],
+          () => null
+        )}
         {switchCase(
           panelContent,
           [
@@ -2035,17 +2140,54 @@ const RuntimePanel = fp.flow(
                       <label style={styles.label} htmlFor='runtime-compute'>
                         Compute type
                       </label>
-                      <Dropdown
-                        id='runtime-compute'
-                        disabled={!allowDataproc || disableControls}
-                        style={{ width: '10rem' }}
-                        options={[ComputeType.Standard, ComputeType.Dataproc]}
-                        value={selectedCompute || ComputeType.Standard}
-                        onChange={({ value }) => {
-                          setSelectedCompute(value);
-                        }}
-                      />
+                      <FlexRow style={{ gap: '10px', alignItems: 'center' }}>
+                        <Dropdown
+                          id='runtime-compute'
+                          disabled={!allowDataproc || disableControls}
+                          style={{ width: '10rem' }}
+                          options={[ComputeType.Standard, ComputeType.Dataproc]}
+                          value={selectedCompute || ComputeType.Standard}
+                          onChange={({ value }) => {
+                            setSelectedCompute(value);
+                          }}
+                        />
+                        {selectedCompute === ComputeType.Dataproc && (
+                          <TooltipTrigger
+                            content={
+                              status !== RuntimeStatus.Running
+                                ? 'Start your Dataproc cluster to access the Spark console'
+                                : null
+                            }
+                          >
+                            <LinkButton
+                              data-test-id='manage-spark-console'
+                              disabled={status !== RuntimeStatus.Running}
+                              onClick={() =>
+                                setPanelContent(PanelContent.SparkConsole)
+                              }
+                            >
+                              Manage and monitor Spark console
+                            </LinkButton>
+                          </TooltipTrigger>
+                        )}
+                      </FlexRow>
                     </FlexColumn>
+                  </FlexRow>
+                  {selectedCompute === ComputeType.Dataproc && (
+                    <DataProcConfigSelector
+                      disabled={disableControls}
+                      runtimeStatus={status}
+                      dataprocExists={runtimeCtx.dataprocExists}
+                      onChange={(config) => setSelectedDataprocConfig(config)}
+                      dataprocConfig={selectedDataprocConfig}
+                    />
+                  )}
+                  <FlexRow
+                    style={{
+                      marginTop: '1rem',
+                      justifyContent: 'space-between',
+                    }}
+                  >
                     <FlexColumn>
                       <label style={styles.label} htmlFor='runtime-autopause'>
                         Automatically pause after idle for
@@ -2070,15 +2212,6 @@ const RuntimePanel = fp.flow(
                       />
                     </FlexColumn>
                   </FlexRow>
-                  {selectedCompute === ComputeType.Dataproc && (
-                    <DataProcConfigSelector
-                      disabled={disableControls}
-                      runtimeStatus={status}
-                      dataprocExists={runtimeCtx.dataprocExists}
-                      onChange={(config) => setSelectedDataprocConfig(config)}
-                      dataprocConfig={selectedDataprocConfig}
-                    />
-                  )}
                   <FlexRow
                     style={{
                       justifyContent: 'space-between',
@@ -2201,7 +2334,11 @@ const RuntimePanel = fp.flow(
               />
             ),
           ],
-          [PanelContent.Disabled, () => <DisabledPanel />]
+          [PanelContent.Disabled, () => <DisabledPanel />],
+          [
+            PanelContent.SparkConsole,
+            () => <SparkConsolePanel {...workspace} />,
+          ]
         )}
       </div>
     );

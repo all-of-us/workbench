@@ -11,6 +11,7 @@ import {
 import * as React from 'react';
 import { StackdriverErrorReporter } from 'stackdriver-errors-js';
 import { BreadcrumbType } from 'app/components/breadcrumb-type';
+import { useParams } from 'react-router';
 
 const { useEffect, useState } = React;
 
@@ -190,9 +191,28 @@ export interface MatchParams {
   nbName?: string;
   ns?: string;
   pid?: string;
+  sparkConsolePath?: string;
   username?: string;
   usernameWithoutGsuiteDomain?: string;
   wsid?: string;
+}
+
+/**
+ * HOC which invalidates a component when the specified params change, by way
+ * of changing the React key value. This can be used to force a remount / render
+ * when a route param changes.
+ */
+export function withParamsKey(...paramNames: (keyof MatchParams)[]) {
+  return (WrappedComponent) =>
+    ({ ...props }) => {
+      const params = useParams<MatchParams>();
+      return (
+        <WrappedComponent
+          key={paramNames.map((k) => params[k] || '').join('/')}
+          {...props}
+        />
+      );
+    };
 }
 
 /**
