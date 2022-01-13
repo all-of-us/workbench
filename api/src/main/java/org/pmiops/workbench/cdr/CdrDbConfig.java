@@ -77,7 +77,7 @@ public class CdrDbConfig {
       // cdr_version table. Note that if new CDR versions are inserted, we need to restart the
       // server in order for it to be used.
       // TODO: find a way to make sure CDR versions aren't shown in the UI until they are in use by
-      // all servers.
+      // all server
       Long defaultId = null;
       Map<Object, Object> cdrVersionDataSourceMap = new HashMap<>();
       for (DbCdrVersion cdrVersion : cdrVersionDao.findAll()) {
