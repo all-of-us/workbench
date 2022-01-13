@@ -355,8 +355,7 @@ export const LeonardoAppLauncher = fp.flow(
   withCurrentWorkspace(),
   withRuntimeStore(),
   withNavigation,
-  withRouter,
-  withParamsKey('sparkConsolePath')
+  withRouter
 )(
   class extends React.Component<Props, State> {
     private redirectTimer: NodeJS.Timeout;

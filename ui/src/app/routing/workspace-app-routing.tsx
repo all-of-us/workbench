@@ -26,7 +26,7 @@ import {
 } from 'app/pages/workspace/workspace-edit';
 import { LeoApplicationType } from 'app/pages/analysis/leonardo-app-launcher';
 import { adminLockedGuard } from 'app/routing/guards';
-import { MatchParams } from 'app/utils/stores';
+import { MatchParams, withParamsKey } from 'app/utils/stores';
 import { BreadcrumbType } from 'app/components/breadcrumb-type';
 
 const CohortPagePage = fp.flow(withRouteData, withRoutingSpinner)(CohortPage);
@@ -199,17 +199,20 @@ export const WorkspaceRoutes = () => {
         path={`${path}/spark/:sparkConsolePath`}
         guards={[adminLockedGuard(ns, wsid)]}
       >
-        <LeonardoAppRedirectPage
-          key='spark'
-          routeData={{
-            breadcrumb: BreadcrumbType.Workspace,
-            pageKey: LEONARDO_APP_PAGE_KEY,
-            contentFullHeightOverride: true,
-            workspaceNavBarTab: 'notebooks',
-            minimizeChrome: true,
-          }}
-          leoAppType={LeoApplicationType.SparkConsole}
-        />
+        {/* Force remounting on parameter change. */}
+        {withParamsKey('sparkConsolePath')(
+          <LeonardoAppRedirectPage
+            key='spark'
+            routeData={{
+              breadcrumb: BreadcrumbType.Workspace,
+              pageKey: LEONARDO_APP_PAGE_KEY,
+              contentFullHeightOverride: true,
+              workspaceNavBarTab: 'notebooks',
+              minimizeChrome: true,
+            }}
+            leoAppType={LeoApplicationType.SparkConsole}
+          />
+        )}
       </AppRoute>
       <AppRoute
         exact
