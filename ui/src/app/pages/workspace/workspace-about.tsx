@@ -234,10 +234,15 @@ export const WorkspaceAbout = fp.flow(
     }
 
     get workspaceGcpBillingSpendUrl(): string {
-      return 'https://console.cloud.google.com/billing/'
-        + this.state.workspace.billingAccountName.replace("billingAccounts/", "")
-        + '/reports;grouping=GROUP_BY_SKU?project='
-        + this.state.workspace.googleProject;
+      return (
+        'https://console.cloud.google.com/billing/' +
+        this.state.workspace.billingAccountName.replace(
+          'billingAccounts/',
+          ''
+        ) +
+        '/reports;grouping=GROUP_BY_SKU?project=' +
+        this.state.workspace.googleProject
+      );
     }
 
     async publishUnpublishWorkspace(publish: boolean) {
@@ -420,33 +425,35 @@ export const WorkspaceAbout = fp.flow(
                 </div>
               </div>
               {workspace &&
-              WorkspacePermissionsUtil.canWrite(workspace.accessLevel) &&
-              isUsingFreeTierBillingAccount(workspace) && (
-                <div style={{ ...styles.infoBox, height: '2.5rem' }}>
-                  <div style={styles.infoBoxHeader}>
-                    Workspace Initial Credit Usage
+                WorkspacePermissionsUtil.canWrite(workspace.accessLevel) &&
+                isUsingFreeTierBillingAccount(workspace) && (
+                  <div style={{ ...styles.infoBox, height: '2.5rem' }}>
+                    <div style={styles.infoBoxHeader}>
+                      Workspace Initial Credit Usage
+                    </div>
+                    <div style={{ fontSize: '0.5rem' }}>
+                      {this.state.workspaceInitialCreditsUsage !== undefined ? (
+                        '$' + this.state.workspaceInitialCreditsUsage.toFixed(2)
+                      ) : (
+                        <Spinner style={{ height: 16, width: 16 }} />
+                      )}
+                    </div>
                   </div>
-                  <div style={{ fontSize: '0.5rem' }}>
-                    {this.state.workspaceInitialCreditsUsage !== undefined ? (
-                      '$' + this.state.workspaceInitialCreditsUsage.toFixed(2)
-                    ) : (
-                      <Spinner style={{ height: 16, width: 16 }} />
-                    )}
-                  </div>
+                )}
+            </div>
+            {workspace &&
+              WorkspacePermissionsUtil.isOwner(workspace.accessLevel) && (
+                <div>
+                  <h3 style={{ marginBottom: '0.5rem' }}>Billing</h3>
+                  <StyledExternalLink
+                    href={this.workspaceGcpBillingSpendUrl}
+                    target='_blank'
+                  >
+                    View detailed spend report
+                  </StyledExternalLink>
                 </div>
               )}
-            </div>
           </div>
-          {workspace && WorkspacePermissionsUtil.isOwner(workspace.accessLevel) &&
-          <div>
-            <h3 style={{marginBottom: '0.5rem'}}>Billing</h3>
-            <StyledExternalLink
-              href={this.workspaceGcpBillingSpendUrl}
-              target='_blank'>
-              View detailed spend report
-            </StyledExternalLink>
-          </div>
-          }
           {sharing && (
             <WorkspaceShare
               workspace={workspace}
