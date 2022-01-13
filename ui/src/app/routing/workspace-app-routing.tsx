@@ -71,6 +71,12 @@ const LeonardoAppRedirectPage = fp.flow(
   withRouteData,
   withRoutingSpinner
 )(LeonardoAppLauncher);
+const LeonardoSparkConsoleRedirectPage = fp.flow(
+  withRouteData,
+  withRoutingSpinner,
+  // Force remounting on parameter change.
+  withParamsKey('sparkConsolePath')
+)(LeonardoAppLauncher);
 const ParticipantsTablePage = fp.flow(
   withRouteData,
   withRoutingSpinner
@@ -199,20 +205,16 @@ export const WorkspaceRoutes = () => {
         path={`${path}/spark/:sparkConsolePath`}
         guards={[adminLockedGuard(ns, wsid)]}
       >
-        {/* Force remounting on parameter change. */}
-        {withParamsKey('sparkConsolePath')(
-          <LeonardoAppRedirectPage
-            key='spark'
-            routeData={{
-              breadcrumb: BreadcrumbType.Workspace,
-              pageKey: LEONARDO_APP_PAGE_KEY,
-              contentFullHeightOverride: true,
-              workspaceNavBarTab: 'notebooks',
-              minimizeChrome: true,
-            }}
-            leoAppType={LeoApplicationType.SparkConsole}
-          />
-        )}
+        <LeonardoSparkConsoleRedirectPage
+          routeData={{
+            breadcrumb: BreadcrumbType.Workspace,
+            pageKey: LEONARDO_APP_PAGE_KEY,
+            contentFullHeightOverride: true,
+            workspaceNavBarTab: 'notebooks',
+            minimizeChrome: true,
+          }}
+          leoAppType={LeoApplicationType.SparkConsole}
+        />
       </AppRoute>
       <AppRoute
         exact
