@@ -42,7 +42,11 @@ import {
   getEmailValidationErrorMessage,
 } from 'app/utils/institutions';
 import { EgressEventsTable } from './egress-events-table';
-import { getAccessModuleConfig } from 'app/utils/access-utils';
+import {
+  getAccessModuleConfig,
+  getAccessModuleStatusByName,
+} from 'app/utils/access-utils';
+import { Toggle } from 'app/components/inputs';
 
 const styles = reactStyles({
   ...commonStyles,
@@ -57,6 +61,14 @@ const styles = reactStyles({
     fontSize: '16px',
     fontWeight: 'bold',
     paddingLeft: '1em',
+  },
+  tableHeader: {
+    color: colors.primary,
+    fontSize: '18px',
+    fontWeight: 'bold',
+    paddingLeft: '1em',
+    paddingTop: '2em',
+    lineHeight: '22px',
   },
   uneditableFieldsSpacer: {
     height: '24px',
@@ -210,13 +222,13 @@ const EditableFields = ({
   );
 };
 
-// I'd like to just say "AccessModule.values()" but that's apparently very difficult in Typescript
+// list the access modules in the desired order
 const accessModulesForTable = [
-  AccessModule.DATAUSERCODEOFCONDUCT,
+  AccessModule.TWOFACTORAUTH,
+  AccessModule.ERACOMMONS,
   AccessModule.COMPLIANCETRAINING,
   AccessModule.CTCOMPLIANCETRAINING,
-  AccessModule.ERACOMMONS,
-  AccessModule.TWOFACTORAUTH,
+  AccessModule.DATAUSERCODEOFCONDUCT,
   AccessModule.RASLINKLOGINGOV,
   AccessModule.PROFILECONFIRMATION,
   AccessModule.PUBLICATIONCONFIRMATION,
@@ -227,21 +239,51 @@ interface TableRow {
   bypassToggle: JSX.Element;
 }
 
-const AccessModuleTable = (props: { profile: Profile }) => {
+const AccessModuleTable = (props: {
+  oldProfile: Profile;
+  updatedProfile: Profile;
+}) => {
   const tableData: TableRow[] = accessModulesForTable.map((moduleName) => {
     const { adminPageTitle, adminBypassable } =
       getAccessModuleConfig(moduleName);
+    const status = getAccessModuleStatusByName(
+      props.updatedProfile,
+      moduleName
+    );
+    const bypassed = !!status?.bypassEpochMillis;
+    const previouslyBypassed = !!getAccessModuleStatusByName(
+      props.oldProfile,
+      moduleName
+    )?.bypassEpochMillis;
+    // temporary for development
+    const bypassToggleText =
+      (bypassed ? 'BYPASSED' : 'NOT-B') +
+      ' ' +
+      (bypassed !== previouslyBypassed ? 'CHANGED' : 'NOT-C');
+
+    const toggleBypass = () => {};
     return {
       moduleName: adminPageTitle,
-      bypassToggle: adminBypassable && <div>TODO</div>,
+      bypassToggle: adminBypassable && (
+        <Toggle
+          style={{ paddingBottom: 0, flexGrow: 0 }}
+          name={bypassToggleText}
+          checked={bypassed}
+          data-test-id={`${moduleName}-toggle`}
+          onToggle={() => toggleBypass()}
+        />
+      ),
     };
   });
 
   return (
-    <DataTable style={{ paddingTop: '1em' }} value={tableData}>
-      <Column field='moduleName' header='Access Module' />
-      <Column field='bypassToggle' header='Bypass' />
-    </DataTable>
+    <FlexColumn>
+      <div style={styles.tableHeader}>Access status</div>
+      <DataTable style={{ paddingTop: '1em' }} value={tableData}>
+        <Column field='moduleName' header='Access Module' />
+        <Column field='bypassToggle' header='Bypass' />
+      </DataTable>
+    </FlexColumn>
   );
 };
 
@@ -429,9 +471,11 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
           />
         </FlexRow>
         <FlexRow>
-          <AccessModuleTable profile={updatedProfile} />
+          <AccessModuleTable
+            oldProfile={oldProfile}
+            updatedProfile={updatedProfile}
+          />
         </FlexRow>
-        <AccessModuleTable profile={updatedProfile} />
         <FlexRow style={{ paddingTop: '1em' }}>
           <ErrorsTooltip errors={errors}>
             <Button
