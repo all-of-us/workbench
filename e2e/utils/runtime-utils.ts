@@ -29,7 +29,7 @@ async function isSecuritySuspended(page: Page): Promise<boolean> {
 
 export async function waitForSecuritySuspendedStatus(
   page: Page,
-  suspended: boolean,
+  suspended = true,
   timeOut = 25 * 60 * 1000
 ): Promise<void> {
   const startTime = Date.now();

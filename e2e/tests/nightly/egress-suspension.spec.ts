@@ -38,6 +38,6 @@ describe('egress suspension', () => {
     // error on reload once the user becomes suspended.
     await newPage.goto(page.url());
 
-    await waitForSecuritySuspendedStatus(newPage, true);
+    await waitForSecuritySuspendedStatus(newPage);
   });
 });
