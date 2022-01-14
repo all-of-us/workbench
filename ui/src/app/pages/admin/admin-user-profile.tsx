@@ -530,7 +530,10 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
           </ErrorsTooltip>
           <Button
             type='secondary'
-            onClick={() => setUpdatedProfile(oldProfile)}
+            onClick={() => {
+              setBypassChangeRequests([]);
+              setUpdatedProfile(oldProfile);
+            }}
           >
             Cancel
           </Button>
