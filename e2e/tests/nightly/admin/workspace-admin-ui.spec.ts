@@ -12,16 +12,18 @@ import { waitForDocumentTitle } from 'utils/waits-utils';
 import { Page } from 'puppeteer';
 import NotebookPreviewPage from 'app/page/notebook-preview-page';
 
+
 describe('Workspace Admin', () => {
   const workspaceName = 'e2eAdminWorkspace';
   const pyNotebookName = 'e2eAdminNotebook';
-  const noActiveRuntimeText = 'No active runtimes exist for this workspace.';
   let workspaceNamespace = '';
 
+  
   beforeEach(async () => {
     await signInWithAccessToken(page, config.ADMIN_TEST_USER);
-    await navigation.navMenu(page, NavLink.WORKSPACE_ADMIN);
+    //await navigation.navMenu(page, NavLink.WORKSPACE_ADMIN);
   });
+
 
   test('Verify the lock-Workspace feature and the Workspace Admin page UI', async () => {
     const workspacesPage = new WorkspacesPage(page);
@@ -51,7 +53,6 @@ describe('Workspace Admin', () => {
     );
     //verify that this newly created workspace has NO active runtime and also expect the RUNTIME DELETE button is falsy.
     expect(await workspaceAdminPage.getRuntimeDeleteButton().exists()).toBeFalsy();
-    expect(await workspaceAdminPage.getNoActiveRuntimeText()).toEqual(noActiveRuntimeText);
 
     //click on the LOCK WORKSPACE button
     const lockWorkspaceModal = await workspaceAdminPage.clickLockWorkspaceButton();
@@ -63,7 +64,9 @@ describe('Workspace Admin', () => {
     await workspaceAdminPage.waitForLoad();
   });
 
+
   test('Verify that admin is able to preview the Notebook', async () => {
+    await navigation.navMenu(page, NavLink.WORKSPACE_ADMIN);
     const workspaceAdminPage = new WorkspaceAdminPage(page);
     await workspaceAdminPage.waitForLoad();
     await workspaceAdminPage.getWorkspaceNamespaceInput().type(workspaceNamespace);
@@ -94,14 +97,8 @@ describe('Workspace Admin', () => {
     await workspaceAdminPage.waitForLoad();
   });
 
-  test('Verify that admin is able to delete runtime', async () => {
-    const workspaceAdminPage = new WorkspaceAdminPage(page);
-    await workspaceAdminPage.waitForLoad();
-    await workspaceAdminPage.getWorkspaceNamespaceInput().type(workspaceNamespace);
-    await workspaceAdminPage.clickLoadWorkspaceButton();
-    await workspaceAdminPage.waitForLoad();
-    expect(await workspaceAdminPage.getNoActiveRuntimeText()).toEqual(noActiveRuntimeText);
 
+  test('Verify that admin is able to delete runtime', async () => {
     await new WorkspacesPage(page).load();
     const workspaceCard = await WorkspaceCard.findCard(page, workspaceName);
     await workspaceCard.clickWorkspaceName(true);
@@ -112,6 +109,7 @@ describe('Workspace Admin', () => {
     await runtimePanel.createRuntime();
     await page.waitForTimeout(2000);
 
+    const workspaceAdminPage = new WorkspaceAdminPage(page);
     // navigate back to workspace admin page
     await navigation.navMenu(page, NavLink.WORKSPACE_ADMIN);
     await workspaceAdminPage.waitForLoad();
@@ -132,6 +130,7 @@ describe('Workspace Admin', () => {
 
     //verify the runtime status is deleting
     expect(await workspaceAdminPage.getRuntimeStatus()).toEqual('Deleting');
+
   });
 
   async function createDatasetNotebook(page: Page, pyNotebookName: string): Promise<NotebookPreviewPage> {
