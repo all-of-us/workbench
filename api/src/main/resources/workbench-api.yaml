@@ -4860,6 +4860,7 @@ definitions:
   AccessBypassRequest:
     type: object
     required:
+    - moduleName
     - isBypassed
     properties:
       moduleName:
