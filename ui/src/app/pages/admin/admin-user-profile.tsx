@@ -33,7 +33,6 @@ import { isBlank, reactStyles } from 'app/utils';
 import {
   AccessBypassRequest,
   AccessModule,
-  AccessModuleStatus,
   InstitutionalRole,
   Profile,
   PublicInstitutionDetails,
@@ -45,10 +44,7 @@ import {
   getEmailValidationErrorMessage,
 } from 'app/utils/institutions';
 import { EgressEventsTable } from './egress-events-table';
-import {
-  getAccessModuleConfig,
-  getAccessModuleStatusByName,
-} from 'app/utils/access-utils';
+import { getAccessModuleConfig } from 'app/utils/access-utils';
 import { Toggle } from 'app/components/inputs';
 
 const styles = reactStyles({

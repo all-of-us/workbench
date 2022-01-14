@@ -7,7 +7,7 @@ import { Link } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 import { Dropdown } from 'primereact/dropdown';
 
-import { cond, formatInitialCreditsUSD, reactStyles } from 'app/utils';
+import { formatInitialCreditsUSD, reactStyles } from 'app/utils';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import {
   AccessBypassRequest,
