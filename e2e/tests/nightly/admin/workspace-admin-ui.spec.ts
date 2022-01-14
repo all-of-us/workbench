@@ -12,18 +12,15 @@ import { waitForDocumentTitle } from 'utils/waits-utils';
 import { Page } from 'puppeteer';
 import NotebookPreviewPage from 'app/page/notebook-preview-page';
 
-
 describe('Workspace Admin', () => {
   const workspaceName = 'e2eAdminWorkspace';
   const pyNotebookName = 'e2eAdminNotebook';
   let workspaceNamespace = '';
 
-  
   beforeEach(async () => {
     await signInWithAccessToken(page, config.ADMIN_TEST_USER);
     //await navigation.navMenu(page, NavLink.WORKSPACE_ADMIN);
   });
-
 
   test('Verify the lock-Workspace feature and the Workspace Admin page UI', async () => {
     const workspacesPage = new WorkspacesPage(page);
@@ -64,7 +61,6 @@ describe('Workspace Admin', () => {
     await workspaceAdminPage.waitForLoad();
   });
 
-
   test('Verify that admin is able to preview the Notebook', async () => {
     await navigation.navMenu(page, NavLink.WORKSPACE_ADMIN);
     const workspaceAdminPage = new WorkspaceAdminPage(page);
@@ -96,7 +92,6 @@ describe('Workspace Admin', () => {
     await adminNotebookPreviewPage.clickNamespaceLink();
     await workspaceAdminPage.waitForLoad();
   });
-
 
   test('Verify that admin is able to delete runtime', async () => {
     await new WorkspacesPage(page).load();
@@ -130,7 +125,6 @@ describe('Workspace Admin', () => {
 
     //verify the runtime status is deleting
     expect(await workspaceAdminPage.getRuntimeStatus()).toEqual('Deleting');
-
   });
 
   async function createDatasetNotebook(page: Page, pyNotebookName: string): Promise<NotebookPreviewPage> {
