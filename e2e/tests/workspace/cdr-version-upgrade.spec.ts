@@ -39,6 +39,7 @@ describe('Workspace CDR Version Upgrade modal', () => {
     await upgradeButton.click();
 
     const duplicationPage = new WorkspaceEditPage(page);
+    await duplicationPage.waitForLoad();
     const upgradeMessage = await duplicationPage.getCdrVersionUpgradeMessage();
     expect(upgradeMessage).toContain(workspaceName);
     expect(upgradeMessage).toContain(`${config.OLD_CDR_VERSION_NAME} to ${config.DEFAULT_CDR_VERSION_NAME}.`);
