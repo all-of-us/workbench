@@ -98,13 +98,6 @@ export default class WorkspaceAdminPage extends AuthenticatedPage {
     return new Textarea(this.page, selector);
   }
 
-  // get the No Active Runtime Text to verify that no runtime is active
-  async getNoActiveRuntimeText(): Promise<string> {
-    const xpath = '//h2[contains(text(),"Runtimes")]/following-sibling::p';
-    const element = BaseElement.asBaseElement(this.page, await this.page.waitForXPath(xpath, { visible: true }));
-    return await element.getTextContent();
-  }
-
   // get the Runtime Delete button
   getRuntimeDeleteButton(): Button {
     return Button.findByName(this.page, { name: LinkText.Delete });
