@@ -9,7 +9,7 @@ import {
   adminGetProfile,
   commonStyles,
   ContactEmailTextInput,
-  enableSave,
+  isChanged,
   ErrorsTooltip,
   getInitalCreditsUsage,
   getPublicInstitutionDetails,
@@ -21,7 +21,6 @@ import {
   updateAccountProperties,
   UserAdminTableLink,
   UserAuditLink,
-  wouldUpdateBypassState,
 } from './admin-user-common';
 import { FadeBox } from 'app/components/containers';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
@@ -506,12 +505,8 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
             <Button
               type='primary'
               disabled={
-                !enableSave(
-                  oldProfile,
-                  updatedProfile,
-                  bypassChangeRequests,
-                  errors
-                )
+                !!errors ||
+                !isChanged(oldProfile, updatedProfile, bypassChangeRequests)
               }
               onClick={async () => {
                 spinnerProps.showSpinner();
@@ -530,8 +525,12 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
           </ErrorsTooltip>
           <Button
             type='secondary'
+            disabled={
+              !isChanged(oldProfile, updatedProfile, bypassChangeRequests)
+            }
             onClick={() => {
               setBypassChangeRequests([]);
+              setEmailValidationStatus(EmailValidationStatus.UNCHECKED);
               setUpdatedProfile(oldProfile);
             }}
           >

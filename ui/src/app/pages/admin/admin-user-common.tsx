@@ -162,20 +162,15 @@ export const wouldUpdateBypassState = (
   request: AccessBypassRequest
 ): boolean => isBypassed(oldProfile, request.moduleName) !== request.isBypassed;
 
-export const enableSave = (
+export const isChanged = (
   oldProfile: Profile,
   updatedProfile: Profile,
-  bypassChangeRequests: AccessBypassRequest[],
-  errors
-): boolean => {
-  return (
-    !errors &&
-    (!fp.isEqual(oldProfile, updatedProfile) ||
-      bypassChangeRequests.some((request) =>
-        wouldUpdateBypassState(oldProfile, request)
-      ))
+  bypassChangeRequests?: AccessBypassRequest[]
+): boolean =>
+  !fp.isEqual(oldProfile, updatedProfile) ||
+  bypassChangeRequests?.some((request) =>
+    wouldUpdateBypassState(oldProfile, request)
   );
-};
 
 export const updateAccountProperties = async (
   oldProfile: Profile,

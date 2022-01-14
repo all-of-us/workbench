@@ -36,9 +36,9 @@ import {
   getPublicInstitutionDetails,
   ContactEmailTextInput,
   updateAccountProperties,
-  enableSave,
   ErrorsTooltip,
   AccessModuleExpirations,
+  isChanged,
 } from './admin-user-common';
 
 const styles = reactStyles({
@@ -447,7 +447,7 @@ export const AdminUser = withRouter(
                   <Button
                     type='primary'
                     disabled={
-                      !enableSave(oldProfile, updatedProfile, [], errors)
+                      !!errors || !isChanged(oldProfile, updatedProfile)
                     }
                     onClick={async () => {
                       this.setState({ loading: true });
