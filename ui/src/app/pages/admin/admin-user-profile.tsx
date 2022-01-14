@@ -262,24 +262,24 @@ const AccessModuleTable = (props: {
       ? pendingBypassState.isBypassed
       : isBypassed(updatedProfile, moduleName);
 
-    // temporary for development
-    const bypassToggleText =
-      (isModuleBypassed ? 'BYPASSED' : 'NOT-B') +
-      ' ' +
-      (isModuleBypassed !== previouslyBypassed ? 'CHANGED' : 'NOT-C');
-
+    const highlightStyle =
+      isModuleBypassed !== previouslyBypassed
+        ? { background: colors.highlight }
+        : {};
     return {
       moduleName: adminPageTitle,
       bypassToggle: adminBypassable && (
-        <Toggle
-          style={{ paddingBottom: 0, flexGrow: 0 }}
-          name={bypassToggleText}
-          checked={isModuleBypassed}
-          data-test-id={`${moduleName}-toggle`}
-          onToggle={() =>
-            bypassUpdate({ moduleName, isBypassed: !isModuleBypassed })
-          }
-        />
+        <div style={highlightStyle}>
+          <Toggle
+            name=' '
+            style={{ paddingBottom: 0, flexGrow: 0 }}
+            checked={isModuleBypassed}
+            data-test-id={`${moduleName}-toggle`}
+            onToggle={() =>
+              bypassUpdate({ moduleName, isBypassed: !isModuleBypassed })
+            }
+          />
+        </div>
       ),
     };
   });
