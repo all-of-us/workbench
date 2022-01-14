@@ -5,22 +5,22 @@ import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
 
 import {
-  AccessModuleExpirations,
   adminGetProfile,
-  commonStyles,
-  ContactEmailTextInput,
-  isChanged,
-  ErrorsTooltip,
-  getInitalCreditsUsage,
-  getPublicInstitutionDetails,
-  InitialCreditsDropdown,
-  InstitutionalRoleDropdown,
-  InstitutionalRoleOtherTextInput,
-  InstitutionDropdown,
-  isBypassed,
-  updateAccountProperties,
   UserAdminTableLink,
   UserAuditLink,
+  commonStyles,
+  getInitalCreditsUsage,
+  InitialCreditsDropdown,
+  InstitutionDropdown,
+  InstitutionalRoleDropdown,
+  InstitutionalRoleOtherTextInput,
+  getPublicInstitutionDetails,
+  ContactEmailTextInput,
+  updateAccountProperties,
+  ErrorsTooltip,
+  AccessModuleExpirations,
+  isBypassed,
+  isChanged,
 } from './admin-user-common';
 import { FadeBox } from 'app/components/containers';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
@@ -266,6 +266,7 @@ const AccessModuleTable = (props: {
       moduleName: adminPageTitle,
       bypassToggle: adminBypassable && (
         <div style={highlightStyle}>
+          // TODO pop out toggle into subcomponent?
           <Toggle
             name=' '
             style={{ paddingBottom: 0, flexGrow: 0 }}
