@@ -446,7 +446,9 @@ export const AdminUser = withRouter(
                 <ErrorsTooltip errors={errors}>
                   <Button
                     type='primary'
-                    disabled={!enableSave(oldProfile, updatedProfile, errors)}
+                    disabled={
+                      !enableSave(oldProfile, updatedProfile, [], errors)
+                    }
                     onClick={async () => {
                       this.setState({ loading: true });
                       const response = await updateAccountProperties(

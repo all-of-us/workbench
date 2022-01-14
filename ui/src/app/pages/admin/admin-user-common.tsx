@@ -149,38 +149,43 @@ export const getUpdatedProfileValue = (
   }
 };
 
-export const getBypassChangeRequests = (
+export const isBypassed = (
+  profile: Profile,
+  moduleName: AccessModule
+): boolean =>
+  !!getAccessModuleStatusByName(profile, moduleName)?.bypassEpochMillis;
+
+// would this AccessBypassRequest actually change the profile state?
+// allows un-toggling of bypass for a module
+export const wouldUpdateBypassState = (
   oldProfile: Profile,
-  updatedProfile: Profile
-): AccessBypassRequest[] => {
-  return updatedProfile.accessModules.modules
-    .filter((updatedModuleStatus) => {
-      const updatedModuleBypassed = !!updatedModuleStatus.bypassEpochMillis;
-      const oldModuleBypassed = !!getAccessModuleStatusByName(
-        oldProfile,
-        updatedModuleStatus.moduleName
-      )?.bypassEpochMillis;
-      return updatedModuleBypassed !== oldModuleBypassed;
-    })
-    .map((updatedModuleStatus) => ({
-      moduleName: updatedModuleStatus.moduleName,
-      isBypassed: !!updatedModuleStatus.bypassEpochMillis,
-    }));
-};
+  request: AccessBypassRequest
+): boolean => isBypassed(oldProfile, request.moduleName) !== request.isBypassed;
 
 export const enableSave = (
   oldProfile: Profile,
   updatedProfile: Profile,
+  bypassChangeRequests: AccessBypassRequest[],
   errors
-): boolean => !errors && !fp.isEqual(oldProfile, updatedProfile);
+): boolean => {
+  return (
+    !errors &&
+    (!fp.isEqual(oldProfile, updatedProfile) ||
+      bypassChangeRequests.some((request) =>
+        wouldUpdateBypassState(oldProfile, request)
+      ))
+  );
+};
 
 export const updateAccountProperties = async (
   oldProfile: Profile,
-  updatedProfile: Profile
+  updatedProfile: Profile,
+  accessBypassRequests?: AccessBypassRequest[]
 ): Promise<Profile> => {
   const { username } = updatedProfile;
   const request: AccountPropertyUpdate = {
     username,
+    accessBypassRequests,
     freeCreditsLimit: getUpdatedProfileValue(oldProfile, updatedProfile, [
       'freeTierDollarQuota',
     ]),
@@ -190,7 +195,6 @@ export const updateAccountProperties = async (
     affiliation: getUpdatedProfileValue(oldProfile, updatedProfile, [
       'verifiedInstitutionalAffiliation',
     ]),
-    accessBypassRequests: getBypassChangeRequests(oldProfile, updatedProfile),
   };
 
   return userAdminApi().updateAccountProperties(request);

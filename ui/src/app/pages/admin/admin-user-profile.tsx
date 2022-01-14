@@ -17,9 +17,11 @@ import {
   InstitutionalRoleDropdown,
   InstitutionalRoleOtherTextInput,
   InstitutionDropdown,
+  isBypassed,
   updateAccountProperties,
   UserAdminTableLink,
   UserAuditLink,
+  wouldUpdateBypassState,
 } from './admin-user-common';
 import { FadeBox } from 'app/components/containers';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
@@ -244,24 +246,28 @@ interface TableRow {
 const AccessModuleTable = (props: {
   oldProfile: Profile;
   updatedProfile: Profile;
+  pendingBypassRequests: AccessBypassRequest[];
   bypassUpdate: (accessBypassRequest: AccessBypassRequest) => void;
 }) => {
   const tableData: TableRow[] = accessModulesForTable.map((moduleName) => {
-    const { oldProfile, updatedProfile, bypassUpdate } = props;
+    const { oldProfile, updatedProfile, pendingBypassRequests, bypassUpdate } =
+      props;
     const { adminPageTitle, adminBypassable } =
       getAccessModuleConfig(moduleName);
-    const status = getAccessModuleStatusByName(updatedProfile, moduleName);
-    const isBypassed = !!status?.bypassEpochMillis;
-    const previouslyBypassed = !!getAccessModuleStatusByName(
-      oldProfile,
-      moduleName
-    )?.bypassEpochMillis;
+    const previouslyBypassed = isBypassed(oldProfile, moduleName);
+
+    const pendingBypassState = pendingBypassRequests.find(
+      (r) => r.moduleName === moduleName
+    );
+    const isModuleBypassed = pendingBypassState
+      ? pendingBypassState.isBypassed
+      : isBypassed(updatedProfile, moduleName);
 
     // temporary for development
     const bypassToggleText =
-      (isBypassed ? 'BYPASSED' : 'NOT-B') +
+      (isModuleBypassed ? 'BYPASSED' : 'NOT-B') +
       ' ' +
-      (isBypassed !== previouslyBypassed ? 'CHANGED' : 'NOT-C');
+      (isModuleBypassed !== previouslyBypassed ? 'CHANGED' : 'NOT-C');
 
     return {
       moduleName: adminPageTitle,
@@ -269,9 +275,11 @@ const AccessModuleTable = (props: {
         <Toggle
           style={{ paddingBottom: 0, flexGrow: 0 }}
           name={bypassToggleText}
-          checked={isBypassed}
+          checked={isModuleBypassed}
           data-test-id={`${moduleName}-toggle`}
-          onToggle={() => bypassUpdate({ moduleName, isBypassed: !isBypassed })}
+          onToggle={() =>
+            bypassUpdate({ moduleName, isBypassed: !isModuleBypassed })
+          }
         />
       ),
     };
@@ -295,6 +303,9 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
   const { usernameWithoutGsuiteDomain } = useParams<MatchParams>();
   const [oldProfile, setOldProfile] = useState<Profile>(null);
   const [updatedProfile, setUpdatedProfile] = useState<Profile>(null);
+  const [bypassChangeRequests, setBypassChangeRequests] = useState<
+    AccessBypassRequest[]
+  >([]);
   const [institutions, setInstitutions] = useState<PublicInstitutionDetails[]>(
     []
   );
@@ -403,30 +414,13 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
     updateProfile({ verifiedInstitutionalAffiliation });
   };
 
-  const updateModuleStatus = (newUpdate: Partial<AccessModuleStatus>) => {
-    const moduleUpdate: AccessModuleStatus = {
-      ...getAccessModuleStatusByName(updatedProfile, newUpdate.moduleName),
-      ...newUpdate,
-    };
-    const unchangedModules = updatedProfile.accessModules.modules.filter(
-      (m) => m.moduleName !== newUpdate.moduleName
-    );
-    const accessModules = {
-      anyModuleHasExpired: updatedProfile.accessModules.anyModuleHasExpired,
-      modules: [...unchangedModules, moduleUpdate],
-    };
-
-    updateProfile({ accessModules });
-  };
-
-  // TODO actually it would be better for Save-button behavior to also record bypassrequests directly
   const updateModuleBypassStatus = (
     accessBypassRequest: AccessBypassRequest
   ) => {
-    updateModuleStatus({
-      moduleName: accessBypassRequest.moduleName,
-      bypassEpochMillis: accessBypassRequest.isBypassed ? Date.now() : null,
-    });
+    const otherModuleRequests = bypassChangeRequests.filter(
+      (r) => r.moduleName !== accessBypassRequest.moduleName
+    );
+    setBypassChangeRequests([...otherModuleRequests, accessBypassRequest]);
   };
 
   const errors = validate(
@@ -501,6 +495,7 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
           <AccessModuleTable
             oldProfile={oldProfile}
             updatedProfile={updatedProfile}
+            pendingBypassRequests={bypassChangeRequests}
             bypassUpdate={(accessBypassRequest) =>
               updateModuleBypassStatus(accessBypassRequest)
             }
@@ -510,12 +505,20 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
           <ErrorsTooltip errors={errors}>
             <Button
               type='primary'
-              disabled={!enableSave(oldProfile, updatedProfile, errors)}
+              disabled={
+                !enableSave(
+                  oldProfile,
+                  updatedProfile,
+                  bypassChangeRequests,
+                  errors
+                )
+              }
               onClick={async () => {
                 spinnerProps.showSpinner();
                 const response = await updateAccountProperties(
                   oldProfile,
-                  updatedProfile
+                  updatedProfile,
+                  bypassChangeRequests
                 );
                 setOldProfile(response);
                 setUpdatedProfile(response);
