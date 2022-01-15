@@ -30,6 +30,12 @@ import org.pmiops.workbench.model.WorkspaceActiveStatus;
 @Entity
 @Table(name = "workspace")
 public class DbWorkspace {
+  /**
+   * Deprecated database migration field. The column is preserved for historical reference, but
+   * forced to 2 (NEW) for all workspaces going forward.
+   */
+  public static final short BILLING_MIGRATION_NEW_STATUS = 2;
+
   private String firecloudUuid;
 
   public static class FirecloudWorkspaceId {
@@ -86,8 +92,6 @@ public class DbWorkspace {
   private Set<DbConceptSet> conceptSets = new HashSet<>();
   private Set<DbDataset> dataSets = new HashSet<>();
   private Short activeStatus;
-  private Short billingMigrationStatus =
-      DbStorageEnums.billingMigrationStatusToStorage(BillingMigrationStatus.OLD);
   private boolean published;
 
   private boolean diseaseFocusedResearch;
@@ -380,6 +384,13 @@ public class DbWorkspace {
     return this;
   }
 
+  @Column(name = "billing_migration_status")
+  private short getBillingMigrationStatus() {
+    return BILLING_MIGRATION_NEW_STATUS;
+  }
+
+  private void setBillingMigrationStatus(Short status) {}
+
   @Column(name = "google_project")
   public String getGoogleProject() {
     return googleProject;
@@ -669,25 +680,6 @@ public class DbWorkspace {
   @Transient
   public boolean isActive() {
     return WorkspaceActiveStatus.ACTIVE.equals(getWorkspaceActiveStatusEnum());
-  }
-
-  @Transient
-  public BillingMigrationStatus getBillingMigrationStatusEnum() {
-    return DbStorageEnums.billingMigrationStatusFromStorage(billingMigrationStatus);
-  }
-
-  public DbWorkspace setBillingMigrationStatusEnum(BillingMigrationStatus status) {
-    return setBillingMigrationStatus(DbStorageEnums.billingMigrationStatusToStorage(status));
-  }
-
-  @Column(name = "billing_migration_status")
-  private short getBillingMigrationStatus() {
-    return this.billingMigrationStatus;
-  }
-
-  private DbWorkspace setBillingMigrationStatus(short s) {
-    this.billingMigrationStatus = s;
-    return this;
   }
 
   @Column(name = "billing_status")

@@ -17,7 +17,6 @@ import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.db.model.DbWorkspace.BillingMigrationStatus;
 import org.pmiops.workbench.exceptions.ExceptionUtils;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
@@ -215,12 +214,9 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
       customEnvironmentVariables.put(BIGQUERY_STORAGE_API_ENABLED_ENV_KEY, "true");
     }
 
-    // i.e. is NEW or MIGRATED
-    if (!workspace.getBillingMigrationStatusEnum().equals(BillingMigrationStatus.OLD)) {
-      customEnvironmentVariables.put(
-          WORKSPACE_CDR_ENV_KEY,
-          cdrVersion.getBigqueryProject() + "." + cdrVersion.getBigqueryDataset());
-    }
+    customEnvironmentVariables.put(
+        WORKSPACE_CDR_ENV_KEY,
+        cdrVersion.getBigqueryProject() + "." + cdrVersion.getBigqueryDataset());
 
     if (cdrVersion.getAllSamplesWgsDataBucket() != null) {
       customEnvironmentVariables.put(

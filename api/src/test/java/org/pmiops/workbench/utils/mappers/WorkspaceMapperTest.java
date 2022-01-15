@@ -23,7 +23,6 @@ import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.db.model.DbWorkspace.BillingMigrationStatus;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.model.BillingStatus;
@@ -118,7 +117,6 @@ public class WorkspaceMapperTest {
     sourceDbWorkspace.setConceptSets(Collections.emptySet());
     sourceDbWorkspace.setDataSets(Collections.emptySet());
     sourceDbWorkspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
-    sourceDbWorkspace.setBillingMigrationStatusEnum(BillingMigrationStatus.MIGRATED);
     sourceDbWorkspace.setPublished(false);
     sourceDbWorkspace.setDiseaseFocusedResearch(true);
     sourceDbWorkspace.setDiseaseOfFocus("leukemia");
