@@ -421,10 +421,13 @@ export const SearchGroupItem = withCurrentWorkspace()(
       const {
         item: { searchParameters, type },
       } = this.props;
-      return type === Domain.ARRAYDATA.toString() ||
+      return (
+        type === Domain.ARRAYDATA.toString() ||
         type === Domain.FITBIT.toString() ||
         type === Domain.WHOLEGENOMEVARIANT.toString() ||
-        (searchParameters[0] && searchParameters[0].type === CriteriaType.DECEASED.toString());
+        (searchParameters[0] &&
+          searchParameters[0].type === CriteriaType.DECEASED.toString())
+      );
     }
 
     render() {
