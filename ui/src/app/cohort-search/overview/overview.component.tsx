@@ -195,6 +195,8 @@ export const ListOverview = fp.flow(
     componentDidMount(): void {
       if (!this.definitionErrors) {
         this.getTotalCount();
+        // Prevents multiple count calls on initial cohort load
+        setTimeout(() => this.setState({ initializing: false}), 100);
       }
     }
 
@@ -225,7 +227,6 @@ export const ListOverview = fp.flow(
           .then((response) => {
             this.setState({
               chartData: response.items,
-              initializing: false,
               loading: false,
               total: response.items.reduce((sum, data) => sum + data.count, 0),
             });
@@ -237,7 +238,7 @@ export const ListOverview = fp.flow(
             }
           });
       } else {
-        this.setState({ chartData: [], total: 0, initializing: false });
+        this.setState({ chartData: [], total: 0 });
       }
     }
 
