@@ -3,6 +3,7 @@ package org.pmiops.workbench.cdr.dao;
 import static com.google.common.truth.Truth.assertThat;
 
 import com.google.common.collect.ImmutableList;
+import java.util.Arrays;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -135,6 +136,7 @@ public class CBCriteriaDaoTest {
                 .addType(CriteriaType.RACE.toString())
                 .addName("Asian")
                 .addStandard(true)
+                .addFullText("[PERSON_rank1]")
                 .build());
     raceWhite =
         cbCriteriaDao.save(
@@ -143,6 +145,7 @@ public class CBCriteriaDaoTest {
                 .addType(CriteriaType.RACE.toString())
                 .addName("White")
                 .addStandard(true)
+                .addFullText("[PERSON_rank1]")
                 .build());
     gender =
         cbCriteriaDao.save(
@@ -250,11 +253,11 @@ public class CBCriteriaDaoTest {
   public void findCriteriaByDomainIdAndTypeAndParentIdOrderByIdAsc() {
     List<DbCriteria> actualIcd9s =
         cbCriteriaDao.findCriteriaByDomainIdAndTypeAndParentIdOrderByIdAsc(
-            Domain.CONDITION.toString(), CriteriaType.ICD9CM.toString(), false, 0L);
+            Arrays.asList(Domain.CONDITION.toString()), CriteriaType.ICD9CM.toString(), false, 0L);
     assertThat(actualIcd9s).containsExactly(sourceCriteria, icd9Criteria);
     List<DbCriteria> actualIcd10s =
         cbCriteriaDao.findCriteriaByDomainIdAndTypeAndParentIdOrderByIdAsc(
-            Domain.CONDITION.toString(), CriteriaType.ICD10CM.toString(), false, 0L);
+            Arrays.asList(Domain.CONDITION.toString()), CriteriaType.ICD10CM.toString(), false, 0L);
     assertThat(actualIcd10s).containsExactly(icd10Criteria);
   }
 

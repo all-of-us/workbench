@@ -852,7 +852,8 @@ public class CohortBuilderControllerTest {
             .addStandard(true)
             .addCount(1L)
             .addConceptId("1")
-            .addFullText("[CONDITION_rank1]")
+            .addFullText(
+                "[condition_rank1][procedure_rank1][observation_rank1][measurement_rank1][drug_rank1]")
             .build();
     cbCriteriaDao.save(criteria);
     assertThat(

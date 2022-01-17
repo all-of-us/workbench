@@ -89,21 +89,11 @@ public class ConceptBigQueryService {
         conceptIdsParam, QueryParameterValue.array(conceptIds.toArray(new Long[0]), Long.class));
     paramMap.put(standardParam, QueryParameterValue.int64(standardOrSource));
     if (CHILD_LOOKUP_DOMAINS.contains(domain)) {
-      String domainParam = (standardOrSource == 1 ? "standardDomain" : "sourceDomain");
-      String rankParam = (standardOrSource == 1 ? "standardRank" : "sourceRank");
       sqlBuilder.append(
           String.format(
               Domain.DRUG.equals(domain) ? DRUG_CHILD_LOOKUP_SQL : CHILD_LOOKUP_SQL,
-              "@" + domainParam,
-              "@" + standardParam,
               "@" + conceptIdsParam,
-              "@" + rankParam,
-              "@" + domainParam,
               "@" + standardParam));
-      paramMap.put(
-          rankParam,
-          QueryParameterValue.string("%[" + domain.toString().toLowerCase() + "_rank1]%"));
-      paramMap.put(domainParam, QueryParameterValue.string(domain.toString()));
     } else {
       sqlBuilder.append(" unnest(@" + conceptIdsParam + ")");
     }

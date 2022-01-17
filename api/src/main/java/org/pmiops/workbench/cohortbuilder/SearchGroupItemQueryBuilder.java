@@ -84,20 +84,15 @@ public final class SearchGroupItemQueryBuilder {
   private static final String CONCEPT_ID_UNNEST_SQL = "concept_id IN unnest(%s)";
   private static final String CONCEPT_ID_IN_SQL = "concept_id IN";
   private static final String STANDARD_OR_SOURCE_SQL =
-      STANDARD_SQL + AND + CONCEPT_ID_UNNEST_SQL + "\n";
+      CONCEPT_ID_UNNEST_SQL + AND + STANDARD_SQL + "\n";
   public static final String CHILD_LOOKUP_SQL =
       " (SELECT DISTINCT c.concept_id\n"
           + "FROM `${projectId}.${dataSetId}.cb_criteria` c\n"
           + "JOIN (select cast(cr.id as string) as id\n"
           + "FROM `${projectId}.${dataSetId}.cb_criteria` cr\n"
-          + "WHERE domain_id = %s\n"
-          + "AND is_standard = %s\n"
-          + "AND concept_id IN unnest(%s)\n"
-          + "AND is_selectable = 1\n"
-          + "AND full_text LIKE %s) a\n"
+          + "WHERE concept_id IN unnest(%s)) a\n"
           + "ON (c.path LIKE CONCAT('%%.', a.id, '.%%') OR c.path LIKE CONCAT('%%.', a.id) OR c.path LIKE CONCAT(a.id, '.%%') OR c.path = a.id)\n"
-          + "WHERE domain_id = %s\n"
-          + "AND is_standard = %s\n"
+          + "WHERE is_standard = %s\n"
           + "AND is_selectable = 1)";
   public static final String DRUG_CHILD_LOOKUP_SQL =
       " (SELECT DISTINCT ca.descendant_id\n"
@@ -106,19 +101,14 @@ public final class SearchGroupItemQueryBuilder {
           + "FROM `${projectId}.${dataSetId}.cb_criteria` c\n"
           + "JOIN (select cast(cr.id as string) as id\n"
           + "FROM `${projectId}.${dataSetId}.cb_criteria` cr\n"
-          + "WHERE domain_id = %s\n"
-          + "AND is_standard = %s\n"
-          + "AND concept_id IN unnest(%s)\n"
-          + "AND is_selectable = 1\n"
-          + "AND full_text LIKE %s) a\n"
+          + "WHERE concept_id IN unnest(%s)) a\n"
           + "ON (c.path LIKE CONCAT('%%.', a.id, '.%%') OR c.path LIKE CONCAT('%%.', a.id) OR c.path LIKE CONCAT(a.id, '.%%') OR c.path = a.id)\n"
-          + "WHERE domain_id = %s\n"
-          + "AND is_standard = %s\n"
+          + "WHERE is_standard = %s\n"
           + "AND is_selectable = 1) b ON (ca.ancestor_id = b.concept_id))";
   private static final String PARENT_STANDARD_OR_SOURCE_SQL =
-      STANDARD_SQL + AND + CONCEPT_ID_IN_SQL + CHILD_LOOKUP_SQL;
+      CONCEPT_ID_IN_SQL + CHILD_LOOKUP_SQL + AND + STANDARD_SQL + "\n";
   private static final String DRUG_SQL =
-      STANDARD_SQL + AND + CONCEPT_ID_IN_SQL + DRUG_CHILD_LOOKUP_SQL;
+      CONCEPT_ID_IN_SQL + DRUG_CHILD_LOOKUP_SQL + AND + STANDARD_SQL;
   private static final String VALUE_AS_NUMBER = " value_as_number %s %s";
   private static final String VALUE_AS_NUMBER_IS_NOT_NULL = " AND value_as_number IS NOT NULL";
   private static final String VALUE_AS_CONCEPT_ID = " value_as_concept_id %s unnest(%s)";
@@ -490,7 +480,7 @@ public final class SearchGroupItemQueryBuilder {
                     : conceptIds.toArray(new Long[0]),
                 Long.class));
     StringBuilder sqlBuilder =
-        new StringBuilder(String.format(STANDARD_OR_SOURCE_SQL, standardParam, conceptIdParam));
+        new StringBuilder(String.format(STANDARD_OR_SOURCE_SQL, conceptIdParam, standardParam));
     if (!nums.isEmpty()) {
       if (!conceptIds.isEmpty()) {
         // attribute.conceptId is unique to blood pressure attributes
@@ -668,12 +658,6 @@ public final class SearchGroupItemQueryBuilder {
               .collect(Collectors.toList());
 
       if (!parents.isEmpty() || Domain.DRUG.toString().equals(domain)) {
-        String domainParam =
-            QueryParameterUtil.addQueryParameterValue(
-                queryParams, QueryParameterValue.string(domain));
-        String rankParam =
-            QueryParameterUtil.addQueryParameterValue(
-                queryParams, QueryParameterValue.string("%[" + domain.toLowerCase() + "_rank1]%"));
         String conceptIdsParam =
             QueryParameterUtil.addQueryParameterValue(
                 queryParams,
@@ -682,12 +666,8 @@ public final class SearchGroupItemQueryBuilder {
         queryParts.add(
             String.format(
                 Domain.DRUG.toString().equals(domain) ? DRUG_SQL : PARENT_STANDARD_OR_SOURCE_SQL,
-                standardOrSourceParam,
-                domainParam,
-                standardOrSourceParam,
                 conceptIdsParam,
-                rankParam,
-                domainParam,
+                standardOrSourceParam,
                 standardOrSourceParam));
       } else {
         // Children only
@@ -696,7 +676,7 @@ public final class SearchGroupItemQueryBuilder {
                 queryParams,
                 QueryParameterValue.array(conceptIds.toArray(new Long[0]), Long.class));
         queryParts.add(
-            String.format(STANDARD_OR_SOURCE_SQL, standardOrSourceParam, conceptIdsParam));
+            String.format(STANDARD_OR_SOURCE_SQL, conceptIdsParam, standardOrSourceParam));
       }
     }
   }

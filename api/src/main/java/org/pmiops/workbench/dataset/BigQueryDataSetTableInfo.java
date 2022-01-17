@@ -9,87 +9,24 @@ public enum BigQueryDataSetTableInfo {
   CONDITION(
       Domain.CONDITION,
       "ds_condition_occurrence",
-      " condition_concept_id IN "
-          + String.format(
-              CHILD_LOOKUP_SQL,
-              Constants.CONDITION,
-              1,
-              "@standardConceptIds",
-              Constants.CONDITION_RANK,
-              Constants.CONDITION,
-              1),
-      " condition_source_concept_id IN "
-          + String.format(
-              CHILD_LOOKUP_SQL,
-              Constants.CONDITION,
-              0,
-              "@sourceConceptIds",
-              Constants.CONDITION_RANK,
-              Constants.CONDITION,
-              0)),
+      " condition_concept_id IN " + String.format(CHILD_LOOKUP_SQL, "@standardConceptIds", 1),
+      " condition_source_concept_id IN " + String.format(CHILD_LOOKUP_SQL, "@sourceConceptIds", 0)),
   PROCEDURE(
       Domain.PROCEDURE,
       "ds_procedure_occurrence",
-      " procedure_concept_id IN "
-          + String.format(
-              CHILD_LOOKUP_SQL,
-              Constants.PROCEDURE,
-              1,
-              "@standardConceptIds",
-              Constants.PROCEDURE_RANK,
-              Constants.PROCEDURE,
-              1),
-      " procedure_source_concept_id IN "
-          + String.format(
-              CHILD_LOOKUP_SQL,
-              Constants.PROCEDURE,
-              0,
-              "@sourceConceptIds",
-              Constants.PROCEDURE_RANK,
-              Constants.PROCEDURE,
-              0)),
+      " procedure_concept_id IN " + String.format(CHILD_LOOKUP_SQL, "@standardConceptIds", 1),
+      " procedure_source_concept_id IN " + String.format(CHILD_LOOKUP_SQL, "@sourceConceptIds", 0)),
   DRUG(
       Domain.DRUG,
       "ds_drug_exposure",
-      " drug_concept_id IN "
-          + String.format(
-              DRUG_CHILD_LOOKUP_SQL,
-              Constants.DRUG,
-              1,
-              "@standardConceptIds",
-              Constants.DRUG_RANK,
-              Constants.DRUG,
-              1),
-      " drug_source_concept_id IN "
-          + String.format(
-              DRUG_CHILD_LOOKUP_SQL,
-              Constants.DRUG,
-              0,
-              "@sourceConceptIds",
-              Constants.DRUG_RANK,
-              Constants.DRUG,
-              0)),
+      " drug_concept_id IN " + String.format(DRUG_CHILD_LOOKUP_SQL, "@standardConceptIds", 1),
+      " drug_source_concept_id in " + String.format(DRUG_CHILD_LOOKUP_SQL, "@sourceConceptIds", 0)),
   MEASUREMENT(
       Domain.MEASUREMENT,
       "ds_measurement",
-      " measurement_concept_id IN "
-          + String.format(
-              CHILD_LOOKUP_SQL,
-              Constants.MEASUREMENT,
-              1,
-              "@standardConceptIds",
-              Constants.MEASUREMENT_RANK,
-              Constants.MEASUREMENT,
-              1),
+      " measurement_concept_id IN " + String.format(CHILD_LOOKUP_SQL, "@standardConceptIds", 1),
       " measurement_source_concept_id IN "
-          + String.format(
-              CHILD_LOOKUP_SQL,
-              Constants.MEASUREMENT,
-              0,
-              "@sourceConceptIds",
-              Constants.MEASUREMENT_RANK,
-              Constants.MEASUREMENT,
-              0)),
+          + String.format(CHILD_LOOKUP_SQL, "@sourceConceptIds", 0)),
   PHYSICAL_MEASUREMENT_CSS(
       Domain.PHYSICAL_MEASUREMENT_CSS,
       "ds_measurement",

@@ -12,6 +12,7 @@ import { conceptSetsApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {
   reactStyles,
+  withCurrentCohortSearchContext,
   withCurrentConcept,
   withCurrentConceptSet,
   withCurrentWorkspace,
@@ -101,16 +102,14 @@ interface Props extends NavigationProps {
   workspace: WorkspaceData;
   concept: Array<any>;
   conceptSet: ConceptSet;
+  cohortContext: any;
 }
 
-interface State {
-  conceptAddModalOpen: boolean;
-  updating: boolean;
-}
 export const ConceptListPage = fp.flow(
-  withCurrentWorkspace(),
+  withCurrentCohortSearchContext(),
   withCurrentConcept(),
   withCurrentConceptSet(),
+  withCurrentWorkspace(),
   withNavigation
 )(
   class extends React.Component<Props, State> {
@@ -208,13 +207,12 @@ export const ConceptListPage = fp.flow(
     }
 
     getDomainCount() {
-      const { domainId, type } = this.props.concept[0];
-      const domain: Domain =
-        domainId === 'Measurement' && type === 'PPI'
-          ? Domain.PHYSICALMEASUREMENT
-          : (domainId as Domain);
+      const { domain, type } = this.props.cohortContext;
       const domainCount: DomainCount = {
-        domain: domain,
+        domain:
+          domain === 'Measurement' && type === 'PPI'
+            ? Domain.PHYSICALMEASUREMENT
+            : (domain as Domain),
         name: domainToTitle(domain),
         conceptCount: this.props.concept.length,
       };
@@ -321,3 +319,7 @@ export const ConceptListPage = fp.flow(
     }
   }
 );
+interface State {
+  conceptAddModalOpen: boolean;
+  updating: boolean;
+}
