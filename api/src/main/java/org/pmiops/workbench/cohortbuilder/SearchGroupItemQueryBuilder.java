@@ -106,7 +106,7 @@ public final class SearchGroupItemQueryBuilder {
           + "WHERE is_standard = %s\n"
           + "AND is_selectable = 1) b ON (ca.ancestor_id = b.concept_id))";
   private static final String PARENT_STANDARD_OR_SOURCE_SQL =
-      CONCEPT_ID_IN_SQL + CHILD_LOOKUP_SQL + AND + STANDARD_SQL;
+      CONCEPT_ID_IN_SQL + CHILD_LOOKUP_SQL + AND + STANDARD_SQL + "\n";
   private static final String DRUG_SQL =
       CONCEPT_ID_IN_SQL + DRUG_CHILD_LOOKUP_SQL + AND + STANDARD_SQL;
   private static final String VALUE_AS_NUMBER = " value_as_number %s %s";
