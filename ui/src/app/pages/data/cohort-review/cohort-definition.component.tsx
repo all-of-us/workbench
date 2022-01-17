@@ -80,37 +80,59 @@ export class CohortDefinition extends React.Component<
   }
 
   mapGroup(group: any) {
-    return group.items.map((item) => {
-      return this.mapParams(item.type, item.searchParameters, item.modifiers);
-    });
-  }
-
-  mapParams(domain: string, params: Array<any>, mod) {
-    const groupedData =
-      domain === Domain[Domain.DRUG]
-        ? this.getGroupedData(params, 'group')
-        : this.getGroupedData(params, 'domain');
-    if (mod.length) {
-      return this.getModifierFormattedData(groupedData, params, mod, domain);
-    } else {
-      return this.getOtherTreeFormattedData(groupedData, params, domain);
-    }
-  }
-
-  getModifierFormattedData(groupedData, params, mod, domain) {
-    let typeMatched;
-    const modArray = params.map((eachParam) => {
-      if (eachParam.domain === Domain.DRUG) {
-        typeMatched = groupedData.find(
-          (matched) => matched.group === eachParam.group.toString()
+    const mappedItems = [];
+    group.items.forEach(({ modifiers, searchParameters, type }) => {
+      const domain = type as Domain;
+      if (
+        (domain === Domain.CONDITION || domain === Domain.PROCEDURE) &&
+        searchParameters.some((param) => param.domain !== domain)
+      ) {
+        const multipleDomains = searchParameters.reduce((acc, param) => {
+          const index = acc.findIndex(
+            (list) => list[0].domain === param.domain
+          );
+          if (index > -1) {
+            acc[index].push(param);
+          } else {
+            acc.push([param]);
+          }
+          return acc;
+        }, []);
+        multipleDomains.forEach((params) =>
+          mappedItems.push(this.mapParams(params, modifiers))
         );
       } else {
-        typeMatched = groupedData.find(
-          (matched) => matched.group === eachParam.domain
-        );
+        mappedItems.push(this.mapParams(searchParameters, modifiers));
       }
-      let name;
-      name = mod.reduce((acc, m) => {
+    });
+    return mappedItems;
+  }
+
+  mapParams(params: Array<any>, mod) {
+    const groupedData =
+      params[0].domain === Domain[Domain.DRUG]
+        ? this.getGroupedData(params, 'group')
+        : this.getGroupedData(params, 'domain');
+    let paramList;
+    if (mod.length) {
+      paramList = this.getModifierFormattedData(groupedData, params, mod);
+    } else {
+      paramList = this.getOtherTreeFormattedData(groupedData, params);
+    }
+    return paramList;
+  }
+
+  getModifierFormattedData(groupedData, params, modifiers) {
+    let typeMatched;
+    const modArray = params.map(({ domain, group, type }) => {
+      if (domain === Domain.DRUG) {
+        typeMatched = groupedData.find(
+          (matched) => matched.group === group.toString()
+        );
+      } else {
+        typeMatched = groupedData.find((matched) => matched.group === domain);
+      }
+      const modifierName = modifiers.reduce((acc, m) => {
         const concatOperand = m.operands.reduce((final, o) => {
           return final !== '' ? `${final} & ${o}` : `${final} ${o}`;
         }, '');
@@ -123,53 +145,59 @@ export class CohortDefinition extends React.Component<
             )}
             ${concatOperand}`;
       }, '');
-      return {
-        items: `${domainToTitle(domain)} | ${eachParam.domain} |
-          ${typeMatched.customString} | ${name}`,
-        domain: eachParam.domain,
-      };
+      return domain === Domain.CONDITION || domain === Domain.PROCEDURE
+        ? {
+            items: `${domainToTitle(domain)} | ${type} | ${
+              typeMatched.customString
+            } | ${modifierName}`,
+            domain,
+          }
+        : {
+            items: `${domainToTitle(domain)} | ${
+              typeMatched.customString
+            } | ${modifierName}`,
+            domain,
+          };
     });
     return this.removeDuplicates(modArray);
   }
 
-  getOtherTreeFormattedData(groupedData, params, domain) {
+  getOtherTreeFormattedData(groupedData, params) {
     let typeMatched;
-    const noModArray = params.map((param) => {
-      if (param.domain === Domain.DRUG) {
+    const noModArray = params.map(({ domain, group, name, type }) => {
+      if (domain === Domain.DRUG) {
         typeMatched = groupedData.find(
-          (matched) => matched.group === param.group.toString()
+          (matched) => matched.group === group.toString()
         );
       } else {
-        typeMatched = groupedData.find(
-          (matched) => matched.group === param.domain
-        );
+        typeMatched = groupedData.find((matched) => matched.group === domain);
       }
-      if (param.domain === Domain.PERSON) {
+      if (domain === Domain.PERSON) {
         return {
           items:
-            param.type === CriteriaType.DECEASED
+            type === CriteriaType.DECEASED
               ? `${domainToTitle(domain)}
-                      | ${param.name}`
+                      | ${name}`
               : `${domainToTitle(domain)}
-                      | ${this.operatorConversion(param.type)} | ${param.name}`,
-          domain: param.domain,
+                      | ${this.operatorConversion(type)} | ${name}`,
+          domain: domain,
         };
-      } else if (param.domain === Domain.VISIT) {
+      } else if (domain === Domain.VISIT) {
         return {
           items: `${domainToTitle(domain)} | ${typeMatched.customString}`,
-          domain: param.domain,
+          domain,
         };
       } else {
         return domain === Domain.CONDITION || domain === Domain.PROCEDURE
           ? {
-              items: `${domainToTitle(domain)} | ${param.type} | ${
+              items: `${domainToTitle(domain)} | ${type} | ${
                 typeMatched.customString
               }`,
-              domain: param.domain,
+              domain,
             }
           : {
               items: `${domainToTitle(domain)} | ${typeMatched.customString}`,
-              domain: param.domain,
+              domain,
             };
       }
     });
