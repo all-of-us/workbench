@@ -67,7 +67,9 @@ public final class SearchGroupItemQueryBuilder {
           Domain.WHOLE_GENOME_VARIANT,
           "has_whole_genome_variant",
           Domain.PHYSICAL_MEASUREMENT,
-          "has_physical_measurement_data");
+          "has_physical_measurement_data",
+          Domain.ARRAY_DATA,
+          "has_array_data");
 
   // sql parts to help construct BigQuery sql statements
   private static final String OR = " OR ";
@@ -783,6 +785,7 @@ public final class SearchGroupItemQueryBuilder {
     Domain domain = Domain.fromValue(searchGroupItem.getType());
     return Domain.FITBIT.equals(domain)
         || Domain.WHOLE_GENOME_VARIANT.equals(domain)
+        || Domain.ARRAY_DATA.equals(domain)
         || (searchGroupItem.getSearchParameters().size() == 1
             && searchGroupItem.getSearchParameters().stream()
                 .allMatch(

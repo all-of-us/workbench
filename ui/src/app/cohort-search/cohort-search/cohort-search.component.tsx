@@ -201,7 +201,10 @@ export const CohortSearch = fp.flow(
         this.selectFitbit();
       } else if (domain === Domain.WHOLEGENOMEVARIANT) {
         this.selectGenome();
+      } else if (domain === Domain.ARRAYDATA) {
+        this.selectArrayData();
       }
+
       currentCohortCriteriaStore.next(selections);
       this.subscription = currentCohortCriteriaStore.subscribe(
         (newSelections) => {
@@ -371,6 +374,22 @@ export const CohortSearch = fp.flow(
         name: 'Whole Genome Sequence',
         group: false,
         domainId: Domain.WHOLEGENOMEVARIANT.toString(),
+        hasAttributes: false,
+        selectable: true,
+        attributes: [],
+      } as Selection;
+      saveCriteria([param]);
+    }
+
+    selectArrayData() {
+      const param = {
+        id: null,
+        parentId: null,
+        parameterId: '',
+        type: '',
+        name: 'Global Diversity Array',
+        group: false,
+        domainId: Domain.ARRAYDATA.toString(),
         hasAttributes: false,
         selectable: true,
         attributes: [],
