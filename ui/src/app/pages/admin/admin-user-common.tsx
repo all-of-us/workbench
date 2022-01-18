@@ -10,6 +10,7 @@ import { Dropdown } from 'primereact/dropdown';
 import { formatInitialCreditsUSD, reactStyles } from 'app/utils';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import {
+  AccessBypassRequest,
   AccessModule,
   AccessModuleStatus,
   AccountPropertyUpdate,
@@ -33,6 +34,7 @@ import {
   accessRenewalModules,
   computeRenewalDisplayDates,
   getAccessModuleConfig,
+  getAccessModuleStatusByName,
 } from 'app/utils/access-utils';
 import { hasRegisteredTierAccess } from 'app/utils/access-tiers';
 
@@ -147,19 +149,38 @@ export const getUpdatedProfileValue = (
   }
 };
 
-export const enableSave = (
+export const isBypassed = (
+  profile: Profile,
+  moduleName: AccessModule
+): boolean =>
+  !!getAccessModuleStatusByName(profile, moduleName)?.bypassEpochMillis;
+
+// would this AccessBypassRequest actually change the profile state?
+// allows un-toggling of bypass for a module
+export const wouldUpdateBypassState = (
+  oldProfile: Profile,
+  request: AccessBypassRequest
+): boolean => isBypassed(oldProfile, request.moduleName) !== request.isBypassed;
+
+export const profileNeedsUpdate = (
   oldProfile: Profile,
   updatedProfile: Profile,
-  errors
-): boolean => !errors && !fp.isEqual(oldProfile, updatedProfile);
+  bypassChangeRequests?: AccessBypassRequest[]
+): boolean =>
+  !fp.isEqual(oldProfile, updatedProfile) ||
+  bypassChangeRequests?.some((request) =>
+    wouldUpdateBypassState(oldProfile, request)
+  );
 
 export const updateAccountProperties = async (
   oldProfile: Profile,
-  updatedProfile: Profile
+  updatedProfile: Profile,
+  accessBypassRequests?: AccessBypassRequest[]
 ): Promise<Profile> => {
   const { username } = updatedProfile;
   const request: AccountPropertyUpdate = {
     username,
+    accessBypassRequests,
     freeCreditsLimit: getUpdatedProfileValue(oldProfile, updatedProfile, [
       'freeTierDollarQuota',
     ]),
@@ -169,7 +190,6 @@ export const updateAccountProperties = async (
     affiliation: getUpdatedProfileValue(oldProfile, updatedProfile, [
       'verifiedInstitutionalAffiliation',
     ]),
-    accessBypassRequests: [], // coming soon: RW-4958
   };
 
   return userAdminApi().updateAccountProperties(request);

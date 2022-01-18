@@ -2,7 +2,6 @@ package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
@@ -25,6 +24,7 @@ import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
@@ -441,7 +441,7 @@ public class CohortReviewControllerTest {
           cohort.getCohortId(),
           cdrVersion.getCdrVersionId(),
           new CreateReviewRequest().size(0));
-      fail("Should have thrown a BadRequestException!");
+      Assertions.fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       // success
       assertThat(bre.getMessage())
@@ -458,7 +458,7 @@ public class CohortReviewControllerTest {
           cohort.getCohortId(),
           cdrVersion.getCdrVersionId(),
           new CreateReviewRequest().size(10001));
-      fail("Should have thrown a BadRequestException!");
+      Assertions.fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       // success
       assertThat(bre.getMessage())
@@ -481,7 +481,7 @@ public class CohortReviewControllerTest {
           cohort.getCohortId(),
           cdrVersion.getCdrVersionId(),
           new CreateReviewRequest().size(1));
-      fail("Should have thrown a BadRequestException!");
+      Assertions.fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       // success
       assertThat(bre.getMessage())
@@ -538,7 +538,7 @@ public class CohortReviewControllerTest {
               cdrVersion.getCdrVersionId(),
               new CreateReviewRequest().size(1))
           .getBody();
-      fail("Should have thrown NotFoundException!");
+      Assertions.fail("Should have thrown NotFoundException!");
     } catch (NotFoundException nfe) {
       assertThat(nfe.getMessage())
           .isEqualTo("Not Found: No Cohort exists for cohortId: " + cohortId);
@@ -724,7 +724,7 @@ public class CohortReviewControllerTest {
                   .annotationValueString("test")
                   .cohortAnnotationDefinitionId(9999L))
           .getBody();
-      fail("Should have thrown a NotFoundException!");
+      Assertions.fail("Should have thrown a NotFoundException!");
     } catch (NotFoundException nfe) {
       // Success
       assertThat(nfe.getMessage())
@@ -841,7 +841,7 @@ public class CohortReviewControllerTest {
           cohortReview.getCohortReviewId(),
           participantId,
           annotationId);
-      fail("Should have thrown a NotFoundException!");
+      Assertions.fail("Should have thrown a NotFoundException!");
     } catch (NotFoundException nfe) {
       // Success
       assertThat(nfe.getMessage())
@@ -1060,7 +1060,7 @@ public class CohortReviewControllerTest {
                   .participantId(participantId)
                   .cohortAnnotationDefinitionId(cohortAnnotationDefId))
           .getBody();
-      fail("Should have thrown a ConflictException!");
+      Assertions.fail("Should have thrown a ConflictException!");
     } catch (ConflictException ce) {
       // Success
       assertThat(ce.getMessage())

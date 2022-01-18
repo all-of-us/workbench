@@ -115,6 +115,8 @@ interface AccessModuleConfig {
   isEnabledInEnvironment: boolean; // either true or dependent on a feature flag
   AARTitleComponent: () => JSX.Element;
   DARTitleComponent: () => JSX.Element;
+  adminPageTitle: string;
+  adminBypassable: true;
   externalSyncAction?: Function;
   refreshAction?: Function;
 }
@@ -145,6 +147,8 @@ export const getAccessModuleConfig = (
         moduleName,
         isEnabledInEnvironment: true,
         DARTitleComponent: () => <div>Turn on Google 2-Step Verification</div>,
+        adminPageTitle: 'Google 2-Step Verification',
+        adminBypassable: true,
         externalSyncAction: async () =>
           await profileApi().syncTwoFactorAuthStatus(),
         refreshAction: async () => await profileApi().syncTwoFactorAuthStatus(),
@@ -169,6 +173,8 @@ export const getAccessModuleConfig = (
             </TooltipTrigger>
           </div>
         ),
+        adminPageTitle: 'Verify your identity with Login.gov',
+        adminBypassable: true,
         refreshAction: () => redirectToRas(false),
       }),
     ],
@@ -179,6 +185,8 @@ export const getAccessModuleConfig = (
         moduleName,
         isEnabledInEnvironment: enableEraCommons,
         DARTitleComponent: () => <div>Connect your eRA Commons account</div>,
+        adminPageTitle: 'Connect your eRA Commons account',
+        adminBypassable: true,
         externalSyncAction: async () =>
           await profileApi().syncEraCommonsStatus(),
         refreshAction: async () => await profileApi().syncEraCommonsStatus(),
@@ -200,6 +208,8 @@ export const getAccessModuleConfig = (
             Complete <AoU /> research Registered Tier training
           </div>
         ),
+        adminPageTitle: 'Registered Tier training',
+        adminBypassable: true,
         externalSyncAction: async () =>
           await profileApi().syncComplianceTrainingStatus(),
         refreshAction: async () =>
@@ -214,9 +224,11 @@ export const getAccessModuleConfig = (
         isEnabledInEnvironment: enableComplianceTraining,
         DARTitleComponent: () => (
           <div>
-            Complete <AoU /> research Controlled Tier training{' '}
+            Complete <AoU /> research Controlled Tier training
           </div>
         ),
+        adminPageTitle: 'Controlled Tier training',
+        adminBypassable: true,
         externalSyncAction: async () =>
           await profileApi().syncComplianceTrainingStatus(),
         refreshAction: async () =>
@@ -231,6 +243,8 @@ export const getAccessModuleConfig = (
         isEnabledInEnvironment: true,
         AARTitleComponent: () => 'Sign Data User Code of Conduct',
         DARTitleComponent: () => <div>Sign Data User Code of Conduct</div>,
+        adminPageTitle: 'Sign Data User Code of Conduct',
+        adminBypassable: true,
       }),
     ],
 
@@ -240,6 +254,8 @@ export const getAccessModuleConfig = (
         moduleName,
         isEnabledInEnvironment: true,
         AARTitleComponent: () => 'Update your profile',
+        adminPageTitle: 'Update your profile',
+        adminBypassable: false,
       }),
     ],
 
@@ -250,6 +266,8 @@ export const getAccessModuleConfig = (
         isEnabledInEnvironment: true,
         AARTitleComponent: () =>
           'Report any publications or presentations based on your research using the Researcher Workbench',
+        adminPageTitle: 'Report any publications',
+        adminBypassable: false,
       }),
     ]
   );

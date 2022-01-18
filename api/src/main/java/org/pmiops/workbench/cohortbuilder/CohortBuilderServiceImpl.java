@@ -20,6 +20,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import javax.inject.Provider;
 import org.jetbrains.annotations.NotNull;
@@ -67,6 +68,21 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   private static final Integer DEFAULT_CRITERIA_SEARCH_LIMIT = 250;
   private static final ImmutableList<String> MYSQL_FULL_TEXT_CHARS =
       ImmutableList.of("\"", "+", "-", "*");
+  private static final List<String> CONDITION_PROCEDURE_SOURCE_DOMAINS =
+      Stream.of(
+              Domain.CONDITION.toString(),
+              Domain.PROCEDURE.toString(),
+              Domain.OBSERVATION.toString(),
+              Domain.MEASUREMENT.toString(),
+              Domain.DRUG.toString())
+          .collect(Collectors.toList());
+  private static final StringBuilder SOURCE_FULL_TEXT =
+      new StringBuilder()
+          .append(String.format("[%s_rank1]", Domain.CONDITION.toString().toLowerCase()))
+          .append(String.format("[%s_rank1]", Domain.PROCEDURE.toString().toLowerCase()))
+          .append(String.format("[%s_rank1]", Domain.OBSERVATION.toString().toLowerCase()))
+          .append(String.format("[%s_rank1]", Domain.MEASUREMENT.toString().toLowerCase()))
+          .append(String.format("[%s_rank1]", Domain.DRUG.toString().toLowerCase()));
 
   private final BigQueryService bigQueryService;
   private final CohortQueryBuilder cohortQueryBuilder;
@@ -229,10 +245,18 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
       String domain, String type, Boolean standard, Long parentId) {
     List<DbCriteria> criteriaList;
     if (parentId != null) {
+      // Not everything in the condition source hierarchy(ICD9CM/ICD10CM) is a condition
+      // Or in the procedure source hierarchy(ICD9Proc/ICDPCS/CPT4) is a procedure
+      // Please see - https://precisionmedicineinitiative.atlassian.net/browse/RW-7658
+      List<String> domains =
+          isConditionProcedureSourceHierarchy(domain, standard)
+              ? CONDITION_PROCEDURE_SOURCE_DOMAINS
+              : Stream.of(domain).collect(Collectors.toList());
       criteriaList =
           cbCriteriaDao.findCriteriaByDomainIdAndTypeAndParentIdOrderByIdAsc(
-              domain, type, standard, parentId);
+              domains, type, standard, parentId);
     } else {
+      // read the visits, PM, Race, Ethnicity, Gender, Sex at Birth hierarchies
       criteriaList = cbCriteriaDao.findCriteriaByDomainAndTypeOrderByIdAsc(domain, type);
     }
     return criteriaList.stream()
@@ -391,6 +415,13 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
             .collect(Collectors.toList());
     List<DbCriteria> criteriaList = new ArrayList<>();
     if (!conceptIds.isEmpty()) {
+      // Not everything in the condition source hierarchy(ICD9CM/ICD10CM) is a condition
+      // Or in the procedure source hierarchy(ICD9Proc/ICDPCS/CPT4) is a procedure
+      // Please see - https://precisionmedicineinitiative.atlassian.net/browse/RW-7658
+      domain =
+          isConditionProcedureSourceDomain(domain)
+              ? SOURCE_FULL_TEXT.toString()
+              : String.format("[%s_rank1]", domain.toLowerCase());
       criteriaList =
           cbCriteriaDao.findStandardCriteriaByDomainAndConceptId(domain, true, conceptIds);
     }
@@ -416,8 +447,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
         sortName.equalsIgnoreCase(Sort.Direction.ASC.toString())
             ? Sort.by(Sort.Direction.ASC, "name")
             : Sort.by(Sort.Direction.DESC, "name");
-    List<DbCriteria> criteriaList =
-        cbCriteriaDao.findByDomainIdAndType(Domain.PERSON.toString(), sortColumn, sort);
+    List<DbCriteria> criteriaList = cbCriteriaDao.findByDomainIdAndType(domainId, sortColumn, sort);
     return criteriaList.stream()
         .map(
             c -> new ConceptIdName().conceptId(new Long(c.getConceptId())).conceptName(c.getName()))
@@ -542,5 +572,14 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
         .map(
             c -> new ConceptIdName().conceptId(new Long(c.getConceptId())).conceptName(c.getName()))
         .collect(Collectors.toList());
+  }
+
+  private boolean isConditionProcedureSourceHierarchy(String domain, Boolean standard) {
+    return (isConditionProcedureSourceDomain(domain)) && !standard;
+  }
+
+  private boolean isConditionProcedureSourceDomain(String domain) {
+    return Domain.CONDITION.equals(Domain.valueOf(domain))
+        || Domain.PROCEDURE.equals(Domain.valueOf(domain));
   }
 }

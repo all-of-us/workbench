@@ -5662,7 +5662,8 @@ SELECT
 FROM \`$BQ_PROJECT.$BQ_DATASET.concept_relationship\` a
 JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.concept_id_2 = b.concept_id
 WHERE b.standard_concept = 'S'
-    AND a.relationship_id = 'Maps to'
+    AND b.domain_id in ('Condition', 'Procedure', 'Measurement', 'Observation', 'Drug')
+    AND a.relationship_id in ('Maps to', 'Maps to value')
     AND a.concept_id_1 in
         (
             SELECT DISTINCT concept_id
@@ -5670,6 +5671,7 @@ WHERE b.standard_concept = 'S'
             WHERE concept_id is not null
                 and is_standard = 0
                 and domain_id in ('CONDITION', 'PROCEDURE')
+                AND type in ('CPT4', 'ICD9CM', 'ICD10CM', 'ICD9Proc', 'ICD10PCS')
         )"
 
 ################################################
