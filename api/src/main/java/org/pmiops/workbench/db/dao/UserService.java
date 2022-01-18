@@ -58,6 +58,8 @@ public interface UserService {
 
   void setDataUseAgreementNameOutOfDate(String newGivenName, String newFamilyName);
 
+  void setDataUserCodeOfConductNameOutOfDate(String newGivenName, String newFamilyName);
+
   DbUser setDisabledStatus(Long userId, boolean disabled);
 
   List<Long> getAllUserIds();

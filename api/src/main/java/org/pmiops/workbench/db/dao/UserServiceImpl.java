@@ -41,6 +41,7 @@ import org.pmiops.workbench.db.model.DbAdminActionHistory;
 import org.pmiops.workbench.db.model.DbDemographicSurvey;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserDataUseAgreement;
+import org.pmiops.workbench.db.model.DbUserDataUserCodeOfConduct;
 import org.pmiops.workbench.db.model.DbUserTermsOfService;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -100,6 +101,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   private final UserDao userDao;
   private final AdminActionHistoryDao adminActionHistoryDao;
   private final UserDataUseAgreementDao userDataUseAgreementDao;
+  private final UserDataUserCodeOfConductDao userDataUserCodeOfConductDao;
   private final UserTermsOfServiceDao userTermsOfServiceDao;
   private final VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
 
@@ -123,6 +125,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       UserDao userDao,
       AdminActionHistoryDao adminActionHistoryDao,
       UserDataUseAgreementDao userDataUseAgreementDao,
+      UserDataUserCodeOfConductDao userDataUserCodeOfConductDao,
       UserTermsOfServiceDao userTermsOfServiceDao,
       VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao,
       AccessModuleService accessModuleService,
@@ -140,6 +143,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     this.userDao = userDao;
     this.adminActionHistoryDao = adminActionHistoryDao;
     this.userDataUseAgreementDao = userDataUseAgreementDao;
+    this.userDataUserCodeOfConductDao = userDataUserCodeOfConductDao;
     this.userTermsOfServiceDao = userTermsOfServiceDao;
     this.verifiedInstitutionalAffiliationDao = verifiedInstitutionalAffiliationDao;
     this.accessModuleService = accessModuleService;
@@ -431,14 +435,12 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       throw new BadRequestException("Data User Code of Conduct Version is not up to date");
     }
     final Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
-    DbUserDataUseAgreement dataUseAgreement = new DbUserDataUseAgreement();
-    dataUseAgreement.setDataUseAgreementSignedVersion(duccSignedVersion);
-    dataUseAgreement.setUserId(dbUser.getUserId());
-    dataUseAgreement.setUserFamilyName(dbUser.getFamilyName());
-    dataUseAgreement.setUserGivenName(dbUser.getGivenName());
-    dataUseAgreement.setUserInitials(initials);
-    dataUseAgreement.setCompletionTime(timestamp);
-    userDataUseAgreementDao.save(dataUseAgreement);
+
+    // dual-write the legacy DUA table and the new DUCC table for rollback safety
+    // then delete the legacy DUA table after a release
+    saveLegacyDUA(dbUser, duccSignedVersion, initials, timestamp);
+    saveDUCCTable(dbUser, duccSignedVersion, initials, timestamp);
+
     return updateUserWithRetries(
         (user) -> {
           // TODO: Teardown/reconcile duplicated state between the user profile and DUA.
@@ -449,6 +451,30 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
         },
         dbUser,
         Agent.asUser(dbUser));
+  }
+
+  private void saveLegacyDUA(DbUser dbUser, Integer duccSignedVersion, String initials,
+      Timestamp timestamp) {
+    DbUserDataUseAgreement dataUseAgreement = new DbUserDataUseAgreement();
+    dataUseAgreement.setDataUseAgreementSignedVersion(duccSignedVersion);
+    dataUseAgreement.setUserId(dbUser.getUserId());
+    dataUseAgreement.setUserFamilyName(dbUser.getFamilyName());
+    dataUseAgreement.setUserGivenName(dbUser.getGivenName());
+    dataUseAgreement.setUserInitials(initials);
+    dataUseAgreement.setCompletionTime(timestamp);
+    userDataUseAgreementDao.save(dataUseAgreement);
+  }
+
+  private void saveDUCCTable(DbUser dbUser, Integer duccSignedVersion, String initials,
+      Timestamp timestamp) {
+    DbUserDataUserCodeOfConduct ducc = new DbUserDataUserCodeOfConduct();
+    ducc.setSignedVersion(duccSignedVersion);
+    ducc.setUserId(dbUser.getUserId());
+    ducc.setUserFamilyName(dbUser.getFamilyName());
+    ducc.setUserGivenName(dbUser.getGivenName());
+    ducc.setUserInitials(initials);
+    ducc.setCompletionTime(timestamp);
+    userDataUserCodeOfConductDao.save(ducc);
   }
 
   @Override
@@ -463,6 +489,20 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
                 !dua.getUserGivenName().equalsIgnoreCase(newGivenName)
                     || !dua.getUserFamilyName().equalsIgnoreCase(newFamilyName)));
     userDataUseAgreementDao.saveAll(dataUseAgreements);
+  }
+
+  @Override
+  @Transactional
+  public void setDataUserCodeOfConductNameOutOfDate(String newGivenName, String newFamilyName) {
+    List<DbUserDataUserCodeOfConduct> duccs =
+        userDataUserCodeOfConductDao.findByUserIdOrderByCompletionTimeDesc(
+            userProvider.get().getUserId());
+    duccs.forEach(
+        ducc ->
+            ducc.setUserNameOutOfDate(
+                !ducc.getUserGivenName().equalsIgnoreCase(newGivenName)
+                    || !ducc.getUserFamilyName().equalsIgnoreCase(newFamilyName)));
+    userDataUserCodeOfConductDao.saveAll(duccs);
   }
 
   @Override
