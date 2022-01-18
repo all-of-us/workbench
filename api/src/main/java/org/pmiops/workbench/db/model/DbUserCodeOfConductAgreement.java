@@ -23,7 +23,7 @@ public class DbUserCodeOfConductAgreement {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Column(name = "user_code_of_conduct_agreement_id")
+  @Column(name = "id")
   public long getUserDuccAgreementId() {
     return userDuccAgreementId;
   }
