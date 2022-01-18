@@ -101,7 +101,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   private final UserDao userDao;
   private final AdminActionHistoryDao adminActionHistoryDao;
   private final UserDataUseAgreementDao userDataUseAgreementDao;
-  private final UserCodeOfConductAgreementDao userDataUserCodeOfConductDao;
+  private final UserCodeOfConductAgreementDao userCodeOfConductAgreementDao;
   private final UserTermsOfServiceDao userTermsOfServiceDao;
   private final VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
 
@@ -125,7 +125,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       UserDao userDao,
       AdminActionHistoryDao adminActionHistoryDao,
       UserDataUseAgreementDao userDataUseAgreementDao,
-      UserCodeOfConductAgreementDao userDataUserCodeOfConductDao,
+      UserCodeOfConductAgreementDao userCodeOfConductAgreementDao,
       UserTermsOfServiceDao userTermsOfServiceDao,
       VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao,
       AccessModuleService accessModuleService,
@@ -143,7 +143,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     this.userDao = userDao;
     this.adminActionHistoryDao = adminActionHistoryDao;
     this.userDataUseAgreementDao = userDataUseAgreementDao;
-    this.userDataUserCodeOfConductDao = userDataUserCodeOfConductDao;
+    this.userCodeOfConductAgreementDao = userCodeOfConductAgreementDao;
     this.userTermsOfServiceDao = userTermsOfServiceDao;
     this.verifiedInstitutionalAffiliationDao = verifiedInstitutionalAffiliationDao;
     this.accessModuleService = accessModuleService;
@@ -436,10 +436,10 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     }
     final Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
 
-    // dual-write the legacy DUA table and the new DUCC table for rollback safety
+    // RW-4838: dual-write the legacy DUA table and the new DUCC table for rollback safety
     // then delete the legacy DUA table after a release
     saveLegacyDUA(dbUser, duccSignedVersion, initials, timestamp);
-    saveDUCCTable(dbUser, duccSignedVersion, initials, timestamp);
+    saveDuccAgreement(dbUser, duccSignedVersion, initials, timestamp);
 
     return updateUserWithRetries(
         (user) -> {
@@ -453,6 +453,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
         Agent.asUser(dbUser));
   }
 
+  @Deprecated() // will be replaced by saveDuccAgreement() as part of RW-4838
   private void saveLegacyDUA(
       DbUser dbUser, Integer duccSignedVersion, String initials, Timestamp timestamp) {
     DbUserDataUseAgreement dataUseAgreement = new DbUserDataUseAgreement();
@@ -465,7 +466,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     userDataUseAgreementDao.save(dataUseAgreement);
   }
 
-  private void saveDUCCTable(
+  private void saveDuccAgreement(
       DbUser dbUser, Integer duccSignedVersion, String initials, Timestamp timestamp) {
     DbUserCodeOfConductAgreement ducc = new DbUserCodeOfConductAgreement();
     ducc.setSignedVersion(duccSignedVersion);
@@ -474,7 +475,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     ducc.setUserGivenName(dbUser.getGivenName());
     ducc.setUserInitials(initials);
     ducc.setCompletionTime(timestamp);
-    userDataUserCodeOfConductDao.save(ducc);
+    userCodeOfConductAgreementDao.save(ducc);
   }
 
   @Override
@@ -494,15 +495,15 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   @Override
   @Transactional
   public void setDataUserCodeOfConductNameOutOfDate(String newGivenName, String newFamilyName) {
-    List<DbUserCodeOfConductAgreement> duccs =
-        userDataUserCodeOfConductDao.findByUserIdOrderByCompletionTimeDesc(
+    List<DbUserCodeOfConductAgreement> duccAgreements =
+        userCodeOfConductAgreementDao.findByUserIdOrderByCompletionTimeDesc(
             userProvider.get().getUserId());
-    duccs.forEach(
+    duccAgreements.forEach(
         ducc ->
             ducc.setUserNameOutOfDate(
                 !ducc.getUserGivenName().equalsIgnoreCase(newGivenName)
                     || !ducc.getUserFamilyName().equalsIgnoreCase(newFamilyName)));
-    userDataUserCodeOfConductDao.saveAll(duccs);
+    userCodeOfConductAgreementDao.saveAll(duccAgreements);
   }
 
   @Override

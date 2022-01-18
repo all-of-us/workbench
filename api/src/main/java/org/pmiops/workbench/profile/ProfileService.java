@@ -224,8 +224,8 @@ public class ProfileService {
 
     if (!user.getGivenName().equalsIgnoreCase(updatedProfile.getGivenName())
         || !user.getFamilyName().equalsIgnoreCase(updatedProfile.getFamilyName())) {
-      // dual-write legacy DUA table and new DUCC table
-      // then delete legacy DUA table after a release
+      // RW-4838: dual-write the legacy DUA table and the new DUCC table for rollback safety
+      // then delete the legacy DUA table after a release
       userService.setDataUseAgreementNameOutOfDate(
           updatedProfile.getGivenName(), updatedProfile.getFamilyName());
       userService.setDataUserCodeOfConductNameOutOfDate(
