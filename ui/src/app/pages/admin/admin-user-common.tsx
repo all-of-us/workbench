@@ -162,7 +162,7 @@ export const wouldUpdateBypassState = (
   request: AccessBypassRequest
 ): boolean => isBypassed(oldProfile, request.moduleName) !== request.isBypassed;
 
-export const isChanged = (
+export const profileNeedsUpdate = (
   oldProfile: Profile,
   updatedProfile: Profile,
   bypassChangeRequests?: AccessBypassRequest[]

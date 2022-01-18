@@ -20,7 +20,7 @@ import {
   ErrorsTooltip,
   AccessModuleExpirations,
   isBypassed,
-  isChanged,
+  profileNeedsUpdate,
 } from './admin-user-common';
 import { FadeBox } from 'app/components/containers';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
@@ -520,7 +520,11 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
               type='primary'
               disabled={
                 !!errors ||
-                !isChanged(oldProfile, updatedProfile, bypassChangeRequests)
+                !profileNeedsUpdate(
+                  oldProfile,
+                  updatedProfile,
+                  bypassChangeRequests
+                )
               }
               onClick={async () => {
                 spinnerProps.showSpinner();
@@ -540,7 +544,11 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
           <Button
             type='secondary'
             disabled={
-              !isChanged(oldProfile, updatedProfile, bypassChangeRequests)
+              !profileNeedsUpdate(
+                oldProfile,
+                updatedProfile,
+                bypassChangeRequests
+              )
             }
             onClick={() => {
               setBypassChangeRequests([]);

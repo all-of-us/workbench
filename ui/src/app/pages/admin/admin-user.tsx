@@ -38,7 +38,7 @@ import {
   updateAccountProperties,
   ErrorsTooltip,
   AccessModuleExpirations,
-  isChanged,
+  profileNeedsUpdate,
 } from './admin-user-common';
 
 const styles = reactStyles({
@@ -447,7 +447,8 @@ export const AdminUser = withRouter(
                   <Button
                     type='primary'
                     disabled={
-                      !!errors || !isChanged(oldProfile, updatedProfile)
+                      !!errors ||
+                      !profileNeedsUpdate(oldProfile, updatedProfile)
                     }
                     onClick={async () => {
                       this.setState({ loading: true });
