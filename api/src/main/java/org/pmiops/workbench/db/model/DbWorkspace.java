@@ -36,6 +36,7 @@ public class DbWorkspace {
    */
   public static final short BILLING_MIGRATION_NEW_STATUS = 2;
 
+  private short billingMigrationStatus = BILLING_MIGRATION_NEW_STATUS;
   private String firecloudUuid;
 
   public static class FirecloudWorkspaceId {
@@ -386,10 +387,12 @@ public class DbWorkspace {
 
   @Column(name = "billing_migration_status")
   private short getBillingMigrationStatus() {
-    return BILLING_MIGRATION_NEW_STATUS;
+    return billingMigrationStatus;
   }
 
-  private void setBillingMigrationStatus(Short status) {}
+  private void setBillingMigrationStatus(Short status) {
+    this.billingMigrationStatus = status;
+  }
 
   @Column(name = "google_project")
   public String getGoogleProject() {
