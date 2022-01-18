@@ -5,7 +5,7 @@
   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
   <changeSet author="thibault" id="changelog-185-user-code-of-conduct-agreement">
-    <createTable tableName="user_code_of_conduct">
+    <createTable tableName="user_code_of_conduct_agreement">
       <column name="id" type="bigint" autoIncrement="true">
         <constraints primaryKey="true" nullable="false"/>
       </column>
@@ -32,15 +32,15 @@
       </column>
     </createTable>
     <addForeignKeyConstraint baseColumnNames="user_id"
-                             baseTableName="user_code_of_conduct"
-                             constraintName="fk_user_id_user_code_of_conduct"
+                             baseTableName="user_code_of_conduct_agreement"
+                             constraintName="fk_user_id_user_code_of_conduct_agreement"
                              referencedColumnNames="user_id"
                              referencedTableName="user" onDelete="CASCADE"/>
 
     <!-- Populate table from the existing data -->
 
     <sql>
-      INSERT INTO user_code_of_conduct
+      INSERT INTO user_code_of_conduct_agreement
           (id, user_id, user_given_name, user_family_name, user_initials, user_name_out_of_date, signed_version, completion_time)
       SELECT
              user_data_user_agreement_id AS id,
