@@ -16,9 +16,9 @@ import WorkspaceAnalysisPage from './workspace-analysis-page';
 import WorkspaceAboutPage from './workspace-about-page';
 import ExportToNotebookModal from 'app/modal/export-to-notebook-modal';
 import { getPropValue } from 'utils/element-utils';
-import { LinkText } from 'app/text-labels';
+import { CohortsSelectValue, ConceptSetSelectValue, LinkText } from 'app/text-labels';
 
-const pageTitle = 'Dataset Page';
+const pageTitle = '(Edit )?Dataset( Page)?';
 
 enum StepLabels {
   SelectValues = 'Select Values',
@@ -32,7 +32,15 @@ export default class DatasetBuildPage extends AuthenticatedPage {
   }
 
   async isLoaded(): Promise<boolean> {
-    await Promise.all([waitForDocumentTitle(this.page, pageTitle), waitWhileLoading(this.page)]);
+    await waitForDocumentTitle(this.page, pageTitle);
+
+    const cohortSelectCheckbox = this.getCohortCheckBox(CohortsSelectValue.AllParticipants);
+    await cohortSelectCheckbox.waitForPropertyBooleanValue('disabled', false);
+
+    const conceptSetCheckBox = this.getConceptSetCheckBox(ConceptSetSelectValue.Demographics);
+    await conceptSetCheckBox.waitForPropertyBooleanValue('disabled', false);
+
+    await waitWhileLoading(this.page);
     return true;
   }
 
@@ -171,6 +179,11 @@ export default class DatasetBuildPage extends AuthenticatedPage {
 
   getConceptSetCheckBox(conceptSetName: string): Checkbox {
     const xpath = this.getCheckboxXpath(StepLabels.SelectConceptSets, conceptSetName);
+    return new Checkbox(this.page, xpath);
+  }
+
+  getSelectValueCheckBox(checkboxName: string): Checkbox {
+    const xpath = this.getCheckboxXpath(StepLabels.SelectValues, checkboxName);
     return new Checkbox(this.page, xpath);
   }
 
