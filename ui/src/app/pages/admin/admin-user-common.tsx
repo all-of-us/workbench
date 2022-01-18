@@ -129,7 +129,7 @@ export const getInitalCreditsUsage = (profile: Profile): string => {
   const { freeTierDollarQuota, freeTierUsage } = profile;
   return `${formatInitialCreditsUSD(
     freeTierUsage
-  )} of ${formatInitialCreditsUSD(freeTierDollarQuota)}`;
+  )} used of ${formatInitialCreditsUSD(freeTierDollarQuota)} limit`;
 };
 
 // returns the updated profile value only if it has changed
@@ -216,7 +216,6 @@ interface ContactEmailTextInputProps {
   inputStyle?: CSSProperties;
   containerStyle?: CSSProperties;
 }
-
 export const ContactEmailTextInput = ({
   contactEmail,
   previousContactEmail,
@@ -249,7 +248,6 @@ interface InitialCreditsDropdownProps {
   labelStyle?: CSSProperties;
   dropdownStyle?: CSSProperties;
 }
-
 export const InitialCreditsDropdown = ({
   currentLimit,
   previousLimit,
@@ -283,7 +281,6 @@ interface InstitutionDropdownProps {
   labelStyle?: CSSProperties;
   dropdownStyle?: CSSProperties;
 }
-
 export const InstitutionDropdown = ({
   institutions,
   currentInstitutionShortName,
@@ -322,7 +319,6 @@ interface InstitutionalRoleDropdownProps {
   labelStyle?: CSSProperties;
   dropdownStyle?: CSSProperties;
 }
-
 export const InstitutionalRoleDropdown = ({
   institutions,
   currentAffiliation,
@@ -362,7 +358,6 @@ interface InstitutionalRoleOtherTextProps {
   inputStyle?: CSSProperties;
   containerStyle?: CSSProperties;
 }
-
 export const InstitutionalRoleOtherTextInput = ({
   affiliation,
   previousOtherText,
@@ -423,7 +418,6 @@ interface ErrorsTooltipProps {
   errors;
   children;
 }
-
 export const ErrorsTooltip = ({ errors, children }: ErrorsTooltipProps) => {
   return (
     <TooltipTrigger
@@ -449,7 +443,6 @@ export const ErrorsTooltip = ({ errors, children }: ErrorsTooltipProps) => {
 interface ExpirationProps {
   profile: Profile;
 }
-
 export const AccessModuleExpirations = ({ profile }: ExpirationProps) => {
   // compliance training is feature-flagged in some environments
   const { enableComplianceTraining } = serverConfigStore.get().config;

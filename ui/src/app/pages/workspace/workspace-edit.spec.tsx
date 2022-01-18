@@ -1008,7 +1008,7 @@ describe('WorkspaceEdit', () => {
       'billingAccounts/freetier',
     ]);
     expect(billingDropDown.props.options.map((o) => o.label)).toEqual([
-      'Use All of Us initial credits - $33 left',
+      'Use All of Us initial credits - $33.33 left',
     ]);
 
     // Now select SELECT_OR_CREATE_BILLING_ACCOUNT_OPTION_VALUE, expect request billing scope then show the
@@ -1031,7 +1031,7 @@ describe('WorkspaceEdit', () => {
       'user-billing',
     ]);
     expect(billingDropDown.props.options.map((o) => o.label)).toEqual([
-      'Use All of Us initial credits - $33 left',
+      'Use All of Us initial credits - $33.33 left',
       'User Billing',
     ]);
   });
@@ -1052,7 +1052,7 @@ describe('WorkspaceEdit', () => {
       'user-billing',
     ]);
     expect(billingDropDown.props.options.map((o) => o.label)).toEqual([
-      'Use All of Us initial credits - $33 left',
+      'Use All of Us initial credits - $33.33 left',
       'User Billing',
     ]);
   });
@@ -1074,7 +1074,7 @@ describe('WorkspaceEdit', () => {
       'user-billing',
     ]);
     expect(billingDropDown.props.options.map((o) => o.label)).toEqual([
-      'Use All of Us initial credits - $33 left',
+      'Use All of Us initial credits - $33.33 left',
       'User Billing',
     ]);
   });
@@ -1099,7 +1099,7 @@ describe('WorkspaceEdit', () => {
       'billing-account',
     ]);
     expect(billingDropDown.props.options.map((o) => o.label)).toEqual([
-      'Use All of Us initial credits - $33 left',
+      'Use All of Us initial credits - $33.33 left',
       'User Billing',
       'User Provided Billing Account',
     ]);
@@ -1145,7 +1145,7 @@ describe('WorkspaceEdit', () => {
       'billing-account',
     ]);
     expect(billingDropDown.props.options.map((o) => o.label)).toEqual([
-      'Use All of Us initial credits - $33 left',
+      'Use All of Us initial credits - $33.33 left',
       'User Billing',
       'User Provided Billing Account',
     ]);
