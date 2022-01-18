@@ -243,10 +243,7 @@ export const CohortPage = fp.flow(
     }
 
     updateRequest = () => {
-      // timeout prevents Angular 'Expression changed after checked' error
-      setTimeout(() =>
-        this.setState({ updateCount: this.state.updateCount + 1 })
-      );
+      this.setState({ updateCount: this.state.updateCount + 1 });
     };
 
     setSearchContext(context: any) {
