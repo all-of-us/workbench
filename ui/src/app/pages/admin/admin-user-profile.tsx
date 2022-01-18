@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import validate from 'validate.js';
+import { Column } from 'primereact/column';
+import { DataTable } from 'primereact/datatable';
 
 import {
   adminGetProfile,
@@ -14,10 +16,11 @@ import {
   InstitutionalRoleOtherTextInput,
   getPublicInstitutionDetails,
   ContactEmailTextInput,
-  enableSave,
   updateAccountProperties,
   ErrorsTooltip,
   AccessModuleExpirations,
+  isBypassed,
+  profileNeedsUpdate,
 } from './admin-user-common';
 import { FadeBox } from 'app/components/containers';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
@@ -28,6 +31,8 @@ import { displayNameForTier } from 'app/utils/access-tiers';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { isBlank, reactStyles } from 'app/utils';
 import {
+  AccessBypassRequest,
+  AccessModule,
   InstitutionalRole,
   Profile,
   PublicInstitutionDetails,
@@ -39,6 +44,8 @@ import {
   getEmailValidationErrorMessage,
 } from 'app/utils/institutions';
 import { EgressEventsTable } from './egress-events-table';
+import { getAccessModuleConfig } from 'app/utils/access-utils';
+import { Toggle } from 'app/components/inputs';
 
 const styles = reactStyles({
   ...commonStyles,
@@ -53,6 +60,14 @@ const styles = reactStyles({
     fontSize: '16px',
     fontWeight: 'bold',
     paddingLeft: '1em',
+  },
+  tableHeader: {
+    color: colors.primary,
+    fontSize: '18px',
+    fontWeight: 'bold',
+    paddingLeft: '1em',
+    paddingTop: '2em',
+    lineHeight: '22px',
   },
   uneditableFieldsSpacer: {
     height: '24px',
@@ -75,7 +90,6 @@ const styles = reactStyles({
     paddingTop: '1em',
   },
   editableFields: {
-    height: '221px',
     width: '601px',
     paddingTop: '1em',
   },
@@ -105,8 +119,8 @@ const UneditableFields = (props: { profile: Profile }) => {
         <div style={styles.uneditableFieldsSpacer} />
         <UneditableField label='User name' value={username} />
         <UneditableField
-          label='Access Tiers'
-          value={accessTierShortNames.map(displayNameForTier).join(' ,')}
+          label='Data Access Tiers'
+          value={accessTierShortNames.map(displayNameForTier).join(', ')}
         />
       </FlexColumn>
     </FlexRow>
@@ -207,6 +221,94 @@ const EditableFields = ({
   );
 };
 
+// list the access modules in the desired order
+const accessModulesForTable = [
+  AccessModule.TWOFACTORAUTH,
+  AccessModule.ERACOMMONS,
+  AccessModule.COMPLIANCETRAINING,
+  AccessModule.CTCOMPLIANCETRAINING,
+  AccessModule.DATAUSERCODEOFCONDUCT,
+  AccessModule.RASLINKLOGINGOV,
+  AccessModule.PROFILECONFIRMATION,
+  AccessModule.PUBLICATIONCONFIRMATION,
+];
+
+interface AccessModuleTableProps {
+  oldProfile: Profile;
+  updatedProfile: Profile;
+  pendingBypassRequests: AccessBypassRequest[];
+  bypassUpdate: (accessBypassRequest: AccessBypassRequest) => void;
+}
+
+interface ToggleProps extends AccessModuleTableProps {
+  moduleName: AccessModule;
+}
+
+const ToggleForModule = (props: ToggleProps) => {
+  const {
+    moduleName,
+    oldProfile,
+    updatedProfile,
+    pendingBypassRequests,
+    bypassUpdate,
+  } = props;
+
+  const previouslyBypassed = isBypassed(oldProfile, moduleName);
+  const pendingBypassState = pendingBypassRequests.find(
+    (r) => r.moduleName === moduleName
+  );
+  const isModuleBypassed = pendingBypassState
+    ? pendingBypassState.isBypassed
+    : isBypassed(updatedProfile, moduleName);
+  const highlightStyle =
+    isModuleBypassed !== previouslyBypassed
+      ? { background: colors.highlight }
+      : {};
+
+  return (
+    <div style={highlightStyle}>
+      <Toggle
+        name=' '
+        style={{ paddingBottom: 0, flexGrow: 0 }}
+        checked={isModuleBypassed}
+        data-test-id={`${moduleName}-toggle`}
+        onToggle={() =>
+          bypassUpdate({ moduleName, isBypassed: !isModuleBypassed })
+        }
+      />
+    </div>
+  );
+};
+
+interface TableRow {
+  moduleName: string;
+  bypassToggle: JSX.Element;
+}
+
+const AccessModuleTable = (props: AccessModuleTableProps) => {
+  const tableData: TableRow[] = accessModulesForTable.map((moduleName) => {
+    const { adminPageTitle, adminBypassable } =
+      getAccessModuleConfig(moduleName);
+
+    return {
+      moduleName: adminPageTitle,
+      bypassToggle: adminBypassable && (
+        <ToggleForModule moduleName={moduleName} {...props} />
+      ),
+    };
+  });
+
+  return (
+    <FlexColumn>
+      <div style={styles.tableHeader}>Access status</div>
+      <DataTable style={{ paddingTop: '1em' }} value={tableData}>
+        <Column field='moduleName' header='Access Module' />
+        <Column field='bypassToggle' header='Bypass' />
+      </DataTable>
+    </FlexColumn>
+  );
+};
+
 export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
   const {
     config: { gsuiteDomain },
@@ -214,6 +316,9 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
   const { usernameWithoutGsuiteDomain } = useParams<MatchParams>();
   const [oldProfile, setOldProfile] = useState<Profile>(null);
   const [updatedProfile, setUpdatedProfile] = useState<Profile>(null);
+  const [bypassChangeRequests, setBypassChangeRequests] = useState<
+    AccessBypassRequest[]
+  >([]);
   const [institutions, setInstitutions] = useState<PublicInstitutionDetails[]>(
     []
   );
@@ -322,6 +427,15 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
     updateProfile({ verifiedInstitutionalAffiliation });
   };
 
+  const updateModuleBypassStatus = (
+    accessBypassRequest: AccessBypassRequest
+  ) => {
+    const otherModuleRequests = bypassChangeRequests.filter(
+      (r) => r.moduleName !== accessBypassRequest.moduleName
+    );
+    setBypassChangeRequests([...otherModuleRequests, accessBypassRequest]);
+  };
+
   const errors = validate(
     {
       contactEmail: !!updatedProfile?.contactEmail,
@@ -390,16 +504,34 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
             }
           />
         </FlexRow>
+        <FlexRow>
+          <AccessModuleTable
+            oldProfile={oldProfile}
+            updatedProfile={updatedProfile}
+            pendingBypassRequests={bypassChangeRequests}
+            bypassUpdate={(accessBypassRequest) =>
+              updateModuleBypassStatus(accessBypassRequest)
+            }
+          />
+        </FlexRow>
         <FlexRow style={{ paddingTop: '1em' }}>
           <ErrorsTooltip errors={errors}>
             <Button
               type='primary'
-              disabled={!enableSave(oldProfile, updatedProfile, errors)}
+              disabled={
+                !!errors ||
+                !profileNeedsUpdate(
+                  oldProfile,
+                  updatedProfile,
+                  bypassChangeRequests
+                )
+              }
               onClick={async () => {
                 spinnerProps.showSpinner();
                 const response = await updateAccountProperties(
                   oldProfile,
-                  updatedProfile
+                  updatedProfile,
+                  bypassChangeRequests
                 );
                 setOldProfile(response);
                 setUpdatedProfile(response);
@@ -411,7 +543,18 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
           </ErrorsTooltip>
           <Button
             type='secondary'
-            onClick={() => setUpdatedProfile(oldProfile)}
+            disabled={
+              !profileNeedsUpdate(
+                oldProfile,
+                updatedProfile,
+                bypassChangeRequests
+              )
+            }
+            onClick={() => {
+              setBypassChangeRequests([]);
+              setEmailValidationStatus(EmailValidationStatus.UNCHECKED);
+              setUpdatedProfile(oldProfile);
+            }}
           >
             Cancel
           </Button>
