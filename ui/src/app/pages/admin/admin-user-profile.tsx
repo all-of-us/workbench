@@ -238,45 +238,63 @@ interface TableRow {
   bypassToggle: JSX.Element;
 }
 
-const AccessModuleTable = (props: {
+interface AccessModuleTableProps {
   oldProfile: Profile;
   updatedProfile: Profile;
   pendingBypassRequests: AccessBypassRequest[];
   bypassUpdate: (accessBypassRequest: AccessBypassRequest) => void;
-}) => {
+}
+
+interface ToggleProps extends AccessModuleTableProps {
+  moduleName: AccessModule;
+}
+
+const ToggleForModule = (props: ToggleProps) => {
+  const {
+    moduleName,
+    oldProfile,
+    updatedProfile,
+    pendingBypassRequests,
+    bypassUpdate,
+  } = props;
+
+  const previouslyBypassed = isBypassed(oldProfile, moduleName);
+  const pendingBypassState = pendingBypassRequests.find(
+    (r) => r.moduleName === moduleName
+  );
+  const isModuleBypassed = pendingBypassState
+    ? pendingBypassState.isBypassed
+    : isBypassed(updatedProfile, moduleName);
+  const highlightStyle =
+    isModuleBypassed !== previouslyBypassed
+      ? { background: colors.highlight }
+      : {};
+
+  return (
+    <div style={highlightStyle}>
+      {' '}
+      <Toggle
+        name=' '
+        style={{ paddingBottom: 0, flexGrow: 0 }}
+        checked={isModuleBypassed}
+        data-test-id={`${moduleName}-toggle`}
+        onToggle={() =>
+          bypassUpdate({ moduleName, isBypassed: !isModuleBypassed })
+        }
+      />
+    </div>
+  );
+};
+
+const AccessModuleTable = (props: AccessModuleTableProps) => {
   const tableData: TableRow[] = accessModulesForTable.map((moduleName) => {
-    const { oldProfile, updatedProfile, pendingBypassRequests, bypassUpdate } =
-      props;
     const { adminPageTitle, adminBypassable } =
       getAccessModuleConfig(moduleName);
-    const previouslyBypassed = isBypassed(oldProfile, moduleName);
 
-    const pendingBypassState = pendingBypassRequests.find(
-      (r) => r.moduleName === moduleName
-    );
-    const isModuleBypassed = pendingBypassState
-      ? pendingBypassState.isBypassed
-      : isBypassed(updatedProfile, moduleName);
-
-    const highlightStyle =
-      isModuleBypassed !== previouslyBypassed
-        ? { background: colors.highlight }
-        : {};
     return {
       moduleName: adminPageTitle,
       bypassToggle: adminBypassable && (
-        <div style={highlightStyle}>
-          // TODO pop out toggle into subcomponent?
-          <Toggle
-            name=' '
-            style={{ paddingBottom: 0, flexGrow: 0 }}
-            checked={isModuleBypassed}
-            data-test-id={`${moduleName}-toggle`}
-            onToggle={() =>
-              bypassUpdate({ moduleName, isBypassed: !isModuleBypassed })
-            }
-          />
-        </div>
+        <ToggleForModule moduleName={moduleName} {...props} />
       ),
     };
   });
