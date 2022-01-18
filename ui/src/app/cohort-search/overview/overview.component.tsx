@@ -196,7 +196,7 @@ export const ListOverview = fp.flow(
       if (!this.definitionErrors) {
         this.getTotalCount();
         // Prevents multiple count calls on initial cohort load
-        setTimeout(() => this.setState({ initializing: false}), 100);
+        setTimeout(() => this.setState({ initializing: false }), 100);
       }
     }
 
