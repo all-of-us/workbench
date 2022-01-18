@@ -85,6 +85,7 @@ export interface WindowSize {
   height: number;
   width: number;
 }
+
 // Components using withWindowSize can use this props interface to ensure they are including the
 // correctly-named props, e.g. "interface MyClassProps extends WindowSizeProps".
 export interface WindowSizeProps {
@@ -460,7 +461,7 @@ export function formatInitialCreditsUSD(value?: number): string {
   if (!value || value <= 0.0) {
     return '$0';
   } else {
-    return '$' + value.toFixed(2).toString();
+    return '$' + value.toFixed(0).toString();
   }
 }
 
