@@ -233,11 +233,6 @@ const accessModulesForTable = [
   AccessModule.PUBLICATIONCONFIRMATION,
 ];
 
-interface TableRow {
-  moduleName: string;
-  bypassToggle: JSX.Element;
-}
-
 interface AccessModuleTableProps {
   oldProfile: Profile;
   updatedProfile: Profile;
@@ -285,6 +280,11 @@ const ToggleForModule = (props: ToggleProps) => {
     </div>
   );
 };
+
+interface TableRow {
+  moduleName: string;
+  bypassToggle: JSX.Element;
+}
 
 const AccessModuleTable = (props: AccessModuleTableProps) => {
   const tableData: TableRow[] = accessModulesForTable.map((moduleName) => {
