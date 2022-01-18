@@ -99,15 +99,15 @@ const InitialCreditsUsage = ({ isAboveLimit, usage }: InitialCreditsProps) => {
   return (
     <React.Fragment>
       <TextInputWithLabel
-        labelText='Initial credits used'
+        labelText='Free credits used'
         value={usage}
-        inputId='initial-credits-used'
+        inputId='free-credits-used'
         disabled={true}
         inputStyle={inputStyle}
         containerStyle={styles.textInputContainer}
       />
       {isAboveLimit && (
-        <div style={{ color: colors.danger }}>Update initial credit limit</div>
+        <div style={{ color: colors.danger }}>Update free credit limit</div>
       )}
     </React.Fragment>
   );
