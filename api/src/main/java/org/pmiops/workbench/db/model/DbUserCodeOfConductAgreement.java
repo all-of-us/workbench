@@ -10,9 +10,9 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "user_data_user_code_of_conduct")
-public class DbUserDataUserCodeOfConduct {
-  private long userDuccId;
+@Table(name = "user_code_of_conduct_agreement")
+public class DbUserCodeOfConductAgreement {
+  private long userDuccAgreementId;
   private long userId;
   private String userGivenName;
   private String userFamilyName;
@@ -23,13 +23,13 @@ public class DbUserDataUserCodeOfConduct {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Column(name = "user_data_user_code_of_conduct_id")
-  public long getUserDuccId() {
-    return userDuccId;
+  @Column(name = "user_code_of_conduct_agreement_id")
+  public long getUserDuccAgreementId() {
+    return userDuccAgreementId;
   }
 
-  public void setUserDuccId(long userDuccId) {
-    this.userDuccId = userDuccId;
+  public void setUserDuccAgreementId(long userDuccAgreementId) {
+    this.userDuccAgreementId = userDuccAgreementId;
   }
 
   @Column(name = "user_id")
@@ -105,8 +105,8 @@ public class DbUserDataUserCodeOfConduct {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    DbUserDataUserCodeOfConduct that = (DbUserDataUserCodeOfConduct) o;
-    return userDuccId == that.userDuccId
+    DbUserCodeOfConductAgreement that = (DbUserCodeOfConductAgreement) o;
+    return userDuccAgreementId == that.userDuccAgreementId
         && userId == that.userId
         && userNameOutOfDate == that.userNameOutOfDate
         && signedVersion == that.signedVersion
@@ -119,7 +119,7 @@ public class DbUserDataUserCodeOfConduct {
   @Override
   public int hashCode() {
     return Objects.hash(
-        userDuccId,
+        userDuccAgreementId,
         userId,
         userGivenName,
         userFamilyName,
