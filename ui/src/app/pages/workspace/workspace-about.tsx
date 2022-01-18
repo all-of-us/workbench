@@ -241,7 +241,9 @@ export const WorkspaceAbout = fp.flow(
           ''
         ) +
         '/reports;grouping=GROUP_BY_SKU?project=' +
-        this.state.workspace.googleProject
+        this.state.workspace.googleProject +
+        '&authuser=' +
+        this.props.profileState.profile.username
       );
     }
 
