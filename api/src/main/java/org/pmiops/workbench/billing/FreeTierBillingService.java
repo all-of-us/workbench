@@ -28,7 +28,6 @@ import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceFreeTierUsageDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.db.model.DbWorkspace.BillingMigrationStatus;
 import org.pmiops.workbench.db.model.DbWorkspaceFreeTierUsage;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.BillingStatus;
@@ -238,8 +237,7 @@ public class FreeTierBillingService {
   private Map<DbWorkspace, Double> getFreeTierWorkspaceCostsFromBQ() {
 
     final Map<String, DbWorkspace> workspacesIndexedByGoogleProject =
-        // don't record cost for OLD or MIGRATED workspaces - only NEW
-        workspaceDao.findAllByBillingMigrationStatus(BillingMigrationStatus.NEW).stream()
+        workspaceDao.findAllWithBillingMigrationNewStatus().stream()
             .collect(Collectors.toMap(DbWorkspace::getGoogleProject, Function.identity()));
 
     final QueryJobConfiguration queryConfig =

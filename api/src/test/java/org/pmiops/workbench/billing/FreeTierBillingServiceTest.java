@@ -40,7 +40,6 @@ import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceFreeTierUsageDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.db.model.DbWorkspace.BillingMigrationStatus;
 import org.pmiops.workbench.db.model.DbWorkspaceFreeTierUsage;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.BillingStatus;
@@ -489,32 +488,6 @@ public class FreeTierBillingServiceTest {
   }
 
   @Test
-  public void checkFreeTierBillingUsage_ignoreOLDMigrationStatus() {
-    workbenchConfig.billing.defaultFreeCreditsDollarLimit = 100.0;
-    doReturn(mockBQTableSingleResult(100.01)).when(bigQueryService).executeQuery(any());
-
-    final DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
-    createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT, BillingMigrationStatus.OLD);
-    freeTierBillingService.checkFreeTierBillingUsage();
-
-    verifyZeroInteractions(mailService);
-    assertThat(workspaceFreeTierUsageDao.count()).isEqualTo(0);
-  }
-
-  @Test
-  public void checkFreeTierBillingUsage_ignoreMIGRATEDMigrationStatus() {
-    workbenchConfig.billing.defaultFreeCreditsDollarLimit = 100.0;
-    doReturn(mockBQTableSingleResult(100.01)).when(bigQueryService).executeQuery(any());
-
-    final DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
-    createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT, BillingMigrationStatus.MIGRATED);
-    freeTierBillingService.checkFreeTierBillingUsage();
-
-    verifyZeroInteractions(mailService);
-    assertThat(workspaceFreeTierUsageDao.count()).isEqualTo(0);
-  }
-
-  @Test
   public void checkFreeTierBillingUsage_dbUpdate() throws MessagingException {
     workbenchConfig.billing.defaultFreeCreditsDollarLimit = 100.0;
     doReturn(mockBQTableSingleResult(100.01)).when(bigQueryService).executeQuery(any());
@@ -671,7 +644,6 @@ public class FreeTierBillingServiceTest {
     userAccountWorkspace.setCreator(user);
     userAccountWorkspace.setWorkspaceNamespace("some other namespace");
     userAccountWorkspace.setGoogleProject("other project");
-    userAccountWorkspace.setBillingMigrationStatusEnum(BillingMigrationStatus.NEW);
     userAccountWorkspace.setBillingAccountName("some other account");
     userAccountWorkspace.setBillingStatus(BillingStatus.ACTIVE);
     workspaceDao.save(userAccountWorkspace);
@@ -730,16 +702,10 @@ public class FreeTierBillingServiceTest {
 
   // we only alert/record for BillingMigrationStatus.NEW workspaces
   private DbWorkspace createWorkspace(DbUser creator, String project) {
-    return createWorkspace(creator, project, BillingMigrationStatus.NEW);
-  }
-
-  private DbWorkspace createWorkspace(
-      DbUser creator, String project, BillingMigrationStatus billingMigrationStatus) {
     DbWorkspace workspace = new DbWorkspace();
     workspace.setCreator(creator);
     workspace.setWorkspaceNamespace(project + "-ns");
     workspace.setGoogleProject(project);
-    workspace.setBillingMigrationStatusEnum(billingMigrationStatus);
     workspace.setBillingAccountName(workbenchConfig.billing.freeTierBillingAccountName());
     return workspaceDao.save(workspace);
   }
