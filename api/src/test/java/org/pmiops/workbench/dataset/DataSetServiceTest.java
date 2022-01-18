@@ -329,14 +329,9 @@ public class DataSetServiceTest {
                 + "FROM `${projectId}.${dataSetId}.cb_criteria` c\n"
                 + "JOIN (select cast(cr.id as string) as id\n"
                 + "FROM `${projectId}.${dataSetId}.cb_criteria` cr\n"
-                + "WHERE domain_id = 'CONDITION'\n"
-                + "AND is_standard = 1\n"
-                + "AND concept_id IN (3, 2, 1, 6, 5, 4)\n"
-                + "AND is_selectable = 1\n"
-                + "AND full_text LIKE '%[condition_rank1]%') a\n"
+                + "WHERE concept_id IN (3, 2, 1, 6, 5, 4)) a\n"
                 + "ON (c.path LIKE CONCAT('%.', a.id, '.%') OR c.path LIKE CONCAT('%.', a.id) OR c.path LIKE CONCAT(a.id, '.%') OR c.path = a.id)\n"
-                + "WHERE domain_id = 'CONDITION'\n"
-                + "AND is_standard = 1\n"
+                + "WHERE is_standard = 1\n"
                 + "AND is_selectable = 1))");
   }
 
@@ -354,14 +349,9 @@ public class DataSetServiceTest {
                 + "FROM `${projectId}.${dataSetId}.cb_criteria` c\n"
                 + "JOIN (select cast(cr.id as string) as id\n"
                 + "FROM `${projectId}.${dataSetId}.cb_criteria` cr\n"
-                + "WHERE domain_id = 'CONDITION'\n"
-                + "AND is_standard = 1\n"
-                + "AND concept_id IN (3, 2, 1)\n"
-                + "AND is_selectable = 1\n"
-                + "AND full_text LIKE '%[condition_rank1]%') a\n"
+                + "WHERE concept_id IN (3, 2, 1)) a\n"
                 + "ON (c.path LIKE CONCAT('%.', a.id, '.%') OR c.path LIKE CONCAT('%.', a.id) OR c.path LIKE CONCAT(a.id, '.%') OR c.path = a.id)\n"
-                + "WHERE domain_id = 'CONDITION'\n"
-                + "AND is_standard = 1\n"
+                + "WHERE is_standard = 1\n"
                 + "AND is_selectable = 1))");
   }
 

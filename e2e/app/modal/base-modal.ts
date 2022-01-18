@@ -33,7 +33,7 @@ export default abstract class BaseModal extends Container {
 
   async getTextContent(): Promise<string[]> {
     // xpath that excludes button labels and spans
-    const selector = `${this.getXpath()}//div[normalize-space(text()) and not(@role="button")]`;
+    const selector = `${this.getXpath()}//div[normalize-space() and not(@role="button")]`;
     await this.page.waitForXPath(selector, { visible: true });
     const elements: ElementHandle[] = await this.page.$x(selector);
     return fp.flow(

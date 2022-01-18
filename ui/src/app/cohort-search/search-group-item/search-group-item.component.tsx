@@ -338,8 +338,7 @@ export const SearchGroupItem = withCurrentWorkspace()(
     launchSearch() {
       triggerEvent('Edit', 'Click', 'Snowman - Edit Criteria - Cohort Builder');
       const { groupId, item, setSearchContext, role } = this.props;
-      // items of type 'DECEASED` cannot be edited
-      if (item.searchParameters[0].type !== CriteriaType.DECEASED.toString()) {
+      if (!this.preventItemEdit) {
         const _item = JSON.parse(JSON.stringify(item));
         const { searchParameters } = _item;
         const domain = _item.type;
@@ -404,7 +403,8 @@ export const SearchGroupItem = withCurrentWorkspace()(
       } = this.props;
       if (
         type === Domain.FITBIT.toString() ||
-        type === Domain.WHOLEGENOMEVARIANT.toString()
+        type === Domain.WHOLEGENOMEVARIANT.toString() ||
+        type === Domain.ARRAYDATA.toString()
       ) {
         return !!name ? name : searchParameters[0].name;
       } else {
@@ -417,17 +417,25 @@ export const SearchGroupItem = withCurrentWorkspace()(
       }
     }
 
-    render() {
+    get preventItemEdit() {
       const {
-        item: { count, modifiers, name, searchParameters, status, type },
+        item: { searchParameters, type },
       } = this.props;
-      const { error, loading, paramListOpen, renaming } = this.state;
-      const showCount = !loading && status !== 'hidden' && count !== undefined;
-      const hideEdit =
+      return (
+        type === Domain.ARRAYDATA.toString() ||
         type === Domain.FITBIT.toString() ||
         type === Domain.WHOLEGENOMEVARIANT.toString() ||
         (searchParameters[0] &&
-          searchParameters[0].type === CriteriaType.DECEASED.toString());
+          searchParameters[0].type === CriteriaType.DECEASED.toString())
+      );
+    }
+
+    render() {
+      const {
+        item: { count, modifiers, name, searchParameters, status },
+      } = this.props;
+      const { error, loading, paramListOpen, renaming } = this.state;
+      const showCount = !loading && status !== 'hidden' && count !== undefined;
       const actionItems = [
         {
           label: 'Edit criteria name',
@@ -436,7 +444,7 @@ export const SearchGroupItem = withCurrentWorkspace()(
         {
           label: 'Edit criteria',
           command: () => this.launchSearch(),
-          style: hideEdit ? { display: 'none' } : {},
+          style: this.preventItemEdit ? { display: 'none' } : {},
         },
         {
           label: 'Suppress criteria from total count',

@@ -17,9 +17,10 @@ export default class ConceptSetSearchPage extends AuthenticatedPage {
   }
 
   async isLoaded(): Promise<boolean> {
-    await Promise.all([waitForDocumentTitle(this.page, PageTitle), waitWhileLoading(this.page)]);
+    await waitForDocumentTitle(this.page, PageTitle);
     const searchTextbox = this.getSearchTextbox();
     await searchTextbox.waitForXPath();
+    await waitWhileLoading(this.page);
     return true;
   }
 

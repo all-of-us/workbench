@@ -44,7 +44,7 @@ describe('User Admin', () => {
     await userProfileInfo.waitForLoad();
   });
 
-  test('Verify admin-user-profile page ui, update freeCredits and update institution', async () => {
+  test('Verify admin-user-profile page ui, update initialCredits and update institution', async () => {
     const userAdminPage = new UserAdminPage(page);
     await userAdminPage.waitForLoad();
 
@@ -106,24 +106,23 @@ describe('User Admin', () => {
         break;
     }
 
-    //verify that userfulName, username and FreeCreditsUsed input fields are disabled
+    //verify that Name, Username and InitialCreditsUsed input fields are disabled
     expect(await userProfileInfo.getNameInput().isCursorNotAllowed()).toBe(true);
     expect(await userProfileInfo.getUsernameInput().isCursorNotAllowed()).toBe(true);
-    expect(await userProfileInfo.getFreeCreditsUsedInput().isCursorNotAllowed()).toBe(true);
+    expect(await userProfileInfo.getInitialCreditsUsedInput().isCursorNotAllowed()).toBe(true);
 
     // get the username field placeholder to verify the email on user-admin-table page and admin-user-profile page matches
     const userNamePlaceHolder = await userProfileInfo.getUserNamePlaceHolder();
     expect(userNameEmail).toEqual(userNamePlaceHolder);
 
-    //verify the credit limit value matches the max value in the free credits used field
-    const freeCreditLimit = await userProfileInfo.getFreeCreditsLimitValue();
-    const freeCreditMaxValue = await userProfileInfo.getFreeCreditMaxValue();
-    console.log(`newcredit1: ${freeCreditMaxValue}`);
-    expect(freeCreditLimit).toEqual(freeCreditMaxValue);
+    //verify the credit limit value matches the limit value in the initial credits used field
+    const initialCreditLimit = await userProfileInfo.getInitialCreditsLimitValue();
+    const initialCreditMaxValue = await userProfileInfo.getCreditLimitValue();
+    expect(initialCreditLimit).toEqual(initialCreditMaxValue);
 
-    // verify the admin is able to update the free credit
-    await userProfileInfo.updateFreeCredits();
-    await userProfileInfo.selectFreeCredits(freeCreditLimit);
+    // verify the admin is able to update the initial credit
+    await userProfileInfo.updateInitialCredits();
+    await userProfileInfo.selectInitialCredits(initialCreditLimit);
   });
 
   test('Verify that the user-audit page UI renders correctly', async () => {

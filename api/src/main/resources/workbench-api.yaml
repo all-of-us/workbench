@@ -3926,6 +3926,7 @@ definitions:
     - PHYSICAL_MEASUREMENT_CSS
     - WHOLE_GENOME_VARIANT
     - ZIP_CODE_SOCIOECONOMIC
+    - ARRAY_DATA
   Surveys:
     type: string
     description: a survey for concepts
@@ -4860,6 +4861,7 @@ definitions:
   AccessBypassRequest:
     type: object
     required:
+    - moduleName
     - isBypassed
     properties:
       moduleName:

@@ -820,8 +820,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
                 () ->
                     new NotFoundException(
                         String.format("User with database ID %d not found", userDatabaseId)));
-    accessModuleService.updateBypassTime(
-        user.getUserId(), accessBypassRequest.getModuleName(), accessBypassRequest.getIsBypassed());
+    accessModuleService.updateBypassTime(userDatabaseId, accessBypassRequest);
     updateUserAccessTiers(user, Agent.asUser(user));
   }
 

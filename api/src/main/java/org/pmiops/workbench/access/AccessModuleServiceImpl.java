@@ -26,6 +26,7 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserAccessModule;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
+import org.pmiops.workbench.model.AccessBypassRequest;
 import org.pmiops.workbench.model.AccessModule;
 import org.pmiops.workbench.model.AccessModuleStatus;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,6 +63,12 @@ public class AccessModuleServiceImpl implements AccessModuleService {
     this.userServiceAuditor = userServiceAuditor;
     this.configProvider = configProvider;
     this.userAccessModuleMapper = userAccessModuleMapper;
+  }
+
+  @Override
+  public void updateBypassTime(long userId, AccessBypassRequest accessBypassRequest) {
+    updateBypassTime(
+        userId, accessBypassRequest.getModuleName(), accessBypassRequest.getIsBypassed());
   }
 
   @Override

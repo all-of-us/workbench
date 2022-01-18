@@ -16,7 +16,7 @@ const DataTestIdAlias = {
   Username: 'username',
   ContactEmail: 'contactEmail',
   InitialCreditsUsed: 'initial-credits-used',
-  InitialCreditsDropdown: 'initial-credits-dropdown',
+  InitialCreditLimit: 'initial-credits-dropdown',
   VerifiedInstitution: 'verifiedInstitution',
   InstitutionalRole: 'institutionalRole',
   EmailErrorMessage: 'email-error-message',
@@ -29,11 +29,11 @@ const DataTestIdAlias = {
 
 export const LabelAlias = {
   VerifiedInstitution: 'Verified institution',
-  FreeCreditLimit: 'Free credit limit',
+  InitialCreditLimit: 'Initial credit limit',
   InstitutionalRole: 'Institutional role'
 };
 
-export const FreeCreditSelectValue = {
+export const InitialCreditSelectValue = {
   three: '$300.00',
   three1: '$350.00',
   four: '$400.00',
@@ -57,10 +57,10 @@ export const InstitutionRoleSelectValue = {
 };
 
 export const FieldSelector = {
-  FreeCreditLimitSelect: {
+  InitialCreditLimitSelect: {
     textOption: {
       type: ElementType.Dropdown,
-      name: LabelAlias.FreeCreditLimit,
+      name: LabelAlias.InitialCreditLimit,
       ancestorLevel: 2
     }
   },
@@ -133,24 +133,25 @@ export default class UserProfileInfo extends AuthenticatedPage {
     return Textbox.findByName(this.page, { dataTestId: DataTestIdAlias.ContactEmail });
   }
 
-  getFreeCreditsUsedInput(): Textbox {
+  getInitialCreditsUsedInput(): Textbox {
     return Textbox.findByName(this.page, { dataTestId: DataTestIdAlias.InitialCreditsUsed });
   }
 
-  // get the free credits used value
-  async getFreeCreditMaxValue(): Promise<string> {
-    const freeCreditsMax = this.getFreeCreditsUsedInput();
-    const freeCreditsMaxValue = await freeCreditsMax.getProperty<string>('value');
-    const regex = new RegExp(/(?<=of ).*(?= limit)/);
-    return regex.exec(freeCreditsMaxValue)[0];
+  // get the limit value from the initial credits used field
+  async getCreditLimitValue(): Promise<string> {
+    const initialCreditsUsed = this.getInitialCreditsUsedInput();
+    const initialCreditsUsedValue = await initialCreditsUsed.getProperty<string>('value');
+    const regexpSize = /\$([0-9.]+) used of \$([0-9.]+) limit/;
+    const match = initialCreditsUsedValue.match(regexpSize);
+    // extract the credit limit value
+    const creditLimitValue = '$' + `${match[2]}`;
+    return creditLimitValue;
   }
 
-  // get the free credits limit value
-  async getFreeCreditsLimitValue(): Promise<string> {
-    const freeCreditsDropdown = SelectMenu.findByName(this.page, {
-      dataTestId: DataTestIdAlias.InitialCreditsDropdown
-    });
-    return await freeCreditsDropdown.getSelectedValue();
+  // get the initial credits limit value from dropdown
+  async getInitialCreditsLimitValue(): Promise<string> {
+    const initialCreditsDropdown = SelectMenu.findByName(this.page, { dataTestId: DataTestIdAlias.InitialCreditLimit });
+    return await initialCreditsDropdown.getSelectedValue();
   }
 
   // select a different Verified Institution to verify email match with institution
@@ -159,18 +160,18 @@ export default class UserProfileInfo extends AuthenticatedPage {
     return dropdown.select(selectTextValue);
   }
 
-  // select a new Free credit value
-  async selectFreeCredits(selectTextValue: string): Promise<void> {
-    const dropdown = SelectMenu.findByName(this.page, FieldSelector.FreeCreditLimitSelect.textOption);
+  // select a new initial credit value
+  async selectInitialCredits(selectTextValue: string): Promise<void> {
+    const dropdown = SelectMenu.findByName(this.page, FieldSelector.InitialCreditLimitSelect.textOption);
     return dropdown.select(selectTextValue);
   }
 
-  // update free credit
-  async updateFreeCredits(): Promise<void> {
-    await this.selectFreeCredits(FreeCreditSelectValue.six);
-    const creditValue = await this.getFreeCreditsLimitValue();
-    const newfreeCreditMaxValue = await this.getFreeCreditMaxValue();
-    expect(creditValue).toEqual(newfreeCreditMaxValue);
+  // update initial credit limit
+  async updateInitialCredits(): Promise<void> {
+    await this.selectInitialCredits(InitialCreditSelectValue.six);
+    const newInitialCreditValue = await this.getInitialCreditsLimitValue();
+    const newCreditLimit = await this.getCreditLimitValue();
+    expect(newCreditLimit).toEqual(newInitialCreditValue);
     await this.waitForSaveButton(true);
   }
 }
