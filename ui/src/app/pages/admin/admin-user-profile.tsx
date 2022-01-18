@@ -267,7 +267,6 @@ const ToggleForModule = (props: ToggleProps) => {
 
   return (
     <div style={highlightStyle}>
-      {' '}
       <Toggle
         name=' '
         style={{ paddingBottom: 0, flexGrow: 0 }}
