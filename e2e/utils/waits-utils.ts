@@ -1,8 +1,9 @@
-import { Page } from 'puppeteer';
+import { ElementHandle, Page } from 'puppeteer';
 import { logger } from 'libs/logger';
 import { takeScreenshot } from './save-file-utils';
 import Container from 'app/container';
 import { makeDateTimeStr } from './str-utils';
+import { getAttrValue } from './element-utils';
 
 export const waitForFn = async (fn: () => any, interval = 2000, timeout = 10000): Promise<boolean> => {
   const start = Date.now();
@@ -366,53 +367,66 @@ export async function waitWhileLoading(
   opts: { waitForRuntime?: boolean } = {}
 ): Promise<void> {
   const { waitForRuntime = false } = opts;
-  const notBlankPageSelector = '[data-test-id="sign-in-container"], title:not(empty), div.spinner, svg[viewBox]';
-  const spinElementsSelector = `[style*="running spin"], .spinner:empty, [style*="running rotation"]${
+  const notBlankTitleXpath = '//title[starts-with(text(), "[Test]") or starts-with(text(), "[Staging]")]';
+  const notBlankPageCss = 'div:not(empty):not([id="root"]):not([id="body"])';
+  const spinElementsCss = `[style*="running spin"], .spinner:empty, [style*="running rotation"]${
     waitForRuntime ? '' : ':not([aria-hidden="true"]):not([data-test-id*="runtime-status"])'
   }`;
 
-  await Promise.race([
+  const foundElement: ElementHandle = await Promise.race([
     page.waitForXPath(process.env.AUTHENTICATED_TEST_ID_XPATH, { timeout }), // authenticated page
     page.waitForXPath(process.env.UNAUTHENTICATED_TEST_ID_XPATH, { timeout }) // Login and Create Account pages
   ]);
 
   // Prevent checking in Login and Create Account pages.
-  await page
-    .waitForXPath(process.env.UNAUTHENTICATED_TEST_ID_XPATH, { timeout: 100 })
-    .then(() => {
-      return;
-    })
-    .catch(() => {
-      // Ignore and continue.
-    });
-
-  // Prevent checking in blank page: wait for loading spinner or some elements exists in DOM.
-  await Promise.race([page.waitForSelector(notBlankPageSelector), page.waitForSelector(spinElementsSelector)]);
-
-  try {
-    await Promise.all([
-      page.waitForFunction(
-        (css) => {
-          return !document.querySelectorAll(css).length;
-        },
-        { polling: 'mutation', timeout },
-        spinElementsSelector
-      ),
-      page.waitForSelector(spinElementsSelector, { hidden: true, timeout })
-    ]);
-  } catch (err) {
-    logger.error(`ERROR: Loading spinner has not stopped. spinner xpath is "${spinElementsSelector}"`);
-    if (err.message.includes('Target closed')) {
-      // Leave blank. Ignore error and continue test.
-      // Puppeteer can throw following exception when polling for mutation status if this object disappeared in DOM
-      //   or page navigation happened.
-      // Error: Protocol error (Runtime.callFunctionOn): Target closed.
-    } else {
-      logger.error(err.stack);
-      await takeScreenshot(page, makeDateTimeStr('ERROR_Spinner_Timeout'));
-      throw new Error(err.message);
-    }
+  const dataTestIdValue = await getAttrValue(page, foundElement, 'data-test-id');
+  console.log(`dataTestIdValue: ${dataTestIdValue}`);
+  if (dataTestIdValue === 'sign-in-page') {
+    return;
   }
+
+  // Prevent checking in non-authenticated and blank pages.
+  await Promise.all([
+    page.waitForXPath(process.env.AUTHENTICATED_TEST_ID_XPATH, { timeout }),
+    page.waitForSelector(notBlankPageCss, { timeout }),
+    page.waitForXPath(notBlankTitleXpath, { timeout })
+  ]);
+
+  let maxRetries = 10;
+  const confidenceLevel = 2;
+  let confidenceCounter = 0;
+  let error;
+  const waitUntilSpinnerGone = async () => {
+    try {
+      await Promise.all([
+        page.waitForFunction(
+          (css) => {
+            return !document.querySelectorAll(css).length;
+          },
+          { polling: 'mutation', timeout },
+          spinElementsCss
+        ),
+        page.waitForSelector(spinElementsCss, { hidden: true, timeout })
+      ]);
+      confidenceCounter++;
+      if (confidenceCounter >= confidenceLevel) {
+        return; // success
+      }
+    } catch (err) {
+      confidenceCounter = confidenceCounter > 0 ? confidenceCounter-- : 0;
+      error = err;
+    }
+    if (maxRetries <= 0) {
+      logger.error(`ERROR: Loading spinner has not stopped. Spinner css is "${spinElementsCss}"`);
+      logger.error(error.stack);
+      await takeScreenshot(page, makeDateTimeStr('ERROR_Spinner_Timeout'));
+      throw new Error(error.message);
+    }
+    maxRetries--;
+    await page.waitForTimeout(200).then(waitUntilSpinnerGone); // short pause then retry
+  };
+
+  await waitUntilSpinnerGone();
 }
 
 export async function waitUntilEnabled(page: Page, cssSelector: string): Promise<boolean> {

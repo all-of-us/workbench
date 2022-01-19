@@ -35,10 +35,10 @@ export default class DatasetBuildPage extends AuthenticatedPage {
     await waitForDocumentTitle(this.page, pageTitle);
 
     const cohortSelectCheckbox = this.getCohortCheckBox(CohortsSelectValue.AllParticipants);
-    await cohortSelectCheckbox.waitForPropertyBooleanValue('disabled', false);
+    await cohortSelectCheckbox.waitUntilEnabled();
 
     const conceptSetCheckBox = this.getConceptSetCheckBox(ConceptSetSelectValue.Demographics);
-    await conceptSetCheckBox.waitForPropertyBooleanValue('disabled', false);
+    await conceptSetCheckBox.waitUntilEnabled();
 
     await waitWhileLoading(this.page);
     return true;

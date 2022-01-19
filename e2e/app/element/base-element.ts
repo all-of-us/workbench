@@ -465,27 +465,4 @@ export default class BaseElement {
         throw new Error(err);
       });
   }
-
-  async waitForPropertyBooleanValue(propertyName: string, propertyValue = false): Promise<void> {
-    await this.page.waitForXPath(this.getXpath(), { visible: true });
-    await this.page
-      .waitForFunction(
-        (xpath, property, value) => {
-          const element = document.evaluate(xpath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null)
-            .singleNodeValue;
-          const attrValue = Boolean((element as Element).getAttribute(property));
-          console.log(`${property}: ${attrValue}`);
-          return value === attrValue;
-        },
-        {},
-        this.getXpath(),
-        propertyName,
-        propertyValue
-      )
-      .catch((err) => {
-        logger.error(`waitForPropertyBooleanValue() failed: ${propertyName}: ${propertyValue}.  XPath=${this.getXpath()}`);
-        logger.error(err);
-        throw new Error(err);
-      });
-  }
 }
