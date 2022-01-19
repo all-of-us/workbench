@@ -22,7 +22,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import javax.inject.Provider;
 import javax.mail.MessagingException;
 import org.hibernate.exception.GenericJDBCException;
@@ -443,8 +442,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
 
     return updateUserWithRetries(
         (user) -> {
-          // TODO: Teardown/reconcile duplicated state between the user profile and DUCC.
-          user.setDuccSignedVersion(duccSignedVersion);
           accessModuleService.updateCompletionTime(
               user, AccessModuleName.DATA_USER_CODE_OF_CONDUCT, timestamp);
           return user;
@@ -469,8 +466,8 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   private void saveDuccAgreement(
       DbUser dbUser, Integer duccSignedVersion, String initials, Timestamp timestamp) {
     DbUserCodeOfConductAgreement ducc = new DbUserCodeOfConductAgreement();
+    ducc.setUser(dbUser);
     ducc.setSignedVersion(duccSignedVersion);
-    ducc.setUserId(dbUser.getUserId());
     ducc.setUserFamilyName(dbUser.getFamilyName());
     ducc.setUserGivenName(dbUser.getGivenName());
     ducc.setUserInitials(initials);
@@ -496,8 +493,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   @Transactional
   public void setDataUserCodeOfConductNameOutOfDate(String newGivenName, String newFamilyName) {
     List<DbUserCodeOfConductAgreement> duccAgreements =
-        userCodeOfConductAgreementDao.findByUserIdOrderByCompletionTimeDesc(
-            userProvider.get().getUserId());
+        userCodeOfConductAgreementDao.findByUserOrderByCompletionTimeDesc(userProvider.get());
     duccAgreements.forEach(
         ducc ->
             ducc.setUserNameOutOfDate(
@@ -803,20 +799,13 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   }
 
   @Override
-  public DbUser syncDuccVersionStatus(
-      DbUser targetUser, Agent agent, @Nullable Integer signedDuccVersion) {
+  public DbUser syncDuccVersionStatus(DbUser targetUser, Agent agent) {
     if (isServiceAccount(targetUser)) {
       // Skip sync for service account user rows.
       return targetUser;
     }
 
-    // convert Integer to int to prevent a NPE from comparison-unboxing
-    final int signedVersionForComparison =
-        Optional.ofNullable(signedDuccVersion)
-            // null is invalid, so convert to a known-invalid int
-            .orElse(accessModuleService.getCurrentDuccVersion() - 1);
-
-    if (signedVersionForComparison != accessModuleService.getCurrentDuccVersion()) {
+    if (!accessModuleService.hasUserSignedTheCurrentDucc(targetUser)) {
       accessModuleService.updateCompletionTime(
           targetUser, AccessModuleName.DATA_USER_CODE_OF_CONDUCT, null);
     }

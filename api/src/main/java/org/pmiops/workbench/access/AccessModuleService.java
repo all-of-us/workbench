@@ -41,4 +41,6 @@ public interface AccessModuleService {
   boolean isModuleBypassed(DbUser dbUser, AccessModuleName accessModuleName);
 
   int getCurrentDuccVersion();
+
+  boolean hasUserSignedTheCurrentDucc(DbUser targetUser);
 }

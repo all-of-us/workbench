@@ -11,6 +11,7 @@ import com.google.api.services.cloudbilling.model.ListBillingAccountsResponse;
 import com.google.api.services.cloudbilling.model.ProjectBillingInfo;
 import com.google.common.collect.ImmutableList;
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -25,6 +26,8 @@ import org.pmiops.workbench.db.model.DbAccessModule;
 import org.pmiops.workbench.db.model.DbAccessModule.AccessModuleName;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbCdrVersion;
+import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbUserCodeOfConductAgreement;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
@@ -320,5 +323,17 @@ public class TestMockFactory {
     DbCdrVersion cdrVersion = createDefaultCdrVersion(cdrVersionDao, accessTierDao, id);
     cdrVersion.setAccessTier(createControlledTierForTests(accessTierDao));
     return cdrVersionDao.save(cdrVersion);
+  }
+
+  public static DbUserCodeOfConductAgreement createDuccAgreement(
+      DbUser dbUser, int signedVersion, Timestamp completionTime) {
+    DbUserCodeOfConductAgreement ducc = new DbUserCodeOfConductAgreement();
+    ducc.setUser(dbUser);
+    ducc.setSignedVersion(signedVersion);
+    ducc.setUserFamilyName(dbUser.getFamilyName());
+    ducc.setUserGivenName(dbUser.getGivenName());
+    ducc.setUserInitials("XYZ");
+    ducc.setCompletionTime(completionTime);
+    return ducc;
   }
 }

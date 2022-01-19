@@ -76,7 +76,9 @@ public class AccessModuleServiceTest {
   public void setup() {
     user = new DbUser();
     user.setUsername("user");
-    user.setDuccSignedVersion(accessModuleService.getCurrentDuccVersion());
+    user.setDuccAgreement(
+        TestMockFactory.createDuccAgreement(
+            user, accessModuleService.getCurrentDuccVersion(), FakeClockConfiguration.NOW));
     user = userDao.save(user);
 
     config = WorkbenchConfig.createEmptyConfig();
@@ -399,9 +401,6 @@ public class AccessModuleServiceTest {
     Instant now = Instant.ofEpochMilli(FakeClockConfiguration.NOW_TIME);
     long expiryDays = 365L;
     config.accessRenewal.expiryDays = expiryDays;
-
-    user.setDuccSignedVersion(accessModuleService.getCurrentDuccVersion());
-    user = userDao.save(user);
 
     DbAccessModule duccModule =
         accessModuleDao.findOneByName(AccessModuleName.DATA_USER_CODE_OF_CONDUCT).get();

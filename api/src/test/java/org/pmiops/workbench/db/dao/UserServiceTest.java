@@ -444,8 +444,7 @@ public class UserServiceTest {
   public void testSyncDuccVersionStatus_correctVersion() {
     final DbUser user = userDao.findUserByUsername(USERNAME);
 
-    userService.syncDuccVersionStatus(
-        user, Agent.asSystem(), accessModuleService.getCurrentDuccVersion());
+    userService.syncDuccVersionStatus(user, Agent.asSystem());
 
     verify(accessModuleService, never()).updateCompletionTime(any(), any(), any());
   }
@@ -454,8 +453,7 @@ public class UserServiceTest {
   public void testSyncDuccVersionStatus_incorrectVersion() {
     final DbUser user = userDao.findUserByUsername(USERNAME);
 
-    userService.syncDuccVersionStatus(
-        user, Agent.asSystem(), accessModuleService.getCurrentDuccVersion() - 1);
+    userService.syncDuccVersionStatus(user, Agent.asSystem());
 
     verify(accessModuleService)
         .updateCompletionTime(user, AccessModuleName.DATA_USER_CODE_OF_CONDUCT, null);
@@ -465,7 +463,7 @@ public class UserServiceTest {
   public void testSyncDuccVersionStatus_missing() {
     final DbUser user = userDao.findUserByUsername(USERNAME);
 
-    userService.syncDuccVersionStatus(user, Agent.asSystem(), null);
+    userService.syncDuccVersionStatus(user, Agent.asSystem());
 
     verify(accessModuleService)
         .updateCompletionTime(user, AccessModuleName.DATA_USER_CODE_OF_CONDUCT, null);
