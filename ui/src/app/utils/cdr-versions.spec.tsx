@@ -1,5 +1,3 @@
-import * as React from 'react';
-
 import { Workspace } from 'generated/fetch';
 import { WorkspaceStubVariables } from 'testing/stubs/workspaces';
 import {

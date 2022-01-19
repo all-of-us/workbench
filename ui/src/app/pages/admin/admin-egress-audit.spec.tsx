@@ -1,4 +1,3 @@
-import * as fp from 'lodash/fp';
 import * as React from 'react';
 import { waitForFakeTimersAndUpdate } from 'testing/react-test-helpers';
 import { AdminEgressAudit } from './admin-egress-audit';

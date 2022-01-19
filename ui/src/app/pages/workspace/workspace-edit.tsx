@@ -2,7 +2,6 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 import validate from 'validate.js';
 import { Dropdown } from 'primereact/dropdown';
-import { OverlayPanel } from 'primereact/overlaypanel';
 
 import { Button, LinkButton, StyledExternalLink } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
@@ -221,10 +220,6 @@ export const styles = reactStyles({
     width: '30em',
   },
 });
-
-const CREATE_BILLING_ACCOUNT_OPTION_VALUE = 'CREATE_BILLING_ACCOUNT_OPTION';
-const SELECT_OR_CREATE_BILLING_ACCOUNT_OPTION_VALUE =
-  'SELECT_OR_CREATE_BILLING_ACCOUNT_OPTION_VALUE';
 
 // default to creating workspaces in the Registered Tier
 const DEFAULT_ACCESS_TIER = AccessTierShortNames.Registered;
@@ -702,15 +697,6 @@ export const WorkspaceEdit = fp.flow(
       );
     }
 
-    openContactWidget() {
-      const {
-        profileState: {
-          profile: { contactEmail, familyName, givenName, username },
-        },
-      } = this.props;
-      openZendeskWidget(givenName, familyName, username, contactEmail);
-    }
-
     renderBillingDescription() {
       return (
         <div>
@@ -879,7 +865,7 @@ export const WorkspaceEdit = fp.flow(
           <div style={{ fontWeight: 'bold', marginBottom: '0.3rem' }}>
             {item.label} *
           </div>
-          {item.subCategory.map((sub, index) => (
+          {item.subCategory.map((sub) => (
             <FlexRow
               key={sub.label}
               style={{ ...styles.categoryRow, paddingTop: '0rem' }}
@@ -1504,7 +1490,7 @@ export const WorkspaceEdit = fp.flow(
                           disabled={!this.isMode(WorkspaceEditMode.Create)}
                         >
                           {environment.accessTiersVisibleToUsers.map(
-                            (shortName, i) => (
+                            (shortName) => (
                               <option key={shortName} value={shortName}>
                                 {displayNameForTier(shortName)}
                               </option>
@@ -1555,7 +1541,7 @@ export const WorkspaceEdit = fp.flow(
                         }}
                         disabled={this.isMode(WorkspaceEditMode.Edit)}
                       >
-                        {cdrVersions.map((version, i) => (
+                        {cdrVersions.map((version) => (
                           <option
                             key={version.cdrVersionId}
                             value={version.cdrVersionId}
@@ -1794,12 +1780,12 @@ export const WorkspaceEdit = fp.flow(
                 <FlexColumn style={styles.flexColumnBy2}>
                   {disseminateFindings
                     .slice(0, sliceByHalfLength(disseminateFindings))
-                    .map((rp, i) => this.makeDisseminateForm(rp, rp.shortName))}
+                    .map((rp) => this.makeDisseminateForm(rp, rp.shortName))}
                 </FlexColumn>
                 <FlexColumn style={styles.flexColumnBy2}>
                   {disseminateFindings
                     .slice(sliceByHalfLength(disseminateFindings))
-                    .map((rp, i) => this.makeDisseminateForm(rp, rp.shortName))}
+                    .map((rp) => this.makeDisseminateForm(rp, rp.shortName))}
                 </FlexColumn>
               </FlexRow>
             </WorkspaceEditSection>
@@ -1838,7 +1824,7 @@ export const WorkspaceEdit = fp.flow(
                   name='population'
                   style={{ marginRight: '0.5rem' }}
                   data-test-id='specific-population-yes'
-                  onChange={(v) => this.setState({ populationChecked: true })}
+                  onChange={() => this.setState({ populationChecked: true })}
                   checked={populationChecked ?? false}
                 />
                 <label style={styles.text}>
@@ -1924,7 +1910,7 @@ export const WorkspaceEdit = fp.flow(
                   name='population'
                   style={{ marginRight: '0.5rem', marginTop: '0.3rem' }}
                   data-test-id='specific-population-no'
-                  onChange={(v) => this.setState({ populationChecked: false })}
+                  onChange={() => this.setState({ populationChecked: false })}
                   checked={populationChecked === false}
                 />
                 <label style={styles.text}>

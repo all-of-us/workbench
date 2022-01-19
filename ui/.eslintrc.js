@@ -59,7 +59,7 @@ module.exports = {
     '@typescript-eslint/no-use-before-define': 'warn',
 
     'no-unused-vars': 'off', // Needed for the below rule
-    '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '_' }], // 271 instances as of 3 Jan 2022
+    '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '_' }],
 
     '@typescript-eslint/consistent-type-definitions': ['warn', 'interface'],
     '@typescript-eslint/explicit-member-accessibility': 'off',

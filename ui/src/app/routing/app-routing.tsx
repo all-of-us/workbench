@@ -1,6 +1,5 @@
 import { bindApiClients as notebooksBindApiClients } from 'app/services/notebooks-swagger-fetch-clients';
 import * as fp from 'lodash/fp';
-import outdatedBrowserRework from 'outdated-browser-rework';
 import { useEffect, useState } from 'react';
 import * as React from 'react';
 import { Switch, useHistory } from 'react-router-dom';
@@ -43,7 +42,6 @@ import {
 import { environment } from 'environments/environment';
 import { Configuration } from 'generated/fetch';
 import 'rxjs/Rx';
-import { WorkspaceData } from 'app/utils/workspace-data';
 
 import logo from 'assets/images/all-of-us-logo.svg';
 

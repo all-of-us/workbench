@@ -124,7 +124,7 @@ export const ErrorHandler = fp.flow(
             serverDownStatus.notebooksDown = true;
           }
         })
-        .catch((error) => {
+        .catch(() => {
           serverDownStatus.apiDown = true;
         });
       shouldCheckStatus.next(true);
