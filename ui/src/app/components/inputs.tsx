@@ -408,7 +408,7 @@ export class CheckBox extends React.Component<CheckBoxProps, CheckBoxState> {
       disabled,
       label,
       labelStyle,
-      // TODO: determine correct behavior and fix
+      // RW-7735: determine correct behavior and fix
       // this isn't used, but removing it changes the contents of otherProps
       // -> which changes whether the onChange() prop in the input below is overridden
       // -> which causes it('calls onChange with target checked state') to fail
