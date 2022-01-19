@@ -77,7 +77,7 @@ import { serverConfigStore } from 'app/utils/stores';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { getBillingAccountInfo } from 'app/utils/workbench-gapi-client';
 import { WorkspaceData } from 'app/utils/workspace-data';
-import { openZendeskWidget, supportUrls } from 'app/utils/zendesk';
+import { supportUrls } from 'app/utils/zendesk';
 import {
   ArchivalStatus,
   BillingAccount,
