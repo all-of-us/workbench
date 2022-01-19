@@ -135,7 +135,6 @@ export const AppRoute = ({
   path,
   guards = [],
   exact,
-  intermediaryRoute = false,
   children,
 }): React.ReactElement => {
   const { renderBlocked = null, redirectPath = null } =

@@ -8,7 +8,7 @@ import {
   currentWorkspaceStore,
 } from 'app/utils/navigation';
 import { CohortBuilderApi, CriteriaType, Domain } from 'generated/fetch';
-import { MemoryRouter, Router } from 'react-router';
+import { MemoryRouter } from 'react-router';
 import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
 import {
   CohortBuilderServiceStub,

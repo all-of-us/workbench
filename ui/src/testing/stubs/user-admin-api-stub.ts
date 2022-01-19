@@ -1,8 +1,6 @@
 import {
-  AccessBypassRequest,
   AdminUserListResponse,
   EmptyResponse,
-  Profile,
   UserAdminApi,
 } from 'generated/fetch';
 import { ProfileStubVariables } from './profile-api-stub';
@@ -15,11 +13,7 @@ export class UserAdminApiStub extends UserAdminApi {
     });
   }
 
-  public bypassAccessRequirement(
-    userId: number,
-    bypassed?: AccessBypassRequest,
-    options?: any
-  ): Promise<EmptyResponse> {
+  public bypassAccessRequirement(): Promise<EmptyResponse> {
     return new Promise<EmptyResponse>(() => {});
   }
 

@@ -10,12 +10,12 @@ describe('RenameModal', () => {
   it('should render', () => {
     const wrapper = mount(
       <RenameModal
-        onRename={(newName) => {}}
+        onRename={() => {}}
         resourceType={ResourceType.NOTEBOOK}
         onCancel={() => {}}
         oldName=''
         existingNames={existingNames}
-        nameFormat={(name) => {}}
+        nameFormat={() => {}}
         hideDescription={true}
       />
     );
@@ -25,12 +25,12 @@ describe('RenameModal', () => {
   it('should display description only if props hideDescription is set to true', () => {
     const wrapper = mount(
       <RenameModal
-        onRename={(newName) => {}}
+        onRename={() => {}}
         resourceType={ResourceType.NOTEBOOK}
         onCancel={() => {}}
         oldName=''
         existingNames={existingNames}
-        nameFormat={(name) => {}}
+        nameFormat={() => {}}
       />
     );
     expect(wrapper.exists()).toBeTruthy();

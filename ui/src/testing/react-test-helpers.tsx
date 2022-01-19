@@ -73,7 +73,7 @@ export const simulateComponentChange = async (
   value: any
 ) => {
   const primeReactComponent = component as React.Component<
-    { onChange: (PrimeReactChangeEvent) => void },
+    { onChange: (e: PrimeReactChangeEvent) => void },
     any
   >;
   primeReactComponent.props.onChange({

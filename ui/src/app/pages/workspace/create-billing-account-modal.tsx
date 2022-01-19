@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Button } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { GoogleCloudLogoSvg, InfoIcon } from 'app/components/icons';
-import { CheckBox, RadioButton, TextInput } from 'app/components/inputs';
+import { CheckBox, TextInput } from 'app/components/inputs';
 import {
   Modal,
   ModalBody,

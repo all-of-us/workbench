@@ -69,7 +69,7 @@ export const AdminLockRequest = (props: Props) => {
       .then(() => {
         onLock();
       })
-      .catch((error) => {
+      .catch(() => {
         setApiError(true);
       });
   };

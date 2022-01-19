@@ -275,8 +275,8 @@ const getStatusText = (status: AccessModuleStatus) => {
   const { completionEpochMillis, bypassEpochMillis }: AccessModuleStatus =
     status || {};
   return isCompleted(status)
-    ? `Completed on: ${displayDateWithoutHours(status.completionEpochMillis)}`
-    : `Bypassed on: ${displayDateWithoutHours(status.bypassEpochMillis)}`;
+    ? `Completed on: ${displayDateWithoutHours(completionEpochMillis)}`
+    : `Bypassed on: ${displayDateWithoutHours(bypassEpochMillis)}`;
 };
 
 const handleTerraShibbolethCallback = (

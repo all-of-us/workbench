@@ -3,9 +3,8 @@ import {
   AccessTierShortNames,
   hasRegisteredTierAccess,
 } from 'app/utils/access-tiers';
-import { authStore, MatchParams, profileStore } from 'app/utils/stores';
+import { authStore, profileStore } from 'app/utils/stores';
 import { eligibleForTier } from 'app/utils/access-utils';
-import { useParams } from 'react-router-dom';
 import { currentWorkspaceStore } from 'app/utils/navigation';
 import {
   AuthorityGuardedAction,

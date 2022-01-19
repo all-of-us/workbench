@@ -28,7 +28,6 @@ import {
   currentCohortSearchContextStore,
   setSidebarActiveIconStore,
 } from 'app/utils/navigation';
-import { serverConfigStore } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { environment } from 'environments/environment';
 import {
@@ -343,11 +342,7 @@ export const ListSearch = fp.flow(
       }
     }
 
-    componentDidUpdate(
-      prevProps: Readonly<Props>,
-      prevState: Readonly<State>,
-      snapshot?: any
-    ) {
+    componentDidUpdate(prevProps: Readonly<Props>) {
       const {
         concept,
         searchContext: { source },
