@@ -1,6 +1,5 @@
 import {
   EmptyResponse,
-  ResearchPurposeReviewRequest,
   WorkspaceAdminApi,
   WorkspaceListResponse,
 } from 'generated/fetch';
@@ -14,7 +13,7 @@ export class WorkspaceAdminApiStub extends WorkspaceAdminApi {
     });
   }
 
-  getWorkspacesForReview(options?: any): Promise<WorkspaceListResponse> {
+  getWorkspacesForReview(): Promise<WorkspaceListResponse> {
     return new Promise<WorkspaceListResponse>((resolve) => {
       resolve({
         items: this.workspaces,
@@ -22,11 +21,7 @@ export class WorkspaceAdminApiStub extends WorkspaceAdminApi {
     });
   }
 
-  reviewWorkspace(
-    workspaceNamespace: string,
-    workspaceId: string,
-    review?: ResearchPurposeReviewRequest
-  ): Promise<EmptyResponse> {
+  reviewWorkspace(): Promise<EmptyResponse> {
     return new Promise<EmptyResponse>((resolve) => {
       resolve({});
     });

@@ -1,4 +1,4 @@
-import { AuthDomainApi, UpdateUserDisabledRequest } from 'generated/fetch';
+import { AuthDomainApi } from 'generated/fetch';
 import { stubNotImplementedError } from 'testing/stubs/stub-utils';
 
 export class AuthDomainApiStub extends AuthDomainApi {
@@ -8,9 +8,7 @@ export class AuthDomainApiStub extends AuthDomainApi {
     });
   }
 
-  public updateUserDisabledStatus(
-    request?: UpdateUserDisabledRequest
-  ): Promise<Response> {
+  public updateUserDisabledStatus(): Promise<Response> {
     return new Promise<Response>((resolve) => {
       resolve(new Response());
     });

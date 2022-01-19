@@ -129,11 +129,6 @@ const ResourceNavigation = (props: NavProps) => {
   } = props;
   const url = stringifyUrl(getResourceUrl(resource));
 
-  function canNavigate(): boolean {
-    // can always navigate to notebooks
-    return isNotebook(resource) || canWrite(resource);
-  }
-
   function onNavigate() {
     if (isNotebook(resource)) {
       AnalyticsTracker.Notebooks.Preview();

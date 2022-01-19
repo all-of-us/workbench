@@ -453,7 +453,7 @@ export class ValueListItem extends React.Component<
       .then((dataDictionaryEntry) => {
         this.setState({ dataDictionaryEntry });
       })
-      .catch((e) => {
+      .catch(() => {
         this.setState({ dataDictionaryEntryError: true });
       });
   }

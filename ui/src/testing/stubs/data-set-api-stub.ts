@@ -3,15 +3,11 @@ import {
   DataSet,
   DataSetApi,
   DataSetCodeResponse,
-  DataSetExportRequest,
   DataSetPreviewRequest,
   DataSetPreviewResponse,
-  DataSetRequest,
   DomainValuesResponse,
   EmptyResponse,
-  GenomicExtractionJobListResponse,
   KernelTypeEnum,
-  MarkDataSetRequest,
   ReadOnlyNotebookResponse,
 } from 'generated/fetch';
 import { stubNotImplementedError } from 'testing/stubs/stub-utils';
@@ -45,52 +41,33 @@ export class DataSetApiStub extends DataSetApi {
     this.extractionJobs = [];
   }
 
-  getDataSet(
-    workspaceNamespace: string,
-    workspaceId: string,
-    dataSetId: number,
-    options?: any
-  ): Promise<DataSet> {
+  getDataSet(): Promise<DataSet> {
     return new Promise<DataSet>((resolve) => resolve(this.getDatasetMock));
   }
 
   generateCode(
     workspaceNamespace: string,
     workspaceId: string,
-    kernelType: string,
-    dataSet: DataSetRequest
+    kernelType: string
   ): Promise<DataSetCodeResponse> {
     return new Promise<DataSetCodeResponse>((resolve) => {
       resolve({ kernelType: KernelTypeEnum[kernelType], code: '' });
     });
   }
 
-  previewExportToNotebook(
-    workspaceNamespace: string,
-    workspaceId: string,
-    dataSetExportRequest: DataSetExportRequest,
-    options?: any
-  ): Promise<ReadOnlyNotebookResponse> {
+  previewExportToNotebook(): Promise<ReadOnlyNotebookResponse> {
     return new Promise<ReadOnlyNotebookResponse>((resolve) => {
       resolve(this.codePreview);
     });
   }
 
-  createDataSet(
-    workspaceNamespace: string,
-    workspaceId: string,
-    dataSet: DataSetRequest
-  ): Promise<DataSet> {
+  createDataSet(): Promise<DataSet> {
     return new Promise<DataSet>((resolve) => {
       resolve({});
     });
   }
 
-  exportToNotebook(
-    workspaceNamespace: string,
-    workspaceId: string,
-    dataSetExportRequest: DataSetExportRequest
-  ): Promise<EmptyResponse> {
+  exportToNotebook(): Promise<EmptyResponse> {
     return new Promise<EmptyResponse>((resolve) => {
       resolve({});
     });
@@ -110,11 +87,7 @@ export class DataSetApiStub extends DataSetApi {
     });
   }
 
-  getDataDictionaryEntry(
-    cdrVersionId: number,
-    domain: string,
-    domainValue: string
-  ): Promise<DataDictionaryEntry> {
+  getDataDictionaryEntry(): Promise<DataDictionaryEntry> {
     return Promise.resolve({
       description: 'datadictionary description',
       relevantOmopTable: 'condition_occurrence',
@@ -146,19 +119,11 @@ export class DataSetApiStub extends DataSetApi {
     return Promise.resolve({ items: domainValueItems });
   }
 
-  async markDirty(
-    workspaceNamespace: string,
-    workspaceId: string,
-    markDataSetRequest?: MarkDataSetRequest,
-    options?: any
-  ) {
+  async markDirty() {
     return true;
   }
 
-  async getGenomicExtractionJobs(
-    workspaceNamespace: string,
-    workspaceId: string
-  ) {
+  async getGenomicExtractionJobs() {
     return Promise.resolve({ jobs: this.extractionJobs });
   }
 }

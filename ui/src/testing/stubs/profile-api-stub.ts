@@ -1,10 +1,7 @@
 import {
-  AccessBypassRequest,
   AccessModule,
   AdminTableUser,
-  CreateAccountRequest,
   InstitutionalRole,
-  NihToken,
   Profile,
   ProfileApi,
 } from 'generated/fetch';
@@ -91,35 +88,32 @@ export class ProfileApiStub extends ProfileApi {
     this.profile = ProfileStubVariables.PROFILE_STUB;
   }
 
-  public createAccount(
-    request?: CreateAccountRequest,
-    options?: any
-  ): Promise<Profile> {
+  public createAccount(): Promise<Profile> {
     return Promise.resolve(this.profile);
   }
 
-  public updateNihToken(token?: NihToken, options?: any) {
+  public updateNihToken() {
     return Promise.resolve(this.profile);
   }
 
-  public updateProfile(updatedProfile?: Profile, options?: any) {
+  public updateProfile(updatedProfile?: Profile) {
     this.profile = updatedProfile;
     return Promise.resolve(new Response('', { status: 200 }));
   }
 
-  public getMe(options?: any) {
+  public getMe() {
     return Promise.resolve(this.profile);
   }
 
-  public confirmProfile(options?: any) {
+  public confirmProfile() {
     return Promise.resolve(new Response('', { status: 200 }));
   }
 
-  public confirmPublications(options?: any) {
+  public confirmPublications() {
     return Promise.resolve(new Response('', { status: 200 }));
   }
 
-  public updatePageVisits(pageVisit) {
+  public updatePageVisits() {
     return Promise.resolve(this.profile);
   }
 
@@ -135,20 +129,12 @@ export class ProfileApiStub extends ProfileApi {
     return Promise.resolve(this.profile);
   }
 
-  public bypassAccessRequirement(
-    userId: number,
-    bypassed?: AccessBypassRequest,
-    options?: any
-  ): Promise<EmptyResponse> {
+  public bypassAccessRequirement(): Promise<EmptyResponse> {
     return new Promise<EmptyResponse>(() => {});
   }
 
   public submitDUCC(duccVersion: number) {
     this.profile.dataUseAgreementSignedVersion = duccVersion;
-    return Promise.resolve(this.profile);
-  }
-
-  public getUser(userId: number): Promise<Profile> {
     return Promise.resolve(this.profile);
   }
 

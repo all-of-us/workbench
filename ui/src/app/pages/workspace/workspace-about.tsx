@@ -29,7 +29,7 @@ import { CdrVersionTiersResponse, Profile, UserRole } from 'generated/fetch';
 import { isUsingFreeTierBillingAccount } from 'app/utils/workspace-utils';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faLockAlt } from '@fortawesome/pro-solid-svg-icons';
-import { openZendeskWidget, supportUrls } from 'app/utils/zendesk';
+import { supportUrls } from 'app/utils/zendesk';
 
 interface WorkspaceProps extends WithSpinnerOverlayProps {
   profileState: { profile: Profile; reload: Function; updateCache: Function };

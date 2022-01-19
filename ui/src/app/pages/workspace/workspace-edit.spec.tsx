@@ -542,11 +542,10 @@ describe('WorkspaceEdit', () => {
     'enables the access tier selection dropdown on creation when multiple tiers are present' +
       ' but prevents selection when the user does not have access',
     async () => {
-      const twoTiers = [
+      environment.accessTiersVisibleToUsers = [
         AccessTierShortNames.Registered,
         AccessTierShortNames.Controlled,
       ];
-      environment.accessTiersVisibleToUsers = twoTiers;
       workspaceEditMode = WorkspaceEditMode.Create;
       profileStore.set({
         ...profileStore.get(),
@@ -836,8 +835,7 @@ describe('WorkspaceEdit', () => {
       .find('textarea#intendedStudyText')
       .simulate('change', { target: { value: testInput } });
 
-    intendedStudySection = wrapper.find('[data-test-id="intendedStudyText"]');
-    const charsRemaining = 1000 - testInput.length;
+    wrapper.find('[data-test-id="intendedStudyText"]');
 
     expect(
       wrapper.find('[data-test-id="characterLimit"]').get(0).props.children

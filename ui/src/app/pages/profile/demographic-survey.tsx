@@ -156,7 +156,7 @@ export const DemographicSurvey = withProfileErrorModal(
           manageOwnState={false}
           wrapperStyle={styles.checkboxWrapper}
           labelStyle={styles.checkboxLabel}
-          onChange={(value) =>
+          onChange={() =>
             this.updateList(optionKey, optionObject.value, preferNoAnswerValue)
           }
         />

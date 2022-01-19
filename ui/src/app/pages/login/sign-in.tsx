@@ -195,7 +195,7 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
     document.body.style.backgroundColor = colors.light;
   }
 
-  componentDidUpdate(prevProps: SignInProps, prevState: SignInState, snapshot) {
+  componentDidUpdate(prevProps: SignInProps, prevState: SignInState) {
     if (prevState.currentStep !== this.state.currentStep) {
       window.scrollTo(0, 0);
     }

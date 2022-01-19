@@ -1,4 +1,3 @@
-import { mount } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import * as React from 'react';
 import * as fp from 'lodash/fp';
@@ -182,19 +181,15 @@ describe('RuntimePanel', () => {
   const pickMainDiskSize = (wrapper, diskSize) =>
     enterNumberInput(wrapper, '#runtime-disk', diskSize);
 
-  const getPdSize = (wrapper) => getInputValue(wrapper, '#persistent-disk');
   const pickPdSize = (wrapper, pdSize) =>
     enterNumberInput(wrapper, '#persistent-disk', pdSize);
 
-  const getGpuType = (wrapper) => getInputValue(wrapper, '#gpu-type');
   const pickGpuType = (wrapper, gpuType) =>
     pickDropdownOption(wrapper, '#gpu-type', gpuType);
 
-  const getGpuNum = (wrapper) => getInputValue(wrapper, '#gpu-num');
   const pickGpuNum = (wrapper, gpuNum) =>
     pickDropdownOption(wrapper, '#gpu-num', gpuNum);
 
-  const getEnableGpu = (wrapper) => getCheckbox(wrapper, '#enable-gpu');
   const clickEnableGpu = (wrapper) => clickCheckbox(wrapper, '#enable-gpu');
 
   const pickComputeType = (wrapper, computeType) =>

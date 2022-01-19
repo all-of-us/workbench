@@ -1,7 +1,6 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import { mount } from 'enzyme';
-import SpyInstance = jest.SpyInstance;
 
 import { AccessRenewal, isExpiring } from 'app/pages/access/access-renewal';
 import {
@@ -160,8 +159,6 @@ describe('Access Renewal Page', () => {
 
   const profile = ProfileStubVariables.PROFILE_STUB;
 
-  let mockUpdateProfile: SpyInstance;
-
   const component = () => {
     return mount(<AccessRenewal hideSpinner={() => {}} />);
   };
@@ -170,7 +167,6 @@ describe('Access Renewal Page', () => {
     const profileApiImpl = new ProfileApiStub();
 
     registerApiClient(ProfileApi, profileApiImpl);
-    mockUpdateProfile = jest.spyOn(profileApi(), 'updateProfile');
 
     reload.mockImplementation(async () => {
       profileStore.set({

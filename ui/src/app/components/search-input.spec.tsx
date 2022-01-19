@@ -36,8 +36,8 @@ test('no dropdown is displayed on user input by default', async () => {
 });
 
 test('dropdown is displayed when results are available', async () => {
-  function onSearch(keyword: string) {
-    return new Promise<Array<string>>((accept, reject) => {
+  function onSearch() {
+    return new Promise<Array<string>>((accept) => {
       accept(['bar']);
     });
   }
@@ -46,7 +46,7 @@ test('dropdown is displayed when results are available', async () => {
     .find('[data-test-id="search-input"]')
     .first()
     .simulate('change', { target: { value: 'foo' } });
-  await new Promise((accept, reject) => {
+  await new Promise((accept) => {
     input.update();
     setTimeout(() => {
       input.update();
@@ -60,8 +60,8 @@ test('dropdown is displayed when results are available', async () => {
 });
 
 test('selecting a result from the dropdown closes the dropdown', async () => {
-  function onSearch(keyword: string) {
-    return new Promise<Array<string>>((accept, reject) => {
+  function onSearch() {
+    return new Promise<Array<string>>((accept) => {
       accept(['bar']);
     });
   }
@@ -70,7 +70,7 @@ test('selecting a result from the dropdown closes the dropdown', async () => {
     .find('[data-test-id="search-input"]')
     .first()
     .simulate('change', { target: { value: 'foo' } });
-  await new Promise((accept, reject) => {
+  await new Promise((accept) => {
     input.update();
     setTimeout(() => {
       input.update();

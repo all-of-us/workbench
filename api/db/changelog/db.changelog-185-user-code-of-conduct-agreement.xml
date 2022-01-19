@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+  <changeSet author="thibault" id="changelog-185-user-code-of-conduct-agreement">
+    <createTable tableName="user_code_of_conduct_agreement">
+      <column name="id" type="bigint" autoIncrement="true">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="user_id" type="bigint">
+        <constraints nullable="false"/>
+      </column>
+      <column name="user_given_name" type="varchar(80)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="user_family_name" type="varchar(80)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="user_initials" type="varchar(6)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="user_name_out_of_date" type="tinyint" defaultValue="0">
+        <constraints nullable="false"/>
+      </column>
+      <column name="signed_version" type="bigint">
+        <constraints nullable="false"/>
+      </column>
+      <column name="completion_time" type="timestamp">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+    <addForeignKeyConstraint baseColumnNames="user_id"
+                             baseTableName="user_code_of_conduct_agreement"
+                             constraintName="fk_user_id_user_code_of_conduct_agreement"
+                             referencedColumnNames="user_id"
+                             referencedTableName="user" onDelete="CASCADE"/>
+  </changeSet>
+</databaseChangeLog>

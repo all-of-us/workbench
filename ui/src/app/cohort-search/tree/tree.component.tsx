@@ -187,11 +187,7 @@ export const CriteriaTree = fp.flow(
       }
     }
 
-    componentDidUpdate(
-      prevProps: Readonly<Props>,
-      prevState: Readonly<State>,
-      snapshot?: any
-    ) {
+    componentDidUpdate(prevProps: Readonly<Props>) {
       const {
         concept,
         node: { domainId },

@@ -6,7 +6,6 @@ import {
   CloneWorkspaceResponse,
   EmptyResponse,
   RecentWorkspaceResponse,
-  ResearchPurposeReviewRequest,
   ResourceType,
   ShareWorkspaceRequest,
   UpdateWorkspaceRequest,
@@ -17,7 +16,6 @@ import {
   WorkspaceCreatorFreeCreditsRemainingResponse,
   WorkspaceListResponse,
   WorkspaceResourceResponse,
-  WorkspaceResourcesRequest,
   WorkspaceResponse,
   WorkspaceResponseListResponse,
   WorkspacesApi,
@@ -58,7 +56,7 @@ export class WorkspacesApiStub extends WorkspacesApi {
     this.recentWorkspaces = recentWorkspaceStubs;
   }
 
-  getWorkspaces(options?: any): Promise<WorkspaceResponseListResponse> {
+  getWorkspaces(): Promise<WorkspaceResponseListResponse> {
     return new Promise<WorkspaceResponseListResponse>((resolve) => {
       resolve({
         items: this.workspaces.map((workspace) => {
@@ -75,7 +73,7 @@ export class WorkspacesApiStub extends WorkspacesApi {
     });
   }
 
-  createWorkspace(workspace?: Workspace, options?: any): Promise<Workspace> {
+  createWorkspace(workspace?: Workspace): Promise<Workspace> {
     return new Promise((resolve) => {
       workspace.id = `created-${++this.newWorkspaceCount}`;
       this.workspaces.push(workspace);
@@ -87,8 +85,7 @@ export class WorkspacesApiStub extends WorkspacesApi {
   updateWorkspace(
     workspaceNamespace: string,
     workspaceId: string,
-    body?: UpdateWorkspaceRequest,
-    options?: any
+    body?: UpdateWorkspaceRequest
   ): Promise<Workspace> {
     return new Promise((resolve) => {
       const originalItemIndex = this.workspaces.findIndex(
@@ -108,8 +105,7 @@ export class WorkspacesApiStub extends WorkspacesApi {
   cloneWorkspace(
     workspaceNamespace: string,
     workspaceId: string,
-    body?: CloneWorkspaceRequest,
-    options?: any
+    body?: CloneWorkspaceRequest
   ): Promise<CloneWorkspaceResponse> {
     return new Promise((resolve) => {
       const fromWorkspace = this.workspaces.find(
@@ -134,8 +130,7 @@ export class WorkspacesApiStub extends WorkspacesApi {
   shareWorkspace(
     workspaceNamespace: string,
     workspaceId: string,
-    body?: ShareWorkspaceRequest,
-    options?: any
+    body?: ShareWorkspaceRequest
   ): Promise<WorkspaceUserRolesResponse> {
     return new Promise<WorkspaceUserRolesResponse>((resolve) => {
       const newEtag = fp.defaults(2, body.workspaceEtag + 1);
@@ -149,8 +144,7 @@ export class WorkspacesApiStub extends WorkspacesApi {
 
   getWorkspace(
     workspaceNamespace: string,
-    workspaceId: string,
-    options: any = {}
+    workspaceId: string
   ): Promise<WorkspaceResponse> {
     return new Promise((resolve) => {
       const ws = this.workspaces.find(
@@ -202,9 +196,7 @@ export class WorkspacesApiStub extends WorkspacesApi {
     });
   }
 
-  getPublishedWorkspaces(
-    options?: any
-  ): Promise<WorkspaceResponseListResponse> {
+  getPublishedWorkspaces(): Promise<WorkspaceResponseListResponse> {
     return new Promise<WorkspaceResponseListResponse>((resolve) => {
       const publishedWorkspaces = this.workspaces.filter(
         (w) => w.published === true
@@ -224,7 +216,7 @@ export class WorkspacesApiStub extends WorkspacesApi {
     });
   }
 
-  getWorkspacesForReview(options?: any): Promise<WorkspaceListResponse> {
+  getWorkspacesForReview(): Promise<WorkspaceListResponse> {
     return new Promise<WorkspaceListResponse>((resolve) => {
       resolve({
         items: this.workspaces,
@@ -232,36 +224,25 @@ export class WorkspacesApiStub extends WorkspacesApi {
     });
   }
 
-  reviewWorkspace(
-    workspaceNamespace: string,
-    workspaceId: string,
-    review?: ResearchPurposeReviewRequest
-  ): Promise<EmptyResponse> {
+  reviewWorkspace(): Promise<EmptyResponse> {
     return new Promise<EmptyResponse>((resolve) => {
       resolve({});
     });
   }
 
-  getUserRecentWorkspaces(options?: any): Promise<RecentWorkspaceResponse> {
+  getUserRecentWorkspaces(): Promise<RecentWorkspaceResponse> {
     return new Promise<RecentWorkspaceResponse>((resolve) => {
       resolve(recentWorkspaceStubs);
     });
   }
 
-  updateRecentWorkspaces(
-    workspaceNamespace: string,
-    workspaceId: string,
-    options?: any
-  ): Promise<RecentWorkspaceResponse> {
+  updateRecentWorkspaces(): Promise<RecentWorkspaceResponse> {
     return new Promise<RecentWorkspaceResponse>((resolve) => {
       resolve(recentWorkspaceStubs);
     });
   }
 
-  getBillingUsage(
-    workspaceNamespace: string,
-    workspaceId: string
-  ): Promise<WorkspaceBillingUsageResponse> {
+  getBillingUsage(): Promise<WorkspaceBillingUsageResponse> {
     return new Promise<WorkspaceBillingUsageResponse>((resolve) => {
       resolve({ cost: 5.5 });
     });
@@ -269,8 +250,7 @@ export class WorkspacesApiStub extends WorkspacesApi {
 
   getWorkspaceResources(
     workspaceNamespace: string,
-    workspaceId: string,
-    resourceTypes: WorkspaceResourcesRequest
+    workspaceId: string
   ): Promise<WorkspaceResourceResponse> {
     return new Promise<WorkspaceResourceResponse>((resolve) => {
       const workspace: WorkspaceData = {
@@ -306,10 +286,7 @@ export class WorkspacesApiStub extends WorkspacesApi {
     });
   }
 
-  getWorkspaceCreatorFreeCreditsRemaining(
-    workspaceNamespace: string,
-    workspaceId: string
-  ): Promise<WorkspaceCreatorFreeCreditsRemainingResponse> {
+  getWorkspaceCreatorFreeCreditsRemaining(): Promise<WorkspaceCreatorFreeCreditsRemainingResponse> {
     return new Promise<WorkspaceCreatorFreeCreditsRemainingResponse>(
       (resolve) => {
         resolve({ freeCreditsRemaining: 123.4 });
@@ -317,11 +294,7 @@ export class WorkspacesApiStub extends WorkspacesApi {
     );
   }
 
-  notebookTransferComplete(
-    workspaceNamespace: string,
-    workspaceId: string,
-    options?: any
-  ): Promise<boolean> {
+  notebookTransferComplete(): Promise<boolean> {
     return new Promise<boolean>((resolve) => resolve(true));
   }
 }
