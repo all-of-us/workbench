@@ -54,6 +54,7 @@
     "extractionCohortsDataset": "fc-aou-cdr-stable-ct.wgs_extraction_cohorts",
     "extractionDestinationDataset": "fc-aou-cdr-stable-ct.wgs_extraction_destination",
     "extractionTempTablesDataset": "fc-aou-cdr-stable-ct.wgs_extraction_temp_tables",
+    "gatkJarUri": "gs:\/\/all-of-us-workbench-test-genomics\/wgs\/gatk-package-4.2.0.0-131-g2c1fc16-SNAPSHOT-local.jar",
     "enableJiraTicketingOnFailure": true
   },
   "cdr": {
