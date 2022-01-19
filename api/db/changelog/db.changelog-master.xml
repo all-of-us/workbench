@@ -195,6 +195,7 @@
   <include file="changelog/db.changelog-183-new-user-recent-resource-table.xml"/>
   <include file="changelog/db.changelog-184-loaddata-new-user-recent-resource-table.xml"/>
   <include file="changelog/db.changelog-185-user-code-of-conduct-agreement.xml"/>
+  <include file="changelog/db.changelog-186-user-code-of-conduct-agreement-backfill.xml"/>
   <!--
    Note: to update the DB locally, do the following:
    - Migrate schema changes: `./project.rb run-local-all-migrations`
