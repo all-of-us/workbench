@@ -156,7 +156,7 @@ export const isBypassed = (
 ): boolean =>
   !!getAccessModuleStatusByName(profile, moduleName)?.bypassEpochMillis;
 
-export const moduleCompletionTime = (
+export const displayModuleCompletionTime = (
   profile: Profile,
   moduleName: AccessModule
 ): string =>
@@ -165,7 +165,7 @@ export const moduleCompletionTime = (
     '-'
   );
 
-export const moduleExpirationTime = (
+export const displayModuleExpirationTime = (
   profile: Profile,
   moduleName: AccessModule
 ): string =>

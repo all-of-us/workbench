@@ -21,8 +21,8 @@ import {
   AccessModuleExpirations,
   isBypassed,
   profileNeedsUpdate,
-  moduleCompletionTime,
-  moduleExpirationTime,
+  displayModuleCompletionTime,
+  displayModuleExpirationTime,
 } from './admin-user-common';
 import { FadeBox } from 'app/components/containers';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
@@ -296,8 +296,14 @@ const AccessModuleTable = (props: AccessModuleTableProps) => {
 
     return {
       moduleName: adminPageTitle,
-      completionTime: moduleCompletionTime(props.updatedProfile, moduleName),
-      expirationTime: moduleExpirationTime(props.updatedProfile, moduleName),
+      completionTime: displayModuleCompletionTime(
+        props.updatedProfile,
+        moduleName
+      ),
+      expirationTime: displayModuleExpirationTime(
+        props.updatedProfile,
+        moduleName
+      ),
       bypassToggle: adminBypassable && (
         <ToggleForModule moduleName={moduleName} {...props} />
       ),
