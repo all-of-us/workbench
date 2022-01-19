@@ -141,6 +141,6 @@ describe('DataUserCodeOfConduct', () => {
       wrapper.find('[data-test-id="submit-ducc-button"]').prop('disabled')
     ).toBeFalsy();
     wrapper.find('[data-test-id="submit-ducc-button"]').simulate('click');
-    expect(spy).toHaveBeenCalledWith(3, 'XX');  // duccSignedVersion
+    expect(spy).toHaveBeenCalledWith(3, 'XX'); // duccSignedVersion
   });
 });
