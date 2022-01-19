@@ -8,11 +8,7 @@ export class LeoRuntimesApiStub extends RuntimesApi {
     });
   }
 
-  public startRuntime(
-    googleProject: string,
-    runtimeName: string,
-    extraHttpRequestParams?: any
-  ): Promise<Response> {
+  public startRuntime(): Promise<Response> {
     return new Promise<Response>((resolve) => {
       resolve(new Response());
     });

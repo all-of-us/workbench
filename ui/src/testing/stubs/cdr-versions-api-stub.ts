@@ -83,7 +83,7 @@ export class CdrVersionsApiStub extends CdrVersionsApi {
     });
   }
 
-  getCdrVersionsByTier(options?: any): Promise<CdrVersionTiersResponse> {
+  getCdrVersionsByTier(): Promise<CdrVersionTiersResponse> {
     return new Promise<CdrVersionTiersResponse>((resolve) => {
       resolve(cdrVersionTiersResponse);
     });

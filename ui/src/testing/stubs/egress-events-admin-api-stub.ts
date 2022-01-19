@@ -1,5 +1,4 @@
 import {
-  AuditEgressEventRequest,
   AuditEgressEventResponse,
   EgressEvent,
   EgressEventsAdminApi,
@@ -20,8 +19,7 @@ export class EgressEventsAdminApiStub extends EgressEventsAdminApi {
   }
 
   public listEgressEvents(
-    request?: ListEgressEventsRequest,
-    options?: any
+    request?: ListEgressEventsRequest
   ): Promise<ListEgressEventsResponse> {
     return new Promise((accept) => {
       const events = this.events
@@ -51,8 +49,7 @@ export class EgressEventsAdminApiStub extends EgressEventsAdminApi {
 
   public updateEgressEvent(
     id: string,
-    request?: UpdateEgressEventRequest,
-    options?: any
+    request?: UpdateEgressEventRequest
   ): Promise<EgressEvent> {
     return new Promise((accept) => {
       const event = this.events.find(
@@ -67,11 +64,7 @@ export class EgressEventsAdminApiStub extends EgressEventsAdminApi {
     });
   }
 
-  public auditEgressEvent(
-    id: string,
-    request?: AuditEgressEventRequest,
-    options?: any
-  ): Promise<AuditEgressEventResponse> {
+  public auditEgressEvent(id: string): Promise<AuditEgressEventResponse> {
     return new Promise((accept) => {
       const event = this.events.find(
         ({ egressEventId }) => egressEventId === id

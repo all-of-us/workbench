@@ -3,7 +3,6 @@ import {
   dropNotebookFileSuffix,
 } from 'app/pages/analysis/util';
 import {
-  CopyRequest,
   FileDetail,
   KernelTypeEnum,
   KernelTypeResponse,
@@ -32,22 +31,13 @@ export class NotebooksApiStub extends NotebooksApi {
     ];
   }
 
-  getNoteBookList(
-    workspaceNamespace: string,
-    workspaceId: string,
-    extraHttpRequestParams?: any
-  ): Promise<Array<FileDetail>> {
+  getNoteBookList(): Promise<Array<FileDetail>> {
     return new Promise<Array<FileDetail>>((resolve) => {
       resolve(this.notebookList);
     });
   }
 
-  getNotebookKernel(
-    workspaceNamespace: string,
-    workspaceId: string,
-    notebookName: string,
-    options?: any
-  ): Promise<KernelTypeResponse> {
+  getNotebookKernel(): Promise<KernelTypeResponse> {
     return new Promise<KernelTypeResponse>((resolve) => {
       resolve({
         kernelType: this.notebookKernel,
@@ -73,22 +63,13 @@ export class NotebooksApiStub extends NotebooksApi {
     });
   }
 
-  copyNotebook(
-    fromWorkspaceNamespace: string,
-    fromWorkspaceId: string,
-    fromNotebookName: String,
-    copyRequest: CopyRequest
-  ): Promise<any> {
+  copyNotebook(): Promise<any> {
     return new Promise<any>((resolve) => {
       resolve({});
     });
   }
 
-  deleteNotebook(
-    workspaceNamespace: string,
-    workspaceId: string,
-    notebookName: String
-  ): Promise<any> {
+  deleteNotebook(): Promise<any> {
     return new Promise<any>((resolve) => {
       this.notebookList.pop();
       resolve({});

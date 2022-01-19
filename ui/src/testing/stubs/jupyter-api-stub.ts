@@ -1,4 +1,4 @@
-import { JupyterApi, JupyterContents, Model } from 'notebooks-generated/fetch';
+import { JupyterApi, JupyterContents } from 'notebooks-generated/fetch';
 import { stubNotImplementedError } from 'testing/stubs/stub-utils';
 
 export class JupyterApiStub extends JupyterApi {
@@ -8,13 +8,7 @@ export class JupyterApiStub extends JupyterApi {
     });
   }
 
-  public postContents(
-    googleProject: string,
-    clusterName: string,
-    workspaceDir: string,
-    model?: Model,
-    extraHttpRequestParams?: any
-  ): Promise<JupyterContents> {
+  public postContents(): Promise<JupyterContents> {
     return new Promise<JupyterContents>((resolve) => {
       resolve({
         type: JupyterContents.TypeEnum.Notebook,
@@ -34,9 +28,7 @@ export class JupyterApiStub extends JupyterApi {
     googleProject: string,
     clusterName: string,
     workspaceDir: string,
-    newName: string,
-    model?: Model,
-    extraHttpRequestParams?: any
+    newName: string
   ): Promise<JupyterContents> {
     return new Promise<JupyterContents>((resolve) => {
       resolve({
