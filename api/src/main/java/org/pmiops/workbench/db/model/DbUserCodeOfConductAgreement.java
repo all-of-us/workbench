@@ -10,28 +10,26 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "user_data_use_agreement")
-@Deprecated() // will be replaced by DbUserCodeOfConductAgreement as part of RW-4838
-public class DbUserDataUseAgreement {
-  private long userDataUseAgreementId;
+@Table(name = "user_code_of_conduct_agreement")
+public class DbUserCodeOfConductAgreement {
+  private long userDuccAgreementId;
   private long userId;
   private String userGivenName;
   private String userFamilyName;
   private String userInitials;
   private boolean userNameOutOfDate;
-  private int dataUseAgreementSignedVersion;
+  private int signedVersion;
   private Timestamp completionTime;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  // TODO(RW-4391): rename this column with a Liquibase change once we're post-beta launch!
-  @Column(name = "user_data_user_agreement_id")
-  public long getUserDataUseAgreementId() {
-    return userDataUseAgreementId;
+  @Column(name = "id")
+  public long getUserDuccAgreementId() {
+    return userDuccAgreementId;
   }
 
-  public void setUserDataUseAgreementId(long userDataUseAgreementId) {
-    this.userDataUseAgreementId = userDataUseAgreementId;
+  public void setUserDuccAgreementId(long userDuccAgreementId) {
+    this.userDuccAgreementId = userDuccAgreementId;
   }
 
   @Column(name = "user_id")
@@ -81,13 +79,13 @@ public class DbUserDataUseAgreement {
     this.userNameOutOfDate = userNameOutOfDate;
   }
 
-  @Column(name = "data_use_agreement_signed_version")
-  public int getDataUseAgreementSignedVersion() {
-    return dataUseAgreementSignedVersion;
+  @Column(name = "signed_version")
+  public int getSignedVersion() {
+    return signedVersion;
   }
 
-  public void setDataUseAgreementSignedVersion(int dataUseAgreementSignedVersion) {
-    this.dataUseAgreementSignedVersion = dataUseAgreementSignedVersion;
+  public void setSignedVersion(int signedVersion) {
+    this.signedVersion = signedVersion;
   }
 
   @Column(name = "completion_time")
@@ -107,11 +105,11 @@ public class DbUserDataUseAgreement {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    DbUserDataUseAgreement that = (DbUserDataUseAgreement) o;
-    return userDataUseAgreementId == that.userDataUseAgreementId
+    DbUserCodeOfConductAgreement that = (DbUserCodeOfConductAgreement) o;
+    return userDuccAgreementId == that.userDuccAgreementId
         && userId == that.userId
         && userNameOutOfDate == that.userNameOutOfDate
-        && dataUseAgreementSignedVersion == that.dataUseAgreementSignedVersion
+        && signedVersion == that.signedVersion
         && userGivenName.equals(that.userGivenName)
         && userFamilyName.equals(that.userFamilyName)
         && userInitials.equals(that.userInitials)
@@ -121,13 +119,13 @@ public class DbUserDataUseAgreement {
   @Override
   public int hashCode() {
     return Objects.hash(
-        userDataUseAgreementId,
+        userDuccAgreementId,
         userId,
         userGivenName,
         userFamilyName,
         userInitials,
         userNameOutOfDate,
-        dataUseAgreementSignedVersion,
+        signedVersion,
         completionTime);
   }
 }

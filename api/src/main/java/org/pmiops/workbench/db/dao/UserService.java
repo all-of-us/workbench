@@ -56,7 +56,10 @@ public interface UserService {
   // Registers that a user has agreed to a given version of the Terms of Service.
   void submitTermsOfService(DbUser dbUser, Integer tosVersion);
 
+  @Deprecated() // will be replaced by setDataUserCodeOfConductNameOutOfDate() as part of RW-4838
   void setDataUseAgreementNameOutOfDate(String newGivenName, String newFamilyName);
+
+  void setDataUserCodeOfConductNameOutOfDate(String newGivenName, String newFamilyName);
 
   DbUser setDisabledStatus(Long userId, boolean disabled);
 
