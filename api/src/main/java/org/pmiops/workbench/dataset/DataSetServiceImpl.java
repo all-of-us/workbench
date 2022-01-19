@@ -1,5 +1,8 @@
 package org.pmiops.workbench.dataset;
 
+import static com.google.cloud.bigquery.StandardSQLTypeName.ARRAY;
+import static org.pmiops.workbench.model.PrePackagedConceptSetEnum.SURVEY;
+
 import com.google.cloud.bigquery.FieldList;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
@@ -12,6 +15,23 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Streams;
 import com.google.gson.Gson;
+import java.time.Clock;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import javax.annotation.Nullable;
+import javax.inject.Provider;
+import javax.persistence.OptimisticLockException;
+import javax.transaction.Transactional;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.engine.jdbc.internal.BasicFormatterImpl;
 import org.pmiops.workbench.api.BigQueryService;
@@ -71,27 +91,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-
-import javax.annotation.Nullable;
-import javax.inject.Provider;
-import javax.persistence.OptimisticLockException;
-import javax.transaction.Transactional;
-import java.time.Clock;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static com.google.cloud.bigquery.StandardSQLTypeName.ARRAY;
-import static org.pmiops.workbench.model.PrePackagedConceptSetEnum.SURVEY;
 
 @Service
 public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
@@ -275,7 +274,10 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   public DataSet saveDataSet(DbDataset dataset) {
     try {
       DbDataset savedDbDataSet = dataSetDao.save(dataset);
-      userRecentResourceService.updateDataSetEntry(savedDbDataSet.getWorkspaceId(), savedDbDataSet.getCreatorId(), savedDbDataSet.getDataSetId());
+      userRecentResourceService.updateDataSetEntry(
+          savedDbDataSet.getWorkspaceId(),
+          savedDbDataSet.getCreatorId(),
+          savedDbDataSet.getDataSetId());
       return dataSetMapper.dbModelToClient(savedDbDataSet);
     } catch (OptimisticLockException e) {
       throw new ConflictException("Failed due to concurrent concept set modification");
@@ -1118,7 +1120,8 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
       throw new NotFoundException(
           "No DataSet found for dataSetId " + dataSetId + " and workspaceId " + workspaceId);
     }
-    userRecentResourceService.deleteDataSetEntry(workspaceId, dbDataset.get().getCreatorId(), dataSetId);
+    userRecentResourceService.deleteDataSetEntry(
+        workspaceId, dbDataset.get().getCreatorId(), dataSetId);
     dataSetDao.deleteById(dataSetId);
   }
 

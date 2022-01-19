@@ -1,5 +1,15 @@
 package org.pmiops.workbench.dataset;
 
+import static com.google.common.truth.Truth.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.pmiops.workbench.db.model.DbStorageEnums.domainToStorage;
+
 import com.google.cloud.bigquery.Field;
 import com.google.cloud.bigquery.FieldList;
 import com.google.cloud.bigquery.FieldValue;
@@ -13,6 +23,18 @@ import com.google.cloud.bigquery.TableResult;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.gson.Gson;
+import java.sql.Timestamp;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -66,29 +88,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
 
-import java.sql.Timestamp;
-import java.time.Clock;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import static com.google.common.truth.Truth.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.pmiops.workbench.db.model.DbStorageEnums.domainToStorage;
-
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class DataSetServiceTest {
@@ -97,7 +96,7 @@ public class DataSetServiceTest {
       QueryJobConfiguration.newBuilder(
               "SELECT person_id FROM `${projectId}.${dataSetId}.person` person")
           .addNamedParameter(
-               "foo",
+              "foo",
               QueryParameterValue.newBuilder()
                   .setType(StandardSQLTypeName.INT64)
                   .setValue(Long.toString(101L))
@@ -748,8 +747,9 @@ public class DataSetServiceTest {
   public void test_userRecentModifiedEntry_saveDataSet() {
     DbDataset dbDataset = createDbDataSetEntry();
     DataSet dataset = dataSetServiceImpl.saveDataSet(dbDataset);
-    verify(userRecentResourceService).updateDataSetEntry(cohort.getWorkspaceId(),
-        cohort.getCreator().getUserId(), dataset.getId());
+    verify(userRecentResourceService)
+        .updateDataSetEntry(
+            cohort.getWorkspaceId(), cohort.getCreator().getUserId(), dataset.getId());
   }
 
   @Test
@@ -763,8 +763,10 @@ public class DataSetServiceTest {
     req.setDomainValuePairs(dataset.getDomainValuePairs());
     req.setCohortIds(dbDataset.getCohortIds());
     req.setConceptSetIds(dbDataset.getConceptSetIds());
-    dataSetServiceImpl.updateDataSet(dataset.getWorkspaceId(), dataset.getId(),req);
-    verify(userRecentResourceService).updateDataSetEntry(cohort.getWorkspaceId(), cohort.getCreator().getUserId(), dataset.getId());
+    dataSetServiceImpl.updateDataSet(dataset.getWorkspaceId(), dataset.getId(), req);
+    verify(userRecentResourceService)
+        .updateDataSetEntry(
+            cohort.getWorkspaceId(), cohort.getCreator().getUserId(), dataset.getId());
   }
 
   private void mockDomainTableFields() {

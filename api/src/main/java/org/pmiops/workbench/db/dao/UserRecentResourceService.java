@@ -1,9 +1,8 @@
 package org.pmiops.workbench.db.dao;
 
+import java.util.List;
 import org.pmiops.workbench.db.model.DbUserRecentResource;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 public interface UserRecentResourceService {
