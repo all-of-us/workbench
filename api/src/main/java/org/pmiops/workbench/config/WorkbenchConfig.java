@@ -269,6 +269,8 @@ public class WorkbenchConfig {
     public boolean enablePrivateDataprocWorker;
     // If true, copy the support staff when sending Admin Locking emails.
     public boolean ccSupportWhenAdminLocking;
+    // If true, insert entries for DataSet and Cohort Review in user_recent_modified_resource table
+    public boolean enableDSCREntryInRecentModified;
   }
 
   public static class ActionAuditConfig {

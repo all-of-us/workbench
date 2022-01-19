@@ -1,8 +1,9 @@
 package org.pmiops.workbench.db.dao;
 
-import java.util.List;
 import org.pmiops.workbench.db.model.DbUserRecentResource;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public interface UserRecentResourceService {
@@ -16,11 +17,19 @@ public interface UserRecentResourceService {
 
   void updateConceptSetEntry(long workspaceId, long userId, long conceptSetId);
 
+  void updateDataSetEntry(long workspaceId, long userId, long dataSetId);
+
+  void updateCohortReviewEntry(long workspaceId, long userId, long cohortReviewId);
+
   void deleteNotebookEntry(long workspaceId, long userId, String notebookName);
 
   void deleteCohortEntry(long workspaceId, long userId, long cohortId);
 
   void deleteConceptSetEntry(long workspaceId, long userId, long conceptSetId);
+
+  void deleteDataSetEntry(long workspaceId, long userId, long dataSetId);
+
+  void deleteCohortReviewEntry(long workspaceId, long userId, long cohortReviewId);
 
   List<DbUserRecentResource> findAllResourcesByUser(long userId);
 }

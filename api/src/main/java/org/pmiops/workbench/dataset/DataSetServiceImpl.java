@@ -1,8 +1,5 @@
 package org.pmiops.workbench.dataset;
 
-import static com.google.cloud.bigquery.StandardSQLTypeName.ARRAY;
-import static org.pmiops.workbench.model.PrePackagedConceptSetEnum.SURVEY;
-
 import com.google.cloud.bigquery.FieldList;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
@@ -15,23 +12,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Streams;
 import com.google.gson.Gson;
-import java.time.Clock;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import javax.annotation.Nullable;
-import javax.inject.Provider;
-import javax.persistence.OptimisticLockException;
-import javax.transaction.Transactional;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.engine.jdbc.internal.BasicFormatterImpl;
 import org.pmiops.workbench.api.BigQueryService;
@@ -50,6 +30,7 @@ import org.pmiops.workbench.dataset.mapper.DataSetMapper;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.DataSetDao;
+import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.WgsExtractCromwellSubmissionDao;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbConceptSet;
@@ -90,6 +71,27 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+
+import javax.annotation.Nullable;
+import javax.inject.Provider;
+import javax.persistence.OptimisticLockException;
+import javax.transaction.Transactional;
+import java.time.Clock;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static com.google.cloud.bigquery.StandardSQLTypeName.ARRAY;
+import static org.pmiops.workbench.model.PrePackagedConceptSetEnum.SURVEY;
 
 @Service
 public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
@@ -222,6 +224,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   private final WgsExtractCromwellSubmissionDao submissionDao;
   private final Provider<String> prefixProvider;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
+  private final UserRecentResourceService userRecentResourceService;
   private final Clock clock;
 
   @Autowired
@@ -240,6 +243,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
       DataSetMapper dataSetMapper,
       WgsExtractCromwellSubmissionDao submissionDao,
       @Qualifier(DatasetConfig.DATASET_PREFIX_CODE) Provider<String> prefixProvider,
+      UserRecentResourceService userRecentResourceService,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       Clock clock) {
     this.bigQueryService = bigQueryService;
@@ -255,6 +259,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     this.dataSetMapper = dataSetMapper;
     this.submissionDao = submissionDao;
     this.prefixProvider = prefixProvider;
+    this.userRecentResourceService = userRecentResourceService;
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.clock = clock;
   }
@@ -269,7 +274,9 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   @Override
   public DataSet saveDataSet(DbDataset dataset) {
     try {
-      return dataSetMapper.dbModelToClient(dataSetDao.save(dataset));
+      DbDataset savedDbDataSet = dataSetDao.save(dataset);
+      userRecentResourceService.updateDataSetEntry(savedDbDataSet.getWorkspaceId(), savedDbDataSet.getCreatorId(), savedDbDataSet.getDataSetId());
+      return dataSetMapper.dbModelToClient(savedDbDataSet);
     } catch (OptimisticLockException e) {
       throw new ConflictException("Failed due to concurrent concept set modification");
     } catch (DataIntegrityViolationException ex) {
@@ -1111,6 +1118,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
       throw new NotFoundException(
           "No DataSet found for dataSetId " + dataSetId + " and workspaceId " + workspaceId);
     }
+    userRecentResourceService.deleteDataSetEntry(workspaceId, dbDataset.get().getCreatorId(), dataSetId);
     dataSetDao.deleteById(dataSetId);
   }
 

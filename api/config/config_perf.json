@@ -108,7 +108,8 @@
     "enableGpu": false,
     "enablePersistentDisk": false,
     "enablePrivateDataprocWorker": true,
-    "ccSupportWhenAdminLocking": false
+    "ccSupportWhenAdminLocking": false,
+    "enableDSCREntryInRecentModified": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-perf",

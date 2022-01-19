@@ -1,15 +1,5 @@
 package org.pmiops.workbench.dataset;
 
-import static com.google.common.truth.Truth.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.pmiops.workbench.db.model.DbStorageEnums.domainToStorage;
-
 import com.google.cloud.bigquery.Field;
 import com.google.cloud.bigquery.FieldList;
 import com.google.cloud.bigquery.FieldValue;
@@ -23,18 +13,6 @@ import com.google.cloud.bigquery.TableResult;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.gson.Gson;
-import java.sql.Timestamp;
-import java.time.Clock;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -54,12 +32,15 @@ import org.pmiops.workbench.dataset.mapper.DataSetMapperImpl;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.DataSetDao;
+import org.pmiops.workbench.db.dao.UserDao;
+import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.WgsExtractCromwellSubmissionDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbConceptSetConceptId;
 import org.pmiops.workbench.db.model.DbDataset;
+import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWgsExtractCromwellSubmission;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -85,6 +66,29 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
 
+import java.sql.Timestamp;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static com.google.common.truth.Truth.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.pmiops.workbench.db.model.DbStorageEnums.domainToStorage;
+
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class DataSetServiceTest {
@@ -93,7 +97,7 @@ public class DataSetServiceTest {
       QueryJobConfiguration.newBuilder(
               "SELECT person_id FROM `${projectId}.${dataSetId}.person` person")
           .addNamedParameter(
-              "foo",
+               "foo",
               QueryParameterValue.newBuilder()
                   .setType(StandardSQLTypeName.INT64)
                   .setValue(Long.toString(101L))
@@ -115,6 +119,8 @@ public class DataSetServiceTest {
   @Autowired private WorkspaceDao workspaceDao;
   @Autowired private DataSetServiceImpl dataSetServiceImpl;
   @Autowired private WgsExtractCromwellSubmissionDao submissionDao;
+  @Autowired private UserDao userDao;
+  @Autowired private UserRecentResourceService userRecentResourceService;
 
   private DbWorkspace workspace;
   private DbCohort cohort;
@@ -127,7 +133,8 @@ public class DataSetServiceTest {
     CohortService.class,
     ConceptBigQueryService.class,
     ConceptSetService.class,
-    CohortQueryBuilder.class
+    CohortQueryBuilder.class,
+    UserRecentResourceService.class
   })
   static class Configuration {
     @Bean
@@ -157,6 +164,7 @@ public class DataSetServiceTest {
     cohortDbModel.setType("foo");
     cohortDbModel.setWorkspaceId(workspace.getWorkspaceId());
     cohortDbModel.setCriteria(cohortCriteria);
+    cohortDbModel.setCreator(buildUser());
     return cohortDbModel;
   }
 
@@ -170,6 +178,13 @@ public class DataSetServiceTest {
             .map(c -> DbConceptSetConceptId.builder().addConceptId(c).addStandard(standard).build())
             .collect(Collectors.toSet()));
     return result;
+  }
+
+  private DbUser buildUser() {
+    DbUser dbUser = new DbUser();
+    dbUser.setFamilyName("Family Name");
+    dbUser.setContactEmail("xyz@mock.com");
+    return userDao.save(dbUser);
   }
 
   private static DataSetRequest buildEmptyRequest() {
@@ -729,6 +744,29 @@ public class DataSetServiceTest {
         .isFalse();
   }
 
+  @Test
+  public void test_userRecentModifiedEntry_saveDataSet() {
+    DbDataset dbDataset = createDbDataSetEntry();
+    DataSet dataset = dataSetServiceImpl.saveDataSet(dbDataset);
+    verify(userRecentResourceService).updateDataSetEntry(cohort.getWorkspaceId(),
+        cohort.getCreator().getUserId(), dataset.getId());
+  }
+
+  @Test
+  public void test_userRecentModifiedEntry_updateDataSet() {
+    DbDataset dbDataset = createDbDataSetEntry();
+    DataSet dataset = dataSetServiceImpl.saveDataSet(dbDataset);
+    dbDataset.setName("Update DataSet Name");
+    DataSetRequest req = new DataSetRequest();
+    req.dataSetId(dataset.getId());
+    req.setName("Update DataSet Name");
+    req.setDomainValuePairs(dataset.getDomainValuePairs());
+    req.setCohortIds(dbDataset.getCohortIds());
+    req.setConceptSetIds(dbDataset.getConceptSetIds());
+    dataSetServiceImpl.updateDataSet(dataset.getWorkspaceId(), dataset.getId(),req);
+    verify(userRecentResourceService).updateDataSetEntry(cohort.getWorkspaceId(), cohort.getCreator().getUserId(), dataset.getId());
+  }
+
   private void mockDomainTableFields() {
     FieldList conditionList =
         FieldList.of(
@@ -817,5 +855,15 @@ public class DataSetServiceTest {
     dsDataDictionary.setFieldType("string");
     dsDataDictionary.setRelevantOmopTable("person");
     dsDataDictionaryDao.save(dsDataDictionary);
+  }
+
+  private DbDataset createDbDataSetEntry() {
+    DbDataset dbDataset = new DbDataset();
+    dbDataset.setName("Data Set dirty 67");
+    dbDataset.setCohortIds(ImmutableList.of(cohort.getCohortId()));
+    dbDataset.setWorkspaceId(cohort.getWorkspaceId());
+    dbDataset.setCreatorId(cohort.getCreator().getUserId());
+    dbDataset.setInvalid(false);
+    return dbDataset;
   }
 }
