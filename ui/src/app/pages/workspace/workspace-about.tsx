@@ -234,7 +234,6 @@ export const WorkspaceAbout = fp.flow(
     }
 
     get workspaceGcpBillingSpendUrl(): string {
-      // Don't render Billing URl because it is not needed and user might not have permission to know the attached billing account.
       return this.state.workspace
         ? 'https://console.cloud.google.com/billing/' +
             this.state.workspace.billingAccountName.replace(
