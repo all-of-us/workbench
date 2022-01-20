@@ -1,19 +1,18 @@
 import { Page } from 'puppeteer';
 import { LinkText } from 'app/text-labels';
 import Modal from './modal';
-import { waitForText } from 'utils/waits-utils';
+import { waitForText, waitWhileLoading } from 'utils/waits-utils';
 
 const modalTitle = 'Delete Runtime';
 
 export default class DeleteRuntimeModal extends Modal {
-  // constructor(page: Page, xpath?: string) {
-  //   super(page, xpath);
   constructor(page: Page, opts?: { xpath?: string; modalIndex?: number }) {
     super(page, opts);
   }
 
   async isLoaded(): Promise<boolean> {
     await waitForText(this.page, modalTitle, { container: this });
+    await waitWhileLoading(this.page);
     return true;
   }
 
