@@ -233,18 +233,19 @@ export const WorkspaceAbout = fp.flow(
       }
     }
 
-    get workspaceGcpBillingSpendUrl(): string {
-      return (
-        'https://console.cloud.google.com/billing/' +
-        this.state.workspace.billingAccountName.replace(
-          'billingAccounts/',
-          ''
-        ) +
-        '/reports;grouping=GROUP_BY_SKU?project=' +
-        this.state.workspace.googleProject +
-        '&authuser=' +
-        this.props.profileState.profile.username
-      );
+    workspaceGcpBillingSpendUrl(disabled: boolean): string {
+      // Don't render Billing URl because it is not needed and user might not have permission to know the attached billing account.
+      return disabled
+        ? ''
+        : 'https://console.cloud.google.com/billing/' +
+            this.state.workspace.billingAccountName.replace(
+              'billingAccounts/',
+              ''
+            ) +
+            '/reports;grouping=GROUP_BY_SKU?project=' +
+            this.state.workspace.googleProject +
+            '&authuser=' +
+            this.props.profileState.profile.username;
     }
 
     async publishUnpublishWorkspace(publish: boolean) {
@@ -443,19 +444,28 @@ export const WorkspaceAbout = fp.flow(
                   </div>
                 )}
             </div>
-            {workspace &&
-              WorkspacePermissionsUtil.isOwner(workspace.accessLevel) && (
-                <div>
-                  <h3 style={{ marginBottom: '0.5rem' }}>Billing</h3>
-                  <StyledExternalLink
-                    href={this.workspaceGcpBillingSpendUrl}
-                    target='_blank'
-                    disable={true}
-                  >
-                    View detailed spend report
-                  </StyledExternalLink>
-                </div>
-              )}
+
+            <div>
+              <h3 style={{ marginBottom: '0.5rem' }}>Billing</h3>
+              <StyledExternalLink
+                data-test-id='workspace-billing-report'
+                href={this.workspaceGcpBillingSpendUrl(
+                  !(
+                    workspace &&
+                    WorkspacePermissionsUtil.isOwner(workspace.accessLevel)
+                  )
+                )}
+                target='_blank'
+                disabled={
+                  !(
+                    workspace &&
+                    WorkspacePermissionsUtil.isOwner(workspace.accessLevel)
+                  )
+                }
+              >
+                View detailed spend report
+              </StyledExternalLink>
+            </div>
           </div>
           {sharing && (
             <WorkspaceShare

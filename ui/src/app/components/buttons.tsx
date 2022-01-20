@@ -544,13 +544,23 @@ export const StyledExternalLink = ({
   children,
   analyticsFn = null,
   style = {},
+  disabled = false,
   ...props
 }) => {
-  return (
+  const linkStyle = {
+    style: { ...styles.inlineAnchor },
+  };
+  const computedStyles = fp.merge(computeStyle(linkStyle, { disabled }), {
+    style,
+  });
+
+  return disabled ? (
+    <span {...computedStyles}>{children}</span>
+  ) : (
     <a
       href={href}
       onClick={() => analyticsFn && analyticsFn()}
-      style={{ ...styles.inlineAnchor, ...style }}
+      {...computedStyles}
       {...props}
     >
       {children}
