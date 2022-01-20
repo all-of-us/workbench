@@ -143,15 +143,12 @@ public class AccessModuleServiceImpl implements AccessModuleService {
 
   @Override
   public boolean hasUserSignedTheCurrentDucc(DbUser targetUser) {
-    // TODO simplify
+    final DbUserCodeOfConductAgreement duccAgreement = targetUser.getDuccAgreement();
+    if (duccAgreement == null) {
+      return false;
+    }
 
-    final int signedVersionForComparison =
-        Optional.ofNullable(targetUser.getDuccAgreement())
-            .map(DbUserCodeOfConductAgreement::getSignedVersion)
-            // if missing, convert to a known-invalid int
-            .orElse(getCurrentDuccVersion() - 1);
-
-    return signedVersionForComparison == getCurrentDuccVersion();
+    return duccAgreement.getSignedVersion() == getCurrentDuccVersion();
   }
 
   @Override
