@@ -270,6 +270,11 @@ public class WorkbenchConfig {
     // If true, copy the support staff when sending Admin Locking emails.
     public boolean ccSupportWhenAdminLocking;
     // If true, insert entries for DataSet and Cohort Review in user_recent_modified_resource table
+    // We are using the feature flag because displaying dataSet as recent resource is done as part
+    // of multiple PR
+    // and we want to ensure that when it is ready the new table user_recently_modified table is
+    // still same as
+    // previously used table user_Recent_resource
     public boolean enableDSCREntryInRecentModified;
   }
 

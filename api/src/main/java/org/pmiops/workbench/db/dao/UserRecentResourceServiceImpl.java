@@ -111,10 +111,6 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
 
   @Override
   public void updateDataSetEntry(long workspaceId, long userId, long dataSetId) {
-    // Save entry for data set in the new user_recently_modified table only when the feature flag is
-    // on
-    // this is because workbench doesnt store dataset information in the existing table
-    // user_recent_resources,
     if (workbenchConfigProvider.get().featureFlags.enableDSCREntryInRecentModified) {
       updateUserRecentlyModifiedResourceEntry(
           workspaceId,

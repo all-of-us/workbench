@@ -749,8 +749,7 @@ public class DataSetServiceTest {
   public void test_userRecentModifiedEntry_saveDataSet() {
     DataSet dataset = dataSetServiceImpl.saveDataSet(dbDataset);
     verify(userRecentResourceService)
-        .updateDataSetEntry(
-            cohort.getWorkspaceId(), cohort.getCreator().getUserId(), dataset.getId());
+        .updateDataSetEntry(dbDataset.getWorkspaceId(), dbDataset.getCreatorId(), dataset.getId());
   }
 
   @Test
