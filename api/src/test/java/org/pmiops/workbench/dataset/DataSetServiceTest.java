@@ -123,6 +123,7 @@ public class DataSetServiceTest {
 
   private DbWorkspace workspace;
   private DbCohort cohort;
+  private DbDataset dbDataset;
 
   @TestConfiguration
   @Import({FakeClockConfiguration.class, DataSetMapperImpl.class, DataSetServiceImpl.class})
@@ -153,6 +154,7 @@ public class DataSetServiceTest {
     cohort = cohortDao.save(buildSimpleCohort(workspace));
     when(mockCohortQueryBuilder.buildParticipantIdQuery(any()))
         .thenReturn(QUERY_JOB_CONFIGURATION_1);
+    dbDataset = createDbDataSetEntry();
   }
 
   private DbCohort buildSimpleCohort(DbWorkspace workspace) {
@@ -745,7 +747,6 @@ public class DataSetServiceTest {
 
   @Test
   public void test_userRecentModifiedEntry_saveDataSet() {
-    DbDataset dbDataset = createDbDataSetEntry();
     DataSet dataset = dataSetServiceImpl.saveDataSet(dbDataset);
     verify(userRecentResourceService)
         .updateDataSetEntry(
@@ -753,20 +754,12 @@ public class DataSetServiceTest {
   }
 
   @Test
-  public void test_userRecentModifiedEntry_updateDataSet() {
-    DbDataset dbDataset = createDbDataSetEntry();
-    DataSet dataset = dataSetServiceImpl.saveDataSet(dbDataset);
-    dbDataset.setName("Update DataSet Name");
-    DataSetRequest req = new DataSetRequest();
-    req.dataSetId(dataset.getId());
-    req.setName("Update DataSet Name");
-    req.setDomainValuePairs(dataset.getDomainValuePairs());
-    req.setCohortIds(dbDataset.getCohortIds());
-    req.setConceptSetIds(dbDataset.getConceptSetIds());
-    dataSetServiceImpl.updateDataSet(dataset.getWorkspaceId(), dataset.getId(), req);
+  public void test_userRecentModifiedEntry_deleteDataSet() {
+    dbDataset = dataSetDao.save(dbDataset);
+    long dataSetId = dbDataset.getDataSetId();
+    dataSetServiceImpl.deleteDataSet(dbDataset.getWorkspaceId(), dbDataset.getDataSetId());
     verify(userRecentResourceService)
-        .updateDataSetEntry(
-            cohort.getWorkspaceId(), cohort.getCreator().getUserId(), dataset.getId());
+        .deleteDataSetEntry(cohort.getWorkspaceId(), cohort.getCreator().getUserId(), dataSetId);
   }
 
   private void mockDomainTableFields() {

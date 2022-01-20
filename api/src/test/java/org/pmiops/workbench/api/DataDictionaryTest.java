@@ -22,6 +22,7 @@ import org.pmiops.workbench.dataset.DataSetServiceImpl;
 import org.pmiops.workbench.dataset.mapper.DataSetMapperImpl;
 import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
+import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
@@ -75,7 +76,8 @@ public class DataDictionaryTest {
     WorkspaceAuthService.class,
     AccessTierService.class,
     CdrVersionMapper.class,
-    GenomicExtractionService.class
+    GenomicExtractionService.class,
+    UserRecentResourceService.class
   })
   static class Configuration {}
 
