@@ -368,7 +368,9 @@ export async function waitWhileLoading(
 ): Promise<void> {
   const { waitForRuntime = false } = opts;
   const notBlankTitleXpath =
-    '//title[starts-with(text(), "[Test]") or starts-with(text(), "[Staging]" or starts-with(text(), "[Local->Test]")]';
+    '//title[starts-with(text(), "[Test]")' +
+    ' or starts-with(text(), "[Staging]")' +
+    ' or starts-with(text(), "[Local->Test]")]';
   const notBlankPageCss = 'div:not(empty):not([id="root"]):not([id="body"])';
   const spinElementsCss = `[style*="running spin"], .spinner:empty, [style*="running rotation"]${
     waitForRuntime ? '' : ':not([aria-hidden="true"]):not([data-test-id*="runtime-status"])'
