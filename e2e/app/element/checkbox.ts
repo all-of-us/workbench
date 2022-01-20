@@ -72,7 +72,7 @@ export default class Checkbox extends BaseElement {
   }
 
   // Override waitUntilEnabled in base-element.ts
-  // Web element property disabled is used to determine check state (enabled/disabled) of checkbox
+  // Web element property disabled is used to determine state (enabled/disabled) of checkbox
   async waitUntilEnabled(xpathSelector?: string): Promise<void> {
     const selector = xpathSelector || this.getXpath();
     const propertyName = 'disabled';

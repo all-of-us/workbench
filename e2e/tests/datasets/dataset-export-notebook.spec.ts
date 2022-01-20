@@ -65,6 +65,8 @@ describe('Export Notebook Test', () => {
 
     // Run all cells.
     await notebookPage.runAllCells();
+    await notebookPage.waitForKernelIdle(2 * 60 * 1000, 5000);
+    await notebookPage.save();
 
     // In both Python / R, the last cell contains a preview of the dataframe.
     const lastCell = await notebookPage.findLastCell();

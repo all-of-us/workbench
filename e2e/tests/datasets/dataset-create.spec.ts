@@ -3,10 +3,10 @@ import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { ConceptSetSelectValue, MenuOption, ResourceCard, WorkspaceAccessLevel } from 'app/text-labels';
 import { findOrCreateWorkspace, findWorkspaceCard, signInWithAccessToken } from 'utils/test-utils';
 import { waitWhileLoading } from 'utils/waits-utils';
-import DatasetEditPage from 'app/page/dataset-edit-page';
 import WorkspaceAboutPage from 'app/page/workspace-about-page';
 import { config } from 'resources/workbench-config';
 import { makeWorkspaceName } from 'utils/str-utils';
+import DatasetBuildPage from 'app/page/dataset-build-page';
 
 // 10 minutes.
 jest.setTimeout(10 * 60 * 1000);
@@ -94,7 +94,7 @@ describe('Create Dataset', () => {
 
     // Although Edit option is not available to click. User can click on dataset name and see the dataset details.
     await dataSetCard.clickResourceName();
-    const dataSetEditPage = new DatasetEditPage(page);
+    const dataSetEditPage = new DatasetBuildPage(page);
     await dataSetEditPage.waitForLoad();
 
     const analyzeButton = dataSetEditPage.getAnalyzeButton();
