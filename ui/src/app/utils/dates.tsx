@@ -35,8 +35,11 @@ export function displayDateWithoutHours(time: number): string {
 }
 
 // If the time passed is null, return the nullDateStringRep else format it into date without hours
-export function formatDates(time: number, nullDateStringRep: string): string {
-  return displayDateWithoutHours(time) || nullDateStringRep;
+export function formatDate(
+  timeInEpochMillis: number | undefined,
+  nullDateStringRep?: string
+): string {
+  return displayDateWithoutHours(timeInEpochMillis) || nullDateStringRep;
 }
 
 export function isDateValid(date: Date): boolean {

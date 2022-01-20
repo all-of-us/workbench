@@ -37,7 +37,7 @@ import {
   getAccessModuleStatusByName,
 } from 'app/utils/access-utils';
 import { hasRegisteredTierAccess } from 'app/utils/access-tiers';
-import { formatDates } from 'app/utils/dates';
+import { formatDate } from 'app/utils/dates';
 
 export const commonStyles = reactStyles({
   semiBold: {
@@ -156,20 +156,20 @@ export const isBypassed = (
 ): boolean =>
   !!getAccessModuleStatusByName(profile, moduleName)?.bypassEpochMillis;
 
-export const displayModuleCompletionTime = (
+export const displayModuleCompletionDate = (
   profile: Profile,
   moduleName: AccessModule
 ): string =>
-  formatDates(
+  formatDate(
     getAccessModuleStatusByName(profile, moduleName)?.completionEpochMillis,
     '-'
   );
 
-export const displayModuleExpirationTime = (
+export const displayModuleExpirationDate = (
   profile: Profile,
   moduleName: AccessModule
 ): string =>
-  formatDates(
+  formatDate(
     getAccessModuleStatusByName(profile, moduleName)?.expirationEpochMillis,
     '-'
   );
