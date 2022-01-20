@@ -38,6 +38,7 @@ import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserAccessTier;
+import org.pmiops.workbench.db.model.DbUserCodeOfConductAgreement;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.DirectoryService;
@@ -231,11 +232,7 @@ public class UserServiceAccessTest {
 
     // add a proper DUCC completion which will expire soon, but remove DUCC bypass
 
-    dbUser.setDuccAgreement(
-        TestMockFactory.createDuccAgreement(
-            dbUser,
-            accessModuleService.getCurrentDuccVersion(),
-            new Timestamp(PROVIDED_CLOCK.millis())));
+    dbUser.setDuccAgreement(signCurrentDucc(dbUser));
     accessModuleService.updateCompletionTime(
         dbUser, AccessModuleName.DATA_USER_CODE_OF_CONDUCT, willExpireAfter(Duration.ofDays(1)));
     dbUser = updateUserWithRetries(this::removeDuccBypass);
@@ -361,11 +358,7 @@ public class UserServiceAccessTest {
               dbUser.getUserId(), AccessModule.DATA_USER_CODE_OF_CONDUCT, false);
           accessModuleService.updateCompletionTime(
               dbUser, AccessModuleName.DATA_USER_CODE_OF_CONDUCT, Timestamp.from(START_INSTANT));
-          user.setDuccAgreement(
-              TestMockFactory.createDuccAgreement(
-                  user,
-                  accessModuleService.getCurrentDuccVersion() - 1,
-                  new Timestamp(PROVIDED_CLOCK.millis())));
+          user.setDuccAgreement(signDucc(user, accessModuleService.getCurrentDuccVersion() - 1));
           return userDao.save(user);
         });
   }
@@ -380,11 +373,7 @@ public class UserServiceAccessTest {
           accessModuleService.updateCompletionTime(
               dbUser, AccessModuleName.DATA_USER_CODE_OF_CONDUCT, willExpire);
 
-          user.setDuccAgreement(
-              TestMockFactory.createDuccAgreement(
-                  user,
-                  accessModuleService.getCurrentDuccVersion(),
-                  new Timestamp(PROVIDED_CLOCK.millis())));
+          user.setDuccAgreement(signCurrentDucc(user));
 
           advanceClockDays(EXPIRATION_DAYS + 1);
 
@@ -453,11 +442,7 @@ public class UserServiceAccessTest {
     accessModuleService.updateCompletionTime(dbUser, AccessModuleName.RT_COMPLIANCE_TRAINING, now);
 
     // a completion requirement for DUCC
-    dbUser.setDuccAgreement(
-        TestMockFactory.createDuccAgreement(
-            dbUser,
-            accessModuleService.getCurrentDuccVersion(),
-            new Timestamp(PROVIDED_CLOCK.millis())));
+    dbUser.setDuccAgreement(signCurrentDucc(dbUser));
 
     userService.maybeSendAccessExpirationEmail(dbUser);
 
@@ -495,11 +480,7 @@ public class UserServiceAccessTest {
     accessModuleService.updateCompletionTime(
         dbUser, AccessModuleName.DATA_USER_CODE_OF_CONDUCT, now);
     // a completion requirement for DUCC
-    dbUser.setDuccAgreement(
-        TestMockFactory.createDuccAgreement(
-            dbUser,
-            accessModuleService.getCurrentDuccVersion(),
-            new Timestamp(PROVIDED_CLOCK.millis())));
+    dbUser.setDuccAgreement(signCurrentDucc(dbUser));
 
     // expiring in 1 day (plus some) will trigger the 1-day warning
 
@@ -610,11 +591,7 @@ public class UserServiceAccessTest {
         dbUser, AccessModuleName.DATA_USER_CODE_OF_CONDUCT, now);
 
     // a completion requirement for DUCC
-    dbUser.setDuccAgreement(
-        TestMockFactory.createDuccAgreement(
-            dbUser,
-            accessModuleService.getCurrentDuccVersion(),
-            new Timestamp(PROVIDED_CLOCK.millis())));
+    dbUser.setDuccAgreement(signCurrentDucc(dbUser));
 
     // expiring in .5 days will not trigger an email
 
@@ -638,11 +615,7 @@ public class UserServiceAccessTest {
         dbUser, AccessModuleName.DATA_USER_CODE_OF_CONDUCT, now);
 
     // a completion requirement for DUCC
-    dbUser.setDuccAgreement(
-        TestMockFactory.createDuccAgreement(
-            dbUser,
-            accessModuleService.getCurrentDuccVersion(),
-            new Timestamp(PROVIDED_CLOCK.millis())));
+    dbUser.setDuccAgreement(signCurrentDucc(dbUser));
 
     // expiring in 30 days (plus) will trigger the 30-day warning
 
@@ -667,11 +640,7 @@ public class UserServiceAccessTest {
         dbUser, AccessModuleName.DATA_USER_CODE_OF_CONDUCT, now);
 
     // a completion requirement for DUCC
-    dbUser.setDuccAgreement(
-        TestMockFactory.createDuccAgreement(
-            dbUser,
-            accessModuleService.getCurrentDuccVersion(),
-            new Timestamp(PROVIDED_CLOCK.millis())));
+    dbUser.setDuccAgreement(signCurrentDucc(dbUser));
 
     // expiring in 31 days (plus) will not trigger a warning
     accessModuleService.updateCompletionTime(
@@ -693,11 +662,7 @@ public class UserServiceAccessTest {
         dbUser, AccessModuleName.PUBLICATION_CONFIRMATION, now);
 
     // a completion requirement for DUCC
-    dbUser.setDuccAgreement(
-        TestMockFactory.createDuccAgreement(
-            dbUser,
-            accessModuleService.getCurrentDuccVersion(),
-            new Timestamp(PROVIDED_CLOCK.millis())));
+    dbUser.setDuccAgreement(signCurrentDucc(dbUser));
 
     // expiring in 30 days (plus) would trigger the 30-day warning...
     final Duration thirtyPlus = daysPlusSome(30);
@@ -730,11 +695,7 @@ public class UserServiceAccessTest {
         dbUser, AccessModuleName.PUBLICATION_CONFIRMATION, now);
 
     // a completion requirement for DUCC
-    dbUser.setDuccAgreement(
-        TestMockFactory.createDuccAgreement(
-            dbUser,
-            accessModuleService.getCurrentDuccVersion(),
-            new Timestamp(PROVIDED_CLOCK.millis())));
+    dbUser.setDuccAgreement(signCurrentDucc(dbUser));
 
     // expiring in 15 days (plus) would trigger the 15-day warning...
     accessModuleService.updateCompletionTime(
@@ -760,11 +721,7 @@ public class UserServiceAccessTest {
         dbUser, AccessModuleName.DATA_USER_CODE_OF_CONDUCT, now);
 
     // a completion requirement for DUCC
-    dbUser.setDuccAgreement(
-        TestMockFactory.createDuccAgreement(
-            dbUser,
-            accessModuleService.getCurrentDuccVersion(),
-            new Timestamp(PROVIDED_CLOCK.millis())));
+    dbUser.setDuccAgreement(signCurrentDucc(dbUser));
 
     // but this is expired
     final Duration oneHour = Duration.ofHours(1);
@@ -791,11 +748,7 @@ public class UserServiceAccessTest {
         dbUser, AccessModuleName.DATA_USER_CODE_OF_CONDUCT, now);
 
     // a completion requirement for DUCC
-    dbUser.setDuccAgreement(
-        TestMockFactory.createDuccAgreement(
-            dbUser,
-            accessModuleService.getCurrentDuccVersion(),
-            new Timestamp(PROVIDED_CLOCK.millis())));
+    dbUser.setDuccAgreement(signCurrentDucc(dbUser));
 
     // but this expired yesterday
 
@@ -1233,6 +1186,15 @@ public class UserServiceAccessTest {
 
   private void advanceClockDays(long days) {
     PROVIDED_CLOCK.increment(daysPlusSome(days).toMillis());
+  }
+
+  private DbUserCodeOfConductAgreement signDucc(DbUser dbUser, int version) {
+    return TestMockFactory.createDuccAgreement(
+        dbUser, version, new Timestamp(PROVIDED_CLOCK.millis()));
+  }
+
+  private DbUserCodeOfConductAgreement signCurrentDucc(DbUser dbUser) {
+    return signDucc(dbUser, accessModuleService.getCurrentDuccVersion());
   }
 
   // checks which power most of these tests - confirm that the unregisteringFunction does that
