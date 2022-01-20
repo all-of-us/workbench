@@ -450,6 +450,7 @@ export const WorkspaceAbout = fp.flow(
                   <StyledExternalLink
                     href={this.workspaceGcpBillingSpendUrl}
                     target='_blank'
+                    disable={true}
                   >
                     View detailed spend report
                   </StyledExternalLink>
