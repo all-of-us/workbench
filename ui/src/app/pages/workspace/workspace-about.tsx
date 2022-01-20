@@ -446,7 +446,7 @@ export const WorkspaceAbout = fp.flow(
             </div>
 
             <TooltipTrigger
-              content='Only workspaces owners can view billing report'
+              content='Only workspaces owners can view the billing report'
               disabled={
                 workspace &&
                 WorkspacePermissionsUtil.isOwner(workspace.accessLevel)
