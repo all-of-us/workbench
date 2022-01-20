@@ -27,17 +27,16 @@ public interface AccessModuleService {
    *
    * @return
    */
-  Optional<AccessModuleStatus> getAccessModuleStatus(
-      DbUser user, AccessModuleName accessModuleName);
+  Optional<AccessModuleStatus> getAccessModuleStatus(DbUser user, AccessModuleName accessModuleName);
 
   /**
-   * Returns true is the access module compliant.
+   * Returns true if the access module is compliant.
    *
    * <p>The module can be bypassed OR (completed but not expired).
    */
   boolean isModuleCompliant(DbUser dbUser, AccessModuleName accessModuleName);
 
-  /** Returns true is the access module is bypassable and bypassed */
+  /** Returns true if the access module is bypassable and bypassed */
   boolean isModuleBypassed(DbUser dbUser, AccessModuleName accessModuleName);
 
   int getCurrentDuccVersion();

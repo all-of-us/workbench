@@ -438,12 +438,12 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     // RW-4838: dual-write the legacy DUA table and the new DUCC table for rollback safety
     // then delete the legacy DUA table after a release
     saveLegacyDUA(dbUser, duccSignedVersion, initials, timestamp);
-    saveDuccAgreement(dbUser, duccSignedVersion, initials, timestamp);
 
     return updateUserWithRetries(
         (user) -> {
           accessModuleService.updateCompletionTime(
               user, AccessModuleName.DATA_USER_CODE_OF_CONDUCT, timestamp);
+          user.setDuccAgreement(createDuccAgreement(user, duccSignedVersion, initials, timestamp));
           return user;
         },
         dbUser,
@@ -463,7 +463,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     userDataUseAgreementDao.save(dataUseAgreement);
   }
 
-  private void saveDuccAgreement(
+  private DbUserCodeOfConductAgreement createDuccAgreement(
       DbUser dbUser, Integer duccSignedVersion, String initials, Timestamp timestamp) {
     DbUserCodeOfConductAgreement ducc = new DbUserCodeOfConductAgreement();
     ducc.setUser(dbUser);
@@ -472,7 +472,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     ducc.setUserGivenName(dbUser.getGivenName());
     ducc.setUserInitials(initials);
     ducc.setCompletionTime(timestamp);
-    userCodeOfConductAgreementDao.save(ducc);
+    return ducc;
   }
 
   @Override
