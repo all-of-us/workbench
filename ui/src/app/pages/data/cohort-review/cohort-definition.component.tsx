@@ -296,49 +296,47 @@ export class CohortDefinition extends React.Component<
       <div style={{ marginTop: '1rem', marginBottom: '1rem' }}>
         <style>{css}</style>
         <div style={styles.defTitle}>Cohort Definition</div>
-        {definition &&
-          definition.map((group, g) => (
-            <React.Fragment key={g}>
-              {group.role === 'excludes' && (
-                <div className='page-break' style={styles.wrapper}>
-                  <div style={styles.exclude}>EXCLUDING</div>
-                </div>
-              )}
-              {group.groups.map((item, i) => (
-                <React.Fragment key={i}>
-                  {i > 0 && (
-                    <div className='page-break' style={styles.wrapper}>
-                      <div style={styles.andCircle}>AND</div>
-                    </div>
-                  )}
-                  <div style={styles.groupBackground}>
-                    {item.map((param, p) => (
-                      <React.Fragment key={p}>
-                        {p > 0 && <div>OR</div>}
-                        <div>
-                          {param.map((crit, c) => (
-                            <React.Fragment key={c}>
-                              {c > 0 && (
-                                <React.Fragment>
-                                  {crit.domain === Domain.PERSON && (
-                                    <div>AND</div>
-                                  )}
-                                  {crit.domain !== Domain.PERSON && (
-                                    <div>OR</div>
-                                  )}
-                                </React.Fragment>
-                              )}
-                              <div>{crit.items}</div>
-                            </React.Fragment>
-                          ))}
-                        </div>
-                      </React.Fragment>
-                    ))}
+        {definition?.map((group, g) => (
+          <React.Fragment key={g}>
+            {group.role === 'excludes' && (
+              <div className='page-break' style={styles.wrapper}>
+                <div style={styles.exclude}>EXCLUDING</div>
+              </div>
+            )}
+            {group.groups.map((item, i) => (
+              <React.Fragment key={i}>
+                {i > 0 && (
+                  <div className='page-break' style={styles.wrapper}>
+                    <div style={styles.andCircle}>AND</div>
                   </div>
-                </React.Fragment>
-              ))}
-            </React.Fragment>
-          ))}
+                )}
+                <div style={styles.groupBackground}>
+                  {item.map((param, p) => (
+                    <React.Fragment key={p}>
+                      {p > 0 && <div>OR</div>}
+                      <div>
+                        {param.map((crit, c) => (
+                          <React.Fragment key={c}>
+                            {c > 0 && (
+                              <React.Fragment>
+                                {crit.domain === Domain.PERSON ? (
+                                  <div>AND</div>
+                                ) : (
+                                  <div>OR</div>
+                                )}
+                              </React.Fragment>
+                            )}
+                            <div>{crit.items}</div>
+                          </React.Fragment>
+                        ))}
+                      </div>
+                    </React.Fragment>
+                  ))}
+                </div>
+              </React.Fragment>
+            ))}
+          </React.Fragment>
+        ))}
       </div>
     );
   }

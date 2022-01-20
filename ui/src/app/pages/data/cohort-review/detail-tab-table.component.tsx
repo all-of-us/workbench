@@ -826,12 +826,10 @@ export const DetailTabTable = fp.flow(
               } else {
                 // text filters
                 if (columnFilters[col]) {
-                  data = data.filter(
-                    (row) =>
-                      row[col] &&
-                      row[col]
-                        .toLowerCase()
-                        .includes(columnFilters[col].toLowerCase())
+                  data = data.filter((row) =>
+                    row[col]
+                      ?.toLowerCase()
+                      .includes(columnFilters[col].toLowerCase())
                   );
                 }
               }
@@ -848,7 +846,7 @@ export const DetailTabTable = fp.flow(
     errorMessage = () => {
       const { tabName } = this.props;
       const { data, filteredData, error } = this.state;
-      if ((filteredData && filteredData.length) || (!data && !error)) {
+      if (filteredData?.length || (!data && !error)) {
         return false;
       }
       let message: string;

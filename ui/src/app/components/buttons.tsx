@@ -530,7 +530,7 @@ export const StyledRouterLink = ({
   ) : (
     <Link
       to={path}
-      onClick={() => analyticsFn && analyticsFn()}
+      onClick={() => analyticsFn?.()}
       {...computedStyles}
       {...childProps}
     >
@@ -549,7 +549,7 @@ export const StyledExternalLink = ({
   return (
     <a
       href={href}
-      onClick={() => analyticsFn && analyticsFn()}
+      onClick={() => analyticsFn?.()}
       style={{ ...styles.inlineAnchor, ...style }}
       {...props}
     >

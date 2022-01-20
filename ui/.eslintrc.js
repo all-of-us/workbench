@@ -71,6 +71,7 @@ module.exports = {
     '@typescript-eslint/no-misused-new': 'warn',
     '@typescript-eslint/no-non-null-assertion': 'warn',
     '@typescript-eslint/no-shadow': 'warn',
+    '@typescript-eslint/prefer-optional-chain': 'warn',
     '@typescript-eslint/unified-signatures': 'warn',
     // '@typescript-eslint/member-ordering': ['warn', { 'classExpressions': ['method', 'field'] }],
 

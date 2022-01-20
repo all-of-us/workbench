@@ -69,7 +69,7 @@ validate.validators.checkEmailResponse = (value: CheckEmailResponse) => {
   if (value == null) {
     return '^Institutional membership check has not completed';
   }
-  if (value && value.isValidMember) {
+  if (value?.isValidMember) {
     return null;
   } else {
     return '^Email address is not a member of the selected institution';
@@ -118,7 +118,7 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
       // Check email and populate appropriate icon In case page is loaded :
       // after clicking PREVIOUS BUTTON from step 3 or
       // if the fields were populated and researcher moves to TOS and back
-      if (this.props.profile && this.props.profile.contactEmail) {
+      if (this.props.profile?.contactEmail) {
         this.checkEmail();
       }
     } catch (e) {
@@ -250,7 +250,7 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
       return '';
     }
     // No error if the institution check was successful.
-    if (checkEmailResponse && checkEmailResponse.isValidMember) {
+    if (checkEmailResponse?.isValidMember) {
       return '';
     }
 

@@ -234,7 +234,7 @@ export function getChartObj(chartObj: any) {
     }
     const chartRef = chartObj.container.parentElement;
     // check that chartRef is of type Element
-    if (chartRef && chartRef.tagName) {
+    if (chartRef?.tagName) {
       // create observer to redraw charts on div resize
       const ro = new ResizeObserver(() => {
         if (chartObj.hasRendered) {

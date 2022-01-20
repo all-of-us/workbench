@@ -316,7 +316,7 @@ export class LeoRuntimeInitializer {
     //
     // Certain runtime states require active intervention, such as deleting or resuming the runtime;
     // these are handled within the the polling loop.
-    if (this.pollAbortSignal && this.pollAbortSignal.aborted) {
+    if (this.pollAbortSignal?.aborted) {
       // We'll bail out early if an abort signal was triggered while waiting for the poll cycle.
       return this.reject(
         new LeoRuntimeInitializationAbortedError(
