@@ -36,7 +36,7 @@ export default class Container {
   }
 
   async waitUntilClose(timeout = 2 * 60 * 1000): Promise<void> {
-    await this.page.waitForXPath(this.getXpath(), { hidden: true, timeout });
+    await this.page.waitForXPath(this.getXpath(), { hidden: true, visible: false, timeout });
     await this.page.waitForTimeout(500); // For page rendering to finish.
   }
 

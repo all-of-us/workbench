@@ -21,6 +21,8 @@ import {
   AccessModuleExpirations,
   isBypassed,
   profileNeedsUpdate,
+  displayModuleCompletionDate,
+  displayModuleExpirationDate,
 } from './admin-user-common';
 import { FadeBox } from 'app/components/containers';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
@@ -282,6 +284,8 @@ const ToggleForModule = (props: ToggleProps) => {
 
 interface TableRow {
   moduleName: string;
+  completionDate: string;
+  expirationDate: string;
   bypassToggle: JSX.Element;
 }
 
@@ -292,6 +296,14 @@ const AccessModuleTable = (props: AccessModuleTableProps) => {
 
     return {
       moduleName: adminPageTitle,
+      completionDate: displayModuleCompletionDate(
+        props.updatedProfile,
+        moduleName
+      ),
+      expirationDate: displayModuleExpirationDate(
+        props.updatedProfile,
+        moduleName
+      ),
       bypassToggle: adminBypassable && (
         <ToggleForModule moduleName={moduleName} {...props} />
       ),
@@ -303,6 +315,8 @@ const AccessModuleTable = (props: AccessModuleTableProps) => {
       <div style={styles.tableHeader}>Access status</div>
       <DataTable style={{ paddingTop: '1em' }} value={tableData}>
         <Column field='moduleName' header='Access Module' />
+        <Column field='completionDate' header='Last completed on' />
+        <Column field='expirationDate' header='Expires on' />
         <Column field='bypassToggle' header='Bypass' />
       </DataTable>
     </FlexColumn>

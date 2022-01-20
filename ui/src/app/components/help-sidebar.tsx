@@ -34,13 +34,13 @@ import {
   switchCase,
   withCdrVersions,
   withCurrentCohortCriteria,
+  withCurrentCohortSearchContext,
   withCurrentConcept,
   withCurrentWorkspace,
   withUserProfile,
 } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
 import {
-  currentCohortSearchContextStore,
   currentConceptStore,
   NavigationProps,
   setSidebarActiveIconStore,
@@ -255,6 +255,7 @@ interface Props extends NavigationProps {
   compoundRuntimeOps: CompoundRuntimeOpStore;
   cdrVersionTiersResponse: CdrVersionTiersResponse;
   genomicExtraction: GenomicExtractionStore;
+  cohortContext: any;
 }
 
 enum CurrentModal {
@@ -277,6 +278,7 @@ interface State {
 
 export const HelpSidebar = fp.flow(
   withCurrentCohortCriteria(),
+  withCurrentCohortSearchContext(),
   withCurrentConcept(),
   withCurrentWorkspace(),
   withRuntimeStore(),
@@ -970,7 +972,7 @@ export const HelpSidebar = fp.flow(
             bodyWidthRem: '20',
             bodyPadding: '0.75rem 0.75rem 0',
             renderBody: () =>
-              !!currentCohortSearchContextStore.getValue() && (
+              !!this.props.cohortContext && (
                 <SelectionList
                   back={() => this.setActiveIcon(null)}
                   selections={[]}

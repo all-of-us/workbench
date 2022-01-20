@@ -181,6 +181,10 @@ export enum HeaderName {
   UserEmailInstruction = 'User Email Instruction'
 }
 
+export const CohortsSelectValue = {
+  AllParticipants: 'All Participants'
+};
+
 export const ConceptSetSelectValue = {
   AllSurveys: 'All Surveys',
   Demographics: 'Demographics',
@@ -192,7 +196,9 @@ export const ConceptSetSelectValue = {
 };
 
 export const DatasetValueSelect = {
-  VCFFile: 'VCF Files'
+  VCFFile: 'VCF Files',
+  PersonID: 'person_id',
+  GenderConceptId: 'gender_concept_id'
 };
 
 export enum AgeSelectionRadioButton {
