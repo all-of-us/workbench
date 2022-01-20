@@ -1,5 +1,5 @@
 import { Page } from 'puppeteer';
-import { waitForText } from 'utils/waits-utils';
+import { waitForText, waitWhileLoading } from 'utils/waits-utils';
 import Modal from './modal';
 import Button from 'app/element/button';
 import { LinkText } from 'app/text-labels';
@@ -8,29 +8,23 @@ import Textarea from 'app/element/textarea';
 const modalTitle = 'Lock workspace';
 
 export default class LockWorkspaceModal extends Modal {
-  // constructor(page: Page, xpath?: string) {
-  //   super(page, xpath);
   constructor(page: Page, opts?: { xpath?: string; modalIndex?: number }) {
     super(page, opts);
   }
 
   async isLoaded(): Promise<boolean> {
     await waitForText(this.page, modalTitle, { container: this });
+    await waitWhileLoading(this.page);
     return true;
   }
 
-  // click cancel button of the lock workspace modal
-  clickCancelButton(): Button {
+  // get cancel button of the lock workspace modal
+  getCancelButton(): Button {
     return Button.findByName(this.page, { name: LinkText.Cancel });
   }
 
   getLockWorkspaceButton(): Button {
     return Button.findByName(this.page, { name: LinkText.LockWorkspace });
-  }
-
-  // click lock workspace button of the modal
-  async clickLockWorkspaceButton(): Promise<void> {
-    await this.clickButton(LinkText.LockWorkspace);
   }
 
   getLockWorkspaceTextArea(): Textarea {
@@ -47,5 +41,9 @@ export default class LockWorkspaceModal extends Modal {
     // Type new message.
     const reasonInput = this.getLockWorkspaceTextArea();
     await reasonInput.type(reasonText);
+  }
+
+  async clickCancelButton(): Promise<void> {
+    this.getCancelButton();
   }
 }
