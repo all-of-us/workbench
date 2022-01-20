@@ -8,7 +8,6 @@ import WorkspacesPage from 'app/page/workspaces-page';
 import WorkspaceCard from 'app/component/workspace-card';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import AdminNotebookPreviewPage from 'app/page/admin-notebook-preview-page';
-import { waitForDocumentTitle } from 'utils/waits-utils';
 import { Page } from 'puppeteer';
 import NotebookPreviewPage from 'app/page/notebook-preview-page';
 
@@ -25,8 +24,8 @@ describe('Workspace Admin', () => {
     const workspacesPage = new WorkspacesPage(page);
     await workspacesPage.load();
     await workspacesPage.createWorkspace(workspaceName);
-    await waitForDocumentTitle(page, 'Data Page');
     const dataPage = new WorkspaceDataPage(page);
+    await dataPage.waitForLoad;
     //extract the Workspace-Namespace
     workspaceNamespace = await dataPage.extractWorkspaceNamespace();
 
@@ -56,7 +55,7 @@ describe('Workspace Admin', () => {
 
     await lockWorkspaceModal.createLockWorkspaceReason();
     expect(await lockWorkspaceModal.getLockWorkspaceButton().isCursorNotAllowed()).toBe(false);
-    lockWorkspaceModal.clickCancelButton();
+    await lockWorkspaceModal.clickCancelButton();
     await workspaceAdminPage.waitForLoad();
   });
 
@@ -111,7 +110,7 @@ describe('Workspace Admin', () => {
     await workspaceAdminPage.clickLoadWorkspaceButton();
     await workspaceAdminPage.waitForLoad();
 
-    //verify the runtime status is running
+    // verify the runtime status is running
     expect(await workspaceAdminPage.getRuntimeStatus()).toEqual('Running');
     const deleteRuntimeModal = await workspaceAdminPage.clickRuntimeDeleteButton();
     await deleteRuntimeModal.clickCancelButton();
@@ -121,6 +120,7 @@ describe('Workspace Admin', () => {
     // delete the runtime
     await deleteRuntimeModal.clickDeleteButton();
     await page.waitForTimeout(50000);
+    await workspaceAdminPage.getDeleteStatus();
 
     //verify the runtime status is deleting
     expect(await workspaceAdminPage.getRuntimeStatus()).toEqual('Deleting');
@@ -128,6 +128,7 @@ describe('Workspace Admin', () => {
 
   async function createDatasetNotebook(page: Page, pyNotebookName: string): Promise<NotebookPreviewPage> {
     const dataPage = new WorkspaceDataPage(page);
+    await dataPage.waitForLoad;
     const datasetBuildPage = await dataPage.clickAddDatasetButton();
 
     // Step 1 Select Cohort: Choose "All Participants"
