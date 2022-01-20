@@ -100,7 +100,6 @@
   },
   "featureFlags": {
     "unsafeAllowDeleteUser": false,
-    "enableBillingUpgrade": true,
     "enableEventDateModifier": false,
     "enableResearchPurposePrompt": false,
     "enableGenomicExtraction": false,
