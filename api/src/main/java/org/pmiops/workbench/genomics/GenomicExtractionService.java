@@ -409,7 +409,7 @@ public class GenomicExtractionService {
                             .put(EXTRACT_WORKFLOW_NAME + ".output_gcs_dir", "\"" + outputDir + "\"")
                             .put(
                                 EXTRACT_WORKFLOW_NAME + ".gatk_override",
-                                "\"gs://all-of-us-workbench-test-genomics/wgs/gatk-package-4.2.0.0-359-gb3f0558-SNAPSHOT-local.jar\"")
+                                "\"" + cohortExtractionConfig.gatkJarUri + "\"")
                             .build())
                     .methodConfigVersion(
                         cohortExtractionConfig.extractionMethodConfigurationVersion)

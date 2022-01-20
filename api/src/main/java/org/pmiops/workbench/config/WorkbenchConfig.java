@@ -174,6 +174,7 @@ public class WorkbenchConfig {
     public String extractionCohortsDataset;
     public String extractionDestinationDataset;
     public String extractionTempTablesDataset;
+    public String gatkJarUri;
     public boolean enableJiraTicketingOnFailure;
   }
 
