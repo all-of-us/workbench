@@ -104,7 +104,6 @@ describe('Workspace Admin', () => {
     await runtimePanel.createRuntime();
     await page.waitForTimeout(2000);
 
-
     const workspaceAdminPage = new WorkspaceAdminPage(page);
     // navigate back to workspace admin page
     await navigation.navMenu(page, NavLink.WORKSPACE_ADMIN);
