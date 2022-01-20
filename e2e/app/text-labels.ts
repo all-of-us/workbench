@@ -105,9 +105,12 @@ export enum LinkText {
   GoToCopiedConceptSet = 'Go to Copied Concept Set',
   GoToCopiedNotebook = 'Go to Copied Notebook',
   KeepEditing = 'Keep Editing',
+  LoadWorkspace = 'Load Workspace',
+  LockWorkspace = 'LOCK WORKSPACE',
   Next = 'Next',
   No = 'No',
   OK = 'OK',
+  Preview = 'Preview',
   Rename = 'Rename',
   RenameCohort = 'Rename Cohort',
   RenameCohortReview = 'Rename Cohort Review',
@@ -202,4 +205,10 @@ export enum AgeSelectionRadioButton {
   AgeAtCdrDate = 'Age at CDR Date',
   CurrentAge = 'Current Age',
   AgeAtConsent = 'Age at Consent'
+}
+
+export enum CloudStorageHeader {
+  Location = 'Location',
+  Filename = 'Filename',
+  FileSize = 'File size (MB)'
 }
