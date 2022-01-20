@@ -34,7 +34,6 @@ import {
 import {
   CheckEmailResponse,
   InstitutionalRole,
-  InstitutionMembershipRequirement,
   Profile,
   PublicInstitutionDetails,
 } from 'generated/fetch';
@@ -65,16 +64,8 @@ const styles = reactStyles({
  * entered email address is a valid member of the institution.
  *
  * @param value
- * @param options
- * @param key
- * @param attributes
  */
-validate.validators.checkEmailResponse = (
-  value: CheckEmailResponse,
-  options,
-  key,
-  attributes
-) => {
+validate.validators.checkEmailResponse = (value: CheckEmailResponse) => {
   if (value == null) {
     return '^Institutional membership check has not completed';
   }

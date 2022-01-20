@@ -160,7 +160,7 @@ describe('WorkspaceAbout', () => {
   it('should not manipulate SpecificPopulationItems object on page load', async () => {
     const raceSubCategoriesBeforePageload =
       SpecificPopulationItems[0].subCategory.length;
-    const wrapper = component();
+    component();
     const raceSubCategoriesAfterPageLoad =
       SpecificPopulationItems[0].subCategory.length;
     expect(raceSubCategoriesBeforePageload).toBe(

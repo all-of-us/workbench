@@ -345,7 +345,6 @@ export const SignedInRoutes = () => {
       <AppRoute
         path='/workspaces/:ns/:wsid'
         exact={false}
-        intermediaryRoute={true}
         guards={[expiredGuard, registrationGuard]}
       >
         <WorkspaceWrapperPage intermediaryRoute={true} routeData={{}} />

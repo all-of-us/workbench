@@ -402,7 +402,7 @@ export const SidebarContent = fp.flow(
         });
     }
 
-    componentDidUpdate(prevProps: SidebarProps, prevState: SidebarState): void {
+    componentDidUpdate(prevProps: SidebarProps): void {
       const {
         cohortReview: { cohortReviewId },
         participant,

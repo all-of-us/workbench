@@ -2,7 +2,6 @@ package org.pmiops.workbench.db.model;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
-import org.pmiops.workbench.db.model.DbWorkspace.BillingMigrationStatus;
 import org.pmiops.workbench.model.AnnotationType;
 import org.pmiops.workbench.model.ArchivalStatus;
 import org.pmiops.workbench.model.Authority;
@@ -102,23 +101,6 @@ public final class DbStorageEnums {
 
   public static Short authorityToStorage(Authority authority) {
     return CLIENT_TO_STORAGE_AUTHORITY.get(authority);
-  }
-
-  // BillingMigrationStatus
-  private static final BiMap<BillingMigrationStatus, Short>
-      CLIENT_TO_STORAGE_BILLING_MIGRATION_STATUS =
-          ImmutableBiMap.<BillingMigrationStatus, Short>builder()
-              .put(BillingMigrationStatus.OLD, (short) 0)
-              .put(BillingMigrationStatus.NEW, (short) 1)
-              .put(BillingMigrationStatus.MIGRATED, (short) 2)
-              .build();
-
-  public static BillingMigrationStatus billingMigrationStatusFromStorage(Short s) {
-    return CLIENT_TO_STORAGE_BILLING_MIGRATION_STATUS.inverse().get(s);
-  }
-
-  public static Short billingMigrationStatusToStorage(BillingMigrationStatus s) {
-    return CLIENT_TO_STORAGE_BILLING_MIGRATION_STATUS.get(s);
   }
 
   // BillingStatus

@@ -9,7 +9,6 @@ import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.db.model.DbWorkspace.BillingMigrationStatus;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
@@ -113,8 +112,8 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long>, Workspa
 
   List<DbWorkspace> findAllByNeedsResearchPurposeReviewPrompt(short researchPurposeReviewed);
 
-  default List<DbWorkspace> findAllByBillingMigrationStatus(BillingMigrationStatus status) {
-    return findAllByBillingMigrationStatus(DbStorageEnums.billingMigrationStatusToStorage(status));
+  default List<DbWorkspace> findAllWithBillingMigrationNewStatus() {
+    return findAllByBillingMigrationStatus(DbWorkspace.BILLING_MIGRATION_NEW_STATUS);
   }
 
   default void updateBillingStatus(long workspaceId, BillingStatus status) {

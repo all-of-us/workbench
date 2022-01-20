@@ -26,11 +26,7 @@ import {
   displayNameForTier,
 } from 'app/utils/access-tiers';
 import { AnalyticsTracker, triggerEvent } from 'app/utils/analytics';
-import {
-  currentWorkspaceStore,
-  NavigationProps,
-  useNavigation,
-} from 'app/utils/navigation';
+import { currentWorkspaceStore, NavigationProps } from 'app/utils/navigation';
 import { serverConfigStore } from 'app/utils/stores';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';

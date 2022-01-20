@@ -99,13 +99,13 @@ export class SearchInput extends React.Component<
     enabled: true,
     placeholder: '',
     value: '',
-    onSearch: (keyword: String) => {
-      return new Promise<Array<string>>((accept, reject) => {
+    onSearch: () => {
+      return new Promise<Array<string>>((accept) => {
         accept([]);
       });
     },
     tooltip: '',
-    onChange: (newInput: string) => {},
+    onChange: () => {},
   };
 
   // Forward declarations

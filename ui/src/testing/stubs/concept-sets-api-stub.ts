@@ -2,7 +2,6 @@ import {
   ConceptSet,
   ConceptSetListResponse,
   ConceptSetsApi,
-  CopyRequest,
   CreateConceptSetRequest,
   Criteria,
   CriteriaType,
@@ -160,10 +159,7 @@ export class ConceptSetsApiStub extends ConceptSetsApi {
     return target;
   }
 
-  public getConceptSetsInWorkspace(
-    workspaceNamespace: string,
-    workspaceId: string
-  ): Promise<ConceptSetListResponse> {
+  public getConceptSetsInWorkspace(): Promise<ConceptSetListResponse> {
     return new Promise<ConceptSetListResponse>((resolve) => {
       resolve({ items: this.conceptSets });
     });
@@ -256,12 +252,7 @@ export class ConceptSetsApiStub extends ConceptSetsApi {
     });
   }
 
-  copyConceptSet(
-    fromWorkspaceNamespace: string,
-    fromWorkspaceId: string,
-    fromNotebookName: String,
-    copyRequest: CopyRequest
-  ): Promise<any> {
+  copyConceptSet(): Promise<any> {
     return new Promise<any>((resolve) => {
       resolve({});
     });

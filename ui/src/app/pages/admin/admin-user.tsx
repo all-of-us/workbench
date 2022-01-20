@@ -36,9 +36,9 @@ import {
   getPublicInstitutionDetails,
   ContactEmailTextInput,
   updateAccountProperties,
-  enableSave,
   ErrorsTooltip,
   AccessModuleExpirations,
+  profileNeedsUpdate,
 } from './admin-user-common';
 
 const styles = reactStyles({
@@ -446,7 +446,10 @@ export const AdminUser = withRouter(
                 <ErrorsTooltip errors={errors}>
                   <Button
                     type='primary'
-                    disabled={!enableSave(oldProfile, updatedProfile, errors)}
+                    disabled={
+                      !!errors ||
+                      !profileNeedsUpdate(oldProfile, updatedProfile)
+                    }
                     onClick={async () => {
                       this.setState({ loading: true });
                       const response = await updateAccountProperties(

@@ -43,7 +43,6 @@ import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.db.model.DbWorkspace.BillingMigrationStatus;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
@@ -743,7 +742,6 @@ public class NotebooksControllerTest {
         .setFirecloudName("fc-name")
         .setWorkspaceNamespace("namespace")
         .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE)
-        .setBillingMigrationStatusEnum(BillingMigrationStatus.NEW)
         .setCdrVersion(cdrVersion)
         .setGoogleProject("proj");
   }

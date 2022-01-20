@@ -1,10 +1,4 @@
-import {
-  Button,
-  Clickable,
-  LinkButton,
-  StyledExternalLink,
-  StyledRouterLink,
-} from 'app/components/buttons';
+import { Button, Clickable, LinkButton } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { ClrIcon } from 'app/components/icons';
 import { ErrorMessage, WarningMessage } from 'app/components/messages';
@@ -44,9 +38,7 @@ import { applyPresetOverride, runtimePresets } from 'app/utils/runtime-presets';
 import { isUsingFreeTierBillingAccount } from 'app/utils/workspace-utils';
 import { RuntimeCostEstimator } from 'app/components/runtime-cost-estimator';
 import { RuntimeSummary } from 'app/components/runtime-summary';
-import { environment } from 'environments/environment';
 import {
-  compareGpu,
   diffsToUpdateMessaging,
   getRuntimeConfigDiffs,
   RuntimeConfig,
@@ -1640,10 +1632,6 @@ const RuntimePanel = fp.flow(
       (pdExists || !gceExists);
     const unattachedPdExists = enablePD && !gceExists && pdExists;
     const pdSizeReduced = selectedPdSize < pdSize;
-    const gpuConfigDiffType = compareGpu(
-      initialRuntimeConfig,
-      newRuntimeConfig
-    ).differenceType;
     // A runtime context can wrap/pass complex runtime context and also make the code cleaner
     const runtimeCtx = {
       runtimeExists: runtimeExists,

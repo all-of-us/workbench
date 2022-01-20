@@ -17,7 +17,7 @@ import {
 } from 'testing/stubs/cohort-review-service-stub';
 import { workspaceDataStub } from 'testing/stubs/workspaces';
 import { SidebarContent } from './sidebar-content.component';
-import { MemoryRouter, Route } from 'react-router-dom';
+import { MemoryRouter } from 'react-router-dom';
 
 describe('SidebarContent', () => {
   beforeEach(() => {
@@ -31,8 +31,6 @@ describe('SidebarContent', () => {
   });
 
   it('should render', () => {
-    const { namespace, id } = workspaceDataStub;
-    const { cohortId, participantCohortStatuses } = cohortReviewStubs[0];
     const wrapper = mount(
       <MemoryRouter>
         <SidebarContent

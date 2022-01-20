@@ -85,12 +85,12 @@ export const AdminInstitution = fp.flow(withNavigation)(
       }
     }
 
-    renderInstitutionName(row, col) {
+    renderInstitutionName(row) {
       const link = 'admin/institution/edit/' + row['shortName'];
       return <a href={link}> {row['displayName']}</a>;
     }
 
-    renderOrganizationType(row, col) {
+    renderOrganizationType(row) {
       // This should fail if the organization value is not in list
       const organizationLabel = OrganizationTypeOptions.filter(
         (organization) => organization.value === row['organizationTypeEnum']
@@ -101,7 +101,7 @@ export const AdminInstitution = fp.flow(withNavigation)(
       return organizationLabel;
     }
 
-    renderAccessTiers(row, col) {
+    renderAccessTiers(row) {
       let tiers = '';
       if (
         getRegisteredTierConfig(row).membershipRequirement !==

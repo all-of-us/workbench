@@ -71,7 +71,7 @@ const FooterAnchorTag = ({ style = {}, href, ...props }) => {
   );
 };
 
-const NewTabFooterAnchorTag = ({ style = {}, href, ...props }) => {
+const NewTabFooterAnchorTag = ({ href, ...props }) => {
   return (
     <StyledExternalLink
       style={{ ...styles.footerAnchor, ...styles }}
@@ -251,7 +251,7 @@ const WorkbenchFooter = withUserProfile()(
   }
 );
 
-const RegistrationFooter = ({ style = {}, ...props }) => {
+const RegistrationFooter = ({ ...props }) => {
   return (
     <FooterTemplate {...props}>
       <FlexColumn>

@@ -130,8 +130,8 @@ export class InstitutionApiStub extends InstitutionApi {
     });
   }
 
-  getInstitutions(shortName: string): Promise<GetInstitutionsResponse> {
-    return new Promise((resolve, reject) => {
+  getInstitutions(): Promise<GetInstitutionsResponse> {
+    return new Promise((resolve) => {
       const institution = { institutions: this.institutions };
       resolve(institution);
     });
@@ -168,8 +168,7 @@ export class InstitutionApiStub extends InstitutionApi {
 
   async checkEmail(
     shortName: string,
-    request: CheckEmailRequest,
-    options?: any
+    request: CheckEmailRequest
   ): Promise<CheckEmailResponse> {
     const { contactEmail } = request;
     const domain = contactEmail.substring(contactEmail.lastIndexOf('@') + 1);

@@ -13,7 +13,6 @@ import {
 } from 'app/utils/leo-runtime-initializer';
 import {
   currentWorkspaceStore,
-  navigateSignOut,
   nextWorkspaceWarmupStore,
   useNavigation,
 } from 'app/utils/navigation';

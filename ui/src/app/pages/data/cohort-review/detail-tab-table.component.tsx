@@ -669,6 +669,16 @@ export const DetailTabTable = fp.flow(
       }
     }
 
+    // Scrolls to the bottom of the table content if an overlay or chart is expanded on the last row
+    scrollToBottom(rowIndex, numberOfRows) {
+      if (rowIndex === numberOfRows - 1) {
+        const tableBody = document.getElementsByClassName(
+          'p-datatable-scrollable-body'
+        );
+        tableBody[0].scrollTop = tableBody[0].scrollHeight;
+      }
+    }
+
     overlayTemplate = (rowData: any, column: any) => {
       let vl: any;
       const {
@@ -688,7 +698,10 @@ export const DetailTabTable = fp.flow(
               <i
                 className='pi pi-caret-down'
                 style={styles.caretIcon}
-                onClick={(e) => vl.toggle(e)}
+                onClick={(e) => {
+                  vl.toggle(e);
+                  this.scrollToBottom(column.rowIndex, column.value.length);
+                }}
               />
             )}
             <OverlayPanel
@@ -1236,7 +1249,12 @@ export const DetailTabTable = fp.flow(
           <style>{datatableStyles}</style>
           <DataTable
             expandedRows={expandedRows}
-            onRowToggle={(e) => this.setState({ expandedRows: e.data })}
+            onRowToggle={({ data }) => this.setState({ expandedRows: data })}
+            onRowExpand={({ data }) =>
+              setTimeout(() =>
+                this.scrollToBottom(value.indexOf(data), value.length)
+              )
+            }
             rowExpansionTemplate={this.rowExpansionTemplate}
             rowClassName={this.hideGraphIcon}
             style={styles.table}

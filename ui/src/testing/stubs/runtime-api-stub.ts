@@ -4,7 +4,6 @@ import {
   Runtime,
   RuntimeApi,
   RuntimeConfigurationType,
-  RuntimeLocalizeRequest,
   RuntimeLocalizeResponse,
   RuntimeStatus,
 } from 'generated/fetch';
@@ -50,7 +49,7 @@ export class RuntimeApiStub extends RuntimeApi {
     this.runtime = defaultRuntime();
   }
 
-  getRuntime(workspaceNamespace: string, options?: any): Promise<Runtime> {
+  getRuntime(): Promise<Runtime> {
     return new Promise<Runtime>((resolve) => {
       resolve(this.runtime);
     });
@@ -63,14 +62,14 @@ export class RuntimeApiStub extends RuntimeApi {
     });
   }
 
-  deleteRuntime(workspaceNamespace: string, options?: any): Promise<{}> {
+  deleteRuntime(): Promise<{}> {
     return new Promise<{}>((resolve) => {
       this.runtime.status = RuntimeStatus.Deleting;
       resolve({});
     });
   }
 
-  updateRuntime(workspaceNamespace: string, options?: any): Promise<{}> {
+  updateRuntime(): Promise<{}> {
     return new Promise<{}>((resolve) => {
       // Setting it to Running doesn't really make sense but it reflects
       // what is currently happening in the product.
@@ -79,11 +78,7 @@ export class RuntimeApiStub extends RuntimeApi {
     });
   }
 
-  localize(
-    projectName: string,
-    req: RuntimeLocalizeRequest,
-    extraHttpRequestParams?: any
-  ): Promise<RuntimeLocalizeResponse> {
+  localize(): Promise<RuntimeLocalizeResponse> {
     return new Promise<RuntimeLocalizeResponse>((resolve) => {
       resolve({ runtimeLocalDirectory: 'workspaces/${req.workspaceId}' });
     });

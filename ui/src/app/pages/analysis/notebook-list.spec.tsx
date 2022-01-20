@@ -8,7 +8,7 @@ import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { NotebooksApi, ProfileApi, WorkspacesApi } from 'generated/fetch';
 import { ProfileApiStub } from 'testing/stubs/profile-api-stub';
 import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
-import { workspaceDataStub, workspaceStubs } from 'testing/stubs/workspaces';
+import { workspaceDataStub } from 'testing/stubs/workspaces';
 import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
 import { NotebooksApiStub } from 'testing/stubs/notebooks-api-stub';
 

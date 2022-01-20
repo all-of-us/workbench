@@ -1,5 +1,3 @@
-import * as React from 'react';
-
 import {
   leoRuntimesApi,
   registerApiClient as registerApiClientNotebooks,
@@ -84,7 +82,7 @@ describe('RuntimeInitializer', () => {
     maxLoops: number = 20
   ) => {
     let isSettled = false;
-    p.then(() => (isSettled = true)).catch((e) => {
+    p.then(() => (isSettled = true)).catch(() => {
       isSettled = true;
     });
     let i = 0;
@@ -181,7 +179,7 @@ describe('RuntimeInitializer', () => {
 
   it("should error and suggest user's most runtime if a valid one exists", async () => {
     serverConfigStore.set({ config: { gsuiteDomain: 'researchallofus.org' } });
-    mockGetRuntime.mockImplementation((namespace) => {
+    mockGetRuntime.mockImplementation(() => {
       return {
         ...defaultRuntime(),
         configurationType: RuntimeConfigurationType.UserOverride,
@@ -211,7 +209,7 @@ describe('RuntimeInitializer', () => {
 
   it('should error and suggest preset values if a preset was selected for deleted runtime', async () => {
     serverConfigStore.set({ config: { gsuiteDomain: 'researchallofus.org' } });
-    mockGetRuntime.mockImplementation((namespace) => {
+    mockGetRuntime.mockImplementation(() => {
       return {
         ...defaultRuntime(),
         configurationType: RuntimeConfigurationType.GeneralAnalysis,
