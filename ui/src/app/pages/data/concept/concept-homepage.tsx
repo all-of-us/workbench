@@ -311,7 +311,7 @@ export const ConceptHomepage = fp.flow(
           console.error(e);
         });
       await Promise.all([getDomainCards, getSurveyInfo]);
-      if (cohortContext && cohortContext.searchTerms) {
+      if (cohortContext?.searchTerms) {
         this.updateCardCounts();
       }
       this.setState({ loadingDomains: false });

@@ -459,7 +459,7 @@ export const Select = ({ value, options, onChange, ...props }) => {
     <RSelect
       value={options.find((o) => o.value === value)}
       options={options}
-      onChange={(o) => onChange(o && o.value)}
+      onChange={(o) => onChange(o?.value)}
       {...props}
     />
   );

@@ -55,7 +55,7 @@ export const useNavigation = () => {
     url = '/' + url.replace(/^\//, '');
 
     const preventDefaultIfNoKeysPressed =
-      extras && extras.preventDefaultIfNoKeysPressed && !!extras.event;
+      extras?.preventDefaultIfNoKeysPressed && !!extras.event;
 
     // if modifier keys are pressed (like shift or cmd) use the href
     // if no keys are pressed, prevent default behavior and route using navigateByUrl
@@ -73,10 +73,9 @@ export const useNavigation = () => {
 
     history.push({
       pathname: url,
-      search:
-        extras && extras.queryParams
-          ? querystring.stringify(extras.queryParams)
-          : '',
+      search: extras?.queryParams
+        ? querystring.stringify(extras.queryParams)
+        : '',
     });
   };
 

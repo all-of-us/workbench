@@ -1156,10 +1156,7 @@ export const WorkspaceEdit = fp.flow(
           if (error.statusCode === 429) {
             errorMsg =
               'Server is overloaded. Please try again in a few minutes.';
-          } else if (
-            error.message &&
-            error.message.includes('billing account is closed')
-          ) {
+          } else if (error.message?.includes('billing account is closed')) {
             errorMsg = error.message;
           } else {
             errorMsg = `Could not
@@ -1293,10 +1290,7 @@ export const WorkspaceEdit = fp.flow(
           presence: true,
         };
       }
-      if (
-        populationDetails &&
-        populationDetails.includes(SpecificPopulationEnum.OTHER)
-      ) {
+      if (populationDetails?.includes(SpecificPopulationEnum.OTHER)) {
         values = { ...values, otherPopulationDetails };
         constraints['otherPopulationDetails'] = requiredStringWithMaxLength(
           100,
@@ -1311,8 +1305,7 @@ export const WorkspaceEdit = fp.flow(
         );
       }
       if (
-        disseminateResearchFindingList &&
-        disseminateResearchFindingList.includes(DisseminateResearchEnum.OTHER)
+        disseminateResearchFindingList?.includes(DisseminateResearchEnum.OTHER)
       ) {
         values = { ...values, otherDisseminateResearchFindings };
         constraints['otherDisseminateResearchFindings'] =

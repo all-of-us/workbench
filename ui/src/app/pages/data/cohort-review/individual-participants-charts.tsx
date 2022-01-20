@@ -69,7 +69,7 @@ export class IndividualParticipantsCharts extends React.Component<{
           },
           labels: {
             formatter: function () {
-              return names[this.value] && names[this.value].substring(0, 13);
+              return names[this.value]?.substring(0, 13);
             },
           },
           tickInterval: 1,

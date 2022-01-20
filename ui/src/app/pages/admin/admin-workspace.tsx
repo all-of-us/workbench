@@ -151,7 +151,7 @@ const NameCell = (props: NameCellProps) => {
       {filenameSpan()}
       <TooltipTrigger
         content='Please enter an access reason below'
-        disabled={accessReason && accessReason.trim()}
+        disabled={accessReason?.trim()}
       >
         <Button
           style={styles.previewButton}
@@ -625,7 +625,7 @@ export class AdminWorkspaceImpl extends React.Component<Props, State> {
           </div>
         )}
 
-        {cloudStorageTraffic && cloudStorageTraffic.receivedBytes && (
+        {cloudStorageTraffic?.receivedBytes && (
           <div>
             <h2>Cloud Storage Traffic</h2>
             <div>

@@ -20,8 +20,9 @@ newfile.write(os.urandom(20000000))    # generate 20MB random content file
 newfile.close()
 # Upload to the internet.
 #
-# Upload the file for 8 times and expect to upload 160MB data. 
-for x in range(1, 9):
+# Upload the file 9 times and expect to upload 180MB data. This stays under the 200MB limit, which could affect
+# tests up to an hour later via the larger egress window.
+for x in range(1, 10):
     print('Uploading to the internet at '+ timestamp() + ' , current count: ' + str(x))
     with open('data.txt', 'rb') as f:
         r = requests.post('http://speedtest.tele2.net/upload.php', files={'data.txt': f})

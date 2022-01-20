@@ -426,9 +426,8 @@ export const ProfileComponent = fp.flow(
                       />
                     )}
 
-                    {currentProfile.verifiedInstitutionalAffiliation &&
-                      currentProfile.verifiedInstitutionalAffiliation
-                        .institutionalRoleEnum &&
+                    {currentProfile.verifiedInstitutionalAffiliation
+                      ?.institutionalRoleEnum &&
                       currentProfile.verifiedInstitutionalAffiliation
                         .institutionalRoleEnum === InstitutionalRole.OTHER && (
                         <div>

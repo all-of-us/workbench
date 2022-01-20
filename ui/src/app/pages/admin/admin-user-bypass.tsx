@@ -67,7 +67,7 @@ export class AdminUserBypass extends React.Component<Props, State> {
   }
 
   private closePopup() {
-    if (this.popupRef && this.popupRef.current) {
+    if (this.popupRef?.current) {
       this.popupRef.current.close();
     }
   }

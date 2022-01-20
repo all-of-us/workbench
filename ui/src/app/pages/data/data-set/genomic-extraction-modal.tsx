@@ -63,8 +63,7 @@ export const GenomicExtractionModal = ({
   const isClientError = error && 400 <= error.status && error.status < 500;
 
   const genomicExtractions = useStore(genomicExtractionStore);
-  const extractsForWorkspace =
-    (genomicExtractions && genomicExtractions[workspaceNamespace]) || [];
+  const extractsForWorkspace = genomicExtractions?.[workspaceNamespace] || [];
   const mostRecentExtract: GenomicExtractionJob = fp.flow(
     fp.filter(
       (extract: GenomicExtractionJob) => extract.datasetName === dataSet.name

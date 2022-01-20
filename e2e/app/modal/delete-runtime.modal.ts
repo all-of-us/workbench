@@ -1,0 +1,28 @@
+import { Page } from 'puppeteer';
+import { LinkText } from 'app/text-labels';
+import Modal from './modal';
+import { waitForText, waitWhileLoading } from 'utils/waits-utils';
+
+const modalTitle = 'Delete Runtime';
+
+export default class DeleteRuntimeModal extends Modal {
+  constructor(page: Page, opts?: { xpath?: string; modalIndex?: number }) {
+    super(page, opts);
+  }
+
+  async isLoaded(): Promise<boolean> {
+    await waitForText(this.page, modalTitle, { container: this });
+    await waitWhileLoading(this.page);
+    return true;
+  }
+
+  // click Delete  button of the Delete RuntimeModal
+  async clickDeleteButton(): Promise<void> {
+    await this.clickButton(LinkText.Delete);
+  }
+
+  // click Cancel button of the Delete Runtime Modal
+  async clickCancelButton(): Promise<void> {
+    await this.clickButton(LinkText.Cancel);
+  }
+}

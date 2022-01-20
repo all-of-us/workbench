@@ -950,7 +950,7 @@ const DataProcConfigSelector = ({
   useEffect(() => {
     onChange({
       ...dataprocConfig,
-      workerMachineType: selectedWorkerMachine && selectedWorkerMachine.name,
+      workerMachineType: selectedWorkerMachine?.name,
       workerDiskSize: selectedDiskSize,
       numberOfWorkers: selectedNumWorkers,
       numberOfPreemptibleWorkers: selectedPreemtible,
@@ -1532,8 +1532,7 @@ const RuntimePanel = fp.flow(
     const pdSize = pdExists ? persistentDisk.size : defaultDiskSize;
     const initialAutopauseThreshold =
       existingRuntime.autopauseThreshold || DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES;
-    const gpuConfig =
-      gceConfig && gceConfig.gpuConfig ? gceConfig.gpuConfig : null;
+    const gpuConfig = gceConfig?.gpuConfig ? gceConfig.gpuConfig : null;
     const enableGpu = serverConfigStore.get().config.enableGpu;
 
     const initialPanelContent = fp.cond([
@@ -1795,13 +1794,10 @@ const RuntimePanel = fp.flow(
       masterMachine: selectedMachine,
       masterDiskSize: diskSize,
       gpu: gpuConfig ? findGpu(gpuConfig.gpuType, gpuConfig.numOfGpus) : null,
-      numberOfWorkers:
-        selectedDataprocConfig && selectedDataprocConfig.numberOfWorkers,
+      numberOfWorkers: selectedDataprocConfig?.numberOfWorkers,
       numberOfPreemptibleWorkers:
-        selectedDataprocConfig &&
-        selectedDataprocConfig.numberOfPreemptibleWorkers,
-      workerDiskSize:
-        selectedDataprocConfig && selectedDataprocConfig.workerDiskSize,
+        selectedDataprocConfig?.numberOfPreemptibleWorkers,
+      workerDiskSize: selectedDataprocConfig?.workerDiskSize,
       workerMachine:
         selectedDataprocConfig &&
         findMachineByName(selectedDataprocConfig.workerMachineType),
@@ -2047,25 +2043,23 @@ const RuntimePanel = fp.flow(
                       runtimeCtx={runtimeCtx}
                     />
                   </FlexRow>
-                  {currentRuntime &&
-                    currentRuntime.errors &&
-                    currentRuntime.errors.length > 0 && (
-                      <ErrorMessage iconPosition={'top'} iconSize={16}>
-                        <div>
-                          An error was encountered with your cloud environment.
-                          Please re-attempt creation of the environment and
-                          contact support if the error persists.
-                        </div>
-                        <div>Error details:</div>
-                        {currentRuntime.errors.map((err, idx) => {
-                          return (
-                            <div style={{ fontFamily: 'monospace' }} key={idx}>
-                              {err.errorMessage}
-                            </div>
-                          );
-                        })}
-                      </ErrorMessage>
-                    )}
+                  {currentRuntime?.errors && currentRuntime.errors.length > 0 && (
+                    <ErrorMessage iconPosition={'top'} iconSize={16}>
+                      <div>
+                        An error was encountered with your cloud environment.
+                        Please re-attempt creation of the environment and
+                        contact support if the error persists.
+                      </div>
+                      <div>Error details:</div>
+                      {currentRuntime.errors.map((err, idx) => {
+                        return (
+                          <div style={{ fontFamily: 'monospace' }} key={idx}>
+                            {err.errorMessage}
+                          </div>
+                        );
+                      })}
+                    </ErrorMessage>
+                  )}
                   <PresetSelector
                     allowDataproc={allowDataproc}
                     disabled={disableControls}
@@ -2296,8 +2290,7 @@ const RuntimePanel = fp.flow(
                         () => renderNextButton(),
                       ],
                       [
-                        currentRuntime &&
-                          currentRuntime.errors &&
+                        currentRuntime?.errors &&
                           currentRuntime.errors.length > 0,
                         () => renderTryAgainButton(),
                       ],

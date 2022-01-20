@@ -7,7 +7,6 @@ import { findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
 import DatasetRenameModal from 'app/modal/dataset-rename-modal';
 import { waitForText, waitWhileLoading } from 'utils/waits-utils';
 import DatasetBuildPage from 'app/page/dataset-build-page';
-import DatasetEditPage from 'app/page/dataset-edit-page';
 
 // 10 minutes.
 jest.setTimeout(10 * 60 * 1000);
@@ -38,7 +37,7 @@ describe('Datasets card snowman menu actions', () => {
     // Edit dataset.
     await datasetCard.selectSnowmanMenu(MenuOption.Edit, { waitForNav: true });
 
-    const datasetEditPage = new DatasetEditPage(page);
+    const datasetEditPage = new DatasetBuildPage(page);
     await datasetEditPage.waitForLoad();
 
     // Verify displayed dataset name.

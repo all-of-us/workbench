@@ -236,7 +236,7 @@ export const CohortPage = fp.flow(
       ${
         this.showCohortSearch
           ? 'save your changes in the right sidebar.'
-          : this.state.cohort && this.state.cohort.id
+          : this.state.cohort?.id
           ? 'use Save or Save As'
           : 'click CREATE COHORT'
       } to save your criteria.`;
