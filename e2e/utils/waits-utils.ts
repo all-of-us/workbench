@@ -378,7 +378,7 @@ export async function waitWhileLoading(
 
   const foundElement: ElementHandle = await Promise.race([
     page.waitForXPath(process.env.AUTHENTICATED_TEST_ID_XPATH, { timeout }), // authenticated page
-    page.waitForXPath(process.env.UNAUTHENTICATED_TEST_ID_XPATH, { timeout }) // Login and Create Account pages
+    page.waitForXPath(process.env.UNAUTHENTICATED_TEST_ID_XPATH, { timeout }) // login or create account page
   ]);
 
   // Prevent checking in Login and Create Account pages.
