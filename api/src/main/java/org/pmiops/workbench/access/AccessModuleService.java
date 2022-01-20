@@ -27,7 +27,8 @@ public interface AccessModuleService {
    *
    * @return
    */
-  Optional<AccessModuleStatus> getAccessModuleStatus(DbUser user, AccessModuleName accessModuleName);
+  Optional<AccessModuleStatus> getAccessModuleStatus(
+      DbUser user, AccessModuleName accessModuleName);
 
   /**
    * Returns true if the access module is compliant.

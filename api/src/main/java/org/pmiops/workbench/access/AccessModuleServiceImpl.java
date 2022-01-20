@@ -120,7 +120,8 @@ public class AccessModuleServiceImpl implements AccessModuleService {
   }
 
   @Override
-  public Optional<AccessModuleStatus> getAccessModuleStatus(DbUser user, AccessModuleName accessModuleName) {
+  public Optional<AccessModuleStatus> getAccessModuleStatus(
+      DbUser user, AccessModuleName accessModuleName) {
     DbAccessModule dbAccessModule =
         getDbAccessModuleOrThrow(dbAccessModulesProvider.get(), accessModuleName);
     DbUserAccessModule userAccessModule = retrieveUserAccessModuleOrCreate(user, dbAccessModule);
