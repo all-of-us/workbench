@@ -37,6 +37,7 @@ import {
   getAccessModuleStatusByName,
 } from 'app/utils/access-utils';
 import { hasRegisteredTierAccess } from 'app/utils/access-tiers';
+import { formatDate } from 'app/utils/dates';
 
 export const commonStyles = reactStyles({
   semiBold: {
@@ -154,6 +155,24 @@ export const isBypassed = (
   moduleName: AccessModule
 ): boolean =>
   !!getAccessModuleStatusByName(profile, moduleName)?.bypassEpochMillis;
+
+export const displayModuleCompletionDate = (
+  profile: Profile,
+  moduleName: AccessModule
+): string =>
+  formatDate(
+    getAccessModuleStatusByName(profile, moduleName)?.completionEpochMillis,
+    '-'
+  );
+
+export const displayModuleExpirationDate = (
+  profile: Profile,
+  moduleName: AccessModule
+): string =>
+  formatDate(
+    getAccessModuleStatusByName(profile, moduleName)?.expirationEpochMillis,
+    '-'
+  );
 
 // would this AccessBypassRequest actually change the profile state?
 // allows un-toggling of bypass for a module

@@ -22,6 +22,9 @@ export function displayDate(time: number): string {
 }
 
 export function displayDateWithoutHours(time: number): string {
+  if (!time) {
+    return null;
+  }
   const date = new Date(time);
   // datetime formatting to slice off weekday and exact time
   return date.toLocaleString('en-us', {
@@ -29,6 +32,14 @@ export function displayDateWithoutHours(time: number): string {
     day: 'numeric',
     year: 'numeric',
   });
+}
+
+// If the time passed is null, return the nullDateStringRep else format it into date without hours
+export function formatDate(
+  timeInEpochMillis: number | undefined,
+  nullDateStringRep?: string
+): string {
+  return displayDateWithoutHours(timeInEpochMillis) || nullDateStringRep;
 }
 
 export function isDateValid(date: Date): boolean {
