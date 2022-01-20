@@ -269,7 +269,7 @@ describe('WorkspaceAbout', () => {
     expect(wrapper.exists('[data-test-id="lock-workspace-msg"]')).toBeFalsy();
   });
 
-  it('Should emnable billing report button if user is workspace owner.', async () => {
+  it('Should enable billing report url if user is workspace owner.', async () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(
@@ -280,7 +280,7 @@ describe('WorkspaceAbout', () => {
     ).toBeFalsy();
   });
 
-  it('Should disable billing report button if user is not workspace owner.', async () => {
+  it('Should disable billing report url if user is not workspace owner.', async () => {
     currentWorkspaceStore.next({
       ...currentWorkspaceStore.getValue(),
       accessLevel: WorkspaceAccessLevel.WRITER,
