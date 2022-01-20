@@ -1,4 +1,4 @@
-import { Page } from 'puppeteer';
+import { ElementHandle, Page } from 'puppeteer';
 import AuthenticatedPage from 'app/page/authenticated-page';
 import { waitForDocumentTitle, waitWhileLoading } from 'utils/waits-utils';
 import Button from 'app/element/button';
@@ -9,6 +9,11 @@ import Table from 'app/component/table';
 import BaseElement from 'app/element/base-element';
 import DeleteRuntimeModal from 'app/modal/delete-runtime.modal';
 import LockWorkspaceModal from 'app/modal/lock-workspace-modal';
+
+enum StatusSelectors {
+  Deleting = '//div[text()="Delete" and @role="button"]/preceding-sibling::div[text()="Deleting"]',
+  Running = '//div[text()="Delete" and @role="button"]/preceding-sibling::div[text()="Running"]'
+}
 
 const PageTitle = 'Workspace Admin | All of Us Researcher Workbench';
 
@@ -111,7 +116,7 @@ export default class WorkspaceAdminPage extends AuthenticatedPage {
     return modal;
   }
 
-  // get the runtime status in the Status col
+  //get the runtime status in the Status col
   async getRuntimeStatus(): Promise<string> {
     const xpath = '//div[text()="Delete" and @role="button"]/preceding-sibling::*[1]';
     const element = BaseElement.asBaseElement(
@@ -119,5 +124,14 @@ export default class WorkspaceAdminPage extends AuthenticatedPage {
       await this.page.waitForXPath(xpath, { visible: true, timeout: 60000 })
     );
     return element.getTextContent();
+  }
+
+  // verify status has updated from running to deleting
+  async getDeleteStatus() {
+    await this.waitUntilSectionVisible(StatusSelectors.Deleting);
+  }
+
+  async waitUntilSectionVisible(xpath: string): Promise<ElementHandle> {
+    return this.page.waitForXPath(xpath, { visible: true });
   }
 }
