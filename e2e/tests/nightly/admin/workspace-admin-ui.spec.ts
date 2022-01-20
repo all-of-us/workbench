@@ -95,12 +95,15 @@ describe('Workspace Admin', () => {
     await new WorkspacesPage(page).load();
     const workspaceCard = await WorkspaceCard.findCard(page, workspaceName);
     await workspaceCard.clickWorkspaceName(true);
-    await new WorkspaceDataPage(page).waitForLoad();
+    const dataPage = await new WorkspaceDataPage(page).waitForLoad();
+    //extract the Workspace-Namespace
+    workspaceNamespace = await dataPage.extractWorkspaceNamespace();
     const runtimePanel = new RuntimePanel(page);
     await runtimePanel.open();
     // Create runtime
     await runtimePanel.createRuntime();
     await page.waitForTimeout(2000);
+
 
     const workspaceAdminPage = new WorkspaceAdminPage(page);
     // navigate back to workspace admin page
