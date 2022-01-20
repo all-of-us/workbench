@@ -223,8 +223,7 @@ export default class WorkspaceDataPage extends WorkspaceBase {
 
   // extract the workspace-namesapce from the url to be used to load workspace in the workspace-admin page
   async extractWorkspaceNamespace(): Promise<string> {
-    const href = await page.evaluate(() => location.href);
-    console.log(`href: ${href}`);
+    const href = await this.page.evaluate(() => location.href);
     const pathArray = href.split('/');
     const workspaceNamespace = pathArray[4];
     return workspaceNamespace;
