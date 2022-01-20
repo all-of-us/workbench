@@ -40,6 +40,7 @@ import org.pmiops.workbench.db.model.DbAccessModule;
 import org.pmiops.workbench.db.model.DbAccessModule.AccessModuleName;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbUserCodeOfConductAgreement;
 import org.pmiops.workbench.db.model.DbUserTermsOfService;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
@@ -443,6 +444,8 @@ public class UserServiceTest {
   @Test
   public void testSyncDuccVersionStatus_correctVersion() {
     final DbUser user = userDao.findUserByUsername(USERNAME);
+    user.setDuccAgreement(signDucc(user, accessModuleService.getCurrentDuccVersion()));
+    userDao.save(user);
 
     userService.syncDuccVersionStatus(user, Agent.asSystem());
 
@@ -452,6 +455,8 @@ public class UserServiceTest {
   @Test
   public void testSyncDuccVersionStatus_incorrectVersion() {
     final DbUser user = userDao.findUserByUsername(USERNAME);
+    user.setDuccAgreement(signDucc(user, accessModuleService.getCurrentDuccVersion() - 1));
+    userDao.save(user);
 
     userService.syncDuccVersionStatus(user, Agent.asSystem());
 
@@ -547,5 +552,9 @@ public class UserServiceTest {
     userAccessModuleDao
         .getByUserAndAccessModule(user, accessModuleDao.findOneByName(moduleName).get())
         .ifPresent(module -> assertThat(module.getCompletionTime()).isNull());
+  }
+
+  private DbUserCodeOfConductAgreement signDucc(DbUser dbUser, int version) {
+    return TestMockFactory.createDuccAgreement(dbUser, version, FakeClockConfiguration.NOW);
   }
 }
