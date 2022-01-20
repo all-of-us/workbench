@@ -383,7 +383,6 @@ export async function waitWhileLoading(
 
   // Prevent checking in Login and Create Account pages.
   const dataTestIdValue = await getAttrValue(page, foundElement, 'data-test-id');
-  console.log(`dataTestIdValue: ${dataTestIdValue}`);
   if (dataTestIdValue === 'sign-in-page') {
     return;
   }

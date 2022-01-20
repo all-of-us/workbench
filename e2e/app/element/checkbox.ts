@@ -84,7 +84,6 @@ export default class Checkbox extends BaseElement {
           const element = document.evaluate(xpath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null)
             .singleNodeValue;
           const attrValue = Boolean((element as Element).getAttribute(property));
-          console.log(`${property}: ${attrValue}`);
           return value === attrValue;
         },
         {},
