@@ -539,7 +539,7 @@ export const LeonardoAppLauncher = fp.flow(
       this.incrementProgress(Progress.Unknown);
 
       let { runtime } = this.props.runtimeStore;
-      if (this.isRuntimeInProgress(runtime && runtime.status)) {
+      if (this.isRuntimeInProgress(runtime?.status)) {
         this.incrementProgress(Progress.Resuming);
       } else {
         this.incrementProgress(Progress.Initializing);

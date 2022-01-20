@@ -7,7 +7,7 @@ import { stackdriverErrorReporterStore } from './stores';
 export function reportError(err: Error | string) {
   console.error('Reporting error to Stackdriver: ', err);
   const reporterStore = stackdriverErrorReporterStore.get();
-  if (reporterStore && reporterStore.reporter) {
+  if (reporterStore?.reporter) {
     reporterStore.reporter.report(err, (e) => {
       // Note: this does not detect non-200 responses from Stackdriver:
       // https://github.com/GoogleCloudPlatform/stackdriver-errors-js/issues/32

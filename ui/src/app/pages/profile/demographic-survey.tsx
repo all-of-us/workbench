@@ -87,9 +87,7 @@ interface State {
 }
 
 const isChecked = (demographicSurvey, optionKey, value) =>
-  demographicSurvey &&
-  demographicSurvey[optionKey] &&
-  demographicSurvey[optionKey].includes(value);
+  demographicSurvey?.[optionKey]?.includes(value);
 
 export const DemographicSurvey = withProfileErrorModal(
   class DemographicSurveyComponent extends React.Component<Props, State> {
@@ -141,10 +139,9 @@ export const DemographicSurvey = withProfileErrorModal(
       const {
         profile: { demographicSurvey },
       } = this.state;
-      const initialValue =
-        demographicSurvey &&
-        demographicSurvey[optionKey] &&
-        demographicSurvey[optionKey].includes(optionObject.value);
+      const initialValue = demographicSurvey?.[optionKey]?.includes(
+        optionObject.value
+      );
 
       return (
         <CheckBox

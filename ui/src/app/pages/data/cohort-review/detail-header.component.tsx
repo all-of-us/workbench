@@ -255,7 +255,7 @@ export const DetailHeader = fp.flow(
         participant,
       } = this.props;
       const pagination = reviewPaginationStore.getValue();
-      const id = participant && participant.participantId;
+      const id = participant?.participantId;
       const index = participantCohortStatuses.findIndex(
         ({ participantId }) => participantId === id
       );

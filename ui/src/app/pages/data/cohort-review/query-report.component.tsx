@@ -351,7 +351,7 @@ export const QueryReport = fp.flow(
       return (
         <React.Fragment>
           <style>{css}</style>
-          {cohortReview && cohortReview.cohortReviewId && (
+          {cohortReview?.cohortReviewId && (
             <button
               style={styles.backBtn}
               type='button'

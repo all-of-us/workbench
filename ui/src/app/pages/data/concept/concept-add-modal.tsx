@@ -206,8 +206,7 @@ export const ConceptAddModal = withCurrentWorkspace()(
       } = this.state;
       if (addingToExistingSet) {
         return (
-          selectedSet &&
-          selectedSet.criteriums &&
+          selectedSet?.criteriums &&
           selectedSet.criteriums.length + selectedConceptsInDomain.length >
             CONCEPT_SET_CONCEPT_LIMIT
         );
@@ -356,8 +355,8 @@ export const ConceptAddModal = withCurrentWorkspace()(
                     addingToExistingSet && (
                       <div>
                         Cannot add more concepts to
-                        <b> {selectedSet && selectedSet.name}. </b> Concept
-                        count exceeds {CONCEPT_SET_CONCEPT_LIMIT}
+                        <b> {selectedSet?.name}. </b> Concept count exceeds{' '}
+                        {CONCEPT_SET_CONCEPT_LIMIT}
                       </div>
                     )
                   }

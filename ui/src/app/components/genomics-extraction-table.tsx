@@ -151,7 +151,7 @@ const mapJobToTableRow = (
     ),
     dateStarted: job.submissionDate,
     dateStartedDisplay: formatDatetime(job.submissionDate),
-    duration: durationMoment && durationMoment.asSeconds(),
+    duration: durationMoment?.asSeconds(),
     durationDisplay: !!durationMoment ? (
       formatDuration(durationMoment)
     ) : (

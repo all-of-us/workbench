@@ -52,7 +52,7 @@ export const switchCase = (value, ...pairs) => {
     ([v]) => fp.isEqual(v, value) || fp.isEqual(v, DEFAULT),
     pairs
   );
-  return match && match[1]();
+  return match?.[1]();
 };
 
 const throttleAnimation = (fn) => {
