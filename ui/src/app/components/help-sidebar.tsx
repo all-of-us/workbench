@@ -41,7 +41,6 @@ import {
 } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
 import {
-  currentCohortSearchContextStore,
   currentConceptStore,
   NavigationProps,
   setSidebarActiveIconStore,
