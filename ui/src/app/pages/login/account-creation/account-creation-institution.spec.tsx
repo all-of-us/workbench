@@ -76,8 +76,8 @@ beforeEach(() => {
 
   props = {
     profile: createEmptyProfile(),
-    onComplete: (profile: Profile) => {},
-    onPreviousClick: (profile: Profile) => {},
+    onComplete: () => {},
+    onPreviousClick: () => {},
   };
 
   mockGetPublicInstitutionDetails = jest.spyOn(

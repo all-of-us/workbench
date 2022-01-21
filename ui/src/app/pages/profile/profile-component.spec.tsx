@@ -1,7 +1,6 @@
 import { mount, ReactWrapper } from 'enzyme';
 import * as React from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import SpyInstance = jest.SpyInstance;
 
 import { TextInput } from 'app/components/inputs';
 import { ProfileComponent } from 'app/pages/profile/profile-component';
@@ -26,8 +25,6 @@ describe('ProfilePageComponent', () => {
 
   const profile = ProfileStubVariables.PROFILE_STUB;
 
-  let mockUpdateProfile: SpyInstance;
-
   const component = (controlledTierProfile = {}) => {
     return mount(
       <MemoryRouter>
@@ -47,7 +44,6 @@ describe('ProfilePageComponent', () => {
     const profileApi = new ProfileApiStub();
 
     registerApiClient(ProfileApi, profileApi);
-    mockUpdateProfile = jest.spyOn(profileApi, 'updateProfile');
 
     // mocking because we don't have access to the angular service
     reload.mockImplementation(async () => {

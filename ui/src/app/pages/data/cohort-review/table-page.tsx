@@ -681,7 +681,7 @@ export const ParticipantsTable = fp.flow(
 
     errorMessage = () => {
       const { data, error, loading } = this.state;
-      if (loading || (data && data.length) || (!data && !error)) {
+      if (loading || data?.length || (!data && !error)) {
         return false;
       }
       let message: string;

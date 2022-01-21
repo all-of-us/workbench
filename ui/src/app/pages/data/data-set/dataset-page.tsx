@@ -453,7 +453,7 @@ export class ValueListItem extends React.Component<
       .then((dataDictionaryEntry) => {
         this.setState({ dataDictionaryEntry });
       })
-      .catch((e) => {
+      .catch(() => {
         this.setState({ dataDictionaryEntryError: true });
       });
   }
@@ -1534,7 +1534,7 @@ export const DatasetPage = fp.flow(
         );
         const columnTitlesDOM =
           document.getElementsByClassName('p-column-title');
-        if (columnTitlesDOM && columnTitlesDOM.item(columnIndex)) {
+        if (columnTitlesDOM?.item(columnIndex)) {
           const element = columnTitlesDOM.item(columnIndex)
             .children[0] as HTMLElement;
           if (element.offsetWidth < element.scrollWidth) {
@@ -1569,10 +1569,7 @@ export const DatasetPage = fp.flow(
       let selectedPreviewDomain = this.state.selectedPreviewDomain.toString();
       // Had to do the following since typescript changes the key by removing _ therefore changing the domain string
       // which resulted in map check from selectedPreviewDomain to give undefined result always
-      if (
-        this.state.selectedPreviewDomain &&
-        this.state.selectedPreviewDomain.toString().startsWith('FITBIT')
-      ) {
+      if (this.state.selectedPreviewDomain?.toString().startsWith('FITBIT')) {
         switch (this.state.selectedPreviewDomain.toString()) {
           case 'FITBITHEARTRATESUMMARY':
             selectedPreviewDomain = 'FITBIT_HEART_RATE_SUMMARY';

@@ -28,7 +28,6 @@ import {
   currentCohortSearchContextStore,
   setSidebarActiveIconStore,
 } from 'app/utils/navigation';
-import { serverConfigStore } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { environment } from 'environments/environment';
 import {
@@ -343,11 +342,7 @@ export const ListSearch = fp.flow(
       }
     }
 
-    componentDidUpdate(
-      prevProps: Readonly<Props>,
-      prevState: Readonly<State>,
-      snapshot?: any
-    ) {
+    componentDidUpdate(prevProps: Readonly<Props>) {
       const {
         concept,
         searchContext: { source },
@@ -609,9 +604,8 @@ export const ListSearch = fp.flow(
         !brand &&
         this.props.selectedIds.includes(this.getParamId(row));
       const unselected = !attributes && !brand && !this.isSelected(row);
-      const open = ingredients[row.id] && ingredients[row.id].open;
-      const loadingIngredients =
-        ingredients[row.id] && ingredients[row.id].loading;
+      const open = ingredients[row.id]?.open;
+      const loadingIngredients = ingredients[row.id]?.loading;
       const columnStyle = child
         ? { ...styles.columnBodyName, paddingLeft: '1.25rem' }
         : styles.columnBodyName;
@@ -954,10 +948,8 @@ export const ListSearch = fp.flow(
                     >
                       <tbody className='p-datatable-tbody'>
                         {displayData.map((row, index) => {
-                          const open =
-                            ingredients[row.id] && ingredients[row.id].open;
-                          const err =
-                            ingredients[row.id] && ingredients[row.id].error;
+                          const open = ingredients[row.id]?.open;
+                          const err = ingredients[row.id]?.error;
                           return (
                             <React.Fragment key={index}>
                               {this.renderRow(row, false, index)}

@@ -4,7 +4,7 @@ import Iframe from 'react-iframe';
 
 import { NavigationProps } from 'app/utils/navigation';
 import { fetchAbortableRetry } from 'app/utils/retry';
-import { MatchParams, RuntimeStore, withParamsKey } from 'app/utils/stores';
+import { MatchParams, RuntimeStore } from 'app/utils/stores';
 
 import { Button } from 'app/components/buttons';
 import { FlexRow } from 'app/components/flex';
@@ -539,7 +539,7 @@ export const LeonardoAppLauncher = fp.flow(
       this.incrementProgress(Progress.Unknown);
 
       let { runtime } = this.props.runtimeStore;
-      if (this.isRuntimeInProgress(runtime && runtime.status)) {
+      if (this.isRuntimeInProgress(runtime?.status)) {
         this.incrementProgress(Progress.Resuming);
       } else {
         this.incrementProgress(Progress.Initializing);

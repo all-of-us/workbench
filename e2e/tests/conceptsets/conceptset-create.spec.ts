@@ -4,7 +4,7 @@ import ConceptSetActionsPage from 'app/page/conceptset-actions-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
 import { waitForText } from 'utils/waits-utils';
-import { ResourceCard } from 'app/text-labels';
+import { CohortsSelectValue, ResourceCard } from 'app/text-labels';
 
 describe('Create Concept Sets from Domains', () => {
   beforeEach(async () => {
@@ -139,7 +139,7 @@ describe('Create Concept Sets from Domains', () => {
 
     // Create new Dataset with two new Concept Sets
     await conceptActionPage.clickCreateDatasetButton();
-    await datasetBuildPage.selectCohorts(['All Participants']);
+    await datasetBuildPage.selectCohorts([CohortsSelectValue.AllParticipants]);
     await datasetBuildPage.selectConceptSets([conceptSet1, conceptSet2]);
     const createModal = await datasetBuildPage.clickCreateButton();
     const datasetName = await createModal.createDataset();

@@ -55,6 +55,7 @@
     "extractionCohortsDataset": "fc-aou-cdr-synth-test-2.wgs_extraction_cohorts",
     "extractionDestinationDataset": "fc-aou-cdr-synth-test-2.wgs_extracted_cohorts",
     "extractionTempTablesDataset": "fc-aou-cdr-synth-test-2.wgs_extraction_temp_tables",
+    "gatkJarUri": "gs:\/\/all-of-us-workbench-test-genomics\/wgs\/gatk-package-4.2.0.0-357-gc79075c-SNAPSHOT-local.jar",
     "enableJiraTicketingOnFailure": false
   },
   "cdr": {
@@ -101,7 +102,6 @@
   },
   "featureFlags": {
     "unsafeAllowDeleteUser": true,
-    "enableBillingUpgrade": true,
     "enableEventDateModifier": false,
     "enableResearchPurposePrompt": false,
     "enableGenomicExtraction": true,

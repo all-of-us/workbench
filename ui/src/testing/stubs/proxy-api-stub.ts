@@ -8,21 +8,13 @@ export class ProxyApiStub extends ProxyApi {
     });
   }
 
-  public setCookie(
-    googleProject: string,
-    runtimeName: string,
-    options?: any
-  ): Promise<Response> {
+  public setCookie(): Promise<Response> {
     return new Promise<Response>((resolve) => {
       resolve(new Response());
     });
   }
 
-  public connectToTerminal(
-    googleProject: string,
-    runtimeName: string,
-    terminalName: string
-  ): Promise<Response> {
+  public connectToTerminal(): Promise<Response> {
     return new Promise<Response>((resolve) => {
       resolve(new Response());
     });

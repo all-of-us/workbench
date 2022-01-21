@@ -272,7 +272,7 @@ export const SearchGroup = withCurrentWorkspace()(
       if (typeof ResizeObserver === 'function') {
         const groupDiv = document.getElementById(id);
         // check that groupDiv is of type Element
-        if (groupDiv && groupDiv.tagName) {
+        if (groupDiv?.tagName) {
           // create observer to reposition overlays on div resize
           const ro = new ResizeObserver(() => {
             const { status } = this.props.group;

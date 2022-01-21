@@ -3,22 +3,6 @@ import * as React from 'react';
 import { WorkspaceAccessLevel } from 'generated/fetch';
 import { MenuItem } from 'app/components/buttons';
 import { WorkspaceData } from 'app/utils/workspace-data';
-import { reactStyles } from 'app/utils';
-import colors, { colorWithWhiteness } from 'app/styles/colors';
-
-const styles = reactStyles({
-  icon: {
-    background: colorWithWhiteness(colors.primary, 0.48),
-    color: colors.white,
-    display: 'table-cell',
-    height: '46px',
-    width: '45px',
-    borderBottom: `1px solid ${colorWithWhiteness(colors.primary, 0.4)}`,
-    cursor: 'pointer',
-    textAlign: 'center',
-    verticalAlign: 'middle',
-  },
-});
 
 interface WorkspaceActionsProps {
   workspaceData: WorkspaceData;

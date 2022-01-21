@@ -174,6 +174,7 @@ public class WorkbenchConfig {
     public String extractionCohortsDataset;
     public String extractionDestinationDataset;
     public String extractionTempTablesDataset;
+    public String gatkJarUri;
     public boolean enableJiraTicketingOnFailure;
   }
 
@@ -250,9 +251,6 @@ public class WorkbenchConfig {
     // Allows a user to delete their own account. This is used for testing purposes so that
     // We can clean up after ourselves. This should never go to prod.
     public boolean unsafeAllowDeleteUser;
-    // Setting this to true will enable the use of Billing Accounts controlled by the user
-    // See RW-4711.
-    public boolean enableBillingUpgrade;
     // Flag to indicate whether to show the Event Date modifier in cohort builder
     public boolean enableEventDateModifier;
     // Flag to indicate whether to show Update research purpose prompt after an year of workspace

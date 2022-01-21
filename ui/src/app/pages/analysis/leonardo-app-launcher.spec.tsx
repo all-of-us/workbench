@@ -295,8 +295,6 @@ describe('NotebookLauncher', () => {
   });
 
   it('should not navigate to notebook after runtime transitions to updating', async () => {
-    const navSpy = jest.fn();
-
     history.push(notebookInitialUrl + '?kernelType=R?creating=false');
     runtimeStub.runtime.status = RuntimeStatus.Running;
 

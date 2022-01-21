@@ -7,7 +7,7 @@ import { Check, ClrIcon, Times } from 'app/components/icons';
 import { Toggle } from 'app/components/inputs';
 import { PopupTrigger } from 'app/components/popups';
 import { SpinnerOverlay } from 'app/components/spinners';
-import { profileApi, userAdminApi } from 'app/services/swagger-fetch-clients';
+import { userAdminApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import { serverConfigStore } from 'app/utils/stores';
 import { AccessModule, AdminTableUser } from 'generated/fetch';
@@ -67,7 +67,7 @@ export class AdminUserBypass extends React.Component<Props, State> {
   }
 
   private closePopup() {
-    if (this.popupRef && this.popupRef.current) {
+    if (this.popupRef?.current) {
       this.popupRef.current.close();
     }
   }

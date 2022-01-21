@@ -112,7 +112,7 @@ enum InstitutionMode {
 
 const isAddressInvalid = (emailAddress: string): boolean => {
   const errors = validate({ emailAddress }, { emailAddress: { email: true } });
-  return errors && errors.emailAddress && errors.emailAddress.length > 0;
+  return errors?.emailAddress && errors.emailAddress.length > 0;
 };
 
 const isDomainInvalid = (emailDomain: string): boolean =>
@@ -193,7 +193,7 @@ const AddressTextArea = (props: {
   const { accessTierShortName, emailAddresses, onBlur, onChange } = props;
   return (
     <TextArea
-      value={emailAddresses && emailAddresses.join(',\n')}
+      value={emailAddresses?.join(',\n')}
       data-test-id={`${accessTierShortName}-email-address-input`}
       onBlur={onBlur}
       onChange={onChange}
@@ -210,7 +210,7 @@ const DomainTextArea = (props: {
   const { accessTierShortName, emailDomains, onBlur, onChange } = props;
   return (
     <TextArea
-      value={emailDomains && emailDomains.join(',\n')}
+      value={emailDomains?.join(',\n')}
       data-test-id={`${accessTierShortName}-email-domain-input`}
       onBlur={onBlur}
       onChange={onChange}

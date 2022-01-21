@@ -82,7 +82,6 @@ export default class Select extends BaseElement {
         (select, text) => {
           for (const option of select.options) {
             if (option.selected) {
-              console.log(option.textContent);
               return option.textContent === text;
             }
           }

@@ -3,6 +3,7 @@ import Container from 'app/container';
 import { ElementType, XPathOptions } from 'app/xpath-options';
 import BaseElement from './base-element';
 import { buildXPath } from 'app/xpath-builders';
+import { logger } from 'libs/logger';
 
 export default class Checkbox extends BaseElement {
   static findByName(page: Page, xOpt: XPathOptions, container?: Container): Checkbox {
@@ -68,5 +69,32 @@ export default class Checkbox extends BaseElement {
       return this.check();
     }
     return this.unCheck();
+  }
+
+  // Override waitUntilEnabled in base-element.ts
+  // Web element property disabled is used to determine state (enabled/disabled) of checkbox
+  async waitUntilEnabled(xpathSelector?: string): Promise<void> {
+    const selector = xpathSelector || this.getXpath();
+    const propertyName = 'disabled';
+    const propertyValue = false;
+    await this.page.waitForXPath(this.getXpath(), { visible: true });
+    await this.page
+      .waitForFunction(
+        (xpath, property, value) => {
+          const element = document.evaluate(xpath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null)
+            .singleNodeValue;
+          const attrValue = Boolean((element as Element).getAttribute(property));
+          return value === attrValue;
+        },
+        {},
+        selector,
+        propertyName,
+        propertyValue
+      )
+      .catch((err) => {
+        logger.error(`waitUntilEnabled() failed: ${propertyName}: ${propertyValue}.  XPath=${selector}`);
+        logger.error(err);
+        throw new Error(err);
+      });
   }
 }

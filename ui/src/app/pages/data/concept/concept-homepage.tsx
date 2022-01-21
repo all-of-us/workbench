@@ -23,7 +23,6 @@ import {
   currentConceptStore,
   NavigationProps,
 } from 'app/utils/navigation';
-import { serverConfigStore } from 'app/utils/stores';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import {
@@ -312,7 +311,7 @@ export const ConceptHomepage = fp.flow(
           console.error(e);
         });
       await Promise.all([getDomainCards, getSurveyInfo]);
-      if (cohortContext && cohortContext.searchTerms) {
+      if (cohortContext?.searchTerms) {
         this.updateCardCounts();
       }
       this.setState({ loadingDomains: false });

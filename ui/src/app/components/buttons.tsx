@@ -5,7 +5,6 @@ import { Interactive as LocalInteractive } from 'app/components/interactive';
 import { TooltipTrigger } from 'app/components/popups';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles } from 'app/utils/index';
-import { useNavigation } from 'app/utils/navigation';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import Interactive from 'react-interactive';
@@ -257,7 +256,6 @@ export const Button = ({
   path = '',
   type = 'primary',
   style = {},
-  linkStyle = {},
   disabled = false,
   propagateDataTestId = false,
   ...props
@@ -532,7 +530,7 @@ export const StyledRouterLink = ({
   ) : (
     <Link
       to={path}
-      onClick={() => analyticsFn && analyticsFn()}
+      onClick={() => analyticsFn?.()}
       {...computedStyles}
       {...childProps}
     >
@@ -546,13 +544,23 @@ export const StyledExternalLink = ({
   children,
   analyticsFn = null,
   style = {},
+  disabled = false,
   ...props
 }) => {
-  return (
+  const linkStyle = {
+    style: { ...styles.inlineAnchor },
+  };
+  const computedStyles = fp.merge(computeStyle(linkStyle, { disabled }), {
+    style,
+  });
+
+  return disabled ? (
+    <span {...computedStyles}>{children}</span>
+  ) : (
     <a
       href={href}
-      onClick={() => analyticsFn && analyticsFn()}
-      style={{ ...styles.inlineAnchor, ...style }}
+      onClick={() => analyticsFn?.()}
+      {...computedStyles}
       {...props}
     >
       {children}

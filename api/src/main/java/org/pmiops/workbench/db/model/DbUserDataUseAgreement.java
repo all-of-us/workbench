@@ -11,6 +11,7 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "user_data_use_agreement")
+@Deprecated() // will be replaced by DbUserCodeOfConductAgreement as part of RW-4838
 public class DbUserDataUseAgreement {
   private long userDataUseAgreementId;
   private long userId;

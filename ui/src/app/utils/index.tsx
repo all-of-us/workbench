@@ -14,13 +14,7 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { ReplaySubject } from 'rxjs/ReplaySubject';
-import {
-  cdrVersionStore,
-  profileStore,
-  serverConfigStore,
-  useStore,
-  withStore,
-} from './stores';
+import { cdrVersionStore, profileStore, withStore } from './stores';
 
 const { useEffect, useState } = React;
 
@@ -58,7 +52,7 @@ export const switchCase = (value, ...pairs) => {
     ([v]) => fp.isEqual(v, value) || fp.isEqual(v, DEFAULT),
     pairs
   );
-  return match && match[1]();
+  return match?.[1]();
 };
 
 const throttleAnimation = (fn) => {

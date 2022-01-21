@@ -9,7 +9,7 @@ import {
 import { delay } from 'app/utils/subscribable';
 import { environment } from 'environments/environment';
 import { ConfigResponse } from 'generated/fetch';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 
 declare const gapi: any;
 

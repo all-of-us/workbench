@@ -215,7 +215,7 @@ export const ConceptSearch = fp.flow(
       );
     }
 
-    componentDidUpdate(prevProps, prevState) {
+    componentDidUpdate() {
       if (this.isDetailPage) {
         if (currentConceptSetStore.getValue()) {
           if (!this.state.conceptSet) {

@@ -4,7 +4,6 @@ import * as fp from 'lodash';
 import { Button } from 'app/components/buttons';
 import { withCurrentWorkspace, withUserProfile } from 'app/utils';
 import { NavigationProps } from 'app/utils/navigation';
-import { serverConfigStore } from 'app/utils/stores';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { openZendeskWidget } from 'app/utils/zendesk';

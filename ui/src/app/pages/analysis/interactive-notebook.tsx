@@ -20,10 +20,7 @@ import { notebooksApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { hasNewValidProps, reactStyles, withCurrentWorkspace } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
-import {
-  NavigationProps,
-  setSidebarActiveIconStore,
-} from 'app/utils/navigation';
+import { NavigationProps } from 'app/utils/navigation';
 import {
   ComputeSecuritySuspendedError,
   maybeInitializeRuntime,
