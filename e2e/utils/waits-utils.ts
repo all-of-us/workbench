@@ -376,13 +376,22 @@ export async function waitWhileLoading(
     return;
   }
 
-  const startTime = Date.now();
   const confidenceLevel = 2;
   let confidenceCounter = 0;
   let error;
   const waitUntilSpinnerGone = async (maxTime: number): Promise<void> => {
+    const startTime = Date.now();
     try {
-      await page.waitForSelector(spinElementsCss, { hidden: true, timeout: 10000 });
+      await Promise.all([
+        page.waitForFunction(
+          (css) => {
+            return !document.querySelectorAll(css).length;
+          },
+          { polling: 'mutation', timeout: 30000 },
+          spinElementsCss
+        ),
+        page.waitForSelector(spinElementsCss, { hidden: true, visible: false, timeout: 30000 })
+      ]);
       confidenceCounter++;
       if (confidenceCounter >= confidenceLevel) {
         return; // success
@@ -392,15 +401,21 @@ export async function waitWhileLoading(
       error = err;
     }
 
-    if (Date.now() - startTime > maxTime) {
-      logger.error(`ERROR: Loading spinner has not stopped. Spinner css is "${spinElementsCss}"`);
-      logger.error(error.stack);
-      await takeScreenshot(page, makeDateTimeStr('ERROR_Spinner_Timeout'));
-      throw new Error(error.message);
+    const spentTime = Date.now() - startTime;
+    if (spentTime > maxTime) {
+      if (confidenceCounter === 0) {
+        logger.error(`ERROR: Loading spinner has not stopped. Spinner css is "${spinElementsCss}"`);
+        logger.error(error.stack);
+        await takeScreenshot(page, makeDateTimeStr('ERROR_Spinner_TimeOut'));
+        throw new Error(error.message);
+      }
+      logger.info('Waiting for loading spinner to stop has exceeded maximum wait time. Test will continue.');
+      await takeScreenshot(page, makeDateTimeStr('Spinner_TimeOut'));
+      return;
     }
 
     await page.waitForTimeout(200); // short pause then retry
-    await waitUntilSpinnerGone(maxTime);
+    await waitUntilSpinnerGone(maxTime - spentTime); // unused time
   };
 
   await waitUntilSpinnerGone(timeout); // Wait do not exceed timeout

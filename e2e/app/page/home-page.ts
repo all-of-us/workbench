@@ -40,16 +40,11 @@ export default class HomePage extends AuthenticatedPage {
         return;
       });
 
-      // Look for either the recent-resources table or the getting-started msg.
-      try {
-        await Promise.race([
-          this.page.waitForXPath('//*[@data-test-id="recent-resources-table"]', { visible: true }),
-          this.page.waitForXPath('//*[@data-test-id="getting-started"]', { visible: true })
-        ]);
-      } catch (err) {
-        // Ignore error.
-      }
-      await waitWhileLoading(this.page);
+      // Find either recent-resources table or Getting Started msg.
+      await Promise.race([
+        this.page.waitForXPath('//*[@data-test-id="recent-resources-table"]', { visible: true }),
+        this.page.waitForXPath('//*[@data-test-id="getting-started"]', { visible: true })
+      ]);
     };
 
     try {
