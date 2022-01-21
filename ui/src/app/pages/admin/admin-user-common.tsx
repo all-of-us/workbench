@@ -156,13 +156,23 @@ export const isBypassed = (
 ): boolean =>
   !!getAccessModuleStatusByName(profile, moduleName)?.bypassEpochMillis;
 
+// Since there is no expiration date for ERA COMMONS or GOOGLE 2-Step Verification,
+// display string NEVER rather than -
+const getNullStringForCompletionExpirationDate = (
+  moduleName: AccessModule
+): string =>
+  moduleName === AccessModule.ERACOMMONS ||
+  moduleName === AccessModule.TWOFACTORAUTH
+    ? 'Never'
+    : '-';
+
 export const displayModuleCompletionDate = (
   profile: Profile,
   moduleName: AccessModule
 ): string =>
   formatDate(
     getAccessModuleStatusByName(profile, moduleName)?.completionEpochMillis,
-    '-'
+    getNullStringForCompletionExpirationDate(moduleName)
   );
 
 export const displayModuleExpirationDate = (
@@ -171,7 +181,7 @@ export const displayModuleExpirationDate = (
 ): string =>
   formatDate(
     getAccessModuleStatusByName(profile, moduleName)?.expirationEpochMillis,
-    '-'
+    getNullStringForCompletionExpirationDate(moduleName)
   );
 
 // would this AccessBypassRequest actually change the profile state?
