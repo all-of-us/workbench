@@ -71,6 +71,24 @@ public class IamServiceImpl implements IamService {
     }
   }
 
+  @Override
+  public void revokeWorkflowRunnerRoleToUsers(String googleProject, List<String> userEmails) {
+    GoogleApi googleApiAsImpersonatedUser = new GoogleApi();
+    try {
+      List<String> petServiceAccountsToRevokePermission = new ArrayList<>();
+      for (String userEmail : userEmails) {
+        googleApiAsImpersonatedUser.setApiClient(
+            samApiClientFactory.newImpersonatedApiClient(userEmail));
+        String petServiceAccountName =
+            getOrCreatePetServiceAccount(googleProject, googleApiAsImpersonatedUser);
+        petServiceAccountsToRevokePermission.add(petServiceAccountName);
+      }
+      revokeLifeScienceRunnerRole(googleProject, petServiceAccountsToRevokePermission);
+    } catch (IOException e) {
+      throw new ServerErrorException(e);
+    }
+  }
+
   /** Gets a Terra pet service account from SAM. SAM will create one if user does not have it. */
   private String getOrCreatePetServiceAccount(String googleProject, GoogleApi googleApi) {
     return samRetryHandler.run(
@@ -90,8 +108,24 @@ public class IamServiceImpl implements IamService {
         googleProject, petServiceAccount, policy.setBindings(bindingList));
   }
 
-  /** Grant life science runner role to list of service accounts. */
+  /** Grants life science runner role to list of service accounts. */
   private void grantLifeScienceRunnerRole(String googleProject, List<String> petServiceAccounts) {
+    com.google.api.services.cloudresourcemanager.model.Policy policy =
+        cloudResourceManagerService.getIamPolicy(googleProject);
+    List<com.google.api.services.cloudresourcemanager.model.Binding> bindingList =
+        Optional.ofNullable(policy.getBindings()).orElse(new ArrayList<>());
+    bindingList.add(
+        new com.google.api.services.cloudresourcemanager.model.Binding()
+            .setRole(LIFESCIENCE_RUNNER_ROLE)
+            .setMembers(
+                petServiceAccounts.stream()
+                    .map(s -> "serviceAccount:" + s)
+                    .collect(Collectors.toList())));
+    cloudResourceManagerService.setIamPolicy(googleProject, policy.setBindings(bindingList));
+  }
+
+  /** Revokes life science runner role to list of service accounts. */
+  private void revokeLifeScienceRunnerRole(String googleProject, List<String> petServiceAccounts) {
     com.google.api.services.cloudresourcemanager.model.Policy policy =
         cloudResourceManagerService.getIamPolicy(googleProject);
     List<com.google.api.services.cloudresourcemanager.model.Binding> bindingList =

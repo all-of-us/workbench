@@ -490,6 +490,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     }
 
     DbWorkspace dbWorkspace = workspaceDao.getRequired(workspaceNamespace, workspaceId);
+    List<UserRole> userRolesBeforeShare =
+        workspaceService.getFirecloudUserRoles(workspaceNamespace, dbWorkspace.getFirecloudName());
     int version = Etags.toVersion(request.getWorkspaceEtag());
     if (dbWorkspace.getVersion() != version) {
       throw new ConflictException("Attempted to modify user roles with outdated workspace etag");
@@ -518,22 +520,25 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     WorkspaceUserRolesResponse resp = new WorkspaceUserRolesResponse();
     resp.setWorkspaceEtag(Etags.fromVersion(dbWorkspace.getVersion()));
 
-    List<UserRole> updatedUserRoles =
+    List<UserRole> userRolesAfterShare =
         workspaceService.getFirecloudUserRoles(workspaceNamespace, dbWorkspace.getFirecloudName());
-    resp.setItems(updatedUserRoles);
+    resp.setItems(userRolesAfterShare);
 
-    // Currently we only grant user workflow permissions for new writer/owners withtout removing
-    // them when unshare. TODO(RW-7615): Revoke workflow permissions when unshare. It might not be
-    // a issue because: (1) Only User pet SA can actAs pet SA. (2) After unshare, user is not able
-    // to access the pet SA in workbench.
     if (dbWorkspace.getCdrVersion().getAccessTier().getEnableUserWorkflows()) {
-      List<String> usersGainPermission =
+      List<String> usersHavePermission =
           aclsByEmail.entrySet().stream()
               .filter(entry -> shouldGrantWorkflowRunnerAsService(userProvider.get(), entry))
               .map(Map.Entry::getKey)
               .collect(Collectors.toList());
+
+      // Find the users who are owners or writers before share, but not in the new gain permission
+      // list
+      List<String> userLostPermission  = userRolesBeforeShare.stream().filter(u -> (u.getRole().equals(WorkspaceAccessLevel.OWNER) || u.getRole().equals(WorkspaceAccessLevel.OWNER)) && !usersHavePermission.contains(u.getEmail()))
+              .map(u -> u.getEmail()).collect(Collectors.toList());
       iamService.grantWorkflowRunnerRoleToUsers(
-          dbWorkspace.getGoogleProject(), usersGainPermission);
+          dbWorkspace.getGoogleProject(), usersHavePermission);
+      iamService.revokeWorkflowRunnerRoleToUsers(
+          dbWorkspace.getGoogleProject(), userLostPermission);
     }
 
     workspaceAuditor.fireCollaborateAction(
