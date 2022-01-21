@@ -756,9 +756,9 @@ public class DataSetServiceTest {
   public void test_userRecentModifiedEntry_deleteDataSet() {
     dbDataset = dataSetDao.save(dbDataset);
     long dataSetId = dbDataset.getDataSetId();
-    dataSetServiceImpl.deleteDataSet(dbDataset.getWorkspaceId(), dbDataset.getDataSetId());
+    dataSetServiceImpl.deleteDataSet(dbDataset.getWorkspaceId(), dataSetId);
     verify(userRecentResourceService)
-        .deleteDataSetEntry(cohort.getWorkspaceId(), cohort.getCreator().getUserId(), dataSetId);
+        .deleteDataSetEntry(dbDataset.getWorkspaceId(), dbDataset.getCreatorId(), dataSetId);
   }
 
   private void mockDomainTableFields() {
