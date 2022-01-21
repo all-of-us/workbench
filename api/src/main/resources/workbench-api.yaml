@@ -2636,7 +2636,7 @@ paths:
           description: 'A SQL query for each domain in the Data Set'
           schema:
             "$ref": "#/definitions/DataSetPreviewResponse"
-  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/data-set/domainValues/{domain}":
+  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/data-set/concept-sets/domainValues/{domain}":
     get:
       tags:
       - dataSet
@@ -2645,6 +2645,11 @@ paths:
       parameters:
       - "$ref": "#/parameters/workspaceNamespace"
       - "$ref": "#/parameters/workspaceId"
+      - in: query
+        name: conceptSetId
+        required: false
+        type: integer
+        format: int64
       - in: path
         name: domain
         required: true
@@ -5428,12 +5433,27 @@ definitions:
         description: 'Survey corresponding to an OMOP table.'
         "$ref": "#/definitions/Surveys"
       values:
-        "$ref": "#/definitions/DomainValuesResponse"
+        type: array
+        items:
+          "$ref": "#/definitions/DomainValue"
   DomainValuesResponse:
     type: object
     required:
     - items
     properties:
+      items:
+        type: array
+        items:
+          "$ref": "#/definitions/DomainWithDomainValues"
+  DomainWithDomainValues:
+    type: object
+    description: 'Domain with list of domain values map to various column names in OMOP.'
+    required:
+    - value
+    properties:
+      domain:
+        description: The domain for this list of values.
+        type: string
       items:
         type: array
         items:

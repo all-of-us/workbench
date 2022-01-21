@@ -1,6 +1,7 @@
 package org.pmiops.workbench.dataset;
 
 import static com.google.cloud.bigquery.StandardSQLTypeName.ARRAY;
+import static org.pmiops.workbench.cohortbuilder.SearchGroupItemQueryBuilder.CHILD_LOOKUP_SQL;
 import static org.pmiops.workbench.model.PrePackagedConceptSetEnum.SURVEY;
 
 import com.google.cloud.bigquery.FieldList;
@@ -20,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -34,6 +36,7 @@ import javax.persistence.OptimisticLockException;
 import javax.transaction.Transactional;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.engine.jdbc.internal.BasicFormatterImpl;
+import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.api.Etags;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
@@ -43,6 +46,7 @@ import org.pmiops.workbench.cdr.model.DbDSDataDictionary;
 import org.pmiops.workbench.cdr.model.DbDSLinking;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
+import org.pmiops.workbench.cohortbuilder.QueryParameterUtil;
 import org.pmiops.workbench.cohorts.CohortService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -73,6 +77,7 @@ import org.pmiops.workbench.model.DataSetRequest;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainValue;
 import org.pmiops.workbench.model.DomainValuePair;
+import org.pmiops.workbench.model.DomainWithDomainValues;
 import org.pmiops.workbench.model.KernelTypeEnum;
 import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
 import org.pmiops.workbench.model.ResourceType;
@@ -107,6 +112,14 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
           KernelTypeEnum.R, R_CDR_ENV_VARIABLE, KernelTypeEnum.PYTHON, PYTHON_CDR_ENV_VARIABLE);
   private static final String PREVIEW_QUERY =
       "SELECT ${columns} \nFROM `${projectId}.${dataSetId}.${tableName}`";
+  private static final String MULTIPLE_DOMAIN_QUERY =
+      "SELECT UPPER(domain) \nFROM `${projectId}.${dataSetId}.cb_search_all_events` se \nWHERE concept_id IN "
+          + CHILD_LOOKUP_SQL
+          + "\nGROUP BY domain";
+  private static final String SOURCE_CONCEPT_DOMAIN_QUERY =
+      "SELECT DISTINCT concept_id \nFROM `${projectId}.${dataSetId}.cb_search_all_events` \nWHERE concept_id IN "
+          + CHILD_LOOKUP_SQL
+          + "\nAND UPPER(domain) = %s";
   private static final String LIMIT_20 = " LIMIT 20";
   private static final String PERSON_ID_COLUMN_NAME = "PERSON_ID";
   private static final ImmutableList<Domain> OUTER_QUERY_DOMAIN =
@@ -127,6 +140,9 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
           Domain.FITBIT_INTRADAY_STEPS,
           Domain.WHOLE_GENOME_VARIANT,
           Domain.ZIP_CODE_SOCIOECONOMIC);
+
+  private static final ImmutableList<Domain> CONCEPT_SET_TYPE_WITH_MULTIPLE_DOMAINS =
+      ImmutableList.of(Domain.CONDITION, Domain.PROCEDURE);
 
   // See https://cloud.google.com/appengine/articles/deadlineexceedederrors for details
   private static final long APP_ENGINE_HARD_TIMEOUT_MSEC_MINUS_FIVE_SEC = 55000L;
@@ -343,24 +359,22 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
                 .replace("${tableName}", BigQueryDataSetTableInfo.getTableName(domain)));
 
     if (supportsConceptSets(domain)) {
-      final List<DbConceptSetConceptId> dbConceptSetConceptIds =
-          (domain.equals(Domain.SURVEY) && request.getPrePackagedConceptSet().contains(SURVEY))
-              ? conceptBigQueryService.getSurveyQuestionConceptIds().stream()
-                  .map(
-                      c ->
-                          DbConceptSetConceptId.builder()
-                              .addConceptId(c)
-                              .addStandard(false)
-                              .build())
-                  .collect(Collectors.toList())
-              : conceptSetDao.findAllByConceptSetIdIn(request.getConceptSetIds()).stream()
-                  .filter(
-                      cs ->
-                          cs.getDomainEnum().equals(domain)
-                              || (cs.getDomainEnum().equals(Domain.PHYSICAL_MEASUREMENT_CSS)
-                                  && domain.equals(Domain.MEASUREMENT)))
-                  .flatMap(cs -> cs.getConceptSetConceptIds().stream())
-                  .collect(Collectors.toList());
+      List<DbConceptSetConceptId> dbConceptSetConceptIds;
+      switch (domain) {
+        case SURVEY:
+        case PHYSICAL_MEASUREMENT_CSS:
+          dbConceptSetConceptIds =
+              isPrepackagedAllSurveys(request)
+                  ? findPrepackagedSurveyQuestionConceptIds()
+                  : findDomainConceptIds(request.getDomain(), request.getConceptSetIds());
+          break;
+        default:
+          // Get all source concepts and check to see if they cross this domain. Please see:
+          // https://precisionmedicineinitiative.atlassian.net/browse/RW-7657
+          dbConceptSetConceptIds =
+              findMultipleDomainConceptIds(request.getDomain(), request.getConceptSetIds());
+          break;
+      }
       Map<Boolean, List<DbConceptSetConceptId>> partitionSourceAndStandard =
           dbConceptSetConceptIds.stream()
               .collect(Collectors.partitioningBy(DbConceptSetConceptId::getStandard));
@@ -696,11 +710,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
       Domain domain, List<DbConceptSet> conceptSets) {
     final List<DbConceptSet> dbConceptSets =
         conceptSets.stream()
-            .filter(
-                cs ->
-                    cs.getDomainEnum().equals(domain)
-                        || (cs.getDomainEnum().equals(Domain.PHYSICAL_MEASUREMENT)
-                            && domain.equals(Domain.MEASUREMENT)))
+            .filter(cs -> cs.getDomainEnum().equals(domain))
             .collect(Collectors.toList());
     if (preDefinedSurveyConceptSet(dbConceptSets)) {
       return Optional.of(
@@ -712,10 +722,12 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
                       ConceptBigQueryService.SURVEY_QUESTION_CONCEPT_ID_SQL_TEMPLATE)
               + ")");
     } else {
+      final List<Long> dbConceptSetIds =
+          conceptSets.stream().map(DbConceptSet::getConceptSetId).collect(Collectors.toList());
       final List<DbConceptSetConceptId> dbConceptSetConceptIds =
-          dbConceptSets.stream()
-              .flatMap(cs -> cs.getConceptSetConceptIds().stream())
-              .collect(Collectors.toList());
+          domain.equals(Domain.SURVEY)
+              ? findDomainConceptIds(domain, dbConceptSetIds)
+              : findMultipleDomainConceptIds(domain, dbConceptSetIds);
       if (dbConceptSetConceptIds.isEmpty()) {
         return Optional.empty();
       } else {
@@ -1232,15 +1244,30 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   }
 
   @Override
-  public List<DomainValue> getValueListFromDomain(String domainValue) {
+  public List<DomainWithDomainValues> getValueListFromDomain(
+      Long conceptSetId, String domainValue) {
     Domain domain =
         Domain.PHYSICAL_MEASUREMENT_CSS.equals(Domain.valueOf(domainValue))
             ? Domain.MEASUREMENT
             : Domain.valueOf(domainValue);
-    FieldList fieldList = bigQueryService.getTableFieldsFromDomain(domain);
-    return fieldList.stream()
-        .map(field -> new DomainValue().value(field.getName().toLowerCase()))
-        .collect(Collectors.toList());
+
+    // If the domain is Condition/Procedure and the concept set contains a source concept then
+    // it may have multiple domains.
+    // Please see: https://precisionmedicineinitiative.atlassian.net/browse/RW-7657
+    List<String> domains = findAllDomains(conceptSetId, domain);
+    List<DomainWithDomainValues> returnList = new ArrayList<>();
+    for (String d : domains) {
+      FieldList fieldList = bigQueryService.getTableFieldsFromDomain(Domain.valueOf(d));
+      returnList.add(
+          new DomainWithDomainValues()
+              .domain(d)
+              .items(
+                  fieldList.stream()
+                      .map(field -> new DomainValue().value(field.getName().toLowerCase()))
+                      .collect(Collectors.toList())));
+    }
+
+    return returnList;
   }
 
   @Override
@@ -1493,5 +1520,137 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     surveyConceptSet.setName("All Surveys");
     surveyConceptSet.setDomain(DbStorageEnums.domainToStorage(Domain.SURVEY));
     return surveyConceptSet;
+  }
+
+  /**
+   * If the domain is Condition/Procedure and the concept set contains a source concept then it may
+   * have multiple domains. Please see:
+   * https://precisionmedicineinitiative.atlassian.net/browse/RW-7657
+   */
+  @NotNull
+  private List<String> findAllDomains(Long conceptSetId, Domain domain) {
+    Set<String> domains = new HashSet<>();
+    if (CONCEPT_SET_TYPE_WITH_MULTIPLE_DOMAINS.contains(domain)) {
+      List<DbConceptSet> dbConceptSetList =
+          conceptSetDao.findAllByConceptSetIdIn(ImmutableList.of(conceptSetId));
+      if (dbConceptSetList.isEmpty()) {
+        throw new NotFoundException("No Concept Set found for conceptSetId " + conceptSetId);
+      }
+      // get all source concepts
+      Map<Boolean, List<DbConceptSetConceptId>> partitionSourceAndStandard =
+          dbConceptSetList.get(0).getConceptSetConceptIds().stream()
+              .collect(Collectors.partitioningBy(DbConceptSetConceptId::getStandard));
+      List<DbConceptSetConceptId> source = partitionSourceAndStandard.get(false);
+
+      Long[] sourceConceptIds =
+          source.stream()
+              .map(DbConceptSetConceptId::getConceptId)
+              .collect(Collectors.toList())
+              .toArray(new Long[0]);
+
+      // add query param for source concepts
+      Map<String, QueryParameterValue> queryParams = new HashMap<>();
+      String conceptIdsParam =
+          QueryParameterUtil.addQueryParameterValue(
+              queryParams, QueryParameterValue.array(sourceConceptIds, Long.class));
+      String sourceParam =
+          QueryParameterUtil.addQueryParameterValue(queryParams, QueryParameterValue.int64(0));
+
+      // build query configuration
+      QueryJobConfiguration queryJobConfiguration =
+          buildQueryJobConfiguration(
+              queryParams, String.format(MULTIPLE_DOMAIN_QUERY, conceptIdsParam, sourceParam));
+
+      // get results
+      domains =
+          Streams.stream(
+                  bigQueryService
+                      .executeQuery(bigQueryService.filterBigQueryConfig(queryJobConfiguration))
+                      .getValues())
+              .map(domainId -> domainId.get(0).getValue().toString())
+              .collect(Collectors.toSet());
+
+      // add standard domains if they don't already exist
+      if (!partitionSourceAndStandard.get(true).isEmpty()) {
+        domains.add(domain.toString());
+      }
+    } else {
+      domains.add(domain.toString());
+    }
+    return new ArrayList<>(domains);
+  }
+
+  @NotNull
+  private List<DbConceptSetConceptId> findPrepackagedSurveyQuestionConceptIds() {
+    return conceptBigQueryService.getSurveyQuestionConceptIds().stream()
+        .map(c -> DbConceptSetConceptId.builder().addConceptId(c).addStandard(false).build())
+        .collect(Collectors.toList());
+  }
+
+  @NotNull
+  private List<DbConceptSetConceptId> findDomainConceptIds(
+      Domain domain, List<Long> conceptSetIds) {
+    return conceptSetDao.findAllByConceptSetIdIn(conceptSetIds).stream()
+        .filter(cs -> cs.getDomainEnum().equals(domain))
+        .flatMap(cs -> cs.getConceptSetConceptIds().stream())
+        .collect(Collectors.toList());
+  }
+
+  private List<DbConceptSetConceptId> findMultipleDomainConceptIds(
+      Domain domain, List<Long> conceptSetIds) {
+    List<DbConceptSetConceptId> dbConceptSetConceptIds =
+        findDomainConceptIds(domain, conceptSetIds).stream()
+            .filter(c -> c.getStandard() == Boolean.TRUE)
+            .collect(Collectors.toList());
+    List<DbConceptSetConceptId> dbPossibleSourceConceptIds =
+        conceptSetDao.findAllByConceptSetIdIn(conceptSetIds).stream()
+            .flatMap(
+                cs ->
+                    cs.getConceptSetConceptIds().stream()
+                        .filter(c -> c.getStandard() == Boolean.FALSE))
+            .collect(Collectors.toList());
+
+    Long[] sourceConceptIds =
+        dbPossibleSourceConceptIds.stream()
+            .map(DbConceptSetConceptId::getConceptId)
+            .collect(Collectors.toList())
+            .toArray(new Long[0]);
+
+    // add query param for source concepts
+    Map<String, QueryParameterValue> queryParams = new HashMap<>();
+    String conceptIdsParam =
+        QueryParameterUtil.addQueryParameterValue(
+            queryParams, QueryParameterValue.array(sourceConceptIds, Long.class));
+    String domainParam =
+        QueryParameterUtil.addQueryParameterValue(
+            queryParams, QueryParameterValue.string(domain.toString()));
+
+    // build query configuration
+    QueryJobConfiguration queryJobConfiguration =
+        buildQueryJobConfiguration(
+            queryParams,
+            String.format(SOURCE_CONCEPT_DOMAIN_QUERY, conceptIdsParam, 0, domainParam));
+
+    // get results
+    List<DbConceptSetConceptId> sourceConceptIdsToAdd =
+        Streams.stream(
+                bigQueryService
+                    .executeQuery(bigQueryService.filterBigQueryConfig(queryJobConfiguration))
+                    .getValues())
+            .map(
+                conceptId ->
+                    DbConceptSetConceptId.builder()
+                        .addConceptId(conceptId.get(0).getLongValue())
+                        .addStandard(Boolean.FALSE)
+                        .build())
+            .collect(Collectors.toList());
+
+    dbConceptSetConceptIds.addAll(sourceConceptIdsToAdd);
+    return dbConceptSetConceptIds;
+  }
+
+  private boolean isPrepackagedAllSurveys(DataSetPreviewRequest request) {
+    final Domain domain = request.getDomain();
+    return domain.equals(Domain.SURVEY) && request.getPrePackagedConceptSet().contains(SURVEY);
   }
 }

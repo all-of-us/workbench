@@ -180,14 +180,16 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
         standardConceptIds.stream().map(Object::toString).collect(Collectors.toList());
     if (!sourceIds.isEmpty()) {
       criteriaList.addAll(
-          cbCriteriaDao.findCriteriaByDomainIdAndStandardAndConceptIds(domainId, false, sourceIds)
+          cbCriteriaDao
+              .findCriteriaByDomainIdAndStandardAndConceptIds(domainId, false, sourceIds)
               .stream()
               .map(cohortBuilderMapper::dbModelToClient)
               .collect(Collectors.toList()));
     }
     if (!standardConceptIds.isEmpty()) {
       criteriaList.addAll(
-          cbCriteriaDao.findCriteriaByDomainIdAndStandardAndConceptIds(domainId, true, standardIds)
+          cbCriteriaDao
+              .findCriteriaByDomainIdAndStandardAndConceptIds(domainId, true, standardIds)
               .stream()
               .map(cohortBuilderMapper::dbModelToClient)
               .collect(Collectors.toList()));
@@ -307,7 +309,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
 
   @Override
   public List<CriteriaMenu> findCriteriaMenuByParentId(long parentId) {
-    return criteriaMenuDao.findByParentIdOrderBySortOrderAsc(parentId).stream()
+    return criteriaMenuDao.findByParentIdOrderByIdAscSortOrderAsc(parentId).stream()
         .map(cohortBuilderMapper::dbModelToClient)
         .collect(Collectors.toList());
   }

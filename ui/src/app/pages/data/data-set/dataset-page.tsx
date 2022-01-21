@@ -674,6 +674,11 @@ function domainValuePairsToLowercase(domainValuePairs: DomainValuePair[]) {
   }));
 }
 
+interface DomainWithConceptSetId {
+  domain: Domain;
+  conceptSetId: number;
+}
+
 interface DataSetPreviewInfo {
   isLoading: boolean;
   errorText: JSX.Element;
@@ -718,6 +723,7 @@ interface State {
   selectedCohortIds: number[];
   selectedConceptSetIds: number[];
   selectedDomains: Set<Domain>;
+  selectedDomainsWithConceptSetIds: Set<DomainWithConceptSetId>;
   selectedDomainValuePairs: DomainValuePair[];
   selectedPrepackagedConceptSets: Set<PrepackagedConceptSet>;
   selectedPreviewDomain: Domain;
@@ -750,6 +756,7 @@ export const DatasetPage = fp.flow(
         selectedCohortIds: [],
         selectedConceptSetIds: [],
         selectedDomains: new Set(),
+        selectedDomainsWithConceptSetIds: new Set(),
         selectedPreviewDomain: Domain.CONDITION,
         selectedPrepackagedConceptSets: new Set(),
         selectedDomainValuePairs: [],
@@ -771,27 +778,32 @@ export const DatasetPage = fp.flow(
       }
     }
 
-    loadDataset(dataset) {
+    loadDataset(dataset: DataSet, initialLoad?: boolean) {
       // This is to set the URL to reference the newly created dataset and the user is staying on the dataset page
       // A bit of a hack but I couldn't find another way to change the URL without triggering a reload
       if (window.location.href.endsWith('data-sets')) {
         history.pushState({}, '', `${window.location.href}/${dataset.id}`);
       }
 
-      return this.setState({
-        dataSet: dataset,
-        dataSetTouched: false,
-        includesAllParticipants: dataset.includesAllParticipants,
-        selectedConceptSetIds: dataset.conceptSets.map((cs) => cs.id),
-        selectedCohortIds: dataset.cohorts.map((c) => c.id),
-        selectedDomainValuePairs: domainValuePairsToLowercase(
-          dataset.domainValuePairs
-        ),
-        selectedDomains: this.getDomainsFromDataSet(dataset),
-        selectedPrepackagedConceptSets: this.apiEnumToPrePackageConceptSets(
-          dataset.prePackagedConceptSet
-        ),
-      });
+      this.setState({ dataSet: dataset, dataSetTouched: false });
+      // We only need to set selections on the initial load of a saved dataset,
+      // not for creating/updating since the selections will already be set
+      if (initialLoad) {
+        this.setState({
+          includesAllParticipants: dataset.includesAllParticipants,
+          selectedConceptSetIds: dataset.conceptSets.map((cs) => cs.id),
+          selectedCohortIds: dataset.cohorts.map((c) => c.id),
+          selectedDomainValuePairs: domainValuePairsToLowercase(
+            dataset.domainValuePairs
+          ),
+          selectedDomains: this.getDomainsFromDataSet(dataset),
+          selectedDomainsWithConceptSetIds:
+            this.getDomainsWithConceptSetIdsFromDataSet(dataset),
+          selectedPrepackagedConceptSets: this.apiEnumToPrePackageConceptSets(
+            dataset.prePackagedConceptSet
+          ),
+        });
+      }
     }
 
     private getCdrVersion(): CdrVersion {
@@ -833,7 +845,7 @@ export const DatasetPage = fp.flow(
         this.props.workspace.id,
         +this.props.match.params.dataSetId
       );
-      this.loadDataset(dataset);
+      this.loadDataset(dataset, true);
     }
 
     async componentDidUpdate(prevProps, prevState: State) {
@@ -864,118 +876,131 @@ export const DatasetPage = fp.flow(
       }
 
       // If any domains were dropped, we want to drop any domain/value pair selections.
-      const droppedDomains = Array.from(prevState.selectedDomains).filter(
-        (d) => !this.state.selectedDomains.has(d)
-      );
+      const droppedDomains = Array.from(
+        prevState.selectedDomainsWithConceptSetIds
+      ).filter((d) => !this.state.selectedDomainsWithConceptSetIds.has(d));
       if (droppedDomains.length > 0) {
-        this.setState(({ selectedDomains, selectedDomainValuePairs }) => ({
-          selectedDomainValuePairs: selectedDomainValuePairs.filter((p) =>
-            selectedDomains.has(p.domain)
-          ),
-        }));
+        const updatedDomains = Array.from(
+          this.state.selectedDomainsWithConceptSetIds
+        ).map(({ domain }) => domain);
+        this.setState(
+          ({ selectedDomainsWithConceptSetIds, selectedDomainValuePairs }) => ({
+            selectedDomains: new Set(updatedDomains),
+            selectedDomainValuePairs: selectedDomainValuePairs.filter((p) =>
+              Array.from(selectedDomainsWithConceptSetIds).some(
+                (d) => d.domain === p.domain
+              )
+            ),
+          })
+        );
       }
 
       // After a state update, first check whether any new domains have been added.
-      const newDomains = Array.from(this.state.selectedDomains).filter(
-        (d) => !prevState.selectedDomains.has(d)
-      );
+      const newDomains = Array.from(
+        this.state.selectedDomainsWithConceptSetIds
+      ).filter((d) => !prevState.selectedDomainsWithConceptSetIds.has(d));
       if (!newDomains.length) {
         return;
       }
+      newDomains.forEach((nd) => {
+        this.setState(({ domainValueSetIsLoading }) => ({
+          domainValueSetIsLoading: domainValueSetIsLoading.add(nd.domain),
+        }));
+        this.loadValueSetForDomain(nd);
+      });
+    }
 
+    private async loadValueSetForDomain(
+      domainWithConceptSetId: DomainWithConceptSetId
+    ) {
       // TODO(RW-4426): There is a lot of complexity here around loading domain
       // values which is static data for a given CDR version. Consider
       // refactoring this page to load all schema data before rendering.
-
-      // If any of these new domains have already been loaded, autoselect all of
-      // their value pairs. The desired product behavior is that when a new
-      // set of domain values appears, all boxes begin as checked.
-      const loadedDomains = newDomains.filter((d) =>
-        this.state.domainValueSetLookup.has(d)
-      );
-      if (loadedDomains.length > 0) {
-        this.setState(({ domainValueSetLookup, selectedDomainValuePairs }) => {
-          const morePairs = fp.flatMap(
-            (d) =>
-              domainValueSetLookup.get(d).values.items.map((v) => ({
-                domain: d,
-                value: v.value,
-              })),
-            loadedDomains
-          );
-
-          return {
-            selectedDomainValuePairs:
-              selectedDomainValuePairs.concat(morePairs),
-          };
-        });
-      }
-
-      // If any of these domains has not yet been loaded, request the schema
-      // (value sets) for them.
-      const domainsToLoad = newDomains.filter(
-        (d) =>
-          d &&
-          !this.state.domainValueSetIsLoading.has(d) &&
-          !this.state.domainValueSetLookup.has(d)
-      );
-      if (domainsToLoad.length > 0) {
-        this.setState(({ domainValueSetIsLoading, domainValueSetLookup }) => {
-          const newLoading = new Set(domainValueSetIsLoading);
-          domainsToLoad.forEach((d) => {
-            if (
-              !domainValueSetIsLoading.has(d) &&
-              !domainValueSetLookup.has(d)
-            ) {
-              // This will also autoselect the newly loaded values.
-              this.loadValueSetForDomain(d);
-              newLoading.add(d);
-            }
-          });
-          return { domainValueSetIsLoading: newLoading };
-        });
-      }
-    }
-
-    private async loadValueSetForDomain(domain: Domain) {
       const { namespace, id } = this.props.workspace;
+      const { selectedDomainsWithConceptSetIds } = this.state;
       const values = await dataSetApi().getValuesFromDomain(
         namespace,
         id,
-        domain.toString()
+        domainWithConceptSetId.domain.toString(),
+        domainWithConceptSetId.conceptSetId
       );
-      this.setState(
-        ({
-          dataSet,
-          domainValueSetIsLoading,
-          domainValueSetLookup,
-          selectedDomainValuePairs,
-        }) => {
-          const newLoading = new Set(domainValueSetIsLoading);
-          const newLookup = new Map(domainValueSetLookup);
+      // Delete the selected domain - conceptId pair and add the domains from the getValuesFromDomain response
+      selectedDomainsWithConceptSetIds.delete(domainWithConceptSetId);
+      values.items.forEach((domainWithDomainValues) => {
+        const domain = Domain[domainWithDomainValues.domain];
+        selectedDomainsWithConceptSetIds.add({
+          conceptSetId: domainWithConceptSetId.conceptSetId,
+          domain,
+        });
+        // If the domain has already been loaded, autoselect all of
+        // its value pairs. The desired product behavior is that when a new
+        // set of domain values appears, all boxes begin as checked.
+        if (this.state.domainValueSetLookup.has(domain)) {
+          this.setState(
+            ({
+              domainValueSetLookup,
+              selectedDomains,
+              selectedDomainValuePairs,
+            }) => {
+              const morePairs = domainValueSetLookup
+                .get(domain)
+                .values.map((v) => ({ domain, value: v.value }));
+              return {
+                selectedDomains: selectedDomains.add(domain),
+                selectedDomainValuePairs:
+                  selectedDomainValuePairs.concat(morePairs),
+              };
+            }
+          );
+          // If any of the domain has not yet been loaded, add the schema
+          // (value sets) for it.
+        } else {
+          this.setState(
+            ({
+              dataSet,
+              domainValueSetLookup,
+              selectedDomains,
+              selectedDomainValuePairs,
+            }) => {
+              const newLookup = new Map(domainValueSetLookup);
+              newLookup.set(domain, {
+                domain,
+                values: domainWithDomainValues.items,
+              });
 
-          newLoading.delete(domain);
-          newLookup.set(domain, { domain, values });
-
-          // Autoselect the newly added domain, except if we're editing an
-          // existing dataset which already covers the domain. This avoids having
-          // us overwrite the selected pairs on initial load.
-          let morePairs = [];
-          if (
-            this.isCreatingNewDataset ||
-            !this.getDomainsFromDataSet(dataSet).has(domain)
-          ) {
-            morePairs = values.items.map((v) => ({ domain, value: v.value }));
-          }
-
-          return {
-            domainValueSetIsLoading: newLoading,
-            domainValueSetLookup: newLookup,
-            selectedDomainValuePairs:
-              selectedDomainValuePairs.concat(morePairs),
-          };
+              // Autoselect the newly added domain, except if we're editing an
+              // existing dataset which already covers the domain. This avoids having
+              // us overwrite the selected pairs on initial load.
+              const morePairs = [];
+              if (
+                this.isCreatingNewDataset ||
+                !this.getDomainsFromDataSet(dataSet).has(domain)
+              ) {
+                domainWithDomainValues.items.forEach((v) =>
+                  morePairs.push({
+                    domain: domainWithDomainValues.domain,
+                    value: v.value,
+                  })
+                );
+              }
+              return {
+                domainValueSetLookup: newLookup,
+                selectedDomains: selectedDomains.add(domain),
+                selectedDomainValuePairs:
+                  selectedDomainValuePairs.concat(morePairs),
+              };
+            }
+          );
         }
-      );
+      });
+      this.setState(({ domainValueSetIsLoading }) => {
+        const newLoading = new Set(domainValueSetIsLoading);
+        newLoading.delete(domainWithConceptSetId.domain);
+        return {
+          domainValueSetIsLoading: newLoading,
+          selectedDomainsWithConceptSetIds,
+        };
+      });
     }
 
     async loadResources(): Promise<void> {
@@ -998,35 +1023,40 @@ export const DatasetPage = fp.flow(
     }
 
     private getDomainsFromDataSet(d: DataSet) {
+      const domains = domainValuePairsToLowercase(d.domainValuePairs).map(
+        ({ domain }) => domain
+      );
+      return new Set(domains);
+    }
+
+    private getDomainsWithConceptSetIdsFromDataSet(d: DataSet) {
       const selectedPrepackagedConceptSets =
         this.apiEnumToPrePackageConceptSets(d.prePackagedConceptSet);
-      return this.getDomainsFromConceptSets(
+      return this.getIdsAndDomainsFromConceptSets(
         d.conceptSets,
         selectedPrepackagedConceptSets
       );
     }
 
-    private getDomainsFromConceptSets(
+    private getIdsAndDomainsFromConceptSets(
       conceptSets: ConceptSet[],
       prepackagedConceptSets: Set<PrepackagedConceptSet>
-    ): Set<Domain> {
-      const domains = conceptSets
-        .map((cs) =>
-          cs.domain === Domain.PHYSICALMEASUREMENT
-            ? Domain.MEASUREMENT
-            : cs.domain
-        )
+    ): Set<DomainWithConceptSetId> {
+      const conceptSetIdsWithDomains = conceptSets
+        .map((cs) => ({
+          conceptSetId: cs.id,
+          domain:
+            cs.domain === Domain.PHYSICALMEASUREMENT
+              ? Domain.MEASUREMENT
+              : cs.domain,
+        }))
         .concat(
-          Array.from(prepackagedConceptSets).map((p) => PREPACKAGED_DOMAINS[p])
+          Array.from(prepackagedConceptSets).map((p) => ({
+            conceptSetId: null,
+            domain: PREPACKAGED_DOMAINS[p],
+          }))
         );
-      return new Set(domains);
-    }
-
-    private getConceptSets(ids: number[]): ConceptSet[] {
-      const setsById = new Map(
-        this.state.conceptSetList.map((cs) => [cs.id, cs] as [any, any])
-      );
-      return ids.map((id) => setsById.get(id));
+      return new Set(conceptSetIdsWithDomains);
     }
 
     getPrePackagedList() {
@@ -1057,19 +1087,38 @@ export const DatasetPage = fp.flow(
       selected: boolean
     ) {
       this.setState(
-        ({ selectedConceptSetIds, selectedPrepackagedConceptSets }) => {
+        ({
+          selectedDomainsWithConceptSetIds,
+          selectedPrepackagedConceptSets,
+        }) => {
           const updatedPrepackaged = new Set(selectedPrepackagedConceptSets);
+          const updatedDomainsWithConceptSetIds = new Set(
+            selectedDomainsWithConceptSetIds
+          );
           if (selected) {
             updatedPrepackaged.add(prepackaged);
+            updatedDomainsWithConceptSetIds.add({
+              conceptSetId: null,
+              domain: PREPACKAGED_DOMAINS[prepackaged],
+            });
           } else {
             updatedPrepackaged.delete(prepackaged);
+            updatedDomainsWithConceptSetIds.forEach(
+              (domainWithConceptSetId) => {
+                if (
+                  domainWithConceptSetId.conceptSetId === null &&
+                  domainWithConceptSetId.domain ===
+                    PREPACKAGED_DOMAINS[prepackaged]
+                ) {
+                  updatedDomainsWithConceptSetIds.delete(
+                    domainWithConceptSetId
+                  );
+                }
+              }
+            );
           }
-          const selectedDomains = this.getDomainsFromConceptSets(
-            this.getConceptSets(selectedConceptSetIds),
-            updatedPrepackaged
-          );
           return {
-            selectedDomains,
+            selectedDomainsWithConceptSetIds: updatedDomainsWithConceptSetIds,
             selectedPrepackagedConceptSets: updatedPrepackaged,
             dataSetTouched: true,
           };
@@ -1079,24 +1128,37 @@ export const DatasetPage = fp.flow(
 
     selectConceptSet(conceptSet: ConceptSet, selected: boolean): void {
       this.setState(
-        ({ selectedConceptSetIds, selectedPrepackagedConceptSets }) => {
+        ({ selectedConceptSetIds, selectedDomainsWithConceptSetIds }) => {
           let updatedConceptSetIds: number[];
+          const updatedDomainsWithConceptSetIds = new Set(
+            selectedDomainsWithConceptSetIds
+          );
           if (selected) {
             updatedConceptSetIds = selectedConceptSetIds.concat([
               conceptSet.id,
             ]);
+            updatedDomainsWithConceptSetIds.add({
+              conceptSetId: conceptSet.id,
+              domain: conceptSet.domain,
+            });
           } else {
             updatedConceptSetIds = fp.pull(
               conceptSet.id,
               selectedConceptSetIds
             );
+            // Iterate the set since it's possible to have multiple domains per concept set for some source concepts
+            updatedDomainsWithConceptSetIds.forEach(
+              (domainWithConceptSetId) => {
+                if (conceptSet.id === domainWithConceptSetId.conceptSetId) {
+                  updatedDomainsWithConceptSetIds.delete(
+                    domainWithConceptSetId
+                  );
+                }
+              }
+            );
           }
-          const selectedDomains = this.getDomainsFromConceptSets(
-            this.getConceptSets(updatedConceptSetIds),
-            selectedPrepackagedConceptSets
-          );
           return {
-            selectedDomains,
+            selectedDomainsWithConceptSetIds: updatedDomainsWithConceptSetIds,
             selectedConceptSetIds: updatedConceptSetIds,
             dataSetTouched: true,
           };
@@ -1135,11 +1197,10 @@ export const DatasetPage = fp.flow(
     }
 
     selectDomainValue(domain: Domain, domainValue: DomainValue): void {
-      const valueSets =
-        this.state.domainValueSetLookup.get(domain).values.items;
+      const valueSets = this.state.domainValueSetLookup.get(domain).values;
       const origSelected = this.state.selectedDomainValuePairs;
       const selectObj = { domain: domain, value: domainValue.value };
-      let valuesSelected = [];
+      let valuesSelected;
       if (fp.some(selectObj, origSelected)) {
         valuesSelected = fp.remove(
           (dv) =>
@@ -1175,7 +1236,7 @@ export const DatasetPage = fp.flow(
         // Only counted loaded domains.
         const v = this.state.domainValueSetLookup.get(d);
         if (v) {
-          count += v.values.items.length;
+          count += v.values.length;
         }
       });
       return count;
@@ -1188,7 +1249,7 @@ export const DatasetPage = fp.flow(
       } else {
         const selectedValuesList = [];
         this.state.domainValueSetLookup.forEach((valueSet) => {
-          valueSet.values.items.map((value) => {
+          valueSet.values.map((value) => {
             selectedValuesList.push({
               domain: valueSet.domain,
               value: value.value,
@@ -1889,7 +1950,7 @@ export const DatasetPage = fp.flow(
                                 </Subheader>
                                 {domainValueSetLookup
                                   .get(domain)
-                                  .values.items.map((domainValue) => (
+                                  .values.map((domainValue) => (
                                     <ValueListItem
                                       data-test-id='value-list-items'
                                       key={domainValue.value}
