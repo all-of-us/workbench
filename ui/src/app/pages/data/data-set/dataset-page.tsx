@@ -1,3 +1,4 @@
+import { AlertInfo } from 'app/components/alert';
 import {
   Button,
   Clickable,
@@ -273,12 +274,20 @@ export const COMPARE_DOMAINS_FOR_DISPLAY = (a: Domain, b: Domain) => {
 const checkNameWidth = (element: HTMLDivElement) =>
   element.offsetWidth < element.scrollWidth;
 
+const crossDomainConceptSetText = `
+  This Concept Set contains source concepts (ICD9CM/ICD10CM/CPT4) that may be present in multiple domains, which may yield multiple data 
+  tables.
+`;
+
 const ImmutableListItem: React.FunctionComponent<{
   name: string;
   onChange: Function;
   checked: boolean;
-}> = ({ name, onChange, checked }) => {
+  showSourceConceptIcon?: boolean;
+}> = ({ name, onChange, checked, showSourceConceptIcon }) => {
   const [showNameTooltip, setShowNameTooltip] = useState(false);
+  const [showSourceConceptTooltip, setShowSourceConceptTooltip] =
+    useState(false);
   return (
     <div style={styles.listItem}>
       <input
@@ -295,6 +304,19 @@ const ImmutableListItem: React.FunctionComponent<{
             setShowNameTooltip(checkNameWidth(e.target as HTMLDivElement))
           }
         >
+          {showSourceConceptIcon && (
+            <TooltipTrigger
+              disabled={!showSourceConceptTooltip}
+              content={crossDomainConceptSetText}
+            >
+              <ClrIcon
+                shape='exclamation-triangle'
+                size={20}
+                onMouseOver={() => setShowSourceConceptTooltip(true)}
+                onMouseOut={() => setShowSourceConceptTooltip(false)}
+              />
+            </TooltipTrigger>
+          )}
           {name}
         </div>
       </TooltipTrigger>
@@ -707,6 +729,7 @@ enum ModalState {
 interface State {
   cohortList: Cohort[];
   conceptSetList: ConceptSet[];
+  crossDomainConceptSetList: Set<number>;
   creatingConceptSet: boolean;
   dataSet: DataSet;
   dataSetTouched: boolean;
@@ -744,6 +767,7 @@ export const DatasetPage = fp.flow(
       this.state = {
         cohortList: [],
         conceptSetList: [],
+        crossDomainConceptSetList: new Set(),
         creatingConceptSet: false,
         dataSet: undefined,
         dataSetTouched: false,
@@ -917,7 +941,8 @@ export const DatasetPage = fp.flow(
       // values which is static data for a given CDR version. Consider
       // refactoring this page to load all schema data before rendering.
       const { namespace, id } = this.props.workspace;
-      const { selectedDomainsWithConceptSetIds } = this.state;
+      const { crossDomainConceptSetList, selectedDomainsWithConceptSetIds } =
+        this.state;
       const values = await dataSetApi().getValuesFromDomain(
         namespace,
         id,
@@ -928,6 +953,9 @@ export const DatasetPage = fp.flow(
       selectedDomainsWithConceptSetIds.delete(domainWithConceptSetId);
       values.items.forEach((domainWithDomainValues) => {
         const domain = Domain[domainWithDomainValues.domain];
+        if (domain !== domainWithConceptSetId.domain) {
+          crossDomainConceptSetList.add(domainWithConceptSetId.conceptSetId);
+        }
         selectedDomainsWithConceptSetIds.add({
           conceptSetId: domainWithConceptSetId.conceptSetId,
           domain,
@@ -997,6 +1025,7 @@ export const DatasetPage = fp.flow(
         const newLoading = new Set(domainValueSetIsLoading);
         newLoading.delete(domainWithConceptSetId.domain);
         return {
+          crossDomainConceptSetList,
           domainValueSetIsLoading: newLoading,
           selectedDomainsWithConceptSetIds,
         };
@@ -1128,7 +1157,11 @@ export const DatasetPage = fp.flow(
 
     selectConceptSet(conceptSet: ConceptSet, selected: boolean): void {
       this.setState(
-        ({ selectedConceptSetIds, selectedDomainsWithConceptSetIds }) => {
+        ({
+          crossDomainConceptSetList,
+          selectedConceptSetIds,
+          selectedDomainsWithConceptSetIds,
+        }) => {
           let updatedConceptSetIds: number[];
           const updatedDomainsWithConceptSetIds = new Set(
             selectedDomainsWithConceptSetIds
@@ -1156,8 +1189,10 @@ export const DatasetPage = fp.flow(
                 }
               }
             );
+            crossDomainConceptSetList.delete(conceptSet.id);
           }
           return {
+            crossDomainConceptSetList,
             selectedDomainsWithConceptSetIds: updatedDomainsWithConceptSetIds,
             selectedConceptSetIds: updatedConceptSetIds,
             dataSetTouched: true,
@@ -1722,6 +1757,7 @@ export const DatasetPage = fp.flow(
       const cohortsPath = pathPrefix + '/cohorts/build';
       const conceptSetsPath = pathPrefix + '/concepts';
       const {
+        crossDomainConceptSetList,
         dataSet,
         dataSetTouched,
         domainValueSetIsLoading,
@@ -1883,6 +1919,9 @@ export const DatasetPage = fp.flow(
                                 !selectedConceptSetIds.includes(conceptSet.id)
                               )
                             }
+                            showSourceConceptIcon={crossDomainConceptSetList.has(
+                              conceptSet.id
+                            )}
                           />
                         ))}
                       {loadingResources && (
@@ -2001,6 +2040,17 @@ export const DatasetPage = fp.flow(
                 </div>
               </div>
             </div>
+            {crossDomainConceptSetList.size > 0 && (
+              <AlertInfo>
+                <ClrIcon
+                  className='is-solid'
+                  shape='exclamation-triangle'
+                  size={20}
+                />
+                One or more of your selected Concept Sets contain source
+                concepts that exist in a different domain
+              </AlertInfo>
+            )}
           </FadeBox>
           <FadeBox style={{ marginTop: '1rem' }}>
             <div
