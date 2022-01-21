@@ -371,7 +371,10 @@ export async function waitWhileLoading(
     waitForRuntime ? '' : ':not([aria-hidden="true"]):not([data-test-id*="runtime-status"])'
   }`;
 
-  await assertValidPage(page, timeout);
+  const isValidPage = await assertValidPage(page, timeout);
+  if (!isValidPage) {
+    return;
+  }
 
   const startTime = Date.now();
   const confidenceLevel = 2;
@@ -403,29 +406,23 @@ export async function waitWhileLoading(
   await waitUntilSpinnerGone(timeout); // Wait do not exceed timeout
 }
 
-async function assertValidPage(page: Page, timeout: number): Promise<void> {
+async function assertValidPage(page: Page, timeout: number): Promise<boolean> {
+  const foundElement: ElementHandle = await Promise.race([
+    page.waitForXPath(process.env.AUTHENTICATED_TEST_ID_XPATH, { timeout }), // authenticated page
+    page.waitForXPath(process.env.UNAUTHENTICATED_TEST_ID_XPATH, { timeout })
+  ]);
+
+  // Prevent checking in Login and Create Account pages.
+  const dataTestIdValue = await getAttrValue(page, foundElement, 'data-test-id');
+  if (dataTestIdValue === 'sign-in-page') {
+    return false;
+  }
+
   const notBlankTitleXpath =
     '//title[starts-with(text(), "[Test]")' +
     ' or starts-with(text(), "[Staging]")' +
     ' or starts-with(text(), "[Local->Test]")]';
-
   const notBlankPageCss = 'div:not(empty):not([id="root"]):not([id="body"])';
-
-  // login or create account page
-  try {
-    const foundElement: ElementHandle = await Promise.race([
-      page.waitForXPath(process.env.AUTHENTICATED_TEST_ID_XPATH, { timeout }), // authenticated page
-      page.waitForXPath(process.env.UNAUTHENTICATED_TEST_ID_XPATH, { timeout })
-    ]);
-
-    // Prevent checking in Login and Create Account pages.
-    const dataTestIdValue = await getAttrValue(page, foundElement, 'data-test-id');
-    if (dataTestIdValue === 'sign-in-page') {
-      throw new Error('Page cannot be un-authenticated.');
-    }
-  } catch (err) {
-    // Leave blank.
-  }
 
   // Prevent checking in non-authenticated and blank pages. Throws error if find all fails.
   await Promise.all([
@@ -433,6 +430,7 @@ async function assertValidPage(page: Page, timeout: number): Promise<void> {
     page.waitForSelector(notBlankPageCss, { timeout }),
     page.waitForXPath(notBlankTitleXpath, { timeout })
   ]);
+  return true;
 }
 
 export async function waitUntilEnabled(page: Page, cssSelector: string): Promise<boolean> {

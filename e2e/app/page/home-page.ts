@@ -28,18 +28,17 @@ export default class HomePage extends AuthenticatedPage {
 
       // Find either a workspace card or "Create your first workspace" msg.
       const foundElement = await Promise.race([
-        this.page.waitForXPath('//text()[contains(., "Create your first workspace")]', {
+        this.page.waitForXPath('//h2[.="Create your first workspace"]', {
           timeout: 60000,
           visible: true
         }),
         this.page.waitForXPath('//*[@data-test-id="workspace-card"]', { timeout: 60000, visible: true })
       ]);
 
-      const dataTestIdValue = await getAttrValue(this.page, foundElement, 'data-test-id');
-      if (dataTestIdValue !== 'workspace-card') {
-        // Workspace is empty.
+      await getAttrValue(this.page, foundElement, 'data-test-id').catch(() => {
+        // Home page is empty without a workspace.
         return;
-      }
+      });
 
       // Look for either the recent-resources table or the getting-started msg.
       try {
@@ -61,7 +60,6 @@ export default class HomePage extends AuthenticatedPage {
       await this.page.waitForTimeout(5000);
       await waitFor();
     }
-
     return true;
   }
 

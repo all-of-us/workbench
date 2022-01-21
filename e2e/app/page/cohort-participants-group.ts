@@ -532,9 +532,8 @@ export default class CohortParticipantsGroup {
 
     const isSuccess = await enterTextAndSearch(searchWord);
     if (!isSuccess) {
-      logger.info('RETRY search criteria in 5 seconds after API request failure.');
-      await this.page.waitForTimeout(5000);
-      await enterTextAndSearch(searchWord);
+      logger.error('Search criteria "searchWord" failed.');
+      throw new Error('Encountered api request failure during search criteria.');
     }
 
     return new Table(this.page, `${this.criteriaSearchContainerXpath}//table[@class="p-datatable"]`);
