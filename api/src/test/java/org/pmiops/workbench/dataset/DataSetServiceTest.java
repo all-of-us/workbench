@@ -71,8 +71,8 @@ import org.pmiops.workbench.model.DataDictionaryEntry;
 import org.pmiops.workbench.model.DataSet;
 import org.pmiops.workbench.model.DataSetRequest;
 import org.pmiops.workbench.model.Domain;
-import org.pmiops.workbench.model.DomainValue;
 import org.pmiops.workbench.model.DomainValuePair;
+import org.pmiops.workbench.model.DomainWithDomainValues;
 import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
 import org.pmiops.workbench.model.ResourceType;
 import org.pmiops.workbench.model.SearchRequest;
@@ -333,6 +333,7 @@ public class DataSetServiceTest {
 
   @Test
   public void testBuildConceptIdListClause_same() {
+    mockPersonIdQuery();
     Domain domain1 = Domain.CONDITION;
     DbConceptSet conceptSet1 = buildConceptSet(1L, domain1, true, ImmutableSet.of(1L, 2L, 3L));
     DbConceptSet conceptSet2 = buildConceptSet(2L, domain1, true, ImmutableSet.of(4L, 5L, 6L));
@@ -341,18 +342,19 @@ public class DataSetServiceTest {
             domain1, ImmutableList.of(conceptSet1, conceptSet2));
     assertThat(listClauseMaybe.map(String::trim).orElse(""))
         .isEqualTo(
-            "( condition_concept_id IN  (SELECT DISTINCT c.concept_id\n"
+            "( condition_source_concept_id IN  (SELECT DISTINCT c.concept_id\n"
                 + "FROM `${projectId}.${dataSetId}.cb_criteria` c\n"
                 + "JOIN (select cast(cr.id as string) as id\n"
                 + "FROM `${projectId}.${dataSetId}.cb_criteria` cr\n"
-                + "WHERE concept_id IN (3, 2, 1, 6, 5, 4)) a\n"
+                + "WHERE concept_id IN (1, 2)) a\n"
                 + "ON (c.path LIKE CONCAT('%.', a.id, '.%') OR c.path LIKE CONCAT('%.', a.id) OR c.path LIKE CONCAT(a.id, '.%') OR c.path = a.id)\n"
-                + "WHERE is_standard = 1\n"
+                + "WHERE is_standard = 0\n"
                 + "AND is_selectable = 1))");
   }
 
   @Test
   public void testBuildConceptIdListClause_differentDomains() {
+    mockPersonIdQuery();
     DbConceptSet conceptSet1 =
         buildConceptSet(1L, Domain.CONDITION, true, ImmutableSet.of(1L, 2L, 3L));
     DbConceptSet conceptSet2 = buildConceptSet(2L, Domain.DRUG, true, ImmutableSet.of(4L, 5L, 6L));
@@ -361,13 +363,13 @@ public class DataSetServiceTest {
             Domain.CONDITION, ImmutableList.of(conceptSet1, conceptSet2));
     assertThat(listClauseMaybe.map(String::trim).orElse(""))
         .isEqualTo(
-            "( condition_concept_id IN  (SELECT DISTINCT c.concept_id\n"
+            "( condition_source_concept_id IN  (SELECT DISTINCT c.concept_id\n"
                 + "FROM `${projectId}.${dataSetId}.cb_criteria` c\n"
                 + "JOIN (select cast(cr.id as string) as id\n"
                 + "FROM `${projectId}.${dataSetId}.cb_criteria` cr\n"
-                + "WHERE concept_id IN (3, 2, 1)) a\n"
+                + "WHERE concept_id IN (1, 2)) a\n"
                 + "ON (c.path LIKE CONCAT('%.', a.id, '.%') OR c.path LIKE CONCAT('%.', a.id) OR c.path LIKE CONCAT(a.id, '.%') OR c.path = a.id)\n"
-                + "WHERE is_standard = 1\n"
+                + "WHERE is_standard = 0\n"
                 + "AND is_selectable = 1))");
   }
 
@@ -508,13 +510,13 @@ public class DataSetServiceTest {
   @Test
   public void testGetValueListFromDomain() {
     mockDomainTableFields();
-    List<DomainValue> conditionDomainValueList =
-        dataSetServiceImpl.getValueListFromDomain("CONDITION");
-    assertThat(conditionDomainValueList.size()).isEqualTo(2);
+    List<DomainWithDomainValues> observationDomainValueList =
+        dataSetServiceImpl.getValueListFromDomain(1L, "OBSERVATION");
+    assertThat(observationDomainValueList.get(0).getItems().size()).isEqualTo(2);
 
-    List<DomainValue> measurementDomainValueList =
-        dataSetServiceImpl.getValueListFromDomain("PHYSICAL_MEASUREMENT_CSS");
-    assertThat(measurementDomainValueList.size()).isEqualTo(1);
+    List<DomainWithDomainValues> measurementDomainValueList =
+        dataSetServiceImpl.getValueListFromDomain(2L, "PHYSICAL_MEASUREMENT_CSS");
+    assertThat(measurementDomainValueList.get(0).getItems().size()).isEqualTo(1);
   }
 
   @Test
@@ -762,7 +764,7 @@ public class DataSetServiceTest {
   }
 
   private void mockDomainTableFields() {
-    FieldList conditionList =
+    FieldList observationList =
         FieldList.of(
             ImmutableList.of(
                 Field.of("OMOP_SQL_Condition", LegacySQLTypeName.STRING),
@@ -770,7 +772,9 @@ public class DataSetServiceTest {
 
     FieldList measurementList =
         FieldList.of(ImmutableList.of(Field.of("OMOP_SQL_M", LegacySQLTypeName.STRING)));
-    doReturn(conditionList).when(mockBigQueryService).getTableFieldsFromDomain(Domain.CONDITION);
+    doReturn(observationList)
+        .when(mockBigQueryService)
+        .getTableFieldsFromDomain(Domain.OBSERVATION);
     doReturn(measurementList)
         .when(mockBigQueryService)
         .getTableFieldsFromDomain(Domain.MEASUREMENT);

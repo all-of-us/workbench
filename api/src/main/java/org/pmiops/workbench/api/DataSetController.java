@@ -49,6 +49,7 @@ import org.pmiops.workbench.model.DataSetRequest;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainValue;
 import org.pmiops.workbench.model.DomainValuesResponse;
+import org.pmiops.workbench.model.DomainWithDomainValues;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.GenomicExtractionJob;
 import org.pmiops.workbench.model.GenomicExtractionJobListResponse;
@@ -426,14 +427,17 @@ public class DataSetController implements DataSetApiDelegate {
 
   @Override
   public ResponseEntity<DomainValuesResponse> getValuesFromDomain(
-      String workspaceNamespace, String workspaceId, String domainValue) {
+      String workspaceNamespace, String workspaceId, String domainValue, Long conceptSetId) {
     workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     DomainValuesResponse response = new DomainValuesResponse();
     if (domainValue.equals(Domain.WHOLE_GENOME_VARIANT.toString())) {
-      response.addItemsItem(new DomainValue().value(WHOLE_GENOME_VALUE));
+      response.addItemsItem(
+          new DomainWithDomainValues()
+              .domain(Domain.WHOLE_GENOME_VARIANT.toString())
+              .addItemsItem(new DomainValue().value(WHOLE_GENOME_VALUE)));
     } else {
-      response.setItems(dataSetService.getValueListFromDomain(domainValue));
+      response.setItems(dataSetService.getValueListFromDomain(conceptSetId, domainValue));
     }
 
     return ResponseEntity.ok(response);

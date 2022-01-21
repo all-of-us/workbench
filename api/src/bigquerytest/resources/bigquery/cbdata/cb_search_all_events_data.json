@@ -430,5 +430,41 @@
     "value_as_number": 10,
     "value_source_concept_id": 10,
     "survey_version_concept_id": 100
+  },
+  {
+    "person_id": 1,
+    "entry_date": "2009-11-03",
+    "concept_id": 44823922,
+    "domain": "Condition",
+    "age_at_event": 38,
+    "visit_concept_id": 1,
+    "visit_occurrence_id": 1,
+    "is_standard": 0,
+    "value_as_number": 10,
+    "value_source_concept_id": 10,
+    "survey_version_concept_id": 100
+  },
+  {
+    "person_id": 1,
+    "entry_date": "2009-11-03",
+    "concept_id": 44823922,
+    "domain": "Measurement",
+    "age_at_event": 38,
+    "visit_concept_id": 1,
+    "visit_occurrence_id": 1,
+    "is_standard": 0,
+    "value_as_number": 10,
+    "value_source_concept_id": 10,
+    "survey_version_concept_id": 100
+  },
+  {
+    "person_id": 1,
+    "entry_date": "2009-12-01",
+    "concept_id": 1,
+    "domain": "Procedure",
+    "age_at_event": 38,
+    "visit_concept_id": 1,
+    "visit_occurrence_id": 1,
+    "is_standard": 0
   }
 ]
