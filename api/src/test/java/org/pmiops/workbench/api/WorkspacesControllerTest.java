@@ -2215,7 +2215,7 @@ public class WorkspacesControllerTest {
   @Test
   public void testShareWorkspaceNoRoleFailure() {
     DbUser writerUser = createAndSaveUser("writerfriend@gmail.com", 124L);
-
+    stubFcGetWorkspaceACL();
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
     ShareWorkspaceRequest shareWorkspaceRequest = new ShareWorkspaceRequest();
