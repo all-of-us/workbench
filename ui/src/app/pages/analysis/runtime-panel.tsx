@@ -182,11 +182,11 @@ const styles = reactStyles({
     margin: 0,
   },
   gpuCheckBox: {
-    marginRight: '10px'
+    marginRight: '10px',
   },
   gpuCheckBoxRow: {
     alignItems: 'center',
-    gap: '10px'
+    gap: '10px',
   },
   gpuSection: {
     justifyContent: 'space-between',
@@ -855,7 +855,10 @@ const GpuConfigSelector = ({
             setHasGpu(!hasGpu);
           }}
         />
-        <a target="_blank" href='https://support.terra.bio/hc/en-us/articles/4403006001947'>
+        <a
+          target='_blank'
+          href='https://support.terra.bio/hc/en-us/articles/4403006001947'
+        >
           Learn more about GPU cost and restrictions.
         </a>
       </FlexRow>
@@ -2120,14 +2123,14 @@ const RuntimePanel = fp.flow(
                     )}
                   </div>
                   {enableGpu && selectedCompute === ComputeType.Standard && (
-                     <GpuConfigSelector
-                       disabled={disableControls}
-                       onChange={(config) => {
-                         setSelectedGpuConfig(config);
-                       }}
-                       selectedMachine={selectedMachine}
-                       gpuConfig={selectedGpuConfig}
-                     />
+                    <GpuConfigSelector
+                      disabled={disableControls}
+                      onChange={(config) => {
+                        setSelectedGpuConfig(config);
+                      }}
+                      selectedMachine={selectedMachine}
+                      gpuConfig={selectedGpuConfig}
+                    />
                   )}
                   <FlexRow
                     style={{
