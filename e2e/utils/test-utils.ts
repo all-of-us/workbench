@@ -182,7 +182,7 @@ export async function findOrCreateWorkspace(
   const { workspaceName, cdrVersion, dataAccessTier } = opts;
   // Returns specified workspaceName Workspace card if exists.
   if (workspaceName !== undefined) {
-    const cardFound = await findWorkspaceCard(page, workspaceName);
+    const cardFound = await findWorkspaceCard(page, workspaceName, 2000);
     if (cardFound != null) {
       logger.info(`Found workspace card name: ${workspaceName}`);
       // TODO workspace CDR version and Data Access Tier are not verified
@@ -213,11 +213,15 @@ export async function findOrCreateWorkspace(
  * @param page
  * @param workspaceName
  */
-export async function findWorkspaceCard(page: Page, workspaceName: string): Promise<WorkspaceCard | null> {
+export async function findWorkspaceCard(
+  page: Page,
+  workspaceName: string,
+  timeout = 30000
+): Promise<WorkspaceCard | null> {
   const workspacesPage = new WorkspacesPage(page);
   await workspacesPage.load();
   const workspaceCard = new WorkspaceCard(page);
-  return workspaceCard.findCard(workspaceName);
+  return workspaceCard.findCard(workspaceName, timeout);
 }
 
 /**
@@ -232,7 +236,7 @@ export async function findOrCreateWorkspaceCard(
 ): Promise<WorkspaceCard> {
   const { cdrVersion = config.DEFAULT_CDR_VERSION_NAME, workspaceName = makeWorkspaceName() } = options;
 
-  let cardFound = await findWorkspaceCard(page, workspaceName);
+  let cardFound = await findWorkspaceCard(page, workspaceName, 2000);
   if (cardFound !== null) {
     // TODO workspaces CDR version is not verified
     logger.info(`Found Workspace card name: "${workspaceName}"`);
