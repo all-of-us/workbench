@@ -160,11 +160,7 @@ export const isBypassed = (
 // display string NEVER rather than -
 const getNullStringForCompletionExpirationDate = (
   moduleName: AccessModule
-): string =>
-  moduleName === AccessModule.ERACOMMONS ||
-  moduleName === AccessModule.TWOFACTORAUTH
-    ? 'Never'
-    : '-';
+): string => (getAccessModuleConfig(moduleName).neverExpire ? 'Never' : '-');
 
 export const displayModuleCompletionDate = (
   profile: Profile,
