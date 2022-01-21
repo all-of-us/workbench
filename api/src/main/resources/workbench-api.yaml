@@ -1419,6 +1419,33 @@ paths:
           description: User doesn't have the ACCESS_CONTROL_ADMIN authority
           schema:
             "$ref": "#/definitions/ErrorResponse"
+  "/v1/admin/users/batchSyncAccess":
+    post:
+      tags:
+        - userAdmin
+      consumes:
+        - application/json
+      description: 'Batch sync user access modules'
+      parameters:
+        - in: body
+          name: request
+          description: A list of users
+          schema:
+            "$ref": "#/definitions/AccountPropertyUpdate"
+      operationId: updateAccountProperties
+      responses:
+        200:
+          description: 'The user''s updated profile'
+          schema:
+            "$ref": "#/definitions/Profile"
+        403:
+          description: User doesn't have the ACCESS_CONTROL_ADMIN authority
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
+        404:
+          description: User associated with request could not be found
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
   "/v1/admin/workspaces/{workspaceNamespace}/locked":
     parameters:
       - "$ref": "#/parameters/workspaceNamespace"
