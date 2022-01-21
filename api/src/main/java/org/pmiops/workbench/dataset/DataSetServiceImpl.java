@@ -273,12 +273,10 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   @Override
   public DataSet saveDataSet(DbDataset dataset) {
     try {
-      DbDataset savedDbDataSet = dataSetDao.save(dataset);
+      dataset = dataSetDao.save(dataset);
       userRecentResourceService.updateDataSetEntry(
-          savedDbDataSet.getWorkspaceId(),
-          savedDbDataSet.getCreatorId(),
-          savedDbDataSet.getDataSetId());
-      return dataSetMapper.dbModelToClient(savedDbDataSet);
+          dataset.getWorkspaceId(), dataset.getCreatorId(), dataset.getDataSetId());
+      return dataSetMapper.dbModelToClient(dataset);
     } catch (OptimisticLockException e) {
       throw new ConflictException("Failed due to concurrent concept set modification");
     } catch (DataIntegrityViolationException ex) {
