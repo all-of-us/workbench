@@ -4,6 +4,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import java.sql.Timestamp;
 import java.time.Clock;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -445,8 +446,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
               .filter(entry -> shouldGrantWorkflowRunnerAsService(user, entry))
               .map(Map.Entry::getKey)
               .collect(Collectors.toList());
-      iamService.grantWorkflowRunnerRoleToUsers(
-          dbWorkspace.getGoogleProject(), usersGainPermission);
+      iamService.updateWorkflowRunnerRoleToUsers(
+          dbWorkspace.getGoogleProject(), usersGainPermission, new ArrayList<>());
     }
     final Workspace savedWorkspace = workspaceMapper.toApiWorkspace(dbWorkspace, toFcWorkspace);
     workspaceAuditor.fireDuplicateAction(
@@ -492,6 +493,13 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     DbWorkspace dbWorkspace = workspaceDao.getRequired(workspaceNamespace, workspaceId);
     List<UserRole> userRolesBeforeShare =
         workspaceService.getFirecloudUserRoles(workspaceNamespace, dbWorkspace.getFirecloudName());
+
+    System.out.println("~~~~~~~~");
+    System.out.println("~~~~~~~~");
+    System.out.println("~~~~~~~~");
+    System.out.println("~~~~~~~~");
+    System.out.println(userRolesBeforeShare.get(0).getEmail());
+    System.out.println(userRolesBeforeShare.get(0).getRole());
     int version = Etags.toVersion(request.getWorkspaceEtag());
     if (dbWorkspace.getVersion() != version) {
       throw new ConflictException("Attempted to modify user roles with outdated workspace etag");
@@ -533,12 +541,24 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
       // Find the users who are owners or writers before share, but not in the new gain permission
       // list
-      List<String> userLostPermission  = userRolesBeforeShare.stream().filter(u -> (u.getRole().equals(WorkspaceAccessLevel.OWNER) || u.getRole().equals(WorkspaceAccessLevel.OWNER)) && !usersHavePermission.contains(u.getEmail()))
-              .map(u -> u.getEmail()).collect(Collectors.toList());
-      iamService.grantWorkflowRunnerRoleToUsers(
-          dbWorkspace.getGoogleProject(), usersHavePermission);
-      iamService.revokeWorkflowRunnerRoleToUsers(
-          dbWorkspace.getGoogleProject(), userLostPermission);
+      List<String> userLostPermission =
+          userRolesBeforeShare.stream()
+              .filter(
+                  u ->
+                      (u.getRole().equals(WorkspaceAccessLevel.OWNER)
+                              || u.getRole().equals(WorkspaceAccessLevel.WRITER))
+                          && !usersHavePermission.contains(u.getEmail())
+                          && !u.getEmail().equals(userProvider.get().getUsername()))
+              .map(u -> u.getEmail())
+              .collect(Collectors.toList());
+
+      System.out.println("~~~~~~~~222");
+      System.out.println("~~~~~~~~2222");
+      System.out.println("~~~~~~~~2222");
+      System.out.println(usersHavePermission);
+      System.out.println(userLostPermission);
+      iamService.updateWorkflowRunnerRoleToUsers(
+          dbWorkspace.getGoogleProject(), usersHavePermission, userLostPermission);
     }
 
     workspaceAuditor.fireCollaborateAction(

@@ -7,8 +7,10 @@ import com.google.api.services.iam.v1.model.Policy;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.pmiops.workbench.exceptions.ServerErrorException;
@@ -49,41 +51,42 @@ public class IamServiceImpl implements IamService {
     String petServiceAccountName =
         getOrCreatePetServiceAccount(googleProject, endUserGoogleApiProvider.get());
     grantServiceAccountUserRole(googleProject, petServiceAccountName);
-    grantLifeScienceRunnerRole(googleProject, Collections.singletonList(petServiceAccountName));
+    updateLifeScienceRunnerRole(
+        googleProject, Collections.singletonList(petServiceAccountName), new ArrayList<>());
   }
 
   @Override
-  public void grantWorkflowRunnerRoleToUsers(String googleProject, List<String> userEmails) {
+  public void updateWorkflowRunnerRoleToUsers(
+      String googleProject, List<String> userEmailsGainAccess, List<String> userEmailsLostAccess) {
     GoogleApi googleApiAsImpersonatedUser = new GoogleApi();
     try {
       List<String> petServiceAccountsToGrantPermission = new ArrayList<>();
-      for (String userEmail : userEmails) {
-        googleApiAsImpersonatedUser.setApiClient(
-            samApiClientFactory.newImpersonatedApiClient(userEmail));
-        String petServiceAccountName =
-            getOrCreatePetServiceAccount(googleProject, googleApiAsImpersonatedUser);
-        petServiceAccountsToGrantPermission.add(petServiceAccountName);
-        grantServiceAccountUserRole(googleProject, petServiceAccountName);
-      }
-      grantLifeScienceRunnerRole(googleProject, petServiceAccountsToGrantPermission);
-    } catch (IOException e) {
-      throw new ServerErrorException(e);
-    }
-  }
-
-  @Override
-  public void revokeWorkflowRunnerRoleToUsers(String googleProject, List<String> userEmails) {
-    GoogleApi googleApiAsImpersonatedUser = new GoogleApi();
-    try {
       List<String> petServiceAccountsToRevokePermission = new ArrayList<>();
-      for (String userEmail : userEmails) {
+      for (String userEmailGainAccess : userEmailsGainAccess) {
         googleApiAsImpersonatedUser.setApiClient(
-            samApiClientFactory.newImpersonatedApiClient(userEmail));
-        String petServiceAccountName =
+            samApiClientFactory.newImpersonatedApiClient(userEmailGainAccess));
+        String petServiceAccountNameGainAccess =
             getOrCreatePetServiceAccount(googleProject, googleApiAsImpersonatedUser);
-        petServiceAccountsToRevokePermission.add(petServiceAccountName);
+        petServiceAccountsToGrantPermission.add(petServiceAccountNameGainAccess);
+        grantServiceAccountUserRole(googleProject, petServiceAccountNameGainAccess);
       }
-      revokeLifeScienceRunnerRole(googleProject, petServiceAccountsToRevokePermission);
+
+      for (String userEmailRevokeAccess : userEmailsLostAccess) {
+        googleApiAsImpersonatedUser.setApiClient(
+            samApiClientFactory.newImpersonatedApiClient(userEmailRevokeAccess));
+        String petServiceAccountNameRevokeAccess =
+            getOrCreatePetServiceAccount(googleProject, googleApiAsImpersonatedUser);
+        petServiceAccountsToRevokePermission.add(petServiceAccountNameRevokeAccess);
+      }
+
+      System.out.println("6666666");
+      System.out.println("6666666");
+      System.out.println("6666666");
+      System.out.println("6666666");
+      System.out.println(petServiceAccountsToGrantPermission);
+      System.out.println(petServiceAccountsToRevokePermission);
+      updateLifeScienceRunnerRole(
+          googleProject, petServiceAccountsToGrantPermission, petServiceAccountsToRevokePermission);
     } catch (IOException e) {
       throw new ServerErrorException(e);
     }
@@ -109,34 +112,48 @@ public class IamServiceImpl implements IamService {
   }
 
   /** Grants life science runner role to list of service accounts. */
-  private void grantLifeScienceRunnerRole(String googleProject, List<String> petServiceAccounts) {
+  private void updateLifeScienceRunnerRole(
+      String googleProject,
+      List<String> petServiceAccountsGainAccess,
+      List<String> petServiceAccountsLostAccess) {
+    System.out.println("~~~~~~~333333");
+    System.out.println("~~~~~~~333333");
+    System.out.println("~~~~~~~333333");
+    System.out.println(petServiceAccountsGainAccess);
+    System.out.println(petServiceAccountsLostAccess);
     com.google.api.services.cloudresourcemanager.model.Policy policy =
         cloudResourceManagerService.getIamPolicy(googleProject);
     List<com.google.api.services.cloudresourcemanager.model.Binding> bindingList =
         Optional.ofNullable(policy.getBindings()).orElse(new ArrayList<>());
-    bindingList.add(
-        new com.google.api.services.cloudresourcemanager.model.Binding()
-            .setRole(LIFESCIENCE_RUNNER_ROLE)
-            .setMembers(
-                petServiceAccounts.stream()
-                    .map(s -> "serviceAccount:" + s)
-                    .collect(Collectors.toList())));
-    cloudResourceManagerService.setIamPolicy(googleProject, policy.setBindings(bindingList));
-  }
+    com.google.api.services.cloudresourcemanager.model.Binding binding =
+        bindingList.stream()
+            .filter(b -> b.getRole().equals(LIFESCIENCE_RUNNER_ROLE))
+            .findFirst()
+            .orElse(
+                new com.google.api.services.cloudresourcemanager.model.Binding()
+                    .setRole(LIFESCIENCE_RUNNER_ROLE)
+                    .setMembers(new ArrayList<>()));
 
-  /** Revokes life science runner role to list of service accounts. */
-  private void revokeLifeScienceRunnerRole(String googleProject, List<String> petServiceAccounts) {
-    com.google.api.services.cloudresourcemanager.model.Policy policy =
-        cloudResourceManagerService.getIamPolicy(googleProject);
-    List<com.google.api.services.cloudresourcemanager.model.Binding> bindingList =
-        Optional.ofNullable(policy.getBindings()).orElse(new ArrayList<>());
-    bindingList.add(
-        new com.google.api.services.cloudresourcemanager.model.Binding()
-            .setRole(LIFESCIENCE_RUNNER_ROLE)
-            .setMembers(
-                petServiceAccounts.stream()
-                    .map(s -> "serviceAccount:" + s)
-                    .collect(Collectors.toList())));
+    Set<String> memebers = new HashSet<>(binding.getMembers());
+    memebers.addAll(petServiceAccountsGainAccess.stream().map(s -> "serviceAccount:" + s).collect(
+        Collectors.toSet()));
+    memebers.removeAll(petServiceAccountsLostAccess.stream().map(s -> "serviceAccount:" + s).collect(
+        Collectors.toSet()));
+    binding.setMembers(new ArrayList<>(memebers));
+
+    // Remove the existing binding if exists.
+    bindingList.stream()
+        .filter(b -> !b.getRole().equals(LIFESCIENCE_RUNNER_ROLE))
+        .collect(Collectors.toList());
+    // Add the new bindings into list if not empty.
+    if (!memebers.isEmpty()) {
+      bindingList.add(binding);
+    }
+    System.out.println("~~~~~~~4444444");
+    System.out.println("~~~~~~~4444444");
+    System.out.println("~~~~~~~4444444");
+    System.out.println("~~~~~~~4444444");
+    System.out.println(memebers);
     cloudResourceManagerService.setIamPolicy(googleProject, policy.setBindings(bindingList));
   }
 }
