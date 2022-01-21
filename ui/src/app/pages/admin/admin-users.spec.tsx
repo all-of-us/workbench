@@ -1,6 +1,7 @@
 import { mount } from 'enzyme';
 import * as React from 'react';
 import * as fp from 'lodash/fp';
+import { MemoryRouter } from 'react-router';
 
 import { AdminUsers } from './admin-users';
 import { AuthDomainApi, Profile, UserAdminApi } from 'generated/fetch';
@@ -14,7 +15,11 @@ describe('AdminUsers', () => {
   let props: { profile: Profile; hideSpinner: () => {}; showSpinner: () => {} };
 
   const component = () => {
-    return mount(<AdminUsers {...props} />);
+    return mount(
+      <MemoryRouter>
+        <AdminUsers {...props} />
+      </MemoryRouter>
+    );
   };
 
   beforeEach(() => {
