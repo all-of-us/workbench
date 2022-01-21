@@ -54,12 +54,15 @@ import org.pmiops.workbench.dataset.mapper.DataSetMapperImpl;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.DataSetDao;
+import org.pmiops.workbench.db.dao.UserDao;
+import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.WgsExtractCromwellSubmissionDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbConceptSetConceptId;
 import org.pmiops.workbench.db.model.DbDataset;
+import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWgsExtractCromwellSubmission;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -115,9 +118,12 @@ public class DataSetServiceTest {
   @Autowired private WorkspaceDao workspaceDao;
   @Autowired private DataSetServiceImpl dataSetServiceImpl;
   @Autowired private WgsExtractCromwellSubmissionDao submissionDao;
+  @Autowired private UserDao userDao;
+  @Autowired private UserRecentResourceService userRecentResourceService;
 
   private DbWorkspace workspace;
   private DbCohort cohort;
+  private DbDataset dbDataset;
 
   @TestConfiguration
   @Import({FakeClockConfiguration.class, DataSetMapperImpl.class, DataSetServiceImpl.class})
@@ -127,7 +133,8 @@ public class DataSetServiceTest {
     CohortService.class,
     ConceptBigQueryService.class,
     ConceptSetService.class,
-    CohortQueryBuilder.class
+    CohortQueryBuilder.class,
+    UserRecentResourceService.class
   })
   static class Configuration {
     @Bean
@@ -147,6 +154,7 @@ public class DataSetServiceTest {
     cohort = cohortDao.save(buildSimpleCohort(workspace));
     when(mockCohortQueryBuilder.buildParticipantIdQuery(any()))
         .thenReturn(QUERY_JOB_CONFIGURATION_1);
+    dbDataset = createDbDataSetEntry();
   }
 
   private DbCohort buildSimpleCohort(DbWorkspace workspace) {
@@ -157,6 +165,7 @@ public class DataSetServiceTest {
     cohortDbModel.setType("foo");
     cohortDbModel.setWorkspaceId(workspace.getWorkspaceId());
     cohortDbModel.setCriteria(cohortCriteria);
+    cohortDbModel.setCreator(buildUser());
     return cohortDbModel;
   }
 
@@ -170,6 +179,13 @@ public class DataSetServiceTest {
             .map(c -> DbConceptSetConceptId.builder().addConceptId(c).addStandard(standard).build())
             .collect(Collectors.toSet()));
     return result;
+  }
+
+  private DbUser buildUser() {
+    DbUser dbUser = new DbUser();
+    dbUser.setFamilyName("Family Name");
+    dbUser.setContactEmail("xyz@mock.com");
+    return userDao.save(dbUser);
   }
 
   private static DataSetRequest buildEmptyRequest() {
@@ -729,6 +745,22 @@ public class DataSetServiceTest {
         .isFalse();
   }
 
+  @Test
+  public void test_userRecentModifiedEntry_saveDataSet() {
+    DataSet dataset = dataSetServiceImpl.saveDataSet(dbDataset);
+    verify(userRecentResourceService)
+        .updateDataSetEntry(dbDataset.getWorkspaceId(), dbDataset.getCreatorId(), dataset.getId());
+  }
+
+  @Test
+  public void test_userRecentModifiedEntry_deleteDataSet() {
+    dbDataset = dataSetDao.save(dbDataset);
+    long dataSetId = dbDataset.getDataSetId();
+    dataSetServiceImpl.deleteDataSet(dbDataset.getWorkspaceId(), dataSetId);
+    verify(userRecentResourceService)
+        .deleteDataSetEntry(dbDataset.getWorkspaceId(), dbDataset.getCreatorId(), dataSetId);
+  }
+
   private void mockDomainTableFields() {
     FieldList conditionList =
         FieldList.of(
@@ -817,5 +849,15 @@ public class DataSetServiceTest {
     dsDataDictionary.setFieldType("string");
     dsDataDictionary.setRelevantOmopTable("person");
     dsDataDictionaryDao.save(dsDataDictionary);
+  }
+
+  private DbDataset createDbDataSetEntry() {
+    DbDataset dbDataset = new DbDataset();
+    dbDataset.setName("Data Set dirty 67");
+    dbDataset.setCohortIds(ImmutableList.of(cohort.getCohortId()));
+    dbDataset.setWorkspaceId(cohort.getWorkspaceId());
+    dbDataset.setCreatorId(cohort.getCreator().getUserId());
+    dbDataset.setInvalid(false);
+    return dbDataset;
   }
 }

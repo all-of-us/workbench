@@ -16,11 +16,19 @@ public interface UserRecentResourceService {
 
   void updateConceptSetEntry(long workspaceId, long userId, long conceptSetId);
 
+  void updateDataSetEntry(long workspaceId, long userId, long dataSetId);
+
+  void updateCohortReviewEntry(long workspaceId, long userId, long cohortReviewId);
+
   void deleteNotebookEntry(long workspaceId, long userId, String notebookName);
 
   void deleteCohortEntry(long workspaceId, long userId, long cohortId);
 
   void deleteConceptSetEntry(long workspaceId, long userId, long conceptSetId);
+
+  void deleteDataSetEntry(long workspaceId, long userId, long dataSetId);
+
+  void deleteCohortReviewEntry(long workspaceId, long userId, long cohortReviewId);
 
   List<DbUserRecentResource> findAllResourcesByUser(long userId);
 }
