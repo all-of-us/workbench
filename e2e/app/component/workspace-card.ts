@@ -5,7 +5,7 @@ import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { getPropValue } from 'utils/element-utils';
 import CardBase from './card-base';
 import WorkspaceEditPage from 'app/page/workspace-edit-page';
-import { waitForFn, waitWhileLoading } from 'utils/waits-utils';
+import { waitWhileLoading } from 'utils/waits-utils';
 import { logger } from 'libs/logger';
 import { asyncFilter } from 'utils/test-utils';
 import Link from 'app/element/link';
@@ -162,16 +162,10 @@ export default class WorkspaceCard extends CardBase {
    * @param {boolean} waitForDataPage Waiting for Data page load and ready after click on Workspace name link.
    */
   async clickWorkspaceName(waitForDataPage = true): Promise<string> {
-    const [card] = await this.asElementHandle().$x(`.//*[${WorkspaceCardSelector.cardNameXpath}]`);
-    const workspaceName = await getPropValue<string>(card, 'textContent');
-
-    await waitForFn(() => {
-      return card && card.boxModel() !== null && card.boundingBox() !== null;
-    });
-
+    const workspaceName = await this.getWorkspaceName();
     const link = new Link(this.page, this.getWorkspaceNameXpath(workspaceName));
     await link.click();
-    logger.info(`Click workspace name "${name}" on Workspace card to open workspace.`);
+    logger.info(`Click workspace name "${workspaceName}" on Workspace card to open workspace.`);
 
     if (waitForDataPage) {
       const dataPage = new WorkspaceDataPage(this.page);
@@ -183,13 +177,12 @@ export default class WorkspaceCard extends CardBase {
   private getWorkspaceNameXpath(workspaceName: string): string {
     return (
       WorkspaceCardSelector.cardRootXpath +
-      `//*[${WorkspaceCardSelector.cardNameXpath} and normalize-space(text())="${workspaceName}"]}`
+      `//*[${WorkspaceCardSelector.cardNameXpath} and normalize-space(text())="${workspaceName}"]`
     );
   }
 
-  private asCard(elementHandle: ElementHandle, xpath?: string): WorkspaceCard {
+  private asCard(elementHandle: ElementHandle): WorkspaceCard {
     this.cardElement = elementHandle;
-    this.xpath = xpath;
     return this;
   }
 
