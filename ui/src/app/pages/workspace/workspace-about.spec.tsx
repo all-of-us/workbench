@@ -3,16 +3,18 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 
 import { WorkspaceAbout } from './workspace-about';
-import { ProfileStubVariables } from 'testing/stubs/profile-api-stub';
+import {
+  ProfileApiStub,
+  ProfileStubVariables,
+} from 'testing/stubs/profile-api-stub';
 import {
   Authority,
-  RuntimeApi,
   Profile,
   ProfileApi,
+  RuntimeApi,
   WorkspaceAccessLevel,
   WorkspacesApi,
 } from 'generated/fetch';
-import { ProfileApiStub } from 'testing/stubs/profile-api-stub';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
 import { currentWorkspaceStore } from 'app/utils/navigation';
@@ -265,5 +267,31 @@ describe('WorkspaceAbout', () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.exists('[data-test-id="lock-workspace-msg"]')).toBeFalsy();
+  });
+
+  it('Should enable billing report url if user is workspace owner.', async () => {
+    const wrapper = component();
+    await waitOneTickAndUpdate(wrapper);
+    expect(
+      wrapper
+        .find({ 'data-test-id': 'workspace-billing-report' })
+        .first()
+        .props().disabled
+    ).toBeFalsy();
+  });
+
+  it('Should disable billing report url if user is not workspace owner.', async () => {
+    currentWorkspaceStore.next({
+      ...currentWorkspaceStore.getValue(),
+      accessLevel: WorkspaceAccessLevel.WRITER,
+    });
+    const wrapper = component();
+    await waitOneTickAndUpdate(wrapper);
+    expect(
+      wrapper
+        .find({ 'data-test-id': 'workspace-billing-report' })
+        .first()
+        .props().disabled
+    ).toBeTruthy();
   });
 });

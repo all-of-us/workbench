@@ -233,6 +233,20 @@ export const WorkspaceAbout = fp.flow(
       }
     }
 
+    get workspaceGcpBillingSpendUrl(): string {
+      return this.state.workspace
+        ? 'https://console.cloud.google.com/billing/' +
+            this.state.workspace.billingAccountName.replace(
+              'billingAccounts/',
+              ''
+            ) +
+            '/reports;grouping=GROUP_BY_SKU?project=' +
+            this.state.workspace.googleProject +
+            '&authuser=' +
+            this.props.profileState.profile.username
+        : '';
+    }
+
     async publishUnpublishWorkspace(publish: boolean) {
       const { workspace } = this.state;
       const { namespace, id } = workspace;
@@ -429,6 +443,31 @@ export const WorkspaceAbout = fp.flow(
                   </div>
                 )}
             </div>
+
+            <TooltipTrigger
+              content='Only workspaces owners can view the billing report'
+              disabled={
+                workspace &&
+                WorkspacePermissionsUtil.isOwner(workspace.accessLevel)
+              }
+            >
+              <div>
+                <h3 style={{ marginBottom: '0.5rem' }}>Billing</h3>
+                <StyledExternalLink
+                  data-test-id='workspace-billing-report'
+                  href={this.workspaceGcpBillingSpendUrl}
+                  target='_blank'
+                  disabled={
+                    !(
+                      workspace &&
+                      WorkspacePermissionsUtil.isOwner(workspace.accessLevel)
+                    )
+                  }
+                >
+                  View detailed spend report
+                </StyledExternalLink>
+              </div>
+            </TooltipTrigger>
           </div>
           {sharing && (
             <WorkspaceShare
