@@ -387,28 +387,28 @@ export async function waitWhileLoading(
     return;
   }
 
-  // Prevent checking in non-authenticated and blank pages.
+  // Prevent checking in non-authenticated and blank pages. Throws error if find all elements fail.
   await Promise.all([
     page.waitForXPath(process.env.AUTHENTICATED_TEST_ID_XPATH, { timeout }),
     page.waitForSelector(notBlankPageCss, { timeout }),
     page.waitForXPath(notBlankTitleXpath, { timeout })
   ]);
 
-  let maxRetries = 10;
+  const startTime = Date.now();
   const confidenceLevel = 2;
   let confidenceCounter = 0;
   let error;
-  const waitUntilSpinnerGone = async () => {
+  const waitUntilSpinnerGone = async (maxTime: number): Promise<void> => {
     try {
       await Promise.all([
         page.waitForFunction(
           (css) => {
             return !document.querySelectorAll(css).length;
           },
-          { polling: 'mutation', timeout },
+          { polling: 'mutation', timeout: 10000 },
           spinElementsCss
         ),
-        page.waitForSelector(spinElementsCss, { hidden: true, timeout })
+        page.waitForSelector(spinElementsCss, { hidden: true, timeout: 10000 })
       ]);
       confidenceCounter++;
       if (confidenceCounter >= confidenceLevel) {
@@ -418,17 +418,19 @@ export async function waitWhileLoading(
       confidenceCounter = confidenceCounter > 0 ? confidenceCounter-- : 0;
       error = err;
     }
-    if (maxRetries <= 0) {
+
+    if (Date.now() - startTime > maxTime) {
       logger.error(`ERROR: Loading spinner has not stopped. Spinner css is "${spinElementsCss}"`);
       logger.error(error.stack);
       await takeScreenshot(page, makeDateTimeStr('ERROR_Spinner_Timeout'));
       throw new Error(error.message);
     }
-    maxRetries--;
-    await page.waitForTimeout(200).then(waitUntilSpinnerGone); // short pause then retry
+
+    await page.waitForTimeout(200); // short pause then retry
+    await waitUntilSpinnerGone(maxTime);
   };
 
-  await waitUntilSpinnerGone();
+  await waitUntilSpinnerGone(timeout); // Wait do not exceed timeout
 }
 
 export async function waitUntilEnabled(page: Page, cssSelector: string): Promise<boolean> {

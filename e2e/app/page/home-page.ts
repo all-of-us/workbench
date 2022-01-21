@@ -5,6 +5,8 @@ import AuthenticatedPage from 'app/page/authenticated-page';
 import ClrIconLink from 'app/element/clr-icon-link';
 import { waitForDocumentTitle, waitWhileLoading } from 'utils/waits-utils';
 import WorkspacesPage from './workspaces-page';
+import {getAttrValue} from "utils/element-utils";
+import { logger } from 'libs/logger';
 
 export const PageTitle = 'Homepage';
 
@@ -19,30 +21,45 @@ export default class HomePage extends AuthenticatedPage {
   }
 
   async isLoaded(): Promise<boolean> {
-    await waitForDocumentTitle(this.page, PageTitle);
 
-    // Find "See All Workspaces" link.
-    await Promise.all([
-      this.getSeeAllWorkspacesLink().asElementHandle({ timeout: 120000, visible: true }),
-      waitWhileLoading(this.page, 120000)
-    ]);
+    const waitFor = async (): Promise<void> => {
+        await waitForDocumentTitle(this.page, PageTitle);
+        await this.getSeeAllWorkspacesLink().asElementHandle({ timeout: 60000, visible: true });
+        await waitWhileLoading(this.page);
 
-    // Find either a workspace card or "Create your first workspace" msg.
-    await this.page
-      .waitForXPath('//text()[contains(., "Create your first workspace")]', { visible: true, timeout: 1000 })
-      .catch(async () => {
-        await this.page.waitForXPath('//*[@data-test-id="workspace-card"]', { visible: true });
+        // Find either a workspace card or "Create your first workspace" msg.
+        const foundElement = await Promise.race([
+          this.page.waitForXPath('//text()[contains(., "Create your first workspace")]', { timeout: 60000, visible: true }),
+          this.page.waitForXPath('//*[@data-test-id="workspace-card"]', { timeout: 60000, visible: true })
+        ]);
+
+        const dataTestIdValue = await getAttrValue(this.page, foundElement, 'data-test-id');
+        if (dataTestIdValue !== 'workspace-card') {
+          // Workspace is empty.
+          return;
+        }
+
+        // Look for either the recent-resources table or the getting-started msg.
         try {
-          // Look for either the recent-resources table or the getting-started msg.
           await Promise.race([
-            this.page.waitForXPath('//*[@data-test-id="recent-resources-table"]', { visible: true, timeout: 1000 }),
-            this.page.waitForXPath('//*[@data-test-id="getting-started"]', { visible: true, timeout: 1000 })
+            this.page.waitForXPath('//*[@data-test-id="recent-resources-table"]', { visible: true }),
+            this.page.waitForXPath('//*[@data-test-id="getting-started"]', { visible: true })
           ]);
         } catch (err) {
-          // ignore error
+          // Ignore error.
         }
-      });
-    await waitWhileLoading(this.page);
+        await waitWhileLoading(this.page);
+    }
+
+    try {
+      await waitFor();
+    } catch (err) {
+      logger.error('RETRY loading Home page in 5 seconds after failure.');
+      logger.error(err);
+      await this.page.waitForTimeout(5000);
+      await waitFor();
+    }
+
     return true;
   }
 
