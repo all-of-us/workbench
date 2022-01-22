@@ -28,17 +28,14 @@ export default abstract class BasePage {
   /**
    * Load a URL.
    */
-  async gotoUrl(url: string, opts: { shouldWaitForLoadingSpinner?: boolean } = {}): Promise<void> {
-    const { shouldWaitForLoadingSpinner = true } = opts;
+  async gotoUrl(url: string): Promise<void> {
     logger.info(`Goto URL: ${url}`);
     const response = await this.page.goto(url, { waitUntil: ['load', 'domcontentloaded', 'networkidle2'] });
     if (response && !response.ok()) {
       // Log response if status is not OK
       logger.info(`Goto URL: ${url}. Response status: ${response.status()}\n${await response.text()}`);
     }
-    if (shouldWaitForLoadingSpinner) {
-      await waitWhileLoading(this.page);
-    }
+    await waitWhileLoading(this.page);
   }
 
   /**
