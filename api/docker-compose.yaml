@@ -2,7 +2,7 @@ version: "3.4"
 
 services:
   db:
-    image: mariadb:10.2
+    image: mysql:8
     env_file:
       - db/local-vars.env
     volumes:

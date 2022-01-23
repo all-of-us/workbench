@@ -16,6 +16,6 @@ def maybe_dockerize_mysql_cmd(cmd, interactive=false, tty=false)
       (tty ? "-t " : "") +
       "--network host " +
       "--entrypoint '' " +
-      "mariadb:10.2 " +
+      "mysql:8 " +
       cmd
 end
