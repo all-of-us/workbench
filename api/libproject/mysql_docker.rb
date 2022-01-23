@@ -16,6 +16,7 @@ def maybe_dockerize_mysql_cmd(cmd, interactive=false, tty=false)
       (tty ? "-t " : "") +
       "--network host " +
       "--entrypoint '' " +
+      "--platform linux/amd64 " +
       "mysql:5.7.27 " +
       cmd
 end
