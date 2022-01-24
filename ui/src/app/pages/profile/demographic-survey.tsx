@@ -280,7 +280,7 @@ export const DemographicSurvey = withProfileErrorModal(
             </div>
           </TextColumn>
 
-          {/*Race section*/}
+          {/* Race section*/}
           <Section header='Race'>
             <SelectAllText />
             <FlexColumn style={styles.checkboxAreaContainer}>
@@ -292,7 +292,7 @@ export const DemographicSurvey = withProfileErrorModal(
             </FlexColumn>
           </Section>
 
-          {/*Ethnicity section*/}
+          {/* Ethnicity section*/}
           <DropDownSection
             data-test-id='dropdown-ethnicity'
             header='Ethnicity'
@@ -301,7 +301,7 @@ export const DemographicSurvey = withProfileErrorModal(
             onChange={(e) => this.updateDemographicAttribute('ethnicity', e)}
           />
 
-          {/*Gender Identity section*/}
+          {/* Gender Identity section*/}
           <Section header='Gender Identity'>
             <SelectAllText />
             <FlexColumn
@@ -402,7 +402,7 @@ or another sexual and/or gender minority?'
             />
           </Section>
 
-          {/*Sex at birth section*/}
+          {/* Sex at birth section*/}
           <Section header='Sex at birth'>
             <SelectAllText />
             <FlexColumn
@@ -416,7 +416,7 @@ or another sexual and/or gender minority?'
             </FlexColumn>
           </Section>
 
-          {/*Year of birth section*/}
+          {/* Year of birth section*/}
           <DropDownSection
             data-test-id='year-of-birth'
             header='Year of Birth'
@@ -424,7 +424,7 @@ or another sexual and/or gender minority?'
             value={!!demographicSurvey ? demographicSurvey.yearOfBirth : null}
             onChange={(e) => this.updateDemographicAttribute('yearOfBirth', e)}
           />
-          {/*Disability section*/}
+          {/* Disability section*/}
           <Section header='Do you have a physical or cognitive disability?'>
             <FlexColumn>
               <FlexRow style={{ alignItems: 'baseline' }}>
@@ -499,7 +499,7 @@ or another sexual and/or gender minority?'
               </FlexRow>
             </FlexColumn>
           </Section>
-          {/*Education section*/}
+          {/* Education section*/}
           <DropDownSection
             data-test-id='highest-education-level'
             header='Highest Level of Education Completed'

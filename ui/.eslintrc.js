@@ -97,11 +97,11 @@ module.exports = {
     ],
 
     'no-trailing-spaces': 'warn',
+    'spaced-comment': 'warn',
 
     // temp disable others.  re-enable if desired after determining that they don't conflict with prettier.
 
     // 'simple-import-sort/sort': 'warn',
-    // 'spaced-comment': 'warn',
 
     /* Jest */
     'jest/no-focused-tests': 'warn',

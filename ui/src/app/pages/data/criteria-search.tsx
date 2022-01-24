@@ -516,7 +516,7 @@ export const CriteriaSearch = fp.flow(
                 source={source}
               />
             )}
-            {/*List View (using duplicated version of ListSearch) */}
+            {/* List View (using duplicated version of ListSearch) */}
             {!this.initTree && cohortContext.domain && (
               <div style={this.searchContentStyle('list')}>
                 <ListSearch
