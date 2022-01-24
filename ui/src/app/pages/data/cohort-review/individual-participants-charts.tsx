@@ -53,7 +53,7 @@ export class IndividualParticipantsCharts extends React.Component<{
           text: 'Entry Date',
         },
         labels: {
-          formatter: function () {
+          formatter: function() {
             return moment.unix(this.value).format('YYYY');
           },
         },
@@ -68,7 +68,7 @@ export class IndividualParticipantsCharts extends React.Component<{
             text: conditionTitle,
           },
           labels: {
-            formatter: function () {
+            formatter: function() {
               return names[this.value]?.substring(0, 13);
             },
           },
