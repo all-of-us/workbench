@@ -150,11 +150,35 @@ export const getUpdatedProfileValue = (
   }
 };
 
+export const isCompleted = (
+  profile: Profile,
+  moduleName: AccessModule
+): boolean =>
+  !!getAccessModuleStatusByName(profile, moduleName)?.completionEpochMillis;
+
 export const isBypassed = (
   profile: Profile,
   moduleName: AccessModule
 ): boolean =>
   !!getAccessModuleStatusByName(profile, moduleName)?.bypassEpochMillis;
+
+export const isExpired = (
+  profile: Profile,
+  moduleName: AccessModule
+): boolean =>
+  !!getAccessModuleStatusByName(profile, moduleName)?.expirationEpochMillis;
+
+export const displayModuleStatus = (
+  profile: Profile,
+  moduleName: AccessModule
+): string =>
+  isCompleted(profile, moduleName)
+    ? 'Completed'
+    : isBypassed(profile, moduleName)
+    ? 'ByPassed'
+    : isExpired(profile, moduleName)
+    ? 'Expired'
+    : 'InComplete';
 
 // Some modules may never expire (eg GOOGLE TWO STEP NOTIFICATION, ERA COMMONS etc),
 // in such cases set the expiry date as NEVER
