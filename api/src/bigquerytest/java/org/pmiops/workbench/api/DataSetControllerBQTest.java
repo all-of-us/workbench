@@ -142,6 +142,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   private DbCohort dbCohort3;
   private DbConceptSet dbConditionConceptSet;
   private DbConceptSet dbConditionConceptSetForValues;
+  private DbConceptSet dbConditionConceptSetForValues2;
   private DbConceptSet dbProcedureConceptSet;
   private DbConceptSet dbMeasurementConceptSet;
   private DbWorkspace dbWorkspace;
@@ -282,6 +283,9 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
         conceptSetDao.save(
             createConceptSet(
                 Domain.CONDITION, dbWorkspace.getWorkspaceId(), 44823922L, Boolean.FALSE));
+    dbConditionConceptSetForValues2 =
+        conceptSetDao.save(
+            createConceptSet(Domain.CONDITION, dbWorkspace.getWorkspaceId(), 6L, Boolean.FALSE));
     dbProcedureConceptSet =
         conceptSetDao.save(
             createConceptSet(Domain.PROCEDURE, dbWorkspace.getWorkspaceId(), 1L, Boolean.FALSE));
@@ -293,6 +297,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
             ImmutableList.of(
                 new ConceptSet().id(dbConditionConceptSet.getConceptSetId()),
                 new ConceptSet().id(dbConditionConceptSetForValues.getConceptSetId()),
+                new ConceptSet().id(dbConditionConceptSetForValues2.getConceptSetId()),
                 new ConceptSet().id(dbProcedureConceptSet.getConceptSetId()),
                 new ConceptSet().id(dbMeasurementConceptSet.getConceptSetId())));
 
@@ -405,6 +410,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
     cohortDao.deleteById(dbCohort2.getCohortId());
     conceptSetDao.deleteById(dbConditionConceptSet.getConceptSetId());
     conceptSetDao.deleteById(dbConditionConceptSetForValues.getConceptSetId());
+    conceptSetDao.deleteById(dbConditionConceptSetForValues2.getConceptSetId());
     conceptSetDao.deleteById(dbProcedureConceptSet.getConceptSetId());
     workspaceDao.deleteById(dbWorkspace.getWorkspaceId());
     cdrVersionDao.deleteById(dbCdrVersion.getCdrVersionId());
@@ -631,7 +637,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                         WORKSPACE_NAMESPACE,
                         WORKSPACE_NAME,
                         Domain.CONDITION.toString(),
-                        dbConditionConceptSetForValues.getConceptSetId())
+                        dbConditionConceptSetForValues2.getConceptSetId())
                     .getBody())
             .getItems();
     assertThat(
