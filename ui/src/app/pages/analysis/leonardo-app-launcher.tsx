@@ -520,8 +520,9 @@ export const LeonardoAppLauncher = fp.flow(
           workspace.id,
           // navigate will encode the notebook name automatically
           'notebooks',
-          'preview',
-          this.getFullNotebookName(),
+          ...(this.props.leoAppType === LeoApplicationType.Notebook
+            ? ['preview', this.getFullNotebookName()]
+            : []),
         ]);
       }
     }
