@@ -114,7 +114,7 @@
     "karma-webdriver-launcher": "^1.0.5",
     "lolex": "^3.0.0",
     "prettier": "^2.0.4",
-    "react-app-rewired": "2.1.8",
+    "react-app-rewired": "^2.1.9",
     "react-scripts": "^5.0.0",
     "react-test-renderer": "^16.6.3",
     "ts-jest": "^26.5.4",
