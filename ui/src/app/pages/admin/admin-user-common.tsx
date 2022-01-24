@@ -156,11 +156,11 @@ export const isBypassed = (
 ): boolean =>
   !!getAccessModuleStatusByName(profile, moduleName)?.bypassEpochMillis;
 
-// Since there is no expiration date for ERA COMMONS or GOOGLE 2-Step Verification,
-// display string NEVER rather than -
-const getNullStringForCompletionExpirationDate = (
-  moduleName: AccessModule
-): string => (getAccessModuleConfig(moduleName).neverExpire ? 'Never' : '-');
+// Some modules may never expire (eg GOOGLE TWO STEP NOTIFICATION, ERA COMMONS),
+// in such cases set the expiry date as NEVER
+// For other modules display the expiry date if known, else display '-' (say in case of bypass)
+const getNullStringForExpirationDate = (moduleName: AccessModule): string =>
+  getAccessModuleConfig(moduleName).canExpire ? '-' : 'Never';
 
 export const displayModuleCompletionDate = (
   profile: Profile,
@@ -168,7 +168,7 @@ export const displayModuleCompletionDate = (
 ): string =>
   formatDate(
     getAccessModuleStatusByName(profile, moduleName)?.completionEpochMillis,
-    getNullStringForCompletionExpirationDate(moduleName)
+    '-'
   );
 
 export const displayModuleExpirationDate = (
@@ -177,7 +177,7 @@ export const displayModuleExpirationDate = (
 ): string =>
   formatDate(
     getAccessModuleStatusByName(profile, moduleName)?.expirationEpochMillis,
-    getNullStringForCompletionExpirationDate(moduleName)
+    getNullStringForExpirationDate(moduleName)
   );
 
 // would this AccessBypassRequest actually change the profile state?

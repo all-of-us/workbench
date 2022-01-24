@@ -117,7 +117,7 @@ interface AccessModuleConfig {
   DARTitleComponent: () => JSX.Element;
   adminPageTitle: string;
   adminBypassable: true;
-  neverExpire: boolean;
+  canExpire: boolean;
   externalSyncAction?: Function;
   refreshAction?: Function;
 }
@@ -150,7 +150,7 @@ export const getAccessModuleConfig = (
         DARTitleComponent: () => <div>Turn on Google 2-Step Verification</div>,
         adminPageTitle: 'Google 2-Step Verification',
         adminBypassable: true,
-        neverExpire: true,
+        canExpire: false,
         externalSyncAction: async () =>
           await profileApi().syncTwoFactorAuthStatus(),
         refreshAction: async () => await profileApi().syncTwoFactorAuthStatus(),
@@ -176,7 +176,7 @@ export const getAccessModuleConfig = (
           </div>
         ),
         adminPageTitle: 'Verify your identity with Login.gov',
-        neverExpire: false,
+        canExpire: true,
         adminBypassable: true,
         refreshAction: () => redirectToRas(false),
       }),
@@ -190,7 +190,7 @@ export const getAccessModuleConfig = (
         DARTitleComponent: () => <div>Connect your eRA Commons account</div>,
         adminPageTitle: 'Connect your eRA Commons account',
         adminBypassable: true,
-        neverExpire: true,
+        canExpire: false,
         externalSyncAction: async () =>
           await profileApi().syncEraCommonsStatus(),
         refreshAction: async () => await profileApi().syncEraCommonsStatus(),
@@ -214,7 +214,7 @@ export const getAccessModuleConfig = (
         ),
         adminPageTitle: 'Registered Tier training',
         adminBypassable: true,
-        neverExpire: false,
+        canExpire: true,
         externalSyncAction: async () =>
           await profileApi().syncComplianceTrainingStatus(),
         refreshAction: async () =>
@@ -234,7 +234,7 @@ export const getAccessModuleConfig = (
         ),
         adminPageTitle: 'Controlled Tier training',
         adminBypassable: true,
-        neverExpire: false,
+        canExpire: true,
         externalSyncAction: async () =>
           await profileApi().syncComplianceTrainingStatus(),
         refreshAction: async () =>
@@ -251,7 +251,7 @@ export const getAccessModuleConfig = (
         DARTitleComponent: () => <div>Sign Data User Code of Conduct</div>,
         adminPageTitle: 'Sign Data User Code of Conduct',
         adminBypassable: true,
-        neverExpire: false,
+        canExpire: true,
       }),
     ],
 
@@ -263,7 +263,7 @@ export const getAccessModuleConfig = (
         AARTitleComponent: () => 'Update your profile',
         adminPageTitle: 'Update your profile',
         adminBypassable: false,
-        neverExpire: false,
+        canExpire: true,
       }),
     ],
 
@@ -276,7 +276,7 @@ export const getAccessModuleConfig = (
           'Report any publications or presentations based on your research using the Researcher Workbench',
         adminPageTitle: 'Report any publications',
         adminBypassable: false,
-        neverExpire: false,
+        canExpire: true,
       }),
     ]
   );
