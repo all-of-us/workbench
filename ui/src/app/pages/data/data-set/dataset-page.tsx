@@ -274,11 +274,6 @@ export const COMPARE_DOMAINS_FOR_DISPLAY = (a: Domain, b: Domain) => {
 const checkNameWidth = (element: HTMLDivElement) =>
   element.offsetWidth < element.scrollWidth;
 
-const crossDomainConceptSetText = `
-  This Concept Set contains source concepts (ICD9CM/ICD10CM/CPT4) that may be present in multiple domains, which may yield multiple data 
-  tables.
-`;
-
 const ImmutableListItem: React.FunctionComponent<{
   name: string;
   onChange: Function;
@@ -286,8 +281,6 @@ const ImmutableListItem: React.FunctionComponent<{
   showSourceConceptIcon?: boolean;
 }> = ({ name, onChange, checked, showSourceConceptIcon }) => {
   const [showNameTooltip, setShowNameTooltip] = useState(false);
-  const [showSourceConceptTooltip, setShowSourceConceptTooltip] =
-    useState(false);
   return (
     <div style={styles.listItem}>
       <input
@@ -305,17 +298,11 @@ const ImmutableListItem: React.FunctionComponent<{
           }
         >
           {showSourceConceptIcon && (
-            <TooltipTrigger
-              disabled={!showSourceConceptTooltip}
-              content={crossDomainConceptSetText}
-            >
-              <ClrIcon
-                shape='exclamation-triangle'
-                size={20}
-                onMouseOver={() => setShowSourceConceptTooltip(true)}
-                onMouseOut={() => setShowSourceConceptTooltip(false)}
-              />
-            </TooltipTrigger>
+            <ClrIcon
+              className='is-solid'
+              shape='exclamation-triangle'
+              size={20}
+            />
           )}
           {name}
         </div>
@@ -2047,8 +2034,9 @@ export const DatasetPage = fp.flow(
                   shape='exclamation-triangle'
                   size={20}
                 />
-                One or more of your selected Concept Sets contain source
-                concepts that exist in a different domain
+                This Concept Set contains source concepts (ICD9CM/ICD10CM/CPT4)
+                that may be present in multiple domains, which may yield
+                multiple data tables.
               </AlertInfo>
             )}
           </FadeBox>

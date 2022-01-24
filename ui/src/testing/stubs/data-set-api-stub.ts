@@ -5,7 +5,6 @@ import {
   DataSetCodeResponse,
   DataSetPreviewRequest,
   DataSetPreviewResponse,
-  DomainValuesResponse,
   EmptyResponse,
   KernelTypeEnum,
   ReadOnlyNotebookResponse,
