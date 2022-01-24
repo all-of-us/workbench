@@ -557,85 +557,96 @@ describe('RuntimePanel', () => {
     expect(runtimeApiStub.runtime.gceConfig).toBeFalsy();
   });
 
-  it('should set runtime preset values in customize panel instead of getRuntime values if configurationType is GeneralAnalysis', async () => {
-    // skip this test after enabling pd
-    if (enablePd) {
-      return;
+  it(
+    'should set runtime preset values in customize panel instead of getRuntime values ' +
+      'if configurationType is GeneralAnalysis',
+    async () => {
+      // skip this test after enabling pd
+      if (enablePd) {
+        return;
+      }
+      const runtime = {
+        ...runtimeApiStub.runtime,
+        status: RuntimeStatus.Deleted,
+        configurationType: RuntimeConfigurationType.GeneralAnalysis,
+        gceConfig: {
+          ...defaultGceConfig(),
+          machineType: 'n1-standard-16',
+          diskSize: 1000,
+        },
+        dataprocConfig: null,
+      };
+      runtimeApiStub.runtime = runtime;
+      runtimeStoreStub.runtime = runtime;
+
+      const wrapper = await component();
+      await mustClickButton(wrapper, 'Customize');
+
+      expect(getMainCpu(wrapper)).toEqual(
+        findMachineByName(
+          runtimePresets.generalAnalysis.runtimeTemplate.gceConfig.machineType
+        ).cpu
+      );
+      expect(getMainRam(wrapper)).toEqual(
+        findMachineByName(
+          runtimePresets.generalAnalysis.runtimeTemplate.gceConfig.machineType
+        ).memory
+      );
+      expect(getMainDiskSize(wrapper)).toEqual(
+        runtimePresets.generalAnalysis.runtimeTemplate.gceConfig.diskSize
+      );
     }
-    const runtime = {
-      ...runtimeApiStub.runtime,
-      status: RuntimeStatus.Deleted,
-      configurationType: RuntimeConfigurationType.GeneralAnalysis,
-      gceConfig: {
-        ...defaultGceConfig(),
-        machineType: 'n1-standard-16',
-        diskSize: 1000,
-      },
-      dataprocConfig: null,
-    };
-    runtimeApiStub.runtime = runtime;
-    runtimeStoreStub.runtime = runtime;
+  );
 
-    const wrapper = await component();
-    await mustClickButton(wrapper, 'Customize');
+  it(
+    'should set runtime preset values in customize panel instead of getRuntime values ' +
+      'if configurationType is HailGenomicsAnalysis',
+    async () => {
+      const runtime = {
+        ...runtimeApiStub.runtime,
+        status: RuntimeStatus.Deleted,
+        configurationType: RuntimeConfigurationType.HailGenomicAnalysis,
+        gceConfig: null,
+        dataprocConfig: {
+          ...defaultDataprocConfig(),
+          masterMachineType: 'n1-standard-16',
+          masterDiskSize: 999,
+          workerDiskSize: 444,
+          numberOfWorkers: 5,
+        },
+      };
+      runtimeApiStub.runtime = runtime;
+      runtimeStoreStub.runtime = runtime;
 
-    expect(getMainCpu(wrapper)).toEqual(
-      findMachineByName(
-        runtimePresets.generalAnalysis.runtimeTemplate.gceConfig.machineType
-      ).cpu
-    );
-    expect(getMainRam(wrapper)).toEqual(
-      findMachineByName(
-        runtimePresets.generalAnalysis.runtimeTemplate.gceConfig.machineType
-      ).memory
-    );
-    expect(getMainDiskSize(wrapper)).toEqual(
-      runtimePresets.generalAnalysis.runtimeTemplate.gceConfig.diskSize
-    );
-  });
+      const wrapper = await component();
+      await mustClickButton(wrapper, 'Customize');
 
-  it('should set runtime preset values in customize panel instead of getRuntime values if configurationType is HailGenomicsAnalysis', async () => {
-    const runtime = {
-      ...runtimeApiStub.runtime,
-      status: RuntimeStatus.Deleted,
-      configurationType: RuntimeConfigurationType.HailGenomicAnalysis,
-      gceConfig: null,
-      dataprocConfig: {
-        ...defaultDataprocConfig(),
-        masterMachineType: 'n1-standard-16',
-        masterDiskSize: 999,
-        workerDiskSize: 444,
-        numberOfWorkers: 5,
-      },
-    };
-    runtimeApiStub.runtime = runtime;
-    runtimeStoreStub.runtime = runtime;
-
-    const wrapper = await component();
-    await mustClickButton(wrapper, 'Customize');
-
-    expect(getMainCpu(wrapper)).toEqual(
-      findMachineByName(
+      expect(getMainCpu(wrapper)).toEqual(
+        findMachineByName(
+          runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig
+            .masterMachineType
+        ).cpu
+      );
+      expect(getMainRam(wrapper)).toEqual(
+        findMachineByName(
+          runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig
+            .masterMachineType
+        ).memory
+      );
+      expect(getMainDiskSize(wrapper)).toEqual(
         runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig
-          .masterMachineType
-      ).cpu
-    );
-    expect(getMainRam(wrapper)).toEqual(
-      findMachineByName(
+          .masterDiskSize
+      );
+      expect(getWorkerDiskSize(wrapper)).toEqual(
         runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig
-          .masterMachineType
-      ).memory
-    );
-    expect(getMainDiskSize(wrapper)).toEqual(
-      runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig.masterDiskSize
-    );
-    expect(getWorkerDiskSize(wrapper)).toEqual(
-      runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig.workerDiskSize
-    );
-    expect(getNumWorkers(wrapper)).toEqual(
-      runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig.numberOfWorkers
-    );
-  });
+          .workerDiskSize
+      );
+      expect(getNumWorkers(wrapper)).toEqual(
+        runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig
+          .numberOfWorkers
+      );
+    }
+  );
 
   it('should allow configuration via dataproc preset from modified form', async () => {
     runtimeApiStub.runtime = null;
