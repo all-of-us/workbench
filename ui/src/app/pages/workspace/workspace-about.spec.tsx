@@ -1,12 +1,7 @@
-import { mount } from 'enzyme';
-import * as fp from 'lodash/fp';
 import * as React from 'react';
+import * as fp from 'lodash/fp';
+import { mount } from 'enzyme';
 
-import { WorkspaceAbout } from './workspace-about';
-import {
-  ProfileApiStub,
-  ProfileStubVariables,
-} from 'testing/stubs/profile-api-stub';
 import {
   Authority,
   ProfileApi,
@@ -14,22 +9,30 @@ import {
   WorkspaceAccessLevel,
   WorkspacesApi,
 } from 'generated/fetch';
+
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
-import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
 import { currentWorkspaceStore } from 'app/utils/navigation';
-import { userRolesStub, workspaceStubs } from 'testing/stubs/workspaces';
-import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
-import { RuntimeApiStub } from 'testing/stubs/runtime-api-stub';
-import {
-  CdrVersionsStubVariables,
-  cdrVersionTiersResponse,
-} from 'testing/stubs/cdr-versions-api-stub';
-import { SpecificPopulationItems } from './workspace-edit-text';
 import {
   cdrVersionStore,
   profileStore,
   serverConfigStore,
 } from 'app/utils/stores';
+
+import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
+import {
+  CdrVersionsStubVariables,
+  cdrVersionTiersResponse,
+} from 'testing/stubs/cdr-versions-api-stub';
+import {
+  ProfileApiStub,
+  ProfileStubVariables,
+} from 'testing/stubs/profile-api-stub';
+import { RuntimeApiStub } from 'testing/stubs/runtime-api-stub';
+import { userRolesStub, workspaceStubs } from 'testing/stubs/workspaces';
+import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
+
+import { WorkspaceAbout } from './workspace-about';
+import { SpecificPopulationItems } from './workspace-edit-text';
 
 describe('WorkspaceAbout', () => {
   const profile = ProfileStubVariables.PROFILE_STUB;

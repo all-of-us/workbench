@@ -1,12 +1,12 @@
+import * as React from 'react';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+
 import { StyledRouterLink } from 'app/components/buttons';
 import { FlexRow } from 'app/components/flex';
 import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
 import { cookiesEnabled } from 'app/utils/cookies';
-import * as React from 'react';
-
 import cookies from 'assets/images/cookies.png';
 
 const styles = reactStyles({

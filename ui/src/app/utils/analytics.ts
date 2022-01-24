@@ -1,5 +1,6 @@
-import { environment } from 'environments/environment';
 import { VerifiedInstitutionalAffiliation } from 'generated/fetch';
+
+import { environment } from 'environments/environment';
 
 declare let gtag: Function;
 

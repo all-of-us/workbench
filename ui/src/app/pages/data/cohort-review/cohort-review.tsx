@@ -1,5 +1,15 @@
-import * as fp from 'lodash/fp';
 import * as React from 'react';
+import { RouteComponentProps, withRouter } from 'react-router-dom';
+import * as fp from 'lodash/fp';
+
+import {
+  Cohort,
+  CriteriaType,
+  Domain,
+  ReviewStatus,
+  SortOrder,
+  WorkspaceAccessLevel,
+} from 'generated/fetch';
 
 import { Button } from 'app/components/buttons';
 import { Modal, ModalFooter, ModalTitle } from 'app/components/modals';
@@ -24,15 +34,6 @@ import {
 import { MatchParams } from 'app/utils/stores';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
-import {
-  Cohort,
-  CriteriaType,
-  Domain,
-  ReviewStatus,
-  SortOrder,
-  WorkspaceAccessLevel,
-} from 'generated/fetch';
-import { RouteComponentProps, withRouter } from 'react-router-dom';
 
 const styles = reactStyles({
   title: {

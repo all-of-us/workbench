@@ -1,10 +1,11 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 
-import { FlexColumn, FlexRow } from './flex';
-import { ClrIcon } from './icons';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles, switchCase } from 'app/utils';
+
+import { FlexColumn, FlexRow } from './flex';
+import { ClrIcon } from './icons';
 
 const styles = reactStyles({
   infoBanner: {

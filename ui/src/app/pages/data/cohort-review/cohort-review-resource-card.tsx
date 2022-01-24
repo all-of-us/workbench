@@ -1,5 +1,7 @@
-import * as fp from 'lodash/fp';
 import * as React from 'react';
+import * as fp from 'lodash/fp';
+
+import { WorkspaceResource } from 'generated/fetch';
 
 import { RenameModal } from 'app/components/rename-modal';
 import {
@@ -25,7 +27,6 @@ import {
 } from 'app/components/with-spinner-overlay';
 import { cohortReviewApi } from 'app/services/swagger-fetch-clients';
 import { getDescription, getDisplayName, getType } from 'app/utils/resources';
-import { WorkspaceResource } from 'generated/fetch';
 
 interface Props
   extends WithConfirmDeleteModalProps,

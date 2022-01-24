@@ -1,23 +1,26 @@
-import { mount } from 'enzyme';
 import * as React from 'react';
+import { MemoryRouter } from 'react-router-dom';
+import { mount } from 'enzyme';
+
+import {
+  CohortAnnotationDefinitionApi,
+  CohortReviewApi,
+} from 'generated/fetch';
 
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import {
   currentCohortReviewStore,
   currentWorkspaceStore,
 } from 'app/utils/navigation';
-import {
-  CohortAnnotationDefinitionApi,
-  CohortReviewApi,
-} from 'generated/fetch';
+
 import { CohortAnnotationDefinitionServiceStub } from 'testing/stubs/cohort-annotation-definition-service-stub';
 import {
   CohortReviewServiceStub,
   cohortReviewStubs,
 } from 'testing/stubs/cohort-review-service-stub';
 import { workspaceDataStub } from 'testing/stubs/workspaces';
+
 import { SidebarContent } from './sidebar-content.component';
-import { MemoryRouter } from 'react-router-dom';
 
 describe('SidebarContent', () => {
   beforeEach(() => {

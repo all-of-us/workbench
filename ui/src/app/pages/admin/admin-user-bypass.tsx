@@ -1,6 +1,8 @@
 import * as React from 'react';
 import * as fp from 'lodash/fp';
 
+import { AccessModule, AdminTableUser } from 'generated/fetch';
+
 import { Button, IconButton } from 'app/components/buttons';
 import { FlexColumn } from 'app/components/flex';
 import { Check, ClrIcon, Times } from 'app/components/icons';
@@ -10,7 +12,6 @@ import { SpinnerOverlay } from 'app/components/spinners';
 import { userAdminApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import { serverConfigStore } from 'app/utils/stores';
-import { AccessModule, AdminTableUser } from 'generated/fetch';
 
 interface Props {
   // The user to render the bypass panel for.

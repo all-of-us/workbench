@@ -1,16 +1,18 @@
-import { mount } from 'enzyme';
-import * as fp from 'lodash/fp';
-import { Dropdown } from 'primereact/dropdown';
 import * as React from 'react';
-import { InputSwitch } from 'primereact/inputswitch';
 import { MemoryRouter, Route } from 'react-router-dom';
+import * as fp from 'lodash/fp';
+import { mount } from 'enzyme';
+import { Dropdown } from 'primereact/dropdown';
+import { InputSwitch } from 'primereact/inputswitch';
 
-import { registerApiClient } from 'app/services/swagger-fetch-clients';
-import { serverConfigStore } from 'app/utils/stores';
 import {
   InstitutionApi,
   InstitutionMembershipRequirement,
 } from 'generated/fetch';
+
+import { registerApiClient } from 'app/services/swagger-fetch-clients';
+import { serverConfigStore } from 'app/utils/stores';
+
 import defaultServerConfig from 'testing/default-server-config';
 import {
   simulateComponentChange,
@@ -21,6 +23,7 @@ import {
   VERILY,
   VERILY_WITHOUT_CT,
 } from 'testing/stubs/institution-api-stub';
+
 import { AdminInstitutionEdit } from './admin-institution-edit';
 
 const findRTDetails = (wrapper) =>

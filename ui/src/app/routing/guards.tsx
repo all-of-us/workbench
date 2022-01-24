@@ -3,17 +3,18 @@ import {
   AccessTierShortNames,
   hasRegisteredTierAccess,
 } from 'app/utils/access-tiers';
-import { authStore, profileStore } from 'app/utils/stores';
 import {
   ACCESS_RENEWAL_PATH,
   DATA_ACCESS_REQUIREMENTS_PATH,
   eligibleForTier,
 } from 'app/utils/access-utils';
-import { currentWorkspaceStore } from 'app/utils/navigation';
 import {
   AuthorityGuardedAction,
   hasAuthorityForAction,
 } from 'app/utils/authorities';
+import { currentWorkspaceStore } from 'app/utils/navigation';
+import { authStore, profileStore } from 'app/utils/stores';
+
 import { AuthorityMissing } from './authority-missing';
 
 export const signInGuard: Guard = {

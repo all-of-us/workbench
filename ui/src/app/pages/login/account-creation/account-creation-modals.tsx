@@ -1,3 +1,5 @@
+import * as React from 'react';
+
 import { Button } from 'app/components/buttons';
 import { styles as headerStyles } from 'app/components/headers';
 import { TextInput, ValidationError } from 'app/components/inputs';
@@ -8,8 +10,6 @@ import {
   ModalTitle,
 } from 'app/components/modals';
 import { profileApi } from 'app/services/swagger-fetch-clients';
-
-import * as React from 'react';
 
 interface AccountCreationResendModalProps {
   username: string;

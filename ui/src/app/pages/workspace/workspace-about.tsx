@@ -1,5 +1,9 @@
-import * as fp from 'lodash/fp';
 import * as React from 'react';
+import * as fp from 'lodash/fp';
+import { faLockAlt } from '@fortawesome/pro-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+
+import { CdrVersionTiersResponse, Profile, UserRole } from 'generated/fetch';
 
 import { Button, StyledExternalLink } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
@@ -25,10 +29,7 @@ import { getCdrVersion } from 'app/utils/cdr-versions';
 import { currentWorkspaceStore } from 'app/utils/navigation';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
-import { CdrVersionTiersResponse, Profile, UserRole } from 'generated/fetch';
 import { isUsingFreeTierBillingAccount } from 'app/utils/workspace-utils';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faLockAlt } from '@fortawesome/pro-solid-svg-icons';
 import { supportUrls } from 'app/utils/zendesk';
 
 interface WorkspaceProps extends WithSpinnerOverlayProps {

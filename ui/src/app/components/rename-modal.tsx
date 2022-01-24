@@ -1,3 +1,8 @@
+import * as React from 'react';
+import { validate } from 'validate.js';
+
+import { ResourceType } from 'generated/fetch';
+
 import { Button } from 'app/components/buttons';
 import { styles as headerStyles } from 'app/components/headers';
 import { TextInput, ValidationError } from 'app/components/inputs';
@@ -11,9 +16,6 @@ import { TooltipTrigger } from 'app/components/popups';
 import colors from 'app/styles/colors';
 import { reactStyles, summarizeErrors } from 'app/utils';
 import { toDisplay } from 'app/utils/resources';
-import { ResourceType } from 'generated/fetch';
-import * as React from 'react';
-import { validate } from 'validate.js';
 
 const styles = reactStyles({
   fieldHeader: {

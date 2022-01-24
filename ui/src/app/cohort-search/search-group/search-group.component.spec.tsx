@@ -1,11 +1,14 @@
-import { mount } from 'enzyme';
 import * as React from 'react';
+import { mount } from 'enzyme';
+
+import { CohortBuilderApi, Domain } from 'generated/fetch';
 
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { currentWorkspaceStore } from 'app/utils/navigation';
-import { CohortBuilderApi, Domain } from 'generated/fetch';
+
 import { CohortBuilderServiceStub } from 'testing/stubs/cohort-builder-service-stub';
 import { workspaceDataStub } from 'testing/stubs/workspaces';
+
 import { SearchGroup } from './search-group.component';
 
 const itemsStub = [

@@ -13,6 +13,7 @@ import {
   TemporalMention,
   TemporalTime,
 } from 'generated/fetch';
+
 import { idsInUse } from './search-state.service';
 
 export function typeDisplay(parameter): string {

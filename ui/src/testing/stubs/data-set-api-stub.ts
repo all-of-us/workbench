@@ -10,6 +10,7 @@ import {
   KernelTypeEnum,
   ReadOnlyNotebookResponse,
 } from 'generated/fetch';
+
 import { stubNotImplementedError } from 'testing/stubs/stub-utils';
 
 export const stubDataSet = (): DataSet => ({

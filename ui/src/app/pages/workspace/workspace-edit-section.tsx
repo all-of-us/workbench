@@ -1,10 +1,11 @@
+import * as React from 'react';
+
 import { FlexRow } from 'app/components/flex';
 import { InfoIcon } from 'app/components/icons';
 import { TooltipTrigger } from 'app/components/popups';
 import { PubliclyDisplayed } from 'app/icons/publicly-displayed-icon';
 import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
-import * as React from 'react';
 
 export const styles = reactStyles({
   header: {

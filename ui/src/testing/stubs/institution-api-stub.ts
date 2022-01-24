@@ -8,9 +8,11 @@ import {
   InstitutionMembershipRequirement,
   OrganizationType,
 } from 'generated/fetch';
-import { stubNotImplementedError } from 'testing/stubs/stub-utils';
-import { getTierConfig } from 'app/utils/institutions';
+
 import { AccessTierShortNames } from 'app/utils/access-tiers';
+import { getTierConfig } from 'app/utils/institutions';
+
+import { stubNotImplementedError } from 'testing/stubs/stub-utils';
 
 export const VUMC: Institution = {
   shortName: 'VUMC',

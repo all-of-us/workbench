@@ -1,13 +1,13 @@
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-
-import { cohortReviewApi } from 'app/services/swagger-fetch-clients';
-import { currentCohortReviewStore } from 'app/utils/navigation';
 import {
   CohortStatus,
   FilterColumns,
   ParticipantCohortStatus,
   SortOrder,
 } from 'generated/fetch';
+
+import { cohortReviewApi } from 'app/services/swagger-fetch-clients';
+import { currentCohortReviewStore } from 'app/utils/navigation';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
 export const initialFilterState = {
   global: {

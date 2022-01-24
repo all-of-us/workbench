@@ -1,5 +1,5 @@
-import { mount, ReactWrapper, shallow, ShallowWrapper } from 'enzyme';
 import * as React from 'react';
+import { mount, ReactWrapper, shallow, ShallowWrapper } from 'enzyme';
 
 import { CheckBox } from './inputs';
 

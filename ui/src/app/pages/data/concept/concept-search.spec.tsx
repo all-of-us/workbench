@@ -1,7 +1,9 @@
-import { mount } from 'enzyme';
-import * as fp from 'lodash/fp';
 import * as React from 'react';
 import { MemoryRouter, Route } from 'react-router';
+import * as fp from 'lodash/fp';
+import { mount } from 'enzyme';
+
+import { ConceptSet, ConceptSetsApi, WorkspacesApi } from 'generated/fetch';
 
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import {
@@ -9,11 +11,12 @@ import {
   currentConceptStore,
   currentWorkspaceStore,
 } from 'app/utils/navigation';
-import { ConceptSet, ConceptSetsApi, WorkspacesApi } from 'generated/fetch';
+
 import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
 import { ConceptSetsApiStub } from 'testing/stubs/concept-sets-api-stub';
 import { workspaceDataStub } from 'testing/stubs/workspaces';
 import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
+
 import { ConceptSearch } from './concept-search';
 
 describe('ConceptSearch', () => {

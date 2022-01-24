@@ -1,5 +1,7 @@
-import { Runtime, RuntimeConfigurationType } from 'generated/fetch';
 import * as fp from 'lodash/fp';
+
+import { Runtime, RuntimeConfigurationType } from 'generated/fetch';
+
 import { DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES } from './machines';
 
 export const runtimePresets: {

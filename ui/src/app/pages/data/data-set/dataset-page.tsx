@@ -1,3 +1,30 @@
+import * as React from 'react';
+import { useState } from 'react';
+import { RouteComponentProps, withRouter } from 'react-router-dom';
+import * as fp from 'lodash/fp';
+import { Column } from 'primereact/column';
+import { DataTable } from 'primereact/datatable';
+
+import {
+  CdrVersion,
+  CdrVersionTiersResponse,
+  Cohort,
+  ConceptSet,
+  DataDictionaryEntry,
+  DataSet,
+  DataSetPreviewRequest,
+  DataSetPreviewValueList,
+  DataSetRequest,
+  Domain,
+  DomainValue,
+  DomainValuePair,
+  ErrorResponse,
+  PrePackagedConceptSetEnum,
+  Profile,
+  ResourceType,
+  ValueSet,
+} from 'generated/fetch';
+
 import { AlertInfo } from 'app/components/alert';
 import {
   Button,
@@ -46,31 +73,6 @@ import { MatchParams, serverConfigStore } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
 import { openZendeskWidget, supportUrls } from 'app/utils/zendesk';
-import {
-  CdrVersion,
-  CdrVersionTiersResponse,
-  Cohort,
-  ConceptSet,
-  DataDictionaryEntry,
-  DataSet,
-  DataSetPreviewRequest,
-  DataSetPreviewValueList,
-  DataSetRequest,
-  Domain,
-  DomainValue,
-  DomainValuePair,
-  ErrorResponse,
-  PrePackagedConceptSetEnum,
-  Profile,
-  ResourceType,
-  ValueSet,
-} from 'generated/fetch';
-import * as fp from 'lodash/fp';
-import { Column } from 'primereact/column';
-import { DataTable } from 'primereact/datatable';
-import * as React from 'react';
-import { useState } from 'react';
-import { RouteComponentProps, withRouter } from 'react-router-dom';
 
 export const styles = reactStyles({
   dataDictionaryHeader: {

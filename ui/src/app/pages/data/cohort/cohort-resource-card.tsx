@@ -1,5 +1,7 @@
-import * as fp from 'lodash/fp';
 import * as React from 'react';
+import * as fp from 'lodash/fp';
+
+import { DataSet, WorkspaceResource } from 'generated/fetch';
 
 import { DataSetReferenceModal } from 'app/components/data-set-reference-modal';
 import { RenameModal } from 'app/components/rename-modal';
@@ -34,7 +36,6 @@ import {
   getType,
 } from 'app/utils/resources';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
-import { DataSet, WorkspaceResource } from 'generated/fetch';
 
 interface Props
   extends WithConfirmDeleteModalProps,

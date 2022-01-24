@@ -1,6 +1,8 @@
-import { TextModal } from 'app/components/text-modal';
-import * as fp from 'lodash/fp';
 import * as React from 'react';
+import * as fp from 'lodash/fp';
+
+import { TextModal } from 'app/components/text-modal';
+
 import { SupportMailto } from './support';
 
 interface State {

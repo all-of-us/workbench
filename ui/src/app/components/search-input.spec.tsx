@@ -1,7 +1,9 @@
-import { mount } from 'enzyme';
 import * as React from 'react';
-import { SearchInput } from './search-input';
+import { mount } from 'enzyme';
+
 import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
+
+import { SearchInput } from './search-input';
 
 // The delay between editing the search input and the dropdown appearing,
 // padded to ensure DOM rendering can complete.

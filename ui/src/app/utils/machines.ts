@@ -1,8 +1,10 @@
-import { Disk, DiskType } from 'generated/fetch';
 import * as fp from 'lodash/fp';
+
+import { Disk, DiskType } from 'generated/fetch';
+
 import { DEFAULT, switchCase } from './index';
 import { formatUsd } from './numbers';
-import { DiskConfig, AnalysisConfig } from './runtime-utils';
+import { AnalysisConfig, DiskConfig } from './runtime-utils';
 
 // Copied from https://github.com/DataBiosphere/terra-ui/blob/219b063b07d56499ccc38013fd88f4f0b88f8cd6/src/data/machines.js
 

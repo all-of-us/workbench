@@ -1,6 +1,8 @@
-import { AuthorityGuardedAction, hasAuthorityForAction } from './authorities';
-import { ProfileStubVariables } from 'testing/stubs/profile-api-stub';
 import { Authority } from 'generated/fetch';
+
+import { ProfileStubVariables } from 'testing/stubs/profile-api-stub';
+
+import { AuthorityGuardedAction, hasAuthorityForAction } from './authorities';
 
 const noAuth = ProfileStubVariables.PROFILE_STUB;
 

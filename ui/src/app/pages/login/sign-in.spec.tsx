@@ -1,16 +1,16 @@
-import { Button } from 'app/components/buttons';
-
-import { mount, shallow } from 'enzyme';
 import * as React from 'react';
+import { MemoryRouter } from 'react-router-dom';
+import { mount, shallow } from 'enzyme';
 
+import { Button } from 'app/components/buttons';
 import { AccountCreation } from 'app/pages/login/account-creation/account-creation';
 import { AccountCreationInstitution } from 'app/pages/login/account-creation/account-creation-institution';
 import { AccountCreationSuccess } from 'app/pages/login/account-creation/account-creation-success';
 import { AccountCreationSurvey } from 'app/pages/login/account-creation/account-creation-survey';
 import { AccountCreationTos } from 'app/pages/login/account-creation/account-creation-tos';
 import LoginReactComponent from 'app/pages/login/login';
-import { createEmptyProfile, SignInProps, SignIn } from './sign-in';
-import { MemoryRouter } from 'react-router-dom';
+
+import { createEmptyProfile, SignIn, SignInProps } from './sign-in';
 
 describe('SignInReact', () => {
   let props: SignInProps;

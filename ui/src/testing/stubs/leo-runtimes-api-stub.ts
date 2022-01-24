@@ -1,4 +1,5 @@
 import { RuntimesApi } from 'notebooks-generated/fetch';
+
 import { stubNotImplementedError } from 'testing/stubs/stub-utils';
 
 export class LeoRuntimesApiStub extends RuntimesApi {

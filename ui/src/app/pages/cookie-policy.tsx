@@ -1,3 +1,5 @@
+import * as React from 'react';
+
 import { StyledExternalLink } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
 import { FlexColumn, FlexRow } from 'app/components/flex';
@@ -6,7 +8,6 @@ import { PublicLayout } from 'app/components/public-layout';
 import { AouTitle } from 'app/components/text-wrappers';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
-import * as React from 'react';
 
 const styles = {
   tableItem: {

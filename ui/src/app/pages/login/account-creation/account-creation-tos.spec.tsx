@@ -1,9 +1,10 @@
+import * as React from 'react';
+import { mount, ReactWrapper, ShallowWrapper } from 'enzyme';
+
 import {
   AccountCreationTos,
   AccountCreationTosProps,
 } from 'app/pages/login/account-creation/account-creation-tos';
-import { mount, ReactWrapper, ShallowWrapper } from 'enzyme';
-import * as React from 'react';
 
 type AnyWrapper = ShallowWrapper | ReactWrapper;
 const getPrivacyCheckbox = (wrapper: AnyWrapper): AnyWrapper => {

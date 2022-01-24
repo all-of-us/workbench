@@ -1,8 +1,11 @@
+import * as React from 'react';
+import { RouteComponentProps, withRouter } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 import { Growl } from 'primereact/growl';
-import * as React from 'react';
-import { Subscription } from 'rxjs/Subscription';
 
+import { Criteria, Domain } from 'generated/fetch';
+
+import { environment } from 'environments/environment';
 import { ListSearch } from 'app/cohort-search/list-search/list-search.component';
 import { Selection } from 'app/cohort-search/selection-list/selection-list.component';
 import { CriteriaTree } from 'app/cohort-search/tree/tree.component';
@@ -21,11 +24,8 @@ import {
   setSidebarActiveIconStore,
 } from 'app/utils/navigation';
 import { MatchParams } from 'app/utils/stores';
-import { environment } from 'environments/environment';
-import { Criteria, Domain } from 'generated/fetch';
-import { RouteComponentProps, withRouter } from 'react-router-dom';
-
 import arrowIcon from 'assets/icons/arrow-left-regular.svg';
+import { Subscription } from 'rxjs/Subscription';
 
 export const LOCAL_STORAGE_KEY_COHORT_CONTEXT = 'CURRENT_COHORT_CONTEXT';
 export const LOCAL_STORAGE_KEY_CRITERIA_SELECTIONS =

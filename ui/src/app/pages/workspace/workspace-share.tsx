@@ -1,10 +1,18 @@
-import { Select } from 'app/components/inputs';
-import * as fp from 'lodash/fp';
 import * as React from 'react';
+import * as fp from 'lodash/fp';
+
+import {
+  Profile,
+  User,
+  UserRole,
+  WorkspaceAccessLevel,
+  WorkspaceUserRolesResponse,
+} from 'generated/fetch/api';
 
 import { Button } from 'app/components/buttons';
 import { FlexRow } from 'app/components/flex';
 import { ClrIcon, InfoIcon } from 'app/components/icons';
+import { Select } from 'app/components/inputs';
 import {
   Modal,
   ModalBody,
@@ -20,13 +28,6 @@ import { isBlank, reactStyles, withUserProfile } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
 import { currentWorkspaceStore } from 'app/utils/navigation';
 import { WorkspaceData } from 'app/utils/workspace-data';
-import {
-  Profile,
-  User,
-  UserRole,
-  WorkspaceAccessLevel,
-  WorkspaceUserRolesResponse,
-} from 'generated/fetch/api';
 import { isUsingFreeTierBillingAccount } from 'app/utils/workspace-utils';
 
 const styles = reactStyles({

@@ -1,17 +1,19 @@
 import { Workspace } from 'generated/fetch';
-import { WorkspaceStubVariables } from 'testing/stubs/workspaces';
+
+import { AccessTierShortNames } from 'app/utils/access-tiers';
+import {
+  getCdrVersion,
+  getDefaultCdrVersionForTier,
+  hasDefaultCdrVersion,
+} from 'app/utils/cdr-versions';
+
 import {
   altCdrVersion,
   cdrVersionTiersResponse,
   controlledCdrVersion,
   defaultCdrVersion,
 } from 'testing/stubs/cdr-versions-api-stub';
-import {
-  getCdrVersion,
-  hasDefaultCdrVersion,
-  getDefaultCdrVersionForTier,
-} from 'app/utils/cdr-versions';
-import { AccessTierShortNames } from 'app/utils/access-tiers';
+import { WorkspaceStubVariables } from 'testing/stubs/workspaces';
 
 const stubWorkspace: Workspace = {
   name: WorkspaceStubVariables.DEFAULT_WORKSPACE_NAME,

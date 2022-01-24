@@ -1,13 +1,15 @@
-import { getTrail } from 'app/components/breadcrumb';
-import { currentWorkspaceStore } from 'app/utils/navigation';
-import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { WorkspacesApi } from 'generated/fetch';
+
+import { getTrail } from 'app/components/breadcrumb';
+import { registerApiClient } from 'app/services/swagger-fetch-clients';
+import { currentWorkspaceStore } from 'app/utils/navigation';
 
 import { cohortReviewStubs } from 'testing/stubs/cohort-review-service-stub';
 import { exampleCohortStubs } from 'testing/stubs/cohorts-api-stub';
 import { ConceptSetsApiStub } from 'testing/stubs/concept-sets-api-stub';
 import { workspaceDataStub } from 'testing/stubs/workspaces';
 import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
+
 import { BreadcrumbType } from './breadcrumb-type';
 
 describe('getTrail', () => {

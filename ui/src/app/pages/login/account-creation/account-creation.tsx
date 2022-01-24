@@ -1,7 +1,9 @@
+import * as React from 'react';
 import * as fp from 'lodash/fp';
 import { MultiSelect } from 'primereact/multiselect';
-import * as React from 'react';
 import validate from 'validate.js';
+
+import { Profile } from 'generated/fetch';
 
 import { Button } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
@@ -30,7 +32,6 @@ import { isBlank, reactStyles } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
 import { serverConfigStore } from 'app/utils/stores';
 import { NOT_ENOUGH_CHARACTERS_RESEARCH_DESCRIPTION } from 'app/utils/strings';
-import { Profile } from 'generated/fetch';
 import { canonicalizeUrl } from 'app/utils/urls';
 
 const styles = reactStyles({

@@ -1,14 +1,15 @@
 import * as React from 'react';
 import * as fp from 'lodash';
 
+import { Profile } from 'generated/fetch';
+
 import { Button } from 'app/components/buttons';
+import { ToastBanner, ToastType } from 'app/components/toast-banner';
 import { withCurrentWorkspace, withUserProfile } from 'app/utils';
 import { NavigationProps } from 'app/utils/navigation';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { openZendeskWidget } from 'app/utils/zendesk';
-import { Profile } from 'generated/fetch';
-import { ToastBanner, ToastType } from 'app/components/toast-banner';
 
 interface Props extends NavigationProps {
   workspace: WorkspaceData;

@@ -1,5 +1,13 @@
-import * as fp from 'lodash/fp';
 import * as React from 'react';
+import * as fp from 'lodash/fp';
+
+import {
+  CdrVersionTiersResponse,
+  Criteria,
+  CriteriaSubType,
+  CriteriaType,
+  Domain,
+} from 'generated/fetch';
 
 import { SearchBar } from 'app/cohort-search/search-bar/search-bar.component';
 import { ppiSurveys } from 'app/cohort-search/search-state.service';
@@ -21,14 +29,6 @@ import {
   currentWorkspaceStore,
 } from 'app/utils/navigation';
 import { WorkspaceData } from 'app/utils/workspace-data';
-import {
-  CdrVersionTiersResponse,
-  Criteria,
-  CriteriaSubType,
-  CriteriaType,
-  Domain,
-} from 'generated/fetch';
-
 import arrow from 'assets/icons/arrow-left-regular.svg';
 
 const styles = reactStyles({

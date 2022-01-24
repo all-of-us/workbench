@@ -1,12 +1,17 @@
-import { mount, ReactWrapper } from 'enzyme';
 import * as React from 'react';
+import RSelect from 'react-select';
+import { mount, ReactWrapper } from 'enzyme';
+import { mockNavigate } from 'setupTests';
 
-import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import {
   ProfileApi,
   WorkspaceAccessLevel,
   WorkspacesApi,
 } from 'generated/fetch';
+
+import { registerApiClient } from 'app/services/swagger-fetch-clients';
+import { profileStore, serverConfigStore } from 'app/utils/stores';
+
 import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
 import { ProfileApiStub } from 'testing/stubs/profile-api-stub';
 import { ProfileStubVariables } from 'testing/stubs/profile-api-stub';
@@ -15,11 +20,9 @@ import {
   workspaceStubs,
   WorkspaceStubVariables,
 } from 'testing/stubs/workspaces';
-import RSelect from 'react-select';
 import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
+
 import { WorkspaceList } from './workspace-list';
-import { profileStore, serverConfigStore } from 'app/utils/stores';
-import { mockNavigate } from 'setupTests';
 
 describe('WorkspaceList', () => {
   const profile = ProfileStubVariables.PROFILE_STUB;

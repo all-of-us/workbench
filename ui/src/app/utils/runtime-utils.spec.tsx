@@ -1,20 +1,23 @@
+import * as React from 'react';
 import { act } from 'react-dom/test-utils';
 import { mount } from 'enzyme';
-import {
-  useCustomRuntime,
-  AnalysisDiffState,
-  findMostSevereDiffState,
-} from 'app/utils/runtime-utils';
-import { runtimeStore, diskStore, serverConfigStore } from 'app/utils/stores';
-import { RuntimeApiStub } from 'testing/stubs/runtime-api-stub';
+
 import { RuntimeApi } from 'generated/fetch/api';
+
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import {
-  waitOneTickAndUpdate,
-  waitForFakeTimersAndUpdate,
-} from 'testing/react-test-helpers';
-import * as React from 'react';
+  AnalysisDiffState,
+  findMostSevereDiffState,
+  useCustomRuntime,
+} from 'app/utils/runtime-utils';
+import { diskStore, runtimeStore, serverConfigStore } from 'app/utils/stores';
+
 import defaultServerConfig from 'testing/default-server-config';
+import {
+  waitForFakeTimersAndUpdate,
+  waitOneTickAndUpdate,
+} from 'testing/react-test-helpers';
+import { RuntimeApiStub } from 'testing/stubs/runtime-api-stub';
 
 const WORKSPACE_NS = 'test';
 

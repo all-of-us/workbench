@@ -1,6 +1,9 @@
-import * as fp from 'lodash/fp';
 import * as React from 'react';
+import * as fp from 'lodash/fp';
 import { validate } from 'validate.js';
+
+import { Cohort } from 'generated/fetch';
+import { CohortReview } from 'generated/fetch';
 
 import { Button } from 'app/components/buttons';
 import { NumberInput, ValidationError } from 'app/components/inputs';
@@ -26,8 +29,6 @@ import {
 } from 'app/utils/navigation';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
-import { Cohort } from 'generated/fetch';
-import { CohortReview } from 'generated/fetch';
 
 const styles = reactStyles({
   title: {

@@ -1,5 +1,6 @@
-import colors from 'app/styles/colors';
 import * as React from 'react';
+
+import colors from 'app/styles/colors';
 
 // tslint:disable:max-line-length
 // We disable the tslint because certain stroke attributes for the SVG cannot be broken

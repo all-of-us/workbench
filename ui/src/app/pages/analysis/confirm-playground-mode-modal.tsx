@@ -1,4 +1,3 @@
-import * as Cookies from 'js-cookie';
 import * as React from 'react';
 
 import { Button } from 'app/components/buttons';
@@ -10,6 +9,7 @@ import {
   ModalTitle,
 } from 'app/components/modals';
 import colors from 'app/styles/colors';
+import * as Cookies from 'js-cookie';
 
 export interface Props {
   onCancel: Function;
