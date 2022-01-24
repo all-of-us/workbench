@@ -7,8 +7,12 @@ import { SpinnerOverlay } from 'app/components/spinners';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { cohortsApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import { reactStyles, withCurrentWorkspace } from 'app/utils';
-import { NavigationProps } from 'app/utils/navigation';
+import {
+  reactStyles,
+  withCurrentCohort,
+  withCurrentWorkspace,
+} from 'app/utils';
+import { currentCohortStore, NavigationProps } from 'app/utils/navigation';
 import { MatchParams } from 'app/utils/stores';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
@@ -88,6 +92,7 @@ interface Props
   extends WithSpinnerOverlayProps,
     NavigationProps,
     RouteComponentProps<MatchParams> {
+  cohort: Cohort;
   workspace: WorkspaceData;
 }
 
@@ -97,6 +102,7 @@ interface State {
 }
 
 export const CohortActions = fp.flow(
+  withCurrentCohort(),
   withCurrentWorkspace(),
   withNavigation,
   withRouter
@@ -109,23 +115,34 @@ export const CohortActions = fp.flow(
 
     componentDidMount(): void {
       this.props.hideSpinner();
-      this.setState({ cohortLoading: true });
-      const { namespace, id } = this.props.workspace;
-      cohortsApi()
-        .getCohort(namespace, id, +this.props.match.params.cid)
-        .then((c) => {
-          if (c) {
-            this.setState({ cohort: c, cohortLoading: false });
-          } else {
-            this.props.navigate([
-              'workspaces',
-              namespace,
-              id,
-              'data',
-              'cohorts',
-            ]);
-          }
-        });
+      const {
+        cohort,
+        match: {
+          params: { cid },
+        },
+      } = this.props;
+      if (cohort && +cid === cohort.id) {
+        this.setState({ cohort });
+      } else {
+        this.setState({ cohortLoading: true });
+        const { namespace, id } = this.props.workspace;
+        cohortsApi()
+          .getCohort(namespace, id, +this.props.match.params.cid)
+          .then((c) => {
+            if (c) {
+              currentCohortStore.next(c);
+              this.setState({ cohort: c, cohortLoading: false });
+            } else {
+              this.props.navigate([
+                'workspaces',
+                namespace,
+                id,
+                'data',
+                'cohorts',
+              ]);
+            }
+          });
+      }
     }
 
     getNavigationPath(action: string): string {
