@@ -176,7 +176,7 @@ export const getAccessModuleConfig = (
           </div>
         ),
         adminPageTitle: 'Verify your identity with Login.gov',
-        canExpire: true,
+        canExpire: false,
         adminBypassable: true,
         refreshAction: () => redirectToRas(false),
       }),
