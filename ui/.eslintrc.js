@@ -93,10 +93,6 @@ module.exports = {
       },
     ],
     'no-trailing-spaces': 'warn',
-    'space-before-function-paren': [
-      'warn',
-      { anonymous: 'never', named: 'never', asyncArrow: 'always' },
-    ],
 
     // temp disable others.  re-enable if desired after determining that they don't conflict with prettier.
 
