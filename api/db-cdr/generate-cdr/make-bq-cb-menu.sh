@@ -71,7 +71,7 @@ then
   "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_menu\`
       (id,parent_id,category,domain_id,type,name,is_group,sort_order)
   VALUES
-  (6,0,'Program Data','ARRAY_DATA','','Infinium Global Diversity Array',0,6)"
+  (6,0,'Program Data','ARRAY_DATA','','Global Diversity Array',0,6)"
 fi
 
 echo "Insert cb_criteria_menu"
