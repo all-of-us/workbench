@@ -20,7 +20,8 @@ describe('Datasets card snowman menu actions', () => {
 
   const workspace = makeWorkspaceName();
 
-  test('Edit dataset', async () => {
+  // TODO temporarily disabled, filed RW-7754 to investigate and re-enable
+  xtest('Edit dataset', async () => {
     await findOrCreateWorkspace(page, { workspaceName: workspace });
 
     const datasetName = await createDataSet();
@@ -66,7 +67,8 @@ describe('Datasets card snowman menu actions', () => {
     await dataPage.deleteResource(datasetName, ResourceCard.Dataset);
   });
 
-  test('Rename dataset', async () => {
+  // TODO temporarily disabled, filed RW-7754 to investigate and re-enable
+  xtest('Rename dataset', async () => {
     await findOrCreateWorkspace(page, { workspaceName: workspace });
 
     const datasetName = await createDataSet();
@@ -114,7 +116,8 @@ describe('Datasets card snowman menu actions', () => {
    * - Create dataset.
    * - Export dataset to notebook thru snowman menu (the notebook is not created).
    */
-  test.each(KernelLanguages)('Export to %s kernel Jupyter notebook', async (kernelLanguage) => {
+  // TODO temporarily disabled, filed RW-7754 to investigate and re-enable
+  xtest.each(KernelLanguages)('Export to %s kernel Jupyter notebook', async (kernelLanguage) => {
     await findOrCreateWorkspace(page, { workspaceName: workspace });
 
     const datasetName = await createDataSet();
