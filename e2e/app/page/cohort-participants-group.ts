@@ -532,7 +532,7 @@ export default class CohortParticipantsGroup {
 
     const isSuccess = await enterTextAndSearch(searchWord);
     if (!isSuccess) {
-      logger.error('Search criteria "searchWord" failed.');
+      logger.error(`Search criteria "${searchWord}" failed.`);
       throw new Error('Encountered api request failure during search criteria.');
     }
 
