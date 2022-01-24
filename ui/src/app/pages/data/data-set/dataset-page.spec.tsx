@@ -210,7 +210,7 @@ describe('DataSetPage', () => {
     expect(valueListItems.length).toBe(5);
 
     // Should be no change in selected values
-    expect(checkedValuesList.length).toBe(4);
+    expect(checkedValuesList.length).toBe(5);
   });
 
   it('should display correct values on rapid selection of multiple domains', async () => {
