@@ -8,8 +8,6 @@ module.exports = {
     'prettier',
     'react',
     'react-hooks',
-    'simple-import-sort',
-    'sort-keys-fix',
   ],
   extends: [],
   parserOptions: {
@@ -74,6 +72,9 @@ module.exports = {
     '@typescript-eslint/prefer-optional-chain': 'warn',
     '@typescript-eslint/unified-signatures': 'warn',
     // '@typescript-eslint/member-ordering': ['warn', { 'classExpressions': ['method', 'field'] }],
+    // '@typescript-eslint/prefer-function-type': 'warn',
+    // semi: 'off', // Needed for the below rule
+    // '@typescript-eslint/semi': 'warn',
 
     'react/jsx-uses-vars': 'warn',
     'react-hooks/rules-of-hooks': 'warn',
@@ -92,21 +93,15 @@ module.exports = {
       },
     ],
     'no-trailing-spaces': 'warn',
-
-    // temp disable others.  re-enable if desired after determining that they don't conflict with prettier.
-
-    // // 'simple-import-sort/sort': 'warn',
     'space-before-function-paren': [
       'warn',
       { anonymous: 'never', named: 'never', asyncArrow: 'always' },
     ],
-    // // 'spaced-comment': 'warn',
-    //
-    // '@typescript-eslint/type-annotation-spacing': 'warn',
-    // '@typescript-eslint/prefer-function-type': 'warn',
-    // // '@typescript-eslint/semi': 'warn',
-    //
-    // 'react/jsx-curly-spacing': ["warn", {'when': 'never'}],
+
+    // temp disable others.  re-enable if desired after determining that they don't conflict with prettier.
+
+    // 'simple-import-sort/sort': 'warn',
+    // 'spaced-comment': 'warn',
 
     /* Jest */
     'jest/no-focused-tests': 'warn',
