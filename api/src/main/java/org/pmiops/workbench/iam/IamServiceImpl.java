@@ -72,7 +72,7 @@ public class IamServiceImpl implements IamService {
   }
 
   @Override
-  public void grantWorkflowRunnerRoleToUsers(String googleProject, List<String> userEmails) {
+  public void grantWorkflowRunnerRoleForUsers(String googleProject, List<String> userEmails) {
     GoogleApi googleApiAsImpersonatedUser = new GoogleApi();
     try {
       List<String> petServiceAccountsToGrantPermission = new ArrayList<>();
@@ -91,7 +91,7 @@ public class IamServiceImpl implements IamService {
   }
 
   @Override
-  public void revokeWorkflowRunnerRoleToUsers(String googleProject, List<String> userEmails) {
+  public void revokeWorkflowRunnerRoleForUsers(String googleProject, List<String> userEmails) {
     GoogleApi googleApiAsImpersonatedUser = new GoogleApi();
     try {
       List<String> petServiceAccountsToRevokePermission = new ArrayList<>();
@@ -133,7 +133,7 @@ public class IamServiceImpl implements IamService {
         Optional.ofNullable(policy.getBindings()).orElse(new ArrayList<>());
     com.google.api.services.cloudresourcemanager.model.Binding binding =
         bindingList.stream()
-            .filter(b -> b.getRole().equals(LIFESCIENCE_RUNNER_ROLE))
+            .filter(b -> LIFESCIENCE_RUNNER_ROLE.equals(b.getRole()))
             .findFirst()
             .orElse(
                 new com.google.api.services.cloudresourcemanager.model.Binding()

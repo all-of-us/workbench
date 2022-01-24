@@ -602,8 +602,8 @@ public class WorkspacesControllerTest {
     assertThat(retrievedWorkspace.getBillingAccountName())
         .isEqualTo(TestMockFactory.WORKSPACE_BILLING_ACCOUNT_NAME);
     verify(mockIamService, never()).grantWorkflowRunnerRoleToCurrentUser(anyString());
-    verify(mockIamService, never()).grantWorkflowRunnerRoleToUsers(anyString(), anyList());
-    verify(mockIamService, never()).revokeWorkflowRunnerRoleToUsers(anyString(), anyList());
+    verify(mockIamService, never()).grantWorkflowRunnerRoleForUsers(anyString(), anyList());
+    verify(mockIamService, never()).revokeWorkflowRunnerRoleForUsers(anyString(), anyList());
   }
 
   @Test
@@ -1982,7 +1982,7 @@ public class WorkspacesControllerTest {
     // The name LOGGED_IN_USER_EMAIL is confusing. The actually logged in user is cloner,
     // LOGGED_IN_USER_EMAIL just a workspace owner
     verify(mockIamService)
-        .grantWorkflowRunnerRoleToUsers(
+        .grantWorkflowRunnerRoleForUsers(
             CLONE_GOOGLE_PROJECT_ID, ImmutableList.of(LOGGED_IN_USER_EMAIL, writer.getUsername()));
   }
 
@@ -2068,8 +2068,8 @@ public class WorkspacesControllerTest {
     ArrayList<FirecloudWorkspaceACLUpdate> updateACLRequestList =
         convertUserRolesToUpdateAclRequestList(shareWorkspaceRequest.getItems());
     verify(fireCloudService).updateWorkspaceACL(any(), any(), eq(updateACLRequestList));
-    verify(mockIamService, never()).grantWorkflowRunnerRoleToUsers(anyString(), anyList());
-    verify(mockIamService, never()).revokeWorkflowRunnerRoleToUsers(anyString(), anyList());
+    verify(mockIamService, never()).grantWorkflowRunnerRoleForUsers(anyString(), anyList());
+    verify(mockIamService, never()).revokeWorkflowRunnerRoleForUsers(anyString(), anyList());
   }
 
   @Test
@@ -2150,11 +2150,11 @@ public class WorkspacesControllerTest {
     verify(fireCloudService, never())
         .removeOwnerFromBillingProject(any(), any(), eq(Optional.empty()));
     verify(mockIamService)
-        .grantWorkflowRunnerRoleToUsers(
+        .grantWorkflowRunnerRoleForUsers(
             DEFAULT_GOOGLE_PROJECT,
             ImmutableList.of(writerUser.getUsername(), ownerUser.getUsername()));
     verify(mockIamService)
-        .revokeWorkflowRunnerRoleToUsers(
+        .revokeWorkflowRunnerRoleForUsers(
             DEFAULT_GOOGLE_PROJECT, ImmutableList.of(previousWriter.getUsername()));
   }
 

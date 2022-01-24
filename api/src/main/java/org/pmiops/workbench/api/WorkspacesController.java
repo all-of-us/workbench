@@ -446,7 +446,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
               .filter(entry -> shouldGrantWorkflowRunnerAsService(user, entry))
               .map(Map.Entry::getKey)
               .collect(Collectors.toList());
-      iamService.grantWorkflowRunnerRoleToUsers(
+      iamService.grantWorkflowRunnerRoleForUsers(
           dbWorkspace.getGoogleProject(), usersGainPermission);
     }
     final Workspace savedWorkspace = workspaceMapper.toApiWorkspace(dbWorkspace, toFcWorkspace);
@@ -517,12 +517,11 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     }
     final ImmutableMap<String, WorkspaceAccessLevel> aclsByEmail = shareRolesMapBuilder.build();
 
-    List<String> usersHavePermission = new ArrayList<>();
+    List<String> workflowUsers = new ArrayList<>();
     // Revoke lifesciene permission before asking Firecloud to remove users. Because after unshare
-    // in
-    // Firecloud, we nolonger can get user petSA from SAM using their credential.
+    // in Firecloud, we nolonger can get user petSA from SAM using their credential.
     if (dbWorkspace.getCdrVersion().getAccessTier().getEnableUserWorkflows()) {
-      usersHavePermission =
+      workflowUsers =
           aclsByEmail.entrySet().stream()
               .filter(entry -> shouldGrantWorkflowRunnerAsService(userProvider.get(), entry))
               .map(Map.Entry::getKey)
@@ -530,18 +529,18 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
       // Find the users who are owners or writers before share, but not in the new gain permission
       // list
-      List<String> finalUsersHavePermission = usersHavePermission;
+      List<String> finalWorkflowUsers = workflowUsers;
       List<String> userLostPermission =
           userRolesBeforeShare.stream()
               .filter(
                   u ->
-                      (u.getRole().equals(WorkspaceAccessLevel.OWNER)
-                              || u.getRole().equals(WorkspaceAccessLevel.WRITER))
-                          && !finalUsersHavePermission.contains(u.getEmail())
+                      (WorkspaceAccessLevel.OWNER.equals(u.getRole())
+                              || WorkspaceAccessLevel.WRITER.equals(u.getRole()))
+                          && !finalWorkflowUsers.contains(u.getEmail())
                           && !u.getEmail().equals(userProvider.get().getUsername()))
               .map(u -> u.getEmail())
               .collect(Collectors.toList());
-      iamService.revokeWorkflowRunnerRoleToUsers(
+      iamService.revokeWorkflowRunnerRoleForUsers(
           dbWorkspace.getGoogleProject(), userLostPermission);
     }
 
@@ -556,8 +555,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     if (dbWorkspace.getCdrVersion().getAccessTier().getEnableUserWorkflows()) {
       // grant newly workspace OWNER and WRITER Lifescience Runner permission
-      iamService.grantWorkflowRunnerRoleToUsers(
-          dbWorkspace.getGoogleProject(), usersHavePermission);
+      iamService.grantWorkflowRunnerRoleForUsers(dbWorkspace.getGoogleProject(), workflowUsers);
     }
     workspaceAuditor.fireCollaborateAction(
         dbWorkspace.getWorkspaceId(), aclStringsByUserIdBuilder.build());
@@ -697,7 +695,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private static boolean shouldGrantWorkflowRunnerAsService(
       DbUser loggedInUser, Map.Entry<String, WorkspaceAccessLevel> userNameToAclMapEntry) {
     return !userNameToAclMapEntry.getKey().equals(loggedInUser.getUsername())
-        && (userNameToAclMapEntry.getValue().equals(WorkspaceAccessLevel.OWNER)
-            || userNameToAclMapEntry.getValue().equals(WorkspaceAccessLevel.WRITER));
+        && (WorkspaceAccessLevel.OWNER.equals(userNameToAclMapEntry.getValue())
+            || WorkspaceAccessLevel.WRITER.equals(userNameToAclMapEntry.getValue()));
   }
 }
