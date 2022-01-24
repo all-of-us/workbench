@@ -484,7 +484,21 @@ export default class WorkspaceEditPage extends WorkspaceBase {
     const modal = new NewWorkspaceModal(this.page);
     await modal.waitForLoad();
     const modalTextContent = await modal.getTextContent();
-    await modal.clickButton(LinkText.Confirm, { waitForClose: true, waitForNav: true, timeout: 120000 });
+
+    const responsePromise = this.page.waitForResponse(
+      (response) => {
+        return response.url().endsWith('/workspaces') && response.request().method() === 'POST';
+      },
+      { timeout: 60000 }
+    );
+    await modal.clickButton(LinkText.Confirm, { waitForClose: true, timeout: 90000 });
+    const response = await responsePromise;
+
+    if (!response.ok()) {
+      const responseText = await response.text().catch(() => response.json());
+      throw new Error(`FAILED POST /workspaces request.\nResponse: ${response.status()} ${responseText}`);
+    }
+
     await waitWhileLoading(this.page);
     return modalTextContent;
   }

@@ -119,6 +119,8 @@ export default class WorkspacesPage extends AuthenticatedPage {
       `Created workspace "${workspaceName}" with CDR Version "${cdrVersionName}"` +
         ` and Data Access Tier "${dataAccessTier}"`
     );
+
+    await new WorkspaceDataPage(this.page).waitForLoad();
     return modalContent;
   }
 
