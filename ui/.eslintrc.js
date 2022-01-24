@@ -91,11 +91,10 @@ module.exports = {
         ignoreComments: true,
       },
     ],
+    'no-trailing-spaces': 'warn',
 
     // temp disable others.  re-enable if desired after determining that they don't conflict with prettier.
 
-    // 'eol-last': 'warn',
-    // 'no-trailing-spaces': 'warn',
     // 'quotes': ['warn', 'single'],
     // // 'brace-style': ['warn', '1tbs'],
     // // 'no-multi-spaces': 'warn',
