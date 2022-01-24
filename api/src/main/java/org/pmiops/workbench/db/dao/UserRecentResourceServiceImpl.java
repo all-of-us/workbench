@@ -4,7 +4,9 @@ import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Duration;
 import java.util.List;
+import javax.inject.Provider;
 import org.jetbrains.annotations.NotNull;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.DbRetryUtils;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbConceptSet;
@@ -22,6 +24,7 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
   private ConceptSetDao conceptSetDao;
   private UserRecentResourceDao userRecentResourceDao;
   private UserRecentlyModifiedResourceDao userRecentlyModifiedResourceDao;
+  private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @Autowired
   public UserRecentResourceServiceImpl(
@@ -29,12 +32,14 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
       CohortDao cohortDao,
       ConceptSetDao conceptSetDao,
       UserRecentlyModifiedResourceDao userRecentlyModifiedResourceDao,
-      UserRecentResourceDao userRecentResourceDao) {
+      UserRecentResourceDao userRecentResourceDao,
+      Provider<WorkbenchConfig> workbenchConfigProvider) {
     this.clock = clock;
     this.cohortDao = cohortDao;
     this.conceptSetDao = conceptSetDao;
     this.userRecentlyModifiedResourceDao = userRecentlyModifiedResourceDao;
     this.userRecentResourceDao = userRecentResourceDao;
+    this.workbenchConfigProvider = workbenchConfigProvider;
   }
 
   /**
@@ -104,6 +109,28 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
         String.valueOf(conceptSetId));
   }
 
+  @Override
+  public void updateDataSetEntry(long workspaceId, long userId, long dataSetId) {
+    if (workbenchConfigProvider.get().featureFlags.enableDSCREntryInRecentModified) {
+      updateUserRecentlyModifiedResourceEntry(
+          workspaceId,
+          userId,
+          DbUserRecentlyModifiedResource.DbUserRecentlyModifiedResourceType.DATA_SET,
+          String.valueOf(dataSetId));
+    }
+  }
+
+  @Override
+  public void updateCohortReviewEntry(long workspaceId, long userId, long cohortReviewId) {
+    if (workbenchConfigProvider.get().featureFlags.enableDSCREntryInRecentModified) {
+      updateUserRecentlyModifiedResourceEntry(
+          workspaceId,
+          userId,
+          DbUserRecentlyModifiedResource.DbUserRecentlyModifiedResourceType.COHORT_REVIEW,
+          String.valueOf(cohortReviewId));
+    }
+  }
+
   @NotNull
   private DbUserRecentResource makeUserRecentResource(
       long workspaceId, long userId, Timestamp now, DbConceptSet conceptSet) {
@@ -131,6 +158,8 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
     if (recentResourcesId == null) {
       recentResourcesId =
           new DbUserRecentlyModifiedResource(workspaceId, userId, resourceType, resourceId, now);
+    } else {
+      recentResourcesId.setLastAccessDate(now);
     }
     userRecentlyModifiedResourceDao.save(recentResourcesId);
   }
@@ -169,6 +198,28 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
         workspaceId,
         DbUserRecentlyModifiedResource.DbUserRecentlyModifiedResourceType.CONCEPT_SET,
         String.valueOf(conceptSetId));
+  }
+
+  @Override
+  public void deleteDataSetEntry(long workspaceId, long userId, long dataSetId) {
+    if (workbenchConfigProvider.get().featureFlags.enableDSCREntryInRecentModified) {
+      deleteUserRecentlyModifiedResourceEntry(
+          userId,
+          workspaceId,
+          DbUserRecentlyModifiedResource.DbUserRecentlyModifiedResourceType.DATA_SET,
+          String.valueOf(dataSetId));
+    }
+  }
+
+  @Override
+  public void deleteCohortReviewEntry(long workspaceId, long userId, long cohortReviewId) {
+    if (workbenchConfigProvider.get().featureFlags.enableDSCREntryInRecentModified) {
+      deleteUserRecentlyModifiedResourceEntry(
+          userId,
+          workspaceId,
+          DbUserRecentlyModifiedResource.DbUserRecentlyModifiedResourceType.COHORT_REVIEW,
+          String.valueOf(cohortReviewId));
+    }
   }
 
   private void deleteUserRecentlyModifiedResourceEntry(

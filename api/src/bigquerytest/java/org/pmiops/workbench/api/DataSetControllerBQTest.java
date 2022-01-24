@@ -48,6 +48,7 @@ import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.DataSetDao;
+import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.WgsExtractCromwellSubmissionDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbCdrVersion;
@@ -123,6 +124,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   @Autowired private Provider<DbUser> userProvider;
   @Autowired private TestWorkbenchConfig testWorkbenchConfig;
   @Autowired private Provider<WorkbenchConfig> workbenchConfigProvider;
+  @Autowired private UserRecentResourceService userRecentResourceService;
   @Autowired private WgsExtractCromwellSubmissionDao submissionDao;
   @Autowired private WorkspaceDao workspaceDao;
   @Autowired private WorkspaceAuthService workspaceAuthService;
@@ -180,7 +182,8 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
     WorkspaceMapperImpl.class,
     AccessTierService.class,
     CdrVersionService.class,
-    GenomicExtractionService.class
+    GenomicExtractionService.class,
+    UserRecentResourceService.class
   })
   static class Configuration {
     @Bean
@@ -238,6 +241,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
             dataSetMapper,
             submissionDao,
             prefixProvider,
+            userRecentResourceService,
             workbenchConfigProvider,
             CLOCK);
     controller =

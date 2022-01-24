@@ -54,6 +54,7 @@ import org.pmiops.workbench.dataset.mapper.DataSetMapper;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.DataSetDao;
+import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.WgsExtractCromwellSubmissionDao;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbConceptSet;
@@ -238,6 +239,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   private final WgsExtractCromwellSubmissionDao submissionDao;
   private final Provider<String> prefixProvider;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
+  private final UserRecentResourceService userRecentResourceService;
   private final Clock clock;
 
   @Autowired
@@ -256,6 +258,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
       DataSetMapper dataSetMapper,
       WgsExtractCromwellSubmissionDao submissionDao,
       @Qualifier(DatasetConfig.DATASET_PREFIX_CODE) Provider<String> prefixProvider,
+      UserRecentResourceService userRecentResourceService,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       Clock clock) {
     this.bigQueryService = bigQueryService;
@@ -271,6 +274,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     this.dataSetMapper = dataSetMapper;
     this.submissionDao = submissionDao;
     this.prefixProvider = prefixProvider;
+    this.userRecentResourceService = userRecentResourceService;
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.clock = clock;
   }
@@ -285,7 +289,10 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   @Override
   public DataSet saveDataSet(DbDataset dataset) {
     try {
-      return dataSetMapper.dbModelToClient(dataSetDao.save(dataset));
+      dataset = dataSetDao.save(dataset);
+      userRecentResourceService.updateDataSetEntry(
+          dataset.getWorkspaceId(), dataset.getCreatorId(), dataset.getDataSetId());
+      return dataSetMapper.dbModelToClient(dataset);
     } catch (OptimisticLockException e) {
       throw new ConflictException("Failed due to concurrent concept set modification");
     } catch (DataIntegrityViolationException ex) {
@@ -1123,6 +1130,8 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
       throw new NotFoundException(
           "No DataSet found for dataSetId " + dataSetId + " and workspaceId " + workspaceId);
     }
+    userRecentResourceService.deleteDataSetEntry(
+        workspaceId, dbDataset.get().getCreatorId(), dataSetId);
     dataSetDao.deleteById(dataSetId);
   }
 
