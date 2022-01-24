@@ -602,7 +602,8 @@ public class WorkspacesControllerTest {
     assertThat(retrievedWorkspace.getBillingAccountName())
         .isEqualTo(TestMockFactory.WORKSPACE_BILLING_ACCOUNT_NAME);
     verify(mockIamService, never()).grantWorkflowRunnerRoleToCurrentUser(anyString());
-    verify(mockIamService, never()).grantWorkflowRunnerRoleToUsers(anyString(), anyList());
+    verify(mockIamService, never()).grantWorkflowRunnerRoleForUsers(anyString(), anyList());
+    verify(mockIamService, never()).revokeWorkflowRunnerRoleForUsers(anyString(), anyList());
   }
 
   @Test
@@ -1981,7 +1982,7 @@ public class WorkspacesControllerTest {
     // The name LOGGED_IN_USER_EMAIL is confusing. The actually logged in user is cloner,
     // LOGGED_IN_USER_EMAIL just a workspace owner
     verify(mockIamService)
-        .grantWorkflowRunnerRoleToUsers(
+        .grantWorkflowRunnerRoleForUsers(
             CLONE_GOOGLE_PROJECT_ID, ImmutableList.of(LOGGED_IN_USER_EMAIL, writer.getUsername()));
   }
 
@@ -2067,7 +2068,8 @@ public class WorkspacesControllerTest {
     ArrayList<FirecloudWorkspaceACLUpdate> updateACLRequestList =
         convertUserRolesToUpdateAclRequestList(shareWorkspaceRequest.getItems());
     verify(fireCloudService).updateWorkspaceACL(any(), any(), eq(updateACLRequestList));
-    verify(mockIamService, never()).grantWorkflowRunnerRoleToUsers(anyString(), anyList());
+    verify(mockIamService, never()).grantWorkflowRunnerRoleForUsers(anyString(), anyList());
+    verify(mockIamService, never()).revokeWorkflowRunnerRoleForUsers(anyString(), anyList());
   }
 
   @Test
@@ -2105,8 +2107,23 @@ public class WorkspacesControllerTest {
     DbUser writerUser = createAndSaveUser("writerfriend@gmail.com", 124L);
     DbUser ownerUser = createAndSaveUser("ownerfriend@gmail.com", 125L);
     DbUser readerUser = createAndSaveUser("reader@gmail.com", 126L);
+    DbUser previousWriter = createAndSaveUser("revoke-writer@gmail.com", 126L);
 
-    stubFcGetWorkspaceACL();
+    stubFcGetWorkspaceACL(
+        createWorkspaceACL(
+            new JSONObject()
+                .put(
+                    currentUser.getUsername(),
+                    new JSONObject()
+                        .put("accessLevel", "OWNER")
+                        .put("canCompute", true)
+                        .put("canShare", true))
+                .put(
+                    previousWriter.getUsername(),
+                    new JSONObject()
+                        .put("accessLevel", "WRITER")
+                        .put("canCompute", true)
+                        .put("canShare", false))));
     DbCdrVersion controlledTierCdr =
         TestMockFactory.createControlledTierCdrVersion(cdrVersionDao, accessTierDao, 2);
     Workspace workspace =
@@ -2133,9 +2150,12 @@ public class WorkspacesControllerTest {
     verify(fireCloudService, never())
         .removeOwnerFromBillingProject(any(), any(), eq(Optional.empty()));
     verify(mockIamService)
-        .grantWorkflowRunnerRoleToUsers(
+        .grantWorkflowRunnerRoleForUsers(
             DEFAULT_GOOGLE_PROJECT,
             ImmutableList.of(writerUser.getUsername(), ownerUser.getUsername()));
+    verify(mockIamService)
+        .revokeWorkflowRunnerRoleForUsers(
+            DEFAULT_GOOGLE_PROJECT, ImmutableList.of(previousWriter.getUsername()));
   }
 
   @Test
@@ -2195,7 +2215,7 @@ public class WorkspacesControllerTest {
   @Test
   public void testShareWorkspaceNoRoleFailure() {
     DbUser writerUser = createAndSaveUser("writerfriend@gmail.com", 124L);
-
+    stubFcGetWorkspaceACL();
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
     ShareWorkspaceRequest shareWorkspaceRequest = new ShareWorkspaceRequest();
