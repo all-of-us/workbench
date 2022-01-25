@@ -73,8 +73,6 @@ module.exports = {
     '@typescript-eslint/unified-signatures': 'warn',
     // '@typescript-eslint/member-ordering': ['warn', { 'classExpressions': ['method', 'field'] }],
     // '@typescript-eslint/prefer-function-type': 'warn',
-    // semi: 'off', // Needed for the below rule
-    // '@typescript-eslint/semi': 'warn',
 
     'react/jsx-uses-vars': 'warn',
     'react-hooks/rules-of-hooks': 'warn',
