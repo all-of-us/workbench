@@ -82,6 +82,9 @@ module.exports = {
 
     /* Style */
 
+    // prettier is 'highly opinionated' and should always be the first rule in this section.
+    // please confirm that other style rules are compatible with prettier before adding them.
+
     'prettier/prettier': 'warn',
 
     'max-len': [
@@ -92,6 +95,7 @@ module.exports = {
         ignoreComments: true,
       },
     ],
+
     'no-trailing-spaces': 'warn',
 
     // temp disable others.  re-enable if desired after determining that they don't conflict with prettier.
