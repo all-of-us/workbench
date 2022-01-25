@@ -36,7 +36,7 @@ export default abstract class BaseModal extends Container {
 
   async getTextContent(): Promise<string[]> {
     // xpath that excludes button labels and spans
-    const selector = `${this.getXpath()}//div[normalize-space() and not(@role="button")]`;
+    const selector = `${this.getXpath()}//*[normalize-space(text()) and not(@role="button")]`;
     await this.page.waitForXPath(selector, { visible: true });
     const elements: ElementHandle[] = await this.page.$x(selector);
     return fp.flow(
@@ -95,7 +95,7 @@ export default abstract class BaseModal extends Container {
       );
       logger.info(`Modal "${await this.getTitle()}" is closed.`);
     } catch (err) {
-      logger.error(`WaitUntilClose failed for modal "${await this.getTitle()}". Xpath: "${this.getXpath()}"`);
+      logger.error(`FAIL: WaitUntilClose failed for modal "${await this.getTitle()}". Xpath: "${this.getXpath()}"`);
       logger.error(err.stack);
       throw new Error(err);
     }

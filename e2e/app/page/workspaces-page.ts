@@ -115,12 +115,12 @@ export default class WorkspacesPage extends AuthenticatedPage {
     const createButton = editPage.getCreateWorkspaceButton();
     await createButton.waitUntilEnabled();
     const modalContent = await editPage.clickCreateFinishButton(createButton);
+
+    await new WorkspaceDataPage(this.page).waitForLoad();
     logger.info(
       `Created workspace "${workspaceName}" with CDR Version "${cdrVersionName}"` +
         ` and Data Access Tier "${dataAccessTier}"`
     );
-
-    await new WorkspaceDataPage(this.page).waitForLoad();
     return modalContent;
   }
 
