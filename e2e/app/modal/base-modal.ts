@@ -30,6 +30,7 @@ export default abstract class BaseModal extends Container {
     const timeout = 30000;
     await this.waitUntilVisible(timeout);
     await this.isLoaded();
+    await this.getTitle();
     await waitWhileLoading(this.page);
     return this;
   }
@@ -80,9 +81,14 @@ export default abstract class BaseModal extends Container {
     try {
       await this.page.waitForFunction(
         (xpath) => {
-          const elem: any = document.evaluate(xpath, document.body, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null)
-            .singleNodeValue;
-          const isVisible = elem && (elem.offsetWidth > 0 || elem.offsetHeight > 0 || elem.getClientRects().length > 0);
+          const elem: HTMLElement = document.evaluate(
+            xpath,
+            document.body,
+            null,
+            XPathResult.FIRST_ORDERED_NODE_TYPE,
+            null
+          ).singleNodeValue as HTMLElement;
+          const isVisible = elem && (elem.offsetWidth > 0 || elem.offsetHeight > 0);
           return !isVisible;
         },
         { timeout },
@@ -90,7 +96,7 @@ export default abstract class BaseModal extends Container {
       );
       logger.info(`Modal "${await this.getTitle()}" is closed.`);
     } catch (err) {
-      logger.error(`WaitUntilClose failed for modal. Xpath: "${this.getXpath()}"`);
+      logger.error(`WaitUntilClose failed for modal "${await this.getTitle()}". Xpath: "${this.getXpath()}"`);
       logger.error(err.stack);
       throw new Error(err);
     }

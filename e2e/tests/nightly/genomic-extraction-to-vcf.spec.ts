@@ -137,7 +137,7 @@ describe('Genomics Extraction Test', () => {
 
     await exportToNotebookModal.enterNotebookName(notebookName);
     await exportToNotebookModal.pickLanguage(Language.Python);
-    exportToNotebookModal.pickAnalysisTool(AnalysisTool.Hail);
+    await exportToNotebookModal.pickAnalysisTool(AnalysisTool.Hail);
     const notebookPreviewPage = await exportToNotebookModal.clickExportButton();
 
     // Check Genomic Extraction History.
