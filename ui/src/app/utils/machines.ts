@@ -1,6 +1,7 @@
 import * as fp from 'lodash/fp';
 import { DEFAULT, switchCase } from './index';
 import { formatUsd } from './numbers';
+import { RuntimeConfig } from './runtime-utils';
 
 // Copied from https://github.com/DataBiosphere/terra-ui/blob/219b063b07d56499ccc38013fd88f4f0b88f8cd6/src/data/machines.js
 
@@ -375,6 +376,11 @@ export const validLeoDataprocWorkerMachineTypes = validPricedTypes.filter(
 export const findMachineByName = (machineToFind: string) =>
   fp.find(({ name }) => name === machineToFind, allMachineTypes);
 
+export const DEFAULT_MACHINE_NAME = 'n1-standard-4';
+export const DEFAULT_MACHINE_TYPE: Machine =
+  findMachineByName(DEFAULT_MACHINE_NAME);
+export const DEFAULT_DISK_SIZE = 100;
+
 export const diskPrice = 0.04 / 730; // per GB hour, from https://cloud.google.com/compute/pricing
 export const diskPricePerMonth = 0.04; // per GB month
 export const dataprocCpuPrice = 0.01; // dataproc costs $0.01 per cpu per hour
@@ -401,13 +407,13 @@ const dataprocSurcharge = ({
 // https://github.com/DataBiosphere/terra-ui/blob/cf5ec4408db3bd1fcdbcc5302da62d42e4d03ca3/src/components/ClusterManager.js#L85
 
 export const machineStorageCost = ({
-  masterDiskSize,
-  numberOfPreemptibleWorkers,
-  numberOfWorkers,
-  workerDiskSize,
-}) => {
+  diskSize,
+  dataprocConfig,
+}: RuntimeConfig) => {
+  const { numberOfWorkers, numberOfPreemptibleWorkers, workerDiskSize } =
+    dataprocConfig ?? {};
   return fp.sum([
-    masterDiskSize * diskPrice,
+    diskSize * diskPrice,
     numberOfWorkers ? numberOfWorkers * workerDiskSize * diskPrice : 0,
     numberOfPreemptibleWorkers
       ? numberOfPreemptibleWorkers * workerDiskSize * diskPrice
@@ -416,14 +422,14 @@ export const machineStorageCost = ({
 };
 
 export const machineStorageCostBreakdown = ({
-  masterDiskSize,
-  numberOfPreemptibleWorkers,
-  numberOfWorkers,
-  workerDiskSize,
-}) => {
+  diskSize,
+  dataprocConfig,
+}: RuntimeConfig) => {
+  const { numberOfWorkers, numberOfPreemptibleWorkers, workerDiskSize } =
+    dataprocConfig ?? {};
   const costs = [];
   if (workerDiskSize) {
-    costs.push(`${formatUsd(masterDiskSize * diskPrice)}/hr Master Disk`);
+    costs.push(`${formatUsd(diskSize * diskPrice)}/hr Master Disk`);
     if (numberOfWorkers) {
       costs.push(
         `${formatUsd(
@@ -439,29 +445,27 @@ export const machineStorageCostBreakdown = ({
       );
     }
   } else {
-    costs.push(`${formatUsd(masterDiskSize * diskPrice)}/hr Disk`);
+    costs.push(`${formatUsd(diskSize * diskPrice)}/hr Disk`);
   }
   return costs;
 };
 
-export const machineRunningCost = ({
-  computeType,
-  masterDiskSize,
-  masterMachine,
-  gpu,
-  numberOfWorkers = 0,
-  numberOfPreemptibleWorkers = 0,
-  workerDiskSize,
-  workerMachine,
-}) => {
+export const machineRunningCost = (runtimeConfig: RuntimeConfig) => {
+  const { computeType, machine, gpuConfig } = runtimeConfig;
+  const { workerMachineType, numberOfWorkers, numberOfPreemptibleWorkers } =
+    runtimeConfig.dataprocConfig ?? {};
+
+  const workerMachine =
+    workerMachineType && findMachineByName(workerMachineType);
+  const gpu = gpuConfig && findGpu(gpuConfig.gpuType, gpuConfig.numOfGpus);
   const dataprocPrice =
     computeType === ComputeType.Dataproc
       ? fp.sum([
           dataprocSurcharge({
-            masterMachine: masterMachine,
-            numberOfWorkers: numberOfWorkers,
-            numberOfPreemptibleWorkers: numberOfPreemptibleWorkers,
-            workerMachine: workerMachine,
+            masterMachine: machine,
+            numberOfWorkers,
+            numberOfPreemptibleWorkers,
+            workerMachine,
           }),
           workerMachine
             ? fp.sum([
@@ -473,31 +477,24 @@ export const machineRunningCost = ({
       : 0;
   return fp.sum([
     dataprocPrice,
-    masterMachine.price,
+    machine.price,
     gpu ? gpu.price : 0,
-    machineStorageCost({
-      masterDiskSize: masterDiskSize,
-      numberOfPreemptibleWorkers: numberOfPreemptibleWorkers,
-      numberOfWorkers: numberOfWorkers,
-      workerDiskSize: workerDiskSize,
-    }),
+    machineStorageCost(runtimeConfig),
   ]);
 };
 
-export const machineRunningCostBreakdown = ({
-  computeType,
-  masterDiskSize,
-  masterMachine,
-  gpu,
-  numberOfWorkers = 0,
-  numberOfPreemptibleWorkers = 0,
-  workerDiskSize,
-  workerMachine,
-}) => {
+export const machineRunningCostBreakdown = (runtimeConfig: RuntimeConfig) => {
+  const { computeType, machine, gpuConfig } = runtimeConfig;
+  const { workerMachineType, numberOfWorkers, numberOfPreemptibleWorkers } =
+    runtimeConfig.dataprocConfig ?? {};
+
+  const workerMachine =
+    workerMachineType && findMachineByName(workerMachineType);
+  const gpu = gpuConfig && findGpu(gpuConfig.gpuType, gpuConfig.numOfGpus);
   const costs = [];
   if (computeType === ComputeType.Dataproc) {
     if (workerMachine) {
-      costs.push(`${formatUsd(masterMachine.price)}/hr Master VM`);
+      costs.push(`${formatUsd(machine.price)}/hr Master VM`);
       if (numberOfWorkers > 0) {
         costs.push(
           `${formatUsd(
@@ -514,7 +511,7 @@ export const machineRunningCostBreakdown = ({
       }
     }
     const dataprocSurchargeAmount = dataprocSurcharge({
-      masterMachine: masterMachine,
+      masterMachine: machine,
       numberOfWorkers: numberOfWorkers,
       numberOfPreemptibleWorkers: numberOfPreemptibleWorkers,
       workerMachine: workerMachine,
@@ -523,18 +520,11 @@ export const machineRunningCostBreakdown = ({
       `${formatUsd(dataprocSurchargeAmount)}/hr Dataproc Per-CPU Surcharge`
     );
   } else {
-    costs.push(`${formatUsd(masterMachine.price)}/hr VM`);
+    costs.push(`${formatUsd(machine.price)}/hr VM`);
     if (gpu) {
       costs.push(`${formatUsd(gpu.price)}/hr GPU`);
     }
   }
-  costs.push(
-    ...machineStorageCostBreakdown({
-      masterDiskSize: masterDiskSize,
-      numberOfPreemptibleWorkers: numberOfPreemptibleWorkers,
-      numberOfWorkers: numberOfWorkers,
-      workerDiskSize: workerDiskSize,
-    })
-  );
+  costs.push(...machineStorageCostBreakdown(runtimeConfig));
   return costs;
 };
