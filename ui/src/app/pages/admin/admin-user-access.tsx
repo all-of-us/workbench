@@ -20,11 +20,18 @@ import { reactStyles } from 'app/utils';
 export const AdminUserAccess = () => {
   const styles = reactStyles({
     accessContainer: {
-      width: '31rem',
-      height: '20rem',
+      width: '20rem',
+      height: '15rem',
       borderRadius: '0.31rem',
       backgroundColor: 'rgba(33,111,180,0.1)',
+      marginLeft: '0.2rem',
+      marginTop: '1rem',
       marginBottom: '1rem',
+    },
+    textArea: {
+      width: '8rem',
+      height: '8rem',
+      borderRadius: '0.31rem',
     },
   });
 
@@ -54,6 +61,7 @@ export const AdminUserAccess = () => {
     <TooltipTrigger
       content={`List of user emails, split by comma or newline.`}>
       <TextArea
+        style={styles.textArea}
         value={userEmails?.join(',\n')}
         data-test-id='user-access-email-list'
         onChange={v => parseUserEmailInput(v)}
@@ -65,6 +73,7 @@ export const AdminUserAccess = () => {
           <TooltipTrigger
             content={`List of user emails, split by comma or newline.`}>
             <TextArea
+              style={styles.textArea}
               value={cloudTaskNames?.join(',\n')}
               data-test-id='user-access-cloud-task'
               onChange={v => parseUserEmailInput(v)}
@@ -76,6 +85,7 @@ export const AdminUserAccess = () => {
         <Button
           onClick={sendBatchUpdateRequest}
           type='primary'
+          style={{marginTop: '10px', marginLeft: '20px', fontWeight: 400, height: '38px', width: '150px'}}
         >
           Sync Access
         </Button>
