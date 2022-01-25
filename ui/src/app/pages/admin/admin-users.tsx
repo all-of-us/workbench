@@ -403,7 +403,7 @@ export const AdminUsers = withUserProfile()(
               </DataTable>
             </div>
           )}
-          <AdminUserAccess/>
+          <AdminUserAccess />
         </div>
       );
     }

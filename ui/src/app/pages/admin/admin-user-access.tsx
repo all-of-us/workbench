@@ -29,7 +29,7 @@ export const AdminUserAccess = () => {
     },
   });
 
-  const [requestSending, setRequestSending] = useState<boolean>(false);
+  const [sendingRequest, setSendingRequest] = useState<boolean>(false);
   const [userEmails, setUserEmails] = useState<Array<string>>(String['']);
   const [cloudTaskNameList, setcloudTaskNameList] = useState<Array<string>>(
     String['']
@@ -44,12 +44,12 @@ export const AdminUserAccess = () => {
       message: 'An error occurred. Please try again.',
     })
   )(async () => {
-    setRequestSending(true);
+    setSendingRequest(true);
     const { cloudTaskNames } = await userAdminApi().batchSyncAccess({
       usernames: userEmails,
     });
     setcloudTaskNameList(cloudTaskNames);
-    setRequestSending(false);
+    setSendingRequest(false);
   });
 
   return (
@@ -92,12 +92,12 @@ export const AdminUserAccess = () => {
             height: '38px',
             width: '150px',
           }}
-          enabled={!requestSending}
+          enabled={!sendingRequest}
         >
           Sync Access
         </Button>
       </FlexRow>
-      {requestSending && <SpinnerOverlay />}
+      {sendingRequest && <SpinnerOverlay />}
     </FlexColumn>
   );
 };
