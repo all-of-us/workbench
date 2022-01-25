@@ -9,7 +9,7 @@ module.exports = {
     'react',
     'react-hooks',
   ],
-  extends: [],
+  extends: ['prettier'],
   parserOptions: {
     ecmaVersion: 6,
     sourceType: 'module',
