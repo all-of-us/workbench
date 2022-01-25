@@ -112,6 +112,11 @@ public class UserAdminController implements UserAdminApiDelegate {
   @Override
   @AuthorityRequired({Authority.ACCESS_CONTROL_ADMIN})
   public ResponseEntity<BatchSyncAccessResponse> batchSyncAccess(BatchSyncAccessRequest request) {
+    System.out.println("~~~~~~batchSyncAccessbatchSyncAccessbatchSyncAccess");
+    System.out.println("~~~~~~batchSyncAccessbatchSyncAccessbatchSyncAccess");
+    System.out.println("~~~~~~batchSyncAccessbatchSyncAccessbatchSyncAccess");
+    System.out.println(request.getUsernames());
+    System.out.println(userService);
     return ResponseEntity.ok(
         new BatchSyncAccessResponse()
             .cloudTaskNames(

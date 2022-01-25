@@ -11,9 +11,9 @@ import colors from 'app/styles/colors';
 import { serverConfigStore } from 'app/utils/stores';
 import { AccessModule, AdminTableUser } from 'generated/fetch';
 import { TextArea, TextInputWithLabel } from 'app/components/inputs';
-import {ReactFragment, useState} from 'react';
+import { ReactFragment, useState } from 'react';
 import { withErrorModal } from 'app/components/modals';
-import {TooltipTrigger} from 'app/components/popups';
+import { TooltipTrigger } from 'app/components/popups';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { reactStyles } from 'app/utils';
 
@@ -35,60 +35,75 @@ export const AdminUserAccess = () => {
     },
   });
 
+  const [requestSending, setRequestSending] = useState<boolean>(false);
   const [userEmails, setUserEmails] = useState<Array<string>>(String['']);
-  const [cloudTaskNames, setcloudTaskNames] = useState<Array<string>>(String['']);
+  const [cloudTaskNames, setcloudTaskNames] = useState<Array<string>>(
+    String['']
+  );
 
-  const parseUserEmailInput = (input : string) => {
-    setUserEmails(input.split(/[,\n]+/).map(email => email.trim()));
-  }
+  const parseUserEmailInput = (input: string) => {
+    setUserEmails(input.split(/[,\n]+/).map((email) => email.trim()));
+  };
   const sendBatchUpdateRequest = fp.flow(
     withErrorModal({
       title: 'Failed To send batch sync user access request',
       message: 'An error occurred. Please try again.',
     })
   )(async () => {
-    const {cloudTaskNames} = await userAdminApi().batchSyncAccess({
+    setRequestSending(true);
+    const { cloudTaskNames } = await userAdminApi().batchSyncAccess({
       usernames: userEmails,
     });
-    setcloudTaskNames(cloudTaskNames)
+    setcloudTaskNames(cloudTaskNames);
+    setRequestSending(false);
   });
 
   return (
     <FlexColumn style={styles.accessContainer}>
       <h3>Sync User Access</h3>
-    <FlexRow style={{ gap: '0.5rem' }}>
-      <FlexColumn>
-    <h3>User emails</h3>
-    <TooltipTrigger
-      content={`List of user emails, split by newline.`}>
-      <TextArea
-        style={styles.textArea}
-        value={userEmails?.join(',\n')}
-        data-test-id='user-access-email-list'
-        onChange={v => parseUserEmailInput(v)}
-      />
-    </TooltipTrigger>
-        </FlexColumn>
-      <FlexColumn>
-          <h3>Cloud task ids</h3>
+      <FlexRow style={{ gap: '0.5rem' }}>
+        <FlexColumn>
+          <h3>User emails</h3>
+          <TooltipTrigger
+            content={`List of user emails, split by newline.`}
+            side='left'
+          >
             <TextArea
               style={styles.textArea}
-              value={cloudTaskNames?.join(',\n')}
-              data-test-id='user-access-cloud-task'
-              onChange={null}
-              disabled='true'
+              value={userEmails?.join(',\n')}
+              data-test-id='user-access-email-list'
+              onChange={(v) => parseUserEmailInput(v)}
             />
-      </FlexColumn>
-    </FlexRow>
+          </TooltipTrigger>
+        </FlexColumn>
+        <FlexColumn>
+          <h3>Cloud task ids</h3>
+          <TextArea
+            style={styles.textArea}
+            value={cloudTaskNames?.join(',\n')}
+            data-test-id='user-access-cloud-task'
+            onChange={null}
+            disabled='true'
+          />
+        </FlexColumn>
+      </FlexRow>
       <FlexRow>
         <Button
           onClick={sendBatchUpdateRequest}
           type='primary'
-          style={{marginTop: '10px', marginLeft: '20px', fontWeight: 400, height: '38px', width: '150px'}}
+          style={{
+            marginTop: '10px',
+            marginLeft: '20px',
+            fontWeight: 400,
+            height: '38px',
+            width: '150px',
+          }}
+          enabled={!requestSending}
         >
           Sync Access
         </Button>
       </FlexRow>
+      {requestSending && <SpinnerOverlay />}
     </FlexColumn>
   );
-}
+};
