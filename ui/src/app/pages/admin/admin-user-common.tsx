@@ -156,6 +156,12 @@ export const isBypassed = (
 ): boolean =>
   !!getAccessModuleStatusByName(profile, moduleName)?.bypassEpochMillis;
 
+// Some modules may never expire (eg GOOGLE TWO STEP NOTIFICATION, ERA COMMONS etc),
+// in such cases set the expiry date as NEVER
+// For other modules display the expiry date if known, else display '-' (say in case of bypass)
+const getNullStringForExpirationDate = (moduleName: AccessModule): string =>
+  getAccessModuleConfig(moduleName).canExpire ? '-' : 'Never';
+
 export const displayModuleCompletionDate = (
   profile: Profile,
   moduleName: AccessModule
@@ -171,7 +177,7 @@ export const displayModuleExpirationDate = (
 ): string =>
   formatDate(
     getAccessModuleStatusByName(profile, moduleName)?.expirationEpochMillis,
-    '-'
+    getNullStringForExpirationDate(moduleName)
   );
 
 // would this AccessBypassRequest actually change the profile state?

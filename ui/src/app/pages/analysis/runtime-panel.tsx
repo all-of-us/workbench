@@ -116,7 +116,13 @@ const styles = reactStyles({
     color: colors.primary,
     fontSize: '14px',
   },
-  formGrid: {
+  formGrid2: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(2, 1fr)',
+    gridGap: '1rem',
+    alignItems: 'center',
+  },
+  formGrid3: {
     display: 'grid',
     gridTemplateColumns: 'repeat(3, 1fr)',
     gridGap: '1rem',
@@ -174,6 +180,18 @@ const styles = reactStyles({
   confirmWarningText: {
     color: colors.primary,
     margin: 0,
+  },
+  gpuCheckBox: {
+    marginRight: '10px',
+  },
+  gpuCheckBoxRow: {
+    alignItems: 'center',
+    gap: '10px',
+  },
+  gpuSection: {
+    justifyContent: 'space-between',
+    gap: '10px',
+    marginTop: '1rem',
   },
   sparkConsoleHeader: {
     color: '#333F52',
@@ -799,7 +817,7 @@ const GpuConfigSelector = ({
   const { gpuType = 'nvidia-tesla-t4', numOfGpus = 1 } = gpuConfig || {};
   const [selectedGpuType, setSelectedGpuType] = useState<string>(gpuType);
   const [selectedNumOfGpus, setSelectedNumOfGpus] = useState<number>(numOfGpus);
-  const [enableGpu, setEnableGpu] = useState<boolean>(!!gpuConfig);
+  const [hasGpu, setHasGpu] = useState<boolean>(!!gpuConfig);
   const validGpuOptions = getValidGpuTypes(
     selectedMachine.cpu,
     selectedMachine.memory
@@ -816,32 +834,36 @@ const GpuConfigSelector = ({
 
   useEffect(() => {
     onChange(
-      enableGpu && validGpuOptions.length > 0
+      hasGpu && validGpuOptions.length > 0
         ? {
             gpuType: selectedGpuType,
             numOfGpus: selectedNumOfGpus,
           }
         : null
     );
-  }, [enableGpu, selectedGpuType, selectedNumOfGpus]);
+  }, [hasGpu, selectedGpuType, selectedNumOfGpus]);
 
   return (
-    <FlexColumn style={{ marginTop: '1rem', justifyContent: 'space-between' }}>
-      <FlexRow>
+    <FlexColumn style={styles.gpuSection}>
+      <FlexRow style={styles.gpuCheckBoxRow}>
         <CheckBox
           id={'enable-gpu'}
           label='Enable GPUs'
-          checked={enableGpu}
+          checked={hasGpu}
+          style={styles.gpuCheckBox}
           onChange={() => {
-            setEnableGpu(!enableGpu);
+            setHasGpu(!hasGpu);
           }}
         />
-        <a href='https://support.terra.bio/hc/en-us/articles/4403006001947'>
+        <a
+          target='_blank'
+          href='https://support.terra.bio/hc/en-us/articles/4403006001947'
+        >
           Learn more about GPU cost and restrictions.
         </a>
       </FlexRow>
-      {enableGpu && (
-        <FlexRow style={styles.formGrid}>
+      {hasGpu && (
+        <FlexRow style={styles.formGrid2}>
           <FlexRow style={styles.labelAndInput}>
             <label
               style={{ ...styles.label, minWidth: '3.0rem' }}
@@ -975,7 +997,7 @@ const DataProcConfigSelector = ({
   return (
     <fieldset style={{ marginTop: '0.75rem' }}>
       <legend style={styles.workerConfigLabel}>Worker Configuration</legend>
-      <div style={styles.formGrid}>
+      <div style={styles.formGrid3}>
         <FlexRow style={styles.labelAndInput}>
           <label style={styles.label} htmlFor='num-workers'>
             Workers
@@ -1532,7 +1554,7 @@ const RuntimePanel = fp.flow(
     const pdSize = pdExists ? persistentDisk.size : defaultDiskSize;
     const initialAutopauseThreshold =
       existingRuntime.autopauseThreshold || DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES;
-    const gpuConfig = gceConfig?.gpuConfig ? gceConfig.gpuConfig : null;
+    const gpuConfig = gceConfig?.gpuConfig ?? null;
     const enableGpu = serverConfigStore.get().config.enableGpu;
 
     const initialPanelContent = fp.cond([
@@ -2078,7 +2100,7 @@ const RuntimePanel = fp.flow(
                   <h3 style={{ ...styles.sectionHeader, ...styles.bold }}>
                     Cloud compute profile
                   </h3>
-                  <div style={styles.formGrid}>
+                  <div style={styles.formGrid3}>
                     <MachineSelector
                       idPrefix='runtime'
                       disabled={disableControls}
@@ -2100,18 +2122,16 @@ const RuntimePanel = fp.flow(
                       />
                     )}
                   </div>
-                  <FlexRow style={{ justifyContent: 'space-between' }}>
-                    {enableGpu && selectedCompute === ComputeType.Standard && (
-                      <GpuConfigSelector
-                        disabled={disableControls}
-                        onChange={(config) => {
-                          setSelectedGpuConfig(config);
-                        }}
-                        selectedMachine={selectedMachine}
-                        gpuConfig={selectedGpuConfig}
-                      />
-                    )}
-                  </FlexRow>
+                  {enableGpu && selectedCompute === ComputeType.Standard && (
+                    <GpuConfigSelector
+                      disabled={disableControls}
+                      onChange={(config) => {
+                        setSelectedGpuConfig(config);
+                      }}
+                      selectedMachine={selectedMachine}
+                      gpuConfig={selectedGpuConfig}
+                    />
+                  )}
                   <FlexRow
                     style={{
                       marginTop: '1rem',

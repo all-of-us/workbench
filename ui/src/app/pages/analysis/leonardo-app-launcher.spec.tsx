@@ -451,6 +451,18 @@ describe('TerminalLauncher', () => {
     return t;
   };
 
+  async function updateRuntime(updateFn: (r: Runtime) => Runtime) {
+    await act(() => {
+      runtimeStub.runtime = updateFn(runtimeStub.runtime);
+      runtimeStore.set({
+        workspaceNamespace: workspace.namespace,
+        runtime: runtimeStub.runtime,
+        runtimeLoaded: true,
+      });
+      return Promise.resolve();
+    });
+  }
+
   beforeEach(() => {
     runtimeStub = new RuntimeApiStub();
     runtimeStub.runtime.status = RuntimeStatus.Creating;
@@ -501,6 +513,38 @@ describe('TerminalLauncher', () => {
     expect(currentCardText(wrapper)).toContain(
       genericProgressStrings.get(Progress.Redirecting)
     );
+  });
+
+  it('should navigate away after runtime transitions to deleting', async () => {
+    history.push(terminalInitialUrl);
+    runtimeStub.runtime.status = RuntimeStatus.Running;
+
+    const wrapper = await terminalComponent();
+    await waitForFakeTimersAndUpdate(wrapper);
+
+    // Wait for the "redirecting" timer to elapse, rendering the iframe.
+    act(() => {
+      jest.advanceTimersByTime(2000);
+    });
+
+    await waitForFakeTimersAndUpdate(wrapper);
+
+    expect(wrapper.find(Iframe).exists()).toBeTruthy();
+    expect(mockNavigate).not.toHaveBeenCalled();
+
+    // Simulate transition to deleting - should navigate away.
+    await updateRuntime((runtime) => ({
+      ...runtime,
+      status: RuntimeStatus.Deleting,
+    }));
+    await waitForFakeTimersAndUpdate(wrapper);
+
+    expect(mockNavigate).toHaveBeenCalledWith([
+      'workspaces',
+      'defaultNamespace',
+      '1',
+      'notebooks',
+    ]);
   });
 });
 
