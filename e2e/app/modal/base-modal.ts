@@ -78,7 +78,7 @@ export default abstract class BaseModal extends Container {
   // Override waitUntilClose in parent class Container.
   async waitUntilClose(timeout = 2 * 60 * 1000): Promise<void> {
     try {
-      await page.waitForFunction(
+      await this.page.waitForFunction(
         (xpath) => {
           const elem: any = document.evaluate(xpath, document.body, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null)
             .singleNodeValue;
