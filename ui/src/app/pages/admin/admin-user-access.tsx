@@ -20,7 +20,7 @@ import { reactStyles } from 'app/utils';
 export const AdminUserAccess = () => {
   const styles = reactStyles({
     accessContainer: {
-      width: '20rem',
+      width: '25rem',
       height: '15rem',
       borderRadius: '0.31rem',
       backgroundColor: 'rgba(33,111,180,0.1)',
@@ -29,7 +29,7 @@ export const AdminUserAccess = () => {
       marginBottom: '1rem',
     },
     textArea: {
-      width: '8rem',
+      width: '12rem',
       height: '8rem',
       borderRadius: '0.31rem',
     },
@@ -39,7 +39,7 @@ export const AdminUserAccess = () => {
   const [cloudTaskNames, setcloudTaskNames] = useState<Array<string>>(String['']);
 
   const parseUserEmailInput = (input : string) => {
-
+    setUserEmails(input.split(/[,\n]+/).map(email => email.trim()));
   }
   const sendBatchUpdateRequest = fp.flow(
     withErrorModal({
@@ -47,9 +47,10 @@ export const AdminUserAccess = () => {
       message: 'An error occurred. Please try again.',
     })
   )(async () => {
-    await userAdminApi().batchSyncAccess({
+    const {cloudTaskNames} = await userAdminApi().batchSyncAccess({
       usernames: userEmails,
     });
+    setcloudTaskNames(cloudTaskNames)
   });
 
   return (
@@ -59,7 +60,7 @@ export const AdminUserAccess = () => {
       <FlexColumn>
     <h3>User emails</h3>
     <TooltipTrigger
-      content={`List of user emails, split by comma or newline.`}>
+      content={`List of user emails, split by newline.`}>
       <TextArea
         style={styles.textArea}
         value={userEmails?.join(',\n')}
@@ -70,15 +71,13 @@ export const AdminUserAccess = () => {
         </FlexColumn>
       <FlexColumn>
           <h3>Cloud task ids</h3>
-          <TooltipTrigger
-            content={`List of user emails, split by comma or newline.`}>
             <TextArea
               style={styles.textArea}
               value={cloudTaskNames?.join(',\n')}
               data-test-id='user-access-cloud-task'
-              onChange={v => parseUserEmailInput(v)}
+              onChange={null}
+              disabled='true'
             />
-          </TooltipTrigger>
       </FlexColumn>
     </FlexRow>
       <FlexRow>
