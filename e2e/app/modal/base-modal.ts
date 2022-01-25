@@ -27,8 +27,7 @@ export default abstract class BaseModal extends Container {
   abstract isLoaded(): Promise<boolean>;
 
   async waitForLoad(): Promise<this> {
-    const timeout = 30000;
-    await this.waitUntilVisible(timeout);
+    await this.waitUntilVisible();
     await this.isLoaded();
     await this.getTitle();
     await waitWhileLoading(this.page);
