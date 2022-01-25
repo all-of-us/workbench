@@ -59,13 +59,13 @@ public class CriteriaMenuDaoTest {
 
   @Test
   public void findByParentIdOrderBySortOrderAscParent() {
-    assertThat(criteriaMenuDao.findByParentIdOrderBySortOrderAsc(0L))
-        .isEqualTo(ImmutableList.of(dbCriteriaMenuParent1, dbCriteriaMenuParent));
+    assertThat(criteriaMenuDao.findByParentIdOrderByIdAscSortOrderAsc(0L))
+        .isEqualTo(ImmutableList.of(dbCriteriaMenuParent, dbCriteriaMenuParent1));
   }
 
   @Test
   public void findByParentIdOrderBySortOrderAscChild() {
-    assertThat(criteriaMenuDao.findByParentIdOrderBySortOrderAsc(1L))
+    assertThat(criteriaMenuDao.findByParentIdOrderByIdAscSortOrderAsc(1L))
         .isEqualTo(ImmutableList.of(dbCriteriaMenuChild));
   }
 }

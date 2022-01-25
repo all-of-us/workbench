@@ -15,7 +15,8 @@ describe('Create Dataset', () => {
   const workspace = makeWorkspaceName();
   let datasetName;
 
-  test('Create dataset with all available inputs', async () => {
+  // TODO temporarily disabled, filed RW-7754 to investigate and re-enable
+  xtest('Create dataset with all available inputs', async () => {
     await signInWithAccessToken(page);
     await findOrCreateWorkspace(page, { workspaceName: workspace });
 

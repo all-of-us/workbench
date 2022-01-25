@@ -29,7 +29,8 @@ describe('Export Notebook Test', () => {
    * - Export dataset to a notebook. Run the notebook code and verify run results.
    * (Cohort and Dataset are saved and reused)
    */
-  test.each(KernelLanguages)('Export to %s kernel notebook', async (kernelLanguage) => {
+  // TODO temporarily disabled, filed RW-7754 to investigate and re-enable
+  xtest.each(KernelLanguages)('Export to %s kernel notebook', async (kernelLanguage) => {
     await findOrCreateWorkspace(page, { workspaceName: workspaceName });
     await findOrCreateCohort(page, cohortName);
     const datasetBuildPage = await findOrCreateDataset(page, datasetName);

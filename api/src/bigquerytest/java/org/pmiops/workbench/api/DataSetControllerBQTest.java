@@ -1,7 +1,6 @@
 package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.Assert.fail;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
@@ -16,16 +15,19 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.billing.FreeTierBillingService;
+import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.dao.DSDataDictionaryDao;
@@ -64,10 +66,14 @@ import org.pmiops.workbench.model.ArchivalStatus;
 import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.DataSetExportRequest;
+import org.pmiops.workbench.model.DataSetPreviewRequest;
+import org.pmiops.workbench.model.DataSetPreviewResponse;
+import org.pmiops.workbench.model.DataSetPreviewValueList;
 import org.pmiops.workbench.model.DataSetRequest;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainValue;
 import org.pmiops.workbench.model.DomainValuePair;
+import org.pmiops.workbench.model.DomainWithDomainValues;
 import org.pmiops.workbench.model.KernelTypeEnum;
 import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
@@ -133,8 +139,12 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   private DbCdrVersion dbCdrVersion;
   private DbCohort dbCohort1;
   private DbCohort dbCohort2;
+  private DbCohort dbCohort3;
   private DbConceptSet dbConditionConceptSet;
+  private DbConceptSet dbConditionConceptSetForValues;
+  private DbConceptSet dbConditionConceptSetForValues2;
   private DbConceptSet dbProcedureConceptSet;
+  private DbConceptSet dbMeasurementConceptSet;
   private DbWorkspace dbWorkspace;
   private DbDSLinking conditionLinking1;
   private DbDSLinking conditionLinking2;
@@ -205,7 +215,9 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
         "ds_activity_summary",
         "ds_heart_rate_minute_level",
         "ds_heart_rate_summary",
-        "ds_steps_intraday");
+        "ds_steps_intraday",
+        "ds_condition_occurrence",
+        "ds_measurement");
   }
 
   @Override
@@ -256,6 +268,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
     dbCdrVersion.setBigqueryProject(testWorkbenchConfig.bigquery.projectId);
     dbCdrVersion.setArchivalStatus(DbStorageEnums.archivalStatusToStorage(ArchivalStatus.LIVE));
     dbCdrVersion = cdrVersionDao.save(dbCdrVersion);
+    CdrVersionContext.setCdrVersionNoCheckAuthDomain(dbCdrVersion);
 
     dbWorkspace = new DbWorkspace();
     dbWorkspace.setWorkspaceNamespace(WORKSPACE_NAMESPACE);
@@ -264,14 +277,29 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
     dbWorkspace = workspaceDao.save(dbWorkspace);
 
     dbConditionConceptSet =
-        conceptSetDao.save(createConceptSet(Domain.CONDITION, dbWorkspace.getWorkspaceId()));
+        conceptSetDao.save(
+            createConceptSet(Domain.CONDITION, dbWorkspace.getWorkspaceId(), 1L, Boolean.FALSE));
+    dbConditionConceptSetForValues =
+        conceptSetDao.save(
+            createConceptSet(
+                Domain.CONDITION, dbWorkspace.getWorkspaceId(), 44823922L, Boolean.FALSE));
+    dbConditionConceptSetForValues2 =
+        conceptSetDao.save(
+            createConceptSet(Domain.CONDITION, dbWorkspace.getWorkspaceId(), 6L, Boolean.FALSE));
     dbProcedureConceptSet =
-        conceptSetDao.save(createConceptSet(Domain.PROCEDURE, dbWorkspace.getWorkspaceId()));
+        conceptSetDao.save(
+            createConceptSet(Domain.PROCEDURE, dbWorkspace.getWorkspaceId(), 1L, Boolean.FALSE));
+    dbMeasurementConceptSet =
+        conceptSetDao.save(
+            createConceptSet(Domain.MEASUREMENT, dbWorkspace.getWorkspaceId(), 3L, Boolean.TRUE));
     when(conceptSetService.findByWorkspaceId(dbWorkspace.getWorkspaceId()))
         .thenReturn(
             ImmutableList.of(
                 new ConceptSet().id(dbConditionConceptSet.getConceptSetId()),
-                new ConceptSet().id(dbProcedureConceptSet.getConceptSetId())));
+                new ConceptSet().id(dbConditionConceptSetForValues.getConceptSetId()),
+                new ConceptSet().id(dbConditionConceptSetForValues2.getConceptSetId()),
+                new ConceptSet().id(dbProcedureConceptSet.getConceptSetId()),
+                new ConceptSet().id(dbMeasurementConceptSet.getConceptSetId())));
 
     dbCohort1 = new DbCohort();
     dbCohort1.setWorkspaceId(dbWorkspace.getWorkspaceId());
@@ -283,11 +311,17 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
     dbCohort2.setCriteria(new Gson().toJson(SearchRequests.icd9Codes()));
     dbCohort2 = cohortDao.save(dbCohort2);
 
+    dbCohort3 = new DbCohort();
+    dbCohort3.setWorkspaceId(dbWorkspace.getWorkspaceId());
+    dbCohort3.setCriteria(new Gson().toJson(SearchRequests.conditionPreviewCodes()));
+    dbCohort3 = cohortDao.save(dbCohort3);
+
     when(cohortService.findByWorkspaceId(dbWorkspace.getWorkspaceId()))
         .thenReturn(
             ImmutableList.of(
                 new Cohort().id(dbCohort1.getCohortId()),
-                new Cohort().id(dbCohort2.getCohortId())));
+                new Cohort().id(dbCohort2.getCohortId()),
+                new Cohort().id(dbCohort3.getCohortId())));
 
     conditionLinking1 =
         DbDSLinking.builder()
@@ -358,11 +392,12 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
     dsLinkingDao.save(procedureLinking2);
   }
 
-  private DbConceptSet createConceptSet(Domain domain, long workspaceId) {
+  private DbConceptSet createConceptSet(
+      Domain domain, long workspaceId, long conceptId, Boolean isStandard) {
     DbConceptSet dbConceptSet = new DbConceptSet();
     dbConceptSet.setDomain(DbStorageEnums.domainToStorage(domain));
     DbConceptSetConceptId dbConceptSetConceptId =
-        DbConceptSetConceptId.builder().addConceptId(1L).addStandard(false).build();
+        DbConceptSetConceptId.builder().addConceptId(conceptId).addStandard(isStandard).build();
     dbConceptSet.setConceptSetConceptIds(
         new HashSet<>(Collections.singletonList(dbConceptSetConceptId)));
     dbConceptSet.setWorkspaceId(workspaceId);
@@ -374,6 +409,8 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
     cohortDao.deleteById(dbCohort1.getCohortId());
     cohortDao.deleteById(dbCohort2.getCohortId());
     conceptSetDao.deleteById(dbConditionConceptSet.getConceptSetId());
+    conceptSetDao.deleteById(dbConditionConceptSetForValues.getConceptSetId());
+    conceptSetDao.deleteById(dbConditionConceptSetForValues2.getConceptSetId());
     conceptSetDao.deleteById(dbProcedureConceptSet.getConceptSetId());
     workspaceDao.deleteById(dbWorkspace.getWorkspaceId());
     cdrVersionDao.deleteById(dbCdrVersion.getCdrVersionId());
@@ -449,7 +486,8 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
               QueryJobConfiguration.newBuilder(query).setUseLegacySql(false).build());
       assertThat(result.getTotalRows()).isEqualTo(1L);
     } catch (Exception e) {
-      fail("Problem generating BigQuery query for notebooks: " + e.getCause().getMessage());
+      Assertions.fail(
+          "Problem generating BigQuery query for notebooks: " + e.getCause().getMessage());
     }
   }
 
@@ -591,83 +629,259 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void getValuesFromDomainActivitySummary() {
-    List<DomainValue> domainValues =
-        controller
-            .getValuesFromDomain(
-                WORKSPACE_NAMESPACE, WORKSPACE_NAME, Domain.FITBIT_ACTIVITY.toString())
-            .getBody()
+  public void getValuesFromDomainCondition() {
+    List<DomainWithDomainValues> domainWithDomainValues =
+        Objects.requireNonNull(
+                controller
+                    .getValuesFromDomain(
+                        WORKSPACE_NAMESPACE,
+                        WORKSPACE_NAME,
+                        Domain.CONDITION.toString(),
+                        dbConditionConceptSetForValues2.getConceptSetId())
+                    .getBody())
             .getItems();
     assertThat(
-            domainValues.containsAll(
+            domainWithDomainValues.containsAll(
                 ImmutableList.of(
-                    new DomainValue().value("date"),
-                    new DomainValue().value("activity_calories"),
-                    new DomainValue().value("calories_bmr"),
-                    new DomainValue().value("calories_out"),
-                    new DomainValue().value("elevation"),
-                    new DomainValue().value("fairly_active_minutes"),
-                    new DomainValue().value("floors"),
-                    new DomainValue().value("lightly_active_minutes"),
-                    new DomainValue().value("marginal_calories"),
-                    new DomainValue().value("sedentary_minutes"),
-                    new DomainValue().value("steps"),
-                    new DomainValue().value("very_active_minutes"),
-                    new DomainValue().value("person_id"))))
+                    new DomainWithDomainValues()
+                        .domain(Domain.CONDITION.toString())
+                        .items(
+                            ImmutableList.of(
+                                new DomainValue().value("person_id"),
+                                new DomainValue().value("condition_concept_id"),
+                                new DomainValue().value("standard_concept_name"),
+                                new DomainValue().value("standard_concept_code"),
+                                new DomainValue().value("standard_vocabulary"),
+                                new DomainValue().value("condition_start_datetime"),
+                                new DomainValue().value("condition_end_datetime"),
+                                new DomainValue().value("condition_type_concept_id"),
+                                new DomainValue().value("condition_type_concept_name"),
+                                new DomainValue().value("stop_reason"),
+                                new DomainValue().value("visit_occurrence_id"),
+                                new DomainValue().value("visit_occurrence_concept_name"),
+                                new DomainValue().value("condition_source_value"),
+                                new DomainValue().value("condition_source_concept_id"),
+                                new DomainValue().value("source_concept_name"),
+                                new DomainValue().value("source_concept_code"),
+                                new DomainValue().value("source_vocabulary"),
+                                new DomainValue().value("condition_status_source_value"),
+                                new DomainValue().value("condition_status_concept_id"),
+                                new DomainValue().value("condition_status_concept_name"))),
+                    new DomainWithDomainValues()
+                        .domain(Domain.MEASUREMENT.toString())
+                        .items(
+                            ImmutableList.of(
+                                new DomainValue().value("person_id"),
+                                new DomainValue().value("measurement_concept_id"),
+                                new DomainValue().value("standard_concept_name"),
+                                new DomainValue().value("standard_concept_code"),
+                                new DomainValue().value("standard_vocabulary"),
+                                new DomainValue().value("measurement_datetime"),
+                                new DomainValue().value("measurement_type_concept_id"),
+                                new DomainValue().value("measurement_type_concept_name"),
+                                new DomainValue().value("operator_concept_id"),
+                                new DomainValue().value("operator_concept_name"),
+                                new DomainValue().value("value_as_number"),
+                                new DomainValue().value("value_as_concept_id"),
+                                new DomainValue().value("value_as_concept_name"),
+                                new DomainValue().value("unit_concept_id"),
+                                new DomainValue().value("unit_concept_name"),
+                                new DomainValue().value("range_low"),
+                                new DomainValue().value("range_high"),
+                                new DomainValue().value("visit_occurrence_id"),
+                                new DomainValue().value("visit_occurrence_concept_name"),
+                                new DomainValue().value("measurement_source_value"),
+                                new DomainValue().value("measurement_source_concept_id"),
+                                new DomainValue().value("source_concept_name"),
+                                new DomainValue().value("source_concept_code"),
+                                new DomainValue().value("source_vocabulary"),
+                                new DomainValue().value("unit_source_value"),
+                                new DomainValue().value("value_source_value"))))))
+        .isEqualTo(true);
+  }
+
+  @Test
+  public void getValuesFromDomainActivitySummary() {
+    List<DomainWithDomainValues> domainWithDomainValues =
+        Objects.requireNonNull(
+                controller
+                    .getValuesFromDomain(
+                        WORKSPACE_NAMESPACE, WORKSPACE_NAME, Domain.FITBIT_ACTIVITY.toString(), 1L)
+                    .getBody())
+            .getItems();
+    assertThat(
+            domainWithDomainValues.containsAll(
+                ImmutableList.of(
+                    new DomainWithDomainValues()
+                        .domain(Domain.FITBIT_ACTIVITY.toString())
+                        .items(
+                            ImmutableList.of(
+                                new DomainValue().value("date"),
+                                new DomainValue().value("activity_calories"),
+                                new DomainValue().value("calories_bmr"),
+                                new DomainValue().value("calories_out"),
+                                new DomainValue().value("elevation"),
+                                new DomainValue().value("fairly_active_minutes"),
+                                new DomainValue().value("floors"),
+                                new DomainValue().value("lightly_active_minutes"),
+                                new DomainValue().value("marginal_calories"),
+                                new DomainValue().value("sedentary_minutes"),
+                                new DomainValue().value("steps"),
+                                new DomainValue().value("very_active_minutes"),
+                                new DomainValue().value("person_id"))))))
         .isEqualTo(true);
   }
 
   @Test
   public void getValuesFromDomainHeartRateLevel() {
-    List<DomainValue> domainValues =
-        controller
-            .getValuesFromDomain(
-                WORKSPACE_NAMESPACE, WORKSPACE_NAME, Domain.FITBIT_HEART_RATE_LEVEL.toString())
-            .getBody()
+    List<DomainWithDomainValues> domainWithDomainValues =
+        Objects.requireNonNull(
+                controller
+                    .getValuesFromDomain(
+                        WORKSPACE_NAMESPACE,
+                        WORKSPACE_NAME,
+                        Domain.FITBIT_HEART_RATE_LEVEL.toString(),
+                        1L)
+                    .getBody())
             .getItems();
+
     assertThat(
-            domainValues.containsAll(
+            domainWithDomainValues.containsAll(
                 ImmutableList.of(
-                    new DomainValue().value("datetime"),
-                    new DomainValue().value("person_id"),
-                    new DomainValue().value("heart_rate_value"))))
+                    new DomainWithDomainValues()
+                        .domain(Domain.FITBIT_HEART_RATE_LEVEL.toString())
+                        .items(
+                            ImmutableList.of(
+                                new DomainValue().value("datetime"),
+                                new DomainValue().value("person_id"),
+                                new DomainValue().value("heart_rate_value"))))))
         .isEqualTo(true);
   }
 
   @Test
   public void getValuesFromDomainHeartRateSummary() {
-    List<DomainValue> domainValues =
-        controller
-            .getValuesFromDomain(
-                WORKSPACE_NAMESPACE, WORKSPACE_NAME, Domain.FITBIT_HEART_RATE_SUMMARY.toString())
-            .getBody()
+    List<DomainWithDomainValues> domainWithDomainValues =
+        Objects.requireNonNull(
+                controller
+                    .getValuesFromDomain(
+                        WORKSPACE_NAMESPACE,
+                        WORKSPACE_NAME,
+                        Domain.FITBIT_HEART_RATE_SUMMARY.toString(),
+                        1L)
+                    .getBody())
             .getItems();
+
     assertThat(
-            domainValues.containsAll(
+            domainWithDomainValues.containsAll(
                 ImmutableList.of(
-                    new DomainValue().value("zone_name"),
-                    new DomainValue().value("min_heart_rate"),
-                    new DomainValue().value("max_heart_rate"),
-                    new DomainValue().value("minute_in_zone"),
-                    new DomainValue().value("calorie_count"))))
+                    new DomainWithDomainValues()
+                        .domain(Domain.FITBIT_HEART_RATE_SUMMARY.toString())
+                        .items(
+                            ImmutableList.of(
+                                new DomainValue().value("person_id"),
+                                new DomainValue().value("date"),
+                                new DomainValue().value("zone_name"),
+                                new DomainValue().value("min_heart_rate"),
+                                new DomainValue().value("max_heart_rate"),
+                                new DomainValue().value("minute_in_zone"),
+                                new DomainValue().value("calorie_count"))))))
         .isEqualTo(true);
   }
 
   @Test
   public void getValuesFromDomainStepsIntraday() {
-    List<DomainValue> domainValues =
-        controller
-            .getValuesFromDomain(
-                WORKSPACE_NAMESPACE, WORKSPACE_NAME, Domain.FITBIT_INTRADAY_STEPS.toString())
-            .getBody()
+    List<DomainWithDomainValues> domainWithDomainValues =
+        Objects.requireNonNull(
+                controller
+                    .getValuesFromDomain(
+                        WORKSPACE_NAMESPACE,
+                        WORKSPACE_NAME,
+                        Domain.FITBIT_INTRADAY_STEPS.toString(),
+                        1L)
+                    .getBody())
             .getItems();
+
     assertThat(
-            domainValues.containsAll(
+            domainWithDomainValues.containsAll(
                 ImmutableList.of(
-                    new DomainValue().value("datetime"),
-                    new DomainValue().value("steps"),
-                    new DomainValue().value("person_id"))))
+                    new DomainWithDomainValues()
+                        .domain(Domain.FITBIT_INTRADAY_STEPS.toString())
+                        .items(
+                            ImmutableList.of(
+                                new DomainValue().value("datetime"),
+                                new DomainValue().value("steps"),
+                                new DomainValue().value("person_id"))))))
         .isEqualTo(true);
+  }
+
+  @Test
+  public void previewDataSetByDomainCondition() {
+    DataSetPreviewResponse dataSetPreviewResponse =
+        Objects.requireNonNull(
+            controller
+                .previewDataSetByDomain(
+                    dbWorkspace.getWorkspaceNamespace(),
+                    dbWorkspace.getFirecloudName(),
+                    new DataSetPreviewRequest()
+                        .domain(Domain.CONDITION)
+                        .addConceptSetIdsItem(dbConditionConceptSetForValues.getConceptSetId())
+                        .addValuesItem("person_id")
+                        .addCohortIdsItem(dbCohort3.getCohortId()))
+                .getBody());
+
+    assertThat(dataSetPreviewResponse)
+        .isEqualTo(
+            new DataSetPreviewResponse()
+                .domain(Domain.CONDITION)
+                .addValuesItem(
+                    new DataSetPreviewValueList().addQueryValueItem("1").value("person_id")));
+  }
+
+  @Test
+  public void previewDataSetByDomainSourceConditionWithMeasurementDomain() {
+    DataSetPreviewResponse dataSetPreviewResponse =
+        Objects.requireNonNull(
+            controller
+                .previewDataSetByDomain(
+                    dbWorkspace.getWorkspaceNamespace(),
+                    dbWorkspace.getFirecloudName(),
+                    new DataSetPreviewRequest()
+                        .domain(Domain.MEASUREMENT)
+                        .addConceptSetIdsItem(dbConditionConceptSetForValues.getConceptSetId())
+                        .addConceptSetIdsItem(dbMeasurementConceptSet.getConceptSetId())
+                        .addValuesItem("person_id")
+                        .addCohortIdsItem(dbCohort3.getCohortId()))
+                .getBody());
+
+    assertThat(dataSetPreviewResponse)
+        .isEqualTo(
+            new DataSetPreviewResponse()
+                .domain(Domain.MEASUREMENT)
+                .addValuesItem(
+                    new DataSetPreviewValueList().addQueryValueItem("1").value("person_id")));
+  }
+
+  @Test
+  public void previewDataSetByDomainSourceConditionAndMeasurementConceptSet() {
+    DataSetPreviewResponse dataSetPreviewResponse =
+        Objects.requireNonNull(
+            controller
+                .previewDataSetByDomain(
+                    dbWorkspace.getWorkspaceNamespace(),
+                    dbWorkspace.getFirecloudName(),
+                    new DataSetPreviewRequest()
+                        .domain(Domain.MEASUREMENT)
+                        .addConceptSetIdsItem(dbConditionConceptSetForValues.getConceptSetId())
+                        .addValuesItem("person_id")
+                        .addCohortIdsItem(dbCohort3.getCohortId()))
+                .getBody());
+
+    assertThat(dataSetPreviewResponse)
+        .isEqualTo(
+            new DataSetPreviewResponse()
+                .domain(Domain.MEASUREMENT)
+                .addValuesItem(
+                    new DataSetPreviewValueList().addQueryValueItem("1").value("person_id")));
   }
 
   private void assertAndExecutePythonQuery(String code, int index, Domain domain) {
@@ -692,7 +906,8 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
               QueryJobConfiguration.newBuilder(query).setUseLegacySql(false).build());
       assertThat(result.getTotalRows()).isEqualTo(1L);
     } catch (Exception e) {
-      fail("Problem generating BigQuery query for notebooks: " + e.getCause().getMessage());
+      Assertions.fail(
+          "Problem generating BigQuery query for notebooks: " + e.getCause().getMessage());
     }
   }
 

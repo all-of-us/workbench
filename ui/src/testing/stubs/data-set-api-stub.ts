@@ -116,7 +116,14 @@ export class DataSetApiStub extends DataSetApi {
         domainValueItems.push({ value: 'Drug1' });
         break;
     }
-    return Promise.resolve({ items: domainValueItems });
+    return Promise.resolve({
+      items: [
+        {
+          domain,
+          items: domainValueItems,
+        },
+      ],
+    });
   }
 
   async markDirty() {

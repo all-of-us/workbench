@@ -32,10 +32,10 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Collectors;
@@ -117,6 +117,7 @@ import org.pmiops.workbench.model.DataSetRequest;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainValue;
 import org.pmiops.workbench.model.DomainValuePair;
+import org.pmiops.workbench.model.DomainWithDomainValues;
 import org.pmiops.workbench.model.KernelTypeEnum;
 import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
 import org.pmiops.workbench.model.ResearchPurpose;
@@ -532,27 +533,15 @@ public class DataSetControllerTest {
     return domainValues;
   }
 
-  private void mockLinkingTableQuery(Collection<String> domainBaseTables) {
+  private void mockLinkingTableQuery() {
     final TableResult tableResultMock = mock(TableResult.class);
 
     final FieldList schema =
-        FieldList.of(
-            ImmutableList.of(
-                Field.of("OMOP_SQL", LegacySQLTypeName.STRING),
-                Field.of("JOIN_VALUE", LegacySQLTypeName.STRING)));
+        FieldList.of(ImmutableList.of(Field.of("PERSON_ID", LegacySQLTypeName.INTEGER)));
 
-    doReturn(
-            domainBaseTables.stream()
-                .map(
-                    domainBaseTable -> {
-                      ArrayList<FieldValue> rows = new ArrayList<>();
-                      rows.add(FieldValue.of(Attribute.PRIMITIVE, "PERSON_ID"));
-                      rows.add(FieldValue.of(Attribute.PRIMITIVE, domainBaseTable));
-                      return FieldValueList.of(rows, schema);
-                    })
-                .collect(ImmutableList.toImmutableList()))
-        .when(tableResultMock)
-        .getValues();
+    ArrayList<FieldValue> rows = new ArrayList<>();
+    rows.add(FieldValue.of(Attribute.PRIMITIVE, "1"));
+    doReturn(ImmutableList.of(FieldValueList.of(rows, schema))).when(tableResultMock).getValues();
 
     doReturn(tableResultMock).when(mockBigQueryService).executeQuery(any());
   }
@@ -842,7 +831,7 @@ public class DataSetControllerTest {
     ArrayList<String> tables = new ArrayList<>();
     tables.add("FROM `" + TEST_CDR_TABLE + ".condition_occurrence` c_occurrence");
 
-    mockLinkingTableQuery(tables);
+    mockLinkingTableQuery();
 
     String notebookName = "Hello World";
 
@@ -874,36 +863,48 @@ public class DataSetControllerTest {
 
   @Test
   public void testGetValuesFromDomain() {
-    when(mockBigQueryService.getTableFieldsFromDomain(Domain.CONDITION))
+    when(mockBigQueryService.getTableFieldsFromDomain(Domain.MEASUREMENT))
         .thenReturn(
             FieldList.of(
                 Field.of("FIELD_ONE", LegacySQLTypeName.STRING),
                 Field.of("FIELD_TWO", LegacySQLTypeName.STRING)));
-    List<DomainValue> domainValues =
-        dataSetController
-            .getValuesFromDomain(
-                workspace.getNamespace(), workspace.getName(), Domain.CONDITION.toString())
-            .getBody()
+    List<DomainWithDomainValues> domainWithDomainValues =
+        Objects.requireNonNull(
+                dataSetController
+                    .getValuesFromDomain(
+                        workspace.getNamespace(),
+                        workspace.getName(),
+                        Domain.MEASUREMENT.toString(),
+                        1L)
+                    .getBody())
             .getItems();
-    verify(mockBigQueryService).getTableFieldsFromDomain(Domain.CONDITION);
+    verify(mockBigQueryService).getTableFieldsFromDomain(Domain.MEASUREMENT);
 
-    assertThat(domainValues)
+    assertThat(domainWithDomainValues)
         .containsExactly(
-            new DomainValue().value("field_one"), new DomainValue().value("field_two"));
+            new DomainWithDomainValues()
+                .domain(Domain.MEASUREMENT.toString())
+                .addItemsItem(new DomainValue().value("field_one"))
+                .addItemsItem(new DomainValue().value("field_two")));
   }
 
   @Test
   public void testGetValuesFromWholeGenomeDomain() {
-    List<DomainValue> domainValues =
-        dataSetController
-            .getValuesFromDomain(
-                workspace.getNamespace(),
-                workspace.getName(),
-                Domain.WHOLE_GENOME_VARIANT.toString())
-            .getBody()
+    List<DomainWithDomainValues> domainWithDomainValues =
+        Objects.requireNonNull(
+                dataSetController
+                    .getValuesFromDomain(
+                        workspace.getNamespace(),
+                        workspace.getName(),
+                        Domain.WHOLE_GENOME_VARIANT.toString(),
+                        1L)
+                    .getBody())
             .getItems();
-    assertThat(domainValues)
-        .containsExactly(new DomainValue().value(DataSetController.WHOLE_GENOME_VALUE));
+    assertThat(domainWithDomainValues)
+        .containsExactly(
+            new DomainWithDomainValues()
+                .domain(Domain.WHOLE_GENOME_VARIANT.toString())
+                .addItemsItem(new DomainValue().value(DataSetController.WHOLE_GENOME_VALUE)));
   }
 
   @Test
@@ -1188,7 +1189,7 @@ public class DataSetControllerTest {
     ArrayList<String> tables = new ArrayList<>();
     tables.add("FROM `" + TEST_CDR_TABLE + ".condition_occurrence` c_occurrence");
 
-    mockLinkingTableQuery(tables);
+    mockLinkingTableQuery();
     String notebookName = "Hello World";
 
     return new DataSetExportRequest()
