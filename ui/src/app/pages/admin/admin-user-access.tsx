@@ -4,7 +4,7 @@ import { Button } from 'app/components/buttons';
 import { SpinnerOverlay } from 'app/components/spinners';
 import { userAdminApi } from 'app/services/swagger-fetch-clients';
 import { TextArea } from 'app/components/inputs';
-import { ReactFragment, useState } from 'react';
+import { useState } from 'react';
 import { withErrorModal } from 'app/components/modals';
 import { TooltipTrigger } from 'app/components/popups';
 import { FlexColumn, FlexRow } from 'app/components/flex';
@@ -30,7 +30,7 @@ export const AdminUserAccess = () => {
 
   const [requestSending, setRequestSending] = useState<boolean>(false);
   const [userEmails, setUserEmails] = useState<Array<string>>(String['']);
-  const [cloudTaskNames, setcloudTaskNames] = useState<Array<string>>(
+  const [cloudTaskNameList, setcloudTaskNameList] = useState<Array<string>>(
     String['']
   );
 
@@ -47,7 +47,7 @@ export const AdminUserAccess = () => {
     const { cloudTaskNames } = await userAdminApi().batchSyncAccess({
       usernames: userEmails,
     });
-    setcloudTaskNames(cloudTaskNames);
+    setcloudTaskNameList(cloudTaskNames);
     setRequestSending(false);
   });
 
@@ -74,7 +74,7 @@ export const AdminUserAccess = () => {
           <h3>Cloud task ids</h3>
           <TextArea
             style={styles.textArea}
-            value={cloudTaskNames?.join(',\n')}
+            value={cloudTaskNameList?.join(',\n')}
             onChange={null}
             disabled='true'
           />
