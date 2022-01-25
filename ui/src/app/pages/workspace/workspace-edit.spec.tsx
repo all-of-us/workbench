@@ -825,7 +825,7 @@ describe('WorkspaceEdit', () => {
     // Intended Study Text
     const testInput = fp.repeat(1000, 'a');
     // since its a new page the characters box for Intended study should say 1000 characters remaining
-    let intendedStudySection = wrapper.find(
+    const intendedStudySection = wrapper.find(
       '[data-test-id="intendedStudyText"]'
     );
     expect(

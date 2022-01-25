@@ -917,7 +917,7 @@ describe('DataAccessRequirements', () => {
       AccessTierShortNames.Controlled,
     ];
 
-    let wrapper = component();
+    const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(findControlledTierCard(wrapper).exists()).toBeTruthy();
   });
@@ -925,7 +925,7 @@ describe('DataAccessRequirements', () => {
   it('Should not display the CT card when the environment does not have a Controlled Tier', async () => {
     environment.accessTiersVisibleToUsers = [AccessTierShortNames.Registered];
 
-    let wrapper = component();
+    const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(findControlledTierCard(wrapper).exists()).toBeFalsy();
   });
