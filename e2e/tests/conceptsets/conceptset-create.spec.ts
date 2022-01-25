@@ -77,8 +77,7 @@ describe('Create Concept Sets from Domains', () => {
    * - Create new Dataset using above two Concept Sets.
    * - Delete Dataset, Concept Set.
    */
-  // TODO temporarily disabled, filed RW-7754 to investigate and re-enable
-  xtest('Create Concept Sets from Drug Exposures and Measurements domains', async () => {
+  test('Create Concept Sets from Drug Exposures and Measurements domains', async () => {
     await findOrCreateWorkspace(page, { workspaceName: workspace });
 
     // Click Add Datasets button.
