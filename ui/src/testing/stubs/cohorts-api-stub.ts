@@ -13,8 +13,8 @@ import { stubNotImplementedError } from 'testing/stubs/stub-utils';
 import { convertToResources } from './resources-stub';
 import { WorkspaceStubVariables } from './workspaces';
 
-export let DEFAULT_COHORT_ID = 1;
-export let DEFAULT_COHORT_ID_2 = 2;
+export const DEFAULT_COHORT_ID = 1;
+export const DEFAULT_COHORT_ID_2 = 2;
 
 export const exampleCohortStubs = [
   {

@@ -47,11 +47,11 @@ module.exports = {
     'no-throw-literal': 'warn',
     'no-undef-init': 'warn',
     'no-var': 'warn',
+    'prefer-const': ['warn', { destructuring: 'all' }],
     radix: 'warn', // Add radix on parseInt
     // 'dot-notation': 'warn',  // 39 instances as of 3 Jan 2022
     // 'no-console': 'warn',  // 69 instances as of 3 Jan 2022
     // 'prefer-arrow/prefer-arrow-functions': ['warn'], // Lots of 'newable' functions in the code base
-    // 'prefer-const': ['warn', {'destructuring': 'all'}],
 
     'no-use-before-define': 'off', // Needed for the below rule
     '@typescript-eslint/no-use-before-define': 'warn',
