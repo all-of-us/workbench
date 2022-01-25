@@ -1425,25 +1425,20 @@ paths:
         - userAdmin
       consumes:
         - application/json
-      description: 'Batch sync user access modules'
+      description: 'Batch sync user access modules, asynchronously'
       parameters:
         - in: body
           name: request
-          description: A list of users
           schema:
-            "$ref": "#/definitions/AccountPropertyUpdate"
-      operationId: updateAccountProperties
+            "$ref": "#/definitions/BatchSyncAccessRequest"
+      operationId: batchSyncAccess
       responses:
         200:
           description: 'The user''s updated profile'
           schema:
-            "$ref": "#/definitions/Profile"
+            "$ref": "#/definitions/BatchSyncAccessResponse"
         403:
           description: User doesn't have the ACCESS_CONTROL_ADMIN authority
-          schema:
-            "$ref": "#/definitions/ErrorResponse"
-        404:
-          description: User associated with request could not be found
           schema:
             "$ref": "#/definitions/ErrorResponse"
   "/v1/admin/workspaces/{workspaceNamespace}/locked":
@@ -6231,6 +6226,25 @@ definitions:
         type: array
         items:
           "$ref": "#/definitions/AdminTableUser"
+  BatchSyncAccessRequest:
+    type: object
+    required:
+    - usernames
+    properties:
+      usernames:
+        type: array
+        items:
+          type: string
+  BatchSyncAccessResponse:
+    type: object
+    required:
+      - users
+    properties:
+      cloudTaskNames:
+        description: list of Cloud task names that processing the batch update
+        type: array
+        items:
+          type: string
   UpdateUserDisabledRequest:
     type: object
     required:

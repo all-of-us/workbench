@@ -7,6 +7,7 @@ import com.google.cloud.tasks.v2.QueueName;
 import com.google.cloud.tasks.v2.Task;
 import com.google.gson.Gson;
 import com.google.protobuf.ByteString;
+import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -79,17 +80,20 @@ public class TaskQueueService {
     }
   }
 
-  public void groupAndPushSynchronizeAccessTasks(List<Long> userIds) {
+  public List<String> groupAndPushSynchronizeAccessTasks(List<Long> userIds) {
     WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
     List<List<Long>> groups =
         CloudTasksUtils.partitionList(
             userIds, workbenchConfig.offlineBatch.usersPerSynchronizeAccessTask);
+    List<String> tasknames = new ArrayList<>();
     for (List<Long> group : groups) {
-      createAndPushTask(
-          SYNCHRONIZE_ACCESS_QUEUE_NAME,
-          SYNCHRONIZE_ACCESS_PATH,
-          new AuditProjectAccessRequest().userIds(group));
+      tasknames.add(
+          createAndPushTask(
+              SYNCHRONIZE_ACCESS_QUEUE_NAME,
+              SYNCHRONIZE_ACCESS_PATH,
+              new AuditProjectAccessRequest().userIds(group)));
     }
+    return tasknames;
   }
 
   public void pushEgressEventTask(Long eventId) {
@@ -99,7 +103,7 @@ public class TaskQueueService {
         new ProcessEgressEventRequest().eventId(eventId));
   }
 
-  private void createAndPushTask(String queueName, String taskUri, Object jsonBody) {
+  private String createAndPushTask(String queueName, String taskUri, Object jsonBody) {
     WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
     String queuePath =
         QueueName.of(
@@ -108,7 +112,7 @@ public class TaskQueueService {
                 queueName)
             .toString();
     String body = new Gson().toJson(jsonBody);
-    cloudTasksClientProvider
+    return cloudTasksClientProvider
         .get()
         .createTask(
             queuePath,
@@ -119,6 +123,7 @@ public class TaskQueueService {
                         .setBody(ByteString.copyFromUtf8(body))
                         .setHttpMethod(HttpMethod.POST)
                         .putHeaders("Content-type", "application/json"))
-                .build());
+                .build())
+        .getName();
   }
 }

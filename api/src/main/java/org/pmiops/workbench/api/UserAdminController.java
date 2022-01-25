@@ -2,10 +2,12 @@ package org.pmiops.workbench.api;
 
 import java.time.Instant;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import javax.inject.Provider;
 import org.pmiops.workbench.actionaudit.ActionAuditQueryService;
 import org.pmiops.workbench.annotations.AuthorityRequired;
+import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbUser;
@@ -14,6 +16,8 @@ import org.pmiops.workbench.model.AccessBypassRequest;
 import org.pmiops.workbench.model.AccountPropertyUpdate;
 import org.pmiops.workbench.model.AdminUserListResponse;
 import org.pmiops.workbench.model.Authority;
+import org.pmiops.workbench.model.BatchSyncAccessRequest;
+import org.pmiops.workbench.model.BatchSyncAccessResponse;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.model.UserAuditLogQueryResponse;
@@ -29,18 +33,21 @@ public class UserAdminController implements UserAdminApiDelegate {
   private final ActionAuditQueryService actionAuditQueryService;
   private final Provider<DbUser> userProvider;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
+  private final TaskQueueService taskQueueService;
 
   public UserAdminController(
       UserService userService,
       ProfileService profileService,
       ActionAuditQueryService actionAuditQueryService,
       Provider<DbUser> userProvider,
-      Provider<WorkbenchConfig> workbenchConfigProvider) {
+      Provider<WorkbenchConfig> workbenchConfigProvider,
+      TaskQueueService taskQueueService) {
     this.userService = userService;
     this.profileService = profileService;
     this.actionAuditQueryService = actionAuditQueryService;
     this.userProvider = userProvider;
     this.workbenchConfigProvider = workbenchConfigProvider;
+    this.taskQueueService = taskQueueService;
   }
 
   @Override
@@ -103,13 +110,14 @@ public class UserAdminController implements UserAdminApiDelegate {
   }
 
   @Override
-  public ResponseEntity<EmptyResponse> batchSyncUserAccess(
-      AccessBypassRequest request) {
-    if (!workbenchConfigProvider.get().access.unsafeAllowSelfBypass) {
-      throw new ForbiddenException("Self bypass is disallowed in this environment.");
-    }
-    long userId = userProvider.get().getUserId();
-    userService.updateBypassTime(userId, request);
-    return ResponseEntity.ok(new EmptyResponse());
+  @AuthorityRequired({Authority.ACCESS_CONTROL_ADMIN})
+  public ResponseEntity<BatchSyncAccessResponse> batchSyncAccess(BatchSyncAccessRequest request) {
+    return ResponseEntity.ok(
+        new BatchSyncAccessResponse()
+            .cloudTaskNames(
+                taskQueueService.groupAndPushSynchronizeAccessTasks(
+                    userService.findUsersByUsernames(request.getUsernames()).stream()
+                        .map(u -> u.getUserId())
+                        .collect(Collectors.toList()))));
   }
 }
