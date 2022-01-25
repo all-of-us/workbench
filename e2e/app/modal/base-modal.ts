@@ -77,7 +77,6 @@ export default abstract class BaseModal extends Container {
 
   // Override waitUntilClose in parent class Container.
   async waitUntilClose(timeout = 2 * 60 * 1000): Promise<void> {
-    console.log(`this.getXpath(): ${this.getXpath()}`);
     try {
       await page.waitForFunction(
         (xpath) => {
@@ -91,7 +90,7 @@ export default abstract class BaseModal extends Container {
       );
       logger.info(`Modal "${await this.getTitle()}" is closed.`);
     } catch (err) {
-      logger.error(`WaitUntilClose failed for modal "${await this.getTitle()}". Xpath: "${this.getXpath()}"`);
+      logger.error(`WaitUntilClose failed for modal. Xpath: "${this.getXpath()}"`);
       logger.error(err.stack);
       throw new Error(err);
     }
