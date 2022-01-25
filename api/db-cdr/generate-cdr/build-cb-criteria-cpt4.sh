@@ -19,7 +19,7 @@ TBL_CBC=$(createTmpTable $TBL_CBC)
 TBL_ANC=$(createTmpTable $TBL_ANC)
 ####### end common block ###########
 
-echo "CPT4 - SOURCE - insert data (do not insert zero count children)"
+echo "CPT4 - SOURCE - insert root"
 bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
     (
@@ -65,7 +65,7 @@ SELECT
     , a.is_selectable
     , a.has_attribute
     , a.has_hierarchy
-    , a.path
+    , CAST((a.id + $CB_CRITERIA_START_ID) as STRING) as path
 FROM \`$BQ_PROJECT.$BQ_DATASET.prep_cpt\` a
 LEFT JOIN
     (
@@ -105,7 +105,104 @@ WHERE a.type = 'CPT4'
                     )
             )
       )
+    AND a.parent_id = 0
 ORDER BY 1"
+
+# for each loop, add all items (children/parents) directly under the items that were previously added
+# currently, there are only 7 levels, but we run it 8 times to be safe
+# if this number is changed, you will need to change the number of JOINS in the query below for prep_cpt_ancestor
+for i in {1..8};
+do
+  echo "CPT4 - SOURCE - add level $i"
+  bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
+  "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
+      (
+            id
+          , parent_id
+          , domain_id
+          , is_standard
+          , type
+          , subtype
+          , concept_id
+          , code
+          , name
+          , rollup_count
+          , item_count
+          , est_count
+          , is_group
+          , is_selectable
+          , has_attribute
+          , has_hierarchy
+          , path
+      )
+  SELECT
+       (a.id + $CB_CRITERIA_START_ID ) id
+      , CASE WHEN a.parent_id=0 THEN 0 ELSE a.parent_id + $CB_CRITERIA_START_ID END as parent_id
+      , a.domain_id
+      , a.is_standard
+      , a.type
+      , a.subtype
+      , a.concept_id
+      , a.code
+      , CASE WHEN b.concept_id is not null THEN b.concept_name ELSE a.name END AS name
+      , CASE WHEN a.parent_id != $CB_CRITERIA_START_ID THEN 0 ELSE null END AS rollup_count
+      , CASE
+          WHEN a.parent_id != $CB_CRITERIA_START_ID THEN
+              CASE
+                  WHEN c.cnt is null THEN 0
+                  ELSE c.cnt
+              END
+          ELSE null
+        END AS item_count
+      , CASE WHEN a.is_group = 0 and a.is_selectable = 1 THEN c.cnt ELSE null END AS est_count
+      , a.is_group
+      , a.is_selectable
+      , a.has_attribute
+      , a.has_hierarchy
+      , (SELECT CONCAT(path, '.', (a.id + $CB_CRITERIA_START_ID )) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` WHERE id = (a.parent_id + $CB_CRITERIA_START_ID)) AS path
+  FROM \`$BQ_PROJECT.$BQ_DATASET.prep_cpt\` a
+  LEFT JOIN
+      (
+          SELECT concept_id, concept_name
+          FROM \`$BQ_PROJECT.$BQ_DATASET.concept\`
+          WHERE vocabulary_id = 'CPT4'
+      ) b on a.concept_id = b.concept_id
+  LEFT JOIN
+      (
+          -- get the count of distinct patients coded with each concept
+          SELECT concept_id, COUNT(DISTINCT person_id) cnt
+          FROM \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\`
+          WHERE is_standard = 0
+              and concept_id in
+                  (
+                      -- get all concepts that are selectable
+                      SELECT concept_id
+                      FROM \`$BQ_PROJECT.$BQ_DATASET.prep_cpt\`
+                      WHERE type = 'CPT4'
+                          and is_selectable = 1
+                  )
+          GROUP BY 1
+      ) c on b.concept_id = c.concept_id
+  WHERE a.type = 'CPT4'
+      AND
+          (
+              -- get all groups and get all children that have a count
+              is_group = 1
+              OR
+              (
+                  is_group = 0
+                  AND is_selectable = 1
+                  AND
+                      (
+                          c.cnt != 0
+                          OR c.cnt is not null
+                      )
+              )
+        )
+      AND a.id in (SELECT id
+          FROM \`$BQ_PROJECT.$BQ_DATASET.prep_cpt\` where LENGTH(path) - LENGTH(REPLACE(path, '.', '')) = $i)
+  ORDER BY 1"
+done
 
 ############ prep_cpt_ancestor ############
 echo "CPT4 - SOURCE - add ancestor data"
