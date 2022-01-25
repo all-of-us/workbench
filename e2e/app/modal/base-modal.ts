@@ -8,11 +8,14 @@ import Checkbox from 'app/element/checkbox';
 import Textarea from 'app/element/textarea';
 import Textbox from 'app/element/textbox';
 import { LinkText } from 'app/text-labels';
+import { logger } from 'libs/logger';
 
 const modalRootXpath = '//*[@id="popup-root"]/*[@class="ReactModalPortal"]';
 const modalXpath = '//*[@role="dialog" and @aria-modal="true" and contains(@class, "after-open")]';
 
 export default abstract class BaseModal extends Container {
+  private title: string;
+
   protected constructor(page: Page, opts: { xpath?: string; modalIndex?: number } = { modalIndex: 1 }) {
     super(page, opts.xpath ? opts.xpath : `${modalRootXpath}[${opts.modalIndex}]${modalXpath}`);
   }
@@ -43,7 +46,10 @@ export default abstract class BaseModal extends Container {
   }
 
   async getTitle(): Promise<string> {
-    return (await this.getTextContent())[0];
+    if (this.title === undefined) {
+      this.title = (await this.getTextContent())[0];
+    }
+    return this.title;
   }
 
   waitForButton(buttonLabel: LinkText): Button {
@@ -67,5 +73,27 @@ export default abstract class BaseModal extends Container {
    */
   async exists(): Promise<boolean> {
     return (await this.page.$x(this.xpath)).length > 0;
+  }
+
+  // Override waitUntilClose in parent class Container.
+  async waitUntilClose(timeout = 2 * 60 * 1000): Promise<void> {
+    console.log(`this.getXpath(): ${this.getXpath()}`);
+    try {
+      await page.waitForFunction(
+        (xpath) => {
+          const elem: any = document.evaluate(xpath, document.body, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null)
+            .singleNodeValue;
+          const isVisible = elem && (elem.offsetWidth > 0 || elem.offsetHeight > 0 || elem.getClientRects().length > 0);
+          return !isVisible;
+        },
+        { timeout },
+        this.getXpath()
+      );
+      logger.info(`Modal "${await this.getTitle()}" is closed.`);
+    } catch (err) {
+      logger.error(`WaitUntilClose failed for modal "${await this.getTitle()}". Xpath: "${this.getXpath()}"`);
+      logger.error(err.stack);
+      throw new Error(err);
+    }
   }
 }
