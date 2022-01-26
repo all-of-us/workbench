@@ -1425,7 +1425,8 @@ paths:
         - userAdmin
       consumes:
         - application/json
-      description: 'Batch sync user access modules, asynchronously'
+      description: 'Batch sync user access modules, asynchronously. This is a work around until SAM
+      supports batch update. See https://broadworkbench.atlassian.net/browse/CA-1504'
       parameters:
         - in: body
           name: request
@@ -6237,8 +6238,6 @@ definitions:
           type: string
   BatchSyncAccessResponse:
     type: object
-    required:
-      - users
     properties:
       cloudTaskNames:
         description: list of Cloud task names that processing the batch update
