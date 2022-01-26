@@ -99,7 +99,8 @@ export class DataSetApiStub extends DataSetApi {
   public getValuesFromDomain(
     workspaceNamespace: string,
     workspaceId: string,
-    domain: string
+    domain: string,
+    conceptSetId: number
   ): Promise<DomainValuesResponse> {
     const domainValueItems = [];
     switch (domain) {
