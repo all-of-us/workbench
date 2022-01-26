@@ -72,7 +72,7 @@ export default class WorkspaceCard extends CardBase {
   static async findAnyCard(page: Page): Promise<WorkspaceCard> {
     const cards = await this.findAllCards(page);
     if (cards.length === 0) {
-      throw new Error('FAILED to find any Workspace card on page.');
+      throw new Error('FAIL: Failed to find any Workspace card on page.');
     }
     return fp.shuffle(cards)[0];
   }
