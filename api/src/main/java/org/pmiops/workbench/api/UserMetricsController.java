@@ -195,15 +195,6 @@ public class UserMetricsController implements UserMetricsApiDelegate {
     return ResponseEntity.ok(recentResponse);
   }
 
-  @Deprecated
-  private Boolean foundBlobIdsContainsUserRecentResource(
-      Set<BlobId> foundNotebooks, DbUserRecentResource urr) {
-    return Optional.ofNullable(urr.getNotebookName())
-        .flatMap(this::uriToBlobId)
-        .map(foundNotebooks::contains)
-        .orElse(true);
-  }
-
   private Boolean foundBlobIdsContainsUserRecentlyModifiedResource(
       Set<BlobId> foundNotebooks, DbUserRecentlyModifiedResource urr) {
     return Optional.ofNullable(urr.getNotebookName())
@@ -213,30 +204,11 @@ public class UserMetricsController implements UserMetricsApiDelegate {
   }
 
   @VisibleForTesting
-  public boolean hasValidBlobIdIfNotebookNamePresent(DbUserRecentResource dbUserRecentResource) {
-    return Optional.ofNullable(dbUserRecentResource.getNotebookName())
-        .map(name -> uriToBlobId(name).isPresent())
-        .orElse(true);
-  }
-
-  @VisibleForTesting
   public boolean hasValidBlobIdIfNotebookNamePresent(
       DbUserRecentlyModifiedResource dbUserRecentResource) {
     return Optional.ofNullable(dbUserRecentResource.getNotebookName())
         .map(name -> uriToBlobId(name).isPresent())
         .orElse(true);
-  }
-
-  private WorkspaceResource buildRecentResource(
-      Map<Long, DbWorkspace> idToDbWorkspace,
-      Map<Long, FirecloudWorkspaceResponse> idToFcWorkspaceResponse,
-      DbUserRecentResource dbUserRecentResource) {
-
-    final long workspaceId = dbUserRecentResource.getWorkspaceId();
-    return workspaceResourceMapper.fromDbUserRecentResource(
-        dbUserRecentResource,
-        idToFcWorkspaceResponse.get(workspaceId),
-        idToDbWorkspace.get(workspaceId));
   }
 
   private WorkspaceResource buildRecentResource(

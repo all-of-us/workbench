@@ -262,7 +262,6 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
   @Override
   public List<DbUserRecentlyModifiedResource> findAllRecentlyModifiedResourcesByUser(long userId) {
     try {
-      System.out.println("in here");
       return DbRetryUtils.executeAndRetry(
           () -> populateRecentlyModifiedResources(userId), Duration.ofSeconds(1), 5);
     } catch (InterruptedException e) {
