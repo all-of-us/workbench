@@ -77,12 +77,16 @@ export enum RuntimeDiffState {
   NEEDS_DELETE_PD,
 }
 
+export interface DiskConfig {
+  size: number;
+  detachable: boolean;
+  detachableType: DiskType | null;
+}
+
 export interface RuntimeConfig {
   computeType: ComputeType;
   machine: Machine;
-  detachableDisk: boolean;
-  diskSize: number;
-  detachableDiskType: DiskType | null;
+  diskConfig: DiskConfig;
   // TODO: Refactor this type to an intermediate representation.
   dataprocConfig: DataprocConfig;
   // TODO: Refactor this type to an intermediate representation.
@@ -268,19 +272,19 @@ export const compareGpu = (
 };
 
 const compareDiskSize = (
-  oldRuntime: RuntimeConfig,
-  newRuntime: RuntimeConfig
+  { diskConfig: oldDiskConfig }: RuntimeConfig,
+  { diskConfig: newDiskConfig }: RuntimeConfig
 ): RuntimeDiff => {
   let desc = 'Disk Size';
   let diffType: RuntimeDiffState;
-  if (newRuntime.diskSize < oldRuntime.diskSize) {
+  if (newDiskConfig.size < oldDiskConfig.size) {
     desc = 'Decease ' + desc;
-    if (newRuntime.detachableDisk && oldRuntime.detachableDisk) {
+    if (newDiskConfig.detachable && oldDiskConfig.detachable) {
       diffType = RuntimeDiffState.NEEDS_DELETE_PD;
     } else {
       diffType = RuntimeDiffState.NEEDS_DELETE_RUNTIME;
     }
-  } else if (newRuntime.diskSize > oldRuntime.diskSize) {
+  } else if (newDiskConfig.size > oldDiskConfig.size) {
     desc = 'Increase ' + desc;
     diffType = RuntimeDiffState.CAN_UPDATE_WITH_REBOOT;
   } else {
@@ -289,8 +293,8 @@ const compareDiskSize = (
 
   return {
     desc: desc,
-    previous: oldRuntime.diskSize && oldRuntime.diskSize.toString() + ' GB',
-    new: newRuntime.diskSize && newRuntime.diskSize.toString() + ' GB',
+    previous: oldDiskConfig.size && oldDiskConfig.size.toString() + ' GB',
+    new: newDiskConfig.size && newDiskConfig.size.toString() + ' GB',
     differenceType: diffType,
   };
 };
@@ -464,7 +468,7 @@ const presetEquals = (a: Runtime, b: Runtime): boolean => {
 
 export const fromRuntimeConfig = (runtimeConfig: RuntimeConfig): Runtime => {
   const {
-    diskSize,
+    diskConfig,
     machine: { name: machineType },
     gpuConfig,
   } = runtimeConfig;
@@ -476,14 +480,14 @@ export const fromRuntimeConfig = (runtimeConfig: RuntimeConfig): Runtime => {
     runtime.dataprocConfig = {
       ...runtimeConfig.dataprocConfig,
       masterMachineType: machineType,
-      masterDiskSize: diskSize,
+      masterDiskSize: diskConfig.size,
     };
-  } else if (runtimeConfig.detachableDisk) {
+  } else if (diskConfig.detachable) {
     runtime.gceWithPdConfig = {
       machineType,
       persistentDisk: {
-        size: diskSize,
-        diskType: runtimeConfig.detachableDiskType,
+        size: diskConfig.size,
+        diskType: diskConfig.detachableType,
         labels: {},
         name: '',
       },
@@ -492,8 +496,8 @@ export const fromRuntimeConfig = (runtimeConfig: RuntimeConfig): Runtime => {
   } else {
     runtime.gceConfig = {
       machineType,
-      diskSize,
       gpuConfig,
+      diskSize: diskConfig.size,
     };
   }
 
@@ -515,34 +519,32 @@ export const withRuntimeConfigDefaults = (
   existingDisk: Disk | null
 ): RuntimeConfig => {
   let {
-    detachableDisk,
-    detachableDiskType,
-    diskSize,
+    diskConfig: { size, detachable, detachableType },
     gpuConfig,
     dataprocConfig,
   } = r;
   const computeType = r.computeType ?? ComputeType.Standard;
   if (computeType === ComputeType.Standard) {
     dataprocConfig = null;
-    if (detachableDisk === true) {
-      diskSize = diskSize ?? existingDisk?.size ?? DEFAULT_DISK_SIZE;
-      detachableDiskType =
-        detachableDiskType ?? existingDisk?.diskType ?? DiskType.Standard;
-    } else if (detachableDisk === false) {
-      detachableDiskType = null;
+    if (detachable === true) {
+      size = size ?? existingDisk?.size ?? DEFAULT_DISK_SIZE;
+      detachableType =
+        detachableType ?? existingDisk?.diskType ?? DiskType.Standard;
+    } else if (detachable === false) {
+      detachableType = null;
     } else if (existingDisk) {
       // Detachable unspecified, but we have an existing disk.
-      detachableDisk = true;
-      diskSize = diskSize ?? existingDisk.size;
-      detachableDiskType = detachableDiskType ?? existingDisk.diskType;
+      detachable = true;
+      size = size ?? existingDisk.size;
+      detachableType = detachableType ?? existingDisk.diskType;
     } else {
       // Detachable unspecified and no existing disk.
-      detachableDisk = false;
-      detachableDiskType = null;
+      detachable = false;
+      detachableType = null;
     }
   } else if (computeType === ComputeType.Dataproc) {
-    detachableDisk = false;
-    detachableDiskType = null;
+    detachable = false;
+    detachableType = null;
     gpuConfig = null;
 
     const defaults = runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig;
@@ -562,9 +564,11 @@ export const withRuntimeConfigDefaults = (
   return {
     computeType,
     machine: r.machine ?? DEFAULT_MACHINE_TYPE,
-    detachableDisk,
-    diskSize: diskSize ?? DEFAULT_DISK_SIZE,
-    detachableDiskType,
+    diskConfig: {
+      size: size ?? DEFAULT_DISK_SIZE,
+      detachable,
+      detachableType,
+    },
     dataprocConfig,
     gpuConfig,
     autopauseThreshold:
@@ -578,9 +582,11 @@ export const toRuntimeConfig = (runtime: Runtime): RuntimeConfig => {
     return {
       computeType: ComputeType.Standard,
       machine: findMachineByName(machineType),
-      detachableDisk: false,
-      diskSize,
-      detachableDiskType: null,
+      diskConfig: {
+        size: diskSize,
+        detachable: false,
+        detachableType: null,
+      },
       autopauseThreshold: runtime.autopauseThreshold,
       dataprocConfig: null,
       gpuConfig,
@@ -588,15 +594,17 @@ export const toRuntimeConfig = (runtime: Runtime): RuntimeConfig => {
   } else if (runtime.gceWithPdConfig) {
     const {
       machineType,
-      persistentDisk: { size: diskSize, diskType: detachableDiskType },
+      persistentDisk: { size: diskSize, diskType: detachableType },
       gpuConfig,
     } = runtime.gceWithPdConfig;
     return {
       computeType: ComputeType.Standard,
       machine: findMachineByName(machineType),
-      detachableDisk: true,
-      diskSize,
-      detachableDiskType,
+      diskConfig: {
+        size: diskSize,
+        detachable: true,
+        detachableType,
+      },
       autopauseThreshold: runtime.autopauseThreshold,
       dataprocConfig: null,
       gpuConfig,
@@ -605,9 +613,11 @@ export const toRuntimeConfig = (runtime: Runtime): RuntimeConfig => {
     return {
       computeType: ComputeType.Dataproc,
       machine: findMachineByName(runtime.dataprocConfig.masterMachineType),
-      detachableDisk: false,
-      diskSize: runtime.dataprocConfig.masterDiskSize,
-      detachableDiskType: null,
+      diskConfig: {
+        size: runtime.dataprocConfig.masterDiskSize,
+        detachable: false,
+        detachableType: null,
+      },
       autopauseThreshold: runtime.autopauseThreshold,
       dataprocConfig: runtime.dataprocConfig,
       gpuConfig: null,
@@ -616,9 +626,11 @@ export const toRuntimeConfig = (runtime: Runtime): RuntimeConfig => {
     return {
       computeType: null,
       machine: null,
-      detachableDisk: null,
-      diskSize: null,
-      detachableDiskType: null,
+      diskConfig: {
+        size: null,
+        detachable: false,
+        detachableType: null,
+      },
       autopauseThreshold: null,
       dataprocConfig: null,
       gpuConfig: null,
@@ -930,8 +942,8 @@ export const useCustomRuntime = (
           ).map((diff) => diff.differenceType);
           const pdIncreased =
             !!detachablePd &&
-            newRuntimeConfig.detachableDisk &&
-            newRuntimeConfig.diskSize > detachablePd.size;
+            newRuntimeConfig.diskConfig.detachable &&
+            newRuntimeConfig.diskConfig.size > detachablePd.size;
 
           if (runtimeDiffTypes.includes(RuntimeDiffState.NEEDS_DELETE_PD)) {
             // Directly call disk api to delete pd if there's no runtime or the runtime is dataproc

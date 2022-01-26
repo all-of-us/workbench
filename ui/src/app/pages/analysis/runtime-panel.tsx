@@ -1446,7 +1446,7 @@ const RuntimePanel = fp.flow(
       withRuntimeConfigDefaults(existingRuntimeConfig, persistentDisk)
     );
 
-    const enableGpu = serverConfigStore.get().config.enableGpu;
+    const { enableGpu } = serverConfigStore.get().config;
 
     const initialPanelContent = fp.cond([
       [([b, ,]) => b === BillingStatus.INACTIVE, () => PanelContent.Disabled],
@@ -1507,13 +1507,15 @@ const RuntimePanel = fp.flow(
       runtimeExists && existingRuntimeConfig.dataprocConfig !== null;
 
     const attachedPdExists =
-      !!persistentDisk && runtimeExists && existingRuntimeConfig.detachableDisk;
+      !!persistentDisk &&
+      runtimeExists &&
+      existingRuntimeConfig.diskConfig.detachable;
     const unattachedPdExists = !!persistentDisk && !attachedPdExists;
     // TODO(RW-7759): Account for disk type.
     const unattachedDiskNeedsRecreate =
       !!persistentDisk &&
-      runtimeConfig.detachableDisk &&
-      persistentDisk.size > runtimeConfig.diskSize;
+      runtimeConfig.diskConfig.detachable &&
+      persistentDisk.size > runtimeConfig.diskConfig.size;
 
     let runtimeDiffs: RuntimeDiff[] = [];
     let updateMessaging: UpdateMessaging;
@@ -1624,7 +1626,7 @@ const RuntimePanel = fp.flow(
     const { masterDiskSize, workerDiskSize, numberOfWorkers } =
       runtimeConfig.dataprocConfig || {};
     const diskErrors = validate(
-      { diskSize: runtimeConfig.diskSize },
+      { diskSize: runtimeConfig.diskConfig.size },
       diskValidator
     );
     const runningCostErrors = validate(
@@ -1780,7 +1782,7 @@ const RuntimePanel = fp.flow(
                     }}
                     onCancel={() => setPanelContent(PanelContent.Customize)}
                     computeType={existingRuntimeConfig.computeType}
-                    pdSize={runtimeConfig.diskSize}
+                    pdSize={runtimeConfig.diskConfig.size}
                   />
                 );
               } else {
@@ -1869,16 +1871,21 @@ const RuntimePanel = fp.flow(
                       validMachineTypes={validMainMachineTypes}
                       machineType={runtimeConfig.machine.name}
                     />
-                    {
-                      <DiskSizeSelector
-                        idPrefix='runtime'
-                        onChange={(diskSize: number) =>
-                          setRuntimeConfig({ ...runtimeConfig, diskSize })
-                        }
-                        diskSize={runtimeConfig.diskSize}
-                        disabled={disableControls}
-                      />
-                    }
+                    <DiskSizeSelector
+                      idPrefix='runtime'
+                      onChange={(size: number) =>
+                        setRuntimeConfig({
+                          ...runtimeConfig,
+                          diskConfig: {
+                            size,
+                            detachable: false,
+                            detachableType: null,
+                          },
+                        })
+                      }
+                      diskSize={runtimeConfig.diskConfig.size}
+                      disabled={disableControls}
+                    />
                   </div>
                   {enableGpu &&
                     runtimeConfig.computeType === ComputeType.Standard && (

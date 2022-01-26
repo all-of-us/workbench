@@ -37,14 +37,14 @@ export const RuntimeCostEstimator = ({
   costTextColor = colors.accent,
   style = {},
 }: Props) => {
-  const { computeType, diskSize, detachableDisk } = runtimeConfig;
+  const { computeType, diskConfig } = runtimeConfig;
   const runningCost = machineRunningCost(runtimeConfig);
   const runningCostBreakdown = machineRunningCostBreakdown(runtimeConfig);
   const storageCost = machineStorageCost(runtimeConfig);
   const storageCostBreakdown = machineStorageCostBreakdown(runtimeConfig);
   const costStyle = {
     ...styles.cost,
-    fontSize: detachableDisk ? '12px' : '15px',
+    fontSize: diskConfig.detachable ? '12px' : '15px',
     color: costTextColor,
   };
   return (
@@ -87,13 +87,13 @@ export const RuntimeCostEstimator = ({
           </div>
         </TooltipTrigger>
       </FlexColumn>
-      {detachableDisk && computeType === ComputeType.Standard && (
+      {diskConfig.detachable && computeType === ComputeType.Standard && (
         <FlexColumn style={styles.costSection}>
           <div style={{ fontSize: '10px', fontWeight: 600 }}>
             Persistent disk cost
           </div>
           <div style={costStyle} data-test-id='pd-cost'>
-            {formatUsd(diskSize * diskPricePerMonth)}/month
+            {formatUsd(diskConfig.size * diskPricePerMonth)}/month
           </div>
         </FlexColumn>
       )}
