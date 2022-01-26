@@ -1911,7 +1911,13 @@ const RuntimePanel = fp.flow(
                             runtimeConfig.computeType || ComputeType.Standard
                           }
                           onChange={({ value: computeType }) =>
-                            setRuntimeConfig({ ...runtimeConfig, computeType })
+                            // When the compute type changes, we need to normalize the config and potentially restore defualts.
+                            setRuntimeConfig(
+                              withRuntimeConfigDefaults(
+                                { ...runtimeConfig, computeType },
+                                persistentDisk
+                              )
+                            )
                           }
                         />
                         {runtimeConfig.computeType === ComputeType.Dataproc && (
