@@ -421,6 +421,12 @@ export async function waitWhileLoading(
   await waitUntilSpinnerGone(timeout); // Wait do not exceed timeout
 }
 
+/**
+ * Function verifies the page is a AoU application page and html documents has been loaded.
+ * @param page: Page
+ * @param timeout: number
+ * @returns Returns False if page is the Login or Create Account page. Otherwise, returns True for all other application pages.
+ */
 async function assertValidPage(page: Page, timeout: number): Promise<boolean> {
   const foundElement: ElementHandle = await Promise.race([
     page.waitForXPath(process.env.AUTHENTICATED_TEST_ID_XPATH, { timeout }), // authenticated page

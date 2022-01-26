@@ -75,7 +75,13 @@ export default abstract class BaseModal extends Container {
     return (await this.page.$x(this.xpath)).length > 0;
   }
 
-  // Override waitUntilClose in parent class Container.
+  /**
+   * Override waitUntilClose in parent class Container.
+   * waitForXPath(this.getXpath(), { hidden: true, visible: false, timeout }) does not work consistently for modal.
+   * when there are two or more visible modals and the modal to check on visibility is not the active (in front) modal.
+   * Workaround: Check element's offsetWidth and offsetHeight are greater than 0.
+   * @param timeout
+   */
   async waitUntilClose(timeout = 2 * 60 * 1000): Promise<void> {
     try {
       await this.page.waitForFunction(
