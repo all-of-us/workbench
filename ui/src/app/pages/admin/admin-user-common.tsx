@@ -38,6 +38,7 @@ import {
 } from 'app/utils/access-utils';
 import { hasRegisteredTierAccess } from 'app/utils/access-tiers';
 import { formatDate } from 'app/utils/dates';
+import { bypassedOrCompleteAndNotExpiring } from 'app/pages/access/access-renewal';
 
 export const commonStyles = reactStyles({
   semiBold: {
@@ -172,10 +173,12 @@ export const displayModuleStatus = (
   profile: Profile,
   moduleName: AccessModule
 ): string =>
-  isCompleted(profile, moduleName)
-    ? 'Completed'
-    : isBypassed(profile, moduleName)
-    ? 'ByPassed'
+  bypassedOrCompleteAndNotExpiring(
+    getAccessModuleStatusByName(profile, moduleName)
+  )
+    ? isCompleted(profile, moduleName)
+      ? 'Completed'
+      : 'ByPassed'
     : isExpired(profile, moduleName)
     ? 'Expired'
     : 'InComplete';
