@@ -68,7 +68,6 @@ const styles = reactStyles({
     color: colors.primary,
     fontSize: '18px',
     fontWeight: 'bold',
-    paddingLeft: '1em',
     paddingTop: '2em',
     lineHeight: '22px',
   },
@@ -295,20 +294,16 @@ interface TableRow {
 }
 
 const AccessModuleTable = (props: AccessModuleTableProps) => {
+  const { updatedProfile } = props;
+
   const tableData: TableRow[] = accessModulesForTable.map((moduleName) => {
     const { adminPageTitle, adminBypassable } =
       getAccessModuleConfig(moduleName);
 
     return {
       moduleName: adminPageTitle,
-      completionDate: displayModuleCompletionDate(
-        props.updatedProfile,
-        moduleName
-      ),
-      expirationDate: displayModuleExpirationDate(
-        props.updatedProfile,
-        moduleName
-      ),
+      completionDate: displayModuleCompletionDate(updatedProfile, moduleName),
+      expirationDate: displayModuleExpirationDate(updatedProfile, moduleName),
       bypassToggle: adminBypassable && (
         <ToggleForModule moduleName={moduleName} {...props} />
       ),
@@ -316,15 +311,35 @@ const AccessModuleTable = (props: AccessModuleTableProps) => {
   });
 
   return (
-    <FlexColumn>
-      <div style={styles.tableHeader}>Access status</div>
-      <DataTable style={{ paddingTop: '1em' }} value={tableData}>
-        <Column field='moduleName' header='Access Module' />
-        <Column field='completionDate' header='Last completed on' />
-        <Column field='expirationDate' header='Expires on' />
-        <Column field='bypassToggle' header='Bypass' />
-      </DataTable>
-    </FlexColumn>
+    <DataTable style={{ paddingTop: '1em' }} value={tableData}>
+      <Column field='moduleName' header='Access Module' />
+      <Column field='completionDate' header='Last completed on' />
+      <Column field='expirationDate' header='Expires on' />
+      <Column field='bypassToggle' header='Bypass' />
+    </DataTable>
+  );
+};
+
+const DisabledToggle = (props: {
+  currentlyDisabled: boolean;
+  previouslyDisabled: boolean;
+  toggleDisabled: () => void;
+}) => {
+  const { currentlyDisabled, previouslyDisabled, toggleDisabled } = props;
+  const highlightStyle =
+    currentlyDisabled !== previouslyDisabled
+      ? { background: colors.highlight }
+      : {};
+
+  return (
+    <div style={highlightStyle}>
+      <Toggle
+        style={{ paddingTop: '2em', paddingLeft: '2em', flexGrow: 0 }}
+        name={currentlyDisabled ? 'Account disabled' : 'Account enabled'}
+        checked={!currentlyDisabled}
+        onToggle={() => toggleDisabled()}
+      />
+    </div>
   );
 };
 
@@ -472,6 +487,10 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
     setBypassChangeRequests([...otherModuleRequests, accessBypassRequest]);
   };
 
+  const toggleDisabledStatus = () => {
+    updateProfile({ disabled: !updatedProfile.disabled });
+  };
+
   const errors = validate(
     {
       contactEmail: !!updatedProfile?.contactEmail,
@@ -554,6 +573,15 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
             />
           </FlexRow>
           <FlexRow>
+            <FlexColumn>
+              <FlexRow>
+                <div style={styles.tableHeader}>Access status</div>
+                <DisabledToggle
+                  currentlyDisabled={updatedProfile.disabled}
+                  previouslyDisabled={oldProfile.disabled}
+                  toggleDisabled={() => toggleDisabledStatus()}
+                />
+              </FlexRow>
             <AccessModuleTable
               oldProfile={oldProfile}
               updatedProfile={updatedProfile}
@@ -561,7 +589,7 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
               bypassUpdate={(accessBypassRequest) =>
                 updateModuleBypassStatus(accessBypassRequest)
               }
-            />
+            /></FlexColumn>
           </FlexRow>
           <FlexRow style={{ paddingTop: '1em' }}>
             <ErrorsTooltip errors={errors}>

@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import javax.inject.Provider;
 import org.pmiops.workbench.actionaudit.ActionAuditQueryService;
+import org.pmiops.workbench.actionaudit.auditors.AuthDomainAuditor;
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.config.WorkbenchConfig;
