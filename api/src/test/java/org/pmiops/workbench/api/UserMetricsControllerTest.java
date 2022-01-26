@@ -242,7 +242,7 @@ public class UserMetricsControllerTest {
     assertThat(recentResources.get(0).getNotebook().getPath()).isEqualTo("gs://bucketFile/");
     assertThat(recentResources.get(0).getNotebook().getName()).isEqualTo("notebook.ipynb");
   }
-  // To do add test for recently resource
+
   @Test
   public void testGetUserRecentResourceWithDuplicatedNameInPath() {
     dbUserRecentlyModifiedResource1.setNotebookName(
