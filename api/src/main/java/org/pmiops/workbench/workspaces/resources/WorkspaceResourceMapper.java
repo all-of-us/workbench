@@ -10,6 +10,7 @@ import org.pmiops.workbench.dataset.mapper.DataSetMapper;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.db.model.DbUserRecentResource;
+import org.pmiops.workbench.db.model.DbUserRecentlyModifiedResource;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.model.CohortReview;
@@ -81,6 +82,14 @@ public interface WorkspaceResourceMapper {
   @Mapping(target = "lastModifiedEpochMillis", source = "dbUserRecentResource.lastAccessDate")
   ResourceFields fromDbUserRecentResource(DbUserRecentResource dbUserRecentResource);
 
+  @Mapping(target = "cohortReview", ignore = true)
+  @Mapping(target = "notebook", source = "notebookName")
+  @Mapping(
+      target = "lastModifiedEpochMillis",
+      source = "dbUserRecentlyModifiedResource.lastAccessDate")
+  ResourceFields fromDbUserRecentResource(
+      DbUserRecentlyModifiedResource dbUserRecentlyModifiedResource);
+
   @Mapping(target = "permission", source = "accessLevel")
   WorkspaceResource mergeWorkspaceAndResourceFields(
       WorkspaceFields workspaceFields,
@@ -122,6 +131,14 @@ public interface WorkspaceResourceMapper {
 
   default WorkspaceResource fromDbUserRecentResource(
       DbUserRecentResource dbUserRecentResource,
+      FirecloudWorkspaceResponse fcWorkspace,
+      DbWorkspace dbWorkspace) {
+    return mergeWorkspaceAndResourceFields(
+        fromWorkspace(dbWorkspace), fcWorkspace, fromDbUserRecentResource(dbUserRecentResource));
+  }
+
+  default WorkspaceResource fromDbUserRecentlyModifiedResource(
+      DbUserRecentlyModifiedResource dbUserRecentResource,
       FirecloudWorkspaceResponse fcWorkspace,
       DbWorkspace dbWorkspace) {
     return mergeWorkspaceAndResourceFields(

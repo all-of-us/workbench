@@ -10,6 +10,7 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.DbRetryUtils;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbConceptSet;
+import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.db.model.DbUserRecentResource;
 import org.pmiops.workbench.db.model.DbUserRecentlyModifiedResource;
 import org.pmiops.workbench.exceptions.ServerErrorException;
@@ -22,6 +23,7 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
   private Clock clock;
   private CohortDao cohortDao;
   private ConceptSetDao conceptSetDao;
+  private DataSetDao dataSetDao;
   private UserRecentResourceDao userRecentResourceDao;
   private UserRecentlyModifiedResourceDao userRecentlyModifiedResourceDao;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
@@ -31,12 +33,14 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
       Clock clock,
       CohortDao cohortDao,
       ConceptSetDao conceptSetDao,
+      DataSetDao dataSetDao,
       UserRecentlyModifiedResourceDao userRecentlyModifiedResourceDao,
       UserRecentResourceDao userRecentResourceDao,
       Provider<WorkbenchConfig> workbenchConfigProvider) {
     this.clock = clock;
     this.cohortDao = cohortDao;
     this.conceptSetDao = conceptSetDao;
+    this.dataSetDao = dataSetDao;
     this.userRecentlyModifiedResourceDao = userRecentlyModifiedResourceDao;
     this.userRecentResourceDao = userRecentResourceDao;
     this.workbenchConfigProvider = workbenchConfigProvider;
@@ -253,6 +257,69 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
     } catch (InterruptedException e) {
       throw new ServerErrorException("Unable to find Resources for user" + userId);
     }
+  }
+
+  @Override
+  public List<DbUserRecentlyModifiedResource> findAllRecentlyModifiedResourcesByUser(long userId) {
+    try {
+      System.out.println("in here");
+      return DbRetryUtils.executeAndRetry(
+          () -> populateRecentlyModifiedResources(userId), Duration.ofSeconds(1), 5);
+    } catch (InterruptedException e) {
+      throw new ServerErrorException(
+          "Unable to find Recently Modified Resources for user" + userId);
+    }
+  }
+
+  public List<DbUserRecentlyModifiedResource> populateRecentlyModifiedResources(long userId) {
+    List<DbUserRecentlyModifiedResource> userList =
+        userRecentlyModifiedResourceDao.findDbUserRecentResourcesByUserId(userId);
+    userList.stream()
+        .forEach(
+            userRecentResource -> {
+              switch (userRecentResource.getResourceType()) {
+                case COHORT:
+                  userRecentResource.setCohort(getCohort(userRecentResource));
+                  break;
+                case CONCEPT_SET:
+                  userRecentResource.setConceptSet(getConceptSet(userRecentResource));
+                  break;
+                case DATA_SET:
+                  userRecentResource.setDataSet(getDataSet(userRecentResource));
+                  break;
+                case NOTEBOOK:
+                  userRecentResource.setNotebookName(getNotebookName(userRecentResource));
+                  break;
+              }
+            });
+    return userList;
+  }
+
+  private DbCohort getCohort(DbUserRecentlyModifiedResource dbUserRecentlyModifiedResource) {
+    return cohortDao.findCohortByWorkspaceIdAndCohortId(
+        dbUserRecentlyModifiedResource.getWorkspaceId(),
+        Long.parseLong(dbUserRecentlyModifiedResource.getResourceId()));
+  }
+
+  private DbConceptSet getConceptSet(
+      DbUserRecentlyModifiedResource dbUserRecentlyModifiedResource) {
+    return conceptSetDao
+        .findByWorkspaceIdAndConceptSetId(
+            dbUserRecentlyModifiedResource.getWorkspaceId(),
+            Long.parseLong(dbUserRecentlyModifiedResource.getResourceId()))
+        .orElse(null);
+  }
+
+  private DbDataset getDataSet(DbUserRecentlyModifiedResource dbUserRecentlyModifiedResource) {
+    return dataSetDao
+        .findByDataSetIdAndWorkspaceId(
+            Long.parseLong(dbUserRecentlyModifiedResource.getResourceId()),
+            dbUserRecentlyModifiedResource.getWorkspaceId())
+        .orElse(null);
+  }
+
+  private String getNotebookName(DbUserRecentlyModifiedResource dbUserRecentlyModifiedResource) {
+    return dbUserRecentlyModifiedResource.getResourceId();
   }
 
   /**

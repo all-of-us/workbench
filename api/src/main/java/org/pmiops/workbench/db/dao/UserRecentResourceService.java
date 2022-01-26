@@ -2,6 +2,7 @@ package org.pmiops.workbench.db.dao;
 
 import java.util.List;
 import org.pmiops.workbench.db.model.DbUserRecentResource;
+import org.pmiops.workbench.db.model.DbUserRecentlyModifiedResource;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -31,4 +32,6 @@ public interface UserRecentResourceService {
   void deleteCohortReviewEntry(long workspaceId, long userId, long cohortReviewId);
 
   List<DbUserRecentResource> findAllResourcesByUser(long userId);
+
+  List<DbUserRecentlyModifiedResource> findAllRecentlyModifiedResourcesByUser(long userId);
 }

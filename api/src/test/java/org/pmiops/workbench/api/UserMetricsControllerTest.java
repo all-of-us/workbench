@@ -34,6 +34,7 @@ import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserRecentResource;
+import org.pmiops.workbench.db.model.DbUserRecentlyModifiedResource;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
@@ -79,9 +80,13 @@ public class UserMetricsControllerTest {
   private UserMetricsController userMetricsController;
 
   private DbUser dbUser;
-  private DbUserRecentResource dbUserRecentResource1;
-  private DbUserRecentResource dbUserRecentResource2;
-  private DbUserRecentResource dbUserRecentResource3;
+  //  private DbUserRecentResource dbUserRecentResource1;
+  //  private DbUserRecentResource dbUserRecentResource2;
+  //  private DbUserRecentResource dbUserRecentResource3;
+
+  private DbUserRecentlyModifiedResource dbUserRecentResource1;
+  private DbUserRecentlyModifiedResource dbUserRecentResource2;
+  private DbUserRecentlyModifiedResource dbUserRecentResource3;
 
   private DbWorkspace dbWorkspace1;
   private DbWorkspace dbWorkspace2;
@@ -139,23 +144,25 @@ public class UserMetricsControllerTest {
     dbWorkspace2.setFirecloudName("firecloudName2");
     dbWorkspace2.setCdrVersion(dbCdrVersion);
 
-    dbUserRecentResource1 = new DbUserRecentResource();
+    dbUserRecentResource1 = new DbUserRecentlyModifiedResource();
+    dbUserRecentResource1.setResourceType(
+        DbUserRecentlyModifiedResource.DbUserRecentlyModifiedResourceType.NOTEBOOK);
     dbUserRecentResource1.setNotebookName("gs://bucketFile/notebooks/notebook1.ipynb");
-    dbUserRecentResource1.setCohort(null);
     dbUserRecentResource1.setLastAccessDate(new Timestamp(fakeClock.millis()));
     dbUserRecentResource1.setUserId(dbUser.getUserId());
     dbUserRecentResource1.setWorkspaceId(dbWorkspace1.getWorkspaceId());
 
-    dbUserRecentResource2 = new DbUserRecentResource();
-    dbUserRecentResource2.setNotebookName(null);
+    dbUserRecentResource2 = new DbUserRecentlyModifiedResource();
+    dbUserRecentResource2.setResourceType(
+        DbUserRecentlyModifiedResource.DbUserRecentlyModifiedResourceType.COHORT);
     dbUserRecentResource2.setCohort(dbCohort);
     dbUserRecentResource2.setLastAccessDate(new Timestamp(fakeClock.millis() - 10000));
     dbUserRecentResource2.setUserId(dbUser.getUserId());
     dbUserRecentResource2.setWorkspaceId(dbWorkspace2.getWorkspaceId());
 
-    dbUserRecentResource3 = new DbUserRecentResource();
-    dbUserRecentResource3.setNotebookName("gs://bucketFile/notebooks/notebook2.ipynb");
-    dbUserRecentResource3.setCohort(null);
+    dbUserRecentResource3 = new DbUserRecentlyModifiedResource();
+    dbUserRecentResource3.setResourceType(
+        DbUserRecentlyModifiedResource.DbUserRecentlyModifiedResourceType.CONCEPT_SET);
     dbUserRecentResource3.setConceptSet(dbConceptSet);
     dbUserRecentResource3.setLastAccessDate(new Timestamp(fakeClock.millis() - 10000));
     dbUserRecentResource3.setUserId(dbUser.getUserId());
@@ -180,7 +187,7 @@ public class UserMetricsControllerTest {
 
     when(mockUserProvider.get()).thenReturn(dbUser);
 
-    when(mockUserRecentResourceService.findAllResourcesByUser(dbUser.getUserId()))
+    when(mockUserRecentResourceService.findAllRecentlyModifiedResourcesByUser(dbUser.getUserId()))
         .thenReturn(
             Arrays.asList(dbUserRecentResource1, dbUserRecentResource2, dbUserRecentResource3));
 
@@ -226,7 +233,7 @@ public class UserMetricsControllerTest {
   @Test
   public void testGetUserRecentResourceFromRawBucket() {
     dbUserRecentResource1.setNotebookName("gs://bucketFile/notebook.ipynb");
-    when(mockUserRecentResourceService.findAllResourcesByUser(dbUser.getUserId()))
+    when(mockUserRecentResourceService.findAllRecentlyModifiedResourcesByUser(dbUser.getUserId()))
         .thenReturn(Collections.singletonList(dbUserRecentResource1));
 
     WorkspaceResourceResponse recentResources =
@@ -235,11 +242,11 @@ public class UserMetricsControllerTest {
     assertThat(recentResources.get(0).getNotebook().getPath()).isEqualTo("gs://bucketFile/");
     assertThat(recentResources.get(0).getNotebook().getName()).isEqualTo("notebook.ipynb");
   }
-
+  // To do add test for recently resource
   @Test
   public void testGetUserRecentResourceWithDuplicatedNameInPath() {
     dbUserRecentResource1.setNotebookName("gs://bucketFile/nb.ipynb/intermediate/nb.ipynb");
-    when(mockUserRecentResourceService.findAllResourcesByUser(dbUser.getUserId()))
+    when(mockUserRecentResourceService.findAllRecentlyModifiedResourcesByUser(dbUser.getUserId()))
         .thenReturn(Collections.singletonList(dbUserRecentResource1));
 
     WorkspaceResourceResponse recentResources =
@@ -253,7 +260,7 @@ public class UserMetricsControllerTest {
   @Test
   public void testGetUserRecentResourceWithSpacesInPath() {
     dbUserRecentResource1.setNotebookName("gs://bucketFile/note books/My favorite notebook.ipynb");
-    when(mockUserRecentResourceService.findAllResourcesByUser(dbUser.getUserId()))
+    when(mockUserRecentResourceService.findAllRecentlyModifiedResourcesByUser(dbUser.getUserId()))
         .thenReturn(Collections.singletonList(dbUserRecentResource1));
 
     WorkspaceResourceResponse recentResources =
@@ -268,7 +275,7 @@ public class UserMetricsControllerTest {
   @Test
   public void testGetUserRecentResourceInvalidURINotebookPath() {
     dbUserRecentResource1.setNotebookName("my local notebook directory: notebook.ipynb");
-    when(mockUserRecentResourceService.findAllResourcesByUser(dbUser.getUserId()))
+    when(mockUserRecentResourceService.findAllRecentlyModifiedResourcesByUser(dbUser.getUserId()))
         .thenReturn(Collections.singletonList(dbUserRecentResource1));
 
     WorkspaceResourceResponse recentResources =
@@ -280,7 +287,7 @@ public class UserMetricsControllerTest {
   @Test
   public void testGetUserRecentResourceNotebookPathEndsWithSlash() {
     dbUserRecentResource1.setNotebookName("gs://bucketFile/notebooks/notebook.ipynb/");
-    when(mockUserRecentResourceService.findAllResourcesByUser(dbUser.getUserId()))
+    when(mockUserRecentResourceService.findAllRecentlyModifiedResourcesByUser(dbUser.getUserId()))
         .thenReturn(Collections.singletonList(dbUserRecentResource1));
 
     WorkspaceResourceResponse recentResources =
@@ -295,7 +302,7 @@ public class UserMetricsControllerTest {
   @Test
   public void testGetUserRecentResource_notebookNameWithParen() {
     dbUserRecentResource1.setNotebookName("gs://bucketFile/notebooks/notebook :).ipynb");
-    when(mockUserRecentResourceService.findAllResourcesByUser(dbUser.getUserId()))
+    when(mockUserRecentResourceService.findAllRecentlyModifiedResourcesByUser(dbUser.getUserId()))
         .thenReturn(Collections.singletonList(dbUserRecentResource1));
 
     WorkspaceResourceResponse recentResources =
@@ -309,7 +316,7 @@ public class UserMetricsControllerTest {
     dbUserRecentResource1.setNotebookName("gs://bkt/notebooks/notebook.ipynb");
     dbUserRecentResource2.setCohort(null);
     dbUserRecentResource2.setNotebookName("gs://bkt/notebooks/not-found.ipynb");
-    when(mockUserRecentResourceService.findAllResourcesByUser(dbUser.getUserId()))
+    when(mockUserRecentResourceService.findAllRecentlyModifiedResourcesByUser(dbUser.getUserId()))
         .thenReturn(ImmutableList.of(dbUserRecentResource1, dbUserRecentResource2));
     when(mockCloudStorageClient.getExistingBlobIdsIn(anyList()))
         .thenReturn(ImmutableSet.of(BlobId.of("bkt", "notebooks/notebook.ipynb")));
@@ -340,7 +347,7 @@ public class UserMetricsControllerTest {
   @Test
   public void testGetUserRecentResources_missingWorkspace() {
     dbUserRecentResource1.setWorkspaceId(9999); // missing workspace
-    when(mockUserRecentResourceService.findAllResourcesByUser(dbUser.getUserId()))
+    when(mockUserRecentResourceService.findAllRecentlyModifiedResourcesByUser(dbUser.getUserId()))
         .thenReturn(ImmutableList.of(dbUserRecentResource1, dbUserRecentResource2));
     WorkspaceResourceResponse recentResources =
         userMetricsController.getUserRecentResources().getBody();

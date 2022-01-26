@@ -21,6 +21,7 @@ import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserRecentResource;
+import org.pmiops.workbench.db.model.DbUserRecentlyModifiedResource;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
@@ -121,11 +122,12 @@ public class UserMetricsController implements UserMetricsApiDelegate {
   @Override
   public ResponseEntity<WorkspaceResourceResponse> getUserRecentResources() {
     long userId = userProvider.get().getUserId();
-    List<DbUserRecentResource> userRecentResourceList =
-        userRecentResourceService.findAllResourcesByUser(userId);
+    List<DbUserRecentlyModifiedResource> userRecentlyModifiedResourceList =
+        userRecentResourceService.findAllRecentlyModifiedResourcesByUser(userId);
+
     List<Long> workspaceIdList =
-        userRecentResourceList.stream()
-            .map(DbUserRecentResource::getWorkspaceId)
+        userRecentlyModifiedResourceList.stream()
+            .map(DbUserRecentlyModifiedResource::getWorkspaceId)
             .distinct()
             .limit(distinctWorkspaceLimit)
             .collect(Collectors.toList());
@@ -160,8 +162,8 @@ public class UserMetricsController implements UserMetricsApiDelegate {
                 ImmutableMap.toImmutableMap(
                     SimpleImmutableEntry::getKey, SimpleImmutableEntry::getValue));
 
-    final ImmutableList<DbUserRecentResource> workspaceFilteredResources =
-        userRecentResourceList.stream()
+    final ImmutableList<DbUserRecentlyModifiedResource> workspaceFilteredResources =
+        userRecentlyModifiedResourceList.stream()
             .filter(r -> idToFirecloudWorkspace.containsKey(r.getWorkspaceId()))
             .filter(this::hasValidBlobIdIfNotebookNamePresent)
             .collect(ImmutableList.toImmutableList());
@@ -176,7 +178,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
     final Set<BlobId> foundBlobIds =
         cloudStorageClient.getExistingBlobIdsIn(
             workspaceFilteredResources.stream()
-                .map(DbUserRecentResource::getNotebookName)
+                .map(DbUserRecentlyModifiedResource::getNotebookName)
                 .map(this::uriToBlobId)
                 .flatMap(Streams::stream)
                 .limit(MAX_RECENT_NOTEBOOKS)
@@ -184,7 +186,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
 
     final ImmutableList<WorkspaceResource> userVisibleRecentResources =
         workspaceFilteredResources.stream()
-            .filter(urr -> foundBlobIdsContainsUserRecentResource(foundBlobIds, urr))
+            .filter(urr -> foundBlobIdsContainsUserRecentlyModifiedResource(foundBlobIds, urr))
             .map(urr -> buildRecentResource(idToDbWorkspace, idToFirecloudWorkspace, urr))
             .collect(ImmutableList.toImmutableList());
     final WorkspaceResourceResponse recentResponse = new WorkspaceResourceResponse();
@@ -193,8 +195,17 @@ public class UserMetricsController implements UserMetricsApiDelegate {
     return ResponseEntity.ok(recentResponse);
   }
 
+  @Deprecated
   private Boolean foundBlobIdsContainsUserRecentResource(
       Set<BlobId> foundNotebooks, DbUserRecentResource urr) {
+    return Optional.ofNullable(urr.getNotebookName())
+        .flatMap(this::uriToBlobId)
+        .map(foundNotebooks::contains)
+        .orElse(true);
+  }
+
+  private Boolean foundBlobIdsContainsUserRecentlyModifiedResource(
+      Set<BlobId> foundNotebooks, DbUserRecentlyModifiedResource urr) {
     return Optional.ofNullable(urr.getNotebookName())
         .flatMap(this::uriToBlobId)
         .map(foundNotebooks::contains)
@@ -208,6 +219,14 @@ public class UserMetricsController implements UserMetricsApiDelegate {
         .orElse(true);
   }
 
+  @VisibleForTesting
+  public boolean hasValidBlobIdIfNotebookNamePresent(
+      DbUserRecentlyModifiedResource dbUserRecentResource) {
+    return Optional.ofNullable(dbUserRecentResource.getNotebookName())
+        .map(name -> uriToBlobId(name).isPresent())
+        .orElse(true);
+  }
+
   private WorkspaceResource buildRecentResource(
       Map<Long, DbWorkspace> idToDbWorkspace,
       Map<Long, FirecloudWorkspaceResponse> idToFcWorkspaceResponse,
@@ -216,6 +235,18 @@ public class UserMetricsController implements UserMetricsApiDelegate {
     final long workspaceId = dbUserRecentResource.getWorkspaceId();
     return workspaceResourceMapper.fromDbUserRecentResource(
         dbUserRecentResource,
+        idToFcWorkspaceResponse.get(workspaceId),
+        idToDbWorkspace.get(workspaceId));
+  }
+
+  private WorkspaceResource buildRecentResource(
+      Map<Long, DbWorkspace> idToDbWorkspace,
+      Map<Long, FirecloudWorkspaceResponse> idToFcWorkspaceResponse,
+      DbUserRecentlyModifiedResource dbUserRecentlyModifiedResource) {
+
+    final long workspaceId = dbUserRecentlyModifiedResource.getWorkspaceId();
+    return workspaceResourceMapper.fromDbUserRecentlyModifiedResource(
+        dbUserRecentlyModifiedResource,
         idToFcWorkspaceResponse.get(workspaceId),
         idToDbWorkspace.get(workspaceId));
   }

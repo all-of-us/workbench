@@ -9,6 +9,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 @Entity
 @Table(name = "user_recently_modified_resource")
@@ -27,6 +28,10 @@ public class DbUserRecentlyModifiedResource {
   private DbUserRecentlyModifiedResourceType resourceTypeEnum;
   private String resourceId;
   private Timestamp lastAccessDate;
+  private DbCohort cohort;
+  private DbConceptSet conceptSet;
+  private DbDataset dataSet;
+  private String notebookName;
 
   public DbUserRecentlyModifiedResource() {}
 
@@ -97,5 +102,41 @@ public class DbUserRecentlyModifiedResource {
 
   public void setLastAccessDate(Timestamp lastAccessDate) {
     this.lastAccessDate = lastAccessDate;
+  }
+
+  @Transient
+  public DbCohort getCohort() {
+    return cohort;
+  }
+
+  public void setCohort(DbCohort cohort) {
+    this.cohort = cohort;
+  }
+
+  @Transient
+  public DbConceptSet getConceptSet() {
+    return conceptSet;
+  }
+
+  public void setConceptSet(DbConceptSet conceptSet) {
+    this.conceptSet = conceptSet;
+  }
+
+  @Transient
+  public DbDataset getDataSet() {
+    return dataSet;
+  }
+
+  public void setDataSet(DbDataset dataSet) {
+    this.dataSet = dataSet;
+  }
+
+  @Transient
+  public String getNotebookName() {
+    return notebookName;
+  }
+
+  public void setNotebookName(String notebookName) {
+    this.notebookName = notebookName;
   }
 }
