@@ -487,10 +487,6 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
     setBypassChangeRequests([...otherModuleRequests, accessBypassRequest]);
   };
 
-  const toggleDisabledStatus = () => {
-    updateProfile({ disabled: !updatedProfile.disabled });
-  };
-
   const errors = validate(
     {
       contactEmail: !!updatedProfile?.contactEmail,
@@ -579,8 +575,9 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
                 <DisabledToggle
                   currentlyDisabled={updatedProfile.disabled}
                   previouslyDisabled={oldProfile.disabled}
-                  toggleDisabled={() => toggleDisabledStatus()}
-                />
+                  toggleDisabled={() =>
+                    updateProfile({ disabled: !updatedProfile.disabled })
+                  } />
               </FlexRow>
             <AccessModuleTable
               oldProfile={oldProfile}
