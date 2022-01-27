@@ -134,7 +134,7 @@ export class ProfileApiStub extends ProfileApi {
   }
 
   public submitDUCC(duccVersion: number) {
-    this.profile.dataUseAgreementSignedVersion = duccVersion;
+    this.profile.duccSignedVersion = duccVersion;
     return Promise.resolve(this.profile);
   }
 

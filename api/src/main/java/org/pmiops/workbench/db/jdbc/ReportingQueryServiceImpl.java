@@ -190,7 +190,7 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 + "  u.creation_time,\n"
                 + "  uamd.data_use_agreement_bypass_time,\n"
                 + "  uamd.data_use_agreement_completion_time,\n"
-                + "  u.data_use_agreement_signed_version,\n"
+                + "  ducc.signed_version AS ducc_signed_version,\n"
                 + "  u.demographic_survey_completion_time,\n"
                 + "  u.disabled,\n"
                 + "  uame.era_commons_bypass_time,\n"
@@ -229,6 +229,7 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 + "FROM user u"
                 + "  LEFT OUTER JOIN address AS a ON u.user_id = a.user_id\n"
                 + "  LEFT OUTER JOIN user_verified_institutional_affiliation AS via on u.user_id = via.user_id\n"
+                + "  LEFT OUTER JOIN user_code_of_conduct_agreement AS ducc on u.user_id = ducc.user_id\n"
                 + "  LEFT OUTER JOIN "
                 + "  ( "
                 + "       SELECT \n"
@@ -319,7 +320,7 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                     offsetDateTimeUtc(rs.getTimestamp("data_use_agreement_bypass_time")))
                 .dataUseAgreementCompletionTime(
                     offsetDateTimeUtc(rs.getTimestamp("data_use_agreement_completion_time")))
-                .dataUseAgreementSignedVersion(rs.getInt("data_use_agreement_signed_version"))
+                .dataUseAgreementSignedVersion(rs.getInt("ducc_signed_version"))
                 .demographicSurveyCompletionTime(
                     offsetDateTimeUtc(rs.getTimestamp("demographic_survey_completion_time")))
                 .disabled(rs.getBoolean("disabled"))

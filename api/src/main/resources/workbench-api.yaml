@@ -5740,10 +5740,10 @@ definitions:
         description: The FireCloud-calculated expiration time
         format: int64
         default: 0
-      dataUseAgreementSignedVersion:
+      duccSignedVersion:
         type: integer
         format: int32
-        description: Version of the data use agreement that the user last signed.
+        description: Version of the data user code of conduct agreement that the user last signed.
       address:
         "$ref": "#/definitions/Address"
       freeTierUsage:

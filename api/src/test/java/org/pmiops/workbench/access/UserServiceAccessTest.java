@@ -38,6 +38,7 @@ import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserAccessTier;
+import org.pmiops.workbench.db.model.DbUserCodeOfConductAgreement;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.DirectoryService;
@@ -224,17 +225,17 @@ public class UserServiceAccessTest {
 
   @Test
   public void testSimulateUserFlowThroughRenewal() {
-    // initialize user as registered with generic values including bypassed DUA
+    // initialize user as registered with generic values including bypassed DUCC
 
     dbUser = updateUserWithRetries(registerUserNow);
     assertRegisteredTierEnabled(dbUser);
 
-    // add a proper DUA completion which will expire soon, but remove DUA bypass
+    // add a proper DUCC completion which will expire soon, but remove DUCC bypass
 
-    dbUser.setDataUseAgreementSignedVersion(accessModuleService.getCurrentDuccVersion());
+    dbUser.setDuccAgreement(signCurrentDucc(dbUser));
     accessModuleService.updateCompletionTime(
         dbUser, AccessModuleName.DATA_USER_CODE_OF_CONDUCT, willExpireAfter(Duration.ofDays(1)));
-    dbUser = updateUserWithRetries(this::removeDuaBypass);
+    dbUser = updateUserWithRetries(this::removeDuccBypass);
 
     // User is compliant
     assertRegisteredTierEnabled(dbUser);
@@ -244,14 +245,14 @@ public class UserServiceAccessTest {
     dbUser = updateUserAccessTiers();
     assertRegisteredTierDisabled(dbUser);
 
-    // Simulate user filling out DUA, becoming compliant again
+    // Simulate user filling out DUCC, becoming compliant again
     accessModuleService.updateCompletionTime(
         dbUser, AccessModuleName.DATA_USER_CODE_OF_CONDUCT, new Timestamp(PROVIDED_CLOCK.millis()));
     dbUser = updateUserAccessTiers();
     assertRegisteredTierEnabled(dbUser);
   }
 
-  private DbUser removeDuaBypass(DbUser user) {
+  private DbUser removeDuccBypass(DbUser user) {
     accessModuleService.updateBypassTime(
         user.getUserId(), AccessModule.DATA_USER_CODE_OF_CONDUCT, false);
     return userDao.save(user);
@@ -324,11 +325,11 @@ public class UserServiceAccessTest {
         });
   }
 
-  // DUA can be bypassed, and is subject to annual renewal.
-  // A missing DUA version or a version other than the latest is also noncompliant.
+  // DUCC can be bypassed, and is subject to annual renewal.
+  // A missing DUCC version or a version other than the latest is also noncompliant.
 
   @Test
-  public void test_updateUserWithRetries_dua_unbypassed_aar_noncompliant() {
+  public void test_updateUserWithRetries_ducc_unbypassed_aar_noncompliant() {
     testUnregistration(
         user -> {
           accessModuleService.updateBypassTime(
@@ -338,32 +339,32 @@ public class UserServiceAccessTest {
   }
 
   @Test
-  public void test_updateUserWithRetries_dua_unbypassed_aar_missing_version_noncompliant() {
-    testUnregistration(
-        user -> {
-          accessModuleService.updateBypassTime(
-              dbUser.getUserId(), AccessModule.DATA_USER_CODE_OF_CONDUCT, false);
-          accessModuleService.updateCompletionTime(
-              dbUser, AccessModuleName.DATA_USER_CODE_OF_CONDUCT, Timestamp.from(START_INSTANT));
-          return userDao.save(user);
-        });
-  }
-
-  @Test
-  public void test_updateUserWithRetries_dua_unbypassed_aar_wrong_version_noncompliant() {
+  public void test_updateUserWithRetries_ducc_unbypassed_aar_missing_version_noncompliant() {
     testUnregistration(
         user -> {
           accessModuleService.updateBypassTime(
               dbUser.getUserId(), AccessModule.DATA_USER_CODE_OF_CONDUCT, false);
           accessModuleService.updateCompletionTime(
               dbUser, AccessModuleName.DATA_USER_CODE_OF_CONDUCT, Timestamp.from(START_INSTANT));
-          user.setDataUseAgreementSignedVersion(accessModuleService.getCurrentDuccVersion() - 1);
           return userDao.save(user);
         });
   }
 
   @Test
-  public void test_updateUserWithRetries_dua_unbypassed_aar_expired_noncompliant() {
+  public void test_updateUserWithRetries_ducc_unbypassed_aar_wrong_version_noncompliant() {
+    testUnregistration(
+        user -> {
+          accessModuleService.updateBypassTime(
+              dbUser.getUserId(), AccessModule.DATA_USER_CODE_OF_CONDUCT, false);
+          accessModuleService.updateCompletionTime(
+              dbUser, AccessModuleName.DATA_USER_CODE_OF_CONDUCT, Timestamp.from(START_INSTANT));
+          user.setDuccAgreement(signDucc(user, accessModuleService.getCurrentDuccVersion() - 1));
+          return userDao.save(user);
+        });
+  }
+
+  @Test
+  public void test_updateUserWithRetries_ducc_unbypassed_aar_expired_noncompliant() {
     testUnregistration(
         user -> {
           final Timestamp willExpire = Timestamp.from(START_INSTANT);
@@ -372,7 +373,7 @@ public class UserServiceAccessTest {
           accessModuleService.updateCompletionTime(
               dbUser, AccessModuleName.DATA_USER_CODE_OF_CONDUCT, willExpire);
 
-          user.setDataUseAgreementSignedVersion(accessModuleService.getCurrentDuccVersion());
+          user.setDuccAgreement(signCurrentDucc(user));
 
           advanceClockDays(EXPIRATION_DAYS + 1);
 
@@ -440,8 +441,8 @@ public class UserServiceAccessTest {
         dbUser, AccessModuleName.DATA_USER_CODE_OF_CONDUCT, now);
     accessModuleService.updateCompletionTime(dbUser, AccessModuleName.RT_COMPLIANCE_TRAINING, now);
 
-    // a completion requirement for DUCC (formerly "DUA" - TODO rename)
-    dbUser.setDataUseAgreementSignedVersion(accessModuleService.getCurrentDuccVersion());
+    // a completion requirement for DUCC
+    dbUser.setDuccAgreement(signCurrentDucc(dbUser));
 
     userService.maybeSendAccessExpirationEmail(dbUser);
 
@@ -478,8 +479,8 @@ public class UserServiceAccessTest {
     accessModuleService.updateCompletionTime(dbUser, AccessModuleName.PROFILE_CONFIRMATION, now);
     accessModuleService.updateCompletionTime(
         dbUser, AccessModuleName.DATA_USER_CODE_OF_CONDUCT, now);
-    // a completion requirement for DUCC (formerly "DUA" - TODO rename)
-    dbUser.setDataUseAgreementSignedVersion(accessModuleService.getCurrentDuccVersion());
+    // a completion requirement for DUCC
+    dbUser.setDuccAgreement(signCurrentDucc(dbUser));
 
     // expiring in 1 day (plus some) will trigger the 1-day warning
 
@@ -589,8 +590,8 @@ public class UserServiceAccessTest {
     accessModuleService.updateCompletionTime(
         dbUser, AccessModuleName.DATA_USER_CODE_OF_CONDUCT, now);
 
-    // a completion requirement for DUCC (formerly "DUA" - TODO rename)
-    dbUser.setDataUseAgreementSignedVersion(accessModuleService.getCurrentDuccVersion());
+    // a completion requirement for DUCC
+    dbUser.setDuccAgreement(signCurrentDucc(dbUser));
 
     // expiring in .5 days will not trigger an email
 
@@ -613,8 +614,8 @@ public class UserServiceAccessTest {
     accessModuleService.updateCompletionTime(
         dbUser, AccessModuleName.DATA_USER_CODE_OF_CONDUCT, now);
 
-    // a completion requirement for DUCC (formerly "DUA" - TODO rename)
-    dbUser.setDataUseAgreementSignedVersion(accessModuleService.getCurrentDuccVersion());
+    // a completion requirement for DUCC
+    dbUser.setDuccAgreement(signCurrentDucc(dbUser));
 
     // expiring in 30 days (plus) will trigger the 30-day warning
 
@@ -638,8 +639,8 @@ public class UserServiceAccessTest {
     accessModuleService.updateCompletionTime(
         dbUser, AccessModuleName.DATA_USER_CODE_OF_CONDUCT, now);
 
-    // a completion requirement for DUCC (formerly "DUA" - TODO rename)
-    dbUser.setDataUseAgreementSignedVersion(accessModuleService.getCurrentDuccVersion());
+    // a completion requirement for DUCC
+    dbUser.setDuccAgreement(signCurrentDucc(dbUser));
 
     // expiring in 31 days (plus) will not trigger a warning
     accessModuleService.updateCompletionTime(
@@ -660,8 +661,8 @@ public class UserServiceAccessTest {
     accessModuleService.updateCompletionTime(
         dbUser, AccessModuleName.PUBLICATION_CONFIRMATION, now);
 
-    // a completion requirement for DUCC (formerly "DUA" - TODO rename)
-    dbUser.setDataUseAgreementSignedVersion(accessModuleService.getCurrentDuccVersion());
+    // a completion requirement for DUCC
+    dbUser.setDuccAgreement(signCurrentDucc(dbUser));
 
     // expiring in 30 days (plus) would trigger the 30-day warning...
     final Duration thirtyPlus = daysPlusSome(30);
@@ -693,8 +694,8 @@ public class UserServiceAccessTest {
     accessModuleService.updateCompletionTime(
         dbUser, AccessModuleName.PUBLICATION_CONFIRMATION, now);
 
-    // a completion requirement for DUCC (formerly "DUA" - TODO rename)
-    dbUser.setDataUseAgreementSignedVersion(accessModuleService.getCurrentDuccVersion());
+    // a completion requirement for DUCC
+    dbUser.setDuccAgreement(signCurrentDucc(dbUser));
 
     // expiring in 15 days (plus) would trigger the 15-day warning...
     accessModuleService.updateCompletionTime(
@@ -719,8 +720,8 @@ public class UserServiceAccessTest {
     accessModuleService.updateCompletionTime(
         dbUser, AccessModuleName.DATA_USER_CODE_OF_CONDUCT, now);
 
-    // a completion requirement for DUCC (formerly "DUA" - TODO rename)
-    dbUser.setDataUseAgreementSignedVersion(accessModuleService.getCurrentDuccVersion());
+    // a completion requirement for DUCC
+    dbUser.setDuccAgreement(signCurrentDucc(dbUser));
 
     // but this is expired
     final Duration oneHour = Duration.ofHours(1);
@@ -746,8 +747,8 @@ public class UserServiceAccessTest {
     accessModuleService.updateCompletionTime(
         dbUser, AccessModuleName.DATA_USER_CODE_OF_CONDUCT, now);
 
-    // a completion requirement for DUCC (formerly "DUA" - TODO rename)
-    dbUser.setDataUseAgreementSignedVersion(accessModuleService.getCurrentDuccVersion());
+    // a completion requirement for DUCC
+    dbUser.setDuccAgreement(signCurrentDucc(dbUser));
 
     // but this expired yesterday
 
@@ -1187,6 +1188,15 @@ public class UserServiceAccessTest {
     PROVIDED_CLOCK.increment(daysPlusSome(days).toMillis());
   }
 
+  private DbUserCodeOfConductAgreement signDucc(DbUser dbUser, int version) {
+    return TestMockFactory.createDuccAgreement(
+        dbUser, version, new Timestamp(PROVIDED_CLOCK.millis()));
+  }
+
+  private DbUserCodeOfConductAgreement signCurrentDucc(DbUser dbUser) {
+    return signDucc(dbUser, accessModuleService.getCurrentDuccVersion());
+  }
+
   // checks which power most of these tests - confirm that the unregisteringFunction does that
   private void testUnregistration(Function<DbUser, DbUser> unregisteringFunction) {
     // initial state: user is unregistered (has no tier memberships)
@@ -1271,7 +1281,7 @@ public class UserServiceAccessTest {
     //        && complianceTrainingCompliant
     //        && eraCommonsCompliant
     //        && twoFactorAuthComplete
-    //        && dataUseAgreementCompliant
+    //        && duccCompliant
     //        && isPublicationsCompliant
     //        && isProfileCompliant
     //        && institutionEmailValid

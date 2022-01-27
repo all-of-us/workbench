@@ -13,6 +13,7 @@ import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.db.model.DbDemographicSurvey;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbUserCodeOfConductAgreement;
 import org.pmiops.workbench.model.Degree;
 import org.pmiops.workbench.model.Disability;
 import org.pmiops.workbench.model.Education;
@@ -59,7 +60,7 @@ public class ReportingUserFixture implements ReportingTestFixture<DbUser, Report
       Timestamp.from(Instant.parse("2015-05-14T00:00:00.00Z"));
   public static final Timestamp USER__DATA_USE_AGREEMENT_COMPLETION_TIME =
       Timestamp.from(Instant.parse("2015-05-15T00:00:00.00Z"));
-  public static final Integer USER__DATA_USE_AGREEMENT_SIGNED_VERSION = 11;
+  public static final Integer USER__DATA_USER_CODE_OF_CONDUCT_SIGNED_VERSION = 11;
   public static final Timestamp USER__DEMOGRAPHIC_SURVEY_COMPLETION_TIME =
       Timestamp.from(Instant.parse("2015-05-17T00:00:00.00Z"));
   public static final Boolean USER__DISABLED = false;
@@ -104,6 +105,9 @@ public class ReportingUserFixture implements ReportingTestFixture<DbUser, Report
   public static String USER__LGBTQ_IDENTITY = "foo_28";
   public static boolean USER__IDENTIFIES_AS_LGBTQ = false;
   public static ImmutableList<Degree> USER__DEGREES = ImmutableList.of(Degree.BA, Degree.ME);
+  public static String USER__INITIALS = "foo_29";
+  public static final Timestamp DATA_USER_CODE_OF_CONDUCT_COMPLETION_TIME =
+      Timestamp.from(Instant.parse("2015-05-31T00:00:00.00Z"));
 
   @Override
   public void assertDTOFieldsMatchConstants(ReportingUser user) {
@@ -117,7 +121,7 @@ public class ReportingUserFixture implements ReportingTestFixture<DbUser, Report
     assertTimeApprox(
         user.getDataUseAgreementCompletionTime(), USER__DATA_USE_AGREEMENT_COMPLETION_TIME);
     assertThat(user.getDataUseAgreementSignedVersion())
-        .isEqualTo(USER__DATA_USE_AGREEMENT_SIGNED_VERSION);
+        .isEqualTo(USER__DATA_USER_CODE_OF_CONDUCT_SIGNED_VERSION);
     assertTimeApprox(
         user.getDemographicSurveyCompletionTime(), USER__DEMOGRAPHIC_SURVEY_COMPLETION_TIME);
     assertThat(user.getDisabled()).isEqualTo(USER__DISABLED);
@@ -159,7 +163,6 @@ public class ReportingUserFixture implements ReportingTestFixture<DbUser, Report
     user.setAreaOfResearch(USER__AREA_OF_RESEARCH);
     user.setContactEmail(USER__CONTACT_EMAIL);
     user.setCreationTime(USER__CREATION_TIME);
-    user.setDataUseAgreementSignedVersion(USER__DATA_USE_AGREEMENT_SIGNED_VERSION);
     user.setDemographicSurveyCompletionTime(USER__DEMOGRAPHIC_SURVEY_COMPLETION_TIME);
     user.setDisabled(USER__DISABLED);
     user.setFamilyName(USER__FAMILY_NAME);
@@ -170,9 +173,15 @@ public class ReportingUserFixture implements ReportingTestFixture<DbUser, Report
     user.setProfessionalUrl(USER__PROFESSIONAL_URL);
     user.setUsername(USER__USERNAME);
     user.setDegreesEnum(USER__DEGREES);
+
     DbDemographicSurvey dbDemographicSurvey = createDbDemographicSurvey();
     dbDemographicSurvey.setUser(user);
     user.setDemographicSurvey(dbDemographicSurvey);
+
+    DbUserCodeOfConductAgreement duccAgreement = createDbUserCodeOfConductAgreement();
+    duccAgreement.setUser(user);
+    user.setDuccAgreement(duccAgreement);
+
     return user;
   }
 
@@ -187,7 +196,7 @@ public class ReportingUserFixture implements ReportingTestFixture<DbUser, Report
         .creationTime(offsetDateTimeUtc(USER__CREATION_TIME))
         .dataUseAgreementBypassTime(offsetDateTimeUtc(USER__DATA_USE_AGREEMENT_BYPASS_TIME))
         .dataUseAgreementCompletionTime(offsetDateTimeUtc(USER__DATA_USE_AGREEMENT_COMPLETION_TIME))
-        .dataUseAgreementSignedVersion(USER__DATA_USE_AGREEMENT_SIGNED_VERSION)
+        .dataUseAgreementSignedVersion(USER__DATA_USER_CODE_OF_CONDUCT_SIGNED_VERSION)
         .demographicSurveyCompletionTime(
             offsetDateTimeUtc(USER__DEMOGRAPHIC_SURVEY_COMPLETION_TIME))
         .disabled(USER__DISABLED)
@@ -239,5 +248,15 @@ public class ReportingUserFixture implements ReportingTestFixture<DbUser, Report
     demographicSurvey.setIdentifiesAsLgbtq(USER__IDENTIFIES_AS_LGBTQ);
     demographicSurvey.setLgbtqIdentity(USER__LGBTQ_IDENTITY);
     return demographicSurvey;
+  }
+
+  public DbUserCodeOfConductAgreement createDbUserCodeOfConductAgreement() {
+    DbUserCodeOfConductAgreement duccAgreement = new DbUserCodeOfConductAgreement();
+    duccAgreement.setSignedVersion(USER__DATA_USER_CODE_OF_CONDUCT_SIGNED_VERSION);
+    duccAgreement.setUserFamilyName(USER__FAMILY_NAME);
+    duccAgreement.setUserGivenName(USER__GIVEN_NAME);
+    duccAgreement.setUserInitials(USER__INITIALS);
+    duccAgreement.setCompletionTime(DATA_USER_CODE_OF_CONDUCT_COMPLETION_TIME);
+    return duccAgreement;
   }
 }
