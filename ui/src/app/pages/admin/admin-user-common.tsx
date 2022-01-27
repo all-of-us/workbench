@@ -7,7 +7,7 @@ import { Link } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 import { Dropdown } from 'primereact/dropdown';
 
-import { formatInitialCreditsUSD, maybe, reactStyles } from 'app/utils';
+import { formatInitialCreditsUSD, reactStyles } from 'app/utils';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import {
   AccessBypassRequest,
@@ -213,7 +213,7 @@ export const updateAccountProperties = async (
 
   const accountDisabledStatus: AccountDisabledStatus =
     updateDisabledMaybe === undefined
-      ? undefined // temp check this
+      ? undefined
       : {
           disabled: updateDisabledMaybe, // play with null later
         };
