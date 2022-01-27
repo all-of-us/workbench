@@ -36,7 +36,9 @@ export const AdminUserAccess = () => {
   );
 
   const parseUserEmailInput = (input: string) => {
-    setUserEmails(input.split(/[,\n]+/).map((email) => email.trim()));
+    if (typeof input === 'string') {
+      setUserEmails(input.split(/[,\n]+/).map((email) => email.trim()));
+    }
   };
   const sendBatchUpdateRequest = fp.flow(
     withErrorModal({
@@ -67,7 +69,6 @@ export const AdminUserAccess = () => {
               value={userEmails?.join(',\n')}
               data-test-id='user-access-email-list'
               onChange={(v) => parseUserEmailInput(v)}
-              onBlur={(v) => parseUserEmailInput(v)}
             />
           </TooltipTrigger>
         </FlexColumn>
@@ -77,7 +78,7 @@ export const AdminUserAccess = () => {
             style={styles.textArea}
             value={cloudTaskNameList?.join(',\n')}
             onChange={null}
-            disabled='true'
+            disabled={true}
           />
         </FlexColumn>
       </FlexRow>
@@ -92,7 +93,6 @@ export const AdminUserAccess = () => {
             height: '38px',
             width: '150px',
           }}
-          enabled={!sendingRequest}
         >
           Sync Access
         </Button>
