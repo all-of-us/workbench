@@ -443,8 +443,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
         (user) -> {
           accessModuleService.updateCompletionTime(
               user, AccessModuleName.DATA_USER_CODE_OF_CONDUCT, timestamp);
-          user.setDuccAgreement(createDuccAgreement(user, duccSignedVersion, initials, timestamp));
-          return user;
+          return updateDuccAgreement(user, duccSignedVersion, initials, timestamp);
         },
         dbUser,
         Agent.asUser(dbUser));
@@ -463,16 +462,15 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     userDataUseAgreementDao.save(dataUseAgreement);
   }
 
-  private DbUserCodeOfConductAgreement createDuccAgreement(
+  private DbUser updateDuccAgreement(
       DbUser dbUser, Integer duccSignedVersion, String initials, Timestamp timestamp) {
-    DbUserCodeOfConductAgreement ducc = new DbUserCodeOfConductAgreement();
-    ducc.setUser(dbUser);
+    DbUserCodeOfConductAgreement ducc = dbUser.getDuccAgreement();
     ducc.setSignedVersion(duccSignedVersion);
     ducc.setUserFamilyName(dbUser.getFamilyName());
     ducc.setUserGivenName(dbUser.getGivenName());
     ducc.setUserInitials(initials);
     ducc.setCompletionTime(timestamp);
-    return ducc;
+    return dbUser;
   }
 
   @Override
