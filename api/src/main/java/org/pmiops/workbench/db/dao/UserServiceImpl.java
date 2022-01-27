@@ -464,7 +464,18 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
 
   private DbUser updateDuccAgreement(
       DbUser dbUser, Integer duccSignedVersion, String initials, Timestamp timestamp) {
-    DbUserCodeOfConductAgreement ducc = dbUser.getDuccAgreement();
+    DbUserCodeOfConductAgreement ducc =
+        Optional.ofNullable(dbUser.getDuccAgreement())
+            .orElseGet(
+                () -> {
+                  DbUserCodeOfConductAgreement d = new DbUserCodeOfConductAgreement();
+
+                  // TODO not sure if we strictly need both of these, but it shouldn't hurt
+                  d.setUser(dbUser);
+                  dbUser.setDuccAgreement(d);
+
+                  return d;
+                });
     ducc.setSignedVersion(duccSignedVersion);
     ducc.setUserFamilyName(dbUser.getFamilyName());
     ducc.setUserGivenName(dbUser.getGivenName());
