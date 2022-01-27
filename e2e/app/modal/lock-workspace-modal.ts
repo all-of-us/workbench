@@ -1,5 +1,5 @@
 import { Page } from 'puppeteer';
-import { waitForText, waitWhileLoading } from 'utils/waits-utils';
+import { waitForText } from 'utils/waits-utils';
 import Modal from './modal';
 import Button from 'app/element/button';
 import { LinkText } from 'app/text-labels';
@@ -14,7 +14,6 @@ export default class LockWorkspaceModal extends Modal {
 
   async isLoaded(): Promise<boolean> {
     await waitForText(this.page, modalTitle, { container: this });
-    await waitWhileLoading(this.page);
     return true;
   }
 

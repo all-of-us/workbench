@@ -15,7 +15,7 @@ export async function initializeRuntimeIfModalPresented(page: Page): Promise<voi
     return;
   }
 
-  await initializeButton.clickAndWait();
+  await initializeButton.click();
 }
 
 async function isSecuritySuspended(page: Page): Promise<boolean> {

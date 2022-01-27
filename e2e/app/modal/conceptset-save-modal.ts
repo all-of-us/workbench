@@ -71,7 +71,6 @@ export default class ConceptSetSaveModal extends Modal {
     // Click SAVE button.
     await this.clickButton(LinkText.Save, { waitForClose: true });
     await waitWhileLoading(this.page);
-    console.log(`"${this.modalTitle}" modal: Saved Concept Set "${conceptName}"`);
     return conceptName;
   }
 }

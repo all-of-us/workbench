@@ -5,6 +5,7 @@ import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
 import { waitForText } from 'utils/waits-utils';
 import { CohortsSelectValue, ResourceCard } from 'app/text-labels';
+import ConceptSetSearchPage from 'app/page/conceptset-search-page';
 
 describe('Create Concept Sets from Domains', () => {
   beforeEach(async () => {
@@ -86,7 +87,8 @@ describe('Create Concept Sets from Domains', () => {
 
     // Start: Create new Concept Set 1
     // Click Add Concept Sets button.
-    const conceptSearchPage = await datasetBuildPage.clickAddConceptSetsButton();
+    let conceptSearchPage = await datasetBuildPage.clickAddConceptSetsButton();
+    await conceptSearchPage.waitForLoad();
 
     // Add new Concept in Drug Exposures domain
     const drugDomainCard = ConceptDomainCard.findDomainCard(page, Domain.DrugExposures);
@@ -117,9 +119,13 @@ describe('Create Concept Sets from Domains', () => {
 
     // Start: Create new Concept Set 2
     const conceptActionPage = new ConceptSetActionsPage(page);
+    await conceptActionPage.waitForLoad();
     await conceptActionPage.clickCreateAnotherConceptSetButton();
 
     // Add new Concept in Measurements domain
+    conceptSearchPage = new ConceptSetSearchPage(page);
+    await conceptSearchPage.waitForLoad();
+
     const measurementsDomainCard = ConceptDomainCard.findDomainCard(page, Domain.Measurements);
     await measurementsDomainCard.getConceptsCount();
     await measurementsDomainCard.clickSelectConceptButton();

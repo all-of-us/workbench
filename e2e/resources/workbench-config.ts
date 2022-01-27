@@ -117,4 +117,5 @@ const environment = {
   perf
 };
 
-export const config = fp.mergeAll([environment[env], userCredential, urlPath]);
+type Config = IEnvConfig & ICredentialConfig & IPathConfig;
+export const config: Config = fp.mergeAll([environment[env], userCredential, urlPath]);

@@ -367,68 +367,93 @@ export async function waitWhileLoading(
   opts: { waitForRuntime?: boolean } = {}
 ): Promise<void> {
   const { waitForRuntime = false } = opts;
-  const notBlankTitleXpath =
-    '//title[starts-with(text(), "[Test]")' +
-    ' or starts-with(text(), "[Staging]")' +
-    ' or starts-with(text(), "[Local->Test]")]';
-  const notBlankPageCss = 'div:not(empty):not([id="root"]):not([id="body"])';
   const spinElementsCss = `[style*="running spin"], .spinner:empty, [style*="running rotation"]${
     waitForRuntime ? '' : ':not([aria-hidden="true"]):not([data-test-id*="runtime-status"])'
   }`;
 
-  const foundElement: ElementHandle = await Promise.race([
-    page.waitForXPath(process.env.AUTHENTICATED_TEST_ID_XPATH, { timeout }), // authenticated page
-    page.waitForXPath(process.env.UNAUTHENTICATED_TEST_ID_XPATH, { timeout }) // login or create account page
-  ]);
-
-  // Prevent checking in Login and Create Account pages.
-  const dataTestIdValue = await getAttrValue(page, foundElement, 'data-test-id');
-  if (dataTestIdValue === 'sign-in-page') {
+  const isValidPage = await assertValidPage(page, timeout);
+  if (!isValidPage) {
     return;
   }
 
-  // Prevent checking in non-authenticated and blank pages.
-  await Promise.all([
-    page.waitForXPath(process.env.AUTHENTICATED_TEST_ID_XPATH, { timeout }),
-    page.waitForSelector(notBlankPageCss, { timeout }),
-    page.waitForXPath(notBlankTitleXpath, { timeout })
-  ]);
-
-  let maxRetries = 10;
   const confidenceLevel = 2;
   let confidenceCounter = 0;
   let error;
-  const waitUntilSpinnerGone = async () => {
+  const waitUntilSpinnerGone = async (maxTime: number): Promise<void> => {
+    const startTime = Date.now();
     try {
       await Promise.all([
         page.waitForFunction(
           (css) => {
             return !document.querySelectorAll(css).length;
           },
-          { polling: 'mutation', timeout },
+          { polling: 'mutation', timeout: maxTime },
           spinElementsCss
         ),
-        page.waitForSelector(spinElementsCss, { hidden: true, timeout })
+        page.waitForSelector(spinElementsCss, { hidden: true, visible: false, timeout: maxTime })
       ]);
       confidenceCounter++;
-      if (confidenceCounter >= confidenceLevel) {
-        return; // success
-      }
     } catch (err) {
-      confidenceCounter = confidenceCounter > 0 ? confidenceCounter-- : 0;
       error = err;
     }
-    if (maxRetries <= 0) {
-      logger.error(`ERROR: Loading spinner has not stopped. Spinner css is "${spinElementsCss}"`);
-      logger.error(error.stack);
-      await takeScreenshot(page, makeDateTimeStr('ERROR_Spinner_Timeout'));
-      throw new Error(error.message);
+
+    if (confidenceCounter >= confidenceLevel) {
+      return; // success
     }
-    maxRetries--;
-    await page.waitForTimeout(200).then(waitUntilSpinnerGone); // short pause then retry
+
+    const spentTime = Date.now() - startTime;
+    if (spentTime > maxTime) {
+      if (confidenceCounter === 0) {
+        logger.error(`ERROR: Loading spinner has not stopped. Spinner css is "${spinElementsCss}"`);
+        logger.error(error.stack);
+        await takeScreenshot(page, makeDateTimeStr('ERROR_Spinner_TimeOut'));
+        throw new Error(error.message);
+      }
+      logger.info(
+        'WARNING: Waiting for loading spinner to stop has exceeded maximum wait time. But test will continue.'
+      );
+      await takeScreenshot(page, makeDateTimeStr('Spinner_TimeOut'));
+      return;
+    }
+
+    await page.waitForTimeout(200); // short pause then check again
+    await waitUntilSpinnerGone(maxTime - spentTime); // unused time
   };
 
-  await waitUntilSpinnerGone();
+  await waitUntilSpinnerGone(timeout); // Wait do not exceed timeout
+}
+
+/**
+ * Function verifies the page is a AoU application page and html documents has been loaded.
+ * @param page: Page
+ * @param timeout: number
+ * @returns Returns False if page is the Login or Create Account page. Otherwise, returns True for all other application pages.
+ */
+async function assertValidPage(page: Page, timeout: number): Promise<boolean> {
+  const foundElement: ElementHandle = await Promise.race([
+    page.waitForXPath(process.env.AUTHENTICATED_TEST_ID_XPATH, { timeout }), // authenticated page
+    page.waitForXPath(process.env.UNAUTHENTICATED_TEST_ID_XPATH, { timeout })
+  ]);
+
+  // Prevent checking in Login and Create Account pages.
+  const dataTestIdValue = await getAttrValue(page, foundElement, 'data-test-id');
+  if (dataTestIdValue === 'sign-in-page') {
+    return false;
+  }
+
+  const notBlankTitleXpath =
+    '//title[starts-with(text(), "[Test]")' +
+    ' or starts-with(text(), "[Staging]")' +
+    ' or starts-with(text(), "[Local->Test]")]';
+  const notBlankPageCss = 'div:not(empty):not([id="root"]):not([id="body"])';
+
+  // Prevent checking in non-authenticated and blank pages. Throws error if find all fails.
+  await Promise.all([
+    page.waitForXPath(process.env.AUTHENTICATED_TEST_ID_XPATH, { timeout }),
+    page.waitForSelector(notBlankPageCss, { timeout }),
+    page.waitForXPath(notBlankTitleXpath, { timeout })
+  ]);
+  return true;
 }
 
 export async function waitUntilEnabled(page: Page, cssSelector: string): Promise<boolean> {

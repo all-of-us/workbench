@@ -9,7 +9,7 @@ import {
 } from 'puppeteer';
 import { getAttrValue, getPropValue } from 'utils/element-utils';
 import { logger } from 'libs/logger';
-import { waitForFn } from 'utils/waits-utils';
+import { waitForFn, waitWhileLoading } from 'utils/waits-utils';
 
 /**
  * BaseElement represents a web element in the DOM.
@@ -391,6 +391,7 @@ export default class BaseElement {
       // Log error but DON'T fail the test! Puppeteer waitForNavigation has issues.
       logger.error(`Encountered error when click (${this.xpath}) and wait for navigation to complete.\n${err.stack}`);
     });
+    await waitWhileLoading(this.page);
   }
 
   /**

@@ -124,7 +124,7 @@ export default class WorkspaceAnalysisPage extends WorkspaceBase {
     destinationWorkspace: string,
     destinationNotebookName?: string
   ): Promise<void> {
-    // Open Copy modal.s
+    // Open Copy modal
     const resourceCard = new DataResourceCard(this.page);
     const notebookCard = await resourceCard.findCard(notebookName, ResourceCard.Notebook);
     await notebookCard.selectSnowmanMenu(MenuOption.CopyToAnotherWorkspace, { waitForNav: false });
