@@ -577,16 +577,18 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
                   previouslyDisabled={oldProfile.disabled}
                   toggleDisabled={() =>
                     updateProfile({ disabled: !updatedProfile.disabled })
-                  } />
+                  }
+                />
               </FlexRow>
-            <AccessModuleTable
-              oldProfile={oldProfile}
-              updatedProfile={updatedProfile}
-              pendingBypassRequests={bypassChangeRequests}
-              bypassUpdate={(accessBypassRequest) =>
-                updateModuleBypassStatus(accessBypassRequest)
-              }
-            /></FlexColumn>
+              <AccessModuleTable
+                oldProfile={oldProfile}
+                updatedProfile={updatedProfile}
+                pendingBypassRequests={bypassChangeRequests}
+                bypassUpdate={(accessBypassRequest) =>
+                  updateModuleBypassStatus(accessBypassRequest)
+                }
+              />
+            </FlexColumn>
           </FlexRow>
           <FlexRow style={{ paddingTop: '1em' }}>
             <ErrorsTooltip errors={errors}>
