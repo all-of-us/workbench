@@ -8958,17 +8958,17 @@ definitions:
         type: string
         format: date-time
         description: Timestamp of account creation.
-      dataUseAgreementBypassTime:
+      duccBypassTime:
         type: string
         format: date-time
         description: |-
-          Time an admin bypassed the DUCC rerquirement for this user, or null if that has not happened.
-          This value is reset to null if a user's bypassed status  is revoked.
-      dataUseAgreementCompletionTime:
+          Time an admin bypassed the DUCC requirement for this user, or null if that has not happened.
+          This value is reset to null if a user's bypassed status is revoked.
+      duccCompletionTime:
         type: string
         format: date-time
         description: Time user last completed DUCC
-      dataUseAgreementSignedVersion:
+      duccSignedVersion:
         type: integer
         format: int32
         description: Version of DUCC last signed by this user.

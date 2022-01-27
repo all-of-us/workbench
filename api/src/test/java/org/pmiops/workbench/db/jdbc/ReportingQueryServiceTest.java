@@ -4,8 +4,8 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__COMPLIANCE_TRAINING_BYPASS_TIME;
 import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__COMPLIANCE_TRAINING_COMPLETION_TIME;
-import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__DATA_USE_AGREEMENT_BYPASS_TIME;
-import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__DATA_USE_AGREEMENT_COMPLETION_TIME;
+import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__DATA_USER_CODE_OF_CONDUCT_AGREEMENT_BYPASS_TIME;
+import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__DATA_USER_CODE_OF_CONDUCT_COMPLETION_TIME;
 import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__ERA_COMMONS_BYPASS_TIME;
 import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__ERA_COMMONS_COMPLETION_TIME;
 import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__INSTITUTIONAL_ROLE_ENUM;
@@ -468,8 +468,8 @@ public class ReportingQueryServiceTest {
       addUserAccessModule(
           user,
           duccModule,
-          USER__DATA_USE_AGREEMENT_BYPASS_TIME,
-          USER__DATA_USE_AGREEMENT_COMPLETION_TIME);
+          USER__DATA_USER_CODE_OF_CONDUCT_AGREEMENT_BYPASS_TIME,
+          USER__DATA_USER_CODE_OF_CONDUCT_COMPLETION_TIME);
     }
     entityManager.flush();
   }

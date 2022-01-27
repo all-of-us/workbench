@@ -72,24 +72,9 @@ public class ReportingTestUtils {
   public static final Long WORKSPACE__WORKSPACE_ID = 34L;
   public static final String WORKSPACE__WORKSPACE_NAMESPACE = "aou-rw-12345";
 
-  // This code was generated using reporting-wizard.rb at 2021-01-05T17:36:27-08:00.
-  // Manual modification should be avoided if possible as this is a one-time generation
-  // and does not run on every build and updates must be merged manually for now.
-
   public static final Double WORKSPACE_FREE_TIER_USAGE__COST = 0.500000;
   public static final Long WORKSPACE_FREE_TIER_USAGE__USER_ID = 1L;
   public static final Long WORKSPACE_FREE_TIER_USAGE__WORKSPACE_ID = 2L;
-
-  // All constant values, mocking statements, and assertions in this file are generated. The values
-  // are chosen so that errors with transposed columns can be caught.
-  // Mapping Short values with valid enums can be tricky, and currently there are
-  // a handful of places where we have to use use a Short in the projection interface but an Enum
-  //  type in the model class. An example of such a manual fix is the following:
-  // .dataUseAgreementSignedVersion(USER__DATA_USE_AGREEMENT_SIGNED_VERSION.longValue())
-
-  // This code was generated using reporting-wizard.rb at 2020-09-24T13:40:02-04:00.
-  // Manual modification should be avoided if possible as this is a one-time generation
-  // and does not run on every build and updates must be merged manually for now.
 
   public static final Long COHORT__COHORT_ID = 0L;
   public static final Timestamp COHORT__CREATION_TIME =
@@ -102,17 +87,6 @@ public class ReportingTestUtils {
   public static final String COHORT__NAME = "foo_6";
   public static final Long COHORT__WORKSPACE_ID = 7L;
 
-  // All constant values, mocking statements, and assertions in this file are generated. The values
-  // are chosen so that errors with transposed columns can be caught.
-  // Mapping Short values with valid enums can be tricky, and currently there are
-  // a handful of places where we have to use use a Short in the projection interface but an Enum
-  //  type in the model class. An example of such a manual fix is the following:
-  // .dataUseAgreementSignedVersion(USER__DATA_USE_AGREEMENT_SIGNED_VERSION.longValue())
-
-  // This code was generated using reporting-wizard.rb at 2020-10-05T09:51:25-04:00.
-  // Manual modification should be avoided if possible as this is a one-time generation
-  // and does not run on every build and updates must be merged manually for now.
-
   public static final String INSTITUTION__DISPLAY_NAME = "foo_0";
   public static final Long INSTITUTION__INSTITUTION_ID = 2L;
   public static final OrganizationType INSTITUTION__ORGANIZATION_TYPE_ENUM =
@@ -121,16 +95,6 @@ public class ReportingTestUtils {
   public static final String INSTITUTION__SHORT_NAME = "foo_5";
   public static final InstitutionMembershipRequirement INSTITUTION__REGISTERED_TIER_REQUIREMENT =
       InstitutionMembershipRequirement.DOMAINS;
-  // All constant values, mocking statements, and assertions in this file are generated. The values
-  // are chosen so that errors with transposed columns can be caught.
-  // Mapping Short values with valid enums can be tricky, and currently there are
-  // a handful of places where we have to use use a Short in the projection interface but an Enum
-  //  type in the model class. An example of such a manual fix is the following:
-  // .dataUseAgreementSignedVersion(USER__DATA_USE_AGREEMENT_SIGNED_VERSION.longValue())
-
-  // This code was generated using reporting-wizard.rb at 2020-11-05T14:31:23-05:00.
-  // Manual modification should be avoided if possible as this is a one-time generation
-  // and does not run on every build and updates must be merged manually for now.
 
   public static final Timestamp DATASET__CREATION_TIME =
       Timestamp.from(Instant.parse("2015-05-05T00:00:00.00Z"));
@@ -188,11 +152,6 @@ public class ReportingTestUtils {
     assertTimeApprox(workspace.getRpTimeRequested(), WORKSPACE__RP_TIME_REQUESTED);
     assertThat(workspace.getWorkspaceId()).isEqualTo(expectedWorkspaceId);
     assertThat(workspace.getWorkspaceNamespace()).isEqualTo(WORKSPACE__WORKSPACE_NAMESPACE);
-  }
-
-  public static void assertDtoWorkspaceFields(ReportingWorkspace workspace) {
-    assertDtoWorkspaceFields(
-        workspace, WORKSPACE__WORKSPACE_ID, WORKSPACE__CDR_VERSION_ID, WORKSPACE__CREATOR_ID);
   }
 
   public static ReportingWorkspace createDtoWorkspace() {
