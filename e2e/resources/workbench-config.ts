@@ -34,7 +34,7 @@ const local: IEnvConfig = {
   OLD_CDR_VERSION_NAME: 'Synthetic Dataset v2',
   CONTROLLED_TIER_CDR_VERSION_NAME: 'Synthetic Dataset in the Controlled Tier',
   LOGIN_GOV_USER: 'aou-dev-registration@broadinstitute.org',
-  ENABLED_PERSISTENT_DISK: true
+  ENABLED_PERSISTENT_DISK: false
 };
 
 // workbench test environment
@@ -52,7 +52,7 @@ const test: IEnvConfig = {
   OLD_CDR_VERSION_NAME: 'Synthetic Dataset v2',
   CONTROLLED_TIER_CDR_VERSION_NAME: 'Synthetic Dataset in the Controlled Tier',
   LOGIN_GOV_USER: 'aou-dev-registration@broadinstitute.org',
-  ENABLED_PERSISTENT_DISK: true
+  ENABLED_PERSISTENT_DISK: false
 };
 
 // workbench staging environment

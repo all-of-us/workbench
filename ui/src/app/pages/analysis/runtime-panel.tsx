@@ -22,8 +22,9 @@ import {
   AutopauseMinuteThresholds,
   ComputeType,
   DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES,
+  DEFAULT_MACHINE_NAME,
+  DEFAULT_MACHINE_TYPE,
   diskPricePerMonth,
-  findGpu,
   findMachineByName,
   getValidGpuTypes,
   gpuTypeToDisplayName,
@@ -40,12 +41,15 @@ import { RuntimeCostEstimator } from 'app/components/runtime-cost-estimator';
 import { RuntimeSummary } from 'app/components/runtime-summary';
 import {
   diffsToUpdateMessaging,
+  fromRuntimeConfig,
   getRuntimeConfigDiffs,
-  RuntimeConfig,
-  RuntimeDiffState,
+  RuntimeDiff,
   RuntimeStatusRequest,
+  toRuntimeConfig,
+  UpdateMessaging,
   useCustomRuntime,
   useRuntimeStatus,
+  withRuntimeConfigDefaults,
 } from 'app/utils/runtime-utils';
 import {
   diskStore,
@@ -62,7 +66,6 @@ import { supportUrls } from 'app/utils/zendesk';
 import {
   BillingStatus,
   DataprocConfig,
-  DiskType,
   GpuConfig,
   Runtime,
   RuntimeConfigurationType,
@@ -218,22 +221,6 @@ const styles = reactStyles({
 // exported for testing
 export const MIN_DISK_SIZE_GB = 100;
 export const DATAPROC_WORKER_MIN_DISK_SIZE_GB = 150;
-
-const defaultMachineName = 'n1-standard-4';
-const defaultMachineType: Machine = findMachineByName(defaultMachineName);
-const defaultDiskSize = 100;
-
-// Returns true if two runtimes are equivalent in terms of the fields which are
-// affected by runtime presets.
-const presetEquals = (a: Runtime, b: Runtime): boolean => {
-  const strip = fp.flow(
-    // In the future, things like toolDockerImage and autopause may be considerations.
-    fp.pick(['gceConfig', 'dataprocConfig']),
-    // numberOfWorkerLocalSSDs is currently part of the API spec, but is not used by the panel.
-    fp.omit(['dataprocConfig.numberOfWorkerLocalSSDs'])
-  );
-  return fp.isEqual(strip(a), strip(b));
-};
 
 enum PanelContent {
   Create = 'Create',
@@ -692,7 +679,7 @@ const MachineSelector = ({
   ramLabelStyles = {},
 }) => {
   const initialMachineType =
-    findMachineByName(machineType) || defaultMachineType;
+    findMachineByName(machineType) || DEFAULT_MACHINE_TYPE;
   const { cpu, memory } = selectedMachine || initialMachineType;
 
   return (
@@ -782,13 +769,7 @@ const DisabledPanel = () => {
   );
 };
 
-const DiskSizeSelector = ({
-  onChange,
-  disabled,
-  selectedDiskSize,
-  diskSize,
-  idPrefix,
-}) => {
+const DiskSizeSelector = ({ onChange, disabled, diskSize, idPrefix }) => {
   return (
     <FlexRow style={styles.labelAndInput}>
       <label style={styles.label} htmlFor={`${idPrefix}-disk`}>
@@ -800,7 +781,7 @@ const DiskSizeSelector = ({
         disabled={disabled}
         decrementButtonClassName='p-button-secondary'
         incrementButtonClassName='p-button-secondary'
-        value={selectedDiskSize || diskSize}
+        value={diskSize}
         inputStyle={styles.inputNumber}
         onChange={({ value }) => onChange(value)}
       />
@@ -905,38 +886,6 @@ const GpuConfigSelector = ({
   );
 };
 
-const PersistentDiskSizeSelector = ({
-  onChange,
-  disabled,
-  selectedDiskSize,
-  diskSize,
-}) => {
-  return (
-    <div>
-      <h3 style={{ ...styles.sectionHeader, ...styles.bold }}>
-        Persistent Disk (GB)
-      </h3>
-      <div>
-        {' '}
-        Persistent disks store analysis data.
-        <a href='https://support.terra.bio/hc/en-us/articles/360047318551'>
-          Learn more about persistent disks and where your disk is mounted.
-        </a>
-      </div>
-      <InputNumber
-        id={'persistent-disk'}
-        showButtons
-        disabled={disabled}
-        decrementButtonClassName='p-button-secondary'
-        incrementButtonClassName='p-button-secondary'
-        value={selectedDiskSize || diskSize}
-        inputStyle={styles.inputNumber}
-        onChange={({ value }) => onChange(value)}
-      />
-    </div>
-  );
-};
-
 const DataProcConfigSelector = ({
   onChange,
   disabled,
@@ -945,7 +894,7 @@ const DataProcConfigSelector = ({
   dataprocConfig,
 }) => {
   const {
-    workerMachineType = defaultMachineName,
+    workerMachineType = DEFAULT_MACHINE_NAME,
     workerDiskSize = DATAPROC_WORKER_MIN_DISK_SIZE_GB,
     numberOfWorkers = 2,
     numberOfPreemptibleWorkers = 0,
@@ -1044,7 +993,6 @@ const DataProcConfigSelector = ({
         <DiskSizeSelector
           diskSize={workerDiskSize}
           onChange={setSelectedDiskSize}
-          selectedDiskSize={selectedDiskSize}
           disabled={disabled}
           idPrefix='worker'
         />
@@ -1054,14 +1002,7 @@ const DataProcConfigSelector = ({
 };
 
 // Select a recommended preset configuration.
-const PresetSelector = ({
-  allowDataproc,
-  setSelectedDiskSize,
-  setSelectedMachine,
-  setSelectedCompute,
-  setSelectedDataprocConfig,
-  disabled,
-}) => {
+const PresetSelector = ({ allowDataproc, setRuntimeConfig, disabled }) => {
   return (
     <Dropdown
       id='runtime-presets-menu'
@@ -1084,31 +1025,7 @@ const PresetSelector = ({
         }))
       )(runtimePresets)}
       onChange={({ value }) => {
-        const { presetDiskSize, presetMachineName, presetCompute } = fp.cond([
-          // Can't destructure due to shadowing.
-          [
-            () => !!value.gceConfig,
-            (tmpl: Runtime) => ({
-              presetDiskSize: tmpl.gceConfig.diskSize,
-              presetMachineName: tmpl.gceConfig.machineType,
-              presetCompute: ComputeType.Standard,
-            }),
-          ],
-          [
-            () => !!value.dataprocConfig,
-            ({ dataprocConfig: { masterDiskSize, masterMachineType } }) => ({
-              presetDiskSize: masterDiskSize,
-              presetMachineName: masterMachineType,
-              presetCompute: ComputeType.Dataproc,
-            }),
-          ],
-        ])(value);
-
-        const presetMachineType = findMachineByName(presetMachineName);
-        setSelectedDiskSize(presetDiskSize);
-        setSelectedMachine(presetMachineType);
-        setSelectedCompute(presetCompute);
-        setSelectedDataprocConfig(value.dataprocConfig);
+        setRuntimeConfig(toRuntimeConfig(value));
 
         // Return false to skip the normal handling of the value selection. We're
         // abusing the dropdown here to act as if it were a menu instead.
@@ -1301,7 +1218,6 @@ const CostInfo = ({
   currentUser,
   workspace,
   creatorFreeCreditsRemaining,
-  runtimeCtx,
 }) => {
   const remainingCredits =
     creatorFreeCreditsRemaining === null ? (
@@ -1323,10 +1239,7 @@ const CostInfo = ({
       data-test-id='cost-estimator'
     >
       <div style={{ minWidth: '250px', margin: '.33rem .5rem' }}>
-        <RuntimeCostEstimator
-          runtimeParameters={runtimeConfig}
-          usePersistentDisk={runtimeCtx.enablePD && !runtimeCtx.dataprocExists}
-        />
+        <RuntimeCostEstimator {...{ runtimeConfig }} />
       </div>
       {isUsingFreeTierBillingAccount(workspace) &&
         currentUser === workspace.creator && (
@@ -1358,7 +1271,6 @@ const CreatePanel = ({
   setPanelContent,
   workspace,
   runtimeConfig,
-  runtimeCtx,
 }) => {
   const displayName =
     runtimeConfig.computeType === ComputeType.Dataproc
@@ -1378,7 +1290,6 @@ const CreatePanel = ({
           currentUser={profile.username}
           workspace={workspace}
           creatorFreeCreditsRemaining={creatorFreeCreditsRemaining}
-          runtimeCtx={runtimeCtx}
         />
       </FlexRow>
       <FlexRow
@@ -1401,19 +1312,16 @@ const CreatePanel = ({
 };
 
 const ConfirmUpdatePanel = ({
-  initialRuntimeConfig,
+  existingRuntimeConfig,
   newRuntimeConfig,
   onCancel,
   updateButton,
-  runtimeCtx,
 }) => {
   const runtimeDiffs = getRuntimeConfigDiffs(
-    initialRuntimeConfig,
-    newRuntimeConfig,
-    runtimeCtx
+    existingRuntimeConfig,
+    newRuntimeConfig
   );
   const updateMessaging = diffsToUpdateMessaging(runtimeDiffs);
-  const usePersistentDisk = runtimeCtx.enablePD && !runtimeCtx.dataprocExists;
   return (
     <React.Fragment>
       <div style={styles.controlSection}>
@@ -1446,10 +1354,7 @@ const ConfirmUpdatePanel = ({
                 padding: '.25rem .5rem',
               }}
             >
-              <RuntimeCostEstimator
-                runtimeParameters={newRuntimeConfig}
-                usePersistentDisk={usePersistentDisk}
-              />
+              <RuntimeCostEstimator runtimeConfig={newRuntimeConfig} />
             </div>
           </div>
           <div>
@@ -1463,8 +1368,7 @@ const ConfirmUpdatePanel = ({
               }}
             >
               <RuntimeCostEstimator
-                runtimeParameters={initialRuntimeConfig}
-                usePersistentDisk={usePersistentDisk}
+                runtimeConfig={existingRuntimeConfig}
                 costTextColor='grey'
               />
             </div>
@@ -1527,35 +1431,22 @@ const RuntimePanel = fp.flow(
       currentRuntime = applyPresetOverride(currentRuntime);
     }
 
-    // Prioritize the "pendingRuntime", if any. When an update is pending, we want
-    // to render the target runtime details, which  may not match the current runtime.
-    const existingRuntime =
-      pendingRuntime || currentRuntime || ({} as Partial<Runtime>);
-    const { dataprocConfig = null, gceConfig = { diskSize: defaultDiskSize } } =
-      existingRuntime;
     const [status, setRuntimeStatus] = useRuntimeStatus(
       namespace,
       googleProject
     );
-    const diskSize = dataprocConfig
-      ? dataprocConfig.masterDiskSize
-      : gceConfig.diskSize
-      ? gceConfig.diskSize
-      : defaultDiskSize;
-    const machineName = dataprocConfig
-      ? dataprocConfig.masterMachineType
-      : gceConfig.machineType;
-    const initialMasterMachine =
-      findMachineByName(machineName) || defaultMachineType;
-    const initialCompute = dataprocConfig
-      ? ComputeType.Dataproc
-      : ComputeType.Standard;
-    const pdExists = !!persistentDisk;
-    const pdSize = pdExists ? persistentDisk.size : defaultDiskSize;
-    const initialAutopauseThreshold =
-      existingRuntime.autopauseThreshold || DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES;
-    const gpuConfig = gceConfig?.gpuConfig ?? null;
-    const enableGpu = serverConfigStore.get().config.enableGpu;
+
+    // Prioritize the "pendingRuntime", if any. When an update is pending, we want
+    // to render the target runtime details, which  may not match the current runtime.
+    const existingRuntime =
+      pendingRuntime || currentRuntime || ({} as Partial<Runtime>);
+    const existingRuntimeConfig = toRuntimeConfig(existingRuntime);
+
+    const [runtimeConfig, setRuntimeConfig] = useState(
+      withRuntimeConfigDefaults(existingRuntimeConfig, persistentDisk)
+    );
+
+    const { enableGpu } = serverConfigStore.get().config;
 
     const initialPanelContent = fp.cond([
       [([b, ,]) => b === BillingStatus.INACTIVE, () => PanelContent.Disabled],
@@ -1582,26 +1473,8 @@ const RuntimePanel = fp.flow(
     const [panelContent, setPanelContent] =
       useState<PanelContent>(initialPanelContent);
 
-    const [selectedMachine, setSelectedMachine] =
-      useState(initialMasterMachine);
-    const [selectedDiskSize, setSelectedDiskSize] = useState(diskSize);
-    const [selectedCompute, setSelectedCompute] =
-      useState<ComputeType>(initialCompute);
-    const [selectedAutopauseThreshold, setSelectedAutopauseThreshold] =
-      useState(initialAutopauseThreshold);
-
-    // Note: while the Dataproc config does contain masterMachineType and masterDiskSize,
-    // the source of truth for these values are selectedMachine, and selectedDiskSize, as
-    // these UI components are used for both Dataproc and standard VMs.
-    const [selectedDataprocConfig, setSelectedDataprocConfig] =
-      useState<DataprocConfig | null>(dataprocConfig);
-    const [selectedPdSize, setSelectedPdSize] = useState(pdSize);
-
-    const [selectedGpuConfig, setSelectedGpuConfig] =
-      useState<GpuConfig | null>(gpuConfig);
-
     const validMainMachineTypes =
-      selectedCompute === ComputeType.Standard
+      runtimeConfig.computeType === ComputeType.Standard
         ? validLeoGceMachineTypes
         : validLeoDataprocMasterMachineTypes;
     // The compute type affects the set of valid machine types, so revert to the
@@ -1609,11 +1482,16 @@ const RuntimePanel = fp.flow(
     // machine type choice.
     useEffect(() => {
       if (
-        !validMainMachineTypes.find(({ name }) => name === selectedMachine.name)
+        !validMainMachineTypes.find(
+          ({ name }) => name === runtimeConfig.machine.name
+        )
       ) {
-        setSelectedMachine(initialMasterMachine);
+        setRuntimeConfig({
+          ...runtimeConfig,
+          machine: existingRuntimeConfig.machine,
+        });
       }
-    }, [selectedCompute]);
+    }, [runtimeConfig.computeType]);
 
     const runtimeExists =
       (status &&
@@ -1625,55 +1503,30 @@ const RuntimePanel = fp.flow(
         status as RuntimeStatus
       );
 
-    const initialRuntimeConfig = {
-      computeType: initialCompute,
-      machine: initialMasterMachine,
-      diskSize,
-      dataprocConfig,
-      gpuConfig,
-      pdSize,
-      autopauseThreshold: initialAutopauseThreshold,
-    };
+    const dataprocExists =
+      runtimeExists && existingRuntimeConfig.dataprocConfig !== null;
 
-    const newRuntimeConfig = {
-      computeType: selectedCompute,
-      machine: selectedMachine,
-      diskSize: selectedDiskSize,
-      dataprocConfig: selectedDataprocConfig,
-      gpuConfig:
-        selectedCompute === ComputeType.Standard ? selectedGpuConfig : null,
-      pdSize: selectedPdSize,
-      autopauseThreshold: selectedAutopauseThreshold,
-    };
+    const attachedPdExists =
+      !!persistentDisk &&
+      runtimeExists &&
+      existingRuntimeConfig.diskConfig.detachable;
+    const unattachedPdExists = !!persistentDisk && !attachedPdExists;
+    // TODO(RW-7759): Account for disk type.
+    const unattachedDiskNeedsRecreate =
+      !!persistentDisk &&
+      runtimeConfig.diskConfig.detachable &&
+      persistentDisk.size > runtimeConfig.diskConfig.size;
 
-    const gceExists = runtimeExists && initialCompute === ComputeType.Standard;
-    const dataprocExists = dataprocConfig !== null;
-    const enablePD =
-      serverConfigStore.get().config.enablePersistentDisk &&
-      (pdExists || !gceExists);
-    const unattachedPdExists = enablePD && !gceExists && pdExists;
-    const pdSizeReduced = selectedPdSize < pdSize;
-    // A runtime context can wrap/pass complex runtime context and also make the code cleaner
-    const runtimeCtx = {
-      runtimeExists: runtimeExists,
-      gceExists: gceExists,
-      dataprocExists: dataprocExists,
-      pdExists: pdExists,
-      // Here the enablePD is not simply the pd feature flag.
-      // It stands for the point when user has no old version gce instances exists and the pd feature flag is also True at the same time.
-      // By using this predicate, we can differentiate the old version and pd version panel much more easily. The code is also cleaner.
-      // In addition, after all the old users change to the new pd version, we can simply replace all occurrences of this variable to True.
-      // The code refactor cost is low.
-      enablePD: enablePD,
-      unattachedPdExists: unattachedPdExists,
-    };
-    const runtimeDiffs = getRuntimeConfigDiffs(
-      initialRuntimeConfig,
-      newRuntimeConfig,
-      runtimeCtx
-    );
-    const updateMessaging = diffsToUpdateMessaging(runtimeDiffs);
-    const runtimeChanged = runtimeExists && runtimeDiffs.length > 0;
+    let runtimeDiffs: RuntimeDiff[] = [];
+    let updateMessaging: UpdateMessaging;
+    if (runtimeExists) {
+      runtimeDiffs = getRuntimeConfigDiffs(
+        existingRuntimeConfig,
+        runtimeConfig
+      );
+      updateMessaging = diffsToUpdateMessaging(runtimeDiffs);
+    }
+    const runtimeChanged = runtimeDiffs.length > 0;
 
     const [creatorFreeCreditsRemaining, setCreatorFreeCreditsRemaining] =
       useState(null);
@@ -1695,69 +1548,6 @@ const RuntimePanel = fp.flow(
         aborter.abort();
       };
     }, []);
-    const createStandardComputeRuntimeRequest = (runtime: RuntimeConfig) => {
-      // The logic here is tricky to be compatible
-      // post launch PD when all existing running Runtime shutdown.
-      const runtimeDiffTypes = runtimeDiffs.map((diff) => diff.differenceType);
-      const runtimeNeedsDelete =
-        runtimeDiffTypes.includes(RuntimeDiffState.NEEDS_DELETE_RUNTIME) ||
-        runtimeDiffTypes.includes(RuntimeDiffState.NEEDS_DELETE_PD);
-      if (
-        runtimeCtx.enablePD &&
-        (!runtimeCtx.gceExists || runtimeNeedsDelete)
-      ) {
-        return {
-          gceWithPdConfig: {
-            machineType: runtime.machine.name,
-            persistentDisk: {
-              // When reducing PD size, passing empty name to backend then API will create a new PD
-              name: !pdExists || pdSizeReduced ? '' : persistentDisk.name,
-              size: runtime.pdSize,
-              diskType: DiskType.Standard,
-              labels: {},
-            },
-            gpuConfig: runtime.gpuConfig,
-          },
-        };
-      } else {
-        return {
-          gceConfig: {
-            machineType: runtime.machine.name,
-            diskSize: !runtimeCtx.enablePD ? runtime.diskSize : runtime.pdSize,
-            gpuConfig: runtime.gpuConfig,
-          },
-        };
-      }
-    };
-    const createRuntimeRequest = (runtime: RuntimeConfig) => {
-      const runtimeRequest: Runtime =
-        runtime.computeType === ComputeType.Dataproc
-          ? {
-              dataprocConfig: {
-                ...runtime.dataprocConfig,
-                masterMachineType: runtime.machine.name,
-                masterDiskSize: runtime.diskSize,
-              },
-            }
-          : runtime.computeType === ComputeType.Standard
-          ? createStandardComputeRuntimeRequest(runtime)
-          : null;
-
-      // If the selected runtime matches a preset, plumb through the appropriate configuration type.
-      runtimeRequest.configurationType =
-        fp.get(
-          'runtimeTemplate.configurationType',
-          fp.find(
-            ({ runtimeTemplate }) =>
-              presetEquals(runtimeRequest, runtimeTemplate),
-            runtimePresets
-          )
-        ) || RuntimeConfigurationType.UserOverride;
-
-      runtimeRequest.autopauseThreshold = runtime.autopauseThreshold;
-
-      return runtimeRequest;
-    };
 
     // Leonardo enforces a minimum limit for disk size, 4000 GB is our arbitrary limit for not making a
     // disk that is way too big and expensive on free tier ($.22 an hour). 64 TB is the GCE limit on
@@ -1811,26 +1601,10 @@ const RuntimePanel = fp.flow(
       };
     };
 
-    const currentRunningCost = machineRunningCost({
-      computeType: selectedCompute,
-      masterMachine: selectedMachine,
-      masterDiskSize: diskSize,
-      gpu: gpuConfig ? findGpu(gpuConfig.gpuType, gpuConfig.numOfGpus) : null,
-      numberOfWorkers: selectedDataprocConfig?.numberOfWorkers,
-      numberOfPreemptibleWorkers:
-        selectedDataprocConfig?.numberOfPreemptibleWorkers,
-      workerDiskSize: selectedDataprocConfig?.workerDiskSize,
-      workerMachine:
-        selectedDataprocConfig &&
-        findMachineByName(selectedDataprocConfig.workerMachineType),
-    });
+    const currentRunningCost = machineRunningCost(runtimeConfig);
 
-    const standardDiskValidator = {
-      selectedDiskSize: diskSizeValidatorWithMessage('standard'),
-    };
-
-    const standardPdValidator = {
-      selectedPdSize: diskSizeValidatorWithMessage('standard'),
+    const diskValidator = {
+      diskSize: diskSizeValidatorWithMessage('standard'),
     };
 
     const runningCostValidator = {
@@ -1850,18 +1624,17 @@ const RuntimePanel = fp.flow(
     };
 
     const { masterDiskSize, workerDiskSize, numberOfWorkers } =
-      selectedDataprocConfig || {};
-    const standardDiskErrors = validate(
-      { selectedDiskSize },
-      standardDiskValidator
+      runtimeConfig.dataprocConfig || {};
+    const diskErrors = validate(
+      { diskSize: runtimeConfig.diskConfig.size },
+      diskValidator
     );
-    const standardPdErrors = validate({ selectedPdSize }, standardPdValidator);
     const runningCostErrors = validate(
       { currentRunningCost },
       runningCostValidator
     );
     const dataprocErrors =
-      selectedCompute === ComputeType.Dataproc
+      runtimeConfig.computeType === ComputeType.Dataproc
         ? validate(
             { masterDiskSize, workerDiskSize, numberOfWorkers },
             dataprocValidators
@@ -1870,13 +1643,8 @@ const RuntimePanel = fp.flow(
 
     const getErrorMessageContent = () => {
       const errorDivs = [];
-      if (standardPdErrors && selectedCompute === ComputeType.Standard) {
-        errorDivs.push(summarizeErrors(standardPdErrors));
-      } else if (
-        standardDiskErrors &&
-        (!runtimeCtx.enablePD || selectedCompute === ComputeType.Dataproc)
-      ) {
-        errorDivs.push(summarizeErrors(standardDiskErrors));
+      if (diskErrors) {
+        errorDivs.push(summarizeErrors(diskErrors));
       }
       if (dataprocErrors) {
         errorDivs.push(summarizeErrors(dataprocErrors));
@@ -1899,11 +1667,10 @@ const RuntimePanel = fp.flow(
     // Casting to RuntimeStatus here because it can't easily be done at the destructuring level
     // where we get 'status' from
     const runtimeCanBeUpdated =
-      ((runtimeChanged &&
-        [RuntimeStatus.Running, RuntimeStatus.Stopped].includes(
-          status as RuntimeStatus
-        )) ||
-        (pdExists && pdSizeReduced)) &&
+      runtimeChanged &&
+      [RuntimeStatus.Running, RuntimeStatus.Stopped].includes(
+        status as RuntimeStatus
+      ) &&
       runtimeCanBeCreated;
 
     const renderUpdateButton = () => {
@@ -1912,7 +1679,7 @@ const RuntimePanel = fp.flow(
           aria-label='Update'
           disabled={!runtimeCanBeUpdated}
           onClick={() => {
-            setRequestedRuntime(createRuntimeRequest(newRuntimeConfig));
+            setRequestedRuntime(fromRuntimeConfig(runtimeConfig));
             onClose();
           }}
         >
@@ -1927,7 +1694,7 @@ const RuntimePanel = fp.flow(
           aria-label='Create'
           disabled={!runtimeCanBeCreated}
           onClick={() => {
-            setRequestedRuntime(createRuntimeRequest(newRuntimeConfig));
+            setRequestedRuntime(fromRuntimeConfig(runtimeConfig));
             onClose();
           }}
         >
@@ -1942,7 +1709,7 @@ const RuntimePanel = fp.flow(
           aria-label='Try Again'
           disabled={!runtimeCanBeCreated}
           onClick={() => {
-            setRequestedRuntime(createRuntimeRequest(newRuntimeConfig));
+            setRequestedRuntime(fromRuntimeConfig(runtimeConfig));
             onClose();
           }}
         >
@@ -1993,8 +1760,7 @@ const RuntimePanel = fp.flow(
                   profile={profile}
                   setPanelContent={(value) => setPanelContent(value)}
                   workspace={workspace}
-                  runtimeConfig={newRuntimeConfig}
-                  runtimeCtx={runtimeCtx}
+                  runtimeConfig={runtimeConfig}
                 />
                 <FlexRow
                   style={{ justifyContent: 'flex-end', marginTop: '1rem' }}
@@ -2007,7 +1773,7 @@ const RuntimePanel = fp.flow(
           [
             PanelContent.DeleteRuntime,
             () => {
-              if (runtimeCtx.enablePD && runtimeCtx.pdExists) {
+              if (attachedPdExists) {
                 return (
                   <ConfirmDeleteRuntimeWithPD
                     onConfirm={async (runtimeStatusReq) => {
@@ -2015,8 +1781,8 @@ const RuntimePanel = fp.flow(
                       onClose();
                     }}
                     onCancel={() => setPanelContent(PanelContent.Customize)}
-                    computeType={initialCompute}
-                    pdSize={selectedPdSize}
+                    computeType={existingRuntimeConfig.computeType}
+                    pdSize={runtimeConfig.diskConfig.size}
                   />
                 );
               } else {
@@ -2057,12 +1823,13 @@ const RuntimePanel = fp.flow(
                       googleProject={workspace.googleProject}
                     />
                     <CostInfo
-                      runtimeChanged={runtimeChanged}
-                      runtimeConfig={newRuntimeConfig}
-                      currentUser={profile.username}
-                      workspace={workspace}
-                      creatorFreeCreditsRemaining={creatorFreeCreditsRemaining}
-                      runtimeCtx={runtimeCtx}
+                      {...{
+                        runtimeChanged,
+                        runtimeConfig,
+                        workspace,
+                        creatorFreeCreditsRemaining,
+                        currentUser: profile.username,
+                      }}
                     />
                   </FlexRow>
                   {currentRuntime?.errors && currentRuntime.errors.length > 0 && (
@@ -2083,18 +1850,11 @@ const RuntimePanel = fp.flow(
                     </ErrorMessage>
                   )}
                   <PresetSelector
-                    allowDataproc={allowDataproc}
-                    disabled={disableControls}
-                    setSelectedDiskSize={(disk) => setSelectedDiskSize(disk)}
-                    setSelectedMachine={(machine) =>
-                      setSelectedMachine(machine)
-                    }
-                    setSelectedCompute={(compute) =>
-                      setSelectedCompute(compute)
-                    }
-                    setSelectedDataprocConfig={(dataproc) =>
-                      setSelectedDataprocConfig(dataproc)
-                    }
+                    {...{
+                      allowDataproc,
+                      setRuntimeConfig,
+                      disabled: disableControls,
+                    }}
                   />
                   {/* Runtime customization: change detailed machine configuration options. */}
                   <h3 style={{ ...styles.sectionHeader, ...styles.bold }}>
@@ -2104,34 +1864,40 @@ const RuntimePanel = fp.flow(
                     <MachineSelector
                       idPrefix='runtime'
                       disabled={disableControls}
-                      selectedMachine={selectedMachine}
-                      onChange={(value) => setSelectedMachine(value)}
+                      selectedMachine={runtimeConfig.machine}
+                      onChange={(machine: Machine) =>
+                        setRuntimeConfig({ ...runtimeConfig, machine })
+                      }
                       validMachineTypes={validMainMachineTypes}
-                      machineType={machineName}
+                      machineType={runtimeConfig.machine.name}
                     />
-                    {(!runtimeCtx.enablePD ||
-                      selectedCompute !== ComputeType.Standard) && (
-                      <DiskSizeSelector
-                        idPrefix='runtime'
-                        selectedDiskSize={selectedDiskSize}
-                        onChange={(value) => {
-                          setSelectedDiskSize(value);
-                        }}
+                    <DiskSizeSelector
+                      idPrefix='runtime'
+                      onChange={(size: number) =>
+                        setRuntimeConfig({
+                          ...runtimeConfig,
+                          diskConfig: {
+                            size,
+                            detachable: false,
+                            detachableType: null,
+                          },
+                        })
+                      }
+                      diskSize={runtimeConfig.diskConfig.size}
+                      disabled={disableControls}
+                    />
+                  </div>
+                  {enableGpu &&
+                    runtimeConfig.computeType === ComputeType.Standard && (
+                      <GpuConfigSelector
                         disabled={disableControls}
-                        diskSize={diskSize}
+                        onChange={(gpuConfig: GpuConfig) =>
+                          setRuntimeConfig({ ...runtimeConfig, gpuConfig })
+                        }
+                        selectedMachine={runtimeConfig.machine}
+                        gpuConfig={runtimeConfig.gpuConfig}
                       />
                     )}
-                  </div>
-                  {enableGpu && selectedCompute === ComputeType.Standard && (
-                    <GpuConfigSelector
-                      disabled={disableControls}
-                      onChange={(config) => {
-                        setSelectedGpuConfig(config);
-                      }}
-                      selectedMachine={selectedMachine}
-                      gpuConfig={selectedGpuConfig}
-                    />
-                  )}
                   <FlexRow
                     style={{
                       marginTop: '1rem',
@@ -2148,12 +1914,20 @@ const RuntimePanel = fp.flow(
                           disabled={!allowDataproc || disableControls}
                           style={{ width: '10rem' }}
                           options={[ComputeType.Standard, ComputeType.Dataproc]}
-                          value={selectedCompute || ComputeType.Standard}
-                          onChange={({ value }) => {
-                            setSelectedCompute(value);
-                          }}
+                          value={
+                            runtimeConfig.computeType || ComputeType.Standard
+                          }
+                          onChange={({ value: computeType }) =>
+                            // When the compute type changes, we need to normalize the config and potentially restore defualts.
+                            setRuntimeConfig(
+                              withRuntimeConfigDefaults(
+                                { ...runtimeConfig, computeType },
+                                persistentDisk
+                              )
+                            )
+                          }
                         />
-                        {selectedCompute === ComputeType.Dataproc && (
+                        {runtimeConfig.computeType === ComputeType.Dataproc && (
                           <TooltipTrigger
                             content={
                               status !== RuntimeStatus.Running
@@ -2175,13 +1949,15 @@ const RuntimePanel = fp.flow(
                       </FlexRow>
                     </FlexColumn>
                   </FlexRow>
-                  {selectedCompute === ComputeType.Dataproc && (
+                  {runtimeConfig.computeType === ComputeType.Dataproc && (
                     <DataProcConfigSelector
                       disabled={disableControls}
                       runtimeStatus={status}
-                      dataprocExists={runtimeCtx.dataprocExists}
-                      onChange={(config) => setSelectedDataprocConfig(config)}
-                      dataprocConfig={selectedDataprocConfig}
+                      dataprocExists={dataprocExists}
+                      onChange={(dataprocConfig: DataprocConfig) =>
+                        setRuntimeConfig({ ...runtimeConfig, dataprocConfig })
+                      }
+                      dataprocConfig={runtimeConfig.dataprocConfig}
                     />
                   )}
                   <FlexRow
@@ -2205,34 +1981,17 @@ const RuntimePanel = fp.flow(
                           value: entry[0],
                         }))}
                         value={
-                          selectedAutopauseThreshold ||
+                          runtimeConfig.autopauseThreshold ||
                           DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES
                         }
-                        onChange={({ value }) =>
-                          setSelectedAutopauseThreshold(value)
+                        onChange={({ value: autopauseThreshold }) =>
+                          setRuntimeConfig({
+                            ...runtimeConfig,
+                            autopauseThreshold,
+                          })
                         }
                       />
                     </FlexColumn>
-                  </FlexRow>
-                  <FlexRow
-                    style={{
-                      justifyContent: 'space-between',
-                      marginTop: '.75rem',
-                    }}
-                  >
-                    {runtimeCtx.enablePD &&
-                      selectedCompute === ComputeType.Standard && (
-                        <div>
-                          <PersistentDiskSizeSelector
-                            selectedDiskSize={selectedPdSize}
-                            onChange={(value) => {
-                              setSelectedPdSize(value);
-                            }}
-                            disabled={disableControls}
-                            diskSize={pdSize}
-                          />{' '}
-                        </div>
-                      )}
                   </FlexRow>
                 </div>
                 {runtimeExists && updateMessaging.warn && (
@@ -2258,7 +2017,7 @@ const RuntimePanel = fp.flow(
                     {getWarningMessageContent()}
                   </WarningMessage>
                 )}
-                {runtimeCtx.unattachedPdExists && !runtimeExists ? (
+                {unattachedPdExists && !runtimeExists ? (
                   <FlexRow
                     style={{
                       justifyContent: 'space-between',
@@ -2280,7 +2039,9 @@ const RuntimePanel = fp.flow(
                     >
                       Delete Persistent Disk
                     </LinkButton>
-                    {!pdSizeReduced ? renderCreateButton() : renderNextButton()}
+                    {unattachedDiskNeedsRecreate
+                      ? renderNextButton()
+                      : renderCreateButton()}
                   </FlexRow>
                 ) : (
                   <FlexRow
@@ -2306,7 +2067,7 @@ const RuntimePanel = fp.flow(
                     </LinkButton>
                     {cond(
                       [
-                        runtimeExists || (pdExists && pdSizeReduced),
+                        runtimeExists || unattachedDiskNeedsRecreate,
                         () => renderNextButton(),
                       ],
                       [
@@ -2325,13 +2086,12 @@ const RuntimePanel = fp.flow(
             PanelContent.Confirm,
             () => (
               <ConfirmUpdatePanel
-                initialRuntimeConfig={initialRuntimeConfig}
-                newRuntimeConfig={newRuntimeConfig}
+                existingRuntimeConfig={existingRuntimeConfig}
+                newRuntimeConfig={runtimeConfig}
                 onCancel={() => {
                   setPanelContent(PanelContent.Customize);
                 }}
                 updateButton={renderUpdateButton()}
-                runtimeCtx={runtimeCtx}
               />
             ),
           ],
