@@ -108,52 +108,6 @@ public class ReportingTestUtils {
   public static final Short DATASET__PRE_PACKAGED_CONCEPT_SET = 7;
   public static final Long DATASET__WORKSPACE_ID = 8L;
 
-  public static void assertDtoWorkspaceFields(
-      ReportingWorkspace workspace,
-      long expectedWorkspaceId,
-      long expectedCdrVersionId,
-      long expectedCreatorId) {
-    assertThat(workspace.getAccessTierShortName()).isEqualTo(WORKSPACE__ACCESS_TIER_SHORT_NAME);
-    assertThat(workspace.getBillingAccountType()).isEqualTo(WORKSPACE__BILLING_ACCOUNT_TYPE);
-    assertThat(workspace.getBillingStatus()).isEqualTo(WORKSPACE__BILLING_STATUS);
-    assertThat(workspace.getCdrVersionId()).isEqualTo(expectedCdrVersionId);
-    assertTimeApprox(workspace.getCreationTime(), WORKSPACE__CREATION_TIME);
-    assertThat(workspace.getCreatorId()).isEqualTo(expectedCreatorId);
-    assertThat(workspace.getDisseminateResearchOther())
-        .isEqualTo(WORKSPACE__DISSEMINATE_RESEARCH_OTHER);
-    assertTimeApprox(workspace.getLastAccessedTime(), WORKSPACE__LAST_ACCESSED_TIME);
-    assertTimeApprox(workspace.getLastModifiedTime(), WORKSPACE__LAST_MODIFIED_TIME);
-    assertThat(workspace.getName()).isEqualTo(WORKSPACE__NAME);
-    assertThat(workspace.getNeedsRpReviewPrompt()).isEqualTo(WORKSPACE__NEEDS_RP_REVIEW_PROMPT);
-    assertThat(workspace.getPublished()).isEqualTo(WORKSPACE__PUBLISHED);
-    assertThat(workspace.getRpAdditionalNotes()).isEqualTo(WORKSPACE__RP_ADDITIONAL_NOTES);
-    assertThat(workspace.getRpAncestry()).isEqualTo(WORKSPACE__RP_ANCESTRY);
-    assertThat(workspace.getRpAnticipatedFindings()).isEqualTo(WORKSPACE__RP_ANTICIPATED_FINDINGS);
-    assertThat(workspace.getRpApproved()).isEqualTo(WORKSPACE__RP_APPROVED);
-    assertThat(workspace.getRpCommercialPurpose()).isEqualTo(WORKSPACE__RP_COMMERCIAL_PURPOSE);
-    assertThat(workspace.getRpControlSet()).isEqualTo(WORKSPACE__RP_CONTROL_SET);
-    assertThat(workspace.getRpDiseaseFocusedResearch())
-        .isEqualTo(WORKSPACE__RP_DISEASE_FOCUSED_RESEARCH);
-    assertThat(workspace.getRpDiseaseOfFocus()).isEqualTo(WORKSPACE__RP_DISEASE_OF_FOCUS);
-    assertThat(workspace.getRpDrugDevelopment()).isEqualTo(WORKSPACE__RP_DRUG_DEVELOPMENT);
-    assertThat(workspace.getRpEducational()).isEqualTo(WORKSPACE__RP_EDUCATIONAL);
-    assertThat(workspace.getRpEthics()).isEqualTo(WORKSPACE__RP_ETHICS);
-    assertThat(workspace.getRpIntendedStudy()).isEqualTo(WORKSPACE__RP_INTENDED_STUDY);
-    assertThat(workspace.getRpMethodsDevelopment()).isEqualTo(WORKSPACE__RP_METHODS_DEVELOPMENT);
-    assertThat(workspace.getRpOtherPopulationDetails())
-        .isEqualTo(WORKSPACE__RP_OTHER_POPULATION_DETAILS);
-    assertThat(workspace.getRpOtherPurpose()).isEqualTo(WORKSPACE__RP_OTHER_PURPOSE);
-    assertThat(workspace.getRpOtherPurposeDetails()).isEqualTo(WORKSPACE__RP_OTHER_PURPOSE_DETAILS);
-    assertThat(workspace.getRpPopulationHealth()).isEqualTo(WORKSPACE__RP_POPULATION_HEALTH);
-    assertThat(workspace.getRpReasonForAllOfUs()).isEqualTo(WORKSPACE__RP_REASON_FOR_ALL_OF_US);
-    assertThat(workspace.getRpReviewRequested()).isEqualTo(WORKSPACE__RP_REVIEW_REQUESTED);
-    assertThat(workspace.getRpScientificApproach()).isEqualTo(WORKSPACE__RP_SCIENTIFIC_APPROACH);
-    assertThat(workspace.getRpSocialBehavioral()).isEqualTo(WORKSPACE__RP_SOCIAL_BEHAVIORAL);
-    assertTimeApprox(workspace.getRpTimeRequested(), WORKSPACE__RP_TIME_REQUESTED);
-    assertThat(workspace.getWorkspaceId()).isEqualTo(expectedWorkspaceId);
-    assertThat(workspace.getWorkspaceNamespace()).isEqualTo(WORKSPACE__WORKSPACE_NAMESPACE);
-  }
-
   public static ReportingWorkspace createDtoWorkspace() {
     return new ReportingWorkspace()
         .accessTierShortName(WORKSPACE__ACCESS_TIER_SHORT_NAME)
