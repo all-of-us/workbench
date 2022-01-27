@@ -443,14 +443,13 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
         (user) -> {
           accessModuleService.updateCompletionTime(
               user, AccessModuleName.DATA_USER_CODE_OF_CONDUCT, timestamp);
-          user.setDuccAgreement(createDuccAgreement(user, duccSignedVersion, initials, timestamp));
-          return user;
+          return updateDuccAgreement(user, duccSignedVersion, initials, timestamp);
         },
         dbUser,
         Agent.asUser(dbUser));
   }
 
-  @Deprecated() // will be replaced by saveDuccAgreement() as part of RW-4838
+  @Deprecated() // replaced by updateDuccAgreement() and will be removed as part of RW-4838
   private void saveLegacyDUA(
       DbUser dbUser, Integer duccSignedVersion, String initials, Timestamp timestamp) {
     DbUserDataUseAgreement dataUseAgreement = new DbUserDataUseAgreement();
@@ -463,16 +462,26 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     userDataUseAgreementDao.save(dataUseAgreement);
   }
 
-  private DbUserCodeOfConductAgreement createDuccAgreement(
+  private DbUser updateDuccAgreement(
       DbUser dbUser, Integer duccSignedVersion, String initials, Timestamp timestamp) {
-    DbUserCodeOfConductAgreement ducc = new DbUserCodeOfConductAgreement();
-    ducc.setUser(dbUser);
+    DbUserCodeOfConductAgreement ducc =
+        Optional.ofNullable(dbUser.getDuccAgreement())
+            .orElseGet(
+                () -> {
+                  DbUserCodeOfConductAgreement d = new DbUserCodeOfConductAgreement();
+
+                  // TODO not sure if we strictly need both of these, but it shouldn't hurt
+                  d.setUser(dbUser);
+                  dbUser.setDuccAgreement(d);
+
+                  return d;
+                });
     ducc.setSignedVersion(duccSignedVersion);
     ducc.setUserFamilyName(dbUser.getFamilyName());
     ducc.setUserGivenName(dbUser.getGivenName());
     ducc.setUserInitials(initials);
     ducc.setCompletionTime(timestamp);
-    return ducc;
+    return dbUser;
   }
 
   @Override

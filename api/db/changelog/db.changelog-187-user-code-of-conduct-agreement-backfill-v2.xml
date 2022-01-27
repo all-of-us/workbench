@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+  <changeSet author="thibault" id="changelog-187-user-code-of-conduct-agreement-backfill-v2">
+    <!--
+    Run migration commands to correct a problematic backfill from the previous migration.
+
+    changelog-186-user-code-of-conduct-agreement-backfill naively copied rows from the table
+    user_data_use_agreement to user_code_of_conduct_agreement. This caused a Hibernate problem
+    because the new table is mapped as @OneToOne, but the old table did not have the restriction of
+    a single entry per user.
+
+    To address this issue, this migration performs 3 tasks:
+    1. deletes all rows from the new table
+    2. applies a unique key restriction to user_id in the new table
+    3. copies only the most recently signed DUCC agreement from the old table to the new table
+     -->
+
+    <!-- 1. delete all rows from the new table -->
+    <sql>
+      DELETE FROM user_code_of_conduct_agreement;
+    </sql>
+
+    <!-- 2. applies a unique key restriction to user_id in the new table -->
+    <addUniqueConstraint columnNames="user_id"
+      constraintName="user_code_of_conduct_agreement_unique_user_id"
+      tableName="user_code_of_conduct_agreement"/>
+
+    <!-- 3. copy only the most recently signed DUCC agreement from the old table to the new table -->
+    <sql>
+      INSERT INTO user_code_of_conduct_agreement
+          (id, user_id, user_given_name, user_family_name, user_initials, user_name_out_of_date, signed_version, completion_time)
+      SELECT user_data_user_agreement_id AS id,
+             user_id, user_given_name, user_family_name, user_initials, user_name_out_of_date,
+             data_use_agreement_signed_version AS signed_version,
+             completion_time
+      FROM user_data_use_agreement
+      WHERE (user_id,completion_time) IN (
+          SELECT user_id, MAX(completion_time)
+          FROM user_data_use_agreement
+          GROUP BY user_id
+          );
+    </sql>
+
+  </changeSet>
+</databaseChangeLog>
