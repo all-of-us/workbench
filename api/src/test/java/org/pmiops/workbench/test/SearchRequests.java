@@ -38,14 +38,15 @@ public class SearchRequests {
     return searchRequest(searchGroupItem);
   }
 
-  public static SearchRequest codesRequest(String groupType, String type, boolean group) {
+  public static SearchRequest codesRequest(
+      String groupType, String type, boolean group, Long conceptId) {
     SearchGroupItem searchGroupItem = new SearchGroupItem().id("id1").type(groupType);
     SearchParameter parameter =
         new SearchParameter()
             .domain(groupType)
             .type(type)
             .group(group)
-            .conceptId(1L)
+            .conceptId(conceptId)
             .standard(false)
             .ancestorData(false);
     searchGroupItem.addSearchParametersItem(parameter);
@@ -134,11 +135,16 @@ public class SearchRequests {
   }
 
   public static SearchRequest icd9Codes() {
-    return codesRequest(Domain.CONDITION.toString(), CriteriaType.ICD9CM.toString(), true);
+    return codesRequest(Domain.CONDITION.toString(), CriteriaType.ICD9CM.toString(), true, 1L);
   }
 
   public static SearchRequest icd9CodesChildren() {
-    return codesRequest(Domain.CONDITION.toString(), CriteriaType.ICD9CM.toString(), false);
+    return codesRequest(Domain.CONDITION.toString(), CriteriaType.ICD9CM.toString(), false, 1L);
+  }
+
+  public static SearchRequest conditionPreviewCodes() {
+    return codesRequest(
+        Domain.CONDITION.toString(), CriteriaType.ICD9CM.toString(), false, 44823922L);
   }
 
   public static SearchRequest icd9CodeWithModifiers() {

@@ -67,7 +67,7 @@ describe('NotebookLauncher', () => {
   let runtimeStub;
 
   const notebookInitialUrl = '/workspaces/namespace/id/notebooks/wharrgarbl';
-  let history = createMemoryHistory({ initialEntries: [notebookInitialUrl] });
+  const history = createMemoryHistory({ initialEntries: [notebookInitialUrl] });
 
   const notebookComponent = async () => {
     const c = mount(
@@ -433,7 +433,7 @@ describe('TerminalLauncher', () => {
   let runtimeStub;
 
   const terminalInitialUrl = '/workspaces/namespace/id/terminals';
-  let history = createMemoryHistory({ initialEntries: [terminalInitialUrl] });
+  const history = createMemoryHistory({ initialEntries: [terminalInitialUrl] });
 
   const terminalComponent = async () => {
     const t = mount(
@@ -561,7 +561,7 @@ describe('SparkConsoleLauncher', () => {
   let runtimeStub;
 
   const terminalInitialUrl = '/workspaces/namespace/id/spark/apphistory';
-  let history = createMemoryHistory({ initialEntries: [terminalInitialUrl] });
+  const history = createMemoryHistory({ initialEntries: [terminalInitialUrl] });
 
   const terminalComponent = async () => {
     const t = mount(

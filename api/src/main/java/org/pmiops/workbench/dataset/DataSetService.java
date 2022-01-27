@@ -15,7 +15,7 @@ import org.pmiops.workbench.model.DataSet;
 import org.pmiops.workbench.model.DataSetExportRequest;
 import org.pmiops.workbench.model.DataSetPreviewRequest;
 import org.pmiops.workbench.model.DataSetRequest;
-import org.pmiops.workbench.model.DomainValue;
+import org.pmiops.workbench.model.DomainWithDomainValues;
 import org.pmiops.workbench.model.ResourceType;
 
 public interface DataSetService {
@@ -62,7 +62,7 @@ public interface DataSetService {
 
   List<String> getPersonIdsWithWholeGenome(DbDataset dataSet);
 
-  List<DomainValue> getValueListFromDomain(String domain);
+  List<DomainWithDomainValues> getValueListFromDomain(Long conceptSetId, String domain);
 
   void validateDataSetPreviewRequestResources(long workspaceId, DataSetPreviewRequest request);
 }

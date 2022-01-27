@@ -27,6 +27,13 @@ export const styles = reactStyles({
     color: colors.dark,
     border: `1px solid ${colorWithWhiteness(colors.danger, 0.6)}`,
   },
+  info: {
+    background: colorWithWhiteness(colors.secondary, 0.75),
+    color: colors.primary,
+    border: `1px solid ${colorWithWhiteness(colors.primary, 0.65)}`,
+    fontSize: '11px',
+    padding: '.2rem',
+  },
   warning: {
     background: colors.warning,
     color: colors.white,
@@ -37,6 +44,7 @@ export const styles = reactStyles({
 
 export const Alert = withStyle(styles.alert)('div');
 export const AlertDanger = withStyle(styles.danger)(Alert);
+export const AlertInfo = withStyle(styles.info)(Alert);
 export const AlertWarning = withStyle(styles.warning)(Alert);
 export const AlertClose = ({ style = {}, ...props }) => {
   return (
