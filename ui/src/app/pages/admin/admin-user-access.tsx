@@ -93,6 +93,7 @@ export const AdminUserAccess = () => {
             height: '38px',
             width: '150px',
           }}
+          disabled={sendingRequest}
         >
           Sync Access
         </Button>
