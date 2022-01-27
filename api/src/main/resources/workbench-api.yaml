@@ -1419,6 +1419,29 @@ paths:
           description: User doesn't have the ACCESS_CONTROL_ADMIN authority
           schema:
             "$ref": "#/definitions/ErrorResponse"
+  "/v1/admin/users/batchSyncAccess":
+    post:
+      tags:
+        - userAdmin
+      consumes:
+        - application/json
+      description: 'Batch sync user access modules, asynchronously. This is a work around until SAM
+      supports batch update. See https://broadworkbench.atlassian.net/browse/CA-1504'
+      parameters:
+        - in: body
+          name: request
+          schema:
+            "$ref": "#/definitions/BatchSyncAccessRequest"
+      operationId: batchSyncAccess
+      responses:
+        200:
+          description: 'The user''s updated profile'
+          schema:
+            "$ref": "#/definitions/BatchSyncAccessResponse"
+        403:
+          description: User doesn't have the ACCESS_CONTROL_ADMIN authority
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
   "/v1/admin/workspaces/{workspaceNamespace}/locked":
     parameters:
       - "$ref": "#/parameters/workspaceNamespace"
@@ -6224,6 +6247,23 @@ definitions:
         type: array
         items:
           "$ref": "#/definitions/AdminTableUser"
+  BatchSyncAccessRequest:
+    type: object
+    required:
+    - usernames
+    properties:
+      usernames:
+        type: array
+        items:
+          type: string
+  BatchSyncAccessResponse:
+    type: object
+    properties:
+      cloudTaskNames:
+        description: list of Cloud task names that processing the batch update
+        type: array
+        items:
+          type: string
   UpdateUserDisabledRequest:
     type: object
     required:

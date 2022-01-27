@@ -589,6 +589,11 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     return userDao.findUsersBySearchStringAndTier(term, sort, accessTierShortName);
   }
 
+  @Override
+  public List<DbUser> findUsersByUsernames(List<String> usernames) {
+    return userDao.findUserByUsernameIn(usernames);
+  }
+
   /** Syncs the current user's training status from Moodle. */
   @Override
   public DbUser syncComplianceTrainingStatusV2()

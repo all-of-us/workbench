@@ -407,6 +407,30 @@ public class UserDaoTest {
     assertThat(result).isEmpty();
   }
 
+  @Test
+  public void testFindUserByUsernames() {
+    DbUser alice = new DbUser();
+    alice.setGivenName("Alice");
+    alice.setFamilyName("Funk");
+    alice.setUsername("afunk123");
+    alice = userDao.save(alice);
+
+    DbUser bob = new DbUser();
+    bob.setGivenName("Bob");
+    bob.setFamilyName("O'Brien");
+    bob.setUsername("bobo1");
+    bob = userDao.save(bob);
+
+    DbUser taylor = new DbUser();
+    taylor.setGivenName("Taylor");
+    taylor.setFamilyName("Nakamura");
+    taylor.setUsername("captain");
+    taylor = userDao.save(taylor);
+
+    assertThat(userDao.findUserByUsernameIn(ImmutableList.of("afunk123", "bobo1")))
+        .containsExactly(alice, bob);
+  }
+
   private List<DbUser> insertTestUsers(
       boolean isDisabled, long numUsers, DbInstitution institution, DbAccessTier... tiers) {
 

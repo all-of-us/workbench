@@ -84,6 +84,9 @@ public interface UserService {
    */
   List<DbUser> findUsersBySearchString(String term, Sort sort, String accessTierShortName);
 
+  /** Loads all users given list of usernames. */
+  List<DbUser> findUsersByUsernames(List<String> usernames);
+
   DbUser syncComplianceTrainingStatusV2()
       throws org.pmiops.workbench.moodle.ApiException, NotFoundException;
 
