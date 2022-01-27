@@ -449,7 +449,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
         Agent.asUser(dbUser));
   }
 
-  @Deprecated() // will be replaced by saveDuccAgreement() as part of RW-4838
+  @Deprecated() // replaced by updateDuccAgreement() and will be removed as part of RW-4838
   private void saveLegacyDUA(
       DbUser dbUser, Integer duccSignedVersion, String initials, Timestamp timestamp) {
     DbUserDataUseAgreement dataUseAgreement = new DbUserDataUseAgreement();
