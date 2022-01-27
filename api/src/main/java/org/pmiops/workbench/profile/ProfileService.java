@@ -35,6 +35,7 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapper;
 import org.pmiops.workbench.model.AccessModuleStatus;
+import org.pmiops.workbench.model.AccountDisabledStatus;
 import org.pmiops.workbench.model.AccountPropertyUpdate;
 import org.pmiops.workbench.model.Address;
 import org.pmiops.workbench.model.AdminTableUser;
@@ -531,8 +532,9 @@ public class ProfileService {
     Optional.ofNullable(request.getContactEmail()).ifPresent(updatedProfile::setContactEmail);
     Optional.ofNullable(request.getAffiliation())
         .ifPresent(updatedProfile::setVerifiedInstitutionalAffiliation);
-    Optional.ofNullable(request.getDisabledStatus())
-        .ifPresent(status -> updatedProfile.setDisabled(status.getDisabled()));
+    Optional.ofNullable(request.getAccountDisabledStatus())
+        .map(AccountDisabledStatus::getDisabled)
+        .ifPresent(updatedProfile::setDisabled);
 
     updateProfile(dbUser, Agent.asAdmin(userProvider.get()), updatedProfile, originalProfile);
 

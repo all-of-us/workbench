@@ -13,8 +13,8 @@ import {
   AccessBypassRequest,
   AccessModule,
   AccessModuleStatus,
+  AccountDisabledStatus,
   AccountPropertyUpdate,
-  DisabledStatus,
   InstitutionalRole,
   Profile,
   PublicInstitutionDetails,
@@ -211,8 +211,7 @@ export const updateAccountProperties = async (
     ['disabled']
   );
 
-  const disabledStatus: DisabledStatus = updateDisabledMaybe && {
-    username,
+  const accountDisabledStatus: AccountDisabledStatus = updateDisabledMaybe && {
     disabled: updateDisabledMaybe,
   };
 
@@ -220,7 +219,7 @@ export const updateAccountProperties = async (
   const request: AccountPropertyUpdate = {
     username,
     accessBypassRequests,
-    disabledStatus,
+    accountDisabledStatus,
     freeCreditsLimit: getUpdatedProfileValue(oldProfile, updatedProfile, [
       'freeTierDollarQuota',
     ]),
