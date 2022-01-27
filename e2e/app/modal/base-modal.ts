@@ -29,14 +29,15 @@ export default abstract class BaseModal extends Container {
   async waitForLoad(): Promise<this> {
     await this.waitUntilVisible();
     await this.isLoaded();
-    await this.getTitle();
+    logger.info(`Modal "${await this.getTitle()}" is open`);
     await waitWhileLoading(this.page);
     return this;
   }
 
   async getTextContent(): Promise<string[]> {
     // xpath that excludes button labels and spans
-    const selector = `${this.getXpath()}//*[normalize-space(text()) and not(@role="button")]`;
+    const selector =
+      this.getXpath() + '//*[normalize-space(.) and not(@role="button") and not(self::b) and not(self::i)]';
     await this.page.waitForXPath(selector, { visible: true });
     const elements: ElementHandle[] = await this.page.$x(selector);
     return fp.flow(
@@ -47,7 +48,11 @@ export default abstract class BaseModal extends Container {
 
   async getTitle(): Promise<string> {
     if (this.title === undefined) {
-      this.title = (await this.getTextContent())[0];
+      try {
+        this.title = (await this.getTextContent())[0];
+      } catch (error) {
+        this.title = '';
+      }
     }
     return this.title;
   }
@@ -83,25 +88,21 @@ export default abstract class BaseModal extends Container {
    * @param timeout
    */
   async waitUntilClose(timeout = 2 * 60 * 1000): Promise<void> {
+    const modalTitle = await this.getTitle();
     try {
       await this.page.waitForFunction(
         (xpath) => {
-          const elem: HTMLElement = document.evaluate(
-            xpath,
-            document.body,
-            null,
-            XPathResult.FIRST_ORDERED_NODE_TYPE,
-            null
-          ).singleNodeValue as HTMLElement;
-          const isVisible = elem && (elem.offsetWidth > 0 || elem.offsetHeight > 0);
+          const element = document.evaluate(xpath, document.body, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null)
+            .singleNodeValue as HTMLElement;
+          const isVisible = element && (element.offsetWidth > 0 || element.offsetHeight > 0);
           return !isVisible;
         },
         { timeout },
         this.getXpath()
       );
-      logger.info(`Modal "${await this.getTitle()}" is closed.`);
+      logger.info(`Modal "${modalTitle}" is closed.`);
     } catch (err) {
-      logger.error(`FAIL: WaitUntilClose failed for modal "${await this.getTitle()}". Xpath: "${this.getXpath()}"`);
+      logger.error(`FAIL: WaitUntilClose failed for modal "${modalTitle}". Modal xpath: "${this.getXpath()}"`);
       logger.error(err.stack);
       throw new Error(err);
     }

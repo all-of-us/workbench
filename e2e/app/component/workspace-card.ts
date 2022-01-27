@@ -34,8 +34,8 @@ export default class WorkspaceCard extends CardBase {
     const card = await WorkspaceCard.findCard(page, workspaceName, 30000);
     await card.selectSnowmanMenu(MenuOption.Delete, { waitForNav: false });
     // Handle Delete Confirmation modal
-    const modalText = new WorkspaceEditPage(page).dismissDeleteWorkspaceModal();
-    await WorkspaceCard.waitUntilGone(page, workspaceName, 120000);
+    const modalText = await new WorkspaceEditPage(page).dismissDeleteWorkspaceModal();
+    await WorkspaceCard.waitUntilGone(page, workspaceName, 10000);
     return modalText;
   }
 
@@ -70,7 +70,7 @@ export default class WorkspaceCard extends CardBase {
   }
 
   static async findAnyCard(page: Page): Promise<WorkspaceCard> {
-    const cards = await this.findAllCards(page);
+    const cards: WorkspaceCard[] = await this.findAllCards(page);
     if (cards.length === 0) {
       throw new Error('FAIL: Failed to find any Workspace card on page.');
     }
@@ -88,7 +88,7 @@ export default class WorkspaceCard extends CardBase {
         return new WorkspaceCard(page).asCard(element);
       })
       .catch(() => {
-        logger.info(`Workspace card: "${workspaceName}" is not found`);
+        logger.info(`Workspace card "${workspaceName}" was not found`);
         return null;
       });
   }

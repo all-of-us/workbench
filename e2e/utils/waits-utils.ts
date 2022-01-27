@@ -387,18 +387,18 @@ export async function waitWhileLoading(
           (css) => {
             return !document.querySelectorAll(css).length;
           },
-          { polling: 'mutation', timeout: 30000 },
+          { polling: 'mutation', timeout: maxTime },
           spinElementsCss
         ),
-        page.waitForSelector(spinElementsCss, { hidden: true, visible: false, timeout: 30000 })
+        page.waitForSelector(spinElementsCss, { hidden: true, visible: false, timeout: maxTime })
       ]);
       confidenceCounter++;
-      if (confidenceCounter >= confidenceLevel) {
-        return; // success
-      }
     } catch (err) {
-      confidenceCounter = confidenceCounter > 0 ? confidenceCounter-- : 0;
       error = err;
+    }
+
+    if (confidenceCounter >= confidenceLevel) {
+      return; // success
     }
 
     const spentTime = Date.now() - startTime;
@@ -409,12 +409,14 @@ export async function waitWhileLoading(
         await takeScreenshot(page, makeDateTimeStr('ERROR_Spinner_TimeOut'));
         throw new Error(error.message);
       }
-      logger.info('Waiting for loading spinner to stop has exceeded maximum wait time. Test will continue.');
+      logger.info(
+        'WARNING: Waiting for loading spinner to stop has exceeded maximum wait time. But test will continue.'
+      );
       await takeScreenshot(page, makeDateTimeStr('Spinner_TimeOut'));
       return;
     }
 
-    await page.waitForTimeout(200); // short pause then retry
+    await page.waitForTimeout(200); // short pause then check again
     await waitUntilSpinnerGone(maxTime - spentTime); // unused time
   };
 

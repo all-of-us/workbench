@@ -249,7 +249,7 @@ export async function findOrCreateWorkspaceCard(
 
   cardFound = await findWorkspaceCard(page, workspaceName);
   if (cardFound === null) {
-    throw new Error(`Failed finding Workspace card name: ${workspaceName}`);
+    throw new Error(`FAIL: Failed to find Workspace card with name: ${workspaceName}`);
   }
   logger.info(`Found Workspace card name: "${workspaceName}"`);
   return cardFound;
