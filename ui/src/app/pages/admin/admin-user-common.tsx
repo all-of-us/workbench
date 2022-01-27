@@ -7,7 +7,7 @@ import { Link } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 import { Dropdown } from 'primereact/dropdown';
 
-import { formatInitialCreditsUSD, reactStyles } from 'app/utils';
+import { formatInitialCreditsUSD, maybe, reactStyles } from 'app/utils';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import {
   AccessBypassRequest,
@@ -147,7 +147,7 @@ export const getUpdatedProfileValue = (
   if (!fp.isEqual(oldValue, updatedValue)) {
     return updatedValue;
   } else {
-    return null;
+    return undefined;
   }
 };
 
@@ -205,15 +205,18 @@ export const updateAccountProperties = async (
 ): Promise<Profile> => {
   const { username } = updatedProfile;
 
-  const updateDisabledMaybe: boolean | null = getUpdatedProfileValue(
+  const updateDisabledMaybe: boolean = getUpdatedProfileValue(
     oldProfile,
     updatedProfile,
     ['disabled']
   );
 
-  const accountDisabledStatus: AccountDisabledStatus = updateDisabledMaybe && {
-    disabled: updateDisabledMaybe,
-  };
+  const accountDisabledStatus: AccountDisabledStatus =
+    updateDisabledMaybe === undefined
+      ? undefined // temp check this
+      : {
+          disabled: updateDisabledMaybe, // play with null later
+        };
 
   // only set these fields if they have changed (except username which we always want)
   const request: AccountPropertyUpdate = {
