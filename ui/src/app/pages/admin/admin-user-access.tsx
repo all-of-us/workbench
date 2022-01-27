@@ -36,9 +36,7 @@ export const AdminUserAccess = () => {
   );
 
   const parseUserEmailInput = (input: string) => {
-    if (typeof input === 'string') {
-      setUserEmails(input.split(/[,\n]+/).map((email) => email.trim()));
-    }
+    setUserEmails(input?.split(/[,\n]+/).map((email) => email.trim()));
   };
   const sendBatchUpdateRequest = fp.flow(
     withErrorModal({
