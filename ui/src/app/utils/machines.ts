@@ -407,13 +407,13 @@ const dataprocSurcharge = ({
 // https://github.com/DataBiosphere/terra-ui/blob/cf5ec4408db3bd1fcdbcc5302da62d42e4d03ca3/src/components/ClusterManager.js#L85
 
 export const machineStorageCost = ({
-  diskSize,
+  diskConfig: { size },
   dataprocConfig,
 }: RuntimeConfig) => {
   const { numberOfWorkers, numberOfPreemptibleWorkers, workerDiskSize } =
     dataprocConfig ?? {};
   return fp.sum([
-    diskSize * diskPrice,
+    size * diskPrice,
     numberOfWorkers ? numberOfWorkers * workerDiskSize * diskPrice : 0,
     numberOfPreemptibleWorkers
       ? numberOfPreemptibleWorkers * workerDiskSize * diskPrice
@@ -422,14 +422,14 @@ export const machineStorageCost = ({
 };
 
 export const machineStorageCostBreakdown = ({
-  diskSize,
+  diskConfig: { size },
   dataprocConfig,
 }: RuntimeConfig) => {
   const { numberOfWorkers, numberOfPreemptibleWorkers, workerDiskSize } =
     dataprocConfig ?? {};
   const costs = [];
   if (workerDiskSize) {
-    costs.push(`${formatUsd(diskSize * diskPrice)}/hr Master Disk`);
+    costs.push(`${formatUsd(size * diskPrice)}/hr Master Disk`);
     if (numberOfWorkers) {
       costs.push(
         `${formatUsd(
@@ -445,7 +445,7 @@ export const machineStorageCostBreakdown = ({
       );
     }
   } else {
-    costs.push(`${formatUsd(diskSize * diskPrice)}/hr Disk`);
+    costs.push(`${formatUsd(size * diskPrice)}/hr Disk`);
   }
   return costs;
 };

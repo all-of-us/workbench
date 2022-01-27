@@ -25,7 +25,7 @@ export const RuntimeSummary = ({
         - Compute size of
         <b> {runtimeConfig.machine.cpu} CPUs</b>,
         <b> {runtimeConfig.machine.memory} GB memory</b>, and a
-        <b> {runtimeConfig.diskSize} GB disk</b>
+        <b> {runtimeConfig.diskConfig.size} GB disk</b>
       </div>
       {runtimeConfig.computeType === ComputeType.Dataproc && (
         <>
