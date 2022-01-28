@@ -238,9 +238,9 @@ public class RuntimeController implements RuntimeApiDelegate {
       throw new BadRequestException("Runtime cannot be empty for an update request");
     }
 
-    if (runtimeRequest.getRuntime().getGceConfig() != null
+    if (!(runtimeRequest.getRuntime().getGceConfig() != null
         ^ runtimeRequest.getRuntime().getGceWithPdConfig() != null
-        ^ runtimeRequest.getRuntime().getDataprocConfig() != null) {
+        ^ runtimeRequest.getRuntime().getDataprocConfig() != null)) {
       throw new BadRequestException(
           "Exactly one of GceConfig, GceWithPdConfig, or DataprocConfig must be provided");
     }

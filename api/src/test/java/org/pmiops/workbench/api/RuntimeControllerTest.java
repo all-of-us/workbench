@@ -278,7 +278,7 @@ public class RuntimeControllerTest {
     dataprocConfigObj.put("masterMachineType", "n1-standard-4");
     dataprocConfigObj.put("masterDiskSize", 50.0);
 
-    leonardoMapper.mapRuntimeConfig(tmpRuntime, dataprocConfigObj);
+    leonardoMapper.mapRuntimeConfig(tmpRuntime, dataprocConfigObj, null);
     dataprocConfig = tmpRuntime.getDataprocConfig();
 
     gceConfigObj = new LinkedTreeMap<>();
@@ -287,7 +287,7 @@ public class RuntimeControllerTest {
     gceConfigObj.put("diskSize", 100.0);
     gceConfigObj.put("machineType", "n1-standard-2");
 
-    leonardoMapper.mapRuntimeConfig(tmpRuntime, gceConfigObj);
+    leonardoMapper.mapRuntimeConfig(tmpRuntime, gceConfigObj, null);
     gceConfig = tmpRuntime.getGceConfig();
 
     testLeoRuntime =
@@ -785,14 +785,12 @@ public class RuntimeControllerTest {
                         .diskType(LeonardoDiskType.SSD)
                         .name("pd")
                         .blockSize(100)
-                        .size(100)));
+                        .size(200)));
 
     Runtime runtime = runtimeController.getRuntime(WORKSPACE_NS).getBody();
 
-    assertThat(runtime.getDiskConfig().getDiskType()).isEqualTo(DiskType.SSD);
-    assertThat(runtime.getDiskConfig().getName()).isEqualTo("pd");
-    assertThat(runtime.getDiskConfig().getSize()).isEqualTo(100);
-    assertThat(runtime.getDiskConfig().getBlockSize()).isEqualTo(100);
+    assertThat(runtime.getGceWithPdConfig().getPersistentDisk())
+        .isEqualTo(new PersistentDiskRequest().diskType(DiskType.SSD).name("pd").size(200));
   }
 
   @Test
@@ -915,7 +913,7 @@ public class RuntimeControllerTest {
   }
 
   @Test
-  public void testCreateRuntime_gceWihPD() throws ApiException {
+  public void testCreateRuntime_gceWithPD() throws ApiException {
     when(userRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
         .thenThrow(new NotFoundException());
     stubGetWorkspace(WORKSPACE_NS, GOOGLE_PROJECT_ID, WORKSPACE_ID, "test");
@@ -925,7 +923,6 @@ public class RuntimeControllerTest {
         new Runtime()
             .gceWithPdConfig(
                 new GceWithPdConfig()
-                    .bootDiskSize(50)
                     .machineType("standard")
                     .persistentDisk(
                         new PersistentDiskRequest()
@@ -951,7 +948,6 @@ public class RuntimeControllerTest {
                 .getCloudService())
         .isEqualTo(LeonardoRuntimeConfig.CloudServiceEnum.GCE);
 
-    assertThat(createLeonardoGceWithPdConfig.getBootDiskSize()).isEqualTo(50);
     assertThat(createLeonardoGceWithPdConfig.getMachineType()).isEqualTo("standard");
     assertThat(createLeonardoGceWithPdConfig.getPersistentDisk().getDiskType())
         .isEqualTo(LeonardoDiskType.SSD);
@@ -1100,7 +1096,6 @@ public class RuntimeControllerTest {
         new Runtime()
             .gceWithPdConfig(
                 new GceWithPdConfig()
-                    .bootDiskSize(50)
                     .machineType("standard")
                     .persistentDisk(
                         new PersistentDiskRequest()
