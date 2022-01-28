@@ -1,17 +1,12 @@
 package org.pmiops.workbench.cdr;
 
-import com.google.common.cache.LoadingCache;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import java.util.logging.Logger;
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 import org.apache.tomcat.jdbc.pool.PoolConfiguration;
 import org.apache.tomcat.jdbc.pool.PoolProperties;
-import org.pmiops.workbench.access.AccessTierService;
-import org.pmiops.workbench.config.CacheSpringConfiguration;
-import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.exceptions.ServerErrorException;
@@ -46,29 +41,18 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 public class CdrDbConfig {
   private static final Logger log = Logger.getLogger(CdrDbConfig.class.getName());
 
+  private static final long DUMMY_CDR_VERSION = -1;
+
   @Service
   public static class CdrDataSource extends AbstractRoutingDataSource {
 
     private boolean finishedInitialization = false;
 
-    // Each access tier has a default version, but we don't know which tier is desired.
-    //
-    // This is because the default CDR Version is only returned when we have no knowledge about
-    // which CDR version is desired, and therefore also the access tier.  We have to choose one,
-    // and the Registered Tier is the safer choice.
-    //
-    // See also https://precisionmedicineinitiative.atlassian.net/browse/RW-6432
-
-    private final Long defaultCdrVersionId;
-
     @Autowired
     public CdrDataSource(
         CdrVersionDao cdrVersionDao,
         @Qualifier("poolConfiguration") PoolConfiguration basePoolConfig,
-        @Qualifier("cdrPoolConfiguration") PoolConfiguration cdrPoolConfig,
-        @Qualifier("configCache") LoadingCache<String, Object> configCache)
-        throws ExecutionException {
-      WorkbenchConfig workbenchConfig = CacheSpringConfiguration.lookupWorkbenchConfig(configCache);
+        @Qualifier("cdrPoolConfiguration") PoolConfiguration cdrPoolConfig) {
       String dbUser = cdrPoolConfig.getUsername();
       String dbPassword = cdrPoolConfig.getPassword();
       String originalDbUrl = cdrPoolConfig.getUrl();
@@ -78,7 +62,6 @@ public class CdrDbConfig {
       // server in order for it to be used.
       // TODO: find a way to make sure CDR versions aren't shown in the UI until they are in use by
       // all servers.
-      Long defaultId = null;
       Map<Object, Object> cdrVersionDataSourceMap = new HashMap<>();
       for (DbCdrVersion cdrVersion : cdrVersionDao.findAll()) {
         int slashIndex = originalDbUrl.lastIndexOf('/');
@@ -119,24 +102,7 @@ public class CdrDbConfig {
         }
 
         cdrVersionDataSourceMap.put(cdrVersion.getCdrVersionId(), dataSource);
-        if (cdrVersion
-                .getAccessTier()
-                .getShortName()
-                .equals(AccessTierService.REGISTERED_TIER_SHORT_NAME)
-            && cdrVersion.getIsDefaultNotNull()) {
-          if (defaultId != null) {
-            throw new ServerErrorException(
-                String.format(
-                    "Multiple Registered Tier CDR versions are marked as the default: %d, %d",
-                    defaultId, cdrVersion.getCdrVersionId()));
-          }
-          defaultId = cdrVersion.getCdrVersionId();
-        }
       }
-      if (defaultId == null) {
-        throw new ServerErrorException("Default Registered Tier CDR version not found!");
-      }
-      this.defaultCdrVersionId = defaultId;
       setTargetDataSources(cdrVersionDataSourceMap);
       afterPropertiesSet();
     }
@@ -152,14 +118,15 @@ public class CdrDbConfig {
       if (cdrVersion == null) {
         if (finishedInitialization) {
           throw new ServerErrorException("No CDR version specified!");
+        } else {
+          // While Spring beans are being initialized, this method can be called
+          // in the course of attempting to determine metadata about the data source.
+          // After Spring beans are finished being initialized, init() will
+          // be called and we will start requiring clients to specify a CDR version.
+          return DUMMY_CDR_VERSION;
         }
-        // While Spring beans are being initialized, this method can be called
-        // in the course of attempting to determine metadata about the data source.
-        // Return the the default Registered Tier CDR version for configuring metadata.
-        // After Spring beans are finished being initialized, init() will
-        // be called and we will start requiring clients to specify a CDR version.
-        return defaultCdrVersionId;
       }
+
       return cdrVersion.getCdrVersionId();
     }
   }

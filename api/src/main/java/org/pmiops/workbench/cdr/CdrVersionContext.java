@@ -1,5 +1,6 @@
 package org.pmiops.workbench.cdr;
 
+import javax.annotation.Nullable;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 
 /** Maintains state of what CDR version is being used in the context of the current request. */
@@ -24,6 +25,7 @@ public class CdrVersionContext {
     cdrVersion.remove();
   }
 
+  @Nullable
   public static DbCdrVersion getCdrVersion() {
     return cdrVersion.get();
   }

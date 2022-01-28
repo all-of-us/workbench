@@ -23,6 +23,20 @@
   ],
   "cdrVersions": [
     {
+      "cdrVersionId": -1,
+      "name": "Dummy version for Spring initialization - do not use",
+      "archivalStatus": 1,
+      "accessTier": "registered",
+      "bigqueryProject": "",
+      "bigqueryDataset": "",
+      "creationTime": "2000-01-01 00:00:00Z",
+      "releaseNumber": 0,
+      "numParticipants": 0,
+      "cdrDbName": "cdr",
+      "hasFitbitData": false,
+      "hasCopeSurveyData": false
+    },
+    {
       "cdrVersionId": 1,
       "name": "[Removed] Synthetic Dataset v1",
       "archivalStatus": 1,
