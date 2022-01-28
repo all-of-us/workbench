@@ -12,7 +12,7 @@ import {
   withCurrentCohort,
   withCurrentWorkspace,
 } from 'app/utils';
-import { currentCohortStore, NavigationProps } from 'app/utils/navigation';
+import { NavigationProps } from 'app/utils/navigation';
 import { MatchParams } from 'app/utils/stores';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
@@ -130,7 +130,6 @@ export const CohortActions = fp.flow(
           .getCohort(namespace, id, +this.props.match.params.cid)
           .then((c) => {
             if (c) {
-              currentCohortStore.next(c);
               this.setState({ cohort: c, cohortLoading: false });
             } else {
               this.props.navigate([
