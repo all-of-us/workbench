@@ -558,8 +558,8 @@ paths:
           to update the user to.
         schema:
           "$ref": "#/definitions/UpdateUserDisabledRequest"
-      summary: enable/disable a user to an auth domain if you have ID verification
-        authority
+      summary: '[DEPRECATED - use admin/users/updateAccount] enable/disable a user to an auth domain 
+        if you have ID verification authority'
       operationId: updateUserDisabledStatus
   "/v1/userSearch/{accessTierShortName}/{term}":
     get:
@@ -6272,9 +6272,17 @@ definitions:
       email:
         type: string
       disabled:
-        description: Set to true to disable user in auth domain, false otherwise
+        description: '[DEPRECATED] Set to true to disable user in auth domain, false otherwise'
         type: boolean
         default: false
+  AccountDisabledStatus:
+    type: object
+    required:
+      - disabled
+    properties:
+      disabled:
+        description: Set to true to disable user, false otherwise
+        type: boolean
   AuditBigQueryResponse:
     type: object
     properties:
@@ -8836,6 +8844,9 @@ definitions:
         type: array
         items:
           "$ref": '#/definitions/AccessBypassRequest'
+      accountDisabledStatus:
+        description: When set, replaces the user's account disabled status.
+        "$ref": '#/definitions/AccountDisabledStatus'
   AccessReason:
     type: object
     properties:

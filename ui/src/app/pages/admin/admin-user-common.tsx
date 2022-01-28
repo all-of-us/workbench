@@ -13,6 +13,7 @@ import {
   AccessBypassRequest,
   AccessModule,
   AccessModuleStatus,
+  AccountDisabledStatus,
   AccountPropertyUpdate,
   InstitutionalRole,
   Profile,
@@ -146,7 +147,7 @@ export const getUpdatedProfileValue = (
   if (!fp.isEqual(oldValue, updatedValue)) {
     return updatedValue;
   } else {
-    return null;
+    return undefined;
   }
 };
 
@@ -203,9 +204,25 @@ export const updateAccountProperties = async (
   accessBypassRequests?: AccessBypassRequest[]
 ): Promise<Profile> => {
   const { username } = updatedProfile;
+
+  const updateDisabledMaybe: boolean = getUpdatedProfileValue(
+    oldProfile,
+    updatedProfile,
+    ['disabled']
+  );
+
+  const accountDisabledStatus: AccountDisabledStatus =
+    updateDisabledMaybe === undefined
+      ? undefined
+      : {
+          disabled: updateDisabledMaybe, // play with null later
+        };
+
+  // only set these fields if they have changed (except username which we always want)
   const request: AccountPropertyUpdate = {
     username,
     accessBypassRequests,
+    accountDisabledStatus,
     freeCreditsLimit: getUpdatedProfileValue(oldProfile, updatedProfile, [
       'freeTierDollarQuota',
     ]),
