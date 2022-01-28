@@ -64,17 +64,11 @@ export async function signInWithAccessToken(
   // logs; there is some delay between a console.log() execution and capture by
   // Puppeteer. Any console.log() within the above global function, for example,
   // is unlikely to be captured.
-  try {
-    await homePage.reloadPage();
-    await homePage.gotoUrl(PageUrl.Home);
-    // normally the user is routed to the homepage after sign-in, so that's the default here.
-    // tests can override this.
-    await postSignInPage.waitForLoad();
-  } catch (err) {
-    // reloadPage and gotoUrl functions could fail on rare occasions.
-    await homePage.gotoUrl(PageUrl.Home);
-    await postSignInPage.waitForLoad();
-  }
+  await homePage.reloadPage();
+  await homePage.gotoUrl(PageUrl.Home);
+  // normally the user is routed to the homepage after sign-in, so that's the default here.
+  // tests can override this.
+  await postSignInPage.waitForLoad();
 }
 
 /**
