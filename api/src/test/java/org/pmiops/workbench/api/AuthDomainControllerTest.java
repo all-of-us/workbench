@@ -4,7 +4,6 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.access.AccessTierService.REGISTERED_TIER_SHORT_NAME;
 
@@ -15,30 +14,15 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.pmiops.workbench.FakeClockConfiguration;
-import org.pmiops.workbench.access.AccessModuleNameMapper;
-import org.pmiops.workbench.access.AccessModuleService;
-import org.pmiops.workbench.access.AccessTierService;
-import org.pmiops.workbench.actionaudit.auditors.AuthDomainAuditor;
-import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
-import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
-import org.pmiops.workbench.db.dao.UserService;
-import org.pmiops.workbench.db.dao.UserServiceImpl;
-import org.pmiops.workbench.db.dao.UserTermsOfServiceDao;
-import org.pmiops.workbench.db.dao.VerifiedInstitutionalAffiliationDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
-import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.institution.InstitutionService;
-import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.AuthDomainCreatedResponse;
 import org.pmiops.workbench.model.Institution;
-import org.pmiops.workbench.model.UpdateUserDisabledRequest;
 import org.pmiops.workbench.test.FakeClock;
-import org.pmiops.workbench.test.FakeLongRandom;
-import org.pmiops.workbench.test.Providers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
@@ -59,18 +43,8 @@ public class AuthDomainControllerTest {
 
   @Autowired private UserDao userDao;
 
-  @Mock private AccessTierService accessTierService;
-  @Mock private AccessModuleNameMapper accessModuleNameMapper;
-  @Mock private AccessModuleService accessModuleService;
-  @Mock private AuthDomainAuditor mockAuthDomainAuditAdapter;
-  @Mock private ComplianceService complianceService;
-  @Mock private DirectoryService directoryService;
   @Mock private FireCloudService fireCloudService;
-  @Mock private MailService mailService;
   @Mock private Provider<DbUser> userProvider;
-  @Mock private UserServiceAuditor mockUserServiceAuditAdapter;
-  @Mock private UserTermsOfServiceDao userTermsOfServiceDao;
-  @Mock private VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
   @Mock private InstitutionService mockInstitutionService;
 
   private AuthDomainController authDomainController;
@@ -93,27 +67,8 @@ public class AuthDomainControllerTest {
     WorkbenchConfig config = WorkbenchConfig.createEmptyConfig();
     config.access.renewal.expiryDays = 365L;
     FakeClock clock = new FakeClock(Instant.now());
-    UserService userService =
-        new UserServiceImpl(
-            Providers.of(config),
-            userProvider,
-            clock,
-            new FakeLongRandom(12345),
-            mockUserServiceAuditAdapter,
-            userDao,
-            userTermsOfServiceDao,
-            verifiedInstitutionalAffiliationDao,
-            accessModuleNameMapper,
-            accessModuleService,
-            fireCloudService,
-            complianceService,
-            directoryService,
-            accessTierService,
-            mailService,
-            mockInstitutionService);
-    this.authDomainController =
-        new AuthDomainController(
-            fireCloudService, userService, userDao, mockAuthDomainAuditAdapter);
+
+    this.authDomainController = new AuthDomainController(fireCloudService);
   }
 
   @Test
@@ -127,38 +82,40 @@ public class AuthDomainControllerTest {
             new AuthDomainCreatedResponse().authDomainName(testDomain).groupEmail(testGroupEmail));
   }
 
-  @Test
-  public void testDisableUser() {
-    final boolean oldDisabledValue = false;
-    final DbUser createdUser = createUser(oldDisabledValue);
-
-    final boolean newDisabledValue = true;
-    UpdateUserDisabledRequest request =
-        new UpdateUserDisabledRequest().email(PRIMARY_EMAIL).disabled(newDisabledValue);
-    ResponseEntity<Void> response = this.authDomainController.updateUserDisabledStatus(request);
-    verify(mockAuthDomainAuditAdapter)
-        .fireSetAccountDisabledStatus(createdUser.getUserId(), newDisabledValue, oldDisabledValue);
-    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
-    DbUser updatedUser = userDao.findUserByUsername(PRIMARY_EMAIL);
-    assertThat(updatedUser.getDisabled()).isTrue();
-  }
-
-  @Test
-  public void testEnableUser() {
-    final boolean oldDisabledValue = true;
-    final DbUser createdUser = createUser(oldDisabledValue);
-
-    final boolean newDisabledValue = false;
-    UpdateUserDisabledRequest request =
-        new UpdateUserDisabledRequest().email(PRIMARY_EMAIL).disabled(newDisabledValue);
-
-    ResponseEntity<Void> response = this.authDomainController.updateUserDisabledStatus(request);
-    verify(mockAuthDomainAuditAdapter)
-        .fireSetAccountDisabledStatus(createdUser.getUserId(), newDisabledValue, oldDisabledValue);
-    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
-    DbUser updatedUser = userDao.findUserByUsername(PRIMARY_EMAIL);
-    assertThat(updatedUser.getDisabled()).isFalse();
-  }
+  //  @Test
+  //  public void testDisableUser() {
+  //    final boolean oldDisabledValue = false;
+  //    final DbUser createdUser = createUser(oldDisabledValue);
+  //
+  //    final boolean newDisabledValue = true;
+  //    UpdateUserDisabledRequest request =
+  //        new UpdateUserDisabledRequest().email(PRIMARY_EMAIL).disabled(newDisabledValue);
+  //    ResponseEntity<Void> response = this.authDomainController.updateUserDisabledStatus(request);
+  //    verify(mockAuthDomainAuditAdapter)
+  //        .fireSetAccountDisabledStatus(createdUser.getUserId(), newDisabledValue,
+  // oldDisabledValue);
+  //    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+  //    DbUser updatedUser = userDao.findUserByUsername(PRIMARY_EMAIL);
+  //    assertThat(updatedUser.getDisabled()).isTrue();
+  //  }
+  //
+  //  @Test
+  //  public void testEnableUser() {
+  //    final boolean oldDisabledValue = true;
+  //    final DbUser createdUser = createUser(oldDisabledValue);
+  //
+  //    final boolean newDisabledValue = false;
+  //    UpdateUserDisabledRequest request =
+  //        new UpdateUserDisabledRequest().email(PRIMARY_EMAIL).disabled(newDisabledValue);
+  //
+  //    ResponseEntity<Void> response = this.authDomainController.updateUserDisabledStatus(request);
+  //    verify(mockAuthDomainAuditAdapter)
+  //        .fireSetAccountDisabledStatus(createdUser.getUserId(), newDisabledValue,
+  // oldDisabledValue);
+  //    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+  //    DbUser updatedUser = userDao.findUserByUsername(PRIMARY_EMAIL);
+  //    assertThat(updatedUser.getDisabled()).isFalse();
+  //  }
 
   private DbUser createUser(boolean disabled) {
     DbUser user = new DbUser();
