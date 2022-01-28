@@ -116,7 +116,7 @@ const userAdminActive = () => {
 };
 
 const userAccessActive = () => {
-  return window.location.pathname.startsWith('/admin/user-access');
+  return window.location.pathname.startsWith('/admin/bulk-sync-user-access');
 };
 
 const userAuditActive = () => {
