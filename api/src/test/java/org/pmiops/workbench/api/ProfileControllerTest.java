@@ -511,8 +511,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     // bypass the other access requirements
     final DbUser dbUser = userDao.findUserByUserId(userId);
     accessModuleService.updateCompletionTime(dbUser, AccessModuleName.ERA_COMMONS, TIMESTAMP);
-    accessModuleService.updateCompletionTime(
-        dbUser, AccessModuleName.RAS_LOGIN_GOV, TIMESTAMP);
+    accessModuleService.updateCompletionTime(dbUser, AccessModuleName.RAS_LOGIN_GOV, TIMESTAMP);
     accessModuleService.updateCompletionTime(
         dbUser, AccessModuleName.RT_COMPLIANCE_TRAINING, TIMESTAMP);
     accessModuleService.updateCompletionTime(dbUser, AccessModuleName.TWO_FACTOR_AUTH, TIMESTAMP);
