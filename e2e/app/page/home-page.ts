@@ -22,9 +22,10 @@ export default class HomePage extends AuthenticatedPage {
 
   async isLoaded(): Promise<boolean> {
     const waitFor = async (timeout: number): Promise<void> => {
+      // Wait for non-blank page before checking for spinner
       await waitForDocumentTitle(this.page, PageTitle);
       await waitWhileLoading(this.page);
-      
+
       const seeAllWorkspace = this.getSeeAllWorkspacesLink();
       await seeAllWorkspace.waitUntilEnabled();
 
@@ -45,6 +46,7 @@ export default class HomePage extends AuthenticatedPage {
           logger.info('Home page is empty without workspace card');
         }
       });
+      // Sometime a second spinner is spinning while waiting for v1/workspaces/user-recent-resources request to finish
       await waitWhileLoading(this.page);
     };
 
