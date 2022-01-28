@@ -5932,9 +5932,6 @@ definitions:
       dataprocConfig:
         description: oneOf gceConfig, dataprocConfig, gceWithPdConfig will be provided
         "$ref": "#/definitions/DataprocConfig"
-      diskConfig:
-        description: The configuration of a persistent disk
-        "$ref": "#/definitions/DiskConfig"
       errors:
         type: array
         description: The list of errors that were encountered on runtime create, if any.
@@ -6035,9 +6032,6 @@ definitions:
     properties:
       persistentDisk:
         $ref: "#/definitions/PersistentDiskRequest"
-      bootDiskSize:
-        type: integer
-        description: size for boot disk
       machineType:
         type: string
         description: >
