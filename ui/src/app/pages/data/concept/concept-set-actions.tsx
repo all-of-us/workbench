@@ -12,11 +12,7 @@ import {
   withCurrentConceptSet,
   withCurrentWorkspace,
 } from 'app/utils';
-import {
-  conceptSetUpdating,
-  currentConceptSetStore,
-  NavigationProps,
-} from 'app/utils/navigation';
+import { conceptSetUpdating, NavigationProps } from 'app/utils/navigation';
 import { MatchParams } from 'app/utils/stores';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
@@ -132,7 +128,6 @@ export const ConceptSetActions = fp.flow(
           .getConceptSet(namespace, id, +csid)
           .then((cs) => {
             if (cs) {
-              currentConceptSetStore.next(cs);
               this.setState({ conceptSet: cs, conceptSetLoading: false });
             } else {
               this.props.navigate([
