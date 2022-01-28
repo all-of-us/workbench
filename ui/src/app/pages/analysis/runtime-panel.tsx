@@ -1,4 +1,9 @@
-import { Button, Clickable, LinkButton } from 'app/components/buttons';
+import {
+  Button,
+  Clickable,
+  LinkButton,
+  StyledExternalLink,
+} from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { ClrIcon } from 'app/components/icons';
 import { ErrorMessage, WarningMessage } from 'app/components/messages';
@@ -41,8 +46,11 @@ import { RuntimeCostEstimator } from 'app/components/runtime-cost-estimator';
 import { RuntimeSummary } from 'app/components/runtime-summary';
 import {
   diffsToUpdateMessaging,
+  DiskConfig,
+  diskTypeLabels,
   fromRuntimeConfig,
   getRuntimeConfigDiffs,
+  maybeWithExistingDiskName,
   RuntimeDiff,
   RuntimeStatusRequest,
   toRuntimeConfig,
@@ -66,6 +74,8 @@ import { supportUrls } from 'app/utils/zendesk';
 import {
   BillingStatus,
   DataprocConfig,
+  Disk,
+  DiskType,
   GpuConfig,
   Runtime,
   RuntimeConfigurationType,
@@ -131,7 +141,7 @@ const styles = reactStyles({
     gridGap: '1rem',
     alignItems: 'center',
   },
-  workerConfigLabel: {
+  sectionTitle: {
     fontWeight: 600,
     marginBottom: '0.5rem',
   },
@@ -158,9 +168,15 @@ const styles = reactStyles({
     borderRadius: '5px',
     color: colors.dark,
   },
+  costComparison: {
+    padding: '.25rem .5rem',
+    width: '400px',
+  },
   costsDrawnFrom: {
     borderLeft: `1px solid ${colorWithWhiteness(colors.dark, 0.5)}`,
+    fontSize: '12px',
     padding: '.33rem .5rem',
+    width: '200px',
   },
   deleteLink: {
     alignSelf: 'center',
@@ -192,7 +208,6 @@ const styles = reactStyles({
     gap: '10px',
   },
   gpuSection: {
-    justifyContent: 'space-between',
     gap: '10px',
     marginTop: '1rem',
   },
@@ -215,6 +230,15 @@ const styles = reactStyles({
     display: 'inline-block',
     marginTop: '17px',
     padding: '10px 21px',
+  },
+  diskRow: {
+    gap: '8px',
+  },
+  diskRadio: {
+    height: '24px',
+  },
+  diskLabel: {
+    fontWeight: 500,
   },
 });
 
@@ -769,10 +793,16 @@ const DisabledPanel = () => {
   );
 };
 
-const DiskSizeSelector = ({ onChange, disabled, diskSize, idPrefix }) => {
+const DiskSizeSelector = ({
+  onChange,
+  disabled,
+  diskSize,
+  idPrefix,
+  style = {},
+}) => {
   return (
-    <FlexRow style={styles.labelAndInput}>
-      <label style={styles.label} htmlFor={`${idPrefix}-disk`}>
+    <FlexRow style={{ ...styles.labelAndInput, ...style }}>
+      <label style={styles.label} htmlFor={`${idPrefix}-disk-size`}>
         Disk (GB)
       </label>
       <InputNumber
@@ -786,6 +816,159 @@ const DiskSizeSelector = ({ onChange, disabled, diskSize, idPrefix }) => {
         onChange={({ value }) => onChange(value)}
       />
     </FlexRow>
+  );
+};
+
+const DiskSelector = ({
+  diskConfig,
+  onChange,
+  disabled,
+  allowDetachable,
+  existingDisk,
+}: {
+  diskConfig: DiskConfig;
+  onChange: (c: DiskConfig) => void;
+  disabled: boolean;
+  allowDetachable: boolean;
+  existingDisk: Disk | null;
+}) => {
+  return (
+    <FlexColumn
+      style={{ ...styles.controlSection, gap: '11px', marginTop: '11px' }}
+    >
+      <FlexRow style={{ gap: '8px' }}>
+        <span style={{ ...styles.sectionTitle, marginBottom: 0 }}>
+          Storage disk options
+        </span>
+        <StyledExternalLink href='https://support.terra.bio/hc/en-us/articles/360047318551'>
+          View documentation
+        </StyledExternalLink>
+      </FlexRow>
+      <FlexRow style={styles.diskRow}>
+        <RadioButton
+          name='standardDisk'
+          style={styles.diskRadio}
+          disabled={disabled}
+          onChange={() =>
+            onChange({
+              ...diskConfig,
+              detachable: false,
+              detachableType: null,
+              existingDiskName: null,
+            })
+          }
+          checked={!diskConfig.detachable}
+        />
+        <FlexColumn>
+          <label style={styles.diskLabel}>Standard disk</label>
+          <span>
+            A standard disk is created and deleted with your cloud environment.
+          </span>
+          {diskConfig.detachable || (
+            <DiskSizeSelector
+              idPrefix='standard'
+              diskSize={diskConfig.size}
+              disabled={disabled}
+              style={{ marginTop: '11px' }}
+              onChange={(size: number) =>
+                onChange(
+                  maybeWithExistingDiskName(
+                    {
+                      ...diskConfig,
+                      size,
+                    },
+                    existingDisk
+                  )
+                )
+              }
+            />
+          )}
+        </FlexColumn>
+      </FlexRow>
+      <TooltipTrigger
+        content='Reattachable disks are unsupported for this compute type'
+        disabled={allowDetachable}
+      >
+        <FlexRow style={styles.diskRow}>
+          <RadioButton
+            name='detachableDisk'
+            style={styles.diskRadio}
+            onChange={() =>
+              onChange(
+                maybeWithExistingDiskName(
+                  {
+                    ...diskConfig,
+                    size: existingDisk?.size || diskConfig.size,
+                    detachable: true,
+                    detachableType: existingDisk?.diskType || DiskType.Standard,
+                  },
+                  existingDisk
+                )
+              )
+            }
+            checked={diskConfig.detachable}
+            disabled={!allowDetachable || disabled}
+          />
+          <FlexColumn>
+            <label style={styles.diskLabel}>Reattachable persistent disk</label>
+            <span>
+              A reattachable disk is saved even when your compute environment is
+              deleted.
+            </span>
+            {diskConfig.detachable && (
+              <FlexRow style={styles.formGrid2}>
+                <FlexRow style={styles.labelAndInput}>
+                  <label
+                    style={{ ...styles.label, minWidth: '3.0rem' }}
+                    htmlFor='disk-type'
+                  >
+                    Disk type
+                  </label>
+                  <Dropdown
+                    id={'disk-type'}
+                    options={[DiskType.Standard, DiskType.Ssd].map((value) => ({
+                      label: diskTypeLabels[value],
+                      value,
+                    }))}
+                    style={{ width: '150px' }}
+                    disabled={disabled}
+                    onChange={({ value }) =>
+                      onChange(
+                        maybeWithExistingDiskName(
+                          {
+                            ...diskConfig,
+                            detachableType: value,
+                          },
+                          existingDisk
+                        )
+                      )
+                    }
+                    value={diskConfig.detachableType}
+                  />
+                </FlexRow>
+                <DiskSizeSelector
+                  idPrefix='detachable'
+                  diskSize={diskConfig.size}
+                  disabled={disabled}
+                  style={{ marginTop: '11px' }}
+                  onChange={(size: number) =>
+                    onChange(
+                      maybeWithExistingDiskName(
+                        {
+                          ...diskConfig,
+                          size,
+                        },
+                        existingDisk
+                      )
+                    )
+                  }
+                />
+              </FlexRow>
+            )}
+          </FlexColumn>
+        </FlexRow>
+      </TooltipTrigger>
+    </FlexColumn>
   );
 };
 
@@ -832,6 +1015,7 @@ const GpuConfigSelector = ({
           label='Enable GPUs'
           checked={hasGpu}
           style={styles.gpuCheckBox}
+          disabled={disabled}
           onChange={() => {
             setHasGpu(!hasGpu);
           }}
@@ -945,7 +1129,7 @@ const DataProcConfigSelector = ({
 
   return (
     <fieldset style={{ marginTop: '0.75rem' }}>
-      <legend style={styles.workerConfigLabel}>Worker Configuration</legend>
+      <legend style={styles.sectionTitle}>Worker Configuration</legend>
       <div style={styles.formGrid3}>
         <FlexRow style={styles.labelAndInput}>
           <label style={styles.label} htmlFor='num-workers'>
@@ -1002,7 +1186,12 @@ const DataProcConfigSelector = ({
 };
 
 // Select a recommended preset configuration.
-const PresetSelector = ({ allowDataproc, setRuntimeConfig, disabled }) => {
+const PresetSelector = ({
+  allowDataproc,
+  setRuntimeConfig,
+  disabled,
+  persistentDisk,
+}) => {
   return (
     <Dropdown
       id='runtime-presets-menu'
@@ -1025,7 +1214,7 @@ const PresetSelector = ({ allowDataproc, setRuntimeConfig, disabled }) => {
         }))
       )(runtimePresets)}
       onChange={({ value }) => {
-        setRuntimeConfig(toRuntimeConfig(value));
+        setRuntimeConfig(toRuntimeConfig(value, persistentDisk));
 
         // Return false to skip the normal handling of the value selection. We're
         // abusing the dropdown here to act as if it were a menu instead.
@@ -1238,7 +1427,7 @@ const CostInfo = ({
       }
       data-test-id='cost-estimator'
     >
-      <div style={{ minWidth: '250px', margin: '.33rem .5rem' }}>
+      <div style={{ margin: '.33rem .5rem' }}>
         <RuntimeCostEstimator {...{ runtimeConfig }} />
       </div>
       {isUsingFreeTierBillingAccount(workspace) &&
@@ -1317,6 +1506,7 @@ const ConfirmUpdatePanel = ({
   onCancel,
   updateButton,
 }) => {
+  // TODO(RW-7582): Offer deletion of detaching PD.
   const runtimeDiffs = getRuntimeConfigDiffs(
     existingRuntimeConfig,
     newRuntimeConfig
@@ -1345,13 +1535,13 @@ const ConfirmUpdatePanel = ({
             </li>
           ))}
         </ul>
-        <FlexRow style={{ marginTop: '.5rem' }}>
-          <div style={{ marginRight: '1rem' }}>
+        <FlexColumn style={{ gap: '8px', marginTop: '.5rem' }}>
+          <div>
             <b style={{ fontSize: 10 }}>New estimated cost</b>
             <div
               style={{
                 ...styles.costPredictorWrapper,
-                padding: '.25rem .5rem',
+                ...styles.costComparison,
               }}
             >
               <RuntimeCostEstimator runtimeConfig={newRuntimeConfig} />
@@ -1362,7 +1552,7 @@ const ConfirmUpdatePanel = ({
             <div
               style={{
                 ...styles.costPredictorWrapper,
-                padding: '.25rem .5rem',
+                ...styles.costComparison,
                 color: 'grey',
                 backgroundColor: '',
               }}
@@ -1373,7 +1563,7 @@ const ConfirmUpdatePanel = ({
               />
             </div>
           </div>
-        </FlexRow>
+        </FlexColumn>
       </div>
 
       {updateMessaging.warn && (
@@ -1440,13 +1630,16 @@ const RuntimePanel = fp.flow(
     // to render the target runtime details, which  may not match the current runtime.
     const existingRuntime =
       pendingRuntime || currentRuntime || ({} as Partial<Runtime>);
-    const existingRuntimeConfig = toRuntimeConfig(existingRuntime);
+    const existingRuntimeConfig = toRuntimeConfig(
+      existingRuntime,
+      persistentDisk
+    );
 
     const [runtimeConfig, setRuntimeConfig] = useState(
       withRuntimeConfigDefaults(existingRuntimeConfig, persistentDisk)
     );
 
-    const { enableGpu } = serverConfigStore.get().config;
+    const { enableGpu, enablePersistentDisk } = serverConfigStore.get().config;
 
     const initialPanelContent = fp.cond([
       [([b, ,]) => b === BillingStatus.INACTIVE, () => PanelContent.Disabled],
@@ -1511,11 +1704,11 @@ const RuntimePanel = fp.flow(
       runtimeExists &&
       existingRuntimeConfig.diskConfig.detachable;
     const unattachedPdExists = !!persistentDisk && !attachedPdExists;
-    // TODO(RW-7759): Account for disk type.
     const unattachedDiskNeedsRecreate =
-      !!persistentDisk &&
+      unattachedPdExists &&
       runtimeConfig.diskConfig.detachable &&
-      persistentDisk.size > runtimeConfig.diskConfig.size;
+      (persistentDisk.size > runtimeConfig.diskConfig.size ||
+        persistentDisk.diskType !== runtimeConfig.diskConfig.detachableType);
 
     let runtimeDiffs: RuntimeDiff[] = [];
     let updateMessaging: UpdateMessaging;
@@ -1815,7 +2008,7 @@ const RuntimePanel = fp.flow(
           [
             PanelContent.Customize,
             () => (
-              <Fragment>
+              <div style={{ marginBottom: '10px' }}>
                 <div style={styles.controlSection}>
                   <FlexRow style={styles.costPredictorWrapper}>
                     <StartStopRuntimeButton
@@ -1853,6 +2046,7 @@ const RuntimePanel = fp.flow(
                     {...{
                       allowDataproc,
                       setRuntimeConfig,
+                      persistentDisk,
                       disabled: disableControls,
                     }}
                   />
@@ -1871,21 +2065,24 @@ const RuntimePanel = fp.flow(
                       validMachineTypes={validMainMachineTypes}
                       machineType={runtimeConfig.machine.name}
                     />
-                    <DiskSizeSelector
-                      idPrefix='runtime'
-                      onChange={(size: number) =>
-                        setRuntimeConfig({
-                          ...runtimeConfig,
-                          diskConfig: {
-                            size,
-                            detachable: false,
-                            detachableType: null,
-                          },
-                        })
-                      }
-                      diskSize={runtimeConfig.diskConfig.size}
-                      disabled={disableControls}
-                    />
+                    {enablePersistentDisk || (
+                      <DiskSizeSelector
+                        idPrefix='runtime'
+                        onChange={(size: number) =>
+                          setRuntimeConfig({
+                            ...runtimeConfig,
+                            diskConfig: {
+                              size,
+                              detachable: false,
+                              detachableType: null,
+                              existingDiskName: null,
+                            },
+                          })
+                        }
+                        diskSize={runtimeConfig.diskConfig.size}
+                        disabled={disableControls}
+                      />
+                    )}
                   </div>
                   {enableGpu &&
                     runtimeConfig.computeType === ComputeType.Standard && (
@@ -1994,6 +2191,19 @@ const RuntimePanel = fp.flow(
                     </FlexColumn>
                   </FlexRow>
                 </div>
+                {enablePersistentDisk && (
+                  <DiskSelector
+                    diskConfig={runtimeConfig.diskConfig}
+                    onChange={(diskConfig) =>
+                      setRuntimeConfig({ ...runtimeConfig, diskConfig })
+                    }
+                    disabled={disableControls}
+                    allowDetachable={
+                      runtimeConfig.computeType === ComputeType.Standard
+                    }
+                    existingDisk={persistentDisk}
+                  />
+                )}
                 {runtimeExists && updateMessaging.warn && (
                   <WarningMessage iconSize={30} iconPosition={'center'}>
                     <div>{updateMessaging.warn}</div>
@@ -2079,7 +2289,7 @@ const RuntimePanel = fp.flow(
                     )}
                   </FlexRow>
                 )}
-              </Fragment>
+              </div>
             ),
           ],
           [
