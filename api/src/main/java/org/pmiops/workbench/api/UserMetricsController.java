@@ -17,8 +17,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
+import org.pmiops.workbench.cohorts.CohortService;
+import org.pmiops.workbench.conceptset.ConceptSetService;
+import org.pmiops.workbench.dataset.DataSetService;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserRecentResource;
 import org.pmiops.workbench.db.model.DbUserRecentlyModifiedResource;
@@ -52,12 +56,18 @@ public class UserMetricsController implements UserMetricsApiDelegate {
   private final WorkspaceAuthService workspaceAuthService;
   private final WorkspaceDao workspaceDao;
   private final WorkspaceResourceMapper workspaceResourceMapper;
+  private final ConceptSetService conceptSetService;
+  private final DataSetService dataSetService;
+  private final CohortService cohortService;
 
   private int distinctWorkspaceLimit = 5;
 
   @Autowired
   UserMetricsController(
       CloudStorageClient cloudStorageClient,
+      CohortService cohortService,
+      ConceptSetService conceptSetService,
+      DataSetService dataSetService,
       FireCloudService fireCloudService,
       Provider<DbUser> userProvider,
       UserRecentResourceService userRecentResourceService,
@@ -65,6 +75,9 @@ public class UserMetricsController implements UserMetricsApiDelegate {
       WorkspaceDao workspaceDao,
       WorkspaceResourceMapper workspaceResourceMapper) {
     this.cloudStorageClient = cloudStorageClient;
+    this.cohortService = cohortService;
+    this.conceptSetService = conceptSetService;
+    this.dataSetService = dataSetService;
     this.fireCloudService = fireCloudService;
     this.userProvider = userProvider;
     this.userRecentResourceService = userRecentResourceService;
@@ -178,7 +191,12 @@ public class UserMetricsController implements UserMetricsApiDelegate {
     final Set<BlobId> foundBlobIds =
         cloudStorageClient.getExistingBlobIdsIn(
             workspaceFilteredResources.stream()
-                .map(DbUserRecentlyModifiedResource::getNotebookName)
+                .filter(
+                    recentResource ->
+                        recentResource.getResourceType()
+                            == DbUserRecentlyModifiedResource.DbUserRecentlyModifiedResourceType
+                                .NOTEBOOK)
+                .map(DbUserRecentlyModifiedResource::getResourceId)
                 .map(this::uriToBlobId)
                 .flatMap(Streams::stream)
                 .limit(MAX_RECENT_NOTEBOOKS)
@@ -197,18 +215,26 @@ public class UserMetricsController implements UserMetricsApiDelegate {
 
   private Boolean foundBlobIdsContainsUserRecentlyModifiedResource(
       Set<BlobId> foundNotebooks, DbUserRecentlyModifiedResource urr) {
-    return Optional.ofNullable(urr.getNotebookName())
-        .flatMap(this::uriToBlobId)
-        .map(foundNotebooks::contains)
-        .orElse(true);
+    if (urr.getResourceType()
+        == DbUserRecentlyModifiedResource.DbUserRecentlyModifiedResourceType.NOTEBOOK) {
+      return Optional.ofNullable(urr.getResourceId())
+          .flatMap(this::uriToBlobId)
+          .map(foundNotebooks::contains)
+          .orElse(true);
+    }
+    return true;
   }
 
   @VisibleForTesting
   public boolean hasValidBlobIdIfNotebookNamePresent(
       DbUserRecentlyModifiedResource dbUserRecentResource) {
-    return Optional.ofNullable(dbUserRecentResource.getNotebookName())
-        .map(name -> uriToBlobId(name).isPresent())
-        .orElse(true);
+    if (dbUserRecentResource.getResourceType()
+        == DbUserRecentlyModifiedResource.DbUserRecentlyModifiedResourceType.NOTEBOOK) {
+      return Optional.ofNullable(dbUserRecentResource.getResourceId())
+          .map(name -> uriToBlobId(name).isPresent())
+          .orElse(true);
+    }
+    return true;
   }
 
   private WorkspaceResource buildRecentResource(
@@ -217,10 +243,41 @@ public class UserMetricsController implements UserMetricsApiDelegate {
       DbUserRecentlyModifiedResource dbUserRecentlyModifiedResource) {
 
     final long workspaceId = dbUserRecentlyModifiedResource.getWorkspaceId();
-    return workspaceResourceMapper.fromDbUserRecentlyModifiedResource(
-        dbUserRecentlyModifiedResource,
-        idToFcWorkspaceResponse.get(workspaceId),
-        idToDbWorkspace.get(workspaceId));
+    switch (dbUserRecentlyModifiedResource.getResourceType()) {
+      case COHORT:
+        return workspaceResourceMapper.fromDbUserRecentlyModifiedResourceAndCohort(
+            dbUserRecentlyModifiedResource,
+            idToFcWorkspaceResponse.get(workspaceId),
+            idToDbWorkspace.get(workspaceId),
+            cohortService.findDbCohortByCohortId(
+                getResourceIdInLong(dbUserRecentlyModifiedResource)));
+      case CONCEPT_SET:
+        return workspaceResourceMapper.fromDbUserRecentlyModifiedResourceAndConceptSet(
+            dbUserRecentlyModifiedResource,
+            idToFcWorkspaceResponse.get(workspaceId),
+            idToDbWorkspace.get(workspaceId),
+            conceptSetService.getDbConceptSet(
+                workspaceId, getResourceIdInLong(dbUserRecentlyModifiedResource)));
+      case DATA_SET:
+        return workspaceResourceMapper.fromDbUserRecentlyModifiedResourceAndDataSet(
+            dbUserRecentlyModifiedResource,
+            idToFcWorkspaceResponse.get(workspaceId),
+            idToDbWorkspace.get(workspaceId),
+            dataSetService
+                .getDbDataSet(workspaceId, getResourceIdInLong(dbUserRecentlyModifiedResource))
+                .orElse(new DbDataset()));
+      case NOTEBOOK:
+        return workspaceResourceMapper.fromDbUserRecentlyModifiedResourceAndNotebookName(
+            dbUserRecentlyModifiedResource,
+            idToFcWorkspaceResponse.get(workspaceId),
+            idToDbWorkspace.get(workspaceId),
+            dbUserRecentlyModifiedResource.getResourceId());
+    }
+    return null;
+  }
+
+  private Long getResourceIdInLong(DbUserRecentlyModifiedResource dbUserRecentlyModifiedResource) {
+    return Long.parseLong(dbUserRecentlyModifiedResource.getResourceId());
   }
 
   // Retrieves Database workspace ID

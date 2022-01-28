@@ -24,6 +24,7 @@ import org.pmiops.workbench.cohorts.CohortMapperImpl;
 import org.pmiops.workbench.cohorts.CohortService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.conceptset.mapper.ConceptSetMapperImpl;
+import org.pmiops.workbench.dataset.DataSetService;
 import org.pmiops.workbench.dataset.mapper.DataSetMapperImpl;
 import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
@@ -65,6 +66,9 @@ public class UserMetricsControllerTest {
 
   @Mock private CloudStorageClient mockCloudStorageClient;
   @Mock private UserRecentResourceService mockUserRecentResourceService;
+  @Mock private CohortService mockCohortService;
+  @Mock private ConceptSetService mockConceptSetService;
+  @Mock private DataSetService mockDataSetService;
   @Mock private Provider<DbUser> mockUserProvider;
   @Mock private FireCloudService mockFireCloudService;
   @Mock private WorkspaceDao workspaceDao;
@@ -204,6 +208,9 @@ public class UserMetricsControllerTest {
     userMetricsController =
         new UserMetricsController(
             mockCloudStorageClient,
+            mockCohortService,
+            mockConceptSetService,
+            mockDataSetService,
             mockFireCloudService,
             mockUserProvider,
             mockUserRecentResourceService,

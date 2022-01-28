@@ -8,6 +8,7 @@ import org.pmiops.workbench.cohorts.CohortMapper;
 import org.pmiops.workbench.conceptset.mapper.ConceptSetMapper;
 import org.pmiops.workbench.dataset.mapper.DataSetMapper;
 import org.pmiops.workbench.db.model.DbCohort;
+import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.db.model.DbUserRecentResource;
 import org.pmiops.workbench.db.model.DbUserRecentlyModifiedResource;
@@ -83,12 +84,47 @@ public interface WorkspaceResourceMapper {
   ResourceFields fromDbUserRecentResource(DbUserRecentResource dbUserRecentResource);
 
   @Mapping(target = "cohortReview", ignore = true)
-  @Mapping(target = "notebook", source = "notebookName")
+  @Mapping(target = "cohort", source = "dbCohort")
+  @Mapping(target = "conceptSet", ignore = true)
+  @Mapping(target = "notebook", ignore = true)
+  @Mapping(target = "dataSet", ignore = true)
   @Mapping(
       target = "lastModifiedEpochMillis",
       source = "dbUserRecentlyModifiedResource.lastAccessDate")
-  ResourceFields fromDbUserRecentResource(
-      DbUserRecentlyModifiedResource dbUserRecentlyModifiedResource);
+  ResourceFields fromDbUserRecentlyModifiedResource(
+      DbUserRecentlyModifiedResource dbUserRecentlyModifiedResource, DbCohort dbCohort);
+
+  @Mapping(target = "cohortReview", ignore = true)
+  @Mapping(target = "cohort", ignore = true)
+  @Mapping(target = "conceptSet", source = "dbConceptSet")
+  @Mapping(target = "notebook", ignore = true)
+  @Mapping(target = "dataSet", ignore = true)
+  @Mapping(
+      target = "lastModifiedEpochMillis",
+      source = "dbUserRecentlyModifiedResource.lastAccessDate")
+  ResourceFields fromDbUserRecentlyModifiedResource(
+      DbUserRecentlyModifiedResource dbUserRecentlyModifiedResource, DbConceptSet dbConceptSet);
+
+  @Mapping(target = "cohortReview", ignore = true)
+  @Mapping(target = "cohort", ignore = true)
+  @Mapping(target = "conceptSet", ignore = true)
+  @Mapping(target = "notebook", ignore = true)
+  @Mapping(target = "dataSet", source = "dbDataset")
+  @Mapping(
+      target = "lastModifiedEpochMillis",
+      source = "dbUserRecentlyModifiedResource.lastAccessDate")
+  ResourceFields fromDbUserRecentlyModifiedResource(
+      DbUserRecentlyModifiedResource dbUserRecentlyModifiedResource, DbDataset dbDataset);
+
+  @Mapping(target = "cohortReview", ignore = true)
+  @Mapping(target = "cohort", ignore = true)
+  @Mapping(target = "conceptSet", ignore = true)
+  @Mapping(target = "dataSet", ignore = true)
+  @Mapping(
+      target = "lastModifiedEpochMillis",
+      source = "dbUserRecentlyModifiedResource.lastAccessDate")
+  ResourceFields fromDbUserRecentlyModifiedResource(
+      DbUserRecentlyModifiedResource dbUserRecentlyModifiedResource, String notebook);
 
   @Mapping(target = "permission", source = "accessLevel")
   WorkspaceResource mergeWorkspaceAndResourceFields(
@@ -129,6 +165,7 @@ public interface WorkspaceResourceMapper {
         fromWorkspace(dbWorkspace), accessLevel, fromDbDataset(dbDataset));
   }
 
+  @Deprecated
   default WorkspaceResource fromDbUserRecentResource(
       DbUserRecentResource dbUserRecentResource,
       FirecloudWorkspaceResponse fcWorkspace,
@@ -137,12 +174,48 @@ public interface WorkspaceResourceMapper {
         fromWorkspace(dbWorkspace), fcWorkspace, fromDbUserRecentResource(dbUserRecentResource));
   }
 
-  default WorkspaceResource fromDbUserRecentlyModifiedResource(
+  default WorkspaceResource fromDbUserRecentlyModifiedResourceAndCohort(
       DbUserRecentlyModifiedResource dbUserRecentResource,
       FirecloudWorkspaceResponse fcWorkspace,
-      DbWorkspace dbWorkspace) {
+      DbWorkspace dbWorkspace,
+      DbCohort dbCohort) {
     return mergeWorkspaceAndResourceFields(
-        fromWorkspace(dbWorkspace), fcWorkspace, fromDbUserRecentResource(dbUserRecentResource));
+        fromWorkspace(dbWorkspace),
+        fcWorkspace,
+        fromDbUserRecentlyModifiedResource(dbUserRecentResource, dbCohort));
+  }
+
+  default WorkspaceResource fromDbUserRecentlyModifiedResourceAndConceptSet(
+      DbUserRecentlyModifiedResource dbUserRecentResource,
+      FirecloudWorkspaceResponse fcWorkspace,
+      DbWorkspace dbWorkspace,
+      DbConceptSet dbConceptSet) {
+    return mergeWorkspaceAndResourceFields(
+        fromWorkspace(dbWorkspace),
+        fcWorkspace,
+        fromDbUserRecentlyModifiedResource(dbUserRecentResource, dbConceptSet));
+  }
+
+  default WorkspaceResource fromDbUserRecentlyModifiedResourceAndDataSet(
+      DbUserRecentlyModifiedResource dbUserRecentResource,
+      FirecloudWorkspaceResponse fcWorkspace,
+      DbWorkspace dbWorkspace,
+      DbDataset dbDataset) {
+    return mergeWorkspaceAndResourceFields(
+        fromWorkspace(dbWorkspace),
+        fcWorkspace,
+        fromDbUserRecentlyModifiedResource(dbUserRecentResource, dbDataset));
+  }
+
+  default WorkspaceResource fromDbUserRecentlyModifiedResourceAndNotebookName(
+      DbUserRecentlyModifiedResource dbUserRecentResource,
+      FirecloudWorkspaceResponse fcWorkspace,
+      DbWorkspace dbWorkspace,
+      String notebookName) {
+    return mergeWorkspaceAndResourceFields(
+        fromWorkspace(dbWorkspace),
+        fcWorkspace,
+        fromDbUserRecentlyModifiedResource(dbUserRecentResource, notebookName));
   }
 
   default FileDetail convertStringToFileDetail(String str) {
