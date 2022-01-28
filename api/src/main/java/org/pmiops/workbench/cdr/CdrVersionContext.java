@@ -1,6 +1,7 @@
 package org.pmiops.workbench.cdr;
 
 import org.pmiops.workbench.db.model.DbCdrVersion;
+import org.pmiops.workbench.exceptions.ServerErrorException;
 
 /** Maintains state of what CDR version is being used in the context of the current request. */
 public class CdrVersionContext {
@@ -25,6 +26,10 @@ public class CdrVersionContext {
   }
 
   public static DbCdrVersion getCdrVersion() {
-    return cdrVersion.get();
+    DbCdrVersion version = cdrVersion.get();
+    if (version == null) {
+      throw new ServerErrorException("No CDR version specified!");
+    }
+    return version;
   }
 }

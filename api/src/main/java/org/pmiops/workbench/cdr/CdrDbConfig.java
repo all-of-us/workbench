@@ -23,8 +23,6 @@ import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.context.event.EventListener;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.jdbc.datasource.lookup.AbstractRoutingDataSource;
 import org.springframework.orm.jpa.JpaTransactionManager;
@@ -48,19 +46,6 @@ public class CdrDbConfig {
 
   @Service
   public static class CdrDataSource extends AbstractRoutingDataSource {
-
-    private boolean finishedInitialization = false;
-
-    // Each access tier has a default version, but we don't know which tier is desired.
-    //
-    // This is because the default CDR Version is only returned when we have no knowledge about
-    // which CDR version is desired, and therefore also the access tier.  We have to choose one,
-    // and the Registered Tier is the safer choice.
-    //
-    // See also https://precisionmedicineinitiative.atlassian.net/browse/RW-6432
-
-    private final Long defaultCdrVersionId;
-
     @Autowired
     public CdrDataSource(
         CdrVersionDao cdrVersionDao,
@@ -136,31 +121,13 @@ public class CdrDbConfig {
       if (defaultId == null) {
         throw new ServerErrorException("Default Registered Tier CDR version not found!");
       }
-      this.defaultCdrVersionId = defaultId;
       setTargetDataSources(cdrVersionDataSourceMap);
       afterPropertiesSet();
     }
 
-    @EventListener
-    public void handleContextRefresh(ContextRefreshedEvent event) {
-      finishedInitialization = true;
-    }
-
     @Override
     protected Object determineCurrentLookupKey() {
-      DbCdrVersion cdrVersion = CdrVersionContext.getCdrVersion();
-      if (cdrVersion == null) {
-        if (finishedInitialization) {
-          throw new ServerErrorException("No CDR version specified!");
-        }
-        // While Spring beans are being initialized, this method can be called
-        // in the course of attempting to determine metadata about the data source.
-        // Return the the default Registered Tier CDR version for configuring metadata.
-        // After Spring beans are finished being initialized, init() will
-        // be called and we will start requiring clients to specify a CDR version.
-        return defaultCdrVersionId;
-      }
-      return cdrVersion.getCdrVersionId();
+      return CdrVersionContext.getCdrVersion().getCdrVersionId();
     }
   }
 
