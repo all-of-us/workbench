@@ -270,7 +270,7 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
     }
   }
 
-  public List<DbUserRecentlyModifiedResource> populateRecentlyModifiedResources(long userId) {
+  private List<DbUserRecentlyModifiedResource> populateRecentlyModifiedResources(long userId) {
     List<DbUserRecentlyModifiedResource> userList =
         userRecentlyModifiedResourceDao.findDbUserRecentResourcesByUserId(userId);
     userList.stream()

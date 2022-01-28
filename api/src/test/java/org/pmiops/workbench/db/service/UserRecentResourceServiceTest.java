@@ -21,6 +21,7 @@ import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbConceptSetConceptId;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserRecentResource;
+import org.pmiops.workbench.db.model.DbUserRecentlyModifiedResource;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.test.FakeClock;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -240,8 +241,8 @@ public class UserRecentResourceServiceTest {
     userRecentResourceService.updateConceptSetEntry(
         workspace.getWorkspaceId(), user.getUserId(), conceptSet.getConceptSetId());
 
-    List<DbUserRecentResource> resources =
-        userRecentResourceService.findAllResourcesByUser(user.getUserId());
+    List<DbUserRecentlyModifiedResource> resources =
+        userRecentResourceService.findAllRecentlyModifiedResourcesByUser(user.getUserId());
 
     assertThat(resources.size()).isEqualTo(4);
     assertThat(resources.get(0).getNotebookName())
