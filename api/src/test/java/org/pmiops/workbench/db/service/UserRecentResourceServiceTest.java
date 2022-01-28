@@ -245,11 +245,12 @@ public class UserRecentResourceServiceTest {
         userRecentResourceService.findAllRecentlyModifiedResourcesByUser(user.getUserId());
 
     assertThat(resources.size()).isEqualTo(4);
-    assertThat(resources.get(0).getNotebookName())
+    assertThat(resources.get(0).getResourceId())
         .isEqualTo("gs://someDirectory1/notebooks/notebook2");
-    assertThat(resources.get(1).getConceptSet()).isEqualTo(conceptSet);
-    assertThat(resources.get(2).getCohort().getCohortId()).isEqualTo(cohort.getCohortId());
-    assertThat(resources.get(3).getNotebookName())
+    assertThat(Long.parseLong(resources.get(1).getResourceId()))
+        .isEqualTo(conceptSet.getConceptSetId());
+    assertThat(Long.parseLong(resources.get(2).getResourceId())).isEqualTo(cohort.getCohortId());
+    assertThat(resources.get(3).getResourceId())
         .isEqualTo("gs://someDirectory1/notebooks/notebook1");
   }
 }

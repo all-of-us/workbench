@@ -6,17 +6,6 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Streams;
-import java.util.AbstractMap;
-import java.util.AbstractMap.SimpleImmutableEntry;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.stream.Collectors;
-import javax.inject.Provider;
 import org.pmiops.workbench.cohorts.CohortService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.dataset.DataSetService;
@@ -41,6 +30,18 @@ import org.pmiops.workbench.workspaces.resources.WorkspaceResourceMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
+
+import javax.inject.Provider;
+import java.util.AbstractMap;
+import java.util.AbstractMap.SimpleImmutableEntry;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 @RestController
 public class UserMetricsController implements UserMetricsApiDelegate {
@@ -237,47 +238,60 @@ public class UserMetricsController implements UserMetricsApiDelegate {
     return true;
   }
 
+  /**
+   * Build recent resource object by grabbing the DB object (cohort/conceptSet or dataSet) depending
+   * upon the DbUserRecentlyModifiedResource.ResourceType
+   *
+   * @param idToDbWorkspace
+   * @param idToFcWorkspaceResponse
+   * @param dbUserRecentlyModifiedResource
+   * @return WorkspaceResource
+   */
   private WorkspaceResource buildRecentResource(
       Map<Long, DbWorkspace> idToDbWorkspace,
       Map<Long, FirecloudWorkspaceResponse> idToFcWorkspaceResponse,
       DbUserRecentlyModifiedResource dbUserRecentlyModifiedResource) {
 
     final long workspaceId = dbUserRecentlyModifiedResource.getWorkspaceId();
+    FirecloudWorkspaceResponse firecloudWorkspaceResponse =
+        idToFcWorkspaceResponse.get(workspaceId);
+    DbWorkspace dbWorkspace = idToDbWorkspace.get(workspaceId);
     switch (dbUserRecentlyModifiedResource.getResourceType()) {
       case COHORT:
         return workspaceResourceMapper.fromDbUserRecentlyModifiedResourceAndCohort(
             dbUserRecentlyModifiedResource,
-            idToFcWorkspaceResponse.get(workspaceId),
-            idToDbWorkspace.get(workspaceId),
+            firecloudWorkspaceResponse,
+            dbWorkspace,
             cohortService.findDbCohortByCohortId(
                 getResourceIdInLong(dbUserRecentlyModifiedResource)));
       case CONCEPT_SET:
         return workspaceResourceMapper.fromDbUserRecentlyModifiedResourceAndConceptSet(
             dbUserRecentlyModifiedResource,
-            idToFcWorkspaceResponse.get(workspaceId),
-            idToDbWorkspace.get(workspaceId),
+            firecloudWorkspaceResponse,
+            dbWorkspace,
             conceptSetService.getDbConceptSet(
                 workspaceId, getResourceIdInLong(dbUserRecentlyModifiedResource)));
       case DATA_SET:
         return workspaceResourceMapper.fromDbUserRecentlyModifiedResourceAndDataSet(
             dbUserRecentlyModifiedResource,
-            idToFcWorkspaceResponse.get(workspaceId),
-            idToDbWorkspace.get(workspaceId),
+            firecloudWorkspaceResponse,
+            dbWorkspace,
             dataSetService
                 .getDbDataSet(workspaceId, getResourceIdInLong(dbUserRecentlyModifiedResource))
                 .orElse(new DbDataset()));
       case NOTEBOOK:
         return workspaceResourceMapper.fromDbUserRecentlyModifiedResourceAndNotebookName(
             dbUserRecentlyModifiedResource,
-            idToFcWorkspaceResponse.get(workspaceId),
-            idToDbWorkspace.get(workspaceId),
+            firecloudWorkspaceResponse,
+            dbWorkspace,
             dbUserRecentlyModifiedResource.getResourceId());
     }
     return null;
   }
 
   private Long getResourceIdInLong(DbUserRecentlyModifiedResource dbUserRecentlyModifiedResource) {
-    return Long.parseLong(dbUserRecentlyModifiedResource.getResourceId());
+    return Long.parseLong(
+        Optional.ofNullable(dbUserRecentlyModifiedResource.getResourceId()).orElse("0"));
   }
 
   // Retrieves Database workspace ID

@@ -6,6 +6,7 @@ import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbUserRecentResource;
 import org.springframework.data.repository.CrudRepository;
 
+@Deprecated
 public interface UserRecentResourceDao extends CrudRepository<DbUserRecentResource, Long> {
 
   long countUserRecentResourceByUserId(long userId);
