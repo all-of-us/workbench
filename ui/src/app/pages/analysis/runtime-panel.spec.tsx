@@ -60,6 +60,7 @@ describe('RuntimePanel', () => {
   let workspacesApiStub: WorkspacesApiStub;
   let onClose: () => void;
   let enableGpu: boolean;
+  let enablePersistentDisk: boolean;
   let freeTierBillingAccountId: string;
 
   const component = async (propOverrides?: object) => {
@@ -75,6 +76,7 @@ describe('RuntimePanel', () => {
     cdrVersionStore.set(cdrVersionTiersResponse);
     serverConfigStore.set({ config: { ...defaultServerConfig } });
     enableGpu = serverConfigStore.get().config.enableGpu;
+    enablePersistentDisk = serverConfigStore.get().config.enablePersistentDisk;
     freeTierBillingAccountId =
       serverConfigStore.get().config.freeTierBillingAccountId;
 
@@ -175,9 +177,29 @@ describe('RuntimePanel', () => {
   const pickMainRam = (wrapper, ram) =>
     pickDropdownOption(wrapper, '#runtime-ram', ram);
 
-  const getMainDiskSize = (wrapper) => getInputValue(wrapper, '#runtime-disk');
+  const getMainDiskSize = (wrapper) =>
+    getInputValue(
+      wrapper,
+      enablePersistentDisk ? '#standard-disk' : '#runtime-disk'
+    );
   const pickMainDiskSize = (wrapper, diskSize) =>
-    enterNumberInput(wrapper, '#runtime-disk', diskSize);
+    enterNumberInput(
+      wrapper,
+      enablePersistentDisk ? '#standard-disk' : '#runtime-disk',
+      diskSize
+    );
+
+  const pickDetachable = (wrapper, detachable: boolean) => {
+    // xxx click radio
+  };
+
+  const pickDetachableType = (wrapper, typeLabel: string) =>
+    pickDropdownOption(wrapper, '#disk-type', typeLabel);
+
+  const getDetachableDiskSize = (wrapper) =>
+    getInputValue(wrapper, '#detachable-disk');
+  const pickDetachableDiskSize = (wrapper, diskSize) =>
+    enterNumberInput(wrapper, '#detachable-disk', diskSize);
 
   const pickGpuType = (wrapper, gpuType) =>
     pickDropdownOption(wrapper, '#gpu-type', gpuType);
