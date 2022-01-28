@@ -190,7 +190,7 @@ export const ConceptSearch = fp.flow(
         error: false,
         errorMessage: '',
         deleting: false,
-        loading: this.isDetailPage,
+        loading: false,
         showMoreDescription: false,
         unsavedChanges: false,
         conceptSetUpdating: false,
@@ -202,6 +202,10 @@ export const ConceptSearch = fp.flow(
 
       if (!this.isDetailPage && !currentConceptStore.getValue()) {
         currentConceptStore.next([]);
+      }
+      if (this.isDetailPage) {
+        this.setState({ loading: true });
+        this.getConceptSet();
       }
       this.subscription = currentConceptStore.subscribe((currentConcepts) => {
         if (![null, undefined].includes(currentConcepts)) {
@@ -215,7 +219,7 @@ export const ConceptSearch = fp.flow(
       );
     }
 
-    componentDidUpdate() {
+    componentDidUpdate(prevProps: Readonly<Props>) {
       if (this.isDetailPage) {
         if (currentConceptSetStore.getValue()) {
           if (!this.state.conceptSet) {
@@ -224,7 +228,10 @@ export const ConceptSearch = fp.flow(
           if (this.state.loading) {
             this.setState({ loading: false });
           }
-        } else {
+        } else if (
+          prevProps.match.params.csid !== this.props.match.params.csid
+        ) {
+          this.setState({ loading: true });
           this.getConceptSet();
         }
       }
@@ -433,11 +440,11 @@ export const ConceptSearch = fp.flow(
           <FadeBox
             style={{ margin: 'auto', paddingTop: '1rem', width: '95.7%' }}
           >
-            {this.isDetailPage && conceptSet && (
+            {loading ? (
+              <SpinnerOverlay />
+            ) : (
               <React.Fragment>
-                {loading ? (
-                  <SpinnerOverlay />
-                ) : (
+                {this.isDetailPage && conceptSet && (
                   <FlexColumn>
                     <div style={styles.conceptSetHeader}>
                       <FlexRow>
@@ -577,32 +584,30 @@ export const ConceptSearch = fp.flow(
                     </div>
                   </FlexColumn>
                 )}
+                <CriteriaSearch
+                  backFn={() =>
+                    this.props.navigate([
+                      'workspaces',
+                      namespace,
+                      id,
+                      'data',
+                      'concepts',
+                    ])
+                  }
+                  cohortContext={this.searchContext}
+                  conceptSearchTerms={
+                    !!cohortContext ? cohortContext.searchTerms : ''
+                  }
+                />
+                <Button
+                  style={{ float: 'right', marginBottom: '2rem' }}
+                  disabled={this.disableFinishButton}
+                  onClick={() => setSidebarActiveIconStore.next('concept')}
+                >
+                  Finish & Review
+                </Button>
               </React.Fragment>
             )}
-            {!loading && (
-              <CriteriaSearch
-                backFn={() =>
-                  this.props.navigate([
-                    'workspaces',
-                    namespace,
-                    id,
-                    'data',
-                    'concepts',
-                  ])
-                }
-                cohortContext={this.searchContext}
-                conceptSearchTerms={
-                  !!cohortContext ? cohortContext.searchTerms : ''
-                }
-              />
-            )}
-            <Button
-              style={{ float: 'right', marginBottom: '2rem' }}
-              disabled={this.disableFinishButton}
-              onClick={() => setSidebarActiveIconStore.next('concept')}
-            >
-              Finish & Review
-            </Button>
           </FadeBox>
           {!loading && deleting && (
             <ConfirmDeleteModal
