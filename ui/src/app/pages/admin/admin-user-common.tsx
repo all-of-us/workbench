@@ -12,7 +12,7 @@ import {
   RegisteredTierBadge,
 } from 'app/components/icons';
 
-import { formatInitialCreditsUSD, reactStyles, switchCase } from 'app/utils';
+import { formatInitialCreditsUSD, reactStyles } from 'app/utils';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import {
   AccessBypassRequest,
@@ -188,21 +188,17 @@ export const displayModuleExpirationDate = (
     getNullStringForExpirationDate(moduleName)
   );
 
-const isModuleRequiredByAccessTier = (
+const isEraRequiredForTier = (
   profile: Profile,
-  moduleName: AccessModule,
   accessTierShortName: AccessTierShortNames
 ): boolean => {
   const tierEligibility = profile.tierEligibilities.find(
     (tier) => tier.accessTierShortName === accessTierShortName
   );
-  // Handling only ERACommon module.
-  return switchCase(moduleName, [
-    AccessModule.ERACOMMONS,
-    () =>
-      getAccessModuleConfig(moduleName).isEnabledInEnvironment &&
-      tierEligibility?.eraRequired,
-  ]);
+  return (
+    getAccessModuleConfig(AccessModule.ERACOMMONS).isEnabledInEnvironment &&
+    tierEligibility?.eraRequired
+  );
 };
 
 export const displayTierBadgeByRequiredModule = (
@@ -211,18 +207,16 @@ export const displayTierBadgeByRequiredModule = (
 ) => {
   return (
     <div>
-      {(getAccessModuleConfig(moduleName)?.isRequiredByRT ||
-        isModuleRequiredByAccessTier(
-          profile,
-          moduleName,
-          AccessTierShortNames.Registered
-        )) && <RegisteredTierBadge style={{ gridArea: 'badge' }} />}
-      {(getAccessModuleConfig(moduleName)?.isRequiredByCT ||
-        isModuleRequiredByAccessTier(
-          profile,
-          moduleName,
-          AccessTierShortNames.Controlled
-        )) && <ControlledTierBadge style={{ gridArea: 'badge' }} />}
+      {(moduleName === AccessModule.ERACOMMONS
+        ? isEraRequiredForTier(profile, AccessTierShortNames.Registered)
+        : getAccessModuleConfig(moduleName)?.isRequiredByRT) && (
+        <RegisteredTierBadge style={{ gridArea: 'badge' }} />
+      )}
+      {(moduleName === AccessModule.ERACOMMONS
+        ? isEraRequiredForTier(profile, AccessTierShortNames.Controlled)
+        : getAccessModuleConfig(moduleName)?.isRequiredByCT) && (
+        <ControlledTierBadge style={{ gridArea: 'badge' }} />
+      )}
     </div>
   );
 };
