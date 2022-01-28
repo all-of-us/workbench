@@ -6,8 +6,13 @@ import { CSSProperties } from 'react';
 import { Link } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 import { Dropdown } from 'primereact/dropdown';
+import {
+  ClrIcon,
+  ControlledTierBadge,
+  RegisteredTierBadge,
+} from 'app/components/icons';
 
-import { formatInitialCreditsUSD, reactStyles } from 'app/utils';
+import { formatInitialCreditsUSD, reactStyles, switchCase } from 'app/utils';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import {
   AccessBypassRequest,
@@ -24,7 +29,6 @@ import {
   institutionApi,
   userAdminApi,
 } from 'app/services/swagger-fetch-clients';
-import { ClrIcon } from 'app/components/icons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { getRoleOptions } from 'app/utils/institutions';
 import { TextInputWithLabel } from 'app/components/inputs';
@@ -37,7 +41,10 @@ import {
   getAccessModuleConfig,
   getAccessModuleStatusByName,
 } from 'app/utils/access-utils';
-import { hasRegisteredTierAccess } from 'app/utils/access-tiers';
+import {
+  AccessTierShortNames,
+  hasRegisteredTierAccess,
+} from 'app/utils/access-tiers';
 import { formatDate } from 'app/utils/dates';
 
 export const commonStyles = reactStyles({
@@ -181,6 +188,44 @@ export const displayModuleExpirationDate = (
     getNullStringForExpirationDate(moduleName)
   );
 
+const isModuleRequiredByAccessTier = (
+  profile: Profile,
+  moduleName: AccessModule,
+  accessTierShortName: AccessTierShortNames
+): boolean => {
+  const tierEligibility = profile.tierEligibilities.find(
+    (tier) => tier.accessTierShortName === accessTierShortName
+  );
+  return switchCase(moduleName, [
+    AccessModule.ERACOMMONS,
+    () =>
+      getAccessModuleConfig(moduleName).isEnabledInEnvironment &&
+      tierEligibility?.eraRequired,
+  ]);
+};
+
+export const displayTierBadgeByRequiredModule = (
+  profile: Profile,
+  moduleName: AccessModule
+) => {
+  return (
+    <div>
+      {(getAccessModuleConfig(moduleName)?.isRequiredByRT ||
+        isModuleRequiredByAccessTier(
+          profile,
+          moduleName,
+          AccessTierShortNames.Registered
+        )) && <RegisteredTierBadge style={{ gridArea: 'badge' }} />}
+      {(getAccessModuleConfig(moduleName)?.isRequiredByCT ||
+        isModuleRequiredByAccessTier(
+          profile,
+          moduleName,
+          AccessTierShortNames.Controlled
+        )) && <ControlledTierBadge style={{ gridArea: 'badge' }} />}
+    </div>
+  );
+};
+
 // would this AccessBypassRequest actually change the profile state?
 // allows un-toggling of bypass for a module
 export const wouldUpdateBypassState = (
@@ -278,6 +323,7 @@ interface ContactEmailTextInputProps {
   inputStyle?: CSSProperties;
   containerStyle?: CSSProperties;
 }
+
 export const ContactEmailTextInput = ({
   contactEmail,
   previousContactEmail,
@@ -310,6 +356,7 @@ interface InitialCreditsDropdownProps {
   labelStyle?: CSSProperties;
   dropdownStyle?: CSSProperties;
 }
+
 export const InitialCreditsDropdown = ({
   currentLimit,
   previousLimit,
@@ -343,6 +390,7 @@ interface InstitutionDropdownProps {
   labelStyle?: CSSProperties;
   dropdownStyle?: CSSProperties;
 }
+
 export const InstitutionDropdown = ({
   institutions,
   currentInstitutionShortName,
@@ -381,6 +429,7 @@ interface InstitutionalRoleDropdownProps {
   labelStyle?: CSSProperties;
   dropdownStyle?: CSSProperties;
 }
+
 export const InstitutionalRoleDropdown = ({
   institutions,
   currentAffiliation,
@@ -420,6 +469,7 @@ interface InstitutionalRoleOtherTextProps {
   inputStyle?: CSSProperties;
   containerStyle?: CSSProperties;
 }
+
 export const InstitutionalRoleOtherTextInput = ({
   affiliation,
   previousOtherText,
@@ -480,6 +530,7 @@ interface ErrorsTooltipProps {
   errors;
   children;
 }
+
 export const ErrorsTooltip = ({ errors, children }: ErrorsTooltipProps) => {
   return (
     <TooltipTrigger
@@ -505,6 +556,7 @@ export const ErrorsTooltip = ({ errors, children }: ErrorsTooltipProps) => {
 interface ExpirationProps {
   profile: Profile;
 }
+
 export const AccessModuleExpirations = ({ profile }: ExpirationProps) => {
   // compliance training is feature-flagged in some environments
   const { enableComplianceTraining } = serverConfigStore.get().config;

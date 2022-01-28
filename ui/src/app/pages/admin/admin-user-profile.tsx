@@ -23,6 +23,7 @@ import {
   profileNeedsUpdate,
   displayModuleCompletionDate,
   displayModuleExpirationDate,
+  displayTierBadgeByRequiredModule,
 } from './admin-user-common';
 import { FadeBox } from 'app/components/containers';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
