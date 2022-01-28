@@ -257,7 +257,7 @@ bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 SELECT
       a.id
     , a.parent_id
-    , a.domain_id
+    , (SELECT UPPER(domain_id) FROM \`$BQ_PROJECT.$BQ_DATASET.concept\` where concept_id = a.concept_id)
     , a.is_standard
     , a.type
     , a.subtype
@@ -1333,7 +1333,7 @@ bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 SELECT
       ROW_NUMBER() OVER (ORDER BY p.parent_id, c.concept_code) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) AS id
     , p.id AS parent_id
-    , p.domain_id
+    , UPPER(c.domain_id)
     , p.is_standard
     , p.type
     , c.concept_id AS concept_id
@@ -1384,7 +1384,7 @@ bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 SELECT
       ROW_NUMBER() OVER (ORDER BY p.id, c.concept_code) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) AS id
     , p.id AS parent_id
-    , p.domain_id
+    , UPPER(c.domain_id)
     , p.is_standard
     , p.type
     , c.concept_id AS concept_id
@@ -1455,7 +1455,7 @@ bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 SELECT
       ROW_NUMBER() OVER (ORDER BY b.id, a.concept_code) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) AS id
     , b.id AS parent_id
-    , b.domain_id
+    , UPPER(a.domain_id)
     , b.is_standard
     , a.vocabulary_id AS type
     , a.concept_id
@@ -1541,7 +1541,7 @@ bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 SELECT
       ROW_NUMBER() OVER (ORDER BY b.id,a.concept_code) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) AS id
     , CASE WHEN b.id is not null THEN b.id ELSE c.id END AS parent_id
-    , CASE WHEN b.domain_id is not null THEN b.domain_id ELSE c.domain_id END as domain_id
+    , UPPER(a.domain_id)
     , 0
     , a.vocabulary_id AS type
     , a.concept_id,a.concept_code AS code
@@ -1894,7 +1894,7 @@ bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 SELECT
       ROW_NUMBER() OVER (ORDER BY p.parent_id, c.concept_code) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) AS id
     , p.id AS parent_id
-    , p.domain_id
+    , UPPER(c.domain_id)
     , p.is_standard
     , p.type
     , c.concept_id AS concept_id
@@ -1949,7 +1949,7 @@ do
     SELECT
           ROW_NUMBER() OVER (ORDER BY p.id, c.concept_code) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`)
         , p.id
-        , p.domain_id
+        , (SELECT UPPER(domain_id) FROM \`$BQ_PROJECT.$BQ_DATASET.concept\` where concept_id = c.concept_id)
         , p.is_standard
         , p.type
         , c.concept_id
@@ -2234,7 +2234,7 @@ SELECT
     ROW_NUMBER() OVER (ORDER BY p.parent_id, c.concept_code) +
         (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) AS id
     , p.id AS parent_id
-    , p.domain_id
+    , UPPER(c.domain_id)
     , p.is_standard
     , p.type
     , c.concept_id AS concept_id
@@ -2290,7 +2290,7 @@ do
         ROW_NUMBER() OVER (ORDER BY p.id, c.concept_code) +
             (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`)
         , p.id
-        , p.domain_id
+        , (SELECT UPPER(domain_id) FROM \`$BQ_PROJECT.$BQ_DATASET.concept\` where concept_id = c.concept_id)
         , p.is_standard
         , p.type
         , c.concept_id
@@ -5796,18 +5796,62 @@ FROM
     ) y
 WHERE x.id = y.id"
 
-# add [rank1] for all items. this is to deal with the poly-hierarchical issue in many trees
+# add [rank1] for all items except source hierarchies. this is to deal with the poly-hierarchical issue in many trees
 echo "FULL_TEXT - add [rank1]"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
 SET x.full_text = CONCAT(x.full_text, '|', y.rnk)
-   ,x.synonyms = CONCAT(x.full_text, '|', y.rnk)
 FROM
     (
         SELECT MIN(id) as id, CONCAT('[', LOWER(domain_id), '_rank1]') as rnk
         FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
         WHERE full_text is not null
             and ( (is_selectable = 1 and est_count != -1) OR type = 'BRAND')
+            and id not in (
+              SELECT id
+              FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+              WHERE type IN ('ICD10CM', 'ICD9CM', 'ICD10PCS', 'ICD9Proc', 'CPT4')
+              AND is_standard = 0
+              AND has_hierarchy = 1
+              AND is_selectable = 1
+              AND est_count != -1
+            )
+        GROUP BY domain_id, is_standard, type, subtype, concept_id, name
+    ) y
+WHERE x.id = y.id"
+
+# add [rank1] for all condition source hierarchies.
+echo "FULL_TEXT - add [rank1]"
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
+"UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
+SET x.full_text = CONCAT(x.full_text, '|', y.rnk)
+FROM
+    (
+        SELECT MIN(id) as id, '[condition_rank1]' as rnk
+        FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+        WHERE type IN ('ICD10CM', 'ICD9CM')
+        AND is_standard = 0
+        AND has_hierarchy = 1
+        AND is_selectable = 1
+        AND est_count != -1
+        GROUP BY domain_id, is_standard, type, subtype, concept_id, name
+    ) y
+WHERE x.id = y.id"
+
+# add [rank1] for all procedure source hierarchies.
+echo "FULL_TEXT - add [rank1]"
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
+"UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
+SET x.full_text = CONCAT(x.full_text, '|', y.rnk)
+FROM
+    (
+        SELECT MIN(id) as id, '[procedure_rank1]' as rnk
+        FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+        WHERE type IN ('ICD10PCS', 'ICD9Proc', 'CPT4')
+        AND is_standard = 0
+        AND has_hierarchy = 1
+        AND is_selectable = 1
+        AND est_count != -1
         GROUP BY domain_id, is_standard, type, subtype, concept_id, name
     ) y
 WHERE x.id = y.id"

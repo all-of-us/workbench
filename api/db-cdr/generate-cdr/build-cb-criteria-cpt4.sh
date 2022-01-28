@@ -44,7 +44,7 @@ bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
 SELECT
      (a.id + $CB_CRITERIA_START_ID ) id
     , CASE WHEN a.parent_id=0 THEN 0 ELSE a.parent_id + $CB_CRITERIA_START_ID END as parent_id
-    , a.domain_id
+    , (SELECT UPPER(domain_id) FROM \`$BQ_PROJECT.$BQ_DATASET.concept\` where concept_id = a.concept_id)
     , a.is_standard
     , a.type
     , a.subtype
@@ -216,7 +216,7 @@ SELECT
       DISTINCT a.id ancestor_id
     , coalesce(h.id, g.id, f.id, e.id, d.id, c.id, b.id) descendant_id
 FROM (SELECT id, parent_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
-           WHERE domain_id = 'PROCEDURE' and type = 'CPT4' and is_standard = 0 and is_group = 1
+           WHERE type = 'CPT4' and is_standard = 0 and is_group = 1
                  and parent_id !=$CB_CRITERIA_START_ID
                  and id > $CB_CRITERIA_START_ID and id < $CB_CRITERIA_END_ID) a
 JOIN (SELECT id, parent_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`) b on a.id  = b.parent_id
