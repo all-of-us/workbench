@@ -56,7 +56,7 @@ export const AdminUserAccess = (spinnerProps: WithSpinnerOverlayProps) => {
 
   return (
     <FlexColumn style={styles.accessContainer}>
-      <h3>Sync User Access</h3>
+      <h2>Bulk Synchronization of User Access Modules</h2>
       <FlexRow style={{ gap: '0.5rem' }}>
         <FlexColumn>
           <h3>User emails</h3>

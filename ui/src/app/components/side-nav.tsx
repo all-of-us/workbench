@@ -343,9 +343,9 @@ export const SideNav = (props: SideNavProps) => {
       {hasAuthorityForAction(profile, AuthorityGuardedAction.USER_ADMIN) &&
         showAdminOptions && (
           <SideNavItem
-            content={'User Access'}
+            content={'Bulk Sync of User Access'}
             onToggleSideNav={() => onToggleSideNav()}
-            href={'/admin/user-access'}
+            href={'/admin/bulk-sync-user-access'}
             active={userAccessActive()}
           />
         )}

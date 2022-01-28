@@ -238,11 +238,11 @@ export const SignedInRoutes = () => {
       </AppRoute>
       <AppRoute
         exact
-        path='/admin/user-access'
+        path='/admin/bulk-sync-user-access'
         guards={[authorityGuard(AuthorityGuardedAction.USER_AUDIT)]}
       >
         <UserAccessPage
-          routeData={{ title: 'User Access', minimizeChrome: true }}
+          routeData={{ title: 'Bulk Sync User Access', minimizeChrome: true }}
         />
       </AppRoute>
       <AppRoute
