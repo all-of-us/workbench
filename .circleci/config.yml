@@ -624,7 +624,7 @@ jobs:
       - run:
           name: "Create a file contains test names"
           working_directory: ~/workbench/e2e
-          command: yarn jest --listTests | grep -o 'tests/.*.ts$' > e2e_tests.txt
+          command: yarn jest --listTests | grep -o 'tests/conceptsets/.*.ts$' > e2e_tests.txt
       - run:
           name: "Running Puppeteer e2e tests"
           working_directory: ~/workbench/e2e
@@ -681,11 +681,11 @@ workflows:
       - wait_until_previous_workflow_done
       # Always run basic test/lint/compilation (open PRs, main branch merge)
       # Note: by default tags are not picked up.
-      - api-local-test
-      - api-unit-test
-      - ui-unit-test
-      - api-bigquery-test
-      - api-integration-test
+#      - api-local-test
+#      - api-unit-test
+#      - ui-unit-test
+#      - api-bigquery-test
+#      - api-integration-test
       # Deploy to "test" on main branch merges
       - api-deploy-to-test:
           <<: *filter-main-branch
