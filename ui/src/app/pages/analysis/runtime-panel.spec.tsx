@@ -178,16 +178,9 @@ describe('RuntimePanel', () => {
     pickDropdownOption(wrapper, '#runtime-ram', ram);
 
   const getMainDiskSize = (wrapper) =>
-    getInputValue(
-      wrapper,
-      enablePersistentDisk ? '#standard-disk' : '#runtime-disk'
-    );
+    getInputValue(wrapper, enablePersistentDisk ? '#standard-disk' : '#runtime-disk');
   const pickMainDiskSize = (wrapper, diskSize) =>
-    enterNumberInput(
-      wrapper,
-      enablePersistentDisk ? '#standard-disk' : '#runtime-disk',
-      diskSize
-    );
+    enterNumberInput(wrapper, enablePersistentDisk ? '#standard-disk' : '#runtime-disk', diskSize);
 
   const pickDetachable = (wrapper, detachable: boolean) => {
     // xxx click radio
@@ -196,8 +189,7 @@ describe('RuntimePanel', () => {
   const pickDetachableType = (wrapper, typeLabel: string) =>
     pickDropdownOption(wrapper, '#disk-type', typeLabel);
 
-  const getDetachableDiskSize = (wrapper) =>
-    getInputValue(wrapper, '#detachable-disk');
+  const getDetachableDiskSize = (wrapper) => getInputValue(wrapper, '#detachable-disk');
   const pickDetachableDiskSize = (wrapper, diskSize) =>
     enterNumberInput(wrapper, '#detachable-disk', diskSize);
 
@@ -1196,6 +1188,31 @@ describe('RuntimePanel', () => {
     await pickMainDiskSize(wrapper, MIN_DISK_SIZE_GB);
     await pickWorkerDiskSize(wrapper, DATAPROC_WORKER_MIN_DISK_SIZE_GB);
     expect(getNextButton().prop('disabled')).toBeFalsy();
+  });
+
+  it('should prevent runtime update when PD disk size is invalid', async () => {
+  });
+
+  // disk type, decrease, increase, no change
+  // other updates: gpu, machine type
+  it('should allow runtime updates to attached PD', async () => {
+  });
+
+  // disk type, decrease, increase, no change
+  it('should allow runtime updates to PD with unattached disk', async () => {
+  });
+
+  it('should allow runtime updates to PD with no existing disk', async () => {
+  });
+
+  // disk type, decrease, increase, no change
+  it('should allow runtime creates with existing disk', async () => {
+  });
+
+  it('should allow Dataproc -> PD transition', async () => {
+  });
+
+  it('should allow PD -> Dataproc transition', async () => {
   });
 
   it('should prevent runtime creation when running cost is too high for free tier', async () => {
