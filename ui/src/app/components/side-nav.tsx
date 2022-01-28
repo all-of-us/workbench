@@ -341,14 +341,14 @@ export const SideNav = (props: SideNavProps) => {
           />
         )}
       {hasAuthorityForAction(profile, AuthorityGuardedAction.USER_ADMIN) &&
-      showAdminOptions && (
-        <SideNavItem
-          content={'User Access Admin'}
-          onToggleSideNav={() => onToggleSideNav()}
-          href={'/admin/user-access'}
-          active={userAccessActive()}
-        />
-      )}
+        showAdminOptions && (
+          <SideNavItem
+            content={'User Access'}
+            onToggleSideNav={() => onToggleSideNav()}
+            href={'/admin/user-access'}
+            active={userAccessActive()}
+          />
+        )}
       {hasAuthorityForAction(profile, AuthorityGuardedAction.USER_AUDIT) &&
         showAdminOptions && (
           <SideNavItem

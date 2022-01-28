@@ -5,13 +5,13 @@ import { Button } from 'app/components/buttons';
 import { SpinnerOverlay } from 'app/components/spinners';
 import { userAdminApi } from 'app/services/swagger-fetch-clients';
 import { TextArea } from 'app/components/inputs';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { withErrorModal } from 'app/components/modals';
 import { TooltipTrigger } from 'app/components/popups';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { reactStyles } from 'app/utils';
-
-export const AdminUserAccess = () => {
+import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
+export const AdminUserAccess = (spinnerProps: WithSpinnerOverlayProps) => {
   const styles = reactStyles({
     accessContainer: {
       width: '25rem',
@@ -28,6 +28,8 @@ export const AdminUserAccess = () => {
       borderRadius: '0.31rem',
     },
   });
+
+  useEffect(() => spinnerProps.hideSpinner(), []);
 
   const [sendingRequest, setSendingRequest] = useState<boolean>(false);
   const [userEmails, setUserEmails] = useState<Array<string>>(String['']);

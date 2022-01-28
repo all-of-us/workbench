@@ -90,7 +90,10 @@ const UserAdminProfilePage = fp.flow(
 )(AdminUserProfile);
 const UsersAdminPage = fp.flow(withRouteData, withRoutingSpinner)(AdminUsers);
 const UserAuditPage = fp.flow(withRouteData, withRoutingSpinner)(UserAudit);
-const UserAccessPage = fp.flow(withRouteData, withRoutingSpinner)(AdminUserAccess);
+const UserAccessPage = fp.flow(
+  withRouteData,
+  withRoutingSpinner
+)(AdminUserAccess);
 const WorkspaceWrapperPage = fp.flow(
   withRouteData,
   withRoutingSpinner
