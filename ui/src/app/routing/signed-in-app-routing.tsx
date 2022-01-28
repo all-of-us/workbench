@@ -21,6 +21,7 @@ import { AdminWorkspace } from 'app/pages/admin/admin-workspace';
 import { WorkspaceAudit } from 'app/pages/admin/admin-workspace-audit';
 import { AdminWorkspaceSearch } from 'app/pages/admin/admin-workspace-search';
 import { UserAudit } from 'app/pages/admin/user-audit';
+import { AdminUserAccess } from 'app/pages/admin/admin-user-access';
 import { DataAccessRequirements } from 'app/pages/homepage/data-access-requirements';
 import { Homepage } from 'app/pages/homepage/homepage';
 import { DataUserCodeOfConduct } from 'app/pages/profile/data-user-code-of-conduct';
@@ -89,6 +90,10 @@ const UserAdminProfilePage = fp.flow(
 )(AdminUserProfile);
 const UsersAdminPage = fp.flow(withRouteData, withRoutingSpinner)(AdminUsers);
 const UserAuditPage = fp.flow(withRouteData, withRoutingSpinner)(UserAudit);
+const UserAccessPage = fp.flow(
+  withRouteData,
+  withRoutingSpinner
+)(AdminUserAccess);
 const WorkspaceWrapperPage = fp.flow(
   withRouteData,
   withRoutingSpinner
@@ -229,6 +234,15 @@ export const SignedInRoutes = () => {
       >
         <UserAuditPage
           routeData={{ title: 'User Audit', minimizeChrome: true }}
+        />
+      </AppRoute>
+      <AppRoute
+        exact
+        path='/admin/bulk-sync-user-access'
+        guards={[authorityGuard(AuthorityGuardedAction.USER_AUDIT)]}
+      >
+        <UserAccessPage
+          routeData={{ title: 'Bulk Sync User Access', minimizeChrome: true }}
         />
       </AppRoute>
       <AppRoute
