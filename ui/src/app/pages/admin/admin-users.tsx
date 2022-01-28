@@ -17,7 +17,6 @@ import { reactStyles, usernameWithoutDomain, withUserProfile } from 'app/utils';
 import { serverConfigStore } from 'app/utils/stores';
 import { AdminTableUser, Profile } from 'generated/fetch';
 import { UserAuditLink } from './admin-user-common';
-import { AdminUserAccess } from './admin-user-access';
 
 const styles = reactStyles({
   colStyle: {
@@ -403,7 +402,6 @@ export const AdminUsers = withUserProfile()(
               </DataTable>
             </div>
           )}
-          <AdminUserAccess />
         </div>
       );
     }
