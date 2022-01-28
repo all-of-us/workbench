@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableBiMap;
 import com.google.gson.Gson;
 import java.util.List;
 import java.util.Map;
+import javax.annotation.Nullable;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -29,6 +30,7 @@ import org.pmiops.workbench.model.DiskStatus;
 import org.pmiops.workbench.model.GceConfig;
 import org.pmiops.workbench.model.GceWithPdConfig;
 import org.pmiops.workbench.model.ListRuntimeResponse;
+import org.pmiops.workbench.model.PersistentDiskRequest;
 import org.pmiops.workbench.model.Runtime;
 import org.pmiops.workbench.model.RuntimeConfigurationType;
 import org.pmiops.workbench.model.RuntimeError;
@@ -64,29 +66,39 @@ public interface LeonardoMapper {
 
   GceConfig toGceConfig(LeonardoGceConfig leonardoGceConfig);
 
-  @Mapping(target = "cloudService", ignore = true)
   @Mapping(target = "bootDiskSize", ignore = true)
+  @Mapping(target = "cloudService", ignore = true)
   @Mapping(target = "zone", ignore = true)
   LeonardoGceConfig toLeonardoGceConfig(GceConfig gceConfig);
+
+  @Mapping(target = "persistentDisk", source = "leonardoDiskConfig")
+  @Mapping(target = "machineType", source = "leonardoGceConfig.machineType")
+  @Mapping(target = "gpuConfig", source = "leonardoGceConfig.gpuConfig")
+  GceWithPdConfig toGceWithPdConfig(
+      LeonardoGceConfig leonardoGceConfig, LeonardoDiskConfig leonardoDiskConfig);
+
+  @Mapping(target = "labels", ignore = true)
+  PersistentDiskRequest diskConfigToPersistentDiskRequest(LeonardoDiskConfig leonardoDiskConfig);
+
+  @Mapping(target = "bootDiskSize", ignore = true)
+  @Mapping(target = "cloudService", ignore = true)
+  @Mapping(target = "zone", ignore = true)
+  LeonardoGceWithPdConfig toLeonardoGceWithPdConfig(GceWithPdConfig gceWithPdConfig);
 
   @AfterMapping
   default void addCloudServiceEnum(@MappingTarget LeonardoGceConfig leonardoGceConfig) {
     leonardoGceConfig.setCloudService(LeonardoGceConfig.CloudServiceEnum.GCE);
   }
 
-  DiskConfig toDiskConfig(LeonardoDiskConfig leonardoDiskConfig);
-
-  Disk toApiDisk(LeonardoListPersistentDiskResponse disk);
-
-  @Mapping(target = "cloudService", ignore = true)
-  @Mapping(target = "zone", ignore = true)
-  LeonardoGceWithPdConfig toLeonardoGceWithPdConfig(GceWithPdConfig gceWithPdConfig);
-
   @AfterMapping
   default void addPdCloudServiceEnum(
       @MappingTarget LeonardoGceWithPdConfig leonardoGceWithPdConfig) {
     leonardoGceWithPdConfig.setCloudService(LeonardoGceWithPdConfig.CloudServiceEnum.GCE);
   }
+
+  DiskConfig toDiskConfig(LeonardoDiskConfig leonardoDiskConfig);
+
+  Disk toApiDisk(LeonardoListPersistentDiskResponse disk);
 
   @Mapping(target = "patchInProgress", ignore = true)
   LeonardoListRuntimeResponse toListRuntimeResponse(LeonardoGetRuntimeResponse runtime);
@@ -102,7 +114,6 @@ public interface LeonardoMapper {
   @Mapping(target = "gceConfig", ignore = true)
   @Mapping(target = "gceWithPdConfig", ignore = true)
   @Mapping(target = "dataprocConfig", ignore = true)
-  @Mapping(target = "diskConfig", ignore = true)
   Runtime toApiRuntime(LeonardoGetRuntimeResponse runtime);
 
   @Mapping(target = "createdDate", source = "auditInfo.createdDate")
@@ -112,7 +123,6 @@ public interface LeonardoMapper {
   @Mapping(target = "gceConfig", ignore = true)
   @Mapping(target = "gceWithPdConfig", ignore = true)
   @Mapping(target = "dataprocConfig", ignore = true)
-  @Mapping(target = "diskConfig", ignore = true)
   @Mapping(target = "errors", ignore = true)
   Runtime toApiRuntime(LeonardoListRuntimeResponse runtime);
 
@@ -122,15 +132,20 @@ public interface LeonardoMapper {
   default void getRuntimeAfterMapper(
       @MappingTarget Runtime runtime, LeonardoGetRuntimeResponse leonardoGetRuntimeResponse) {
     mapLabels(runtime, leonardoGetRuntimeResponse.getLabels());
-    mapRuntimeConfig(runtime, leonardoGetRuntimeResponse.getRuntimeConfig());
-    mapDiskConfig(runtime, leonardoGetRuntimeResponse);
+    mapRuntimeConfig(
+        runtime,
+        leonardoGetRuntimeResponse.getRuntimeConfig(),
+        leonardoGetRuntimeResponse.getDiskConfig());
   }
 
   @AfterMapping
   default void listRuntimeAfterMapper(
       @MappingTarget Runtime runtime, LeonardoListRuntimeResponse leonardoListRuntimeResponse) {
     mapLabels(runtime, leonardoListRuntimeResponse.getLabels());
-    mapRuntimeConfig(runtime, leonardoListRuntimeResponse.getRuntimeConfig());
+    mapRuntimeConfig(
+        runtime,
+        leonardoListRuntimeResponse.getRuntimeConfig(),
+        leonardoListRuntimeResponse.getDiskConfig());
   }
 
   default void mapLabels(Runtime runtime, Object runtimeLabelsObj) {
@@ -148,32 +163,30 @@ public interface LeonardoMapper {
     }
   }
 
-  default void mapDiskConfig(
-      Runtime runtime, LeonardoGetRuntimeResponse leonardoGetRuntimeResponse) {
-    Gson gson = new Gson();
-    runtime.diskConfig(
-        toDiskConfig(
-            gson.fromJson(
-                gson.toJson(leonardoGetRuntimeResponse.getDiskConfig()),
-                LeonardoDiskConfig.class)));
-  }
-
-  default void mapRuntimeConfig(Runtime runtime, Object runtimeConfigObj) {
+  default void mapRuntimeConfig(
+      Runtime runtime, Object runtimeConfigObj, @Nullable LeonardoDiskConfig diskConfig) {
     if (runtimeConfigObj == null) {
       return;
     }
 
     Gson gson = new Gson();
+    String runtimeConfigJson = gson.toJson(runtimeConfigObj);
     LeonardoRuntimeConfig runtimeConfig =
-        gson.fromJson(gson.toJson(runtimeConfigObj), LeonardoRuntimeConfig.class);
+        gson.fromJson(runtimeConfigJson, LeonardoRuntimeConfig.class);
 
     if (CloudServiceEnum.DATAPROC.equals(runtimeConfig.getCloudService())) {
       runtime.dataprocConfig(
-          toDataprocConfig(
-              gson.fromJson(gson.toJson(runtimeConfigObj), LeonardoMachineConfig.class)));
+          toDataprocConfig(gson.fromJson(runtimeConfigJson, LeonardoMachineConfig.class)));
     } else if (CloudServiceEnum.GCE.equals(runtimeConfig.getCloudService())) {
-      runtime.gceConfig(
-          toGceConfig(gson.fromJson(gson.toJson(runtimeConfigObj), LeonardoGceConfig.class)));
+      // Unfortunately the discriminator does not allow us to distinguish plain GCE config
+      // from GceWithPd; use the diskConfig to help differentiate.
+      LeonardoGceConfig leonardoGceConfig =
+          gson.fromJson(runtimeConfigJson, LeonardoGceConfig.class);
+      if (diskConfig != null) {
+        runtime.gceWithPdConfig(toGceWithPdConfig(leonardoGceConfig, diskConfig));
+      } else {
+        runtime.gceConfig(toGceConfig(leonardoGceConfig));
+      }
     } else {
       throw new IllegalArgumentException(
           "Invalid LeonardoGetRuntimeResponse.RuntimeConfig.cloudService : "
