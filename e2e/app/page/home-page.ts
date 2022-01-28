@@ -21,39 +21,42 @@ export default class HomePage extends AuthenticatedPage {
   }
 
   async isLoaded(): Promise<boolean> {
-    const waitFor = async (): Promise<void> => {
+    const waitFor = async (timeout: number): Promise<void> => {
+      // Wait for non-blank page before checking for spinner
       await waitForDocumentTitle(this.page, PageTitle);
-      await this.getSeeAllWorkspacesLink().asElementHandle({ timeout: 60000, visible: true });
       await waitWhileLoading(this.page);
 
+      const seeAllWorkspace = this.getSeeAllWorkspacesLink();
+      await seeAllWorkspace.waitUntilEnabled();
+
       // Find either a workspace card or "Create your first workspace" msg.
+      const firstWorkspaceMsgXpath = '//h2[.="Create your first workspace"]';
+      const workspaceCardXpath =
+        '//*[@data-test-id="workspace-card"][.//*[@data-test-id="workspace-card-name" and normalize-space(text())]]';
       const foundElement = await Promise.race([
-        this.page.waitForXPath('//h2[.="Create your first workspace"]', {
-          timeout: 60000,
+        this.page.waitForXPath(firstWorkspaceMsgXpath, {
+          timeout,
           visible: true
         }),
-        this.page.waitForXPath('//*[@data-test-id="workspace-card"]', { timeout: 60000, visible: true })
+        this.page.waitForXPath(workspaceCardXpath, { timeout, visible: true })
       ]);
 
-      await getAttrValue(this.page, foundElement, 'data-test-id').catch(() => {
-        // Home page is empty without a workspace.
-        return;
+      await getAttrValue(this.page, foundElement, 'data-test-id').then((id) => {
+        if (id === null) {
+          logger.info('Home page is empty without workspace card');
+        }
       });
-
-      // Find either recent-resources table or Getting Started msg.
-      await Promise.race([
-        this.page.waitForXPath('//*[@data-test-id="recent-resources-table"]', { visible: true }),
-        this.page.waitForXPath('//*[@data-test-id="getting-started"]', { visible: true })
-      ]);
+      // Sometime a second spinner is spinning while waiting for v1/workspaces/user-recent-resources request to finish
+      await waitWhileLoading(this.page);
     };
 
     try {
-      await waitFor();
+      await waitFor(60 * 1000);
     } catch (err) {
       logger.error('RETRY loading Home page in 5 seconds after failure.');
       logger.error(err);
       await this.page.waitForTimeout(5000);
-      await waitFor();
+      await waitFor(30 * 1000);
     }
     return true;
   }
