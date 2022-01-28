@@ -196,6 +196,7 @@ const isModuleRequiredByAccessTier = (
   const tierEligibility = profile.tierEligibilities.find(
     (tier) => tier.accessTierShortName === accessTierShortName
   );
+  // Handling only ERACommon module.
   return switchCase(moduleName, [
     AccessModule.ERACOMMONS,
     () =>

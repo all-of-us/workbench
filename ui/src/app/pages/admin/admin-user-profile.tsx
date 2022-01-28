@@ -305,6 +305,10 @@ const AccessModuleTable = (props: AccessModuleTableProps) => {
       moduleName: adminPageTitle,
       completionDate: displayModuleCompletionDate(updatedProfile, moduleName),
       expirationDate: displayModuleExpirationDate(updatedProfile, moduleName),
+      accessTierBadge: displayTierBadgeByRequiredModule(
+        props.updatedProfile,
+        moduleName
+      ),
       bypassToggle: adminBypassable && (
         <ToggleForModule moduleName={moduleName} {...props} />
       ),
@@ -316,6 +320,7 @@ const AccessModuleTable = (props: AccessModuleTableProps) => {
       <Column field='moduleName' header='Access Module' />
       <Column field='completionDate' header='Last completed on' />
       <Column field='expirationDate' header='Expires on' />
+      <Column field='accessTierBadge' header='Required for tier access' />
       <Column field='bypassToggle' header='Bypass' />
     </DataTable>
   );
