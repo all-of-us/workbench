@@ -32,13 +32,13 @@ import { TooltipTrigger } from 'app/components/popups';
 import { serverConfigStore } from 'app/utils/stores';
 import {
   accessRenewalModules,
+  AccessRenewalModulesStatus,
   computeRenewalDisplayDates,
   getAccessModuleConfig,
   getAccessModuleStatusByName,
 } from 'app/utils/access-utils';
 import { hasRegisteredTierAccess } from 'app/utils/access-tiers';
 import { formatDate } from 'app/utils/dates';
-import { bypassedOrCompleteAndNotExpiring } from 'app/pages/access/access-renewal';
 
 export const commonStyles = reactStyles({
   semiBold: {
@@ -151,37 +151,24 @@ export const getUpdatedProfileValue = (
   }
 };
 
-export const isCompleted = (
-  profile: Profile,
-  moduleName: AccessModule
-): boolean =>
-  !!getAccessModuleStatusByName(profile, moduleName)?.completionEpochMillis;
-
 export const isBypassed = (
   profile: Profile,
   moduleName: AccessModule
 ): boolean =>
   !!getAccessModuleStatusByName(profile, moduleName)?.bypassEpochMillis;
 
-export const isExpired = (
-  profile: Profile,
-  moduleName: AccessModule
-): boolean =>
-  !!getAccessModuleStatusByName(profile, moduleName)?.expirationEpochMillis;
-
 export const displayModuleStatus = (
   profile: Profile,
   moduleName: AccessModule
-): string =>
-  bypassedOrCompleteAndNotExpiring(
+): string => {
+  const moduleStatus = computeRenewalDisplayDates(
     getAccessModuleStatusByName(profile, moduleName)
-  )
-    ? isCompleted(profile, moduleName)
-      ? 'Completed'
-      : 'ByPassed'
-    : isExpired(profile, moduleName)
-    ? 'Expired'
-    : 'InComplete';
+  ).moduleStatus;
+  const canModuleExpire = getAccessModuleConfig(moduleName).canExpire;
+  return !canModuleExpire && moduleStatus === AccessRenewalModulesStatus.EXPIRED
+    ? AccessRenewalModulesStatus.COMPLETE
+    : moduleStatus;
+};
 
 // Some modules may never expire (eg GOOGLE TWO STEP NOTIFICATION, ERA COMMONS etc),
 // in such cases set the expiry date as NEVER
