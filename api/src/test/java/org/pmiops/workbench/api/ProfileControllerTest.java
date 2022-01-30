@@ -51,6 +51,7 @@ import org.pmiops.workbench.config.CommonConfig;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.AccessModuleDao;
 import org.pmiops.workbench.db.dao.AccessTierDao;
+import org.pmiops.workbench.db.dao.UserCodeOfConductAgreementDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserDataUseAgreementDao;
 import org.pmiops.workbench.db.dao.UserServiceImpl;
@@ -59,7 +60,7 @@ import org.pmiops.workbench.db.model.DbAccessModule;
 import org.pmiops.workbench.db.model.DbAccessModule.AccessModuleName;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbUser;
-import org.pmiops.workbench.db.model.DbUserDataUseAgreement;
+import org.pmiops.workbench.db.model.DbUserCodeOfConductAgreement;
 import org.pmiops.workbench.db.model.DbUserTermsOfService;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
@@ -147,6 +148,7 @@ public class ProfileControllerTest extends BaseControllerTest {
   @Autowired private ProfileController profileController;
   @Autowired private ProfileService profileService;
   @Autowired private UserDao userDao;
+  @Autowired private UserCodeOfConductAgreementDao userCodeOfConductAgreementDao;
   @Autowired private UserDataUseAgreementDao userDataUseAgreementDao;
   @Autowired private UserTermsOfServiceDao userTermsOfServiceDao;
   @Autowired private FakeClock fakeClock;
@@ -465,14 +467,14 @@ public class ProfileControllerTest extends BaseControllerTest {
     String initials = "NIH";
     assertThat(profileController.submitDUCC(DUCC_VERSION, initials).getStatusCode())
         .isEqualTo(HttpStatus.OK);
-    List<DbUserDataUseAgreement> dbUserDataUseAgreementList =
-        userDataUseAgreementDao.findByUserIdOrderByCompletionTimeDesc(dbUser.getUserId());
-    assertThat(dbUserDataUseAgreementList.size()).isEqualTo(1);
-    DbUserDataUseAgreement dbUserDataUseAgreement = dbUserDataUseAgreementList.get(0);
-    assertThat(dbUserDataUseAgreement.getUserFamilyName()).isEqualTo(dbUser.getFamilyName());
-    assertThat(dbUserDataUseAgreement.getUserGivenName()).isEqualTo(dbUser.getGivenName());
-    assertThat(dbUserDataUseAgreement.getUserInitials()).isEqualTo(initials);
-    assertThat(dbUserDataUseAgreement.getDataUseAgreementSignedVersion()).isEqualTo(DUCC_VERSION);
+    List<DbUserCodeOfConductAgreement> duccAgreementList =
+        userCodeOfConductAgreementDao.findByUserOrderByCompletionTimeDesc(dbUser);
+    assertThat(duccAgreementList.size()).isEqualTo(1);
+    DbUserCodeOfConductAgreement duccAgreement = duccAgreementList.get(0);
+    assertThat(duccAgreement.getUserFamilyName()).isEqualTo(dbUser.getFamilyName());
+    assertThat(duccAgreement.getUserGivenName()).isEqualTo(dbUser.getGivenName());
+    assertThat(duccAgreement.getUserInitials()).isEqualTo(initials);
+    assertThat(duccAgreement.getSignedVersion()).isEqualTo(DUCC_VERSION);
   }
 
   @Test
@@ -509,6 +511,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     // bypass the other access requirements
     final DbUser dbUser = userDao.findUserByUserId(userId);
     accessModuleService.updateCompletionTime(dbUser, AccessModuleName.ERA_COMMONS, TIMESTAMP);
+    accessModuleService.updateCompletionTime(dbUser, AccessModuleName.RAS_LOGIN_GOV, TIMESTAMP);
     accessModuleService.updateCompletionTime(
         dbUser, AccessModuleName.RT_COMPLIANCE_TRAINING, TIMESTAMP);
     accessModuleService.updateCompletionTime(dbUser, AccessModuleName.TWO_FACTOR_AUTH, TIMESTAMP);
@@ -699,7 +702,7 @@ public class ProfileControllerTest extends BaseControllerTest {
   }
 
   @Test
-  public void updateName_alsoUpdatesDua() {
+  public void updateName_alsoUpdatesDucc() {
     createAccountAndDbUserWithAffiliation();
     Profile profile = profileController.getMe().getBody();
     profile.setGivenName("OldGivenName");
@@ -709,9 +712,9 @@ public class ProfileControllerTest extends BaseControllerTest {
     profile.setGivenName("NewGivenName");
     profile.setFamilyName("NewFamilyName");
     profileController.updateProfile(profile);
-    List<DbUserDataUseAgreement> duas =
-        userDataUseAgreementDao.findByUserIdOrderByCompletionTimeDesc(profile.getUserId());
-    assertThat(duas.get(0).isUserNameOutOfDate()).isTrue();
+    List<DbUserCodeOfConductAgreement> duccAgreementList =
+        userCodeOfConductAgreementDao.findByUserOrderByCompletionTimeDesc(dbUser);
+    assertThat(duccAgreementList.get(0).isUserNameOutOfDate()).isTrue();
   }
 
   @Test

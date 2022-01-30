@@ -5,6 +5,8 @@ import AuthenticatedPage from 'app/page/authenticated-page';
 import ClrIconLink from 'app/element/clr-icon-link';
 import { waitForDocumentTitle, waitWhileLoading } from 'utils/waits-utils';
 import WorkspacesPage from './workspaces-page';
+import { getAttrValue } from 'utils/element-utils';
+import { logger } from 'libs/logger';
 
 export const PageTitle = 'Homepage';
 
@@ -19,30 +21,43 @@ export default class HomePage extends AuthenticatedPage {
   }
 
   async isLoaded(): Promise<boolean> {
-    await waitForDocumentTitle(this.page, PageTitle);
+    const waitFor = async (timeout: number): Promise<void> => {
+      // Wait for non-blank page before checking for spinner
+      await waitForDocumentTitle(this.page, PageTitle);
+      await waitWhileLoading(this.page);
 
-    // Find "See All Workspaces" link.
-    await Promise.all([
-      this.getSeeAllWorkspacesLink().asElementHandle({ timeout: 120000, visible: true }),
-      waitWhileLoading(this.page, 120000)
-    ]);
+      const seeAllWorkspace = this.getSeeAllWorkspacesLink();
+      await seeAllWorkspace.waitUntilEnabled();
 
-    // Find either a workspace card or "Create your first workspace" msg.
-    await this.page
-      .waitForXPath('//text()[contains(., "Create your first workspace")]', { visible: true, timeout: 1000 })
-      .catch(async () => {
-        await this.page.waitForXPath('//*[@data-test-id="workspace-card"]', { visible: true });
-        try {
-          // Look for either the recent-resources table or the getting-started msg.
-          await Promise.race([
-            this.page.waitForXPath('//*[@data-test-id="recent-resources-table"]', { visible: true, timeout: 1000 }),
-            this.page.waitForXPath('//*[@data-test-id="getting-started"]', { visible: true, timeout: 1000 })
-          ]);
-        } catch (err) {
-          // ignore error
+      // Find either a workspace card or "Create your first workspace" msg.
+      const firstWorkspaceMsgXpath = '//h2[.="Create your first workspace"]';
+      const workspaceCardXpath =
+        '//*[@data-test-id="workspace-card"][.//*[@data-test-id="workspace-card-name" and normalize-space(text())]]';
+      const foundElement = await Promise.race([
+        this.page.waitForXPath(firstWorkspaceMsgXpath, {
+          timeout,
+          visible: true
+        }),
+        this.page.waitForXPath(workspaceCardXpath, { timeout, visible: true })
+      ]);
+
+      await getAttrValue(this.page, foundElement, 'data-test-id').then((id) => {
+        if (id === null) {
+          logger.info('Home page is empty without workspace card');
         }
       });
-    await waitWhileLoading(this.page);
+      // Sometime a second spinner is spinning while waiting for v1/workspaces/user-recent-resources request to finish
+      await waitWhileLoading(this.page);
+    };
+
+    try {
+      await waitFor(60 * 1000);
+    } catch (err) {
+      logger.error('RETRY loading Home page in 5 seconds after failure.');
+      logger.error(err);
+      await this.page.waitForTimeout(5000);
+      await waitFor(30 * 1000);
+    }
     return true;
   }
 

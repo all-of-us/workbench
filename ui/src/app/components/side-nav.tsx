@@ -115,6 +115,10 @@ const userAdminActive = () => {
   return window.location.pathname.startsWith('/admin/user');
 };
 
+const userAccessActive = () => {
+  return window.location.pathname.startsWith('/admin/bulk-sync-user-access');
+};
+
 const userAuditActive = () => {
   return window.location.pathname.startsWith('/admin/user-audit');
 };
@@ -334,6 +338,15 @@ export const SideNav = (props: SideNavProps) => {
             onToggleSideNav={() => onToggleSideNav()}
             href={'/admin/user'}
             active={userAdminActive()}
+          />
+        )}
+      {hasAuthorityForAction(profile, AuthorityGuardedAction.USER_ADMIN) &&
+        showAdminOptions && (
+          <SideNavItem
+            content={'Bulk Sync of User Access'}
+            onToggleSideNav={() => onToggleSideNav()}
+            href={'/admin/bulk-sync-user-access'}
+            active={userAccessActive()}
           />
         )}
       {hasAuthorityForAction(profile, AuthorityGuardedAction.USER_AUDIT) &&

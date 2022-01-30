@@ -1,5 +1,7 @@
 package org.pmiops.workbench.api;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.matches;
 import static org.mockito.Mockito.verify;
@@ -71,6 +73,8 @@ public class OfflineUserControllerTest {
     when(mockUserService.getAllUsersExcludingDisabled()).thenReturn(users);
     when(mockUserService.getAllUsers()).thenReturn(users);
     when(mockUserService.getAllUserIds()).thenReturn(userIds);
+    when(mockCloudTasksClient.createTask(anyString(), any(Task.class)))
+        .thenReturn(Task.newBuilder().setName("name").build());
 
     workbenchConfig = WorkbenchConfig.createEmptyConfig();
     workbenchConfig.server.projectId = "test";

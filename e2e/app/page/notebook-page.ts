@@ -65,7 +65,7 @@ export default class NotebookPage extends NotebookFrame {
     }
     // When open notebook for the first time, notebook connection could fail unexpectedly.
     // But notebook connection will retry to establish. thus, a longer sleep interval is required.
-    await this.waitForKernelIdle(10 * 60 * 1000, 10000); // 10 minutes
+    await this.waitForKernelIdle(10 * 60 * 1000); // 10 minutes
     return true;
   }
 

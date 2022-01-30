@@ -8,11 +8,14 @@ import Checkbox from 'app/element/checkbox';
 import Textarea from 'app/element/textarea';
 import Textbox from 'app/element/textbox';
 import { LinkText } from 'app/text-labels';
+import { logger } from 'libs/logger';
 
 const modalRootXpath = '//*[@id="popup-root"]/*[@class="ReactModalPortal"]';
 const modalXpath = '//*[@role="dialog" and @aria-modal="true" and contains(@class, "after-open")]';
 
 export default abstract class BaseModal extends Container {
+  private title: string;
+
   protected constructor(page: Page, opts: { xpath?: string; modalIndex?: number } = { modalIndex: 1 }) {
     super(page, opts.xpath ? opts.xpath : `${modalRootXpath}[${opts.modalIndex}]${modalXpath}`);
   }
@@ -24,16 +27,17 @@ export default abstract class BaseModal extends Container {
   abstract isLoaded(): Promise<boolean>;
 
   async waitForLoad(): Promise<this> {
-    const timeout = 30000;
-    await this.waitUntilVisible(timeout);
+    await this.waitUntilVisible();
     await this.isLoaded();
+    logger.info(`Modal "${await this.getTitle()}" is open`);
     await waitWhileLoading(this.page);
     return this;
   }
 
   async getTextContent(): Promise<string[]> {
     // xpath that excludes button labels and spans
-    const selector = `${this.getXpath()}//div[normalize-space() and not(@role="button")]`;
+    const selector =
+      this.getXpath() + '//*[normalize-space(.) and not(@role="button") and not(self::b) and not(self::i)]';
     await this.page.waitForXPath(selector, { visible: true });
     const elements: ElementHandle[] = await this.page.$x(selector);
     return fp.flow(
@@ -43,7 +47,14 @@ export default abstract class BaseModal extends Container {
   }
 
   async getTitle(): Promise<string> {
-    return (await this.getTextContent())[0];
+    if (this.title === undefined) {
+      try {
+        this.title = (await this.getTextContent())[0];
+      } catch (error) {
+        this.title = '';
+      }
+    }
+    return this.title;
   }
 
   waitForButton(buttonLabel: LinkText): Button {
@@ -67,5 +78,33 @@ export default abstract class BaseModal extends Container {
    */
   async exists(): Promise<boolean> {
     return (await this.page.$x(this.xpath)).length > 0;
+  }
+
+  /**
+   * Override waitUntilClose in parent class Container.
+   * waitForXPath(this.getXpath(), { hidden: true, visible: false, timeout }) does not work consistently for modal.
+   * when there are two or more visible modals and the modal to check on visibility is not the active (in front) modal.
+   * Workaround: Check element's offsetWidth and offsetHeight are greater than 0.
+   * @param timeout
+   */
+  async waitUntilClose(timeout = 2 * 60 * 1000): Promise<void> {
+    const modalTitle = await this.getTitle();
+    try {
+      await this.page.waitForFunction(
+        (xpath) => {
+          const element = document.evaluate(xpath, document.body, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null)
+            .singleNodeValue as HTMLElement;
+          const isVisible = element && (element.offsetWidth > 0 || element.offsetHeight > 0);
+          return !isVisible;
+        },
+        { timeout },
+        this.getXpath()
+      );
+      logger.info(`Modal "${modalTitle}" is closed.`);
+    } catch (err) {
+      logger.error(`FAIL: WaitUntilClose failed for modal "${modalTitle}". Modal xpath: "${this.getXpath()}"`);
+      logger.error(err.stack);
+      throw new Error(err);
+    }
   }
 }

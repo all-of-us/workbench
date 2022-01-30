@@ -287,17 +287,22 @@ describe('Cohort review set tests', () => {
 
     // Include Participants Group 1: Add hydroxychloroquine drug.
     const group1 = cohortBuildPage.findIncludeParticipantsGroup('Group 1');
-    await group1.includeDrugs('hydroxychloroquine', 1);
+    let searchResults = await group1.includeDrugs('hydroxychloroquine', 1);
+    expect(searchResults.length).toBeGreaterThan(0); // search results is not empty.
+
     // Include Participants Group 1: Add Hydrocodone drug.
-    await group1.includeDrugs('Hydrocodone', 1);
+    searchResults = await group1.includeDrugs('Hydrocodone', 1);
+    expect(searchResults.length).toBeGreaterThan(0);
 
     // Include Participants Group 2: Add colonoscopy procedures.
     const group2 = cohortBuildPage.findIncludeParticipantsGroup('Group 2');
-    await group2.includeProcedures('Colonoscopy', 1);
+    searchResults = await group2.includeProcedures('Colonoscopy', 1);
+    expect(searchResults.length).toBeGreaterThan(0);
 
     // Include Participants Group 3: Add Red cell indices labs and measurements.
     const group3 = cohortBuildPage.findIncludeParticipantsGroup('Group 3');
-    await group3.includeLabsAndMeasurements('Red cell indices', 1);
+    searchResults = await group3.includeLabsAndMeasurements('Red cell indices', 1);
+    expect(searchResults.length).toBeGreaterThan(0);
 
     // Save new cohort
     await cohortBuildPage.createCohort(cohortName);

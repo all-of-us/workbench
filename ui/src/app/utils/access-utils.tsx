@@ -120,6 +120,8 @@ export const redirectToRas = (openInNewTab: boolean = true): void => {
 interface AccessModuleConfig {
   moduleName: AccessModule;
   isEnabledInEnvironment: boolean; // either true or dependent on a feature flag
+  isRequiredByRT: boolean;
+  isRequiredByCT: boolean;
   AARTitleComponent: () => JSX.Element;
   DARTitleComponent: () => JSX.Element;
   adminPageTitle: string;
@@ -161,6 +163,8 @@ export const getAccessModuleConfig = (
         externalSyncAction: async () =>
           await profileApi().syncTwoFactorAuthStatus(),
         refreshAction: async () => await profileApi().syncTwoFactorAuthStatus(),
+        isRequiredByRT: true,
+        isRequiredByCT: true,
       }),
     ],
 
@@ -186,6 +190,8 @@ export const getAccessModuleConfig = (
         canExpire: false,
         adminBypassable: true,
         refreshAction: () => redirectToRas(false),
+        isRequiredByRT: enforceRasLoginGovLinking,
+        isRequiredByCT: enforceRasLoginGovLinking,
       }),
     ],
 
@@ -226,6 +232,8 @@ export const getAccessModuleConfig = (
           await profileApi().syncComplianceTrainingStatus(),
         refreshAction: async () =>
           await profileApi().syncComplianceTrainingStatus(),
+        isRequiredByRT: true,
+        isRequiredByCT: true,
       }),
     ],
 
@@ -246,6 +254,8 @@ export const getAccessModuleConfig = (
           await profileApi().syncComplianceTrainingStatus(),
         refreshAction: async () =>
           await profileApi().syncComplianceTrainingStatus(),
+        isRequiredByRT: false,
+        isRequiredByCT: true,
       }),
     ],
 
@@ -258,6 +268,8 @@ export const getAccessModuleConfig = (
         DARTitleComponent: () => <div>Sign Data User Code of Conduct</div>,
         adminPageTitle: 'Sign Data User Code of Conduct',
         adminBypassable: true,
+        isRequiredByRT: true,
+        isRequiredByCT: true,
         canExpire: true,
       }),
     ],
@@ -270,6 +282,8 @@ export const getAccessModuleConfig = (
         AARTitleComponent: () => 'Update your profile',
         adminPageTitle: 'Update your profile',
         adminBypassable: false,
+        isRequiredByRT: true,
+        isRequiredByCT: true,
         canExpire: true,
       }),
     ],
@@ -283,6 +297,8 @@ export const getAccessModuleConfig = (
           'Report any publications or presentations based on your research using the Researcher Workbench',
         adminPageTitle: 'Report any publications',
         adminBypassable: false,
+        isRequiredByRT: true,
+        isRequiredByCT: true,
         canExpire: true,
       }),
     ]

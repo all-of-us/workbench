@@ -30,6 +30,7 @@ export default class EditDeleteAnnotationsModal extends Modal {
     const baseElement = BaseElement.asBaseElement(this.page, clearTextSelector);
     await baseElement.clearTextInput();
     await baseElement.type(newName);
+    await waitWhileLoading(this.page);
     await this.clickButton(LinkText.Rename);
     await this.clickButton(LinkText.Close);
     await this.waitUntilClose();

@@ -64,17 +64,11 @@ export async function signInWithAccessToken(
   // logs; there is some delay between a console.log() execution and capture by
   // Puppeteer. Any console.log() within the above global function, for example,
   // is unlikely to be captured.
-  try {
-    await homePage.reloadPage();
-    await homePage.gotoUrl(PageUrl.Home);
-    // normally the user is routed to the homepage after sign-in, so that's the default here.
-    // tests can override this.
-    await postSignInPage.waitForLoad();
-  } catch (err) {
-    // reloadPage and gotoUrl functions could fail on rare occasions.
-    await homePage.gotoUrl(PageUrl.Home);
-    await postSignInPage.waitForLoad();
-  }
+  await homePage.reloadPage();
+  await homePage.gotoUrl(PageUrl.Home);
+  // normally the user is routed to the homepage after sign-in, so that's the default here.
+  // tests can override this.
+  await postSignInPage.waitForLoad();
 }
 
 /**
@@ -182,7 +176,7 @@ export async function findOrCreateWorkspace(
   const { workspaceName, cdrVersion, dataAccessTier } = opts;
   // Returns specified workspaceName Workspace card if exists.
   if (workspaceName !== undefined) {
-    const cardFound = await findWorkspaceCard(page, workspaceName);
+    const cardFound = await findWorkspaceCard(page, workspaceName, 2000);
     if (cardFound != null) {
       logger.info(`Found workspace card name: ${workspaceName}`);
       // TODO workspace CDR version and Data Access Tier are not verified
@@ -213,11 +207,15 @@ export async function findOrCreateWorkspace(
  * @param page
  * @param workspaceName
  */
-export async function findWorkspaceCard(page: Page, workspaceName: string): Promise<WorkspaceCard | null> {
+export async function findWorkspaceCard(
+  page: Page,
+  workspaceName: string,
+  timeout = 30000
+): Promise<WorkspaceCard | null> {
   const workspacesPage = new WorkspacesPage(page);
   await workspacesPage.load();
   const workspaceCard = new WorkspaceCard(page);
-  return workspaceCard.findCard(workspaceName);
+  return workspaceCard.findCard(workspaceName, timeout);
 }
 
 /**
@@ -232,7 +230,7 @@ export async function findOrCreateWorkspaceCard(
 ): Promise<WorkspaceCard> {
   const { cdrVersion = config.DEFAULT_CDR_VERSION_NAME, workspaceName = makeWorkspaceName() } = options;
 
-  let cardFound = await findWorkspaceCard(page, workspaceName);
+  let cardFound = await findWorkspaceCard(page, workspaceName, 2000);
   if (cardFound !== null) {
     // TODO workspaces CDR version is not verified
     logger.info(`Found Workspace card name: "${workspaceName}"`);
@@ -245,7 +243,7 @@ export async function findOrCreateWorkspaceCard(
 
   cardFound = await findWorkspaceCard(page, workspaceName);
   if (cardFound === null) {
-    throw new Error(`Failed finding Workspace card name: ${workspaceName}`);
+    throw new Error(`FAIL: Failed to find Workspace card with name: ${workspaceName}`);
   }
   logger.info(`Found Workspace card name: "${workspaceName}"`);
   return cardFound;

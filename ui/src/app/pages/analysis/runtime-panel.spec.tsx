@@ -59,7 +59,6 @@ describe('RuntimePanel', () => {
   let runtimeApiStub: RuntimeApiStub;
   let workspacesApiStub: WorkspacesApiStub;
   let onClose: () => void;
-  let enablePd: boolean;
   let enableGpu: boolean;
   let freeTierBillingAccountId: string;
 
@@ -75,7 +74,6 @@ describe('RuntimePanel', () => {
   beforeEach(async () => {
     cdrVersionStore.set(cdrVersionTiersResponse);
     serverConfigStore.set({ config: { ...defaultServerConfig } });
-    enablePd = serverConfigStore.get().config.enablePersistentDisk;
     enableGpu = serverConfigStore.get().config.enableGpu;
     freeTierBillingAccountId =
       serverConfigStore.get().config.freeTierBillingAccountId;
@@ -181,9 +179,6 @@ describe('RuntimePanel', () => {
   const pickMainDiskSize = (wrapper, diskSize) =>
     enterNumberInput(wrapper, '#runtime-disk', diskSize);
 
-  const pickPdSize = (wrapper, pdSize) =>
-    enterNumberInput(wrapper, '#persistent-disk', pdSize);
-
   const pickGpuType = (wrapper, gpuType) =>
     pickDropdownOption(wrapper, '#gpu-type', gpuType);
 
@@ -268,15 +263,9 @@ describe('RuntimePanel', () => {
     await mustClickButton(wrapper, 'Create');
 
     expect(runtimeApiStub.runtime.status).toEqual('Creating');
-    if (enablePd) {
-      expect(runtimeApiStub.runtime.gceWithPdConfig.machineType).toEqual(
-        'n1-standard-4'
-      );
-    } else {
-      expect(runtimeApiStub.runtime.gceConfig.machineType).toEqual(
-        'n1-standard-4'
-      );
-    }
+    expect(runtimeApiStub.runtime.gceConfig.machineType).toEqual(
+      'n1-standard-4'
+    );
   });
 
   it('should show customize after create', async () => {
@@ -295,10 +284,6 @@ describe('RuntimePanel', () => {
     // In the case where the user's latest runtime is a preset (GeneralAnalysis in this case)
     // we should ignore the other runtime config values that were delivered with the getRuntime response
     // and instead, defer to the preset values defined in runtime-presets.ts when creating a new runtime
-    // skip this test after enabling pd
-    if (enablePd) {
-      return;
-    }
     const runtime = {
       ...runtimeApiStub.runtime,
       status: RuntimeStatus.Deleted,
@@ -430,10 +415,6 @@ describe('RuntimePanel', () => {
   });
 
   it('should allow creation with GCE config', async () => {
-    // skip this test after enabling pd
-    if (enablePd) {
-      return;
-    }
     runtimeApiStub.runtime = null;
     runtimeStoreStub.runtime = null;
 
@@ -470,16 +451,9 @@ describe('RuntimePanel', () => {
     // master settings
     await pickMainCpu(wrapper, 2);
     await pickMainRam(wrapper, 7.5);
+    await pickComputeType(wrapper, ComputeType.Dataproc);
+    await pickMainDiskSize(wrapper, MIN_DISK_SIZE_GB);
 
-    if (enablePd) {
-      await pickComputeType(wrapper, ComputeType.Dataproc);
-
-      await pickMainDiskSize(wrapper, MIN_DISK_SIZE_GB);
-    } else {
-      await pickMainDiskSize(wrapper, MIN_DISK_SIZE_GB);
-
-      await pickComputeType(wrapper, ComputeType.Dataproc);
-    }
     // worker settings
     await pickWorkerCpu(wrapper, 8);
     await pickWorkerRam(wrapper, 30);
@@ -505,10 +479,6 @@ describe('RuntimePanel', () => {
   });
 
   it('should allow configuration via GCE preset', async () => {
-    // skip this test after enabling pd
-    if (enablePd) {
-      return;
-    }
     runtimeApiStub.runtime = null;
     runtimeStoreStub.runtime = null;
 
@@ -557,85 +527,92 @@ describe('RuntimePanel', () => {
     expect(runtimeApiStub.runtime.gceConfig).toBeFalsy();
   });
 
-  it('should set runtime preset values in customize panel instead of getRuntime values if configurationType is GeneralAnalysis', async () => {
-    // skip this test after enabling pd
-    if (enablePd) {
-      return;
+  it(
+    'should set runtime preset values in customize panel instead of getRuntime values ' +
+      'if configurationType is GeneralAnalysis',
+    async () => {
+      const runtime = {
+        ...runtimeApiStub.runtime,
+        status: RuntimeStatus.Deleted,
+        configurationType: RuntimeConfigurationType.GeneralAnalysis,
+        gceConfig: {
+          ...defaultGceConfig(),
+          machineType: 'n1-standard-16',
+          diskSize: 1000,
+        },
+        dataprocConfig: null,
+      };
+      runtimeApiStub.runtime = runtime;
+      runtimeStoreStub.runtime = runtime;
+
+      const wrapper = await component();
+      await mustClickButton(wrapper, 'Customize');
+
+      expect(getMainCpu(wrapper)).toEqual(
+        findMachineByName(
+          runtimePresets.generalAnalysis.runtimeTemplate.gceConfig.machineType
+        ).cpu
+      );
+      expect(getMainRam(wrapper)).toEqual(
+        findMachineByName(
+          runtimePresets.generalAnalysis.runtimeTemplate.gceConfig.machineType
+        ).memory
+      );
+      expect(getMainDiskSize(wrapper)).toEqual(
+        runtimePresets.generalAnalysis.runtimeTemplate.gceConfig.diskSize
+      );
     }
-    const runtime = {
-      ...runtimeApiStub.runtime,
-      status: RuntimeStatus.Deleted,
-      configurationType: RuntimeConfigurationType.GeneralAnalysis,
-      gceConfig: {
-        ...defaultGceConfig(),
-        machineType: 'n1-standard-16',
-        diskSize: 1000,
-      },
-      dataprocConfig: null,
-    };
-    runtimeApiStub.runtime = runtime;
-    runtimeStoreStub.runtime = runtime;
+  );
 
-    const wrapper = await component();
-    await mustClickButton(wrapper, 'Customize');
+  it(
+    'should set runtime preset values in customize panel instead of getRuntime values ' +
+      'if configurationType is HailGenomicsAnalysis',
+    async () => {
+      const runtime = {
+        ...runtimeApiStub.runtime,
+        status: RuntimeStatus.Deleted,
+        configurationType: RuntimeConfigurationType.HailGenomicAnalysis,
+        gceConfig: null,
+        dataprocConfig: {
+          ...defaultDataprocConfig(),
+          masterMachineType: 'n1-standard-16',
+          masterDiskSize: 999,
+          workerDiskSize: 444,
+          numberOfWorkers: 5,
+        },
+      };
+      runtimeApiStub.runtime = runtime;
+      runtimeStoreStub.runtime = runtime;
 
-    expect(getMainCpu(wrapper)).toEqual(
-      findMachineByName(
-        runtimePresets.generalAnalysis.runtimeTemplate.gceConfig.machineType
-      ).cpu
-    );
-    expect(getMainRam(wrapper)).toEqual(
-      findMachineByName(
-        runtimePresets.generalAnalysis.runtimeTemplate.gceConfig.machineType
-      ).memory
-    );
-    expect(getMainDiskSize(wrapper)).toEqual(
-      runtimePresets.generalAnalysis.runtimeTemplate.gceConfig.diskSize
-    );
-  });
+      const wrapper = await component();
+      await mustClickButton(wrapper, 'Customize');
 
-  it('should set runtime preset values in customize panel instead of getRuntime values if configurationType is HailGenomicsAnalysis', async () => {
-    const runtime = {
-      ...runtimeApiStub.runtime,
-      status: RuntimeStatus.Deleted,
-      configurationType: RuntimeConfigurationType.HailGenomicAnalysis,
-      gceConfig: null,
-      dataprocConfig: {
-        ...defaultDataprocConfig(),
-        masterMachineType: 'n1-standard-16',
-        masterDiskSize: 999,
-        workerDiskSize: 444,
-        numberOfWorkers: 5,
-      },
-    };
-    runtimeApiStub.runtime = runtime;
-    runtimeStoreStub.runtime = runtime;
-
-    const wrapper = await component();
-    await mustClickButton(wrapper, 'Customize');
-
-    expect(getMainCpu(wrapper)).toEqual(
-      findMachineByName(
+      expect(getMainCpu(wrapper)).toEqual(
+        findMachineByName(
+          runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig
+            .masterMachineType
+        ).cpu
+      );
+      expect(getMainRam(wrapper)).toEqual(
+        findMachineByName(
+          runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig
+            .masterMachineType
+        ).memory
+      );
+      expect(getMainDiskSize(wrapper)).toEqual(
         runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig
-          .masterMachineType
-      ).cpu
-    );
-    expect(getMainRam(wrapper)).toEqual(
-      findMachineByName(
+          .masterDiskSize
+      );
+      expect(getWorkerDiskSize(wrapper)).toEqual(
         runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig
-          .masterMachineType
-      ).memory
-    );
-    expect(getMainDiskSize(wrapper)).toEqual(
-      runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig.masterDiskSize
-    );
-    expect(getWorkerDiskSize(wrapper)).toEqual(
-      runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig.workerDiskSize
-    );
-    expect(getNumWorkers(wrapper)).toEqual(
-      runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig.numberOfWorkers
-    );
-  });
+          .workerDiskSize
+      );
+      expect(getNumWorkers(wrapper)).toEqual(
+        runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig
+          .numberOfWorkers
+      );
+    }
+  );
 
   it('should allow configuration via dataproc preset from modified form', async () => {
     runtimeApiStub.runtime = null;
@@ -649,13 +626,9 @@ describe('RuntimePanel', () => {
     // the Hail preset selection.
     await pickMainCpu(wrapper, 2);
     await pickMainRam(wrapper, 7.5);
-    if (enablePd) {
-      await pickComputeType(wrapper, ComputeType.Dataproc);
-      await pickMainDiskSize(wrapper, 100);
-    } else {
-      await pickMainDiskSize(wrapper, 100);
-      await pickComputeType(wrapper, ComputeType.Dataproc);
-    }
+    await pickMainDiskSize(wrapper, 100);
+    await pickComputeType(wrapper, ComputeType.Dataproc);
+
     await pickWorkerCpu(wrapper, 8);
     await pickWorkerRam(wrapper, 30);
     await pickWorkerDiskSize(wrapper, 300);
@@ -697,10 +670,6 @@ describe('RuntimePanel', () => {
   });
 
   it('should tag as preset if configuration matches', async () => {
-    // skip this test after enabling pd
-    if (enablePd) {
-      return;
-    }
     runtimeApiStub.runtime = null;
     runtimeStoreStub.runtime = null;
 
@@ -1165,23 +1134,13 @@ describe('RuntimePanel', () => {
     const getCreateButton = () =>
       wrapper.find({ 'aria-label': 'Create' }).first();
 
-    if (enablePd) {
-      await pickPdSize(wrapper, 49);
-      expect(getCreateButton().prop('disabled')).toBeTruthy();
+    await pickMainDiskSize(wrapper, 49);
+    expect(getCreateButton().prop('disabled')).toBeTruthy();
 
-      await pickPdSize(wrapper, 4900);
-      expect(getCreateButton().prop('disabled')).toBeTruthy();
+    await pickMainDiskSize(wrapper, 4900);
+    expect(getCreateButton().prop('disabled')).toBeTruthy();
 
-      await pickPdSize(wrapper, MIN_DISK_SIZE_GB);
-    } else {
-      await pickMainDiskSize(wrapper, 49);
-      expect(getCreateButton().prop('disabled')).toBeTruthy();
-
-      await pickMainDiskSize(wrapper, 4900);
-      expect(getCreateButton().prop('disabled')).toBeTruthy();
-
-      await pickMainDiskSize(wrapper, MIN_DISK_SIZE_GB);
-    }
+    await pickMainDiskSize(wrapper, MIN_DISK_SIZE_GB);
     await pickComputeType(wrapper, ComputeType.Dataproc);
     await pickWorkerDiskSize(wrapper, 49);
     expect(getCreateButton().prop('disabled')).toBeTruthy();
@@ -1341,27 +1300,14 @@ describe('RuntimePanel', () => {
     await clickEnableGpu(wrapper);
     await pickGpuType(wrapper, 'nvidia-tesla-t4');
     await pickGpuNum(wrapper, 2);
-    if (enablePd) {
-      await pickMainCpu(wrapper, 8);
-      await pickPdSize(wrapper, 75);
-      await mustClickButton(wrapper, 'Create');
-      expect(runtimeApiStub.runtime.status).toEqual('Creating');
-      expect(runtimeApiStub.runtime.gceWithPdConfig.gpuConfig.gpuType).toEqual(
-        'nvidia-tesla-t4'
-      );
-      expect(
-        runtimeApiStub.runtime.gceWithPdConfig.gpuConfig.numOfGpus
-      ).toEqual(2);
-    } else {
-      await pickMainCpu(wrapper, 8);
-      await pickMainDiskSize(wrapper, 75);
-      await mustClickButton(wrapper, 'Create');
-      expect(runtimeApiStub.runtime.status).toEqual('Creating');
-      expect(runtimeApiStub.runtime.gceConfig.gpuConfig.gpuType).toEqual(
-        'nvidia-tesla-t4'
-      );
-      expect(runtimeApiStub.runtime.gceConfig.gpuConfig.numOfGpus).toEqual(2);
-    }
+    await pickMainCpu(wrapper, 8);
+    await pickMainDiskSize(wrapper, 75);
+    await mustClickButton(wrapper, 'Create');
+    expect(runtimeApiStub.runtime.status).toEqual('Creating');
+    expect(runtimeApiStub.runtime.gceConfig.gpuConfig.gpuType).toEqual(
+      'nvidia-tesla-t4'
+    );
+    expect(runtimeApiStub.runtime.gceConfig.gpuConfig.numOfGpus).toEqual(2);
   });
 
   it('should allow creating gce without GPU', async () => {
@@ -1373,19 +1319,11 @@ describe('RuntimePanel', () => {
     const wrapper = await component();
     await mustClickButton(wrapper, 'Customize');
     await pickComputeType(wrapper, ComputeType.Standard);
-    if (enablePd) {
-      await pickMainCpu(wrapper, 8);
-      await pickPdSize(wrapper, 75);
-      await mustClickButton(wrapper, 'Create');
-      expect(runtimeApiStub.runtime.status).toEqual('Creating');
-      expect(runtimeApiStub.runtime.gceWithPdConfig.gpuConfig).toEqual(null);
-    } else {
-      await pickMainCpu(wrapper, 8);
-      await pickMainDiskSize(wrapper, 75);
-      await mustClickButton(wrapper, 'Create');
-      expect(runtimeApiStub.runtime.status).toEqual('Creating');
-      expect(runtimeApiStub.runtime.gceConfig.gpuConfig).toEqual(null);
-    }
+    await pickMainCpu(wrapper, 8);
+    await pickMainDiskSize(wrapper, 75);
+    await mustClickButton(wrapper, 'Create');
+    expect(runtimeApiStub.runtime.status).toEqual('Creating');
+    expect(runtimeApiStub.runtime.gceConfig.gpuConfig).toEqual(null);
   });
 
   it('should disable worker count updates for stopped dataproc cluster', async () => {
@@ -1439,6 +1377,7 @@ describe('RuntimePanel', () => {
       status: RuntimeStatus.Stopped,
       configurationType: RuntimeConfigurationType.HailGenomicAnalysis,
       dataprocConfig: defaultDataprocConfig(),
+      gceConfig: null,
     };
     runtimeApiStub.runtime = runtime;
     runtimeStoreStub.runtime = runtime;
@@ -1455,6 +1394,7 @@ describe('RuntimePanel', () => {
       status: RuntimeStatus.Running,
       configurationType: RuntimeConfigurationType.HailGenomicAnalysis,
       dataprocConfig: defaultDataprocConfig(),
+      gceConfig: null,
     };
     runtimeApiStub.runtime = runtime;
     runtimeStoreStub.runtime = runtime;

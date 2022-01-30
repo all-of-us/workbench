@@ -210,7 +210,7 @@ describe('DataSetPage', () => {
     expect(valueListItems.length).toBe(5);
 
     // Should be no change in selected values
-    expect(checkedValuesList.length).toBe(4);
+    expect(checkedValuesList.length).toBe(5);
   });
 
   it('should display correct values on rapid selection of multiple domains', async () => {
@@ -223,8 +223,9 @@ describe('DataSetPage', () => {
       '[data-test-id="concept-set-list-item"]'
     );
     conceptSetEls.at(0).find('input').first().simulate('change');
-    conceptSetEls.at(1).find('input').first().simulate('change');
     await waitOneTickAndUpdate(wrapper);
+
+    conceptSetEls.at(1).find('input').first().simulate('change');
     await waitOneTickAndUpdate(wrapper);
 
     const valueListItems = wrapper.find('[data-test-id="value-list-items"]');
@@ -355,6 +356,7 @@ describe('DataSetPage', () => {
     // Select "Condition" and "Measurement" concept sets.
     let conceptSetEls = wrapper.find('[data-test-id="concept-set-list-item"]');
     conceptSetEls.at(0).find('input').first().simulate('change');
+    await waitOneTickAndUpdate(wrapper);
     conceptSetEls.at(1).find('input').first().simulate('change');
     await waitOneTickAndUpdate(wrapper);
 

@@ -59,12 +59,18 @@ export default class CopyToWorkspaceModal extends Modal {
    */
   async copyToAnotherWorkspace(workspaceName: string, newName?: string): Promise<void> {
     await this.beginCopyToAnotherWorkspace(workspaceName, newName);
-    await this.clickButton(LinkText.Copy, { waitForClose: true });
+    await this.clickButton(LinkText.Copy);
     await waitWhileLoading(this.page);
   }
 
   async selectDestinationWorkspace(workspaceName: string): Promise<void> {
     const selectMenu = new ReactSelect(this.page, { name: 'Destination *' });
-    await selectMenu.selectOption(workspaceName);
+
+    const input = selectMenu.waitForInput();
+    const inputElementHandle = await input.asElementHandle();
+    await inputElementHandle.type(workspaceName);
+
+    const option = await selectMenu.waitForOption(workspaceName);
+    await option.click({ delay: 20 });
   }
 }

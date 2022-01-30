@@ -25,7 +25,7 @@ describe('Workspace Admin', () => {
     await workspacesPage.load();
     await workspacesPage.createWorkspace(workspaceName);
     const dataPage = new WorkspaceDataPage(page);
-    await dataPage.waitForLoad;
+    await dataPage.waitForLoad();
     //extract the Workspace-Namespace
     workspaceNamespace = await dataPage.extractWorkspaceNamespace();
 
@@ -130,7 +130,7 @@ describe('Workspace Admin', () => {
 
   async function createDatasetNotebook(page: Page, pyNotebookName: string): Promise<NotebookPreviewPage> {
     const dataPage = new WorkspaceDataPage(page);
-    await dataPage.waitForLoad;
+    await dataPage.waitForLoad();
     const datasetBuildPage = await dataPage.clickAddDatasetButton();
 
     // Step 1 Select Cohort: Choose "All Participants"

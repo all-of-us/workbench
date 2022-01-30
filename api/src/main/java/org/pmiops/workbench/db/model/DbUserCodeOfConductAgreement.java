@@ -7,13 +7,15 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 @Entity
 @Table(name = "user_code_of_conduct_agreement")
 public class DbUserCodeOfConductAgreement {
   private long userDuccAgreementId;
-  private long userId;
+  private DbUser user;
   private String userGivenName;
   private String userFamilyName;
   private String userInitials;
@@ -32,13 +34,14 @@ public class DbUserCodeOfConductAgreement {
     this.userDuccAgreementId = userDuccAgreementId;
   }
 
-  @Column(name = "user_id")
-  public long getUserId() {
-    return userId;
+  @OneToOne
+  @JoinColumn(name = "user_id")
+  public DbUser getUser() {
+    return user;
   }
 
-  public void setUserId(long userId) {
-    this.userId = userId;
+  public void setUser(DbUser dbUser) {
+    this.user = dbUser;
   }
 
   @Column(name = "user_given_name")
@@ -107,7 +110,7 @@ public class DbUserCodeOfConductAgreement {
     }
     DbUserCodeOfConductAgreement that = (DbUserCodeOfConductAgreement) o;
     return userDuccAgreementId == that.userDuccAgreementId
-        && userId == that.userId
+        && user.equals(that.user)
         && userNameOutOfDate == that.userNameOutOfDate
         && signedVersion == that.signedVersion
         && userGivenName.equals(that.userGivenName)
@@ -120,7 +123,7 @@ public class DbUserCodeOfConductAgreement {
   public int hashCode() {
     return Objects.hash(
         userDuccAgreementId,
-        userId,
+        user,
         userGivenName,
         userFamilyName,
         userInitials,

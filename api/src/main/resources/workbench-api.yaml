@@ -558,8 +558,8 @@ paths:
           to update the user to.
         schema:
           "$ref": "#/definitions/UpdateUserDisabledRequest"
-      summary: enable/disable a user to an auth domain if you have ID verification
-        authority
+      summary: '[DEPRECATED - use admin/users/updateAccount] enable/disable a user to an auth domain 
+        if you have ID verification authority'
       operationId: updateUserDisabledStatus
   "/v1/userSearch/{accessTierShortName}/{term}":
     get:
@@ -1415,6 +1415,29 @@ paths:
           description: A list of users
           schema:
             "$ref": "#/definitions/AdminUserListResponse"
+        403:
+          description: User doesn't have the ACCESS_CONTROL_ADMIN authority
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
+  "/v1/admin/users/batchSyncAccess":
+    post:
+      tags:
+        - userAdmin
+      consumes:
+        - application/json
+      description: 'Batch sync user access modules, asynchronously. This is a work around until SAM
+      supports batch update. See https://broadworkbench.atlassian.net/browse/CA-1504'
+      parameters:
+        - in: body
+          name: request
+          schema:
+            "$ref": "#/definitions/BatchSyncAccessRequest"
+      operationId: batchSyncAccess
+      responses:
+        200:
+          description: 'The user''s updated profile'
+          schema:
+            "$ref": "#/definitions/BatchSyncAccessResponse"
         403:
           description: User doesn't have the ACCESS_CONTROL_ADMIN authority
           schema:
@@ -2636,7 +2659,7 @@ paths:
           description: 'A SQL query for each domain in the Data Set'
           schema:
             "$ref": "#/definitions/DataSetPreviewResponse"
-  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/data-set/domainValues/{domain}":
+  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/data-set/concept-sets/domainValues/{domain}":
     get:
       tags:
       - dataSet
@@ -2645,6 +2668,11 @@ paths:
       parameters:
       - "$ref": "#/parameters/workspaceNamespace"
       - "$ref": "#/parameters/workspaceId"
+      - in: query
+        name: conceptSetId
+        required: false
+        type: integer
+        format: int64
       - in: path
         name: domain
         required: true
@@ -5428,12 +5456,27 @@ definitions:
         description: 'Survey corresponding to an OMOP table.'
         "$ref": "#/definitions/Surveys"
       values:
-        "$ref": "#/definitions/DomainValuesResponse"
+        type: array
+        items:
+          "$ref": "#/definitions/DomainValue"
   DomainValuesResponse:
     type: object
     required:
     - items
     properties:
+      items:
+        type: array
+        items:
+          "$ref": "#/definitions/DomainWithDomainValues"
+  DomainWithDomainValues:
+    type: object
+    description: 'Domain with list of domain values map to various column names in OMOP.'
+    required:
+    - value
+    properties:
+      domain:
+        description: The domain for this list of values.
+        type: string
       items:
         type: array
         items:
@@ -5697,10 +5740,10 @@ definitions:
         description: The FireCloud-calculated expiration time
         format: int64
         default: 0
-      dataUseAgreementSignedVersion:
+      duccSignedVersion:
         type: integer
         format: int32
-        description: Version of the data use agreement that the user last signed.
+        description: Version of the data user code of conduct agreement that the user last signed.
       address:
         "$ref": "#/definitions/Address"
       freeTierUsage:
@@ -5889,9 +5932,6 @@ definitions:
       dataprocConfig:
         description: oneOf gceConfig, dataprocConfig, gceWithPdConfig will be provided
         "$ref": "#/definitions/DataprocConfig"
-      diskConfig:
-        description: The configuration of a persistent disk
-        "$ref": "#/definitions/DiskConfig"
       errors:
         type: array
         description: The list of errors that were encountered on runtime create, if any.
@@ -5992,9 +6032,6 @@ definitions:
     properties:
       persistentDisk:
         $ref: "#/definitions/PersistentDiskRequest"
-      bootDiskSize:
-        type: integer
-        description: size for boot disk
       machineType:
         type: string
         description: >
@@ -6204,6 +6241,23 @@ definitions:
         type: array
         items:
           "$ref": "#/definitions/AdminTableUser"
+  BatchSyncAccessRequest:
+    type: object
+    required:
+    - usernames
+    properties:
+      usernames:
+        type: array
+        items:
+          type: string
+  BatchSyncAccessResponse:
+    type: object
+    properties:
+      cloudTaskNames:
+        description: list of Cloud task names that processing the batch update
+        type: array
+        items:
+          type: string
   UpdateUserDisabledRequest:
     type: object
     required:
@@ -6212,9 +6266,17 @@ definitions:
       email:
         type: string
       disabled:
-        description: Set to true to disable user in auth domain, false otherwise
+        description: '[DEPRECATED] Set to true to disable user in auth domain, false otherwise'
         type: boolean
         default: false
+  AccountDisabledStatus:
+    type: object
+    required:
+      - disabled
+    properties:
+      disabled:
+        description: Set to true to disable user, false otherwise
+        type: boolean
   AuditBigQueryResponse:
     type: object
     properties:
@@ -8776,6 +8838,9 @@ definitions:
         type: array
         items:
           "$ref": '#/definitions/AccessBypassRequest'
+      accountDisabledStatus:
+        description: When set, replaces the user's account disabled status.
+        "$ref": '#/definitions/AccountDisabledStatus'
   AccessReason:
     type: object
     properties:

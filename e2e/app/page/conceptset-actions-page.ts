@@ -16,11 +16,12 @@ export default class ConceptSetActionsPage extends AuthenticatedPage {
   }
 
   async isLoaded(): Promise<boolean> {
-    await Promise.all([waitForDocumentTitle(this.page, PageTitle), waitWhileLoading(this.page)]);
+    await waitForDocumentTitle(this.page, PageTitle);
     await Promise.all([
       this.getCreateAnotherConceptSetButton().asElementHandle(),
       this.getCreateDatasetButton().asElementHandle()
     ]);
+    await waitWhileLoading(this.page);
     return true;
   }
 

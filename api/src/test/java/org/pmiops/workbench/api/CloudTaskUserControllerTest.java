@@ -90,8 +90,8 @@ public class CloudTaskUserControllerTest {
         .thenReturn(Optional.of(new AccessModuleStatus()));
 
     // kluge to prevent test NPEs on the return value of syncDuccVersionStatus()
-    when(mockUserService.syncDuccVersionStatus(userA, Agent.asSystem(), null)).thenReturn(userA);
-    when(mockUserService.syncDuccVersionStatus(userB, Agent.asSystem(), null)).thenReturn(userB);
+    when(mockUserService.syncDuccVersionStatus(userA, Agent.asSystem())).thenReturn(userA);
+    when(mockUserService.syncDuccVersionStatus(userB, Agent.asSystem())).thenReturn(userB);
 
     controller.synchronizeUserAccess(
         new SynchronizeUserAccessRequest()
@@ -102,8 +102,8 @@ public class CloudTaskUserControllerTest {
     // unfortunately UserService is too sprawling to replicate in a unit test.
 
     // we sync DUCC for all users
-    verify(mockUserService).syncDuccVersionStatus(userA, Agent.asSystem(), null);
-    verify(mockUserService).syncDuccVersionStatus(userB, Agent.asSystem(), null);
+    verify(mockUserService).syncDuccVersionStatus(userA, Agent.asSystem());
+    verify(mockUserService).syncDuccVersionStatus(userB, Agent.asSystem());
 
     // we only sync 2FA users with completed 2FA
     verify(mockUserService).syncTwoFactorAuthStatus(userA, Agent.asSystem());

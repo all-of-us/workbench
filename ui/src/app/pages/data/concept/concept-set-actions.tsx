@@ -7,7 +7,11 @@ import { SpinnerOverlay } from 'app/components/spinners';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { conceptSetsApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import { reactStyles, withCurrentWorkspace } from 'app/utils';
+import {
+  reactStyles,
+  withCurrentConceptSet,
+  withCurrentWorkspace,
+} from 'app/utils';
 import { conceptSetUpdating, NavigationProps } from 'app/utils/navigation';
 import { MatchParams } from 'app/utils/stores';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
@@ -87,10 +91,12 @@ interface Props
   extends WithSpinnerOverlayProps,
     NavigationProps,
     RouteComponentProps<MatchParams> {
+  conceptSet: ConceptSet;
   workspace: WorkspaceData;
 }
 
 export const ConceptSetActions = fp.flow(
+  withCurrentConceptSet(),
   withCurrentWorkspace(),
   withNavigation,
   withRouter
@@ -107,12 +113,16 @@ export const ConceptSetActions = fp.flow(
     componentDidMount(): void {
       this.props.hideSpinner();
       conceptSetUpdating.next(false);
-      this.setState({ conceptSetLoading: true });
-    }
-
-    componentDidUpdate() {
-      const { csid } = this.props.match.params;
-      if (csid && this.state.conceptSetLoading) {
+      const {
+        conceptSet,
+        match: {
+          params: { csid },
+        },
+      } = this.props;
+      if (conceptSet && +csid === conceptSet.id) {
+        this.setState({ conceptSet });
+      } else {
+        this.setState({ conceptSetLoading: true });
         const { namespace, id } = this.props.workspace;
         conceptSetsApi()
           .getConceptSet(namespace, id, +csid)

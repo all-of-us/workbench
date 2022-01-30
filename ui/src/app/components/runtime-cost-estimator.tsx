@@ -1,11 +1,10 @@
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { TooltipTrigger } from 'app/components/popups';
 import colors from 'app/styles/colors';
+import { reactStyles } from 'app/utils';
 import {
   ComputeType,
   diskPricePerMonth,
-  findGpu,
-  findMachineByName,
   machineRunningCost,
   machineRunningCostBreakdown,
   machineStorageCost,
@@ -16,50 +15,41 @@ import { RuntimeConfig } from 'app/utils/runtime-utils';
 import { CSSProperties } from 'react';
 
 interface Props {
-  runtimeParameters: RuntimeConfig;
-  // TODO(RW-7582): remove this prop, this information should be self-contained
-  // by the RuntimeConfig instead.
-  usePersistentDisk: boolean;
+  runtimeConfig: RuntimeConfig;
   costTextColor?: string;
   style?: CSSProperties;
 }
 
+const styles = reactStyles({
+  costSection: {
+    marginRight: '1rem',
+    overflow: 'hidden',
+    whiteSpace: 'nowrap',
+  },
+  cost: {
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+  },
+});
+
 export const RuntimeCostEstimator = ({
-  runtimeParameters,
-  usePersistentDisk,
+  runtimeConfig,
   costTextColor = colors.accent,
   style = {},
 }: Props) => {
-  const { computeType, diskSize, pdSize, machine, gpuConfig, dataprocConfig } =
-    runtimeParameters;
-  const {
-    numberOfWorkers = 0,
-    workerMachineType = null,
-    workerDiskSize = null,
-    numberOfPreemptibleWorkers = 0,
-  } = dataprocConfig || {};
-  const workerMachine = findMachineByName(workerMachineType);
-  const gpu = gpuConfig
-    ? findGpu(gpuConfig.gpuType, gpuConfig.numOfGpus)
-    : null;
-  const costConfig = {
-    computeType,
-    masterMachine: machine,
-    gpu,
-    masterDiskSize: usePersistentDisk ? pdSize : diskSize,
-    numberOfWorkers,
-    numberOfPreemptibleWorkers,
-    workerDiskSize,
-    workerMachine,
+  const { computeType, diskConfig } = runtimeConfig;
+  const runningCost = machineRunningCost(runtimeConfig);
+  const runningCostBreakdown = machineRunningCostBreakdown(runtimeConfig);
+  const storageCost = machineStorageCost(runtimeConfig);
+  const storageCostBreakdown = machineStorageCostBreakdown(runtimeConfig);
+  const costStyle = {
+    ...styles.cost,
+    fontSize: diskConfig.detachable ? '12px' : '15px',
+    color: costTextColor,
   };
-  const runningCost = machineRunningCost(costConfig);
-  const runningCostBreakdown = machineRunningCostBreakdown(costConfig);
-  const storageCost = machineStorageCost(costConfig);
-  const storageCostBreakdown = machineStorageCostBreakdown(costConfig);
-  const costPriceFontSize = usePersistentDisk ? '12px' : '20px';
   return (
     <FlexRow style={style}>
-      <FlexColumn style={{ marginRight: '1rem' }}>
+      <FlexColumn style={styles.costSection}>
         <div style={{ fontSize: '10px', fontWeight: 600 }}>
           Cost when running
         </div>
@@ -73,15 +63,12 @@ export const RuntimeCostEstimator = ({
             </div>
           }
         >
-          <div
-            style={{ fontSize: costPriceFontSize, color: costTextColor }}
-            data-test-id='running-cost'
-          >
+          <div style={costStyle} data-test-id='running-cost'>
             {formatUsd(runningCost)}/hour
           </div>
         </TooltipTrigger>
       </FlexColumn>
-      <FlexColumn style={{ marginRight: '1rem' }}>
+      <FlexColumn style={styles.costSection}>
         <div style={{ fontSize: '10px', fontWeight: 600 }}>
           Cost when paused
         </div>
@@ -95,24 +82,18 @@ export const RuntimeCostEstimator = ({
             </div>
           }
         >
-          <div
-            style={{ fontSize: costPriceFontSize, color: costTextColor }}
-            data-test-id='storage-cost'
-          >
+          <div style={costStyle} data-test-id='storage-cost'>
             {formatUsd(storageCost)}/hour
           </div>
         </TooltipTrigger>
       </FlexColumn>
-      {usePersistentDisk && computeType === ComputeType.Standard && (
-        <FlexColumn>
+      {diskConfig.detachable && computeType === ComputeType.Standard && (
+        <FlexColumn style={styles.costSection}>
           <div style={{ fontSize: '10px', fontWeight: 600 }}>
             Persistent disk cost
           </div>
-          <div
-            style={{ fontSize: costPriceFontSize, color: costTextColor }}
-            data-test-id='pd-cost'
-          >
-            {formatUsd(pdSize * diskPricePerMonth)}/month
+          <div style={costStyle} data-test-id='pd-cost'>
+            {formatUsd(diskConfig.size * diskPricePerMonth)}/month
           </div>
         </FlexColumn>
       )}

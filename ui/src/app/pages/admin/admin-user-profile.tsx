@@ -24,11 +24,12 @@ import {
   displayModuleCompletionDate,
   displayModuleExpirationDate,
   displayModuleStatus,
+  displayTierBadgeByRequiredModule,
 } from './admin-user-common';
 import { FadeBox } from 'app/components/containers';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { MatchParams, serverConfigStore, useStore } from 'app/utils/stores';
-import { CaretRight } from 'app/components/icons';
+import { CaretRight, ClrIcon } from 'app/components/icons';
 import { FlexColumn, FlexRow, FlexSpacer } from 'app/components/flex';
 import { displayNameForTier } from 'app/utils/access-tiers';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
@@ -49,6 +50,7 @@ import {
 import { EgressEventsTable } from './egress-events-table';
 import { getAccessModuleConfig } from 'app/utils/access-utils';
 import { Toggle } from 'app/components/inputs';
+import { AlertDanger } from 'app/components/alert';
 
 const styles = reactStyles({
   ...commonStyles,
@@ -68,7 +70,6 @@ const styles = reactStyles({
     color: colors.primary,
     fontSize: '18px',
     fontWeight: 'bold',
-    paddingLeft: '1em',
     paddingTop: '2em',
     lineHeight: '22px',
   },
@@ -148,6 +149,7 @@ interface EditableFieldsProps {
   onChangeInstitutionalRole: (institutionalRoleEnum: InstitutionalRole) => void;
   onChangeInstitutionOtherText: (otherText: string) => void;
 }
+
 const EditableFields = ({
   oldProfile,
   updatedProfile,
@@ -188,8 +190,11 @@ const EditableFields = ({
             onChange={(event) => onChangeInstitution(event.value)}
           />
         </FlexRow>
-        {emailValidationStatus === EmailValidationStatus.INVALID &&
-          getEmailValidationErrorMessage(institution)}
+        {emailValidationStatus === EmailValidationStatus.INVALID && (
+          <div style={{ paddingLeft: '1em' }}>
+            {getEmailValidationErrorMessage(institution)}
+          </div>
+        )}
         <FlexRow>
           <InitialCreditsDropdown
             currentLimit={updatedProfile.freeTierDollarQuota}
@@ -292,18 +297,18 @@ interface TableRow {
 }
 
 const AccessModuleTable = (props: AccessModuleTableProps) => {
+  const { updatedProfile } = props;
+
   const tableData: TableRow[] = accessModulesForTable.map((moduleName) => {
     const { adminPageTitle, adminBypassable } =
       getAccessModuleConfig(moduleName);
 
     return {
       moduleName: adminPageTitle,
-      moduleStatus: displayModuleStatus(props.updatedProfile, moduleName),
-      completionDate: displayModuleCompletionDate(
-        props.updatedProfile,
-        moduleName
-      ),
-      expirationDate: displayModuleExpirationDate(
+        moduleStatus: displayModuleStatus(props.updatedProfile, moduleName),
+      completionDate: displayModuleCompletionDate(updatedProfile, moduleName),
+      expirationDate: displayModuleExpirationDate(updatedProfile, moduleName),
+      accessTierBadge: displayTierBadgeByRequiredModule(
         props.updatedProfile,
         moduleName
       ),
@@ -314,16 +319,37 @@ const AccessModuleTable = (props: AccessModuleTableProps) => {
   });
 
   return (
-    <FlexColumn>
-      <div style={styles.tableHeader}>Access status</div>
-      <DataTable style={{ paddingTop: '1em' }} value={tableData}>
-        <Column field='moduleName' header='Access Module' />
-        <Column field='moduleStatus' header='Status' />
-        <Column field='completionDate' header='Last completed on' />
-        <Column field='expirationDate' header='Expires on' />
-        <Column field='bypassToggle' header='Bypass' />
-      </DataTable>
-    </FlexColumn>
+    <DataTable style={{ paddingTop: '1em' }} value={tableData}>
+      <Column field='moduleName' header='Access Module' />
+       <Column field='moduleStatus' header='Status' />
+      <Column field='completionDate' header='Last completed on' />
+      <Column field='expirationDate' header='Expires on' />
+      <Column field='accessTierBadge' header='Required for tier access' />
+      <Column field='bypassToggle' header='Bypass' />
+    </DataTable>
+  );
+};
+
+const DisabledToggle = (props: {
+  currentlyDisabled: boolean;
+  previouslyDisabled: boolean;
+  toggleDisabled: () => void;
+}) => {
+  const { currentlyDisabled, previouslyDisabled, toggleDisabled } = props;
+  const highlightStyle =
+    currentlyDisabled !== previouslyDisabled
+      ? { background: colors.highlight }
+      : {};
+
+  return (
+    <div style={highlightStyle}>
+      <Toggle
+        style={{ paddingTop: '2em', paddingLeft: '2em', flexGrow: 0 }}
+        name={currentlyDisabled ? 'Account disabled' : 'Account enabled'}
+        checked={!currentlyDisabled}
+        onToggle={() => toggleDisabled()}
+      />
+    </div>
   );
 };
 
@@ -345,15 +371,32 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
   const [emailValidationStatus, setEmailValidationStatus] = useState(
     EmailValidationStatus.UNCHECKED
   );
+  const [profileLoadingError, setProfileLoadingError] = useState<string>(null);
+  const [institutionsLoadingError, setInstitutionsLoadingError] =
+    useState<string>(null);
 
   useEffect(() => {
     const onMount = async () => {
-      const p = await adminGetProfile(
-        usernameWithoutGsuiteDomain + '@' + gsuiteDomain
-      );
-      setOldProfile(p);
-      setUpdatedProfile(p);
-      setInstitutions(await getPublicInstitutionDetails());
+      try {
+        const p = await adminGetProfile(
+          usernameWithoutGsuiteDomain + '@' + gsuiteDomain
+        );
+        setOldProfile(p);
+        setUpdatedProfile(p);
+        setProfileLoadingError(null);
+      } catch (error) {
+        setProfileLoadingError(
+          'Could not find user - please check spelling of username and try again'
+        );
+      }
+      try {
+        setInstitutions(await getPublicInstitutionDetails());
+        setInstitutionsLoadingError(null);
+      } catch (error) {
+        setInstitutionsLoadingError(
+          'Could not get list of verified institutions - please try again later'
+        );
+      }
       spinnerProps.hideSpinner();
     };
     onMount();
@@ -486,110 +529,136 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
   );
 
   return (
-    updatedProfile && (
-      <FadeBox style={styles.fadeBox}>
-        <FlexRow style={{ alignItems: 'center' }}>
-          <UserAdminTableLink />
-          <span style={styles.header}>User Profile Information</span>
-          <UserAuditLink
-            style={styles.auditLink}
-            usernameWithoutDomain={usernameWithoutGsuiteDomain}
-          >
-            AUDIT <CaretRight />
-          </UserAuditLink>
-        </FlexRow>
-        <FlexRow style={{ paddingTop: '1em' }}>
-          <UneditableFields profile={updatedProfile} />
-          <EditableFields
-            oldProfile={oldProfile}
-            updatedProfile={updatedProfile}
-            institutions={institutions}
-            emailValidationStatus={emailValidationStatus}
-            onChangeEmail={(contactEmail: string) =>
-              updateContactEmail(contactEmail.trim())
-            }
-            onChangeInitialCreditsLimit={(freeTierDollarQuota: number) =>
-              updateProfile({ freeTierDollarQuota })
-            }
-            onChangeInstitution={(institutionShortName: string) =>
-              updateInstitution(institutionShortName)
-            }
-            onChangeInstitutionalRole={(
-              institutionalRoleEnum: InstitutionalRole
-            ) => updateInstitutionalRole(institutionalRoleEnum)}
-            onChangeInstitutionOtherText={(otherText: string) =>
-              updateInstitutionalRoleOtherText(otherText)
-            }
-          />
-        </FlexRow>
-        <FlexRow>
-          <AccessModuleTable
-            oldProfile={oldProfile}
-            updatedProfile={updatedProfile}
-            pendingBypassRequests={bypassChangeRequests}
-            bypassUpdate={(accessBypassRequest) =>
-              updateModuleBypassStatus(accessBypassRequest)
-            }
-          />
-        </FlexRow>
-        <FlexRow style={{ paddingTop: '1em' }}>
-          <ErrorsTooltip errors={errors}>
+    <FadeBox style={styles.fadeBox}>
+      {profileLoadingError && (
+        <AlertDanger style={{ fontSize: 14 }}>
+          <ClrIcon shape='exclamation-circle' />
+          {profileLoadingError}
+        </AlertDanger>
+      )}
+      {institutionsLoadingError && (
+        <AlertDanger style={{ fontSize: 14 }}>
+          <ClrIcon shape='exclamation-circle' />
+          {institutionsLoadingError}
+        </AlertDanger>
+      )}
+      {updatedProfile && (
+        <FlexColumn>
+          <FlexRow style={{ alignItems: 'center' }}>
+            <UserAdminTableLink />
+            <span style={styles.header}>User Profile Information</span>
+            <UserAuditLink
+              style={styles.auditLink}
+              usernameWithoutDomain={usernameWithoutGsuiteDomain}
+            >
+              AUDIT <CaretRight />
+            </UserAuditLink>
+          </FlexRow>
+          <FlexRow style={{ paddingTop: '1em' }}>
+            <UneditableFields profile={updatedProfile} />
+            <EditableFields
+              oldProfile={oldProfile}
+              updatedProfile={updatedProfile}
+              institutions={institutions}
+              emailValidationStatus={emailValidationStatus}
+              onChangeEmail={(contactEmail: string) =>
+                updateContactEmail(contactEmail.trim())
+              }
+              onChangeInitialCreditsLimit={(freeTierDollarQuota: number) =>
+                updateProfile({ freeTierDollarQuota })
+              }
+              onChangeInstitution={(institutionShortName: string) =>
+                updateInstitution(institutionShortName)
+              }
+              onChangeInstitutionalRole={(
+                institutionalRoleEnum: InstitutionalRole
+              ) => updateInstitutionalRole(institutionalRoleEnum)}
+              onChangeInstitutionOtherText={(otherText: string) =>
+                updateInstitutionalRoleOtherText(otherText)
+              }
+            />
+          </FlexRow>
+          <FlexRow>
+            <FlexColumn>
+              <FlexRow>
+                <div style={styles.tableHeader}>Access status</div>
+                <DisabledToggle
+                  currentlyDisabled={updatedProfile.disabled}
+                  previouslyDisabled={oldProfile.disabled}
+                  toggleDisabled={() =>
+                    updateProfile({ disabled: !updatedProfile.disabled })
+                  }
+                />
+              </FlexRow>
+              <AccessModuleTable
+                oldProfile={oldProfile}
+                updatedProfile={updatedProfile}
+                pendingBypassRequests={bypassChangeRequests}
+                bypassUpdate={(accessBypassRequest) =>
+                  updateModuleBypassStatus(accessBypassRequest)
+                }
+              />
+            </FlexColumn>
+          </FlexRow>
+          <FlexRow style={{ paddingTop: '1em' }}>
+            <ErrorsTooltip errors={errors}>
+              <Button
+                type='primary'
+                disabled={
+                  !!errors ||
+                  !profileNeedsUpdate(
+                    oldProfile,
+                    updatedProfile,
+                    bypassChangeRequests
+                  )
+                }
+                onClick={async () => {
+                  spinnerProps.showSpinner();
+                  const response = await updateAccountProperties(
+                    oldProfile,
+                    updatedProfile,
+                    bypassChangeRequests
+                  );
+                  setOldProfile(response);
+                  setUpdatedProfile(response);
+                  spinnerProps.hideSpinner();
+                }}
+              >
+                Save
+              </Button>
+            </ErrorsTooltip>
             <Button
-              type='primary'
+              type='secondary'
               disabled={
-                !!errors ||
                 !profileNeedsUpdate(
                   oldProfile,
                   updatedProfile,
                   bypassChangeRequests
                 )
               }
-              onClick={async () => {
-                spinnerProps.showSpinner();
-                const response = await updateAccountProperties(
-                  oldProfile,
-                  updatedProfile,
-                  bypassChangeRequests
-                );
-                setOldProfile(response);
-                setUpdatedProfile(response);
-                spinnerProps.hideSpinner();
+              onClick={() => {
+                setBypassChangeRequests([]);
+                setEmailValidationStatus(EmailValidationStatus.UNCHECKED);
+                setUpdatedProfile(oldProfile);
               }}
             >
-              Save
+              Cancel
             </Button>
-          </ErrorsTooltip>
-          <Button
-            type='secondary'
-            disabled={
-              !profileNeedsUpdate(
-                oldProfile,
-                updatedProfile,
-                bypassChangeRequests
-              )
-            }
-            onClick={() => {
-              setBypassChangeRequests([]);
-              setEmailValidationStatus(EmailValidationStatus.UNCHECKED);
-              setUpdatedProfile(oldProfile);
-            }}
-          >
-            Cancel
-          </Button>
-        </FlexRow>
-        <FlexRow>
-          <AccessModuleExpirations profile={updatedProfile} />
-        </FlexRow>
-        <FlexRow>
-          <h2>Egress event history</h2>
-        </FlexRow>
-        <FlexRow>
-          <EgressEventsTable
-            displayPageSize={10}
-            sourceUserEmail={updatedProfile.username}
-          />
-        </FlexRow>
-      </FadeBox>
-    )
+          </FlexRow>
+          <FlexRow>
+            <AccessModuleExpirations profile={updatedProfile} />
+          </FlexRow>
+          <FlexRow>
+            <h2>Egress event history</h2>
+          </FlexRow>
+          <FlexRow>
+            <EgressEventsTable
+              displayPageSize={10}
+              sourceUserEmail={updatedProfile.username}
+            />
+          </FlexRow>
+        </FlexColumn>
+      )}
+    </FadeBox>
   );
 };

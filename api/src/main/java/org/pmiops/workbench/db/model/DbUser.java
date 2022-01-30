@@ -77,8 +77,7 @@ public class DbUser {
   private String eraCommonsLinkedNihUsername;
   private Timestamp eraCommonsLinkExpireTime;
   private String rasLinkLoginGovUsername;
-  private Integer dataUseAgreementSignedVersion;
-  private Timestamp complianceTrainingExpirationTime;
+  private DbUserCodeOfConductAgreement duccAgreement;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -298,13 +297,17 @@ public class DbUser {
     this.rasLinkLoginGovUsername = rasLinkLoginGovUsername;
   }
 
-  @Column(name = "data_use_agreement_signed_version")
-  public Integer getDataUseAgreementSignedVersion() {
-    return dataUseAgreementSignedVersion;
+  @OneToOne(
+      cascade = CascadeType.ALL,
+      orphanRemoval = true,
+      fetch = FetchType.LAZY,
+      mappedBy = "user")
+  public DbUserCodeOfConductAgreement getDuccAgreement() {
+    return duccAgreement;
   }
 
-  public void setDataUseAgreementSignedVersion(Integer dataUseAgreementSignedVersion) {
-    this.dataUseAgreementSignedVersion = dataUseAgreementSignedVersion;
+  public void setDuccAgreement(DbUserCodeOfConductAgreement duccAgreement) {
+    this.duccAgreement = duccAgreement;
   }
 
   @OneToOne(

@@ -15,6 +15,7 @@ import ReviewCriteriaSidebar from 'app/component/review-criteria-sidebar';
 import Table from 'app/component/table';
 import { getPropValue } from 'utils/element-utils';
 import { centerPoint, dragDrop } from 'utils/test-utils';
+import { logger } from 'libs/logger';
 
 export enum Ethnicity {
   NotHispanicOrLatino = 'Not Hispanic or Latino',
@@ -513,17 +514,28 @@ export default class CohortParticipantsGroup {
   }
 
   async searchCriteria(searchWord: string): Promise<Table> {
-    const searchFilterTextbox = Textbox.findByName(this.page, { dataTestId: 'list-search-input' });
-    const waitForResponsePromise = this.page.waitForResponse(
-      (response) => {
-        return response.url().includes('/criteria/') && response.request().method() === 'GET';
-      },
-      { timeout: 60000 }
-    );
-    await searchFilterTextbox.type(searchWord);
-    await searchFilterTextbox.pressReturn();
-    await waitForResponsePromise;
-    await waitWhileLoading(this.page);
+    const searchTextbox = Textbox.findByName(this.page, { dataTestId: 'list-search-input' });
+
+    const enterTextAndSearch = async (searchString: string): Promise<boolean> => {
+      const responsePromise = this.page.waitForResponse(
+        (response) => {
+          return response.url().includes('/criteria/') && response.request().method() === 'GET';
+        },
+        { timeout: 60000 }
+      );
+      await searchTextbox.type(searchString);
+      await searchTextbox.pressReturn();
+      const response = await responsePromise;
+      await waitWhileLoading(this.page);
+      return response.ok();
+    };
+
+    const isSuccess = await enterTextAndSearch(searchWord);
+    if (!isSuccess) {
+      logger.error(`Search criteria "${searchWord}" failed.`);
+      throw new Error('Encountered api request failure during search criteria.');
+    }
+
     return new Table(this.page, `${this.criteriaSearchContainerXpath}//table[@class="p-datatable"]`);
   }
 

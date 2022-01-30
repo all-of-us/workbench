@@ -429,7 +429,9 @@ describe('WorkspaceEdit', () => {
       CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID
     );
 
-    const expectedUpgradeMessage = `${CdrVersionsStubVariables.ALT_WORKSPACE_CDR_VERSION} to ${CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION}.`;
+    const { ALT_WORKSPACE_CDR_VERSION, DEFAULT_WORKSPACE_CDR_VERSION } =
+      CdrVersionsStubVariables;
+    const expectedUpgradeMessage = `${ALT_WORKSPACE_CDR_VERSION} to ${DEFAULT_WORKSPACE_CDR_VERSION}.`;
     const cdrUpgradeMessage = wrapper
       .find('[data-test-id="cdr-version-upgrade"]')
       .first()
@@ -823,7 +825,7 @@ describe('WorkspaceEdit', () => {
     // Intended Study Text
     const testInput = fp.repeat(1000, 'a');
     // since its a new page the characters box for Intended study should say 1000 characters remaining
-    let intendedStudySection = wrapper.find(
+    const intendedStudySection = wrapper.find(
       '[data-test-id="intendedStudyText"]'
     );
     expect(

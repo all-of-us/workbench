@@ -98,7 +98,7 @@
     "unsafeAllowSelfBypass": true,
     "unsafeAllowUserCreationFromGSuiteData": false,
     "enableRasLoginGovLinking": true,
-    "enforceRasLoginGovLinking": false
+    "enforceRasLoginGovLinking": true
   },
   "featureFlags": {
     "unsafeAllowDeleteUser": true,

@@ -24,6 +24,7 @@ import org.pmiops.workbench.db.model.DbAccessModule;
 import org.pmiops.workbench.db.model.DbAccessModule.AccessModuleName;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserAccessModule;
+import org.pmiops.workbench.db.model.DbUserCodeOfConductAgreement;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.model.AccessBypassRequest;
@@ -141,6 +142,16 @@ public class AccessModuleServiceImpl implements AccessModuleService {
   }
 
   @Override
+  public boolean hasUserSignedTheCurrentDucc(DbUser targetUser) {
+    final DbUserCodeOfConductAgreement duccAgreement = targetUser.getDuccAgreement();
+    if (duccAgreement == null) {
+      return false;
+    }
+
+    return duccAgreement.getSignedVersion() == getCurrentDuccVersion();
+  }
+
+  @Override
   public boolean isModuleCompliant(DbUser dbUser, AccessModuleName accessModuleName) {
     DbAccessModule dbAccessModule =
         getDbAccessModuleOrThrow(dbAccessModulesProvider.get(), accessModuleName);
@@ -154,10 +165,7 @@ public class AccessModuleServiceImpl implements AccessModuleService {
 
     // we have an additional check before considering DUCC "complete"
     if (isCompleted && accessModuleName == AccessModuleName.DATA_USER_CODE_OF_CONDUCT) {
-      // protect against NPE when unboxing for comparison
-      final int signedVersion =
-          Optional.ofNullable(dbUser.getDataUseAgreementSignedVersion()).orElse(-1);
-      isCompleted = (getCurrentDuccVersion() == signedVersion);
+      isCompleted = hasUserSignedTheCurrentDucc(dbUser);
     }
 
     boolean isExpired =

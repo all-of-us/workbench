@@ -45,6 +45,7 @@ public class AuthDomainController implements AuthDomainApiDelegate {
             .groupEmail(group.getGroupEmail()));
   }
 
+  @Deprecated // use UserAdminController.updateAccountProperties()
   @Override
   @AuthorityRequired({Authority.ACCESS_CONTROL_ADMIN})
   public ResponseEntity<Void> updateUserDisabledStatus(UpdateUserDisabledRequest request) {

@@ -12,7 +12,6 @@ import { ClrIcon } from './icons';
 import { reactStyles } from 'app/utils';
 import { setSidebarActiveIconStore } from 'app/utils/navigation';
 import { WarningMessage } from './messages';
-import { serverConfigStore } from 'app/utils/stores';
 
 const styles = reactStyles({
   bodyElement: {
@@ -53,10 +52,7 @@ export const RuntimeInitializerModal = ({
             : 'Would you like to continue with your most recently used environment settings in this workspace?'}
         </WarningMessage>
         <RuntimeCostEstimator
-          runtimeParameters={defaultRuntimeConfig}
-          usePersistentDisk={
-            serverConfigStore.get().config.enablePersistentDisk
-          }
+          runtimeConfig={defaultRuntimeConfig}
           style={{ ...styles.bodyElement, justifyContent: 'space-evenly' }}
         />
         <Clickable

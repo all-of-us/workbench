@@ -4,7 +4,6 @@ import com.google.api.services.oauth2.model.Userinfoplus;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
-import javax.annotation.Nullable;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.db.model.DbAddress;
 import org.pmiops.workbench.db.model.DbDemographicSurvey;
@@ -84,6 +83,9 @@ public interface UserService {
    */
   List<DbUser> findUsersBySearchString(String term, Sort sort, String accessTierShortName);
 
+  /** Loads all users given list of usernames. */
+  List<DbUser> findUsersByUsernames(List<String> usernames);
+
   DbUser syncComplianceTrainingStatusV2()
       throws org.pmiops.workbench.moodle.ApiException, NotFoundException;
 
@@ -117,7 +119,7 @@ public interface UserService {
    */
   DbUser syncTwoFactorAuthStatus(DbUser targetUser, Agent agent, boolean isEnrolledIn2FA);
 
-  DbUser syncDuccVersionStatus(DbUser targetUser, Agent agent, @Nullable Integer signedDuccVersion);
+  DbUser syncDuccVersionStatus(DbUser targetUser, Agent agent);
 
   Optional<DbUser> getByUsername(String username);
 

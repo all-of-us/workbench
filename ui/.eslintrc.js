@@ -8,8 +8,6 @@ module.exports = {
     'prettier',
     'react',
     'react-hooks',
-    'simple-import-sort',
-    'sort-keys-fix',
   ],
   extends: [],
   parserOptions: {
@@ -49,11 +47,11 @@ module.exports = {
     'no-throw-literal': 'warn',
     'no-undef-init': 'warn',
     'no-var': 'warn',
+    'prefer-const': ['warn', { destructuring: 'all' }],
     radix: 'warn', // Add radix on parseInt
     // 'dot-notation': 'warn',  // 39 instances as of 3 Jan 2022
     // 'no-console': 'warn',  // 69 instances as of 3 Jan 2022
     // 'prefer-arrow/prefer-arrow-functions': ['warn'], // Lots of 'newable' functions in the code base
-    // 'prefer-const': ['warn', {'destructuring': 'all'}],
 
     'no-use-before-define': 'off', // Needed for the below rule
     '@typescript-eslint/no-use-before-define': 'warn',
@@ -74,6 +72,9 @@ module.exports = {
     '@typescript-eslint/prefer-optional-chain': 'warn',
     '@typescript-eslint/unified-signatures': 'warn',
     // '@typescript-eslint/member-ordering': ['warn', { 'classExpressions': ['method', 'field'] }],
+    // '@typescript-eslint/prefer-function-type': 'warn',
+    // semi: 'off', // Needed for the below rule
+    // '@typescript-eslint/semi': 'warn',
 
     'react/jsx-uses-vars': 'warn',
     'react-hooks/rules-of-hooks': 'warn',
@@ -83,23 +84,20 @@ module.exports = {
 
     'prettier/prettier': 'warn',
 
+    'max-len': [
+      'warn',
+      {
+        code: 140,
+        ignorePattern: '^import |^export\\{(.*?)\\}',
+        ignoreComments: true,
+      },
+    ],
+    'no-trailing-spaces': 'warn',
+
     // temp disable others.  re-enable if desired after determining that they don't conflict with prettier.
 
-    // 'eol-last': 'warn',
-    // 'max-len': ['warn', {code: 140, ignorePattern: '^import |^export\\{(.*?)\\}', ignoreComments: true}],
-    // 'no-trailing-spaces': 'warn',
-    // 'quotes': ['warn', 'single'],
-    // // 'brace-style': ['warn', '1tbs'],
-    // // 'no-multi-spaces': 'warn',
-    // // 'simple-import-sort/sort': 'warn',
-    // // 'space-before-function-paren': ['warn', { 'anonymous': 'never', 'named': 'never', 'asyncArrow': 'always' }],
-    // // 'spaced-comment': 'warn',
-    //
-    // '@typescript-eslint/type-annotation-spacing': 'warn',
-    // '@typescript-eslint/prefer-function-type': 'warn',
-    // // '@typescript-eslint/semi': 'warn',
-    //
-    // 'react/jsx-curly-spacing': ["warn", {'when': 'never'}],
+    // 'simple-import-sort/sort': 'warn',
+    // 'spaced-comment': 'warn',
 
     /* Jest */
     'jest/no-focused-tests': 'warn',
