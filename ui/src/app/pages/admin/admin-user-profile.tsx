@@ -305,7 +305,7 @@ const AccessModuleTable = (props: AccessModuleTableProps) => {
 
     return {
       moduleName: adminPageTitle,
-        moduleStatus: displayModuleStatus(props.updatedProfile, moduleName),
+      moduleStatus: displayModuleStatus(props.updatedProfile, moduleName),
       completionDate: displayModuleCompletionDate(updatedProfile, moduleName),
       expirationDate: displayModuleExpirationDate(updatedProfile, moduleName),
       accessTierBadge: displayTierBadgeByRequiredModule(
@@ -321,7 +321,7 @@ const AccessModuleTable = (props: AccessModuleTableProps) => {
   return (
     <DataTable style={{ paddingTop: '1em' }} value={tableData}>
       <Column field='moduleName' header='Access Module' />
-       <Column field='moduleStatus' header='Status' />
+      <Column field='moduleStatus' header='Status' />
       <Column field='completionDate' header='Last completed on' />
       <Column field='expirationDate' header='Expires on' />
       <Column field='accessTierBadge' header='Required for tier access' />
