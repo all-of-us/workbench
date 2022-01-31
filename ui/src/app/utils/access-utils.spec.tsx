@@ -232,7 +232,7 @@ describe('computeRenewalDisplayDates', () => {
       nextReviewDate: `${displayDateWithoutHours(expirationDate)} (${
         EXPIRATION_DAYS - completionDaysPast
       } days)`,
-      moduleStatus: AccessModulesStatus.COMPLETE,
+      moduleStatus: AccessModulesStatus.EXPIRINGSOON,
     });
   });
 
