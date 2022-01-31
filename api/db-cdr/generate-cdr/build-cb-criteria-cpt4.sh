@@ -44,16 +44,7 @@ bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
 SELECT
      (a.id + $CB_CRITERIA_START_ID ) id
     , CASE WHEN a.parent_id=0 THEN 0 ELSE a.parent_id + $CB_CRITERIA_START_ID END as parent_id
-    , (SELECT domain_id
-       FROM (
-         SELECT 1 as id, UPPER(domain_id) as domain_id
-         FROM \`$BQ_PROJECT.$BQ_DATASET.concept\`
-         where concept_id = a.concept_id
-         union distinct
-         SELECT 2 as id, 'PROCEDURE' as domain_id
-       )
-       ORDER BY id
-       LIMIT 1)
+    , (SELECT UPPER(domain_id) FROM \`$BQ_PROJECT.$BQ_DATASET.concept\` where concept_id = a.concept_id)
     , a.is_standard
     , a.type
     , a.subtype
@@ -147,16 +138,7 @@ do
   SELECT
        (a.id + $CB_CRITERIA_START_ID ) id
       , CASE WHEN a.parent_id=0 THEN 0 ELSE a.parent_id + $CB_CRITERIA_START_ID END as parent_id
-      , (SELECT domain_id
-                FROM (
-                  SELECT 1 as id, UPPER(domain_id) as domain_id
-                  FROM \`$BQ_PROJECT.$BQ_DATASET.concept\`
-                  where concept_id = a.concept_id
-                  union distinct
-                  SELECT 2 as id, 'PROCEDURE' as domain_id
-                )
-                ORDER BY id
-                LIMIT 1)
+      , (SELECT UPPER(domain_id) FROM \`$BQ_PROJECT.$BQ_DATASET.concept\` where concept_id = a.concept_id)
       , a.is_standard
       , a.type
       , a.subtype
@@ -221,6 +203,16 @@ do
           FROM \`$BQ_PROJECT.$BQ_DATASET.prep_cpt\` where LENGTH(path) - LENGTH(REPLACE(path, '.', '')) = $i)
   ORDER BY 1"
 done
+
+############ update null domain_id for parent nodes that don't exist in concept table ############
+echo "CPT4 - SOURCE - update domain_id"
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
+"UPDATE \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
+SET domain_id = 'PROCEDURE'
+WHERE type = 'CPT4'
+AND is_standard = 0
+AND has_hierarchy = 1
+AND domain_id is null"
 
 ############ prep_cpt_ancestor ############
 echo "CPT4 - SOURCE - add ancestor data"
