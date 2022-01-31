@@ -448,9 +448,9 @@ public class UserServiceTest {
 
     providedWorkbenchConfig.access.currentDuccVersions.forEach(
         version -> {
-          final DbUser user = userDao.findUserByUsername(USERNAME);
+          DbUser user = userDao.findUserByUsername(USERNAME);
           user.setDuccAgreement(signDucc(user, version));
-          userDao.save(user);
+          user = userDao.save(user);
           userService.syncDuccVersionStatus(user, Agent.asSystem());
           verify(accessModuleService, never()).updateCompletionTime(any(), any(), any());
         });
