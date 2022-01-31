@@ -53,7 +53,6 @@ import org.pmiops.workbench.db.dao.AccessModuleDao;
 import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.UserCodeOfConductAgreementDao;
 import org.pmiops.workbench.db.dao.UserDao;
-import org.pmiops.workbench.db.dao.UserDataUseAgreementDao;
 import org.pmiops.workbench.db.dao.UserServiceImpl;
 import org.pmiops.workbench.db.dao.UserTermsOfServiceDao;
 import org.pmiops.workbench.db.model.DbAccessModule;
@@ -118,7 +117,6 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
@@ -142,6 +140,7 @@ public class ProfileControllerTest extends BaseControllerTest {
   @MockBean private RasLinkService mockRasLinkService;
 
   @Autowired private AccessModuleDao accessModuleDao;
+  @Autowired private AccessModuleService accessModuleService;
   @Autowired private AccessTierDao accessTierDao;
   @Autowired private AccessTierService accessTierService;
   @Autowired private InstitutionService institutionService;
@@ -149,12 +148,8 @@ public class ProfileControllerTest extends BaseControllerTest {
   @Autowired private ProfileService profileService;
   @Autowired private UserDao userDao;
   @Autowired private UserCodeOfConductAgreementDao userCodeOfConductAgreementDao;
-  @Autowired private UserDataUseAgreementDao userDataUseAgreementDao;
   @Autowired private UserTermsOfServiceDao userTermsOfServiceDao;
   @Autowired private FakeClock fakeClock;
-
-  // allows us to mock out only specific methods
-  @SpyBean private AccessModuleService accessModuleService;
 
   private static final long NONCE_LONG = 12345;
   private static final String CAPTCHA_TOKEN = "captchaToken";
@@ -175,7 +170,7 @@ public class ProfileControllerTest extends BaseControllerTest {
   private static final Timestamp TIMESTAMP = FakeClockConfiguration.NOW;
   private static final double TIME_TOLERANCE_MILLIS = 100.0;
   private static final int CURRENT_TERMS_OF_SERVICE_VERSION = 1;
-  private static final int CURRENT_DUCC_VERSION = 27; // arbitrary
+  private static final int CURRENT_DUCC_VERSION = 27; // arbitrary for test
   private CreateAccountRequest createAccountRequest;
   private User googleUser;
   private static DbUser dbUser;
