@@ -134,11 +134,6 @@ export const initPageBeforeTest = async (page: Page): Promise<void> => {
    * In order to intercept and mutate requests, see page.setRequestInterceptionEnabled.
    */
   page.on('request', (request: Request) => {
-    // Abort Google Analytics requests.
-    const blockRequestList = ['www.google-analytics.com', '/gtag/js', 'ga.js', 'analytics.js'];
-    if (blockRequestList.find((regex) => request.url().match(regex))) {
-      return request.abort();
-    }
     if (isLoggable(request)) {
       const requestBody = getRequestData(request);
       const body = requestBody.length === 0 ? '' : `\n${requestBody}`;

@@ -136,6 +136,14 @@ export default class WorkspaceCard extends CardBase {
     return getPropValue<string>(element, 'innerText');
   }
 
+  /**
+   * Find element with specified workspace name on the page.
+   * @param {string} workspaceName
+   */
+  async getWorkspaceNameLink(workspaceName: string): Promise<ElementHandle> {
+    return this.page.waitForXPath(this.workspaceNameLinkSelector(workspaceName), { visible: true });
+  }
+
   async getWorkspaceMatchAccessLevel(
     level: WorkspaceAccessLevel = WorkspaceAccessLevel.Owner
   ): Promise<WorkspaceCard[]> {
@@ -182,7 +190,14 @@ export default class WorkspaceCard extends CardBase {
   private getWorkspaceNameXpath(workspaceName: string): string {
     return (
       WorkspaceCardSelector.cardRootXpath +
-      `//*[@role='button']/*[${WorkspaceCardSelector.cardNameXpath} and normalize-space(text())="${workspaceName}"]`
+      `//*[${WorkspaceCardSelector.cardNameXpath} and normalize-space(text())="${workspaceName}"]`
+    );
+  }
+
+  private workspaceNameLinkSelector(workspaceName: string): string {
+    return (
+      `//*[@role='button'][./*[${WorkspaceCardSelector.cardNameXpath}` +
+      ` and normalize-space(text())="${workspaceName}"]]`
     );
   }
 

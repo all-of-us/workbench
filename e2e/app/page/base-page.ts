@@ -16,33 +16,26 @@ export default abstract class BasePage {
   /**
    * Reload current page.
    */
-  async reloadPage(): Promise<void> {
-    logger.info(`Reload page URL: ${this.page.url()}`);
-    try {
-      const response = await this.page.reload({ waitUntil: ['load', 'domcontentloaded', 'networkidle0'] });
-      if (response && !response.ok()) {
-        logger.error(`Reload page: Response status: ${response.status()}\n${await response.text()}`);
-      }
-      await waitWhileLoading(this.page);
-    } catch (err) {
-      logger.error(err);
+  async reloadPage(timeout?: number): Promise<void> {
+    const response = await this.page.reload({ waitUntil: ['networkidle0', 'load', 'domcontentloaded'], timeout });
+    if (response && !response.ok()) {
+      // Log response if status is not OK
+      logger.info(`Reload page: Response status: ${response.status()}\n${await response.text()}`);
     }
+    await waitWhileLoading(this.page);
   }
 
   /**
-   * Go to a URL.
+   * Load a URL.
    */
   async gotoUrl(url: string): Promise<void> {
     logger.info(`Goto URL: ${url}`);
-    try {
-      const response = await this.page.goto(url, { waitUntil: ['load', 'domcontentloaded', 'networkidle0'] });
-      if (response && !response.ok()) {
-        logger.error(`Goto URL: ${url}. Response status: ${response.status()}\n${await response.text()}`);
-      }
-      await waitWhileLoading(this.page);
-    } catch (err) {
-      logger.error(err);
+    const response = await this.page.goto(url, { waitUntil: ['load', 'domcontentloaded', 'networkidle2'] });
+    if (response && !response.ok()) {
+      // Log response if status is not OK
+      logger.info(`Goto URL: ${url}. Response status: ${response.status()}\n${await response.text()}`);
     }
+    await waitWhileLoading(this.page);
   }
 
   /**
