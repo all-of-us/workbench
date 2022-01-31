@@ -1,4 +1,4 @@
-import { Page, Response } from 'puppeteer';
+import { Page } from 'puppeteer';
 import { logger } from 'libs/logger';
 import { waitWhileLoading } from 'utils/waits-utils';
 
@@ -15,27 +15,30 @@ export default abstract class BasePage {
 
   /**
    * Load AoU page url or reload page.
-   * @param {{ url: string, reload: boolean, timeout: number }} opts
+   *
    */
-  async loadPage(opts: { url?: string; reload?: boolean; timeout?: number } = {}): Promise<void> {
-    const { url, reload = false, timeout = 30 * 1000 } = opts;
+  async loadPage(opts: { url?: string; reload?: boolean } = {}): Promise<void> {
+    const { url, reload } = opts;
+    if (url !== undefined && reload !== undefined) {
+      throw new Error('Invalid parameters: url and reload both defined.');
+    }
+    if (url === undefined && reload === undefined) {
+      throw new Error('Invalid parameters: url and reload both undefined.');
+    }
+    const timeout = 30 * 1000;
     try {
-      let response: Response;
-      if (reload) {
-        logger.info(`Reload page: ${this.page.url()}`);
-        response = await this.page.reload({ waitUntil: ['networkidle0', 'load', 'domcontentloaded'], timeout });
-      } else if (url) {
+      if (url !== undefined) {
         logger.info(`Go to page: ${url}`);
-        response = await this.page.goto(url, { waitUntil: ['load', 'domcontentloaded', 'networkidle2'], timeout });
+        await this.page.goto(url, { waitUntil: ['load', 'domcontentloaded', 'networkidle0'], timeout });
       }
-      if (response && !response.ok()) {
-        logger.error(
-          `ERROR: Encountered error while loading page.\nResponse: ${response.status()}\n${await response.text()}`
-        );
+      if (reload !== undefined) {
+        logger.info(`Reload page: ${this.page.url()}`);
+        await this.page.reload({ waitUntil: ['networkidle0', 'load', 'domcontentloaded'], timeout });
       }
       await waitWhileLoading(this.page, { timeout });
     } catch (err) {
-      logger.error(err);
+      logger.error(`ERROR: Encountered error when loading page.\n${err}`);
+      // Let test continue
     }
   }
 
