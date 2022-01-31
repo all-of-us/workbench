@@ -37,7 +37,7 @@ import { TooltipTrigger } from 'app/components/popups';
 import { serverConfigStore } from 'app/utils/stores';
 import {
   accessRenewalModules,
-  AccessRenewalModulesStatus,
+  AccessModulesStatus,
   computeRenewalDisplayDates,
   getAccessModuleConfig,
   getAccessModuleStatusByName,
@@ -173,8 +173,8 @@ export const displayModuleStatus = (
     getAccessModuleStatusByName(profile, moduleName)
   ).moduleStatus;
   const canModuleExpire = getAccessModuleConfig(moduleName).canExpire;
-  return !canModuleExpire && moduleStatus === AccessRenewalModulesStatus.EXPIRED
-    ? AccessRenewalModulesStatus.COMPLETE
+  return !canModuleExpire && moduleStatus === AccessModulesStatus.EXPIRED
+    ? AccessModulesStatus.COMPLETE
     : moduleStatus;
 };
 

@@ -15,6 +15,7 @@ import { Profile } from 'generated/fetch';
 import { authStore, profileStore, serverConfigStore } from 'app/utils/stores';
 import { waitOnTimersAndUpdate } from 'testing/react-test-helpers';
 import {
+  AccessModulesStatus,
   buildRasRedirectUrl,
   computeRenewalDisplayDates,
   getTwoFactorSetupUrl,
@@ -158,6 +159,7 @@ describe('computeRenewalDisplayDates', () => {
     expect(computeRenewalDisplayDates({})).toStrictEqual({
       lastConfirmedDate: 'Unavailable (not completed)',
       nextReviewDate: 'Unavailable (not completed)',
+      moduleStatus: AccessModulesStatus.INCOMPLETE,
     });
   });
 
@@ -170,6 +172,7 @@ describe('computeRenewalDisplayDates', () => {
     expect(computeRenewalDisplayDates(status)).toStrictEqual({
       lastConfirmedDate: 'Unavailable (not completed)',
       nextReviewDate: 'Unavailable (not completed)',
+      moduleStatus: AccessModulesStatus.INCOMPLETE,
     });
   });
 
@@ -182,6 +185,7 @@ describe('computeRenewalDisplayDates', () => {
     expect(computeRenewalDisplayDates(status)).toStrictEqual({
       lastConfirmedDate: displayDateWithoutHours(bypassDate),
       nextReviewDate: 'Unavailable (bypassed)',
+      moduleStatus: AccessModulesStatus.BYPASS,
     });
   });
 
@@ -202,6 +206,7 @@ describe('computeRenewalDisplayDates', () => {
     expect(computeRenewalDisplayDates(status)).toStrictEqual({
       lastConfirmedDate: displayDateWithoutHours(bypassDate),
       nextReviewDate: 'Unavailable (bypassed)',
+      moduleStatus: AccessModulesStatus.BYPASS,
     });
   });
 
@@ -227,6 +232,7 @@ describe('computeRenewalDisplayDates', () => {
       nextReviewDate: `${displayDateWithoutHours(expirationDate)} (${
         EXPIRATION_DAYS - completionDaysPast
       } days)`,
+      moduleStatus: AccessModulesStatus.COMPLETE,
     });
   });
 
@@ -252,6 +258,7 @@ describe('computeRenewalDisplayDates', () => {
       nextReviewDate: `${displayDateWithoutHours(expirationDate)} (${
         EXPIRATION_DAYS - completionDaysPast
       } days)`,
+      moduleStatus: AccessModulesStatus.COMPLETE,
     });
   });
 
@@ -269,6 +276,7 @@ describe('computeRenewalDisplayDates', () => {
     expect(computeRenewalDisplayDates(status)).toStrictEqual({
       lastConfirmedDate: displayDateWithoutHours(completionDate),
       nextReviewDate: `${displayDateWithoutHours(expirationDate)} (expired)`,
+      moduleStatus: AccessModulesStatus.EXPIRED,
     });
   });
 });

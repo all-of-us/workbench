@@ -30,7 +30,7 @@ import {
   MILLIS_PER_DAY,
 } from './dates';
 
-export enum AccessRenewalModulesStatus {
+export enum AccessModulesStatus {
   COMPLETE = 'Current',
   EXPIRED = 'Expired',
   BYPASS = 'Bypassed',
@@ -436,7 +436,7 @@ export const computeRenewalDisplayDates = ({
       () => ({
         lastConfirmedDate: `${bypassDate}`,
         nextReviewDate: 'Unavailable (bypassed)',
-        moduleStatus: AccessRenewalModulesStatus.BYPASS,
+        moduleStatus: AccessModulesStatus.BYPASS,
       }),
     ],
     // User never completed training
@@ -445,7 +445,7 @@ export const computeRenewalDisplayDates = ({
       () => ({
         lastConfirmedDate: 'Unavailable (not completed)',
         nextReviewDate: 'Unavailable (not completed)',
-        moduleStatus: AccessRenewalModulesStatus.INCOMPLETE,
+        moduleStatus: AccessModulesStatus.INCOMPLETE,
       }),
     ],
     // User completed training; covers expired, within-lookback, and after-lookback cases.
@@ -462,8 +462,8 @@ export const computeRenewalDisplayDates = ({
           nextReviewDate: `${nextReviewDate} ${daysRemainingDisplay}`,
           moduleStatus:
             daysRemaining >= 0
-              ? AccessRenewalModulesStatus.COMPLETE
-              : AccessRenewalModulesStatus.EXPIRED,
+              ? AccessModulesStatus.COMPLETE
+              : AccessModulesStatus.EXPIRED,
         };
       },
     ]
