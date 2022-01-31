@@ -44,7 +44,16 @@ bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
 SELECT
      (a.id + $CB_CRITERIA_START_ID ) id
     , CASE WHEN a.parent_id=0 THEN 0 ELSE a.parent_id + $CB_CRITERIA_START_ID END as parent_id
-    , (SELECT UPPER(domain_id) FROM \`$BQ_PROJECT.$BQ_DATASET.concept\` where concept_id = a.concept_id)
+    , (SELECT domain_id
+       FROM (
+         SELECT 1 as id, UPPER(domain_id) as domain_id
+         FROM \`$BQ_PROJECT.$BQ_DATASET.concept\`
+         where concept_id = a.concept_id
+         union distinct
+         SELECT 2 as id, 'PROCEDURE' as domain_id
+       )
+       ORDER BY id
+       LIMIT 1)
     , a.is_standard
     , a.type
     , a.subtype
@@ -138,7 +147,16 @@ do
   SELECT
        (a.id + $CB_CRITERIA_START_ID ) id
       , CASE WHEN a.parent_id=0 THEN 0 ELSE a.parent_id + $CB_CRITERIA_START_ID END as parent_id
-      , (SELECT UPPER(domain_id) FROM \`$BQ_PROJECT.$BQ_DATASET.concept\` where concept_id = a.concept_id)
+      , (SELECT domain_id
+                FROM (
+                  SELECT 1 as id, UPPER(domain_id) as domain_id
+                  FROM \`$BQ_PROJECT.$BQ_DATASET.concept\`
+                  where concept_id = a.concept_id
+                  union distinct
+                  SELECT 2 as id, 'PROCEDURE' as domain_id
+                )
+                ORDER BY id
+                LIMIT 1)
       , a.is_standard
       , a.type
       , a.subtype
