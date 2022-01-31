@@ -34,7 +34,6 @@ import {
 import { convertAPIError } from 'app/utils/errors';
 import {
   defaultTierConfig,
-  getControlledTierConfig,
   getTierBadge,
   getTierConfig,
   getTierEmailAddresses,
@@ -160,7 +159,7 @@ const EnableCtSwitch = (props: {
       onChange={(v) => onChange(v.value)}
       checked={
         getTierConfig(institution, AccessTierShortNames.Controlled)
-          .membershipRequirement !== InstitutionMembershipRequirement.NOACCESS
+          ?.membershipRequirement !== InstitutionMembershipRequirement.NOACCESS
       }
       disabled={false} // TODO
     />

@@ -1,3 +1,8 @@
+import * as React from 'react';
+import * as fp from 'lodash/fp';
+import { Column } from 'primereact/column';
+import { DataTable } from 'primereact/datatable';
+
 import { Button } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
 import { SemiBoldHeader } from 'app/components/headers';
@@ -15,10 +20,6 @@ import {
   InstitutionMembershipRequirement,
   OrganizationType,
 } from 'generated/fetch';
-import * as fp from 'lodash/fp';
-import { Column } from 'primereact/column';
-import { DataTable } from 'primereact/datatable';
-import * as React from 'react';
 import { AccessTierShortNames } from 'app/utils/access-tiers';
 
 const styles = reactStyles({
