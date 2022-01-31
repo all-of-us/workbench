@@ -185,7 +185,7 @@ describe('computeRenewalDisplayDates', () => {
     expect(computeRenewalDisplayDates(status)).toStrictEqual({
       lastConfirmedDate: displayDateWithoutHours(bypassDate),
       nextReviewDate: 'Unavailable (bypassed)',
-      moduleStatus: AccessModulesStatus.BYPASS,
+      moduleStatus: AccessModulesStatus.BYPASSED,
     });
   });
 
@@ -206,7 +206,7 @@ describe('computeRenewalDisplayDates', () => {
     expect(computeRenewalDisplayDates(status)).toStrictEqual({
       lastConfirmedDate: displayDateWithoutHours(bypassDate),
       nextReviewDate: 'Unavailable (bypassed)',
-      moduleStatus: AccessModulesStatus.BYPASS,
+      moduleStatus: AccessModulesStatus.BYPASSED,
     });
   });
 

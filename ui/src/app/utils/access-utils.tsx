@@ -32,8 +32,9 @@ import {
 
 export enum AccessModulesStatus {
   COMPLETE = 'Current',
+  EXPIRINGSOON = 'Expiring Soon',
   EXPIRED = 'Expired',
-  BYPASS = 'Bypassed',
+  BYPASSED = 'Bypassed',
   INCOMPLETE = 'Incomplete',
 }
 
@@ -429,6 +430,16 @@ export const computeRenewalDisplayDates = ({
   const nextReviewDate = withInvalidDateHandling(expirationEpochMillis);
   const bypassDate = withInvalidDateHandling(bypassEpochMillis);
 
+  function calCompleteOrExpiringOrExpirationStatus(
+    daysRemaining: number
+  ): AccessModulesStatus {
+    return daysRemaining >= serverConfigStore.get().config.accessRenewalLookback
+      ? AccessModulesStatus.COMPLETE
+      : daysRemaining >= 0
+      ? AccessModulesStatus.EXPIRINGSOON
+      : AccessModulesStatus.EXPIRED;
+  }
+
   return cond(
     // User has bypassed module
     [
@@ -436,7 +447,7 @@ export const computeRenewalDisplayDates = ({
       () => ({
         lastConfirmedDate: `${bypassDate}`,
         nextReviewDate: 'Unavailable (bypassed)',
-        moduleStatus: AccessModulesStatus.BYPASS,
+        moduleStatus: AccessModulesStatus.BYPASSED,
       }),
     ],
     // User never completed training
@@ -460,10 +471,7 @@ export const computeRenewalDisplayDates = ({
         return {
           lastConfirmedDate,
           nextReviewDate: `${nextReviewDate} ${daysRemainingDisplay}`,
-          moduleStatus:
-            daysRemaining >= 0
-              ? AccessModulesStatus.COMPLETE
-              : AccessModulesStatus.EXPIRED,
+          moduleStatus: calCompleteOrExpiringOrExpirationStatus(daysRemaining),
         };
       },
     ]
