@@ -371,7 +371,7 @@ export async function waitWhileSpinnerDisplayed(
   const confidenceLevel = 2;
   let confidenceCounter = 0;
   let error;
-  const waitForDisappear = async (maxTime: number): Promise<void> => {
+  const waitForHidden = async (maxTime: number): Promise<void> => {
     const startTime = Date.now();
     try {
       await Promise.all([
@@ -401,10 +401,10 @@ export async function waitWhileSpinnerDisplayed(
     }
 
     await page.waitForTimeout(500);
-    await waitForDisappear(maxTime - spentTime); // unused time
+    await waitForHidden(maxTime - spentTime); // unused time
   };
 
-  await waitForDisappear(timeout);
+  await waitForHidden(timeout);
 }
 
 /**
