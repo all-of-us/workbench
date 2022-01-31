@@ -7,18 +7,19 @@ import { OrganizationTypeOptions } from 'app/pages/admin/admin-institution-optio
 import { institutionApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
-import {
-  getControlledTierConfig,
-  getRegisteredTierConfig,
-} from 'app/utils/institutions';
+import { getTierConfig } from 'app/utils/institutions';
 import { NavigationProps } from 'app/utils/navigation';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
-import { Institution, InstitutionMembershipRequirement } from 'generated/fetch';
-import { OrganizationType } from 'generated/fetch';
+import {
+  Institution,
+  InstitutionMembershipRequirement,
+  OrganizationType,
+} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
 import * as React from 'react';
+import { AccessTierShortNames } from 'app/utils/access-tiers';
 
 const styles = reactStyles({
   pageHeader: {
@@ -102,22 +103,18 @@ export const AdminInstitution = fp.flow(withNavigation)(
     }
 
     renderAccessTiers(row) {
-      let tiers = '';
-      if (
-        getRegisteredTierConfig(row).membershipRequirement !==
-        InstitutionMembershipRequirement.NOACCESS
-      ) {
-        tiers += 'Registered';
-      }
-
-      if (
-        getControlledTierConfig(row) &&
-        getControlledTierConfig(row).membershipRequirement !==
-          InstitutionMembershipRequirement.NOACCESS
-      ) {
-        tiers += ',Controlled';
-      }
-      return tiers;
+      const tiersInOrder = [
+        AccessTierShortNames.Registered,
+        AccessTierShortNames.Controlled,
+      ];
+      return tiersInOrder
+        .filter(
+          (tier) =>
+            getTierConfig(row, tier)?.membershipRequirement !==
+            InstitutionMembershipRequirement.NOACCESS
+        )
+        .map((tier) => tier.toUpperCase())
+        .join(', ');
     }
 
     render() {
