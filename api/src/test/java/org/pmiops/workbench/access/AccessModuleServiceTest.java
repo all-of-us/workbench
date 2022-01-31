@@ -74,18 +74,18 @@ public class AccessModuleServiceTest {
 
   @BeforeEach
   public void setup() {
-    user = new DbUser();
-    user.setUsername("user");
-    user.setDuccAgreement(
-        TestMockFactory.createDuccAgreement(
-            user, accessModuleService.getCurrentDuccVersion(), FakeClockConfiguration.NOW));
-    user = userDao.save(user);
-
     config = WorkbenchConfig.createEmptyConfig();
     config.access.enableComplianceTraining = true;
     config.access.enableEraCommons = true;
+    config.access.currentDuccVersions = ImmutableList.of(10, 11);
 
     accessModules = TestMockFactory.createAccessModules(accessModuleDao);
+
+    user = new DbUser();
+    user.setUsername("user");
+    user.setDuccAgreement(
+        TestMockFactory.createDuccAgreement(user, 10, FakeClockConfiguration.NOW));
+    user = userDao.save(user);
   }
 
   @Test
@@ -342,7 +342,7 @@ public class AccessModuleServiceTest {
   }
 
   @Test
-  public void testModuleCompliant_byPassedAndExpired() {
+  public void testModuleCompliant_bypassedAndExpired() {
     Instant now = Instant.ofEpochMilli(FakeClockConfiguration.NOW_TIME);
     long expiryDays = 365L;
     config.accessRenewal.expiryDays = expiryDays;

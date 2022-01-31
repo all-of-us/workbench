@@ -12,6 +12,7 @@ import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.access.AccessTierService.REGISTERED_TIER_SHORT_NAME;
 
 import com.google.api.services.directory.model.User;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -442,20 +443,25 @@ public class UserServiceTest {
   }
 
   @Test
-  public void testSyncDuccVersionStatus_correctVersion() {
-    final DbUser user = userDao.findUserByUsername(USERNAME);
-    user.setDuccAgreement(signDucc(user, accessModuleService.getCurrentDuccVersion()));
-    userDao.save(user);
+  public void testSyncDuccVersionStatus_correctVersions() {
+    providedWorkbenchConfig.access.currentDuccVersions = ImmutableList.of(3, 4, 5);
 
-    userService.syncDuccVersionStatus(user, Agent.asSystem());
-
-    verify(accessModuleService, never()).updateCompletionTime(any(), any(), any());
+    providedWorkbenchConfig.access.currentDuccVersions.forEach(
+        version -> {
+          final DbUser user = userDao.findUserByUsername(USERNAME);
+          user.setDuccAgreement(signDucc(user, version));
+          userDao.save(user);
+          userService.syncDuccVersionStatus(user, Agent.asSystem());
+          verify(accessModuleService, never()).updateCompletionTime(any(), any(), any());
+        });
   }
 
   @Test
   public void testSyncDuccVersionStatus_incorrectVersion() {
+    providedWorkbenchConfig.access.currentDuccVersions = ImmutableList.of(3, 4, 5);
+
     final DbUser user = userDao.findUserByUsername(USERNAME);
-    user.setDuccAgreement(signDucc(user, accessModuleService.getCurrentDuccVersion() - 1));
+    user.setDuccAgreement(signDucc(user, 2));
     userDao.save(user);
 
     userService.syncDuccVersionStatus(user, Agent.asSystem());

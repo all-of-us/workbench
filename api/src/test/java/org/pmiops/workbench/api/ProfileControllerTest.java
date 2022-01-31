@@ -175,12 +175,12 @@ public class ProfileControllerTest extends BaseControllerTest {
   private static final Timestamp TIMESTAMP = FakeClockConfiguration.NOW;
   private static final double TIME_TOLERANCE_MILLIS = 100.0;
   private static final int CURRENT_TERMS_OF_SERVICE_VERSION = 1;
+  private static final int CURRENT_DUCC_VERSION = 27; // arbitrary
   private CreateAccountRequest createAccountRequest;
   private User googleUser;
   private static DbUser dbUser;
   private static List<DbAccessModule> accessModules;
 
-  private int DUCC_VERSION;
   private DbAccessTier registeredTier;
   private InstitutionTierConfig rtAddressesConfig;
   private InstitutionTierConfig rtDomainsConfig;
@@ -290,7 +290,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     googleUser.setPassword("testPassword");
     googleUser.setIsEnrolledIn2Sv(true);
 
-    DUCC_VERSION = accessModuleService.getCurrentDuccVersion();
+    config.access.currentDuccVersions = ImmutableList.of(CURRENT_DUCC_VERSION);
 
     when(mockDirectoryService.getUserOrThrow(FULL_USER_NAME)).thenReturn(googleUser);
     when(mockDirectoryService.createUser(GIVEN_NAME, FAMILY_NAME, FULL_USER_NAME, CONTACT_EMAIL))
@@ -465,7 +465,7 @@ public class ProfileControllerTest extends BaseControllerTest {
   public void testSubmitDUCC_success() {
     createAccountAndDbUserWithAffiliation();
     String initials = "NIH";
-    assertThat(profileController.submitDUCC(DUCC_VERSION, initials).getStatusCode())
+    assertThat(profileController.submitDUCC(CURRENT_DUCC_VERSION, initials).getStatusCode())
         .isEqualTo(HttpStatus.OK);
     List<DbUserCodeOfConductAgreement> duccAgreementList =
         userCodeOfConductAgreementDao.findByUserOrderByCompletionTimeDesc(dbUser);
@@ -474,7 +474,29 @@ public class ProfileControllerTest extends BaseControllerTest {
     assertThat(duccAgreement.getUserFamilyName()).isEqualTo(dbUser.getFamilyName());
     assertThat(duccAgreement.getUserGivenName()).isEqualTo(dbUser.getGivenName());
     assertThat(duccAgreement.getUserInitials()).isEqualTo(initials);
-    assertThat(duccAgreement.getSignedVersion()).isEqualTo(DUCC_VERSION);
+    assertThat(duccAgreement.getSignedVersion()).isEqualTo(CURRENT_DUCC_VERSION);
+  }
+
+  @Test
+  public void testSubmitDUCC_success_multiple_current() {
+    config.access.currentDuccVersions = ImmutableList.of(7, 8, 9);
+
+    createAccountAndDbUserWithAffiliation();
+    String initials = "NIH";
+
+    config.access.currentDuccVersions.forEach(
+        version -> {
+          assertThat(profileController.submitDUCC(version, initials).getStatusCode())
+              .isEqualTo(HttpStatus.OK);
+          List<DbUserCodeOfConductAgreement> duccAgreementList =
+              userCodeOfConductAgreementDao.findByUserOrderByCompletionTimeDesc(dbUser);
+          assertThat(duccAgreementList.size()).isEqualTo(1);
+          DbUserCodeOfConductAgreement duccAgreement = duccAgreementList.get(0);
+          assertThat(duccAgreement.getSignedVersion()).isEqualTo(version);
+          assertThat(duccAgreement.getUserFamilyName()).isEqualTo(dbUser.getFamilyName());
+          assertThat(duccAgreement.getUserGivenName()).isEqualTo(dbUser.getGivenName());
+          assertThat(duccAgreement.getUserInitials()).isEqualTo(initials);
+        });
   }
 
   @Test
@@ -484,7 +506,7 @@ public class ProfileControllerTest extends BaseControllerTest {
         () -> {
           createAccountAndDbUserWithAffiliation();
           String initials = "NIH";
-          profileController.submitDUCC(DUCC_VERSION - 1, initials);
+          profileController.submitDUCC(CURRENT_DUCC_VERSION - 1, initials);
         });
   }
 
@@ -497,7 +519,7 @@ public class ProfileControllerTest extends BaseControllerTest {
         () -> {
           createAccountAndDbUserWithAffiliation();
           String initials = "NIH";
-          profileController.submitDUCC(DUCC_VERSION + 1, initials);
+          profileController.submitDUCC(CURRENT_DUCC_VERSION + 1, initials);
         });
   }
 
@@ -525,7 +547,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     final int versionB = 8;
 
     // set the current DUCC version to version A
-    when(accessModuleService.getCurrentDuccVersion()).thenReturn(versionA);
+    config.access.currentDuccVersions = ImmutableList.of(versionA);
 
     // sign the current version (A)
 
@@ -535,7 +557,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     assertThat(accessTierService.getAccessTiersForUser(dbUser)).contains(registeredTier);
 
     // time passes and the system now requires a newer version (B)
-    when(accessModuleService.getCurrentDuccVersion()).thenReturn(versionB);
+    config.access.currentDuccVersions = ImmutableList.of(versionB);
 
     // a bit of a hack here: use this to sync the registration status
     // see also https://precisionmedicineinitiative.atlassian.net/browse/RW-2352
@@ -708,7 +730,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     profile.setGivenName("OldGivenName");
     profile.setFamilyName("OldFamilyName");
     profileController.updateProfile(profile);
-    profileController.submitDUCC(DUCC_VERSION, "O.O.");
+    profileController.submitDUCC(CURRENT_DUCC_VERSION, "O.O.");
     profile.setGivenName("NewGivenName");
     profile.setFamilyName("NewFamilyName");
     profileController.updateProfile(profile);
