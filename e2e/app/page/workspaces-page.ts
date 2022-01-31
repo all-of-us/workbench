@@ -34,7 +34,7 @@ export default class WorkspacesPage extends AuthenticatedPage {
 
   async isLoaded(): Promise<boolean> {
     await waitForDocumentTitle(this.page, PageTitle);
-    await waitWhileLoading(this.page, 120000).catch(async () => {
+    await waitWhileLoading(this.page).catch(async () => {
       logger.warn('Retry loading Workspaces page');
       await this.page.reload({ waitUntil: ['networkidle0', 'load'] });
       await waitWhileLoading(this.page);
