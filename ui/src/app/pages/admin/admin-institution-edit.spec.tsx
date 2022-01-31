@@ -741,8 +741,9 @@ describe('AdminInstitutionEditSpec - add mode', () => {
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper).toBeTruthy();
 
-    expect(findRTERARequired(wrapper).props.checked).toBeTruthy();
-    expect(findCTERARequired(wrapper).props.checked).toBeTruthy();
+    // false by default
+    expect(findRTERARequired(wrapper).props.checked).toBeFalsy();
+    expect(findCTERARequired(wrapper).props.checked).toBeFalsy();
 
     // change Registered to ADDRESS
 
@@ -757,8 +758,8 @@ describe('AdminInstitutionEditSpec - add mode', () => {
     expect(findRTAddress(wrapper).exists()).toBeTruthy();
     expect(findRTDomain(wrapper).exists()).toBeFalsy();
 
-    expect(findRTERARequired(wrapper).props.checked).toBeTruthy();
-    expect(findCTERARequired(wrapper).props.checked).toBeTruthy();
+    expect(findRTERARequired(wrapper).props.checked).toBeFalsy();
+    expect(findCTERARequired(wrapper).props.checked).toBeFalsy();
   });
 
   it('Should display error in case of invalid email Address Format in Registered Tier requirement', async () => {

@@ -116,7 +116,7 @@ export const defaultTierConfig = (
 ): InstitutionTierConfig => ({
   accessTierShortName: accessTier,
   membershipRequirement: InstitutionMembershipRequirement.NOACCESS,
-  eraRequired: true,
+  eraRequired: false,
   emailAddresses: [],
   emailDomains: [],
 });
@@ -126,7 +126,7 @@ export function getTierConfigOrDefault(
   accessTierShortName: string
 ): InstitutionTierConfig {
   return (
-    configs.find((t) => t.accessTierShortName === accessTierShortName) ||
+    configs?.find((t) => t.accessTierShortName === accessTierShortName) ||
     defaultTierConfig(accessTierShortName)
   );
 }
@@ -135,23 +135,7 @@ export function getTierConfig(
   institution: Institution,
   accessTierShortName: string
 ): InstitutionTierConfig {
-  if (!institution.tierConfigs) {
-    return defaultTierConfig(accessTierShortName);
-  }
-
-  return getTierConfigOrDefault(institution.tierConfigs, accessTierShortName);
-}
-
-export function getRegisteredTierConfig(
-  institution: Institution
-): InstitutionTierConfig {
-  return getTierConfig(institution, AccessTierShortNames.Registered);
-}
-
-export function getControlledTierConfig(
-  institution: Institution
-): InstitutionTierConfig {
-  return getTierConfig(institution, AccessTierShortNames.Controlled);
+  return getTierConfigOrDefault(institution?.tierConfigs, accessTierShortName);
 }
 
 export function getTierEmailAddresses(
