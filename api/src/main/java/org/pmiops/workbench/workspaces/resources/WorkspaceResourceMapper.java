@@ -1,11 +1,15 @@
 package org.pmiops.workbench.workspaces.resources;
 
+import java.util.Optional;
 import org.mapstruct.CollectionMappingStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.pmiops.workbench.cohortreview.mapper.CohortReviewMapper;
 import org.pmiops.workbench.cohorts.CohortMapper;
+import org.pmiops.workbench.cohorts.CohortService;
+import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.conceptset.mapper.ConceptSetMapper;
+import org.pmiops.workbench.dataset.DataSetService;
 import org.pmiops.workbench.dataset.mapper.DataSetMapper;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbConceptSet;
@@ -120,11 +124,12 @@ public interface WorkspaceResourceMapper {
   @Mapping(target = "cohort", ignore = true)
   @Mapping(target = "conceptSet", ignore = true)
   @Mapping(target = "dataSet", ignore = true)
+  @Mapping(target = "notebook", source = "notebookName")
   @Mapping(
       target = "lastModifiedEpochMillis",
       source = "dbUserRecentlyModifiedResource.lastAccessDate")
   ResourceFields fromDbUserRecentlyModifiedResource(
-      DbUserRecentlyModifiedResource dbUserRecentlyModifiedResource, String notebook);
+      DbUserRecentlyModifiedResource dbUserRecentlyModifiedResource, String notebookName);
 
   @Mapping(target = "permission", source = "accessLevel")
   WorkspaceResource mergeWorkspaceAndResourceFields(
@@ -216,6 +221,52 @@ public interface WorkspaceResourceMapper {
         fromWorkspace(dbWorkspace),
         fcWorkspace,
         fromDbUserRecentlyModifiedResource(dbUserRecentResource, notebookName));
+  }
+
+  default WorkspaceResource fromDbUserRecentlyModifiedResource(
+      DbUserRecentlyModifiedResource dbUserRecentlyModifiedResource,
+      FirecloudWorkspaceResponse fcWorkspace,
+      DbWorkspace dbWorkspace,
+      CohortService cohortService,
+      ConceptSetService conceptSetService,
+      DataSetService dataSetService) {
+    final long workspaceId = dbUserRecentlyModifiedResource.getWorkspaceId();
+    switch (dbUserRecentlyModifiedResource.getResourceType()) {
+      case COHORT:
+        return fromDbUserRecentlyModifiedResourceAndCohort(
+            dbUserRecentlyModifiedResource,
+            fcWorkspace,
+            dbWorkspace,
+            cohortService.findDbCohortByCohortId(
+                getResourceIdInLong(dbUserRecentlyModifiedResource)));
+      case CONCEPT_SET:
+        return fromDbUserRecentlyModifiedResourceAndConceptSet(
+            dbUserRecentlyModifiedResource,
+            fcWorkspace,
+            dbWorkspace,
+            conceptSetService.getDbConceptSet(
+                workspaceId, getResourceIdInLong(dbUserRecentlyModifiedResource)));
+      case DATA_SET:
+        return fromDbUserRecentlyModifiedResourceAndDataSet(
+            dbUserRecentlyModifiedResource,
+            fcWorkspace,
+            dbWorkspace,
+            dataSetService
+                .getDbDataSet(workspaceId, getResourceIdInLong(dbUserRecentlyModifiedResource))
+                .orElse(new DbDataset()));
+      case NOTEBOOK:
+        return fromDbUserRecentlyModifiedResourceAndNotebookName(
+            dbUserRecentlyModifiedResource,
+            fcWorkspace,
+            dbWorkspace,
+            dbUserRecentlyModifiedResource.getResourceId());
+    }
+    return null;
+  }
+
+  default Long getResourceIdInLong(DbUserRecentlyModifiedResource dbUserRecentlyModifiedResource) {
+    return Long.parseLong(
+        Optional.ofNullable(dbUserRecentlyModifiedResource.getResourceId()).orElse("0"));
   }
 
   default FileDetail convertStringToFileDetail(String str) {

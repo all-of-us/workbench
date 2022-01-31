@@ -22,7 +22,6 @@ import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.dataset.DataSetService;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
-import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserRecentResource;
 import org.pmiops.workbench.db.model.DbUserRecentlyModifiedResource;
@@ -250,47 +249,14 @@ public class UserMetricsController implements UserMetricsApiDelegate {
       Map<Long, DbWorkspace> idToDbWorkspace,
       Map<Long, FirecloudWorkspaceResponse> idToFcWorkspaceResponse,
       DbUserRecentlyModifiedResource dbUserRecentlyModifiedResource) {
-
     final long workspaceId = dbUserRecentlyModifiedResource.getWorkspaceId();
-    FirecloudWorkspaceResponse firecloudWorkspaceResponse =
-        idToFcWorkspaceResponse.get(workspaceId);
-    DbWorkspace dbWorkspace = idToDbWorkspace.get(workspaceId);
-    switch (dbUserRecentlyModifiedResource.getResourceType()) {
-      case COHORT:
-        return workspaceResourceMapper.fromDbUserRecentlyModifiedResourceAndCohort(
-            dbUserRecentlyModifiedResource,
-            firecloudWorkspaceResponse,
-            dbWorkspace,
-            cohortService.findDbCohortByCohortId(
-                getResourceIdInLong(dbUserRecentlyModifiedResource)));
-      case CONCEPT_SET:
-        return workspaceResourceMapper.fromDbUserRecentlyModifiedResourceAndConceptSet(
-            dbUserRecentlyModifiedResource,
-            firecloudWorkspaceResponse,
-            dbWorkspace,
-            conceptSetService.getDbConceptSet(
-                workspaceId, getResourceIdInLong(dbUserRecentlyModifiedResource)));
-      case DATA_SET:
-        return workspaceResourceMapper.fromDbUserRecentlyModifiedResourceAndDataSet(
-            dbUserRecentlyModifiedResource,
-            firecloudWorkspaceResponse,
-            dbWorkspace,
-            dataSetService
-                .getDbDataSet(workspaceId, getResourceIdInLong(dbUserRecentlyModifiedResource))
-                .orElse(new DbDataset()));
-      case NOTEBOOK:
-        return workspaceResourceMapper.fromDbUserRecentlyModifiedResourceAndNotebookName(
-            dbUserRecentlyModifiedResource,
-            firecloudWorkspaceResponse,
-            dbWorkspace,
-            dbUserRecentlyModifiedResource.getResourceId());
-    }
-    return null;
-  }
-
-  private Long getResourceIdInLong(DbUserRecentlyModifiedResource dbUserRecentlyModifiedResource) {
-    return Long.parseLong(
-        Optional.ofNullable(dbUserRecentlyModifiedResource.getResourceId()).orElse("0"));
+    return workspaceResourceMapper.fromDbUserRecentlyModifiedResource(
+        dbUserRecentlyModifiedResource,
+        idToFcWorkspaceResponse.get(workspaceId),
+        idToDbWorkspace.get(workspaceId),
+        cohortService,
+        conceptSetService,
+        dataSetService);
   }
 
   // Retrieves Database workspace ID
