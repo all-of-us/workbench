@@ -79,7 +79,7 @@ export default class Navigation {
     } else {
       // click and wait for page navigation
       await Promise.all([
-        page.waitForNavigation({ waitUntil: ['domcontentloaded', 'networkidle0'], timeout: 90000 }),
+        page.waitForNavigation({ waitUntil: ['load', 'networkidle0'], timeout: 90000 }),
         link.click()
       ]);
     }

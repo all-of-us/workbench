@@ -3,7 +3,7 @@ import { PageUrl } from 'app/text-labels';
 import Link from 'app/element/link';
 import AuthenticatedPage from 'app/page/authenticated-page';
 import ClrIconLink from 'app/element/clr-icon-link';
-import { waitForDocumentTitle, waitWhileLoading } from 'utils/waits-utils';
+import { waitForDocumentTitle, waitWhileLoading, waitWhileSpinnerDisplayed } from 'utils/waits-utils';
 import WorkspacesPage from './workspaces-page';
 import { getAttrValue } from 'utils/element-utils';
 import { logger } from 'libs/logger';
@@ -46,8 +46,17 @@ export default class HomePage extends AuthenticatedPage {
           logger.info('Home page is empty without workspace card');
         }
       });
+      try {
+        // Look for either Recent Resources table or the Getting Started text.
+        await Promise.race([
+          this.page.waitForXPath('//*[@data-test-id="recent-resources-table"]', { visible: true, timeout: 2000 }),
+          this.page.waitForXPath('//*[@data-test-id="getting-started"]', { visible: true, timeout: 2000 })
+        ]);
+      } catch (err) {
+        // ignore error
+      }
       // Sometime a second spinner is spinning while waiting for v1/workspaces/user-recent-resources request to finish
-      await waitWhileLoading(this.page);
+      await waitWhileSpinnerDisplayed(this.page);
     };
 
     try {

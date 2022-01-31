@@ -356,30 +356,22 @@ export async function waitForText(
 }
 
 /**
- * <pre>
- * Wait while the page is loading (spinner is spinning and visible). Waiting stops when spinner stops spinning or when timed out.
- * It usually indicates the page is ready for user interaction.
- * </pre>
+ * Wait while loading spinner is visible.
+ * @param page
+ * @param opts
  */
-export async function waitWhileLoading(
+export async function waitWhileSpinnerDisplayed(
   page: Page,
-  timeout: number = 2 * 60 * 1000,
-  opts: { waitForRuntime?: boolean } = {}
+  opts: { timeout?: number; waitForRuntime?: boolean; sleepInterval?: number } = {}
 ): Promise<void> {
-  const { waitForRuntime = false } = opts;
-  const spinElementsCss = `[style*="running spin"], .spinner:empty, [style*="running rotation"]${
+  const { timeout = 2 * 60 * 1000, waitForRuntime = false, sleepInterval = 500 } = opts;
+  const spinnerCss = `[style*="running spin"], .spinner:empty, [style*="running rotation"]${
     waitForRuntime ? '' : ':not([aria-hidden="true"]):not([data-test-id*="runtime-status"])'
   }`;
-
-  const isValidPage = await assertValidPage(page, timeout);
-  if (!isValidPage) {
-    return;
-  }
-
   const confidenceLevel = 2;
   let confidenceCounter = 0;
   let error;
-  const waitUntilSpinnerGone = async (maxTime: number): Promise<void> => {
+  const waitForDisappear = async (maxTime: number): Promise<void> => {
     const startTime = Date.now();
     try {
       await Promise.all([
@@ -388,9 +380,9 @@ export async function waitWhileLoading(
             return !document.querySelectorAll(css).length;
           },
           { polling: 'mutation', timeout: maxTime },
-          spinElementsCss
+          spinnerCss
         ),
-        page.waitForSelector(spinElementsCss, { hidden: true, visible: false, timeout: maxTime })
+        page.waitForSelector(spinnerCss, { hidden: true, visible: false, timeout: maxTime })
       ]);
       confidenceCounter++;
     } catch (err) {
@@ -400,27 +392,34 @@ export async function waitWhileLoading(
     if (confidenceCounter >= confidenceLevel) {
       return; // success
     }
-
     const spentTime = Date.now() - startTime;
     if (spentTime > maxTime) {
-      if (confidenceCounter === 0) {
-        logger.error(`ERROR: Loading spinner has not stopped. Spinner css is "${spinElementsCss}"`);
-        logger.error(error.stack);
-        await takeScreenshot(page, makeDateTimeStr('ERROR_Spinner_TimeOut'));
-        throw new Error(error.message);
-      }
-      logger.info(
-        'WARNING: Waiting for loading spinner to stop has exceeded maximum wait time. But test will continue.'
-      );
-      await takeScreenshot(page, makeDateTimeStr('Spinner_TimeOut'));
-      return;
+      logger.error(`ERROR: Loading spinner has not stopped. Spinner css is "${spinnerCss}"`);
+      logger.error(error.stack);
+      await takeScreenshot(page, makeDateTimeStr('ERROR_Spinner_TimeOut'));
+      throw new Error(error.message);
     }
 
-    await page.waitForTimeout(200); // short pause then check again
-    await waitUntilSpinnerGone(maxTime - spentTime); // unused time
+    await page.waitForTimeout(sleepInterval);
+    await waitForDisappear(maxTime - spentTime); // unused time
   };
 
-  await waitUntilSpinnerGone(timeout); // Wait do not exceed timeout
+  await waitForDisappear(timeout);
+}
+
+/**
+ * Wait while the page is loading.
+ */
+export async function waitWhileLoading(
+  page: Page,
+  timeout: number = 2 * 60 * 1000,
+  opts: { waitForRuntime?: boolean } = {}
+): Promise<void> {
+  const isValidPage = await assertValidPage(page, timeout);
+  if (!isValidPage) {
+    return;
+  }
+  await waitWhileSpinnerDisplayed(page, { timeout, waitForRuntime: opts.waitForRuntime });
 }
 
 /**
