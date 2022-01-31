@@ -362,11 +362,11 @@ export async function waitForText(
  */
 export async function waitWhileSpinnerDisplayed(
   page: Page,
-  opts: { timeout?: number; waitForRuntime?: boolean; sleepInterval?: number } = {}
+  opts: { includeRuntimeSpinner?: boolean; timeout?: number } = {}
 ): Promise<void> {
-  const { timeout = 2 * 60 * 1000, waitForRuntime = false, sleepInterval = 500 } = opts;
+  const { timeout = 2 * 60 * 1000, includeRuntimeSpinner = false } = opts;
   const spinnerCss = `[style*="running spin"], .spinner:empty, [style*="running rotation"]${
-    waitForRuntime ? '' : ':not([aria-hidden="true"]):not([data-test-id*="runtime-status"])'
+    includeRuntimeSpinner ? '' : ':not([aria-hidden="true"]):not([data-test-id*="runtime-status"])'
   }`;
   const confidenceLevel = 2;
   let confidenceCounter = 0;
@@ -400,7 +400,7 @@ export async function waitWhileSpinnerDisplayed(
       throw new Error(error.message);
     }
 
-    await page.waitForTimeout(sleepInterval);
+    await page.waitForTimeout(500);
     await waitForDisappear(maxTime - spentTime); // unused time
   };
 
@@ -412,14 +412,14 @@ export async function waitWhileSpinnerDisplayed(
  */
 export async function waitWhileLoading(
   page: Page,
-  timeout: number = 2 * 60 * 1000,
-  opts: { waitForRuntime?: boolean } = {}
+  opts: { includeRuntimeSpinner?: boolean; timeout?: number } = {}
 ): Promise<void> {
+  const { timeout = 2 * 60 * 1000 } = opts;
   const isValidPage = await assertValidPage(page, timeout);
   if (!isValidPage) {
     return;
   }
-  await waitWhileSpinnerDisplayed(page, { timeout, waitForRuntime: opts.waitForRuntime });
+  await waitWhileSpinnerDisplayed(page, opts);
 }
 
 /**

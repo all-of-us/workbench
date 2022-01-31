@@ -91,7 +91,7 @@ export default class WorkspaceAnalysisPage extends WorkspaceBase {
     ]);
 
     // Waiting up to 30 minutes
-    await waitWhileLoading(this.page, 30 * 60 * 1000);
+    await waitWhileLoading(this.page, { timeout: 30 * 60 * 1000 });
 
     const notebook = new NotebookPage(this.page, notebookName);
     await notebook.waitForLoad();

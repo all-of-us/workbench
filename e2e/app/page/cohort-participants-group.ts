@@ -219,7 +219,7 @@ export default class CohortParticipantsGroup {
   async getGroupCount(): Promise<number> {
     const [count] = await Promise.all([
       waitForNumericalString(this.page, this.getGroupCountXpath(), 120000),
-      waitWhileLoading(this.page, 120000)
+      waitWhileLoading(this.page)
     ]);
     return numericalStringToNumber(count);
   }

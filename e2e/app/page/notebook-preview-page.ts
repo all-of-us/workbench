@@ -41,7 +41,7 @@ export default class NotebookPreviewPage extends AuthenticatedPage {
     await initializeRuntimeIfModalPresented(this.page);
 
     // Restarting notebook server may take a while.
-    await waitWhileLoading(this.page, 60 * 20 * 1000);
+    await waitWhileLoading(this.page, { timeout: 60 * 20 * 1000 });
 
     const notebookPage = new NotebookPage(this.page, notebookName);
     await notebookPage.waitForLoad();
