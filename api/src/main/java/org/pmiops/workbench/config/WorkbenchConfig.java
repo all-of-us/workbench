@@ -245,7 +245,7 @@ public class WorkbenchConfig {
     public boolean enableRasLoginGovLinking;
     // If true, all users are required to finish identity verification using RAS/login.gov
     public boolean enforceRasLoginGovLinking;
-    // Which Data User Code of Conduct (DUCC) Agreement versions are currently accepted as valid
+    // Which Data User Code of Conduct (DUCC) Agreement version(s) are currently accepted as valid
     public List<Integer> currentDuccVersions;
   }
 
