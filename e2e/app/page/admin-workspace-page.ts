@@ -127,8 +127,8 @@ export default class WorkspaceAdminPage extends AuthenticatedPage {
   }
 
   // verify status has updated from running to deleting
-  async getDeleteStatus() {
-    await this.waitUntilSectionVisible(StatusSelectors.Deleting);
+  async getDeleteStatus(): Promise<ElementHandle> {
+    return this.waitUntilSectionVisible(StatusSelectors.Deleting);
   }
 
   async waitUntilSectionVisible(xpath: string): Promise<ElementHandle> {

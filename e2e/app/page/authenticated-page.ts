@@ -46,18 +46,6 @@ export default abstract class AuthenticatedPage extends BasePage {
   }
 
   /**
-   * Load AoU page URL.
-   */
-  async loadPageUrl(url: string): Promise<void> {
-    await this.gotoUrl(url);
-    const signedIn = await this.isSignedIn();
-    if (!signedIn) {
-      await this.page.reload();
-    }
-    await this.waitForLoad();
-  }
-
-  /**
    * Find the actual displayed User name string in sidenav dropdown.
    */
   async getUsername(): Promise<string> {

@@ -78,7 +78,7 @@ export default class HomePage extends AuthenticatedPage {
    * Load Home page and ensure page load is completed.
    */
   async load(): Promise<this> {
-    await this.loadPageUrl(PageUrl.Home);
+    await this.loadPage({ url: PageUrl.Home });
     return this;
   }
 

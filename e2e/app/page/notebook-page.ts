@@ -304,7 +304,7 @@ export default class NotebookPage extends NotebookFrame {
     // Retry only when kernel status is "no connection to kernel" by reloading the notebook page.
     if (await this.isNoConnection()) {
       await takeScreenshot(this.page, makeDateTimeStr('reload_notebook_connection'));
-      await this.reloadPage();
+      await this.loadPage();
       if (await waitForIdle()) {
         return true;
       }

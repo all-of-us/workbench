@@ -48,7 +48,7 @@ export async function signInWithAccessToken(
 
   logger.info('Sign in with access token to Workbench application');
   const homePage = new HomePage(page);
-  await homePage.gotoUrl(PageUrl.Home);
+  await homePage.loadPage({ url: PageUrl.Home });
 
   // Once ready, initialize the token on the page (this is stored in local storage).
   // See sign-in.service.ts for details.
@@ -64,8 +64,8 @@ export async function signInWithAccessToken(
   // logs; there is some delay between a console.log() execution and capture by
   // Puppeteer. Any console.log() within the above global function, for example,
   // is unlikely to be captured.
-  await homePage.reloadPage();
-  await homePage.gotoUrl(PageUrl.Home);
+  await homePage.loadPage();
+  await homePage.loadPage({ url: PageUrl.Home });
   // normally the user is routed to the homepage after sign-in, so that's the default here.
   // tests can override this.
   await postSignInPage.waitForLoad();

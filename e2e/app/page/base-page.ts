@@ -1,4 +1,4 @@
-import { Page } from 'puppeteer';
+import { Page, Response } from 'puppeteer';
 import { logger } from 'libs/logger';
 import { waitWhileLoading } from 'utils/waits-utils';
 
@@ -14,28 +14,29 @@ export default abstract class BasePage {
   }
 
   /**
-   * Reload current page.
+   * Load AoU page url or reload page.
+   * @param {{ url: string, reload: boolean, timeout: number }} opts
    */
-  async reloadPage(timeout?: number): Promise<void> {
-    const response = await this.page.reload({ waitUntil: ['networkidle0', 'load', 'domcontentloaded'], timeout });
-    if (response && !response.ok()) {
-      // Log response if status is not OK
-      logger.info(`Reload page: Response status: ${response.status()}\n${await response.text()}`);
+  async loadPage(opts: { url?: string; reload?: boolean; timeout?: number } = {}): Promise<void> {
+    const { url, reload = false, timeout = 30 * 1000 } = opts;
+    try {
+      let response: Response;
+      if (reload) {
+        logger.info(`Reload page: ${this.page.url()}`);
+        response = await this.page.reload({ waitUntil: ['networkidle0', 'load', 'domcontentloaded'], timeout });
+      } else if (url) {
+        logger.info(`Go to page: ${url}`);
+        response = await this.page.goto(url, { waitUntil: ['load', 'domcontentloaded', 'networkidle2'], timeout });
+      }
+      if (response && !response.ok()) {
+        logger.error(
+          `ERROR: Encountered error while loading page.\nResponse: ${response.status()}\n${await response.text()}`
+        );
+      }
+      await waitWhileLoading(this.page, { timeout });
+    } catch (err) {
+      logger.error(err);
     }
-    await waitWhileLoading(this.page);
-  }
-
-  /**
-   * Load a URL.
-   */
-  async gotoUrl(url: string): Promise<void> {
-    logger.info(`Goto URL: ${url}`);
-    const response = await this.page.goto(url, { waitUntil: ['load', 'domcontentloaded', 'networkidle2'] });
-    if (response && !response.ok()) {
-      // Log response if status is not OK
-      logger.info(`Goto URL: ${url}. Response status: ${response.status()}\n${await response.text()}`);
-    }
-    await waitWhileLoading(this.page);
   }
 
   /**
