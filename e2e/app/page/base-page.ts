@@ -14,28 +14,32 @@ export default abstract class BasePage {
   }
 
   /**
-   * Reload current page.
+   * Load AoU page url or reload page.
+   *
    */
-  async reloadPage(timeout?: number): Promise<void> {
-    const response = await this.page.reload({ waitUntil: ['networkidle0', 'load', 'domcontentloaded'], timeout });
-    if (response && !response.ok()) {
-      // Log response if status is not OK
-      logger.info(`Reload page: Response status: ${response.status()}\n${await response.text()}`);
+  async loadPage(opts: { url?: string; reload?: boolean } = {}): Promise<void> {
+    const { url, reload } = opts;
+    if (url !== undefined && reload !== undefined) {
+      throw new Error('Invalid parameters: url and reload both defined.');
     }
-    await waitWhileLoading(this.page);
-  }
-
-  /**
-   * Load a URL.
-   */
-  async gotoUrl(url: string): Promise<void> {
-    logger.info(`Goto URL: ${url}`);
-    const response = await this.page.goto(url, { waitUntil: ['load', 'domcontentloaded', 'networkidle2'] });
-    if (response && !response.ok()) {
-      // Log response if status is not OK
-      logger.info(`Goto URL: ${url}. Response status: ${response.status()}\n${await response.text()}`);
+    if (url === undefined && reload === undefined) {
+      throw new Error('Invalid parameters: url and reload both undefined.');
     }
-    await waitWhileLoading(this.page);
+    const timeout = 30 * 1000;
+    try {
+      if (url !== undefined) {
+        logger.info(`Go to page: ${url}`);
+        await this.page.goto(url, { waitUntil: ['load', 'domcontentloaded', 'networkidle0'], timeout });
+      }
+      if (reload !== undefined) {
+        logger.info(`Reload page: ${this.page.url()}`);
+        await this.page.reload({ waitUntil: ['networkidle0', 'load', 'domcontentloaded'], timeout });
+      }
+      await waitWhileLoading(this.page, { timeout });
+    } catch (err) {
+      logger.error(`ERROR: Encountered error when loading page.\n${err}`);
+      // Let test continue
+    }
   }
 
   /**

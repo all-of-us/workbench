@@ -48,7 +48,7 @@ export default class ProfilePage extends AuthenticatedPage {
    * Load 'Profile' page and ensure page load is completed.
    */
   async load(): Promise<this> {
-    await this.loadPageUrl(PageUrl.Profile);
+    await this.loadPage({ url: PageUrl.Profile });
     await waitWhileLoading(this.page);
     return this;
   }
