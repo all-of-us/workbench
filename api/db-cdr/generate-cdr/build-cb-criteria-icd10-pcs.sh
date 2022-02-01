@@ -298,6 +298,22 @@ WHERE x.concept_id = y.concept_id
     and x.is_standard = 0
     and x.is_group = 1"
 
+echo "ICD10 - SOURCE - update ICD10PCS domain"
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
+"UPDATE \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` x
+SET x.domain_id = y.domain_id
+FROM (
+  SELECT c.concept_id, UPPER(c.domain_id) as domain_id
+  FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` cr
+  JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c on (cr.concept_id = c.concept_id and cr.type = c.vocabulary_id)
+  AND cr.type = 'ICD10PCS'
+  AND cr.is_standard = 0
+  AND c.domain_id in ('Drug', 'Device')
+) y
+WHERE x.concept_id = y.concept_id
+AND x.type = 'ICD10PCS'
+AND x.is_standard = 0"
+
 #wait for process to end before copying
 wait
 ## copy temp tables back to main tables, and delete temp?
