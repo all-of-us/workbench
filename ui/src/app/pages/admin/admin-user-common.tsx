@@ -12,7 +12,7 @@ import {
   RegisteredTierBadge,
 } from 'app/components/icons';
 
-import { formatInitialCreditsUSD, reactStyles } from 'app/utils';
+import { formatInitialCreditsUSD, isBlank, reactStyles } from 'app/utils';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import {
   AccessBypassRequest,
@@ -230,19 +230,22 @@ export const getEraNote = (profile: Profile): string => {
     profile,
     AccessTierShortNames.Controlled
   );
-  let note = `*eRA Commons requirements vary by institution. This user's institution 
-  (${profile.verifiedInstitutionalAffiliation.institutionDisplayName}) `;
+  const institutionName =
+    profile.verifiedInstitutionalAffiliation?.institutionDisplayName;
+  let note = `* eRA Commons requirements vary by institution. This user's institution 
+  (${isBlank(institutionName) ? 'N/A' : institutionName}) `;
 
   if (!requiredForRT && !requiredForCT) {
     note += 'does not require eRA Commons.';
   } else if (requiredForRT && !requiredForCT) {
-    note += 'requires eRA Commons for RT access.';
+    note += 'requires eRA Commons for Registered Tier access.';
   } else if (!requiredForRT && requiredForCT) {
-    note += 'requires eRA Commons for CT access.';
+    note += 'requires eRA Commons for Controlled Tier access.';
   } else if (requiredForRT && requiredForCT) {
-    note += 'requires eRA Commons for RT and CT access.';
+    note +=
+      'requires eRA Commons for Registered Tier and Controlled Tier access.';
   }
-  return note;
+  return (note += ' *');
 };
 
 // would this AccessBypassRequest actually change the profile state?
