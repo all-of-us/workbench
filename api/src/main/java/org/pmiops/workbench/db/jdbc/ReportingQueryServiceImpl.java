@@ -188,8 +188,8 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 + "  uamrt.compliance_training_completion_time,\n"
                 + "  u.contact_email,\n"
                 + "  u.creation_time,\n"
-                + "  uamd.data_use_agreement_bypass_time,\n"
-                + "  uamd.data_use_agreement_completion_time,\n"
+                + "  uamd.ducc_bypass_time,\n"
+                + "  uamd.ducc_completion_time,\n"
                 + "  ducc.signed_version AS ducc_signed_version,\n"
                 + "  u.demographic_survey_completion_time,\n"
                 + "  u.disabled,\n"
@@ -296,8 +296,8 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 + "  ) uamrt ON u.user_id = uamrt.user_id "
                 + "  LEFT OUTER JOIN ( "
                 + "    SELECT uam.user_id, "
-                + "      uam.bypass_time AS data_use_agreement_bypass_time, "
-                + "      uam.completion_time AS data_use_agreement_completion_time "
+                + "      uam.bypass_time AS ducc_bypass_time, "
+                + "      uam.completion_time AS ducc_completion_time "
                 + "    FROM user_access_module uam "
                 + "    JOIN access_module am ON am.access_module_id=uam.access_module_id "
                 + "    WHERE am.name = 'DATA_USER_CODE_OF_CONDUCT' "
@@ -316,11 +316,9 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 .contactEmail(rs.getString("contact_email"))
                 .creationTime(offsetDateTimeUtc(rs.getTimestamp("creation_time")))
                 .accessTierShortNames(rs.getString("access_tier_short_names"))
-                .dataUseAgreementBypassTime(
-                    offsetDateTimeUtc(rs.getTimestamp("data_use_agreement_bypass_time")))
-                .dataUseAgreementCompletionTime(
-                    offsetDateTimeUtc(rs.getTimestamp("data_use_agreement_completion_time")))
-                .dataUseAgreementSignedVersion(rs.getInt("ducc_signed_version"))
+                .duccBypassTime(offsetDateTimeUtc(rs.getTimestamp("ducc_bypass_time")))
+                .duccCompletionTime(offsetDateTimeUtc(rs.getTimestamp("ducc_completion_time")))
+                .duccSignedVersion(rs.getInt("ducc_signed_version"))
                 .demographicSurveyCompletionTime(
                     offsetDateTimeUtc(rs.getTimestamp("demographic_survey_completion_time")))
                 .disabled(rs.getBoolean("disabled"))

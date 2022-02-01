@@ -38,9 +38,9 @@ public class ReportingUserFixture implements ReportingTestFixture<DbUser, Report
   // All constant values, mocking statements, and assertions in this file are generated. The values
   // are chosen so that errors with transposed columns can be caught.
   // Mapping Short values with valid enums can be tricky, and currently there are
-  // a handful of places where we have to use use a Short in the projection interface but an Enum
+  // a handful of places where we have to use a Short in the projection interface but an Enum
   //  type in the model class. An example of such a manual fix is the following:
-  // .dataUseAgreementSignedVersion(USER__DATA_USE_AGREEMENT_SIGNED_VERSION.longValue())
+  // .duccSignedVersion(USER__DATA_USER_CODE_OF_CONDUCT_SIGNED_VERSION.longValue())
 
   // This code was generated using reporting-wizard.rb at 2020-09-23T15:56:47-04:00.
   // Manual modification should be avoided if possible as this is a one-time generation
@@ -56,9 +56,9 @@ public class ReportingUserFixture implements ReportingTestFixture<DbUser, Report
       Timestamp.from(Instant.parse("2015-05-11T00:00:00.00Z"));
   public static final String USER__ACCESS_TIER_SHORT_NAMES =
       AccessTierService.REGISTERED_TIER_SHORT_NAME;
-  public static final Timestamp USER__DATA_USE_AGREEMENT_BYPASS_TIME =
+  public static final Timestamp USER__DATA_USER_CODE_OF_CONDUCT_AGREEMENT_BYPASS_TIME =
       Timestamp.from(Instant.parse("2015-05-14T00:00:00.00Z"));
-  public static final Timestamp USER__DATA_USE_AGREEMENT_COMPLETION_TIME =
+  public static final Timestamp USER__DATA_USER_CODE_OF_CONDUCT_COMPLETION_TIME =
       Timestamp.from(Instant.parse("2015-05-15T00:00:00.00Z"));
   public static final Integer USER__DATA_USER_CODE_OF_CONDUCT_SIGNED_VERSION = 11;
   public static final Timestamp USER__DEMOGRAPHIC_SURVEY_COMPLETION_TIME =
@@ -117,10 +117,10 @@ public class ReportingUserFixture implements ReportingTestFixture<DbUser, Report
         user.getComplianceTrainingCompletionTime(), USER__COMPLIANCE_TRAINING_COMPLETION_TIME);
     assertThat(user.getContactEmail()).isEqualTo(USER__CONTACT_EMAIL);
     assertThat(user.getAccessTierShortNames()).isEqualTo(USER__ACCESS_TIER_SHORT_NAMES);
-    assertTimeApprox(user.getDataUseAgreementBypassTime(), USER__DATA_USE_AGREEMENT_BYPASS_TIME);
     assertTimeApprox(
-        user.getDataUseAgreementCompletionTime(), USER__DATA_USE_AGREEMENT_COMPLETION_TIME);
-    assertThat(user.getDataUseAgreementSignedVersion())
+        user.getDuccBypassTime(), USER__DATA_USER_CODE_OF_CONDUCT_AGREEMENT_BYPASS_TIME);
+    assertTimeApprox(user.getDuccCompletionTime(), USER__DATA_USER_CODE_OF_CONDUCT_COMPLETION_TIME);
+    assertThat(user.getDuccSignedVersion())
         .isEqualTo(USER__DATA_USER_CODE_OF_CONDUCT_SIGNED_VERSION);
     assertTimeApprox(
         user.getDemographicSurveyCompletionTime(), USER__DEMOGRAPHIC_SURVEY_COMPLETION_TIME);
@@ -194,9 +194,9 @@ public class ReportingUserFixture implements ReportingTestFixture<DbUser, Report
             offsetDateTimeUtc(USER__COMPLIANCE_TRAINING_COMPLETION_TIME))
         .contactEmail(USER__CONTACT_EMAIL)
         .creationTime(offsetDateTimeUtc(USER__CREATION_TIME))
-        .dataUseAgreementBypassTime(offsetDateTimeUtc(USER__DATA_USE_AGREEMENT_BYPASS_TIME))
-        .dataUseAgreementCompletionTime(offsetDateTimeUtc(USER__DATA_USE_AGREEMENT_COMPLETION_TIME))
-        .dataUseAgreementSignedVersion(USER__DATA_USER_CODE_OF_CONDUCT_SIGNED_VERSION)
+        .duccBypassTime(offsetDateTimeUtc(USER__DATA_USER_CODE_OF_CONDUCT_AGREEMENT_BYPASS_TIME))
+        .duccCompletionTime(offsetDateTimeUtc(USER__DATA_USER_CODE_OF_CONDUCT_COMPLETION_TIME))
+        .duccSignedVersion(USER__DATA_USER_CODE_OF_CONDUCT_SIGNED_VERSION)
         .demographicSurveyCompletionTime(
             offsetDateTimeUtc(USER__DEMOGRAPHIC_SURVEY_COMPLETION_TIME))
         .disabled(USER__DISABLED)

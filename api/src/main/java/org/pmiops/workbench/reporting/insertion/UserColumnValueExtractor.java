@@ -22,13 +22,10 @@ public enum UserColumnValueExtractor implements ColumnValueExtractor<ReportingUs
       u -> toInsertRowString(u.getComplianceTrainingCompletionTime())),
   CONTACT_EMAIL("contact_email", ReportingUser::getContactEmail),
   CREATION_TIME("creation_time", u -> toInsertRowString(u.getCreationTime())),
-  DATA_USE_AGREEMENT_BYPASS_TIME(
-      "data_use_agreement_bypass_time", u -> toInsertRowString(u.getDataUseAgreementBypassTime())),
-  DATA_USE_AGREEMENT_COMPLETION_TIME(
-      "data_use_agreement_completion_time",
-      u -> toInsertRowString(u.getDataUseAgreementCompletionTime())),
-  DATA_USE_AGREEMENT_SIGNED_VERSION(
-      "data_use_agreement_signed_version", ReportingUser::getDataUseAgreementSignedVersion),
+  DUCC_BYPASS_TIME("data_use_agreement_bypass_time", u -> toInsertRowString(u.getDuccBypassTime())),
+  DUCC_COMPLETION_TIME(
+      "data_use_agreement_completion_time", u -> toInsertRowString(u.getDuccCompletionTime())),
+  DUCC_SIGNED_VERSION("data_use_agreement_signed_version", ReportingUser::getDuccSignedVersion),
   DEMOGRAPHIC_SURVEY_COMPLETION_TIME(
       "demographic_survey_completion_time",
       u -> toInsertRowString(u.getDemographicSurveyCompletionTime())),

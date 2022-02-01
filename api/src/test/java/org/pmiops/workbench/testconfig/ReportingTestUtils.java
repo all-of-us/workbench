@@ -72,24 +72,9 @@ public class ReportingTestUtils {
   public static final Long WORKSPACE__WORKSPACE_ID = 34L;
   public static final String WORKSPACE__WORKSPACE_NAMESPACE = "aou-rw-12345";
 
-  // This code was generated using reporting-wizard.rb at 2021-01-05T17:36:27-08:00.
-  // Manual modification should be avoided if possible as this is a one-time generation
-  // and does not run on every build and updates must be merged manually for now.
-
   public static final Double WORKSPACE_FREE_TIER_USAGE__COST = 0.500000;
   public static final Long WORKSPACE_FREE_TIER_USAGE__USER_ID = 1L;
   public static final Long WORKSPACE_FREE_TIER_USAGE__WORKSPACE_ID = 2L;
-
-  // All constant values, mocking statements, and assertions in this file are generated. The values
-  // are chosen so that errors with transposed columns can be caught.
-  // Mapping Short values with valid enums can be tricky, and currently there are
-  // a handful of places where we have to use use a Short in the projection interface but an Enum
-  //  type in the model class. An example of such a manual fix is the following:
-  // .dataUseAgreementSignedVersion(USER__DATA_USE_AGREEMENT_SIGNED_VERSION.longValue())
-
-  // This code was generated using reporting-wizard.rb at 2020-09-24T13:40:02-04:00.
-  // Manual modification should be avoided if possible as this is a one-time generation
-  // and does not run on every build and updates must be merged manually for now.
 
   public static final Long COHORT__COHORT_ID = 0L;
   public static final Timestamp COHORT__CREATION_TIME =
@@ -102,17 +87,6 @@ public class ReportingTestUtils {
   public static final String COHORT__NAME = "foo_6";
   public static final Long COHORT__WORKSPACE_ID = 7L;
 
-  // All constant values, mocking statements, and assertions in this file are generated. The values
-  // are chosen so that errors with transposed columns can be caught.
-  // Mapping Short values with valid enums can be tricky, and currently there are
-  // a handful of places where we have to use use a Short in the projection interface but an Enum
-  //  type in the model class. An example of such a manual fix is the following:
-  // .dataUseAgreementSignedVersion(USER__DATA_USE_AGREEMENT_SIGNED_VERSION.longValue())
-
-  // This code was generated using reporting-wizard.rb at 2020-10-05T09:51:25-04:00.
-  // Manual modification should be avoided if possible as this is a one-time generation
-  // and does not run on every build and updates must be merged manually for now.
-
   public static final String INSTITUTION__DISPLAY_NAME = "foo_0";
   public static final Long INSTITUTION__INSTITUTION_ID = 2L;
   public static final OrganizationType INSTITUTION__ORGANIZATION_TYPE_ENUM =
@@ -121,16 +95,6 @@ public class ReportingTestUtils {
   public static final String INSTITUTION__SHORT_NAME = "foo_5";
   public static final InstitutionMembershipRequirement INSTITUTION__REGISTERED_TIER_REQUIREMENT =
       InstitutionMembershipRequirement.DOMAINS;
-  // All constant values, mocking statements, and assertions in this file are generated. The values
-  // are chosen so that errors with transposed columns can be caught.
-  // Mapping Short values with valid enums can be tricky, and currently there are
-  // a handful of places where we have to use use a Short in the projection interface but an Enum
-  //  type in the model class. An example of such a manual fix is the following:
-  // .dataUseAgreementSignedVersion(USER__DATA_USE_AGREEMENT_SIGNED_VERSION.longValue())
-
-  // This code was generated using reporting-wizard.rb at 2020-11-05T14:31:23-05:00.
-  // Manual modification should be avoided if possible as this is a one-time generation
-  // and does not run on every build and updates must be merged manually for now.
 
   public static final Timestamp DATASET__CREATION_TIME =
       Timestamp.from(Instant.parse("2015-05-05T00:00:00.00Z"));
@@ -143,57 +107,6 @@ public class ReportingTestUtils {
   public static final String DATASET__NAME = "foo_6";
   public static final Short DATASET__PRE_PACKAGED_CONCEPT_SET = 7;
   public static final Long DATASET__WORKSPACE_ID = 8L;
-
-  public static void assertDtoWorkspaceFields(
-      ReportingWorkspace workspace,
-      long expectedWorkspaceId,
-      long expectedCdrVersionId,
-      long expectedCreatorId) {
-    assertThat(workspace.getAccessTierShortName()).isEqualTo(WORKSPACE__ACCESS_TIER_SHORT_NAME);
-    assertThat(workspace.getBillingAccountType()).isEqualTo(WORKSPACE__BILLING_ACCOUNT_TYPE);
-    assertThat(workspace.getBillingStatus()).isEqualTo(WORKSPACE__BILLING_STATUS);
-    assertThat(workspace.getCdrVersionId()).isEqualTo(expectedCdrVersionId);
-    assertTimeApprox(workspace.getCreationTime(), WORKSPACE__CREATION_TIME);
-    assertThat(workspace.getCreatorId()).isEqualTo(expectedCreatorId);
-    assertThat(workspace.getDisseminateResearchOther())
-        .isEqualTo(WORKSPACE__DISSEMINATE_RESEARCH_OTHER);
-    assertTimeApprox(workspace.getLastAccessedTime(), WORKSPACE__LAST_ACCESSED_TIME);
-    assertTimeApprox(workspace.getLastModifiedTime(), WORKSPACE__LAST_MODIFIED_TIME);
-    assertThat(workspace.getName()).isEqualTo(WORKSPACE__NAME);
-    assertThat(workspace.getNeedsRpReviewPrompt()).isEqualTo(WORKSPACE__NEEDS_RP_REVIEW_PROMPT);
-    assertThat(workspace.getPublished()).isEqualTo(WORKSPACE__PUBLISHED);
-    assertThat(workspace.getRpAdditionalNotes()).isEqualTo(WORKSPACE__RP_ADDITIONAL_NOTES);
-    assertThat(workspace.getRpAncestry()).isEqualTo(WORKSPACE__RP_ANCESTRY);
-    assertThat(workspace.getRpAnticipatedFindings()).isEqualTo(WORKSPACE__RP_ANTICIPATED_FINDINGS);
-    assertThat(workspace.getRpApproved()).isEqualTo(WORKSPACE__RP_APPROVED);
-    assertThat(workspace.getRpCommercialPurpose()).isEqualTo(WORKSPACE__RP_COMMERCIAL_PURPOSE);
-    assertThat(workspace.getRpControlSet()).isEqualTo(WORKSPACE__RP_CONTROL_SET);
-    assertThat(workspace.getRpDiseaseFocusedResearch())
-        .isEqualTo(WORKSPACE__RP_DISEASE_FOCUSED_RESEARCH);
-    assertThat(workspace.getRpDiseaseOfFocus()).isEqualTo(WORKSPACE__RP_DISEASE_OF_FOCUS);
-    assertThat(workspace.getRpDrugDevelopment()).isEqualTo(WORKSPACE__RP_DRUG_DEVELOPMENT);
-    assertThat(workspace.getRpEducational()).isEqualTo(WORKSPACE__RP_EDUCATIONAL);
-    assertThat(workspace.getRpEthics()).isEqualTo(WORKSPACE__RP_ETHICS);
-    assertThat(workspace.getRpIntendedStudy()).isEqualTo(WORKSPACE__RP_INTENDED_STUDY);
-    assertThat(workspace.getRpMethodsDevelopment()).isEqualTo(WORKSPACE__RP_METHODS_DEVELOPMENT);
-    assertThat(workspace.getRpOtherPopulationDetails())
-        .isEqualTo(WORKSPACE__RP_OTHER_POPULATION_DETAILS);
-    assertThat(workspace.getRpOtherPurpose()).isEqualTo(WORKSPACE__RP_OTHER_PURPOSE);
-    assertThat(workspace.getRpOtherPurposeDetails()).isEqualTo(WORKSPACE__RP_OTHER_PURPOSE_DETAILS);
-    assertThat(workspace.getRpPopulationHealth()).isEqualTo(WORKSPACE__RP_POPULATION_HEALTH);
-    assertThat(workspace.getRpReasonForAllOfUs()).isEqualTo(WORKSPACE__RP_REASON_FOR_ALL_OF_US);
-    assertThat(workspace.getRpReviewRequested()).isEqualTo(WORKSPACE__RP_REVIEW_REQUESTED);
-    assertThat(workspace.getRpScientificApproach()).isEqualTo(WORKSPACE__RP_SCIENTIFIC_APPROACH);
-    assertThat(workspace.getRpSocialBehavioral()).isEqualTo(WORKSPACE__RP_SOCIAL_BEHAVIORAL);
-    assertTimeApprox(workspace.getRpTimeRequested(), WORKSPACE__RP_TIME_REQUESTED);
-    assertThat(workspace.getWorkspaceId()).isEqualTo(expectedWorkspaceId);
-    assertThat(workspace.getWorkspaceNamespace()).isEqualTo(WORKSPACE__WORKSPACE_NAMESPACE);
-  }
-
-  public static void assertDtoWorkspaceFields(ReportingWorkspace workspace) {
-    assertDtoWorkspaceFields(
-        workspace, WORKSPACE__WORKSPACE_ID, WORKSPACE__CDR_VERSION_ID, WORKSPACE__CREATOR_ID);
-  }
 
   public static ReportingWorkspace createDtoWorkspace() {
     return new ReportingWorkspace()
