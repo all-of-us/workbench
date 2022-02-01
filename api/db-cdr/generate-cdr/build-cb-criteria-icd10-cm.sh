@@ -80,7 +80,7 @@ SELECT
       ROW_NUMBER() OVER (ORDER BY p.parent_id, c.concept_code)
          + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` where id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID) AS id
     , p.id AS parent_id
-    , UPPER(c.domain_id)
+    , p.domain_id
     , p.is_standard
     , p.type
     , c.concept_id AS concept_id
@@ -136,7 +136,7 @@ do
         ROW_NUMBER() OVER (ORDER BY p.id, c.concept_code)
           + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` where id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID)
         , p.id
-        , (SELECT UPPER(domain_id) FROM \`$BQ_PROJECT.$BQ_DATASET.concept\` where concept_id = c.concept_id)
+        , p.domain_id
         , p.is_standard
         , p.type
         , c.concept_id
@@ -193,7 +193,7 @@ SELECT DISTINCT a.concept_id as ancestor_concept_id
 
 FROM
     (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
-         WHERE type = 'ICD10CM' and is_group = 1 and is_selectable = 1 and is_standard = 0
+         WHERE domain_id = 'CONDITION' and type = 'ICD10CM' and is_group = 1 and is_selectable = 1 and is_standard = 0
          and id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID ) a
     LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` WHERE type = 'ICD10CM') b on a.id = b.parent_id
     LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` WHERE type = 'ICD10CM') c on b.id = c.parent_id
@@ -290,6 +290,22 @@ WHERE x.concept_id = y.concept_id
     and x.type = 'ICD10CM'
     and x.is_standard = 0
     and x.is_group = 1"
+
+echo "ICD10 - SOURCE - update ICD10CM domain"
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
+"UPDATE \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` x
+SET x.domain_id = y.domain_id
+FROM (
+  SELECT c.concept_id, UPPER(c.domain_id) as domain_id
+  FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` cr
+  JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c on (cr.concept_id = c.concept_id and cr.type = c.vocabulary_id)
+  AND cr.type = 'ICD10CM'
+  AND cr.is_standard = 0
+  AND c.domain_id in ('Observation', 'Measurement', 'Procedure')
+) y
+WHERE x.concept_id = y.concept_id
+AND x.type = 'ICD10CM'
+AND x.is_standard = 0"
 
 #wait for process to end before copying
 wait
