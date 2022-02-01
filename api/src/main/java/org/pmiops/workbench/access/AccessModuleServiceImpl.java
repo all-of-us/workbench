@@ -46,8 +46,6 @@ public class AccessModuleServiceImpl implements AccessModuleService {
   private final Provider<WorkbenchConfig> configProvider;
   private final UserAccessModuleMapper userAccessModuleMapper;
 
-  private static final int CURRENT_DATA_USER_CODE_OF_CONDUCT_VERSION = 3;
-
   @Autowired
   public AccessModuleServiceImpl(
       Provider<List<DbAccessModule>> dbAccessModulesProvider,
@@ -137,18 +135,18 @@ public class AccessModuleServiceImpl implements AccessModuleService {
 
   @VisibleForTesting
   @Override
-  public int getCurrentDuccVersion() {
-    return CURRENT_DATA_USER_CODE_OF_CONDUCT_VERSION;
+  public boolean isSignedDuccVersionCurrent(Integer signedVersion) {
+    return configProvider.get().access.currentDuccVersions.contains(signedVersion);
   }
 
   @Override
-  public boolean hasUserSignedTheCurrentDucc(DbUser targetUser) {
+  public boolean hasUserSignedACurrentDucc(DbUser targetUser) {
     final DbUserCodeOfConductAgreement duccAgreement = targetUser.getDuccAgreement();
     if (duccAgreement == null) {
       return false;
     }
 
-    return duccAgreement.getSignedVersion() == getCurrentDuccVersion();
+    return isSignedDuccVersionCurrent(duccAgreement.getSignedVersion());
   }
 
   @Override
@@ -165,7 +163,7 @@ public class AccessModuleServiceImpl implements AccessModuleService {
 
     // we have an additional check before considering DUCC "complete"
     if (isCompleted && accessModuleName == AccessModuleName.DATA_USER_CODE_OF_CONDUCT) {
-      isCompleted = hasUserSignedTheCurrentDucc(dbUser);
+      isCompleted = hasUserSignedACurrentDucc(dbUser);
     }
 
     boolean isExpired =

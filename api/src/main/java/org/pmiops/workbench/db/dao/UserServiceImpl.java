@@ -429,8 +429,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
 
   @Override
   public DbUser submitDUCC(DbUser dbUser, Integer duccSignedVersion, String initials) {
-    // FIXME: this should not be hardcoded
-    if (duccSignedVersion != accessModuleService.getCurrentDuccVersion()) {
+    if (!accessModuleService.isSignedDuccVersionCurrent(duccSignedVersion)) {
       throw new BadRequestException("Data User Code of Conduct Version is not up to date");
     }
     final Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
@@ -819,7 +818,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       return targetUser;
     }
 
-    if (!accessModuleService.hasUserSignedTheCurrentDucc(targetUser)) {
+    if (!accessModuleService.hasUserSignedACurrentDucc(targetUser)) {
       accessModuleService.updateCompletionTime(
           targetUser, AccessModuleName.DATA_USER_CODE_OF_CONDUCT, null);
     }

@@ -164,10 +164,10 @@ public class UserServiceAccessTest {
     providedWorkbenchConfig.access.enableEraCommons = true;
     providedWorkbenchConfig.access.enforceRasLoginGovLinking = true;
     providedWorkbenchConfig.access.enableRasLoginGovLinking = true;
+    providedWorkbenchConfig.access.currentDuccVersions = ImmutableList.of(1, 2); // arbitrary
     providedWorkbenchConfig.accessRenewal.expiryDays = EXPIRATION_DAYS;
     providedWorkbenchConfig.accessRenewal.expiryDaysWarningThresholds =
         ImmutableList.of(1L, 3L, 7L, 15L, 30L);
-
     registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
     controlledTier = TestMockFactory.createControlledTierForTests(accessTierDao);
     accessModules = TestMockFactory.createAccessModules(accessModuleDao);
@@ -352,13 +352,15 @@ public class UserServiceAccessTest {
 
   @Test
   public void test_updateUserWithRetries_ducc_unbypassed_aar_wrong_version_noncompliant() {
+    providedWorkbenchConfig.access.currentDuccVersions = ImmutableList.of(4, 5);
+
     testUnregistration(
         user -> {
           accessModuleService.updateBypassTime(
               dbUser.getUserId(), AccessModule.DATA_USER_CODE_OF_CONDUCT, false);
           accessModuleService.updateCompletionTime(
               dbUser, AccessModuleName.DATA_USER_CODE_OF_CONDUCT, Timestamp.from(START_INSTANT));
-          user.setDuccAgreement(signDucc(user, accessModuleService.getCurrentDuccVersion() - 1));
+          user.setDuccAgreement(signDucc(user, 3));
           return userDao.save(user);
         });
   }
@@ -479,6 +481,7 @@ public class UserServiceAccessTest {
     accessModuleService.updateCompletionTime(dbUser, AccessModuleName.PROFILE_CONFIRMATION, now);
     accessModuleService.updateCompletionTime(
         dbUser, AccessModuleName.DATA_USER_CODE_OF_CONDUCT, now);
+
     // a completion requirement for DUCC
     dbUser.setDuccAgreement(signCurrentDucc(dbUser));
 
@@ -1194,7 +1197,8 @@ public class UserServiceAccessTest {
   }
 
   private DbUserCodeOfConductAgreement signCurrentDucc(DbUser dbUser) {
-    return signDucc(dbUser, accessModuleService.getCurrentDuccVersion());
+    int aValidVersion = providedWorkbenchConfig.access.currentDuccVersions.get(0);
+    return signDucc(dbUser, aValidVersion);
   }
 
   // checks which power most of these tests - confirm that the unregisteringFunction does that

@@ -98,7 +98,8 @@
     "unsafeAllowSelfBypass": true,
     "unsafeAllowUserCreationFromGSuiteData": false,
     "enableRasLoginGovLinking": true,
-    "enforceRasLoginGovLinking": true
+    "enforceRasLoginGovLinking": true,
+    "currentDuccVersions": [3]
   },
   "featureFlags": {
     "unsafeAllowDeleteUser": true,
