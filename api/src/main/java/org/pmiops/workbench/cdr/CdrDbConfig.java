@@ -104,7 +104,8 @@ public class CdrDbConfig {
         @Qualifier("cdrPoolConfiguration") PoolConfiguration cdrPoolConfig,
         @Qualifier("configCache") LoadingCache<String, Object> configCache)
         throws ExecutionException {
-      //WorkbenchConfig workbenchConfig = CacheSpringConfiguration.lookupWorkbenchConfig(configCache);
+      // WorkbenchConfig workbenchConfig =
+      // CacheSpringConfiguration.lookupWorkbenchConfig(configCache);
       String dbUser = cdrPoolConfig.getUsername();
       String dbPassword = cdrPoolConfig.getPassword();
       String originalDbUrl = cdrPoolConfig.getUrl();
@@ -172,6 +173,10 @@ public class CdrDbConfig {
         if (finishedInitialization) {
           throw new ServerErrorException("No CDR version specified!");
         } else {
+          // While Spring beans are being initialized, this method can be called
+          // in the course of attempting to determine metadata about the data source.
+          // After Spring beans are finished being initialized, init() will
+          // be called and we will start requiring clients to specify a CDR version.
           return DUMMY_DATA_SOURCE_INDEX;
         }
       }
