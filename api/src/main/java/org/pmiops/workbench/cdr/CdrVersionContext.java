@@ -36,7 +36,7 @@ public class CdrVersionContext {
   public static DbCdrVersion getCdrVersionNotNull() {
     DbCdrVersion version = nullableGetCdrVersion();
     if (version == null) {
-      throw new ServerErrorException("No CDR version specified");
+      throw new ServerErrorException("No CDR version specified!");
     }
 
     return version;
