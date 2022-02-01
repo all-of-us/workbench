@@ -40,7 +40,7 @@ public class CdrVersionContext {
 
   /**
    * BigQueryService.getBigQueryService() operates in two modes: with and without a CDR context
-   * 
+   *
    * @return the CDR Context's BigQuery project if there is a CDR in context, null if not
    */
   @Nullable
