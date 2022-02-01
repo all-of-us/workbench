@@ -221,6 +221,30 @@ export const displayTierBadgeByRequiredModule = (
   );
 };
 
+export const getEraNote = (profile: Profile): string => {
+  const requiredForRT = isEraRequiredForTier(
+    profile,
+    AccessTierShortNames.Registered
+  );
+  const requiredForCT = isEraRequiredForTier(
+    profile,
+    AccessTierShortNames.Controlled
+  );
+  let note = `*eRA Commons requirements vary by institution. This user's institution 
+  (${profile.verifiedInstitutionalAffiliation.institutionDisplayName}) `;
+
+  if (!requiredForRT && !requiredForCT) {
+    note += 'does not require eRA Commons.';
+  } else if (requiredForRT && !requiredForCT) {
+    note += 'requires eRA Commons for RT access.';
+  } else if (!requiredForRT && requiredForCT) {
+    note += 'requires eRA Commons for CT access.';
+  } else if (requiredForRT && requiredForCT) {
+    note += 'requires eRA Commons for RT and CT access.';
+  }
+  return note;
+};
+
 // would this AccessBypassRequest actually change the profile state?
 // allows un-toggling of bypass for a module
 export const wouldUpdateBypassState = (
