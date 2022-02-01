@@ -113,6 +113,7 @@ export interface NodeProp extends Criteria {
 
 interface TreeNodeProps {
   autocompleteSelection: any;
+  domain: Domain;
   expand?: Function;
   groupSelections: Array<number>;
   node: NodeProp;
@@ -177,39 +178,35 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
   }
 
   get inMemorySearch() {
-    const {
-      node: { domainId },
-    } = this.props;
-    return (
-      domainId === Domain.PHYSICALMEASUREMENT.toString() ||
-      domainId === Domain.VISIT.toString()
-    );
+    const { domain } = this.props;
+    return domain === Domain.PHYSICALMEASUREMENT || domain === Domain.VISIT;
   }
 
   loadChildren() {
     const {
-      node: { conceptId, count, domainId, id, isStandard, name, type },
+      domain,
+      node: { conceptId, count, id, isStandard, name, type },
     } = this.props;
     this.setState({ loading: true });
     const workspace = currentWorkspaceStore.getValue();
     const criteriaType =
-      domainId === Domain.DRUG.toString() ? CriteriaType.ATC.toString() : type;
+      domain === Domain.DRUG ? CriteriaType.ATC.toString() : type;
     cohortBuilderApi()
       .findCriteriaBy(
         workspace.namespace,
         workspace.id,
-        domainId,
+        domain.toString(),
         criteriaType,
         isStandard,
         id
       )
       .then((resp) => {
-        if (resp.items.length === 0 && domainId === Domain.DRUG.toString()) {
+        if (resp.items.length === 0 && domain === Domain.DRUG) {
           cohortBuilderApi()
             .findCriteriaBy(
               workspace.namespace,
               workspace.id,
-              domainId,
+              domain.toString(),
               CriteriaType[CriteriaType.RXNORM],
               isStandard,
               id
@@ -224,7 +221,7 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
           this.setState({ children: resp.items, loading: false });
           if (
             resp.items.length > 0 &&
-            domainId === Domain.SURVEY.toString() &&
+            domain === Domain.SURVEY &&
             !resp.items[0].group
           ) {
             // save questions in the store so we can display them along with answers if selected
@@ -453,6 +450,7 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
   render() {
     const {
       autocompleteSelection,
+      domain,
       groupSelections,
       node,
       node: { code, count, id, group, hasAttributes, name, selectable },
@@ -568,6 +566,7 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
               <TreeNode
                 key={c}
                 autocompleteSelection={autocompleteSelection}
+                domain={domain}
                 expand={() => this.setState({ expanded: true })}
                 groupSelections={groupSelections}
                 node={child}

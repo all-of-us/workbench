@@ -501,18 +501,19 @@ export const CriteriaSearch = fp.flow(
             />
             {hierarchyNode && (
               <CriteriaTree
-                source={source}
-                selectedSurvey={selectedSurvey}
                 autocompleteSelection={autocompleteSelection}
                 back={this.back}
+                domain={domain}
                 groupSelections={groupSelections}
                 node={hierarchyNode}
                 scrollToMatch={this.setScroll}
                 searchTerms={treeSearchTerms}
                 select={this.addSelection}
                 selectedIds={this.getListSearchSelectedIds()}
+                selectedSurvey={selectedSurvey}
                 selectOption={this.setAutocompleteSelection}
                 setSearchTerms={this.setTreeSearchTerms}
+                source={source}
               />
             )}
             {/*List View (using duplicated version of ListSearch) */}
