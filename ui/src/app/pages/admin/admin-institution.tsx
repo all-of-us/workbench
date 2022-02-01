@@ -87,35 +87,40 @@ export const AdminInstitution = fp.flow(withNavigation)(
       }
     }
 
-    renderInstitutionName(row) {
-      const link = 'admin/institution/edit/' + row['shortName'];
-      return <a href={link}> {row['displayName']}</a>;
+    renderInstitutionName(institution: Institution) {
+      const link = 'admin/institution/edit/' + institution.shortName;
+      return <a href={link}>{institution.displayName}</a>;
     }
 
-    renderOrganizationType(row) {
+    renderOrganizationType(institution: Institution) {
       // This should fail if the organization value is not in list
       const organizationLabel = OrganizationTypeOptions.filter(
-        (organization) => organization.value === row['organizationTypeEnum']
+        (organization) =>
+          organization.value === institution.organizationTypeEnum
       )[0].label;
-      if (row['organizationTypeEnum'] === OrganizationType.OTHER) {
-        return organizationLabel + ' - ' + row['organizationTypeOtherText'];
+      if (institution.organizationTypeEnum === OrganizationType.OTHER) {
+        return (
+          organizationLabel + ' - ' + institution.organizationTypeOtherText
+        );
       }
       return organizationLabel;
     }
 
-    renderAccessTiers(row) {
+    renderAccessTiers(institution: Institution) {
       const tiersInOrder = [
         AccessTierShortNames.Registered,
         AccessTierShortNames.Controlled,
       ];
-      return tiersInOrder
-        .filter(
+
+      return fp.flow(
+        fp.filter<string>(
           (tier) =>
-            getTierConfig(row, tier)?.membershipRequirement !==
+            getTierConfig(institution, tier)?.membershipRequirement !==
             InstitutionMembershipRequirement.NOACCESS
-        )
-        .map((tier) => tier.toUpperCase())
-        .join(', ');
+        ),
+        fp.map(fp.capitalize),
+        fp.join(', ')
+      )(tiersInOrder);
     }
 
     render() {
