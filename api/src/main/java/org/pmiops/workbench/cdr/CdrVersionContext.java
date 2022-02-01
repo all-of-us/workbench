@@ -1,5 +1,7 @@
 package org.pmiops.workbench.cdr;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 
@@ -25,11 +27,18 @@ public class CdrVersionContext {
     cdrVersion.remove();
   }
 
-  public static DbCdrVersion getCdrVersion() {
-    DbCdrVersion version = cdrVersion.get();
+  @Nullable
+  public static DbCdrVersion nullableGetCdrVersion() {
+    return cdrVersion.get();
+  }
+
+  @Nonnull
+  public static DbCdrVersion getCdrVersionNotNull() {
+    DbCdrVersion version = nullableGetCdrVersion();
     if (version == null) {
-      throw new ServerErrorException("No CDR version specified!");
+      throw new ServerErrorException("No CDR version specified");
     }
+
     return version;
   }
 }

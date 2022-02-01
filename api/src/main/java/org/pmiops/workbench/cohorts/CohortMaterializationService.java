@@ -284,7 +284,7 @@ public class CohortMaterializationService {
       DataTableSpecification dataTableSpecification,
       @Nullable DbCohortReview cohortReview,
       @Nullable Set<Long> conceptIds) {
-    DbCdrVersion cdrVersion = CdrVersionContext.getCdrVersion();
+    DbCdrVersion cdrVersion = CdrVersionContext.getCdrVersionNotNull();
     CdrQuery cdrQuery =
         new CdrQuery()
             .bigqueryDataset(cdrVersion.getBigqueryDataset())

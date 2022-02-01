@@ -2133,7 +2133,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   protected String getTablePrefix() {
-    DbCdrVersion cdrVersion = CdrVersionContext.getCdrVersion();
+    DbCdrVersion cdrVersion = CdrVersionContext.getCdrVersionNotNull();
     return cdrVersion.getBigqueryProject() + "." + cdrVersion.getBigqueryDataset();
   }
 

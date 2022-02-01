@@ -49,7 +49,7 @@ public class BigQueryService {
 
   @VisibleForTesting
   protected BigQuery getBigQueryService() {
-    DbCdrVersion cdrVersion = CdrVersionContext.getCdrVersion();
+    DbCdrVersion cdrVersion = CdrVersionContext.nullableGetCdrVersion();
     if (cdrVersion == null) {
       return defaultBigQuery;
     }
@@ -104,10 +104,7 @@ public class BigQueryService {
   }
 
   public QueryJobConfiguration filterBigQueryConfig(QueryJobConfiguration queryJobConfiguration) {
-    DbCdrVersion cdrVersion = CdrVersionContext.getCdrVersion();
-    if (cdrVersion == null) {
-      throw new ServerErrorException("No CDR version specified");
-    }
+    DbCdrVersion cdrVersion = CdrVersionContext.getCdrVersionNotNull();
     String returnSql =
         queryJobConfiguration.getQuery().replace("${projectId}", cdrVersion.getBigqueryProject());
     returnSql = returnSql.replace("${dataSetId}", cdrVersion.getBigqueryDataset());
@@ -160,7 +157,7 @@ public class BigQueryService {
   }
 
   public FieldList getTableFieldsFromDomain(Domain domain) {
-    DbCdrVersion cdrVersion = CdrVersionContext.getCdrVersion();
+    DbCdrVersion cdrVersion = CdrVersionContext.getCdrVersionNotNull();
     TableId tableId =
         TableId.of(
             cdrVersion.getBigqueryProject(),

@@ -102,7 +102,7 @@ public class CdrDbConfig {
 
     @Override
     protected Object determineCurrentLookupKey() {
-      return CdrVersionContext.getCdrVersion().getCdrVersionId();
+      return CdrVersionContext.getCdrVersionNotNull().getCdrVersionId();
     }
   }
 
