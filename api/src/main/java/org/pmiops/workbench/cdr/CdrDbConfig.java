@@ -1,13 +1,11 @@
 package org.pmiops.workbench.cdr;
 
-import com.google.common.cache.LoadingCache;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import java.util.logging.Logger;
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
@@ -101,11 +99,7 @@ public class CdrDbConfig {
     public CdrDataSource(
         CdrVersionDao cdrVersionDao,
         @Qualifier("poolConfiguration") PoolConfiguration basePoolConfig,
-        @Qualifier("cdrPoolConfiguration") PoolConfiguration cdrPoolConfig,
-        @Qualifier("configCache") LoadingCache<String, Object> configCache)
-        throws ExecutionException {
-      // WorkbenchConfig workbenchConfig =
-      // CacheSpringConfiguration.lookupWorkbenchConfig(configCache);
+        @Qualifier("cdrPoolConfiguration") PoolConfiguration cdrPoolConfig) {
       String dbUser = cdrPoolConfig.getUsername();
       String dbPassword = cdrPoolConfig.getPassword();
       String originalDbUrl = cdrPoolConfig.getUrl();
