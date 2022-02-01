@@ -88,7 +88,7 @@ export const AdminInstitution = fp.flow(withNavigation)(
     }
 
     renderInstitutionName(institution: Institution) {
-      const link = 'admin/institution/edit/' + institution.shortName;
+      const link = `admin/institution/edit/${institution.shortName}`;
       return <a href={link}>{institution.displayName}</a>;
     }
 
@@ -99,9 +99,7 @@ export const AdminInstitution = fp.flow(withNavigation)(
           organization.value === institution.organizationTypeEnum
       )[0].label;
       if (institution.organizationTypeEnum === OrganizationType.OTHER) {
-        return (
-          organizationLabel + ' - ' + institution.organizationTypeOtherText
-        );
+        return `${organizationLabel} - ${institution.organizationTypeOtherText}`;
       }
       return organizationLabel;
     }
