@@ -1,3 +1,8 @@
+import * as React from 'react';
+import * as fp from 'lodash/fp';
+import { Column } from 'primereact/column';
+import { DataTable } from 'primereact/datatable';
+
 import { Button } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
 import { SemiBoldHeader } from 'app/components/headers';
@@ -7,18 +12,15 @@ import { OrganizationTypeOptions } from 'app/pages/admin/admin-institution-optio
 import { institutionApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
-import {
-  getControlledTierConfig,
-  getRegisteredTierConfig,
-} from 'app/utils/institutions';
+import { getTierConfig } from 'app/utils/institutions';
 import { NavigationProps } from 'app/utils/navigation';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
-import { Institution, InstitutionMembershipRequirement } from 'generated/fetch';
-import { OrganizationType } from 'generated/fetch';
-import * as fp from 'lodash/fp';
-import { Column } from 'primereact/column';
-import { DataTable } from 'primereact/datatable';
-import * as React from 'react';
+import {
+  Institution,
+  InstitutionMembershipRequirement,
+  OrganizationType,
+} from 'generated/fetch';
+import { AccessTierShortNames } from 'app/utils/access-tiers';
 
 const styles = reactStyles({
   pageHeader: {
@@ -85,39 +87,38 @@ export const AdminInstitution = fp.flow(withNavigation)(
       }
     }
 
-    renderInstitutionName(row) {
-      const link = 'admin/institution/edit/' + row['shortName'];
-      return <a href={link}> {row['displayName']}</a>;
+    renderInstitutionName(institution: Institution) {
+      const link = `admin/institution/edit/${institution.shortName}`;
+      return <a href={link}>{institution.displayName}</a>;
     }
 
-    renderOrganizationType(row) {
+    renderOrganizationType(institution: Institution) {
       // This should fail if the organization value is not in list
       const organizationLabel = OrganizationTypeOptions.filter(
-        (organization) => organization.value === row['organizationTypeEnum']
+        (organization) =>
+          organization.value === institution.organizationTypeEnum
       )[0].label;
-      if (row['organizationTypeEnum'] === OrganizationType.OTHER) {
-        return organizationLabel + ' - ' + row['organizationTypeOtherText'];
+      if (institution.organizationTypeEnum === OrganizationType.OTHER) {
+        return `${organizationLabel} - ${institution.organizationTypeOtherText}`;
       }
       return organizationLabel;
     }
 
-    renderAccessTiers(row) {
-      let tiers = '';
-      if (
-        getRegisteredTierConfig(row).membershipRequirement !==
-        InstitutionMembershipRequirement.NOACCESS
-      ) {
-        tiers += 'Registered';
-      }
+    renderAccessTiers(institution: Institution) {
+      const tiersInOrder = [
+        AccessTierShortNames.Registered,
+        AccessTierShortNames.Controlled,
+      ];
 
-      if (
-        getControlledTierConfig(row) &&
-        getControlledTierConfig(row).membershipRequirement !==
-          InstitutionMembershipRequirement.NOACCESS
-      ) {
-        tiers += ',Controlled';
-      }
-      return tiers;
+      return fp.flow(
+        fp.filter<string>(
+          (tier) =>
+            getTierConfig(institution, tier)?.membershipRequirement !==
+            InstitutionMembershipRequirement.NOACCESS
+        ),
+        fp.map(fp.capitalize),
+        fp.join(', ')
+      )(tiersInOrder);
     }
 
     render() {

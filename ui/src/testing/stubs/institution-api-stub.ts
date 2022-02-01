@@ -9,7 +9,8 @@ import {
   OrganizationType,
 } from 'generated/fetch';
 import { stubNotImplementedError } from 'testing/stubs/stub-utils';
-import { getRegisteredTierConfig } from 'app/utils/institutions';
+import { getTierConfig } from 'app/utils/institutions';
+import { AccessTierShortNames } from 'app/utils/access-tiers';
 
 export const VUMC: Institution = {
   shortName: 'VUMC',
@@ -145,8 +146,10 @@ export class InstitutionApiStub extends InstitutionApi {
             shortName: x.shortName,
             displayName: x.displayName,
             organizationTypeEnum: x.organizationTypeEnum,
-            registeredTierMembershipRequirement:
-              getRegisteredTierConfig(x).membershipRequirement,
+            registeredTierMembershipRequirement: getTierConfig(
+              x,
+              AccessTierShortNames.Registered
+            ).membershipRequirement,
           };
         }),
       });
@@ -183,7 +186,10 @@ export class InstitutionApiStub extends InstitutionApi {
     const response: CheckEmailResponse = {
       isValidMember: false,
     };
-    const tierConfig = getRegisteredTierConfig(institution);
+    const tierConfig = getTierConfig(
+      institution,
+      AccessTierShortNames.Registered
+    );
     if (
       tierConfig.membershipRequirement ===
         InstitutionMembershipRequirement.ADDRESSES &&
