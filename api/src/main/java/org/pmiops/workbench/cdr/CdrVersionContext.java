@@ -1,5 +1,6 @@
 package org.pmiops.workbench.cdr;
 
+import java.util.Optional;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.pmiops.workbench.db.model.DbCdrVersion;
@@ -27,18 +28,23 @@ public class CdrVersionContext {
     cdrVersion.remove();
   }
 
-  @Nullable
-  public static DbCdrVersion nullableGetCdrVersion() {
-    return cdrVersion.get();
-  }
-
   @Nonnull
-  public static DbCdrVersion getCdrVersionNotNull() {
-    DbCdrVersion version = nullableGetCdrVersion();
+  public static DbCdrVersion getCdrVersion() {
+    DbCdrVersion version = cdrVersion.get();
     if (version == null) {
       throw new ServerErrorException("No CDR version specified!");
     }
 
     return version;
+  }
+
+  /**
+   * BigQueryService.getBigQueryService() operates in two modes: with and without a CDR context
+   * 
+   * @return the CDR Context's BigQuery project if there is a CDR in context, null if not
+   */
+  @Nullable
+  public static String nullableGetBigQueryProject() {
+    return Optional.ofNullable(cdrVersion.get()).map(DbCdrVersion::getBigqueryProject).orElse(null);
   }
 }

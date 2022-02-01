@@ -128,14 +128,14 @@ public class CdrVersionServiceTest {
   public void testSetCdrVersionDefault() {
     addMembershipForTest(registeredTier);
     cdrVersionService.setCdrVersion(defaultCdrVersion);
-    assertThat(CdrVersionContext.getCdrVersionNotNull()).isEqualTo(defaultCdrVersion);
+    assertThat(CdrVersionContext.getCdrVersion()).isEqualTo(defaultCdrVersion);
   }
 
   @Test
   public void testSetCdrVersionDefaultId() {
     addMembershipForTest(registeredTier);
     cdrVersionService.setCdrVersion(defaultCdrVersion);
-    assertThat(CdrVersionContext.getCdrVersionNotNull()).isEqualTo(defaultCdrVersion);
+    assertThat(CdrVersionContext.getCdrVersion()).isEqualTo(defaultCdrVersion);
   }
 
   @Test
@@ -183,14 +183,14 @@ public class CdrVersionServiceTest {
   public void testSetCdrVersionControlled() {
     addMembershipForTest(controlledTier);
     cdrVersionService.setCdrVersion(controlledCdrVersion);
-    assertThat(CdrVersionContext.getCdrVersionNotNull()).isEqualTo(controlledCdrVersion);
+    assertThat(CdrVersionContext.getCdrVersion()).isEqualTo(controlledCdrVersion);
   }
 
   @Test
   public void testSetCdrVersionControlledId() {
     addMembershipForTest(controlledTier);
     cdrVersionService.setCdrVersion(controlledCdrVersion);
-    assertThat(CdrVersionContext.getCdrVersionNotNull()).isEqualTo(controlledCdrVersion);
+    assertThat(CdrVersionContext.getCdrVersion()).isEqualTo(controlledCdrVersion);
   }
 
   @Test
