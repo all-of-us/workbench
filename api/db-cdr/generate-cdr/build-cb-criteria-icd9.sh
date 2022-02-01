@@ -80,7 +80,7 @@ SELECT
       ROW_NUMBER() OVER (ORDER BY p.parent_id, c.concept_code)
          + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` where id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID) AS id
     , p.id AS parent_id
-    , UPPER(c.domain_id)
+    , p.domain_id
     , p.is_standard
     , p.type
     , c.concept_id AS concept_id
@@ -132,7 +132,7 @@ SELECT
       ROW_NUMBER() OVER (ORDER BY p.id, c.concept_code)
         + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` where id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID) AS id
     , p.id AS parent_id
-    , UPPER(c.domain_id)
+    , p.domain_id
     , p.is_standard
     , p.type
     , c.concept_id AS concept_id
@@ -204,7 +204,7 @@ SELECT
       ROW_NUMBER() OVER (ORDER BY b.id, a.concept_code)
          + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` where id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID) AS id
     , b.id AS parent_id
-    , UPPER(a.domain_id)
+    , b.domain_id
     , b.is_standard
     , a.vocabulary_id AS type
     , a.concept_id
@@ -290,7 +290,7 @@ SELECT
       ROW_NUMBER() OVER (ORDER BY b.id,a.concept_code)
          + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` where id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID) AS id
     , CASE WHEN b.id is not null THEN b.id ELSE c.id END AS parent_id
-    , UPPER(a.domain_id)
+    , CASE WHEN b.domain_id is not null THEN b.domain_id ELSE c.domain_id END as domain_id
     , 0
     , a.vocabulary_id AS type
     , a.concept_id,a.concept_code AS code
@@ -427,12 +427,27 @@ WHERE x.concept_id = y.concept_id
 echo "ICD9 - SOURCE - delete parents that have no count"
 bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
 "DELETE
-FROM\`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
+FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
 WHERE type in ('ICD9CM', 'ICD9Proc')
     and is_group = 1
     and is_selectable = 1
     and rollup_count is null"
 
+echo "ICD9 - SOURCE - update ICD9CM domain"
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
+"UPDATE \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` x
+SET x.domain_id = y.domain_id
+FROM (
+  SELECT c.concept_id, UPPER(c.domain_id) as domain_id
+  FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` cr
+  JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c on (cr.concept_id = c.concept_id and cr.type = c.vocabulary_id)
+  AND cr.type = 'ICD9CM'
+  AND cr.is_standard = 0
+  AND c.domain_id in ('Observation', 'Measurement', 'Procedure')
+) y
+WHERE x.concept_id = y.concept_id
+AND x.type = 'ICD9CM'
+AND x.is_standard = 0"
 
 # TODO there are still some parents that don't actually have any children and never will. WHAT TO DO?
 

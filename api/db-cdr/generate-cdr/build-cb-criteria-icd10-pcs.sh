@@ -80,7 +80,7 @@ SELECT
     ROW_NUMBER() OVER (ORDER BY p.parent_id, c.concept_code) +
         (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` where id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID) AS id
     , p.id AS parent_id
-    , UPPER(c.domain_id)
+    , p.domain_id
     , p.is_standard
     , p.type
     , c.concept_id AS concept_id
@@ -136,7 +136,7 @@ do
         ROW_NUMBER() OVER (ORDER BY p.id, c.concept_code)
           + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` where id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID)
         , p.id
-        , (SELECT UPPER(domain_id) FROM \`$BQ_PROJECT.$BQ_DATASET.concept\` where concept_id = c.concept_id)
+        , p.domain_id
         , p.is_standard
         , p.type
         , c.concept_id
@@ -195,7 +195,7 @@ SELECT DISTINCT a.concept_id as ancestor_concept_id
 
 FROM
     (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
-          WHERE type = 'ICD10PCS' and is_group = 1 and is_selectable = 1 and is_standard = 0
+          WHERE domain_id = 'PROCEDURE' and type = 'ICD10PCS' and is_group = 1 and is_selectable = 1 and is_standard = 0
                 and id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID ) a
     LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` WHERE type = 'ICD10PCS') b on a.id = b.parent_id
     LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` WHERE type = 'ICD10PCS') c on b.id = c.parent_id

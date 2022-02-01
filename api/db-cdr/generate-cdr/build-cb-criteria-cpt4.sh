@@ -44,7 +44,7 @@ bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
 SELECT
      (a.id + $CB_CRITERIA_START_ID ) id
     , CASE WHEN a.parent_id=0 THEN 0 ELSE a.parent_id + $CB_CRITERIA_START_ID END as parent_id
-    , (SELECT UPPER(domain_id) FROM \`$BQ_PROJECT.$BQ_DATASET.concept\` where concept_id = a.concept_id)
+    , a.domain_id
     , a.is_standard
     , a.type
     , a.subtype
@@ -204,16 +204,6 @@ do
   ORDER BY 1"
 done
 
-############ update null domain_id for parent nodes that don't exist in concept table ############
-echo "CPT4 - SOURCE - update domain_id"
-bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
-"UPDATE \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
-SET domain_id = 'PROCEDURE'
-WHERE type = 'CPT4'
-AND is_standard = 0
-AND has_hierarchy = 1
-AND domain_id is null"
-
 ############ prep_cpt_ancestor ############
 echo "CPT4 - SOURCE - add ancestor data"
 bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
@@ -226,7 +216,7 @@ SELECT
       DISTINCT a.id ancestor_id
     , coalesce(h.id, g.id, f.id, e.id, d.id, c.id, b.id) descendant_id
 FROM (SELECT id, parent_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
-           WHERE type = 'CPT4' and is_standard = 0 and is_group = 1
+           WHERE domain_id = 'PROCEDURE' and type = 'CPT4' and is_standard = 0 and is_group = 1
                  and parent_id !=$CB_CRITERIA_START_ID
                  and id > $CB_CRITERIA_START_ID and id < $CB_CRITERIA_END_ID) a
 JOIN (SELECT id, parent_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`) b on a.id  = b.parent_id
@@ -294,6 +284,22 @@ WHERE type = 'CPT4'
                       and id > $CB_CRITERIA_START_ID and id < $CB_CRITERIA_END_ID
                 )
         )"
+
+echo "CPT4 - SOURCE - update CPT4 domain"
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
+"UPDATE \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` x
+SET x.domain_id = y.domain_id
+FROM (
+  SELECT c.concept_id, UPPER(c.domain_id) as domain_id
+  FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` cr
+  JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c on (cr.concept_id = c.concept_id and cr.type = c.vocabulary_id)
+  AND cr.type = 'CPT4'
+  AND cr.is_standard = 0
+  AND c.domain_id in ('Observation', 'Measurement', 'Device', 'Drug')
+) y
+WHERE x.concept_id = y.concept_id
+AND x.type = 'CPT4'
+AND x.is_standard = 0"
 
 #wait for process to end before copying
 wait
