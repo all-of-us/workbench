@@ -281,10 +281,10 @@ const compareDiskSize = (
       diskDiff = RuntimeDiffState.NO_CHANGE;
     }
   } else if (newDiskConfig.size > oldDiskConfig.size) {
-    desc = 'Increase ' + desc;
     // Technically, a PD can always be extended in place. However, the only Leo-supported
     // way to claim the newly allocated space is by rebooting (disk is remounted).
-    diff = RuntimeDiffState.CAN_UPDATE_WITH_REBOOT;
+    desc = 'Increase ' + desc;
+    diff = RuntimeDiffState.NO_CHANGE;
     if (newDiskConfig.detachable) {
       // Attached PDs are not distinct from the runtime itself.
       diskDiff = RuntimeDiffState.CAN_UPDATE_IN_PLACE;
