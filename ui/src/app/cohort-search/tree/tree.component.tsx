@@ -127,6 +127,7 @@ const ANY_PM_SELECTION = {
 interface Props {
   autocompleteSelection: any;
   back: Function;
+  domain: Domain;
   groupSelections: Array<number>;
   node: Criteria;
   source?: string;
@@ -171,15 +172,9 @@ export const CriteriaTree = fp.flow(
     }
 
     componentDidMount(): void {
-      const {
-        node: { domainId },
-        selectedIds,
-      } = this.props;
+      const { domain, selectedIds } = this.props;
       this.loadRootNodes();
-      if (
-        domainId === Domain.PHYSICALMEASUREMENT.toString() &&
-        selectedIds.length
-      ) {
+      if (domain === Domain.PHYSICALMEASUREMENT && selectedIds.length) {
         // Set hasAnyPM if editing a PM item
         this.setState({
           hasAnyPM: selectedIds.includes(ANY_PM_SELECTION.parameterId),
@@ -188,17 +183,12 @@ export const CriteriaTree = fp.flow(
     }
 
     componentDidUpdate(prevProps: Readonly<Props>) {
-      const {
-        concept,
-        node: { domainId },
-        selectedIds,
-        source,
-      } = this.props;
+      const { concept, domain, selectedIds, source } = this.props;
       if (source === 'conceptSetDetails') {
         if (prevProps.concept !== concept) {
           const { cdrVersionId } = currentWorkspaceStore.getValue();
           this.setState({ children: concept, loading: false });
-          if (domainId === Domain.SURVEY.toString()) {
+          if (domain === Domain.SURVEY) {
             const rootSurveys = ppiSurveys.getValue();
             if (!rootSurveys[cdrVersionId]) {
               rootSurveys[cdrVersionId] = concept;
@@ -208,7 +198,7 @@ export const CriteriaTree = fp.flow(
         }
       }
       if (
-        domainId === Domain.PHYSICALMEASUREMENT.toString() &&
+        domain === Domain.PHYSICALMEASUREMENT &&
         prevProps.selectedIds !== selectedIds
       ) {
         // Check for hasAnyPM changes if in PM tree and selections have changed
@@ -218,17 +208,15 @@ export const CriteriaTree = fp.flow(
       }
     }
 
-    sendOnlyCriteriaType(domainId) {
-      return (
-        domainId === Domain.VISIT.toString() ||
-        domainId === Domain.PHYSICALMEASUREMENT.toString()
-      );
+    sendOnlyCriteriaType(domain: Domain) {
+      return domain === Domain.VISIT || domain === Domain.PHYSICALMEASUREMENT;
     }
 
     async loadRootNodes() {
       try {
         const {
-          node: { domainId, id, isStandard, parentId, subtype, type },
+          domain,
+          node: { id, isStandard, parentId, subtype, type },
           selectedSurvey,
         } = this.props;
         this.setState({ loading: true });
@@ -238,15 +226,13 @@ export const CriteriaTree = fp.flow(
           namespace,
         } = currentWorkspaceStore.getValue();
         const criteriaType =
-          domainId === Domain.DRUG.toString()
-            ? CriteriaType.ATC.toString()
-            : type;
-        const promises = this.sendOnlyCriteriaType(domainId)
+          domain === Domain.DRUG ? CriteriaType.ATC.toString() : type;
+        const promises = this.sendOnlyCriteriaType(domain)
           ? [
               cohortBuilderApi().findCriteriaBy(
                 namespace,
                 workspaceId,
-                domainId,
+                domain.toString(),
                 criteriaType
               ),
             ]
@@ -254,7 +240,7 @@ export const CriteriaTree = fp.flow(
               cohortBuilderApi().findCriteriaBy(
                 namespace,
                 workspaceId,
-                domainId,
+                domain.toString(),
                 criteriaType,
                 isStandard,
                 id
@@ -275,7 +261,7 @@ export const CriteriaTree = fp.flow(
             cohortBuilderApi().findCriteriaForCohortEdit(
               namespace,
               workspaceId,
-              domainId,
+              domain.toString(),
               criteriaRequest
             )
           );
@@ -284,12 +270,9 @@ export const CriteriaTree = fp.flow(
         if (criteriaLookup) {
           this.updateCriteriaSelectionStore(criteriaLookup.items);
         }
-        if (
-          domainId === Domain.PHYSICALMEASUREMENT.toString() ||
-          domainId === Domain.VISIT.toString()
-        ) {
+        if (domain === Domain.PHYSICALMEASUREMENT || domain === Domain.VISIT) {
           let children = [];
-          const rootParentId = domainId === Domain.VISIT.toString() ? -1 : 0;
+          const rootParentId = domain === Domain.VISIT ? -1 : 0;
           rootNodes.items.forEach((child) => {
             child['children'] = [];
             if (child.parentId === rootParentId) {
@@ -299,14 +282,14 @@ export const CriteriaTree = fp.flow(
             }
           });
           this.setState({ children });
-        } else if (domainId === Domain.SURVEY.toString() && selectedSurvey) {
+        } else if (domain === Domain.SURVEY && selectedSurvey) {
           // Temp: This should be handle in API
           this.updatePpiSurveys(
             rootNodes,
             rootNodes.items.filter((child) => child.name === selectedSurvey)
           );
         } else if (
-          domainId === Domain.SURVEY.toString() &&
+          domain === Domain.SURVEY &&
           this.props.source === 'conceptSetDetails'
         ) {
           this.updatePpiSurveys(
@@ -316,14 +299,14 @@ export const CriteriaTree = fp.flow(
         } else {
           this.setState({
             children:
-              domainId === Domain.MEASUREMENT.toString()
+              domain === Domain.MEASUREMENT
                 ? // For Measurements, only show the subtype of the node selected in list search and don't display the code
                   rootNodes.items
                     .filter((node) => node.subtype === subtype)
                     .map((node) => ({ ...node, code: null }))
                 : rootNodes.items,
           });
-          if (domainId === Domain.SURVEY.toString()) {
+          if (domain === Domain.SURVEY) {
             const rootSurveys = ppiSurveys.getValue();
             if (!rootSurveys[cdrVersionId]) {
               rootSurveys[cdrVersionId] = rootNodes.items;
@@ -342,18 +325,15 @@ export const CriteriaTree = fp.flow(
     get criteriaLookupNeeded() {
       return (
         this.props.source === 'cohort' &&
-        ![
-          Domain.PHYSICALMEASUREMENT.toString(),
-          Domain.VISIT.toString(),
-        ].includes(this.props.node.domainId) &&
+        ![Domain.PHYSICALMEASUREMENT, Domain.VISIT].includes(
+          this.props.domain
+        ) &&
         currentCohortCriteriaStore.getValue().some((crit) => !crit.id)
       );
     }
 
     updateCriteriaSelectionStore(criteriaLookupItems: Criteria[]) {
-      const {
-        node: { domainId },
-      } = this.props;
+      const { domain } = this.props;
       const updatedSelections = currentCohortCriteriaStore
         .getValue()
         .map((sel) => {
@@ -361,8 +341,7 @@ export const CriteriaTree = fp.flow(
             (item) =>
               item.conceptId === sel.conceptId &&
               item.isStandard === sel.isStandard &&
-              (domainId !== Domain.SURVEY.toString() ||
-                item.subtype === sel.subtype) &&
+              (domain !== Domain.SURVEY || item.subtype === sel.subtype) &&
               (sel.subtype !== CriteriaSubType.ANSWER.toString() ||
                 item.value === sel.code)
           );
@@ -379,17 +358,13 @@ export const CriteriaTree = fp.flow(
         node: { domainId, isStandard, type },
       } = this.props;
       const { cdrVersionId, id, namespace } = currentWorkspaceStore.getValue();
-      const criteriaType =
-        domainId === Domain.DRUG.toString()
-          ? CriteriaType.ATC.toString()
-          : type;
       if (selectedSurveyChild && selectedSurveyChild.length > 0) {
         cohortBuilderApi()
           .findCriteriaBy(
             namespace,
             id,
             domainId,
-            criteriaType,
+            type,
             isStandard,
             selectedSurveyChild[0].id
           )
@@ -398,12 +373,10 @@ export const CriteriaTree = fp.flow(
           );
       } else {
         this.setState({ children: resp.items });
-        if (domainId === Domain.SURVEY.toString()) {
-          const rootSurveys = ppiSurveys.getValue();
-          if (!rootSurveys[cdrVersionId]) {
-            rootSurveys[cdrVersionId] = resp.items;
-            ppiSurveys.next(rootSurveys);
-          }
+        const rootSurveys = ppiSurveys.getValue();
+        if (!rootSurveys[cdrVersionId]) {
+          rootSurveys[cdrVersionId] = resp.items;
+          ppiSurveys.next(rootSurveys);
         }
       }
     }
@@ -428,14 +401,11 @@ export const CriteriaTree = fp.flow(
     }
 
     get showHeader() {
-      const {
-        node: { domainId },
-        source,
-      } = this.props;
+      const { domain, source } = this.props;
       return (
-        !(source === 'cohort' && domainId === Domain.SURVEY.toString()) &&
-        domainId !== Domain.PHYSICALMEASUREMENT.toString() &&
-        domainId !== Domain.VISIT.toString()
+        !(source === 'cohort' && domain === Domain.SURVEY) &&
+        domain !== Domain.PHYSICALMEASUREMENT &&
+        domain !== Domain.VISIT
       );
     }
 
@@ -465,6 +435,7 @@ export const CriteriaTree = fp.flow(
       const {
         autocompleteSelection,
         back,
+        domain,
         groupSelections,
         node,
         scrollToMatch,
@@ -548,7 +519,7 @@ export const CriteriaTree = fp.flow(
                 }
                 className='show-scrollbar'
               >
-                {node.domainId === Domain.PHYSICALMEASUREMENT.toString() && (
+                {domain === Domain.PHYSICALMEASUREMENT && (
                   <div style={{ margin: '0.5rem 0 0 0.5rem' }}>
                     <CheckBox
                       manageOwnState={false}
@@ -570,8 +541,8 @@ export const CriteriaTree = fp.flow(
                       this.showNode(child) && (
                         <TreeNode
                           key={c}
-                          source={source}
                           autocompleteSelection={autocompleteSelection}
+                          domain={domain}
                           groupSelections={groupSelections}
                           node={child}
                           scrollToMatch={scrollToMatch}
@@ -579,6 +550,7 @@ export const CriteriaTree = fp.flow(
                           select={(s) => select(s)}
                           selectedIds={selectedIds}
                           setAttributes={setAttributes}
+                          source={source}
                         />
                       )
                   )}
