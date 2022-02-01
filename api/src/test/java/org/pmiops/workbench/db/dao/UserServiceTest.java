@@ -460,9 +460,9 @@ public class UserServiceTest {
   public void testSyncDuccVersionStatus_incorrectVersion() {
     providedWorkbenchConfig.access.currentDuccVersions = ImmutableList.of(3, 4, 5);
 
-    final DbUser user = userDao.findUserByUsername(USERNAME);
+    DbUser user = userDao.findUserByUsername(USERNAME);
     user.setDuccAgreement(signDucc(user, 2));
-    userDao.save(user);
+    user = userDao.save(user);
 
     userService.syncDuccVersionStatus(user, Agent.asSystem());
 
