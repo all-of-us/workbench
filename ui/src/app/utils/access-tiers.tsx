@@ -6,20 +6,10 @@ export enum AccessTierShortNames {
   Controlled = 'controlled',
 }
 
-export const orderedAccessTierShortNames = [
-  AccessTierShortNames.Registered,
-  AccessTierShortNames.Controlled,
-];
-
 export enum AccessTierDisplayNames {
   Registered = 'Registered Tier',
   Controlled = 'Controlled Tier',
 }
-
-export const orderedAccessTierDisplayNames = [
-  AccessTierDisplayNames.Registered,
-  AccessTierDisplayNames.Controlled,
-];
 
 export function hasTierAccess(profile: Profile, shortName): boolean {
   return profile.accessTierShortNames.includes(shortName);

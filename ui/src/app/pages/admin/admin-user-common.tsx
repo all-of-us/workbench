@@ -42,10 +42,9 @@ import {
   getAccessModuleStatusByName,
 } from 'app/utils/access-utils';
 import {
+  AccessTierDisplayNames,
   AccessTierShortNames,
   hasRegisteredTierAccess,
-  orderedAccessTierDisplayNames,
-  orderedAccessTierShortNames,
 } from 'app/utils/access-tiers';
 import { formatDate } from 'app/utils/dates';
 
@@ -224,10 +223,14 @@ export const displayTierBadgeByRequiredModule = (
 };
 
 export const getEraNote = (profile: Profile): string => {
-  const tiersRequired = orderedAccessTierShortNames.map((t) =>
-    isEraRequiredForTier(profile, t)
-  );
-  const requiredForTierNames = orderedAccessTierDisplayNames.filter(
+  // prettier-ignore
+  const tierDisplayNames = Object.keys(AccessTierDisplayNames).map(function (key) {
+    return AccessTierDisplayNames[key];
+  });
+  const tiersRequired = Object.keys(AccessTierShortNames).map(function (key) {
+    return isEraRequiredForTier(profile, AccessTierShortNames[key]);
+  });
+  const requiredForTierNames = tierDisplayNames.filter(
     (n, i) => tiersRequired[i]
   );
   const accessText =
