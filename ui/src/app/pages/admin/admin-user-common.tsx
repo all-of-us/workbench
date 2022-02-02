@@ -232,9 +232,12 @@ export const getEraNote = (profile: Profile): string => {
   );
   const institutionName =
     profile.verifiedInstitutionalAffiliation?.institutionDisplayName;
-  let note = `* eRA Commons requirements vary by institution. This user's institution 
-  (${isBlank(institutionName) ? 'N/A' : institutionName}) `;
-
+  let note = '* eRA Commons requirements vary by institution.';
+  if (isBlank(institutionName)) {
+    return (note +=
+      " We don't have any institutional information for this user.");
+  }
+  note += ` This user's institution (${institutionName}) `;
   if (!requiredForRT && !requiredForCT) {
     note += 'does not require eRA Commons.';
   } else if (requiredForRT && !requiredForCT) {
@@ -245,7 +248,7 @@ export const getEraNote = (profile: Profile): string => {
     note +=
       'requires eRA Commons for Registered Tier and Controlled Tier access.';
   }
-  return (note += ' *');
+  return note;
 };
 
 // would this AccessBypassRequest actually change the profile state?
