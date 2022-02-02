@@ -2,7 +2,6 @@ package org.pmiops.workbench.cdr;
 
 import java.util.Optional;
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 
@@ -41,10 +40,9 @@ public class CdrVersionContext {
   /**
    * BigQueryService.getBigQueryService() operates in two modes: with and without a CDR context
    *
-   * @return the CDR Context's BigQuery project if there is a CDR in context, null if not
+   * @return the CDR Context's BigQuery project if there is a CDR in context, EMPTY if not
    */
-  @Nullable
-  public static String nullableGetBigQueryProject() {
-    return Optional.ofNullable(cdrVersion.get()).map(DbCdrVersion::getBigqueryProject).orElse(null);
+  public static Optional<String> maybeGetBigQueryProject() {
+    return Optional.ofNullable(cdrVersion.get()).map(DbCdrVersion::getBigqueryProject);
   }
 }

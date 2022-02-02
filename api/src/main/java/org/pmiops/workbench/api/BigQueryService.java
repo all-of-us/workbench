@@ -49,14 +49,12 @@ public class BigQueryService {
 
   @VisibleForTesting
   protected BigQuery getBigQueryService() {
-    String projectId = CdrVersionContext.nullableGetBigQueryProject();
-    if (projectId == null) {
-      return defaultBigQuery;
-    }
     // If a query is being executed in the context of a CDR, it must be run within that project as
     // well. By default, the query would run in the Workbench App Engine project, which would
     // violate VPC-SC restrictions.
-    return BigQueryOptions.newBuilder().setProjectId(projectId).build().getService();
+    return CdrVersionContext.maybeGetBigQueryProject()
+        .map(projectId -> BigQueryOptions.newBuilder().setProjectId(projectId).build().getService())
+        .orElse(defaultBigQuery);
   }
 
   /** Execute the provided query using bigquery and wait for completion. */
