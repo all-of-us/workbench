@@ -435,7 +435,7 @@ export const computeRenewalDisplayDates = ({
   const nextReviewDate = withInvalidDateHandling(expirationEpochMillis);
   const bypassDate = withInvalidDateHandling(bypassEpochMillis);
 
-  function completeOrExpiringOrExpirationStatus(): AccessModulesStatus {
+  function currentOrExpiringOrExpirationStatus(): AccessModulesStatus {
     return hasExpired(expirationEpochMillis)
       ? AccessModulesStatus.EXPIRED
       : isExpiringNotBypassed({ expirationEpochMillis })
@@ -474,7 +474,7 @@ export const computeRenewalDisplayDates = ({
         return {
           lastConfirmedDate,
           nextReviewDate: `${nextReviewDate} ${daysRemainingDisplay}`,
-          moduleStatus: completeOrExpiringOrExpirationStatus(),
+          moduleStatus: currentOrExpiringOrExpirationStatus(),
         };
       },
     ]
