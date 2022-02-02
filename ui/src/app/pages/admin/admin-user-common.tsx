@@ -44,6 +44,8 @@ import {
 import {
   AccessTierShortNames,
   hasRegisteredTierAccess,
+  orderedAccessTierDisplayNames,
+  orderedAccessTierShortNames,
 } from 'app/utils/access-tiers';
 import { formatDate } from 'app/utils/dates';
 
@@ -222,33 +224,26 @@ export const displayTierBadgeByRequiredModule = (
 };
 
 export const getEraNote = (profile: Profile): string => {
-  const requiredForRT = isEraRequiredForTier(
-    profile,
-    AccessTierShortNames.Registered
+  const tiersRequired = orderedAccessTierShortNames.map((t) =>
+    isEraRequiredForTier(profile, t)
   );
-  const requiredForCT = isEraRequiredForTier(
-    profile,
-    AccessTierShortNames.Controlled
+  const requiredForTierNames = orderedAccessTierDisplayNames.filter(
+    (n, i) => tiersRequired[i]
   );
+  const accessText =
+    requiredForTierNames.length === 0
+      ? 'does not require eRA Commons'
+      : 'requires eRA Commons for ' +
+        (requiredForTierNames.join(' and ') + ' access');
   const institutionName =
     profile.verifiedInstitutionalAffiliation?.institutionDisplayName;
-  let note = '* eRA Commons requirements vary by institution.';
-  if (isBlank(institutionName)) {
-    return (note +=
-      " We don't have any institutional information for this user.");
-  }
-  note += ` This user's institution (${institutionName}) `;
-  if (!requiredForRT && !requiredForCT) {
-    note += 'does not require eRA Commons.';
-  } else if (requiredForRT && !requiredForCT) {
-    note += 'requires eRA Commons for Registered Tier access.';
-  } else if (!requiredForRT && requiredForCT) {
-    note += 'requires eRA Commons for Controlled Tier access.';
-  } else if (requiredForRT && requiredForCT) {
-    note +=
-      'requires eRA Commons for Registered Tier and Controlled Tier access.';
-  }
-  return note;
+  const note = '* eRA Commons requirements vary by institution.';
+  return (
+    note +
+    (isBlank(institutionName)
+      ? ` We don't have any institutional information for this user.`
+      : ` This user's institution (${institutionName}) ${accessText}.`)
+  );
 };
 
 // would this AccessBypassRequest actually change the profile state?
