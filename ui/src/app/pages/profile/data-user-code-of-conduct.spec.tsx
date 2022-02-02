@@ -8,7 +8,7 @@ import {
   registerApiClient,
 } from 'app/services/swagger-fetch-clients';
 import { profileStore } from 'app/utils/stores';
-import { Profile, ProfileApi } from 'generated/fetch';
+import { ProfileApi } from 'generated/fetch';
 import {
   ProfileApiStub,
   ProfileStubVariables,
