@@ -90,7 +90,8 @@ public final class SearchGroupItemQueryBuilder {
           + "FROM `${projectId}.${dataSetId}.cb_criteria` c\n"
           + "JOIN (select cast(cr.id as string) as id\n"
           + "FROM `${projectId}.${dataSetId}.cb_criteria` cr\n"
-          + "WHERE concept_id IN unnest(%s)) a\n"
+          + "WHERE concept_id IN unnest(%s)\n"
+          + "AND full_text LIKE %s) a\n"
           + "ON (c.path LIKE CONCAT('%%.', a.id, '.%%') OR c.path LIKE CONCAT('%%.', a.id) OR c.path LIKE CONCAT(a.id, '.%%') OR c.path = a.id)\n"
           + "WHERE is_standard = %s\n"
           + "AND is_selectable = 1)";
@@ -101,7 +102,8 @@ public final class SearchGroupItemQueryBuilder {
           + "FROM `${projectId}.${dataSetId}.cb_criteria` c\n"
           + "JOIN (select cast(cr.id as string) as id\n"
           + "FROM `${projectId}.${dataSetId}.cb_criteria` cr\n"
-          + "WHERE concept_id IN unnest(%s)) a\n"
+          + "WHERE concept_id IN unnest(%s)\n"
+          + "AND full_text LIKE %s) a\n"
           + "ON (c.path LIKE CONCAT('%%.', a.id, '.%%') OR c.path LIKE CONCAT('%%.', a.id) OR c.path LIKE CONCAT(a.id, '.%%') OR c.path = a.id)\n"
           + "WHERE is_standard = %s\n"
           + "AND is_selectable = 1) b ON (ca.ancestor_id = b.concept_id))";
@@ -658,6 +660,9 @@ public final class SearchGroupItemQueryBuilder {
               .collect(Collectors.toList());
 
       if (!parents.isEmpty() || Domain.DRUG.toString().equals(domain)) {
+        String rankParam =
+            QueryParameterUtil.addQueryParameterValue(
+                queryParams, QueryParameterValue.string("%_rank1]%"));
         String conceptIdsParam =
             QueryParameterUtil.addQueryParameterValue(
                 queryParams,
@@ -667,6 +672,7 @@ public final class SearchGroupItemQueryBuilder {
             String.format(
                 Domain.DRUG.toString().equals(domain) ? DRUG_SQL : PARENT_STANDARD_OR_SOURCE_SQL,
                 conceptIdsParam,
+                rankParam,
                 standardOrSourceParam,
                 standardOrSourceParam));
       } else {

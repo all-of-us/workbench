@@ -1564,11 +1564,15 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
               queryParams, QueryParameterValue.array(sourceConceptIds, Long.class));
       String sourceParam =
           QueryParameterUtil.addQueryParameterValue(queryParams, QueryParameterValue.int64(0));
+      String rankParam =
+          QueryParameterUtil.addQueryParameterValue(
+              queryParams, QueryParameterValue.string("%_rank1]%"));
 
       // build query configuration
       QueryJobConfiguration queryJobConfiguration =
           buildQueryJobConfiguration(
-              queryParams, String.format(MULTIPLE_DOMAIN_QUERY, conceptIdsParam, sourceParam));
+              queryParams,
+              String.format(MULTIPLE_DOMAIN_QUERY, conceptIdsParam, rankParam, sourceParam));
 
       // get results
       domains =
@@ -1633,12 +1637,15 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     String domainParam =
         QueryParameterUtil.addQueryParameterValue(
             queryParams, QueryParameterValue.string(domain.toString()));
+    String rankParam =
+        QueryParameterUtil.addQueryParameterValue(
+            queryParams, QueryParameterValue.string("%_rank1]%"));
 
     // build query configuration
     QueryJobConfiguration queryJobConfiguration =
         buildQueryJobConfiguration(
             queryParams,
-            String.format(SOURCE_CONCEPT_DOMAIN_QUERY, conceptIdsParam, 0, domainParam));
+            String.format(SOURCE_CONCEPT_DOMAIN_QUERY, conceptIdsParam, rankParam, 0, domainParam));
 
     // get results
     List<DbConceptSetConceptId> sourceConceptIdsToAdd =
