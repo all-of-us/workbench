@@ -1,6 +1,20 @@
 import fp from 'lodash/fp';
-import { Request } from 'puppeteer';
+import { JSHandle, Request } from 'puppeteer';
 import { logger } from 'libs/logger';
+
+export const describeJsHandle = async (jsHandle: JSHandle): Promise<string> => {
+  return jsHandle
+    .executionContext()
+    .evaluateHandle((obj) => {
+      if (obj instanceof Error) {
+        return obj.message;
+      }
+      return obj;
+    }, jsHandle)
+    .then(async (jsHandle) => {
+      return (await jsHandle.jsonValue()) as string;
+    });
+};
 
 const stringifyData = (data: string): string => {
   if (!data) return '';
