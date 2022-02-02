@@ -29,6 +29,10 @@ import {
   displayDateWithoutHours,
   MILLIS_PER_DAY,
 } from './dates';
+import {
+  hasExpired,
+  isExpiringNotBypassed,
+} from 'app/pages/access/access-renewal';
 
 export enum AccessModulesStatus {
   COMPLETE = 'Current',
@@ -430,14 +434,12 @@ export const computeRenewalDisplayDates = ({
   const nextReviewDate = withInvalidDateHandling(expirationEpochMillis);
   const bypassDate = withInvalidDateHandling(bypassEpochMillis);
 
-  function calCompleteOrExpiringOrExpirationStatus(
-    daysRemaining: number
-  ): AccessModulesStatus {
-    return daysRemaining >= serverConfigStore.get().config.accessRenewalLookback
-      ? AccessModulesStatus.COMPLETE
-      : daysRemaining >= 0
+  function completeOrExpiringOrExpirationStatus(): AccessModulesStatus {
+    return hasExpired(expirationEpochMillis)
+      ? AccessModulesStatus.EXPIRED
+      : isExpiringNotBypassed({ expirationEpochMillis })
       ? AccessModulesStatus.EXPIRINGSOON
-      : AccessModulesStatus.EXPIRED;
+      : AccessModulesStatus.COMPLETE;
   }
 
   return cond(
@@ -471,7 +473,7 @@ export const computeRenewalDisplayDates = ({
         return {
           lastConfirmedDate,
           nextReviewDate: `${nextReviewDate} ${daysRemainingDisplay}`,
-          moduleStatus: calCompleteOrExpiringOrExpirationStatus(daysRemaining),
+          moduleStatus: completeOrExpiringOrExpirationStatus(),
         };
       },
     ]
