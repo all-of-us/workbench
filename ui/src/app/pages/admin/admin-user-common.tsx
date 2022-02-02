@@ -223,16 +223,18 @@ export const displayTierBadgeByRequiredModule = (
 };
 
 export const getEraNote = (profile: Profile): string => {
-  // prettier-ignore
-  const tierDisplayNames = Object.keys(AccessTierDisplayNames).map(function (key) {
+  const tierDisplayNames: AccessTierDisplayNames[] = Object.keys(
+    AccessTierDisplayNames
+  ).map((key) => {
     return AccessTierDisplayNames[key];
   });
-  const tiersRequired = Object.keys(AccessTierShortNames).map(function (key) {
-    return isEraRequiredForTier(profile, AccessTierShortNames[key]);
-  });
-  const requiredForTierNames = tierDisplayNames.filter(
-    (n, i) => tiersRequired[i]
+  const tiersRequired: boolean[] = Object.keys(AccessTierShortNames).map(
+    (key) => {
+      return isEraRequiredForTier(profile, AccessTierShortNames[key]);
+    }
   );
+  const requiredForTierNames: AccessTierDisplayNames[] =
+    tierDisplayNames.filter((name, index) => tiersRequired[index]);
   const accessText =
     requiredForTierNames.length === 0
       ? 'does not require eRA Commons'
