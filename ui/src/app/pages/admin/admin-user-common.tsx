@@ -223,23 +223,29 @@ export const displayTierBadgeByRequiredModule = (
 };
 
 export const getEraNote = (profile: Profile): string => {
-  const tierDisplayNames: AccessTierDisplayNames[] = Object.keys(
-    AccessTierDisplayNames
-  ).map((key) => {
-    return AccessTierDisplayNames[key];
-  });
+  // Boolean array that indicates whether eRA is required for Registered Tier and Controlled Tier
   const tiersRequired: boolean[] = Object.keys(AccessTierShortNames).map(
     (key) => {
       return isEraRequiredForTier(profile, AccessTierShortNames[key]);
     }
   );
-  const requiredForTierNames: AccessTierDisplayNames[] =
+
+  // Turn values of enum AccessTierDisplayNames to an array
+  const tierDisplayNames: AccessTierDisplayNames[] = Object.keys(
+    AccessTierDisplayNames
+  ).map((key) => {
+    return AccessTierDisplayNames[key];
+  });
+
+  // Tiers that require eRA
+  const requiredTierDisplayNames: AccessTierDisplayNames[] =
     tierDisplayNames.filter((name, index) => tiersRequired[index]);
+
   const accessText =
-    requiredForTierNames.length === 0
+    requiredTierDisplayNames.length === 0
       ? 'does not require eRA Commons'
       : 'requires eRA Commons for ' +
-        (requiredForTierNames.join(' and ') + ' access');
+        (requiredTierDisplayNames.join(' and ') + ' access');
   const institutionName =
     profile.verifiedInstitutionalAffiliation?.institutionDisplayName;
   const note = '* eRA Commons requirements vary by institution.';
