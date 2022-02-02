@@ -1,7 +1,6 @@
 import { Browser, ConsoleMessage, launch, LaunchOptions, Page, Request } from 'puppeteer';
 import {
   showFailedResponse,
-  describeJsHandle,
   getRequestData,
   isLoggable,
   logRequestError,
@@ -210,40 +209,33 @@ export const initPageBeforeTest = async (page: Page): Promise<void> => {
   page.on('console', async (message: ConsoleMessage) => {
     if (message.args().length === 0) return;
     const title = await getPageTitle(page);
-    try {
-      await Promise.all(message.args().map((arg) => arg.jsonValue())).then((values) => {
-        const allMessages = values
-          .filter((value) => {
-            if (JSON.stringify(value) === JSON.stringify({})) {
-              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-              // @ts-ignore
-              const { subtype, description } = arg._remoteObject;
-              return `${subtype ? subtype.toUpperCase() : ''}:\n${description}`;
-            }
-            return values;
-          })
-          .join('\n');
-        if (allMessages.trim().length > 0) {
-          logger.info(`Page Console: ${title}\n${allMessages}`);
-        }
-      });
-    } catch (ex) {
-      // arg.jsonValue() sometimes throws exception. Try another way when encountering error.
-      await Promise.all(message.args().map((jsHandle) => describeJsHandle(jsHandle)))
-        .then((args) => {
-          const allMessages = args.filter((arg) => !!arg).join('\n');
-          logger.info(`Page Console ${message.type().toUpperCase()}: "${title}"\n${allMessages}`);
+    const type = message.type().toUpperCase();
+    const text = message.text();
+    if (text === 'JSHandle@error') {
+      Promise.all(
+        message.args().map((jsHandle) => {
+          jsHandle.executionContext().evaluate((handle) => handle.toString(), jsHandle);
         })
-        .catch((ex1) => {
-          logger.error(`Exception thrown when reading page console: ${ex1}`);
-        });
+      ).then((args) => {
+        console.log(`Console ${type}: "${title}"\n`, ...args);
+      });
+    } else if (text === 'JSHandle@object') {
+      Promise.all(
+        message.args().map((jsHandle) => {
+          jsHandle.jsonValue();
+        })
+      ).then((args) => {
+        console.log(`Console ${type}: "${title}"\n`, ...args);
+      });
+    } else {
+      console.log(`Console ${type}: "${title}"\n`, text);
     }
   });
 
   /** Emitted when the page crashes. */
   page.on('error', async (error: Error) => {
     const title = await getPageTitle(page);
-    logger.error(`PAGE ERROR: "${title}"\n${error.message}`);
+    logger.error(`Page Error: "${title}"\n${error.message}`);
   });
 
   /** Emitted when an uncaught exception happens within the page. */
