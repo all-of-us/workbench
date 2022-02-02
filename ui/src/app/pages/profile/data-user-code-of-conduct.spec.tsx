@@ -1,5 +1,6 @@
 import { mount } from 'enzyme';
 import * as React from 'react';
+import { MemoryRouter } from 'react-router-dom';
 
 import { DataUserCodeOfConduct } from 'app/pages/profile/data-user-code-of-conduct';
 import {
@@ -13,13 +14,13 @@ import {
   ProfileStubVariables,
 } from 'testing/stubs/profile-api-stub';
 import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
-import { MemoryRouter } from 'react-router-dom';
+import { getLiveDUCCVersion } from 'app/utils/code-of-conduct';
 
 describe('DataUserCodeOfConduct', () => {
   const load = jest.fn();
   const reload = jest.fn();
   const updateCache = jest.fn();
-  const profile = ProfileStubVariables.PROFILE_STUB as unknown as Profile;
+  const profile = ProfileStubVariables.PROFILE_STUB;
 
   const component = () =>
     mount(
@@ -141,6 +142,6 @@ describe('DataUserCodeOfConduct', () => {
       wrapper.find('[data-test-id="submit-ducc-button"]').prop('disabled')
     ).toBeFalsy();
     wrapper.find('[data-test-id="submit-ducc-button"]').simulate('click');
-    expect(spy).toHaveBeenCalledWith(3, 'XX'); // duccSignedVersion
+    expect(spy).toHaveBeenCalledWith(getLiveDUCCVersion(), 'XX');
   });
 });
