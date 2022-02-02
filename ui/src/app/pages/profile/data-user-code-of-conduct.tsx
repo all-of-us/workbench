@@ -105,6 +105,7 @@ interface State {
   name: string;
   initialMonitoring: string;
   initialPublic: string;
+  initialAccess: string;
   page: DataUserCodeOfConductPage;
   submitting: boolean;
   proceedDisabled: boolean;
@@ -122,6 +123,7 @@ export const DataUserCodeOfConduct = fp.flow(
         name: '',
         initialMonitoring: '',
         initialPublic: '',
+        initialAccess: '',
         page: DataUserCodeOfConductPage.CONTENT,
         submitting: false,
         proceedDisabled: true,
@@ -167,17 +169,22 @@ export const DataUserCodeOfConduct = fp.flow(
         proceedDisabled,
         initialMonitoring,
         initialPublic,
+        initialAccess,
         page,
         submitting,
       } = this.state;
       const errors = validate(
-        { initialMonitoring, initialPublic },
+        { initialMonitoring, initialPublic, initialAccess },
         {
           initialMonitoring: {
             presence: { allowEmpty: false },
             length: { maxiumum: 6 },
           },
           initialPublic: {
+            presence: { allowEmpty: false },
+            equality: { attribute: 'initialMonitoring' },
+          },
+          initialAccess: {
             presence: { allowEmpty: false },
             equality: { attribute: 'initialMonitoring' },
           },
@@ -252,6 +259,18 @@ export const DataUserCodeOfConduct = fp.flow(
                   be used by the <AoU /> Research Program to provide
                   participants with meaningful information about the research
                   being conducted.
+                </InitialsAgreement>
+                <InitialsAgreement
+                  onChange={(v) => this.setState({ initialAccess: v })}
+                >
+                  <AoU /> retains the discretion to make decisions about my
+                  access, including the provision or revocation thereof, at any
+                  time that take into account any data use violations, data
+                  management incidents, research misconduct, and legal or
+                  regulatory violations related to the conduct of research for
+                  which I’ve been penalized in the past or that I may commit or
+                  am found to have committed subsequent to becoming an <AoU />{' '}
+                  Authorized Data User.
                 </InitialsAgreement>
                 <div style={{ ...styles.bold, ...styles.smallTopMargin }}>
                   I acknowledge that failure to comply with the requirements
