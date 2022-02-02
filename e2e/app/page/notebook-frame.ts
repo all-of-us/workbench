@@ -2,12 +2,12 @@ import AuthenticatedPage from './authenticated-page';
 import { Frame, Page } from 'puppeteer';
 
 export default abstract class NotebookFrame extends AuthenticatedPage {
-  constructor(page: Page) {
+  protected constructor(page: Page) {
     super(page);
   }
 
-  async getIFrame(): Promise<Frame> {
-    const frame = await this.page.waitForSelector('iframe[src*="notebooks"]');
+  async getIFrame(timeout?: number): Promise<Frame> {
+    const frame = await this.page.waitForSelector('iframe[src*="notebooks"]', { visible: true, timeout });
     return frame.contentFrame();
   }
 }

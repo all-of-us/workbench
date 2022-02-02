@@ -19,12 +19,13 @@ export default class CohortActionsPage extends AuthenticatedPage {
   }
 
   async isLoaded(): Promise<boolean> {
-    await Promise.all([waitForDocumentTitle(this.page, PageTitle), waitWhileLoading(this.page)]);
+    await waitForDocumentTitle(this.page, PageTitle);
     await Promise.all([
       this.getCreateAnotherCohortButton().asElementHandle(),
       this.getCreateReviewSetsButton().asElementHandle(),
       this.getCreateDatasetButton().asElementHandle()
     ]);
+    await waitWhileLoading(this.page);
     return true;
   }
 
