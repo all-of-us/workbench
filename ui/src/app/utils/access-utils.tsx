@@ -35,7 +35,8 @@ import {
 } from 'app/pages/access/access-renewal';
 
 export enum AccessModulesStatus {
-  COMPLETE = 'Current',
+  COMPLETE = 'Complete',
+  CURRENT = 'Current',
   EXPIRINGSOON = 'Expiring Soon',
   EXPIRED = 'Expired',
   BYPASSED = 'Bypassed',
@@ -439,7 +440,7 @@ export const computeRenewalDisplayDates = ({
       ? AccessModulesStatus.EXPIRED
       : isExpiringNotBypassed({ expirationEpochMillis })
       ? AccessModulesStatus.EXPIRINGSOON
-      : AccessModulesStatus.COMPLETE;
+      : AccessModulesStatus.CURRENT;
   }
 
   return cond(

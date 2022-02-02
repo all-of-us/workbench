@@ -157,9 +157,7 @@ const isExpiringAndNotBypassed = (
   return isExpiringNotBypassed(status);
 };
 
-export const bypassedOrCompleteAndNotExpiring = (
-  status: AccessModuleStatus
-) => {
+const bypassedOrCompleteAndNotExpiring = (status: AccessModuleStatus) => {
   const isComplete = !!status.completionEpochMillis;
   const wasBypassed = !!status.bypassEpochMillis;
   return (
