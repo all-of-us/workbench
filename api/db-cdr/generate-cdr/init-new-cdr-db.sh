@@ -68,7 +68,8 @@ then
     rm -rf "$(dirname "${BASH_SOURCE}")/../csv"
     mkdir "$(dirname "${BASH_SOURCE}")/../csv"
     # copy down csv files from bucket
-    gsutil -m cp gs://all-of-us-cb-test-csv/*.csv "$(dirname "${BASH_SOURCE}")/../csv"
+    # gsutil -m cp gs://all-of-us-cb-test-csv/*.csv "$(dirname "${BASH_SOURCE}")/../csv"
+    gsutil -m -o "GSUtil:parallel_process_count=1" cp gs://all-of-us-cb-test-csv/*.csv "$(dirname "${BASH_SOURCE}")/../csv"
 fi
 
 # Use liquibase to generate the schema and data
