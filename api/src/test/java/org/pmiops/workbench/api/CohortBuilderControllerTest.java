@@ -1,13 +1,26 @@
 package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.doReturn;
 
+import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
+import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Objects;
 import javax.inject.Provider;
+import javax.sql.RowSet;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -24,6 +37,7 @@ import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.cdr.model.DbCriteriaAttribute;
 import org.pmiops.workbench.cdr.model.DbCriteriaMenu;
 import org.pmiops.workbench.cdr.model.DbDomainCard;
+import org.pmiops.workbench.cdr.model.DbPerson;
 import org.pmiops.workbench.cdr.model.DbSurveyModule;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderServiceImpl;
@@ -34,6 +48,7 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.model.AgeTypeCount;
 import org.pmiops.workbench.model.ConceptIdName;
 import org.pmiops.workbench.model.Criteria;
 import org.pmiops.workbench.model.CriteriaAttribute;
@@ -41,6 +56,7 @@ import org.pmiops.workbench.model.CriteriaSubType;
 import org.pmiops.workbench.model.CriteriaType;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainCard;
+import org.pmiops.workbench.model.DomainCount;
 import org.pmiops.workbench.model.ParticipantDemographics;
 import org.pmiops.workbench.model.SurveyModule;
 import org.pmiops.workbench.model.SurveyVersionListResponse;
@@ -51,6 +67,8 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.test.annotation.DirtiesContext;
 
 @DataJpaTest
@@ -1052,6 +1070,140 @@ public class CohortBuilderControllerTest {
     assertThat(response.getItems().get(2).getItemCount()).isEqualTo(new Long("150"));
     jdbcTemplate.execute("drop table cb_survey_version");
     jdbcTemplate.execute("drop table cb_survey_attribute");
+  }
+
+  @Test
+  public void findDrugIngredientByConceptId(){
+    // mock dao call
+    DbCriteria drugBrandCriteria =
+        DbCriteria.builder()
+            .addDomainId(Domain.DRUG.toString())
+            .addType(CriteriaType.RXNORM.toString())
+            .addParentId(1L)
+            .addCode("C2653")
+            .addName("Ascorbate")
+            .addConceptId("12345")
+            .addGroup(false)
+            .addSelectable(true)
+            .addCount(13L)
+            .addFullText("ascorbate|[drug_rank1]")
+            .build();
+    cbCriteriaDao.save(drugBrandCriteria);
+    jdbcTemplate.execute(
+        "create table cb_criteria_relationship(concept_id_1 integer, concept_id_2 integer)");
+    jdbcTemplate.execute(
+        "insert into cb_criteria_relationship(concept_id_1, concept_id_2) values (12345, 1)");
+    try {
+      List<Criteria> res = controller.findDrugIngredientByConceptId(WORKSPACE_NAMESPACE, WORKSPACE_ID, 12345l).getBody().getItems();
+    } catch (Exception e){
+      //e.printStackTrace(System.out);
+      fail("sql uses `MATCH` function not present in H2 database");
+    }
+  }
+
+  @Test
+  public void findAgeTypeCountsDobMonthDateToday() throws Exception{
+    Calendar today = Calendar.getInstance();
+    int age = 25;
+    // birthday-month-date today
+    DbPerson todayDob = DbPerson.builder()
+          .addPersonId(1000L)
+          .addDob(Date.valueOf(getDateRelativeToToday(-age,0,0)))
+          .addAgeAtCdr(20)
+          .addAgeAtConsent(18)
+          .addIsDeceased(false)
+          .build();
+    // assert dob month and date is today's month/date
+    Calendar dob = new GregorianCalendar();
+    dob.setTime(todayDob.getDob());
+    assertEquals(0,(today.get(Calendar.DAY_OF_YEAR)-dob.get(Calendar.DAY_OF_YEAR)));
+    // birthday-month-date yesterday
+    DbPerson yesterdayDob = DbPerson.builder()
+        .addPersonId(1001L)
+        .addDob(Date.valueOf(getDateRelativeToToday(-age,0,-1)))
+        .addAgeAtCdr(20)
+        .addAgeAtConsent(18)
+        .addIsDeceased(false)
+        .build();
+    // assert dob month and date is today's month/date
+    dob = new GregorianCalendar();
+    dob.setTime(yesterdayDob.getDob());
+    assertEquals(1,(today.get(Calendar.DAY_OF_YEAR)-dob.get(Calendar.DAY_OF_YEAR)));
+
+    // birthday-month-date yesterday
+    DbPerson tomorrowDob = DbPerson.builder()
+        .addPersonId(1002L)
+        .addDob(Date.valueOf(getDateRelativeToToday(-age,0,1)))
+        .addAgeAtCdr(20)
+        .addAgeAtConsent(18)
+        .addIsDeceased(false)
+        .build();
+    // assert dob month and date is today's month/date
+    dob = new GregorianCalendar();
+    dob.setTime(tomorrowDob.getDob());
+    assertEquals(-1,(today.get(Calendar.DAY_OF_YEAR)-dob.get(Calendar.DAY_OF_YEAR)));
+    // save DbPerson entities
+    personDao.save(todayDob);
+    personDao.save(yesterdayDob);
+    personDao.save(tomorrowDob);
+
+    List<AgeTypeCount> expected = new ArrayList<>();
+    // preserve order of output - order by age, count
+    expected.add(new AgeTypeCount().ageType("AGE").age(age-1).count(1l)); // birthday tomorrow
+    expected.add(new AgeTypeCount().ageType("AGE").age(age).count(2l)); // birthday yesterday and today
+    expected.add(new AgeTypeCount().ageType("AGE_AT_CDR").age(20).count(3l));
+    expected.add(new AgeTypeCount().ageType("AGE_AT_CONSENT").age(18).count(3l));
+
+    List<AgeTypeCount> response = controller.findAgeTypeCounts(WORKSPACE_NAMESPACE, WORKSPACE_ID).getBody().getItems();
+    assertIterableEquals(expected, response);
+  }
+
+  @Test
+  public void findDomainCountByStandardSource(){
+    // standardCriteria
+        cbCriteriaDao.save(
+            DbCriteria.builder()
+                .addDomainId(Domain.CONDITION.toString())
+                .addType(CriteriaType.SNOMED.toString())
+                .addCount(100L)
+                .addHierarchy(true)
+                .addConceptId("1")
+                .addStandard(true)
+                .addSelectable(true)
+                .addCode("120")
+                .addFullText("StdTerm[CONDITION_rank1]")
+                .build());
+    // sourceCriteria
+        cbCriteriaDao.save(
+            DbCriteria.builder()
+                .addDomainId(Domain.CONDITION.toString())
+                .addType(CriteriaType.ICD9CM.toString())
+                .addCount(100L)
+                .addStandard(false)
+                .addSelectable(true)
+                .addCode("120")
+                .addConceptId("12")
+                .addFullText("SrcTerm[CONDITION_rank1]")
+                .build());
+
+    DomainCount domainCountStd = controller.findDomainCountByStandardSource(WORKSPACE_NAMESPACE, WORKSPACE_ID,
+        Domain.CONDITION.toString(),Boolean.TRUE,"StdTerm").getBody();
+
+    DomainCount domainCountSrc = controller.findDomainCountByStandardSource(WORKSPACE_NAMESPACE, WORKSPACE_ID,
+        Domain.CONDITION.toString(),Boolean.FALSE,"SrcTerm").getBody();
+
+    System.out.println("");
+
+  }
+
+  private String getDateRelativeToToday(int offsetYears, int offsetMonths, int offsetDate){
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+    Calendar today = Calendar.getInstance();
+    // set date of birth to today's month/date 25 years back
+    today.add(Calendar.YEAR, offsetYears);
+    today.add(Calendar.MONTH, offsetMonths);
+    today.add(Calendar.DATE, offsetDate);
+    return sdf.format(today.getTime());
   }
 
   private Criteria createResponseCriteria(DbCriteria dbCriteria) {
