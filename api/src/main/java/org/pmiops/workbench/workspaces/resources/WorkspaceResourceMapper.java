@@ -17,6 +17,8 @@ import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.db.model.DbUserRecentResource;
 import org.pmiops.workbench.db.model.DbUserRecentlyModifiedResource;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.model.CohortReview;
 import org.pmiops.workbench.model.ConceptSet;
@@ -253,15 +255,21 @@ public interface WorkspaceResourceMapper {
             dbWorkspace,
             dataSetService
                 .getDbDataSet(workspaceId, getResourceIdInLong(dbUserRecentlyModifiedResource))
-                .orElse(new DbDataset()));
+                .orElseThrow(
+                    () ->
+                        new NotFoundException(
+                            String.format(
+                                "Data Set not found for dataSetId: %d",
+                                dbUserRecentlyModifiedResource.getResourceId()))));
       case NOTEBOOK:
         return fromDbUserRecentlyModifiedResourceAndNotebookName(
             dbUserRecentlyModifiedResource,
             fcWorkspace,
             dbWorkspace,
             dbUserRecentlyModifiedResource.getResourceId());
+      default:
+        throw new ServerErrorException("Recent resource: bad resource type ");
     }
-    return null;
   }
 
   default Long getResourceIdInLong(DbUserRecentlyModifiedResource dbUserRecentlyModifiedResource) {
