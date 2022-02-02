@@ -190,7 +190,7 @@ export const DataUserCodeOfConduct = fp.flow(
               <HtmlViewer
                 ariaLabel='data user code of conduct agreement'
                 containerStyles={{ margin: '2rem 0 1rem' }}
-                filePath={'/data-user-code-of-conduct.html'}
+                filePath={'/data-user-code-of-conduct-v4.html'}
                 onLastPage={() => this.setState({ proceedDisabled: false })}
               />
               <FlexRow style={styles.dataUserCodeOfConductFooter}>
