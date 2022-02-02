@@ -135,7 +135,7 @@ export const initPageBeforeTest = async (page: Page): Promise<void> => {
    */
   page.on('request', (request: Request) => {
     // Abort Google Analytics requests.
-    const blockRequestList = ['www.google-analytics.com', '/gtag/js', 'ga.js', 'analytics.js'];
+    const blockRequestList = ['www.google-analytics.com', '/gtag/js', 'ga.js', 'analytics.js', 'zendesk'];
     if (blockRequestList.find((regex) => request.url().match(regex))) {
       return request.abort();
     }
