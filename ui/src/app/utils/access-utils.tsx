@@ -35,7 +35,9 @@ import {
 } from 'app/pages/access/access-renewal';
 
 export enum AccessModulesStatus {
+  // Complete represents modules that cannot be expired (eg ERA COMMON, LOGIN GOV etc) and are not bypassed/incomplete
   COMPLETE = 'Complete',
+  // Current represents modules that can be expired and are not bypassed/incomplete
   CURRENT = 'Current',
   EXPIRINGSOON = 'Expiring Soon',
   EXPIRED = 'Expired',
