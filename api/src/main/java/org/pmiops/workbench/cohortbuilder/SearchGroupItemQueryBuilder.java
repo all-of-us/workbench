@@ -91,7 +91,7 @@ public final class SearchGroupItemQueryBuilder {
           + "JOIN (select cast(cr.id as string) as id\n"
           + "FROM `${projectId}.${dataSetId}.cb_criteria` cr\n"
           + "WHERE concept_id IN unnest(%s)\n"
-          + "AND full_text LIKE '%_rank1]%') a\n"
+          + "AND full_text LIKE '%%_rank1]%%') a\n"
           + "ON (c.path LIKE CONCAT('%%.', a.id, '.%%') OR c.path LIKE CONCAT('%%.', a.id) OR c.path LIKE CONCAT(a.id, '.%%') OR c.path = a.id)\n"
           + "WHERE is_standard = %s\n"
           + "AND is_selectable = 1)";
@@ -103,7 +103,7 @@ public final class SearchGroupItemQueryBuilder {
           + "JOIN (select cast(cr.id as string) as id\n"
           + "FROM `${projectId}.${dataSetId}.cb_criteria` cr\n"
           + "WHERE concept_id IN unnest(%s)\n"
-          + "AND full_text LIKE '%_rank1]%') a\n"
+          + "AND full_text LIKE '%%_rank1]%%') a\n"
           + "ON (c.path LIKE CONCAT('%%.', a.id, '.%%') OR c.path LIKE CONCAT('%%.', a.id) OR c.path LIKE CONCAT(a.id, '.%%') OR c.path = a.id)\n"
           + "WHERE is_standard = %s\n"
           + "AND is_selectable = 1) b ON (ca.ancestor_id = b.concept_id))";
