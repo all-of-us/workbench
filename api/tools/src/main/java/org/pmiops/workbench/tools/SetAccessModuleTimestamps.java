@@ -94,8 +94,6 @@ public class SetAccessModuleTimestamps {
           AccessModuleName.PROFILE_CONFIRMATION,
           PROFILE_CONFIRMATION_TIMESTAMP,
           false);
-      applyTimestampUpdateToUser(
-          accessModuleService, username, AccessModuleName.RAS_LOGIN_GOV, null, false);
     };
   }
 
