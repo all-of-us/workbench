@@ -9,31 +9,24 @@ public enum BigQueryDataSetTableInfo {
   CONDITION(
       Domain.CONDITION,
       "ds_condition_occurrence",
-      " condition_concept_id IN "
-          + String.format(CHILD_LOOKUP_SQL, "@standardConceptIds", Constants.RANK, 1),
-      " condition_source_concept_id IN "
-          + String.format(CHILD_LOOKUP_SQL, "@sourceConceptIds", Constants.RANK, 0)),
+      " condition_concept_id IN " + String.format(CHILD_LOOKUP_SQL, "@standardConceptIds", 1),
+      " condition_source_concept_id IN " + String.format(CHILD_LOOKUP_SQL, "@sourceConceptIds", 0)),
   PROCEDURE(
       Domain.PROCEDURE,
       "ds_procedure_occurrence",
-      " procedure_concept_id IN "
-          + String.format(CHILD_LOOKUP_SQL, "@standardConceptIds", Constants.RANK, 1),
-      " procedure_source_concept_id IN "
-          + String.format(CHILD_LOOKUP_SQL, "@sourceConceptIds", Constants.RANK, 0)),
+      " procedure_concept_id IN " + String.format(CHILD_LOOKUP_SQL, "@standardConceptIds", 1),
+      " procedure_source_concept_id IN " + String.format(CHILD_LOOKUP_SQL, "@sourceConceptIds", 0)),
   DRUG(
       Domain.DRUG,
       "ds_drug_exposure",
-      " drug_concept_id IN "
-          + String.format(DRUG_CHILD_LOOKUP_SQL, "@standardConceptIds", Constants.RANK, 1),
-      " drug_source_concept_id in "
-          + String.format(DRUG_CHILD_LOOKUP_SQL, "@sourceConceptIds", Constants.RANK, 0)),
+      " drug_concept_id IN " + String.format(DRUG_CHILD_LOOKUP_SQL, "@standardConceptIds", 1),
+      " drug_source_concept_id in " + String.format(DRUG_CHILD_LOOKUP_SQL, "@sourceConceptIds", 0)),
   MEASUREMENT(
       Domain.MEASUREMENT,
       "ds_measurement",
-      " measurement_concept_id IN "
-          + String.format(CHILD_LOOKUP_SQL, "@standardConceptIds", Constants.RANK, 1),
+      " measurement_concept_id IN " + String.format(CHILD_LOOKUP_SQL, "@standardConceptIds", 1),
       " measurement_source_concept_id IN "
-          + String.format(CHILD_LOOKUP_SQL, "@sourceConceptIds", Constants.RANK, 0)),
+          + String.format(CHILD_LOOKUP_SQL, "@sourceConceptIds", 0)),
   PHYSICAL_MEASUREMENT_CSS(
       Domain.PHYSICAL_MEASUREMENT_CSS,
       "ds_measurement",
@@ -84,6 +77,13 @@ public enum BigQueryDataSetTableInfo {
   }
 
   private static class Constants {
-    private static final String RANK = "'%_rank1]%'";
+    private static final String CONDITION = "'CONDITION'";
+    private static final String CONDITION_RANK = "'%[condition_rank1]%'";
+    private static final String PROCEDURE = "'PROCEDURE'";
+    private static final String PROCEDURE_RANK = "'%[procedure_rank1]%'";
+    private static final String DRUG = "'DRUG'";
+    private static final String DRUG_RANK = "'%[drug_rank1]%'";
+    private static final String MEASUREMENT = "'MEASUREMENT'";
+    private static final String MEASUREMENT_RANK = "'%[measurement_rank1]%'";
   }
 }
