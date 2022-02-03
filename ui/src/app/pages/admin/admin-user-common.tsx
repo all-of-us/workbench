@@ -42,9 +42,10 @@ import {
   getAccessModuleStatusByName,
 } from 'app/utils/access-utils';
 import {
-  AccessTierDisplayNames,
   AccessTierShortNames,
   hasRegisteredTierAccess,
+  orderedAccessTierShortNames,
+  displayNameForTier,
 } from 'app/utils/access-tiers';
 import { formatDate } from 'app/utils/dates';
 
@@ -223,29 +224,15 @@ export const displayTierBadgeByRequiredModule = (
 };
 
 export const getEraNote = (profile: Profile): string => {
-  // Boolean array that indicates whether eRA is required for Registered Tier and Controlled Tier
-  const tiersRequired: boolean[] = Object.keys(AccessTierShortNames).map(
-    (key) => {
-      return isEraRequiredForTier(profile, AccessTierShortNames[key]);
-    }
-  );
-
-  // Turn values of enum AccessTierDisplayNames to an array
-  const tierDisplayNames: AccessTierDisplayNames[] = Object.keys(
-    AccessTierDisplayNames
-  ).map((key) => {
-    return AccessTierDisplayNames[key];
-  });
-
-  // Tiers that require eRA
-  const requiredTierDisplayNames: AccessTierDisplayNames[] =
-    tierDisplayNames.filter((name, index) => tiersRequired[index]);
+  const requiredTierNames = orderedAccessTierShortNames
+    .filter((name) => isEraRequiredForTier(profile, name))
+    .map(displayNameForTier);
 
   const accessText =
-    requiredTierDisplayNames.length === 0
+    requiredTierNames.length === 0
       ? 'does not require eRA Commons'
       : 'requires eRA Commons for ' +
-        (requiredTierDisplayNames.join(' and ') + ' access');
+        (requiredTierNames.join(' and ') + ' access');
   const institutionName =
     profile.verifiedInstitutionalAffiliation?.institutionDisplayName;
   const note = '* eRA Commons requirements vary by institution.';

@@ -6,6 +6,11 @@ export enum AccessTierShortNames {
   Controlled = 'controlled',
 }
 
+export const orderedAccessTierShortNames = [
+  AccessTierShortNames.Registered,
+  AccessTierShortNames.Controlled,
+];
+
 export enum AccessTierDisplayNames {
   Registered = 'Registered Tier',
   Controlled = 'Controlled Tier',
