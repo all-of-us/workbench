@@ -9,6 +9,7 @@ import { waitForDocumentTitle, waitWhileLoading } from 'utils/waits-utils';
 import NotebookPage from './notebook-page';
 import WorkspaceBase from './workspace-base';
 import { initializeRuntimeIfModalPresented } from 'utils/runtime-utils';
+import { logger } from 'libs/logger';
 
 const PageTitle = 'View Notebooks';
 
@@ -65,7 +66,8 @@ export default class WorkspaceAnalysisPage extends WorkspaceBase {
     const progressTextElement = await this.page.waitForSelector(progressCss, { visible: true });
     const progressText = await getPropValue<string>(progressTextElement, 'textContent');
 
-    console.log(`${headingText}. ${progressText}`);
+    logger.info(headingText);
+    logger.info(progressText.trim());
 
     // Wait for existences of important messages.
     const warningTexts =
@@ -92,7 +94,6 @@ export default class WorkspaceAnalysisPage extends WorkspaceBase {
 
     // Waiting up to 15 minutes
     await waitWhileLoading(this.page, { timeout: 15 * 60 * 1000 });
-
     const notebook = new NotebookPage(this.page, notebookName);
     await notebook.waitForLoad();
     return notebook;

@@ -9,7 +9,6 @@ import {
 } from 'testing/stubs/profile-api-stub';
 import {
   Authority,
-  Profile,
   ProfileApi,
   RuntimeApi,
   WorkspaceAccessLevel,
@@ -33,7 +32,7 @@ import {
 } from 'app/utils/stores';
 
 describe('WorkspaceAbout', () => {
-  const profile = ProfileStubVariables.PROFILE_STUB as unknown as Profile;
+  const profile = ProfileStubVariables.PROFILE_STUB;
   let profileApi: ProfileApiStub;
   const load = jest.fn();
   const reload = jest.fn();

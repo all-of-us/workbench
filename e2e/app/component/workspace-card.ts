@@ -1,5 +1,4 @@
 import { ElementHandle, Page } from 'puppeteer';
-import * as fp from 'lodash/fp';
 import { MenuOption, WorkspaceAccessLevel } from 'app/text-labels';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { getPropValue } from 'utils/element-utils';
@@ -69,14 +68,6 @@ export default class WorkspaceCard extends CardBase {
     return allCards;
   }
 
-  static async findAnyCard(page: Page): Promise<WorkspaceCard> {
-    const cards: WorkspaceCard[] = await this.findAllCards(page);
-    if (cards.length === 0) {
-      throw new Error('FAIL: Failed to find any Workspace card on page.');
-    }
-    return fp.shuffle(cards)[0];
-  }
-
   static async findCard(page: Page, workspaceName: string, timeout = 5000): Promise<WorkspaceCard | null> {
     const selector =
       `${WorkspaceCardSelector.cardRootXpath}[.//*[${WorkspaceCardSelector.cardNameXpath}` +
@@ -136,14 +127,6 @@ export default class WorkspaceCard extends CardBase {
     return getPropValue<string>(element, 'innerText');
   }
 
-  /**
-   * Find element with specified workspace name on the page.
-   * @param {string} workspaceName
-   */
-  async getWorkspaceNameLink(workspaceName: string): Promise<ElementHandle> {
-    return this.page.waitForXPath(this.workspaceNameLinkSelector(workspaceName), { visible: true });
-  }
-
   async getWorkspaceMatchAccessLevel(
     level: WorkspaceAccessLevel = WorkspaceAccessLevel.Owner
   ): Promise<WorkspaceCard[]> {
@@ -190,14 +173,7 @@ export default class WorkspaceCard extends CardBase {
   private getWorkspaceNameXpath(workspaceName: string): string {
     return (
       WorkspaceCardSelector.cardRootXpath +
-      `//*[${WorkspaceCardSelector.cardNameXpath} and normalize-space(text())="${workspaceName}"]`
-    );
-  }
-
-  private workspaceNameLinkSelector(workspaceName: string): string {
-    return (
-      `//*[@role='button'][./*[${WorkspaceCardSelector.cardNameXpath}` +
-      ` and normalize-space(text())="${workspaceName}"]]`
+      `//*[@role='button']/*[${WorkspaceCardSelector.cardNameXpath} and normalize-space(text())="${workspaceName}"]`
     );
   }
 

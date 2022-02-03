@@ -8,5 +8,5 @@
  * thinking though. For now just consolidate DUCC logic through this package.
  */
 export function getLiveDUCCVersion(): number {
-  return 3;
+  return 4;
 }

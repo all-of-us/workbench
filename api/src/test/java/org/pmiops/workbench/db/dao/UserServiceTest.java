@@ -23,7 +23,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.function.Supplier;
-import javax.annotation.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
@@ -43,7 +42,6 @@ import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserCodeOfConductAgreement;
 import org.pmiops.workbench.db.model.DbUserTermsOfService;
-import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
@@ -409,30 +407,6 @@ public class UserServiceTest {
     userService.syncTwoFactorAuthStatus();
     user = userDao.findUserByUsername(USERNAME);
     assertModuleCompletionEqual(AccessModuleName.TWO_FACTOR_AUTH, providedDbUser, null);
-  }
-
-  private Optional<Instant> nullableTimestampToOptionalInstant(
-      @Nullable Timestamp complianceTrainingBypassTime) {
-    return Optional.ofNullable(complianceTrainingBypassTime).map(Timestamp::toInstant);
-  }
-
-  @Test
-  public void testSubmitTermsOfService_illegalTosVersion() {
-    // Testing NULL input version
-    assertThrows(
-        BadRequestException.class,
-        () -> {
-          userService.submitTermsOfService(
-              userDao.findUserByUsername(USERNAME), /* tosVersion */ null);
-        });
-
-    // Testing not current term input version
-    assertThrows(
-        BadRequestException.class,
-        () -> {
-          userService.submitTermsOfService(
-              userDao.findUserByUsername(USERNAME), /* tosVersion */ -1);
-        });
   }
 
   @Test

@@ -3,18 +3,16 @@ import csv
 import os
 import shutil
 from collections import OrderedDict
+from google.cloud import storage
 from io import StringIO
 from os import listdir
 from os.path import isfile, join
-
-from google.cloud import storage
 
 # these are the column names for the controlled and registered output files
 surveys = ['ENGLISHBasics_DataDictionary',
            'ENGLISHLifestyle_DataDictionary',
            'ENGLISHOverallHealth_DataDictionary',
            'ENGLISHPersonalMedicalHistory_DataDictionary',
-           'FamilyHealthHistory',
            'ENGLISHHealthCareAccessUtiliza_DataDictionary',
            'ENGLISHMay2020Covid19Participa_DataDictionary',
            'ENGLISHJune2020Covid19Particip_DataDictionary',
@@ -52,65 +50,58 @@ def main():
     os.mkdir(home_dir)
 
     # open your file writers for this survey and write headers
-    #csv_writer, csv_file = open_writers_with_headers("prep_survey_staged")
+    # csv_writer, csv_file = open_writers_with_headers("prep_survey_staged")
     master_cope_dictionary = OrderedDict()
 
     for name in surveys:
         rows = read_csv(get_filename(name, date))
-        file_name = name.replace("ENGLISH", "").replace("_DataDictionary", "").lower()
+        file_name = name.replace("ENGLISH", "").replace("_DataDictionary",
+                                                        "").lower()
         if "covid" not in name.lower():
-            csv_writer, csv_file = open_writers_with_headers(file_name + "_staged")
+            csv_writer, csv_file = open_writers_with_headers(
+                file_name + "_staged")
         print("Reading & Parsing... " + name)
         previous_concept_code = None
 
         for row in rows:
-            if name == "FamilyHealthHistory":
-                concept_code, survey_name, topic, answers = parse_family_health_row_columns(
-                    row)
+            concept_code, topic, answers, concept_code_rename = \
+                parse_row_columns(row)
+            if concept_code_rename:
+                possible_names = concept_code_rename.split(",")
+                for possible_name in possible_names:
+                    if possible_name.strip().startswith(concept_code):
+                        new_name = possible_name.split("=").pop(1)
+                        if new_name and previous_concept_code != new_name:
+                            concept_code = new_name
+            if not list(filter(concept_code.endswith, exclude_list)):
+                survey_name = name.replace("ENGLISH", "") \
+                    .replace("_DataDictionary", "")
                 new_entry = {'concept_code': concept_code,
                              'survey_name': survey_name,
                              'topic': topic,
                              'answers': answers}
-                csv_writer.writerow(new_entry)
-            else:
-                concept_code, topic, answers, concept_code_rename = \
-                    parse_row_columns(row)
-                if concept_code_rename:
-                    possible_names = concept_code_rename.split(",")
-                    for possible_name in possible_names:
-                        if possible_name.strip().startswith(concept_code):
-                            new_name = possible_name.split("=").pop(1)
-                            if new_name and previous_concept_code != new_name:
-                                concept_code = new_name
-                if not list(filter(concept_code.endswith, exclude_list)):
-                    survey_name = name.replace("ENGLISH", "") \
-                        .replace("_DataDictionary", "")
-                    new_entry = {'concept_code': concept_code,
-                                 'survey_name': survey_name,
-                                 'topic': topic,
-                                 'answers': answers}
-                    if "covid" not in name.lower():
-                        csv_writer.writerow(new_entry)
+                if "covid" not in name.lower():
+                    csv_writer.writerow(new_entry)
+                else:
+                    if "may2020" in name.lower():
+                        if len(master_cope_dictionary) == 0:
+                            cope_entry = {'concept_code': 'cope',
+                                          'survey_name': survey_name,
+                                          'topic': None,
+                                          'answers': None}
+                            master_cope_dictionary['cope'] = cope_entry
+                        master_cope_dictionary[concept_code] = new_entry
                     else:
-                        if "may2020" in name.lower():
-                            if len(master_cope_dictionary) == 0:
-                                cope_entry = {'concept_code': 'cope',
-                                              'survey_name': survey_name,
-                                              'topic': None,
-                                              'answers': None}
-                                master_cope_dictionary['cope'] = cope_entry
-                            master_cope_dictionary[concept_code] = new_entry
+                        if master_cope_dictionary.get(concept_code) is None:
+                            if concept_code == "c19corset_59":
+                                previous_concept_code = "ukmh_j3"
+                            master_cope_dictionary = rewrite_dictionary(
+                                master_cope_dictionary,
+                                previous_concept_code,
+                                new_entry)
                         else:
-                            if master_cope_dictionary.get(concept_code) is None:
-                                if concept_code == "c19corset_59":
-                                    previous_concept_code = "ukmh_j3"
-                                master_cope_dictionary = rewrite_dictionary(
-                                    master_cope_dictionary,
-                                    previous_concept_code,
-                                    new_entry)
-                            else:
-                                master_cope_dictionary[concept_code] = new_entry
-                previous_concept_code = concept_code
+                            master_cope_dictionary[concept_code] = new_entry
+            previous_concept_code = concept_code
         if "covid" not in name.lower():
             flush_and_close_files(csv_file)
 
@@ -127,6 +118,10 @@ def main():
     for f in files:
         blob = bucket.blob(dataset + '/cdr_csv_files/' + f)
         blob.upload_from_filename(home_dir + "/" + f)
+
+    bucket.copy_blob(bucket.blob('redcap/familyhealthhistory_staged.csv'),
+                     bucket,
+                     dataset + '/cdr_csv_files/familyhealthhistory_staged.csv')
 
     # when done remove directory and all files
     shutil.rmtree(home_dir)
@@ -162,8 +157,6 @@ def files_exist(date):
 
 def get_filename(name, date):
     file = name + '_' + date + '.csv'
-    if name == "FamilyHealthHistory":
-        file = "FamilyHealthHistory.csv"
     return file
 
 

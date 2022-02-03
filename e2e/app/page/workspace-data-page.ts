@@ -27,7 +27,8 @@ export default class WorkspaceDataPage extends WorkspaceBase {
   }
 
   async isLoaded(): Promise<boolean> {
-    await Promise.all([waitForDocumentTitle(this.page, PageTitle), waitWhileLoading(this.page)]);
+    await waitForDocumentTitle(this.page, PageTitle);
+    await waitWhileLoading(this.page);
     return true;
   }
 

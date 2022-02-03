@@ -27,7 +27,7 @@ export default class WorkspaceAdminPage extends AuthenticatedPage {
   }
 
   async isLoaded(): Promise<boolean> {
-    await Promise.all([waitForDocumentTitle(this.page, PageTitle)]);
+    await waitForDocumentTitle(this.page, PageTitle);
     await waitWhileLoading(this.page);
     return true;
   }

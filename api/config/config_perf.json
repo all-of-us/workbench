@@ -9,7 +9,7 @@
     "leoBaseUrl": "https:\/\/leonardo.dsde-perf.broadinstitute.org",
     "xAppIdValue": "perf-AoU-RW",
     "timeoutInSeconds": 60,
-    "jupyterDockerImage": "us.gcr.io/broad-dsp-gcr-public/terra-jupyter-aou:2.0.8",
+    "jupyterDockerImage": "us.gcr.io/broad-dsp-gcr-public/terra-jupyter-aou:2.0.11",
     "shibbolethApiBaseUrl": "",
     "shibbolethUiBaseUrl": "",
     "workspaceLogsProject": "fc-aou-logs-perf",
@@ -99,7 +99,7 @@
     "unsafeAllowUserCreationFromGSuiteData": false,
     "enableRasLoginGovLinking": true,
     "enforceRasLoginGovLinking": true,
-    "currentDuccVersions": [3]
+    "currentDuccVersions": [3, 4]
   },
   "featureFlags": {
     "unsafeAllowDeleteUser": true,

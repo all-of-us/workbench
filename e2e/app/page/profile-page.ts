@@ -54,11 +54,8 @@ export default class ProfilePage extends AuthenticatedPage {
   }
 
   async isLoaded(): Promise<boolean> {
-    await Promise.all([
-      waitForUrl(this.page, '/profile'),
-      waitForDocumentTitle(this.page, PageTitle),
-      waitWhileLoading(this.page)
-    ]);
+    await Promise.all([waitForUrl(this.page, '/profile'), waitForDocumentTitle(this.page, PageTitle)]);
+    await waitWhileLoading(this.page);
     return true;
   }
 

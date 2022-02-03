@@ -3,7 +3,6 @@ import * as React from 'react';
 
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import {
-  Profile,
   ProfileApi,
   WorkspaceAccessLevel,
   WorkspacesApi,
@@ -23,7 +22,7 @@ import { profileStore, serverConfigStore } from 'app/utils/stores';
 import { mockNavigate } from 'setupTests';
 
 describe('WorkspaceList', () => {
-  const profile = ProfileStubVariables.PROFILE_STUB as unknown as Profile;
+  const profile = ProfileStubVariables.PROFILE_STUB;
   let profileApi: ProfileApiStub;
   const load = jest.fn();
   const reload = jest.fn();

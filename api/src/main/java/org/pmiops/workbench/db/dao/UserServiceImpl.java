@@ -40,7 +40,6 @@ import org.pmiops.workbench.db.model.DbAdminActionHistory;
 import org.pmiops.workbench.db.model.DbDemographicSurvey;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserCodeOfConductAgreement;
-import org.pmiops.workbench.db.model.DbUserDataUseAgreement;
 import org.pmiops.workbench.db.model.DbUserTermsOfService;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -83,7 +82,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserServiceImpl implements UserService, GaugeDataCollector {
 
   private static final int MAX_RETRIES = 3;
-  private static final int CURRENT_TERMS_OF_SERVICE_VERSION = 1;
 
   private static final Map<AccessModuleName, BadgeName> BADGE_BY_COMPLIANCE_MODULE =
       ImmutableMap.<AccessModuleName, BadgeName>builder()
@@ -99,7 +97,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
 
   private final UserDao userDao;
   private final AdminActionHistoryDao adminActionHistoryDao;
-  private final UserDataUseAgreementDao userDataUseAgreementDao;
   private final UserCodeOfConductAgreementDao userCodeOfConductAgreementDao;
   private final UserTermsOfServiceDao userTermsOfServiceDao;
   private final VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
@@ -123,7 +120,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       UserServiceAuditor userServiceAuditor,
       UserDao userDao,
       AdminActionHistoryDao adminActionHistoryDao,
-      UserDataUseAgreementDao userDataUseAgreementDao,
       UserCodeOfConductAgreementDao userCodeOfConductAgreementDao,
       UserTermsOfServiceDao userTermsOfServiceDao,
       VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao,
@@ -141,7 +137,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     this.userServiceAuditor = userServiceAuditor;
     this.userDao = userDao;
     this.adminActionHistoryDao = adminActionHistoryDao;
-    this.userDataUseAgreementDao = userDataUseAgreementDao;
     this.userCodeOfConductAgreementDao = userCodeOfConductAgreementDao;
     this.userTermsOfServiceDao = userTermsOfServiceDao;
     this.verifiedInstitutionalAffiliationDao = verifiedInstitutionalAffiliationDao;
@@ -433,11 +428,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       throw new BadRequestException("Data User Code of Conduct Version is not up to date");
     }
     final Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
-
-    // RW-4838: dual-write the legacy DUA table and the new DUCC table for rollback safety
-    // then delete the legacy DUA table after a release
-    saveLegacyDUA(dbUser, duccSignedVersion, initials, timestamp);
-
     return updateUserWithRetries(
         (user) -> {
           accessModuleService.updateCompletionTime(
@@ -446,19 +436,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
         },
         dbUser,
         Agent.asUser(dbUser));
-  }
-
-  @Deprecated() // replaced by updateDuccAgreement() and will be removed as part of RW-4838
-  private void saveLegacyDUA(
-      DbUser dbUser, Integer duccSignedVersion, String initials, Timestamp timestamp) {
-    DbUserDataUseAgreement dataUseAgreement = new DbUserDataUseAgreement();
-    dataUseAgreement.setDataUseAgreementSignedVersion(duccSignedVersion);
-    dataUseAgreement.setUserId(dbUser.getUserId());
-    dataUseAgreement.setUserFamilyName(dbUser.getFamilyName());
-    dataUseAgreement.setUserGivenName(dbUser.getGivenName());
-    dataUseAgreement.setUserInitials(initials);
-    dataUseAgreement.setCompletionTime(timestamp);
-    userDataUseAgreementDao.save(dataUseAgreement);
   }
 
   private DbUser updateDuccAgreement(
@@ -485,43 +462,19 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
 
   @Override
   @Transactional
-  public void setDataUseAgreementNameOutOfDate(String newGivenName, String newFamilyName) {
-    List<DbUserDataUseAgreement> dataUseAgreements =
-        userDataUseAgreementDao.findByUserIdOrderByCompletionTimeDesc(
-            userProvider.get().getUserId());
-    dataUseAgreements.forEach(
-        dua ->
-            dua.setUserNameOutOfDate(
-                !dua.getUserGivenName().equalsIgnoreCase(newGivenName)
-                    || !dua.getUserFamilyName().equalsIgnoreCase(newFamilyName)));
-    userDataUseAgreementDao.saveAll(dataUseAgreements);
-  }
-
-  @Override
-  @Transactional
   public void setDataUserCodeOfConductNameOutOfDate(String newGivenName, String newFamilyName) {
-    List<DbUserCodeOfConductAgreement> duccAgreements =
-        userCodeOfConductAgreementDao.findByUserOrderByCompletionTimeDesc(userProvider.get());
-    duccAgreements.forEach(
-        ducc ->
-            ducc.setUserNameOutOfDate(
-                !ducc.getUserGivenName().equalsIgnoreCase(newGivenName)
-                    || !ducc.getUserFamilyName().equalsIgnoreCase(newFamilyName)));
-    userCodeOfConductAgreementDao.saveAll(duccAgreements);
+    DbUserCodeOfConductAgreement duccAgreement = userProvider.get().getDuccAgreement();
+    if (duccAgreement != null) {
+      duccAgreement.setUserNameOutOfDate(
+          !duccAgreement.getUserGivenName().equalsIgnoreCase(newGivenName)
+              || !duccAgreement.getUserFamilyName().equalsIgnoreCase(newFamilyName));
+      userCodeOfConductAgreementDao.save(duccAgreement);
+    }
   }
 
   @Override
   @Transactional
   public void submitTermsOfService(DbUser dbUser, @Nonnull Integer tosVersion) {
-
-    // Validates a given tosVersion, by running all validation checks.
-    if (tosVersion == null) {
-      throw new BadRequestException("Terms of Service version is NULL");
-    }
-    if (tosVersion != CURRENT_TERMS_OF_SERVICE_VERSION) {
-      throw new BadRequestException("Terms of Service version is not up to date");
-    }
-
     DbUserTermsOfService userTermsOfService = new DbUserTermsOfService();
     userTermsOfService.setTosVersion(tosVersion);
     userTermsOfService.setUserId(dbUser.getUserId());

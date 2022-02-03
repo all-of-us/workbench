@@ -26,7 +26,8 @@ const CssSelector = {
   runCellButton: 'button[data-jupyter-action="jupyter-notebook:run-cell-and-select-next"]',
   saveNotebookButton: 'button[data-jupyter-action="jupyter-notebook:save-notebook"]',
   kernelIcon: '#kernel_indicator_icon',
-  kernelName: '.kernel_indicator_name'
+  kernelName: '.kernel_indicator_name',
+  notebookName: '#header #notebook_name'
 };
 
 const Xpath = {
@@ -51,22 +52,32 @@ export enum KernelStatus {
 }
 
 export default class NotebookPage extends NotebookFrame {
-  constructor(page: Page, private readonly documentTitle: string) {
+  constructor(page: Page, private readonly pageTitleRegex: string) {
     super(page);
   }
 
   async isLoaded(): Promise<boolean> {
-    await waitForDocumentTitle(this.page, this.documentTitle);
-    try {
-      await this.findRunButton(120000);
-    } catch (err) {
-      logger.info(`Reloading "${this.documentTitle}" because cannot find the Run button`);
-      await this.page.reload();
-    }
-    // When open notebook for the first time, notebook connection could fail unexpectedly.
-    // But notebook connection will retry to establish. thus, a longer sleep interval is required.
-    await this.waitForKernelIdle(10 * 60 * 1000); // 10 minutes
+    const timeout = 2 * 60 * 1000;
+    await waitForDocumentTitle(this.page, this.pageTitleRegex);
+    const iframe = await this.getIFrame(timeout);
+    await iframe.waitForFunction(
+      (css, name) => {
+        const element = document.querySelector(css);
+        return element && element.textContent === name;
+      },
+      { timeout },
+      CssSelector.notebookName,
+      this.pageTitleRegex
+    );
+    await this.findRunButton(timeout);
+    await this.waitForKernelIdle(timeout);
     return true;
+  }
+
+  async getNotebookName(): Promise<string> {
+    const iframe = await this.getIFrame();
+    const element = await iframe.waitForSelector(CssSelector.notebookName, { visible: true });
+    return getPropValue<string>(element, 'innerText');
   }
 
   /**

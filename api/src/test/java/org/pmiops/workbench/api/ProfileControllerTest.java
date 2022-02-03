@@ -430,6 +430,16 @@ public class ProfileControllerTest extends BaseControllerTest {
   }
 
   @Test
+  public void testCreateAccount_withBadTosVersion_Null() {
+    assertThrows(
+        BadRequestException.class,
+        () -> {
+          createAccountRequest.setTermsOfServiceVersion(null);
+          createAccountAndDbUserWithAffiliation();
+        });
+  }
+
+  @Test
   public void testCreateAccount_invalidUser() {
     CreateAccountRequest accountRequest = new CreateAccountRequest();
     accountRequest.setCaptchaVerificationToken(CAPTCHA_TOKEN);
@@ -462,10 +472,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     String initials = "NIH";
     assertThat(profileController.submitDUCC(CURRENT_DUCC_VERSION, initials).getStatusCode())
         .isEqualTo(HttpStatus.OK);
-    List<DbUserCodeOfConductAgreement> duccAgreementList =
-        userCodeOfConductAgreementDao.findByUserOrderByCompletionTimeDesc(dbUser);
-    assertThat(duccAgreementList.size()).isEqualTo(1);
-    DbUserCodeOfConductAgreement duccAgreement = duccAgreementList.get(0);
+    DbUserCodeOfConductAgreement duccAgreement = dbUser.getDuccAgreement();
     assertThat(duccAgreement.getUserFamilyName()).isEqualTo(dbUser.getFamilyName());
     assertThat(duccAgreement.getUserGivenName()).isEqualTo(dbUser.getGivenName());
     assertThat(duccAgreement.getUserInitials()).isEqualTo(initials);
@@ -483,10 +490,7 @@ public class ProfileControllerTest extends BaseControllerTest {
         version -> {
           assertThat(profileController.submitDUCC(version, initials).getStatusCode())
               .isEqualTo(HttpStatus.OK);
-          List<DbUserCodeOfConductAgreement> duccAgreementList =
-              userCodeOfConductAgreementDao.findByUserOrderByCompletionTimeDesc(dbUser);
-          assertThat(duccAgreementList.size()).isEqualTo(1);
-          DbUserCodeOfConductAgreement duccAgreement = duccAgreementList.get(0);
+          DbUserCodeOfConductAgreement duccAgreement = dbUser.getDuccAgreement();
           assertThat(duccAgreement.getSignedVersion()).isEqualTo(version);
           assertThat(duccAgreement.getUserFamilyName()).isEqualTo(dbUser.getFamilyName());
           assertThat(duccAgreement.getUserGivenName()).isEqualTo(dbUser.getGivenName());
@@ -729,9 +733,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     profile.setGivenName("NewGivenName");
     profile.setFamilyName("NewFamilyName");
     profileController.updateProfile(profile);
-    List<DbUserCodeOfConductAgreement> duccAgreementList =
-        userCodeOfConductAgreementDao.findByUserOrderByCompletionTimeDesc(dbUser);
-    assertThat(duccAgreementList.get(0).isUserNameOutOfDate()).isTrue();
+    assertThat(dbUser.getDuccAgreement().isUserNameOutOfDate()).isTrue();
   }
 
   @Test
