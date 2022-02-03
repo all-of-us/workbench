@@ -1573,7 +1573,6 @@ const ConfirmUpdatePanel = ({
           </div>
         </FlexColumn>
       </div>
-      a{' '}
       {updateMessaging.warn && (
         <WarningMessage iconSize={30} iconPosition={'center'}>
           <TextColumn>
