@@ -51,7 +51,6 @@ import org.pmiops.workbench.config.CommonConfig;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.AccessModuleDao;
 import org.pmiops.workbench.db.dao.AccessTierDao;
-import org.pmiops.workbench.db.dao.UserCodeOfConductAgreementDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserServiceImpl;
 import org.pmiops.workbench.db.dao.UserTermsOfServiceDao;
@@ -147,7 +146,6 @@ public class ProfileControllerTest extends BaseControllerTest {
   @Autowired private ProfileController profileController;
   @Autowired private ProfileService profileService;
   @Autowired private UserDao userDao;
-  @Autowired private UserCodeOfConductAgreementDao userCodeOfConductAgreementDao;
   @Autowired private UserTermsOfServiceDao userTermsOfServiceDao;
   @Autowired private FakeClock fakeClock;
 

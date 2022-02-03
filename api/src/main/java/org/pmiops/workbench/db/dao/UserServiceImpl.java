@@ -97,7 +97,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
 
   private final UserDao userDao;
   private final AdminActionHistoryDao adminActionHistoryDao;
-  private final UserCodeOfConductAgreementDao userCodeOfConductAgreementDao;
   private final UserTermsOfServiceDao userTermsOfServiceDao;
   private final VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
 
@@ -120,7 +119,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       UserServiceAuditor userServiceAuditor,
       UserDao userDao,
       AdminActionHistoryDao adminActionHistoryDao,
-      UserCodeOfConductAgreementDao userCodeOfConductAgreementDao,
       UserTermsOfServiceDao userTermsOfServiceDao,
       VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao,
       AccessModuleService accessModuleService,
@@ -137,7 +135,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     this.userServiceAuditor = userServiceAuditor;
     this.userDao = userDao;
     this.adminActionHistoryDao = adminActionHistoryDao;
-    this.userCodeOfConductAgreementDao = userCodeOfConductAgreementDao;
     this.userTermsOfServiceDao = userTermsOfServiceDao;
     this.verifiedInstitutionalAffiliationDao = verifiedInstitutionalAffiliationDao;
     this.accessModuleService = accessModuleService;
