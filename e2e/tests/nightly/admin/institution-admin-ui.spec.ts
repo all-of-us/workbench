@@ -71,7 +71,7 @@ describe('Institution Admin', () => {
     const institutionEditPage = new InstitutionEditPage(page);
     await institutionEditPage.waitForLoad();
     await institutionEditPage.getAddNewInstitutionFields();
-    expect(await institutionEditPage.getRtEratoggle().isChecked()).toBe(true);
+    expect(await institutionEditPage.getRtEratoggle().isChecked()).toBe(false);
     await institutionEditPage.selectRtEmailOption(AcceptedAddressSelectValue.Domains);
     //verify if the Accepted Email Domains textarea now displays in registered-card-details div
     const rtEmailDomainsTextArea = institutionEditPage.getRtEmailDomainsInput();
@@ -97,9 +97,9 @@ describe('Institution Admin', () => {
     // click Keep Editing button to stay on the add new institution page
     await institutionNotSavedModal.clickKeepEditingButton();
     await institutionEditPage.waitForLoad();
-    const institutionNotSavedModal2 = await institutionEditPage.clickBackButton();
+    await institutionEditPage.clickBackButton();
     // click yes, leave button to navigate to the institution admin page
-    await institutionNotSavedModal2.clickYesLeaveButton();
+    await institutionNotSavedModal.clickYesLeaveButton();
     await institutionAdminPage.waitForLoad();
   });
 });
