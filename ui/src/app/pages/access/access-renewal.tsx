@@ -133,7 +133,7 @@ const syncAndReloadTraining = fp.flow(
 // Helper Functions
 // The module has already expired
 export const hasExpired = (expiration: number): boolean =>
-  getWholeDaysFromNow(expiration) < 0;
+  !!expiration && getWholeDaysFromNow(expiration) < 0;
 
 // The module can either be expired or is expiring
 export const isExpiring = (expiration?: number): boolean =>

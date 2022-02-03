@@ -37,7 +37,6 @@ import { TooltipTrigger } from 'app/components/popups';
 import { serverConfigStore } from 'app/utils/stores';
 import {
   accessRenewalModules,
-  AccessModulesStatus,
   computeRenewalDisplayDates,
   getAccessModuleConfig,
   getAccessModuleStatusByName,
@@ -172,10 +171,7 @@ export const displayModuleStatus = (
   const moduleStatus = computeRenewalDisplayDates(
     getAccessModuleStatusByName(profile, moduleName)
   ).moduleStatus;
-  const canModuleExpire = getAccessModuleConfig(moduleName).canExpire;
-  return !canModuleExpire && moduleStatus === AccessModulesStatus.EXPIRED
-    ? AccessModulesStatus.COMPLETE
-    : moduleStatus;
+  return moduleStatus;
 };
 
 // Some modules may never expire (eg GOOGLE TWO STEP NOTIFICATION, ERA COMMONS etc),

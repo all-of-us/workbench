@@ -35,11 +35,9 @@ import {
 } from 'app/pages/access/access-renewal';
 
 export enum AccessModulesStatus {
-  // Complete represents modules that cannot be expired (eg ERA COMMON, LOGIN GOV etc) and are not bypassed/incomplete
-  COMPLETE = 'Complete',
-  // Current represents modules that can be expired and are not bypassed/incomplete
+  NEVER_EXPIRE = 'Complete (Never Expire)',
   CURRENT = 'Current',
-  EXPIRINGSOON = 'Expiring Soon',
+  EXPIRING_SOON = 'Expiring Soon',
   EXPIRED = 'Expired',
   BYPASSED = 'Bypassed',
   INCOMPLETE = 'Incomplete',
@@ -437,12 +435,15 @@ export const computeRenewalDisplayDates = ({
   const nextReviewDate = withInvalidDateHandling(expirationEpochMillis);
   const bypassDate = withInvalidDateHandling(bypassEpochMillis);
 
-  function currentOrExpiringOrExpirationStatus(): AccessModulesStatus {
+  function getOtherModuleStatus(): AccessModulesStatus {
+    // If there is no expirationDate, the module never expires
     return hasExpired(expirationEpochMillis)
       ? AccessModulesStatus.EXPIRED
       : isExpiringNotBypassed({ expirationEpochMillis })
-      ? AccessModulesStatus.EXPIRINGSOON
-      : AccessModulesStatus.CURRENT;
+      ? AccessModulesStatus.EXPIRING_SOON
+      : !!expirationEpochMillis
+      ? AccessModulesStatus.CURRENT
+      : AccessModulesStatus.NEVER_EXPIRE;
   }
 
   return cond(
@@ -476,7 +477,7 @@ export const computeRenewalDisplayDates = ({
         return {
           lastConfirmedDate,
           nextReviewDate: `${nextReviewDate} ${daysRemainingDisplay}`,
-          moduleStatus: currentOrExpiringOrExpirationStatus(),
+          moduleStatus: getOtherModuleStatus(),
         };
       },
     ]
