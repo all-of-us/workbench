@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.doReturn;
 
 import java.sql.Date;
@@ -23,7 +22,6 @@ import javax.inject.Provider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.cdr.cache.MySQLStopWords;
 import org.pmiops.workbench.cdr.dao.CBCriteriaAttributeDao;
@@ -62,6 +60,7 @@ import org.pmiops.workbench.model.DomainCount;
 import org.pmiops.workbench.model.GenderOrSexType;
 import org.pmiops.workbench.model.ParticipantDemographics;
 import org.pmiops.workbench.model.SurveyModule;
+import org.pmiops.workbench.model.SurveyVersion;
 import org.pmiops.workbench.model.SurveyVersionListResponse;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -1074,35 +1073,37 @@ public class CohortBuilderControllerTest {
   }
 
   @Test
-  public void findDrugIngredientByConceptId(){
-    CBCriteriaDao cbCriteriaDaoMock = Mockito.mock(CBCriteriaDao.class);
+  public void findSurveyCount(){
+    assertTrue(true,"This method cannot be tested due to (a) Is a Native Query and not JPQL,"
+        + " and (b) H2 not having a compatible MATCH ... against... function");
+  }
 
-    // mock dao call
-    DbCriteria drugBrandCriteria =
-        DbCriteria.builder()
-            .addDomainId(Domain.DRUG.toString())
-            .addType(CriteriaType.RXNORM.toString())
-            .addParentId(1L)
-            .addCode("C2653")
-            .addName("Ascorbate")
-            .addConceptId("12345")
-            .addGroup(false)
-            .addSelectable(true)
-            .addCount(13L)
-            .addFullText("ascorbate|[drug_rank1]")
-            .build();
-    cbCriteriaDao.save(drugBrandCriteria);
+  @Test
+  public void findSurveyVersionByQuestionConceptIdAndAnswerConceptId(){
     jdbcTemplate.execute(
-        "create table cb_criteria_relationship(concept_id_1 integer, concept_id_2 integer)");
+        "create table cb_survey_version(survey_version_concept_id integer, survey_concept_id integer, display_name varchar(50), display_order integer)");
     jdbcTemplate.execute(
-        "insert into cb_criteria_relationship(concept_id_1, concept_id_2) values (12345, 1)");
-    try {
-      List<Criteria> res = controller.findDrugIngredientByConceptId(WORKSPACE_NAMESPACE, WORKSPACE_ID, 12345l).getBody().getItems();
-      System.out.println(res);
-    } catch (Exception e){
-      //e.printStackTrace(System.out);
-      fail("sql uses `MATCH` function not present in H2 database");
-    }
+        "create table cb_survey_attribute(id integer, question_concept_id integer, answer_concept_id integer, survey_version_concept_id integer, item_count integer)");
+    jdbcTemplate.execute(
+        "insert into cb_survey_version(survey_version_concept_id, survey_concept_id, display_name, display_order) values (999, 111, 'May 2020', 1)");
+     jdbcTemplate.execute(
+        "insert into cb_survey_attribute(id, question_concept_id, answer_concept_id, survey_version_concept_id, item_count) values (1, 222, 333, 999, 200)");
+
+    List<SurveyVersion> response = controller.findSurveyVersionByQuestionConceptIdAndAnswerConceptId(WORKSPACE_NAMESPACE,WORKSPACE_ID,
+                      111l,222l,333l)
+                                      .getBody().getItems();
+    assertThat(response.get(0).getSurveyVersionConceptId()).isEqualTo(999);
+    assertThat(response.get(0).getDisplayName()).isEqualTo("May 2020");
+    assertThat(response.get(0).getItemCount()).isEqualTo(200);
+
+    jdbcTemplate.execute("drop table cb_survey_version");
+    jdbcTemplate.execute("drop table cb_survey_attribute");
+  }
+
+  @Test
+  public void findDrugIngredientByConceptId(){
+    assertTrue(true,"This method cannot be tested due to (a) Is a Native Query and not JPQL,"
+        + " and (b) H2 not having a compatible MATCH ... against... function");
   }
 
   @Test
@@ -1121,6 +1122,7 @@ public class CohortBuilderControllerTest {
     Calendar dob = new GregorianCalendar();
     dob.setTime(todayDob.getDob());
     assertEquals(0,(today.get(Calendar.DAY_OF_YEAR)-dob.get(Calendar.DAY_OF_YEAR)));
+
     // birthday-month-date yesterday
     DbPerson yesterdayDob = DbPerson.builder()
         .addPersonId(1001L)
@@ -1129,12 +1131,12 @@ public class CohortBuilderControllerTest {
         .addAgeAtConsent(18)
         .addIsDeceased(false)
         .build();
-    // assert dob month and date is today's month/date
+    // assert dob month and date is yesterday's month/date
     dob = new GregorianCalendar();
     dob.setTime(yesterdayDob.getDob());
     assertEquals(1,(today.get(Calendar.DAY_OF_YEAR)-dob.get(Calendar.DAY_OF_YEAR)));
 
-    // birthday-month-date yesterday
+    // birthday-month-date tomorrow
     DbPerson tomorrowDob = DbPerson.builder()
         .addPersonId(1002L)
         .addDob(Date.valueOf(getDateRelativeToToday(-age,0,1)))
@@ -1142,7 +1144,7 @@ public class CohortBuilderControllerTest {
         .addAgeAtConsent(18)
         .addIsDeceased(false)
         .build();
-    // assert dob month and date is today's month/date
+    // assert dob month and date is tomorrows's month/date
     dob = new GregorianCalendar();
     dob.setTime(tomorrowDob.getDob());
     assertEquals(-1,(today.get(Calendar.DAY_OF_YEAR)-dob.get(Calendar.DAY_OF_YEAR)));
@@ -1165,49 +1167,43 @@ public class CohortBuilderControllerTest {
   @Test
   public void findDomainCountByStandardSource(){
     // standardCriteria
+    for (int i = 0; i < 10; i++) {
         cbCriteriaDao.save(
             DbCriteria.builder()
                 .addDomainId(Domain.CONDITION.toString())
                 .addType(CriteriaType.SNOMED.toString())
-                .addCount(100L)
+                .addCount(100L+i)
                 .addHierarchy(true)
-                .addConceptId("1")
+                .addConceptId(String.valueOf(1000+i))
                 .addStandard(true)
                 .addSelectable(true)
                 .addCode("120")
-                .addFullText("myterm[CONDITION_rank1]")
+                .addName("Diabetes 1")
+                .addFullText("Diabetes 1[CONDITION_rank1]")
                 .build());
+    }
     // sourceCriteria
         cbCriteriaDao.save(
             DbCriteria.builder()
                 .addDomainId(Domain.CONDITION.toString())
                 .addType(CriteriaType.ICD9CM.toString())
-                .addCount(100L)
+                .addCount(200L)
+                .addHierarchy(false)
+                .addConceptId("13000")
                 .addStandard(false)
                 .addSelectable(true)
-                .addCode("120")
-                .addConceptId("12")
-                .addFullText("term[CONDITION_rank1]")
+                .addCode("130")
+                .addName("Other liver")
+                .addFullText("Other liver[CONDITION_rank1]")
                 .build());
 
     DomainCount domainCountStd = controller.findDomainCountByStandardSource(WORKSPACE_NAMESPACE, WORKSPACE_ID,
-        Domain.CONDITION.toString(),Boolean.TRUE,"myterm").getBody();
+        Domain.CONDITION.toString(),Boolean.TRUE,"120").getBody();
+    assertThat(domainCountStd.getConceptCount()).isEqualTo(10);
 
     DomainCount domainCountSrc = controller.findDomainCountByStandardSource(WORKSPACE_NAMESPACE, WORKSPACE_ID,
-        Domain.CONDITION.toString(),Boolean.FALSE,"term").getBody();
-    // TODO What am I asserting?
-    System.out.println("domainCountStd\n"+ domainCountStd);
-    System.out.println("domainCountSrc\n"+ domainCountSrc);
-  }
-
-  @Test
-  public void findSurveyCount(){
-    throw new NotImplementedException("Not yet...");
-  }
-
-  @Test
-  public void findSurveyVersionByQuestionConceptIdAndAnswerConceptId(){
-    throw new NotImplementedException("Not yet...");
+        Domain.CONDITION.toString(),Boolean.FALSE,"130").getBody();
+    assertThat(domainCountSrc.getConceptCount()).isEqualTo(1);
   }
 
   @Test
@@ -1230,13 +1226,52 @@ public class CohortBuilderControllerTest {
   }
 
   @Test
+  public void validDomainAndSurveyName(){
+    // While validateDomain is case-insensitive,
+    // this is case sensitive for SURVEY when checking surveyName
+    assertDoesNotThrow(() -> controller.validateDomain("SURVEY", "some survey name"),
+        "BadRequestException is not expected to be thrown for [some survey name]");
+    // survey name cannot be null for SURVEY
+    Throwable exceptionThrown = assertThrows(BadRequestException.class,
+        () -> controller.validateDomain("SURVEY", null), "Expected BadRequestException is not thrown.");
+    assertTrue(exceptionThrown.getMessage().contains("Please provide a valid surveyName"));
+  }
+
+  @Test
   public void validateType(){
-    throw new NotImplementedException("Not yet...");
+    List<String> values = Stream.of(CriteriaType.values())
+        .map(CriteriaType::toString).collect(Collectors.toList());
+    for (String value : values) {
+      assertDoesNotThrow(() -> controller.validateType(value),
+          "BadRequestException is not expected to be thrown for [" + value + "]");
+    }
+    // Do not expect exception for lowercase
+    values.replaceAll(String::toLowerCase);
+    for (String value : values ) {
+      assertDoesNotThrow(() -> controller.validateType(value.toLowerCase()),
+          "BadRequestException is not expected to be thrown for [" + value +"]");
+    }
+    Throwable exceptionThrown = assertThrows(BadRequestException.class,
+        () -> controller.validateType("BOGUS"), "Expected BadRequestException is not thrown.");
+    assertTrue(exceptionThrown.getMessage().contains("Please provide a valid type"));
   }
 
   @Test
   public void validateTerm(){
-    throw new NotImplementedException("Not yet...");
+    assertDoesNotThrow(() -> controller.validateTerm("non-empty search string"),
+        "BadRequestException is not expected to be thrown for non-empty search string");
+    // null string
+    Throwable exceptionThrown = assertThrows(BadRequestException.class,
+        () -> controller.validateTerm(null), "Expected BadRequestException is not thrown.");
+    assertTrue(exceptionThrown.getMessage().contains("Please provide a valid search term"));
+    // empty string length = 0
+    exceptionThrown = assertThrows(BadRequestException.class,
+        () -> controller.validateTerm(""), "Expected BadRequestException is not thrown.");
+    assertTrue(exceptionThrown.getMessage().contains("Please provide a valid search term"));
+    // empty string length > 0
+    exceptionThrown = assertThrows(BadRequestException.class,
+        () -> controller.validateTerm("   "), "Expected BadRequestException is not thrown.");
+    assertTrue(exceptionThrown.getMessage().contains("Please provide a valid search term"));
   }
 
   @Test
