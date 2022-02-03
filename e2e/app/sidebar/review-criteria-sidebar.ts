@@ -4,7 +4,7 @@ import { LinkText } from 'app/text-labels';
 import { buildXPath } from 'app/xpath-builders';
 import { ElementType } from 'app/xpath-options';
 import { waitForNumericalString, waitWhileLoading } from 'utils/waits-utils';
-import BaseHelpSidebar, { Selectors } from './base-help-sidebar';
+import BaseSidebar, { Selectors } from './base-sidebar';
 import { logger } from 'libs/logger';
 import { FilterSign } from 'app/page/cohort-participants-group';
 import { getPropValue } from 'utils/element-utils';
@@ -16,7 +16,7 @@ enum SectionSelectors {
   SelectionList = '//*[@id="selection-list"]'
 }
 
-export default class ReviewCriteriaSidebar extends BaseHelpSidebar {
+export default class ReviewCriteriaSidebar extends BaseSidebar {
   participantResultXpath = `${this.xpath}//*[./*[contains(text(), "Number of Participants")]]`;
 
   constructor(page: Page) {

@@ -1,4 +1,4 @@
-import RuntimePanel, { ComputeType } from 'app/component/runtime-panel';
+import RuntimePanel, { ComputeType } from 'app/sidebar/runtime-panel';
 import { config } from 'resources/workbench-config';
 import { createWorkspace, signInWithAccessToken } from 'utils/test-utils';
 import WorkspaceDataPage from 'app/page/workspace-data-page';

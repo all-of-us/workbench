@@ -8,7 +8,7 @@ import DataResourceCard from 'app/component/data-resource-card';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { waitForText } from 'utils/waits-utils';
 import { getPropValue } from 'utils/element-utils';
-import AnnotationsSidebar, { ReviewStatus } from 'app/component/annotations-sidebar';
+import AnnotationsSidebar, { ReviewStatus } from 'app/sidebar/annotations-sidebar';
 import { AnnotationType } from 'app/modal/annotation-field-modal';
 import CohortActionsPage from 'app/page/cohort-actions-page';
 import { Page } from 'puppeteer';

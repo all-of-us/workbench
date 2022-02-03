@@ -5,7 +5,7 @@ import DataTable from 'app/component/data-table';
 import Button from 'app/element/button';
 import { LinkText } from 'app/text-labels';
 import { getPropValue, waitUntilChanged } from 'utils/element-utils';
-import ReviewConceptSetSidebar from 'app/component/review-conceptset-sidebar';
+import ReviewConceptSetSidebar from 'app/sidebar/review-conceptset-sidebar';
 import AuthenticatedPage from './authenticated-page';
 import ConceptSetSaveModal, { SaveOption } from 'app/modal/conceptset-save-modal';
 

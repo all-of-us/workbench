@@ -5,7 +5,7 @@ import { makeWorkspaceName } from 'utils/str-utils';
 import CohortActionsPage from 'app/page/cohort-actions-page';
 import { MenuOption, ResourceCard } from 'app/text-labels';
 import ClrIconLink from 'app/element/clr-icon-link';
-import ReviewCriteriaSidebar from 'app/component/review-criteria-sidebar';
+import ReviewCriteriaSidebar from 'app/sidebar/review-criteria-sidebar';
 import { Page } from 'puppeteer';
 
 describe('Create Cohorts Test', () => {

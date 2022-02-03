@@ -4,7 +4,7 @@ import { findAllCards, signInWithAccessToken } from 'utils/test-utils';
 import CohortBuildPage from 'app/page/cohort-build-page';
 import ClrIconLink from 'app/element/clr-icon-link';
 import { PhysicalMeasurementsCriteria } from 'app/page/cohort-participants-group';
-import ReviewCriteriaSidebar from 'app/component/review-criteria-sidebar';
+import ReviewCriteriaSidebar from 'app/sidebar/review-criteria-sidebar';
 import * as fp from 'lodash/fp';
 import { logger } from 'libs/logger';
 import { Page } from 'puppeteer';
