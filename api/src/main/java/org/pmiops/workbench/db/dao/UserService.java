@@ -55,8 +55,6 @@ public interface UserService {
   // Registers that a user has agreed to a given version of the Terms of Service.
   void submitTermsOfService(DbUser dbUser, Integer tosVersion);
 
-  void setDataUserCodeOfConductNameOutOfDate(String newGivenName, String newFamilyName);
-
   DbUser setDisabledStatus(Long userId, boolean disabled);
 
   List<Long> getAllUserIds();
