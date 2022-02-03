@@ -9,6 +9,8 @@ module.exports = {
     'react',
     'react-hooks',
   ],
+  // If we extend multiple rulesets in the future, ensure that 'prettier' is last.
+  // This will allow it to disable prettier-incompatible rules from other rulesets.
   extends: ['prettier'],
   parserOptions: {
     ecmaVersion: 6,
