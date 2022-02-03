@@ -99,7 +99,7 @@
     "unsafeAllowUserCreationFromGSuiteData": true,
     "enableRasLoginGovLinking": true,
     "enforceRasLoginGovLinking": true,
-    "currentDuccVersions": [3]
+    "currentDuccVersions": [3, 4]
   },
   "featureFlags": {
     "unsafeAllowDeleteUser": true,
