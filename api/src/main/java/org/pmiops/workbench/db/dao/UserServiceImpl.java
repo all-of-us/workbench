@@ -83,7 +83,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserServiceImpl implements UserService, GaugeDataCollector {
 
   private static final int MAX_RETRIES = 3;
-  private static final int CURRENT_TERMS_OF_SERVICE_VERSION = 1;
 
   private static final Map<AccessModuleName, BadgeName> BADGE_BY_COMPLIANCE_MODULE =
       ImmutableMap.<AccessModuleName, BadgeName>builder()
@@ -513,15 +512,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   @Override
   @Transactional
   public void submitTermsOfService(DbUser dbUser, @Nonnull Integer tosVersion) {
-
-    // Validates a given tosVersion, by running all validation checks.
-    if (tosVersion == null) {
-      throw new BadRequestException("Terms of Service version is NULL");
-    }
-    if (tosVersion != CURRENT_TERMS_OF_SERVICE_VERSION) {
-      throw new BadRequestException("Terms of Service version is not up to date");
-    }
-
     DbUserTermsOfService userTermsOfService = new DbUserTermsOfService();
     userTermsOfService.setTosVersion(tosVersion);
     userTermsOfService.setUserId(dbUser.getUserId());

@@ -430,6 +430,16 @@ public class ProfileControllerTest extends BaseControllerTest {
   }
 
   @Test
+  public void testCreateAccount_withBadTosVersion_Null() {
+    assertThrows(
+        BadRequestException.class,
+        () -> {
+          createAccountRequest.setTermsOfServiceVersion(null);
+          createAccountAndDbUserWithAffiliation();
+        });
+  }
+
+  @Test
   public void testCreateAccount_invalidUser() {
     CreateAccountRequest accountRequest = new CreateAccountRequest();
     accountRequest.setCaptchaVerificationToken(CAPTCHA_TOKEN);
