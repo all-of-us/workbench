@@ -1,6 +1,7 @@
 package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -9,8 +10,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.doReturn;
 
 import java.sql.Date;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -18,12 +17,13 @@ import java.util.Collections;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.inject.Provider;
-import javax.sql.RowSet;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.cdr.cache.MySQLStopWords;
 import org.pmiops.workbench.cdr.dao.CBCriteriaAttributeDao;
@@ -48,6 +48,8 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.exceptions.NotImplementedException;
+import org.pmiops.workbench.model.AgeType;
 import org.pmiops.workbench.model.AgeTypeCount;
 import org.pmiops.workbench.model.ConceptIdName;
 import org.pmiops.workbench.model.Criteria;
@@ -57,6 +59,7 @@ import org.pmiops.workbench.model.CriteriaType;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainCard;
 import org.pmiops.workbench.model.DomainCount;
+import org.pmiops.workbench.model.GenderOrSexType;
 import org.pmiops.workbench.model.ParticipantDemographics;
 import org.pmiops.workbench.model.SurveyModule;
 import org.pmiops.workbench.model.SurveyVersionListResponse;
@@ -67,8 +70,6 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.test.annotation.DirtiesContext;
 
 @DataJpaTest
@@ -1074,6 +1075,8 @@ public class CohortBuilderControllerTest {
 
   @Test
   public void findDrugIngredientByConceptId(){
+    CBCriteriaDao cbCriteriaDaoMock = Mockito.mock(CBCriteriaDao.class);
+
     // mock dao call
     DbCriteria drugBrandCriteria =
         DbCriteria.builder()
@@ -1095,6 +1098,7 @@ public class CohortBuilderControllerTest {
         "insert into cb_criteria_relationship(concept_id_1, concept_id_2) values (12345, 1)");
     try {
       List<Criteria> res = controller.findDrugIngredientByConceptId(WORKSPACE_NAMESPACE, WORKSPACE_ID, 12345l).getBody().getItems();
+      System.out.println(res);
     } catch (Exception e){
       //e.printStackTrace(System.out);
       fail("sql uses `MATCH` function not present in H2 database");
@@ -1102,7 +1106,7 @@ public class CohortBuilderControllerTest {
   }
 
   @Test
-  public void findAgeTypeCountsDobMonthDateToday() throws Exception{
+  public void findAgeTypeCounts() throws Exception{
     Calendar today = Calendar.getInstance();
     int age = 25;
     // birthday-month-date today
@@ -1171,7 +1175,7 @@ public class CohortBuilderControllerTest {
                 .addStandard(true)
                 .addSelectable(true)
                 .addCode("120")
-                .addFullText("StdTerm[CONDITION_rank1]")
+                .addFullText("myterm[CONDITION_rank1]")
                 .build());
     // sourceCriteria
         cbCriteriaDao.save(
@@ -1183,17 +1187,90 @@ public class CohortBuilderControllerTest {
                 .addSelectable(true)
                 .addCode("120")
                 .addConceptId("12")
-                .addFullText("SrcTerm[CONDITION_rank1]")
+                .addFullText("term[CONDITION_rank1]")
                 .build());
 
     DomainCount domainCountStd = controller.findDomainCountByStandardSource(WORKSPACE_NAMESPACE, WORKSPACE_ID,
-        Domain.CONDITION.toString(),Boolean.TRUE,"StdTerm").getBody();
+        Domain.CONDITION.toString(),Boolean.TRUE,"myterm").getBody();
 
     DomainCount domainCountSrc = controller.findDomainCountByStandardSource(WORKSPACE_NAMESPACE, WORKSPACE_ID,
-        Domain.CONDITION.toString(),Boolean.FALSE,"SrcTerm").getBody();
+        Domain.CONDITION.toString(),Boolean.FALSE,"term").getBody();
+    // TODO What am I asserting?
+    System.out.println("domainCountStd\n"+ domainCountStd);
+    System.out.println("domainCountSrc\n"+ domainCountSrc);
+  }
 
-    System.out.println("");
+  @Test
+  public void findSurveyCount(){
+    throw new NotImplementedException("Not yet...");
+  }
 
+  @Test
+  public void findSurveyVersionByQuestionConceptIdAndAnswerConceptId(){
+    throw new NotImplementedException("Not yet...");
+  }
+
+  @Test
+  public void validateDomainCaseInsensitive(){
+    List<String> values = Stream.of(Domain.values())
+        .map(Domain::toString).collect(Collectors.toList());
+    for (String value : values ) {
+      assertDoesNotThrow(() -> controller.validateDomain(value),
+          "BadRequestException is not expected to be thrown for [" + value + "]");
+    }
+    // Do not expect exception for lowercase
+    values.replaceAll(String::toLowerCase);
+    for (String value : values ) {
+      assertDoesNotThrow(() -> controller.validateDomain(value.toLowerCase()),
+          "BadRequestException is not expected to be thrown for [" + value +"]");
+    }
+    Throwable exceptionThrown = assertThrows(BadRequestException.class,
+        () -> controller.validateDomain("BOGUS"), "Expected BadRequestException is not thrown.");
+    assertTrue(exceptionThrown.getMessage().contains("Please provide a valid domain"));
+  }
+
+  @Test
+  public void validateType(){
+    throw new NotImplementedException("Not yet...");
+  }
+
+  @Test
+  public void validateTerm(){
+    throw new NotImplementedException("Not yet...");
+  }
+
+  @Test
+  public void validateAgeTypeCaseSensitive(){
+    List<String> values = Stream.of(AgeType.values())
+        .map(AgeType::toString).collect(Collectors.toList());
+    for (String value : values) {
+      assertDoesNotThrow(() -> controller.validateAgeType(value),
+          "BadRequestException is not expected to be thrown for [" + value + "]");
+    }
+    // expect exception for lowercase
+    values.replaceAll(String::toLowerCase);
+    for (String value : values) {
+      Throwable exceptionThrown = assertThrows(BadRequestException.class,
+          () -> controller.validateAgeType(value), "Expected BadRequestException is not thrown.");
+      assertTrue(exceptionThrown.getMessage().contains("Please provide a valid age type parameter"));
+    }
+  }
+
+  @Test
+  public void validateGenderOrSexTypeCaseSensitive(){
+    List<String> values = Stream.of(GenderOrSexType.values())
+        .map(GenderOrSexType::toString).collect(Collectors.toList());
+    for (String value : values ) {
+      assertDoesNotThrow(() -> controller.validateGenderOrSexType(value),
+          "BadRequestException is not expected to be thrown for [" + value + "]");
+    }
+    // expect exception for lowercase
+    values.replaceAll(String::toLowerCase);
+    for (String value : values) {
+      Throwable exceptionThrown = assertThrows(BadRequestException.class,
+          () -> controller.validateGenderOrSexType(value), "Expected BadRequestException is not thrown.");
+      assertTrue(exceptionThrown.getMessage().contains("Please provide a valid gender or sex at birth parameter"));
+    }
   }
 
   private String getDateRelativeToToday(int offsetYears, int offsetMonths, int offsetDate){
