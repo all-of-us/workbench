@@ -28,6 +28,7 @@ import org.pmiops.workbench.db.dao.VerifiedInstitutionalAffiliationDao;
 import org.pmiops.workbench.db.model.DbDemographicSurvey;
 import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbUserCodeOfConductAgreement;
 import org.pmiops.workbench.db.model.DbUserTermsOfService;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -225,8 +226,10 @@ public class ProfileService {
 
     if (!user.getGivenName().equalsIgnoreCase(updatedProfile.getGivenName())
         || !user.getFamilyName().equalsIgnoreCase(updatedProfile.getFamilyName())) {
-      userService.setDataUserCodeOfConductNameOutOfDate(
-          updatedProfile.getGivenName(), updatedProfile.getFamilyName());
+      DbUserCodeOfConductAgreement duccAgreement = user.getDuccAgreement();
+      if (duccAgreement != null) {
+        duccAgreement.setUserNameOutOfDate(true);
+      }
     }
 
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());

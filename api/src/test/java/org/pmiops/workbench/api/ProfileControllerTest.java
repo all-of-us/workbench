@@ -737,6 +737,41 @@ public class ProfileControllerTest extends BaseControllerTest {
   }
 
   @Test
+  public void testSubmitDUCC_name_no_longer_out_of_date() {
+    createAccountAndDbUserWithAffiliation();
+    Profile profile = profileController.getMe().getBody();
+    String givenName1 = profile.getGivenName();
+    String familyName1 = profile.getFamilyName();
+    String initials1 = "AAA";
+
+    profileController.submitDUCC(CURRENT_DUCC_VERSION, initials1);
+    DbUserCodeOfConductAgreement duccAgreement = dbUser.getDuccAgreement();
+    assertThat(duccAgreement.isUserNameOutOfDate()).isFalse();
+    assertThat(duccAgreement.getUserGivenName()).isEqualTo(givenName1);
+    assertThat(duccAgreement.getUserFamilyName()).isEqualTo(familyName1);
+    assertThat(duccAgreement.getUserInitials()).isEqualTo(initials1);
+    assertThat(duccAgreement.getSignedVersion()).isEqualTo(CURRENT_DUCC_VERSION);
+
+    String givenName2 = profile.getGivenName() + " Jr.";
+    String familyName2 = profile.getFamilyName() + " Jr.";
+    String initials2 = "BBB";
+
+    profile.setGivenName(givenName2);
+    profile.setFamilyName(familyName2);
+    profileController.updateProfile(profile);
+    assertThat(dbUser.getDuccAgreement().isUserNameOutOfDate()).isTrue();
+
+    // signing again updates the name and also the out-of-date flag
+    profileController.submitDUCC(CURRENT_DUCC_VERSION, initials2);
+    duccAgreement = dbUser.getDuccAgreement();
+    assertThat(duccAgreement.isUserNameOutOfDate()).isFalse();
+    assertThat(duccAgreement.getUserGivenName()).isEqualTo(givenName2);
+    assertThat(duccAgreement.getUserFamilyName()).isEqualTo(familyName2);
+    assertThat(duccAgreement.getUserInitials()).isEqualTo(initials2);
+    assertThat(duccAgreement.getSignedVersion()).isEqualTo(CURRENT_DUCC_VERSION);
+  }
+
+  @Test
   public void updateGivenName_badRequest() {
     assertThrows(
         BadRequestException.class,

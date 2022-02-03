@@ -457,19 +457,8 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     ducc.setUserGivenName(dbUser.getGivenName());
     ducc.setUserInitials(initials);
     ducc.setCompletionTime(timestamp);
+    ducc.setUserNameOutOfDate(false);
     return dbUser;
-  }
-
-  @Override
-  @Transactional
-  public void setDataUserCodeOfConductNameOutOfDate(String newGivenName, String newFamilyName) {
-    DbUserCodeOfConductAgreement duccAgreement = userProvider.get().getDuccAgreement();
-    if (duccAgreement != null) {
-      duccAgreement.setUserNameOutOfDate(
-          !duccAgreement.getUserGivenName().equalsIgnoreCase(newGivenName)
-              || !duccAgreement.getUserFamilyName().equalsIgnoreCase(newFamilyName));
-      userCodeOfConductAgreementDao.save(duccAgreement);
-    }
   }
 
   @Override
