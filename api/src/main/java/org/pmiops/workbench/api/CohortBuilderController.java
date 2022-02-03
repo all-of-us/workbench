@@ -320,11 +320,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   }
 
   protected void validateDomain(String domain, String surveyName) {
-    Arrays.stream(Domain.values())
-        .filter(domainType -> domainType.toString().equalsIgnoreCase(domain))
-        .findFirst()
-        .orElseThrow(
-            () -> new BadRequestException(String.format(BAD_REQUEST_MESSAGE, "domain", domain)));
+    validateDomain(domain);
     if (Domain.SURVEY.equals(Domain.fromValue(domain))) {
       Optional.ofNullable(surveyName)
           .orElseThrow(
