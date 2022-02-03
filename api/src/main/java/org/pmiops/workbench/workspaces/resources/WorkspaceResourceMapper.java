@@ -1,6 +1,5 @@
 package org.pmiops.workbench.workspaces.resources;
 
-import java.util.Optional;
 import org.mapstruct.CollectionMappingStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -28,6 +27,8 @@ import org.pmiops.workbench.model.WorkspaceResource;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.FirecloudMapper;
 import org.pmiops.workbench.utils.mappers.MapStructConfig;
+
+import java.util.Optional;
 
 @Mapper(
     config = MapStructConfig.class,
@@ -259,7 +260,7 @@ public interface WorkspaceResourceMapper {
                     () ->
                         new NotFoundException(
                             String.format(
-                                "Data Set not found for dataSetId: %d",
+                                "Dataset not found for dataSetId: %s",
                                 dbUserRecentlyModifiedResource.getResourceId()))));
       case NOTEBOOK:
         return fromDbUserRecentlyModifiedResourceAndNotebookName(
@@ -272,7 +273,7 @@ public interface WorkspaceResourceMapper {
     }
   }
 
-  default Long getResourceIdInLong(DbUserRecentlyModifiedResource dbUserRecentlyModifiedResource) {
+  default long getResourceIdInLong(DbUserRecentlyModifiedResource dbUserRecentlyModifiedResource) {
     return Long.parseLong(
         Optional.ofNullable(dbUserRecentlyModifiedResource.getResourceId()).orElse("0"));
   }
