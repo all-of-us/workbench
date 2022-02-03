@@ -2,12 +2,9 @@ package org.pmiops.workbench.api;
 
 import com.google.api.services.directory.model.User;
 import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableMap;
 import java.sql.Timestamp;
 import java.time.Clock;
-import java.util.Map;
 import java.util.Objects;
-import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.inject.Provider;
@@ -22,7 +19,6 @@ import org.pmiops.workbench.captcha.CaptchaVerificationService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
-import org.pmiops.workbench.db.model.DbAddress;
 import org.pmiops.workbench.db.model.DbPageVisit;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -33,13 +29,10 @@ import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exceptions.UnauthorizedException;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.FirecloudBillingProjectMembership.CreationStatusEnum;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapper;
 import org.pmiops.workbench.mail.MailService;
-import org.pmiops.workbench.model.Address;
-import org.pmiops.workbench.model.BillingProjectStatus;
 import org.pmiops.workbench.model.CreateAccountRequest;
 import org.pmiops.workbench.model.NihToken;
 import org.pmiops.workbench.model.PageVisit;
@@ -51,6 +44,7 @@ import org.pmiops.workbench.model.UpdateContactEmailRequest;
 import org.pmiops.workbench.model.UsernameTakenResponse;
 import org.pmiops.workbench.model.VerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.moodle.ApiException;
+import org.pmiops.workbench.profile.AddressMapper;
 import org.pmiops.workbench.profile.DemographicSurveyMapper;
 import org.pmiops.workbench.profile.PageVisitMapper;
 import org.pmiops.workbench.profile.ProfileService;
@@ -70,33 +64,11 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 public class ProfileController implements ProfileApiDelegate {
-
   private static final int CURRENT_TERMS_OF_SERVICE_VERSION = 1;
-
-  private static final Map<CreationStatusEnum, BillingProjectStatus> fcToWorkbenchBillingMap =
-      new ImmutableMap.Builder<CreationStatusEnum, BillingProjectStatus>()
-          .put(CreationStatusEnum.CREATING, BillingProjectStatus.PENDING)
-          .put(CreationStatusEnum.READY, BillingProjectStatus.READY)
-          .put(CreationStatusEnum.ERROR, BillingProjectStatus.ERROR)
-          .build();
-
-  private static final Function<Address, DbAddress> FROM_CLIENT_ADDRESS =
-      new Function<Address, DbAddress>() {
-        @Override
-        public DbAddress apply(Address address) {
-          DbAddress result = new DbAddress();
-          result.setStreetAddress1(address.getStreetAddress1());
-          result.setStreetAddress2(address.getStreetAddress2());
-          result.setCity(address.getCity());
-          result.setState(address.getState());
-          result.setZipCode(address.getZipCode());
-          result.setCountry(address.getCountry());
-          return result;
-        }
-      };
 
   private static final Logger log = Logger.getLogger(ProfileController.class.getName());
 
+  private final AddressMapper addressMapper;
   private final CaptchaVerificationService captchaVerificationService;
   private final Clock clock;
   private final DemographicSurveyMapper demographicSurveyMapper;
@@ -118,6 +90,7 @@ public class ProfileController implements ProfileApiDelegate {
 
   @Autowired
   ProfileController(
+      AddressMapper addressMapper,
       CaptchaVerificationService captchaVerificationService,
       Clock clock,
       DemographicSurveyMapper demographicSurveyMapper,
@@ -136,6 +109,7 @@ public class ProfileController implements ProfileApiDelegate {
       UserService userService,
       VerifiedInstitutionalAffiliationMapper verifiedInstitutionalAffiliationMapper,
       RasLinkService rasLinkService) {
+    this.addressMapper = addressMapper;
     this.captchaVerificationService = captchaVerificationService;
     this.clock = clock;
     this.demographicSurveyMapper = demographicSurveyMapper;
@@ -248,7 +222,7 @@ public class ProfileController implements ProfileApiDelegate {
               profile.getAreaOfResearch(),
               profile.getProfessionalUrl(),
               profile.getDegrees(),
-              FROM_CLIENT_ADDRESS.apply(profile.getAddress()),
+              addressMapper.addressToDbAddress(profile.getAddress()),
               demographicSurveyMapper.demographicSurveyToDbDemographicSurvey(
                   profile.getDemographicSurvey()),
               verifiedInstitutionalAffiliationMapper.modelToDbWithoutUser(
