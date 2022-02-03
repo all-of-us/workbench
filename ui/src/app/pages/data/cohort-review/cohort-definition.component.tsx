@@ -109,10 +109,7 @@ export class CohortDefinition extends React.Component<
   }
 
   mapParams(params: Array<any>, mod) {
-    const groupedData =
-      params[0].domain === Domain[Domain.DRUG]
-        ? this.getGroupedData(params, 'group')
-        : this.getGroupedData(params, 'domain');
+    const groupedData = this.getGroupedData(params, 'type');
     let paramList;
     if (mod.length) {
       paramList = this.getModifierFormattedData(groupedData, params, mod);
@@ -123,15 +120,8 @@ export class CohortDefinition extends React.Component<
   }
 
   getModifierFormattedData(groupedData, params, modifiers) {
-    let typeMatched;
-    const modArray = params.map(({ domain, group, type }) => {
-      if (domain === Domain.DRUG) {
-        typeMatched = groupedData.find(
-          (matched) => matched.group === group.toString()
-        );
-      } else {
-        typeMatched = groupedData.find((matched) => matched.group === domain);
-      }
+    const modArray = params.map(({ domain, type }) => {
+      const typeMatched = groupedData.find((matched) => matched.group === type);
       const modifierName = modifiers.reduce((acc, m) => {
         const concatOperand = m.operands.reduce((final, o) => {
           return final !== '' ? `${final} & ${o}` : `${final} ${o}`;
@@ -163,15 +153,8 @@ export class CohortDefinition extends React.Component<
   }
 
   getOtherTreeFormattedData(groupedData, params) {
-    let typeMatched;
-    const noModArray = params.map(({ domain, group, name, type }) => {
-      if (domain === Domain.DRUG) {
-        typeMatched = groupedData.find(
-          (matched) => matched.group === group.toString()
-        );
-      } else {
-        typeMatched = groupedData.find((matched) => matched.group === domain);
-      }
+    const noModArray = params.map(({ domain, name, type }) => {
+      const typeMatched = groupedData.find((matched) => matched.group === type);
       if (domain === Domain.PERSON) {
         return {
           items:
