@@ -354,7 +354,6 @@ public class ProfileController implements ProfileApiDelegate {
   }
 
   private void validateTermsOfService(Integer tosVersion) {
-    // Validates a given tosVersion, by running all validation checks.
     if (tosVersion == null) {
       throw new BadRequestException("Terms of Service version is NULL");
     }
