@@ -32,6 +32,7 @@ import {
   DiskType,
   ErrorCode,
   GpuConfig,
+  PersistentDiskRequest,
   Runtime,
   RuntimeConfigurationType,
   RuntimeStatus,
@@ -281,13 +282,15 @@ const compareDiskSize = (
       diskDiff = RuntimeDiffState.NO_CHANGE;
     }
   } else if (newDiskConfig.size > oldDiskConfig.size) {
-    // Technically, a PD can always be extended in place. However, the only Leo-supported
-    // way to claim the newly allocated space is by rebooting (disk is remounted).
     desc = 'Increase ' + desc;
-    diff = RuntimeDiffState.NO_CHANGE;
     if (newDiskConfig.detachable) {
-      // Attached PDs are not distinct from the runtime itself.
+      // Technically, a PD can always be extended in place. However, the only Leo-supported
+      // way to claim the newly allocated space is by rebooting (disk is remounted).
+      diff = RuntimeDiffState.NO_CHANGE;
       diskDiff = RuntimeDiffState.CAN_UPDATE_IN_PLACE;
+    } else {
+      // Attached PDs are not distinct from the runtime itself.
+      diff = RuntimeDiffState.CAN_UPDATE_WITH_REBOOT;
     }
   } else {
     diff = RuntimeDiffState.NO_CHANGE;
@@ -564,6 +567,20 @@ const canUseExistingDisk = (
   );
 };
 
+const diskNeedsSizeIncrease = (
+  requestedDisk: PersistentDiskRequest | null,
+  existingDisk: Disk | null
+) => {
+  if (!requestedDisk) {
+    return false;
+  }
+  const { diskType, size } = requestedDisk;
+  return (
+    canUseExistingDisk({ detachableType: diskType, size }, existingDisk) &&
+    size > existingDisk.size
+  );
+};
+
 export const maybeWithExistingDiskName = (
   c: Omit<DiskConfig, 'existingDiskName'>,
   existingDisk: Disk | null
@@ -587,17 +604,13 @@ export const withRuntimeConfigDefaults = (
   const computeType = r.computeType ?? ComputeType.Standard;
   if (computeType === ComputeType.Standard) {
     dataprocConfig = null;
-    if (detachable === true) {
+    if (detachable === false) {
+      detachableType = null;
+    } else if (detachable === true || existingDisk) {
+      detachable = true;
       size = size ?? existingDisk?.size ?? DEFAULT_DISK_SIZE;
       detachableType =
         detachableType ?? existingDisk?.diskType ?? DiskType.Standard;
-    } else if (detachable === false) {
-      detachableType = null;
-    } else if (existingDisk) {
-      // Detachable unspecified, but we have an existing disk.
-      detachable = true;
-      size = size ?? existingDisk.size;
-      detachableType = detachableType ?? existingDisk.diskType;
       if (canUseExistingDisk(r.diskConfig, existingDisk)) {
         existingDiskName = existingDisk.name;
       }
@@ -701,7 +714,7 @@ export const toRuntimeConfig = (
       machine: null,
       diskConfig: {
         size: null,
-        detachable: false,
+        detachable: null,
         detachableType: null,
         existingDiskName: null,
       },
@@ -984,6 +997,8 @@ export const useCustomRuntime = (
   useEffect(() => {
     let mounted = true;
     const aborter = new AbortController();
+    const existingDisk = diskStore.get().persistentDisk;
+    const requestedDisk = requestedRuntime?.gceWithPdConfig?.persistentDisk;
     const runAction = async () => {
       const applyRuntimeUpdate = async () => {
         const oldRuntimeConfig = toRuntimeConfig(runtime, detachablePd);
@@ -1006,8 +1021,8 @@ export const useCustomRuntime = (
         if (mostSevereDiskDiff === RuntimeDiffState.CAN_UPDATE_IN_PLACE) {
           await disksApi().updateDisk(
             currentWorkspaceNamespace,
-            diskStore.get().persistentDisk.name,
-            requestedRuntime.gceWithPdConfig.persistentDisk.size
+            existingDisk.name,
+            requestedDisk.size
           );
         }
 
@@ -1054,7 +1069,15 @@ export const useCustomRuntime = (
       try {
         if (runtimeExists) {
           await applyRuntimeUpdate();
-        } else if (runtime?.status === RuntimeStatus.Error) {
+        } else if (diskNeedsSizeIncrease(requestedDisk, existingDisk)) {
+          await disksApi().updateDisk(
+            currentWorkspaceNamespace,
+            existingDisk.name,
+            requestedDisk.size
+          );
+        }
+
+        if (runtime?.status === RuntimeStatus.Error) {
           await runtimeApi().deleteRuntime(currentWorkspaceNamespace, false, {
             signal: aborter.signal,
           });

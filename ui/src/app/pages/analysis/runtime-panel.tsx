@@ -251,6 +251,7 @@ enum PanelContent {
   Customize = 'Customize',
   DeleteRuntime = 'DeleteRuntime',
   DeleteUnattachedPd = 'DeleteUnattachedPd',
+  DeleteUnattachedPdAndCreate = 'DeleteUnattachedPdAndCreate',
   Disabled = 'Disabled',
   Confirm = 'Confirm',
   SparkConsole = 'SparkConsole',
@@ -360,7 +361,11 @@ export const ConfirmDelete = ({ onCancel, onConfirm }) => {
   );
 };
 
-export const ConfirmDeleteUnattachedPD = ({ onConfirm, onCancel }) => {
+export const ConfirmDeleteUnattachedPD = ({
+  onConfirm,
+  onCancel,
+  showCreateMessaging = false,
+}) => {
   const [deleting, setDeleting] = useState(false);
 
   return (
@@ -373,7 +378,9 @@ export const ConfirmDeleteUnattachedPD = ({ onConfirm, onCancel }) => {
           size='20'
         />
         <h3 style={{ ...styles.baseHeader, ...styles.bold }}>
-          Delete environment options
+          {showCreateMessaging
+            ? 'Environment creation requires deleting your unattached disk'
+            : 'Delete environment options'}
         </h3>
       </div>
 
@@ -391,6 +398,7 @@ export const ConfirmDeleteUnattachedPD = ({ onConfirm, onCancel }) => {
             style={{ display: 'inline-block', marginRight: '0.5rem' }}
           >
             <RadioButton
+              data-test-id='delete-unattached-pd-radio'
               style={{ marginRight: '0.25rem' }}
               onChange={() => setDeleting(true)}
               checked={deleting === true}
@@ -443,7 +451,7 @@ export const ConfirmDeleteUnattachedPD = ({ onConfirm, onCancel }) => {
             }
           }}
         >
-          Delete
+          {showCreateMessaging ? 'Delete and recreate' : 'Delete'}
         </Button>
       </FlexRow>
     </Fragment>
@@ -823,13 +831,13 @@ const DiskSelector = ({
   diskConfig,
   onChange,
   disabled,
-  allowDetachable,
+  disableDetachableReason,
   existingDisk,
 }: {
   diskConfig: DiskConfig;
   onChange: (c: DiskConfig) => void;
   disabled: boolean;
-  allowDetachable: boolean;
+  disableDetachableReason: string | null;
   existingDisk: Disk | null;
 }) => {
   return (
@@ -886,8 +894,8 @@ const DiskSelector = ({
         </FlexColumn>
       </FlexRow>
       <TooltipTrigger
-        content='Reattachable disks are unsupported for this compute type'
-        disabled={allowDetachable}
+        content={disableDetachableReason}
+        disabled={!disableDetachableReason}
       >
         <FlexRow style={styles.diskRow}>
           <RadioButton
@@ -907,7 +915,7 @@ const DiskSelector = ({
               )
             }
             checked={diskConfig.detachable}
-            disabled={!allowDetachable || disabled}
+            disabled={disabled || !!disableDetachableReason}
           />
           <FlexColumn>
             <label style={styles.diskLabel}>Reattachable persistent disk</label>
@@ -1565,7 +1573,7 @@ const ConfirmUpdatePanel = ({
           </div>
         </FlexColumn>
       </div>
-
+      a{' '}
       {updateMessaging.warn && (
         <WarningMessage iconSize={30} iconPosition={'center'}>
           <TextColumn>
@@ -1578,7 +1586,6 @@ const ConfirmUpdatePanel = ({
           </TextColumn>
         </WarningMessage>
       )}
-
       <FlexRow style={{ justifyContent: 'flex-end', marginTop: '.75rem' }}>
         <Button
           type='secondary'
@@ -1709,6 +1716,19 @@ const RuntimePanel = fp.flow(
       runtimeConfig.diskConfig.detachable &&
       (persistentDisk.size > runtimeConfig.diskConfig.size ||
         persistentDisk.diskType !== runtimeConfig.diskConfig.detachableType);
+
+    const disableDetachableReason = cond(
+      [
+        runtimeConfig.computeType === ComputeType.Dataproc,
+        () => 'Reattachable disks are unsupported for this compute type',
+      ],
+      [
+        runtimeExists && existingRuntimeConfig?.diskConfig?.detachable,
+        () =>
+          'To use a detachable disk, first delete your analysis environment',
+      ],
+      () => null
+    );
 
     let runtimeDiffs: RuntimeDiff[] = [];
     let updateMessaging: UpdateMessaging;
@@ -1896,6 +1916,20 @@ const RuntimePanel = fp.flow(
       );
     };
 
+    const renderNextWithDiskDeleteButton = () => {
+      return (
+        <Button
+          aria-label='Next'
+          disabled={!runtimeCanBeCreated}
+          onClick={() => {
+            setPanelContent(PanelContent.DeleteUnattachedPdAndCreate);
+          }}
+        >
+          Next
+        </Button>
+      );
+    };
+
     const renderTryAgainButton = () => {
       return (
         <Button
@@ -1911,7 +1945,7 @@ const RuntimePanel = fp.flow(
       );
     };
 
-    const renderNextButton = () => {
+    const renderNextUpdateButton = () => {
       return (
         <Button
           aria-label='Next'
@@ -1999,6 +2033,20 @@ const RuntimePanel = fp.flow(
               <ConfirmDeleteUnattachedPD
                 onConfirm={async () => {
                   await disksApi().deleteDisk(namespace, persistentDisk.name);
+                  onClose();
+                }}
+                onCancel={() => setPanelContent(PanelContent.Customize)}
+              />
+            ),
+          ],
+          [
+            PanelContent.DeleteUnattachedPdAndCreate,
+            () => (
+              <ConfirmDeleteUnattachedPD
+                showCreateMessaging
+                onConfirm={async () => {
+                  await disksApi().deleteDisk(namespace, persistentDisk.name);
+                  setRequestedRuntime(fromRuntimeConfig(runtimeConfig));
                   onClose();
                 }}
                 onCancel={() => setPanelContent(PanelContent.Customize)}
@@ -2198,9 +2246,7 @@ const RuntimePanel = fp.flow(
                       setRuntimeConfig({ ...runtimeConfig, diskConfig })
                     }
                     disabled={disableControls}
-                    allowDetachable={
-                      runtimeConfig.computeType === ComputeType.Standard
-                    }
+                    disableDetachableReason={disableDetachableReason}
                     existingDisk={persistentDisk}
                   />
                 )}
@@ -2250,7 +2296,7 @@ const RuntimePanel = fp.flow(
                       Delete Persistent Disk
                     </LinkButton>
                     {unattachedDiskNeedsRecreate
-                      ? renderNextButton()
+                      ? renderNextWithDiskDeleteButton()
                       : renderCreateButton()}
                   </FlexRow>
                 ) : (
@@ -2276,9 +2322,10 @@ const RuntimePanel = fp.flow(
                       Delete Environment
                     </LinkButton>
                     {cond(
+                      [runtimeExists, () => renderNextUpdateButton()],
                       [
-                        runtimeExists || unattachedDiskNeedsRecreate,
-                        () => renderNextButton(),
+                        unattachedDiskNeedsRecreate,
+                        () => renderNextWithDiskDeleteButton(),
                       ],
                       [
                         currentRuntime?.errors &&

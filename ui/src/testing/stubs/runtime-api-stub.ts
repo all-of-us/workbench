@@ -57,7 +57,10 @@ export class RuntimeApiStub extends RuntimeApi {
     });
   }
 
-  async createRuntime(workspaceNamespace: string, runtime: Runtime): Promise<{}> {
+  async createRuntime(
+    workspaceNamespace: string,
+    runtime: Runtime
+  ): Promise<{}> {
     const reqDisk = runtime?.gceWithPdConfig?.persistentDisk;
     if (reqDisk && !reqDisk.name) {
       const dapi = disksApi();
@@ -74,9 +77,15 @@ export class RuntimeApiStub extends RuntimeApi {
     return {};
   }
 
-  async deleteRuntime(workspaceNamespace: string, deleteDisk: boolean): Promise<{}> {
+  async deleteRuntime(
+    workspaceNamespace: string,
+    deleteDisk: boolean
+  ): Promise<{}> {
     if (deleteDisk) {
-      await disksApi().deleteDisk(workspaceNamespace, this.runtime.gceWithPdConfig?.persistentDisk?.name);
+      await disksApi().deleteDisk(
+        workspaceNamespace,
+        this.runtime.gceWithPdConfig?.persistentDisk?.name
+      );
     }
     this.runtime.status = RuntimeStatus.Deleting;
     return {};

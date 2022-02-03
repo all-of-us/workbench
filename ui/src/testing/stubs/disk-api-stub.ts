@@ -1,17 +1,11 @@
-import {
-  DiskApi,
-  Disk,
-  EmptyResponse,
-  DiskType
-} from 'generated/fetch';
+import { DiskApi, Disk, EmptyResponse, DiskType } from 'generated/fetch';
 import { stubNotImplementedError } from 'testing/stubs/stub-utils';
-
 
 export const stubDisk = () => ({
   size: 1000,
   diskType: DiskType.Standard,
   name: 'stub-disk',
-  blockSize: 1
+  blockSize: 1,
 });
 
 export class DiskApiStub extends DiskApi {
@@ -21,7 +15,11 @@ export class DiskApiStub extends DiskApi {
     });
   }
 
-  deleteDisk(workspaceNamespace: string, diskName: string, options?: any): Promise<EmptyResponse> {
+  deleteDisk(
+    _workspaceNamespace: string,
+    _diskName: string,
+    _options?: any
+  ): Promise<EmptyResponse> {
     return new Promise<EmptyResponse>((resolve, reject) => {
       if (!this.disk) {
         reject(Error('disk not found'));
@@ -31,7 +29,7 @@ export class DiskApiStub extends DiskApi {
     });
   }
 
-  getDisk(workspaceNamespace: string, options?: any): Promise<Disk> {
+  getDisk(_workspaceNamespace: string, _options?: any): Promise<Disk> {
     return new Promise<Disk>((resolve, reject) => {
       if (!this.disk) {
         reject(Error('disk not found'));
@@ -40,7 +38,12 @@ export class DiskApiStub extends DiskApi {
     });
   }
 
-  updateDisk(workspaceNamespace: string, diskName: string, diskSize: number, options?: any):  Promise<EmptyResponse> {
+  updateDisk(
+    _workspaceNamespace: string,
+    _diskName: string,
+    diskSize: number,
+    _options?: any
+  ): Promise<EmptyResponse> {
     return new Promise<EmptyResponse>((resolve, reject) => {
       if (!this.disk) {
         reject(Error('disk not found'));

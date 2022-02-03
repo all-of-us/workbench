@@ -13,19 +13,29 @@ export async function waitOneTickAndUpdate(wrapper: ReactWrapper) {
 
 // Combining a setTimeout with a delay of 0 (used in UI) and setImmediate can result in a non-deterministic order of events
 // If you are testing code that uses setTimeout this may be a safer choice.
-export async function waitOnTimersAndUpdate(wrapper: ReactWrapper) {
-  const waitForTimeout = () =>
-    new Promise<void>((resolve) => setTimeout(resolve, 0));
-  await act(waitForTimeout);
-  wrapper.update();
-}
-
-export async function waitForFakeTimersAndUpdate(wrapper: ReactWrapper) {
-  await act(() => {
-    jest.runOnlyPendingTimers();
-    return Promise.resolve();
-  });
-  wrapper.update();
+// maxRetries may be specified to retry on timer exception.
+export async function waitForFakeTimersAndUpdate(
+  wrapper: ReactWrapper,
+  maxRetries = 0
+) {
+  for (let attempt = 0; ; attempt++) {
+    try {
+      await act(() => {
+        jest.runOnlyPendingTimers();
+        return Promise.resolve();
+      });
+    } catch (e) {
+      if (attempt >= maxRetries) {
+        throw e;
+      }
+      console.log(
+        `retrying timer exception (try ${attempt}/${maxRetries}): ${e}`
+      );
+      continue;
+    }
+    wrapper.update();
+    return;
+  }
 }
 
 export async function simulateSelection(
