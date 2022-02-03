@@ -70,6 +70,9 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 public class ProfileController implements ProfileApiDelegate {
+
+  private static final int CURRENT_TERMS_OF_SERVICE_VERSION = 1;
+
   private static final Map<CreationStatusEnum, BillingProjectStatus> fcToWorkbenchBillingMap =
       new ImmutableMap.Builder<CreationStatusEnum, BillingProjectStatus>()
           .put(CreationStatusEnum.CREATING, BillingProjectStatus.PENDING)
@@ -212,6 +215,9 @@ public class ProfileController implements ProfileApiDelegate {
     if (workbenchConfigProvider.get().captcha.enableCaptcha) {
       verifyCaptcha(request.getCaptchaVerificationToken());
     }
+
+    validateTermsOfService(request.getTermsOfServiceVersion());
+
     profileService.validateAffiliation(request.getProfile());
 
     final Profile profile = request.getProfile();
@@ -344,6 +350,16 @@ public class ProfileController implements ProfileApiDelegate {
       }
     } catch (org.pmiops.workbench.captcha.ApiException e) {
       throw new ServerErrorException("Exception while verifying Captcha");
+    }
+  }
+
+  private void validateTermsOfService(Integer tosVersion) {
+    // Validates a given tosVersion, by running all validation checks.
+    if (tosVersion == null) {
+      throw new BadRequestException("Terms of Service version is NULL");
+    }
+    if (tosVersion != CURRENT_TERMS_OF_SERVICE_VERSION) {
+      throw new BadRequestException("Terms of Service version is not up to date");
     }
   }
 
