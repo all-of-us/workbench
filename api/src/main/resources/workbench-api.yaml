@@ -4345,9 +4345,11 @@ definitions:
         items:
           type: object
           properties:
-            moduleName:
+            name:
               "$ref": "#/definitions/AccessModule"
-            isBypassable:
+            expirable:
+              type: boolean
+            bypassable:
               type: boolean
 
   RuntimeImage:

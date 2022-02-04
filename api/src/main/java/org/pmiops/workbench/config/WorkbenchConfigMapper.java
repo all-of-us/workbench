@@ -36,8 +36,6 @@ public interface WorkbenchConfigMapper {
             .collect(Collectors.toList()));
   }
 
-  @Mapping(target = "moduleName", source = "name")
-  @Mapping(target = "isBypassable", source = "bypassable")
   ConfigResponseAccessModules mapAccessModule(DbAccessModule accessModule);
 
   // handled by mapRuntimeImages()

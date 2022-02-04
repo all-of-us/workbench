@@ -128,14 +128,14 @@ export const DATA_ACCESS_REQUIREMENTS_PATH = '/data-access-requirements';
 
 interface AccessModuleConfig {
   moduleName: AccessModule;
+  expirable: boolean;
+  bypassable: true;
   isEnabledInEnvironment: boolean; // either true or dependent on a feature flag
   isRequiredByRT: boolean;
   isRequiredByCT: boolean;
   AARTitleComponent: () => JSX.Element;
   DARTitleComponent: () => JSX.Element;
   adminPageTitle: string;
-  adminBypassable: true;
-  canExpire: boolean;
   externalSyncAction?: Function;
   refreshAction?: Function;
 }
@@ -156,7 +156,11 @@ export const getAccessModuleConfig = (
     enforceRasLoginGovLinking,
     enableEraCommons,
     enableComplianceTraining,
+    accessModules,
   } = serverConfigStore.get().config;
+  const { expirable, bypassable } = accessModules.find(
+    (m) => m.name === moduleName
+  );
   return switchCase(
     moduleName,
 
@@ -164,11 +168,11 @@ export const getAccessModuleConfig = (
       AccessModule.TWOFACTORAUTH,
       () => ({
         moduleName,
+        expirable,
+        bypassable,
         isEnabledInEnvironment: true,
         DARTitleComponent: () => <div>Turn on Google 2-Step Verification</div>,
         adminPageTitle: 'Google 2-Step Verification',
-        adminBypassable: true,
-        canExpire: false,
         externalSyncAction: async () =>
           await profileApi().syncTwoFactorAuthStatus(),
         refreshAction: async () => await profileApi().syncTwoFactorAuthStatus(),
@@ -181,6 +185,8 @@ export const getAccessModuleConfig = (
       AccessModule.RASLINKLOGINGOV,
       () => ({
         moduleName,
+        expirable,
+        bypassable,
         isEnabledInEnvironment:
           enableRasLoginGovLinking || enforceRasLoginGovLinking,
         DARTitleComponent: () => (
@@ -196,8 +202,6 @@ export const getAccessModuleConfig = (
           </div>
         ),
         adminPageTitle: 'Verify your identity with Login.gov',
-        canExpire: false,
-        adminBypassable: true,
         refreshAction: () => redirectToRas(false),
         isRequiredByRT: enforceRasLoginGovLinking,
         isRequiredByCT: enforceRasLoginGovLinking,
@@ -208,11 +212,11 @@ export const getAccessModuleConfig = (
       AccessModule.ERACOMMONS,
       () => ({
         moduleName,
+        expirable,
+        bypassable,
         isEnabledInEnvironment: enableEraCommons,
         DARTitleComponent: () => <div>Connect your eRA Commons account</div>,
         adminPageTitle: 'Connect your eRA Commons* account',
-        adminBypassable: true,
-        canExpire: false,
         externalSyncAction: async () =>
           await profileApi().syncEraCommonsStatus(),
         refreshAction: async () => await profileApi().syncEraCommonsStatus(),
@@ -223,6 +227,8 @@ export const getAccessModuleConfig = (
       AccessModule.COMPLIANCETRAINING,
       () => ({
         moduleName,
+        expirable,
+        bypassable,
         isEnabledInEnvironment: enableComplianceTraining,
         AARTitleComponent: () => (
           <div>
@@ -235,8 +241,6 @@ export const getAccessModuleConfig = (
           </div>
         ),
         adminPageTitle: 'Registered Tier training',
-        adminBypassable: true,
-        canExpire: true,
         externalSyncAction: async () =>
           await profileApi().syncComplianceTrainingStatus(),
         refreshAction: async () =>
@@ -250,6 +254,8 @@ export const getAccessModuleConfig = (
       AccessModule.CTCOMPLIANCETRAINING,
       () => ({
         moduleName,
+        expirable,
+        bypassable,
         isEnabledInEnvironment: enableComplianceTraining,
         DARTitleComponent: () => (
           <div>
@@ -257,8 +263,6 @@ export const getAccessModuleConfig = (
           </div>
         ),
         adminPageTitle: 'Controlled Tier training',
-        adminBypassable: true,
-        canExpire: true,
         externalSyncAction: async () =>
           await profileApi().syncComplianceTrainingStatus(),
         refreshAction: async () =>
@@ -272,14 +276,14 @@ export const getAccessModuleConfig = (
       AccessModule.DATAUSERCODEOFCONDUCT,
       () => ({
         moduleName,
+        expirable,
+        bypassable,
         isEnabledInEnvironment: true,
         AARTitleComponent: () => 'Sign Data User Code of Conduct',
         DARTitleComponent: () => <div>Sign Data User Code of Conduct</div>,
         adminPageTitle: 'Sign Data User Code of Conduct',
-        adminBypassable: true,
         isRequiredByRT: true,
         isRequiredByCT: true,
-        canExpire: true,
       }),
     ],
 
@@ -287,13 +291,13 @@ export const getAccessModuleConfig = (
       AccessModule.PROFILECONFIRMATION,
       () => ({
         moduleName,
+        expirable,
+        bypassable,
         isEnabledInEnvironment: true,
         AARTitleComponent: () => 'Update your profile',
         adminPageTitle: 'Update your profile',
-        adminBypassable: false,
         isRequiredByRT: true,
         isRequiredByCT: true,
-        canExpire: true,
       }),
     ],
 
@@ -301,14 +305,14 @@ export const getAccessModuleConfig = (
       AccessModule.PUBLICATIONCONFIRMATION,
       () => ({
         moduleName,
+        expirable,
+        bypassable,
         isEnabledInEnvironment: true,
         AARTitleComponent: () =>
           'Report any publications or presentations based on your research using the Researcher Workbench',
         adminPageTitle: 'Report any publications',
-        adminBypassable: false,
         isRequiredByRT: true,
         isRequiredByCT: true,
-        canExpire: true,
       }),
     ]
   );

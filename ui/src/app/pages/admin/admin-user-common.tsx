@@ -179,7 +179,7 @@ export const displayModuleStatus = (
 // in such cases set the expiry date as NEVER
 // For other modules display the expiry date if known, else display '-' (say in case of bypass)
 const getNullStringForExpirationDate = (moduleName: AccessModule): string =>
-  getAccessModuleConfig(moduleName).canExpire ? '-' : 'Never';
+  getAccessModuleConfig(moduleName).expirable ? '-' : 'Never';
 
 export const displayModuleCompletionDate = (
   profile: Profile,
