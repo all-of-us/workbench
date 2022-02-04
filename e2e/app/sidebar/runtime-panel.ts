@@ -4,7 +4,7 @@ import PrimereactInputNumber from 'app/element/primereact-input-number';
 import { LinkText, SideBarLink } from 'app/text-labels';
 import Button from 'app/element/button';
 import NotebookPreviewPage from 'app/page/notebook-preview-page';
-import BaseHelpSidebar from './base-help-sidebar';
+import BaseSidebar from './base-sidebar';
 import { logger } from 'libs/logger';
 import RadioButton from 'app/element/radiobutton';
 import { config } from 'resources/workbench-config';
@@ -35,7 +35,7 @@ export enum RuntimePreset {
   HailGenomicsAnalysis = 'Hail Genomics Analysis'
 }
 
-export default class RuntimePanel extends BaseHelpSidebar {
+export default class RuntimePanel extends BaseSidebar {
   constructor(page: Page, xpath: string = defaultXpath) {
     super(page);
     super.setXpath(`${super.getXpath()}${xpath}`);

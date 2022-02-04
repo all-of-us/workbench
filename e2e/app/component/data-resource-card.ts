@@ -2,7 +2,7 @@ import { ElementHandle, Page } from 'puppeteer';
 import * as fp from 'lodash/fp';
 import { getPropValue } from 'utils/element-utils';
 import { LinkText, MenuOption, ResourceCard } from 'app/text-labels';
-import CardBase from './card-base';
+import BaseCard from './base-card';
 import { waitWhileLoading } from 'utils/waits-utils';
 import Modal from 'app/modal/modal';
 import { logger } from 'libs/logger';
@@ -16,7 +16,7 @@ const DataResourceCardSelector = {
 /**
  * DataResourceCard represents resource card found on Workspace's data page.
  */
-export default class DataResourceCard extends CardBase {
+export default class DataResourceCard extends BaseCard {
   // **********************
   // static functions
   // **********************

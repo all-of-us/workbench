@@ -1,12 +1,12 @@
 import { SideBarLink } from 'app/text-labels';
 import { Page } from 'puppeteer';
 import { waitForText } from 'utils/waits-utils';
-import BaseHelpSidebar from './base-help-sidebar';
+import BaseSidebar from './base-sidebar';
 import { logger } from 'libs/logger';
 
 const sidebarTitle = 'Help Tips';
 
-export default class HelpTipsSidebar extends BaseHelpSidebar {
+export default class HelpTipsSidebar extends BaseSidebar {
   constructor(page: Page) {
     super(page);
   }

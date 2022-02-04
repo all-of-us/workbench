@@ -1,7 +1,7 @@
 import { Page } from 'puppeteer';
 import BasePage from 'app/page/base-page';
 import { getPropValue } from 'utils/element-utils';
-import HelpTipsSidebar from 'app/component/help-tips-sidebar';
+import HelpTipsSidebar from 'app/sidebar/help-tips-sidebar';
 import { logger } from 'libs/logger';
 
 /**
