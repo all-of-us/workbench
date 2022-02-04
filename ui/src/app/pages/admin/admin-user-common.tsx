@@ -12,7 +12,7 @@ import {
   RegisteredTierBadge,
 } from 'app/components/icons';
 
-import { formatInitialCreditsUSD, reactStyles } from 'app/utils';
+import { formatInitialCreditsUSD, isBlank, reactStyles } from 'app/utils';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import {
   AccessBypassRequest,
@@ -44,6 +44,8 @@ import {
 import {
   AccessTierShortNames,
   hasRegisteredTierAccess,
+  orderedAccessTierShortNames,
+  displayNameForTier,
 } from 'app/utils/access-tiers';
 import { formatDate } from 'app/utils/dates';
 
@@ -218,6 +220,27 @@ export const displayTierBadgeByRequiredModule = (
         <ControlledTierBadge style={{ gridArea: 'badge' }} />
       )}
     </div>
+  );
+};
+
+export const getEraNote = (profile: Profile): string => {
+  const requiredTierNames = orderedAccessTierShortNames
+    .filter((name) => isEraRequiredForTier(profile, name))
+    .map(displayNameForTier);
+
+  const accessText =
+    requiredTierNames.length === 0
+      ? 'does not require eRA Commons'
+      : 'requires eRA Commons for ' +
+        (requiredTierNames.join(' and ') + ' access');
+  const institutionName =
+    profile.verifiedInstitutionalAffiliation?.institutionDisplayName;
+  const note = '* eRA Commons requirements vary by institution.';
+  return (
+    note +
+    (isBlank(institutionName)
+      ? ` We don't have any institutional information for this user.`
+      : ` This user's institution (${institutionName}) ${accessText}.`)
   );
 };
 
