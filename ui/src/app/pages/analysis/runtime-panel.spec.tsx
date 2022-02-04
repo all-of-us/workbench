@@ -1253,6 +1253,26 @@ describe('RuntimePanel', () => {
   });
 
   it('should prevent detachable PD use for Dataproc', async () => {
+    const runtime = {
+      ...runtimeApiStub.runtime,
+      status: RuntimeStatus.Running,
+      configurationType: RuntimeConfigurationType.GeneralAnalysis,
+      gceWithPdConfig: {
+        machineType: 'n1-standard-16',
+        persistentDisk: {
+          size: 1000,
+          diskType: DiskType.Standard,
+          labels: {},
+          name: 'my-existing-disk',
+        },
+        gpuConfig: null,
+      },
+      gceConfig: null,
+      dataprocConfig: null,
+    };
+    runtimeApiStub.runtime = runtime;
+    runtimeStoreStub.runtime = runtime;
+
     const wrapper = await component();
     const getDetachableRadio = () =>
       wrapper.find({ name: 'detachableDisk' }).first();

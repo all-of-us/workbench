@@ -924,7 +924,7 @@ const DiskSelector = ({
               deleted.
             </span>
             {diskConfig.detachable && (
-              <FlexRow style={styles.formGrid2}>
+              <FlexRow style={{ ...styles.formGrid2, marginTop: '11px' }}>
                 <FlexRow style={styles.labelAndInput}>
                   <label
                     style={{ ...styles.label, minWidth: '3.0rem' }}
@@ -958,7 +958,6 @@ const DiskSelector = ({
                   idPrefix='detachable'
                   diskSize={diskConfig.size}
                   disabled={disabled}
-                  style={{ marginTop: '11px' }}
                   onChange={(size: number) =>
                     onChange(
                       maybeWithExistingDiskName(
@@ -1722,7 +1721,8 @@ const RuntimePanel = fp.flow(
         () => 'Reattachable disks are unsupported for this compute type',
       ],
       [
-        runtimeExists && existingRuntimeConfig?.diskConfig?.detachable,
+        runtimeExists &&
+          existingRuntimeConfig?.diskConfig?.detachable === false,
         () =>
           'To use a detachable disk, first delete your analysis environment',
       ],
