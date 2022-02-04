@@ -20,7 +20,7 @@ import {
   InstitutionMembershipRequirement,
   OrganizationType,
 } from 'generated/fetch';
-import { AccessTierShortNames } from 'app/utils/access-tiers';
+import { orderedAccessTierShortNames } from 'app/utils/access-tiers';
 
 const styles = reactStyles({
   pageHeader: {
@@ -105,11 +105,6 @@ export const AdminInstitution = fp.flow(withNavigation)(
     }
 
     renderAccessTiers(institution: Institution) {
-      const tiersInOrder = [
-        AccessTierShortNames.Registered,
-        AccessTierShortNames.Controlled,
-      ];
-
       return fp.flow(
         fp.filter<string>(
           (tier) =>
@@ -118,7 +113,7 @@ export const AdminInstitution = fp.flow(withNavigation)(
         ),
         fp.map(fp.capitalize),
         fp.join(', ')
-      )(tiersInOrder);
+      )(orderedAccessTierShortNames);
     }
 
     render() {

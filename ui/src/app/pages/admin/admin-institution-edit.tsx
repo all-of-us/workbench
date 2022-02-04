@@ -30,6 +30,7 @@ import { reactStyles, switchCase } from 'app/utils';
 import {
   AccessTierShortNames,
   displayNameForTier,
+  orderedAccessTierShortNames,
 } from 'app/utils/access-tiers';
 import { convertAPIError } from 'app/utils/errors';
 import {
@@ -785,12 +786,6 @@ export const AdminInstitutionEdit = fp.flow(
         }
       );
 
-      // in display order
-      const tiers = [
-        AccessTierShortNames.Registered,
-        AccessTierShortNames.Controlled,
-      ];
-
       return (
         <div>
           <style>{css}</style>
@@ -897,7 +892,7 @@ export const AdminInstitutionEdit = fp.flow(
             </SemiBoldHeader>
             <hr style={{ border: '1px solid #A9B6CB' }} />
             <FlexRow style={{ gap: '2rem' }}>
-              {tiers.map((accessTierShortName) => (
+              {orderedAccessTierShortNames.map((accessTierShortName) => (
                 <TierConfig
                   key={accessTierShortName}
                   accessTierShortName={accessTierShortName}
