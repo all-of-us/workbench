@@ -4340,7 +4340,7 @@ definitions:
       freeTierBillingAccountId:
         type: string
         description: The free tier billing account id
-      accessModuleConfig:
+      accessModules:
         type: array
         items:
           type: object

@@ -17,7 +17,10 @@ public class ConfigController implements ConfigApiDelegate {
   private final AccessModuleDao accessModuleDao;
 
   @Autowired
-  ConfigController(Provider<WorkbenchConfig> configProvider, WorkbenchConfigMapper configMapper, AccessModuleDao accessModuleDao) {
+  ConfigController(
+      Provider<WorkbenchConfig> configProvider,
+      WorkbenchConfigMapper configMapper,
+      AccessModuleDao accessModuleDao) {
     this.configProvider = configProvider;
     this.configMapper = configMapper;
     this.accessModuleDao = accessModuleDao;
@@ -25,6 +28,6 @@ public class ConfigController implements ConfigApiDelegate {
 
   @Override
   public ResponseEntity<ConfigResponse> getConfig() {
-    return ResponseEntity.ok(configMapper.toModel(configProvider.get(), accessModuleDao));
+    return ResponseEntity.ok(configMapper.toModel(configProvider.get(), accessModuleDao.findAll()));
   }
 }
