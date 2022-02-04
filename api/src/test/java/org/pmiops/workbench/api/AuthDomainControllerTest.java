@@ -22,7 +22,6 @@ import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.AdminActionHistoryDao;
-import org.pmiops.workbench.db.dao.UserCodeOfConductAgreementDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.UserServiceImpl;
@@ -69,7 +68,6 @@ public class AuthDomainControllerTest {
   @Mock private FireCloudService fireCloudService;
   @Mock private MailService mailService;
   @Mock private Provider<DbUser> userProvider;
-  @Mock private UserCodeOfConductAgreementDao userDataUserCodeOfConductDao;
   @Mock private UserServiceAuditor mockUserServiceAuditAdapter;
   @Mock private UserTermsOfServiceDao userTermsOfServiceDao;
   @Mock private VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
@@ -104,7 +102,6 @@ public class AuthDomainControllerTest {
             mockUserServiceAuditAdapter,
             userDao,
             adminActionHistoryDao,
-            userDataUserCodeOfConductDao,
             userTermsOfServiceDao,
             verifiedInstitutionalAffiliationDao,
             accessModuleService,
