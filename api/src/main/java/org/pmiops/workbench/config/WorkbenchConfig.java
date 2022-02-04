@@ -30,6 +30,7 @@ public class WorkbenchConfig {
   public CaptchaConfig captcha;
   public ReportingConfig reporting;
   public RasConfig ras;
+  @Deprecated // moved inside AccessConfig.  will remove as part of RW-7828
   public AccessRenewalConfig accessRenewal;
   public OfflineBatchConfig offlineBatch;
   public EgressAlertRemediationPolicy egressAlertRemediationPolicy;
@@ -334,7 +335,7 @@ public class WorkbenchConfig {
     public String logoutUrl;
   }
 
-  // migrating this to live inside AccessConfig soon as part of RW-7828
+  // Note: migrating this to live inside AccessConfig soon as part of RW-7828
   public static class AccessRenewalConfig {
     // Days a user's module completion is good for until it expires
     public Long expiryDays;
