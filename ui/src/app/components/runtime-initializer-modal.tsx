@@ -12,6 +12,7 @@ import { ClrIcon } from './icons';
 import { reactStyles } from 'app/utils';
 import { setSidebarActiveIconStore } from 'app/utils/navigation';
 import { WarningMessage } from './messages';
+import { diskStore, useStore } from 'app/utils/stores';
 
 const styles = reactStyles({
   bodyElement: {
@@ -37,8 +38,9 @@ export const RuntimeInitializerModal = ({
   defaultRuntime,
 }: Props) => {
   const [showDetails, setShowDetails] = useState(false);
+  const { persistentDisk } = useStore(diskStore);
 
-  const defaultRuntimeConfig = toRuntimeConfig(defaultRuntime);
+  const defaultRuntimeConfig = toRuntimeConfig(defaultRuntime, persistentDisk);
   return (
     <Modal width={600}>
       <ModalTitle>Create an Analysis Environment</ModalTitle>

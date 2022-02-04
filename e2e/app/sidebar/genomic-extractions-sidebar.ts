@@ -1,10 +1,10 @@
-import BaseHelpSidebar from './base-help-sidebar';
+import BaseSidebar from './base-sidebar';
 import { SideBarLink } from 'app/text-labels';
 import { logger } from 'libs/logger';
 import { Page } from 'puppeteer';
-import DataTable from './data-table';
+import DataTable from '../component/data-table';
 
-export default class GenomicExtractionsSidebar extends BaseHelpSidebar {
+export default class GenomicExtractionsSidebar extends BaseSidebar {
   constructor(page: Page) {
     super(page);
   }

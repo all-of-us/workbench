@@ -11,7 +11,7 @@ import ClrIconLink from 'app/element/clr-icon-link';
 import { numericalStringToNumber } from 'utils/str-utils';
 import Textbox from 'app/element/textbox';
 import RadioButton from 'app/element/radiobutton';
-import ReviewCriteriaSidebar from 'app/component/review-criteria-sidebar';
+import ReviewCriteriaSidebar from 'app/sidebar/review-criteria-sidebar';
 import Table from 'app/component/table';
 import { getPropValue } from 'utils/element-utils';
 import { centerPoint, dragDrop } from 'utils/test-utils';

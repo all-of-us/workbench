@@ -13,6 +13,7 @@ import {
   RuntimePanelWrapper,
 } from 'app/pages/analysis/runtime-panel';
 import {
+  disksApi,
   profileApi,
   registerApiClient,
   runtimeApi,
@@ -26,10 +27,11 @@ import {
   WorkspaceAccessLevel,
   WorkspacesApi,
 } from 'generated/fetch';
-import { RuntimeApi } from 'generated/fetch/api';
+import { DiskApi, DiskType, RuntimeApi } from 'generated/fetch/api';
 import defaultServerConfig from 'testing/default-server-config';
 import {
   mountWithRouter,
+  waitForFakeTimersAndUpdate,
   waitOneTickAndUpdate,
 } from 'testing/react-test-helpers';
 import {
@@ -51,15 +53,21 @@ import {
   serverConfigStore,
   runtimeStore,
   profileStore,
+  diskStore,
 } from 'app/utils/stores';
 import { currentWorkspaceStore } from 'app/utils/navigation';
+import { diskTypeLabels } from 'app/utils/runtime-utils';
+import { DiskApiStub } from 'testing/stubs/disk-api-stub';
+import { ReactWrapper } from 'enzyme';
 
 describe('RuntimePanel', () => {
   let props: Props;
   let runtimeApiStub: RuntimeApiStub;
+  let diskApiStub: DiskApiStub;
   let workspacesApiStub: WorkspacesApiStub;
   let onClose: () => void;
   let enableGpu: boolean;
+  let enablePersistentDisk: boolean;
   let freeTierBillingAccountId: string;
 
   const component = async (propOverrides?: object) => {
@@ -70,16 +78,21 @@ describe('RuntimePanel', () => {
   };
 
   let runtimeStoreStub;
+  let diskStoreStub;
 
   beforeEach(async () => {
     cdrVersionStore.set(cdrVersionTiersResponse);
     serverConfigStore.set({ config: { ...defaultServerConfig } });
     enableGpu = serverConfigStore.get().config.enableGpu;
+    enablePersistentDisk = serverConfigStore.get().config.enablePersistentDisk;
     freeTierBillingAccountId =
       serverConfigStore.get().config.freeTierBillingAccountId;
 
     runtimeApiStub = new RuntimeApiStub();
     registerApiClient(RuntimeApi, runtimeApiStub);
+
+    diskApiStub = new DiskApiStub();
+    registerApiClient(DiskApi, diskApiStub);
 
     workspacesApiStub = new WorkspacesApiStub();
     registerApiClient(WorkspacesApi, workspacesApiStub);
@@ -113,11 +126,18 @@ describe('RuntimePanel', () => {
     };
     runtimeStore.set(runtimeStoreStub);
 
+    diskStoreStub = {
+      workspaceNamespace: workspaceStubs[0].namespace,
+      persistentDisk: null,
+    };
+    diskStore.set(diskStoreStub);
+
     jest.useFakeTimers();
   });
 
   afterEach(() => {
     act(() => clearCompoundRuntimeOperations());
+    jest.clearAllTimers();
     jest.useRealTimers();
   });
 
@@ -127,9 +147,7 @@ describe('RuntimePanel', () => {
   };
 
   const pickDropdownOption = async (wrapper, id, label) => {
-    act(() => {
-      wrapper.find(id).first().simulate('click');
-    });
+    wrapper.find(id).first().simulate('click');
     const item = wrapper
       .find(`${id} .p-dropdown-item`)
       .find({ 'aria-label': label })
@@ -155,17 +173,25 @@ describe('RuntimePanel', () => {
     await waitOneTickAndUpdate(wrapper);
   };
 
-  function getCheckbox(wrapper, id) {
+  function getCheckbox(wrapper, id): boolean {
     return wrapper.find(id).first().prop('checked');
   }
 
-  function clickCheckbox(wrapper, id) {
+  async function clickCheckbox(wrapper, id) {
     const currentChecked = getCheckbox(wrapper, id);
     wrapper
       .find(id)
+      .find('input')
       .first()
       .simulate('change', { target: { checked: !currentChecked } });
+    await waitOneTickAndUpdate(wrapper);
   }
+
+  const clickDeletePdRadioButton = (wrapper) =>
+    wrapper
+      .find({ 'data-test-id': 'delete-unattached-pd-radio' })
+      .first()
+      .simulate('change');
 
   const getMainCpu = (wrapper) => getInputValue(wrapper, '#runtime-cpu');
   const pickMainCpu = (wrapper, cpu) =>
@@ -175,9 +201,31 @@ describe('RuntimePanel', () => {
   const pickMainRam = (wrapper, ram) =>
     pickDropdownOption(wrapper, '#runtime-ram', ram);
 
-  const getMainDiskSize = (wrapper) => getInputValue(wrapper, '#runtime-disk');
+  const getMainDiskSize = (wrapper) =>
+    getInputValue(
+      wrapper,
+      enablePersistentDisk ? '#standard-disk' : '#runtime-disk'
+    );
   const pickMainDiskSize = (wrapper, diskSize) =>
-    enterNumberInput(wrapper, '#runtime-disk', diskSize);
+    enterNumberInput(
+      wrapper,
+      enablePersistentDisk ? '#standard-disk' : '#runtime-disk',
+      diskSize
+    );
+
+  const enableDetachable = (wrapper, detachable = true) =>
+    wrapper
+      .find({ name: detachable ? 'detachableDisk' : 'standardDisk' })
+      .first()
+      .simulate('change');
+
+  const pickDetachableType = (wrapper, diskType: DiskType) =>
+    pickDropdownOption(wrapper, '#disk-type', diskTypeLabels[diskType]);
+
+  const getDetachableDiskSize = (wrapper) =>
+    getInputValue(wrapper, '#detachable-disk');
+  const pickDetachableDiskSize = (wrapper, diskSize) =>
+    enterNumberInput(wrapper, '#detachable-disk', diskSize);
 
   const pickGpuType = (wrapper, gpuType) =>
     pickDropdownOption(wrapper, '#gpu-type', gpuType);
@@ -215,14 +263,22 @@ describe('RuntimePanel', () => {
     pickDropdownOption(wrapper, '#runtime-presets-menu', displayName);
 
   const mustClickButton = async (wrapper, label) => {
-    const createButton = wrapper
-      .find(Button)
-      .find({ 'aria-label': label })
-      .first();
-    expect(createButton.exists()).toBeTruthy();
-    expect(createButton.prop('disabled')).toBeFalsy();
+    const btn = wrapper.find(Button).find({ 'aria-label': label }).first();
+    expect(btn.exists()).toBeTruthy();
+    expect(btn.prop('disabled')).toBeFalsy();
 
-    createButton.simulate('click');
+    btn.simulate('click');
+    await waitOneTickAndUpdate(wrapper);
+  };
+
+  const clickButtonIfVisible = async (wrapper, label) => {
+    const btn = wrapper.find(Button).find({ 'aria-label': label }).first();
+    if (!btn.exists()) {
+      return;
+    }
+    expect(btn.prop('disabled')).toBeFalsy();
+
+    btn.simulate('click');
     await waitOneTickAndUpdate(wrapper);
   };
 
@@ -1176,6 +1232,279 @@ describe('RuntimePanel', () => {
     expect(getNextButton().prop('disabled')).toBeFalsy();
   });
 
+  it('should prevent runtime update when PD disk size is invalid', async () => {
+    const wrapper = await component();
+    const getNextButton = () => wrapper.find({ 'aria-label': 'Next' }).first();
+
+    await enableDetachable(wrapper);
+    await pickDetachableType(wrapper, DiskType.Standard);
+
+    await pickDetachableDiskSize(wrapper, 49);
+    expect(getNextButton().prop('disabled')).toBeTruthy();
+
+    await pickDetachableType(wrapper, DiskType.Ssd);
+    expect(getNextButton().prop('disabled')).toBeTruthy();
+
+    await pickDetachableDiskSize(wrapper, 4900);
+    expect(getNextButton().prop('disabled')).toBeTruthy();
+
+    await pickDetachableType(wrapper, DiskType.Standard);
+    expect(getNextButton().prop('disabled')).toBeTruthy();
+  });
+
+  it('should prevent detachable PD use for Dataproc', async () => {
+    const runtime = {
+      ...runtimeApiStub.runtime,
+      status: RuntimeStatus.Running,
+      configurationType: RuntimeConfigurationType.GeneralAnalysis,
+      gceWithPdConfig: {
+        machineType: 'n1-standard-16',
+        persistentDisk: {
+          size: 1000,
+          diskType: DiskType.Standard,
+          labels: {},
+          name: 'my-existing-disk',
+        },
+        gpuConfig: null,
+      },
+      gceConfig: null,
+      dataprocConfig: null,
+    };
+    runtimeApiStub.runtime = runtime;
+    runtimeStoreStub.runtime = runtime;
+
+    const wrapper = await component();
+    const getDetachableRadio = () =>
+      wrapper.find({ name: 'detachableDisk' }).first();
+
+    expect(getDetachableRadio().prop('disabled')).toBeFalsy();
+    await enableDetachable(wrapper);
+    await pickComputeType(wrapper, ComputeType.Dataproc);
+
+    expect(getDetachableRadio().prop('disabled')).toBeTruthy();
+  });
+
+  const pickSsdType = async (wrapper) =>
+    pickDetachableType(wrapper, DiskType.Ssd);
+  const decrementDetachableDiskSize = async (wrapper) => {
+    const prevSize = await getDetachableDiskSize(wrapper);
+    await pickDetachableDiskSize(wrapper, prevSize - 1);
+  };
+  const incrementDetachableDiskSize = async (wrapper) => {
+    const prevSize = await getDetachableDiskSize(wrapper);
+    await pickDetachableDiskSize(wrapper, prevSize + 1);
+  };
+  const changeMainCpu = async (wrapper) => pickMainCpu(wrapper, 8);
+
+  type DetachableDiskCase = [
+    string,
+    ((w: ReactWrapper) => Promise<void>)[],
+    {
+      wantUpdateDisk?: boolean;
+      wantDeleteDisk?: boolean;
+      wantUpdateRuntime?: boolean;
+      wantDeleteRuntime?: boolean;
+    }
+  ];
+
+  async function runDetachableDiskCase(
+    wrapper: ReactWrapper,
+    [
+      _,
+      setters,
+      {
+        wantUpdateDisk = false,
+        wantDeleteDisk = false,
+        wantUpdateRuntime = false,
+        wantDeleteRuntime = false,
+      },
+    ]: DetachableDiskCase,
+    existingDiskName: string
+  ) {
+    const updateDiskSpy = jest.spyOn(disksApi(), 'updateDisk');
+    const deleteDiskSpy = jest.spyOn(disksApi(), 'deleteDisk');
+    const createRuntimeSpy = jest.spyOn(runtimeApi(), 'createRuntime');
+    const updateRuntimeSpy = jest.spyOn(runtimeApi(), 'updateRuntime');
+
+    for (const f of setters) {
+      await f(wrapper);
+    }
+
+    await waitOneTickAndUpdate(wrapper);
+    await clickButtonIfVisible(wrapper, 'Next');
+    await clickButtonIfVisible(wrapper, 'Update');
+    await clickButtonIfVisible(wrapper, 'Create');
+
+    if (
+      wrapper.find({ 'data-test-id': 'delete-unattached-pd-radio' }).exists()
+    ) {
+      await clickDeletePdRadioButton(wrapper);
+      await clickButtonIfVisible(wrapper, 'Delete');
+    }
+
+    expect(updateDiskSpy).toHaveBeenCalledTimes(wantUpdateDisk ? 1 : 0);
+    expect(deleteDiskSpy).toHaveBeenCalledTimes(wantDeleteDisk ? 1 : 0);
+
+    expect(updateRuntimeSpy).toHaveBeenCalledTimes(wantUpdateRuntime ? 1 : 0);
+    if (wantDeleteRuntime) {
+      expect(runtimeApiStub.runtime.status).toEqual('Deleting');
+
+      runtimeApiStub.runtime.status = RuntimeStatus.Deleted;
+
+      // Dropdown adds a hacky setTimeout(.., 1), which causes exceptions here, hence the retries.
+      await waitForFakeTimersAndUpdate(wrapper, /* maxRetries*/ 10);
+      expect(createRuntimeSpy).toHaveBeenCalledTimes(1);
+    }
+
+    if (wantDeleteDisk) {
+      expect(diskApiStub.disk.name).not.toEqual(existingDiskName);
+    } else {
+      expect(diskApiStub.disk.name).toEqual(existingDiskName);
+    }
+  }
+
+  test.each([
+    [
+      'disk type',
+      [pickSsdType],
+      { wantDeleteDisk: true, wantDeleteRuntime: true },
+    ],
+    [
+      'disk decrease',
+      [decrementDetachableDiskSize],
+      { wantDeleteDisk: true, wantDeleteRuntime: true },
+    ],
+    ['disk increase', [incrementDetachableDiskSize], { wantUpdateDisk: true }],
+    ['in-place', [changeMainCpu], { wantUpdateRuntime: true }],
+    [
+      'in-place + disk type',
+      [changeMainCpu, pickSsdType],
+      { wantDeleteDisk: true, wantDeleteRuntime: true },
+    ],
+    [
+      'in-place + disk decrease',
+      [changeMainCpu, decrementDetachableDiskSize],
+      { wantDeleteDisk: true, wantDeleteRuntime: true },
+    ],
+    [
+      'in-place + disk increase',
+      [changeMainCpu, incrementDetachableDiskSize],
+      { wantUpdateDisk: true, wantUpdateRuntime: true },
+    ],
+    ['recreate', [clickEnableGpu], { wantDeleteRuntime: true }],
+    [
+      'recreate + disk type',
+      [clickEnableGpu, pickSsdType],
+      { wantDeleteDisk: true, wantDeleteRuntime: true },
+    ],
+    [
+      'recreate + disk decrease',
+      [clickEnableGpu, decrementDetachableDiskSize],
+      { wantDeleteDisk: true, wantDeleteRuntime: true },
+    ],
+    [
+      'recreate + disk increase',
+      [clickEnableGpu, incrementDetachableDiskSize],
+      { wantUpdateDisk: true, wantDeleteRuntime: true },
+    ],
+  ] as DetachableDiskCase[])(
+    'should allow runtime updates to attached PD: %s',
+    async (desc: string, setters, expectations) => {
+      const runtime = {
+        ...runtimeApiStub.runtime,
+        status: RuntimeStatus.Running,
+        configurationType: RuntimeConfigurationType.GeneralAnalysis,
+        gceWithPdConfig: {
+          machineType: 'n1-standard-16',
+          persistentDisk: {
+            size: 1000,
+            diskType: DiskType.Standard,
+            labels: {},
+            name: 'my-existing-disk',
+          },
+          gpuConfig: null,
+        },
+        gceConfig: null,
+        dataprocConfig: null,
+      };
+      runtimeApiStub.runtime = runtime;
+      runtimeStoreStub.runtime = runtime;
+
+      const disk = {
+        size: 1000,
+        diskType: DiskType.Standard,
+        name: 'my-existing-disk',
+        blockSize: 1,
+      };
+      diskApiStub.disk = disk;
+      diskStoreStub.persistentDisk = disk;
+
+      const wrapper = await component();
+      await runDetachableDiskCase(
+        wrapper,
+        [desc, setters, expectations],
+        disk.name
+      );
+    }
+  );
+
+  test.each([
+    ['disk type', [pickSsdType], { wantDeleteDisk: true }],
+    ['disk decrease', [decrementDetachableDiskSize], { wantDeleteDisk: true }],
+    ['disk increase', [incrementDetachableDiskSize], { wantUpdateDisk: true }],
+  ] as DetachableDiskCase[])(
+    'should allow runtime creates with existing disk: %s',
+    async (desc, setters, expectations) => {
+      runtimeApiStub.runtime = null;
+      runtimeStoreStub.runtime = null;
+
+      const disk = {
+        size: 1000,
+        diskType: DiskType.Standard,
+        name: 'my-existing-disk',
+        blockSize: 1,
+      };
+      diskApiStub.disk = disk;
+      diskStoreStub.persistentDisk = disk;
+
+      const wrapper = await component();
+      await mustClickButton(wrapper, 'Customize');
+      await runDetachableDiskCase(
+        wrapper,
+        [desc, setters, expectations],
+        disk.name
+      );
+    }
+  );
+
+  it('should allow Dataproc -> PD transition', async () => {
+    const runtime = {
+      ...runtimeApiStub.runtime,
+      status: RuntimeStatus.Running,
+      configurationType: RuntimeConfigurationType.HailGenomicAnalysis,
+      gceConfig: null,
+      gceWithPdConfig: null,
+      dataprocConfig: defaultDataprocConfig(),
+    };
+    runtimeApiStub.runtime = runtime;
+    runtimeStoreStub.runtime = runtime;
+
+    const wrapper = await component();
+    pickComputeType(wrapper, ComputeType.Standard);
+
+    enableDetachable(wrapper);
+    await mustClickButton(wrapper, 'Next');
+    await mustClickButton(wrapper, 'Update');
+
+    runtimeApiStub.runtime.status = RuntimeStatus.Deleted;
+
+    await waitForFakeTimersAndUpdate(wrapper, /* maxRetries*/ 10);
+    expect(runtimeApiStub.runtime.status).toEqual(RuntimeStatus.Creating);
+    expect(diskApiStub.disk).toBeTruthy();
+  });
+
+  // TODO(calbach): Add test coverage for PD -> dataproc.
+
   it('should prevent runtime creation when running cost is too high for free tier', async () => {
     runtimeApiStub.runtime = null;
     runtimeStoreStub.runtime = null;
@@ -1289,19 +1618,17 @@ describe('RuntimePanel', () => {
   });
 
   it('should allow creating gce with GPU', async () => {
-    if (!enableGpu) {
-      return;
-    }
     runtimeApiStub.runtime = null;
     runtimeStoreStub.runtime = null;
     const wrapper = await component();
     await mustClickButton(wrapper, 'Customize');
     await pickComputeType(wrapper, ComputeType.Standard);
     await clickEnableGpu(wrapper);
-    await pickGpuType(wrapper, 'nvidia-tesla-t4');
+    await pickGpuType(wrapper, 'NVIDIA Tesla T4');
     await pickGpuNum(wrapper, 2);
     await pickMainCpu(wrapper, 8);
-    await pickMainDiskSize(wrapper, 75);
+    await pickMainDiskSize(wrapper, 150);
+
     await mustClickButton(wrapper, 'Create');
     expect(runtimeApiStub.runtime.status).toEqual('Creating');
     expect(runtimeApiStub.runtime.gceConfig.gpuConfig.gpuType).toEqual(
@@ -1320,7 +1647,7 @@ describe('RuntimePanel', () => {
     await mustClickButton(wrapper, 'Customize');
     await pickComputeType(wrapper, ComputeType.Standard);
     await pickMainCpu(wrapper, 8);
-    await pickMainDiskSize(wrapper, 75);
+    await pickMainDiskSize(wrapper, 150);
     await mustClickButton(wrapper, 'Create');
     expect(runtimeApiStub.runtime.status).toEqual('Creating');
     expect(runtimeApiStub.runtime.gceConfig.gpuConfig).toEqual(null);

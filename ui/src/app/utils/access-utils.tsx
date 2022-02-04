@@ -194,7 +194,7 @@ export const getAccessModuleConfig = (
         moduleName,
         isEnabledInEnvironment: enableEraCommons,
         DARTitleComponent: () => <div>Connect your eRA Commons account</div>,
-        adminPageTitle: 'Connect your eRA Commons account',
+        adminPageTitle: 'Connect your eRA Commons* account',
         adminBypassable: true,
         canExpire: false,
         externalSyncAction: async () =>

@@ -24,6 +24,7 @@ import {
   displayModuleCompletionDate,
   displayModuleExpirationDate,
   displayTierBadgeByRequiredModule,
+  getEraNote,
 } from './admin-user-common';
 import { FadeBox } from 'app/components/containers';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
@@ -316,7 +317,16 @@ const AccessModuleTable = (props: AccessModuleTableProps) => {
   });
 
   return (
-    <DataTable style={{ paddingTop: '1em' }} value={tableData}>
+    <DataTable
+      rowHover
+      style={{ paddingTop: '1em' }}
+      value={tableData}
+      footer={
+        <div style={{ textAlign: 'left', fontWeight: 'normal' }}>
+          {getEraNote(updatedProfile)}
+        </div>
+      }
+    >
       <Column field='moduleName' header='Access Module' />
       <Column field='completionDate' header='Last completed on' />
       <Column field='expirationDate' header='Expires on' />

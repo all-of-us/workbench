@@ -973,7 +973,11 @@ export const AdminInstitutionEdit = fp.flow(
                     data-test-id='save-institution-button'
                     style={styles.saveButton}
                     disabled={this.disableSave(errors)}
-                    onClick={() => this.saveInstitution()}
+                    onClick={async () => {
+                      this.props.showSpinner();
+                      await this.saveInstitution();
+                      this.props.hideSpinner();
+                    }}
                   >
                     {this.buttonText}
                   </Button>

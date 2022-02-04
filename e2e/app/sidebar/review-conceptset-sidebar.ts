@@ -1,9 +1,9 @@
 import { Page } from 'puppeteer';
 import { LinkText } from 'app/text-labels';
-import BaseHelpSidebar from './base-help-sidebar';
+import BaseSidebar from './base-sidebar';
 import { logger } from 'libs/logger';
 
-export default class ReviewConceptSetSidebar extends BaseHelpSidebar {
+export default class ReviewConceptSetSidebar extends BaseSidebar {
   constructor(page: Page) {
     super(page);
   }

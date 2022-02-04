@@ -1,4 +1,4 @@
-import RuntimePanel, { ComputeType, RuntimePreset, StartStopIconState } from 'app/component/runtime-panel';
+import RuntimePanel, { ComputeType, RuntimePreset, StartStopIconState } from 'app/sidebar/runtime-panel';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { LinkText, ResourceCard } from 'app/text-labels';
 import { config } from 'resources/workbench-config';

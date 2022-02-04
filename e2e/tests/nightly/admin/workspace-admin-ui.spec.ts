@@ -3,7 +3,7 @@ import { config } from 'resources/workbench-config';
 import navigation, { NavLink } from 'app/component/navigation';
 import WorkspaceAdminPage from 'app/page/admin-workspace-page';
 import { ConceptSetSelectValue, CloudStorageHeader, Language } from 'app/text-labels';
-import RuntimePanel from 'app/component/runtime-panel';
+import RuntimePanel from 'app/sidebar/runtime-panel';
 import WorkspacesPage from 'app/page/workspaces-page';
 import WorkspaceCard from 'app/component/workspace-card';
 import WorkspaceDataPage from 'app/page/workspace-data-page';

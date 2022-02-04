@@ -4,7 +4,7 @@ import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
 import {
   ComputeType,
-  diskPricePerMonth,
+  diskConfigPrice,
   machineRunningCost,
   machineRunningCostBreakdown,
   machineStorageCost,
@@ -24,11 +24,11 @@ const styles = reactStyles({
   costSection: {
     marginRight: '1rem',
     overflow: 'hidden',
-    whiteSpace: 'nowrap',
   },
   cost: {
     overflow: 'hidden',
     textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
   },
 });
 
@@ -93,7 +93,7 @@ export const RuntimeCostEstimator = ({
             Persistent disk cost
           </div>
           <div style={costStyle} data-test-id='pd-cost'>
-            {formatUsd(diskConfig.size * diskPricePerMonth)}/month
+            {formatUsd(diskConfigPrice(diskConfig))}/month
           </div>
         </FlexColumn>
       )}
