@@ -9,7 +9,9 @@ module.exports = {
     'react',
     'react-hooks',
   ],
-  extends: [],
+  // If we extend multiple rulesets in the future, ensure that 'prettier' is last.
+  // This will allow it to disable prettier-incompatible rules from other rulesets.
+  extends: ['prettier'],
   parserOptions: {
     ecmaVersion: 6,
     sourceType: 'module',
@@ -73,14 +75,15 @@ module.exports = {
     '@typescript-eslint/unified-signatures': 'warn',
     // '@typescript-eslint/member-ordering': ['warn', { 'classExpressions': ['method', 'field'] }],
     // '@typescript-eslint/prefer-function-type': 'warn',
-    // semi: 'off', // Needed for the below rule
-    // '@typescript-eslint/semi': 'warn',
 
     'react/jsx-uses-vars': 'warn',
     'react-hooks/rules-of-hooks': 'warn',
     // 'react-hooks/exhaustive-deps': 'warn',  // 45 instances as of 3 Jan 2022
 
     /* Style */
+
+    // prettier is 'highly opinionated' and should always be the first rule in this section.
+    // please confirm that other style rules are compatible with prettier before adding them.
 
     'prettier/prettier': 'warn',
 
@@ -92,6 +95,7 @@ module.exports = {
         ignoreComments: true,
       },
     ],
+
     'no-trailing-spaces': 'warn',
 
     // temp disable others.  re-enable if desired after determining that they don't conflict with prettier.
