@@ -11,7 +11,7 @@ import org.pmiops.workbench.access.AccessUtils;
 import org.pmiops.workbench.db.model.DbAccessModule;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeConfig.CloudServiceEnum;
 import org.pmiops.workbench.model.ConfigResponse;
-import org.pmiops.workbench.model.ConfigResponseAccessModuleConfig;
+import org.pmiops.workbench.model.ConfigResponseAccessModules;
 import org.pmiops.workbench.model.RuntimeImage;
 import org.pmiops.workbench.utils.mappers.MapStructConfig;
 
@@ -38,7 +38,7 @@ public interface WorkbenchConfigMapper {
 
   @Mapping(target = "moduleName", source = "name")
   @Mapping(target = "isBypassable", source = "bypassable")
-  ConfigResponseAccessModuleConfig mapAccessModule(DbAccessModule accessModule);
+  ConfigResponseAccessModules mapAccessModule(DbAccessModule accessModule);
 
   // handled by mapRuntimeImages()
   @Mapping(target = "runtimeImages", ignore = true)
