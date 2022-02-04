@@ -1,5 +1,6 @@
 package org.pmiops.workbench.api;
 
+import com.google.common.base.Strings;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.sql.Timestamp;
@@ -202,7 +203,7 @@ public class RuntimeController implements RuntimeApiDelegate {
     GceWithPdConfig gceWithPdConfig = runtime.getGceWithPdConfig();
     if (gceWithPdConfig != null) {
       PersistentDiskRequest persistentDiskRequest = gceWithPdConfig.getPersistentDisk();
-      if (persistentDiskRequest != null && persistentDiskRequest.getName().isEmpty()) {
+      if (persistentDiskRequest != null && Strings.isNullOrEmpty(persistentDiskRequest.getName())) {
         persistentDiskRequest.setName(userProvider.get().generatePDName());
       }
     }
