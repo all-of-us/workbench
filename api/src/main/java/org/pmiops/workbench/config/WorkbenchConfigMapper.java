@@ -6,12 +6,18 @@ import org.mapstruct.BeforeMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+import org.pmiops.workbench.db.dao.AccessModuleDao;
+import org.pmiops.workbench.db.model.DbAccessModule;
+import org.pmiops.workbench.db.model.DbAccessModule.AccessModuleName;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeConfig.CloudServiceEnum;
 import org.pmiops.workbench.model.ConfigResponse;
 import org.pmiops.workbench.model.RuntimeImage;
 import org.pmiops.workbench.utils.mappers.MapStructConfig;
 
-@Mapper(config = MapStructConfig.class)
+@Mapper(
+    config = MapStructConfig.class,
+    uses = {AccessModuleDao.class}
+)
 public interface WorkbenchConfigMapper {
   default RuntimeImage dataprocToModel(String imageName) {
     return new RuntimeImage().cloudService(CloudServiceEnum.DATAPROC.toString()).name(imageName);
@@ -30,8 +36,23 @@ public interface WorkbenchConfigMapper {
             .collect(Collectors.toList()));
   }
 
+//  @AfterMapping
+//  default void mapAccessModuleConfig(WorkbenchConfig source, @MappingTarget ConfigResponse target, AccessModuleDao accessModuleDao) {
+//    target.accessModuleConfig(getAllAccessModules(accessModuleDao).stream()
+//            .map(
+//                module ->
+//                    new ConfigResponseAccessModuleConfig()
+//                        .moduleName(AccessUtils.storageAccessModuleToClient(module.getName()))
+//                        .isBypassable(module.getBypassable()))
+//            .collect(Collectors.toList()));
+//  }
+
+  DbAccessModule getAccessModule(AccessModuleName name, AccessModuleDao accessModuleDao);
+
   // handled by mapRuntimeImages()
   @Mapping(target = "runtimeImages", ignore = true)
+  // handled by mapAccessModuleConfig()
+  @Mapping(target = "accessModuleConfig", ignore = true)
   @Mapping(target = "accessRenewalLookback", source = "accessRenewal.lookbackPeriod")
   @Mapping(target = "gsuiteDomain", source = "googleDirectoryService.gSuiteDomain")
   @Mapping(target = "projectId", source = "server.projectId")
