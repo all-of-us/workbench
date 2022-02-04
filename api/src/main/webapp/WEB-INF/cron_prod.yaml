@@ -1,3 +1,0 @@
-cron:
-- url: /v1/cron/synchronizeUserAccess
-  aou_skip_reason: "RW-7066"
