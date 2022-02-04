@@ -13,6 +13,7 @@ import { useId } from 'app/utils';
 import {
   AccessTierShortNames,
   displayNameForTier,
+  orderedAccessTierShortNames,
 } from 'app/utils/access-tiers';
 import { environment } from 'environments/environment';
 
@@ -59,11 +60,6 @@ export interface DataAccessPanelProps {
 export const DataAccessPanel = (props: DataAccessPanelProps) => {
   const { userAccessTiers } = props;
 
-  const orderedTiers = [
-    AccessTierShortNames.Registered,
-    AccessTierShortNames.Controlled,
-  ];
-
   const sectionId = useId();
   return (
     <section aria-labelledby={sectionId} style={{ marginLeft: '1rem' }}>
@@ -74,7 +70,7 @@ export const DataAccessPanel = (props: DataAccessPanelProps) => {
         </Link>
       </FlexRow>
       <hr style={{ ...styles.verticalLine }} />
-      {orderedTiers.map((tier) => (
+      {orderedAccessTierShortNames.map((tier) => (
         <Tier
           key={tier}
           shortName={tier}
