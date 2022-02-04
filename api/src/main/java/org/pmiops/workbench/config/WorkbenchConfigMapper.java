@@ -10,8 +10,8 @@ import org.mapstruct.MappingTarget;
 import org.pmiops.workbench.access.AccessUtils;
 import org.pmiops.workbench.db.model.DbAccessModule;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeConfig.CloudServiceEnum;
+import org.pmiops.workbench.model.AccessModuleConfig;
 import org.pmiops.workbench.model.ConfigResponse;
-import org.pmiops.workbench.model.ConfigResponseAccessModules;
 import org.pmiops.workbench.model.RuntimeImage;
 import org.pmiops.workbench.utils.mappers.MapStructConfig;
 
@@ -36,7 +36,7 @@ public interface WorkbenchConfigMapper {
             .collect(Collectors.toList()));
   }
 
-  ConfigResponseAccessModules mapAccessModule(DbAccessModule accessModule);
+  AccessModuleConfig mapAccessModule(DbAccessModule accessModule);
 
   // handled by mapRuntimeImages()
   @Mapping(target = "runtimeImages", ignore = true)

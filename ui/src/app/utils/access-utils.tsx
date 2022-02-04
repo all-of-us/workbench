@@ -17,7 +17,7 @@ import {
 import {
   AccessModule,
   AccessModuleStatus,
-  ConfigResponseAccessModules,
+  AccessModuleConfig,
   ErrorCode,
   Profile,
 } from 'generated/fetch';
@@ -127,7 +127,7 @@ export const redirectToRas = (openInNewTab: boolean = true): void => {
 export const ACCESS_RENEWAL_PATH = '/access-renewal';
 export const DATA_ACCESS_REQUIREMENTS_PATH = '/data-access-requirements';
 
-interface AccessModuleConfig extends ConfigResponseAccessModules {
+interface AccessModuleUIConfig extends AccessModuleConfig {
   isEnabledInEnvironment: boolean; // either true or dependent on a feature flag
   isRequiredByRT: boolean;
   isRequiredByCT: boolean;
@@ -148,7 +148,7 @@ interface AccessModuleConfig extends ConfigResponseAccessModules {
 // https://github.com/all-of-us/workbench/blob/main/api/src/main/java/org/pmiops/workbench/db/dao/UserServiceImpl.java#L240-L272
 export const getAccessModuleConfig = (
   moduleName: AccessModule
-): AccessModuleConfig => {
+): AccessModuleUIConfig => {
   const {
     enableRasLoginGovLinking,
     enforceRasLoginGovLinking,

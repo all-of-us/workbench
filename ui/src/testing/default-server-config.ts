@@ -1,10 +1,10 @@
 import {
   AccessModule,
   ConfigResponse,
-  ConfigResponseAccessModules,
+  AccessModuleConfig,
 } from 'generated/fetch/api';
 
-const defaultAccessModuleConfig: ConfigResponseAccessModules[] = [
+const defaultAccessModuleConfig: AccessModuleConfig[] = [
   { name: AccessModule.TWOFACTORAUTH, bypassable: true, expirable: false },
   { name: AccessModule.RASLINKLOGINGOV, bypassable: true, expirable: false },
   { name: AccessModule.ERACOMMONS, bypassable: true, expirable: false },

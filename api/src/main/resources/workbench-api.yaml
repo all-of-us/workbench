@@ -4343,19 +4343,7 @@ definitions:
       accessModules:
         type: array
         items:
-          type: object
-          required:
-            - name
-            - expirable
-            - bypassable
-          properties:
-            name:
-              "$ref": "#/definitions/AccessModule"
-            expirable:
-              type: boolean
-            bypassable:
-              type: boolean
-
+          "$ref": "#/definitions/AccessModuleConfig"
   RuntimeImage:
     type: object
     properties:
@@ -4363,7 +4351,19 @@ definitions:
         type: string
       name:
         type: string
-
+  AccessModuleConfig:
+    type: object
+    required:
+      - name
+      - expirable
+      - bypassable
+    properties:
+      name:
+        "$ref": "#/definitions/AccessModule"
+      expirable:
+        type: boolean
+      bypassable:
+        type: boolean
   FeaturedWorkspacesConfigResponse:
     type: object
     properties:
