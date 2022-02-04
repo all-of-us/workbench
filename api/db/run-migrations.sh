@@ -27,7 +27,7 @@ function run_mysql() {
   else
     echo "Outside docker: invoking mariadb via docker for portability"
     docker run --rm --network host --entrypoint '' -i \
-      mariadb:10.3 \
+      mysql \
       mysql $@
   fi
 }
