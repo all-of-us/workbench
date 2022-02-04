@@ -213,7 +213,7 @@ public class AccessModuleServiceImpl implements AccessModuleService {
     }
     return Optional.of(
         deriveExpirationTimestamp(
-            dbUserAccessModule.getCompletionTime(), configProvider.get().accessRenewal.expiryDays));
+            dbUserAccessModule.getCompletionTime(), configProvider.get().access.renewal.expiryDays));
   }
 
   private static DbAccessModule getDbAccessModuleOrThrow(
