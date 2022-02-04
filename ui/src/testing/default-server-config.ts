@@ -1,4 +1,39 @@
-import { ConfigResponse } from 'generated/fetch/api';
+import {
+  AccessModule,
+  ConfigResponse,
+  ConfigResponseAccessModules,
+} from 'generated/fetch/api';
+
+const defaultAccessModuleConfig: ConfigResponseAccessModules[] = [
+  { name: AccessModule.TWOFACTORAUTH, bypassable: true, expirable: false },
+  { name: AccessModule.RASLINKLOGINGOV, bypassable: true, expirable: false },
+  { name: AccessModule.ERACOMMONS, bypassable: true, expirable: false },
+  {
+    name: AccessModule.COMPLIANCETRAINING,
+    bypassable: true,
+    expirable: true,
+  },
+  {
+    name: AccessModule.CTCOMPLIANCETRAINING,
+    bypassable: true,
+    expirable: false,
+  },
+  {
+    name: AccessModule.DATAUSERCODEOFCONDUCT,
+    bypassable: true,
+    expirable: true,
+  },
+  {
+    name: AccessModule.PROFILECONFIRMATION,
+    bypassable: false,
+    expirable: true,
+  },
+  {
+    name: AccessModule.PUBLICATIONCONFIRMATION,
+    bypassable: false,
+    expirable: true,
+  },
+];
 
 const defaultServerConfig: ConfigResponse = {
   gsuiteDomain: 'researchallofus.org',
@@ -17,6 +52,7 @@ const defaultServerConfig: ConfigResponse = {
   enablePersistentDisk: true,
   accessRenewalLookback: 330,
   freeTierBillingAccountId: 'freetier',
+  accessModules: defaultAccessModuleConfig,
 };
 
 export default defaultServerConfig;
