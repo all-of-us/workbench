@@ -1,23 +1,22 @@
 package org.pmiops.workbench.config;
 
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.mapstruct.BeforeMapping;
+import org.mapstruct.Context;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+import org.pmiops.workbench.access.AccessUtils;
 import org.pmiops.workbench.db.dao.AccessModuleDao;
-import org.pmiops.workbench.db.model.DbAccessModule;
-import org.pmiops.workbench.db.model.DbAccessModule.AccessModuleName;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeConfig.CloudServiceEnum;
 import org.pmiops.workbench.model.ConfigResponse;
+import org.pmiops.workbench.model.ConfigResponseAccessModuleConfig;
 import org.pmiops.workbench.model.RuntimeImage;
 import org.pmiops.workbench.utils.mappers.MapStructConfig;
 
-@Mapper(
-    config = MapStructConfig.class,
-    uses = {AccessModuleDao.class}
-)
+@Mapper(config = MapStructConfig.class)
 public interface WorkbenchConfigMapper {
   default RuntimeImage dataprocToModel(String imageName) {
     return new RuntimeImage().cloudService(CloudServiceEnum.DATAPROC.toString()).name(imageName);
@@ -36,18 +35,20 @@ public interface WorkbenchConfigMapper {
             .collect(Collectors.toList()));
   }
 
-//  @AfterMapping
-//  default void mapAccessModuleConfig(WorkbenchConfig source, @MappingTarget ConfigResponse target, AccessModuleDao accessModuleDao) {
-//    target.accessModuleConfig(getAllAccessModules(accessModuleDao).stream()
-//            .map(
-//                module ->
-//                    new ConfigResponseAccessModuleConfig()
-//                        .moduleName(AccessUtils.storageAccessModuleToClient(module.getName()))
-//                        .isBypassable(module.getBypassable()))
-//            .collect(Collectors.toList()));
-//  }
+  @BeforeMapping
+  default void mapAccessModuleConfig(WorkbenchConfig source, @MappingTarget ConfigResponse target, @Context AccessModuleDao accessModuleDao) {
+    target.accessModuleConfig(getAccessModuleConfigs(accessModuleDao));
+  }
 
-  DbAccessModule getAccessModule(AccessModuleName name, AccessModuleDao accessModuleDao);
+  default List<ConfigResponseAccessModuleConfig> getAccessModuleConfigs(AccessModuleDao accessModuleDao) {
+    return accessModuleDao.findAll().stream()
+        .map(
+            module ->
+                new ConfigResponseAccessModuleConfig()
+                    .moduleName(AccessUtils.storageAccessModuleToClient(module.getName()))
+                    .isBypassable(module.getBypassable()))
+        .collect(Collectors.toList());
+  }
 
   // handled by mapRuntimeImages()
   @Mapping(target = "runtimeImages", ignore = true)
@@ -79,5 +80,5 @@ public interface WorkbenchConfigMapper {
   @Mapping(target = "rasClientId", source = "ras.clientId")
   @Mapping(target = "rasLogoutUrl", source = "ras.logoutUrl")
   @Mapping(target = "freeTierBillingAccountId", source = "billing.accountId")
-  ConfigResponse toModel(WorkbenchConfig config);
+  ConfigResponse toModel(WorkbenchConfig config, @Context AccessModuleDao accessModuleDao);
 }
