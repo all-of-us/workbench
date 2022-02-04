@@ -1,5 +1,5 @@
 import { leoRuntimesApi } from 'app/services/notebooks-swagger-fetch-clients';
-import { disksApi, runtimeApi } from 'app/services/swagger-fetch-clients';
+import { diskApi, runtimeApi } from 'app/services/swagger-fetch-clients';
 import { switchCase, withAsyncErrorHandling } from 'app/utils';
 import {
   ExceededActionCountError,
@@ -844,7 +844,7 @@ export const useDisk = (currentWorkspaceNamespace: string) => {
       async () => {
         let persistentDisk: Disk = null;
         try {
-          persistentDisk = await disksApi().getDisk(currentWorkspaceNamespace);
+          persistentDisk = await diskApi().getDisk(currentWorkspaceNamespace);
         } catch (e) {
           if (!(e instanceof Response && e.status === 404)) {
             throw e;
@@ -946,7 +946,7 @@ export const useRuntimeStatus = (
       [
         RuntimeStatusRequest.DeletePD,
         () => {
-          return disksApi().deleteDisk(
+          return diskApi().deleteDisk(
             currentWorkspaceNamespace,
             diskStore.get().persistentDisk.name
           );
@@ -1019,7 +1019,7 @@ export const useCustomRuntime = (
 
         // A disk update may be need in combination with a runtime update.
         if (mostSevereDiskDiff === RuntimeDiffState.CAN_UPDATE_IN_PLACE) {
-          await disksApi().updateDisk(
+          await diskApi().updateDisk(
             currentWorkspaceNamespace,
             existingDisk.name,
             requestedDisk.size
@@ -1070,7 +1070,7 @@ export const useCustomRuntime = (
         if (runtimeExists) {
           await applyRuntimeUpdate();
         } else if (diskNeedsSizeIncrease(requestedDisk, existingDisk)) {
-          await disksApi().updateDisk(
+          await diskApi().updateDisk(
             currentWorkspaceNamespace,
             existingDisk.name,
             requestedDisk.size
