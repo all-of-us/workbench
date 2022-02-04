@@ -58,7 +58,7 @@ public class DirectoryServiceImplIntegrationTest extends BaseIntegrationTest {
     assertThat(aouMeta).containsEntry("Institution", "All of Us Research Workbench");
     assertThat(service.getContactEmail(username)).hasValue("notasecret@gmail.com");
 
-    service.deleteUser(username);
+    retryTemplate().execute(c -> service.deleteUser(username));
     assertThat(service.isUsernameTaken(userPrefix)).isFalse();
   }
 
