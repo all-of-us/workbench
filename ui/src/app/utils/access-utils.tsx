@@ -17,6 +17,7 @@ import {
 import {
   AccessModule,
   AccessModuleStatus,
+  ConfigResponseAccessModules,
   ErrorCode,
   Profile,
 } from 'generated/fetch';
@@ -126,10 +127,7 @@ export const redirectToRas = (openInNewTab: boolean = true): void => {
 export const ACCESS_RENEWAL_PATH = '/access-renewal';
 export const DATA_ACCESS_REQUIREMENTS_PATH = '/data-access-requirements';
 
-interface AccessModuleConfig {
-  moduleName: AccessModule;
-  expirable: boolean;
-  bypassable: true;
+interface AccessModuleConfig extends ConfigResponseAccessModules {
   isEnabledInEnvironment: boolean; // either true or dependent on a feature flag
   isRequiredByRT: boolean;
   isRequiredByCT: boolean;
@@ -158,18 +156,14 @@ export const getAccessModuleConfig = (
     enableComplianceTraining,
     accessModules,
   } = serverConfigStore.get().config;
-  const { expirable, bypassable } = accessModules.find(
-    (m) => m.name === moduleName
-  );
+  const apiConfig = accessModules.find((m) => m.name === moduleName);
   return switchCase(
     moduleName,
 
     [
       AccessModule.TWOFACTORAUTH,
       () => ({
-        moduleName,
-        expirable,
-        bypassable,
+        ...apiConfig,
         isEnabledInEnvironment: true,
         DARTitleComponent: () => <div>Turn on Google 2-Step Verification</div>,
         adminPageTitle: 'Google 2-Step Verification',
@@ -184,9 +178,7 @@ export const getAccessModuleConfig = (
     [
       AccessModule.RASLINKLOGINGOV,
       () => ({
-        moduleName,
-        expirable,
-        bypassable,
+        ...apiConfig,
         isEnabledInEnvironment:
           enableRasLoginGovLinking || enforceRasLoginGovLinking,
         DARTitleComponent: () => (
@@ -211,9 +203,7 @@ export const getAccessModuleConfig = (
     [
       AccessModule.ERACOMMONS,
       () => ({
-        moduleName,
-        expirable,
-        bypassable,
+        ...apiConfig,
         isEnabledInEnvironment: enableEraCommons,
         DARTitleComponent: () => <div>Connect your eRA Commons account</div>,
         adminPageTitle: 'Connect your eRA Commons* account',
@@ -226,9 +216,7 @@ export const getAccessModuleConfig = (
     [
       AccessModule.COMPLIANCETRAINING,
       () => ({
-        moduleName,
-        expirable,
-        bypassable,
+        ...apiConfig,
         isEnabledInEnvironment: enableComplianceTraining,
         AARTitleComponent: () => (
           <div>
@@ -253,9 +241,7 @@ export const getAccessModuleConfig = (
     [
       AccessModule.CTCOMPLIANCETRAINING,
       () => ({
-        moduleName,
-        expirable,
-        bypassable,
+        ...apiConfig,
         isEnabledInEnvironment: enableComplianceTraining,
         DARTitleComponent: () => (
           <div>
@@ -275,9 +261,7 @@ export const getAccessModuleConfig = (
     [
       AccessModule.DATAUSERCODEOFCONDUCT,
       () => ({
-        moduleName,
-        expirable,
-        bypassable,
+        ...apiConfig,
         isEnabledInEnvironment: true,
         AARTitleComponent: () => 'Sign Data User Code of Conduct',
         DARTitleComponent: () => <div>Sign Data User Code of Conduct</div>,
@@ -290,9 +274,7 @@ export const getAccessModuleConfig = (
     [
       AccessModule.PROFILECONFIRMATION,
       () => ({
-        moduleName,
-        expirable,
-        bypassable,
+        ...apiConfig,
         isEnabledInEnvironment: true,
         AARTitleComponent: () => 'Update your profile',
         adminPageTitle: 'Update your profile',
@@ -304,9 +286,7 @@ export const getAccessModuleConfig = (
     [
       AccessModule.PUBLICATIONCONFIRMATION,
       () => ({
-        moduleName,
-        expirable,
-        bypassable,
+        ...apiConfig,
         isEnabledInEnvironment: true,
         AARTitleComponent: () =>
           'Report any publications or presentations based on your research using the Researcher Workbench',
