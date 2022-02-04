@@ -239,7 +239,7 @@ public class AccessModuleServiceImpl implements AccessModuleService {
    */
   public static Timestamp deriveExpirationTimestamp(Timestamp completionTime, Long expiryDays) {
     Preconditions.checkNotNull(
-        expiryDays, "expected value for config key accessRenewal.expiryDays.expiryDays");
+        expiryDays, "expected value for config key access.renewal.expiryDays.expiryDays");
     long expiryDaysInMs = TimeUnit.MILLISECONDS.convert(expiryDays, TimeUnit.DAYS);
     return new Timestamp(completionTime.getTime() + expiryDaysInMs);
   }

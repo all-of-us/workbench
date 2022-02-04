@@ -40,7 +40,7 @@ public interface WorkbenchConfigMapper {
 
   // handled by mapRuntimeImages()
   @Mapping(target = "runtimeImages", ignore = true)
-  @Mapping(target = "accessRenewalLookback", source = "config.accessRenewal.lookbackPeriod")
+  @Mapping(target = "accessRenewalLookback", source = "config.access.renewal.lookbackPeriod")
   @Mapping(target = "gsuiteDomain", source = "config.googleDirectoryService.gSuiteDomain")
   @Mapping(target = "projectId", source = "config.server.projectId")
   @Mapping(target = "firecloudURL", source = "config.firecloud.baseUrl")
