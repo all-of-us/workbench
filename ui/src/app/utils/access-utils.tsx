@@ -23,7 +23,7 @@ import {
 import { parseQueryParams } from 'app/components/app-router';
 import { cond, switchCase } from './index';
 import { TooltipTrigger } from 'app/components/popups';
-import { InfoIcon } from 'app/components/icons';
+import { InfoIcon } from 'app/components/clr-icons';
 import {
   getWholeDaysFromNow,
   displayDateWithoutHours,
