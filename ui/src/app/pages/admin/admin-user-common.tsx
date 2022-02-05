@@ -6,11 +6,8 @@ import { CSSProperties } from 'react';
 import { Link } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 import { Dropdown } from 'primereact/dropdown';
-import {
-  ClrIcon,
-  ControlledTierBadge,
-  RegisteredTierBadge,
-} from 'app/components/icons';
+import { ControlledTierBadge, RegisteredTierBadge } from 'app/components/icons';
+import { ClrIcon } from 'app/components/clr-icons';
 
 import { formatInitialCreditsUSD, isBlank, reactStyles } from 'app/utils';
 import colors, { colorWithWhiteness } from 'app/styles/colors';

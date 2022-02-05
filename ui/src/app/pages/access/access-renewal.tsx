@@ -6,7 +6,6 @@ import { FadeBox } from 'app/components/containers';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import {
   Arrow,
-  ClrIcon,
   ExclamationTriangle,
   withCircleBackground,
 } from 'app/components/icons';
@@ -21,24 +20,19 @@ import { profileApi } from 'app/services/swagger-fetch-clients';
 import colors, { addOpacity, colorWithWhiteness } from 'app/styles/colors';
 import { cond, useId, withStyle } from 'app/utils';
 import {
-  computeRenewalDisplayDates,
   accessRenewalModules,
-  syncModulesExternal,
+  computeRenewalDisplayDates,
   getAccessModuleConfig,
   maybeDaysRemaining,
   redirectToRegisteredTraining,
+  syncModulesExternal,
 } from 'app/utils/access-utils';
 import { useNavigation } from 'app/utils/navigation';
 import { profileStore, serverConfigStore, useStore } from 'app/utils/stores';
 import { AccessModule, AccessModuleStatus } from 'generated/fetch';
 import { SupportMailto } from 'app/components/support';
 import { getWholeDaysFromNow } from 'app/utils/dates';
-import {useNavigation} from 'app/utils/navigation';
-import {profileStore, serverConfigStore, useStore} from 'app/utils/stores';
-import {AccessModule, AccessModuleStatus} from 'generated/fetch';
-import {SupportMailto} from 'app/components/support';
-import {getWholeDaysFromNow} from 'app/utils/dates';
-import {CheckIcon} from 'app/components/clr-icons';
+import { CheckIcon } from 'app/components/clr-icons';
 
 const { useState, useEffect } = React;
 
