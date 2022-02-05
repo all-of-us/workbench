@@ -217,51 +217,12 @@ public final class DbStorageEnums {
           .put(Domain.LR_WHOLE_GENOME_VARIANT, (short) 25)
           .build();
 
-  // A mapping from our Domain enum to OMOP domain ID values.
-  private static final BiMap<Domain, String> DOMAIN_ID_MAP =
-      ImmutableBiMap.<Domain, String>builder()
-          .put(Domain.CONDITION, "Condition")
-          .put(Domain.DEATH, "Death")
-          .put(Domain.DEVICE, "Device")
-          .put(Domain.DRUG, "Drug")
-          .put(Domain.MEASUREMENT, "Measurement")
-          .put(Domain.OBSERVATION, "Observation")
-          .put(Domain.PROCEDURE, "Procedure")
-          .put(Domain.VISIT, "Visit")
-          .put(Domain.SURVEY, "Survey")
-          .put(Domain.PERSON, "Person")
-          .put(Domain.PHYSICAL_MEASUREMENT, "Physical Measurement")
-          .put(Domain.ALL_EVENTS, "All Events")
-          .put(Domain.LAB, "Labs")
-          .put(Domain.VITAL, "Vitals")
-          .put(Domain.FITBIT, "Fitbit")
-          .put(Domain.FITBIT_HEART_RATE_SUMMARY, "Fitbit: Heart Rate - Zone Summary")
-          .put(Domain.FITBIT_HEART_RATE_LEVEL, "Fitbit: Heart Rate - Minute-Level")
-          .put(Domain.FITBIT_ACTIVITY, "Fitbit: Activity - Daily Summary")
-          .put(Domain.FITBIT_INTRADAY_STEPS, "Fitbit: Intraday Steps - Minute-Level")
-          .put(Domain.FITBIT_SLEEP_DAILY_SUMMARY, "Fitbit: Sleep - Daily Summary")
-          .put(Domain.FITBIT_SLEEP_LEVEL, "Fitbit: Sleep - Minute-Level")
-          .put(Domain.PHYSICAL_MEASUREMENT_CSS, "Physical Measurement CSS")
-          .put(Domain.WHOLE_GENOME_VARIANT, "Whole Genome Variant")
-          .put(Domain.LR_WHOLE_GENOME_VARIANT, "Long Read Whole Genome Variant")
-          .put(Domain.ZIP_CODE_SOCIOECONOMIC, "Zip Code Socioeconomic Status")
-          .put(Domain.ARRAY_DATA, "Global Diversity Array")
-          .build();
-
   public static Domain domainFromStorage(Short domain) {
     return CLIENT_TO_STORAGE_DOMAIN.inverse().get(domain);
   }
 
   public static Short domainToStorage(Domain domain) {
     return CLIENT_TO_STORAGE_DOMAIN.get(domain);
-  }
-
-  public static String domainToDomainId(Domain domain) {
-    return DOMAIN_ID_MAP.get(domain);
-  }
-
-  public static Domain domainIdToDomain(String domainId) {
-    return DOMAIN_ID_MAP.inverse().get(domainId);
   }
 
   // InstitutionalRole
