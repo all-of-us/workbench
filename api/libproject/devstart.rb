@@ -2593,7 +2593,7 @@ def connect_to_cloud_db_binlog(cmd_name, *args)
     run_with_redirects(
       "docker run -i -t --rm --network host --entrypoint '' " +
       "-v $(pwd)/libproject/with-mysql-login.sh:/with-mysql-login.sh " +
-      "mysql:8 /bin/bash -c " +
+      "mysql/mysql-server:8.0 /bin/bash -c " +
       "'export MYSQL_HOME=$(./with-mysql-login.sh root #{password}); /bin/bash'", password)
   end
 end
