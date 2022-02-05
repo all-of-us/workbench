@@ -1,7 +1,6 @@
 package org.pmiops.workbench.db.model;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.Truth.assertWithMessage;
 
 import com.google.api.client.util.Sets;
 import java.lang.reflect.Field;
@@ -15,7 +14,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
-import org.pmiops.workbench.model.Domain;
 
 public class StorageEnumsTest {
   private final Object INDICATES_STATIC_METHOD = null;
@@ -38,46 +36,28 @@ public class StorageEnumsTest {
     Set<String> seenMethodNames = Sets.newHashSet();
     for (Method method : allMethods) {
       String methodName = method.getName();
-      // TODO: sort out the Disability mess: it can be Boolean, Short, or Disability
-      if (!methodName.equals("disabilityToStorage")) {
-        assertThat(methodName).isNotIn(seenMethodNames);
-      }
+      assertThat(methodName).isNotIn(seenMethodNames);
       seenMethodNames.add(methodName);
     }
   }
 
-  final Set<Class> allMappedEnumerationClasses = getEnumerationClasses(allFields);
-
-  // special-case test for domain ID round trip
-
-  @Test
-  public void test_domainId() {
-    for (Domain domainValue : Domain.values()) {
-      String storageValue = DbStorageEnums.domainToDomainId(domainValue);
-      assertWithMessage("unmapped enum value: " + domainValue).that(storageValue).isNotNull();
-      assertThat(DbStorageEnums.domainIdToDomain(storageValue)).isEqualTo(domainValue);
-    }
-  }
+  final Set<Class<?>> allMappedEnumerationClasses = getEnumerationClasses(allFields);
 
   @Test
   public void test_noMissingMapEntries() throws InvocationTargetException, IllegalAccessException {
     // e.g. public static Short reviewStatusToStorage(ReviewStatus s)
-    final Map<Class, Method> enumClassToStorageMethod =
+    final Map<Class<?>, Method> enumClassToStorageMethod =
         allMethods.stream()
-            // domainToDomainId is stringly typed - test with test_domainId
-            .filter(m -> !m.getName().equals("domainToDomainId"))
             .filter(m -> allMappedEnumerationClasses.contains(firstMethodParameterType(m)))
             .collect(Collectors.toMap(this::firstMethodParameterType, m -> m));
 
     // e.g. public static ReviewStatus reviewStatusFromStorage(Short s)
     final Map<Type, Method> storageMethodToEnumClass =
         allMethods.stream()
-            // domainIdToDomain is stringly typed - test with test_domainId
-            .filter(m -> !m.getName().equals("domainIdToDomain"))
             .filter(m -> allMappedEnumerationClasses.contains(m.getReturnType()))
             .collect(Collectors.toMap(Method::getReturnType, m -> m));
 
-    for (final Class enumClass : allMappedEnumerationClasses) {
+    for (final Class<?> enumClass : allMappedEnumerationClasses) {
       for (final Object enumValue : enumClass.getEnumConstants()) {
         final Method enumToStorageMethod = enumClassToStorageMethod.get(enumClass);
         Short shortValue = enumToStorage(enumValue, enumToStorageMethod);
@@ -114,7 +94,7 @@ public class StorageEnumsTest {
    *
    * @return
    */
-  private Set<Class> getEnumerationClasses(List<Field> fields) {
+  private Set<Class<?>> getEnumerationClasses(List<Field> fields) {
     return fields.stream()
         .map(
             field -> {
@@ -129,7 +109,7 @@ public class StorageEnumsTest {
               final Type enumType = pType.getActualTypeArguments()[0];
 
               // needed for the isEnum() check
-              final Class enumClass = (Class) enumType;
+              final Class<?> enumClass = (Class<?>) enumType;
               assertThat(enumClass.isEnum()).isTrue();
               return enumClass;
             })
@@ -137,7 +117,7 @@ public class StorageEnumsTest {
   }
 
   // convenience method describing what is retrieved here
-  private Class firstMethodParameterType(Method method) {
+  private Class<?> firstMethodParameterType(Method method) {
     return method.getParameterTypes()[0];
   }
 }
