@@ -29,7 +29,7 @@ import {
 import { FadeBox } from 'app/components/containers';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { MatchParams, serverConfigStore, useStore } from 'app/utils/stores';
-import { CaretRight, ClrIcon } from 'app/components/icons';
+import { CaretRight } from 'app/components/icons';
 import { FlexColumn, FlexRow, FlexSpacer } from 'app/components/flex';
 import { displayNameForTier } from 'app/utils/access-tiers';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
@@ -51,6 +51,7 @@ import { EgressEventsTable } from './egress-events-table';
 import { getAccessModuleConfig } from 'app/utils/access-utils';
 import { Toggle } from 'app/components/inputs';
 import { AlertDanger } from 'app/components/alert';
+import { ExclamationCircleIcon } from 'app/components/clr-icons';
 
 const styles = reactStyles({
   ...commonStyles,
@@ -538,13 +539,13 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
     <FadeBox style={styles.fadeBox}>
       {profileLoadingError && (
         <AlertDanger style={{ fontSize: 14 }}>
-          <ClrIcon shape='exclamation-circle' />
+          <ExclamationCircleIcon />
           {profileLoadingError}
         </AlertDanger>
       )}
       {institutionsLoadingError && (
         <AlertDanger style={{ fontSize: 14 }}>
-          <ClrIcon shape='exclamation-circle' />
+          <ExclamationCircleIcon />
           {institutionsLoadingError}
         </AlertDanger>
       )}
