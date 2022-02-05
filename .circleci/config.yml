@@ -384,6 +384,7 @@ jobs:
                   GRADLE_ARGS=$(echo $CLASSNAMES | awk '{for (i=1; i<=NF; i++) print "--tests", $i }')
                   gradle :test $GRADLE_ARGS
             - run:
+                # Lint last; it's more important to surface test failures early.
                 name: Lint Java code
                 working_directory: ~/workbench/api
                 command: |
@@ -640,7 +641,7 @@ jobs:
           paths:
             - .
 
-  # Run Puppeteer UI tests on deployed "local", "test" or "staging" environment.
+  # Run Puppeteer UI tests on deployed "local", "test", "perf", or "staging" environment.
   puppeteer-test:
     executor: puppeteer-executor
     parameters:
