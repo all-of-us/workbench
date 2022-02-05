@@ -3,6 +3,10 @@ import { act } from 'react-dom/test-utils';
 import { MemoryRouter } from 'react-router';
 import * as fp from 'lodash/fp';
 import { mount, MountRendererProps, ReactWrapper } from 'enzyme';
+import * as fp from 'lodash/fp';
+import {Select} from 'app/components/inputs';
+import {InputSwitch} from 'primereact/inputswitch';
+import {MemoryRouter} from 'react-router';
 
 import { setImmediate } from 'timers';
 
@@ -48,7 +52,10 @@ export async function waitForFakeTimersAndUpdate(
   }
 }
 
-export async function simulateSelection(
+// TODO: we have multiple dropdown implementations https://precisionmedicineinitiative.atlassian.net/browse/RW-6023
+// but until we fix this, it's useful to simulate both
+
+export async function simulateHtmlSelection(
   selectElement: ReactWrapper,
   selection: string
 ) {
@@ -56,6 +63,19 @@ export async function simulateSelection(
   domNode.value = selection;
   selectElement.simulate('change', { target: domNode });
   await waitOneTickAndUpdate(selectElement);
+}
+
+export async function simulateReactSelection(wrapper: ReactWrapper, selection: string) {
+  // Open Select options. Simulating a click doesn't work for some reason
+  const select = wrapper.find(Select);
+  select.instance().setState({menuIsOpen: true});
+  wrapper.update();
+
+  // Select an option
+  wrapper.find(Select).find({type: 'option'})
+    .findWhere(e => e.text() === selection)
+    .first()
+    .simulate('click');
 }
 
 export function mountWithRouter(

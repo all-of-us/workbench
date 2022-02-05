@@ -33,7 +33,7 @@ import { WorkspaceData } from 'app/utils/workspace-data';
 
 import defaultServerConfig from 'testing/default-server-config';
 import {
-  simulateSelection,
+  simulateHtmlSelection,
   waitOneTickAndUpdate,
 } from 'testing/react-test-helpers';
 import {
@@ -517,7 +517,8 @@ describe('WorkspaceEdit', () => {
       ]);
 
       // when Controlled is selected, the CDR Version dropdown lists the (one) controlled tier CDR Version
-      await simulateSelection(
+
+      await simulateHtmlSelection(
         accessTierSelection,
         AccessTierShortNames.Controlled
       );

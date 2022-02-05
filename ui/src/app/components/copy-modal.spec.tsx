@@ -65,6 +65,17 @@ function simulateWorkspaceSelection(
   simulateSelect(wrapper, Select, workspace.name);
 }
 
+interface TestWorkspace {
+  namespace: string,
+  name: string,
+  id: string,
+  cdrVersionId: string,
+}
+
+function simulateWorkspaceSelection(wrapper: ReactWrapper, workspace: TestWorkspace) {
+  simulateReactSelection(wrapper, workspace.name);
+}
+
 describe('CopyModal', () => {
   let props: CopyModalProps;
 
