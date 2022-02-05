@@ -11,7 +11,7 @@ import { TooltipTrigger } from 'app/components/popups';
 import { Spinner } from 'app/components/spinners';
 import { TextColumn } from 'app/components/text-column';
 
-import { disksApi, workspacesApi } from 'app/services/swagger-fetch-clients';
+import { diskApi, workspacesApi } from 'app/services/swagger-fetch-clients';
 import colors, { addOpacity, colorWithWhiteness } from 'app/styles/colors';
 import {
   cond,
@@ -2031,7 +2031,7 @@ const RuntimePanel = fp.flow(
             () => (
               <ConfirmDeleteUnattachedPD
                 onConfirm={async () => {
-                  await disksApi().deleteDisk(namespace, persistentDisk.name);
+                  await diskApi().deleteDisk(namespace, persistentDisk.name);
                   onClose();
                 }}
                 onCancel={() => setPanelContent(PanelContent.Customize)}
@@ -2044,7 +2044,7 @@ const RuntimePanel = fp.flow(
               <ConfirmDeleteUnattachedPD
                 showCreateMessaging
                 onConfirm={async () => {
-                  await disksApi().deleteDisk(namespace, persistentDisk.name);
+                  await diskApi().deleteDisk(namespace, persistentDisk.name);
                   setRequestedRuntime(fromRuntimeConfig(runtimeConfig));
                   onClose();
                 }}

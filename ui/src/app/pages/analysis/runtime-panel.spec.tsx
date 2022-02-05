@@ -13,7 +13,7 @@ import {
   RuntimePanelWrapper,
 } from 'app/pages/analysis/runtime-panel';
 import {
-  disksApi,
+  diskApi,
   profileApi,
   registerApiClient,
   runtimeApi,
@@ -1321,8 +1321,8 @@ describe('RuntimePanel', () => {
     ]: DetachableDiskCase,
     existingDiskName: string
   ) {
-    const updateDiskSpy = jest.spyOn(disksApi(), 'updateDisk');
-    const deleteDiskSpy = jest.spyOn(disksApi(), 'deleteDisk');
+    const updateDiskSpy = jest.spyOn(diskApi(), 'updateDisk');
+    const deleteDiskSpy = jest.spyOn(diskApi(), 'deleteDisk');
     const createRuntimeSpy = jest.spyOn(runtimeApi(), 'createRuntime');
     const updateRuntimeSpy = jest.spyOn(runtimeApi(), 'updateRuntime');
 
