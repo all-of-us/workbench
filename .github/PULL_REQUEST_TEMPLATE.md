@@ -23,8 +23,15 @@ Please also:
 - [ ] This PR meets the Acceptance Criteria in the JIRA story
 - [ ] The JIRA story has been moved to Dev Review
 - [ ] This PR includes appropriate unit tests
-- [ ] I have run and tested this change locally
-- [ ] I have run the E2E tests on ths change against my local UI and/or API server with `yarn test-local` or [yarn test-local-devup](https://github.com/all-of-us/workbench/blob/main/e2e/README.md#examples)
+- [ ] I have added explanatory comments where the logic is not obvious
+- [ ] I have run and tested this change locally, and my testing process is described here
+- [ ] If this includes a UI change, I have run the E2E tests on ths change against my local UI and/or API server with `yarn test-local` or [yarn test-local-devup](https://github.com/all-of-us/workbench/blob/master/e2e/README.md#examples)
 - [ ] If this includes a UI change, I have taken screen recordings or screenshots of the new behavior and notified the PO and UX designer
-- [ ] If this includes an API change, I have updated the appropriate Swagger definitions and notified API consumers
+- [ ] I have considered the impact on deployment safety (i.e. removing/altering APIs which are in use)
+- [ ] If this includes an API change, I have updated the appropriate Swagger definitions and notified/updated the appropriate API consumers
+  * AoU UI
+  * Perf tests (https://github.com/broadinstitute/mcnulty/blob/develop/src/test/scala/services/AoU.scala)
+  * RDR 
+  * Cron tasks - for Offline*Controllers
+  * SumoLogic - for EgressAlert 
 - [ ] If this includes a new feature flag, I have created and linked new JIRA tickets to (a) turn on the feature flag and (b) remove it later
