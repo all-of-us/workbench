@@ -11,13 +11,14 @@ import CohortBuildPage from './cohort-build-page';
 import DatasetBuildPage from './dataset-build-page';
 import NotebookPage from './notebook-page';
 import WorkspaceAnalysisPage from './workspace-analysis-page';
-import WorkspaceBase from './workspace-base';
+import WorkspaceBase, { Tabs } from './workspace-base';
 import ConceptSetSearchPage from './conceptset-search-page';
 import { SaveOption } from 'app/modal/conceptset-save-modal';
 import ConceptSetActionsPage from './conceptset-actions-page';
 import { Visits } from './cohort-participants-group';
 import CriteriaSearchPage from './criteria-search-page';
 import WorkspaceEditPage from './workspace-edit-page';
+import { openTab } from 'utils/test-utils';
 
 const PageTitle = 'Data Page';
 
@@ -75,7 +76,7 @@ export default class WorkspaceDataPage extends WorkspaceBase {
   }
 
   async findCohortCard(cohortName?: string, timeout?: number): Promise<DataResourceCard> {
-    await this.openCohortsSubtab();
+    await openTab(this.page, Tabs.Cohorts);
     if (cohortName) {
       // find Concept Set that match specified name.
       return new DataResourceCard(this.page).findCard(cohortName, ResourceCard.Cohort, timeout);
@@ -118,8 +119,8 @@ export default class WorkspaceDataPage extends WorkspaceBase {
     const conceptSetActionPage = new ConceptSetActionsPage(this.page);
     await conceptSetActionPage.openConceptSet(conceptName);
 
-    await this.openConceptSetsSubtab();
-    return await this.findConceptSetsCard(conceptName);
+    await openTab(this.page, Tabs.ConceptSets);
+    return this.findConceptSetsCard(conceptName);
   }
 
   /**
@@ -153,8 +154,8 @@ export default class WorkspaceDataPage extends WorkspaceBase {
    * @param {Language} lang The notebook language.
    */
   async createNotebook(notebookName: string, lang: Language = Language.Python): Promise<NotebookPage> {
-    await this.openAnalysisPage();
     const analysisPage = new WorkspaceAnalysisPage(this.page);
+    await openTab(this.page, Tabs.Analysis, analysisPage);
     await analysisPage.waitForLoad();
     return analysisPage.createNotebook(notebookName, lang);
   }
@@ -171,7 +172,7 @@ export default class WorkspaceDataPage extends WorkspaceBase {
   }
 
   async findConceptSetsCard(conceptSetsName?: string): Promise<DataResourceCard> {
-    await this.openConceptSetsSubtab();
+    await openTab(this.page, Tabs.ConceptSets);
     if (conceptSetsName === undefined) {
       // if Concept Sets name isn't specified, find an existing Concept Sets.
       return new DataResourceCard(this.page).findAnyCard(ResourceCard.ConceptSet);

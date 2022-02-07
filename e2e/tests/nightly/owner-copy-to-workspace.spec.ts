@@ -2,9 +2,10 @@ import DataResourceCard from 'app/component/data-resource-card';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { LinkText, ResourceCard } from 'app/text-labels';
 import { makeRandomName } from 'utils/str-utils';
-import { findOrCreateWorkspace, findWorkspaceCard, signInWithAccessToken } from 'utils/test-utils';
+import { findOrCreateWorkspace, findWorkspaceCard, openTab, signInWithAccessToken } from 'utils/test-utils';
 import { config } from 'resources/workbench-config';
 import Modal from 'app/modal/modal';
+import { Tabs } from 'app/page/workspace-base';
 
 /**
  * This test suite takes a long time to run. Two tests create 3 new workspaces and 2 notebook runtime.
@@ -121,7 +122,7 @@ describe('Workspace owner can copy notebook', () => {
     await findWorkspaceCard(page, destWorkspace).then((card) => card.clickWorkspaceName());
 
     // Verify copy-to notebook exists in destination Workspace
-    await dataPage.openAnalysisPage();
+    await openTab(page, Tabs.Analysis, analysisPage);
     const dataResourceCard = new DataResourceCard(page);
     const notebookCard = await dataResourceCard.findCard(copiedNotebookName, ResourceCard.Notebook);
     expect(notebookCard).toBeTruthy();

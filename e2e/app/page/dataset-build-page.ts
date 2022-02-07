@@ -17,6 +17,8 @@ import WorkspaceAboutPage from './workspace-about-page';
 import ExportToNotebookModal from 'app/modal/export-to-notebook-modal';
 import { getPropValue } from 'utils/element-utils';
 import { CohortsSelectValue, ConceptSetSelectValue, LinkText } from 'app/text-labels';
+import { openTab } from 'utils/test-utils';
+import { Tabs } from './workspace-base';
 
 const pageTitle = '(Edit )?Dataset( Page)?';
 
@@ -189,22 +191,19 @@ export default class DatasetBuildPage extends AuthenticatedPage {
 
   async clickDataTab(): Promise<WorkspaceDataPage> {
     const dataPage = new WorkspaceDataPage(this.page);
-    await dataPage.openDataPage({ waitPageChange: true });
-    await dataPage.waitForLoad();
+    await openTab(this.page, Tabs.Data, dataPage);
     return dataPage;
   }
 
   async clickAnalysisTab(): Promise<WorkspaceAnalysisPage> {
     const analysisPage = new WorkspaceAnalysisPage(this.page);
-    await analysisPage.openAnalysisPage({ waitPageChange: true });
-    await analysisPage.waitForLoad();
+    await openTab(this.page, Tabs.Analysis, analysisPage);
     return analysisPage;
   }
 
   async clickAboutTab(): Promise<WorkspaceAboutPage> {
     const aboutPage = new WorkspaceAboutPage(this.page);
-    await aboutPage.openAboutPage({ waitPageChange: true });
-    await aboutPage.waitForLoad();
+    await openTab(this.page, Tabs.About, aboutPage);
     return aboutPage;
   }
 

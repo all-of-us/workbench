@@ -5,7 +5,8 @@ import { SaveOption } from 'app/modal/conceptset-save-modal';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { ResourceCard } from 'app/text-labels';
 import { makeRandomName, makeString } from 'utils/str-utils';
-import { findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
+import { findOrCreateWorkspace, openTab, signInWithAccessToken } from 'utils/test-utils';
+import { Tabs } from 'app/page/workspace-base';
 
 describe('Editing and rename Concept Set', () => {
   beforeEach(async () => {
@@ -88,7 +89,7 @@ describe('Editing and rename Concept Set', () => {
     // Navigate to workspace Data page, then delete Concept Set
     await new Link(page, `//a[text()="${workspace}"]`).click();
     await dataPage.waitForLoad();
-    await dataPage.openConceptSetsSubtab();
+    await openTab(page, Tabs.ConceptSets, dataPage);
     await dataPage.deleteResource(newName, ResourceCard.ConceptSet);
   });
 });

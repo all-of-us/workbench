@@ -17,6 +17,8 @@ import { logger } from 'libs/logger';
 import { authenticator } from 'otplib';
 import AuthenticatedPage from 'app/page/authenticated-page';
 import { AccessTierDisplayNames } from 'app/page/workspace-edit-page';
+import Tab from '../app/element/tab';
+import { Tabs } from 'app/page/workspace-base';
 
 export async function signOut(page: Page): Promise<void> {
   await page.evaluate(() => {
@@ -314,4 +316,15 @@ export const asyncFilter = async (arr, predicate) =>
  */
 export async function generate2FACode(secret: string) {
   return authenticator.generate(secret);
+}
+
+/**
+ * Click tab to open a page.
+ * @param tabName: Tab name.
+ * @param pageExpected: Page expected to load.
+ */
+export async function openTab(page: Page, tabName: Tabs, pageExpected?: AuthenticatedPage): Promise<void> {
+  const tab = new Tab(page, tabName);
+  await tab.click();
+  pageExpected ? await pageExpected.waitForLoad() : null;
 }

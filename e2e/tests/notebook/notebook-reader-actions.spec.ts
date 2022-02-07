@@ -6,7 +6,7 @@ import WorkspaceAnalysisPage from 'app/page/workspace-analysis-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { Language, LinkText, MenuOption, ResourceCard, WorkspaceAccessLevel } from 'app/text-labels';
 import { config } from 'resources/workbench-config';
-import { findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
+import { findOrCreateWorkspace, openTab, signInWithAccessToken } from 'utils/test-utils';
 import { waitWhileLoading } from 'utils/waits-utils';
 import WorkspacesPage from 'app/page/workspaces-page';
 import Modal from 'app/modal/modal';
@@ -14,6 +14,7 @@ import NotebookPreviewPage from 'app/page/notebook-preview-page';
 import WorkspaceEditPage from 'app/page/workspace-edit-page';
 import { makeRandomName, makeWorkspaceName } from 'utils/str-utils';
 import expect from 'expect';
+import { Tabs } from 'app/page/workspace-base';
 
 // 30 minutes.
 jest.setTimeout(30 * 60 * 1000);
@@ -34,8 +35,8 @@ describe('Workspace READER Jupyter notebook action tests', () => {
     const dataPage = new WorkspaceDataPage(page);
 
     // Share workspace to a READER before creating new notebook.
-    await dataPage.openAboutPage();
     const aboutPage = new WorkspaceAboutPage(page);
+    await openTab(page, Tabs.About, aboutPage);
     await aboutPage.waitForLoad();
 
     const shareModal = await aboutPage.openShareModal();
@@ -70,9 +71,8 @@ describe('Workspace READER Jupyter notebook action tests', () => {
 
     // Verify notebook actions list.
     await workspaceCard.clickWorkspaceName();
-    await new WorkspaceDataPage(page).openAnalysisPage();
-
     const analysisPage = new WorkspaceAnalysisPage(page);
+    await openTab(page, Tabs.Analysis, analysisPage);
     await analysisPage.waitForLoad();
 
     // Create Notebook link is disabled.
@@ -171,9 +171,8 @@ describe('Workspace READER Jupyter notebook action tests', () => {
     await workspaceEditPage.clickCreateFinishButton(duplicateButton);
 
     await dataPage.waitForLoad();
-    await dataPage.openAnalysisPage();
     const analysisPage = new WorkspaceAnalysisPage(page);
-    await analysisPage.waitForLoad();
+    await openTab(page, Tabs.Analysis, analysisPage);
 
     // Create Notebook button is enabled.
     expect(await analysisPage.createNewNotebookLink().isCursorNotAllowed()).toBe(false);

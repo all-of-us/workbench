@@ -7,13 +7,14 @@ import { waitForDocumentTitle, waitWhileLoading } from 'utils/waits-utils';
 import ReactSelect from 'app/element/react-select';
 import WorkspaceDataPage from './workspace-data-page';
 import { config } from 'resources/workbench-config';
-import { UseFreeCredits } from './workspace-base';
+import { Tabs, UseFreeCredits } from './workspace-base';
 import OldCdrVersionModal from 'app/modal/old-cdr-version-modal';
 import AuthenticatedPage from './authenticated-page';
 import { logger } from 'libs/logger';
 import WorkspaceAboutPage from './workspace-about-page';
 import WorkspaceReviewResearchPurposeModal from 'app/modal/workspace-review-research-purpose-modal';
 import WorkspaceCard from 'app/component/workspace-card';
+import { openTab } from 'utils/test-utils';
 
 const faker = require('faker/locale/en_US');
 
@@ -199,7 +200,7 @@ export default class WorkspacesPage extends AuthenticatedPage {
           // Ignore timeout error thrown by waitForXpath
         });
     } else {
-      await new WorkspaceDataPage(this.page).openAboutPage();
+      await openTab(this.page, Tabs.About, aboutPage);
     }
     await aboutPage.waitForLoad();
     return aboutPage;

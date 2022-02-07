@@ -2,10 +2,11 @@ import ConceptDomainCard, { Domain } from 'app/component/concept-domain-card';
 import DataResourceCard from 'app/component/data-resource-card';
 import ConceptSetActionsPage from 'app/page/conceptset-actions-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
-import { findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
+import { findOrCreateWorkspace, openTab, signInWithAccessToken } from 'utils/test-utils';
 import { waitForText } from 'utils/waits-utils';
 import { CohortsSelectValue, ResourceCard } from 'app/text-labels';
 import ConceptSetSearchPage from 'app/page/conceptset-search-page';
+import { Tabs } from 'app/page/workspace-base';
 
 describe('Create Concept Sets from Domains', () => {
   beforeEach(async () => {
@@ -65,8 +66,8 @@ describe('Create Concept Sets from Domains', () => {
     console.log(`Created Concept Set "${conceptSetName}"`);
 
     // Delete Concept Set
-    await dataPage.openConceptSetsSubtab();
-
+    await openTab(page, Tabs.Data, dataPage);
+    await openTab(page, Tabs.ConceptSets, dataPage);
     const modalTextContent = await dataPage.deleteResource(conceptSetName, ResourceCard.ConceptSet);
     expect(modalTextContent).toContain(`Are you sure you want to delete Concept Set: ${conceptSetName}?`);
   });
@@ -151,7 +152,8 @@ describe('Create Concept Sets from Domains', () => {
     const datasetName = await createModal.createDataset();
 
     // Verify Dataset created successful.
-    await dataPage.openDatasetsSubtab();
+    await openTab(page, Tabs.Data, dataPage);
+    await openTab(page, Tabs.Datasets, dataPage);
 
     const resourceCard = new DataResourceCard(page);
     const dataSetExists = await resourceCard.cardExists(datasetName, ResourceCard.Dataset);
@@ -162,7 +164,7 @@ describe('Create Concept Sets from Domains', () => {
     expect(textContent).toContain(`Are you sure you want to delete Dataset: ${datasetName}?`);
 
     // Delete Concept Set.
-    await dataPage.openConceptSetsSubtab();
+    await openTab(page, Tabs.ConceptSets, dataPage);
 
     await dataPage.deleteResource(conceptSet1, ResourceCard.ConceptSet);
     await dataPage.deleteResource(conceptSet2, ResourceCard.ConceptSet);

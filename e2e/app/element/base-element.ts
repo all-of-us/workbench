@@ -7,7 +7,7 @@ import {
   Page,
   WaitForSelectorOptions
 } from 'puppeteer';
-import { getAttrValue, getPropValue } from 'utils/element-utils';
+import { getAttrValue, getPropValue, getStyleValue } from 'utils/element-utils';
 import { logger } from 'libs/logger';
 import { waitForFn, waitWhileLoading } from 'utils/waits-utils';
 
@@ -334,21 +334,12 @@ export default class BaseElement {
     return this.getProperty<string>('value');
   }
 
-  async getComputedStyle(styleName: string): Promise<string> {
-    const handle = await this.asElementHandle();
-    const attrStyle = await handle.evaluateHandle((e) => {
-      const style = window.getComputedStyle(e);
-      return style;
-    }, this.element);
-    const propValue = await attrStyle.getProperty(styleName);
-    return (await propValue.jsonValue()).toString();
-  }
-
   /**
    * Determine if cursor is disabled (== " not-allowed ") by checking style 'cursor' value.
    */
   async isCursorNotAllowed(): Promise<boolean> {
-    const cursor = await this.getComputedStyle('cursor');
+    const element = await this.asElementHandle();
+    const cursor = await getStyleValue<string>(this.page, element, 'cursor');
     return !!cursor && cursor === 'not-allowed';
   }
 

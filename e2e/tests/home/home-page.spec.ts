@@ -2,6 +2,7 @@ import BaseElement from 'app/element/base-element';
 import HomePage from 'app/page/home-page';
 import WorkspaceCard from 'app/component/workspace-card';
 import { signInWithAccessToken } from 'utils/test-utils';
+import { getStyleValue } from 'utils/element-utils';
 
 describe('Home page ui tests', () => {
   beforeEach(async () => {
@@ -56,7 +57,7 @@ async function checkCreateNewWorkspaceLink(): Promise<void> {
   expect(hasShape).toBe(true);
   const disabled = await plusIcon.isDisabled();
   expect(disabled).toBe(false);
-  const cursor = await plusIcon.getComputedStyle('cursor');
+  const cursor = await getStyleValue<string>(page, await plusIcon.asElementHandle(), 'cursor');
   expect(cursor).toBe('pointer');
   expect(await plusIcon.isVisible()).toBe(true);
 }

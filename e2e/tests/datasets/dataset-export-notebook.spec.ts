@@ -1,15 +1,16 @@
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import NotebookPreviewPage from 'app/page/notebook-preview-page';
 import { makeRandomName } from 'utils/str-utils';
-import { findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
+import { findOrCreateWorkspace, openTab, signInWithAccessToken } from 'utils/test-utils';
 import CohortActionsPage from 'app/page/cohort-actions-page';
 import { Ethnicity, Sex } from 'app/page/cohort-participants-group';
-import { Language, ConceptSetSelectValue, ResourceCard } from 'app/text-labels';
+import { ConceptSetSelectValue, Language, ResourceCard } from 'app/text-labels';
 import { Page } from 'puppeteer';
 import { getPropValue } from 'utils/element-utils';
 import WorkspaceAnalysisPage from 'app/page/workspace-analysis-page';
 import DataResourceCard from 'app/component/data-resource-card';
 import DatasetBuildPage from 'app/page/dataset-build-page';
+import { Tabs } from 'app/page/workspace-base';
 
 // 30 minutes. Test involves starting of notebook that could take a long time to create.
 jest.setTimeout(30 * 60 * 1000);
@@ -85,12 +86,11 @@ describe('Export Notebook Test', () => {
     expect(notebookLink.asElement()).toBeTruthy();
 
     // Navigate to Workspace Data page.
-    const dataPage = await notebookPage.goDataPage();
+    await notebookPage.goDataPage();
 
     // Delete Notebook.
-    await dataPage.openAnalysisPage();
     const analysisPage = new WorkspaceAnalysisPage(page);
-    await analysisPage.waitForLoad();
+    await openTab(page, Tabs.Analysis, analysisPage);
     await analysisPage.deleteResource(notebookName, ResourceCard.Notebook);
   });
 
@@ -119,8 +119,7 @@ describe('Export Notebook Test', () => {
     const cohortActionsPage = new CohortActionsPage(page);
     await cohortActionsPage.waitForLoad();
 
-    await dataPage.openDataPage({ waitPageChange: true });
-    await dataPage.waitForLoad();
+    await openTab(page, Tabs.Data, dataPage);
   }
 
   // Find an existing dataset or create a new dataset.

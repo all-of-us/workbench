@@ -1,4 +1,4 @@
-import { signInWithAccessToken } from 'utils/test-utils';
+import { openTab, signInWithAccessToken } from 'utils/test-utils';
 import { LinkText } from 'app/text-labels';
 import expect from 'expect';
 import WorkspaceAnalysisPage from 'app/page/workspace-analysis-page';
@@ -7,6 +7,7 @@ import { Page } from 'puppeteer';
 import { logger } from 'libs/logger';
 import WorkspaceCard from 'app/component/workspace-card';
 import DataResourceCard from 'app/component/data-resource-card';
+import { Tabs } from 'app/page/workspace-base';
 
 describe('Notebook and Runtime UI Test', () => {
   beforeEach(async () => {
@@ -69,8 +70,7 @@ describe('Notebook and Runtime UI Test', () => {
 
   async function openAnyNotebook(page: Page): Promise<DataResourceCard | null> {
     const analysisPage = new WorkspaceAnalysisPage(page);
-    await analysisPage.openAnalysisPage();
-    await analysisPage.waitForLoad();
+    await openTab(page, Tabs.Analysis, analysisPage);
     return analysisPage.findNotebookCard();
   }
 });

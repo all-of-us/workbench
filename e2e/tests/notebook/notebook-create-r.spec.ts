@@ -1,4 +1,4 @@
-import { findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
+import { findOrCreateWorkspace, openTab, signInWithAccessToken } from 'utils/test-utils';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { makeRandomName } from 'utils/str-utils';
 import { Language, ResourceCard } from 'app/text-labels';
@@ -6,6 +6,7 @@ import expect from 'expect';
 import { Page } from 'puppeteer';
 import WorkspaceAnalysisPage from 'app/page/workspace-analysis-page';
 import DataResourceCard from 'app/component/data-resource-card';
+import { Tabs } from 'app/page/workspace-base';
 
 // 30 minutes.
 jest.setTimeout(30 * 60 * 1000);
@@ -58,9 +59,9 @@ describe('Create R kernel notebook', () => {
   test('Duplicate rename delete notebook', async () => {
     await loadWorkspace(page, workspaceName);
 
-    const dataPage = new WorkspaceDataPage(page);
-    await dataPage.openAnalysisPage({ waitPageChange: true });
     const analysisPage = new WorkspaceAnalysisPage(page);
+    await openTab(page, Tabs.Analysis, analysisPage);
+
     await analysisPage.waitForLoad();
 
     // Start clone notebook.
