@@ -111,6 +111,7 @@ export const redirectToRas = (openInNewTab: boolean = true): void => {
 };
 
 export const ACCESS_RENEWAL_PATH = '/access-renewal';
+export const DATA_ACCESS_REQUIREMENTS_PATH = '/access-renewal';
 
 interface AccessModuleConfig {
   moduleName: AccessModule;

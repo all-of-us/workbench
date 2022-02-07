@@ -35,6 +35,7 @@ import { WorkspaceList } from 'app/pages/workspace/workspace-list';
 import { WorkspaceWrapper } from 'app/pages/workspace/workspace-wrapper';
 import {
   ACCESS_RENEWAL_PATH,
+  DATA_ACCESS_REQUIREMENTS_PATH,
   NIH_CALLBACK_PATH,
   RAS_CALLBACK_PATH,
 } from 'app/utils/access-utils';
@@ -303,7 +304,7 @@ export const SignedInRoutes = () => {
           routeData={{ pathElementForTitle: 'nbName', minimizeChrome: true }}
         />
       </AppRoute>
-      <AppRoute exact path='/data-access-requirements'>
+      <AppRoute exact path={DATA_ACCESS_REQUIREMENTS_PATH}>
         <DataAccessRequirementsPage
           routeData={{ title: 'Data Access Requirements' }}
         />

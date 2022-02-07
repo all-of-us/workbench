@@ -16,6 +16,7 @@ import {
   orderedAccessTierShortNames,
 } from 'app/utils/access-tiers';
 import { environment } from 'environments/environment';
+import { DATA_ACCESS_REQUIREMENTS_PATH } from '../../utils/access-utils';
 
 interface TierProps {
   shortName: string;
@@ -65,7 +66,7 @@ export const DataAccessPanel = (props: DataAccessPanelProps) => {
     <section aria-labelledby={sectionId} style={{ marginLeft: '1rem' }}>
       <FlexRow id={sectionId}>
         <div style={styles.title}>Data access</div>
-        <Link style={{ marginLeft: 'auto' }} to='/data-access-requirements'>
+        <Link style={{ marginLeft: 'auto' }} to={DATA_ACCESS_REQUIREMENTS_PATH}>
           Manage data access
         </Link>
       </FlexRow>
