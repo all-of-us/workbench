@@ -382,10 +382,10 @@ export const DEFAULT_MACHINE_TYPE: Machine =
   findMachineByName(DEFAULT_MACHINE_NAME);
 export const DEFAULT_DISK_SIZE = 100;
 
+const approxHoursPerMonth = 730;
 export const diskPricePerMonth = 0.04; // per GB month
-export const diskPrice = diskPricePerMonth / 730; // per GB hour, from https://cloud.google.com/compute/pricing
+export const diskPrice = diskPricePerMonth / approxHoursPerMonth; // per GB hour, from https://cloud.google.com/compute/pricing
 export const ssdPricePerMonth = 0.17; // per GB month
-export const ssdPrice = ssdPricePerMonth / 730; // per GB hour, from https://cloud.google.com/compute/pricing
 export const dataprocCpuPrice = 0.01; // dataproc costs $0.01 per cpu per hour
 
 const dataprocSurcharge = ({
@@ -409,23 +409,26 @@ const dataprocSurcharge = ({
 // The following calculations were based off of Terra UI's cost estimator:
 // https://github.com/DataBiosphere/terra-ui/blob/cf5ec4408db3bd1fcdbcc5302da62d42e4d03ca3/src/components/ClusterManager.js#L85
 
-export const diskConfigPrice = ({
+export const diskConfigPricePerMonth = ({
   size,
   detachableType,
 }: Partial<DiskConfig>) => {
-  return size * (detachableType === DiskType.Ssd ? ssdPrice : diskPrice);
-};
-
-const detachableDiskPrice = (disk: Disk) => {
-  return diskConfigPrice({ size: disk.size, detachableType: disk.diskType });
-};
-
-export const diskConfigPricePerMonth = (config: Partial<DiskConfig>) => {
-  return 30 * 24 * diskConfigPrice(config);
+  return (
+    size *
+    (detachableType === DiskType.Ssd ? ssdPricePerMonth : diskPricePerMonth)
+  );
 };
 
 export const detachableDiskPricePerMonth = (disk: Disk) => {
-  return 30 * 24 * detachableDiskPrice(disk);
+  return diskConfigPrice({ size: disk.size, detachableType: disk.diskType });
+};
+
+export const diskConfigPrice = (config: Partial<DiskConfig>) => {
+  return diskConfigPricePerMonth(config) / approxHoursPerMonth;
+};
+
+const detachableDiskPrice = (disk: Disk) => {
+  return detachableDiskPricePerMonth(disk) / approxHoursPerMonth;
 };
 
 export const machineStorageCost = ({

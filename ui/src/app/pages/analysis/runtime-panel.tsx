@@ -1609,8 +1609,8 @@ const ConfirmUpdatePanel = ({
   updateButton,
 }) => {
   const configDiffs = getAnalysisConfigDiffs(
-    existingRuntimeConfig,
-    newRuntimeConfig
+    existingAnalysisConfig,
+    newAnalysisConfig
   );
   const updateMessaging = diffsToUpdateMessaging(configDiffs);
   return (
@@ -2459,8 +2459,8 @@ const RuntimePanel = fp.flow(
             PanelContent.ConfirmUpdate,
             () => (
               <ConfirmUpdatePanel
-                existingRuntimeConfig={existingAnalysisConfig}
-                newRuntimeConfig={analysisConfig}
+                existingAnalysisConfig={existingAnalysisConfig}
+                newAnalysisConfig={analysisConfig}
                 onCancel={() => {
                   setPanelContent(PanelContent.Customize);
                 }}
