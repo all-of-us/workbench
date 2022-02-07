@@ -473,7 +473,7 @@ export const AttributesPage = fp.flow(
             } else {
               // CAT attributes are displayed as checkboxes in the attributes form
               if (parseInt(attr.estCount, 10) > 0) {
-                attr['checked'] = false;
+                attr.checked = false;
                 form.cat.push(attr);
               }
             }
@@ -666,7 +666,7 @@ export const AttributesPage = fp.flow(
           .forEach(({ operator, operands, conceptId }) => {
             const attr = { name: AttrName.NUM, operator, operands };
             if (subtype === CriteriaSubType.BP) {
-              attr['conceptId'] = conceptId;
+              attr.conceptId = conceptId;
             }
             if (attr.operator === 'ANY' && subtype === CriteriaSubType.BP) {
               attr.name = AttrName.ANY;

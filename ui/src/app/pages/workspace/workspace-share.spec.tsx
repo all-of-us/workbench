@@ -195,7 +195,7 @@ describe('WorkspaceShare', () => {
       wrapper
         .find('[data-test-id="harry.potter@hogwarts.edu-user-role"]')
         .first()
-        .props()['isDisabled']
+        .props().isDisabled
     ).toBe(true);
   });
 

@@ -108,7 +108,7 @@ export class GenderChart extends React.Component<Props, State> {
     );
     return {
       categories: chartData.categories.sort((a, b) => (a > b ? 1 : -1)),
-      data: chartData.data.sort((a, b) => (a['name'] > b['name'] ? 1 : -1)),
+      data: chartData.data.sort((a, b) => (a.name > b.name ? 1 : -1)),
     };
   }
 

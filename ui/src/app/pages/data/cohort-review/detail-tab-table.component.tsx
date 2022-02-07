@@ -528,7 +528,7 @@ export const DetailTabTable = fp.flow(
         .then((response) => {
           data = response.items.map((item) => {
             if (domain === Domain.VITAL || domain === Domain.LAB) {
-              item['itemTime'] = moment(
+              item.itemTime = moment(
                 item.itemDate,
                 'YYYY-MM-DD HH:mm Z'
               ).format('hh:mm a z');

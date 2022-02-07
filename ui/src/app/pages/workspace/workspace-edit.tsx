@@ -247,7 +247,7 @@ function getDiseaseNames(keyword) {
       const labeledMatches = fp.filter((elt) => elt.hasOwnProperty('label'))(
         matches
       );
-      const diseases = fp.map((elt) => elt['label'])(labeledMatches);
+      const diseases = fp.map((elt) => elt.label)(labeledMatches);
       return diseases;
     });
 }
@@ -1279,27 +1279,27 @@ export const WorkspaceEdit = fp.flow(
       // Conditionally include optional fields for validation.
       if (otherPurpose) {
         values = { ...values, otherPurposeDetails };
-        constraints['otherPurposeDetails'] = requiredStringWithMaxLength(
+        constraints.otherPurposeDetails = requiredStringWithMaxLength(
           500,
           'Other primary purpose'
         );
       }
       if (populationChecked) {
         values = { ...values, populationDetails };
-        constraints['populationDetails'] = {
+        constraints.populationDetails = {
           presence: true,
         };
       }
       if (populationDetails?.includes(SpecificPopulationEnum.OTHER)) {
         values = { ...values, otherPopulationDetails };
-        constraints['otherPopulationDetails'] = requiredStringWithMaxLength(
+        constraints.otherPopulationDetails = requiredStringWithMaxLength(
           100,
           'Other Specific Population'
         );
       }
       if (diseaseFocusedResearch) {
         values = { ...values, diseaseOfFocus };
-        constraints['diseaseOfFocus'] = requiredStringWithMaxLength(
+        constraints.diseaseOfFocus = requiredStringWithMaxLength(
           80,
           'Disease of Focus'
         );
@@ -1308,7 +1308,7 @@ export const WorkspaceEdit = fp.flow(
         disseminateResearchFindingList?.includes(DisseminateResearchEnum.OTHER)
       ) {
         values = { ...values, otherDisseminateResearchFindings };
-        constraints['otherDisseminateResearchFindings'] =
+        constraints.otherDisseminateResearchFindings =
           requiredStringWithMaxLength(
             100,
             'Other methods of disseminating research findings'

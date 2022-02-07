@@ -274,7 +274,7 @@ export const CriteriaTree = fp.flow(
           let children = [];
           const rootParentId = domain === Domain.VISIT ? -1 : 0;
           rootNodes.items.forEach((child) => {
-            child['children'] = [];
+            child.children = [];
             if (child.parentId === rootParentId) {
               children.push(child);
             } else {

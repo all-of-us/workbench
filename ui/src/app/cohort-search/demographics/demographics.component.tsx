@@ -257,7 +257,7 @@ export class Demographics extends React.Component<Props, State> {
   }
 
   onSliderInit(slider: React.ReactNode) {
-    this.slider = slider['noUiSlider'];
+    this.slider = slider.noUiSlider;
     if (this.slider) {
       this.centerAgeCount();
     }

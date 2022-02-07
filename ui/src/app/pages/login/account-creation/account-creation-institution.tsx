@@ -308,7 +308,7 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
       ) &&
       !isBlank(this.state.profile.contactEmail)
     ) {
-      validationCheck['checkEmailResponse'] = {
+      validationCheck.checkEmailResponse = {
         checkEmailResponse: {},
       };
     }

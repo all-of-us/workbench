@@ -159,7 +159,7 @@ const useOverriddenApiUrl = () => {
       try {
         setOverriddenUrl(localStorage.getItem(LOCAL_STORAGE_API_OVERRIDE_KEY));
 
-        window['setAllOfUsApiUrl'] = (url: string) => {
+        window.setAllOfUsApiUrl = (url: string) => {
           if (url) {
             if (!url.match(/^https?:[/][/][a-z0-9.:-]+$/)) {
               throw new Error(

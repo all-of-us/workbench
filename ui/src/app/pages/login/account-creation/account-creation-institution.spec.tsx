@@ -189,7 +189,7 @@ it('should validate email affiliation when inst and email address are specified'
 
   // Email address is entered, but the input hasn't been blurred. The form should know that a
   // response is required, but the API request hasn't been sent and returned yet.
-  expect(getInstance(wrapper).validate()['checkEmailResponse']).toContain(
+  expect(getInstance(wrapper).validate().checkEmailResponse).toContain(
     'Institutional membership check has not completed'
   );
 
@@ -198,7 +198,7 @@ it('should validate email affiliation when inst and email address are specified'
   getEmailInput(wrapper).simulate('blur');
 
   await waitOneTickAndUpdate(wrapper);
-  expect(getInstance(wrapper).validate()['checkEmailResponse']).toContain(
+  expect(getInstance(wrapper).validate().checkEmailResponse).toContain(
     'Email address is not a member of the selected institution'
   );
 
@@ -224,7 +224,7 @@ it('should validate email affiliation when inst and email domain are specified',
 
   // Email address is entered, but the input hasn't been blurred. The form should know that a
   // response is required, but the API request hasn't been sent and returned yet.
-  expect(getInstance(wrapper).validate()['checkEmailResponse']).toContain(
+  expect(getInstance(wrapper).validate().checkEmailResponse).toContain(
     'Institutional membership check has not completed'
   );
 
@@ -233,7 +233,7 @@ it('should validate email affiliation when inst and email domain are specified',
   getEmailInput(wrapper).simulate('blur');
 
   await waitOneTickAndUpdate(wrapper);
-  expect(getInstance(wrapper).validate()['checkEmailResponse']).toContain(
+  expect(getInstance(wrapper).validate().checkEmailResponse).toContain(
     'Email address is not a member of the selected institution'
   );
 
@@ -258,7 +258,7 @@ it('should display validation icon only after email verification', async () => {
 
   // Email address is entered, but the input hasn't been blurred. The form should know that a
   // response is required, but the API request hasn't been sent and returned yet.
-  expect(getInstance(wrapper).validate()['checkEmailResponse']).toContain(
+  expect(getInstance(wrapper).validate().checkEmailResponse).toContain(
     'Institutional membership check has not completed'
   );
 
@@ -313,7 +313,7 @@ it('should clear email validation when institution is changed', async () => {
   });
 
   // The form should be blocked now due to lack of email verification.
-  expect(getInstance(wrapper).validate()['checkEmailResponse']).toBeTruthy();
+  expect(getInstance(wrapper).validate().checkEmailResponse).toBeTruthy();
 });
 
 it('should trigger email check when email is filled in before choosing institution', async () => {

@@ -23,7 +23,7 @@ export function triggerEvent(
   label?: string,
   value?: number
 ) {
-  if (window['gtag']) {
+  if (window.gtag) {
     gtag('event', action, {
       event_category: category,
       event_label: label,
