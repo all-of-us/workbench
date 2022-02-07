@@ -435,8 +435,7 @@ export const computeRenewalDisplayDates = ({
   const nextReviewDate = withInvalidDateHandling(expirationEpochMillis);
   const bypassDate = withInvalidDateHandling(bypassEpochMillis);
 
-  function getOtherModuleStatus(): AccessModulesStatus {
-    // If there is no expirationDate, the module never expires
+  function getModuleStatus(): AccessModulesStatus {
     return cond(
       [hasExpired(expirationEpochMillis), () => AccessModulesStatus.EXPIRED],
       [
@@ -479,7 +478,7 @@ export const computeRenewalDisplayDates = ({
         return {
           lastConfirmedDate,
           nextReviewDate: `${nextReviewDate} ${daysRemainingDisplay}`,
-          moduleStatus: getOtherModuleStatus(),
+          moduleStatus: getModuleStatus(),
         };
       },
     ]
