@@ -420,7 +420,10 @@ export const diskConfigPricePerMonth = ({
 };
 
 export const detachableDiskPricePerMonth = (disk: Disk) => {
-  return diskConfigPricePerMonth({ size: disk.size, detachableType: disk.diskType });
+  return diskConfigPricePerMonth({
+    size: disk.size,
+    detachableType: disk.diskType,
+  });
 };
 
 export const diskConfigPrice = (config: Partial<DiskConfig>) => {

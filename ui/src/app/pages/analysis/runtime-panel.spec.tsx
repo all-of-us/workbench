@@ -27,7 +27,13 @@ import {
   WorkspaceAccessLevel,
   WorkspacesApi,
 } from 'generated/fetch';
-import { Disk, DiskApi, DiskType, Runtime, RuntimeApi } from 'generated/fetch/api';
+import {
+  Disk,
+  DiskApi,
+  DiskType,
+  Runtime,
+  RuntimeApi,
+} from 'generated/fetch/api';
 import defaultServerConfig from 'testing/default-server-config';
 import {
   mountWithRouter,
@@ -85,10 +91,10 @@ describe('RuntimePanel', () => {
       name: 'my-existing-disk',
       blockSize: 1,
     };
-  }
+  };
 
   const detachableDiskRuntime = (): Runtime => {
-    const {size, diskType, name} = existingDisk();
+    const { size, diskType, name } = existingDisk();
     return {
       ...runtimeApiStub.runtime,
       status: RuntimeStatus.Running,
@@ -1404,7 +1410,6 @@ describe('RuntimePanel', () => {
       const disk = existingDisk();
       setCurrentDisk(disk);
 
-
       const wrapper = await component();
       await runDetachableDiskCase(
         wrapper,
@@ -1468,7 +1473,9 @@ describe('RuntimePanel', () => {
     pickComputeType(wrapper, ComputeType.Dataproc);
 
     await mustClickButton(wrapper, 'Next');
-    expect(wrapper.text()).toContain('will be unused after you apply this update');
+    expect(wrapper.text()).toContain(
+      'will be unused after you apply this update'
+    );
 
     // Click the "delete" radio button.
     wrapper
@@ -1497,7 +1504,9 @@ describe('RuntimePanel', () => {
 
     await mustClickButton(wrapper, 'Next');
 
-    expect(wrapper.text()).toContain('will be unused after you apply this update');
+    expect(wrapper.text()).toContain(
+      'will be unused after you apply this update'
+    );
 
     // Default option should be NOT to delete.
     await mustClickButton(wrapper, 'Next');
