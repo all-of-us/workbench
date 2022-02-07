@@ -23,7 +23,10 @@ export function triggerEvent(
   label?: string,
   value?: number
 ) {
-  if (window.gtag) {
+  // Property 'gtag' does not exist on type 'Window & typeof globalThis'.
+  // TODO RW-5572 confirm proper behavior and fix
+  // eslint-disable-next-line @typescript-eslint/dot-notation
+  if (window['gtag']) {
     gtag('event', action, {
       event_category: category,
       event_label: label,

@@ -473,7 +473,10 @@ export const AttributesPage = fp.flow(
             } else {
               // CAT attributes are displayed as checkboxes in the attributes form
               if (parseInt(attr.estCount, 10) > 0) {
-                attr.checked = false;
+                // Property 'checked' does not exist on type 'CriteriaAttribute'.
+                // TODO RW-5572 confirm proper behavior and fix
+                // eslint-disable-next-line @typescript-eslint/dot-notation
+                attr['checked'] = false;
                 form.cat.push(attr);
               }
             }
@@ -666,7 +669,10 @@ export const AttributesPage = fp.flow(
           .forEach(({ operator, operands, conceptId }) => {
             const attr = { name: AttrName.NUM, operator, operands };
             if (subtype === CriteriaSubType.BP) {
-              attr.conceptId = conceptId;
+              // Property 'conceptId' does not exist on type '{ name: AttrName; operator: any; operands: any; }'..
+              // TODO RW-5572 confirm proper behavior and fix
+              // eslint-disable-next-line @typescript-eslint/dot-notation
+              attr['conceptId'] = conceptId;
             }
             if (attr.operator === 'ANY' && subtype === CriteriaSubType.BP) {
               attr.name = AttrName.ANY;

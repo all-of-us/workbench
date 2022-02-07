@@ -159,7 +159,10 @@ const useOverriddenApiUrl = () => {
       try {
         setOverriddenUrl(localStorage.getItem(LOCAL_STORAGE_API_OVERRIDE_KEY));
 
-        window.setAllOfUsApiUrl = (url: string) => {
+        // Property 'setAllOfUsApiUrl' does not exist on type 'Window & typeof globalThis'
+        // TODO RW-5572 confirm proper behavior and fix
+        // eslint-disable-next-line @typescript-eslint/dot-notation
+        window['setAllOfUsApiUrl'] = (url: string) => {
           if (url) {
             if (!url.match(/^https?:[/][/][a-z0-9.:-]+$/)) {
               throw new Error(

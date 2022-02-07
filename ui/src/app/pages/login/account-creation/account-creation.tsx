@@ -311,7 +311,10 @@ export class AccountCreation extends React.Component<
       validationData.username + '@' + gsuiteDomain;
 
     if (!isBlank(validationData.username)) {
-      validationCheck.usernameWithEmail = {
+      // Property 'usernameWithEmail' does not exist on type ...
+      // TODO RW-5572 confirm proper behavior and fix
+      // eslint-disable-next-line @typescript-eslint/dot-notation
+      validationCheck['usernameWithEmail'] = {
         email: {
           message: '^Username contains invalid characters',
         },

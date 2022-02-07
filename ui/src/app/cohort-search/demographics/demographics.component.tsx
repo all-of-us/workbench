@@ -257,7 +257,10 @@ export class Demographics extends React.Component<Props, State> {
   }
 
   onSliderInit(slider: React.ReactNode) {
-    this.slider = slider.noUiSlider;
+    // Property 'noUiSlider' does not exist on type 'ReactNode'
+    // TODO RW-5572 confirm proper behavior and fix
+    // eslint-disable-next-line @typescript-eslint/dot-notation
+    this.slider = slider['noUiSlider'];
     if (this.slider) {
       this.centerAgeCount();
     }

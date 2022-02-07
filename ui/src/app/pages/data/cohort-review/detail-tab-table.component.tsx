@@ -528,7 +528,10 @@ export const DetailTabTable = fp.flow(
         .then((response) => {
           data = response.items.map((item) => {
             if (domain === Domain.VITAL || domain === Domain.LAB) {
-              item.itemTime = moment(
+              // Property 'itemTime' does not exist on type 'ParticipantData'
+              // TODO RW-5572 confirm proper behavior and fix
+              // eslint-disable-next-line @typescript-eslint/dot-notation
+              item['itemTime'] = moment(
                 item.itemDate,
                 'YYYY-MM-DD HH:mm Z'
               ).format('hh:mm a z');

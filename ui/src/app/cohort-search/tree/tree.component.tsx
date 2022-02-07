@@ -274,7 +274,10 @@ export const CriteriaTree = fp.flow(
           let children = [];
           const rootParentId = domain === Domain.VISIT ? -1 : 0;
           rootNodes.items.forEach((child) => {
-            child.children = [];
+            // Property 'children' does not exist on type 'Criteria'
+            // TODO RW-5572 confirm proper behavior and fix
+            // eslint-disable-next-line @typescript-eslint/dot-notation
+            child['children'] = [];
             if (child.parentId === rootParentId) {
               children.push(child);
             } else {
