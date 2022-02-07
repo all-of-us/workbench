@@ -156,7 +156,6 @@ export default class WorkspaceDataPage extends WorkspaceBase {
   async createNotebook(notebookName: string, lang: Language = Language.Python): Promise<NotebookPage> {
     const analysisPage = new WorkspaceAnalysisPage(this.page);
     await openTab(this.page, Tabs.Analysis, analysisPage);
-    await analysisPage.waitForLoad();
     return analysisPage.createNotebook(notebookName, lang);
   }
 

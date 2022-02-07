@@ -186,8 +186,8 @@ export default class WorkspacesPage extends AuthenticatedPage {
     const aboutPage = new WorkspaceAboutPage(this.page);
     // Older workspace requires Review Research Purpose
     const reviewPurposeModal = new WorkspaceReviewResearchPurposeModal(this.page);
-    // Wait maximum 3 seconds to find Review Purpose modal.
-    const modalVisible = await reviewPurposeModal.isVisible(3000);
+    // Wait maximum 2 seconds to find Review Purpose modal.
+    const modalVisible = await reviewPurposeModal.isVisible(2000);
     if (modalVisible) {
       await reviewPurposeModal.clickReviewNowButton();
       await aboutPage.waitForLoad();

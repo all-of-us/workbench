@@ -62,8 +62,6 @@ describe('Create R kernel notebook', () => {
     const analysisPage = new WorkspaceAnalysisPage(page);
     await openTab(page, Tabs.Analysis, analysisPage);
 
-    await analysisPage.waitForLoad();
-
     // Start clone notebook.
     const cloneNotebookName = `Duplicate of ${rNotebookName}`;
     await analysisPage.duplicateNotebook(rNotebookName);

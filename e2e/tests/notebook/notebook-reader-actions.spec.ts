@@ -37,7 +37,6 @@ describe('Workspace READER Jupyter notebook action tests', () => {
     // Share workspace to a READER before creating new notebook.
     const aboutPage = new WorkspaceAboutPage(page);
     await openTab(page, Tabs.About, aboutPage);
-    await aboutPage.waitForLoad();
 
     const shareModal = await aboutPage.openShareModal();
     await shareModal.shareWithUser(config.READER_USER, WorkspaceAccessLevel.Reader);
@@ -73,7 +72,6 @@ describe('Workspace READER Jupyter notebook action tests', () => {
     await workspaceCard.clickWorkspaceName();
     const analysisPage = new WorkspaceAnalysisPage(page);
     await openTab(page, Tabs.Analysis, analysisPage);
-    await analysisPage.waitForLoad();
 
     // Create Notebook link is disabled.
     expect(await analysisPage.createNewNotebookLink().isCursorNotAllowed()).toBe(true);

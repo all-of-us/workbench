@@ -17,7 +17,7 @@ import { logger } from 'libs/logger';
 import { authenticator } from 'otplib';
 import AuthenticatedPage from 'app/page/authenticated-page';
 import { AccessTierDisplayNames } from 'app/page/workspace-edit-page';
-import Tab from '../app/element/tab';
+import Tab from 'app/element/tab';
 import { Tabs } from 'app/page/workspace-base';
 
 export async function signOut(page: Page): Promise<void> {
