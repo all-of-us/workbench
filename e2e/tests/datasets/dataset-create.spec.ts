@@ -1,7 +1,7 @@
 import DataResourceCard from 'app/component/data-resource-card';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
-import { ConceptSetSelectValue, MenuOption, ResourceCard, WorkspaceAccessLevel } from 'app/text-labels';
-import { findOrCreateWorkspace, findWorkspaceCard, signInWithAccessToken } from 'utils/test-utils';
+import { ConceptSetSelectValue, MenuOption, ResourceCard, Tabs, WorkspaceAccessLevel } from 'app/text-labels';
+import { findOrCreateWorkspace, findWorkspaceCard, openTab, signInWithAccessToken } from 'utils/test-utils';
 import { waitWhileLoading } from 'utils/waits-utils';
 import WorkspaceAboutPage from 'app/page/workspace-about-page';
 import { config } from 'resources/workbench-config';
@@ -45,17 +45,15 @@ describe('Create Dataset', () => {
 
     // Verify dataset card in Data page.
     dataPage = await datasetBuildPage.clickDataTab();
-    await dataPage.openDatasetsSubtab();
-    await waitWhileLoading(page);
+    await openTab(page, Tabs.Datasets, dataPage);
 
     const resourceCard = new DataResourceCard(page);
     const dataSetCard = await resourceCard.findCard(datasetName, ResourceCard.Dataset);
     expect(dataSetCard).toBeTruthy();
 
     // Share workspace with a READER.
-    await dataPage.openAboutPage();
     const aboutPage = new WorkspaceAboutPage(page);
-    await aboutPage.waitForLoad();
+    await openTab(page, Tabs.About, aboutPage);
 
     await aboutPage.shareWorkspaceWithUser(config.READER_USER, WorkspaceAccessLevel.Reader);
     await waitWhileLoading(page);
@@ -78,8 +76,7 @@ describe('Create Dataset', () => {
     expect(await readerDataPage.getAddDatasetButton().isCursorNotAllowed()).toBe(true);
     expect(await readerDataPage.getAddCohortsButton().isCursorNotAllowed()).toBe(true);
 
-    await readerDataPage.openDatasetsSubtab();
-    await waitWhileLoading(page);
+    await openTab(page, Tabs.Datasets, readerDataPage);
 
     // Verify Snowman menu: Rename, Edit Export to Notebook and Delete actions are not available for click in Dataset card.
     const resourceCard = new DataResourceCard(page);

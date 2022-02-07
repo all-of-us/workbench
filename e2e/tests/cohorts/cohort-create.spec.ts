@@ -1,9 +1,9 @@
 import { Ethnicity, FilterSign, PhysicalMeasurementsCriteria, Race, Sex } from 'app/page/cohort-participants-group';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
-import { findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
+import { findOrCreateWorkspace, openTab, signInWithAccessToken } from 'utils/test-utils';
 import { makeWorkspaceName } from 'utils/str-utils';
 import CohortActionsPage from 'app/page/cohort-actions-page';
-import { MenuOption, ResourceCard } from 'app/text-labels';
+import { MenuOption, ResourceCard, Tabs } from 'app/text-labels';
 import ClrIconLink from 'app/element/clr-icon-link';
 import ReviewCriteriaSidebar from 'app/sidebar/review-criteria-sidebar';
 import { Page } from 'puppeteer';
@@ -148,8 +148,7 @@ describe('Create Cohorts Test', () => {
     const cohortName = await cohortBuildPage.createCohort();
 
     // Verify cohort created successfully.
-    await dataPage.openDataPage({ waitPageChange: true });
-    await dataPage.waitForLoad();
+    await openTab(page, Tabs.Data, dataPage);
 
     // In Show All tab, new cohort card is found.
     const cohortCard = await dataPage.findCohortCard(cohortName);

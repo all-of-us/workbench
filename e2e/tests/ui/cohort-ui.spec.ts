@@ -1,6 +1,6 @@
 import WorkspaceDataPage from 'app/page/workspace-data-page';
-import { LinkText, MenuOption } from 'app/text-labels';
-import { findAllCards, signInWithAccessToken } from 'utils/test-utils';
+import { LinkText, MenuOption, Tabs } from 'app/text-labels';
+import { findAllCards, openTab, signInWithAccessToken } from 'utils/test-utils';
 import CohortBuildPage from 'app/page/cohort-build-page';
 import ClrIconLink from 'app/element/clr-icon-link';
 import { PhysicalMeasurementsCriteria } from 'app/page/cohort-participants-group';
@@ -73,7 +73,7 @@ describe('Cohort UI Test', () => {
     await reviewCriteriaSidebar.waitUntilClose();
 
     // Click Data tab, Warning (Discard Changes) modal should open. Finish discarding changes.
-    await dataPage.openDataPage({ waitPageChange: false });
+    await openTab(page, Tabs.Data);
     const warning = await cohortBuildPage.discardChangesConfirmationDialog();
     const expectedWarningText =
       'Your cohort has not been saved. If you’d like to save your cohort criteria,' +

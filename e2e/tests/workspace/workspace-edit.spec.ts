@@ -1,7 +1,6 @@
-import WorkspaceDataPage from 'app/page/workspace-data-page';
-import { MenuOption, WorkspaceAccessLevel } from 'app/text-labels';
+import { MenuOption, Tabs, WorkspaceAccessLevel } from 'app/text-labels';
 import * as testData from 'resources/data/workspace-data';
-import { findOrCreateWorkspaceCard, performActions, signInWithAccessToken } from 'utils/test-utils';
+import { findOrCreateWorkspaceCard, openTab, performActions, signInWithAccessToken } from 'utils/test-utils';
 import WorkspaceAboutPage from 'app/page/workspace-about-page';
 import WorkspaceEditPage from 'app/page/workspace-edit-page';
 import { makeWorkspaceName } from 'utils/str-utils';
@@ -43,14 +42,12 @@ describe('Editing workspace via workspace card snowman menu', () => {
     await updateButton.waitUntilEnabled();
     await workspaceEditPage.clickCreateFinishButton(updateButton);
 
-    const dataPage = new WorkspaceDataPage(page);
-    await dataPage.waitForLoad();
-
     // Check Workspace Information
 
     // Check CDR version
-    await dataPage.openAboutPage();
     const aboutPage = new WorkspaceAboutPage(page);
+    await openTab(page, Tabs.About, aboutPage);
+
     const cdrValue = await aboutPage.getCdrVersion();
     expect(cdrValue).toEqual(expect.stringContaining(selectedValue));
 
@@ -98,9 +95,8 @@ describe('Editing workspace via workspace card snowman menu', () => {
 
     await workspaceCard.clickWorkspaceName();
 
-    const dataPage = new WorkspaceDataPage(page);
-    await dataPage.openAboutPage();
     const aboutPage = new WorkspaceAboutPage(page);
+    await openTab(page, Tabs.About, aboutPage);
     await aboutPage.editWorkspace();
 
     const workspaceEditPage = new WorkspaceEditPage(page);
@@ -116,10 +112,8 @@ describe('Editing workspace via workspace card snowman menu', () => {
     await updateButton.waitUntilEnabled();
     await workspaceEditPage.clickCreateFinishButton(updateButton);
 
-    await dataPage.waitForLoad();
-
     // navigate to About Page
-    await dataPage.openAboutPage();
+    await openTab(page, Tabs.About, aboutPage);
 
     const cdrValue = await aboutPage.getCdrVersion();
     expect(cdrValue).toEqual(expect.stringContaining(selectedValue));

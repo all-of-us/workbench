@@ -1,7 +1,7 @@
-import { findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
+import { findOrCreateWorkspace, openTab, signInWithAccessToken } from 'utils/test-utils';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { makeRandomName } from 'utils/str-utils';
-import { Language, ResourceCard } from 'app/text-labels';
+import { Language, ResourceCard, Tabs } from 'app/text-labels';
 import expect from 'expect';
 import { Page } from 'puppeteer';
 import WorkspaceAnalysisPage from 'app/page/workspace-analysis-page';
@@ -58,10 +58,8 @@ describe('Create R kernel notebook', () => {
   test('Duplicate rename delete notebook', async () => {
     await loadWorkspace(page, workspaceName);
 
-    const dataPage = new WorkspaceDataPage(page);
-    await dataPage.openAnalysisPage({ waitPageChange: true });
     const analysisPage = new WorkspaceAnalysisPage(page);
-    await analysisPage.waitForLoad();
+    await openTab(page, Tabs.Analysis, analysisPage);
 
     // Start clone notebook.
     const cloneNotebookName = `Duplicate of ${rNotebookName}`;

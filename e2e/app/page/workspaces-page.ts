@@ -1,6 +1,6 @@
 import { Page } from 'puppeteer';
 import Button from 'app/element/button';
-import { LinkText, PageUrl } from 'app/text-labels';
+import { LinkText, PageUrl, Tabs } from 'app/text-labels';
 import WorkspaceEditPage, { AccessTierDisplayNames, FIELD as EDIT_FIELD } from 'app/page/workspace-edit-page';
 import RadioButton from 'app/element/radiobutton';
 import { waitForDocumentTitle, waitWhileLoading } from 'utils/waits-utils';
@@ -14,6 +14,7 @@ import { logger } from 'libs/logger';
 import WorkspaceAboutPage from './workspace-about-page';
 import WorkspaceReviewResearchPurposeModal from 'app/modal/workspace-review-research-purpose-modal';
 import WorkspaceCard from 'app/component/workspace-card';
+import { openTab } from 'utils/test-utils';
 
 const faker = require('faker/locale/en_US');
 
@@ -185,8 +186,8 @@ export default class WorkspacesPage extends AuthenticatedPage {
     const aboutPage = new WorkspaceAboutPage(this.page);
     // Older workspace requires Review Research Purpose
     const reviewPurposeModal = new WorkspaceReviewResearchPurposeModal(this.page);
-    // Wait maximum 3 seconds to find Review Purpose modal.
-    const modalVisible = await reviewPurposeModal.isVisible(3000);
+    // Wait maximum 2 seconds to find Review Purpose modal.
+    const modalVisible = await reviewPurposeModal.isVisible(2000);
     if (modalVisible) {
       await reviewPurposeModal.clickReviewNowButton();
       await aboutPage.waitForLoad();
@@ -199,7 +200,7 @@ export default class WorkspacesPage extends AuthenticatedPage {
           // Ignore timeout error thrown by waitForXpath
         });
     } else {
-      await new WorkspaceDataPage(this.page).openAboutPage();
+      await openTab(this.page, Tabs.About, aboutPage);
     }
     await aboutPage.waitForLoad();
     return aboutPage;

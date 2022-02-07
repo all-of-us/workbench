@@ -212,3 +212,14 @@ export enum CloudStorageHeader {
   Filename = 'Filename',
   FileSize = 'File size (MB)'
 }
+
+export enum Tabs {
+  Data = 'Data',
+  Analysis = 'Analysis',
+  About = 'About',
+  Cohorts = 'Cohorts',
+  Datasets = 'Datasets',
+  CohortReviews = 'Cohort Reviews',
+  ConceptSets = 'Concept Sets',
+  ShowAll = 'Show All'
+}
