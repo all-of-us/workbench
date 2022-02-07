@@ -1899,7 +1899,14 @@ export const DatasetPage = fp.flow(
                       />
                     </BoxHeader>
                     <div
-                      style={{ height: '9rem', overflowY: 'auto' }}
+                      style={{
+                        height: '9rem',
+                        overflowY: 'auto',
+                        pointerEvents:
+                          this.state.domainValueSetIsLoading.size > 0
+                            ? 'none'
+                            : 'auto',
+                      }}
                       data-test-id='prePackage-concept-set'
                     >
                       <Subheader>Prepackaged Concept Sets</Subheader>
