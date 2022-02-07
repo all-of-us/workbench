@@ -442,6 +442,7 @@ async function assertValidPage(page: Page, timeout: number): Promise<boolean> {
 
   const notBlankTitleXpath =
     '//title[starts-with(text(), "[Test]")' +
+    ' or starts-with(text(), "[Local->Local]")' +
     ' or starts-with(text(), "[Staging]")' +
     ' or starts-with(text(), "[Local->Test]")]';
   const notBlankPageCss = 'div:not(empty):not([id="root"]):not([id="body"])';

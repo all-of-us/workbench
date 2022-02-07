@@ -18,7 +18,6 @@ export interface IEnvConfig {
   LOGIN_URL_DOMAIN_NAME: string;
   API_URL: string;
   EMAIL_DOMAIN_NAME: string;
-  COLLABORATOR_USER: string;
   WRITER_USER: string;
   READER_USER: string;
   ACCESS_TEST_USER: string;
