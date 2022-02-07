@@ -12,11 +12,10 @@ export default class Tab extends BaseElement {
     super(page, buildXPath({ name: tabName, type: ElementType.Tab }));
   }
 
-  async click(): Promise<this> {
+  async click(): Promise<void> {
     const tab = await this.waitForXPath();
     await tab.click();
     await waitWhileLoading(this.page);
-    return this;
   }
 
   async isSelected(): Promise<boolean> {

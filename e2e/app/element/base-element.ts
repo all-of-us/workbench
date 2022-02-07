@@ -147,7 +147,7 @@ export default class BaseElement {
       .catch(() => false);
   }
 
-  async click(options?: ClickOptions): Promise<this> {
+  async click(options?: ClickOptions): Promise<void> {
     await this.asElementHandle().then(async (element) => {
       // Click workaround: Wait for (x,y) to stop changing within specified time
       const startTime = Date.now();
@@ -186,7 +186,6 @@ export default class BaseElement {
       }
       await element.click(options);
     });
-    return this;
   }
 
   /**
