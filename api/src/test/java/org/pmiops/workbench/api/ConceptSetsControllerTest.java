@@ -2,12 +2,14 @@ package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -48,8 +50,10 @@ import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbConceptSetConceptId;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.exceptions.NotImplementedException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
@@ -738,6 +742,90 @@ public class ConceptSetsControllerTest {
     assertThat(conceptSet2.getCriteriums()).hasSize(1);
     assertThat(conceptSet2.getCriteriums().get(0).getConceptId())
         .isEqualTo(CLIENT_CRITERIA_2.getConceptId());
+  }
+
+  @Test
+  void copyConceptSet() {
+    throw new NotImplementedException("Not yet");
+  }
+
+  @Test
+  public void validateCreateConceptSetRequest() {
+    // just conceptSet not enough also need non null set of conceptSet ids
+    final CreateConceptSetRequest createConceptSetRequest =
+        new CreateConceptSetRequest().conceptSet(new ConceptSet().domain(Domain.CONDITION));
+    Throwable exception =
+        assertThrows(
+            BadRequestException.class,
+            () -> conceptSetsController.validateCreateConceptSetRequest(createConceptSetRequest),
+            "Expected BadRequestException not thrown");
+    assertThat(exception).hasMessageThat().contains("Cannot create a concept set with no concepts");
+    // also need non-emptyList of conceptSetIds
+    final CreateConceptSetRequest createConceptSetRequest2 =
+        createConceptSetRequest.addedConceptSetConceptIds(new ArrayList<ConceptSetConceptId>());
+    exception =
+        assertThrows(
+            BadRequestException.class,
+            () -> conceptSetsController.validateCreateConceptSetRequest(createConceptSetRequest2),
+            "Expected BadRequestException not thrown");
+    assertThat(exception).hasMessageThat().contains("Cannot create a concept set with no concepts");
+    // add a single conceptSetConceptId to List
+    final CreateConceptSetRequest createConceptSetRequest3 =
+        createConceptSetRequest.addAddedConceptSetConceptIdsItem(
+            new ConceptSetConceptId().conceptId(1000L));
+    assertDoesNotThrow(
+        () -> conceptSetsController.validateCreateConceptSetRequest(createConceptSetRequest3),
+        "BadRequestException is not expected to be thrown");
+    // add a multiple conceptSetConceptIds to list
+    final CreateConceptSetRequest createConceptSetRequest4 =
+        createConceptSetRequest.addedConceptSetConceptIds(
+            Arrays.asList(
+                new ConceptSetConceptId().conceptId(1000L),
+                new ConceptSetConceptId().conceptId(2000L)));
+    assertDoesNotThrow(
+        () -> conceptSetsController.validateCreateConceptSetRequest(createConceptSetRequest4),
+        "BadRequestException is not expected to be thrown");
+  }
+
+  @Test
+  public void validateUpdateConceptSet() {
+    // invalid empty object need etag and domain
+    Throwable exception =
+        assertThrows(
+            BadRequestException.class,
+            () -> conceptSetsController.validateUpdateConceptSet(new ConceptSet()),
+            "Expected BadRequestException not thrown");
+    assertThat(exception).hasMessageThat().contains("missing required update field 'etag'");
+    // just add etag
+    final ConceptSet conceptSet = new ConceptSet().etag("testEtag");
+    exception =
+        assertThrows(
+            BadRequestException.class,
+            () -> conceptSetsController.validateUpdateConceptSet(conceptSet),
+            "Expected BadRequestException not thrown");
+    assertThat(exception).hasMessageThat().contains("Domain cannot be null");
+    // add etag and domain
+    final ConceptSet conceptSet2 = new ConceptSet().etag("testEtag").domain(Domain.CONDITION);
+    assertDoesNotThrow(
+        () -> conceptSetsController.validateUpdateConceptSet(conceptSet2),
+        "BadRequestException is not expected to be thrown");
+  }
+
+  @Test
+  public void validateUpdateConceptSetConcepts() {
+    // invalid empty object
+    Throwable exception =
+        assertThrows(
+            BadRequestException.class,
+            () ->
+                conceptSetsController.validateUpdateConceptSetConcepts(
+                    new UpdateConceptSetRequest()),
+            "Expected BadRequestException not thrown");
+    assertThat(exception).hasMessageThat().contains("missing required update field 'etag'");
+    // just add etag which is required
+    assertDoesNotThrow(
+        () -> conceptSetsController.validateUpdateConceptSetConcepts(addConceptsRequest("eTagTest",1000l,1001L)),
+        "BadRequestException is not expected to be thrown");
   }
 
   private UpdateConceptSetRequest addConceptsRequest(String etag, Long... conceptIds) {
