@@ -675,6 +675,33 @@ const PREPACKAGED_WITH_ZIP_CODE_SOCIOECONOMIC = {
 };
 let PREPACKAGED_DOMAINS = PREPACKAGED_SURVEY_PERSON_DOMAIN;
 
+// For converting domain strings to type Domain
+const reverseDomainEnum = {
+  OBSERVATION: Domain.OBSERVATION,
+  PROCEDURE: Domain.PROCEDURE,
+  DRUG: Domain.DRUG,
+  CONDITION: Domain.CONDITION,
+  MEASUREMENT: Domain.MEASUREMENT,
+  DEVICE: Domain.DEVICE,
+  DEATH: Domain.DEATH,
+  VISIT: Domain.VISIT,
+  SURVEY: Domain.SURVEY,
+  PERSON: Domain.PERSON,
+  PHYSICAL_MEASUREMENT: Domain.PHYSICALMEASUREMENT,
+  ALL_EVENTS: Domain.ALLEVENTS,
+  LAB: Domain.LAB,
+  VITAL: Domain.VITAL,
+  FITBIT: Domain.FITBIT,
+  FITBIT_HEART_RATE_SUMMARY: Domain.FITBITHEARTRATESUMMARY,
+  FITBIT_HEART_RATE_LEVEL: Domain.FITBITHEARTRATELEVEL,
+  FITBIT_ACTIVITY: Domain.FITBITACTIVITY,
+  FITBIT_INTRADAY_STEPS: Domain.FITBITINTRADAYSTEPS,
+  PHYSICAL_MEASUREMENT_CSS: Domain.PHYSICALMEASUREMENTCSS,
+  WHOLE_GENOME_VARIANT: Domain.WHOLEGENOMEVARIANT,
+  ZIP_CODE_SOCIOECONOMIC: Domain.ZIPCODESOCIOECONOMIC,
+  ARRAY_DATA: Domain.ARRAYDATA,
+};
+
 // Temp workaround to prevent errors from mismatched upper and lower case values
 function domainValuePairsToLowercase(domainValuePairs: DomainValuePair[]) {
   return domainValuePairs.map(({ domain, value }) => ({
@@ -781,9 +808,9 @@ export const DatasetPage = fp.flow(
 
     async componentDidMount() {
       this.props.hideSpinner();
-      await this.loadResources();
-
       this.updatePrepackagedDomains();
+
+      await this.loadResources();
       if (this.props.match.params.dataSetId) {
         this.fetchDataset();
       }
@@ -939,7 +966,7 @@ export const DatasetPage = fp.flow(
       // Delete the selected domain - conceptId pair and add the domains from the getValuesFromDomain response
       selectedDomainsWithConceptSetIds.delete(domainWithConceptSetId);
       values.items.forEach((domainWithDomainValues) => {
-        const domain = Domain[domainWithDomainValues.domain];
+        const domain = reverseDomainEnum[domainWithDomainValues.domain];
         if (domain !== domainWithConceptSetId.domain) {
           crossDomainConceptSetList.add(domainWithConceptSetId.conceptSetId);
         }
@@ -959,7 +986,11 @@ export const DatasetPage = fp.flow(
             }) => {
               const morePairs = domainValueSetLookup
                 .get(domain)
-                .values.map((v) => ({ domain, value: v.value }));
+                .values.map((v) => ({
+                  domain: reverseDomainEnum[domainWithDomainValues.domain],
+                  value: v.value,
+                }));
+              console.log(morePairs);
               return {
                 selectedDomains: selectedDomains.add(domain),
                 selectedDomainValuePairs:
@@ -993,10 +1024,11 @@ export const DatasetPage = fp.flow(
               ) {
                 domainWithDomainValues.items.forEach((v) =>
                   morePairs.push({
-                    domain: domainWithDomainValues.domain,
+                    domain: reverseDomainEnum[domainWithDomainValues.domain],
                     value: v.value,
                   })
                 );
+                console.log(morePairs);
               }
               return {
                 domainValueSetLookup: newLookup,
