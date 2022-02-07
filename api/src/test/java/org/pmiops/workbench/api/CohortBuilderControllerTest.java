@@ -1152,11 +1152,11 @@ public class CohortBuilderControllerTest {
 
     List<AgeTypeCount> expected = new ArrayList<>();
     // preserve order of output - order by age, count
-    expected.add(new AgeTypeCount().ageType("AGE").age(age - 1).count(1l)); // birthday tomorrow
+    expected.add(new AgeTypeCount().ageType("AGE").age(age - 1).count(1L)); // birthday tomorrow
     expected.add(
-        new AgeTypeCount().ageType("AGE").age(age).count(2l)); // birthday yesterday and today
-    expected.add(new AgeTypeCount().ageType("AGE_AT_CDR").age(20).count(3l));
-    expected.add(new AgeTypeCount().ageType("AGE_AT_CONSENT").age(18).count(3l));
+        new AgeTypeCount().ageType("AGE").age(age).count(2L)); // birthday yesterday and today
+    expected.add(new AgeTypeCount().ageType("AGE_AT_CDR").age(20).count(3L));
+    expected.add(new AgeTypeCount().ageType("AGE_AT_CONSENT").age(18).count(3L));
 
     List<AgeTypeCount> response =
         controller.findAgeTypeCounts(WORKSPACE_NAMESPACE, WORKSPACE_ID).getBody().getItems();
