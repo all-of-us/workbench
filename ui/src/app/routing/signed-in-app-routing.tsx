@@ -33,7 +33,11 @@ import {
 import { WorkspaceLibrary } from 'app/pages/workspace/workspace-library';
 import { WorkspaceList } from 'app/pages/workspace/workspace-list';
 import { WorkspaceWrapper } from 'app/pages/workspace/workspace-wrapper';
-import { NIH_CALLBACK_PATH, RAS_CALLBACK_PATH } from 'app/utils/access-utils';
+import {
+  ACCESS_RENEWAL_PATH,
+  NIH_CALLBACK_PATH,
+  RAS_CALLBACK_PATH,
+} from 'app/utils/access-utils';
 import { Redirect, Switch } from 'react-router-dom';
 import { authorityGuard, expiredGuard, registrationGuard } from './guards';
 import { AuthorityGuardedAction } from 'app/utils/authorities';
@@ -129,7 +133,7 @@ export const SignedInRoutes = () => {
       <AppRoute exact path='/' guards={[expiredGuard, registrationGuard]}>
         <HomepagePage routeData={{ title: 'Homepage' }} />
       </AppRoute>
-      <AppRoute exact path='/access-renewal'>
+      <AppRoute exact path={ACCESS_RENEWAL_PATH}>
         <AccessRenewalPage routeData={{ title: 'Access Renewal' }} />
       </AppRoute>
       <AppRoute

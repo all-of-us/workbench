@@ -110,6 +110,8 @@ export const redirectToRas = (openInNewTab: boolean = true): void => {
   openInNewTab ? window.open(url, '_blank') : <Redirect to={url} />;
 };
 
+export const ACCESS_RENEWAL_PATH = '/access-renewal';
+
 interface AccessModuleConfig {
   moduleName: AccessModule;
   isEnabledInEnvironment: boolean; // either true or dependent on a feature flag
