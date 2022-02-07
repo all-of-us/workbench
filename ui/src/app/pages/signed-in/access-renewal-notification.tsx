@@ -21,6 +21,7 @@ export const AccessRenewalNotificationMaybe = () => {
       text={notificationText}
       buttonText='Get Started'
       buttonPath='/access-renewal'
+      buttonDisabled={window.location.pathname === '/access-renewal'}
     />
   ) : null;
 };

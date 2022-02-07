@@ -65,6 +65,7 @@ interface NotificationProps {
   text: string;
   buttonText: string;
   buttonPath: string;
+  buttonDisabled: boolean;
 }
 
 export const NotificationBanner = ({
@@ -72,12 +73,18 @@ export const NotificationBanner = ({
   text,
   buttonText,
   buttonPath,
+  buttonDisabled,
 }: NotificationProps) => {
   return (
     <FlexRow data-test-id={dataTestId} style={styles.box}>
       <AlarmExclamation style={styles.icon} />
       <div style={styles.text}>{text}</div>
-      <Button type='primary' style={styles.button} path={buttonPath}>
+      <Button
+        type='primary'
+        style={styles.button}
+        path={buttonPath}
+        disabled={buttonDisabled}
+      >
         <div style={styles.buttonText}>{buttonText}</div>
       </Button>
     </FlexRow>
