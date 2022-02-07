@@ -437,13 +437,15 @@ export const computeRenewalDisplayDates = ({
 
   function getOtherModuleStatus(): AccessModulesStatus {
     // If there is no expirationDate, the module never expires
-    return hasExpired(expirationEpochMillis)
-      ? AccessModulesStatus.EXPIRED
-      : isExpiringNotBypassed({ expirationEpochMillis })
-      ? AccessModulesStatus.EXPIRING_SOON
-      : !!expirationEpochMillis
-      ? AccessModulesStatus.CURRENT
-      : AccessModulesStatus.NEVER_EXPIRE;
+    return cond(
+      [hasExpired(expirationEpochMillis), () => AccessModulesStatus.EXPIRED],
+      [
+        isExpiringNotBypassed({ expirationEpochMillis }),
+        () => AccessModulesStatus.EXPIRING_SOON,
+      ],
+      [!!expirationEpochMillis, () => AccessModulesStatus.CURRENT],
+      [!expirationEpochMillis, () => AccessModulesStatus.NEVER_EXPIRE]
+    );
   }
 
   return cond(
