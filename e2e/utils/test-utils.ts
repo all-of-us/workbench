@@ -326,5 +326,5 @@ export async function generate2FACode(secret: string) {
 export async function openTab(page: Page, tabName: Tabs, pageExpected?: AuthenticatedPage): Promise<void> {
   const tab = new Tab(page, tabName);
   await tab.click();
-  pageExpected ? await pageExpected.waitForLoad() : null;
+  pageExpected ? await tab.waitFor(pageExpected) : null;
 }
