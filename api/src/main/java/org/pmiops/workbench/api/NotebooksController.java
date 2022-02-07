@@ -175,7 +175,7 @@ public class NotebooksController implements NotebooksApiDelegate {
 
         Set<String> workspaceUsers =
             workspaceAuthService
-                .getFirecloudWorkspaceAcls(workspaceNamespace, workspaceName)
+                .getFirecloudWorkspaceAcls(workspaceNamespace, firecloudName)
                 .keySet();
 
         response.lastLockedBy(findHashedUser(bucketName, workspaceUsers, lastLockedByHash));

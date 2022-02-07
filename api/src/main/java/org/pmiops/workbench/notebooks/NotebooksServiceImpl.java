@@ -202,7 +202,7 @@ public class NotebooksServiceImpl implements NotebooksService {
   @Override
   public void deleteNotebook(String workspaceNamespace, String firecloudName, String notebookName) {
     workspaceAuthService.enforceWorkspaceAccessLevel(
-        workspaceNamespace, workspaceName, WorkspaceAccessLevel.WRITER);
+        workspaceNamespace, firecloudName, WorkspaceAccessLevel.WRITER);
 
     GoogleCloudLocators notebookLocators =
         getNotebookLocators(workspaceNamespace, firecloudName, notebookName);
