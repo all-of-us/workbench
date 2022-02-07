@@ -322,12 +322,12 @@ public class FireCloudServiceImpl implements FireCloudService {
 
   @Override
   public FirecloudWorkspaceDetails createWorkspace(
-      String workspaceNamespace, String workspaceName, String authDomainName) {
+      String workspaceNamespace, String firecloudName, String authDomainName) {
     WorkspacesApi workspacesApi = endUserWorkspacesApiProvider.get();
     FirecloudWorkspaceIngest workspaceIngest =
         new FirecloudWorkspaceIngest()
             .namespace(workspaceNamespace)
-            .name(workspaceName)
+            .name(firecloudName)
             .authorizationDomain(
                 ImmutableList.of(new FirecloudManagedGroupRef().membersGroupName(authDomainName)));
 

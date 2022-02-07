@@ -523,7 +523,7 @@ public class DataSetControllerTest {
     Map<String, FirecloudWorkspaceAccessEntry> userEmailToAccessEntry =
         ImmutableMap.of(DataSetControllerTest.USER_EMAIL, accessLevelEntry);
     workspaceAccessLevelResponse.setAcl(userEmailToAccessEntry);
-    when(fireCloudService.getWorkspaceAclAsService(w.getNamespace(), w.getName()))
+    when(fireCloudService.getWorkspaceAclAsService(w.getNamespace(), w.getId()))
         .thenReturn(workspaceAccessLevelResponse);
   }
 

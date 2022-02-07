@@ -254,7 +254,7 @@ public class NotebooksControllerTest {
     DbWorkspace fromWorkspace = createWorkspace();
     String fromNotebookName = "origin";
 
-    DbWorkspace toWorkspace = createWorkspace("toWorkspaceNs", "toworkspace");
+    DbWorkspace toWorkspace = createWorkspace("toWorkspaceNs", "To Workspace");
     String newNotebookName = "new";
     String expectedNotebookName = newNotebookName + NotebooksService.NOTEBOOK_EXTENSION;
 
@@ -289,7 +289,7 @@ public class NotebooksControllerTest {
     DbWorkspace fromWorkspace = createWorkspace();
     String fromNotebookName = "origin";
 
-    DbWorkspace toWorkspace = createWorkspace("toWorkspaceNs", "toworkspace");
+    DbWorkspace toWorkspace = createWorkspace("toWorkspaceNs", "To Workspace");
     String newNotebookName = NotebooksService.withNotebookExtension("new");
 
     stubGetWorkspace(fromWorkspace, WorkspaceAccessLevel.OWNER);
@@ -316,7 +316,7 @@ public class NotebooksControllerTest {
   public void copyNotebook_onlyHasReadPermissionsToDestination() {
     DbWorkspace fromWorkspace = createWorkspace();
     String fromNotebookName = "origin";
-    DbWorkspace toWorkspace = createWorkspace("toWorkspaceNs", "toworkspace");
+    DbWorkspace toWorkspace = createWorkspace("toWorkspaceNs", "To Workspace");
     String newNotebookName = "new";
 
     stubGetWorkspace(fromWorkspace, WorkspaceAccessLevel.OWNER);
@@ -337,9 +337,9 @@ public class NotebooksControllerTest {
 
   @Test
   public void copyNotebook_noAccessOnSource() {
-    DbWorkspace fromWorkspace = createWorkspace("fromWorkspaceNs", "fromworkspace");
+    DbWorkspace fromWorkspace = createWorkspace("fromWorkspaceNs", "From Workspace");
     String fromNotebookName = "origin";
-    DbWorkspace toWorkspace = createWorkspace("toWorkspaceNs", "toworkspace");
+    DbWorkspace toWorkspace = createWorkspace("toWorkspaceNs", "To Workspace");
     String newNotebookName = "new";
 
     stubGetWorkspace(fromWorkspace, WorkspaceAccessLevel.NO_ACCESS);
@@ -362,7 +362,7 @@ public class NotebooksControllerTest {
   public void copyNotebook_alreadyExists() {
     DbWorkspace fromWorkspace = createWorkspace();
     String fromNotebookName = "origin";
-    DbWorkspace toWorkspace = createWorkspace("toWorkspaceNs", "toworkspace");
+    DbWorkspace toWorkspace = createWorkspace("toWorkspaceNs", "To Workspace");
     String newNotebookName = NotebooksService.withNotebookExtension("new");
 
     stubGetWorkspace(fromWorkspace, WorkspaceAccessLevel.OWNER);
@@ -736,10 +736,16 @@ public class NotebooksControllerTest {
   }
 
   private DbWorkspace newWorkspace() {
+    final String rwName = "RW Name";
+    final String fcName = FireCloudService.toFirecloudName(rwName);
+    assertWithMessage("rwName and fcName must be distinct for a valid test")
+        .that(fcName)
+        .isNotEqualTo(rwName);
+
     return new DbWorkspace()
-        .setName("name")
+        .setName(rwName)
+        .setFirecloudName(fcName)
         .setCreator(currentUser)
-        .setFirecloudName("fc-name")
         .setWorkspaceNamespace("namespace")
         .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE)
         .setCdrVersion(cdrVersion)
@@ -750,12 +756,14 @@ public class NotebooksControllerTest {
     return createWorkspace(newWorkspace());
   }
 
-  private DbWorkspace createWorkspace(String namespace, String name) {
+  private DbWorkspace createWorkspace(String namespace, String rwName) {
+    final String fcName = FireCloudService.toFirecloudName(rwName);
+    assertWithMessage("rwName and fcName must be distinct for a valid test")
+        .that(fcName)
+        .isNotEqualTo(rwName);
+
     return createWorkspace(
-        newWorkspace()
-            .setWorkspaceNamespace(namespace)
-            .setName(name)
-            .setFirecloudName("fc-" + name));
+        newWorkspace().setWorkspaceNamespace(namespace).setName(rwName).setFirecloudName(fcName));
   }
 
   private DbWorkspace createWorkspace(DbWorkspace workspace) {
