@@ -1,4 +1,4 @@
-package org.pmiops.workbench.notebooks;
+ package org.pmiops.workbench.notebooks;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -56,8 +56,16 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
   private static final String WORKSPACE_NAMESPACE_KEY = "WORKSPACE_NAMESPACE";
   private static final String WORKSPACE_BUCKET_KEY = "WORKSPACE_BUCKET";
   private static final String JUPYTER_DEBUG_LOGGING_ENV_KEY = "JUPYTER_DEBUG_LOGGING";
+
+  // Deprecated env vars: remove once featured workspaces are updated.
   private static final String ALL_SAMPLES_WGS_KEY = "ALL_SAMPLES_WGS_BUCKET";
   private static final String SINGLE_SAMPLE_ARRAY_BUCKET_KEY = "SINGLE_SAMPLE_ARRAY_BUCKET";
+
+  private static final String CDR_STORAGE_PATH_KEY = "CDR_STORAGE_PATH";
+  private static final String WGS_VCF_MERGED_STORAGE_PATH_KEY = "WGS_VCF_MERGED_STORAGE_PATH";
+  private static final String WGS_HAIL_STORAGE_PATH_KEY = "WGS_HAIL_STORAGE_PATH";
+  private static final String MICROARRAY_HAIL_STORAGE_PATH_KEY = "MICROARRAY_HAIL_STORAGE_PATH";
+  private static final String MICROARRAY_VCF_SINGLE_SAMPLE_STORAGE_PATH_KEY = "MICROARRAY_VCF_SINGLE_SAMPLE_STORAGE_PATH";
 
   // Keep in sync with
   // https://github.com/DataBiosphere/leonardo/blob/develop/core/src/main/scala/org/broadinstitute/dsde/workbench/leonardo/runtimeModels.scala#L162

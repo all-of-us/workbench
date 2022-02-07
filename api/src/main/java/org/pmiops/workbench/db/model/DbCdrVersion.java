@@ -30,6 +30,7 @@ public class DbCdrVersion {
   private String wgsBigqueryDataset;
   private Boolean hasFitbitData;
   private Boolean hasCopeSurveyData;
+  // TODO(calbach): Rename these columns.
   private String allSamplesWgsDataBucket;
   private String singleSampleArrayDataBucket;
 

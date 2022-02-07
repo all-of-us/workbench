@@ -120,7 +120,12 @@
       "hasCopeSurveyData": true,
       "accessTier": "controlled",
       "allSamplesWgsDataBucket": "5/wgs/vcf/merged/beta",
-      "singleSampleArrayDataBucket": "5/microarray/vcf/single_sample/beta"
+      "singleSampleArrayDataBucket": "5/microarray/vcf/single_sample/beta",
+      "storageBasePath": "5",
+      "wgsVcfMergedStoragePath": "wgs/vcf/merged/beta",
+      "wgsHailStoragePath": "wgs/hail.mt",
+      "microarrayHailStoragePath": "microarray/hail.mt",
+      "microarrayVcfSingleSampleStoragePath": "microarray/vcf/single_sample/beta"
     }
   ]
 }
