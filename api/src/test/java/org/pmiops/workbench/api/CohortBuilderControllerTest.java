@@ -2,18 +2,14 @@ package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doReturn;
 
 import java.sql.Date;
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.Period;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
-import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -1091,7 +1087,7 @@ public class CohortBuilderControllerTest {
     List<SurveyVersion> response =
         controller
             .findSurveyVersionByQuestionConceptIdAndAnswerConceptId(
-                WORKSPACE_NAMESPACE, WORKSPACE_ID, 111l, 222l, 333l)
+                WORKSPACE_NAMESPACE, WORKSPACE_ID, 111L, 222L, 333L)
             .getBody()
             .getItems();
     assertThat(response.get(0).getSurveyVersionConceptId()).isEqualTo(999);
@@ -1108,54 +1104,51 @@ public class CohortBuilderControllerTest {
   public void findDrugIngredientByConceptId() {}
 
   @Test
-  public void findAgeTypeCounts() throws Exception {
-    Calendar today = Calendar.getInstance();
+  public void findAgeTypeCounts() {
     int age = 25;
+    LocalDate todayDate = LocalDate.now().minusYears(age);
     // birthday-month-date today
-    DbPerson todayDob =
+    LocalDate dob = todayDate.minusDays(0);
+    DbPerson person =
         DbPerson.builder()
             .addPersonId(1000L)
-            .addDob(Date.valueOf(getDateRelativeToToday(-age, 0, 0)))
+            .addDob(Date.valueOf(dob))
             .addAgeAtCdr(20)
             .addAgeAtConsent(18)
             .addIsDeceased(false)
             .build();
     // assert dob month and date is today's month/date
-    Calendar dob = new GregorianCalendar();
-    dob.setTime(todayDob.getDob());
-    assertEquals(0, (today.get(Calendar.DAY_OF_YEAR) - dob.get(Calendar.DAY_OF_YEAR)));
+    assertThat(Period.between(dob, todayDate).getDays()).isEqualTo(0);
+    personDao.save(person);
 
     // birthday-month-date yesterday
-    DbPerson yesterdayDob =
+    dob = todayDate.minusDays(1);
+    person =
         DbPerson.builder()
             .addPersonId(1001L)
-            .addDob(Date.valueOf(getDateRelativeToToday(-age, 0, -1)))
+            .addDob(Date.valueOf(dob))
             .addAgeAtCdr(20)
             .addAgeAtConsent(18)
             .addIsDeceased(false)
             .build();
     // assert dob month and date is yesterday's month/date
-    dob = new GregorianCalendar();
-    dob.setTime(yesterdayDob.getDob());
-    assertEquals(1, (today.get(Calendar.DAY_OF_YEAR) - dob.get(Calendar.DAY_OF_YEAR)));
+    assertThat(Period.between(dob, todayDate).getDays()).isEqualTo(1);
+    personDao.save(person);
 
     // birthday-month-date tomorrow
-    DbPerson tomorrowDob =
+    dob = todayDate.plusDays(1);
+    person =
         DbPerson.builder()
             .addPersonId(1002L)
-            .addDob(Date.valueOf(getDateRelativeToToday(-age, 0, 1)))
+            .addDob(Date.valueOf(dob))
             .addAgeAtCdr(20)
             .addAgeAtConsent(18)
             .addIsDeceased(false)
             .build();
     // assert dob month and date is tomorrows's month/date
-    dob = new GregorianCalendar();
-    dob.setTime(tomorrowDob.getDob());
-    assertEquals(-1, (today.get(Calendar.DAY_OF_YEAR) - dob.get(Calendar.DAY_OF_YEAR)));
+    assertThat(Period.between(dob, todayDate).getDays()).isEqualTo(-1);
     // save DbPerson entities
-    personDao.save(todayDob);
-    personDao.save(yesterdayDob);
-    personDao.save(tomorrowDob);
+    personDao.save(person);
 
     List<AgeTypeCount> expected = new ArrayList<>();
     // preserve order of output - order by age, count
@@ -1167,7 +1160,7 @@ public class CohortBuilderControllerTest {
 
     List<AgeTypeCount> response =
         controller.findAgeTypeCounts(WORKSPACE_NAMESPACE, WORKSPACE_ID).getBody().getItems();
-    assertIterableEquals(expected, response);
+    assertThat(response).isEqualTo(expected);
   }
 
   @Test
@@ -1238,12 +1231,12 @@ public class CohortBuilderControllerTest {
           () -> controller.validateDomain(value.toLowerCase()),
           "BadRequestException is not expected to be thrown for [" + value + "]");
     }
-    Throwable exceptionThrown =
+    Throwable exception =
         assertThrows(
             BadRequestException.class,
             () -> controller.validateDomain("BOGUS"),
             "Expected BadRequestException is not thrown.");
-    assertTrue(exceptionThrown.getMessage().contains("Please provide a valid domain"));
+    assertThat(exception).hasMessageThat().contains("Please provide a valid domain");
   }
 
   @Test
@@ -1254,12 +1247,12 @@ public class CohortBuilderControllerTest {
         () -> controller.validateDomain("SURVEY", "some survey name"),
         "BadRequestException is not expected to be thrown for [some survey name]");
     // survey name cannot be null for SURVEY
-    Throwable exceptionThrown =
+    Throwable exception =
         assertThrows(
             BadRequestException.class,
             () -> controller.validateDomain("SURVEY", null),
             "Expected BadRequestException is not thrown.");
-    assertTrue(exceptionThrown.getMessage().contains("Please provide a valid surveyName"));
+    assertThat(exception).hasMessageThat().contains("Please provide a valid surveyName");
   }
 
   @Test
@@ -1278,12 +1271,12 @@ public class CohortBuilderControllerTest {
           () -> controller.validateType(value.toLowerCase()),
           "BadRequestException is not expected to be thrown for [" + value + "]");
     }
-    Throwable exceptionThrown =
+    Throwable exception =
         assertThrows(
             BadRequestException.class,
             () -> controller.validateType("BOGUS"),
             "Expected BadRequestException is not thrown.");
-    assertTrue(exceptionThrown.getMessage().contains("Please provide a valid type"));
+    assertThat(exception).hasMessageThat().contains("Please provide a valid type");
   }
 
   @Test
@@ -1292,26 +1285,26 @@ public class CohortBuilderControllerTest {
         () -> controller.validateTerm("non-empty search string"),
         "BadRequestException is not expected to be thrown for non-empty search string");
     // null string
-    Throwable exceptionThrown =
+    Throwable exception =
         assertThrows(
             BadRequestException.class,
             () -> controller.validateTerm(null),
             "Expected BadRequestException is not thrown.");
-    assertTrue(exceptionThrown.getMessage().contains("Please provide a valid search term"));
+    assertThat(exception).hasMessageThat().contains("Please provide a valid search term");
     // empty string length = 0
-    exceptionThrown =
+    exception =
         assertThrows(
             BadRequestException.class,
             () -> controller.validateTerm(""),
             "Expected BadRequestException is not thrown.");
-    assertTrue(exceptionThrown.getMessage().contains("Please provide a valid search term"));
+    assertThat(exception).hasMessageThat().contains("Please provide a valid search term");
     // empty string length > 0
-    exceptionThrown =
+    exception =
         assertThrows(
             BadRequestException.class,
             () -> controller.validateTerm("   "),
             "Expected BadRequestException is not thrown.");
-    assertTrue(exceptionThrown.getMessage().contains("Please provide a valid search term"));
+    assertThat(exception).hasMessageThat().contains("Please provide a valid search term");
   }
 
   @Test
@@ -1326,13 +1319,12 @@ public class CohortBuilderControllerTest {
     // expect exception for lowercase
     values.replaceAll(String::toLowerCase);
     for (String value : values) {
-      Throwable exceptionThrown =
+      Throwable exception =
           assertThrows(
               BadRequestException.class,
               () -> controller.validateAgeType(value),
               "Expected BadRequestException is not thrown.");
-      assertTrue(
-          exceptionThrown.getMessage().contains("Please provide a valid age type parameter"));
+      assertThat(exception).hasMessageThat().contains("Please provide a valid age type parameter");
     }
   }
 
@@ -1350,26 +1342,15 @@ public class CohortBuilderControllerTest {
     // expect exception for lowercase
     values.replaceAll(String::toLowerCase);
     for (String value : values) {
-      Throwable exceptionThrown =
+      Throwable exception =
           assertThrows(
               BadRequestException.class,
               () -> controller.validateGenderOrSexType(value),
               "Expected BadRequestException is not thrown.");
-      assertTrue(
-          exceptionThrown
-              .getMessage()
-              .contains("Please provide a valid gender or sex at birth parameter"));
+      assertThat(exception)
+          .hasMessageThat()
+          .contains("Please provide a valid gender or sex at birth parameter");
     }
-  }
-
-  private String getDateRelativeToToday(int offsetYears, int offsetMonths, int offsetDate) {
-    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-    Calendar today = Calendar.getInstance();
-    // set date of birth to today's month/date 25 years back
-    today.add(Calendar.YEAR, offsetYears);
-    today.add(Calendar.MONTH, offsetMonths);
-    today.add(Calendar.DATE, offsetDate);
-    return sdf.format(today.getTime());
   }
 
   private Criteria createResponseCriteria(DbCriteria dbCriteria) {
