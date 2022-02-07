@@ -11,11 +11,11 @@ import {
   machineStorageCostBreakdown,
 } from 'app/utils/machines';
 import { formatUsd } from 'app/utils/numbers';
-import { RuntimeConfig } from 'app/utils/runtime-utils';
+import { AnalysisConfig } from 'app/utils/runtime-utils';
 import { CSSProperties } from 'react';
 
 interface Props {
-  runtimeConfig: RuntimeConfig;
+  analysisConfig: AnalysisConfig;
   costTextColor?: string;
   style?: CSSProperties;
 }
@@ -33,15 +33,15 @@ const styles = reactStyles({
 });
 
 export const RuntimeCostEstimator = ({
-  runtimeConfig,
+  analysisConfig,
   costTextColor = colors.accent,
   style = {},
 }: Props) => {
-  const { computeType, diskConfig } = runtimeConfig;
-  const runningCost = machineRunningCost(runtimeConfig);
-  const runningCostBreakdown = machineRunningCostBreakdown(runtimeConfig);
-  const storageCost = machineStorageCost(runtimeConfig);
-  const storageCostBreakdown = machineStorageCostBreakdown(runtimeConfig);
+  const { computeType, diskConfig } = analysisConfig;
+  const runningCost = machineRunningCost(analysisConfig);
+  const runningCostBreakdown = machineRunningCostBreakdown(analysisConfig);
+  const storageCost = machineStorageCost(analysisConfig);
+  const storageCostBreakdown = machineStorageCostBreakdown(analysisConfig);
   const costStyle = {
     ...styles.cost,
     fontSize: diskConfig.detachable ? '12px' : '15px',

@@ -1,6 +1,6 @@
 import { reactStyles } from 'app/utils';
 import { ComputeType, findMachineByName } from 'app/utils/machines';
-import { RuntimeConfig } from 'app/utils/runtime-utils';
+import { AnalysisConfig } from 'app/utils/runtime-utils';
 
 const styles = reactStyles({
   bold: {
@@ -9,9 +9,9 @@ const styles = reactStyles({
 });
 
 export const RuntimeSummary = ({
-  runtimeConfig,
+  analysisConfig,
 }: {
-  runtimeConfig: RuntimeConfig;
+  analysisConfig: AnalysisConfig;
 }) => {
   return (
     <>
@@ -23,11 +23,11 @@ export const RuntimeSummary = ({
       </label>
       <div id='compute-resources'>
         - Compute size of
-        <b> {runtimeConfig.machine.cpu} CPUs</b>,
-        <b> {runtimeConfig.machine.memory} GB memory</b>, and a
-        <b> {runtimeConfig.diskConfig.size} GB disk</b>
+        <b> {analysisConfig.machine.cpu} CPUs</b>,
+        <b> {analysisConfig.machine.memory} GB memory</b>, and a
+        <b> {analysisConfig.diskConfig.size} GB disk</b>
       </div>
-      {runtimeConfig.computeType === ComputeType.Dataproc && (
+      {analysisConfig.computeType === ComputeType.Dataproc && (
         <>
           <label
             htmlFor='worker-configuration'
@@ -36,10 +36,10 @@ export const RuntimeSummary = ({
             Worker Configuration
           </label>
           <div id='worker-configuration'>
-            -<b> {runtimeConfig.dataprocConfig.numberOfWorkers} worker(s) </b>
-            {runtimeConfig.dataprocConfig.numberOfPreemptibleWorkers > 0 && (
+            -<b> {analysisConfig.dataprocConfig.numberOfWorkers} worker(s) </b>
+            {analysisConfig.dataprocConfig.numberOfPreemptibleWorkers > 0 && (
               <b>
-                and {runtimeConfig.dataprocConfig.numberOfPreemptibleWorkers}{' '}
+                and {analysisConfig.dataprocConfig.numberOfPreemptibleWorkers}{' '}
                 preemptible worker(s){' '}
               </b>
             )}
@@ -47,7 +47,7 @@ export const RuntimeSummary = ({
             <b>
               {
                 findMachineByName(
-                  runtimeConfig.dataprocConfig.workerMachineType
+                  analysisConfig.dataprocConfig.workerMachineType
                 ).cpu
               }{' '}
               CPUs
@@ -57,12 +57,13 @@ export const RuntimeSummary = ({
               {' '}
               {
                 findMachineByName(
-                  runtimeConfig.dataprocConfig.workerMachineType
+                  analysisConfig.dataprocConfig.workerMachineType
                 ).memory
               }{' '}
               GB memory
             </b>
-            , and a<b> {runtimeConfig.dataprocConfig.workerDiskSize} GB disk</b>
+            , and a
+            <b> {analysisConfig.dataprocConfig.workerDiskSize} GB disk</b>
           </div>
         </>
       )}
