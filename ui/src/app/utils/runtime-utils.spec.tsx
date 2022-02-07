@@ -109,10 +109,7 @@ describe('runtime-utils', () => {
   test.each([
     [[], undefined],
     [[AnalysisDiffState.NEEDS_DELETE], AnalysisDiffState.NEEDS_DELETE],
-    [
-      [AnalysisDiffState.NEEDS_DELETE, undefined],
-      AnalysisDiffState.NEEDS_DELETE,
-    ],
+    [[AnalysisDiffState.NEEDS_DELETE, undefined], AnalysisDiffState.NEEDS_DELETE],
     [
       [
         AnalysisDiffState.CAN_UPDATE_IN_PLACE,

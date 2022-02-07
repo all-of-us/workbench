@@ -1,4 +1,4 @@
-import { DiskType } from 'generated/fetch';
+import { Disk, DiskType } from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import { DEFAULT, switchCase } from './index';
 import { formatUsd } from './numbers';
@@ -409,18 +409,32 @@ const dataprocSurcharge = ({
 // The following calculations were based off of Terra UI's cost estimator:
 // https://github.com/DataBiosphere/terra-ui/blob/cf5ec4408db3bd1fcdbcc5302da62d42e4d03ca3/src/components/ClusterManager.js#L85
 
-export const diskConfigPrice = ({ size, detachableType }: DiskConfig) => {
+export const diskConfigPrice = ({ size, detachableType }: Partial<DiskConfig>) => {
   return size * (detachableType === DiskType.Ssd ? ssdPrice : diskPrice);
+};
+
+const detachableDiskPrice = (disk: Disk) => {
+  return diskConfigPrice({size: disk.size, detachableType: disk.diskType});
+};
+
+export const diskConfigPricePerMonth = (config: Partial<DiskConfig>) => {
+  return 30 * 24 * diskConfigPrice(config);
+};
+
+export const detachableDiskPricePerMonth = (disk: Disk) => {
+  return 30 * 24 * detachableDiskPrice(disk);
 };
 
 export const machineStorageCost = ({
   diskConfig,
   dataprocConfig,
+  detachedDisk,
 }: AnalysisConfig) => {
   const { numberOfWorkers, numberOfPreemptibleWorkers, workerDiskSize } =
     dataprocConfig ?? {};
   return fp.sum([
     diskConfigPrice(diskConfig),
+    detachedDisk ? detachableDiskPrice(detachedDisk) : 0,
     numberOfWorkers ? numberOfWorkers * workerDiskSize * diskPrice : 0,
     numberOfPreemptibleWorkers
       ? numberOfPreemptibleWorkers * workerDiskSize * diskPrice
@@ -431,6 +445,7 @@ export const machineStorageCost = ({
 export const machineStorageCostBreakdown = ({
   diskConfig,
   dataprocConfig,
+  detachedDisk,
 }: AnalysisConfig) => {
   const { numberOfWorkers, numberOfPreemptibleWorkers, workerDiskSize } =
     dataprocConfig ?? {};
@@ -453,6 +468,9 @@ export const machineStorageCostBreakdown = ({
     }
   } else {
     costs.push(`${formatUsd(diskConfigPrice(diskConfig))}/hr Disk`);
+  }
+  if (detachedDisk) {
+    costs.push(`${formatUsd(detachableDiskPrice(detachedDisk))}/hr Detached Disk`);
   }
   return costs;
 };
