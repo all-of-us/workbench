@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.inject.Provider;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.pmiops.workbench.FakeClockConfiguration;
@@ -1071,13 +1072,10 @@ public class CohortBuilderControllerTest {
     jdbcTemplate.execute("drop table cb_survey_attribute");
   }
 
-  @Test
-  public void findSurveyCount() {
-    assertTrue(
-        true,
-        "This method cannot be tested due to (a) Is a Native Query and not JPQL,"
-            + " and (b) H2 not having a compatible MATCH ... against... function");
-  }
+  @Disabled(
+      "Cannot be tested without SQL/Java modifications for H2. "
+          + "(a) Native query and not JPQL and (b) MATCH ... against... not H2 function")
+  public void findSurveyCount() {}
 
   @Test
   public void findSurveyVersionByQuestionConceptIdAndAnswerConceptId() {
@@ -1104,13 +1102,10 @@ public class CohortBuilderControllerTest {
     jdbcTemplate.execute("drop table cb_survey_attribute");
   }
 
-  @Test
-  public void findDrugIngredientByConceptId() {
-    assertTrue(
-        true,
-        "This method cannot be tested due to (a) Is a Native Query and not JPQL,"
-            + " and (b) H2 not having a compatible MATCH ... against... function");
-  }
+  @Disabled(
+      "Cannot be tested without SQL/Java modifications for H2. "
+          + "(a) Native query and not JPQL and (b) MATCH ... against... not H2 function")
+  public void findDrugIngredientByConceptId() {}
 
   @Test
   public void findAgeTypeCounts() throws Exception {
