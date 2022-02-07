@@ -12,7 +12,7 @@ import {
   DATAPROC_WORKER_MIN_DISK_SIZE_GB,
   MIN_DISK_SIZE_GB,
 } from 'app/pages/analysis/runtime-panel';
-import { disksApi } from 'app/services/swagger-fetch-clients';
+import { diskApi } from 'app/services/swagger-fetch-clients';
 import { DiskApiStub, stubDisk } from './disk-api-stub';
 
 export const defaultGceConfig = (): GceConfig => ({
@@ -63,7 +63,7 @@ export class RuntimeApiStub extends RuntimeApi {
   ): Promise<{}> {
     const reqDisk = runtime?.gceWithPdConfig?.persistentDisk;
     if (reqDisk && !reqDisk.name) {
-      const dapi = disksApi();
+      const dapi = diskApi();
       if (dapi instanceof DiskApiStub) {
         dapi.disk = {
           ...stubDisk(),
@@ -82,7 +82,7 @@ export class RuntimeApiStub extends RuntimeApi {
     deleteDisk: boolean
   ): Promise<{}> {
     if (deleteDisk) {
-      await disksApi().deleteDisk(
+      await diskApi().deleteDisk(
         workspaceNamespace,
         this.runtime.gceWithPdConfig?.persistentDisk?.name
       );
