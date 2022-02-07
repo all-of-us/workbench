@@ -1,11 +1,10 @@
 import DataResourceCard from 'app/component/data-resource-card';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
-import { LinkText, ResourceCard } from 'app/text-labels';
+import { LinkText, ResourceCard, Tabs } from 'app/text-labels';
 import { makeRandomName } from 'utils/str-utils';
 import { findOrCreateWorkspace, findWorkspaceCard, openTab, signInWithAccessToken } from 'utils/test-utils';
 import { config } from 'resources/workbench-config';
 import Modal from 'app/modal/modal';
-import { Tabs } from 'app/page/workspace-base';
 
 /**
  * This test suite takes a long time to run. Two tests create 3 new workspaces and 2 notebook runtime.

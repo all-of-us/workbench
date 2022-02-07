@@ -4,13 +4,12 @@ import { makeRandomName } from 'utils/str-utils';
 import { findOrCreateWorkspace, openTab, signInWithAccessToken } from 'utils/test-utils';
 import CohortActionsPage from 'app/page/cohort-actions-page';
 import { Ethnicity, Sex } from 'app/page/cohort-participants-group';
-import { ConceptSetSelectValue, Language, ResourceCard } from 'app/text-labels';
+import { ConceptSetSelectValue, Language, ResourceCard, Tabs } from 'app/text-labels';
 import { Page } from 'puppeteer';
 import { getPropValue } from 'utils/element-utils';
 import WorkspaceAnalysisPage from 'app/page/workspace-analysis-page';
 import DataResourceCard from 'app/component/data-resource-card';
 import DatasetBuildPage from 'app/page/dataset-build-page';
-import { Tabs } from 'app/page/workspace-base';
 
 // 30 minutes. Test involves starting of notebook that could take a long time to create.
 jest.setTimeout(30 * 60 * 1000);

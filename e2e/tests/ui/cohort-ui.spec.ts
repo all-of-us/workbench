@@ -1,5 +1,5 @@
 import WorkspaceDataPage from 'app/page/workspace-data-page';
-import { LinkText, MenuOption } from 'app/text-labels';
+import { LinkText, MenuOption, Tabs } from 'app/text-labels';
 import { findAllCards, openTab, signInWithAccessToken } from 'utils/test-utils';
 import CohortBuildPage from 'app/page/cohort-build-page';
 import ClrIconLink from 'app/element/clr-icon-link';
@@ -10,7 +10,6 @@ import { logger } from 'libs/logger';
 import { Page } from 'puppeteer';
 import { waitWhileLoading } from 'utils/waits-utils';
 import expect from 'expect';
-import { Tabs } from 'app/page/workspace-base';
 
 describe('Cohort UI Test', () => {
   beforeEach(async () => {

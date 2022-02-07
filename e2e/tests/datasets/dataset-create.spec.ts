@@ -1,13 +1,12 @@
 import DataResourceCard from 'app/component/data-resource-card';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
-import { ConceptSetSelectValue, MenuOption, ResourceCard, WorkspaceAccessLevel } from 'app/text-labels';
+import { ConceptSetSelectValue, MenuOption, ResourceCard, Tabs, WorkspaceAccessLevel } from 'app/text-labels';
 import { findOrCreateWorkspace, findWorkspaceCard, openTab, signInWithAccessToken } from 'utils/test-utils';
 import { waitWhileLoading } from 'utils/waits-utils';
 import WorkspaceAboutPage from 'app/page/workspace-about-page';
 import { config } from 'resources/workbench-config';
 import { makeWorkspaceName } from 'utils/str-utils';
 import DatasetBuildPage from 'app/page/dataset-build-page';
-import { Tabs } from 'app/page/workspace-base';
 
 // 10 minutes.
 jest.setTimeout(10 * 60 * 1000);

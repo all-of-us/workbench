@@ -3,11 +3,10 @@ import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { findOrCreateWorkspace, openTab, signInWithAccessToken } from 'utils/test-utils';
 import { makeWorkspaceName } from 'utils/str-utils';
 import CohortActionsPage from 'app/page/cohort-actions-page';
-import { MenuOption, ResourceCard } from 'app/text-labels';
+import { MenuOption, ResourceCard, Tabs } from 'app/text-labels';
 import ClrIconLink from 'app/element/clr-icon-link';
 import ReviewCriteriaSidebar from 'app/sidebar/review-criteria-sidebar';
 import { Page } from 'puppeteer';
-import { Tabs } from 'app/page/workspace-base';
 
 describe('Create Cohorts Test', () => {
   const workspaceName = makeWorkspaceName();

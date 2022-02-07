@@ -1,11 +1,10 @@
-import { LinkText, MenuOption, WorkspaceAccessLevel } from 'app/text-labels';
+import { LinkText, MenuOption, WorkspaceAccessLevel, Tabs } from 'app/text-labels';
 import { findOrCreateWorkspace, findWorkspaceCard, openTab, signInWithAccessToken } from 'utils/test-utils';
 import WorkspaceAboutPage from 'app/page/workspace-about-page';
 import { config } from 'resources/workbench-config';
 import WorkspacesPage from 'app/page/workspaces-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { makeWorkspaceName } from 'utils/str-utils';
-import { Tabs } from 'app/page/workspace-base';
 
 describe('Workspace Reader and Writer Permission Test', () => {
   const assignAccess = [

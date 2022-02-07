@@ -16,9 +16,8 @@ import WorkspaceAnalysisPage from './workspace-analysis-page';
 import WorkspaceAboutPage from './workspace-about-page';
 import ExportToNotebookModal from 'app/modal/export-to-notebook-modal';
 import { getPropValue } from 'utils/element-utils';
-import { CohortsSelectValue, ConceptSetSelectValue, LinkText } from 'app/text-labels';
+import { CohortsSelectValue, ConceptSetSelectValue, LinkText, Tabs } from 'app/text-labels';
 import { openTab } from 'utils/test-utils';
-import { Tabs } from './workspace-base';
 
 const pageTitle = '(Edit )?Dataset( Page)?';
 

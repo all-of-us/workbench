@@ -1,5 +1,5 @@
 import { findOrCreateWorkspace, isValidDate, openTab, signInWithAccessToken } from 'utils/test-utils';
-import { MenuOption, LinkText, ResourceCard } from 'app/text-labels';
+import { MenuOption, LinkText, ResourceCard, Tabs } from 'app/text-labels';
 import { makeRandomName } from 'utils/str-utils';
 import CohortParticipantDetailPage from 'app/page/cohort-participant-detail-page';
 import CohortReviewModal from 'app/modal/cohort-review-modal';
@@ -13,7 +13,6 @@ import { AnnotationType } from 'app/modal/annotation-field-modal';
 import CohortActionsPage from 'app/page/cohort-actions-page';
 import { Page } from 'puppeteer';
 import CohortBuildPage from 'app/page/cohort-build-page';
-import { Tabs } from 'app/page/workspace-base';
 
 jest.setTimeout(20 * 60 * 1000);
 

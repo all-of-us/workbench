@@ -1,13 +1,12 @@
 import DataResourceCard from 'app/component/data-resource-card';
 import ExportToNotebookModal from 'app/modal/export-to-notebook-modal';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
-import { ConceptSetSelectValue, Language, LinkText, MenuOption, ResourceCard } from 'app/text-labels';
+import { ConceptSetSelectValue, Language, LinkText, MenuOption, ResourceCard, Tabs } from 'app/text-labels';
 import { makeRandomName, makeWorkspaceName } from 'utils/str-utils';
 import { findOrCreateWorkspace, openTab, signInWithAccessToken } from 'utils/test-utils';
 import DatasetRenameModal from 'app/modal/dataset-rename-modal';
 import { waitForText, waitWhileLoading } from 'utils/waits-utils';
 import DatasetBuildPage from 'app/page/dataset-build-page';
-import { Tabs } from 'app/page/workspace-base';
 
 // 10 minutes.
 jest.setTimeout(10 * 60 * 1000);

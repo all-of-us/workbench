@@ -1,7 +1,7 @@
 import CohortActionsPage from 'app/page/cohort-actions-page';
 import CohortBuildPage from 'app/page/cohort-build-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
-import { MenuOption, ResourceCard } from 'app/text-labels';
+import { MenuOption, ResourceCard, Tabs } from 'app/text-labels';
 import { makeRandomName, makeWorkspaceName } from 'utils/str-utils';
 import { findOrCreateWorkspace, openTab, signInWithAccessToken } from 'utils/test-utils';
 import { waitWhileLoading } from 'utils/waits-utils';
@@ -9,7 +9,6 @@ import { getPropValue } from 'utils/element-utils';
 import ClrIconLink from 'app/element/clr-icon-link';
 import { Ethnicity, PhysicalMeasurementsCriteria } from 'app/page/cohort-participants-group';
 import waitForExpect from 'wait-for-expect';
-import { Tabs } from 'app/page/workspace-base';
 
 describe('Build cohort page actions', () => {
   beforeEach(async () => {

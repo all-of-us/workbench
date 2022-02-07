@@ -1,13 +1,13 @@
 import { Page } from 'puppeteer';
 import Button from 'app/element/button';
-import { LinkText, PageUrl } from 'app/text-labels';
+import { LinkText, PageUrl, Tabs } from 'app/text-labels';
 import WorkspaceEditPage, { AccessTierDisplayNames, FIELD as EDIT_FIELD } from 'app/page/workspace-edit-page';
 import RadioButton from 'app/element/radiobutton';
 import { waitForDocumentTitle, waitWhileLoading } from 'utils/waits-utils';
 import ReactSelect from 'app/element/react-select';
 import WorkspaceDataPage from './workspace-data-page';
 import { config } from 'resources/workbench-config';
-import { Tabs, UseFreeCredits } from './workspace-base';
+import { UseFreeCredits } from './workspace-base';
 import OldCdrVersionModal from 'app/modal/old-cdr-version-modal';
 import AuthenticatedPage from './authenticated-page';
 import { logger } from 'libs/logger';

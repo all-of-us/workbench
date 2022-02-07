@@ -4,9 +4,8 @@ import ConceptSetActionsPage from 'app/page/conceptset-actions-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { findOrCreateWorkspace, openTab, signInWithAccessToken } from 'utils/test-utils';
 import { waitForText } from 'utils/waits-utils';
-import { CohortsSelectValue, ResourceCard } from 'app/text-labels';
+import { CohortsSelectValue, ResourceCard, Tabs } from 'app/text-labels';
 import ConceptSetSearchPage from 'app/page/conceptset-search-page';
-import { Tabs } from 'app/page/workspace-base';
 
 describe('Create Concept Sets from Domains', () => {
   beforeEach(async () => {

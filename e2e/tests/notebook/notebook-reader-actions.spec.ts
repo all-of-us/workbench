@@ -4,7 +4,7 @@ import Link from 'app/element/link';
 import WorkspaceAboutPage from 'app/page/workspace-about-page';
 import WorkspaceAnalysisPage from 'app/page/workspace-analysis-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
-import { Language, LinkText, MenuOption, ResourceCard, WorkspaceAccessLevel } from 'app/text-labels';
+import { Language, LinkText, MenuOption, ResourceCard, Tabs, WorkspaceAccessLevel } from 'app/text-labels';
 import { config } from 'resources/workbench-config';
 import { findOrCreateWorkspace, openTab, signInWithAccessToken } from 'utils/test-utils';
 import { waitWhileLoading } from 'utils/waits-utils';
@@ -14,7 +14,6 @@ import NotebookPreviewPage from 'app/page/notebook-preview-page';
 import WorkspaceEditPage from 'app/page/workspace-edit-page';
 import { makeRandomName, makeWorkspaceName } from 'utils/str-utils';
 import expect from 'expect';
-import { Tabs } from 'app/page/workspace-base';
 
 // 30 minutes.
 jest.setTimeout(30 * 60 * 1000);

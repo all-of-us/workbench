@@ -3,10 +3,9 @@ import Link from 'app/element/link';
 import ConceptSetActionsPage from 'app/page/conceptset-actions-page';
 import { SaveOption } from 'app/modal/conceptset-save-modal';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
-import { ResourceCard } from 'app/text-labels';
+import { ResourceCard, Tabs } from 'app/text-labels';
 import { makeRandomName, makeString } from 'utils/str-utils';
 import { findOrCreateWorkspace, openTab, signInWithAccessToken } from 'utils/test-utils';
-import { Tabs } from 'app/page/workspace-base';
 
 describe('Editing and rename Concept Set', () => {
   beforeEach(async () => {

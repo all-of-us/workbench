@@ -1,10 +1,9 @@
-import { MenuOption, WorkspaceAccessLevel } from 'app/text-labels';
+import { MenuOption, Tabs, WorkspaceAccessLevel } from 'app/text-labels';
 import * as testData from 'resources/data/workspace-data';
 import { findOrCreateWorkspaceCard, openTab, performActions, signInWithAccessToken } from 'utils/test-utils';
 import WorkspaceAboutPage from 'app/page/workspace-about-page';
 import WorkspaceEditPage from 'app/page/workspace-edit-page';
 import { makeWorkspaceName } from 'utils/str-utils';
-import { Tabs } from 'app/page/workspace-base';
 
 describe('Editing workspace via workspace card snowman menu', () => {
   beforeEach(async () => {

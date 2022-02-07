@@ -3,11 +3,10 @@ import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { findOrCreateWorkspace, openTab, signInWithAccessToken } from 'utils/test-utils';
 import CohortBuildPage from 'app/page/cohort-build-page';
 import { makeWorkspaceName } from 'utils/str-utils';
-import { MenuOption, ResourceCard } from 'app/text-labels';
+import { MenuOption, ResourceCard, Tabs } from 'app/text-labels';
 import DataResourceCard from 'app/component/data-resource-card';
 import Link from 'app/element/link';
 import { Visits } from 'app/page/cohort-participants-group';
-import { Tabs } from 'app/page/workspace-base';
 
 describe('Editing Cohort Test', () => {
   // Tests require one and same workspace

@@ -13,17 +13,6 @@ import { logger } from 'libs/logger';
 
 export const UseFreeCredits = 'Use All of Us initial credits';
 
-export enum Tabs {
-  Data = 'Data',
-  Analysis = 'Analysis',
-  About = 'About',
-  Cohorts = 'Cohorts',
-  Datasets = 'Datasets',
-  CohortReviews = 'Cohort Reviews',
-  ConceptSets = 'Concept Sets',
-  ShowAll = 'Show All'
-}
-
 export default abstract class WorkspaceBase extends AuthenticatedPage {
   protected constructor(page: Page) {
     super(page);

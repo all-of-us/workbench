@@ -1,5 +1,5 @@
 import { Page } from 'puppeteer';
-import { Tabs } from 'app/page/workspace-base';
+import { Tabs } from 'app/text-labels';
 import { buildXPath } from 'app/xpath-builders';
 import { ElementType } from 'app/xpath-options';
 import BaseElement from './base-element';

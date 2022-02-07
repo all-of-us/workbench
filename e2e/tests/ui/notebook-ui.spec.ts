@@ -1,5 +1,5 @@
 import { openTab, signInWithAccessToken } from 'utils/test-utils';
-import { LinkText } from 'app/text-labels';
+import { LinkText, Tabs } from 'app/text-labels';
 import expect from 'expect';
 import WorkspaceAnalysisPage from 'app/page/workspace-analysis-page';
 import NewNotebookModal from 'app/modal/new-notebook-modal';
@@ -7,7 +7,6 @@ import { Page } from 'puppeteer';
 import { logger } from 'libs/logger';
 import WorkspaceCard from 'app/component/workspace-card';
 import DataResourceCard from 'app/component/data-resource-card';
-import { Tabs } from 'app/page/workspace-base';
 
 describe('Notebook and Runtime UI Test', () => {
   beforeEach(async () => {

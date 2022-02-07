@@ -8,7 +8,7 @@ import * as fs from 'fs';
 import * as fp from 'lodash/fp';
 import { ElementHandle, Page } from 'puppeteer';
 import WorkspaceCard from 'app/component/workspace-card';
-import { PageUrl, WorkspaceAccessLevel } from 'app/text-labels';
+import { PageUrl, Tabs, WorkspaceAccessLevel } from 'app/text-labels';
 import WorkspacesPage from 'app/page/workspaces-page';
 import Navigation, { NavLink } from 'app/component/navigation';
 import { isBlank, makeWorkspaceName } from './str-utils';
@@ -18,7 +18,6 @@ import { authenticator } from 'otplib';
 import AuthenticatedPage from 'app/page/authenticated-page';
 import { AccessTierDisplayNames } from 'app/page/workspace-edit-page';
 import Tab from 'app/element/tab';
-import { Tabs } from 'app/page/workspace-base';
 
 export async function signOut(page: Page): Promise<void> {
   await page.evaluate(() => {

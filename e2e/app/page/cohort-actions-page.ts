@@ -1,7 +1,7 @@
 import { Page } from 'puppeteer';
 import { waitForDocumentTitle, waitWhileLoading } from 'utils/waits-utils';
 import Button from 'app/element/button';
-import { LinkText } from 'app/text-labels';
+import { LinkText, Tabs } from 'app/text-labels';
 import AuthenticatedPage from './authenticated-page';
 import DatasetBuildPage from './dataset-build-page';
 import Link from 'app/element/link';
@@ -11,7 +11,6 @@ import { getPropValue } from 'utils/element-utils';
 import WorkspaceAnalysisPage from './workspace-analysis-page';
 import WorkspaceAboutPage from './workspace-about-page';
 import { openTab } from 'utils/test-utils';
-import { Tabs } from './workspace-base';
 
 const PageTitle = 'Cohort Actions';
 
