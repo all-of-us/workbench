@@ -8,7 +8,7 @@ import {
   ModalTitle,
 } from 'app/components/modals';
 import { displayNameForTier } from 'app/utils/access-tiers';
-import { DATA_ACCESS_REQUIREMENTS_PATH } from '../../utils/access-utils';
+import { DATA_ACCESS_REQUIREMENTS_PATH } from 'app/utils/access-utils';
 
 interface Props {
   accessTierShortName: string;

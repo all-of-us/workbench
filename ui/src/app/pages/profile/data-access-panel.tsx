@@ -16,7 +16,7 @@ import {
   orderedAccessTierShortNames,
 } from 'app/utils/access-tiers';
 import { environment } from 'environments/environment';
-import { DATA_ACCESS_REQUIREMENTS_PATH } from '../../utils/access-utils';
+import { DATA_ACCESS_REQUIREMENTS_PATH } from 'app/utils/access-utils';
 
 interface TierProps {
   shortName: string;
