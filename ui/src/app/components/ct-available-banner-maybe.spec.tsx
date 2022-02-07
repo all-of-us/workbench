@@ -10,7 +10,7 @@ import { environment } from 'environments/environment';
 import { CdrVersionTier, Profile, UserTierEligibility } from 'generated/fetch';
 import { cdrVersionTiersResponse } from 'testing/stubs/cdr-versions-api-stub';
 import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
-import { DATA_ACCESS_REQUIREMENTS_PATH } from '../utils/access-utils';
+import { DATA_ACCESS_REQUIREMENTS_PATH } from 'app/utils/access-utils';
 
 // 3 times, in order
 const [TIME1, TIME2, TIME3] = [10000, 20000, 30000];
