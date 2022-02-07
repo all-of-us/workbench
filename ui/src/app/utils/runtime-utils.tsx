@@ -354,7 +354,9 @@ const compareDetachedDisks = (
   const oldDetachableExists = oldDiskConfig.detachable || !!oldDetachedDisk;
   const newDetachableExists = newDiskConfig.detachable || !!newDetachedDisk;
   if (oldDetachableExists && !newDetachableExists) {
-    const oldSize = oldDiskConfig.detachable ? oldDiskConfig.size : oldDetachedDisk.size;
+    const oldSize = oldDiskConfig.detachable
+      ? oldDiskConfig.size
+      : oldDetachedDisk.size;
     return {
       desc: 'Reattachable disk',
       previous: `${oldSize}GB disk`,
@@ -368,7 +370,7 @@ const compareDetachedDisks = (
     previous: '',
     new: '',
     diff: AnalysisDiffState.NO_CHANGE,
-  }
+  };
 };
 
 const compareWorkerCpu = (
@@ -604,7 +606,7 @@ const diskNeedsSizeIncrease = (
   if (!requestedDisk) {
     return false;
   }
-  const {diskType, size} = requestedDisk;
+  const { diskType, size } = requestedDisk;
   return (
     canUseExistingDisk({ detachableType: diskType, size }, existingDisk) &&
     size > existingDisk.size
@@ -1020,12 +1022,13 @@ export const useCustomRuntime = (
   detachablePd: Disk | null
 ): [
   { currentRuntime: Runtime; pendingRuntime: Runtime },
-  (request: {runtime: Runtime, detachedDisk: Disk | null}) => void
+  (request: { runtime: Runtime; detachedDisk: Disk | null }) => void
 ] => {
   const { runtime, workspaceNamespace } = useStore(runtimeStore);
   const runtimeOps = useStore(compoundRuntimeOpStore);
   const { pendingRuntime = null } = runtimeOps[currentWorkspaceNamespace] || {};
-  const [request, setRequest] = useState<{runtime: Runtime, detachedDisk: Disk | null}>();
+  const [request, setRequest] =
+    useState<{ runtime: Runtime; detachedDisk: Disk | null }>();
 
   // Ensure that a runtime gets initialized, if it hasn't already been.
   useRuntime(currentWorkspaceNamespace);
@@ -1043,9 +1046,7 @@ export const useCustomRuntime = (
           request.detachedDisk
         );
         const mostSevereDiff = findMostSevereDiffState(
-          getAnalysisConfigDiffs(oldConfig, newConfig).map(
-            ({ diff }) => diff
-          )
+          getAnalysisConfigDiffs(oldConfig, newConfig).map(({ diff }) => diff)
         );
         const mostSevereDiskDiff = findMostSevereDiffState(
           getAnalysisConfigDiffs(oldConfig, newConfig).map(
@@ -1136,10 +1137,7 @@ export const useCustomRuntime = (
       }
     };
 
-    if (
-      request !== undefined &&
-      !fp.equals(request.runtime, runtime)
-    ) {
+    if (request !== undefined && !fp.equals(request.runtime, runtime)) {
       registerCompoundRuntimeOperation(currentWorkspaceNamespace, {
         pendingRuntime: request.runtime,
         aborter,

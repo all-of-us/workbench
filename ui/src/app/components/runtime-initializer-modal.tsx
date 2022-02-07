@@ -40,7 +40,10 @@ export const RuntimeInitializerModal = ({
   const [showDetails, setShowDetails] = useState(false);
   const { persistentDisk } = useStore(diskStore);
 
-  const defaultAnalysisConfig = toAnalysisConfig(defaultRuntime, persistentDisk);
+  const defaultAnalysisConfig = toAnalysisConfig(
+    defaultRuntime,
+    persistentDisk
+  );
   return (
     <Modal width={600}>
       <ModalTitle>Create an Analysis Environment</ModalTitle>

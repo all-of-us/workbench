@@ -409,12 +409,15 @@ const dataprocSurcharge = ({
 // The following calculations were based off of Terra UI's cost estimator:
 // https://github.com/DataBiosphere/terra-ui/blob/cf5ec4408db3bd1fcdbcc5302da62d42e4d03ca3/src/components/ClusterManager.js#L85
 
-export const diskConfigPrice = ({ size, detachableType }: Partial<DiskConfig>) => {
+export const diskConfigPrice = ({
+  size,
+  detachableType,
+}: Partial<DiskConfig>) => {
   return size * (detachableType === DiskType.Ssd ? ssdPrice : diskPrice);
 };
 
 const detachableDiskPrice = (disk: Disk) => {
-  return diskConfigPrice({size: disk.size, detachableType: disk.diskType});
+  return diskConfigPrice({ size: disk.size, detachableType: disk.diskType });
 };
 
 export const diskConfigPricePerMonth = (config: Partial<DiskConfig>) => {
@@ -470,7 +473,9 @@ export const machineStorageCostBreakdown = ({
     costs.push(`${formatUsd(diskConfigPrice(diskConfig))}/hr Disk`);
   }
   if (detachedDisk) {
-    costs.push(`${formatUsd(detachableDiskPrice(detachedDisk))}/hr Detached Disk`);
+    costs.push(
+      `${formatUsd(detachableDiskPrice(detachedDisk))}/hr Detached Disk`
+    );
   }
   return costs;
 };

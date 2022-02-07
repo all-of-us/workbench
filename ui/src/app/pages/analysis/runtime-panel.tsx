@@ -364,19 +364,21 @@ export const ConfirmDelete = ({ onCancel, onConfirm }) => {
   );
 };
 
-const BackupFilesHelpSection = () => (<div>
+const BackupFilesHelpSection = () => (
   <div>
-  To backup and share files, such as input data, analysis outputs, or
-  installed packages,{' '}
-  <a href={supportUrls.workspaceBucket}>
-    move them to the workspace bucket.
-  </a>
-      </div>
-      <div>
-        Note: Jupyter notebooks are autosaved to the workspace bucket, and
-        deleting your disk will not delete your notebooks.
-      </div>
-      </div>);
+    <div>
+      To backup and share files, such as input data, analysis outputs, or
+      installed packages,{' '}
+      <a href={supportUrls.workspaceBucket}>
+        move them to the workspace bucket.
+      </a>
+    </div>
+    <div>
+      Note: Jupyter notebooks are autosaved to the workspace bucket, and
+      deleting your disk will not delete your notebooks.
+    </div>
+  </div>
+);
 
 export const ConfirmDeleteUnattachedPD = ({
   onConfirm,
@@ -510,8 +512,8 @@ export const ConfirmDeleteRuntimeWithPD = ({
         </p>
         <p style={{ ...styles.confirmWarningText, gridColumn: 1, gridRow: 4 }}>
           You will continue to incur persistent disk cost at{' '}
-          <b>{formatUsd(detachableDiskPricePerMonth(disk))}</b> per month. You can
-          delete your disk at any time via the runtime panel.
+          <b>{formatUsd(detachableDiskPricePerMonth(disk))}</b> per month. You
+          can delete your disk at any time via the runtime panel.
         </p>
       </div>
       <div style={styles.confirmWarning}>
@@ -671,9 +673,9 @@ const OfferDeleteDiskWithUpdate = ({
   onCancel,
   disk,
 }: {
-  onNext: (deleteDetachedDisk: boolean) => void,
-  onCancel: () => void,
-  disk: Disk,
+  onNext: (deleteDetachedDisk: boolean) => void;
+  onCancel: () => void;
+  disk: Disk;
 }) => {
   const [deleteDetachedDisk, setDeleteDetachedDisk] = useState(false);
   return (
@@ -685,70 +687,73 @@ const OfferDeleteDiskWithUpdate = ({
           shape='exclamation-triangle'
           size='20'
         />
-        <h3 style={{ ...styles.baseHeader, ...styles.bold }}>
-          Disk options
-        </h3>
+        <h3 style={{ ...styles.baseHeader, ...styles.bold }}>Disk options</h3>
       </div>
       <div>
         <div>
-          Your environment currently has a reattachable disk, which will be unused after you apply this update. What would you like to do with it?
+          Your environment currently has a reattachable disk, which will be
+          unused after you apply this update. What would you like to do with it?
         </div>
-      <div style={styles.confirmWarning}>
-        <h3
-          style={{
-            ...styles.baseHeader,
-            ...styles.bold,
-            gridColumn: 1,
-            gridRow: 1,
-          }}
-        >
-          <div
-            data-test-id='keep-pd'
-            style={{ display: 'inline-block', marginRight: '0.5rem' }}
+        <div style={styles.confirmWarning}>
+          <h3
+            style={{
+              ...styles.baseHeader,
+              ...styles.bold,
+              gridColumn: 1,
+              gridRow: 1,
+            }}
           >
-            <RadioButton
-              style={{ marginRight: '0.25rem' }}
-              onChange={() => setDeleteDetachedDisk(false)}
-              checked={!deleteDetachedDisk}
-            />
-            <label>Keep unattached persistent disk</label>
-          </div>
-        </h3>
-        <p style={{ ...styles.confirmWarningText, gridColumn: 1, gridRow: 2 }}>
-          Your disk will be saved for later and can be reattached when you next
-          configure a standard VM analysis environment. You will continue to
-          incur persistent disk cost at{' '}
-          <b>{formatUsd(detachableDiskPricePerMonth(disk))}</b> per month.
-        </p>
-      </div>
-      <div style={styles.confirmWarning}>
-        <h3
-          style={{
-            ...styles.baseHeader,
-            ...styles.bold,
-            gridColumn: 1,
-            gridRow: 1,
-          }}
-        >
-          <div
-            data-test-id='delete-pd'
-            style={{ display: 'inline-block', marginRight: '0.5rem' }}
+            <div
+              data-test-id='keep-pd'
+              style={{ display: 'inline-block', marginRight: '0.5rem' }}
+            >
+              <RadioButton
+                style={{ marginRight: '0.25rem' }}
+                onChange={() => setDeleteDetachedDisk(false)}
+                checked={!deleteDetachedDisk}
+              />
+              <label>Keep unattached persistent disk</label>
+            </div>
+          </h3>
+          <p
+            style={{ ...styles.confirmWarningText, gridColumn: 1, gridRow: 2 }}
           >
-            <RadioButton
-              style={{ marginRight: '0.25rem' }}
-              onChange={() => setDeleteDetachedDisk(true)}
-              checked={deleteDetachedDisk}
-            />
-            <label>Delete persistent disk</label>
-          </div>
-        </h3>
-        <p style={{ ...styles.confirmWarningText, gridColumn: 1, gridRow: 2 }}>
-          Delete your persistent disk, which will also delete all files on the
-          disk.
-        </p>
+            Your disk will be saved for later and can be reattached when you
+            next configure a standard VM analysis environment. You will continue
+            to incur persistent disk cost at{' '}
+            <b>{formatUsd(detachableDiskPricePerMonth(disk))}</b> per month.
+          </p>
+        </div>
+        <div style={styles.confirmWarning}>
+          <h3
+            style={{
+              ...styles.baseHeader,
+              ...styles.bold,
+              gridColumn: 1,
+              gridRow: 1,
+            }}
+          >
+            <div
+              data-test-id='delete-pd'
+              style={{ display: 'inline-block', marginRight: '0.5rem' }}
+            >
+              <RadioButton
+                style={{ marginRight: '0.25rem' }}
+                onChange={() => setDeleteDetachedDisk(true)}
+                checked={deleteDetachedDisk}
+              />
+              <label>Delete persistent disk</label>
+            </div>
+          </h3>
+          <p
+            style={{ ...styles.confirmWarningText, gridColumn: 1, gridRow: 2 }}
+          >
+            Delete your persistent disk, which will also delete all files on the
+            disk.
+          </p>
+        </div>
       </div>
-    </div>
-    <BackupFilesHelpSection />
+      <BackupFilesHelpSection />
       <FlexRow style={{ justifyContent: 'flex-end' }}>
         <Button
           type='secondaryLight'
@@ -758,10 +763,7 @@ const OfferDeleteDiskWithUpdate = ({
         >
           Cancel
         </Button>
-        <Button
-          aria-label={'Next'}
-          onClick={() => onNext(deleteDetachedDisk)}
-        >
+        <Button aria-label={'Next'} onClick={() => onNext(deleteDetachedDisk)}>
           Next
         </Button>
       </FlexRow>
@@ -1518,11 +1520,16 @@ const CostInfo = ({
 
   return (
     <FlexRow data-test-id='cost-estimator'>
-      <div style={{ padding: '.33rem .5rem', ...(runtimeChanged
-          ? {
-              backgroundColor: colorWithWhiteness(colors.warning, 0.9),
-            }
-          : {}) }}>
+      <div
+        style={{
+          padding: '.33rem .5rem',
+          ...(runtimeChanged
+            ? {
+                backgroundColor: colorWithWhiteness(colors.warning, 0.9),
+              }
+            : {}),
+        }}
+      >
         <RuntimeCostEstimator {...{ analysisConfig }} />
       </div>
       {isUsingFreeTierBillingAccount(workspace) &&
@@ -1730,11 +1737,11 @@ const RuntimePanel = fp.flow(
     const [analysisConfig, setAnalysisConfig] = useState(
       withAnalysisConfigDefaults(existingAnalysisConfig, persistentDisk)
     );
-    const requestAnalysisConfig = (config: AnalysisConfig) => setRuntimeRequest({
-      runtime: fromAnalysisConfig(config),
-      detachedDisk: config.detachedDisk
-    });
-
+    const requestAnalysisConfig = (config: AnalysisConfig) =>
+      setRuntimeRequest({
+        runtime: fromAnalysisConfig(config),
+        detachedDisk: config.detachedDisk,
+      });
 
     const { enableGpu, enablePersistentDisk } = serverConfigStore.get().config;
 
@@ -2036,7 +2043,9 @@ const RuntimePanel = fp.flow(
       );
     };
 
-    const updateYieldsUnusedDisk = existingAnalysisConfig.diskConfig.detachable && !analysisConfig.diskConfig.detachable;
+    const updateYieldsUnusedDisk =
+      existingAnalysisConfig.diskConfig.detachable &&
+      !analysisConfig.diskConfig.detachable;
     const renderNextUpdateButton = () => {
       return (
         <Button
@@ -2268,7 +2277,8 @@ const RuntimePanel = fp.flow(
                             )
                           }
                         />
-                        {analysisConfig.computeType === ComputeType.Dataproc && (
+                        {analysisConfig.computeType ===
+                          ComputeType.Dataproc && (
                           <TooltipTrigger
                             content={
                               status !== RuntimeStatus.Running
@@ -2278,7 +2288,11 @@ const RuntimePanel = fp.flow(
                           >
                             <LinkButton
                               data-test-id='manage-spark-console'
-                              disabled={status !== RuntimeStatus.Running || existingAnalysisConfig.computeType !== ComputeType.Dataproc}
+                              disabled={
+                                status !== RuntimeStatus.Running ||
+                                existingAnalysisConfig.computeType !==
+                                  ComputeType.Dataproc
+                              }
                               onClick={() =>
                                 setPanelContent(PanelContent.SparkConsole)
                               }
@@ -2339,7 +2353,13 @@ const RuntimePanel = fp.flow(
                   <DiskSelector
                     diskConfig={analysisConfig.diskConfig}
                     onChange={(diskConfig) =>
-                      setAnalysisConfig({ ...analysisConfig, diskConfig, detachedDisk: diskConfig.detachable ? null : persistentDisk })
+                      setAnalysisConfig({
+                        ...analysisConfig,
+                        diskConfig,
+                        detachedDisk: diskConfig.detachable
+                          ? null
+                          : persistentDisk,
+                      })
                     }
                     disabled={disableControls}
                     disableDetachableReason={disableDetachableReason}
@@ -2456,15 +2476,15 @@ const RuntimePanel = fp.flow(
                   if (deleteDetachedDisk) {
                     setAnalysisConfig({
                       ...analysisConfig,
-                      detachedDisk: null
+                      detachedDisk: null,
                     });
                   }
                   setPanelContent(PanelContent.ConfirmUpdate);
                 }}
-              onCancel={() => setPanelContent(PanelContent.Customize)}
+                onCancel={() => setPanelContent(PanelContent.Customize)}
                 disk={persistentDisk}
               />
-            )
+            ),
           ],
           [PanelContent.Disabled, () => <DisabledPanel />],
           [

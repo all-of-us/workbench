@@ -3,9 +3,7 @@ import { TooltipTrigger } from 'app/components/popups';
 import colors from 'app/styles/colors';
 import { cond, reactStyles } from 'app/utils';
 import {
-  ComputeType,
   detachableDiskPricePerMonth,
-  diskConfigPrice,
   diskConfigPricePerMonth,
   machineRunningCost,
   machineRunningCostBreakdown,
@@ -49,11 +47,11 @@ export const RuntimeCostEstimator = ({
     ...styles.cost,
     color: costTextColor,
   };
-  const pdCost =
-    cond(
-      [diskConfig.detachable, () => diskConfigPricePerMonth(diskConfig)],
-      [!!detachedDisk, () => detachableDiskPricePerMonth(detachedDisk)],
-      () => 0);
+  const pdCost = cond(
+    [diskConfig.detachable, () => diskConfigPricePerMonth(diskConfig)],
+    [!!detachedDisk, () => detachableDiskPricePerMonth(detachedDisk)],
+    () => 0
+  );
   return (
     <FlexRow style={style}>
       <FlexColumn style={styles.costSection}>
