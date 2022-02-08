@@ -1,5 +1,8 @@
 package org.pmiops.workbench.db.model;
 
+import static org.pmiops.workbench.access.AccessUtils.REQUIRED_MODULES_FOR_CONTROLLED_TIER;
+import static org.pmiops.workbench.access.AccessUtils.REQUIRED_MODULES_FOR_REGISTERED_TIER;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -8,6 +11,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 @Entity
 @Table(name = "access_module")
@@ -58,6 +62,16 @@ public class DbAccessModule {
   public DbAccessModule setName(AccessModuleName name) {
     this.name = name;
     return this;
+  }
+
+  @Transient
+  public boolean getRequiredForRTAccess() {
+    return REQUIRED_MODULES_FOR_REGISTERED_TIER.contains(name);
+  }
+
+  @Transient
+  public boolean getRequiredForCTAccess() {
+    return REQUIRED_MODULES_FOR_CONTROLLED_TIER.contains(name);
   }
 
   public enum AccessModuleName {
