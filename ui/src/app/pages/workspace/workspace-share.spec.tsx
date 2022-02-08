@@ -191,12 +191,12 @@ describe('WorkspaceShare', () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
 
-    const roleSelectComponent = wrapper
+    const roleSelectProps = wrapper
       .find('[data-test-id="harry.potter@hogwarts.edu-user-role"]')
       .first()
       .props() as object;
-    expect(roleSelectComponent.hasOwnProperty('isDisabled')).toBe(true);
-    expect(roleSelectComponent.isDisabled).toBe(true);
+    expect(roleSelectProps.hasOwnProperty('isDisabled')).toBe(true);
+    expect(roleSelectProps.isDisabled).toBe(true);
   });
 
   it('saves acl correctly after changes made', async () => {
