@@ -99,7 +99,12 @@
     "unsafeAllowUserCreationFromGSuiteData": true,
     "enableRasLoginGovLinking": true,
     "enforceRasLoginGovLinking": true,
-    "currentDuccVersions": [3, 4]
+    "currentDuccVersions": [3, 4],
+    "renewal": {
+      "expiryDays": 365,
+      "expiryDaysWarningThresholds": [1, 3, 7, 15, 30],
+      "lookbackPeriod": 330
+    }
   },
   "featureFlags": {
     "unsafeAllowDeleteUser": true,

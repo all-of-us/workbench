@@ -924,7 +924,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     long millisRemaining = expiration.getTime() - clock.millis();
     long daysRemaining = TimeUnit.DAYS.convert(millisRemaining, TimeUnit.MILLISECONDS);
 
-    final List<Long> thresholds = configProvider.get().accessRenewal.expiryDaysWarningThresholds;
+    final List<Long> thresholds = configProvider.get().access.renewal.expiryDaysWarningThresholds;
     try {
       // we only want to send the expiration email on the day of the actual expiration
       if (millisRemaining < 0 && daysRemaining == 0) {
