@@ -37,7 +37,7 @@ public class WorkbenchConfig {
     WorkbenchConfig config = new WorkbenchConfig();
     config.access = new AccessConfig();
     config.access.currentDuccVersions = new ArrayList<>();
-    config.access.renewal = new AccessConfig.AccessRenewalConfig();
+    config.access.renewal = new AccessConfig.Renewal();
     config.actionAudit = new ActionAuditConfig();
     config.admin = new AdminConfig();
     config.auth = new AuthConfig();
@@ -222,7 +222,7 @@ public class WorkbenchConfig {
     // Which Data User Code of Conduct (DUCC) Agreement version(s) are currently accepted as valid
     public List<Integer> currentDuccVersions;
 
-    public static class AccessRenewalConfig {
+    public static class Renewal {
       // Days a user's module completion is good for until it expires
       public Long expiryDays;
       // Lookback period - the point when we give users the option to update their compliance items
@@ -231,7 +231,7 @@ public class WorkbenchConfig {
       public List<Long> expiryDaysWarningThresholds;
     }
 
-    public AccessRenewalConfig renewal;
+    public Renewal renewal;
   }
 
   public static class FeatureFlagsConfig {
