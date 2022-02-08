@@ -301,34 +301,26 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
           message: '^Institutional role cannot be blank',
         },
       },
+      checkEmailResponse:
+        !isBlank(
+          this.state.profile.verifiedInstitutionalAffiliation
+            .institutionShortName
+        ) && !isBlank(this.state.profile.contactEmail)
+          ? {
+              checkEmailResponse: {},
+            }
+          : {},
+      'profile.verifiedInstitutionalAffiliation.institutionalRoleOtherText':
+        this.state.profile.verifiedInstitutionalAffiliation
+          .institutionalRoleEnum === InstitutionalRole.OTHER
+          ? {
+              presence: {
+                allowEmpty: false,
+                message: '^Institutional role text cannot be blank',
+              },
+            }
+          : {},
     };
-    if (
-      !isBlank(
-        this.state.profile.verifiedInstitutionalAffiliation.institutionShortName
-      ) &&
-      !isBlank(this.state.profile.contactEmail)
-    ) {
-      // Property 'checkEmailResponse' does not exist on type ...
-      // TODO RW-5572 confirm proper behavior and fix
-      // eslint-disable-next-line @typescript-eslint/dot-notation
-      validationCheck['checkEmailResponse'] = {
-        checkEmailResponse: {},
-      };
-    }
-
-    if (
-      this.state.profile.verifiedInstitutionalAffiliation
-        .institutionalRoleEnum === InstitutionalRole.OTHER
-    ) {
-      validationCheck[
-        'profile.verifiedInstitutionalAffiliation.institutionalRoleOtherText'
-      ] = {
-        presence: {
-          allowEmpty: false,
-          message: '^Institutional role text cannot be blank',
-        },
-      };
-    }
 
     return validate(this.state, validationCheck);
   }
