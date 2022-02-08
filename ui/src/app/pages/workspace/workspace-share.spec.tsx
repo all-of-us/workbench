@@ -191,15 +191,12 @@ describe('WorkspaceShare', () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
 
-    expect(
-      wrapper
-        .find('[data-test-id="harry.potter@hogwarts.edu-user-role"]')
-        .first()
-        // Property 'isDisabled' does not exist on type 'HTMLAttributes'. Did you mean 'disabled'?
-        // TODO RW-5572 confirm proper behavior and fix
-        // eslint-disable-next-line @typescript-eslint/dot-notation
-        .props()['isDisabled']
-    ).toBe(true);
+    const roleSelectComponent = wrapper
+      .find('[data-test-id="harry.potter@hogwarts.edu-user-role"]')
+      .first()
+      .props() as object;
+    expect(roleSelectComponent.hasOwnProperty('isDisabled')).toBe(true);
+    expect(roleSelectComponent.isDisabled).toBe(true);
   });
 
   it('saves acl correctly after changes made', async () => {
