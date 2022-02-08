@@ -291,9 +291,9 @@ const ToggleForModule = (props: ToggleProps) => {
 
 interface TableRow {
   moduleName: string;
-  moduleStatus: string;
-  completionDate: string;
-  expirationDate: string;
+  moduleStatus: JSX.Element;
+  completionDate: JSX.Element;
+  expirationDate: JSX.Element;
   bypassToggle: JSX.Element;
 }
 

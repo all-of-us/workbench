@@ -12,7 +12,7 @@ import {
   RegisteredTierBadge,
 } from 'app/components/icons';
 
-import { formatInitialCreditsUSD, isBlank, reactStyles } from 'app/utils';
+import { cond, formatInitialCreditsUSD, isBlank, reactStyles } from 'app/utils';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import {
   AccessBypassRequest,
@@ -36,6 +36,7 @@ import { BulletAlignedUnorderedList } from 'app/components/lists';
 import { TooltipTrigger } from 'app/components/popups';
 import { serverConfigStore } from 'app/utils/stores';
 import {
+  AccessModulesStatus,
   accessRenewalModules,
   computeRenewalDisplayDates,
   getAccessModuleConfig,
@@ -84,6 +85,15 @@ export const commonStyles = reactStyles({
     color: colors.accent,
     borderRadius: '18px',
     transform: 'rotate(270deg)',
+  },
+  expiredModule: {
+    color: colors.danger,
+  },
+  expiringSoonModule: {
+    color: colors.warning,
+  },
+  completeModule: {
+    color: colors.black,
   },
 });
 
@@ -160,20 +170,40 @@ export const getUpdatedProfileValue = (
   }
 };
 
+const getModuleStatus = (profile, moduleName) =>
+  computeRenewalDisplayDates(getAccessModuleStatusByName(profile, moduleName))
+    .moduleStatus;
+
+const moduleStatusStyle = (moduleStatus) =>
+  cond(
+    [
+      moduleStatus === AccessModulesStatus.EXPIRED,
+      () => commonStyles.expiredModule,
+    ],
+    [
+      moduleStatus === AccessModulesStatus.EXPIRING_SOON,
+      () => commonStyles.expiringSoonModule,
+    ],
+    () => commonStyles.completeModule
+  );
+
+const displayModuleStatusAndDate = (
+  profile: Profile,
+  moduleName: AccessModule,
+  child: string
+): JSX.Element => {
+  return (
+    <div style={moduleStatusStyle(getModuleStatus(profile, moduleName))}>
+      {child}
+    </div>
+  );
+};
+
 export const isBypassed = (
   profile: Profile,
   moduleName: AccessModule
 ): boolean =>
   !!getAccessModuleStatusByName(profile, moduleName)?.bypassEpochMillis;
-
-export const displayModuleStatus = (
-  profile: Profile,
-  moduleName: AccessModule
-): string => {
-  return computeRenewalDisplayDates(
-    getAccessModuleStatusByName(profile, moduleName)
-  ).moduleStatus;
-};
 
 // Some modules may never expire (eg GOOGLE TWO STEP NOTIFICATION, ERA COMMONS etc),
 // in such cases set the expiry date as NEVER
@@ -181,22 +211,40 @@ export const displayModuleStatus = (
 const getNullStringForExpirationDate = (moduleName: AccessModule): string =>
   getAccessModuleConfig(moduleName).canExpire ? '-' : 'Never';
 
+export const displayModuleStatus = (
+  profile: Profile,
+  moduleName: AccessModule
+): JSX.Element =>
+  displayModuleStatusAndDate(
+    profile,
+    moduleName,
+    getModuleStatus(profile, moduleName)
+  );
+
 export const displayModuleCompletionDate = (
   profile: Profile,
   moduleName: AccessModule
-): string =>
-  formatDate(
-    getAccessModuleStatusByName(profile, moduleName)?.completionEpochMillis,
-    '-'
+): JSX.Element =>
+  displayModuleStatusAndDate(
+    profile,
+    moduleName,
+    formatDate(
+      getAccessModuleStatusByName(profile, moduleName)?.completionEpochMillis,
+      '-'
+    )
   );
 
 export const displayModuleExpirationDate = (
   profile: Profile,
   moduleName: AccessModule
-): string =>
-  formatDate(
-    getAccessModuleStatusByName(profile, moduleName)?.expirationEpochMillis,
-    getNullStringForExpirationDate(moduleName)
+): JSX.Element =>
+  displayModuleStatusAndDate(
+    profile,
+    moduleName,
+    formatDate(
+      getAccessModuleStatusByName(profile, moduleName)?.expirationEpochMillis,
+      getNullStringForExpirationDate(moduleName)
+    )
   );
 
 const isEraRequiredForTier = (
