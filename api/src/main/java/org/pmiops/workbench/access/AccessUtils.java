@@ -98,5 +98,4 @@ public class AccessUtils {
           AccessModuleName.PROFILE_CONFIRMATION,
           AccessModuleName.PUBLICATION_CONFIRMATION,
           AccessModuleName.CT_COMPLIANCE_TRAINING);
-
 }
