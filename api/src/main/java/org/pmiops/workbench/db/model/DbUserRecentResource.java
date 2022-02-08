@@ -10,6 +10,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+// This will be replaced by DbUserRecentlyModifiedResource
+@Deprecated
 @Entity
 @Table(name = "user_recent_resource")
 public class DbUserRecentResource {

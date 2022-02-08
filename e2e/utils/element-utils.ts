@@ -27,6 +27,16 @@ export async function getPropValue<T>(element: ElementHandle, property: string):
   return value as T;
 }
 
+export async function getStyleValue<T>(page: Page, element: ElementHandle, styleName: string): Promise<T> {
+  const value = await page
+    .evaluateHandle((elem) => {
+      return window.getComputedStyle(elem);
+    }, element)
+    .then((style) => style.getProperty(styleName))
+    .then((prop) => prop.jsonValue());
+  return value as T;
+}
+
 /*
  * Wait until the existing element changed in DOM.
  * @param {Page} page Instance of Puppeteer page object.

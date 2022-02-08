@@ -8,7 +8,7 @@ import * as fs from 'fs';
 import * as fp from 'lodash/fp';
 import { ElementHandle, Page } from 'puppeteer';
 import WorkspaceCard from 'app/component/workspace-card';
-import { PageUrl, WorkspaceAccessLevel } from 'app/text-labels';
+import { PageUrl, Tabs, WorkspaceAccessLevel } from 'app/text-labels';
 import WorkspacesPage from 'app/page/workspaces-page';
 import Navigation, { NavLink } from 'app/component/navigation';
 import { isBlank, makeWorkspaceName } from './str-utils';
@@ -17,6 +17,7 @@ import { logger } from 'libs/logger';
 import { authenticator } from 'otplib';
 import AuthenticatedPage from 'app/page/authenticated-page';
 import { AccessTierDisplayNames } from 'app/page/workspace-edit-page';
+import Tab from 'app/element/tab';
 
 export async function signOut(page: Page): Promise<void> {
   await page.evaluate(() => {
@@ -274,7 +275,11 @@ export async function centerPoint(element: ElementHandle): Promise<[number, numb
   return [cx, cy];
 }
 
-export async function dragDrop(page: Page, element: ElementHandle, destinationPoint: { x; y }): Promise<void> {
+export async function dragDrop(
+  page: Page,
+  element: ElementHandle,
+  destinationPoint: { x: number; y: number }
+): Promise<void> {
   const [x0, y0] = await centerPoint(element);
   const { x, y } = destinationPoint;
   const mouse = page.mouse;
@@ -293,7 +298,7 @@ export async function dragDrop(page: Page, element: ElementHandle, destinationPo
  * @param {string} date
  */
 // See: https://stackoverflow.com/questions/18758772/how-do-i-validate-a-date-in-this-format-yyyy-mm-dd-using-jquery
-export function isValidDate(date: string) {
+export function isValidDate(date: string): boolean {
   const regex = /^\d{4}-\d{2}-\d{2}$/;
   if (!regex.exec(date)) {
     return false;
@@ -312,6 +317,20 @@ export const asyncFilter = async (arr, predicate) =>
 /**
  * Generates a two factor auth code by given secret.
  */
-export async function generate2FACode(secret: string) {
+export function generate2FACode(secret: string): string {
   return authenticator.generate(secret);
+}
+
+/**
+ * Click tab to open a page.
+ * @param page {Page}
+ * @param tabName: Tab name.
+ * @param pageExpected: Page expected to load.
+ */
+export async function openTab<T extends AuthenticatedPage>(page: Page, tabName: Tabs, pageExpected?: T): Promise<void> {
+  const tab = new Tab(page, tabName);
+  await tab.click();
+  if (pageExpected !== undefined) {
+    await tab.waitFor(pageExpected);
+  }
 }

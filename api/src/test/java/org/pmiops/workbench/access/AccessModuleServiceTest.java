@@ -193,7 +193,7 @@ public class AccessModuleServiceTest {
   public void testGetClientAccessModuleStatus() {
     Instant now = Instant.ofEpochMilli(FakeClockConfiguration.NOW_TIME);
     long expiryDays = 365L;
-    config.accessRenewal.expiryDays = expiryDays;
+    config.access.renewal.expiryDays = expiryDays;
     DbAccessModule twoFactorAuthModule =
         accessModuleDao.findOneByName(AccessModuleName.TWO_FACTOR_AUTH).get();
     DbAccessModule rtTrainingModule =
@@ -300,7 +300,7 @@ public class AccessModuleServiceTest {
   public void testGetClientAccessModuleStatus_moduleNotEnabledInEnv() {
     Instant now = Instant.ofEpochMilli(FakeClockConfiguration.NOW_TIME);
     long expiryDays = 365L;
-    config.accessRenewal.expiryDays = expiryDays;
+    config.access.renewal.expiryDays = expiryDays;
     config.access.enableComplianceTraining = false;
     DbAccessModule twoFactorAuthModule =
         accessModuleDao.findOneByName(AccessModuleName.TWO_FACTOR_AUTH).get();
@@ -345,7 +345,7 @@ public class AccessModuleServiceTest {
   public void testModuleCompliant_bypassedAndExpired() {
     Instant now = Instant.ofEpochMilli(FakeClockConfiguration.NOW_TIME);
     long expiryDays = 365L;
-    config.accessRenewal.expiryDays = expiryDays;
+    config.access.renewal.expiryDays = expiryDays;
     DbAccessModule duccModule =
         accessModuleDao.findOneByName(AccessModuleName.DATA_USER_CODE_OF_CONDUCT).get();
     Timestamp completionTime = Timestamp.from(now.minus(expiryDays + 10, ChronoUnit.DAYS));
@@ -368,7 +368,7 @@ public class AccessModuleServiceTest {
   public void testModuleCompliant_expired() {
     Instant now = Instant.ofEpochMilli(FakeClockConfiguration.NOW_TIME);
     long expiryDays = 365L;
-    config.accessRenewal.expiryDays = expiryDays;
+    config.access.renewal.expiryDays = expiryDays;
     DbAccessModule duccModule =
         accessModuleDao.findOneByName(AccessModuleName.DATA_USER_CODE_OF_CONDUCT).get();
     DbAccessModule twoFactorAuthModule =
@@ -400,7 +400,7 @@ public class AccessModuleServiceTest {
   public void testModuleCompliant_completeAndNotExpired() {
     Instant now = Instant.ofEpochMilli(FakeClockConfiguration.NOW_TIME);
     long expiryDays = 365L;
-    config.accessRenewal.expiryDays = expiryDays;
+    config.access.renewal.expiryDays = expiryDays;
 
     DbAccessModule duccModule =
         accessModuleDao.findOneByName(AccessModuleName.DATA_USER_CODE_OF_CONDUCT).get();

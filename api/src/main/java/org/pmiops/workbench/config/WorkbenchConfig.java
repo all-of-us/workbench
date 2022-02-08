@@ -30,6 +30,7 @@ public class WorkbenchConfig {
   public CaptchaConfig captcha;
   public ReportingConfig reporting;
   public RasConfig ras;
+  @Deprecated // moved inside AccessConfig.  will remove as part of RW-7828
   public AccessRenewalConfig accessRenewal;
   public OfflineBatchConfig offlineBatch;
   public EgressAlertRemediationPolicy egressAlertRemediationPolicy;
@@ -38,28 +39,30 @@ public class WorkbenchConfig {
   public static WorkbenchConfig createEmptyConfig() {
     WorkbenchConfig config = new WorkbenchConfig();
     config.access = new AccessConfig();
+    config.access.currentDuccVersions = new ArrayList<>();
+    config.access.renewal = new AccessRenewalConfig();
+    config.accessRenewal = new AccessRenewalConfig();
+    config.actionAudit = new ActionAuditConfig();
     config.admin = new AdminConfig();
     config.auth = new AuthConfig();
     config.auth.serviceAccountApiUsers = new ArrayList<>();
-    config.wgsCohortExtraction = new WgsCohortExtractionConfig();
+    config.billing = new BillingConfig();
+    config.captcha = new CaptchaConfig();
     config.cdr = new CdrConfig();
+    config.egressAlertRemediationPolicy = new EgressAlertRemediationPolicy();
     config.featureFlags = new FeatureFlagsConfig();
     config.firecloud = new FireCloudConfig();
     config.googleCloudStorageService = new GoogleCloudStorageServiceConfig();
     config.googleDirectoryService = new GoogleDirectoryServiceConfig();
     config.mandrill = new MandrillConfig();
     config.moodle = new MoodleConfig();
-    config.zendesk = new ZendeskConfig();
-    config.server = new ServerConfig();
-    config.billing = new BillingConfig();
-    config.actionAudit = new ActionAuditConfig();
-    config.rdrExport = new RdrExportConfig();
-    config.captcha = new CaptchaConfig();
-    config.reporting = new ReportingConfig();
-    config.ras = new RasConfig();
-    config.accessRenewal = new AccessRenewalConfig();
     config.offlineBatch = new OfflineBatchConfig();
-    config.egressAlertRemediationPolicy = new EgressAlertRemediationPolicy();
+    config.ras = new RasConfig();
+    config.rdrExport = new RdrExportConfig();
+    config.reporting = new ReportingConfig();
+    config.server = new ServerConfig();
+    config.wgsCohortExtraction = new WgsCohortExtractionConfig();
+    config.zendesk = new ZendeskConfig();
     return config;
   }
 
@@ -247,6 +250,8 @@ public class WorkbenchConfig {
     public boolean enforceRasLoginGovLinking;
     // Which Data User Code of Conduct (DUCC) Agreement version(s) are currently accepted as valid
     public List<Integer> currentDuccVersions;
+
+    public AccessRenewalConfig renewal;
   }
 
   public static class FeatureFlagsConfig {
@@ -329,6 +334,7 @@ public class WorkbenchConfig {
     public String logoutUrl;
   }
 
+  // Note: migrating this to live inside AccessConfig soon as part of RW-7828
   public static class AccessRenewalConfig {
     // Days a user's module completion is good for until it expires
     public Long expiryDays;

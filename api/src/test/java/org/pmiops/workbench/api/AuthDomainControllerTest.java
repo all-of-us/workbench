@@ -91,7 +91,7 @@ public class AuthDomainControllerTest {
             eq(institution), anyString(), eq(REGISTERED_TIER_SHORT_NAME)))
         .thenReturn(true);
     WorkbenchConfig config = WorkbenchConfig.createEmptyConfig();
-    config.accessRenewal.expiryDays = (long) 365;
+    config.access.renewal.expiryDays = 365L;
     FakeClock clock = new FakeClock(Instant.now());
     UserService userService =
         new UserServiceImpl(

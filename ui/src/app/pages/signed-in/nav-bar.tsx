@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from 'react';
 import { AccessRenewalNotificationMaybe } from 'app/pages/signed-in/access-renewal-notification';
 import { Breadcrumb } from 'app/components/breadcrumb';
 import { ClrIcon } from 'app/components/icons';
-import { LoginGovIAL2NotificationMaybe } from 'app/pages/signed-in/login-gov-ial2-notification';
 import { SideNav } from 'app/components/side-nav';
 import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
@@ -151,12 +150,7 @@ export const NavBar = () => {
         )}
       </div>
       <Breadcrumb />
-      {window.location.pathname !== '/access-renewal' && (
-        <AccessRenewalNotificationMaybe />
-      )}
-      {window.location.pathname !== '/data-access-requirements' && (
-        <LoginGovIAL2NotificationMaybe />
-      )}
+      <AccessRenewalNotificationMaybe />
       <StatusAlertBannerMaybe />
       <CTAvailableBannerMaybe />
       {showSideNav && (

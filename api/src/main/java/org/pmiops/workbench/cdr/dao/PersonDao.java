@@ -12,7 +12,9 @@ public interface PersonDao extends CrudRepository<DbPerson, Long> {
       value =
           "SELECT * FROM \n"
               + "  (\n"
-              + "    SELECT 'AGE' as ageType, DATE_FORMAT(NOW(), '%Y') - DATE_FORMAT(dob, '%Y') - (DATE_FORMAT(NOW(), '00-%m-%d') < DATE_FORMAT(dob, '00-%m-%d')) as age, count(*) as count \n"
+              + "    SELECT 'AGE' as ageType, (EXTRACT(YEAR FROM CURRENT_DATE) - EXTRACT(YEAR FROM dob)) "
+              + "      - (SELECT CASE WHEN (100*EXTRACT(MONTH FROM CURRENT_DATE) + EXTRACT(DAY FROM CURRENT_DATE)) "
+              + "                        < (100*EXTRACT(MONTH FROM dob) + EXTRACT(DAY FROM dob)) THEN 1 ELSE 0 END) as age, count(*) as count "
               + "    FROM cb_person where is_deceased = 0\n"
               + "    GROUP BY ageType, age \n"
               + "    UNION \n"

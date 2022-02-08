@@ -2,7 +2,7 @@ import { act } from 'react-dom/test-utils';
 import { mount } from 'enzyme';
 import {
   useCustomRuntime,
-  RuntimeDiffState,
+  AnalysisDiffState,
   findMostSevereDiffState,
 } from 'app/utils/runtime-utils';
 import { runtimeStore, diskStore, serverConfigStore } from 'app/utils/stores';
@@ -108,36 +108,39 @@ describe('runtime-utils', () => {
 
   test.each([
     [[], undefined],
-    [[RuntimeDiffState.NEEDS_DELETE], RuntimeDiffState.NEEDS_DELETE],
-    [[RuntimeDiffState.NEEDS_DELETE, undefined], RuntimeDiffState.NEEDS_DELETE],
+    [[AnalysisDiffState.NEEDS_DELETE], AnalysisDiffState.NEEDS_DELETE],
     [
-      [
-        RuntimeDiffState.CAN_UPDATE_IN_PLACE,
-        RuntimeDiffState.NEEDS_DELETE,
-        RuntimeDiffState.NO_CHANGE,
-        RuntimeDiffState.CAN_UPDATE_WITH_REBOOT,
-        RuntimeDiffState.NO_CHANGE,
-      ],
-      RuntimeDiffState.NEEDS_DELETE,
+      [AnalysisDiffState.NEEDS_DELETE, undefined],
+      AnalysisDiffState.NEEDS_DELETE,
     ],
     [
       [
-        RuntimeDiffState.CAN_UPDATE_IN_PLACE,
-        RuntimeDiffState.NO_CHANGE,
-        RuntimeDiffState.CAN_UPDATE_WITH_REBOOT,
-        RuntimeDiffState.CAN_UPDATE_IN_PLACE,
+        AnalysisDiffState.CAN_UPDATE_IN_PLACE,
+        AnalysisDiffState.NEEDS_DELETE,
+        AnalysisDiffState.NO_CHANGE,
+        AnalysisDiffState.CAN_UPDATE_WITH_REBOOT,
+        AnalysisDiffState.NO_CHANGE,
       ],
-      RuntimeDiffState.CAN_UPDATE_WITH_REBOOT,
+      AnalysisDiffState.NEEDS_DELETE,
     ],
     [
       [
-        RuntimeDiffState.NO_CHANGE,
-        RuntimeDiffState.CAN_UPDATE_IN_PLACE,
-        RuntimeDiffState.NO_CHANGE,
+        AnalysisDiffState.CAN_UPDATE_IN_PLACE,
+        AnalysisDiffState.NO_CHANGE,
+        AnalysisDiffState.CAN_UPDATE_WITH_REBOOT,
+        AnalysisDiffState.CAN_UPDATE_IN_PLACE,
       ],
-      RuntimeDiffState.CAN_UPDATE_IN_PLACE,
+      AnalysisDiffState.CAN_UPDATE_WITH_REBOOT,
     ],
-    [[RuntimeDiffState.NO_CHANGE], RuntimeDiffState.NO_CHANGE],
+    [
+      [
+        AnalysisDiffState.NO_CHANGE,
+        AnalysisDiffState.CAN_UPDATE_IN_PLACE,
+        AnalysisDiffState.NO_CHANGE,
+      ],
+      AnalysisDiffState.CAN_UPDATE_IN_PLACE,
+    ],
+    [[AnalysisDiffState.NO_CHANGE], AnalysisDiffState.NO_CHANGE],
   ])('findMostSevereDiffState(%s) = %s', (diffStates, want) => {
     expect(findMostSevereDiffState(diffStates)).toEqual(want);
   });

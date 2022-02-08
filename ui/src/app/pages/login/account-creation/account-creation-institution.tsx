@@ -308,6 +308,9 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
       ) &&
       !isBlank(this.state.profile.contactEmail)
     ) {
+      // Property 'checkEmailResponse' does not exist on type ...
+      // TODO RW-5572 confirm proper behavior and fix
+      // eslint-disable-next-line @typescript-eslint/dot-notation
       validationCheck['checkEmailResponse'] = {
         checkEmailResponse: {},
       };

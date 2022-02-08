@@ -4,7 +4,6 @@ import { getPropValue } from 'utils/element-utils';
 import WorkspaceBase from './workspace-base';
 import Button from 'app/element/button';
 import ShareModal from 'app/modal/share-modal';
-import { config } from 'resources/workbench-config';
 
 export const PageTitle = 'View Workspace Details';
 
@@ -69,7 +68,7 @@ export default class WorkspaceAboutPage extends WorkspaceBase {
   }
 
   // if the collaborator is already on this workspace, just remove them before continuing.
-  async removeCollaborator(name = config.COLLABORATOR_USER): Promise<void> {
+  async removeCollaborator(name: string): Promise<void> {
     const modal = await this.openShareModal();
     await modal.removeUser(name);
     await waitWhileLoading(this.page);

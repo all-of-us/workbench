@@ -1,6 +1,9 @@
 import * as React from 'react';
 
-import { maybeDaysRemaining } from 'app/utils/access-utils';
+import {
+  ACCESS_RENEWAL_PATH,
+  maybeDaysRemaining,
+} from 'app/utils/access-utils';
 import { profileStore, useStore } from 'app/utils/stores';
 import { NotificationBanner } from 'app/components/notification-banner';
 
@@ -20,7 +23,8 @@ export const AccessRenewalNotificationMaybe = () => {
       dataTestId='access-renewal-notification'
       text={notificationText}
       buttonText='Get Started'
-      buttonPath='/access-renewal'
+      buttonPath={ACCESS_RENEWAL_PATH}
+      buttonDisabled={window.location.pathname === ACCESS_RENEWAL_PATH}
     />
   ) : null;
 };

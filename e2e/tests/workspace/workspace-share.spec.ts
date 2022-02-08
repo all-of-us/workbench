@@ -1,5 +1,5 @@
-import { LinkText, MenuOption, WorkspaceAccessLevel } from 'app/text-labels';
-import { findOrCreateWorkspace, findWorkspaceCard, signInWithAccessToken } from 'utils/test-utils';
+import { LinkText, MenuOption, WorkspaceAccessLevel, Tabs } from 'app/text-labels';
+import { findOrCreateWorkspace, findWorkspaceCard, openTab, signInWithAccessToken } from 'utils/test-utils';
 import WorkspaceAboutPage from 'app/page/workspace-about-page';
 import { config } from 'resources/workbench-config';
 import WorkspacesPage from 'app/page/workspaces-page';
@@ -27,9 +27,8 @@ describe('Workspace Reader and Writer Permission Test', () => {
     const dataPage = new WorkspaceDataPage(page);
     await dataPage.waitForLoad();
 
-    await dataPage.openAboutPage();
     const aboutPage = new WorkspaceAboutPage(page);
-    await aboutPage.waitForLoad();
+    await openTab(page, Tabs.About, aboutPage);
 
     for (const assign of assignAccess) {
       await aboutPage.shareWorkspaceWithUser(assign.userEmail, assign.accessRole);
@@ -105,13 +104,10 @@ describe('Workspace Reader and Writer Permission Test', () => {
 
   // Open Data page then back to About page in order to refresh Collaborators list in page.
   async function reloadAboutPage() {
-    const aboutPage = new WorkspaceAboutPage(page);
-    await aboutPage.waitForLoad();
-    await aboutPage.openDataPage({ waitPageChange: true });
     const dataPage = new WorkspaceDataPage(page);
-    await dataPage.waitForLoad();
-    await dataPage.openAboutPage({ waitPageChange: true });
-    await aboutPage.waitForLoad();
+    await openTab(page, Tabs.Data, dataPage);
+    const aboutPage = new WorkspaceAboutPage(page);
+    await openTab(page, Tabs.About, aboutPage);
   }
   async function verifyWorkspaceActionMenuOptions(): Promise<void> {
     const dataPage = new WorkspaceDataPage(page);

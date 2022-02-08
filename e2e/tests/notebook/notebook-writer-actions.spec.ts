@@ -4,9 +4,9 @@ import Link from 'app/element/link';
 import WorkspaceAboutPage from 'app/page/workspace-about-page';
 import WorkspaceAnalysisPage from 'app/page/workspace-analysis-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
-import { Language, LinkText, MenuOption, ResourceCard, WorkspaceAccessLevel } from 'app/text-labels';
+import { Language, LinkText, MenuOption, ResourceCard, Tabs, WorkspaceAccessLevel } from 'app/text-labels';
 import { config } from 'resources/workbench-config';
-import { findOrCreateWorkspace, signInWithAccessToken, signOut } from 'utils/test-utils';
+import { findOrCreateWorkspace, openTab, signInWithAccessToken, signOut } from 'utils/test-utils';
 import { waitWhileLoading } from 'utils/waits-utils';
 import WorkspacesPage from 'app/page/workspaces-page';
 import Modal from 'app/modal/modal';
@@ -29,13 +29,12 @@ xdescribe('Workspace WRITER Jupyter notebook action tests', () => {
     await findOrCreateWorkspace(page, { workspaceName });
 
     // Share workspace to a WRITER before creating new notebook.
-    const dataPage = new WorkspaceDataPage(page);
-    await dataPage.openAboutPage();
     const aboutPage = new WorkspaceAboutPage(page);
-    await aboutPage.waitForLoad();
+    await openTab(page, Tabs.About, aboutPage);
     await aboutPage.shareWorkspaceWithUser(config.WRITER_USER, WorkspaceAccessLevel.Writer);
     await waitWhileLoading(page);
 
+    const dataPage = new WorkspaceDataPage(page);
     const notebook = await dataPage.createNotebook(notebookName, Language.Python);
 
     // Run Python code.
@@ -62,9 +61,8 @@ xdescribe('Workspace WRITER Jupyter notebook action tests', () => {
     await dataPage.clone();
 
     // Currently displayed workspace is the workspace clone.
-    await dataPage.openAnalysisPage();
     const analysisPage = new WorkspaceAnalysisPage(page);
-    await analysisPage.waitForLoad();
+    await openTab(page, Tabs.Analysis, analysisPage);
 
     // Create Notebook button is enabled.
     expect(await analysisPage.createNewNotebookLink().isCursorNotAllowed()).toBe(false);
@@ -117,10 +115,9 @@ xdescribe('Workspace WRITER Jupyter notebook action tests', () => {
 
     // Verify notebook actions list.
     await workspaceCard.clickWorkspaceName();
-    await new WorkspaceDataPage(page).openAnalysisPage();
 
     const analysisPage = new WorkspaceAnalysisPage(page);
-    await analysisPage.waitForLoad();
+    await openTab(page, Tabs.Analysis, analysisPage);
 
     // Create Notebook link is disabled.
     const isCreateLinkDisabled = await analysisPage.createNewNotebookLink().isCursorNotAllowed();

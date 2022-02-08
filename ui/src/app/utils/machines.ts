@@ -2,7 +2,7 @@ import { DiskType } from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import { DEFAULT, switchCase } from './index';
 import { formatUsd } from './numbers';
-import { DiskConfig, RuntimeConfig } from './runtime-utils';
+import { DiskConfig, AnalysisConfig } from './runtime-utils';
 
 // Copied from https://github.com/DataBiosphere/terra-ui/blob/219b063b07d56499ccc38013fd88f4f0b88f8cd6/src/data/machines.js
 
@@ -416,7 +416,7 @@ export const diskConfigPrice = ({ size, detachableType }: DiskConfig) => {
 export const machineStorageCost = ({
   diskConfig,
   dataprocConfig,
-}: RuntimeConfig) => {
+}: AnalysisConfig) => {
   const { numberOfWorkers, numberOfPreemptibleWorkers, workerDiskSize } =
     dataprocConfig ?? {};
   return fp.sum([
@@ -431,7 +431,7 @@ export const machineStorageCost = ({
 export const machineStorageCostBreakdown = ({
   diskConfig,
   dataprocConfig,
-}: RuntimeConfig) => {
+}: AnalysisConfig) => {
   const { numberOfWorkers, numberOfPreemptibleWorkers, workerDiskSize } =
     dataprocConfig ?? {};
   const costs = [];
@@ -457,10 +457,10 @@ export const machineStorageCostBreakdown = ({
   return costs;
 };
 
-export const machineRunningCost = (runtimeConfig: RuntimeConfig) => {
-  const { computeType, machine, gpuConfig } = runtimeConfig;
+export const machineRunningCost = (analysisConfig: AnalysisConfig) => {
+  const { computeType, machine, gpuConfig } = analysisConfig;
   const { workerMachineType, numberOfWorkers, numberOfPreemptibleWorkers } =
-    runtimeConfig.dataprocConfig ?? {};
+    analysisConfig.dataprocConfig ?? {};
 
   const workerMachine =
     workerMachineType && findMachineByName(workerMachineType);
@@ -486,14 +486,14 @@ export const machineRunningCost = (runtimeConfig: RuntimeConfig) => {
     dataprocPrice,
     machine.price,
     gpu ? gpu.price : 0,
-    machineStorageCost(runtimeConfig),
+    machineStorageCost(analysisConfig),
   ]);
 };
 
-export const machineRunningCostBreakdown = (runtimeConfig: RuntimeConfig) => {
-  const { computeType, machine, gpuConfig } = runtimeConfig;
+export const machineRunningCostBreakdown = (analysisConfig: AnalysisConfig) => {
+  const { computeType, machine, gpuConfig } = analysisConfig;
   const { workerMachineType, numberOfWorkers, numberOfPreemptibleWorkers } =
-    runtimeConfig.dataprocConfig ?? {};
+    analysisConfig.dataprocConfig ?? {};
 
   const workerMachine =
     workerMachineType && findMachineByName(workerMachineType);
@@ -532,6 +532,6 @@ export const machineRunningCostBreakdown = (runtimeConfig: RuntimeConfig) => {
       costs.push(`${formatUsd(gpu.price)}/hr GPU`);
     }
   }
-  costs.push(...machineStorageCostBreakdown(runtimeConfig));
+  costs.push(...machineStorageCostBreakdown(analysisConfig));
   return costs;
 };

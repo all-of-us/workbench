@@ -1,7 +1,7 @@
 import { Page } from 'puppeteer';
 import { waitForDocumentTitle, waitWhileLoading } from 'utils/waits-utils';
 import Button from 'app/element/button';
-import { LinkText } from 'app/text-labels';
+import { LinkText, Tabs } from 'app/text-labels';
 import AuthenticatedPage from './authenticated-page';
 import DatasetBuildPage from './dataset-build-page';
 import Link from 'app/element/link';
@@ -10,6 +10,7 @@ import WorkspaceDataPage from './workspace-data-page';
 import { getPropValue } from 'utils/element-utils';
 import WorkspaceAnalysisPage from './workspace-analysis-page';
 import WorkspaceAboutPage from './workspace-about-page';
+import { openTab } from 'utils/test-utils';
 
 const PageTitle = 'Cohort Actions';
 
@@ -73,19 +74,19 @@ export default class CohortActionsPage extends AuthenticatedPage {
 
   async clickDataTab(): Promise<WorkspaceDataPage> {
     const dataPage = new WorkspaceDataPage(this.page);
-    await dataPage.openDataPage({ waitPageChange: true });
+    await openTab(this.page, Tabs.Data, dataPage);
     return dataPage;
   }
 
   async clickAnalysisTab(): Promise<WorkspaceAnalysisPage> {
     const analysisPage = new WorkspaceAnalysisPage(this.page);
-    await analysisPage.openAnalysisPage({ waitPageChange: true });
+    await openTab(this.page, Tabs.Analysis, analysisPage);
     return analysisPage;
   }
 
   async clickAboutTab(): Promise<WorkspaceAboutPage> {
     const aboutPage = new WorkspaceAboutPage(this.page);
-    await aboutPage.openAboutPage({ waitPageChange: true });
+    await openTab(this.page, Tabs.About, aboutPage);
     return aboutPage;
   }
 

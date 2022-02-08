@@ -1,6 +1,7 @@
 package org.pmiops.workbench.db.dao;
 
 import java.util.Collection;
+import java.util.List;
 import org.pmiops.workbench.db.model.DbUserRecentlyModifiedResource;
 import org.springframework.data.repository.CrudRepository;
 
@@ -27,5 +28,12 @@ public interface UserRecentlyModifiedResourceDao
       String resourceId) {
     return this.findDbUserRecentResourcesIdByUserIdAndWorkspaceIdAndResourceTypeAndResourceId(
         userId, workspaceId, resourceType, resourceId);
+  }
+
+  List<DbUserRecentlyModifiedResource>
+      findDbUserRecentlyModifiedResourcesByUserIdOrderByLastAccessDateDesc(long userId);
+
+  default List<DbUserRecentlyModifiedResource> findDbUserRecentResourcesByUserId(long userId) {
+    return this.findDbUserRecentlyModifiedResourcesByUserIdOrderByLastAccessDateDesc(userId);
   }
 }

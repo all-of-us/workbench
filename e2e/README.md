@@ -50,7 +50,6 @@ e2e tests require 5 test users:
 - USER_NAME: Default test user
 - WRITER_USER: Share workspace to this test user with WRITER role
 - READER_USER: Share workspace to this test user with READER role
-- COLLABORATOR_USER: Share workspace to this test user with OWNER role
 - ACCESS_TEST_USER: User to be modified outside of e2e tests to prepare for access testing
 - ADMIN_TEST_USER: Test user with access to admin feature for admin-ui testing
 

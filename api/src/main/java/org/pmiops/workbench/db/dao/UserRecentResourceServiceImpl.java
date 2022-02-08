@@ -255,6 +255,19 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
     }
   }
 
+  @Override
+  public List<DbUserRecentlyModifiedResource> findAllRecentlyModifiedResourcesByUser(long userId) {
+    try {
+      return DbRetryUtils.executeAndRetry(
+          () -> userRecentlyModifiedResourceDao.findDbUserRecentResourcesByUserId(userId),
+          Duration.ofSeconds(1),
+          5);
+    } catch (InterruptedException e) {
+      throw new ServerErrorException(
+          "Unable to find Recently Modified Resources for user" + userId);
+    }
+  }
+
   /**
    * Check number of entries in user_recent_resource for user, If it exceeds USER_ENTRY_COUNT,
    * delete the one with earliest lastAccessTime

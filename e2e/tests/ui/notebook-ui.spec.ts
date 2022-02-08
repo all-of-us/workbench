@@ -1,5 +1,5 @@
-import { signInWithAccessToken } from 'utils/test-utils';
-import { LinkText } from 'app/text-labels';
+import { openTab, signInWithAccessToken } from 'utils/test-utils';
+import { LinkText, Tabs } from 'app/text-labels';
 import expect from 'expect';
 import WorkspaceAnalysisPage from 'app/page/workspace-analysis-page';
 import NewNotebookModal from 'app/modal/new-notebook-modal';
@@ -69,8 +69,7 @@ describe('Notebook and Runtime UI Test', () => {
 
   async function openAnyNotebook(page: Page): Promise<DataResourceCard | null> {
     const analysisPage = new WorkspaceAnalysisPage(page);
-    await analysisPage.openAnalysisPage();
-    await analysisPage.waitForLoad();
+    await openTab(page, Tabs.Analysis, analysisPage);
     return analysisPage.findNotebookCard();
   }
 });

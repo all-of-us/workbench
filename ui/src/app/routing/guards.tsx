@@ -4,7 +4,11 @@ import {
   hasRegisteredTierAccess,
 } from 'app/utils/access-tiers';
 import { authStore, profileStore } from 'app/utils/stores';
-import { eligibleForTier } from 'app/utils/access-utils';
+import {
+  ACCESS_RENEWAL_PATH,
+  DATA_ACCESS_REQUIREMENTS_PATH,
+  eligibleForTier,
+} from 'app/utils/access-utils';
 import { currentWorkspaceStore } from 'app/utils/navigation';
 import {
   AuthorityGuardedAction,
@@ -37,13 +41,13 @@ export const userDisabledPageGuard = (userDisabledInDb: boolean): Guard => ({
 
 export const registrationGuard: Guard = {
   allowed: (): boolean => hasRegisteredTierAccess(profileStore.get().profile),
-  redirectPath: '/data-access-requirements',
+  redirectPath: DATA_ACCESS_REQUIREMENTS_PATH,
 };
 
 export const expiredGuard: Guard = {
   allowed: (): boolean =>
     !profileStore.get().profile.accessModules.anyModuleHasExpired,
-  redirectPath: '/access-renewal',
+  redirectPath: ACCESS_RENEWAL_PATH,
 };
 
 export const adminLockedGuard = (ns: string, wsid: string): Guard => {

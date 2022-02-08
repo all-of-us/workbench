@@ -13,11 +13,12 @@ module.exports = {
   // This will allow it to disable prettier-incompatible rules from other rulesets.
   extends: ['prettier'],
   parserOptions: {
-    ecmaVersion: 6,
-    sourceType: 'module',
     ecmaFeatures: {
       jsx: true,
     },
+    ecmaVersion: 6,
+    project: ['./tsconfig.json'],
+    sourceType: 'module',
   },
   settings: {
     react: {
@@ -51,7 +52,6 @@ module.exports = {
     'no-var': 'warn',
     'prefer-const': ['warn', { destructuring: 'all' }],
     radix: 'warn', // Add radix on parseInt
-    // 'dot-notation': 'warn',  // 39 instances as of 3 Jan 2022
     // 'no-console': 'warn',  // 69 instances as of 3 Jan 2022
     // 'prefer-arrow/prefer-arrow-functions': ['warn'], // Lots of 'newable' functions in the code base
 
@@ -62,6 +62,7 @@ module.exports = {
     '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '_' }],
 
     '@typescript-eslint/consistent-type-definitions': ['warn', 'interface'],
+    '@typescript-eslint/dot-notation': 'warn',
     '@typescript-eslint/explicit-member-accessibility': 'off',
     '@typescript-eslint/no-empty-interface': 'warn',
     '@typescript-eslint/no-inferrable-types': [

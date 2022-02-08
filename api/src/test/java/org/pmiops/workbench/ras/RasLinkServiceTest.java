@@ -167,7 +167,7 @@ public class RasLinkServiceTest {
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     public WorkbenchConfig getWorkbenchConfig() {
       WorkbenchConfig config = WorkbenchConfig.createEmptyConfig();
-      config.accessRenewal.expiryDays = (long) 365;
+      config.access.renewal.expiryDays = 365L;
       config.access.enableEraCommons = true;
       config.access.enableRasLoginGovLinking = true;
       config.access.enforceRasLoginGovLinking = true;
