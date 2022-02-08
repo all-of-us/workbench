@@ -13,32 +13,6 @@ describe('Creating new workspaces', () => {
     await signInWithAccessToken(page);
   });
 
-  test('Create workspace using minimum required fields', async () => {
-    const newWorkspaceName = makeWorkspaceName();
-    const workspacesPage = new WorkspacesPage(page);
-    await workspacesPage.load();
-
-    // create workspace with "No Review Requested" radiobutton selected
-    const modalTextContent = await workspacesPage.createWorkspace(newWorkspaceName);
-
-    // Pick out few sentences to verify
-    expect(modalTextContent).toContain('Create Workspace');
-    expect(modalTextContent).toContain(
-      'Will be displayed publicly to inform All of Us research participants. ' +
-        'Therefore, please verify that you have provided sufficiently detailed responses in plain language.'
-    );
-    expect(modalTextContent).toContain('You can also make changes to your answers after you create your workspace.');
-
-    const dataPage = new WorkspaceDataPage(page);
-    await dataPage.verifyWorkspaceNameOnDataPage(newWorkspaceName);
-
-    // Verify the CDR version displays in the workspace navigation bar
-    expect(await dataPage.getCdrVersion()).toBe(config.DEFAULT_CDR_VERSION_NAME);
-
-    // cleanup
-    await dataPage.deleteWorkspace();
-  });
-
   test('Create workspace using all fields', async () => {
     const workspacesPage = new WorkspacesPage(page);
     await workspacesPage.load();
@@ -116,15 +90,4 @@ describe('Creating new workspaces', () => {
     // cleanup
     await dataPage.deleteWorkspace();
   });
-
-  // // helper function to check visible workspace link on Data page
-  // async function verifyWorkspaceLinkOnDataPage(workspaceName: string): Promise<WorkspaceDataPage> {
-  //   const dataPage = new WorkspaceDataPage(page);
-  //   await dataPage.waitForLoad();
-
-  //   const workspaceLink = new Link(page, `//a[text()='${workspaceName}']`);
-  //   await workspaceLink.waitForXPath({visible: true});
-  //   expect(await workspaceLink.isVisible()).toBe(true);
-  //   return dataPage;
-  // }
 });
