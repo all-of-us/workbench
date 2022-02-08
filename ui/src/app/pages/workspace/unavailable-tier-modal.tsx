@@ -8,6 +8,7 @@ import {
   ModalTitle,
 } from 'app/components/modals';
 import { displayNameForTier } from 'app/utils/access-tiers';
+import { DATA_ACCESS_REQUIREMENTS_PATH } from 'app/utils/access-utils';
 
 interface Props {
   accessTierShortName: string;
@@ -32,7 +33,7 @@ export const UnavailableTierModal = (props: Props) => {
         <Button type='secondary' onClick={() => onCancel()}>
           Cancel
         </Button>
-        <Button type='primary' path='/data-access-requirements'>
+        <Button type='primary' path={DATA_ACCESS_REQUIREMENTS_PATH}>
           Get Started
         </Button>
       </ModalFooter>
