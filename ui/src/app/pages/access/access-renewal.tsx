@@ -131,7 +131,11 @@ const syncAndReloadTraining = fp.flow(
 });
 
 // Helper Functions
+// The module has already expired
+export const hasExpired = (expiration: number): boolean =>
+  !!expiration && getWholeDaysFromNow(expiration) < 0;
 
+// The module can either be expired or is expiring
 export const isExpiring = (expiration?: number): boolean =>
   expiration
     ? getWholeDaysFromNow(expiration) <=
@@ -141,12 +145,16 @@ export const isExpiring = (expiration?: number): boolean =>
 const isModuleExpiring = (status: AccessModuleStatus): boolean =>
   isExpiring(status.expirationEpochMillis);
 
+export const isExpiringNotBypassed = (moduleStatus: AccessModuleStatus) => {
+  return isModuleExpiring(moduleStatus) && !moduleStatus.bypassEpochMillis;
+};
+
 const isExpiringAndNotBypassed = (
   moduleName: AccessModule,
   modules: AccessModuleStatus[]
 ) => {
   const status = modules.find((m) => m.moduleName === moduleName);
-  return isModuleExpiring(status) && !status.bypassEpochMillis;
+  return isExpiringNotBypassed(status);
 };
 
 const bypassedOrCompleteAndNotExpiring = (status: AccessModuleStatus) => {

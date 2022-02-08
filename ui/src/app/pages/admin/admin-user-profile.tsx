@@ -23,6 +23,7 @@ import {
   profileNeedsUpdate,
   displayModuleCompletionDate,
   displayModuleExpirationDate,
+  displayModuleStatus,
   displayTierBadgeByRequiredModule,
   getEraNote,
 } from './admin-user-common';
@@ -290,6 +291,7 @@ const ToggleForModule = (props: ToggleProps) => {
 
 interface TableRow {
   moduleName: string;
+  moduleStatus: string;
   completionDate: string;
   expirationDate: string;
   bypassToggle: JSX.Element;
@@ -304,6 +306,7 @@ const AccessModuleTable = (props: AccessModuleTableProps) => {
 
     return {
       moduleName: adminPageTitle,
+      moduleStatus: displayModuleStatus(props.updatedProfile, moduleName),
       completionDate: displayModuleCompletionDate(updatedProfile, moduleName),
       expirationDate: displayModuleExpirationDate(updatedProfile, moduleName),
       accessTierBadge: displayTierBadgeByRequiredModule(
@@ -328,6 +331,7 @@ const AccessModuleTable = (props: AccessModuleTableProps) => {
       }
     >
       <Column field='moduleName' header='Access Module' />
+      <Column field='moduleStatus' header='Status' />
       <Column field='completionDate' header='Last completed on' />
       <Column field='expirationDate' header='Expires on' />
       <Column field='accessTierBadge' header='Required for tier access' />

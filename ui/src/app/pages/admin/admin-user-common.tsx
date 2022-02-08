@@ -166,6 +166,15 @@ export const isBypassed = (
 ): boolean =>
   !!getAccessModuleStatusByName(profile, moduleName)?.bypassEpochMillis;
 
+export const displayModuleStatus = (
+  profile: Profile,
+  moduleName: AccessModule
+): string => {
+  return computeRenewalDisplayDates(
+    getAccessModuleStatusByName(profile, moduleName)
+  ).moduleStatus;
+};
+
 // Some modules may never expire (eg GOOGLE TWO STEP NOTIFICATION, ERA COMMONS etc),
 // in such cases set the expiry date as NEVER
 // For other modules display the expiry date if known, else display '-' (say in case of bypass)

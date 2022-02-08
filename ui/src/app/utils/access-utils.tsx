@@ -29,6 +29,19 @@ import {
   displayDateWithoutHours,
   MILLIS_PER_DAY,
 } from './dates';
+import {
+  hasExpired,
+  isExpiringNotBypassed,
+} from 'app/pages/access/access-renewal';
+
+export enum AccessModulesStatus {
+  NEVER_EXPIRES = 'Complete (Never Expires)',
+  CURRENT = 'Current',
+  EXPIRING_SOON = 'Expiring Soon',
+  EXPIRED = 'Expired',
+  BYPASSED = 'Bypassed',
+  INCOMPLETE = 'Incomplete',
+}
 
 const { useState, useEffect } = React;
 
@@ -422,6 +435,18 @@ export const computeRenewalDisplayDates = ({
   const nextReviewDate = withInvalidDateHandling(expirationEpochMillis);
   const bypassDate = withInvalidDateHandling(bypassEpochMillis);
 
+  function getCompleteOrExpireModuleStatus(): AccessModulesStatus {
+    return cond(
+      [!expirationEpochMillis, () => AccessModulesStatus.NEVER_EXPIRES],
+      [hasExpired(expirationEpochMillis), () => AccessModulesStatus.EXPIRED],
+      [
+        isExpiringNotBypassed({ expirationEpochMillis }),
+        () => AccessModulesStatus.EXPIRING_SOON,
+      ],
+      [!!expirationEpochMillis, () => AccessModulesStatus.CURRENT]
+    );
+  }
+
   return cond(
     // User has bypassed module
     [
@@ -429,6 +454,7 @@ export const computeRenewalDisplayDates = ({
       () => ({
         lastConfirmedDate: `${bypassDate}`,
         nextReviewDate: 'Unavailable (bypassed)',
+        moduleStatus: AccessModulesStatus.BYPASSED,
       }),
     ],
     // User never completed training
@@ -437,6 +463,7 @@ export const computeRenewalDisplayDates = ({
       () => ({
         lastConfirmedDate: 'Unavailable (not completed)',
         nextReviewDate: 'Unavailable (not completed)',
+        moduleStatus: AccessModulesStatus.INCOMPLETE,
       }),
     ],
     // User completed training; covers expired, within-lookback, and after-lookback cases.
@@ -451,6 +478,7 @@ export const computeRenewalDisplayDates = ({
         return {
           lastConfirmedDate,
           nextReviewDate: `${nextReviewDate} ${daysRemainingDisplay}`,
+          moduleStatus: getCompleteOrExpireModuleStatus(),
         };
       },
     ]
