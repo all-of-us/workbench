@@ -168,10 +168,9 @@ export const displayModuleStatus = (
   profile: Profile,
   moduleName: AccessModule
 ): string => {
-  const moduleStatus = computeRenewalDisplayDates(
+  return computeRenewalDisplayDates(
     getAccessModuleStatusByName(profile, moduleName)
   ).moduleStatus;
-  return moduleStatus;
 };
 
 // Some modules may never expire (eg GOOGLE TWO STEP NOTIFICATION, ERA COMMONS etc),

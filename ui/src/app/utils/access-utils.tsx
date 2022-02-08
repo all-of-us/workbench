@@ -35,7 +35,7 @@ import {
 } from 'app/pages/access/access-renewal';
 
 export enum AccessModulesStatus {
-  NEVER_EXPIRE = 'Complete (Never Expire)',
+  NEVER_EXPIRES = 'Complete (Never Expires)',
   CURRENT = 'Current',
   EXPIRING_SOON = 'Expiring Soon',
   EXPIRED = 'Expired',
@@ -435,15 +435,15 @@ export const computeRenewalDisplayDates = ({
   const nextReviewDate = withInvalidDateHandling(expirationEpochMillis);
   const bypassDate = withInvalidDateHandling(bypassEpochMillis);
 
-  function getModuleStatus(): AccessModulesStatus {
+  function getCompleteOrExpireModuleStatus(): AccessModulesStatus {
     return cond(
+      [!expirationEpochMillis, () => AccessModulesStatus.NEVER_EXPIRES],
       [hasExpired(expirationEpochMillis), () => AccessModulesStatus.EXPIRED],
       [
         isExpiringNotBypassed({ expirationEpochMillis }),
         () => AccessModulesStatus.EXPIRING_SOON,
       ],
-      [!!expirationEpochMillis, () => AccessModulesStatus.CURRENT],
-      [!expirationEpochMillis, () => AccessModulesStatus.NEVER_EXPIRE]
+      [!!expirationEpochMillis, () => AccessModulesStatus.CURRENT]
     );
   }
 
@@ -478,7 +478,7 @@ export const computeRenewalDisplayDates = ({
         return {
           lastConfirmedDate,
           nextReviewDate: `${nextReviewDate} ${daysRemainingDisplay}`,
-          moduleStatus: getModuleStatus(),
+          moduleStatus: getCompleteOrExpireModuleStatus(),
         };
       },
     ]
