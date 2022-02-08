@@ -4,7 +4,7 @@ import { FlexRow } from './flex';
 import { AlarmExclamation } from './icons';
 import { Button } from './buttons';
 import { reactStyles } from 'app/utils';
-import colors from 'app/styles/colors';
+import colors, { colorWithWhiteness } from 'app/styles/colors';
 
 const styles = reactStyles({
   box: {
@@ -13,7 +13,7 @@ const styles = reactStyles({
     width: '380.5px',
     border: '0.5px solid rgba(38,34,98,0.5)',
     borderRadius: '5px',
-    backgroundColor: 'rgba(38,34,98,0.08)',
+    backgroundColor: colorWithWhiteness(colors.warning, 0.9),
     alignItems: 'center',
     justifyContent: 'center',
     marginLeft: 'auto',
