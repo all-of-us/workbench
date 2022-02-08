@@ -6,6 +6,8 @@ import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbUserRecentResource;
 import org.springframework.data.repository.CrudRepository;
 
+// This DAO will be replaced by UserRecentlyModifiedResourceDao
+@Deprecated
 public interface UserRecentResourceDao extends CrudRepository<DbUserRecentResource, Long> {
 
   long countUserRecentResourceByUserId(long userId);

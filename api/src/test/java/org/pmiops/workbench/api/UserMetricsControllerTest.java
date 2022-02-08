@@ -24,6 +24,7 @@ import org.pmiops.workbench.cohorts.CohortMapperImpl;
 import org.pmiops.workbench.cohorts.CohortService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.conceptset.mapper.ConceptSetMapperImpl;
+import org.pmiops.workbench.dataset.DataSetService;
 import org.pmiops.workbench.dataset.mapper.DataSetMapperImpl;
 import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
@@ -34,6 +35,7 @@ import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserRecentResource;
+import org.pmiops.workbench.db.model.DbUserRecentlyModifiedResource;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
@@ -64,6 +66,9 @@ public class UserMetricsControllerTest {
 
   @Mock private CloudStorageClient mockCloudStorageClient;
   @Mock private UserRecentResourceService mockUserRecentResourceService;
+  @Mock private CohortService mockCohortService;
+  @Mock private ConceptSetService mockConceptSetService;
+  @Mock private DataSetService mockDataSetService;
   @Mock private Provider<DbUser> mockUserProvider;
   @Mock private FireCloudService mockFireCloudService;
   @Mock private WorkspaceDao workspaceDao;
@@ -79,9 +84,10 @@ public class UserMetricsControllerTest {
   private UserMetricsController userMetricsController;
 
   private DbUser dbUser;
-  private DbUserRecentResource dbUserRecentResource1;
-  private DbUserRecentResource dbUserRecentResource2;
-  private DbUserRecentResource dbUserRecentResource3;
+
+  private DbUserRecentlyModifiedResource dbUserRecentlyModifiedResource1;
+  private DbUserRecentlyModifiedResource dbUserRecentlyModifiedResource2;
+  private DbUserRecentlyModifiedResource dbUserRecentlyModifiedResource3;
 
   private DbWorkspace dbWorkspace1;
   private DbWorkspace dbWorkspace2;
@@ -118,6 +124,7 @@ public class UserMetricsControllerTest {
     dbCohort.setDescription("Cohort description");
     dbCohort.setLastModifiedTime(new Timestamp(fakeClock.millis()));
     dbCohort.setCreationTime(new Timestamp(fakeClock.millis()));
+    when(mockCohortService.findDbCohortByCohortId(1l)).thenReturn(dbCohort);
 
     DbConceptSet dbConceptSet = new DbConceptSet();
     dbConceptSet.setName("Concept Set");
@@ -126,6 +133,7 @@ public class UserMetricsControllerTest {
     dbConceptSet.setDomainEnum(Domain.CONDITION);
     dbConceptSet.setLastModifiedTime(new Timestamp(fakeClock.millis()));
     dbConceptSet.setCreationTime(new Timestamp(fakeClock.millis()));
+    when(mockConceptSetService.getDbConceptSet(2l, 1l)).thenReturn(dbConceptSet);
 
     dbWorkspace1 = new DbWorkspace();
     dbWorkspace1.setWorkspaceId(1L);
@@ -139,27 +147,29 @@ public class UserMetricsControllerTest {
     dbWorkspace2.setFirecloudName("firecloudName2");
     dbWorkspace2.setCdrVersion(dbCdrVersion);
 
-    dbUserRecentResource1 = new DbUserRecentResource();
-    dbUserRecentResource1.setNotebookName("gs://bucketFile/notebooks/notebook1.ipynb");
-    dbUserRecentResource1.setCohort(null);
-    dbUserRecentResource1.setLastAccessDate(new Timestamp(fakeClock.millis()));
-    dbUserRecentResource1.setUserId(dbUser.getUserId());
-    dbUserRecentResource1.setWorkspaceId(dbWorkspace1.getWorkspaceId());
+    dbUserRecentlyModifiedResource1 = new DbUserRecentlyModifiedResource();
+    dbUserRecentlyModifiedResource1.setResourceType(
+        DbUserRecentlyModifiedResource.DbUserRecentlyModifiedResourceType.NOTEBOOK);
+    dbUserRecentlyModifiedResource1.setResourceId("gs://bucketFile/notebooks/notebook1.ipynb");
+    dbUserRecentlyModifiedResource1.setLastAccessDate(new Timestamp(fakeClock.millis()));
+    dbUserRecentlyModifiedResource1.setUserId(dbUser.getUserId());
+    dbUserRecentlyModifiedResource1.setWorkspaceId(dbWorkspace1.getWorkspaceId());
 
-    dbUserRecentResource2 = new DbUserRecentResource();
-    dbUserRecentResource2.setNotebookName(null);
-    dbUserRecentResource2.setCohort(dbCohort);
-    dbUserRecentResource2.setLastAccessDate(new Timestamp(fakeClock.millis() - 10000));
-    dbUserRecentResource2.setUserId(dbUser.getUserId());
-    dbUserRecentResource2.setWorkspaceId(dbWorkspace2.getWorkspaceId());
+    dbUserRecentlyModifiedResource2 = new DbUserRecentlyModifiedResource();
+    dbUserRecentlyModifiedResource2.setResourceType(
+        DbUserRecentlyModifiedResource.DbUserRecentlyModifiedResourceType.COHORT);
+    dbUserRecentlyModifiedResource2.setResourceId(dbCohort.getCohortId() + "");
+    dbUserRecentlyModifiedResource2.setLastAccessDate(new Timestamp(fakeClock.millis() - 10000));
+    dbUserRecentlyModifiedResource2.setUserId(dbUser.getUserId());
+    dbUserRecentlyModifiedResource2.setWorkspaceId(dbWorkspace2.getWorkspaceId());
 
-    dbUserRecentResource3 = new DbUserRecentResource();
-    dbUserRecentResource3.setNotebookName("gs://bucketFile/notebooks/notebook2.ipynb");
-    dbUserRecentResource3.setCohort(null);
-    dbUserRecentResource3.setConceptSet(dbConceptSet);
-    dbUserRecentResource3.setLastAccessDate(new Timestamp(fakeClock.millis() - 10000));
-    dbUserRecentResource3.setUserId(dbUser.getUserId());
-    dbUserRecentResource3.setWorkspaceId(dbWorkspace2.getWorkspaceId());
+    dbUserRecentlyModifiedResource3 = new DbUserRecentlyModifiedResource();
+    dbUserRecentlyModifiedResource3.setResourceType(
+        DbUserRecentlyModifiedResource.DbUserRecentlyModifiedResourceType.CONCEPT_SET);
+    dbUserRecentlyModifiedResource3.setResourceId(dbConceptSet.getConceptSetId() + "");
+    dbUserRecentlyModifiedResource3.setLastAccessDate(new Timestamp(fakeClock.millis() - 10000));
+    dbUserRecentlyModifiedResource3.setUserId(dbUser.getUserId());
+    dbUserRecentlyModifiedResource3.setWorkspaceId(dbWorkspace2.getWorkspaceId());
 
     final FirecloudWorkspaceDetails fcWorkspace1 = new FirecloudWorkspaceDetails();
     fcWorkspace1.setNamespace(dbWorkspace1.getFirecloudName());
@@ -180,9 +190,12 @@ public class UserMetricsControllerTest {
 
     when(mockUserProvider.get()).thenReturn(dbUser);
 
-    when(mockUserRecentResourceService.findAllResourcesByUser(dbUser.getUserId()))
+    when(mockUserRecentResourceService.findAllRecentlyModifiedResourcesByUser(dbUser.getUserId()))
         .thenReturn(
-            Arrays.asList(dbUserRecentResource1, dbUserRecentResource2, dbUserRecentResource3));
+            Arrays.asList(
+                dbUserRecentlyModifiedResource1,
+                dbUserRecentlyModifiedResource2,
+                dbUserRecentlyModifiedResource3));
 
     when(mockCloudStorageClient.getExistingBlobIdsIn(anyList()))
         .then(
@@ -197,6 +210,9 @@ public class UserMetricsControllerTest {
     userMetricsController =
         new UserMetricsController(
             mockCloudStorageClient,
+            mockCohortService,
+            mockConceptSetService,
+            mockDataSetService,
             mockFireCloudService,
             mockUserProvider,
             mockUserRecentResourceService,
@@ -225,9 +241,9 @@ public class UserMetricsControllerTest {
 
   @Test
   public void testGetUserRecentResourceFromRawBucket() {
-    dbUserRecentResource1.setNotebookName("gs://bucketFile/notebook.ipynb");
-    when(mockUserRecentResourceService.findAllResourcesByUser(dbUser.getUserId()))
-        .thenReturn(Collections.singletonList(dbUserRecentResource1));
+    dbUserRecentlyModifiedResource1.setResourceId("gs://bucketFile/notebook.ipynb");
+    when(mockUserRecentResourceService.findAllRecentlyModifiedResourcesByUser(dbUser.getUserId()))
+        .thenReturn(Collections.singletonList(dbUserRecentlyModifiedResource1));
 
     WorkspaceResourceResponse recentResources =
         userMetricsController.getUserRecentResources().getBody();
@@ -238,9 +254,9 @@ public class UserMetricsControllerTest {
 
   @Test
   public void testGetUserRecentResourceWithDuplicatedNameInPath() {
-    dbUserRecentResource1.setNotebookName("gs://bucketFile/nb.ipynb/intermediate/nb.ipynb");
-    when(mockUserRecentResourceService.findAllResourcesByUser(dbUser.getUserId()))
-        .thenReturn(Collections.singletonList(dbUserRecentResource1));
+    dbUserRecentlyModifiedResource1.setResourceId("gs://bucketFile/nb.ipynb/intermediate/nb.ipynb");
+    when(mockUserRecentResourceService.findAllRecentlyModifiedResourcesByUser(dbUser.getUserId()))
+        .thenReturn(Collections.singletonList(dbUserRecentlyModifiedResource1));
 
     WorkspaceResourceResponse recentResources =
         userMetricsController.getUserRecentResources().getBody();
@@ -252,9 +268,10 @@ public class UserMetricsControllerTest {
 
   @Test
   public void testGetUserRecentResourceWithSpacesInPath() {
-    dbUserRecentResource1.setNotebookName("gs://bucketFile/note books/My favorite notebook.ipynb");
-    when(mockUserRecentResourceService.findAllResourcesByUser(dbUser.getUserId()))
-        .thenReturn(Collections.singletonList(dbUserRecentResource1));
+    dbUserRecentlyModifiedResource1.setResourceId(
+        "gs://bucketFile/note books/My favorite notebook.ipynb");
+    when(mockUserRecentResourceService.findAllRecentlyModifiedResourcesByUser(dbUser.getUserId()))
+        .thenReturn(Collections.singletonList(dbUserRecentlyModifiedResource1));
 
     WorkspaceResourceResponse recentResources =
         userMetricsController.getUserRecentResources().getBody();
@@ -267,9 +284,9 @@ public class UserMetricsControllerTest {
 
   @Test
   public void testGetUserRecentResourceInvalidURINotebookPath() {
-    dbUserRecentResource1.setNotebookName("my local notebook directory: notebook.ipynb");
-    when(mockUserRecentResourceService.findAllResourcesByUser(dbUser.getUserId()))
-        .thenReturn(Collections.singletonList(dbUserRecentResource1));
+    dbUserRecentlyModifiedResource1.setResourceId("my local notebook directory: notebook.ipynb");
+    when(mockUserRecentResourceService.findAllRecentlyModifiedResourcesByUser(dbUser.getUserId()))
+        .thenReturn(Collections.singletonList(dbUserRecentlyModifiedResource1));
 
     WorkspaceResourceResponse recentResources =
         userMetricsController.getUserRecentResources().getBody();
@@ -279,9 +296,9 @@ public class UserMetricsControllerTest {
 
   @Test
   public void testGetUserRecentResourceNotebookPathEndsWithSlash() {
-    dbUserRecentResource1.setNotebookName("gs://bucketFile/notebooks/notebook.ipynb/");
-    when(mockUserRecentResourceService.findAllResourcesByUser(dbUser.getUserId()))
-        .thenReturn(Collections.singletonList(dbUserRecentResource1));
+    dbUserRecentlyModifiedResource1.setResourceId("gs://bucketFile/notebooks/notebook.ipynb/");
+    when(mockUserRecentResourceService.findAllRecentlyModifiedResourcesByUser(dbUser.getUserId()))
+        .thenReturn(Collections.singletonList(dbUserRecentlyModifiedResource1));
 
     WorkspaceResourceResponse recentResources =
         userMetricsController.getUserRecentResources().getBody();
@@ -294,9 +311,9 @@ public class UserMetricsControllerTest {
   // RW-7498 regression test
   @Test
   public void testGetUserRecentResource_notebookNameWithParen() {
-    dbUserRecentResource1.setNotebookName("gs://bucketFile/notebooks/notebook :).ipynb");
-    when(mockUserRecentResourceService.findAllResourcesByUser(dbUser.getUserId()))
-        .thenReturn(Collections.singletonList(dbUserRecentResource1));
+    dbUserRecentlyModifiedResource1.setResourceId("gs://bucketFile/notebooks/notebook :).ipynb");
+    when(mockUserRecentResourceService.findAllRecentlyModifiedResourcesByUser(dbUser.getUserId()))
+        .thenReturn(Collections.singletonList(dbUserRecentlyModifiedResource1));
 
     WorkspaceResourceResponse recentResources =
         userMetricsController.getUserRecentResources().getBody();
@@ -306,11 +323,13 @@ public class UserMetricsControllerTest {
 
   @Test
   public void testGetUserRecentResourceNonexistentNotebook() {
-    dbUserRecentResource1.setNotebookName("gs://bkt/notebooks/notebook.ipynb");
-    dbUserRecentResource2.setCohort(null);
-    dbUserRecentResource2.setNotebookName("gs://bkt/notebooks/not-found.ipynb");
-    when(mockUserRecentResourceService.findAllResourcesByUser(dbUser.getUserId()))
-        .thenReturn(ImmutableList.of(dbUserRecentResource1, dbUserRecentResource2));
+    dbUserRecentlyModifiedResource1.setResourceId("gs://bkt/notebooks/notebook.ipynb");
+    dbUserRecentlyModifiedResource2.setResourceType(
+        DbUserRecentlyModifiedResource.DbUserRecentlyModifiedResourceType.NOTEBOOK);
+    dbUserRecentlyModifiedResource2.setResourceId("gs://bkt/notebooks/not-found.ipynb");
+    when(mockUserRecentResourceService.findAllRecentlyModifiedResourcesByUser(dbUser.getUserId()))
+        .thenReturn(
+            ImmutableList.of(dbUserRecentlyModifiedResource1, dbUserRecentlyModifiedResource2));
     when(mockCloudStorageClient.getExistingBlobIdsIn(anyList()))
         .thenReturn(ImmutableSet.of(BlobId.of("bkt", "notebooks/notebook.ipynb")));
 
@@ -339,18 +358,20 @@ public class UserMetricsControllerTest {
 
   @Test
   public void testGetUserRecentResources_missingWorkspace() {
-    dbUserRecentResource1.setWorkspaceId(9999); // missing workspace
-    when(mockUserRecentResourceService.findAllResourcesByUser(dbUser.getUserId()))
-        .thenReturn(ImmutableList.of(dbUserRecentResource1, dbUserRecentResource2));
+    dbUserRecentlyModifiedResource1.setWorkspaceId(9999); // missing workspace
+    when(mockUserRecentResourceService.findAllRecentlyModifiedResourcesByUser(dbUser.getUserId()))
+        .thenReturn(
+            ImmutableList.of(dbUserRecentlyModifiedResource1, dbUserRecentlyModifiedResource2));
     WorkspaceResourceResponse recentResources =
         userMetricsController.getUserRecentResources().getBody();
     assertThat(recentResources.size()).isEqualTo(1);
     WorkspaceResource foundResource = recentResources.get(0);
     final Cohort cohort1 = foundResource.getCohort();
-    final Cohort cohort2 = cohortMapper.dbModelToClient(dbUserRecentResource2.getCohort());
+    final Long cohort2Id = Long.parseLong(dbUserRecentlyModifiedResource2.getResourceId());
 
-    assertThat(cohort1).isEqualTo(cohort2);
-    assertThat(foundResource.getWorkspaceId()).isEqualTo(dbUserRecentResource2.getWorkspaceId());
+    assertThat(cohort1.getId()).isEqualTo(cohort2Id);
+    assertThat(foundResource.getWorkspaceId())
+        .isEqualTo(dbUserRecentlyModifiedResource2.getWorkspaceId());
   }
 
   @Test
@@ -369,14 +390,14 @@ public class UserMetricsControllerTest {
   @Test
   public void testDeleteResource() {
     RecentResourceRequest request = new RecentResourceRequest();
-    request.setNotebookName(dbUserRecentResource1.getNotebookName());
+    request.setNotebookName(dbUserRecentlyModifiedResource1.getResourceId());
     userMetricsController.deleteRecentResource(
         dbWorkspace2.getWorkspaceNamespace(), dbWorkspace2.getFirecloudName(), request);
     verify(mockUserRecentResourceService)
         .deleteNotebookEntry(
             dbWorkspace2.getWorkspaceId(),
             dbUser.getUserId(),
-            dbUserRecentResource1.getNotebookName());
+            dbUserRecentlyModifiedResource1.getResourceId());
   }
 
   @Test
@@ -413,21 +434,27 @@ public class UserMetricsControllerTest {
 
   @Test
   public void testHasValidBlobIdIfNotebookNamePresent_nullNotebookName_passes() {
-    dbUserRecentResource1.setNotebookName(null);
-    assertThat(userMetricsController.hasValidBlobIdIfNotebookNamePresent(dbUserRecentResource1))
+    dbUserRecentlyModifiedResource1.setResourceId(null);
+    assertThat(
+            userMetricsController.hasValidBlobIdIfNotebookNamePresent(
+                dbUserRecentlyModifiedResource1))
         .isTrue();
   }
 
   @Test
   public void testHasValidBlobIdIfNotebookNamePresent_validNotebookName_passes() {
-    assertThat(userMetricsController.hasValidBlobIdIfNotebookNamePresent(dbUserRecentResource1))
+    assertThat(
+            userMetricsController.hasValidBlobIdIfNotebookNamePresent(
+                dbUserRecentlyModifiedResource1))
         .isTrue();
   }
 
   @Test
   public void testHasValidBlobIdIfNotebookNamePresent_invalidNotebookName_fails() {
-    dbUserRecentResource1.setNotebookName("invalid-notebook@name");
-    assertThat(userMetricsController.hasValidBlobIdIfNotebookNamePresent(dbUserRecentResource1))
+    dbUserRecentlyModifiedResource1.setResourceId("invalid-notebook@name");
+    assertThat(
+            userMetricsController.hasValidBlobIdIfNotebookNamePresent(
+                dbUserRecentlyModifiedResource1))
         .isFalse();
   }
 
