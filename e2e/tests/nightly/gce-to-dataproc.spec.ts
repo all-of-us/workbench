@@ -76,7 +76,6 @@ describe('Updating runtime compute type', () => {
 
     // Delete runtime
     await notebook.deleteRuntime();
-    await notebook.deleteUnattachedPd();
 
     // Verify that dataproc settings are still shown
     await runtimePanel.open();

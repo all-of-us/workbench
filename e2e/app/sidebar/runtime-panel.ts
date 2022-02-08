@@ -8,6 +8,7 @@ import BaseSidebar from './base-sidebar';
 import { logger } from 'libs/logger';
 import RadioButton from 'app/element/radiobutton';
 import { config } from 'resources/workbench-config';
+import Checkbox from 'app/element/checkbox';
 
 const defaultXpath = '//*[@id="runtime-panel"]';
 
@@ -61,18 +62,50 @@ export default class RuntimePanel extends BaseSidebar {
     return await ramDropdown.getSelectedValue();
   }
 
-  async pickDiskGbs(diskGbs: number): Promise<void> {
-    const diskInput = new PrimereactInputNumber(this.page, '//*[@id="runtime-disk"]');
+  private getStandardDiskSelector(): string {
+    const id = config.ENABLED_PERSISTENT_DISK ? 'runtime-disk' : 'standard-disk';
+    return `//*[@id="${id}"]`;
+  }
+
+  getStandardDiskInput(): PrimereactInputNumber {
+    return new PrimereactInputNumber(this.page, this.getStandardDiskSelector());
+  }
+
+  async pickStandardDiskGbs(diskGbs: number): Promise<void> {
+    const diskInput = this.getStandardDiskInput();
     return await diskInput.setValue(diskGbs);
   }
 
-  getDiskInput(): PrimereactInputNumber {
-    return new PrimereactInputNumber(this.page, '//*[@id="runtime-disk"]');
+  async getStandardDiskGbs(): Promise<number> {
+    const diskInput = this.getStandardDiskInput();
+    return await diskInput.getInputValue();
   }
 
-  async getDiskGbs(): Promise<number> {
-    const diskInput = this.getDiskInput();
+  getDetachableDiskInput(): PrimereactInputNumber {
+    return new PrimereactInputNumber(this.page, '//*[@id="detachable-disk"]');
+  }
+
+  async pickDetachableDiskGbs(diskGbs: number): Promise<void> {
+    const diskInput = this.getDetachableDiskInput();
+    return await diskInput.setValue(diskGbs);
+  }
+
+  async getDetachableDiskGbs(): Promise<number> {
+    const diskInput = this.getDetachableDiskInput();
     return await diskInput.getInputValue();
+  }
+
+  private getDetachableRadioButton(detachable: boolean): RadioButton {
+    const name = detachable ? 'detachableDisk' : 'standardDisk';
+    return RadioButton.findByName(this.page, { name });
+  }
+
+  async isDetachableDisk(): Promise<boolean> {
+    return await this.getDetachableRadioButton(true).isSelected();
+  }
+
+  async pickDetachableDisk(detachable = true): Promise<void> {
+    await this.getDetachableRadioButton(detachable).select();
   }
 
   getComputeTypeSelect(): SelectMenu {
@@ -82,6 +115,15 @@ export default class RuntimePanel extends BaseSidebar {
   async pickComputeType(computeType: ComputeType): Promise<void> {
     const computeTypeDropdown = this.getComputeTypeSelect();
     return await computeTypeDropdown.select(computeType);
+  }
+
+  getEnableGpu(): Checkbox {
+    return Checkbox.findByName(this.page, { id: 'enable-gpu' });
+  }
+
+  async pickEnableGpu(enable = true): Promise<void> {
+    const checkbox = this.getEnableGpu();
+    return enable ? checkbox.check() : checkbox.unCheck();
   }
 
   getAutoPauseSelect(): SelectMenu {
