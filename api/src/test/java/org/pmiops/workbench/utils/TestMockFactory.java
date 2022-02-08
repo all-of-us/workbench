@@ -15,8 +15,10 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.db.dao.AccessModuleDao;
@@ -48,6 +50,9 @@ public class TestMockFactory {
   private static final String WORKSPACE_FIRECLOUD_NAME =
       "gonewiththewind"; // should match workspace name w/o spaces
   public static final String DEFAULT_GOOGLE_PROJECT = "aou-rw-test-123";
+
+  // for creating multiple workspaces with different access levels
+  private static Map<String, String> accessLevelMap = new HashMap<>();
 
   /**
    * Populate the list of expected Access Modules with appropriate properties. See
@@ -170,7 +175,8 @@ public class TestMockFactory {
         .status(LeonardoRuntimeStatus.STOPPED);
   }
 
-  public static void stubCreateFcWorkspace(FireCloudService fireCloudService) {
+  public static void stubCreateFcWorkspace(
+      FireCloudService fireCloudService, WorkspaceAccessLevel... workspaceAccessLevels) {
     doAnswer(
             invocation -> {
               String capturedWorkspaceName = (String) invocation.getArguments()[1];
@@ -180,7 +186,13 @@ public class TestMockFactory {
 
               FirecloudWorkspaceResponse fcResponse = new FirecloudWorkspaceResponse();
               fcResponse.setWorkspace(fcWorkspace);
-              fcResponse.setAccessLevel(WorkspaceAccessLevel.OWNER.toString());
+              String accessLevelKey = capturedWorkspaceName + capturedWorkspaceNamespace;
+              if (workspaceAccessLevels.length == 0) {
+                accessLevelMap.put(accessLevelKey, WorkspaceAccessLevel.OWNER.toString());
+              } else {
+                accessLevelMap.put(accessLevelKey, workspaceAccessLevels[0].toString());
+              }
+              fcResponse.setAccessLevel(accessLevelMap.get(accessLevelKey));
 
               doReturn(fcResponse)
                   .when(fireCloudService)
