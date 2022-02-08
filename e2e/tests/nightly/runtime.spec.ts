@@ -39,10 +39,12 @@ describe('Updating runtime status', () => {
     await runtimePanel.deleteRuntime();
   });
 
-  test.only('Create with detachable disk, re-attach, delete', async () => {
-    await createWorkspace(page, { cdrVersionName: config.DEFAULT_CDR_VERSION_NAME });
+  test('Create with detachable disk, re-attach, delete', async () => {
+    await createWorkspace(page);
 
     const runtimePanel = new RuntimePanel(page);
+    await runtimePanel.open();
+    await runtimePanel.getCustomizeButton().click();
 
     // Select detachable disk, start.
     await runtimePanel.pickDetachableDisk();
@@ -52,7 +54,11 @@ describe('Updating runtime status', () => {
     let dataPage = new WorkspaceDataPage(page);
     let notebookPage = await dataPage.createNotebook(makeRandomName('disk-before'));
     await notebookPage.uploadFile(diskBeforeNotebookName, diskBeforeNotebookFilePath);
-    await notebookPage.runCodeFile(1, diskBeforeNotebookName);
+    let codeOutput = await notebookPage.runCodeFile(1, diskBeforeNotebookName);
+    expect(codeOutput).toMatch(/success$/);
+
+    await notebookPage.save();
+    dataPage = await notebookPage.goDataPage();
 
     // Select increase detachable disk, enable GPU to force a recreate.
     await runtimePanel.open();
@@ -61,12 +67,13 @@ describe('Updating runtime status', () => {
     await runtimePanel.applyChanges();
 
     // Run notebook to verify file is still on disk; check new disk size.
-    dataPage = new WorkspaceDataPage(page);
     notebookPage = await dataPage.createNotebook(makeRandomName('disk-after'));
     await notebookPage.uploadFile(diskAfterNotebookName, diskAfterNotebookFilePath);
-    await notebookPage.runCodeFile(1, diskAfterNotebookName);
+    codeOutput = await notebookPage.runCodeFile(1, diskAfterNotebookName);
+    expect(codeOutput).toMatch(/success$/);
 
     // Delete runtime, then delete disk
+    await runtimePanel.open();
     await runtimePanel.deleteRuntime();
     await runtimePanel.deleteUnattachedPd();
   });

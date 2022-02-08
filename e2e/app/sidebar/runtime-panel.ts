@@ -9,6 +9,7 @@ import { logger } from 'libs/logger';
 import RadioButton from 'app/element/radiobutton';
 import { config } from 'resources/workbench-config';
 import Checkbox from 'app/element/checkbox';
+import { waitWhileLoading } from 'utils/waits-utils';
 
 const defaultXpath = '//*[@id="runtime-panel"]';
 
@@ -63,7 +64,7 @@ export default class RuntimePanel extends BaseSidebar {
   }
 
   private getStandardDiskSelector(): string {
-    const id = config.ENABLED_PERSISTENT_DISK ? 'runtime-disk' : 'standard-disk';
+    const id = config.ENABLED_PERSISTENT_DISK ? 'standard-disk' : 'runtime-disk';
     return `//*[@id="${id}"]`;
   }
 
@@ -96,8 +97,8 @@ export default class RuntimePanel extends BaseSidebar {
   }
 
   private getDetachableRadioButton(detachable: boolean): RadioButton {
-    const name = detachable ? 'detachableDisk' : 'standardDisk';
-    return RadioButton.findByName(this.page, { name });
+    const dataTestId = detachable ? 'detachable-disk-radio' : 'standard-disk-radio';
+    return RadioButton.findByName(this.page, { dataTestId });
   }
 
   async isDetachableDisk(): Promise<boolean> {
@@ -324,14 +325,20 @@ export default class RuntimePanel extends BaseSidebar {
     logger.info('Unattached persistent disk is deleted');
   }
 
-  async applyChanges(): Promise<NotebookPreviewPage> {
+  async applyChanges(expectPreviewPageNavigate = false): Promise<NotebookPreviewPage|null> {
     await this.clickButton(LinkText.Next);
     await this.clickButton(LinkText.ApplyRecreate);
     await this.waitUntilClose();
 
-    // Automatically opens the Preview page
-    const notebookPreviewPage = new NotebookPreviewPage(this.page);
-    await notebookPreviewPage.waitForLoad();
+    // The preview page automatically opens only if the browser is currently on a
+    // notebook / terminal page.
+    let notebookPreviewPage = null;
+    if (expectPreviewPageNavigate) {
+      notebookPreviewPage = new NotebookPreviewPage(this.page);
+      await notebookPreviewPage.waitForLoad();
+    } else {
+      await waitWhileLoading(this.page);
+    }
 
     // Wait for new runtime running. The runtime status transition from Stopping to None to Running
     await this.open();

@@ -63,7 +63,7 @@ describe('Updating runtime compute type', () => {
     await runtimePanel.pickWorkerDisk(workerDisk);
 
     // Apply changes and wait for new runtime running
-    const notebookPreviewPage = await runtimePanel.applyChanges();
+    const notebookPreviewPage = await runtimePanel.applyChanges(true);
 
     // Go back to the notebook
     await notebookPreviewPage.openEditMode(notebookName);
