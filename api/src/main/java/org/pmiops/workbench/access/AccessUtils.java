@@ -82,20 +82,20 @@ public class AccessUtils {
   // see also: AccessModuleServiceImpl.isModuleRequiredInEnvironment()
   public static final List<AccessModuleName> REQUIRED_MODULES_FOR_REGISTERED_TIER =
       ImmutableList.of(
-          AccessModuleName.TWO_FACTOR_AUTH,
-          AccessModuleName.RT_COMPLIANCE_TRAINING,
           AccessModuleName.DATA_USER_CODE_OF_CONDUCT,
-          AccessModuleName.RAS_LOGIN_GOV,
           AccessModuleName.PROFILE_CONFIRMATION,
-          AccessModuleName.PUBLICATION_CONFIRMATION);
+          AccessModuleName.PUBLICATION_CONFIRMATION,
+          AccessModuleName.RAS_LOGIN_GOV,
+          AccessModuleName.RT_COMPLIANCE_TRAINING,
+          AccessModuleName.TWO_FACTOR_AUTH);
 
   public static final List<AccessModuleName> REQUIRED_MODULES_FOR_CONTROLLED_TIER =
       ImmutableList.of(
-          AccessModuleName.TWO_FACTOR_AUTH,
-          AccessModuleName.RT_COMPLIANCE_TRAINING,
+          AccessModuleName.CT_COMPLIANCE_TRAINING,
           AccessModuleName.DATA_USER_CODE_OF_CONDUCT,
-          AccessModuleName.RAS_LOGIN_GOV,
           AccessModuleName.PROFILE_CONFIRMATION,
           AccessModuleName.PUBLICATION_CONFIRMATION,
-          AccessModuleName.CT_COMPLIANCE_TRAINING);
+          AccessModuleName.RAS_LOGIN_GOV,
+          AccessModuleName.RT_COMPLIANCE_TRAINING,
+          AccessModuleName.TWO_FACTOR_AUTH);
 }
