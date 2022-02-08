@@ -23,13 +23,6 @@
     "accountId": "00293C-5DEA2D-6887E7",
     "projectNamePrefix": "aou-rw-preprod-",
     "exportBigQueryTable": "all-of-us-rw-prod-bdata.RwProdBillingDataExport.rw_firecloud_view",
-    "retryCount": 4,
-    "bufferCapacityPerTier": {
-      "registered": 20,
-      "controlled": 20
-    },
-    "bufferRefillProjectsPerTask": 1,
-    "bufferStatusChecksPerTask": 10,
     "defaultFreeCreditsDollarLimit": 300.0,
     "freeTierCostAlertThresholds": [
       0.5,
