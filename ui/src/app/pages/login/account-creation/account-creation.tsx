@@ -211,6 +211,14 @@ export class AccountCreation extends React.Component<
   validate(): { [key: string]: string } {
     const { gsuiteDomain } = serverConfigStore.get().config;
 
+    // The validation data for this form is *almost* the raw Profile, except for the additional
+    // 'usernameWithEmail' field we're adding, to be able to separate our validation on the
+    // username itself from validation of the full email address. For this reason, we need to cast
+    // the profile object to 'any'.
+    const validationData = { ...this.state.profile } as any;
+    validationData.usernameWithEmail =
+      validationData.username + '@' + gsuiteDomain;
+
     const validationCheck = {
       username: {
         presence: {
@@ -222,6 +230,13 @@ export class AccountCreation extends React.Component<
           maximum: 64,
         },
       },
+      usernameWithEmail: isBlank(validationData.username)
+        ? {}
+        : {
+            email: {
+              message: '^Username contains invalid characters',
+            },
+          },
       givenName: {
         presence: {
           allowEmpty: false,
@@ -301,25 +316,6 @@ export class AccountCreation extends React.Component<
         },
       },
     };
-
-    // The validation data for this form is *almost* the raw Profile, except for the additional
-    // 'usernameWithEmail' field we're adding, to be able to separate our validation on the
-    // username itself from validation of the full email address. For this reason, we need to cast
-    // the profile object to 'any'.
-    const validationData = { ...this.state.profile } as any;
-    validationData.usernameWithEmail =
-      validationData.username + '@' + gsuiteDomain;
-
-    if (!isBlank(validationData.username)) {
-      // Property 'usernameWithEmail' does not exist on type ...
-      // TODO RW-5572 confirm proper behavior and fix
-      // eslint-disable-next-line @typescript-eslint/dot-notation
-      validationCheck['usernameWithEmail'] = {
-        email: {
-          message: '^Username contains invalid characters',
-        },
-      };
-    }
 
     // validatejs requires a scheme, which we don't necessarily need in the profile; rather than
     // forking their website regex, just ensure a scheme ahead of validation.
