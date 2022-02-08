@@ -243,12 +243,11 @@ function getDiseaseNames(keyword) {
     .then((response) => {
       return response.json();
     })
-    .then((matches) => {
-      const labeledMatches = matches.filter((elt) =>
-        elt.hasOwnProperty('label')
-      );
-      return labeledMatches.map((elt) => elt.label);
-    });
+    .then((matches) =>
+      matches
+        .filter((elt) => elt.hasOwnProperty('label'))
+        .map((elt) => elt.label)
+    );
 }
 
 interface UpgradeProps {
