@@ -247,7 +247,11 @@ function getDiseaseNames(keyword) {
       const labeledMatches = fp.filter((elt) => elt.hasOwnProperty('label'))(
         matches
       );
+      // Property 'label' does not exist on type 'unknown'
+      // TODO RW-5572 confirm proper behavior and fix
+      // eslint-disable-next-line @typescript-eslint/dot-notation
       const diseases = fp.map((elt) => elt['label'])(labeledMatches);
+
       return diseases;
     });
 }
@@ -1279,6 +1283,9 @@ export const WorkspaceEdit = fp.flow(
       // Conditionally include optional fields for validation.
       if (otherPurpose) {
         values = { ...values, otherPurposeDetails };
+        // Property 'otherPurposeDetails' does not exist on type 'object'.
+        // TODO RW-5572 confirm proper behavior and fix
+        // eslint-disable-next-line @typescript-eslint/dot-notation
         constraints['otherPurposeDetails'] = requiredStringWithMaxLength(
           500,
           'Other primary purpose'
@@ -1286,12 +1293,18 @@ export const WorkspaceEdit = fp.flow(
       }
       if (populationChecked) {
         values = { ...values, populationDetails };
+        // Property 'populationDetails' does not exist on type 'object'.
+        // TODO RW-5572 confirm proper behavior and fix
+        // eslint-disable-next-line @typescript-eslint/dot-notation
         constraints['populationDetails'] = {
           presence: true,
         };
       }
       if (populationDetails?.includes(SpecificPopulationEnum.OTHER)) {
         values = { ...values, otherPopulationDetails };
+        // Property 'otherPopulationDetails' does not exist on type 'object'.
+        // TODO RW-5572 confirm proper behavior and fix
+        // eslint-disable-next-line @typescript-eslint/dot-notation
         constraints['otherPopulationDetails'] = requiredStringWithMaxLength(
           100,
           'Other Specific Population'
@@ -1299,6 +1312,9 @@ export const WorkspaceEdit = fp.flow(
       }
       if (diseaseFocusedResearch) {
         values = { ...values, diseaseOfFocus };
+        // Property 'diseaseOfFocus' does not exist on type 'object'.
+        // TODO RW-5572 confirm proper behavior and fix
+        // eslint-disable-next-line @typescript-eslint/dot-notation
         constraints['diseaseOfFocus'] = requiredStringWithMaxLength(
           80,
           'Disease of Focus'
@@ -1308,6 +1324,9 @@ export const WorkspaceEdit = fp.flow(
         disseminateResearchFindingList?.includes(DisseminateResearchEnum.OTHER)
       ) {
         values = { ...values, otherDisseminateResearchFindings };
+        // Property 'otherDisseminateResearchFindings' does not exist on type 'object'.
+        // TODO RW-5572 confirm proper behavior and fix
+        // eslint-disable-next-line @typescript-eslint/dot-notation
         constraints['otherDisseminateResearchFindings'] =
           requiredStringWithMaxLength(
             100,
