@@ -4340,7 +4340,10 @@ definitions:
       freeTierBillingAccountId:
         type: string
         description: The free tier billing account id
-
+      accessModules:
+        type: array
+        items:
+          "$ref": "#/definitions/AccessModuleConfig"
   RuntimeImage:
     type: object
     properties:
@@ -4348,7 +4351,19 @@ definitions:
         type: string
       name:
         type: string
-
+  AccessModuleConfig:
+    type: object
+    required:
+      - name
+      - expirable
+      - bypassable
+    properties:
+      name:
+        "$ref": "#/definitions/AccessModule"
+      expirable:
+        type: boolean
+      bypassable:
+        type: boolean
   FeaturedWorkspacesConfigResponse:
     type: object
     properties:

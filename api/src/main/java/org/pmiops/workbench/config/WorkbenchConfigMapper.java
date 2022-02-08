@@ -1,17 +1,23 @@
 package org.pmiops.workbench.config;
 
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.mapstruct.BeforeMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+import org.pmiops.workbench.access.AccessUtils;
+import org.pmiops.workbench.db.model.DbAccessModule;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeConfig.CloudServiceEnum;
+import org.pmiops.workbench.model.AccessModuleConfig;
 import org.pmiops.workbench.model.ConfigResponse;
 import org.pmiops.workbench.model.RuntimeImage;
 import org.pmiops.workbench.utils.mappers.MapStructConfig;
 
-@Mapper(config = MapStructConfig.class)
+@Mapper(
+    config = MapStructConfig.class,
+    uses = {AccessUtils.class})
 public interface WorkbenchConfigMapper {
   default RuntimeImage dataprocToModel(String imageName) {
     return new RuntimeImage().cloudService(CloudServiceEnum.DATAPROC.toString()).name(imageName);
@@ -30,33 +36,41 @@ public interface WorkbenchConfigMapper {
             .collect(Collectors.toList()));
   }
 
+  AccessModuleConfig mapAccessModule(DbAccessModule accessModule);
+
   // handled by mapRuntimeImages()
   @Mapping(target = "runtimeImages", ignore = true)
-  @Mapping(target = "accessRenewalLookback", source = "accessRenewal.lookbackPeriod")
-  @Mapping(target = "gsuiteDomain", source = "googleDirectoryService.gSuiteDomain")
-  @Mapping(target = "projectId", source = "server.projectId")
-  @Mapping(target = "firecloudURL", source = "firecloud.baseUrl")
-  @Mapping(target = "publicApiKeyForErrorReports", source = "server.publicApiKeyForErrorReports")
-  @Mapping(target = "shibbolethUiBaseUrl", source = "firecloud.shibbolethUiBaseUrl")
+  @Mapping(target = "accessRenewalLookback", source = "config.accessRenewal.lookbackPeriod")
+  @Mapping(target = "gsuiteDomain", source = "config.googleDirectoryService.gSuiteDomain")
+  @Mapping(target = "projectId", source = "config.server.projectId")
+  @Mapping(target = "firecloudURL", source = "config.firecloud.baseUrl")
+  @Mapping(
+      target = "publicApiKeyForErrorReports",
+      source = "config.server.publicApiKeyForErrorReports")
+  @Mapping(target = "shibbolethUiBaseUrl", source = "config.firecloud.shibbolethUiBaseUrl")
   @Mapping(
       target = "defaultFreeCreditsDollarLimit",
-      source = "billing.defaultFreeCreditsDollarLimit")
-  @Mapping(target = "enableComplianceTraining", source = "access.enableComplianceTraining")
-  @Mapping(target = "complianceTrainingHost", source = "moodle.host")
-  @Mapping(target = "enableEraCommons", source = "access.enableEraCommons")
-  @Mapping(target = "unsafeAllowSelfBypass", source = "access.unsafeAllowSelfBypass")
-  @Mapping(target = "enableEventDateModifier", source = "featureFlags.enableEventDateModifier")
+      source = "config.billing.defaultFreeCreditsDollarLimit")
+  @Mapping(target = "enableComplianceTraining", source = "config.access.enableComplianceTraining")
+  @Mapping(target = "complianceTrainingHost", source = "config.moodle.host")
+  @Mapping(target = "enableEraCommons", source = "config.access.enableEraCommons")
+  @Mapping(target = "unsafeAllowSelfBypass", source = "config.access.unsafeAllowSelfBypass")
+  @Mapping(
+      target = "enableEventDateModifier",
+      source = "config.featureFlags.enableEventDateModifier")
   @Mapping(
       target = "enableResearchReviewPrompt",
-      source = "featureFlags.enableResearchPurposePrompt")
-  @Mapping(target = "enableRasLoginGovLinking", source = "access.enableRasLoginGovLinking")
-  @Mapping(target = "enforceRasLoginGovLinking", source = "access.enforceRasLoginGovLinking")
-  @Mapping(target = "enableGenomicExtraction", source = "featureFlags.enableGenomicExtraction")
-  @Mapping(target = "enableGpu", source = "featureFlags.enableGpu")
-  @Mapping(target = "enablePersistentDisk", source = "featureFlags.enablePersistentDisk")
-  @Mapping(target = "rasHost", source = "ras.host")
-  @Mapping(target = "rasClientId", source = "ras.clientId")
-  @Mapping(target = "rasLogoutUrl", source = "ras.logoutUrl")
-  @Mapping(target = "freeTierBillingAccountId", source = "billing.accountId")
-  ConfigResponse toModel(WorkbenchConfig config);
+      source = "config.featureFlags.enableResearchPurposePrompt")
+  @Mapping(target = "enableRasLoginGovLinking", source = "config.access.enableRasLoginGovLinking")
+  @Mapping(target = "enforceRasLoginGovLinking", source = "config.access.enforceRasLoginGovLinking")
+  @Mapping(
+      target = "enableGenomicExtraction",
+      source = "config.featureFlags.enableGenomicExtraction")
+  @Mapping(target = "enableGpu", source = "config.featureFlags.enableGpu")
+  @Mapping(target = "enablePersistentDisk", source = "config.featureFlags.enablePersistentDisk")
+  @Mapping(target = "rasHost", source = "config.ras.host")
+  @Mapping(target = "rasClientId", source = "config.ras.clientId")
+  @Mapping(target = "rasLogoutUrl", source = "config.ras.logoutUrl")
+  @Mapping(target = "freeTierBillingAccountId", source = "config.billing.accountId")
+  ConfigResponse toModel(WorkbenchConfig config, List<DbAccessModule> accessModules);
 }

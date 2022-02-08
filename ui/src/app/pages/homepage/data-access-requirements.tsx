@@ -384,9 +384,9 @@ export const getEligibleModules = (
     fp.map(getAccessModuleConfig),
     fp.filter((moduleConfig) => moduleConfig.isEnabledInEnvironment),
     fp.filter((moduleConfig) =>
-      isEraCommonsModuleRequiredByInstitution(profile, moduleConfig.moduleName)
+      isEraCommonsModuleRequiredByInstitution(profile, moduleConfig.name)
     ),
-    fp.map((moduleConfig) => moduleConfig.moduleName)
+    fp.map((moduleConfig) => moduleConfig.name)
   )(modules);
 
 const incompleteModules = (

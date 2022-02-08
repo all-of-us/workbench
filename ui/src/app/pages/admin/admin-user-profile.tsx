@@ -301,8 +301,7 @@ const AccessModuleTable = (props: AccessModuleTableProps) => {
   const { updatedProfile } = props;
 
   const tableData: TableRow[] = accessModulesForTable.map((moduleName) => {
-    const { adminPageTitle, adminBypassable } =
-      getAccessModuleConfig(moduleName);
+    const { adminPageTitle, bypassable } = getAccessModuleConfig(moduleName);
 
     return {
       moduleName: adminPageTitle,
@@ -313,7 +312,7 @@ const AccessModuleTable = (props: AccessModuleTableProps) => {
         props.updatedProfile,
         moduleName
       ),
-      bypassToggle: adminBypassable && (
+      bypassToggle: bypassable && (
         <ToggleForModule moduleName={moduleName} {...props} />
       ),
     };
