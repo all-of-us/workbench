@@ -2,7 +2,6 @@ package org.pmiops.workbench.config;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * A class representing the main workbench configuration; parsed from JSON stored in the database.
@@ -66,9 +65,10 @@ public class WorkbenchConfig {
     return config;
   }
 
-  // Environment config variables related to billing and the billing project buffer (which buffers
-  // GCP projects, aka "billing projects" in Terra terminology).
+  // Environment config variables related to Terra billing projects / GCP projects.
   public static class BillingConfig {
+    // The environment-driven prefix to apply to Terra billing projects we create. Example:
+    // "aou-rw-perf-" causes us to create projects named like "aou-rw-perf-8aec175b".
     public String projectNamePrefix;
     // The free tier GCP billing account ID to associate with Terra / GCP projects.
     public String accountId;
