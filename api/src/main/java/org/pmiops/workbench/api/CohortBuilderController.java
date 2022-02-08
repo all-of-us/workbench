@@ -311,7 +311,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
                     surveyConceptId, questionConceptId, answerConceptId)));
   }
 
-  private void validateDomain(String domain) {
+  protected void validateDomain(String domain) {
     Arrays.stream(Domain.values())
         .filter(domainType -> domainType.toString().equalsIgnoreCase(domain))
         .findFirst()
@@ -319,12 +319,8 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
             () -> new BadRequestException(String.format(BAD_REQUEST_MESSAGE, "domain", domain)));
   }
 
-  private void validateDomain(String domain, String surveyName) {
-    Arrays.stream(Domain.values())
-        .filter(domainType -> domainType.toString().equalsIgnoreCase(domain))
-        .findFirst()
-        .orElseThrow(
-            () -> new BadRequestException(String.format(BAD_REQUEST_MESSAGE, "domain", domain)));
+  protected void validateDomain(String domain, String surveyName) {
+    validateDomain(domain);
     if (Domain.SURVEY.equals(Domain.fromValue(domain))) {
       Optional.ofNullable(surveyName)
           .orElseThrow(
@@ -334,7 +330,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     }
   }
 
-  private void validateType(String type) {
+  protected void validateType(String type) {
     Arrays.stream(CriteriaType.values())
         .filter(critType -> critType.toString().equalsIgnoreCase(type))
         .findFirst()
@@ -342,13 +338,13 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
             () -> new BadRequestException(String.format(BAD_REQUEST_MESSAGE, "type", type)));
   }
 
-  private void validateTerm(String term) {
+  protected void validateTerm(String term) {
     if (term == null || term.trim().isEmpty()) {
       throw new BadRequestException(String.format(BAD_REQUEST_MESSAGE, "search term", term));
     }
   }
 
-  private AgeType validateAgeType(String age) {
+  protected AgeType validateAgeType(String age) {
     return Optional.ofNullable(age)
         .map(AgeType::fromValue)
         .orElseThrow(
@@ -357,7 +353,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
                     String.format(BAD_REQUEST_MESSAGE, "age type parameter", age)));
   }
 
-  private GenderOrSexType validateGenderOrSexType(String genderOrSex) {
+  protected GenderOrSexType validateGenderOrSexType(String genderOrSex) {
     return Optional.ofNullable(genderOrSex)
         .map(GenderOrSexType::fromValue)
         .orElseThrow(

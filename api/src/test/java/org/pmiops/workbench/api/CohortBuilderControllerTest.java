@@ -1,14 +1,22 @@
 package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doReturn;
 
+import java.sql.Date;
+import java.time.LocalDate;
+import java.time.Period;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.inject.Provider;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.pmiops.workbench.FakeClockConfiguration;
@@ -24,6 +32,7 @@ import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.cdr.model.DbCriteriaAttribute;
 import org.pmiops.workbench.cdr.model.DbCriteriaMenu;
 import org.pmiops.workbench.cdr.model.DbDomainCard;
+import org.pmiops.workbench.cdr.model.DbPerson;
 import org.pmiops.workbench.cdr.model.DbSurveyModule;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderServiceImpl;
@@ -34,6 +43,8 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.model.AgeType;
+import org.pmiops.workbench.model.AgeTypeCount;
 import org.pmiops.workbench.model.ConceptIdName;
 import org.pmiops.workbench.model.Criteria;
 import org.pmiops.workbench.model.CriteriaAttribute;
@@ -41,8 +52,11 @@ import org.pmiops.workbench.model.CriteriaSubType;
 import org.pmiops.workbench.model.CriteriaType;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainCard;
+import org.pmiops.workbench.model.DomainCount;
+import org.pmiops.workbench.model.GenderOrSexType;
 import org.pmiops.workbench.model.ParticipantDemographics;
 import org.pmiops.workbench.model.SurveyModule;
+import org.pmiops.workbench.model.SurveyVersion;
 import org.pmiops.workbench.model.SurveyVersionListResponse;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -1052,6 +1066,291 @@ public class CohortBuilderControllerTest {
     assertThat(response.getItems().get(2).getItemCount()).isEqualTo(new Long("150"));
     jdbcTemplate.execute("drop table cb_survey_version");
     jdbcTemplate.execute("drop table cb_survey_attribute");
+  }
+
+  @Disabled(
+      "Cannot be tested without SQL/Java modifications for H2. "
+          + "(a) Native query and not JPQL and (b) MATCH ... against... not H2 function")
+  public void findSurveyCount() {}
+
+  @Test
+  public void findSurveyVersionByQuestionConceptIdAndAnswerConceptId() {
+    jdbcTemplate.execute(
+        "create table cb_survey_version(survey_version_concept_id integer, survey_concept_id integer, display_name varchar(50), display_order integer)");
+    jdbcTemplate.execute(
+        "create table cb_survey_attribute(id integer, question_concept_id integer, answer_concept_id integer, survey_version_concept_id integer, item_count integer)");
+    jdbcTemplate.execute(
+        "insert into cb_survey_version(survey_version_concept_id, survey_concept_id, display_name, display_order) values (999, 111, 'May 2020', 1)");
+    jdbcTemplate.execute(
+        "insert into cb_survey_attribute(id, question_concept_id, answer_concept_id, survey_version_concept_id, item_count) values (1, 222, 333, 999, 200)");
+
+    List<SurveyVersion> response =
+        controller
+            .findSurveyVersionByQuestionConceptIdAndAnswerConceptId(
+                WORKSPACE_NAMESPACE, WORKSPACE_ID, 111L, 222L, 333L)
+            .getBody()
+            .getItems();
+    assertThat(response.get(0).getSurveyVersionConceptId()).isEqualTo(999);
+    assertThat(response.get(0).getDisplayName()).isEqualTo("May 2020");
+    assertThat(response.get(0).getItemCount()).isEqualTo(200);
+
+    jdbcTemplate.execute("drop table cb_survey_version");
+    jdbcTemplate.execute("drop table cb_survey_attribute");
+  }
+
+  @Disabled(
+      "Cannot be tested without SQL/Java modifications for H2. "
+          + "(a) Native query and not JPQL and (b) MATCH ... against... not H2 function")
+  public void findDrugIngredientByConceptId() {}
+
+  @Test
+  public void findAgeTypeCounts() {
+    int age = 25;
+    LocalDate todayDate = LocalDate.now().minusYears(age);
+    // birthday-month-date today
+    LocalDate dob = todayDate.minusDays(0);
+    DbPerson person =
+        DbPerson.builder()
+            .addPersonId(1000L)
+            .addDob(Date.valueOf(dob))
+            .addAgeAtCdr(20)
+            .addAgeAtConsent(18)
+            .addIsDeceased(false)
+            .build();
+    // assert dob month and date is today's month/date
+    assertThat(Period.between(dob, todayDate).getDays()).isEqualTo(0);
+    personDao.save(person);
+
+    // birthday-month-date yesterday
+    dob = todayDate.minusDays(1);
+    person =
+        DbPerson.builder()
+            .addPersonId(1001L)
+            .addDob(Date.valueOf(dob))
+            .addAgeAtCdr(20)
+            .addAgeAtConsent(18)
+            .addIsDeceased(false)
+            .build();
+    // assert dob month and date is yesterday's month/date
+    assertThat(Period.between(dob, todayDate).getDays()).isEqualTo(1);
+    personDao.save(person);
+
+    // birthday-month-date tomorrow
+    dob = todayDate.plusDays(1);
+    person =
+        DbPerson.builder()
+            .addPersonId(1002L)
+            .addDob(Date.valueOf(dob))
+            .addAgeAtCdr(20)
+            .addAgeAtConsent(18)
+            .addIsDeceased(false)
+            .build();
+    // assert dob month and date is tomorrows's month/date
+    assertThat(Period.between(dob, todayDate).getDays()).isEqualTo(-1);
+    // save DbPerson entities
+    personDao.save(person);
+
+    List<AgeTypeCount> expected = new ArrayList<>();
+    // preserve order of output - order by age, count
+    expected.add(new AgeTypeCount().ageType("AGE").age(age - 1).count(1L)); // birthday tomorrow
+    expected.add(
+        new AgeTypeCount().ageType("AGE").age(age).count(2L)); // birthday yesterday and today
+    expected.add(new AgeTypeCount().ageType("AGE_AT_CDR").age(20).count(3L));
+    expected.add(new AgeTypeCount().ageType("AGE_AT_CONSENT").age(18).count(3L));
+
+    List<AgeTypeCount> response =
+        controller.findAgeTypeCounts(WORKSPACE_NAMESPACE, WORKSPACE_ID).getBody().getItems();
+    assertThat(response).isEqualTo(expected);
+  }
+
+  @Test
+  public void findDomainCountByStandardSource() {
+    // standardCriteria
+    for (int i = 0; i < 10; i++) {
+      cbCriteriaDao.save(
+          DbCriteria.builder()
+              .addDomainId(Domain.CONDITION.toString())
+              .addType(CriteriaType.SNOMED.toString())
+              .addCount(100L + i)
+              .addHierarchy(true)
+              .addConceptId(String.valueOf(1000 + i))
+              .addStandard(true)
+              .addSelectable(true)
+              .addCode("120")
+              .addName("Diabetes 1")
+              .addFullText("Diabetes 1[CONDITION_rank1]")
+              .build());
+    }
+    // sourceCriteria
+    cbCriteriaDao.save(
+        DbCriteria.builder()
+            .addDomainId(Domain.CONDITION.toString())
+            .addType(CriteriaType.ICD9CM.toString())
+            .addCount(200L)
+            .addHierarchy(false)
+            .addConceptId("13000")
+            .addStandard(false)
+            .addSelectable(true)
+            .addCode("130")
+            .addName("Other liver")
+            .addFullText("Other liver[CONDITION_rank1]")
+            .build());
+
+    DomainCount domainCountStd =
+        controller
+            .findDomainCountByStandardSource(
+                WORKSPACE_NAMESPACE, WORKSPACE_ID, Domain.CONDITION.toString(), Boolean.TRUE, "120")
+            .getBody();
+    assertThat(domainCountStd.getConceptCount()).isEqualTo(10);
+
+    DomainCount domainCountSrc =
+        controller
+            .findDomainCountByStandardSource(
+                WORKSPACE_NAMESPACE,
+                WORKSPACE_ID,
+                Domain.CONDITION.toString(),
+                Boolean.FALSE,
+                "130")
+            .getBody();
+    assertThat(domainCountSrc.getConceptCount()).isEqualTo(1);
+  }
+
+  @Test
+  public void validateDomainCaseInsensitive() {
+    List<String> values =
+        Stream.of(Domain.values()).map(Domain::toString).collect(Collectors.toList());
+    for (String value : values) {
+      assertDoesNotThrow(
+          () -> controller.validateDomain(value),
+          "BadRequestException is not expected to be thrown for [" + value + "]");
+    }
+    // Do not expect exception for lowercase
+    values.replaceAll(String::toLowerCase);
+    for (String value : values) {
+      assertDoesNotThrow(
+          () -> controller.validateDomain(value.toLowerCase()),
+          "BadRequestException is not expected to be thrown for [" + value + "]");
+    }
+    Throwable exception =
+        assertThrows(
+            BadRequestException.class,
+            () -> controller.validateDomain("BOGUS"),
+            "Expected BadRequestException is not thrown.");
+    assertThat(exception).hasMessageThat().contains("Please provide a valid domain");
+  }
+
+  @Test
+  public void validDomainAndSurveyName() {
+    // While validateDomain is case-insensitive,
+    // this is case sensitive for SURVEY when checking surveyName
+    assertDoesNotThrow(
+        () -> controller.validateDomain("SURVEY", "some survey name"),
+        "BadRequestException is not expected to be thrown for [some survey name]");
+    // survey name cannot be null for SURVEY
+    Throwable exception =
+        assertThrows(
+            BadRequestException.class,
+            () -> controller.validateDomain("SURVEY", null),
+            "Expected BadRequestException is not thrown.");
+    assertThat(exception).hasMessageThat().contains("Please provide a valid surveyName");
+  }
+
+  @Test
+  public void validateType() {
+    List<String> values =
+        Stream.of(CriteriaType.values()).map(CriteriaType::toString).collect(Collectors.toList());
+    for (String value : values) {
+      assertDoesNotThrow(
+          () -> controller.validateType(value),
+          "BadRequestException is not expected to be thrown for [" + value + "]");
+    }
+    // Do not expect exception for lowercase
+    values.replaceAll(String::toLowerCase);
+    for (String value : values) {
+      assertDoesNotThrow(
+          () -> controller.validateType(value.toLowerCase()),
+          "BadRequestException is not expected to be thrown for [" + value + "]");
+    }
+    Throwable exception =
+        assertThrows(
+            BadRequestException.class,
+            () -> controller.validateType("BOGUS"),
+            "Expected BadRequestException is not thrown.");
+    assertThat(exception).hasMessageThat().contains("Please provide a valid type");
+  }
+
+  @Test
+  public void validateTerm() {
+    assertDoesNotThrow(
+        () -> controller.validateTerm("non-empty search string"),
+        "BadRequestException is not expected to be thrown for non-empty search string");
+    // null string
+    Throwable exception =
+        assertThrows(
+            BadRequestException.class,
+            () -> controller.validateTerm(null),
+            "Expected BadRequestException is not thrown.");
+    assertThat(exception).hasMessageThat().contains("Please provide a valid search term");
+    // empty string length = 0
+    exception =
+        assertThrows(
+            BadRequestException.class,
+            () -> controller.validateTerm(""),
+            "Expected BadRequestException is not thrown.");
+    assertThat(exception).hasMessageThat().contains("Please provide a valid search term");
+    // empty string length > 0
+    exception =
+        assertThrows(
+            BadRequestException.class,
+            () -> controller.validateTerm("   "),
+            "Expected BadRequestException is not thrown.");
+    assertThat(exception).hasMessageThat().contains("Please provide a valid search term");
+  }
+
+  @Test
+  public void validateAgeTypeCaseSensitive() {
+    List<String> values =
+        Stream.of(AgeType.values()).map(AgeType::toString).collect(Collectors.toList());
+    for (String value : values) {
+      assertDoesNotThrow(
+          () -> controller.validateAgeType(value),
+          "BadRequestException is not expected to be thrown for [" + value + "]");
+    }
+    // expect exception for lowercase
+    values.replaceAll(String::toLowerCase);
+    for (String value : values) {
+      Throwable exception =
+          assertThrows(
+              BadRequestException.class,
+              () -> controller.validateAgeType(value),
+              "Expected BadRequestException is not thrown.");
+      assertThat(exception).hasMessageThat().contains("Please provide a valid age type parameter");
+    }
+  }
+
+  @Test
+  public void validateGenderOrSexTypeCaseSensitive() {
+    List<String> values =
+        Stream.of(GenderOrSexType.values())
+            .map(GenderOrSexType::toString)
+            .collect(Collectors.toList());
+    for (String value : values) {
+      assertDoesNotThrow(
+          () -> controller.validateGenderOrSexType(value),
+          "BadRequestException is not expected to be thrown for [" + value + "]");
+    }
+    // expect exception for lowercase
+    values.replaceAll(String::toLowerCase);
+    for (String value : values) {
+      Throwable exception =
+          assertThrows(
+              BadRequestException.class,
+              () -> controller.validateGenderOrSexType(value),
+              "Expected BadRequestException is not thrown.");
+      assertThat(exception)
+          .hasMessageThat()
+          .contains("Please provide a valid gender or sex at birth parameter");
+    }
   }
 
   private Criteria createResponseCriteria(DbCriteria dbCriteria) {
