@@ -1,5 +1,6 @@
 package org.pmiops.workbench.workspaces.resources;
 
+import java.util.Optional;
 import org.mapstruct.CollectionMappingStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -27,8 +28,6 @@ import org.pmiops.workbench.model.WorkspaceResource;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.FirecloudMapper;
 import org.pmiops.workbench.utils.mappers.MapStructConfig;
-
-import java.util.Optional;
 
 @Mapper(
     config = MapStructConfig.class,
