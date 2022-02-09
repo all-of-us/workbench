@@ -216,7 +216,7 @@ export class AccountCreation extends React.Component<
     // username itself from validation of the full email address.
     const validationData = {
       ...this.state.profile,
-      usernameWithEmail: this.state.profile.username + '@' + gsuiteDomain
+      usernameWithEmail: this.state.profile.username + '@' + gsuiteDomain,
     };
 
     const validationCheck = {
