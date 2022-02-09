@@ -17,65 +17,61 @@ export class WorkspaceStubVariables {
   static DEFAULT_WORKSPACE_PERMISSION = WorkspaceAccessLevel.OWNER;
 }
 
-export function buildWorkspaceStub(suffix = ''): Workspace {
-  return {
-    name: WorkspaceStubVariables.DEFAULT_WORKSPACE_NAME + suffix,
-    id: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID + suffix,
-    namespace: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS + suffix,
-    cdrVersionId:
-      CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID + suffix,
-    accessTierShortName: AccessTierShortNames.Registered,
-    creationTime: new Date().getTime(),
-    lastModifiedTime: new Date().getTime(),
-    researchPurpose: {
-      ancestry: false,
-      anticipatedFindings: '',
-      commercialPurpose: false,
-      controlSet: false,
-      disseminateResearchFindingList: [],
-      diseaseFocusedResearch: false,
-      drugDevelopment: true,
-      educational: true,
-      intendedStudy: '',
-      scientificApproach: '',
-      methodsDevelopment: false,
-      otherPurpose: false,
-      otherPurposeDetails: '',
-      populationDetails: [
-        SpecificPopulationEnum.AGEOLDERMORETHAN75,
-        SpecificPopulationEnum.RACENHPI,
-      ],
-      populationHealth: true,
-      researchOutcomeList: [],
-      ethics: true,
-      reviewRequested: false,
-      socialBehavioral: false,
-      reasonForAllOfUs: '',
-      needsReviewPrompt: false,
-    },
-    published: false,
-    billingAccountName: 'billing-account',
-    adminLocked: false,
-  };
-}
+export const buildWorkspaceStub = (suffix = ''): Workspace => ({
+  name: WorkspaceStubVariables.DEFAULT_WORKSPACE_NAME + suffix,
+  id: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID + suffix,
+  namespace: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS + suffix,
+  cdrVersionId:
+    CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID + suffix,
+  accessTierShortName: AccessTierShortNames.Registered,
+  creationTime: new Date().getTime(),
+  lastModifiedTime: new Date().getTime(),
+  researchPurpose: {
+    ancestry: false,
+    anticipatedFindings: '',
+    commercialPurpose: false,
+    controlSet: false,
+    disseminateResearchFindingList: [],
+    diseaseFocusedResearch: false,
+    drugDevelopment: true,
+    educational: true,
+    intendedStudy: '',
+    scientificApproach: '',
+    methodsDevelopment: false,
+    otherPurpose: false,
+    otherPurposeDetails: '',
+    populationDetails: [
+      SpecificPopulationEnum.AGEOLDERMORETHAN75,
+      SpecificPopulationEnum.RACENHPI,
+    ],
+    populationHealth: true,
+    researchOutcomeList: [],
+    ethics: true,
+    reviewRequested: false,
+    socialBehavioral: false,
+    reasonForAllOfUs: '',
+    needsReviewPrompt: false,
+  },
+  published: false,
+  billingAccountName: 'billing-account',
+  adminLocked: false,
+});
 
-export function buildWorkspaceStubs(suffixes: string[]): Workspace[] {
-  return suffixes.map((suffix) => buildWorkspaceStub(suffix));
-}
+export const buildWorkspaceStubs = (suffixes: string[]): Workspace[] =>
+  suffixes.map((suffix) => buildWorkspaceStub(suffix));
 
-function buildRecentWorkspaceStub(suffix: string): RecentWorkspace {
+const buildRecentWorkspaceStub = (suffix: string): RecentWorkspace => {
   const workspaceStub = buildWorkspaceStub(suffix);
   return {
     workspace: workspaceStub,
     accessLevel: WorkspaceAccessLevel.OWNER,
   };
-}
+};
 
-export function buildRecentWorkspaceResponseStub(
+export const buildRecentWorkspaceResponseStub = (
   suffixes: string[]
-): RecentWorkspaceResponse {
-  return suffixes.map((suffix) => buildRecentWorkspaceStub(suffix));
-}
+): RecentWorkspaceResponse =>
+  suffixes.map((suffix) => buildRecentWorkspaceStub(suffix));
 
 export const workspaceStubs = buildWorkspaceStubs(['']);
 
