@@ -18,7 +18,6 @@ import {
   ContactEmailTextInput,
   updateAccountProperties,
   ErrorsTooltip,
-  AccessModuleExpirations,
   isBypassed,
   profileNeedsUpdate,
   displayModuleCompletionDate,
@@ -653,9 +652,6 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
             >
               Cancel
             </Button>
-          </FlexRow>
-          <FlexRow>
-            <AccessModuleExpirations profile={updatedProfile} />
           </FlexRow>
           <FlexRow>
             <h2>Egress event history</h2>
