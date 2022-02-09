@@ -76,11 +76,10 @@ module.exports = {
     '@typescript-eslint/prefer-optional-chain': 'warn',
     '@typescript-eslint/unified-signatures': 'warn',
     // '@typescript-eslint/member-ordering': ['warn', { 'classExpressions': ['method', 'field'] }],
-    // '@typescript-eslint/prefer-function-type': 'warn',
 
-    'react/jsx-uses-vars': 'warn',
+    'react-hooks/exhaustive-deps': 'warn',  // 45 instances as of 3 Jan 2022
     'react-hooks/rules-of-hooks': 'warn',
-    // 'react-hooks/exhaustive-deps': 'warn',  // 45 instances as of 3 Jan 2022
+    'react/jsx-uses-vars': 'warn',
 
     /* Style */
 
