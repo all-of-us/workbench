@@ -660,7 +660,7 @@ export const AdminInstitutionEdit = fp.flow(
             this.props.match.params.institutionId,
             institutionToSave
           )
-          .then(() => this.backNavigate())
+          .then((updatedInstitution) => this.initEditMode(updatedInstitution))
           .catch((reason) => this.handleError(reason));
       } else {
         await institutionApi()

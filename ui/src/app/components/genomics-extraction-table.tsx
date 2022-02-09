@@ -136,7 +136,7 @@ const mapJobToTableRow = (
       <TooltipTrigger content={iconConfig.iconTooltip}>
         <div>
           {' '}
-          {/*This div wrapper is needed so the tooltip doesn't move around with the spinning icon*/}
+          {/* This div wrapper is needed so the tooltip doesn't move around with the spinning icon*/}
           <FontAwesomeIcon
             icon={iconConfig.icon}
             style={{

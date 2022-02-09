@@ -1,10 +1,10 @@
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { TooltipTrigger } from 'app/components/popups';
 import colors from 'app/styles/colors';
-import { reactStyles } from 'app/utils';
+import { cond, reactStyles } from 'app/utils';
 import {
-  ComputeType,
-  diskConfigPrice,
+  detachableDiskPricePerMonth,
+  diskConfigPricePerMonth,
   machineRunningCost,
   machineRunningCostBreakdown,
   machineStorageCost,
@@ -26,6 +26,7 @@ const styles = reactStyles({
     overflow: 'hidden',
   },
   cost: {
+    fontSize: '12px',
     overflow: 'hidden',
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
@@ -37,16 +38,20 @@ export const RuntimeCostEstimator = ({
   costTextColor = colors.accent,
   style = {},
 }: Props) => {
-  const { computeType, diskConfig } = analysisConfig;
+  const { detachedDisk, diskConfig } = analysisConfig;
   const runningCost = machineRunningCost(analysisConfig);
   const runningCostBreakdown = machineRunningCostBreakdown(analysisConfig);
   const storageCost = machineStorageCost(analysisConfig);
   const storageCostBreakdown = machineStorageCostBreakdown(analysisConfig);
   const costStyle = {
     ...styles.cost,
-    fontSize: diskConfig.detachable ? '12px' : '15px',
     color: costTextColor,
   };
+  const pdCost = cond(
+    [diskConfig.detachable, () => diskConfigPricePerMonth(diskConfig)],
+    [!!detachedDisk, () => detachableDiskPricePerMonth(detachedDisk)],
+    () => 0
+  );
   return (
     <FlexRow style={style}>
       <FlexColumn style={styles.costSection}>
@@ -87,13 +92,13 @@ export const RuntimeCostEstimator = ({
           </div>
         </TooltipTrigger>
       </FlexColumn>
-      {diskConfig.detachable && computeType === ComputeType.Standard && (
+      {!!pdCost && (
         <FlexColumn style={styles.costSection}>
           <div style={{ fontSize: '10px', fontWeight: 600 }}>
             Persistent disk cost
           </div>
           <div style={costStyle} data-test-id='pd-cost'>
-            {formatUsd(diskConfigPrice(diskConfig))}/month
+            {formatUsd(pdCost)}/month
           </div>
         </FlexColumn>
       )}

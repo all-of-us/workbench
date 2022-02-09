@@ -94,6 +94,8 @@ export interface AnalysisConfig {
   computeType: ComputeType;
   machine: Machine;
   diskConfig: DiskConfig;
+  // This should only be populated if !diskconfig.detachable.
+  detachedDisk: Disk;
   // TODO: Refactor this type to an intermediate representation.
   dataprocConfig: DataprocConfig;
   // TODO: Refactor this type to an intermediate representation.
@@ -338,6 +340,36 @@ const compareDiskTypes = (
     new: describeDiskType(newDiskConfig),
     diff,
     diskDiff,
+  };
+};
+
+const compareDetachedDisks = (
+  { diskConfig: oldDiskConfig, detachedDisk: oldDetachedDisk }: AnalysisConfig,
+  { diskConfig: newDiskConfig, detachedDisk: newDetachedDisk }: AnalysisConfig
+): AnalysisDiff => {
+  // This comparator only concerns itself with legal state transitions within
+  // the Workbench. Currently the only allowed interaction with an unattached
+  // disk is to delete it. Therefore, this only returns a diff if an analysis
+  // config transition deletes a detached disk.
+  const oldDetachableExists = oldDiskConfig.detachable || !!oldDetachedDisk;
+  const newDetachableExists = newDiskConfig.detachable || !!newDetachedDisk;
+  if (oldDetachableExists && !newDetachableExists) {
+    const oldSize = oldDiskConfig.detachable
+      ? oldDiskConfig.size
+      : oldDetachedDisk.size;
+    return {
+      desc: 'Reattachable disk',
+      previous: `${oldSize}GB disk`,
+      new: 'None',
+      diff: AnalysisDiffState.NO_CHANGE,
+      diskDiff: AnalysisDiffState.NEEDS_DELETE,
+    };
+  }
+  return {
+    desc: 'Reattachable disk',
+    previous: '',
+    new: '',
+    diff: AnalysisDiffState.NO_CHANGE,
   };
 };
 
@@ -647,6 +679,7 @@ export const withAnalysisConfigDefaults = (
       detachableType,
       existingDiskName,
     },
+    detachedDisk: detachable ? null : existingDisk,
     dataprocConfig,
     gpuConfig,
     autopauseThreshold:
@@ -669,6 +702,7 @@ export const toAnalysisConfig = (
         detachableType: null,
         existingDiskName: null,
       },
+      detachedDisk: existingDisk,
       autopauseThreshold: runtime.autopauseThreshold,
       dataprocConfig: null,
       gpuConfig,
@@ -690,6 +724,7 @@ export const toAnalysisConfig = (
         },
         existingDisk
       ),
+      detachedDisk: null,
       autopauseThreshold: runtime.autopauseThreshold,
       dataprocConfig: null,
       gpuConfig,
@@ -704,6 +739,7 @@ export const toAnalysisConfig = (
         detachableType: null,
         existingDiskName: null,
       },
+      detachedDisk: existingDisk,
       autopauseThreshold: runtime.autopauseThreshold,
       dataprocConfig: runtime.dataprocConfig,
       gpuConfig: null,
@@ -718,6 +754,7 @@ export const toAnalysisConfig = (
         detachableType: null,
         existingDiskName: null,
       },
+      detachedDisk: existingDisk,
       autopauseThreshold: null,
       dataprocConfig: null,
       gpuConfig: null,
@@ -740,6 +777,7 @@ export const getAnalysisConfigDiffs = (
     compareMachineMemory,
     compareDiskTypes,
     compareDiskSize,
+    compareDetachedDisks,
     compareAutopauseThreshold,
     compareGpu,
   ]
@@ -984,12 +1022,13 @@ export const useCustomRuntime = (
   detachablePd: Disk | null
 ): [
   { currentRuntime: Runtime; pendingRuntime: Runtime },
-  (runtime: Runtime) => void
+  (request: { runtime: Runtime; detachedDisk: Disk | null }) => void
 ] => {
   const { runtime, workspaceNamespace } = useStore(runtimeStore);
   const runtimeOps = useStore(compoundRuntimeOpStore);
   const { pendingRuntime = null } = runtimeOps[currentWorkspaceNamespace] || {};
-  const [requestedRuntime, setRequestedRuntime] = useState<Runtime>();
+  const [request, setRequest] =
+    useState<{ runtime: Runtime; detachedDisk: Disk | null }>();
 
   // Ensure that a runtime gets initialized, if it hasn't already been.
   useRuntime(currentWorkspaceNamespace);
@@ -998,11 +1037,14 @@ export const useCustomRuntime = (
     let mounted = true;
     const aborter = new AbortController();
     const existingDisk = diskStore.get().persistentDisk;
-    const requestedDisk = requestedRuntime?.gceWithPdConfig?.persistentDisk;
+    const requestedDisk = request?.runtime?.gceWithPdConfig?.persistentDisk;
     const runAction = async () => {
       const applyRuntimeUpdate = async () => {
         const oldConfig = toAnalysisConfig(runtime, detachablePd);
-        const newConfig = toAnalysisConfig(requestedRuntime, detachablePd);
+        const newConfig = toAnalysisConfig(
+          request.runtime,
+          request.detachedDisk
+        );
         const mostSevereDiff = findMostSevereDiffState(
           getAnalysisConfigDiffs(oldConfig, newConfig).map(({ diff }) => diff)
         );
@@ -1042,14 +1084,14 @@ export const useCustomRuntime = (
             runtime.status === RuntimeStatus.Stopped
           ) {
             await runtimeApi().updateRuntime(currentWorkspaceNamespace, {
-              runtime: requestedRuntime,
+              runtime: request.runtime,
             });
             // Calling updateRuntime will not immediately set the Runtime status to not Running so the
             // default initializer will resolve on its first call. The polling below first checks for the
             // non Running status before initializing the default one that checks for Running status
             await LeoRuntimeInitializer.initialize({
               workspaceNamespace,
-              targetRuntime: requestedRuntime,
+              targetRuntime: request.runtime,
               resolutionCondition: (r) => r.status !== RuntimeStatus.Running,
               pollAbortSignal: aborter.signal,
               overallTimeout: 1000 * 60, // The switch to a non running status should occur quickly
@@ -1080,7 +1122,7 @@ export const useCustomRuntime = (
 
         await LeoRuntimeInitializer.initialize({
           workspaceNamespace,
-          targetRuntime: requestedRuntime,
+          targetRuntime: request.runtime,
           pollAbortSignal: aborter.signal,
         });
       } catch (e) {
@@ -1090,17 +1132,14 @@ export const useCustomRuntime = (
       } finally {
         markCompoundRuntimeOperationCompleted(currentWorkspaceNamespace);
         if (mounted) {
-          setRequestedRuntime(undefined);
+          setRequest(undefined);
         }
       }
     };
 
-    if (
-      requestedRuntime !== undefined &&
-      !fp.equals(requestedRuntime, runtime)
-    ) {
+    if (request !== undefined && !fp.equals(request.runtime, runtime)) {
       registerCompoundRuntimeOperation(currentWorkspaceNamespace, {
-        pendingRuntime: requestedRuntime,
+        pendingRuntime: request.runtime,
         aborter,
       });
       runAction();
@@ -1112,9 +1151,9 @@ export const useCustomRuntime = (
     return () => {
       mounted = false;
     };
-  }, [requestedRuntime]);
+  }, [request]);
 
-  return [{ currentRuntime: runtime, pendingRuntime }, setRequestedRuntime];
+  return [{ currentRuntime: runtime, pendingRuntime }, setRequest];
 };
 
 export const withRuntimeStore = () => (WrappedComponent) => {

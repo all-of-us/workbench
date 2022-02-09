@@ -127,7 +127,7 @@ export function getSelectedPopulations(researchPurpose: ResearchPurpose) {
   return categories.map((selectedPopulationOfInterest, index) => {
     return (
       <React.Fragment key={index}>
-        {/*Generate a header for each section of underserved populations*/}
+        {/* Generate a header for each section of underserved populations*/}
         <div
           style={{
             ...styles.researchPurposeItemHeader,
@@ -136,7 +136,7 @@ export function getSelectedPopulations(researchPurpose: ResearchPurpose) {
         >
           {selectedPopulationOfInterest.label}
         </div>
-        {/*Iterate through the subcategories of underserved populations and list each of them*/}
+        {/* Iterate through the subcategories of underserved populations and list each of them*/}
         {selectedPopulationOfInterest.subCategory.map(
           (subCategory, subCategoryIndex) => (
             <div

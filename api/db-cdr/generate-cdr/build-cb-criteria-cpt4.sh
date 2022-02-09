@@ -138,7 +138,7 @@ do
   SELECT
        (a.id + $CB_CRITERIA_START_ID ) id
       , CASE WHEN a.parent_id=0 THEN 0 ELSE a.parent_id + $CB_CRITERIA_START_ID END as parent_id
-      , (SELECT UPPER(domain_id) FROM \`$BQ_PROJECT.$BQ_DATASET.concept\` where concept_id = a.concept_id)
+      , a.domain_id
       , a.is_standard
       , a.type
       , a.subtype
