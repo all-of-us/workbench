@@ -6,14 +6,9 @@ import { DataTable } from 'primereact/datatable';
 import * as fp from 'lodash/fp';
 
 import {
-  AccessModuleExpirations,
   adminGetProfile,
   commonStyles,
   ContactEmailTextInput,
-  updateAccountProperties,
-  ErrorsTooltip,
-  isBypassed,
-  profileNeedsUpdate,
   displayModuleCompletionDate,
   displayModuleExpirationDate,
   displayModuleStatus,
