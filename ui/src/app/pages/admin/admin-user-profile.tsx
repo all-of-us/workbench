@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import validate from 'validate.js';
 import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
+import * as fp from 'lodash/fp';
 
 import {
   adminGetProfile,
@@ -299,23 +300,34 @@ interface TableRow {
 const AccessModuleTable = (props: AccessModuleTableProps) => {
   const { updatedProfile } = props;
 
-  const tableData: TableRow[] = accessModulesForTable.map((moduleName) => {
-    const { adminPageTitle, bypassable } = getAccessModuleConfig(moduleName);
+  const tableData: TableRow[] = fp.flatMap((moduleName) => {
+    const { adminPageTitle, bypassable, isEnabledInEnvironment } =
+      getAccessModuleConfig(moduleName);
 
-    return {
-      moduleName: adminPageTitle,
-      moduleStatus: displayModuleStatus(props.updatedProfile, moduleName),
-      completionDate: displayModuleCompletionDate(updatedProfile, moduleName),
-      expirationDate: displayModuleExpirationDate(updatedProfile, moduleName),
-      accessTierBadge: displayTierBadgeByRequiredModule(
-        props.updatedProfile,
-        moduleName
-      ),
-      bypassToggle: bypassable && (
-        <ToggleForModule moduleName={moduleName} {...props} />
-      ),
-    };
-  });
+    return isEnabledInEnvironment
+      ? [
+          {
+            moduleName: adminPageTitle,
+            moduleStatus: displayModuleStatus(props.updatedProfile, moduleName),
+            completionDate: displayModuleCompletionDate(
+              updatedProfile,
+              moduleName
+            ),
+            expirationDate: displayModuleExpirationDate(
+              updatedProfile,
+              moduleName
+            ),
+            accessTierBadge: displayTierBadgeByRequiredModule(
+              props.updatedProfile,
+              moduleName
+            ),
+            bypassToggle: bypassable && (
+              <ToggleForModule moduleName={moduleName} {...props} />
+            ),
+          },
+        ]
+      : [];
+  }, accessModulesForTable);
 
   return (
     <DataTable
