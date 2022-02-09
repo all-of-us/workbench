@@ -396,8 +396,8 @@ export const QueryReport = fp.flow(
                         <div style={{ ...columns.col10, ...styles.queryTitle }}>
                           Descriptive Statistics
                         </div>
-                        {/*TODO uncomment print icon when we know how we want to display the data download policy*/}
-                        {/*<ClrIcon*/}
+                        {/* TODO uncomment print icon when we know how we want to display the data download policy*/}
+                        {/* <ClrIcon*/}
                         {/*  className='is-solid'*/}
                         {/*  style={{...columns.col2,*/}
                         {/*    ...(groupedData ? styles.print : styles.printDisabled)}}*/}

@@ -405,7 +405,7 @@ export class QuickTourReact extends React.Component<
             {panels.map((p, i) => {
               return (
                 <React.Fragment key={i}>
-                  {/*We don't set the width on the last item, because there is no connector,
+                  {/* We don't set the width on the last item, because there is no connector,
                 so setting a width would offset the entire selection area by half a connector length*/}
                   <div
                     style={{ width: i !== panels.length - 1 ? '128px' : null }}
