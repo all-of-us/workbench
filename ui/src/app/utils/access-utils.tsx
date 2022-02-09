@@ -177,6 +177,14 @@ export const getAccessModuleConfig = (
         ...apiConfig,
         isEnabledInEnvironment:
           enableRasLoginGovLinking || enforceRasLoginGovLinking,
+
+        // override these API config values temporarily
+        // we can remove these when enableRasLoginGovLinking and enforceRasLoginGovLinking are collapsed into one
+        // and they can be treated as a normal access enable flag
+
+        requiredForRTAccess: enforceRasLoginGovLinking,
+        requiredForCTAccess: enforceRasLoginGovLinking,
+
         DARTitleComponent: () => (
           <div>
             Verify your identity with Login.gov{' '}
