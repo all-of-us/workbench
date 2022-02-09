@@ -25,9 +25,9 @@ function run_mysql() {
   if [ -f /.dockerenv ]; then
     mysql $@
   else
-    echo "Outside docker: invoking mysql via docker for portability"
+    echo "Outside docker: invoking mariadb via docker for portability"
     docker run --rm --network host --entrypoint '' -i \
-      mysql:5.7.27 \
+      mysql \
       mysql $@
   fi
 }

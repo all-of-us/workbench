@@ -50,8 +50,7 @@ plugins {
 }
 
 
-if (JavaVersion.current() != JavaVersion.VERSION_1_8) {
-    throw new GradleException("This build must be run with Java 8. See developer-system-initialization.md")
+if (JavaVersion.current() != JavaVersion.VERSION_1_8) {throw new GradleException("This build must be run with Java 8. See developer-system-initialization.md")
 }
 
 // Artifact configurations derived from base configs. Configuration names
