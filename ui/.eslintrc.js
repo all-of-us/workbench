@@ -54,7 +54,7 @@ module.exports = {
     'prefer-const': ['warn', { destructuring: 'all' }],
     radix: 'warn', // Add radix on parseInt
     // 'no-console': 'warn',  // 69 instances as of 3 Jan 2022
-    // 'prefer-arrow/prefer-arrow-functions': ['warn'], // Lots of 'newable' functions in the code base
+    'prefer-arrow/prefer-arrow-functions': ['warn'], // Lots of 'newable' functions in the code base
 
     'no-use-before-define': 'off', // Needed for the below rule
     '@typescript-eslint/no-use-before-define': 'warn',
@@ -76,7 +76,6 @@ module.exports = {
     '@typescript-eslint/prefer-optional-chain': 'warn',
     '@typescript-eslint/unified-signatures': 'warn',
     // '@typescript-eslint/member-ordering': ['warn', { 'classExpressions': ['method', 'field'] }],
-    // '@typescript-eslint/prefer-function-type': 'warn',
 
     'react/jsx-uses-vars': 'warn',
     'react-hooks/rules-of-hooks': 'warn',
