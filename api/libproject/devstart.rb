@@ -109,6 +109,10 @@ def dev_up(cmd_name, args)
     raise("Please run 'gcloud auth login' before starting the server.")
   end
 
+  at_exit do
+    common.run_inline %W{docker-compose down} if op.opts.start_db
+  end
+
   setup_local_environment()
 
   overall_bm = Benchmark.measure {
