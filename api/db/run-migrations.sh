@@ -13,6 +13,7 @@ fi
 # Ruby is not installed in our dev container and this script is short, so bash is fine.
 
 CREATE_DB_FILE=/tmp/create_db.sql
+HEX_DB_PASSWORD=$(hexdump -e '"%X"' <<< ${MYSQL_ROOT_PASSWORD})
 
 function finish {
   rm -f ${CREATE_DB_FILE}
@@ -33,6 +34,9 @@ function run_mysql() {
 }
 
 echo "Creating database if it does not exist..."
+
+echo "${MYSQL_ROOT_PASSWORD}"
+echo "${HEX_DB_PASSWORD}"
 cat "${CREATE_DB_FILE}" | run_mysql -h "${DB_HOST}" --port "${DB_PORT}" -u root -p"${MYSQL_ROOT_PASSWORD}"
 
 echo "Upgrading database..."
