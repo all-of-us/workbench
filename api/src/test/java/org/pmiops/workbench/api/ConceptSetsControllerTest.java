@@ -287,35 +287,6 @@ public class ConceptSetsControllerTest {
             WORKSPACE_NAME_2,
             cdrVersion.getCdrVersionId(),
             WorkspaceAccessLevel.OWNER);
-
-    // TODO: delete all commented lines below
-    //    workspace = new Workspace();
-    //    workspace.setName(WORKSPACE_NAME);
-    //    workspace.setNamespace(WORKSPACE_NAMESPACE);
-    //    workspace.setResearchPurpose(new ResearchPurpose());
-    //    workspace.setCdrVersionId(String.valueOf(cdrVersion.getCdrVersionId()));
-    //    workspace.setBillingAccountName("billing-account");
-    // TODO: delete all commented lines below
-    //    workspace2 = new Workspace();
-    //    workspace2.setName(WORKSPACE_NAME_2);
-    //    workspace2.setNamespace(WORKSPACE_NAMESPACE);
-    //    workspace2.setResearchPurpose(new ResearchPurpose());
-    //    workspace2.setCdrVersionId(String.valueOf(cdrVersion.getCdrVersionId()));
-    //    workspace2.setBillingAccountName("billing-account");
-    // TODO: delete all commented lines below
-    //    workspace = workspacesController.createWorkspace(workspace).getBody();
-    //    workspace2 = workspacesController.createWorkspace(workspace2).getBody();
-    //    stubGetWorkspace(workspace.getNamespace(), WORKSPACE_NAME);
-    //    stubGetWorkspaceAcl(workspace.getNamespace(), WORKSPACE_NAME);
-    //    stubGetWorkspace(workspace2.getNamespace(), WORKSPACE_NAME_2);
-    //    stubGetWorkspaceAcl(workspace2.getNamespace(), WORKSPACE_NAME_2);
-    // TODO: delete all commented lines below
-    //    FirecloudWorkspaceResponse fcResponse = new FirecloudWorkspaceResponse();
-    //    fcResponse.setAccessLevel(WorkspaceAccessLevel.OWNER.name());
-    //    when(fireCloudService.getWorkspace(workspace.getNamespace(), WORKSPACE_NAME))
-    //        .thenReturn(fcResponse);
-    //    when(fireCloudService.getWorkspace(workspace2.getNamespace(), WORKSPACE_NAME_2))
-    //        .thenReturn(fcResponse);
   }
 
   @Test
@@ -759,103 +730,66 @@ public class ConceptSetsControllerTest {
   }
 
   @Test
-  public void testCopyConceptSetWriterToWriter() {
-    // minimal access level to create and copy conceptSet
-    DbCdrVersion cdrVersion = TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao);
-    Workspace fromWs =
-        createTestWorkspace(
-            "From_Ns", "From_N", cdrVersion.getCdrVersionId(), WorkspaceAccessLevel.WRITER);
-    Workspace toWs =
-        createTestWorkspace(
-            "To_Ns", "To_N", cdrVersion.getCdrVersionId(), WorkspaceAccessLevel.WRITER);
-    testCopyConceptSetForAccessLevels(fromWs, toWs);
+  public void testCopyConceptSetOwnerToOwner() {
+    // owner: to workspace has no permission to write
+    testCopyConceptSetForAccessLevels(workspace, workspace2);
   }
 
   @Test
-  public void testCopyConceptSetOwnerToOwner() {
-    DbCdrVersion cdrVersion = TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao);
-    Workspace fromWs =
-        createTestWorkspace(
-            "From_Ns", "From_N", cdrVersion.getCdrVersionId(), WorkspaceAccessLevel.OWNER);
-    Workspace toWs =
-        createTestWorkspace(
-            "To_Ns", "To_N", cdrVersion.getCdrVersionId(), WorkspaceAccessLevel.OWNER);
-    testCopyConceptSetForAccessLevels(fromWs, toWs);
+  public void testCopyConceptSetWriterToWriter() {
+    // writer: minimal access level to create and copy conceptSet
+    stubGetWorkspace(workspace.getNamespace(), workspace.getName(), WorkspaceAccessLevel.WRITER);
+    stubGetWorkspaceAcl(workspace.getNamespace(), workspace.getName(), WorkspaceAccessLevel.WRITER);
+    stubGetWorkspace(workspace2.getNamespace(), workspace2.getName(), WorkspaceAccessLevel.WRITER);
+    stubGetWorkspaceAcl(
+        workspace2.getNamespace(), workspace2.getName(), WorkspaceAccessLevel.WRITER);
+    testCopyConceptSetForAccessLevels(workspace, workspace2);
   }
 
   @Test
   public void testCopyConceptSetOwnerToWriter() {
-    DbCdrVersion cdrVersion = TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao);
-    Workspace fromWs =
-        createTestWorkspace(
-            "From_Ns", "From_N", cdrVersion.getCdrVersionId(), WorkspaceAccessLevel.OWNER);
-    Workspace toWs =
-        createTestWorkspace(
-            "To_Ns", "To_N", cdrVersion.getCdrVersionId(), WorkspaceAccessLevel.WRITER);
-    testCopyConceptSetForAccessLevels(fromWs, toWs);
+    // writer: to workspace has permission to write
+    stubGetWorkspace(workspace2.getNamespace(), workspace2.getName(), WorkspaceAccessLevel.WRITER);
+    stubGetWorkspaceAcl(
+        workspace2.getNamespace(), workspace2.getName(), WorkspaceAccessLevel.WRITER);
+    testCopyConceptSetForAccessLevels(workspace, workspace2);
   }
 
   @Test
   public void testCopyConceptSetOwnerToReaderFail() {
-    DbCdrVersion cdrVersion = TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao);
-    Workspace fromWs =
-        createTestWorkspace(
-            "From_Ns", "From_N", cdrVersion.getCdrVersionId(), WorkspaceAccessLevel.OWNER);
-    Workspace toWs =
-        createTestWorkspace(
-            "To_Ns", "To_N", cdrVersion.getCdrVersionId(), WorkspaceAccessLevel.READER);
-    // toWs has no permission to write
+    // reader: to workspace has no permission to write
+    stubGetWorkspace(workspace2.getNamespace(), workspace2.getName(), WorkspaceAccessLevel.READER);
+    stubGetWorkspaceAcl(
+        workspace2.getNamespace(), workspace2.getName(), WorkspaceAccessLevel.READER);
     Throwable exception =
         assertThrows(
-            ForbiddenException.class, () -> testCopyConceptSetForAccessLevels(fromWs, toWs));
+            ForbiddenException.class,
+            () -> testCopyConceptSetForAccessLevels(workspace, workspace2));
     assertThat(exception)
         .hasMessageThat()
         .contains(
             String.format(
                 "You do not have sufficient permissions to access workspace %s/%s",
-                toWs.getNamespace(), toWs.getId()));
+                workspace2.getNamespace(), workspace2.getId()));
   }
 
   @Test
   public void testCopyConceptSetOwnerToNoAccessFail() {
-    DbCdrVersion cdrVersion = TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao);
-    Workspace fromWs =
-        createTestWorkspace(
-            "From_Ns", "From_N", cdrVersion.getCdrVersionId(), WorkspaceAccessLevel.OWNER);
-    Workspace toWs =
-        createTestWorkspace(
-            "To_Ns", "To_N", cdrVersion.getCdrVersionId(), WorkspaceAccessLevel.NO_ACCESS);
-    // toWs has no permission to write
+    // no access: to workspace has no permission to write
+    stubGetWorkspace(
+        workspace2.getNamespace(), workspace2.getName(), WorkspaceAccessLevel.NO_ACCESS);
+    stubGetWorkspaceAcl(
+        workspace2.getNamespace(), workspace2.getName(), WorkspaceAccessLevel.NO_ACCESS);
     Throwable exception =
         assertThrows(
-            ForbiddenException.class, () -> testCopyConceptSetForAccessLevels(fromWs, toWs));
+            ForbiddenException.class,
+            () -> testCopyConceptSetForAccessLevels(workspace, workspace2));
     assertThat(exception)
         .hasMessageThat()
         .contains(
             String.format(
                 "You do not have sufficient permissions to access workspace %s/%s",
-                toWs.getNamespace(), toWs.getId()));
-  }
-
-  @Test
-  public void testCopyConceptSetNoAccessToNoAccessFail() {
-    DbCdrVersion cdrVersion = TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao);
-    Workspace fromWs =
-        createTestWorkspace(
-            "From_Ns", "From_N", cdrVersion.getCdrVersionId(), WorkspaceAccessLevel.NO_ACCESS);
-    Workspace toWs =
-        createTestWorkspace(
-            "To_Ns", "To_N", cdrVersion.getCdrVersionId(), WorkspaceAccessLevel.NO_ACCESS);
-
-    Throwable exception =
-        assertThrows(
-            ForbiddenException.class, () -> testCopyConceptSetForAccessLevels(fromWs, toWs));
-    assertThat(exception)
-        .hasMessageThat()
-        .contains(
-            String.format(
-                "You do not have sufficient permissions to access workspace %s/%s",
-                fromWs.getNamespace(), fromWs.getId()));
+                workspace2.getNamespace(), workspace2.getId()));
   }
 
   @Test
@@ -871,7 +805,7 @@ public class ConceptSetsControllerTest {
     assertThat(exception).hasMessageThat().contains("Cannot create a concept set with no concepts");
     // also need non-emptyList of conceptSetIds
     final CreateConceptSetRequest createConceptSetRequest2 =
-        createConceptSetRequest.addedConceptSetConceptIds(new ArrayList<ConceptSetConceptId>());
+        createConceptSetRequest.addedConceptSetConceptIds(new ArrayList<>());
     exception =
         assertThrows(
             BadRequestException.class,
@@ -935,7 +869,7 @@ public class ConceptSetsControllerTest {
     assertDoesNotThrow(
         () ->
             conceptSetsController.validateUpdateConceptSetConcepts(
-                addConceptsRequest("eTagTest", 1000l, 1001L)),
+                addConceptsRequest("eTagTest", 1000L, 1001L)),
         "BadRequestException is not expected to be thrown");
   }
 
@@ -1157,7 +1091,7 @@ public class ConceptSetsControllerTest {
     tmpWorkspace.setCdrVersionId(String.valueOf(cdrVersionId));
     tmpWorkspace.setBillingAccountName("billing-account");
 
-    TestMockFactory.stubCreateFcWorkspace(fireCloudService, workspaceAccessLevel);
+    TestMockFactory.stubCreateFcWorkspace(fireCloudService);
 
     tmpWorkspace = workspacesController.createWorkspace(tmpWorkspace).getBody();
 
