@@ -6,16 +6,9 @@ import { DataTable } from 'primereact/datatable';
 import * as fp from 'lodash/fp';
 
 import {
+  AccessModuleExpirations,
   adminGetProfile,
-  UserAdminTableLink,
-  UserAuditLink,
   commonStyles,
-  getInitalCreditsUsage,
-  InitialCreditsDropdown,
-  InstitutionDropdown,
-  InstitutionalRoleDropdown,
-  InstitutionalRoleOtherTextInput,
-  getPublicInstitutionDetails,
   ContactEmailTextInput,
   updateAccountProperties,
   ErrorsTooltip,
@@ -25,7 +18,19 @@ import {
   displayModuleExpirationDate,
   displayModuleStatus,
   displayTierBadgeByRequiredModule,
+  ErrorsTooltip,
   getEraNote,
+  getInitalCreditsUsage,
+  getPublicInstitutionDetails,
+  InitialCreditsDropdown,
+  InstitutionalRoleDropdown,
+  InstitutionalRoleOtherTextInput,
+  InstitutionDropdown,
+  isBypassed,
+  profileNeedsUpdate,
+  updateAccountProperties,
+  UserAdminTableLink,
+  UserAuditLink,
 } from './admin-user-common';
 import { FadeBox } from 'app/components/containers';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
@@ -335,9 +340,12 @@ const AccessModuleTable = (props: AccessModuleTableProps) => {
       style={{ paddingTop: '1em' }}
       value={tableData}
       footer={
-        <div style={{ textAlign: 'left', fontWeight: 'normal' }}>
-          {getEraNote(updatedProfile)}
-        </div>
+        getAccessModuleConfig(AccessModule.ERACOMMONS)
+          .isEnabledInEnvironment && (
+          <div style={{ textAlign: 'left', fontWeight: 'normal' }}>
+            {getEraNote(updatedProfile)}
+          </div>
+        )
       }
     >
       <Column field='moduleName' header='Access Module' />
