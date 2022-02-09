@@ -14,6 +14,7 @@ import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.google.GoogleConfig.SERVICE_ACCOUNT_CLOUD_BILLING;
 
 import com.google.api.services.cloudbilling.Cloudbilling;
+import com.google.cloud.PageImpl;
 import com.google.cloud.bigquery.Field;
 import com.google.cloud.bigquery.FieldList;
 import com.google.cloud.bigquery.FieldValue;
@@ -22,6 +23,7 @@ import com.google.cloud.bigquery.FieldValueList;
 import com.google.cloud.bigquery.LegacySQLTypeName;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
+import com.google.cloud.bigquery.Schema;
 import com.google.cloud.bigquery.StandardSQLTypeName;
 import com.google.cloud.bigquery.TableResult;
 import com.google.common.collect.ImmutableList;
@@ -32,10 +34,7 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -90,8 +89,6 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbCdrVersion;
-import org.pmiops.workbench.db.model.DbConceptSet;
-import org.pmiops.workbench.db.model.DbConceptSetConceptId;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -501,6 +498,14 @@ public class DataSetControllerTest {
               returnSql = returnSql.replace("${dataSetId}", TEST_CDR_DATA_SET_ID);
               return queryJobConfiguration.toBuilder().setQuery(returnSql).build();
             });
+    // used only by generateCode() test case below.
+    // needs modifications if any new test case that asserts the TableResult
+    when(mockBigQueryService.executeQuery(any()))
+        .thenAnswer(
+            (InvocationOnMock invocation) -> {
+              return new TableResult(
+                  Schema.of(), 0, new PageImpl<>(() -> null, null, new ArrayList<>()));
+            });
   }
 
   private DataSetRequest buildEmptyDataSetRequest() {
@@ -829,25 +834,9 @@ public class DataSetControllerTest {
   }
 
   @Test
-  public void generateCode() {
-    //    String workspaceNamespace,
-    //    String workspaceId,
-    //    String kernelTypeEnumString,
-    //    DataSetRequest dataSetRequest) {
-    DbWorkspace dbWorkspace =
-        workspaceDao.findByWorkspaceNamespaceAndFirecloudNameAndActiveStatus(
-            workspace.getNamespace(),
-            workspace.getName(),
-            DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
-    dbWorkspace.setBillingStatus(BillingStatus.ACTIVE);
-    workspaceDao.save(dbWorkspace);
-
-    DbConceptSet dbConceptSet1 = makeDbConceptSet(conceptSet1,dbWorkspace.getWorkspaceId());
-    DbConceptSet dbConceptSet2 = makeDbConceptSet(conceptSet2,dbWorkspace.getWorkspaceId());
-
-    DataSetRequest dataSetRequest =
-        new DataSetRequest().conceptSetIds(ImmutableList.of(conceptSet1.getId(),conceptSet2.getId()));
-    DataSetCodeResponse dscr =
+  public void generateCode_pyhton() {
+    DataSetRequest dataSetRequest = buildValidDataSetRequest();
+    DataSetCodeResponse dataSetCodeResponse =
         dataSetController
             .generateCode(
                 workspace.getNamespace(),
@@ -856,23 +845,24 @@ public class DataSetControllerTest {
                 dataSetRequest)
             .getBody();
 
-    System.out.println(dscr);
+    assertThat(dataSetCodeResponse.getCode())
+        .containsMatch("import pandas[\\S|\\s]*pandas\\.read_gbq");
   }
 
-  private DbConceptSet makeDbConceptSet(ConceptSet conceptSet, long dbWorkspaceId){
-    DbConceptSet dbConceptSet = new DbConceptSet();
-    dbConceptSet.setName(conceptSet.getName());
-    dbConceptSet.setDescription(conceptSet.getDescription());
-    dbConceptSet.setDomainEnum(conceptSet.getDomain());
-    dbConceptSet.setWorkspaceId(dbWorkspaceId);
+  @Test
+  public void generateCode_R() {
+    DataSetRequest dataSetRequest = buildValidDataSetRequest();
+    DataSetCodeResponse dataSetCodeResponse =
+        dataSetController
+            .generateCode(
+                workspace.getNamespace(),
+                workspace.getId(),
+                KernelTypeEnum.R.toString(),
+                dataSetRequest)
+            .getBody();
 
-    DbConceptSetConceptId dbConceptSetConceptId = new DbConceptSetConceptId();
-    dbConceptSetConceptId.setConceptId(conceptSet.getId());
-
-    dbConceptSet.setConceptSetConceptIds(new HashSet(Arrays.asList(dbConceptSetConceptId)));
-
-    dbConceptSet = conceptSetDao.save(dbConceptSet);
-    return dbConceptSet;
+    assertThat(dataSetCodeResponse.getCode())
+        .containsMatch("library[\\S|\\s]*read_bq_export_from_workspace_bucket");
   }
 
   @Test
