@@ -325,7 +325,7 @@ export default class RuntimePanel extends BaseSidebar {
     logger.info('Unattached persistent disk is deleted');
   }
 
-  async applyChanges(expectPreviewPageNavigate = false): Promise<NotebookPreviewPage|null> {
+  async applyChanges(expectPreviewPageNavigate = false): Promise<NotebookPreviewPage | null> {
     await this.clickButton(LinkText.Next);
     await this.clickButton(LinkText.ApplyRecreate);
     await this.waitUntilClose();
