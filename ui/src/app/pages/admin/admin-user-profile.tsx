@@ -530,7 +530,7 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
       spinnerProps.hideSpinner();
     };
     onMount();
-  }, []);
+  }, [gsuiteDomain, usernameWithoutGsuiteDomain, spinnerProps]);
 
   // clean up any currently-running or previously-run validation
   const clearEmailValidation = () => {
