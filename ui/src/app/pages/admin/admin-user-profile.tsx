@@ -18,7 +18,6 @@ import {
   ContactEmailTextInput,
   updateAccountProperties,
   ErrorsTooltip,
-  AccessModuleExpirations,
   isBypassed,
   profileNeedsUpdate,
   displayModuleCompletionDate,
@@ -564,7 +563,7 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
             </UserAuditLink>
           </FlexRow>
           <FlexRow style={{ paddingTop: '1em' }}>
-            <UneditableFields profile={updatedProfile} />
+            <UneditableFields profile={oldProfile} />
             <EditableFields
               oldProfile={oldProfile}
               updatedProfile={updatedProfile}
@@ -653,9 +652,6 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
             >
               Cancel
             </Button>
-          </FlexRow>
-          <FlexRow>
-            <AccessModuleExpirations profile={updatedProfile} />
           </FlexRow>
           <FlexRow>
             <h2>Egress event history</h2>
