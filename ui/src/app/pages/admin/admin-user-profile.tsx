@@ -563,7 +563,7 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
             </UserAuditLink>
           </FlexRow>
           <FlexRow style={{ paddingTop: '1em' }}>
-            <UneditableFields profile={updatedProfile} />
+            <UneditableFields profile={oldProfile} />
             <EditableFields
               oldProfile={oldProfile}
               updatedProfile={updatedProfile}
