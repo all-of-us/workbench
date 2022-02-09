@@ -42,14 +42,7 @@ trap finish EXIT
 envsubst < "$(dirname "${BASH_SOURCE}")/create_db.sql" > $CREATE_DB_FILE
 
 function run_mysql() {
-  if [ -f /.dockerenv ]; then
-    mysql $@
-  else
-    echo "Outside docker: invoking mysql via docker for portability"
-    docker run -i --rm --network host --entrypoint '' \
-      mysql:5.7.27 \
-      mysql $@
-  fi
+  mysql $@
 }
 
 # Drop and create new cdr database
