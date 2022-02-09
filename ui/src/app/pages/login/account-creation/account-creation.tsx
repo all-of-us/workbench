@@ -213,11 +213,11 @@ export class AccountCreation extends React.Component<
 
     // The validation data for this form is *almost* the raw Profile, except for the additional
     // 'usernameWithEmail' field we're adding, to be able to separate our validation on the
-    // username itself from validation of the full email address. For this reason, we need to cast
-    // the profile object to 'any'.
-    const validationData = { ...this.state.profile } as any;
-    validationData.usernameWithEmail =
-      validationData.username + '@' + gsuiteDomain;
+    // username itself from validation of the full email address.
+    const validationData = {
+      ...this.state.profile,
+      usernameWithEmail: this.state.profile.username + '@' + gsuiteDomain
+    };
 
     const validationCheck = {
       username: {
