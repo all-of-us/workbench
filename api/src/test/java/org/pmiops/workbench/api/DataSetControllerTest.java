@@ -32,7 +32,10 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -82,10 +85,13 @@ import org.pmiops.workbench.dataset.DatasetConfig;
 import org.pmiops.workbench.dataset.mapper.DataSetMapperImpl;
 import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
+import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbCdrVersion;
+import org.pmiops.workbench.db.model.DbConceptSet;
+import org.pmiops.workbench.db.model.DbConceptSetConceptId;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -111,6 +117,7 @@ import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.ConceptSetConceptId;
 import org.pmiops.workbench.model.CreateConceptSetRequest;
 import org.pmiops.workbench.model.DataSet;
+import org.pmiops.workbench.model.DataSetCodeResponse;
 import org.pmiops.workbench.model.DataSetExportRequest;
 import org.pmiops.workbench.model.DataSetPreviewValueList;
 import org.pmiops.workbench.model.DataSetRequest;
@@ -197,6 +204,7 @@ public class DataSetControllerTest {
   @Autowired private ConceptSetsController conceptSetsController;
   @Autowired private DataSetController dataSetController;
   @Autowired private UserDao userDao;
+  @Autowired private ConceptSetDao conceptSetDao;
   @Autowired private WorkspaceDao workspaceDao;
   @Autowired private WorkspacesController workspacesController;
 
@@ -818,6 +826,53 @@ public class DataSetControllerTest {
                             .conceptSetIds(
                                 ImmutableList.of(
                                     conceptSet1.getId(), noAccessConceptSet.getId())))));
+  }
+
+  @Test
+  public void generateCode() {
+    //    String workspaceNamespace,
+    //    String workspaceId,
+    //    String kernelTypeEnumString,
+    //    DataSetRequest dataSetRequest) {
+    DbWorkspace dbWorkspace =
+        workspaceDao.findByWorkspaceNamespaceAndFirecloudNameAndActiveStatus(
+            workspace.getNamespace(),
+            workspace.getName(),
+            DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
+    dbWorkspace.setBillingStatus(BillingStatus.ACTIVE);
+    workspaceDao.save(dbWorkspace);
+
+    DbConceptSet dbConceptSet1 = makeDbConceptSet(conceptSet1,dbWorkspace.getWorkspaceId());
+    DbConceptSet dbConceptSet2 = makeDbConceptSet(conceptSet2,dbWorkspace.getWorkspaceId());
+
+    DataSetRequest dataSetRequest =
+        new DataSetRequest().conceptSetIds(ImmutableList.of(conceptSet1.getId(),conceptSet2.getId()));
+    DataSetCodeResponse dscr =
+        dataSetController
+            .generateCode(
+                workspace.getNamespace(),
+                workspace.getId(),
+                KernelTypeEnum.PYTHON.toString(),
+                dataSetRequest)
+            .getBody();
+
+    System.out.println(dscr);
+  }
+
+  private DbConceptSet makeDbConceptSet(ConceptSet conceptSet, long dbWorkspaceId){
+    DbConceptSet dbConceptSet = new DbConceptSet();
+    dbConceptSet.setName(conceptSet.getName());
+    dbConceptSet.setDescription(conceptSet.getDescription());
+    dbConceptSet.setDomainEnum(conceptSet.getDomain());
+    dbConceptSet.setWorkspaceId(dbWorkspaceId);
+
+    DbConceptSetConceptId dbConceptSetConceptId = new DbConceptSetConceptId();
+    dbConceptSetConceptId.setConceptId(conceptSet.getId());
+
+    dbConceptSet.setConceptSetConceptIds(new HashSet(Arrays.asList(dbConceptSetConceptId)));
+
+    dbConceptSet = conceptSetDao.save(dbConceptSet);
+    return dbConceptSet;
   }
 
   @Test
