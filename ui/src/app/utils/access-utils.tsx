@@ -179,8 +179,8 @@ export const getAccessModuleConfig = (
           enableRasLoginGovLinking || enforceRasLoginGovLinking,
 
         // override these API config values temporarily
-        // we can remove these when enableRasLoginGovLinking and enforceRasLoginGovLinking are collapsed into one
-        // and they can be treated as a normal access enable flag
+        // when we complete RW-7862, enforceRasLoginGovLinking will work as normal access enable flag
+        // and we can remove this override
 
         requiredForRTAccess: enforceRasLoginGovLinking,
         requiredForCTAccess: enforceRasLoginGovLinking,
