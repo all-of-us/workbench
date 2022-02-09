@@ -9,13 +9,18 @@ import { createWorkspace, signInWithAccessToken } from 'utils/test-utils';
 jest.setTimeout(30 * 60 * 1000);
 
 describe('Updating runtime status', () => {
-
   // Notebooks to run before/after reattaching a PD.
   const diskBeforeNotebookName = 'disk-reattach-before.py';
-  const diskBeforeNotebookFilePath = path.relative(process.cwd(), __dirname + `../../../resources/python-code/${diskBeforeNotebookName}`);
+  const diskBeforeNotebookFilePath = path.relative(
+    process.cwd(),
+    __dirname + `../../../resources/python-code/${diskBeforeNotebookName}`
+  );
 
   const diskAfterNotebookName = 'disk-reattach-after.py';
-  const diskAfterNotebookFilePath = path.relative(process.cwd(), __dirname + `../../../resources/python-code/${diskAfterNotebookName}`);
+  const diskAfterNotebookFilePath = path.relative(
+    process.cwd(),
+    __dirname + `../../../resources/python-code/${diskAfterNotebookName}`
+  );
 
   beforeEach(async () => {
     await signInWithAccessToken(page);
@@ -48,7 +53,10 @@ describe('Updating runtime status', () => {
 
     // Select detachable disk, start.
     await runtimePanel.pickDetachableDisk();
-    await runtimePanel.createRuntime({waitForComplete: false});
+
+    // TODO(calbach): Investigate why 110GB -> 120GB causes issues.
+    await runtimePanel.pickDetachableDiskGbs((await runtimePanel.getDetachableDiskGbs()) + 10);
+    await runtimePanel.createRuntime({ waitForComplete: false });
 
     // Run notebook to write a file to disk.
     let dataPage = new WorkspaceDataPage(page);
@@ -62,7 +70,7 @@ describe('Updating runtime status', () => {
 
     // Select increase detachable disk, enable GPU to force a recreate.
     await runtimePanel.open();
-    await runtimePanel.pickDetachableDiskGbs(await runtimePanel.getDetachableDiskGbs() + 10);
+    await runtimePanel.pickDetachableDiskGbs((await runtimePanel.getDetachableDiskGbs()) + 10);
     await runtimePanel.pickEnableGpu();
     await runtimePanel.applyChanges();
 
