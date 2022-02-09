@@ -28,7 +28,7 @@ function run_mysql() {
   else
     echo "Outside docker: invoking mysql via docker for portability"
     docker run --rm --network host --entrypoint '' -i \
-      mysql:mysql:8.0.27 \
+      mysql:8.0.27 \
       mysql $@
   fi
 }
