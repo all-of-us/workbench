@@ -23,18 +23,18 @@ trap finish EXIT
 envsubst < "$(dirname "${BASH_SOURCE}")/create_db.sql" > $CREATE_DB_FILE
 
 function run_mysql() {
-  if [ -f /.dockerenv ]; then
+#   if [ -f /.dockerenv ]; then
     mysql $@
-  else
-    echo "Outside docker: invoking mysql via docker for portability"
-    docker run -d --name mysql mysql:8.0.26
-    sleep 10
-    docker exec -i mysql mysql -h "${DB_HOST}" --port "${DB_PORT}" -u root -p"${MYSQL_ROOT_PASSWORD}"
-
+#  else
+#    echo "Outside docker: invoking mysql via docker for portability"
+#    docker run -d --name mysql mysql:8.0.26
+#    sleep 10
+#    docker exec -i mysql mysql -h "${DB_HOST}" --port "${DB_PORT}" -u root -p"${MYSQL_ROOT_PASSWORD}"
+#
 #    docker run --rm --entrypoint '' -i \
 #      mysql:8.0.26 \
 #      mysql $@
-  fi
+#  fi
 }
 
 echo "Creating database if it does not exist..."
