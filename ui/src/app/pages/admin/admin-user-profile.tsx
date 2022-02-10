@@ -587,7 +587,7 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
               institutions={institutions}
               emailValidationStatus={emailValidationStatus}
               onChangeEmail={(contactEmail: string) =>
-                updateContactEmail(contactEmail.trim())
+                updateContactEmail(contactEmail)
               }
               onChangeInitialCreditsLimit={(freeTierDollarQuota: number) =>
                 updateProfile({ freeTierDollarQuota })
