@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+  <changeSet author="thibault" id="changelog-188-controlled-tier-training-expirable">
+    <sql>
+      UPDATE access_module SET expirable = TRUE WHERE name = 'CT_COMPLIANCE_TRAINING' LIMIT 1;
+    </sql>
+  </changeSet>
+</databaseChangeLog>
