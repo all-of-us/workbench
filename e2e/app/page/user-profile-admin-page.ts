@@ -8,7 +8,9 @@ import { ElementType } from 'app/xpath-options';
 import Button from 'app/element/button';
 import { LinkText } from 'app/text-labels';
 import Switch from 'app/element/switch';
-import Text from '../element/text';
+import StaticText from 'app/element/staticText';
+import { parseForNumbericalString } from 'utils/test-utils';
+import DataTable from 'app/component/data-table';
 
 const pageTitle = 'User Profile Admin';
 
@@ -32,27 +34,29 @@ export default class UserProfileAdminPage extends AuthenticatedPage {
   }
 
   async getName(): Promise<string> {
-    const name = Text.findByName(this.page, { name: 'Name' });
+    const name = StaticText.findByName(this.page, { name: 'Name' });
     const text = await name.getText();
     return text.split('\n')[1];
   }
 
   async getUserName(): Promise<string> {
-    const userName = Text.findByName(this.page, { name: 'User name' });
+    const userName = StaticText.findByName(this.page, { name: 'User name' });
     const text = await userName.getText();
     return text.split('\n')[1];
   }
 
   async getDataAccessTiers(): Promise<string> {
-    const tiers = Text.findByName(this.page, { name: 'Data Access Tiers' });
+    const tiers = StaticText.findByName(this.page, { name: 'Data Access Tiers' });
     const text = await tiers.getText();
     return text.split('\n')[1];
   }
 
-  async getInitialCreditsUsed(): Promise<string> {
-    const creditsUsed = Text.findByName(this.page, { name: 'Initial Credits Used' });
+  async getInitialCreditsUsed(): Promise<[number, number]> {
+    const creditsUsed = StaticText.findByName(this.page, { name: 'Initial Credits Used' });
     const text = await creditsUsed.getText();
-    return text.split('\n')[1];
+    const words = text.split('\n')[1];
+    const currencies = parseForNumbericalString(words);
+    return [parseInt(currencies[0]), parseInt(currencies[1])];
   }
 
   getContactEmail(): Textbox {
@@ -90,5 +94,12 @@ export default class UserProfileAdminPage extends AuthenticatedPage {
 
   getAccountAccessSwitch(): Switch {
     return Switch.findByName(this.page, { containsText: 'Account' });
+  }
+
+  getAccessStatusTable(): DataTable {
+    const table = new DataTable(this.page);
+    // Append to table xpath with xpath that check for table title. There's another data table in same page. It's the Egress Alert table.
+    table.setXpath(`${table.getXpath()}[./preceding-sibling::*[contains(., "Access status")]]`);
+    return table;
   }
 }

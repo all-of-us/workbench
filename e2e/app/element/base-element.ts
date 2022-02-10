@@ -457,4 +457,31 @@ export default class BaseElement {
         throw new Error(err);
       });
   }
+
+  /**
+   * Wait until button is not clickable (disabled).
+   * @param {string} xpathSelector (Optional) Button Xpath selector.
+   * @throws Timeout exception if button is not enabled after waiting.
+   */
+  async waitUntilDisabled(xpathSelector?: string): Promise<void> {
+    const selector = xpathSelector || this.getXpath();
+    await this.page.waitForXPath(selector, { visible: true });
+    await this.page
+      .waitForFunction(
+        (xpath) => {
+          const node = document.evaluate(xpath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null)
+            .singleNodeValue;
+          const style = window.getComputedStyle(node as Element);
+          const cursor = style.getPropertyValue('cursor');
+          return cursor === 'not-allowed';
+        },
+        {},
+        selector
+      )
+      .catch((err) => {
+        logger.error(`FAIL waitUntilDisabled(): xpath=${selector}`);
+        logger.error(err);
+        throw new Error(err);
+      });
+  }
 }

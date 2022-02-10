@@ -77,6 +77,17 @@ export default class Table extends Container {
     return columnNames;
   }
 
+  async getRowValues(columnIndex = 1): Promise<string[]> {
+    const rows = await this.getRows();
+    const rowValues: string[] = [];
+    for (let i = 1; i <= rows.length; i++) {
+      const cell = await this.getCell(i, columnIndex);
+      const textContent = await getPropValue<string>(cell, 'innerText');
+      rowValues.push(textContent);
+    }
+    return rowValues;
+  }
+
   async getColumnIndex(columnName: string): Promise<number> {
     const indexXpath =
       `count(${this.theadXpath}[contains(normalize-space(text()), "${columnName}")]` + '/preceding-sibling::*)';
