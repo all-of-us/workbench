@@ -14,6 +14,7 @@ import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
 import org.pmiops.workbench.cohortreview.CohortReviewService;
 import org.pmiops.workbench.cohortreview.util.PageRequest;
 import org.pmiops.workbench.cohortreview.util.ParticipantCohortStatusDbInfo;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbCohortReview;
@@ -70,6 +71,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
   private final CohortReviewService cohortReviewService;
   private final UserRecentResourceService userRecentResourceService;
   private final Provider<DbUser> userProvider;
+  private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final WorkspaceAuthService workspaceAuthService;
   private final Clock clock;
 
@@ -79,12 +81,14 @@ public class CohortReviewController implements CohortReviewApiDelegate {
       CohortBuilderService cohortBuilderService,
       UserRecentResourceService userRecentResourceService,
       Provider<DbUser> userProvider,
+      Provider<WorkbenchConfig> workbenchConfigProvider,
       WorkspaceAuthService workspaceAuthService,
       Clock clock) {
     this.cohortReviewService = cohortReviewService;
     this.cohortBuilderService = cohortBuilderService;
     this.userRecentResourceService = userRecentResourceService;
     this.userProvider = userProvider;
+    this.workbenchConfigProvider = workbenchConfigProvider;
     this.workspaceAuthService = workspaceAuthService;
     this.clock = clock;
   }
@@ -149,6 +153,8 @@ public class CohortReviewController implements CohortReviewApiDelegate {
 
     List<ParticipantCohortStatus> paginatedPCS =
         cohortReviewService.findAll(cohortReview.getCohortReviewId(), pageRequest);
+    userRecentResourceService.updateCohortReviewEntry(
+        cohort.getWorkspaceId(), userProvider.get().getUserId(), cohortReview.getCohortReviewId());
 
     return ResponseEntity.ok(cohortReview.participantCohortStatuses(paginatedPCS));
   }
@@ -188,6 +194,11 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     CohortReview cohortReview =
         cohortReviewService.findCohortReviewForWorkspace(
             dbWorkspace.getWorkspaceId(), cohortReviewId);
+    userRecentResourceService.deleteCohortReviewEntry(
+        dbWorkspace.getWorkspaceId(),
+        userProvider.get().getUserId(),
+        cohortReview.getCohortReviewId());
+
     cohortReviewService.deleteCohortReview(cohortReview.getCohortReviewId());
     return ResponseEntity.ok(new EmptyResponse());
   }
@@ -356,8 +367,21 @@ public class CohortReviewController implements CohortReviewApiDelegate {
 
     cohortReview.participantCohortStatuses(participantCohortStatuses);
 
-    userRecentResourceService.updateCohortEntry(
-        cohort.getWorkspaceId(), userProvider.get().getUserId(), cohortId);
+    if (!workbenchConfigProvider.get().featureFlags.enableDSCREntryInRecentModified) {
+      userRecentResourceService.updateCohortEntry(
+          cohort.getWorkspaceId(), userProvider.get().getUserId(), cohortId);
+    }
+
+    // Cohort review id will be null if the user is creating a new Cohort Review
+    // In such cases createCohort will update the userrecentresource
+    // This scenario covers viewing an existing cohort review
+    if (cohortReview.getCohortReviewId() != null) {
+      userRecentResourceService.updateCohortReviewEntry(
+          cohort.getWorkspaceId(),
+          userProvider.get().getUserId(),
+          cohortReview.getCohortReviewId());
+    }
+
     return ResponseEntity.ok(
         new CohortReviewWithCountResponse()
             .cohortReview(cohortReview)
