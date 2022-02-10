@@ -14,7 +14,6 @@ import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.google.GoogleConfig.SERVICE_ACCOUNT_CLOUD_BILLING;
 
 import com.google.api.services.cloudbilling.Cloudbilling;
-import com.google.cloud.PageImpl;
 import com.google.cloud.bigquery.Field;
 import com.google.cloud.bigquery.FieldList;
 import com.google.cloud.bigquery.FieldValue;
@@ -23,7 +22,6 @@ import com.google.cloud.bigquery.FieldValueList;
 import com.google.cloud.bigquery.LegacySQLTypeName;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
-import com.google.cloud.bigquery.Schema;
 import com.google.cloud.bigquery.StandardSQLTypeName;
 import com.google.cloud.bigquery.TableResult;
 import com.google.common.collect.ImmutableList;
@@ -44,6 +42,7 @@ import java.util.stream.Collectors;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -123,8 +122,10 @@ import org.pmiops.workbench.model.DomainValue;
 import org.pmiops.workbench.model.DomainValuePair;
 import org.pmiops.workbench.model.DomainWithDomainValues;
 import org.pmiops.workbench.model.KernelTypeEnum;
+import org.pmiops.workbench.model.MarkDataSetRequest;
 import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
 import org.pmiops.workbench.model.ResearchPurpose;
+import org.pmiops.workbench.model.ResourceType;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
@@ -498,14 +499,6 @@ public class DataSetControllerTest {
               returnSql = returnSql.replace("${dataSetId}", TEST_CDR_DATA_SET_ID);
               return queryJobConfiguration.toBuilder().setQuery(returnSql).build();
             });
-    // used only by generateCode() test case below.
-    // needs modifications if any new test case that asserts the TableResult
-    when(mockBigQueryService.executeQuery(any()))
-        .thenAnswer(
-            (InvocationOnMock invocation) -> {
-              return new TableResult(
-                  Schema.of(), 0, new PageImpl<>(() -> null, null, new ArrayList<>()));
-            });
   }
 
   private DataSetRequest buildEmptyDataSetRequest() {
@@ -835,6 +828,7 @@ public class DataSetControllerTest {
 
   @Test
   public void generateCode_pyhton() {
+    mockLinkingTableQuery();
     DataSetRequest dataSetRequest = buildValidDataSetRequest();
     DataSetCodeResponse dataSetCodeResponse =
         dataSetController
@@ -851,6 +845,7 @@ public class DataSetControllerTest {
 
   @Test
   public void generateCode_R() {
+    mockLinkingTableQuery();
     DataSetRequest dataSetRequest = buildValidDataSetRequest();
     DataSetCodeResponse dataSetCodeResponse =
         dataSetController
@@ -1218,6 +1213,54 @@ public class DataSetControllerTest {
         () ->
             dataSetController.getDataSet(
                 workspace.getNamespace(), workspace.getName(), finalDataSet.getId()));
+  }
+
+  @Test
+  public void testMarkDirty_cohort() {
+    MarkDataSetRequest markDataSetRequest =
+        new MarkDataSetRequest().resourceType(ResourceType.COHORT).id(cohort.getId());
+    assertThat(
+            dataSetController
+                .markDirty(workspace.getNamespace(), workspace.getId(), markDataSetRequest)
+                .getBody())
+        .isTrue();
+  }
+
+  @Test
+  public void testMarkDirty_concept() {
+    MarkDataSetRequest markDataSetRequest =
+        new MarkDataSetRequest().resourceType(ResourceType.CONCEPT_SET).id(conceptSet1.getId());
+    assertThat(
+            dataSetController
+                .markDirty(workspace.getNamespace(), workspace.getId(), markDataSetRequest)
+                .getBody())
+        .isTrue();
+  }
+
+  @Test
+  public void testMarkDirty_dataset() {
+    MarkDataSetRequest markDataSetRequest =
+        new MarkDataSetRequest().resourceType(ResourceType.DATASET).id(noAccessDataSet.getId());
+    assertThat(
+            dataSetController
+                .markDirty(workspace.getNamespace(), workspace.getId(), markDataSetRequest)
+                .getBody())
+        .isTrue();
+  }
+
+  @Disabled(
+      "The DataSetController#getDataSetByResourceId(...) is a passthrough "
+          + "call to DataSetServiceImpl#getDataSets(...) which is already "
+          + "tested in DataSetServiceTest test suite.")
+  public void testGetDataSetByResourceId() {
+    // The DataSetController call is a pass through to
+    // DataSetServiceImpl.getDataSets(...)
+  }
+
+  @Disabled("Already tested as part of DataSetControllerTest#createDataSetMissingArguments")
+  public void testValidateDataSetCreateRequest() {
+    // The private method ValidateDataSetCreateRequest is already tested as
+    // part of DataSetControllerTest#createDataSetMissingArguments
   }
 
   DataSetRequest buildValidDataSetRequest() {
