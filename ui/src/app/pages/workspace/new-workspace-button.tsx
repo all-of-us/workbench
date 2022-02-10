@@ -1,10 +1,11 @@
+import * as React from 'react';
+
 import { CardButton } from 'app/components/buttons';
 import { ClrIcon } from 'app/components/icons';
 import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
 import { useNavigation } from 'app/utils/navigation';
-import * as React from 'react';
 
 const styles = reactStyles({
   addCard: {

@@ -1,9 +1,16 @@
+import * as React from 'react';
+import { RouteComponentProps, withRouter } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 import { Dropdown } from 'primereact/dropdown';
 import { InputSwitch } from 'primereact/inputswitch';
-import * as React from 'react';
-import { RouteComponentProps, withRouter } from 'react-router-dom';
 import validate from 'validate.js';
+
+import {
+  Institution,
+  InstitutionMembershipRequirement,
+  InstitutionTierConfig,
+  OrganizationType,
+} from 'generated/fetch';
 
 import { Button } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
@@ -48,12 +55,6 @@ import {
 import { NavigationProps } from 'app/utils/navigation';
 import { MatchParams, serverConfigStore, useStore } from 'app/utils/stores';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
-import {
-  Institution,
-  InstitutionMembershipRequirement,
-  InstitutionTierConfig,
-  OrganizationType,
-} from 'generated/fetch';
 
 const styles = reactStyles({
   label: {

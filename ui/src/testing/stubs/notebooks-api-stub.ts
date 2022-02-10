@@ -1,13 +1,15 @@
 import {
-  appendNotebookFileSuffix,
-  dropNotebookFileSuffix,
-} from 'app/pages/analysis/util';
-import {
   FileDetail,
   KernelTypeEnum,
   KernelTypeResponse,
   NotebooksApi,
 } from 'generated/fetch';
+
+import {
+  appendNotebookFileSuffix,
+  dropNotebookFileSuffix,
+} from 'app/pages/analysis/util';
+
 import { stubNotImplementedError } from 'testing/stubs/stub-utils';
 
 export class NotebooksApiStub extends NotebooksApi {

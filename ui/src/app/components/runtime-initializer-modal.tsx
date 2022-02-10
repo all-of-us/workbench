@@ -1,18 +1,20 @@
-import { Modal, ModalBody, ModalFooter, ModalTitle } from './modals';
 import * as React from 'react';
-import { Button, Clickable } from './buttons';
-import { Runtime, RuntimeConfigurationType } from 'generated/fetch';
-import colors, { colorWithWhiteness } from 'app/styles/colors';
-import { RuntimeCostEstimator } from './runtime-cost-estimator';
-import { RuntimeSummary } from './runtime-summary';
-import { toAnalysisConfig } from 'app/utils/runtime-utils';
-
 import { useState } from 'react';
-import { ClrIcon } from './icons';
+
+import { Runtime, RuntimeConfigurationType } from 'generated/fetch';
+
+import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
 import { setSidebarActiveIconStore } from 'app/utils/navigation';
-import { WarningMessage } from './messages';
+import { toAnalysisConfig } from 'app/utils/runtime-utils';
 import { diskStore, useStore } from 'app/utils/stores';
+
+import { Button, Clickable } from './buttons';
+import { ClrIcon } from './icons';
+import { WarningMessage } from './messages';
+import { Modal, ModalBody, ModalFooter, ModalTitle } from './modals';
+import { RuntimeCostEstimator } from './runtime-cost-estimator';
+import { RuntimeSummary } from './runtime-summary';
 
 const styles = reactStyles({
   bodyElement: {

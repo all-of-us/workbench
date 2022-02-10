@@ -1,6 +1,7 @@
-import * as Utils from 'app/utils';
-import * as fp from 'lodash/fp';
 import * as React from 'react';
+import * as fp from 'lodash/fp';
+
+import * as Utils from 'app/utils';
 
 const { useState, forwardRef } = React;
 const allowedHoverVariables = [

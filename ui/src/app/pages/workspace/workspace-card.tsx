@@ -1,5 +1,7 @@
-import * as fp from 'lodash/fp';
 import * as React from 'react';
+import * as fp from 'lodash/fp';
+import { faLockAlt } from '@fortawesome/pro-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { ResourceType, Workspace, WorkspaceAccessLevel } from 'generated/fetch';
 
@@ -26,13 +28,12 @@ import {
   displayNameForTier,
 } from 'app/utils/access-tiers';
 import { AnalyticsTracker, triggerEvent } from 'app/utils/analytics';
+import { displayDate } from 'app/utils/dates';
 import { currentWorkspaceStore, NavigationProps } from 'app/utils/navigation';
 import { serverConfigStore } from 'app/utils/stores';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faLockAlt } from '@fortawesome/pro-solid-svg-icons';
+
 import { WorkspaceActionsMenu } from './workspace-actions-menu';
-import { displayDate } from 'app/utils/dates';
 
 const EVENT_CATEGORY = 'Workspace list';
 

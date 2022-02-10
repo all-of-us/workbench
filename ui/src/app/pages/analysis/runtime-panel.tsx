@@ -1,3 +1,20 @@
+import * as React from 'react';
+import * as fp from 'lodash/fp';
+import { Dropdown } from 'primereact/dropdown';
+import { InputNumber } from 'primereact/inputnumber';
+import { validate } from 'validate.js';
+
+import {
+  BillingStatus,
+  DataprocConfig,
+  Disk,
+  DiskType,
+  GpuConfig,
+  Runtime,
+  RuntimeConfigurationType,
+  RuntimeStatus,
+} from 'generated/fetch';
+
 import {
   Button,
   Clickable,
@@ -6,11 +23,14 @@ import {
 } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { ClrIcon } from 'app/components/icons';
+import { CheckBox, RadioButton } from 'app/components/inputs';
 import { ErrorMessage, WarningMessage } from 'app/components/messages';
 import { TooltipTrigger } from 'app/components/popups';
+import { RuntimeCostEstimator } from 'app/components/runtime-cost-estimator';
+import { RuntimeSummary } from 'app/components/runtime-summary';
 import { Spinner } from 'app/components/spinners';
 import { TextColumn } from 'app/components/text-column';
-
+import { AoU } from 'app/components/text-wrappers';
 import { diskApi, workspacesApi } from 'app/services/swagger-fetch-clients';
 import colors, { addOpacity, colorWithWhiteness } from 'app/styles/colors';
 import {
@@ -23,6 +43,7 @@ import {
   withCurrentWorkspace,
   withUserProfile,
 } from 'app/utils';
+import { findCdrVersion } from 'app/utils/cdr-versions';
 import {
   AutopauseMinuteThresholds,
   ComputeType,
@@ -41,24 +62,21 @@ import {
 } from 'app/utils/machines';
 import { formatUsd } from 'app/utils/numbers';
 import { applyPresetOverride, runtimePresets } from 'app/utils/runtime-presets';
-import { isUsingFreeTierBillingAccount } from 'app/utils/workspace-utils';
-import { RuntimeCostEstimator } from 'app/components/runtime-cost-estimator';
-import { RuntimeSummary } from 'app/components/runtime-summary';
 import {
+  AnalysisConfig,
+  AnalysisDiff,
   diffsToUpdateMessaging,
   DiskConfig,
   diskTypeLabels,
   fromAnalysisConfig,
   getAnalysisConfigDiffs,
   maybeWithExistingDiskName,
-  AnalysisDiff,
   RuntimeStatusRequest,
   toAnalysisConfig,
   UpdateMessaging,
   useCustomRuntime,
   useRuntimeStatus,
   withAnalysisConfigDefaults,
-  AnalysisConfig,
 } from 'app/utils/runtime-utils';
 import {
   diskStore,
@@ -67,38 +85,21 @@ import {
   useStore,
   withStore,
 } from 'app/utils/stores';
-
-import { CheckBox, RadioButton } from 'app/components/inputs';
-import { AoU } from 'app/components/text-wrappers';
-import { findCdrVersion } from 'app/utils/cdr-versions';
+import { isUsingFreeTierBillingAccount } from 'app/utils/workspace-utils';
 import { supportUrls } from 'app/utils/zendesk';
-import {
-  BillingStatus,
-  DataprocConfig,
-  Disk,
-  DiskType,
-  GpuConfig,
-  Runtime,
-  RuntimeConfigurationType,
-  RuntimeStatus,
-} from 'generated/fetch';
-import * as fp from 'lodash/fp';
-import { Dropdown } from 'primereact/dropdown';
-import { InputNumber } from 'primereact/inputnumber';
-import * as React from 'react';
-import { validate } from 'validate.js';
 
 const { useState, useEffect, Fragment } = React;
 
-import computeStarting from 'assets/icons/compute-starting.svg';
-import computeRunning from 'assets/icons/compute-running.svg';
-import computeStopping from 'assets/icons/compute-stopping.svg';
-import computeError from 'assets/icons/compute-error.svg';
-import computeStopped from 'assets/icons/compute-stopped.svg';
-import computeNone from 'assets/icons/compute-none.svg';
-import { SparkConsolePath } from './leonardo-app-launcher';
 import { RouteLink } from 'app/components/app-router';
 import { WorkspaceData } from 'app/utils/workspace-data';
+import computeError from 'assets/icons/compute-error.svg';
+import computeNone from 'assets/icons/compute-none.svg';
+import computeRunning from 'assets/icons/compute-running.svg';
+import computeStarting from 'assets/icons/compute-starting.svg';
+import computeStopped from 'assets/icons/compute-stopped.svg';
+import computeStopping from 'assets/icons/compute-stopping.svg';
+
+import { SparkConsolePath } from './leonardo-app-launcher';
 
 const styles = reactStyles({
   baseHeader: {

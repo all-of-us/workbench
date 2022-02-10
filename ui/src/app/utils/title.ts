@@ -1,5 +1,4 @@
 import { environment } from 'environments/environment';
-
 import { BASE_TITLE } from 'app/utils/strings';
 
 export function buildPageTitleForEnvironment(pageTitle?: string) {

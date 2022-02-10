@@ -1,10 +1,13 @@
-import { bindApiClients as notebooksBindApiClients } from 'app/services/notebooks-swagger-fetch-clients';
-import * as fp from 'lodash/fp';
+import 'rxjs/Rx';
+
 import { useEffect, useState } from 'react';
 import * as React from 'react';
 import { Switch, useHistory } from 'react-router-dom';
-import { StackdriverErrorReporter } from 'stackdriver-errors-js';
+import * as fp from 'lodash/fp';
 
+import { Configuration } from 'generated/fetch';
+
+import { environment } from 'environments/environment';
 import { AppRoute, AppRouter, withRouteData } from 'app/components/app-router';
 import { NotificationModal } from 'app/components/modals';
 import { withRoutingSpinner } from 'app/components/with-routing-spinner';
@@ -20,6 +23,7 @@ import {
   signInGuard,
   userDisabledPageGuard,
 } from 'app/routing/guards';
+import { bindApiClients as notebooksBindApiClients } from 'app/services/notebooks-swagger-fetch-clients';
 import {
   bindApiClients,
   configApi,
@@ -39,11 +43,8 @@ import {
   stackdriverErrorReporterStore,
   useStore,
 } from 'app/utils/stores';
-import { environment } from 'environments/environment';
-import { Configuration } from 'generated/fetch';
-import 'rxjs/Rx';
-
 import logo from 'assets/images/all-of-us-logo.svg';
+import { StackdriverErrorReporter } from 'stackdriver-errors-js';
 
 declare const gapi: any;
 

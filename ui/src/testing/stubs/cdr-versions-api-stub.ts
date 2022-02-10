@@ -1,12 +1,14 @@
 import {
-  AccessTierDisplayNames,
-  AccessTierShortNames,
-} from 'app/utils/access-tiers';
-import {
   ArchivalStatus,
   CdrVersionsApi,
   CdrVersionTiersResponse,
 } from 'generated/fetch';
+
+import {
+  AccessTierDisplayNames,
+  AccessTierShortNames,
+} from 'app/utils/access-tiers';
+
 import { stubNotImplementedError } from 'testing/stubs/stub-utils';
 
 export class CdrVersionsStubVariables {

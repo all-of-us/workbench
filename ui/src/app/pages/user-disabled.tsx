@@ -3,9 +3,9 @@ import { useEffect } from 'react';
 
 import { BoldHeader } from 'app/components/headers';
 import { PublicLayout } from 'app/components/public-layout';
+import { SupportMailto } from 'app/components/support';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import colors from 'app/styles/colors';
-import { SupportMailto } from 'app/components/support';
 
 export const UserDisabled = (spinnerProps: WithSpinnerOverlayProps) => {
   useEffect(() => spinnerProps.hideSpinner(), []);

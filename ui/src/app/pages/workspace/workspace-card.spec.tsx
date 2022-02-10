@@ -1,12 +1,15 @@
-import { mount } from 'enzyme';
 import * as React from 'react';
+import { mount } from 'enzyme';
+
+import { WorkspaceAccessLevel, WorkspacesApi } from 'generated/fetch';
 
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { serverConfigStore } from 'app/utils/stores';
-import { WorkspaceAccessLevel, WorkspacesApi } from 'generated/fetch';
+
 import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
 import { workspaceStubs } from 'testing/stubs/workspaces';
 import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
+
 import { WorkspaceCard } from './workspace-card';
 
 describe('WorkspaceCard', () => {

@@ -1,10 +1,15 @@
+import * as React from 'react';
+import { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
+import * as fp from 'lodash/fp';
+
 import { HelpSidebar } from 'app/components/help-sidebar';
 import { Spinner } from 'app/components/spinners';
 import { WorkspaceNavBar } from 'app/pages/workspace/workspace-nav-bar';
 import { WorkspaceRoutes } from 'app/routing/workspace-app-routing';
 import { workspacesApi } from 'app/services/swagger-fetch-clients';
-import { reportError } from 'app/utils/errors';
 import { withCurrentWorkspace } from 'app/utils';
+import { reportError } from 'app/utils/errors';
 import {
   ExceededActionCountError,
   InitialRuntimeNotFoundError,
@@ -23,10 +28,6 @@ import {
   runtimeStore,
   useStore,
 } from 'app/utils/stores';
-import * as fp from 'lodash/fp';
-import * as React from 'react';
-import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
 
 export const WorkspaceWrapper = fp.flow(withCurrentWorkspace())(
   ({ workspace, hideSpinner }) => {

@@ -1,8 +1,20 @@
+import * as React from 'react';
+import { RouteComponentProps, withRouter } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
 import { OverlayPanel } from 'primereact/overlaypanel';
-import * as React from 'react';
+
+import {
+  CohortReview,
+  CohortStatus,
+  Filter,
+  FilterColumns as Columns,
+  Operator,
+  PageFilterRequest as Request,
+  ParticipantCohortStatus,
+  SortOrder,
+} from 'generated/fetch';
 
 import { Button } from 'app/components/buttons';
 import { ClrIcon } from 'app/components/icons';
@@ -35,17 +47,6 @@ import {
 import { MatchParams } from 'app/utils/stores';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
-import {
-  CohortReview,
-  CohortStatus,
-  Filter,
-  FilterColumns as Columns,
-  Operator,
-  PageFilterRequest as Request,
-  ParticipantCohortStatus,
-  SortOrder,
-} from 'generated/fetch';
-import { RouteComponentProps, withRouter } from 'react-router-dom';
 
 const fields = [
   { field: 'participantId', name: 'Participant ID' },

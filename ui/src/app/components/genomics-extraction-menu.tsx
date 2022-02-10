@@ -1,7 +1,12 @@
+import { useState } from 'react';
+import * as React from 'react';
+import * as fp from 'lodash/fp';
 import { faBan, faEllipsisV, faTrash } from '@fortawesome/free-solid-svg-icons';
-
 import { faLocationCircle } from '@fortawesome/pro-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+
+import { GenomicExtractionJob, TerraJobStatus } from 'generated/fetch';
+
 import { MenuItem } from 'app/components/buttons';
 import { CopySnippetModal } from 'app/components/copy-snippet-modal';
 import { PopupTrigger } from 'app/components/popups';
@@ -14,10 +19,6 @@ import {
 } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
-import { GenomicExtractionJob, TerraJobStatus } from 'generated/fetch';
-import * as fp from 'lodash/fp';
-import { useState } from 'react';
-import * as React from 'react';
 
 const styles = {
   hr: {

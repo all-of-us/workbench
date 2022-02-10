@@ -1,3 +1,5 @@
+import { CSSProperties } from 'react';
+
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { TooltipTrigger } from 'app/components/popups';
 import colors from 'app/styles/colors';
@@ -12,7 +14,6 @@ import {
 } from 'app/utils/machines';
 import { formatUsd } from 'app/utils/numbers';
 import { AnalysisConfig } from 'app/utils/runtime-utils';
-import { CSSProperties } from 'react';
 
 interface Props {
   analysisConfig: AnalysisConfig;

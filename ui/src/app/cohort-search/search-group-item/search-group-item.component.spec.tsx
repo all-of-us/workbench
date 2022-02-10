@@ -1,7 +1,8 @@
-import { shallow } from 'enzyme';
 import * as React from 'react';
+import { shallow } from 'enzyme';
 
 import { Domain } from 'generated/fetch';
+
 import { SearchGroupItem } from './search-group-item.component';
 
 const itemStub = {

@@ -1,6 +1,7 @@
+import * as React from 'react';
+
 import { FlexColumn } from 'app/components/flex';
 import colors from 'app/styles/colors';
-import * as React from 'react';
 
 const style = {
   color: colors.primary,

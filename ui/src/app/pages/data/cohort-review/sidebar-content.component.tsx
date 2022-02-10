@@ -1,6 +1,15 @@
-import * as fp from 'lodash/fp';
-import moment from 'moment';
 import * as React from 'react';
+import * as fp from 'lodash/fp';
+
+import {
+  AnnotationType,
+  CohortAnnotationDefinition,
+  CohortReview,
+  CohortStatus,
+  ParticipantCohortAnnotation,
+  ParticipantCohortStatus,
+  WorkspaceAccessLevel,
+} from 'generated/fetch';
 
 import { Button } from 'app/components/buttons';
 import { styles as headerStyles } from 'app/components/headers';
@@ -29,15 +38,7 @@ import {
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { withCurrentCohortReview, withCurrentWorkspace } from 'app/utils';
 import { WorkspaceData } from 'app/utils/workspace-data';
-import {
-  AnnotationType,
-  CohortAnnotationDefinition,
-  CohortReview,
-  CohortStatus,
-  ParticipantCohortAnnotation,
-  ParticipantCohortStatus,
-  WorkspaceAccessLevel,
-} from 'generated/fetch';
+import moment from 'moment';
 
 const styles = {
   header: {

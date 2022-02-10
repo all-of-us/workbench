@@ -1,13 +1,7 @@
-import * as fp from 'lodash/fp';
 import * as React from 'react';
+import * as fp from 'lodash/fp';
 import { mount } from 'enzyme';
 
-import { AccessRenewal, isExpiring } from 'app/pages/access/access-renewal';
-import {
-  profileApi,
-  registerApiClient,
-} from 'app/services/swagger-fetch-clients';
-import { profileStore, serverConfigStore } from 'app/utils/stores';
 import {
   AccessModule,
   AccessModuleStatus,
@@ -15,6 +9,16 @@ import {
   Profile,
   ProfileApi,
 } from 'generated/fetch';
+
+import { AccessRenewal, isExpiring } from 'app/pages/access/access-renewal';
+import {
+  profileApi,
+  registerApiClient,
+} from 'app/services/swagger-fetch-clients';
+import { accessRenewalModules } from 'app/utils/access-utils';
+import { nowPlusDays, plusDays } from 'app/utils/dates';
+import { profileStore, serverConfigStore } from 'app/utils/stores';
+
 import defaultServerConfig from 'testing/default-server-config';
 import {
   findNodesByExactText,
@@ -26,8 +30,6 @@ import {
   ProfileApiStub,
   ProfileStubVariables,
 } from 'testing/stubs/profile-api-stub';
-import { accessRenewalModules } from 'app/utils/access-utils';
-import { nowPlusDays, plusDays } from 'app/utils/dates';
 
 const EXPIRY_DAYS = 365;
 const oneYearAgo = () => nowPlusDays(-EXPIRY_DAYS);

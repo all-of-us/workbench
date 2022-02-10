@@ -1,15 +1,18 @@
-import { mount } from 'enzyme';
 import * as React from 'react';
-import * as fp from 'lodash/fp';
 import { MemoryRouter } from 'react-router';
+import * as fp from 'lodash/fp';
+import { mount } from 'enzyme';
 
-import { AdminUsers } from './admin-users';
 import { AuthDomainApi, Profile, UserAdminApi } from 'generated/fetch';
+
+import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { serverConfigStore } from 'app/utils/stores';
+
+import { AuthDomainApiStub } from 'testing/stubs/auth-domain-api-stub';
 import { ProfileStubVariables } from 'testing/stubs/profile-api-stub';
 import { UserAdminApiStub } from 'testing/stubs/user-admin-api-stub';
-import { registerApiClient } from 'app/services/swagger-fetch-clients';
-import { AuthDomainApiStub } from 'testing/stubs/auth-domain-api-stub';
+
+import { AdminUsers } from './admin-users';
 
 describe('AdminUsers', () => {
   let props: { profile: Profile; hideSpinner: () => {}; showSpinner: () => {} };

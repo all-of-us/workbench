@@ -1,8 +1,8 @@
-import { mount, MountRendererProps, ReactWrapper } from 'enzyme';
 import * as React from 'react';
 import { act } from 'react-dom/test-utils';
-import * as fp from 'lodash/fp';
 import { MemoryRouter } from 'react-router';
+import * as fp from 'lodash/fp';
+import { mount, MountRendererProps, ReactWrapper } from 'enzyme';
 
 export async function waitOneTickAndUpdate(wrapper: ReactWrapper) {
   const waitImmediate = () =>

@@ -1,3 +1,5 @@
+import * as React from 'react';
+
 import { Button } from 'app/components/buttons';
 import { StyledExternalLink } from 'app/components/buttons';
 import { CookieBanner } from 'app/components/cookie-banner';
@@ -6,7 +8,6 @@ import { Header, SmallHeader } from 'app/components/headers';
 import { AouTitle } from 'app/components/text-wrappers';
 import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
-import * as React from 'react';
 
 export const styles = reactStyles({
   sign: {

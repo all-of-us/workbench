@@ -1,5 +1,7 @@
-import Nouislider from 'nouislider-react';
 import * as React from 'react';
+import Nouislider from 'nouislider-react';
+
+import { AttrName, CriteriaType, Domain, Operator } from 'generated/fetch';
 
 import { typeToTitle } from 'app/cohort-search/utils';
 import { Button } from 'app/components/buttons';
@@ -11,7 +13,6 @@ import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
 import { triggerEvent } from 'app/utils/analytics';
 import { currentWorkspaceStore } from 'app/utils/navigation';
-import { AttrName, CriteriaType, Domain, Operator } from 'generated/fetch';
 
 const styles = reactStyles({
   ageContainer: {

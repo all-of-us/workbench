@@ -1,8 +1,10 @@
-import { registerApiClient } from 'app/services/swagger-fetch-clients';
+import * as React from 'react';
 import { shallow } from 'enzyme';
 
 import { ProfileApi } from 'generated/fetch';
-import * as React from 'react';
+
+import { registerApiClient } from 'app/services/swagger-fetch-clients';
+
 import { ProfileApiStub } from 'testing/stubs/profile-api-stub';
 
 import {

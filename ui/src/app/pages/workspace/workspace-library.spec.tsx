@@ -1,23 +1,26 @@
-import { mount } from 'enzyme';
 import * as React from 'react';
+import { mount } from 'enzyme';
 
-import {
-  profileApi,
-  registerApiClient,
-} from 'app/services/swagger-fetch-clients';
 import {
   FeaturedWorkspacesConfigApi,
   ProfileApi,
   WorkspacesApi,
 } from 'generated/fetch';
+
+import {
+  profileApi,
+  registerApiClient,
+} from 'app/services/swagger-fetch-clients';
+import { AccessTierShortNames } from 'app/utils/access-tiers';
+import { profileStore } from 'app/utils/stores';
+
 import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
 import { FeaturedWorkspacesConfigApiStub } from 'testing/stubs/featured-workspaces-config-api-stub';
+import { ProfileApiStub } from 'testing/stubs/profile-api-stub';
 import { buildWorkspaceStubs } from 'testing/stubs/workspaces';
 import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
+
 import { WorkspaceLibrary } from './workspace-library';
-import { ProfileApiStub } from 'testing/stubs/profile-api-stub';
-import { profileStore } from 'app/utils/stores';
-import { AccessTierShortNames } from 'app/utils/access-tiers';
 
 describe('WorkspaceLibrary', () => {
   let publishedWorkspaceStubs = [];

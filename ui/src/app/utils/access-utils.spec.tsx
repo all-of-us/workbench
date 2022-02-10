@@ -7,13 +7,12 @@ import {
   ErrorCode,
   ProfileApi,
 } from 'generated/fetch';
-import {
-  ProfileApiStub,
-  ProfileStubVariables,
-} from 'testing/stubs/profile-api-stub';
 import { Profile } from 'generated/fetch';
-import { authStore, profileStore, serverConfigStore } from 'app/utils/stores';
-import { waitOnTimersAndUpdate } from 'testing/react-test-helpers';
+
+import {
+  profileApi,
+  registerApiClient,
+} from 'app/services/swagger-fetch-clients';
 import {
   AccessModulesStatus,
   buildRasRedirectUrl,
@@ -25,15 +24,18 @@ import {
   useIsUserDisabled,
 } from 'app/utils/access-utils';
 import {
-  profileApi,
-  registerApiClient,
-} from 'app/services/swagger-fetch-clients';
-import {
-  plusDays,
   displayDateWithoutHours,
   nowPlusDays,
+  plusDays,
 } from 'app/utils/dates';
+import { authStore, profileStore, serverConfigStore } from 'app/utils/stores';
+
 import defaultServerConfig from 'testing/default-server-config';
+import { waitOnTimersAndUpdate } from 'testing/react-test-helpers';
+import {
+  ProfileApiStub,
+  ProfileStubVariables,
+} from 'testing/stubs/profile-api-stub';
 
 const ONE_MINUTE_IN_MILLIS = 1000 * 60;
 

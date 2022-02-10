@@ -1,11 +1,7 @@
-import * as fp from 'lodash/fp';
 import * as React from 'react';
 import { CSSProperties } from 'react';
+import * as fp from 'lodash/fp';
 
-import { AccountCreationOptions } from 'app/pages/login/account-creation/account-creation-options';
-import { institutionApi } from 'app/services/swagger-fetch-clients';
-import colors from 'app/styles/colors';
-import { AccessTierShortNames } from 'app/utils/access-tiers';
 import {
   Institution,
   InstitutionalRole,
@@ -13,9 +9,15 @@ import {
   InstitutionTierConfig,
   PublicInstitutionDetails,
 } from 'generated/fetch';
+
+import { ControlledTierBadge, RegisteredTierBadge } from 'app/components/icons';
+import { AccountCreationOptions } from 'app/pages/login/account-creation/account-creation-options';
+import { institutionApi } from 'app/services/swagger-fetch-clients';
+import colors from 'app/styles/colors';
+import { AccessTierShortNames } from 'app/utils/access-tiers';
+
 import { isAbortError } from './errors';
 import { isBlank, switchCase } from './index';
-import { ControlledTierBadge, RegisteredTierBadge } from 'app/components/icons';
 
 /**
  * Checks that the entered email address is a valid member of the chosen institution.

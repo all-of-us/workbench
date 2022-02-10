@@ -1,8 +1,7 @@
-import { ActionAuditCardBase } from 'app/components/card';
-import { FlexRow } from 'app/components/flex';
-import { CheckBox } from 'app/components/inputs';
-import colors from 'app/styles/colors';
-import { reactStyles, usernameWithoutDomain } from 'app/utils';
+import * as React from 'react';
+import { useState } from 'react';
+import * as fp from 'lodash/fp';
+
 import {
   AuditAction,
   AuditAgent,
@@ -11,10 +10,13 @@ import {
   AuditTarget,
   AuditTargetPropertyChange,
 } from 'generated/fetch';
-import * as fp from 'lodash/fp';
+
+import { ActionAuditCardBase } from 'app/components/card';
+import { FlexRow } from 'app/components/flex';
+import { CheckBox } from 'app/components/inputs';
+import colors from 'app/styles/colors';
+import { reactStyles, usernameWithoutDomain } from 'app/utils';
 import moment from 'moment';
-import * as React from 'react';
-import { useState } from 'react';
 
 const { useEffect } = React;
 

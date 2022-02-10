@@ -1,14 +1,17 @@
-import { mount } from 'enzyme';
 import * as React from 'react';
+import { mount } from 'enzyme';
+
+import { StatusApi } from 'generated/fetch';
 
 import {
   registerApiClient,
   statusApi,
 } from 'app/services/swagger-fetch-clients';
 import { fetchWithGlobalErrorHandler } from 'app/utils/retry';
-import { StatusApi } from 'generated/fetch';
+
 import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
 import { StatusApiStub } from 'testing/stubs/status-api-stub';
+
 import { ErrorHandler } from './error-handler';
 
 describe('ErrorHandler', () => {

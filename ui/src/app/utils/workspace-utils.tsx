@@ -1,5 +1,6 @@
-import { serverConfigStore } from 'app/utils/stores';
 import { Workspace } from 'generated/fetch';
+
+import { serverConfigStore } from 'app/utils/stores';
 
 export const isUsingFreeTierBillingAccount = (
   workspace: Workspace

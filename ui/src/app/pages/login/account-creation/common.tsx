@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { Dropdown } from 'primereact/dropdown';
 
 import { Divider } from 'app/components/divider';
 import { flexStyle } from 'app/components/flex';
@@ -6,7 +7,6 @@ import { FormSection } from 'app/components/forms';
 import { AouTitle } from 'app/components/text-wrappers';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
-import { Dropdown } from 'primereact/dropdown';
 
 // Contains style definitions shared across multiple account-creation form steps.
 export const commonStyles = reactStyles({

@@ -1,10 +1,12 @@
-import { getChartObj } from 'app/cohort-search/utils';
-import { ParticipantChartData } from 'generated/fetch';
+import * as React from 'react';
+import * as fp from 'lodash/fp';
 import * as highCharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
-import * as fp from 'lodash/fp';
+
+import { ParticipantChartData } from 'generated/fetch';
+
+import { getChartObj } from 'app/cohort-search/utils';
 import moment from 'moment';
-import * as React from 'react';
 
 export class IndividualParticipantsCharts extends React.Component<{
   chartData: {

@@ -1,3 +1,5 @@
+import * as fp from 'lodash/fp';
+
 import {
   User,
   UserApi,
@@ -6,7 +8,6 @@ import {
   WorkbenchListBillingAccountsResponse,
 } from 'generated/fetch';
 
-import * as fp from 'lodash/fp';
 import { stubNotImplementedError } from 'testing/stubs/stub-utils';
 
 export class UserApiStub extends UserApi {

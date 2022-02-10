@@ -1,5 +1,6 @@
-import { zendeskWidgetKey } from 'app/utils/zendesk';
 import * as React from 'react';
+
+import { zendeskWidgetKey } from 'app/utils/zendesk';
 
 const { useEffect } = React;
 

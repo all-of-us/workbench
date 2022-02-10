@@ -1,12 +1,15 @@
-import { mount } from 'enzyme';
 import * as React from 'react';
+import { mount } from 'enzyme';
 
-import { BugReportModal } from './bug-report';
-import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { ProfileApi } from 'generated/fetch';
+
+import { registerApiClient } from 'app/services/swagger-fetch-clients';
+import { profileStore } from 'app/utils/stores';
+
 import { ProfileApiStub } from 'testing/stubs/profile-api-stub';
 import { ProfileStubVariables } from 'testing/stubs/profile-api-stub';
-import { profileStore } from 'app/utils/stores';
+
+import { BugReportModal } from './bug-report';
 
 describe('BugReport', () => {
   const description = 'test';

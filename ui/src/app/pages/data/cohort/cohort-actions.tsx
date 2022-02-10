@@ -1,3 +1,10 @@
+import * as React from 'react';
+import { RouteComponentProps, withRouter } from 'react-router-dom';
+import * as fp from 'lodash/fp';
+import * as querystring from 'querystring';
+
+import { Cohort } from 'generated/fetch';
+
 import { RouteLink } from 'app/components/app-router';
 import { Button } from 'app/components/buttons';
 import { ActionCardBase } from 'app/components/card';
@@ -16,11 +23,6 @@ import { NavigationProps } from 'app/utils/navigation';
 import { MatchParams } from 'app/utils/stores';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
-import { Cohort } from 'generated/fetch';
-import * as fp from 'lodash/fp';
-import * as querystring from 'querystring';
-import * as React from 'react';
-import { RouteComponentProps, withRouter } from 'react-router-dom';
 
 const styles = reactStyles({
   cohortsHeader: {

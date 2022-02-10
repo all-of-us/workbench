@@ -1,5 +1,9 @@
-import * as fp from 'lodash/fp';
 import * as React from 'react';
+import { RouteComponentProps, withRouter } from 'react-router-dom';
+import * as fp from 'lodash/fp';
+import { TabPanel, TabView } from 'primereact/tabview';
+
+import { CohortReview, Domain, FilterColumns } from 'generated/fetch';
 
 import { domainToTitle } from 'app/cohort-search/utils';
 import { SpinnerOverlay } from 'app/components/spinners';
@@ -16,9 +20,6 @@ import {
 import { triggerEvent } from 'app/utils/analytics';
 import { MatchParams } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
-import { CohortReview, Domain, FilterColumns } from 'generated/fetch';
-import { TabPanel, TabView } from 'primereact/tabview';
-import { RouteComponentProps, withRouter } from 'react-router-dom';
 
 const styles = reactStyles({
   container: {

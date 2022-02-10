@@ -1,9 +1,24 @@
-import * as fp from 'lodash/fp';
 import * as React from 'react';
 import { Redirect } from 'react-router-dom';
+import * as fp from 'lodash/fp';
 
+import {
+  AccessModule,
+  AccessModuleConfig,
+  AccessModuleStatus,
+  ErrorCode,
+  Profile,
+} from 'generated/fetch';
+
+import { parseQueryParams } from 'app/components/app-router';
 import { Button } from 'app/components/buttons';
+import { InfoIcon } from 'app/components/icons';
+import { TooltipTrigger } from 'app/components/popups';
 import { AoU } from 'app/components/text-wrappers';
+import {
+  hasExpired,
+  isExpiringNotBypassed,
+} from 'app/pages/access/access-renewal';
 import { profileApi, userAdminApi } from 'app/services/swagger-fetch-clients';
 import { AnalyticsTracker } from 'app/utils/analytics';
 import { convertAPIError } from 'app/utils/errors';
@@ -14,26 +29,13 @@ import {
   serverConfigStore,
   useStore,
 } from 'app/utils/stores';
+
 import {
-  AccessModule,
-  AccessModuleStatus,
-  AccessModuleConfig,
-  ErrorCode,
-  Profile,
-} from 'generated/fetch';
-import { parseQueryParams } from 'app/components/app-router';
-import { cond, switchCase } from './index';
-import { TooltipTrigger } from 'app/components/popups';
-import { InfoIcon } from 'app/components/icons';
-import {
-  getWholeDaysFromNow,
   displayDateWithoutHours,
+  getWholeDaysFromNow,
   MILLIS_PER_DAY,
 } from './dates';
-import {
-  hasExpired,
-  isExpiringNotBypassed,
-} from 'app/pages/access/access-renewal';
+import { cond, switchCase } from './index';
 
 export enum AccessModulesStatus {
   NEVER_EXPIRES = 'Complete (Never Expires)',

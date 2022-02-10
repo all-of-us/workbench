@@ -1,8 +1,10 @@
-import { AppRoute, AppRouter, Guard } from 'app/components/app-router';
-import { mount } from 'enzyme';
 import * as React from 'react';
 import { MemoryRouter } from 'react-router';
 import { Redirect, Switch } from 'react-router-dom';
+import { mount } from 'enzyme';
+
+import { AppRoute, AppRouter, Guard } from 'app/components/app-router';
+
 import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
 
 jest.mock('react-router-dom', () => {

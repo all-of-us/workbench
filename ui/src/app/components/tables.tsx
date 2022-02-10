@@ -1,6 +1,7 @@
+import * as React from 'react';
+
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import colors from 'app/styles/colors';
-import * as React from 'react';
 
 const styles = {
   paddedTable: {

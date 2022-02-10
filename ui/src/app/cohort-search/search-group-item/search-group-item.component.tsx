@@ -1,4 +1,16 @@
 import * as React from 'react';
+import { Menu } from 'primereact/menu';
+import { OverlayPanel } from 'primereact/overlaypanel';
+
+import {
+  CriteriaType,
+  Domain,
+  Modifier,
+  ModifierType,
+  ResourceType,
+  SearchGroupItem as Item,
+  SearchRequest,
+} from 'generated/fetch';
 
 import { MODIFIERS_MAP } from 'app/cohort-search/constant';
 import {
@@ -20,17 +32,6 @@ import { reactStyles, withCurrentWorkspace } from 'app/utils';
 import { triggerEvent } from 'app/utils/analytics';
 import { currentWorkspaceStore } from 'app/utils/navigation';
 import { WorkspaceData } from 'app/utils/workspace-data';
-import {
-  CriteriaType,
-  Domain,
-  Modifier,
-  ModifierType,
-  ResourceType,
-  SearchGroupItem as Item,
-  SearchRequest,
-} from 'generated/fetch';
-import { Menu } from 'primereact/menu';
-import { OverlayPanel } from 'primereact/overlaypanel';
 
 const styles = reactStyles({
   menu: {

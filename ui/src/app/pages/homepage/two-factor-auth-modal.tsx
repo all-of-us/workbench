@@ -10,7 +10,6 @@ import {
 import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
 import { redirectToTwoFactorSetup } from 'app/utils/access-utils';
-
 import twoFactorAuthModalImage from 'assets/images/2sv-image.png';
 
 const styles = reactStyles({

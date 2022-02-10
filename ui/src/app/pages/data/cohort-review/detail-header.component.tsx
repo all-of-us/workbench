@@ -1,8 +1,18 @@
-import * as fp from 'lodash/fp';
-import moment from 'moment';
-import { RadioButton } from 'primereact/radiobutton';
 import * as React from 'react';
+import { RouteComponentProps, withRouter } from 'react-router-dom';
+import * as fp from 'lodash/fp';
+import { RadioButton } from 'primereact/radiobutton';
 import { validate, validators } from 'validate.js';
+
+import {
+  CohortReview,
+  Filter,
+  FilterColumns as Columns,
+  Operator,
+  PageFilterRequest,
+  ParticipantCohortStatus,
+  SortOrder,
+} from 'generated/fetch';
 
 import {
   DatePicker,
@@ -32,16 +42,7 @@ import {
 import { MatchParams } from 'app/utils/stores';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
-import {
-  CohortReview,
-  Filter,
-  FilterColumns as Columns,
-  Operator,
-  PageFilterRequest,
-  ParticipantCohortStatus,
-  SortOrder,
-} from 'generated/fetch';
-import { RouteComponentProps, withRouter } from 'react-router-dom';
+import moment from 'moment';
 
 validators.dateFormat = (value: string) => {
   return moment(value, 'YYYY-MM-DD', true).isValid()

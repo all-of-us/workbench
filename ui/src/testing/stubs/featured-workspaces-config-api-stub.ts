@@ -4,7 +4,9 @@ import {
   FeaturedWorkspacesConfigApi,
   FeaturedWorkspacesConfigResponse,
 } from 'generated/fetch';
+
 import { stubNotImplementedError } from 'testing/stubs/stub-utils';
+
 import { WorkspaceStubVariables } from './workspaces';
 
 const phenotypeWorkspace = {

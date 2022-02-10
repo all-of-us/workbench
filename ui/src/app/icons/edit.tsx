@@ -1,6 +1,6 @@
-import colors, { colorWithWhiteness } from 'app/styles/colors';
-
 import * as React from 'react';
+
+import colors, { colorWithWhiteness } from 'app/styles/colors';
 
 export interface EditComponentProps {
   disabled: boolean;

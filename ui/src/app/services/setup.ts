@@ -1,4 +1,5 @@
 import validate from 'validate.js';
+
 import { environment } from 'environments/environment';
 import { LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN } from 'app/utils/cookies';
 import outdatedBrowserRework from 'outdated-browser-rework';

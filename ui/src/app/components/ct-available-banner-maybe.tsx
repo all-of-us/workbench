@@ -1,21 +1,23 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
 
-import { ToastBanner, ToastType } from './toast-banner';
-import { cookiesEnabled } from 'app/utils/cookies';
-import { StyledRouterLink } from './buttons';
+import { CdrVersionTier, Profile } from 'generated/fetch';
+
 import { environment } from 'environments/environment';
 import {
   AccessTierDisplayNames,
   AccessTierShortNames,
 } from 'app/utils/access-tiers';
-import { CdrVersionTier, Profile } from 'generated/fetch';
 import {
   DATA_ACCESS_REQUIREMENTS_PATH,
   eligibleForTier,
 } from 'app/utils/access-utils';
+import { cookiesEnabled } from 'app/utils/cookies';
 import { cdrVersionStore, profileStore, useStore } from 'app/utils/stores';
+
+import { StyledRouterLink } from './buttons';
 import { AoU } from './text-wrappers';
+import { ToastBanner, ToastType } from './toast-banner';
 
 const CT_COOKIE_KEY = 'controlled-tier-available';
 

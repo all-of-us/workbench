@@ -3,6 +3,12 @@ import * as fp from 'lodash/fp';
 import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
 
+import {
+  Institution,
+  InstitutionMembershipRequirement,
+  OrganizationType,
+} from 'generated/fetch';
+
 import { Button } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
 import { SemiBoldHeader } from 'app/components/headers';
@@ -12,15 +18,10 @@ import { OrganizationTypeOptions } from 'app/pages/admin/admin-institution-optio
 import { institutionApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
+import { orderedAccessTierShortNames } from 'app/utils/access-tiers';
 import { getTierConfig } from 'app/utils/institutions';
 import { NavigationProps } from 'app/utils/navigation';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
-import {
-  Institution,
-  InstitutionMembershipRequirement,
-  OrganizationType,
-} from 'generated/fetch';
-import { orderedAccessTierShortNames } from 'app/utils/access-tiers';
 
 const styles = reactStyles({
   pageHeader: {

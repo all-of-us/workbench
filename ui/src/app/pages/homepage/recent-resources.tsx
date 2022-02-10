@@ -1,22 +1,12 @@
-import * as fp from 'lodash/fp';
 import * as React from 'react';
+import { CSSProperties, useEffect, useState } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
+import * as fp from 'lodash/fp';
 import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
-import { CSSProperties, useEffect, useState } from 'react';
+import { faLockAlt } from '@fortawesome/pro-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-import { Clickable } from 'app/components/buttons';
-import { SmallHeader } from 'app/components/headers';
-import { renderResourceCard } from 'app/components/render-resource-card';
-import {
-  ResourceNavigation,
-  StyledResourceType,
-} from 'app/components/resource-card';
-import { SpinnerOverlay } from 'app/components/spinners';
-import { userMetricsApi } from 'app/services/swagger-fetch-clients';
-import { reactStyles, withCdrVersions } from 'app/utils';
-import { getCdrVersion } from 'app/utils/cdr-versions';
-import { getDisplayName, isNotebook } from 'app/utils/resources';
 import {
   CdrVersionTiersResponse,
   Workspace,
@@ -24,11 +14,22 @@ import {
   WorkspaceResourceResponse,
   WorkspaceResponse,
 } from 'generated/fetch';
-import { faLockAlt } from '@fortawesome/pro-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import colors from 'app/styles/colors';
+
+import { Clickable } from 'app/components/buttons';
+import { SmallHeader } from 'app/components/headers';
 import { TooltipTrigger } from 'app/components/popups';
+import { renderResourceCard } from 'app/components/render-resource-card';
+import {
+  ResourceNavigation,
+  StyledResourceType,
+} from 'app/components/resource-card';
+import { SpinnerOverlay } from 'app/components/spinners';
+import { userMetricsApi } from 'app/services/swagger-fetch-clients';
+import colors from 'app/styles/colors';
+import { reactStyles, withCdrVersions } from 'app/utils';
+import { getCdrVersion } from 'app/utils/cdr-versions';
 import { displayDateWithoutHours } from 'app/utils/dates';
+import { getDisplayName, isNotebook } from 'app/utils/resources';
 
 const styles = reactStyles({
   column: {

@@ -1,9 +1,11 @@
-import { mount } from 'enzyme';
 import * as React from 'react';
+import { mount } from 'enzyme';
 
 import { profileStore } from 'app/utils/stores';
-import { CreateBillingAccountModal } from './create-billing-account-modal';
+
 import { ProfileStubVariables } from 'testing/stubs/profile-api-stub';
+
+import { CreateBillingAccountModal } from './create-billing-account-modal';
 
 describe('CreateBillingAccountModal', () => {
   const load = jest.fn();

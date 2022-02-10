@@ -6,14 +6,7 @@ import { CSSProperties } from 'react';
 import { Link } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 import { Dropdown } from 'primereact/dropdown';
-import {
-  ClrIcon,
-  ControlledTierBadge,
-  RegisteredTierBadge,
-} from 'app/components/icons';
 
-import { cond, formatInitialCreditsUSD, isBlank, reactStyles } from 'app/utils';
-import colors, { colorWithWhiteness } from 'app/styles/colors';
 import {
   AccessBypassRequest,
   AccessModule,
@@ -25,16 +18,28 @@ import {
   PublicInstitutionDetails,
   VerifiedInstitutionalAffiliation,
 } from 'generated/fetch';
+
+import { FlexColumn, FlexRow } from 'app/components/flex';
+import {
+  ClrIcon,
+  ControlledTierBadge,
+  RegisteredTierBadge,
+} from 'app/components/icons';
+import { TextInputWithLabel } from 'app/components/inputs';
+import { BulletAlignedUnorderedList } from 'app/components/lists';
+import { TooltipTrigger } from 'app/components/popups';
 import {
   institutionApi,
   userAdminApi,
 } from 'app/services/swagger-fetch-clients';
-import { FlexColumn, FlexRow } from 'app/components/flex';
-import { getRoleOptions } from 'app/utils/institutions';
-import { TextInputWithLabel } from 'app/components/inputs';
-import { BulletAlignedUnorderedList } from 'app/components/lists';
-import { TooltipTrigger } from 'app/components/popups';
-import { serverConfigStore } from 'app/utils/stores';
+import colors, { colorWithWhiteness } from 'app/styles/colors';
+import { cond, formatInitialCreditsUSD, isBlank, reactStyles } from 'app/utils';
+import {
+  AccessTierShortNames,
+  displayNameForTier,
+  hasRegisteredTierAccess,
+  orderedAccessTierShortNames,
+} from 'app/utils/access-tiers';
 import {
   AccessModulesStatus,
   accessRenewalModules,
@@ -42,13 +47,9 @@ import {
   getAccessModuleConfig,
   getAccessModuleStatusByName,
 } from 'app/utils/access-utils';
-import {
-  AccessTierShortNames,
-  hasRegisteredTierAccess,
-  orderedAccessTierShortNames,
-  displayNameForTier,
-} from 'app/utils/access-tiers';
 import { formatDate } from 'app/utils/dates';
+import { getRoleOptions } from 'app/utils/institutions';
+import { serverConfigStore } from 'app/utils/stores';
 
 export const commonStyles = reactStyles({
   semiBold: {

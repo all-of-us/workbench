@@ -1,8 +1,18 @@
+import * as React from 'react';
+import { ReactFragment, useState } from 'react';
+import { Link, RouteComponentProps, withRouter } from 'react-router-dom';
+import * as fp from 'lodash/fp';
 import * as HighCharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
-import * as fp from 'lodash/fp';
-import moment from 'moment';
-import * as React from 'react';
+import { Column } from 'primereact/column';
+import { DataTable } from 'primereact/datatable';
+
+import {
+  CloudStorageTraffic,
+  FileDetail,
+  ListRuntimeResponse,
+  WorkspaceAdminView,
+} from 'generated/fetch';
 
 import { Button } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
@@ -25,19 +35,11 @@ import {
   getSelectedPrimaryPurposeItems,
 } from 'app/utils/research-purpose';
 import { MatchParams } from 'app/utils/stores';
-import {
-  CloudStorageTraffic,
-  FileDetail,
-  ListRuntimeResponse,
-  WorkspaceAdminView,
-} from 'generated/fetch';
-import { Column } from 'primereact/column';
-import { DataTable } from 'primereact/datatable';
-import { ReactFragment, useState } from 'react';
-import { Link, RouteComponentProps, withRouter } from 'react-router-dom';
 import { isUsingFreeTierBillingAccount } from 'app/utils/workspace-utils';
-import { EgressEventsTable } from './egress-events-table';
+import moment from 'moment';
+
 import { AdminLockRequest } from './admin-lock-request';
+import { EgressEventsTable } from './egress-events-table';
 
 const styles = reactStyles({
   infoRow: {

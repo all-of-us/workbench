@@ -1,5 +1,9 @@
+import * as React from 'react';
+import { useState } from 'react';
+import * as fp from 'lodash/fp';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+
 import { Button } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { GoogleCloudLogoSvg, InfoIcon } from 'app/components/icons';
@@ -10,6 +14,8 @@ import {
   ModalFooter,
   withErrorModal,
 } from 'app/components/modals';
+import { TooltipTrigger } from 'app/components/popups';
+import { SpinnerOverlay } from 'app/components/spinners';
 import { TextColumn } from 'app/components/text-column';
 import { profileApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
@@ -17,11 +23,6 @@ import { switchCase } from 'app/utils';
 import { reactStyles } from 'app/utils';
 import { profileStore, useStore } from 'app/utils/stores';
 import { supportUrls } from 'app/utils/zendesk';
-import { SpinnerOverlay } from 'app/components/spinners';
-import * as fp from 'lodash/fp';
-import * as React from 'react';
-import { useState } from 'react';
-import { TooltipTrigger } from 'app/components/popups';
 
 export const styles = reactStyles({
   line: {

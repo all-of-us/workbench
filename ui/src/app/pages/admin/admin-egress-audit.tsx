@@ -1,17 +1,19 @@
-import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
-import { egressEventsAdminApi } from 'app/services/swagger-fetch-clients';
-import { AuditEgressEventResponse, EgressEvent } from 'generated/fetch';
-import { useState, useEffect, useCallback } from 'react';
-import { MatchParams } from 'app/utils/stores';
+import { useCallback, useEffect, useState } from 'react';
 import { useParams } from 'react-router';
+import * as fp from 'lodash/fp';
 import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
-import { TabPanel, TabView } from 'primereact/tabview';
-import { FlexRow } from 'app/components/flex';
-import { Button, StyledRouterLink } from 'app/components/buttons';
 import { Dropdown } from 'primereact/dropdown';
+import { TabPanel, TabView } from 'primereact/tabview';
+
+import { AuditEgressEventResponse, EgressEvent } from 'generated/fetch';
+
+import { Button, StyledRouterLink } from 'app/components/buttons';
+import { FlexRow } from 'app/components/flex';
+import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
+import { egressEventsAdminApi } from 'app/services/swagger-fetch-clients';
 import { mutableEgressEventStatuses } from 'app/utils/egress-events';
-import * as fp from 'lodash/fp';
+import { MatchParams } from 'app/utils/stores';
 
 const DetailRow = ({
   label,

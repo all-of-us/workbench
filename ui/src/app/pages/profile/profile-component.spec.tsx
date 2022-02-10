@@ -1,12 +1,14 @@
-import { mount, ReactWrapper } from 'enzyme';
 import * as React from 'react';
 import { MemoryRouter } from 'react-router-dom';
+import { mount, ReactWrapper } from 'enzyme';
+
+import { InstitutionApi, ProfileApi } from 'generated/fetch';
 
 import { TextInput } from 'app/components/inputs';
 import { ProfileComponent } from 'app/pages/profile/profile-component';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { profileStore, serverConfigStore } from 'app/utils/stores';
-import { InstitutionApi, ProfileApi } from 'generated/fetch';
+
 import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
 import { InstitutionApiStub } from 'testing/stubs/institution-api-stub';
 import { ProfileApiStub } from 'testing/stubs/profile-api-stub';

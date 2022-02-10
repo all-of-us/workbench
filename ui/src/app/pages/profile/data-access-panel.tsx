@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { Link } from 'react-router-dom';
 
+import { environment } from 'environments/environment';
 import { FlexRow } from 'app/components/flex';
 import {
   CheckCircle,
@@ -15,7 +16,6 @@ import {
   displayNameForTier,
   orderedAccessTierShortNames,
 } from 'app/utils/access-tiers';
-import { environment } from 'environments/environment';
 import { DATA_ACCESS_REQUIREMENTS_PATH } from 'app/utils/access-utils';
 
 interface TierProps {

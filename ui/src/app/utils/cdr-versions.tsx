@@ -1,10 +1,11 @@
+import * as fp from 'lodash/fp';
+
 import {
   CdrVersion,
   CdrVersionTier,
   CdrVersionTiersResponse,
   Workspace,
 } from 'generated/fetch';
-import * as fp from 'lodash/fp';
 
 function getCdrVersionTier(
   accessTierShortName: string,

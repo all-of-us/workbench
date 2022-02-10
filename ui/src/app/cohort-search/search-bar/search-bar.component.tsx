@@ -1,5 +1,7 @@
-import * as fp from 'lodash/fp';
 import * as React from 'react';
+import * as fp from 'lodash/fp';
+
+import { Criteria, CriteriaType, Domain } from 'generated/fetch';
 
 import { domainToTitle } from 'app/cohort-search/utils';
 import { AlertDanger } from 'app/components/alert';
@@ -16,7 +18,6 @@ import {
 } from 'app/utils';
 import { triggerEvent } from 'app/utils/analytics';
 import { currentWorkspaceStore } from 'app/utils/navigation';
-import { Criteria, CriteriaType, Domain } from 'generated/fetch';
 
 const styles = reactStyles({
   searchContainer: {

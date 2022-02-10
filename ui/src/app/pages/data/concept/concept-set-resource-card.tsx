@@ -1,5 +1,7 @@
-import * as fp from 'lodash/fp';
 import * as React from 'react';
+import * as fp from 'lodash/fp';
+
+import { CopyRequest, DataSet, WorkspaceResource } from 'generated/fetch';
 
 import { CopyModal } from 'app/components/copy-modal';
 import { DataSetReferenceModal } from 'app/components/data-set-reference-modal';
@@ -32,7 +34,6 @@ import {
   getId,
   getType,
 } from 'app/utils/resources';
-import { CopyRequest, DataSet, WorkspaceResource } from 'generated/fetch';
 
 interface Props
   extends WithConfirmDeleteModalProps,
