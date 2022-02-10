@@ -86,11 +86,14 @@ export const commonStyles = reactStyles({
     borderRadius: '18px',
     transform: 'rotate(270deg)',
   },
+  incompleteModule: {
+    color: colorWithWhiteness(colors.highlight, -0.2),
+  },
   expiredModule: {
     color: colors.danger,
   },
   expiringSoonModule: {
-    color: colors.warning,
+    color: colorWithWhiteness(colors.warning, -0.3),
   },
   completeModule: {
     color: colors.black,
@@ -176,6 +179,10 @@ const getModuleStatus = (profile, moduleName) =>
 
 const moduleStatusStyle = (moduleStatus) =>
   cond(
+    [
+      moduleStatus === AccessModulesStatus.INCOMPLETE,
+      () => commonStyles.incompleteModule,
+    ],
     [
       moduleStatus === AccessModulesStatus.EXPIRED,
       () => commonStyles.expiredModule,
