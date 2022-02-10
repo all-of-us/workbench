@@ -455,7 +455,7 @@ AND x.is_standard = 0"
 # CB_CRITERIA_ANCESTOR
 ################################################
 echo "CB_CRITERIA_ANCESTOR - Drugs - add any drugs from the ICD9Proc hierarchy"
-bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBA\`
     (
           ancestor_id
