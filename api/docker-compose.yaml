@@ -10,6 +10,8 @@ services:
       - db:/var/lib/mysql
     ports:
       - 127.0.0.1:3306:3306
+    cap_add:
+      - SYS_NICE
 
 volumes:
   db:
