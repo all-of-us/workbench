@@ -129,8 +129,6 @@ export const DATA_ACCESS_REQUIREMENTS_PATH = '/data-access-requirements';
 
 interface AccessModuleUIConfig extends AccessModuleConfig {
   isEnabledInEnvironment: boolean; // either true or dependent on a feature flag
-  isRequiredByRT: boolean;
-  isRequiredByCT: boolean;
   AARTitleComponent: () => JSX.Element;
   DARTitleComponent: () => JSX.Element;
   adminPageTitle: string;
@@ -170,8 +168,6 @@ export const getAccessModuleConfig = (
         externalSyncAction: async () =>
           await profileApi().syncTwoFactorAuthStatus(),
         refreshAction: async () => await profileApi().syncTwoFactorAuthStatus(),
-        isRequiredByRT: true,
-        isRequiredByCT: true,
       }),
     ],
 
@@ -181,6 +177,14 @@ export const getAccessModuleConfig = (
         ...apiConfig,
         isEnabledInEnvironment:
           enableRasLoginGovLinking || enforceRasLoginGovLinking,
+
+        // override these API config values temporarily
+        // when we complete RW-7862, enforceRasLoginGovLinking will work as normal access enable flag
+        // and we can remove this override
+
+        requiredForRTAccess: enforceRasLoginGovLinking,
+        requiredForCTAccess: enforceRasLoginGovLinking,
+
         DARTitleComponent: () => (
           <div>
             Verify your identity with Login.gov{' '}
@@ -195,8 +199,6 @@ export const getAccessModuleConfig = (
         ),
         adminPageTitle: 'Verify your identity with Login.gov',
         refreshAction: () => redirectToRas(false),
-        isRequiredByRT: enforceRasLoginGovLinking,
-        isRequiredByCT: enforceRasLoginGovLinking,
       }),
     ],
 
@@ -233,8 +235,6 @@ export const getAccessModuleConfig = (
           await profileApi().syncComplianceTrainingStatus(),
         refreshAction: async () =>
           await profileApi().syncComplianceTrainingStatus(),
-        isRequiredByRT: true,
-        isRequiredByCT: true,
       }),
     ],
 
@@ -253,8 +253,6 @@ export const getAccessModuleConfig = (
           await profileApi().syncComplianceTrainingStatus(),
         refreshAction: async () =>
           await profileApi().syncComplianceTrainingStatus(),
-        isRequiredByRT: false,
-        isRequiredByCT: true,
       }),
     ],
 
@@ -266,8 +264,6 @@ export const getAccessModuleConfig = (
         AARTitleComponent: () => 'Sign Data User Code of Conduct',
         DARTitleComponent: () => <div>Sign Data User Code of Conduct</div>,
         adminPageTitle: 'Sign Data User Code of Conduct',
-        isRequiredByRT: true,
-        isRequiredByCT: true,
       }),
     ],
 
@@ -278,8 +274,6 @@ export const getAccessModuleConfig = (
         isEnabledInEnvironment: true,
         AARTitleComponent: () => 'Update your profile',
         adminPageTitle: 'Update your profile',
-        isRequiredByRT: true,
-        isRequiredByCT: true,
       }),
     ],
 
@@ -291,8 +285,6 @@ export const getAccessModuleConfig = (
         AARTitleComponent: () =>
           'Report any publications or presentations based on your research using the Researcher Workbench',
         adminPageTitle: 'Report any publications',
-        isRequiredByRT: true,
-        isRequiredByCT: true,
       }),
     ]
   );

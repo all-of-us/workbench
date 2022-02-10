@@ -275,12 +275,12 @@ export const displayTierBadgeByRequiredModule = (
     <div>
       {(moduleName === AccessModule.ERACOMMONS
         ? isEraRequiredForTier(profile, AccessTierShortNames.Registered)
-        : getAccessModuleConfig(moduleName)?.isRequiredByRT) && (
+        : getAccessModuleConfig(moduleName)?.requiredForRTAccess) && (
         <RegisteredTierBadge style={{ gridArea: 'badge' }} />
       )}
       {(moduleName === AccessModule.ERACOMMONS
         ? isEraRequiredForTier(profile, AccessTierShortNames.Controlled)
-        : getAccessModuleConfig(moduleName)?.isRequiredByCT) && (
+        : getAccessModuleConfig(moduleName)?.requiredForCTAccess) && (
         <ControlledTierBadge style={{ gridArea: 'badge' }} />
       )}
     </div>
