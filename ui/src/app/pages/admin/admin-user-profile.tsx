@@ -468,11 +468,11 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
   };
 
   const updateContactEmail = async (contactEmail: string) => {
+    updateProfile({ contactEmail });
     await validateAffiliation(
-      contactEmail,
+      contactEmail.trim(),
       updatedProfile.verifiedInstitutionalAffiliation?.institutionShortName
     );
-    updateProfile({ contactEmail });
   };
 
   const updateInstitution = async (institutionShortName: string) => {
@@ -524,12 +524,12 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
 
   const errors = validate(
     {
-      contactEmail: !!updatedProfile?.contactEmail,
+      contactEmail: !isBlank(updatedProfile?.contactEmail?.trim()),
       verifiedInstitutionalAffiliation:
         !!updatedProfile?.verifiedInstitutionalAffiliation,
-      institutionShortName:
-        !!updatedProfile?.verifiedInstitutionalAffiliation
-          ?.institutionShortName,
+      institutionShortName: !isBlank(
+        updatedProfile?.verifiedInstitutionalAffiliation?.institutionShortName
+      ),
       institutionalRoleEnum:
         !!updatedProfile?.verifiedInstitutionalAffiliation
           ?.institutionalRoleEnum,
