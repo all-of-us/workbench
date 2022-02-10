@@ -164,7 +164,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
     return ResponseEntity.ok(conceptSet);
   }
 
-  private void validateCreateConceptSetRequest(CreateConceptSetRequest request) {
+  protected void validateCreateConceptSetRequest(CreateConceptSetRequest request) {
     Optional.ofNullable(request.getConceptSet().getDomain())
         .orElseThrow(() -> new BadRequestException("Domain cannot be null"));
     if (CollectionUtils.isEmpty(request.getAddedConceptSetConceptIds())) {
@@ -172,7 +172,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
     }
   }
 
-  private void validateUpdateConceptSet(ConceptSet conceptSet) {
+  protected void validateUpdateConceptSet(ConceptSet conceptSet) {
     if (Strings.isNullOrEmpty(conceptSet.getEtag())) {
       throw new BadRequestException("missing required update field 'etag'");
     }
@@ -180,7 +180,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
         .orElseThrow(() -> new BadRequestException("Domain cannot be null"));
   }
 
-  private void validateUpdateConceptSetConcepts(UpdateConceptSetRequest request) {
+  protected void validateUpdateConceptSetConcepts(UpdateConceptSetRequest request) {
     if (Strings.isNullOrEmpty(request.getEtag())) {
       throw new BadRequestException("missing required update field 'etag'");
     }

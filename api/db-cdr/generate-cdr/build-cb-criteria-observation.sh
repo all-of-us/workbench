@@ -119,6 +119,7 @@ FROM
                 FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
                 WHERE domain_id = 'OBSERVATION'
                     and is_group = 0
+                    and is_standard = 1
             )
             and value_as_number is not null
         GROUP BY 1
@@ -139,6 +140,7 @@ FROM
                 FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
                 WHERE domain_id = 'OBSERVATION'
                     and is_group = 0
+                    and is_standard = 1
             )
             and value_as_number is not null
         GROUP BY 1
@@ -180,6 +182,7 @@ FROM
                 FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
                 WHERE domain_id = 'OBSERVATION'
                     and is_group = 0
+                    and is_standard = 1
             )
             and value_as_concept_id != 0
             and value_as_concept_id is not null
