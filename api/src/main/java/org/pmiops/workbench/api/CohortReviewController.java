@@ -367,6 +367,9 @@ public class CohortReviewController implements CohortReviewApiDelegate {
 
     cohortReview.participantCohortStatuses(participantCohortStatuses);
 
+    // Pushing the following logic behind the feature flag so that in test/local opening/creating
+    // cohort review will create an entry in user recent resource with resource type cohortReview
+    // rather than cohort, while the rest of the environments remains as is
     if (!workbenchConfigProvider.get().featureFlags.enableDSCREntryInRecentModified) {
       userRecentResourceService.updateCohortEntry(
           cohort.getWorkspaceId(), userProvider.get().getUserId(), cohortId);
