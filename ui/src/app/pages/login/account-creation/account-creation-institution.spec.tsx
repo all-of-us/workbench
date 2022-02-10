@@ -1,30 +1,28 @@
 import * as React from 'react';
 import { mount, ReactWrapper, ShallowWrapper } from 'enzyme';
+import { Dropdown } from 'primereact/dropdown';
 
 import { ConfigApi, InstitutionApi, Profile } from 'generated/fetch';
+import { InstitutionalRole } from 'generated/fetch';
 
+import { AccountCreationOptions } from 'app/pages/login/account-creation/account-creation-options';
 import { createEmptyProfile } from 'app/pages/login/sign-in';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { institutionApi } from 'app/services/swagger-fetch-clients';
 import { serverConfigStore } from 'app/utils/stores';
 
 import defaultServerConfig from 'testing/default-server-config';
+import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
 import { ConfigApiStub } from 'testing/stubs/config-api-stub';
 import { InstitutionApiStub } from 'testing/stubs/institution-api-stub';
+import { defaultInstitutions } from 'testing/stubs/institution-api-stub';
 
 import {
   AccountCreationInstitution,
   Props,
 } from './account-creation-institution';
+
 import SpyInstance = jest.SpyInstance;
-import { Dropdown } from 'primereact/dropdown';
-
-import { InstitutionalRole } from 'generated/fetch';
-
-import { AccountCreationOptions } from 'app/pages/login/account-creation/account-creation-options';
-
-import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
-import { defaultInstitutions } from 'testing/stubs/institution-api-stub';
 
 let mockGetPublicInstitutionDetails: SpyInstance;
 

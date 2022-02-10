@@ -26,6 +26,7 @@ import { LeoRuntimesApiStub } from 'testing/stubs/leo-runtimes-api-stub';
 import { defaultRuntime, RuntimeApiStub } from 'testing/stubs/runtime-api-stub';
 
 import { runtimePresets } from './runtime-presets';
+
 import SpyInstance = jest.SpyInstance;
 
 let mockGetRuntime: SpyInstance;

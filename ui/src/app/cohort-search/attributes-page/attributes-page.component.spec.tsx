@@ -13,7 +13,7 @@ import {
   registerApiClient,
 } from 'app/services/swagger-fetch-clients';
 import { currentWorkspaceStore } from 'app/utils/navigation';
-import SpyInstance = jest.SpyInstance;
+
 import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
 import {
   CohortBuilderServiceStub,
@@ -24,6 +24,8 @@ import {
 import { workspaceDataStub } from 'testing/stubs/workspaces';
 
 import { AttributesPage, Props } from './attributes-page.component';
+
+import SpyInstance = jest.SpyInstance;
 
 type AnyWrapper = ShallowWrapper | ReactWrapper;
 
