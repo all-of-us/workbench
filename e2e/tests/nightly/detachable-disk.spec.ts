@@ -48,11 +48,15 @@ describe('Updating runtime status', () => {
     await notebookPage.save();
     dataPage = await notebookPage.goDataPage();
 
-    // Select increase detachable disk, enable GPU to force a recreate.
+    // Delete the environment, but not the PD.
     await runtimePanel.open();
+    await runtimePanel.deleteRuntime();
+
+    // Create a new runtime, reattaching the PD and increasing the size.
+    await runtimePanel.open();
+    await runtimePanel.pickDetachableDisk();
     await runtimePanel.pickDetachableDiskGbs((await runtimePanel.getDetachableDiskGbs()) + 50);
-    await runtimePanel.pickEnableGpu();
-    await runtimePanel.applyChanges();
+    await runtimePanel.createRuntime({ waitForComplete: false });
 
     // Run notebook to verify file is still on disk; check new disk size.
     notebookPage = await dataPage.createNotebook(makeRandomName('disk-after'));
