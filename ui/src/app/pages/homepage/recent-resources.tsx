@@ -94,12 +94,15 @@ export const RecentResources = fp.flow(withCdrVersions())((props: Props) => {
   const [wsMap, setWorkspaceMap] = useState<Map<string, Workspace>>();
   const [tableData, setTableData] = useState<TableData[]>();
 
-  const loadResources = () => {
-    setLoading(true);
-    return userMetricsApi()
-      .getUserRecentResources()
-      .then(setResources)
-      .then(() => setLoading(false));
+  const loadResources = async () => {
+    try {
+      setLoading(true);
+      await userMetricsApi().getUserRecentResources().then(setResources);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
