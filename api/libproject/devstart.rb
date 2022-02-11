@@ -17,7 +17,7 @@ require "tempfile"
 require "net/http"
 require "json"
 
-INSTANCE_NAME = "workbenchmaindb"
+INSTANCE_NAME = "workbenchmaindb-mysql8"
 FAILOVER_INSTANCE_NAME = "workbenchbackupdb"
 SERVICES = %W{servicemanagement.googleapis.com storage-component.googleapis.com iam.googleapis.com
               compute.googleapis.com admin.googleapis.com appengine.googleapis.com
@@ -1878,7 +1878,7 @@ Common.register_command({
 })
 
 def write_db_creds_file(project, cdr_db_name, root_password, workbench_password, readonly_password)
-  instance_name = "#{project}:us-central1:workbenchmaindb"
+  instance_name = "#{project}:us-central1:workbenchmaindb-mysql8"
   db_creds_file = Tempfile.new("#{project}-vars.env")
   if db_creds_file
     begin
@@ -3241,7 +3241,7 @@ def create_project_resources(gcc)
   common.status "Waiting for database instance to become ready..."
   loop do
     sleep 3.0
-    db_status = `gcloud sql instances describe workbenchmaindb --project #{gcc.project} | grep state`
+    db_status = `gcloud sql instances describe workbenchmaindb-mysql8 --project #{gcc.project} | grep state`
     common.status "DB status: #{db_status}"
     break if db_status.include? "RUNNABLE"
   end

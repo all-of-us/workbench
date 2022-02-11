@@ -13,7 +13,7 @@ class CloudSqlProxyContext < ServiceAccountContext
     super do
       ps = nil
       docker_container_id = nil
-      instance = "#{@project}:us-central1:workbenchmaindb=tcp:0.0.0.0:3307"
+      instance = "#{@project}:us-central1:workbenchmaindb-mysql8=tcp:0.0.0.0:3307"
       if Workbench.in_docker?
         ps = fork do
           exec(*%W{
