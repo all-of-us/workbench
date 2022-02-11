@@ -952,6 +952,7 @@ const DiskSelector = ({
       <FlexRow style={styles.diskRow}>
         <RadioButton
           name='standardDisk'
+          data-test-id='standard-disk-radio'
           style={styles.diskRadio}
           disabled={disabled}
           onChange={() =>
@@ -996,6 +997,7 @@ const DiskSelector = ({
       >
         <FlexRow style={styles.diskRow}>
           <RadioButton
+            data-test-id='detachable-disk-radio'
             name='detachableDisk'
             style={styles.diskRadio}
             onChange={() =>
