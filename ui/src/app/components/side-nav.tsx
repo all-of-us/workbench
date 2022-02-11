@@ -8,6 +8,7 @@ import { ClrIcon } from 'app/components/icons';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
 import { hasRegisteredTierAccess } from 'app/utils/access-tiers';
+import { DATA_ACCESS_REQUIREMENTS_PATH } from 'app/utils/access-utils';
 import { signOut } from 'app/utils/authentication';
 import {
   AuthorityGuardedAction,
@@ -34,7 +35,7 @@ const styles = reactStyles({
     bottom: '0',
     zIndex: 1500,
     flexGrow: 1,
-    width: '10rem',
+    width: '11rem',
     boxShadow: '0px 3px 10px',
     opacity: 1,
     transition: 'opacity 0.5s',
@@ -146,6 +147,10 @@ const workspacesActive = () => {
 
 const profileActive = () => {
   return window.location.pathname === '/profile';
+};
+
+const DARActive = () => {
+  return window.location.pathname === DATA_ACCESS_REQUIREMENTS_PATH;
 };
 
 const institutionAdminActive = () => {
@@ -272,6 +277,14 @@ export const SideNav = (props: SideNavProps) => {
           onToggleSideNav={() => onToggleSideNav()}
           href='/profile'
           active={profileActive()}
+        />
+      )}
+      {showUserOptions && (
+        <SideNavItem
+          content={'Data Access Requirements'}
+          onToggleSideNav={() => onToggleSideNav()}
+          href={DATA_ACCESS_REQUIREMENTS_PATH}
+          active={DARActive()}
         />
       )}
       {showUserOptions && (
