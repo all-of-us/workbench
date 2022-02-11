@@ -123,8 +123,7 @@ export default class RuntimePanel extends BaseSidebar {
   }
 
   async pickEnableGpu(enable = true): Promise<void> {
-    const checkbox = this.getEnableGpu();
-    return enable ? checkbox.check() : checkbox.unCheck();
+    return this.getEnableGpu().toggle(enable);
   }
 
   getAutoPauseSelect(): SelectMenu {
@@ -332,7 +331,7 @@ export default class RuntimePanel extends BaseSidebar {
 
     // The preview page automatically opens only if the browser is currently on a
     // notebook / terminal page.
-    let notebookPreviewPage = null;
+    let notebookPreviewPage: NotebookPreviewPage = null;
     if (expectPreviewPageNavigate) {
       notebookPreviewPage = new NotebookPreviewPage(this.page);
       await notebookPreviewPage.waitForLoad();
