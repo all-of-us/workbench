@@ -468,11 +468,11 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
   };
 
   const updateContactEmail = async (contactEmail: string) => {
+    updateProfile({ contactEmail });
     await validateAffiliation(
-      contactEmail,
+      contactEmail.trim(),
       updatedProfile.verifiedInstitutionalAffiliation?.institutionShortName
     );
-    updateProfile({ contactEmail });
   };
 
   const updateInstitution = async (institutionShortName: string) => {
@@ -524,7 +524,7 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
 
   const errors = validate(
     {
-      contactEmail: !!updatedProfile?.contactEmail,
+      contactEmail: !isBlank(updatedProfile?.contactEmail),
       verifiedInstitutionalAffiliation:
         !!updatedProfile?.verifiedInstitutionalAffiliation,
       institutionShortName:
@@ -587,7 +587,7 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
               institutions={institutions}
               emailValidationStatus={emailValidationStatus}
               onChangeEmail={(contactEmail: string) =>
-                updateContactEmail(contactEmail.trim())
+                updateContactEmail(contactEmail)
               }
               onChangeInitialCreditsLimit={(freeTierDollarQuota: number) =>
                 updateProfile({ freeTierDollarQuota })

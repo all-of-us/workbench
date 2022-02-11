@@ -356,7 +356,7 @@ export const updateAccountProperties = async (
     ]),
     contactEmail: getUpdatedProfileValue(oldProfile, updatedProfile, [
       'contactEmail',
-    ]),
+    ])?.trim(),
     affiliation: getUpdatedProfileValue(oldProfile, updatedProfile, [
       'verifiedInstitutionalAffiliation',
     ]),
