@@ -9,6 +9,8 @@ import { DiskConfig, AnalysisConfig } from './runtime-utils';
 export enum ComputeType {
   Standard = 'Standard VM',
   Dataproc = 'Dataproc Cluster',
+  Cromwell = 'Cromwell',
+  RStudio = 'RStudio',
 }
 
 export const AutopauseMinuteThresholds = new Map([

@@ -11,7 +11,7 @@ import { TooltipTrigger } from 'app/components/popups';
 import { Spinner } from 'app/components/spinners';
 import { TextColumn } from 'app/components/text-column';
 
-import { diskApi, workspacesApi } from 'app/services/swagger-fetch-clients';
+import { diskApi, workspacesApi, appApi } from 'app/services/swagger-fetch-clients';
 import colors, { addOpacity, colorWithWhiteness } from 'app/styles/colors';
 import {
   cond,
@@ -1560,6 +1560,7 @@ const CreatePanel = ({
   creatorFreeCreditsRemaining,
   profile,
   setPanelContent,
+  createApp,
   workspace,
   analysisConfig,
 }) => {
@@ -1595,6 +1596,20 @@ const CreatePanel = ({
           aria-label='Customize'
         >
           Customize
+        </Button>
+        <Button
+          type='secondarySmall'
+          onClick={() => createApp('Cromwell')}
+          aria-label='Cromwell App'
+        >
+          Cromwell App
+        </Button>
+        <Button
+          type='secondarySmall'
+          onClick={() => createApp('Rstudio')}
+          aria-label='Rsudio'
+        >
+          RSudio
         </Button>
       </FlexRow>
       <RuntimeSummary analysisConfig={analysisConfig} />
@@ -1860,6 +1875,10 @@ const RuntimePanel = fp.flow(
       };
     }, []);
 
+    const createLeoApp = (appType: string): void => {
+      appApi().createApp(workspace.namespace, appType)
+    }
+
     // Leonardo enforces a minimum limit for disk size, 4000 GB is our arbitrary limit for not making a
     // disk that is way too big and expensive on free tier ($.22 an hour). 64 TB is the GCE limit on
     // persistent disk.
@@ -2091,6 +2110,7 @@ const RuntimePanel = fp.flow(
                   creatorFreeCreditsRemaining={creatorFreeCreditsRemaining}
                   profile={profile}
                   setPanelContent={(value) => setPanelContent(value)}
+                  createApp={(value) => createLeoApp(value)}
                   workspace={workspace}
                   analysisConfig={analysisConfig}
                 />

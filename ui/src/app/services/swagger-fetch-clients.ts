@@ -38,6 +38,7 @@ import {
   Configuration as FetchConfiguration,
   DataSetApi,
   DiskApi,
+  AppApi,
   EgressEventsAdminApi,
   FeaturedWorkspacesConfigApi, // internal
   InstitutionApi,
@@ -123,6 +124,7 @@ export const userMetricsApi = bindCtor(UserMetricsApi);
 export const workspaceAdminApi = bindCtor(WorkspaceAdminApi);
 export const workspacesApi = bindCtor(WorkspacesApi);
 export const diskApi = bindCtor(DiskApi);
+export const appApi = bindCtor(AppApi);
 
 export const getApiBaseUrl = () => {
   if (cookiesEnabled()) {
