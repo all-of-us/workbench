@@ -1,10 +1,11 @@
-package org.pmiops.workbench.leonardo;
+package org.pmiops.workbench.notebooks;
 
 import java.net.SocketTimeoutException;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpServletResponse;
 import org.pmiops.workbench.exceptions.ExceptionUtils;
 import org.pmiops.workbench.exceptions.WorkbenchException;
+import org.pmiops.workbench.leonardo.ApiException;
 import org.pmiops.workbench.utils.ResponseCodeRetryPolicy;
 import org.pmiops.workbench.utils.RetryHandler;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +13,7 @@ import org.springframework.retry.backoff.BackOffPolicy;
 import org.springframework.stereotype.Service;
 
 @Service
-public class LeonardoRetryHandler extends RetryHandler<ApiException> {
+public class LeonardoRetryHandler extends RetryHandler<org.pmiops.workbench.leonardo.ApiException> {
 
   private static final Logger logger = Logger.getLogger(LeonardoRetryHandler.class.getName());
 
@@ -24,8 +25,8 @@ public class LeonardoRetryHandler extends RetryHandler<ApiException> {
 
     @Override
     protected int getResponseCode(Throwable lastException) {
-      if (lastException instanceof ApiException) {
-        return ((ApiException) lastException).getCode();
+      if (lastException instanceof org.pmiops.workbench.leonardo.ApiException) {
+        return ((org.pmiops.workbench.leonardo.ApiException) lastException).getCode();
       }
       if (lastException instanceof SocketTimeoutException) {
         return HttpServletResponse.SC_GATEWAY_TIMEOUT;
@@ -35,7 +36,7 @@ public class LeonardoRetryHandler extends RetryHandler<ApiException> {
 
     @Override
     protected void logNoRetry(Throwable t, int responseCode) {
-      if (t instanceof ApiException) {
+      if (t instanceof org.pmiops.workbench.leonardo.ApiException) {
         if (responseCode == 404) {
           logger.log(
               getLogLevel(responseCode),
@@ -48,7 +49,7 @@ public class LeonardoRetryHandler extends RetryHandler<ApiException> {
               getLogLevel(responseCode),
               String.format(
                   "Exception calling Leonardo API with response: %s",
-                  ((ApiException) t).getResponseBody()),
+                  ((org.pmiops.workbench.leonardo.ApiException) t).getResponseBody()),
               t);
         }
       } else {

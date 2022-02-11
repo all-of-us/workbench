@@ -62,7 +62,7 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.institution.PublicInstitutionDetailsMapperImpl;
 import org.pmiops.workbench.leonardo.ApiException;
-import org.pmiops.workbench.leonardo.LeonardoRetryHandler;
+import org.pmiops.workbench.notebooks.LeonardoRetryHandler;
 import org.pmiops.workbench.leonardo.api.RuntimesApi;
 import org.pmiops.workbench.leonardo.model.LeonardoAuditInfo;
 import org.pmiops.workbench.leonardo.model.LeonardoClusterError;

@@ -24,7 +24,6 @@ import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.leonardo.ApiException;
-import org.pmiops.workbench.leonardo.LeonardoRetryHandler;
 import org.pmiops.workbench.leonardo.api.DisksApi;
 import org.pmiops.workbench.leonardo.api.RuntimesApi;
 import org.pmiops.workbench.leonardo.api.ServiceInfoApi;
