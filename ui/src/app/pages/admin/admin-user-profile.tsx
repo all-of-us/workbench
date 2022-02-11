@@ -527,9 +527,9 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
       contactEmail: !isBlank(updatedProfile?.contactEmail),
       verifiedInstitutionalAffiliation:
         !!updatedProfile?.verifiedInstitutionalAffiliation,
-      institutionShortName: !isBlank(
-        updatedProfile?.verifiedInstitutionalAffiliation?.institutionShortName
-      ),
+      institutionShortName:
+        !!updatedProfile?.verifiedInstitutionalAffiliation
+          ?.institutionShortName,
       institutionalRoleEnum:
         !!updatedProfile?.verifiedInstitutionalAffiliation
           ?.institutionalRoleEnum,
