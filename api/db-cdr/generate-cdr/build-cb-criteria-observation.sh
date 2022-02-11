@@ -196,6 +196,7 @@ bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
 SET has_attribute = 1
 WHERE domain_id = 'OBSERVATION'
     and is_selectable = 1
+    and is_standard = 1
     and concept_id in
     (
         SELECT DISTINCT concept_id
