@@ -524,7 +524,7 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
 
   const errors = validate(
     {
-      contactEmail: !isBlank(updatedProfile?.contactEmail?.trim()),
+      contactEmail: !isBlank(updatedProfile?.contactEmail),
       verifiedInstitutionalAffiliation:
         !!updatedProfile?.verifiedInstitutionalAffiliation,
       institutionShortName: !isBlank(
