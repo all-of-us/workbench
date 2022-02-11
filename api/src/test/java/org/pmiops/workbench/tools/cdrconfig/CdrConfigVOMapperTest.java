@@ -58,6 +58,8 @@ public class CdrConfigVOMapperTest {
     testVersionJson.hasCopeSurveyData = true;
     testVersionJson.allSamplesWgsDataBucket = "";
     testVersionJson.singleSampleArrayDataBucket = "gs://lol";
+    testVersionJson.storageBasePath = "20";
+    testVersionJson.microarrayHailStoragePath = "hail/mt";
   }
 
   @Test

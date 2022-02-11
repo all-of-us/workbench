@@ -1,12 +1,16 @@
- package org.pmiops.workbench.notebooks;
+package org.pmiops.workbench.notebooks;
 
+import com.google.common.base.CharMatcher;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -65,7 +69,8 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
   private static final String WGS_VCF_MERGED_STORAGE_PATH_KEY = "WGS_VCF_MERGED_STORAGE_PATH";
   private static final String WGS_HAIL_STORAGE_PATH_KEY = "WGS_HAIL_STORAGE_PATH";
   private static final String MICROARRAY_HAIL_STORAGE_PATH_KEY = "MICROARRAY_HAIL_STORAGE_PATH";
-  private static final String MICROARRAY_VCF_SINGLE_SAMPLE_STORAGE_PATH_KEY = "MICROARRAY_VCF_SINGLE_SAMPLE_STORAGE_PATH";
+  private static final String MICROARRAY_VCF_SINGLE_SAMPLE_STORAGE_PATH_KEY =
+      "MICROARRAY_VCF_SINGLE_SAMPLE_STORAGE_PATH";
 
   // Keep in sync with
   // https://github.com/DataBiosphere/leonardo/blob/develop/core/src/main/scala/org/broadinstitute/dsde/workbench/leonardo/runtimeModels.scala#L162
@@ -191,6 +196,15 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
     }
   }
 
+  private String joinStoragePaths(String... paths) {
+    final CharMatcher slashMatch = CharMatcher.is('/');
+    return Arrays.stream(paths)
+        .map(slashMatch::trimLeadingFrom)
+        .map(slashMatch::trimTrailingFrom)
+        .filter(p -> !p.isEmpty())
+        .collect(Collectors.joining("/"));
+  }
+
   @Override
   public void createRuntime(
       Runtime runtime, String workspaceNamespace, String workspaceFirecloudName) {
@@ -226,20 +240,44 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
         WORKSPACE_CDR_ENV_KEY,
         cdrVersion.getBigqueryProject() + "." + cdrVersion.getBigqueryDataset());
 
+    String datasetsBucket = cdrVersion.getAccessTier().getDatasetsBucket();
+    String bucketInfix = cdrVersion.getStorageBasePath();
+    if (!Strings.isNullOrEmpty(datasetsBucket) && !Strings.isNullOrEmpty(bucketInfix)) {
+      String basePath = joinStoragePaths(datasetsBucket, bucketInfix);
+      customEnvironmentVariables.putAll(
+          ImmutableMap.of(
+                  CDR_STORAGE_PATH_KEY,
+                  "",
+                  WGS_VCF_MERGED_STORAGE_PATH_KEY,
+                  cdrVersion.getWgsVcfMergedStoragePath(),
+                  WGS_HAIL_STORAGE_PATH_KEY,
+                  cdrVersion.getWgsHailStoragePath(),
+                  MICROARRAY_HAIL_STORAGE_PATH_KEY,
+                  cdrVersion.getMicroarrayHailStoragePath(),
+                  MICROARRAY_VCF_SINGLE_SAMPLE_STORAGE_PATH_KEY,
+                  cdrVersion.getMicroarrayVcfSingleSampleStoragePath())
+              .entrySet()
+              .stream()
+              .filter(entry -> !Strings.isNullOrEmpty(entry.getValue()))
+              .collect(
+                  Collectors.toMap(
+                      Entry::getKey, entry -> joinStoragePaths(basePath, entry.getValue()))));
+    }
+
+    // TODO(calbach): Remove these env vars.
     if (cdrVersion.getAllSamplesWgsDataBucket() != null) {
       customEnvironmentVariables.put(
           ALL_SAMPLES_WGS_KEY,
-          cdrVersion.getAccessTier().getDatasetsBucket().replaceFirst("/$", "")
-              + "/"
-              + cdrVersion.getAllSamplesWgsDataBucket().replaceFirst("^/", ""));
+          joinStoragePaths(
+              cdrVersion.getAccessTier().getDatasetsBucket(),
+              cdrVersion.getAllSamplesWgsDataBucket()));
     }
-
     if (cdrVersion.getSingleSampleArrayDataBucket() != null) {
       customEnvironmentVariables.put(
           SINGLE_SAMPLE_ARRAY_BUCKET_KEY,
-          cdrVersion.getAccessTier().getDatasetsBucket().replaceFirst("/$", "")
-              + "/"
-              + cdrVersion.getSingleSampleArrayDataBucket().replaceFirst("^/", ""));
+          joinStoragePaths(
+              cdrVersion.getAccessTier().getDatasetsBucket()
+                  + cdrVersion.getSingleSampleArrayDataBucket()));
     }
 
     // See RW-6079
