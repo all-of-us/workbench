@@ -160,7 +160,36 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
     expect(findCTDetails(wrapper).exists()).toBeTruthy();
   });
 
-  it('should populate CT requirements from RT when enabling CT if RT matches on DOMAIN', async () => {});
+  it('should populate CT requirements from RT when enabling CT if RT matches on DOMAIN', async () => {
+    const wrapper = component(VERILY_WITHOUT_CT.shortName);
+    await waitOneTickAndUpdate(wrapper);
+    expect(wrapper).toBeTruthy();
+    expect(findCTDetails(wrapper).exists()).toBeFalsy();
+
+    expect(findRTERARequired(wrapper).props.checked).toBeTruthy();
+
+    // update RT domains
+
+    findRTDomainInput(wrapper)
+      .first()
+      .simulate('change', {
+        target: {
+          value: 'domain1.com,\n' + 'domain2.com,\n' + 'domain3.com',
+        },
+      });
+
+    await simulateComponentChange(wrapper, findCTEnabled(wrapper), true);
+    expect(findCTEnabled(wrapper).props.checked).toBeTruthy();
+    expect(findCTDetails(wrapper).exists()).toBeTruthy();
+
+    // CT has the default requirement: domain, empty, ERA = false
+
+    expect(findCTDomain(wrapper).exists()).toBeTruthy();
+    expect(findCTAddress(wrapper).exists()).toBeFalsy();
+    expect(findRTERARequired(wrapper).props.checked).toBeFalsy();
+
+    expect(textInputValue(findCTDomainInput(wrapper))).toBeUndefined();
+  });
 
   it('should not populate CT requirements from RT when enabling CT if RT matches on ADDRESS', async () => {
     const wrapper = component(VERILY_WITHOUT_CT.shortName);
@@ -199,10 +228,11 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
     expect(findCTEnabled(wrapper).props.checked).toBeTruthy();
     expect(findCTDetails(wrapper).exists()).toBeTruthy();
 
-    // CT has the default requirement: domain and empty
+    // CT has the default requirement: domain, empty, ERA = false
 
     expect(findCTDomain(wrapper).exists()).toBeTruthy();
     expect(findCTAddress(wrapper).exists()).toBeFalsy();
+    expect(findRTERARequired(wrapper).props.checked).toBeFalsy();
 
     expect(textInputValue(findCTDomainInput(wrapper))).toBeUndefined();
   });

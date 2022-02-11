@@ -214,11 +214,10 @@ export function updateRequireEra(
 
 export function updateEnableControlledTier(
   tierConfigs: Array<InstitutionTierConfig>,
-  accessTierShortName: string,
   enableCtAccess: boolean
 ): Array<InstitutionTierConfig> {
   return mergeTierConfigs(tierConfigs, {
-    ...getTierConfigOrDefault(tierConfigs, accessTierShortName),
+    ...getTierConfigOrDefault(tierConfigs, AccessTierShortNames.Controlled),
     membershipRequirement:
       enableCtAccess === true
         ? InstitutionMembershipRequirement.DOMAINS

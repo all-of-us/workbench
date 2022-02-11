@@ -524,17 +524,10 @@ export const AdminInstitutionEdit = fp.flow(
       );
     }
 
-    private setEnableControlledTier(
-      accessTierShortName: string,
-      enableControlled: boolean
-    ) {
+    private setEnableControlledTier(enableControlled: boolean) {
       const { tierConfigs } = this.state.institution;
       this.setTierConfigs(
-        updateEnableControlledTier(
-          tierConfigs,
-          accessTierShortName,
-          enableControlled
-        )
+        updateEnableControlledTier(tierConfigs, enableControlled)
       );
     }
 
@@ -899,7 +892,7 @@ export const AdminInstitutionEdit = fp.flow(
                   accessTierShortName={accessTierShortName}
                   institution={institution}
                   setEnableControlledTier={(value) =>
-                    this.setEnableControlledTier(accessTierShortName, value)
+                    this.setEnableControlledTier(value)
                   }
                   setEraRequired={(value) =>
                     this.setRequireEra(accessTierShortName, value)
