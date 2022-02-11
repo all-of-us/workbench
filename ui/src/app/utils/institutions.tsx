@@ -17,7 +17,7 @@ import colors from 'app/styles/colors';
 import { AccessTierShortNames } from 'app/utils/access-tiers';
 
 import { isAbortError } from './errors';
-import { isBlank, switchCase } from './index';
+import { cond, isBlank, switchCase } from './index';
 
 /**
  * Checks that the entered email address is a valid member of the chosen institution.
@@ -212,17 +212,44 @@ export function updateRequireEra(
   });
 }
 
+// if RT has InstitutionMembershipRequirement.DOMAINS,
+// copy the RT config and domains to CT.
+// otherwise initialize to the defaultTierConfig with empty DOMAINS
 export function updateEnableControlledTier(
   tierConfigs: Array<InstitutionTierConfig>,
   enableCtAccess: boolean
 ): Array<InstitutionTierConfig> {
-  return mergeTierConfigs(tierConfigs, {
-    ...getTierConfigOrDefault(tierConfigs, AccessTierShortNames.Controlled),
-    membershipRequirement:
-      enableCtAccess === true
-        ? InstitutionMembershipRequirement.DOMAINS
-        : InstitutionMembershipRequirement.NOACCESS,
-  });
+  const rtConfig = tierConfigs.find(
+    (tier) => tier.accessTierShortName === AccessTierShortNames.Registered
+  );
+
+  const rtReq = rtConfig.membershipRequirement;
+
+  const ctConfig = cond(
+    [
+      // if we are disabling CT access, choose the default (empty) config
+      !enableCtAccess,
+      () => defaultTierConfig(AccessTierShortNames.Controlled),
+    ],
+    [
+      // if we are enabling CT access and RT is DOMAINS, copy RT to CT
+      enableCtAccess && rtReq === InstitutionMembershipRequirement.DOMAINS,
+      () => ({
+        ...rtConfig,
+        accessTierShortName: AccessTierShortNames.Controlled,
+      }),
+    ],
+    [
+      // if we are enabling CT access and RT is ADDRESSES, init CT with DOMAINS and leave empty
+      enableCtAccess && rtReq === InstitutionMembershipRequirement.ADDRESSES,
+      () => ({
+        ...defaultTierConfig(AccessTierShortNames.Controlled),
+        membershipRequirement: InstitutionMembershipRequirement.DOMAINS,
+      }),
+    ]
+  );
+
+  return mergeTierConfigs(tierConfigs, ctConfig);
 }
 
 export function getTierBadge(accessTierShortName: string): () => JSX.Element {

@@ -170,11 +170,12 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
 
     // update RT domains
 
+    const testDomains = 'domain1.com,\n' + 'domain2.com,\n' + 'domain3.com';
     findRTDomainInput(wrapper)
       .first()
       .simulate('change', {
         target: {
-          value: 'domain1.com,\n' + 'domain2.com,\n' + 'domain3.com',
+          value: testDomains,
         },
       });
 
@@ -182,13 +183,13 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
     expect(findCTEnabled(wrapper).props.checked).toBeTruthy();
     expect(findCTDetails(wrapper).exists()).toBeTruthy();
 
-    // CT has the default requirement: domain, empty, ERA = false
+    // CT copies RT's requirements: domain, same domains, ERA = true
 
     expect(findCTDomain(wrapper).exists()).toBeTruthy();
     expect(findCTAddress(wrapper).exists()).toBeFalsy();
-    expect(findRTERARequired(wrapper).props.checked).toBeFalsy();
+    expect(findCTERARequired(wrapper).props.checked).toBeTruthy();
 
-    expect(textInputValue(findCTDomainInput(wrapper))).toBeUndefined();
+    expect(textInputValue(findCTDomainInput(wrapper))).toBe(testDomains);
   });
 
   it('should not populate CT requirements from RT when enabling CT if RT matches on ADDRESS', async () => {
@@ -232,9 +233,9 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
 
     expect(findCTDomain(wrapper).exists()).toBeTruthy();
     expect(findCTAddress(wrapper).exists()).toBeFalsy();
-    expect(findRTERARequired(wrapper).props.checked).toBeFalsy();
+    expect(findCTERARequired(wrapper).props.checked).toBeFalsy();
 
-    expect(textInputValue(findCTDomainInput(wrapper))).toBeUndefined();
+    expect(textInputValue(findCTDomainInput(wrapper))).toBe('');
   });
 
   it('should not change eRA Required and tier enabled switches when changing tier requirement', async () => {
