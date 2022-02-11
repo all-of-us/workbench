@@ -1,34 +1,27 @@
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import RuntimePanel from 'app/sidebar/runtime-panel';
-import path from 'path';
-import { config } from 'resources/workbench-config';
 import { makeRandomName } from 'utils/str-utils';
 import { createWorkspace, signInWithAccessToken } from 'utils/test-utils';
+import path from 'path';
 
-// 30 minutes. Test could take a long time.
 jest.setTimeout(30 * 60 * 1000);
 
 describe('Updating runtime status', () => {
+  // Notebooks to run before/after reattaching a PD.
+  const diskBeforeNotebookName = 'disk-reattach-before.py';
+  const diskBeforeNotebookFilePath = path.relative(
+    process.cwd(),
+    __dirname + `../../../resources/python-code/${diskBeforeNotebookName}`
+  );
+
+  const diskAfterNotebookName = 'disk-reattach-after.py';
+  const diskAfterNotebookFilePath = path.relative(
+    process.cwd(),
+    __dirname + `../../../resources/python-code/${diskAfterNotebookName}`
+  );
+
   beforeEach(async () => {
     await signInWithAccessToken(page);
-  });
-
-  test('Create, pause, resume, delete', async () => {
-    await createWorkspace(page, { cdrVersionName: config.OLD_CDR_VERSION_NAME });
-
-    const runtimePanel = new RuntimePanel(page);
-
-    // Create runtime
-    await runtimePanel.createRuntime();
-
-    // Pause runtime
-    await runtimePanel.pauseRuntime();
-
-    // Restart runtime
-    await runtimePanel.resumeRuntime();
-
-    // Delete runtime
-    await runtimePanel.deleteRuntime();
   });
 
   test('Create with detachable disk, re-attach, delete', async () => {
@@ -42,7 +35,7 @@ describe('Updating runtime status', () => {
     await runtimePanel.pickDetachableDisk();
 
     // TODO(calbach): Investigate why 110GB -> 120GB causes issues.
-    await runtimePanel.pickDetachableDiskGbs((await runtimePanel.getDetachableDiskGbs()) + 10);
+    await runtimePanel.pickDetachableDiskGbs((await runtimePanel.getDetachableDiskGbs()) + 50);
     await runtimePanel.createRuntime({ waitForComplete: false });
 
     // Run notebook to write a file to disk.
