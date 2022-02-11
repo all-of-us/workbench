@@ -148,7 +148,7 @@ const profileActive = () => {
   return window.location.pathname === '/profile';
 };
 
-const DARAActive = () => {
+const DARActive = () => {
   return window.location.pathname === DATA_ACCESS_REQUIREMENTS_PATH;
 };
 
@@ -283,7 +283,7 @@ export const SideNav = (props: SideNavProps) => {
           content={'Data Access Requirements'}
           onToggleSideNav={() => onToggleSideNav()}
           href={DATA_ACCESS_REQUIREMENTS_PATH}
-          active={DARAActive()}
+          active={DARActive()}
         />
       )}
       {showUserOptions && (
