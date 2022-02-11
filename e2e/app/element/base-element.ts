@@ -340,7 +340,8 @@ export default class BaseElement {
   async isCursorNotAllowed(): Promise<boolean> {
     const element = await this.asElementHandle();
     const cursor = await getStyleValue<string>(this.page, element, 'cursor');
-    return !!cursor && cursor === 'not-allowed';
+    console.log(`cursor: "${cursor}"`);
+    return cursor && cursor === 'not-allowed';
   }
 
   /**

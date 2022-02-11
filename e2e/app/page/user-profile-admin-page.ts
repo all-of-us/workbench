@@ -1,5 +1,5 @@
 import AuthenticatedPage from './authenticated-page';
-import { Page } from 'puppeteer';
+import { ElementHandle, Page } from 'puppeteer';
 import { waitForDocumentTitle, waitForText, waitWhileLoading } from 'utils/waits-utils';
 import Link from 'app/element/link';
 import Textbox from 'app/element/textbox';
@@ -7,10 +7,12 @@ import SelectMenu from 'app/component/select-menu';
 import { ElementType } from 'app/xpath-options';
 import Button from 'app/element/button';
 import { LinkText } from 'app/text-labels';
-import Switch from 'app/element/switch';
+import Switch, { defaultSwitchXpath } from 'app/element/switch';
 import StaticText from 'app/element/staticText';
 import { parseForNumbericalString } from 'utils/test-utils';
 import DataTable from 'app/component/data-table';
+import { getPropValue } from 'utils/element-utils';
+import Cell from 'app/component/cell';
 
 const pageTitle = 'User Profile Admin';
 
@@ -59,6 +61,14 @@ export default class UserProfileAdminPage extends AuthenticatedPage {
     return [parseInt(currencies[0]), parseInt(currencies[1])];
   }
 
+  async contactEmailBugWorkaround(text: string): Promise<void> {
+    await this.page.$eval(
+      'input[data-test-id="contactEmail"]',
+      (el: HTMLInputElement, value: string) => (el.value = value),
+      text
+    );
+  }
+
   getContactEmail(): Textbox {
     return Textbox.findByName(this.page, { dataTestId: 'contactEmail' });
   }
@@ -66,21 +76,24 @@ export default class UserProfileAdminPage extends AuthenticatedPage {
   getInitialCreditLimit(): SelectMenu {
     return SelectMenu.findByName(this.page, {
       type: ElementType.Dropdown,
-      dataTestId: 'initial-credits-dropdown'
+      dataTestId: 'initial-credits-dropdown',
+      ancestorLevel: 0
     });
   }
 
   getInstitutionalRole(): SelectMenu {
     return SelectMenu.findByName(this.page, {
       type: ElementType.Dropdown,
-      dataTestId: 'institutionalRole'
+      dataTestId: 'institutionalRole',
+      ancestorLevel: 0
     });
   }
 
   getVerifiedInstitution(): SelectMenu {
     return SelectMenu.findByName(this.page, {
       type: ElementType.Dropdown,
-      dataTestId: 'verifiedInstitution'
+      dataTestId: 'verifiedInstitution',
+      ancestorLevel: 0
     });
   }
 
@@ -101,5 +114,28 @@ export default class UserProfileAdminPage extends AuthenticatedPage {
     // Append to table xpath with xpath that check for table title. There's another data table in same page. It's the Egress Alert table.
     table.setXpath(`${table.getXpath()}[./preceding-sibling::*[contains(., "Access status")]]`);
     return table;
+  }
+
+  async getEmailErrorMessage(): Promise<string> {
+    const emailErrorElement = await this.page.waitForXPath('//*[@data-test-id="email-error-message"]', {
+      visible: true
+    });
+    return getPropValue<string>(emailErrorElement, 'innerText');
+  }
+
+  async getEmailErrorMessageLink(): Promise<ElementHandle> {
+    return this.page.waitForXPath('//*[@data-test-id="email-error-message"]/a', {
+      visible: true
+    });
+  }
+
+  async getBypassSwitchCell(rowValue: string): Promise<Cell> {
+    const accountAccessTable = this.getAccessStatusTable();
+    return await accountAccessTable.getCellByValue(rowValue, 'Bypass');
+  }
+
+  async getBypassSwitchForRow(rowValue: string): Promise<Switch> {
+    const cell = await this.getBypassSwitchCell(rowValue);
+    return new Switch(this.page, defaultSwitchXpath, cell);
   }
 }

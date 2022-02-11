@@ -5,6 +5,8 @@ import Container from 'app/container';
 import { buildXPath } from 'app/xpath-builders';
 import { getPropValue } from 'utils/element-utils';
 
+export const defaultSwitchXpath = '//label[.//input[@type="checkbox" and @role="switch"]]';
+
 export default class Switch extends BaseElement {
   static findByName(page: Page, xOpt: XPathOptions, container?: Container): Switch {
     xOpt.type = ElementType.Switch;
@@ -12,8 +14,8 @@ export default class Switch extends BaseElement {
     return new Switch(page, xpath);
   }
 
-  constructor(page: Page, xpath?: string) {
-    super(page, xpath);
+  constructor(page: Page, xpath = defaultSwitchXpath, container?: Container) {
+    super(page, container === undefined ? xpath : `${container.getXpath()}${xpath}`);
   }
 
   async getLabel(): Promise<string> {
@@ -41,7 +43,7 @@ export default class Switch extends BaseElement {
 
   async isOn(): Promise<boolean> {
     const labelElement = await this.asElementHandle();
-    const [input] = await labelElement.$x('.//input[@type="checkbox"]');
+    const [input] = await labelElement.$x('.//input[@type="checkbox" and @role="switch"]');
     return !!(await getPropValue<boolean>(input, 'checked'));
   }
 }

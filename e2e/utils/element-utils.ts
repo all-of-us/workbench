@@ -28,6 +28,7 @@ export async function getPropValue<T>(element: ElementHandle, property: string):
 }
 
 export async function getStyleValue<T>(page: Page, element: ElementHandle, styleName: string): Promise<T> {
+  console.log(`Look for style ${styleName}`);
   const value = await page
     .evaluateHandle(
       (element, styleName) => {
@@ -38,6 +39,7 @@ export async function getStyleValue<T>(page: Page, element: ElementHandle, style
       styleName
     )
     .then((prop) => prop.jsonValue());
+  console.log(`value: "${value}"`);
   return value as T;
 }
 

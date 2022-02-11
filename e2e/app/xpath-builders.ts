@@ -77,7 +77,7 @@ export function buildXPath(xOpts: XPathOptions, container?: Container): string {
       selector = `//*[(@aria-selected | @tabindex) and @role="button" and text()="${name}"]`;
       break;
     case ElementType.Switch:
-      selector = `${textExpr}[.//input[@type="checkbox"]]`;
+      selector = `${textExpr}[.//input[@type="checkbox" and @role="switch"]]`;
       break;
     case ElementType.StaticText:
       selector = textExpr;

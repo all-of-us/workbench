@@ -164,14 +164,25 @@ export enum SideBarLink {
   GenomicExtractionsHistory
 }
 
-export const InstitutionSelectValue = {
+export const Institution = {
   Vanderbilt: 'Vanderbilt University Medical Center',
   Broad: 'Broad Institute',
   Verily: 'Verily LLC',
   NationalInstituteHealth: 'National Institute of Health',
   Wondros: 'Wondros',
   AdminTesting: 'Admin Testing',
-  DummyMaster: 'Dummy Master'
+  DummyMaster: 'Dummy Master',
+  Google: 'Google'
+};
+
+export const InstitutionRole = {
+  EarlyCareerTenureTrackResearcher: 'Early career tenure-track researcher',
+  UndergraduteStudent: 'Undergraduate (Bachelor level) student',
+  Industry: 'Industry',
+  ResearchAssistant: 'Research Assistant (pre-doctoral)',
+  ResearchAssociate: 'Research associate (post-doctoral; early/mid career)',
+  SeniorResearcher: 'Senior Researcher (PI/Team Lead, senior scientist)',
+  Teacher: 'Teacher/Instructor/Professor'
 };
 
 export enum HeaderName {
