@@ -15,6 +15,7 @@ import { navigateSignOut, useNavigation } from 'app/utils/navigation';
 import { getProfilePictureSrc } from 'app/utils/profile-picture';
 import { openZendeskWidget, supportUrls } from 'app/utils/zendesk';
 import { Profile } from 'generated/fetch';
+import { DATA_ACCESS_REQUIREMENTS_PATH } from 'app/utils/access-utils';
 
 const styles = reactStyles({
   flex: {
@@ -33,7 +34,7 @@ const styles = reactStyles({
     bottom: '0',
     zIndex: 1500,
     flexGrow: 1,
-    width: '10rem',
+    width: '11rem',
     boxShadow: '0px 3px 10px',
     opacity: 1,
     transition: 'opacity 0.5s',
@@ -145,6 +146,10 @@ const workspacesActive = () => {
 
 const profileActive = () => {
   return window.location.pathname === '/profile';
+};
+
+const DARAActive = () => {
+  return window.location.pathname === DATA_ACCESS_REQUIREMENTS_PATH;
 };
 
 const institutionAdminActive = () => {
@@ -271,6 +276,14 @@ export const SideNav = (props: SideNavProps) => {
           onToggleSideNav={() => onToggleSideNav()}
           href='/profile'
           active={profileActive()}
+        />
+      )}
+      {showUserOptions && (
+        <SideNavItem
+          content={'Data Access Requirements'}
+          onToggleSideNav={() => onToggleSideNav()}
+          href={DATA_ACCESS_REQUIREMENTS_PATH}
+          active={DARAActive()}
         />
       )}
       {showUserOptions && (
