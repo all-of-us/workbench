@@ -1,3 +1,17 @@
+import * as React from 'react';
+import ReCAPTCHA from 'react-google-recaptcha';
+import * as fp from 'lodash/fp';
+import validate from 'validate.js';
+
+import {
+  Disability,
+  GenderIdentity,
+  Profile,
+  Race,
+  SexAtBirth,
+} from 'generated/fetch';
+
+import { environment } from 'environments/environment';
 import { Button } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { FormSection } from 'app/components/forms';
@@ -21,20 +35,7 @@ import {
 } from 'app/pages/login/account-creation/common';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles, toggleIncludes } from 'app/utils';
-
 import { convertAPIError, reportError } from 'app/utils/errors';
-import { environment } from 'environments/environment';
-import {
-  Disability,
-  GenderIdentity,
-  Profile,
-  Race,
-  SexAtBirth,
-} from 'generated/fetch';
-import * as fp from 'lodash/fp';
-import * as React from 'react';
-import ReCAPTCHA from 'react-google-recaptcha';
-import validate from 'validate.js';
 
 const styles = reactStyles({
   checkbox: { height: 17, width: 17, marginTop: '0.15rem' },

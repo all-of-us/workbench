@@ -1,9 +1,24 @@
-import * as fp from 'lodash/fp';
 import * as React from 'react';
 import { Redirect } from 'react-router-dom';
+import * as fp from 'lodash/fp';
 
+import {
+  AccessModule,
+  AccessModuleConfig,
+  AccessModuleStatus,
+  ErrorCode,
+  Profile,
+} from 'generated/fetch';
+
+import { parseQueryParams } from 'app/components/app-router';
 import { Button } from 'app/components/buttons';
+import { InfoIcon } from 'app/components/icons';
+import { TooltipTrigger } from 'app/components/popups';
 import { AoU } from 'app/components/text-wrappers';
+import {
+  hasExpired,
+  isExpiringNotBypassed,
+} from 'app/pages/access/access-renewal';
 import { profileApi, userAdminApi } from 'app/services/swagger-fetch-clients';
 import { AnalyticsTracker } from 'app/utils/analytics';
 import { convertAPIError } from 'app/utils/errors';
@@ -14,26 +29,13 @@ import {
   serverConfigStore,
   useStore,
 } from 'app/utils/stores';
+
 import {
-  AccessModule,
-  AccessModuleStatus,
-  AccessModuleConfig,
-  ErrorCode,
-  Profile,
-} from 'generated/fetch';
-import { parseQueryParams } from 'app/components/app-router';
-import { cond, switchCase } from './index';
-import { TooltipTrigger } from 'app/components/popups';
-import { InfoIcon } from 'app/components/icons';
-import {
-  getWholeDaysFromNow,
   displayDateWithoutHours,
+  getWholeDaysFromNow,
   MILLIS_PER_DAY,
 } from './dates';
-import {
-  hasExpired,
-  isExpiringNotBypassed,
-} from 'app/pages/access/access-renewal';
+import { cond, switchCase } from './index';
 
 export enum AccessModulesStatus {
   NEVER_EXPIRES = 'Complete (Never Expires)',
@@ -129,8 +131,6 @@ export const DATA_ACCESS_REQUIREMENTS_PATH = '/data-access-requirements';
 
 interface AccessModuleUIConfig extends AccessModuleConfig {
   isEnabledInEnvironment: boolean; // either true or dependent on a feature flag
-  isRequiredByRT: boolean;
-  isRequiredByCT: boolean;
   AARTitleComponent: () => JSX.Element;
   DARTitleComponent: () => JSX.Element;
   adminPageTitle: string;
@@ -170,8 +170,6 @@ export const getAccessModuleConfig = (
         externalSyncAction: async () =>
           await profileApi().syncTwoFactorAuthStatus(),
         refreshAction: async () => await profileApi().syncTwoFactorAuthStatus(),
-        isRequiredByRT: true,
-        isRequiredByCT: true,
       }),
     ],
 
@@ -181,6 +179,14 @@ export const getAccessModuleConfig = (
         ...apiConfig,
         isEnabledInEnvironment:
           enableRasLoginGovLinking || enforceRasLoginGovLinking,
+
+        // override these API config values temporarily
+        // when we complete RW-7862, enforceRasLoginGovLinking will work as normal access enable flag
+        // and we can remove this override
+
+        requiredForRTAccess: enforceRasLoginGovLinking,
+        requiredForCTAccess: enforceRasLoginGovLinking,
+
         DARTitleComponent: () => (
           <div>
             Verify your identity with Login.gov{' '}
@@ -195,8 +201,6 @@ export const getAccessModuleConfig = (
         ),
         adminPageTitle: 'Verify your identity with Login.gov',
         refreshAction: () => redirectToRas(false),
-        isRequiredByRT: enforceRasLoginGovLinking,
-        isRequiredByCT: enforceRasLoginGovLinking,
       }),
     ],
 
@@ -233,8 +237,6 @@ export const getAccessModuleConfig = (
           await profileApi().syncComplianceTrainingStatus(),
         refreshAction: async () =>
           await profileApi().syncComplianceTrainingStatus(),
-        isRequiredByRT: true,
-        isRequiredByCT: true,
       }),
     ],
 
@@ -253,8 +255,6 @@ export const getAccessModuleConfig = (
           await profileApi().syncComplianceTrainingStatus(),
         refreshAction: async () =>
           await profileApi().syncComplianceTrainingStatus(),
-        isRequiredByRT: false,
-        isRequiredByCT: true,
       }),
     ],
 
@@ -266,8 +266,6 @@ export const getAccessModuleConfig = (
         AARTitleComponent: () => 'Sign Data User Code of Conduct',
         DARTitleComponent: () => <div>Sign Data User Code of Conduct</div>,
         adminPageTitle: 'Sign Data User Code of Conduct',
-        isRequiredByRT: true,
-        isRequiredByCT: true,
       }),
     ],
 
@@ -278,8 +276,6 @@ export const getAccessModuleConfig = (
         isEnabledInEnvironment: true,
         AARTitleComponent: () => 'Update your profile',
         adminPageTitle: 'Update your profile',
-        isRequiredByRT: true,
-        isRequiredByCT: true,
       }),
     ],
 
@@ -291,8 +287,6 @@ export const getAccessModuleConfig = (
         AARTitleComponent: () =>
           'Report any publications or presentations based on your research using the Researcher Workbench',
         adminPageTitle: 'Report any publications',
-        isRequiredByRT: true,
-        isRequiredByCT: true,
       }),
     ]
   );

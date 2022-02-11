@@ -1,9 +1,10 @@
-import { mount } from 'enzyme';
 import * as React from 'react';
+import { MemoryRouter } from 'react-router';
+import { mount } from 'enzyme';
+
+import { WorkspaceAccessLevel } from 'generated/fetch';
 
 import { NotebookResourceCard } from 'app/pages/analysis/notebook-resource-card';
-import { WorkspaceAccessLevel } from 'generated/fetch';
-import { MemoryRouter } from 'react-router';
 
 describe('NotebookResourceCard', () => {
   const component = () => {

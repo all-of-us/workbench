@@ -1,7 +1,15 @@
-import * as fp from 'lodash/fp';
-import moment from 'moment';
-import { Dropdown } from 'primereact/dropdown';
 import * as React from 'react';
+import * as fp from 'lodash/fp';
+import { Dropdown } from 'primereact/dropdown';
+
+import {
+  Criteria,
+  CriteriaType,
+  Domain,
+  Modifier,
+  ModifierType,
+  Operator,
+} from 'generated/fetch';
 
 import { CalculateFooter } from 'app/cohort-search/attributes-page/attributes-page.component';
 import { encountersStore } from 'app/cohort-search/search-state.service';
@@ -20,14 +28,7 @@ import { triggerEvent } from 'app/utils/analytics';
 import { currentCohortSearchContextStore } from 'app/utils/navigation';
 import { serverConfigStore } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
-import {
-  Criteria,
-  CriteriaType,
-  Domain,
-  Modifier,
-  ModifierType,
-  Operator,
-} from 'generated/fetch';
+import moment from 'moment';
 
 const styles = reactStyles({
   header: {

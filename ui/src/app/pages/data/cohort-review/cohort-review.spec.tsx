@@ -1,17 +1,20 @@
-import { shallow } from 'enzyme';
 import * as React from 'react';
+import { shallow } from 'enzyme';
 
-import { registerApiClient } from 'app/services/swagger-fetch-clients';
-import { currentWorkspaceStore } from 'app/utils/navigation';
 import {
   CohortBuilderApi,
   CohortReviewApi,
   CohortsApi,
   WorkspaceAccessLevel,
 } from 'generated/fetch';
+
+import { registerApiClient } from 'app/services/swagger-fetch-clients';
+import { currentWorkspaceStore } from 'app/utils/navigation';
+
 import { CohortBuilderServiceStub } from 'testing/stubs/cohort-builder-service-stub';
 import { CohortReviewServiceStub } from 'testing/stubs/cohort-review-service-stub';
 import { CohortsApiStub } from 'testing/stubs/cohorts-api-stub';
+
 import { CohortReview } from './cohort-review';
 
 describe('CohortReview', () => {

@@ -2,6 +2,8 @@ import { useState } from 'react';
 import * as React from 'react';
 import { validate } from 'validate.js';
 
+import { ResourceType, Workspace } from 'generated/fetch';
+
 import { Button } from 'app/components/buttons';
 import { styles as headerStyles } from 'app/components/headers';
 import { RadioButton, TextInput, ValidationError } from 'app/components/inputs';
@@ -15,11 +17,9 @@ import { TooltipTrigger } from 'app/components/popups';
 import { nameValidationFormat } from 'app/components/rename-modal';
 import { userMetricsApi } from 'app/services/swagger-fetch-clients';
 import { summarizeErrors } from 'app/utils';
+import { AnalyticsTracker } from 'app/utils/analytics';
 import { useNavigation } from 'app/utils/navigation';
 import { Kernels } from 'app/utils/notebook-kernels';
-
-import { AnalyticsTracker } from 'app/utils/analytics';
-import { ResourceType, Workspace } from 'generated/fetch';
 
 interface Props {
   onClose: Function;

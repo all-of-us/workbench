@@ -6,14 +6,7 @@ import { CSSProperties } from 'react';
 import { Link } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 import { Dropdown } from 'primereact/dropdown';
-import {
-  ClrIcon,
-  ControlledTierBadge,
-  RegisteredTierBadge,
-} from 'app/components/icons';
 
-import { formatInitialCreditsUSD, isBlank, reactStyles } from 'app/utils';
-import colors, { colorWithWhiteness } from 'app/styles/colors';
 import {
   AccessBypassRequest,
   AccessModule,
@@ -25,29 +18,38 @@ import {
   PublicInstitutionDetails,
   VerifiedInstitutionalAffiliation,
 } from 'generated/fetch';
+
+import { FlexColumn, FlexRow } from 'app/components/flex';
+import {
+  ClrIcon,
+  ControlledTierBadge,
+  RegisteredTierBadge,
+} from 'app/components/icons';
+import { TextInputWithLabel } from 'app/components/inputs';
+import { BulletAlignedUnorderedList } from 'app/components/lists';
+import { TooltipTrigger } from 'app/components/popups';
 import {
   institutionApi,
   userAdminApi,
 } from 'app/services/swagger-fetch-clients';
-import { FlexColumn, FlexRow } from 'app/components/flex';
-import { getRoleOptions } from 'app/utils/institutions';
-import { TextInputWithLabel } from 'app/components/inputs';
-import { BulletAlignedUnorderedList } from 'app/components/lists';
-import { TooltipTrigger } from 'app/components/popups';
-import { serverConfigStore } from 'app/utils/stores';
+import colors, { colorWithWhiteness } from 'app/styles/colors';
+import { cond, formatInitialCreditsUSD, isBlank, reactStyles } from 'app/utils';
 import {
+  AccessTierShortNames,
+  displayNameForTier,
+  hasRegisteredTierAccess,
+  orderedAccessTierShortNames,
+} from 'app/utils/access-tiers';
+import {
+  AccessModulesStatus,
   accessRenewalModules,
   computeRenewalDisplayDates,
   getAccessModuleConfig,
   getAccessModuleStatusByName,
 } from 'app/utils/access-utils';
-import {
-  AccessTierShortNames,
-  hasRegisteredTierAccess,
-  orderedAccessTierShortNames,
-  displayNameForTier,
-} from 'app/utils/access-tiers';
 import { formatDate } from 'app/utils/dates';
+import { getRoleOptions } from 'app/utils/institutions';
+import { serverConfigStore } from 'app/utils/stores';
 
 export const commonStyles = reactStyles({
   semiBold: {
@@ -84,6 +86,18 @@ export const commonStyles = reactStyles({
     color: colors.accent,
     borderRadius: '18px',
     transform: 'rotate(270deg)',
+  },
+  incompleteModule: {
+    color: colorWithWhiteness(colors.highlight, -0.2),
+  },
+  expiredModule: {
+    color: colors.danger,
+  },
+  expiringSoonModule: {
+    color: colorWithWhiteness(colors.warning, -0.3),
+  },
+  completeModule: {
+    color: colors.black,
   },
 });
 
@@ -160,20 +174,44 @@ export const getUpdatedProfileValue = (
   }
 };
 
+const getModuleStatus = (profile, moduleName) =>
+  computeRenewalDisplayDates(getAccessModuleStatusByName(profile, moduleName))
+    .moduleStatus;
+
+const moduleStatusStyle = (moduleStatus) =>
+  cond(
+    [
+      moduleStatus === AccessModulesStatus.INCOMPLETE,
+      () => commonStyles.incompleteModule,
+    ],
+    [
+      moduleStatus === AccessModulesStatus.EXPIRED,
+      () => commonStyles.expiredModule,
+    ],
+    [
+      moduleStatus === AccessModulesStatus.EXPIRING_SOON,
+      () => commonStyles.expiringSoonModule,
+    ],
+    () => commonStyles.completeModule
+  );
+
+const displayModuleStatusAndDate = (
+  profile: Profile,
+  moduleName: AccessModule,
+  child: string
+): JSX.Element => {
+  return (
+    <div style={moduleStatusStyle(getModuleStatus(profile, moduleName))}>
+      {child}
+    </div>
+  );
+};
+
 export const isBypassed = (
   profile: Profile,
   moduleName: AccessModule
 ): boolean =>
   !!getAccessModuleStatusByName(profile, moduleName)?.bypassEpochMillis;
-
-export const displayModuleStatus = (
-  profile: Profile,
-  moduleName: AccessModule
-): string => {
-  return computeRenewalDisplayDates(
-    getAccessModuleStatusByName(profile, moduleName)
-  ).moduleStatus;
-};
 
 // Some modules may never expire (eg GOOGLE TWO STEP NOTIFICATION, ERA COMMONS etc),
 // in such cases set the expiry date as NEVER
@@ -181,22 +219,40 @@ export const displayModuleStatus = (
 const getNullStringForExpirationDate = (moduleName: AccessModule): string =>
   getAccessModuleConfig(moduleName).expirable ? '-' : 'Never';
 
+export const displayModuleStatus = (
+  profile: Profile,
+  moduleName: AccessModule
+): JSX.Element =>
+  displayModuleStatusAndDate(
+    profile,
+    moduleName,
+    getModuleStatus(profile, moduleName)
+  );
+
 export const displayModuleCompletionDate = (
   profile: Profile,
   moduleName: AccessModule
-): string =>
-  formatDate(
-    getAccessModuleStatusByName(profile, moduleName)?.completionEpochMillis,
-    '-'
+): JSX.Element =>
+  displayModuleStatusAndDate(
+    profile,
+    moduleName,
+    formatDate(
+      getAccessModuleStatusByName(profile, moduleName)?.completionEpochMillis,
+      '-'
+    )
   );
 
 export const displayModuleExpirationDate = (
   profile: Profile,
   moduleName: AccessModule
-): string =>
-  formatDate(
-    getAccessModuleStatusByName(profile, moduleName)?.expirationEpochMillis,
-    getNullStringForExpirationDate(moduleName)
+): JSX.Element =>
+  displayModuleStatusAndDate(
+    profile,
+    moduleName,
+    formatDate(
+      getAccessModuleStatusByName(profile, moduleName)?.expirationEpochMillis,
+      getNullStringForExpirationDate(moduleName)
+    )
   );
 
 const isEraRequiredForTier = (
@@ -220,12 +276,12 @@ export const displayTierBadgeByRequiredModule = (
     <div>
       {(moduleName === AccessModule.ERACOMMONS
         ? isEraRequiredForTier(profile, AccessTierShortNames.Registered)
-        : getAccessModuleConfig(moduleName)?.isRequiredByRT) && (
+        : getAccessModuleConfig(moduleName)?.requiredForRTAccess) && (
         <RegisteredTierBadge style={{ gridArea: 'badge' }} />
       )}
       {(moduleName === AccessModule.ERACOMMONS
         ? isEraRequiredForTier(profile, AccessTierShortNames.Controlled)
-        : getAccessModuleConfig(moduleName)?.isRequiredByCT) && (
+        : getAccessModuleConfig(moduleName)?.requiredForCTAccess) && (
         <ControlledTierBadge style={{ gridArea: 'badge' }} />
       )}
     </div>
@@ -300,7 +356,7 @@ export const updateAccountProperties = async (
     ]),
     contactEmail: getUpdatedProfileValue(oldProfile, updatedProfile, [
       'contactEmail',
-    ]),
+    ])?.trim(),
     affiliation: getUpdatedProfileValue(oldProfile, updatedProfile, [
       'verifiedInstitutionalAffiliation',
     ]),

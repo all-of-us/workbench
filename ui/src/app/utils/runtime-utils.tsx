@@ -1,3 +1,19 @@
+import * as React from 'react';
+import * as fp from 'lodash/fp';
+
+import {
+  DataprocConfig,
+  Disk,
+  DiskType,
+  ErrorCode,
+  GpuConfig,
+  PersistentDiskRequest,
+  Runtime,
+  RuntimeConfigurationType,
+  RuntimeStatus,
+  SecuritySuspendedErrorParameters,
+} from 'generated/fetch';
+
 import { leoRuntimesApi } from 'app/services/notebooks-swagger-fetch-clients';
 import { diskApi, runtimeApi } from 'app/services/swagger-fetch-clients';
 import { switchCase, withAsyncErrorHandling } from 'app/utils';
@@ -26,20 +42,6 @@ import {
   useStore,
 } from 'app/utils/stores';
 
-import {
-  DataprocConfig,
-  Disk,
-  DiskType,
-  ErrorCode,
-  GpuConfig,
-  PersistentDiskRequest,
-  Runtime,
-  RuntimeConfigurationType,
-  RuntimeStatus,
-  SecuritySuspendedErrorParameters,
-} from 'generated/fetch';
-import * as fp from 'lodash/fp';
-import * as React from 'react';
 import { runtimePresets } from './runtime-presets';
 
 const { useState, useEffect } = React;

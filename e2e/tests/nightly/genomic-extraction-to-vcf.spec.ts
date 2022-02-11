@@ -109,7 +109,7 @@ describe('Genomics Extraction Test', () => {
     await runtimePanel.pickAutoPauseTime(AutoPauseIdleTime.EightHours);
 
     // Disk (GB) is visible after select Dataproc Cluster.
-    expect(await runtimePanel.getDiskGbs()).toBe(100);
+    expect(await runtimePanel.getStandardDiskGbs()).toBe(100);
     // Make sure CPU and RAM remains unchanged after change Compute Type.
     expect(await runtimePanel.getCpus()).toBe('4');
     expect(await runtimePanel.getRamGbs()).toBe('15');

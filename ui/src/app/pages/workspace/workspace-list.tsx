@@ -1,3 +1,9 @@
+import * as React from 'react';
+import RSelect from 'react-select';
+import * as fp from 'lodash/fp';
+
+import { Profile, WorkspaceAccessLevel } from 'generated/fetch';
+
 import { AlertDanger } from 'app/components/alert';
 import { FadeBox } from 'app/components/containers';
 import { FlexRow } from 'app/components/flex';
@@ -9,13 +15,9 @@ import { NewWorkspaceButton } from 'app/pages/workspace/new-workspace-button';
 import { WorkspaceCard } from 'app/pages/workspace/workspace-card';
 import { workspacesApi } from 'app/services/swagger-fetch-clients';
 import { reactStyles, withUserProfile } from 'app/utils';
+import { hasTierAccess } from 'app/utils/access-tiers';
 import { convertAPIError } from 'app/utils/errors';
 import { WorkspacePermissions } from 'app/utils/workspace-permissions';
-import * as React from 'react';
-import RSelect from 'react-select';
-import * as fp from 'lodash/fp';
-import { Profile, WorkspaceAccessLevel } from 'generated/fetch';
-import { hasTierAccess } from 'app/utils/access-tiers';
 
 const styles = reactStyles({
   fadeBox: {

@@ -1,3 +1,9 @@
+import * as React from 'react';
+import { RouteComponentProps, withRouter } from 'react-router-dom';
+import * as fp from 'lodash/fp';
+
+import { ConceptSet } from 'generated/fetch';
+
 import { RouteLink } from 'app/components/app-router';
 import { Button } from 'app/components/buttons';
 import { ActionCardBase } from 'app/components/card';
@@ -16,10 +22,6 @@ import { conceptSetUpdating, NavigationProps } from 'app/utils/navigation';
 import { MatchParams } from 'app/utils/stores';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
-import { ConceptSet } from 'generated/fetch';
-import * as fp from 'lodash/fp';
-import * as React from 'react';
-import { RouteComponentProps, withRouter } from 'react-router-dom';
 
 const styles = reactStyles({
   conceptSetsHeader: {

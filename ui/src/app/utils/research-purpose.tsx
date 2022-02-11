@@ -1,4 +1,7 @@
 import * as React from 'react';
+import * as fp from 'lodash/fp';
+
+import { ResearchPurpose, SpecificPopulationEnum } from 'generated/fetch';
 
 import {
   PrimaryPurposeItems,
@@ -7,8 +10,6 @@ import {
   SpecificPopulationItems,
 } from 'app/pages/workspace/workspace-edit-text';
 import colors from 'app/styles/colors';
-import { ResearchPurpose, SpecificPopulationEnum } from 'generated/fetch';
-import * as fp from 'lodash/fp';
 
 const styles = {
   researchPurposeItemHeader: {

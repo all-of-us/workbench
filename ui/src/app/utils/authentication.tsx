@@ -1,3 +1,8 @@
+import { useEffect } from 'react';
+
+import { ConfigResponse } from 'generated/fetch';
+
+import { environment } from 'environments/environment';
 import { AnalyticsTracker, setLoggedInState } from 'app/utils/analytics';
 import { LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN } from 'app/utils/cookies';
 import {
@@ -7,9 +12,6 @@ import {
   useStore,
 } from 'app/utils/stores';
 import { delay } from 'app/utils/subscribable';
-import { environment } from 'environments/environment';
-import { ConfigResponse } from 'generated/fetch';
-import { useEffect } from 'react';
 
 declare const gapi: any;
 

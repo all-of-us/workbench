@@ -1,3 +1,8 @@
+import * as React from 'react';
+import * as fp from 'lodash/fp';
+
+import { AuditAction, AuditLogEntry } from 'generated/fetch';
+
 import { AuditActionCardListView } from 'app/components/admin/audit-card-list-view';
 import { Navigate } from 'app/components/app-router';
 import {
@@ -10,10 +15,7 @@ import { TooltipTrigger } from 'app/components/popups';
 import colors from 'app/styles/colors';
 import { useDebounce, useToggle } from 'app/utils';
 import { downloadTextFile } from 'app/utils/audit-utils';
-import { AuditAction, AuditLogEntry } from 'generated/fetch';
-import * as fp from 'lodash/fp';
 import moment from 'moment';
-import * as React from 'react';
 
 const { useEffect, useState } = React;
 

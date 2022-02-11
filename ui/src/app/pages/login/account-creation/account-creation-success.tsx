@@ -1,5 +1,7 @@
 import * as React from 'react';
 
+import { Profile } from 'generated/fetch/api';
+
 import { Divider } from 'app/components/divider';
 import { PageHeader } from 'app/components/headers';
 import { TextColumn } from 'app/components/text-column';
@@ -9,7 +11,6 @@ import {
   AccountCreationUpdateModal,
 } from 'app/pages/login/account-creation/account-creation-modals';
 import colors from 'app/styles/colors';
-import { Profile } from 'generated/fetch/api';
 
 const styles = {
   buttonLinkStyling: {

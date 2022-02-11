@@ -1,6 +1,6 @@
+import * as React from 'react';
 import * as highCharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
-import * as React from 'react';
 
 import { getChartObj } from 'app/cohort-search/utils';
 import colors from 'app/styles/colors';

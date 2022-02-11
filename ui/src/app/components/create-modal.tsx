@@ -1,3 +1,6 @@
+import { useEffect, useState } from 'react';
+import * as React from 'react';
+
 import { Button } from 'app/components/buttons';
 import {
   Modal,
@@ -6,8 +9,6 @@ import {
   ModalTitle,
 } from 'app/components/modals';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
-import { useEffect, useState } from 'react';
-import * as React from 'react';
 
 import { ClrIcon } from './icons';
 import { TextArea, TextInput } from './inputs';

@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
+import javax.inject.Provider;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -42,6 +43,7 @@ import org.pmiops.workbench.cohortreview.ReviewQueryBuilder;
 import org.pmiops.workbench.cohortreview.mapper.CohortReviewMapperImpl;
 import org.pmiops.workbench.cohortreview.mapper.ParticipantCohortAnnotationMapperImpl;
 import org.pmiops.workbench.cohortreview.mapper.ParticipantCohortStatusMapperImpl;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortAnnotationDefinitionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
@@ -153,6 +155,8 @@ public class CohortReviewControllerTest {
 
   @Autowired private UserDao userDao;
 
+  @Autowired private Provider<WorkbenchConfig> workbenchConfigProvider;
+
   private enum TestConcepts {
     ASIAN("Asian", 8515),
     WHITE("White", 8527),
@@ -203,7 +207,7 @@ public class CohortReviewControllerTest {
     ParticipantCohortStatusMapperImpl.class,
     CohortReviewMapperImpl.class,
     ParticipantCohortAnnotationMapperImpl.class,
-    CommonMappers.class,
+    CommonMappers.class
   })
   @MockBean({
     BigQueryService.class,
@@ -214,7 +218,7 @@ public class CohortReviewControllerTest {
     WorkspaceAuthService.class,
     AccessTierService.class,
     AccessModuleService.class,
-    CdrVersionService.class,
+    CdrVersionService.class
   })
   static class Configuration {
     @Bean
@@ -226,6 +230,12 @@ public class CohortReviewControllerTest {
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     DbUser user() {
       return user;
+    }
+
+    @Bean
+    WorkbenchConfig workbenchConfig() {
+      WorkbenchConfig workbenchConfig = WorkbenchConfig.createEmptyConfig();
+      return workbenchConfig;
     }
   }
 

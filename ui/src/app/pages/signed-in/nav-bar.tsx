@@ -1,17 +1,17 @@
 import * as React from 'react';
 import { useEffect, useRef, useState } from 'react';
 
-import { AccessRenewalNotificationMaybe } from 'app/pages/signed-in/access-renewal-notification';
+import { environment } from 'environments/environment';
+import { CTAvailableBannerMaybe } from 'app//components/ct-available-banner-maybe';
 import { Breadcrumb } from 'app/components/breadcrumb';
 import { ClrIcon } from 'app/components/icons';
 import { SideNav } from 'app/components/side-nav';
+import { StatusAlertBannerMaybe } from 'app/components/status-alert-banner-maybe';
+import { AccessRenewalNotificationMaybe } from 'app/pages/signed-in/access-renewal-notification';
 import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
-import { profileStore, ProfileStore, useStore } from 'app/utils/stores';
-import { environment } from 'environments/environment';
+import { ProfileStore, profileStore, useStore } from 'app/utils/stores';
 import logo from 'assets/images/all-of-us-logo.svg';
-import { StatusAlertBannerMaybe } from 'app/components/status-alert-banner-maybe';
-import { CTAvailableBannerMaybe } from 'app//components/ct-available-banner-maybe';
 
 const styles = reactStyles({
   headerContainer: {

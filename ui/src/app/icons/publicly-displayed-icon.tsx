@@ -1,9 +1,10 @@
+import * as React from 'react';
+
 import { InfoIcon } from 'app/components/icons';
 import { TooltipTrigger } from 'app/components/popups';
 import { AouTitle } from 'app/components/text-wrappers';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
-import * as React from 'react';
 
 const styles = reactStyles({
   label: {

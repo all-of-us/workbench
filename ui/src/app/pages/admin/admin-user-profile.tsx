@@ -1,9 +1,35 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import validate from 'validate.js';
+import * as fp from 'lodash/fp';
 import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
-import * as fp from 'lodash/fp';
+import validate from 'validate.js';
+
+import {
+  AccessBypassRequest,
+  AccessModule,
+  InstitutionalRole,
+  Profile,
+  PublicInstitutionDetails,
+  VerifiedInstitutionalAffiliation,
+} from 'generated/fetch';
+
+import { AlertDanger } from 'app/components/alert';
+import { Button } from 'app/components/buttons';
+import { FadeBox } from 'app/components/containers';
+import { FlexColumn, FlexRow, FlexSpacer } from 'app/components/flex';
+import { CaretRight, ClrIcon } from 'app/components/icons';
+import { Toggle } from 'app/components/inputs';
+import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
+import colors, { colorWithWhiteness } from 'app/styles/colors';
+import { isBlank, reactStyles } from 'app/utils';
+import { displayNameForTier } from 'app/utils/access-tiers';
+import { getAccessModuleConfig } from 'app/utils/access-utils';
+import {
+  checkInstitutionalEmail,
+  getEmailValidationErrorMessage,
+} from 'app/utils/institutions';
+import { MatchParams, serverConfigStore, useStore } from 'app/utils/stores';
 
 import {
   adminGetProfile,
@@ -27,31 +53,7 @@ import {
   UserAdminTableLink,
   UserAuditLink,
 } from './admin-user-common';
-import { FadeBox } from 'app/components/containers';
-import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
-import { MatchParams, serverConfigStore, useStore } from 'app/utils/stores';
-import { CaretRight, ClrIcon } from 'app/components/icons';
-import { FlexColumn, FlexRow, FlexSpacer } from 'app/components/flex';
-import { displayNameForTier } from 'app/utils/access-tiers';
-import colors, { colorWithWhiteness } from 'app/styles/colors';
-import { isBlank, reactStyles } from 'app/utils';
-import {
-  AccessBypassRequest,
-  AccessModule,
-  InstitutionalRole,
-  Profile,
-  PublicInstitutionDetails,
-  VerifiedInstitutionalAffiliation,
-} from 'generated/fetch';
-import { Button } from 'app/components/buttons';
-import {
-  checkInstitutionalEmail,
-  getEmailValidationErrorMessage,
-} from 'app/utils/institutions';
 import { EgressEventsTable } from './egress-events-table';
-import { getAccessModuleConfig } from 'app/utils/access-utils';
-import { Toggle } from 'app/components/inputs';
-import { AlertDanger } from 'app/components/alert';
 
 const styles = reactStyles({
   ...commonStyles,
@@ -291,9 +293,9 @@ const ToggleForModule = (props: ToggleProps) => {
 
 interface TableRow {
   moduleName: string;
-  moduleStatus: string;
-  completionDate: string;
-  expirationDate: string;
+  moduleStatus: JSX.Element;
+  completionDate: JSX.Element;
+  expirationDate: JSX.Element;
   bypassToggle: JSX.Element;
 }
 
@@ -466,11 +468,11 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
   };
 
   const updateContactEmail = async (contactEmail: string) => {
+    updateProfile({ contactEmail });
     await validateAffiliation(
-      contactEmail,
+      contactEmail.trim(),
       updatedProfile.verifiedInstitutionalAffiliation?.institutionShortName
     );
-    updateProfile({ contactEmail });
   };
 
   const updateInstitution = async (institutionShortName: string) => {
@@ -522,7 +524,7 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
 
   const errors = validate(
     {
-      contactEmail: !!updatedProfile?.contactEmail,
+      contactEmail: !isBlank(updatedProfile?.contactEmail),
       verifiedInstitutionalAffiliation:
         !!updatedProfile?.verifiedInstitutionalAffiliation,
       institutionShortName:
@@ -585,7 +587,7 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
               institutions={institutions}
               emailValidationStatus={emailValidationStatus}
               onChangeEmail={(contactEmail: string) =>
-                updateContactEmail(contactEmail.trim())
+                updateContactEmail(contactEmail)
               }
               onChangeInitialCreditsLimit={(freeTierDollarQuota: number) =>
                 updateProfile({ freeTierDollarQuota })

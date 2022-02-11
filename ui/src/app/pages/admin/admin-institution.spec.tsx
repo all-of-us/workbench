@@ -1,12 +1,15 @@
 import * as React from 'react';
 import { mount } from 'enzyme';
 
+import { InstitutionApi } from 'generated/fetch';
+
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { serverConfigStore } from 'app/utils/stores';
-import { InstitutionApi } from 'generated/fetch';
+
 import defaultServerConfig from 'testing/default-server-config';
 import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
 import { InstitutionApiStub } from 'testing/stubs/institution-api-stub';
+
 import { AdminInstitution } from './admin-institution';
 
 describe('AdminInstitutionSpec', () => {

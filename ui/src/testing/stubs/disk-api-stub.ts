@@ -1,4 +1,5 @@
-import { DiskApi, Disk, EmptyResponse, DiskType } from 'generated/fetch';
+import { Disk, DiskApi, DiskType, EmptyResponse } from 'generated/fetch';
+
 import { stubNotImplementedError } from 'testing/stubs/stub-utils';
 
 export const stubDisk = () => ({

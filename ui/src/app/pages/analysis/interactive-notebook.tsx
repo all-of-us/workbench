@@ -1,16 +1,14 @@
-import * as Cookies from 'js-cookie';
-import * as fp from 'lodash/fp';
 import * as React from 'react';
+import { RouteComponentProps, withRouter } from 'react-router-dom';
+import * as fp from 'lodash/fp';
+
+import { BillingStatus, Runtime, RuntimeStatus } from 'generated/fetch';
 
 import { IconButton } from 'app/components/buttons';
 import { ClrIcon } from 'app/components/icons';
-import {
-  ErrorMode,
-  NotebookFrameError,
-  SecuritySuspendedMessage,
-} from './notebook-frame-error';
 import { PlaygroundIcon } from 'app/components/icons';
 import { TooltipTrigger } from 'app/components/popups';
+import { RuntimeInitializerModal } from 'app/components/runtime-initializer-modal';
 import { SpinnerOverlay } from 'app/components/spinners';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { EditComponentReact } from 'app/icons/edit';
@@ -20,6 +18,7 @@ import { notebooksApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { hasNewValidProps, reactStyles, withCurrentWorkspace } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
+import { InitialRuntimeNotFoundError } from 'app/utils/leo-runtime-initializer';
 import { NavigationProps } from 'app/utils/navigation';
 import {
   ComputeSecuritySuspendedError,
@@ -31,10 +30,13 @@ import { ACTION_DISABLED_INVALID_BILLING } from 'app/utils/strings';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
-import { BillingStatus, Runtime, RuntimeStatus } from 'generated/fetch';
-import { RouteComponentProps, withRouter } from 'react-router-dom';
-import { InitialRuntimeNotFoundError } from 'app/utils/leo-runtime-initializer';
-import { RuntimeInitializerModal } from 'app/components/runtime-initializer-modal';
+import * as Cookies from 'js-cookie';
+
+import {
+  ErrorMode,
+  NotebookFrameError,
+  SecuritySuspendedMessage,
+} from './notebook-frame-error';
 
 const styles = reactStyles({
   navBar: {

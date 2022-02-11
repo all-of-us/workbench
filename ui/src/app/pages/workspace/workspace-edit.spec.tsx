@@ -1,12 +1,10 @@
-import * as fp from 'lodash/fp';
 import * as React from 'react';
+import { MemoryRouter } from 'react-router';
+import * as fp from 'lodash/fp';
 import { mount, ReactWrapper, ShallowWrapper } from 'enzyme';
 import { Dropdown } from 'primereact/dropdown';
-import { MemoryRouter } from 'react-router';
+import { mockNavigate } from 'setupTests';
 
-import { registerApiClient } from 'app/services/swagger-fetch-clients';
-import { currentWorkspaceStore } from 'app/utils/navigation';
-import { WorkspaceData } from 'app/utils/workspace-data';
 import {
   DisseminateResearchEnum,
   ProfileApi,
@@ -16,6 +14,24 @@ import {
   WorkspaceAccessLevel,
   WorkspacesApi,
 } from 'generated/fetch';
+
+import { environment } from 'environments/environment';
+import {
+  WorkspaceEdit,
+  WorkspaceEditMode,
+} from 'app/pages/workspace/workspace-edit';
+import { WorkspaceEditSection } from 'app/pages/workspace/workspace-edit-section';
+import { registerApiClient } from 'app/services/swagger-fetch-clients';
+import { AccessTierShortNames } from 'app/utils/access-tiers';
+import * as Authentication from 'app/utils/authentication';
+import { currentWorkspaceStore } from 'app/utils/navigation';
+import {
+  cdrVersionStore,
+  profileStore,
+  serverConfigStore,
+} from 'app/utils/stores';
+import { WorkspaceData } from 'app/utils/workspace-data';
+
 import {
   simulateSelection,
   waitOneTickAndUpdate,
@@ -27,27 +43,13 @@ import {
   controlledCdrVersion,
   defaultCdrVersion,
 } from 'testing/stubs/cdr-versions-api-stub';
-import { UserApiStub } from 'testing/stubs/user-api-stub';
-import { workspaceStubs } from 'testing/stubs/workspaces';
-import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
-import {
-  WorkspaceEdit,
-  WorkspaceEditMode,
-} from 'app/pages/workspace/workspace-edit';
-import { WorkspaceEditSection } from 'app/pages/workspace/workspace-edit-section';
-import {
-  cdrVersionStore,
-  profileStore,
-  serverConfigStore,
-} from 'app/utils/stores';
-import { AccessTierShortNames } from 'app/utils/access-tiers';
 import {
   ProfileApiStub,
   ProfileStubVariables,
 } from 'testing/stubs/profile-api-stub';
-import * as Authentication from 'app/utils/authentication';
-import { mockNavigate } from 'setupTests';
-import { environment } from 'environments/environment';
+import { UserApiStub } from 'testing/stubs/user-api-stub';
+import { workspaceStubs } from 'testing/stubs/workspaces';
+import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
 
 type AnyWrapper = ShallowWrapper | ReactWrapper;
 

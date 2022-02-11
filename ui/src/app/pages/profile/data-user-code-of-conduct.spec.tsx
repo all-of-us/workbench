@@ -1,20 +1,22 @@
-import { mount } from 'enzyme';
 import * as React from 'react';
 import { MemoryRouter } from 'react-router-dom';
+import { mount } from 'enzyme';
+
+import { ProfileApi } from 'generated/fetch';
 
 import { DataUserCodeOfConduct } from 'app/pages/profile/data-user-code-of-conduct';
 import {
   profileApi,
   registerApiClient,
 } from 'app/services/swagger-fetch-clients';
+import { getLiveDUCCVersion } from 'app/utils/code-of-conduct';
 import { profileStore } from 'app/utils/stores';
-import { ProfileApi } from 'generated/fetch';
+
+import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
 import {
   ProfileApiStub,
   ProfileStubVariables,
 } from 'testing/stubs/profile-api-stub';
-import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
-import { getLiveDUCCVersion } from 'app/utils/code-of-conduct';
 
 describe('DataUserCodeOfConduct', () => {
   const load = jest.fn();

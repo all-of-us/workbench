@@ -1,5 +1,19 @@
-import { mount } from 'enzyme';
 import * as React from 'react';
+import { MemoryRouter, Route } from 'react-router-dom';
+import { mount } from 'enzyme';
+import { mockNavigateByUrl } from 'setupTests';
+
+import {
+  CdrVersionsApi,
+  CohortsApi,
+  ConceptSetsApi,
+  DataSetApi,
+  Domain,
+  NotebooksApi,
+  PrePackagedConceptSetEnum,
+  WorkspaceAccessLevel,
+  WorkspacesApi,
+} from 'generated/fetch';
 
 import { Button, Clickable } from 'app/components/buttons';
 import {
@@ -14,17 +28,7 @@ import {
 } from 'app/services/swagger-fetch-clients';
 import { currentWorkspaceStore } from 'app/utils/navigation';
 import { cdrVersionStore, serverConfigStore } from 'app/utils/stores';
-import {
-  CdrVersionsApi,
-  CohortsApi,
-  ConceptSetsApi,
-  DataSetApi,
-  Domain,
-  NotebooksApi,
-  PrePackagedConceptSetEnum,
-  WorkspaceAccessLevel,
-  WorkspacesApi,
-} from 'generated/fetch';
+
 import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
 import {
   CdrVersionsApiStub,
@@ -36,11 +40,9 @@ import {
 } from 'testing/stubs/cohorts-api-stub';
 import { ConceptSetsApiStub } from 'testing/stubs/concept-sets-api-stub';
 import { DataSetApiStub, stubDataSet } from 'testing/stubs/data-set-api-stub';
+import { NotebooksApiStub } from 'testing/stubs/notebooks-api-stub';
 import { workspaceDataStub, workspaceStubs } from 'testing/stubs/workspaces';
 import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
-import { MemoryRouter, Route } from 'react-router-dom';
-import { mockNavigateByUrl } from 'setupTests';
-import { NotebooksApiStub } from 'testing/stubs/notebooks-api-stub';
 
 describe('DataSetPage', () => {
   let datasetApiStub;

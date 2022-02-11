@@ -1,16 +1,19 @@
-import { mount } from 'enzyme';
 import * as React from 'react';
 import { MemoryRouter } from 'react-router';
-import { NotebookList } from './notebook-list';
+import { mount } from 'enzyme';
 
-import { currentWorkspaceStore } from 'app/utils/navigation';
-import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { NotebooksApi, ProfileApi, WorkspacesApi } from 'generated/fetch';
-import { ProfileApiStub } from 'testing/stubs/profile-api-stub';
+
+import { registerApiClient } from 'app/services/swagger-fetch-clients';
+import { currentWorkspaceStore } from 'app/utils/navigation';
+
 import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
+import { NotebooksApiStub } from 'testing/stubs/notebooks-api-stub';
+import { ProfileApiStub } from 'testing/stubs/profile-api-stub';
 import { workspaceDataStub } from 'testing/stubs/workspaces';
 import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
-import { NotebooksApiStub } from 'testing/stubs/notebooks-api-stub';
+
+import { NotebookList } from './notebook-list';
 
 describe('NotebookList', () => {
   beforeEach(() => {

@@ -1,9 +1,18 @@
-import * as fp from 'lodash/fp';
 import * as React from 'react';
 import { Prompt, RouteComponentProps, withRouter } from 'react-router';
-import { Subscription } from 'rxjs/Subscription';
+import * as fp from 'lodash/fp';
 import validate from 'validate.js';
 
+import {
+  ConceptSet,
+  CopyRequest,
+  Criteria,
+  Domain,
+  ResourceType,
+  WorkspaceAccessLevel,
+} from 'generated/fetch';
+
+import { parseQueryParams } from 'app/components/app-router';
 import {
   Button,
   Clickable,
@@ -46,15 +55,7 @@ import { MatchParams } from 'app/utils/stores';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
-import {
-  ConceptSet,
-  CopyRequest,
-  Criteria,
-  Domain,
-  ResourceType,
-  WorkspaceAccessLevel,
-} from 'generated/fetch';
-import { parseQueryParams } from 'app/components/app-router';
+import { Subscription } from 'rxjs/Subscription';
 
 const styles = reactStyles({
   conceptSetHeader: {

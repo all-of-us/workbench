@@ -1,5 +1,6 @@
-import { SpinnerOverlay, SpinnerOverlayProps } from 'app/components/spinners';
 import * as React from 'react';
+
+import { SpinnerOverlay, SpinnerOverlayProps } from 'app/components/spinners';
 
 interface State {
   show: boolean;

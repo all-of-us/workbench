@@ -1,5 +1,13 @@
-import * as fp from 'lodash/fp';
 import * as React from 'react';
+import * as fp from 'lodash/fp';
+
+import {
+  ConceptSet,
+  Criteria,
+  Domain,
+  DomainCount,
+  UpdateConceptSetRequest,
+} from 'generated/fetch';
 
 import { domainToTitle } from 'app/cohort-search/utils';
 import { Button } from 'app/components/buttons';
@@ -26,13 +34,6 @@ import {
 } from 'app/utils/navigation';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
-import {
-  ConceptSet,
-  Criteria,
-  Domain,
-  DomainCount,
-  UpdateConceptSetRequest,
-} from 'generated/fetch';
 
 const styles = reactStyles({
   sectionTitle: {

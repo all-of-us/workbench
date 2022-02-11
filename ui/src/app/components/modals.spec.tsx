@@ -1,8 +1,9 @@
-import { mount } from 'enzyme';
 import * as React from 'react';
+import { mount } from 'enzyme';
 
 import { NotificationModal } from 'app/components/modals';
 import { notificationStore } from 'app/utils/stores';
+
 import {
   findNodesByExactText,
   waitOnTimersAndUpdate,

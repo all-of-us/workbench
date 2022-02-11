@@ -1,4 +1,3 @@
-import { AccessTierShortNames } from 'app/utils/access-tiers';
 import {
   RecentWorkspace,
   RecentWorkspaceResponse,
@@ -6,6 +5,9 @@ import {
   Workspace,
   WorkspaceAccessLevel,
 } from 'generated/fetch';
+
+import { AccessTierShortNames } from 'app/utils/access-tiers';
+
 import { CdrVersionsStubVariables } from './cdr-versions-api-stub';
 
 export class WorkspaceStubVariables {

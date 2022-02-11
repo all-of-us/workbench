@@ -1,6 +1,8 @@
-import * as fp from 'lodash/fp';
 import * as React from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
+import * as fp from 'lodash/fp';
+
+import { Profile, WorkspaceResponseListResponse } from 'generated/fetch';
 
 import { StyledExternalLink, StyledRouterLink } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
@@ -20,11 +22,11 @@ import { NavigationProps, useNavigation } from 'app/utils/navigation';
 import { fetchWithGlobalErrorHandler } from 'app/utils/retry';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { supportUrls } from 'app/utils/zendesk';
-import { Profile, WorkspaceResponseListResponse } from 'generated/fetch';
-import { QuickTourAndVideos } from './quick-tour-and-videos';
-import workspaceIcon from 'assets/images/workspace-icon.svg';
-import cohortIcon from 'assets/images/cohort-icon.svg';
 import analysisIcon from 'assets/images/analysis-icon.svg';
+import cohortIcon from 'assets/images/cohort-icon.svg';
+import workspaceIcon from 'assets/images/workspace-icon.svg';
+
+import { QuickTourAndVideos } from './quick-tour-and-videos';
 
 export const styles = reactStyles({
   bottomBanner: {

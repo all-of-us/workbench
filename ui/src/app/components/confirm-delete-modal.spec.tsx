@@ -1,12 +1,13 @@
-import { shallow } from 'enzyme';
 import * as React from 'react';
+import { shallow } from 'enzyme';
+
+import { ResourceType } from 'generated/fetch';
 
 import {
   ConfirmDeleteModal,
   ConfirmDeleteModalProps,
   ConfirmDeleteModalState,
 } from './confirm-delete-modal';
-import { ResourceType } from 'generated/fetch';
 
 describe('ConfirmDeleteModalComponent', () => {
   let props: ConfirmDeleteModalProps;

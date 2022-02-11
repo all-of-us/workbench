@@ -1,8 +1,23 @@
-import * as fp from 'lodash/fp';
 import * as React from 'react';
-import validate from 'validate.js';
+import * as fp from 'lodash/fp';
 import { Dropdown } from 'primereact/dropdown';
+import validate from 'validate.js';
 
+import {
+  ArchivalStatus,
+  BillingAccount,
+  CdrVersion,
+  CdrVersionTiersResponse,
+  DisseminateResearchEnum,
+  Profile,
+  ResearchOutcomeEnum,
+  ResearchPurpose,
+  SpecificPopulationEnum,
+  Workspace,
+  WorkspaceAccessLevel,
+} from 'generated/fetch';
+
+import { environment } from 'environments/environment';
 import { Button, LinkButton, StyledExternalLink } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
 import { FlexColumn, FlexRow } from 'app/components/flex';
@@ -78,21 +93,8 @@ import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { getBillingAccountInfo } from 'app/utils/workbench-gapi-client';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { supportUrls } from 'app/utils/zendesk';
-import {
-  ArchivalStatus,
-  BillingAccount,
-  CdrVersion,
-  CdrVersionTiersResponse,
-  DisseminateResearchEnum,
-  Profile,
-  ResearchOutcomeEnum,
-  ResearchPurpose,
-  SpecificPopulationEnum,
-  Workspace,
-  WorkspaceAccessLevel,
-} from 'generated/fetch';
+
 import { OldCdrVersionModal } from './old-cdr-version-modal';
-import { environment } from 'environments/environment';
 import { UnavailableTierModal } from './unavailable-tier-modal';
 
 export const styles = reactStyles({

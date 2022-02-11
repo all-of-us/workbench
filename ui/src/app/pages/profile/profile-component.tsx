@@ -1,8 +1,11 @@
+import * as React from 'react';
+import { RouteComponentProps, withRouter } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 import { Dropdown } from 'primereact/dropdown';
-import * as React from 'react';
 import validate from 'validate.js';
-import { withRouter, RouteComponentProps } from 'react-router-dom';
+
+import { AccessModule, InstitutionalRole, Profile } from 'generated/fetch';
+import { PublicInstitutionDetails } from 'generated/fetch';
 
 import { Button } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
@@ -31,14 +34,13 @@ import { institutionApi, profileApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import { formatInitialCreditsUSD, withUserProfile } from 'app/utils';
 import { wasReferredFromRenewal } from 'app/utils/access-utils';
+import { displayDateWithoutHours } from 'app/utils/dates';
 import { convertAPIError, reportError } from 'app/utils/errors';
 import { NavigationProps } from 'app/utils/navigation';
-import { withNavigation } from 'app/utils/with-navigation-hoc';
-import { AccessModule, InstitutionalRole, Profile } from 'generated/fetch';
-import { PublicInstitutionDetails } from 'generated/fetch';
-import { DataAccessPanel } from './data-access-panel';
-import { displayDateWithoutHours } from 'app/utils/dates';
 import { canonicalizeUrl } from 'app/utils/urls';
+import { withNavigation } from 'app/utils/with-navigation-hoc';
+
+import { DataAccessPanel } from './data-access-panel';
 
 // validators for validate.js
 const required = { presence: { allowEmpty: false } };

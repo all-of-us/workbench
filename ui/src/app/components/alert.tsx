@@ -1,9 +1,9 @@
-import { reactStyles, withStyle } from 'app/utils';
+import * as React from 'react';
 
 import { Clickable } from 'app/components/buttons';
 import { ClrIcon } from 'app/components/icons';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
-import * as React from 'react';
+import { reactStyles, withStyle } from 'app/utils';
 
 export const styles = reactStyles({
   alert: {

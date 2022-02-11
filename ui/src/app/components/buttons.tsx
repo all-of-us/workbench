@@ -1,14 +1,16 @@
+import * as React from 'react';
+import Interactive from 'react-interactive';
+import { Link } from 'react-router-dom';
+import * as fp from 'lodash/fp';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+
 import { styles as cardStyles } from 'app/components/card';
 import { ClrIcon, SnowmanIcon } from 'app/components/icons';
 import { Interactive as LocalInteractive } from 'app/components/interactive';
 import { TooltipTrigger } from 'app/components/popups';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles } from 'app/utils/index';
-import * as fp from 'lodash/fp';
-import * as React from 'react';
-import Interactive from 'react-interactive';
-import { Link } from 'react-router-dom';
+
 import { RouteLink } from './app-router';
 
 export const styles = reactStyles({

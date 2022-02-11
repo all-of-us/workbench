@@ -17,6 +17,7 @@ import {
   SurveysResponse,
   SurveyVersionListResponse,
 } from 'generated/fetch';
+
 import { stubNotImplementedError } from 'testing/stubs/stub-utils';
 
 export class SurveyStubVariables {

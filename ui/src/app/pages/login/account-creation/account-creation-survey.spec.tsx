@@ -1,5 +1,7 @@
-import { mount } from 'enzyme';
 import * as React from 'react';
+import { mount } from 'enzyme';
+
+import { ProfileApi } from 'generated/fetch';
 
 import {
   AccountCreationSurvey,
@@ -8,7 +10,7 @@ import {
 import { createEmptyProfile } from 'app/pages/login/sign-in';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { serverConfigStore } from 'app/utils/stores';
-import { ProfileApi } from 'generated/fetch';
+
 import { ProfileApiStub } from 'testing/stubs/profile-api-stub';
 
 let props: AccountCreationSurveyProps;

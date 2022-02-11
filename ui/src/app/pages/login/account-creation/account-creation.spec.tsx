@@ -1,11 +1,12 @@
-import { mount, ReactWrapper } from 'enzyme';
-import * as fp from 'lodash/fp';
 import * as React from 'react';
+import * as fp from 'lodash/fp';
+import { mount, ReactWrapper } from 'enzyme';
 
-import { serverConfigStore } from 'app/utils/stores';
 import { createEmptyProfile } from 'app/pages/login/sign-in';
-import { AccountCreation, AccountCreationProps } from './account-creation';
 import colors from 'app/styles/colors';
+import { serverConfigStore } from 'app/utils/stores';
+
+import { AccountCreation, AccountCreationProps } from './account-creation';
 
 let props: AccountCreationProps;
 const component = () => {
