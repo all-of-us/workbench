@@ -108,7 +108,7 @@
     "enablePersistentDisk": true,
     "enablePrivateDataprocWorker": true,
     "ccSupportWhenAdminLocking": false,
-    "enableDSCREntryInRecentModified": true
+    "enableDSCREntryInRecentModified": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-test",
