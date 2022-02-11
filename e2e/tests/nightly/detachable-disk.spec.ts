@@ -35,7 +35,7 @@ describe('Updating runtime status', () => {
     await runtimePanel.pickDetachableDisk();
 
     // TODO(calbach): Investigate why 110GB -> 120GB causes issues.
-    await runtimePanel.pickDetachableDiskGbs((await runtimePanel.getDetachableDiskGbs()) + 50);
+    await runtimePanel.pickDetachableDiskGbs((await runtimePanel.getDetachableDiskGbs()) + 10);
     await runtimePanel.createRuntime({ waitForComplete: false });
 
     // Run notebook to write a file to disk.
@@ -50,7 +50,7 @@ describe('Updating runtime status', () => {
 
     // Select increase detachable disk, enable GPU to force a recreate.
     await runtimePanel.open();
-    await runtimePanel.pickDetachableDiskGbs((await runtimePanel.getDetachableDiskGbs()) + 10);
+    await runtimePanel.pickDetachableDiskGbs((await runtimePanel.getDetachableDiskGbs()) + 50);
     await runtimePanel.pickEnableGpu();
     await runtimePanel.applyChanges();
 
