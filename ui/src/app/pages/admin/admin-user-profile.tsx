@@ -102,7 +102,10 @@ const styles = reactStyles({
   },
 });
 
-const UneditableField = (props: { label: string; value: string }) => (
+const UneditableField = (props: {
+  label: string;
+  value: string | JSX.Element;
+}) => (
   <FlexColumn>
     <div style={styles.label}>{props.label}</div>
     <div style={styles.value}>{props.value}</div>
@@ -112,6 +115,14 @@ const UneditableField = (props: { label: string; value: string }) => (
 const UneditableFields = (props: { profile: Profile }) => {
   const { givenName, familyName, username, accessTierShortNames } =
     props.profile;
+  const accessTiers =
+    accessTierShortNames?.length === 0 ? (
+      <span>
+        <i>No data access</i>
+      </span>
+    ) : (
+      accessTierShortNames.map(displayNameForTier).join(', ')
+    );
   return (
     <FlexRow style={styles.uneditableFields}>
       <FlexColumn>
@@ -125,10 +136,7 @@ const UneditableFields = (props: { profile: Profile }) => {
       <FlexColumn style={{ paddingLeft: '80px' }}>
         <div style={styles.uneditableFieldsSpacer} />
         <UneditableField label='User name' value={username} />
-        <UneditableField
-          label='Data Access Tiers'
-          value={accessTierShortNames.map(displayNameForTier).join(', ')}
-        />
+        <UneditableField label='Data Access Tiers' value={accessTiers} />
       </FlexColumn>
     </FlexRow>
   );
